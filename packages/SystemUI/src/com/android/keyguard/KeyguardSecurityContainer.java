@@ -918,7 +918,7 @@ public class KeyguardSecurityContainer extends FrameLayout {
                     }
                     drawable.setTint(iconColor);
 
-                    Drawable bg = context.getDrawable(R.drawable.kg_bg_avatar);
+                    Drawable bg = context.getDrawable(R.drawable.user_avatar_bg);
                     bg.setTintBlendMode(BlendMode.DST);
                     bg.setTint(Utils.getColorAttrDefaultColor(context,
                                 com.android.internal.R.attr.colorSurfaceVariant));
@@ -973,18 +973,22 @@ public class KeyguardSecurityContainer extends FrameLayout {
 
         @Override
         public void updateSecurityViewLocation() {
+            int yTrans = mResources.getDimensionPixelSize(R.dimen.bouncer_user_switcher_y_trans);
+
             if (mResources.getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
                 updateViewGravity(mViewFlipper, Gravity.CENTER_HORIZONTAL);
                 updateViewGravity(mUserSwitcherViewGroup, Gravity.CENTER_HORIZONTAL);
-                mUserSwitcherViewGroup.setTranslationY(0);
+
+                mUserSwitcherViewGroup.setTranslationY(yTrans);
+                mViewFlipper.setTranslationY(-yTrans);
             } else {
                 updateViewGravity(mViewFlipper, Gravity.RIGHT | Gravity.BOTTOM);
                 updateViewGravity(mUserSwitcherViewGroup, Gravity.LEFT | Gravity.CENTER_VERTICAL);
 
                 // Attempt to reposition a bit higher to make up for this frame being a bit lower
                 // on the device
-                int yTrans = mResources.getDimensionPixelSize(R.dimen.status_bar_height);
                 mUserSwitcherViewGroup.setTranslationY(-yTrans);
+                mViewFlipper.setTranslationY(0);
             }
         }
 

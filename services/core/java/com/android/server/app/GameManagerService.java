@@ -359,6 +359,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
     public enum FrameRate {
         FPS_DEFAULT(0),
         FPS_30(30),
+        FPS_40(40),
         FPS_45(45),
         FPS_60(60),
         FPS_90(90),
@@ -378,6 +379,8 @@ public final class GameManagerService extends IGameManagerService.Stub {
         switch (raw) {
             case "30":
                 return FrameRate.FPS_30.fps;
+            case "40":
+                return FrameRate.FPS_40.fps;
             case "45":
                 return FrameRate.FPS_45.fps;
             case "60":
@@ -1320,15 +1323,26 @@ public final class GameManagerService extends IGameManagerService.Stub {
         // Make sure after resetting the game mode is still supported.
         // If not, set the game mode to standard
         int gameMode = getGameMode(packageName, userId);
-        int newGameMode = gameMode;
 
         GamePackageConfiguration config = null;
         synchronized (mOverrideConfigLock) {
             config = mOverrideConfigs.get(packageName);
         }
-        synchronized (mDeviceConfigLock) {
-            config = mConfigs.get(packageName);
+        if (config == null) {
+            synchronized (mDeviceConfigLock) {
+                config = mConfigs.get(packageName);
+            }
         }
+        final int newGameMode = getNewGameMode(gameMode, config);
+        if (gameMode != newGameMode) {
+            setGameMode(packageName, GameManager.GAME_MODE_STANDARD, userId);
+            return;
+        }
+        setGameMode(packageName, gameMode, userId);
+    }
+
+    private int getNewGameMode(int gameMode, GamePackageConfiguration config) {
+        int newGameMode = gameMode;
         if (config != null) {
             int modesBitfield = config.getAvailableGameModesBitfield();
             // Remove UNSUPPORTED to simplify the logic here, since we really just
@@ -1350,11 +1364,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
             // UNSUPPORTED, then set to UNSUPPORTED
             newGameMode = GameManager.GAME_MODE_UNSUPPORTED;
         }
-        if (gameMode != newGameMode) {
-            setGameMode(packageName, GameManager.GAME_MODE_STANDARD, userId);
-            return;
-        }
-        setGameMode(packageName, gameMode, userId);
+        return newGameMode;
     }
 
     /**
@@ -1412,7 +1422,6 @@ public final class GameManagerService extends IGameManagerService.Stub {
             }
             for (final String packageName : packageNames) {
                 int gameMode = getGameMode(packageName, userId);
-                int newGameMode = gameMode;
                 // Make sure the user settings and package configs don't conflict.
                 // I.e. the user setting is set to a mode that no longer available due to
                 // config/manifest changes.
@@ -1421,27 +1430,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
                 synchronized (mDeviceConfigLock) {
                     config = mConfigs.get(packageName);
                 }
-                if (config != null) {
-                    int modesBitfield = config.getAvailableGameModesBitfield();
-                    // Remove UNSUPPORTED to simplify the logic here, since we really just
-                    // want to check if we support selectable game modes
-                    modesBitfield &= ~modeToBitmask(GameManager.GAME_MODE_UNSUPPORTED);
-                    if (!bitFieldContainsModeBitmask(modesBitfield, gameMode)) {
-                        if (bitFieldContainsModeBitmask(modesBitfield,
-                                GameManager.GAME_MODE_STANDARD)) {
-                            // If the current set mode isn't supported,
-                            // but we support STANDARD, then set the mode to STANDARD.
-                            newGameMode = GameManager.GAME_MODE_STANDARD;
-                        } else {
-                            // If we don't support any game modes, then set to UNSUPPORTED
-                            newGameMode = GameManager.GAME_MODE_UNSUPPORTED;
-                        }
-                    }
-                } else if (gameMode != GameManager.GAME_MODE_UNSUPPORTED) {
-                    // If we have no config for the package, but the configured mode is not
-                    // UNSUPPORTED, then set to UNSUPPORTED
-                    newGameMode = GameManager.GAME_MODE_UNSUPPORTED;
-                }
+                final int newGameMode = getNewGameMode(gameMode, config);
                 if (newGameMode != gameMode) {
                     setGameMode(packageName, newGameMode, userId);
                 }

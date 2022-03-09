@@ -446,12 +446,10 @@ public class DisplayRotation {
                 return false;
             }
 
-            final int transientFixedOrientation =
-                    mDisplayContent.mFixedRotationTransitionListener.getTransientFixedOrientation();
-            if (transientFixedOrientation != SCREEN_ORIENTATION_UNSET) {
+            if (mDisplayContent.mFixedRotationTransitionListener.shouldDeferRotation()) {
                 // Makes sure that after the transition is finished, updateOrientation() can see
                 // the difference from the latest orientation source.
-                mLastOrientation = transientFixedOrientation;
+                mLastOrientation = SCREEN_ORIENTATION_UNSET;
                 // During the recents animation, the closing app might still be considered on top.
                 // In order to ignore its requested orientation to avoid a sensor led rotation (e.g
                 // user rotating the device while the recents animation is running), we ignore

@@ -111,13 +111,13 @@ import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.row.NotificationGuts;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.row.NotificationSnooze;
+import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.HeadsUpAppearanceController;
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.HeadsUpTouchHelper;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.ShadeController;
-import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
@@ -1086,8 +1086,8 @@ public class NotificationStackScrollLayoutController {
         }
     }
 
-    public void setQsExpanded(boolean expanded) {
-        mView.setQsExpanded(expanded);
+    public void setQsFullScreen(boolean fullScreen) {
+        mView.setQsFullScreen(fullScreen);
         updateShowEmptyShadeView();
     }
 
@@ -1181,13 +1181,6 @@ public class NotificationStackScrollLayoutController {
         mView.setUnlockHintRunning(running);
     }
 
-    /**
-     * @param isFlinging Whether we are flinging the shade open or close.
-     */
-    public void setIsFlinging(boolean isFlinging) {
-        mView.setIsFlinging(isFlinging);
-    }
-
     public boolean isFooterViewNotGone() {
         return mView.isFooterViewNotGone();
     }
@@ -1211,7 +1204,7 @@ public class NotificationStackScrollLayoutController {
     public void updateShowEmptyShadeView() {
         Trace.beginSection("NSSLC.updateShowEmptyShadeView");
         mShowEmptyShadeView = mBarState != KEYGUARD
-                && (!mView.isQsExpanded() || mView.isUsingSplitNotificationShade())
+                && !mView.isQsFullScreen()
                 && getVisibleNotificationCount() == 0;
 
         mView.updateEmptyShadeView(

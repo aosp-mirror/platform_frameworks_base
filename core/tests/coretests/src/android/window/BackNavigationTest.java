@@ -27,7 +27,6 @@ import android.app.EmptyActivity;
 import android.app.Instrumentation;
 import android.os.RemoteException;
 import android.support.test.uiautomator.UiDevice;
-import android.view.OnBackInvokedCallback;
 
 import androidx.lifecycle.Lifecycle;
 import androidx.test.core.app.ActivityScenario;

@@ -152,7 +152,8 @@ public abstract class AbstractPerUserSystemService<S extends AbstractPerUserSyst
         updateIsSetupComplete(mUserId);
         mDisabled = disabled;
 
-        if (mMaster.mServiceNameResolver.isConfiguredInMultipleMode()) {
+        if (mMaster.mServiceNameResolver != null
+                && mMaster.mServiceNameResolver.isConfiguredInMultipleMode()) {
             updateServiceInfoListLocked();
         } else {
             updateServiceInfoLocked();

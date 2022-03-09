@@ -70,6 +70,7 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"Gọi ba chiều"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"Từ chối các cuộc gọi làm phiền không mong muốn"</string>
     <string name="CndMmi" msgid="185136449405618437">"Gửi số đang gọi"</string>
+    <string name="DndMmi" msgid="8797375819689129800">"Không làm phiền"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"Số gọi đến mặc định thành bị giới hạn. Cuộc gọi tiếp theo: Bị giới hạn"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"Số gọi đến mặc định thành bị giới hạn. Cuộc gọi tiếp theo. Không bị giới hạn"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"Số gọi đến mặc định thành không bị giới hạn. Cuộc gọi tiếp theo. Bị giới hạn"</string>
@@ -304,10 +305,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"truy cập lịch của bạn"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"Tin nhắn SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"gửi và xem tin nhắn SMS"</string>
-    <!-- no translation found for permgrouplab_storage (9173334109512154196) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_storage (8352226729501080525) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="9173334109512154196">"Tệp và tài liệu"</string>
+    <string name="permgroupdesc_storage" msgid="8352226729501080525">"truy cập vào các tệp và tài liệu trên thiết bị của bạn"</string>
     <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"Nhạc và âm thanh khác"</string>
     <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"truy cập vào tệp âm thanh trên thiết bị"</string>
     <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"Ảnh và video"</string>
@@ -548,7 +547,7 @@
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"xác định khoảng cách tương đối giữa các thiết bị ở gần dùng Băng tần siêu rộng"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Cho phép ứng dụng xác định khoảng cách tương đối giữa các thiết bị ở gần dùng Băng tần siêu rộng"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"tương tác với các thiết bị Wi‑Fi lân cận"</string>
-    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Cho phép ứng dụng thông báo, kết nối và xác định vị trí tương đối của các thiết bị Wi‑Fi lân cận"</string>
+    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Cho phép ứng dụng này thông báo, kết nối và xác định vị trí tương đối của các thiết bị Wi‑Fi lân cận"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Thông tin về dịch vụ thanh toán qua công nghệ giao tiếp tầm gần (NFC) được ưu tiên"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Cho phép ứng dụng nhận thông tin về dịch vụ thanh toán qua công nghệ giao tiếp tầm gần mà bạn ưu tiên, chẳng hạn như các hình thức hỗ trợ đã đăng ký và điểm đến trong hành trình."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"kiểm soát Liên lạc trường gần"</string>
@@ -588,12 +587,9 @@
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Hãy nhập phương thức khóa màn hình của bạn để tiếp tục"</string>
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Phát hiện thấy một phần vân tay"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Không thể xử lý vân tay. Vui lòng thử lại."</string>
-    <!-- no translation found for fingerprint_acquired_imager_dirty (1770676120848224250) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_imager_dirty_alt (9169582140486372897) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_too_fast (1628459767349116104) -->
-    <skip />
+    <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Hãy vệ sinh cảm biến vân tay rồi thử lại"</string>
+    <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Vệ sinh cảm biến rồi thử lại"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Nhấn chắc trên cảm biến"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Di chuyển ngón tay quá chậm. Vui lòng thử lại."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Hãy thử một vân tay khác"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Quá sáng"</string>
@@ -601,10 +597,8 @@
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Mỗi lần, hãy thay đổi vị trí ngón tay một chút"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <!-- no translation found for fingerprint_error_not_match (4599441812893438961) -->
-    <skip />
-    <!-- no translation found for fingerprint_udfps_error_not_match (4709197752023550709) -->
-    <skip />
+    <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Không nhận dạng được vân tay"</string>
+    <string name="fingerprint_udfps_error_not_match" msgid="4709197752023550709">"Nhấn chắc trên cảm biến"</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Đã xác thực vân tay"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Đã xác thực khuôn mặt"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Đã xác thực khuôn mặt, vui lòng nhấn để xác nhận"</string>
@@ -743,6 +737,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"Cho phép chủ sở hữu liên kết với giao diện cấp cao nhất của dịch vụ nhắn tin của nhà cung cấp dịch vụ. Không cần thiết cho các ứng dụng thông thường."</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"liên kết với dịch vụ của nhà cung cấp"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"Cho phép chủ sở hữu liên kết với các dịch vụ của nhà cung cấp. Không bao giờ cần cho các ứng dụng thông thường."</string>
+    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"quyền truy cập chế độ Không làm phiền"</string>
+    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Cho phép ứng dụng đọc và ghi cấu hình Không làm phiền."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"cấp quyền xem"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Cho phép chủ sở hữu cấp quyền cho một ứng dụng. Các ứng dụng thông thường sẽ không bao giờ cần quyền này."</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"bắt đầu xem các quyết định cấp quyền"</string>
@@ -1508,8 +1504,7 @@
     <string name="skip_button_label" msgid="3566599811326688389">"Bỏ qua"</string>
     <string name="no_matches" msgid="6472699895759164599">"Không có kết quả nào phù hợp"</string>
     <string name="find_on_page" msgid="5400537367077438198">"Tìm kiếm trên trang"</string>
-    <!-- no translation found for matches_found (2296462299979507689) -->
-    <skip />
+    <string name="matches_found" msgid="2296462299979507689">"{count,plural, =1{# kết quả trùng khớp}other{#/{total}}}"</string>
     <string name="action_mode_done" msgid="2536182504764803222">"Xong"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"Đang xóa bộ nhớ dùng chung…"</string>
     <string name="share" msgid="4157615043345227321">"Chia sẻ"</string>
@@ -1874,8 +1869,10 @@
     <string name="zen_mode_until" msgid="2250286190237669079">"Cho đến <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"Cho tới <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (cảnh báo tiếp theo)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"Cho đến khi bạn tắt"</string>
+    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"Cho đến khi bạn tắt Đừng làm phiền"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"Thu gọn"</string>
+    <string name="zen_mode_feature_name" msgid="3785547207263754500">"Không làm phiền"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"Thời gian ngừng hoạt động"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"Đêm trong tuần"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Cuối tuần"</string>
@@ -2040,7 +2037,10 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Cuộc gọi và thông báo sẽ rung"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Cuộc gọi và thông báo sẽ tắt tiếng"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Thay đổi hệ thống"</string>
+    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Không làm phiền"</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Mới: Chế độ Không làm phiền sẽ ẩn thông báo"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Nhấn để tìm hiểu thêm và thay đổi."</string>
+    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Cài đặt Không làm phiền đã thay đổi"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Nhấn để xem những thông báo bị chặn."</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Hệ thống"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Cài đặt"</string>
@@ -2057,6 +2057,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Tắt"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Tìm hiểu thêm"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Thông báo nâng cao đã thay thế Thông báo thích ứng trên Android trong Android 12. Tính năng này hiển thị những thao tác và câu trả lời đề xuất, đồng thời sắp xếp các thông báo của bạn.\n\nThông báo nâng cao có thể đọc mọi nội dung thông báo, bao gồm cả thông tin cá nhân như tên liên hệ và tin nhắn. Tính năng này cũng có thể đóng hoặc phản hồi các thông báo, chẳng hạn như trả lời cuộc gọi điện thoại, đồng thời có thể kiểm soát chế độ Không làm phiền."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Thông báo cung cấp thông tin về chế độ sạc thông thường"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Pin có thể hết trước khi sạc bình thường"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Trình tiết kiệm pin được kích hoạt để kéo dài thời lượng pin"</string>
@@ -2260,9 +2261,8 @@
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Đã dịch thông báo từ <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> sang <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Hoạt động trong nền"</string>
     <string name="notification_title_abusive_bg_apps" msgid="344582472797982073">"Hoạt động trong nền"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> đang chạy trong nền và làm tiêu hao pin. Nhấn để xem lại."</string>
+    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> đang chạy trong nền và làm tiêu hao pin. Nhấn để xem."</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> đang chạy trong nền trong thời gian dài. Nhấn để xem lại."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Xem các ứng dụng đang hoạt động"</string>
-    <!-- no translation found for vdm_camera_access_denied (6345652513729130490) -->
-    <skip />
+    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"Không sử dụng được máy ảnh trên thiết bị này"</string>
 </resources>

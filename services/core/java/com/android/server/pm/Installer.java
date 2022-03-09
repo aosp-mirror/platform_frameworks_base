@@ -92,6 +92,7 @@ public class Installer extends SystemService {
     public static final int FLAG_STORAGE_DE = IInstalld.FLAG_STORAGE_DE;
     public static final int FLAG_STORAGE_CE = IInstalld.FLAG_STORAGE_CE;
     public static final int FLAG_STORAGE_EXTERNAL = IInstalld.FLAG_STORAGE_EXTERNAL;
+    public static final int FLAG_STORAGE_SDK = IInstalld.FLAG_STORAGE_SDK;
 
     public static final int FLAG_CLEAR_CACHE_ONLY = IInstalld.FLAG_CLEAR_CACHE_ONLY;
     public static final int FLAG_CLEAR_CODE_CACHE_ONLY = IInstalld.FLAG_CLEAR_CODE_CACHE_ONLY;
@@ -190,12 +191,16 @@ public class Installer extends SystemService {
     // We explicitly do NOT set previousAppId because the default value should always be 0.
     // Manually override previousAppId after building CreateAppDataArgs for specific behaviors.
     static CreateAppDataArgs buildCreateAppDataArgs(String uuid, String packageName,
-            int userId, int flags, int appId, String seInfo, int targetSdkVersion) {
+            int userId, int flags, int appId, String seInfo, int targetSdkVersion,
+            boolean usesSdk) {
         final CreateAppDataArgs args = new CreateAppDataArgs();
         args.uuid = uuid;
         args.packageName = packageName;
         args.userId = userId;
         args.flags = flags;
+        if (usesSdk) {
+            args.flags |= FLAG_STORAGE_SDK;
+        }
         args.appId = appId;
         args.seInfo = seInfo;
         args.targetSdkVersion = targetSdkVersion;
@@ -215,6 +220,8 @@ public class Installer extends SystemService {
         if (!checkBeforeRemote()) {
             return buildPlaceholderCreateAppDataResult();
         }
+        // Hardcode previousAppId to 0 to disable any data migration (http://b/221088088)
+        args.previousAppId = 0;
         try {
             return mInstalld.createAppData(args);
         } catch (Exception e) {
@@ -228,6 +235,10 @@ public class Installer extends SystemService {
             final CreateAppDataResult[] results = new CreateAppDataResult[args.length];
             Arrays.fill(results, buildPlaceholderCreateAppDataResult());
             return results;
+        }
+        // Hardcode previousAppId to 0 to disable any data migration (http://b/221088088)
+        for (final CreateAppDataArgs arg : args) {
+            arg.previousAppId = 0;
         }
         try {
             return mInstalld.createAppDataBatched(args);

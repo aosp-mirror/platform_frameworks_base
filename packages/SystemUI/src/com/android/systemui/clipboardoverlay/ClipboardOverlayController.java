@@ -73,6 +73,7 @@ import android.widget.TextView;
 
 import com.android.internal.policy.PhoneWindow;
 import com.android.systemui.R;
+import com.android.systemui.screenshot.DraggableConstraintLayout;
 import com.android.systemui.screenshot.FloatingWindowUtil;
 import com.android.systemui.screenshot.OverlayActionChip;
 import com.android.systemui.screenshot.TimeoutHandler;
@@ -166,8 +167,28 @@ public class ClipboardOverlayController {
         mRemoteCopyChip = requireNonNull(mView.findViewById(R.id.remote_copy_chip));
         mDismissButton = requireNonNull(mView.findViewById(R.id.dismiss_button));
 
-        mView.setOnDismissCallback(this::hideImmediate);
-        mView.setOnInteractionCallback(mTimeoutHandler::resetTimeout);
+        mView.setCallbacks(new DraggableConstraintLayout.SwipeDismissCallbacks() {
+            @Override
+            public void onInteraction() {
+                mTimeoutHandler.resetTimeout();
+            }
+
+            @Override
+            public void onSwipeDismissInitiated(Animator animator) {
+                animator.addListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationStart(Animator animation) {
+                        super.onAnimationStart(animation);
+                        mContainer.animate().alpha(0).start();
+                    }
+                });
+            }
+
+            @Override
+            public void onDismissComplete() {
+                hideImmediate();
+            }
+        });
 
         mDismissButton.setOnClickListener(view -> animateOut());
 

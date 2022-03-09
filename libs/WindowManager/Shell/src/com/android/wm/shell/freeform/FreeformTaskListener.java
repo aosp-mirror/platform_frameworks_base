@@ -110,6 +110,24 @@ public class FreeformTaskListener implements ShellTaskOrganizer.TaskListener {
     }
 
     @Override
+    public void attachChildSurfaceToTask(int taskId, SurfaceControl.Builder b) {
+        b.setParent(findTaskSurface(taskId));
+    }
+
+    @Override
+    public void reparentChildSurfaceToTask(int taskId, SurfaceControl sc,
+            SurfaceControl.Transaction t) {
+        t.reparent(sc, findTaskSurface(taskId));
+    }
+
+    private SurfaceControl findTaskSurface(int taskId) {
+        if (!mTasks.contains(taskId)) {
+            throw new IllegalArgumentException("There is no surface for taskId=" + taskId);
+        }
+        return mTasks.get(taskId).mLeash;
+    }
+
+    @Override
     public void dump(PrintWriter pw, String prefix) {
         final String innerPrefix = prefix + "  ";
         pw.println(prefix + this);

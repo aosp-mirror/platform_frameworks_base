@@ -148,7 +148,8 @@ public class StartingSurfaceDrawer {
         mContext = context;
         mDisplayManager = mContext.getSystemService(DisplayManager.class);
         mSplashScreenExecutor = splashScreenExecutor;
-        mSplashscreenContentDrawer = new SplashscreenContentDrawer(mContext, iconProvider, pool);
+        mSplashscreenContentDrawer = new SplashscreenContentDrawer(mContext, iconProvider, pool,
+                mSplashScreenExecutor);
         mSplashScreenExecutor.execute(() -> mChoreographer = Choreographer.getInstance());
         mWindowManagerGlobal = WindowManagerGlobal.getInstance();
         mDisplayManager.getDisplay(DEFAULT_DISPLAY);

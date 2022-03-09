@@ -28,7 +28,6 @@ import android.app.Activity;
 import android.app.ActivityClient;
 import android.app.ActivityOptions;
 import android.app.ActivityThread;
-import android.app.Application.ActivityLifecycleCallbacks;
 import android.app.Instrumentation;
 import android.content.Context;
 import android.content.Intent;
@@ -40,6 +39,8 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.window.TaskFragmentInfo;
 import android.window.WindowContainerTransaction;
+
+import androidx.window.common.EmptyLifecycleCallbacksAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -404,7 +405,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     TaskFragmentContainer getTopActiveContainer() {
         for (int i = mContainers.size() - 1; i >= 0; i--) {
             TaskFragmentContainer container = mContainers.get(i);
-            if (!container.isFinished() && container.getTopNonFinishingActivity() != null) {
+            if (!container.isFinished() && container.getRunningActivityCount() > 0) {
                 return container;
             }
         }
@@ -499,6 +500,10 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     boolean launchPlaceholderIfNecessary(@NonNull Activity activity) {
         final  TaskFragmentContainer container = getContainerWithActivity(
                 activity.getActivityToken());
+        // Don't launch placeholder if the container is occluded.
+        if (container != getTopActiveContainer()) {
+            return false;
+        }
 
         SplitContainer splitContainer = container != null ? getActiveSplitForContainer(container)
                 : null;
@@ -759,11 +764,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         return shouldRetainAssociatedContainer(finishingContainer, associatedContainer);
     }
 
-    private final class LifecycleCallbacks implements ActivityLifecycleCallbacks {
-
-        @Override
-        public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
-        }
+    private final class LifecycleCallbacks extends EmptyLifecycleCallbacksAdapter {
 
         @Override
         public void onActivityPostCreated(Activity activity, Bundle savedInstanceState) {
@@ -772,30 +773,6 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             // that we don't launch it if an activity itself already requested something to be
             // launched to side.
             SplitController.this.onActivityCreated(activity);
-        }
-
-        @Override
-        public void onActivityStarted(Activity activity) {
-        }
-
-        @Override
-        public void onActivityResumed(Activity activity) {
-        }
-
-        @Override
-        public void onActivityPaused(Activity activity) {
-        }
-
-        @Override
-        public void onActivityStopped(Activity activity) {
-        }
-
-        @Override
-        public void onActivitySaveInstanceState(Activity activity, Bundle outState) {
-        }
-
-        @Override
-        public void onActivityDestroyed(Activity activity) {
         }
 
         @Override

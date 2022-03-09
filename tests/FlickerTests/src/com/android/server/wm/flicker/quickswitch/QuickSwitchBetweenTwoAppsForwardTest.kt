@@ -51,7 +51,7 @@ import org.junit.runners.Parameterized
 /**
  * Test quick switching back to previous app from last opened app
  *
- * To run this test: `atest FlickerTests:QuickSwitchBetweenTwoAppsBackTest`
+ * To run this test: `atest FlickerTests:QuickSwitchBetweenTwoAppsForwardTest`
  *
  * Actions:
  *     Launch an app [testApp1]
@@ -101,6 +101,7 @@ open class QuickSwitchBetweenTwoAppsForwardTest(private val testSpec: FlickerTes
                 taplInstrumentation.launchedAppState.quickSwitchToPreviousAppSwipeLeft()
 
                 wmHelper.waitForFullScreenApp(testApp2.component)
+                wmHelper.waitSnapshotGone()
                 wmHelper.waitForAppTransitionIdle()
                 wmHelper.waitForNavBarStatusBarVisible()
             }

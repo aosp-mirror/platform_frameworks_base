@@ -1421,17 +1421,9 @@ public class ActivityOptions extends ComponentOptions {
         return mRemoteTransition;
     }
 
-    /**
-     * Creates an ActivityOptions from the Bundle generated from {@link ActivityOptions#toBundle()}.
-     * Returns an instance of ActivityOptions populated with options with known keys from the
-     * provided Bundle, stripping out unknown entries.
-     * @hide
-     */
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
-    @TestApi
-    @NonNull
-    public static ActivityOptions fromBundle(@NonNull Bundle bOptions) {
-        return new ActivityOptions(bOptions);
+    /** @hide */
+    public static ActivityOptions fromBundle(Bundle bOptions) {
+        return bOptions != null ? new ActivityOptions(bOptions) : null;
     }
 
     /** @hide */
@@ -1472,12 +1464,12 @@ public class ActivityOptions extends ComponentOptions {
      * Sets the preferred splash screen style of the opening activities. This only applies if the
      * Activity or Process is not yet created.
      * @param style Can be either {@link SplashScreen#SPLASH_SCREEN_STYLE_ICON} or
-     *              {@link SplashScreen#SPLASH_SCREEN_STYLE_EMPTY}
+     *              {@link SplashScreen#SPLASH_SCREEN_STYLE_SOLID_COLOR}
      */
     @NonNull
     public ActivityOptions setSplashScreenStyle(@SplashScreen.SplashScreenStyle int style) {
         if (style == SplashScreen.SPLASH_SCREEN_STYLE_ICON
-                || style == SplashScreen.SPLASH_SCREEN_STYLE_EMPTY) {
+                || style == SplashScreen.SPLASH_SCREEN_STYLE_SOLID_COLOR) {
             mSplashScreenStyle = style;
         }
         return this;

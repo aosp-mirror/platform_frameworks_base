@@ -773,7 +773,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
             }
             if (mUnOcclusionAnimationRunning && mState == ScrimState.KEYGUARD) {
                 // We're unoccluding the keyguard and don't want to have a bright flash.
-                mNotificationsAlpha = mScrimBehindAlphaKeyguard;
+                mNotificationsAlpha = ScrimState.KEYGUARD.getNotifAlpha();
                 mNotificationsTint = ScrimState.KEYGUARD.getNotifTint();
             }
         }

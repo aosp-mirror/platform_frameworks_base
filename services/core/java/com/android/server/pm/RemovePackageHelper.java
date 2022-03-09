@@ -239,6 +239,7 @@ final class RemovePackageHelper {
                     && deletedPkg.getStaticSharedLibName() != null;
             outInfo.populateUsers(deletedPs.queryInstalledUsers(
                     mUserManagerInternal.getUserIds(), true), deletedPs);
+            outInfo.mIsExternal = deletedPs.isExternalStorage();
         }
 
         removePackageLI(deletedPs.getPackageName(), (flags & PackageManager.DELETE_CHATTY) != 0);
@@ -283,7 +284,11 @@ final class RemovePackageHelper {
                     List<AndroidPackage> sharedUserPkgs =
                             sus != null ? sus.getPackages() : Collections.emptyList();
                     mPermissionManager.onPackageUninstalled(packageName, deletedPs.getAppId(),
-                            deletedPs.getPkg(), sharedUserPkgs, UserHandle.USER_ALL);
+                            deletedPkg, sharedUserPkgs, UserHandle.USER_ALL);
+                    // After permissions are handled, check if the shared user can be migrated
+                    if (sus != null) {
+                        mPm.mSettings.checkAndConvertSharedUserSettingsLPw(sus);
+                    }
                 }
                 mPm.clearPackagePreferredActivitiesLPw(
                         deletedPs.getPackageName(), changedUsers, UserHandle.USER_ALL);

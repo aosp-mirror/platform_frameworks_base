@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Build;
 import android.os.CombinedVibration;
+import android.os.IBinder;
 import android.os.VibrationEffect;
 import android.os.vibrator.PrebakedSegment;
 import android.os.vibrator.PrimitiveSegment;
@@ -46,7 +47,7 @@ import java.util.Queue;
  * VibrationThread. The only thread-safe methods for calling from other threads are the "notify"
  * methods (which should never be used from the VibrationThread thread).
  */
-final class VibrationStepConductor {
+final class VibrationStepConductor implements IBinder.DeathRecipient {
     private static final boolean DEBUG = VibrationThread.DEBUG;
     private static final String TAG = VibrationThread.TAG;
 
@@ -58,8 +59,6 @@ final class VibrationStepConductor {
     /** Threshold to prevent the ramp off steps from trying to set extremely low amplitudes. */
     static final float RAMP_OFF_AMPLITUDE_MIN = 1e-3f;
     static final List<Step> EMPTY_STEP_LIST = new ArrayList<>();
-
-    private final Object mLock = new Object();
 
     // Used within steps.
     public final VibrationSettings vibrationSettings;
@@ -73,6 +72,11 @@ final class VibrationStepConductor {
     private final Queue<Step> mPendingOnVibratorCompleteSteps = new LinkedList<>();
 
     // Signalling fields.
+    // Note that vibrator callback signals may happen inside vibrator HAL calls made by the
+    // VibrationThread, or on an external executor, so this lock should not be held for anything
+    // other than updating signalling state - particularly not during HAL calls or when invoking
+    // other callbacks that may trigger calls into the thread.
+    private final Object mLock = new Object();
     @GuardedBy("mLock")
     private final IntArray mSignalVibratorsComplete;
     @GuardedBy("mLock")
@@ -290,6 +294,19 @@ final class VibrationStepConductor {
     }
 
     /**
+     * Binder death notification. VibrationThread registers this when it's running a conductor.
+     * Note that cancellation could theoretically happen immediately, before the conductor has
+     * started, but in this case it will be processed in the first signals loop.
+     */
+    @Override
+    public void binderDied() {
+        if (DEBUG) {
+            Slog.d(TAG, "Binder died, cancelling vibration...");
+        }
+        notifyCancelled(/* immediate= */ false);
+    }
+
+    /**
      * Notify the execution that cancellation is requested. This will be acted upon
      * asynchronously in the VibrationThread.
      *
@@ -320,9 +337,9 @@ final class VibrationStepConductor {
      * The state update is recorded for processing on the main execution thread (VibrationThread).
      */
     public void notifyVibratorComplete(int vibratorId) {
-        if (Build.IS_DEBUGGABLE) {
-            expectIsVibrationThread(false);
-        }
+        // HAL callbacks may be triggered directly within HAL calls, so these notifications
+        // could be on the VibrationThread as it calls the HAL, or some other executor later.
+        // Therefore no thread assertion is made here.
 
         if (DEBUG) {
             Slog.d(TAG, "Vibration complete reported by vibrator " + vibratorId);
@@ -342,9 +359,9 @@ final class VibrationStepConductor {
      * (VibrationThread).
      */
     public void notifySyncedVibrationComplete() {
-        if (Build.IS_DEBUGGABLE) {
-            expectIsVibrationThread(false);
-        }
+        // HAL callbacks may be triggered directly within HAL calls, so these notifications
+        // could be on the VibrationThread as it calls the HAL, or some other executor later.
+        // Therefore no thread assertion is made here.
 
         if (DEBUG) {
             Slog.d(TAG, "Synced vibration complete reported by vibrator manager");
@@ -380,7 +397,7 @@ final class VibrationStepConductor {
         int[] vibratorsToProcess = null;
         boolean doCancel = false;
         boolean doCancelImmediate = false;
-        // Swap out the queue of completions to process.
+        // Collect signals to process, but don't keep the lock while processing them.
         synchronized (mLock) {
             if (mSignalCancelImmediate) {
                 if (mCancelledImmediately) {
@@ -393,6 +410,7 @@ final class VibrationStepConductor {
                 doCancel = true;
             }
             if (!doCancelImmediate && mSignalVibratorsComplete.size() > 0) {
+                // Swap out the queue of completions to process.
                 vibratorsToProcess = mSignalVibratorsComplete.toArray();  // makes a copy
                 mSignalVibratorsComplete.clear();
             }

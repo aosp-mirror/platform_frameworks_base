@@ -18,6 +18,7 @@ package com.android.server.notification;
 
 import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND;
 import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_VISIBLE;
+import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.MODE_IGNORED;
 import static android.app.Notification.FLAG_AUTO_CANCEL;
@@ -420,6 +421,11 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                     return getApplicationInfo((String) args[0], mUid);
                 });
         when(mPackageManagerClient.getPackageUidAsUser(any(), anyInt())).thenReturn(mUid);
+        when(mPackageManagerInternal.isSameApp(anyString(), anyInt(), anyInt())).thenAnswer(
+                (Answer<Boolean>) invocation -> {
+                    Object[] args = invocation.getArguments();
+                    return (int) args[1] == mUid;
+                });
         final LightsManager mockLightsManager = mock(LightsManager.class);
         when(mockLightsManager.getLight(anyInt())).thenReturn(mock(LogicalLight.class));
         when(mAudioManager.getRingerModeInternal()).thenReturn(AudioManager.RINGER_MODE_NORMAL);
@@ -427,8 +433,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         when(mUgmInternal.newUriPermissionOwner(anyString())).thenReturn(mPermOwner);
         when(mPackageManager.getPackagesForUid(mUid)).thenReturn(new String[]{PKG});
         when(mPackageManagerClient.getPackagesForUid(anyInt())).thenReturn(new String[]{PKG});
-        when(mPermissionPolicyInternal.canShowPermissionPromptForTask(
-                any(ActivityManager.RecentTaskInfo.class))).thenReturn(false);
+        when(mAtm.getTaskToShowPermissionDialogOn(anyString(), anyInt()))
+                .thenReturn(INVALID_TASK_ID);
         mContext.addMockSystemService(AppOpsManager.class, mock(AppOpsManager.class));
         when(mUm.getProfileIds(0, false)).thenReturn(new int[]{0});
 
@@ -966,8 +972,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     public void testCreateNotificationChannels_FirstChannelWithFgndTaskStartsPermDialog()
             throws Exception {
-        when(mPermissionPolicyInternal.canShowPermissionPromptForTask(any(
-                ActivityManager.RecentTaskInfo.class))).thenReturn(true);
+        when(mAtm.getTaskToShowPermissionDialogOn(anyString(), anyInt())).thenReturn(TEST_TASK_ID);
         final NotificationChannel channel =
                 new NotificationChannel("id", "name", IMPORTANCE_DEFAULT);
         mBinderService.createNotificationChannels(PKG_NO_CHANNELS,
@@ -980,8 +985,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     public void testCreateNotificationChannels_SecondChannelWithFgndTaskDoesntStartPermDialog()
             throws Exception {
-        when(mPermissionPolicyInternal.canShowPermissionPromptForTask(any(
-                ActivityManager.RecentTaskInfo.class))).thenReturn(true);
+        when(mAtm.getTaskToShowPermissionDialogOn(anyString(), anyInt())).thenReturn(TEST_TASK_ID);
         assertTrue(mBinderService.getNumNotificationChannelsForPackage(PKG, mUid, true) > 0);
 
         final NotificationChannel channel =
@@ -996,8 +1000,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     public void testCreateNotificationChannels_FirstChannelWithBgndTaskDoesntStartPermDialog()
             throws Exception {
         reset(mPermissionPolicyInternal);
-        when(mPermissionPolicyInternal.canShowPermissionPromptForTask(any(
-                ActivityManager.RecentTaskInfo.class))).thenReturn(false);
+        when(mAtm.getTaskToShowPermissionDialogOn(anyString(), anyInt())).thenReturn(TEST_TASK_ID);
 
         final NotificationChannel channel =
                 new NotificationChannel("id", "name", IMPORTANCE_DEFAULT);
@@ -2702,13 +2705,10 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     public void testUpdateAppNotifyCreatorBlock() throws Exception {
         mService.setPreferencesHelper(mPreferencesHelper);
-
-        // should not trigger a broadcast
-        when(mAppOpsManager.checkOpNoThrow(anyInt(), eq(mUid), eq(PKG))).thenReturn(MODE_IGNORED);
-        mService.mAppOpsCallback.opChanged(0, mUid, PKG);
+        when(mPreferencesHelper.getImportance(PKG, mUid)).thenReturn(IMPORTANCE_DEFAULT);
 
         // should trigger a broadcast
-        mBinderService.setNotificationsEnabledForPackage(PKG, 0, true);
+        mBinderService.setNotificationsEnabledForPackage(PKG, mUid, false);
         Thread.sleep(500);
         waitForIdle();
         ArgumentCaptor<Intent> captor = ArgumentCaptor.forClass(Intent.class);
@@ -2717,7 +2717,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         assertEquals(NotificationManager.ACTION_APP_BLOCK_STATE_CHANGED,
                 captor.getValue().getAction());
         assertEquals(PKG, captor.getValue().getPackage());
-        assertFalse(captor.getValue().getBooleanExtra(EXTRA_BLOCKED_STATE, true));
+        assertTrue(captor.getValue().getBooleanExtra(EXTRA_BLOCKED_STATE, true));
     }
 
     @Test
@@ -2734,7 +2734,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         // should not trigger a broadcast
         when(mAppOpsManager.checkOpNoThrow(anyInt(), eq(mUid), eq(PKG))).thenReturn(MODE_ALLOWED);
-        mService.mAppOpsCallback.opChanged(0, mUid, PKG);
 
         // should trigger a broadcast
         mBinderService.setNotificationsEnabledForPackage(PKG, 0, true);

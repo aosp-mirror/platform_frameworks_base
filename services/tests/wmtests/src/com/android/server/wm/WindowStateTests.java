@@ -29,6 +29,8 @@ import static android.view.Surface.ROTATION_90;
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+import static android.view.WindowManager.LayoutParams.FLAG_SPLIT_TOUCH;
+import static android.view.WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ABOVE_SUB_PANEL;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
@@ -61,6 +63,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
@@ -80,6 +83,7 @@ import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.IBinder;
+import android.os.InputConfig;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 import android.util.ArraySet;
@@ -97,7 +101,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -490,6 +496,26 @@ public class WindowStateTests extends WindowTestsBase {
     }
 
     @Test
+    public void testApplyWithNextDraw() {
+        final WindowState win = createWindow(null, TYPE_APPLICATION_OVERLAY, "app");
+        final SurfaceControl.Transaction[] handledT = { null };
+        // The normal case that the draw transaction is applied with finishing drawing.
+        win.applyWithNextDraw(t -> handledT[0] = t);
+        assertTrue(win.useBLASTSync());
+        final SurfaceControl.Transaction drawT = new StubTransaction();
+        win.prepareDrawHandlers();
+        assertTrue(win.finishDrawing(drawT));
+        assertEquals(drawT, handledT[0]);
+        assertFalse(win.useBLASTSync());
+
+        // If the window is gone before reporting drawn, the sync state should be cleared.
+        win.applyWithNextDraw(t -> handledT[0] = t);
+        win.destroySurfaceUnchecked();
+        assertFalse(win.useBLASTSync());
+        assertNotEquals(drawT, handledT[0]);
+    }
+
+    @Test
     public void testSeamlesslyRotateWindow() {
         final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
         final SurfaceControl.Transaction t = spy(StubTransaction.class);
@@ -731,10 +757,15 @@ public class WindowStateTests extends WindowTestsBase {
         assertFalse(win0.canReceiveTouchInput());
     }
 
+    private boolean testFlag(int flags, int test) {
+        return (flags & test) == test;
+    }
+
     @Test
     public void testUpdateInputWindowHandle() {
         final WindowState win = createWindow(null, TYPE_APPLICATION, "win");
         win.mAttrs.inputFeatures = WindowManager.LayoutParams.INPUT_FEATURE_DISABLE_USER_ACTIVITY;
+        win.mAttrs.flags = FLAG_WATCH_OUTSIDE_TOUCH | FLAG_SPLIT_TOUCH;
         final InputWindowHandle handle = new InputWindowHandle(
                 win.mInputWindowHandle.getInputApplicationHandle(), win.getDisplayId());
         final InputWindowHandleWrapper handleWrapper = new InputWindowHandleWrapper(handle);
@@ -744,13 +775,14 @@ public class WindowStateTests extends WindowTestsBase {
         mDisplayContent.getInputMonitor().populateInputWindowHandle(handleWrapper, win);
 
         assertTrue(handleWrapper.isChanged());
+        assertTrue(testFlag(handle.inputConfig, InputConfig.WATCH_OUTSIDE_TOUCH));
+        assertFalse(testFlag(handle.inputConfig, InputConfig.PREVENT_SPLITTING));
+        assertTrue(testFlag(handle.inputConfig, InputConfig.DISABLE_USER_ACTIVITY));
         // The window of standard resizable task should not use surface crop as touchable region.
         assertFalse(handle.replaceTouchableRegionWithCrop);
         assertEquals(inputChannelToken, handle.token);
         assertEquals(win.mActivityRecord.getInputApplicationHandle(false /* update */),
                 handle.inputApplicationHandle);
-        assertEquals(win.mAttrs.inputFeatures, handle.inputFeatures);
-        assertEquals(win.isVisible(), handle.visible);
 
         final SurfaceControl sc = mock(SurfaceControl.class);
         final SurfaceControl.Transaction transaction = mSystemServicesTestRule.mTransaction;
@@ -776,15 +808,13 @@ public class WindowStateTests extends WindowTestsBase {
         assertEquals(rotatedBounds, handle.touchableRegion.getBounds());
 
         // Populate as an overlay to disable the input of window.
-        InputMonitor.populateOverlayInputInfo(handleWrapper, false /* isVisible */);
+        InputMonitor.populateOverlayInputInfo(handleWrapper);
         // The overlay attributes should be set.
         assertTrue(handleWrapper.isChanged());
-        assertFalse(handle.focusable);
-        assertFalse(handle.visible);
+        assertFalse(handleWrapper.isFocusable());
         assertNull(handle.token);
         assertEquals(0L, handle.dispatchingTimeoutMillis);
-        assertEquals(WindowManager.LayoutParams.INPUT_FEATURE_NO_INPUT_CHANNEL,
-                handle.inputFeatures);
+        assertTrue(testFlag(handle.inputConfig, InputConfig.NO_INPUT_CHANNEL));
     }
 
     @Test
@@ -992,14 +1022,18 @@ public class WindowStateTests extends WindowTestsBase {
         final Rect keepClearArea1 = new Rect(0, 0, 10, 10);
         final Rect keepClearArea2 = new Rect(5, 10, 15, 20);
         final List<Rect> keepClearAreas = Arrays.asList(keepClearArea1, keepClearArea2);
-        window.setKeepClearAreas(keepClearAreas);
+        window.setKeepClearAreas(keepClearAreas, Collections.emptyList());
 
         // Test that the keep-clear rects are stored and returned
-        assertEquals(new ArraySet(keepClearAreas), new ArraySet(window.getKeepClearAreas()));
+        final List<Rect> windowKeepClearAreas = new ArrayList();
+        window.getKeepClearAreas(windowKeepClearAreas, new ArrayList());
+        assertEquals(new ArraySet(keepClearAreas), new ArraySet(windowKeepClearAreas));
 
         // Test that keep-clear rects are overwritten
-        window.setKeepClearAreas(Arrays.asList());
-        assertEquals(0, window.getKeepClearAreas().size());
+        window.setKeepClearAreas(Collections.emptyList(), Collections.emptyList());
+        windowKeepClearAreas.clear();
+        window.getKeepClearAreas(windowKeepClearAreas, new ArrayList());
+        assertEquals(0, windowKeepClearAreas.size());
 
         // Move the window position
         final SurfaceControl.Transaction t = spy(StubTransaction.class);
@@ -1010,13 +1044,60 @@ public class WindowStateTests extends WindowTestsBase {
         assertEquals(new Point(frame.left, frame.top), window.mLastSurfacePosition);
 
         // Test that the returned keep-clear rects are translated to display space
-        window.setKeepClearAreas(keepClearAreas);
+        window.setKeepClearAreas(keepClearAreas, Collections.emptyList());
         Rect expectedArea1 = new Rect(keepClearArea1);
         expectedArea1.offset(frame.left, frame.top);
         Rect expectedArea2 = new Rect(keepClearArea2);
         expectedArea2.offset(frame.left, frame.top);
 
+        windowKeepClearAreas.clear();
+        window.getKeepClearAreas(windowKeepClearAreas, new ArrayList());
         assertEquals(new ArraySet(Arrays.asList(expectedArea1, expectedArea2)),
-                     new ArraySet(window.getKeepClearAreas()));
+                     new ArraySet(windowKeepClearAreas));
+    }
+
+    @Test
+    public void testUnrestrictedKeepClearAreas() {
+        final WindowState window = createWindow(null, TYPE_APPLICATION, "window");
+        makeWindowVisible(window);
+
+        final Rect keepClearArea1 = new Rect(0, 0, 10, 10);
+        final Rect keepClearArea2 = new Rect(5, 10, 15, 20);
+        final List<Rect> keepClearAreas = Arrays.asList(keepClearArea1, keepClearArea2);
+        window.setKeepClearAreas(Collections.emptyList(), keepClearAreas);
+
+        // Test that the keep-clear rects are stored and returned
+        final List<Rect> restrictedKeepClearAreas = new ArrayList();
+        final List<Rect> unrestrictedKeepClearAreas = new ArrayList();
+        window.getKeepClearAreas(restrictedKeepClearAreas, unrestrictedKeepClearAreas);
+        assertEquals(Collections.emptySet(), new ArraySet(restrictedKeepClearAreas));
+        assertEquals(new ArraySet(keepClearAreas), new ArraySet(unrestrictedKeepClearAreas));
+
+        // Test that keep-clear rects are overwritten
+        window.setKeepClearAreas(Collections.emptyList(), Collections.emptyList());
+        unrestrictedKeepClearAreas.clear();
+        window.getKeepClearAreas(unrestrictedKeepClearAreas, new ArrayList());
+        assertEquals(0, unrestrictedKeepClearAreas.size());
+
+        // Move the window position
+        final SurfaceControl.Transaction t = spy(StubTransaction.class);
+        window.mSurfaceControl = mock(SurfaceControl.class);
+        final Rect frame = window.getFrame();
+        frame.set(10, 20, 60, 80);
+        window.updateSurfacePosition(t);
+        assertEquals(new Point(frame.left, frame.top), window.mLastSurfacePosition);
+
+        // Test that the returned keep-clear rects are translated to display space
+        window.setKeepClearAreas(Collections.emptyList(), keepClearAreas);
+        Rect expectedArea1 = new Rect(keepClearArea1);
+        expectedArea1.offset(frame.left, frame.top);
+        Rect expectedArea2 = new Rect(keepClearArea2);
+        expectedArea2.offset(frame.left, frame.top);
+
+        unrestrictedKeepClearAreas.clear();
+        window.getKeepClearAreas(restrictedKeepClearAreas, unrestrictedKeepClearAreas);
+        assertEquals(Collections.emptySet(), new ArraySet(restrictedKeepClearAreas));
+        assertEquals(new ArraySet(Arrays.asList(expectedArea1, expectedArea2)),
+                     new ArraySet(unrestrictedKeepClearAreas));
     }
 }

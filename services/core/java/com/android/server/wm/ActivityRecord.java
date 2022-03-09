@@ -46,7 +46,6 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.app.WindowConfiguration.activityTypeToString;
-import static android.app.WindowConfiguration.isSplitScreenWindowingMode;
 import static android.app.admin.DevicePolicyResources.Drawables.Source.PROFILE_SWITCH_ANIMATION;
 import static android.app.admin.DevicePolicyResources.Drawables.Style.OUTLINE;
 import static android.app.admin.DevicePolicyResources.Drawables.WORK_PROFILE_ICON;
@@ -279,6 +278,7 @@ import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.gui.DropInputMode;
 import android.hardware.HardwareBuffer;
 import android.net.Uri;
 import android.os.Binder;
@@ -544,7 +544,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     final RootWindowContainer mRootWindowContainer;
 
     // Tracking splash screen status from previous activity
-    boolean mSplashScreenStyleEmpty = false;
+    boolean mSplashScreenStyleSolidColor = false;
 
     Drawable mEnterpriseThumbnailDrawable;
 
@@ -783,6 +783,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     boolean startingDisplayed;
     boolean startingMoved;
 
+    /** The last set {@link DropInputMode} for this activity surface. */
+    @DropInputMode
+    private int mLastDropInputMode = DropInputMode.NONE;
+
     /**
      * If it is non-null, it requires all activities who have the same starting data to be drawn
      * to remove the starting window.
@@ -827,7 +831,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      */
     private static final int SPLASH_SCREEN_BEHAVIOR_DEFAULT = 0;
     /**
-     * The icon is shown unless the launching app specified SPLASH_SCREEN_STYLE_EMPTY.
+     * The icon is shown unless the launching app specified SPLASH_SCREEN_STYLE_SOLID_COLOR.
      *
      * @see android.R.attr#windowSplashScreenBehavior
      */
@@ -1549,6 +1553,60 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 rootTask.setHasBeenVisible(true);
             }
         }
+
+        // Update the input mode if the embedded mode is changed.
+        updateUntrustedEmbeddingInputProtection();
+    }
+
+    @Override
+    void setSurfaceControl(SurfaceControl sc) {
+        super.setSurfaceControl(sc);
+        if (sc != null) {
+            mLastDropInputMode = DropInputMode.NONE;
+            updateUntrustedEmbeddingInputProtection();
+        }
+    }
+
+    /**
+     * Sets to drop input when obscured to activity if it is embedded in untrusted mode.
+     *
+     * Although the untrusted embedded activity should be invisible when behind other overlay,
+     * theoretically even if this activity is the top most, app can still move surface of activity
+     * below it to the top. As a result, we want to update the input mode to drop when obscured for
+     * all untrusted activities.
+     */
+    private void updateUntrustedEmbeddingInputProtection() {
+        final SurfaceControl sc = getSurfaceControl();
+        if (sc == null) {
+            return;
+        }
+        if (isEmbeddedInUntrustedMode()) {
+            // Set drop input to OBSCURED when untrusted embedded.
+            setDropInputMode(DropInputMode.OBSCURED);
+        } else {
+            // Reset drop input mode when this activity is not embedded in untrusted mode.
+            setDropInputMode(DropInputMode.NONE);
+        }
+    }
+
+    @VisibleForTesting
+    void setDropInputMode(@DropInputMode int mode) {
+        if (mLastDropInputMode != mode && getSurfaceControl() != null) {
+            mLastDropInputMode = mode;
+            mWmService.mTransactionFactory.get()
+                    .setDropInputMode(getSurfaceControl(), mode)
+                    .apply();
+        }
+    }
+
+    private boolean isEmbeddedInUntrustedMode() {
+        final TaskFragment organizedTaskFragment = getOrganizedTaskFragment();
+        if (organizedTaskFragment == null) {
+            // Not embedded.
+            return false;
+        }
+        // Check if trusted.
+        return !organizedTaskFragment.isAllowedToEmbedActivityInTrustedMode(this);
     }
 
     void updateAnimatingActivityRegistry() {
@@ -2183,7 +2241,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     @VisibleForTesting
     boolean addStartingWindow(String pkg, int resolvedTheme, ActivityRecord from, boolean newTask,
             boolean taskSwitch, boolean processRunning, boolean allowTaskSnapshot,
-            boolean activityCreated, boolean useEmpty,
+            boolean activityCreated, boolean isSimple,
             boolean activityAllDrawn) {
         // If the display is frozen, we won't do anything until the actual window is
         // displayed so there is no reason to put in the starting window.
@@ -2219,7 +2277,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         final int typeParameter = StartingSurfaceController
                 .makeStartingWindowTypeParameter(newTask, taskSwitch, processRunning,
-                        allowTaskSnapshot, activityCreated, useEmpty, useLegacy, activityAllDrawn,
+                        allowTaskSnapshot, activityCreated, isSimple, useLegacy, activityAllDrawn,
                         type, packageName, mUserId);
 
         if (type == STARTING_WINDOW_TYPE_SNAPSHOT) {
@@ -2453,7 +2511,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // either way, abort and reset the sequence.
         if (parcelable == null
                 || mTransferringSplashScreenState != TRANSFER_SPLASH_SCREEN_COPYING
-                || mStartingWindow == null) {
+                || mStartingWindow == null
+                || finishing) {
             if (parcelable != null) {
                 parcelable.clearIfNeeded();
             }
@@ -3643,6 +3702,20 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return;
         }
         finishing = true;
+
+        // Transfer the launch cookie to the next running activity above this in the same task.
+        if (mLaunchCookie != null && mState != RESUMED && task != null && !task.mInRemoveTask
+                && !task.isClearingToReuseTask()) {
+            final ActivityRecord nextCookieTarget = task.getActivity(
+                    // Intend to only associate the same app by checking uid.
+                    r -> r.mLaunchCookie == null && !r.finishing && r.isUid(getUid()),
+                    this, false /* includeBoundary */, false /* traverseTopToBottom */);
+            if (nextCookieTarget != null) {
+                nextCookieTarget.mLaunchCookie = mLaunchCookie;
+                mLaunchCookie = null;
+            }
+        }
+
         final TaskFragment taskFragment = getTaskFragment();
         if (taskFragment != null) {
             final Task task = taskFragment.getTask();
@@ -5429,6 +5502,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return false;
         }
 
+        // Untrusted embedded activity can be visible only if there is no other overlay window.
+        if (hasOverlayOverUntrustedModeEmbedded()) {
+            return false;
+        }
+
         // Check if the activity is on a sleeping display, canTurnScreenOn will also check
         // keyguard visibility
         if (mDisplayContent.isSleeping()) {
@@ -5436,6 +5514,25 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         } else {
             return mTaskSupervisor.getKeyguardController().checkKeyguardVisibility(this);
         }
+    }
+
+    /**
+     * Checks if there are any activities or other containers that belong to the same task on top of
+     * this activity when embedded in untrusted mode.
+     */
+    boolean hasOverlayOverUntrustedModeEmbedded() {
+        if (!isEmbeddedInUntrustedMode() || getRootTask() == null) {
+            // The activity is not embedded in untrusted mode.
+            return false;
+        }
+
+        // Check if there are any activities with different UID over the activity that is embedded
+        // in untrusted mode. Traverse bottom to top with boundary so that it will only check
+        // activities above this activity.
+        final ActivityRecord differentUidOverlayActivity = getRootTask().getActivity(
+                a -> a.getUid() != getUid(), this /* boundary */, false /* includeBoundary */,
+                false /* traverseTopToBottom */);
+        return differentUidOverlayActivity != null;
     }
 
     void updateVisibilityIgnoringKeyguard(boolean behindFullscreenActivity) {
@@ -6138,7 +6235,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     void onFirstWindowDrawn(WindowState win) {
         firstWindowDrawn = true;
         // stop tracking
-        mSplashScreenStyleEmpty = true;
+        mSplashScreenStyleSolidColor = true;
 
         // We now have a good window to show, remove dead placeholders
         removeDeadWindows();
@@ -6173,7 +6270,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     void onStartingWindowDrawn() {
         boolean wasTaskVisible = false;
         if (task != null) {
-            mSplashScreenStyleEmpty = true;
+            mSplashScreenStyleSolidColor = true;
             wasTaskVisible = task.getHasBeenVisible();
             task.setHasBeenVisible(true);
         }
@@ -6647,10 +6744,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
         return false;
     }
-    private boolean shouldUseEmptySplashScreen(ActivityRecord sourceRecord, boolean startActivity,
-            ActivityOptions options, int resolvedTheme) {
+    private boolean shouldUseSolidColorSplashScreen(ActivityRecord sourceRecord,
+            boolean startActivity, ActivityOptions options, int resolvedTheme) {
         if (sourceRecord == null && !startActivity) {
-            // Use empty style if this activity is not top activity. This could happen when adding
+            // Use simple style if this activity is not top activity. This could happen when adding
             // a splash screen window to the warm start activity which is re-create because top is
             // finishing.
             final ActivityRecord above = task.getActivityAbove(this);
@@ -6662,7 +6759,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // setSplashScreenStyle decide in priority of windowSplashScreenBehavior.
         if (options != null) {
             final int optionsStyle = options.getSplashScreenStyle();
-            if (optionsStyle == SplashScreen.SPLASH_SCREEN_STYLE_EMPTY) {
+            if (optionsStyle == SplashScreen.SPLASH_SCREEN_STYLE_SOLID_COLOR) {
                 return true;
             } else if (optionsStyle == SplashScreen.SPLASH_SCREEN_STYLE_ICON
                     || isIconStylePreferred(resolvedTheme)) {
@@ -6670,7 +6767,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             }
             // Choose the default behavior for Launcher and SystemUI when the SplashScreen style is
             // not specified in the ActivityOptions.
-            if (mLaunchSourceType == LAUNCH_SOURCE_TYPE_HOME) {
+            if (mLaunchSourceType == LAUNCH_SOURCE_TYPE_HOME
+                    || launchedFromUid == Process.SHELL_UID) {
                 return false;
             } else if (mLaunchSourceType == LAUNCH_SOURCE_TYPE_SYSTEMUI) {
                 return true;
@@ -6683,14 +6781,15 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
 
         if (sourceRecord != null && !sourceRecord.isActivityTypeHome()) {
-            return sourceRecord.mSplashScreenStyleEmpty;
+            return sourceRecord.mSplashScreenStyleSolidColor;
         }
 
-        // If this activity was launched from Launcher or System for first start, never use an
-        // empty splash screen.
+        // If this activity was launched from Launcher or System for first start, never use a
+        // solid color splash screen.
         // Need to check sourceRecord before in case this activity is launched from service.
         return !startActivity || !(mLaunchSourceType == LAUNCH_SOURCE_TYPE_SYSTEM
-                || mLaunchSourceType == LAUNCH_SOURCE_TYPE_HOME);
+                || mLaunchSourceType == LAUNCH_SOURCE_TYPE_HOME
+                || launchedFromUid == Process.SHELL_UID);
     }
 
     private int getSplashscreenTheme(ActivityOptions options) {
@@ -6753,7 +6852,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         final int resolvedTheme = evaluateStartingWindowTheme(prev, packageName, theme,
                 splashScreenTheme);
 
-        mSplashScreenStyleEmpty = shouldUseEmptySplashScreen(sourceRecord, startActivity,
+        mSplashScreenStyleSolidColor = shouldUseSolidColorSplashScreen(sourceRecord, startActivity,
                 startOptions, resolvedTheme);
 
         final boolean activityCreated =
@@ -6765,7 +6864,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         final boolean scheduled = addStartingWindow(packageName, resolvedTheme,
                 prev, newTask || newSingleActivity, taskSwitch, processRunning,
-                allowTaskSnapshot(), activityCreated, mSplashScreenStyleEmpty, allDrawn);
+                allowTaskSnapshot(), activityCreated, mSplashScreenStyleSolidColor, allDrawn);
         if (DEBUG_STARTING_WINDOW_VERBOSE && scheduled) {
             Slog.d(TAG, "Scheduled starting window for " + this);
         }
@@ -7515,8 +7614,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         final int parentWindowingMode =
                 newParentConfiguration.windowConfiguration.getWindowingMode();
         final boolean isFixedOrientationLetterboxAllowed =
-                isSplitScreenWindowingMode(parentWindowingMode)
-                        || parentWindowingMode == WINDOWING_MODE_MULTI_WINDOW
+                parentWindowingMode == WINDOWING_MODE_MULTI_WINDOW
                         || parentWindowingMode == WINDOWING_MODE_FULLSCREEN;
         // TODO(b/181207944): Consider removing the if condition and always run
         // resolveFixedOrientationConfiguration() since this should be applied for all cases.

@@ -76,12 +76,6 @@ public class KeyguardPinViewController
     }
 
     @Override
-    void resetState() {
-        super.resetState();
-        mMessageAreaController.setMessage("");
-    }
-
-    @Override
     public boolean startDisappearAnimation(Runnable finishRunnable) {
         return mView.startDisappearAnimation(
                 mKeyguardUpdateMonitor.needsSlowUnlockTransition(), finishRunnable);

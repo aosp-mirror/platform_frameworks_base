@@ -12313,7 +12313,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 info.addAction(AccessibilityNodeInfo.ACTION_CUT);
             }
             if (canReplace()) {
-                info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_SHOW_SUGGESTIONS);
+                info.addAction(
+                        AccessibilityNodeInfo.AccessibilityAction.ACTION_SHOW_TEXT_SUGGESTIONS);
             }
             if (canShare()) {
                 info.addAction(new AccessibilityNodeInfo.AccessibilityAction(
@@ -12634,7 +12635,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             default: {
                 // New ids have static blocks to assign values, so they can't be used in a case
                 // block.
-                if (action == R.id.accessibilityActionShowSuggestions) {
+                if (action == R.id.accessibilityActionShowTextSuggestions) {
                     return isFocused() && canReplace() && onTextContextMenuItem(ID_REPLACE);
                 }
                 return super.performAccessibilityActionInternal(action, arguments);

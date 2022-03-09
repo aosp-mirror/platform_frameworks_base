@@ -60,10 +60,6 @@ platform_bootclasspath {
             module: "art-bootclasspath-fragment",
         },
         {
-            apex: "com.android.auxiliary",
-            module: "com.android.auxiliary-bootclasspath-fragment",
-        },
-        {
             apex: "com.android.bluetooth",
             module: "com.android.bluetooth-bootclasspath-fragment",
         },
@@ -106,10 +102,6 @@ platform_bootclasspath {
         {
             apex: "com.android.sdkext",
             module: "com.android.sdkext-bootclasspath-fragment",
-        },
-        {
-            apex: "com.android.supplementalprocess",
-            module: "com.android.supplementalprocess-bootclasspath-fragment",
         },
         {
             apex: "com.android.tethering",

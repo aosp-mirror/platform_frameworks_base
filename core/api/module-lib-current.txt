@@ -10,7 +10,7 @@ package android {
 
 package android.app {
 
-  @UiContext public class Activity extends android.view.ContextThemeWrapper implements android.content.ComponentCallbacks2 android.view.KeyEvent.Callback android.view.LayoutInflater.Factory2 android.view.OnBackInvokedDispatcherOwner android.view.View.OnCreateContextMenuListener android.view.Window.Callback {
+  @UiContext public class Activity extends android.view.ContextThemeWrapper implements android.content.ComponentCallbacks2 android.view.KeyEvent.Callback android.view.LayoutInflater.Factory2 android.window.OnBackInvokedDispatcherOwner android.view.View.OnCreateContextMenuListener android.view.Window.Callback {
     method public final boolean addDumpable(@NonNull android.util.Dumpable);
   }
 
@@ -18,10 +18,6 @@ package android.app {
     method @RequiresPermission(android.Manifest.permission.SET_ACTIVITY_WATCHER) public void addHomeVisibilityListener(@NonNull java.util.concurrent.Executor, @NonNull android.app.HomeVisibilityListener);
     method @RequiresPermission(android.Manifest.permission.SET_ACTIVITY_WATCHER) public void removeHomeVisibilityListener(@NonNull android.app.HomeVisibilityListener);
     method @RequiresPermission(android.Manifest.permission.CHANGE_CONFIGURATION) public boolean updateMccMncConfiguration(@NonNull String, @NonNull String);
-  }
-
-  public class ActivityOptions {
-    method @NonNull public static android.app.ActivityOptions fromBundle(@NonNull android.os.Bundle);
   }
 
   public class AppOpsManager {
@@ -52,21 +48,6 @@ package android.app {
 
   public static interface PendingIntent.CancelListener {
     method public void onCanceled(@NonNull android.app.PendingIntent);
-  }
-
-  public class PropertyInvalidatedCache<Query, Result> {
-    ctor public PropertyInvalidatedCache(int, int, @NonNull String, @NonNull String, @NonNull android.app.PropertyInvalidatedCache.QueryHandler<Query,Result>);
-    method public final void disableForCurrentProcess();
-    method public final void invalidateCache();
-    method public static void invalidateCache(int, @NonNull String);
-    method @Nullable public final Result query(@NonNull Query);
-    field public static final int MODULE_BLUETOOTH = 2; // 0x2
-  }
-
-  public abstract static class PropertyInvalidatedCache.QueryHandler<Q, R> {
-    ctor public PropertyInvalidatedCache.QueryHandler();
-    method @Nullable public abstract R apply(@NonNull Q);
-    method public boolean shouldBypassCache(@NonNull Q);
   }
 
   public class StatusBarManager {
@@ -357,13 +338,29 @@ package android.os {
     field public static final int DEVICE_INITIAL_SDK_INT;
   }
 
+  public class IpcDataCache<Query, Result> {
+    ctor public IpcDataCache(int, @NonNull String, @NonNull String, @NonNull String, @NonNull android.os.IpcDataCache.QueryHandler<Query,Result>);
+    method public void disableForCurrentProcess();
+    method public static void disableForCurrentProcess(@NonNull String);
+    method public void invalidateCache();
+    method public static void invalidateCache(@NonNull String, @NonNull String);
+    method @Nullable public Result query(@NonNull Query);
+    field public static final String MODULE_BLUETOOTH = "bluetooth";
+  }
+
+  public abstract static class IpcDataCache.QueryHandler<Q, R> {
+    ctor public IpcDataCache.QueryHandler();
+    method @Nullable public abstract R apply(@NonNull Q);
+    method public boolean shouldBypassCache(@NonNull Q);
+  }
+
   public interface Parcelable {
     method public default int getStability();
   }
 
   public class Process {
+    method public static final int getAppUidForSdkSandboxUid(int);
     method public static final boolean isSdkSandboxUid(int);
-    method public static final int toAppUid(int);
     method public static final int toSdkSandboxUid(int);
     field public static final int NFC_UID = 1027; // 0x403
     field public static final int VPN_UID = 1016; // 0x3f8

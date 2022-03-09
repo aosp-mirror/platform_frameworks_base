@@ -39,6 +39,7 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.SparseBooleanArray;
 import android.view.MotionEvent;
 import android.view.accessibility.IWindowMagnificationConnection;
 import android.view.accessibility.IWindowMagnificationConnectionCallback;
@@ -124,6 +125,7 @@ public class WindowMagnificationManager implements
     private SparseArray<WindowMagnifier> mWindowMagnifiers = new SparseArray<>();
     // Whether the following typing focus feature for magnification is enabled.
     private boolean mMagnificationFollowTypingEnabled = true;
+    private final SparseBooleanArray mIsImeVisibleArray = new SparseBooleanArray();
 
     private boolean mReceiverRegistered = false;
     @VisibleForTesting
@@ -384,7 +386,8 @@ public class WindowMagnificationManager implements
         float toCenterY = (float) (top + bottom) / 2;
 
         synchronized (mLock) {
-            if (!isPositionInSourceBounds(displayId, toCenterX, toCenterY)
+            if (mIsImeVisibleArray.get(displayId, false)
+                    && !isPositionInSourceBounds(displayId, toCenterX, toCenterY)
                     && isTrackingTypingFocusEnabled(displayId)) {
                 moveWindowMagnifierToPositionInternal(displayId, toCenterX, toCenterY,
                         STUB_ANIMATION_CALLBACK);
@@ -456,7 +459,8 @@ public class WindowMagnificationManager implements
      *
      * @param shown {@code true} means the IME window shows on the screen. Otherwise, it's hidden.
      */
-    void onImeWindowVisibilityChanged(boolean shown) {
+    void onImeWindowVisibilityChanged(int displayId, boolean shown) {
+        mIsImeVisibleArray.put(displayId, shown);
         if (shown) {
             enableAllTrackingTypingFocus();
         }
@@ -903,10 +907,10 @@ public class WindowMagnificationManager implements
         }
 
         @Override
-        public void onDrag(int displayId) {
+        public void onMove(int displayId) {
             if (mTrace.isA11yTracingEnabledForTypes(
                     FLAGS_WINDOW_MAGNIFICATION_CONNECTION_CALLBACK)) {
-                mTrace.logTrace(TAG + "ConnectionCallback.onDrag",
+                mTrace.logTrace(TAG + "ConnectionCallback.onMove",
                         FLAGS_WINDOW_MAGNIFICATION_CONNECTION_CALLBACK,
                         "displayId=" + displayId);
             }

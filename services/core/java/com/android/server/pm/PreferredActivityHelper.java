@@ -151,7 +151,8 @@ final class PreferredActivityHelper {
         if (TextUtils.equals(currentPackageName, packageName)) {
             return false;
         }
-        final String[] callingPackages = mPm.getPackagesForUid(Binder.getCallingUid());
+        final String[] callingPackages = mPm.mIPackageManager
+                .getPackagesForUid(Binder.getCallingUid());
         if (callingPackages != null && ArrayUtils.contains(callingPackages,
                 mPm.mRequiredPermissionControllerPackage)) {
             // PermissionController manages default home directly.

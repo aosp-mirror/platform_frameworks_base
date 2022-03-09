@@ -334,7 +334,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                 StagingManager.StagedSession stagedSession = session.mStagedSession;
                 if (!stagedSession.isInTerminalState() && stagedSession.hasParentSessionId()
                         && getSession(stagedSession.getParentSessionId()) == null) {
-                    stagedSession.setSessionFailed(SessionInfo.SESSION_ACTIVATION_FAILED,
+                    stagedSession.setSessionFailed(PackageManager.INSTALL_ACTIVATION_FAILED,
                             "An orphan staged session " + stagedSession.sessionId() + " is found, "
                                 + "parent " + stagedSession.getParentSessionId() + " is missing");
                     continue;
@@ -676,7 +676,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         String originatingPackageName = null;
         if (params.originatingUid != SessionParams.UID_UNKNOWN
                 && params.originatingUid != callingUid) {
-            String[] packages = mPm.getPackagesForUid(params.originatingUid);
+            String[] packages = mPm.mIPackageManager.getPackagesForUid(params.originatingUid);
             if (packages != null && packages.length > 0) {
                 // Choose an arbitrary representative package in the case of a shared UID.
                 originatingPackageName = packages[0];
@@ -727,7 +727,8 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
 
         if ((params.installFlags & PackageManager.INSTALL_INSTANT_APP) != 0
                 && !isCalledBySystemOrShell(callingUid)
-                && (mPm.getFlagsForUid(callingUid) & ApplicationInfo.FLAG_SYSTEM) == 0) {
+                && (mPm.mIPackageManager.getFlagsForUid(callingUid) & ApplicationInfo.FLAG_SYSTEM)
+                == 0) {
             throw new SecurityException(
                     "Only system apps could use the PackageManager.INSTALL_INSTANT_APP flag.");
         }
@@ -852,7 +853,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                 mSilentUpdatePolicy, mInstallThread.getLooper(), mStagingManager, sessionId,
                 userId, callingUid, installSource, params, createdMillis, 0L, stageDir, stageCid,
                 null, null, false, false, false, false, null, SessionInfo.INVALID_ID,
-                false, false, false, SessionInfo.SESSION_NO_ERROR, "");
+                false, false, false, PackageManager.INSTALL_UNKNOWN, "");
 
         synchronized (mSessions) {
             mSessions.put(sessionId, session);
@@ -1153,7 +1154,8 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                     .setAdmin(callerPackageName)
                     .write();
         } else {
-            ApplicationInfo appInfo = mPm.getApplicationInfo(callerPackageName, 0, userId);
+            ApplicationInfo appInfo = mPm.mIPackageManager
+                    .getApplicationInfo(callerPackageName, 0, userId);
             if (appInfo.targetSdkVersion >= Build.VERSION_CODES.P) {
                 mContext.enforceCallingOrSelfPermission(Manifest.permission.REQUEST_DELETE_PACKAGES,
                         null);

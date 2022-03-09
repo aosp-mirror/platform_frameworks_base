@@ -303,7 +303,7 @@ public class FullScreenMagnificationController implements
         public void onImeWindowVisibilityChanged(boolean shown) {
             final Message m = PooledLambda.obtainMessage(
                     FullScreenMagnificationController::notifyImeWindowVisibilityChanged,
-                    FullScreenMagnificationController.this, shown);
+                    FullScreenMagnificationController.this, mDisplayId, shown);
             mControllerCtx.getHandler().sendMessage(m);
         }
 
@@ -1215,11 +1215,12 @@ public class FullScreenMagnificationController implements
     /**
      * Notifies that the IME window visibility changed.
      *
+     * @param displayId the logical display id
      * @param shown {@code true} means the IME window shows on the screen. Otherwise it's
      *                           hidden.
      */
-    void notifyImeWindowVisibilityChanged(boolean shown) {
-        mMagnificationInfoChangedCallback.onImeWindowVisibilityChanged(shown);
+    void notifyImeWindowVisibilityChanged(int displayId, boolean shown) {
+        mMagnificationInfoChangedCallback.onImeWindowVisibilityChanged(displayId, shown);
     }
 
     /**
@@ -1609,17 +1610,19 @@ public class FullScreenMagnificationController implements
          * Called when the state of the magnification activation is changed.
          * It is for the logging data of the magnification activation state.
          *
-         * @param displayId The logical display id.
+         * @param displayId the logical display id
          * @param activated {@code true} if the magnification is activated, otherwise {@code false}.
          */
         void onFullScreenMagnificationActivationState(int displayId, boolean activated);
 
         /**
          * Called when the IME window visibility changed.
+         *
+         * @param displayId the logical display id
          * @param shown {@code true} means the IME window shows on the screen. Otherwise it's
          *                           hidden.
          */
-        void onImeWindowVisibilityChanged(boolean shown);
+        void onImeWindowVisibilityChanged(int displayId, boolean shown);
 
         /**
          * Called when the magnification spec changed.

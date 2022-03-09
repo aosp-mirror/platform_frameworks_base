@@ -29,6 +29,7 @@ import static android.os.Process.PACKAGE_INFO_GID;
 import static android.os.Process.SYSTEM_UID;
 
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
+import static com.android.server.pm.SharedUidMigration.BEST_EFFORT;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -410,7 +411,7 @@ public final class Settings implements Watchable, Snappable {
         int[] excludedUserIds;
     }
 
-    private static int mFirstAvailableUid = 0;
+    private static int mFirstAvailableUid = Process.FIRST_APPLICATION_UID;
 
     /** Map from volume UUID to {@link VersionInfo} */
     @Watched
@@ -1421,6 +1422,35 @@ public final class Settings implements Watchable, Snappable {
             if (index < size) mAppIds.set(index, obj);
         } else {
             mOtherAppIds.put(appId, obj);
+        }
+    }
+
+    /**
+     * Transparently convert a SharedUserSetting into PackageSettings without changing appId.
+     * The sharedUser passed to this method has to be {@link SharedUserSetting#isSingleUser()}.
+     */
+    void convertSharedUserSettingsLPw(SharedUserSetting sharedUser) {
+        final PackageSetting ps = sharedUser.getPackageSettings().valueAt(0);
+        replaceAppIdLPw(sharedUser.getAppId(), ps);
+
+        // Unlink the SharedUserSetting
+        ps.setSharedUserAppId(INVALID_UID);
+        if (!sharedUser.getDisabledPackageSettings().isEmpty()) {
+            final PackageSetting disabledPs = sharedUser.getDisabledPackageSettings().valueAt(0);
+            disabledPs.setSharedUserAppId(INVALID_UID);
+        }
+        mSharedUsers.remove(sharedUser.getName());
+    }
+
+    /**
+     * Check and convert eligible SharedUserSettings to PackageSettings.
+     */
+    void checkAndConvertSharedUserSettingsLPw(SharedUserSetting sharedUser) {
+        if (!sharedUser.isSingleUser()) return;
+        final AndroidPackage pkg = sharedUser.getPackageSettings().valueAt(0).getPkg();
+        if (pkg != null && pkg.isLeavingSharedUid()
+                && SharedUidMigration.applyStrategy(BEST_EFFORT)) {
+            convertSharedUserSettingsLPw(sharedUser);
         }
     }
 
@@ -4190,10 +4220,11 @@ public final class Settings implements Watchable, Snappable {
                     // Accumulate all required args and call the installer after mPackages lock
                     // has been released
                     final String seInfo = AndroidPackageUtils.getSeInfo(ps.getPkg(), ps);
+                    final boolean usesSdk = !ps.getPkg().getUsesSdkLibraries().isEmpty();
                     final CreateAppDataArgs args = Installer.buildCreateAppDataArgs(
                             ps.getVolumeUuid(), ps.getPackageName(), userHandle,
                             StorageManager.FLAG_STORAGE_CE | StorageManager.FLAG_STORAGE_DE,
-                            ps.getAppId(), seInfo, ps.getPkg().getTargetSdkVersion());
+                            ps.getAppId(), seInfo, ps.getPkg().getTargetSdkVersion(), usesSdk);
                     batch.createAppData(args);
                 } else {
                     // Make sure the app is excluded from storage mapping for this user
@@ -4275,7 +4306,7 @@ public final class Settings implements Watchable, Snappable {
     private int acquireAndRegisterNewAppIdLPw(SettingBase obj) {
         // Let's be stupidly inefficient for now...
         final int size = mAppIds.size();
-        for (int i = mFirstAvailableUid; i < size; i++) {
+        for (int i = mFirstAvailableUid - Process.FIRST_APPLICATION_UID; i < size; i++) {
             if (mAppIds.get(i) == null) {
                 mAppIds.set(i, obj);
                 return Process.FIRST_APPLICATION_UID + i;

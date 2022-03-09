@@ -73,9 +73,9 @@ public class Transitions implements RemoteCallable<Transitions> {
 
     /** Set to {@code true} to enable shell transitions. */
     public static final boolean ENABLE_SHELL_TRANSITIONS =
-            SystemProperties.getBoolean("persist.debug.shell_transit", false);
+            SystemProperties.getBoolean("persist.wm.debug.shell_transit", false);
     public static final boolean SHELL_TRANSITIONS_ROTATION = ENABLE_SHELL_TRANSITIONS
-            && SystemProperties.getBoolean("persist.debug.shell_transit_rotate", false);
+            && SystemProperties.getBoolean("persist.wm.debug.shell_transit_rotate", false);
 
     /** Transition type for exiting PIP via the Shell, via pressing the expand button. */
     public static final int TRANSIT_EXIT_PIP = TRANSIT_FIRST_CUSTOM + 1;
@@ -363,7 +363,9 @@ public class Transitions implements RemoteCallable<Transitions> {
             return;
         }
 
-        // apply transfer starting window directly if there is no other task change.
+        // apply transfer starting window directly if there is no other task change. Since this
+        // is an activity->activity situation, we can detect it by selecting transitions with only
+        // 2 changes where neither are tasks and one is a starting-window recipient.
         final int changeSize = info.getChanges().size();
         if (changeSize == 2) {
             boolean nonTaskChange = true;
@@ -380,7 +382,9 @@ public class Transitions implements RemoteCallable<Transitions> {
             }
             if (nonTaskChange && transferStartingWindow) {
                 t.apply();
-                onFinish(transitionToken, null /* wct */, null /* wctCB */);
+                // Treat this as an abort since we are bypassing any merge logic and effectively
+                // finishing immediately.
+                onAbort(transitionToken);
                 return;
             }
         }

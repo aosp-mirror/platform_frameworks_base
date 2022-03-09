@@ -574,6 +574,7 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                             false /* disableImeIcon */);
                 }
             }
+            dc.removeImeSurfaceImmediately();
             dc.handleCompleteDeferredRemoval();
         }
     }
@@ -1525,6 +1526,9 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             final Task task = wc.asTask();
             if (task != null && task.voiceSession != null) {
                 flags |= FLAG_IS_VOICE_INTERACTION;
+            }
+            if (task != null && task.isTranslucent(null)) {
+                flags |= FLAG_TRANSLUCENT;
             }
             final ActivityRecord record = wc.asActivityRecord();
             if (record != null) {

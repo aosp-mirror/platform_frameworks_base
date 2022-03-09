@@ -752,7 +752,7 @@ public class MagnificationControllerTest {
         MagnificationController spyController = spy(mMagnificationController);
         spyController.onWindowMagnificationActivationState(TEST_DISPLAY, true);
 
-        spyController.onImeWindowVisibilityChanged(true);
+        spyController.onImeWindowVisibilityChanged(TEST_DISPLAY, true);
 
         verify(spyController).logMagnificationModeWithIme(
                 eq(ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW));
@@ -763,7 +763,7 @@ public class MagnificationControllerTest {
         MagnificationController spyController = spy(mMagnificationController);
         spyController.onFullScreenMagnificationActivationState(TEST_DISPLAY, true);
 
-        spyController.onImeWindowVisibilityChanged(true);
+        spyController.onImeWindowVisibilityChanged(TEST_DISPLAY, true);
 
         verify(spyController).logMagnificationModeWithIme(
                 eq(ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN));
@@ -772,7 +772,7 @@ public class MagnificationControllerTest {
     @Test
     public void imeWindowStateShown_noMagnifying_noLogAnyMode() {
         MagnificationController spyController = spy(mMagnificationController);
-        spyController.onImeWindowVisibilityChanged(true);
+        spyController.onImeWindowVisibilityChanged(TEST_DISPLAY, true);
 
         verify(spyController, never()).logMagnificationModeWithIme(anyInt());
     }

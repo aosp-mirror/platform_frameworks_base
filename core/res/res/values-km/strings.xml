@@ -70,6 +70,7 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"ការ​ហៅ​បី​ផ្លូវ"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"បដិសេធ​ការ​ហៅ​រំខាន​ដែល​មិន​ចង់បាន"</string>
     <string name="CndMmi" msgid="185136449405618437">"ការ​បញ្ជូន​លេខ​ហៅ"</string>
+    <string name="DndMmi" msgid="8797375819689129800">"កុំ​រំខាន"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"បាន​ដាក់​កម្រិត​លំនាំដើម​លេខ​សម្គាល់​អ្នក​ហៅ។​​​ ការ​ហៅ​បន្ទាប់៖​ បាន​ដាក់កម្រិត"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"មិន​បាន​ដាក់កម្រិត​លំនាំដើម​លេខ​សម្គាល់​អ្នក​ហៅ។ ការ​ហៅ​បន្ទាប់៖ មិន​បាន​ដាក់​កម្រិត។"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"មិន​បាន​ដាក់​កម្រិត​លេខ​សម្គាល់​អ្នក​ហៅ​លំនាំ​ដើម។ ការ​ហៅ​បន្ទាប់៖​ បាន​ដាក់កម្រិត"</string>
@@ -304,10 +305,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"ចូលប្រើប្រិតិទិនរបស់អ្នក"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"សារ SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"ផ្ញើ និងមើលសារ SMS"</string>
-    <!-- no translation found for permgrouplab_storage (9173334109512154196) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_storage (8352226729501080525) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="9173334109512154196">"ឯកសារ"</string>
+    <string name="permgroupdesc_storage" msgid="8352226729501080525">"ចូលប្រើ​ឯកសារ​នៅលើ​ឧបករណ៍​របស់អ្នក"</string>
     <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"តន្ត្រី និងសំឡេងផ្សេងទៀត"</string>
     <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"ចូលប្រើឯកសារសំឡេងនៅលើឧបករណ៍របស់អ្នក"</string>
     <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"រូបថត និងវីដេអូ"</string>
@@ -588,12 +587,9 @@
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"បញ្ចូលការចាក់សោអេក្រង់របស់អ្នក ដើម្បីបន្ត"</string>
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"បានសម្គាល់​ស្នាមម្រាមដៃដោយផ្នែក"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"មិនអាចដំណើរការស្នាមម្រាមដៃបានទេ។ សូមព្យាយាមម្តងទៀត។"</string>
-    <!-- no translation found for fingerprint_acquired_imager_dirty (1770676120848224250) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_imager_dirty_alt (9169582140486372897) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_too_fast (1628459767349116104) -->
-    <skip />
+    <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"សម្អាត​ឧបករណ៍​ចាប់ស្នាមម្រាមដៃ រួចព្យាយាម​ម្ដងទៀត"</string>
+    <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"សម្អាត​ឧបករណ៍​ចាប់សញ្ញា រួចព្យាយាម​ម្ដងទៀត"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"សង្កត់លើ​ឧបករណ៍​ចាប់សញ្ញា​ឱ្យណែន"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"ចលនាម្រាមដៃយឺតពេកហើយ។ សូមព្យាយាមម្តងទៀត។"</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"សាកល្បងប្រើ​ស្នាមម្រាមដៃផ្សេងទៀត"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"ភ្លឺពេក"</string>
@@ -601,10 +597,8 @@
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"ប្ដូរទីតាំងម្រាមដៃ​របស់អ្នកតិចៗ​គ្រប់ពេល"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <!-- no translation found for fingerprint_error_not_match (4599441812893438961) -->
-    <skip />
-    <!-- no translation found for fingerprint_udfps_error_not_match (4709197752023550709) -->
-    <skip />
+    <string name="fingerprint_error_not_match" msgid="4599441812893438961">"មិនស្គាល់ស្នាមម្រាមដៃទេ"</string>
+    <string name="fingerprint_udfps_error_not_match" msgid="4709197752023550709">"សង្កត់លើ​ឧបករណ៍​ចាប់សញ្ញា​ឱ្យណែន"</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"បាន​ផ្ទៀង​ផ្ទាត់​ស្នាម​ម្រាមដៃ"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"បានផ្ទៀងផ្ទាត់​មុខ"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"បានផ្ទៀងផ្ទាត់​មុខ សូម​ចុច​បញ្ជាក់"</string>
@@ -743,6 +737,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"អនុញ្ញាតឲ្យអ្នកប្រើភ្ជាប់ទៅអ៊ីនធឺហ្វេសកម្រិតខ្ពស់នៃសេវាកម្មសារអ្នកផ្តល់សេវាកម្មទូរស័ព្ទ។ មិនគួរចាំបាច់សម្រាប់កម្មវិធីធម្មតាទេ។"</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"ភ្ជាប់ទៅក្រុមហ៊ុនផ្តល់សេវាកម្ម"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"អនុញ្ញាតឲ្យម្ចាស់ភ្ជាប់ទៅសេវាកម្មក្រុមហ៊ុនផ្តល់សេវាកម្ម។ មិនគួរចាំបាច់សម្រាប់កម្មវិធីធម្មតាទេ។"</string>
+    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"ចូលដំណើរការ កុំរំខាន"</string>
+    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"អនុញ្ញាតឲ្យកម្មវិធីអាន និងសរសេរការកំណត់រចនាសម្ព័ន្ធមុខងារ កុំរំខាន។"</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"ចាប់ផ្ដើម​មើល​ការប្រើប្រាស់​ការអនុញ្ញាត"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"អនុញ្ញាត​ឱ្យម្ចាស់​ចាប់ផ្ដើម​ការប្រើប្រាស់​ការអនុញ្ញាត​សម្រាប់កម្មវិធី។ មិនគួរ​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ។"</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"ចាប់ផ្ដើមមើលការសម្រេចលើការអនុញ្ញាត"</string>
@@ -1508,8 +1504,7 @@
     <string name="skip_button_label" msgid="3566599811326688389">"រំលង"</string>
     <string name="no_matches" msgid="6472699895759164599">"គ្មាន​ការ​ផ្គូផ្គង"</string>
     <string name="find_on_page" msgid="5400537367077438198">"រក​ក្នុង​ទំព័រ"</string>
-    <!-- no translation found for matches_found (2296462299979507689) -->
-    <skip />
+    <string name="matches_found" msgid="2296462299979507689">"{count,plural, =1{ត្រូវគ្នា #}other{# នៃ {total}}}"</string>
     <string name="action_mode_done" msgid="2536182504764803222">"រួចរាល់"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"កំពុងលុបទំហំផ្ទុករួម…"</string>
     <string name="share" msgid="4157615043345227321">"ចែក​រំលែក​"</string>
@@ -1874,8 +1869,10 @@
     <string name="zen_mode_until" msgid="2250286190237669079">"រហូត​ដល់ <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"រហូតដល់ <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (ម៉ោងរោទិ៍បន្ទាប់)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"រហូតទាល់តែ​អ្នកបិទ"</string>
+    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"រហូតទាល់តែអ្នកបិទ កុំរំខាន"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"បង្រួម"</string>
+    <string name="zen_mode_feature_name" msgid="3785547207263754500">"កុំរំខាន"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"ពេលមិនដំណើរការ"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"យប់ថ្ងៃធម្មតា"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"ចុងសប្ដាហ៍"</string>
@@ -2040,7 +2037,10 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"ការហៅ​ទូរសព្ទ និងការជូន​ដំណឹងនឹងញ័រ"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"ការហៅ​ទូរសព្ទ និងការជូន​ដំណឹងនឹង​បិទសំឡេង"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"ការផ្លាស់ប្ដូរ​ប្រព័ន្ធ"</string>
+    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"កុំ​រំខាន"</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"ថ្មី៖ មុខងារ​កុំរំខាន​កំពុងលាក់​ការជូនដំណឹង"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"ចុចដើម្បីស្វែងយល់បន្ថែម និងផ្លាស់ប្ដូរ។"</string>
+    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"មុខងារ​កុំ​រំខាន​ត្រូវ​បាន​ប្ដូរ"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"សូមចុច​ដើម្បី​មើល​ថា​​បានទប់ស្កាត់អ្វីខ្លះ។"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"ប្រព័ន្ធ"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"ការកំណត់"</string>
@@ -2057,6 +2057,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"យល់ព្រម"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"បិទ"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"ស្វែងយល់បន្ថែម"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"ការជូនដំណឹងប្រសើរជាងមុន​បានជំនួស​ការជូនដំណឹងដែលមានភាពបត់បែន Android នៅក្នុង Android 12។ មុខងារនេះបង្ហាញការឆ្លើយតប និងសកម្មភាពដែលបានណែនាំ ព្រមទាំងរៀបចំការជូនដំណឹងរបស់អ្នក។\n\nការជូនដំណឹងប្រសើរជាងមុនអាចចូលប្រើខ្លឹមសារនៃការជូនដំណឹង រួមទាំងព័ត៌មានផ្ទាល់ខ្លួនដូចជា ឈ្មោះទំនាក់ទំនង និងសារជាដើម។ មុខងារនេះក៏អាចច្រានចោល ឬឆ្លើយតបនឹងការជូនដំណឹងដូចជា ការទទួល​ការហៅទូរសព្ទ និងគ្រប់គ្រង​មុខងារកុំរំខានផងដែរ។"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"ការ​ជូនដំណឹង​ព័ត៌មាន​របស់​មុខងារ​ទម្លាប់"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"ថ្ម​អាច​នឹង​អស់ មុនពេល​សាកថ្មធម្មតា"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"បាន​បើក​ដំណើរការមុខងារ​សន្សំ​ថ្ម ដើម្បីបង្កើនកម្រិត​ថាមពល​​ថ្ម"</string>
@@ -2263,6 +2264,5 @@
     <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> កំពុងដំណើរការនៅផ្ទៃខាងក្រោយ និងធ្វើឱ្យអស់ថ្មលឿន។ សូមចុច ដើម្បី​ពិនិត្យមើល។"</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> កំពុងដំណើរការនៅផ្ទៃខាងក្រោយអស់រយៈពេលយូរហើយ។ សូមចុច ដើម្បី​ពិនិត្យមើល។"</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"ពិនិត្យមើលកម្មវិធីសកម្ម"</string>
-    <!-- no translation found for vdm_camera_access_denied (6345652513729130490) -->
-    <skip />
+    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"មិនអាចចូលប្រើកាមេរ៉ាពីឧបករណ៍នេះបានទេ"</string>
 </resources>

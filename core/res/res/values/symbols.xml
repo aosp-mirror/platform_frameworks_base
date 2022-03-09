@@ -493,6 +493,7 @@
   <java-symbol type="string" name="config_bandwidthEstimateSource" />
   <java-symbol type="integer" name="config_smartSelectionInitializedTimeoutMillis" />
   <java-symbol type="integer" name="config_smartSelectionInitializingTimeoutMillis" />
+  <java-symbol type="integer" name="config_preferKeepClearForFocusDelayMillis" />
   <java-symbol type="bool" name="config_hibernationDeletesOatArtifactsEnabled"/>
   <java-symbol type="integer" name="config_defaultAnalogClockSecondsHandFps"/>
 
@@ -1107,6 +1108,7 @@
   <java-symbol type="string" name="media_route_status_not_available" />
   <java-symbol type="string" name="media_route_status_in_use" />
   <java-symbol type="string" name="owner_name" />
+  <java-symbol type="string" name="guest_name" />
   <java-symbol type="string" name="config_chooseAccountActivity" />
   <java-symbol type="string" name="config_chooseTypeAndAccountActivity" />
   <java-symbol type="string" name="config_chooserActivity" />
@@ -3881,6 +3883,10 @@
   <java-symbol type="string" name="log_access_confirmation_deny" />
   <java-symbol type="string" name="log_access_confirmation_title" />
   <java-symbol type="string" name="log_access_confirmation_body" />
+  <java-symbol type="layout" name="log_access_user_consent_dialog_permission" />
+  <java-symbol type="id" name="log_access_dialog_title" />
+  <java-symbol type="id" name="log_access_dialog_allow_button" />
+  <java-symbol type="id" name="log_access_dialog_deny_button" />
 
   <java-symbol type="string" name="config_defaultAssistantAccessComponent" />
 
@@ -4762,4 +4768,6 @@
   <java-symbol type="bool" name="config_bg_prompt_fgs_with_noti_to_bg_restricted" />
   <java-symbol type="integer" name="config_bg_current_drain_exempted_types" />
   <java-symbol type="bool" name="config_bg_current_drain_high_threshold_by_bg_location" />
+  <java-symbol type="drawable" name="ic_swap_horiz" />
+
 </resources>

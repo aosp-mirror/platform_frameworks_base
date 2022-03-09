@@ -67,8 +67,7 @@ public class MainStageTests extends ShellTestCase {
 
     @Test
     public void testActiveDeactivate() {
-        mMainStage.activate(mRootTaskInfo.configuration.windowConfiguration.getBounds(), mWct,
-                true /* reparent */);
+        mMainStage.activate(mWct, true /* reparent */);
         assertThat(mMainStage.isActive()).isTrue();
 
         mMainStage.deactivate(mWct);

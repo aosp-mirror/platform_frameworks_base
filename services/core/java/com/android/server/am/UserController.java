@@ -399,6 +399,9 @@ class UserController implements Handler.Callback {
     @GuardedBy("mLock")
     private @StopUserOnSwitch int mStopUserOnSwitch = STOP_USER_ON_SWITCH_DEFAULT;
 
+    /** @see #getLastUserUnlockingUptime */
+    private volatile long mLastUserUnlockingUptime = 0;
+
     UserController(ActivityManagerService service) {
         this(new Injector(service));
     }
@@ -660,6 +663,8 @@ class UserController implements Handler.Callback {
             mInjector.getUserManagerInternal().setUserState(userId, uss.state);
 
             uss.mUnlockProgress.setProgress(20);
+
+            mLastUserUnlockingUptime = SystemClock.uptimeMillis();
 
             // Dispatch unlocked to system services; when fully dispatched,
             // that calls through to the next "unlocked" phase
@@ -2753,6 +2758,7 @@ class UserController implements Handler.Callback {
             if (mSwitchingToSystemUserMessage != null) {
                 pw.println("  mSwitchingToSystemUserMessage: " + mSwitchingToSystemUserMessage);
             }
+            pw.println("  mLastUserUnlockingUptime:" + mLastUserUnlockingUptime);
         }
     }
 
@@ -3075,6 +3081,14 @@ class UserController implements Handler.Callback {
         bOptions.setTemporaryAppAllowlist(duration,
                 TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED, reasonCode, "");
         return bOptions;
+    }
+
+    /**
+     * Uptime when any user was being unlocked most recently. 0 if no users have been unlocked
+     * yet. To avoid lock contention (since it's used by OomAdjuster), it's volatile internally.
+     */
+    public long getLastUserUnlockingUptime() {
+        return mLastUserUnlockingUptime;
     }
 
     /**

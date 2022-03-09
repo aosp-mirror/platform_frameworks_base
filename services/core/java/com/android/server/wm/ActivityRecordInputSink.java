@@ -19,6 +19,7 @@ package com.android.server.wm;
 import android.app.compat.CompatChanges;
 import android.compat.annotation.ChangeId;
 import android.os.IBinder;
+import android.os.InputConfig;
 import android.os.InputConstants;
 import android.os.Looper;
 import android.os.Process;
@@ -111,13 +112,12 @@ class ActivityRecordInputSink {
                 mActivityRecord.getDisplayId());
         inputWindowHandle.replaceTouchableRegionWithCrop = true;
         inputWindowHandle.name = mName;
+        inputWindowHandle.layoutParamsType = WindowManager.LayoutParams.TYPE_INPUT_CONSUMER;
         inputWindowHandle.ownerUid = Process.myUid();
         inputWindowHandle.ownerPid = Process.myPid();
-        inputWindowHandle.layoutParamsFlags =
-                WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
-                        | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH;
         inputWindowHandle.dispatchingTimeoutMillis =
                 InputConstants.DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
+        inputWindowHandle.inputConfig = InputConfig.NOT_FOCUSABLE;
         return inputWindowHandle;
     }
 
@@ -169,5 +169,4 @@ class ActivityRecordInputSink {
             finishInputEvent(event, true);
         }
     }
-
 }

@@ -1327,14 +1327,13 @@ public class TouchExplorer extends BaseEventStreamTransformation
         if (mState.isServiceDetectingGestures() && mState.isTouchInteracting()) {
             // Cancel without deleting events.
             mHandler.removeCallbacks(mSendHoverEnterAndMoveDelayed);
-            mSendHoverEnterAndMoveDelayed.run();
-            mSendHoverEnterAndMoveDelayed.clear();
-            final MotionEvent prototype = mState.getLastReceivedEvent();
-            final MotionEvent rawEvent = mState.getLastReceivedRawEvent();
             final int pointerId = mReceivedPointerTracker.getPrimaryPointerId();
             final int pointerIdBits = (1 << pointerId);
             final int policyFlags = mState.getLastReceivedPolicyFlags();
-            mSendHoverExitDelayed.post(prototype, rawEvent, pointerIdBits, policyFlags);
+            mSendHoverEnterAndMoveDelayed.setPointerIdBits(pointerIdBits);
+            mSendHoverEnterAndMoveDelayed.setPolicyFlags(policyFlags);
+            mSendHoverEnterAndMoveDelayed.run();
+            mSendHoverEnterAndMoveDelayed.clear();
         }
     }
 

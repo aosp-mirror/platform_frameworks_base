@@ -29,7 +29,10 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Insets;
 import android.graphics.Rect;
+import android.net.Uri;
+import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.service.games.CreateGameSessionRequest;
@@ -45,11 +48,15 @@ import android.service.games.IGameSessionService;
 import android.util.Slog;
 import android.view.SurfaceControl;
 import android.view.SurfaceControlViewHost.SurfacePackage;
+import android.view.WindowManager;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.infra.AndroidFuture;
 import com.android.internal.infra.ServiceConnector;
+import com.android.internal.infra.ServiceConnector.ServiceLifecycleCallbacks;
+import com.android.internal.os.BackgroundThread;
+import com.android.internal.util.ScreenshotHelper;
 import com.android.server.wm.WindowManagerInternal;
 import com.android.server.wm.WindowManagerInternal.TaskSystemBarsListener;
 import com.android.server.wm.WindowManagerService;
@@ -58,11 +65,46 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 final class GameServiceProviderInstanceImpl implements GameServiceProviderInstance {
     private static final String TAG = "GameServiceProviderInstance";
     private static final int CREATE_GAME_SESSION_TIMEOUT_MS = 10_000;
     private static final boolean DEBUG = false;
+
+    private final ServiceLifecycleCallbacks<IGameService> mGameServiceLifecycleCallbacks =
+            new ServiceLifecycleCallbacks<IGameService>() {
+                @Override
+                public void onConnected(@NonNull IGameService service) {
+                    try {
+                        service.connected(mGameServiceController);
+                    } catch (RemoteException ex) {
+                        Slog.w(TAG, "Failed to send connected event", ex);
+                    }
+                }
+
+                @Override
+                public void onDisconnected(@NonNull IGameService service) {
+                    try {
+                        service.disconnected();
+                    } catch (RemoteException ex) {
+                        Slog.w(TAG, "Failed to send disconnected event", ex);
+                    }
+                }
+            };
+
+    private final ServiceLifecycleCallbacks<IGameSessionService>
+            mGameSessionServiceLifecycleCallbacks =
+            new ServiceLifecycleCallbacks<IGameSessionService>() {
+                @Override
+                public void onBinderDied() {
+                    mBackgroundExecutor.execute(() -> {
+                        synchronized (mLock) {
+                            destroyAndClearAllGameSessionsLocked();
+                        }
+                    });
+                }
+            };
 
     private final TaskSystemBarsListener mTaskSystemBarsVisibilityListener =
             new TaskSystemBarsListener() {
@@ -153,6 +195,7 @@ final class GameServiceProviderInstanceImpl implements GameServiceProviderInstan
     private final IActivityTaskManager mActivityTaskManager;
     private final WindowManagerService mWindowManagerService;
     private final WindowManagerInternal mWindowManagerInternal;
+    private final ScreenshotHelper mScreenshotHelper;
     private final ServiceConnector<IGameService> mGameServiceConnector;
     private final ServiceConnector<IGameSessionService> mGameSessionServiceConnector;
 
@@ -172,7 +215,8 @@ final class GameServiceProviderInstanceImpl implements GameServiceProviderInstan
             @NonNull WindowManagerService windowManagerService,
             @NonNull WindowManagerInternal windowManagerInternal,
             @NonNull ServiceConnector<IGameService> gameServiceConnector,
-            @NonNull ServiceConnector<IGameSessionService> gameSessionServiceConnector) {
+            @NonNull ServiceConnector<IGameSessionService> gameSessionServiceConnector,
+            @NonNull ScreenshotHelper screenshotHelper) {
         mUserHandle = userHandle;
         mBackgroundExecutor = backgroundExecutor;
         mContext = context;
@@ -183,6 +227,7 @@ final class GameServiceProviderInstanceImpl implements GameServiceProviderInstan
         mWindowManagerInternal = windowManagerInternal;
         mGameServiceConnector = gameServiceConnector;
         mGameSessionServiceConnector = gameSessionServiceConnector;
+        mScreenshotHelper = screenshotHelper;
     }
 
     @Override
@@ -206,11 +251,11 @@ final class GameServiceProviderInstanceImpl implements GameServiceProviderInstan
         }
         mIsRunning = true;
 
-        // TODO(b/204503192): In cases where the connection to the game service fails retry with
-        //  back off mechanism.
-        AndroidFuture<Void> unusedPostConnectedFuture = mGameServiceConnector.post(gameService -> {
-            gameService.connected(mGameServiceController);
-        });
+        mGameServiceConnector.setServiceLifecycleCallbacks(mGameServiceLifecycleCallbacks);
+        mGameSessionServiceConnector.setServiceLifecycleCallbacks(
+                mGameSessionServiceLifecycleCallbacks);
+
+        AndroidFuture<?> unusedConnectFuture = mGameServiceConnector.connect();
 
         try {
             mActivityTaskManager.registerTaskStackListener(mTaskStackListener);
@@ -237,19 +282,14 @@ final class GameServiceProviderInstanceImpl implements GameServiceProviderInstan
         mWindowManagerInternal.unregisterTaskSystemBarsListener(
                 mTaskSystemBarsVisibilityListener);
 
-        for (GameSessionRecord gameSessionRecord : mGameSessions.values()) {
-            destroyGameSessionFromRecordLocked(gameSessionRecord);
-        }
-        mGameSessions.clear();
+        destroyAndClearAllGameSessionsLocked();
 
-        // TODO(b/204503192): It is possible that the game service is disconnected. In this
-        //  case we should avoid rebinding just to shut it down again.
-        mGameServiceConnector.post(gameService -> {
-            gameService.disconnected();
-        }).whenComplete((result, t) -> {
-            mGameServiceConnector.unbind();
-        });
+        mGameServiceConnector.unbind();
         mGameSessionServiceConnector.unbind();
+
+        mGameServiceConnector.setServiceLifecycleCallbacks(null);
+        mGameSessionServiceConnector.setServiceLifecycleCallbacks(null);
+
     }
 
     private void onTaskCreated(int taskId, @NonNull ComponentName componentName) {
@@ -488,6 +528,14 @@ final class GameServiceProviderInstanceImpl implements GameServiceProviderInstan
                         createGameSessionResult.getSurfacePackage()));
     }
 
+    @GuardedBy("mLock")
+    private void destroyAndClearAllGameSessionsLocked() {
+        for (GameSessionRecord gameSessionRecord : mGameSessions.values()) {
+            destroyGameSessionFromRecordLocked(gameSessionRecord);
+        }
+        mGameSessions.clear();
+    }
+
     private void destroyGameSessionDuringAttach(
             int taskId,
             CreateGameSessionResult createGameSessionResult) {
@@ -544,9 +592,7 @@ final class GameServiceProviderInstanceImpl implements GameServiceProviderInstan
                 Slog.d(TAG, "No active game sessions. Disconnecting GameSessionService");
             }
 
-            if (mGameSessionServiceConnector != null) {
-                mGameSessionServiceConnector.unbind();
-            }
+            mGameSessionServiceConnector.unbind();
         }
     }
 
@@ -615,7 +661,26 @@ final class GameServiceProviderInstanceImpl implements GameServiceProviderInstan
                 Slog.w(TAG, "Could not get bitmap for id: " + taskId);
                 callback.complete(GameScreenshotResult.createInternalErrorResult());
             } else {
-                callback.complete(GameScreenshotResult.createSuccessResult(bitmap));
+                final Bundle bundle = ScreenshotHelper.HardwareBitmapBundler.hardwareBitmapToBundle(
+                        bitmap);
+                final RunningTaskInfo runningTaskInfo = getRunningTaskInfoForTask(taskId);
+                if (runningTaskInfo == null) {
+                    Slog.w(TAG, "Could not get running task info for id: " + taskId);
+                    callback.complete(GameScreenshotResult.createInternalErrorResult());
+                }
+                final Rect crop = runningTaskInfo.configuration.windowConfiguration.getBounds();
+                final Consumer<Uri> completionConsumer = (uri) -> {
+                    if (uri == null) {
+                        callback.complete(GameScreenshotResult.createInternalErrorResult());
+                    } else {
+                        callback.complete(GameScreenshotResult.createSuccessResult());
+                    }
+                };
+                mScreenshotHelper.provideScreenshot(bundle, crop, Insets.NONE, taskId,
+                        mUserHandle.getIdentifier(), gameSessionRecord.getComponentName(),
+                        WindowManager.ScreenshotSource.SCREENSHOT_OTHER,
+                        BackgroundThread.getHandler(),
+                        completionConsumer);
             }
         });
     }

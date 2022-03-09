@@ -22,9 +22,11 @@ import android.view.View
 import com.android.internal.logging.UiEventLogger
 import com.android.settingslib.bluetooth.LocalBluetoothManager
 import com.android.systemui.animation.DialogLaunchAnimator
+import com.android.systemui.media.nearby.NearbyMediaDevicesManager
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection
 import com.android.systemui.statusbar.phone.ShadeController
+import java.util.Optional
 import javax.inject.Inject
 
 /**
@@ -38,7 +40,8 @@ class MediaOutputDialogFactory @Inject constructor(
     private val starter: ActivityStarter,
     private val notifCollection: CommonNotifCollection,
     private val uiEventLogger: UiEventLogger,
-    private val dialogLaunchAnimator: DialogLaunchAnimator
+    private val dialogLaunchAnimator: DialogLaunchAnimator,
+    private val nearbyMediaDevicesManagerOptional: Optional<NearbyMediaDevicesManager>
 ) {
     companion object {
         var mediaOutputDialog: MediaOutputDialog? = null
@@ -50,8 +53,8 @@ class MediaOutputDialogFactory @Inject constructor(
         mediaOutputDialog?.dismiss()
 
         val controller = MediaOutputController(context, packageName, aboveStatusBar,
-            mediaSessionManager, lbm, shadeController, starter, notifCollection,
-            uiEventLogger, dialogLaunchAnimator)
+                mediaSessionManager, lbm, shadeController, starter, notifCollection,
+                uiEventLogger, dialogLaunchAnimator, nearbyMediaDevicesManagerOptional)
         val dialog = MediaOutputDialog(context, aboveStatusBar, controller, uiEventLogger)
         mediaOutputDialog = dialog
 

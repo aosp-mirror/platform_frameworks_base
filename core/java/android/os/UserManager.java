@@ -2574,6 +2574,9 @@ public class UserManager {
     /**
      * Checks if the context user is a managed profile.
      *
+     * Note that this applies specifically to <em>managed</em> profiles. For profiles in general,
+     * use {@link #isProfile()} instead.
+     *
      * @return whether the context user is a managed profile.
      */
     @UserHandleAware(
@@ -2592,6 +2595,9 @@ public class UserManager {
      * {@link android.Manifest.permission#INTERACT_ACROSS_USERS} or
      * {@link android.Manifest.permission#QUERY_USERS} permission, otherwise the caller
      * must be in the same profile group of specified user.
+     *
+     * Note that this applies specifically to <em>managed</em> profiles. For profiles in general,
+     * use {@link #isProfile()} instead.
      *
      * @return whether the specified user is a managed profile.
      * @hide
@@ -3322,7 +3328,7 @@ public class UserManager {
      *
      * <p>This method can be used by OEMs to "warm" up the user creation by pre-creating some users
      * at the first boot, so they when the "real" user is created (for example,
-     * by {@link #createUser(String, String, int)} or {@link #createGuest(Context, String)}), it
+     * by {@link #createUser(String, String, int)} or {@link #createGuest(Context)}), it
      * takes less time.
      *
      * <p>This method completes the majority of work necessary for user creation: it
@@ -3359,7 +3365,6 @@ public class UserManager {
     /**
      * Creates a guest user and configures it.
      * @param context an application context
-     * @param name the name to set for the user
      * @return the {@link UserInfo} object for the created user, or {@code null} if the user
      *         could not be created.
      *
@@ -3367,20 +3372,19 @@ public class UserManager {
      */
     @RequiresPermission(anyOf = {Manifest.permission.MANAGE_USERS,
             Manifest.permission.CREATE_USERS})
-    public UserInfo createGuest(Context context, String name) {
-        UserInfo guest = null;
+    public UserInfo createGuest(Context context) {
         try {
-            guest = mService.createUserWithThrow(name, USER_TYPE_FULL_GUEST, 0);
+            final UserInfo guest = mService.createUserWithThrow(null, USER_TYPE_FULL_GUEST, 0);
             if (guest != null) {
                 Settings.Secure.putStringForUser(context.getContentResolver(),
                         Settings.Secure.SKIP_FIRST_USE_HINTS, "1", guest.id);
             }
+            return guest;
         } catch (ServiceSpecificException e) {
             return null;
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
-        return guest;
     }
 
     /**

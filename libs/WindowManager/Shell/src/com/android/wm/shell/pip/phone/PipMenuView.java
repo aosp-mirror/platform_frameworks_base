@@ -47,7 +47,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.UserHandle;
-import android.util.Log;
 import android.util.Pair;
 import android.util.Size;
 import android.view.KeyEvent;
@@ -60,11 +59,13 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
+import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.R;
 import com.android.wm.shell.animation.Interpolators;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.pip.PipUiEventLogger;
 import com.android.wm.shell.pip.PipUtils;
+import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 
 import java.lang.annotation.Retention;
@@ -423,7 +424,7 @@ public class PipMenuView extends FrameLayout {
 
     /**
      * @return Estimated minimum {@link Size} to hold the actions.
-     *         See also {@link #updateActionViews(Rect)}
+     * See also {@link #updateActionViews(Rect)}
      */
     Size getEstimatedMinMenuSize() {
         final int pipActionSize = getResources().getDimensionPixelSize(R.dimen.pip_action_size);
@@ -505,7 +506,8 @@ public class PipMenuView extends FrameLayout {
                             try {
                                 action.getActionIntent().send();
                             } catch (CanceledException e) {
-                                Log.w(TAG, "Failed to send action", e);
+                                ProtoLog.w(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                                        "%s: Failed to send action, %s", TAG, e);
                             }
                         });
                     }

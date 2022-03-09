@@ -22,4 +22,6 @@
     <string name="pip_close" msgid="9135220303720555525">"Mbyll PIP"</string>
     <string name="pip_fullscreen" msgid="7278047353591302554">"Ekrani i plotë"</string>
     <string name="pip_move" msgid="1544227837964635439">"Zhvendos PIP"</string>
+    <string name="pip_expand" msgid="7605396312689038178">"Zgjero PIP"</string>
+    <string name="pip_collapse" msgid="5732233773786896094">"Palos PIP"</string>
 </resources>

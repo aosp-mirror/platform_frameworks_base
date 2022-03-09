@@ -397,6 +397,7 @@ public abstract class PanelViewController {
 
     private void endMotionEvent(MotionEvent event, float x, float y, boolean forceCancel) {
         mTrackingPointer = -1;
+        mAmbientState.setSwipingUp(false);
         if ((mTracking && mTouchSlopExceeded) || Math.abs(x - mInitialTouchX) > mTouchSlop
                 || Math.abs(y - mInitialTouchY) > mTouchSlop
                 || event.getActionMasked() == MotionEvent.ACTION_CANCEL || forceCancel) {
@@ -460,7 +461,6 @@ public abstract class PanelViewController {
             boolean expands = onEmptySpaceClick(mInitialTouchX);
             onTrackingStopped(expands);
         }
-        mAmbientState.setSwipingUp(false);
         mVelocityTracker.clear();
     }
 

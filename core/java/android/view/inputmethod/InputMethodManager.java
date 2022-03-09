@@ -1919,10 +1919,17 @@ public final class InputMethodManager {
         if (fallbackImm != null) {
             fallbackImm.startStylusHandwriting(view);
         }
+        Objects.requireNonNull(view);
+
+        if (Settings.Global.getInt(view.getContext().getContentResolver(),
+                Settings.Global.STYLUS_HANDWRITING_ENABLED, 0) == 0) {
+            Log.d(TAG, "Ignoring startStylusHandwriting(view) as stylus handwriting is disabled");
+            return;
+        }
 
         checkFocus();
         synchronized (mH) {
-            if (view == null || !hasServedByInputMethodLocked(view)) {
+            if (!hasServedByInputMethodLocked(view)) {
                 Log.w(TAG,
                         "Ignoring startStylusHandwriting() as view=" + view + " is not served.");
                 return;
@@ -1936,8 +1943,8 @@ public final class InputMethodManager {
                 // TODO (b/210039666): Pipe IME displayId from InputBindResult and use it here.
                 //  instead of mDisplayId.
                 mServedInputConnection.requestCursorUpdatesFromImm(
-                        CURSOR_UPDATE_IMMEDIATE | CURSOR_UPDATE_MONITOR
-                                | CURSOR_UPDATE_FILTER_EDITOR_BOUNDS,
+                        CURSOR_UPDATE_IMMEDIATE | CURSOR_UPDATE_MONITOR,
+                                CURSOR_UPDATE_FILTER_EDITOR_BOUNDS,
                         mDisplayId);
             }
 
@@ -3251,10 +3258,11 @@ public final class InputMethodManager {
      * @return Something that is not well-defined.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(trackingBug = 204906124, maxTargetSdk = Build.VERSION_CODES.TIRAMISU,
+            publicAlternatives = "Use {@link android.view.WindowInsets} instead")
     public int getInputMethodWindowVisibleHeight() {
         try {
-            return mService.getInputMethodWindowVisibleHeight();
+            return mService.getInputMethodWindowVisibleHeight(mClient);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

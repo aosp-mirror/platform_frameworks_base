@@ -53,8 +53,8 @@ import java.io.PrintWriter;
  * Base class that handle common task org. related for split-screen stages.
  * Note that this class and its sub-class do not directly perform hierarchy operations.
  * They only serve to hold a collection of tasks and provide APIs like
- * {@link #setBounds(Rect, WindowContainerTransaction)} for the centralized {@link StageCoordinator}
- * to perform operations in-sync with other containers.
+ * {@link #addTask(ActivityManager.RunningTaskInfo, WindowContainerTransaction)} for the centralized
+ * {@link StageCoordinator} to perform hierarchy operations in-sync with other containers.
  *
  * @see StageCoordinator
  */
@@ -122,6 +122,20 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
 
     boolean containsTask(int taskId) {
         return mChildrenTaskInfo.contains(taskId);
+    }
+
+    boolean containsToken(WindowContainerToken token) {
+        if (token.equals(mRootTaskInfo.token)) {
+            return true;
+        }
+
+        for (int i = mChildrenTaskInfo.size() - 1; i >= 0; --i) {
+            if (token.equals(mChildrenTaskInfo.valueAt(i).token)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -280,10 +294,20 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
 
     @Override
     public void attachChildSurfaceToTask(int taskId, SurfaceControl.Builder b) {
+        b.setParent(findTaskSurface(taskId));
+    }
+
+    @Override
+    public void reparentChildSurfaceToTask(int taskId, SurfaceControl sc,
+            SurfaceControl.Transaction t) {
+        t.reparent(sc, findTaskSurface(taskId));
+    }
+
+    private SurfaceControl findTaskSurface(int taskId) {
         if (mRootTaskInfo.taskId == taskId) {
-            b.setParent(mRootLeash);
+            return mRootLeash;
         } else if (mChildrenLeashes.contains(taskId)) {
-            b.setParent(mChildrenLeashes.get(taskId));
+            return mChildrenLeashes.get(taskId);
         } else {
             throw new IllegalArgumentException("There is no surface for taskId=" + taskId);
         }
@@ -310,13 +334,9 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
         wct.reparent(task.token, mRootTaskInfo.token, true /* onTop*/);
     }
 
-    void moveToTop(Rect rootBounds, WindowContainerTransaction wct) {
+    void moveToTop(WindowContainerTransaction wct) {
         final WindowContainerToken rootToken = mRootTaskInfo.token;
-        wct.setBounds(rootToken, rootBounds).reorder(rootToken, true /* onTop */);
-    }
-
-    void setBounds(Rect bounds, WindowContainerTransaction wct) {
-        wct.setBounds(mRootTaskInfo.token, bounds);
+        wct.reorder(rootToken, true /* onTop */);
     }
 
     void reorderChild(int taskId, boolean onTop, WindowContainerTransaction wct) {

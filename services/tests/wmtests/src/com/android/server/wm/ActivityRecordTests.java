@@ -2217,6 +2217,19 @@ public class ActivityRecordTests extends WindowTestsBase {
         assertTrue(activity.pictureInPictureArgs.isLaunchIntoPip());
     }
 
+    @Test
+    public void testTransferLaunchCookieWhenFinishing() {
+        final ActivityRecord activity1 = createActivityWithTask();
+        final Binder launchCookie = new Binder();
+        activity1.mLaunchCookie = launchCookie;
+        final ActivityRecord activity2 = createActivityRecord(activity1.getTask());
+        activity1.setState(PAUSED, "test");
+        activity1.makeFinishingLocked();
+
+        assertEquals(launchCookie, activity2.mLaunchCookie);
+        assertNull(activity1.mLaunchCookie);
+    }
+
     private void verifyProcessInfoUpdate(ActivityRecord activity, State state,
             boolean shouldUpdate, boolean activityChange) {
         reset(activity.app);
@@ -2625,14 +2638,14 @@ public class ActivityRecordTests extends WindowTestsBase {
                 .setTask(sourceRecord.getTask()).build();
         secondRecord.showStartingWindow(null /* prev */, true /* newTask */, false,
                 true /* startActivity */, sourceRecord);
-        assertFalse(secondRecord.mSplashScreenStyleEmpty);
+        assertFalse(secondRecord.mSplashScreenStyleSolidColor);
         secondRecord.onStartingWindowDrawn();
 
         final ActivityRecord finalRecord = new ActivityBuilder(mAtm)
                 .setTask(sourceRecord.getTask()).build();
         finalRecord.showStartingWindow(null /* prev */, true /* newTask */, false,
                 true /* startActivity */, secondRecord);
-        assertTrue(finalRecord.mSplashScreenStyleEmpty);
+        assertTrue(finalRecord.mSplashScreenStyleSolidColor);
     }
 
     @Test

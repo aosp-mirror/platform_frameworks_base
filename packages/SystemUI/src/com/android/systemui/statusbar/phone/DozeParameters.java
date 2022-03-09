@@ -292,20 +292,11 @@ public class DozeParameters implements
     }
 
     public void updateControlScreenOff() {
-        final boolean controlScreenOff = shouldControlUnlockedScreenOff()
-                || (!getDisplayNeedsBlanking() && getAlwaysOn() && mKeyguardShowing);
-        setControlScreenOffAnimation(controlScreenOff);
-    }
-
-    /**
-     * Whether we're capable of controlling the screen off animation if we want to. This isn't
-     * possible if AOD isn't even enabled or if the flag is disabled, or if the display needs
-     * blanking.
-     */
-    public boolean canControlUnlockedScreenOff() {
-        return getAlwaysOn()
-                && mFeatureFlags.isEnabled(Flags.LOCKSCREEN_ANIMATIONS)
-                && !getDisplayNeedsBlanking();
+        if (!getDisplayNeedsBlanking()) {
+            final boolean controlScreenOff =
+                    getAlwaysOn() && (mKeyguardShowing || shouldControlUnlockedScreenOff());
+            setControlScreenOffAnimation(controlScreenOff);
+        }
     }
 
     /**
@@ -318,7 +309,8 @@ public class DozeParameters implements
      * disabled for a11y.
      */
     public boolean shouldControlUnlockedScreenOff() {
-        return mUnlockedScreenOffAnimationController.shouldPlayUnlockedScreenOffAnimation();
+        return canControlUnlockedScreenOff()
+                && mUnlockedScreenOffAnimationController.shouldPlayUnlockedScreenOffAnimation();
     }
 
     public boolean shouldDelayKeyguardShow() {
@@ -348,6 +340,16 @@ public class DozeParameters implements
 
     private boolean willAnimateFromLockScreenToAod() {
         return getAlwaysOn() && mKeyguardShowing;
+    }
+
+    /**
+     * Whether we're capable of controlling the screen off animation if we want to. This isn't
+     * possible if AOD isn't even enabled or if the flag is disabled.
+     */
+    public boolean canControlUnlockedScreenOff() {
+        return getAlwaysOn()
+                && mFeatureFlags.isEnabled(Flags.LOCKSCREEN_ANIMATIONS)
+                && !getDisplayNeedsBlanking();
     }
 
     private boolean getBoolean(String propName, int resId) {

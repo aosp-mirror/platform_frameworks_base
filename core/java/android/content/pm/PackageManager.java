@@ -121,6 +121,9 @@ public abstract class PackageManager {
     /** {@hide} */
     public static final boolean APPLY_DEFAULT_TO_DEVICE_PROTECTED_STORAGE = true;
 
+    /** {@hide} */
+    public static final boolean ENABLE_SHARED_UID_MIGRATION = true;
+
     /**
      * This exception is thrown when a given package, application, or component
      * name cannot be found.
@@ -2201,6 +2204,14 @@ public abstract class PackageManager {
      * @hide
      */
     public static final int INSTALL_FAILED_BAD_PERMISSION_GROUP = -127;
+
+    /**
+     * Installation failed return code: an error occurred during the activation phase of this
+     * session.
+     *
+     * @hide
+     */
+    public static final int INSTALL_ACTIVATION_FAILED = -128;
 
     /** @hide */
     @IntDef(flag = true, prefix = { "DELETE_" }, value = {

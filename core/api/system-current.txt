@@ -234,6 +234,7 @@ package android {
     field public static final String POWER_SAVER = "android.permission.POWER_SAVER";
     field public static final String PROVIDE_RESOLVER_RANKER_SERVICE = "android.permission.PROVIDE_RESOLVER_RANKER_SERVICE";
     field public static final String PROVIDE_TRUST_AGENT = "android.permission.PROVIDE_TRUST_AGENT";
+    field public static final String PROVISION_DEMO_DEVICE = "android.permission.PROVISION_DEMO_DEVICE";
     field public static final String QUERY_ADMIN_POLICY = "android.permission.QUERY_ADMIN_POLICY";
     field public static final String QUERY_TIME_ZONE_RULES = "android.permission.QUERY_TIME_ZONE_RULES";
     field public static final String QUERY_USERS = "android.permission.QUERY_USERS";
@@ -463,7 +464,7 @@ package android.accounts {
 
 package android.app {
 
-  @UiContext public class Activity extends android.view.ContextThemeWrapper implements android.content.ComponentCallbacks2 android.view.KeyEvent.Callback android.view.LayoutInflater.Factory2 android.view.OnBackInvokedDispatcherOwner android.view.View.OnCreateContextMenuListener android.view.Window.Callback {
+  @UiContext public class Activity extends android.view.ContextThemeWrapper implements android.content.ComponentCallbacks2 android.view.KeyEvent.Callback android.view.LayoutInflater.Factory2 android.window.OnBackInvokedDispatcherOwner android.view.View.OnCreateContextMenuListener android.view.Window.Callback {
     method public void convertFromTranslucent();
     method public boolean convertToTranslucent(android.app.Activity.TranslucentConversionListener, android.app.ActivityOptions);
     method @Deprecated public boolean isBackgroundVisibleBehind();
@@ -1101,7 +1102,7 @@ package android.app.admin {
     method @RequiresPermission("android.permission.NOTIFY_PENDING_SYSTEM_UPDATE") public void notifyPendingSystemUpdate(long);
     method @RequiresPermission("android.permission.NOTIFY_PENDING_SYSTEM_UPDATE") public void notifyPendingSystemUpdate(long, boolean);
     method @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL) public boolean packageHasActiveAdmins(String);
-    method @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS) public void provisionFullyManagedDevice(@NonNull android.app.admin.FullyManagedDeviceProvisioningParams) throws android.app.admin.ProvisioningException;
+    method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS, android.Manifest.permission.PROVISION_DEMO_DEVICE}) public void provisionFullyManagedDevice(@NonNull android.app.admin.FullyManagedDeviceProvisioningParams) throws android.app.admin.ProvisioningException;
     method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_MANAGEMENT_RESOURCES) public void resetDrawables(@NonNull String[]);
     method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_MANAGEMENT_RESOURCES) public void resetStrings(@NonNull String[]);
     method @RequiresPermission(android.Manifest.permission.SEND_LOST_MODE_LOCATION_UPDATES) public void sendLostModeLocationUpdate(@NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Boolean>);
@@ -1254,6 +1255,7 @@ package android.app.admin {
     method @Nullable public java.util.Locale getLocale();
     method @NonNull public String getOwnerName();
     method @Nullable public String getTimeZone();
+    method public boolean isDemoDevice();
     method public boolean isLeaveAllSystemAppsEnabled();
     method public void writeToParcel(@NonNull android.os.Parcel, @Nullable int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.admin.FullyManagedDeviceProvisioningParams> CREATOR;
@@ -1264,6 +1266,7 @@ package android.app.admin {
     method @NonNull public android.app.admin.FullyManagedDeviceProvisioningParams build();
     method @NonNull public android.app.admin.FullyManagedDeviceProvisioningParams.Builder setAdminExtras(@NonNull android.os.PersistableBundle);
     method @NonNull public android.app.admin.FullyManagedDeviceProvisioningParams.Builder setCanDeviceOwnerGrantSensorsPermissions(boolean);
+    method @NonNull public android.app.admin.FullyManagedDeviceProvisioningParams.Builder setDemoDevice(boolean);
     method @NonNull public android.app.admin.FullyManagedDeviceProvisioningParams.Builder setLeaveAllSystemAppsEnabled(boolean);
     method @NonNull public android.app.admin.FullyManagedDeviceProvisioningParams.Builder setLocalTime(long);
     method @NonNull public android.app.admin.FullyManagedDeviceProvisioningParams.Builder setLocale(@Nullable java.util.Locale);
@@ -2808,8 +2811,7 @@ package android.companion.virtual {
   }
 
   public static class VirtualDeviceManager.VirtualDevice implements java.lang.AutoCloseable {
-    method public void addActivityListener(@NonNull android.companion.virtual.VirtualDeviceManager.ActivityListener);
-    method public void addActivityListener(@NonNull android.companion.virtual.VirtualDeviceManager.ActivityListener, @NonNull java.util.concurrent.Executor);
+    method public void addActivityListener(@NonNull java.util.concurrent.Executor, @NonNull android.companion.virtual.VirtualDeviceManager.ActivityListener);
     method @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void close();
     method @NonNull @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public android.companion.virtual.audio.VirtualAudioDevice createVirtualAudioDevice(@NonNull android.hardware.display.VirtualDisplay, @Nullable java.util.concurrent.Executor, @Nullable android.companion.virtual.audio.VirtualAudioDevice.AudioConfigurationChangeCallback);
     method @Nullable public android.hardware.display.VirtualDisplay createVirtualDisplay(@IntRange(from=1) int, @IntRange(from=1) int, @IntRange(from=1) int, @Nullable android.view.Surface, int, @Nullable java.util.concurrent.Executor, @Nullable android.hardware.display.VirtualDisplay.Callback);
@@ -2850,19 +2852,31 @@ package android.companion.virtual {
 package android.companion.virtual.audio {
 
   public final class AudioCapture {
-    ctor public AudioCapture();
+    method @NonNull public android.media.AudioFormat getFormat();
     method public int getRecordingState();
+    method public int read(@NonNull byte[], int, int);
+    method public int read(@NonNull byte[], int, int, int);
     method public int read(@NonNull java.nio.ByteBuffer, int);
+    method public int read(@NonNull java.nio.ByteBuffer, int, int);
+    method public int read(@NonNull float[], int, int, int);
+    method public int read(@NonNull short[], int, int);
+    method public int read(@NonNull short[], int, int, int);
     method public void startRecording();
     method public void stop();
   }
 
   public final class AudioInjection {
-    ctor public AudioInjection();
+    method @NonNull public android.media.AudioFormat getFormat();
     method public int getPlayState();
     method public void play();
     method public void stop();
+    method public int write(@NonNull byte[], int, int);
+    method public int write(@NonNull byte[], int, int, int);
     method public int write(@NonNull java.nio.ByteBuffer, int, int);
+    method public int write(@NonNull java.nio.ByteBuffer, int, int, long);
+    method public int write(@NonNull float[], int, int, int);
+    method public int write(@NonNull short[], int, int);
+    method public int write(@NonNull short[], int, int, int);
   }
 
   public final class VirtualAudioDevice implements java.io.Closeable {
@@ -6329,7 +6343,6 @@ package android.media {
     method public int describeContents();
     method @NonNull public String getMediaRoute2Id();
     method public int getRangeZone();
-    method @NonNull public static String rangeZoneToString(int);
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.media.NearbyDevice> CREATOR;
     field public static final int RANGE_CLOSE = 3; // 0x3
@@ -9017,6 +9030,7 @@ package android.net.wifi.nl80211 {
     method public void enableVerboseLogging(boolean);
     method @NonNull public int[] getChannelsMhzForBand(int);
     method @Nullable public android.net.wifi.nl80211.DeviceWiphyCapabilities getDeviceWiphyCapabilities(@NonNull String);
+    method public int getMaxNumScanSsids(@NonNull String);
     method @NonNull public java.util.List<android.net.wifi.nl80211.NativeScanResult> getScanResults(@NonNull String, int);
     method @Nullable public android.net.wifi.nl80211.WifiNl80211Manager.TxPacketCounters getTxPacketCounters(@NonNull String);
     method public void notifyCountryCodeChanged(@Nullable String);
@@ -10292,6 +10306,7 @@ package android.provider {
     method @RequiresPermission(android.Manifest.permission.WRITE_DEVICE_CONFIG) public static boolean setProperty(@NonNull String, @NonNull String, @Nullable String, boolean);
     field public static final String NAMESPACE_ACTIVITY_MANAGER = "activity_manager";
     field public static final String NAMESPACE_ACTIVITY_MANAGER_NATIVE_BOOT = "activity_manager_native_boot";
+    field public static final String NAMESPACE_ADSERVICES = "adservices";
     field public static final String NAMESPACE_AMBIENT_CONTEXT_MANAGER_SERVICE = "ambient_context_manager_service";
     field public static final String NAMESPACE_APPSEARCH = "appsearch";
     field public static final String NAMESPACE_APP_COMPAT = "app_compat";
@@ -10336,7 +10351,6 @@ package android.provider {
     field public static final String NAMESPACE_STATSD_NATIVE_BOOT = "statsd_native_boot";
     field @Deprecated public static final String NAMESPACE_STORAGE = "storage";
     field public static final String NAMESPACE_STORAGE_NATIVE_BOOT = "storage_native_boot";
-    field public static final String NAMESPACE_SUPPLEMENTAL_API = "supplemental_api";
     field public static final String NAMESPACE_SURFACE_FLINGER_NATIVE_BOOT = "surface_flinger_native_boot";
     field public static final String NAMESPACE_SWCODEC_NATIVE = "swcodec_native";
     field public static final String NAMESPACE_SYSTEMUI = "systemui";
@@ -10524,6 +10538,7 @@ package android.provider {
     field public static final String ACTION_SHOW_ADMIN_SUPPORT_DETAILS = "android.settings.SHOW_ADMIN_SUPPORT_DETAILS";
     field public static final String ACTION_TETHER_PROVISIONING_UI = "android.settings.TETHER_PROVISIONING_UI";
     field public static final String ACTION_TETHER_SETTINGS = "android.settings.TETHER_SETTINGS";
+    field public static final String ACTION_TETHER_UNSUPPORTED_CARRIER_UI = "android.settings.TETHER_UNSUPPORTED_CARRIER_UI";
   }
 
   public static final class Settings.Global extends android.provider.Settings.NameValueTable {
@@ -11391,7 +11406,7 @@ package android.service.games {
 
   public static interface GameSession.ScreenshotCallback {
     method public void onFailure(int);
-    method public void onSuccess(@NonNull android.graphics.Bitmap);
+    method public void onSuccess();
     field public static final int ERROR_TAKE_SCREENSHOT_INTERNAL_ERROR = 0; // 0x0
   }
 
@@ -15700,6 +15715,11 @@ package android.util {
 }
 
 package android.view {
+
+  @UiThread public class View implements android.view.accessibility.AccessibilityEventSource android.graphics.drawable.Drawable.Callback android.view.KeyEvent.Callback {
+    method @NonNull public final java.util.List<android.graphics.Rect> getUnrestrictedPreferKeepClearRects();
+    method @RequiresPermission(android.Manifest.permission.SET_UNRESTRICTED_KEEP_CLEAR_AREAS) public final void setUnrestrictedPreferKeepClearRects(@NonNull java.util.List<android.graphics.Rect>);
+  }
 
   public abstract class Window {
     method public void addSystemFlags(@android.view.WindowManager.LayoutParams.SystemFlags int);

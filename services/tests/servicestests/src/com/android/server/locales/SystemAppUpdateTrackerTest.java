@@ -98,11 +98,8 @@ public class SystemAppUpdateTrackerTest {
     private ActivityTaskManagerInternal mMockActivityTaskManager;
     @Mock
     private ActivityManagerInternal mMockActivityManager;
-    @Mock
-    private LocaleManagerBackupHelper mMockLocaleManagerBackupHelper;
-    @Mock
-    PackageMonitor mMockPackageMonitor;
 
+    PackageMonitor mPackageMonitor;
     private LocaleManagerService mLocaleManagerService;
 
     // Object under test.
@@ -114,11 +111,14 @@ public class SystemAppUpdateTrackerTest {
         mMockActivityTaskManager = mock(ActivityTaskManagerInternal.class);
         mMockActivityManager = mock(ActivityManagerInternal.class);
         mMockPackageManagerInternal = mock(PackageManagerInternal.class);
-        mMockPackageMonitor = mock(PackageMonitor.class);
-        mMockLocaleManagerBackupHelper = mock(ShadowLocaleManagerBackupHelper.class);
+        LocaleManagerBackupHelper mockLocaleManagerBackupHelper =
+                mock(ShadowLocaleManagerBackupHelper.class);
+        // PackageMonitor is not needed in LocaleManagerService for these tests hence it is
+        // passed as null.
         mLocaleManagerService = new LocaleManagerService(mMockContext,
                 mMockActivityTaskManager, mMockActivityManager,
-                mMockPackageManagerInternal, mMockLocaleManagerBackupHelper, mMockPackageMonitor);
+                mMockPackageManagerInternal, mockLocaleManagerBackupHelper,
+                /* mPackageMonitor= */ null);
 
         doReturn(DEFAULT_USER_ID).when(mMockActivityManager)
                 .handleIncomingUser(anyInt(), anyInt(), eq(DEFAULT_USER_ID), anyBoolean(), anyInt(),
@@ -134,6 +134,9 @@ public class SystemAppUpdateTrackerTest {
 
         mSystemAppUpdateTracker = new SystemAppUpdateTracker(mMockContext,
             mLocaleManagerService, mStoragefile);
+
+        mPackageMonitor = new LocaleManagerServicePackageMonitor(
+                mockLocaleManagerBackupHelper, mSystemAppUpdateTracker);
     }
 
     @After
@@ -148,7 +151,7 @@ public class SystemAppUpdateTrackerTest {
             .when(mMockPackageManager).getApplicationInfo(eq(DEFAULT_PACKAGE_NAME_1), any());
 
         // Updates the app once so that it writes to the file.
-        mSystemAppUpdateTracker.onPackageUpdateFinished(DEFAULT_PACKAGE_NAME_1,
+        mPackageMonitor.onPackageUpdateFinished(DEFAULT_PACKAGE_NAME_1,
                 Binder.getCallingUid());
         // Clear the in-memory data of updated apps
         mSystemAppUpdateTracker.getUpdatedApps().clear();
@@ -167,7 +170,7 @@ public class SystemAppUpdateTrackerTest {
                 DEFAULT_LOCALES)).when(mMockActivityTaskManager)
                 .getApplicationConfig(anyString(), anyInt());
 
-        mSystemAppUpdateTracker.onPackageUpdateFinished(DEFAULT_PACKAGE_NAME_1,
+        mPackageMonitor.onPackageUpdateFinished(DEFAULT_PACKAGE_NAME_1,
                 Binder.getCallingUid());
 
         assertBroadcastSentToInstaller(DEFAULT_PACKAGE_NAME_1, DEFAULT_LOCALES);
@@ -186,7 +189,7 @@ public class SystemAppUpdateTrackerTest {
                 .getApplicationConfig(anyString(), anyInt());
 
         // first update
-        mSystemAppUpdateTracker.onPackageUpdateFinished(DEFAULT_PACKAGE_NAME_1,
+        mPackageMonitor.onPackageUpdateFinished(DEFAULT_PACKAGE_NAME_1,
                 Binder.getCallingUid());
 
         assertBroadcastSentToInstaller(DEFAULT_PACKAGE_NAME_1, DEFAULT_LOCALES);
@@ -195,7 +198,7 @@ public class SystemAppUpdateTrackerTest {
         verifyStorageFileContents(expectedAppList);
 
         // second update
-        mSystemAppUpdateTracker.onPackageUpdateFinished(DEFAULT_PACKAGE_NAME_1,
+        mPackageMonitor.onPackageUpdateFinished(DEFAULT_PACKAGE_NAME_1,
                 Binder.getCallingUid());
         // getApplicationLocales should be invoked only once on the first update.
         verify(mMockActivityTaskManager, times(1))
@@ -212,7 +215,7 @@ public class SystemAppUpdateTrackerTest {
             /* isUpdatedSystemApp = */false))
             .when(mMockPackageManager).getApplicationInfo(eq(DEFAULT_PACKAGE_NAME_2), any());
 
-        mSystemAppUpdateTracker.onPackageUpdateFinished(DEFAULT_PACKAGE_NAME_2,
+        mPackageMonitor.onPackageUpdateFinished(DEFAULT_PACKAGE_NAME_2,
                 Binder.getCallingUid());
 
         assertTrue(!mSystemAppUpdateTracker.getUpdatedApps().contains(DEFAULT_PACKAGE_NAME_2));
@@ -231,7 +234,7 @@ public class SystemAppUpdateTrackerTest {
             .when(mMockPackageManager).getApplicationInfo(eq(DEFAULT_PACKAGE_NAME_1), any());
         doReturn(null).when(mMockPackageManager).getInstallSourceInfo(anyString());
 
-        mSystemAppUpdateTracker.onPackageUpdateFinished(DEFAULT_PACKAGE_NAME_1,
+        mPackageMonitor.onPackageUpdateFinished(DEFAULT_PACKAGE_NAME_1,
                 Binder.getCallingUid());
 
         // getApplicationLocales should be never be invoked if not installer is not present.

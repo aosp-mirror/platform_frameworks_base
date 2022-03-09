@@ -79,6 +79,7 @@ import android.util.ArraySet;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.SparseBooleanArray;
 import android.util.TypedValue;
 import android.util.proto.ProtoOutputStream;
 import android.view.Display;
@@ -138,7 +139,7 @@ final class AccessibilityController {
             new SparseArray<>();
     private SparseArray<IBinder> mFocusedWindow = new SparseArray<>();
     private int mFocusedDisplay = -1;
-    private boolean mIsImeVisible = false;
+    private final SparseBooleanArray mIsImeVisibleArray = new SparseBooleanArray();
     // Set to true if initializing window population complete.
     private boolean mAllObserversInitialized = true;
     private final AccessibilityWindowsPopulator mAccessibilityWindowsPopulator;
@@ -167,8 +168,11 @@ final class AccessibilityController {
             if (dc != null) {
                 final Display display = dc.getDisplay();
                 if (display != null && display.getType() != Display.TYPE_OVERLAY) {
-                    mDisplayMagnifiers.put(displayId, new DisplayMagnifier(
-                            mService, dc, display, callbacks));
+                    final DisplayMagnifier magnifier = new DisplayMagnifier(
+                            mService, dc, display, callbacks);
+                    magnifier.notifyImeWindowVisibilityChanged(
+                            mIsImeVisibleArray.get(displayId, false));
+                    mDisplayMagnifiers.put(displayId, magnifier);
                     result = true;
                 }
             }
@@ -263,6 +267,8 @@ final class AccessibilityController {
                     FLAGS_MAGNIFICATION_CALLBACK | FLAGS_WINDOWS_FOR_ACCESSIBILITY_CALLBACK,
                     "displayId=" + displayId + "; spec={" + spec + "}");
         }
+        mAccessibilityWindowsPopulator.setMagnificationSpec(displayId, spec);
+
         final DisplayMagnifier displayMagnifier = mDisplayMagnifiers.get(displayId);
         if (displayMagnifier != null) {
             displayMagnifier.setMagnificationSpec(spec);
@@ -454,19 +460,6 @@ final class AccessibilityController {
         return null;
     }
 
-    boolean getMagnificationSpecForDisplay(int displayId, MagnificationSpec outSpec) {
-        if (mAccessibilityTracing.isTracingEnabled(FLAGS_MAGNIFICATION_CALLBACK)) {
-            mAccessibilityTracing.logTrace(TAG + ".getMagnificationSpecForDisplay",
-                    FLAGS_MAGNIFICATION_CALLBACK, "displayId=" + displayId);
-        }
-        final DisplayMagnifier displayMagnifier = mDisplayMagnifiers.get(displayId);
-        if (displayMagnifier == null) {
-            return false;
-        }
-
-        return displayMagnifier.getMagnificationSpec(outSpec);
-    }
-
     boolean hasCallbacks() {
         if (mAccessibilityTracing.isTracingEnabled(FLAGS_MAGNIFICATION_CALLBACK
                 | FLAGS_WINDOWS_FOR_ACCESSIBILITY_CALLBACK)) {
@@ -494,11 +487,13 @@ final class AccessibilityController {
             mAccessibilityTracing.logTrace(TAG + ".updateImeVisibilityIfNeeded",
                     FLAGS_MAGNIFICATION_CALLBACK, "displayId=" + displayId + ";shown=" + shown);
         }
-        if (mIsImeVisible == shown) {
+
+        final boolean isDisplayImeVisible = mIsImeVisibleArray.get(displayId, false);
+        if (isDisplayImeVisible == shown) {
             return;
         }
 
-        mIsImeVisible = shown;
+        mIsImeVisibleArray.put(displayId, shown);
         final DisplayMagnifier displayMagnifier = mDisplayMagnifiers.get(displayId);
         if (displayMagnifier != null) {
             displayMagnifier.notifyImeWindowVisibilityChanged(shown);
@@ -534,6 +529,7 @@ final class AccessibilityController {
     }
 
     public void onDisplayRemoved(int displayId) {
+        mIsImeVisibleArray.delete(displayId);
         mFocusedWindow.remove(displayId);
     }
 
@@ -766,25 +762,6 @@ final class AccessibilityController {
                 }
             }
             return spec;
-        }
-
-        boolean getMagnificationSpec(MagnificationSpec outSpec) {
-            if (mAccessibilityTracing.isTracingEnabled(FLAGS_MAGNIFICATION_CALLBACK)) {
-                mAccessibilityTracing.logTrace(LOG_TAG + ".getMagnificationSpec",
-                        FLAGS_MAGNIFICATION_CALLBACK);
-            }
-            MagnificationSpec spec = mMagnifedViewport.getMagnificationSpec();
-            if (spec == null) {
-                return false;
-            }
-
-            outSpec.setTo(spec);
-            if (mAccessibilityTracing.isTracingEnabled(FLAGS_MAGNIFICATION_CALLBACK)) {
-                mAccessibilityTracing.logTrace(LOG_TAG + ".getMagnificationSpec",
-                        FLAGS_MAGNIFICATION_CALLBACK, "outSpec={" + outSpec + "}");
-            }
-
-            return true;
         }
 
         void getMagnificationRegion(Region outMagnificationRegion) {

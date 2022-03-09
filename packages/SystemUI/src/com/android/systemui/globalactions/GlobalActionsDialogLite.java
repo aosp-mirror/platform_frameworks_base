@@ -624,7 +624,9 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
                     addIfShouldShowAction(tempActions, new LogoutAction());
                 }
             } else if (GLOBAL_ACTION_KEY_EMERGENCY.equals(actionKey)) {
-                addIfShouldShowAction(tempActions, new EmergencyDialerAction());
+                if (shouldDisplayEmergency()) {
+                    addIfShouldShowAction(tempActions, new EmergencyDialerAction());
+                }
             } else {
                 Log.e(TAG, "Invalid global action key " + actionKey);
             }
@@ -701,6 +703,12 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
         int state = mLockPatternUtils.getStrongAuthForUser(userId);
         return (state == STRONG_AUTH_NOT_REQUIRED
                 || state == SOME_AUTH_REQUIRED_AFTER_USER_REQUEST);
+    }
+
+    @VisibleForTesting
+    boolean shouldDisplayEmergency() {
+        // Emergency calling requires a telephony radio.
+        return mHasTelephony;
     }
 
     @VisibleForTesting

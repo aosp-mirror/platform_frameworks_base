@@ -28,8 +28,10 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
+import android.app.ActivityManager;
 import android.content.res.Configuration;
 import android.graphics.Rect;
+import android.window.WindowContainerTransaction;
 
 import androidx.test.annotation.UiThreadTest;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -38,6 +40,7 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.policy.DividerSnapAlgorithm;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.ShellTestCase;
+import com.android.wm.shell.TestRunningTaskInfoBuilder;
 import com.android.wm.shell.common.DisplayImeController;
 
 import org.junit.Before;
@@ -56,6 +59,7 @@ public class SplitLayoutTests extends ShellTestCase {
     @Mock SplitWindowManager.ParentContainerCallbacks mCallbacks;
     @Mock DisplayImeController mDisplayImeController;
     @Mock ShellTaskOrganizer mTaskOrganizer;
+    @Mock WindowContainerTransaction mWct;
     @Captor ArgumentCaptor<Runnable> mRunnableCaptor;
     private SplitLayout mSplitLayout;
 
@@ -147,6 +151,16 @@ public class SplitLayoutTests extends ShellTestCase {
         mSplitLayout.snapToTarget(0 /* currentPosition */, snapTarget);
         waitDividerFlingFinished();
         verify(mSplitLayoutHandler).onSnappedToDismiss(eq(true));
+    }
+
+    @Test
+    public void testApplyTaskChanges_updatesSmallestScreenWidthDp() {
+        final ActivityManager.RunningTaskInfo task1 = new TestRunningTaskInfoBuilder().build();
+        final ActivityManager.RunningTaskInfo task2 = new TestRunningTaskInfoBuilder().build();
+        mSplitLayout.applyTaskChanges(mWct, task1, task2);
+
+        verify(mWct).setSmallestScreenWidthDp(eq(task1.token), anyInt());
+        verify(mWct).setSmallestScreenWidthDp(eq(task2.token), anyInt());
     }
 
     private void waitDividerFlingFinished() {

@@ -21,6 +21,10 @@ import android.annotation.StringRes;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.ApplicationInfoFlags;
+import android.graphics.Color;
+import android.graphics.drawable.Drawable;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Parcel;
@@ -32,6 +36,10 @@ import android.text.Spanned;
  * Utilities.
  */
 class Utils {
+    private static final String COMPANION_DEVICE_ACTIVITY_VENDOR_ICON =
+            "android.companion.vendor_icon";
+    private static final String COMPANION_DEVICE_ACTIVITY_VENDOR_NAME =
+            "android.companion.vendor_name";
 
     /**
      * Convert an instance of a "locally-defined" ResultReceiver to an instance of
@@ -60,6 +68,12 @@ class Utils {
         return packageManager.getApplicationLabel(appInfo);
     }
 
+    static @NonNull Drawable getApplicationIcon(@NonNull Context context,
+            @NonNull String packageName) throws PackageManager.NameNotFoundException {
+        final PackageManager packageManager = context.getPackageManager();
+        return packageManager.getApplicationIcon(packageName);
+    }
+
     static Spanned getHtmlFromResources(
             @NonNull Context context, @StringRes int resId, CharSequence... formatArgs) {
         final String[] escapedArgs = new String[formatArgs.length];
@@ -68,6 +82,50 @@ class Utils {
         }
         final String plain = context.getString(resId, (Object[]) escapedArgs);
         return Html.fromHtml(plain, 0);
+    }
+
+    static @NonNull Drawable getVendorHeaderIcon(@NonNull Context context,
+            @NonNull String packageName, int userId) throws PackageManager.NameNotFoundException {
+        final ApplicationInfo appInfo = getApplicationInfo(context, packageName, userId);
+        final Bundle bundle = appInfo.metaData;
+        int resId = bundle == null ? 0 : bundle.getInt(COMPANION_DEVICE_ACTIVITY_VENDOR_ICON, 0);
+
+        if (bundle == null || resId == 0) {
+            return getApplicationIcon(context, packageName);
+        }
+
+        return context.createPackageContext(packageName, /* flags= */ 0).getDrawable(resId);
+    }
+
+    static CharSequence getVendorHeaderName(@NonNull Context context,
+            @NonNull String packageName, int userId) throws PackageManager.NameNotFoundException {
+        final ApplicationInfo appInfo = getApplicationInfo(context, packageName, userId);
+        final Bundle bundle = appInfo.metaData;
+
+        if (bundle == null) {
+            return "";
+        }
+
+        return appInfo.metaData.getCharSequence(COMPANION_DEVICE_ACTIVITY_VENDOR_NAME, "");
+    }
+
+    /**
+     * Getting ApplicationInfo from meta-data.
+     */
+    private static @NonNull ApplicationInfo getApplicationInfo(@NonNull Context context,
+            @NonNull String packageName, int userId) throws PackageManager.NameNotFoundException {
+        final PackageManager packageManager = context.getPackageManager();
+        final ApplicationInfoFlags flags = ApplicationInfoFlags.of(PackageManager.GET_META_DATA);
+        final ApplicationInfo appInfo = packageManager.getApplicationInfoAsUser(
+                packageName, flags, userId);
+
+        return appInfo;
+    }
+
+    static @NonNull Drawable getIcon(@NonNull Context context, int resId) {
+        Drawable icon = context.getResources().getDrawable(resId, null);
+        icon.setTint(Color.DKGRAY);
+        return icon;
     }
 
     static void runOnMainThread(Runnable runnable) {

@@ -16,6 +16,8 @@
 
 package android.app.admin;
 
+import static android.net.NetworkCapabilities.NET_ENTERPRISE_ID_1;
+
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 
 import android.Manifest.permission;
@@ -242,6 +244,17 @@ public class DevicePolicyManager {
      * the provisioning flow was successful, although this doesn't guarantee the full flow will
      * succeed. Conversely a result code of {@link android.app.Activity#RESULT_CANCELED} implies
      * that the user backed-out of provisioning, or some precondition for provisioning wasn't met.
+     *
+     * <p>If a device policy management role holder (DPMRH) updater is present on the device, an
+     * internet connection attempt must be made prior to launching this intent. If internet
+     * connection could not be established, provisioning will fail unless {@link
+     * #EXTRA_PROVISIONING_ALLOW_OFFLINE} is explicitly set to {@code true}, in which case
+     * provisioning will continue without using the DPMRH. If an internet connection has been
+     * established, the DPMRH updater will be launched, which will update the DPMRH if it's not
+     * present on the device, or if it's present and not valid.
+     *
+     * <p>If a DPMRH is present on the device and valid, the provisioning flow will be deferred to
+     * it.
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_PROVISION_MANAGED_PROFILE
@@ -398,6 +411,23 @@ public class DevicePolicyManager {
      * by a privileged app with the permission
      * {@link android.Manifest.permission#DISPATCH_PROVISIONING_MESSAGE}.
      *
+     * <p>If a device policy management role holder (DPMRH) updater is present on the device, an
+     * internet connection attempt must be made prior to launching this intent. If internet
+     * connection could not be established, provisioning will fail unless {@link
+     * #EXTRA_PROVISIONING_ALLOW_OFFLINE} is explicitly set to {@code true}, in which case
+     * provisioning will continue without using the DPMRH. If an internet connection has been
+     * established, the DPMRH updater will be launched via {@link
+     * #ACTION_UPDATE_DEVICE_MANAGEMENT_ROLE_HOLDER}, which will update the DPMRH if it's not
+     * present on the device, or if it's present and not valid.
+     *
+     * <p>A DPMRH is considered valid if it has intent filters for {@link
+     * #ACTION_ROLE_HOLDER_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE}, {@link
+     * #ACTION_ROLE_HOLDER_PROVISION_MANAGED_PROFILE} and {@link
+     * #ACTION_ROLE_HOLDER_PROVISION_FINALIZATION}.
+     *
+     * <p>If a DPMRH is present on the device and valid, the provisioning flow will be deferred to
+     * it via the {@link #ACTION_ROLE_HOLDER_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE} intent.
+     *
      * <p>The provisioning intent contains the following properties:
      * <ul>
      * <li>{@link #EXTRA_PROVISIONING_DEVICE_ADMIN_COMPONENT_NAME}</li>
@@ -536,6 +566,10 @@ public class DevicePolicyManager {
      * <li>{@link #STATE_USER_SETUP_COMPLETE}</li>
      * <li>{@link #STATE_USER_PROFILE_COMPLETE}</li>
      * </ul>
+     *
+     * <p>If a device policy management role holder (DPMRH) is present on the device and
+     * valid, the provisioning flow will be deferred to it via the {@link
+     * #ACTION_ROLE_HOLDER_PROVISION_FINALIZATION} intent.
      *
      * @hide
      */
@@ -1380,6 +1414,9 @@ public class DevicePolicyManager {
      * <p>Use only for device owner provisioning. This extra can be returned by the
      * admin app when performing the admin-integrated provisioning flow as a result of the
      * {@link #ACTION_GET_PROVISIONING_MODE} activity.
+     *
+     * <p>This extra may also be provided to the admin app via an intent extra for {@link
+     * #ACTION_GET_PROVISIONING_MODE}.
      *
      * @see #ACTION_GET_PROVISIONING_MODE
      */
@@ -3030,6 +3067,8 @@ public class DevicePolicyManager {
      *     <li>{@link #EXTRA_PROVISIONING_ADMIN_EXTRAS_BUNDLE}</li>
      *     <li>{@link #EXTRA_PROVISIONING_IMEI}</li>
      *     <li>{@link #EXTRA_PROVISIONING_SERIAL_NUMBER}</li>
+     *     <li>{@link #EXTRA_PROVISIONING_ALLOWED_PROVISIONING_MODES}</li>
+     *     <li>{@link #EXTRA_PROVISIONING_SENSORS_PERMISSION_GRANT_OPT_OUT}</li>
      * </ul>
      *
      * <p>The target activity should return one of the following values in
@@ -3053,8 +3092,22 @@ public class DevicePolicyManager {
      * activity, along with the values of the {@link #EXTRA_PROVISIONING_ADMIN_EXTRAS_BUNDLE} extra
      * that are already supplied to this activity.
      *
-     * @see #EXTRA_PROVISIONING_KEEP_ACCOUNT_ON_MIGRATION
-     * @see #EXTRA_PROVISIONING_LEAVE_ALL_SYSTEM_APPS_ENABLED
+     * <p>Other extras the target activity may include in the intent result:
+     * <ul>
+     *     <li>{@link #EXTRA_PROVISIONING_DISCLAIMERS}</li>
+     *     <li>{@link #EXTRA_PROVISIONING_SKIP_ENCRYPTION}</li>
+     *     <li>{@link #EXTRA_PROVISIONING_KEEP_SCREEN_ON}</li>
+     *     <li>{@link #EXTRA_PROVISIONING_KEEP_ACCOUNT_ON_MIGRATION} for work profile
+     *     provisioning</li>
+     *     <li>{@link #EXTRA_PROVISIONING_LEAVE_ALL_SYSTEM_APPS_ENABLED} for work profile
+     *     provisioning</li>
+     *     <li>{@link #EXTRA_PROVISIONING_SENSORS_PERMISSION_GRANT_OPT_OUT} for fully-managed
+     *     device provisioning</li>
+     *     <li>{@link #EXTRA_PROVISIONING_LOCALE} for fully-managed device provisioning</li>
+     *     <li>{@link #EXTRA_PROVISIONING_LOCAL_TIME} for fully-managed device provisioning</li>
+     *     <li>{@link #EXTRA_PROVISIONING_TIME_ZONE} for fully-managed device provisioning</li>
+     * </ul>
+     *
      * @see #ACTION_ADMIN_POLICY_COMPLIANCE
      */
     public static final String ACTION_GET_PROVISIONING_MODE =
@@ -3766,6 +3819,7 @@ public class DevicePolicyManager {
      * for the user.
      * @hide
      */
+    @TestApi
     public boolean isRemovingAdmin(@NonNull ComponentName admin, int userId) {
         if (mService != null) {
             try {
@@ -10979,7 +11033,7 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Sets whether preferential network service is enabled on the work profile.
+     * Sets whether preferential network service is enabled.
      * For example, an organization can have a deal/agreement with a carrier that all of
      * the work data from its employees’ devices will be sent via a network service dedicated
      * for enterprise use.
@@ -10987,75 +11041,72 @@ public class DevicePolicyManager {
      * An example of a supported preferential network service is the Enterprise
      * slice on 5G networks.
      *
-     * By default, preferential network service is disabled on the work profile on supported
-     * carriers and devices. Admins can explicitly enable it with this API.
-     * On fully-managed devices this method is unsupported because all traffic is considered
-     * work traffic.
+     * By default, preferential network service is disabled on the work profile and
+     * fully managed devices, on supported carriers and devices.
+     * Admins can explicitly enable it with this API.
      *
      * <p> This method enables preferential network service with a default configuration.
-     * To fine-tune the configuration, use {@link #setPreferentialNetworkServiceConfig) instead.
+     * To fine-tune the configuration, use {@link #setPreferentialNetworkServiceConfigs) instead.
+     * <p> Before Android version {@link android.os.Build.VERSION_CODES#TIRAMISU}:
+     * this method can be called by the profile owner of a managed profile.
+     * <p> Starting from Android version {@link android.os.Build.VERSION_CODES#TIRAMISU}:
+     * This method can be called by the profile owner of a managed profile
+     * or device owner.
      *
-     * <p>This method can only be called by the profile owner of a managed profile.
      * @param enabled whether preferential network service should be enabled.
-     * @throws SecurityException if the caller is not the profile owner.
+     * @throws SecurityException if the caller is not the profile owner or device owner.
      **/
     public void setPreferentialNetworkServiceEnabled(boolean enabled) {
         throwIfParentInstance("setPreferentialNetworkServiceEnabled");
-        if (mService == null) {
-            return;
+        PreferentialNetworkServiceConfig.Builder configBuilder =
+                new PreferentialNetworkServiceConfig.Builder();
+        configBuilder.setEnabled(enabled);
+        if (enabled) {
+            configBuilder.setNetworkId(NET_ENTERPRISE_ID_1);
         }
-
-        try {
-            mService.setPreferentialNetworkServiceEnabled(enabled);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        setPreferentialNetworkServiceConfigs(List.of(configBuilder.build()));
     }
 
     /**
      * Indicates whether preferential network service is enabled.
      *
-     * <p>This method can be called by the profile owner of a managed profile.
+     * <p> Before Android version {@link android.os.Build.VERSION_CODES#TIRAMISU}:
+     * This method can be called by the profile owner of a managed profile.
+     * <p> Starting from Android version {@link android.os.Build.VERSION_CODES#TIRAMISU}:
+     * This method can be called by the profile owner of a managed profile
+     * or device owner.
      *
      * @return whether preferential network service is enabled.
-     * @throws SecurityException if the caller is not the profile owner.
+     * @throws SecurityException if the caller is not the profile owner or device owner.
      */
     public boolean isPreferentialNetworkServiceEnabled() {
         throwIfParentInstance("isPreferentialNetworkServiceEnabled");
-        if (mService == null) {
-            return false;
-        }
-        try {
-            return mService.isPreferentialNetworkServiceEnabled(myUserId());
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        return getPreferentialNetworkServiceConfigs().stream().anyMatch(c -> c.isEnabled());
     }
 
     /**
-     * Sets preferential network configuration on the work profile.
+     * Sets preferential network configurations.
      * {@see PreferentialNetworkServiceConfig}
      *
      * An example of a supported preferential network service is the Enterprise
      * slice on 5G networks.
      *
-     * By default, preferential network service is disabled on the work profile on supported
-     * carriers and devices. Admins can explicitly enable it with this API.
-     * On fully-managed devices this method is unsupported because all traffic is considered
-     * work traffic.
+     * By default, preferential network service is disabled on the work profile and fully managed
+     * devices, on supported carriers and devices. Admins can explicitly enable it with this API.
+     * If admin wants to have multiple enterprise slices,
+     * it can be configured by passing list of {@link PreferentialNetworkServiceConfig} objects.
      *
-     * <p>This method can only be called by the profile owner of a managed profile.
-     * @param preferentialNetworkServiceConfig preferential network configuration.
-     * @throws SecurityException if the caller is not the profile owner.
+     * @param preferentialNetworkServiceConfigs list of preferential network configurations.
+     * @throws SecurityException if the caller is not the profile owner or device owner.
      **/
-    public void setPreferentialNetworkServiceConfig(
-            @NonNull PreferentialNetworkServiceConfig preferentialNetworkServiceConfig) {
-        throwIfParentInstance("setPreferentialNetworkServiceConfig");
+    public void setPreferentialNetworkServiceConfigs(
+            @NonNull List<PreferentialNetworkServiceConfig> preferentialNetworkServiceConfigs) {
+        throwIfParentInstance("setPreferentialNetworkServiceConfigs");
         if (mService == null) {
             return;
         }
         try {
-            mService.setPreferentialNetworkServiceConfig(preferentialNetworkServiceConfig);
+            mService.setPreferentialNetworkServiceConfigs(preferentialNetworkServiceConfigs);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -11065,18 +11116,16 @@ public class DevicePolicyManager {
      * Get preferential network configuration
      * {@see PreferentialNetworkServiceConfig}
      *
-     * <p>This method can be called by the profile owner of a managed profile.
-     *
      * @return preferential network configuration.
-     * @throws SecurityException if the caller is not the profile owner.
+     * @throws SecurityException if the caller is not the profile owner or device owner.
      */
-    public @NonNull PreferentialNetworkServiceConfig getPreferentialNetworkServiceConfig() {
-        throwIfParentInstance("getPreferentialNetworkServiceConfig");
+    public @NonNull List<PreferentialNetworkServiceConfig> getPreferentialNetworkServiceConfigs() {
+        throwIfParentInstance("getPreferentialNetworkServiceConfigs");
         if (mService == null) {
-            return PreferentialNetworkServiceConfig.DEFAULT;
+            return List.of(PreferentialNetworkServiceConfig.DEFAULT);
         }
         try {
-            return mService.getPreferentialNetworkServiceConfig();
+            return mService.getPreferentialNetworkServiceConfigs();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -13560,13 +13609,18 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by device owner to add an override APN.
+     * Called by device owner or profile owner to add an override APN.
      *
      * <p>This method may returns {@code -1} if {@code apnSetting} conflicts with an existing
      * override APN. Update the existing conflicted APN with
      * {@link #updateOverrideApn(ComponentName, int, ApnSetting)} instead of adding a new entry.
      * <p>Two override APNs are considered to conflict when all the following APIs return
      * the same values on both override APNs:
+     * <p> Before Android version {@link android.os.Build.VERSION_CODES#TIRAMISU}:
+     * Only device owners can add APNs.
+     * <p> Starting from Android version {@link android.os.Build.VERSION_CODES#TIRAMISU}:
+     * Device and profile owners can add enterprise APNs
+     * ({@link ApnSetting#TYPE_ENTERPRISE}), while only device owners can add other type of APNs.
      * <ul>
      *   <li>{@link ApnSetting#getOperatorNumeric()}</li>
      *   <li>{@link ApnSetting#getApnName()}</li>
@@ -13585,7 +13639,8 @@ public class DevicePolicyManager {
      * @param apnSetting the override APN to insert
      * @return The {@code id} of inserted override APN. Or {@code -1} when failed to insert into
      *         the database.
-     * @throws SecurityException if {@code admin} is not a device owner.
+     * @throws SecurityException If request is for enterprise APN {@code admin} is either device
+     * owner or profile owner and in all other types of APN if {@code admin} is not a device owner.
      *
      * @see #setOverrideApnsEnabled(ComponentName, boolean)
      */
@@ -13602,20 +13657,26 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by device owner to update an override APN.
+     * Called by device owner or profile owner to update an override APN.
      *
      * <p>This method may returns {@code false} if there is no override APN with the given
      * {@code apnId}.
      * <p>This method may also returns {@code false} if {@code apnSetting} conflicts with an
      * existing override APN. Update the existing conflicted APN instead.
      * <p>See {@link #addOverrideApn} for the definition of conflict.
+     * <p> Before Android version {@link android.os.Build.VERSION_CODES#TIRAMISU}:
+     * Only device owners can update APNs.
+     * <p> Starting from Android version {@link android.os.Build.VERSION_CODES#TIRAMISU}:
+     * Device and profile owners can update enterprise APNs
+     * ({@link ApnSetting#TYPE_ENTERPRISE}), while only device owners can update other type of APNs.
      *
      * @param admin which {@link DeviceAdminReceiver} this request is associated with
      * @param apnId the {@code id} of the override APN to update
      * @param apnSetting the override APN to update
      * @return {@code true} if the required override APN is successfully updated,
      *         {@code false} otherwise.
-     * @throws SecurityException if {@code admin} is not a device owner.
+     * @throws SecurityException If request is for enterprise APN {@code admin} is either device
+     * owner or profile owner and in all other types of APN if {@code admin} is not a device owner.
      *
      * @see #setOverrideApnsEnabled(ComponentName, boolean)
      */
@@ -13633,16 +13694,22 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by device owner to remove an override APN.
+     * Called by device owner or profile owner to remove an override APN.
      *
      * <p>This method may returns {@code false} if there is no override APN with the given
      * {@code apnId}.
+     * <p> Before Android version {@link android.os.Build.VERSION_CODES#TIRAMISU}:
+     * Only device owners can remove APNs.
+     * <p> Starting from Android version {@link android.os.Build.VERSION_CODES#TIRAMISU}:
+     * Device and profile owners can remove enterprise APNs
+     * ({@link ApnSetting#TYPE_ENTERPRISE}), while only device owners can remove other type of APNs.
      *
      * @param admin which {@link DeviceAdminReceiver} this request is associated with
      * @param apnId the {@code id} of the override APN to remove
      * @return {@code true} if the required override APN is successfully removed, {@code false}
      *         otherwise.
-     * @throws SecurityException if {@code admin} is not a device owner.
+     * @throws SecurityException If request is for enterprise APN {@code admin} is either device
+     * owner or profile owner and in all other types of APN if {@code admin} is not a device owner.
      *
      * @see #setOverrideApnsEnabled(ComponentName, boolean)
      */
@@ -14743,17 +14810,20 @@ public class DevicePolicyManager {
      * <p>The method {@link #checkProvisioningPrecondition} must be returning {@link #STATUS_OK}
      * before calling this method.
      *
+     * <p>Holders of {@link android.Manifest.permission#PROVISION_DEMO_DEVICE} can call this API
+     * only if {@link FullyManagedDeviceProvisioningParams#isDemoDevice()} is {@code true}.</p>
+     *
      * @param provisioningParams Params required to provision a fully managed device,
      * see {@link FullyManagedDeviceProvisioningParams}.
      *
-     * @throws SecurityException if the caller does not hold
-     * {@link android.Manifest.permission#MANAGE_PROFILE_AND_DEVICE_OWNERS}.
      * @throws ProvisioningException if an error occurred during provisioning.
      *
      * @hide
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS,
+            android.Manifest.permission.PROVISION_DEMO_DEVICE})
     public void provisionFullyManagedDevice(
             @NonNull FullyManagedDeviceProvisioningParams provisioningParams)
             throws ProvisioningException {
@@ -15610,7 +15680,9 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Returns a boolean for whether the DPC has been downloaded during provisioning.
+     * Returns a boolean for whether the DPC
+     * (Device Policy Controller, the agent responsible for enforcing policy)
+     * has been downloaded during provisioning.
      *
      * <p>If true is returned, then any attempts to begin setup again should result in factory reset
      *
@@ -15631,9 +15703,11 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Use to indicate that the DPC has or has not been downloaded during provisioning.
+     * Indicates that the DPC (Device Policy Controller, the agent responsible for enforcing policy)
+     * has or has not been downloaded during provisioning.
      *
-     * @param downloaded {@code true} if the dpc has been downloaded during provisioning. false otherwise.
+     * @param downloaded {@code true} if the dpc has been downloaded during provisioning.
+     *                               {@code false} otherwise.
      *
      * @hide
      */

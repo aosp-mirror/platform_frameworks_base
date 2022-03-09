@@ -54,6 +54,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
             MediaOutputDialog mediaOutputDialog) {
         super(controller);
         mMediaOutputDialog = mediaOutputDialog;
+        setHasStableIds(true);
     }
 
     @Override
@@ -76,6 +77,20 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
         } else if (DEBUG) {
             Log.d(TAG, "Incorrect position: " + position);
         }
+    }
+
+    @Override
+    public long getItemId(int position) {
+        final int size = mController.getMediaDevices().size();
+        if (position == size && mController.isZeroMode()) {
+            return -1;
+        } else if (position < size) {
+            return ((List<MediaDevice>) (mController.getMediaDevices()))
+                    .get(position).getId().hashCode();
+        } else if (DEBUG) {
+            Log.d(TAG, "Incorrect position for item id: " + position);
+        }
+        return position;
     }
 
     @Override
@@ -159,7 +174,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                         onCheckBoxClicked(false, device);
                     });
                     setCheckBoxColor(mCheckBox, mController.getColorActiveItem());
-                    initSessionSeekbar();
+                    initSeekbar(device);
                 } else if (!mController.hasAdjustVolumeUserRestriction() && currentlyConnected) {
                     mStatusIcon.setImageDrawable(
                             mContext.getDrawable(R.drawable.media_output_status_check));

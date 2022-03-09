@@ -41,6 +41,7 @@ import android.app.usage.UsageStatsManagerInternal;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.IPackageManager;
 import android.content.pm.PackageItemInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
@@ -213,8 +214,6 @@ import com.android.server.wm.WindowManagerGlobalLock;
 import com.android.server.wm.WindowManagerService;
 
 import dalvik.system.VMRuntime;
-
-import com.google.android.startop.iorap.IorapForwardingService;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -1227,12 +1226,15 @@ public final class SystemServer implements Dumpable {
         mSystemServiceManager.startService(domainVerificationService);
         t.traceEnd();
 
+        IPackageManager iPackageManager;
         t.traceBegin("StartPackageManagerService");
         try {
             Watchdog.getInstance().pauseWatchingCurrentThread("packagemanagermain");
-            mPackageManagerService = PackageManagerService.main(mSystemContext, installer,
-                    domainVerificationService, mFactoryTestMode != FactoryTest.FACTORY_TEST_OFF,
-                    mOnlyCore);
+            Pair<PackageManagerService, IPackageManager> pmsPair = PackageManagerService.main(
+                    mSystemContext, installer, domainVerificationService,
+                    mFactoryTestMode != FactoryTest.FACTORY_TEST_OFF, mOnlyCore);
+            mPackageManagerService = pmsPair.first;
+            iPackageManager = pmsPair.second;
         } finally {
             Watchdog.getInstance().resumeWatchingCurrentThread("packagemanagermain");
         }
@@ -1240,7 +1242,7 @@ public final class SystemServer implements Dumpable {
         // Now that the package manager has started, register the dex load reporter to capture any
         // dex files loaded by system server.
         // These dex files will be optimized by the BackgroundDexOptService.
-        SystemServerDexLoadReporter.configureSystemServerDexReporter(mPackageManagerService);
+        SystemServerDexLoadReporter.configureSystemServerDexReporter(iPackageManager);
 
         mFirstBoot = mPackageManagerService.isFirstBoot();
         mPackageManager = mSystemContext.getPackageManager();
@@ -1643,10 +1645,6 @@ public final class SystemServer implements Dumpable {
 
             t.traceBegin("PinnerService");
             mSystemServiceManager.startService(PinnerService.class);
-            t.traceEnd();
-
-            t.traceBegin("IorapForwardingService");
-            mSystemServiceManager.startService(IorapForwardingService.class);
             t.traceEnd();
 
             if (Build.IS_DEBUGGABLE && ProfcollectForwardingService.enabled()) {

@@ -66,6 +66,8 @@ import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.PackageUserState;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
+import dalvik.system.VMRuntime;
+
 import java.util.Collections;
 import java.util.List;
 
@@ -241,12 +243,13 @@ final class DeletePackageHelper {
         if (res) {
             final boolean killApp = (deleteFlags & PackageManager.DELETE_DONT_KILL_APP) == 0;
             info.sendPackageRemovedBroadcasts(killApp, removedBySystem);
-            if (disabledSystemPs != null) {
-                info.sendSystemPackageUpdatedBroadcasts(disabledSystemPs.getAppId());
-            }
+            info.sendSystemPackageUpdatedBroadcasts();
         }
-        // Force a gc here.
-        Runtime.getRuntime().gc();
+
+        // Force a gc to clear up things.
+        // Ask for a background one, it's fine to go on and not block here.
+        VMRuntime.getRuntime().requestConcurrentGC();
+
         // Delete the resources here after sending the broadcast to let
         // other processes clean up before deleting resources.
         synchronized (mPm.mInstallLock) {
@@ -508,6 +511,7 @@ final class DeletePackageHelper {
             outInfo.mRemovedAppId = ps.getAppId();
             outInfo.mRemovedUsers = userIds;
             outInfo.mBroadcastUsers = userIds;
+            outInfo.mIsExternal = ps.isExternalStorage();
         }
     }
 
@@ -597,9 +601,6 @@ final class DeletePackageHelper {
         if (outInfo != null) {
             // Delete the updated package
             outInfo.mIsRemovedPackageSystemUpdate = true;
-            if (disabledPs.getAppId() != deletedPs.getAppId()) {
-                outInfo.mNewAppId = disabledPs.getAppId();
-            }
         }
 
         if (disabledPs.getVersionCode() < deletedPs.getVersionCode()
@@ -679,7 +680,8 @@ final class DeletePackageHelper {
             return;
         }
 
-        if (!deleteAllUsers && mPm.getBlockUninstallForUser(internalPackageName, userId)) {
+        if (!deleteAllUsers && mPm.mIPackageManager
+                .getBlockUninstallForUser(internalPackageName, userId)) {
             mPm.mHandler.post(() -> {
                 try {
                     observer.onPackageDeleted(packageName,
@@ -699,11 +701,14 @@ final class DeletePackageHelper {
         // Queue up an async operation since the package deletion may take a little while.
         mPm.mHandler.post(() -> {
             int returnCode;
-            final PackageSetting ps = mPm.mSettings.getPackageLPr(internalPackageName);
+            final Computer innerSnapshot = mPm.snapshotComputer();
+            final PackageStateInternal packageState =
+                    innerSnapshot.getPackageStateInternal(internalPackageName);
             boolean doDeletePackage = true;
-            if (ps != null) {
+            if (packageState != null) {
                 final boolean targetIsInstantApp =
-                        ps.getInstantApp(UserHandle.getUserId(callingUid));
+                        packageState.getUserStateOrDefault(UserHandle.getUserId(callingUid))
+                                .isInstantApp();
                 doDeletePackage = !targetIsInstantApp
                         || canViewInstantApps;
             }
@@ -712,7 +717,7 @@ final class DeletePackageHelper {
                     returnCode = deletePackageX(internalPackageName, versionCode,
                             userId, deleteFlags, false /*removedBySystem*/);
                 } else {
-                    int[] blockUninstallUserIds = getBlockUninstallForUsers(
+                    int[] blockUninstallUserIds = getBlockUninstallForUsers(innerSnapshot,
                             internalPackageName, users);
                     // If nobody is blocking uninstall, proceed with delete for all users
                     if (ArrayUtils.isEmpty(blockUninstallUserIds)) {
@@ -763,39 +768,40 @@ final class DeletePackageHelper {
         }
         final int callingUserId = UserHandle.getUserId(callingUid);
         // If the caller installed the pkgName, then allow it to silently uninstall.
-        if (callingUid == mPm.getPackageUid(
-                mPm.getInstallerPackageName(pkgName), 0, callingUserId)) {
+        if (callingUid == mPm.mIPackageManager.getPackageUid(
+                mPm.mIPackageManager.getInstallerPackageName(pkgName), 0, callingUserId)) {
             return true;
         }
 
         // Allow package verifier to silently uninstall.
-        if (mPm.mRequiredVerifierPackage != null && callingUid == mPm.getPackageUid(
-                mPm.mRequiredVerifierPackage, 0, callingUserId)) {
+        if (mPm.mRequiredVerifierPackage != null && callingUid == mPm.mIPackageManager
+                .getPackageUid(mPm.mRequiredVerifierPackage, 0, callingUserId)) {
             return true;
         }
 
         // Allow package uninstaller to silently uninstall.
-        if (mPm.mRequiredUninstallerPackage != null && callingUid == mPm.getPackageUid(
-                mPm.mRequiredUninstallerPackage, 0, callingUserId)) {
+        if (mPm.mRequiredUninstallerPackage != null && callingUid == mPm.mIPackageManager
+                .getPackageUid(mPm.mRequiredUninstallerPackage, 0, callingUserId)) {
             return true;
         }
 
         // Allow storage manager to silently uninstall.
-        if (mPm.mStorageManagerPackage != null && callingUid == mPm.getPackageUid(
+        if (mPm.mStorageManagerPackage != null && callingUid == mPm.mIPackageManager.getPackageUid(
                 mPm.mStorageManagerPackage, 0, callingUserId)) {
             return true;
         }
 
         // Allow caller having MANAGE_PROFILE_AND_DEVICE_OWNERS permission to silently
         // uninstall for device owner provisioning.
-        return mPm.checkUidPermission(MANAGE_PROFILE_AND_DEVICE_OWNERS, callingUid)
+        return mPm.mIPackageManager.checkUidPermission(MANAGE_PROFILE_AND_DEVICE_OWNERS, callingUid)
                 == PERMISSION_GRANTED;
     }
 
-    private int[] getBlockUninstallForUsers(String packageName, int[] userIds) {
+    private int[] getBlockUninstallForUsers(@NonNull Computer snapshot, String packageName,
+            int[] userIds) {
         int[] result = EMPTY_INT_ARRAY;
         for (int userId : userIds) {
-            if (mPm.getBlockUninstallForUser(packageName, userId)) {
+            if (snapshot.getBlockUninstallForUser(packageName, userId)) {
                 result = ArrayUtils.appendInt(result, userId);
             }
         }

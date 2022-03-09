@@ -159,9 +159,9 @@ class PackageManagerShellCommand extends ShellCommand {
 
     private static final SecureRandom RANDOM = new SecureRandom();
 
-    PackageManagerShellCommand(@NonNull PackageManagerService service,
+    PackageManagerShellCommand(@NonNull IPackageManager packageManager,
             @NonNull Context context, @NonNull DomainVerificationShell domainVerificationShell) {
-        mInterface = service;
+        mInterface = packageManager;
         mLegacyPermissionManager = LocalServices.getService(LegacyPermissionManagerInternal.class);
         mPermissionManager = context.getSystemService(PermissionManager.class);
         mContext = context;

@@ -2723,7 +2723,7 @@
     <string name="config_bandwidthEstimateSource">bandwidth_estimator</string>
 
     <!-- Whether force to enable telephony new data stack or not -->
-    <bool name="config_force_enable_telephony_new_data_stack">false</bool>
+    <bool name="config_force_enable_telephony_new_data_stack">true</bool>
 
     <!-- Whether WiFi display is supported by this device.
          There are many prerequisites for this feature to work correctly.
@@ -2930,6 +2930,11 @@
 
     <!-- Apps that are authorized to access shared accounts, overridden by product overlays -->
     <string name="config_appsAuthorizedForSharedAccounts" translatable="false">;com.android.settings;</string>
+
+    <!-- Settings intelligence package name -->
+    <string name="config_settingsIntelligencePackageName" translatable="false">
+        com.android.settings.intelligence
+    </string>
 
     <!-- Flag indicating that the media framework should not allow changes or mute on any
          stream or global volumes. -->
@@ -5192,6 +5197,10 @@
          when TextClassifier has not been initialized. -->
     <integer name="config_smartSelectionInitializingTimeoutMillis">500</integer>
 
+    <!-- The delay in milliseconds before focused Views set themselves as preferred to keep clear.
+         Set to -1 if Views should not set themselves as preferred to keep clear. -->
+    <integer name="config_preferKeepClearForFocusDelayMillis">-1</integer>
+
     <!-- Indicates that default fitness tracker app needs to request sensor and location permissions. -->
     <bool name="config_trackerAppNeedsPermissions">false</bool>
 
@@ -5258,9 +5267,9 @@
 
     <bool name="config_cecPowerStateChangeOnActiveSourceLost_userConfigurable">true</bool>
     <bool name="config_cecPowerStateChangeOnActiveSourceLostNone_allowed">true</bool>
-    <bool name="config_cecPowerStateChangeOnActiveSourceLostNone_default">true</bool>
+    <bool name="config_cecPowerStateChangeOnActiveSourceLostNone_default">false</bool>
     <bool name="config_cecPowerStateChangeOnActiveSourceLostStandbyNow_allowed">true</bool>
-    <bool name="config_cecPowerStateChangeOnActiveSourceLostStandbyNow_default">false</bool>
+    <bool name="config_cecPowerStateChangeOnActiveSourceLostStandbyNow_default">true</bool>
 
     <bool name="config_cecSystemAudioControl_userConfigurable">true</bool>
     <bool name="config_cecSystemAudioControlEnabled_allowed">true</bool>

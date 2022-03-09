@@ -19,6 +19,7 @@ package com.android.server.inputmethod;
 import static android.os.InputConstants.DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
 
 import android.annotation.NonNull;
+import android.os.InputConfig;
 import android.os.Process;
 import android.view.InputApplicationHandle;
 import android.view.InputChannel;
@@ -56,20 +57,17 @@ final class HandwritingEventReceiverSurface {
         mWindowHandle.name = name;
         mWindowHandle.token = mClientChannel.getToken();
         mWindowHandle.layoutParamsType = WindowManager.LayoutParams.TYPE_SECURE_SYSTEM_OVERLAY;
-        mWindowHandle.layoutParamsFlags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
-                | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
         mWindowHandle.dispatchingTimeoutMillis = DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
-        mWindowHandle.visible = true;
-        mWindowHandle.focusable = false;
-        mWindowHandle.hasWallpaper = false;
-        mWindowHandle.paused = false;
         mWindowHandle.ownerPid = Process.myPid();
         mWindowHandle.ownerUid = Process.myUid();
-        mWindowHandle.inputFeatures = WindowManager.LayoutParams.INPUT_FEATURE_SPY
-                | WindowManager.LayoutParams.INPUT_FEATURE_INTERCEPTS_STYLUS;
         mWindowHandle.scaleFactor = 1.0f;
-        mWindowHandle.trustedOverlay = true;
         mWindowHandle.replaceTouchableRegionWithCrop(null /* use this surface's bounds */);
+        mWindowHandle.inputConfig =
+                InputConfig.NOT_FOCUSABLE
+                        | InputConfig.NOT_TOUCHABLE
+                        | InputConfig.SPY
+                        | InputConfig.INTERCEPTS_STYLUS
+                        | InputConfig.TRUSTED_OVERLAY;
 
         final SurfaceControl.Transaction t = new SurfaceControl.Transaction();
         t.setInputWindowInfo(mInputSurface, mWindowHandle);
@@ -82,13 +80,14 @@ final class HandwritingEventReceiverSurface {
         mIsIntercepting = false;
     }
 
-    void startIntercepting() {
-        // TODO(b/210978621): Update the spy window's PID and UID to be associated with the IME so
-        //  that ANRs are correctly attributed to the IME.
-        final SurfaceControl.Transaction t = new SurfaceControl.Transaction();
-        mWindowHandle.inputFeatures &= ~WindowManager.LayoutParams.INPUT_FEATURE_SPY;
-        t.setInputWindowInfo(mInputSurface, mWindowHandle);
-        t.apply();
+    void startIntercepting(int imePid, int imeUid) {
+        mWindowHandle.ownerPid = imePid;
+        mWindowHandle.ownerUid = imeUid;
+        mWindowHandle.inputConfig &= ~InputConfig.SPY;
+
+        new SurfaceControl.Transaction()
+                .setInputWindowInfo(mInputSurface, mWindowHandle)
+                .apply();
         mIsIntercepting = true;
     }
 

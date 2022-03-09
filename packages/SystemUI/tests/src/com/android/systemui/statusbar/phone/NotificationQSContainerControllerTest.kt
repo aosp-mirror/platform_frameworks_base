@@ -5,6 +5,7 @@ import android.testing.TestableLooper
 import android.view.WindowInsets
 import android.view.WindowManagerPolicyConstants
 import androidx.test.filters.SmallTest
+import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
@@ -40,6 +41,7 @@ class NotificationQSContainerControllerTest : SysuiTestCase() {
         const val GESTURES_NAVIGATION = WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL
         const val BUTTONS_NAVIGATION = WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON
         const val NOTIFICATIONS_MARGIN = 50
+        const val SCRIM_MARGIN = 10
     }
 
     @Mock
@@ -65,12 +67,18 @@ class NotificationQSContainerControllerTest : SysuiTestCase() {
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
+        mContext.ensureTestableResources()
+        whenever(notificationsQSContainer.resources).thenReturn(mContext.resources)
         notificationsQSContainerController = NotificationsQSContainerController(
                 notificationsQSContainer,
                 navigationModeController,
                 overviewProxyService,
                 featureFlags
         )
+
+        mContext.orCreateTestableResources
+            .addOverride(R.dimen.split_shade_notifications_scrim_margin_bottom, SCRIM_MARGIN)
+
         whenever(notificationsQSContainer.defaultNotificationsMarginBottom)
                 .thenReturn(NOTIFICATIONS_MARGIN)
         whenever(navigationModeController.addListener(navigationModeCaptor.capture()))
@@ -115,14 +123,14 @@ class NotificationQSContainerControllerTest : SysuiTestCase() {
                 insets = windowInsets().withStableBottom())
         then(expectedContainerPadding = 0, // taskbar should disappear when shade is expanded
                 expectedNotificationsMargin = NOTIFICATIONS_MARGIN,
-                expectedQsPadding = STABLE_INSET_BOTTOM)
+                expectedQsPadding = NOTIFICATIONS_MARGIN - SCRIM_MARGIN)
 
         given(taskbarVisible = true,
                 navigationMode = BUTTONS_NAVIGATION,
                 insets = windowInsets().withStableBottom())
         then(expectedContainerPadding = STABLE_INSET_BOTTOM,
                 expectedNotificationsMargin = NOTIFICATIONS_MARGIN,
-                expectedQsPadding = STABLE_INSET_BOTTOM)
+                expectedQsPadding = NOTIFICATIONS_MARGIN - SCRIM_MARGIN)
     }
 
     @Test
@@ -153,14 +161,14 @@ class NotificationQSContainerControllerTest : SysuiTestCase() {
                 navigationMode = GESTURES_NAVIGATION,
                 insets = windowInsets().withStableBottom())
         then(expectedContainerPadding = 0,
-                expectedQsPadding = STABLE_INSET_BOTTOM)
+                expectedQsPadding = NOTIFICATIONS_MARGIN - SCRIM_MARGIN)
 
         given(taskbarVisible = false,
                 navigationMode = BUTTONS_NAVIGATION,
                 insets = windowInsets().withStableBottom())
         then(expectedContainerPadding = 0, // qs goes full height as it's not obscuring nav buttons
                 expectedNotificationsMargin = STABLE_INSET_BOTTOM + NOTIFICATIONS_MARGIN,
-                expectedQsPadding = STABLE_INSET_BOTTOM)
+                expectedQsPadding = STABLE_INSET_BOTTOM + NOTIFICATIONS_MARGIN - SCRIM_MARGIN)
     }
 
     @Test
@@ -188,14 +196,15 @@ class NotificationQSContainerControllerTest : SysuiTestCase() {
         given(taskbarVisible = false,
                 navigationMode = GESTURES_NAVIGATION,
                 insets = windowInsets().withCutout())
-        then(expectedContainerPadding = CUTOUT_HEIGHT)
+        then(expectedContainerPadding = CUTOUT_HEIGHT,
+            expectedQsPadding = NOTIFICATIONS_MARGIN - SCRIM_MARGIN)
 
         given(taskbarVisible = false,
                 navigationMode = BUTTONS_NAVIGATION,
                 insets = windowInsets().withCutout().withStableBottom())
         then(expectedContainerPadding = 0,
                 expectedNotificationsMargin = STABLE_INSET_BOTTOM + NOTIFICATIONS_MARGIN,
-                expectedQsPadding = STABLE_INSET_BOTTOM)
+                expectedQsPadding = STABLE_INSET_BOTTOM + NOTIFICATIONS_MARGIN - SCRIM_MARGIN)
     }
 
     @Test
@@ -392,6 +401,7 @@ class NotificationQSContainerControllerTest : SysuiTestCase() {
 
     @Test
     fun testNotificationsMarginBottomIsUpdated() {
+        Mockito.clearInvocations(notificationsQSContainer)
         notificationsQSContainerController.splitShadeEnabled = true
         verify(notificationsQSContainer).setNotificationsMarginBottom(NOTIFICATIONS_MARGIN)
 

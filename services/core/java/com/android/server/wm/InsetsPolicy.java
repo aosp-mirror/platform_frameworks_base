@@ -449,11 +449,8 @@ class InsetsPolicy {
             boolean copyState) {
         final WindowState roundedCornerWindow = mPolicy.getRoundedCornerWindow();
         final Task task = w.getTask();
-        final boolean isInSplitScreenMode = task != null && task.inMultiWindowMode()
-                && task.getRootTask() != null
-                && task.getRootTask().getAdjacentTaskFragment() != null;
         if (task != null && !task.getWindowConfiguration().tasksAreFloating()
-                && (roundedCornerWindow != null || isInSplitScreenMode)) {
+                && (roundedCornerWindow != null || task.inSplitScreen())) {
             // Instead of using display frame to calculating rounded corner, for the fake rounded
             // corners drawn by divider bar or task bar, we need to re-calculate rounded corners
             // based on task bounds and if the task bounds is intersected with task bar, we should
@@ -586,10 +583,10 @@ class InsetsPolicy {
             // Notification shade has control anyways, no reason to force anything.
             return focusedWin;
         }
-        if (mPolicy.isForceShowNavigationBarEnabled()
+        if (mPolicy.isForceShowNavigationBarEnabled() && focusedWin != null
                 && focusedWin.getActivityType() == ACTIVITY_TYPE_STANDARD) {
-            // When "force show navigation bar" is enabled, it means we are in kid navigation bar
-            // and 3-button navigation bar mode. In this mode, the navigation bar is forcibly shown
+            // When "force show navigation bar" is enabled, it means both force visible is true, and
+            // we are in 3-button navigation. In this mode, the navigation bar is forcibly shown
             // when activity type is ACTIVITY_TYPE_STANDARD which means Launcher or Recent could
             // still control the navigation bar in this mode.
             return null;

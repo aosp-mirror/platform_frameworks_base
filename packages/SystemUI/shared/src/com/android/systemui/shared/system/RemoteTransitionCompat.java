@@ -243,10 +243,15 @@ public class RemoteTransitionCompat implements Parcelable {
         boolean merge(TransitionInfo info, SurfaceControl.Transaction t,
                 RecentsAnimationListener recents) {
             ArrayList<TransitionInfo.Change> openingTasks = null;
+            boolean cancelRecents = false;
             for (int i = info.getChanges().size() - 1; i >= 0; --i) {
                 final TransitionInfo.Change change = info.getChanges().get(i);
                 if (change.getMode() == TRANSIT_OPEN || change.getMode() == TRANSIT_TO_FRONT) {
                     if (change.getTaskInfo() != null) {
+                        if (change.getTaskInfo().topActivityType == ACTIVITY_TYPE_HOME) {
+                            // canceling recents animation
+                            cancelRecents = true;
+                        }
                         if (openingTasks == null) {
                             openingTasks = new ArrayList<>();
                         }
@@ -256,9 +261,11 @@ public class RemoteTransitionCompat implements Parcelable {
             }
             if (openingTasks == null) return false;
             int pauseMatches = 0;
-            for (int i = 0; i < openingTasks.size(); ++i) {
-                if (mPausingTasks.contains(openingTasks.get(i).getContainer())) {
-                    ++pauseMatches;
+            if (!cancelRecents) {
+                for (int i = 0; i < openingTasks.size(); ++i) {
+                    if (mPausingTasks.contains(openingTasks.get(i).getContainer())) {
+                        ++pauseMatches;
+                    }
                 }
             }
             if (pauseMatches > 0) {

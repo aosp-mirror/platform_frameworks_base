@@ -8,6 +8,9 @@ package android {
   public static final class Manifest.permission {
     ctor public Manifest.permission();
     field public static final String ACCEPT_HANDOVER = "android.permission.ACCEPT_HANDOVER";
+    field public static final String ACCESS_ADSERVICES_ATTRIBUTION = "android.permission.ACCESS_ADSERVICES_ATTRIBUTION";
+    field public static final String ACCESS_ADSERVICES_CUSTOM_AUDIENCES = "android.permission.ACCESS_ADSERVICES_CUSTOM_AUDIENCES";
+    field public static final String ACCESS_ADSERVICES_TOPICS = "android.permission.ACCESS_ADSERVICES_TOPICS";
     field public static final String ACCESS_BACKGROUND_LOCATION = "android.permission.ACCESS_BACKGROUND_LOCATION";
     field public static final String ACCESS_BLOBS_ACROSS_USERS = "android.permission.ACCESS_BLOBS_ACROSS_USERS";
     field public static final String ACCESS_CHECKIN_PROPERTIES = "android.permission.ACCESS_CHECKIN_PROPERTIES";
@@ -17,7 +20,6 @@ package android {
     field public static final String ACCESS_MEDIA_LOCATION = "android.permission.ACCESS_MEDIA_LOCATION";
     field public static final String ACCESS_NETWORK_STATE = "android.permission.ACCESS_NETWORK_STATE";
     field public static final String ACCESS_NOTIFICATION_POLICY = "android.permission.ACCESS_NOTIFICATION_POLICY";
-    field public static final String ACCESS_SUPPLEMENTAL_APIS = "android.permission.ACCESS_SUPPLEMENTAL_APIS";
     field public static final String ACCESS_WIFI_STATE = "android.permission.ACCESS_WIFI_STATE";
     field public static final String ACCOUNT_MANAGER = "android.permission.ACCOUNT_MANAGER";
     field public static final String ACTIVITY_RECOGNITION = "android.permission.ACTIVITY_RECOGNITION";
@@ -979,8 +981,8 @@ package android {
     field public static final int left = 16843181; // 0x10101ad
     field public static final int letterSpacing = 16843958; // 0x10104b6
     field public static final int level = 16844032; // 0x1010500
-    field public static final int lineBreakStyle = 16844365; // 0x101064d
-    field public static final int lineBreakWordStyle = 16844366; // 0x101064e
+    field public static final int lineBreakStyle;
+    field public static final int lineBreakWordStyle;
     field public static final int lineHeight = 16844159; // 0x101057f
     field public static final int lineSpacingExtra = 16843287; // 0x1010217
     field public static final int lineSpacingMultiplier = 16843288; // 0x1010218
@@ -2094,12 +2096,8 @@ package android {
     field public static final int accessibilityActionScrollUp = 16908344; // 0x1020038
     field public static final int accessibilityActionSetProgress = 16908349; // 0x102003d
     field public static final int accessibilityActionShowOnScreen = 16908342; // 0x1020036
-    field public static final int accessibilityActionShowSuggestions;
+    field public static final int accessibilityActionShowTextSuggestions;
     field public static final int accessibilityActionShowTooltip = 16908356; // 0x1020044
-    field public static final int accessibilityActionSwipeDown;
-    field public static final int accessibilityActionSwipeLeft;
-    field public static final int accessibilityActionSwipeRight;
-    field public static final int accessibilityActionSwipeUp;
     field public static final int accessibilitySystemActionBack = 16908363; // 0x102004b
     field public static final int accessibilitySystemActionHome = 16908364; // 0x102004c
     field public static final int accessibilitySystemActionLockScreen = 16908370; // 0x1020052
@@ -4073,7 +4071,7 @@ package android.app {
     method @Deprecated public void onTabUnselected(android.app.ActionBar.Tab, android.app.FragmentTransaction);
   }
 
-  @UiContext public class Activity extends android.view.ContextThemeWrapper implements android.content.ComponentCallbacks2 android.view.KeyEvent.Callback android.view.LayoutInflater.Factory2 android.view.OnBackInvokedDispatcherOwner android.view.View.OnCreateContextMenuListener android.view.Window.Callback {
+  @UiContext public class Activity extends android.view.ContextThemeWrapper implements android.content.ComponentCallbacks2 android.view.KeyEvent.Callback android.view.LayoutInflater.Factory2 android.window.OnBackInvokedDispatcherOwner android.view.View.OnCreateContextMenuListener android.view.Window.Callback {
     ctor public Activity();
     method public void addContentView(android.view.View, android.view.ViewGroup.LayoutParams);
     method public void closeContextMenu();
@@ -4116,7 +4114,7 @@ package android.app {
     method public int getMaxNumPictureInPictureActions();
     method public final android.media.session.MediaController getMediaController();
     method @NonNull public android.view.MenuInflater getMenuInflater();
-    method @NonNull public android.view.OnBackInvokedDispatcher getOnBackInvokedDispatcher();
+    method @NonNull public android.window.OnBackInvokedDispatcher getOnBackInvokedDispatcher();
     method public final android.app.Activity getParent();
     method @Nullable public android.content.Intent getParentActivityIntent();
     method public android.content.SharedPreferences getPreferences(int);
@@ -5002,7 +5000,7 @@ package android.app {
     method public void onDateSet(android.widget.DatePicker, int, int, int);
   }
 
-  public class Dialog implements android.content.DialogInterface android.view.KeyEvent.Callback android.view.OnBackInvokedDispatcherOwner android.view.View.OnCreateContextMenuListener android.view.Window.Callback {
+  public class Dialog implements android.content.DialogInterface android.view.KeyEvent.Callback android.window.OnBackInvokedDispatcherOwner android.view.View.OnCreateContextMenuListener android.view.Window.Callback {
     ctor public Dialog(@NonNull @UiContext android.content.Context);
     ctor public Dialog(@NonNull @UiContext android.content.Context, @StyleRes int);
     ctor protected Dialog(@NonNull @UiContext android.content.Context, boolean, @Nullable android.content.DialogInterface.OnCancelListener);
@@ -5022,7 +5020,7 @@ package android.app {
     method @NonNull @UiContext public final android.content.Context getContext();
     method @Nullable public android.view.View getCurrentFocus();
     method @NonNull public android.view.LayoutInflater getLayoutInflater();
-    method @NonNull public android.view.OnBackInvokedDispatcher getOnBackInvokedDispatcher();
+    method @NonNull public android.window.OnBackInvokedDispatcher getOnBackInvokedDispatcher();
     method @Nullable public final android.app.Activity getOwnerActivity();
     method @Nullable public final android.view.SearchEvent getSearchEvent();
     method public final int getVolumeControlStream();
@@ -7439,7 +7437,7 @@ package android.app.admin {
     method @Nullable public java.util.List<java.lang.String> getPermittedCrossProfileNotificationListeners(@NonNull android.content.ComponentName);
     method @Nullable public java.util.List<java.lang.String> getPermittedInputMethods(@NonNull android.content.ComponentName);
     method public int getPersonalAppsSuspendedReasons(@NonNull android.content.ComponentName);
-    method @NonNull public android.app.admin.PreferentialNetworkServiceConfig getPreferentialNetworkServiceConfig();
+    method @NonNull public java.util.List<android.app.admin.PreferentialNetworkServiceConfig> getPreferentialNetworkServiceConfigs();
     method public int getRequiredPasswordComplexity();
     method public long getRequiredStrongAuthTimeout(@Nullable android.content.ComponentName);
     method public boolean getScreenCaptureDisabled(@Nullable android.content.ComponentName);
@@ -7584,7 +7582,7 @@ package android.app.admin {
     method public boolean setPermittedCrossProfileNotificationListeners(@NonNull android.content.ComponentName, @Nullable java.util.List<java.lang.String>);
     method public boolean setPermittedInputMethods(@NonNull android.content.ComponentName, java.util.List<java.lang.String>);
     method public void setPersonalAppsSuspended(@NonNull android.content.ComponentName, boolean);
-    method public void setPreferentialNetworkServiceConfig(@NonNull android.app.admin.PreferentialNetworkServiceConfig);
+    method public void setPreferentialNetworkServiceConfigs(@NonNull java.util.List<android.app.admin.PreferentialNetworkServiceConfig>);
     method public void setPreferentialNetworkServiceEnabled(boolean);
     method public void setProfileEnabled(@NonNull android.content.ComponentName);
     method public void setProfileName(@NonNull android.content.ComponentName, String);
@@ -26621,9 +26619,9 @@ package android.net {
 
   public abstract class PlatformVpnProfile {
     method public final boolean areLocalRoutesExcluded();
-    method public final boolean getRequiresInternetValidation();
     method public final int getType();
     method @NonNull public final String getTypeString();
+    method public final boolean isInternetValidationRequired();
     field public static final int TYPE_IKEV2_IPSEC_PSK = 7; // 0x7
     field public static final int TYPE_IKEV2_IPSEC_RSA = 8; // 0x8
     field public static final int TYPE_IKEV2_IPSEC_USER_PASS = 6; // 0x6
@@ -30942,7 +30940,7 @@ package android.os {
     method @Deprecated @Nullable public android.os.Parcelable[] getParcelableArray(@Nullable String);
     method @Nullable public <T> T[] getParcelableArray(@Nullable String, @NonNull Class<T>);
     method @Deprecated @Nullable public <T extends android.os.Parcelable> java.util.ArrayList<T> getParcelableArrayList(@Nullable String);
-    method @Nullable public <T> java.util.ArrayList<T> getParcelableArrayList(@Nullable String, @NonNull Class<T>);
+    method @Nullable public <T> java.util.ArrayList<T> getParcelableArrayList(@Nullable String, @NonNull Class<? extends T>);
     method @Deprecated @Nullable public java.io.Serializable getSerializable(@Nullable String);
     method @Nullable public <T extends java.io.Serializable> T getSerializable(@Nullable String, @NonNull Class<T>);
     method public short getShort(String);
@@ -30951,7 +30949,7 @@ package android.os {
     method @Nullable public android.util.Size getSize(@Nullable String);
     method @Nullable public android.util.SizeF getSizeF(@Nullable String);
     method @Deprecated @Nullable public <T extends android.os.Parcelable> android.util.SparseArray<T> getSparseParcelableArray(@Nullable String);
-    method @Nullable public <T> android.util.SparseArray<T> getSparseParcelableArray(@Nullable String, @NonNull Class<T>);
+    method @Nullable public <T> android.util.SparseArray<T> getSparseParcelableArray(@Nullable String, @NonNull Class<? extends T>);
     method @Nullable public java.util.ArrayList<java.lang.String> getStringArrayList(@Nullable String);
     method public boolean hasFileDescriptors();
     method public void putAll(android.os.Bundle);
@@ -40022,7 +40020,6 @@ package android.telecom {
     field public static final int PROPERTY_NETWORK_IDENTIFIED_EMERGENCY_CALL = 2048; // 0x800
     field public static final int PROPERTY_RTT = 1024; // 0x400
     field public static final int PROPERTY_SELF_MANAGED = 256; // 0x100
-    field public static final int PROPERTY_TETHERED_CALL = 32768; // 0x8000
     field public static final int PROPERTY_VOIP_AUDIO_MODE = 4096; // 0x1000
     field public static final int PROPERTY_WIFI = 8; // 0x8
   }
@@ -40051,7 +40048,6 @@ package android.telecom {
     field @NonNull public static final android.os.Parcelable.Creator<android.telecom.CallAudioState> CREATOR;
     field public static final int ROUTE_BLUETOOTH = 2; // 0x2
     field public static final int ROUTE_EARPIECE = 1; // 0x1
-    field public static final int ROUTE_EXTERNAL = 16; // 0x10
     field public static final int ROUTE_SPEAKER = 8; // 0x8
     field public static final int ROUTE_WIRED_HEADSET = 4; // 0x4
     field public static final int ROUTE_WIRED_OR_EARPIECE = 5; // 0x5
@@ -40326,7 +40322,6 @@ package android.telecom {
     field public static final int PROPERTY_IS_RTT = 256; // 0x100
     field public static final int PROPERTY_NETWORK_IDENTIFIED_EMERGENCY_CALL = 1024; // 0x400
     field public static final int PROPERTY_SELF_MANAGED = 128; // 0x80
-    field public static final int PROPERTY_TETHERED_CALL = 16384; // 0x4000
     field public static final int PROPERTY_WIFI = 8; // 0x8
     field public static final int STATE_ACTIVE = 4; // 0x4
     field public static final int STATE_DIALING = 3; // 0x3
@@ -49032,21 +49027,6 @@ package android.view {
     field public int toolType;
   }
 
-  public interface OnBackInvokedCallback {
-    method public default void onBackInvoked();
-  }
-
-  public interface OnBackInvokedDispatcher {
-    method public void registerOnBackInvokedCallback(@NonNull android.view.OnBackInvokedCallback, @IntRange(from=0) int);
-    method public void unregisterOnBackInvokedCallback(@NonNull android.view.OnBackInvokedCallback);
-    field public static final int PRIORITY_DEFAULT = 0; // 0x0
-    field public static final int PRIORITY_OVERLAY = 1000000; // 0xf4240
-  }
-
-  public interface OnBackInvokedDispatcherOwner {
-    method @NonNull public android.view.OnBackInvokedDispatcher getOnBackInvokedDispatcher();
-  }
-
   public interface OnReceiveContentListener {
     method @Nullable public android.view.ContentInfo onReceiveContent(@NonNull android.view.View, @NonNull android.view.ContentInfo);
   }
@@ -51949,12 +51929,8 @@ package android.view.accessibility {
     field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_SET_SELECTION;
     field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_SET_TEXT;
     field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_SHOW_ON_SCREEN;
-    field @NonNull public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_SHOW_SUGGESTIONS;
+    field @NonNull public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_SHOW_TEXT_SUGGESTIONS;
     field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_SHOW_TOOLTIP;
-    field @NonNull public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_SWIPE_DOWN;
-    field @NonNull public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_SWIPE_LEFT;
-    field @NonNull public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_SWIPE_RIGHT;
-    field @NonNull public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_SWIPE_UP;
     field @NonNull public static final android.os.Parcelable.Creator<android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction> CREATOR;
   }
 
@@ -52966,6 +52942,7 @@ package android.view.inputmethod {
     method public default boolean performSpellCheck();
     method public boolean reportFullscreenMode(boolean);
     method public boolean requestCursorUpdates(int);
+    method public default boolean requestCursorUpdates(int, int);
     method public boolean sendKeyEvent(android.view.KeyEvent);
     method public boolean setComposingRegion(int, int);
     method public default boolean setComposingRegion(int, int, @Nullable android.view.inputmethod.TextAttribute);
@@ -57908,12 +57885,27 @@ package android.widget.inline {
 
 package android.window {
 
+  public interface OnBackInvokedCallback {
+    method public default void onBackInvoked();
+  }
+
+  public interface OnBackInvokedDispatcher {
+    method public void registerOnBackInvokedCallback(@NonNull android.window.OnBackInvokedCallback, @IntRange(from=0) int);
+    method public void unregisterOnBackInvokedCallback(@NonNull android.window.OnBackInvokedCallback);
+    field public static final int PRIORITY_DEFAULT = 0; // 0x0
+    field public static final int PRIORITY_OVERLAY = 1000000; // 0xf4240
+  }
+
+  public interface OnBackInvokedDispatcherOwner {
+    method @NonNull public android.window.OnBackInvokedDispatcher getOnBackInvokedDispatcher();
+  }
+
   public interface SplashScreen {
     method public void clearOnExitAnimationListener();
     method public void setOnExitAnimationListener(@NonNull android.window.SplashScreen.OnExitAnimationListener);
     method public void setSplashScreenTheme(@StyleRes int);
-    field public static final int SPLASH_SCREEN_STYLE_EMPTY = 0; // 0x0
     field public static final int SPLASH_SCREEN_STYLE_ICON = 1; // 0x1
+    field public static final int SPLASH_SCREEN_STYLE_SOLID_COLOR = 0; // 0x0
   }
 
   public static interface SplashScreen.OnExitAnimationListener {

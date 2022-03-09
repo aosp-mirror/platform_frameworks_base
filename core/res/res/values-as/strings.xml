@@ -70,6 +70,7 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"ত্ৰিপক্ষীয় কলিং"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"আমনিদায়ক কল প্ৰত্যাখ্যান"</string>
     <string name="CndMmi" msgid="185136449405618437">"কল কৰা নম্বৰত ডেলিভাৰী"</string>
+    <string name="DndMmi" msgid="8797375819689129800">"অসুবিধা নিদিব"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"কলাৰ আইডি সীমিত কৰিবলৈ পূর্বনির্ধাৰণ কৰা হৈছে। পৰৱৰ্তী কল: সীমিত কৰা হৈছে"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"কলাৰ আইডি সীমিত কৰিবলৈ পূর্বনির্ধাৰণ কৰা হৈছে। পৰৱৰ্তী কল: সীমিত কৰা হৈছে"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"কলাৰ আইডি সীমিত নকৰিবলৈ পূর্বনির্ধাৰণ কৰা হৈছে। পৰৱৰ্তী কল: সীমিত কৰা হোৱা নাই"</string>
@@ -736,6 +737,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"বাহক মেছেজিং সেৱাৰ উচ্চ স্তৰৰ ইণ্টাৰফেইচত সংযোগ কৰিবলৈ ধাৰকক অনুমতি দিয়ে। এয়া সাধাৰণ এপবোৰৰ বাবে কেতিয়াও প্ৰয়োজন নহয়।"</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"বাহক সেৱাসমূহৰ সৈতে সংযুক্ত হ\'ব পাৰে"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"বাহক সেৱাৰ সৈতে সংযুক্ত হ\'বলৈ ধাৰকক অনুমতি দিয়ে। সাধাৰণ এপসমূহৰ বাবে সাধাৰণতে প্ৰয়োজন হ\'ব নালাগে।"</string>
+    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"অসুবিধা নিদিব চাব পাৰে"</string>
+    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"অসুবিধা নিদিবৰ কনফিগাৰেশ্বনক পঢ়িবলৈ আৰু সালসলনি কৰিবলৈ এপটোক অনুমতি দিয়ে।"</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"চোৱাৰ অনুমতিৰ ব্যৱহাৰ আৰম্ভ কৰক"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"ধাৰকক কোনো এপৰ বাবে অনুমতিৰ ব্যৱহাৰ আৰম্ভ কৰিবলৈ দিয়ে। সাধাৰণ এপ্‌সমূহৰ বাবে কেতিয়াও প্ৰয়োজন হ’ব নালাগে।"</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"অনুমতিৰ সিদ্ধান্তসমূহ চোৱা আৰম্ভ কৰক"</string>
@@ -1501,8 +1504,7 @@
     <string name="skip_button_label" msgid="3566599811326688389">"এৰি যাওক"</string>
     <string name="no_matches" msgid="6472699895759164599">"কোনো মিল নাই"</string>
     <string name="find_on_page" msgid="5400537367077438198">"পৃষ্ঠাত বিচাৰক"</string>
-    <!-- no translation found for matches_found (2296462299979507689) -->
-    <skip />
+    <string name="matches_found" msgid="2296462299979507689">"{count,plural, =1{# টা মিল}one{{total}ৰ #}other{{total}ৰ #}}"</string>
     <string name="action_mode_done" msgid="2536182504764803222">"সম্পন্ন হ’ল"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"শ্বেয়াৰ কৰি থোৱা ষ্ট’ৰেজ মচি থকা হৈছে…"</string>
     <string name="share" msgid="4157615043345227321">"শ্বেয়াৰ কৰক"</string>
@@ -1867,8 +1869,10 @@
     <string name="zen_mode_until" msgid="2250286190237669079">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> পৰ্যন্ত"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (পৰৱৰ্তী এলার্ম) পর্যন্ত"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"আপুনি অফ নকৰা পর্যন্ত"</string>
+    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"আপুনি যেতিয়ালৈকে অসুবিধা নিদিব অফ নকৰে"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"সংকুচিত কৰক"</string>
+    <string name="zen_mode_feature_name" msgid="3785547207263754500">"অসুবিধা নিদিব"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"ডাউনটাইম"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"কাৰ্য-দিনৰ নিশা"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"সপ্তাহ অন্ত"</string>
@@ -2033,7 +2037,10 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"কল আৰু জাননীসমূহে কম্পন কৰিব"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"কল আৰু জাননীসমূহ মিউট কৰা হ\'ব"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"ছিষ্টেমৰ সালসলনি"</string>
+    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"অসুবিধা নিদিব"</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"নতুন: অসুবিধা নিদিব ম\'ডে জাননীসমূহ লুকাই ৰাখিছে"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"অধিক জানিবলৈ আৰু সলনি কৰিবলৈ টিপক।"</string>
+    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"অসুবিধা নিদিব সলনি হৈছে"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"কি কি অৱৰোধ কৰা হৈছে জানিবলৈ টিপক।"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"ছিষ্টেম"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"ছেটিং"</string>
@@ -2050,6 +2057,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"ঠিক আছে"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"অফ কৰক"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"অধিক জানক"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Android 12ত Androidৰ অভিযোজিত জাননীক উন্নত জাননীৰ দ্বাৰা সলনি কৰা হৈছে। এই সুবিধাটোৱে পৰামৰ্শ দিয়া কাৰ্য আৰু প্ৰত্যুত্তৰ দেখুৱায় আৰু আপোনাৰ জাননীসমূহ শৃংখলাবদ্ধ কৰে।\n\nউন্নত জাননীয়ে সম্পৰ্কৰ নাম আৰু বাৰ্তাৰ দৰে ব্যক্তিগত তথ্যকে ধৰি জাননীৰ সমল এক্সেছ কৰিব পাৰে। এই সুবিধাটোৱে জাননী অগ্ৰাহ্য কৰিব অথবা জাননীৰ প্ৰতি সঁহাৰি জনাবও পাৰে, যেনে ফ’ন কলৰ উত্তৰ দিয়া আৰু অসুবিধা নিদিব সুবিধাটো নিয়ন্ত্ৰণ কৰা আদি।"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"ৰুটিন ম’ডৰ তথ্য জাননী"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"চাৰ্জ কৰাৰ সচৰাচৰ সময়ৰ আগতেই বেটাৰী শেষ হ’ব পাৰে"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"বেটাৰীৰ খৰচ কমাবলৈ বেটাৰী সঞ্চয়কাৰী অন কৰা হৈছে"</string>
@@ -2256,6 +2264,5 @@
     <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> নেপথ্যত চলি আছে আৰু অত্যধিক বেটাৰী খৰচ কৰিছে। পৰ্যালোচনা কৰিবলৈ টিপক।"</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> নেপথ্যত দীৰ্ঘ সময় ধৰি চলি আছে। পৰ্যালোচনা কৰিবলৈ টিপক।"</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"সক্ৰিয় এপ্‌সমূহ পৰীক্ষা কৰক"</string>
-    <!-- no translation found for vdm_camera_access_denied (6345652513729130490) -->
-    <skip />
+    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"এইটো ডিভাইচৰ পৰা কেমেৰা এক্সেছ কৰিব নোৱাৰি"</string>
 </resources>

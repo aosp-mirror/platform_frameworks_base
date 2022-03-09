@@ -147,6 +147,15 @@ public interface ServiceConnector<I extends IInterface> {
     void unbind();
 
     /**
+     * Registers a {@link ServiceLifecycleCallbacks callbacks} to be invoked when the lifecycle
+     * of the managed service changes.
+     *
+     * @param callbacks The callbacks that will be run, or {@code null} to clear the existing
+     *                 callbacks.
+     */
+    void setServiceLifecycleCallbacks(@Nullable ServiceLifecycleCallbacks<I> callbacks);
+
+    /**
      * A request to be run when the service is
      * {@link ServiceConnection#onServiceConnected connected}.
      *
@@ -187,6 +196,32 @@ public interface ServiceConnector<I extends IInterface> {
             runNoResult(service);
             return null;
         }
+    }
+
+    /**
+     * Collection of callbacks invoked when the lifecycle of the service changes.
+     *
+     * @param <II> the type of the {@link IInterface ipc interface} for the remote service
+     * @see ServiceConnector#setServiceLifecycleCallbacks(ServiceLifecycleCallbacks)
+     */
+    interface ServiceLifecycleCallbacks<II extends IInterface> {
+        /**
+         * Called when the service has just connected and before any queued jobs are run.
+         */
+        default void onConnected(@NonNull II service) {}
+
+        /**
+         * Called just before the service is disconnected and unbound.
+         */
+        default void onDisconnected(@NonNull II service) {}
+
+        /**
+         * Called when the service Binder has died.
+         *
+         * In cases where {@link #onBinderDied()} is invoked the service becomes unbound without
+         * a callback to {@link #onDisconnected(IInterface)}.
+         */
+        default void onBinderDied() {}
     }
 
 
@@ -230,6 +265,8 @@ public interface ServiceConnector<I extends IInterface> {
         private final @NonNull Handler mHandler;
         protected final @NonNull Executor mExecutor;
 
+        @Nullable
+        private volatile ServiceLifecycleCallbacks<I> mServiceLifecycleCallbacks = null;
         private volatile I mService = null;
         private boolean mBinding = false;
         private boolean mUnbinding = false;
@@ -328,6 +365,19 @@ public interface ServiceConnector<I extends IInterface> {
             if (DEBUG) {
                 logTrace();
             }
+        }
+
+        private void dispatchOnServiceConnectionStatusChanged(
+                @NonNull I service, boolean isConnected) {
+            ServiceLifecycleCallbacks<I> serviceLifecycleCallbacks = mServiceLifecycleCallbacks;
+            if (serviceLifecycleCallbacks != null) {
+                if (isConnected) {
+                    serviceLifecycleCallbacks.onConnected(service);
+                } else {
+                    serviceLifecycleCallbacks.onDisconnected(service);
+                }
+            }
+            onServiceConnectionStatusChanged(service, isConnected);
         }
 
         /**
@@ -504,12 +554,17 @@ public interface ServiceConnector<I extends IInterface> {
             mHandler.post(this::unbindJobThread);
         }
 
+        @Override
+        public void setServiceLifecycleCallbacks(@Nullable ServiceLifecycleCallbacks<I> callbacks) {
+            mServiceLifecycleCallbacks = callbacks;
+        }
+
         void unbindJobThread() {
             cancelTimeout();
             I service = mService;
             boolean wasBound = service != null;
             if (wasBound) {
-                onServiceConnectionStatusChanged(service, false);
+                dispatchOnServiceConnectionStatusChanged(service, false);
                 mContext.unbindService(mServiceConnection);
                 service.asBinder().unlinkToDeath(this, 0);
                 mService = null;
@@ -560,7 +615,7 @@ public interface ServiceConnector<I extends IInterface> {
             } catch (RemoteException e) {
                 Log.e(LOG_TAG, "onServiceConnected " + name + ": ", e);
             }
-            onServiceConnectionStatusChanged(service, true);
+            dispatchOnServiceConnectionStatusChanged(service, true);
             processQueue();
         }
 
@@ -572,7 +627,7 @@ public interface ServiceConnector<I extends IInterface> {
             mBinding = true;
             I service = mService;
             if (service != null) {
-                onServiceConnectionStatusChanged(service, false);
+                dispatchOnServiceConnectionStatusChanged(service, false);
                 mService = null;
             }
         }
@@ -592,6 +647,14 @@ public interface ServiceConnector<I extends IInterface> {
             }
             mService = null;
             unbind();
+            dispatchOnBinderDied();
+        }
+
+        private void dispatchOnBinderDied() {
+            ServiceLifecycleCallbacks<I> serviceLifecycleCallbacks = mServiceLifecycleCallbacks;
+            if (serviceLifecycleCallbacks != null) {
+                serviceLifecycleCallbacks.onBinderDied();
+            }
         }
 
         @Override
@@ -764,5 +827,10 @@ public interface ServiceConnector<I extends IInterface> {
 
         @Override
         public void unbind() {}
+
+        @Override
+        public void setServiceLifecycleCallbacks(@Nullable ServiceLifecycleCallbacks<T> callbacks) {
+            // Do nothing.
+        }
     }
 }

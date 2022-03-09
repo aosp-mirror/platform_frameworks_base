@@ -27,6 +27,7 @@ import android.graphics.RectF;
 import android.graphics.Region;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.InputConfig;
 import android.os.Looper;
 import android.os.Message;
 import android.util.Slog;
@@ -41,7 +42,9 @@ import android.window.WindowInfosListener;
 import com.android.internal.annotations.GuardedBy;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * This class is the accessibility windows population adapter.
@@ -68,12 +71,23 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
     private final SparseArray<Matrix> mMagnificationSpecInverseMatrix = new SparseArray<>();
     @GuardedBy("mLock")
     private final SparseArray<DisplayInfo> mDisplayInfos = new SparseArray<>();
+    private final SparseArray<MagnificationSpec> mCurrentMagnificationSpec = new SparseArray<>();
+    @GuardedBy("mLock")
+    private final SparseArray<MagnificationSpec> mPreviousMagnificationSpec = new SparseArray<>();
     @GuardedBy("mLock")
     private final List<InputWindowHandle> mVisibleWindows = new ArrayList<>();
     @GuardedBy("mLock")
     private boolean mWindowsNotificationEnabled = false;
+    @GuardedBy("mLock")
+    private final Map<IBinder, Matrix> mWindowsTransformMatrixMap = new HashMap<>();
     private final Object mLock = new Object();
     private final Handler mHandler;
+
+    private final Matrix mTempMatrix1 = new Matrix();
+    private final Matrix mTempMatrix2 = new Matrix();
+    private final float[] mTempFloat1 = new float[9];
+    private final float[] mTempFloat2 = new float[9];
+    private final float[] mTempFloat3 = new float[9];
 
     AccessibilityWindowsPopulator(WindowManagerService service,
             AccessibilityController accessibilityController) {
@@ -132,13 +146,28 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
     @Override
     public void onWindowInfosChanged(InputWindowHandle[] windowHandles,
             DisplayInfo[] displayInfos) {
-        synchronized (mLock) {
-            mVisibleWindows.clear();
-            for (InputWindowHandle window : windowHandles) {
-                if (window.visible && window.getWindow() != null) {
-                    mVisibleWindows.add(window);
-                }
+        mHandler.post(() -> onWindowInfosChangedInternal(windowHandles, displayInfos));
+    }
+
+    private void onWindowInfosChangedInternal(InputWindowHandle[] windowHandles,
+            DisplayInfo[] displayInfos) {
+        final List<InputWindowHandle> tempVisibleWindows = new ArrayList<>();
+
+        for (InputWindowHandle window : windowHandles) {
+            final boolean visible = (window.inputConfig & InputConfig.NOT_VISIBLE) == 0;
+            if (visible && window.getWindow() != null) {
+                tempVisibleWindows.add(window);
             }
+        }
+        final HashMap<IBinder, Matrix> windowsTransformMatrixMap =
+                getWindowsTransformMatrix(tempVisibleWindows);
+
+        synchronized (mLock) {
+            mWindowsTransformMatrixMap.clear();
+            mWindowsTransformMatrixMap.putAll(windowsTransformMatrixMap);
+
+            mVisibleWindows.clear();
+            mVisibleWindows.addAll(tempVisibleWindows);
 
             mDisplayInfos.clear();
             for (final DisplayInfo displayInfo : displayInfos) {
@@ -146,14 +175,33 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
             }
 
             if (mWindowsNotificationEnabled) {
-                if (!mHandler.hasMessages(
-                        MyHandler.MESSAGE_NOTIFY_WINDOWS_CHANGED_BY_TIMEOUT)) {
+                if (!mHandler.hasMessages(MyHandler.MESSAGE_NOTIFY_WINDOWS_CHANGED_BY_TIMEOUT)) {
                     mHandler.sendEmptyMessageDelayed(
                             MyHandler.MESSAGE_NOTIFY_WINDOWS_CHANGED_BY_TIMEOUT,
                             WINDOWS_CHANGED_NOTIFICATION_MAX_DURATION_TIMES_MS);
                 }
-                populateVisibleWindowHandlesAndNotifyWindowsChangeIfNeededLocked();
+                populateVisibleWindowHandlesAndNotifyWindowsChangeIfNeeded();
             }
+        }
+    }
+
+    private HashMap<IBinder, Matrix> getWindowsTransformMatrix(List<InputWindowHandle> windows) {
+        synchronized (mService.mGlobalLock) {
+            final HashMap<IBinder, Matrix> windowsTransformMatrixMap = new HashMap<>();
+
+            for (InputWindowHandle inputWindowHandle : windows) {
+                final IWindow iWindow = inputWindowHandle.getWindow();
+                final WindowState windowState = iWindow != null ? mService.mWindowMap.get(
+                        iWindow.asBinder()) : null;
+
+                if (windowState != null && windowState.shouldMagnify()) {
+                    final Matrix transformMatrix = new Matrix();
+                    windowState.getTransformationMatrix(sTempFloats, transformMatrix);
+                    windowsTransformMatrixMap.put(iWindow.asBinder(), transformMatrix);
+                }
+            }
+
+            return windowsTransformMatrixMap;
         }
     }
 
@@ -171,14 +219,43 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
             }
             mWindowsNotificationEnabled = register;
             if (mWindowsNotificationEnabled) {
-                populateVisibleWindowHandlesAndNotifyWindowsChangeIfNeededLocked();
+                populateVisibleWindowHandlesAndNotifyWindowsChangeIfNeeded();
             } else {
                 releaseResources();
             }
         }
     }
 
-    private void populateVisibleWindowHandlesAndNotifyWindowsChangeIfNeededLocked() {
+    /**
+     * Sets the magnification spec for calculating the window bounds of all windows
+     * reported from the surface flinger in the magnifying.
+     *
+     * @param displayId The display Id.
+     * @param spec THe magnification spec.
+     */
+    public void setMagnificationSpec(int displayId, MagnificationSpec spec) {
+        synchronized (mLock) {
+            MagnificationSpec currentMagnificationSpec = mCurrentMagnificationSpec.get(displayId);
+            if (currentMagnificationSpec == null) {
+                currentMagnificationSpec = new MagnificationSpec();
+                currentMagnificationSpec.setTo(spec);
+                mCurrentMagnificationSpec.put(displayId, currentMagnificationSpec);
+
+                return;
+            }
+
+            MagnificationSpec previousMagnificationSpec = mPreviousMagnificationSpec.get(displayId);
+            if (previousMagnificationSpec == null) {
+                previousMagnificationSpec = new MagnificationSpec();
+                mPreviousMagnificationSpec.put(displayId, previousMagnificationSpec);
+            }
+            previousMagnificationSpec.setTo(currentMagnificationSpec);
+            currentMagnificationSpec.setTo(spec);
+        }
+    }
+
+    @GuardedBy("mLock")
+    private void populateVisibleWindowHandlesAndNotifyWindowsChangeIfNeeded() {
         final SparseArray<List<InputWindowHandle>> tempWindowHandleList = new SparseArray<>();
 
         for (final InputWindowHandle windowHandle : mVisibleWindows) {
@@ -188,15 +265,15 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
             if (inputWindowHandles == null) {
                 inputWindowHandles = new ArrayList<>();
                 tempWindowHandleList.put(windowHandle.displayId, inputWindowHandles);
-                generateMagnificationSpecInverseMatrixLocked(windowHandle.displayId);
             }
             inputWindowHandles.add(windowHandle);
         }
+        findMagnificationSpecInverseMatrixIfNeeded(tempWindowHandleList);
 
         final List<Integer> displayIdsForWindowsChanged = new ArrayList<>();
-
-        getDisplaysForWindowsChangedLocked(displayIdsForWindowsChanged, tempWindowHandleList,
+        getDisplaysForWindowsChanged(displayIdsForWindowsChanged, tempWindowHandleList,
                 mInputWindowHandlesOnDisplays);
+
         // Clones all windows from the callback of the surface flinger.
         mInputWindowHandlesOnDisplays.clear();
         for (int i = 0; i < tempWindowHandleList.size(); i++) {
@@ -204,7 +281,7 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
             mInputWindowHandlesOnDisplays.put(displayId, tempWindowHandleList.get(displayId));
         }
 
-        if (displayIdsForWindowsChanged.size() > 0) {
+        if (!displayIdsForWindowsChanged.isEmpty()) {
             if (!mHandler.hasMessages(MyHandler.MESSAGE_NOTIFY_WINDOWS_CHANGED)) {
                 mHandler.obtainMessage(MyHandler.MESSAGE_NOTIFY_WINDOWS_CHANGED,
                         displayIdsForWindowsChanged).sendToTarget();
@@ -217,7 +294,8 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
                 SURFACE_FLINGER_CALLBACK_WINDOWS_STABLE_TIMES_MS);
     }
 
-    private void getDisplaysForWindowsChangedLocked(List<Integer> outDisplayIdsForWindowsChanged,
+    @GuardedBy("mLock")
+    private static void getDisplaysForWindowsChanged(List<Integer> outDisplayIdsForWindowsChanged,
             SparseArray<List<InputWindowHandle>> newWindowsList,
             SparseArray<List<InputWindowHandle>> oldWindowsList) {
         for (int i = 0; i < newWindowsList.size(); i++) {
@@ -225,13 +303,14 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
             final List<InputWindowHandle> newWindows = newWindowsList.get(displayId);
             final List<InputWindowHandle> oldWindows = oldWindowsList.get(displayId);
 
-            if (hasWindowsChangedLocked(newWindows, oldWindows)) {
+            if (hasWindowsChanged(newWindows, oldWindows)) {
                 outDisplayIdsForWindowsChanged.add(displayId);
             }
         }
     }
 
-    private boolean hasWindowsChangedLocked(List<InputWindowHandle> newWindows,
+    @GuardedBy("mLock")
+    private static boolean hasWindowsChanged(List<InputWindowHandle> newWindows,
             List<InputWindowHandle> oldWindows) {
         if (oldWindows == null || oldWindows.size() != newWindows.size()) {
             return true;
@@ -253,34 +332,195 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
         return false;
     }
 
-    private void generateMagnificationSpecInverseMatrixLocked(int displayId) {
-        MagnificationSpec spec = new MagnificationSpec();
-        if (!mAccessibilityController.getMagnificationSpecForDisplay(displayId, spec)) {
-            mMagnificationSpecInverseMatrix.remove(displayId);
-            return;
+    @GuardedBy("mLock")
+    private void findMagnificationSpecInverseMatrixIfNeeded(SparseArray<List<InputWindowHandle>>
+            windowHandleList) {
+        MagnificationSpec currentMagnificationSpec;
+        MagnificationSpec previousMagnificationSpec;
+        for (int i = 0; i < windowHandleList.size(); i++) {
+            final int displayId = windowHandleList.keyAt(i);
+            List<InputWindowHandle> inputWindowHandles = windowHandleList.get(displayId);
+
+            final MagnificationSpec currentSpec = mCurrentMagnificationSpec.get(displayId);
+            if (currentSpec == null) {
+                continue;
+            }
+            currentMagnificationSpec = new MagnificationSpec();
+            currentMagnificationSpec.setTo(currentSpec);
+
+            final MagnificationSpec previousSpec = mPreviousMagnificationSpec.get(displayId);
+
+            if (previousSpec == null) {
+                final Matrix inverseMatrixForCurrentSpec = new Matrix();
+                generateInverseMatrix(currentMagnificationSpec, inverseMatrixForCurrentSpec);
+                mMagnificationSpecInverseMatrix.put(displayId, inverseMatrixForCurrentSpec);
+                continue;
+            }
+            previousMagnificationSpec = new MagnificationSpec();
+            previousMagnificationSpec.setTo(previousSpec);
+
+            generateInverseMatrixBasedOnProperMagnificationSpecForDisplay(inputWindowHandles,
+                    currentMagnificationSpec, previousMagnificationSpec);
         }
-        sTempFloats[Matrix.MSCALE_X] = spec.scale;
-        sTempFloats[Matrix.MSKEW_Y] = 0;
-        sTempFloats[Matrix.MSKEW_X] = 0;
-        sTempFloats[Matrix.MSCALE_Y] = spec.scale;
-        sTempFloats[Matrix.MTRANS_X] = spec.offsetX;
-        sTempFloats[Matrix.MTRANS_Y] = spec.offsetY;
-        sTempFloats[Matrix.MPERSP_0] = 0;
-        sTempFloats[Matrix.MPERSP_1] = 0;
-        sTempFloats[Matrix.MPERSP_2] = 1;
+    }
+
+    @GuardedBy("mLock")
+    private void generateInverseMatrixBasedOnProperMagnificationSpecForDisplay(
+            List<InputWindowHandle> inputWindowHandles, MagnificationSpec currentMagnificationSpec,
+            MagnificationSpec previousMagnificationSpec) {
+        // To decrease the counts of holding the WindowManagerService#mGlogalLock in
+        // the method, getWindowTransformMatrix(), this for loop begins from the bottom
+        // to top of the z-order windows.
+        for (int index = inputWindowHandles.size() - 1; index >= 0; index--) {
+            final Matrix windowTransformMatrix = mTempMatrix2;
+            final InputWindowHandle windowHandle = inputWindowHandles.get(index);
+            final IBinder iBinder = windowHandle.getWindow().asBinder();
+
+            if (getWindowTransformMatrix(iBinder, windowTransformMatrix)) {
+                generateMagnificationSpecInverseMatrix(windowHandle, currentMagnificationSpec,
+                        previousMagnificationSpec, windowTransformMatrix);
+
+                break;
+            }
+        }
+    }
+
+    @GuardedBy("mLock")
+    private boolean getWindowTransformMatrix(IBinder iBinder, Matrix outTransform) {
+        final Matrix windowMatrix = iBinder != null
+                ? mWindowsTransformMatrixMap.get(iBinder) : null;
+
+        if (windowMatrix == null) {
+            return false;
+        }
+        outTransform.set(windowMatrix);
+
+        return true;
+    }
+
+    /**
+     * Generates the inverse matrix based on the proper magnification spec.
+     * The magnification spec associated with the InputWindowHandle might not the current
+     * spec set by WM, which might be the previous one. To find the appropriate spec,
+     * we store two consecutive magnification specs, and found out which one is the proper
+     * one closing the identity matrix for generating the inverse matrix.
+     *
+     * @param inputWindowHandle The window from the surface flinger.
+     * @param currentMagnificationSpec The current magnification spec.
+     * @param previousMagnificationSpec The previous magnification spec.
+     * @param transformMatrix The transform matrix of the window doesn't consider the
+     *                        magnifying effect.
+     */
+    @GuardedBy("mLock")
+    private void generateMagnificationSpecInverseMatrix(InputWindowHandle inputWindowHandle,
+            @NonNull MagnificationSpec currentMagnificationSpec,
+            @NonNull MagnificationSpec previousMagnificationSpec, Matrix transformMatrix) {
+
+        final float[] identityMatrixFloatsForCurrentSpec = mTempFloat1;
+        computeIdentityMatrix(inputWindowHandle, currentMagnificationSpec,
+                transformMatrix, identityMatrixFloatsForCurrentSpec);
+        final float[] identityMatrixFloatsForPreviousSpec = mTempFloat2;
+        computeIdentityMatrix(inputWindowHandle, previousMagnificationSpec,
+                transformMatrix, identityMatrixFloatsForPreviousSpec);
+
+        Matrix inverseMatrixForMagnificationSpec = new Matrix();
+        if (selectProperMagnificationSpecByComparingIdentityDegree(
+                identityMatrixFloatsForCurrentSpec, identityMatrixFloatsForPreviousSpec)) {
+            generateInverseMatrix(currentMagnificationSpec,
+                    inverseMatrixForMagnificationSpec);
+
+            // Choosing the current spec means the previous spec is out of date,
+            // so removing it. And if the current spec is no magnifying, meaning
+            // the magnifying is done so removing the inverse matrix of this display.
+            mPreviousMagnificationSpec.remove(inputWindowHandle.displayId);
+            if (currentMagnificationSpec.isNop()) {
+                mCurrentMagnificationSpec.remove(inputWindowHandle.displayId);
+                mMagnificationSpecInverseMatrix.remove(inputWindowHandle.displayId);
+                return;
+            }
+        } else {
+            generateInverseMatrix(previousMagnificationSpec,
+                    inverseMatrixForMagnificationSpec);
+        }
+
+        mMagnificationSpecInverseMatrix.put(inputWindowHandle.displayId,
+                inverseMatrixForMagnificationSpec);
+    }
+
+    /**
+     * Computes the identity matrix for generating the
+     * inverse matrix based on below formula under window is at the stable state:
+     * inputWindowHandle#transform * MagnificationSpecMatrix * WindowState#transform
+     * = IdentityMatrix
+     */
+    @GuardedBy("mLock")
+    private void computeIdentityMatrix(InputWindowHandle inputWindowHandle,
+            @NonNull MagnificationSpec magnificationSpec,
+            Matrix transformMatrix, float[] magnifyMatrixFloats) {
+        final Matrix specMatrix = mTempMatrix1;
+        transformMagnificationSpecToMatrix(magnificationSpec, specMatrix);
+
+        final Matrix resultMatrix = new Matrix(inputWindowHandle.transform);
+        resultMatrix.preConcat(specMatrix);
+        resultMatrix.preConcat(transformMatrix);
+
+        resultMatrix.getValues(magnifyMatrixFloats);
+    }
+
+    /**
+     * @return true if selecting the magnification spec one, otherwise selecting the
+     * magnification spec two.
+     */
+    @GuardedBy("mLock")
+    private boolean selectProperMagnificationSpecByComparingIdentityDegree(
+            float[] magnifyMatrixFloatsForSpecOne,
+            float[] magnifyMatrixFloatsForSpecTwo) {
+        final float[] IdentityMatrixValues = mTempFloat3;
+        Matrix.IDENTITY_MATRIX.getValues(IdentityMatrixValues);
+
+        final float scaleDiffForSpecOne = Math.abs(IdentityMatrixValues[Matrix.MSCALE_X]
+                - magnifyMatrixFloatsForSpecOne[Matrix.MSCALE_X]);
+        final float scaleDiffForSpecTwo = Math.abs(IdentityMatrixValues[Matrix.MSCALE_X]
+                - magnifyMatrixFloatsForSpecTwo[Matrix.MSCALE_X]);
+        final float offsetXDiffForSpecOne = Math.abs(IdentityMatrixValues[Matrix.MTRANS_X]
+                - magnifyMatrixFloatsForSpecOne[Matrix.MTRANS_X]);
+        final float offsetXDiffForSpecTwo = Math.abs(IdentityMatrixValues[Matrix.MTRANS_X]
+                - magnifyMatrixFloatsForSpecTwo[Matrix.MTRANS_X]);
+        final float offsetYDiffForSpecOne = Math.abs(IdentityMatrixValues[Matrix.MTRANS_Y]
+                - magnifyMatrixFloatsForSpecOne[Matrix.MTRANS_Y]);
+        final float offsetYDiffForSpecTwo = Math.abs(IdentityMatrixValues[Matrix.MTRANS_Y]
+                - magnifyMatrixFloatsForSpecTwo[Matrix.MTRANS_Y]);
+        final float offsetDiffForSpecOne = offsetXDiffForSpecOne
+                + offsetYDiffForSpecOne;
+        final float offsetDiffForSpecTwo = offsetXDiffForSpecTwo
+                + offsetYDiffForSpecTwo;
+
+        return Float.compare(scaleDiffForSpecTwo, scaleDiffForSpecOne) > 0
+                || (Float.compare(scaleDiffForSpecTwo, scaleDiffForSpecOne) == 0
+                && Float.compare(offsetDiffForSpecTwo, offsetDiffForSpecOne) > 0);
+    }
+
+    @GuardedBy("mLock")
+    private static void generateInverseMatrix(MagnificationSpec spec, Matrix outMatrix) {
+        outMatrix.reset();
 
         final Matrix tempMatrix = new Matrix();
-        tempMatrix.setValues(sTempFloats);
+        transformMagnificationSpecToMatrix(spec, tempMatrix);
 
-        final Matrix inverseMatrix = new Matrix();
-        final boolean result = tempMatrix.invert(inverseMatrix);
-
+        final boolean result = tempMatrix.invert(outMatrix);
         if (!result) {
             Slog.e(TAG, "Can't inverse the magnification spec matrix with the "
-                    + "magnification spec = " + spec + " on the displayId = " + displayId);
-            return;
+                    + "magnification spec = " + spec);
+            outMatrix.reset();
         }
-        mMagnificationSpecInverseMatrix.set(displayId, inverseMatrix);
+    }
+
+    @GuardedBy("mLock")
+    private static void transformMagnificationSpecToMatrix(MagnificationSpec spec,
+            Matrix outMatrix) {
+        outMatrix.reset();
+        outMatrix.postScale(spec.scale, spec.scale);
+        outMatrix.postTranslate(spec.offsetX, spec.offsetY);
     }
 
     private void notifyWindowsChanged(@NonNull List<Integer> displayIdsForWindowsChanged) {
@@ -310,6 +550,9 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
         mMagnificationSpecInverseMatrix.clear();
         mVisibleWindows.clear();
         mDisplayInfos.clear();
+        mCurrentMagnificationSpec.clear();
+        mPreviousMagnificationSpec.clear();
+        mWindowsTransformMatrixMap.clear();
         mWindowsNotificationEnabled = false;
         mHandler.removeCallbacksAndMessages(null);
     }
@@ -400,7 +643,8 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
             final RecentsAnimationController controller = service.getRecentsAnimationController();
             instance.mIgnoreDuetoRecentsAnimation = windowState != null && controller != null
                     && controller.shouldIgnoreForAccessibility(windowState);
-            instance.mIsTrustedOverlay = inputWindowHandle.trustedOverlay;
+            instance.mIsTrustedOverlay =
+                    (inputWindowHandle.inputConfig & InputConfig.TRUSTED_OVERLAY) != 0;
 
             // TODO (b/199358388) : gets the letterbox bounds of the window from other way.
             if (windowState != null && windowState.areAppWindowBoundsLetterboxed()) {

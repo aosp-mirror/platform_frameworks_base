@@ -263,6 +263,15 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
                     // Notify FalsingManager that an intentional gesture has occurred.
                     // TODO(b/186519446): use a different method than isFalseTouch
                     mFalsingManager.isFalseTouch(BACK_GESTURE);
+                    // Only inject back keycodes when ahead-of-time back dispatching is disabled.
+                    if (mBackAnimation == null) {
+                        boolean sendDown = sendEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_BACK);
+                        boolean sendUp = sendEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_BACK);
+                        if (DEBUG_MISSING_GESTURE) {
+                            Log.d(DEBUG_MISSING_GESTURE_TAG, "Triggered back: down="
+                                    + sendDown + ", up=" + sendUp);
+                        }
+                    }
 
                     mOverviewProxyService.notifyBackAction(true, (int) mDownPoint.x,
                             (int) mDownPoint.y, false /* isButton */, !mIsOnLeftEdge);

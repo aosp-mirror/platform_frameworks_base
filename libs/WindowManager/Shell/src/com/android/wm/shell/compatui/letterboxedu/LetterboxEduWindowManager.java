@@ -28,6 +28,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup.MarginLayoutParams;
 import android.view.WindowManager;
+import android.view.accessibility.AccessibilityEvent;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.wm.shell.R;
@@ -132,7 +133,7 @@ public class LetterboxEduWindowManager extends CompatUIWindowManagerAbstract {
         updateDialogMargins();
 
         mAnimationController.startEnterAnimation(mLayout, /* endCallback= */
-                this::setDismissOnClickListener);
+                this::onDialogEnterAnimationEnded);
 
         return mLayout;
     }
@@ -157,11 +158,13 @@ public class LetterboxEduWindowManager extends CompatUIWindowManagerAbstract {
                 R.layout.letterbox_education_dialog_layout, null);
     }
 
-    private void setDismissOnClickListener() {
+    private void onDialogEnterAnimationEnded() {
         if (mLayout == null) {
             return;
         }
         mLayout.setDismissOnClickListener(this::onDismiss);
+        // Focus on the dialog title for accessibility.
+        mLayout.getDialogTitle().sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_FOCUSED);
     }
 
     private void onDismiss() {

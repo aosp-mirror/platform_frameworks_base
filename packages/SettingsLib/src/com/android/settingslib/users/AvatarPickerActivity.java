@@ -95,7 +95,9 @@ public class AvatarPickerActivity extends Activity {
         restoreState(savedInstanceState);
 
         mAvatarPhotoController = new AvatarPhotoController(
-                this, mWaitingForActivityResult, getFileAuthority());
+                new AvatarPhotoController.AvatarUiImpl(this),
+                new AvatarPhotoController.ContextInjectorImpl(this, getFileAuthority()),
+                mWaitingForActivityResult);
     }
 
     private void setUpButtons() {

@@ -91,6 +91,7 @@ import com.android.internal.R;
 import com.android.internal.os.ClassLoaderFactory;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.XmlUtils;
+import com.android.server.pm.SharedUidMigration;
 import com.android.server.pm.permission.CompatibilityPermissionInfo;
 import com.android.server.pm.pkg.component.ComponentMutateUtils;
 import com.android.server.pm.pkg.component.ComponentParseUtils;
@@ -893,9 +894,7 @@ public class ParsingPackageUtils {
                 .setTargetSandboxVersion(anInteger(PARSE_DEFAULT_TARGET_SANDBOX,
                         R.styleable.AndroidManifest_targetSandboxVersion, sa))
                 /* Set the global "on SD card" flag */
-                .setExternalStorage((flags & PARSE_EXTERNAL_STORAGE) != 0)
-                .setInheritKeyStoreKeys(bool(false,
-                        R.styleable.AndroidManifest_inheritKeyStoreKeys, sa));
+                .setExternalStorage((flags & PARSE_EXTERNAL_STORAGE) != 0);
 
         boolean foundApp = false;
         final int depth = parser.getDepth();
@@ -1047,8 +1046,11 @@ public class ParsingPackageUtils {
             }
         }
 
-        int maxSdkVersion = anInteger(0, R.styleable.AndroidManifest_sharedUserMaxSdkVersion, sa);
-        boolean leaving = (maxSdkVersion != 0) && (maxSdkVersion < Build.VERSION.RESOURCES_SDK_INT);
+        boolean leaving = false;
+        if (!SharedUidMigration.isDisabled()) {
+            int max = anInteger(0, R.styleable.AndroidManifest_sharedUserMaxSdkVersion, sa);
+            leaving = (max != 0) && (max < Build.VERSION.RESOURCES_SDK_INT);
+        }
 
         return input.success(pkg
                 .setLeavingSharedUid(leaving)

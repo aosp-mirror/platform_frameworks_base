@@ -51,7 +51,6 @@ import com.android.systemui.statusbar.phone.CentralSurfaces;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.time.Duration;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.concurrent.Future;
@@ -70,7 +69,6 @@ public class PowerUI extends CoreStartable implements CommandQueue.Callbacks {
     private static final int MAX_RECENT_TEMPS = 125; // TEMPERATURE_LOGGING_INTERVAL plus a buffer
     static final long THREE_HOURS_IN_MILLIS = DateUtils.HOUR_IN_MILLIS * 3;
     private static final int CHARGE_CYCLE_PERCENT_RESET = 30;
-    private static final long SIX_HOURS_MILLIS = Duration.ofHours(6).toMillis();
     public static final int NO_ESTIMATE_AVAILABLE = -1;
     private static final String BOOT_COUNT_KEY = "boot_count";
     private static final String PREFS = "powerui_prefs";

@@ -109,27 +109,26 @@ abstract class DisplayDevice {
     }
 
     /**
-     * Returns the window token of the level of the WindowManager hierarchy to mirror, or null
-     * if layer mirroring by SurfaceFlinger should not be performed.
-     * For now, only used for mirroring started from MediaProjection.
+     * Returns the if WindowManager is responsible for mirroring on this display. If {@code false},
+     * then SurfaceFlinger performs no layer mirroring on this display.
+     * Only used for mirroring started from MediaProjection.
      */
-    @Nullable
-    public IBinder getWindowTokenClientToMirrorLocked() {
-        return null;
+    public boolean isWindowManagerMirroringLocked() {
+        return false;
     }
 
     /**
-     * Updates the window token of the level of the level of the WindowManager hierarchy to mirror.
-     * If windowToken is null, then no layer mirroring by SurfaceFlinger to should be performed.
-     * For now, only used for mirroring started from MediaProjection.
+     * Updates if WindowManager is responsible for mirroring on this display. If {@code false}, then
+     * SurfaceFlinger performs no layer mirroring to this display.
+     * Only used for mirroring started from MediaProjection.
      */
-    public void setWindowTokenClientToMirrorLocked(IBinder windowToken) {
+    public void setWindowManagerMirroringLocked(boolean isMirroring) {
     }
 
     /**
      * Returns the default size of the surface associated with the display, or null if the surface
      * is not provided for layer mirroring by SurfaceFlinger.
-     * For now, only used for mirroring started from MediaProjection.
+     * Only used for mirroring started from MediaProjection.
      */
     @Nullable
     public Point getDisplaySurfaceDefaultSize() {

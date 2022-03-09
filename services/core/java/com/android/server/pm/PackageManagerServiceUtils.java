@@ -1250,6 +1250,14 @@ public class PackageManagerServiceUtils {
     }
 
     /**
+     * Check if the Binder caller is system UID or root's UID.
+     */
+    public static boolean isSystemOrRoot() {
+        final int uid = Binder.getCallingUid();
+        return uid == Process.SYSTEM_UID || uid == Process.ROOT_UID;
+    }
+
+    /**
      * Enforces that only the system UID or root's UID can call a method exposed
      * via Binder.
      *
@@ -1257,8 +1265,7 @@ public class PackageManagerServiceUtils {
      * @throws SecurityException if the caller is not system or root
      */
     public static void enforceSystemOrRoot(String message) {
-        final int uid = Binder.getCallingUid();
-        if (uid != Process.SYSTEM_UID && uid != Process.ROOT_UID) {
+        if (!isSystemOrRoot()) {
             throw new SecurityException(message);
         }
     }

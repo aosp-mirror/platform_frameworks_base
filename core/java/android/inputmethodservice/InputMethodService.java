@@ -83,6 +83,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.Process;
 import android.os.ResultReceiver;
 import android.os.SystemClock;
 import android.os.SystemProperties;
@@ -139,6 +140,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.inputmethod.IInputContentUriToken;
 import com.android.internal.inputmethod.IInputMethodPrivilegedOperations;
 import com.android.internal.inputmethod.ImeTracing;
+import com.android.internal.inputmethod.InputMethodNavButtonFlags;
 import com.android.internal.inputmethod.InputMethodPrivilegedOperations;
 import com.android.internal.inputmethod.InputMethodPrivilegedOperationsRegistry;
 import com.android.internal.view.IInlineSuggestionsRequestCallback;
@@ -346,7 +348,7 @@ public class InputMethodService extends AbstractInputMethodService {
      */
     @AnyThread
     public static boolean canImeRenderGesturalNavButtons() {
-        return SystemProperties.getBoolean(PROP_CAN_RENDER_GESTURAL_NAV_BUTTONS, false);
+        return SystemProperties.getBoolean(PROP_CAN_RENDER_GESTURAL_NAV_BUTTONS, true);
     }
 
     /**
@@ -659,7 +661,7 @@ public class InputMethodService extends AbstractInputMethodService {
         @Override
         public final void initializeInternal(@NonNull IBinder token,
                 IInputMethodPrivilegedOperations privilegedOperations, int configChanges,
-                boolean stylusHwSupported, boolean shouldShowImeSwitcherWhenImeIsShown) {
+                boolean stylusHwSupported, @InputMethodNavButtonFlags int navButtonFlags) {
             if (mDestroyed) {
                 Log.i(TAG, "The InputMethodService has already onDestroyed()."
                     + "Ignore the initialization.");
@@ -672,8 +674,7 @@ public class InputMethodService extends AbstractInputMethodService {
             if (stylusHwSupported) {
                 mInkWindow = new InkWindow(mWindow.getContext());
             }
-            mNavigationBarController.setShouldShowImeSwitcherWhenImeIsShown(
-                    shouldShowImeSwitcherWhenImeIsShown);
+            mNavigationBarController.onNavButtonFlagsChanged(navButtonFlags);
             attachToken(token);
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
@@ -783,10 +784,9 @@ public class InputMethodService extends AbstractInputMethodService {
         @Override
         public final void dispatchStartInputWithToken(@Nullable InputConnection inputConnection,
                 @NonNull EditorInfo editorInfo, boolean restarting,
-                @NonNull IBinder startInputToken, boolean shouldShowImeSwitcherWhenImeIsShown) {
+                @NonNull IBinder startInputToken, @InputMethodNavButtonFlags int navButtonFlags) {
             mPrivOps.reportStartInputAsync(startInputToken);
-            mNavigationBarController.setShouldShowImeSwitcherWhenImeIsShown(
-                    shouldShowImeSwitcherWhenImeIsShown);
+            mNavigationBarController.onNavButtonFlagsChanged(navButtonFlags);
             if (restarting) {
                 restartInput(inputConnection, editorInfo);
             } else {
@@ -800,10 +800,8 @@ public class InputMethodService extends AbstractInputMethodService {
          */
         @MainThread
         @Override
-        public void onShouldShowImeSwitcherWhenImeIsShownChanged(
-                boolean shouldShowImeSwitcherWhenImeIsShown) {
-            mNavigationBarController.setShouldShowImeSwitcherWhenImeIsShown(
-                    shouldShowImeSwitcherWhenImeIsShown);
+        public void onNavButtonFlagsChanged(@InputMethodNavButtonFlags int navButtonFlags) {
+            mNavigationBarController.onNavButtonFlagsChanged(navButtonFlags);
         }
 
         /**
@@ -926,7 +924,7 @@ public class InputMethodService extends AbstractInputMethodService {
                 mOnPreparedStylusHwCalled = true;
             }
             if (onStartStylusHandwriting()) {
-                mPrivOps.onStylusHandwritingReady(requestId);
+                mPrivOps.onStylusHandwritingReady(requestId, Process.myPid());
             } else {
                 Log.i(TAG, "IME is not ready. Can't start Stylus Handwriting");
                 // TODO(b/210039666): see if it's valuable to propagate this back to IMM.
