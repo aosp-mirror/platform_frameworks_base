@@ -458,6 +458,26 @@ class NotificationQSContainerControllerTest : SysuiTestCase() {
     }
 
     @Test
+    fun testSplitShadeLayout_qsFrameHasHorizontalMarginsOfZero() {
+        enableSplitShade()
+        controller.updateResources()
+        assertThat(getConstraintSetLayout(R.id.qs_frame).endMargin).isEqualTo(0)
+        assertThat(getConstraintSetLayout(R.id.qs_frame).startMargin).isEqualTo(0)
+    }
+
+    @Test
+    fun testSinglePaneShadeLayout_qsFrameHasHorizontalMarginsSetToCorrectValue() {
+        disableSplitShade()
+        controller.updateResources()
+        val notificationPanelMarginHorizontal = context.resources
+                .getDimensionPixelSize(R.dimen.notification_panel_margin_horizontal)
+        assertThat(getConstraintSetLayout(R.id.qs_frame).endMargin)
+                .isEqualTo(notificationPanelMarginHorizontal)
+        assertThat(getConstraintSetLayout(R.id.qs_frame).startMargin)
+                .isEqualTo(notificationPanelMarginHorizontal)
+    }
+
+    @Test
     fun testSinglePaneShadeLayout_isAlignedToParent() {
         disableSplitShade()
         controller.updateResources()
