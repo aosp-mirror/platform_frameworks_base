@@ -26,6 +26,7 @@ import android.view.WindowInsets;
 
 import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.constraintlayout.widget.ConstraintSet;
 
 import com.android.systemui.R;
 import com.android.systemui.fragments.FragmentHostManager;
@@ -123,10 +124,6 @@ public class NotificationsQuickSettingsContainer extends ConstraintLayout
         }
     }
 
-    public int getDefaultNotificationsMarginBottom() {
-        return ((LayoutParams) mStackScroller.getLayoutParams()).bottomMargin;
-    }
-
     public void setInsetsChangedListener(Consumer<WindowInsets> onInsetsChangedListener) {
         mInsetsChangedListener = onInsetsChangedListener;
     }
@@ -197,4 +194,7 @@ public class NotificationsQuickSettingsContainer extends ConstraintLayout
         }
     }
 
+    public void applyConstraints(ConstraintSet constraintSet) {
+        constraintSet.applyTo(this);
+    }
 }

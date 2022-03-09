@@ -1,6 +1,15 @@
 package com.android.systemui.statusbar.phone
 
+import android.view.View
+import android.view.ViewGroup
+import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.view.WindowInsets
+import androidx.constraintlayout.widget.ConstraintSet
+import androidx.constraintlayout.widget.ConstraintSet.BOTTOM
+import androidx.constraintlayout.widget.ConstraintSet.END
+import androidx.constraintlayout.widget.ConstraintSet.PARENT_ID
+import androidx.constraintlayout.widget.ConstraintSet.START
+import androidx.constraintlayout.widget.ConstraintSet.TOP
 import com.android.systemui.R
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
@@ -10,6 +19,7 @@ import com.android.systemui.plugins.qs.QSContainerController
 import com.android.systemui.recents.OverviewProxyService
 import com.android.systemui.recents.OverviewProxyService.OverviewProxyListener
 import com.android.systemui.shared.system.QuickStepContract
+import com.android.systemui.util.Utils
 import com.android.systemui.util.ViewController
 import java.util.function.Consumer
 import javax.inject.Inject
@@ -28,23 +38,20 @@ class NotificationsQSContainerController @Inject constructor(
                 mView.invalidate()
             }
         }
-    var splitShadeEnabled = false
-        set(value) {
-            if (field != value) {
-                field = value
-                // in case device configuration changed while showing QS details/customizer
-                updateBottomSpacing()
-            }
-        }
-
+    private var splitShadeEnabled = false
     private var isQSDetailShowing = false
     private var isQSCustomizing = false
     private var isQSCustomizerAnimating = false
 
+    private var splitShadeStatusBarHeight = 0
     private var notificationsBottomMargin = 0
     private var scrimShadeBottomMargin = 0
     private var bottomStableInsets = 0
     private var bottomCutoutInsets = 0
+    private var panelMarginHorizontal = 0
+    private var topMargin = 0
+
+    private val useCombinedQSHeaders = featureFlags.isEnabled(Flags.COMBINED_QS_HEADERS)
 
     private var isGestureNavigation = true
     private var taskbarVisible = false
@@ -68,7 +75,6 @@ class NotificationsQSContainerController @Inject constructor(
     }
 
     public override fun onViewAttached() {
-        updateMargins()
         updateResources()
         overviewProxyService.addCallback(taskbarVisibilityListener)
         mView.setInsetsChangedListener(windowInsetsListener)
@@ -83,7 +89,27 @@ class NotificationsQSContainerController @Inject constructor(
         mView.setConfigurationChangedListener(null)
     }
 
-    private fun updateResources() {
+    fun updateResources() {
+        val newSplitShadeEnabled = Utils.shouldUseSplitNotificationShade(resources)
+        val splitShadeEnabledChanged = newSplitShadeEnabled != splitShadeEnabled
+        splitShadeEnabled = newSplitShadeEnabled
+        notificationsBottomMargin = resources.getDimensionPixelSize(
+                R.dimen.notification_panel_margin_bottom)
+        splitShadeStatusBarHeight = Utils.getSplitShadeStatusBarHeight(context)
+        panelMarginHorizontal = resources.getDimensionPixelSize(
+                R.dimen.notification_panel_margin_horizontal)
+        topMargin = if (splitShadeEnabled) {
+            splitShadeStatusBarHeight
+        } else {
+            resources.getDimensionPixelSize(R.dimen.notification_panel_margin_top)
+        }
+        updateConstraints()
+        if (splitShadeEnabledChanged) {
+            // Let's do it at the end when all margins/paddings were already applied.
+            // We need to updateBottomSpacing() in case device configuration changed while showing
+            // QS details/customizer
+            updateBottomSpacing()
+        }
         val previousScrimShadeBottomMargin = scrimShadeBottomMargin
         scrimShadeBottomMargin = resources.getDimensionPixelSize(
             R.dimen.split_shade_notifications_scrim_margin_bottom
@@ -92,15 +118,6 @@ class NotificationsQSContainerController @Inject constructor(
         if (previousScrimShadeBottomMargin != scrimShadeBottomMargin) {
             updateBottomSpacing()
         }
-    }
-
-    /**
-     * Update the notification bottom margin.
-     *
-     * Will not call updateBottomSpacing
-     */
-    fun updateMargins() {
-        notificationsBottomMargin = mView.defaultNotificationsMarginBottom
     }
 
     override fun setCustomizerAnimating(animating: Boolean) {
@@ -177,5 +194,67 @@ class NotificationsQSContainerController @Inject constructor(
             }
         }
         return containerPadding to stackScrollMargin
+    }
+
+    fun updateConstraints() {
+        // To change the constraints at runtime, all children of the ConstraintLayout must have ids
+        ensureAllViewsHaveIds(mView)
+        val constraintSet = ConstraintSet()
+        constraintSet.clone(mView)
+        setKeyguardStatusViewConstraints(constraintSet)
+        setQsConstraints(constraintSet)
+        setNotificationsConstraints(constraintSet)
+        setSplitShadeStatusBarConstraints(constraintSet)
+        mView.applyConstraints(constraintSet)
+    }
+
+    private fun setSplitShadeStatusBarConstraints(constraintSet: ConstraintSet) {
+        if (splitShadeEnabled) {
+            constraintSet.constrainHeight(R.id.split_shade_status_bar, splitShadeStatusBarHeight)
+        } else {
+            if (useCombinedQSHeaders) {
+                constraintSet.constrainHeight(R.id.split_shade_status_bar, WRAP_CONTENT)
+            }
+        }
+    }
+
+    private fun setNotificationsConstraints(constraintSet: ConstraintSet) {
+        val startConstraintId = if (splitShadeEnabled) R.id.qs_edge_guideline else PARENT_ID
+        constraintSet.apply {
+            connect(R.id.notification_stack_scroller, START, startConstraintId, START)
+            setMargin(R.id.notification_stack_scroller, START,
+                    if (splitShadeEnabled) 0 else panelMarginHorizontal)
+            setMargin(R.id.notification_stack_scroller, END, panelMarginHorizontal)
+            setMargin(R.id.notification_stack_scroller, TOP, topMargin)
+            setMargin(R.id.notification_stack_scroller, BOTTOM, notificationsBottomMargin)
+        }
+    }
+
+    private fun setQsConstraints(constraintSet: ConstraintSet) {
+        val endConstraintId = if (splitShadeEnabled) R.id.qs_edge_guideline else PARENT_ID
+        constraintSet.apply {
+            connect(R.id.qs_frame, END, endConstraintId, END)
+            setMargin(R.id.qs_frame, START, panelMarginHorizontal)
+            setMargin(R.id.qs_frame, END, if (splitShadeEnabled) 0 else panelMarginHorizontal)
+            setMargin(R.id.qs_frame, TOP, topMargin)
+        }
+    }
+
+    private fun setKeyguardStatusViewConstraints(constraintSet: ConstraintSet) {
+        val statusViewMarginHorizontal = resources.getDimensionPixelSize(
+                R.dimen.status_view_margin_horizontal)
+        constraintSet.apply {
+            setMargin(R.id.keyguard_status_view, START, statusViewMarginHorizontal)
+            setMargin(R.id.keyguard_status_view, END, statusViewMarginHorizontal)
+        }
+    }
+
+    private fun ensureAllViewsHaveIds(parentView: ViewGroup) {
+        for (i in 0 until parentView.childCount) {
+            val childView = parentView.getChildAt(i)
+            if (childView.id == View.NO_ID) {
+                childView.id = View.generateViewId()
+            }
+        }
     }
 }
