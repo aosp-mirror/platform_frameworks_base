@@ -60,6 +60,7 @@ import com.android.settingslib.fuelgauge.BatterySaverUtils;
 import com.android.settingslib.utils.PowerUtil;
 import com.android.systemui.R;
 import com.android.systemui.SystemUIApplication;
+import com.android.systemui.broadcast.BroadcastSender;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
@@ -160,17 +161,20 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     @VisibleForTesting SystemUIDialog mUsbHighTempDialog;
     private BatteryStateSnapshot mCurrentBatterySnapshot;
     private ActivityStarter mActivityStarter;
+    private final BroadcastSender mBroadcastSender;
 
     /**
      */
     @Inject
-    public PowerNotificationWarnings(Context context, ActivityStarter activityStarter) {
+    public PowerNotificationWarnings(Context context, ActivityStarter activityStarter,
+            BroadcastSender broadcastSender) {
         mContext = context;
         mNoMan = mContext.getSystemService(NotificationManager.class);
         mPowerMan = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         mKeyguard = mContext.getSystemService(KeyguardManager.class);
         mReceiver.init();
         mActivityStarter = activityStarter;
+        mBroadcastSender = broadcastSender;
         mUseSevereDialog = mContext.getResources().getBoolean(R.bool.config_severe_battery_dialog);
     }
 
@@ -258,7 +262,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
 
     protected void showWarningNotification() {
         if (showSevereLowBatteryDialog()) {
-            mContext.sendBroadcast(new Intent(ACTION_ENABLE_SEVERE_BATTERY_DIALOG)
+            mBroadcastSender.sendBroadcast(new Intent(ACTION_ENABLE_SEVERE_BATTERY_DIALOG)
                     .setPackage(mContext.getPackageName())
                     .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY
                             | Intent.FLAG_RECEIVER_FOREGROUND));
@@ -716,9 +720,9 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
                         mSaverConfirmation.dismiss();
                     }
                     // Also close the notification shade, if it's open.
-                    mContext.sendBroadcast(
+                    mBroadcastSender.sendBroadcast(
                             new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)
-                            .setFlags(Intent.FLAG_RECEIVER_FOREGROUND));
+                                    .setFlags(Intent.FLAG_RECEIVER_FOREGROUND));
 
                     final Uri uri = Uri.parse(getURL());
                     Context context = widget.getContext();

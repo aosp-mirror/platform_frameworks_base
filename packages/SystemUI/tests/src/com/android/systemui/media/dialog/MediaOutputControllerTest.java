@@ -45,7 +45,6 @@ import android.text.TextUtils;
 import androidx.core.graphics.drawable.IconCompat;
 import androidx.test.filters.SmallTest;
 
-import com.android.internal.logging.UiEventLogger;
 import com.android.settingslib.bluetooth.CachedBluetoothDeviceManager;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.settingslib.media.LocalMediaManager;
@@ -57,7 +56,6 @@ import com.android.systemui.media.nearby.NearbyMediaDevicesManager;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
-import com.android.systemui.statusbar.phone.ShadeController;
 
 import com.google.common.collect.ImmutableList;
 
@@ -96,10 +94,8 @@ public class MediaOutputControllerTest extends SysuiTestCase {
     private NearbyDevice mNearbyDevice2 = mock(NearbyDevice.class);
     private MediaMetadata mMediaMetadata = mock(MediaMetadata.class);
     private RoutingSessionInfo mRemoteSessionInfo = mock(RoutingSessionInfo.class);
-    private ShadeController mShadeController = mock(ShadeController.class);
     private ActivityStarter mStarter = mock(ActivityStarter.class);
     private CommonNotifCollection mNotifCollection = mock(CommonNotifCollection.class);
-    private final UiEventLogger mUiEventLogger = mock(UiEventLogger.class);
     private final DialogLaunchAnimator mDialogLaunchAnimator = mock(DialogLaunchAnimator.class);
     private final NearbyMediaDevicesManager mNearbyMediaDevicesManager = mock(
             NearbyMediaDevicesManager.class);
@@ -124,9 +120,9 @@ public class MediaOutputControllerTest extends SysuiTestCase {
         when(mLocalBluetoothManager.getCachedDeviceManager()).thenReturn(
                 mCachedBluetoothDeviceManager);
 
-        mMediaOutputController = new MediaOutputController(mSpyContext, TEST_PACKAGE_NAME, false,
-                mMediaSessionManager, mLocalBluetoothManager, mShadeController, mStarter,
-                mNotifCollection, mUiEventLogger, mDialogLaunchAnimator,
+        mMediaOutputController = new MediaOutputController(mSpyContext, TEST_PACKAGE_NAME,
+                mMediaSessionManager, mLocalBluetoothManager, mStarter,
+                mNotifCollection, mDialogLaunchAnimator,
                 Optional.of(mNearbyMediaDevicesManager));
         mLocalMediaManager = spy(mMediaOutputController.mLocalMediaManager);
         mMediaOutputController.mLocalMediaManager = mLocalMediaManager;
@@ -176,9 +172,9 @@ public class MediaOutputControllerTest extends SysuiTestCase {
 
     @Test
     public void start_withoutPackageName_verifyMediaControllerInit() {
-        mMediaOutputController = new MediaOutputController(mSpyContext, null, false,
-                mMediaSessionManager, mLocalBluetoothManager, mShadeController, mStarter,
-                mNotifCollection, mUiEventLogger, mDialogLaunchAnimator,
+        mMediaOutputController = new MediaOutputController(mSpyContext, null,
+                mMediaSessionManager, mLocalBluetoothManager, mStarter,
+                mNotifCollection, mDialogLaunchAnimator,
                 Optional.of(mNearbyMediaDevicesManager));
 
         mMediaOutputController.start(mCb);
@@ -205,9 +201,9 @@ public class MediaOutputControllerTest extends SysuiTestCase {
 
     @Test
     public void stop_withoutPackageName_verifyMediaControllerDeinit() {
-        mMediaOutputController = new MediaOutputController(mSpyContext, null, false,
-                mMediaSessionManager, mLocalBluetoothManager, mShadeController, mStarter,
-                mNotifCollection, mUiEventLogger, mDialogLaunchAnimator,
+        mMediaOutputController = new MediaOutputController(mSpyContext, null,
+                mMediaSessionManager, mLocalBluetoothManager, mStarter,
+                mNotifCollection, mDialogLaunchAnimator,
                 Optional.of(mNearbyMediaDevicesManager));
 
         mMediaOutputController.start(mCb);
@@ -510,9 +506,9 @@ public class MediaOutputControllerTest extends SysuiTestCase {
 
     @Test
     public void getNotificationLargeIcon_withoutPackageName_returnsNull() {
-        mMediaOutputController = new MediaOutputController(mSpyContext, null, false,
-                mMediaSessionManager, mLocalBluetoothManager, mShadeController, mStarter,
-                mNotifCollection, mUiEventLogger, mDialogLaunchAnimator,
+        mMediaOutputController = new MediaOutputController(mSpyContext, null,
+                mMediaSessionManager, mLocalBluetoothManager, mStarter,
+                mNotifCollection, mDialogLaunchAnimator,
                 Optional.of(mNearbyMediaDevicesManager));
 
         assertThat(mMediaOutputController.getNotificationIcon()).isNull();
