@@ -74,7 +74,7 @@ public class PipBoundsAlgorithm {
     /**
      * TODO: move the resources to SysUI package.
      */
-    protected void reloadResources(Context context) {
+    private void reloadResources(Context context) {
         final Resources res = context.getResources();
         mDefaultAspectRatio = res.getFloat(
                 R.dimen.config_pictureInPictureDefaultAspectRatio);
