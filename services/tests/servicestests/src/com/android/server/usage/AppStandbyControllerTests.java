@@ -489,6 +489,7 @@ public class AppStandbyControllerTests {
 
     @Before
     public void setUp() throws Exception {
+        LocalServices.removeServiceForTest(UsageStatsManagerInternal.class);
         LocalServices.addService(
                 UsageStatsManagerInternal.class, mock(UsageStatsManagerInternal.class));
         MyContextWrapper myContext = new MyContextWrapper(InstrumentationRegistry.getContext());
