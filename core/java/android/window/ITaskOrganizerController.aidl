@@ -52,7 +52,7 @@ interface ITaskOrganizerController {
     /** Gets all root tasks on a display (ordered from top-to-bottom) */
     List<ActivityManager.RunningTaskInfo> getRootTasks(int displayId, in int[] activityTypes);
 
-    /** Get the root task which contains the current ime target */
+    /** Get the {@link WindowContainerToken} of the task which contains the current ime target */
     WindowContainerToken getImeTarget(int display);
 
     /**
