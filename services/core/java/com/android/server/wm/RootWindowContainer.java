@@ -149,6 +149,7 @@ import com.android.server.LocalServices;
 import com.android.server.am.ActivityManagerService;
 import com.android.server.am.AppTimeTracker;
 import com.android.server.am.UserState;
+import com.android.server.policy.PermissionPolicyInternal;
 import com.android.server.policy.WindowManagerPolicy;
 
 import java.io.FileDescriptor;
@@ -2727,9 +2728,9 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         return false;
     }
 
-    Task getLaunchRootTask(@Nullable ActivityRecord r, @Nullable ActivityOptions options,
+    Task getOrCreateRootTask(@Nullable ActivityRecord r, @Nullable ActivityOptions options,
             @Nullable Task candidateTask, boolean onTop) {
-        return getLaunchRootTask(r, options, candidateTask, null /* sourceTask */, onTop,
+        return getOrCreateRootTask(r, options, candidateTask, null /* sourceTask */, onTop,
                 null /* launchParams */, 0 /* launchFlags */);
     }
 
@@ -2744,9 +2745,9 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
      * @param launchFlags    The launch flags for this launch.
      * @param realCallingPid The pid from {@link ActivityStarter#setRealCallingPid}
      * @param realCallingUid The uid from {@link ActivityStarter#setRealCallingUid}
-     * @return The root task to use for the launch or INVALID_TASK_ID.
+     * @return The root task to use for the launch.
      */
-    Task getLaunchRootTask(@Nullable ActivityRecord r,
+    Task getOrCreateRootTask(@Nullable ActivityRecord r,
             @Nullable ActivityOptions options, @Nullable Task candidateTask,
             @Nullable Task sourceTask, boolean onTop,
             @Nullable LaunchParamsController.LaunchParams launchParams, int launchFlags) {
@@ -3235,12 +3236,12 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             if (aOptions != null) {
                 // Resolve the root task the task should be placed in now based on options
                 // and reparent if needed.
-                final Task launchRootTask =
-                        getLaunchRootTask(null, aOptions, task, onTop);
-                if (launchRootTask != null && task.getRootTask() != launchRootTask) {
+                final Task targetRootTask =
+                        getOrCreateRootTask(null, aOptions, task, onTop);
+                if (targetRootTask != null && task.getRootTask() != targetRootTask) {
                     final int reparentMode = onTop
                             ? REPARENT_MOVE_ROOT_TASK_TO_FRONT : REPARENT_LEAVE_ROOT_TASK_IN_PLACE;
-                    task.reparent(launchRootTask, onTop, reparentMode, ANIMATE, DEFER_RESUME,
+                    task.reparent(targetRootTask, onTop, reparentMode, ANIMATE, DEFER_RESUME,
                             "anyTaskForId");
                 }
             }
@@ -3329,6 +3330,36 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             }
         }
         mService.startLaunchPowerMode(reason);
+    }
+
+    /**
+     * Iterate over all task fragments, to see if there exists one that meets the
+     * PermissionPolicyService's criteria to show a permission dialog.
+     */
+    public int getTaskToShowPermissionDialogOn(String pkgName, int uid) {
+        PermissionPolicyInternal pPi = mService.getPermissionPolicyInternal();
+        if (pPi == null) {
+            return INVALID_TASK_ID;
+        }
+
+        final int[] validTaskId = {INVALID_TASK_ID};
+        forAllLeafTaskFragments(fragment -> {
+            ActivityRecord record = fragment.getActivity((r) -> {
+                // skip hidden (or about to hide) apps, or the permission dialog
+                return r.canBeTopRunning() && r.isVisibleRequested()
+                        && !pPi.isIntentToPermissionDialog(r.intent);
+            });
+            if (record != null && record.isUid(uid)
+                    && Objects.equals(pkgName, record.packageName)
+                    && pPi.shouldShowNotificationDialogForTask(record.getTask().getTaskInfo(),
+                    pkgName, record.intent)) {
+                validTaskId[0] = record.getTask().mTaskId;
+                return true;
+            }
+            return false;
+        });
+
+        return validTaskId[0];
     }
 
     /**

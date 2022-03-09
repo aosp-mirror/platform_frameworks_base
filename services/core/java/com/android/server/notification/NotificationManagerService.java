@@ -1623,18 +1623,6 @@ public class NotificationManagerService extends SystemService {
         }
     };
 
-    @VisibleForTesting
-    final IAppOpsCallback mAppOpsCallback = new IAppOpsCallback.Stub() {
-        @Override public void opChanged(int op, int uid, String packageName) {
-            if (mEnableAppSettingMigration) {
-                int opValue = mAppOps.checkOpNoThrow(
-                        AppOpsManager.OP_POST_NOTIFICATION, uid, packageName);
-                boolean blocked = op != MODE_ALLOWED;
-                sendAppBlockStateChangedBroadcast(packageName, uid, blocked);
-            }
-        }
-    };
-
     private final BroadcastReceiver mPackageIntentReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -2133,12 +2121,6 @@ public class NotificationManagerService extends SystemService {
         mUsageStatsManagerInternal = usageStatsManagerInternal;
         mAppOps = appOps;
         mAppOpsService = iAppOps;
-        try {
-            mAppOpsService.startWatchingMode(
-                    AppOpsManager.OP_POST_NOTIFICATION, null, mAppOpsCallback);
-        } catch (RemoteException e) {
-            Slog.e(TAG, "Could not register OP_POST_NOTIFICATION listener");
-        }
         mAppUsageStats = appUsageStats;
         mAlarmManager = (AlarmManager) getContext().getSystemService(Context.ALARM_SERVICE);
         mCompanionManager = companionManager;
@@ -3409,6 +3391,7 @@ public class NotificationManagerService extends SystemService {
                 }
                 mPermissionHelper.setNotificationPermission(
                         pkg, UserHandle.getUserId(uid), enabled, true);
+                sendAppBlockStateChangedBroadcast(pkg, uid, !enabled);
             } else {
                 synchronized (mNotificationLock) {
                     boolean wasEnabled = mPreferencesHelper.getImportance(pkg, uid)
@@ -3746,6 +3729,10 @@ public class NotificationManagerService extends SystemService {
                     if (!hadChannel && hasChannel && !hasRequestedNotificationPermission
                             && startingTaskId != ActivityTaskManager.INVALID_TASK_ID) {
                         hasRequestedNotificationPermission = true;
+                        if (mPermissionPolicyInternal == null) {
+                            mPermissionPolicyInternal =
+                                    LocalServices.getService(PermissionPolicyInternal.class);
+                        }
                         mHandler.post(new ShowNotificationPermissionPromptRunnable(pkg,
                                 UserHandle.getUserId(uid), startingTaskId,
                                 mPermissionPolicyInternal));
@@ -3764,19 +3751,7 @@ public class NotificationManagerService extends SystemService {
             try {
                 int uid = mPackageManager.getPackageUid(pkg, 0,
                         UserHandle.getUserId(Binder.getCallingUid()));
-                List<ActivityManager.AppTask> tasks = mAtm.getAppTasks(pkg, uid);
-                for (int i = 0; i < tasks.size(); i++) {
-                    ActivityManager.RecentTaskInfo task = tasks.get(i).getTaskInfo();
-                    if (mPermissionPolicyInternal == null) {
-                        mPermissionPolicyInternal =
-                                LocalServices.getService(PermissionPolicyInternal.class);
-                    }
-                    if (mPermissionPolicyInternal != null
-                            && mPermissionPolicyInternal.canShowPermissionPromptForTask(task)) {
-                        taskId = task.taskId;
-                        break;
-                    }
-                }
+                taskId = mAtm.getTaskToShowPermissionDialogOn(pkg, uid);
             } catch (RemoteException e) {
                 // Do nothing
             }
@@ -4068,13 +4043,12 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public ParceledListSlice<NotificationChannel> getNotificationChannelsBypassingDnd(
-                String pkg, int userId) {
+                String pkg, int uid) {
             checkCallerIsSystem();
-            if (!areNotificationsEnabledForPackage(pkg,
-                    mPackageManagerInternal.getPackageUid(pkg, 0, userId))) {
+            if (!areNotificationsEnabledForPackage(pkg, uid)) {
                 return ParceledListSlice.emptyList();
             }
-            return mPreferencesHelper.getNotificationChannelsBypassingDnd(pkg, userId);
+            return mPreferencesHelper.getNotificationChannelsBypassingDnd(pkg, uid);
         }
 
         @Override

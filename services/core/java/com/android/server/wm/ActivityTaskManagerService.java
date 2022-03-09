@@ -6736,5 +6736,13 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             }
             return tasks;
         }
+
+        @Override
+        public int getTaskToShowPermissionDialogOn(String pkgName, int uid) {
+            synchronized (ActivityTaskManagerService.this.mGlobalLock) {
+                return ActivityTaskManagerService.this.mRootWindowContainer
+                        .getTaskToShowPermissionDialogOn(pkgName, uid);
+            }
+        }
     }
 }

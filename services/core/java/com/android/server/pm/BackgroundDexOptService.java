@@ -557,7 +557,7 @@ public final class BackgroundDexOptService {
 
     /** Gets the size of a package. */
     private long getPackageSize(PackageManagerService pm, String pkg) {
-        PackageInfo info = pm.getPackageInfo(pkg, 0, UserHandle.USER_SYSTEM);
+        PackageInfo info = pm.snapshotComputer().getPackageInfo(pkg, 0, UserHandle.USER_SYSTEM);
         long size = 0;
         if (info != null && info.applicationInfo != null) {
             File path = Paths.get(info.applicationInfo.sourceDir).toFile();

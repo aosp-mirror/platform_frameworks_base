@@ -122,7 +122,7 @@ public class PackageInfoUtils {
         info.isStub = pkg.isStub();
         info.coreApp = pkg.isCoreApp();
 
-        if (!pkgSetting.hasSharedUser()) {
+        if (pkgSetting != null && !pkgSetting.hasSharedUser()) {
             // It is possible that this shared UID app has left
             info.sharedUserId = null;
             info.sharedUserLabel = 0;

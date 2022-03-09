@@ -18,7 +18,10 @@ package com.android.systemui.qs
 
 import android.app.IActivityManager
 import android.app.IForegroundServiceObserver
+import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import android.os.IBinder
@@ -42,6 +45,7 @@ import com.android.internal.config.sysui.SystemUiDeviceConfigFlags.TASK_MANAGER_
 import com.android.systemui.Dumpable
 import com.android.systemui.R
 import com.android.systemui.animation.DialogLaunchAnimator
+import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
@@ -67,6 +71,7 @@ class FgsManagerController @Inject constructor(
     private val packageManager: PackageManager,
     private val deviceConfigProxy: DeviceConfigProxy,
     private val dialogLaunchAnimator: DialogLaunchAnimator,
+    private val broadcastDispatcher: BroadcastDispatcher,
     private val dumpManager: DumpManager
 ) : IForegroundServiceObserver.Stub(), Dumpable {
 
@@ -124,6 +129,18 @@ class FgsManagerController @Inject constructor(
                     .getBoolean(NAMESPACE_SYSTEMUI, TASK_MANAGER_ENABLED, true)
 
             dumpManager.registerDumpable(this)
+
+            broadcastDispatcher.registerReceiver(
+                    object : BroadcastReceiver() {
+                        override fun onReceive(context: Context, intent: Intent) {
+                            if (intent.action == Intent.ACTION_SHOW_FOREGROUND_SERVICE_MANAGER) {
+                                showDialog(null)
+                            }
+                        }
+                    },
+                    IntentFilter(Intent.ACTION_SHOW_FOREGROUND_SERVICE_MANAGER),
+                    executor = mainExecutor,
+                    flags = Context.RECEIVER_NOT_EXPORTED)
 
             initialized = true
         }

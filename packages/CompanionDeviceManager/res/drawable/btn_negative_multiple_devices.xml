@@ -1,6 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?>
 <!--
-  ~ Copyright (C) 2021 The Android Open Source Project
+  ~ Copyright (C) 2022 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -15,14 +14,12 @@
   ~ limitations under the License.
   -->
 
-<vector xmlns:android="http://schemas.android.com/apk/res/android"
-        android:width="48dp"
-        android:height="48dp"
-        android:viewportWidth="100"
-        android:viewportHeight="100">
-
-    <path
-        android:fillColor="@color/kg_user_switcher_avatar_background"
-        android:pathData="M50,50m-50,0a50,50 0,1 1,100 0a50,50 0,1 1,-100 0"/>
-
-</vector>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+       android:shape="rectangle">
+    <solid android:color="@android:color/transparent" />
+    <corners android:topLeftRadius="16dp" android:topRightRadius="16dp"
+             android:bottomLeftRadius="16dp" android:bottomRightRadius="16dp"/>
+    <stroke
+        android:width="2dp"
+        android:color="@android:color/system_accent1_600" />
+</shape>

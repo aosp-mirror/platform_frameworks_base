@@ -540,7 +540,7 @@ public class KeyguardUserSwitcherController extends ViewController<KeyguardUserS
             }
             drawable.setTint(mResources.getColor(iconColorRes, mContext.getTheme()));
 
-            Drawable bg = mContext.getDrawable(R.drawable.kg_bg_avatar);
+            Drawable bg = mContext.getDrawable(R.drawable.user_avatar_bg);
             drawable = new LayerDrawable(new Drawable[]{bg, drawable});
             return drawable;
         }

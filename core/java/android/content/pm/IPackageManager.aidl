@@ -497,19 +497,8 @@ interface IPackageManager {
     void enterSafeMode();
     @UnsupportedAppUsage
     boolean isSafeMode();
-    void systemReady();
     @UnsupportedAppUsage
     boolean hasSystemUidErrors();
-
-    /**
-     * Ask the package manager to fstrim the disk if needed.
-     */
-    void performFstrimIfNeeded();
-
-    /**
-     * Ask the package manager to update packages if needed.
-     */
-    void updatePackagesIfNeeded();
 
     /**
      * Notify the package manager that a package is going to be used and why.

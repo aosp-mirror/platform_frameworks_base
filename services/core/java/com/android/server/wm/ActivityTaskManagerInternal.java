@@ -680,4 +680,15 @@ public abstract class ActivityTaskManagerInternal {
 
     /** Get the app tasks for a package */
     public abstract List<ActivityManager.AppTask> getAppTasks(String pkgName, int uid);
+
+    /**
+     * Determine if there exists a task which meets the criteria set by the PermissionPolicyService
+     * to show a system-owned permission dialog over, for a given package
+     * @see PermissionPolicyInternal.shouldShowNotificationDialogForTask
+     *
+     * @param pkgName The package whose activity must be top
+     * @param uid The uid that must have a top activity
+     * @return a task ID if a valid task ID is found. Otherwise, return INVALID_TASK_ID
+     */
+    public abstract int getTaskToShowPermissionDialogOn(String pkgName, int uid);
 }

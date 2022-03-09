@@ -100,7 +100,7 @@ public class TransitionAnimation {
 
     // TODO (b/215515255): remove once we full migrate to shell transitions
     private static final boolean SHELL_TRANSITIONS_ENABLED =
-            SystemProperties.getBoolean("persist.debug.shell_transit", false);
+            SystemProperties.getBoolean("persist.wm.debug.shell_transit", false);
 
     private final Context mContext;
     private final String mTag;
