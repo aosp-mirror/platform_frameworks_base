@@ -16,6 +16,7 @@
 
 package com.android.server.accessibility;
 
+import android.accessibilityservice.AccessibilityTrace;
 import android.annotation.NonNull;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -56,6 +57,7 @@ public class AutoclickController extends BaseEventStreamTransformation {
 
     private static final String LOG_TAG = AutoclickController.class.getSimpleName();
 
+    private final AccessibilityTraceManager mTrace;
     private final Context mContext;
     private final int mUserId;
 
@@ -63,13 +65,18 @@ public class AutoclickController extends BaseEventStreamTransformation {
     private ClickScheduler mClickScheduler;
     private ClickDelayObserver mClickDelayObserver;
 
-    public AutoclickController(Context context, int userId) {
+    public AutoclickController(Context context, int userId, AccessibilityTraceManager trace) {
+        mTrace = trace;
         mContext = context;
         mUserId = userId;
     }
 
     @Override
     public void onMotionEvent(MotionEvent event, MotionEvent rawEvent, int policyFlags) {
+        if (mTrace.isA11yTracingEnabledForTypes(AccessibilityTrace.FLAGS_INPUT_FILTER)) {
+            mTrace.logTrace(LOG_TAG + ".onMotionEvent", AccessibilityTrace.FLAGS_INPUT_FILTER,
+                    "event=" + event + ";rawEvent=" + rawEvent + ";policyFlags=" + policyFlags);
+        }
         if (event.isFromSource(InputDevice.SOURCE_MOUSE)) {
             if (mClickScheduler == null) {
                 Handler handler = new Handler(mContext.getMainLooper());
@@ -89,6 +96,10 @@ public class AutoclickController extends BaseEventStreamTransformation {
 
     @Override
     public void onKeyEvent(KeyEvent event, int policyFlags) {
+        if (mTrace.isA11yTracingEnabledForTypes(AccessibilityTrace.FLAGS_INPUT_FILTER)) {
+            mTrace.logTrace(LOG_TAG + ".onKeyEvent", AccessibilityTrace.FLAGS_INPUT_FILTER,
+                    "event=" + event + ";policyFlags=" + policyFlags);
+        }
         if (mClickScheduler != null) {
             if (KeyEvent.isModifierKey(event.getKeyCode())) {
                 mClickScheduler.updateMetaState(event.getMetaState());

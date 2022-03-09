@@ -17,7 +17,7 @@
 package com.android.systemui.statusbar.notification.collection.inflation;
 
 import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.statusbar.FeatureFlags;
+import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.statusbar.notification.collection.GroupEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;

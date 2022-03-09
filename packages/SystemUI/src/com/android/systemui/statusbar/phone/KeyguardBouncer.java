@@ -21,6 +21,7 @@ import static com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
+import android.hardware.biometrics.BiometricSourceType;
 import android.os.Handler;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -30,6 +31,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowInsets;
 
+import com.android.internal.policy.SystemBarUtils;
 import com.android.keyguard.KeyguardHostViewController;
 import com.android.keyguard.KeyguardRootViewController;
 import com.android.keyguard.KeyguardSecurityModel;
@@ -44,6 +46,7 @@ import com.android.systemui.dagger.qualifiers.RootView;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.shared.system.SysUiStatsLog;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.util.ListenerSet;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -79,15 +82,22 @@ public class KeyguardBouncer {
                 public void onStrongAuthStateChanged(int userId) {
                     mBouncerPromptReason = mCallback.getBouncerPromptReason();
                 }
+
+                @Override
+                public void onLockedOutStateChanged(BiometricSourceType type) {
+                    if (type == BiometricSourceType.FINGERPRINT) {
+                        mBouncerPromptReason = mCallback.getBouncerPromptReason();
+                    }
+                }
             };
     private final Runnable mRemoveViewRunnable = this::removeView;
     private final KeyguardBypassController mKeyguardBypassController;
     private KeyguardHostViewController mKeyguardViewController;
-    private final List<KeyguardResetCallback> mResetCallbacks = new ArrayList<>();
+    private final ListenerSet<KeyguardResetCallback> mResetCallbacks = new ListenerSet<>();
     private final Runnable mResetRunnable = ()-> {
         if (mKeyguardViewController != null) {
             mKeyguardViewController.resetSecurityContainer();
-            for (KeyguardResetCallback callback : new ArrayList<>(mResetCallbacks)) {
+            for (KeyguardResetCallback callback : mResetCallbacks) {
                 callback.onKeyguardReset();
             }
         }
@@ -124,6 +134,19 @@ public class KeyguardBouncer {
         mKeyguardUpdateMonitor.registerCallback(mUpdateMonitorCallback);
         mKeyguardBypassController = keyguardBypassController;
         mExpansionCallbacks.add(expansionCallback);
+    }
+
+    /**
+     * Enable/disable only the back button
+     */
+    public void setBackButtonEnabled(boolean enabled) {
+        int vis = mContainer.getSystemUiVisibility();
+        if (enabled) {
+            vis &= ~View.STATUS_BAR_DISABLE_BACK;
+        } else {
+            vis |= View.STATUS_BAR_DISABLE_BACK;
+        }
+        mContainer.setSystemUiVisibility(vis);
     }
 
     public void show(boolean resetSecuritySelection) {
@@ -252,8 +275,6 @@ public class KeyguardBouncer {
                 mKeyguardViewController.resetSecurityContainer();
                 showPromptReason(mBouncerPromptReason);
             }
-            SysUiStatsLog.write(SysUiStatsLog.KEYGUARD_BOUNCER_STATE_CHANGED,
-                    SysUiStatsLog.KEYGUARD_BOUNCER_STATE_CHANGED__STATE__SHOWN);
         }
     };
 
@@ -456,8 +477,7 @@ public class KeyguardBouncer {
         mKeyguardViewController.init();
 
         mContainer.addView(mRoot, mContainer.getChildCount());
-        mStatusBarHeight = mRoot.getResources().getDimensionPixelOffset(
-                com.android.systemui.R.dimen.status_bar_height);
+        mStatusBarHeight = SystemBarUtils.getStatusBarHeight(mContext);
         setVisibility(View.INVISIBLE);
 
         final WindowInsets rootInsets = mRoot.getRootWindowInsets();
@@ -591,7 +611,7 @@ public class KeyguardBouncer {
     }
 
     public void addKeyguardResetCallback(KeyguardResetCallback callback) {
-        mResetCallbacks.add(callback);
+        mResetCallbacks.addIfAbsent(callback);
     }
 
     public void removeKeyguardResetCallback(KeyguardResetCallback callback) {

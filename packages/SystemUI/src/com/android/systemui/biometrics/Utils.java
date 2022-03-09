@@ -31,6 +31,7 @@ import android.hardware.biometrics.SensorPropertiesInternal;
 import android.os.UserManager;
 import android.util.DisplayMetrics;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 
@@ -46,17 +47,19 @@ public class Utils {
     public static final int CREDENTIAL_PATTERN = 2;
     public static final int CREDENTIAL_PASSWORD = 3;
 
+    /** Base set of layout flags for fingerprint overlay widgets. */
+    public static final int FINGERPRINT_OVERLAY_LAYOUT_PARAM_FLAGS =
+            WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
+                | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+                | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
+
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({CREDENTIAL_PIN, CREDENTIAL_PATTERN, CREDENTIAL_PASSWORD})
     @interface CredentialType {}
 
     static float dpToPixels(Context context, float dp) {
         return dp * ((float) context.getResources().getDisplayMetrics().densityDpi
-                / DisplayMetrics.DENSITY_DEFAULT);
-    }
-
-    static float pixelsToDp(Context context, float pixels) {
-        return pixels / ((float) context.getResources().getDisplayMetrics().densityDpi
                 / DisplayMetrics.DENSITY_DEFAULT);
     }
 

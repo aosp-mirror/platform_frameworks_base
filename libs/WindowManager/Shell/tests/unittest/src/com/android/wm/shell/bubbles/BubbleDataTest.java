@@ -39,6 +39,7 @@ import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
+import android.util.Log;
 import android.util.Pair;
 import android.view.WindowManager;
 
@@ -131,7 +132,7 @@ public class BubbleDataTest extends ShellTestCase {
 
         NotificationListenerService.Ranking ranking =
                 mock(NotificationListenerService.Ranking.class);
-        when(ranking.visuallyInterruptive()).thenReturn(true);
+        when(ranking.isTextChanged()).thenReturn(true);
         mEntryInterruptive = createBubbleEntry(1, "interruptive", "package.d", ranking);
         mBubbleInterruptive = new Bubble(mEntryInterruptive, mSuppressionListener, null,
                 mMainExecutor);
@@ -793,7 +794,7 @@ public class BubbleDataTest extends ShellTestCase {
     }
 
     @Test
-    public void test_expanded_removeLastBubble_collapsesStack() {
+    public void test_expanded_removeLastBubble_showsOverflowIfNotEmpty() {
         // Setup
         sendUpdatedEntryAtTime(mEntryA1, 1000);
         changeExpandedStateAtTime(true, 2000);
@@ -802,6 +803,21 @@ public class BubbleDataTest extends ShellTestCase {
         // Test
         mBubbleData.dismissBubbleWithKey(mEntryA1.getKey(), Bubbles.DISMISS_USER_GESTURE);
         verifyUpdateReceived();
+        assertThat(mBubbleData.getOverflowBubbles().size()).isGreaterThan(0);
+        assertSelectionChangedTo(mBubbleData.getOverflow());
+    }
+
+    @Test
+    public void test_expanded_removeLastBubble_collapsesIfOverflowEmpty() {
+        // Setup
+        sendUpdatedEntryAtTime(mEntryA1, 1000);
+        changeExpandedStateAtTime(true, 2000);
+        mBubbleData.setListener(mListener);
+
+        // Test
+        mBubbleData.dismissBubbleWithKey(mEntryA1.getKey(), Bubbles.DISMISS_NO_BUBBLE_UP);
+        verifyUpdateReceived();
+        assertThat(mBubbleData.getOverflowBubbles()).isEmpty();
         assertExpandedChangedTo(false);
     }
 
@@ -869,6 +885,60 @@ public class BubbleDataTest extends ShellTestCase {
         assertNotNull(mBubbleData.getOverflowBubbleWithKey(mBubbleA2.getKey()));
     }
 
+    /**
+     * Verifies that after the stack is collapsed with the overflow selected, it will select
+     * the top bubble upon next expansion.
+     */
+    @Test
+    public void test_collapseWithOverflowSelected_nextExpansion() {
+        sendUpdatedEntryAtTime(mEntryA1, 1000);
+        sendUpdatedEntryAtTime(mEntryA2, 2000);
+        mBubbleData.setExpanded(true);
+
+        mBubbleData.setListener(mListener);
+
+        // Select the overflow
+        mBubbleData.setShowingOverflow(true);
+        mBubbleData.setSelectedBubble(mBubbleData.getOverflow());
+        verifyUpdateReceived();
+        assertSelectionChangedTo(mBubbleData.getOverflow());
+
+        // Collapse
+        mBubbleData.setExpanded(false);
+        verifyUpdateReceived();
+        assertSelectionNotChanged();
+
+        // Expand (here we should select the new bubble)
+        mBubbleData.setExpanded(true);
+        verifyUpdateReceived();
+        assertSelectionChangedTo(mBubbleA2);
+    }
+
+    /**
+      * - have a maxed out bubble stack & all of the bubbles have been recently accessed
+      * - bubble a notification that was posted before any of those bubbles were accessed
+      * => that bubble should be added
+     *
+      */
+    @Test
+    public void test_addOldNotifWithNewerBubbles() {
+        sendUpdatedEntryAtTime(mEntryA1, 2000);
+        sendUpdatedEntryAtTime(mEntryA2, 3000);
+        sendUpdatedEntryAtTime(mEntryA3, 4000);
+        sendUpdatedEntryAtTime(mEntryB1, 5000);
+        sendUpdatedEntryAtTime(mEntryB2, 6000);
+
+        mBubbleData.setListener(mListener);
+        sendUpdatedEntryAtTime(mEntryB3, 1000 /* postTime */, 7000 /* currentTime */);
+        verifyUpdateReceived();
+
+        // B3 is in the stack
+        assertThat(mBubbleData.getBubbleInStackWithKey(mBubbleB3.getKey())).isNotNull();
+        // A1 is the oldest so it's in the overflow
+        assertThat(mBubbleData.getOverflowBubbleWithKey(mEntryA1.getKey())).isNotNull();
+        assertOrderChangedTo(mBubbleB3, mBubbleB2, mBubbleB1, mBubbleA3, mBubbleA2);
+    }
+
     private void verifyUpdateReceived() {
         verify(mListener).applyUpdate(mUpdateCaptor.capture());
         reset(mListener);
@@ -902,7 +972,7 @@ public class BubbleDataTest extends ShellTestCase {
         assertWithMessage("selectionChanged").that(update.selectionChanged).isFalse();
     }
 
-    private void assertSelectionChangedTo(Bubble bubble) {
+    private void assertSelectionChangedTo(BubbleViewProvider bubble) {
         BubbleData.Update update = mUpdateCaptor.getValue();
         assertWithMessage("selectionChanged").that(update.selectionChanged).isTrue();
         assertWithMessage("selectedBubble").that(update.selectedBubble).isEqualTo(bubble);
@@ -924,7 +994,6 @@ public class BubbleDataTest extends ShellTestCase {
         BubbleData.Update update = mUpdateCaptor.getValue();
         assertThat(update.overflowBubbles).isEqualTo(bubbles);
     }
-
 
     private BubbleEntry createBubbleEntry(int userId, String notifKey, String packageName,
             NotificationListenerService.Ranking ranking) {
@@ -971,15 +1040,21 @@ public class BubbleDataTest extends ShellTestCase {
     }
 
     private void sendUpdatedEntryAtTime(BubbleEntry entry, long postTime) {
-        sendUpdatedEntryAtTime(entry, postTime, true /* visuallyInterruptive */);
+        setCurrentTime(postTime);
+        sendUpdatedEntryAtTime(entry, postTime, true /* isTextChanged */);
+    }
+
+    private void sendUpdatedEntryAtTime(BubbleEntry entry, long postTime, long currentTime) {
+        setCurrentTime(currentTime);
+        sendUpdatedEntryAtTime(entry, postTime, true /* isTextChanged */);
     }
 
     private void sendUpdatedEntryAtTime(BubbleEntry entry, long postTime,
-            boolean visuallyInterruptive) {
+            boolean textChanged) {
         setPostTime(entry, postTime);
         // BubbleController calls this:
         Bubble b = mBubbleData.getOrCreateBubble(entry, null /* persistedBubble */);
-        b.setVisuallyInterruptiveForTest(visuallyInterruptive);
+        b.setTextChangedForTest(textChanged);
         // And then this
         mBubbleData.notificationEntryUpdated(b, false /* suppressFlyout*/,
                 true /* showInShade */);

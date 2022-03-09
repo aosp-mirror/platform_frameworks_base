@@ -23,9 +23,9 @@ import android.content.pm.PackageManager;
 import android.os.RemoteException;
 import android.service.notification.StatusBarNotification;
 
-import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.collection.coordinator.dagger.CoordinatorScope;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 
@@ -36,7 +36,7 @@ import javax.inject.Inject;
  * Special notifications with extra permissions and tags won't be filtered out even when the
  * device is unprovisioned.
  */
-@SysUISingleton
+@CoordinatorScope
 public class DeviceProvisionedCoordinator implements Coordinator {
     private static final String TAG = "DeviceProvisionedCoordinator";
 

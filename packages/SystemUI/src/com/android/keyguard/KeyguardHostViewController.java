@@ -320,6 +320,10 @@ public class KeyguardHostViewController extends ViewController<KeyguardHostView>
         mKeyguardSecurityContainerController.showPrimarySecurityScreen(false);
     }
 
+    /**
+     * Fades and translates in/out the security screen.
+     * @param fraction amount of the screen that should show.
+     */
     public void setExpansion(float fraction) {
         float alpha = MathUtils.map(KeyguardBouncer.ALPHA_EXPANSION_THRESHOLD, 1, 1, 0, fraction);
         mView.setAlpha(MathUtils.constrain(alpha, 0f, 1f));

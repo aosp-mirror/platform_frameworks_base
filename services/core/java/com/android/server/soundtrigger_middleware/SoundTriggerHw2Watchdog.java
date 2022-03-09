@@ -27,8 +27,6 @@ import android.os.SystemProperties;
 import android.util.Log;
 
 import java.util.Objects;
-import java.util.Timer;
-import java.util.TimerTask;
 
 /**
  * An {@link ISoundTriggerHw2} decorator that would enforce deadlines on all calls and reboot the
@@ -38,14 +36,12 @@ public class SoundTriggerHw2Watchdog implements ISoundTriggerHw2 {
     private static final long TIMEOUT_MS = 3000;
     private static final String TAG = "SoundTriggerHw2Watchdog";
 
-    private final @NonNull
-    ISoundTriggerHw2 mUnderlying;
-    private final @NonNull
-    Timer mTimer;
+    private final @NonNull ISoundTriggerHw2 mUnderlying;
+    private final @NonNull UptimeTimer mTimer;
 
     public SoundTriggerHw2Watchdog(@NonNull ISoundTriggerHw2 underlying) {
         mUnderlying = Objects.requireNonNull(underlying);
-        mTimer = new Timer("SoundTriggerHw2Watchdog");
+        mTimer = new UptimeTimer("SoundTriggerHw2Watchdog");
     }
 
     @Override
@@ -149,21 +145,16 @@ public class SoundTriggerHw2Watchdog implements ISoundTriggerHw2 {
     }
 
     private class Watchdog implements AutoCloseable {
-        private final @NonNull
-        TimerTask mTask;
+        private final @NonNull UptimeTimer.Task mTask;
         // This exception is used merely for capturing a stack trace at the time of creation.
         private final @NonNull
         Exception mException = new Exception();
 
         Watchdog() {
-            mTask = new TimerTask() {
-                @Override
-                public void run() {
-                    Log.e(TAG, "HAL deadline expired. Rebooting.", mException);
-                    rebootHal();
-                }
-            };
-            mTimer.schedule(mTask, TIMEOUT_MS);
+            mTask = mTimer.createTask(() -> {
+                Log.e(TAG, "HAL deadline expired. Rebooting.", mException);
+                rebootHal();
+            }, TIMEOUT_MS);
         }
 
         @Override

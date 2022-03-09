@@ -123,6 +123,17 @@ class DisplayDeviceRepository implements DisplayAdapter.Listener {
         return null;
     }
 
+    // String uniqueId -> DisplayDevice object with that given uniqueId
+    public DisplayDevice getByUniqueIdLocked(@NonNull String uniqueId) {
+        for (int i = mDisplayDevices.size() - 1; i >= 0; i--) {
+            final DisplayDevice displayDevice = mDisplayDevices.get(i);
+            if (displayDevice.getUniqueId().equals(uniqueId)) {
+                return displayDevice;
+            }
+        }
+        return null;
+    }
+
     private void handleDisplayDeviceAdded(DisplayDevice device) {
         synchronized (mSyncRoot) {
             DisplayDeviceInfo info = device.getDisplayDeviceInfoLocked();

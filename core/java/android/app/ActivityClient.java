@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -200,6 +201,19 @@ public class ActivityClient {
     public int getTaskForActivity(IBinder token, boolean onlyRoot) {
         try {
             return getActivityClientController().getTaskForActivity(token, onlyRoot);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the non-finishing activity token below in the same task if it belongs to the same
+     * process.
+     */
+    @Nullable
+    public IBinder getActivityTokenBelow(IBinder activityToken) {
+        try {
+            return getActivityClientController().getActivityTokenBelow(activityToken);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

@@ -24,7 +24,6 @@ import android.util.ArraySet;
 
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Consumer;
 
 /**
  * This class represents a page of a launcher page used by the wallpaper
@@ -82,11 +81,6 @@ public class EngineWindowPage {
     /** get areas of interest */
     public Set<RectF> getAreas() {
         return mCallbackAreas;
-    }
-
-    /** run operations on this page */
-    public synchronized void execSync(Consumer<EngineWindowPage> run) {
-        run.accept(this);
     }
 
     /** nullify the area color */

@@ -613,6 +613,36 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
     public static final int CONTENT_CHANGE_TYPE_STATE_DESCRIPTION = 0x00000040;
 
     /**
+     * Change type for {@link #TYPE_WINDOW_CONTENT_CHANGED} event:
+     * A drag has started while accessibility is enabled. This is either via an
+     * AccessibilityAction, or via touch events. This is sent from the source that initiated the
+     * drag.
+     *
+     * @see AccessibilityNodeInfo.AccessibilityAction#ACTION_DRAG_START
+     */
+    public static final int CONTENT_CHANGE_TYPE_DRAG_STARTED = 0x00000080;
+
+    /**
+     * Change type for {@link #TYPE_WINDOW_CONTENT_CHANGED} event:
+     * A drag in with accessibility enabled has ended. This means the content has been
+     * successfully dropped. This is sent from the target that accepted the dragged content.
+     *
+     * @see AccessibilityNodeInfo.AccessibilityAction#ACTION_DRAG_DROP
+     */
+    public static final int CONTENT_CHANGE_TYPE_DRAG_DROPPED = 0x00000100;
+
+    /**
+     * Change type for {@link #TYPE_WINDOW_CONTENT_CHANGED} event:
+     * A drag in with accessibility enabled has ended. This means the content has been
+     * unsuccessfully dropped, the user has canceled the action via an AccessibilityAction, or
+     * no drop has been detected within a timeout and the drag was automatically cancelled. This is
+     * sent from the source that initiated the drag.
+     *
+     * @see AccessibilityNodeInfo.AccessibilityAction#ACTION_DRAG_CANCEL
+     */
+    public static final int CONTENT_CHANGE_TYPE_DRAG_CANCELLED = 0x0000200;
+
+    /**
      * Change type for {@link #TYPE_WINDOWS_CHANGED} event:
      * The window was added.
      */
@@ -710,7 +740,10 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
                     CONTENT_CHANGE_TYPE_STATE_DESCRIPTION,
                     CONTENT_CHANGE_TYPE_PANE_TITLE,
                     CONTENT_CHANGE_TYPE_PANE_APPEARED,
-                    CONTENT_CHANGE_TYPE_PANE_DISAPPEARED
+                    CONTENT_CHANGE_TYPE_PANE_DISAPPEARED,
+                    CONTENT_CHANGE_TYPE_DRAG_STARTED,
+                    CONTENT_CHANGE_TYPE_DRAG_DROPPED,
+                    CONTENT_CHANGE_TYPE_DRAG_CANCELLED
             })
     public @interface ContentChangeTypes {}
 
@@ -959,6 +992,9 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
             case CONTENT_CHANGE_TYPE_PANE_APPEARED: return "CONTENT_CHANGE_TYPE_PANE_APPEARED";
             case CONTENT_CHANGE_TYPE_PANE_DISAPPEARED:
                 return "CONTENT_CHANGE_TYPE_PANE_DISAPPEARED";
+            case CONTENT_CHANGE_TYPE_DRAG_STARTED: return "CONTENT_CHANGE_TYPE_DRAG_STARTED";
+            case CONTENT_CHANGE_TYPE_DRAG_DROPPED: return "CONTENT_CHANGE_TYPE_DRAG_DROPPED";
+            case CONTENT_CHANGE_TYPE_DRAG_CANCELLED: return "CONTENT_CHANGE_TYPE_DRAG_CANCELLED";
             default: return Integer.toHexString(type);
         }
     }
@@ -1017,6 +1053,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
     /**
      * Sets the event type.
      *
+     * <b>Note: An event must represent a single event type.</b>
      * @param eventType The event type.
      *
      * @throws IllegalStateException If called from an AccessibilityService.

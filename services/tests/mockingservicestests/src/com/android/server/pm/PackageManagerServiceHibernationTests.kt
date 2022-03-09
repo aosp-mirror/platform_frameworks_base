@@ -16,8 +16,10 @@
 
 package com.android.server.pm
 
+import android.content.Context
 import android.os.Build
 import android.os.Handler
+import android.os.PowerManager
 import android.provider.DeviceConfig
 import android.provider.DeviceConfig.NAMESPACE_APP_HIBERNATION
 import android.testing.AndroidTestingRunner
@@ -27,6 +29,7 @@ import com.android.server.apphibernation.AppHibernationManagerInternal
 import com.android.server.apphibernation.AppHibernationService
 import com.android.server.extendedtestutils.wheneverStatic
 import com.android.server.testutils.whenever
+import org.junit.Assert
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -55,6 +58,8 @@ class PackageManagerServiceHibernationTests {
 
     @Mock
     lateinit var appHibernationManager: AppHibernationManagerInternal
+    @Mock
+    lateinit var powerManager: PowerManager
 
     @Before
     @Throws(Exception::class)
@@ -68,6 +73,24 @@ class PackageManagerServiceHibernationTests {
             .thenReturn(appHibernationManager)
         whenever(rule.mocks().injector.handler)
             .thenReturn(Handler(TestableLooper.get(this).looper))
+        val injector = object : PackageDexOptimizer.Injector {
+            override fun getAppHibernationManagerInternal(): AppHibernationManagerInternal {
+                return appHibernationManager
+            }
+
+            override fun getPowerManager(context: Context?): PowerManager {
+                return powerManager
+            }
+        }
+        val packageDexOptimizer = PackageDexOptimizer(
+            injector,
+            rule.mocks().installer,
+            rule.mocks().installLock,
+            rule.mocks().context,
+            "*dexopt*")
+        whenever(rule.mocks().injector.packageDexOptimizer)
+            .thenReturn(packageDexOptimizer)
+        whenever(appHibernationManager.isOatArtifactDeletionEnabled).thenReturn(true)
     }
 
     @Test
@@ -78,8 +101,11 @@ class PackageManagerServiceHibernationTests {
             rule.system().dataAppDirectory)
         val pm = createPackageManagerService()
         rule.system().validateFinalState()
-        val ps = pm.getPackageSetting(TEST_PACKAGE_NAME)
-        ps!!.setStopped(true, TEST_USER_ID)
+
+        TestableLooper.get(this).processAllMessages()
+
+        whenever(appHibernationManager.isHibernatingForUser(TEST_PACKAGE_NAME, TEST_USER_ID))
+            .thenReturn(true)
 
         pm.setPackageStoppedState(TEST_PACKAGE_NAME, false, TEST_USER_ID)
 
@@ -87,6 +113,31 @@ class PackageManagerServiceHibernationTests {
 
         verify(appHibernationManager).setHibernatingForUser(TEST_PACKAGE_NAME, TEST_USER_ID, false)
         verify(appHibernationManager).setHibernatingGlobally(TEST_PACKAGE_NAME, false)
+    }
+
+    @Test
+    fun testExitForceStop_nonExistingAppHibernationManager_doesNotThrowException() {
+        whenever(rule.mocks().injector.getLocalService(AppHibernationManagerInternal::class.java))
+            .thenReturn(null)
+
+        rule.system().stageScanExistingPackage(
+            TEST_PACKAGE_NAME,
+            1L,
+            rule.system().dataAppDirectory)
+        val pm = createPackageManagerService()
+        rule.system().validateFinalState()
+
+        TestableLooper.get(this).processAllMessages()
+
+        whenever(appHibernationManager.isHibernatingForUser(TEST_PACKAGE_NAME, TEST_USER_ID))
+            .thenReturn(true)
+
+        try {
+            pm.setPackageStoppedState(TEST_PACKAGE_NAME, false, TEST_USER_ID)
+            TestableLooper.get(this).processAllMessages()
+        } catch (e: Exception) {
+            Assert.fail("Method throws exception when AppHibernationManager is not ready.\n$e")
+        }
     }
 
     @Test

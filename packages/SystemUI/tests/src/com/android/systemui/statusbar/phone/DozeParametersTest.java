@@ -20,10 +20,9 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.when;
 
 import android.content.res.Resources;
@@ -34,12 +33,15 @@ import android.test.suitebuilder.annotation.SmallTest;
 
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.doze.AlwaysOnDisplayPolicy;
 import com.android.systemui.doze.DozeScreenState;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.statusbar.FeatureFlags;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.policy.BatteryController;
+import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.tuner.TunerService;
 
 import org.junit.Assert;
@@ -52,7 +54,6 @@ import org.mockito.MockitoAnnotations;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class DozeParametersTest extends SysuiTestCase {
-
     private DozeParameters mDozeParameters;
 
     @Mock Resources mResources;
@@ -64,10 +65,31 @@ public class DozeParametersTest extends SysuiTestCase {
     @Mock private FeatureFlags mFeatureFlags;
     @Mock private DumpManager mDumpManager;
     @Mock private UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
+    @Mock private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
+    @Mock private StatusBarStateController mStatusBarStateController;
+    @Mock private ConfigurationController mConfigurationController;
+
+    /**
+     * The current value of PowerManager's dozeAfterScreenOff property.
+     *
+     * This property controls whether System UI is controlling the screen off animation. If it's
+     * false (PowerManager should not doze after screen off) then System UI is controlling the
+     * animation. If true, we're not controlling it and PowerManager will doze immediately.
+     */
+    private boolean mPowerManagerDozeAfterScreenOff;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
+
+        // Save the current value set for dozeAfterScreenOff so we can make assertions. This method
+        // is only called if the value changes, which makes it difficult to check that it was set
+        // correctly in tests.
+        doAnswer(invocation -> {
+            mPowerManagerDozeAfterScreenOff = invocation.getArgument(0);
+            return mPowerManagerDozeAfterScreenOff;
+        }).when(mPowerManager).setDozeAfterScreenOff(anyBoolean());
+
         mDozeParameters = new DozeParameters(
             mResources,
             mAmbientDisplayConfiguration,
@@ -77,23 +99,30 @@ public class DozeParametersTest extends SysuiTestCase {
             mTunerService,
             mDumpManager,
             mFeatureFlags,
-            mUnlockedScreenOffAnimationController
+            mUnlockedScreenOffAnimationController,
+            mKeyguardUpdateMonitor,
+            mConfigurationController,
+            mStatusBarStateController
         );
-    }
-    @Test
-    public void testSetControlScreenOffAnimation_setsDozeAfterScreenOff_false() {
-        mDozeParameters.setControlScreenOffAnimation(true);
-        reset(mPowerManager);
-        mDozeParameters.setControlScreenOffAnimation(false);
-        verify(mPowerManager).setDozeAfterScreenOff(eq(true));
+
+        when(mFeatureFlags.useNewLockscreenAnimations()).thenReturn(true);
+
+        setAodEnabledForTest(true);
+        setShouldControlUnlockedScreenOffForTest(true);
+        setDisplayNeedsBlankingForTest(false);
     }
 
     @Test
-    public void testSetControlScreenOffAnimation_setsDozeAfterScreenOff_true() {
-        mDozeParameters.setControlScreenOffAnimation(false);
-        reset(mPowerManager);
+    public void testSetControlScreenOffAnimation_setsDozeAfterScreenOff_correctly() {
+        // If we want to control screen off, we do NOT want PowerManager to doze after screen off.
+        // Obviously.
         mDozeParameters.setControlScreenOffAnimation(true);
-        verify(mPowerManager).setDozeAfterScreenOff(eq(false));
+        assertFalse(mPowerManagerDozeAfterScreenOff);
+
+        // If we don't want to control screen off, PowerManager is free to doze after screen off if
+        // that's what'll make it happy.
+        mDozeParameters.setControlScreenOffAnimation(false);
+        assertTrue(mPowerManagerDozeAfterScreenOff);
     }
 
     @Test
@@ -122,37 +151,124 @@ public class DozeParametersTest extends SysuiTestCase {
         assertThat(mDozeParameters.getAlwaysOn()).isFalse();
     }
 
+    /**
+     * PowerManager.setDozeAfterScreenOff(true) means we are not controlling screen off, and calling
+     * it with false means we are. Confusing, but sure - make sure that we call PowerManager with
+     * the correct value depending on whether we want to control screen off.
+     */
     @Test
     public void testControlUnlockedScreenOffAnimation_dozeAfterScreenOff_false() {
-        when(mAmbientDisplayConfiguration.alwaysOnEnabled(anyInt())).thenReturn(true);
-        mDozeParameters.onTuningChanged(Settings.Secure.DOZE_ALWAYS_ON, "1");
-        when(mFeatureFlags.useNewLockscreenAnimations()).thenReturn(true);
-        when(mUnlockedScreenOffAnimationController.shouldPlayUnlockedScreenOffAnimation())
-                .thenReturn(true);
-        assertTrue(mDozeParameters.shouldControlUnlockedScreenOff());
+        // If AOD is disabled, we shouldn't want to control screen off. Also, let's double check
+        // that when that value is updated, we called through to PowerManager.
+        setAodEnabledForTest(false);
+        assertFalse(mDozeParameters.shouldControlScreenOff());
+        assertTrue(mPowerManagerDozeAfterScreenOff);
 
-        // Trigger the setter for the current value.
-        mDozeParameters.setControlScreenOffAnimation(mDozeParameters.shouldControlScreenOff());
-
-        // We should have asked power manager not to doze after screen off no matter what, since
-        // we're animating and controlling screen off.
-        verify(mPowerManager).setDozeAfterScreenOff(eq(false));
+        // And vice versa...
+        setAodEnabledForTest(true);
+        assertTrue(mDozeParameters.shouldControlScreenOff());
+        assertFalse(mPowerManagerDozeAfterScreenOff);
     }
 
     @Test
     public void testControlUnlockedScreenOffAnimationDisabled_dozeAfterScreenOff() {
-        when(mAmbientDisplayConfiguration.alwaysOnEnabled(anyInt())).thenReturn(true);
-        mDozeParameters.onTuningChanged(Settings.Secure.DOZE_ALWAYS_ON, "1");
+        setShouldControlUnlockedScreenOffForTest(true);
         when(mFeatureFlags.useNewLockscreenAnimations()).thenReturn(false);
 
         assertFalse(mDozeParameters.shouldControlUnlockedScreenOff());
 
         // Trigger the setter for the current value.
         mDozeParameters.setControlScreenOffAnimation(mDozeParameters.shouldControlScreenOff());
+        assertFalse(mDozeParameters.shouldControlScreenOff());
+    }
 
-        // We should have asked power manager to doze only if we're not controlling screen off
-        // normally.
-        verify(mPowerManager).setDozeAfterScreenOff(
-                eq(!mDozeParameters.shouldControlScreenOff()));
+    @Test
+    public void propagatesAnimateScreenOff_noAlwaysOn() {
+        setAodEnabledForTest(false);
+        setDisplayNeedsBlankingForTest(false);
+
+        mDozeParameters.mKeyguardVisibilityCallback.onKeyguardVisibilityChanged(false);
+        assertFalse(mDozeParameters.shouldControlScreenOff());
+    }
+
+    @Test
+    public void propagatesAnimateScreenOff_alwaysOn() {
+        setAodEnabledForTest(true);
+        setDisplayNeedsBlankingForTest(false);
+        setShouldControlUnlockedScreenOffForTest(false);
+
+        // Take over when the keyguard is visible.
+        mDozeParameters.mKeyguardVisibilityCallback.onKeyguardVisibilityChanged(true);
+        assertTrue(mDozeParameters.shouldControlScreenOff());
+
+        // Do not animate screen-off when keyguard isn't visible.
+        mDozeParameters.mKeyguardVisibilityCallback.onKeyguardVisibilityChanged(false);
+        assertFalse(mDozeParameters.shouldControlScreenOff());
+    }
+
+
+    @Test
+    public void neverAnimateScreenOff_whenNotSupported() {
+        setDisplayNeedsBlankingForTest(true);
+
+        // Never animate if display doesn't support it.
+        mDozeParameters.mKeyguardVisibilityCallback.onKeyguardVisibilityChanged(true);
+        assertFalse(mDozeParameters.shouldControlScreenOff());
+        mDozeParameters.mKeyguardVisibilityCallback.onKeyguardVisibilityChanged(false);
+        assertFalse(mDozeParameters.shouldControlScreenOff());
+    }
+
+
+    @Test
+    public void controlScreenOffTrueWhenKeyguardNotShowingAndControlUnlockedScreenOff() {
+        setShouldControlUnlockedScreenOffForTest(true);
+
+        // Tell doze that keyguard is not visible.
+        mDozeParameters.mKeyguardVisibilityCallback.onKeyguardVisibilityChanged(
+                false /* showing */);
+
+        // Since we're controlling the unlocked screen off animation, verify that we've asked to
+        // control the screen off animation despite being unlocked.
+        assertTrue(mDozeParameters.shouldControlScreenOff());
+    }
+
+
+    @Test
+    public void keyguardVisibility_changesControlScreenOffAnimation() {
+        setShouldControlUnlockedScreenOffForTest(false);
+
+        mDozeParameters.mKeyguardVisibilityCallback.onKeyguardVisibilityChanged(false);
+        assertFalse(mDozeParameters.shouldControlScreenOff());
+        mDozeParameters.mKeyguardVisibilityCallback.onKeyguardVisibilityChanged(true);
+        assertTrue(mDozeParameters.shouldControlScreenOff());
+    }
+
+    @Test
+    public void keyguardVisibility_changesControlScreenOffAnimation_respectsUnlockedScreenOff() {
+        setShouldControlUnlockedScreenOffForTest(true);
+
+        // Even if the keyguard is gone, we should control screen off if we can control unlocked
+        // screen off.
+        mDozeParameters.mKeyguardVisibilityCallback.onKeyguardVisibilityChanged(false);
+        assertTrue(mDozeParameters.shouldControlScreenOff());
+
+        mDozeParameters.mKeyguardVisibilityCallback.onKeyguardVisibilityChanged(true);
+        assertTrue(mDozeParameters.shouldControlScreenOff());
+    }
+
+    private void setDisplayNeedsBlankingForTest(boolean needsBlanking) {
+        when(mResources.getBoolean(
+                com.android.internal.R.bool.config_displayBlanksAfterDoze)).thenReturn(
+                        needsBlanking);
+    }
+
+    private void setAodEnabledForTest(boolean enabled) {
+        when(mAmbientDisplayConfiguration.alwaysOnEnabled(anyInt())).thenReturn(enabled);
+        mDozeParameters.onTuningChanged(Settings.Secure.DOZE_ALWAYS_ON, "");
+    }
+
+    private void setShouldControlUnlockedScreenOffForTest(boolean shouldControl) {
+        when(mUnlockedScreenOffAnimationController.shouldPlayUnlockedScreenOffAnimation())
+                .thenReturn(shouldControl);
     }
 }

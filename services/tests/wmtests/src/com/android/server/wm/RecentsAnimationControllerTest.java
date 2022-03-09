@@ -41,8 +41,8 @@ import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_RECENTS;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
@@ -124,7 +124,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         // Verify that the finish callback to reparent the leash is called
         verify(mFinishedCallback).onAnimationFinished(eq(ANIMATION_TYPE_RECENTS), eq(adapter));
         // Verify the animation canceled callback to the app was made
-        verify(mMockRunner).onAnimationCanceled(null /* taskSnapshot */);
+        verify(mMockRunner).onAnimationCanceled(null /* taskIds */, null /* taskSnapshots */);
         verifyNoMoreInteractionsExceptAsBinder(mMockRunner);
     }
 
@@ -207,7 +207,8 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         wallpaperWindowToken.cancelAnimation();
         assertTrue(mController.isAnimatingTask(activity.getTask()));
         assertFalse(mController.isAnimatingWallpaper(wallpaperWindowToken));
-        verify(mMockRunner, never()).onAnimationCanceled(null /* taskSnapshot */);
+        verify(mMockRunner, never()).onAnimationCanceled(null /* taskIds */,
+                null /* taskSnapshots */);
     }
 
     @Test
@@ -254,10 +255,10 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
 
         mController.setDeferredCancel(true /* deferred */, false /* screenshot */);
         mController.cancelAnimationWithScreenshot(false /* screenshot */);
-        verify(mMockRunner).onAnimationCanceled(null /* taskSnapshot */);
+        verify(mMockRunner).onAnimationCanceled(null /* taskIds */, null /* taskSnapshots */);
 
         // Simulate the app transition finishing
-        mController.mAppTransitionListener.onAppTransitionStartingLocked(false, 0, 0, 0);
+        mController.mAppTransitionListener.onAppTransitionStartingLocked(false, false, 0, 0, 0);
         verify(mAnimationCallbacks).onAnimationFinished(REORDER_KEEP_IN_PLACE, false);
     }
 
@@ -281,7 +282,8 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
                 anyInt(), eq(false) /* restoreFromDisk */, eq(false) /* isLowResolution */);
         mController.setDeferredCancel(true /* deferred */, true /* screenshot */);
         mController.cancelAnimationWithScreenshot(true /* screenshot */);
-        verify(mMockRunner).onAnimationCanceled(mMockTaskSnapshot /* taskSnapshot */);
+        verify(mMockRunner).onAnimationCanceled(any(int[].class) /* taskIds */,
+                any(TaskSnapshot[].class) /* taskSnapshots */);
 
         // Continue the animation (simulating a call to cleanupScreenshot())
         mController.continueDeferredCancelAnimation();
@@ -322,7 +324,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         doReturn(mMockTaskSnapshot).when(mWm.mTaskSnapshotController).getSnapshot(anyInt(),
                 anyInt(), eq(false) /* restoreFromDisk */, eq(false) /* isLowResolution */);
         mController.cancelAnimationWithScreenshot(true /* screenshot */);
-        verify(mMockRunner).onAnimationCanceled(any());
+        verify(mMockRunner).onAnimationCanceled(any(), any());
 
         // Simulate process crashing and ensure the animation is still canceled
         mController.binderDied();
@@ -436,6 +438,22 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         // The rotation transform should be preserved. In real case, it will be cleared by the next
         // move-to-top transition.
         assertTrue(activity.hasFixedRotationTransform());
+    }
+
+    @Test
+    public void testCheckRotationAfterCleanup() {
+        mWm.setRecentsAnimationController(mController);
+        spyOn(mDisplayContent.mFixedRotationTransitionListener);
+        doReturn(true).when(mDisplayContent.mFixedRotationTransitionListener)
+                .isTopFixedOrientationRecentsAnimating();
+        // Rotation update is skipped while the recents animation is running.
+        assertFalse(mDisplayContent.getDisplayRotation().updateOrientation(DisplayContentTests
+                .getRotatedOrientation(mDefaultDisplay), false /* forceUpdate */));
+        final int prevRotation = mDisplayContent.getRotation();
+        mWm.cleanupRecentsAnimation(REORDER_MOVE_TO_ORIGINAL_POSITION);
+        waitHandlerIdle(mWm.mH);
+        // The display should be updated to the changed orientation after the animation is finished.
+        assertNotEquals(mDisplayContent.getRotation(), prevRotation);
     }
 
     @Test
@@ -684,7 +702,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         mController.setWillFinishToHome(true);
         mController.cancelAnimationForDisplayChange();
 
-        verify(mMockRunner).onAnimationCanceled(any());
+        verify(mMockRunner).onAnimationCanceled(any(), any());
         verify(mAnimationCallbacks).onAnimationFinished(REORDER_MOVE_TO_TOP, false);
     }
 
@@ -699,7 +717,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         mController.setWillFinishToHome(false);
         mController.cancelAnimationForDisplayChange();
 
-        verify(mMockRunner).onAnimationCanceled(any());
+        verify(mMockRunner).onAnimationCanceled(any(), any());
         verify(mAnimationCallbacks).onAnimationFinished(REORDER_MOVE_TO_ORIGINAL_POSITION, false);
     }
 
@@ -719,7 +737,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         doReturn(mMockTaskSnapshot).when(mWm.mTaskSnapshotController).getSnapshot(anyInt(),
                 anyInt(), eq(false) /* restoreFromDisk */, eq(false) /* isLowResolution */);
         mController.cancelAnimationForHomeStart();
-        verify(mMockRunner).onAnimationCanceled(any());
+        verify(mMockRunner).onAnimationCanceled(any(), any());
 
         // Continue the animation (simulating a call to cleanupScreenshot())
         mController.continueDeferredCancelAnimation();

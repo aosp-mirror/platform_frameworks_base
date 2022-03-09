@@ -187,7 +187,7 @@ public class AppPredictionPerUserService extends
             @NonNull IPredictionCallback callback) {
         final AppPredictionSessionInfo sessionInfo = mSessionInfos.get(sessionId);
         if (sessionInfo == null) return;
-        final boolean serviceExists = resolveService(sessionId, false,
+        final boolean serviceExists = resolveService(sessionId, true,
                 sessionInfo.mUsesPeopleService,
                 s -> s.registerPredictionUpdates(sessionId, callback));
         if (serviceExists) {

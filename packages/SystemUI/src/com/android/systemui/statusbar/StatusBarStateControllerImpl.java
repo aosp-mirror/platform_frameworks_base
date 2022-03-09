@@ -16,6 +16,10 @@
 
 package com.android.systemui.statusbar;
 
+import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
+import static android.view.InsetsState.ITYPE_STATUS_BAR;
+import static android.view.WindowInsetsController.APPEARANCE_LOW_PROFILE_BARS;
+
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_LOCKSCREEN_TRANSITION_FROM_AOD;
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_LOCKSCREEN_TRANSITION_TO_AOD;
 
@@ -23,10 +27,16 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
+import android.os.SystemProperties;
 import android.text.format.DateFormat;
 import android.util.FloatProperty;
 import android.util.Log;
+import android.view.InsetsFlags;
+import android.view.InsetsVisibilities;
 import android.view.View;
+import android.view.ViewDebug;
+import android.view.WindowInsetsController.Appearance;
+import android.view.WindowInsetsController.Behavior;
 import android.view.animation.Interpolator;
 
 import androidx.annotation.NonNull;
@@ -38,6 +48,7 @@ import com.android.systemui.DejankUtils;
 import com.android.systemui.Dumpable;
 import com.android.systemui.animation.Interpolators;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.statusbar.policy.CallbackController;
@@ -53,9 +64,14 @@ import javax.inject.Inject;
  * Tracks and reports on {@link StatusBarState}.
  */
 @SysUISingleton
-public class StatusBarStateControllerImpl implements SysuiStatusBarStateController,
-        CallbackController<StateListener>, Dumpable {
+public class StatusBarStateControllerImpl implements
+        SysuiStatusBarStateController,
+        CallbackController<StateListener>,
+        Dumpable {
     private static final String TAG = "SbStateController";
+    private static final boolean DEBUG_IMMERSIVE_APPS =
+            SystemProperties.getBoolean("persist.debug.immersive_apps", false);
+
     // Must be a power of 2
     private static final int HISTORY_SIZE = 32;
 
@@ -133,11 +149,13 @@ public class StatusBarStateControllerImpl implements SysuiStatusBarStateControll
     private Interpolator mDozeInterpolator = Interpolators.FAST_OUT_SLOW_IN;
 
     @Inject
-    public StatusBarStateControllerImpl(UiEventLogger uiEventLogger) {
+    public StatusBarStateControllerImpl(UiEventLogger uiEventLogger, DumpManager dumpManager) {
         mUiEventLogger = uiEventLogger;
         for (int i = 0; i < HISTORY_SIZE; i++) {
             mHistoricalRecords[i] = new HistoricalState();
         }
+
+        dumpManager.registerDumpable(this);
     }
 
     @Override
@@ -155,7 +173,7 @@ public class StatusBarStateControllerImpl implements SysuiStatusBarStateControll
         }
 
         // Record the to-be mState and mLastState
-        recordHistoricalState(state, mState);
+        recordHistoricalState(state /* newState */, mState /* lastState */, false);
 
         // b/139259891
         if (mState == StatusBarState.SHADE && state == StatusBarState.SHADE_LOCKED) {
@@ -188,6 +206,7 @@ public class StatusBarStateControllerImpl implements SysuiStatusBarStateControll
     @Override
     public void setUpcomingState(int nextState) {
         mUpcomingState = nextState;
+        recordHistoricalState(mUpcomingState /* newState */, mState /* lastState */, true);
     }
 
     @Override
@@ -420,14 +439,30 @@ public class StatusBarStateControllerImpl implements SysuiStatusBarStateControll
     }
 
     @Override
-    public void setFullscreenState(boolean isFullscreen) {
+    public void setSystemBarAttributes(@Appearance int appearance, @Behavior int behavior,
+            InsetsVisibilities requestedVisibilities, String packageName) {
+        boolean isFullscreen = !requestedVisibilities.getVisibility(ITYPE_STATUS_BAR)
+                || !requestedVisibilities.getVisibility(ITYPE_NAVIGATION_BAR);
         if (mIsFullscreen != isFullscreen) {
             mIsFullscreen = isFullscreen;
             synchronized (mListeners) {
                 for (RankedListener rl : new ArrayList<>(mListeners)) {
-                    rl.mListener.onFullscreenStateChanged(isFullscreen, true /* isImmersive */);
+                    rl.mListener.onFullscreenStateChanged(isFullscreen);
                 }
             }
+        }
+
+        // TODO (b/190543382): Finish the logging logic.
+        // This section can be removed if we don't need to print it on logcat.
+        if (DEBUG_IMMERSIVE_APPS) {
+            boolean dim = (appearance & APPEARANCE_LOW_PROFILE_BARS) != 0;
+            String behaviorName = ViewDebug.flagsToString(InsetsFlags.class, "behavior", behavior);
+            String requestedVisibilityString = requestedVisibilities.toString();
+            if (requestedVisibilityString.isEmpty()) {
+                requestedVisibilityString = "none";
+            }
+            Log.d(TAG, packageName + " dim=" + dim + " behavior=" + behaviorName
+                    + " requested visibilities: " + requestedVisibilityString);
         }
     }
 
@@ -471,31 +506,36 @@ public class StatusBarStateControllerImpl implements SysuiStatusBarStateControll
         }
     }
 
-    private void recordHistoricalState(int currentState, int lastState) {
+    private void recordHistoricalState(int newState, int lastState, boolean upcoming) {
         mHistoryIndex = (mHistoryIndex + 1) % HISTORY_SIZE;
         HistoricalState state = mHistoricalRecords[mHistoryIndex];
-        state.mState = currentState;
+        state.mNewState = newState;
         state.mLastState = lastState;
         state.mTimestamp = System.currentTimeMillis();
+        state.mUpcoming = upcoming;
     }
 
     /**
      * For keeping track of our previous state to help with debugging
      */
     private static class HistoricalState {
-        int mState;
+        int mNewState;
         int mLastState;
         long mTimestamp;
+        boolean mUpcoming;
 
         @Override
         public String toString() {
             if (mTimestamp != 0) {
                 StringBuilder sb = new StringBuilder();
-                sb.append("state=").append(mState)
-                        .append(" (").append(describe(mState)).append(")");
-                sb.append("lastState=").append(mLastState).append(" (").append(describe(mLastState))
+                if (mUpcoming) {
+                    sb.append("upcoming-");
+                }
+                sb.append("newState=").append(mNewState)
+                        .append("(").append(describe(mNewState)).append(")");
+                sb.append(" lastState=").append(mLastState).append("(").append(describe(mLastState))
                         .append(")");
-                sb.append("timestamp=")
+                sb.append(" timestamp=")
                         .append(DateFormat.format("MM-dd HH:mm:ss", mTimestamp));
 
                 return sb.toString();

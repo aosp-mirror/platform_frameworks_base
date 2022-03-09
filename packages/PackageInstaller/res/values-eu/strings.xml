@@ -46,7 +46,7 @@
     <string name="out_of_space_dlg_text" msgid="8727714096031856231">"Ezin izan da instalatu <xliff:g id="APP_NAME">%1$s</xliff:g>. Egin toki pixka bat eta saiatu berriro."</string>
     <string name="app_not_found_dlg_title" msgid="5107924008597470285">"Ez da aurkitu aplikazioa"</string>
     <string name="app_not_found_dlg_text" msgid="5219983779377811611">"Ez da aurkitu aplikazioa instalatutako aplikazioen zerrendan."</string>
-    <string name="user_is_not_allowed_dlg_title" msgid="6915293433252210232">"Baimendu gabe"</string>
+    <string name="user_is_not_allowed_dlg_title" msgid="6915293433252210232">"Ez du baimenik"</string>
     <string name="user_is_not_allowed_dlg_text" msgid="3468447791330611681">"Erabiltzaile honek ez dauka desinstalatzeko baimenik."</string>
     <string name="generic_error_dlg_title" msgid="5863195085927067752">"Errorea"</string>
     <string name="generic_error_dlg_text" msgid="5287861443265795232">"Ezin izan da desinstalatu aplikazioa."</string>

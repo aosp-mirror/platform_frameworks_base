@@ -88,6 +88,12 @@ public class KeyguardUpdateMonitorCallback {
      */
     public void onKeyguardVisibilityChanged(boolean showing) { }
 
+    /**
+     * Called when the keyguard occluded state changes.
+     * @param occluded Indicates if the keyguard is now occluded.
+     */
+    public void onKeyguardOccludedChanged(boolean occluded) { }
+
     public void onKeyguardVisibilityChangedRaw(boolean showing) {
         final long now = SystemClock.elapsedRealtime();
         if (showing == mShowing
@@ -286,9 +292,9 @@ public class KeyguardUpdateMonitorCallback {
     public void onStrongAuthStateChanged(int userId) { }
 
     /**
-     * Called when the state whether we have a lockscreen wallpaper has changed.
+     * When the current user's locked out state changed.
      */
-    public void onHasLockscreenWallpaperChanged(boolean hasLockscreenWallpaper) { }
+    public void onLockedOutStateChanged(BiometricSourceType biometricSourceType) { }
 
     /**
      * Called when the dream's window state is changed.
@@ -322,11 +328,6 @@ public class KeyguardUpdateMonitorCallback {
      * Called when the secondary lock screen requirement changes.
      */
     public void onSecondaryLockscreenRequirementChanged(int userId) { }
-
-    /**
-     * Called to switch lock screen layout/clock layouts
-     */
-    public void onLockScreenModeChanged(int mode) { }
 
     /**
      * Called when notifying user to unlock in order to use NFC.

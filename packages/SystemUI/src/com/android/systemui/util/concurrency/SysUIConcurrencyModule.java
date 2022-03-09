@@ -120,16 +120,6 @@ public abstract class SysUIConcurrencyModule {
     }
 
     /**
-     * Provide a Main-Thread Executor.
-     */
-    @Provides
-    @SysUISingleton
-    @Main
-    public static DelayableExecutor provideMainDelayableExecutor(@Main Looper looper) {
-        return new ExecutorImpl(looper);
-    }
-
-    /**
      * Provide a Background-Thread Executor by default.
      */
     @Provides
@@ -169,5 +159,21 @@ public abstract class SysUIConcurrencyModule {
     @UiBackground
     public static Executor provideUiBackgroundExecutor() {
         return Executors.newSingleThreadExecutor();
+    }
+
+    /** */
+    @Provides
+    @Main
+    public static MessageRouter providesMainMessageRouter(
+            @Main DelayableExecutor executor) {
+        return new MessageRouterImpl(executor);
+    }
+
+    /** */
+    @Provides
+    @Background
+    public static MessageRouter providesBackgroundMessageRouter(
+            @Background DelayableExecutor executor) {
+        return new MessageRouterImpl(executor);
     }
 }

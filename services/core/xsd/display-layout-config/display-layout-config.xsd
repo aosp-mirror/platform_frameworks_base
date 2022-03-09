@@ -52,6 +52,6 @@
             <xs:element name="address" type="xs:nonNegativeInteger"/>
         </xs:sequence>
         <xs:attribute name="enabled" type="xs:boolean" use="optional" />
-        <xs:attribute name="isDefault" type="xs:boolean" use="optional" />
+        <xs:attribute name="defaultDisplay" type="xs:boolean" use="optional" />
     </xs:complexType>
 </xs:schema>
