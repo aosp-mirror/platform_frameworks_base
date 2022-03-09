@@ -443,6 +443,13 @@ class KeyguardController {
                 || !mWindowManager.isKeyguardSecure(mService.getCurrentUserId());
     }
 
+    /**
+     * @return Whether the dream activity is on top of default display.
+     */
+    boolean isShowingDream() {
+        return getDisplayState(DEFAULT_DISPLAY).mShowingDream;
+    }
+
     private void dismissMultiWindowModeForTaskIfNeeded(int displayId,
             @Nullable Task currentTaskControllingOcclusion) {
         // TODO(b/113840485): Handle docked stack for individual display.
@@ -501,6 +508,7 @@ class KeyguardController {
         private boolean mKeyguardGoingAway;
         private boolean mDismissalRequested;
         private boolean mOccluded;
+        private boolean mShowingDream;
 
         private ActivityRecord mTopOccludesActivity;
         private ActivityRecord mDismissingKeyguardActivity;
@@ -536,6 +544,7 @@ class KeyguardController {
 
             mRequestDismissKeyguard = false;
             mOccluded = false;
+            mShowingDream = false;
 
             mTopOccludesActivity = null;
             mDismissingKeyguardActivity = null;
@@ -570,9 +579,9 @@ class KeyguardController {
                 }
             }
 
-            final boolean dreaming = display.getDisplayPolicy().isShowingDreamLw() && (top != null
+            mShowingDream = display.getDisplayPolicy().isShowingDreamLw() && (top != null
                     && top.getActivityType() == ACTIVITY_TYPE_DREAM);
-            mOccluded = dreaming || occludedByActivity;
+            mOccluded = mShowingDream || occludedByActivity;
             mRequestDismissKeyguard = lastDismissKeyguardActivity != mDismissingKeyguardActivity
                     && !mOccluded
                     && mDismissingKeyguardActivity != null
