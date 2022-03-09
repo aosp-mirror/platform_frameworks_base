@@ -575,25 +575,6 @@ public class MediaControlPanel {
         int textTertiary = com.android.settingslib.Utils.getColorAttr(mContext,
                 com.android.internal.R.attr.textColorTertiary).getDefaultColor();
 
-        // App icon - use launcher icon
-        ImageView appIconView = mMediaViewHolder.getAppIcon();
-        appIconView.clearColorFilter();
-        try {
-            Drawable icon = mContext.getPackageManager().getApplicationIcon(
-                    data.getPackageName());
-            appIconView.setImageDrawable(icon);
-        } catch (PackageManager.NameNotFoundException e) {
-            Log.w(TAG, "Cannot find icon for package " + data.getPackageName(), e);
-            // Fall back to notification icon
-            if (data.getAppIcon() != null) {
-                appIconView.setImageIcon(data.getAppIcon());
-            } else {
-                appIconView.setImageResource(R.drawable.ic_music_note);
-            }
-            int color = mContext.getColor(R.color.material_dynamic_secondary10);
-            appIconView.setColorFilter(color);
-        }
-
         // Album art
         ColorScheme colorScheme = null;
         ImageView albumView = mMediaViewHolder.getAlbumView();
@@ -639,6 +620,25 @@ public class MediaControlPanel {
         albumView.setBackgroundTintList(
                 ColorStateList.valueOf(surfaceColor));
         mMediaViewHolder.getPlayer().setBackgroundTintList(bgColorList);
+
+        // App icon - use notification icon
+        ImageView appIconView = mMediaViewHolder.getAppIcon();
+        appIconView.clearColorFilter();
+        if (data.getAppIcon() != null && !data.getResumption()) {
+            appIconView.setImageIcon(data.getAppIcon());
+            appIconView.setColorFilter(accentPrimary);
+        } else {
+            // Resume players use launcher icon
+            appIconView.setColorFilter(getGrayscaleFilter());
+            try {
+                Drawable icon = mContext.getPackageManager().getApplicationIcon(
+                        data.getPackageName());
+                appIconView.setImageDrawable(icon);
+            } catch (PackageManager.NameNotFoundException e) {
+                Log.w(TAG, "Cannot find icon for package " + data.getPackageName(), e);
+                appIconView.setImageResource(R.drawable.ic_music_note);
+            }
+        }
 
         // Metadata text
         mMediaViewHolder.getTitleText().setTextColor(textPrimary);
@@ -688,7 +688,6 @@ public class MediaControlPanel {
         mMediaViewHolder.getCancelText().setBackgroundTintList(accentColorList);
         mMediaViewHolder.getDismissText().setTextColor(textColorList);
         mMediaViewHolder.getDismissText().setBackgroundTintList(accentColorList);
-
     }
 
     private void setSemanticButton(final ImageButton button, MediaAction mediaAction,
