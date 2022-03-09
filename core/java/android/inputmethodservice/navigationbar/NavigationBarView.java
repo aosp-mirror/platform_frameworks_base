@@ -181,7 +181,7 @@ public final class NavigationBarView extends FrameLayout {
         }
     }
 
-    public KeyButtonDrawable getBackDrawable() {
+    private KeyButtonDrawable getBackDrawable() {
         KeyButtonDrawable drawable = getDrawable(com.android.internal.R.drawable.ic_ime_nav_back);
         orientBackButton(drawable);
         return drawable;
@@ -233,6 +233,11 @@ public final class NavigationBarView extends FrameLayout {
         super.setLayoutDirection(layoutDirection);
     }
 
+    /**
+     * Updates the navigation icons based on {@code hints}.
+     *
+     * @param hints bit flags defined in {@link StatusBarManager}.
+     */
     public void setNavigationIconHints(int hints) {
         if (hints == mNavigationIconHints) return;
         final boolean newBackAlt = (hints & StatusBarManager.NAVIGATION_HINT_BACK_ALT) != 0;
@@ -250,15 +255,7 @@ public final class NavigationBarView extends FrameLayout {
         updateNavButtonIcons();
     }
 
-    public void setDisabledFlags(int disabledFlags) {
-        if (mDisabledFlags == disabledFlags) return;
-
-        mDisabledFlags = disabledFlags;
-
-        updateNavButtonIcons();
-    }
-
-    public void updateNavButtonIcons() {
+    private void updateNavButtonIcons() {
         // We have to replace or restore the back and home button icons when exiting or entering
         // carmode, respectively. Recents are not available in CarMode in nav bar so change
         // to recent icon is not required.
@@ -319,7 +316,7 @@ public final class NavigationBarView extends FrameLayout {
         mHorizontal.setVisibility(View.GONE);
     }
 
-    public void reorient() {
+    private void reorient() {
         updateCurrentView();
 
         final android.inputmethodservice.navigationbar.NavigationBarFrame frame =
@@ -372,6 +369,11 @@ public final class NavigationBarView extends FrameLayout {
         }
     }
 
+    /**
+     * Updates the dark intensity.
+     *
+     * @param intensity The intensity of darkness from {@code 0.0f} to {@code 1.0f}.
+     */
     public void setDarkIntensity(@FloatRange(from = 0.0f, to = 1.0f) float intensity) {
         for (int i = 0; i < mButtonDispatchers.size(); ++i) {
             mButtonDispatchers.valueAt(i).setDarkIntensity(intensity);

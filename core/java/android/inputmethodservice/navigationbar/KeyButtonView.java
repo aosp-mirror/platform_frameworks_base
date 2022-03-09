@@ -272,12 +272,13 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
                 : KeyButtonRipple.Type.ROUNDED_RECT);
     }
 
+    @Override
     public void playSoundEffect(int soundConstant) {
         if (!mPlaySounds) return;
         mAudioManager.playSoundEffect(soundConstant);
     }
 
-    public void sendEvent(int action, int flags) {
+    private void sendEvent(int action, int flags) {
         sendEvent(action, flags, SystemClock.uptimeMillis());
     }
 

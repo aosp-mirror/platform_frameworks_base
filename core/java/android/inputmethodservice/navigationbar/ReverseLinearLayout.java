@@ -30,9 +30,8 @@ import java.util.ArrayList;
 /**
  * Automatically reverses the order of children as they are added.
  * Also reverse the width and height values of layout params
- * @hide
  */
-public class ReverseLinearLayout extends LinearLayout {
+class ReverseLinearLayout extends LinearLayout {
 
     /** If true, the layout is reversed vs. a regular linear layout */
     private boolean mIsLayoutReverse;
