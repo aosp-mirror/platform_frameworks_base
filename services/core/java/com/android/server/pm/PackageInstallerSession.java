@@ -91,6 +91,7 @@ import android.system.OsConstants;
 import android.system.StructStat;
 import android.text.TextUtils;
 import android.util.ArraySet;
+import android.util.EventLog;
 import android.util.ExceptionUtils;
 import android.util.MathUtils;
 import android.util.Slog;
@@ -1717,6 +1718,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     resolveInheritedFile(baseDexMetadataFile);
                 }
                 baseApk = existingBase;
+            } else if ((params.installFlags & PackageManager.INSTALL_DONT_KILL_APP) != 0) {
+                EventLog.writeEvent(0x534e4554, "219044664");
+
+                // Installing base.apk. Make sure the app is restarted.
+                params.setDontKillApp(false);
             }
 
             // Inherit splits if not overridden
@@ -2133,6 +2139,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     @Override
     public boolean isStaged() {
         return params.isStaged;
+    }
+
+    @Override
+    public int getInstallFlags() {
+        return params.installFlags;
     }
 
     @Override
