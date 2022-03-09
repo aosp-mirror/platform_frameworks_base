@@ -40,7 +40,7 @@ gensrcs {
         ":libtombstone_proto-src",
         "core/proto/**/*.proto",
         "libs/incident/**/*.proto",
-        ":service-permission-protos",
+        ":service-permission-streaming-proto-sources",
     ],
     output_extension: "srcjar",
 }
@@ -70,7 +70,7 @@ gensrcs {
         ":libstats_atom_message_protos",
         "core/proto/**/*.proto",
         "libs/incident/**/*.proto",
-        ":service-permission-protos",
+        ":service-permission-streaming-proto-sources",
     ],
 
     output_extension: "proto.h",
@@ -90,7 +90,7 @@ java_library_host {
         "cmds/statsd/src/**/*.proto",
         "core/proto/**/*.proto",
         "libs/incident/proto/**/*.proto",
-        ":service-permission-protos",
+        ":service-permission-streaming-proto-sources",
     ],
     proto: {
         include_dirs: [
@@ -126,7 +126,7 @@ java_library {
         ":libstats_atom_message_protos",
         "core/proto/**/*.proto",
         "libs/incident/proto/android/os/**/*.proto",
-        ":service-permission-protos",
+        ":service-permission-streaming-proto-sources",
     ],
     // Protos have lots of MissingOverride and similar.
     errorprone: {
@@ -149,7 +149,7 @@ java_library {
         ":libstats_atom_message_protos",
         "core/proto/**/*.proto",
         "libs/incident/proto/android/os/**/*.proto",
-        ":service-permission-protos",
+        ":service-permission-streaming-proto-sources",
     ],
     exclude_srcs: [
         "core/proto/android/privacy.proto",
@@ -186,7 +186,7 @@ cc_defaults {
         ":libstats_atom_enum_protos",
         ":libstats_atom_message_protos",
         "core/proto/**/*.proto",
-        ":service-permission-protos",
+        ":service-permission-streaming-proto-sources",
     ],
 }
 

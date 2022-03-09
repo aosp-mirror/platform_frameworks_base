@@ -16,6 +16,7 @@
 
 package com.android.systemui.biometrics;
 
+import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_GOOD;
 import static android.hardware.biometrics.BiometricOverlayConstants.REASON_AUTH_KEYGUARD;
 
 import static com.android.internal.util.Preconditions.checkArgument;
@@ -30,6 +31,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Point;
 import android.graphics.RectF;
+import android.hardware.biometrics.BiometricFingerprintConstants;
 import android.hardware.biometrics.SensorLocationInternal;
 import android.hardware.display.DisplayManager;
 import android.hardware.fingerprint.FingerprintManager;
@@ -141,11 +143,11 @@ public class UdfpsController implements DozeReceiver {
     private int mActivePointerId = -1;
     // The timestamp of the most recent touch log.
     private long mTouchLogTime;
-    // Sensor has a good capture for this touch. Do not need to illuminate for this particular
-    // touch event anymore. In other words, do not illuminate until user lifts and touches the
-    // sensor area again.
+    // Sensor has a capture (good or bad) for this touch. Do not need to illuminate for this
+    // particular touch event anymore. In other words, do not illuminate until user lifts and
+    // touches the sensor area again.
     // TODO: We should probably try to make touch/illumination things more of a FSM
-    private boolean mGoodCaptureReceived;
+    private boolean mAcquiredReceived;
 
     // The current request from FingerprintService. Null if no current request.
     @Nullable UdfpsControllerOverlay mOverlay;
@@ -221,19 +223,28 @@ public class UdfpsController implements DozeReceiver {
         }
 
         @Override
-        public void onAcquiredGood(int sensorId) {
-            mFgExecutor.execute(() -> {
-                if (mOverlay == null) {
-                    Log.e(TAG, "Null request when onAcquiredGood for sensorId: " + sensorId);
-                    return;
-                }
-                mGoodCaptureReceived = true;
-                final UdfpsView view = mOverlay.getOverlayView();
-                if (view != null) {
-                    view.stopIllumination();
-                }
-                mOverlay.onAcquiredGood();
-            });
+        public void onAcquired(
+                int sensorId,
+                @BiometricFingerprintConstants.FingerprintAcquired int acquiredInfo
+        ) {
+            if (BiometricFingerprintConstants.shouldTurnOffHbm(acquiredInfo)) {
+                boolean acquiredGood = acquiredInfo == FINGERPRINT_ACQUIRED_GOOD;
+                mFgExecutor.execute(() -> {
+                    if (mOverlay == null) {
+                        Log.e(TAG, "Null request when onAcquired for sensorId: " + sensorId
+                                + " acquiredInfo=" + acquiredInfo);
+                        return;
+                    }
+                    mAcquiredReceived = true;
+                    final UdfpsView view = mOverlay.getOverlayView();
+                    if (view != null) {
+                        view.stopIllumination(); // turn off HBM
+                    }
+                    if (acquiredGood) {
+                        mOverlay.onAcquiredGood();
+                    }
+                });
+            }
         }
 
         @Override
@@ -414,8 +425,8 @@ public class UdfpsController implements DozeReceiver {
                                 "minor: %.1f, major: %.1f, v: %.1f, exceedsVelocityThreshold: %b",
                                 minor, major, v, exceedsVelocityThreshold);
                         final long sinceLastLog = mSystemClock.elapsedRealtime() - mTouchLogTime;
-                        if (!isIlluminationRequested && !mGoodCaptureReceived &&
-                                !exceedsVelocityThreshold) {
+                        if (!isIlluminationRequested && !mAcquiredReceived
+                                && !exceedsVelocityThreshold) {
                             final int rawX = (int) event.getRawX();
                             final int rawY = (int) event.getRawY();
                             // Default coordinates assume portrait mode.
@@ -799,7 +810,7 @@ public class UdfpsController implements DozeReceiver {
     private void onFingerUp(@NonNull UdfpsView view) {
         mExecution.assertIsMainThread();
         mActivePointerId = -1;
-        mGoodCaptureReceived = false;
+        mAcquiredReceived = false;
         if (mOnFingerDown) {
             mFingerprintManager.onPointerUp(mSensorProps.sensorId);
             for (Callback cb : mCallbacks) {

@@ -36,7 +36,7 @@
   </item>
   <!-- Where the user drawable/bitmap will be placed -->
   <item
-      android:drawable="@drawable/kg_bg_avatar"
+      android:drawable="@drawable/user_avatar_bg"
       android:width="@dimen/bouncer_user_switcher_icon_size"
       android:height="@dimen/bouncer_user_switcher_icon_size"
       android:top="@dimen/user_switcher_icon_large_margin"
