@@ -1,12 +1,13 @@
 package com.android.systemui.statusbar.phone
 
-import android.annotation.IdRes
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowInsets
 import android.view.WindowManagerPolicyConstants
+import androidx.annotation.AnyRes
+import androidx.annotation.IdRes
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.test.filters.SmallTest
@@ -72,8 +73,6 @@ class NotificationQSContainerControllerTest : SysuiTestCase() {
     private lateinit var taskbarVisibilityCallback: OverviewProxyListener
     private lateinit var windowInsetsCallback: Consumer<WindowInsets>
 
-    private val testableResources = mContext.orCreateTestableResources
-
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
@@ -105,7 +104,7 @@ class NotificationQSContainerControllerTest : SysuiTestCase() {
         windowInsetsCallback = windowInsetsCallbackCaptor.value
     }
 
-    fun overrideResource(@IdRes id: Int, value: Any) {
+    private fun overrideResource(@AnyRes id: Int, value: Any) {
         mContext.orCreateTestableResources.addOverride(id, value)
     }
 
