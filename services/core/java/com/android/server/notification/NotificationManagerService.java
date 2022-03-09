@@ -630,6 +630,7 @@ public class NotificationManagerService extends SystemService {
     private int mWarnRemoteViewsSizeBytes;
     private int mStripRemoteViewsSizeBytes;
     final boolean mEnableAppSettingMigration;
+    private boolean mForceUserSetOnUpgrade;
 
     private MetricsLogger mMetricsLogger;
     private TriPredicate<String, Integer, String> mAllowedManagedServicePackages;
@@ -2312,6 +2313,7 @@ public class NotificationManagerService extends SystemService {
 
         mMsgPkgsAllowedAsConvos = Set.of(getStringArrayResource(
                 com.android.internal.R.array.config_notificationMsgPkgsAllowedAsConvos));
+
         mStatsManager = statsManager;
 
         mToastRateLimiter = toastRateLimiter;
@@ -2404,6 +2406,9 @@ public class NotificationManagerService extends SystemService {
 
         WorkerHandler handler = new WorkerHandler(Looper.myLooper());
 
+        mForceUserSetOnUpgrade = getContext().getResources().getBoolean(
+                R.bool.config_notificationForceUserSetOnUpgrade);
+
         init(handler, new RankingHandlerWorker(mRankingThread.getLooper()),
                 AppGlobals.getPackageManager(), getContext().getPackageManager(),
                 getLocalService(LightsManager.class),
@@ -2432,7 +2437,8 @@ public class NotificationManagerService extends SystemService {
                 LocalServices.getService(ActivityManagerInternal.class),
                 createToastRateLimiter(), new PermissionHelper(LocalServices.getService(
                         PermissionManagerServiceInternal.class), AppGlobals.getPackageManager(),
-                        AppGlobals.getPermissionManager(), mEnableAppSettingMigration),
+                        AppGlobals.getPermissionManager(), mEnableAppSettingMigration,
+                        mForceUserSetOnUpgrade),
                 LocalServices.getService(UsageStatsManagerInternal.class));
 
         publishBinderService(Context.NOTIFICATION_SERVICE, mService, /* allowIsolated= */ false,
@@ -6086,6 +6092,7 @@ public class NotificationManagerService extends SystemService {
                     pw.println("  mMaxPackageEnqueueRate=" + mMaxPackageEnqueueRate);
                     pw.println("  hideSilentStatusBar="
                             + mPreferencesHelper.shouldHideSilentStatusIcons());
+                    pw.println("  mForceUserSetOnUpgrade=" + mForceUserSetOnUpgrade);
                 }
                 pw.println("  mArchive=" + mArchive.toString());
                 mArchive.dumpImpl(pw, filter);
