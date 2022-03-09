@@ -31,16 +31,12 @@ class PlayerSessionViewHolder private constructor(itemView: View) : MediaViewHol
     val actionPlayPause = itemView.requireViewById<ImageButton>(R.id.actionPlayPause)
     val actionNext = itemView.requireViewById<ImageButton>(R.id.actionNext)
     val actionPrev = itemView.requireViewById<ImageButton>(R.id.actionPrev)
-    val actionStart = itemView.requireViewById<ImageButton>(R.id.actionStart)
-    val actionEnd = itemView.requireViewById<ImageButton>(R.id.actionEnd)
 
     init {
         (player.background as IlluminationDrawable).let {
             it.registerLightSource(actionPlayPause)
             it.registerLightSource(actionNext)
             it.registerLightSource(actionPrev)
-            it.registerLightSource(actionStart)
-            it.registerLightSource(actionEnd)
         }
     }
 
@@ -49,8 +45,11 @@ class PlayerSessionViewHolder private constructor(itemView: View) : MediaViewHol
             R.id.actionPlayPause -> actionPlayPause
             R.id.actionNext -> actionNext
             R.id.actionPrev -> actionPrev
-            R.id.actionStart -> actionStart
-            R.id.actionEnd -> actionEnd
+            R.id.action0 -> action0
+            R.id.action1 -> action1
+            R.id.action2 -> action2
+            R.id.action3 -> action3
+            R.id.action4 -> action4
             else -> {
                 throw IllegalArgumentException()
             }
@@ -90,8 +89,11 @@ class PlayerSessionViewHolder private constructor(itemView: View) : MediaViewHol
                 R.id.actionPlayPause,
                 R.id.actionNext,
                 R.id.actionPrev,
-                R.id.actionStart,
-                R.id.actionEnd,
+                R.id.action0,
+                R.id.action1,
+                R.id.action2,
+                R.id.action3,
+                R.id.action4,
                 R.id.icon
         )
         val gutsIds = setOf(

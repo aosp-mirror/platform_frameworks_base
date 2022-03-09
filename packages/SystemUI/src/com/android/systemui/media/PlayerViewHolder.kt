@@ -33,23 +33,6 @@ class PlayerViewHolder private constructor(itemView: View) : MediaViewHolder(ite
     override val elapsedTimeView = itemView.requireViewById<TextView>(R.id.media_elapsed_time)
     override val totalTimeView = itemView.requireViewById<TextView>(R.id.media_total_time)
 
-    // Action Buttons
-    val action0 = itemView.requireViewById<ImageButton>(R.id.action0)
-    val action1 = itemView.requireViewById<ImageButton>(R.id.action1)
-    val action2 = itemView.requireViewById<ImageButton>(R.id.action2)
-    val action3 = itemView.requireViewById<ImageButton>(R.id.action3)
-    val action4 = itemView.requireViewById<ImageButton>(R.id.action4)
-
-    init {
-        (player.background as IlluminationDrawable).let {
-            it.registerLightSource(action0)
-            it.registerLightSource(action1)
-            it.registerLightSource(action2)
-            it.registerLightSource(action3)
-            it.registerLightSource(action4)
-        }
-    }
-
     override fun getAction(id: Int): ImageButton {
         return when (id) {
             R.id.action0 -> action0
