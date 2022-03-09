@@ -200,8 +200,8 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
                 postDelayed(mCheckLongPress, ViewConfiguration.getLongPressTimeout());
                 break;
             case MotionEvent.ACTION_MOVE:
-                x = (int)ev.getRawX();
-                y = (int)ev.getRawY();
+                x = (int) ev.getRawX();
+                y = (int) ev.getRawY();
 
                 float slop = getQuickStepTouchSlopPx(getContext());
                 if (Math.abs(x - mTouchDownX) > slop || Math.abs(y - mTouchDownY) > slop) {
@@ -272,12 +272,13 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
                 : KeyButtonRipple.Type.ROUNDED_RECT);
     }
 
+    @Override
     public void playSoundEffect(int soundConstant) {
         if (!mPlaySounds) return;
         mAudioManager.playSoundEffect(soundConstant);
     }
 
-    public void sendEvent(int action, int flags) {
+    private void sendEvent(int action, int flags) {
         sendEvent(action, flags, SystemClock.uptimeMillis());
     }
 
@@ -309,8 +310,8 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
             switch (action) {
                 case KeyEvent.ACTION_DOWN:
                     handled = ims.onKeyDown(ev.getKeyCode(), ev);
-                    mTracking = handled && ev.getRepeatCount() == 0 &&
-                            (ev.getFlags() & KeyEvent.FLAG_START_TRACKING) != 0;
+                    mTracking = handled && ev.getRepeatCount() == 0
+                            && (ev.getFlags() & KeyEvent.FLAG_START_TRACKING) != 0;
                     break;
                 case KeyEvent.ACTION_UP:
                     handled = ims.onKeyUp(ev.getKeyCode(), ev);
