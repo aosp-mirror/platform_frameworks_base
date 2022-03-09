@@ -41,8 +41,8 @@ import android.util.Slog;
 
 import com.android.internal.util.ArrayUtils;
 
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -87,7 +87,8 @@ final class PackageUtils {
         final List<ResolveInfo> companionServices = pm.queryIntentServicesAsUser(
                 COMPANION_SERVICE_INTENT, ResolveInfoFlags.of(0), userId);
 
-        final Map<String, List<ComponentName>> packageNameToServiceInfoList = new HashMap<>();
+        final Map<String, List<ComponentName>> packageNameToServiceInfoList =
+                new HashMap<>(companionServices.size());
 
         for (ResolveInfo resolveInfo : companionServices) {
             final ServiceInfo service = resolveInfo.serviceInfo;
@@ -101,19 +102,19 @@ final class PackageUtils {
                 continue;
             }
 
-            // Use LinkedList, because we'll need to prepend "primary" services, while appending the
-            // other (non-primary) services to the list.
-            final LinkedList<ComponentName> services =
-                    (LinkedList<ComponentName>) packageNameToServiceInfoList.computeIfAbsent(
-                            service.packageName, it -> new LinkedList<>());
+            // We'll need to prepend "primary" services, while appending the other (non-primary)
+            // services to the list.
+            final ArrayList<ComponentName> services =
+                    (ArrayList<ComponentName>) packageNameToServiceInfoList.computeIfAbsent(
+                            service.packageName, it -> new ArrayList<>(1));
 
             final ComponentName componentName = service.getComponentName();
 
             if (isPrimaryCompanionDeviceService(pm, componentName)) {
                 // "Primary" service should be at the head of the list.
-                services.addFirst(componentName);
+                services.add(0, componentName);
             } else {
-                services.addLast(componentName);
+                services.add(componentName);
             }
         }
 
