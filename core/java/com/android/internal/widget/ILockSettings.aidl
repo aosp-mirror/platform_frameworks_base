@@ -97,7 +97,6 @@ interface ILockSettings {
     boolean hasSecureLockScreen();
     boolean tryUnlockWithCachedUnifiedChallenge(int userId);
     void removeCachedUnifiedChallenge(int userId);
-    void updateEncryptionPassword(int type, in byte[] password);
     boolean registerWeakEscrowTokenRemovedListener(in IWeakEscrowTokenRemovedListener listener);
     boolean unregisterWeakEscrowTokenRemovedListener(in IWeakEscrowTokenRemovedListener listener);
     long addWeakEscrowToken(in byte[] token, int userId, in IWeakEscrowTokenActivatedListener callback);
