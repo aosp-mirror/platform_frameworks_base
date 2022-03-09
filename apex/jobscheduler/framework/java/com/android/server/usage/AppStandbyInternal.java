@@ -2,6 +2,7 @@ package com.android.server.usage;
 
 import android.annotation.CurrentTimeMillisLong;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager.ProcessState;
 import android.app.usage.AppStandbyInfo;
@@ -237,4 +238,11 @@ public interface AppStandbyInternal {
      */
     @ProcessState
     int getBroadcastResponseFgThresholdState();
+
+    /**
+     * Return the last known value corresponding to the {@code key} from
+     * {@link android.provider.DeviceConfig#NAMESPACE_APP_STANDBY} in AppStandbyController.
+     */
+    @Nullable
+    String getAppStandbyConstant(@NonNull String key);
 }
