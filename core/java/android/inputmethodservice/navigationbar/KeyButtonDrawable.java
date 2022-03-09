@@ -100,7 +100,7 @@ final class KeyButtonDrawable extends Drawable {
         }
     };
 
-    public KeyButtonDrawable(Drawable d, @ColorInt int lightColor, @ColorInt int darkColor,
+    KeyButtonDrawable(Drawable d, @ColorInt int lightColor, @ColorInt int darkColor,
             boolean horizontalFlip, Color ovalBackgroundColor) {
         this(d, new ShadowDrawableState(lightColor, darkColor,
                 d instanceof AnimatedVectorDrawable, horizontalFlip, ovalBackgroundColor));
@@ -433,8 +433,8 @@ final class KeyButtonDrawable extends Drawable {
         final boolean mSupportsAnimation;
         final Color mOvalBackgroundColor;
 
-        public ShadowDrawableState(@ColorInt int lightColor, @ColorInt int darkColor,
-                boolean animated, boolean horizontalFlip, Color ovalBackgroundColor) {
+        ShadowDrawableState(@ColorInt int lightColor, @ColorInt int darkColor, boolean animated,
+                boolean horizontalFlip, Color ovalBackgroundColor) {
             mLightColor = lightColor;
             mDarkColor = darkColor;
             mSupportsAnimation = animated;

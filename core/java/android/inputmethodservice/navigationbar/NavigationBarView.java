@@ -48,8 +48,8 @@ import java.util.function.Consumer;
  * @hide
  */
 public final class NavigationBarView extends FrameLayout {
-    final static boolean DEBUG = false;
-    final static String TAG = "NavBarView";
+    private static final boolean DEBUG = false;
+    private static final String TAG = "NavBarView";
 
     // Copied from com.android.systemui.animation.Interpolators#FAST_OUT_SLOW_IN
     private static final Interpolator FAST_OUT_SLOW_IN = new PathInterpolator(0.4f, 0f, 0.2f, 1f);

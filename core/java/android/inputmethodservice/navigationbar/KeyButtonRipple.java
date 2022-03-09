@@ -90,7 +90,7 @@ final class KeyButtonRipple extends Drawable {
 
     private Type mType = Type.ROUNDED_RECT;
 
-    public KeyButtonRipple(Context ctx, View targetView, @DimenRes int maxWidthResource) {
+    KeyButtonRipple(Context ctx, View targetView, @DimenRes int maxWidthResource) {
         mMaxWidthResource = maxWidthResource;
         mMaxWidth = ctx.getResources().getDimensionPixelSize(maxWidthResource);
         mTargetView = targetView;

@@ -67,7 +67,7 @@ final class ButtonDispatcher {
         }
     };
 
-    public ButtonDispatcher(int id) {
+    ButtonDispatcher(int id) {
         mId = id;
     }
 

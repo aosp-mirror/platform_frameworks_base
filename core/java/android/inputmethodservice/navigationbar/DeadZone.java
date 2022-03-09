@@ -82,7 +82,7 @@ final class DeadZone {
         }
     };
 
-    public DeadZone(NavigationBarView view) {
+    DeadZone(NavigationBarView view) {
         mNavigationBarView = view;
         onConfigurationChanged(Surface.ROTATION_0);
     }
