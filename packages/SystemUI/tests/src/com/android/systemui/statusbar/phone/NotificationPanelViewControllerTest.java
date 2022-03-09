@@ -56,13 +56,11 @@ import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.ViewPropertyAnimator;
 import android.view.ViewStub;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.test.filters.SmallTest;
 
@@ -389,8 +387,6 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
         when(mView.findViewById(R.id.keyguard_status_view))
                 .thenReturn(mock(KeyguardStatusView.class));
         mNotificationContainerParent = new NotificationsQuickSettingsContainer(getContext(), null);
-        mNotificationContainerParent.addView(newViewWithId(R.id.qs_frame));
-        mNotificationContainerParent.addView(newViewWithId(R.id.notification_stack_scroller));
         mNotificationContainerParent.addView(mKeyguardStatusView);
         mNotificationContainerParent.onFinishInflate();
         when(mView.findViewById(R.id.notification_container_parent))
@@ -679,31 +675,6 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testAllChildrenOfNotificationContainer_haveIds() {
-        enableSplitShade(/* enabled= */ true);
-        mNotificationContainerParent.removeAllViews();
-        mNotificationContainerParent.addView(newViewWithId(1));
-        mNotificationContainerParent.addView(newViewWithId(View.NO_ID));
-
-        mNotificationPanelViewController.updateResources();
-
-        assertThat(mNotificationContainerParent.getChildAt(0).getId()).isEqualTo(1);
-        assertThat(mNotificationContainerParent.getChildAt(1).getId()).isNotEqualTo(View.NO_ID);
-    }
-
-    @Test
-    public void testSinglePaneShadeLayout_isAlignedToParent() {
-        enableSplitShade(/* enabled= */ false);
-
-        mNotificationPanelViewController.updateResources();
-
-        assertThat(getConstraintSetLayout(R.id.qs_frame).endToEnd)
-                .isEqualTo(ConstraintSet.PARENT_ID);
-        assertThat(getConstraintSetLayout(R.id.notification_stack_scroller).startToStart)
-                .isEqualTo(ConstraintSet.PARENT_ID);
-    }
-
-    @Test
     public void testKeyguardStatusViewInSplitShade_changesConstraintsDependingOnNotifications() {
         mStatusBarStateController.setState(KEYGUARD);
         enableSplitShade(/* enabled= */ true);
@@ -749,46 +720,6 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
         updateSmallestScreenWidth(800);
 
         verify(mUserSwitcherStubView).inflate();
-    }
-
-    @Test
-    public void testSplitShadeLayout_isAlignedToGuideline() {
-        enableSplitShade(/* enabled= */ true);
-
-        mNotificationPanelViewController.updateResources();
-
-        assertThat(getConstraintSetLayout(R.id.qs_frame).endToEnd)
-                .isEqualTo(R.id.qs_edge_guideline);
-        assertThat(getConstraintSetLayout(R.id.notification_stack_scroller).startToStart)
-                .isEqualTo(R.id.qs_edge_guideline);
-    }
-
-    @Test
-    public void testSplitShadeLayout_childrenHaveInsideMarginsOfZero() {
-        enableSplitShade(/* enabled= */ true);
-
-        mNotificationPanelViewController.updateResources();
-
-        assertThat(getConstraintSetLayout(R.id.qs_frame).startMargin).isEqualTo(10);
-        assertThat(getConstraintSetLayout(R.id.qs_frame).endMargin).isEqualTo(0);
-        assertThat(getConstraintSetLayout(R.id.notification_stack_scroller).startMargin)
-                .isEqualTo(0);
-        assertThat(getConstraintSetLayout(R.id.notification_stack_scroller).endMargin)
-                .isEqualTo(10);
-    }
-
-    @Test
-    public void testSinglePaneLayout_childrenHaveEqualMargins() {
-        enableSplitShade(/* enabled= */ false);
-
-        mNotificationPanelViewController.updateResources();
-
-        assertThat(getConstraintSetLayout(R.id.qs_frame).startMargin).isEqualTo(10);
-        assertThat(getConstraintSetLayout(R.id.qs_frame).endMargin).isEqualTo(10);
-        assertThat(getConstraintSetLayout(R.id.notification_stack_scroller).startMargin)
-                .isEqualTo(10);
-        assertThat(getConstraintSetLayout(R.id.notification_stack_scroller).endMargin)
-                .isEqualTo(10);
     }
 
     @Test
@@ -1014,17 +945,6 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
         for (View.OnAttachStateChangeListener listener : mOnAttachStateChangeListeners) {
             listener.onViewDetachedFromWindow(mView);
         }
-    }
-
-
-    private View newViewWithId(int id) {
-        View view = new View(mContext);
-        view.setId(id);
-        ConstraintLayout.LayoutParams layoutParams = new ConstraintLayout.LayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        // required as cloning ConstraintSet fails if view doesn't have layout params
-        view.setLayoutParams(layoutParams);
-        return view;
     }
 
     private ConstraintSet.Layout getConstraintSetLayout(@IdRes int id) {
