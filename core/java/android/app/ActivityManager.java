@@ -185,6 +185,11 @@ public class ActivityManager {
      * @hide
      */
     public static final int INSTR_FLAG_ALWAYS_CHECK_SIGNATURE = 1 << 4;
+    /**
+     * Instrument Sdk Sandbox process that corresponds to the target package.
+     * @hide
+     */
+    public static final int INSTR_FLAG_INSTRUMENT_SDK_SANDBOX = 1 << 5;
 
     static final class UidObserver extends IUidObserver.Stub {
         final OnUidImportanceListener mListener;
