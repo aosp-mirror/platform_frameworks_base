@@ -21,6 +21,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -32,7 +33,10 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-class ThresholdSensorImpl implements ThresholdSensor {
+/**
+ * Sensor that will only trigger beyond some lower and upper threshold.
+ */
+public class ThresholdSensorImpl implements ThresholdSensor {
     private static final String TAG = "ThresholdSensor";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
@@ -198,6 +202,15 @@ class ThresholdSensorImpl implements ThresholdSensor {
         alertListenersInternal(belowThreshold, timestampNs);
     }
 
+    @Override
+    public String getName() {
+        return mSensor != null ? mSensor.getName() : null;
+    }
+
+    @Override
+    public String getType() {
+        return mSensor != null ? mSensor.getStringType() : null;
+    }
 
     @Override
     public String toString() {
@@ -211,7 +224,12 @@ class ThresholdSensorImpl implements ThresholdSensor {
         }
     }
 
-    static class Builder {
+    /**
+     * Use to build a ThresholdSensor. Should only be used once per sensor built, since
+     * parameters are not reset after calls to build(). For ease of retrievingnew Builders, use
+     * {@link BuilderFactory}.
+     */
+    public static class Builder {
         private final Resources mResources;
         private final AsyncSensorManager mSensorManager;
         private final Execution mExecution;
@@ -318,7 +336,7 @@ class ThresholdSensorImpl implements ThresholdSensor {
 
         @VisibleForTesting
         Sensor findSensorByType(String sensorType, boolean requireWakeUp) {
-            if (sensorType.isEmpty()) {
+            if (TextUtils.isEmpty(sensorType)) {
                 return null;
             }
 
@@ -334,6 +352,31 @@ class ThresholdSensorImpl implements ThresholdSensor {
             }
 
             return sensor;
+        }
+    }
+
+    /**
+     * Factory that creates a new ThresholdSensorImpl.Builder. In general, Builders should not be
+     * reused after creating a ThresholdSensor or else there may be default threshold and sensor
+     * values set from the previous built sensor.
+     */
+    public static class BuilderFactory {
+        private final Resources mResources;
+        private final AsyncSensorManager mSensorManager;
+        private final Execution mExecution;
+
+        @Inject
+        BuilderFactory(
+                @Main Resources resources,
+                AsyncSensorManager sensorManager,
+                Execution execution) {
+            mResources = resources;
+            mSensorManager = sensorManager;
+            mExecution = execution;
+        }
+
+        ThresholdSensorImpl.Builder createBuilder() {
+            return new Builder(mResources, mSensorManager, mExecution);
         }
     }
 }

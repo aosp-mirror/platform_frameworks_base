@@ -369,7 +369,6 @@ import com.android.server.SystemConfig;
 import com.android.server.SystemServerInitThreadPool;
 import com.android.server.Watchdog;
 import com.android.server.apphibernation.AppHibernationManagerInternal;
-import com.android.server.apphibernation.AppHibernationService;
 import com.android.server.compat.CompatChange;
 import com.android.server.compat.PlatformCompat;
 import com.android.server.net.NetworkPolicyManagerInternal;
@@ -1460,7 +1459,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
     final ArtManagerService mArtManagerService;
 
-    private final PackageDexOptimizer mPackageDexOptimizer;
+    final PackageDexOptimizer mPackageDexOptimizer;
     // DexManager handles the usage of dex files (e.g. secondary files, whether or not a package
     // is used by other apps).
     private final DexManager mDexManager;
@@ -4795,7 +4794,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     try {
                         mDomainVerificationManager.printState(writer, packageName,
                                 UserHandle.USER_ALL, mSettings::getPackageLPr);
-                    } catch (PackageManager.NameNotFoundException e) {
+                    } catch (Exception e) {
                         pw.println("Failure printing domain verification information");
                         Slog.e(TAG, "Failure printing domain verification information", e);
                     }
@@ -10587,7 +10586,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 userId);
         // Find any earlier preferred or last chosen entries and nuke them
         findPreferredActivityNotLocked(
-                intent, resolvedType, flags, query, false, true, false, userId);
+                intent, resolvedType, flags, query, 0, false, true, false, userId);
         // Add the new activity as the last chosen for this filter
         addPreferredActivity(filter, match, null, activity, false, userId,
                 "Setting last chosen", false);
@@ -10603,7 +10602,7 @@ public class PackageManagerService extends IPackageManager.Stub
         final List<ResolveInfo> query = queryIntentActivitiesInternal(intent, resolvedType, flags,
                 userId);
         return findPreferredActivityNotLocked(
-                intent, resolvedType, flags, query, false, false, false, userId);
+                intent, resolvedType, flags, query, 0, false, false, false, userId);
     }
 
     private void requestInstantAppResolutionPhaseTwo(AuxiliaryResolveInfo responseObj,
@@ -10645,7 +10644,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 // If we have saved a preference for a preferred activity for
                 // this Intent, use that.
                 ResolveInfo ri = findPreferredActivityNotLocked(intent, resolvedType,
-                        flags, query, true, false, debug, userId, queryMayBeFiltered);
+                        flags, query, r0.priority, true, false, debug, userId, queryMayBeFiltered);
                 if (ri != null) {
                     return ri;
                 }
@@ -10791,17 +10790,17 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     ResolveInfo findPreferredActivityNotLocked(Intent intent, String resolvedType, int flags,
-            List<ResolveInfo> query, boolean always,
+            List<ResolveInfo> query, int priority, boolean always,
             boolean removeMatches, boolean debug, int userId) {
         return findPreferredActivityNotLocked(
-                intent, resolvedType, flags, query, always, removeMatches, debug, userId,
+                intent, resolvedType, flags, query, priority, always, removeMatches, debug, userId,
                 UserHandle.getAppId(Binder.getCallingUid()) >= Process.FIRST_APPLICATION_UID);
     }
 
     // TODO: handle preferred activities missing while user has amnesia
     /** <b>must not hold {@link #mLock}</b> */
     ResolveInfo findPreferredActivityNotLocked(Intent intent, String resolvedType, int flags,
-            List<ResolveInfo> query, boolean always,
+            List<ResolveInfo> query, int priority, boolean always,
             boolean removeMatches, boolean debug, int userId, boolean queryMayBeFiltered) {
         if (Thread.holdsLock(mLock)) {
             Slog.wtf(TAG, "Calling thread " + Thread.currentThread().getName()
@@ -12723,7 +12722,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
             }
 
-            if (!PackageDexOptimizer.canOptimizePackage(pkg)) {
+            if (!mPackageDexOptimizer.canOptimizePackage(pkg)) {
                 if (DEBUG_DEXOPT) {
                     Log.i(TAG, "Skipping update of non-optimizable app " + pkg.getPackageName());
                 }
@@ -12804,7 +12803,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     return;
                 }
             } else {
-                if (isInstantApp(packageName, callingUserId)) {
+                if (isInstantAppInternal(packageName, callingUserId, Process.SYSTEM_UID)) {
                     return;
                 }
             }
@@ -12975,15 +12974,10 @@ public class PackageManagerService extends IPackageManager.Stub
         ArraySet<String> pkgs = new ArraySet<>();
         synchronized (mLock) {
             for (AndroidPackage p : mPackages.values()) {
-                if (PackageDexOptimizer.canOptimizePackage(p)) {
+                if (mPackageDexOptimizer.canOptimizePackage(p)) {
                     pkgs.add(p.getPackageName());
                 }
             }
-        }
-        if (AppHibernationService.isAppHibernationEnabled()) {
-            AppHibernationManagerInternal appHibernationManager =
-                    mInjector.getLocalService(AppHibernationManagerInternal.class);
-            pkgs.removeIf(pkgName -> appHibernationManager.isHibernatingGlobally(pkgName));
         }
         return pkgs;
     }
@@ -15344,7 +15338,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     mResolveActivity.processName = "system:ui";
                     mResolveActivity.launchMode = ActivityInfo.LAUNCH_MULTIPLE;
                     mResolveActivity.documentLaunchMode = ActivityInfo.DOCUMENT_LAUNCH_NEVER;
-                    mResolveActivity.flags = ActivityInfo.FLAG_EXCLUDE_FROM_RECENTS;
+                    mResolveActivity.flags = ActivityInfo.FLAG_EXCLUDE_FROM_RECENTS
+                            | ActivityInfo.FLAG_RELINQUISH_TASK_IDENTITY;
                     mResolveActivity.theme = R.style.Theme_Material_Dialog_Alert;
                     mResolveActivity.exported = true;
                     mResolveActivity.enabled = true;
@@ -23546,7 +23541,7 @@ public class PackageManagerService extends IPackageManager.Stub
         final List<ResolveInfo> resolveInfos = queryIntentActivitiesInternal(intent, null,
                 MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE, userId);
         final ResolveInfo preferredResolveInfo = findPreferredActivityNotLocked(
-                intent, null, 0, resolveInfos, true, false, false, userId);
+                intent, null, 0, resolveInfos, 0, true, false, false, userId);
         final String packageName = preferredResolveInfo != null
                 && preferredResolveInfo.activityInfo != null
                 ? preferredResolveInfo.activityInfo.packageName : null;
@@ -24247,24 +24242,24 @@ public class PackageManagerService extends IPackageManager.Stub
         }
         enforceCrossUserPermission(callingUid, userId, true /* requireFullPermission */,
                 true /* checkShell */, "stop package");
-        boolean shouldUnhibernate = false;
         // writer
         synchronized (mLock) {
             final PackageSetting ps = mSettings.getPackageLPr(packageName);
-            if (ps != null && ps.getStopped(userId) && !stopped) {
-                shouldUnhibernate = true;
-            }
             if (!shouldFilterApplicationLocked(ps, callingUid, userId)
                     && mSettings.setPackageStoppedStateLPw(this, packageName, stopped, userId)) {
                 scheduleWritePackageRestrictionsLocked(userId);
             }
         }
-        if (shouldUnhibernate) {
+        // If this would cause the app to leave force-stop, then also make sure to unhibernate the
+        // app if needed.
+        if (!stopped) {
             mHandler.post(() -> {
                 AppHibernationManagerInternal ah =
                         mInjector.getLocalService(AppHibernationManagerInternal.class);
-                ah.setHibernatingForUser(packageName, userId, false);
-                ah.setHibernatingGlobally(packageName, false);
+                if (ah != null && ah.isHibernatingForUser(packageName, userId)) {
+                    ah.setHibernatingForUser(packageName, userId, false);
+                    ah.setHibernatingGlobally(packageName, false);
+                }
             });
         }
     }
@@ -28796,8 +28791,12 @@ public class PackageManagerService extends IPackageManager.Stub
     @Override
     public void setSplashScreenTheme(@NonNull String packageName, @Nullable String themeId,
             int userId) {
-        int callingUid = Binder.getCallingUid();
-        PackageSetting packageSetting = getPackageSettingForUser(packageName, callingUid, userId);
+        final int callingUid = Binder.getCallingUid();
+        enforceCrossUserPermission(callingUid, userId, false /* requireFullPermission */,
+                false /* checkShell */, "setSplashScreenTheme");
+        enforceOwnerRights(packageName, callingUid);
+        final PackageSetting packageSetting = getPackageSettingForUser(packageName, callingUid,
+                userId);
         if (packageSetting != null) {
             packageSetting.setSplashScreenTheme(userId, themeId);
         }

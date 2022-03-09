@@ -25,6 +25,7 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 
+import com.android.systemui.R;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
@@ -85,6 +86,8 @@ public class ExpandableNotificationRowController implements NodeController {
     private final PeopleNotificationIdentifier mPeopleNotificationIdentifier;
     private final Optional<BubblesManager> mBubblesManagerOptional;
 
+    private final ExpandableNotificationRowDragController mDragController;
+
     @Inject
     public ExpandableNotificationRowController(
             ExpandableNotificationRow view,
@@ -109,7 +112,8 @@ public class ExpandableNotificationRowController implements NodeController {
             FalsingManager falsingManager,
             FalsingCollector falsingCollector,
             PeopleNotificationIdentifier peopleNotificationIdentifier,
-            Optional<BubblesManager> bubblesManagerOptional) {
+            Optional<BubblesManager> bubblesManagerOptional,
+            ExpandableNotificationRowDragController dragController) {
         mView = view;
         mListContainer = listContainer;
         mActivatableNotificationViewController = activatableNotificationViewController;
@@ -134,6 +138,7 @@ public class ExpandableNotificationRowController implements NodeController {
         mFalsingCollector = falsingCollector;
         mPeopleNotificationIdentifier = peopleNotificationIdentifier;
         mBubblesManagerOptional = bubblesManagerOptional;
+        mDragController = dragController;
     }
 
     /**
@@ -164,6 +169,10 @@ public class ExpandableNotificationRowController implements NodeController {
         );
         mView.setDescendantFocusability(ViewGroup.FOCUS_BLOCK_DESCENDANTS);
         if (mAllowLongPress) {
+            if (mView.getResources().getBoolean(R.bool.config_notificationToContents)) {
+                mView.setDragController(mDragController);
+            }
+
             mView.setLongPressListener((v, x, y, item) -> {
                 if (mView.isSummaryWithChildren()) {
                     mView.expandNotification();

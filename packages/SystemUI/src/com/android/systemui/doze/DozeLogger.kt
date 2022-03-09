@@ -24,6 +24,7 @@ import com.android.systemui.log.LogLevel.DEBUG
 import com.android.systemui.log.LogLevel.ERROR
 import com.android.systemui.log.LogLevel.INFO
 import com.android.systemui.log.dagger.DozeLog
+import com.android.systemui.statusbar.policy.DevicePostureController
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -62,6 +63,14 @@ class DozeLogger @Inject constructor(
             bool1 = isDozing
         }, {
             "Dozing=$bool1"
+        })
+    }
+
+    fun logDozingChanged(isDozing: Boolean) {
+        buffer.log(TAG, INFO, {
+            bool1 = isDozing
+        }, {
+            "Dozing changed dozing=$bool1"
         })
     }
 
@@ -192,6 +201,16 @@ class DozeLogger @Inject constructor(
             int1 = reason
         }, {
             "Proximity result reason=${reasonToString(int1)} near=$bool1 millis=$long1"
+        })
+    }
+
+    fun logPostureChanged(posture: Int, partUpdated: String) {
+        buffer.log(TAG, INFO, {
+            int1 = posture
+            str1 = partUpdated
+        }, {
+            "Posture changed, posture=${DevicePostureController.devicePostureToString(int1)}" +
+                    " partUpdated=$str1"
         })
     }
 

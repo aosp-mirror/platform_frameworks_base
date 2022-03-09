@@ -21,6 +21,7 @@ import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.annotation.IntDef
 import android.content.Context
+import android.content.res.Configuration
 import android.graphics.Rect
 import android.util.MathUtils
 import android.view.View
@@ -41,6 +42,7 @@ import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.KeyguardStateController
+import com.android.systemui.util.Utils
 import com.android.systemui.util.animation.UniqueObjectHostView
 import javax.inject.Inject
 
@@ -185,6 +187,8 @@ class MediaHierarchyManager @Inject constructor(
      */
     @MediaLocation
     private var currentAttachmentLocation = -1
+
+    private var inSplitShade = false
 
     /**
      * Is there any active media in the carousel?
@@ -390,8 +394,9 @@ class MediaHierarchyManager @Inject constructor(
     init {
         updateConfiguration()
         configurationController.addCallback(object : ConfigurationController.ConfigurationListener {
-            override fun onDensityOrFontScaleChanged() {
+            override fun onConfigChanged(newConfig: Configuration?) {
                 updateConfiguration()
+                updateDesiredLocation(forceNoAnimation = true, forceStateUpdate = true)
             }
         })
         statusBarStateController.addCallback(object : StatusBarStateController.StateListener {
@@ -467,6 +472,7 @@ class MediaHierarchyManager @Inject constructor(
     private fun updateConfiguration() {
         distanceForFullShadeTransition = context.resources.getDimensionPixelSize(
                 R.dimen.lockscreen_shade_media_transition_distance)
+        inSplitShade = Utils.shouldUseSplitNotificationShade(context.resources)
     }
 
     /**
@@ -803,7 +809,7 @@ class MediaHierarchyManager @Inject constructor(
     private fun getQSTransformationProgress(): Float {
         val currentHost = getHost(desiredLocation)
         val previousHost = getHost(previousLocation)
-        if (hasActiveMedia && currentHost?.location == LOCATION_QS) {
+        if (hasActiveMedia && (currentHost?.location == LOCATION_QS && !inSplitShade)) {
             if (previousHost?.location == LOCATION_QQS) {
                 if (previousHost.visible || statusbarState != StatusBarState.KEYGUARD) {
                     return qsExpansion
@@ -934,7 +940,7 @@ class MediaHierarchyManager @Inject constructor(
                 statusbarState == StatusBarState.FULLSCREEN_USER_SWITCHER))
         val allowedOnLockscreen = notifLockscreenUserManager.shouldShowLockscreenNotifications()
         val location = when {
-            qsExpansion > 0.0f && !onLockscreen -> LOCATION_QS
+            (qsExpansion > 0.0f || inSplitShade) && !onLockscreen -> LOCATION_QS
             qsExpansion > 0.4f && onLockscreen -> LOCATION_QS
             !hasActiveMedia -> LOCATION_QS
             onLockscreen && isTransformingToFullShadeAndInQQS() -> LOCATION_QQS

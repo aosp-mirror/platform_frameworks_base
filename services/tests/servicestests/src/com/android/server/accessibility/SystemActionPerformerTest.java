@@ -296,14 +296,6 @@ public class SystemActionPerformerTest {
     }
 
     @Test
-    public void testToggleSplitScreen_legacy() {
-        setupWithRealContext();
-        mSystemActionPerformer.performSystemAction(
-                AccessibilityService.GLOBAL_ACTION_TOGGLE_SPLIT_SCREEN);
-        verify(mMockStatusBarManagerInternal).toggleSplitScreen();
-    }
-
-    @Test
     public void testScreenshot_requestsFromScreenshotHelper_legacy() {
         setupWithMockContext();
         mSystemActionPerformer.performSystemAction(

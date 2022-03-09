@@ -16,8 +16,12 @@
 
 package com.android.internal.os;
 
+import static android.os.BatteryStats.NUM_SCREEN_BRIGHTNESS_BINS;
 import static android.os.BatteryStats.STATS_SINCE_CHARGED;
 import static android.os.BatteryStats.WAKE_TYPE_PARTIAL;
+
+import static com.android.internal.os.BatteryStatsImpl.ExternalStatsSync.UPDATE_CPU;
+import static com.android.internal.os.BatteryStatsImpl.ExternalStatsSync.UPDATE_DISPLAY;
 
 import android.app.ActivityManager;
 import android.os.BatteryStats;
@@ -37,8 +41,10 @@ import com.android.internal.power.MeasuredEnergyStats;
 
 import junit.framework.TestCase;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.IntConsumer;
 
 /**
  * Test various BatteryStatsImpl noteStart methods.
@@ -317,18 +323,130 @@ public class BatteryStatsNoteTest extends TestCase {
     public void testNoteScreenStateLocked() throws Exception {
         final MockClocks clocks = new MockClocks(); // holds realtime and uptime in ms
         MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
+        bi.initMeasuredEnergyStats(new String[]{"FOO", "BAR"});
 
         bi.updateTimeBasesLocked(true, Display.STATE_ON, 0, 0);
-        bi.noteScreenStateLocked(Display.STATE_ON);
-        bi.noteScreenStateLocked(Display.STATE_DOZE);
+        bi.noteScreenStateLocked(0, Display.STATE_ON);
+
+        bi.noteScreenStateLocked(0, Display.STATE_DOZE);
         assertTrue(bi.getOnBatteryScreenOffTimeBase().isRunning());
-        assertEquals(bi.getScreenState(), Display.STATE_DOZE);
-        bi.noteScreenStateLocked(Display.STATE_ON);
+        assertEquals(Display.STATE_DOZE, bi.getScreenState());
+        assertEquals(UPDATE_CPU | UPDATE_DISPLAY, bi.getAndClearExternalStatsSyncFlags());
+
+        bi.noteScreenStateLocked(0, Display.STATE_ON);
         assertFalse(bi.getOnBatteryScreenOffTimeBase().isRunning());
-        assertEquals(bi.getScreenState(), Display.STATE_ON);
-        bi.noteScreenStateLocked(Display.STATE_OFF);
+        assertEquals(Display.STATE_ON, bi.getScreenState());
+        assertEquals(UPDATE_CPU | UPDATE_DISPLAY, bi.getAndClearExternalStatsSyncFlags());
+
+        bi.noteScreenStateLocked(0, Display.STATE_OFF);
         assertTrue(bi.getOnBatteryScreenOffTimeBase().isRunning());
-        assertEquals(bi.getScreenState(), Display.STATE_OFF);
+        assertEquals(Display.STATE_OFF, bi.getScreenState());
+        assertEquals(UPDATE_CPU | UPDATE_DISPLAY, bi.getAndClearExternalStatsSyncFlags());
+
+        bi.noteScreenStateLocked(0, Display.STATE_DOZE_SUSPEND);
+        assertTrue(bi.getOnBatteryScreenOffTimeBase().isRunning());
+        assertEquals(Display.STATE_DOZE_SUSPEND, bi.getScreenState());
+        assertEquals(UPDATE_CPU | UPDATE_DISPLAY, bi.getAndClearExternalStatsSyncFlags());
+
+        // STATE_VR note should map to STATE_ON.
+        bi.noteScreenStateLocked(0, Display.STATE_VR);
+        assertFalse(bi.getOnBatteryScreenOffTimeBase().isRunning());
+        assertEquals(Display.STATE_ON, bi.getScreenState());
+        assertEquals(UPDATE_CPU | UPDATE_DISPLAY, bi.getAndClearExternalStatsSyncFlags());
+
+        // STATE_ON_SUSPEND note should map to STATE_ON.
+        bi.noteScreenStateLocked(0, Display.STATE_ON_SUSPEND);
+        assertFalse(bi.getOnBatteryScreenOffTimeBase().isRunning());
+        assertEquals(Display.STATE_ON, bi.getScreenState());
+        // Transition from ON to ON state should not cause an External Sync
+        assertEquals(0, bi.getAndClearExternalStatsSyncFlags());
+    }
+
+    /**
+     * Test BatteryStatsImpl.noteScreenStateLocked sets timebases and screen states correctly for
+     * multi display devices
+     */
+    @SmallTest
+    public void testNoteScreenStateLocked_multiDisplay() throws Exception {
+        final MockClocks clocks = new MockClocks(); // holds realtime and uptime in ms
+        MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
+        bi.setDisplayCountLocked(2);
+        bi.initMeasuredEnergyStats(new String[]{"FOO", "BAR"});
+
+        bi.updateTimeBasesLocked(true, Display.STATE_OFF, 0, 0);
+        bi.noteScreenStateLocked(0, Display.STATE_OFF);
+        bi.noteScreenStateLocked(1, Display.STATE_OFF);
+
+        bi.noteScreenStateLocked(0, Display.STATE_DOZE);
+        assertTrue(bi.getOnBatteryScreenOffTimeBase().isRunning());
+        assertEquals(Display.STATE_DOZE, bi.getScreenState());
+        assertEquals(UPDATE_CPU | UPDATE_DISPLAY, bi.getAndClearExternalStatsSyncFlags());
+
+        bi.noteScreenStateLocked(0, Display.STATE_ON);
+        assertEquals(Display.STATE_ON, bi.getScreenState());
+        assertFalse(bi.getOnBatteryScreenOffTimeBase().isRunning());
+        assertEquals(UPDATE_CPU | UPDATE_DISPLAY, bi.getAndClearExternalStatsSyncFlags());
+
+        bi.noteScreenStateLocked(0, Display.STATE_OFF);
+        assertTrue(bi.getOnBatteryScreenOffTimeBase().isRunning());
+        assertEquals(Display.STATE_OFF, bi.getScreenState());
+        assertEquals(UPDATE_CPU | UPDATE_DISPLAY, bi.getAndClearExternalStatsSyncFlags());
+
+        bi.noteScreenStateLocked(0, Display.STATE_DOZE_SUSPEND);
+        assertTrue(bi.getOnBatteryScreenOffTimeBase().isRunning());
+        assertEquals(Display.STATE_DOZE_SUSPEND, bi.getScreenState());
+        assertEquals(UPDATE_CPU | UPDATE_DISPLAY, bi.getAndClearExternalStatsSyncFlags());
+
+        // STATE_VR note should map to STATE_ON.
+        bi.noteScreenStateLocked(0, Display.STATE_VR);
+        assertFalse(bi.getOnBatteryScreenOffTimeBase().isRunning());
+        assertEquals(Display.STATE_ON, bi.getScreenState());
+        assertEquals(UPDATE_CPU | UPDATE_DISPLAY, bi.getAndClearExternalStatsSyncFlags());
+
+        // STATE_ON_SUSPEND note should map to STATE_ON.
+        bi.noteScreenStateLocked(0, Display.STATE_ON_SUSPEND);
+        assertFalse(bi.getOnBatteryScreenOffTimeBase().isRunning());
+        assertEquals(Display.STATE_ON, bi.getScreenState());
+        // Transition from ON to ON state should not cause an External Sync
+        assertEquals(0, bi.getAndClearExternalStatsSyncFlags());
+
+        bi.noteScreenStateLocked(1, Display.STATE_DOZE);
+        assertFalse(bi.getOnBatteryScreenOffTimeBase().isRunning());
+        // Should remain STATE_ON since display0 is still on.
+        assertEquals(Display.STATE_ON, bi.getScreenState());
+        // Overall screen state did not change, so no need to sync CPU stats.
+        assertEquals(UPDATE_DISPLAY, bi.getAndClearExternalStatsSyncFlags());
+
+        bi.noteScreenStateLocked(0, Display.STATE_DOZE);
+        assertTrue(bi.getOnBatteryScreenOffTimeBase().isRunning());
+        assertEquals(Display.STATE_DOZE, bi.getScreenState());
+        assertEquals(UPDATE_CPU | UPDATE_DISPLAY, bi.getAndClearExternalStatsSyncFlags());
+
+        bi.noteScreenStateLocked(0, Display.STATE_ON);
+        assertFalse(bi.getOnBatteryScreenOffTimeBase().isRunning());
+        assertEquals(Display.STATE_ON, bi.getScreenState());
+        assertEquals(UPDATE_CPU | UPDATE_DISPLAY, bi.getAndClearExternalStatsSyncFlags());
+
+        bi.noteScreenStateLocked(0, Display.STATE_OFF);
+        assertTrue(bi.getOnBatteryScreenOffTimeBase().isRunning());
+        assertEquals(Display.STATE_DOZE, bi.getScreenState());
+        assertEquals(UPDATE_CPU | UPDATE_DISPLAY, bi.getAndClearExternalStatsSyncFlags());
+
+        bi.noteScreenStateLocked(0, Display.STATE_DOZE_SUSPEND);
+        assertTrue(bi.getOnBatteryScreenOffTimeBase().isRunning());
+        assertEquals(Display.STATE_DOZE, bi.getScreenState());
+        // Overall screen state did not change, so no need to sync CPU stats.
+        assertEquals(UPDATE_DISPLAY, bi.getAndClearExternalStatsSyncFlags());
+
+        bi.noteScreenStateLocked(0, Display.STATE_VR);
+        assertFalse(bi.getOnBatteryScreenOffTimeBase().isRunning());
+        assertEquals(Display.STATE_ON, bi.getScreenState());
+        assertEquals(UPDATE_CPU | UPDATE_DISPLAY, bi.getAndClearExternalStatsSyncFlags());
+
+        bi.noteScreenStateLocked(0, Display.STATE_ON_SUSPEND);
+        assertFalse(bi.getOnBatteryScreenOffTimeBase().isRunning());
+        assertEquals(Display.STATE_ON, bi.getScreenState());
+        assertEquals(0, bi.getAndClearExternalStatsSyncFlags());
     }
 
     /*
@@ -352,32 +470,317 @@ public class BatteryStatsNoteTest extends TestCase {
         bi.updateTimeBasesLocked(true, Display.STATE_UNKNOWN, 100_000, 100_000);
         // Turn on display at 200us
         clocks.realtime = clocks.uptime = 200;
-        bi.noteScreenStateLocked(Display.STATE_ON);
+        bi.noteScreenStateLocked(0, Display.STATE_ON);
         assertEquals(150_000, bi.computeBatteryRealtime(250_000, STATS_SINCE_CHARGED));
         assertEquals(100_000, bi.computeBatteryScreenOffRealtime(250_000, STATS_SINCE_CHARGED));
         assertEquals(50_000, bi.getScreenOnTime(250_000, STATS_SINCE_CHARGED));
         assertEquals(0, bi.getScreenDozeTime(250_000, STATS_SINCE_CHARGED));
+        assertEquals(50_000, bi.getDisplayScreenOnTime(0, 250_000));
+        assertEquals(0, bi.getDisplayScreenDozeTime(0, 250_000));
 
         clocks.realtime = clocks.uptime = 310;
-        bi.noteScreenStateLocked(Display.STATE_OFF);
+        bi.noteScreenStateLocked(0, Display.STATE_OFF);
         assertEquals(250_000, bi.computeBatteryRealtime(350_000, STATS_SINCE_CHARGED));
         assertEquals(140_000, bi.computeBatteryScreenOffRealtime(350_000, STATS_SINCE_CHARGED));
         assertEquals(110_000, bi.getScreenOnTime(350_000, STATS_SINCE_CHARGED));
         assertEquals(0, bi.getScreenDozeTime(350_000, STATS_SINCE_CHARGED));
+        assertEquals(110_000, bi.getDisplayScreenOnTime(0, 350_000));
+        assertEquals(0, bi.getDisplayScreenDozeTime(0, 350_000));
 
         clocks.realtime = clocks.uptime = 400;
-        bi.noteScreenStateLocked(Display.STATE_DOZE);
+        bi.noteScreenStateLocked(0, Display.STATE_DOZE);
         assertEquals(400_000, bi.computeBatteryRealtime(500_000, STATS_SINCE_CHARGED));
         assertEquals(290_000, bi.computeBatteryScreenOffRealtime(500_000, STATS_SINCE_CHARGED));
         assertEquals(110_000, bi.getScreenOnTime(500_000, STATS_SINCE_CHARGED));
         assertEquals(100_000, bi.getScreenDozeTime(500_000, STATS_SINCE_CHARGED));
+        assertEquals(110_000, bi.getDisplayScreenOnTime(0, 500_000));
+        assertEquals(100_000, bi.getDisplayScreenDozeTime(0, 500_000));
 
         clocks.realtime = clocks.uptime = 1000;
-        bi.noteScreenStateLocked(Display.STATE_OFF);
+        bi.noteScreenStateLocked(0, Display.STATE_OFF);
         assertEquals(1400_000, bi.computeBatteryRealtime(1500_000, STATS_SINCE_CHARGED));
         assertEquals(1290_000, bi.computeBatteryScreenOffRealtime(1500_000, STATS_SINCE_CHARGED));
         assertEquals(110_000, bi.getScreenOnTime(1500_000, STATS_SINCE_CHARGED));
         assertEquals(600_000, bi.getScreenDozeTime(1500_000, STATS_SINCE_CHARGED));
+        assertEquals(110_000, bi.getDisplayScreenOnTime(0, 1500_000));
+        assertEquals(600_000, bi.getDisplayScreenDozeTime(0, 1500_000));
+    }
+
+    /*
+     * Test BatteryStatsImpl.noteScreenStateLocked updates timers correctly for multi display
+     * devices.
+     */
+    @SmallTest
+    public void testNoteScreenStateTimersLocked_multiDisplay() throws Exception {
+        final MockClocks clocks = new MockClocks(); // holds realtime and uptime in ms
+        MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
+        bi.setDisplayCountLocked(2);
+
+        clocks.realtime = clocks.uptime = 100;
+        // Device startup, setOnBatteryLocked calls updateTimebases
+        bi.updateTimeBasesLocked(true, Display.STATE_UNKNOWN, 100_000, 100_000);
+        // Turn on display at 200us
+        clocks.realtime = clocks.uptime = 200;
+        bi.noteScreenStateLocked(0, Display.STATE_ON);
+        bi.noteScreenStateLocked(1, Display.STATE_OFF);
+        assertEquals(150_000, bi.computeBatteryRealtime(250_000, STATS_SINCE_CHARGED));
+        assertEquals(100_000, bi.computeBatteryScreenOffRealtime(250_000, STATS_SINCE_CHARGED));
+        assertEquals(50_000, bi.getScreenOnTime(250_000, STATS_SINCE_CHARGED));
+        assertEquals(0, bi.getScreenDozeTime(250_000, STATS_SINCE_CHARGED));
+        assertEquals(50_000, bi.getDisplayScreenOnTime(0, 250_000));
+        assertEquals(0, bi.getDisplayScreenDozeTime(0, 250_000));
+        assertEquals(0, bi.getDisplayScreenOnTime(1, 250_000));
+        assertEquals(0, bi.getDisplayScreenDozeTime(1, 250_000));
+
+        clocks.realtime = clocks.uptime = 310;
+        bi.noteScreenStateLocked(0, Display.STATE_OFF);
+        assertEquals(250_000, bi.computeBatteryRealtime(350_000, STATS_SINCE_CHARGED));
+        assertEquals(140_000, bi.computeBatteryScreenOffRealtime(350_000, STATS_SINCE_CHARGED));
+        assertEquals(110_000, bi.getScreenOnTime(350_000, STATS_SINCE_CHARGED));
+        assertEquals(0, bi.getScreenDozeTime(350_000, STATS_SINCE_CHARGED));
+        assertEquals(110_000, bi.getDisplayScreenOnTime(0, 350_000));
+        assertEquals(0, bi.getDisplayScreenDozeTime(0, 350_000));
+        assertEquals(0, bi.getDisplayScreenOnTime(1, 350_000));
+        assertEquals(0, bi.getDisplayScreenDozeTime(1, 350_000));
+
+        clocks.realtime = clocks.uptime = 400;
+        bi.noteScreenStateLocked(0, Display.STATE_DOZE);
+        assertEquals(400_000, bi.computeBatteryRealtime(500_000, STATS_SINCE_CHARGED));
+        assertEquals(290_000, bi.computeBatteryScreenOffRealtime(500_000, STATS_SINCE_CHARGED));
+        assertEquals(110_000, bi.getScreenOnTime(500_000, STATS_SINCE_CHARGED));
+        assertEquals(100_000, bi.getScreenDozeTime(500_000, STATS_SINCE_CHARGED));
+        assertEquals(110_000, bi.getDisplayScreenOnTime(0, 500_000));
+        assertEquals(100_000, bi.getDisplayScreenDozeTime(0, 500_000));
+        assertEquals(0, bi.getDisplayScreenOnTime(1, 500_000));
+        assertEquals(0, bi.getDisplayScreenDozeTime(1, 500_000));
+
+        clocks.realtime = clocks.uptime = 1000;
+        bi.noteScreenStateLocked(0, Display.STATE_OFF);
+        assertEquals(1000_000, bi.computeBatteryRealtime(1100_000, STATS_SINCE_CHARGED));
+        assertEquals(890_000, bi.computeBatteryScreenOffRealtime(1100_000, STATS_SINCE_CHARGED));
+        assertEquals(110_000, bi.getScreenOnTime(1100_000, STATS_SINCE_CHARGED));
+        assertEquals(600_000, bi.getScreenDozeTime(1100_000, STATS_SINCE_CHARGED));
+        assertEquals(110_000, bi.getDisplayScreenOnTime(0, 1100_000));
+        assertEquals(600_000, bi.getDisplayScreenDozeTime(0, 1100_000));
+        assertEquals(0, bi.getDisplayScreenOnTime(1, 1100_000));
+        assertEquals(0, bi.getDisplayScreenDozeTime(1, 1100_000));
+
+        clocks.realtime = clocks.uptime = 1200;
+        // Change state of second display to doze
+        bi.noteScreenStateLocked(1, Display.STATE_DOZE);
+        assertEquals(1150_000, bi.computeBatteryRealtime(1250_000, STATS_SINCE_CHARGED));
+        assertEquals(1040_000, bi.computeBatteryScreenOffRealtime(1250_000, STATS_SINCE_CHARGED));
+        assertEquals(110_000, bi.getScreenOnTime(1250_000, STATS_SINCE_CHARGED));
+        assertEquals(650_000, bi.getScreenDozeTime(1250_000, STATS_SINCE_CHARGED));
+        assertEquals(110_000, bi.getDisplayScreenOnTime(0, 1250_000));
+        assertEquals(600_000, bi.getDisplayScreenDozeTime(0, 1250_000));
+        assertEquals(0, bi.getDisplayScreenOnTime(1, 1250_000));
+        assertEquals(50_000, bi.getDisplayScreenDozeTime(1, 1250_000));
+
+        clocks.realtime = clocks.uptime = 1310;
+        bi.noteScreenStateLocked(0, Display.STATE_ON);
+        assertEquals(1250_000, bi.computeBatteryRealtime(1350_000, STATS_SINCE_CHARGED));
+        assertEquals(1100_000, bi.computeBatteryScreenOffRealtime(1350_000, STATS_SINCE_CHARGED));
+        assertEquals(150_000, bi.getScreenOnTime(1350_000, STATS_SINCE_CHARGED));
+        assertEquals(710_000, bi.getScreenDozeTime(1350_000, STATS_SINCE_CHARGED));
+        assertEquals(150_000, bi.getDisplayScreenOnTime(0, 1350_000));
+        assertEquals(600_000, bi.getDisplayScreenDozeTime(0, 1350_000));
+        assertEquals(0, bi.getDisplayScreenOnTime(1, 1350_000));
+        assertEquals(150_000, bi.getDisplayScreenDozeTime(1, 1350_000));
+
+        clocks.realtime = clocks.uptime = 1400;
+        bi.noteScreenStateLocked(0, Display.STATE_DOZE);
+        assertEquals(1400_000, bi.computeBatteryRealtime(1500_000, STATS_SINCE_CHARGED));
+        assertEquals(1200_000, bi.computeBatteryScreenOffRealtime(1500_000, STATS_SINCE_CHARGED));
+        assertEquals(200_000, bi.getScreenOnTime(1500_000, STATS_SINCE_CHARGED));
+        assertEquals(810_000, bi.getScreenDozeTime(1500_000, STATS_SINCE_CHARGED));
+        assertEquals(200_000, bi.getDisplayScreenOnTime(0, 1500_000));
+        assertEquals(700_000, bi.getDisplayScreenDozeTime(0, 1500_000));
+        assertEquals(0, bi.getDisplayScreenOnTime(1, 1500_000));
+        assertEquals(300_000, bi.getDisplayScreenDozeTime(1, 1500_000));
+
+        clocks.realtime = clocks.uptime = 2000;
+        bi.noteScreenStateLocked(0, Display.STATE_OFF);
+        assertEquals(2000_000, bi.computeBatteryRealtime(2100_000, STATS_SINCE_CHARGED));
+        assertEquals(1800_000, bi.computeBatteryScreenOffRealtime(2100_000, STATS_SINCE_CHARGED));
+        assertEquals(200_000, bi.getScreenOnTime(2100_000, STATS_SINCE_CHARGED));
+        assertEquals(1410_000, bi.getScreenDozeTime(2100_000, STATS_SINCE_CHARGED));
+        assertEquals(200_000, bi.getDisplayScreenOnTime(0, 2100_000));
+        assertEquals(1200_000, bi.getDisplayScreenDozeTime(0, 2100_000));
+        assertEquals(0, bi.getDisplayScreenOnTime(1, 2100_000));
+        assertEquals(900_000, bi.getDisplayScreenDozeTime(1, 2100_000));
+
+
+        clocks.realtime = clocks.uptime = 2200;
+        // Change state of second display to on
+        bi.noteScreenStateLocked(1, Display.STATE_ON);
+        assertEquals(2150_000, bi.computeBatteryRealtime(2250_000, STATS_SINCE_CHARGED));
+        assertEquals(1900_000, bi.computeBatteryScreenOffRealtime(2250_000, STATS_SINCE_CHARGED));
+        assertEquals(250_000, bi.getScreenOnTime(2250_000, STATS_SINCE_CHARGED));
+        assertEquals(1510_000, bi.getScreenDozeTime(2250_000, STATS_SINCE_CHARGED));
+        assertEquals(200_000, bi.getDisplayScreenOnTime(0, 2250_000));
+        assertEquals(1200_000, bi.getDisplayScreenDozeTime(0, 2250_000));
+        assertEquals(50_000, bi.getDisplayScreenOnTime(1, 2250_000));
+        assertEquals(1000_000, bi.getDisplayScreenDozeTime(1, 2250_000));
+
+        clocks.realtime = clocks.uptime = 2310;
+        bi.noteScreenStateLocked(0, Display.STATE_ON);
+        assertEquals(2250_000, bi.computeBatteryRealtime(2350_000, STATS_SINCE_CHARGED));
+        assertEquals(1900_000, bi.computeBatteryScreenOffRealtime(2350_000, STATS_SINCE_CHARGED));
+        assertEquals(350_000, bi.getScreenOnTime(2350_000, STATS_SINCE_CHARGED));
+        assertEquals(1510_000, bi.getScreenDozeTime(2350_000, STATS_SINCE_CHARGED));
+        assertEquals(240_000, bi.getDisplayScreenOnTime(0, 2350_000));
+        assertEquals(1200_000, bi.getDisplayScreenDozeTime(0, 2350_000));
+        assertEquals(150_000, bi.getDisplayScreenOnTime(1, 2350_000));
+        assertEquals(1000_000, bi.getDisplayScreenDozeTime(1, 2350_000));
+
+        clocks.realtime = clocks.uptime = 2400;
+        bi.noteScreenStateLocked(0, Display.STATE_DOZE);
+        assertEquals(2400_000, bi.computeBatteryRealtime(2500_000, STATS_SINCE_CHARGED));
+        assertEquals(1900_000, bi.computeBatteryScreenOffRealtime(2500_000, STATS_SINCE_CHARGED));
+        assertEquals(500_000, bi.getScreenOnTime(2500_000, STATS_SINCE_CHARGED));
+        assertEquals(1510_000, bi.getScreenDozeTime(2500_000, STATS_SINCE_CHARGED));
+        assertEquals(290_000, bi.getDisplayScreenOnTime(0, 2500_000));
+        assertEquals(1300_000, bi.getDisplayScreenDozeTime(0, 2500_000));
+        assertEquals(300_000, bi.getDisplayScreenOnTime(1, 2500_000));
+        assertEquals(1000_000, bi.getDisplayScreenDozeTime(1, 2500_000));
+
+        clocks.realtime = clocks.uptime = 3000;
+        bi.noteScreenStateLocked(0, Display.STATE_OFF);
+        assertEquals(3000_000, bi.computeBatteryRealtime(3100_000, STATS_SINCE_CHARGED));
+        assertEquals(1900_000, bi.computeBatteryScreenOffRealtime(3100_000, STATS_SINCE_CHARGED));
+        assertEquals(1100_000, bi.getScreenOnTime(3100_000, STATS_SINCE_CHARGED));
+        assertEquals(1510_000, bi.getScreenDozeTime(3100_000, STATS_SINCE_CHARGED));
+        assertEquals(290_000, bi.getDisplayScreenOnTime(0, 3100_000));
+        assertEquals(1800_000, bi.getDisplayScreenDozeTime(0, 3100_000));
+        assertEquals(900_000, bi.getDisplayScreenOnTime(1, 3100_000));
+        assertEquals(1000_000, bi.getDisplayScreenDozeTime(1, 3100_000));
+    }
+
+
+    /**
+     * Test BatteryStatsImpl.noteScreenBrightnessLocked updates timers correctly.
+     */
+    @SmallTest
+    public void testScreenBrightnessLocked_multiDisplay() throws Exception {
+        final MockClocks clocks = new MockClocks(); // holds realtime and uptime in ms
+        MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
+
+        final int numDisplay = 2;
+        bi.setDisplayCountLocked(numDisplay);
+
+
+        final long[] overallExpected = new long[NUM_SCREEN_BRIGHTNESS_BINS];
+        final long[][] perDisplayExpected = new long[numDisplay][NUM_SCREEN_BRIGHTNESS_BINS];
+        class Bookkeeper {
+            public long currentTimeMs = 100;
+            public int overallActiveBin = -1;
+            public int[] perDisplayActiveBin = new int[numDisplay];
+        }
+        final Bookkeeper bk = new Bookkeeper();
+        Arrays.fill(bk.perDisplayActiveBin, -1);
+
+        IntConsumer incrementTime = inc -> {
+            bk.currentTimeMs += inc;
+            if (bk.overallActiveBin >= 0) {
+                overallExpected[bk.overallActiveBin] += inc;
+            }
+            for (int i = 0; i < numDisplay; i++) {
+                final int bin = bk.perDisplayActiveBin[i];
+                if (bin >= 0) {
+                    perDisplayExpected[i][bin] += inc;
+                }
+            }
+            clocks.realtime = clocks.uptime = bk.currentTimeMs;
+        };
+
+        bi.updateTimeBasesLocked(true, Display.STATE_ON, 0, 0);
+        bi.noteScreenStateLocked(0, Display.STATE_ON);
+        bi.noteScreenStateLocked(1, Display.STATE_ON);
+
+        incrementTime.accept(100);
+        bi.noteScreenBrightnessLocked(0, 25);
+        bi.noteScreenBrightnessLocked(1, 25);
+        // floor(25/256*5) = bin 0
+        bk.overallActiveBin = 0;
+        bk.perDisplayActiveBin[0] = 0;
+        bk.perDisplayActiveBin[1] = 0;
+
+        incrementTime.accept(50);
+        checkScreenBrightnesses(overallExpected, perDisplayExpected, bi, bk.currentTimeMs);
+
+        incrementTime.accept(13);
+        bi.noteScreenBrightnessLocked(0, 100);
+        // floor(25/256*5) = bin 1
+        bk.overallActiveBin = 1;
+        bk.perDisplayActiveBin[0] = 1;
+
+        incrementTime.accept(44);
+        checkScreenBrightnesses(overallExpected, perDisplayExpected, bi, bk.currentTimeMs);
+
+        incrementTime.accept(22);
+        bi.noteScreenBrightnessLocked(1, 200);
+        // floor(200/256*5) = bin 3
+        bk.overallActiveBin = 3;
+        bk.perDisplayActiveBin[1] = 3;
+
+        incrementTime.accept(33);
+        checkScreenBrightnesses(overallExpected, perDisplayExpected, bi, bk.currentTimeMs);
+
+        incrementTime.accept(77);
+        bi.noteScreenBrightnessLocked(0, 150);
+        // floor(150/256*5) = bin 2
+        // Overall active bin should not change
+        bk.perDisplayActiveBin[0] = 2;
+
+        incrementTime.accept(88);
+        checkScreenBrightnesses(overallExpected, perDisplayExpected, bi, bk.currentTimeMs);
+
+        incrementTime.accept(11);
+        bi.noteScreenStateLocked(1, Display.STATE_OFF);
+        // Display 1 should timers should stop incrementing
+        // Overall active bin should fallback to display 0's bin
+        bk.overallActiveBin = 2;
+        bk.perDisplayActiveBin[1] = -1;
+
+        incrementTime.accept(99);
+        checkScreenBrightnesses(overallExpected, perDisplayExpected, bi, bk.currentTimeMs);
+
+        incrementTime.accept(200);
+        bi.noteScreenBrightnessLocked(0, 255);
+        // floor(150/256*5) = bin 4
+        bk.overallActiveBin = 4;
+        bk.perDisplayActiveBin[0] = 4;
+
+        incrementTime.accept(300);
+        checkScreenBrightnesses(overallExpected, perDisplayExpected, bi, bk.currentTimeMs);
+
+        incrementTime.accept(200);
+        bi.noteScreenStateLocked(0, Display.STATE_DOZE);
+        // No displays are on. No brightness timers should be active.
+        bk.overallActiveBin = -1;
+        bk.perDisplayActiveBin[0] = -1;
+
+        incrementTime.accept(300);
+        checkScreenBrightnesses(overallExpected, perDisplayExpected, bi, bk.currentTimeMs);
+
+        incrementTime.accept(400);
+        bi.noteScreenStateLocked(1, Display.STATE_ON);
+        // Display 1 turned back on.
+        bk.overallActiveBin = 3;
+        bk.perDisplayActiveBin[1] = 3;
+
+        incrementTime.accept(500);
+        checkScreenBrightnesses(overallExpected, perDisplayExpected, bi, bk.currentTimeMs);
+
+        incrementTime.accept(600);
+        bi.noteScreenStateLocked(0, Display.STATE_ON);
+        // Display 0 turned back on.
+        bk.overallActiveBin = 4;
+        bk.perDisplayActiveBin[0] = 4;
+
+        incrementTime.accept(700);
+        checkScreenBrightnesses(overallExpected, perDisplayExpected, bi, bk.currentTimeMs);
     }
 
     @SmallTest
@@ -595,7 +998,7 @@ public class BatteryStatsNoteTest extends TestCase {
         bi.initMeasuredEnergyStats(new String[]{"FOO", "BAR"});
 
         clocks.realtime = 0;
-        int screen = Display.STATE_OFF;
+        int[] screen = new int[]{Display.STATE_OFF};
         boolean battery = false;
 
         final int uid1 = 10500;
@@ -605,35 +1008,35 @@ public class BatteryStatsNoteTest extends TestCase {
         long globalDoze = 0;
 
         // Case A: uid1 off, uid2 off, battery off, screen off
-        bi.updateTimeBasesLocked(battery, screen, clocks.realtime*1000, 0);
+        bi.updateTimeBasesLocked(battery, screen[0], clocks.realtime * 1000, 0);
         bi.setOnBatteryInternal(battery);
-        bi.updateDisplayMeasuredEnergyStatsLocked(500_000, screen, clocks.realtime);
+        bi.updateDisplayMeasuredEnergyStatsLocked(new long[]{500_000}, screen, clocks.realtime);
         checkMeasuredCharge("A", uid1, blame1, uid2, blame2, globalDoze, bi);
 
         // Case B: uid1 off, uid2 off, battery ON,  screen off
         clocks.realtime += 17;
         battery = true;
-        bi.updateTimeBasesLocked(battery, screen, clocks.realtime*1000, 0);
+        bi.updateTimeBasesLocked(battery, screen[0], clocks.realtime * 1000, 0);
         bi.setOnBatteryInternal(battery);
         clocks.realtime += 19;
-        bi.updateDisplayMeasuredEnergyStatsLocked(510_000, screen, clocks.realtime);
+        bi.updateDisplayMeasuredEnergyStatsLocked(new long[]{510_000}, screen, clocks.realtime);
         checkMeasuredCharge("B", uid1, blame1, uid2, blame2, globalDoze, bi);
 
         // Case C: uid1 ON,  uid2 off, battery on,  screen off
         clocks.realtime += 18;
         setFgState(uid1, true, bi);
         clocks.realtime += 18;
-        bi.updateDisplayMeasuredEnergyStatsLocked(520_000, screen, clocks.realtime);
+        bi.updateDisplayMeasuredEnergyStatsLocked(new long[]{520_000}, screen, clocks.realtime);
         checkMeasuredCharge("C", uid1, blame1, uid2, blame2, globalDoze, bi);
 
         // Case D: uid1 on,  uid2 off, battery on,  screen ON
         clocks.realtime += 17;
-        screen = Display.STATE_ON;
-        bi.updateDisplayMeasuredEnergyStatsLocked(521_000, screen, clocks.realtime);
+        screen[0] = Display.STATE_ON;
+        bi.updateDisplayMeasuredEnergyStatsLocked(new long[]{521_000}, screen, clocks.realtime);
         blame1 += 0; // Screen had been off during the measurement period
         checkMeasuredCharge("D.1", uid1, blame1, uid2, blame2, globalDoze, bi);
         clocks.realtime += 101;
-        bi.updateDisplayMeasuredEnergyStatsLocked(530_000, screen, clocks.realtime);
+        bi.updateDisplayMeasuredEnergyStatsLocked(new long[]{530_000}, screen, clocks.realtime);
         blame1 += 530_000;
         checkMeasuredCharge("D.2", uid1, blame1, uid2, blame2, globalDoze, bi);
 
@@ -641,33 +1044,33 @@ public class BatteryStatsNoteTest extends TestCase {
         clocks.realtime += 20;
         setFgState(uid2, true, bi);
         clocks.realtime += 40;
-        bi.updateDisplayMeasuredEnergyStatsLocked(540_000, screen, clocks.realtime);
+        bi.updateDisplayMeasuredEnergyStatsLocked(new long[]{540_000}, screen, clocks.realtime);
         // In the past 60ms, sum of fg is 20+40+40=100ms. uid1 is blamed for 60/100; uid2 for 40/100
         blame1 += 540_000 * (20 + 40) / (20 + 40 + 40);
-        blame2 += 540_000 * ( 0 + 40) / (20 + 40 + 40);
+        blame2 += 540_000 * (0 + 40) / (20 + 40 + 40);
         checkMeasuredCharge("E", uid1, blame1, uid2, blame2, globalDoze, bi);
 
         // Case F: uid1 on,  uid2 OFF, battery on,  screen on
         clocks.realtime += 40;
         setFgState(uid2, false, bi);
         clocks.realtime += 120;
-        bi.updateDisplayMeasuredEnergyStatsLocked(550_000, screen, clocks.realtime);
+        bi.updateDisplayMeasuredEnergyStatsLocked(new long[]{550_000}, screen, clocks.realtime);
         // In the past 160ms, sum f fg is 200ms. uid1 is blamed for 40+120 of it; uid2 for 40 of it.
         blame1 += 550_000 * (40 + 120) / (40 + 40 + 120);
-        blame2 += 550_000 * (40 + 0  ) / (40 + 40 + 120);
+        blame2 += 550_000 * (40 + 0) / (40 + 40 + 120);
         checkMeasuredCharge("F", uid1, blame1, uid2, blame2, globalDoze, bi);
 
         // Case G: uid1 on,  uid2 off,  battery on, screen DOZE
         clocks.realtime += 5;
-        screen = Display.STATE_DOZE;
-        bi.updateDisplayMeasuredEnergyStatsLocked(570_000, screen, clocks.realtime);
+        screen[0] = Display.STATE_DOZE;
+        bi.updateDisplayMeasuredEnergyStatsLocked(new long[]{570_000}, screen, clocks.realtime);
         blame1 += 570_000; // All of this pre-doze time is blamed on uid1.
         checkMeasuredCharge("G", uid1, blame1, uid2, blame2, globalDoze, bi);
 
         // Case H: uid1 on,  uid2 off,  battery on, screen ON
         clocks.realtime += 6;
-        screen = Display.STATE_ON;
-        bi.updateDisplayMeasuredEnergyStatsLocked(580_000, screen, clocks.realtime);
+        screen[0] = Display.STATE_ON;
+        bi.updateDisplayMeasuredEnergyStatsLocked(new long[]{580_000}, screen, clocks.realtime);
         blame1 += 0; // The screen had been doze during the energy period
         globalDoze += 580_000;
         checkMeasuredCharge("H", uid1, blame1, uid2, blame2, globalDoze, bi);
@@ -821,5 +1224,20 @@ public class BatteryStatsNoteTest extends TestCase {
         assertEquals("Wrong uid2 blame in bucket 0 for Case " + caseName, blame2A, actualUid2[0]);
 
         assertEquals("Wrong uid2 blame in bucket 1 for Case " + caseName, blame2B, actualUid2[1]);
+    }
+
+    private void checkScreenBrightnesses(long[] overallExpected, long[][] perDisplayExpected,
+            BatteryStatsImpl bi, long currentTimeMs) {
+        final int numDisplay = bi.getDisplayCount();
+        for (int bin = 0; bin < NUM_SCREEN_BRIGHTNESS_BINS; bin++) {
+            for (int display = 0; display < numDisplay; display++) {
+                assertEquals("Failure for display " + display + " screen brightness bin " + bin,
+                        perDisplayExpected[display][bin] * 1000,
+                        bi.getDisplayScreenBrightnessTime(display, bin, currentTimeMs * 1000));
+            }
+            assertEquals("Failure for overall screen brightness bin " + bin,
+                    overallExpected[bin] * 1000,
+                    bi.getScreenBrightnessTime(bin, currentTimeMs * 1000, STATS_SINCE_CHARGED));
+        }
     }
 }

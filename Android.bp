@@ -110,6 +110,7 @@ filegroup {
         ":framework_native_aidl",
         ":gatekeeper_aidl",
         ":gsiservice_aidl",
+        ":guiconstants_aidl",
         ":idmap2_aidl",
         ":idmap2_core_aidl",
         ":incidentcompanion_aidl",
@@ -319,6 +320,8 @@ java_defaults {
         "modules-utils-synchronous-result-receiver",
         "modules-utils-os",
         "framework-permission-aidl-java",
+        "spatializer-aidl-java",
+        "audiopolicy-types-aidl-java",
     ],
 }
 

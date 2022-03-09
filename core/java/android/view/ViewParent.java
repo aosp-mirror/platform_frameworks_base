@@ -412,6 +412,9 @@ public interface ViewParent {
      *            <li>{@link AccessibilityEvent#CONTENT_CHANGE_TYPE_SUBTREE}
      *            <li>{@link AccessibilityEvent#CONTENT_CHANGE_TYPE_TEXT}
      *            <li>{@link AccessibilityEvent#CONTENT_CHANGE_TYPE_UNDEFINED}
+     *            <li>{@link AccessibilityEvent#CONTENT_CHANGE_TYPE_DRAG_STARTED}
+     *            <li>{@link AccessibilityEvent#CONTENT_CHANGE_TYPE_DRAG_CANCELLED}
+     *            <li>{@link AccessibilityEvent#CONTENT_CHANGE_TYPE_DRAG_DROPPED}
      *            </ul>
      */
     public void notifySubtreeAccessibilityStateChanged(

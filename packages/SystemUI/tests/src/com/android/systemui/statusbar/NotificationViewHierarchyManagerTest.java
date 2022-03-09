@@ -36,6 +36,7 @@ import android.widget.LinearLayout;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
 import com.android.systemui.statusbar.notification.AssistantFeedbackController;
 import com.android.systemui.statusbar.notification.DynamicChildBindController;
@@ -75,6 +76,7 @@ public class NotificationViewHierarchyManagerTest extends SysuiTestCase {
     @Spy private FakeListContainer mListContainer = new FakeListContainer();
 
     // Dependency mocks:
+    @Mock private FeatureFlags mFeatureFlags;
     @Mock private NotificationEntryManager mEntryManager;
     @Mock private NotificationLockscreenUserManager mLockscreenUserManager;
     @Mock private NotificationGroupManagerLegacy mGroupManager;
@@ -101,10 +103,14 @@ public class NotificationViewHierarchyManagerTest extends SysuiTestCase {
         when(mVisualStabilityManager.areGroupChangesAllowed()).thenReturn(true);
         when(mVisualStabilityManager.isReorderingAllowed()).thenReturn(true);
 
+        when(mFeatureFlags.isNewNotifPipelineEnabled()).thenReturn(false);
+        when(mFeatureFlags.checkLegacyPipelineEnabled()).thenReturn(true);
+
         mHelper = new NotificationTestHelper(mContext, mDependency, TestableLooper.get(this));
 
         mViewHierarchyManager = new NotificationViewHierarchyManager(mContext,
-                mHandler, mLockscreenUserManager, mGroupManager, mVisualStabilityManager,
+                mHandler, mFeatureFlags, mLockscreenUserManager, mGroupManager,
+                mVisualStabilityManager,
                 mock(StatusBarStateControllerImpl.class), mEntryManager,
                 mock(KeyguardBypassController.class),
                 Optional.of(mock(Bubbles.class)),

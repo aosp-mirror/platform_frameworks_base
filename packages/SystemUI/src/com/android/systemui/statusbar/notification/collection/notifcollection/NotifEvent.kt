@@ -64,10 +64,11 @@ data class EntryAddedEvent(
 }
 
 data class EntryUpdatedEvent(
-    val entry: NotificationEntry
+    val entry: NotificationEntry,
+    val fromSystem: Boolean
 ) : NotifEvent() {
     override fun dispatchToListener(listener: NotifCollectionListener) {
-        listener.onEntryUpdated(entry)
+        listener.onEntryUpdated(entry, fromSystem)
     }
 }
 

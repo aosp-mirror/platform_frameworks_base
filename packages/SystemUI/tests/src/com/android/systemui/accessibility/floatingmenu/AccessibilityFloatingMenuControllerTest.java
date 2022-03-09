@@ -282,9 +282,12 @@ public class AccessibilityFloatingMenuControllerTest extends SysuiTestCase {
         mTargetsObserver = spy(Dependency.get(AccessibilityButtonTargetsObserver.class));
         mModeObserver = spy(Dependency.get(AccessibilityButtonModeObserver.class));
         mKeyguardUpdateMonitor = Dependency.get(KeyguardUpdateMonitor.class);
+        final AccessibilityFloatingMenuController controller =
+                new AccessibilityFloatingMenuController(mContextWrapper, mTargetsObserver,
+                        mModeObserver, mKeyguardUpdateMonitor);
+        controller.init();
 
-        return new AccessibilityFloatingMenuController(mContextWrapper, mTargetsObserver,
-                mModeObserver, mKeyguardUpdateMonitor);
+        return controller;
     }
 
     private void enableAccessibilityFloatingMenuConfig() {

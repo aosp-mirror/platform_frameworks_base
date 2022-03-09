@@ -33,6 +33,7 @@ import android.testing.TestableLooper;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
@@ -76,7 +77,8 @@ public class NotificationGroupManagerLegacyTest extends SysuiTestCase {
         mGroupManager = new NotificationGroupManagerLegacy(
                 mock(StatusBarStateController.class),
                 () -> mPeopleNotificationIdentifier,
-                Optional.of(mock(Bubbles.class)));
+                Optional.of(mock(Bubbles.class)),
+                mock(DumpManager.class));
         mGroupManager.setHeadsUpManager(mHeadsUpManager);
     }
 
@@ -176,20 +178,68 @@ public class NotificationGroupManagerLegacyTest extends SysuiTestCase {
     }
 
     /**
+     * Helper for testing various sibling counts
+     */
+    private void helpTestAlertOverrideWithSiblings(int numSiblings) {
+        helpTestAlertOverride(
+                /* numSiblings */ numSiblings,
+                /* summaryAlert */ Notification.GROUP_ALERT_SUMMARY,
+                /* childAlert */ Notification.GROUP_ALERT_SUMMARY,
+                /* siblingAlert */ Notification.GROUP_ALERT_SUMMARY,
+                /* expectAlertOverride */ true);
+    }
+
+    @Test
+    public void testAlertOverrideWithParentAlertAll() {
+        // tests that summary can have GROUP_ALERT_ALL and this still works
+        helpTestAlertOverride(
+                /* numSiblings */ 1,
+                /* summaryAlert */ Notification.GROUP_ALERT_ALL,
+                /* childAlert */ Notification.GROUP_ALERT_SUMMARY,
+                /* siblingAlert */ Notification.GROUP_ALERT_SUMMARY,
+                /* expectAlertOverride */ true);
+    }
+
+    @Test
+    public void testAlertOverrideWithParentAlertChild() {
+        // Tests that if the summary alerts CHILDREN, there's no alertOverride
+        helpTestAlertOverride(
+                /* numSiblings */ 1,
+                /* summaryAlert */ Notification.GROUP_ALERT_CHILDREN,
+                /* childAlert */ Notification.GROUP_ALERT_SUMMARY,
+                /* siblingAlert */ Notification.GROUP_ALERT_SUMMARY,
+                /* expectAlertOverride */ false);
+    }
+
+    @Test
+    public void testAlertOverrideWithChildrenAlertAll() {
+        // Tests that if the children alert ALL, there's no alertOverride
+        helpTestAlertOverride(
+                /* numSiblings */ 1,
+                /* summaryAlert */ Notification.GROUP_ALERT_SUMMARY,
+                /* childAlert */ Notification.GROUP_ALERT_ALL,
+                /* siblingAlert */ Notification.GROUP_ALERT_ALL,
+                /* expectAlertOverride */ false);
+    }
+
+    /**
      * This tests, for a group with a priority entry and the given number of siblings, that:
      * 1) the priority entry is identified as the alertOverride for the group
      * 2) the onAlertOverrideChanged method is called at that time
      * 3) when the priority entry is removed, these are reversed
      */
-    private void helpTestAlertOverrideWithSiblings(int numSiblings) {
-        int groupAlert = Notification.GROUP_ALERT_SUMMARY;
+    private void helpTestAlertOverride(int numSiblings,
+            @Notification.GroupAlertBehavior int summaryAlert,
+            @Notification.GroupAlertBehavior int childAlert,
+            @Notification.GroupAlertBehavior int siblingAlert,
+            boolean expectAlertOverride) {
         // Create entries in an order so that the priority entry can be deemed the newest child.
         NotificationEntry[] siblings = new NotificationEntry[numSiblings];
         for (int i = 0; i < numSiblings; i++) {
-            siblings[i] = mGroupTestHelper.createChildNotification(groupAlert);
+            siblings[i] = mGroupTestHelper.createChildNotification(siblingAlert);
         }
-        NotificationEntry priorityEntry = mGroupTestHelper.createChildNotification(groupAlert);
-        NotificationEntry summaryEntry = mGroupTestHelper.createSummaryNotification(groupAlert);
+        NotificationEntry priorityEntry = mGroupTestHelper.createChildNotification(childAlert);
+        NotificationEntry summaryEntry = mGroupTestHelper.createSummaryNotification(summaryAlert);
 
         // The priority entry is an important conversation.
         when(mPeopleNotificationIdentifier.getPeopleNotificationType(eq(priorityEntry)))
@@ -205,6 +255,14 @@ public class NotificationGroupManagerLegacyTest extends SysuiTestCase {
             mGroupManager.onEntryAdded(siblings[i]);
         }
         mGroupManager.onEntryAdded(priorityEntry);
+
+        if (!expectAlertOverride) {
+            // Test expectation is that there will NOT be an alert, so verify that!
+            NotificationGroup summaryGroup =
+                    mGroupManager.getGroupForSummary(summaryEntry.getSbn());
+            assertNull(summaryGroup.alertOverride);
+            return;
+        }
 
         // Verify that the summary group has the priority child as its alertOverride
         NotificationGroup summaryGroup = mGroupManager.getGroupForSummary(summaryEntry.getSbn());

@@ -966,6 +966,7 @@ please see styles_device_defaults.xml.
     <style name="TextAppearance.Toast">
         <item name="fontFamily">@*android:string/config_bodyFontFamily</item>
         <item name="textSize">14sp</item>
+        <item name="lineHeight">20sp</item>
         <item name="textColor">?android:attr/textColorPrimary</item>
     </style>
 

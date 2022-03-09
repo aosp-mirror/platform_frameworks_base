@@ -23,6 +23,7 @@ import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager.UserChangedListener;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.collection.coordinator.dagger.CoordinatorScope;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
 
 import javax.inject.Inject;
@@ -37,6 +38,7 @@ import javax.inject.Inject;
  * TODO: The NotificationLockscreenUserManager currently maintains the list of active user profiles.
  *  We should spin that off into a standalone section at some point.
  */
+@CoordinatorScope
 public class HideNotifsForOtherUsersCoordinator implements Coordinator {
     private final NotificationLockscreenUserManager mLockscreenUserManager;
     private final SharedCoordinatorLogger mLogger;

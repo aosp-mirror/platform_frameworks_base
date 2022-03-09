@@ -128,10 +128,6 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
-    public void setKeyguardCandidateLw(WindowState win) {
-    }
-
-    @Override
     public Animation createHiddenByKeyguardExit(boolean onWallpaper,
             boolean goingToNotificationShade, boolean subtleAnimation) {
         return null;
@@ -368,7 +364,7 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
-    public int applyKeyguardOcclusionChange() {
+    public int applyKeyguardOcclusionChange(boolean keyguardOccludingStarted) {
         return 0;
     }
 

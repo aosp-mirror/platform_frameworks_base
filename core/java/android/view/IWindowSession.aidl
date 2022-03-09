@@ -32,6 +32,7 @@ import android.view.MotionEvent;
 import android.view.WindowManager;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
+import android.view.InsetsVisibilities;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
@@ -46,12 +47,12 @@ import java.util.List;
  */
 interface IWindowSession {
     int addToDisplay(IWindow window, in WindowManager.LayoutParams attrs,
-            in int viewVisibility, in int layerStackId, in InsetsState requestedVisibility,
+            in int viewVisibility, in int layerStackId, in InsetsVisibilities requestedVisibilities,
             out InputChannel outInputChannel, out InsetsState insetsState,
             out InsetsSourceControl[] activeControls);
     int addToDisplayAsUser(IWindow window, in WindowManager.LayoutParams attrs,
             in int viewVisibility, in int layerStackId, in int userId,
-            in InsetsState requestedVisibility, out InputChannel outInputChannel,
+            in InsetsVisibilities requestedVisibilities, out InputChannel outInputChannel,
             out InsetsState insetsState, out InsetsSourceControl[] activeControls);
     int addToDisplayWithoutInputChannel(IWindow window, in WindowManager.LayoutParams attrs,
             in int viewVisibility, in int layerStackId, out InsetsState insetsState);
@@ -174,6 +175,11 @@ interface IWindowSession {
             float touchX, float touchY, float thumbCenterX, float thumbCenterY, in ClipData data);
 
     /**
+     * Drops the content of the current drag operation for accessibility
+     */
+    boolean dropForAccessibility(IWindow window, int x, int y);
+
+    /**
      * Report the result of a drop action targeted to the given window.
      * consumed is 'true' when the drop was accepted by a valid recipient,
      * 'false' otherwise.
@@ -285,10 +291,9 @@ interface IWindowSession {
     oneway void updateTapExcludeRegion(IWindow window, in Region region);
 
     /**
-     * Called when the client has changed the local insets state, and now the server should reflect
-     * that new state.
+     * Updates the requested visibilities of insets.
      */
-    oneway void insetsModified(IWindow window, in InsetsState state);
+    oneway void updateRequestedVisibilities(IWindow window, in InsetsVisibilities visibilities);
 
     /**
      * Called when the system gesture exclusion has changed.

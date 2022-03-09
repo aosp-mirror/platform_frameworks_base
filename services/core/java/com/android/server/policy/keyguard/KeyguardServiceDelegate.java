@@ -29,7 +29,6 @@ import com.android.internal.policy.IKeyguardExitCallback;
 import com.android.internal.policy.IKeyguardService;
 import com.android.server.UiThread;
 import com.android.server.policy.WindowManagerPolicy.OnKeyguardExitResult;
-import com.android.server.wm.WindowManagerService;
 
 import java.io.PrintWriter;
 
@@ -67,7 +66,7 @@ public class KeyguardServiceDelegate {
         boolean showing;
         boolean showingAndNotOccluded;
         boolean inputRestricted;
-        boolean occluded;
+        volatile boolean occluded;
         boolean secure;
         boolean dreaming;
         boolean systemIsReady;
@@ -235,13 +234,6 @@ public class KeyguardServiceDelegate {
         return false;
     }
 
-    public boolean hasLockscreenWallpaper() {
-        if (mKeyguardService != null) {
-            return mKeyguardService.hasLockscreenWallpaper();
-        }
-        return false;
-    }
-
     public boolean hasKeyguard() {
         return mKeyguardState.deviceHasKeyguard;
     }
@@ -259,17 +251,16 @@ public class KeyguardServiceDelegate {
         }
     }
 
-    /**
-     * @deprecated Notify occlude status change via remote animation.
-     */
-    @Deprecated
-    public void setOccluded(boolean isOccluded, boolean animate) {
-        if (!WindowManagerService.sEnableRemoteKeyguardOccludeAnimation
-                && mKeyguardService != null) {
+    public void setOccluded(boolean isOccluded, boolean animate, boolean notify) {
+        if (mKeyguardService != null && notify) {
             if (DEBUG) Log.v(TAG, "setOccluded(" + isOccluded + ") animate=" + animate);
             mKeyguardService.setOccluded(isOccluded, animate);
         }
         mKeyguardState.occluded = isOccluded;
+    }
+
+    public boolean isOccluded() {
+        return mKeyguardState.occluded;
     }
 
     public void dismiss(IKeyguardDismissCallback callback, CharSequence message) {
@@ -406,8 +397,7 @@ public class KeyguardServiceDelegate {
     }
 
     public void startKeyguardExitAnimation(long startTime, long fadeoutDuration) {
-        if (!WindowManagerService.sEnableRemoteKeyguardGoingAwayAnimation
-                && mKeyguardService != null) {
+        if (mKeyguardService != null) {
             mKeyguardService.startKeyguardExitAnimation(startTime, fadeoutDuration);
         }
     }

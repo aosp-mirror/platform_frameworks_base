@@ -25,6 +25,7 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_OLD_TASK_CLOSE;
+import static android.view.WindowManager.TRANSIT_OLD_TASK_FRAGMENT_CHANGE;
 import static android.view.WindowManager.TRANSIT_OLD_TASK_OPEN;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.window.DisplayAreaOrganizer.FEATURE_DEFAULT_TASK_CONTAINER;
@@ -52,6 +53,7 @@ import static com.android.server.wm.WindowContainer.POSITION_TOP;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -1069,6 +1071,163 @@ public class WindowContainerTests extends WindowTestsBase {
         // Trigger for the same relative layer call if forceUpdate=true
         container.assignRelativeLayer(t, relativeParent, 1 /* layer */, true /* forceUpdate */);
         verify(surfaceAnimator).setRelativeLayer(t, relativeParent, 1 /* layer */);
+    }
+
+    @Test
+    public void testAssignAnimationLayer() {
+        final WindowContainer container = new WindowContainer(mWm);
+        container.mSurfaceControl = mock(SurfaceControl.class);
+        final SurfaceAnimator surfaceAnimator = container.mSurfaceAnimator;
+        final SurfaceFreezer surfaceFreezer = container.mSurfaceFreezer;
+        final SurfaceControl relativeParent = mock(SurfaceControl.class);
+        final SurfaceControl.Transaction t = mock(SurfaceControl.Transaction.class);
+        spyOn(container);
+        spyOn(surfaceAnimator);
+        spyOn(surfaceFreezer);
+
+        container.setLayer(t, 1);
+        container.setRelativeLayer(t, relativeParent, 2);
+
+        // Set through surfaceAnimator if surfaceFreezer doesn't have leash.
+        verify(surfaceAnimator).setLayer(t, 1);
+        verify(surfaceAnimator).setRelativeLayer(t, relativeParent, 2);
+        verify(surfaceFreezer, never()).setLayer(any(), anyInt());
+        verify(surfaceFreezer, never()).setRelativeLayer(any(), any(), anyInt());
+
+        clearInvocations(surfaceAnimator);
+        clearInvocations(surfaceFreezer);
+        doReturn(true).when(surfaceFreezer).hasLeash();
+
+        container.setLayer(t, 1);
+        container.setRelativeLayer(t, relativeParent, 2);
+
+        // Set through surfaceFreezer if surfaceFreezer has leash.
+        verify(surfaceFreezer).setLayer(t, 1);
+        verify(surfaceFreezer).setRelativeLayer(t, relativeParent, 2);
+        verify(surfaceAnimator, never()).setLayer(any(), anyInt());
+        verify(surfaceAnimator, never()).setRelativeLayer(any(), any(), anyInt());
+    }
+
+    @Test
+    public void testStartChangeTransitionWhenPreviousIsNotFinished() {
+        final WindowContainer container = createTaskFragmentWithParentTask(
+                createTask(mDisplayContent), false);
+        container.mSurfaceControl = mock(SurfaceControl.class);
+        final SurfaceAnimator surfaceAnimator = container.mSurfaceAnimator;
+        final SurfaceFreezer surfaceFreezer = container.mSurfaceFreezer;
+        final SurfaceControl.Transaction t = mock(SurfaceControl.Transaction.class);
+        spyOn(container);
+        spyOn(surfaceAnimator);
+        mockSurfaceFreezerSnapshot(surfaceFreezer);
+        doReturn(t).when(container).getPendingTransaction();
+        doReturn(t).when(container).getSyncTransaction();
+
+        // Leash and snapshot created for change transition.
+        container.initializeChangeTransition(new Rect(0, 0, 1000, 2000));
+
+        assertNotNull(surfaceFreezer.mLeash);
+        assertNotNull(surfaceFreezer.mSnapshot);
+        assertEquals(surfaceFreezer.mLeash, container.getAnimationLeash());
+
+        // Start animation: surfaceAnimator take over the leash and snapshot from surfaceFreezer.
+        container.applyAnimationUnchecked(null /* lp */, true /* enter */,
+                TRANSIT_OLD_TASK_FRAGMENT_CHANGE, false /* isVoiceInteraction */,
+                null /* sources */);
+
+        assertNull(surfaceFreezer.mLeash);
+        assertNull(surfaceFreezer.mSnapshot);
+        assertNotNull(surfaceAnimator.mLeash);
+        assertNotNull(surfaceAnimator.mSnapshot);
+        final SurfaceControl prevLeash = surfaceAnimator.mLeash;
+        final SurfaceFreezer.Snapshot prevSnapshot = surfaceAnimator.mSnapshot;
+
+        // Prepare another change transition.
+        container.initializeChangeTransition(new Rect(0, 0, 1000, 2000));
+
+        assertNotNull(surfaceFreezer.mLeash);
+        assertNotNull(surfaceFreezer.mSnapshot);
+        assertEquals(surfaceFreezer.mLeash, container.getAnimationLeash());
+        assertNotEquals(prevLeash, container.getAnimationLeash());
+
+        // Start another animation before the previous one is finished, it should reset the previous
+        // one, but not change the current one.
+        container.applyAnimationUnchecked(null /* lp */, true /* enter */,
+                TRANSIT_OLD_TASK_FRAGMENT_CHANGE, false /* isVoiceInteraction */,
+                null /* sources */);
+
+        verify(container, never()).onAnimationLeashLost(any());
+        verify(surfaceFreezer, never()).unfreeze(any());
+        assertNotNull(surfaceAnimator.mLeash);
+        assertNotNull(surfaceAnimator.mSnapshot);
+        assertEquals(surfaceAnimator.mLeash, container.getAnimationLeash());
+        assertNotEquals(prevLeash, surfaceAnimator.mLeash);
+        assertNotEquals(prevSnapshot, surfaceAnimator.mSnapshot);
+
+        // Clean up after animation finished.
+        surfaceAnimator.mInnerAnimationFinishedCallback.onAnimationFinished(
+                ANIMATION_TYPE_APP_TRANSITION, surfaceAnimator.getAnimation());
+
+        verify(container).onAnimationLeashLost(any());
+        assertNull(surfaceAnimator.mLeash);
+        assertNull(surfaceAnimator.mSnapshot);
+    }
+
+    @Test
+    public void testUnfreezeWindow_removeWindowFromChanging() {
+        final WindowContainer container = createTaskFragmentWithParentTask(
+                createTask(mDisplayContent), false);
+        mockSurfaceFreezerSnapshot(container.mSurfaceFreezer);
+        final SurfaceControl.Transaction t = mock(SurfaceControl.Transaction.class);
+
+        container.initializeChangeTransition(new Rect(0, 0, 1000, 2000));
+
+        assertTrue(mDisplayContent.mChangingContainers.contains(container));
+
+        container.mSurfaceFreezer.unfreeze(t);
+
+        assertFalse(mDisplayContent.mChangingContainers.contains(container));
+    }
+
+    @Test
+    public void testFailToTaskSnapshot_unfreezeWindow() {
+        final WindowContainer container = createTaskFragmentWithParentTask(
+                createTask(mDisplayContent), false);
+        final SurfaceControl.Transaction t = mock(SurfaceControl.Transaction.class);
+        spyOn(container.mSurfaceFreezer);
+
+        container.initializeChangeTransition(new Rect(0, 0, 1000, 2000));
+
+        verify(container.mSurfaceFreezer).freeze(any(), any(), any(), any());
+        verify(container.mSurfaceFreezer).unfreeze(any());
+        assertTrue(mDisplayContent.mChangingContainers.isEmpty());
+    }
+
+    @Test
+    public void testRemoveUnstartedFreezeSurfaceWhenFreezeAgain() {
+        final WindowContainer container = createTaskFragmentWithParentTask(
+                createTask(mDisplayContent), false);
+        container.mSurfaceControl = mock(SurfaceControl.class);
+        final SurfaceFreezer surfaceFreezer = container.mSurfaceFreezer;
+        mockSurfaceFreezerSnapshot(surfaceFreezer);
+        final SurfaceControl.Transaction t = mock(SurfaceControl.Transaction.class);
+        spyOn(container);
+        doReturn(t).when(container).getPendingTransaction();
+        doReturn(t).when(container).getSyncTransaction();
+
+        // Leash and snapshot created for change transition.
+        container.initializeChangeTransition(new Rect(0, 0, 1000, 2000));
+
+        assertNotNull(surfaceFreezer.mLeash);
+        assertNotNull(surfaceFreezer.mSnapshot);
+
+        final SurfaceControl prevLeash = surfaceFreezer.mLeash;
+        final SurfaceFreezer.Snapshot prevSnapshot = surfaceFreezer.mSnapshot;
+        spyOn(prevSnapshot);
+
+        container.initializeChangeTransition(new Rect(0, 0, 1500, 2500));
+
+        verify(t).remove(prevLeash);
+        verify(prevSnapshot).destroy(t);
     }
 
     /* Used so we can gain access to some protected members of the {@link WindowContainer} class */

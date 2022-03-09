@@ -256,7 +256,7 @@ void CanvasContext::setStopped(bool stopped) {
 }
 
 void CanvasContext::allocateBuffers() {
-    if (mNativeSurface && Properties::isDrawingEnabled()) {
+    if (mNativeSurface) {
         ANativeWindow_tryAllocateBuffers(mNativeSurface->getNativeWindow());
     }
 }
@@ -480,8 +480,7 @@ nsecs_t CanvasContext::draw() {
     SkRect dirty;
     mDamageAccumulator.finish(&dirty);
 
-    if (!Properties::isDrawingEnabled() ||
-        (dirty.isEmpty() && Properties::skipEmptyFrames && !surfaceRequiresRedraw())) {
+    if (dirty.isEmpty() && Properties::skipEmptyFrames && !surfaceRequiresRedraw()) {
         mCurrentFrameInfo->addFlag(FrameInfoFlags::SkippedFrame);
         if (auto grContext = getGrContext()) {
             // Submit to ensure that any texture uploads complete and Skia can
@@ -492,10 +491,10 @@ nsecs_t CanvasContext::draw() {
         // Notify the callbacks, even if there's nothing to draw so they aren't waiting
         // indefinitely
         waitOnFences();
-        for (auto& func : mFrameCompleteCallbacks) {
-            std::invoke(func, mFrameNumber);
+        for (auto& func : mFrameCommitCallbacks) {
+            std::invoke(func, false /* didProduceBuffer */);
         }
-        mFrameCompleteCallbacks.clear();
+        mFrameCommitCallbacks.clear();
         return 0;
     }
 
@@ -604,10 +603,10 @@ nsecs_t CanvasContext::draw() {
 #endif
 
     if (didSwap) {
-        for (auto& func : mFrameCompleteCallbacks) {
-            std::invoke(func, frameCompleteNr);
+        for (auto& func : mFrameCommitCallbacks) {
+            std::invoke(func, true /* didProduceBuffer */);
         }
-        mFrameCompleteCallbacks.clear();
+        mFrameCommitCallbacks.clear();
     }
 
     if (requireSwap) {

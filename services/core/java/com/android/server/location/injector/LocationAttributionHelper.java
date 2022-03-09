@@ -24,55 +24,23 @@ import static com.android.server.location.LocationManagerService.TAG;
 
 import android.location.util.identity.CallerIdentity;
 import android.util.ArrayMap;
-import android.util.ArraySet;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
 
 import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
 
 /**
  * Helps manage appop monitoring for multiple location clients.
  */
 public class LocationAttributionHelper {
 
-    private static class BucketKey {
-        private final String mBucket;
-        private final Object mKey;
-
-        private BucketKey(String bucket, Object key) {
-            mBucket = Objects.requireNonNull(bucket);
-            mKey = Objects.requireNonNull(key);
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (o == null || getClass() != o.getClass()) {
-                return false;
-            }
-
-            BucketKey that = (BucketKey) o;
-            return mBucket.equals(that.mBucket)
-                    && mKey.equals(that.mKey);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(mBucket, mKey);
-        }
-    }
-
     private final AppOpsHelper mAppOpsHelper;
 
     @GuardedBy("this")
-    private final Map<CallerIdentity, Set<BucketKey>> mAttributions;
+    private final Map<CallerIdentity, Integer> mAttributions;
     @GuardedBy("this")
-    private final Map<CallerIdentity, Set<BucketKey>> mHighPowerAttributions;
+    private final Map<CallerIdentity, Integer> mHighPowerAttributions;
 
     public LocationAttributionHelper(AppOpsHelper appOpsHelper) {
         mAppOpsHelper = appOpsHelper;
@@ -84,15 +52,16 @@ public class LocationAttributionHelper {
     /**
      * Report normal location usage for the given caller in the given bucket, with a unique key.
      */
-    public synchronized void reportLocationStart(CallerIdentity identity, String bucket,
-            Object key) {
-        Set<BucketKey> keySet = mAttributions.computeIfAbsent(identity,
-                i -> new ArraySet<>());
-        boolean empty = keySet.isEmpty();
-        if (keySet.add(new BucketKey(bucket, key)) && empty) {
-            if (!mAppOpsHelper.startOpNoThrow(OP_MONITOR_LOCATION, identity)) {
-                mAttributions.remove(identity);
+    public synchronized void reportLocationStart(CallerIdentity identity) {
+        identity = CallerIdentity.forAggregation(identity);
+
+        int count = mAttributions.getOrDefault(identity, 0);
+        if (count == 0) {
+            if (mAppOpsHelper.startOpNoThrow(OP_MONITOR_LOCATION, identity)) {
+                mAttributions.put(identity, 1);
             }
+        } else {
+            mAttributions.put(identity, count + 1);
         }
     }
 
@@ -100,13 +69,15 @@ public class LocationAttributionHelper {
      * Report normal location usage has stopped for the given caller in the given bucket, with a
      * unique key.
      */
-    public synchronized void reportLocationStop(CallerIdentity identity, String bucket,
-            Object key) {
-        Set<BucketKey> keySet = mAttributions.get(identity);
-        if (keySet != null && keySet.remove(new BucketKey(bucket, key))
-                && keySet.isEmpty()) {
+    public synchronized void reportLocationStop(CallerIdentity identity) {
+        identity = CallerIdentity.forAggregation(identity);
+
+        int count = mAttributions.getOrDefault(identity, 0);
+        if (count == 1) {
             mAttributions.remove(identity);
             mAppOpsHelper.finishOp(OP_MONITOR_LOCATION, identity);
+        } else if (count > 1) {
+            mAttributions.put(identity, count - 1);
         }
     }
 
@@ -114,19 +85,19 @@ public class LocationAttributionHelper {
      * Report high power location usage for the given caller in the given bucket, with a unique
      * key.
      */
-    public synchronized void reportHighPowerLocationStart(CallerIdentity identity, String bucket,
-            Object key) {
-        Set<BucketKey> keySet = mHighPowerAttributions.computeIfAbsent(identity,
-                i -> new ArraySet<>());
-        boolean empty = keySet.isEmpty();
-        if (keySet.add(new BucketKey(bucket, key)) && empty) {
-            if (mAppOpsHelper.startOpNoThrow(OP_MONITOR_HIGH_POWER_LOCATION, identity)) {
-                if (D) {
-                    Log.v(TAG, "starting high power location attribution for " + identity);
-                }
-            } else {
-                mHighPowerAttributions.remove(identity);
+    public synchronized void reportHighPowerLocationStart(CallerIdentity identity) {
+        identity = CallerIdentity.forAggregation(identity);
+
+        int count = mHighPowerAttributions.getOrDefault(identity, 0);
+        if (count == 0) {
+            if (D) {
+                Log.v(TAG, "starting high power location attribution for " + identity);
             }
+            if (mAppOpsHelper.startOpNoThrow(OP_MONITOR_HIGH_POWER_LOCATION, identity)) {
+                mHighPowerAttributions.put(identity, 1);
+            }
+        } else {
+            mHighPowerAttributions.put(identity, count + 1);
         }
     }
 
@@ -134,16 +105,18 @@ public class LocationAttributionHelper {
      * Report high power location usage has stopped for the given caller in the given bucket,
      * with a unique key.
      */
-    public synchronized void reportHighPowerLocationStop(CallerIdentity identity, String bucket,
-            Object key) {
-        Set<BucketKey> keySet = mHighPowerAttributions.get(identity);
-        if (keySet != null && keySet.remove(new BucketKey(bucket, key))
-                && keySet.isEmpty()) {
+    public synchronized void reportHighPowerLocationStop(CallerIdentity identity) {
+        identity = CallerIdentity.forAggregation(identity);
+
+        int count = mHighPowerAttributions.getOrDefault(identity, 0);
+        if (count == 1) {
             if (D) {
                 Log.v(TAG, "stopping high power location attribution for " + identity);
             }
             mHighPowerAttributions.remove(identity);
             mAppOpsHelper.finishOp(OP_MONITOR_HIGH_POWER_LOCATION, identity);
+        } else if (count > 1) {
+            mHighPowerAttributions.put(identity, count - 1);
         }
     }
 }

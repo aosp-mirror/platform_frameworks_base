@@ -1752,6 +1752,8 @@
     <string name="face_setup_notification_title">Set up Face Unlock</string>
     <!-- Contents of a notification that directs the user to set up face unlock by enrolling their face. [CHAR LIMIT=NONE] -->
     <string name="face_setup_notification_content">Unlock your phone by looking at it</string>
+    <!-- Error message indicating that the camera privacy sensor has been turned on [CHAR LIMIT=NONE] -->
+    <string name="face_sensor_privacy_enabled">To use Face Unlock, turn on <b>Camera access</b> in Settings > Privacy</string>
     <!-- Title of a notification that directs the user to enroll a fingerprint. [CHAR LIMIT=NONE] -->
     <string name="fingerprint_setup_notification_title">Set up more ways to unlock</string>
     <!-- Contents of a notification that directs the user to enroll a fingerprint. [CHAR LIMIT=NONE] -->
@@ -2018,6 +2020,10 @@
     typed when unlocking the screen, and lock your Android TV device or erase all your Android TV device\'s
     data if too many incorrect passwords are typed.</string>
     <!-- Description of policy access to watch user login attempts -->
+    <string name="policydesc_watchLogin" product="automotive">Monitor the number of incorrect passwords
+    typed. when unlocking the screen, and lock the infotainment system or erase all the infotainment system\'s
+    data if too many incorrect passwords are typed.</string>
+    <!-- Description of policy access to watch user login attempts -->
     <string name="policydesc_watchLogin" product="default">Monitor the number of incorrect passwords
     typed. when unlocking the screen, and lock the phone or erase all the phone\'s
     data if too many incorrect passwords are typed.</string>
@@ -2026,6 +2032,9 @@
     if too many incorrect passwords are typed.</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv">Monitor the number of incorrect passwords
     typed when unlocking the screen, and lock your Android TV device or erase all this user\'s data
+    if too many incorrect passwords are typed.</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive">Monitor the number of incorrect passwords
+    typed when unlocking the screen, and lock the infotainment system or erase all this profile\'s data
     if too many incorrect passwords are typed.</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default">Monitor the number of incorrect passwords
     typed when unlocking the screen, and lock the phone or erase all this user\'s data
@@ -2045,13 +2054,19 @@
     <!-- Description of policy access to wipe the user's data -->
     <string name="policydesc_wipeData" product="tv">Erase your Android TV device\'s data without warning by performing a factory data reset.</string>
     <!-- Description of policy access to wipe the user's data -->
+    <string name="policydesc_wipeData" product="automotive">Erase the infotainment system\'s data without warning by performing a factory data reset.</string>
+    <!-- Description of policy access to wipe the user's data -->
     <string name="policydesc_wipeData" product="default">Erase the phone\'s data without warning by performing a factory data reset.</string>
     <!-- Title of policy access to wipe secondary user's data -->
-    <string name="policylab_wipeData_secondaryUser">Erase user data</string>
+    <string name="policylab_wipeData_secondaryUser" product="automotive">Erase profile data</string>
+    <!-- Title of policy access to wipe secondary user's data -->
+    <string name="policylab_wipeData_secondaryUser" product="default">Erase user data</string>
     <!-- Description of policy access to wipe the user's data -->
     <string name="policydesc_wipeData_secondaryUser" product="tablet">Erase this user\'s data on this tablet without warning.</string>
     <!-- Description of policy access to wipe the user's data -->
     <string name="policydesc_wipeData_secondaryUser" product="tv">Erase this user\'s data on this Android TV device without warning.</string>
+    <!-- Description of policy access to wipe the user's data -->
+    <string name="policydesc_wipeData_secondaryUser" product="automotive">Erase this profile\'s data on this infotainment system without warning.</string>
     <!-- Description of policy access to wipe the user's data -->
     <string name="policydesc_wipeData_secondaryUser" product="default">Erase this user\'s data on this phone without warning.</string>
     <!-- Title of policy access to set global proxy -->
@@ -4644,7 +4659,7 @@
     <string name="accessibility_shortcut_multiple_service_warning">Holding down both volume keys for a few seconds turns on accessibility features. This may change how your device works.\n\nCurrent features:\n<xliff:g id="service" example="TalkBack">%1$s</xliff:g>\nYou can change selected features in Settings > Accessibility.</string>
 
     <!-- Used in multiple service warning to list current features. [CHAR LIMIT=none] -->
-    <string name="accessibility_shortcut_multiple_service_list">\t• <xliff:g id="service" example="TalkBack">%1$s</xliff:g>\n</string>
+    <string name="accessibility_shortcut_multiple_service_list">\u0020• <xliff:g id="service" example="TalkBack">%1$s</xliff:g>\n</string>
 
     <!-- Dialog title for dialog shown when this accessibility shortcut is activated, and we want to confirm that the user understands what's going to happen. [CHAR LIMIT=none] -->
     <string name="accessibility_shortcut_single_service_warning_title">Turn on <xliff:g id="service" example="TalkBack">%1$s</xliff:g> shortcut?</string>

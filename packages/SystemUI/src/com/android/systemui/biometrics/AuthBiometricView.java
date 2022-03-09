@@ -636,6 +636,9 @@ public abstract class AuthBiometricView extends LinearLayout {
         mIndicatorView.setText(message);
         mIndicatorView.setTextColor(mTextColorError);
         mIndicatorView.setVisibility(View.VISIBLE);
+        // select to enable marquee unless a screen reader is enabled
+        mIndicatorView.setSelected(!mAccessibilityManager.isEnabled()
+                || !mAccessibilityManager.isTouchExplorationEnabled());
         mHandler.postDelayed(resetMessageRunnable, mInjector.getDelayAfterError());
 
         Utils.notifyAccessibilityContentChanged(mAccessibilityManager, this);
@@ -824,11 +827,25 @@ public abstract class AuthBiometricView extends LinearLayout {
         return new AuthDialog.LayoutParams(width, totalHeight);
     }
 
+    private boolean isLargeDisplay() {
+        return com.android.systemui.util.Utils.shouldUseSplitNotificationShade(getResources());
+    }
+
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         final int width = MeasureSpec.getSize(widthMeasureSpec);
         final int height = MeasureSpec.getSize(heightMeasureSpec);
-        final int newWidth = Math.min(width, height);
+
+        final boolean isLargeDisplay = isLargeDisplay();
+
+        final int newWidth;
+        if (isLargeDisplay) {
+            // TODO(b/201811580): Unless we can come up with a one-size-fits-all equation, we may
+            //  want to consider moving this to an overlay.
+            newWidth = 2 * Math.min(width, height) / 3;
+        } else {
+            newWidth = Math.min(width, height);
+        }
 
         // Use "newWidth" instead, so the landscape dialog width is the same as the portrait
         // width.

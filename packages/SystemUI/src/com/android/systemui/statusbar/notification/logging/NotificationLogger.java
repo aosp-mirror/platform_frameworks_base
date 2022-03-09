@@ -20,6 +20,7 @@ import android.os.Handler;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
+import android.os.Trace;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.util.ArrayMap;
@@ -158,6 +159,9 @@ public class NotificationLogger implements StateListener {
 
             mExpansionStateLogger.onVisibilityChanged(
                     mTmpCurrentlyVisibleNotifications, mTmpCurrentlyVisibleNotifications);
+            Trace.traceCounter(Trace.TRACE_TAG_APP, "Notifications [Active]", N);
+            Trace.traceCounter(Trace.TRACE_TAG_APP, "Notifications [Visible]",
+                    mCurrentlyVisibleNotifications.size());
 
             recycleAllVisibilityObjects(mTmpNoLongerVisibleNotifications);
             mTmpCurrentlyVisibleNotifications.clear();

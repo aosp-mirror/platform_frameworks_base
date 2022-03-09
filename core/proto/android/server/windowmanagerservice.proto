@@ -69,6 +69,7 @@ message RootWindowContainerProto {
     // know what activity types to check for when invoking splitscreen multi-window.
     optional bool is_home_recents_component = 6;
     repeated IdentifierProto pending_activities = 7 [deprecated=true];
+    optional int32 default_min_size_resizable_task = 8;
 }
 
 message BarControllerProto {
@@ -201,7 +202,6 @@ message DisplayContentProto {
     optional .com.android.server.wm.IdentifierProto resumed_activity = 24;
     repeated TaskProto tasks = 25 [deprecated=true];
     optional bool display_ready = 26;
-
     optional WindowStateProto input_method_target = 27;
     optional WindowStateProto input_method_input_target = 28;
     optional WindowStateProto input_method_control_target = 29;
@@ -211,6 +211,8 @@ message DisplayContentProto {
 
     optional DisplayRotationProto display_rotation = 33;
     optional int32 ime_policy = 34;
+    optional bool is_sleeping = 36;
+    repeated string sleep_tokens = 37;
 }
 
 /* represents DisplayArea object */
@@ -278,7 +280,7 @@ message PinnedTaskControllerProto {
 message TaskProto {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-    optional WindowContainerProto window_container = 1;
+    optional WindowContainerProto window_container = 1 [deprecated=true];
     optional int32 id = 2;
     reserved 3; // activity
     optional bool fills_parent = 4;
@@ -295,12 +297,12 @@ message TaskProto {
     optional string real_activity = 13;
     optional string orig_activity = 14;
 
-    optional int32 display_id = 15;
+    optional int32 display_id = 15 [deprecated=true];
     optional int32 root_task_id = 16;
-    optional int32 activity_type = 17 [(.android.typedef) = "android.app.WindowConfiguration.ActivityType"];
+    optional int32 activity_type = 17 [(.android.typedef) = "android.app.WindowConfiguration.ActivityType", deprecated=true] ;
     optional int32 resize_mode = 18 [(.android.typedef) = "android.appwidget.AppWidgetProviderInfo.ResizeModeFlags"];
-    optional int32 min_width = 19;
-    optional int32 min_height = 20;
+    optional int32 min_width = 19 [deprecated=true];
+    optional int32 min_height = 20 [deprecated=true];
 
     optional .android.graphics.RectProto adjusted_bounds = 21;
     optional .android.graphics.RectProto last_non_fullscreen_bounds = 22;
@@ -312,6 +314,18 @@ message TaskProto {
     optional bool created_by_organizer = 28;
     optional string affinity = 29;
     optional bool has_child_pip_activity = 30;
+    optional TaskFragmentProto task_fragment = 31;
+}
+
+/* represents TaskFragment */
+message TaskFragmentProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    optional WindowContainerProto window_container = 1;
+    optional int32 display_id = 2;
+    optional int32 activity_type = 3 [(.android.typedef) = "android.app.WindowConfiguration.ActivityType"];
+    optional int32 min_width = 4;
+    optional int32 min_height = 5;
 }
 
 /* represents ActivityRecordProto */
@@ -352,6 +366,7 @@ message ActivityRecordProto {
     optional bool pip_auto_enter_enabled = 31;
     optional bool in_size_compat_mode = 32;
     optional float min_aspect_ratio = 33;
+    optional bool provides_max_bounds = 34;
 }
 
 /* represents WindowToken */
@@ -469,6 +484,7 @@ message WindowContainerProto {
     optional SurfaceAnimatorProto surface_animator = 4;
     repeated WindowContainerChildProto children = 5;
     optional IdentifierProto identifier = 6;
+    optional .android.view.SurfaceControlProto surface_control = 7;
 }
 
 /* represents a generic child of a WindowContainer */
@@ -494,6 +510,8 @@ message WindowContainerChildProto {
     optional WindowTokenProto window_token = 7;
     /* represents a WindowState child */
     optional WindowStateProto window = 8;
+    /* represents a WindowState child */
+    optional TaskFragmentProto task_fragment = 9;
 }
 
 /* represents ConfigurationContainer */

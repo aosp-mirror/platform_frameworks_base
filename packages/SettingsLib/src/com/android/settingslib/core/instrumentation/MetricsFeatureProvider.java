@@ -97,6 +97,9 @@ public class MetricsFeatureProvider {
 
     /**
      * Logs a simple action without page id or attribution
+     *
+     * @param category the target page
+     * @param taggedData the data for {@link EventLogWriter}
      */
     public void action(Context context, int category, Pair<Integer, Object>... taggedData) {
         for (LogWriter writer : mLoggerWriters) {

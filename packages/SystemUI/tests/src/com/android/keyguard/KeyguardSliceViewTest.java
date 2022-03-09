@@ -54,7 +54,7 @@ public class KeyguardSliceViewTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         LayoutInflater layoutInflater = LayoutInflater.from(getContext());
         mKeyguardSliceView = (KeyguardSliceView) layoutInflater
-                .inflate(R.layout.keyguard_status_area, null);
+                .inflate(R.layout.keyguard_slice_view, null);
         mSliceUri = Uri.parse(KeyguardSliceProvider.KEYGUARD_SLICE_URI);
         SliceProvider.setSpecs(new HashSet<>(Collections.singletonList(SliceSpecs.LIST)));
     }

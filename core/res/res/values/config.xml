@@ -647,14 +647,36 @@
         -->
     </integer-array>
 
+    <!-- When entering this device state (defined in device_state_configuration.xml),
+         we should wake the device. -1 to disable the feature (do not wake on any device-state
+         transition). -->
+    <integer name="config_deviceStateOnWhichToWakeUp">-1</integer>
+
     <!-- Indicate the display area rect for foldable devices in folded state. -->
     <string name="config_foldedArea"></string>
+
+    <!-- Indicates whether to enable an animation when unfolding a device or not -->
+    <bool name="config_unfoldTransitionEnabled">false</bool>
+
+    <!-- Indicates whether to enable hinge angle sensor when using unfold animation -->
+    <bool name="config_unfoldTransitionHingeAngle">false</bool>
 
     <!-- Indicates that the device supports having more than one internal display on at the same
          time. Only applicable to devices with more than one internal display. If this option is
          set to false, DisplayManager will make additional effort to ensure no more than 1 internal
          display is powered on at the same time. -->
     <bool name="config_supportsConcurrentInternalDisplays">true</bool>
+
+    <!-- Map of DeviceState to rotation lock setting. Each entry must be in the format
+         "key:value", for example: "0:1".
+          The keys are device states, and the values are one of
+          Settings.Secure.DeviceStateRotationLockSetting.
+          Any device state that doesn't have a default set here will be treated as
+          DEVICE_STATE_ROTATION_LOCK_IGNORED meaning it will not have its own rotation lock setting.
+          If this map is missing, the feature is disabled and only one global rotation lock setting
+           will apply, regardless of device state. -->
+    <string-array name="config_perDeviceStateRotationLockDefaults" />
+
 
     <!-- Desk dock behavior -->
 
@@ -1358,6 +1380,12 @@
          that can be set by the user. -->
     <integer name="config_screenBrightnessDim">10</integer>
     <item name="config_screenBrightnessDimFloat" format="float" type="dimen">0.05</item>
+
+    <!-- If the screen brightness is already set at or below config_screenBrightnessDim, and the
+         user activity timeout expires, we still want to dim the screen slightly to indicate that
+         the device is about to go to sleep. The screen will dim by this amount in that case.
+         -->
+    <item name="config_screenBrightnessMinimumDimAmountFloat" format="float" type="dimen">0.04</item>
 
     <!-- Minimum allowable screen brightness to use in a very dark room.
          This value sets the floor for the darkest possible auto-brightness
@@ -2276,6 +2304,11 @@
     <!-- Type of the tap sensor. Empty if tap is not supported. -->
     <string name="config_dozeTapSensorType" translatable="false"></string>
 
+    <!-- Type of the ambient tap sensor per device posture (defined by WM Jetpack posture).
+         Unspecified values use config_dozeTapSensor -->
+    <string-array name="config_dozeTapSensorPostureMapping" translatable="false">
+    </string-array>
+
     <!-- Type of the long press sensor. Empty if long press is not supported. -->
     <string name="config_dozeLongPressSensorType" translatable="false"></string>
 
@@ -2620,6 +2653,16 @@
         <item>350</item>
     </integer-array>
 
+    <!-- A vibration waveform for notifications that specify DEFAULT_VIBRATE.
+         This value is a float array with values grouped as
+         { targetAmplitude (within [0,1]), targetFrequency [-1,1], duration (in milliseconds) }
+         This is only applied on devices with vibration frequency control. If the device doesn't
+         support frequency control, then the vibration specified in
+         config_defaultNotificationVibePattern is used instead.
+     -->
+    <array name="config_defaultNotificationVibeWaveform">
+    </array>
+
     <!-- Vibrator pattern to be used as the default for notifications
          that do not specify vibration but vibrate anyway because the device
          is in vibrate mode.
@@ -2630,6 +2673,16 @@
         <item>150</item>
         <item>100</item>
     </integer-array>
+
+    <!-- A vibration waveform for notifications that do not specify vibration but vibrate anyway,
+         because the device is in vibrate mode. This value is a float array with values grouped as
+         { targetAmplitude (within [0,1]), targetFrequency [-1,1], duration (in milliseconds) }
+         This is only applied on devices with vibration frequency control. If the device doesn't
+         support frequency control, then the vibration specified in
+         config_notificationFallbackVibePattern is used instead.
+     -->
+    <array name="config_notificationFallbackVibeWaveform">
+    </array>
 
     <!-- Flag indicating if the speed up audio on mt call code should be executed -->
     <bool name="config_speed_up_audio_on_mt_calls">false</bool>
@@ -3601,8 +3654,8 @@
     -->
     <integer name="config_largeScreenSmallestScreenWidthDp">600</integer>
 
-    <!-- True if the device is using leagacy split. -->
-    <bool name="config_useLegacySplit">true</bool>
+    <!-- True if the device is using legacy split. -->
+    <bool name="config_useLegacySplit">false</bool>
 
     <!-- True if the device supports running activities on secondary displays. -->
     <bool name="config_supportsMultiDisplay">true</bool>
@@ -4012,7 +4065,7 @@
     <string translatable="false" name="config_inCallNotificationSound">/product/media/audio/ui/InCallNotification.ogg</string>
 
     <!-- URI for default ringtone sound file to be used for silent ringer vibration -->
-    <string translatable="false" name="config_defaultRingtoneVibrationSound">/product/media/audio/ui/AttentionalHaptics.ogg</string>
+    <string translatable="false" name="config_defaultRingtoneVibrationSound"></string>
 
     <!-- Default number of notifications from the same app before they are automatically grouped by the OS -->
     <integer translatable="false" name="config_autoGroupAtCount">4</integer>
@@ -4544,6 +4597,20 @@
       -->
     </integer-array>
 
+    <!-- An array of arrays of side fingerprint sensor properties relative to each display.
+         Note: this value is temporary and is expected to be queried directly
+         from the HAL in the future. -->
+    <array name="config_sfps_sensor_props" translatable="false">
+        <!--
+            <array>
+                <item>displayId</item>
+                <item>sensorLocationX</item>
+                <item>sensorLocationY</item>
+                <item>sensorRadius</item>
+            <array>
+        -->
+    </array>
+
     <!-- How long it takes for the HW to start illuminating after the illumination is requested. -->
     <integer name="config_udfps_illumination_transition_ms">50</integer>
 
@@ -4804,8 +4871,9 @@
          the app in the letterbox mode. -->
     <item name="config_fixedOrientationLetterboxAspectRatio" format="float" type="dimen">0.0</item>
 
-    <!-- Corners radius for activity presented the letterbox mode. Values < 0 will be ignored and
-         corners of the activity won't be rounded. -->
+    <!-- Corners radius for activity presented the letterbox mode. Values < 0 enable rounded
+         corners with radius equal to min between device bottom corner radii. Default 0 value turns
+         off rounded corners logic in LetterboxUiController. -->
     <integer name="config_letterboxActivityCornersRadius">0</integer>
 
     <!-- Blur radius for the Option 3 in R.integer.config_letterboxBackgroundType. Values < 0 are
@@ -4840,14 +4908,27 @@
             - Option 3 is selected for R.integer.config_letterboxBackgroundType and blur requested
             but isn't supported on the device or both dark scrim alpha and blur radius aren't
             provided.
-        Defaults to black if not specified.
      -->
-    <color name="config_letterboxBackgroundColor">#000</color>
+    <color name="config_letterboxBackgroundColor">@android:color/system_neutral2_900</color>
 
     <!-- Horizonal position of a center of the letterboxed app window.
         0 corresponds to the left side of the screen and 1 to the right side. If given value < 0
         or > 1, it is ignored and central positionis used (0.5). -->
     <item name="config_letterboxHorizontalPositionMultiplier" format="float" type="dimen">0.5</item>
+
+    <!-- Whether reachability repositioning is allowed for letterboxed fullscreen apps in landscape
+        device orientation. -->
+    <bool name="config_letterboxIsReachabilityEnabled">false</bool>
+
+    <!-- Default horizonal position of the letterboxed app window when reachability is
+        enabled and an app is fullscreen in landscape device orientation. When reachability is
+        enabled, the position can change between left, center and right. This config defines the
+        default one:
+            - Option 0 - Left.
+            - Option 1 - Center.
+            - Option 2 - Right.
+        If given value is outside of this range, the option 1 (center) is assummed. -->
+    <integer name="config_letterboxDefaultPositionForReachability">1</integer>
 
     <!-- If true, hide the display cutout with display area -->
     <bool name="config_hideDisplayCutoutWithDisplayArea">false</bool>
@@ -5055,6 +5136,153 @@
 
     <!-- the number of the max cached processes in the system. -->
     <integer name="config_customizedMaxCachedProcesses">32</integer>
+
+    <!-- The display cutout configs for secondary built-in display. -->
+    <string name="config_secondaryBuiltInDisplayCutout" translatable="false"></string>
+    <string name="config_secondaryBuiltInDisplayCutoutRectApproximation" translatable="false">
+        @string/config_secondaryBuiltInDisplayCutout
+    </string>
+    <bool name="config_fillSecondaryBuiltInDisplayCutout">false</bool>
+    <bool name="config_maskSecondaryBuiltInDisplayCutout">false</bool>
+
+    <!-- An array contains unique ids of all built-in displays and the unique id of a display can be
+         obtained from {@link Display#getUniqueId}. This array should be set for multi-display
+         devices if there are different display related configs(e.g. display cutout, rounded corner)
+         between each built-in display.
+         It is used as an index for multi-display related configs:
+         First look up the index of the unique id of the given built-in display unique id in this
+         array and use this index to get the info in corresponding config arrays such as:
+           - config_displayCutoutPathArray
+           - config_displayCutoutApproximationRectArray
+           - config_fillBuiltInDisplayCutoutArray
+           - config_maskBuiltInDisplayCutoutArray
+           - config_waterfallCutoutArray
+           - config_roundedCornerRadiusArray
+           - config_roundedCornerTopRadiusArray
+           - config_roundedCornerBottomRadiusArray
+           - config_builtInDisplayIsRoundArray (config in SystemUI resource)
+           - config_roundedCornerMultipleRadiusArray (config in SystemUI resource)
+           - config_roundedCornerDrawableArray (config in SystemUI resource)
+           - config_roundedCornerTopDrawableArray (config in SystemUI resource)
+           - config_roundedCornerBottomDrawableArray (config in SystemUI resource)
+
+         Leave this array empty for single display device and the system will load the default main
+         built-in related configs.
+         -->
+    <string-array name="config_displayUniqueIdArray" translatable="false">
+        <!-- Example:
+        <item>"local:1234567891"</item> // main built-in display
+        <item>"local:1234567892"</item> // secondary built-in display
+        -->
+    </string-array>
+
+    <!-- The display cutout path config for each display in a multi-display device. -->
+    <string-array name="config_displayCutoutPathArray" translatable="false">
+        <item>@string/config_mainBuiltInDisplayCutout</item>
+        <item>@string/config_secondaryBuiltInDisplayCutout</item>
+    </string-array>
+
+    <!-- The display cutout approximation rect config for each display in a multi-display device.
+         -->
+    <string-array name="config_displayCutoutApproximationRectArray" translatable="false">
+        <item>@string/config_mainBuiltInDisplayCutoutRectApproximation</item>
+        <item>@string/config_secondaryBuiltInDisplayCutoutRectApproximation</item>
+    </string-array>
+
+    <!-- The maskBuiltInDisplayCutout config for each display in a multi-display device. -->
+    <array name="config_maskBuiltInDisplayCutoutArray" translatable="false">
+        <item>@bool/config_maskMainBuiltInDisplayCutout</item>
+        <item>@bool/config_maskSecondaryBuiltInDisplayCutout</item>
+    </array>
+
+    <!-- The fillBuiltInDisplayCutout config for each display in a multi-display device. -->
+    <array name="config_fillBuiltInDisplayCutoutArray" translatable="false">
+        <item>@bool/config_fillMainBuiltInDisplayCutout</item>
+        <item>@bool/config_fillSecondaryBuiltInDisplayCutout</item>
+    </array>
+
+    <array name="config_mainBuiltInDisplayWaterfallCutout" translatable="false">
+        <item>@dimen/waterfall_display_left_edge_size</item>
+        <item>@dimen/waterfall_display_top_edge_size</item>
+        <item>@dimen/waterfall_display_right_edge_size</item>
+        <item>@dimen/waterfall_display_bottom_edge_size</item>
+    </array>
+
+    <array name="config_secondaryBuiltInDisplayWaterfallCutout" translatable="false">
+        <item>@dimen/secondary_waterfall_display_left_edge_size</item>
+        <item>@dimen/secondary_waterfall_display_top_edge_size</item>
+        <item>@dimen/secondary_waterfall_display_right_edge_size</item>
+        <item>@dimen/secondary_waterfall_display_bottom_edge_size</item>
+    </array>
+
+    <!-- The waterfall cutout config for each display in a multi-display device. -->
+    <array name="config_waterfallCutoutArray" translatable="false">
+        <item>@array/config_mainBuiltInDisplayWaterfallCutout</item>
+        <item>@array/config_secondaryBuiltInDisplayWaterfallCutout</item>
+    </array>
+
+    <!-- The component name of the activity for the companion-device-manager notification access
+     confirmation. -->
+    <string name="config_notificationAccessConfirmationActivity" translatable="false">
+        com.android.settings/com.android.settings.notification.NotificationAccessConfirmationActivity
+    </string>
+
+    <!-- Whether the airplane mode should be reset when device boots in non-safemode after exiting
+         from safemode.
+         This flag should be enabled only when the product does not have any UI to toggle airplane
+         mode like automotive devices.-->
+    <bool name="config_autoResetAirplaneMode">false</bool>
+
+    <bool name="config_secondaryBuiltInDisplayIsRound">@bool/config_windowIsRound</bool>
+
+    <!-- The display round config for each display in a multi-display device. -->
+    <array name="config_builtInDisplayIsRoundArray" translatable="false">
+        <item>@bool/config_mainBuiltInDisplayIsRound</item>
+        <item>@bool/config_secondaryBuiltInDisplayIsRound</item>
+    </array>
+
+    <!-- The rounded corner radius for each display in a multi-display device. -->
+    <array name="config_roundedCornerRadiusArray" translatable="false">
+        <item>@dimen/rounded_corner_radius</item>
+        <item>@dimen/secondary_rounded_corner_radius</item>
+    </array>
+
+    <!-- The top rounded corner radius for each display in a multi-display device. -->
+    <array name="config_roundedCornerTopRadiusArray" translatable="false">
+        <item>@dimen/rounded_corner_radius_top</item>
+        <item>@dimen/secondary_rounded_corner_radius_top</item>
+    </array>
+
+    <!-- The bottom rounded corner radius for each display in a multi-display device. -->
+    <array name="config_roundedCornerBottomRadiusArray" translatable="false">
+        <item>@dimen/rounded_corner_radius_bottom</item>
+        <item>@dimen/secondary_rounded_corner_radius_bottom</item>
+    </array>
+
+    <!-- The rounded corner radius adjustment for each display in a multi-display device. -->
+    <array name="config_roundedCornerRadiusAdjustmentArray" translatable="false">
+        <item>@dimen/rounded_corner_radius_adjustment</item>
+        <item>@dimen/secondary_rounded_corner_radius_adjustment</item>
+    </array>
+
+    <!-- The rounded corner radius top adjustment for each display in a multi-display device. -->
+    <array name="config_roundedCornerTopRadiusAdjustmentArray" translatable="false">
+        <item>@dimen/rounded_corner_radius_top_adjustment</item>
+        <item>@dimen/secondary_rounded_corner_radius_top_adjustment</item>
+    </array>
+
+    <!-- The rounded corner radius bottom adjustment for each display in a multi-display device. -->
+    <array name="config_roundedCornerBottomRadiusAdjustmentArray" translatable="false">
+        <item>@dimen/rounded_corner_radius_bottom_adjustment</item>
+        <item>@dimen/secondary_rounded_corner_radius_bottom_adjustment</item>
+    </array>
+
+    <!-- Shape of the work badge icon for viewport size 24. -->
+    <string name="config_work_badge_path_24" translatable="false">
+        M20,6h-4L16,4c0,-1.11 -0.89,-2 -2,-2h-4c-1.11,0 -2,0.89 -2,2v2L4,6c-1.11,0 -1.99,0.89 -1.99,2L2,19c0,1.11 0.89,2 2,2h16c1.11,0 2,-0.89 2,-2L22,8c0,-1.11 -0.89,-2 -2,-2zM14,6h-4L10,4h4v2z
+    </string>
+
+    <integer name="config_chooser_max_targets_per_row">4</integer>
 
     <!-- Whether this device should support taking app snapshots on closure -->
     <bool name="config_disableTaskSnapshots">false</bool>

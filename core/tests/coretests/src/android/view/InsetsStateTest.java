@@ -216,9 +216,9 @@ public class InsetsStateTest {
         mState.getSource(ITYPE_CAPTION_BAR).setFrame(new Rect(0, 0, 100, 300));
         mState.getSource(ITYPE_CAPTION_BAR).setVisible(true);
 
-        Rect visibleInsets = mState.calculateVisibleInsets(
+        Insets visibleInsets = mState.calculateVisibleInsets(
                 new Rect(0, 0, 100, 400), SOFT_INPUT_ADJUST_NOTHING);
-        assertEquals(new Rect(0, 300, 0, 0), visibleInsets);
+        assertEquals(Insets.of(0, 300, 0, 0), visibleInsets);
     }
 
     @Test
@@ -226,9 +226,9 @@ public class InsetsStateTest {
         mState.getSource(ITYPE_CAPTION_BAR).setFrame(new Rect(0, 0, 100, 300));
         mState.getSource(ITYPE_CAPTION_BAR).setVisible(true);
 
-        Rect visibleInsets = mState.calculateVisibleInsets(
+        Insets visibleInsets = mState.calculateVisibleInsets(
                 new Rect(0, 0, 150, 400), SOFT_INPUT_ADJUST_NOTHING);
-        assertEquals(new Rect(0, 300, 0, 0), visibleInsets);
+        assertEquals(Insets.of(0, 300, 0, 0), visibleInsets);
     }
 
     @Test
@@ -413,9 +413,9 @@ public class InsetsStateTest {
         // Make sure bottom gestures are ignored
         mState.getSource(ITYPE_BOTTOM_GESTURES).setFrame(new Rect(0, 100, 100, 300));
         mState.getSource(ITYPE_BOTTOM_GESTURES).setVisible(true);
-        Rect visibleInsets = mState.calculateVisibleInsets(
+        Insets visibleInsets = mState.calculateVisibleInsets(
                 new Rect(0, 0, 100, 300), SOFT_INPUT_ADJUST_PAN);
-        assertEquals(new Rect(0, 100, 0, 100), visibleInsets);
+        assertEquals(Insets.of(0, 100, 0, 100), visibleInsets);
     }
 
     @Test
@@ -428,9 +428,9 @@ public class InsetsStateTest {
         // Make sure bottom gestures are ignored
         mState.getSource(ITYPE_BOTTOM_GESTURES).setFrame(new Rect(0, 100, 100, 300));
         mState.getSource(ITYPE_BOTTOM_GESTURES).setVisible(true);
-        Rect visibleInsets = mState.calculateVisibleInsets(
+        Insets visibleInsets = mState.calculateVisibleInsets(
                 new Rect(0, 0, 100, 300), SOFT_INPUT_ADJUST_NOTHING);
-        assertEquals(new Rect(0, 100, 0, 0), visibleInsets);
+        assertEquals(Insets.of(0, 100, 0, 0), visibleInsets);
     }
 
     @Test

@@ -69,7 +69,7 @@ public interface BiometricFaceConstants {
             BIOMETRIC_ERROR_NO_DEVICE_CREDENTIAL,
             BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED,
             BIOMETRIC_ERROR_RE_ENROLL,
-            FACE_ERROR_UNKNOWN
+            FACE_ERROR_UNKNOWN,
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface FaceError {}

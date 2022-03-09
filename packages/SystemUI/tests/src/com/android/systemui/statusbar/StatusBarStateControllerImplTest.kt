@@ -21,10 +21,12 @@ import android.testing.TestableLooper
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.dump.DumpManager
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mockito.mock
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
@@ -37,7 +39,7 @@ class StatusBarStateControllerImplTest : SysuiTestCase() {
     @Before
     fun setUp() {
         uiEventLogger = UiEventLoggerFake()
-        controller = StatusBarStateControllerImpl(uiEventLogger)
+        controller = StatusBarStateControllerImpl(uiEventLogger, mock(DumpManager::class.java))
     }
 
     @Test

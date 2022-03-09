@@ -25,6 +25,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY;
 import static android.view.WindowManagerPolicyConstants.APPLICATION_LAYER;
 import static android.window.DisplayAreaOrganizer.FEATURE_DEFAULT_TASK_CONTAINER;
 import static android.window.DisplayAreaOrganizer.FEATURE_VENDOR_LAST;
+import static android.window.DisplayAreaOrganizer.KEY_ROOT_DISPLAY_AREA_ID;
 
 import android.annotation.Nullable;
 import android.os.Bundle;
@@ -134,12 +135,6 @@ import java.util.function.BiFunction;
  * {@link RootDisplayArea}.
  */
 class DisplayAreaPolicyBuilder {
-
-    /**
-     * Key to specify the {@link RootDisplayArea} to attach the window to. Should be used by the
-     * function passed in from {@link #setSelectRootForWindowFunc(BiFunction)}
-     */
-    static final String KEY_ROOT_DISPLAY_AREA_ID = "root_display_area_id";
 
     @Nullable private HierarchyBuilder mRootHierarchyBuilder;
     private final ArrayList<HierarchyBuilder> mDisplayAreaGroupHierarchyBuilders =

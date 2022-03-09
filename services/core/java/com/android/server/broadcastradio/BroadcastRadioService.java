@@ -52,11 +52,11 @@ public class BroadcastRadioService extends SystemService {
     public BroadcastRadioService(Context context) {
         super(context);
 
-        mHal1 = new com.android.server.broadcastradio.hal1.BroadcastRadioService();
+        mHal1 = new com.android.server.broadcastradio.hal1.BroadcastRadioService(mLock);
         mV1Modules = mHal1.loadModules();
         OptionalInt max = mV1Modules.stream().mapToInt(RadioManager.ModuleProperties::getId).max();
         mHal2 = new com.android.server.broadcastradio.hal2.BroadcastRadioService(
-                max.isPresent() ? max.getAsInt() + 1 : 0);
+                max.isPresent() ? max.getAsInt() + 1 : 0, mLock);
     }
 
     @Override
@@ -111,7 +111,7 @@ public class BroadcastRadioService extends SystemService {
             synchronized (mLock) {
                 if (!mHal2.hasAnyModules()) {
                     Slog.i(TAG, "There are no HAL 2.x modules registered");
-                    return new AnnouncementAggregator(listener);
+                    return new AnnouncementAggregator(listener, mLock);
                 }
 
                 return mHal2.addAnnouncementListener(enabledTypes, listener);

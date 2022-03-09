@@ -18,6 +18,7 @@ package com.android.keyguard.dagger;
 
 import com.android.keyguard.CarrierText;
 import com.android.systemui.R;
+import com.android.systemui.battery.BatteryMeterView;
 import com.android.systemui.statusbar.phone.KeyguardStatusBarView;
 
 import dagger.Module;
@@ -30,5 +31,12 @@ public abstract class KeyguardStatusBarViewModule {
     @KeyguardStatusBarViewScope
     static CarrierText getCarrierText(KeyguardStatusBarView view) {
         return view.findViewById(R.id.keyguard_carrier_text);
+    }
+
+    /** */
+    @Provides
+    @KeyguardStatusBarViewScope
+    static BatteryMeterView getBatteryMeterView(KeyguardStatusBarView view) {
+        return view.findViewById(R.id.battery);
     }
 }

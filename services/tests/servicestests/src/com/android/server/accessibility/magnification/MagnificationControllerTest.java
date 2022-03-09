@@ -54,6 +54,7 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.server.accessibility.AccessibilityManagerService;
+import com.android.server.accessibility.AccessibilityTraceManager;
 
 import org.junit.After;
 import org.junit.Before;
@@ -84,6 +85,8 @@ public class MagnificationControllerTest {
             Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN;
 
     @Mock
+    private AccessibilityTraceManager mTraceManager;
+    @Mock
     private AccessibilityManagerService mService;
     @Mock
     private MagnificationController.TransitionCallBack mTransitionCallBack;
@@ -112,7 +115,7 @@ public class MagnificationControllerTest {
                 CURRENT_USER_ID);
         mWindowMagnificationManager = Mockito.spy(
                 new WindowMagnificationManager(mContext, CURRENT_USER_ID,
-                        mock(WindowMagnificationManager.Callback.class)));
+                        mock(WindowMagnificationManager.Callback.class), mTraceManager));
         mMockConnection = new MockWindowMagnificationConnection(true);
         mWindowMagnificationManager.setConnection(mMockConnection.getConnection());
         mScreenMagnificationControllerStubber = new FullScreenMagnificationControllerStubber(

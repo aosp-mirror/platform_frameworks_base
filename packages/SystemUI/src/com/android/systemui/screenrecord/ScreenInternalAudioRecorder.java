@@ -27,6 +27,7 @@ import android.media.MediaMuxer;
 import android.media.MediaRecorder;
 import android.media.projection.MediaProjection;
 import android.util.Log;
+import android.util.MathUtils;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -128,30 +129,64 @@ public class ScreenInternalAudioRecorder {
         mThread = new Thread(() -> {
             short[] bufferInternal = null;
             short[] bufferMic = null;
-            byte[] buffer = null;
+            byte[] buffer = new byte[size];
 
             if (mMic) {
                 bufferInternal = new short[size / 2];
                 bufferMic = new short[size / 2];
-            } else {
-                buffer = new byte[size];
             }
 
+            int readBytes = 0;
+            int readShortsInternal = 0;
+            int offsetShortsInternal = 0;
+            int readShortsMic = 0;
+            int offsetShortsMic = 0;
             while (true) {
-                int readBytes = 0;
-                int readShortsInternal = 0;
-                int readShortsMic = 0;
                 if (mMic) {
-                    readShortsInternal = mAudioRecord.read(bufferInternal, 0,
-                            bufferInternal.length);
-                    readShortsMic = mAudioRecordMic.read(bufferMic, 0, bufferMic.length);
+                    readShortsInternal = mAudioRecord.read(bufferInternal, offsetShortsInternal,
+                            bufferInternal.length - offsetShortsInternal);
+                    readShortsMic = mAudioRecordMic.read(
+                            bufferMic, offsetShortsMic, bufferMic.length - offsetShortsMic);
+
+                    // if both error, end the recording
+                    if (readShortsInternal < 0 && readShortsMic < 0) {
+                        break;
+                    }
+
+                    // if one has an errors, fill its buffer with zeros and assume it is mute
+                    // with the same size as the other buffer
+                    if (readShortsInternal < 0) {
+                        readShortsInternal = readShortsMic;
+                        offsetShortsInternal = offsetShortsMic;
+                        java.util.Arrays.fill(bufferInternal, (short) 0);
+                    }
+
+                    if (readShortsMic < 0) {
+                        readShortsMic = readShortsInternal;
+                        offsetShortsMic = offsetShortsInternal;
+                        java.util.Arrays.fill(bufferMic, (short) 0);
+                    }
+
+                    // Add offset (previous unmixed values) to the buffer
+                    readShortsInternal += offsetShortsInternal;
+                    readShortsMic += offsetShortsMic;
+
+                    int minShorts = Math.min(readShortsInternal, readShortsMic);
+                    readBytes = minShorts * 2;
 
                     // modify the volume
-                    bufferMic = scaleValues(bufferMic,
-                            readShortsMic, MIC_VOLUME_SCALE);
-                    readBytes = Math.min(readShortsInternal, readShortsMic) * 2;
-                    buffer = addAndConvertBuffers(bufferInternal, readShortsInternal, bufferMic,
-                            readShortsMic);
+                    // scale only mixed shorts
+                    scaleValues(bufferMic, minShorts, MIC_VOLUME_SCALE);
+                    // Mix the two buffers
+                    addAndConvertBuffers(bufferInternal, bufferMic, buffer, minShorts);
+
+                    // shift unmixed shorts to the beginning of the buffer
+                    shiftToStart(bufferInternal, minShorts, offsetShortsInternal);
+                    shiftToStart(bufferMic, minShorts, offsetShortsMic);
+
+                    // reset the offset for the next loop
+                    offsetShortsInternal = readShortsInternal - minShorts;
+                    offsetShortsMic = readShortsMic - minShorts;
                 } else {
                     readBytes = mAudioRecord.read(buffer, 0, buffer.length);
                 }
@@ -169,40 +204,31 @@ public class ScreenInternalAudioRecorder {
         });
     }
 
-    private short[] scaleValues(short[] buff, int len, float scale) {
-        for (int i = 0; i < len; i++) {
-            int oldValue = buff[i];
-            int newValue = (int) (buff[i] * scale);
-            if (newValue > Short.MAX_VALUE) {
-                newValue = Short.MAX_VALUE;
-            } else if (newValue < Short.MIN_VALUE) {
-                newValue = Short.MIN_VALUE;
-            }
-            buff[i] = (short) (newValue);
+    /**
+     * moves all bits from start to end to the beginning of the array
+     */
+    private void shiftToStart(short[] target, int start, int end) {
+        for (int i = 0; i  < end - start; i++) {
+            target[i] = target[start + i];
         }
-        return buff;
     }
-    private byte[] addAndConvertBuffers(short[] a1, int a1Limit, short[] a2, int a2Limit) {
-        int size = Math.max(a1Limit, a2Limit);
-        if (size < 0) return new byte[0];
-        byte[] buff = new byte[size * 2];
-        for (int i = 0; i < size; i++) {
-            int sum;
-            if (i > a1Limit) {
-                sum = a2[i];
-            } else if (i > a2Limit) {
-                sum = a1[i];
-            } else {
-                sum = (int) a1[i] + (int) a2[i];
-            }
 
-            if (sum > Short.MAX_VALUE) sum = Short.MAX_VALUE;
-            if (sum < Short.MIN_VALUE) sum = Short.MIN_VALUE;
-            int byteIndex = i * 2;
-            buff[byteIndex] = (byte) (sum & 0xff);
-            buff[byteIndex + 1] = (byte) ((sum >> 8) & 0xff);
+    private void scaleValues(short[] buff, int len, float scale) {
+        for (int i = 0; i < len; i++) {
+            int newValue = (int) (buff[i] * scale);
+            buff[i] = (short) MathUtils.constrain(newValue, Short.MIN_VALUE, Short.MAX_VALUE);
         }
-        return buff;
+    }
+
+    private void addAndConvertBuffers(short[] src1, short[] src2, byte[] dst, int sizeShorts) {
+        for (int i = 0; i < sizeShorts; i++) {
+            int sum;
+            sum = (short) MathUtils.constrain(
+                    (int) src1[i] + (int) src2[i], Short.MIN_VALUE, Short.MAX_VALUE);
+            int byteIndex = i * 2;
+            dst[byteIndex] = (byte) (sum & 0xff);
+            dst[byteIndex + 1] = (byte) ((sum >> 8) & 0xff);
+        }
     }
 
     private void encode(byte[] buffer, int readBytes) {

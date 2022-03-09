@@ -25,15 +25,15 @@
         android:id="@+id/bubble_manage_menu_dismiss_container"
         android:background="@drawable/bubble_manage_menu_row"
         android:layout_width="match_parent"
-        android:layout_height="48dp"
+        android:layout_height="@dimen/bubble_menu_item_height"
         android:gravity="center_vertical"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"
+        android:paddingStart="@dimen/bubble_menu_padding"
+        android:paddingEnd="@dimen/bubble_menu_padding"
         android:orientation="horizontal">
 
         <ImageView
-            android:layout_width="24dp"
-            android:layout_height="24dp"
+            android:layout_width="@dimen/bubble_menu_icon_size"
+            android:layout_height="@dimen/bubble_menu_icon_size"
             android:src="@drawable/ic_remove_no_shadow"
             android:tint="@color/bubbles_icon_tint"/>
 
@@ -50,15 +50,15 @@
         android:id="@+id/bubble_manage_menu_dont_bubble_container"
         android:background="@drawable/bubble_manage_menu_row"
         android:layout_width="match_parent"
-        android:layout_height="48dp"
+        android:layout_height="@dimen/bubble_menu_item_height"
         android:gravity="center_vertical"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"
+        android:paddingStart="@dimen/bubble_menu_padding"
+        android:paddingEnd="@dimen/bubble_menu_padding"
         android:orientation="horizontal">
 
         <ImageView
-            android:layout_width="24dp"
-            android:layout_height="24dp"
+            android:layout_width="@dimen/bubble_menu_icon_size"
+            android:layout_height="@dimen/bubble_menu_icon_size"
             android:src="@drawable/bubble_ic_stop_bubble"
             android:tint="@color/bubbles_icon_tint"/>
 
@@ -75,16 +75,16 @@
         android:id="@+id/bubble_manage_menu_settings_container"
         android:background="@drawable/bubble_manage_menu_row"
         android:layout_width="match_parent"
-        android:layout_height="48dp"
+        android:layout_height="@dimen/bubble_menu_item_height"
         android:gravity="center_vertical"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"
+        android:paddingStart="@dimen/bubble_menu_padding"
+        android:paddingEnd="@dimen/bubble_menu_padding"
         android:orientation="horizontal">
 
         <ImageView
             android:id="@+id/bubble_manage_menu_settings_icon"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
+            android:layout_width="@dimen/bubble_menu_icon_size"
+            android:layout_height="@dimen/bubble_menu_icon_size"
             android:src="@drawable/ic_remove_no_shadow"/>
 
         <TextView

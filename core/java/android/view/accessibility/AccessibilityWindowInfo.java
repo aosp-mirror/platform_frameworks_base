@@ -19,6 +19,7 @@ package android.view.accessibility;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
+import android.app.ActivityTaskManager;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.Parcel;
@@ -114,6 +115,7 @@ public final class AccessibilityWindowInfo implements Parcelable {
     private int mBooleanProperties;
     private int mId = UNDEFINED_WINDOW_ID;
     private int mParentId = UNDEFINED_WINDOW_ID;
+    private int mTaskId = ActivityTaskManager.INVALID_TASK_ID;
     private Region mRegionInScreen = new Region();
     private LongArray mChildIds;
     private CharSequence mTitle;
@@ -304,6 +306,28 @@ public final class AccessibilityWindowInfo implements Parcelable {
      */
     public void setId(int id) {
         mId = id;
+    }
+
+    /**
+     * Gets the task ID.
+     *
+     * @return The task ID.
+     *
+     * @hide
+     */
+    public int getTaskId() {
+        return mTaskId;
+    }
+
+    /**
+     * Sets the task ID.
+     *
+     * @param taskId The task ID.
+     *
+     * @hide
+     */
+    public void setTaskId(int taskId) {
+        mTaskId = taskId;
     }
 
     /**
@@ -578,6 +602,7 @@ public final class AccessibilityWindowInfo implements Parcelable {
         parcel.writeInt(mBooleanProperties);
         parcel.writeInt(mId);
         parcel.writeInt(mParentId);
+        parcel.writeInt(mTaskId);
         mRegionInScreen.writeToParcel(parcel, flags);
         parcel.writeCharSequence(mTitle);
         parcel.writeLong(mAnchorId);
@@ -608,6 +633,7 @@ public final class AccessibilityWindowInfo implements Parcelable {
         mBooleanProperties = other.mBooleanProperties;
         mId = other.mId;
         mParentId = other.mParentId;
+        mTaskId = other.mTaskId;
         mRegionInScreen.set(other.mRegionInScreen);
         mTitle = other.mTitle;
         mAnchorId = other.mAnchorId;
@@ -631,6 +657,7 @@ public final class AccessibilityWindowInfo implements Parcelable {
         mBooleanProperties = parcel.readInt();
         mId = parcel.readInt();
         mParentId = parcel.readInt();
+        mTaskId = parcel.readInt();
         mRegionInScreen = Region.CREATOR.createFromParcel(parcel);
         mTitle = parcel.readCharSequence();
         mAnchorId = parcel.readLong();
@@ -676,6 +703,7 @@ public final class AccessibilityWindowInfo implements Parcelable {
         builder.append("title=").append(mTitle);
         builder.append(", displayId=").append(mDisplayId);
         builder.append(", id=").append(mId);
+        builder.append(", taskId=").append(mTaskId);
         builder.append(", type=").append(typeToString(mType));
         builder.append(", layer=").append(mLayer);
         builder.append(", region=").append(mRegionInScreen);
@@ -719,6 +747,7 @@ public final class AccessibilityWindowInfo implements Parcelable {
         mBooleanProperties = 0;
         mId = UNDEFINED_WINDOW_ID;
         mParentId = UNDEFINED_WINDOW_ID;
+        mTaskId = ActivityTaskManager.INVALID_TASK_ID;
         mRegionInScreen.setEmpty();
         mChildIds = null;
         mConnectionId = UNDEFINED_WINDOW_ID;
