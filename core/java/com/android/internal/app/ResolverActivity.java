@@ -1458,15 +1458,6 @@ public class ResolverActivity extends Activity implements
                 .write();
     }
 
-
-    public boolean startAsCallerImpl(Intent intent, Bundle options, boolean ignoreTargetSecurity,
-            int userId) {
-        // Note: this method will be overridden in the delegate implementation to use the passed-in
-        // permission token.
-        startActivityAsCaller(intent, options, false, userId);
-        return true;
-    }
-
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {
