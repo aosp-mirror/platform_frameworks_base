@@ -455,6 +455,14 @@ package android.provider {
 
 }
 
+package android.telecom {
+
+  public abstract class ConnectionService extends android.app.Service {
+    method @Nullable @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public android.telecom.Connection onCreateUnknownConnection(@NonNull android.telecom.PhoneAccountHandle, @NonNull android.telecom.ConnectionRequest);
+  }
+
+}
+
 package android.telephony {
 
   public abstract class CellSignalStrength {
