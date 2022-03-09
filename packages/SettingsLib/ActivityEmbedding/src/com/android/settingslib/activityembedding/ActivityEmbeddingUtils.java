@@ -51,27 +51,34 @@ public class ActivityEmbeddingUtils {
     }
 
     /**
-     * Whether current activity is embedded in the Settings app or not.
+     * Whether the current activity is embedded in the Settings app or not.
+     *
+     * @param activity Activity that needs the check
      */
     public static boolean isActivityEmbedded(Activity activity) {
         return SplitController.getInstance().isActivityEmbedded(activity);
     }
 
     /**
-     * Whether current activity is suggested to show back button or not.
+     * Whether the current activity should hide the navigate up button.
+     *
+     * @param activity             Activity that needs the check
+     * @param isSecondLayerPage indicates if the activity(page) is shown in the 2nd layer of
+     *                             Settings app
      */
-    public static boolean shouldHideBackButton(Activity activity, boolean isSecondaryLayerPage) {
+    public static boolean shouldHideNavigateUpButton(Activity activity, boolean isSecondLayerPage) {
         if (!BuildCompat.isAtLeastT()) {
             return false;
         }
-        if (!isSecondaryLayerPage) {
+        if (!isSecondLayerPage) {
             return false;
         }
-        final String shouldHideBackButton = Settings.Global.getString(activity.getContentResolver(),
-                "settings_hide_secondary_page_back_button_in_two_pane");
+        final String shouldHideNavigateUpButton =
+                Settings.Global.getString(activity.getContentResolver(),
+                        "settings_hide_second_layer_page_navigate_up_button_in_two_pane");
 
-        if (TextUtils.isEmpty(shouldHideBackButton)
-                || TextUtils.equals("true", shouldHideBackButton)) {
+        if (TextUtils.isEmpty(shouldHideNavigateUpButton)
+                || Boolean.parseBoolean(shouldHideNavigateUpButton)) {
             return isActivityEmbedded(activity);
         }
         return false;
