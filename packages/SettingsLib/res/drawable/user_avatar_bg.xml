@@ -22,7 +22,7 @@
         android:viewportHeight="100">
 
     <path
-        android:fillColor="@color/kg_user_switcher_avatar_background"
+        android:fillColor="@color/user_avatar_color_bg"
         android:pathData="M50,50m-50,0a50,50 0,1 1,100 0a50,50 0,1 1,-100 0"/>
 
 </vector>

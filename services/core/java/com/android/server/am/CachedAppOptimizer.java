@@ -1048,16 +1048,16 @@ public final class CachedAppOptimizer {
      * This quick function works around the race condition between WM/ATMS and AMS, allowing
      * the former to directly unfreeze a frozen process before the latter runs updateOomAdj.
      * After the race issue is solved, this workaround can be removed. (b/213288355)
+     * The caller of this function should still trigger updateOomAdj for AMS to unfreeze the app.
      * @param pid pid of the process to be unfrozen
      */
-    @GuardedBy({"mFreezerLock"})
     void unfreezeProcess(int pid) {
         synchronized (mFreezerLock) {
             ProcessRecord app = mFrozenProcesses.get(pid);
             if (app == null) {
                 return;
             }
-            Slog.i(TAG_AM, "quick sync unfreeze " + pid);
+            Slog.d(TAG_AM, "quick sync unfreeze " + pid);
             try {
                 freezeBinder(pid, false);
             } catch (RuntimeException e) {
