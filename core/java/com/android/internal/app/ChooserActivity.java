@@ -153,18 +153,6 @@ public class ChooserActivity extends ResolverActivity implements
         SelectableTargetInfoCommunicator {
     private static final String TAG = "ChooserActivity";
 
-    /**
-     * Whether this chooser is operating in "headless springboard" mode (as determined during
-     * onCreate). In this mode, our activity sits in the background and waits for the new
-     * "unbundled" chooser to handle the Sharesheet experience; the system ChooserActivity is
-     * responsible only for providing the startActivityAsCaller permission token and keeping it
-     * valid for the life of the unbundled delegate activity.
-     *
-     * TODO: when the unbundled chooser is fully launched, the system-side "springboard" can use a
-     * simpler implementation that doesn't inherit from ResolverActivity.
-     */
-    private boolean mIsHeadlessSpringboardActivity;
-
     private AppPredictor mPersonalAppPredictor;
     private AppPredictor mWorkAppPredictor;
     private boolean mShouldDisplayLandscape;
@@ -259,11 +247,6 @@ public class ChooserActivity extends ResolverActivity implements
     private static final int NO_DIRECT_SHARE_ANIM_IN_MILLIS = 200;
 
     private static final float DIRECT_SHARE_EXPANSION_RATE = 0.78f;
-
-    private boolean mEnableChooserDelegate =
-            DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_SYSTEMUI,
-                    SystemUiDeviceConfigFlags.USE_DELEGATE_CHOOSER,
-                    false);
 
     private static final int DEFAULT_SALT_EXPIRATION_DAYS = 7;
     private int mMaxHashSaltDays = DeviceConfig.getInt(DeviceConfig.NAMESPACE_SYSTEMUI,
@@ -531,12 +514,6 @@ public class ChooserActivity extends ResolverActivity implements
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        if (handOverToDelegateChooser()) {
-            super_onCreate(savedInstanceState);
-            mIsHeadlessSpringboardActivity = true;
-            return;
-        }
-
         final long intentReceivedTime = System.currentTimeMillis();
         getChooserActivityLogger().logSharesheetTriggered();
         // This is the only place this value is being set. Effectively final.
@@ -750,56 +727,6 @@ public class ChooserActivity extends ResolverActivity implements
             }
         });
         postponeEnterTransition();
-    }
-
-    private boolean handOverToDelegateChooser() {
-        // Check the explicit classname so that we don't interfere with the flow of any subclasses.
-        if (!this.getClass().getName().equals("com.android.internal.app.ChooserActivity")
-                || !mEnableChooserDelegate) {
-            return false;
-        }
-
-        Intent delegationIntent = new Intent();
-        final ComponentName delegateActivity = ComponentName.unflattenFromString(
-                Resources.getSystem().getString(R.string.config_chooserActivity));
-        delegationIntent.setComponent(delegateActivity);
-        delegationIntent.putExtra(Intent.EXTRA_INTENT, getIntent());
-        delegationIntent.addFlags(Intent.FLAG_ACTIVITY_PREVIOUS_IS_TOP);
-
-        // Don't close until the delegate finishes, or the token will be invalidated.
-        mAwaitingDelegateResponse = true;
-        startActivityForResult(delegationIntent, REQUEST_CODE_RETURN_FROM_DELEGATE_CHOOSER);
-        return true;
-    }
-
-    @Override
-    protected void onRestart() {
-        if (mIsHeadlessSpringboardActivity) {
-            super_onRestart();
-            return;
-        }
-
-        super.onRestart();
-    }
-
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        if (mIsHeadlessSpringboardActivity) {
-            super_onSaveInstanceState(outState);
-            return;
-        }
-
-        super.onSaveInstanceState(outState);
-    }
-
-    @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        if (mIsHeadlessSpringboardActivity) {
-            super_onRestoreInstanceState(savedInstanceState);
-            return;
-        }
-
-        super.onRestoreInstanceState(savedInstanceState);
     }
 
     @Override
@@ -1061,11 +988,6 @@ public class ChooserActivity extends ResolverActivity implements
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
-        if (mIsHeadlessSpringboardActivity) {
-            super_onConfigurationChanged(newConfig);
-            return;
-        }
-
         super.onConfigurationChanged(newConfig);
         ViewPager viewPager = findViewById(R.id.profile_pager);
         if (viewPager.isLayoutRtl()) {
@@ -1617,10 +1539,6 @@ public class ChooserActivity extends ResolverActivity implements
     @Override
     protected void onDestroy() {
         super.onDestroy();
-
-        if (mIsHeadlessSpringboardActivity) {
-            return;
-        }
 
         if (mRefinementResultReceiver != null) {
             mRefinementResultReceiver.destroy();
