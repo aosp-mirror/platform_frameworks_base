@@ -22,12 +22,14 @@ import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.ILocaleManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
+import android.content.res.Configuration;
 import android.os.Binder;
 import android.os.HandlerThread;
 import android.os.LocaleList;
@@ -151,6 +153,12 @@ public class LocaleManagerService extends SystemService {
         public LocaleList getApplicationLocales(@NonNull String appPackageName,
                 @UserIdInt int userId) throws RemoteException {
             return LocaleManagerService.this.getApplicationLocales(appPackageName, userId);
+        }
+
+        @Override
+        @NonNull
+        public LocaleList getSystemLocales() throws RemoteException {
+            return LocaleManagerService.this.getSystemLocales();
         }
 
         @Override
@@ -424,6 +432,32 @@ public class LocaleManagerService extends SystemService {
             Slog.w(TAG, "Package not found " + packageName);
         }
         return null;
+    }
+
+    /**
+     * Returns the current system locales.
+     */
+    @NonNull
+    public LocaleList getSystemLocales() throws RemoteException {
+        final long token = Binder.clearCallingIdentity();
+        try {
+            return getSystemLocalesUnchecked();
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    @NonNull
+    private LocaleList getSystemLocalesUnchecked() throws RemoteException {
+        LocaleList systemLocales = null;
+        Configuration conf = ActivityManager.getService().getConfiguration();
+        if (conf != null) {
+            systemLocales = conf.getLocales();
+        }
+        if (systemLocales == null) {
+            systemLocales = LocaleList.getEmptyLocaleList();
+        }
+        return systemLocales;
     }
 
     private void logMetric(@NonNull AppLocaleChangedAtomRecord atomRecordForMetrics) {

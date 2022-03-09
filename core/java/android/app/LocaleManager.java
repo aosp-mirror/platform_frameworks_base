@@ -18,7 +18,6 @@ package android.app;
 
 import android.Manifest;
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
@@ -127,6 +126,26 @@ public class LocaleManager {
     }
 
     /**
+     * Returns the current system locales, ignoring app-specific overrides.
+     *
+     * <p><b>Note:</b> Apps should generally access the user's locale preferences as indicated in
+     * their in-process {@link LocaleList}s. However, in case an app-specific locale is set, this
+     * method helps cater to rare use-cases which might require specifically knowing the system
+     * locale.
+     *
+     * <p><b>Note:</b> This API is not user-aware. It returns the system locales for the foreground
+     * user.
+     */
+    @NonNull
+    public LocaleList getSystemLocales() {
+        try {
+            return mService.getSystemLocales();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Sets the current system locales to the provided value.
      *
      * @hide
@@ -137,21 +156,6 @@ public class LocaleManager {
             Configuration conf = ActivityManager.getService().getConfiguration();
             conf.setLocales(locales);
             ActivityManager.getService().updatePersistentConfiguration(conf);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Returns the current system locales for the device.
-     *
-     * @hide
-     */
-    @TestApi
-    @Nullable
-    public LocaleList getSystemLocales() {
-        try {
-            return ActivityManager.getService().getConfiguration().getLocales();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
