@@ -794,7 +794,7 @@
                   android:noHistory="true"
                   android:showForAllUsers="true"
                   android:finishOnTaskLaunch="true"
-                  android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboard|keyboardHidden"
+                  android:configChanges="screenSize|smallestScreenSize|screenLayout|keyboard|keyboardHidden"
                   android:visibleToInstantApps="true">
         </activity>
 
@@ -805,7 +805,7 @@
                   android:showForAllUsers="true"
                   android:finishOnTaskLaunch="true"
                   android:launchMode="singleInstance"
-                  android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboard|keyboardHidden"
+                  android:configChanges="screenSize|smallestScreenSize|screenLayout|keyboard|keyboardHidden"
                   android:visibleToInstantApps="true">
         </activity>
 
