@@ -1572,4 +1572,10 @@
     <!-- Content description for a default user icon. [CHAR LIMIT=NONE] -->
     <string name="default_user_icon_description">Default user icon</string>
 
+    <!-- Title for the 'physical keyboard' settings screen. [CHAR LIMIT=35] -->
+    <string name="physical_keyboard_title">Physical keyboard</string>
+    <!-- Title for the keyboard layout preference dialog. [CHAR LIMIT=35] -->
+    <string name="keyboard_layout_dialog_title">Choose keyboard layout</string>
+    <!-- Label of the default keyboard layout.  [CHAR LIMIT=35] -->
+    <string name="keyboard_layout_default_label">Default</string>
 </resources>
