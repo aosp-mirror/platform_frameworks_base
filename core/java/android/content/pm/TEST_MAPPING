@@ -19,6 +19,16 @@
       "name": "CarrierAppIntegrationTestCases"
     },
     {
+      "name": "CtsIncrementalInstallHostTestCases",
+      "options": [
+        {
+          "include-filter": "android.incrementalinstall.cts.IncrementalFeatureTest"
+        }
+      ]
+    }
+  ],
+  "presubmit-large": [
+    {
       "name": "CtsContentTestCases",
       "options": [
         {
@@ -29,14 +39,6 @@
         },
         {
           "include-filter": "android.content.pm.cts"
-        }
-      ]
-    },
-    {
-      "name": "CtsIncrementalInstallHostTestCases",
-      "options": [
-        {
-          "include-filter": "android.incrementalinstall.cts.IncrementalFeatureTest"
         }
       ]
     }

@@ -78,7 +78,7 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"ID pozivaoca podrazumevano nije ograničen. Sledeći poziv: Nije ograničen."</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Usluga nije dobavljena."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Ne možete da promenite podešavanje ID-a korisnika."</string>
-    <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"Nema usluge prenosa podataka preko mobilnog operatera"</string>
+    <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"Nema usluge mobilnih podataka"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"Hitni pozivi nisu dostupni"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"Nema glasovne usluge"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="3982069078579103087">"Nema glasovne usluge ni hitnih poziva"</string>
@@ -1523,7 +1523,7 @@
     <string name="vpn_lockdown_disconnected" msgid="5573611651300764955">"Veza sa uvek uključenim VPN-om je prekinuta"</string>
     <string name="vpn_lockdown_error" msgid="4453048646854247947">"Povezivanje na stalno uključeni VPN nije uspelo"</string>
     <string name="vpn_lockdown_config" msgid="8331697329868252169">"Promenite podešavanja VPN-a"</string>
-    <string name="upload_file" msgid="8651942222301634271">"Odaberi datoteku"</string>
+    <string name="upload_file" msgid="8651942222301634271">"Odaberi fajl"</string>
     <string name="no_file_chosen" msgid="4146295695162318057">"Nije izabrana nijedna datoteka"</string>
     <string name="reset" msgid="3865826612628171429">"Resetuj"</string>
     <string name="submit" msgid="862795280643405865">"Pošalji"</string>
@@ -2175,7 +2175,7 @@
     <string name="accessibility_system_action_notifications_label" msgid="6083767351772162010">"Obaveštenja"</string>
     <string name="accessibility_system_action_quick_settings_label" msgid="4583900123506773783">"Brza podešavanja"</string>
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"Dijalog napajanja"</string>
-    <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Zaključani ekran"</string>
+    <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Zaključavanje ekrana"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Snimak ekrana"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"Prečica za pristupačnost na ekranu"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"Alatka za biranje prečica za pristupačnost na ekranu"</string>
