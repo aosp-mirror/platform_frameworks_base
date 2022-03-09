@@ -585,7 +585,6 @@ public final class BackgroundDexOptService {
     private int idleOptimizePackages(PackageManagerService pm, List<String> pkgs,
             long lowStorageThreshold, boolean isPostBootUpdate) {
         ArraySet<String> updatedPackages = new ArraySet<>();
-        ArraySet<String> updatedPackagesDueToSecondaryDex = new ArraySet<>();
 
         try {
             boolean supportSecondaryDex = mInjector.supportSecondaryDex();
@@ -646,20 +645,7 @@ public final class BackgroundDexOptService {
                 }
             }
 
-            @Status int primaryResult = optimizePackages(pkgs, lowStorageThreshold,
-                    /*isForPrimaryDex=*/ true, updatedPackages, isPostBootUpdate);
-            if (primaryResult != STATUS_OK) {
-                return primaryResult;
-            }
-
-            if (!supportSecondaryDex) {
-                return STATUS_OK;
-            }
-
-            @Status int secondaryResult = optimizePackages(pkgs, lowStorageThreshold,
-                    /*isForPrimaryDex*/ false, updatedPackagesDueToSecondaryDex,
-                    isPostBootUpdate);
-            return secondaryResult;
+            return optimizePackages(pkgs, lowStorageThreshold, updatedPackages, isPostBootUpdate);
         } finally {
             // Always let the pinner service know about changes.
             notifyPinService(updatedPackages);
@@ -672,7 +658,9 @@ public final class BackgroundDexOptService {
 
     @Status
     private int optimizePackages(List<String> pkgs, long lowStorageThreshold,
-            boolean isForPrimaryDex, ArraySet<String> updatedPackages, boolean isPostBootUpdate) {
+            ArraySet<String> updatedPackages, boolean isPostBootUpdate) {
+        boolean supportSecondaryDex = mInjector.supportSecondaryDex();
+
         for (String pkg : pkgs) {
             int abortCode = abortIdleOptimizations(lowStorageThreshold);
             if (abortCode != STATUS_OK) {
@@ -680,11 +668,23 @@ public final class BackgroundDexOptService {
                 return abortCode;
             }
 
-            @DexOptResult int result = optimizePackage(pkg, isForPrimaryDex, isPostBootUpdate);
-            if (result == PackageDexOptimizer.DEX_OPT_PERFORMED) {
+            @DexOptResult int primaryResult =
+                    optimizePackage(pkg, true /* isForPrimaryDex */, isPostBootUpdate);
+            if (primaryResult == PackageDexOptimizer.DEX_OPT_PERFORMED) {
                 updatedPackages.add(pkg);
-            } else if (result != PackageDexOptimizer.DEX_OPT_SKIPPED) {
-                return convertPackageDexOptimizerStatusToInternal(result);
+            } else if (primaryResult != PackageDexOptimizer.DEX_OPT_SKIPPED) {
+                return convertPackageDexOptimizerStatusToInternal(primaryResult);
+            }
+
+            if (!supportSecondaryDex) {
+                continue;
+            }
+
+            @DexOptResult int secondaryResult =
+                    optimizePackage(pkg, false /* isForPrimaryDex */, isPostBootUpdate);
+            if (secondaryResult != PackageDexOptimizer.DEX_OPT_PERFORMED
+                    && secondaryResult != PackageDexOptimizer.DEX_OPT_SKIPPED) {
+                return convertPackageDexOptimizerStatusToInternal(secondaryResult);
             }
         }
         return STATUS_OK;

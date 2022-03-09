@@ -115,9 +115,11 @@ public final class BackgroundDexOptServiceUnitTest {
         when(mInjector.getDataDirStorageLowBytes()).thenReturn(STORAGE_LOW_BYTES);
         when(mInjector.getDexOptThermalCutoff()).thenReturn(PowerManager.THERMAL_STATUS_CRITICAL);
         when(mInjector.getCurrentThermalStatus()).thenReturn(PowerManager.THERMAL_STATUS_NONE);
+        when(mInjector.supportSecondaryDex()).thenReturn(true);
         when(mDexOptHelper.getOptimizablePackages(any())).thenReturn(DEFAULT_PACKAGE_LIST);
         when(mDexOptHelper.performDexOptWithStatus(any())).thenReturn(
                 PackageDexOptimizer.DEX_OPT_PERFORMED);
+        when(mDexOptHelper.performDexOpt(any())).thenReturn(true);
 
         mService = new BackgroundDexOptService(mInjector);
     }
@@ -423,6 +425,8 @@ public final class BackgroundDexOptServiceUnitTest {
             for (String pkg : pkgs) {
                 inOrder.verify(mDexOptHelper, times(1)).performDexOptWithStatus(argThat((option) ->
                         option.getPackageName().equals(pkg) && !option.isDexoptOnlySecondaryDex()));
+                inOrder.verify(mDexOptHelper, times(1)).performDexOpt(argThat((option) ->
+                        option.getPackageName().equals(pkg) && option.isDexoptOnlySecondaryDex()));
             }
         }
     }
