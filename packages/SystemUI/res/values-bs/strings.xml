@@ -992,7 +992,7 @@
     <string name="running_foreground_services_title" msgid="5137313173431186685">"Aplikacije koje rade u pozadini"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"Dodirnite za detalje o potrošnji baterije i prijenosa podataka"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"Isključiti prijenos podataka na mobilnoj mreži?"</string>
-    <string name="mobile_data_disable_message" msgid="8604966027899770415">"Nećete imati pristup podacima ni internetu putem mobilnog operatera <xliff:g id="CARRIER">%s</xliff:g>. Internet će biti dostupan samo putem WiFi mreže."</string>
+    <string name="mobile_data_disable_message" msgid="8604966027899770415">"Nećete imati pristup podacima ni internetu putem mobilnog operatera <xliff:g id="CARRIER">%s</xliff:g>. Internet će biti dostupan samo putem WiFi-ja."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"vaš operater"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"Postavke ne mogu potvrditi vaš odgovor jer aplikacija zaklanja zahtjev za odobrenje."</string>
     <string name="slice_permission_title" msgid="3262615140094151017">"Dozvoliti aplikaciji <xliff:g id="APP_0">%1$s</xliff:g> da prikazuje isječke aplikacije <xliff:g id="APP_2">%2$s</xliff:g>?"</string>
