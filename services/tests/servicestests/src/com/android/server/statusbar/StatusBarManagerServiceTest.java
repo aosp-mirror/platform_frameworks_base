@@ -607,19 +607,8 @@ public class StatusBarManagerServiceTest {
     public void testSetNavBarMode_invalidInputThrowsError() throws RemoteException {
         int navBarModeInvalid = -1;
 
-        assertThrows(UnsupportedOperationException.class,
+        assertThrows(IllegalArgumentException.class,
                 () -> mStatusBarManagerService.setNavBarMode(navBarModeInvalid));
-        verify(mOverlayManager, never()).setEnabledExclusiveInCategory(anyString(), anyInt());
-    }
-
-    @Test
-    public void testSetNavBarMode_noOverlayManagerDoesNotEnable() throws RemoteException {
-        mOverlayManager = null;
-        int navBarModeKids = StatusBarManager.NAV_BAR_MODE_KIDS;
-
-        mStatusBarManagerService.setNavBarMode(navBarModeKids);
-
-        assertEquals(navBarModeKids, mStatusBarManagerService.getNavBarMode());
         verify(mOverlayManager, never()).setEnabledExclusiveInCategory(anyString(), anyInt());
     }
 
