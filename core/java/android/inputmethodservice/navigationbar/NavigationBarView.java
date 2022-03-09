@@ -139,7 +139,7 @@ public final class NavigationBarView extends FrameLayout {
     }
 
     /**
-     * Applies {@param consumer} to each of the nav bar views.
+     * Applies {@code consumer} to each of the nav bar views.
      */
     public void forEachView(Consumer<View> consumer) {
         if (mHorizontal != null) {

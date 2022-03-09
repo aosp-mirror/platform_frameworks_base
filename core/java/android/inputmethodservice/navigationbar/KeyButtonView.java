@@ -310,8 +310,8 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
             switch (action) {
                 case KeyEvent.ACTION_DOWN:
                     handled = ims.onKeyDown(ev.getKeyCode(), ev);
-                    mTracking = handled && ev.getRepeatCount() == 0 &&
-                            (ev.getFlags() & KeyEvent.FLAG_START_TRACKING) != 0;
+                    mTracking = handled && ev.getRepeatCount() == 0
+                            && (ev.getFlags() & KeyEvent.FLAG_START_TRACKING) != 0;
                     break;
                 case KeyEvent.ACTION_UP:
                     handled = ims.onKeyUp(ev.getKeyCode(), ev);

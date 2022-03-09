@@ -54,30 +54,30 @@ import android.view.View;
 final class KeyButtonDrawable extends Drawable {
 
     public static final FloatProperty<KeyButtonDrawable> KEY_DRAWABLE_ROTATE =
-        new FloatProperty<KeyButtonDrawable>("KeyButtonRotation") {
-            @Override
-            public void setValue(KeyButtonDrawable drawable, float degree) {
-                drawable.setRotation(degree);
-            }
+            new FloatProperty<KeyButtonDrawable>("KeyButtonRotation") {
+                @Override
+                public void setValue(KeyButtonDrawable drawable, float degree) {
+                    drawable.setRotation(degree);
+                }
 
-            @Override
-            public Float get(KeyButtonDrawable drawable) {
-                return drawable.getRotation();
-            }
-        };
+                @Override
+                public Float get(KeyButtonDrawable drawable) {
+                    return drawable.getRotation();
+                }
+            };
 
     public static final FloatProperty<KeyButtonDrawable> KEY_DRAWABLE_TRANSLATE_Y =
-        new FloatProperty<KeyButtonDrawable>("KeyButtonTranslateY") {
-            @Override
-            public void setValue(KeyButtonDrawable drawable, float y) {
-                drawable.setTranslationY(y);
-            }
+            new FloatProperty<KeyButtonDrawable>("KeyButtonTranslateY") {
+                @Override
+                public void setValue(KeyButtonDrawable drawable, float y) {
+                    drawable.setTranslationY(y);
+                }
 
-            @Override
-            public Float get(KeyButtonDrawable drawable) {
-                return drawable.getTranslationY();
-            }
-        };
+                @Override
+                public Float get(KeyButtonDrawable drawable) {
+                    return drawable.getTranslationY();
+                }
+            };
 
     private final Paint mIconPaint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
     private final Paint mShadowPaint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
