@@ -12016,7 +12016,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     /**
      * Return the handwriting areas set on this view, in its local coordinates.
-     * Notice: the caller of this method should not modify the Rect returned.
      * @see #setHandwritingArea(Rect)
      *
      * @hide
@@ -12025,7 +12024,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public Rect getHandwritingArea() {
         final ListenerInfo info = mListenerInfo;
         if (info != null) {
-            return info.mHandwritingArea;
+            return new Rect(info.mHandwritingArea);
         }
         return null;
     }
