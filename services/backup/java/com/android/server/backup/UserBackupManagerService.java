@@ -85,7 +85,6 @@ import android.os.PowerSaveState;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SELinux;
-import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.WorkSource;
@@ -4144,6 +4143,24 @@ public class UserBackupManagerService {
                 pw.print(" : ");
                 pw.println(entry.packageName);
             }
+            pw.println(userPrefix + "Agent timeouts:");
+            pw.println("    KvBackupAgentTimeoutMillis: "
+                    + mAgentTimeoutParameters.getKvBackupAgentTimeoutMillis());
+            pw.println("    FullBackupAgentTimeoutMillis: "
+                    + mAgentTimeoutParameters.getFullBackupAgentTimeoutMillis());
+            pw.println("    SharedBackupAgentTimeoutMillis: "
+                    + mAgentTimeoutParameters.getSharedBackupAgentTimeoutMillis());
+            pw.println("    RestoreAgentTimeoutMillis (system): "
+                    + mAgentTimeoutParameters.getRestoreAgentTimeoutMillis(
+                    Process.FIRST_APPLICATION_UID - 1));
+            pw.println("    RestoreAgentTimeoutMillis: "
+                    + mAgentTimeoutParameters.getRestoreAgentTimeoutMillis(
+                    Process.FIRST_APPLICATION_UID));
+            pw.println("    RestoreAgentFinishedTimeoutMillis: "
+                    + mAgentTimeoutParameters.getRestoreAgentFinishedTimeoutMillis());
+            pw.println("    QuotaExceededTimeoutMillis: "
+                    + mAgentTimeoutParameters.getQuotaExceededTimeoutMillis());
+
         }
     }
 
