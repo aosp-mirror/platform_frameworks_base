@@ -584,16 +584,18 @@ public class UdfpsController implements DozeReceiver {
     }
 
     /**
-     * Play haptic to signal udfps scanning started.
+     * If a11y touchExplorationEnabled, play haptic to signal UDFPS scanning started.
      */
     @VisibleForTesting
     public void playStartHaptic() {
-        mVibrator.vibrate(
-                Process.myUid(),
-                mContext.getOpPackageName(),
-                EFFECT_CLICK,
-                "udfps-onStart-click",
-                VIBRATION_ATTRIBUTES);
+        if (mAccessibilityManager.isTouchExplorationEnabled()) {
+            mVibrator.vibrate(
+                    Process.myUid(),
+                    mContext.getOpPackageName(),
+                    EFFECT_CLICK,
+                    "udfps-onStart-click",
+                    VIBRATION_ATTRIBUTES);
+        }
     }
 
     @Nullable
