@@ -30,6 +30,7 @@ import static com.android.server.pm.PackageManagerService.SCAN_NO_DEX;
 import static com.android.server.pm.PackageManagerService.SCAN_REQUIRE_KNOWN;
 import static com.android.server.pm.PackageManagerService.SYSTEM_PARTITIONS;
 import static com.android.server.pm.PackageManagerService.TAG;
+import static com.android.server.pm.pkg.parsing.ParsingPackageUtils.PARSE_CHECK_MAX_SDK_VERSION;
 
 import android.annotation.Nullable;
 import android.content.pm.parsing.ApkLiteParseUtils;
@@ -313,10 +314,14 @@ final class InitAndSystemPackageHelper {
 
     @GuardedBy({"mPm.mInstallLock", "mPm.mLock"})
     private void scanDirTracedLI(File scanDir, List<File> frameworkSplits,
-            final int parseFlags, int scanFlags,
+            int parseFlags, int scanFlags,
             long currentTime, PackageParser2 packageParser, ExecutorService executorService) {
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "scanDir [" + scanDir.getAbsolutePath() + "]");
         try {
+            if ((scanFlags & SCAN_AS_APK_IN_APEX) != 0) {
+                // when scanning apk in apexes, we want to check the maxSdkVersion
+                parseFlags |= PARSE_CHECK_MAX_SDK_VERSION;
+            }
             mInstallPackageHelper.installPackagesFromDir(scanDir, frameworkSplits, parseFlags,
                     scanFlags, currentTime, packageParser, executorService);
         } finally {
