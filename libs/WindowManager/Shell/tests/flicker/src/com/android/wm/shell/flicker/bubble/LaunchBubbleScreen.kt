@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.flicker.bubble
 
+import android.platform.test.annotations.Presubmit
 import androidx.test.filters.FlakyTest
 import android.platform.test.annotations.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
@@ -57,9 +58,19 @@ open class LaunchBubbleScreen(testSpec: FlickerTestParameter) : BaseBubbleScreen
             }
         }
 
-    @FlakyTest(bugId = 218642026)
+    @Presubmit
     @Test
     open fun testAppIsAlwaysVisible() {
+        Assume.assumeFalse(isShellTransitionsEnabled)
+        testSpec.assertLayers {
+            this.isVisible(testApp.component)
+        }
+    }
+
+    @FlakyTest(bugId = 218642026)
+    @Test
+    open fun testAppIsAlwaysVisible_ShellTransit() {
+        Assume.assumeTrue(isShellTransitionsEnabled)
         testSpec.assertLayers {
             this.isVisible(testApp.component)
         }
