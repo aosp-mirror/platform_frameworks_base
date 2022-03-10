@@ -1718,8 +1718,16 @@ public final class ProcessList {
             int runtimeFlags = 0;
 
             boolean debuggableFlag = (app.info.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
-            if (!debuggableFlag && app.isSdkSandbox) {
-                debuggableFlag = isAppForSdkSandboxDebuggable(app);
+            boolean isProfileableByShell = app.info.isProfileableByShell();
+            boolean isProfileable = app.info.isProfileable();
+
+            if (app.isSdkSandbox) {
+                ApplicationInfo clientInfo = app.getClientInfoForSdkSandbox();
+                if (clientInfo != null) {
+                    debuggableFlag |= (clientInfo.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
+                    isProfileableByShell |= clientInfo.isProfileableByShell();
+                    isProfileable |= clientInfo.isProfileable();
+                }
             }
 
             if (debuggableFlag) {
@@ -1741,10 +1749,10 @@ public final class ProcessList {
             if ((app.info.flags & ApplicationInfo.FLAG_VM_SAFE_MODE) != 0 || mService.mSafeMode) {
                 runtimeFlags |= Zygote.DEBUG_ENABLE_SAFEMODE;
             }
-            if ((app.info.privateFlags & ApplicationInfo.PRIVATE_FLAG_PROFILEABLE_BY_SHELL) != 0) {
+            if (isProfileableByShell) {
                 runtimeFlags |= Zygote.PROFILE_FROM_SHELL;
             }
-            if (app.info.isProfileable()) {
+            if (isProfileable) {
                 runtimeFlags |= Zygote.PROFILEABLE;
             }
             if ("1".equals(SystemProperties.get("debug.checkjni"))) {
@@ -1812,7 +1820,7 @@ public final class ProcessList {
             }
 
             String invokeWith = null;
-            if ((app.info.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
+            if (debuggableFlag) {
                 // Debuggable apps may include a wrapper script with their library directory.
                 String wrapperFileName = app.info.nativeLibraryDir + "/wrap.sh";
                 StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskReads();
@@ -1887,24 +1895,6 @@ public final class ProcessList {
         }
     }
 
-    /** Return true if the client app for the SDK sandbox process is debuggable. */
-    private boolean isAppForSdkSandboxDebuggable(ProcessRecord sandboxProcess) {
-        // TODO (b/221004701) use client app process name
-        final int appUid = Process.getAppUidForSdkSandboxUid(sandboxProcess.uid);
-        IPackageManager pm = mService.getPackageManager();
-        try {
-            String[] packages = pm.getPackagesForUid(appUid);
-            for (String aPackage : packages) {
-                ApplicationInfo i = pm.getApplicationInfo(aPackage, 0, sandboxProcess.userId);
-                if ((i.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
-                    return true;
-                }
-            }
-        } catch (RemoteException e) {
-            // shouldn't happen
-        }
-        return false;
-    }
 
     @GuardedBy("mService")
     boolean startProcessLocked(HostingRecord hostingRecord, String entryPoint, ProcessRecord app,
