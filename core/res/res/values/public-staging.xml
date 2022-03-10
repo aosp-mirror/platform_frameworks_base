@@ -175,6 +175,8 @@
     <public name="config_systemAutomotiveCalendarSyncManager" />
     <!-- @hide @SystemApi -->
     <public name="config_defaultAutomotiveNavigation" />
+    <!-- @hide @SystemApi -->
+    <public name="safety_protection_display_text" />
   </staging-public-group>
 
   <staging-public-group type="dimen" first-id="0x01db0000">
@@ -189,6 +191,8 @@
   </staging-public-group>
 
   <staging-public-group type="drawable" first-id="0x01d80000">
+    <!-- @hide @SystemApi -->
+    <public name="ic_safety_protection" />
   </staging-public-group>
 
   <staging-public-group type="layout" first-id="0x01d70000">

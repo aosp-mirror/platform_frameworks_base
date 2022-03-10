@@ -5796,4 +5796,14 @@
          because of it.
     -->
     <bool name="config_bg_current_drain_high_threshold_by_bg_location">false</bool>
+
+    <!-- Start safety protection resources to be overlaid -->
+
+    <!-- Safety protection icon to be overlaid -->
+    <item name="ic_safety_protection" type="drawable">@null</item>
+
+    <!-- Display text for safety protection to be overlaid. This is translatable -->
+    <string name="safety_protection_display_text"></string>
+
+    <!-- End safety protection resources to be overlaid -->
 </resources>
