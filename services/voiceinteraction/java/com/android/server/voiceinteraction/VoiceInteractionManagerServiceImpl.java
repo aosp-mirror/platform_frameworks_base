@@ -462,24 +462,33 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
             IHotwordRecognitionStatusCallback callback,
             int detectorType) {
         Slog.v(TAG, "updateStateLocked");
+        int voiceInteractionServiceUid = mInfo.getServiceInfo().applicationInfo.uid;
         if (mHotwordDetectionComponentName == null) {
             Slog.w(TAG, "Hotword detection service name not found");
+            logDetectorCreateEventIfNeeded(callback, detectorType, false,
+                    voiceInteractionServiceUid);
             throw new IllegalStateException("Hotword detection service name not found");
         }
         ServiceInfo hotwordDetectionServiceInfo = getServiceInfoLocked(
                 mHotwordDetectionComponentName, mUser);
         if (hotwordDetectionServiceInfo == null) {
             Slog.w(TAG, "Hotword detection service info not found");
+            logDetectorCreateEventIfNeeded(callback, detectorType, false,
+                    voiceInteractionServiceUid);
             throw new IllegalStateException("Hotword detection service info not found");
         }
         if (!isIsolatedProcessLocked(hotwordDetectionServiceInfo)) {
             Slog.w(TAG, "Hotword detection service not in isolated process");
+            logDetectorCreateEventIfNeeded(callback, detectorType, false,
+                    voiceInteractionServiceUid);
             throw new IllegalStateException("Hotword detection service not in isolated process");
         }
         if (!Manifest.permission.BIND_HOTWORD_DETECTION_SERVICE.equals(
                 hotwordDetectionServiceInfo.permission)) {
             Slog.w(TAG, "Hotword detection service does not require permission "
                     + Manifest.permission.BIND_HOTWORD_DETECTION_SERVICE);
+            logDetectorCreateEventIfNeeded(callback, detectorType, false,
+                    voiceInteractionServiceUid);
             throw new SecurityException("Hotword detection service does not require permission "
                     + Manifest.permission.BIND_HOTWORD_DETECTION_SERVICE);
         }
@@ -488,17 +497,23 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
                 mInfo.getServiceInfo().packageName) == PackageManager.PERMISSION_GRANTED) {
             Slog.w(TAG, "Voice interaction service should not hold permission "
                     + Manifest.permission.BIND_HOTWORD_DETECTION_SERVICE);
+            logDetectorCreateEventIfNeeded(callback, detectorType, false,
+                    voiceInteractionServiceUid);
             throw new SecurityException("Voice interaction service should not hold permission "
                     + Manifest.permission.BIND_HOTWORD_DETECTION_SERVICE);
         }
 
         if (sharedMemory != null && !sharedMemory.setProtect(OsConstants.PROT_READ)) {
             Slog.w(TAG, "Can't set sharedMemory to be read-only");
+            logDetectorCreateEventIfNeeded(callback, detectorType, false,
+                    voiceInteractionServiceUid);
             throw new IllegalStateException("Can't set sharedMemory to be read-only");
         }
 
         mDetectorType = detectorType;
 
+        logDetectorCreateEventIfNeeded(callback, detectorType, true,
+                voiceInteractionServiceUid);
         if (mHotwordDetectionConnection == null) {
             mHotwordDetectionConnection = new HotwordDetectionConnection(mServiceStub, mContext,
                     mInfo.getServiceInfo().applicationInfo.uid, voiceInteractorIdentity,
@@ -507,6 +522,15 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
         } else {
             mHotwordDetectionConnection.updateStateLocked(options, sharedMemory);
         }
+    }
+
+    private void logDetectorCreateEventIfNeeded(IHotwordRecognitionStatusCallback callback,
+            int detectorType, boolean isCreated, int voiceInteractionServiceUid) {
+        if (callback != null) {
+            HotwordMetricsLogger.writeDetectorCreateEvent(detectorType, true,
+                    voiceInteractionServiceUid);
+        }
+
     }
 
     public void shutdownHotwordDetectionServiceLocked() {
