@@ -42,7 +42,6 @@ import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.FIRST_SYSTEM_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON;
 import static android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
-import static android.view.WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS;
@@ -348,7 +347,6 @@ public class DisplayPolicy {
 
     private WindowState mTopFullscreenOpaqueWindowState;
     private boolean mTopIsFullscreen;
-    private boolean mForceStatusBar;
     private int mNavBarOpacityMode = NAV_BAR_OPAQUE_WHEN_FREEFORM_OR_DOCKED;
     private boolean mForceShowSystemBars;
 
@@ -1558,7 +1556,6 @@ public class DisplayPolicy {
         mStatusBarBackgroundWindows.clear();
         mStatusBarColorCheckedBounds.setEmpty();
         mStatusBarBackgroundCheckedBounds.setEmpty();
-        mForceStatusBar = false;
 
         mAllowLockscreenWhenOn = false;
         mShowingDream = false;
@@ -1599,9 +1596,6 @@ public class DisplayPolicy {
                 && attrs.type < FIRST_SYSTEM_WINDOW;
         if (mTopFullscreenOpaqueWindowState == null) {
             final int fl = attrs.flags;
-            if ((fl & FLAG_FORCE_NOT_FULLSCREEN) != 0) {
-                mForceStatusBar = true;
-            }
             if (win.isDreamWindow()) {
                 // If the lockscreen was showing when the dream started then wait
                 // for the dream to draw before hiding the lockscreen.
@@ -1734,13 +1728,12 @@ public class DisplayPolicy {
         }
 
         if (getStatusBar() != null) {
-            if (DEBUG_LAYOUT) Slog.i(TAG, "force=" + mForceStatusBar
-                    + " top=" + mTopFullscreenOpaqueWindowState);
+            if (DEBUG_LAYOUT) Slog.i(TAG, " top=" + mTopFullscreenOpaqueWindowState);
             final boolean forceShowStatusBar = (getStatusBar().getAttrs().privateFlags
                     & PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR) != 0;
 
             boolean topAppHidesStatusBar = topAppHidesStatusBar();
-            if (mForceStatusBar || forceShowStatusBar) {
+            if (forceShowStatusBar) {
                 if (DEBUG_LAYOUT) Slog.v(TAG, "Showing status bar: forced");
                 // Maintain fullscreen layout until incoming animation is complete.
                 topIsFullscreen = mTopIsFullscreen && mStatusBar.isAnimatingLw();
@@ -2781,7 +2774,6 @@ public class DisplayPolicy {
             }
         }
         pw.print(prefix); pw.print("mTopIsFullscreen="); pw.println(mTopIsFullscreen);
-        pw.print(prefix); pw.print("mForceStatusBar="); pw.print(mForceStatusBar);
         pw.print(prefix); pw.print("mForceShowNavigationBarEnabled=");
         pw.print(mForceShowNavigationBarEnabled);
         pw.print(" mAllowLockscreenWhenOn="); pw.println(mAllowLockscreenWhenOn);
