@@ -33,7 +33,7 @@ import android.os.Build;
 import android.os.RemoteException;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.os.BackgroundThread;
+import com.android.modules.utils.BackgroundThread;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
