@@ -26,7 +26,6 @@ import android.graphics.drawable.Icon;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.service.quicksettings.IQSService;
@@ -51,6 +50,7 @@ import java.util.Comparator;
 import java.util.Objects;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 
 /**
  * Runs the day-to-day operations of which tiles should be bound and when.
@@ -64,8 +64,8 @@ public class TileServices extends IQSService.Stub {
     private final ArrayMap<ComponentName, CustomTile> mTiles = new ArrayMap<>();
     private final ArrayMap<IBinder, CustomTile> mTokenMap = new ArrayMap<>();
     private final Context mContext;
-    private final Handler mHandler;
     private final Handler mMainHandler;
+    private final Provider<Handler> mHandlerProvider;
     private final QSTileHost mHost;
     private final KeyguardStateController mKeyguardStateController;
     private final BroadcastDispatcher mBroadcastDispatcher;
@@ -76,7 +76,7 @@ public class TileServices extends IQSService.Stub {
     @Inject
     public TileServices(
             QSTileHost host,
-            @Main Looper looper,
+            @Main Provider<Handler> handlerProvider,
             BroadcastDispatcher broadcastDispatcher,
             UserTracker userTracker,
             KeyguardStateController keyguardStateController) {
@@ -84,8 +84,8 @@ public class TileServices extends IQSService.Stub {
         mKeyguardStateController = keyguardStateController;
         mContext = mHost.getContext();
         mBroadcastDispatcher = broadcastDispatcher;
-        mHandler = new Handler(looper);
-        mMainHandler = new Handler(Looper.getMainLooper());
+        mHandlerProvider = handlerProvider;
+        mMainHandler = mHandlerProvider.get();
         mUserTracker = userTracker;
         mBroadcastDispatcher.registerReceiver(
                 mRequestListeningReceiver,
@@ -118,7 +118,7 @@ public class TileServices extends IQSService.Stub {
 
     protected TileServiceManager onCreateTileService(ComponentName component,
             BroadcastDispatcher broadcastDispatcher) {
-        return new TileServiceManager(this, mHandler, component,
+        return new TileServiceManager(this, mHandlerProvider.get(), component,
                 broadcastDispatcher, mUserTracker);
     }
 
