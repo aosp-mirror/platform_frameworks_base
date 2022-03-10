@@ -45,7 +45,6 @@ import static android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACK
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_INTERCEPT_GLOBAL_DRAG_AND_DROP;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
@@ -78,7 +77,6 @@ import static android.window.DisplayAreaOrganizer.FEATURE_UNDEFINED;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_SCREEN_ON;
 import static com.android.server.policy.PhoneWindowManager.TOAST_WINDOW_TIMEOUT;
-import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_LAYOUT;
 import static com.android.server.policy.WindowManagerPolicy.TRANSIT_ENTER;
 import static com.android.server.policy.WindowManagerPolicy.TRANSIT_EXIT;
 import static com.android.server.policy.WindowManagerPolicy.TRANSIT_HIDE;
@@ -1704,61 +1702,15 @@ public class DisplayPolicy {
     }
 
     /**
-     * Called following layout of all windows and after policy has been applied
-     * to each window. If in this function you do
-     * something that may have modified the animation state of another window,
-     * be sure to return non-zero in order to perform another pass through layout.
-     *
-     * @return Return any bit set of
-     *         {@link WindowManagerPolicy#FINISH_LAYOUT_REDO_LAYOUT},
-     *         {@link WindowManagerPolicy#FINISH_LAYOUT_REDO_CONFIG},
-     *         {@link WindowManagerPolicy#FINISH_LAYOUT_REDO_WALLPAPER}, or
-     *         {@link WindowManagerPolicy#FINISH_LAYOUT_REDO_ANIM}.
+     * Called following layout of all windows and after policy has been applied to each window.
      */
-    public int finishPostLayoutPolicyLw() {
-        int changes = 0;
-        boolean topIsFullscreen = false;
-
+    public void finishPostLayoutPolicyLw() {
         // If we are not currently showing a dream then remember the current
         // lockscreen state.  We will use this to determine whether the dream
         // started while the lockscreen was showing and remember this state
         // while the dream is showing.
         if (!mShowingDream) {
             mDreamingLockscreen = mService.mPolicy.isKeyguardShowingAndNotOccluded();
-        }
-
-        if (getStatusBar() != null) {
-            if (DEBUG_LAYOUT) Slog.i(TAG, " top=" + mTopFullscreenOpaqueWindowState);
-            final boolean forceShowStatusBar = (getStatusBar().getAttrs().privateFlags
-                    & PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR) != 0;
-
-            boolean topAppHidesStatusBar = topAppHidesStatusBar();
-            if (forceShowStatusBar) {
-                if (DEBUG_LAYOUT) Slog.v(TAG, "Showing status bar: forced");
-                // Maintain fullscreen layout until incoming animation is complete.
-                topIsFullscreen = mTopIsFullscreen && mStatusBar.isAnimatingLw();
-            } else if (mTopFullscreenOpaqueWindowState != null) {
-                topIsFullscreen = topAppHidesStatusBar;
-                // The subtle difference between the window for mTopFullscreenOpaqueWindowState
-                // and mTopIsFullscreen is that mTopIsFullscreen is set only if the window
-                // requests to hide the status bar.  Not sure if there is another way that to be the
-                // case though.
-                if (!topIsFullscreen) {
-                    topAppHidesStatusBar = false;
-                }
-            }
-            StatusBarManagerInternal statusBar = getStatusBarManagerInternal();
-            if (statusBar != null) {
-                statusBar.setTopAppHidesStatusBar(topAppHidesStatusBar);
-            }
-        }
-
-        if (mTopIsFullscreen != topIsFullscreen) {
-            if (!topIsFullscreen) {
-                // Force another layout when status bar becomes fully shown.
-                changes |= FINISH_LAYOUT_REDO_LAYOUT;
-            }
-            mTopIsFullscreen = topIsFullscreen;
         }
 
         updateSystemBarAttributes();
@@ -1770,7 +1722,6 @@ public class DisplayPolicy {
         }
 
         mService.mPolicy.setAllowLockscreenWhenOn(getDisplayId(), mAllowLockscreenWhenOn);
-        return changes;
     }
 
     /**
@@ -2433,6 +2384,18 @@ public class DisplayPolicy {
         // visible.
         mForceShowSystemBars = multiWindowTaskVisible || freeformRootTaskVisible;
         mDisplayContent.getInsetsPolicy().updateBarControlTarget(win);
+
+        final boolean topAppHidesStatusBar = topAppHidesStatusBar();
+        if (getStatusBar() != null) {
+            final StatusBarManagerInternal statusBar = getStatusBarManagerInternal();
+            if (statusBar != null) {
+                statusBar.setTopAppHidesStatusBar(topAppHidesStatusBar);
+            }
+        }
+
+        // If the top app is not fullscreen, only the default rotation animation is allowed.
+        mTopIsFullscreen = topAppHidesStatusBar
+                && (mNotificationShade == null || !mNotificationShade.isVisible());
 
         int appearance = APPEARANCE_OPAQUE_NAVIGATION_BARS | APPEARANCE_OPAQUE_STATUS_BARS;
         appearance = configureStatusBarOpacity(appearance);
