@@ -118,8 +118,9 @@ public class CompanionDeviceActivity extends FragmentActivity implements
     // Present for self-managed association requests and "single-device" regular association
     // regular.
     private Button mButtonAllow;
-    // Present for all associations.
     private Button mButtonNotAllow;
+    // Present for multiple devices association requests only.
+    private Button mButtonNotAllowMultipleDevices;
 
     private LinearLayout mAssociationConfirmationDialog;
     private RelativeLayout mVendorHeader;
@@ -260,9 +261,12 @@ public class CompanionDeviceActivity extends FragmentActivity implements
 
         mButtonAllow = findViewById(R.id.btn_positive);
         mButtonNotAllow = findViewById(R.id.btn_negative);
+        mButtonNotAllowMultipleDevices = findViewById(R.id.btn_negative_multiple_devices);
 
         mButtonAllow.setOnClickListener(this::onPositiveButtonClick);
         mButtonNotAllow.setOnClickListener(this::onNegativeButtonClick);
+        mButtonNotAllowMultipleDevices.setOnClickListener(this::onNegativeButtonClick);
+
         mVendorHeaderButton.setOnClickListener(this::onShowHelperDialog);
 
         if (mRequest.isSelfManaged()) {
@@ -490,6 +494,8 @@ public class CompanionDeviceActivity extends FragmentActivity implements
 
         // "Remove" consent button: users would need to click on the list item.
         mButtonAllow.setVisibility(View.GONE);
+        mButtonNotAllow.setVisibility(View.GONE);
+        mButtonNotAllowMultipleDevices.setVisibility(View.VISIBLE);
     }
 
     private void onListItemClick(int position) {

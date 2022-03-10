@@ -352,11 +352,6 @@ public interface ParsingPackageRead extends PkgWithoutStateAppInfo, PkgWithoutSt
     int getLocaleConfigRes();
 
     /**
-     * @see R.styleable#AndroidManifest_inheritKeyStoreKeys
-     */
-    boolean shouldInheritKeyStoreKeys();
-
-    /**
      * @see R.styleable.AndroidManifestApplication_enableOnBackInvokedCallback
      */
     boolean isOnBackInvokedCallbackEnabled();

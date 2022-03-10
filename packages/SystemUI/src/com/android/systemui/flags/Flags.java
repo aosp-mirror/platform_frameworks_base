@@ -16,6 +16,7 @@
 
 package com.android.systemui.flags;
 
+import com.android.internal.annotations.Keep;
 import com.android.systemui.R;
 
 import java.lang.reflect.Field;
@@ -154,8 +155,9 @@ public class Flags {
             new BooleanFlag(1000, true);
 
     // 1100 - windowing
+    @Keep
     public static final SysPropBooleanFlag WM_ENABLE_SHELL_TRANSITIONS =
-            new SysPropBooleanFlag(1100, "persist.debug.shell_transit", false);
+            new SysPropBooleanFlag(1100, "persist.wm.debug.shell_transit", false);
 
     // Pay no attention to the reflection behind the curtain.
     // ========================== Curtain ==========================

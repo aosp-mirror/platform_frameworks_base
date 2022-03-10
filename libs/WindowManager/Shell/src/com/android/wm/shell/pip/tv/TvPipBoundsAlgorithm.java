@@ -28,15 +28,21 @@ import static com.android.wm.shell.pip.tv.TvPipBoundsState.ORIENTATION_VERTICAL;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Rect;
+import android.os.SystemClock;
+import android.util.ArraySet;
 import android.util.Log;
 import android.util.Size;
 import android.view.Gravity;
 
 import androidx.annotation.NonNull;
 
+import com.android.wm.shell.R;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.pip.PipBoundsAlgorithm;
 import com.android.wm.shell.pip.PipSnapAlgorithm;
+import com.android.wm.shell.pip.tv.TvPipKeepClearAlgorithm.Placement;
+
+import java.util.Set;
 
 /**
  * Contains pip bounds calculations that are specific to TV.
@@ -46,91 +52,129 @@ public class TvPipBoundsAlgorithm extends PipBoundsAlgorithm {
     private static final String TAG = TvPipBoundsAlgorithm.class.getSimpleName();
     private static final boolean DEBUG = TvPipController.DEBUG;
 
-    private final @android.annotation.NonNull TvPipBoundsState mTvPipBoundsState;
+    private final @NonNull TvPipBoundsState mTvPipBoundsState;
 
     private int mFixedExpandedHeightInPx;
     private int mFixedExpandedWidthInPx;
+
+    private final TvPipKeepClearAlgorithm mKeepClearAlgorithm;
 
     public TvPipBoundsAlgorithm(Context context,
             @NonNull TvPipBoundsState tvPipBoundsState,
             @NonNull PipSnapAlgorithm pipSnapAlgorithm) {
         super(context, tvPipBoundsState, pipSnapAlgorithm);
         this.mTvPipBoundsState = tvPipBoundsState;
+        this.mKeepClearAlgorithm = new TvPipKeepClearAlgorithm(SystemClock::uptimeMillis);
+        reloadResources(context);
     }
 
-    @Override
-    protected void reloadResources(Context context) {
-        super.reloadResources(context);
+    private void reloadResources(Context context) {
         final Resources res = context.getResources();
         mFixedExpandedHeightInPx = res.getDimensionPixelSize(
                 com.android.internal.R.dimen.config_pictureInPictureExpandedHorizontalHeight);
         mFixedExpandedWidthInPx = res.getDimensionPixelSize(
                 com.android.internal.R.dimen.config_pictureInPictureExpandedVerticalWidth);
+        mKeepClearAlgorithm.setPipAreaPadding(
+                res.getDimensionPixelSize(R.dimen.pip_keep_clear_area_padding));
+        mKeepClearAlgorithm.setMaxRestrictedDistanceFraction(
+                res.getFraction(R.fraction.config_pipMaxRestrictedMoveDistance, 1, 1));
+        mKeepClearAlgorithm.setStashDuration(res.getInteger(R.integer.config_pipStashDuration));
+    }
+
+    @Override
+    public void onConfigurationChanged(Context context) {
+        super.onConfigurationChanged(context);
+        reloadResources(context);
     }
 
     /** Returns the destination bounds to place the PIP window on entry. */
     @Override
     public Rect getEntryDestinationBounds() {
         if (DEBUG) Log.d(TAG, "getEntryDestinationBounds()");
-        if (mTvPipBoundsState.getTvExpandedAspectRatio() != 0
+        if (mTvPipBoundsState.isTvExpandedPipSupported()
+                && mTvPipBoundsState.getDesiredTvExpandedAspectRatio() != 0
                 && !mTvPipBoundsState.isTvPipManuallyCollapsed()) {
-            updatePositionOnExpandToggled(Gravity.NO_GRAVITY, true);
+            updateExpandedPipSize();
+            updateGravityOnExpandToggled(Gravity.NO_GRAVITY, true);
+            mTvPipBoundsState.setTvPipExpanded(true);
         }
-        return getTvPipBounds(true);
+        return getTvPipBounds().getBounds();
     }
 
     /** Returns the current bounds adjusted to the new aspect ratio, if valid. */
     @Override
     public Rect getAdjustedDestinationBounds(Rect currentBounds, float newAspectRatio) {
         if (DEBUG) Log.d(TAG, "getAdjustedDestinationBounds: " + newAspectRatio);
-        return getTvPipBounds(mTvPipBoundsState.isTvPipExpanded());
+        return getTvPipBounds().getBounds();
     }
 
     /**
-     * The normal bounds at a different position on the screen.
+     * Calculates the PiP bounds.
      */
-    public Rect getTvNormalBounds() {
-        Rect normalBounds = getNormalBounds();
-        Rect insetBounds = new Rect();
+    public Placement getTvPipBounds() {
+        final Size pipSize = getPipSize();
+        final Rect displayBounds = mTvPipBoundsState.getDisplayBounds();
+        final Size screenSize = new Size(displayBounds.width(), displayBounds.height());
+        final Rect insetBounds = new Rect();
         getInsetBounds(insetBounds);
+
+        Set<Rect> restrictedKeepClearAreas = mTvPipBoundsState.getRestrictedKeepClearAreas();
+        Set<Rect> unrestrictedKeepClearAreas = mTvPipBoundsState.getUnrestrictedKeepClearAreas();
 
         if (mTvPipBoundsState.isImeShowing()) {
             if (DEBUG) Log.d(TAG, "IME showing, height: " + mTvPipBoundsState.getImeHeight());
-            insetBounds.bottom -= mTvPipBoundsState.getImeHeight();
+
+            final Rect imeBounds = new Rect(
+                    0,
+                    insetBounds.bottom - mTvPipBoundsState.getImeHeight(),
+                    insetBounds.right,
+                    insetBounds.bottom);
+
+            unrestrictedKeepClearAreas = new ArraySet<>(unrestrictedKeepClearAreas);
+            unrestrictedKeepClearAreas.add(imeBounds);
         }
 
-        Rect result = new Rect();
-        Gravity.apply(mTvPipBoundsState.getTvPipGravity(), normalBounds.width(),
-                normalBounds.height(), insetBounds, result);
+        mKeepClearAlgorithm.setGravity(mTvPipBoundsState.getTvPipGravity());
+        mKeepClearAlgorithm.setScreenSize(screenSize);
+        mKeepClearAlgorithm.setMovementBounds(insetBounds);
+        mKeepClearAlgorithm.setStashOffset(mTvPipBoundsState.getStashOffset());
+
+        final Placement placement = mKeepClearAlgorithm.calculatePipPosition(
+                pipSize,
+                restrictedKeepClearAreas,
+                unrestrictedKeepClearAreas);
 
         if (DEBUG) {
-            Log.d(TAG, "normalBounds: " + normalBounds.toShortString());
+            Log.d(TAG, "pipSize: " + pipSize);
+            Log.d(TAG, "screenSize: " + screenSize);
+            Log.d(TAG, "stashOffset: " + mTvPipBoundsState.getStashOffset());
             Log.d(TAG, "insetBounds: " + insetBounds.toShortString());
+            Log.d(TAG, "pipSize: " + pipSize);
             Log.d(TAG, "gravity: " + Gravity.toString(mTvPipBoundsState.getTvPipGravity()));
-            Log.d(TAG, "resultBounds: " + result.toShortString());
+            Log.d(TAG, "restrictedKeepClearAreas: " + restrictedKeepClearAreas);
+            Log.d(TAG, "unrestrictedKeepClearAreas: " + unrestrictedKeepClearAreas);
+            Log.d(TAG, "placement: " + placement);
         }
 
-        mTvPipBoundsState.setTvPipExpanded(false);
-
-        return result;
+        return placement;
     }
 
     /**
-     * @return previous gravity if it is to be saved, or Gravity.NO_GRAVITY if not.
+     * @return previous gravity if it is to be saved, or {@link Gravity#NO_GRAVITY} if not.
      */
-    int updatePositionOnExpandToggled(int previousGravity, boolean expanding) {
+    int updateGravityOnExpandToggled(int previousGravity, boolean expanding) {
         if (DEBUG) {
-            Log.d(TAG, "updatePositionOnExpandToggle(), expanding: " + expanding
+            Log.d(TAG, "updateGravityOnExpandToggled(), expanding: " + expanding
                     + ", mOrientation: " + mTvPipBoundsState.getTvFixedPipOrientation()
                     + ", previous gravity: " + Gravity.toString(previousGravity));
         }
 
-        if (!mTvPipBoundsState.isTvExpandedPipEnabled()) {
+        if (!mTvPipBoundsState.isTvExpandedPipSupported()) {
             return Gravity.NO_GRAVITY;
         }
 
         if (expanding && mTvPipBoundsState.getTvFixedPipOrientation() == ORIENTATION_UNDETERMINED) {
-            float expandedRatio = mTvPipBoundsState.getTvExpandedAspectRatio();
+            float expandedRatio = mTvPipBoundsState.getDesiredTvExpandedAspectRatio();
             if (expandedRatio == 0) {
                 return Gravity.NO_GRAVITY;
             }
@@ -139,7 +183,6 @@ public class TvPipBoundsAlgorithm extends PipBoundsAlgorithm {
             } else {
                 mTvPipBoundsState.setTvFixedPipOrientation(ORIENTATION_HORIZONTAL);
             }
-
         }
 
         int gravityToSave = Gravity.NO_GRAVITY;
@@ -181,10 +224,10 @@ public class TvPipBoundsAlgorithm extends PipBoundsAlgorithm {
     }
 
     /**
-     * @return true if position changed
+     * @return true if gravity changed
      */
-    boolean updatePosition(int keycode) {
-        if (DEBUG) Log.d(TAG, "updatePosition, keycode: " + keycode);
+    boolean updateGravity(int keycode) {
+        if (DEBUG) Log.d(TAG, "updateGravity, keycode: " + keycode);
 
         // Check if position change is valid
         if (mTvPipBoundsState.isTvPipExpanded()) {
@@ -247,26 +290,31 @@ public class TvPipBoundsAlgorithm extends PipBoundsAlgorithm {
         return false;
     }
 
+    private Size getPipSize() {
+        final boolean isExpanded =
+                mTvPipBoundsState.isTvExpandedPipSupported() && mTvPipBoundsState.isTvPipExpanded()
+                        && mTvPipBoundsState.getDesiredTvExpandedAspectRatio() != 0;
+        if (isExpanded) {
+            return mTvPipBoundsState.getTvExpandedSize();
+        } else {
+            final Rect normalBounds = getNormalBounds();
+            return new Size(normalBounds.width(), normalBounds.height());
+        }
+    }
+
     /**
-     * Calculates the PiP bounds.
+     * Updates {@link TvPipBoundsState#getTvExpandedSize()} based on
+     * {@link TvPipBoundsState#getDesiredTvExpandedAspectRatio()}, the screen size.
      */
-    public Rect getTvPipBounds(boolean expandedIfPossible) {
-        if (DEBUG) {
-            Log.d(TAG, "getExpandedBoundsIfPossible with gravity "
-                    + Gravity.toString(mTvPipBoundsState.getTvPipGravity())
-                    + ", fixed orientation: " + mTvPipBoundsState.getTvFixedPipOrientation());
-        }
+    void updateExpandedPipSize() {
+        final DisplayLayout displayLayout = mTvPipBoundsState.getDisplayLayout();
+        final float expandedRatio =
+                mTvPipBoundsState.getDesiredTvExpandedAspectRatio(); // width / height
 
-        if (!mTvPipBoundsState.isTvExpandedPipEnabled() || !expandedIfPossible) {
-            return getTvNormalBounds();
-        }
-
-        DisplayLayout displayLayout = mTvPipBoundsState.getDisplayLayout();
-        float expandedRatio = mTvPipBoundsState.getTvExpandedAspectRatio(); // width / height
-        Size expandedSize;
+        final Size expandedSize;
         if (expandedRatio == 0) {
-            Log.d(TAG, "Expanded mode not supported");
-            return getTvNormalBounds();
+            Log.d(TAG, "updateExpandedPipSize(): Expanded mode aspect ratio of 0 not supported");
+            return;
         } else if (expandedRatio < 1) {
             // vertical
             if (mTvPipBoundsState.getTvFixedPipOrientation() == ORIENTATION_HORIZONTAL) {
@@ -300,26 +348,14 @@ public class TvPipBoundsAlgorithm extends PipBoundsAlgorithm {
             }
         }
 
-        if (expandedSize == null) {
-            return getTvNormalBounds();
-        }
-
-        if (DEBUG) {
-            Log.d(TAG, "expanded size, width: " + expandedSize.getWidth()
-                    + ", height: " + expandedSize.getHeight());
-        }
-
-        Rect insetBounds = new Rect();
-        getInsetBounds(insetBounds);
-
-        Rect expandedBounds = new Rect();
-        Gravity.apply(mTvPipBoundsState.getTvPipGravity(), expandedSize.getWidth(),
-                expandedSize.getHeight(), insetBounds, expandedBounds);
-        if (DEBUG) Log.d(TAG, "expanded bounds: " + expandedBounds.toShortString());
-
         mTvPipBoundsState.setTvExpandedSize(expandedSize);
-        mTvPipBoundsState.setTvPipExpanded(true);
-        return expandedBounds;
+        if (DEBUG) {
+            Log.d(TAG, "updateExpandedPipSize(): expanded size, width=" + expandedSize.getWidth()
+                    + ", height=" + expandedSize.getHeight());
+        }
     }
 
+    void keepUnstashedForCurrentKeepClearAreas() {
+        mKeepClearAlgorithm.keepUnstashedForCurrentKeepClearAreas();
+    }
 }

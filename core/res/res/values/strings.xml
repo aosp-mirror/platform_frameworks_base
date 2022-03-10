@@ -1248,14 +1248,13 @@
         Malicious apps may use this to erase or modify your call log.</string>
 
     <!-- Title of the body sensors permission, listed so the user can decide whether to allow the application to access body sensor data. [CHAR LIMIT=80] -->
-    <string name="permlab_bodySensors">access body sensors (like heart rate monitors)
-    </string>
+    <string name="permlab_bodySensors">Access body sensor data, like heart rate, while in use</string>
     <!-- Description of the body sensors permission, listed so the user can decide whether to allow the application to access data from body sensors. [CHAR LIMIT=NONE] -->
-    <string name="permdesc_bodySensors" product="default">Access to data from body sensors such as heart rate, temperature, blood oxygen percentage, etc.</string>
+    <string name="permdesc_bodySensors" product="default">Allows the app to access body sensor data, such as heart rate, temperature, and blood oxygen percentage, while the app is in use.</string>
     <!-- Title of the background body sensors permission, listed so the user can decide whether to allow the application to access body sensor data in the background. [CHAR LIMIT=80] -->
-    <string name="permlab_bodySensors_background">access body sensors (like heart rate monitors) while in the background</string>
+    <string name="permlab_bodySensors_background">Access body sensor data, like heart rate, while in the background</string>
     <!-- Description of the background body sensors permission, listed so the user can decide whether to allow the application to access data from body sensors in the background. [CHAR LIMIT=NONE] -->
-    <string name="permdesc_bodySensors_background" product="default">Access to data from body sensors such as heart rate, temperature, blood oxygen percentage, etc. while in the background.</string>
+    <string name="permdesc_bodySensors_background" product="default">Allows the app to access body sensor data, such as heart rate, temperature, and blood oxygen percentage, while the app is in the background.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_readCalendar">Read calendar events and details</string>
@@ -2415,7 +2414,7 @@
     <!-- On the unlock pattern screen, shown at the top of the unlock screen to tell the user what to do. Below this text is the place for theu ser to draw the pattern. -->
     <string name="lockscreen_pattern_instructions">Draw pattern to unlock</string>
     <!-- Button at the bottom of the unlock screen to make an emergency call or access other emergency assistance functions. -->
-    <string name="lockscreen_emergency_call">Emergency call</string>
+    <string name="lockscreen_emergency_call">Emergency</string>
     <!-- Button at the bottom of the unlock screen that lets the user return to a call -->
     <string name="lockscreen_return_to_call">Return to call</string>
     <!-- Shown to confirm that the user entered their lock pattern correctly. -->
@@ -5731,16 +5730,17 @@
     <!-- Title for the harmful app warning dialog. [CHAR LIMIT=40] -->
     <string name="harmful_app_warning_title">Harmful app detected</string>
 
-    <!-- Title for the log access confirmation dialog. [CHAR LIMIT=40] -->
-    <string name="log_access_confirmation_title">System log access request</string>
+    <!-- Title for the log access confirmation dialog. [CHAR LIMIT=NONE] -->
+    <string name="log_access_confirmation_title">Allow <xliff:g id="log_access_app_name" example="Example App">%s</xliff:g> to access all device logs?</string>
     <!-- Label for the allow button on the log access confirmation dialog. [CHAR LIMIT=20] -->
     <string name="log_access_confirmation_allow">Only this time</string>
     <!-- Label for the deny button on the log access confirmation dialog. [CHAR LIMIT=20] -->
     <string name="log_access_confirmation_deny">Don\u2019t allow</string>
 
     <!-- Content for the log access confirmation dialog. [CHAR LIMIT=NONE]-->
-    <string name="log_access_confirmation_body"><xliff:g id="log_access_app_name" example="Example App">%s</xliff:g> requests system logs for functional debugging.
-        These logs might contain information that apps and services on your device have written.</string>
+    <string name="log_access_confirmation_body">Device logs record what happens on your device. Apps can use these logs to find and fix issues.\n\nSome logs may contain sensitive info, so only allow apps you trust to access all device logs.
+        \n\nIf you don’t allow this app to access all device logs, it can still access its own logs, and your device manufacturer may still be able to access some logs or info on your device. Learn more
+    </string>
 
     <!-- Privacy notice do not show [CHAR LIMIT=20] -->
     <string name="log_access_do_not_show_again">Don\u2019t show again</string>

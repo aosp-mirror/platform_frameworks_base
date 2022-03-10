@@ -15,8 +15,8 @@
  */
 package android.hardware;
 
-import android.hardware.camera2.params.DynamicRangeProfiles;
 import android.hardware.camera2.CameraMetadata;
+import android.hardware.camera2.params.DynamicRangeProfiles;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
@@ -37,6 +37,7 @@ public class CameraStreamStats implements Parcelable {
     private int mWidth;
     private int mHeight;
     private int mFormat;
+    private float mMaxPreviewFps;
     private int mDataSpace;
     private long mUsage;
     private long mRequestCount;
@@ -56,6 +57,7 @@ public class CameraStreamStats implements Parcelable {
         mWidth = 0;
         mHeight = 0;
         mFormat = 0;
+        mMaxPreviewFps = 0;
         mDataSpace = 0;
         mUsage = 0;
         mRequestCount = 0;
@@ -68,13 +70,14 @@ public class CameraStreamStats implements Parcelable {
         mStreamUseCase = CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_DEFAULT;
     }
 
-    public CameraStreamStats(int width, int height, int format,
+    public CameraStreamStats(int width, int height, int format, float maxPreviewFps,
             int dataSpace, long usage, long requestCount, long errorCount,
             int startLatencyMs, int maxHalBuffers, int maxAppBuffers, long dynamicRangeProfile,
             int streamUseCase) {
         mWidth = width;
         mHeight = height;
         mFormat = format;
+        mMaxPreviewFps = maxPreviewFps;
         mDataSpace = dataSpace;
         mUsage = usage;
         mRequestCount = requestCount;
@@ -120,6 +123,7 @@ public class CameraStreamStats implements Parcelable {
         dest.writeInt(mWidth);
         dest.writeInt(mHeight);
         dest.writeInt(mFormat);
+        dest.writeFloat(mMaxPreviewFps);
         dest.writeInt(mDataSpace);
         dest.writeLong(mUsage);
         dest.writeLong(mRequestCount);
@@ -138,6 +142,7 @@ public class CameraStreamStats implements Parcelable {
         mWidth = in.readInt();
         mHeight = in.readInt();
         mFormat = in.readInt();
+        mMaxPreviewFps = in.readFloat();
         mDataSpace = in.readInt();
         mUsage = in.readLong();
         mRequestCount = in.readLong();
@@ -162,6 +167,10 @@ public class CameraStreamStats implements Parcelable {
 
     public int getFormat() {
         return mFormat;
+    }
+
+    public float getMaxPreviewFps() {
+        return mMaxPreviewFps;
     }
 
     public int getDataSpace() {

@@ -119,14 +119,10 @@ public final class BroadcastHelper {
                 intent.setPackage(targetPkg);
             }
             // Modify the UID when posting to other users
-            final String[] uidExtraNames =
-                    { Intent.EXTRA_UID, Intent.EXTRA_PREVIOUS_UID, Intent.EXTRA_NEW_UID };
-            for (String name : uidExtraNames) {
-                int uid = intent.getIntExtra(name, -1);
-                if (uid >= 0 && UserHandle.getUserId(uid) != userId) {
-                    uid = UserHandle.getUid(userId, UserHandle.getAppId(uid));
-                    intent.putExtra(name, uid);
-                }
+            int uid = intent.getIntExtra(Intent.EXTRA_UID, -1);
+            if (uid >= 0 && UserHandle.getUserId(uid) != userId) {
+                uid = UserHandle.getUid(userId, UserHandle.getAppId(uid));
+                intent.putExtra(Intent.EXTRA_UID, uid);
             }
             if (broadcastAllowList != null && PLATFORM_PACKAGE_NAME.equals(targetPkg)) {
                 intent.putExtra(Intent.EXTRA_VISIBILITY_ALLOW_LIST,

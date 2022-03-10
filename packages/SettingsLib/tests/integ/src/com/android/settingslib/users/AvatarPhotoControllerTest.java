@@ -150,23 +150,6 @@ public class AvatarPhotoControllerTest {
     }
 
     @Test
-    public void takePhotoIsNotFollowedByCropIntentWhenCropNotSupported() throws IOException {
-        when(mMockAvatarUi.startSystemActivityForResult(any(), anyInt())).thenReturn(false);
-
-        File file = new File(mImagesDir, "file.txt");
-        saveBitmapToFile(file);
-
-        Intent intent = new Intent();
-        intent.setData(Uri.parse(
-                "content://com.android.settingslib.test/my_cache/multi_user/file.txt"));
-        mController.onActivityResult(
-                REQUEST_CODE_TAKE_PHOTO, Activity.RESULT_OK, intent);
-
-        verify(mMockAvatarUi, never()).startActivityForResult(any(), anyInt());
-        verify(mMockAvatarUi, never()).startSystemActivityForResult(any(), anyInt());
-    }
-
-    @Test
     public void choosePhotoIsFollowedByCrop() throws IOException {
         new File(mImagesDir, "file.txt").createNewFile();
 

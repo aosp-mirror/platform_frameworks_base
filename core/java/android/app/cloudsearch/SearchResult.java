@@ -71,6 +71,8 @@ public final class SearchResult implements Parcelable {
             EXTRAINFO_APP_BADGES,
             EXTRAINFO_ACTION_BUTTON_TEXT_PREREGISTERING,
             EXTRAINFO_ACTION_BUTTON_IMAGE_PREREGISTERING,
+            EXTRAINFO_APP_CARD_ACTION,
+            EXTRAINFO_INSTALL_BUTTON_ACTION,
             EXTRAINFO_WEB_URL,
             EXTRAINFO_WEB_ICON})
     public @interface SearchResultExtraInfoKey {}
@@ -119,6 +121,14 @@ public final class SearchResult implements Parcelable {
     @SuppressLint("IntentName")
     public static final String EXTRAINFO_ACTION_BUTTON_IMAGE_PREREGISTERING =
             "android.app.cloudsearch.ACTION_BUTTON_IMAGE";
+    /** Intent for tapping the app card, PendingIntent expected. */
+    @SuppressLint("IntentName")
+    public static final String EXTRAINFO_APP_CARD_ACTION =
+            "android.app.cloudsearch.APP_CARD_ACTION";
+    /** Intent for tapping the install button, PendingIntent expected. */
+    @SuppressLint("IntentName")
+    public static final String EXTRAINFO_INSTALL_BUTTON_ACTION =
+            "android.app.cloudsearch.INSTALL_BUTTON_ACTION";
     /** Web content's URL, String value expected. */
     public static final String EXTRAINFO_WEB_URL = "android.app.cloudsearch.WEB_URL";
     /** Web content's domain icon, android.graphics.drawable.Icon expected. */
