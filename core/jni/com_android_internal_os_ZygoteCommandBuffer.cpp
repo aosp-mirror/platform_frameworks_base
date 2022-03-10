@@ -34,6 +34,7 @@
 #include <sys/mman.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/system_properties.h>
 #include <vector>
 
 namespace android {
@@ -43,10 +44,10 @@ using android::base::StringPrintf;
 using android::zygote::ZygoteFailure;
 
 // WARNING: Knows a little about the wire protocol used to communicate with Zygote.
-// TODO: Fix error handling.
 
+// Commands and nice names have large arbitrary size limits to avoid dynamic memory allocation.
 constexpr size_t MAX_COMMAND_BYTES = 32768;
-constexpr size_t NICE_NAME_BYTES = 50;
+constexpr size_t NICE_NAME_BYTES = 128;
 
 // A buffer optionally bundled with a file descriptor from which we can fill it.
 // Does not own the file descriptor; destroying a NativeCommandBuffer does not
@@ -190,6 +191,9 @@ class NativeCommandBuffer {
         size_t copy_len = std::min(name_len, NICE_NAME_BYTES - 1);
         memcpy(mNiceName, arg_start + NN_LENGTH, copy_len);
         mNiceName[copy_len] = '\0';
+        if (haveWrapProperty()) {
+          return false;
+        }
         continue;
       }
       if (arg_end - arg_start == IW_LENGTH
@@ -222,6 +226,8 @@ class NativeCommandBuffer {
         }
         saw_setgid = true;
       }
+      // ro.debuggable can be handled entirely in the child unless --invoke-with is also specified.
+      // Thus we do not need to check it here.
     }
     return saw_runtime_args && saw_setuid && saw_setgid;
   }
@@ -249,6 +255,14 @@ class NativeCommandBuffer {
   }
 
  private:
+  bool haveWrapProperty() {
+    static const char* WRAP = "wrap.";
+    static const size_t WRAP_LENGTH = strlen(WRAP);
+    char propNameBuf[WRAP_LENGTH + NICE_NAME_BYTES];
+    strcpy(propNameBuf, WRAP);
+    strlcpy(propNameBuf + WRAP_LENGTH, mNiceName, NICE_NAME_BYTES);
+    return __system_property_find(propNameBuf) != nullptr;
+  }
   // Picky version of atoi(). No sign or unexpected characters allowed. Return -1 on failure.
   static int digitsVal(char* start, char* end) {
     int result = 0;
@@ -269,7 +283,7 @@ class NativeCommandBuffer {
   uint32_t mNext;  // Index of first character past last line returned by readLine.
   int32_t mLinesLeft;  // Lines in current command that haven't yet been read.
   int mFd;  // Open file descriptor from which we can read more. -1 if none.
-  char mNiceName[NICE_NAME_BYTES];
+  char mNiceName[NICE_NAME_BYTES];  // Always null terminated.
   char mBuffer[MAX_COMMAND_BYTES];
 };
 
@@ -372,6 +386,7 @@ jboolean com_android_internal_os_ZygoteCommandBuffer_nativeForkRepeatedly(
             jint minUid,
             jstring managed_nice_name) {
 
+  ALOGI("Entering forkRepeatedly native zygote loop");
   NativeCommandBuffer* n_buffer = reinterpret_cast<NativeCommandBuffer*>(j_buffer);
   int session_socket = n_buffer->getFd();
   std::vector<int> session_socket_fds {session_socket};
@@ -400,7 +415,8 @@ jboolean com_android_internal_os_ZygoteCommandBuffer_nativeForkRepeatedly(
   socklen_t cred_size = sizeof credentials;
   if (getsockopt(n_buffer->getFd(), SOL_SOCKET, SO_PEERCRED, &credentials, &cred_size) == -1
       || cred_size != sizeof credentials) {
-    fail_fn_1(CREATE_ERROR("ForkMany failed to get initial credentials, %s", strerror(errno)));
+    fail_fn_1(CREATE_ERROR("ForkRepeatedly failed to get initial credentials, %s",
+                           strerror(errno)));
   }
 
   bool first_time = true;
