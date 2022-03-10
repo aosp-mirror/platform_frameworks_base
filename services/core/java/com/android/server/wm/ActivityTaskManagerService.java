@@ -203,8 +203,6 @@ import android.os.UpdateLock;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.WorkSource;
-import android.os.storage.IStorageManager;
-import android.os.storage.StorageManager;
 import android.provider.Settings;
 import android.service.dreams.DreamActivity;
 import android.service.voice.IVoiceInteractionSession;
@@ -4209,11 +4207,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             SystemProperties.set("persist.sys.locale",
                     locales.get(bestLocaleIndex).toLanguageTag());
             LocaleList.setDefault(locales, bestLocaleIndex);
-
-            final Message m = PooledLambda.obtainMessage(
-                    ActivityTaskManagerService::sendLocaleToMountDaemonMsg, this,
-                    locales.get(bestLocaleIndex));
-            mH.sendMessage(m);
         }
 
         mTempConfig.seq = increaseConfigurationSeqLocked();
@@ -4365,17 +4358,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     private void sendPutConfigurationForUserMsg(int userId, Configuration config) {
         final ContentResolver resolver = mContext.getContentResolver();
         Settings.System.putConfigurationForUser(resolver, config, userId);
-    }
-
-    private void sendLocaleToMountDaemonMsg(Locale l) {
-        try {
-            IBinder service = ServiceManager.getService("mount");
-            IStorageManager storageManager = IStorageManager.Stub.asInterface(service);
-            Log.d(TAG, "Storing locale " + l.toLanguageTag() + " for decryption UI");
-            storageManager.setField(StorageManager.SYSTEM_LOCALE_KEY, l.toLanguageTag());
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error storing locale for decryption UI", e);
-        }
     }
 
     private void expireStartAsCallerTokenMsg(IBinder permissionToken) {

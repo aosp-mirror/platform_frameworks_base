@@ -1409,10 +1409,11 @@ public class TelephonyCallback {
          *
          * @param enabled {@code true} if data is enabled, otherwise disabled.
          * @param reason  Reason for data enabled/disabled.
-         *                See {@link TelephonyManager.DataEnabledReason}.
+         *                See {@link TelephonyManager.DataEnabledChangedReason}.
          */
         @RequiresPermission(Manifest.permission.READ_PRECISE_PHONE_STATE)
-        void onDataEnabledChanged(boolean enabled, @TelephonyManager.DataEnabledReason int reason);
+        void onDataEnabledChanged(boolean enabled,
+                @TelephonyManager.DataEnabledChangedReason int reason);
     }
 
     /**
