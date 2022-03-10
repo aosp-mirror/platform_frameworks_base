@@ -61,7 +61,7 @@ class TransitionController {
 
     /** Whether to use shell-transitions rotation instead of fixed-rotation. */
     private static final boolean SHELL_TRANSITIONS_ROTATION =
-            SystemProperties.getBoolean("persist.debug.shell_transit_rotate", false);
+            SystemProperties.getBoolean("persist.wm.debug.shell_transit_rotate", false);
 
     /** The same as legacy APP_TRANSITION_TIMEOUT_MS. */
     private static final int DEFAULT_TIMEOUT_MS = 5000;

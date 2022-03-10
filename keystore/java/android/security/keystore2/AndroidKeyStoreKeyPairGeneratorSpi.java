@@ -108,6 +108,16 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
         }
     }
 
+    /**
+     * XDH represents Curve 25519 providers.
+     */
+    public static class XDH extends AndroidKeyStoreKeyPairGeneratorSpi {
+        // XDH is treated as EC.
+        public XDH() {
+            super(KeymasterDefs.KM_ALGORITHM_EC);
+        }
+    }
+
     /*
      * These must be kept in sync with system/security/keystore/defaults.h
      */
@@ -241,6 +251,23 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
                     spec = buildKeyGenParameterSpecFromLegacy(legacySpec, keymasterAlgorithm);
                 } catch (NullPointerException | IllegalArgumentException e) {
                     throw new InvalidAlgorithmParameterException(e);
+                }
+            } else if (params instanceof NamedParameterSpec) {
+                NamedParameterSpec namedSpec = (NamedParameterSpec) params;
+                // Android Keystore cannot support initialization from a NamedParameterSpec
+                // because an alias for the key is needed (a KeyGenParameterSpec cannot be
+                // constructed).
+                if (namedSpec.getName().equalsIgnoreCase(NamedParameterSpec.X25519.getName())
+                        || namedSpec.getName().equalsIgnoreCase(
+                        NamedParameterSpec.ED25519.getName())) {
+                    throw new IllegalArgumentException(
+                            "This KeyPairGenerator cannot be initialized using NamedParameterSpec."
+                                    + " use " + KeyGenParameterSpec.class.getName() + " or "
+                                    + KeyPairGeneratorSpec.class.getName());
+                } else {
+                    throw new InvalidAlgorithmParameterException(
+                            "Unsupported algorithm specified via NamedParameterSpec: "
+                            + namedSpec.getName());
                 }
             } else {
                 throw new InvalidAlgorithmParameterException(

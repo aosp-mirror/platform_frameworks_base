@@ -343,6 +343,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     return runSetStopUserOnSwitch(pw);
                 case "set-bg-abusive-uids":
                     return runSetBgAbusiveUids(pw);
+                case "list-bg-exemptions-config":
+                    return runListBgExemptionsConfig(pw);
                 default:
                     return handleDefaultCommands(cmd);
             }
@@ -3289,6 +3291,19 @@ final class ActivityManagerShellCommand extends ShellCommand {
             return -1;
         }
         batteryTracker.setDebugUidPercentage(uids, values);
+        return 0;
+    }
+
+    private int runListBgExemptionsConfig(PrintWriter pw) throws RemoteException {
+        final ArraySet<String> sysConfigs = mInternal.mAppRestrictionController
+                .mBgRestrictionExemptioFromSysConfig;
+        if (sysConfigs != null) {
+            for (int i = 0, size = sysConfigs.size(); i < size; i++) {
+                pw.print(sysConfigs.valueAt(i));
+                pw.print(' ');
+            }
+            pw.println();
+        }
         return 0;
     }
 

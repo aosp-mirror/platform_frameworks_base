@@ -28,45 +28,40 @@
     <!-- Do NOT change the ID of the root LinearLayout above: it's referenced in CTS tests. -->
 
     <TextView
-            android:id="@+id/title"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:paddingHorizontal="12dp"
-            style="@*android:style/TextAppearance.Widget.Toolbar.Title"/>
+        android:id="@+id/title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:paddingHorizontal="12dp"
+        style="@*android:style/TextAppearance.Widget.Toolbar.Title"/>
 
     <TextView
-            android:id="@+id/summary"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:layout_marginBottom="12dp"
-            android:gravity="center"
-            android:textColor="?android:attr/textColorSecondary"
-            android:textSize="14sp" />
+        android:id="@+id/summary"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="12dp"
+        android:gravity="center"
+        android:textColor="?android:attr/textColorSecondary"
+        android:textSize="14sp" />
 
     <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="end">
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginTop="24dp">
 
         <!-- Do NOT change the IDs of the buttons: they are referenced in CTS tests. -->
 
         <Button
-                android:id="@+id/btn_negative"
-                style="@android:style/Widget.Material.Button.Borderless.Colored"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/consent_no"
-                android:textColor="?android:attr/textColorSecondary" />
+            android:id="@+id/btn_negative"
+            style="@style/NegativeButton"
+            android:text="@string/consent_no" />
 
         <Button
-                android:id="@+id/btn_positive"
-                style="@android:style/Widget.Material.Button.Borderless.Colored"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/consent_yes" />
+            android:id="@+id/btn_positive"
+            style="@style/PositiveButton"
+            android:text="@string/consent_yes" />
 
     </LinearLayout>
 

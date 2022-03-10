@@ -196,8 +196,8 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
     }
 
     @VisibleForTesting
-    ShellTaskOrganizer(ITaskOrganizerController taskOrganizerController, ShellExecutor mainExecutor,
-            Context context, @Nullable CompatUIController compatUI,
+    protected ShellTaskOrganizer(ITaskOrganizerController taskOrganizerController,
+            ShellExecutor mainExecutor, Context context, @Nullable CompatUIController compatUI,
             Optional<RecentTasksController> recentTasks) {
         super(taskOrganizerController, mainExecutor);
         mCompatUI = compatUI;

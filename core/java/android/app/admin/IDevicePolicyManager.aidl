@@ -285,12 +285,9 @@ interface IDevicePolicyManager {
     void setSecondaryLockscreenEnabled(in ComponentName who, boolean enabled);
     boolean isSecondaryLockscreenEnabled(in UserHandle userHandle);
 
-    void setPreferentialNetworkServiceEnabled(in boolean enabled);
-    boolean isPreferentialNetworkServiceEnabled(int userHandle);
-
-    void setPreferentialNetworkServiceConfig(
-            in PreferentialNetworkServiceConfig preferentialNetworkServiceConfig);
-    PreferentialNetworkServiceConfig getPreferentialNetworkServiceConfig();
+    void setPreferentialNetworkServiceConfigs(
+            in List<PreferentialNetworkServiceConfig> preferentialNetworkServiceConfigs);
+    List<PreferentialNetworkServiceConfig> getPreferentialNetworkServiceConfigs();
 
     void setLockTaskPackages(in ComponentName who, in String[] packages);
     String[] getLockTaskPackages(in ComponentName who);

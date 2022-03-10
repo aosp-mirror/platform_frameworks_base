@@ -184,6 +184,9 @@ public class CameraServiceProxy extends SystemService
     // Must be equal to number of CameraStreamProto in CameraActionEvent
     private static final int MAX_STREAM_STATISTICS = 5;
 
+    private static final float MIN_PREVIEW_FPS = 30.0f;
+    private static final float MAX_PREVIEW_FPS = 60.0f;
+
     private final Context mContext;
     private final ServiceThread mHandlerThread;
     private final Handler mHandler;
@@ -821,6 +824,7 @@ public class CameraServiceProxy extends SystemService
                         Slog.v(TAG, "Stream " + i + ": width " + streamProtos[i].width
                                 + ", height " + streamProtos[i].height
                                 + ", format " + streamProtos[i].format
+                                + ", maxPreviewFps " + streamStats.getMaxPreviewFps()
                                 + ", dataSpace " + streamProtos[i].dataSpace
                                 + ", usage " + streamProtos[i].usage
                                 + ", requestCount " + streamProtos[i].requestCount
@@ -1015,6 +1019,11 @@ public class CameraServiceProxy extends SystemService
         return false;
     }
 
+    private float getMinFps(CameraSessionStats cameraState) {
+        float maxFps = cameraState.getMaxPreviewFps();
+        return Math.max(Math.min(maxFps, MAX_PREVIEW_FPS), MIN_PREVIEW_FPS);
+    }
+
     private void updateActivityCount(CameraSessionStats cameraState) {
         String cameraId = cameraState.getCameraId();
         int newCameraState = cameraState.getNewCameraState();
@@ -1068,7 +1077,9 @@ public class CameraServiceProxy extends SystemService
                     if (!alreadyActivePackage) {
                         WindowManagerInternal wmi =
                                 LocalServices.getService(WindowManagerInternal.class);
-                        wmi.addNonHighRefreshRatePackage(clientName);
+                        float minFps = getMinFps(cameraState);
+                        wmi.addRefreshRateRangeForPackage(clientName,
+                                minFps, MAX_PREVIEW_FPS);
                     }
 
                     // Update activity events
@@ -1107,7 +1118,7 @@ public class CameraServiceProxy extends SystemService
                         if (!stillActivePackage) {
                             WindowManagerInternal wmi =
                                     LocalServices.getService(WindowManagerInternal.class);
-                            wmi.removeNonHighRefreshRatePackage(clientName);
+                            wmi.removeRefreshRateRangeForPackage(clientName);
                         }
                     }
 

@@ -307,8 +307,8 @@ class ActiveAdmin {
     public boolean mAdminCanGrantSensorsPermissions;
     public boolean mPreferentialNetworkServiceEnabled =
             DevicePolicyManager.PREFERENTIAL_NETWORK_SERVICE_ENABLED_DEFAULT;
-    public PreferentialNetworkServiceConfig mPreferentialNetworkServiceConfig =
-            PreferentialNetworkServiceConfig.DEFAULT;
+    public List<PreferentialNetworkServiceConfig> mPreferentialNetworkServiceConfigs =
+            List.of(PreferentialNetworkServiceConfig.DEFAULT);
 
     private static final boolean USB_DATA_SIGNALING_ENABLED_DEFAULT = true;
     boolean mUsbDataSignalingEnabled = USB_DATA_SIGNALING_ENABLED_DEFAULT;

@@ -131,6 +131,10 @@ public final class TvInteractiveAppInfo implements Parcelable {
         dest.writeInt(mTypes);
     }
 
+    /**
+     * Returns a unique ID for this TV interactive app service. The ID is generated from the package
+     * and class name implementing the TV interactive app service.
+     */
     @NonNull
     public String getId() {
         return mId;

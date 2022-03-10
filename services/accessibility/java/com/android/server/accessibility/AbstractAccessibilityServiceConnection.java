@@ -281,9 +281,9 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
 
         void onDoubleTapAndHold(int displayId);
 
-        void requestImeLocked(AccessibilityServiceConnection connection);
+        void requestImeLocked(AbstractAccessibilityServiceConnection connection);
 
-        void unbindImeLocked(AccessibilityServiceConnection connection);
+        void unbindImeLocked(AbstractAccessibilityServiceConnection connection);
     }
 
     public AbstractAccessibilityServiceConnection(Context context, ComponentName componentName,
@@ -387,7 +387,6 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
                 & AccessibilityServiceInfo.FLAG_REQUEST_FINGERPRINT_GESTURES) != 0;
         mRequestAccessibilityButton = (info.flags
                 & AccessibilityServiceInfo.FLAG_REQUEST_ACCESSIBILITY_BUTTON) != 0;
-        // TODO(b/218193835): request ime when ime flag is set and clean up when ime flag is unset
         mRequestImeApis = (info.flags
                 & AccessibilityServiceInfo.FLAG_INPUT_METHOD_EDITOR) != 0;
     }
@@ -439,6 +438,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
                 // If the XML manifest had data to configure the service its info
                 // should be already set. In such a case update only the dynamically
                 // configurable properties.
+                boolean oldRequestIme = mRequestImeApis;
                 AccessibilityServiceInfo oldInfo = mAccessibilityServiceInfo;
                 if (oldInfo != null) {
                     oldInfo.updateDynamicallyConfigurableProperties(mIPlatformCompat, info);
@@ -447,6 +447,11 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
                     setDynamicallyConfigurableProperties(info);
                 }
                 mSystemSupport.onClientChangeLocked(true);
+                if (!oldRequestIme && mRequestImeApis) {
+                    mSystemSupport.requestImeLocked(this);
+                } else if (oldRequestIme && !mRequestImeApis) {
+                    mSystemSupport.unbindImeLocked(this);
+                }
             }
         } finally {
             Binder.restoreCallingIdentity(identity);

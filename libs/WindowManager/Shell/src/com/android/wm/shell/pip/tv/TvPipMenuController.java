@@ -174,8 +174,8 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
     }
 
     void updateExpansionState() {
-        mPipMenuView.setExpandedModeEnabled(mTvPipBoundsState.isTvExpandedPipEnabled()
-                && mTvPipBoundsState.getTvExpandedAspectRatio() != 0);
+        mPipMenuView.setExpandedModeEnabled(mTvPipBoundsState.isTvExpandedPipSupported()
+                && mTvPipBoundsState.getDesiredTvExpandedAspectRatio() != 0);
         mPipMenuView.setIsExpanded(mTvPipBoundsState.isTvPipExpanded());
     }
 
@@ -202,12 +202,17 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
         }
     }
 
+    boolean isInMoveMode() {
+        return mInMoveMode;
+    }
+
     @Override
     public void onEnterMoveMode() {
         if (DEBUG) Log.d(TAG, "onEnterMoveMode - " + mInMoveMode);
         mInMoveMode = true;
         mPipMenuView.showMenuButtons(false);
         mPipMenuView.showMovementHints(mDelegate.getPipGravity());
+        mDelegate.onInMoveModeChanged();
     }
 
     @Override
@@ -217,6 +222,7 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
             mInMoveMode = false;
             mPipMenuView.showMenuButtons(true);
             mPipMenuView.hideMovementHints();
+            mDelegate.onInMoveModeChanged();
             return true;
         }
         return false;
@@ -446,6 +452,8 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
         void movePipToFullscreen();
 
         void movePip(int keycode);
+
+        void onInMoveModeChanged();
 
         int getPipGravity();
 

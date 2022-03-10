@@ -3780,7 +3780,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     synchronized (mProcLock) {
                         mProcessList.killPackageProcessesLSP(packageName, appId, targetUserId,
                                 ProcessList.SERVICE_ADJ, ApplicationExitInfo.REASON_USER_REQUESTED,
-                                ApplicationExitInfo.SUBREASON_UNKNOWN, "kill background");
+                                ApplicationExitInfo.SUBREASON_KILL_BACKGROUND, "kill background");
                     }
                 }
             }
@@ -3810,7 +3810,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     mProcessList.killPackageProcessesLSP(null /* packageName */, -1 /* appId */,
                             UserHandle.USER_ALL, ProcessList.CACHED_APP_MIN_ADJ,
                             ApplicationExitInfo.REASON_USER_REQUESTED,
-                            ApplicationExitInfo.SUBREASON_UNKNOWN,
+                            ApplicationExitInfo.SUBREASON_KILL_BACKGROUND,
                             "kill all background");
                 }
 
@@ -4352,7 +4352,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         ProcessList.INVALID_ADJ, true, false, true,
                         false, true /* setRemoved */, false,
                         ApplicationExitInfo.REASON_USER_REQUESTED,
-                        ApplicationExitInfo.SUBREASON_UNKNOWN,
+                        ApplicationExitInfo.SUBREASON_STOP_APP,
                         "fully stop " + packageName + "/" + userId + " by user request");
             }
 
@@ -4404,7 +4404,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     evenPersistent, true /* setRemoved */, uninstalling,
                     packageName == null ? ApplicationExitInfo.REASON_USER_STOPPED
                     : ApplicationExitInfo.REASON_USER_REQUESTED,
-                    ApplicationExitInfo.SUBREASON_UNKNOWN,
+                    ApplicationExitInfo.SUBREASON_FORCE_STOP,
                     (packageName == null ? ("stop user " + userId) : ("stop " + packageName))
                     + " due to " + reason);
         }
@@ -9756,7 +9756,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     if (info.deniedPermissions != null) {
                         for (int j = 0; j < info.deniedPermissions.size(); j++) {
                             pw.print("      deny: ");
-                            pw.println(info.deniedPermissions.valueAt(i));
+                            pw.println(info.deniedPermissions.valueAt(j));
                         }
                     }
                 }
@@ -13636,7 +13636,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                                                     UserHandle.getAppId(extraUid),
                                                     userId, ProcessList.INVALID_ADJ,
                                                     ApplicationExitInfo.REASON_USER_REQUESTED,
-                                                    ApplicationExitInfo.SUBREASON_UNKNOWN,
+                                                    ApplicationExitInfo.SUBREASON_PACKAGE_UPDATE,
                                                     "change " + ssp);
                                         }
                                     }
@@ -16365,7 +16365,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     if (pr.mState.getSetSchedGroup() == ProcessList.SCHED_GROUP_BACKGROUND
                             && pr.mReceivers.numberOfCurReceivers() == 0) {
                         pr.killLocked("remove task", ApplicationExitInfo.REASON_USER_REQUESTED,
-                                ApplicationExitInfo.SUBREASON_UNKNOWN, true);
+                                ApplicationExitInfo.SUBREASON_REMOVE_TASK, true);
                     } else {
                         // We delay killing processes that are not in the background or running a
                         // receiver.
@@ -17002,6 +17002,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         @Override
         public void addPendingTopUid(int uid, int pid) {
+            final boolean isNewPending = mPendingStartActivityUids.add(uid, pid);
             // If the next top activity is in cached and frozen mode, WM should raise its priority
             // to unfreeze it. This is done by calling AMS.updateOomAdj that will lower its oom adj.
             // However, WM cannot hold the AMS clock here so the updateOomAdj operation is performed
@@ -17009,11 +17010,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             // next top activity on time. This race will fail the following binder transactions WM
             // sends to the activity. After this race issue between WM/ATMS and AMS is solved, this
             // workaround can be removed. (b/213288355)
-            if (!isPendingTopUid(uid)) {
+            if (isNewPending && mOomAdjuster != null) { // It can be null in unit test.
                 mOomAdjuster.mCachedAppOptimizer.unfreezeProcess(pid);
             }
-
-            mPendingStartActivityUids.add(uid, pid);
         }
 
         @Override

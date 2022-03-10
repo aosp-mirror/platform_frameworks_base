@@ -18,6 +18,8 @@ package com.android.keyguard;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
 import android.os.PowerManager;
 import android.os.SystemClock;
 import android.util.AttributeSet;
@@ -129,8 +131,13 @@ public class NumPadKey extends ViewGroup {
 
         setContentDescription(mDigitText.getText().toString());
 
-        mAnimator = new NumPadAnimator(context, getBackground().mutate(),
-                R.style.NumPadKey, mDigitText);
+        Drawable background = getBackground();
+        if (background instanceof GradientDrawable) {
+            mAnimator = new NumPadAnimator(context, background.mutate(),
+                    R.style.NumPadKey, mDigitText);
+        } else {
+            mAnimator = null;
+        }
     }
 
     @Override

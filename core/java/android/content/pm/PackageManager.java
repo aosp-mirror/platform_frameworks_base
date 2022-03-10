@@ -121,6 +121,9 @@ public abstract class PackageManager {
     /** {@hide} */
     public static final boolean APPLY_DEFAULT_TO_DEVICE_PROTECTED_STORAGE = true;
 
+    /** {@hide} */
+    public static final boolean ENABLE_SHARED_UID_MIGRATION = true;
+
     /**
      * This exception is thrown when a given package, application, or component
      * name cannot be found.
@@ -2202,6 +2205,14 @@ public abstract class PackageManager {
      */
     public static final int INSTALL_FAILED_BAD_PERMISSION_GROUP = -127;
 
+    /**
+     * Installation failed return code: an error occurred during the activation phase of this
+     * session.
+     *
+     * @hide
+     */
+    public static final int INSTALL_ACTIVATION_FAILED = -128;
+
     /** @hide */
     @IntDef(flag = true, prefix = { "DELETE_" }, value = {
             DELETE_KEEP_DATA,
@@ -4251,8 +4262,9 @@ public abstract class PackageManager {
      * for more details.
      * @hide
      */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final String EXTRA_VERIFICATION_ROOT_HASH =
-            "android.content.pm.extra.EXTRA_VERIFICATION_ROOT_HASH";
+            "android.content.pm.extra.VERIFICATION_ROOT_HASH";
 
     /**
      * Extra field name for the ID of a intent filter pending verification.

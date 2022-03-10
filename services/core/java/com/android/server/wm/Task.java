@@ -1523,7 +1523,7 @@ class Task extends TaskFragment {
                 mTaskSupervisor.removeTask(this, false /* killProcess */,
                         !REMOVE_FROM_RECENTS, reason);
             }
-        } else if (!mReuseTask && !mCreatedByOrganizer) {
+        } else if (!mReuseTask && shouldRemoveSelfOnLastChildRemoval()) {
             // Remove entire task if it doesn't have any activity left and it isn't marked for reuse
             // or created by task organizer.
             if (!isRootTask()) {
@@ -2036,8 +2036,10 @@ class Task extends TaskFragment {
         Rect outOverrideBounds = getResolvedOverrideConfiguration().windowConfiguration.getBounds();
 
         if (windowingMode == WINDOWING_MODE_FULLSCREEN) {
-            // Use empty bounds to indicate "fill parent".
-            outOverrideBounds.setEmpty();
+            if (!mCreatedByOrganizer) {
+                // Use empty bounds to indicate "fill parent".
+                outOverrideBounds.setEmpty();
+            }
             // The bounds for fullscreen mode shouldn't be adjusted by minimal size. Otherwise if
             // the parent or display is smaller than the size, the content may be cropped.
             return;

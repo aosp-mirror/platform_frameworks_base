@@ -28,6 +28,8 @@ import android.os.Parcelable;
 import android.os.UserHandle;
 import android.util.ArraySet;
 
+import com.android.internal.util.Preconditions;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -82,7 +84,7 @@ public final class VirtualDeviceParams implements Parcelable {
     public static final int ACTIVITY_POLICY_DEFAULT_BLOCKED = 1;
 
     private final int mLockState;
-    private final ArraySet<UserHandle> mUsersWithMatchingAccounts;
+    @NonNull private final ArraySet<UserHandle> mUsersWithMatchingAccounts;
     @NonNull private final ArraySet<ComponentName> mAllowedActivities;
     @NonNull private final ArraySet<ComponentName> mBlockedActivities;
     @ActivityPolicy
@@ -94,10 +96,14 @@ public final class VirtualDeviceParams implements Parcelable {
             @NonNull Set<ComponentName> allowedActivities,
             @NonNull Set<ComponentName> blockedActivities,
             @ActivityPolicy int defaultActivityPolicy) {
+        Preconditions.checkNotNull(usersWithMatchingAccounts);
+        Preconditions.checkNotNull(allowedActivities);
+        Preconditions.checkNotNull(blockedActivities);
+
         mLockState = lockState;
         mUsersWithMatchingAccounts = new ArraySet<>(usersWithMatchingAccounts);
-        mAllowedActivities = allowedActivities == null ? null : new ArraySet<>(allowedActivities);
-        mBlockedActivities = blockedActivities == null ? null : new ArraySet<>(blockedActivities);
+        mAllowedActivities = new ArraySet<>(allowedActivities);
+        mBlockedActivities = new ArraySet<>(blockedActivities);
         mDefaultActivityPolicy = defaultActivityPolicy;
     }
 
@@ -130,30 +136,24 @@ public final class VirtualDeviceParams implements Parcelable {
     }
 
     /**
-     * Returns the set of activities allowed to be streamed, or {@code null} if all activities are
+     * Returns the set of activities allowed to be streamed, or empty set if all activities are
      * allowed, except the ones explicitly blocked.
      *
      * @see Builder#setAllowedActivities(Set)
      */
     @NonNull
     public Set<ComponentName> getAllowedActivities() {
-        if (mAllowedActivities == null) {
-            return Collections.emptySet();
-        }
         return Collections.unmodifiableSet(mAllowedActivities);
     }
 
     /**
-     * Returns the set of activities that are blocked from streaming, or {@code null} to indicate
+     * Returns the set of activities that are blocked from streaming, or empty set to indicate
      * that all activities in {@link #getAllowedActivities} are allowed.
      *
      * @see Builder#setBlockedActivities(Set)
      */
     @NonNull
     public Set<ComponentName> getBlockedActivities() {
-        if (mBlockedActivities == null) {
-            return Collections.emptySet();
-        }
         return Collections.unmodifiableSet(mBlockedActivities);
     }
 
@@ -237,7 +237,7 @@ public final class VirtualDeviceParams implements Parcelable {
     public static final class Builder {
 
         private @LockState int mLockState = LOCK_STATE_DEFAULT;
-        private Set<UserHandle> mUsersWithMatchingAccounts;
+        @NonNull private Set<UserHandle> mUsersWithMatchingAccounts = Collections.emptySet();;
         @NonNull private Set<ComponentName> mBlockedActivities = Collections.emptySet();
         @NonNull private Set<ComponentName> mAllowedActivities = Collections.emptySet();
         @ActivityPolicy
@@ -282,6 +282,7 @@ public final class VirtualDeviceParams implements Parcelable {
         @NonNull
         public Builder setUsersWithMatchingAccounts(
                 @NonNull Set<UserHandle> usersWithMatchingAccounts) {
+            Preconditions.checkNotNull(usersWithMatchingAccounts);
             mUsersWithMatchingAccounts = usersWithMatchingAccounts;
             return this;
         }
@@ -301,6 +302,7 @@ public final class VirtualDeviceParams implements Parcelable {
          */
         @NonNull
         public Builder setAllowedActivities(@NonNull Set<ComponentName> allowedActivities) {
+            Preconditions.checkNotNull(allowedActivities);
             if (mDefaultActivityPolicyConfigured
                     && mDefaultActivityPolicy != ACTIVITY_POLICY_DEFAULT_BLOCKED) {
                 throw new IllegalArgumentException(
@@ -327,6 +329,7 @@ public final class VirtualDeviceParams implements Parcelable {
          */
         @NonNull
         public Builder setBlockedActivities(@NonNull Set<ComponentName> blockedActivities) {
+            Preconditions.checkNotNull(blockedActivities);
             if (mDefaultActivityPolicyConfigured
                     && mDefaultActivityPolicy != ACTIVITY_POLICY_DEFAULT_ALLOWED) {
                 throw new IllegalArgumentException(
@@ -343,9 +346,6 @@ public final class VirtualDeviceParams implements Parcelable {
          */
         @NonNull
         public VirtualDeviceParams build() {
-            if (mUsersWithMatchingAccounts == null) {
-                mUsersWithMatchingAccounts = Collections.emptySet();
-            }
             return new VirtualDeviceParams(
                     mLockState,
                     mUsersWithMatchingAccounts,

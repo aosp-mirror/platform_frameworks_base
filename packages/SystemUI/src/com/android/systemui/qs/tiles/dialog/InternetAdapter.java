@@ -47,9 +47,6 @@ import java.util.concurrent.atomic.AtomicReference;
 public class InternetAdapter extends RecyclerView.Adapter<InternetAdapter.InternetViewHolder> {
 
     private static final String TAG = "InternetAdapter";
-    private static final String ACTION_WIFI_DIALOG = "com.android.settings.WIFI_DIALOG";
-    private static final String EXTRA_CHOSEN_WIFI_ENTRY_KEY = "key_chosen_wifientry_key";
-    private static final String EXTRA_CONNECT_FOR_CALLER = "connect_for_caller";
 
     private final InternetDialogController mInternetDialogController;
     @Nullable
@@ -169,11 +166,10 @@ public class InternetAdapter extends RecyclerView.Adapter<InternetAdapter.Intern
             }
             mWifiListLayout.setOnClickListener(v -> {
                 if (wifiEntry.shouldEditBeforeConnect()) {
-                    final Intent intent = new Intent(ACTION_WIFI_DIALOG);
+                    final Intent intent = WifiUtils.getWifiDialogIntent(wifiEntry.getKey(),
+                            true /* connectForCaller */);
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-                    intent.putExtra(EXTRA_CHOSEN_WIFI_ENTRY_KEY, wifiEntry.getKey());
-                    intent.putExtra(EXTRA_CONNECT_FOR_CALLER, false);
                     mContext.startActivity(intent);
                 }
                 mInternetDialogController.connect(wifiEntry);

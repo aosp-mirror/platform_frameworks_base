@@ -124,6 +124,20 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
         return mChildrenTaskInfo.contains(taskId);
     }
 
+    boolean containsToken(WindowContainerToken token) {
+        if (token.equals(mRootTaskInfo.token)) {
+            return true;
+        }
+
+        for (int i = mChildrenTaskInfo.size() - 1; i >= 0; --i) {
+            if (token.equals(mChildrenTaskInfo.valueAt(i).token)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     /**
      * Returns the top visible child task's id.
      */

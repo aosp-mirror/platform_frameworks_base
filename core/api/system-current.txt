@@ -1650,13 +1650,13 @@ package android.app.cloudsearch {
 
   public final class SearchRequest implements android.os.Parcelable {
     method public int describeContents();
+    method @NonNull public String getCallerPackageName();
     method public float getMaxLatencyMillis();
     method @NonNull public String getQuery();
     method @NonNull public String getRequestId();
     method public int getResultNumber();
     method public int getResultOffset();
     method @NonNull public android.os.Bundle getSearchConstraints();
-    method @NonNull public String getSource();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field public static final String CONSTRAINT_IS_PRESUBMIT_SUGGESTION = "android.app.cloudsearch.IS_PRESUBMIT_SUGGESTION";
     field public static final String CONSTRAINT_SEARCH_PROVIDER_FILTER = "android.app.cloudsearch.SEARCH_PROVIDER_FILTER";
@@ -1704,6 +1704,7 @@ package android.app.cloudsearch {
     field public static final String EXTRAINFO_ACTION_BUTTON_IMAGE_PREREGISTERING = "android.app.cloudsearch.ACTION_BUTTON_IMAGE";
     field public static final String EXTRAINFO_ACTION_BUTTON_TEXT_PREREGISTERING = "android.app.cloudsearch.ACTION_BUTTON_TEXT";
     field public static final String EXTRAINFO_APP_BADGES = "android.app.cloudsearch.APP_BADGES";
+    field public static final String EXTRAINFO_APP_CARD_ACTION = "android.app.cloudsearch.APP_CARD_ACTION";
     field public static final String EXTRAINFO_APP_CONTAINS_ADS_DISCLAIMER = "android.app.cloudsearch.APP_CONTAINS_ADS_DISCLAIMER";
     field public static final String EXTRAINFO_APP_CONTAINS_IAP_DISCLAIMER = "android.app.cloudsearch.APP_CONTAINS_IAP_DISCLAIMER";
     field public static final String EXTRAINFO_APP_DEVELOPER_NAME = "android.app.cloudsearch.APP_DEVELOPER_NAME";
@@ -1713,6 +1714,7 @@ package android.app.cloudsearch {
     field public static final String EXTRAINFO_APP_REVIEW_COUNT = "android.app.cloudsearch.APP_REVIEW_COUNT";
     field public static final String EXTRAINFO_APP_SIZE_BYTES = "android.app.cloudsearch.APP_SIZE_BYTES";
     field public static final String EXTRAINFO_APP_STAR_RATING = "android.app.cloudsearch.APP_STAR_RATING";
+    field public static final String EXTRAINFO_INSTALL_BUTTON_ACTION = "android.app.cloudsearch.INSTALL_BUTTON_ACTION";
     field public static final String EXTRAINFO_LONG_DESCRIPTION = "android.app.cloudsearch.LONG_DESCRIPTION";
     field public static final String EXTRAINFO_SCREENSHOTS = "android.app.cloudsearch.SCREENSHOTS";
     field public static final String EXTRAINFO_SHORT_DESCRIPTION = "android.app.cloudsearch.SHORT_DESCRIPTION";
@@ -6946,7 +6948,7 @@ package android.media.tv.tuner {
   }
 
   public class Lnb implements java.lang.AutoCloseable {
-    method public void addCallback(@NonNull android.media.tv.tuner.LnbCallback, @NonNull java.util.concurrent.Executor);
+    method public void addCallback(@NonNull java.util.concurrent.Executor, @NonNull android.media.tv.tuner.LnbCallback);
     method public void close();
     method public boolean removeCallback(@NonNull android.media.tv.tuner.LnbCallback);
     method public int sendDiseqcMessage(@NonNull byte[]);
@@ -8547,7 +8549,7 @@ package android.net {
   public final class EthernetNetworkUpdateRequest implements android.os.Parcelable {
     method public int describeContents();
     method @NonNull public android.net.IpConfiguration getIpConfiguration();
-    method @NonNull public android.net.NetworkCapabilities getNetworkCapabilities();
+    method @Nullable public android.net.NetworkCapabilities getNetworkCapabilities();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.net.EthernetNetworkUpdateRequest> CREATOR;
   }
@@ -8557,7 +8559,7 @@ package android.net {
     ctor public EthernetNetworkUpdateRequest.Builder(@NonNull android.net.EthernetNetworkUpdateRequest);
     method @NonNull public android.net.EthernetNetworkUpdateRequest build();
     method @NonNull public android.net.EthernetNetworkUpdateRequest.Builder setIpConfiguration(@NonNull android.net.IpConfiguration);
-    method @NonNull public android.net.EthernetNetworkUpdateRequest.Builder setNetworkCapabilities(@NonNull android.net.NetworkCapabilities);
+    method @NonNull public android.net.EthernetNetworkUpdateRequest.Builder setNetworkCapabilities(@Nullable android.net.NetworkCapabilities);
   }
 
   public final class MatchAllNetworkSpecifier extends android.net.NetworkSpecifier implements android.os.Parcelable {
@@ -9030,6 +9032,7 @@ package android.net.wifi.nl80211 {
     method public void enableVerboseLogging(boolean);
     method @NonNull public int[] getChannelsMhzForBand(int);
     method @Nullable public android.net.wifi.nl80211.DeviceWiphyCapabilities getDeviceWiphyCapabilities(@NonNull String);
+    method public int getMaxNumScanSsids(@NonNull String);
     method @NonNull public java.util.List<android.net.wifi.nl80211.NativeScanResult> getScanResults(@NonNull String, int);
     method @Nullable public android.net.wifi.nl80211.WifiNl80211Manager.TxPacketCounters getTxPacketCounters(@NonNull String);
     method public void notifyCountryCodeChanged(@Nullable String);
@@ -10580,7 +10583,6 @@ package android.provider {
     field public static final String AUTO_REVOKE_DISABLED = "auto_revoke_disabled";
     field public static final String COMPLETED_CATEGORY_PREFIX = "suggested.completed_category.";
     field public static final String DOZE_ALWAYS_ON = "doze_always_on";
-    field public static final String FAST_PAIR_SCAN_ENABLED = "fast_pair_scan_enabled";
     field public static final String HUSH_GESTURE_USED = "hush_gesture_used";
     field public static final String INSTANT_APPS_ENABLED = "instant_apps_enabled";
     field public static final String LAST_SETUP_SHOWN = "last_setup_shown";
@@ -11405,7 +11407,7 @@ package android.service.games {
 
   public static interface GameSession.ScreenshotCallback {
     method public void onFailure(int);
-    method public void onSuccess(@NonNull android.graphics.Bitmap);
+    method public void onSuccess();
     field public static final int ERROR_TAKE_SCREENSHOT_INTERNAL_ERROR = 0; // 0x0
   }
 
@@ -12217,7 +12219,6 @@ package android.telecom {
 
   public abstract class ConnectionService extends android.app.Service {
     method public final void addExistingConnection(@NonNull android.telecom.PhoneAccountHandle, @NonNull android.telecom.Connection, @NonNull android.telecom.Conference);
-    method @Nullable @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public android.telecom.Connection onCreateUnknownConnection(@NonNull android.telecom.PhoneAccountHandle, @NonNull android.telecom.ConnectionRequest);
   }
 
   public abstract class InCallService extends android.app.Service {

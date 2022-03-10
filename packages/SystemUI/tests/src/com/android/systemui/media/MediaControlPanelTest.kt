@@ -40,6 +40,7 @@ import androidx.lifecycle.LiveData
 import androidx.test.filters.SmallTest
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.broadcast.BroadcastSender
 import com.android.systemui.media.dialog.MediaOutputDialogFactory
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
@@ -59,6 +60,7 @@ import org.mockito.ArgumentMatchers.anyLong
 import org.mockito.Mock
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
+import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnit
 import org.mockito.Mockito.`when` as whenever
@@ -85,6 +87,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
 
     private lateinit var bgExecutor: FakeExecutor
     @Mock private lateinit var activityStarter: ActivityStarter
+    @Mock private lateinit var broadcastSender: BroadcastSender
 
     @Mock private lateinit var holder: PlayerViewHolder
     @Mock private lateinit var sessionHolder: PlayerSessionViewHolder
@@ -119,8 +122,6 @@ public class MediaControlPanelTest : SysuiTestCase() {
     private lateinit var actionPlayPause: ImageButton
     private lateinit var actionNext: ImageButton
     private lateinit var actionPrev: ImageButton
-    private lateinit var actionStart: ImageButton
-    private lateinit var actionEnd: ImageButton
     @Mock private lateinit var longPressText: TextView
     @Mock private lateinit var handler: Handler
     private lateinit var settings: View
@@ -144,8 +145,8 @@ public class MediaControlPanelTest : SysuiTestCase() {
         whenever(mediaViewController.expandedLayout).thenReturn(expandedSet)
         whenever(mediaViewController.collapsedLayout).thenReturn(collapsedSet)
 
-        player = MediaControlPanel(context, bgExecutor, activityStarter, mediaViewController,
-            seekBarViewModel, Lazy { mediaDataManager },
+        player = MediaControlPanel(context, bgExecutor, activityStarter, broadcastSender,
+            mediaViewController, seekBarViewModel, Lazy { mediaDataManager },
             mediaOutputDialogFactory, mediaCarouselController, falsingManager, mediaFlags, clock)
         whenever(seekBarViewModel.progress).thenReturn(seekBarData)
 
@@ -168,6 +169,17 @@ public class MediaControlPanelTest : SysuiTestCase() {
         cancelText = TextView(context)
         dismiss = FrameLayout(context)
         dismissText = TextView(context)
+
+        action0 = ImageButton(context).also { it.setId(R.id.action0) }
+        action1 = ImageButton(context).also { it.setId(R.id.action1) }
+        action2 = ImageButton(context).also { it.setId(R.id.action2) }
+        action3 = ImageButton(context).also { it.setId(R.id.action3) }
+        action4 = ImageButton(context).also { it.setId(R.id.action4) }
+
+        actionPlayPause = ImageButton(context).also { it.setId(R.id.actionPlayPause) }
+        actionPrev = ImageButton(context).also { it.setId(R.id.actionPrev) }
+        actionNext = ImageButton(context).also { it.setId(R.id.actionNext) }
+
         initPlayerHolderMocks()
         initSessionHolderMocks()
 
@@ -208,90 +220,64 @@ public class MediaControlPanelTest : SysuiTestCase() {
         whenever(mediaFlags.useMediaSessionLayout()).thenReturn(false)
     }
 
-    /** Mock view holder for the notification player */
-    private fun initPlayerHolderMocks() {
-        whenever(holder.player).thenReturn(view)
-        whenever(holder.appIcon).thenReturn(appIcon)
-        whenever(holder.albumView).thenReturn(albumView)
-        whenever(holder.titleText).thenReturn(titleText)
-        whenever(holder.artistText).thenReturn(artistText)
+    /**
+     * Initialize elements common to both view holders
+     */
+    private fun initMediaViewHolderMocks(viewHolder: MediaViewHolder) {
+        whenever(viewHolder.player).thenReturn(view)
+        whenever(viewHolder.appIcon).thenReturn(appIcon)
+        whenever(viewHolder.albumView).thenReturn(albumView)
+        whenever(viewHolder.titleText).thenReturn(titleText)
+        whenever(viewHolder.artistText).thenReturn(artistText)
         whenever(seamlessBackground.getDrawable(0)).thenReturn(mock(GradientDrawable::class.java))
-        whenever(holder.seamless).thenReturn(seamless)
-        whenever(holder.seamlessButton).thenReturn(seamlessButton)
-        whenever(holder.seamlessIcon).thenReturn(seamlessIcon)
-        whenever(holder.seamlessText).thenReturn(seamlessText)
-        whenever(holder.seekBar).thenReturn(seekBar)
-        whenever(holder.elapsedTimeView).thenReturn(elapsedTimeView)
-        whenever(holder.totalTimeView).thenReturn(totalTimeView)
+        whenever(viewHolder.seamless).thenReturn(seamless)
+        whenever(viewHolder.seamlessButton).thenReturn(seamlessButton)
+        whenever(viewHolder.seamlessIcon).thenReturn(seamlessIcon)
+        whenever(viewHolder.seamlessText).thenReturn(seamlessText)
+        whenever(viewHolder.seekBar).thenReturn(seekBar)
 
         // Action buttons
-        action0 = ImageButton(context)
-        whenever(holder.action0).thenReturn(action0)
-        whenever(holder.getAction(R.id.action0)).thenReturn(action0)
-        action1 = ImageButton(context)
-        whenever(holder.action1).thenReturn(action1)
-        whenever(holder.getAction(R.id.action1)).thenReturn(action1)
-        action2 = ImageButton(context)
-        whenever(holder.action2).thenReturn(action2)
-        whenever(holder.getAction(R.id.action2)).thenReturn(action2)
-        action3 = ImageButton(context)
-        whenever(holder.action3).thenReturn(action3)
-        whenever(holder.getAction(R.id.action3)).thenReturn(action3)
-        action4 = ImageButton(context)
-        whenever(holder.action4).thenReturn(action4)
-        whenever(holder.getAction(R.id.action4)).thenReturn(action4)
+        whenever(viewHolder.action0).thenReturn(action0)
+        whenever(viewHolder.getAction(R.id.action0)).thenReturn(action0)
+        whenever(viewHolder.action1).thenReturn(action1)
+        whenever(viewHolder.getAction(R.id.action1)).thenReturn(action1)
+        whenever(viewHolder.action2).thenReturn(action2)
+        whenever(viewHolder.getAction(R.id.action2)).thenReturn(action2)
+        whenever(viewHolder.action3).thenReturn(action3)
+        whenever(viewHolder.getAction(R.id.action3)).thenReturn(action3)
+        whenever(viewHolder.action4).thenReturn(action4)
+        whenever(viewHolder.getAction(R.id.action4)).thenReturn(action4)
 
         // Long press menu
-        whenever(holder.longPressText).thenReturn(longPressText)
+        whenever(viewHolder.longPressText).thenReturn(longPressText)
         whenever(longPressText.handler).thenReturn(handler)
-        whenever(holder.settings).thenReturn(settings)
-        whenever(holder.settingsText).thenReturn(settingsText)
-        whenever(holder.cancel).thenReturn(cancel)
-        whenever(holder.cancelText).thenReturn(cancelText)
-        whenever(holder.dismiss).thenReturn(dismiss)
-        whenever(holder.dismissText).thenReturn(dismissText)
+        whenever(viewHolder.settings).thenReturn(settings)
+        whenever(viewHolder.settingsText).thenReturn(settingsText)
+        whenever(viewHolder.cancel).thenReturn(cancel)
+        whenever(viewHolder.cancelText).thenReturn(cancelText)
+        whenever(viewHolder.dismiss).thenReturn(dismiss)
+        whenever(viewHolder.dismissText).thenReturn(dismissText)
+    }
+
+    /** Mock view holder for the notification player */
+    private fun initPlayerHolderMocks() {
+        initMediaViewHolderMocks(holder)
+
+        whenever(holder.elapsedTimeView).thenReturn(elapsedTimeView)
+        whenever(holder.totalTimeView).thenReturn(totalTimeView)
     }
 
     /** Mock view holder for session player */
     private fun initSessionHolderMocks() {
-        whenever(sessionHolder.player).thenReturn(view)
-        whenever(sessionHolder.albumView).thenReturn(albumView)
-        whenever(sessionHolder.appIcon).thenReturn(appIcon)
-        whenever(sessionHolder.titleText).thenReturn(titleText)
-        whenever(sessionHolder.artistText).thenReturn(artistText)
-        val seamlessBackground = mock(RippleDrawable::class.java)
-        whenever(seamlessBackground.getDrawable(0)).thenReturn(mock(GradientDrawable::class.java))
-        whenever(sessionHolder.seamless).thenReturn(seamless)
-        whenever(sessionHolder.seamlessButton).thenReturn(seamlessButton)
-        whenever(sessionHolder.seamlessIcon).thenReturn(seamlessIcon)
-        whenever(sessionHolder.seamlessText).thenReturn(seamlessText)
-        whenever(sessionHolder.seekBar).thenReturn(seekBar)
+        initMediaViewHolderMocks(sessionHolder)
 
-        // Action buttons
-        actionPlayPause = ImageButton(context)
+        // Semantic action buttons
         whenever(sessionHolder.actionPlayPause).thenReturn(actionPlayPause)
         whenever(sessionHolder.getAction(R.id.actionPlayPause)).thenReturn(actionPlayPause)
-        actionNext = ImageButton(context)
         whenever(sessionHolder.actionNext).thenReturn(actionNext)
         whenever(sessionHolder.getAction(R.id.actionNext)).thenReturn(actionNext)
-        actionPrev = ImageButton(context)
         whenever(sessionHolder.actionPrev).thenReturn(actionPrev)
         whenever(sessionHolder.getAction(R.id.actionPrev)).thenReturn(actionPrev)
-        actionStart = ImageButton(context)
-        whenever(sessionHolder.actionStart).thenReturn(actionStart)
-        whenever(sessionHolder.getAction(R.id.actionStart)).thenReturn(actionStart)
-        actionEnd = ImageButton(context)
-        whenever(sessionHolder.actionEnd).thenReturn(actionEnd)
-        whenever(sessionHolder.getAction(R.id.actionEnd)).thenReturn(actionEnd)
-
-        // Long press menu
-        whenever(sessionHolder.longPressText).thenReturn(longPressText)
-        whenever(sessionHolder.settings).thenReturn(settings)
-        whenever(sessionHolder.settingsText).thenReturn(settingsText)
-        whenever(sessionHolder.cancel).thenReturn(cancel)
-        whenever(sessionHolder.cancelText).thenReturn(cancelText)
-        whenever(sessionHolder.dismiss).thenReturn(dismiss)
-        whenever(sessionHolder.dismissText).thenReturn(dismissText)
     }
 
     @After
@@ -316,8 +302,8 @@ public class MediaControlPanelTest : SysuiTestCase() {
         val semanticActions = MediaButton(
             playOrPause = MediaAction(icon, Runnable {}, "play"),
             nextOrCustom = MediaAction(icon, Runnable {}, "next"),
-            startCustom = MediaAction(icon, null, "custom 1"),
-            endCustom = MediaAction(icon, null, "custom 2")
+            custom0 = MediaAction(icon, null, "custom 0"),
+            custom1 = MediaAction(icon, null, "custom 1")
         )
         val state = mediaData.copy(semanticActions = semanticActions)
 
@@ -325,7 +311,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
         player.bindPlayer(state, PACKAGE)
 
         verify(expandedSet).setVisibility(R.id.action0, ConstraintSet.VISIBLE)
-        assertThat(action0.contentDescription).isEqualTo("custom 1")
+        assertThat(action0.contentDescription).isEqualTo("custom 0")
         assertThat(action0.isEnabled()).isFalse()
 
         verify(expandedSet).setVisibility(R.id.action1, ConstraintSet.INVISIBLE)
@@ -340,7 +326,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
         assertThat(action3.contentDescription).isEqualTo("next")
 
         verify(expandedSet).setVisibility(R.id.action4, ConstraintSet.VISIBLE)
-        assertThat(action4.contentDescription).isEqualTo("custom 2")
+        assertThat(action4.contentDescription).isEqualTo("custom 1")
         assertThat(action4.isEnabled()).isFalse()
     }
 
@@ -353,28 +339,96 @@ public class MediaControlPanelTest : SysuiTestCase() {
         val semanticActions = MediaButton(
                 playOrPause = MediaAction(icon, Runnable {}, "play"),
                 nextOrCustom = MediaAction(icon, Runnable {}, "next"),
-                startCustom = MediaAction(icon, null, "custom 1"),
-                endCustom = MediaAction(icon, null, "custom 2")
+                custom0 = MediaAction(icon, null, "custom 0"),
+                custom1 = MediaAction(icon, null, "custom 1")
         )
         val state = mediaData.copy(semanticActions = semanticActions)
 
         player.attachPlayer(sessionHolder, MediaViewController.TYPE.PLAYER_SESSION)
         player.bindPlayer(state, PACKAGE)
 
-        assertThat(actionStart.contentDescription).isEqualTo("custom 1")
-        assertThat(actionStart.isEnabled()).isFalse()
-
         assertThat(actionPrev.isEnabled()).isFalse()
         assertThat(actionPrev.drawable).isNull()
+        verify(collapsedSet).setVisibility(R.id.actionPrev, ConstraintSet.GONE)
 
         assertThat(actionPlayPause.isEnabled()).isTrue()
         assertThat(actionPlayPause.contentDescription).isEqualTo("play")
+        verify(collapsedSet).setVisibility(R.id.actionPlayPause, ConstraintSet.VISIBLE)
 
         assertThat(actionNext.isEnabled()).isTrue()
         assertThat(actionNext.contentDescription).isEqualTo("next")
+        verify(collapsedSet).setVisibility(R.id.actionNext, ConstraintSet.VISIBLE)
 
-        assertThat(actionEnd.contentDescription).isEqualTo("custom 2")
-        assertThat(actionEnd.isEnabled()).isFalse()
+        // Called twice since these IDs are used as generic buttons
+        assertThat(action0.contentDescription).isEqualTo("custom 0")
+        assertThat(action0.isEnabled()).isFalse()
+        verify(collapsedSet, times(2)).setVisibility(R.id.action0, ConstraintSet.GONE)
+
+        assertThat(action1.contentDescription).isEqualTo("custom 1")
+        assertThat(action1.isEnabled()).isFalse()
+        verify(collapsedSet, times(2)).setVisibility(R.id.action1, ConstraintSet.GONE)
+
+        // Verify generic buttons are hidden
+        verify(collapsedSet).setVisibility(R.id.action2, ConstraintSet.GONE)
+        verify(expandedSet).setVisibility(R.id.action2, ConstraintSet.GONE)
+
+        verify(collapsedSet).setVisibility(R.id.action3, ConstraintSet.GONE)
+        verify(expandedSet).setVisibility(R.id.action3, ConstraintSet.GONE)
+
+        verify(collapsedSet).setVisibility(R.id.action4, ConstraintSet.GONE)
+        verify(expandedSet).setVisibility(R.id.action4, ConstraintSet.GONE)
+    }
+
+    @Test
+    fun bindNotificationActionsNewLayout() {
+        whenever(mediaFlags.areMediaSessionActionsEnabled()).thenReturn(true)
+        whenever(mediaFlags.useMediaSessionLayout()).thenReturn(true)
+
+        val icon = Icon.createWithResource(context, android.R.drawable.ic_media_play)
+        val actions = listOf(
+            MediaAction(icon, Runnable {}, "previous"),
+            MediaAction(icon, Runnable {}, "play"),
+            MediaAction(icon, null, "next"),
+            MediaAction(icon, null, "custom 0"),
+            MediaAction(icon, Runnable {}, "custom 1")
+        )
+        val state = mediaData.copy(actions = actions,
+            actionsToShowInCompact = listOf(1, 2),
+            semanticActions = null)
+
+        player.attachPlayer(sessionHolder, MediaViewController.TYPE.PLAYER_SESSION)
+        player.bindPlayer(state, PACKAGE)
+
+        // Verify semantic actions are hidden
+        verify(collapsedSet).setVisibility(R.id.actionPrev, ConstraintSet.GONE)
+        verify(expandedSet).setVisibility(R.id.actionPrev, ConstraintSet.GONE)
+
+        verify(collapsedSet).setVisibility(R.id.actionPlayPause, ConstraintSet.GONE)
+        verify(expandedSet).setVisibility(R.id.actionPlayPause, ConstraintSet.GONE)
+
+        verify(collapsedSet).setVisibility(R.id.actionNext, ConstraintSet.GONE)
+        verify(expandedSet).setVisibility(R.id.actionNext, ConstraintSet.GONE)
+
+        // Generic actions all enabled
+        assertThat(action0.contentDescription).isEqualTo("previous")
+        assertThat(action0.isEnabled()).isTrue()
+        verify(collapsedSet).setVisibility(R.id.action0, ConstraintSet.GONE)
+
+        assertThat(action1.contentDescription).isEqualTo("play")
+        assertThat(action1.isEnabled()).isTrue()
+        verify(collapsedSet).setVisibility(R.id.action1, ConstraintSet.VISIBLE)
+
+        assertThat(action2.contentDescription).isEqualTo("next")
+        assertThat(action2.isEnabled()).isFalse()
+        verify(collapsedSet).setVisibility(R.id.action2, ConstraintSet.VISIBLE)
+
+        assertThat(action3.contentDescription).isEqualTo("custom 0")
+        assertThat(action3.isEnabled()).isFalse()
+        verify(collapsedSet).setVisibility(R.id.action3, ConstraintSet.GONE)
+
+        assertThat(action4.contentDescription).isEqualTo("custom 1")
+        assertThat(action4.isEnabled()).isTrue()
+        verify(collapsedSet).setVisibility(R.id.action4, ConstraintSet.GONE)
     }
 
     @Test

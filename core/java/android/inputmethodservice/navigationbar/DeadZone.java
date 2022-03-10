@@ -82,7 +82,7 @@ final class DeadZone {
         }
     };
 
-    public DeadZone(NavigationBarView view) {
+    DeadZone(NavigationBarView view) {
         mNavigationBarView = view;
         onConfigurationChanged(Surface.ROTATION_0);
     }
@@ -92,13 +92,15 @@ final class DeadZone {
     }
 
     private float getSize(long now) {
-        if (mSizeMax == 0)
+        if (mSizeMax == 0) {
             return 0;
+        }
         long dt = (now - mLastPokeTime);
-        if (dt > mHold + mDecay)
+        if (dt > mHold + mDecay) {
             return mSizeMin;
-        if (dt < mHold)
+        } else if (dt < mHold) {
             return mSizeMax;
+        }
         return (int) lerp(mSizeMax, mSizeMin, (float) (dt - mHold) / mDecay);
     }
 
@@ -177,8 +179,9 @@ final class DeadZone {
 
     private void poke(MotionEvent event) {
         mLastPokeTime = event.getEventTime();
-        if (DEBUG)
+        if (DEBUG) {
             Log.v(TAG, "poked! size=" + getSize(mLastPokeTime));
+        }
         if (mShouldFlash) mNavigationBarView.postInvalidate();
     }
 
