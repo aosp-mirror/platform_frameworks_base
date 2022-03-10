@@ -84,6 +84,7 @@ class SharedLibrariesImplTest {
     private lateinit var mSharedLibrariesImpl: SharedLibrariesImpl
     private lateinit var mPms: PackageManagerService
     private lateinit var mSettings: Settings
+    private lateinit var mComputer: Computer
 
     @Mock
     private lateinit var mDeletePackageHelper: DeletePackageHelper
@@ -113,22 +114,16 @@ class SharedLibrariesImplTest {
         mSharedLibrariesImpl.setDeletePackageHelper(mDeletePackageHelper)
         addExistingSharedLibraries()
 
+        mComputer = mock {
+            whenever(sharedLibraries) { mSharedLibrariesImpl.sharedLibraries }
+            whenever(resolveInternalPackageName(anyString(), anyLong())) { arguments[0] }
+        }
+
         whenever(mSettings.getPackageLPr(any())) { mExistingSettings[arguments[0]] }
         whenever(mRule.mocks().injector.getSystemService(StorageManager::class.java))
             .thenReturn(mStorageManager)
         whenever(mStorageManager.findPathForUuid(nullable())).thenReturn(mFile)
-        doAnswer { it.arguments[0] }.`when`(mPms).resolveInternalPackageName(any(), any())
-        doAnswer {
-            mockThrowOnUnmocked<Computer> {
-                whenever(sharedLibraries) { mSharedLibrariesImpl.sharedLibraries }
-                whenever(resolveInternalPackageName(anyString(), anyLong())) {
-                    mPms.resolveInternalPackageName(getArgument(0), getArgument(1))
-                }
-                whenever(getPackageStateInternal(anyString())) {
-                    mPms.getPackageStateInternal(getArgument(0))
-                }
-            }
-        }.`when`(mPms).snapshotComputer()
+        doAnswer { mComputer }.`when`(mPms).snapshotComputer()
         whenever(mDeletePackageHelper.deletePackageX(any(), any(), any(), any(), any()))
             .thenReturn(PackageManager.DELETE_SUCCEEDED)
         whenever(mRule.mocks().injector.compatibility).thenReturn(mPlatformCompat)
@@ -188,7 +183,8 @@ class SharedLibrariesImplTest {
 
     @Test
     fun removeSharedLibrary() {
-        doAnswer { mutableListOf(VersionedPackage(CONSUMER_PACKAGE_NAME, 1L)) }.`when`(mPms)
+        doAnswer { mutableListOf(VersionedPackage(CONSUMER_PACKAGE_NAME, 1L)) }
+            .`when`(mComputer)
             .getPackagesUsingSharedLibrary(any(), any(), any(), any())
         val staticInfo = mSharedLibrariesImpl
             .getSharedLibraryInfo(STATIC_LIB_NAME, STATIC_LIB_VERSION)!!

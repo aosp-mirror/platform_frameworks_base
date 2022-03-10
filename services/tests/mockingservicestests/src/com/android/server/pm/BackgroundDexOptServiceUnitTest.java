@@ -116,7 +116,7 @@ public final class BackgroundDexOptServiceUnitTest {
         when(mInjector.getDataDirStorageLowBytes()).thenReturn(STORAGE_LOW_BYTES);
         when(mInjector.getDexOptThermalCutoff()).thenReturn(PowerManager.THERMAL_STATUS_CRITICAL);
         when(mInjector.getCurrentThermalStatus()).thenReturn(PowerManager.THERMAL_STATUS_NONE);
-        when(mDexOptHelper.getOptimizablePackages()).thenReturn(DEFAULT_PACKAGE_LIST);
+        when(mDexOptHelper.getOptimizablePackages(any())).thenReturn(DEFAULT_PACKAGE_LIST);
         when(mDexOptHelper.performDexOptWithStatus(any())).thenReturn(
                 PackageDexOptimizer.DEX_OPT_PERFORMED);
 
@@ -158,7 +158,7 @@ public final class BackgroundDexOptServiceUnitTest {
     @Test
     public void testNoExecutionForNoOptimizablePackages() {
         initUntilBootCompleted();
-        when(mDexOptHelper.getOptimizablePackages()).thenReturn(EMPTY_PACKAGE_LIST);
+        when(mDexOptHelper.getOptimizablePackages(any())).thenReturn(EMPTY_PACKAGE_LIST);
 
         assertThat(mService.onStartJob(mJobServiceForPostBoot,
                 mJobParametersForPostBoot)).isFalse();
