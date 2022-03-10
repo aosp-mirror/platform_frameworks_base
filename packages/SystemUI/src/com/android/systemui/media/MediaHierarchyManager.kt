@@ -292,6 +292,18 @@ class MediaHierarchyManager @Inject constructor(
     }
 
     /**
+     * Returns the amount of translationY of the media container, during the current guided
+     * transformation, if running. If there is no guided transformation running, it will return 0.
+     */
+    fun getGuidedTransformationTranslationY(): Int {
+        if (!isCurrentlyInGuidedTransformation()) {
+            return -1
+        }
+        val startHost = getHost(previousLocation) ?: return 0
+        return targetBounds.top - startHost.currentBounds.top
+    }
+
+    /**
      * Is the shade currently collapsing from the expanded qs? If we're on the lockscreen and in qs,
      * we wouldn't want to transition in that case.
      */
