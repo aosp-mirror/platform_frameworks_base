@@ -844,6 +844,24 @@ public class StatusBarManager {
     }
 
     /**
+     * Sets an active {@link android.service.quicksettings.TileService} to listening state
+     *
+     * The {@code componentName}'s package must match the calling package.
+     *
+     * @param componentName the tile to set into listening state
+     * @see android.service.quicksettings.TileService#requestListeningState
+     * @hide
+     */
+    public void requestTileServiceListeningState(@NonNull ComponentName componentName) {
+        Objects.requireNonNull(componentName);
+        try {
+            getService().requestTileServiceListeningState(componentName, mContext.getUserId());
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Request to the user to add a {@link android.service.quicksettings.TileService}
      * to the set of current QS tiles.
      * <p>
