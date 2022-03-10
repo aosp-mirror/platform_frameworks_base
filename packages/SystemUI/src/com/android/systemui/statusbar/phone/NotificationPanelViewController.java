@@ -145,6 +145,7 @@ import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
+import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.NotificationShelfController;
 import com.android.systemui.statusbar.PulseExpansionHandler;
 import com.android.systemui.statusbar.RemoteInputController;
@@ -664,7 +665,9 @@ public class NotificationPanelViewController extends PanelViewController {
             NotificationLockscreenUserManager notificationLockscreenUserManager,
             NotificationEntryManager notificationEntryManager,
             KeyguardStateController keyguardStateController,
-            StatusBarStateController statusBarStateController, DozeLog dozeLog,
+            StatusBarStateController statusBarStateController,
+            NotificationShadeWindowController notificationShadeWindowController,
+            DozeLog dozeLog,
             DozeParameters dozeParameters, CommandQueue commandQueue, VibratorHelper vibratorHelper,
             LatencyTracker latencyTracker, PowerManager powerManager,
             AccessibilityManager accessibilityManager, @DisplayId int displayId,
@@ -716,6 +719,7 @@ public class NotificationPanelViewController extends PanelViewController {
                 dozeLog,
                 keyguardStateController,
                 (SysuiStatusBarStateController) statusBarStateController,
+                notificationShadeWindowController,
                 vibratorHelper,
                 statusBarKeyguardViewManager,
                 latencyTracker,
