@@ -3072,23 +3072,6 @@ class StorageManagerService extends IStorageManager.Stub
     }
 
     /**
-     * Is userdata convertible to file based encryption?
-     * @return non zero for convertible
-     */
-    @Override
-    public boolean isConvertibleToFBE() throws RemoteException {
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.CRYPT_KEEPER,
-            "no permission to access the crypt keeper");
-
-        try {
-            return mVold.isConvertibleToFbe();
-        } catch (Exception e) {
-            Slog.wtf(TAG, e);
-            return false;
-        }
-    }
-
-    /**
      * Check whether the device supports filesystem checkpointing.
      *
      * @return true if the device supports filesystem checkpointing, false otherwise.
