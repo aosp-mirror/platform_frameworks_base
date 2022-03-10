@@ -216,6 +216,7 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
                         PorterDuff.Mode.SRC_IN);
                 mDoneButton.getBackground().setColorFilter(buttonColorFilter);
                 mStopButton.getBackground().setColorFilter(buttonColorFilter);
+                mDoneButton.setTextColor(mAdapter.getController().getColorPositiveButtonText());
             }
             mHeaderIcon.setVisibility(View.VISIBLE);
             mHeaderIcon.setImageIcon(icon);
