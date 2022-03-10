@@ -27,6 +27,7 @@ import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.os.Looper;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemProperties;
@@ -104,6 +105,10 @@ public class SystemUIApplication extends Application implements
         mComponentHelper = mSysUIComponent.getContextComponentHelper();
         mBootCompleteCache = mSysUIComponent.provideBootCacheImpl();
         log.traceEnd();
+
+        // Enable Looper trace points.
+        // This allows us to see Handler callbacks on traces.
+        Looper.getMainLooper().setTraceTag(Trace.TRACE_TAG_APP);
 
         // Set the application theme that is inherited by all services. Note that setting the
         // application theme in the manifest does only work for activities. Keep this in sync with
