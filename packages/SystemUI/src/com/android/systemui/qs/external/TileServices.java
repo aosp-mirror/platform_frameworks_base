@@ -15,11 +15,8 @@
  */
 package com.android.systemui.qs.external;
 
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Icon;
@@ -30,10 +27,10 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.service.quicksettings.IQSService;
 import android.service.quicksettings.Tile;
-import android.service.quicksettings.TileService;
 import android.util.ArrayMap;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.internal.statusbar.StatusBarIcon;
@@ -41,6 +38,7 @@ import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.settings.UserTracker;
+import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
@@ -69,6 +67,7 @@ public class TileServices extends IQSService.Stub {
     private final QSTileHost mHost;
     private final KeyguardStateController mKeyguardStateController;
     private final BroadcastDispatcher mBroadcastDispatcher;
+    private final CommandQueue mCommandQueue;
     private final UserTracker mUserTracker;
 
     private int mMaxBound = DEFAULT_MAX_BOUND;
@@ -79,7 +78,8 @@ public class TileServices extends IQSService.Stub {
             @Main Provider<Handler> handlerProvider,
             BroadcastDispatcher broadcastDispatcher,
             UserTracker userTracker,
-            KeyguardStateController keyguardStateController) {
+            KeyguardStateController keyguardStateController,
+            CommandQueue commandQueue) {
         mHost = host;
         mKeyguardStateController = keyguardStateController;
         mContext = mHost.getContext();
@@ -87,12 +87,8 @@ public class TileServices extends IQSService.Stub {
         mHandlerProvider = handlerProvider;
         mMainHandler = mHandlerProvider.get();
         mUserTracker = userTracker;
-        mBroadcastDispatcher.registerReceiver(
-                mRequestListeningReceiver,
-                new IntentFilter(TileService.ACTION_REQUEST_LISTENING),
-                null, // Use the default Executor
-                UserHandle.ALL
-        );
+        mCommandQueue = commandQueue;
+        mCommandQueue.addCallback(mRequestListeningCallback);
     }
 
     public Context getContext() {
@@ -354,21 +350,14 @@ public class TileServices extends IQSService.Stub {
     public void destroy() {
         synchronized (mServices) {
             mServices.values().forEach(service -> service.handleDestroy());
-            mBroadcastDispatcher.unregisterReceiver(mRequestListeningReceiver);
         }
+        mCommandQueue.removeCallback(mRequestListeningCallback);
     }
 
-    private final BroadcastReceiver mRequestListeningReceiver = new BroadcastReceiver() {
+    private final CommandQueue.Callbacks mRequestListeningCallback = new CommandQueue.Callbacks() {
         @Override
-        public void onReceive(Context context, Intent intent) {
-            if (TileService.ACTION_REQUEST_LISTENING.equals(intent.getAction())) {
-                try {
-                    ComponentName c = intent.getParcelableExtra(Intent.EXTRA_COMPONENT_NAME);
-                    requestListening(c);
-                } catch (ClassCastException ex) {
-                    Log.e(TAG, "Bad component name", ex);
-                }
-            }
+        public void requestTileServiceListeningState(@NonNull ComponentName componentName) {
+            mMainHandler.post(() -> requestListening(componentName));
         }
     };
 

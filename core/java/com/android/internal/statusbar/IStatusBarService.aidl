@@ -171,6 +171,11 @@ interface IStatusBarService
      */
     void suppressAmbientDisplay(boolean suppress);
 
+    /**
+     * Send a request to SystemUI to put a given active tile in listening state
+     */
+    void requestTileServiceListeningState(in ComponentName componentName, int userId);
+
     void requestAddTile(in ComponentName componentName, in CharSequence label, in Icon icon, int userId, in IAddTileResultCallback callback);
     void cancelRequestAddTile(in String packageName);
 
