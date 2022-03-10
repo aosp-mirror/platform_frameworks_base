@@ -75,7 +75,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ProviderInfo;
 import android.content.pm.UserInfo;
-import android.content.res.Configuration;
 import android.content.res.ObbInfo;
 import android.database.ContentObserver;
 import android.net.Uri;
@@ -122,7 +121,6 @@ import android.provider.DocumentsContract;
 import android.provider.Downloads;
 import android.provider.MediaStore;
 import android.provider.Settings;
-import android.sysprop.VoldProperties;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.ArrayMap;
@@ -1380,39 +1378,6 @@ class StorageManagerService extends IStorageManager.Stub
     private void handleDaemonConnected() {
         initIfBootedAndConnected();
         resetIfBootedAndConnected();
-
-        // On an encrypted device we can't see system properties yet, so pull
-        // the system locale out of the mount service.
-        if ("".equals(VoldProperties.encrypt_progress().orElse(""))) {
-            copyLocaleFromMountService();
-        }
-    }
-
-    private void copyLocaleFromMountService() {
-        String systemLocale;
-        try {
-            systemLocale = getField(StorageManager.SYSTEM_LOCALE_KEY);
-        } catch (RemoteException e) {
-            return;
-        }
-        if (TextUtils.isEmpty(systemLocale)) {
-            return;
-        }
-
-        Slog.d(TAG, "Got locale " + systemLocale + " from mount service");
-        Locale locale = Locale.forLanguageTag(systemLocale);
-        Configuration config = new Configuration();
-        config.setLocale(locale);
-        try {
-            ActivityManager.getService().updatePersistentConfigurationWithAttribution(config,
-                    mContext.getOpPackageName(), mContext.getAttributionTag());
-        } catch (RemoteException e) {
-            Slog.e(TAG, "Error setting system locale from mount service", e);
-        }
-
-        // Temporary workaround for http://b/17945169.
-        Slog.d(TAG, "Setting system properties to " + systemLocale + " from mount service");
-        SystemProperties.set("persist.sys.locale", locale.toLanguageTag());
     }
 
     private final IVoldListener mListener = new IVoldListener.Stub() {
