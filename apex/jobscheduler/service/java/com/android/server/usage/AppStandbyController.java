@@ -1573,8 +1573,10 @@ public class AppStandbyController
                     (reason & REASON_MAIN_MASK) == REASON_MAIN_FORCED_BY_SYSTEM;
 
             if (app.currentBucket == newBucket && wasForcedBySystem && isForcedBySystem) {
-                mAppIdleHistory
-                        .noteRestrictionAttempt(packageName, userId, elapsedRealtime, reason);
+                if (newBucket == STANDBY_BUCKET_RESTRICTED) {
+                    mAppIdleHistory
+                            .noteRestrictionAttempt(packageName, userId, elapsedRealtime, reason);
+                }
                 // Keep track of all restricting reasons
                 reason = REASON_MAIN_FORCED_BY_SYSTEM
                         | (app.bucketingReason & REASON_SUB_MASK)
