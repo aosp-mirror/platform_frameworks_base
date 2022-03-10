@@ -534,8 +534,10 @@ final class InstallPackageHelper {
                     + android.Manifest.permission.INSTALL_PACKAGES + ".");
         }
         PackageSetting pkgSetting;
-        mPm.enforceCrossUserPermission(callingUid, userId, true /* requireFullPermission */,
-                true /* checkShell */, "installExistingPackage for user " + userId);
+        final Computer preLockSnapshot = mPm.snapshotComputer();
+        preLockSnapshot.enforceCrossUserPermission(callingUid, userId,
+                true /* requireFullPermission */, true /* checkShell */,
+                "installExistingPackage for user " + userId);
         if (mPm.isUserRestricted(userId, UserManager.DISALLOW_INSTALL_APPS)) {
             return PackageManager.INSTALL_FAILED_USER_RESTRICTED;
         }
@@ -550,11 +552,12 @@ final class InstallPackageHelper {
 
             // writer
             synchronized (mPm.mLock) {
+                final Computer snapshot = mPm.snapshotComputer();
                 pkgSetting = mPm.mSettings.getPackageLPr(packageName);
                 if (pkgSetting == null) {
                     return PackageManager.INSTALL_FAILED_INVALID_URI;
                 }
-                if (!mPm.canViewInstantApps(callingUid, UserHandle.getUserId(callingUid))) {
+                if (!snapshot.canViewInstantApps(callingUid, UserHandle.getUserId(callingUid))) {
                     // only allow the existing package to be used if it's installed as a full
                     // application for at least one user
                     boolean installAllowed = false;
@@ -604,7 +607,8 @@ final class InstallPackageHelper {
                         mAppDataHelper.prepareAppDataAfterInstallLIF(pkgSetting.getPkg());
                     }
                 }
-                mPm.sendPackageAddedForUser(packageName, pkgSetting, userId, DataLoaderType.NONE);
+                mPm.sendPackageAddedForUser(mPm.snapshotComputer(), packageName, pkgSetting, userId,
+                        DataLoaderType.NONE);
                 synchronized (mPm.mLock) {
                     mPm.updateSequenceNumberLP(pkgSetting, new int[]{ userId });
                 }
@@ -1909,8 +1913,8 @@ final class InstallPackageHelper {
                 AndroidPackage oldPackage = mPm.mPackages.get(packageName);
 
                 // Set the update and install times
-                PackageStateInternal deletedPkgSetting = mPm.getPackageStateInternal(
-                        oldPackage.getPackageName());
+                PackageStateInternal deletedPkgSetting = mPm.snapshotComputer()
+                        .getPackageStateInternal(oldPackage.getPackageName());
                 reconciledPkg.mPkgSetting
                         .setFirstInstallTimeFromReplaced(deletedPkgSetting, request.mAllUsers)
                         .setLastUpdateTime(System.currentTimeMillis());
@@ -2578,9 +2582,10 @@ final class InstallPackageHelper {
             size = i;
             mPm.mPendingBroadcasts.clear();
         }
+        final Computer snapshot = mPm.snapshotComputer();
         // Send broadcasts
         for (int i = 0; i < size; i++) {
-            mPm.sendPackageChangedBroadcast(packages[i], true /* dontKillApp */,
+            mPm.sendPackageChangedBroadcast(snapshot, packages[i], true /* dontKillApp */,
                     components[i], uids[i], null /* reason */);
         }
         Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
@@ -2599,7 +2604,7 @@ final class InstallPackageHelper {
         final boolean update = res.mRemovedInfo != null && res.mRemovedInfo.mRemovedPackage != null;
         final String packageName = res.mName;
         final PackageStateInternal pkgSetting =
-                succeeded ? mPm.getPackageStateInternal(packageName) : null;
+                succeeded ? mPm.snapshotComputer().getPackageStateInternal(packageName) : null;
         final boolean removedBeforeUpdate = (pkgSetting == null)
                 || (pkgSetting.isSystem() && !pkgSetting.getPath().getPath().equals(
                 res.mPkg.getPath()));
@@ -2697,9 +2702,9 @@ final class InstallPackageHelper {
                 // sendPackageAddedForNewUsers also deals with system apps
                 int appId = UserHandle.getAppId(res.mUid);
                 boolean isSystem = res.mPkg.isSystem();
-                mPm.sendPackageAddedForNewUsers(packageName, isSystem || virtualPreload,
-                        virtualPreload /*startReceiver*/, appId, firstUserIds, firstInstantUserIds,
-                        dataLoaderType);
+                mPm.sendPackageAddedForNewUsers(mPm.snapshotComputer(), packageName,
+                        isSystem || virtualPreload, virtualPreload /*startReceiver*/, appId,
+                        firstUserIds, firstInstantUserIds, dataLoaderType);
 
                 // Send added for users that don't see the package for the first time
                 Bundle extras = new Bundle();
@@ -2712,7 +2717,8 @@ final class InstallPackageHelper {
                 final SparseArray<int[]> newBroadcastAllowList;
                 synchronized (mPm.mLock) {
                     newBroadcastAllowList = mPm.mAppsFilter.getVisibilityAllowList(
-                            mPm.getPackageStateInternal(packageName, Process.SYSTEM_UID),
+                            mPm.snapshotComputer()
+                                    .getPackageStateInternal(packageName, Process.SYSTEM_UID),
                             updateUserIds, mPm.mSettings.getPackagesLocked());
                 }
                 mPm.sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED, packageName,
@@ -2814,11 +2820,12 @@ final class InstallPackageHelper {
                 }
             } else if (!ArrayUtils.isEmpty(res.mLibraryConsumers)) { // if static shared lib
                 // No need to kill consumers if it's installation of new version static shared lib.
+                final Computer snapshot = mPm.snapshotComputer();
                 final boolean dontKillApp = !update && res.mPkg.getStaticSharedLibName() != null;
                 for (int i = 0; i < res.mLibraryConsumers.size(); i++) {
                     AndroidPackage pkg = res.mLibraryConsumers.get(i);
                     // send broadcast that all consumers of the static shared library have changed
-                    mPm.sendPackageChangedBroadcast(pkg.getPackageName(), dontKillApp,
+                    mPm.sendPackageChangedBroadcast(snapshot, pkg.getPackageName(), dontKillApp,
                             new ArrayList<>(Collections.singletonList(pkg.getPackageName())),
                             pkg.getUid(), null);
                 }
