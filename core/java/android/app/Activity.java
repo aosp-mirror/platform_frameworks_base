@@ -5663,7 +5663,6 @@ public class Activity extends ContextThemeWrapper
      * @throws ActivityNotFoundException &nbsp;
      * @hide
      */
-    @SystemApi
     @RequiresPermission(anyOf = {INTERACT_ACROSS_USERS, INTERACT_ACROSS_USERS_FULL})
     public void startActivityAsUser(@NonNull Intent intent,
             @Nullable Bundle options, @NonNull UserHandle user) {
