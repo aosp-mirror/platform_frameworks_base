@@ -132,6 +132,5 @@ public abstract class KeyguardPinBasedInputViewController<T extends KeyguardPinB
     @Override
     void resetState() {
         mView.setPasswordEntryEnabled(true);
-        mMessageAreaController.setMessage(R.string.keyguard_enter_your_pin);
     }
 }
