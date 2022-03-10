@@ -4763,7 +4763,7 @@ public class UserManager {
     }
 
     /**
-     * Returns {@code true} if the user shares lock settings credential with its parent user
+     * Returns whether the user can have shared lockscreen credential with its parent user.
      *
      * This API only works for {@link UserManager#isProfile() profiles}
      * and will always return false for any other user type.
@@ -4776,9 +4776,9 @@ public class UserManager {
                     Manifest.permission.MANAGE_USERS,
                     Manifest.permission.INTERACT_ACROSS_USERS})
     @SuppressAutoDoc
-    public boolean isCredentialSharedWithParent() {
+    public boolean isCredentialSharableWithParent() {
         try {
-            return mService.isCredentialSharedWithParent(mUserId);
+            return mService.isCredentialSharableWithParent(mUserId);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
