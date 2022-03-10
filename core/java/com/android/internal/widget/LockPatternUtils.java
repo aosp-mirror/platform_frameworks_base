@@ -808,7 +808,7 @@ public class LockPatternUtils {
      */
     public void setSeparateProfileChallengeEnabled(int userHandle, boolean enabled,
             LockscreenCredential profilePassword) {
-        if (!isCredentialSharedWithParent(userHandle)) {
+        if (!isCredentialSharableWithParent(userHandle)) {
             return;
         }
         try {
@@ -824,7 +824,7 @@ public class LockPatternUtils {
      * Returns true if {@code userHandle} is a managed profile with separate challenge.
      */
     public boolean isSeparateProfileChallengeEnabled(int userHandle) {
-        return isCredentialSharedWithParent(userHandle) && hasSeparateChallenge(userHandle);
+        return isCredentialSharableWithParent(userHandle) && hasSeparateChallenge(userHandle);
     }
 
     /**
@@ -849,8 +849,8 @@ public class LockPatternUtils {
         return info != null && info.isManagedProfile();
     }
 
-    private boolean isCredentialSharedWithParent(int userHandle) {
-        return getUserManager(userHandle).isCredentialSharedWithParent();
+    private boolean isCredentialSharableWithParent(int userHandle) {
+        return getUserManager(userHandle).isCredentialSharableWithParent();
     }
 
     /**
