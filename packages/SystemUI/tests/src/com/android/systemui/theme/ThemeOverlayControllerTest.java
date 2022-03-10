@@ -200,12 +200,6 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
         verify(mThemeOverlayApplier)
                 .applyCurrentUserOverlays(themeOverlays.capture(), any(), anyInt(), any());
 
-        // Assert that we received the colors that we were expecting
-        assertThat(themeOverlays.getValue().get(OVERLAY_CATEGORY_SYSTEM_PALETTE))
-                .isEqualTo(new OverlayIdentifier("ffff0000"));
-        assertThat(themeOverlays.getValue().get(OVERLAY_CATEGORY_ACCENT_COLOR))
-                .isEqualTo(new OverlayIdentifier("ffff0000"));
-
         // Should not change theme after changing wallpapers, if intent doesn't have
         // WallpaperManager.EXTRA_FROM_FOREGROUND_APP set to true.
         clearInvocations(mThemeOverlayApplier);
