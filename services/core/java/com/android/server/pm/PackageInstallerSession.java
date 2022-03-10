@@ -859,8 +859,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             return USER_ACTION_NOT_NEEDED;
         }
 
-        if (snapshot.isInstallDisabledForPackage(getInstallerPackageName(), mInstallerUid,
-                userId)) {
+        if (mPm.isInstallDisabledForPackage(getInstallerPackageName(), mInstallerUid, userId)) {
             // show the installer to account for device poslicy or unknown sources use cases
             return USER_ACTION_REQUIRED;
         }
@@ -3753,8 +3752,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         };
 
         if (!manualStartAndDestroy) {
-            final PerUidReadTimeouts[] perUidReadTimeouts =
-                    mPm.getPerUidReadTimeouts(mPm.snapshotComputer());
+            final PerUidReadTimeouts[] perUidReadTimeouts = mPm.getPerUidReadTimeouts();
 
             final StorageHealthCheckParams healthCheckParams = new StorageHealthCheckParams();
             healthCheckParams.blockedTimeoutMs = INCREMENTAL_STORAGE_BLOCKED_TIMEOUT_MS;
