@@ -382,7 +382,7 @@ public abstract class PanelViewController {
 
     protected void startExpandMotion(float newX, float newY, boolean startTracking,
             float expandedHeight) {
-        if (!mHandlingPointerUp) {
+        if (!mHandlingPointerUp && !mStatusBarStateController.isDozing()) {
             beginJankMonitoring(CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE);
         }
         mInitialOffsetOnTouch = expandedHeight;
@@ -654,7 +654,9 @@ public abstract class PanelViewController {
 
             @Override
             public void onAnimationStart(Animator animation) {
-                beginJankMonitoring(CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE);
+                if (!mStatusBarStateController.isDozing()) {
+                    beginJankMonitoring(CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE);
+                }
             }
 
             @Override
