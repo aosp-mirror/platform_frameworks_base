@@ -126,6 +126,7 @@ import android.system.StructStat;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.EventLog;
 import android.util.ExceptionUtils;
 import android.util.IntArray;
 import android.util.MathUtils;
@@ -2861,7 +2862,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 inheritFileLocked(mResolvedBaseFile);
                 // Collect the requiredSplitTypes from base
                 CollectionUtils.addAll(requiredSplitTypes, existing.getBaseRequiredSplitTypes());
-            } else {
+            } else if ((params.installFlags & PackageManager.INSTALL_DONT_KILL_APP) != 0) {
+                EventLog.writeEvent(0x534e4554, "219044664");
+
                 // Installing base.apk. Make sure the app is restarted.
                 params.setDontKillApp(false);
             }
