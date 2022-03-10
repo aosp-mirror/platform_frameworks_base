@@ -24,7 +24,6 @@ import android.os.Build
 import android.os.storage.StorageManager
 import android.util.ArrayMap
 import android.util.PackageUtils
-import com.android.internal.util.FunctionalUtils
 import com.android.server.SystemConfig.SharedLibraryEntry
 import com.android.server.compat.PlatformCompat
 import com.android.server.extendedtestutils.wheneverStatic
@@ -35,7 +34,6 @@ import com.android.server.pm.parsing.pkg.ParsedPackage
 import com.android.server.testutils.any
 import com.android.server.testutils.eq
 import com.android.server.testutils.mock
-import com.android.server.testutils.mockThrowOnUnmocked
 import com.android.server.testutils.nullable
 import com.android.server.testutils.spy
 import com.android.server.testutils.whenever
@@ -59,6 +57,7 @@ import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
+@Ignore("b/216603387")
 @RunWith(JUnit4::class)
 class SharedLibrariesImplTest {
 
@@ -253,7 +252,6 @@ class SharedLibrariesImplTest {
         assertThat(testPackageSetting.usesLibraryFiles).contains(builtinLibPath(BUILTIN_LIB_NAME))
     }
 
-    @Ignore("b/216603387")
     @Test
     fun updateSharedLibraries_withStaticLibPackage() {
         val testPackageSetting = mExistingSettings[STATIC_LIB_PACKAGE_NAME]!!
@@ -266,7 +264,6 @@ class SharedLibrariesImplTest {
         assertThat(testPackageSetting.usesLibraryFiles).contains(apkPath(DYNAMIC_LIB_PACKAGE_NAME))
     }
 
-    @Ignore("b/216603387")
     @Test
     fun updateSharedLibraries_withConsumerPackage() {
         val testPackageSetting = mExistingSettings[CONSUMER_PACKAGE_NAME]!!
@@ -280,7 +277,6 @@ class SharedLibrariesImplTest {
         assertThat(testPackageSetting.usesLibraryFiles).contains(apkPath(STATIC_LIB_PACKAGE_NAME))
     }
 
-    @Ignore("b/216603387")
     @Test
     fun updateAllSharedLibraries() {
         mExistingSettings.forEach {
