@@ -28,13 +28,13 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.media.MediaMetadata;
 import android.os.Handler;
-import android.os.UserHandle;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
+import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.R;
 import com.android.wm.shell.pip.PipMediaController;
+import com.android.wm.shell.protolog.ShellProtoLogGroup;
 
 import java.util.Objects;
 
@@ -98,7 +98,10 @@ public class TvPipNotificationController {
     }
 
     void setDelegate(Delegate delegate) {
-        if (DEBUG) Log.d(TAG, "setDelegate(), delegate=" + delegate);
+        if (DEBUG) {
+            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: setDelegate(), delegate=%s", TAG, delegate);
+        }
         if (mDelegate != null) {
             throw new IllegalStateException(
                     "The delegate has already been set and should not change.");
@@ -240,7 +243,10 @@ public class TvPipNotificationController {
         @Override
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
-            if (DEBUG) Log.d(TAG, "on(Broadcast)Receive(), action=" + action);
+            if (DEBUG) {
+                ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                        "%s: on(Broadcast)Receive(), action=%s", TAG, action);
+            }
 
             if (ACTION_SHOW_PIP_MENU.equals(action)) {
                 mDelegate.showPictureInPictureMenu();

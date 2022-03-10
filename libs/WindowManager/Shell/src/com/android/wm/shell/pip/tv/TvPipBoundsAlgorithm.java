@@ -30,17 +30,18 @@ import android.content.res.Resources;
 import android.graphics.Rect;
 import android.os.SystemClock;
 import android.util.ArraySet;
-import android.util.Log;
 import android.util.Size;
 import android.view.Gravity;
 
 import androidx.annotation.NonNull;
 
+import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.R;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.pip.PipBoundsAlgorithm;
 import com.android.wm.shell.pip.PipSnapAlgorithm;
 import com.android.wm.shell.pip.tv.TvPipKeepClearAlgorithm.Placement;
+import com.android.wm.shell.protolog.ShellProtoLogGroup;
 
 import java.util.Set;
 
@@ -90,7 +91,10 @@ public class TvPipBoundsAlgorithm extends PipBoundsAlgorithm {
     /** Returns the destination bounds to place the PIP window on entry. */
     @Override
     public Rect getEntryDestinationBounds() {
-        if (DEBUG) Log.d(TAG, "getEntryDestinationBounds()");
+        if (DEBUG) {
+            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: getEntryDestinationBounds()", TAG);
+        }
         if (mTvPipBoundsState.isTvExpandedPipSupported()
                 && mTvPipBoundsState.getDesiredTvExpandedAspectRatio() != 0
                 && !mTvPipBoundsState.isTvPipManuallyCollapsed()) {
@@ -104,7 +108,10 @@ public class TvPipBoundsAlgorithm extends PipBoundsAlgorithm {
     /** Returns the current bounds adjusted to the new aspect ratio, if valid. */
     @Override
     public Rect getAdjustedDestinationBounds(Rect currentBounds, float newAspectRatio) {
-        if (DEBUG) Log.d(TAG, "getAdjustedDestinationBounds: " + newAspectRatio);
+        if (DEBUG) {
+            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: getAdjustedDestinationBounds: %f", TAG, newAspectRatio);
+        }
         return getTvPipBounds().getBounds();
     }
 
@@ -122,7 +129,11 @@ public class TvPipBoundsAlgorithm extends PipBoundsAlgorithm {
         Set<Rect> unrestrictedKeepClearAreas = mTvPipBoundsState.getUnrestrictedKeepClearAreas();
 
         if (mTvPipBoundsState.isImeShowing()) {
-            if (DEBUG) Log.d(TAG, "IME showing, height: " + mTvPipBoundsState.getImeHeight());
+            if (DEBUG) {
+                ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                        "%s: IME showing, height: %d",
+                        TAG, mTvPipBoundsState.getImeHeight());
+            }
 
             final Rect imeBounds = new Rect(
                     0,
@@ -145,15 +156,22 @@ public class TvPipBoundsAlgorithm extends PipBoundsAlgorithm {
                 unrestrictedKeepClearAreas);
 
         if (DEBUG) {
-            Log.d(TAG, "pipSize: " + pipSize);
-            Log.d(TAG, "screenSize: " + screenSize);
-            Log.d(TAG, "stashOffset: " + mTvPipBoundsState.getStashOffset());
-            Log.d(TAG, "insetBounds: " + insetBounds.toShortString());
-            Log.d(TAG, "pipSize: " + pipSize);
-            Log.d(TAG, "gravity: " + Gravity.toString(mTvPipBoundsState.getTvPipGravity()));
-            Log.d(TAG, "restrictedKeepClearAreas: " + restrictedKeepClearAreas);
-            Log.d(TAG, "unrestrictedKeepClearAreas: " + unrestrictedKeepClearAreas);
-            Log.d(TAG, "placement: " + placement);
+            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: screenSize: %s", TAG, screenSize);
+            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: stashOffset: %d", TAG, mTvPipBoundsState.getStashOffset());
+            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: insetBounds: %s", TAG, insetBounds.toShortString());
+            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: pipSize: %s", TAG, pipSize);
+            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: gravity: %s", TAG, Gravity.toString(mTvPipBoundsState.getTvPipGravity()));
+            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: restrictedKeepClearAreas: %s", TAG, restrictedKeepClearAreas);
+            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: unrestrictedKeepClearAreas: %s", TAG, unrestrictedKeepClearAreas);
+            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: placement: %s", TAG, placement);
         }
 
         return placement;
@@ -164,9 +182,11 @@ public class TvPipBoundsAlgorithm extends PipBoundsAlgorithm {
      */
     int updateGravityOnExpandToggled(int previousGravity, boolean expanding) {
         if (DEBUG) {
-            Log.d(TAG, "updateGravityOnExpandToggled(), expanding: " + expanding
-                    + ", mOrientation: " + mTvPipBoundsState.getTvFixedPipOrientation()
-                    + ", previous gravity: " + Gravity.toString(previousGravity));
+            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: updateGravityOnExpandToggled(), expanding: %b"
+                    + ", mOrientation: %d, previous gravity: %s",
+                    TAG, expanding, mTvPipBoundsState.getTvFixedPipOrientation(),
+                    Gravity.toString(previousGravity));
         }
 
         if (!mTvPipBoundsState.isTvExpandedPipSupported()) {
@@ -218,7 +238,10 @@ public class TvPipBoundsAlgorithm extends PipBoundsAlgorithm {
             }
         }
         mTvPipBoundsState.setTvPipGravity(updatedGravity);
-        if (DEBUG) Log.d(TAG, "new gravity: " + Gravity.toString(updatedGravity));
+        if (DEBUG) {
+            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: new gravity: %s", TAG, Gravity.toString(updatedGravity));
+        }
 
         return gravityToSave;
     }
@@ -227,7 +250,10 @@ public class TvPipBoundsAlgorithm extends PipBoundsAlgorithm {
      * @return true if gravity changed
      */
     boolean updateGravity(int keycode) {
-        if (DEBUG) Log.d(TAG, "updateGravity, keycode: " + keycode);
+        if (DEBUG) {
+            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: updateGravity, keycode: %d", TAG, keycode);
+        }
 
         // Check if position change is valid
         if (mTvPipBoundsState.isTvPipExpanded()) {
@@ -284,7 +310,10 @@ public class TvPipBoundsAlgorithm extends PipBoundsAlgorithm {
 
         if (updatedGravity != currentGravity) {
             mTvPipBoundsState.setTvPipGravity(updatedGravity);
-            if (DEBUG) Log.d(TAG, "new gravity: " + Gravity.toString(updatedGravity));
+            if (DEBUG) {
+                ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                        "%s: new gravity: %s", TAG, Gravity.toString(updatedGravity));
+            }
             return true;
         }
         return false;
@@ -313,7 +342,9 @@ public class TvPipBoundsAlgorithm extends PipBoundsAlgorithm {
 
         final Size expandedSize;
         if (expandedRatio == 0) {
-            Log.d(TAG, "updateExpandedPipSize(): Expanded mode aspect ratio of 0 not supported");
+            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                       "%s: updateExpandedPipSize(): Expanded mode aspect ratio"
+                               + " of 0 not supported", TAG);
             return;
         } else if (expandedRatio < 1) {
             // vertical
@@ -324,10 +355,16 @@ public class TvPipBoundsAlgorithm extends PipBoundsAlgorithm {
                 float aspectRatioHeight = mFixedExpandedWidthInPx / expandedRatio;
 
                 if (maxHeight > aspectRatioHeight) {
-                    if (DEBUG) Log.d(TAG, "Accommodate aspect ratio");
+                    if (DEBUG) {
+                        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                                "%s: Accommodate aspect ratio", TAG);
+                    }
                     expandedSize = new Size(mFixedExpandedWidthInPx, (int) aspectRatioHeight);
                 } else {
-                    if (DEBUG) Log.d(TAG, "Aspect ratio is too extreme, use max size");
+                    if (DEBUG) {
+                        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                                "%s: Aspect ratio is too extreme, use max size", TAG);
+                    }
                     expandedSize = new Size(mFixedExpandedWidthInPx, maxHeight);
                 }
             }
@@ -339,10 +376,16 @@ public class TvPipBoundsAlgorithm extends PipBoundsAlgorithm {
                 int maxWidth = displayLayout.width() - (2 * mScreenEdgeInsets.x);
                 float aspectRatioWidth = mFixedExpandedHeightInPx * expandedRatio;
                 if (maxWidth > aspectRatioWidth) {
-                    if (DEBUG) Log.d(TAG, "Accommodate aspect ratio");
+                    if (DEBUG) {
+                        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                                "%s: Accommodate aspect ratio", TAG);
+                    }
                     expandedSize = new Size((int) aspectRatioWidth, mFixedExpandedHeightInPx);
                 } else {
-                    if (DEBUG) Log.d(TAG, "Aspect ratio is too extreme, use max size");
+                    if (DEBUG) {
+                        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                                "%s: Aspect ratio is too extreme, use max size", TAG);
+                    }
                     expandedSize = new Size(maxWidth, mFixedExpandedHeightInPx);
                 }
             }
@@ -350,8 +393,9 @@ public class TvPipBoundsAlgorithm extends PipBoundsAlgorithm {
 
         mTvPipBoundsState.setTvExpandedSize(expandedSize);
         if (DEBUG) {
-            Log.d(TAG, "updateExpandedPipSize(): expanded size, width=" + expandedSize.getWidth()
-                    + ", height=" + expandedSize.getHeight());
+            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                       "%s: updateExpandedPipSize(): expanded size, width: %d, height: %d",
+                    TAG, expandedSize.getWidth(), expandedSize.getHeight());
         }
     }
 
