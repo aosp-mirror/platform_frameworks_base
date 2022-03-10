@@ -41759,8 +41759,10 @@ package android.telephony {
     field public static final int DATA_DISCONNECTED = 0; // 0x0
     field public static final int DATA_DISCONNECTING = 4; // 0x4
     field public static final int DATA_ENABLED_REASON_CARRIER = 2; // 0x2
+    field public static final int DATA_ENABLED_REASON_OVERRIDE = 4; // 0x4
     field public static final int DATA_ENABLED_REASON_POLICY = 1; // 0x1
     field public static final int DATA_ENABLED_REASON_THERMAL = 3; // 0x3
+    field public static final int DATA_ENABLED_REASON_UNKNOWN = -1; // 0xffffffff
     field public static final int DATA_ENABLED_REASON_USER = 0; // 0x0
     field public static final int DATA_HANDOVER_IN_PROGRESS = 5; // 0x5
     field public static final int DATA_SUSPENDED = 3; // 0x3
@@ -42065,6 +42067,7 @@ package android.telephony.data {
     field public static final int TYPE_DEFAULT = 17; // 0x11
     field public static final int TYPE_DUN = 8; // 0x8
     field public static final int TYPE_EMERGENCY = 512; // 0x200
+    field public static final int TYPE_ENTERPRISE = 16384; // 0x4000
     field public static final int TYPE_FOTA = 32; // 0x20
     field public static final int TYPE_HIPRI = 16; // 0x10
     field public static final int TYPE_IA = 256; // 0x100
