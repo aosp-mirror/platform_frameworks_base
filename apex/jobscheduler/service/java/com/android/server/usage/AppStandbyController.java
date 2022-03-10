@@ -78,6 +78,7 @@ import android.content.pm.CrossProfileAppsInternal;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
+import android.content.pm.ResolveInfo;
 import android.database.ContentObserver;
 import android.hardware.display.DisplayManager;
 import android.net.NetworkScoreManager;
@@ -219,7 +220,8 @@ public class AppStandbyController
 
     private static final int HEADLESS_APP_CHECK_FLAGS =
             PackageManager.MATCH_DIRECT_BOOT_AWARE | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
-                    | PackageManager.GET_ACTIVITIES | PackageManager.MATCH_DISABLED_COMPONENTS;
+                    | PackageManager.MATCH_DISABLED_COMPONENTS
+                    | PackageManager.MATCH_SYSTEM_ONLY;
 
     // To name the lock for stack traces
     static class Lock {}
@@ -253,7 +255,7 @@ public class AppStandbyController
     private final SparseArray<Set<String>> mActiveAdminApps = new SparseArray<>();
 
     /**
-     * Set of system apps that are headless (don't have any declared activities, enabled or
+     * Set of system apps that are headless (don't have any "front door" activities, enabled or
      * disabled). Presence in this map indicates that the app is a headless system app.
      */
     @GuardedBy("mHeadlessSystemApps")
@@ -1942,7 +1944,7 @@ public class AppStandbyController
         try {
             PackageInfo pi = mPackageManager.getPackageInfoAsUser(
                     packageName, HEADLESS_APP_CHECK_FLAGS, userId);
-            evaluateSystemAppException(pi);
+            maybeUpdateHeadlessSystemAppCache(pi);
         } catch (PackageManager.NameNotFoundException e) {
             synchronized (mHeadlessSystemApps) {
                 mHeadlessSystemApps.remove(packageName);
@@ -1950,19 +1952,31 @@ public class AppStandbyController
         }
     }
 
-    /** Returns true if the exception status changed. */
-    private boolean evaluateSystemAppException(@Nullable PackageInfo pkgInfo) {
+    /**
+     * Update the "headless system app" cache.
+     *
+     * @return true if the cache is updated.
+     */
+    private boolean maybeUpdateHeadlessSystemAppCache(@Nullable PackageInfo pkgInfo) {
         if (pkgInfo == null || pkgInfo.applicationInfo == null
                 || (!pkgInfo.applicationInfo.isSystemApp()
                         && !pkgInfo.applicationInfo.isUpdatedSystemApp())) {
             return false;
         }
+        final Intent frontDoorActivityIntent = new Intent(Intent.ACTION_MAIN)
+                .addCategory(Intent.CATEGORY_LAUNCHER)
+                .setPackage(pkgInfo.packageName);
+        List<ResolveInfo> res = mPackageManager.queryIntentActivitiesAsUser(frontDoorActivityIntent,
+                HEADLESS_APP_CHECK_FLAGS, UserHandle.USER_SYSTEM);
+        return updateHeadlessSystemAppCache(pkgInfo.packageName, ArrayUtils.isEmpty(res));
+    }
+
+    private boolean updateHeadlessSystemAppCache(String packageName, boolean add) {
         synchronized (mHeadlessSystemApps) {
-            if (pkgInfo.activities == null || pkgInfo.activities.length == 0) {
-                // Headless system app.
-                return mHeadlessSystemApps.add(pkgInfo.packageName);
+            if (add) {
+                return mHeadlessSystemApps.add(packageName);
             } else {
-                return mHeadlessSystemApps.remove(pkgInfo.packageName);
+                return mHeadlessSystemApps.remove(packageName);
             }
         }
     }
@@ -1999,20 +2013,45 @@ public class AppStandbyController
         }
     }
 
+    /** Returns the packages that have launcher icons. */
+    private Set<String> getSystemPackagesWithLauncherActivities() {
+        final Intent intent = new Intent(Intent.ACTION_MAIN)
+                .addCategory(Intent.CATEGORY_LAUNCHER);
+        List<ResolveInfo> activities = mPackageManager.queryIntentActivitiesAsUser(intent,
+                HEADLESS_APP_CHECK_FLAGS, UserHandle.USER_SYSTEM);
+        final ArraySet<String> ret = new ArraySet<>();
+        for (ResolveInfo ri : activities) {
+            ret.add(ri.activityInfo.packageName);
+        }
+        return ret;
+    }
+
     /** Call on system boot to get the initial set of headless system apps. */
     private void loadHeadlessSystemAppCache() {
-        Slog.d(TAG, "Loading headless system app cache. appIdleEnabled=" + mAppIdleEnabled);
+        final long start = SystemClock.uptimeMillis();
         final List<PackageInfo> packages = mPackageManager.getInstalledPackagesAsUser(
                 HEADLESS_APP_CHECK_FLAGS, UserHandle.USER_SYSTEM);
+
+        final Set<String> systemLauncherActivities = getSystemPackagesWithLauncherActivities();
+
         final int packageCount = packages.size();
         for (int i = 0; i < packageCount; i++) {
-            PackageInfo pkgInfo = packages.get(i);
-            if (pkgInfo != null && evaluateSystemAppException(pkgInfo)) {
+            final PackageInfo pkgInfo = packages.get(i);
+            if (pkgInfo == null) {
+                continue;
+            }
+            final String pkg = pkgInfo.packageName;
+            final boolean isHeadLess = !systemLauncherActivities.contains(pkg);
+
+            if (updateHeadlessSystemAppCache(pkg, isHeadLess)) {
                 mHandler.obtainMessage(MSG_CHECK_PACKAGE_IDLE_STATE,
-                        UserHandle.USER_SYSTEM, -1, pkgInfo.packageName)
+                        UserHandle.USER_SYSTEM, -1, pkg)
                     .sendToTarget();
             }
         }
+        final long end = SystemClock.uptimeMillis();
+        Slog.d(TAG, "Loaded headless system app cache in " + (end - start) + " ms:"
+                + " appIdleEnabled=" + mAppIdleEnabled);
     }
 
     @Override
