@@ -118,7 +118,8 @@ final class RemovePackageHelper {
 
     public void removePackageLI(AndroidPackage pkg, boolean chatty) {
         // Remove the parent package setting
-        PackageStateInternal ps = mPm.getPackageStateInternal(pkg.getPackageName());
+        PackageStateInternal ps = mPm.snapshotComputer()
+                .getPackageStateInternal(pkg.getPackageName());
         if (ps != null) {
             removePackageLI(ps.getPackageName(), chatty);
         } else if (DEBUG_REMOVE && chatty) {
@@ -271,8 +272,8 @@ final class RemovePackageHelper {
             synchronized (mPm.mLock) {
                 mPm.mDomainVerificationManager.clearPackage(deletedPs.getPackageName());
                 mPm.mSettings.getKeySetManagerService().removeAppKeySetDataLPw(packageName);
-                mPm.mAppsFilter.removePackage(mPm.getPackageStateInternal(packageName),
-                        false /* isReplace */);
+                mPm.mAppsFilter.removePackage(mPm.snapshotComputer()
+                                .getPackageStateInternal(packageName), false /* isReplace */);
                 removedAppId = mPm.mSettings.removePackageLPw(packageName);
                 if (outInfo != null) {
                     outInfo.mRemovedAppId = removedAppId;
@@ -298,7 +299,8 @@ final class RemovePackageHelper {
             if (changedUsers.size() > 0) {
                 final PreferredActivityHelper preferredActivityHelper =
                         new PreferredActivityHelper(mPm);
-                preferredActivityHelper.updateDefaultHomeNotLocked(changedUsers);
+                preferredActivityHelper.updateDefaultHomeNotLocked(mPm.snapshotComputer(),
+                        changedUsers);
                 mPm.postPreferredActivityChangedBroadcast(UserHandle.USER_ALL);
             }
         }

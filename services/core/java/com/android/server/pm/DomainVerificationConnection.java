@@ -21,7 +21,6 @@ import static com.android.server.pm.PackageManagerService.DOMAIN_VERIFICATION;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
-import android.content.pm.PackageManagerInternal;
 import android.os.Binder;
 import android.os.Message;
 import android.os.UserHandle;
@@ -35,13 +34,10 @@ import com.android.server.pm.verify.domain.proxy.DomainVerificationProxyV2;
 public final class DomainVerificationConnection implements DomainVerificationService.Connection,
         DomainVerificationProxyV1.Connection, DomainVerificationProxyV2.Connection {
     final PackageManagerService mPm;
-    final PackageManagerInternal mPmInternal;
     final UserManagerInternal mUmInternal;
 
-    // TODO(b/198166813): remove PMS dependency
     DomainVerificationConnection(PackageManagerService pm) {
         mPm = pm;
-        mPmInternal = mPm.mInjector.getLocalService(PackageManagerInternal.class);
         mUmInternal = mPm.mInjector.getLocalService(UserManagerInternal.class);
     }
 
@@ -82,18 +78,18 @@ public final class DomainVerificationConnection implements DomainVerificationSer
     @Override
     public boolean isCallerPackage(int callingUid, @NonNull String packageName) {
         final int callingUserId = UserHandle.getUserId(callingUid);
-        return callingUid == mPmInternal.getPackageUid(packageName, 0, callingUserId);
+        return callingUid == mPm.snapshotComputer().getPackageUid(packageName, 0, callingUserId);
     }
 
     @Nullable
     @Override
     public AndroidPackage getPackage(@NonNull String packageName) {
-        return mPmInternal.getPackage(packageName);
+        return mPm.snapshotComputer().getPackage(packageName);
     }
 
     @Override
     public boolean filterAppAccess(String packageName, int callingUid, int userId) {
-        return mPmInternal.filterAppAccess(packageName, callingUid, userId);
+        return mPm.snapshotComputer().filterAppAccess(packageName, callingUid, userId);
     }
 
     @Override
@@ -108,6 +104,6 @@ public final class DomainVerificationConnection implements DomainVerificationSer
 
     @NonNull
     public Computer snapshot() {
-        return (Computer) mPmInternal.snapshot();
+        return mPm.snapshotComputer();
     }
 }

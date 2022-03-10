@@ -34,6 +34,7 @@ import android.content.Context;
 import android.content.pm.ApkChecksum;
 import android.content.pm.Checksum;
 import android.content.pm.IOnChecksumsReadyListener;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.Signature;
 import android.content.pm.SigningDetails.SignatureSchemeVersion;
@@ -62,6 +63,7 @@ import android.util.apk.VerityBuilder;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.security.VerityUtils;
+import com.android.server.LocalServices;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 
 import java.io.ByteArrayOutputStream;
