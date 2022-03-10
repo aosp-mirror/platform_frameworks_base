@@ -2367,7 +2367,7 @@ public class AppOpsManager {
             null, // no permission for OP_WRITE_MEDIA_AUDIO
             Manifest.permission.READ_MEDIA_VIDEO,
             null, // no permission for OP_WRITE_MEDIA_VIDEO
-            Manifest.permission.READ_MEDIA_IMAGE,
+            Manifest.permission.READ_MEDIA_IMAGES,
             null, // no permission for OP_WRITE_MEDIA_IMAGES
             null, // no permission for OP_LEGACY_STORAGE
             null, // no permission for OP_ACCESS_ACCESSIBILITY
