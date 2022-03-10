@@ -616,6 +616,11 @@ public class NotificationPanelViewController extends PanelViewController {
      */
     private float mKeyguardOnlyContentAlpha = 1.0f;
 
+    /**
+     * The translationY of the views which only show on the keyguard but in shade / shade locked.
+     */
+    private int mKeyguardOnlyTransitionTranslationY = 0;
+
     private float mUdfpsMaxYBurnInOffset;
 
     /**
@@ -1575,6 +1580,8 @@ public class NotificationPanelViewController extends PanelViewController {
     private void updateClock() {
         float alpha = mClockPositionResult.clockAlpha * mKeyguardOnlyContentAlpha;
         mKeyguardStatusViewController.setAlpha(alpha);
+        mKeyguardStatusViewController
+                .setTranslationYExcludingMedia(mKeyguardOnlyTransitionTranslationY);
         if (mKeyguardQsUserSwitchController != null) {
             mKeyguardQsUserSwitchController.setAlpha(alpha);
         }
@@ -2732,11 +2739,12 @@ public class NotificationPanelViewController extends PanelViewController {
     }
 
     /**
-     * Set the alpha of the keyguard elements which only show on the lockscreen, but not in
-     * shade locked / shade. This is used when dragging down to the full shade.
+     * Set the alpha and translationY of the keyguard elements which only show on the lockscreen,
+     * but not in shade locked / shade. This is used when dragging down to the full shade.
      */
-    public void setKeyguardOnlyContentAlpha(float keyguardAlpha) {
+    public void setKeyguardTransitionProgress(float keyguardAlpha, int keyguardTranslationY) {
         mKeyguardOnlyContentAlpha = Interpolators.ALPHA_IN.getInterpolation(keyguardAlpha);
+        mKeyguardOnlyTransitionTranslationY = keyguardTranslationY;
         if (mBarState == KEYGUARD) {
             // If the animator is running, it's already fading out the content and this is a reset
             mBottomAreaShadeAlpha = mKeyguardOnlyContentAlpha;
