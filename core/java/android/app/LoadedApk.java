@@ -37,6 +37,7 @@ import android.content.res.CompatibilityInfo;
 import android.content.res.Resources;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.FileUtils;
 import android.os.GraphicsEnvironment;
 import android.os.Handler;
@@ -409,6 +410,26 @@ public final class LoadedApk {
         if (aInfo.requestsIsolatedSplitLoading() && !ArrayUtils.isEmpty(mSplitNames)) {
             mSplitLoader = new SplitDependencyLoaderImpl(aInfo.splitDependencies);
         }
+    }
+
+    /** @hide */
+    void setSdkSandboxStorage(String sdkSandboxClientAppPackage) {
+        int userId = UserHandle.myUserId();
+        mDeviceProtectedDataDirFile = Environment
+                .getDataMiscDeSharedSdkSandboxDirectory(userId, sdkSandboxClientAppPackage)
+                .getAbsoluteFile();
+        mCredentialProtectedDataDirFile = Environment
+                .getDataMiscCeSharedSdkSandboxDirectory(userId, sdkSandboxClientAppPackage)
+                .getAbsoluteFile();
+
+        if ((mApplicationInfo.privateFlags
+                & ApplicationInfo.PRIVATE_FLAG_DEFAULT_TO_DEVICE_PROTECTED_STORAGE) != 0
+                && PackageManager.APPLY_DEFAULT_TO_DEVICE_PROTECTED_STORAGE) {
+            mDataDirFile = mDeviceProtectedDataDirFile;
+        } else {
+            mDataDirFile = mCredentialProtectedDataDirFile;
+        }
+        mDataDir = mDataDirFile.getAbsolutePath();
     }
 
     public static void makePaths(ActivityThread activityThread,
