@@ -36,6 +36,7 @@ import static android.app.ActivityManager.PROCESS_STATE_TOP;
 import static android.app.ActivityManager.StopUserOnSwitch;
 import static android.app.ActivityManagerInternal.ALLOW_FULL_ONLY;
 import static android.app.ActivityManagerInternal.ALLOW_NON_FULL;
+import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.OP_NONE;
 import static android.content.pm.ApplicationInfo.HIDDEN_API_ENFORCEMENT_DEFAULT;
 import static android.content.pm.PackageManager.GET_SHARED_LIBRARY_FILES;
@@ -1895,6 +1896,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         0,
                         false,
                         0,
+                        null,
                         new HostingRecord("system"));
                 app.setPersistent(true);
                 app.setPid(MY_PID);
@@ -2783,7 +2785,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                     false /* knownToBeDead */, 0 /* intentFlags */,
                     sNullHostingRecord  /* hostingRecord */, ZYGOTE_POLICY_FLAG_EMPTY,
                     true /* allowWhileBooting */, true /* isolated */,
-                    uid, false /* supplemental */, 0 /* supplementalUid */,
+                    uid, false /* isSdkSandbox */, 0 /* sdkSandboxUid */,
+                    null /* sdkSandboxClientAppPackage */,
                     abiOverride, entryPoint, entryPointArgs, crashHandler);
             return proc != null;
         }
@@ -2792,11 +2795,12 @@ public class ActivityManagerService extends IActivityManager.Stub
     @GuardedBy("this")
     final ProcessRecord startSdkSandboxProcessLocked(String processName,
             ApplicationInfo info, boolean knownToBeDead, int intentFlags,
-            HostingRecord hostingRecord, int zygotePolicyFlags, int sdkSandboxUid) {
+            HostingRecord hostingRecord, int zygotePolicyFlags, int sdkSandboxUid,
+            String sdkSandboxClientAppPackage) {
         return mProcessList.startProcessLocked(processName, info, knownToBeDead, intentFlags,
                 hostingRecord, zygotePolicyFlags, false /* allowWhileBooting */,
                 false /* isolated */, 0 /* isolatedUid */,
-                true /* isSdkSandbox */, sdkSandboxUid,
+                true /* isSdkSandbox */, sdkSandboxUid, sdkSandboxClientAppPackage,
                 null /* ABI override */, null /* entryPoint */,
                 null /* entryPointArgs */, null /* crashHandler */);
     }
@@ -2808,7 +2812,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             boolean isolated) {
         return mProcessList.startProcessLocked(processName, info, knownToBeDead, intentFlags,
                 hostingRecord, zygotePolicyFlags, allowWhileBooting, isolated, 0 /* isolatedUid */,
-                false /* isSdkSandbox */, 0 /* sdkSandboxClientdAppUid */,
+                false /* isSdkSandbox */, 0 /* sdkSandboxClientAppUid */,
+                null /* sdkSandboxClientAppPackage */,
                 null /* ABI override */, null /* entryPoint */,
                 null /* entryPointArgs */, null /* crashHandler */);
     }
@@ -4773,7 +4778,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 thread.runIsolatedEntryPoint(
                         app.getIsolatedEntryPoint(), app.getIsolatedEntryPointArgs());
             } else if (instr2 != null) {
-                thread.bindApplication(processName, appInfo, providerList,
+                thread.bindApplication(processName, appInfo, app.sdkSandboxClientAppPackage,
+                        providerList,
                         instr2.mClass,
                         profilerInfo, instr2.mArguments,
                         instr2.mWatcher,
@@ -4787,8 +4793,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                         app.getDisabledCompatChanges(), serializedSystemFontMap,
                         app.getStartElapsedTime(), app.getStartUptime());
             } else {
-                thread.bindApplication(processName, appInfo, providerList, null, profilerInfo,
-                        null, null, null, testMode,
+                thread.bindApplication(processName, appInfo, app.sdkSandboxClientAppPackage,
+                        providerList, null, profilerInfo, null, null, null, testMode,
                         mBinderTransactionTrackingEnabled, enableTrackAllocation,
                         isRestrictedBackupMode || !normalMode, app.isPersistent(),
                         new Configuration(app.getWindowProcessController().getConfiguration()),
@@ -6553,7 +6559,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         if (app == null) {
             app = mProcessList.newProcessRecordLocked(info, customProcess, isolated, 0,
-                    false, 0,
+                    false, 0, null,
                     new HostingRecord("added application",
                         customProcess != null ? customProcess : info.processName));
             updateLruProcessLocked(app, false, null);
@@ -12395,13 +12401,13 @@ public class ActivityManagerService extends IActivityManager.Stub
             String resolvedType, IServiceConnection connection, int flags, String instanceName,
             String callingPackage, int userId) throws TransactionTooLargeException {
         return bindServiceInstance(caller, token, service, resolvedType, connection, flags,
-                instanceName, false, 0, callingPackage, userId);
+                instanceName, false, 0, null, callingPackage, userId);
     }
 
     private int bindServiceInstance(IApplicationThread caller, IBinder token, Intent service,
             String resolvedType, IServiceConnection connection, int flags, String instanceName,
-            boolean isSdkSandboxService, int sdkSandboxClientdAppUid, String callingPackage,
-            int userId)
+            boolean isSdkSandboxService, int sdkSandboxClientAppUid,
+            String sdkSandboxClientAppPackage, String callingPackage, int userId)
             throws TransactionTooLargeException {
         enforceNotIsolatedCaller("bindService");
 
@@ -12438,8 +12444,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             synchronized (this) {
                 return mServices.bindServiceLocked(caller, token, service, resolvedType, connection,
-                        flags, instanceName, isSdkSandboxService, sdkSandboxClientdAppUid,
-                        callingPackage, userId);
+                        flags, instanceName, isSdkSandboxService, sdkSandboxClientAppUid,
+                        sdkSandboxClientAppPackage, callingPackage, userId);
             }
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
@@ -16022,12 +16028,16 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         @Override
         public boolean bindSdkSandboxService(Intent service, ServiceConnection conn,
-                int userAppUid, String processName, int flags) throws RemoteException {
+                int clientAppUid, String clientAppPackage, String processName, int flags)
+                throws RemoteException {
             if (service == null) {
                 throw new IllegalArgumentException("intent is null");
             }
             if (conn == null) {
                 throw new IllegalArgumentException("connection is null");
+            }
+            if (clientAppPackage == null) {
+                throw new IllegalArgumentException("clientAppPackage is null");
             }
             if (processName == null) {
                 throw new IllegalArgumentException("processName is null");
@@ -16035,8 +16045,11 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (service.getComponent() == null) {
                 throw new IllegalArgumentException("service must specify explicit component");
             }
-            if (!UserHandle.isApp(userAppUid)) {
+            if (!UserHandle.isApp(clientAppUid)) {
                 throw new IllegalArgumentException("uid is not within application range");
+            }
+            if (mAppOpsService.checkPackage(clientAppUid, clientAppPackage) != MODE_ALLOWED) {
+                throw new IllegalArgumentException("uid does not belong to provided package");
             }
 
             Handler handler = mContext.getMainThreadHandler();
@@ -16046,8 +16059,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             return ActivityManagerService.this.bindServiceInstance(
                     mContext.getIApplicationThread(), mContext.getActivityToken(), service,
                     service.resolveTypeIfNeeded(mContext.getContentResolver()), sd, flags,
-                    processName, /*isSupplementalProcessService*/ true, userAppUid,
-                    mContext.getOpPackageName(), UserHandle.getUserId(userAppUid)) != 0;
+                    processName, /*isSdkSandboxService*/ true, clientAppUid, clientAppPackage,
+                    mContext.getOpPackageName(), UserHandle.getUserId(clientAppUid)) != 0;
         }
 
         @Override

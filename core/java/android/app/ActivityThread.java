@@ -868,6 +868,7 @@ public final class ActivityThread extends ClientTransactionHandler
         String processName;
         @UnsupportedAppUsage
         ApplicationInfo appInfo;
+        String sdkSandboxClientAppPackage;
         @UnsupportedAppUsage
         List<ProviderInfo> providers;
         ComponentName instrumentationName;
@@ -1113,9 +1114,9 @@ public final class ActivityThread extends ClientTransactionHandler
 
         @Override
         public final void bindApplication(String processName, ApplicationInfo appInfo,
-                ProviderInfoList providerList, ComponentName instrumentationName,
-                ProfilerInfo profilerInfo, Bundle instrumentationArgs,
-                IInstrumentationWatcher instrumentationWatcher,
+                String sdkSandboxClientAppPackage, ProviderInfoList providerList,
+                ComponentName instrumentationName, ProfilerInfo profilerInfo,
+                Bundle instrumentationArgs, IInstrumentationWatcher instrumentationWatcher,
                 IUiAutomationConnection instrumentationUiConnection, int debugMode,
                 boolean enableBinderTracking, boolean trackAllocation,
                 boolean isRestrictedBackupMode, boolean persistent, Configuration config,
@@ -1155,6 +1156,7 @@ public final class ActivityThread extends ClientTransactionHandler
             AppBindData data = new AppBindData();
             data.processName = processName;
             data.appInfo = appInfo;
+            data.sdkSandboxClientAppPackage = sdkSandboxClientAppPackage;
             data.providers = providerList.getList();
             data.instrumentationName = instrumentationName;
             data.instrumentationArgs = instrumentationArgs;
@@ -6536,6 +6538,9 @@ public final class ActivityThread extends ClientTransactionHandler
         }
 
         data.info = getPackageInfoNoCheck(data.appInfo, data.compatInfo);
+        if (data.sdkSandboxClientAppPackage != null) {
+            data.info.setSdkSandboxStorage(data.sdkSandboxClientAppPackage);
+        }
 
         if (agent != null) {
             handleAttachAgent(agent, data.info);

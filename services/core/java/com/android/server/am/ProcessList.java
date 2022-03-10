@@ -2365,7 +2365,7 @@ public final class ProcessList {
     ProcessRecord startProcessLocked(String processName, ApplicationInfo info,
             boolean knownToBeDead, int intentFlags, HostingRecord hostingRecord,
             int zygotePolicyFlags, boolean allowWhileBooting, boolean isolated, int isolatedUid,
-            boolean isSdkSandbox, int sdkSandboxUid,
+            boolean isSdkSandbox, int sdkSandboxUid, String sdkSandboxClientAppPackage,
             String abiOverride, String entryPoint, String[] entryPointArgs, Runnable crashHandler) {
         long startTime = SystemClock.uptimeMillis();
         ProcessRecord app;
@@ -2460,7 +2460,7 @@ public final class ProcessList {
         if (app == null) {
             checkSlow(startTime, "startProcess: creating new process record");
             app = newProcessRecordLocked(info, processName, isolated, isolatedUid, isSdkSandbox,
-                    sdkSandboxUid, hostingRecord);
+                    sdkSandboxUid, sdkSandboxClientAppPackage, hostingRecord);
             if (app == null) {
                 Slog.w(TAG, "Failed making new process record for "
                         + processName + "/" + info.uid + " isolated=" + isolated);
@@ -2956,7 +2956,7 @@ public final class ProcessList {
     @GuardedBy("mService")
     ProcessRecord newProcessRecordLocked(ApplicationInfo info, String customProcess,
             boolean isolated, int isolatedUid, boolean isSdkSandbox, int sdkSandboxUid,
-            HostingRecord hostingRecord) {
+            String sdkSandboxClientAppPackage, HostingRecord hostingRecord) {
         String proc = customProcess != null ? customProcess : info.processName;
         final int userId = UserHandle.getUserId(info.uid);
         int uid = info.uid;
@@ -2992,6 +2992,7 @@ public final class ProcessList {
                     FrameworkStatsLog.ISOLATED_UID_CHANGED__EVENT__CREATED);
         }
         final ProcessRecord r = new ProcessRecord(mService, info, proc, uid,
+                sdkSandboxClientAppPackage,
                 hostingRecord.getDefiningUid(), hostingRecord.getDefiningProcessName());
         final ProcessStateRecord state = r.mState;
 
