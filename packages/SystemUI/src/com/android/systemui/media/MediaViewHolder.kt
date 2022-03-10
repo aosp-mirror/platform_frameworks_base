@@ -60,12 +60,24 @@ abstract class MediaViewHolder constructor(itemView: View) {
     val settings = itemView.requireViewById<View>(R.id.settings)
     val settingsText = itemView.requireViewById<TextView>(R.id.settings_text)
 
+    // Action Buttons
+    val action0 = itemView.requireViewById<ImageButton>(R.id.action0)
+    val action1 = itemView.requireViewById<ImageButton>(R.id.action1)
+    val action2 = itemView.requireViewById<ImageButton>(R.id.action2)
+    val action3 = itemView.requireViewById<ImageButton>(R.id.action3)
+    val action4 = itemView.requireViewById<ImageButton>(R.id.action4)
+
     init {
         (player.background as IlluminationDrawable).let {
             it.registerLightSource(seamless)
             it.registerLightSource(cancel)
             it.registerLightSource(dismiss)
             it.registerLightSource(settings)
+            it.registerLightSource(action0)
+            it.registerLightSource(action1)
+            it.registerLightSource(action2)
+            it.registerLightSource(action3)
+            it.registerLightSource(action4)
         }
     }
 

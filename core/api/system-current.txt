@@ -8553,7 +8553,7 @@ package android.net {
   public final class EthernetNetworkUpdateRequest implements android.os.Parcelable {
     method public int describeContents();
     method @NonNull public android.net.IpConfiguration getIpConfiguration();
-    method @NonNull public android.net.NetworkCapabilities getNetworkCapabilities();
+    method @Nullable public android.net.NetworkCapabilities getNetworkCapabilities();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.net.EthernetNetworkUpdateRequest> CREATOR;
   }
@@ -8563,7 +8563,7 @@ package android.net {
     ctor public EthernetNetworkUpdateRequest.Builder(@NonNull android.net.EthernetNetworkUpdateRequest);
     method @NonNull public android.net.EthernetNetworkUpdateRequest build();
     method @NonNull public android.net.EthernetNetworkUpdateRequest.Builder setIpConfiguration(@NonNull android.net.IpConfiguration);
-    method @NonNull public android.net.EthernetNetworkUpdateRequest.Builder setNetworkCapabilities(@NonNull android.net.NetworkCapabilities);
+    method @NonNull public android.net.EthernetNetworkUpdateRequest.Builder setNetworkCapabilities(@Nullable android.net.NetworkCapabilities);
   }
 
   public final class MatchAllNetworkSpecifier extends android.net.NetworkSpecifier implements android.os.Parcelable {
@@ -10587,7 +10587,6 @@ package android.provider {
     field public static final String AUTO_REVOKE_DISABLED = "auto_revoke_disabled";
     field public static final String COMPLETED_CATEGORY_PREFIX = "suggested.completed_category.";
     field public static final String DOZE_ALWAYS_ON = "doze_always_on";
-    field public static final String FAST_PAIR_SCAN_ENABLED = "fast_pair_scan_enabled";
     field public static final String HUSH_GESTURE_USED = "hush_gesture_used";
     field public static final String INSTANT_APPS_ENABLED = "instant_apps_enabled";
     field public static final String LAST_SETUP_SHOWN = "last_setup_shown";
@@ -12225,7 +12224,6 @@ package android.telecom {
 
   public abstract class ConnectionService extends android.app.Service {
     method public final void addExistingConnection(@NonNull android.telecom.PhoneAccountHandle, @NonNull android.telecom.Connection, @NonNull android.telecom.Conference);
-    method @Nullable @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public android.telecom.Connection onCreateUnknownConnection(@NonNull android.telecom.PhoneAccountHandle, @NonNull android.telecom.ConnectionRequest);
   }
 
   public abstract class InCallService extends android.app.Service {

@@ -31,6 +31,7 @@ import androidx.core.view.GestureDetectorCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.statusbar.NotificationMediaManager
 import com.android.systemui.util.concurrency.RepeatableExecutor
 import javax.inject.Inject
 
@@ -73,7 +74,7 @@ private fun PlaybackState.computePosition(duration: Long): Long {
 class SeekBarViewModel @Inject constructor(
     @Background private val bgExecutor: RepeatableExecutor
 ) {
-    private var _data = Progress(false, false, null, 0)
+    private var _data = Progress(false, false, false, null, 0)
         set(value) {
             field = value
             _progress.postValue(value)
@@ -130,6 +131,8 @@ class SeekBarViewModel @Inject constructor(
         }
 
     lateinit var logSmartspaceClick: () -> Unit
+
+    fun getEnabled() = _data.enabled
 
     /**
      * Event indicating that the user has started interacting with the seek bar.
@@ -192,10 +195,12 @@ class SeekBarViewModel @Inject constructor(
         val seekAvailable = ((playbackState?.actions ?: 0L) and PlaybackState.ACTION_SEEK_TO) != 0L
         val position = playbackState?.position?.toInt()
         val duration = mediaMetadata?.getLong(MediaMetadata.METADATA_KEY_DURATION)?.toInt() ?: 0
+        val playing = NotificationMediaManager
+                .isPlayingState(playbackState?.state ?: PlaybackState.STATE_NONE)
         val enabled = if (playbackState == null ||
                 playbackState?.getState() == PlaybackState.STATE_NONE ||
                 (duration <= 0)) false else true
-        _data = Progress(enabled, seekAvailable, position, duration)
+        _data = Progress(enabled, seekAvailable, playing, position, duration)
         checkIfPollingNeeded()
     }
 
@@ -412,6 +417,7 @@ class SeekBarViewModel @Inject constructor(
     data class Progress(
         val enabled: Boolean,
         val seekAvailable: Boolean,
+        val playing: Boolean,
         val elapsedTime: Int?,
         val duration: Int
     )
