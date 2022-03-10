@@ -25,7 +25,6 @@ import static com.android.server.pm.PackageManagerService.DEBUG_PREFERRED;
 import static com.android.server.pm.PackageManagerService.TAG;
 
 import android.annotation.NonNull;
-import android.annotation.UserIdInt;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -75,18 +74,17 @@ final class PreferredActivityHelper {
         mPm = pm;
     }
 
-    private ResolveInfo findPreferredActivityNotLocked(@NonNull Computer snapshot, Intent intent,
-            String resolvedType, @PackageManager.ResolveInfoFlagsBits long flags,
-            List<ResolveInfo> query, boolean always, boolean removeMatches, boolean debug,
-            @UserIdInt int userId) {
-        return findPreferredActivityNotLocked(snapshot, intent, resolvedType, flags, query, always,
-                removeMatches, debug, userId,
+    private ResolveInfo findPreferredActivityNotLocked(Intent intent, String resolvedType,
+            @PackageManager.ResolveInfoFlagsBits long flags, List<ResolveInfo> query,
+            boolean always, boolean removeMatches, boolean debug, int userId) {
+        return findPreferredActivityNotLocked(
+                intent, resolvedType, flags, query, always, removeMatches, debug, userId,
                 UserHandle.getAppId(Binder.getCallingUid()) >= Process.FIRST_APPLICATION_UID);
     }
 
     // TODO: handle preferred activities missing while user has amnesia
     /** <b>must not hold {@link PackageManagerService.mLock}</b> */
-    public ResolveInfo findPreferredActivityNotLocked(@NonNull Computer snapshot,
+    public ResolveInfo findPreferredActivityNotLocked(
             Intent intent, String resolvedType, @PackageManager.ResolveInfoFlagsBits long flags,
             List<ResolveInfo> query, boolean always, boolean removeMatches, boolean debug,
             int userId, boolean queryMayBeFiltered) {
@@ -97,7 +95,7 @@ final class PreferredActivityHelper {
         if (!mPm.mUserManager.exists(userId)) return null;
 
         PackageManagerService.FindPreferredActivityBodyResult body =
-                snapshot.findPreferredActivityInternal(
+                mPm.findPreferredActivityInternal(
                 intent, resolvedType, flags, query, always,
                 removeMatches, debug, userId, queryMayBeFiltered);
         if (body.mChanged) {
@@ -119,7 +117,7 @@ final class PreferredActivityHelper {
             mPm.clearPackagePreferredActivitiesLPw(packageName, changedUsers, userId);
         }
         if (changedUsers.size() > 0) {
-            updateDefaultHomeNotLocked(mPm.snapshotComputer(), changedUsers);
+            updateDefaultHomeNotLocked(changedUsers);
             mPm.postPreferredActivityChangedBroadcast(userId);
             mPm.scheduleWritePackageRestrictions(userId);
         }
@@ -130,7 +128,7 @@ final class PreferredActivityHelper {
      *
      * @return Whether the ACTION_PREFERRED_ACTIVITY_CHANGED broadcast has been scheduled.
      */
-    public boolean updateDefaultHomeNotLocked(@NonNull Computer snapshot, @UserIdInt int userId) {
+    public boolean updateDefaultHomeNotLocked(int userId) {
         if (Thread.holdsLock(mPm.mLock)) {
             Slog.wtf(TAG, "Calling thread " + Thread.currentThread().getName()
                     + " is holding mLock", new Throwable());
@@ -141,10 +139,10 @@ final class PreferredActivityHelper {
             // before that.
             return false;
         }
-        final Intent intent = snapshot.getHomeIntent();
-        final List<ResolveInfo> resolveInfos = snapshot.queryIntentActivitiesInternal(
+        final Intent intent = mPm.getHomeIntent();
+        final List<ResolveInfo> resolveInfos = mPm.snapshotComputer().queryIntentActivitiesInternal(
                 intent, null, MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE, userId);
-        final ResolveInfo preferredResolveInfo = findPreferredActivityNotLocked(snapshot,
+        final ResolveInfo preferredResolveInfo = findPreferredActivityNotLocked(
                 intent, null, 0, resolveInfos, true, false, false, userId);
         final String packageName = preferredResolveInfo != null
                 && preferredResolveInfo.activityInfo != null
@@ -153,7 +151,8 @@ final class PreferredActivityHelper {
         if (TextUtils.equals(currentPackageName, packageName)) {
             return false;
         }
-        final String[] callingPackages = snapshot.getPackagesForUid(Binder.getCallingUid());
+        final String[] callingPackages = mPm.mIPackageManager
+                .getPackagesForUid(Binder.getCallingUid());
         if (callingPackages != null && ArrayUtils.contains(callingPackages,
                 mPm.mRequiredPermissionControllerPackage)) {
             // PermissionController manages default home directly.
@@ -175,21 +174,23 @@ final class PreferredActivityHelper {
     /**
      * Variant that takes a {@link WatchedIntentFilter}
      */
-    public void addPreferredActivity(@NonNull Computer snapshot, WatchedIntentFilter filter,
-            int match, ComponentName[] set, ComponentName activity, boolean always, int userId,
+    public void addPreferredActivity(WatchedIntentFilter filter, int match,
+            ComponentName[] set, ComponentName activity, boolean always, int userId,
             String opname, boolean removeExisting) {
         // writer
         int callingUid = Binder.getCallingUid();
-        snapshot.enforceCrossUserPermission(callingUid, userId, true /* requireFullPermission */,
+        mPm.enforceCrossUserPermission(callingUid, userId, true /* requireFullPermission */,
                 false /* checkShell */, "add preferred activity");
         if (mPm.mContext.checkCallingOrSelfPermission(
                 android.Manifest.permission.SET_PREFERRED_APPLICATIONS)
                 != PackageManager.PERMISSION_GRANTED) {
-            if (snapshot.getUidTargetSdkVersion(callingUid)
-                    < Build.VERSION_CODES.FROYO) {
-                Slog.w(TAG, "Ignoring addPreferredActivity() from uid "
-                        + callingUid);
-                return;
+            synchronized (mPm.mLock) {
+                if (mPm.getUidTargetSdkVersion(callingUid)
+                        < Build.VERSION_CODES.FROYO) {
+                    Slog.w(TAG, "Ignoring addPreferredActivity() from uid "
+                            + callingUid);
+                    return;
+                }
             }
             mPm.mContext.enforceCallingOrSelfPermission(
                     android.Manifest.permission.SET_PREFERRED_APPLICATIONS, null);
@@ -213,8 +214,7 @@ final class PreferredActivityHelper {
                     new PreferredActivity(filter, match, set, activity, always));
             mPm.scheduleWritePackageRestrictions(userId);
         }
-        // Re-snapshot after mLock
-        if (!(isHomeFilter(filter) && updateDefaultHomeNotLocked(mPm.snapshotComputer(), userId))) {
+        if (!(isHomeFilter(filter) && updateDefaultHomeNotLocked(userId))) {
             mPm.postPreferredActivityChangedBroadcast(userId);
         }
     }
@@ -222,8 +222,8 @@ final class PreferredActivityHelper {
     /**
      * Variant that takes a {@link WatchedIntentFilter}
      */
-    public void replacePreferredActivity(@NonNull Computer snapshot, WatchedIntentFilter filter,
-            int match, ComponentName[] set, ComponentName activity, int userId) {
+    public void replacePreferredActivity(WatchedIntentFilter filter, int match,
+            ComponentName[] set, ComponentName activity, int userId) {
         if (filter.countActions() != 1) {
             throw new IllegalArgumentException(
                     "replacePreferredActivity expects filter to have only 1 action.");
@@ -238,14 +238,13 @@ final class PreferredActivityHelper {
         }
 
         final int callingUid = Binder.getCallingUid();
-        snapshot.enforceCrossUserPermission(callingUid, userId, true /* requireFullPermission */,
+        mPm.enforceCrossUserPermission(callingUid, userId, true /* requireFullPermission */,
                 false /* checkShell */, "replace preferred activity");
         if (mPm.mContext.checkCallingOrSelfPermission(
                 android.Manifest.permission.SET_PREFERRED_APPLICATIONS)
                 != PackageManager.PERMISSION_GRANTED) {
             synchronized (mPm.mLock) {
-                // TODO: Remove lock?
-                if (mPm.snapshotComputer().getUidTargetSdkVersion(callingUid)
+                if (mPm.getUidTargetSdkVersion(callingUid)
                         < Build.VERSION_CODES.FROYO) {
                     Slog.w(TAG, "Ignoring replacePreferredActivity() from uid "
                             + Binder.getCallingUid());
@@ -297,23 +296,21 @@ final class PreferredActivityHelper {
                 }
             }
         }
-
-        // Retake a snapshot after editing with lock held
-        addPreferredActivity(mPm.snapshotComputer(), filter, match, set, activity, true, userId,
+        addPreferredActivity(filter, match, set, activity, true, userId,
                 "Replacing preferred", false);
     }
 
-    public void clearPackagePreferredActivities(@NonNull Computer snapshot, String packageName) {
+    public void clearPackagePreferredActivities(String packageName) {
         final int callingUid = Binder.getCallingUid();
-        if (snapshot.getInstantAppPackageName(callingUid) != null) {
+        if (mPm.getInstantAppPackageName(callingUid) != null) {
             return;
         }
-        final PackageStateInternal packageState = snapshot.getPackageStateInternal(packageName);
-        if (packageState == null || !snapshot.isCallerSameApp(packageName, callingUid)) {
+        final PackageStateInternal packageState = mPm.getPackageStateInternal(packageName);
+        if (packageState == null || !mPm.isCallerSameApp(packageName, callingUid)) {
             if (mPm.mContext.checkCallingOrSelfPermission(
                     android.Manifest.permission.SET_PREFERRED_APPLICATIONS)
                     != PackageManager.PERMISSION_GRANTED) {
-                if (snapshot.getUidTargetSdkVersion(callingUid)
+                if (mPm.getUidTargetSdkVersion(callingUid)
                         < Build.VERSION_CODES.FROYO) {
                     Slog.w(TAG, "Ignoring clearPackagePreferredActivities() from uid "
                             + callingUid);
@@ -323,7 +320,7 @@ final class PreferredActivityHelper {
                         android.Manifest.permission.SET_PREFERRED_APPLICATIONS, null);
             }
         }
-        if (packageState != null && snapshot.shouldFilterApplication(packageState, callingUid,
+        if (packageState != null && mPm.shouldFilterApplication(packageState, callingUid,
                 UserHandle.getUserId(callingUid))) {
             return;
         }
@@ -332,23 +329,23 @@ final class PreferredActivityHelper {
     }
 
     /** <b>must not hold {@link #PackageManagerService.mLock}</b> */
-    void updateDefaultHomeNotLocked(@NonNull Computer snapshot, SparseBooleanArray userIds) {
+    void updateDefaultHomeNotLocked(SparseBooleanArray userIds) {
         if (Thread.holdsLock(mPm.mLock)) {
             Slog.wtf(TAG, "Calling thread " + Thread.currentThread().getName()
                     + " is holding mLock", new Throwable());
         }
         for (int i = userIds.size() - 1; i >= 0; --i) {
             final int userId = userIds.keyAt(i);
-            updateDefaultHomeNotLocked(snapshot, userId);
+            updateDefaultHomeNotLocked(userId);
         }
     }
 
-    public void setHomeActivity(@NonNull Computer snapshot, ComponentName comp, int userId) {
-        if (snapshot.getInstantAppPackageName(Binder.getCallingUid()) != null) {
+    public void setHomeActivity(ComponentName comp, int userId) {
+        if (mPm.getInstantAppPackageName(Binder.getCallingUid()) != null) {
             return;
         }
         ArrayList<ResolveInfo> homeActivities = new ArrayList<>();
-        snapshot.getHomeActivitiesAsUser(homeActivities, userId);
+        mPm.getHomeActivitiesAsUser(homeActivities, userId);
 
         boolean found = false;
 
@@ -367,7 +364,7 @@ final class PreferredActivityHelper {
             throw new IllegalArgumentException("Component " + comp + " cannot be home on user "
                     + userId);
         }
-        replacePreferredActivity(snapshot, getHomeFilter(), IntentFilter.MATCH_CATEGORY_EMPTY,
+        replacePreferredActivity(getHomeFilter(), IntentFilter.MATCH_CATEGORY_EMPTY,
                 set, comp, userId);
     }
 
@@ -404,7 +401,7 @@ final class PreferredActivityHelper {
             mPm.scheduleWritePackageRestrictions(userId);
         }
         if (isHomeFilter(filter)) {
-            updateDefaultHomeNotLocked(mPm.snapshotComputer(), userId);
+            updateDefaultHomeNotLocked(userId);
         }
         mPm.postPreferredActivityChangedBroadcast(userId);
     }
@@ -420,7 +417,7 @@ final class PreferredActivityHelper {
             changed = mPm.mSettings.clearPackagePersistentPreferredActivities(packageName, userId);
         }
         if (changed) {
-            updateDefaultHomeNotLocked(mPm.snapshotComputer(), userId);
+            updateDefaultHomeNotLocked(userId);
             mPm.postPreferredActivityChangedBroadcast(userId);
             mPm.scheduleWritePackageRestrictions(userId);
         }
@@ -509,7 +506,7 @@ final class PreferredActivityHelper {
                         synchronized (mPm.mLock) {
                             mPm.mSettings.readPreferredActivitiesLPw(readParser, readUserId);
                         }
-                        updateDefaultHomeNotLocked(mPm.snapshotComputer(), readUserId);
+                        updateDefaultHomeNotLocked(readUserId);
                     });
         } catch (Exception e) {
             if (DEBUG_BACKUP) {
@@ -601,7 +598,7 @@ final class PreferredActivityHelper {
                     mPm.mPermissionManager.resetRuntimePermissions(pkg, userId);
                 }
             }
-            updateDefaultHomeNotLocked(mPm.snapshotComputer(), userId);
+            updateDefaultHomeNotLocked(userId);
             resetNetworkPolicies(userId);
             mPm.scheduleWritePackageRestrictions(userId);
         } finally {
@@ -613,11 +610,12 @@ final class PreferredActivityHelper {
         mPm.mInjector.getLocalService(NetworkPolicyManagerInternal.class).resetUserState(userId);
     }
 
-    public int getPreferredActivities(@NonNull Computer snapshot, List<IntentFilter> outFilters,
-            List<ComponentName> outActivities, String packageName) {
+    // TODO: This method should not touch the Computer directly
+    public int getPreferredActivities(List<IntentFilter> outFilters,
+            List<ComponentName> outActivities, String packageName, Computer computer) {
         List<WatchedIntentFilter> temp =
                 WatchedIntentFilter.toWatchedIntentFilterList(outFilters);
-        int result = getPreferredActivitiesInternal(snapshot, temp, outActivities, packageName);
+        int result = getPreferredActivitiesInternal(temp, outActivities, packageName, computer);
         outFilters.clear();
         for (int i = 0; i < temp.size(); i++) {
             outFilters.add(temp.get(i).getIntentFilter());
@@ -628,17 +626,16 @@ final class PreferredActivityHelper {
     /**
      * Variant that takes a {@link WatchedIntentFilter}
      */
-    private int getPreferredActivitiesInternal(@NonNull Computer snapshot,
-            List<WatchedIntentFilter> outFilters, List<ComponentName> outActivities,
-            String packageName) {
+    private int getPreferredActivitiesInternal(List<WatchedIntentFilter> outFilters,
+            List<ComponentName> outActivities, String packageName, Computer computer) {
         final int callingUid = Binder.getCallingUid();
-        if (snapshot.getInstantAppPackageName(callingUid) != null) {
+        if (mPm.getInstantAppPackageName(callingUid) != null) {
             return 0;
         }
         int num = 0;
         final int userId = UserHandle.getCallingUserId();
 
-        PreferredIntentResolver pir = snapshot.getPreferredActivities(userId);
+        PreferredIntentResolver pir = computer.getPreferredActivities(userId);
         if (pir != null) {
             final Iterator<PreferredActivity> it = pir.filterIterator();
             while (it.hasNext()) {
@@ -646,9 +643,8 @@ final class PreferredActivityHelper {
                 final String prefPackageName = pa.mPref.mComponent.getPackageName();
                 if (packageName == null
                         || (prefPackageName.equals(packageName) && pa.mPref.mAlways)) {
-                    if (snapshot.shouldFilterApplication(
-                            snapshot.getPackageStateInternal(prefPackageName), callingUid,
-                            userId)) {
+                    if (mPm.shouldFilterApplication(
+                            mPm.getPackageStateInternal(prefPackageName), callingUid, userId)) {
                         continue;
                     }
                     if (outFilters != null) {
@@ -664,8 +660,7 @@ final class PreferredActivityHelper {
         return num;
     }
 
-    public ResolveInfo findPersistentPreferredActivity(@NonNull Computer snapshot, Intent intent,
-            int userId) {
+    public ResolveInfo findPersistentPreferredActivity(Intent intent, int userId) {
         if (!UserHandle.isSameApp(Binder.getCallingUid(), Process.SYSTEM_UID)) {
             throw new SecurityException(
                     "findPersistentPreferredActivity can only be run by the system");
@@ -676,23 +671,24 @@ final class PreferredActivityHelper {
         final int callingUid = Binder.getCallingUid();
         intent = PackageManagerServiceUtils.updateIntentForResolve(intent);
         final String resolvedType = intent.resolveTypeIfNeeded(mPm.mContext.getContentResolver());
-        final long flags = snapshot.updateFlagsForResolve(
+        final long flags = mPm.updateFlagsForResolve(
                 0, userId, callingUid, false /*includeInstantApps*/,
-                snapshot.isImplicitImageCaptureIntentAndNotSetByDpc(intent, userId, resolvedType,
+                mPm.isImplicitImageCaptureIntentAndNotSetByDpcLocked(intent, userId, resolvedType,
                         0));
-        final List<ResolveInfo> query = snapshot.queryIntentActivitiesInternal(intent,
+        final List<ResolveInfo> query = mPm.snapshotComputer().queryIntentActivitiesInternal(intent,
                 resolvedType, flags, userId);
-        return snapshot.findPersistentPreferredActivity(intent, resolvedType, flags, query, false,
-                userId);
+        synchronized (mPm.mLock) {
+            return mPm.findPersistentPreferredActivityLP(intent, resolvedType, flags, query, false,
+                    userId);
+        }
     }
 
     /**
      * Variant that takes a {@link WatchedIntentFilter}
      */
-    public void setLastChosenActivity(@NonNull Computer snapshot, Intent intent,
-            String resolvedType, int flags, WatchedIntentFilter filter, int match,
-            ComponentName activity) {
-        if (snapshot.getInstantAppPackageName(Binder.getCallingUid()) != null) {
+    public void setLastChosenActivity(Intent intent, String resolvedType, int flags,
+            WatchedIntentFilter filter, int match, ComponentName activity) {
+        if (mPm.getInstantAppPackageName(Binder.getCallingUid()) != null) {
             return;
         }
         final int userId = UserHandle.getCallingUserId();
@@ -706,26 +702,25 @@ final class PreferredActivityHelper {
             filter.dump(new PrintStreamPrinter(System.out), "    ");
         }
         intent.setComponent(null);
-        final List<ResolveInfo> query = snapshot.queryIntentActivitiesInternal(intent,
+        final List<ResolveInfo> query = mPm.snapshotComputer().queryIntentActivitiesInternal(intent,
                 resolvedType, flags, userId);
         // Find any earlier preferred or last chosen entries and nuke them
-        findPreferredActivityNotLocked(snapshot, intent, resolvedType, flags, query, false, true,
-                false, userId);
+        findPreferredActivityNotLocked(
+                intent, resolvedType, flags, query, false, true, false, userId);
         // Add the new activity as the last chosen for this filter
-        addPreferredActivity(snapshot, filter, match, null, activity, false, userId,
+        addPreferredActivity(filter, match, null, activity, false, userId,
                 "Setting last chosen", false);
     }
 
-    public ResolveInfo getLastChosenActivity(@NonNull Computer snapshot, Intent intent,
-            String resolvedType, int flags) {
-        if (snapshot.getInstantAppPackageName(Binder.getCallingUid()) != null) {
+    public ResolveInfo getLastChosenActivity(Intent intent, String resolvedType, int flags) {
+        if (mPm.getInstantAppPackageName(Binder.getCallingUid()) != null) {
             return null;
         }
         final int userId = UserHandle.getCallingUserId();
         if (DEBUG_PREFERRED) Log.v(TAG, "Querying last chosen activity for " + intent);
-        final List<ResolveInfo> query = snapshot.queryIntentActivitiesInternal(intent,
+        final List<ResolveInfo> query = mPm.snapshotComputer().queryIntentActivitiesInternal(intent,
                 resolvedType, flags, userId);
-        return findPreferredActivityNotLocked(snapshot, intent, resolvedType, flags, query, false,
-                false, false, userId);
+        return findPreferredActivityNotLocked(
+                intent, resolvedType, flags, query, false, false, false, userId);
     }
 }

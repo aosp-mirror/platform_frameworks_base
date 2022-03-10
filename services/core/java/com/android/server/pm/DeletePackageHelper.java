@@ -147,7 +147,6 @@ final class DeletePackageHelper {
         final SparseArray<TempUserState> priorUserStates;
         /** enabled state of the uninstalled application */
         synchronized (mPm.mLock) {
-            final Computer computer = mPm.snapshotComputer();
             uninstalledPs = mPm.mSettings.getPackageLPr(packageName);
             if (uninstalledPs == null) {
                 Slog.w(TAG, "Not removing non-existent package " + packageName);
@@ -171,10 +170,10 @@ final class DeletePackageHelper {
             if (pkg != null) {
                 SharedLibraryInfo libraryInfo = null;
                 if (pkg.getStaticSharedLibName() != null) {
-                    libraryInfo = computer.getSharedLibraryInfo(pkg.getStaticSharedLibName(),
+                    libraryInfo = mPm.getSharedLibraryInfo(pkg.getStaticSharedLibName(),
                             pkg.getStaticSharedLibVersion());
                 } else if (pkg.getSdkLibName() != null) {
-                    libraryInfo = computer.getSharedLibraryInfo(pkg.getSdkLibName(),
+                    libraryInfo = mPm.getSharedLibraryInfo(pkg.getSdkLibName(),
                             pkg.getSdkLibVersionMajor());
                 }
 
@@ -184,7 +183,7 @@ final class DeletePackageHelper {
                             continue;
                         }
                         List<VersionedPackage> libClientPackages =
-                                computer.getPackagesUsingSharedLibrary(libraryInfo,
+                                mPm.getPackagesUsingSharedLibrary(libraryInfo,
                                         MATCH_KNOWN_PACKAGES, Process.SYSTEM_UID, currUserId);
                         if (!ArrayUtils.isEmpty(libClientPackages)) {
                             Slog.w(TAG, "Not removing package " + pkg.getManifestPackageName()
@@ -455,11 +454,11 @@ final class DeletePackageHelper {
         if (affectedUserIds == null) {
             affectedUserIds = mPm.resolveUserIds(userId);
         }
-        final Computer snapshot = mPm.snapshotComputer();
         for (final int affectedUserId : affectedUserIds) {
             if (hadSuspendAppsPermission.get(affectedUserId)) {
-                mPm.unsuspendForSuspendingPackage(snapshot, packageName, affectedUserId);
-                mPm.removeAllDistractingPackageRestrictions(snapshot, affectedUserId);
+                mPm.unsuspendForSuspendingPackage(mPm.snapshotComputer(), packageName,
+                        affectedUserId);
+                mPm.removeAllDistractingPackageRestrictions(affectedUserId);
             }
         }
 
@@ -622,8 +621,7 @@ final class DeletePackageHelper {
         final int callingUid = Binder.getCallingUid();
         mPm.mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.DELETE_PACKAGES, null);
-        final Computer snapshot = mPm.snapshotComputer();
-        final boolean canViewInstantApps = snapshot.canViewInstantApps(callingUid, userId);
+        final boolean canViewInstantApps = mPm.canViewInstantApps(callingUid, userId);
         Preconditions.checkNotNull(versionedPackage);
         Preconditions.checkNotNull(observer);
         Preconditions.checkArgumentInRange(versionedPackage.getLongVersionCode(),
@@ -646,13 +644,12 @@ final class DeletePackageHelper {
         }
 
         // Normalize package name to handle renamed packages and static libs
-        final String internalPackageName =
-                snapshot.resolveInternalPackageName(packageName, versionCode);
+        final String internalPackageName = mPm.resolveInternalPackageName(packageName, versionCode);
 
         final int uid = Binder.getCallingUid();
-        if (!isOrphaned(snapshot, internalPackageName)
+        if (!isOrphaned(internalPackageName)
                 && !allowSilentUninstall
-                && !isCallerAllowedToSilentlyUninstall(snapshot, uid, internalPackageName)) {
+                && !isCallerAllowedToSilentlyUninstall(uid, internalPackageName)) {
             mPm.mHandler.post(() -> {
                 try {
                     final Intent intent = new Intent(Intent.ACTION_UNINSTALL_PACKAGE);
@@ -683,7 +680,8 @@ final class DeletePackageHelper {
             return;
         }
 
-        if (!deleteAllUsers && snapshot.getBlockUninstallForUser(internalPackageName, userId)) {
+        if (!deleteAllUsers && mPm.mIPackageManager
+                .getBlockUninstallForUser(internalPackageName, userId)) {
             mPm.mHandler.post(() -> {
                 try {
                     observer.onPackageDeleted(packageName,
@@ -758,45 +756,44 @@ final class DeletePackageHelper {
         });
     }
 
-    private boolean isOrphaned(@NonNull Computer snapshot, String packageName) {
-        final PackageStateInternal packageState = snapshot.getPackageStateInternal(packageName);
+    private boolean isOrphaned(String packageName) {
+        final PackageStateInternal packageState = mPm.getPackageStateInternal(packageName);
         return packageState != null && packageState.getInstallSource().isOrphaned;
     }
 
-    private boolean isCallerAllowedToSilentlyUninstall(@NonNull Computer snapshot, int callingUid,
-            String pkgName) {
+    private boolean isCallerAllowedToSilentlyUninstall(int callingUid, String pkgName) {
         if (callingUid == Process.SHELL_UID || callingUid == Process.ROOT_UID
                 || UserHandle.getAppId(callingUid) == Process.SYSTEM_UID) {
             return true;
         }
         final int callingUserId = UserHandle.getUserId(callingUid);
         // If the caller installed the pkgName, then allow it to silently uninstall.
-        if (callingUid == snapshot.getPackageUid(snapshot.getInstallerPackageName(pkgName), 0,
-                callingUserId)) {
+        if (callingUid == mPm.mIPackageManager.getPackageUid(
+                mPm.mIPackageManager.getInstallerPackageName(pkgName), 0, callingUserId)) {
             return true;
         }
 
         // Allow package verifier to silently uninstall.
-        if (mPm.mRequiredVerifierPackage != null && callingUid == snapshot
+        if (mPm.mRequiredVerifierPackage != null && callingUid == mPm.mIPackageManager
                 .getPackageUid(mPm.mRequiredVerifierPackage, 0, callingUserId)) {
             return true;
         }
 
         // Allow package uninstaller to silently uninstall.
-        if (mPm.mRequiredUninstallerPackage != null && callingUid == snapshot
+        if (mPm.mRequiredUninstallerPackage != null && callingUid == mPm.mIPackageManager
                 .getPackageUid(mPm.mRequiredUninstallerPackage, 0, callingUserId)) {
             return true;
         }
 
         // Allow storage manager to silently uninstall.
-        if (mPm.mStorageManagerPackage != null && callingUid == snapshot.getPackageUid(
+        if (mPm.mStorageManagerPackage != null && callingUid == mPm.mIPackageManager.getPackageUid(
                 mPm.mStorageManagerPackage, 0, callingUserId)) {
             return true;
         }
 
         // Allow caller having MANAGE_PROFILE_AND_DEVICE_OWNERS permission to silently
         // uninstall for device owner provisioning.
-        return snapshot.checkUidPermission(MANAGE_PROFILE_AND_DEVICE_OWNERS, callingUid)
+        return mPm.mIPackageManager.checkUidPermission(MANAGE_PROFILE_AND_DEVICE_OWNERS, callingUid)
                 == PERMISSION_GRANTED;
     }
 
@@ -902,8 +899,8 @@ final class DeletePackageHelper {
         int installedForUsersCount = 0;
         synchronized (mPm.mLock) {
             // Normalize package name to handle renamed packages and static libs
-            final String internalPkgName = mPm.snapshotComputer()
-                    .resolveInternalPackageName(packageName, versionCode);
+            final String internalPkgName = mPm.resolveInternalPackageName(packageName,
+                    versionCode);
             final PackageSetting ps = mPm.mSettings.getPackageLPr(internalPkgName);
             if (ps != null) {
                 int[] installedUsers = ps.queryInstalledUsers(mUserManagerInternal.getUserIds(),
