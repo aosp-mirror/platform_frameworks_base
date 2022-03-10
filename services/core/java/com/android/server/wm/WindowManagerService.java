@@ -7163,18 +7163,42 @@ public class WindowManagerService extends IWindowManager.Stub
         private float mLatestMouseX;
         private float mLatestMouseY;
 
-        void updatePosition(float x, float y) {
+        /**
+         * The display that the pointer (mouse cursor) is currently shown on. This is updated
+         * directly by InputManagerService when the pointer display changes.
+         */
+        private int mPointerDisplayId = INVALID_DISPLAY;
+
+        /**
+         * Update the mouse cursor position as a result of a mouse movement.
+         * @return true if the position was successfully updated, false otherwise.
+         */
+        boolean updatePosition(int displayId, float x, float y) {
             synchronized (this) {
                 mLatestEventWasMouse = true;
+
+                if (displayId != mPointerDisplayId) {
+                    // The display of the position update does not match the display on which the
+                    // mouse pointer is shown, so do not update the position.
+                    return false;
+                }
                 mLatestMouseX = x;
                 mLatestMouseY = y;
+                return true;
+            }
+        }
+
+        void setPointerDisplayId(int displayId) {
+            synchronized (this) {
+                mPointerDisplayId = displayId;
             }
         }
 
         @Override
         public void onPointerEvent(MotionEvent motionEvent) {
             if (motionEvent.isFromSource(InputDevice.SOURCE_MOUSE)) {
-                updatePosition(motionEvent.getRawX(), motionEvent.getRawY());
+                updatePosition(motionEvent.getDisplayId(), motionEvent.getRawX(),
+                        motionEvent.getRawY());
             } else {
                 synchronized (this) {
                     mLatestEventWasMouse = false;
@@ -7184,6 +7208,7 @@ public class WindowManagerService extends IWindowManager.Stub
     };
 
     void updatePointerIcon(IWindow client) {
+        int pointerDisplayId;
         float mouseX, mouseY;
 
         synchronized(mMousePositionTracker) {
@@ -7192,6 +7217,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             mouseX = mMousePositionTracker.mLatestMouseX;
             mouseY = mMousePositionTracker.mLatestMouseY;
+            pointerDisplayId = mMousePositionTracker.mPointerDisplayId;
         }
 
         synchronized (mGlobalLock) {
@@ -7206,6 +7232,10 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             final DisplayContent displayContent = callingWin.getDisplayContent();
             if (displayContent == null) {
+                return;
+            }
+            if (pointerDisplayId != displayContent.getDisplayId()) {
+                // Do not let the pointer icon be updated by a window on a different display.
                 return;
             }
             WindowState windowUnderPointer =
@@ -7225,7 +7255,11 @@ public class WindowManagerService extends IWindowManager.Stub
 
     void restorePointerIconLocked(DisplayContent displayContent, float latestX, float latestY) {
         // Mouse position tracker has not been getting updates while dragging, update it now.
-        mMousePositionTracker.updatePosition(latestX, latestY);
+        if (!mMousePositionTracker.updatePosition(
+                displayContent.getDisplayId(), latestX, latestY)) {
+            // The mouse position could not be updated, so ignore this request.
+            return;
+        }
 
         WindowState windowUnderPointer =
                 displayContent.getTouchableWinAtPointLocked(latestX, latestY);
@@ -7247,6 +7281,10 @@ public class WindowManagerService extends IWindowManager.Stub
             return new PointF(mMousePositionTracker.mLatestMouseX,
                     mMousePositionTracker.mLatestMouseY);
         }
+    }
+
+    void setMousePointerDisplayId(int displayId) {
+        mMousePositionTracker.setPointerDisplayId(displayId);
     }
 
     /**

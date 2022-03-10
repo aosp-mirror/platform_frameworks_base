@@ -115,6 +115,7 @@ static struct {
     jmethodID interceptKeyBeforeDispatching;
     jmethodID dispatchUnhandledKey;
     jmethodID checkInjectEventsPermission;
+    jmethodID onPointerDisplayIdChanged;
     jmethodID onPointerDownOutsideFocus;
     jmethodID getVirtualKeyQuietTimeMillis;
     jmethodID getExcludedDeviceNames;
@@ -128,7 +129,6 @@ static struct {
     jmethodID getLongPressTimeout;
     jmethodID getPointerLayer;
     jmethodID getPointerIcon;
-    jmethodID getPointerDisplayId;
     jmethodID getKeyboardLayoutOverlay;
     jmethodID getDeviceAlias;
     jmethodID getTouchCalibrationForInputDevice;
@@ -285,6 +285,7 @@ public:
     void setFocusedDisplay(int32_t displayId);
     void setInputDispatchMode(bool enabled, bool frozen);
     void setSystemUiLightsOut(bool lightsOut);
+    void setPointerDisplayId(int32_t displayId);
     void setPointerSpeed(int32_t speed);
     void setPointerAcceleration(float acceleration);
     void setInputDeviceEnabled(uint32_t deviceId, bool enabled);
@@ -296,7 +297,6 @@ public:
     void requestPointerCapture(const sp<IBinder>& windowToken, bool enabled);
     void setCustomPointerIcon(const SpriteIcon& icon);
     void setMotionClassifierEnabled(bool enabled);
-    void notifyPointerDisplayIdChanged();
 
     /* --- InputReaderPolicyInterface implementation --- */
 
@@ -354,6 +354,7 @@ public:
             std::map<int32_t, PointerAnimation>* outAnimationResources, int32_t displayId);
     virtual int32_t getDefaultPointerIconId();
     virtual int32_t getCustomPointerIconId();
+    virtual void onPointerDisplayIdChanged(int32_t displayId, float xPos, float yPos);
 
 private:
     sp<InputManagerInterface> mInputManager;
@@ -402,7 +403,6 @@ private:
     void updateInactivityTimeoutLocked();
     void handleInterceptActions(jint wmActions, nsecs_t when, uint32_t& policyFlags);
     void ensureSpriteControllerLocked();
-    int32_t getPointerDisplayId();
     sp<SurfaceControl> getParentSurfaceForPointers(int displayId);
     static bool checkAndClearExceptionFromCallback(JNIEnv* env, const char* methodName);
 
@@ -506,13 +506,9 @@ void NativeInputManager::setDisplayViewports(JNIEnv* env, jobjectArray viewportO
         }
     }
 
-    // Get the preferred pointer controller displayId.
-    int32_t pointerDisplayId = getPointerDisplayId();
-
     { // acquire lock
         AutoMutex _l(mLock);
         mLocked.viewports = viewports;
-        mLocked.pointerDisplayId = pointerDisplayId;
         std::shared_ptr<PointerController> controller = mLocked.pointerController.lock();
         if (controller != nullptr) {
             controller->onDisplayViewportsUpdated(mLocked.viewports);
@@ -674,15 +670,12 @@ std::shared_ptr<PointerControllerInterface> NativeInputManager::obtainPointerCon
     return controller;
 }
 
-int32_t NativeInputManager::getPointerDisplayId() {
+void NativeInputManager::onPointerDisplayIdChanged(int32_t pointerDisplayId, float xPos,
+                                                   float yPos) {
     JNIEnv* env = jniEnv();
-    jint pointerDisplayId = env->CallIntMethod(mServiceObj,
-            gServiceClassInfo.getPointerDisplayId);
-    if (checkAndClearExceptionFromCallback(env, "getPointerDisplayId")) {
-        pointerDisplayId = ADISPLAY_ID_DEFAULT;
-    }
-
-    return pointerDisplayId;
+    env->CallVoidMethod(mServiceObj, gServiceClassInfo.onPointerDisplayIdChanged, pointerDisplayId,
+                        xPos, yPos);
+    checkAndClearExceptionFromCallback(env, "onPointerDisplayIdChanged");
 }
 
 sp<SurfaceControl> NativeInputManager::getParentSurfaceForPointers(int displayId) {
@@ -1038,6 +1031,22 @@ void NativeInputManager::updateInactivityTimeoutLocked() REQUIRES(mLock) {
 
     controller->setInactivityTimeout(mLocked.systemUiLightsOut ? InactivityTimeout::SHORT
                                                                : InactivityTimeout::NORMAL);
+}
+
+void NativeInputManager::setPointerDisplayId(int32_t displayId) {
+    { // acquire lock
+        AutoMutex _l(mLock);
+
+        if (mLocked.pointerDisplayId == displayId) {
+            return;
+        }
+
+        ALOGI("Setting pointer display id to %d.", displayId);
+        mLocked.pointerDisplayId = displayId;
+    } // release lock
+
+    mInputManager->getReader().requestRefreshConfiguration(
+            InputReaderConfiguration::CHANGE_DISPLAY_INFO);
 }
 
 void NativeInputManager::setPointerSpeed(int32_t speed) {
@@ -1500,18 +1509,6 @@ int32_t NativeInputManager::getCustomPointerIconId() {
 
 void NativeInputManager::setMotionClassifierEnabled(bool enabled) {
     mInputManager->getClassifier().setMotionClassifierEnabled(enabled);
-}
-
-void NativeInputManager::notifyPointerDisplayIdChanged() {
-    int32_t pointerDisplayId = getPointerDisplayId();
-
-    { // acquire lock
-        AutoMutex _l(mLock);
-        mLocked.pointerDisplayId = pointerDisplayId;
-    } // release lock
-
-    mInputManager->getReader().requestRefreshConfiguration(
-            InputReaderConfiguration::CHANGE_DISPLAY_INFO);
 }
 
 // ----------------------------------------------------------------------------
@@ -2209,11 +2206,6 @@ static void nativeNotifyPortAssociationsChanged(JNIEnv* env, jobject nativeImplO
             InputReaderConfiguration::CHANGE_DISPLAY_INFO);
 }
 
-static void nativeNotifyPointerDisplayIdChanged(JNIEnv* env, jobject nativeImplObj) {
-    NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
-    im->notifyPointerDisplayIdChanged();
-}
-
 static void nativeSetDisplayEligibilityForPointerCapture(JNIEnv* env, jobject nativeImplObj,
                                                          jint displayId, jboolean isEligible) {
     NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
@@ -2331,6 +2323,11 @@ static void nativeCancelCurrentTouch(JNIEnv* env, jobject nativeImplObj) {
     im->getInputManager()->getDispatcher().cancelCurrentTouch();
 }
 
+static void nativeSetPointerDisplayId(JNIEnv* env, jobject nativeImplObj, jint displayId) {
+    NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
+    im->setPointerDisplayId(displayId);
+}
+
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod gInputManagerMethods[] = {
@@ -2403,7 +2400,6 @@ static const JNINativeMethod gInputManagerMethods[] = {
         {"canDispatchToDisplay", "(II)Z", (void*)nativeCanDispatchToDisplay},
         {"notifyPortAssociationsChanged", "()V", (void*)nativeNotifyPortAssociationsChanged},
         {"changeUniqueIdAssociation", "()V", (void*)nativeChangeUniqueIdAssociation},
-        {"notifyPointerDisplayIdChanged", "()V", (void*)nativeNotifyPointerDisplayIdChanged},
         {"setDisplayEligibilityForPointerCapture", "(IZ)V",
          (void*)nativeSetDisplayEligibilityForPointerCapture},
         {"setMotionClassifierEnabled", "(Z)V", (void*)nativeSetMotionClassifierEnabled},
@@ -2413,6 +2409,7 @@ static const JNINativeMethod gInputManagerMethods[] = {
         {"disableSensor", "(II)V", (void*)nativeDisableSensor},
         {"flushSensor", "(II)Z", (void*)nativeFlushSensor},
         {"cancelCurrentTouch", "()V", (void*)nativeCancelCurrentTouch},
+        {"setPointerDisplayId", "(I)V", (void*)nativeSetPointerDisplayId},
 };
 
 #define FIND_CLASS(var, className) \
@@ -2508,6 +2505,9 @@ int register_android_server_InputManager(JNIEnv* env) {
     GET_METHOD_ID(gServiceClassInfo.checkInjectEventsPermission, clazz,
                   "checkInjectEventsPermission", "(II)Z");
 
+    GET_METHOD_ID(gServiceClassInfo.onPointerDisplayIdChanged, clazz, "onPointerDisplayIdChanged",
+                  "(IFF)V");
+
     GET_METHOD_ID(gServiceClassInfo.onPointerDownOutsideFocus, clazz,
             "onPointerDownOutsideFocus", "(Landroid/os/IBinder;)V");
 
@@ -2546,9 +2546,6 @@ int register_android_server_InputManager(JNIEnv* env) {
 
     GET_METHOD_ID(gServiceClassInfo.getPointerIcon, clazz,
             "getPointerIcon", "(I)Landroid/view/PointerIcon;");
-
-    GET_METHOD_ID(gServiceClassInfo.getPointerDisplayId, clazz,
-            "getPointerDisplayId", "()I");
 
     GET_METHOD_ID(gServiceClassInfo.getKeyboardLayoutOverlay, clazz,
             "getKeyboardLayoutOverlay",

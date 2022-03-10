@@ -19,7 +19,6 @@ package com.android.server.companion.virtual;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -67,7 +66,7 @@ public class InputControllerTest {
         mInputManagerMockHelper = new InputManagerMockHelper(
                 TestableLooper.get(this), mNativeWrapperMock, mIInputManagerMock);
 
-        doNothing().when(mInputManagerInternalMock).setVirtualMousePointerDisplayId(anyInt());
+        doReturn(true).when(mInputManagerInternalMock).setVirtualMousePointerDisplayId(anyInt());
         LocalServices.removeServiceForTest(InputManagerInternal.class);
         LocalServices.addService(InputManagerInternal.class, mInputManagerInternalMock);
 
