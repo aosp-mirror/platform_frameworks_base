@@ -5842,8 +5842,9 @@ public class CarrierConfigManager {
      *     <item value="source=GERAN|UTRAN, target:IWLAN, type=disallowed"/>
      *     <!-- Handover from IWLAN to 3G/4G/5G is not allowed if the device is roaming. -->
      *     <item value="source=IWLAN, target=UTRAN|EUTRAN|NGRAN, roaming=true, type=disallowed"/>
-     *     <!-- Handover from 4G to IWLAN is not allowed -->
-     *     <item value="source=EUTRAN, target=IWLAN, type=disallowed"/>
+     *     <!-- Handover from 4G to IWLAN is not allowed if the device has capability in either IMS
+     *     or EIMS-->
+     *     <item value="source=EUTRAN, target=IWLAN, type=disallowed, capabilities=IMS|EIMS"/>
      *     <!-- Handover is always allowed in any condition. -->
      *     <item value="source=GERAN|UTRAN|EUTRAN|NGRAN|IWLAN,
      *         target=GERAN|UTRAN|EUTRAN|NGRAN|IWLAN, type=allowed"/>
