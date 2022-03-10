@@ -31,7 +31,6 @@ import android.content.Context;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.SurfaceControl;
@@ -45,7 +44,9 @@ import android.widget.LinearLayout;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.R;
+import com.android.wm.shell.protolog.ShellProtoLogGroup;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -118,17 +119,24 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
     }
 
     void updateLayout(Rect updatedBounds) {
-        Log.d(TAG, "update menu layout: " + updatedBounds.toShortString());
+        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                "%s: update menu layout: %s", TAG, updatedBounds.toShortString());
         boolean previouslyVertical =
                 mCurrentBounds != null && mCurrentBounds.height() > mCurrentBounds.width();
         boolean vertical = updatedBounds.height() > updatedBounds.width();
 
         mCurrentBounds = updatedBounds;
         if (previouslyVertical == vertical) {
-            if (DEBUG) Log.d(TAG, "no update for menu layout");
+            if (DEBUG) {
+                ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                        "%s: no update for menu layout", TAG);
+            }
             return;
         } else {
-            if (DEBUG) Log.d(TAG, "change menu layout to vertical: " + vertical);
+            if (DEBUG) {
+                ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                        "%s: change menu layout to vertical: %b", TAG, vertical);
+            }
         }
 
         if (vertical) {
@@ -154,7 +162,10 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
     }
 
     void setIsExpanded(boolean expanded) {
-        if (DEBUG) Log.d(TAG, "setIsExpanded, expanded: " + expanded);
+        if (DEBUG) {
+            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: setIsExpanded, expanded: %b", TAG, expanded);
+        }
         mExpandButton.setImageResource(
                 expanded ? R.drawable.pip_ic_collapse : R.drawable.pip_ic_expand);
         mExpandButton.setTextAndDescription(
@@ -162,7 +173,10 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
     }
 
     void show(boolean inMoveMode, int gravity) {
-        if (DEBUG) Log.d(TAG, "show(), inMoveMode: " + inMoveMode);
+        if (DEBUG) {
+            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: show(), inMoveMode: %b", TAG, inMoveMode);
+        }
         if (inMoveMode) {
             showMovementHints(gravity);
         } else {
@@ -172,7 +186,9 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
     }
 
     void hide() {
-        if (DEBUG) Log.d(TAG, "hide()");
+        if (DEBUG) {
+            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE, "%s: hide()", TAG);
+        }
         animateAlphaTo(0, mActionButtonsContainer);
         animateAlphaTo(0, mMenuFrameView);
         hideMovementHints();
@@ -205,7 +221,10 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
     }
 
     void setAdditionalActions(List<RemoteAction> actions, Handler mainHandler) {
-        if (DEBUG) Log.d(TAG, "setAdditionalActions()");
+        if (DEBUG) {
+            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: setAdditionalActions()", TAG);
+        }
 
         // Make sure we exactly as many additional buttons as we have actions to display.
         final int actionsNumber = actions.size();
@@ -278,10 +297,12 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
                 try {
                     action.getActionIntent().send();
                 } catch (PendingIntent.CanceledException e) {
-                    Log.w(TAG, "Failed to send action", e);
+                    ProtoLog.w(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                            "%s: Failed to send action, %s", TAG, e);
                 }
             } else {
-                Log.w(TAG, "RemoteAction is null");
+                ProtoLog.w(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                        "%s: RemoteAction is null", TAG);
             }
         }
     }
@@ -289,8 +310,9 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
         if (DEBUG) {
-            Log.d(TAG, "dispatchKeyEvent, action: " + event.getAction()
-                    + ", keycode: " + event.getKeyCode());
+            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: dispatchKeyEvent, action: %d, keycode: %d",
+                    TAG, event.getAction(), event.getKeyCode());
         }
         if (mListener != null && event.getAction() == ACTION_UP) {
             switch (event.getKeyCode()) {
@@ -317,7 +339,10 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
      * Shows user hints for moving the PiP, e.g. arrows.
      */
     public void showMovementHints(int gravity) {
-        if (DEBUG) Log.d(TAG, "showMovementHints(), position: " + Gravity.toString(gravity));
+        if (DEBUG) {
+            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: showMovementHints(), position: %s", TAG, Gravity.toString(gravity));
+        }
 
         animateAlphaTo(checkGravity(gravity, Gravity.BOTTOM) ? 1f : 0f, mArrowUp);
         animateAlphaTo(checkGravity(gravity, Gravity.TOP) ? 1f : 0f, mArrowDown);
@@ -333,7 +358,10 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
      * Hides user hints for moving the PiP, e.g. arrows.
      */
     public void hideMovementHints() {
-        if (DEBUG) Log.d(TAG, "hideMovementHints()");
+        if (DEBUG) {
+            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: hideMovementHints()", TAG);
+        }
         animateAlphaTo(0, mArrowUp);
         animateAlphaTo(0, mArrowRight);
         animateAlphaTo(0, mArrowDown);
@@ -344,7 +372,10 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
      * Show or hide the pip user actions.
      */
     public void showMenuButtons(boolean show) {
-        if (DEBUG) Log.d(TAG, "showMenuButtons: " + show);
+        if (DEBUG) {
+            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: showMenuButtons: %b", TAG, show);
+        }
         animateAlphaTo(show ? 1 : 0, mActionButtonsContainer);
     }
 
