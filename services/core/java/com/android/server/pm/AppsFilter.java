@@ -1329,7 +1329,9 @@ public class AppsFilter implements Watchable, Snappable {
                                 + callingUid + " -> " + targetUid);
                         return true;
                     }
-                    return mShouldFilterCache.valueAt(callingIndex, targetIndex);
+                    if (!mShouldFilterCache.valueAt(callingIndex, targetIndex)) {
+                        return false;
+                    }
                 } else {
                     if (!shouldFilterApplicationInternal(
                             callingUid, callingSetting, targetPkgSetting, userId)) {
