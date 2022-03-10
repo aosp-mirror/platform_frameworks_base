@@ -27,6 +27,12 @@ public interface IndividualSensorPrivacyController extends
 
     boolean isSensorBlocked(@Sensor int sensor);
 
+    /**
+     * Returns {@code true} if the given sensor is blocked by a hardware toggle, {@code false}
+     * if the sensor is not blocked or blocked by a software toggle.
+     */
+    boolean isSensorBlockedByHardwareToggle(@Sensor int sensor);
+
     void setSensorBlocked(@Source int source, @Sensor int sensor, boolean blocked);
 
     void suppressSensorPrivacyReminders(int sensor, boolean suppress);
