@@ -112,6 +112,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
+import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.phone.BiometricUnlockController;
 import com.android.systemui.statusbar.phone.DozeParameters;
@@ -324,6 +325,7 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
     // the properties of the keyguard
 
     private final KeyguardUpdateMonitor mUpdateMonitor;
+    private final Lazy<NotificationShadeWindowController> mNotificationShadeWindowControllerLazy;
 
     /**
      * Last SIM state reported by the telephony system.
@@ -846,7 +848,8 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
             KeyguardStateController keyguardStateController,
             Lazy<KeyguardUnlockAnimationController> keyguardUnlockAnimationControllerLazy,
             UnlockedScreenOffAnimationController unlockedScreenOffAnimationController,
-            Lazy<NotificationShadeDepthController> notificationShadeDepthController) {
+            Lazy<NotificationShadeDepthController> notificationShadeDepthController,
+            Lazy<NotificationShadeWindowController> notificationShadeWindowControllerLazy) {
         super(context);
         mFalsingCollector = falsingCollector;
         mLockPatternUtils = lockPatternUtils;
@@ -862,6 +865,7 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
         mKeyguardDisplayManager = keyguardDisplayManager;
         dumpManager.registerDumpable(getClass().getName(), this);
         mDeviceConfig = deviceConfig;
+        mNotificationShadeWindowControllerLazy = notificationShadeWindowControllerLazy;
         mShowHomeOverLockscreen = mDeviceConfig.getBoolean(
                 DeviceConfig.NAMESPACE_SYSTEMUI,
                 NAV_BAR_HANDLE_SHOW_OVER_LOCKSCREEN,
@@ -1889,10 +1893,13 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
                     Trace.beginSection(
                             "KeyguardViewMediator#handleMessage START_KEYGUARD_EXIT_ANIM");
                     StartKeyguardExitAnimParams params = (StartKeyguardExitAnimParams) msg.obj;
-                    handleStartKeyguardExitAnimation(params.startTime, params.fadeoutDuration,
-                            params.mApps, params.mWallpapers, params.mNonApps,
-                            params.mFinishedCallback);
-                    mFalsingCollector.onSuccessfulUnlock();
+                    mNotificationShadeWindowControllerLazy.get().batchApplyWindowLayoutParams(
+                            () -> {
+                                handleStartKeyguardExitAnimation(params.startTime,
+                                        params.fadeoutDuration, params.mApps, params.mWallpapers,
+                                        params.mNonApps, params.mFinishedCallback);
+                                mFalsingCollector.onSuccessfulUnlock();
+                            });
                     Trace.endSection();
                     break;
                 case CANCEL_KEYGUARD_EXIT_ANIM:
@@ -2190,10 +2197,12 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
                 mKeyguardGoingAwayRunnable.run();
             } else {
                 // TODO(bc-unlock): Fill parameters
-                handleStartKeyguardExitAnimation(
-                        SystemClock.uptimeMillis() + mHideAnimation.getStartOffset(),
-                        mHideAnimation.getDuration(), null /* apps */,  null /* wallpapers */,
-                        null /* nonApps */, null /* finishedCallback */);
+                mNotificationShadeWindowControllerLazy.get().batchApplyWindowLayoutParams(() -> {
+                    handleStartKeyguardExitAnimation(
+                            SystemClock.uptimeMillis() + mHideAnimation.getStartOffset(),
+                            mHideAnimation.getDuration(), null /* apps */, null /* wallpapers */,
+                            null /* nonApps */, null /* finishedCallback */);
+                });
             }
         }
         Trace.endSection();
