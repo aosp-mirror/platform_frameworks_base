@@ -24,7 +24,6 @@ import android.os.Build
 import android.os.storage.StorageManager
 import android.util.ArrayMap
 import android.util.PackageUtils
-import com.android.internal.util.FunctionalUtils
 import com.android.server.SystemConfig.SharedLibraryEntry
 import com.android.server.compat.PlatformCompat
 import com.android.server.extendedtestutils.wheneverStatic
@@ -35,7 +34,6 @@ import com.android.server.pm.parsing.pkg.ParsedPackage
 import com.android.server.testutils.any
 import com.android.server.testutils.eq
 import com.android.server.testutils.mock
-import com.android.server.testutils.mockThrowOnUnmocked
 import com.android.server.testutils.nullable
 import com.android.server.testutils.spy
 import com.android.server.testutils.whenever
@@ -59,6 +57,7 @@ import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
+@Ignore("b/216603387")
 @RunWith(JUnit4::class)
 class SharedLibrariesImplTest {
 
@@ -85,6 +84,7 @@ class SharedLibrariesImplTest {
     private lateinit var mSharedLibrariesImpl: SharedLibrariesImpl
     private lateinit var mPms: PackageManagerService
     private lateinit var mSettings: Settings
+    private lateinit var mComputer: Computer
 
     @Mock
     private lateinit var mDeletePackageHelper: DeletePackageHelper
@@ -114,22 +114,16 @@ class SharedLibrariesImplTest {
         mSharedLibrariesImpl.setDeletePackageHelper(mDeletePackageHelper)
         addExistingSharedLibraries()
 
+        mComputer = mock {
+            whenever(sharedLibraries) { mSharedLibrariesImpl.sharedLibraries }
+            whenever(resolveInternalPackageName(anyString(), anyLong())) { arguments[0] }
+        }
+
         whenever(mSettings.getPackageLPr(any())) { mExistingSettings[arguments[0]] }
         whenever(mRule.mocks().injector.getSystemService(StorageManager::class.java))
             .thenReturn(mStorageManager)
         whenever(mStorageManager.findPathForUuid(nullable())).thenReturn(mFile)
-        doAnswer { it.arguments[0] }.`when`(mPms).resolveInternalPackageName(any(), any())
-        doAnswer {
-            mockThrowOnUnmocked<Computer> {
-                whenever(sharedLibraries) { mSharedLibrariesImpl.sharedLibraries }
-                whenever(resolveInternalPackageName(anyString(), anyLong())) {
-                    mPms.resolveInternalPackageName(getArgument(0), getArgument(1))
-                }
-                whenever(getPackageStateInternal(anyString())) {
-                    mPms.getPackageStateInternal(getArgument(0))
-                }
-            }
-        }.`when`(mPms).snapshotComputer()
+        doAnswer { mComputer }.`when`(mPms).snapshotComputer()
         whenever(mDeletePackageHelper.deletePackageX(any(), any(), any(), any(), any()))
             .thenReturn(PackageManager.DELETE_SUCCEEDED)
         whenever(mRule.mocks().injector.compatibility).thenReturn(mPlatformCompat)
@@ -189,7 +183,8 @@ class SharedLibrariesImplTest {
 
     @Test
     fun removeSharedLibrary() {
-        doAnswer { mutableListOf(VersionedPackage(CONSUMER_PACKAGE_NAME, 1L)) }.`when`(mPms)
+        doAnswer { mutableListOf(VersionedPackage(CONSUMER_PACKAGE_NAME, 1L)) }
+            .`when`(mComputer)
             .getPackagesUsingSharedLibrary(any(), any(), any(), any())
         val staticInfo = mSharedLibrariesImpl
             .getSharedLibraryInfo(STATIC_LIB_NAME, STATIC_LIB_VERSION)!!
@@ -253,7 +248,6 @@ class SharedLibrariesImplTest {
         assertThat(testPackageSetting.usesLibraryFiles).contains(builtinLibPath(BUILTIN_LIB_NAME))
     }
 
-    @Ignore("b/216603387")
     @Test
     fun updateSharedLibraries_withStaticLibPackage() {
         val testPackageSetting = mExistingSettings[STATIC_LIB_PACKAGE_NAME]!!
@@ -266,7 +260,6 @@ class SharedLibrariesImplTest {
         assertThat(testPackageSetting.usesLibraryFiles).contains(apkPath(DYNAMIC_LIB_PACKAGE_NAME))
     }
 
-    @Ignore("b/216603387")
     @Test
     fun updateSharedLibraries_withConsumerPackage() {
         val testPackageSetting = mExistingSettings[CONSUMER_PACKAGE_NAME]!!
@@ -280,7 +273,6 @@ class SharedLibrariesImplTest {
         assertThat(testPackageSetting.usesLibraryFiles).contains(apkPath(STATIC_LIB_PACKAGE_NAME))
     }
 
-    @Ignore("b/216603387")
     @Test
     fun updateAllSharedLibraries() {
         mExistingSettings.forEach {
