@@ -1664,6 +1664,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
 
     @Override
     public void hideCurrentInputMethodForBubbles() {
+        enforceStatusBarService();
         final long token = Binder.clearCallingIdentity();
         try {
             InputMethodManagerInternal.get().hideCurrentInputMethod(
