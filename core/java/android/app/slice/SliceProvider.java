@@ -452,8 +452,8 @@ public abstract class SliceProvider extends ContentProvider {
         String pkg = callingPkg != null ? callingPkg
                 : getContext().getPackageManager().getNameForUid(callingUid);
         try {
-            mSliceManager.enforceSlicePermission(sliceUri, pkg,
-                    callingPid, callingUid, mAutoGrantPermissions);
+            mSliceManager.enforceSlicePermission(sliceUri, callingPid, callingUid,
+                    mAutoGrantPermissions);
         } catch (SecurityException e) {
             return createPermissionSlice(getContext(), sliceUri, pkg);
         }

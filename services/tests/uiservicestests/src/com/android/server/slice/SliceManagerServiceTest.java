@@ -122,8 +122,7 @@ public class SliceManagerServiceTest extends UiServiceTestCase {
         when(mContextSpy.checkPermission("perm2", Process.myPid(), Process.myUid()))
                 .thenReturn(PERMISSION_GRANTED);
         mService.checkSlicePermission(TEST_URI, mContext.getPackageName(),
-                mContext.getPackageName(), Process.myPid(),
-                Process.myUid(), testPerms);
+                Process.myPid(), Process.myUid(), testPerms);
 
         verify(mContextSpy).checkPermission(eq("perm1"), eq(Process.myPid()), eq(Process.myUid()));
         verify(mContextSpy).checkPermission(eq("perm2"), eq(Process.myPid()), eq(Process.myUid()));
@@ -148,7 +147,7 @@ public class SliceManagerServiceTest extends UiServiceTestCase {
 
     private void grantSlicePermission() {
         doReturn(PERMISSION_GRANTED).when(mService).checkSlicePermission(
-                eq(TEST_URI), anyString(), anyString(), anyInt(), anyInt(), any());
+                eq(TEST_URI), anyString(), anyInt(), anyInt(), any());
         doReturn(PERMISSION_GRANTED).when(mService).checkAccess(
                 anyString(), eq(TEST_URI), anyInt(), anyInt());
     }
