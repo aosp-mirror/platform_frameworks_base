@@ -177,7 +177,7 @@ final class InitAndSystemPackageHelper {
             }
         }
         OverlayConfig overlayConfig = OverlayConfig.initializeSystemInstance(
-                consumer -> mPm.forEachPackage(mPm.snapshotComputer(),
+                consumer -> mPm.forEachPackage(
                         pkg -> consumer.accept(pkg, pkg.isSystem(),
                           apkInApexPreInstalledPaths.get(pkg.getPackageName()))));
         // Prune any system packages that no longer exist.

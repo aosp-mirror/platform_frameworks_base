@@ -466,7 +466,7 @@ public class ComputerEngine implements Computer {
 
         flags = updateFlagsForResolve(flags, userId, filterCallingUid, resolveForStart,
                 comp != null || pkgName != null /*onlyExposedExplicitly*/,
-                isImplicitImageCaptureIntentAndNotSetByDpc(intent, userId, resolvedType,
+                isImplicitImageCaptureIntentAndNotSetByDpcLocked(intent, userId, resolvedType,
                         flags));
         List<ResolveInfo> list = Collections.emptyList();
         boolean skipPostResolution = false;
@@ -1722,6 +1722,15 @@ public class ComputerEngine implements Computer {
         return mSettings.getPackage(packageName);
     }
 
+    @Nullable
+    public PackageState getPackageStateCopied(@NonNull String packageName) {
+        int callingUid = Binder.getCallingUid();
+        packageName = resolveInternalPackageNameInternalLocked(
+                packageName, PackageManager.VERSION_CODE_HIGHEST, callingUid);
+        PackageStateInternal pkgSetting = mSettings.getPackage(packageName);
+        return pkgSetting == null ? null : PackageStateImpl.copy(pkgSetting);
+    }
+
     public final ParceledListSlice<PackageInfo> getInstalledPackages(long flags, int userId) {
         final int callingUid = Binder.getCallingUid();
         if (getInstantAppPackageName(callingUid) != null) {
@@ -2459,7 +2468,7 @@ public class ComputerEngine implements Computer {
      * @return {@code true} if the intent is a camera intent and the persistent preferred
      * activity was not set by the DPC.
      */
-    public final boolean isImplicitImageCaptureIntentAndNotSetByDpc(Intent intent,
+    public final boolean isImplicitImageCaptureIntentAndNotSetByDpcLocked(Intent intent,
             int userId, String resolvedType, @PackageManager.ResolveInfoFlagsBits long flags) {
         return intent.isImplicitImageCaptureIntent() && !isPersistentPreferredActivitySetByDpm(
                 intent, userId, resolvedType, flags);
@@ -3219,12 +3228,12 @@ public class ComputerEngine implements Computer {
 
         flags = updateFlagsForResolve(
                 flags, userId, callingUid, false /*includeInstantApps*/,
-                isImplicitImageCaptureIntentAndNotSetByDpc(intent, userId,
+                isImplicitImageCaptureIntentAndNotSetByDpcLocked(intent, userId,
                         resolvedType, flags));
         intent = PackageManagerServiceUtils.updateIntentForResolve(intent);
 
         // Try to find a matching persistent preferred activity.
-        result.mPreferredResolveInfo = findPersistentPreferredActivity(intent,
+        result.mPreferredResolveInfo = findPersistentPreferredActivityLP(intent,
                 resolvedType, flags, query, debug, userId);
 
         // If a persistent preferred activity matched, use it.
@@ -3435,7 +3444,7 @@ public class ComputerEngine implements Computer {
                 userId, queryMayBeFiltered, callingUid, isDeviceProvisioned);
     }
 
-    public final ResolveInfo findPersistentPreferredActivity(Intent intent,
+    public final ResolveInfo findPersistentPreferredActivityLP(Intent intent,
             String resolvedType, @PackageManager.ResolveInfoFlagsBits long flags,
             List<ResolveInfo> query, boolean debug, int userId) {
         final int n = query.size();
@@ -5409,7 +5418,7 @@ public class ComputerEngine implements Computer {
             }
             long flags = updateFlagsForResolve(0, parent.id, callingUid,
                     false /*includeInstantApps*/,
-                    isImplicitImageCaptureIntentAndNotSetByDpc(intent, parent.id,
+                    isImplicitImageCaptureIntentAndNotSetByDpcLocked(intent, parent.id,
                             resolvedType, 0));
             flags |= PackageManager.MATCH_DEFAULT_ONLY;
             CrossProfileDomainInfo xpDomainInfo = getCrossProfileDomainPreferredLpr(
@@ -5684,18 +5693,5 @@ public class ComputerEngine implements Computer {
     @Override
     public ResolveInfo getInstantAppInstallerInfo() {
         return mInstantAppInstallerInfo;
-    }
-
-    @NonNull
-    @Override
-    public WatchedArrayMap<String, Integer> getFrozenPackages() {
-        return mFrozenPackages;
-    }
-
-    @Nullable
-    @Override
-    public ComponentName getInstantAppInstallerComponent() {
-        return mLocalInstantAppInstallerActivity == null
-                ? null : mLocalInstantAppInstallerActivity.getComponentName();
     }
 }
