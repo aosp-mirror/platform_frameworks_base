@@ -760,7 +760,12 @@ public final class TvInteractiveAppManager {
     }
 
     /**
-     * Registers app link info.
+     * Registers an Android application link info record which can be used to launch the specific
+     * Android application by TV interactive App RTE.
+     *
+     * @param tvIAppServiceId The ID of TV interactive service which the command to be sent to. The
+     *                        ID can be found in {@link TvInputInfo#getId()}.
+     * @param appLinkInfo The Android application link info record to be registered.
      */
     public void registerAppLinkInfo(
             @NonNull String tvIAppServiceId, @NonNull AppLinkInfo appLinkInfo) {
@@ -772,7 +777,12 @@ public final class TvInteractiveAppManager {
     }
 
     /**
-     * Unregisters app link info.
+     * Unregisters an Android application link info record which can be used to launch the specific
+     * Android application by TV interactive App RTE.
+     *
+     * @param tvIAppServiceId The ID of TV interactive service which the command to be sent to. The
+     *                        ID can be found in {@link TvInputInfo#getId()}.
+     * @param appLinkInfo The Android application link info record to be unregistered.
      */
     public void unregisterAppLinkInfo(
             @NonNull String tvIAppServiceId, @NonNull AppLinkInfo appLinkInfo) {

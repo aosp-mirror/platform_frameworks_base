@@ -244,13 +244,13 @@ public abstract class TvInteractiveAppService extends Service {
     public abstract void onPrepare(@TvInteractiveAppInfo.InteractiveAppType int type);
 
     /**
-     * Registers App link info.
+     * Called when a request to register an Android application link info record is received.
      */
     public void onRegisterAppLinkInfo(@NonNull AppLinkInfo appLinkInfo) {
     }
 
     /**
-     * Unregisters App link info.
+     * Called when a request to unregister an Android application link info record is received.
      */
     public void onUnregisterAppLinkInfo(@NonNull AppLinkInfo appLinkInfo) {
     }
