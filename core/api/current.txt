@@ -142,7 +142,7 @@ package android {
     field @Deprecated public static final String READ_INPUT_STATE = "android.permission.READ_INPUT_STATE";
     field public static final String READ_LOGS = "android.permission.READ_LOGS";
     field public static final String READ_MEDIA_AUDIO = "android.permission.READ_MEDIA_AUDIO";
-    field public static final String READ_MEDIA_IMAGE = "android.permission.READ_MEDIA_IMAGE";
+    field public static final String READ_MEDIA_IMAGES = "android.permission.READ_MEDIA_IMAGES";
     field public static final String READ_MEDIA_VIDEO = "android.permission.READ_MEDIA_VIDEO";
     field public static final String READ_NEARBY_STREAMING_POLICY = "android.permission.READ_NEARBY_STREAMING_POLICY";
     field public static final String READ_PHONE_NUMBERS = "android.permission.READ_PHONE_NUMBERS";
