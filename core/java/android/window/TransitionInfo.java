@@ -344,7 +344,7 @@ public final class TransitionInfo implements Parcelable {
             if (parentChg.getMode() != TRANSIT_CHANGE) return false;
 
             // If there are no more parents left, then all the parents, so far, have not been
-            // visibility changes which means this change is indpendent.
+            // visibility changes which means this change is independent.
             if (parentChg.getParent() == null) return true;
 
             parentChg = info.getChange(parentChg.getParent());

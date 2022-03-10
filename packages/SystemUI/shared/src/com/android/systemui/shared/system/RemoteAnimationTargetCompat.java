@@ -32,6 +32,7 @@ import android.app.WindowConfiguration;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.util.ArrayMap;
+import android.util.IntArray;
 import android.util.SparseArray;
 import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
@@ -269,6 +270,7 @@ public class RemoteAnimationTargetCompat {
             SurfaceControl.Transaction t, ArrayMap<SurfaceControl, SurfaceControl> leashMap) {
         final ArrayList<RemoteAnimationTargetCompat> out = new ArrayList<>();
         final SparseArray<RemoteAnimationTargetCompat> childTaskTargets = new SparseArray<>();
+        final IntArray excludedParentTaskIds = new IntArray();
         for (int i = 0; i < info.getChanges().size(); i++) {
             final TransitionInfo.Change change = info.getChanges().get(i);
             final boolean changeIsWallpaper =
@@ -282,22 +284,40 @@ public class RemoteAnimationTargetCompat {
             }
             final ActivityManager.RunningTaskInfo taskInfo = change.getTaskInfo();
             if (taskInfo != null) {
-                if (taskInfo.parentTaskId != -1) {
-                    // Cache child task targets to override its parent target later and exclude
-                    // child task while wrapping up animate targets. Otherwise the child task might
-                    // get transformed twice with the flow like RecentsView#redrawLiveTile.
-                    childTaskTargets.put(taskInfo.parentTaskId, targetCompat);
+                // Skip wrapping excluded parent task animate target since it will animate its child
+                // tasks instead.
+                if (excludedParentTaskIds.binarySearch(taskInfo.taskId) != -1) {
                     continue;
                 }
 
-                final RemoteAnimationTargetCompat childTaskTarget =
-                        childTaskTargets.get(taskInfo.taskId);
+                // Check if there's a matching child task target in cache.
+                RemoteAnimationTargetCompat childTaskTarget = childTaskTargets.get(taskInfo.taskId);
                 if (childTaskTarget != null) {
-                    // Launcher monitors leaf tasks to perform animation, hence override the parent
-                    // task target with child task info so Launcher can locate and animate root
-                    // surface directly with leaf task information.
+                    // Launcher monitors leaf task ids to perform animation, override the target
+                    // with its child task information so Launcher can animate this parent surface
+                    // directly with leaf task information.
                     targetCompat.taskInfo = childTaskTarget.taskInfo;
                     targetCompat.taskId = childTaskTarget.taskId;
+                    childTaskTargets.remove(taskInfo.taskId);
+                }
+
+                // Check if it has a parent task, cache its information for later use.
+                if (taskInfo.parentTaskId != -1
+                        && excludedParentTaskIds.binarySearch(taskInfo.parentTaskId) == -1) {
+                    if (!childTaskTargets.contains(taskInfo.parentTaskId)) {
+                        // Cache the target amd skip wrapping it info the final animation targets.
+                        // Otherwise, the child task might get transformed multiple-times with the
+                        // flow like RecentsView#redrawLiveTile.
+                        childTaskTargets.put(taskInfo.parentTaskId, targetCompat);
+                        continue;
+                    }
+
+                    // There is another child task target cached with the same parent task id.
+                    // Which means the parent having multiple child tasks in transition. Stop
+                    // propagate child task info.
+                    childTaskTarget = childTaskTargets.removeReturnOld(taskInfo.parentTaskId);
+                    out.add(childTaskTarget);
+                    excludedParentTaskIds.add(taskInfo.parentTaskId);
                 }
             }
 
