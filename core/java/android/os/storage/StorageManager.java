@@ -82,7 +82,6 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.MediaStore;
 import android.provider.Settings;
-import android.sysprop.VoldProperties;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
@@ -1636,10 +1635,7 @@ public class StorageManager {
      *         false not encrypted or file encrypted
      */
     public static boolean isBlockEncrypted() {
-        if (!isEncrypted()) {
-            return false;
-        }
-        return RoSystemProperties.CRYPTO_BLOCK_ENCRYPTED;
+        return false;
     }
 
     /** {@hide}
@@ -1649,18 +1645,7 @@ public class StorageManager {
      *         false not encrypted, file encrypted or default block encrypted
      */
     public static boolean isNonDefaultBlockEncrypted() {
-        if (!isBlockEncrypted()) {
-            return false;
-        }
-
-        try {
-            IStorageManager storageManager = IStorageManager.Stub.asInterface(
-                    ServiceManager.getService("mount"));
-            return storageManager.getPasswordType() != CRYPT_TYPE_DEFAULT;
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error getting encryption type");
-            return false;
-        }
+        return false;
     }
 
     /** {@hide}
@@ -1674,8 +1659,7 @@ public class StorageManager {
      * framework, so no service needs to check for changes during their lifespan
      */
     public static boolean isBlockEncrypting() {
-        final String state = VoldProperties.encrypt_progress().orElse("");
-        return !"".equalsIgnoreCase(state);
+        return false;
     }
 
     /** {@hide}
@@ -1690,8 +1674,7 @@ public class StorageManager {
      * framework, so no service needs to check for changes during their lifespan
      */
     public static boolean inCryptKeeperBounce() {
-        final String status = VoldProperties.decrypt().orElse("");
-        return "trigger_restart_min_framework".equals(status);
+        return false;
     }
 
     /** {@hide} */
