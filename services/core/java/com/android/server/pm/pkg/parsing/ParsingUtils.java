@@ -50,6 +50,7 @@ public class ParsingUtils {
     public static final String ANDROID_RES_NAMESPACE = "http://schemas.android.com/apk/res/android";
 
     public static final int DEFAULT_MIN_SDK_VERSION = 1;
+    public static final int DEFAULT_MAX_SDK_VERSION = Integer.MAX_VALUE;
     public static final int DEFAULT_TARGET_SDK_VERSION = 0;
 
     public static final int NOT_SET = -1;
