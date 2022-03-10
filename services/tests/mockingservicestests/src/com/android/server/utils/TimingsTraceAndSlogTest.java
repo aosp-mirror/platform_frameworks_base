@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 The Android Open Source Project
+ * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.util;
+package com.android.server.utils;
 
 import static android.os.Trace.TRACE_TAG_APP;
 
@@ -30,6 +30,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 
 import android.os.Trace;
+import android.util.Slog;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -46,13 +47,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Tests for {@link TimingsTraceLog}.
+ * Tests for {@link TimingsTraceAndSlog}.
  *
- * <p>Usage: {@code atest FrameworksMockingCoreTests:android.util.TimingsTraceLogTest}
+ * <p>Usage: {@code atest FrameworksMockingServicesTests:TimingsTraceAndSlogTest}
  */
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class TimingsTraceLogTest {
+public class TimingsTraceAndSlogTest {
 
     private static final String TAG = "TEST";
 
@@ -73,7 +74,7 @@ public class TimingsTraceLogTest {
 
     @Test
     public void testDifferentThreads() throws Exception {
-        TimingsTraceLog log = new TimingsTraceLog(TAG, TRACE_TAG_APP);
+        TimingsTraceAndSlog log = new TimingsTraceAndSlog(TAG, TRACE_TAG_APP);
         // Should be able to log on the same thread
         log.traceBegin("test");
         log.traceEnd();
@@ -91,7 +92,7 @@ public class TimingsTraceLogTest {
             } catch (IllegalStateException expected) {
             }
             // Verify that creating a new log will work
-            TimingsTraceLog log2 = new TimingsTraceLog(TAG, TRACE_TAG_APP);
+            TimingsTraceAndSlog log2 = new TimingsTraceAndSlog(TAG, TRACE_TAG_APP);
             log2.traceBegin("test");
             log2.traceEnd();
 
@@ -103,7 +104,7 @@ public class TimingsTraceLogTest {
 
     @Test
     public void testGetUnfinishedTracesForDebug() {
-        TimingsTraceLog log = new TimingsTraceLog("TEST", Trace.TRACE_TAG_APP);
+        TimingsTraceAndSlog log = new TimingsTraceAndSlog(TAG, TRACE_TAG_APP);
         assertThat(log.getUnfinishedTracesForDebug()).isEmpty();
 
         log.traceBegin("One");
@@ -121,14 +122,14 @@ public class TimingsTraceLogTest {
 
     @Test
     public void testLogDuration() throws Exception {
-        TimingsTraceLog log = new TimingsTraceLog(TAG, TRACE_TAG_APP, 10);
+        TimingsTraceAndSlog log = new TimingsTraceAndSlog(TAG, TRACE_TAG_APP);
         log.logDuration("logro", 42);
         verify((MockedVoidMethod) () -> Slog.v(eq(TAG), contains("logro took to complete: 42ms")));
     }
 
     @Test
     public void testOneLevel() throws Exception {
-        TimingsTraceLog log = new TimingsTraceLog(TAG, TRACE_TAG_APP, 10);
+        TimingsTraceAndSlog log = new TimingsTraceAndSlog(TAG, TRACE_TAG_APP);
         log.traceBegin("test");
         log.traceEnd();
 
@@ -139,7 +140,7 @@ public class TimingsTraceLogTest {
 
     @Test
     public void testMultipleLevels() throws Exception {
-        TimingsTraceLog log = new TimingsTraceLog(TAG, Trace.TRACE_TAG_APP, 10);
+        TimingsTraceAndSlog log = new TimingsTraceAndSlog(TAG, TRACE_TAG_APP);
         log.traceBegin("L1");
         log.traceBegin("L2");
         log.traceEnd();
@@ -154,34 +155,8 @@ public class TimingsTraceLogTest {
     }
 
     @Test
-    public void testTooManyLevels() throws Exception {
-        TimingsTraceLog log = new TimingsTraceLog(TAG, Trace.TRACE_TAG_APP, 2);
-
-        log.traceBegin("L1"); // ok
-        log.traceBegin("L2"); // ok
-        log.traceBegin("L3"); // logging ignored ( > 2)
-
-        log.traceEnd();
-        log.traceEnd();
-        log.traceEnd();
-
-        verify((MockedVoidMethod) () -> Trace.traceBegin(TRACE_TAG_APP, "L1"));
-        verify((MockedVoidMethod) () -> Trace.traceBegin(TRACE_TAG_APP, "L2"));
-        verify((MockedVoidMethod) () -> Trace.traceBegin(TRACE_TAG_APP, "L3"));
-        verify((MockedVoidMethod) () -> Trace.traceEnd(TRACE_TAG_APP), times(3));
-
-        verify((MockedVoidMethod) () -> Slog.v(eq(TAG), matches("L2 took to complete: \\d+ms")));
-        verify((MockedVoidMethod) () -> Slog.v(eq(TAG), matches("L1 took to complete: \\d+ms")));
-        verify((MockedVoidMethod) () -> Slog.v(eq(TAG), matches("L3 took to complete: \\d+ms")),
-                never());
-
-        verify((MockedVoidMethod) () -> Slog.w(TAG, "not tracing duration of 'L3' "
-                + "because already reached 2 levels"));
-    }
-
-    @Test
     public void testEndNoBegin() throws Exception {
-        TimingsTraceLog log = new TimingsTraceLog(TAG, TRACE_TAG_APP);
+        TimingsTraceAndSlog log = new TimingsTraceAndSlog(TAG, TRACE_TAG_APP);
         log.traceEnd();
         verify((MockedVoidMethod) () -> Trace.traceEnd(TRACE_TAG_APP));
         verify((MockedVoidMethod) () -> Slog.d(eq(TAG), anyString()), never());
