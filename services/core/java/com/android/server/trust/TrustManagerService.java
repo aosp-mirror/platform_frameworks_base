@@ -715,7 +715,7 @@ public class TrustManagerService extends SystemService {
                     (disabledFeatures & DevicePolicyManager.KEYGUARD_DISABLE_TRUST_AGENTS) != 0;
 
             List<ComponentName> enabledAgents = lockPatternUtils.getEnabledTrustAgents(userInfo.id);
-            if (enabledAgents == null) {
+            if (enabledAgents.isEmpty()) {
                 if (DEBUG) Slog.d(TAG, "refreshAgentList: skipping user " + userInfo.id
                         + ": no agents enabled by user");
                 continue;
@@ -1080,9 +1080,7 @@ public class TrustManagerService extends SystemService {
         }
 
         List<ComponentName> previouslyEnabledAgents = utils.getEnabledTrustAgents(userId);
-        if (previouslyEnabledAgents != null) {
-            discoveredAgents.addAll(previouslyEnabledAgents);
-        }
+        discoveredAgents.addAll(previouslyEnabledAgents);
         utils.setEnabledTrustAgents(discoveredAgents, userId);
         Settings.Secure.putIntForUser(mContext.getContentResolver(),
                 Settings.Secure.TRUST_AGENTS_INITIALIZED, 1, userId);
