@@ -16,7 +16,6 @@
 
 package com.android.server.pm;
 
-import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.IIntentReceiver;
 import android.os.Bundle;
@@ -31,9 +30,9 @@ interface PackageSender {
             Bundle extras, int flags, String targetPkg,
             IIntentReceiver finishedReceiver, int[] userIds, int[] instantUserIds,
             @Nullable SparseArray<int[]> broadcastAllowList, @Nullable Bundle bOptions);
-    void sendPackageAddedForNewUsers(@NonNull Computer snapshot, String packageName,
-            boolean sendBootCompleted, boolean includeStopped, int appId, int[] userIds,
-            int[] instantUserIds, int dataLoaderType);
+    void sendPackageAddedForNewUsers(String packageName, boolean sendBootCompleted,
+            boolean includeStopped, int appId, int[] userIds, int[] instantUserIds,
+            int dataLoaderType);
     void notifyPackageAdded(String packageName, int uid);
     void notifyPackageChanged(String packageName, int uid);
     void notifyPackageRemoved(String packageName, int uid);

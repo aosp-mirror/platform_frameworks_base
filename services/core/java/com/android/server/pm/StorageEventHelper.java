@@ -26,13 +26,13 @@ import static com.android.server.pm.PackageManagerService.SCAN_INITIAL;
 import static com.android.server.pm.PackageManagerService.TAG;
 import static com.android.server.pm.PackageManagerServiceUtils.logCriticalInfo;
 
-import android.annotation.NonNull;
 import android.app.ResourcesManager;
 import android.content.IIntentReceiver;
 import android.content.pm.PackageManager;
 import android.content.pm.PackagePartitions;
 import android.content.pm.UserInfo;
 import android.content.pm.VersionedPackage;
+import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
 import android.os.Environment;
 import android.os.FileUtils;
 import android.os.UserHandle;
@@ -48,7 +48,6 @@ import android.util.Slog;
 import com.android.internal.policy.AttributeCache;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageStateInternal;
-import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -79,7 +78,7 @@ public final class StorageEventHelper extends StorageEventListener {
                 // Clean up any users or apps that were removed or recreated
                 // while this volume was missing
                 mPm.mUserManager.reconcileUsers(volumeUuid);
-                reconcileApps(mPm.snapshotComputer(), volumeUuid);
+                reconcileApps(volumeUuid);
 
                 // Clean up any install sessions that expired or were
                 // cancelled while this volume was missing
@@ -300,8 +299,8 @@ public final class StorageEventHelper extends StorageEventListener {
      * aren't expected, either due to uninstallation or reinstallation on
      * another volume.
      */
-    public void reconcileApps(@NonNull Computer snapshot, String volumeUuid) {
-        List<String> absoluteCodePaths = collectAbsoluteCodePaths(snapshot);
+    public void reconcileApps(String volumeUuid) {
+        List<String> absoluteCodePaths = collectAbsoluteCodePaths();
         List<File> filesToDelete = null;
 
         final File[] files = FileUtils.listFilesOrEmpty(
@@ -346,10 +345,10 @@ public final class StorageEventHelper extends StorageEventListener {
         }
     }
 
-    private List<String> collectAbsoluteCodePaths(@NonNull Computer snapshot) {
+    private List<String> collectAbsoluteCodePaths() {
         List<String> codePaths = new ArrayList<>();
         final ArrayMap<String, ? extends PackageStateInternal> packageStates =
-                snapshot.getPackageStates();
+                mPm.getPackageStates();
         final int packageCount = packageStates.size();
         for (int i = 0; i < packageCount; i++) {
             final PackageStateInternal ps = packageStates.valueAt(i);
