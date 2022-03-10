@@ -283,6 +283,12 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
 
     public void disconnect() {
         synchronized (mProfileLock) {
+            if (getGroupId() != BluetoothCsipSetCoordinator.GROUP_ID_INVALID) {
+                for (CachedBluetoothDevice member : getMemberDevice()) {
+                    Log.d(TAG, "Disconnect the member(" + member.getAddress() + ")");
+                    member.disconnect();
+                }
+            }
             mDevice.disconnect();
         }
         // Disconnect  PBAP server in case its connected
@@ -397,6 +403,12 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
             }
 
             mDevice.connect();
+            if (getGroupId() != BluetoothCsipSetCoordinator.GROUP_ID_INVALID) {
+                for (CachedBluetoothDevice member : getMemberDevice()) {
+                    Log.d(TAG, "connect the member(" + member.getAddress() + ")");
+                    member.connect();
+                }
+            }
         }
     }
 
