@@ -97,5 +97,6 @@ private fun faceModel(user: Int) = KeyguardFaceListenModel(
     primaryUser = false,
     scanningAllowedByStrongAuth = false,
     secureCameraLaunched = false,
-    switchingUser = false
+    switchingUser = false,
+    udfpsBouncerShowing = false
 )
