@@ -2881,8 +2881,7 @@ public class CentralSurfaces extends CoreStartable implements
     }
 
     boolean updateIsKeyguard(boolean forceStateChange) {
-        boolean wakeAndUnlocking = mBiometricUnlockController.getMode()
-                == BiometricUnlockController.MODE_WAKE_AND_UNLOCK;
+        boolean wakeAndUnlocking = mBiometricUnlockController.isWakeAndUnlock();
 
         // For dozing, keyguard needs to be shown whenever the device is non-interactive. Otherwise
         // there's no surface we can show to the user. Note that the device goes fully interactive
@@ -2892,7 +2891,7 @@ public class CentralSurfaces extends CoreStartable implements
                 && (!mDeviceInteractive || (isGoingToSleep()
                     && (isScreenFullyOff()
                         || (mKeyguardStateController.isShowing() && !isOccluded()))));
-        boolean isWakingAndOccluded = isOccluded() && isWaking();
+        boolean isWakingAndOccluded = isOccluded() && isWakingOrAwake();
         boolean shouldBeKeyguard = (mStatusBarStateController.isKeyguardRequested()
                 || keyguardForDozing) && !wakeAndUnlocking && !isWakingAndOccluded;
         if (keyguardForDozing) {
@@ -3076,7 +3075,6 @@ public class CentralSurfaces extends CoreStartable implements
         mMessageRouter.cancelMessages(MSG_LAUNCH_TRANSITION_TIMEOUT);
         releaseGestureWakeLock();
         mNotificationPanelViewController.onAffordanceLaunchEnded();
-        mNotificationPanelViewController.cancelAnimation();
         mNotificationPanelViewController.resetAlpha();
         mNotificationPanelViewController.resetTranslation();
         mNotificationPanelViewController.resetViewGroupFade();
@@ -3702,8 +3700,9 @@ public class CentralSurfaces extends CoreStartable implements
                 == WakefulnessLifecycle.WAKEFULNESS_GOING_TO_SLEEP;
     }
 
-    boolean isWaking() {
-        return mWakefulnessLifecycle.getWakefulness() == WakefulnessLifecycle.WAKEFULNESS_WAKING;
+    boolean isWakingOrAwake() {
+        return mWakefulnessLifecycle.getWakefulness() == WakefulnessLifecycle.WAKEFULNESS_WAKING
+                || mWakefulnessLifecycle.getWakefulness() == WakefulnessLifecycle.WAKEFULNESS_AWAKE;
     }
 
     public void notifyBiometricAuthModeChanged() {
