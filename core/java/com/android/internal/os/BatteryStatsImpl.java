@@ -546,9 +546,9 @@ public class BatteryStatsImpl extends BatteryStats {
                 final LongArrayMultiStateCounter onBatteryScreenOffCounter =
                         u.getProcStateScreenOffTimeCounter().getCounter();
 
-                if (uid == parentUid) {
-                    mKernelSingleUidTimeReader.addDelta(uid, onBatteryCounter, timestampMs);
-                    mKernelSingleUidTimeReader.addDelta(uid, onBatteryScreenOffCounter,
+                if (uid == parentUid || Process.isSdkSandboxUid(uid)) {
+                    mKernelSingleUidTimeReader.addDelta(parentUid, onBatteryCounter, timestampMs);
+                    mKernelSingleUidTimeReader.addDelta(parentUid, onBatteryScreenOffCounter,
                             timestampMs);
                 } else {
                     Uid.ChildUid childUid = u.getChildUid(uid);
@@ -4753,7 +4753,10 @@ public class BatteryStatsImpl extends BatteryStats {
         mIsolatedUidRefCounts.put(uid, refCount + 1);
     }
 
-    public int mapUid(int uid) {
+    private int mapUid(int uid) {
+        if (Process.isSdkSandboxUid(uid)) {
+            return Process.getAppUidForSdkSandboxUid(uid);
+        }
         int isolated = mIsolatedUids.get(uid, -1);
         return isolated > 0 ? isolated : uid;
     }
@@ -4849,16 +4852,18 @@ public class BatteryStatsImpl extends BatteryStats {
             long elapsedRealtimeMs, long uptimeMs) {
         int parentUid = mapUid(uid);
         if (uid != parentUid) {
-            // Isolated UIDs process state is already rolled up into parent, so no need to track
-            // Otherwise the parent's process state will get downgraded incorrectly
-            return;
+            if (Process.isIsolated(uid)) {
+                // Isolated UIDs process state is already rolled up into parent, so no need to track
+                // Otherwise the parent's process state will get downgraded incorrectly
+                return;
+            }
         }
         // TODO(b/155216561): It is possible for isolated uids to be in a higher
         // state than its parent uid. We should track the highest state within the union of host
         // and isolated uids rather than only the parent uid.
         FrameworkStatsLog.write(FrameworkStatsLog.UID_PROCESS_STATE_CHANGED, uid,
                 ActivityManager.processStateAmToProto(state));
-        getUidStatsLocked(uid, elapsedRealtimeMs, uptimeMs)
+        getUidStatsLocked(parentUid, elapsedRealtimeMs, uptimeMs)
                 .updateUidProcessStateLocked(state, elapsedRealtimeMs, uptimeMs);
     }
 
@@ -16259,6 +16264,9 @@ public class BatteryStatsImpl extends BatteryStats {
     public Uid getUidStatsLocked(int uid, long elapsedRealtimeMs, long uptimeMs) {
         Uid u = mUidStats.get(uid);
         if (u == null) {
+            if (Process.isSdkSandboxUid(uid)) {
+                Log.wtf(TAG, "Tracking an SDK Sandbox UID");
+            }
             u = new Uid(this, uid, elapsedRealtimeMs, uptimeMs);
             mUidStats.put(uid, u);
         }
