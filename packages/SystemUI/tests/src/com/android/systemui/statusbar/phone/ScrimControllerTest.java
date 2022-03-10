@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.phone;
 
-import static com.android.systemui.statusbar.phone.ScrimController.KEYGUARD_SCRIM_ALPHA;
 import static com.android.systemui.statusbar.phone.ScrimController.OPAQUE;
 import static com.android.systemui.statusbar.phone.ScrimController.SEMI_TRANSPARENT;
 import static com.android.systemui.statusbar.phone.ScrimController.TRANSPARENT;
@@ -1263,17 +1262,34 @@ public class ScrimControllerTest extends SysuiTestCase {
 
         mScrimController.setClipsQsScrim(true);
         float progress = 0.5f;
-        mScrimController.setTransitionToFullShadeProgress(progress);
+        float lsNotifProgress = 0.3f;
+        mScrimController.setTransitionToFullShadeProgress(progress, lsNotifProgress);
         assertEquals(MathUtils.lerp(keyguardAlpha, shadeLockedAlpha, progress),
                 mNotificationsScrim.getViewAlpha(), 0.2);
         progress = 0.0f;
-        mScrimController.setTransitionToFullShadeProgress(progress);
+        mScrimController.setTransitionToFullShadeProgress(progress, lsNotifProgress);
         assertEquals(MathUtils.lerp(keyguardAlpha, shadeLockedAlpha, progress),
                 mNotificationsScrim.getViewAlpha(), 0.2);
         progress = 1.0f;
-        mScrimController.setTransitionToFullShadeProgress(progress);
+        mScrimController.setTransitionToFullShadeProgress(progress, lsNotifProgress);
         assertEquals(MathUtils.lerp(keyguardAlpha, shadeLockedAlpha, progress),
                 mNotificationsScrim.getViewAlpha(), 0.2);
+    }
+
+    @Test
+    public void notificationTransparency_followsNotificationScrimProgress() {
+        mScrimController.transitionTo(ScrimState.SHADE_LOCKED);
+        mScrimController.setRawPanelExpansionFraction(1.0f);
+        finishAnimationsImmediately();
+        mScrimController.transitionTo(ScrimState.KEYGUARD);
+        mScrimController.setRawPanelExpansionFraction(1.0f);
+        finishAnimationsImmediately();
+
+        float progress = 0.5f;
+        float notifProgress = 0.3f;
+        mScrimController.setTransitionToFullShadeProgress(progress, notifProgress);
+
+        assertThat(mNotificationsScrim.getViewAlpha()).isEqualTo(notifProgress);
     }
 
     private void assertAlphaAfterExpansion(ScrimView scrim, float expectedAlpha, float expansion) {

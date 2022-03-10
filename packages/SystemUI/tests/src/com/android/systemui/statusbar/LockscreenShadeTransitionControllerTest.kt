@@ -1,5 +1,6 @@
 package com.android.systemui.statusbar
 
+import org.mockito.Mockito.`when` as whenever
 import android.test.suitebuilder.annotation.SmallTest
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
@@ -18,11 +19,11 @@ import com.android.systemui.statusbar.notification.row.NotificationTestHelper
 import com.android.systemui.statusbar.notification.stack.AmbientState
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
+import com.android.systemui.statusbar.phone.CentralSurfaces
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.phone.LSShadeTransitionLogger
 import com.android.systemui.statusbar.phone.NotificationPanelViewController
 import com.android.systemui.statusbar.phone.ScrimController
-import com.android.systemui.statusbar.phone.CentralSurfaces
 import com.android.systemui.statusbar.policy.FakeConfigurationController
 import org.junit.After
 import org.junit.Assert.assertFalse
@@ -37,14 +38,13 @@ import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.ArgumentMatchers.anyFloat
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.anyLong
+import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnit
-import org.mockito.Mockito.`when` as whenever
-import org.mockito.ArgumentMatchers.eq
 
 private fun <T> anyObject(): T {
     return Mockito.anyObject<T>()
@@ -231,7 +231,7 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
         transitionController.dragDownAmount = 10f
         verify(nsslController, never()).setTransitionToFullShadeAmount(anyFloat(), anyFloat())
         verify(mediaHierarchyManager, never()).setTransitionToFullShadeAmount(anyFloat())
-        verify(scrimController, never()).setTransitionToFullShadeProgress(anyFloat())
+        verify(scrimController, never()).setTransitionToFullShadeProgress(anyFloat(), anyFloat())
         verify(notificationPanelController, never()).setTransitionToFullShadeAmount(anyFloat(),
                 anyBoolean(), anyLong())
         verify(qS, never()).setTransitionToFullShadeAmount(anyFloat(), anyFloat())
@@ -242,7 +242,7 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
         transitionController.dragDownAmount = 10f
         verify(nsslController).setTransitionToFullShadeAmount(anyFloat(), anyFloat())
         verify(mediaHierarchyManager).setTransitionToFullShadeAmount(anyFloat())
-        verify(scrimController).setTransitionToFullShadeProgress(anyFloat())
+        verify(scrimController).setTransitionToFullShadeProgress(anyFloat(), anyFloat())
         verify(notificationPanelController).setTransitionToFullShadeAmount(anyFloat(),
                 anyBoolean(), anyLong())
         verify(qS).setTransitionToFullShadeAmount(anyFloat(), anyFloat())
@@ -311,6 +311,75 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
     }
 
     @Test
+    fun setDragAmount_setsScrimProgressBasedOnScrimDistance() {
+        val distance = 10
+        context.orCreateTestableResources
+                .addOverride(R.dimen.lockscreen_shade_scrim_transition_distance, distance)
+        configurationController.notifyConfigurationChanged()
+
+        transitionController.dragDownAmount = 5f
+
+        verify(scrimController).transitionToFullShadeProgress(
+                progress = eq(0.5f),
+                lockScreenNotificationsProgress = anyFloat()
+        )
+    }
+
+    @Test
+    fun setDragAmount_setsNotificationsScrimProgressBasedOnNotificationsScrimDistanceAndDelay() {
+        val distance = 100
+        val delay = 10
+        context.orCreateTestableResources.addOverride(
+                R.dimen.lockscreen_shade_notifications_scrim_transition_distance, distance)
+        context.orCreateTestableResources.addOverride(
+                R.dimen.lockscreen_shade_notifications_scrim_transition_delay, delay)
+        configurationController.notifyConfigurationChanged()
+
+        transitionController.dragDownAmount = 20f
+
+        verify(scrimController).transitionToFullShadeProgress(
+                progress = anyFloat(),
+                lockScreenNotificationsProgress = eq(0.1f)
+        )
+    }
+
+    @Test
+    fun setDragAmount_dragAmountLessThanNotifDelayDistance_setsNotificationsScrimProgressToZero() {
+        val distance = 100
+        val delay = 50
+        context.orCreateTestableResources.addOverride(
+                R.dimen.lockscreen_shade_notifications_scrim_transition_distance, distance)
+        context.orCreateTestableResources.addOverride(
+                R.dimen.lockscreen_shade_notifications_scrim_transition_delay, delay)
+        configurationController.notifyConfigurationChanged()
+
+        transitionController.dragDownAmount = 20f
+
+        verify(scrimController).transitionToFullShadeProgress(
+                progress = anyFloat(),
+                lockScreenNotificationsProgress = eq(0f)
+        )
+    }
+
+    @Test
+    fun setDragAmount_dragAmountMoreThanTotalDistance_setsNotificationsScrimProgressToOne() {
+        val distance = 100
+        val delay = 50
+        context.orCreateTestableResources.addOverride(
+                R.dimen.lockscreen_shade_notifications_scrim_transition_distance, distance)
+        context.orCreateTestableResources.addOverride(
+                R.dimen.lockscreen_shade_notifications_scrim_transition_delay, delay)
+        configurationController.notifyConfigurationChanged()
+
+        transitionController.dragDownAmount = 999999f
+
+        verify(scrimController).transitionToFullShadeProgress(
+                progress = anyFloat(),
+                lockScreenNotificationsProgress = eq(1f)
+        )
+    }
+
+    @Test
     fun setDragDownAmount_inSplitShade_setsValueOnMediaHierarchyManager() {
         enableSplitShade()
 
@@ -328,9 +397,21 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
     }
 
     private fun setSplitShadeEnabled(enabled: Boolean) {
-        context.getOrCreateTestableResources().addOverride(
-                R.bool.config_use_split_notification_shade, enabled
-        )
+        overrideResource(R.bool.config_use_split_notification_shade, enabled)
         configurationController.notifyConfigurationChanged()
+    }
+
+    /**
+     * Wrapper around [ScrimController.transitionToFullShadeProgress] that has named parameters for
+     * clarify and easier refactoring of parameter names.
+     */
+    private fun ScrimController.transitionToFullShadeProgress(
+        progress: Float,
+        lockScreenNotificationsProgress: Float
+    ) {
+        scrimController.setTransitionToFullShadeProgress(
+                progress,
+                lockScreenNotificationsProgress
+        )
     }
 }

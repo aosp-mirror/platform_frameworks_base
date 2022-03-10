@@ -6,7 +6,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowInsets
 import android.view.WindowManagerPolicyConstants
-import androidx.annotation.AnyRes
 import androidx.annotation.IdRes
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
@@ -102,10 +101,6 @@ class NotificationQSContainerControllerTest : SysuiTestCase() {
         navigationModeCallback = navigationModeCaptor.value
         taskbarVisibilityCallback = taskbarVisibilityCaptor.value
         windowInsetsCallback = windowInsetsCallbackCaptor.value
-    }
-
-    private fun overrideResource(@AnyRes id: Int, value: Any) {
-        mContext.orCreateTestableResources.addOverride(id, value)
     }
 
     @Test
