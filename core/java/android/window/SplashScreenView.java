@@ -104,6 +104,9 @@ public final class SplashScreenView extends FrameLayout {
     private Duration mIconAnimationDuration;
     private Instant mIconAnimationStart;
 
+    private final Rect mTmpRect = new Rect();
+    private final int[] mTmpPos = new int[2];
+
     // The host activity when transfer view to it.
     private Activity mHostActivity;
 
@@ -582,6 +585,45 @@ public final class SplashScreenView extends FrameLayout {
         releaseAnimationSurfaceHost();
     }
 
+    @Override
+    protected void onLayout(boolean changed, int l, int t, int r, int b) {
+        super.onLayout(changed, l, t, r, b);
+
+        mBrandingImageView.getDrawingRect(mTmpRect);
+        final int brandingHeight = mTmpRect.height();
+        if (brandingHeight == 0 || mIconView == null) {
+            return;
+        }
+        final int visibility = mBrandingImageView.getVisibility();
+        if (visibility != VISIBLE) {
+            return;
+        }
+        final int currentHeight = b - t;
+
+        mIconView.getLocationInWindow(mTmpPos);
+        mIconView.getDrawingRect(mTmpRect);
+        final int iconHeight = mTmpRect.height();
+
+        final ViewGroup.MarginLayoutParams params =
+                (ViewGroup.MarginLayoutParams) mBrandingImageView.getLayoutParams();
+        if (params == null) {
+            Log.e(TAG, "Unable to adjust branding image layout, layout changed?");
+            return;
+        }
+        final int marginBottom = params.bottomMargin;
+        final int remainingHeight = currentHeight - mTmpPos[1] - iconHeight;
+        final int remainingMaxMargin = remainingHeight - brandingHeight;
+        if (remainingHeight < brandingHeight) {
+            // unable to show the branding image, hide it
+            mBrandingImageView.setVisibility(GONE);
+        } else if (remainingMaxMargin < marginBottom) {
+            // shorter than original margin
+            params.bottomMargin = (int) Math.round(remainingMaxMargin / 2.0);
+            mBrandingImageView.setLayoutParams(params);
+        }
+        // nothing need to adjust
+    }
+
     private void releaseAnimationSurfaceHost() {
         if (mSurfaceHost != null && !mIsCopied) {
             if (DEBUG) {
@@ -762,6 +804,9 @@ public final class SplashScreenView extends FrameLayout {
                 final Rect initialBounds = drawable.copyBounds();
                 final int width = initialBounds.width();
                 final int height = initialBounds.height();
+                if (width <= 0 || height <= 0) {
+                    return null;
+                }
 
                 final Bitmap snapshot = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
                 final Canvas bmpCanvas = new Canvas(snapshot);
