@@ -30,6 +30,7 @@ import junit.framework.TestCase;
 public class BatteryStatsSensorTest extends TestCase {
 
     private static final int UID = 10500;
+    private static final int UID_2 = 10501; // second uid for testing pool usage
     private static final int SENSOR_ID = -10000;
 
     @SmallTest
@@ -239,7 +240,6 @@ public class BatteryStatsSensorTest extends TestCase {
 
     @SmallTest
     public void testPooledBackgroundUsage() throws Exception {
-        final int UID_2 = 20000; // second uid for testing pool usage
         final MockClock clocks = new MockClock();
         MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
         bi.mForceOnBattery = true;

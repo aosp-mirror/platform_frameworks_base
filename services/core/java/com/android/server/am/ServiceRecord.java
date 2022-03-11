@@ -96,6 +96,8 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
     final long createRealTime;  // when this service was created
     final boolean isSdkSandbox; // whether this is a sdk sandbox service
     final int sdkSandboxClientAppUid; // the app uid for which this sdk sandbox service is running
+    final String sdkSandboxClientAppPackage; // the app package for which this sdk sandbox service
+                                             // is running
     final ArrayMap<Intent.FilterComparison, IntentBindRecord> bindings
             = new ArrayMap<Intent.FilterComparison, IntentBindRecord>();
                             // All active bindings to the service.
@@ -573,13 +575,14 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
             Intent.FilterComparison intent, ServiceInfo sInfo, boolean callerIsFg,
             Runnable restarter) {
         this(ams, name, instanceName, definingPackageName, definingUid, intent, sInfo, callerIsFg,
-                restarter, null, 0);
+                restarter, null, 0, null);
     }
 
     ServiceRecord(ActivityManagerService ams, ComponentName name,
             ComponentName instanceName, String definingPackageName, int definingUid,
             Intent.FilterComparison intent, ServiceInfo sInfo, boolean callerIsFg,
-            Runnable restarter, String sdkSandboxProcessName, int sdkSandboxClientAppUid) {
+            Runnable restarter, String sdkSandboxProcessName, int sdkSandboxClientAppUid,
+            String sdkSandboxClientAppPackage) {
         this.ams = ams;
         this.name = name;
         this.instanceName = instanceName;
@@ -590,8 +593,9 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         serviceInfo = sInfo;
         appInfo = sInfo.applicationInfo;
         packageName = sInfo.applicationInfo.packageName;
-        isSdkSandbox = sdkSandboxProcessName != null;
+        this.isSdkSandbox = sdkSandboxProcessName != null;
         this.sdkSandboxClientAppUid = sdkSandboxClientAppUid;
+        this.sdkSandboxClientAppPackage = sdkSandboxClientAppPackage;
         if ((sInfo.flags & ServiceInfo.FLAG_ISOLATED_PROCESS) != 0) {
             processName = sInfo.processName + ":" + instanceName.getClassName();
         } else if (sdkSandboxProcessName != null) {

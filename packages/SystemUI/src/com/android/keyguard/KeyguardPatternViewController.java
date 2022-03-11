@@ -358,7 +358,7 @@ public class KeyguardPatternViewController
     }
 
     private void displayDefaultSecurityMessage() {
-        mMessageAreaController.setMessage(R.string.keyguard_enter_your_pattern);
+        mMessageAreaController.setMessage("");
     }
 
     private void handleAttemptLockout(long elapsedRealtimeDeadline) {

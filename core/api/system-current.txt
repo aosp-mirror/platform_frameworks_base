@@ -469,7 +469,6 @@ package android.app {
     method public boolean convertToTranslucent(android.app.Activity.TranslucentConversionListener, android.app.ActivityOptions);
     method @Deprecated public boolean isBackgroundVisibleBehind();
     method @Deprecated public void onBackgroundVisibleBehindChanged(boolean);
-    method @RequiresPermission(anyOf={android.Manifest.permission.INTERACT_ACROSS_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS_FULL}) public void startActivityAsUser(@NonNull android.content.Intent, @Nullable android.os.Bundle, @NonNull android.os.UserHandle);
     method @RequiresPermission(anyOf={android.Manifest.permission.INTERACT_ACROSS_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS_FULL}) public void startActivityForResultAsUser(@NonNull android.content.Intent, int, @NonNull android.os.UserHandle);
     method @RequiresPermission(anyOf={android.Manifest.permission.INTERACT_ACROSS_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS_FULL}) public void startActivityForResultAsUser(@NonNull android.content.Intent, int, @Nullable android.os.Bundle, @NonNull android.os.UserHandle);
     method @RequiresPermission(anyOf={android.Manifest.permission.INTERACT_ACROSS_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS_FULL}) public void startActivityForResultAsUser(@NonNull android.content.Intent, @NonNull String, int, @Nullable android.os.Bundle, @NonNull android.os.UserHandle);
@@ -1701,20 +1700,22 @@ package android.app.cloudsearch {
     method @NonNull public String getTitle();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.cloudsearch.SearchResult> CREATOR;
+    field public static final String EXTRAINFO_ACTION_APP_CARD = "android.app.cloudsearch.ACTION_APP_CARD";
     field public static final String EXTRAINFO_ACTION_BUTTON_IMAGE_PREREGISTERING = "android.app.cloudsearch.ACTION_BUTTON_IMAGE";
     field public static final String EXTRAINFO_ACTION_BUTTON_TEXT_PREREGISTERING = "android.app.cloudsearch.ACTION_BUTTON_TEXT";
+    field public static final String EXTRAINFO_ACTION_INSTALL_BUTTON = "android.app.cloudsearch.ACTION_INSTALL_BUTTON";
     field public static final String EXTRAINFO_APP_BADGES = "android.app.cloudsearch.APP_BADGES";
-    field public static final String EXTRAINFO_APP_CARD_ACTION = "android.app.cloudsearch.APP_CARD_ACTION";
     field public static final String EXTRAINFO_APP_CONTAINS_ADS_DISCLAIMER = "android.app.cloudsearch.APP_CONTAINS_ADS_DISCLAIMER";
     field public static final String EXTRAINFO_APP_CONTAINS_IAP_DISCLAIMER = "android.app.cloudsearch.APP_CONTAINS_IAP_DISCLAIMER";
     field public static final String EXTRAINFO_APP_DEVELOPER_NAME = "android.app.cloudsearch.APP_DEVELOPER_NAME";
     field public static final String EXTRAINFO_APP_DOMAIN_URL = "android.app.cloudsearch.APP_DOMAIN_URL";
     field public static final String EXTRAINFO_APP_IARC = "android.app.cloudsearch.APP_IARC";
     field public static final String EXTRAINFO_APP_ICON = "android.app.cloudsearch.APP_ICON";
+    field public static final String EXTRAINFO_APP_INSTALL_COUNT = "android.app.cloudsearch.APP_INSTALL_COUNT";
+    field public static final String EXTRAINFO_APP_PACKAGE_NAME = "android.app.cloudsearch.APP_PACKAGE_NAME";
     field public static final String EXTRAINFO_APP_REVIEW_COUNT = "android.app.cloudsearch.APP_REVIEW_COUNT";
     field public static final String EXTRAINFO_APP_SIZE_BYTES = "android.app.cloudsearch.APP_SIZE_BYTES";
     field public static final String EXTRAINFO_APP_STAR_RATING = "android.app.cloudsearch.APP_STAR_RATING";
-    field public static final String EXTRAINFO_INSTALL_BUTTON_ACTION = "android.app.cloudsearch.INSTALL_BUTTON_ACTION";
     field public static final String EXTRAINFO_LONG_DESCRIPTION = "android.app.cloudsearch.LONG_DESCRIPTION";
     field public static final String EXTRAINFO_SCREENSHOTS = "android.app.cloudsearch.SCREENSHOTS";
     field public static final String EXTRAINFO_SHORT_DESCRIPTION = "android.app.cloudsearch.SHORT_DESCRIPTION";
@@ -2950,6 +2951,7 @@ package android.content {
     method public void sendBroadcastMultiplePermissions(@NonNull android.content.Intent, @NonNull String[], @Nullable android.app.BroadcastOptions);
     method public abstract void sendOrderedBroadcast(@NonNull android.content.Intent, @Nullable String, @Nullable android.os.Bundle, @Nullable android.content.BroadcastReceiver, @Nullable android.os.Handler, int, @Nullable String, @Nullable android.os.Bundle);
     method @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS) public void startActivityAsUser(@NonNull @RequiresPermission android.content.Intent, @NonNull android.os.UserHandle);
+    method @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS) public void startActivityAsUser(@NonNull @RequiresPermission android.content.Intent, @Nullable android.os.Bundle, @NonNull android.os.UserHandle);
     field public static final String AMBIENT_CONTEXT_SERVICE = "ambient_context";
     field public static final String APP_HIBERNATION_SERVICE = "app_hibernation";
     field public static final String APP_INTEGRITY_SERVICE = "app_integrity";
@@ -8523,45 +8525,6 @@ package android.metrics {
 
 package android.net {
 
-  public class EthernetManager {
-    method @RequiresPermission(anyOf={android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, android.Manifest.permission.NETWORK_STACK, android.Manifest.permission.MANAGE_ETHERNET_NETWORKS}) public void connectNetwork(@NonNull String, @Nullable java.util.concurrent.Executor, @Nullable java.util.function.BiConsumer<android.net.Network,android.net.EthernetNetworkManagementException>);
-    method @RequiresPermission(anyOf={android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, android.Manifest.permission.NETWORK_STACK, android.Manifest.permission.MANAGE_ETHERNET_NETWORKS}) public void disconnectNetwork(@NonNull String, @Nullable java.util.concurrent.Executor, @Nullable java.util.function.BiConsumer<android.net.Network,android.net.EthernetNetworkManagementException>);
-    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_STACK, android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK}) public android.net.EthernetManager.TetheredInterfaceRequest requestTetheredInterface(@NonNull java.util.concurrent.Executor, @NonNull android.net.EthernetManager.TetheredInterfaceCallback);
-    method @RequiresPermission(anyOf={android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, android.Manifest.permission.NETWORK_STACK, android.Manifest.permission.MANAGE_ETHERNET_NETWORKS}) public void updateConfiguration(@NonNull String, @NonNull android.net.EthernetNetworkUpdateRequest, @Nullable java.util.concurrent.Executor, @Nullable java.util.function.BiConsumer<android.net.Network,android.net.EthernetNetworkManagementException>);
-  }
-
-  public static interface EthernetManager.TetheredInterfaceCallback {
-    method public void onAvailable(@NonNull String);
-    method public void onUnavailable();
-  }
-
-  public static class EthernetManager.TetheredInterfaceRequest {
-    method public void release();
-  }
-
-  public final class EthernetNetworkManagementException extends java.lang.RuntimeException implements android.os.Parcelable {
-    ctor public EthernetNetworkManagementException(@NonNull String);
-    method public int describeContents();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.net.EthernetNetworkManagementException> CREATOR;
-  }
-
-  public final class EthernetNetworkUpdateRequest implements android.os.Parcelable {
-    method public int describeContents();
-    method @NonNull public android.net.IpConfiguration getIpConfiguration();
-    method @Nullable public android.net.NetworkCapabilities getNetworkCapabilities();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.net.EthernetNetworkUpdateRequest> CREATOR;
-  }
-
-  public static final class EthernetNetworkUpdateRequest.Builder {
-    ctor public EthernetNetworkUpdateRequest.Builder();
-    ctor public EthernetNetworkUpdateRequest.Builder(@NonNull android.net.EthernetNetworkUpdateRequest);
-    method @NonNull public android.net.EthernetNetworkUpdateRequest build();
-    method @NonNull public android.net.EthernetNetworkUpdateRequest.Builder setIpConfiguration(@NonNull android.net.IpConfiguration);
-    method @NonNull public android.net.EthernetNetworkUpdateRequest.Builder setNetworkCapabilities(@Nullable android.net.NetworkCapabilities);
-  }
-
   public final class MatchAllNetworkSpecifier extends android.net.NetworkSpecifier implements android.os.Parcelable {
     ctor public MatchAllNetworkSpecifier();
     method public int describeContents();
@@ -9032,7 +8995,7 @@ package android.net.wifi.nl80211 {
     method public void enableVerboseLogging(boolean);
     method @NonNull public int[] getChannelsMhzForBand(int);
     method @Nullable public android.net.wifi.nl80211.DeviceWiphyCapabilities getDeviceWiphyCapabilities(@NonNull String);
-    method public int getMaxNumScanSsids(@NonNull String);
+    method public int getMaxSsidsPerScan(@NonNull String);
     method @NonNull public java.util.List<android.net.wifi.nl80211.NativeScanResult> getScanResults(@NonNull String, int);
     method @Nullable public android.net.wifi.nl80211.WifiNl80211Manager.TxPacketCounters getTxPacketCounters(@NonNull String);
     method public void notifyCountryCodeChanged(@Nullable String);
@@ -9822,7 +9785,7 @@ package android.os {
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS}, conditional=true) public boolean hasUserRestrictionForUser(@NonNull String, @NonNull android.os.UserHandle);
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS, android.Manifest.permission.QUERY_USERS}) public boolean isAdminUser();
     method public boolean isCloneProfile();
-    method public boolean isCredentialSharedWithParent();
+    method public boolean isCredentialSharableWithParent();
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS, android.Manifest.permission.QUERY_USERS}) public boolean isGuestUser();
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.QUERY_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS}, conditional=true) public boolean isManagedProfile(int);
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS}, conditional=true) public boolean isMediaSharedWithParent();
@@ -10334,6 +10297,7 @@ package android.provider {
     field public static final String NAMESPACE_MEDIA_NATIVE = "media_native";
     field public static final String NAMESPACE_NETD_NATIVE = "netd_native";
     field public static final String NAMESPACE_NNAPI_NATIVE = "nnapi_native";
+    field public static final String NAMESPACE_ON_DEVICE_PERSONALIZATION = "on_device_personalization";
     field public static final String NAMESPACE_OTA = "ota";
     field public static final String NAMESPACE_PACKAGE_MANAGER_SERVICE = "package_manager_service";
     field public static final String NAMESPACE_PERMISSIONS = "permissions";

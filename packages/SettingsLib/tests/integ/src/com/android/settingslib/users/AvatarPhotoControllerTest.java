@@ -89,6 +89,10 @@ public class AvatarPhotoControllerTest {
 
     @After
     public void tearDown() {
+        String[] entries = mImagesDir.list();
+        for (String entry : entries) {
+            new File(mImagesDir, entry).delete();
+        }
         mImagesDir.delete();
     }
 
@@ -233,17 +237,14 @@ public class AvatarPhotoControllerTest {
     public void internalCropUsedIfNoSystemCropperFound() throws IOException {
         when(mMockAvatarUi.startSystemActivityForResult(any(), anyInt())).thenReturn(false);
 
-        new File(mImagesDir, "file.txt").createNewFile();
+        File file = new File(mImagesDir, "file.txt");
+        saveBitmapToFile(file);
 
         Intent intent = new Intent();
         intent.setData(Uri.parse(
                 "content://com.android.settingslib.test/my_cache/multi_user/file.txt"));
         mController.onActivityResult(
                 REQUEST_CODE_TAKE_PHOTO, Activity.RESULT_OK, intent);
-
-        Intent startIntent = verifyStartSystemActivityForResult(
-                "com.android.camera.action.CROP", REQUEST_CODE_CROP_PHOTO);
-        assertThat(startIntent.getData()).isNotEqualTo(mTakePhotoUri);
 
         verify(mMockAvatarUi, timeout(TIMEOUT_MILLIS)).returnUriResult(mCropPhotoUri);
 

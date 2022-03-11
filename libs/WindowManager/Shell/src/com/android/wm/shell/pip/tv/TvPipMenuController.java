@@ -30,17 +30,18 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.os.Handler;
 import android.os.RemoteException;
-import android.util.Log;
 import android.view.SurfaceControl;
 import android.view.SyncRtSurfaceTransactionApplier;
 import android.view.WindowManagerGlobal;
 
 import androidx.annotation.Nullable;
 
+import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.R;
 import com.android.wm.shell.common.SystemWindows;
 import com.android.wm.shell.pip.PipMediaController;
 import com.android.wm.shell.pip.PipMenuController;
+import com.android.wm.shell.protolog.ShellProtoLogGroup;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -110,7 +111,10 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
     }
 
     void setDelegate(Delegate delegate) {
-        if (DEBUG) Log.d(TAG, "setDelegate(), delegate=" + delegate);
+        if (DEBUG) {
+            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: setDelegate(), delegate=%s", TAG, delegate);
+        }
         if (mDelegate != null) {
             throw new IllegalStateException(
                     "The delegate has already been set and should not change.");
@@ -133,7 +137,10 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
     }
 
     private void attachPipMenuView() {
-        if (DEBUG) Log.d(TAG, "attachPipMenuView()");
+        if (DEBUG) {
+            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: attachPipMenuView()", TAG);
+        }
 
         if (mPipMenuView != null) {
             detachPipMenuView();
@@ -148,7 +155,10 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
 
     @Override
     public void showMenu() {
-        if (DEBUG) Log.d(TAG, "showMenu()");
+        if (DEBUG) {
+            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: showMenu()", TAG);
+        }
 
         if (mPipMenuView != null) {
             Rect menuBounds = getMenuBounds(mTvPipBoundsState.getBounds());
@@ -189,10 +199,16 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
 
     void hideMenu() {
         if (!isMenuVisible()) {
-            if (DEBUG) Log.d(TAG, "hideMenu() - Menu isn't visible, so don't hide");
+            if (DEBUG) {
+                ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                        "%s: hideMenu() - Menu isn't visible, so don't hide", TAG);
+            }
             return;
         } else {
-            if (DEBUG) Log.d(TAG, "hideMenu()");
+            if (DEBUG) {
+                ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                        "%s: hideMenu()", TAG);
+            }
         }
 
         mPipMenuView.hide();
@@ -208,7 +224,10 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
 
     @Override
     public void onEnterMoveMode() {
-        if (DEBUG) Log.d(TAG, "onEnterMoveMode - " + mInMoveMode);
+        if (DEBUG) {
+            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: onEnterMoveMode - %b", TAG, mInMoveMode);
+        }
         mInMoveMode = true;
         mPipMenuView.showMenuButtons(false);
         mPipMenuView.showMovementHints(mDelegate.getPipGravity());
@@ -217,7 +236,10 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
 
     @Override
     public boolean onExitMoveMode() {
-        if (DEBUG) Log.d(TAG, "onExitMoveMode - " + mInMoveMode);
+        if (DEBUG) {
+            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: onExitMoveMode - %b", TAG, mInMoveMode);
+        }
         if (mInMoveMode) {
             mInMoveMode = false;
             mPipMenuView.showMenuButtons(true);
@@ -230,7 +252,10 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
 
     @Override
     public boolean onPipMovement(int keycode) {
-        if (DEBUG) Log.d(TAG, "onPipMovement - " + mInMoveMode);
+        if (DEBUG) {
+            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: onPipMovement - %b", TAG, mInMoveMode);
+        }
         if (mInMoveMode) {
             mDelegate.movePip(keycode);
         }
@@ -246,12 +271,18 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
 
     @Override
     public void setAppActions(ParceledListSlice<RemoteAction> actions) {
-        if (DEBUG) Log.d(TAG, "setAppActions()");
+        if (DEBUG) {
+            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: setAppActions()", TAG);
+        }
         updateAdditionalActionsList(mAppActions, actions.getList());
     }
 
     private void onMediaActionsChanged(List<RemoteAction> actions) {
-        if (DEBUG) Log.d(TAG, "onMediaActionsChanged()");
+        if (DEBUG) {
+            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: onMediaActionsChanged()", TAG);
+        }
 
         // Hide disabled actions.
         List<RemoteAction> enabledActions = new ArrayList<>();
@@ -292,7 +323,10 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
     @Override
     public boolean isMenuVisible() {
         boolean isVisible = mPipMenuView != null && mPipMenuView.isVisible();
-        if (DEBUG) Log.d(TAG, "isMenuVisible: " + isVisible);
+        if (DEBUG) {
+            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: isMenuVisible: %b", TAG, isVisible);
+        }
         return isVisible;
     }
 
@@ -303,7 +337,10 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
     public void resizePipMenu(@android.annotation.Nullable SurfaceControl pipLeash,
             @android.annotation.Nullable SurfaceControl.Transaction t,
             Rect destinationBounds) {
-        if (DEBUG) Log.d(TAG, "resizePipMenu: " + destinationBounds.toShortString());
+        if (DEBUG) {
+            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: resizePipMenu: %s", TAG, destinationBounds.toShortString());
+        }
         if (destinationBounds.isEmpty()) {
             return;
         }
@@ -335,10 +372,16 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
     @Override
     public void movePipMenu(SurfaceControl pipLeash, SurfaceControl.Transaction transaction,
             Rect pipDestBounds) {
-        if (DEBUG) Log.d(TAG, "movePipMenu: " + pipDestBounds.toShortString());
+        if (DEBUG) {
+            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: movePipMenu: %s", TAG, pipDestBounds.toShortString());
+        }
 
         if (pipDestBounds.isEmpty()) {
-            if (transaction == null && DEBUG) Log.d(TAG, "no transaction given");
+            if (transaction == null && DEBUG) {
+                ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                        "%s: no transaction given", TAG);
+            }
             return;
         }
         if (!maybeCreateSyncApplier()) {
@@ -351,10 +394,16 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
         // resizing and the PiP menu is also resized. We then want to do a scale from the current
         // new menu bounds.
         if (pipLeash != null && transaction != null) {
-            if (DEBUG) Log.d(TAG, "mTmpSourceBounds based on mPipMenuView.getBoundsOnScreen()");
+            if (DEBUG) {
+                ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                        "%s: mTmpSourceBounds based on mPipMenuView.getBoundsOnScreen()", TAG);
+            }
             mPipMenuView.getBoundsOnScreen(mTmpSourceBounds);
         } else {
-            if (DEBUG) Log.d(TAG, "mTmpSourceBounds based on menu width and height");
+            if (DEBUG) {
+                ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                        "%s: mTmpSourceBounds based on menu width and height", TAG);
+            }
             mTmpSourceBounds.set(0, 0, menuDestBounds.width(), menuDestBounds.height());
         }
 
@@ -389,7 +438,8 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
 
     private boolean maybeCreateSyncApplier() {
         if (mPipMenuView == null || mPipMenuView.getViewRootImpl() == null) {
-            Log.v(TAG, "Not going to move PiP, either menu or its parent is not created.");
+            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: Not going to move PiP, either menu or its parent is not created.", TAG);
             return false;
         }
 
@@ -412,7 +462,10 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
     @Override
     public void updateMenuBounds(Rect destinationBounds) {
         Rect menuBounds = getMenuBounds(destinationBounds);
-        if (DEBUG) Log.d(TAG, "updateMenuBounds: " + menuBounds.toShortString());
+        if (DEBUG) {
+            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: updateMenuBounds: %s", TAG, menuBounds.toShortString());
+        }
         mSystemWindows.updateViewLayout(mPipMenuView,
                 getPipMenuLayoutParams(MENU_WINDOW_TITLE, menuBounds.width(),
                         menuBounds.height()));
@@ -423,7 +476,7 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
 
     @Override
     public void onFocusTaskChanged(ActivityManager.RunningTaskInfo taskInfo) {
-        Log.d(TAG, "onFocusTaskChanged");
+        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE, "%s: onFocusTaskChanged", TAG);
     }
 
     @Override
@@ -465,13 +518,17 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
     }
 
     private void grantPipMenuFocus(boolean grantFocus) {
-        if (DEBUG) Log.d(TAG, "grantWindowFocus(" + grantFocus + ")");
+        if (DEBUG) {
+            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: grantWindowFocus(%b)", TAG, grantFocus);
+        }
 
         try {
             WindowManagerGlobal.getWindowSession().grantEmbeddedWindowFocus(null /* window */,
                     mSystemWindows.getFocusGrantToken(mPipMenuView), grantFocus);
         } catch (Exception e) {
-            Log.e(TAG, "Unable to update focus", e);
+            ProtoLog.e(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: Unable to update focus, %s", TAG, e);
         }
     }
 }

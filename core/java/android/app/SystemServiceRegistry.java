@@ -138,8 +138,6 @@ import android.media.tv.tunerresourcemanager.TunerResourceManager;
 import android.nearby.NearbyFrameworkInitializer;
 import android.net.ConnectivityFrameworkInitializer;
 import android.net.ConnectivityFrameworkInitializerTiramisu;
-import android.net.EthernetManager;
-import android.net.IEthernetManager;
 import android.net.INetworkPolicyManager;
 import android.net.IPacProxyManager;
 import android.net.IVpnManager;
@@ -787,15 +785,6 @@ public final class SystemServiceRegistry {
                 IBinder b = ServiceManager.getServiceOrThrow(Context.LOWPAN_SERVICE);
                 ILowpanManager service = ILowpanManager.Stub.asInterface(b);
                 return new LowpanManager(ctx.getOuterContext(), service);
-            }});
-
-        registerService(Context.ETHERNET_SERVICE, EthernetManager.class,
-                new CachedServiceFetcher<EthernetManager>() {
-            @Override
-            public EthernetManager createService(ContextImpl ctx) throws ServiceNotFoundException {
-                IBinder b = ServiceManager.getServiceOrThrow(Context.ETHERNET_SERVICE);
-                IEthernetManager service = IEthernetManager.Stub.asInterface(b);
-                return new EthernetManager(ctx.getOuterContext(), service);
             }});
 
         registerService(Context.WIFI_NL80211_SERVICE, WifiNl80211Manager.class,

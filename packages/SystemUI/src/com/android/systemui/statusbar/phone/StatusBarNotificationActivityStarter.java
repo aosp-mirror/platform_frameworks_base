@@ -370,6 +370,8 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
             mLogger.logExpandingBubble(notificationKey);
             removeHunAfterClick(row);
             expandBubbleStackOnMainThread(entry);
+            mMainThreadHandler.post(
+                    () -> mLaunchEventsEmitter.notifyFinishLaunchNotifActivity(entry));
         } else {
             startNotificationIntent(intent, fillInIntent, entry, row, animate, isActivityIntent);
         }
@@ -395,7 +397,6 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
             mMainThreadHandler.post(() -> {
                 final Runnable removeNotification = () -> {
                     mOnUserInteractionCallback.onDismiss(entry, REASON_CLICK, summaryToRemove);
-                    mLaunchEventsEmitter.notifyFinishLaunchNotifActivity(entry);
                 };
                 if (mPresenter.isCollapsing()) {
                     // To avoid lags we're only performing the remove
@@ -405,9 +406,6 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
                     removeNotification.run();
                 }
             });
-        } else {
-            mMainThreadHandler.post(
-                    () -> mLaunchEventsEmitter.notifyFinishLaunchNotifActivity(entry));
         }
 
         mIsCollapsingToShowActivityOverLockscreen = false;
@@ -483,14 +481,19 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
             boolean isActivityIntent) {
         mLogger.logStartNotificationIntent(entry.getKey(), intent);
         try {
+            Runnable onFinishAnimationCallback =
+                    () -> mLaunchEventsEmitter.notifyFinishLaunchNotifActivity(entry);
             ActivityLaunchAnimator.Controller animationController =
                     new StatusBarLaunchAnimatorController(
-                            mNotificationAnimationProvider.getAnimatorController(row),
+                            mNotificationAnimationProvider
+                                    .getAnimatorController(row, onFinishAnimationCallback),
                             mCentralSurfaces,
                             isActivityIntent);
-
-            mActivityLaunchAnimator.startPendingIntentWithAnimation(animationController,
-                    animate, intent.getCreatorPackage(), (adapter) -> {
+            mActivityLaunchAnimator.startPendingIntentWithAnimation(
+                    animationController,
+                    animate,
+                    intent.getCreatorPackage(),
+                    (adapter) -> {
                         long eventTime = row.getAndResetLastActionUpTime();
                         Bundle options = eventTime > 0
                                 ? getActivityOptions(

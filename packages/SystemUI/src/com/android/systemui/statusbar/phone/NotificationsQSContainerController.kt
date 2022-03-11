@@ -234,7 +234,7 @@ class NotificationsQSContainerController @Inject constructor(
         val endConstraintId = if (splitShadeEnabled) R.id.qs_edge_guideline else PARENT_ID
         constraintSet.apply {
             connect(R.id.qs_frame, END, endConstraintId, END)
-            setMargin(R.id.qs_frame, START, panelMarginHorizontal)
+            setMargin(R.id.qs_frame, START, if (splitShadeEnabled) 0 else panelMarginHorizontal)
             setMargin(R.id.qs_frame, END, if (splitShadeEnabled) 0 else panelMarginHorizontal)
             setMargin(R.id.qs_frame, TOP, topMargin)
         }

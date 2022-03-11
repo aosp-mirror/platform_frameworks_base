@@ -23,7 +23,6 @@ import static com.android.settingslib.RestrictedLockUtils.EnforcedAdmin;
 import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.os.Build;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.AttributeSet;
@@ -33,8 +32,6 @@ import android.widget.TextView;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceViewHolder;
 
-import com.android.internal.util.Preconditions;
-
 /**
  * Helper class for managing settings preferences that can be disabled
  * by device admins via user restrictions.
@@ -42,8 +39,8 @@ import com.android.internal.util.Preconditions;
 public class RestrictedPreferenceHelper {
     private final Context mContext;
     private final Preference mPreference;
-    final String packageName;
-    final int uid;
+    String packageName;
+    int uid;
 
     private boolean mDisabledByAdmin;
     private EnforcedAdmin mEnforcedAdmin;
@@ -217,6 +214,11 @@ public class RestrictedPreferenceHelper {
 
     public boolean isDisabledByAppOps() {
         return mDisabledByAppOps;
+    }
+
+    public void updatePackageDetails(String packageName, int uid) {
+        this.packageName = packageName;
+        this.uid = uid;
     }
 
     private void updateDisabledState() {

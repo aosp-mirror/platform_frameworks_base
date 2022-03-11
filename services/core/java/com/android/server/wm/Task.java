@@ -3403,7 +3403,7 @@ class Task extends TaskFragment {
         info.positionInParent = getRelativePosition();
 
         info.pictureInPictureParams = getPictureInPictureParams(top);
-        info.preferDockBigOverlays = getPreferDockBigOverlays();
+        info.shouldDockBigOverlays = shouldDockBigOverlays();
         if (info.pictureInPictureParams != null
                 && info.pictureInPictureParams.isLaunchIntoPip()
                 && top.getTopMostActivity().getLastParentBeforePip() != null) {
@@ -3456,9 +3456,9 @@ class Task extends TaskFragment {
                 ? null : new PictureInPictureParams(topMostActivity.pictureInPictureArgs);
     }
 
-    private boolean getPreferDockBigOverlays() {
+    private boolean shouldDockBigOverlays() {
         final ActivityRecord topMostActivity = getTopMostActivity();
-        return topMostActivity != null && topMostActivity.preferDockBigOverlays;
+        return topMostActivity != null && topMostActivity.shouldDockBigOverlays;
     }
 
     Rect getDisplayCutoutInsets() {
@@ -4354,7 +4354,7 @@ class Task extends TaskFragment {
         }
     }
 
-    void onPreferDockBigOverlaysChanged() {
+    void onShouldDockBigOverlaysChanged() {
         dispatchTaskInfoChangedIfNeeded(true /* force */);
     }
 

@@ -1593,13 +1593,13 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     @Override
-    public boolean isCredentialSharedWithParent(@UserIdInt int userId) {
+    public boolean isCredentialSharableWithParent(@UserIdInt int userId) {
         checkManageOrInteractPermissionIfCallerInOtherProfileGroup(userId,
-                "isCredentialSharedWithParent");
+                "isCredentialSharableWithParent");
         synchronized (mUsersLock) {
             UserTypeDetails userTypeDetails = getUserTypeDetailsNoChecks(userId);
             return userTypeDetails != null && userTypeDetails.isProfile()
-                    && userTypeDetails.isCredentialSharedWithParent();
+                    && userTypeDetails.isCredentialSharableWithParent();
         }
     }
 
@@ -4148,11 +4148,11 @@ public class UserManagerService extends IUserManager.Stub {
                 continue;
             }
             if (filter.direction == DefaultCrossProfileIntentFilter.Direction.TO_PARENT) {
-                mPm.addCrossProfileIntentFilter(
+                mPm.addCrossProfileIntentFilter(mPm.snapshotComputer(),
                         filter.filter, mContext.getOpPackageName(), profileUserId, parentUserId,
                         filter.flags);
             } else {
-                mPm.addCrossProfileIntentFilter(
+                mPm.addCrossProfileIntentFilter(mPm.snapshotComputer(),
                         filter.filter, mContext.getOpPackageName(), parentUserId, profileUserId,
                         filter.flags);
             }

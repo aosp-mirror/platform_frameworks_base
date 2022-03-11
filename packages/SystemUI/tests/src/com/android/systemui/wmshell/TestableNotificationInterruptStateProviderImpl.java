@@ -23,7 +23,9 @@ import android.os.PowerManager;
 import android.service.dreams.IDreamManager;
 
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.NotificationFilter;
+import com.android.systemui.statusbar.notification.interruption.KeyguardNotificationVisibilityProvider;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptLogger;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderImpl;
 import com.android.systemui.statusbar.policy.BatteryController;
@@ -42,7 +44,9 @@ public class TestableNotificationInterruptStateProviderImpl
             BatteryController batteryController,
             HeadsUpManager headsUpManager,
             NotificationInterruptLogger logger,
-            Handler mainHandler) {
+            Handler mainHandler,
+            NotifPipelineFlags flags,
+            KeyguardNotificationVisibilityProvider keyguardNotificationVisibilityProvider) {
         super(contentResolver,
                 powerManager,
                 dreamManager,
@@ -52,7 +56,9 @@ public class TestableNotificationInterruptStateProviderImpl
                 statusBarStateController,
                 headsUpManager,
                 logger,
-                mainHandler);
+                mainHandler,
+                flags,
+                keyguardNotificationVisibilityProvider);
         mUseHeadsUp = true;
     }
 }
