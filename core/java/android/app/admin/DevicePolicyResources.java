@@ -22,7 +22,8 @@ import android.os.UserHandle;
 /**
  * Class containing the required identifiers to update device management resources.
  *
- * <p>See {@link DevicePolicyManager#getDrawable} and {@link DevicePolicyManager#getString}.
+ * <p>See {@link DevicePolicyResourcesManager#getDrawable} and
+ * {@link DevicePolicyResourcesManager#getString}.
  */
 public final class DevicePolicyResources {
 

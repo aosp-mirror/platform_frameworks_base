@@ -28,7 +28,7 @@ import java.util.Objects;
 
 /**
  * Used to pass in the required information for updating an enterprise string resource using
- * {@link DevicePolicyManager#setStrings}.
+ * {@link DevicePolicyResourcesManager#setStrings}.
  *
  * @hide
  */
@@ -40,7 +40,7 @@ public final class DevicePolicyStringResource implements Parcelable {
 
     /**
      * Creates an object containing the required information for updating an enterprise string
-     * resource using {@link DevicePolicyManager#setStrings}.
+     * resource using {@link DevicePolicyResourcesManager#setStrings}.
      *
      * <p>It will be used to update the string defined by {@code stringId} to the string with ID
      * {@code resourceIdInCallingPackage} in the calling package</p>

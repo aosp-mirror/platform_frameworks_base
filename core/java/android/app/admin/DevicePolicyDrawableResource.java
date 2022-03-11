@@ -28,7 +28,7 @@ import java.util.Objects;
 
 /**
  * Used to pass in the required information for updating an enterprise drawable resource using
- * {@link DevicePolicyManager#setDrawables}.
+ * {@link DevicePolicyResourcesManager#setDrawables}.
  *
  * @hide
  */
@@ -42,7 +42,7 @@ public final class DevicePolicyDrawableResource implements Parcelable {
 
     /**
      * Creates an object containing the required information for updating an enterprise drawable
-     * resource using {@link DevicePolicyManager#setDrawables}.
+     * resource using {@link DevicePolicyResourcesManager#setDrawables}.
      *
      * <p>It will be used to update the drawable defined by {@code drawableId} with style
      * {@code drawableStyle} located in source {@code drawableSource} to the drawable with ID
@@ -89,7 +89,7 @@ public final class DevicePolicyDrawableResource implements Parcelable {
 
     /**
      * Creates an object containing the required information for updating an enterprise drawable
-     * resource using {@link DevicePolicyManager#setDrawables}.
+     * resource using {@link DevicePolicyResourcesManager#setDrawables}.
      * <p>It will be used to update the drawable defined by {@code drawableId} with style
      * {@code drawableStyle} to the drawable with ID {@code resourceIdInCallingPackage} in the
      * calling package</p>
