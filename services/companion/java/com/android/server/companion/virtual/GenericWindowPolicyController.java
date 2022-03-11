@@ -22,6 +22,7 @@ import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTE
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.WindowConfiguration;
 import android.app.compat.CompatChanges;
 import android.companion.virtual.VirtualDeviceManager.ActivityListener;
 import android.companion.virtual.VirtualDeviceParams;
@@ -119,6 +120,7 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
             @ActivityPolicy int defaultActivityPolicy,
             @NonNull ActivityListener activityListener,
             @NonNull Consumer<ActivityInfo> activityBlockedCallback) {
+        super();
         mAllowedUsers = allowedUsers;
         mAllowedActivities = new ArraySet<>(allowedActivities);
         mBlockedActivities = new ArraySet<>(blockedActivities);
@@ -134,7 +136,11 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
     }
 
     @Override
-    public boolean canContainActivities(@NonNull List<ActivityInfo> activities) {
+    public boolean canContainActivities(@NonNull List<ActivityInfo> activities,
+            @WindowConfiguration.WindowingMode int windowingMode) {
+        if (!isWindowingModeSupported(windowingMode)) {
+            return false;
+        }
         // Can't display all the activities if any of them don't want to be displayed.
         final int activityCount = activities.size();
         for (int i = 0; i < activityCount; i++) {
