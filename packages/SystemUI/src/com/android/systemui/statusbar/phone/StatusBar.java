@@ -2937,9 +2937,8 @@ public class StatusBar extends SystemUI implements
         // turned off fully.
         boolean keyguardForDozing = mDozeServiceHost.getDozingRequested()
                 && (!mDeviceInteractive || isGoingToSleep() && (isScreenFullyOff() || mIsKeyguard));
-        boolean isWakingAndOccluded = isOccluded() && isWaking();
         boolean shouldBeKeyguard = (mStatusBarStateController.isKeyguardRequested()
-                || keyguardForDozing) && !wakeAndUnlocking && !isWakingAndOccluded;
+                || keyguardForDozing) && !wakeAndUnlocking;
         if (keyguardForDozing) {
             updatePanelExpansionForKeyguard();
         }
@@ -3560,26 +3559,29 @@ public class StatusBar extends SystemUI implements
         public void onStartedWakingUp() {
             String tag = "StatusBar#onStartedWakingUp";
             DejankUtils.startDetectingBlockingIpcs(tag);
-            mDeviceInteractive = true;
-            mWakeUpCoordinator.setWakingUp(true);
-            if (!mKeyguardBypassController.getBypassEnabled()) {
-                mHeadsUpManager.releaseAllImmediately();
-            }
-            updateVisibleToUser();
-            updateIsKeyguard();
-            mDozeServiceHost.stopDozing();
-            // This is intentionally below the stopDozing call above, since it avoids that we're
-            // unnecessarily animating the wakeUp transition. Animations should only be enabled
-            // once we fully woke up.
-            updateRevealEffect(true /* wakingUp */);
-            updateNotificationPanelTouchState();
+            mNotificationShadeWindowController.batchApplyWindowLayoutParams(()-> {
+                mDeviceInteractive = true;
+                mWakeUpCoordinator.setWakingUp(true);
+                if (!mKeyguardBypassController.getBypassEnabled()) {
+                    mHeadsUpManager.releaseAllImmediately();
+                }
+                updateVisibleToUser();
+                updateIsKeyguard();
+                mDozeServiceHost.stopDozing();
+                // This is intentionally below the stopDozing call above, since it avoids that we're
+                // unnecessarily animating the wakeUp transition. Animations should only be enabled
+                // once we fully woke up.
+                updateRevealEffect(true /* wakingUp */);
+                updateNotificationPanelTouchState();
 
-            // If we are waking up during the screen off animation, we should undo making the
-            // expanded visible (we did that so the LightRevealScrim would be visible).
-            if (mUnlockedScreenOffAnimationController.isScreenOffLightRevealAnimationPlaying()) {
-                makeExpandedInvisible();
-            }
+                // If we are waking up during the screen off animation, we should undo making the
+                // expanded visible (we did that so the LightRevealScrim would be visible).
+                if (mUnlockedScreenOffAnimationController
+                        .isScreenOffLightRevealAnimationPlaying()) {
+                    makeExpandedInvisible();
+                }
 
+            });
             DejankUtils.stopDetectingBlockingIpcs(tag);
         }
 
@@ -3715,10 +3717,6 @@ public class StatusBar extends SystemUI implements
     boolean isGoingToSleep() {
         return mWakefulnessLifecycle.getWakefulness()
                 == WakefulnessLifecycle.WAKEFULNESS_GOING_TO_SLEEP;
-    }
-
-    boolean isWaking() {
-        return mWakefulnessLifecycle.getWakefulness() == WakefulnessLifecycle.WAKEFULNESS_WAKING;
     }
 
     public void notifyBiometricAuthModeChanged() {
