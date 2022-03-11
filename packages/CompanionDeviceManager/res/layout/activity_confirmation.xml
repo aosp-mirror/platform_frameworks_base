@@ -20,6 +20,15 @@
     <!-- A header for selfManaged devices only. -->
     <include layout="@layout/vendor_header" />
 
+    <ImageView
+        android:id="@+id/profile_icon"
+        android:layout_width="match_parent"
+        android:layout_height="32dp"
+        android:gravity="center"
+        android:layout_marginBottom="12dp"
+        android:layout_marginTop="1dp"
+        android:tint="@android:color/system_accent1_600"/>
+
     <!-- Do NOT change the ID of the root LinearLayout above: it's referenced in CTS tests. -->
 
     <TextView
@@ -28,7 +37,8 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:paddingHorizontal="12dp"
-        style="@*android:style/TextAppearance.Widget.Toolbar.Title"/>
+        android:layout_marginBottom="12dp"
+        style="@*android:style/TextAppearance.Widget.Toolbar.Title" />
 
     <TextView
         android:id="@+id/summary"
@@ -45,11 +55,29 @@
         android:layout_height="0dp"
         android:layout_weight="1">
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/device_list"
+        <LinearLayout
+            android:id="@+id/multiple_device_list"
             android:layout_width="match_parent"
-            android:scrollbars="vertical"
-            android:layout_height="200dp" />
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <View
+                android:id="@+id/border_top"
+                android:layout_marginTop="12dp"
+                style="@style/DeviceListBorder" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/device_list"
+                android:layout_width="match_parent"
+                android:scrollbars="vertical"
+                android:layout_height="200dp" />
+
+            <View
+                android:id="@+id/border_bottom"
+                style="@style/DeviceListBorder" />
+
+        </LinearLayout>
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/permission_list"
