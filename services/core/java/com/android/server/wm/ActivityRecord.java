@@ -534,7 +534,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // activity can enter picture in picture while pausing (only when switching to another task)
     PictureInPictureParams pictureInPictureArgs = new PictureInPictureParams.Builder().build();
         // The PiP params used when deferring the entering of picture-in-picture.
-    boolean preferDockBigOverlays;
+    boolean shouldDockBigOverlays;
     int launchCount;        // count of launches since last state
     long lastLaunchTime;    // time of last launch of this activity
     ComponentName requestedVrComponent; // the requested component for handling VR mode.
@@ -2042,7 +2042,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         mLetterboxUiController = new LetterboxUiController(mWmService, this);
         mCameraCompatControlEnabled = mWmService.mContext.getResources()
                 .getBoolean(R.bool.config_isCameraCompatControlForStretchedIssuesEnabled);
-        preferDockBigOverlays = mWmService.mContext.getResources()
+        shouldDockBigOverlays = mWmService.mContext.getResources()
                 .getBoolean(R.bool.config_dockBigOverlayWindows);
 
         if (_createTime > 0) {
@@ -9575,9 +9575,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         getTask().getRootTask().onPictureInPictureParamsChanged();
     }
 
-    void setPreferDockBigOverlays(boolean preferDockBigOverlays) {
-        this.preferDockBigOverlays = preferDockBigOverlays;
-        getTask().getRootTask().onPreferDockBigOverlaysChanged();
+    void setShouldDockBigOverlays(boolean shouldDockBigOverlays) {
+        this.shouldDockBigOverlays = shouldDockBigOverlays;
+        getTask().getRootTask().onShouldDockBigOverlaysChanged();
     }
 
     @Override

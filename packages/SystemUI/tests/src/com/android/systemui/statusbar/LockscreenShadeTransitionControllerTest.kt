@@ -44,6 +44,7 @@ import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnit
 import org.mockito.Mockito.`when` as whenever
+import org.mockito.ArgumentMatchers.eq
 
 private fun <T> anyObject(): T {
     return Mockito.anyObject<T>()
@@ -260,6 +261,49 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
     }
 
     @Test
+    fun setDragAmount_setsKeyguardTransitionProgress() {
+        transitionController.dragDownAmount = 10f
+
+        verify(notificationPanelController).setKeyguardTransitionProgress(anyFloat(), anyInt())
+    }
+
+    @Test
+    fun setDragAmount_setsKeyguardAlphaBasedOnDistance() {
+        val alphaDistance = context.resources.getDimensionPixelSize(
+                R.dimen.lockscreen_shade_npvc_keyguard_content_alpha_transition_distance)
+        transitionController.dragDownAmount = 10f
+
+        val expectedAlpha = 1 - 10f / alphaDistance
+        verify(notificationPanelController)
+                .setKeyguardTransitionProgress(eq(expectedAlpha), anyInt())
+    }
+
+    @Test
+    fun setDragAmount_notInSplitShade_setsKeyguardTranslationToZero() {
+        val mediaTranslationY = 123
+        disableSplitShade()
+        whenever(mediaHierarchyManager.getGuidedTransformationTranslationY())
+                .thenReturn(mediaTranslationY)
+
+        transitionController.dragDownAmount = 10f
+
+        verify(notificationPanelController).setKeyguardTransitionProgress(anyFloat(), eq(0))
+    }
+
+    @Test
+    fun setDragAmount_inSplitShade_setsKeyguardTranslationBasedOnMediaTranslation() {
+        val mediaTranslationY = 123
+        enableSplitShade()
+        whenever(mediaHierarchyManager.getGuidedTransformationTranslationY())
+                .thenReturn(mediaTranslationY)
+
+        transitionController.dragDownAmount = 10f
+
+        verify(notificationPanelController)
+                .setKeyguardTransitionProgress(anyFloat(), eq(mediaTranslationY))
+    }
+
+    @Test
     fun setDragDownAmount_setsValueOnMediaHierarchyManager() {
         transitionController.dragDownAmount = 10f
 
@@ -276,8 +320,16 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
     }
 
     private fun enableSplitShade() {
+        setSplitShadeEnabled(true)
+    }
+
+    private fun disableSplitShade() {
+        setSplitShadeEnabled(false)
+    }
+
+    private fun setSplitShadeEnabled(enabled: Boolean) {
         context.getOrCreateTestableResources().addOverride(
-            R.bool.config_use_split_notification_shade, true
+                R.bool.config_use_split_notification_shade, enabled
         )
         configurationController.notifyConfigurationChanged()
     }

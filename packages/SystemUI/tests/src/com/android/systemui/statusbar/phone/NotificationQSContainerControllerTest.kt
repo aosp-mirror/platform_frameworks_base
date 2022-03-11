@@ -1,12 +1,13 @@
 package com.android.systemui.statusbar.phone
 
-import android.annotation.IdRes
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowInsets
 import android.view.WindowManagerPolicyConstants
+import androidx.annotation.AnyRes
+import androidx.annotation.IdRes
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.test.filters.SmallTest
@@ -72,8 +73,6 @@ class NotificationQSContainerControllerTest : SysuiTestCase() {
     private lateinit var taskbarVisibilityCallback: OverviewProxyListener
     private lateinit var windowInsetsCallback: Consumer<WindowInsets>
 
-    private val testableResources = mContext.orCreateTestableResources
-
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
@@ -105,7 +104,7 @@ class NotificationQSContainerControllerTest : SysuiTestCase() {
         windowInsetsCallback = windowInsetsCallbackCaptor.value
     }
 
-    fun overrideResource(@IdRes id: Int, value: Any) {
+    private fun overrideResource(@AnyRes id: Int, value: Any) {
         mContext.orCreateTestableResources.addOverride(id, value)
     }
 
@@ -455,6 +454,26 @@ class NotificationQSContainerControllerTest : SysuiTestCase() {
         assertThat(getConstraintSetLayout(R.id.qs_frame).endMargin).isEqualTo(0)
         assertThat(getConstraintSetLayout(R.id.notification_stack_scroller).startMargin)
                 .isEqualTo(0)
+    }
+
+    @Test
+    fun testSplitShadeLayout_qsFrameHasHorizontalMarginsOfZero() {
+        enableSplitShade()
+        controller.updateResources()
+        assertThat(getConstraintSetLayout(R.id.qs_frame).endMargin).isEqualTo(0)
+        assertThat(getConstraintSetLayout(R.id.qs_frame).startMargin).isEqualTo(0)
+    }
+
+    @Test
+    fun testSinglePaneShadeLayout_qsFrameHasHorizontalMarginsSetToCorrectValue() {
+        disableSplitShade()
+        controller.updateResources()
+        val notificationPanelMarginHorizontal = context.resources
+                .getDimensionPixelSize(R.dimen.notification_panel_margin_horizontal)
+        assertThat(getConstraintSetLayout(R.id.qs_frame).endMargin)
+                .isEqualTo(notificationPanelMarginHorizontal)
+        assertThat(getConstraintSetLayout(R.id.qs_frame).startMargin)
+                .isEqualTo(notificationPanelMarginHorizontal)
     }
 
     @Test

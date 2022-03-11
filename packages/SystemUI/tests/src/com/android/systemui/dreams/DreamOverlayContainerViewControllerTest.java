@@ -16,7 +16,6 @@
 
 package com.android.systemui.dreams;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -30,7 +29,6 @@ import android.view.ViewTreeObserver;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dreams.complication.ComplicationHostViewController;
 
@@ -44,7 +42,6 @@ import org.mockito.MockitoAnnotations;
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 public class DreamOverlayContainerViewControllerTest extends SysuiTestCase {
-    private static final int DREAM_OVERLAY_NOTIFICATIONS_DRAG_AREA_HEIGHT = 100;
     private static final int MAX_BURN_IN_OFFSET = 20;
     private static final long BURN_IN_PROTECTION_UPDATE_INTERVAL = 10;
     private static final long MILLIS_UNTIL_FULL_JITTER = 240 * 1000;
@@ -76,9 +73,6 @@ public class DreamOverlayContainerViewControllerTest extends SysuiTestCase {
     public void setup() {
         MockitoAnnotations.initMocks(this);
 
-        when(mResources.getDimensionPixelSize(
-                R.dimen.dream_overlay_notifications_drag_area_height)).thenReturn(
-                        DREAM_OVERLAY_NOTIFICATIONS_DRAG_AREA_HEIGHT);
         when(mDreamOverlayContainerView.getResources()).thenReturn(mResources);
         when(mDreamOverlayContainerView.getViewTreeObserver()).thenReturn(mViewTreeObserver);
 
@@ -97,13 +91,6 @@ public class DreamOverlayContainerViewControllerTest extends SysuiTestCase {
     public void testDreamOverlayStatusBarViewControllerInitialized() {
         mController.init();
         verify(mDreamOverlayStatusBarViewController).init();
-    }
-
-    @Test
-    public void testSetsDreamOverlayNotificationsDragAreaHeight() {
-        assertEquals(
-                mController.getDreamOverlayNotificationsDragAreaHeight(),
-                DREAM_OVERLAY_NOTIFICATIONS_DRAG_AREA_HEIGHT);
     }
 
     @Test

@@ -322,6 +322,13 @@ public final class DeviceConfig {
     public static final String NAMESPACE_NNAPI_NATIVE = "nnapi_native";
 
     /**
+     * Namespace for all OnDevicePersonalization related feature.
+     * @hide
+     */
+    @SystemApi
+    public static final String NAMESPACE_ON_DEVICE_PERSONALIZATION = "on_device_personalization";
+
+    /**
      * Namespace for features related to the Package Manager Service.
      *
      * @hide

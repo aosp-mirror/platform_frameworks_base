@@ -19,6 +19,7 @@ package android.media.tv.interactive;
 import android.annotation.MainThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SdkConstant;
 import android.annotation.StringDef;
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
@@ -76,15 +77,14 @@ public abstract class TvInteractiveAppService extends Service {
 
     private static final int DETACH_MEDIA_VIEW_TIMEOUT_MS = 5000;
 
-    // TODO: cleanup and unhide APIs.
-
     /**
      * This is the interface name that a service implementing a TV Interactive App service should
      * say that it supports -- that is, this is the action it uses for its intent filter. To be
      * supported, the service must also require the
-     * android.Manifest.permission#BIND_TV_INTERACTIVE_APP permission so that other applications
-     * cannot abuse it.
+     * {@link android.Manifest.permission#BIND_TV_INTERACTIVE_APP} permission so that other
+     * applications cannot abuse it.
      */
+    @SdkConstant(SdkConstant.SdkConstantType.SERVICE_ACTION)
     public static final String SERVICE_INTERFACE =
             "android.media.tv.interactive.TvInteractiveAppService";
 
@@ -244,13 +244,13 @@ public abstract class TvInteractiveAppService extends Service {
     public abstract void onPrepare(@TvInteractiveAppInfo.InteractiveAppType int type);
 
     /**
-     * Registers App link info.
+     * Called when a request to register an Android application link info record is received.
      */
     public void onRegisterAppLinkInfo(@NonNull AppLinkInfo appLinkInfo) {
     }
 
     /**
-     * Unregisters App link info.
+     * Called when a request to unregister an Android application link info record is received.
      */
     public void onUnregisterAppLinkInfo(@NonNull AppLinkInfo appLinkInfo) {
     }
@@ -383,7 +383,7 @@ public abstract class TvInteractiveAppService extends Service {
         }
 
         /**
-         * Resets TvIAppService session.
+         * Resets TvInteractiveAppService session.
          */
         public void onResetInteractiveApp() {
         }

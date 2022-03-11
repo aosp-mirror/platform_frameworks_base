@@ -4276,7 +4276,6 @@ package android.app {
     method public void setLocusContext(@Nullable android.content.LocusId, @Nullable android.os.Bundle);
     method public final void setMediaController(android.media.session.MediaController);
     method public void setPictureInPictureParams(@NonNull android.app.PictureInPictureParams);
-    method public void setPreferDockBigOverlays(boolean);
     method @Deprecated public final void setProgress(int);
     method @Deprecated public final void setProgressBarIndeterminate(boolean);
     method @Deprecated public final void setProgressBarIndeterminateVisibility(boolean);
@@ -4286,6 +4285,7 @@ package android.app {
     method public final void setResult(int);
     method public final void setResult(int, android.content.Intent);
     method @Deprecated public final void setSecondaryProgress(int);
+    method public void setShouldDockBigOverlays(boolean);
     method public void setShowWhenLocked(boolean);
     method public void setTaskDescription(android.app.ActivityManager.TaskDescription);
     method public void setTitle(CharSequence);
@@ -4296,6 +4296,7 @@ package android.app {
     method public void setVisible(boolean);
     method public final void setVolumeControlStream(int);
     method public void setVrModeEnabled(boolean, @NonNull android.content.ComponentName) throws android.content.pm.PackageManager.NameNotFoundException;
+    method public boolean shouldDockBigOverlays();
     method public boolean shouldShowRequestPermissionRationale(@NonNull String);
     method public boolean shouldUpRecreateTask(android.content.Intent);
     method public boolean showAssist(android.os.Bundle);
@@ -18824,6 +18825,7 @@ package android.inputmethodservice {
     method public void onStartInput(android.view.inputmethod.EditorInfo, boolean);
     method public void onStartInputView(android.view.inputmethod.EditorInfo, boolean);
     method public boolean onStartStylusHandwriting();
+    method public void onStylusHandwritingMotionEvent(@NonNull android.view.MotionEvent);
     method public void onUnbindInput();
     method @Deprecated public void onUpdateCursor(android.graphics.Rect);
     method public void onUpdateCursorAnchorInfo(android.view.inputmethod.CursorAnchorInfo);
@@ -26069,11 +26071,9 @@ package android.media.tv.interactive {
   public static final class AppLinkInfo.Builder {
     ctor public AppLinkInfo.Builder(@NonNull String, @NonNull String);
     method @NonNull public android.media.tv.interactive.AppLinkInfo build();
-    method @NonNull public android.media.tv.interactive.AppLinkInfo.Builder setClassName(@NonNull String);
-    method @NonNull public android.media.tv.interactive.AppLinkInfo.Builder setPackageName(@NonNull String);
-    method @NonNull public android.media.tv.interactive.AppLinkInfo.Builder setUriHost(@Nullable String);
-    method @NonNull public android.media.tv.interactive.AppLinkInfo.Builder setUriPrefix(@Nullable String);
-    method @NonNull public android.media.tv.interactive.AppLinkInfo.Builder setUriScheme(@Nullable String);
+    method @NonNull public android.media.tv.interactive.AppLinkInfo.Builder setUriHost(@NonNull String);
+    method @NonNull public android.media.tv.interactive.AppLinkInfo.Builder setUriPrefix(@NonNull String);
+    method @NonNull public android.media.tv.interactive.AppLinkInfo.Builder setUriScheme(@NonNull String);
   }
 
   public final class TvInteractiveAppInfo implements android.os.Parcelable {
@@ -26511,14 +26511,6 @@ package android.net {
     method public int getGid();
     method public int getPid();
     method public int getUid();
-  }
-
-  public final class EthernetNetworkSpecifier extends android.net.NetworkSpecifier implements android.os.Parcelable {
-    ctor public EthernetNetworkSpecifier(@NonNull String);
-    method public int describeContents();
-    method @Nullable public String getInterfaceName();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.net.EthernetNetworkSpecifier> CREATOR;
   }
 
   public final class Ikev2VpnProfile extends android.net.PlatformVpnProfile {
