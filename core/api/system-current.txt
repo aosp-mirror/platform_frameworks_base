@@ -1198,43 +1198,6 @@ package android.app.admin {
   }
 
   public static final class DevicePolicyResources.Strings {
-    field public static final String UNDEFINED = "UNDEFINED";
-  }
-
-  public static final class DevicePolicyResources.Strings.Dialer {
-    field public static final String NOTIFICATION_INCOMING_WORK_CALL_TITLE = "Dialer.NOTIFICATION_INCOMING_WORK_CALL_TITLE";
-    field public static final String NOTIFICATION_MISSED_WORK_CALL_TITLE = "Dialer.NOTIFICATION_MISSED_WORK_CALL_TITLE";
-    field public static final String NOTIFICATION_ONGOING_WORK_CALL_TITLE = "Dialer.NOTIFICATION_ONGOING_WORK_CALL_TITLE";
-    field public static final String NOTIFICATION_WIFI_WORK_CALL_LABEL = "Dialer.NOTIFICATION_WIFI_WORK_CALL_LABEL";
-  }
-
-  public static final class DevicePolicyResources.Strings.DocumentsUi {
-    field public static final String CANT_SAVE_TO_PERSONAL_MESSAGE = "DocumentsUi.CANT_SAVE_TO_PERSONAL_MESSAGE";
-    field public static final String CANT_SAVE_TO_PERSONAL_TITLE = "DocumentsUi.CANT_SAVE_TO_PERSONAL_TITLE";
-    field public static final String CANT_SAVE_TO_WORK_MESSAGE = "DocumentsUi.CANT_SAVE_TO_WORK_MESSAGE";
-    field public static final String CANT_SAVE_TO_WORK_TITLE = "DocumentsUi.CANT_SAVE_TO_WORK_TITLE";
-    field public static final String CANT_SELECT_PERSONAL_FILES_MESSAGE = "DocumentsUi.CANT_SELECT_PERSONAL_FILES_MESSAGE";
-    field public static final String CANT_SELECT_PERSONAL_FILES_TITLE = "DocumentsUi.CANT_SELECT_PERSONAL_FILES_TITLE";
-    field public static final String CANT_SELECT_WORK_FILES_MESSAGE = "DocumentsUi.CANT_SELECT_WORK_FILES_MESSAGE";
-    field public static final String CANT_SELECT_WORK_FILES_TITLE = "DocumentsUi.CANT_SELECT_WORK_FILES_TITLE";
-    field public static final String CROSS_PROFILE_NOT_ALLOWED_MESSAGE = "DocumentsUi.CROSS_PROFILE_NOT_ALLOWED_MESSAGE";
-    field public static final String CROSS_PROFILE_NOT_ALLOWED_TITLE = "DocumentsUi.CROSS_PROFILE_NOT_ALLOWED_TITLE";
-    field public static final String PERSONAL_TAB = "DocumentsUi.PERSONAL_TAB";
-    field public static final String PREVIEW_WORK_FILE_ACCESSIBILITY = "DocumentsUi.PREVIEW_WORK_FILE_ACCESSIBILITY";
-    field public static final String WORK_ACCESSIBILITY = "DocumentsUi.WORK_ACCESSIBILITY";
-    field public static final String WORK_PROFILE_OFF_ENABLE_BUTTON = "DocumentsUi.WORK_PROFILE_OFF_ENABLE_BUTTON";
-    field public static final String WORK_PROFILE_OFF_ERROR_TITLE = "DocumentsUi.WORK_PROFILE_OFF_ERROR_TITLE";
-    field public static final String WORK_TAB = "DocumentsUi.WORK_TAB";
-  }
-
-  public static final class DevicePolicyResources.Strings.MediaProvider {
-    field public static final String BLOCKED_BY_ADMIN_TITLE = "MediaProvider.BLOCKED_BY_ADMIN_TITLE";
-    field public static final String BLOCKED_FROM_PERSONAL_MESSAGE = "MediaProvider.BLOCKED_FROM_PERSONAL_MESSAGE";
-    field public static final String BLOCKED_FROM_WORK_MESSAGE = "MediaProvider.BLOCKED_FROM_WORK_MESSAGE";
-    field public static final String SWITCH_TO_PERSONAL_MESSAGE = "MediaProvider.SWITCH_TO_PERSONAL_MESSAGE";
-    field public static final String SWITCH_TO_WORK_MESSAGE = "MediaProvider.SWITCH_TO_WORK_MESSAGE";
-    field public static final String WORK_PROFILE_PAUSED_MESSAGE = "MediaProvider.WORK_PROFILE_PAUSED_MESSAGE";
-    field public static final String WORK_PROFILE_PAUSED_TITLE = "MediaProvider.WORK_PROFILE_PAUSED_TITLE";
   }
 
   public static final class DevicePolicyResources.Strings.PermissionController {

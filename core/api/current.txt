@@ -7839,31 +7839,7 @@ package android.app.admin {
   }
 
   public final class DevicePolicyResources {
-  }
-
-  public static final class DevicePolicyResources.Drawables {
     field public static final String UNDEFINED = "UNDEFINED";
-    field public static final String WORK_PROFILE_ICON = "WORK_PROFILE_ICON";
-    field public static final String WORK_PROFILE_ICON_BADGE = "WORK_PROFILE_ICON_BADGE";
-    field public static final String WORK_PROFILE_OFF_ICON = "WORK_PROFILE_OFF_ICON";
-    field public static final String WORK_PROFILE_USER_ICON = "WORK_PROFILE_USER_ICON";
-  }
-
-  public static final class DevicePolicyResources.Drawables.Source {
-    field public static final String HOME_WIDGET = "HOME_WIDGET";
-    field public static final String LAUNCHER_OFF_BUTTON = "LAUNCHER_OFF_BUTTON";
-    field public static final String NOTIFICATION = "NOTIFICATION";
-    field public static final String PROFILE_SWITCH_ANIMATION = "PROFILE_SWITCH_ANIMATION";
-    field public static final String QUICK_SETTINGS = "QUICK_SETTINGS";
-    field public static final String STATUS_BAR = "STATUS_BAR";
-    field public static final String UNDEFINED = "UNDEFINED";
-  }
-
-  public static final class DevicePolicyResources.Drawables.Style {
-    field public static final String DEFAULT = "DEFAULT";
-    field public static final String OUTLINE = "OUTLINE";
-    field public static final String SOLID_COLORED = "SOLID_COLORED";
-    field public static final String SOLID_NOT_COLORED = "SOLID_NOT_COLORED";
   }
 
   public final class DnsEvent extends android.app.admin.NetworkEvent implements android.os.Parcelable {

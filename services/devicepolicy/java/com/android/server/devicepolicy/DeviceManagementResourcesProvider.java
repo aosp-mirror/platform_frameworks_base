@@ -16,17 +16,14 @@
 
 package com.android.server.devicepolicy;
 
-import static android.app.admin.DevicePolicyResources.Drawables.Source.UPDATABLE_DRAWABLE_SOURCES;
 import static android.app.admin.DevicePolicyResources.Drawables.Style;
-import static android.app.admin.DevicePolicyResources.Drawables.Style.UPDATABLE_DRAWABLE_STYLES;
-import static android.app.admin.DevicePolicyResources.Drawables.UPDATABLE_DRAWABLE_IDS;
-import static android.app.admin.DevicePolicyResources.Strings.UPDATABLE_STRING_IDS;
 
 import static java.util.Objects.requireNonNull;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.admin.DevicePolicyDrawableResource;
+import android.app.admin.DevicePolicyResources;
 import android.app.admin.DevicePolicyResources.Drawables;
 import android.app.admin.DevicePolicyStringResource;
 import android.app.admin.ParcelableResource;
@@ -113,7 +110,7 @@ class DeviceManagementResourcesProvider {
             Objects.requireNonNull(drawableSource, "drawableSource must be provided.");
             Objects.requireNonNull(resource, "ParcelableResource must be provided.");
 
-            if (Drawables.Source.UNDEFINED.equals(drawableSource)) {
+            if (DevicePolicyResources.UNDEFINED.equals(drawableSource)) {
                 updated |= updateDrawable(drawableId, drawableStyle, resource);
             } else {
                 updated |= updateDrawableForSource(drawableId, drawableSource, resource);
@@ -130,12 +127,6 @@ class DeviceManagementResourcesProvider {
 
     private boolean updateDrawable(
             String drawableId, String drawableStyle, ParcelableResource updatableResource) {
-        if (!UPDATABLE_DRAWABLE_IDS.contains(drawableId)) {
-            Log.w(TAG, "Updating a resource for an unknown drawable id " + drawableId);
-        }
-        if (!UPDATABLE_DRAWABLE_STYLES.contains(drawableStyle)) {
-            Log.w(TAG, "Updating a resource for an unknown style id " + drawableStyle);
-        }
         synchronized (mLock) {
             if (!mUpdatedDrawablesForStyle.containsKey(drawableId)) {
                 mUpdatedDrawablesForStyle.put(drawableId, new HashMap<>());
@@ -153,12 +144,6 @@ class DeviceManagementResourcesProvider {
     // TODO(b/214576716): change this to respect style
     private boolean updateDrawableForSource(
             String drawableId, String drawableSource, ParcelableResource updatableResource) {
-        if (!UPDATABLE_DRAWABLE_IDS.contains(drawableId)) {
-            Log.w(TAG, "Updating a resource for an unknown drawable id " + drawableId);
-        }
-        if (!UPDATABLE_DRAWABLE_SOURCES.contains(drawableSource)) {
-            Log.w(TAG, "Updating a resource for an unknown source id " + drawableSource);
-        }
         synchronized (mLock) {
             if (!mUpdatedDrawablesForSource.containsKey(drawableId)) {
                 mUpdatedDrawablesForSource.put(drawableId, new HashMap<>());
@@ -195,17 +180,6 @@ class DeviceManagementResourcesProvider {
     @Nullable
     ParcelableResource getDrawable(
             String drawableId, String drawableStyle, String drawableSource) {
-        if (!UPDATABLE_DRAWABLE_IDS.contains(drawableId)) {
-            Log.w(TAG, "Getting an updated resource for an unknown drawable id " + drawableId);
-        }
-        if (!UPDATABLE_DRAWABLE_STYLES.contains(drawableStyle)) {
-            Log.w(TAG, "Getting an updated resource for an unknown drawable style "
-                    + drawableStyle);
-        }
-        if (!UPDATABLE_DRAWABLE_SOURCES.contains(drawableSource)) {
-            Log.w(TAG, "Getting an updated resource for an unknown drawable Source "
-                    + drawableSource);
-        }
         if (mUpdatedDrawablesForSource.containsKey(drawableId)
                 && mUpdatedDrawablesForSource.get(drawableId).containsKey(drawableSource)) {
             return mUpdatedDrawablesForSource.get(drawableId).get(drawableSource);
@@ -216,10 +190,6 @@ class DeviceManagementResourcesProvider {
         }
         if (mUpdatedDrawablesForStyle.get(drawableId).containsKey(drawableStyle)) {
             return mUpdatedDrawablesForStyle.get(drawableId).get(drawableStyle);
-        }
-
-        if (mUpdatedDrawablesForStyle.get(drawableId).containsKey(Style.DEFAULT)) {
-            return mUpdatedDrawablesForStyle.get(drawableId).get(Style.DEFAULT);
         }
         Log.d(TAG, "No updated drawable found for drawable id " + drawableId);
         return null;
@@ -249,9 +219,6 @@ class DeviceManagementResourcesProvider {
     }
 
     private boolean updateString(String stringId, ParcelableResource updatableResource) {
-        if (!UPDATABLE_STRING_IDS.contains(stringId)) {
-            Log.w(TAG, "Updating a resource for an unknown string id " + stringId);
-        }
         synchronized (mLock) {
             ParcelableResource current = mUpdatedStrings.get(stringId);
             if (updatableResource.equals(current)) {
@@ -282,10 +249,6 @@ class DeviceManagementResourcesProvider {
 
     @Nullable
     ParcelableResource getString(String stringId) {
-        if (!UPDATABLE_STRING_IDS.contains(stringId)) {
-            Log.w(TAG, "Getting an updated resource for an unknown string id " + stringId);
-        }
-
         if (mUpdatedStrings.containsKey(stringId)) {
             return mUpdatedStrings.get(stringId);
         }
