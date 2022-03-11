@@ -3832,4 +3832,13 @@ public class ApplicationPackageManager extends PackageManager {
             throw re.rethrowAsRuntimeException();
         }
     }
+
+    @Override
+    public void makeUidVisible(int recipientUid, int visibleUid) {
+        try {
+            mPM.makeUidVisible(recipientUid, visibleUid);
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
 }
