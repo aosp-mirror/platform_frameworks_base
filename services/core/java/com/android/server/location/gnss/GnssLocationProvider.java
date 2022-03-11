@@ -1184,6 +1184,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
                 mAlarmManager.cancel(mBatchingAlarm);
                 mBatchingAlarm = null;
             }
+            mGnssNative.flushBatch();
             mGnssNative.stopBatch();
             mBatchingStarted = false;
         }
