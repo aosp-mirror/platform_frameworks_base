@@ -3589,7 +3589,7 @@ public final class Telephony {
          * @hide
          */
         public static final Uri PREFERRED_APN_URI = Uri.parse(
-                "content://telephony/carriers/preferapn/subId/");
+                "content://telephony/carriers/preferapn/subId");
 
         /**
          * The {@code content://} style URL for the perferred APN set id.
@@ -3597,8 +3597,15 @@ public final class Telephony {
          * @hide
          */
         public static final Uri PREFERRED_APN_SET_URI = Uri.parse(
-                "content://telephony/carriers/preferapnset/subId/");
+                "content://telephony/carriers/preferapnset/subId");
 
+        /**
+         * The id of preferred APN.
+         *
+         * @see #PREFERRED_APN_URI
+         * @hide
+         */
+        public static final String APN_ID = "apn_id";
 
         /**
          * The column name for ENFORCE_MANAGED_URI, indicates whether DPC-owned APNs are enforced.
