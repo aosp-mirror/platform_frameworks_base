@@ -5063,7 +5063,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         }
 
         @Override
-        public void grantImplicitAccess(int recipientUid, @NonNull String visibleAuthority) {
+        public void makeProviderVisible(int recipientUid, @NonNull String visibleAuthority) {
             final Computer snapshot = snapshotComputer();
             final int recipientUserId = UserHandle.getUserId(recipientUid);
             final ProviderInfo providerInfo =
@@ -5072,6 +5072,26 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 return;
             }
             int visibleUid = providerInfo.applicationInfo.uid;
+            PackageManagerService.this.grantImplicitAccess(snapshot, recipientUserId,
+                    null /*Intent*/, UserHandle.getAppId(recipientUid), visibleUid,
+                    false /*direct*/, false /* retainOnUpdate */);
+        }
+
+        @Override
+        public void makeUidVisible(int recipientUid, int visibleUid) {
+            mContext.enforceCallingOrSelfPermission(
+                    android.Manifest.permission.MAKE_UID_VISIBLE, "makeUidVisible");
+            final int callingUid = Binder.getCallingUid();
+            final int recipientUserId = UserHandle.getUserId(recipientUid);
+            final int visibleUserId = UserHandle.getUserId(visibleUid);
+            final Computer snapshot = snapshotComputer();
+            snapshot.enforceCrossUserPermission(callingUid, recipientUserId,
+                    false /* requireFullPermission */, false /* checkShell */, "makeUidVisible");
+            snapshot.enforceCrossUserPermission(callingUid, visibleUserId,
+                    false /* requireFullPermission */, false /* checkShell */, "makeUidVisible");
+            snapshot.enforceCrossUserPermission(recipientUid, visibleUserId,
+                    false /* requireFullPermission */, false /* checkShell */, "makeUidVisible");
+
             PackageManagerService.this.grantImplicitAccess(snapshot, recipientUserId,
                     null /*Intent*/, UserHandle.getAppId(recipientUid), visibleUid,
                     false /*direct*/, false /* retainOnUpdate */);

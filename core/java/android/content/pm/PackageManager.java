@@ -10281,17 +10281,36 @@ public abstract class PackageManager {
     }
 
     /**
-     * Grants implicit visibility of the package that provides an authority to a querying UID.
+     * Makes a package that provides an authority {@code visibleAuthority} become visible to the
+     * application {@code recipientUid}.
      *
      * @throws SecurityException when called by a package other than the contacts provider
      * @hide
      */
-    public void grantImplicitAccess(int queryingUid, String visibleAuthority) {
+    public void makeProviderVisible(int recipientUid, String visibleAuthority) {
         try {
-            ActivityThread.getPackageManager().grantImplicitAccess(queryingUid, visibleAuthority);
+            ActivityThread.getPackageManager().makeProviderVisible(recipientUid, visibleAuthority);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Makes the package associated with the uid {@code visibleUid} become visible to the
+     * recipient uid application.
+     *
+     * @param recipientUid The uid of the application that is being given access to {@code
+     *                     visibleUid}
+     * @param visibleUid The uid of the application that is becoming accessible to {@code
+     *                   recipientAppId}
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MAKE_UID_VISIBLE)
+    @TestApi
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public void makeUidVisible(int recipientUid, int visibleUid) {
+        throw new UnsupportedOperationException(
+                "makeUidVisible not implemented in subclass");
     }
 
     // Some of the flags don't affect the query result, but let's be conservative and cache
