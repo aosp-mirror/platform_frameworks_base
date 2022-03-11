@@ -18,6 +18,7 @@ package android.media.tv.interactive;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.ComponentName;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -25,8 +26,7 @@ import android.os.Parcelable;
  * App link information used by TV interactive app to launch Android apps.
  */
 public final class AppLinkInfo implements Parcelable {
-    private @NonNull String mPackageName;
-    private @NonNull String mClassName;
+    private @NonNull ComponentName mComponentName;
     private @Nullable String mUriScheme;
     private @Nullable String mUriHost;
     private @Nullable String mUriPrefix;
@@ -41,12 +41,11 @@ public final class AppLinkInfo implements Parcelable {
             @Nullable String uriScheme,
             @Nullable String uriHost,
             @Nullable String uriPrefix) {
-        this.mPackageName = packageName;
         com.android.internal.util.AnnotationValidations.validate(
-                NonNull.class, null, mPackageName);
-        this.mClassName = className;
+                NonNull.class, null, packageName);
         com.android.internal.util.AnnotationValidations.validate(
-                NonNull.class, null, mClassName);
+                NonNull.class, null, className);
+        this.mComponentName = new ComponentName(packageName, className);
         this.mUriScheme = uriScheme;
         this.mUriHost = uriHost;
         this.mUriPrefix = uriPrefix;
@@ -57,7 +56,7 @@ public final class AppLinkInfo implements Parcelable {
      */
     @NonNull
     public String getPackageName() {
-        return mPackageName;
+        return mComponentName.getPackageName();
     }
 
     /**
@@ -65,7 +64,7 @@ public final class AppLinkInfo implements Parcelable {
      */
     @NonNull
     public String getClassName() {
-        return mClassName;
+        return mComponentName.getClassName();
     }
 
     /**
@@ -95,8 +94,8 @@ public final class AppLinkInfo implements Parcelable {
     @Override
     public String toString() {
         return "AppLinkInfo { "
-                + "packageName = " + mPackageName + ", "
-                + "className = " + mClassName + ", "
+                + "packageName = " + mComponentName.getPackageName() + ", "
+                + "className = " + mComponentName.getClassName() + ", "
                 + "uriScheme = " + mUriScheme + ", "
                 + "uriHost = " + mUriHost + ", "
                 + "uriPrefix = " + mUriPrefix
@@ -105,8 +104,8 @@ public final class AppLinkInfo implements Parcelable {
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
-        dest.writeString(mPackageName);
-        dest.writeString(mClassName);
+        dest.writeString(mComponentName.getPackageName());
+        dest.writeString(mComponentName.getClassName());
         dest.writeString(mUriScheme);
         dest.writeString(mUriHost);
         dest.writeString(mUriPrefix);
@@ -124,12 +123,11 @@ public final class AppLinkInfo implements Parcelable {
         String uriHost = in.readString();
         String uriPrefix = in.readString();
 
-        this.mPackageName = packageName;
         com.android.internal.util.AnnotationValidations.validate(
-                NonNull.class, null, mPackageName);
-        this.mClassName = className;
+                NonNull.class, null, packageName);
         com.android.internal.util.AnnotationValidations.validate(
-                NonNull.class, null, mClassName);
+                NonNull.class, null, className);
+        this.mComponentName = new ComponentName(packageName, className);
         this.mUriScheme = uriScheme;
         this.mUriHost = uriHost;
         this.mUriPrefix = uriPrefix;
@@ -174,28 +172,10 @@ public final class AppLinkInfo implements Parcelable {
         }
 
         /**
-         * Sets package name of the App link.
-         */
-        @NonNull
-        public Builder setPackageName(@NonNull String value) {
-            mPackageName = value;
-            return this;
-        }
-
-        /**
-         * Sets app name of the App link.
-         */
-        @NonNull
-        public Builder setClassName(@NonNull String value) {
-            mClassName = value;
-            return this;
-        }
-
-        /**
          * Sets URI scheme of the App link.
          */
         @NonNull
-        public Builder setUriScheme(@Nullable String value) {
+        public Builder setUriScheme(@NonNull String value) {
             mUriScheme = value;
             return this;
         }
@@ -204,7 +184,7 @@ public final class AppLinkInfo implements Parcelable {
          * Sets URI host of the App link.
          */
         @NonNull
-        public Builder setUriHost(@Nullable String value) {
+        public Builder setUriHost(@NonNull String value) {
             mUriHost = value;
             return this;
         }
@@ -213,7 +193,7 @@ public final class AppLinkInfo implements Parcelable {
          * Sets URI prefix of the App link.
          */
         @NonNull
-        public Builder setUriPrefix(@Nullable String value) {
+        public Builder setUriPrefix(@NonNull String value) {
             mUriPrefix = value;
             return this;
         }

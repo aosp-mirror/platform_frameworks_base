@@ -277,6 +277,12 @@ public final class ViewRootImpl implements ViewParent,
     private static final boolean ENABLE_INPUT_LATENCY_TRACKING = true;
 
     /**
+     * Whether the caption is drawn by the shell.
+     * @hide
+     */
+    public static final boolean CAPTION_ON_SHELL = false;
+
+    /**
      * Set this system property to true to force the view hierarchy to render
      * at 60 Hz. This can be used to measure the potential framerate.
      */
@@ -867,6 +873,7 @@ public final class ViewRootImpl implements ViewParent,
         mDensity = context.getResources().getDisplayMetrics().densityDpi;
         mNoncompatDensity = context.getResources().getDisplayMetrics().noncompatDensityDpi;
         mFallbackEventHandler = new PhoneFallbackEventHandler(context);
+        // TODO(b/222696368): remove getSfInstance usage and use vsyncId for transactions
         mChoreographer = useSfChoreographer
                 ? Choreographer.getSfInstance() : Choreographer.getInstance();
         mDisplayManager = (DisplayManager)context.getSystemService(Context.DISPLAY_SERVICE);
@@ -1771,6 +1778,7 @@ public final class ViewRootImpl implements ViewParent,
         updateInternalDisplay(displayId, mView.getResources());
         mImeFocusController.onMovedToDisplay();
         mAttachInfo.mDisplayState = mDisplay.getState();
+        mDisplayInstallOrientation = mDisplay.getInstallOrientation();
         // Internal state updated, now notify the view hierarchy.
         mView.dispatchMovedToDisplay(mDisplay, config);
     }
@@ -2561,6 +2569,9 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     private boolean updateCaptionInsets() {
+        if (CAPTION_ON_SHELL) {
+            return false;
+        }
         if (!(mView instanceof DecorView)) return false;
         final int captionInsetsHeight = ((DecorView) mView).getCaptionInsetsHeight();
         final Rect captionFrame = new Rect();
@@ -3438,6 +3449,12 @@ public final class ViewRootImpl implements ViewParent,
                 if (!wasReportNextDraw && mReportNextDraw) {
                     mReportNextDraw = false;
                     pendingDrawFinished();
+                }
+
+                // Make sure the consumer is not waiting if the view root was just made invisible.
+                if (mBLASTDrawConsumer != null) {
+                    mBLASTDrawConsumer.accept(null);
+                    mBLASTDrawConsumer = null;
                 }
             }
         }

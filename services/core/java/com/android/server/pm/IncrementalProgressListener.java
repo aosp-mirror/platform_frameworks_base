@@ -33,7 +33,8 @@ final class IncrementalProgressListener extends IPackageLoadingProgressCallback.
 
     @Override
     public void onPackageLoadingProgressChanged(float progress) {
-        PackageStateInternal packageState = mPm.getPackageStateInternal(mPackageName);
+        PackageStateInternal packageState = mPm.snapshotComputer()
+                .getPackageStateInternal(mPackageName);
         if (packageState == null) {
             return;
         }

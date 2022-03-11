@@ -154,17 +154,17 @@ filegroup {
     ],
 }
 
+// TODO: remove this empty filegroup.
 filegroup {
     name: "framework-connectivity-tiramisu-sources",
-    srcs: [
-        ":framework-connectivity-ethernet-sources",
-    ],
+    srcs: [],
     visibility: ["//frameworks/base"],
 }
 
 filegroup {
     name: "framework-connectivity-tiramisu-updatable-sources",
     srcs: [
+        ":framework-connectivity-ethernet-sources",
         ":framework-connectivity-ipsec-sources",
         ":framework-connectivity-netstats-sources",
         ":framework-connectivity-nsd-sources",

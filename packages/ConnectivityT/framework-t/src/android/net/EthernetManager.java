@@ -33,7 +33,7 @@ import android.os.Build;
 import android.os.RemoteException;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.os.BackgroundThread;
+import com.android.modules.utils.BackgroundThread;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -511,7 +511,6 @@ public class EthernetManager {
             NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
             android.Manifest.permission.NETWORK_STACK,
             android.Manifest.permission.MANAGE_ETHERNET_NETWORKS})
-    @RequiresFeature(PackageManager.FEATURE_AUTOMOTIVE)
     public void updateConfiguration(
             @NonNull String iface,
             @NonNull EthernetNetworkUpdateRequest request,

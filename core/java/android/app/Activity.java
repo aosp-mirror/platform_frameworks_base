@@ -984,6 +984,8 @@ public class Activity extends ContextThemeWrapper
     private boolean mIsInMultiWindowMode;
     private boolean mIsInPictureInPictureMode;
 
+    private boolean mShouldDockBigOverlays;
+
     private UiTranslationController mUiTranslationController;
 
     private SplashScreen mSplashScreen;
@@ -2977,13 +2979,28 @@ public class Activity extends ContextThemeWrapper
      * <p> If specified, the system will try to respect the preference, but it may be
      * overridden by a user preference.
      *
-     * @param preferDockBigOverlays indicates that the activity prefers big overlays to be
-     *                              docked next to it instead of overlaying its content
+     * @param shouldDockBigOverlays indicates that big overlays should be docked next to the
+     *                              activity instead of overlay its content
      *
      * @see PictureInPictureParams.Builder#setExpandedAspectRatio
+     * @see #shouldDockBigOverlays
      */
-    public void setPreferDockBigOverlays(boolean preferDockBigOverlays) {
-        ActivityClient.getInstance().setPreferDockBigOverlays(mToken, preferDockBigOverlays);
+    public void setShouldDockBigOverlays(boolean shouldDockBigOverlays) {
+        ActivityClient.getInstance().setShouldDockBigOverlays(mToken, shouldDockBigOverlays);
+        mShouldDockBigOverlays = shouldDockBigOverlays;
+    }
+
+    /**
+     * Returns whether big overlays should be docked next to the activity as set by
+     * {@link #setShouldDockBigOverlays}.
+     *
+     * @return {@code true} if big overlays should be docked next to the activity instead
+     *         of overlay its content
+     *
+     * @see #setShouldDockBigOverlays
+     */
+    public boolean shouldDockBigOverlays() {
+        return mShouldDockBigOverlays;
     }
 
     void dispatchMovedToDisplay(int displayId, Configuration config) {
@@ -5663,7 +5680,6 @@ public class Activity extends ContextThemeWrapper
      * @throws ActivityNotFoundException &nbsp;
      * @hide
      */
-    @SystemApi
     @RequiresPermission(anyOf = {INTERACT_ACROSS_USERS, INTERACT_ACROSS_USERS_FULL})
     public void startActivityAsUser(@NonNull Intent intent,
             @Nullable Bundle options, @NonNull UserHandle user) {
@@ -8249,6 +8265,7 @@ public class Activity extends ContextThemeWrapper
                 .getWindowingMode();
         mIsInMultiWindowMode = inMultiWindowMode(windowingMode);
         mIsInPictureInPictureMode = windowingMode == WINDOWING_MODE_PINNED;
+        mShouldDockBigOverlays = getResources().getBoolean(R.bool.config_dockBigOverlayWindows);
         restoreHasCurrentPermissionRequest(icicle);
         if (persistentState != null) {
             onCreate(icicle, persistentState);

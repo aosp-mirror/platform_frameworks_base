@@ -36,6 +36,7 @@
         android:tooltipText="@*android:string/share"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/copy_button"
+        android:tint="?android:attr/textColorPrimary"
         android:src="@drawable/ic_screenshot_share" />
 
     <ScrollView

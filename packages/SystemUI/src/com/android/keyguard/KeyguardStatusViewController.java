@@ -137,6 +137,13 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
     }
 
     /**
+     * Sets a translationY on the views on the keyguard, except on the media view.
+     */
+    public void setTranslationYExcludingMedia(float translationY) {
+        mView.setChildrenTranslationYExcludingMediaView(translationY);
+    }
+
+    /**
      * Set keyguard status view alpha.
      */
     public void setAlpha(float alpha) {
