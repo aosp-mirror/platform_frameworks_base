@@ -1049,10 +1049,17 @@ public class BubbleStackView extends FrameLayout
 
     private final Runnable mAnimateTemporarilyInvisibleImmediate = () -> {
         if (mTemporarilyInvisible && mFlyout.getVisibility() != View.VISIBLE) {
+            // To calculate a distance, bubble stack needs to be moved to become hidden,
+            // we need to take into account that the bubble stack is positioned on the edge
+            // of the available screen rect, which can be offset by system bars and cutouts.
             if (mStackAnimationController.isStackOnLeftSide()) {
-                animate().translationX(-mBubbleSize).start();
+                int availableRectOffsetX =
+                        mPositioner.getAvailableRect().left - mPositioner.getScreenRect().left;
+                animate().translationX(-(mBubbleSize + availableRectOffsetX)).start();
             } else {
-                animate().translationX(mBubbleSize).start();
+                int availableRectOffsetX =
+                        mPositioner.getAvailableRect().right - mPositioner.getScreenRect().right;
+                animate().translationX(mBubbleSize - availableRectOffsetX).start();
             }
         } else {
             animate().translationX(0).start();
