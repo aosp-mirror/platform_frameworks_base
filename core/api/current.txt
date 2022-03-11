@@ -7418,12 +7418,6 @@ package android.app.admin {
     method @NonNull public java.util.List<java.lang.String> getDelegatedScopes(@Nullable android.content.ComponentName, @NonNull String);
     method public CharSequence getDeviceOwnerLockScreenInfo();
     method @Nullable public String getDevicePolicyManagementRoleHolderPackage();
-    method @Nullable public android.graphics.drawable.Drawable getDrawable(@NonNull String, @NonNull String, @NonNull java.util.function.Supplier<android.graphics.drawable.Drawable>);
-    method @Nullable public android.graphics.drawable.Drawable getDrawable(@NonNull String, @NonNull String, @NonNull String, @NonNull java.util.function.Supplier<android.graphics.drawable.Drawable>);
-    method @Nullable public android.graphics.drawable.Icon getDrawableAsIcon(@NonNull String, @NonNull String, @NonNull String, @Nullable android.graphics.drawable.Icon);
-    method @Nullable public android.graphics.drawable.Icon getDrawableAsIcon(@NonNull String, @NonNull String, @Nullable android.graphics.drawable.Icon);
-    method @Nullable public android.graphics.drawable.Drawable getDrawableForDensity(@NonNull String, @NonNull String, int, @NonNull java.util.function.Supplier<android.graphics.drawable.Drawable>);
-    method @Nullable public android.graphics.drawable.Drawable getDrawableForDensity(@NonNull String, @NonNull String, @NonNull String, int, @NonNull java.util.function.Supplier<android.graphics.drawable.Drawable>);
     method public CharSequence getEndUserSessionMessage(@NonNull android.content.ComponentName);
     method @NonNull public String getEnrollmentSpecificId();
     method @Nullable public android.app.admin.FactoryResetProtectionPolicy getFactoryResetProtectionPolicy(@Nullable android.content.ComponentName);
@@ -7470,14 +7464,13 @@ package android.app.admin {
     method @NonNull public java.util.List<android.app.admin.PreferentialNetworkServiceConfig> getPreferentialNetworkServiceConfigs();
     method public int getRequiredPasswordComplexity();
     method public long getRequiredStrongAuthTimeout(@Nullable android.content.ComponentName);
+    method @NonNull public android.app.admin.DevicePolicyResourcesManager getResources();
     method public boolean getScreenCaptureDisabled(@Nullable android.content.ComponentName);
     method public java.util.List<android.os.UserHandle> getSecondaryUsers(@NonNull android.content.ComponentName);
     method public CharSequence getShortSupportMessage(@NonNull android.content.ComponentName);
     method public CharSequence getStartUserSessionMessage(@NonNull android.content.ComponentName);
     method @Deprecated public boolean getStorageEncryption(@Nullable android.content.ComponentName);
     method public int getStorageEncryptionStatus();
-    method @Nullable public String getString(@NonNull String, @NonNull java.util.function.Supplier<java.lang.String>);
-    method @Nullable public String getString(@NonNull String, @NonNull java.util.function.Supplier<java.lang.String>, @NonNull java.lang.Object...);
     method @Nullable public android.app.admin.SystemUpdatePolicy getSystemUpdatePolicy();
     method @Nullable public android.os.PersistableBundle getTransferOwnershipBundle();
     method @Nullable public java.util.List<android.os.PersistableBundle> getTrustAgentConfiguration(@Nullable android.content.ComponentName, @NonNull android.content.ComponentName);
@@ -7840,6 +7833,17 @@ package android.app.admin {
 
   public final class DevicePolicyResources {
     field public static final String UNDEFINED = "UNDEFINED";
+  }
+
+  public class DevicePolicyResourcesManager {
+    method @Nullable public android.graphics.drawable.Drawable getDrawable(@NonNull String, @NonNull String, @NonNull java.util.function.Supplier<android.graphics.drawable.Drawable>);
+    method @Nullable public android.graphics.drawable.Drawable getDrawable(@NonNull String, @NonNull String, @NonNull String, @NonNull java.util.function.Supplier<android.graphics.drawable.Drawable>);
+    method @Nullable public android.graphics.drawable.Icon getDrawableAsIcon(@NonNull String, @NonNull String, @NonNull String, @Nullable android.graphics.drawable.Icon);
+    method @Nullable public android.graphics.drawable.Icon getDrawableAsIcon(@NonNull String, @NonNull String, @Nullable android.graphics.drawable.Icon);
+    method @Nullable public android.graphics.drawable.Drawable getDrawableForDensity(@NonNull String, @NonNull String, int, @NonNull java.util.function.Supplier<android.graphics.drawable.Drawable>);
+    method @Nullable public android.graphics.drawable.Drawable getDrawableForDensity(@NonNull String, @NonNull String, @NonNull String, int, @NonNull java.util.function.Supplier<android.graphics.drawable.Drawable>);
+    method @Nullable public String getString(@NonNull String, @NonNull java.util.function.Supplier<java.lang.String>);
+    method @Nullable public String getString(@NonNull String, @NonNull java.util.function.Supplier<java.lang.String>, @NonNull java.lang.Object...);
   }
 
   public final class DnsEvent extends android.app.admin.NetworkEvent implements android.os.Parcelable {

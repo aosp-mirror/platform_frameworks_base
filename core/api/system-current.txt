@@ -1109,16 +1109,12 @@ package android.app.admin {
     method @RequiresPermission("android.permission.NOTIFY_PENDING_SYSTEM_UPDATE") public void notifyPendingSystemUpdate(long, boolean);
     method @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL) public boolean packageHasActiveAdmins(String);
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS, android.Manifest.permission.PROVISION_DEMO_DEVICE}) public void provisionFullyManagedDevice(@NonNull android.app.admin.FullyManagedDeviceProvisioningParams) throws android.app.admin.ProvisioningException;
-    method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_MANAGEMENT_RESOURCES) public void resetDrawables(@NonNull java.util.Set<java.lang.String>);
-    method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_MANAGEMENT_RESOURCES) public void resetStrings(@NonNull java.util.Set<java.lang.String>);
     method @RequiresPermission(android.Manifest.permission.TRIGGER_LOST_MODE) public void sendLostModeLocationUpdate(@NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Boolean>);
     method @Deprecated @RequiresPermission(android.Manifest.permission.MANAGE_DEVICE_ADMINS) public boolean setActiveProfileOwner(@NonNull android.content.ComponentName, String) throws java.lang.IllegalArgumentException;
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public void setDeviceProvisioningConfigApplied();
     method @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS) public void setDpcDownloaded(boolean);
-    method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_MANAGEMENT_RESOURCES) public void setDrawables(@NonNull java.util.Set<android.app.admin.DevicePolicyDrawableResource>);
     method @Deprecated @RequiresPermission(value=android.Manifest.permission.GRANT_PROFILE_OWNER_DEVICE_IDS_ACCESS, conditional=true) public void setProfileOwnerCanAccessDeviceIds(@NonNull android.content.ComponentName);
     method public void setSecondaryLockscreenEnabled(@NonNull android.content.ComponentName, boolean);
-    method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_MANAGEMENT_RESOURCES) public void setStrings(@NonNull java.util.Set<android.app.admin.DevicePolicyStringResource>);
     method @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS) public void setUserProvisioningState(int, @NonNull android.os.UserHandle);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ROLE_HOLDERS) public boolean shouldAllowBypassingDevicePolicyManagementRoleQualification();
     field public static final String ACCOUNT_FEATURE_DEVICE_OR_PROFILE_OWNER_ALLOWED = "android.account.DEVICE_OR_PROFILE_OWNER_ALLOWED";
@@ -1207,6 +1203,13 @@ package android.app.admin {
     field public static final String HOME_MISSING_WORK_PROFILE_SUPPORT_MESSAGE = "PermissionController.HOME_MISSING_WORK_PROFILE_SUPPORT_MESSAGE";
     field public static final String LOCATION_AUTO_GRANTED_MESSAGE = "PermissionController.LOCATION_AUTO_GRANTED_MESSAGE";
     field public static final String WORK_PROFILE_DEFAULT_APPS_TITLE = "PermissionController.WORK_PROFILE_DEFAULT_APPS_TITLE";
+  }
+
+  public class DevicePolicyResourcesManager {
+    method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_MANAGEMENT_RESOURCES) public void resetDrawables(@NonNull java.util.Set<java.lang.String>);
+    method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_MANAGEMENT_RESOURCES) public void resetStrings(@NonNull java.util.Set<java.lang.String>);
+    method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_MANAGEMENT_RESOURCES) public void setDrawables(@NonNull java.util.Set<android.app.admin.DevicePolicyDrawableResource>);
+    method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_MANAGEMENT_RESOURCES) public void setStrings(@NonNull java.util.Set<android.app.admin.DevicePolicyStringResource>);
   }
 
   public final class DevicePolicyStringResource implements android.os.Parcelable {
