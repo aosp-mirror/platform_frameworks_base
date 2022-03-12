@@ -49,7 +49,11 @@ public class UserPowerCalculator extends PowerCalculator {
                 builder.getUidBatteryConsumerBuilders();
 
         for (int i = uidBatteryConsumerBuilders.size() - 1; i >= 0; i--) {
-            UidBatteryConsumer.Builder uidBuilder = uidBatteryConsumerBuilders.valueAt(i);
+            final UidBatteryConsumer.Builder uidBuilder = uidBatteryConsumerBuilders.valueAt(i);
+            if (uidBuilder.isVirtualUid()) {
+                continue;
+            }
+
             final int uid = uidBuilder.getUid();
             if (UserHandle.getAppId(uid) < Process.FIRST_APPLICATION_UID) {
                 continue;

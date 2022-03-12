@@ -60,7 +60,7 @@ import android.telephony.SubscriptionManager;
 import android.telephony.SubscriptionManager.OnSubscriptionsChangedListener;
 import android.telephony.TelephonyCallback;
 import android.telephony.TelephonyManager;
-import android.telephony.TelephonyManager.CarrierPrivilegesListener;
+import android.telephony.TelephonyManager.CarrierPrivilegesCallback;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 
@@ -187,11 +187,11 @@ public class TelephonySubscriptionTrackerTest {
         return captor.getValue();
     }
 
-    private List<CarrierPrivilegesListener> getCarrierPrivilegesListeners() {
-        final ArgumentCaptor<CarrierPrivilegesListener> captor =
-                ArgumentCaptor.forClass(CarrierPrivilegesListener.class);
+    private List<CarrierPrivilegesCallback> getCarrierPrivilegesCallbacks() {
+        final ArgumentCaptor<CarrierPrivilegesCallback> captor =
+                ArgumentCaptor.forClass(CarrierPrivilegesCallback.class);
         verify(mTelephonyManager, atLeastOnce())
-                .addCarrierPrivilegesListener(anyInt(), any(), captor.capture());
+                .registerCarrierPrivilegesCallback(anyInt(), any(), captor.capture());
 
         return captor.getAllValues();
     }
@@ -270,12 +270,12 @@ public class TelephonySubscriptionTrackerTest {
         assertNotNull(getOnSubscriptionsChangedListener());
 
         verify(mTelephonyManager, times(2))
-                .addCarrierPrivilegesListener(anyInt(), any(HandlerExecutor.class), any());
+                .registerCarrierPrivilegesCallback(anyInt(), any(HandlerExecutor.class), any());
         verify(mTelephonyManager)
-                .addCarrierPrivilegesListener(eq(0), any(HandlerExecutor.class), any());
+                .registerCarrierPrivilegesCallback(eq(0), any(HandlerExecutor.class), any());
         verify(mTelephonyManager)
-                .addCarrierPrivilegesListener(eq(1), any(HandlerExecutor.class), any());
-        assertEquals(2, getCarrierPrivilegesListeners().size());
+                .registerCarrierPrivilegesCallback(eq(1), any(HandlerExecutor.class), any());
+        assertEquals(2, getCarrierPrivilegesCallbacks().size());
     }
 
     @Test
@@ -287,10 +287,10 @@ public class TelephonySubscriptionTrackerTest {
         final OnSubscriptionsChangedListener listener = getOnSubscriptionsChangedListener();
         verify(mSubscriptionManager).removeOnSubscriptionsChangedListener(eq(listener));
 
-        for (CarrierPrivilegesListener carrierPrivilegesListener :
-                getCarrierPrivilegesListeners()) {
+        for (CarrierPrivilegesCallback carrierPrivilegesCallback :
+                getCarrierPrivilegesCallbacks()) {
             verify(mTelephonyManager)
-                    .removeCarrierPrivilegesListener(eq(carrierPrivilegesListener));
+                    .unregisterCarrierPrivilegesCallback(eq(carrierPrivilegesCallback));
         }
     }
 
@@ -303,15 +303,15 @@ public class TelephonySubscriptionTrackerTest {
         mTelephonySubscriptionTracker.setReadySubIdsBySlotId(readySubIdsBySlotId);
         doReturn(1).when(mTelephonyManager).getActiveModemCount();
 
-        List<CarrierPrivilegesListener> carrierPrivilegesListeners =
-                getCarrierPrivilegesListeners();
+        List<CarrierPrivilegesCallback> carrierPrivilegesCallbacks =
+                getCarrierPrivilegesCallbacks();
 
         mTelephonySubscriptionTracker.onReceive(mContext, buildTestMultiSimConfigBroadcastIntent());
         mTestLooper.dispatchAll();
 
-        for (CarrierPrivilegesListener carrierPrivilegesListener : carrierPrivilegesListeners) {
+        for (CarrierPrivilegesCallback carrierPrivilegesCallback : carrierPrivilegesCallbacks) {
             verify(mTelephonyManager)
-                    .removeCarrierPrivilegesListener(eq(carrierPrivilegesListener));
+                    .unregisterCarrierPrivilegesCallback(eq(carrierPrivilegesCallback));
         }
 
         // Expect cache cleared for inactive slots.
@@ -323,9 +323,9 @@ public class TelephonySubscriptionTrackerTest {
         // Expect a new CarrierPrivilegesListener to have been registered for slot 0, and none other
         // (2 previously registered during startup, for slots 0 & 1)
         verify(mTelephonyManager, times(3))
-                .addCarrierPrivilegesListener(anyInt(), any(HandlerExecutor.class), any());
+                .registerCarrierPrivilegesCallback(anyInt(), any(HandlerExecutor.class), any());
         verify(mTelephonyManager, times(2))
-                .addCarrierPrivilegesListener(eq(0), any(HandlerExecutor.class), any());
+                .registerCarrierPrivilegesCallback(eq(0), any(HandlerExecutor.class), any());
 
         // Verify that this triggers a re-evaluation
         verify(mCallback).onNewSnapshot(eq(buildExpectedSnapshot(TEST_PRIVILEGED_PACKAGES)));
@@ -391,8 +391,8 @@ public class TelephonySubscriptionTrackerTest {
     public void testOnCarrierPrivilegesChanged() throws Exception {
         setupReadySubIds();
 
-        final CarrierPrivilegesListener listener = getCarrierPrivilegesListeners().get(0);
-        listener.onCarrierPrivilegesChanged(Collections.emptyList(), new int[] {});
+        final CarrierPrivilegesCallback callback = getCarrierPrivilegesCallbacks().get(0);
+        callback.onCarrierPrivilegesChanged(Collections.emptySet(), Collections.emptySet());
         mTestLooper.dispatchAll();
 
         verify(mCallback).onNewSnapshot(eq(buildExpectedSnapshot(TEST_PRIVILEGED_PACKAGES)));

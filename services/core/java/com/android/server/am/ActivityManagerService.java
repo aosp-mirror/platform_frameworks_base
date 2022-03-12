@@ -5755,6 +5755,18 @@ public class ActivityManagerService extends IActivityManager.Stub
                 owningUid, exported);
     }
 
+    private void enforceDebuggable(ProcessRecord proc) {
+        if (!Build.IS_DEBUGGABLE && !proc.isDebuggable()) {
+            throw new SecurityException("Process not debuggable: " + proc.info.packageName);
+        }
+    }
+
+    private void enforceDebuggable(ApplicationInfo info) {
+        if (!Build.IS_DEBUGGABLE && (info.flags & ApplicationInfo.FLAG_DEBUGGABLE) == 0) {
+            throw new SecurityException("Process not debuggable: " + info.packageName);
+        }
+    }
+
     /**
      * As the only public entry point for permissions checking, this method
      * can enforce the semantic that requesting a check on a null global
@@ -6792,22 +6804,25 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     void setTrackAllocationApp(ApplicationInfo app, String processName) {
-        if (!Build.IS_DEBUGGABLE) {
-            if ((app.flags & ApplicationInfo.FLAG_DEBUGGABLE) == 0) {
-                throw new SecurityException("Process not debuggable: " + app.packageName);
-            }
-        }
+        enforceDebuggable(app);
 
         synchronized (mProcLock) {
             mTrackAllocationApp = processName;
         }
     }
 
-    void setProfileApp(ApplicationInfo app, String processName, ProfilerInfo profilerInfo) {
+    void setProfileApp(ApplicationInfo app, String processName, ProfilerInfo profilerInfo,
+            ApplicationInfo sdkSandboxClientApp) {
         synchronized (mAppProfiler.mProfilerLock) {
             if (!Build.IS_DEBUGGABLE) {
                 boolean isAppDebuggable = (app.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
                 boolean isAppProfileable = app.isProfileableByShell();
+
+                if (sdkSandboxClientApp != null) {
+                    isAppDebuggable |=
+                            (sdkSandboxClientApp.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
+                    isAppProfileable |= sdkSandboxClientApp.isProfileableByShell();
+                }
                 if (!isAppDebuggable && !isAppProfileable) {
                     throw new SecurityException("Process not debuggable, "
                             + "and not profileable by shell: " + app.packageName);
@@ -6818,11 +6833,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     void setNativeDebuggingAppLocked(ApplicationInfo app, String processName) {
-        if (!Build.IS_DEBUGGABLE) {
-            if ((app.flags & ApplicationInfo.FLAG_DEBUGGABLE) == 0) {
-                throw new SecurityException("Process not debuggable: " + app.packageName);
-            }
-        }
+        enforceDebuggable(app);
         mNativeDebuggingApp = processName;
     }
 
@@ -15568,12 +15579,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     throw new IllegalArgumentException("Unknown process: " + process);
                 }
 
-                boolean isDebuggable = Build.IS_DEBUGGABLE;
-                if (!isDebuggable) {
-                    if ((proc.info.flags&ApplicationInfo.FLAG_DEBUGGABLE) == 0) {
-                        throw new SecurityException("Process not debuggable: " + proc);
-                    }
-                }
+                enforceDebuggable(proc);
 
                 mOomAdjuster.mCachedAppOptimizer.enableFreezer(false);
 
@@ -15676,10 +15682,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     throw new SecurityException("No process found for calling pid "
                             + Binder.getCallingPid());
                 }
-                if (!Build.IS_DEBUGGABLE
-                        && (proc.info.flags&ApplicationInfo.FLAG_DEBUGGABLE) == 0) {
-                    throw new SecurityException("Not running a debuggable build");
-                }
+                enforceDebuggable(proc);
                 processName = proc.processName;
                 uid = proc.uid;
                 if (reportPackage != null && !proc.getPkgList().containsKey(reportPackage)) {
@@ -15890,13 +15893,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             return false;
         }
 
-        if (!Build.IS_DEBUGGABLE) {
-            if ((process.info.flags&ApplicationInfo.FLAG_DEBUGGABLE) == 0) {
-                return false;
-            }
-        }
-
-        return true;
+        return Build.IS_DEBUGGABLE || process.isDebuggable();
     }
 
     public boolean startBinderTracking() throws RemoteException {
@@ -16850,7 +16847,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     }
 
                     if (profilerInfo != null) {
-                        setProfileApp(aInfo.applicationInfo, aInfo.processName, profilerInfo);
+                        setProfileApp(aInfo.applicationInfo, aInfo.processName, profilerInfo, null);
                     }
                     wmLock.notify();
                 }
@@ -17638,11 +17635,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     throw new IllegalArgumentException("Unknown process: " + process);
                 }
 
-                if (!Build.IS_DEBUGGABLE) {
-                    if ((proc.info.flags & ApplicationInfo.FLAG_DEBUGGABLE) == 0) {
-                        throw new SecurityException("Process not debuggable: " + proc);
-                    }
-                }
+                enforceDebuggable(proc);
 
                 thread.attachAgent(path);
             }
