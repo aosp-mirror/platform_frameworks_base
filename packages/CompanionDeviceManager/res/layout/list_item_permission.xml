@@ -27,6 +27,7 @@
         android:layout_height="24dp"
         android:layout_marginTop="7dp"
         android:layout_marginEnd="12dp"
+        android:tint="@android:color/system_accent1_600"
         android:contentDescription="Permission Icon"/>
 
     <LinearLayout

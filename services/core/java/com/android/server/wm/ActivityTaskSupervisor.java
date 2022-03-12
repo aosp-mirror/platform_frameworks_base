@@ -402,7 +402,8 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                     activities.add(r.info);
                 });
             }
-            if (!displayContent.mDwpcHelper.canContainActivities(activities)) {
+            if (!displayContent.mDwpcHelper.canContainActivities(activities,
+                    displayContent.getWindowingMode())) {
                 return false;
             }
         }

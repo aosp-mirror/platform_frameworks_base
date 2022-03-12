@@ -2723,7 +2723,7 @@
     <string name="config_bandwidthEstimateSource">bandwidth_estimator</string>
 
     <!-- Whether force to enable telephony new data stack or not -->
-    <bool name="config_force_enable_telephony_new_data_stack">true</bool>
+    <bool name="config_force_enable_telephony_new_data_stack">false</bool>
 
     <!-- Whether WiFi display is supported by this device.
          There are many prerequisites for this feature to work correctly.
@@ -2987,6 +2987,12 @@
         <item>com.android.server.notification.CriticalNotificationExtractor</item>
 
     </string-array>
+
+    <!-- When migrating notification settings into the permission framework, whether all existing
+         apps should be marked as 'user-set' (true) or whether only the apps that have explicitly
+         modified notification settings should be marked as 'user-set' (false). Users will not see
+         system generated permission prompts for 'user-set' apps. -->
+    <bool name="config_notificationForceUserSetOnUpgrade">true</bool>
 
     <!-- Default Gravity setting for the system Toast view. Equivalent to: Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM -->
     <integer name="config_toastDefaultGravity">0x00000051</integer>

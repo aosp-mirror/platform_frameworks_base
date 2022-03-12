@@ -2476,7 +2476,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     private boolean transferSplashScreenIfNeeded() {
-        if (!mHandleExitSplashScreen || mStartingSurface == null || mStartingWindow == null
+        if (finishing || !mHandleExitSplashScreen || mStartingSurface == null
+                || mStartingWindow == null
                 || mTransferringSplashScreenState == TRANSFER_SPLASH_SCREEN_FINISH) {
             return false;
         }
@@ -2914,7 +2915,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      */
     boolean supportsPictureInPicture() {
         return mAtmService.mSupportsPictureInPicture && isActivityTypeStandardOrUndefined()
-                && info.supportsPictureInPicture();
+                && info.supportsPictureInPicture()
+                && (mDisplayContent != null && mDisplayContent.mDwpcHelper.isWindowingModeSupported(
+                WINDOWING_MODE_PINNED));
     }
 
     /**

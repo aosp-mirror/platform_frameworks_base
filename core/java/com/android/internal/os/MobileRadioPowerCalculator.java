@@ -136,12 +136,14 @@ public class MobileRadioPowerCalculator extends PowerCalculator {
             PowerAndDuration total,
             BatteryUsageStatsQuery query, BatteryConsumer.Key[] keys) {
         final long radioActiveDurationMs = calculateDuration(u, BatteryStats.STATS_SINCE_CHARGED);
-        total.totalAppDurationMs += radioActiveDurationMs;
-
         final long consumptionUC = u.getMobileRadioMeasuredBatteryConsumptionUC();
         final int powerModel = getPowerModel(consumptionUC, query);
         final double powerMah = calculatePower(u, powerModel, radioActiveDurationMs, consumptionUC);
-        total.totalAppPowerMah += powerMah;
+
+        if (!app.isVirtualUid()) {
+            total.totalAppDurationMs += radioActiveDurationMs;
+            total.totalAppPowerMah += powerMah;
+        }
 
         app.setUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO,
                         radioActiveDurationMs)
