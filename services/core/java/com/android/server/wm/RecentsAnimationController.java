@@ -553,10 +553,6 @@ public class RecentsAnimationController implements DeathRecipient {
 
             mPendingStart = false;
 
-            // Perform layout if it was scheduled before to make sure that we get correct content
-            // insets for the target app window after a rotation
-            mDisplayContent.performLayout(false /* initial */, false /* updateInputWindows */);
-
             final Rect contentInsets;
             final WindowState targetAppMainWindow = getTargetAppMainWindow();
             if (targetAppMainWindow != null) {

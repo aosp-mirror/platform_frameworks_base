@@ -5655,6 +5655,7 @@ public abstract class BatteryStats implements Parcelable {
                         .setMaxStatsAgeMs(0)
                         .includePowerModels()
                         .includeProcessStateData()
+                        .includeVirtualUids()
                         .build());
         stats.dump(pw, prefix);
 

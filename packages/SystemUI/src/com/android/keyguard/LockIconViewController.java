@@ -558,7 +558,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         switch(event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
             case MotionEvent.ACTION_HOVER_ENTER:
-                if (!mDownDetected) {
+                if (!mDownDetected && mAccessibilityManager.isTouchExplorationEnabled()) {
                     mVibrator.vibrate(
                             Process.myUid(),
                             getContext().getOpPackageName(),

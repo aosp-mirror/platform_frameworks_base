@@ -216,6 +216,7 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
     }
 
     Task getTransientLaunchRestoreTarget(@NonNull WindowContainer container) {
+        if (mTransientLaunches == null) return null;
         for (int i = 0; i < mTransientLaunches.size(); ++i) {
             if (mTransientLaunches.keyAt(i).isDescendantOf(container)) {
                 return mTransientLaunches.valueAt(i);

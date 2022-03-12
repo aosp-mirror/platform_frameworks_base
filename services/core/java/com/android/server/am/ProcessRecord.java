@@ -27,6 +27,7 @@ import android.app.ApplicationExitInfo.Reason;
 import android.app.ApplicationExitInfo.SubReason;
 import android.app.IApplicationThread;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.ProcessInfo;
 import android.content.pm.VersionedPackage;
 import android.content.res.CompatibilityInfo;
@@ -863,6 +864,29 @@ class ProcessRecord implements WindowProcessListener {
     @GuardedBy("mService")
     boolean isDebugging() {
         return mDebugging;
+    }
+
+    @Nullable
+    public ApplicationInfo getClientInfoForSdkSandbox() {
+        if (!isSdkSandbox || sdkSandboxClientAppPackage == null) {
+            throw new IllegalStateException(
+                    "getClientInfoForSdkSandbox called for non-sandbox process"
+            );
+        }
+        PackageManagerInternal pm = mService.getPackageManagerInternal();
+        return pm.getApplicationInfo(
+                sdkSandboxClientAppPackage, /* flags */0, Process.SYSTEM_UID, userId);
+    }
+
+    public boolean isDebuggable() {
+        if ((info.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
+            return true;
+        }
+        if (isSdkSandbox) {
+            ApplicationInfo clientInfo = getClientInfoForSdkSandbox();
+            return clientInfo != null && (clientInfo.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
+        }
+        return false;
     }
 
     @GuardedBy("mService")

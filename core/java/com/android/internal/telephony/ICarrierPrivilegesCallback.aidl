@@ -16,7 +16,8 @@
 
 package com.android.internal.telephony;
 
-oneway interface ICarrierPrivilegesListener {
+oneway interface ICarrierPrivilegesCallback {
     void onCarrierPrivilegesChanged(
             in List<String> privilegedPackageNames, in int[] privilegedUids);
+    void onCarrierServiceChanged(in String carrierServicePackageName, in int carrierServiceUid);
 }
