@@ -228,6 +228,13 @@
     <!-- Connected devices settings. Message when Bluetooth is connected and active but no battery information, showing remote device status. [CHAR LIMIT=NONE] -->
     <string name="bluetooth_active_no_battery_level">Active</string>
 
+    <!-- Connected device settings. Message when the left-side hearing aid device is active. [CHAR LIMIT=NONE] -->
+    <string name="bluetooth_hearing_aid_left_active">Active, left ear</string>
+    <!-- Connected device settings. Message when the right-side hearing aid device is active. [CHAR LIMIT=NONE] -->
+    <string name="bluetooth_hearing_aid_right_active">Active, right ear</string>
+    <!-- Connected device settings. Message when the left-side and right-side hearing aids device are active. [CHAR LIMIT=NONE] -->
+    <string name="bluetooth_hearing_aid_left_and_right_active">Active, left and right ears</string>
+
     <!-- Bluetooth settings.  The user-visible string that is used whenever referring to the A2DP profile. -->
     <string name="bluetooth_profile_a2dp">Media audio</string>
     <!-- Bluetooth settings.  The user-visible string that is used whenever referring to the headset or handsfree profile. -->
@@ -346,15 +353,6 @@
 
     <!-- Message for telling the user the kind of BT device being displayed in list. [CHAR LIMIT=30 BACKUP_MESSAGE_ID=5615463912185280812] -->
     <string name="bluetooth_talkback_bluetooth">Bluetooth</string>
-
-    <!-- Message for telling the user the left-side hearing aid device is doing its pairing operation [CHAR LIMIT=NONE] -->
-    <string name="bluetooth_hearingaid_left_pairing_message">Pairing left hearing aid\u2026</string>
-    <!-- Message for telling the user the right-side hearing aid device is doing its pairing operation [CHAR LIMIT=NONE] -->
-    <string name="bluetooth_hearingaid_right_pairing_message">Pairing right hearing aid\u2026</string>
-    <!-- Bluetooth settings.  Message when connected to a left-side Hearing Aid device, showing remote device battery level. [CHAR LIMIT=NONE] -->
-    <string name="bluetooth_hearingaid_left_battery_level">Left - <xliff:g id="battery_level_as_percentage">%1$s</xliff:g> battery</string>
-    <!-- Bluetooth settings.  Message when connected to a right-side Hearing Aid device, showing remote device battery level. [CHAR LIMIT=NONE] -->
-    <string name="bluetooth_hearingaid_right_battery_level">Right - <xliff:g id="battery_level_as_percentage">%1$s</xliff:g> battery</string>
 
     <!-- Content description of the WIFI signal when WIFI is disabled for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_wifi_off">Wifi off.</string>
