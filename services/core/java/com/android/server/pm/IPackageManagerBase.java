@@ -803,7 +803,7 @@ public abstract class IPackageManagerBase extends IPackageManager.Stub {
     public final String getSystemCaptionsServicePackageName() {
         return mService.ensureSystemPackageName(snapshot(),
                 mService.getPackageFromComponentString(
-                        R.string.config_defaultSystemCaptionsService));
+                        R.string.config_defaultSystemCaptionsManagerService));
     }
 
     @Nullable
