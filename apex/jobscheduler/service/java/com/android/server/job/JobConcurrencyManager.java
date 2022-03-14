@@ -17,6 +17,7 @@
 package com.android.server.job;
 
 import static com.android.server.job.JobSchedulerService.MAX_JOB_CONTEXTS_COUNT;
+import static com.android.server.job.JobSchedulerService.RESTRICTED_INDEX;
 import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
 
 import android.annotation.IntDef;
@@ -32,9 +33,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.UserInfo;
+import android.os.BatteryStats;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.provider.DeviceConfig;
 import android.util.ArraySet;
@@ -51,19 +54,24 @@ import android.util.proto.ProtoOutputStream;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.app.IBatteryStats;
 import com.android.internal.app.procstats.ProcessStats;
 import com.android.internal.util.StatLogger;
 import com.android.server.JobSchedulerBackgroundThread;
 import com.android.server.LocalServices;
 import com.android.server.job.controllers.JobStatus;
 import com.android.server.job.controllers.StateController;
+import com.android.server.job.restrictions.JobRestriction;
 import com.android.server.pm.UserManagerInternal;
 
+import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 /**
  * This class decides, given the various configuration and the system status, which jobs can start
@@ -278,6 +286,11 @@ class JobConcurrencyManager {
 
     String[] mRecycledShouldStopJobReason = new String[MAX_JOB_CONTEXTS_COUNT];
 
+    /**
+     * Set of JobServiceContexts that we use to run jobs.
+     */
+    final List<JobServiceContext> mActiveServices = new ArrayList<>();
+
     private final ArraySet<JobStatus> mRunningJobs = new ArraySet<>();
 
     private final WorkCountTracker mWorkCountTracker = new WorkCountTracker();
@@ -358,6 +371,20 @@ class JobConcurrencyManager {
         onInteractiveStateChanged(mPowerManager.isInteractive());
     }
 
+    /**
+     * Called when the boot phase reaches
+     * {@link com.android.server.SystemService#PHASE_THIRD_PARTY_APPS_CAN_START}.
+     */
+    void onThirdPartyAppsCanStart() {
+        final IBatteryStats batteryStats = IBatteryStats.Stub.asInterface(
+                ServiceManager.getService(BatteryStats.SERVICE_NAME));
+        for (int i = 0; i < MAX_JOB_CONTEXTS_COUNT; i++) {
+            mActiveServices.add(
+                    new JobServiceContext(mService, this, batteryStats,
+                            mService.mJobPackageTracker, mContext.getMainLooper()));
+        }
+    }
+
     @GuardedBy("mLock")
     void onAppRemovedLocked(String pkgName, int uid) {
         final PackageStats packageStats = mActivePkgStats.get(UserHandle.getUserId(uid), pkgName);
@@ -390,6 +417,7 @@ class JobConcurrencyManager {
                 case PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED:
                     if (mPowerManager != null && mPowerManager.isDeviceIdleMode()) {
                         synchronized (mLock) {
+                            stopUnexemptedJobsForDoze();
                             stopLongRunningJobsLocked("deep doze");
                         }
                     }
@@ -471,6 +499,11 @@ class JobConcurrencyManager {
     }
 
     @GuardedBy("mLock")
+    ArraySet<JobStatus> getRunningJobsLocked() {
+        return mRunningJobs;
+    }
+
+    @GuardedBy("mLock")
     boolean isJobRunningLocked(JobStatus job) {
         return mRunningJobs.contains(job);
     }
@@ -546,7 +579,7 @@ class JobConcurrencyManager {
         }
 
         final List<JobStatus> pendingJobs = mService.mPendingJobs;
-        final List<JobServiceContext> activeServices = mService.mActiveServices;
+        final List<JobServiceContext> activeServices = mActiveServices;
 
         // To avoid GC churn, we recycle the arrays.
         JobStatus[] contextIdToJobMap = mRecycledAssignContextIdToJobMap;
@@ -719,14 +752,84 @@ class JobConcurrencyManager {
     }
 
     @GuardedBy("mLock")
+    boolean stopJobOnServiceContextLocked(JobStatus job,
+            @JobParameters.StopReason int reason, int internalReasonCode, String debugReason) {
+        if (!mRunningJobs.contains(job)) {
+            return false;
+        }
+
+        for (int i = 0; i < mActiveServices.size(); i++) {
+            JobServiceContext jsc = mActiveServices.get(i);
+            final JobStatus executing = jsc.getRunningJobLocked();
+            if (executing != null && executing.matches(job.getUid(), job.getJobId())) {
+                jsc.cancelExecutingJobLocked(reason, internalReasonCode, debugReason);
+                return true;
+            }
+        }
+        Slog.wtf(TAG, "Couldn't find running job on a context");
+        mRunningJobs.remove(job);
+        return false;
+    }
+
+    @GuardedBy("mLock")
+    private void stopUnexemptedJobsForDoze() {
+        // When becoming idle, make sure no jobs are actively running,
+        // except those using the idle exemption flag.
+        for (int i = 0; i < mActiveServices.size(); i++) {
+            JobServiceContext jsc = mActiveServices.get(i);
+            final JobStatus executing = jsc.getRunningJobLocked();
+            if (executing != null && !executing.canRunInDoze()) {
+                jsc.cancelExecutingJobLocked(JobParameters.STOP_REASON_DEVICE_STATE,
+                        JobParameters.INTERNAL_STOP_REASON_DEVICE_IDLE,
+                        "cancelled due to doze");
+            }
+        }
+    }
+
+    @GuardedBy("mLock")
     private void stopLongRunningJobsLocked(@NonNull String debugReason) {
         for (int i = 0; i < MAX_JOB_CONTEXTS_COUNT; ++i) {
-            final JobServiceContext jsc = mService.mActiveServices.get(i);
+            final JobServiceContext jsc = mActiveServices.get(i);
             final JobStatus jobStatus = jsc.getRunningJobLocked();
 
             if (jobStatus != null && !jsc.isWithinExecutionGuaranteeTime()) {
                 jsc.cancelExecutingJobLocked(JobParameters.STOP_REASON_DEVICE_STATE,
                         JobParameters.INTERNAL_STOP_REASON_TIMEOUT, debugReason);
+            }
+        }
+    }
+
+    @GuardedBy("mLock")
+    void stopNonReadyActiveJobsLocked() {
+        for (int i = 0; i < mActiveServices.size(); i++) {
+            JobServiceContext serviceContext = mActiveServices.get(i);
+            final JobStatus running = serviceContext.getRunningJobLocked();
+            if (running == null) {
+                continue;
+            }
+            if (!running.isReady()) {
+                if (running.getEffectiveStandbyBucket() == RESTRICTED_INDEX
+                        && running.getStopReason() == JobParameters.STOP_REASON_APP_STANDBY) {
+                    serviceContext.cancelExecutingJobLocked(
+                            running.getStopReason(),
+                            JobParameters.INTERNAL_STOP_REASON_RESTRICTED_BUCKET,
+                            "cancelled due to restricted bucket");
+                } else {
+                    serviceContext.cancelExecutingJobLocked(
+                            running.getStopReason(),
+                            JobParameters.INTERNAL_STOP_REASON_CONSTRAINTS_NOT_SATISFIED,
+                            "cancelled due to unsatisfied constraints");
+                }
+            } else {
+                final JobRestriction restriction = mService.checkIfRestricted(running);
+                if (restriction != null) {
+                    final int internalReasonCode = restriction.getInternalReason();
+                    serviceContext.cancelExecutingJobLocked(restriction.getReason(),
+                            internalReasonCode,
+                            "restricted due to "
+                                    + JobParameters.getInternalReasonCodeDescription(
+                                    internalReasonCode));
+                }
             }
         }
     }
@@ -1078,6 +1181,24 @@ class JobConcurrencyManager {
     }
 
     @GuardedBy("mLock")
+    boolean executeTimeoutCommandLocked(PrintWriter pw, String pkgName, int userId,
+            boolean hasJobId, int jobId) {
+        boolean foundSome = false;
+        for (int i = 0; i < mActiveServices.size(); i++) {
+            final JobServiceContext jc = mActiveServices.get(i);
+            final JobStatus js = jc.getRunningJobLocked();
+            if (jc.timeoutIfExecutingLocked(pkgName, userId, hasJobId, jobId, "shell")) {
+                foundSome = true;
+                pw.print("Timing out: ");
+                js.printUniqueId(pw);
+                pw.print(" ");
+                pw.println(js.getServiceComponent().flattenToShortString());
+            }
+        }
+        return foundSome;
+    }
+
+    @GuardedBy("mLock")
     private String printPendingQueueLocked() {
         StringBuilder s = new StringBuilder("Pending queue: ");
         Iterator<JobStatus> it = mService.mPendingJobs.iterator();
@@ -1198,6 +1319,43 @@ class JobConcurrencyManager {
         } finally {
             pw.decreaseIndent();
         }
+    }
+
+    @GuardedBy("mLock")
+    void dumpActiveJobsLocked(IndentingPrintWriter pw, Predicate<JobStatus> predicate,
+            long nowElapsed, long nowUptime) {
+        pw.println("Active jobs:");
+        pw.increaseIndent();
+        for (int i = 0; i < mActiveServices.size(); i++) {
+            JobServiceContext jsc = mActiveServices.get(i);
+            final JobStatus job = jsc.getRunningJobLocked();
+
+            if (job != null && !predicate.test(job)) {
+                continue;
+            }
+
+            pw.print("Slot #"); pw.print(i); pw.print(": ");
+            jsc.dumpLocked(pw, nowElapsed);
+
+            if (job != null) {
+                pw.increaseIndent();
+
+                pw.increaseIndent();
+                job.dump(pw, false, nowElapsed);
+                pw.decreaseIndent();
+
+                pw.print("Evaluated bias: ");
+                pw.println(JobInfo.getBiasString(job.lastEvaluatedBias));
+
+                pw.print("Active at ");
+                TimeUtils.formatDuration(job.madeActive - nowUptime, pw);
+                pw.print(", pending for ");
+                TimeUtils.formatDuration(job.madeActive - job.madePending, pw);
+                pw.decreaseIndent();
+                pw.println();
+            }
+        }
+        pw.decreaseIndent();
     }
 
     public void dumpProtoLocked(ProtoOutputStream proto, long tag, long now, long nowRealtime) {
