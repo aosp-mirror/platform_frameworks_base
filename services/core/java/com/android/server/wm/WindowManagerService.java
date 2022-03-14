@@ -314,7 +314,6 @@ import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.policy.WindowManagerPolicy.ScreenOffListener;
 import com.android.server.power.ShutdownThread;
 import com.android.server.utils.PriorityDump;
-import com.android.server.wm.utils.WmDisplayCutout;
 
 import dalvik.annotation.optimization.NeverCompile;
 
@@ -6248,8 +6247,9 @@ public class WindowManagerService extends IWindowManager.Stub
                         + " callers=" + Debug.getCallers(3));
                 return NAV_BAR_INVALID;
             }
-            return displayContent.getDisplayPolicy().navigationBarPosition(
-                    displayContent.getDisplayRotation().getRotation());
+            displayContent.performLayout(false /* initial */,
+                    false /* updateInputWindows */);
+            return displayContent.getDisplayPolicy().getNavBarPosition();
         }
     }
 
@@ -7090,9 +7090,7 @@ public class WindowManagerService extends IWindowManager.Stub
         final DisplayContent dc = mRoot.getDisplayContent(displayId);
         if (dc != null) {
             final DisplayInfo di = dc.getDisplayInfo();
-            final WmDisplayCutout cutout = dc.calculateDisplayCutoutForRotation(di.rotation);
-            dc.getDisplayPolicy().getStableInsetsLw(di.rotation, di.logicalWidth, di.logicalHeight,
-                    cutout, outInsets);
+            dc.getDisplayPolicy().getStableInsetsLw(di.rotation, di.displayCutout, outInsets);
         }
     }
 
