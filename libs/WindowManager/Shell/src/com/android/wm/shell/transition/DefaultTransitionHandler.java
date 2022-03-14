@@ -189,7 +189,7 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
     }
 
     private void updateEnterpriseThumbnailDrawable() {
-        mEnterpriseThumbnailDrawable = mDevicePolicyManager.getDrawable(
+        mEnterpriseThumbnailDrawable = mDevicePolicyManager.getResources().getDrawable(
                 WORK_PROFILE_ICON, OUTLINE, PROFILE_SWITCH_ANIMATION,
                 () -> mContext.getDrawable(R.drawable.ic_corp_badge));
     }

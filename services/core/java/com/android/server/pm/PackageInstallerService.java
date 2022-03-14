@@ -1332,7 +1332,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
 
         private String getDeviceOwnerDeletedPackageMsg() {
             DevicePolicyManager dpm = mContext.getSystemService(DevicePolicyManager.class);
-            return dpm.getString(PACKAGE_DELETED_BY_DO,
+            return dpm.getResources().getString(PACKAGE_DELETED_BY_DO,
                     () -> mContext.getString(R.string.package_updated_device_owner));
         }
 

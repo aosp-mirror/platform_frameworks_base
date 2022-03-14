@@ -51,6 +51,7 @@ import static org.mockito.Mockito.when;
 import android.app.IActivityManager;
 import android.app.Instrumentation;
 import android.app.admin.DevicePolicyManager;
+import android.app.admin.DevicePolicyResourcesManager;
 import android.app.trust.TrustManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -125,6 +126,8 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
 
     @Mock
     private DevicePolicyManager mDevicePolicyManager;
+    @Mock
+    private DevicePolicyResourcesManager mDevicePolicyResourcesManager;
     @Mock
     private ViewGroup mIndicationArea;
     @Mock
@@ -210,12 +213,14 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
                 .thenReturn(mIndicationAreaBottom);
         when(mIndicationArea.findViewById(R.id.keyguard_indication_text)).thenReturn(mTextView);
 
+        when(mDevicePolicyManager.getResources()).thenReturn(mDevicePolicyResourcesManager);
         when(mDevicePolicyManager.getDeviceOwnerComponentOnAnyUser())
                 .thenReturn(DEVICE_OWNER_COMPONENT);
         when(mDevicePolicyManager.getDeviceOwnerType(DEVICE_OWNER_COMPONENT))
                 .thenReturn(DEVICE_OWNER_TYPE_DEFAULT);
-        when(mDevicePolicyManager.getString(anyString(), any())).thenReturn(mDisclosureGeneric);
-        when(mDevicePolicyManager.getString(anyString(), any(), anyString()))
+        when(mDevicePolicyResourcesManager.getString(anyString(), any()))
+                .thenReturn(mDisclosureGeneric);
+        when(mDevicePolicyResourcesManager.getString(anyString(), any(), anyString()))
                 .thenReturn(mDisclosureWithOrganization);
 
         mWakeLock = new WakeLockFake();

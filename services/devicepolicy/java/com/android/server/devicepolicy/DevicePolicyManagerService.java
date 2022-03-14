@@ -7032,10 +7032,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             boolean calledByProfileOwnerOnOrgOwnedDevice, boolean calledOnParentInstance) {
         DevicePolicyManager dpm = mContext.getSystemService(DevicePolicyManager.class);
         return calledByProfileOwnerOnOrgOwnedDevice && !calledOnParentInstance
-                ? dpm.getString(WORK_PROFILE_DELETED_ORG_OWNED_MESSAGE,
+                ? dpm.getResources().getString(WORK_PROFILE_DELETED_ORG_OWNED_MESSAGE,
                         () -> mContext.getString(
                                 R.string.device_ownership_relinquished))
-                : dpm.getString(WORK_PROFILE_DELETED_GENERIC_MESSAGE,
+                : dpm.getResources().getString(WORK_PROFILE_DELETED_GENERIC_MESSAGE,
                         () -> mContext.getString(
                                 R.string.work_profile_deleted_description_dpm_wipe));
     }
@@ -7134,7 +7134,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     private String getWorkProfileDeletedTitle() {
         DevicePolicyManager dpm = mContext.getSystemService(DevicePolicyManager.class);
-        return dpm.getString(WORK_PROFILE_DELETED_TITLE,
+        return dpm.getResources().getString(WORK_PROFILE_DELETED_TITLE,
                 () -> mContext.getString(R.string.work_profile_deleted));
     }
 
@@ -7450,7 +7450,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     private String getFailedPasswordAttemptWipeMessage() {
         DevicePolicyManager dpm = mContext.getSystemService(DevicePolicyManager.class);
-        return dpm.getString(WORK_PROFILE_DELETED_FAILED_PASSWORD_ATTEMPTS_MESSAGE,
+        return dpm.getResources().getString(WORK_PROFILE_DELETED_FAILED_PASSWORD_ATTEMPTS_MESSAGE,
                 () -> mContext.getString(
                         R.string.work_profile_deleted_reason_maximum_password_failure));
     }
@@ -12652,13 +12652,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     private String getLocationChangedTitle() {
         DevicePolicyManager dpm = mContext.getSystemService(DevicePolicyManager.class);
-        return dpm.getString(LOCATION_CHANGED_TITLE,
+        return dpm.getResources().getString(LOCATION_CHANGED_TITLE,
                 () -> mContext.getString(R.string.location_changed_notification_title));
     }
 
     private String getLocationChangedText() {
         DevicePolicyManager dpm = mContext.getSystemService(DevicePolicyManager.class);
-        return dpm.getString(LOCATION_CHANGED_MESSAGE,
+        return dpm.getResources().getString(LOCATION_CHANGED_MESSAGE,
                 () -> mContext.getString(R.string.location_changed_notification_text));
     }
 
@@ -13259,7 +13259,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     return null;
                 }
                 DevicePolicyManager dpm = mContext.getSystemService(DevicePolicyManager.class);
-                return dpm.getString(
+                return dpm.getResources().getString(
                         PRINTING_DISABLED_NAMED_ADMIN,
                         () -> getDefaultPrintingDisabledMsg(appLabel),
                         appLabel);
@@ -15877,13 +15877,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     private String getNetworkLoggingTitle() {
         DevicePolicyManager dpm = mContext.getSystemService(DevicePolicyManager.class);
-        return dpm.getString(NETWORK_LOGGING_TITLE,
+        return dpm.getResources().getString(NETWORK_LOGGING_TITLE,
                 () -> mContext.getString(R.string.network_logging_notification_title));
     }
 
     private String getNetworkLoggingText() {
         DevicePolicyManager dpm = mContext.getSystemService(DevicePolicyManager.class);
-        return dpm.getString(NETWORK_LOGGING_MESSAGE,
+        return dpm.getResources().getString(NETWORK_LOGGING_MESSAGE,
                 () -> mContext.getString(R.string.network_logging_notification_text));
     }
 
@@ -17472,25 +17472,25 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     private String getPersonalAppSuspensionButtonText() {
         DevicePolicyManager dpm = mContext.getSystemService(DevicePolicyManager.class);
-        return dpm.getString(PERSONAL_APP_SUSPENSION_TURN_ON_PROFILE,
+        return dpm.getResources().getString(PERSONAL_APP_SUSPENSION_TURN_ON_PROFILE,
                 () -> mContext.getString(R.string.personal_apps_suspended_turn_profile_on));
     }
 
     private String getPersonalAppSuspensionTitle() {
         DevicePolicyManager dpm = mContext.getSystemService(DevicePolicyManager.class);
-        return dpm.getString(PERSONAL_APP_SUSPENSION_TITLE,
+        return dpm.getResources().getString(PERSONAL_APP_SUSPENSION_TITLE,
                 () -> mContext.getString(R.string.personal_apps_suspension_title));
     }
 
     private String getPersonalAppSuspensionText() {
         DevicePolicyManager dpm = mContext.getSystemService(DevicePolicyManager.class);
-        return dpm.getString(PERSONAL_APP_SUSPENSION_TITLE,
+        return dpm.getResources().getString(PERSONAL_APP_SUSPENSION_TITLE,
                 () -> mContext.getString(R.string.personal_apps_suspension_text));
     }
 
     private String getPersonalAppSuspensionSoonText(String date, String time, int maxDays) {
         DevicePolicyManager dpm = mContext.getSystemService(DevicePolicyManager.class);
-        return dpm.getString(PERSONAL_APP_SUSPENSION_TITLE,
+        return dpm.getResources().getString(PERSONAL_APP_SUSPENSION_TITLE,
                 () -> mContext.getString(
                         R.string.personal_apps_suspension_soon_text, date, time, maxDays),
                 date, time, maxDays);
@@ -17498,7 +17498,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     private String getWorkProfileContentDescription() {
         DevicePolicyManager dpm = mContext.getSystemService(DevicePolicyManager.class);
-        return dpm.getString(NOTIFICATION_WORK_PROFILE_CONTENT_DESCRIPTION,
+        return dpm.getResources().getString(NOTIFICATION_WORK_PROFILE_CONTENT_DESCRIPTION,
                 () -> mContext.getString(R.string.notification_work_profile_content_description));
     }
 

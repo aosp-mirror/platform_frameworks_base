@@ -4304,9 +4304,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private static String getDeviceOwnerInstalledPackageMsg(Context context, boolean update) {
         DevicePolicyManager dpm = context.getSystemService(DevicePolicyManager.class);
         return update
-                ? dpm.getString(PACKAGE_UPDATED_BY_DO,
+                ? dpm.getResources().getString(PACKAGE_UPDATED_BY_DO,
                     () -> context.getString(R.string.package_updated_device_owner))
-                : dpm.getString(PACKAGE_INSTALLED_BY_DO,
+                : dpm.getResources().getString(PACKAGE_INSTALLED_BY_DO,
                     () -> context.getString(R.string.package_installed_device_owner));
     }
 
