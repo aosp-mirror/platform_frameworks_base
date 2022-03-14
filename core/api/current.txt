@@ -3901,7 +3901,7 @@ package android.animation {
     method public Object getAnimatedValue(String);
     method public long getCurrentPlayTime();
     method public long getDuration();
-    method @FloatRange(from=0, to=1) public static float getDurationScale();
+    method @FloatRange(from=0) public static float getDurationScale();
     method public static long getFrameDelay();
     method public int getRepeatCount();
     method public int getRepeatMode();
@@ -3941,7 +3941,7 @@ package android.animation {
   }
 
   public static interface ValueAnimator.DurationScaleChangeListener {
-    method public void onChanged(float);
+    method public void onChanged(@FloatRange(from=0) float);
   }
 
 }
