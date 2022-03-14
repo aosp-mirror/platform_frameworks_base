@@ -533,9 +533,9 @@
     <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"Permite que o app acesse a configuração do Bluetooth no tablet, além de fazer e aceitar conexões com dispositivos pareados."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"Permite que o app acesse a configuração do Bluetooth no dispositivo Android TV, além de fazer e aceitar conexões com dispositivos pareados."</string>
     <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"Permite que o app acesse a configuração do Bluetooth no telefone, além de fazer e aceitar conexões com dispositivos pareados."</string>
-    <string name="permlab_bluetooth_scan" msgid="5402587142833124594">"descobrir e se parear a disp. Bluetooth por perto"</string>
+    <string name="permlab_bluetooth_scan" msgid="5402587142833124594">"descobrir e parear com disp. Bluetooth por perto"</string>
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Permite que o app descubra e se pareie a dispositivos Bluetooth por perto"</string>
-    <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"conecte-se a dispositivos Bluetooth pareados"</string>
+    <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"conectar a dispositivos Bluetooth pareados"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Permite que o app se conecte a dispositivos Bluetooth pareados"</string>
     <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"anunciar em dispositivos Bluetooth por perto"</string>
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Permite que o app seja anunciado em dispositivos Bluetooth por perto"</string>

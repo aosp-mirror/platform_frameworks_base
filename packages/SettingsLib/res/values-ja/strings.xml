@@ -378,7 +378,7 @@
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"マニフェストの値に関係なく、すべてのアプリを外部ストレージに書き込めるようになります"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"アクティビティをサイズ変更可能にする"</string>
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"マニフェストの値に関係なく、マルチウィンドウですべてのアクティビティのサイズを変更できるようにします。"</string>
-    <string name="enable_freeform_support" msgid="7599125687603914253">"フリーフォーム ウィンドウの有効化"</string>
+    <string name="enable_freeform_support" msgid="7599125687603914253">"フリーフォーム ウィンドウを有効にする"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"試験運用機能のフリーフォーム ウィンドウのサポートを有効にします。"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"PC バックアップ パスワード"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"デスクトップのフルバックアップは現在保護されていません"</string>
