@@ -3901,6 +3901,7 @@ package android.animation {
     method public Object getAnimatedValue(String);
     method public long getCurrentPlayTime();
     method public long getDuration();
+    method @FloatRange(from=0, to=1) public static float getDurationScale();
     method public static long getFrameDelay();
     method public int getRepeatCount();
     method public int getRepeatMode();
@@ -3912,6 +3913,7 @@ package android.animation {
     method public static android.animation.ValueAnimator ofInt(int...);
     method public static android.animation.ValueAnimator ofObject(android.animation.TypeEvaluator, java.lang.Object...);
     method public static android.animation.ValueAnimator ofPropertyValuesHolder(android.animation.PropertyValuesHolder...);
+    method public static boolean registerDurationScaleChangeListener(@NonNull android.animation.ValueAnimator.DurationScaleChangeListener);
     method public void removeAllUpdateListeners();
     method public void removeUpdateListener(android.animation.ValueAnimator.AnimatorUpdateListener);
     method public void reverse();
@@ -3928,6 +3930,7 @@ package android.animation {
     method public void setRepeatMode(int);
     method public void setStartDelay(long);
     method public void setValues(android.animation.PropertyValuesHolder...);
+    method public static boolean unregisterDurationScaleChangeListener(@NonNull android.animation.ValueAnimator.DurationScaleChangeListener);
     field public static final int INFINITE = -1; // 0xffffffff
     field public static final int RESTART = 1; // 0x1
     field public static final int REVERSE = 2; // 0x2
@@ -3935,6 +3938,10 @@ package android.animation {
 
   public static interface ValueAnimator.AnimatorUpdateListener {
     method public void onAnimationUpdate(@NonNull android.animation.ValueAnimator);
+  }
+
+  public static interface ValueAnimator.DurationScaleChangeListener {
+    method public void onChanged(float);
   }
 
 }
