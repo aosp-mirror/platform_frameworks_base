@@ -830,6 +830,24 @@ public final class ViewRootImpl implements ViewParent,
 
     private int mLastTransformHint = Integer.MIN_VALUE;
 
+    /**
+     * A temporary object used so relayoutWindow can return the latest SyncSeqId
+     * system. The SyncSeqId system was designed to work without synchronous relayout
+     * window, and actually synchronous relayout window presents a problem.  We could have
+     * a sequence like this:
+     *    1. We send MSG_RESIZED to the client with a new syncSeqId to begin a new sync
+     *    2. Due to scheduling the client executes performTraversals before calling MSG_RESIZED
+     *    3. Coincidentally for some random reason it also calls relayout
+     *    4. It observes the new state from relayout, and so the next frame will contain the state
+     * However it hasn't received the seqId yet, and so under the designed operation of
+     * seqId flowing through MSG_RESIZED, the next frame wouldn't be synced. Since it
+     * contains our target sync state, we need to sync it! This problem won't come up once
+     * we get rid of synchronous relayout, until then, we use this bundle to channel the
+     * integer back over relayout.
+     */
+    private Bundle mRelayoutBundle = new Bundle();
+    private int mSyncSeqId;
+
     private String mTag = TAG;
 
     public ViewRootImpl(Context context, Display display) {
@@ -1711,6 +1729,7 @@ public final class ViewRootImpl implements ViewParent,
         mPendingBackDropFrame.set(backdropFrame);
         mForceNextWindowRelayout = forceNextWindowRelayout;
         mPendingAlwaysConsumeSystemBars = args.argi2 != 0;
+        mSyncSeqId = args.argi4;
 
         if (msg == MSG_RESIZED_REPORT) {
             reportNextDraw();
@@ -4128,7 +4147,7 @@ public final class ViewRootImpl implements ViewParent,
         mDrawsNeededToReport = 0;
 
         try {
-            mWindowSession.finishDrawing(mWindow, mSurfaceChangedTransaction);
+            mWindowSession.finishDrawing(mWindow, mSurfaceChangedTransaction, Integer.MAX_VALUE);
         } catch (RemoteException e) {
             Log.e(mTag, "Unable to report draw finished", e);
             mSurfaceChangedTransaction.apply();
@@ -8071,7 +8090,7 @@ public final class ViewRootImpl implements ViewParent,
                 requestedWidth, requestedHeight, viewVisibility,
                 insetsPending ? WindowManagerGlobal.RELAYOUT_INSETS_PENDING : 0,
                 mTmpFrames, mPendingMergedConfiguration, mSurfaceControl, mTempInsets,
-                mTempControls);
+                mTempControls, mRelayoutBundle);
 
         final int transformHint = SurfaceControl.rotationToBufferTransform(
                 (mDisplayInstallOrientation + mDisplay.getRotation()) % 4);
@@ -8497,7 +8516,7 @@ public final class ViewRootImpl implements ViewParent,
                             if ((relayoutWindow(mWindowAttributes, viewVisibility, false)
                                     & WindowManagerGlobal.RELAYOUT_RES_FIRST_TIME) != 0) {
                                 mWindowSession.finishDrawing(
-                                        mWindow, null /* postDrawTransaction */);
+                                    mWindow, null /* postDrawTransaction */, Integer.MAX_VALUE);
                             }
                         } catch (RemoteException e) {
                         }
@@ -8571,7 +8590,7 @@ public final class ViewRootImpl implements ViewParent,
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private void dispatchResized(ClientWindowFrames frames, boolean reportDraw,
             MergedConfiguration mergedConfiguration, boolean forceLayout,
-            boolean alwaysConsumeSystemBars, int displayId) {
+                                 boolean alwaysConsumeSystemBars, int displayId, int seqId) {
         final Rect frame = frames.frame;
         final Rect backDropFrame = frames.backdropFrame;
         if (DEBUG_LAYOUT) Log.v(mTag, "Resizing " + this + ": frame=" + frame.toShortString()
@@ -8602,6 +8621,7 @@ public final class ViewRootImpl implements ViewParent,
         args.argi1 = forceLayout ? 1 : 0;
         args.argi2 = alwaysConsumeSystemBars ? 1 : 0;
         args.argi3 = displayId;
+        args.argi4 = seqId;
         msg.obj = args;
         mHandler.sendMessage(msg);
     }
@@ -9986,11 +10006,11 @@ public final class ViewRootImpl implements ViewParent,
         @Override
         public void resized(ClientWindowFrames frames, boolean reportDraw,
                 MergedConfiguration mergedConfiguration, boolean forceLayout,
-                boolean alwaysConsumeSystemBars, int displayId) {
+                boolean alwaysConsumeSystemBars, int displayId, int seqId) {
             final ViewRootImpl viewAncestor = mViewAncestor.get();
             if (viewAncestor != null) {
                 viewAncestor.dispatchResized(frames, reportDraw, mergedConfiguration, forceLayout,
-                        alwaysConsumeSystemBars, displayId);
+                        alwaysConsumeSystemBars, displayId, seqId);
             }
         }
 

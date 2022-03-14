@@ -692,7 +692,8 @@ public class TransitionTests extends WindowTestsBase {
         statusBar.mWinAnimator.mDrawState = WindowStateAnimator.DRAW_PENDING;
         final SurfaceControl.Transaction postDrawTransaction =
                 mock(SurfaceControl.Transaction.class);
-        final boolean layoutNeeded = statusBar.finishDrawing(postDrawTransaction);
+        final boolean layoutNeeded = statusBar.finishDrawing(postDrawTransaction,
+                Integer.MAX_VALUE);
         assertFalse(layoutNeeded);
 
         transactionCommittedListener.onTransactionCommitted();
@@ -742,7 +743,7 @@ public class TransitionTests extends WindowTestsBase {
         player.finish();
 
         // The controller should be cleared if the target windows are drawn.
-        statusBar.finishDrawing(mWm.mTransactionFactory.get());
+        statusBar.finishDrawing(mWm.mTransactionFactory.get(), Integer.MAX_VALUE);
         statusBar.setOrientationChanging(false);
         assertNull(mDisplayContent.getAsyncRotationController());
     }
