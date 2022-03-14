@@ -11883,6 +11883,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 ap = getParentOfAdminIfRequired(getOrganizationOwnedProfileOwnerLocked(caller),
                         parent);
             } else {
+                Preconditions.checkCallAuthorization(!isFinancedDeviceOwner(caller));
                 ap = getParentOfAdminIfRequired(getProfileOwnerOrDeviceOwnerLocked(caller), parent);
             }
 
