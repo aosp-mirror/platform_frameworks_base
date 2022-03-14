@@ -812,7 +812,7 @@ class MediaHierarchyManager @Inject constructor(
     @TransformationType
     fun calculateTransformationType(): Int {
         if (isTransitioningToFullShade) {
-            if (inSplitShade) {
+            if (inSplitShade && areGuidedTransitionHostsVisible()) {
                 return TRANSFORMATION_TYPE_TRANSITION
             }
             return TRANSFORMATION_TYPE_FADE
@@ -827,6 +827,11 @@ class MediaHierarchyManager @Inject constructor(
             return TRANSFORMATION_TYPE_FADE
         }
         return TRANSFORMATION_TYPE_TRANSITION
+    }
+
+    private fun areGuidedTransitionHostsVisible(): Boolean {
+        return getHost(previousLocation)?.visible == true &&
+                getHost(desiredLocation)?.visible == true
     }
 
     /**

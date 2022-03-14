@@ -223,6 +223,18 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
     }
 
     @Test
+    fun calculateTransformationType_onLockSplitShade_goingToFullShade_mediaInvisible_returnsFade() {
+        enableSplitShade()
+        goToLockscreen()
+        expandQS()
+        whenever(lockHost.visible).thenReturn(false)
+        mediaHiearchyManager.setTransitionToFullShadeAmount(10000f)
+
+        val transformType = mediaHiearchyManager.calculateTransformationType()
+        assertThat(transformType).isEqualTo(MediaHierarchyManager.TRANSFORMATION_TYPE_FADE)
+    }
+
+    @Test
     fun calculateTransformationType_onLockShade_inSplitShade_notExpanding_returnsFade() {
         enableSplitShade()
         goToLockscreen()
