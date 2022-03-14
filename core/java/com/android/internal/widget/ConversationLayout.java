@@ -150,6 +150,7 @@ public class ConversationLayout extends FrameLayout
     private Icon mShortcutIcon;
     private View mAppNameDivider;
     private TouchDelegateComposite mTouchDelegate = new TouchDelegateComposite(this);
+    private ArrayList<MessagingGroup> mToRecycle = new ArrayList<>();
 
     public ConversationLayout(@NonNull Context context) {
         super(context);
@@ -472,6 +473,12 @@ public class ConversationLayout extends FrameLayout
         updateTitleAndNamesDisplay();
 
         updateConversationLayout();
+
+        // Recycle everything at the end of the update, now that we know it's no longer needed.
+        for (MessagingGroup group : mToRecycle) {
+            group.recycle();
+        }
+        mToRecycle.clear();
     }
 
     /**
@@ -745,18 +752,18 @@ public class ConversationLayout extends FrameLayout
             MessagingGroup group = oldGroups.get(i);
             if (!mGroups.contains(group)) {
                 List<MessagingMessage> messages = group.getMessages();
-                Runnable endRunnable = () -> {
-                    mMessagingLinearLayout.removeTransientView(group);
-                    group.recycle();
-                };
-
                 boolean wasShown = group.isShown();
                 mMessagingLinearLayout.removeView(group);
                 if (wasShown && !MessagingLinearLayout.isGone(group)) {
                     mMessagingLinearLayout.addTransientView(group, 0);
-                    group.removeGroupAnimated(endRunnable);
+                    group.removeGroupAnimated(() -> {
+                        mMessagingLinearLayout.removeTransientView(group);
+                        group.recycle();
+                    });
                 } else {
-                    endRunnable.run();
+                    // Defer recycling until after the update is done, since we may still need the
+                    // old group around to perform other updates.
+                    mToRecycle.add(group);
                 }
                 mMessages.removeAll(messages);
                 mHistoricMessages.removeAll(messages);
