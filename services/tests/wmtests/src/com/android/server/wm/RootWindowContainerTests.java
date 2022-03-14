@@ -20,6 +20,7 @@ import static android.app.KeyguardManager.ACTION_CONFIRM_DEVICE_CREDENTIAL_WITH_
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
@@ -945,14 +946,16 @@ public class RootWindowContainerTests extends WindowTestsBase {
                 mWm, "TDA", FEATURE_VENDOR_FIRST);
         display.addChild(taskDisplayArea, POSITION_BOTTOM);
 
-        // Making sure getting the root task from the preferred TDA
+        // Making sure getting the root task from the preferred TDA and the preferred windowing mode
         LaunchParamsController.LaunchParams launchParams =
                 new LaunchParamsController.LaunchParams();
         launchParams.mPreferredTaskDisplayArea = taskDisplayArea;
+        launchParams.mWindowingMode = WINDOWING_MODE_FREEFORM;
         Task root = mRootWindowContainer.getOrCreateRootTask(null /* r */, null /* options */,
                 null /* candidateTask */, null /* sourceTask */, true /* onTop */, launchParams,
                 0 /* launchParams */);
         assertEquals(taskDisplayArea, root.getTaskDisplayArea());
+        assertEquals(WINDOWING_MODE_FREEFORM, root.getWindowingMode());
 
         // Making sure still getting the root task from the preferred TDA when passing in a
         // launching activity.
@@ -961,6 +964,7 @@ public class RootWindowContainerTests extends WindowTestsBase {
                 null /* candidateTask */, null /* sourceTask */, true /* onTop */, launchParams,
                 0 /* launchParams */);
         assertEquals(taskDisplayArea, root.getTaskDisplayArea());
+        assertEquals(WINDOWING_MODE_FREEFORM, root.getWindowingMode());
     }
 
     @Test
