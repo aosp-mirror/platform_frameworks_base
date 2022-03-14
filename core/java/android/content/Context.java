@@ -6512,11 +6512,11 @@ public abstract class Context {
      * currently granted, nothing happens (even if later granted by the user).
      *
      * @param permName The name of the permission to be revoked.
-     * @see #revokeOwnPermissionsOnKill(Collection)
+     * @see #revokeSelfPermissionsOnKill(Collection)
      * @throws IllegalArgumentException if the permission is not a runtime permission
      */
-    public void revokeOwnPermissionOnKill(@NonNull String permName) {
-        revokeOwnPermissionsOnKill(Collections.singletonList(permName));
+    public void revokeSelfPermissionOnKill(@NonNull String permName) {
+        revokeSelfPermissionsOnKill(Collections.singletonList(permName));
     }
 
     /**
@@ -6551,7 +6551,7 @@ public abstract class Context {
      * @see PackageManager#getPlatformPermissionsForGroup(String, Executor, Consumer)
      * @throws IllegalArgumentException if any of the permissions is not a runtime permission
      */
-    public void revokeOwnPermissionsOnKill(@NonNull Collection<String> permissions) {
+    public void revokeSelfPermissionsOnKill(@NonNull Collection<String> permissions) {
         throw new AbstractMethodError("Must be overridden in implementing class");
     }
 

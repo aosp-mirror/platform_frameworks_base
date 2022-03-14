@@ -340,10 +340,10 @@ public abstract class PermissionControllerService extends Service {
      * @param permissions List of permissions to be revoked.
      * @param callback Callback waiting for operation to be complete.
      *
-     * @see android.content.Context#revokeOwnPermissionsOnKill(java.util.Collection)
+     * @see android.content.Context#revokeSelfPermissionsOnKill(java.util.Collection)
      */
     @BinderThread
-    public void onRevokeOwnPermissionsOnKill(@NonNull String packageName,
+    public void onRevokeSelfPermissionsOnKill(@NonNull String packageName,
             @NonNull List<String> permissions, @NonNull Runnable callback) {
         throw new AbstractMethodError("Must be overridden in implementing class");
     }
@@ -704,7 +704,7 @@ public abstract class PermissionControllerService extends Service {
             }
 
             @Override
-            public void revokeOwnPermissionsOnKill(@NonNull String packageName,
+            public void revokeSelfPermissionsOnKill(@NonNull String packageName,
                     @NonNull List<String> permissions, @NonNull AndroidFuture callback) {
                 try {
                     Objects.requireNonNull(callback);
@@ -716,7 +716,7 @@ public abstract class PermissionControllerService extends Service {
                         enforceSomePermissionsGrantedToCaller(
                                 Manifest.permission.REVOKE_RUNTIME_PERMISSIONS);
                     }
-                    onRevokeOwnPermissionsOnKill(packageName, permissions,
+                    onRevokeSelfPermissionsOnKill(packageName, permissions,
                             () -> callback.complete(null));
                 } catch (Throwable t) {
                     callback.completeExceptionally(t);
