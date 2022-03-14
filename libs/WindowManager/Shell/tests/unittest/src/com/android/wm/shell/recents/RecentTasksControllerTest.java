@@ -30,11 +30,13 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import static java.lang.Integer.MAX_VALUE;
 
 import android.app.ActivityManager;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.graphics.Rect;
 import android.view.SurfaceControl;
 
@@ -77,6 +79,7 @@ public class RecentTasksControllerTest extends ShellTestCase {
     @Before
     public void setUp() {
         mMainExecutor = new TestShellExecutor();
+        when(mContext.getPackageManager()).thenReturn(mock(PackageManager.class));
         mRecentTasksController = spy(new RecentTasksController(mContext, mTaskStackListener,
                 mMainExecutor));
         mShellTaskOrganizer = new ShellTaskOrganizer(mMainExecutor, mContext,

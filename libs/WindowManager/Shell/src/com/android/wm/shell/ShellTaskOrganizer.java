@@ -435,6 +435,7 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
         }
         notifyLocusVisibilityIfNeeded(info.getTaskInfo());
         notifyCompatUI(info.getTaskInfo(), listener);
+        mRecentTasks.ifPresent(recentTasks -> recentTasks.onTaskAdded(info.getTaskInfo()));
     }
 
     /**
