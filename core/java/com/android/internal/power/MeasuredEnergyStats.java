@@ -194,6 +194,7 @@ public class MeasuredEnergyStats {
             return mSupportedMultiStateBuckets[index];
         }
 
+        @NonNull
         public String[] getStateNames() {
             return mStateNames;
         }
@@ -321,6 +322,10 @@ public class MeasuredEnergyStats {
             LongMultiStateCounter multiStateCounter = null;
             if (in.readBoolean()) {
                 multiStateCounter = LongMultiStateCounter.CREATOR.createFromParcel(in);
+                if (mConfig == null
+                        || multiStateCounter.getStateCount() != mConfig.getStateNames().length) {
+                    multiStateCounter = null;
+                }
             }
 
             if (index < mAccumulatedChargeMicroCoulomb.length) {
