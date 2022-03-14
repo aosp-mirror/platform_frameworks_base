@@ -42,6 +42,9 @@ public class FadeRotationAnimationController extends FadeAnimationController {
     /** A runnable which gets called when the {@link #show()} is called. */
     private Runnable mOnShowRunnable;
 
+    /** Whether to use constant zero alpha animation. */
+    private boolean mHideImmediately;
+
     public FadeRotationAnimationController(DisplayContent displayContent) {
         super(displayContent);
         mService = displayContent.mWmService;
@@ -51,6 +54,10 @@ public class FadeRotationAnimationController extends FadeAnimationController {
                 mService.mWindowPlacerLocked.performSurfacePlacement();
             }
         } : null;
+        if (mFrozenTimeoutRunnable != null) {
+            // Hide the windows immediately because screen should have been covered by screenshot.
+            mHideImmediately = true;
+        }
         final DisplayPolicy displayPolicy = displayContent.getDisplayPolicy();
         final WindowState navigationBar = displayPolicy.getNavigationBar();
         if (navigationBar != null) {
@@ -120,6 +127,15 @@ public class FadeRotationAnimationController extends FadeAnimationController {
         }
     }
 
+    /** Hides the window immediately until it is drawn in new rotation. */
+    void hideImmediately(WindowToken windowToken) {
+        final boolean original = mHideImmediately;
+        mHideImmediately = true;
+        mTargetWindowTokens.add(windowToken);
+        fadeWindowToken(false /* show */, windowToken, ANIMATION_TYPE_FIXED_TRANSFORM);
+        mHideImmediately = original;
+    }
+
     /** Returns {@code true} if the window is handled by this controller. */
     boolean isHandledToken(WindowToken token) {
         return token == mNavBarToken || isTargetToken(token);
@@ -145,8 +161,7 @@ public class FadeRotationAnimationController extends FadeAnimationController {
 
     @Override
     public Animation getFadeOutAnimation() {
-        if (mFrozenTimeoutRunnable != null) {
-            // Hide the window immediately because screen should have been covered by screenshot.
+        if (mHideImmediately) {
             return new AlphaAnimation(0 /* fromAlpha */, 0 /* toAlpha */);
         }
         return super.getFadeOutAnimation();

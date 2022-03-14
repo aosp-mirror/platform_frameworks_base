@@ -21,7 +21,7 @@
     android:layout_height="@*android:dimen/quick_qs_offset_height"
     android:clipChildren="false"
     android:clipToPadding="false"
-    android:minHeight="48dp"
+    android:minHeight="@dimen/qs_header_row_min_height"
     android:clickable="false"
     android:focusable="true"
     android:theme="@style/Theme.SystemUI.QuickSettings.Header">
@@ -39,7 +39,7 @@
             android:id="@+id/clock"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:minHeight="48dp"
+            android:minHeight="@dimen/qs_header_row_min_height"
             android:gravity="center_vertical|start"
             android:paddingStart="@dimen/status_bar_left_clock_starting_padding"
             android:paddingEnd="@dimen/status_bar_left_clock_end_padding"
@@ -64,7 +64,7 @@
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
-        android:minHeight="48dp"
+        android:minHeight="@dimen/qs_header_row_min_height"
         android:minWidth="48dp"
         android:layout_marginStart="8dp"
         android:layout_gravity="end|center_vertical"
@@ -97,7 +97,7 @@
             android:layout_height="match_parent"
             android:paddingEnd="@dimen/signal_cluster_battery_padding" />
 
-        <com.android.systemui.BatteryMeterView
+        <com.android.systemui.battery.BatteryMeterView
             android:id="@+id/batteryRemainingIcon"
             android:layout_height="match_parent"
             android:layout_width="0dp"

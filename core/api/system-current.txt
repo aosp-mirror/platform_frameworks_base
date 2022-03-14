@@ -26,6 +26,7 @@ package android {
     field public static final String ADJUST_RUNTIME_PERMISSIONS_POLICY = "android.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY";
     field public static final String ALLOCATE_AGGRESSIVE = "android.permission.ALLOCATE_AGGRESSIVE";
     field public static final String ALLOW_ANY_CODEC_FOR_PLAYBACK = "android.permission.ALLOW_ANY_CODEC_FOR_PLAYBACK";
+    field public static final String ALLOW_PLACE_IN_MULTI_PANE_SETTINGS = "android.permission.ALLOW_PLACE_IN_MULTI_PANE_SETTINGS";
     field public static final String AMBIENT_WALLPAPER = "android.permission.AMBIENT_WALLPAPER";
     field public static final String APPROVE_INCIDENT_REPORTS = "android.permission.APPROVE_INCIDENT_REPORTS";
     field public static final String ASSOCIATE_COMPANION_DEVICES = "android.permission.ASSOCIATE_COMPANION_DEVICES";
@@ -440,6 +441,11 @@ package android.app {
 
   public static interface ActivityManager.OnUidImportanceListener {
     method public void onUidImportance(int, int);
+  }
+
+  public class ActivityOptions {
+    method public int getLaunchTaskId();
+    method @RequiresPermission("android.permission.START_TASKS_FROM_RECENTS") public void setLaunchTaskId(int);
   }
 
   public class AlarmManager {
@@ -2931,11 +2937,13 @@ package android.hardware.display {
   public final class DisplayManager {
     method @RequiresPermission(android.Manifest.permission.ACCESS_AMBIENT_LIGHT_STATS) public java.util.List<android.hardware.display.AmbientBrightnessDayStats> getAmbientBrightnessStats();
     method @RequiresPermission(android.Manifest.permission.CONFIGURE_DISPLAY_BRIGHTNESS) public android.hardware.display.BrightnessConfiguration getBrightnessConfiguration();
+    method @Nullable @RequiresPermission(android.Manifest.permission.CONFIGURE_DISPLAY_BRIGHTNESS) public android.hardware.display.BrightnessConfiguration getBrightnessConfigurationForDisplay(@NonNull String);
     method @RequiresPermission(android.Manifest.permission.BRIGHTNESS_SLIDER_USAGE) public java.util.List<android.hardware.display.BrightnessChangeEvent> getBrightnessEvents();
     method @Nullable @RequiresPermission(android.Manifest.permission.CONFIGURE_DISPLAY_BRIGHTNESS) public android.hardware.display.BrightnessConfiguration getDefaultBrightnessConfiguration();
     method public android.util.Pair<float[],float[]> getMinimumBrightnessCurve();
     method public android.graphics.Point getStableDisplaySize();
     method @RequiresPermission(android.Manifest.permission.CONFIGURE_DISPLAY_BRIGHTNESS) public void setBrightnessConfiguration(android.hardware.display.BrightnessConfiguration);
+    method @RequiresPermission(android.Manifest.permission.CONFIGURE_DISPLAY_BRIGHTNESS) public void setBrightnessConfigurationForDisplay(@NonNull android.hardware.display.BrightnessConfiguration, @NonNull String);
     method @Deprecated @RequiresPermission(android.Manifest.permission.CONTROL_DISPLAY_SATURATION) public void setSaturationLevel(float);
   }
 
@@ -5041,6 +5049,46 @@ package android.media {
     field public static final android.media.RouteDiscoveryPreference EMPTY;
   }
 
+  public class Spatializer {
+    method @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public void addCompatibleAudioDevice(@NonNull android.media.AudioDeviceAttributes);
+    method @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public void addOnHeadTrackingModeChangedListener(@NonNull java.util.concurrent.Executor, @NonNull android.media.Spatializer.OnHeadTrackingModeChangedListener);
+    method @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public void clearOnHeadToSoundstagePoseUpdatedListener();
+    method @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public void clearOnSpatializerOutputChangedListener();
+    method @NonNull @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public java.util.List<android.media.AudioDeviceAttributes> getCompatibleAudioDevices();
+    method @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public int getDesiredHeadTrackingMode();
+    method @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public void getEffectParameter(int, @NonNull byte[]);
+    method @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public int getHeadTrackingMode();
+    method @IntRange(from=0) @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public int getOutput();
+    method @NonNull @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public java.util.List<java.lang.Integer> getSupportedHeadTrackingModes();
+    method @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public void recenterHeadTracker();
+    method @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public void removeCompatibleAudioDevice(@NonNull android.media.AudioDeviceAttributes);
+    method @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public void removeOnHeadTrackingModeChangedListener(@NonNull android.media.Spatializer.OnHeadTrackingModeChangedListener);
+    method @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public void setDesiredHeadTrackingMode(int);
+    method @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public void setEffectParameter(int, @NonNull byte[]);
+    method @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public void setEnabled(boolean);
+    method @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public void setGlobalTransform(@NonNull float[]);
+    method @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public void setOnHeadToSoundstagePoseUpdatedListener(@NonNull java.util.concurrent.Executor, @NonNull android.media.Spatializer.OnHeadToSoundstagePoseUpdatedListener);
+    method @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public void setOnSpatializerOutputChangedListener(@NonNull java.util.concurrent.Executor, @NonNull android.media.Spatializer.OnSpatializerOutputChangedListener);
+    field @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public static final int HEAD_TRACKING_MODE_DISABLED = -1; // 0xffffffff
+    field @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public static final int HEAD_TRACKING_MODE_OTHER = 0; // 0x0
+    field @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public static final int HEAD_TRACKING_MODE_RELATIVE_DEVICE = 2; // 0x2
+    field @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public static final int HEAD_TRACKING_MODE_RELATIVE_WORLD = 1; // 0x1
+    field @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public static final int HEAD_TRACKING_MODE_UNSUPPORTED = -2; // 0xfffffffe
+  }
+
+  public static interface Spatializer.OnHeadToSoundstagePoseUpdatedListener {
+    method public void onHeadToSoundstagePoseUpdated(@NonNull android.media.Spatializer, @NonNull float[]);
+  }
+
+  public static interface Spatializer.OnHeadTrackingModeChangedListener {
+    method public void onDesiredHeadTrackingModeChanged(@NonNull android.media.Spatializer, int);
+    method public void onHeadTrackingModeChanged(@NonNull android.media.Spatializer, int);
+  }
+
+  public static interface Spatializer.OnSpatializerOutputChangedListener {
+    method public void onSpatializerOutputChanged(@NonNull android.media.Spatializer, @IntRange(from=0) int);
+  }
+
 }
 
 package android.media.audiofx {
@@ -7041,7 +7089,7 @@ package android.net {
   public final class EthernetNetworkUpdateRequest implements android.os.Parcelable {
     method public int describeContents();
     method @NonNull public android.net.IpConfiguration getIpConfiguration();
-    method @NonNull public android.net.NetworkCapabilities getNetworkCapabilities();
+    method @Nullable public android.net.NetworkCapabilities getNetworkCapabilities();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.net.EthernetNetworkUpdateRequest> CREATOR;
   }
@@ -7051,7 +7099,7 @@ package android.net {
     ctor public EthernetNetworkUpdateRequest.Builder(@NonNull android.net.EthernetNetworkUpdateRequest);
     method @NonNull public android.net.EthernetNetworkUpdateRequest build();
     method @NonNull public android.net.EthernetNetworkUpdateRequest.Builder setIpConfiguration(@NonNull android.net.IpConfiguration);
-    method @NonNull public android.net.EthernetNetworkUpdateRequest.Builder setNetworkCapabilities(@NonNull android.net.NetworkCapabilities);
+    method @NonNull public android.net.EthernetNetworkUpdateRequest.Builder setNetworkCapabilities(@Nullable android.net.NetworkCapabilities);
   }
 
   public final class MatchAllNetworkSpecifier extends android.net.NetworkSpecifier implements android.os.Parcelable {
@@ -11951,6 +11999,7 @@ package android.telephony.data {
     field public static final String TYPE_DEFAULT_STRING = "default";
     field public static final String TYPE_DUN_STRING = "dun";
     field public static final String TYPE_EMERGENCY_STRING = "emergency";
+    field public static final String TYPE_ENTERPRISE_STRING = "enterprise";
     field public static final String TYPE_FOTA_STRING = "fota";
     field public static final String TYPE_HIPRI_STRING = "hipri";
     field public static final String TYPE_IA_STRING = "ia";
@@ -12022,21 +12071,23 @@ package android.telephony.data {
 
   public final class DataProfile implements android.os.Parcelable {
     method public int describeContents();
-    method @NonNull public String getApn();
-    method public int getAuthType();
-    method public int getBearerBitmask();
+    method @Deprecated @NonNull public String getApn();
+    method @Nullable public android.telephony.data.ApnSetting getApnSetting();
+    method @Deprecated public int getAuthType();
+    method @Deprecated public int getBearerBitmask();
     method @Deprecated public int getMtu();
-    method public int getMtuV4();
-    method public int getMtuV6();
-    method @Nullable public String getPassword();
-    method public int getProfileId();
-    method public int getProtocolType();
-    method public int getRoamingProtocolType();
-    method public int getSupportedApnTypesBitmask();
+    method @Deprecated public int getMtuV4();
+    method @Deprecated public int getMtuV6();
+    method @Deprecated @Nullable public String getPassword();
+    method @Deprecated public int getProfileId();
+    method @Deprecated public int getProtocolType();
+    method @Deprecated public int getRoamingProtocolType();
+    method @Deprecated public int getSupportedApnTypesBitmask();
+    method @Nullable public android.telephony.data.TrafficDescriptor getTrafficDescriptor();
     method public int getType();
-    method @Nullable public String getUserName();
+    method @Deprecated @Nullable public String getUserName();
     method public boolean isEnabled();
-    method public boolean isPersistent();
+    method @Deprecated public boolean isPersistent();
     method public boolean isPreferred();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.data.DataProfile> CREATOR;
@@ -12049,21 +12100,23 @@ package android.telephony.data {
     ctor public DataProfile.Builder();
     method @NonNull public android.telephony.data.DataProfile build();
     method @NonNull public android.telephony.data.DataProfile.Builder enable(boolean);
-    method @NonNull public android.telephony.data.DataProfile.Builder setApn(@NonNull String);
-    method @NonNull public android.telephony.data.DataProfile.Builder setAuthType(int);
-    method @NonNull public android.telephony.data.DataProfile.Builder setBearerBitmask(int);
+    method @Deprecated @NonNull public android.telephony.data.DataProfile.Builder setApn(@NonNull String);
+    method @NonNull public android.telephony.data.DataProfile.Builder setApnSetting(@NonNull android.telephony.data.ApnSetting);
+    method @Deprecated @NonNull public android.telephony.data.DataProfile.Builder setAuthType(int);
+    method @Deprecated @NonNull public android.telephony.data.DataProfile.Builder setBearerBitmask(int);
     method @Deprecated @NonNull public android.telephony.data.DataProfile.Builder setMtu(int);
-    method @NonNull public android.telephony.data.DataProfile.Builder setMtuV4(int);
-    method @NonNull public android.telephony.data.DataProfile.Builder setMtuV6(int);
-    method @NonNull public android.telephony.data.DataProfile.Builder setPassword(@NonNull String);
-    method @NonNull public android.telephony.data.DataProfile.Builder setPersistent(boolean);
+    method @Deprecated @NonNull public android.telephony.data.DataProfile.Builder setMtuV4(int);
+    method @Deprecated @NonNull public android.telephony.data.DataProfile.Builder setMtuV6(int);
+    method @Deprecated @NonNull public android.telephony.data.DataProfile.Builder setPassword(@NonNull String);
+    method @Deprecated @NonNull public android.telephony.data.DataProfile.Builder setPersistent(boolean);
     method @NonNull public android.telephony.data.DataProfile.Builder setPreferred(boolean);
-    method @NonNull public android.telephony.data.DataProfile.Builder setProfileId(int);
-    method @NonNull public android.telephony.data.DataProfile.Builder setProtocolType(int);
-    method @NonNull public android.telephony.data.DataProfile.Builder setRoamingProtocolType(int);
-    method @NonNull public android.telephony.data.DataProfile.Builder setSupportedApnTypesBitmask(int);
+    method @Deprecated @NonNull public android.telephony.data.DataProfile.Builder setProfileId(int);
+    method @Deprecated @NonNull public android.telephony.data.DataProfile.Builder setProtocolType(int);
+    method @Deprecated @NonNull public android.telephony.data.DataProfile.Builder setRoamingProtocolType(int);
+    method @Deprecated @NonNull public android.telephony.data.DataProfile.Builder setSupportedApnTypesBitmask(int);
+    method @NonNull public android.telephony.data.DataProfile.Builder setTrafficDescriptor(@NonNull android.telephony.data.TrafficDescriptor);
     method @NonNull public android.telephony.data.DataProfile.Builder setType(int);
-    method @NonNull public android.telephony.data.DataProfile.Builder setUserName(@NonNull String);
+    method @Deprecated @NonNull public android.telephony.data.DataProfile.Builder setUserName(@NonNull String);
   }
 
   public abstract class DataService extends android.app.Service {
@@ -14102,6 +14155,7 @@ package android.view.contentcapture {
     method public int getFlags();
     method @Nullable public android.view.contentcapture.ContentCaptureSessionId getParentSessionId();
     method public int getTaskId();
+    method @Nullable public android.os.IBinder getWindowToken();
     field public static final int FLAG_DISABLED_BY_APP = 1; // 0x1
     field public static final int FLAG_DISABLED_BY_FLAG_SECURE = 2; // 0x2
     field public static final int FLAG_RECONNECTED = 4; // 0x4
@@ -14109,6 +14163,7 @@ package android.view.contentcapture {
 
   public final class ContentCaptureEvent implements android.os.Parcelable {
     method public int describeContents();
+    method @Nullable public android.graphics.Rect getBounds();
     method @Nullable public android.view.contentcapture.ContentCaptureContext getContentCaptureContext();
     method public long getEventTime();
     method @Nullable public android.view.autofill.AutofillId getId();
@@ -14128,6 +14183,7 @@ package android.view.contentcapture {
     field public static final int TYPE_VIEW_TEXT_CHANGED = 3; // 0x3
     field public static final int TYPE_VIEW_TREE_APPEARED = 5; // 0x5
     field public static final int TYPE_VIEW_TREE_APPEARING = 4; // 0x4
+    field public static final int TYPE_WINDOW_BOUNDS_CHANGED = 10; // 0xa
   }
 
   public final class ContentCaptureManager {

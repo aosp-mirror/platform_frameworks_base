@@ -1,7 +1,8 @@
 package com.android.systemui.statusbar.policy;
 
+import static java.lang.Float.NaN;
+
 import android.annotation.ColorInt;
-import android.annotation.NonNull;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.RemoteInput;
@@ -14,16 +15,20 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.InsetDrawable;
 import android.graphics.drawable.RippleDrawable;
+import android.os.SystemClock;
 import android.text.Layout;
 import android.text.TextPaint;
 import android.text.method.TransformationMethod;
 import android.util.AttributeSet;
+import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ContrastColorUtil;
@@ -88,6 +93,13 @@ public class SmartReplyView extends ViewGroup {
     private int mMaxSqueezeRemeasureAttempts;
     private int mMaxNumActions;
     private int mMinNumSystemGeneratedReplies;
+
+    // DEBUG variables tracked for the dump()
+    private long mLastDrawChildTime;
+    private long mLastDispatchDrawTime;
+    private long mLastMeasureTime;
+    private int mTotalSqueezeRemeasureAttempts;
+    private boolean mDidHideSystemReplies;
 
     public SmartReplyView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -207,6 +219,7 @@ public class SmartReplyView extends ViewGroup {
     private void clearLayoutLineCount(View view) {
         if (view instanceof TextView) {
             ((TextView) view).nullLayouts();
+            view.forceLayout();
         }
     }
 
@@ -217,6 +230,7 @@ public class SmartReplyView extends ViewGroup {
 
         // Mark all buttons as hidden and un-squeezed.
         resetButtonsLayoutParams();
+        mTotalSqueezeRemeasureAttempts = 0;
 
         if (!mCandidateButtonQueueForSqueezing.isEmpty()) {
             Log.wtf(TAG, "Single line button queue leaked between onMeasure calls");
@@ -257,6 +271,9 @@ public class SmartReplyView extends ViewGroup {
 
             clearLayoutLineCount(child);
             child.measure(MEASURE_SPEC_ANY_LENGTH, heightMeasureSpec);
+            if (((Button) child).getLayout() == null) {
+                Log.wtf(TAG, "Button layout is null after measure.");
+            }
 
             coveredSuggestions.add(child);
 
@@ -329,6 +346,7 @@ public class SmartReplyView extends ViewGroup {
             }
         }
 
+        mDidHideSystemReplies = false;
         if (mSmartRepliesGeneratedByAssistant) {
             if (!gotEnoughSmartReplies(smartReplies)) {
                 // We don't have enough smart replies - hide all of them.
@@ -339,6 +357,7 @@ public class SmartReplyView extends ViewGroup {
                 // Reset our measures back to when we had only added actions (before adding
                 // replies).
                 accumulatedMeasures = actionsMeasures;
+                mDidHideSystemReplies = true;
             }
         }
 
@@ -356,6 +375,7 @@ public class SmartReplyView extends ViewGroup {
                                      accumulatedMeasures.mMeasuredWidth),
                             widthMeasureSpec),
                 resolveSize(buttonHeight, heightMeasureSpec));
+        mLastMeasureTime = SystemClock.elapsedRealtime();
     }
 
     // TODO: this should be replaced, and instead, setMinSystemGenerated... should be invoked
@@ -369,6 +389,53 @@ public class SmartReplyView extends ViewGroup {
         if (mSmartReplyContainer != null) {
             mSmartReplyContainer.setVisibility(View.GONE);
         }
+    }
+
+    /** Dump internal state for debugging */
+    public void dump(IndentingPrintWriter pw) {
+        pw.println(this);
+        pw.increaseIndent();
+        pw.print("mMaxSqueezeRemeasureAttempts=");
+        pw.println(mMaxSqueezeRemeasureAttempts);
+        pw.print("mTotalSqueezeRemeasureAttempts=");
+        pw.println(mTotalSqueezeRemeasureAttempts);
+        pw.print("mMaxNumActions=");
+        pw.println(mMaxNumActions);
+        pw.print("mSmartRepliesGeneratedByAssistant=");
+        pw.println(mSmartRepliesGeneratedByAssistant);
+        pw.print("mMinNumSystemGeneratedReplies=");
+        pw.println(mMinNumSystemGeneratedReplies);
+        pw.print("mHeightUpperLimit=");
+        pw.println(mHeightUpperLimit);
+        pw.print("mDidHideSystemReplies=");
+        pw.println(mDidHideSystemReplies);
+        long now = SystemClock.elapsedRealtime();
+        pw.print("lastMeasureAge (s)=");
+        pw.println(mLastMeasureTime == 0 ? NaN : (now - mLastMeasureTime) / 1000.0f);
+        pw.print("lastDrawChildAge (s)=");
+        pw.println(mLastDrawChildTime == 0 ? NaN : (now - mLastDrawChildTime) / 1000.0f);
+        pw.print("lastDispatchDrawAge (s)=");
+        pw.println(mLastDispatchDrawTime == 0 ? NaN : (now - mLastDispatchDrawTime) / 1000.0f);
+        int numChildren = getChildCount();
+        pw.print("children: num=");
+        pw.println(numChildren);
+        pw.increaseIndent();
+        for (int i = 0; i < numChildren; i++) {
+            View child = getChildAt(i);
+            LayoutParams lp = (LayoutParams) child.getLayoutParams();
+            pw.print("[");
+            pw.print(i);
+            pw.print("] type=");
+            pw.print(lp.mButtonType);
+            pw.print(" squeezeStatus=");
+            pw.print(lp.squeezeStatus);
+            pw.print(" show=");
+            pw.print(lp.show);
+            pw.print(" view=");
+            pw.println(child);
+        }
+        pw.decreaseIndent();
+        pw.decreaseIndent();
     }
 
     /**
@@ -393,8 +460,11 @@ public class SmartReplyView extends ViewGroup {
      * Returns whether our notification contains at least N smart replies (or 0) where N is
      * determined by {@link SmartReplyConstants}.
      */
-    // TODO: we probably sholdn't make this deliberation in the View
     private boolean gotEnoughSmartReplies(List<View> smartReplies) {
+        if (mMinNumSystemGeneratedReplies <= 1) {
+            // Count is irrelevant, do not bother.
+            return true;
+        }
         int numShownReplies = 0;
         for (View smartReplyButton : smartReplies) {
             final LayoutParams lp = (LayoutParams) smartReplyButton.getLayoutParams();
@@ -474,6 +544,7 @@ public class SmartReplyView extends ViewGroup {
             final boolean moveLeft = initialLeftTextWidth > initialRightTextWidth;
             final int maxSqueezeRemeasureAttempts = mMaxSqueezeRemeasureAttempts;
             for (int i = 0; i < maxSqueezeRemeasureAttempts; i++) {
+                mTotalSqueezeRemeasureAttempts++;
                 final int newPosition =
                         moveLeft ? mBreakIterator.previous() : mBreakIterator.next();
                 if (newPosition == BreakIterator.DONE) {
@@ -523,6 +594,9 @@ public class SmartReplyView extends ViewGroup {
                 button.getPaddingLeft() + button.getPaddingRight() + textWidth
                       + getLeftCompoundDrawableWidthWithPadding(button), MeasureSpec.AT_MOST);
         button.measure(widthMeasureSpec, heightMeasureSpec);
+        if (button.getLayout() == null) {
+            Log.wtf(TAG, "Button layout is null after measure.");
+        }
 
         final int newWidth = button.getMeasuredWidth();
 
@@ -613,7 +687,17 @@ public class SmartReplyView extends ViewGroup {
     @Override
     protected boolean drawChild(Canvas canvas, View child, long drawingTime) {
         final LayoutParams lp = (LayoutParams) child.getLayoutParams();
-        return lp.show && super.drawChild(canvas, child, drawingTime);
+        if (!lp.show) {
+            return false;
+        }
+        mLastDrawChildTime = SystemClock.elapsedRealtime();
+        return super.drawChild(canvas, child, drawingTime);
+    }
+
+    @Override
+    protected void dispatchDraw(Canvas canvas) {
+        super.dispatchDraw(canvas);
+        mLastDispatchDrawTime = SystemClock.elapsedRealtime();
     }
 
     /**

@@ -18,6 +18,7 @@ package com.android.server.location.injector;
 
 import static com.android.server.location.LocationPermissions.PERMISSION_NONE;
 
+import android.annotation.Nullable;
 import android.location.util.identity.CallerIdentity;
 
 import com.android.server.location.LocationPermissions;
@@ -36,9 +37,10 @@ public abstract class LocationPermissionsHelper {
     public interface LocationPermissionsListener {
 
         /**
-         * Called when something has changed about location permissions for the given package.
+         * Called when something has changed about location permissions for the given package. A
+         * null package indicates this affects every package.
          */
-        void onLocationPermissionsChanged(String packageName);
+        void onLocationPermissionsChanged(@Nullable String packageName);
 
         /**
          * Called when something has changed about location permissions for the given uid.

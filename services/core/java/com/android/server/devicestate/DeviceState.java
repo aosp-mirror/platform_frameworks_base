@@ -19,11 +19,14 @@ package com.android.server.devicestate;
 import static android.hardware.devicestate.DeviceStateManager.MAXIMUM_DEVICE_STATE;
 import static android.hardware.devicestate.DeviceStateManager.MINIMUM_DEVICE_STATE;
 
+import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 
 import com.android.internal.util.Preconditions;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Objects;
 
 /**
@@ -39,6 +42,19 @@ import java.util.Objects;
  * @see DeviceStateManagerService
  */
 public final class DeviceState {
+    /**
+     * Flag that indicates sticky requests should be cancelled when this device state becomes the
+     * base device state.
+     */
+    public static final int FLAG_CANCEL_STICKY_REQUESTS = 1 << 0;
+
+    /** @hide */
+    @IntDef(prefix = {"FLAG_"}, flag = true, value = {
+            FLAG_CANCEL_STICKY_REQUESTS,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface DeviceStateFlags {}
+
     /** Unique identifier for the device state. */
     @IntRange(from = MINIMUM_DEVICE_STATE, to = MAXIMUM_DEVICE_STATE)
     private final int mIdentifier;
@@ -47,14 +63,19 @@ public final class DeviceState {
     @NonNull
     private final String mName;
 
+    @DeviceStateFlags
+    private final int mFlags;
+
     public DeviceState(
             @IntRange(from = MINIMUM_DEVICE_STATE, to = MAXIMUM_DEVICE_STATE) int identifier,
-            @NonNull String name) {
+            @NonNull String name,
+            @DeviceStateFlags int flags) {
         Preconditions.checkArgumentInRange(identifier, MINIMUM_DEVICE_STATE, MAXIMUM_DEVICE_STATE,
                 "identifier");
 
         mIdentifier = identifier;
         mName = name;
+        mFlags = flags;
     }
 
     /** Returns the unique identifier for the device state. */
@@ -69,6 +90,11 @@ public final class DeviceState {
         return mName;
     }
 
+    @DeviceStateFlags
+    public int getFlags() {
+        return mFlags;
+    }
+
     @Override
     public String toString() {
         return "DeviceState{" + "identifier=" + mIdentifier + ", name='" + mName + '\'' + '}';
@@ -80,11 +106,12 @@ public final class DeviceState {
         if (o == null || getClass() != o.getClass()) return false;
         DeviceState that = (DeviceState) o;
         return mIdentifier == that.mIdentifier
-                && Objects.equals(mName, that.mName);
+                && Objects.equals(mName, that.mName)
+                && mFlags == that.mFlags;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mIdentifier, mName);
+        return Objects.hash(mIdentifier, mName, mFlags);
     }
 }

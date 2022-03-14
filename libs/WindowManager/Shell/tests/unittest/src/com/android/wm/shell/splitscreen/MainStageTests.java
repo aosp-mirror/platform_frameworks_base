@@ -25,10 +25,13 @@ import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.window.WindowContainerTransaction;
 
+import androidx.test.annotation.UiThreadTest;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
+import com.android.launcher3.icons.IconProvider;
 import com.android.wm.shell.ShellTaskOrganizer;
+import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestRunningTaskInfoBuilder;
 import com.android.wm.shell.common.SyncTransactionQueue;
 
@@ -41,28 +44,31 @@ import org.mockito.MockitoAnnotations;
 /** Tests for {@link MainStage} */
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class MainStageTests {
+public class MainStageTests extends ShellTestCase {
     @Mock private ShellTaskOrganizer mTaskOrganizer;
     @Mock private StageTaskListener.StageListenerCallbacks mCallbacks;
     @Mock private SyncTransactionQueue mSyncQueue;
     @Mock private ActivityManager.RunningTaskInfo mRootTaskInfo;
     @Mock private SurfaceControl mRootLeash;
+    @Mock private IconProvider mIconProvider;
     private WindowContainerTransaction mWct = new WindowContainerTransaction();
     private SurfaceSession mSurfaceSession = new SurfaceSession();
     private MainStage mMainStage;
 
     @Before
+    @UiThreadTest
     public void setup() {
         MockitoAnnotations.initMocks(this);
         mRootTaskInfo = new TestRunningTaskInfoBuilder().build();
-        mMainStage = new MainStage(mTaskOrganizer, DEFAULT_DISPLAY, mCallbacks, mSyncQueue,
-                mSurfaceSession);
+        mMainStage = new MainStage(mContext, mTaskOrganizer, DEFAULT_DISPLAY, mCallbacks,
+                mSyncQueue, mSurfaceSession, mIconProvider, null);
         mMainStage.onTaskAppeared(mRootTaskInfo, mRootLeash);
     }
 
     @Test
     public void testActiveDeactivate() {
-        mMainStage.activate(mRootTaskInfo.configuration.windowConfiguration.getBounds(), mWct);
+        mMainStage.activate(mRootTaskInfo.configuration.windowConfiguration.getBounds(), mWct,
+                true /* reparent */);
         assertThat(mMainStage.isActive()).isTrue();
 
         mMainStage.deactivate(mWct);

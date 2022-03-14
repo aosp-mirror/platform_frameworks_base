@@ -115,6 +115,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
     private boolean mIsHeadsetProfileConnectedFail = false;
     private boolean mIsHearingAidProfileConnectedFail = false;
     private boolean mIsLeAudioProfileConnectedFail = false;
+    private boolean mUnpairing = false;
     // Group second device for Hearing Aid
     private CachedBluetoothDevice mSubDevice;
     // Group member devices for the coordinated set
@@ -282,6 +283,12 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
 
     public void disconnect() {
         synchronized (mProfileLock) {
+            if (getGroupId() != BluetoothCsipSetCoordinator.GROUP_ID_INVALID) {
+                for (CachedBluetoothDevice member : getMemberDevice()) {
+                    Log.d(TAG, "Disconnect the member(" + member.getAddress() + ")");
+                    member.disconnect();
+                }
+            }
             mDevice.disconnect();
         }
         // Disconnect  PBAP server in case its connected
@@ -396,6 +403,12 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
             }
 
             mDevice.connect();
+            if (getGroupId() != BluetoothCsipSetCoordinator.GROUP_ID_INVALID) {
+                for (CachedBluetoothDevice member : getMemberDevice()) {
+                    Log.d(TAG, "connect the member(" + member.getAddress() + ")");
+                    member.connect();
+                }
+            }
         }
     }
 
@@ -456,6 +469,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         if (state != BluetoothDevice.BOND_NONE) {
             final BluetoothDevice dev = mDevice;
             if (dev != null) {
+                mUnpairing = true;
                 final boolean successful = dev.removeBond();
                 if (successful) {
                     releaseLruCache();
@@ -1396,5 +1410,9 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
 
     void releaseLruCache() {
         mDrawableCache.evictAll();
+    }
+
+    boolean getUnpairing() {
+        return mUnpairing;
     }
 }

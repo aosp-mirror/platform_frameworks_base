@@ -18,8 +18,7 @@ package android.content.pm;
 
 import static android.provider.DeviceConfig.NAMESPACE_CONSTRAIN_DISPLAY_APIS;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
 
 import android.annotation.Nullable;
 import android.platform.test.annotations.Presubmit;
@@ -146,24 +145,17 @@ public final class ConstrainDisplayApisConfigTest {
 
     private static void testNeverConstrainDisplayApis(String packageName, long version,
             boolean expected) {
-        boolean result = ConstrainDisplayApisConfig.neverConstrainDisplayApis(
-                buildApplicationInfo(packageName, version));
-        if (expected) {
-            assertTrue(result);
-        } else {
-            assertFalse(result);
-        }
+        ConstrainDisplayApisConfig config = new ConstrainDisplayApisConfig();
+        assertEquals(expected,
+                config.getNeverConstrainDisplayApis(buildApplicationInfo(packageName, version)));
     }
 
     private static void testAlwaysConstrainDisplayApis(String packageName, long version,
             boolean expected) {
-        boolean result = ConstrainDisplayApisConfig.alwaysConstrainDisplayApis(
-                buildApplicationInfo(packageName, version));
-        if (expected) {
-            assertTrue(result);
-        } else {
-            assertFalse(result);
-        }
+        ConstrainDisplayApisConfig config = new ConstrainDisplayApisConfig();
+
+        assertEquals(expected,
+                config.getAlwaysConstrainDisplayApis(buildApplicationInfo(packageName, version)));
     }
 
     private static ApplicationInfo buildApplicationInfo(String packageName, long version) {

@@ -152,6 +152,7 @@ public class WallpaperManagerServiceTests {
         sContext.getTestablePermissions().setPermission(
                 android.Manifest.permission.SET_WALLPAPER,
                 PackageManager.PERMISSION_GRANTED);
+        doNothing().when(sContext).sendBroadcastAsUser(any(), any());
 
         //Wallpaper components
         sWallpaperService = mock(IWallpaperConnection.Stub.class);
@@ -188,7 +189,6 @@ public class WallpaperManagerServiceTests {
         MockitoAnnotations.initMocks(this);
 
         sContext.addMockSystemService(DisplayManager.class, mDisplayManager);
-        doNothing().when(sContext).sendBroadcastAsUser(any(), any());
 
         final Display mockDisplay = mock(Display.class);
         doReturn(DISPLAY_SIZE_DIMENSION).when(mockDisplay).getMaximumSizeDimension();

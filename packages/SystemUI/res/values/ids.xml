@@ -46,17 +46,11 @@
     <item type="id" name="height_animator_start_value_tag"/>
     <item type="id" name="x_animator_tag_start_value"/>
     <item type="id" name="y_animator_tag_start_value"/>
-    <item type="id" name="doze_saved_filter_tag"/>
     <item type="id" name="qs_icon_tag"/>
     <item type="id" name="qs_slash_tag"/>
     <item type="id" name="scrim"/>
     <item type="id" name="scrim_alpha_start"/>
     <item type="id" name="scrim_alpha_end"/>
-    <item type="id" name="notification_power"/>
-    <item type="id" name="notification_screenshot"/>
-    <item type="id" name="notification_hidden"/>
-    <item type="id" name="notification_temperature"/>
-    <item type="id" name="notification_plugin"/>
     <item type="id" name="transformation_start_x_tag"/>
     <item type="id" name="doze_intensity_tag"/>
     <item type="id" name="transformation_start_y_tag"/>

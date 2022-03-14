@@ -42,6 +42,9 @@
     <uses-permission android:name="android.permission.MEDIA_CONTENT_CONTROL"/>
     <!-- ATM.removeRootTasksWithActivityTypes() -->
     <uses-permission android:name="android.permission.MANAGE_ACTIVITY_TASKS" />
+    <!-- Enable bubble notification-->
+    <uses-permission android:name="android.permission.STATUS_BAR_SERVICE" />
+
     <!-- Allow the test to write directly to /sdcard/ -->
     <application android:requestLegacyExternalStorage="true">
         <uses-library android:name="android.test.runner"/>

@@ -18,6 +18,7 @@
         package="com.android.servicestests.apps.simpleservicetestapp">
 
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
 
     <application>
         <service android:name=".SimpleService"

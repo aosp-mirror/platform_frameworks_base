@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
 
+import android.annotation.NonNull;
 import android.view.SurfaceControl;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
@@ -144,7 +145,7 @@ public class NavBarFadeAnimationController extends FadeAnimationController{
 
         @Override
         public void startAnimation(SurfaceControl animationLeash, SurfaceControl.Transaction t,
-                int type, SurfaceAnimator.OnAnimationFinishedCallback finishCallback) {
+                int type, @NonNull SurfaceAnimator.OnAnimationFinishedCallback finishCallback) {
             super.startAnimation(animationLeash, t, type, finishCallback);
             if (mParent != null && mParent.isValid()) {
                 t.reparent(animationLeash, mParent);

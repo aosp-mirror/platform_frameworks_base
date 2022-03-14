@@ -1761,32 +1761,15 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     private void onPostPasswordChanged(LockscreenCredential newCredential, int userHandle) {
-        updateEncryptionPasswordIfNeeded(newCredential, userHandle);
+        if (userHandle == UserHandle.USER_SYSTEM && isDeviceEncryptionEnabled() &&
+            shouldEncryptWithCredentials() && newCredential.isNone()) {
+            setCredentialRequiredToDecrypt(false);
+        }
         if (newCredential.isPattern()) {
             setBoolean(LockPatternUtils.PATTERN_EVER_CHOSEN_KEY, true, userHandle);
         }
         updatePasswordHistory(newCredential, userHandle);
         mContext.getSystemService(TrustManager.class).reportEnabledTrustAgentsChanged(userHandle);
-    }
-
-    /**
-     * Update device encryption password if calling user is USER_SYSTEM and device supports
-     * encryption.
-     */
-    private void updateEncryptionPasswordIfNeeded(LockscreenCredential credential, int userHandle) {
-        // Update the device encryption password.
-        if (userHandle != UserHandle.USER_SYSTEM || !isDeviceEncryptionEnabled()) {
-            return;
-        }
-        if (!shouldEncryptWithCredentials()) {
-            updateEncryptionPassword(StorageManager.CRYPT_TYPE_DEFAULT, null);
-            return;
-        }
-        if (credential.isNone()) {
-            // Set the encryption password to default.
-            setCredentialRequiredToDecrypt(false);
-        }
-        updateEncryptionPassword(credential.getStorageCryptType(), credential.getCredential());
     }
 
     /**
@@ -1881,34 +1864,6 @@ public class LockSettingsService extends ILockSettings.Stub {
             Settings.Global.putInt(mContext.getContentResolver(),
                     Settings.Global.REQUIRE_PASSWORD_TO_DECRYPT, required ? 1 : 0);
         }
-    }
-
-    /** Update the encryption password if it is enabled **/
-    @Override
-    public void updateEncryptionPassword(final int type, final byte[] password) {
-        if (!hasSecureLockScreen() && password != null && password.length != 0) {
-            throw new UnsupportedOperationException(
-                    "This operation requires the lock screen feature.");
-        }
-        if (!isDeviceEncryptionEnabled()) {
-            return;
-        }
-        final IBinder service = ServiceManager.getService("mount");
-        if (service == null) {
-            Slog.e(TAG, "Could not find the mount service to update the encryption password");
-            return;
-        }
-
-        // TODO(b/120484642): This is a location where we still use a String for vold
-        String passwordString = password != null ? new String(password) : null;
-        mHandler.post(() -> {
-            IStorageManager storageManager = mInjector.getStorageManager();
-            try {
-                storageManager.changeEncryptionPassword(type, passwordString);
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Error changing encryption password", e);
-            }
-        });
     }
 
     @VisibleForTesting /** Note: this method is overridden in unit tests */

@@ -23,6 +23,7 @@ import android.graphics.RectF;
 import android.view.SurfaceControl;
 
 import com.android.wm.shell.R;
+import com.android.wm.shell.transition.Transitions;
 
 /**
  * Abstracts the common operations on {@link SurfaceControl.Transaction} for PiP transition.
@@ -137,7 +138,8 @@ public class PipSurfaceTransactionHelper {
         // destination are different.
         final float scale = srcW <= srcH ? (float) destW / srcW : (float) destH / srcH;
         final Rect crop = mTmpDestinationRect;
-        crop.set(0, 0, destW, destH);
+        crop.set(0, 0, Transitions.ENABLE_SHELL_TRANSITIONS ? destH
+                : destW, Transitions.ENABLE_SHELL_TRANSITIONS ? destW : destH);
         // Inverse scale for crop to fit in screen coordinates.
         crop.scale(1 / scale);
         crop.offset(insets.left, insets.top);

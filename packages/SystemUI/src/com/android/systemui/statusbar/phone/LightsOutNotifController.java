@@ -21,6 +21,7 @@ import static android.view.WindowInsetsController.APPEARANCE_LOW_PROFILE_BARS;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.Nullable;
+import android.view.InsetsVisibilities;
 import android.view.View;
 import android.view.WindowInsetsController.Appearance;
 import android.view.WindowInsetsController.Behavior;
@@ -123,6 +124,9 @@ public class LightsOutNotifController {
                         public void onAnimationEnd(Animator a) {
                             mLightsOutNotifView.setAlpha(showDot ? 1 : 0);
                             mLightsOutNotifView.setVisibility(showDot ? View.VISIBLE : View.GONE);
+                            // Unset the listener, otherwise this may persist for
+                            // another view property animation
+                            mLightsOutNotifView.animate().setListener(null);
                         }
                     })
                     .start();
@@ -149,7 +153,8 @@ public class LightsOutNotifController {
         @Override
         public void onSystemBarAttributesChanged(int displayId, @Appearance int appearance,
                 AppearanceRegion[] appearanceRegions, boolean navbarColorManagedByIme,
-                @Behavior int behavior, boolean isFullscreen) {
+                @Behavior int behavior, InsetsVisibilities requestedVisibilities,
+                String packageName) {
             if (displayId != mDisplayId) {
                 return;
             }

@@ -145,4 +145,11 @@ public final class UserState {
         proto.write(UserStateProto.SWITCHING, switching);
         proto.end(token);
     }
+
+    @Override
+    public String toString() {
+        return "[UserState: id=" + mHandle.getIdentifier() + ", state=" + stateToString(state)
+            + ", lastState=" + stateToString(lastState) + ", switching=" + switching
+            + ", tokenProvided=" + tokenProvided + "]";
+    }
 }

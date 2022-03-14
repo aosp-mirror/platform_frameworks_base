@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.notification.collection.listbuilder.pluggable;
 
 import android.annotation.Nullable;
+import android.os.Trace;
 
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 
@@ -50,7 +51,9 @@ public abstract class Pluggable<This> {
      */
     public final void invalidateList() {
         if (mListener != null) {
+            Trace.beginSection("Pluggable<" + mName + ">.invalidateList");
             mListener.onPluggableInvalidated((This) this);
+            Trace.endSection();
         }
     }
 

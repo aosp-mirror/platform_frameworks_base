@@ -451,13 +451,26 @@ public final class AudioAttributes implements Parcelable {
      */
     public static final int FLAG_CAPTURE_PRIVATE = 0x1 << 13;
 
+    /**
+     * @hide
+     * Flag indicating the audio content has been processed to provide a virtual multichannel
+     * audio experience
+     */
+    public static final int FLAG_CONTENT_SPATIALIZED = 0x1 << 14;
+
+    /**
+     * @hide
+     * Flag indicating the audio content is to never be spatialized
+     */
+    public static final int FLAG_NEVER_SPATIALIZE = 0x1 << 15;
 
     // Note that even though FLAG_MUTE_HAPTIC is stored as a flag bit, it is not here since
     // it is known as a boolean value outside of AudioAttributes.
     private static final int FLAG_ALL = FLAG_AUDIBILITY_ENFORCED | FLAG_SECURE | FLAG_SCO
             | FLAG_BEACON | FLAG_HW_AV_SYNC | FLAG_HW_HOTWORD | FLAG_BYPASS_INTERRUPTION_POLICY
             | FLAG_BYPASS_MUTE | FLAG_LOW_LATENCY | FLAG_DEEP_BUFFER | FLAG_NO_MEDIA_PROJECTION
-            | FLAG_NO_SYSTEM_CAPTURE | FLAG_CAPTURE_PRIVATE;
+            | FLAG_NO_SYSTEM_CAPTURE | FLAG_CAPTURE_PRIVATE | FLAG_CONTENT_SPATIALIZED
+            | FLAG_NEVER_SPATIALIZE;
     private final static int FLAG_ALL_PUBLIC = FLAG_AUDIBILITY_ENFORCED |
             FLAG_HW_AV_SYNC | FLAG_LOW_LATENCY;
     /* mask of flags that can be set by SDK and System APIs through the Builder */
@@ -619,6 +632,49 @@ public final class AudioAttributes implements Parcelable {
     }
 
     /**
+     * Return true if the audio content associated with these attributes has already been
+     * spatialized, that is it has already been processed to offer a binaural or transaural
+     * immersive audio experience.
+     * @return {@code true} if the content has been processed
+     */
+    public boolean isContentSpatialized() {
+        return (mFlags & FLAG_CONTENT_SPATIALIZED) != 0;
+    }
+
+    /** @hide */
+    @IntDef(flag = false, value = {
+            SPATIALIZATION_BEHAVIOR_AUTO,
+            SPATIALIZATION_BEHAVIOR_NEVER,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface SpatializationBehavior {};
+
+    /**
+     * Constant indicating the audio content associated with these attributes will follow the
+     * default platform behavior with regards to which content will be spatialized or not.
+     * @see #getSpatializationBehavior()
+     * @see Spatializer
+     */
+    public static final int SPATIALIZATION_BEHAVIOR_AUTO = 0;
+
+    /**
+     * Constant indicating the audio content associated with these attributes should never
+     * be virtualized.
+     * @see #getSpatializationBehavior()
+     * @see Spatializer
+     */
+    public static final int SPATIALIZATION_BEHAVIOR_NEVER = 1;
+
+    /**
+     * Return the behavior affecting whether spatialization will be used.
+     * @return the spatialization behavior
+     */
+    public @SpatializationBehavior int getSpatializationBehavior() {
+        return ((mFlags & FLAG_NEVER_SPATIALIZE) != 0)
+                ? SPATIALIZATION_BEHAVIOR_NEVER : SPATIALIZATION_BEHAVIOR_AUTO;
+    }
+
+    /**
      * Return the capture policy.
      * @return the capture policy set by {@link Builder#setAllowedCapturePolicy(int)} or
      *         the default if it was not called.
@@ -661,6 +717,8 @@ public final class AudioAttributes implements Parcelable {
         private int mSource = MediaRecorder.AudioSource.AUDIO_SOURCE_INVALID;
         private int mFlags = 0x0;
         private boolean mMuteHapticChannels = true;
+        private boolean mIsContentSpatialized = false;
+        private int mSpatializationBehavior = SPATIALIZATION_BEHAVIOR_AUTO;
         private HashSet<String> mTags = new HashSet<String>();
         private Bundle mBundle;
         private int mPrivacySensitive = PRIVACY_SENSITIVE_DEFAULT;
@@ -691,6 +749,8 @@ public final class AudioAttributes implements Parcelable {
             mFlags = aa.getAllFlags();
             mTags = (HashSet<String>) aa.mTags.clone();
             mMuteHapticChannels = aa.areHapticChannelsMuted();
+            mIsContentSpatialized = aa.isContentSpatialized();
+            mSpatializationBehavior = aa.getSpatializationBehavior();
         }
 
         /**
@@ -722,6 +782,12 @@ public final class AudioAttributes implements Parcelable {
             aa.mFlags = mFlags;
             if (mMuteHapticChannels) {
                 aa.mFlags |= FLAG_MUTE_HAPTIC;
+            }
+            if (mIsContentSpatialized) {
+                aa.mFlags |= FLAG_CONTENT_SPATIALIZED;
+            }
+            if (mSpatializationBehavior == SPATIALIZATION_BEHAVIOR_NEVER) {
+                aa.mFlags |= FLAG_NEVER_SPATIALIZE;
             }
 
             if (mPrivacySensitive == PRIVACY_SENSITIVE_DEFAULT) {
@@ -910,6 +976,35 @@ public final class AudioAttributes implements Parcelable {
         }
 
         /**
+         * Specifies whether the content has already been processed for spatialization.
+         * If it has, setting this to true will prevent issues such as double-processing.
+         * @param isSpatialized
+         * @return the same Builder instance
+         */
+        public @NonNull Builder setIsContentSpatialized(boolean isSpatialized) {
+            mIsContentSpatialized = isSpatialized;
+            return this;
+        }
+
+        /**
+         * Sets the behavior affecting whether spatialization will be used.
+         * @param sb the spatialization behavior
+         * @return the same Builder instance
+         *
+         */
+        public @NonNull Builder setSpatializationBehavior(@SpatializationBehavior int sb) {
+            switch (sb) {
+                case SPATIALIZATION_BEHAVIOR_NEVER:
+                case SPATIALIZATION_BEHAVIOR_AUTO:
+                    break;
+                default:
+                    throw new IllegalArgumentException("Invalid spatialization behavior " + sb);
+            }
+            mSpatializationBehavior = sb;
+            return this;
+        }
+
+        /**
          * @hide
          * Replaces flags.
          * @param flags any combination of {@link AudioAttributes#FLAG_ALL}.
@@ -994,6 +1089,8 @@ public final class AudioAttributes implements Parcelable {
                     mContentType = attributes.mContentType;
                     mFlags = attributes.getAllFlags();
                     mMuteHapticChannels = attributes.areHapticChannelsMuted();
+                    mIsContentSpatialized = attributes.isContentSpatialized();
+                    mSpatializationBehavior = attributes.getSpatializationBehavior();
                     mTags = attributes.mTags;
                     mBundle = attributes.mBundle;
                     mSource = attributes.mSource;

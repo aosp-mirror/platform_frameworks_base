@@ -54,6 +54,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.time.Duration;
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.concurrent.Future;
 
 import javax.inject.Inject;
@@ -108,15 +109,15 @@ public class PowerUI extends SystemUI implements CommandQueue.Callbacks {
     private IThermalEventListener mUsbThermalEventListener;
     private final BroadcastDispatcher mBroadcastDispatcher;
     private final CommandQueue mCommandQueue;
-    private final Lazy<StatusBar> mStatusBarLazy;
+    private final Lazy<Optional<StatusBar>> mStatusBarOptionalLazy;
 
     @Inject
     public PowerUI(Context context, BroadcastDispatcher broadcastDispatcher,
-            CommandQueue commandQueue, Lazy<StatusBar> statusBarLazy) {
+            CommandQueue commandQueue, Lazy<Optional<StatusBar>> statusBarOptionalLazy) {
         super(context);
         mBroadcastDispatcher = broadcastDispatcher;
         mCommandQueue = commandQueue;
-        mStatusBarLazy = statusBarLazy;
+        mStatusBarOptionalLazy = statusBarOptionalLazy;
     }
 
     public void start() {
@@ -710,7 +711,8 @@ public class PowerUI extends SystemUI implements CommandQueue.Callbacks {
             int status = temp.getStatus();
 
             if (status >= Temperature.THROTTLING_EMERGENCY) {
-                if (!mStatusBarLazy.get().isDeviceInVrMode()) {
+                final Optional<StatusBar> statusBarOptional = mStatusBarOptionalLazy.get();
+                if (!statusBarOptional.map(StatusBar::isDeviceInVrMode).orElse(false)) {
                     mWarnings.showHighTemperatureWarning();
                     Slog.d(TAG, "SkinThermalEventListener: notifyThrottling was called "
                             + ", current skin status = " + status

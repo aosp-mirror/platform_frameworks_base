@@ -507,6 +507,30 @@ public class MagnificationModeSwitchTest extends SysuiTestCase {
                 expectedY, mWindowManager.getLayoutParamsFromAttachedView().y);
     }
 
+    @Test
+    public void onScreenSizeChanged_buttonIsShowingOnTheRightSide_expectedPosition() {
+        final Rect windowBounds = mWindowManager.getCurrentWindowMetrics().getBounds();
+        mMagnificationModeSwitch.showButton(ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
+        final Rect oldDraggableBounds = new Rect(mMagnificationModeSwitch.mDraggableWindowBounds);
+        final float windowHeightFraction =
+                (float) (mWindowManager.getLayoutParamsFromAttachedView().y
+                        - oldDraggableBounds.top) / oldDraggableBounds.height();
+
+        // The window bounds and the draggable bounds are changed due to the screen size change.
+        final Rect tmpRect = new Rect(windowBounds);
+        tmpRect.scale(2);
+        final Rect newWindowBounds = new Rect(tmpRect);
+        mWindowManager.setWindowBounds(newWindowBounds);
+        mMagnificationModeSwitch.onConfigurationChanged(ActivityInfo.CONFIG_SCREEN_SIZE);
+
+        final int expectedX = mMagnificationModeSwitch.mDraggableWindowBounds.right;
+        final int expectedY = (int) (windowHeightFraction
+                * mMagnificationModeSwitch.mDraggableWindowBounds.height())
+                + mMagnificationModeSwitch.mDraggableWindowBounds.top;
+        assertEquals(expectedX, mWindowManager.getLayoutParamsFromAttachedView().x);
+        assertEquals(expectedY, mWindowManager.getLayoutParamsFromAttachedView().y);
+    }
+
     private void assertModeUnchanged(int expectedMode) {
         final int actualMode = Settings.Secure.getInt(mContext.getContentResolver(),
                 Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE, 0);

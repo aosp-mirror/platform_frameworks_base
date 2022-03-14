@@ -41,7 +41,6 @@ import com.android.systemui.plugins.ClockPlugin;
 import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.settings.CurrentUserObservable;
 import com.android.systemui.shared.plugins.PluginManager;
-import com.android.systemui.util.InjectionInflationController;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -125,16 +124,16 @@ public final class ClockManager {
     private final int mHeight;
 
     @Inject
-    public ClockManager(Context context, InjectionInflationController injectionInflater,
+    public ClockManager(Context context, LayoutInflater layoutInflater,
             PluginManager pluginManager, SysuiColorExtractor colorExtractor,
             @Nullable DockManager dockManager, BroadcastDispatcher broadcastDispatcher) {
-        this(context, injectionInflater, pluginManager, colorExtractor,
+        this(context, layoutInflater, pluginManager, colorExtractor,
                 context.getContentResolver(), new CurrentUserObservable(broadcastDispatcher),
                 new SettingsWrapper(context.getContentResolver()), dockManager);
     }
 
     @VisibleForTesting
-    ClockManager(Context context, InjectionInflationController injectionInflater,
+    ClockManager(Context context, LayoutInflater layoutInflater,
             PluginManager pluginManager, SysuiColorExtractor colorExtractor,
             ContentResolver contentResolver, CurrentUserObservable currentUserObservable,
             SettingsWrapper settingsWrapper, DockManager dockManager) {
@@ -147,7 +146,6 @@ public final class ClockManager {
         mPreviewClocks = new AvailableClocks();
 
         Resources res = context.getResources();
-        LayoutInflater layoutInflater = injectionInflater.injectable(LayoutInflater.from(context));
 
         addBuiltinClock(() -> new DefaultClockController(res, layoutInflater, colorExtractor));
 

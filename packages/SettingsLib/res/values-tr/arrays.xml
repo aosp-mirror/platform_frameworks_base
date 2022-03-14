@@ -185,7 +185,7 @@
   </string-array>
   <string-array name="select_logpersist_summaries">
     <item msgid="97587758561106269">"Kapalı"</item>
-    <item msgid="7126170197336963369">"Günlük arabelleklerinin tümü"</item>
+    <item msgid="7126170197336963369">"Günlük arabelleklerin tümü"</item>
     <item msgid="7167543126036181392">"Radyo günlük arabellekleri hariç tümü"</item>
     <item msgid="5135340178556563979">"yalnızca çekirdek günlük arabelleği"</item>
   </string-array>

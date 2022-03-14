@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.pip.phone;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.provider.Settings.ACTION_PICTURE_IN_PICTURE_SETTINGS;
@@ -23,7 +24,6 @@ import static android.view.accessibility.AccessibilityManager.FLAG_CONTENT_CONTR
 import static android.view.accessibility.AccessibilityManager.FLAG_CONTENT_ICONS;
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_CLICK;
 
-import static com.android.wm.shell.pip.phone.PhonePipMenuController.MENU_STATE_CLOSE;
 import static com.android.wm.shell.pip.phone.PhonePipMenuController.MENU_STATE_FULL;
 import static com.android.wm.shell.pip.phone.PhonePipMenuController.MENU_STATE_NONE;
 
@@ -33,8 +33,10 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.annotation.IntDef;
+import android.app.ActivityManager;
 import android.app.PendingIntent.CanceledException;
 import android.app.RemoteAction;
+import android.app.WindowConfiguration;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -62,11 +64,13 @@ import com.android.wm.shell.R;
 import com.android.wm.shell.animation.Interpolators;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.pip.PipUtils;
+import com.android.wm.shell.splitscreen.SplitScreenController;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Translucent window that gets started on top of a task in PIP to allow the user to control it.
@@ -100,12 +104,11 @@ public class PipMenuView extends FrameLayout {
     private static final float MENU_BACKGROUND_ALPHA = 0.3f;
     private static final float DISABLED_ACTION_ALPHA = 0.54f;
 
-    private static final boolean ENABLE_RESIZE_HANDLE = false;
-
     private int mMenuState;
     private boolean mAllowMenuTimeout = true;
     private boolean mAllowTouches = true;
     private int mDismissFadeOutDurationMs;
+    private boolean mFocusedTaskAllowSplitScreen;
 
     private final List<RemoteAction> mActions = new ArrayList<>();
 
@@ -117,6 +120,7 @@ public class PipMenuView extends FrameLayout {
 
     private AnimatorSet mMenuContainerAnimator;
     private PhonePipMenuController mController;
+    private Optional<SplitScreenController> mSplitScreenControllerOptional;
 
     private ValueAnimator.AnimatorUpdateListener mMenuBgUpdateListener =
             new ValueAnimator.AnimatorUpdateListener() {
@@ -140,17 +144,19 @@ public class PipMenuView extends FrameLayout {
     protected View mViewRoot;
     protected View mSettingsButton;
     protected View mDismissButton;
-    protected View mResizeHandle;
+    protected View mEnterSplitButton;
     protected View mTopEndContainer;
     protected PipMenuIconsAlgorithm mPipMenuIconsAlgorithm;
 
     public PipMenuView(Context context, PhonePipMenuController controller,
-            ShellExecutor mainExecutor, Handler mainHandler) {
+            ShellExecutor mainExecutor, Handler mainHandler,
+            Optional<SplitScreenController> splitScreenController) {
         super(context, null, 0);
         mContext = context;
         mController = controller;
         mMainExecutor = mainExecutor;
         mMainHandler = mainHandler;
+        mSplitScreenControllerOptional = splitScreenController;
 
         mAccessibilityManager = context.getSystemService(AccessibilityManager.class);
         inflate(context, R.layout.pip_menu, this);
@@ -178,14 +184,23 @@ public class PipMenuView extends FrameLayout {
             }
         });
 
-        mResizeHandle = findViewById(R.id.resize_handle);
-        mResizeHandle.setAlpha(0);
+        mEnterSplitButton = findViewById(R.id.enter_split);
+        mEnterSplitButton.setAlpha(0);
+        mEnterSplitButton.setOnClickListener(v -> {
+            if (mEnterSplitButton.getAlpha() != 0) {
+                enterSplit();
+            }
+        });
+
+        findViewById(R.id.resize_handle).setAlpha(0);
+
         mActionsGroup = findViewById(R.id.actions_group);
         mBetweenActionPaddingLand = getResources().getDimensionPixelSize(
                 R.dimen.pip_between_action_padding_land);
         mPipMenuIconsAlgorithm = new PipMenuIconsAlgorithm(mContext);
         mPipMenuIconsAlgorithm.bindViews((ViewGroup) mViewRoot, (ViewGroup) mTopEndContainer,
-                mResizeHandle, mSettingsButton, mDismissButton);
+                findViewById(R.id.resize_handle), mEnterSplitButton, mSettingsButton,
+                mDismissButton);
         mDismissFadeOutDurationMs = context.getResources()
                 .getInteger(R.integer.config_pipExitAnimationDuration);
 
@@ -203,7 +218,7 @@ public class PipMenuView extends FrameLayout {
 
             @Override
             public boolean performAccessibilityAction(View host, int action, Bundle args) {
-                if (action == ACTION_CLICK && mMenuState == MENU_STATE_CLOSE) {
+                if (action == ACTION_CLICK && mMenuState != MENU_STATE_FULL) {
                     mController.showMenu();
                 }
                 return super.performAccessibilityAction(host, action, args);
@@ -247,10 +262,21 @@ public class PipMenuView extends FrameLayout {
         return super.dispatchGenericMotionEvent(event);
     }
 
+    public void onFocusTaskChanged(ActivityManager.RunningTaskInfo taskInfo) {
+        final boolean isSplitScreen = mSplitScreenControllerOptional.isPresent()
+                && mSplitScreenControllerOptional.get().isTaskInSplitScreen(taskInfo.taskId);
+        mFocusedTaskAllowSplitScreen = isSplitScreen
+                || (taskInfo.getWindowingMode() == WINDOWING_MODE_FULLSCREEN
+                && taskInfo.supportsSplitScreenMultiWindow
+                && taskInfo.topActivityType != WindowConfiguration.ACTIVITY_TYPE_HOME);
+    }
+
     void showMenu(int menuState, Rect stackBounds, boolean allowMenuTimeout,
             boolean resizeMenuOnShow, boolean withDelay, boolean showResizeHandle) {
         mAllowMenuTimeout = allowMenuTimeout;
         mDidLastShowMenuResize = resizeMenuOnShow;
+        final boolean enableEnterSplit =
+                mContext.getResources().getBoolean(R.bool.config_pipEnableEnterSplitButton);
         if (mMenuState != menuState) {
             // Disallow touches if the menu needs to resize while showing, and we are transitioning
             // to/from a full menu state.
@@ -269,15 +295,14 @@ public class PipMenuView extends FrameLayout {
                     mSettingsButton.getAlpha(), 1f);
             ObjectAnimator dismissAnim = ObjectAnimator.ofFloat(mDismissButton, View.ALPHA,
                     mDismissButton.getAlpha(), 1f);
-            ObjectAnimator resizeAnim = ObjectAnimator.ofFloat(mResizeHandle, View.ALPHA,
-                    mResizeHandle.getAlpha(),
-                    ENABLE_RESIZE_HANDLE && menuState == MENU_STATE_CLOSE && showResizeHandle
-                            ? 1f : 0f);
+            ObjectAnimator enterSplitAnim = ObjectAnimator.ofFloat(mEnterSplitButton, View.ALPHA,
+                    mEnterSplitButton.getAlpha(),
+                    enableEnterSplit && mFocusedTaskAllowSplitScreen ? 1f : 0f);
             if (menuState == MENU_STATE_FULL) {
                 mMenuContainerAnimator.playTogether(menuAnim, settingsAnim, dismissAnim,
-                        resizeAnim);
+                        enterSplitAnim);
             } else {
-                mMenuContainerAnimator.playTogether(dismissAnim, resizeAnim);
+                mMenuContainerAnimator.playTogether(enterSplitAnim);
             }
             mMenuContainerAnimator.setInterpolator(Interpolators.ALPHA_IN);
             mMenuContainerAnimator.setDuration(ANIMATION_HIDE_DURATION_MS);
@@ -330,7 +355,7 @@ public class PipMenuView extends FrameLayout {
         mMenuContainer.setAlpha(0f);
         mSettingsButton.setAlpha(0f);
         mDismissButton.setAlpha(0f);
-        mResizeHandle.setAlpha(0f);
+        mEnterSplitButton.setAlpha(0f);
     }
 
     void pokeMenu() {
@@ -370,9 +395,10 @@ public class PipMenuView extends FrameLayout {
                     mSettingsButton.getAlpha(), 0f);
             ObjectAnimator dismissAnim = ObjectAnimator.ofFloat(mDismissButton, View.ALPHA,
                     mDismissButton.getAlpha(), 0f);
-            ObjectAnimator resizeAnim = ObjectAnimator.ofFloat(mResizeHandle, View.ALPHA,
-                    mResizeHandle.getAlpha(), 0f);
-            mMenuContainerAnimator.playTogether(menuAnim, settingsAnim, dismissAnim, resizeAnim);
+            ObjectAnimator enterSplitAnim = ObjectAnimator.ofFloat(mEnterSplitButton, View.ALPHA,
+                    mEnterSplitButton.getAlpha(), 0f);
+            mMenuContainerAnimator.playTogether(menuAnim, settingsAnim, dismissAnim,
+                    enterSplitAnim);
             mMenuContainerAnimator.setInterpolator(Interpolators.ALPHA_OUT);
             mMenuContainerAnimator.setDuration(getFadeOutDuration(animationType));
             mMenuContainerAnimator.addListener(new AnimatorListenerAdapter() {
@@ -429,7 +455,7 @@ public class PipMenuView extends FrameLayout {
 
         FrameLayout.LayoutParams expandedLp =
                 (FrameLayout.LayoutParams) expandContainer.getLayoutParams();
-        if (mActions.isEmpty() || menuState == MENU_STATE_CLOSE || menuState == MENU_STATE_NONE) {
+        if (mActions.isEmpty() || menuState == MENU_STATE_NONE) {
             actionsContainer.setVisibility(View.INVISIBLE);
 
             // Update the expand container margin to adjust the center of the expand button to
@@ -523,6 +549,14 @@ public class PipMenuView extends FrameLayout {
             mController.onPipDismiss();
         }
     }
+
+    private void enterSplit() {
+        // Do not notify menu visibility when hiding the menu, the controller will do this when it
+        // handles the message
+        hideMenu(mController::onEnterSplit, false /* notifyMenuVisibility */, true /* resize */,
+                ANIM_TYPE_HIDE);
+    }
+
 
     private void showSettings() {
         final Pair<ComponentName, Integer> topPipActivityInfo =

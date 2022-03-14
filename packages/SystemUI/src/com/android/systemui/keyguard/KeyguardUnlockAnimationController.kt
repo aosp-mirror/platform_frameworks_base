@@ -24,6 +24,7 @@ import android.graphics.Matrix
 import android.view.RemoteAnimationTarget
 import android.view.SyncRtSurfaceTransactionApplier
 import android.view.View
+import androidx.annotation.VisibleForTesting
 import androidx.core.math.MathUtils
 import com.android.internal.R
 import com.android.keyguard.KeyguardClockSwitchController
@@ -31,7 +32,8 @@ import com.android.keyguard.KeyguardViewController
 import com.android.systemui.animation.Interpolators
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.shared.system.smartspace.SmartspaceTransitionController
-import com.android.systemui.statusbar.FeatureFlags
+import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.statusbar.phone.BiometricUnlockController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import dagger.Lazy
 import javax.inject.Inject
@@ -62,7 +64,7 @@ const val SURFACE_BEHIND_SCALE_PIVOT_Y = 0.66f
  * The dismiss amount is the inverse of the notification panel expansion, which decreases as the
  * lock screen is swiped away.
  */
-const val DISMISS_AMOUNT_SHOW_SURFACE_THRESHOLD = 0.1f
+const val DISMISS_AMOUNT_SHOW_SURFACE_THRESHOLD = 0.25f
 
 /**
  * Dismiss amount at which to complete the keyguard exit animation and hide the keyguard.
@@ -70,7 +72,7 @@ const val DISMISS_AMOUNT_SHOW_SURFACE_THRESHOLD = 0.1f
  * The dismiss amount is the inverse of the notification panel expansion, which decreases as the
  * lock screen is swiped away.
  */
-const val DISMISS_AMOUNT_EXIT_KEYGUARD_THRESHOLD = 0.3f
+const val DISMISS_AMOUNT_EXIT_KEYGUARD_THRESHOLD = 0.4f
 
 /**
  * Initiates, controls, and ends the keyguard unlock animation.
@@ -91,7 +93,8 @@ class KeyguardUnlockAnimationController @Inject constructor(
     private val keyguardViewMediator: Lazy<KeyguardViewMediator>,
     private val keyguardViewController: KeyguardViewController,
     private val smartspaceTransitionController: SmartspaceTransitionController,
-    private val featureFlags: FeatureFlags
+    private val featureFlags: FeatureFlags,
+    private val biometricUnlockController: BiometricUnlockController
 ) : KeyguardStateController.Callback {
 
     /**
@@ -105,7 +108,8 @@ class KeyguardUnlockAnimationController @Inject constructor(
      * If we're unlocking via biometrics, PIN entry, or from clicking a notification, a canned
      * animation is started in [notifyStartKeyguardExitAnimation].
      */
-    private var surfaceTransactionApplier: SyncRtSurfaceTransactionApplier? = null
+    @VisibleForTesting
+    var surfaceTransactionApplier: SyncRtSurfaceTransactionApplier? = null
     private var surfaceBehindRemoteAnimationTarget: RemoteAnimationTarget? = null
     private var surfaceBehindRemoteAnimationStartTime: Long = 0
 
@@ -132,7 +136,8 @@ class KeyguardUnlockAnimationController @Inject constructor(
      * Animator that animates in the surface behind the keyguard. This is used to play a canned
      * animation on the surface, if we're not doing a swipe gesture.
      */
-    private val surfaceBehindEntryAnimator = ValueAnimator.ofFloat(0f, 1f)
+    @VisibleForTesting
+    val surfaceBehindEntryAnimator = ValueAnimator.ofFloat(0f, 1f)
 
     /** Rounded corner radius to apply to the surface behind the keyguard. */
     private var roundedCornerRadius = 0f
@@ -220,8 +225,24 @@ class KeyguardUnlockAnimationController @Inject constructor(
         // to animate it in. Otherwise, the swipe touch events will continue animating it.
         if (!requestedShowSurfaceBehindKeyguard) {
             keyguardViewController.hide(startTime, 350)
-            surfaceBehindEntryAnimator.start()
+
+            // If we're wake and unlocking, we don't want to animate the surface since we're going
+            // to do the light reveal scrim from the black AOD screen. Make it visible and end the
+            // remote aimation.
+            if (biometricUnlockController.isWakeAndUnlock) {
+                setSurfaceBehindAppearAmount(1f)
+                keyguardViewMediator.get().onKeyguardExitRemoteAnimationFinished(
+                    false /* cancelled */)
+            } else {
+                // Otherwise, animate it in normally.
+                surfaceBehindEntryAnimator.start()
+            }
         }
+
+        // Finish the keyguard remote animation if the dismiss amount has crossed the threshold.
+        // Check it here in case there is no more change to the dismiss amount after the last change
+        // that starts the keyguard animation. @see #updateKeyguardViewMediatorIfThresholdsReached()
+        finishKeyguardExitRemoteAnimationIfReachThreshold()
     }
 
     fun notifyCancelKeyguardExitAnimation() {
@@ -259,7 +280,7 @@ class KeyguardUnlockAnimationController @Inject constructor(
      * animations and swipe gestures to animate the surface's entry (and exit, if the swipe is
      * cancelled).
      */
-    private fun setSurfaceBehindAppearAmount(amount: Float) {
+    fun setSurfaceBehindAppearAmount(amount: Float) {
         if (surfaceBehindRemoteAnimationTarget == null) {
             return
         }
@@ -353,16 +374,6 @@ class KeyguardUnlockAnimationController @Inject constructor(
         }
 
         val dismissAmount = keyguardStateController.dismissAmount
-
-        // Hide the keyguard if we're fully dismissed, or if we're swiping to dismiss and have
-        // crossed the threshold to finish the dismissal.
-        val reachedHideKeyguardThreshold = (dismissAmount >= 1f ||
-                (keyguardStateController.isDismissingFromSwipe &&
-                        // Don't hide if we're flinging during a swipe, since we need to finish
-                        // animating it out. This will be called again after the fling ends.
-                        !keyguardStateController.isFlingingToDismissKeyguardDuringSwipeGesture &&
-                        dismissAmount >= DISMISS_AMOUNT_EXIT_KEYGUARD_THRESHOLD))
-
         if (dismissAmount >= DISMISS_AMOUNT_SHOW_SURFACE_THRESHOLD &&
                 !keyguardViewMediator.get().requestedShowSurfaceBehindKeyguard()) {
             // We passed the threshold, and we're not yet showing the surface behind the
@@ -375,9 +386,35 @@ class KeyguardUnlockAnimationController @Inject constructor(
             // out.
             keyguardViewMediator.get().hideSurfaceBehindKeyguard()
             fadeOutSurfaceBehind()
-        } else if (keyguardViewMediator.get()
-                        .isAnimatingBetweenKeyguardAndSurfaceBehindOrWillBe &&
-                reachedHideKeyguardThreshold) {
+        } else {
+            finishKeyguardExitRemoteAnimationIfReachThreshold()
+        }
+    }
+
+    /**
+     * Hides the keyguard if we're fully dismissed, or if we're swiping to dismiss and have crossed
+     * the threshold to finish the dismissal.
+     */
+    private fun finishKeyguardExitRemoteAnimationIfReachThreshold() {
+        // no-op if keyguard is not showing or animation is not enabled.
+        if (!KeyguardService.sEnableRemoteKeyguardGoingAwayAnimation ||
+                !keyguardViewController.isShowing) {
+            return
+        }
+
+        // no-op if animation is not requested yet.
+        if (!keyguardViewMediator.get().requestedShowSurfaceBehindKeyguard() ||
+                !keyguardViewMediator.get().isAnimatingBetweenKeyguardAndSurfaceBehindOrWillBe) {
+            return
+        }
+
+        val dismissAmount = keyguardStateController.dismissAmount
+        if (dismissAmount >= 1f ||
+                (keyguardStateController.isDismissingFromSwipe &&
+                        // Don't hide if we're flinging during a swipe, since we need to finish
+                        // animating it out. This will be called again after the fling ends.
+                        !keyguardStateController.isFlingingToDismissKeyguardDuringSwipeGesture &&
+                        dismissAmount >= DISMISS_AMOUNT_EXIT_KEYGUARD_THRESHOLD)) {
             keyguardViewMediator.get().onKeyguardExitRemoteAnimationFinished(false /* cancelled */)
         }
     }

@@ -36,6 +36,7 @@ import com.android.internal.util.ConcurrentUtils;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.dump.DumpManager;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -91,14 +92,18 @@ public class HotspotControllerImpl implements HotspotController, WifiManager.Sof
      * Controller used to retrieve information related to a hotspot.
      */
     @Inject
-    public HotspotControllerImpl(Context context, @Main Handler mainHandler,
-            @Background Handler backgroundHandler) {
+    public HotspotControllerImpl(
+            Context context,
+            @Main Handler mainHandler,
+            @Background Handler backgroundHandler,
+            DumpManager dumpManager) {
         mContext = context;
         mTetheringManager = context.getSystemService(TetheringManager.class);
         mWifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
         mMainHandler = mainHandler;
         mTetheringManager.registerTetheringEventCallback(
                 new HandlerExecutor(backgroundHandler), mTetheringCallback);
+        dumpManager.registerDumpable(getClass().getSimpleName(), this);
     }
 
     /**

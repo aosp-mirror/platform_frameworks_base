@@ -16,8 +16,12 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
+import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 
+import static com.android.server.wm.ActivityRecord.computeAspectRatio;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND;
@@ -28,14 +32,20 @@ import static com.android.server.wm.LetterboxConfiguration.letterboxBackgroundTy
 
 import android.annotation.Nullable;
 import android.app.ActivityManager.TaskDescription;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.util.Slog;
+import android.view.InsetsSource;
+import android.view.InsetsState;
+import android.view.RoundedCorner;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 import android.view.WindowManager;
 
+import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.wm.LetterboxConfiguration.LetterboxBackgroundType;
 
@@ -55,6 +65,10 @@ final class LetterboxUiController {
     private final LetterboxConfiguration mLetterboxConfiguration;
     private final ActivityRecord mActivityRecord;
 
+    // Taskbar expanded height. Used to determine whether to crop an app window to display rounded
+    // corners above the taskbar.
+    private float mExpandedTaskBarHeight;
+
     private boolean mShowWallpaperForLetterboxBackground;
 
     @Nullable
@@ -66,6 +80,8 @@ final class LetterboxUiController {
         // is created in its constructor. It shouldn't be used in this constructor but it's safe
         // to use it after since controller is only used in ActivityRecord.
         mActivityRecord = activityRecord;
+        mExpandedTaskBarHeight =
+                getResources().getDimensionPixelSize(R.dimen.taskbar_frame_height);
     }
 
     /** Cleans up {@link Letterbox} if it exists.*/
@@ -134,11 +150,12 @@ final class LetterboxUiController {
             if (mLetterbox == null) {
                 mLetterbox = new Letterbox(() -> mActivityRecord.makeChildSurface(null),
                         mActivityRecord.mWmService.mTransactionFactory,
-                        mLetterboxConfiguration::isLetterboxActivityCornersRounded,
+                        this::shouldLetterboxHaveRoundedCorners,
                         this::getLetterboxBackgroundColor,
                         this::hasWallpaperBackgroudForLetterbox,
                         this::getLetterboxWallpaperBlurRadius,
-                        this::getLetterboxWallpaperDarkScrimAlpha);
+                        this::getLetterboxWallpaperDarkScrimAlpha,
+                        this::handleDoubleTap);
                 mLetterbox.attachInput(w);
             }
             mActivityRecord.getPosition(mTmpPoint);
@@ -158,11 +175,95 @@ final class LetterboxUiController {
         }
     }
 
+    private boolean shouldLetterboxHaveRoundedCorners() {
+        // TODO(b/214030873): remove once background is drawn for transparent activities
+        // Letterbox shouldn't have rounded corners if the activity is transparent
+        return mLetterboxConfiguration.isLetterboxActivityCornersRounded()
+                && mActivityRecord.fillsParent();
+    }
+
+    float getHorizontalPositionMultiplier(Configuration parentConfiguration) {
+        // Don't check resolved configuration because it may not be updated yet during
+        // configuration change.
+        return isReachabilityEnabled(parentConfiguration)
+                // Using the last global dynamic position to avoid "jumps" when moving
+                // between apps or activities.
+                ? mLetterboxConfiguration.getHorizontalMultiplierForReachability()
+                : mLetterboxConfiguration.getLetterboxHorizontalPositionMultiplier();
+    }
+
+    float getFixedOrientationLetterboxAspectRatio(Configuration parentConfiguration) {
+        // Don't check resolved windowing mode because it may not be updated yet during
+        // configuration change.
+        if (!isReachabilityEnabled(parentConfiguration)) {
+            return mLetterboxConfiguration.getFixedOrientationLetterboxAspectRatio();
+        }
+
+        int dividerWindowWidth =
+                getResources().getDimensionPixelSize(R.dimen.docked_stack_divider_thickness);
+        int dividerInsets =
+                getResources().getDimensionPixelSize(R.dimen.docked_stack_divider_insets);
+        int dividerSize = dividerWindowWidth - dividerInsets * 2;
+
+        // Getting the same aspect ratio that apps get in split screen.
+        Rect bounds = new Rect(parentConfiguration.windowConfiguration.getAppBounds());
+        bounds.inset(dividerSize, /* dy */ 0);
+        bounds.right = bounds.centerX();
+
+        return computeAspectRatio(bounds);
+    }
+
+    Resources getResources() {
+        return mActivityRecord.mWmService.mContext.getResources();
+    }
+
+    private void handleDoubleTap(int x) {
+        if (!isReachabilityEnabled() || mActivityRecord.isInTransition()) {
+            return;
+        }
+
+        if (mLetterbox.getInnerFrame().left <= x && mLetterbox.getInnerFrame().right >= x) {
+            // Only react to clicks at the sides of the letterboxed app window.
+            return;
+        }
+
+        if (mLetterbox.getInnerFrame().left > x) {
+            // Moving to the next stop on the left side of the app window: right > center > left.
+            mLetterboxConfiguration.movePositionForReachabilityToNextLeftStop();
+        } else if (mLetterbox.getInnerFrame().right < x) {
+            // Moving to the next stop on the right side of the app window: left > center > right.
+            mLetterboxConfiguration.movePositionForReachabilityToNextRightStop();
+        }
+
+        // TODO(197549949): Add animation for transition.
+        mActivityRecord.recomputeConfiguration();
+    }
+
+    /**
+     * Whether reachability is enabled for an activity in the curren configuration.
+     *
+     * <p>Conditions that needs to be met:
+     * <ul>
+     *   <li>Activity is portrait-only.
+     *   <li>Fullscreen window in landscape device orientation.
+     *   <li>Reachability is enabled.
+     * </ul>
+     */
+    private boolean isReachabilityEnabled(Configuration parentConfiguration) {
+        return mLetterboxConfiguration.getIsReachabilityEnabled()
+                && parentConfiguration.windowConfiguration.getWindowingMode()
+                        == WINDOWING_MODE_FULLSCREEN
+                && parentConfiguration.orientation == ORIENTATION_LANDSCAPE
+                && mActivityRecord.getRequestedConfigurationOrientation() == ORIENTATION_PORTRAIT;
+    }
+
+    private boolean isReachabilityEnabled() {
+        return isReachabilityEnabled(mActivityRecord.getParent().getConfiguration());
+    }
+
     @VisibleForTesting
     boolean shouldShowLetterboxUi(WindowState mainWindow) {
         return isSurfaceReadyAndVisible(mainWindow) && mainWindow.areAppWindowBoundsLetterboxed()
-                // Check that an activity isn't transparent.
-                && mActivityRecord.fillsParent()
                 // Check for FLAG_SHOW_WALLPAPER explicitly instead of using
                 // WindowContainer#showWallpaper because the later will return true when this
                 // activity is using blurred wallpaper for letterbox backgroud.
@@ -219,21 +320,72 @@ final class LetterboxUiController {
     }
 
     private void updateRoundedCorners(WindowState mainWindow) {
-        int cornersRadius =
-                // Don't round corners if letterboxed only for display cutout.
-                shouldShowLetterboxUi(mainWindow)
-                                && !mainWindow.isLetterboxedForDisplayCutout()
-                        ? Math.max(0, mLetterboxConfiguration.getLetterboxActivityCornersRadius())
-                        : 0;
-        setCornersRadius(mainWindow, cornersRadius);
-    }
-
-    private void setCornersRadius(WindowState mainWindow, int cornersRadius) {
         final SurfaceControl windowSurface = mainWindow.getClientViewRootSurface();
         if (windowSurface != null && windowSurface.isValid()) {
             Transaction transaction = mActivityRecord.getSyncTransaction();
-            transaction.setCornerRadius(windowSurface, cornersRadius);
+
+            if (!isLetterboxedNotForDisplayCutout(mainWindow)
+                    || !mLetterboxConfiguration.isLetterboxActivityCornersRounded()) {
+                transaction
+                        .setWindowCrop(windowSurface, null)
+                        .setCornerRadius(windowSurface, 0);
+                return;
+            }
+
+            final InsetsState insetsState = mainWindow.getInsetsState();
+            final InsetsSource taskbarInsetsSource =
+                    insetsState.getSource(InsetsState.ITYPE_EXTRA_NAVIGATION_BAR);
+
+            Rect cropBounds = null;
+
+            // Rounded corners should be displayed above the taskbar. When taskbar is hidden,
+            // an insets frame is equal to a navigation bar which shouldn't affect position of
+            // rounded corners since apps are expected to handle navigation bar inset.
+            // This condition checks whether the taskbar is visible.
+            if (taskbarInsetsSource.getFrame().height() >= mExpandedTaskBarHeight) {
+                cropBounds = new Rect(mActivityRecord.getBounds());
+                // Activity bounds are in screen coordinates while (0,0) for activity's surface
+                // control is at the top left corner of an app window so offsetting bounds
+                // accordingly.
+                cropBounds.offsetTo(0, 0);
+                // Rounded cornerners should be displayed above the taskbar.
+                cropBounds.bottom =
+                        Math.min(cropBounds.bottom, taskbarInsetsSource.getFrame().top);
+                if (mActivityRecord.inSizeCompatMode()
+                        && mActivityRecord.getSizeCompatScale() < 1.0f) {
+                    cropBounds.scale(1.0f / mActivityRecord.getSizeCompatScale());
+                }
+            }
+
+            transaction
+                    .setWindowCrop(windowSurface, cropBounds)
+                    .setCornerRadius(windowSurface, getRoundedCorners(insetsState));
         }
+    }
+
+    // Returns rounded corners radius based on override in
+    // R.integer.config_letterboxActivityCornersRadius or min device bottom corner radii.
+    // Device corners can be different on the right and left sides but we use the same radius
+    // for all corners for consistency and pick a minimal bottom one for consistency with a
+    // taskbar rounded corners.
+    private int getRoundedCorners(InsetsState insetsState) {
+        if (mLetterboxConfiguration.getLetterboxActivityCornersRadius() >= 0) {
+            return mLetterboxConfiguration.getLetterboxActivityCornersRadius();
+        }
+        return Math.min(
+                getInsetsStateCornerRadius(insetsState, RoundedCorner.POSITION_BOTTOM_LEFT),
+                getInsetsStateCornerRadius(insetsState, RoundedCorner.POSITION_BOTTOM_RIGHT));
+    }
+
+    private int getInsetsStateCornerRadius(
+                InsetsState insetsState, @RoundedCorner.Position int position) {
+        RoundedCorner corner = insetsState.getRoundedCorners().getRoundedCorner(position);
+        return corner == null ? 0 : corner.getRadius();
+    }
+
+    private boolean isLetterboxedNotForDisplayCutout(WindowState mainWindow) {
+        return shouldShowLetterboxUi(mainWindow)
+                && !mainWindow.isLetterboxedForDisplayCutout();
     }
 
     private void updateWallpaperForLetterbox(WindowState mainWindow) {
@@ -241,9 +393,8 @@ final class LetterboxUiController {
                 mLetterboxConfiguration.getLetterboxBackgroundType();
         boolean wallpaperShouldBeShown =
                 letterboxBackgroundType == LETTERBOX_BACKGROUND_WALLPAPER
-                        && shouldShowLetterboxUi(mainWindow)
                         // Don't use wallpaper as a background if letterboxed for display cutout.
-                        && !mainWindow.isLetterboxedForDisplayCutout()
+                        && isLetterboxedNotForDisplayCutout(mainWindow)
                         // Check that dark scrim alpha or blur radius are provided
                         && (getLetterboxWallpaperBlurRadius() > 0
                                 || getLetterboxWallpaperDarkScrimAlpha() > 0)
@@ -285,7 +436,7 @@ final class LetterboxUiController {
         }
 
         pw.println(prefix + "  letterboxReason=" + getLetterboxReasonString(mainWin));
-        pw.println(prefix + "  letterboxAspectRatio="
+        pw.println(prefix + "  activityAspectRatio="
                 + mActivityRecord.computeAspectRatio(mActivityRecord.getBounds()));
 
         boolean shouldShowLetterboxUi = shouldShowLetterboxUi(mainWin);
@@ -299,6 +450,8 @@ final class LetterboxUiController {
         pw.println(prefix + "  letterboxBackgroundType="
                 + letterboxBackgroundTypeToString(
                         mLetterboxConfiguration.getLetterboxBackgroundType()));
+        pw.println(prefix + "  letterboxCornerRadius="
+                + getRoundedCorners(mainWin.getInsetsState()));
         if (mLetterboxConfiguration.getLetterboxBackgroundType()
                 == LETTERBOX_BACKGROUND_WALLPAPER) {
             pw.println(prefix + "  isLetterboxWallpaperBlurSupported="
@@ -308,8 +461,13 @@ final class LetterboxUiController {
             pw.println(prefix + "  letterboxBackgroundWallpaperBlurRadius="
                     + getLetterboxWallpaperBlurRadius());
         }
+
+        pw.println(prefix + "  isReachabilityEnabled=" + isReachabilityEnabled());
         pw.println(prefix + "  letterboxHorizontalPositionMultiplier="
-                + mLetterboxConfiguration.getLetterboxHorizontalPositionMultiplier());
+                + getHorizontalPositionMultiplier(mActivityRecord.getParent().getConfiguration()));
+        pw.println(prefix + "  fixedOrientationLetterboxAspectRatio="
+                + getFixedOrientationLetterboxAspectRatio(
+                        mActivityRecord.getParent().getConfiguration()));
     }
 
     /**

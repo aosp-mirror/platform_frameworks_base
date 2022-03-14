@@ -24,13 +24,9 @@ import android.view.View
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.FrameLayout
-
 import com.android.systemui.R
-import com.android.systemui.statusbar.SuperStatusBarViewFactory
 import com.android.systemui.statusbar.phone.StatusBarLocationPublisher
-import com.android.systemui.statusbar.phone.StatusBarWindowController
-import com.android.systemui.statusbar.phone.StatusBarWindowView
-
+import com.android.systemui.statusbar.window.StatusBarWindowController
 import javax.inject.Inject
 
 /**
@@ -38,7 +34,6 @@ import javax.inject.Inject
  */
 class SystemEventChipAnimationController @Inject constructor(
     private val context: Context,
-    private val statusBarViewFactory: SuperStatusBarViewFactory,
     private val statusBarWindowController: StatusBarWindowController,
     private val locationPublisher: StatusBarLocationPublisher
 ) : SystemStatusChipAnimationCallback {
@@ -51,7 +46,6 @@ class SystemEventChipAnimationController @Inject constructor(
 
     private lateinit var animationWindowView: FrameLayout
     private lateinit var animationDotView: View
-    private lateinit var statusBarWindowView: StatusBarWindowView
     private var currentAnimatedView: View? = null
 
     // TODO: move to dagger
@@ -125,13 +119,12 @@ class SystemEventChipAnimationController @Inject constructor(
 
     private fun init() {
         initialized = true
-        statusBarWindowView = statusBarViewFactory.statusBarWindowView
         animationWindowView = LayoutInflater.from(context)
                 .inflate(R.layout.system_event_animation_window, null) as FrameLayout
         animationDotView = animationWindowView.findViewById(R.id.dot_view)
         val lp = FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT)
         lp.gravity = Gravity.END or Gravity.CENTER_VERTICAL
-        statusBarWindowView.addView(animationWindowView, lp)
+        statusBarWindowController.addViewToWindow(animationWindowView, lp)
     }
 
     private fun start() = if (animationWindowView.isLayoutRtl) right() else left()

@@ -18,11 +18,19 @@ package com.android.server.wm;
 
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
+import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FLAG_APP_CRASHED;
 import static android.view.WindowManager.TRANSIT_KEYGUARD_GOING_AWAY;
+import static android.view.WindowManager.TRANSIT_KEYGUARD_OCCLUDE;
+import static android.view.WindowManager.TRANSIT_KEYGUARD_UNOCCLUDE;
+import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_OLD_CRASHING_ACTIVITY_CLOSE;
 import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_GOING_AWAY;
+import static android.view.WindowManager.TRANSIT_OLD_TASK_CHANGE_WINDOWING_MODE;
+import static android.view.WindowManager.TRANSIT_OLD_TASK_FRAGMENT_CHANGE;
+import static android.view.WindowManager.TRANSIT_OLD_TASK_FRAGMENT_CLOSE;
+import static android.view.WindowManager.TRANSIT_OLD_TASK_FRAGMENT_OPEN;
 import static android.view.WindowManager.TRANSIT_OLD_UNSET;
 import static android.view.WindowManager.TRANSIT_OPEN;
 
@@ -30,22 +38,32 @@ import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentat
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
+import static com.android.server.wm.WindowContainer.POSITION_TOP;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 
+import android.graphics.Rect;
+import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
+import android.util.ArraySet;
 import android.view.Display;
 import android.view.IRemoteAnimationFinishedCallback;
 import android.view.IRemoteAnimationRunner;
 import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationTarget;
+import android.view.SurfaceControl;
 import android.view.WindowManager;
+import android.window.ITaskFragmentOrganizer;
+import android.window.TaskFragmentOrganizer;
 
 import androidx.test.filters.SmallTest;
 
@@ -77,13 +95,30 @@ public class AppTransitionTests extends WindowTestsBase {
         final ActivityRecord activity = createActivityRecord(dc);
 
         mDc.prepareAppTransition(TRANSIT_OPEN);
+        mDc.prepareAppTransition(TRANSIT_KEYGUARD_OCCLUDE);
         mDc.prepareAppTransition(TRANSIT_KEYGUARD_GOING_AWAY);
         mDc.mOpeningApps.add(activity);
         assertEquals(TRANSIT_OLD_KEYGUARD_GOING_AWAY,
                 AppTransitionController.getTransitCompatType(mDc.mAppTransition,
                         mDisplayContent.mOpeningApps, mDisplayContent.mClosingApps,
-                        null /* wallpaperTarget */, null /* oldWallpaper */,
-                        false /*skipAppTransitionAnimation*/));
+                        mDisplayContent.mChangingContainers, null /* wallpaperTarget */,
+                        null /* oldWallpaper */, false /*skipAppTransitionAnimation*/));
+    }
+
+    @Test
+    public void testKeyguardUnoccludeOcclude() {
+        final DisplayContent dc = createNewDisplay(Display.STATE_ON);
+        final ActivityRecord activity = createActivityRecord(dc);
+
+        mDc.prepareAppTransition(TRANSIT_KEYGUARD_UNOCCLUDE);
+        mDc.prepareAppTransition(TRANSIT_KEYGUARD_OCCLUDE);
+        mDc.mOpeningApps.add(activity);
+        assertEquals(TRANSIT_NONE,
+                AppTransitionController.getTransitCompatType(mDc.mAppTransition,
+                        mDisplayContent.mOpeningApps, mDisplayContent.mClosingApps,
+                        mDisplayContent.mChangingContainers, null /* wallpaperTarget */,
+                        null /* oldWallpaper */, false /*skipAppTransitionAnimation*/));
+
     }
 
     @Test
@@ -97,8 +132,8 @@ public class AppTransitionTests extends WindowTestsBase {
         assertEquals(TRANSIT_OLD_KEYGUARD_GOING_AWAY,
                 AppTransitionController.getTransitCompatType(mDc.mAppTransition,
                         mDisplayContent.mOpeningApps, mDisplayContent.mClosingApps,
-                        null /* wallpaperTarget */, null /* oldWallpaper */,
-                        false /*skipAppTransitionAnimation*/));
+                        mDisplayContent.mChangingContainers, null /* wallpaperTarget */,
+                        null /* oldWallpaper */, false /*skipAppTransitionAnimation*/));
     }
 
     @Test
@@ -112,8 +147,8 @@ public class AppTransitionTests extends WindowTestsBase {
         assertEquals(TRANSIT_OLD_CRASHING_ACTIVITY_CLOSE,
                 AppTransitionController.getTransitCompatType(mDc.mAppTransition,
                         mDisplayContent.mOpeningApps, mDisplayContent.mClosingApps,
-                        null /* wallpaperTarget */, null /* oldWallpaper */,
-                        false /*skipAppTransitionAnimation*/));
+                        mDisplayContent.mChangingContainers, null /* wallpaperTarget */,
+                        null /* oldWallpaper */, false /*skipAppTransitionAnimation*/));
     }
 
     @Test
@@ -127,8 +162,8 @@ public class AppTransitionTests extends WindowTestsBase {
         assertEquals(TRANSIT_OLD_KEYGUARD_GOING_AWAY,
                 AppTransitionController.getTransitCompatType(mDc.mAppTransition,
                         mDisplayContent.mOpeningApps, mDisplayContent.mClosingApps,
-                        null /* wallpaperTarget */, null /* oldWallpaper */,
-                        false /*skipAppTransitionAnimation*/));
+                        mDisplayContent.mChangingContainers, null /* wallpaperTarget */,
+                        null /* oldWallpaper */, false /*skipAppTransitionAnimation*/));
     }
 
     @Test
@@ -142,8 +177,129 @@ public class AppTransitionTests extends WindowTestsBase {
         assertEquals(TRANSIT_OLD_UNSET,
                 AppTransitionController.getTransitCompatType(mDc.mAppTransition,
                         mDisplayContent.mOpeningApps, mDisplayContent.mClosingApps,
-                        null /* wallpaperTarget */, null /* oldWallpaper */,
-                        true /*skipAppTransitionAnimation*/));
+                        mDisplayContent.mChangingContainers, null /* wallpaperTarget */,
+                        null /* oldWallpaper */, true /*skipAppTransitionAnimation*/));
+    }
+
+    @Test
+    public void testTaskChangeWindowingMode() {
+        final ActivityRecord activity = createActivityRecord(mDc);
+
+        mDc.prepareAppTransition(TRANSIT_OPEN);
+        mDc.prepareAppTransition(TRANSIT_CHANGE);
+        mDc.mOpeningApps.add(activity); // Make sure TRANSIT_CHANGE has the priority
+        mDc.mChangingContainers.add(activity.getTask());
+
+        assertEquals(TRANSIT_OLD_TASK_CHANGE_WINDOWING_MODE,
+                AppTransitionController.getTransitCompatType(mDc.mAppTransition,
+                        mDisplayContent.mOpeningApps, mDisplayContent.mClosingApps,
+                        mDisplayContent.mChangingContainers, null /* wallpaperTarget */,
+                        null /* oldWallpaper */, false /*skipAppTransitionAnimation*/));
+    }
+
+    @Test
+    public void testTaskFragmentChange() {
+        final ActivityRecord activity = createActivityRecord(mDc);
+        final TaskFragment taskFragment = new TaskFragment(mAtm, new Binder(),
+                true /* createdByOrganizer */, true /* isEmbedded */);
+        activity.getTask().addChild(taskFragment, POSITION_TOP);
+        activity.reparent(taskFragment, POSITION_TOP);
+
+        mDc.prepareAppTransition(TRANSIT_OPEN);
+        mDc.prepareAppTransition(TRANSIT_CHANGE);
+        mDc.mOpeningApps.add(activity); // Make sure TRANSIT_CHANGE has the priority
+        mDc.mChangingContainers.add(taskFragment);
+
+        assertEquals(TRANSIT_OLD_TASK_FRAGMENT_CHANGE,
+                AppTransitionController.getTransitCompatType(mDc.mAppTransition,
+                        mDisplayContent.mOpeningApps, mDisplayContent.mClosingApps,
+                        mDisplayContent.mChangingContainers, null /* wallpaperTarget */,
+                        null /* oldWallpaper */, false /*skipAppTransitionAnimation*/));
+    }
+
+    @Test
+    public void testTaskFragmentOpeningTransition() {
+        final ActivityRecord activity = createHierarchyForTaskFragmentTest(
+                false /* createEmbeddedTask */);
+        activity.setVisible(false);
+
+        mDisplayContent.prepareAppTransition(TRANSIT_OPEN);
+        mDisplayContent.mOpeningApps.add(activity);
+        assertEquals(TRANSIT_OLD_TASK_FRAGMENT_OPEN,
+                AppTransitionController.getTransitCompatType(mDisplayContent.mAppTransition,
+                        mDisplayContent.mOpeningApps, mDisplayContent.mClosingApps,
+                        mDisplayContent.mChangingContainers, null /* wallpaperTarget */,
+                        null /* oldWallpaper */, false /* skipAppTransitionAnimation */));
+    }
+
+    @Test
+    public void testEmbeddedTaskOpeningTransition() {
+        final ActivityRecord activity = createHierarchyForTaskFragmentTest(
+                true /* createEmbeddedTask */);
+        activity.setVisible(false);
+
+        mDisplayContent.prepareAppTransition(TRANSIT_OPEN);
+        mDisplayContent.mOpeningApps.add(activity);
+        assertEquals(TRANSIT_OLD_TASK_FRAGMENT_OPEN,
+                AppTransitionController.getTransitCompatType(mDisplayContent.mAppTransition,
+                        mDisplayContent.mOpeningApps, mDisplayContent.mClosingApps,
+                        mDisplayContent.mChangingContainers, null /* wallpaperTarget */,
+                        null /* oldWallpaper */, false /* skipAppTransitionAnimation */));
+    }
+
+    @Test
+    public void testTaskFragmentClosingTransition() {
+        final ActivityRecord activity = createHierarchyForTaskFragmentTest(
+                false /* createEmbeddedTask */);
+        activity.setVisible(true);
+
+        mDisplayContent.prepareAppTransition(TRANSIT_CLOSE);
+        mDisplayContent.mClosingApps.add(activity);
+        assertEquals(TRANSIT_OLD_TASK_FRAGMENT_CLOSE,
+                AppTransitionController.getTransitCompatType(mDisplayContent.mAppTransition,
+                        mDisplayContent.mOpeningApps, mDisplayContent.mClosingApps,
+                        mDisplayContent.mChangingContainers, null /* wallpaperTarget */,
+                        null /* oldWallpaper */, false /* skipAppTransitionAnimation */));
+    }
+
+    @Test
+    public void testEmbeddedTaskClosingTransition() {
+        final ActivityRecord activity = createHierarchyForTaskFragmentTest(
+                true /* createEmbeddedTask */);
+        activity.setVisible(true);
+
+        mDisplayContent.prepareAppTransition(TRANSIT_CLOSE);
+        mDisplayContent.mClosingApps.add(activity);
+        assertEquals(TRANSIT_OLD_TASK_FRAGMENT_CLOSE,
+                AppTransitionController.getTransitCompatType(mDisplayContent.mAppTransition,
+                        mDisplayContent.mOpeningApps, mDisplayContent.mClosingApps,
+                        mDisplayContent.mChangingContainers, null /* wallpaperTarget */,
+                        null /* oldWallpaper */, false /* skipAppTransitionAnimation */));
+    }
+
+    /**
+     * Creates a {@link Task} with two {@link TaskFragment TaskFragments}.
+     * The bottom TaskFragment is to prevent
+     * {@link AppTransitionController#getAnimationTargets(ArraySet, ArraySet, boolean) the animation
+     * target} to promote to Task or above.
+     *
+     * @param createEmbeddedTask {@code true} to create embedded Task for verified TaskFragment
+     * @return The Activity to be put in either opening or closing Activity
+     */
+    private ActivityRecord createHierarchyForTaskFragmentTest(boolean createEmbeddedTask) {
+        final Task parentTask = createTask(mDisplayContent);
+        final TaskFragment bottomTaskFragment = createTaskFragmentWithParentTask(parentTask,
+                false /* createEmbeddedTask */);
+        final ActivityRecord bottomActivity = bottomTaskFragment.getTopMostActivity();
+        bottomActivity.setOccludesParent(true);
+        bottomActivity.setVisible(true);
+
+        final TaskFragment verifiedTaskFragment = createTaskFragmentWithParentTask(parentTask,
+                createEmbeddedTask);
+        final ActivityRecord activity = verifiedTaskFragment.getTopMostActivity();
+        activity.setOccludesParent(true);
+
+        return activity;
     }
 
     @Test
@@ -260,6 +416,43 @@ public class AppTransitionTests extends WindowTestsBase {
         attrs.type = TYPE_APPLICATION_STARTING;
         assertEquals(mDc.mAppTransition.getDefaultWindowAnimationStyleResId(),
                 mDc.mAppTransition.getAnimationStyleResId(attrs));
+    }
+
+    @Test
+    public void testActivityRecordReparentToTaskFragment() {
+        final ActivityRecord activity = createActivityRecord(mDc);
+        final SurfaceControl activityLeash = mock(SurfaceControl.class);
+        activity.setVisibility(true);
+        activity.setSurfaceControl(activityLeash);
+        final Task task = activity.getTask();
+
+        // Add a TaskFragment of half of the Task size.
+        final TaskFragmentOrganizer organizer = new TaskFragmentOrganizer(Runnable::run);
+        final ITaskFragmentOrganizer iOrganizer =
+                ITaskFragmentOrganizer.Stub.asInterface(organizer.getOrganizerToken().asBinder());
+        mAtm.mTaskFragmentOrganizerController.registerOrganizer(iOrganizer);
+        final TaskFragment taskFragment = new TaskFragmentBuilder(mAtm)
+                .setParentTask(task)
+                .setOrganizer(organizer)
+                .build();
+        final Rect taskBounds = new Rect();
+        task.getBounds(taskBounds);
+        taskFragment.setBounds(0, 0, taskBounds.right / 2, taskBounds.bottom);
+        spyOn(taskFragment);
+        mockSurfaceFreezerSnapshot(taskFragment.mSurfaceFreezer);
+
+        assertTrue(mDc.mChangingContainers.isEmpty());
+        assertFalse(mDc.mAppTransition.isTransitionSet());
+
+        // Schedule app transition when reparent activity to a TaskFragment of different size.
+        final Rect startBounds = new Rect(activity.getBounds());
+        activity.reparent(taskFragment, POSITION_TOP);
+
+        // It should transit at TaskFragment level with snapshot on the activity surface.
+        verify(taskFragment).initializeChangeTransition(activity.getBounds(), activityLeash);
+        assertTrue(mDc.mChangingContainers.contains(taskFragment));
+        assertTrue(mDc.mAppTransition.containsTransitRequest(TRANSIT_CHANGE));
+        assertEquals(startBounds, taskFragment.mSurfaceFreezer.mFreezeBounds);
     }
 
     private class TestRemoteAnimationRunner implements IRemoteAnimationRunner {

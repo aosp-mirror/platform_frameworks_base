@@ -1166,9 +1166,17 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
             final ConnectivityManager cm = mContext.getSystemService(ConnectivityManager.class);
             try {
                 if (allowlist) {
-                    cm.updateMeteredNetworkAllowList(uid, enable);
+                    if (enable) {
+                        cm.addUidToMeteredNetworkAllowList(uid);
+                    } else {
+                        cm.removeUidFromMeteredNetworkAllowList(uid);
+                    }
                 } else {
-                    cm.updateMeteredNetworkDenyList(uid, enable);
+                    if (enable) {
+                        cm.addUidToMeteredNetworkDenyList(uid);
+                    } else {
+                        cm.removeUidFromMeteredNetworkDenyList(uid);
+                    }
                 }
                 synchronized (mRulesLock) {
                     if (enable) {

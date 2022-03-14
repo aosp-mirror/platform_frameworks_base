@@ -998,6 +998,8 @@ public class VibratorManagerServiceTest {
             throws Exception {
         mockVibrators(1);
         mVibratorProviders.get(1).setCapabilities(IVibrator.CAP_EXTERNAL_CONTROL);
+        setRingerMode(AudioManager.RINGER_MODE_NORMAL);
+        setUserSetting(Settings.System.VIBRATE_WHEN_RINGING, 1);
         createSystemReadyService();
 
         IExternalVibrationController firstController = mock(IExternalVibrationController.class);
@@ -1006,8 +1008,11 @@ public class VibratorManagerServiceTest {
                 firstController);
         int firstScale = mExternalVibratorService.onExternalVibrationStart(firstVibration);
 
-        ExternalVibration secondVibration = new ExternalVibration(UID, PACKAGE_NAME, AUDIO_ATTRS,
-                secondController);
+        AudioAttributes ringtoneAudioAttrs = new AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_NOTIFICATION_RINGTONE)
+                .build();
+        ExternalVibration secondVibration = new ExternalVibration(UID, PACKAGE_NAME,
+                ringtoneAudioAttrs, secondController);
         int secondScale = mExternalVibratorService.onExternalVibrationStart(secondVibration);
 
         assertEquals(IExternalVibratorService.SCALE_NONE, firstScale);
@@ -1038,6 +1043,37 @@ public class VibratorManagerServiceTest {
         // Vibration is cancelled.
         assertTrue(waitUntil(s -> !s.isVibrating(1), service, TEST_TIMEOUT_MILLIS));
         assertEquals(Arrays.asList(true), mVibratorProviders.get(1).getExternalControlStates());
+    }
+
+    @Test
+    public void onExternalVibration_withRingtone_usesRingerModeSettings() {
+        mockVibrators(1);
+        mVibratorProviders.get(1).setCapabilities(IVibrator.CAP_EXTERNAL_CONTROL);
+        mVibrator.setDefaultRingVibrationIntensity(Vibrator.VIBRATION_INTENSITY_MEDIUM);
+        AudioAttributes audioAttrs = new AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_NOTIFICATION_RINGTONE)
+                .build();
+        ExternalVibration externalVibration = new ExternalVibration(UID, PACKAGE_NAME, audioAttrs,
+                mock(IExternalVibrationController.class));
+
+        setRingerMode(AudioManager.RINGER_MODE_NORMAL);
+        setUserSetting(Settings.System.VIBRATE_WHEN_RINGING, 0);
+        setGlobalSetting(Settings.Global.APPLY_RAMPING_RINGER, 0);
+        createSystemReadyService();
+        int scale = mExternalVibratorService.onExternalVibrationStart(externalVibration);
+        assertEquals(IExternalVibratorService.SCALE_MUTE, scale);
+
+        setUserSetting(Settings.System.VIBRATE_WHEN_RINGING, 0);
+        setGlobalSetting(Settings.Global.APPLY_RAMPING_RINGER, 1);
+        createSystemReadyService();
+        scale = mExternalVibratorService.onExternalVibrationStart(externalVibration);
+        assertEquals(IExternalVibratorService.SCALE_NONE, scale);
+
+        setUserSetting(Settings.System.VIBRATE_WHEN_RINGING, 1);
+        setGlobalSetting(Settings.Global.APPLY_RAMPING_RINGER, 0);
+        createSystemReadyService();
+        scale = mExternalVibratorService.onExternalVibrationStart(externalVibration);
+        assertEquals(IExternalVibratorService.SCALE_NONE, scale);
     }
 
     private VibrationEffectSegment expectedPrebaked(int effectId) {

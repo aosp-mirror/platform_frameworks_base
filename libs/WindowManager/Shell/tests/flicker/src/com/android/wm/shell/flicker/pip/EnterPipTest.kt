@@ -23,6 +23,7 @@ import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
+import com.android.server.wm.flicker.LAUNCHER_COMPONENT
 import com.android.server.wm.flicker.annotation.Group3
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import org.junit.FixMethodOrder
@@ -32,8 +33,21 @@ import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
 
 /**
- * Test Pip launch.
+ * Test entering pip from an app by interacting with the app UI
+ *
  * To run this test: `atest WMShellFlickerTests:EnterPipTest`
+ *
+ * Actions:
+ *     Launch an app in full screen
+ *     Press an "enter pip" button to put [pipApp] in pip mode
+ *
+ * Notes:
+ *     1. Some default assertions (e.g., nav bar, status bar and screen covered)
+ *        are inherited [PipTransition]
+ *     2. Part of the test setup occurs automatically via
+ *        [com.android.server.wm.flicker.TransitionRunnerWithRules],
+ *        including configuring navigation mode, initial orientation and ensuring no
+ *        apps are running before setup
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
@@ -41,49 +55,121 @@ import org.junit.runners.Parameterized
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group3
 class EnterPipTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
+    /**
+     * Defines the transition used to run the test
+     */
     override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
         get() = buildTransition(eachRun = true, stringExtras = emptyMap()) {
             transitions {
-                pipApp.clickEnterPipButton()
-                pipApp.expandPipWindow(wmHelper)
+                pipApp.clickEnterPipButton(wmHelper)
             }
         }
 
-    @FlakyTest
-    @Test
-    override fun noUncoveredRegions() {
-        super.noUncoveredRegions()
-    }
-
+    /**
+     * Checks [pipApp] window remains visible throughout the animation
+     */
     @Presubmit
     @Test
     fun pipAppWindowAlwaysVisible() {
         testSpec.assertWm {
-            this.showsAppWindow(pipApp.defaultWindowName)
+            this.isAppWindowVisible(pipApp.component)
         }
     }
 
-    @FlakyTest
+    /**
+     * Checks [pipApp] layer remains visible throughout the animation
+     */
+    @Presubmit
     @Test
-    fun pipLayerBecomesVisible() {
+    fun pipAppLayerAlwaysVisible() {
         testSpec.assertLayers {
-            this.isVisible(pipApp.windowName)
+            this.isVisible(pipApp.component)
         }
     }
 
-    @FlakyTest
+    /**
+     * Checks that the pip app window remains inside the display bounds throughout the whole
+     * animation
+     */
+    @Presubmit
     @Test
-    fun pipWindowBecomesVisible() {
+    fun pipWindowRemainInsideVisibleBounds() {
         testSpec.assertWm {
-            invoke("pipWindowIsNotVisible") {
-                verify("Has no pip window").that(it.wmState.hasPipWindow()).isTrue()
-            }.then().invoke("pipWindowIsVisible") {
-                verify("Has pip window").that(it.wmState.hasPipWindow()).isTrue()
+            coversAtMost(displayBounds, pipApp.component)
+        }
+    }
+
+    /**
+     * Checks that the pip app layer remains inside the display bounds throughout the whole
+     * animation
+     */
+    @Presubmit
+    @Test
+    fun pipLayerRemainInsideVisibleBounds() {
+        testSpec.assertLayers {
+            coversAtMost(displayBounds, pipApp.component)
+        }
+    }
+
+    /**
+     * Checks that the visible region of [pipApp] always reduces during the animation
+     */
+    @Presubmit
+    @Test
+    fun pipLayerReduces() {
+        val layerName = pipApp.component.toLayerName()
+        testSpec.assertLayers {
+            val pipLayerList = this.layers { it.name.contains(layerName) && it.isVisible }
+            pipLayerList.zipWithNext { previous, current ->
+                current.visibleRegion.coversAtMost(previous.visibleRegion.region)
             }
         }
     }
 
+    /**
+     * Checks that [pipApp] window becomes pinned
+     */
+    @Presubmit
+    @Test
+    fun pipWindowBecomesPinned() {
+        testSpec.assertWm {
+            invoke("pipWindowIsNotPinned") { it.isNotPinned(pipApp.component) }
+                .then()
+                .invoke("pipWindowIsPinned") { it.isPinned(pipApp.component) }
+        }
+    }
+
+    /**
+     * Checks [LAUNCHER_COMPONENT] layer remains visible throughout the animation
+     */
+    @Presubmit
+    @Test
+    fun launcherLayerBecomesVisible() {
+        testSpec.assertLayers {
+            isInvisible(LAUNCHER_COMPONENT)
+                .then()
+                .isVisible(LAUNCHER_COMPONENT)
+        }
+    }
+
+    /**
+     * Checks the focus doesn't change during the animation
+     */
+    @FlakyTest
+    @Test
+    fun focusDoesNotChange() {
+        testSpec.assertEventLog {
+            this.focusDoesNotChange()
+        }
+    }
+
     companion object {
+        /**
+         * Creates the test configurations.
+         *
+         * See [FlickerTestParameterFactory.getConfigNonRotationTests] for configuring
+         * repetitions, screen orientation and navigation modes.
+         */
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
         fun getParams(): List<FlickerTestParameter> {

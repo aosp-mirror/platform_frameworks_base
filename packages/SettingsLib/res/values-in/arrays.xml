@@ -23,7 +23,7 @@
   <string-array name="wifi_status">
     <item msgid="1596683495752107015"></item>
     <item msgid="3288373008277313483">"Memindai..."</item>
-    <item msgid="6050951078202663628">"Menghubungkan…"</item>
+    <item msgid="6050951078202663628">"Menyambung…"</item>
     <item msgid="8356618438494652335">"Mengautentikasi…"</item>
     <item msgid="2837871868181677206">"Mendapatkan alamat IP…"</item>
     <item msgid="4613015005934755724">"Terhubung"</item>
@@ -37,7 +37,7 @@
   <string-array name="wifi_status_with_ssid">
     <item msgid="5969842512724979061"></item>
     <item msgid="1818677602615822316">"Memindai..."</item>
-    <item msgid="8339720953594087771">"Menghubungkan ke <xliff:g id="NETWORK_NAME">%1$s</xliff:g>…"</item>
+    <item msgid="8339720953594087771">"Menyambung ke <xliff:g id="NETWORK_NAME">%1$s</xliff:g>…"</item>
     <item msgid="3028983857109369308">"Mengautentikasi dengan <xliff:g id="NETWORK_NAME">%1$s</xliff:g>…"</item>
     <item msgid="4287401332778341890">"Mendapatkan alamat IP dari <xliff:g id="NETWORK_NAME">%1$s</xliff:g>…"</item>
     <item msgid="1043944043827424501">"Terhubung ke <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</item>

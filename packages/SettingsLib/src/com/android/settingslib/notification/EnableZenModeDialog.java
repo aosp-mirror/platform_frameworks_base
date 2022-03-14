@@ -19,7 +19,6 @@ package com.android.settingslib.notification;
 import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -85,6 +84,8 @@ public class EnableZenModeDialog {
 
     @VisibleForTesting
     protected Context mContext;
+    private final int mThemeResId;
+    private final boolean mCancelIsNeutral;
     @VisibleForTesting
     protected TextView mZenAlarmWarning;
     @VisibleForTesting
@@ -97,10 +98,20 @@ public class EnableZenModeDialog {
     protected LayoutInflater mLayoutInflater;
 
     public EnableZenModeDialog(Context context) {
-        mContext = context;
+        this(context, 0);
     }
 
-    public Dialog createDialog() {
+    public EnableZenModeDialog(Context context, int themeResId) {
+        this(context, themeResId, false /* cancelIsNeutral */);
+    }
+
+    public EnableZenModeDialog(Context context, int themeResId, boolean cancelIsNeutral) {
+        mContext = context;
+        mThemeResId = themeResId;
+        mCancelIsNeutral = cancelIsNeutral;
+    }
+
+    public AlertDialog createDialog() {
         mNotificationManager = (NotificationManager) mContext.
                 getSystemService(Context.NOTIFICATION_SERVICE);
         mForeverId =  Condition.newId(mContext).appendPath("forever").build();
@@ -108,9 +119,8 @@ public class EnableZenModeDialog {
         mUserId = mContext.getUserId();
         mAttached = false;
 
-        final AlertDialog.Builder builder = new AlertDialog.Builder(mContext)
+        final AlertDialog.Builder builder = new AlertDialog.Builder(mContext, mThemeResId)
                 .setTitle(R.string.zen_mode_settings_turn_on_dialog_title)
-                .setNegativeButton(R.string.cancel, null)
                 .setPositiveButton(R.string.zen_mode_enable_dialog_turn_on,
                         new DialogInterface.OnClickListener() {
                             @Override
@@ -139,6 +149,12 @@ public class EnableZenModeDialog {
                                         getRealConditionId(tag.condition), TAG);
                             }
                         });
+
+        if (mCancelIsNeutral) {
+            builder.setNeutralButton(R.string.cancel, null);
+        } else {
+            builder.setNegativeButton(R.string.cancel, null);
+        }
 
         View contentView = getContentView();
         bindConditions(forever());

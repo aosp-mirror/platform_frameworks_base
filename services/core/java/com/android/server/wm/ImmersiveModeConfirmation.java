@@ -20,6 +20,7 @@ import static android.app.ActivityManager.LOCK_TASK_MODE_LOCKED;
 import static android.app.ActivityManager.LOCK_TASK_MODE_NONE;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.window.DisplayAreaOrganizer.FEATURE_UNDEFINED;
+import static android.window.DisplayAreaOrganizer.KEY_ROOT_DISPLAY_AREA_ID;
 
 import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
@@ -420,7 +421,7 @@ public class ImmersiveModeConfirmation {
         }
 
         final Bundle options = new Bundle();
-        options.putInt(DisplayAreaPolicyBuilder.KEY_ROOT_DISPLAY_AREA_ID, rootDisplayAreaId);
+        options.putInt(KEY_ROOT_DISPLAY_AREA_ID, rootDisplayAreaId);
         return options;
     }
 
