@@ -490,6 +490,9 @@ public class ImsService extends Service {
     }
 
     private void removeImsFeature(int slotId, int featureType) {
+        // clear cached data
+        notifySubscriptionRemoved(slotId);
+
         synchronized (mFeaturesBySlot) {
             // get ImsFeature associated with the slot/feature
             SparseArray<ImsFeature> features = mFeaturesBySlot.get(slotId);
@@ -507,7 +510,6 @@ public class ImsService extends Service {
             f.onFeatureRemoved();
             features.remove(featureType);
         }
-
     }
 
     /**
@@ -626,6 +628,24 @@ public class ImsService extends Service {
      */
     public void disableImsForSubscription(int slotId, int subscriptionId) {
         disableIms(slotId);
+    }
+
+    /**
+     * The subscription has removed. The ImsService should notify ImsRegistrationImplBase and
+     * ImsConfigImplBase the SIM state was changed.
+     * @param slotId The slot ID which has removed.
+     */
+    private void notifySubscriptionRemoved(int slotId) {
+        ImsRegistrationImplBase registrationImplBase =
+                getRegistration(slotId);
+        if (registrationImplBase != null) {
+            registrationImplBase.clearRegistrationCache();
+        }
+
+        ImsConfigImplBase imsConfigImplBase = getConfig(slotId);
+        if (imsConfigImplBase != null) {
+            imsConfigImplBase.clearConfigurationCache();
+        }
     }
 
     /**
