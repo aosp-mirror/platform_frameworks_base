@@ -104,7 +104,7 @@ public class WorkModeTile extends QSTileImpl<BooleanState> implements
     @Override
     public CharSequence getTileLabel() {
         DevicePolicyManager dpm = mContext.getSystemService(DevicePolicyManager.class);
-        return dpm.getString(QS_WORK_PROFILE_LABEL,
+        return dpm.getResources().getString(QS_WORK_PROFILE_LABEL,
                 () -> mContext.getString(R.string.quick_settings_work_mode_label));
     }
 
