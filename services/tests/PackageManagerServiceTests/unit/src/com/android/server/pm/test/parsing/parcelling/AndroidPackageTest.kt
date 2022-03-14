@@ -143,6 +143,7 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
         AndroidPackage::getLogo,
         AndroidPackage::getLocaleConfigRes,
         AndroidPackage::getManageSpaceActivityName,
+        AndroidPackage::getMaxSdkVersion,
         AndroidPackage::getMemtagMode,
         AndroidPackage::getMinSdkVersion,
         AndroidPackage::getNativeHeapZeroInitialized,
