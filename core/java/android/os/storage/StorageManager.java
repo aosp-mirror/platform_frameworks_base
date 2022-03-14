@@ -3044,14 +3044,4 @@ public class StorageManager {
     public static final int CRYPT_TYPE_PATTERN = IVold.PASSWORD_TYPE_PATTERN;
     /** @hide */
     public static final int CRYPT_TYPE_PIN = IVold.PASSWORD_TYPE_PIN;
-
-    // Constants for the data available via StorageManagerService.getField.
-    /** @hide */
-    public static final String SYSTEM_LOCALE_KEY = "SystemLocale";
-    /** @hide */
-    public static final String OWNER_INFO_KEY = "OwnerInfo";
-    /** @hide */
-    public static final String PATTERN_VISIBLE_KEY = "PatternVisible";
-    /** @hide */
-    public static final String PASSWORD_VISIBLE_KEY = "PasswordVisible";
 }
