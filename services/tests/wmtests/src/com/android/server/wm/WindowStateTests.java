@@ -800,7 +800,6 @@ public class WindowStateTests extends WindowTestsBase {
     @Test
     public void testHasActiveVisibleWindow() {
         final int uid = ActivityBuilder.DEFAULT_FAKE_UID;
-        mAtm.mActiveUids.onUidActive(uid, 0 /* any proc state */);
 
         final WindowState app = createWindow(null, TYPE_APPLICATION, "app", uid);
         app.mActivityRecord.setVisible(false);
@@ -828,6 +827,11 @@ public class WindowStateTests extends WindowTestsBase {
         // Make the application overlay window visible. It should be a valid active visible window.
         overlay.onSurfaceShownChanged(true);
         assertTrue(mAtm.hasActiveVisibleWindow(uid));
+
+        // The number of windows should be independent of the existence of uid state.
+        mAtm.mActiveUids.onUidInactive(uid);
+        mAtm.mActiveUids.onUidActive(uid, 0 /* any proc state */);
+        assertTrue(mAtm.mActiveUids.hasNonAppVisibleWindow(uid));
     }
 
     @UseTestDisplay(addWindows = W_ACTIVITY)
