@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -64,10 +65,14 @@ public class SuggestedLocaleAdapter extends BaseAdapter implements Filterable {
     private Locale mDisplayLocale = null;
     // used to potentially cache a modified Context that uses mDisplayLocale
     private Context mContextOverride = null;
+    private String mAppPackageName;
 
-    public SuggestedLocaleAdapter(Set<LocaleStore.LocaleInfo> localeOptions, boolean countryMode) {
+    public SuggestedLocaleAdapter(Set<LocaleStore.LocaleInfo> localeOptions, boolean countryMode,
+            String appPackageName) {
         mCountryMode = countryMode;
         mLocaleOptions = new ArrayList<>(localeOptions.size());
+        mAppPackageName = appPackageName;
+
         for (LocaleStore.LocaleInfo li : localeOptions) {
             if (li.isSuggested()) {
                 mSuggestionCount++;
@@ -195,11 +200,20 @@ public class SuggestedLocaleAdapter extends BaseAdapter implements Filterable {
 
                 TextView text = (TextView) convertView.findViewById(R.id.locale);
                 LocaleStore.LocaleInfo item = (LocaleStore.LocaleInfo) getItem(position);
-                text.setText(item.getLabel(mCountryMode));
-                text.setTextLocale(item.getLocale());
-                text.setContentDescription(item.getContentDescription(mCountryMode));
+                Locale layoutLocale;
+                if (item.isSystemLocale()) {
+                    // show system default option
+                    text.setText(R.string.system_locale_title);
+                    text.setTextLocale(Locale.getDefault());
+                    layoutLocale = Locale.getDefault();
+                } else {
+                    text.setText(item.getLabel(mCountryMode));
+                    text.setTextLocale(item.getLocale());
+                    text.setContentDescription(item.getContentDescription(mCountryMode));
+                    layoutLocale = item.getParent();
+                }
                 if (mCountryMode) {
-                    int layoutDir = TextUtils.getLayoutDirectionFromLocale(item.getParent());
+                    int layoutDir = TextUtils.getLayoutDirectionFromLocale(layoutLocale);
                     //noinspection ResourceType
                     convertView.setLayoutDirection(layoutDir);
                     text.setTextDirection(layoutDir == View.LAYOUT_DIRECTION_RTL
@@ -315,5 +329,9 @@ public class SuggestedLocaleAdapter extends BaseAdapter implements Filterable {
     @Override
     public Filter getFilter() {
         return new FilterByNativeAndUiNames();
+    }
+
+    public String getAppPackageName() {
+        return mAppPackageName;
     }
 }

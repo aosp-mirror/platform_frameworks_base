@@ -4772,4 +4772,5 @@
   <java-symbol type="drawable" name="ic_swap_horiz" />
   <java-symbol type="bool" name="config_notificationForceUserSetOnUpgrade" />
 
+  <java-symbol type="string" name="system_locale_title" />
 </resources>
