@@ -57925,7 +57925,7 @@ package android.window {
   }
 
   public interface OnBackInvokedDispatcher {
-    method public void registerOnBackInvokedCallback(@NonNull android.window.OnBackInvokedCallback, @IntRange(from=0) int);
+    method public void registerOnBackInvokedCallback(@IntRange(from=0) int, @NonNull android.window.OnBackInvokedCallback);
     method public void unregisterOnBackInvokedCallback(@NonNull android.window.OnBackInvokedCallback);
     field public static final int PRIORITY_DEFAULT = 0; // 0x0
     field public static final int PRIORITY_OVERLAY = 1000000; // 0xf4240
