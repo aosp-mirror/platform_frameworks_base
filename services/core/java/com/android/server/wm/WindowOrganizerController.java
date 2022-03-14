@@ -94,6 +94,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.function.IntSupplier;
 
 /**
  * Server side implementation for the interface for organizing windows
@@ -810,26 +811,8 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 launchOpts.remove(WindowContainerTransaction.HierarchyOp.LAUNCH_KEY_TASK_ID);
                 final SafeActivityOptions safeOptions =
                         SafeActivityOptions.fromBundle(launchOpts, caller.mPid, caller.mUid);
-                final Integer[] starterResult = {null};
-                // startActivityFromRecents should not be called in lock.
-                mService.mH.post(() -> {
-                    try {
-                        starterResult[0] = mService.mTaskSupervisor.startActivityFromRecents(
-                                caller.mPid, caller.mUid, taskId, safeOptions);
-                    } catch (Throwable t) {
-                        starterResult[0] = ActivityManager.START_CANCELED;
-                        Slog.w(TAG, t);
-                    }
-                    synchronized (mGlobalLock) {
-                        mGlobalLock.notifyAll();
-                    }
-                });
-                while (starterResult[0] == null) {
-                    try {
-                        mGlobalLock.wait();
-                    } catch (InterruptedException ignored) {
-                    }
-                }
+                waitAsyncStart(() -> mService.mTaskSupervisor.startActivityFromRecents(
+                        caller.mPid, caller.mUid, taskId, safeOptions));
                 break;
             }
             case HIERARCHY_OP_TYPE_PENDING_INTENT: {
@@ -838,22 +821,22 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                         mService.mContext.getContentResolver())
                         : null;
 
-                Bundle options = null;
+                ActivityOptions activityOptions = null;
                 if (hop.getPendingIntent().isActivity()) {
                     // Set the context display id as preferred for this activity launches, so that
                     // it can land on caller's display. Or just brought the task to front at the
                     // display where it was on since it has higher preference.
-                    ActivityOptions activityOptions = hop.getLaunchOptions() != null
+                    activityOptions = hop.getLaunchOptions() != null
                             ? new ActivityOptions(hop.getLaunchOptions())
                             : ActivityOptions.makeBasic();
                     activityOptions.setCallerDisplayId(DEFAULT_DISPLAY);
-                    options = activityOptions.toBundle();
                 }
-
-                mService.mAmInternal.sendIntentSender(hop.getPendingIntent().getTarget(),
+                final Bundle options = activityOptions != null ? activityOptions.toBundle() : null;
+                waitAsyncStart(() -> mService.mAmInternal.sendIntentSender(
+                        hop.getPendingIntent().getTarget(),
                         hop.getPendingIntent().getWhitelistToken(), 0 /* code */,
                         hop.getActivityIntent(), resolvedType, null /* finishReceiver */,
-                        null /* requiredPermission */, options);
+                        null /* requiredPermission */, options));
                 break;
             }
             case HIERARCHY_OP_TYPE_START_SHORTCUT: {
@@ -912,6 +895,31 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 break;
         }
         return effects;
+    }
+
+    /**
+     * Post and wait for the result of the activity start to prevent potential deadlock against
+     * {@link WindowManagerGlobalLock}.
+     */
+    private void waitAsyncStart(IntSupplier startActivity) {
+        final Integer[] starterResult = {null};
+        mService.mH.post(() -> {
+            try {
+                starterResult[0] = startActivity.getAsInt();
+            } catch (Throwable t) {
+                starterResult[0] = ActivityManager.START_CANCELED;
+                Slog.w(TAG, t);
+            }
+            synchronized (mGlobalLock) {
+                mGlobalLock.notifyAll();
+            }
+        });
+        while (starterResult[0] == null) {
+            try {
+                mGlobalLock.wait();
+            } catch (InterruptedException ignored) {
+            }
+        }
     }
 
     private int sanitizeAndApplyHierarchyOp(WindowContainer container,
