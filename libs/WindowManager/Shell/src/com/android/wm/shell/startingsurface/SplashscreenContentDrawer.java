@@ -301,8 +301,6 @@ public class SplashscreenContentDrawer {
                 Color.TRANSPARENT);
         attrs.mSplashScreenIcon = safeReturnAttrDefault((def) -> typedArray.getDrawable(
                 R.styleable.Window_windowSplashScreenAnimatedIcon), null);
-        attrs.mAnimationDuration = safeReturnAttrDefault((def) -> typedArray.getInt(
-                R.styleable.Window_windowSplashScreenAnimationDuration, def), 0);
         attrs.mBrandingImage = safeReturnAttrDefault((def) -> typedArray.getDrawable(
                 R.styleable.Window_windowSplashScreenBrandingImage), null);
         attrs.mIconBgColor = safeReturnAttrDefault((def) -> typedArray.getColor(
@@ -310,9 +308,8 @@ public class SplashscreenContentDrawer {
                 Color.TRANSPARENT);
         typedArray.recycle();
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_STARTING_WINDOW,
-                "getWindowAttrs: window attributes color: %s, replace icon: %b, avd duration: %d",
-                Integer.toHexString(attrs.mWindowBgColor), attrs.mSplashScreenIcon != null,
-                attrs.mAnimationDuration);
+                "getWindowAttrs: window attributes color: %s, replace icon: %b",
+                Integer.toHexString(attrs.mWindowBgColor), attrs.mSplashScreenIcon != null);
     }
 
     /** Creates the wrapper with system theme to avoid unexpected styles from app. */
@@ -327,7 +324,6 @@ public class SplashscreenContentDrawer {
         private Drawable mSplashScreenIcon = null;
         private Drawable mBrandingImage = null;
         private int mIconBgColor = Color.TRANSPARENT;
-        private int mAnimationDuration = 0;
     }
 
     /**
@@ -401,16 +397,13 @@ public class SplashscreenContentDrawer {
 
         SplashScreenView build() {
             Drawable iconDrawable;
-            final long animationDuration;
             if (mSuggestType == STARTING_WINDOW_TYPE_SOLID_COLOR_SPLASH_SCREEN
                     || mSuggestType == STARTING_WINDOW_TYPE_LEGACY_SPLASH_SCREEN) {
                 // empty or legacy splash screen case
-                animationDuration = 0;
                 mFinalIconSize = 0;
             } else if (mTmpAttrs.mSplashScreenIcon != null) {
                 // Using the windowSplashScreenAnimatedIcon attribute
                 iconDrawable = mTmpAttrs.mSplashScreenIcon;
-                animationDuration = mTmpAttrs.mAnimationDuration;
 
                 // There is no background below the icon, so scale the icon up
                 if (mTmpAttrs.mIconBgColor == Color.TRANSPARENT
@@ -440,11 +433,9 @@ public class SplashscreenContentDrawer {
                     Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
                     createIconDrawable(new BitmapDrawable(bitmap), true);
                 }
-                animationDuration = 0;
             }
 
-            return fillViewWithIcon(mFinalIconSize, mFinalIconDrawables, animationDuration,
-                    mUiThreadInitTask);
+            return fillViewWithIcon(mFinalIconSize, mFinalIconDrawables, mUiThreadInitTask);
         }
 
         private class ShapeIconFactory extends BaseIconFactory {
@@ -460,7 +451,7 @@ public class SplashscreenContentDrawer {
             } else {
                 mFinalIconDrawables = SplashscreenIconDrawableFactory.makeIconDrawable(
                         mTmpAttrs.mIconBgColor, mThemeColor, iconDrawable, mDefaultIconSize,
-                        mFinalIconSize, mSplashscreenWorkerHandler, mSplashScreenExecutor);
+                        mFinalIconSize, mSplashscreenWorkerHandler);
             }
         }
 
@@ -520,7 +511,7 @@ public class SplashscreenContentDrawer {
         }
 
         private SplashScreenView fillViewWithIcon(int iconSize, @Nullable Drawable[] iconDrawable,
-                long animationDuration, Consumer<Runnable> uiThreadInitTask) {
+                Consumer<Runnable> uiThreadInitTask) {
             Drawable foreground = null;
             Drawable background = null;
             if (iconDrawable != null) {
@@ -536,7 +527,6 @@ public class SplashscreenContentDrawer {
                     .setIconSize(iconSize)
                     .setIconBackground(background)
                     .setCenterViewDrawable(foreground)
-                    .setAnimationDurationMillis(animationDuration)
                     .setUiThreadInitConsumer(uiThreadInitTask)
                     .setAllowHandleSolidColor(mAllowHandleSolidColor);
 
