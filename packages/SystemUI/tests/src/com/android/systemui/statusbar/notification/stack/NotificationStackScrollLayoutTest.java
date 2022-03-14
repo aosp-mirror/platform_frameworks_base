@@ -161,17 +161,6 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     }
 
     @Test
-    public void testUpdateStackEndHeight_forEndOfStackHeightAnimation() {
-        final float nsslHeight = 10f;
-        final float bottomMargin = 1f;
-        final float topPadding = 1f;
-
-        mStackScroller.updateStackEndHeight(nsslHeight, bottomMargin, topPadding);
-        final float stackEndHeight = nsslHeight - bottomMargin - topPadding;
-        assertTrue(mAmbientState.getStackEndHeight() == stackEndHeight);
-    }
-
-    @Test
     public void testUpdateStackHeight_withDozeAmount_whenDozeChanging() {
         final float dozeAmount = 0.5f;
         mAmbientState.setDozeAmount(dozeAmount);
