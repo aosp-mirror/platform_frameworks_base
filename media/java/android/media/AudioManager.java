@@ -805,7 +805,7 @@ public class AudioManager {
     }
 
     @UnsupportedAppUsage
-    private static IAudioService getService()
+    static IAudioService getService()
     {
         if (sService != null) {
             return sService;
@@ -2437,6 +2437,19 @@ public class AudioManager {
             throw new NullPointerException("Illegal null AudioAttributes");
         }
         return AudioSystem.getOffloadSupport(format, attributes);
+    }
+
+    //====================================================================
+    // Immersive audio
+
+    /**
+     * Return a handle to the optional platform's {@link Spatializer}
+     * @return the {@code Spatializer} instance.
+     * @see Spatializer#getImmersiveAudioLevel() to check for the level of support of the effect
+     *   on the platform
+     */
+    public @NonNull Spatializer getSpatializer() {
+        return new Spatializer(this);
     }
 
     //====================================================================
@@ -6818,7 +6831,8 @@ public class AudioManager {
         for (Integer format : formatsList) {
             int btSourceCodec = AudioSystem.audioFormatToBluetoothSourceCodec(format);
             if (btSourceCodec != BluetoothCodecConfig.SOURCE_CODEC_TYPE_INVALID) {
-                codecConfigList.add(new BluetoothCodecConfig(btSourceCodec));
+                codecConfigList.add(
+                        new BluetoothCodecConfig.Builder().setCodecType(btSourceCodec).build());
             }
         }
         return codecConfigList;

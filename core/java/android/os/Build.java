@@ -1160,7 +1160,6 @@ public class Build {
          * S V2.
          *
          * Once more unto the breach, dear friends, once more.
-         *
          */
         public static final int S_V2 = 32;
 

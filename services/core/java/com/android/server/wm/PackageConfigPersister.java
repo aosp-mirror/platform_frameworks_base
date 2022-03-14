@@ -16,11 +16,10 @@
 
 package com.android.server.wm;
 
-import static android.app.UiModeManager.MODE_NIGHT_AUTO;
-import static android.app.UiModeManager.MODE_NIGHT_CUSTOM;
-
 import android.annotation.NonNull;
+import android.content.res.Configuration;
 import android.os.Environment;
+import android.os.LocaleList;
 import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -54,12 +53,14 @@ public class PackageConfigPersister {
     private static final String TAG_CONFIG = "config";
     private static final String ATTR_PACKAGE_NAME = "package_name";
     private static final String ATTR_NIGHT_MODE = "night_mode";
+    private static final String ATTR_LOCALES = "locale_list";
 
     private static final String PACKAGE_DIRNAME = "package_configs";
     private static final String SUFFIX_FILE_NAME = "_config.xml";
 
     private final PersisterQueue mPersisterQueue;
     private final Object mLock = new Object();
+    private final ActivityTaskManagerService mAtm;
 
     @GuardedBy("mLock")
     private final SparseArray<HashMap<String, PackageConfigRecord>> mPendingWrite =
@@ -72,8 +73,9 @@ public class PackageConfigPersister {
         return new File(Environment.getDataSystemCeDirectory(userId), PACKAGE_DIRNAME);
     }
 
-    PackageConfigPersister(PersisterQueue queue) {
+    PackageConfigPersister(PersisterQueue queue, ActivityTaskManagerService atm) {
         mPersisterQueue = queue;
+        mAtm = atm;
     }
 
     @GuardedBy("mLock")
@@ -100,7 +102,8 @@ public class PackageConfigPersister {
                     final TypedXmlPullParser in = Xml.resolvePullParser(is);
                     int event;
                     String packageName = null;
-                    int nightMode = MODE_NIGHT_AUTO;
+                    Integer nightMode = null;
+                    LocaleList locales = null;
                     while (((event = in.next()) != XmlPullParser.END_DOCUMENT)
                             && event != XmlPullParser.END_TAG) {
                         final String name = in.getName();
@@ -120,6 +123,9 @@ public class PackageConfigPersister {
                                         case ATTR_NIGHT_MODE:
                                             nightMode = Integer.parseInt(attrValue);
                                             break;
+                                        case ATTR_LOCALES:
+                                            locales = LocaleList.forLanguageTags(attrValue);
+                                            break;
                                     }
                                 }
                             }
@@ -130,6 +136,7 @@ public class PackageConfigPersister {
                         final PackageConfigRecord initRecord =
                                 findRecordOrCreate(mModified, packageName, userId);
                         initRecord.mNightMode = nightMode;
+                        initRecord.mLocales = locales;
                         if (DEBUG) {
                             Slog.d(TAG, "loadPackages: load one package " + initRecord);
                         }
@@ -155,20 +162,28 @@ public class PackageConfigPersister {
                         "updateConfigIfNeeded record " + container + " find? " + modifiedRecord);
             }
             if (modifiedRecord != null) {
-                container.setOverrideNightMode(modifiedRecord.mNightMode);
+                container.applyAppSpecificConfig(modifiedRecord.mNightMode,
+                        LocaleOverlayHelper.combineLocalesIfOverlayExists(
+                        modifiedRecord.mLocales, mAtm.getGlobalConfiguration().getLocales()));
             }
         }
     }
 
     @GuardedBy("mLock")
     void updateFromImpl(String packageName, int userId,
-            ActivityTaskManagerService.PackageConfigurationUpdaterImpl impl) {
+            PackageConfigurationUpdaterImpl impl) {
         synchronized (mLock) {
             PackageConfigRecord record = findRecordOrCreate(mModified, packageName, userId);
-            record.mNightMode = impl.getNightMode();
-
-            if (record.isResetNightMode()) {
-                removePackage(record.mName, record.mUserId);
+            if (impl.getNightMode() != null) {
+                record.mNightMode = impl.getNightMode();
+            }
+            if (impl.getLocales() != null) {
+                record.mLocales = impl.getLocales();
+            }
+            if ((record.mNightMode == null || record.isResetNightMode())
+                    && (record.mLocales == null || record.mLocales.isEmpty())) {
+                // if all values default to system settings, we can remove the package.
+                removePackage(packageName, userId);
             } else {
                 final PackageConfigRecord pendingRecord =
                         findRecord(mPendingWrite, record.mName, record.mUserId);
@@ -179,16 +194,33 @@ public class PackageConfigPersister {
                 } else {
                     writeRecord = pendingRecord;
                 }
-                if (writeRecord.mNightMode == record.mNightMode) {
+
+                if (!updateNightMode(record, writeRecord) && !updateLocales(record, writeRecord)) {
                     return;
                 }
-                writeRecord.mNightMode = record.mNightMode;
+
                 if (DEBUG) {
                     Slog.d(TAG, "PackageConfigUpdater save config " + writeRecord);
                 }
                 mPersisterQueue.addItem(new WriteProcessItem(writeRecord), false /* flush */);
             }
         }
+    }
+
+    private boolean updateNightMode(PackageConfigRecord record, PackageConfigRecord writeRecord) {
+        if (record.mNightMode == null || record.mNightMode.equals(writeRecord.mNightMode)) {
+            return false;
+        }
+        writeRecord.mNightMode = record.mNightMode;
+        return true;
+    }
+
+    private boolean updateLocales(PackageConfigRecord record, PackageConfigRecord writeRecord) {
+        if (record.mLocales == null || record.mLocales.equals(writeRecord.mLocales)) {
+            return false;
+        }
+        writeRecord.mLocales = record.mLocales;
+        return true;
     }
 
     @GuardedBy("mLock")
@@ -210,7 +242,7 @@ public class PackageConfigPersister {
     @GuardedBy("mLock")
     void onPackageUninstall(String packageName) {
         synchronized (mLock) {
-            for (int i = mModified.size() - 1; i > 0; i--) {
+            for (int i = mModified.size() - 1; i >= 0; i--) {
                 final int userId = mModified.keyAt(i);
                 removePackage(packageName, userId);
             }
@@ -238,11 +270,30 @@ public class PackageConfigPersister {
         }
     }
 
+    /**
+     * Retrieves and returns application configuration from persisted records if it exists, else
+     * returns null.
+     */
+    ActivityTaskManagerInternal.PackageConfig findPackageConfiguration(String packageName,
+            int userId) {
+        synchronized (mLock) {
+            PackageConfigRecord packageConfigRecord = findRecord(mModified, packageName, userId);
+            if (packageConfigRecord == null) {
+                Slog.w(TAG, "App-specific configuration not found for packageName: " + packageName
+                        + " and userId: " + userId);
+                return null;
+            }
+            return new ActivityTaskManagerInternal.PackageConfig(
+                    packageConfigRecord.mNightMode, packageConfigRecord.mLocales);
+        }
+    }
+
     // store a changed data so we don't need to get the process
     static class PackageConfigRecord {
         final String mName;
         final int mUserId;
-        int mNightMode;
+        Integer mNightMode;
+        LocaleList mLocales;
 
         PackageConfigRecord(String name, int userId) {
             mName = name;
@@ -250,13 +301,13 @@ public class PackageConfigPersister {
         }
 
         boolean isResetNightMode() {
-            return mNightMode == MODE_NIGHT_AUTO || mNightMode == MODE_NIGHT_CUSTOM;
+            return mNightMode == Configuration.UI_MODE_NIGHT_UNDEFINED;
         }
 
         @Override
         public String toString() {
             return "PackageConfigRecord package name: " + mName + " userId " + mUserId
-                    + " nightMode " + mNightMode;
+                    + " nightMode " + mNightMode + " locales " + mLocales;
         }
     }
 
@@ -369,7 +420,13 @@ public class PackageConfigPersister {
             }
             xmlSerializer.startTag(null, TAG_CONFIG);
             xmlSerializer.attribute(null, ATTR_PACKAGE_NAME, mRecord.mName);
-            xmlSerializer.attributeInt(null, ATTR_NIGHT_MODE, mRecord.mNightMode);
+            if (mRecord.mNightMode != null) {
+                xmlSerializer.attributeInt(null, ATTR_NIGHT_MODE, mRecord.mNightMode);
+            }
+            if (mRecord.mLocales != null) {
+                xmlSerializer.attribute(null, ATTR_LOCALES, mRecord.mLocales
+                        .toLanguageTags());
+            }
             xmlSerializer.endTag(null, TAG_CONFIG);
             xmlSerializer.endDocument();
             xmlSerializer.flush();

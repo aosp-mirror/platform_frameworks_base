@@ -19,6 +19,7 @@ package com.android.internal.widget;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Insets;
 import android.graphics.Paint;
 import android.graphics.Paint.FontMetricsInt;
 import android.graphics.Path;
@@ -136,6 +137,7 @@ public class PointerLocationView extends View implements InputDeviceListener,
     private final FontMetricsInt mTextMetrics = new FontMetricsInt();
     private int mHeaderBottom;
     private int mHeaderPaddingTop = 0;
+    private Insets mWaterfallInsets = Insets.NONE;
     @UnsupportedAppUsage
     private boolean mCurDown;
     @UnsupportedAppUsage
@@ -229,8 +231,10 @@ public class PointerLocationView extends View implements InputDeviceListener,
     public WindowInsets onApplyWindowInsets(WindowInsets insets) {
         if (insets.getDisplayCutout() != null) {
             mHeaderPaddingTop = insets.getDisplayCutout().getSafeInsetTop();
+            mWaterfallInsets = insets.getDisplayCutout().getWaterfallInsets();
         } else {
             mHeaderPaddingTop = 0;
+            mWaterfallInsets = Insets.NONE;
         }
         return super.onApplyWindowInsets(insets);
     }
@@ -266,11 +270,6 @@ public class PointerLocationView extends View implements InputDeviceListener,
 
     @Override
     protected void onDraw(Canvas canvas) {
-        final int w = getWidth();
-        final int itemW = w/7;
-        final int base = mHeaderPaddingTop-mTextMetrics.ascent+1;
-        final int bottom = mHeaderBottom;
-
         final int NP = mPointers.size();
 
         if (!mSystemGestureExclusion.isEmpty()) {
@@ -286,71 +285,7 @@ public class PointerLocationView extends View implements InputDeviceListener,
         }
 
         // Labels
-        if (mActivePointerId >= 0) {
-            final PointerState ps = mPointers.get(mActivePointerId);
-            
-            canvas.drawRect(0, mHeaderPaddingTop, itemW-1, bottom,mTextBackgroundPaint);
-            canvas.drawText(mText.clear()
-                    .append("P: ").append(mCurNumPointers)
-                    .append(" / ").append(mMaxNumPointers)
-                    .toString(), 1, base, mTextPaint);
-
-            final int N = ps.mTraceCount;
-            if ((mCurDown && ps.mCurDown) || N == 0) {
-                canvas.drawRect(itemW, mHeaderPaddingTop, (itemW * 2) - 1, bottom,
-                        mTextBackgroundPaint);
-                canvas.drawText(mText.clear()
-                        .append("X: ").append(ps.mCoords.x, 1)
-                        .toString(), 1 + itemW, base, mTextPaint);
-                canvas.drawRect(itemW * 2, mHeaderPaddingTop, (itemW * 3) - 1, bottom,
-                        mTextBackgroundPaint);
-                canvas.drawText(mText.clear()
-                        .append("Y: ").append(ps.mCoords.y, 1)
-                        .toString(), 1 + itemW * 2, base, mTextPaint);
-            } else {
-                float dx = ps.mTraceX[N - 1] - ps.mTraceX[0];
-                float dy = ps.mTraceY[N - 1] - ps.mTraceY[0];
-                canvas.drawRect(itemW, mHeaderPaddingTop, (itemW * 2) - 1, bottom,
-                        Math.abs(dx) < mVC.getScaledTouchSlop()
-                        ? mTextBackgroundPaint : mTextLevelPaint);
-                canvas.drawText(mText.clear()
-                        .append("dX: ").append(dx, 1)
-                        .toString(), 1 + itemW, base, mTextPaint);
-                canvas.drawRect(itemW * 2, mHeaderPaddingTop, (itemW * 3) - 1, bottom,
-                        Math.abs(dy) < mVC.getScaledTouchSlop()
-                        ? mTextBackgroundPaint : mTextLevelPaint);
-                canvas.drawText(mText.clear()
-                        .append("dY: ").append(dy, 1)
-                        .toString(), 1 + itemW * 2, base, mTextPaint);
-            }
-
-            canvas.drawRect(itemW * 3, mHeaderPaddingTop, (itemW * 4) - 1, bottom,
-                    mTextBackgroundPaint);
-            canvas.drawText(mText.clear()
-                    .append("Xv: ").append(ps.mXVelocity, 3)
-                    .toString(), 1 + itemW * 3, base, mTextPaint);
-
-            canvas.drawRect(itemW * 4, mHeaderPaddingTop, (itemW * 5) - 1, bottom,
-                    mTextBackgroundPaint);
-            canvas.drawText(mText.clear()
-                    .append("Yv: ").append(ps.mYVelocity, 3)
-                    .toString(), 1 + itemW * 4, base, mTextPaint);
-
-            canvas.drawRect(itemW * 5, mHeaderPaddingTop, (itemW * 6) - 1, bottom,
-                    mTextBackgroundPaint);
-            canvas.drawRect(itemW * 5, mHeaderPaddingTop,
-                    (itemW * 5) + (ps.mCoords.pressure * itemW) - 1, bottom, mTextLevelPaint);
-            canvas.drawText(mText.clear()
-                    .append("Prs: ").append(ps.mCoords.pressure, 2)
-                    .toString(), 1 + itemW * 5, base, mTextPaint);
-
-            canvas.drawRect(itemW * 6, mHeaderPaddingTop, w, bottom, mTextBackgroundPaint);
-            canvas.drawRect(itemW * 6, mHeaderPaddingTop,
-                    (itemW * 6) + (ps.mCoords.size * itemW) - 1, bottom, mTextLevelPaint);
-            canvas.drawText(mText.clear()
-                    .append("Size: ").append(ps.mCoords.size, 2)
-                    .toString(), 1 + itemW * 6, base, mTextPaint);
-        }
+        drawLabels(canvas);
 
         // Pointer trace.
         for (int p = 0; p < NP; p++) {
@@ -461,6 +396,84 @@ public class PointerLocationView extends View implements InputDeviceListener,
                 }
             }
         }
+    }
+
+    private void drawLabels(Canvas canvas) {
+        if (mActivePointerId < 0) {
+            return;
+        }
+
+        final int w = getWidth() - mWaterfallInsets.left - mWaterfallInsets.right;
+        final int itemW = w / 7;
+        final int base = mHeaderPaddingTop - mTextMetrics.ascent + 1;
+        final int bottom = mHeaderBottom;
+
+        canvas.save();
+        canvas.translate(mWaterfallInsets.left, 0);
+        final PointerState ps = mPointers.get(mActivePointerId);
+
+        canvas.drawRect(0, mHeaderPaddingTop, itemW - 1, bottom, mTextBackgroundPaint);
+        canvas.drawText(mText.clear()
+                .append("P: ").append(mCurNumPointers)
+                .append(" / ").append(mMaxNumPointers)
+                .toString(), 1, base, mTextPaint);
+
+        final int count = ps.mTraceCount;
+        if ((mCurDown && ps.mCurDown) || count == 0) {
+            canvas.drawRect(itemW, mHeaderPaddingTop, (itemW * 2) - 1, bottom,
+                    mTextBackgroundPaint);
+            canvas.drawText(mText.clear()
+                    .append("X: ").append(ps.mCoords.x, 1)
+                    .toString(), 1 + itemW, base, mTextPaint);
+            canvas.drawRect(itemW * 2, mHeaderPaddingTop, (itemW * 3) - 1, bottom,
+                    mTextBackgroundPaint);
+            canvas.drawText(mText.clear()
+                    .append("Y: ").append(ps.mCoords.y, 1)
+                    .toString(), 1 + itemW * 2, base, mTextPaint);
+        } else {
+            float dx = ps.mTraceX[count - 1] - ps.mTraceX[0];
+            float dy = ps.mTraceY[count - 1] - ps.mTraceY[0];
+            canvas.drawRect(itemW, mHeaderPaddingTop, (itemW * 2) - 1, bottom,
+                    Math.abs(dx) < mVC.getScaledTouchSlop()
+                            ? mTextBackgroundPaint : mTextLevelPaint);
+            canvas.drawText(mText.clear()
+                    .append("dX: ").append(dx, 1)
+                    .toString(), 1 + itemW, base, mTextPaint);
+            canvas.drawRect(itemW * 2, mHeaderPaddingTop, (itemW * 3) - 1, bottom,
+                    Math.abs(dy) < mVC.getScaledTouchSlop()
+                            ? mTextBackgroundPaint : mTextLevelPaint);
+            canvas.drawText(mText.clear()
+                    .append("dY: ").append(dy, 1)
+                    .toString(), 1 + itemW * 2, base, mTextPaint);
+        }
+
+        canvas.drawRect(itemW * 3, mHeaderPaddingTop, (itemW * 4) - 1, bottom,
+                mTextBackgroundPaint);
+        canvas.drawText(mText.clear()
+                .append("Xv: ").append(ps.mXVelocity, 3)
+                .toString(), 1 + itemW * 3, base, mTextPaint);
+
+        canvas.drawRect(itemW * 4, mHeaderPaddingTop, (itemW * 5) - 1, bottom,
+                mTextBackgroundPaint);
+        canvas.drawText(mText.clear()
+                .append("Yv: ").append(ps.mYVelocity, 3)
+                .toString(), 1 + itemW * 4, base, mTextPaint);
+
+        canvas.drawRect(itemW * 5, mHeaderPaddingTop, (itemW * 6) - 1, bottom,
+                mTextBackgroundPaint);
+        canvas.drawRect(itemW * 5, mHeaderPaddingTop,
+                (itemW * 5) + (ps.mCoords.pressure * itemW) - 1, bottom, mTextLevelPaint);
+        canvas.drawText(mText.clear()
+                .append("Prs: ").append(ps.mCoords.pressure, 2)
+                .toString(), 1 + itemW * 5, base, mTextPaint);
+
+        canvas.drawRect(itemW * 6, mHeaderPaddingTop, w, bottom, mTextBackgroundPaint);
+        canvas.drawRect(itemW * 6, mHeaderPaddingTop,
+                (itemW * 6) + (ps.mCoords.size * itemW) - 1, bottom, mTextLevelPaint);
+        canvas.drawText(mText.clear()
+                .append("Size: ").append(ps.mCoords.size, 2)
+                .toString(), 1 + itemW * 6, base, mTextPaint);
+        canvas.restore();
     }
 
     private void logMotionEvent(String type, MotionEvent event) {

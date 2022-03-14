@@ -190,6 +190,15 @@ public class WalletCardCarousel extends RecyclerView {
     }
 
     /**
+     * Sets the adapter again in the RecyclerView, updating the ViewHolders children's layout.
+     * This is needed when changing the state of the device (eg fold/unfold) so the ViewHolders are
+     * recreated.
+     */
+    void resetAdapter() {
+        setAdapter(mWalletCardCarouselAdapter);
+    }
+
+    /**
      * Returns true if the data set is changed.
      */
     boolean setData(List<WalletCardViewInfo> data, int selectedIndex, boolean hasLockStateChanged) {
@@ -376,8 +385,8 @@ public class WalletCardCarousel extends RecyclerView {
             CardView cardView = viewHolder.mCardView;
             cardView.setRadius(mCornerRadiusPx);
             ViewGroup.LayoutParams layoutParams = cardView.getLayoutParams();
-            layoutParams.width = mCardWidthPx;
-            layoutParams.height = mCardHeightPx;
+            layoutParams.width = getCardWidthPx();
+            layoutParams.height = getCardHeightPx();
             view.setTag(viewHolder);
             return viewHolder;
         }

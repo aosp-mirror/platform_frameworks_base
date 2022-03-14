@@ -43,6 +43,7 @@ public class FooterPreference extends Preference {
     View.OnClickListener mLearnMoreListener;
     private CharSequence mContentDescription;
     private CharSequence mLearnMoreContentDescription;
+    private FooterLearnMoreSpan mLearnMoreSpan;
 
     public FooterPreference(Context context, AttributeSet attrs) {
         super(context, attrs, R.attr.footerPreferenceStyle);
@@ -68,7 +69,11 @@ public class FooterPreference extends Preference {
         if (learnMore != null && mLearnMoreListener != null) {
             learnMore.setVisibility(View.VISIBLE);
             SpannableString learnMoreText = new SpannableString(learnMore.getText());
-            learnMoreText.setSpan(new FooterLearnMoreSpan(mLearnMoreListener), 0,
+            if (mLearnMoreSpan != null) {
+                learnMoreText.removeSpan(mLearnMoreSpan);
+            }
+            mLearnMoreSpan = new FooterLearnMoreSpan(mLearnMoreListener);
+            learnMoreText.setSpan(mLearnMoreSpan, 0,
                     learnMoreText.length(), 0);
             learnMore.setText(learnMoreText);
             if (!TextUtils.isEmpty(mLearnMoreContentDescription)) {

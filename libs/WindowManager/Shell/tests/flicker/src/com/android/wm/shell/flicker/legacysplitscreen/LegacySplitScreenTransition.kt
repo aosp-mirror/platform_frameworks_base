@@ -31,11 +31,14 @@ import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
 import com.android.server.wm.flicker.repetitions
 import com.android.server.wm.flicker.startRotation
-import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
+import com.android.server.wm.traces.common.FlickerComponentName
+import com.android.wm.shell.flicker.helpers.BaseAppHelper.Companion.isShellTransitionsEnabled
 import com.android.wm.shell.flicker.helpers.MultiWindowHelper.Companion.getDevEnableNonResizableMultiWindow
 import com.android.wm.shell.flicker.helpers.MultiWindowHelper.Companion.setDevEnableNonResizableMultiWindow
 import com.android.wm.shell.flicker.helpers.SplitScreenHelper
 import org.junit.After
+import org.junit.Assume.assumeFalse
+import org.junit.Assume.assumeTrue
 import org.junit.Before
 import org.junit.Test
 
@@ -46,12 +49,17 @@ abstract class LegacySplitScreenTransition(protected val testSpec: FlickerTestPa
     protected val splitScreenApp = SplitScreenHelper.getPrimary(instrumentation)
     protected val secondaryApp = SplitScreenHelper.getSecondary(instrumentation)
     protected val nonResizeableApp = SplitScreenHelper.getNonResizeable(instrumentation)
-    protected val LAUNCHER_PACKAGE_NAME = LauncherStrategyFactory.getInstance(instrumentation)
-        .launcherStrategy.supportedLauncherPackage
+    protected val LAUNCHER_COMPONENT = FlickerComponentName("",
+            LauncherStrategyFactory.getInstance(instrumentation)
+                    .launcherStrategy.supportedLauncherPackage)
     private var prevDevEnableNonResizableMultiWindow = 0
 
     @Before
     open fun setup() {
+        // Only run legacy split tests when the system is using legacy split screen.
+        assumeTrue(SplitScreenHelper.isUsingLegacySplit())
+        // Legacy split is having some issue with Shell transition, and will be deprecated soon.
+        assumeFalse(isShellTransitionsEnabled())
         prevDevEnableNonResizableMultiWindow = getDevEnableNonResizableMultiWindow(context)
         if (prevDevEnableNonResizableMultiWindow != 0) {
             // Turn off the development option
@@ -70,8 +78,9 @@ abstract class LegacySplitScreenTransition(protected val testSpec: FlickerTestPa
      *
      * b/182720234
      */
-    open val ignoredWindows: List<String> = listOf(WindowManagerStateHelper.SPLASH_SCREEN_NAME,
-        WindowManagerStateHelper.SNAPSHOT_WINDOW_NAME)
+    open val ignoredWindows: List<FlickerComponentName> = listOf(
+        FlickerComponentName.SPLASH_SCREEN,
+        FlickerComponentName.SNAPSHOT)
 
     protected open val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
         get() = { configuration ->
@@ -138,9 +147,9 @@ abstract class LegacySplitScreenTransition(protected val testSpec: FlickerTestPa
     }
 
     companion object {
-        internal const val LIVE_WALLPAPER_PACKAGE_NAME =
-            "com.breel.wallpapers18.soundviz.wallpaper.variations.SoundVizWallpaperV2"
-        internal const val LETTERBOX_NAME = "Letterbox"
-        internal const val TOAST_NAME = "Toast"
+        internal val LIVE_WALLPAPER_COMPONENT = FlickerComponentName("",
+            "com.breel.wallpapers18.soundviz.wallpaper.variations.SoundVizWallpaperV2")
+        internal val LETTERBOX_COMPONENT = FlickerComponentName("", "Letterbox")
+        internal val TOAST_COMPONENT = FlickerComponentName("", "Toast")
     }
 }

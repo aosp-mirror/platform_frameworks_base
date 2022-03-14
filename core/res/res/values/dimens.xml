@@ -39,15 +39,21 @@
     <!-- Elevation of toast view -->
     <dimen name="toast_elevation">2dp</dimen>
 
-    <!-- Height of the status bar -->
-    <dimen name="status_bar_height">@dimen/status_bar_height_portrait</dimen>
-    <!-- Height of the status bar in portrait. The height should be
-         Max((status bar content height + waterfall top size), top cutout size) -->
-    <dimen name="status_bar_height_portrait">24dp</dimen>
-    <!-- Height of the status bar in landscape. The height should be
-         Max((status bar content height + waterfall top size), top cutout size) -->
+    <!-- Height of the status bar.
+         Do not read this dimen directly. Use {@link SystemBarUtils#getStatusBarHeight} instead.
+         -->
+    <dimen name="status_bar_height">24dp</dimen>
+    <!-- Height of the status bar in portrait.
+         Do not read this dimen directly. Use {@link SystemBarUtils#getStatusBarHeight} instead.
+         -->
+    <dimen name="status_bar_height_portrait">@dimen/status_bar_height</dimen>
+    <!-- Height of the status bar in landscape.
+         Do not read this dimen directly. Use {@link SystemBarUtils#getStatusBarHeight} instead.
+         -->
     <dimen name="status_bar_height_landscape">@dimen/status_bar_height_portrait</dimen>
-    <!-- Height of area above QQS where battery/time go -->
+    <!-- Height of area above QQS where battery/time go.
+         Do not read this dimen directly. Use {@link SystemBarUtils#getQuickQsOffsetHeight} instead.
+         -->
     <dimen name="quick_qs_offset_height">48dp</dimen>
     <!-- Height of the bottom navigation / system bar. -->
     <dimen name="navigation_bar_height">48dp</dimen>
@@ -55,6 +61,8 @@
     <dimen name="navigation_bar_height_landscape">48dp</dimen>
     <!-- Width of the navigation bar when it is placed vertically on the screen -->
     <dimen name="navigation_bar_width">48dp</dimen>
+    <!-- Height of the bottom taskbar not including decorations like rounded corners. -->
+    <dimen name="taskbar_frame_height">60dp</dimen>
     <!-- How much we expand the touchable region of the status bar below the notch to catch touches
          that just start below the notch. -->
     <dimen name="display_cutout_touchable_region_size">12dp</dimen>
@@ -892,7 +900,8 @@
     <dimen name="seekbar_thumb_exclusion_max_size">48dp</dimen>
 
     <!-- chooser/resolver (sharesheet) spacing -->
-    <dimen name="chooser_corner_radius">16dp</dimen>
+    <dimen name="chooser_width">412dp</dimen>
+    <dimen name="chooser_corner_radius">28dp</dimen>
     <dimen name="chooser_row_text_option_translate">25dp</dimen>
     <dimen name="chooser_view_spacing">18dp</dimen>
     <dimen name="chooser_edge_margin_thin">16dp</dimen>
@@ -909,7 +918,7 @@
     <dimen name="resolver_icon_size">32dp</dimen>
     <dimen name="resolver_button_bar_spacing">0dp</dimen>
     <dimen name="resolver_badge_size">18dp</dimen>
-    <dimen name="resolver_icon_margin">16dp</dimen>
+    <dimen name="resolver_icon_margin">8dp</dimen>
     <dimen name="resolver_small_margin">18dp</dimen>
     <dimen name="resolver_edge_margin">24dp</dimen>
     <dimen name="resolver_elevation">1dp</dimen>
@@ -926,7 +935,7 @@
 
     <dimen name="chooser_action_button_icon_size">18dp</dimen>
 
-    <!-- For Waterfall Display -->
+    <!-- For main built-in Waterfall Display -->
     <dimen name="waterfall_display_left_edge_size">0px</dimen>
     <dimen name="waterfall_display_top_edge_size">0px</dimen>
     <dimen name="waterfall_display_right_edge_size">0px</dimen>
@@ -949,4 +958,18 @@
     <dimen name="starting_surface_icon_size">160dp</dimen>
     <!-- The default width/height of the icon on the spec of adaptive icon drawable. -->
     <dimen name="starting_surface_default_icon_size">108dp</dimen>
+
+    <!-- For secondary built-in Waterfall Display -->
+    <dimen name="secondary_waterfall_display_left_edge_size">0px</dimen>
+    <dimen name="secondary_waterfall_display_top_edge_size">0px</dimen>
+    <dimen name="secondary_waterfall_display_right_edge_size">0px</dimen>
+    <dimen name="secondary_waterfall_display_bottom_edge_size">0px</dimen>
+
+    <!-- Rounded corner settings for secondary built-in display -->
+    <dimen name="secondary_rounded_corner_radius">0px</dimen>
+    <dimen name="secondary_rounded_corner_radius_top">0px</dimen>
+    <dimen name="secondary_rounded_corner_radius_bottom">0px</dimen>
+    <dimen name="secondary_rounded_corner_radius_adjustment">0px</dimen>
+    <dimen name="secondary_rounded_corner_radius_top_adjustment">0px</dimen>
+    <dimen name="secondary_rounded_corner_radius_bottom_adjustment">0px</dimen>
 </resources>

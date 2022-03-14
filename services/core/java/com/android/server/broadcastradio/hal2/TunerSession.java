@@ -40,7 +40,7 @@ class TunerSession extends ITuner.Stub {
     private static final String TAG = "BcRadio2Srv.session";
     private static final String kAudioDeviceName = "Radio tuner source";
 
-    private final Object mLock = new Object();
+    private final Object mLock;
 
     private final RadioModule mModule;
     private final ITunerSession mHwSession;
@@ -53,10 +53,12 @@ class TunerSession extends ITuner.Stub {
     private RadioManager.BandConfig mDummyConfig = null;
 
     TunerSession(@NonNull RadioModule module, @NonNull ITunerSession hwSession,
-            @NonNull android.hardware.radio.ITunerCallback callback) {
+            @NonNull android.hardware.radio.ITunerCallback callback,
+            @NonNull Object lock) {
         mModule = Objects.requireNonNull(module);
         mHwSession = Objects.requireNonNull(hwSession);
         mCallback = Objects.requireNonNull(callback);
+        mLock = Objects.requireNonNull(lock);
     }
 
     @Override

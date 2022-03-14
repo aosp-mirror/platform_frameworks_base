@@ -14,7 +14,6 @@
 
 package com.android.systemui.statusbar.policy;
 
-import android.content.Context;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityManager.AccessibilityServicesStateChangeListener;
@@ -35,8 +34,8 @@ public class AccessibilityManagerWrapper implements
     private final AccessibilityManager mAccessibilityManager;
 
     @Inject
-    public AccessibilityManagerWrapper(Context context) {
-        mAccessibilityManager = context.getSystemService(AccessibilityManager.class);
+    public AccessibilityManagerWrapper(AccessibilityManager accessibilityManager) {
+        mAccessibilityManager = accessibilityManager;
     }
 
     @Override

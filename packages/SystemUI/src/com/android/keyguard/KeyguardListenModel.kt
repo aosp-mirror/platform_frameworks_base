@@ -43,8 +43,7 @@ data class KeyguardFingerprintListenModel(
     val shouldListenForFingerprintAssistant: Boolean,
     val switchingUser: Boolean,
     val udfps: Boolean,
-    val userDoesNotHaveTrust: Boolean,
-    val userNeedsStrongAuth: Boolean
+    val userDoesNotHaveTrust: Boolean
 ) : KeyguardListenModel() {
     override val modality: Int = TYPE_FACE
 }

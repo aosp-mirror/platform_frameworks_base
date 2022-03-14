@@ -30,3 +30,7 @@ inline fun modifyEntry(
     modifier(builder)
     builder.apply(entry)
 }
+
+fun getAttachState(entry: ListEntry): ListAttachState {
+    return entry.attachState
+}

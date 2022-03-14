@@ -20,5 +20,4 @@ interface IKeyguardStateCallback {
     void onSimSecureStateChanged(boolean simSecure);
     void onInputRestrictedStateChanged(boolean inputRestricted);
     void onTrustedChanged(boolean trusted);
-    void onHasLockscreenWallpaperChanged(boolean hasLockscreenWallpaper);
 }

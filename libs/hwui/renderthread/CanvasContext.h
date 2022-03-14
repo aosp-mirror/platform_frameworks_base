@@ -90,17 +90,9 @@ public:
      *         and false otherwise (e.g. cache limits have been exceeded).
      */
     bool pinImages(std::vector<SkImage*>& mutableImages) {
-        if (!Properties::isDrawingEnabled()) {
-            return true;
-        }
         return mRenderPipeline->pinImages(mutableImages);
     }
-    bool pinImages(LsaVector<sk_sp<Bitmap>>& images) {
-        if (!Properties::isDrawingEnabled()) {
-            return true;
-        }
-        return mRenderPipeline->pinImages(images);
-    }
+    bool pinImages(LsaVector<sk_sp<Bitmap>>& images) { return mRenderPipeline->pinImages(images); }
 
     /**
      * Unpin any image that had be previously pinned to the GPU cache
@@ -195,8 +187,8 @@ public:
 
     IRenderPipeline* getRenderPipeline() { return mRenderPipeline.get(); }
 
-    void addFrameCompleteListener(std::function<void(int64_t)>&& func) {
-        mFrameCompleteCallbacks.push_back(std::move(func));
+    void addFrameCommitListener(std::function<void(bool)>&& func) {
+        mFrameCommitCallbacks.push_back(std::move(func));
     }
 
     void setPictureCapturedCallback(const std::function<void(sk_sp<SkPicture>&&)>& callback) {
@@ -328,7 +320,7 @@ private:
     std::vector<std::future<void>> mFrameFences;
     std::unique_ptr<IRenderPipeline> mRenderPipeline;
 
-    std::vector<std::function<void(int64_t)>> mFrameCompleteCallbacks;
+    std::vector<std::function<void(bool)>> mFrameCommitCallbacks;
 
     // If set to true, we expect that callbacks into onSurfaceStatsAvailable
     bool mExpectSurfaceStats = false;

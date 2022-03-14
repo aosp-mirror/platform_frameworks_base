@@ -39,8 +39,8 @@ import com.android.server.biometrics.sensors.BiometricNotificationUtils;
 import com.android.server.biometrics.sensors.BiometricUtils;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.EnrollClient;
+import com.android.server.biometrics.sensors.SensorOverlays;
 import com.android.server.biometrics.sensors.fingerprint.FingerprintUtils;
-import com.android.server.biometrics.sensors.fingerprint.SidefpsHelper;
 import com.android.server.biometrics.sensors.fingerprint.Udfps;
 import com.android.server.biometrics.sensors.fingerprint.UdfpsHelper;
 
@@ -49,8 +49,7 @@ class FingerprintEnrollClient extends EnrollClient<ISession> implements Udfps {
     private static final String TAG = "FingerprintEnrollClient";
 
     @NonNull private final FingerprintSensorPropertiesInternal mSensorProps;
-    @Nullable private final IUdfpsOverlayController mUdfpsOverlayController;
-    @Nullable private final ISidefpsController mSidefpsController;
+    @NonNull private final SensorOverlays mSensorOverlays;
 
     private final @FingerprintManager.EnrollReason int mEnrollReason;
     @Nullable private ICancellationSignal mCancellationSignal;
@@ -63,7 +62,7 @@ class FingerprintEnrollClient extends EnrollClient<ISession> implements Udfps {
             @NonNull byte[] hardwareAuthToken, @NonNull String owner,
             @NonNull BiometricUtils<Fingerprint> utils, int sensorId,
             @NonNull FingerprintSensorPropertiesInternal sensorProps,
-            @Nullable IUdfpsOverlayController udfpsOvelayController,
+            @Nullable IUdfpsOverlayController udfpsOverlayController,
             @Nullable ISidefpsController sidefpsController,
             int maxTemplatesPerUser, @FingerprintManager.EnrollReason int enrollReason) {
         // UDFPS haptics occur when an image is acquired (instead of when the result is known)
@@ -71,8 +70,7 @@ class FingerprintEnrollClient extends EnrollClient<ISession> implements Udfps {
                 0 /* timeoutSec */, BiometricsProtoEnums.MODALITY_FINGERPRINT, sensorId,
                 !sensorProps.isAnyUdfpsType() /* shouldVibrate */);
         mSensorProps = sensorProps;
-        mUdfpsOverlayController = udfpsOvelayController;
-        mSidefpsController = sidefpsController;
+        mSensorOverlays = new SensorOverlays(udfpsOverlayController, sidefpsController);
         mMaxTemplatesPerUser = maxTemplatesPerUser;
 
         mEnrollReason = enrollReason;
@@ -91,11 +89,11 @@ class FingerprintEnrollClient extends EnrollClient<ISession> implements Udfps {
     public void onEnrollResult(BiometricAuthenticator.Identifier identifier, int remaining) {
         super.onEnrollResult(identifier, remaining);
 
-        UdfpsHelper.onEnrollmentProgress(getSensorId(), remaining, mUdfpsOverlayController);
+        mSensorOverlays.ifUdfps(
+                controller -> controller.onEnrollmentProgress(getSensorId(), remaining));
 
         if (remaining == 0) {
-            UdfpsHelper.hideUdfpsOverlay(getSensorId(), mUdfpsOverlayController);
-            SidefpsHelper.hideOverlay(mSidefpsController);
+            mSensorOverlays.hide(getSensorId());
         }
     }
 
@@ -106,12 +104,14 @@ class FingerprintEnrollClient extends EnrollClient<ISession> implements Udfps {
         if (acquiredInfo == BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_GOOD
                 && mSensorProps.isAnyUdfpsType()) {
             vibrateSuccess();
-            UdfpsHelper.onAcquiredGood(getSensorId(), mUdfpsOverlayController);
+            mSensorOverlays.ifUdfps(controller -> controller.onAcquiredGood(getSensorId()));
         }
 
-        if (UdfpsHelper.isValidAcquisitionMessage(getContext(), acquiredInfo, vendorCode)) {
-            UdfpsHelper.onEnrollmentHelp(getSensorId(), mUdfpsOverlayController);
-        }
+        mSensorOverlays.ifUdfps(controller -> {
+            if (UdfpsHelper.isValidAcquisitionMessage(getContext(), acquiredInfo, vendorCode)) {
+                controller.onEnrollmentHelp(getSensorId());
+            }
+        });
 
         super.onAcquired(acquiredInfo, vendorCode);
     }
@@ -120,8 +120,7 @@ class FingerprintEnrollClient extends EnrollClient<ISession> implements Udfps {
     public void onError(int errorCode, int vendorCode) {
         super.onError(errorCode, vendorCode);
 
-        UdfpsHelper.hideUdfpsOverlay(getSensorId(), mUdfpsOverlayController);
-        SidefpsHelper.hideOverlay(mSidefpsController);
+        mSensorOverlays.hide(getSensorId());
     }
 
     @Override
@@ -133,8 +132,8 @@ class FingerprintEnrollClient extends EnrollClient<ISession> implements Udfps {
 
     @Override
     protected void stopHalOperation() {
-        UdfpsHelper.hideUdfpsOverlay(getSensorId(), mUdfpsOverlayController);
-        SidefpsHelper.hideOverlay(mSidefpsController);
+        mSensorOverlays.hide(getSensorId());
+
         if (mCancellationSignal != null) {
             try {
                 mCancellationSignal.cancel();
@@ -149,10 +148,8 @@ class FingerprintEnrollClient extends EnrollClient<ISession> implements Udfps {
 
     @Override
     protected void startHalOperation() {
-        UdfpsHelper.showUdfpsOverlay(getSensorId(),
-                UdfpsHelper.getReasonFromEnrollReason(mEnrollReason),
-                mUdfpsOverlayController, this);
-        SidefpsHelper.showOverlay(mSidefpsController);
+        mSensorOverlays.show(getSensorId(), getOverlayReasonFromEnrollReason(mEnrollReason), this);
+
         BiometricNotificationUtils.cancelBadCalibrationNotification(getContext());
         try {
             mCancellationSignal = getFreshDaemon().enroll(

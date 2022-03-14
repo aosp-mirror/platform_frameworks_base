@@ -1216,7 +1216,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             mHandler.post(() -> {
                 if (DBG) Slog.d(TAG, "begin noteScreenState");
                 synchronized (mStats) {
-                    mStats.noteScreenStateLocked(state, elapsedRealtime, uptime, currentTime);
+                    mStats.noteScreenStateLocked(0, state, elapsedRealtime, uptime, currentTime);
                 }
                 if (DBG) Slog.d(TAG, "end noteScreenState");
             });
@@ -1231,7 +1231,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             final long uptime = SystemClock.uptimeMillis();
             mHandler.post(() -> {
                 synchronized (mStats) {
-                    mStats.noteScreenBrightnessLocked(brightness, elapsedRealtime, uptime);
+                    mStats.noteScreenBrightnessLocked(0, brightness, elapsedRealtime, uptime);
                 }
             });
         }

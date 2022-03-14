@@ -115,6 +115,20 @@ public class BatteryUsageStatsRule implements TestRule {
         return this;
     }
 
+    public BatteryUsageStatsRule setAveragePowerForOrdinal(String group, int ordinal,
+            double value) {
+        when(mPowerProfile.getAveragePowerForOrdinal(group, ordinal)).thenReturn(value);
+        when(mPowerProfile.getAveragePowerForOrdinal(eq(group), eq(ordinal),
+                anyDouble())).thenReturn(value);
+        return this;
+    }
+
+    public BatteryUsageStatsRule setNumDisplays(int value) {
+        when(mPowerProfile.getNumDisplays()).thenReturn(value);
+        mBatteryStats.setDisplayCountLocked(value);
+        return this;
+    }
+
     /** Call only after setting the power profile information. */
     public BatteryUsageStatsRule initMeasuredEnergyStatsLocked() {
         return initMeasuredEnergyStatsLocked(new String[0]);

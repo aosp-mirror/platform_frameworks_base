@@ -275,6 +275,7 @@
   <java-symbol type="bool" name="action_bar_expanded_action_views_exclusive" />
   <java-symbol type="bool" name="config_avoidGfxAccel" />
   <java-symbol type="bool" name="config_bluetooth_address_validation" />
+  <java-symbol type="integer" name="config_chooser_max_targets_per_row" />
   <java-symbol type="bool" name="config_flipToScreenOffEnabled" />
   <java-symbol type="integer" name="config_flipToScreenOffMaxLatencyMicros" />
   <java-symbol type="bool" name="config_bluetooth_sco_off_call" />
@@ -1684,6 +1685,10 @@
   <java-symbol type="anim" name="activity_translucent_close_exit" />
   <java-symbol type="anim" name="activity_open_enter" />
   <java-symbol type="anim" name="activity_close_exit" />
+  <java-symbol type="anim" name="task_fragment_close_enter" />
+  <java-symbol type="anim" name="task_fragment_close_exit" />
+  <java-symbol type="anim" name="task_fragment_open_enter" />
+  <java-symbol type="anim" name="task_fragment_open_exit" />
 
   <java-symbol type="array" name="config_autoRotationTiltTolerance" />
   <java-symbol type="array" name="config_keyboardTapVibePattern" />
@@ -1734,6 +1739,7 @@
   <java-symbol type="dimen" name="navigation_bar_height_car_mode" />
   <java-symbol type="dimen" name="navigation_bar_height_landscape_car_mode" />
   <java-symbol type="dimen" name="navigation_bar_width_car_mode" />
+  <java-symbol type="dimen" name="taskbar_frame_height" />
   <java-symbol type="dimen" name="status_bar_height" />
   <java-symbol type="dimen" name="display_cutout_touchable_region_size" />
   <java-symbol type="dimen" name="system_gestures_start_threshold" />
@@ -1903,7 +1909,9 @@
   <java-symbol type="array" name="config_locationExtraPackageNames" />
   <java-symbol type="array" name="config_testLocationProviders" />
   <java-symbol type="array" name="config_defaultNotificationVibePattern" />
+  <java-symbol type="array" name="config_defaultNotificationVibeWaveform" />
   <java-symbol type="array" name="config_notificationFallbackVibePattern" />
+  <java-symbol type="array" name="config_notificationFallbackVibeWaveform" />
   <java-symbol type="bool" name="config_enableServerNotificationEffectsForAutomotive" />
   <java-symbol type="bool" name="config_useAttentionLight" />
   <java-symbol type="bool" name="config_adaptive_sleep_available" />
@@ -2031,6 +2039,7 @@
   <java-symbol type="dimen" name="config_screenBrightnessSettingDefaultFloat" />
   <java-symbol type="dimen" name="config_screenBrightnessDozeFloat" />
   <java-symbol type="dimen" name="config_screenBrightnessDimFloat" />
+  <java-symbol type="dimen" name="config_screenBrightnessMinimumDimAmountFloat" />
   <java-symbol type="integer" name="config_screenBrightnessDark" />
   <java-symbol type="integer" name="config_screenBrightnessDim" />
   <java-symbol type="integer" name="config_screenBrightnessDoze" />
@@ -2213,6 +2222,8 @@
   <java-symbol type="string" name="config_primaryLocationTimeZoneProviderPackageName" />
   <java-symbol type="bool" name="config_enableSecondaryLocationTimeZoneProvider" />
   <java-symbol type="string" name="config_secondaryLocationTimeZoneProviderPackageName" />
+  <java-symbol type="bool" name="config_autoResetAirplaneMode" />
+  <java-symbol type="string" name="config_notificationAccessConfirmationActivity" />
 
   <java-symbol type="layout" name="resolver_list" />
   <java-symbol type="id" name="resolver_list" />
@@ -2554,6 +2565,7 @@
   <java-symbol type="string" name="face_recalibrate_notification_name" />
   <java-symbol type="string" name="face_recalibrate_notification_title" />
   <java-symbol type="string" name="face_recalibrate_notification_content" />
+  <java-symbol type="string" name="face_sensor_privacy_enabled" />
   <java-symbol type="string" name="face_error_unable_to_process" />
   <java-symbol type="string" name="face_error_hw_not_available" />
   <java-symbol type="string" name="face_error_no_space" />
@@ -2600,6 +2612,7 @@
   <java-symbol type="array" name="config_biometric_sensors" />
   <java-symbol type="bool" name="allow_test_udfps" />
   <java-symbol type="array" name="config_udfps_sensor_props" />
+  <java-symbol type="array" name="config_sfps_sensor_props" />
   <java-symbol type="integer" name="config_udfps_illumination_transition_ms" />
   <java-symbol type="bool" name="config_is_powerbutton_fps" />
   <java-symbol type="array" name="config_udfps_enroll_stage_thresholds" />
@@ -2826,6 +2839,7 @@
   <java-symbol type="layout" name="date_picker_month_item_material" />
   <java-symbol type="id" name="month_view" />
   <java-symbol type="integer" name="config_zen_repeat_callers_threshold" />
+  <java-symbol type="dimen" name="chooser_width" />
   <java-symbol type="dimen" name="chooser_corner_radius" />
   <java-symbol type="string" name="chooser_no_direct_share_targets" />
   <java-symbol type="drawable" name="chooser_row_layer_list" />
@@ -3244,6 +3258,7 @@
 
   <java-symbol type="string" name="config_dozeDoubleTapSensorType" />
   <java-symbol type="string" name="config_dozeTapSensorType" />
+  <java-symbol type="array" name="config_dozeTapSensorPostureMapping" />
   <java-symbol type="bool" name="config_dozePulsePickup" />
 
   <!-- Used for MimeIconUtils. -->
@@ -3833,8 +3848,13 @@
 
   <!-- For Foldables -->
   <java-symbol type="array" name="config_foldedDeviceStates" />
+  <java-symbol type="integer" name="config_deviceStateOnWhichToWakeUp" />
   <java-symbol type="string" name="config_foldedArea" />
   <java-symbol type="bool" name="config_supportsConcurrentInternalDisplays" />
+  <java-symbol type="bool" name="config_unfoldTransitionEnabled" />
+  <java-symbol type="bool" name="config_unfoldTransitionHingeAngle" />
+  <java-symbol type="array" name="config_perDeviceStateRotationLockDefaults" />
+
 
   <java-symbol type="array" name="config_disableApksUnlessMatchedSku_apk_list" />
   <java-symbol type="array" name="config_disableApkUnlessMatchedSku_skus_list" />
@@ -4243,6 +4263,8 @@
   <java-symbol type="integer" name="config_letterboxBackgroundType" />
   <java-symbol type="color" name="config_letterboxBackgroundColor" />
   <java-symbol type="dimen" name="config_letterboxHorizontalPositionMultiplier" />
+  <java-symbol type="bool" name="config_letterboxIsReachabilityEnabled" />
+  <java-symbol type="integer" name="config_letterboxDefaultPositionForReachability" />
 
   <java-symbol type="bool" name="config_hideDisplayCutoutWithDisplayArea" />
 
@@ -4432,6 +4454,37 @@
 
   <java-symbol type="color" name="overview_background"/>
 
+  <java-symbol type="string" name="config_secondaryBuiltInDisplayCutout" />
+  <java-symbol type="string" name="config_secondaryBuiltInDisplayCutoutRectApproximation" />
+  <java-symbol type="bool" name="config_fillSecondaryBuiltInDisplayCutout" />
+  <java-symbol type="bool" name="config_maskSecondaryBuiltInDisplayCutout" />
+  <java-symbol type="array" name="config_displayUniqueIdArray" />
+  <java-symbol type="array" name="config_displayCutoutPathArray" />
+  <java-symbol type="array" name="config_displayCutoutApproximationRectArray" />
+  <java-symbol type="array" name="config_fillBuiltInDisplayCutoutArray" />
+  <java-symbol type="array" name="config_maskBuiltInDisplayCutoutArray" />
+  <java-symbol type="dimen" name="secondary_waterfall_display_left_edge_size" />
+  <java-symbol type="dimen" name="secondary_waterfall_display_top_edge_size" />
+  <java-symbol type="dimen" name="secondary_waterfall_display_right_edge_size" />
+  <java-symbol type="dimen" name="secondary_waterfall_display_bottom_edge_size" />
+  <java-symbol type="array" name="config_mainBuiltInDisplayWaterfallCutout" />
+  <java-symbol type="array" name="config_secondaryBuiltInDisplayWaterfallCutout" />
+  <java-symbol type="array" name="config_waterfallCutoutArray" />
+
+  <java-symbol type="dimen" name="secondary_rounded_corner_radius" />
+  <java-symbol type="dimen" name="secondary_rounded_corner_radius_top" />
+  <java-symbol type="dimen" name="secondary_rounded_corner_radius_bottom" />
+  <java-symbol type="dimen" name="secondary_rounded_corner_radius_adjustment" />
+  <java-symbol type="dimen" name="secondary_rounded_corner_radius_top_adjustment" />
+  <java-symbol type="dimen" name="secondary_rounded_corner_radius_bottom_adjustment" />
+  <java-symbol type="array" name="config_roundedCornerRadiusArray" />
+  <java-symbol type="array" name="config_roundedCornerTopRadiusArray" />
+  <java-symbol type="array" name="config_roundedCornerBottomRadiusArray" />
+  <java-symbol type="array" name="config_roundedCornerRadiusAdjustmentArray" />
+  <java-symbol type="array" name="config_roundedCornerTopRadiusAdjustmentArray" />
+  <java-symbol type="array" name="config_roundedCornerBottomRadiusAdjustmentArray" />
+  <java-symbol type="bool" name="config_secondaryBuiltInDisplayIsRound" />
+  <java-symbol type="array" name="config_builtInDisplayIsRoundArray" />
   <java-symbol type="bool" name="config_disableTaskSnapshots" />
 
 </resources>

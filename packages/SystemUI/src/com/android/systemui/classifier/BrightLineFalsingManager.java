@@ -330,7 +330,7 @@ public class BrightLineFalsingManager implements FalsingManager {
                 || mTestHarness
                 || mDataProvider.isJustUnlockedWithFace()
                 || mDataProvider.isDocked()
-                || mAccessibilityManager.isEnabled();
+                || mAccessibilityManager.isTouchExplorationEnabled();
     }
 
     @Override

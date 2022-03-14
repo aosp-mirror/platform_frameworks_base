@@ -97,6 +97,7 @@ import android.content.ClipData;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.graphics.Insets;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -317,6 +318,25 @@ public interface WindowManager extends ViewManager {
     int TRANSIT_OLD_TASK_CHANGE_WINDOWING_MODE = 27;
 
     /**
+     * A window in a new task fragment is being opened.
+     * @hide
+     */
+    int TRANSIT_OLD_TASK_FRAGMENT_OPEN = 28;
+
+    /**
+     * A window in the top-most activity of task fragment is being closed to reveal the activity
+     * below.
+     * @hide
+     */
+    int TRANSIT_OLD_TASK_FRAGMENT_CLOSE = 29;
+
+    /**
+     * A window of task fragment is changing bounds.
+     * @hide
+     */
+    int TRANSIT_OLD_TASK_FRAGMENT_CHANGE = 30;
+
+    /**
      * @hide
      */
     @IntDef(prefix = { "TRANSIT_OLD_" }, value = {
@@ -341,7 +361,10 @@ public interface WindowManager extends ViewManager {
             TRANSIT_OLD_TRANSLUCENT_ACTIVITY_OPEN,
             TRANSIT_OLD_TRANSLUCENT_ACTIVITY_CLOSE,
             TRANSIT_OLD_CRASHING_ACTIVITY_CLOSE,
-            TRANSIT_OLD_TASK_CHANGE_WINDOWING_MODE
+            TRANSIT_OLD_TASK_CHANGE_WINDOWING_MODE,
+            TRANSIT_OLD_TASK_FRAGMENT_OPEN,
+            TRANSIT_OLD_TASK_FRAGMENT_CLOSE,
+            TRANSIT_OLD_TASK_FRAGMENT_CHANGE
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface TransitionOldType {}
@@ -378,8 +401,11 @@ public interface WindowManager extends ViewManager {
     int TRANSIT_CHANGE = 6;
     /**
      * The keyguard was visible and has been dismissed.
+     * @deprecated use {@link #TRANSIT_TO_BACK} + {@link #TRANSIT_FLAG_KEYGUARD_GOING_AWAY} for
+     *             keyguard going away with Shell transition.
      * @hide
      */
+    @Deprecated
     int TRANSIT_KEYGUARD_GOING_AWAY = 7;
     /**
      * A window is appearing above a locked keyguard.
@@ -392,6 +418,16 @@ public interface WindowManager extends ViewManager {
      */
     int TRANSIT_KEYGUARD_UNOCCLUDE = 9;
     /**
+     * A window is starting to enter PiP.
+     * @hide
+     */
+    int TRANSIT_PIP = 10;
+    /**
+     * The screen is turning on.
+     * @hide
+     */
+    int TRANSIT_WAKE = 11;
+    /**
      * The first slot for custom transition types. Callers (like Shell) can make use of custom
      * transition types for dealing with special cases. These types are effectively ignored by
      * Core and will just be passed along as part of TransitionInfo objects. An example is
@@ -400,7 +436,7 @@ public interface WindowManager extends ViewManager {
      * implementation.
      * @hide
      */
-    int TRANSIT_FIRST_CUSTOM = 10;
+    int TRANSIT_FIRST_CUSTOM = 12;
 
     /**
      * @hide
@@ -416,6 +452,8 @@ public interface WindowManager extends ViewManager {
             TRANSIT_KEYGUARD_GOING_AWAY,
             TRANSIT_KEYGUARD_OCCLUDE,
             TRANSIT_KEYGUARD_UNOCCLUDE,
+            TRANSIT_PIP,
+            TRANSIT_WAKE,
             TRANSIT_FIRST_CUSTOM
     })
     @Retention(RetentionPolicy.SOURCE)
@@ -465,6 +503,19 @@ public interface WindowManager extends ViewManager {
     int TRANSIT_FLAG_KEYGUARD_LOCKED = 0x40;
 
     /**
+     * Transition flag: Indicates that this transition is for recents animation.
+     * TODO(b/188669821): Remove once special-case logic moves to shell.
+     * @hide
+     */
+    int TRANSIT_FLAG_IS_RECENTS = 0x80;
+
+    /**
+     * Transition flag: Indicates that keyguard should go away with this transition.
+     * @hide
+     */
+    int TRANSIT_FLAG_KEYGUARD_GOING_AWAY = 0x100;
+
+    /**
      * @hide
      */
     @IntDef(flag = true, prefix = { "TRANSIT_FLAG_" }, value = {
@@ -474,7 +525,9 @@ public interface WindowManager extends ViewManager {
             TRANSIT_FLAG_KEYGUARD_GOING_AWAY_SUBTLE_ANIMATION,
             TRANSIT_FLAG_APP_CRASHED,
             TRANSIT_FLAG_OPEN_BEHIND,
-            TRANSIT_FLAG_KEYGUARD_LOCKED
+            TRANSIT_FLAG_KEYGUARD_LOCKED,
+            TRANSIT_FLAG_IS_RECENTS,
+            TRANSIT_FLAG_KEYGUARD_GOING_AWAY
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface TransitionFlags {}
@@ -920,6 +973,8 @@ public interface WindowManager extends ViewManager {
             case TRANSIT_KEYGUARD_GOING_AWAY: return "KEYGUARD_GOING_AWAY";
             case TRANSIT_KEYGUARD_OCCLUDE: return "KEYGUARD_OCCLUDE";
             case TRANSIT_KEYGUARD_UNOCCLUDE: return "KEYGUARD_UNOCCLUDE";
+            case TRANSIT_PIP: return "PIP";
+            case TRANSIT_WAKE: return "WAKE";
             case TRANSIT_FIRST_CUSTOM: return "FIRST_CUSTOM";
             default:
                 if (type > TRANSIT_FIRST_CUSTOM) {
@@ -2369,6 +2424,20 @@ public interface WindowManager extends ViewManager {
         public static final int PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY = 0x00100000;
 
         /**
+         * Flag to indicate that this window will be excluded while computing the magnifiable region
+         * on the un-scaled screen coordinate, which could avoid the cutout on the magnification
+         * border. It should be used for unmagnifiable overlays.
+         *
+         * </p><p>
+         * Note unlike {@link #PRIVATE_FLAG_NOT_MAGNIFIABLE}, this flag doesn't affect the ability
+         * of magnification. If you want to the window to be unmagnifiable and doesn't lead to the
+         * cutout, you need to combine both of them.
+         * </p><p>
+         * @hide
+         */
+        public static final int PRIVATE_FLAG_EXCLUDE_FROM_SCREEN_MAGNIFICATION = 0x00200000;
+
+        /**
          * Flag to prevent the window from being magnified by the accessibility magnifier.
          *
          * TODO(b/190623172): This is a temporary solution and need to find out another way instead.
@@ -2479,6 +2548,7 @@ public interface WindowManager extends ViewManager {
                 PRIVATE_FLAG_SUSTAINED_PERFORMANCE_MODE,
                 SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS,
                 PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY,
+                PRIVATE_FLAG_EXCLUDE_FROM_SCREEN_MAGNIFICATION,
                 PRIVATE_FLAG_NOT_MAGNIFIABLE,
                 PRIVATE_FLAG_STATUS_FORCE_SHOW_NAVIGATION,
                 PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC,
@@ -2559,6 +2629,10 @@ public interface WindowManager extends ViewManager {
                         mask = PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY,
                         equals = PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY,
                         name = "IS_ROUNDED_CORNERS_OVERLAY"),
+                @ViewDebug.FlagToString(
+                        mask = PRIVATE_FLAG_EXCLUDE_FROM_SCREEN_MAGNIFICATION,
+                        equals = PRIVATE_FLAG_EXCLUDE_FROM_SCREEN_MAGNIFICATION,
+                        name = "EXCLUDE_FROM_SCREEN_MAGNIFICATION"),
                 @ViewDebug.FlagToString(
                         mask = PRIVATE_FLAG_NOT_MAGNIFIABLE,
                         equals = PRIVATE_FLAG_NOT_MAGNIFIABLE,
@@ -3482,6 +3556,30 @@ public interface WindowManager extends ViewManager {
         public @InsetsState.InternalInsetsType int[] providesInsetsTypes;
 
         /**
+         * If specified, the insets provided by this window will be our window frame minus the
+         * insets specified by providedInternalInsets.
+         *
+         * @hide
+         */
+        public Insets providedInternalInsets = Insets.NONE;
+
+        /**
+         * If specified, the insets provided by this window for the IME will be our window frame
+         * minus the insets specified by providedInternalImeInsets.
+         *
+         * @hide
+         */
+        public Insets providedInternalImeInsets = Insets.NONE;
+
+        /**
+         * {@link LayoutParams} to be applied to the window when layout with a assigned rotation.
+         * This will make layout during rotation change smoothly.
+         *
+         * @hide
+         */
+        public LayoutParams[] paramsForRotation;
+
+        /**
          * Specifies types of insets that this window should avoid overlapping during layout.
          *
          * @param types which {@link WindowInsets.Type}s of insets that this window should avoid.
@@ -3578,6 +3676,18 @@ public interface WindowManager extends ViewManager {
          */
         public boolean isFitInsetsIgnoringVisibility() {
             return mFitInsetsIgnoringVisibility;
+        }
+
+        private void checkNonRecursiveParams() {
+            if (paramsForRotation == null) {
+                return;
+            }
+            for (int i = paramsForRotation.length - 1; i >= 0; i--) {
+                if (paramsForRotation[i].paramsForRotation != null) {
+                    throw new IllegalArgumentException(
+                            "Params cannot contain params recursively.");
+                }
+            }
         }
 
         public LayoutParams() {
@@ -3834,6 +3944,15 @@ public interface WindowManager extends ViewManager {
             } else {
                 out.writeInt(0);
             }
+            providedInternalInsets.writeToParcel(out, 0 /* parcelableFlags */);
+            providedInternalImeInsets.writeToParcel(out, 0 /* parcelableFlags */);
+            if (paramsForRotation != null) {
+                checkNonRecursiveParams();
+                out.writeInt(paramsForRotation.length);
+                out.writeTypedArray(paramsForRotation, 0 /* parcelableFlags */);
+            } else {
+                out.writeInt(0);
+            }
         }
 
         public static final @android.annotation.NonNull Parcelable.Creator<LayoutParams> CREATOR
@@ -3904,6 +4023,13 @@ public interface WindowManager extends ViewManager {
             if (insetsTypesLength > 0) {
                 providesInsetsTypes = new int[insetsTypesLength];
                 in.readIntArray(providesInsetsTypes);
+            }
+            providedInternalInsets = Insets.CREATOR.createFromParcel(in);
+            providedInternalImeInsets = Insets.CREATOR.createFromParcel(in);
+            int paramsForRotationLength = in.readInt();
+            if (paramsForRotationLength > 0) {
+                paramsForRotation = new LayoutParams[paramsForRotationLength];
+                in.readTypedArray(paramsForRotation, LayoutParams.CREATOR);
             }
         }
 
@@ -4201,6 +4327,22 @@ public interface WindowManager extends ViewManager {
                 changes |= LAYOUT_CHANGED;
             }
 
+            if (!providedInternalInsets.equals(o.providedInternalInsets)) {
+                providedInternalInsets = o.providedInternalInsets;
+                changes |= LAYOUT_CHANGED;
+            }
+
+            if (!providedInternalImeInsets.equals(o.providedInternalImeInsets)) {
+                providedInternalImeInsets = o.providedInternalImeInsets;
+                changes |= LAYOUT_CHANGED;
+            }
+
+            if (!Arrays.equals(paramsForRotation, o.paramsForRotation)) {
+                paramsForRotation = o.paramsForRotation;
+                checkNonRecursiveParams();
+                changes |= LAYOUT_CHANGED;
+            }
+
             return changes;
         }
 
@@ -4394,6 +4536,22 @@ public interface WindowManager extends ViewManager {
                 for (int i = 0; i < providesInsetsTypes.length; ++i) {
                     if (i > 0) sb.append(' ');
                     sb.append(InsetsState.typeToString(providesInsetsTypes[i]));
+                }
+            }
+            if (!providedInternalInsets.equals(Insets.NONE)) {
+                sb.append(" providedInternalInsets=");
+                sb.append(providedInternalInsets);
+            }
+            if (!providedInternalImeInsets.equals(Insets.NONE)) {
+                sb.append(" providedInternalImeInsets=");
+                sb.append(providedInternalImeInsets);
+            }
+            if (paramsForRotation != null && paramsForRotation.length != 0) {
+                sb.append(System.lineSeparator());
+                sb.append(prefix).append("  paramsForRotation=");
+                for (int i = 0; i < paramsForRotation.length; ++i) {
+                    if (i > 0) sb.append(' ');
+                    sb.append(paramsForRotation[i].toString());
                 }
             }
 
@@ -4609,6 +4767,16 @@ public interface WindowManager extends ViewManager {
                 default:
                     return Integer.toString(inputFeature);
             }
+        }
+
+        /**
+         * True if the window should consume all pointer events itself, regardless of whether they
+         * are inside of the window. If the window is modal, its touchable region will expand to the
+         * size of its task.
+         * @hide
+         */
+        public boolean isModal() {
+            return (flags & (FLAG_NOT_TOUCH_MODAL | FLAG_NOT_FOCUSABLE)) == 0;
         }
     }
 

@@ -511,7 +511,6 @@ public class EthernetManager {
             NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
             android.Manifest.permission.NETWORK_STACK,
             android.Manifest.permission.MANAGE_ETHERNET_NETWORKS})
-    @RequiresFeature(PackageManager.FEATURE_AUTOMOTIVE)
     public void updateConfiguration(
             @NonNull String iface,
             @NonNull EthernetNetworkUpdateRequest request,

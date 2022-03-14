@@ -223,6 +223,7 @@ cc_library_shared {
                 "fd_utils.cpp",
                 "android_hardware_input_InputWindowHandle.cpp",
                 "android_hardware_input_InputApplicationHandle.cpp",
+                "android_window_WindowInfosListener.cpp",
             ],
 
             static_libs: [
@@ -230,15 +231,19 @@ cc_library_shared {
                 "libbinderthreadstateutils",
                 "libdmabufinfo",
                 "libgif",
+                "libgui_window_info_static",
                 "libseccomp_policy",
                 "libgrallocusage",
                 "libscrypt_static",
                 "libstatssocket_lazy",
+                "libskia",
             ],
 
             shared_libs: [
                 "audioclient-types-aidl-cpp",
                 "audioflinger-aidl-cpp",
+                "audiopolicy-types-aidl-cpp",
+                "spatializer-aidl-cpp",
                 "av-types-aidl-cpp",
                 "android.hardware.camera.device@3.2",
                 "libandroid_net",
@@ -369,6 +374,7 @@ cc_library_shared {
                 "libinput",
                 "libbinderthreadstateutils",
                 "libsqlite",
+                "libgui_window_info_static",
             ],
             shared_libs: [
                 // libbinder needs to be shared since it has global state

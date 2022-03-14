@@ -20,6 +20,7 @@ import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.android.systemui.statusbar.notification.NotificationFadeAware;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 
 /**
@@ -66,5 +67,15 @@ public class NotificationDecoratedCustomViewWrapper extends NotificationTemplate
             invertViewLuminosity(mWrappedView);
         }
         super.onContentUpdated(row);
+    }
+
+    /**
+     * Apply the faded state as a layer type change to the custom view which needs to have
+     * overlapping contents render precisely.
+     */
+    @Override
+    public void setNotificationFaded(boolean faded) {
+        super.setNotificationFaded(faded);
+        NotificationFadeAware.setLayerTypeForFaded(mWrappedView, faded);
     }
 }

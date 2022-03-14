@@ -26,12 +26,12 @@ import android.app.ApplicationExitInfo;
 import android.app.ApplicationExitInfo.Reason;
 import android.app.ApplicationExitInfo.SubReason;
 import android.app.IApplicationThread;
-import android.app.RemoteServiceException;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ProcessInfo;
 import android.content.pm.VersionedPackage;
 import android.content.res.CompatibilityInfo;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Process;
 import android.os.RemoteException;
@@ -948,11 +948,6 @@ class ProcessRecord implements WindowProcessListener {
         return mServices.hasForegroundServices();
     }
 
-    @GuardedBy("mService")
-    void scheduleCrashLocked(String message) {
-        scheduleCrashLocked(message, RemoteServiceException.TYPE_ID);
-    }
-
     /**
      * Let an app process throw an exception on a binder thread, which typically crashes the
      * process, unless it has an unhandled exception handler.
@@ -964,7 +959,7 @@ class ProcessRecord implements WindowProcessListener {
      *                        of its subclasses.
      */
     @GuardedBy("mService")
-    void scheduleCrashLocked(String message, int exceptionTypeId) {
+    void scheduleCrashLocked(String message, int exceptionTypeId, @Nullable Bundle extras) {
         // Checking killedbyAm should keep it from showing the crash dialog if the process
         // was already dead for a good / normal reason.
         if (!mKilledByAm) {
@@ -975,7 +970,7 @@ class ProcessRecord implements WindowProcessListener {
                 }
                 final long ident = Binder.clearCallingIdentity();
                 try {
-                    mThread.scheduleCrash(message, exceptionTypeId);
+                    mThread.scheduleCrash(message, exceptionTypeId, extras);
                 } catch (RemoteException e) {
                     // If it's already dead our work is done. If it's wedged just kill it.
                     // We won't get the crash dialog or the error reporting.

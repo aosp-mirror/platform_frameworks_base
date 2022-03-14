@@ -41,24 +41,26 @@ public final class DeviceStateTest {
     @Test
     public void testConstruct() {
         final DeviceState state = new DeviceState(MINIMUM_DEVICE_STATE /* identifier */,
-                "CLOSED" /* name */);
+                "CLOSED" /* name */, DeviceState.FLAG_CANCEL_STICKY_REQUESTS /* flags */);
         assertEquals(state.getIdentifier(), MINIMUM_DEVICE_STATE);
         assertEquals(state.getName(), "CLOSED");
+        assertEquals(state.getFlags(), DeviceState.FLAG_CANCEL_STICKY_REQUESTS);
     }
 
     @Test
     public void testConstruct_nullName() {
         final DeviceState state = new DeviceState(MAXIMUM_DEVICE_STATE /* identifier */,
-                null /* name */);
+                null /* name */, 0/* flags */);
         assertEquals(state.getIdentifier(), MAXIMUM_DEVICE_STATE);
         assertNull(state.getName());
+        assertEquals(state.getFlags(), 0);
     }
 
     @Test
     public void testConstruct_tooLargeIdentifier() {
         assertThrows(IllegalArgumentException.class, () -> {
             final DeviceState state = new DeviceState(MAXIMUM_DEVICE_STATE + 1 /* identifier */,
-                    null /* name */);
+                    null /* name */, 0 /* flags */);
         });
     }
 
@@ -66,7 +68,7 @@ public final class DeviceStateTest {
     public void testConstruct_tooSmallIdentifier() {
         assertThrows(IllegalArgumentException.class, () -> {
             final DeviceState state = new DeviceState(MINIMUM_DEVICE_STATE - 1 /* identifier */,
-                    null /* name */);
+                    null /* name */, 0 /* flags */);
         });
     }
 }

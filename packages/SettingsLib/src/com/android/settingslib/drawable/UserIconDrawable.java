@@ -183,6 +183,20 @@ public class UserIconDrawable extends Drawable implements Drawable.Callback {
         return setBadge(badge);
     }
 
+    /**
+     * Sets the managed badge to this user icon if the device has a device owner.
+     */
+    public UserIconDrawable setBadgeIfManagedDevice(Context context) {
+        Drawable badge = null;
+        boolean deviceOwnerExists = context.getSystemService(DevicePolicyManager.class)
+                .getDeviceOwnerComponentOnAnyUser() != null;
+        if (deviceOwnerExists) {
+            badge = getDrawableForDisplayDensity(
+                    context, com.android.internal.R.drawable.ic_corp_badge_case);
+        }
+        return setBadge(badge);
+    }
+
     public void setBadgeRadius(float radius) {
         mBadgeRadius = radius;
         onBoundsChange(getBounds());

@@ -27,6 +27,8 @@ import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.ApplicationInfo
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.ImageDecoder
@@ -82,18 +84,10 @@ private val LOADING = MediaData(-1, false, 0, null, null, null, null, null,
         emptyList(), emptyList(), "INVALID", null, null, null, true, null)
 @VisibleForTesting
 internal val EMPTY_SMARTSPACE_MEDIA_DATA = SmartspaceMediaData("INVALID", false, false,
-    "INVALID", null, emptyList(), null, 0)
+    "INVALID", null, emptyList(), null, 0, 0)
 
 fun isMediaNotification(sbn: StatusBarNotification): Boolean {
-    if (!sbn.notification.hasMediaSession()) {
-        return false
-    }
-    val notificationStyle = sbn.notification.notificationStyle
-    if (Notification.DecoratedMediaCustomViewStyle::class.java.equals(notificationStyle) ||
-            Notification.MediaStyle::class.java.equals(notificationStyle)) {
-        return true
-    }
-    return false
+    return sbn.notification.isMediaNotification()
 }
 
 /**
@@ -152,6 +146,24 @@ class MediaDataManager(
     var smartspaceMediaData: SmartspaceMediaData = EMPTY_SMARTSPACE_MEDIA_DATA
     private var smartspaceSession: SmartspaceSession? = null
     private var allowMediaRecommendations = Utils.allowMediaRecommendations(context)
+
+    /**
+     * Check whether this notification is an RCN
+     * TODO(b/204910409) implement new API for explicitly declaring this
+     */
+    private fun isRemoteCastNotification(sbn: StatusBarNotification): Boolean {
+        val pm = context.packageManager
+        try {
+            val info = pm.getApplicationInfo(sbn.packageName, PackageManager.MATCH_SYSTEM_ONLY)
+            if (info.privateFlags and ApplicationInfo.PRIVATE_FLAG_PRIVILEGED != 0) {
+                val extras = sbn.notification.extras
+                if (extras.containsKey(Notification.EXTRA_SUBSTITUTE_APP_NAME)) {
+                    return true
+                }
+            }
+        } catch (e: PackageManager.NameNotFoundException) { }
+        return false
+    }
 
     @Inject
     constructor(
@@ -442,7 +454,7 @@ class MediaDataManager(
         val existed = mediaEntries[key] != null
         backgroundExecutor.execute {
             mediaEntries[key]?.let { mediaData ->
-                if (mediaData.isLocalSession) {
+                if (mediaData.isLocalSession()) {
                     mediaData.token?.let {
                         val mediaController = mediaControllerFactory.create(it)
                         mediaController.transportControls.stop()
@@ -626,8 +638,11 @@ class MediaDataManager(
             }
         }
 
-        val isLocalSession = mediaController.playbackInfo?.playbackType ==
-            MediaController.PlaybackInfo.PLAYBACK_TYPE_LOCAL
+        val playbackLocation =
+                if (isRemoteCastNotification(sbn)) MediaData.PLAYBACK_CAST_REMOTE
+                else if (mediaController.playbackInfo?.playbackType ==
+                    MediaController.PlaybackInfo.PLAYBACK_TYPE_LOCAL) MediaData.PLAYBACK_LOCAL
+                else MediaData.PLAYBACK_CAST_LOCAL
         val isPlaying = mediaController.playbackState?.let { isPlayingState(it.state) } ?: null
         val lastActive = systemClock.elapsedRealtime()
         foregroundExecutor.execute {
@@ -637,7 +652,7 @@ class MediaDataManager(
             onMediaDataLoaded(key, oldKey, MediaData(sbn.normalizedUserId, true, bgColor, app,
                     smallIcon, artist, song, artWorkIcon, actionIcons,
                     actionsToShowCollapsed, sbn.packageName, token, notif.contentIntent, null,
-                    active, resumeAction = resumeAction, isLocalSession = isLocalSession,
+                    active, resumeAction = resumeAction, playbackLocation = playbackLocation,
                     notificationKey = key, hasCheckedForResume = hasCheckedForResume,
                     isPlaying = isPlaying, isClearable = sbn.isClearable(),
                     lastActive = lastActive))
@@ -762,13 +777,13 @@ class MediaDataManager(
     fun onNotificationRemoved(key: String) {
         Assert.isMainThread()
         val removed = mediaEntries.remove(key)
-        if (useMediaResumption && removed?.resumeAction != null && removed?.isLocalSession) {
+        if (useMediaResumption && removed?.resumeAction != null && removed?.isLocalSession()) {
             Log.d(TAG, "Not removing $key because resumable")
             // Move to resume key (aka package name) if that key doesn't already exist.
             val resumeAction = getResumeMediaAction(removed.resumeAction!!)
             val updated = removed.copy(token = null, actions = listOf(resumeAction),
                     actionsToShowInCompact = listOf(0), active = false, resumption = true,
-                    isClearable = true)
+                    isPlaying = false, isClearable = true)
             val pkg = removed.packageName
             val migrate = mediaEntries.put(pkg, updated) == null
             // Notify listeners of "new" controls when migrating or removed and update when not
@@ -837,15 +852,16 @@ class MediaDataManager(
          * until the next refresh-round before UI becomes visible. True by default to take in place
          * immediately.
          *
-         * @param isSsReactivated indicates transition from a state with no active media players to
-         * a state with active media players upon receiving Smartspace media data.
+         * @param receivedSmartspaceCardLatency is the latency between headphone connects and sysUI
+         * displays Smartspace media targets. Will be 0 if the data is not activated by Smartspace
+         * signal.
          */
         fun onMediaDataLoaded(
             key: String,
             oldKey: String?,
             data: MediaData,
             immediately: Boolean = true,
-            isSsReactivated: Boolean = false
+            receivedSmartspaceCardLatency: Int = 0
         ) {}
 
         /**
@@ -854,11 +870,15 @@ class MediaDataManager(
          * @param shouldPrioritize indicates the sorting priority of the Smartspace card. If true,
          * it will be prioritized as the first card. Otherwise, it will show up as the last card as
          * default.
+         *
+         * @param isSsReactivated indicates resume media card is reactivated by Smartspace
+         * recommendation signal
          */
         fun onSmartspaceMediaDataLoaded(
             key: String,
             data: SmartspaceMediaData,
-            shouldPrioritize: Boolean = false
+            shouldPrioritize: Boolean = false,
+            isSsReactivated: Boolean = false
         ) {}
 
         /** Called whenever a previously existing Media notification was removed. */
@@ -889,17 +909,18 @@ class MediaDataManager(
             dismissIntent = target
                 .baseAction
                 .extras
-                .getParcelable(EXTRAS_SMARTSPACE_DISMISS_INTENT_KEY) as Intent
+                .getParcelable(EXTRAS_SMARTSPACE_DISMISS_INTENT_KEY) as Intent?
         }
         packageName(target)?.let {
             return SmartspaceMediaData(target.smartspaceTargetId, isActive, true, it,
                 target.baseAction, target.iconGrid,
-                dismissIntent, 0)
+                dismissIntent, 0, target.creationTimeMillis)
         }
         return EMPTY_SMARTSPACE_MEDIA_DATA
             .copy(targetId = target.smartspaceTargetId,
-                isActive = isActive,
-                dismissIntent = dismissIntent)
+                    isActive = isActive,
+                    dismissIntent = dismissIntent,
+                    headphoneConnectionTimeMillis = target.creationTimeMillis)
     }
 
     private fun packageName(target: SmartspaceTarget): String? {

@@ -19,6 +19,7 @@ package com.android.settingslib.utils;
 import android.content.Context;
 import android.icu.text.MeasureFormat;
 import android.icu.text.MeasureFormat.FormatWidth;
+import android.icu.text.MessageFormat;
 import android.icu.text.RelativeDateTimeFormatter;
 import android.icu.text.RelativeDateTimeFormatter.RelativeUnit;
 import android.icu.util.Measure;
@@ -31,7 +32,9 @@ import android.text.style.TtsSpan;
 import com.android.settingslib.R;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
 /** Utility class for generally useful string methods **/
 public class StringUtil {
@@ -182,5 +185,38 @@ public class StringUtil {
             boolean withSeconds) {
         return formatRelativeTime(context, millis, withSeconds,
                 RelativeDateTimeFormatter.Style.LONG);
+    }
+
+    /**
+     * Get ICU plural string without additional arguments
+     *
+     * @param context Context used to get the string
+     * @param count The number used to get the correct string for the current language's plural
+     *              rules.
+     * @param resId Resource id of the string
+     *
+     * @return Formatted plural string
+     */
+    public static String getIcuPluralsString(Context context, int count, int resId) {
+        MessageFormat msgFormat = new MessageFormat(context.getResources().getString(resId),
+                Locale.getDefault());
+        Map<String, Object> arguments = new HashMap<>();
+        arguments.put("count", count);
+        return msgFormat.format(arguments);
+    }
+
+    /**
+     * Get ICU plural string with additional arguments
+     *
+     * @param context Context used to get the string
+     * @param args String arguments
+     * @param resId Resource id of the string
+     *
+     * @return Formatted plural string
+     */
+    public static String getIcuPluralsString(Context context, Map<String, Object> args, int resId) {
+        MessageFormat msgFormat = new MessageFormat(context.getResources().getString(resId),
+                Locale.getDefault());
+        return msgFormat.format(args);
     }
 }

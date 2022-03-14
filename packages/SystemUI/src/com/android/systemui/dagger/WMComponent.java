@@ -20,17 +20,22 @@ import android.content.Context;
 
 import com.android.systemui.SystemUIFactory;
 import com.android.systemui.tv.TvWMComponent;
-import com.android.systemui.wmshell.TvWMShellModule;
-import com.android.systemui.wmshell.WMShellModule;
 import com.android.wm.shell.ShellCommandHandler;
 import com.android.wm.shell.ShellInit;
 import com.android.wm.shell.TaskViewFactory;
 import com.android.wm.shell.apppairs.AppPairs;
 import com.android.wm.shell.bubbles.Bubbles;
+import com.android.wm.shell.compatui.CompatUI;
+import com.android.wm.shell.dagger.TvWMShellModule;
+import com.android.wm.shell.dagger.WMShellModule;
+import com.android.wm.shell.dagger.WMSingleton;
+import com.android.wm.shell.displayareahelper.DisplayAreaHelper;
+import com.android.wm.shell.draganddrop.DragAndDrop;
 import com.android.wm.shell.hidedisplaycutout.HideDisplayCutout;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 import com.android.wm.shell.onehanded.OneHanded;
 import com.android.wm.shell.pip.Pip;
+import com.android.wm.shell.recents.RecentTasks;
 import com.android.wm.shell.splitscreen.SplitScreen;
 import com.android.wm.shell.startingsurface.StartingSurface;
 import com.android.wm.shell.tasksurfacehelper.TaskSurfaceHelper;
@@ -105,5 +110,17 @@ public interface WMComponent {
     Optional<StartingSurface> getStartingSurface();
 
     @WMSingleton
+    Optional<DisplayAreaHelper> getDisplayAreaHelper();
+
+    @WMSingleton
     Optional<TaskSurfaceHelper> getTaskSurfaceHelper();
+
+    @WMSingleton
+    Optional<RecentTasks> getRecentTasks();
+
+    @WMSingleton
+    CompatUI getCompatUI();
+
+    @WMSingleton
+    DragAndDrop getDragAndDrop();
 }

@@ -32,7 +32,6 @@ import static junit.framework.Assert.assertTrue;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
@@ -40,6 +39,7 @@ import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.after;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -48,6 +48,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.app.KeyguardManager;
 import android.app.Notification;
@@ -73,7 +74,6 @@ import android.provider.Settings;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.test.suitebuilder.annotation.SmallTest;
-import android.util.Slog;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.IAccessibilityManager;
@@ -102,6 +102,7 @@ import java.util.Objects;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
+@SuppressLint("GuardedBy") // It's ok for this test to access guarded methods from the service.
 public class BuzzBeepBlinkTest extends UiServiceTestCase {
 
     @Mock AudioManager mAudioManager;
@@ -156,6 +157,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
         when(mAudioManager.getRingtonePlayer()).thenReturn(mRingtonePlayer);
         when(mAudioManager.getStreamVolume(anyInt())).thenReturn(10);
         when(mAudioManager.getRingerModeInternal()).thenReturn(AudioManager.RINGER_MODE_NORMAL);
+        when(mAudioManager.getFocusRampTimeMs(anyInt(), any(AudioAttributes.class))).thenReturn(50);
         when(mUsageStats.isAlertRateLimited(any())).thenReturn(false);
         when(mVibrator.hasFrequencyControl()).thenReturn(false);
         when(mKeyguardManager.isDeviceLocked(anyInt())).thenReturn(false);
@@ -442,6 +444,11 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
     private void verifyDelayedVibrate(VibrationEffect effect) {
         verifyVibrate(argument -> Objects.equals(effect, argument),
                 timeout(MAX_VIBRATION_DELAY).times(1));
+    }
+
+    private void verifyDelayedNeverVibrate() {
+        verify(mVibrator, after(MAX_VIBRATION_DELAY).never()).vibrate(anyInt(), anyString(), any(),
+                anyString(), any(AudioAttributes.class));
     }
 
     private void verifyVibrate(ArgumentMatcher<VibrationEffect> effectMatcher,
@@ -1588,8 +1595,51 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
         // beep wasn't reset
         verifyNeverBeep();
         verifyNeverVibrate();
-        verify(mRingtonePlayer, never()).stopAsync();
-        verify(mVibrator, never()).cancel();
+        verifyNeverStopAudio();
+        verifyNeverStopVibrate();
+    }
+
+    @Test
+    public void testRingtoneInsistentBeep_clearEffectsStopsSoundAndVibration() throws Exception {
+        NotificationChannel ringtoneChannel =
+                new NotificationChannel("ringtone", "", IMPORTANCE_HIGH);
+        ringtoneChannel.setSound(Uri.fromParts("a", "b", "c"),
+                new AudioAttributes.Builder().setUsage(USAGE_NOTIFICATION_RINGTONE).build());
+        ringtoneChannel.enableVibration(true);
+        NotificationRecord ringtoneNotification = getCallRecord(1, ringtoneChannel, true);
+        mService.addNotification(ringtoneNotification);
+        assertFalse(mService.shouldMuteNotificationLocked(ringtoneNotification));
+        mService.buzzBeepBlinkLocked(ringtoneNotification);
+        verifyBeepLooped();
+        verifyDelayedVibrateLooped();
+
+        mService.clearSoundLocked();
+        mService.clearVibrateLocked();
+
+        verifyStopAudio();
+        verifyStopVibrate();
+    }
+
+    @Test
+    public void testRingtoneInsistentBeep_neverVibratesWhenEffectsClearedBeforeDelay()
+            throws Exception {
+        NotificationChannel ringtoneChannel =
+                new NotificationChannel("ringtone", "", IMPORTANCE_HIGH);
+        ringtoneChannel.setSound(Uri.fromParts("a", "b", "c"),
+                new AudioAttributes.Builder().setUsage(USAGE_NOTIFICATION_RINGTONE).build());
+        ringtoneChannel.enableVibration(true);
+        NotificationRecord ringtoneNotification = getCallRecord(1, ringtoneChannel, true);
+        mService.addNotification(ringtoneNotification);
+        assertFalse(mService.shouldMuteNotificationLocked(ringtoneNotification));
+        mService.buzzBeepBlinkLocked(ringtoneNotification);
+        verifyBeepLooped();
+        verifyNeverVibrate();
+
+        mService.clearSoundLocked();
+        mService.clearVibrateLocked();
+
+        verifyStopAudio();
+        verifyDelayedNeverVibrate();
     }
 
     @Test

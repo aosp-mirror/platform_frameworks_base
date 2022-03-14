@@ -35,7 +35,7 @@ import android.graphics.Rect;
 import android.os.IBinder;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
-import android.window.IRemoteTransition;
+import android.window.RemoteTransition;
 import android.window.TransitionInfo;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
@@ -84,17 +84,19 @@ class SplitScreenTransitions {
     }
 
     void playAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
-            @NonNull SurfaceControl.Transaction t,
+            @NonNull SurfaceControl.Transaction startTransaction,
+            @NonNull SurfaceControl.Transaction finishTransaction,
             @NonNull Transitions.TransitionFinishCallback finishCallback,
             @NonNull WindowContainerToken mainRoot, @NonNull WindowContainerToken sideRoot) {
         mFinishCallback = finishCallback;
         mAnimatingTransition = transition;
         if (mRemoteHandler != null) {
-            mRemoteHandler.startAnimation(transition, info, t, mRemoteFinishCB);
+            mRemoteHandler.startAnimation(transition, info, startTransaction, finishTransaction,
+                    mRemoteFinishCB);
             mRemoteHandler = null;
             return;
         }
-        playInternalAnimation(transition, info, t, mainRoot, sideRoot);
+        playInternalAnimation(transition, info, startTransaction, mainRoot, sideRoot);
     }
 
     private void playInternalAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
@@ -167,7 +169,7 @@ class SplitScreenTransitions {
 
     /** Starts a transition to enter split with a remote transition animator. */
     IBinder startEnterTransition(@WindowManager.TransitionType int transitType,
-            @NonNull WindowContainerTransaction wct, @Nullable IRemoteTransition remoteTransition,
+            @NonNull WindowContainerTransaction wct, @Nullable RemoteTransition remoteTransition,
             @NonNull Transitions.TransitionHandler handler) {
         if (remoteTransition != null) {
             // Wrapping it for ease-of-use (OneShot handles all the binder linking/death stuff)

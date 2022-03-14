@@ -28,6 +28,7 @@ LIBHWUI {
     register_android_graphics_GraphicsStatsService;
     zygote_preload_graphics;
     AMatrix_getContents;
+    AMatrix_newInstance;
     APaint_createPaint;
     APaint_destroyPaint;
     APaint_setBlendMode;

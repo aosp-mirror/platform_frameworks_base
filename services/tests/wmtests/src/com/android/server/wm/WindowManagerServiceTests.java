@@ -56,6 +56,7 @@ import android.platform.test.annotations.Presubmit;
 import android.view.IWindowSessionCallback;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
+import android.view.InsetsVisibilities;
 import android.view.View;
 import android.view.WindowManager;
 
@@ -107,9 +108,9 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         Task tappedTask = createTaskInRootTask(tappedRootTask, 0 /* userId */);
         spyOn(mWm.mAtmService);
 
-        mWm.handleTaskFocusChange(tappedTask);
+        mWm.handleTaskFocusChange(tappedTask, null /* window */);
 
-        verify(mWm.mAtmService).setFocusedTask(tappedTask.mTaskId);
+        verify(mWm.mAtmService).setFocusedTask(tappedTask.mTaskId, null);
     }
 
     @Test
@@ -128,9 +129,9 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         Task tappedTask = createTaskInRootTask(tappedRootTask, 0 /* userId */);
         spyOn(mWm.mAtmService);
 
-        mWm.handleTaskFocusChange(tappedTask);
+        mWm.handleTaskFocusChange(tappedTask, null /* window */);
 
-        verify(mWm.mAtmService, never()).setFocusedTask(tappedTask.mTaskId);
+        verify(mWm.mAtmService, never()).setFocusedTask(tappedTask.mTaskId, null);
     }
 
     @Test
@@ -151,9 +152,9 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         Task tappedTask = createTaskInRootTask(tappedRootTask, 0 /* userId */);
         spyOn(mWm.mAtmService);
 
-        mWm.handleTaskFocusChange(tappedTask);
+        mWm.handleTaskFocusChange(tappedTask, null /* window */);
 
-        verify(mWm.mAtmService).setFocusedTask(tappedTask.mTaskId);
+        verify(mWm.mAtmService).setFocusedTask(tappedTask.mTaskId, null);
     }
 
     @Test
@@ -278,7 +279,7 @@ public class WindowManagerServiceTests extends WindowTestsBase {
                 .getWindowType(eq(windowContextToken));
 
         mWm.addWindow(session, new TestIWindow(), params, View.VISIBLE, DEFAULT_DISPLAY,
-                UserHandle.USER_SYSTEM, new InsetsState(), null, new InsetsState(),
+                UserHandle.USER_SYSTEM, new InsetsVisibilities(), null, new InsetsState(),
                 new InsetsSourceControl[0]);
 
         verify(mWm.mWindowContextListenerController, never()).registerWindowContainerListener(any(),

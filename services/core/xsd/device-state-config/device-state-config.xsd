@@ -40,7 +40,16 @@
             <xs:element name="name" type="xs:string" minOccurs="0">
                 <xs:annotation name="nullable" />
             </xs:element>
+            <xs:element name="flags" type="flags" />
             <xs:element name="conditions" type="conditions" />
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="flags">
+        <xs:sequence>
+            <xs:element name="flag" type="xs:string" minOccurs="0" maxOccurs="unbounded">
+                <xs:annotation name="nullable" />
+            </xs:element>
         </xs:sequence>
     </xs:complexType>
 

@@ -109,6 +109,12 @@ public class AlphaTintDrawableWrapper extends InsetDrawable {
         }
     }
 
+    @Override
+    public void setTintList(ColorStateList tint) {
+        super.setTintList(tint);
+        mTint = tint;
+    }
+
     private void applyTint() {
         if (getDrawable() != null && mTint != null) {
             getDrawable().mutate().setTintList(mTint);

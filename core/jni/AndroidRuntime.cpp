@@ -207,6 +207,7 @@ extern int register_com_android_internal_os_ZygoteCommandBuffer(JNIEnv *env);
 extern int register_com_android_internal_os_ZygoteInit(JNIEnv *env);
 extern int register_com_android_internal_security_VerityUtils(JNIEnv* env);
 extern int register_com_android_internal_util_VirtualRefBasePtr(JNIEnv *env);
+extern int register_android_window_WindowInfosListener(JNIEnv* env);
 
 // Namespace for Android Runtime flags applied during boot time.
 static const char* RUNTIME_NATIVE_BOOT_NAMESPACE = "runtime_native_boot";
@@ -1564,6 +1565,7 @@ static const RegJNIRec gRegJNI[] = {
         REG_JNI(register_android_graphics_classes),
         REG_JNI(register_android_graphics_BLASTBufferQueue),
         REG_JNI(register_android_graphics_GraphicBuffer),
+        REG_JNI(register_android_graphics_GraphicsStatsService),
         REG_JNI(register_android_graphics_SurfaceTexture),
         REG_JNI(register_android_database_CursorWindow),
         REG_JNI(register_android_database_SQLiteConnection),
@@ -1652,6 +1654,8 @@ static const RegJNIRec gRegJNI[] = {
         REG_JNI(register_com_android_internal_os_KernelCpuUidBpfMapReader),
         REG_JNI(register_com_android_internal_os_KernelSingleProcessCpuThreadReader),
         REG_JNI(register_com_android_internal_os_KernelSingleUidTimeReader),
+
+        REG_JNI(register_android_window_WindowInfosListener),
 };
 
 /*

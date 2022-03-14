@@ -13,10 +13,9 @@
  */
 package com.android.systemui.shared.plugins;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -30,19 +29,13 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
-import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
-import com.android.systemui.Dependency;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.Plugin;
-import com.android.systemui.plugins.PluginEnablerImpl;
-import com.android.systemui.plugins.PluginInitializerImpl;
 import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.plugins.annotations.ProvidesInterface;
-import com.android.systemui.shared.plugins.PluginInstanceManager.PluginInfo;
-import com.android.systemui.shared.plugins.PluginManagerImpl.PluginInstanceManagerFactory;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -51,19 +44,24 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 import java.lang.Thread.UncaughtExceptionHandler;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Optional;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
 public class PluginManagerTest extends SysuiTestCase {
 
-    private static final String WHITELISTED_PACKAGE = "com.android.systemui";
+    private static final String PRIVILEGED_PACKAGE = "com.android.systemui";
 
-    private PluginInstanceManagerFactory mMockFactory;
-    private PluginInstanceManager mMockPluginInstance;
+    private PluginActionManager.Factory mMockFactory;
+    private PluginActionManager<TestPlugin> mMockPluginInstance;
     private PluginManagerImpl mPluginManager;
-    private PluginListener mMockListener;
+    private PluginListener<TestPlugin> mMockListener;
     private PackageManager mMockPackageManager;
+    private PluginEnabler mPluginEnabler;
+    private PluginPrefs mPluginPrefs;
 
     private UncaughtExceptionHandler mRealExceptionHandler;
     private UncaughtExceptionHandler mMockExceptionHandler;
@@ -71,42 +69,23 @@ public class PluginManagerTest extends SysuiTestCase {
 
     @Before
     public void setup() throws Exception {
-        mDependency.injectTestDependency(Dependency.BG_LOOPER,
-                TestableLooper.get(this).getLooper());
         mRealExceptionHandler = Thread.getUncaughtExceptionPreHandler();
         mMockExceptionHandler = mock(UncaughtExceptionHandler.class);
-        mMockFactory = mock(PluginInstanceManagerFactory.class);
-        mMockPluginInstance = mock(PluginInstanceManager.class);
-        when(mMockFactory.createPluginInstanceManager(Mockito.any(), Mockito.any(), Mockito.any(),
-                Mockito.anyBoolean(), Mockito.any(), Mockito.any(), Mockito.any()))
+        mMockFactory = mock(PluginActionManager.Factory.class);
+        mMockPluginInstance = mock(PluginActionManager.class);
+        mPluginEnabler = mock(PluginEnabler.class);
+        mPluginPrefs = mock(PluginPrefs.class);
+        when(mMockFactory.create(any(), any(), eq(TestPlugin.class), anyBoolean(), anyBoolean()))
                 .thenReturn(mMockPluginInstance);
 
         mMockPackageManager = mock(PackageManager.class);
         mPluginManager = new PluginManagerImpl(
                 getContext(), mMockFactory, true,
-                mMockExceptionHandler, new PluginInitializerImpl() {
-                    @Override
-                    public String[] getWhitelistedPlugins(Context context) {
-                        return new String[0];
-                    }
+                Optional.of(mMockExceptionHandler), mPluginEnabler,
+                mPluginPrefs, new ArrayList<>());
 
-                    @Override
-                    public PluginEnabler getPluginEnabler(Context context) {
-                        return new PluginEnablerImpl(context, mMockPackageManager);
-                    }
-        });
         resetExceptionHandler();
         mMockListener = mock(PluginListener.class);
-    }
-
-    @RunWithLooper(setAsMainLooper = true)
-    @Test
-    public void testOneShot() {
-        Plugin mockPlugin = mock(Plugin.class);
-        when(mMockPluginInstance.getPlugin()).thenReturn(new PluginInfo(null, null, mockPlugin,
-                null, null));
-        Plugin result = mPluginManager.getOneShotPlugin("myAction", TestPlugin.class);
-        assertSame(mockPlugin, result);
     }
 
     @Test
@@ -126,53 +105,49 @@ public class PluginManagerTest extends SysuiTestCase {
 
     @Test
     @RunWithLooper(setAsMainLooper = true)
-    public void testNonDebuggable_noWhitelist() {
-        mPluginManager = new PluginManagerImpl(getContext(), mMockFactory, false,
-                mMockExceptionHandler, new PluginInitializerImpl() {
-            @Override
-            public String[] getWhitelistedPlugins(Context context) {
-                return new String[0];
-            }
-        });
+    public void testNonDebuggable_nonPrivileged() {
+        mPluginManager = new PluginManagerImpl(
+                getContext(), mMockFactory, false,
+                Optional.of(mMockExceptionHandler), mPluginEnabler,
+                mPluginPrefs, new ArrayList<>());
         resetExceptionHandler();
 
         String sourceDir = "myPlugin";
         ApplicationInfo applicationInfo = new ApplicationInfo();
         applicationInfo.sourceDir = sourceDir;
-        applicationInfo.packageName = WHITELISTED_PACKAGE;
+        applicationInfo.packageName = PRIVILEGED_PACKAGE;
         mPluginManager.addPluginListener("myAction", mMockListener, TestPlugin.class);
-        assertNull(mPluginManager.getOneShotPlugin(sourceDir, TestPlugin.class));
-        assertNull(mPluginManager.getClassLoader(applicationInfo));
+        verify(mMockFactory).create(eq("myAction"), eq(mMockListener), eq(TestPlugin.class),
+                eq(false), eq(false));
+        verify(mMockPluginInstance).loadAll();
     }
 
     @Test
     @RunWithLooper(setAsMainLooper = true)
-    public void testNonDebuggable_whitelistedPkg() {
-        mPluginManager = new PluginManagerImpl(getContext(), mMockFactory, false,
-                mMockExceptionHandler, new PluginInitializerImpl() {
-            @Override
-            public String[] getWhitelistedPlugins(Context context) {
-                return new String[] {WHITELISTED_PACKAGE};
-            }
-        });
+    public void testNonDebuggable_privilegedPackage() {
+        mPluginManager = new PluginManagerImpl(
+                getContext(), mMockFactory, false,
+                Optional.of(mMockExceptionHandler), mPluginEnabler,
+                mPluginPrefs, Collections.singletonList(PRIVILEGED_PACKAGE));
         resetExceptionHandler();
 
         String sourceDir = "myPlugin";
-        ApplicationInfo whiteListedApplicationInfo = new ApplicationInfo();
-        whiteListedApplicationInfo.sourceDir = sourceDir;
-        whiteListedApplicationInfo.packageName = WHITELISTED_PACKAGE;
+        ApplicationInfo privilegedApplicationInfo = new ApplicationInfo();
+        privilegedApplicationInfo.sourceDir = sourceDir;
+        privilegedApplicationInfo.packageName = PRIVILEGED_PACKAGE;
         ApplicationInfo invalidApplicationInfo = new ApplicationInfo();
         invalidApplicationInfo.sourceDir = sourceDir;
         invalidApplicationInfo.packageName = "com.android.invalidpackage";
         mPluginManager.addPluginListener("myAction", mMockListener, TestPlugin.class);
-        assertNotNull(mPluginManager.getClassLoader(whiteListedApplicationInfo));
-        assertNull(mPluginManager.getClassLoader(invalidApplicationInfo));
+        verify(mMockFactory).create(eq("myAction"), eq(mMockListener), eq(TestPlugin.class),
+                eq(false), eq(false));
+        verify(mMockPluginInstance).loadAll();
     }
 
     @Test
     public void testExceptionHandler_foundPlugin() {
         mPluginManager.addPluginListener("myAction", mMockListener, TestPlugin.class);
-        when(mMockPluginInstance.checkAndDisable(Mockito.any())).thenReturn(true);
+        when(mMockPluginInstance.checkAndDisable(any())).thenReturn(true);
 
         mPluginExceptionHandler.uncaughtException(Thread.currentThread(), new Throwable());
 
@@ -187,7 +162,7 @@ public class PluginManagerTest extends SysuiTestCase {
     @Test
     public void testExceptionHandler_noFoundPlugin() {
         mPluginManager.addPluginListener("myAction", mMockListener, TestPlugin.class);
-        when(mMockPluginInstance.checkAndDisable(Mockito.any())).thenReturn(false);
+        when(mMockPluginInstance.checkAndDisable(any())).thenReturn(false);
 
         mPluginExceptionHandler.uncaughtException(Thread.currentThread(), new Throwable());
 
@@ -211,9 +186,7 @@ public class PluginManagerTest extends SysuiTestCase {
         intent.setData(Uri.parse("package://" + testComponent.flattenToString()));
         mPluginManager.onReceive(mContext, intent);
         verify(nm).cancel(eq(testComponent.getClassName()), eq(SystemMessage.NOTE_PLUGIN));
-        verify(mMockPackageManager).setComponentEnabledSetting(eq(testComponent),
-                eq(PackageManager.COMPONENT_ENABLED_STATE_DISABLED),
-                eq(PackageManager.DONT_KILL_APP));
+        verify(mPluginEnabler).setDisabled(testComponent, PluginEnabler.DISABLED_INVALID_VERSION);
     }
 
     private void resetExceptionHandler() {
@@ -223,8 +196,8 @@ public class PluginManagerTest extends SysuiTestCase {
     }
 
     @ProvidesInterface(action = TestPlugin.ACTION, version = TestPlugin.VERSION)
-    public static interface TestPlugin extends Plugin {
-        public static final String ACTION = "testAction";
-        public static final int VERSION = 1;
+    public interface TestPlugin extends Plugin {
+        String ACTION = "testAction";
+        int VERSION = 1;
     }
 }

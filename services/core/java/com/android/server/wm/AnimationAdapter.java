@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import android.annotation.NonNull;
 import android.util.proto.ProtoOutputStream;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
@@ -52,7 +53,7 @@ interface AnimationAdapter {
      * @param finishCallback The callback to be invoked when the animation has finished.
      */
     void startAnimation(SurfaceControl animationLeash, Transaction t, @AnimationType int type,
-            OnAnimationFinishedCallback finishCallback);
+            @NonNull OnAnimationFinishedCallback finishCallback);
 
     /**
      * Called when the animation that was started with {@link #startAnimation} was cancelled by the

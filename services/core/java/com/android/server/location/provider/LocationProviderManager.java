@@ -31,6 +31,7 @@ import static android.os.PowerManager.LOCATION_MODE_ALL_DISABLED_WHEN_SCREEN_OFF
 import static android.os.PowerManager.LOCATION_MODE_FOREGROUND_ONLY;
 import static android.os.PowerManager.LOCATION_MODE_GPS_DISABLED_WHEN_SCREEN_OFF;
 import static android.os.PowerManager.LOCATION_MODE_THROTTLE_REQUESTS_WHEN_SCREEN_OFF;
+import static android.os.UserHandle.USER_CURRENT;
 
 import static com.android.server.location.LocationManagerService.D;
 import static com.android.server.location.LocationManagerService.TAG;
@@ -177,7 +178,7 @@ public class LocationProviderManager extends
     protected interface LocationTransport {
 
         void deliverOnLocationChanged(LocationResult locationResult,
-                @Nullable Runnable onCompleteCallback) throws Exception;
+                @Nullable IRemoteCallback onCompleteCallback) throws Exception;
         void deliverOnFlushComplete(int requestCode) throws Exception;
     }
 
@@ -197,9 +198,8 @@ public class LocationProviderManager extends
 
         @Override
         public void deliverOnLocationChanged(LocationResult locationResult,
-                @Nullable Runnable onCompleteCallback) throws RemoteException {
-            mListener.onLocationChanged(locationResult.asList(),
-                    SingleUseCallback.wrap(onCompleteCallback));
+                @Nullable IRemoteCallback onCompleteCallback) throws RemoteException {
+            mListener.onLocationChanged(locationResult.asList(), onCompleteCallback);
         }
 
         @Override
@@ -227,7 +227,7 @@ public class LocationProviderManager extends
 
         @Override
         public void deliverOnLocationChanged(LocationResult locationResult,
-                @Nullable Runnable onCompleteCallback)
+                @Nullable IRemoteCallback onCompleteCallback)
                 throws PendingIntent.CanceledException {
             BroadcastOptions options = BroadcastOptions.makeBasic();
             options.setDontSendToRestrictedApps(true);
@@ -243,20 +243,34 @@ public class LocationProviderManager extends
                 intent.putExtra(KEY_LOCATIONS, locationResult.asList().toArray(new Location[0]));
             }
 
+            PendingIntent.OnFinished onFinished = null;
+
             // send() SHOULD only run the completion callback if it completes successfully. however,
-            // b/199464864 (which could not be fixed in the S timeframe) means that it's possible
+            // b/201299281 (which could not be fixed in the S timeframe) means that it's possible
             // for send() to throw an exception AND run the completion callback. if this happens, we
             // would over-release the wakelock... we take matters into our own hands to ensure that
             // the completion callback can only be run if send() completes successfully. this means
             // the completion callback may be run inline - but as we've never specified what thread
             // the callback is run on, this is fine.
-            GatedCallback gatedCallback = new GatedCallback(onCompleteCallback);
+            GatedCallback gatedCallback;
+            if (onCompleteCallback != null) {
+                gatedCallback = new GatedCallback(() -> {
+                    try {
+                        onCompleteCallback.sendResult(null);
+                    } catch (RemoteException e) {
+                        throw e.rethrowFromSystemServer();
+                    }
+                });
+                onFinished = (pI, i, rC, rD, rE) -> gatedCallback.run();
+            } else {
+                gatedCallback = new GatedCallback(null);
+            }
 
             mPendingIntent.send(
                     mContext,
                     0,
                     intent,
-                    (pI, i, rC, rD, rE) -> gatedCallback.run(),
+                    onFinished,
                     null,
                     null,
                     options.toBundle());
@@ -293,7 +307,7 @@ public class LocationProviderManager extends
 
         @Override
         public void deliverOnLocationChanged(@Nullable LocationResult locationResult,
-                @Nullable Runnable onCompleteCallback)
+                @Nullable IRemoteCallback onCompleteCallback)
                 throws RemoteException {
             // ILocationCallback doesn't currently support completion callbacks
             Preconditions.checkState(onCompleteCallback == null);
@@ -398,7 +412,7 @@ public class LocationProviderManager extends
             EVENT_LOG.logProviderClientActive(mName, getIdentity());
 
             if (!getRequest().isHiddenFromAppOps()) {
-                mLocationAttributionHelper.reportLocationStart(getIdentity(), getName(), getKey());
+                mLocationAttributionHelper.reportLocationStart(getIdentity());
             }
             onHighPowerUsageChanged();
 
@@ -413,7 +427,7 @@ public class LocationProviderManager extends
 
             onHighPowerUsageChanged();
             if (!getRequest().isHiddenFromAppOps()) {
-                mLocationAttributionHelper.reportLocationStop(getIdentity(), getName(), getKey());
+                mLocationAttributionHelper.reportLocationStop(getIdentity());
             }
 
             onProviderListenerInactive();
@@ -488,10 +502,10 @@ public class LocationProviderManager extends
                 if (!getRequest().isHiddenFromAppOps()) {
                     if (mIsUsingHighPower) {
                         mLocationAttributionHelper.reportHighPowerLocationStart(
-                                getIdentity(), getName(), getKey());
+                                getIdentity());
                     } else {
                         mLocationAttributionHelper.reportHighPowerLocationStop(
-                                getIdentity(), getName(), getKey());
+                                getIdentity());
                     }
                 }
             }
@@ -514,8 +528,8 @@ public class LocationProviderManager extends
         }
 
         @GuardedBy("mLock")
-        final boolean onLocationPermissionsChanged(String packageName) {
-            if (getIdentity().getPackageName().equals(packageName)) {
+        final boolean onLocationPermissionsChanged(@Nullable String packageName) {
+            if (packageName == null || getIdentity().getPackageName().equals(packageName)) {
                 return onLocationPermissionsChanged();
             }
 
@@ -714,6 +728,13 @@ public class LocationProviderManager extends
 
         final PowerManager.WakeLock mWakeLock;
 
+        // b/206340085 - if we allocate a new wakelock releaser object for every delivery we
+        // increase the risk of resource starvation. if a client stops processing deliveries the
+        // system server binder allocation pool will be starved as we continue to queue up
+        // deliveries, each with a new allocation. in order to mitigate this, we use a single
+        // releaser object per registration rather than per delivery.
+        final ExternalWakeLockReleaser mWakeLockReleaser;
+
         private volatile ProviderTransport mProviderTransport;
         private int mNumLocationsDelivered = 0;
         private long mExpirationRealtimeMs = Long.MAX_VALUE;
@@ -727,6 +748,7 @@ public class LocationProviderManager extends
                     .newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, WAKELOCK_TAG);
             mWakeLock.setReferenceCounted(true);
             mWakeLock.setWorkSource(request.getWorkSource());
+            mWakeLockReleaser = new ExternalWakeLockReleaser(identity, mWakeLock);
         }
 
         @Override
@@ -872,6 +894,10 @@ public class LocationProviderManager extends
                                         MAX_FASTEST_INTERVAL_JITTER_MS);
                                 if (deltaMs
                                         < getRequest().getMinUpdateIntervalMillis() - maxJitterMs) {
+                                    if (D) {
+                                        Log.v(TAG, mName + " provider registration " + getIdentity()
+                                                + " dropped delivery - too fast");
+                                    }
                                     return false;
                                 }
 
@@ -881,6 +907,10 @@ public class LocationProviderManager extends
                                 if (smallestDisplacementM > 0.0 && location.distanceTo(
                                         mPreviousLocation)
                                         <= smallestDisplacementM) {
+                                    if (D) {
+                                        Log.v(TAG, mName + " provider registration " + getIdentity()
+                                                + " dropped delivery - too close");
+                                    }
                                     return false;
                                 }
                             }
@@ -898,7 +928,8 @@ public class LocationProviderManager extends
             if (!mAppOpsHelper.noteOpNoThrow(LocationPermissions.asAppOp(getPermissionLevel()),
                     getIdentity())) {
                 if (D) {
-                    Log.w(TAG, "noteOp denied for " + getIdentity());
+                    Log.w(TAG,
+                            mName + " provider registration " + getIdentity() + " noteOp denied");
                 }
                 return null;
             }
@@ -911,18 +942,21 @@ public class LocationProviderManager extends
                 @Override
                 public void onPreExecute() {
                     mUseWakeLock = false;
-                    final int size = locationResult.size();
-                    for (int i = 0; i < size; ++i) {
-                        if (!locationResult.get(i).isMock()) {
-                            mUseWakeLock = true;
-                            break;
+
+                    // don't acquire a wakelock for passive requests or for mock locations
+                    if (getRequest().getIntervalMillis() != LocationRequest.PASSIVE_INTERVAL) {
+                        final int size = locationResult.size();
+                        for (int i = 0; i < size; ++i) {
+                            if (!locationResult.get(i).isMock()) {
+                                mUseWakeLock = true;
+                                break;
+                            }
                         }
                     }
 
                     // update last delivered location
                     setLastDeliveredLocation(locationResult.getLastLocation());
 
-                    // don't acquire a wakelock for mock locations to prevent abuse
                     if (mUseWakeLock) {
                         mWakeLock.acquire(WAKELOCK_TIMEOUT_MS);
                     }
@@ -940,7 +974,7 @@ public class LocationProviderManager extends
                     }
 
                     listener.deliverOnLocationChanged(deliverLocationResult,
-                            mUseWakeLock ? mWakeLock::release : null);
+                            mUseWakeLock ? mWakeLockReleaser : null);
                     EVENT_LOG.logProviderDeliveredLocations(mName, locationResult.size(),
                             getIdentity());
                 }
@@ -1339,7 +1373,7 @@ public class LocationProviderManager extends
     private final LocationPermissionsListener mLocationPermissionsListener =
             new LocationPermissionsListener() {
                 @Override
-                public void onLocationPermissionsChanged(String packageName) {
+                public void onLocationPermissionsChanged(@Nullable String packageName) {
                     LocationProviderManager.this.onLocationPermissionsChanged(packageName);
                 }
 
@@ -1479,7 +1513,7 @@ public class LocationProviderManager extends
     public boolean isEnabled(int userId) {
         if (userId == UserHandle.USER_NULL) {
             return false;
-        } else if (userId == UserHandle.USER_CURRENT) {
+        } else if (userId == USER_CURRENT) {
             return isEnabled(mUserHelper.getCurrentUserId());
         }
 
@@ -1652,7 +1686,7 @@ public class LocationProviderManager extends
                 }
             }
             return lastLocation;
-        } else if (userId == UserHandle.USER_CURRENT) {
+        } else if (userId == USER_CURRENT) {
             return getLastLocationUnsafe(mUserHelper.getCurrentUserId(), permissionLevel,
                     isBypass, maximumAgeMs);
         }
@@ -1697,7 +1731,7 @@ public class LocationProviderManager extends
                 setLastLocation(location, runningUserIds[i]);
             }
             return;
-        } else if (userId == UserHandle.USER_CURRENT) {
+        } else if (userId == USER_CURRENT) {
             setLastLocation(location, mUserHelper.getCurrentUserId());
             return;
         }
@@ -1994,6 +2028,11 @@ public class LocationProviderManager extends
             if (D) {
                 Log.d(TAG, mName + " provider delaying request update " + newRequest + " by "
                         + TimeUtils.formatDuration(delayMs));
+            }
+
+            if (mDelayedRegister != null) {
+                mAlarmHelper.cancel(mDelayedRegister);
+                mDelayedRegister = null;
             }
 
             mDelayedRegister = new OnAlarmListener() {
@@ -2327,7 +2366,7 @@ public class LocationProviderManager extends
         }
     }
 
-    private void onLocationPermissionsChanged(String packageName) {
+    private void onLocationPermissionsChanged(@Nullable String packageName) {
         synchronized (mLock) {
             updateRegistrations(
                     registration -> registration.onLocationPermissionsChanged(packageName));
@@ -2375,13 +2414,13 @@ public class LocationProviderManager extends
             filtered = locationResult.filter(location -> {
                 if (!location.isMock()) {
                     if (location.getLatitude() == 0 && location.getLongitude() == 0) {
-                        Log.w(TAG, "blocking 0,0 location from " + mName + " provider");
+                        Log.e(TAG, "blocking 0,0 location from " + mName + " provider");
                         return false;
                     }
                 }
 
                 if (!location.isComplete()) {
-                    Log.w(TAG, "blocking incomplete location from " + mName + " provider");
+                    Log.e(TAG, "blocking incomplete location from " + mName + " provider");
                     return false;
                 }
 
@@ -2397,6 +2436,12 @@ public class LocationProviderManager extends
         } else {
             // passive provider should get already filtered results as input
             filtered = locationResult;
+        }
+
+        Location last = getLastLocationUnsafe(USER_CURRENT, PERMISSION_FINE, true, Long.MAX_VALUE);
+        if (last != null && locationResult.get(0).getElapsedRealtimeNanos()
+                < last.getElapsedRealtimeNanos()) {
+            Log.e(TAG, "non-monotonic location received from " + mName + " provider");
         }
 
         // update last location
@@ -2753,7 +2798,7 @@ public class LocationProviderManager extends
         @GuardedBy("this")
         private boolean mRun;
 
-        GatedCallback(Runnable callback) {
+        GatedCallback(@Nullable Runnable callback) {
             mCallback = callback;
         }
 
@@ -2785,6 +2830,29 @@ public class LocationProviderManager extends
 
             if (callback != null) {
                 callback.run();
+            }
+        }
+    }
+
+    private static class ExternalWakeLockReleaser extends IRemoteCallback.Stub {
+
+        private final CallerIdentity mIdentity;
+        private final PowerManager.WakeLock mWakeLock;
+
+        ExternalWakeLockReleaser(CallerIdentity identity, PowerManager.WakeLock wakeLock) {
+            mIdentity = identity;
+            mWakeLock = Objects.requireNonNull(wakeLock);
+        }
+
+        @Override
+        public void sendResult(Bundle data) {
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                mWakeLock.release();
+            } catch (RuntimeException e) {
+                Log.e(TAG, "wakelock over-released by " + mIdentity, e);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
             }
         }
     }
