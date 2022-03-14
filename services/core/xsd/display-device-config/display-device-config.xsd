@@ -34,7 +34,8 @@
                     <xs:annotation name="nonnull"/>
                     <xs:annotation name="final"/>
                 </xs:element>
-                <xs:element type="highBrightnessMode" name="highBrightnessMode" minOccurs="0" maxOccurs="1"/>
+                <xs:element type="highBrightnessMode" name="highBrightnessMode" minOccurs="0"
+                            maxOccurs="1"/>
                 <xs:element type="displayQuirks" name="quirks" minOccurs="0" maxOccurs="1" />
                 <xs:element type="nonNegativeDecimal" name="screenBrightnessRampFastDecrease">
                     <xs:annotation name="final"/>
@@ -54,6 +55,19 @@
                 <xs:element type="sensorDetails" name="proxSensor">
                     <xs:annotation name="final"/>
                 </xs:element>
+
+                <!-- Set of thresholds that dictate the change needed for screen brightness
+                adaptations -->
+                <xs:element type="thresholds" name="displayBrightnessChangeThresholds">
+                    <xs:annotation name="nonnull"/>
+                    <xs:annotation name="final"/>
+                </xs:element>
+                <!-- Set of thresholds that dictate the change needed for ambient brightness
+                adaptations -->
+                <xs:element type="thresholds" name="ambientBrightnessChangeThresholds">
+                    <xs:annotation name="nonnull"/>
+                    <xs:annotation name="final"/>
+                </xs:element>
             </xs:sequence>
         </xs:complexType>
     </xs:element>
@@ -68,7 +82,8 @@
 
     <xs:complexType name="highBrightnessMode">
         <xs:all>
-            <xs:element name="transitionPoint" type="nonNegativeDecimal" minOccurs="1" maxOccurs="1">
+            <xs:element name="transitionPoint" type="nonNegativeDecimal" minOccurs="1"
+                        maxOccurs="1">
                 <xs:annotation name="nonnull"/>
                 <xs:annotation name="final"/>
             </xs:element>
@@ -97,7 +112,8 @@
 
     <xs:complexType name="hbmTiming">
         <xs:all>
-            <xs:element name="timeWindowSecs" type="xs:nonNegativeInteger" minOccurs="1" maxOccurs="1">
+            <xs:element name="timeWindowSecs" type="xs:nonNegativeInteger" minOccurs="1"
+                        maxOccurs="1">
                 <xs:annotation name="nonnull"/>
                 <xs:annotation name="final"/>
             </xs:element>
@@ -181,5 +197,31 @@
         </xs:sequence>
     </xs:complexType>
 
+    <!-- Thresholds for brightness changes. -->
+    <xs:complexType name="thresholds">
+        <xs:sequence>
+            <!-- Brightening thresholds. -->
+            <xs:element name="brighteningThresholds" type="brightnessThresholds" minOccurs="0"
+                        maxOccurs="1" >
+                <xs:annotation name="nonnull"/>
+                <xs:annotation name="final"/>
+            </xs:element>
+            <!-- Darkening thresholds. -->
+            <xs:element name="darkeningThresholds" type="brightnessThresholds" minOccurs="0"
+                        maxOccurs="1" >
+                <xs:annotation name="nonnull"/>
+                <xs:annotation name="final"/>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <!-- Brightening and darkening minimum change thresholds. -->
+    <xs:complexType name="brightnessThresholds">
+        <!-- Minimum brightness change needed. -->
+        <xs:element name="minimum" type="nonNegativeDecimal" minOccurs="0" maxOccurs="1" >
+            <xs:annotation name="nonnull"/>
+            <xs:annotation name="final"/>
+        </xs:element>
+    </xs:complexType>
 
 </xs:schema>
