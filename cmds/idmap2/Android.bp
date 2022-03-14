@@ -52,6 +52,7 @@ cc_defaults {
         "-readability-braces-around-statements",
         "-readability-const-return-type",
         "-readability-convert-member-functions-to-static",
+        "-readability-duplicate-include",
         "-readability-else-after-return",
         "-readability-identifier-length",
         "-readability-named-parameter",
