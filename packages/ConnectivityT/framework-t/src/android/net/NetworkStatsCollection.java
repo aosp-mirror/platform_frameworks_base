@@ -36,6 +36,7 @@ import static com.android.net.module.util.NetworkStatsUtils.multiplySafeByRation
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.net.NetworkStats.State;
 import android.net.NetworkStatsHistory.Entry;
 import android.os.Binder;
 import android.service.NetworkStatsCollectionKeyProto;
@@ -102,7 +103,7 @@ public class NetworkStatsCollection implements FileRotator.Reader, FileRotator.W
 
     private ArrayMap<Key, NetworkStatsHistory> mStats = new ArrayMap<>();
 
-    private final long mBucketDuration;
+    private final long mBucketDurationMillis;
 
     private long mStartMillis;
     private long mEndMillis;
@@ -115,8 +116,8 @@ public class NetworkStatsCollection implements FileRotator.Reader, FileRotator.W
      * @param bucketDuration duration of the buckets in this object, in milliseconds.
      * @hide
      */
-    public NetworkStatsCollection(long bucketDuration) {
-        mBucketDuration = bucketDuration;
+    public NetworkStatsCollection(long bucketDurationMillis) {
+        mBucketDurationMillis = bucketDurationMillis;
         reset();
     }
 
@@ -148,7 +149,7 @@ public class NetworkStatsCollection implements FileRotator.Reader, FileRotator.W
         if (mStartMillis == Long.MAX_VALUE) {
             return Long.MAX_VALUE;
         } else {
-            return mStartMillis + mBucketDuration;
+            return mStartMillis + mBucketDurationMillis;
         }
     }
 
@@ -184,10 +185,10 @@ public class NetworkStatsCollection implements FileRotator.Reader, FileRotator.W
                 || time == SubscriptionPlan.TIME_UNKNOWN) {
             return time;
         } else {
-            final long mod = time % mBucketDuration;
+            final long mod = time % mBucketDurationMillis;
             if (mod > 0) {
                 time -= mod;
-                time += mBucketDuration;
+                time += mBucketDurationMillis;
             }
             return time;
         }
@@ -200,7 +201,7 @@ public class NetworkStatsCollection implements FileRotator.Reader, FileRotator.W
                 || time == SubscriptionPlan.TIME_UNKNOWN) {
             return time;
         } else {
-            final long mod = time % mBucketDuration;
+            final long mod = time % mBucketDurationMillis;
             if (mod > 0) {
                 time -= mod;
             }
@@ -247,10 +248,10 @@ public class NetworkStatsCollection implements FileRotator.Reader, FileRotator.W
         // 180 days of history should be enough for anyone; if we end up needing
         // more, we'll dynamically grow the history object.
         final int bucketEstimate = (int) NetworkStatsUtils.constrain(
-                ((end - start) / mBucketDuration), 0,
-                (180 * DateUtils.DAY_IN_MILLIS) / mBucketDuration);
+                ((end - start) / mBucketDurationMillis), 0,
+                (180 * DateUtils.DAY_IN_MILLIS) / mBucketDurationMillis);
         final NetworkStatsHistory combined = new NetworkStatsHistory(
-                mBucketDuration, bucketEstimate, fields);
+                mBucketDurationMillis, bucketEstimate, fields);
 
         // shortcut when we know stats will be empty
         if (start == end) return combined;
@@ -343,7 +344,7 @@ public class NetworkStatsCollection implements FileRotator.Reader, FileRotator.W
 
             // Finally we can slice data as originally requested
             final NetworkStatsHistory sliced = new NetworkStatsHistory(
-                    mBucketDuration, bucketEstimate, fields);
+                    mBucketDurationMillis, bucketEstimate, fields);
             sliced.recordHistory(combined, start, end);
             return sliced;
         } else {
@@ -458,9 +459,9 @@ public class NetworkStatsCollection implements FileRotator.Reader, FileRotator.W
         // update when no existing, or when bucket duration changed
         NetworkStatsHistory updated = null;
         if (existing == null) {
-            updated = new NetworkStatsHistory(mBucketDuration, 10);
-        } else if (existing.getBucketDuration() != mBucketDuration) {
-            updated = new NetworkStatsHistory(existing, mBucketDuration);
+            updated = new NetworkStatsHistory(mBucketDurationMillis, 10);
+        } else if (existing.getBucketDuration() != mBucketDurationMillis) {
+            updated = new NetworkStatsHistory(existing, mBucketDurationMillis);
         }
 
         if (updated != null) {
@@ -702,7 +703,7 @@ public class NetworkStatsCollection implements FileRotator.Reader, FileRotator.W
 
     private int estimateBuckets() {
         return (int) (Math.min(mEndMillis - mStartMillis, WEEK_IN_MILLIS * 5)
-                / mBucketDuration);
+                / mBucketDurationMillis);
     }
 
     private ArrayList<Key> getSortedKeys() {
@@ -828,7 +829,7 @@ public class NetworkStatsCollection implements FileRotator.Reader, FileRotator.W
      * Builder class for {@link NetworkStatsCollection}.
      */
     public static final class Builder {
-        private final long mBucketDuration;
+        private final long mBucketDurationMillis;
         private final ArrayMap<Key, NetworkStatsHistory> mEntries = new ArrayMap<>();
 
         /**
@@ -836,8 +837,8 @@ public class NetworkStatsCollection implements FileRotator.Reader, FileRotator.W
          *
          * @param bucketDuration Duration of the buckets of the object, in milliseconds.
          */
-        public Builder(long bucketDuration) {
-            mBucketDuration = bucketDuration;
+        public Builder(long bucketDurationMillis) {
+            mBucketDurationMillis = bucketDurationMillis;
         }
 
         /**
@@ -855,7 +856,7 @@ public class NetworkStatsCollection implements FileRotator.Reader, FileRotator.W
             final List<Entry> historyEntries = history.getEntries();
 
             final NetworkStatsHistory.Builder historyBuilder =
-                    new NetworkStatsHistory.Builder(mBucketDuration, historyEntries.size());
+                    new NetworkStatsHistory.Builder(mBucketDurationMillis, historyEntries.size());
             for (Entry entry : historyEntries) {
                 historyBuilder.addEntry(entry);
             }
@@ -871,7 +872,8 @@ public class NetworkStatsCollection implements FileRotator.Reader, FileRotator.W
          */
         @NonNull
         public NetworkStatsCollection build() {
-            final NetworkStatsCollection collection = new NetworkStatsCollection(mBucketDuration);
+            final NetworkStatsCollection collection =
+                    new NetworkStatsCollection(mBucketDurationMillis);
             for (int i = 0; i < mEntries.size(); i++) {
                 collection.recordHistory(mEntries.keyAt(i), mEntries.valueAt(i));
             }
@@ -883,7 +885,7 @@ public class NetworkStatsCollection implements FileRotator.Reader, FileRotator.W
      * the identifier that associate with the {@link NetworkStatsHistory} object to identify
      * a certain record in the {@link NetworkStatsCollection} object.
      */
-    public static class Key {
+    public static final class Key {
         /** @hide */
         public final NetworkIdentitySet ident;
         /** @hide */
@@ -903,7 +905,7 @@ public class NetworkStatsCollection implements FileRotator.Reader, FileRotator.W
          * @param set Set of the record, see {@code NetworkStats#SET_*}.
          * @param tag Tag of the record, see {@link TrafficStats#setThreadStatsTag(int)}.
          */
-        public Key(@NonNull Set<NetworkIdentity> ident, int uid, int set, int tag) {
+        public Key(@NonNull Set<NetworkIdentity> ident, int uid, @State int set, int tag) {
             this(new NetworkIdentitySet(Objects.requireNonNull(ident)), uid, set, tag);
         }
 
