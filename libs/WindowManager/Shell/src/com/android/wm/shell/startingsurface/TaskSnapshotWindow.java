@@ -62,6 +62,7 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.hardware.HardwareBuffer;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.Trace;
@@ -243,7 +244,7 @@ public class TaskSnapshotWindow {
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "TaskSnapshot#relayout");
             session.relayout(window, layoutParams, -1, -1, View.VISIBLE, 0,
                     tmpFrames, tmpMergedConfiguration, surfaceControl, tmpInsetsState,
-                    tmpControls);
+                    tmpControls, new Bundle());
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         } catch (RemoteException e) {
             snapshotSurface.clearWindowSynced();
@@ -517,7 +518,7 @@ public class TaskSnapshotWindow {
 
     private void reportDrawn() {
         try {
-            mSession.finishDrawing(mWindow, null /* postDrawTransaction */);
+            mSession.finishDrawing(mWindow, null /* postDrawTransaction */, Integer.MAX_VALUE);
         } catch (RemoteException e) {
             clearWindowSynced();
         }
@@ -534,7 +535,7 @@ public class TaskSnapshotWindow {
         @Override
         public void resized(ClientWindowFrames frames, boolean reportDraw,
                 MergedConfiguration mergedConfiguration, boolean forceLayout,
-                boolean alwaysConsumeSystemBars, int displayId) {
+                boolean alwaysConsumeSystemBars, int displayId, int seqId) {
             if (mOuter != null) {
                 mOuter.mSplashScreenExecutor.execute(() -> {
                     if (mergedConfiguration != null
