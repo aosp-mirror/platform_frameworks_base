@@ -546,7 +546,6 @@ public final class ViewRootImpl implements ViewParent,
 
     private final Rect mVisRect = new Rect(); // used to retrieve visible rect of focused view.
     private final Rect mTempRect = new Rect();
-    private final Rect mTempRect2 = new Rect();
 
     private final WindowLayout mWindowLayout = new WindowLayout();
 
@@ -1198,8 +1197,7 @@ public final class ViewRootImpl implements ViewParent,
                         displayCutoutSafe, winConfig.getBounds(), winConfig.getWindowingMode(),
                         UNSPECIFIED_LENGTH, UNSPECIFIED_LENGTH,
                         mInsetsController.getRequestedVisibilities(),
-                        getAttachedWindowFrame(), 1f /* compactScale */,
-                        mTmpFrames.displayFrame, mTempRect2, mTmpFrames.frame);
+                        getAttachedWindowFrame(), 1f /* compactScale */, mTmpFrames);
                 setFrame(mTmpFrames.frame);
                 registerBackCallbackOnWindow();
                 if (!WindowOnBackInvokedDispatcher.isOnBackInvokedCallbackEnabled(mContext)) {
