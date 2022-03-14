@@ -526,20 +526,6 @@ public class LockPatternUtils {
     }
 
     /**
-     * Check to see if vold already has the password.
-     * Note that this also clears vold's copy of the password.
-     * @return Whether the vold password matches or not.
-     */
-    public boolean checkVoldPassword(int userId) {
-        try {
-            return getLockSettings().checkVoldPassword(userId);
-        } catch (RemoteException re) {
-            Log.e(TAG, "failed to check vold password", re);
-            return false;
-        }
-    }
-
-    /**
      * Returns the password history hash factor, needed to check new password against password
      * history with {@link #checkPasswordHistory(byte[], byte[], int)}
      */
