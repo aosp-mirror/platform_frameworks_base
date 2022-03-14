@@ -3291,10 +3291,13 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
         } else if (pkg.isSystemExt()) {
             permissions = systemConfig.getSystemExtPrivAppPermissions(pkg.getPackageName());
         } else if (containingApexPackageName != null) {
+            final ApexManager apexManager = ApexManager.getInstance();
+            final String apexName = apexManager.getApexModuleNameForPackageName(
+                    containingApexPackageName);
             final Set<String> privAppPermissions = systemConfig.getPrivAppPermissions(
                     pkg.getPackageName());
             final Set<String> apexPermissions = systemConfig.getApexPrivAppPermissions(
-                    containingApexPackageName, pkg.getPackageName());
+                    apexName, pkg.getPackageName());
             if (privAppPermissions != null) {
                 // TODO(andreionea): Remove check as soon as all apk-in-apex
                 // permission allowlists are migrated.
