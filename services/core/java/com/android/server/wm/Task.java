@@ -1630,12 +1630,16 @@ class Task extends TaskFragment {
     }
 
     ActivityRecord performClearTop(ActivityRecord newR, int launchFlags) {
+        // The task should be preserved for putting new activity in case the last activity is
+        // finished if it is normal launch mode and not single top ("clear-task-top").
+        mReuseTask = true;
         mTaskSupervisor.beginDeferResume();
         final ActivityRecord result;
         try {
             result = clearTopActivities(newR, launchFlags);
         } finally {
             mTaskSupervisor.endDeferResume();
+            mReuseTask = false;
         }
         return result;
     }

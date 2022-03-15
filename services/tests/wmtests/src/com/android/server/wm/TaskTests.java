@@ -259,6 +259,20 @@ public class TaskTests extends WindowTestsBase {
     }
 
     @Test
+    public void testPerformClearTop() {
+        final Task task = createTask(mDisplayContent);
+        final ActivityRecord activity1 = new ActivityBuilder(mAtm).setTask(task).build();
+        final ActivityRecord activity2 = new ActivityBuilder(mAtm).setTask(task).build();
+        // Detach from process so the activities can be removed from hierarchy when finishing.
+        activity1.detachFromProcess();
+        activity2.detachFromProcess();
+        assertNull(task.performClearTop(activity1, 0 /* launchFlags */));
+        assertFalse(task.hasChild());
+        // In real case, the task should be preserved for adding new activity.
+        assertTrue(task.isAttached());
+    }
+
+    @Test
     public void testRemoveChildForOverlayTask() {
         final Task task = createTask(mDisplayContent);
         final int taskId = task.mTaskId;
