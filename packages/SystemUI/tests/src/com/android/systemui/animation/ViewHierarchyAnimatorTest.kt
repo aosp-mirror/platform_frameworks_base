@@ -21,7 +21,8 @@ import org.junit.runner.RunWith
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
 @TestableLooper.RunWithLooper
-class ViewHierarchyAnimatorTest : SysuiTestCase() {
+class
+ViewHierarchyAnimatorTest : SysuiTestCase() {
     companion object {
         private const val TEST_DURATION = 1000L
         private val TEST_INTERPOLATOR = Interpolators.LINEAR
@@ -622,27 +623,6 @@ class ViewHierarchyAnimatorTest : SysuiTestCase() {
         endAnimation(rootView)
         assertNull(rootView.getTag(R.id.tag_animator))
         checkBounds(rootView, l = 10, t = 10, r = 70, b = 80)
-    }
-
-    @Test
-    fun doesNotAnimateExcludedBounds() {
-        rootView.layout(10 /* l */, 10 /* t */, 50 /* r */, 50 /* b */)
-
-        val success = ViewHierarchyAnimator.animate(
-            rootView,
-            bounds = setOf(ViewHierarchyAnimator.Bound.LEFT, ViewHierarchyAnimator.Bound.TOP),
-            interpolator = TEST_INTERPOLATOR
-        )
-        // Change all bounds.
-        rootView.layout(0 /* l */, 20 /* t */, 70 /* r */, 80 /* b */)
-
-        assertTrue(success)
-        assertNotNull(rootView.getTag(R.id.tag_animator))
-        advanceAnimation(rootView, 0.5f)
-        checkBounds(rootView, l = 5, t = 15, r = 70, b = 80)
-        endAnimation(rootView)
-        assertNull(rootView.getTag(R.id.tag_animator))
-        checkBounds(rootView, l = 0, t = 20, r = 70, b = 80)
     }
 
     @Test
