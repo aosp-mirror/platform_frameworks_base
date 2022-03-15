@@ -4479,7 +4479,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @BinderThread
-    private void hideMySoftInput(@NonNull IBinder token, int flags) {
+    private void hideMySoftInput(@NonNull IBinder token, int flags,
+            @SoftInputShowHideReason int reason) {
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMMS.hideMySoftInput");
         synchronized (ImfLock.class) {
             if (!calledWithValidTokenLocked(token)) {
@@ -4487,10 +4488,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             }
             final long ident = Binder.clearCallingIdentity();
             try {
-                hideCurrentInputLocked(
-                        mLastImeTargetWindow, flags, null,
-                        SoftInputShowHideReason.HIDE_MY_SOFT_INPUT);
-
+                hideCurrentInputLocked(mLastImeTargetWindow, flags, null, reason);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -4508,7 +4506,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             final long ident = Binder.clearCallingIdentity();
             try {
                 showCurrentInputLocked(mLastImeTargetWindow, flags, null,
-                        SoftInputShowHideReason.SHOW_MY_SOFT_INPUT);
+                        SoftInputShowHideReason.SHOW_SOFT_INPUT_FROM_IME);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -6301,11 +6299,12 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
         @BinderThread
         @Override
-        public void hideMySoftInput(int flags, AndroidFuture future /* T=Void */) {
+        public void hideMySoftInput(int flags, @SoftInputShowHideReason int reason,
+                AndroidFuture future /* T=Void */) {
             @SuppressWarnings("unchecked")
             final AndroidFuture<Void> typedFuture = future;
             try {
-                mImms.hideMySoftInput(mToken, flags);
+                mImms.hideMySoftInput(mToken, flags, reason);
                 typedFuture.complete(null);
             } catch (Throwable e) {
                 typedFuture.completeExceptionally(e);

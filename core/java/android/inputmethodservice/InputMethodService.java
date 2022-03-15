@@ -143,6 +143,7 @@ import com.android.internal.inputmethod.ImeTracing;
 import com.android.internal.inputmethod.InputMethodNavButtonFlags;
 import com.android.internal.inputmethod.InputMethodPrivilegedOperations;
 import com.android.internal.inputmethod.InputMethodPrivilegedOperationsRegistry;
+import com.android.internal.inputmethod.SoftInputShowHideReason;
 import com.android.internal.util.RingBuffer;
 import com.android.internal.view.IInlineSuggestionsRequestCallback;
 import com.android.internal.view.IInputContext;
@@ -1050,7 +1051,7 @@ public class InputMethodService extends AbstractInputMethodService {
     }
 
     private void notifyImeHidden() {
-        requestHideSelf(0);
+        requestHideSelf(0 /* flags */, SoftInputShowHideReason.HIDE_SOFT_INPUT_BY_INSETS_API);
     }
 
     private void scheduleImeSurfaceRemoval() {
@@ -2898,9 +2899,13 @@ public class InputMethodService extends AbstractInputMethodService {
      * @param flags Provides additional operating flags.
      */
     public void requestHideSelf(int flags) {
+        requestHideSelf(flags, SoftInputShowHideReason.HIDE_SOFT_INPUT_FROM_IME);
+    }
+
+    private void requestHideSelf(int flags, @SoftInputShowHideReason int reason) {
         ImeTracing.getInstance().triggerServiceDump("InputMethodService#requestHideSelf", mDumper,
                 null /* icProto */);
-        mPrivOps.hideMySoftInput(flags);
+        mPrivOps.hideMySoftInput(flags, reason);
     }
 
     /**
@@ -2921,7 +2926,9 @@ public class InputMethodService extends AbstractInputMethodService {
         if (mShowInputRequested) {
             // If the soft input area is shown, back closes it and we
             // consume the back key.
-            if (doIt) requestHideSelf(0);
+            if (doIt) {
+                requestHideSelf(0 /* flags */, SoftInputShowHideReason.HIDE_SOFT_INPUT_BY_BACK_KEY);
+            }
             return true;
         } else if (mDecorViewVisible) {
             if (mCandidatesVisibility == View.VISIBLE) {
@@ -3072,7 +3079,8 @@ public class InputMethodService extends AbstractInputMethodService {
     private void onToggleSoftInput(int showFlags, int hideFlags) {
         if (DEBUG) Log.v(TAG, "toggleSoftInput()");
         if (isInputViewShown()) {
-            requestHideSelf(hideFlags);
+            requestHideSelf(
+                    hideFlags, SoftInputShowHideReason.HIDE_SOFT_INPUT_IME_TOGGLE_SOFT_INPUT);
         } else {
             requestShowSelf(showFlags);
         }
@@ -3507,7 +3515,8 @@ public class InputMethodService extends AbstractInputMethodService {
      */
     public void onExtractingInputChanged(EditorInfo ei) {
         if (ei.inputType == InputType.TYPE_NULL) {
-            requestHideSelf(InputMethodManager.HIDE_NOT_ALWAYS);
+            requestHideSelf(InputMethodManager.HIDE_NOT_ALWAYS,
+                    SoftInputShowHideReason.HIDE_SOFT_INPUT_EXTRACT_INPUT_CHANGED);
         }
     }
 
