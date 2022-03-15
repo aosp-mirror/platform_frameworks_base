@@ -145,7 +145,6 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.H.REPORT_HARD_KEYBOARD_STATUS_CHANGE;
 import static com.android.server.wm.WindowManagerService.H.WINDOW_HIDE_TIMEOUT;
-import static com.android.server.wm.WindowManagerService.LAYOUT_REPEAT_THRESHOLD;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_PLACING_SURFACES;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_WILL_ASSIGN_LAYERS;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_WILL_PLACE_SURFACES;
@@ -4504,56 +4503,38 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
         mTmpUpdateAllDrawn.clear();
 
-        int repeats = 0;
-        do {
-            repeats++;
-            if (repeats > 6) {
-                Slog.w(TAG, "Animation repeat aborted after too many iterations");
-                clearLayoutNeeded();
-                break;
-            }
+        if (DEBUG_LAYOUT_REPEATS) surfacePlacer.debugLayoutRepeats("On entry to LockedInner",
+                pendingLayoutChanges);
 
-            if (DEBUG_LAYOUT_REPEATS) surfacePlacer.debugLayoutRepeats("On entry to LockedInner",
-                    pendingLayoutChanges);
+        if ((pendingLayoutChanges & FINISH_LAYOUT_REDO_WALLPAPER) != 0) {
+            mWallpaperController.adjustWallpaperWindows();
+        }
 
-            if ((pendingLayoutChanges & FINISH_LAYOUT_REDO_WALLPAPER) != 0) {
-                mWallpaperController.adjustWallpaperWindows();
-            }
-
-            if ((pendingLayoutChanges & FINISH_LAYOUT_REDO_CONFIG) != 0) {
-                if (DEBUG_LAYOUT) Slog.v(TAG, "Computing new config from layout");
-                if (updateOrientation()) {
-                    setLayoutNeeded();
-                    sendNewConfiguration();
-                }
-            }
-
-            if ((pendingLayoutChanges & FINISH_LAYOUT_REDO_LAYOUT) != 0) {
+        if ((pendingLayoutChanges & FINISH_LAYOUT_REDO_CONFIG) != 0) {
+            if (DEBUG_LAYOUT) Slog.v(TAG, "Computing new config from layout");
+            if (updateOrientation()) {
                 setLayoutNeeded();
+                sendNewConfiguration();
             }
+        }
 
-            // FIRST LOOP: Perform a layout, if needed.
-            if (repeats < LAYOUT_REPEAT_THRESHOLD) {
-                performLayout(repeats == 1, false /* updateInputWindows */);
-            } else {
-                Slog.w(TAG, "Layout repeat skipped after too many iterations");
-            }
+        if ((pendingLayoutChanges & FINISH_LAYOUT_REDO_LAYOUT) != 0) {
+            setLayoutNeeded();
+        }
 
-            // FIRST AND ONE HALF LOOP: Make WindowManagerPolicy think it is animating.
-            pendingLayoutChanges = 0;
+        // Perform a layout, if needed.
+        performLayout(true /* initial */, false /* updateInputWindows */);
+        pendingLayoutChanges = 0;
 
-            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "applyPostLayoutPolicy");
-            try {
-                mDisplayPolicy.beginPostLayoutPolicyLw();
-                forAllWindows(mApplyPostLayoutPolicy, true /* traverseTopToBottom */);
-                pendingLayoutChanges |= mDisplayPolicy.finishPostLayoutPolicyLw();
-            } finally {
-                Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
-            }
-            if (DEBUG_LAYOUT_REPEATS) surfacePlacer.debugLayoutRepeats(
-                    "after finishPostLayoutPolicyLw", pendingLayoutChanges);
-            mInsetsStateController.onPostLayout();
-        } while (pendingLayoutChanges != 0);
+        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "applyPostLayoutPolicy");
+        try {
+            mDisplayPolicy.beginPostLayoutPolicyLw();
+            forAllWindows(mApplyPostLayoutPolicy, true /* traverseTopToBottom */);
+            mDisplayPolicy.finishPostLayoutPolicyLw();
+        } finally {
+            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+        }
+        mInsetsStateController.onPostLayout();
 
         mTmpApplySurfaceChangesTransactionState.reset();
 
