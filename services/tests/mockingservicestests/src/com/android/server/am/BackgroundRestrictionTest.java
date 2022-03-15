@@ -119,6 +119,7 @@ import android.util.Pair;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.R;
+import com.android.internal.app.IAppOpsService;
 import com.android.server.AppStateTracker;
 import com.android.server.DeviceIdleInternal;
 import com.android.server.am.AppBatteryExemptionTracker.AppBatteryExemptionPolicy;
@@ -231,6 +232,7 @@ public final class BackgroundRestrictionTest {
     @Mock private MediaSessionManager mMediaSessionManager;
     @Mock private RoleManager mRoleManager;
     @Mock private TelephonyManager mTelephonyManager;
+    @Mock private IAppOpsService mIAppOpsService;
 
     private long mCurrentTimeMillis;
 
@@ -2747,6 +2749,11 @@ public final class BackgroundRestrictionTest {
         @Override
         RoleManager getRoleManager() {
             return BackgroundRestrictionTest.this.mRoleManager;
+        }
+
+        @Override
+        IAppOpsService getIAppOpsService() {
+            return BackgroundRestrictionTest.this.mIAppOpsService;
         }
     }
 

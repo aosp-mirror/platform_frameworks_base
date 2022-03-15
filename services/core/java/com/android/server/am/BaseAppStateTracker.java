@@ -33,9 +33,11 @@ import android.media.session.MediaSessionManager;
 import android.os.BatteryManagerInternal;
 import android.os.BatteryStatsInternal;
 import android.os.Handler;
+import android.os.ServiceManager;
 import android.permission.PermissionManager;
 import android.util.Slog;
 
+import com.android.internal.app.IAppOpsService;
 import com.android.server.DeviceIdleInternal;
 import com.android.server.LocalServices;
 import com.android.server.notification.NotificationManagerInternal;
@@ -266,6 +268,7 @@ public abstract class BaseAppStateTracker<T extends BaseAppStatePolicy> {
         MediaSessionManager mMediaSessionManager;
         RoleManager mRoleManager;
         NotificationManagerInternal mNotificationManagerInternal;
+        IAppOpsService mIAppOpsService;
 
         void setPolicy(T policy) {
             mAppStatePolicy = policy;
@@ -288,6 +291,8 @@ public abstract class BaseAppStateTracker<T extends BaseAppStatePolicy> {
             mRoleManager = context.getSystemService(RoleManager.class);
             mNotificationManagerInternal = LocalServices.getService(
                     NotificationManagerInternal.class);
+            mIAppOpsService = IAppOpsService.Stub.asInterface(
+                    ServiceManager.getService(Context.APP_OPS_SERVICE));
 
             getPolicy().onSystemReady();
         }
@@ -357,6 +362,10 @@ public abstract class BaseAppStateTracker<T extends BaseAppStatePolicy> {
 
         NotificationManagerInternal getNotificationManagerInternal() {
             return mNotificationManagerInternal;
+        }
+
+        IAppOpsService getIAppOpsService() {
+            return mIAppOpsService;
         }
     }
 }
