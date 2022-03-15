@@ -6309,7 +6309,8 @@ public class Editor {
             }
             switch (event.getActionMasked()) {
                 case MotionEvent.ACTION_MOVE:
-                    if (event.isFromSource(InputDevice.SOURCE_MOUSE)) {
+                    if (event.isFromSource(InputDevice.SOURCE_MOUSE)
+                            || (mTextView.isAutoHandwritingEnabled() && isFromStylus(event))) {
                         break;
                     }
                     if (mIsDraggingCursor) {
@@ -6330,6 +6331,11 @@ public class Editor {
                     }
                     break;
             }
+        }
+
+        private boolean isFromStylus(MotionEvent motionEvent) {
+            final int pointerIndex = motionEvent.getActionIndex();
+            return motionEvent.getToolType(pointerIndex) == MotionEvent.TOOL_TYPE_STYLUS;
         }
 
         private void positionCursorDuringDrag(MotionEvent event) {
