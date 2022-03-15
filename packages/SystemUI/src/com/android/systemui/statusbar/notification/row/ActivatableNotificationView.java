@@ -163,10 +163,13 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     }
 
     /**
-     * @return The background of this view.
+     * @param width The actual width to apply to the background view.
      */
-    public NotificationBackgroundView getBackgroundNormal() {
-        return mBackgroundNormal;
+    public void setBackgroundWidth(int width) {
+        if (mBackgroundNormal == null) {
+            return;
+        }
+        mBackgroundNormal.setActualWidth(width);
     }
 
     @Override
