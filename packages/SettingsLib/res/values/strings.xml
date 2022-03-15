@@ -1293,6 +1293,8 @@
     <string name="cancel">Cancel</string>
     <!-- Button label for generic OK action [CHAR LIMIT=20] -->
     <string name="okay">OK</string>
+    <!-- Button label for generic Done action, to be pressed when an action has been completed [CHAR LIMIT=20] -->
+    <string name="done">Done</string>
 
     <!-- Label for the settings activity for controlling apps that can schedule alarms [CHAR LIMIT=30] -->
     <string name="alarms_and_reminders_label">Alarms and reminders</string>
