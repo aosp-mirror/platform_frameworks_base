@@ -5424,6 +5424,34 @@ public class UserManagerService extends IUserManager.Stub {
     private static final String ARG_CRITICAL_ONLY = "--critical-only";
     private static final String ARG_MODE = "--mode";
 
+    // Temporary class used to minmize git diff
+    private final class TmpShellCommand {
+
+    public void onHelp(PrintWriter pw) {
+        pw.printf("User manager (user) commands:\n");
+
+        pw.printf("%s%s\n", PREFIX_HELP_COMMAND, CMD_HELP);
+        pw.printf("%sPrints this help text.\n\n", PREFIX_HELP_DESCRIPTION);
+
+        pw.printf("%s%s [%s] [%s]\n", PREFIX_HELP_COMMAND, CMD_LIST, ARG_V, ARG_ALL);
+        pw.printf("%sPrints all users on the system.\n\n", PREFIX_HELP_DESCRIPTION);
+
+        pw.printf("%s%s [%s | %s] [%s] [%s MODE]\n", PREFIX_HELP_COMMAND,
+                CMD_REPORT_SYSTEM_USER_PACKAGE_ALLOWLIST_PROBLEMS,
+                ARG_V, ARG_VERBOSE, ARG_CRITICAL_ONLY, ARG_MODE);
+
+        pw.printf("%sReports all issues on user-type package allowlist XML files. Options:\n",
+                PREFIX_HELP_DESCRIPTION);
+        pw.printf("%s%s | %s: shows extra info, like number of issues\n",
+                PREFIX_HELP_DESCRIPTION, ARG_V, ARG_VERBOSE);
+        pw.printf("%s%s: show only critical issues, excluding warnings\n",
+                PREFIX_HELP_DESCRIPTION, ARG_CRITICAL_ONLY);
+        pw.printf("%s%s MODE: shows what errors would be if device used mode MODE\n"
+                + "%s(where MODE is the allowlist mode integer as defined by "
+                + "config_userTypePackageWhitelistMode)\n\n",
+                PREFIX_HELP_DESCRIPTION, ARG_MODE, PREFIX_HELP_DESCRIPTION_EXTRA_LINES);
+    }
+
     private int onShellCommand(Shell shell, String cmd) {
         if (cmd == null) {
             return shell.handleDefaultCommands(cmd);
@@ -5560,6 +5588,8 @@ public class UserManagerService extends IUserManager.Stub {
         }
         return 0;
     }
+
+    } // TmpShellCommand
 
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
@@ -6255,36 +6285,16 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     private class Shell extends ShellCommand {
+        private final TmpShellCommand mTmpShellCommand = new TmpShellCommand();
+
         @Override
         public int onCommand(String cmd) {
-            return onShellCommand(this, cmd);
+            return mTmpShellCommand.onShellCommand(this, cmd);
         }
 
         @Override
         public void onHelp() {
-            final PrintWriter pw = getOutPrintWriter();
-            pw.printf("User manager (user) commands:\n");
-
-            pw.printf("%s%s\n", PREFIX_HELP_COMMAND, CMD_HELP);
-            pw.printf("%sPrints this help text.\n\n", PREFIX_HELP_DESCRIPTION);
-
-            pw.printf("%s%s [%s] [%s]\n", PREFIX_HELP_COMMAND, CMD_LIST, ARG_V, ARG_ALL);
-            pw.printf("%sPrints all users on the system.\n\n", PREFIX_HELP_DESCRIPTION);
-
-            pw.printf("%s%s [%s | %s] [%s] [%s MODE]\n", PREFIX_HELP_COMMAND,
-                    CMD_REPORT_SYSTEM_USER_PACKAGE_ALLOWLIST_PROBLEMS,
-                    ARG_V, ARG_VERBOSE, ARG_CRITICAL_ONLY, ARG_MODE);
-
-            pw.printf("%sReports all issues on user-type package allowlist XML files. Options:\n",
-                    PREFIX_HELP_DESCRIPTION);
-            pw.printf("%s%s | %s: shows extra info, like number of issues\n",
-                    PREFIX_HELP_DESCRIPTION, ARG_V, ARG_VERBOSE);
-            pw.printf("%s%s: show only critical issues, excluding warnings\n",
-                    PREFIX_HELP_DESCRIPTION, ARG_CRITICAL_ONLY);
-            pw.printf("%s%s MODE: shows what errors would be if device used mode MODE\n"
-                    + "%s(where MODE is the allowlist mode integer as defined by "
-                    + "config_userTypePackageWhitelistMode)\n\n",
-                    PREFIX_HELP_DESCRIPTION, ARG_MODE, PREFIX_HELP_DESCRIPTION_EXTRA_LINES);
+            mTmpShellCommand.onHelp(getOutPrintWriter());
         }
     }
 
