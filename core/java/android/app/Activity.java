@@ -872,7 +872,7 @@ public class Activity extends ContextThemeWrapper
     @UnsupportedAppUsage
     /*package*/ int mConfigChangeFlags;
     @UnsupportedAppUsage
-    /*package*/ Configuration mCurrentConfig;
+    /*package*/ Configuration mCurrentConfig = Configuration.EMPTY;
     private SearchManager mSearchManager;
     private MenuInflater mMenuInflater;
 
