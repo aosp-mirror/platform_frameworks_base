@@ -1716,9 +1716,10 @@ class ActivityStarter {
         // If we are not able to proceed, disassociate the activity from the task. Leaving an
         // activity in an incomplete state can lead to issues, such as performing operations
         // without a window container.
-        final Task rootTask = mStartActivity.getRootTask();
-        if (rootTask != null) {
+        if (mStartActivity.getTask() != null) {
             mStartActivity.finishIfPossible("startActivity", true /* oomAdj */);
+        } else if (mStartActivity.getParent() != null) {
+            mStartActivity.getParent().removeChild(mStartActivity);
         }
 
         // Root task should also be detached from display and be removed if it's empty.
