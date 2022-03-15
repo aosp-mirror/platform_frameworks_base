@@ -413,7 +413,10 @@ public class NotificationContentView extends FrameLayout implements Notification
             if (mExpandedRemoteInput != null) {
                 mExpandedRemoteInput.onNotificationUpdateOrReset();
                 if (mExpandedRemoteInput.isActive()) {
-                    mPreviousExpandedRemoteInputIntent = mExpandedRemoteInput.getPendingIntent();
+                    if (mExpandedRemoteInputController != null) {
+                        mPreviousExpandedRemoteInputIntent =
+                                mExpandedRemoteInputController.getPendingIntent();
+                    }
                     mCachedExpandedRemoteInput = mExpandedRemoteInput;
                     mCachedExpandedRemoteInputViewController = mExpandedRemoteInputController;
                     mExpandedRemoteInput.dispatchStartTemporaryDetach();
@@ -460,7 +463,10 @@ public class NotificationContentView extends FrameLayout implements Notification
             if (mHeadsUpRemoteInput != null) {
                 mHeadsUpRemoteInput.onNotificationUpdateOrReset();
                 if (mHeadsUpRemoteInput.isActive()) {
-                    mPreviousHeadsUpRemoteInputIntent = mHeadsUpRemoteInput.getPendingIntent();
+                    if (mHeadsUpRemoteInputController != null) {
+                        mPreviousHeadsUpRemoteInputIntent =
+                                mHeadsUpRemoteInputController.getPendingIntent();
+                    }
                     mCachedHeadsUpRemoteInput = mHeadsUpRemoteInput;
                     mCachedHeadsUpRemoteInputViewController = mHeadsUpRemoteInputController;
                     mHeadsUpRemoteInput.dispatchStartTemporaryDetach();
@@ -961,14 +967,16 @@ public class NotificationContentView extends FrameLayout implements Notification
 
     private void transferRemoteInputFocus(int visibleType) {
         if (visibleType == VISIBLE_TYPE_HEADSUP
-                && mHeadsUpRemoteInput != null
-                && (mExpandedRemoteInput != null && mExpandedRemoteInput.isActive())) {
-            mHeadsUpRemoteInput.stealFocusFrom(mExpandedRemoteInput);
+                && mHeadsUpRemoteInputController != null
+                && mExpandedRemoteInputController != null
+                && mExpandedRemoteInputController.isActive()) {
+            mHeadsUpRemoteInputController.stealFocusFrom(mExpandedRemoteInputController);
         }
         if (visibleType == VISIBLE_TYPE_EXPANDED
-                && mExpandedRemoteInput != null
-                && (mHeadsUpRemoteInput != null && mHeadsUpRemoteInput.isActive())) {
-            mExpandedRemoteInput.stealFocusFrom(mHeadsUpRemoteInput);
+                && mExpandedRemoteInputController != null
+                && mHeadsUpRemoteInputController != null
+                && mHeadsUpRemoteInputController.isActive()) {
+            mExpandedRemoteInputController.stealFocusFrom(mHeadsUpRemoteInputController);
         }
     }
 
@@ -1313,7 +1321,6 @@ public class NotificationContentView extends FrameLayout implements Notification
                     // If we find a matching action in the new notification, focus, otherwise close.
                     Notification.Action[] actions = entry.getSbn().getNotification().actions;
                     if (existingPendingIntent != null) {
-                        result.mView.setPendingIntent(existingPendingIntent);
                         result.mController.setPendingIntent(existingPendingIntent);
                     }
                     if (result.mController.updatePendingIntentFromActions(actions)) {
