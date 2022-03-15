@@ -7368,7 +7368,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         mSizeCompatBounds = null;
         mCompatDisplayInsets = null;
 
-        onRequestedOverrideConfigurationChanged(getRequestedOverrideConfiguration());
+        // Clear config override in #updateCompatDisplayInsets().
+        onRequestedOverrideConfigurationChanged(EMPTY);
     }
 
     @Override
