@@ -424,7 +424,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      */
     final DisplayMetrics mRealDisplayMetrics = new DisplayMetrics();
 
-    /** @see #computeCompatSmallestWidth(boolean, int, int) */
+    /** @see #computeCompatSmallestWidth(boolean, int, int, int) */
     private final DisplayMetrics mTmpDisplayMetrics = new DisplayMetrics();
 
     /**
@@ -1967,7 +1967,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         // the top of the method, the caller is obligated to call computeNewConfigurationLocked().
         // By updating the Display info here it will be available to
         // #computeScreenConfiguration() later.
-        updateDisplayAndOrientation(null /* outConfig */);
+        updateDisplayAndOrientation(getConfiguration().uiMode, null /* outConfig */);
 
         // NOTE: We disable the rotation in the emulator because
         //       it doesn't support hardware OpenGL emulation yet.
@@ -2017,7 +2017,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      * changed.
      * Do not call if {@link WindowManagerService#mDisplayReady} == false.
      */
-    private DisplayInfo updateDisplayAndOrientation(Configuration outConfig) {
+    private DisplayInfo updateDisplayAndOrientation(int uiMode, Configuration outConfig) {
         // Use the effective "visual" dimensions based on current rotation
         final int rotation = getRotation();
         final boolean rotated = (rotation == ROTATION_90 || rotation == ROTATION_270);
@@ -2029,14 +2029,16 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         final DisplayCutout displayCutout = wmDisplayCutout.getDisplayCutout();
         final RoundedCorners roundedCorners = calculateRoundedCornersForRotation(rotation);
 
-        final Rect appFrame = mDisplayPolicy.getNonDecorDisplayFrame(dw, dh, rotation,
-                wmDisplayCutout);
+        final int appWidth = mDisplayPolicy.getNonDecorDisplayWidth(dw, dh, rotation, uiMode,
+                displayCutout);
+        final int appHeight = mDisplayPolicy.getNonDecorDisplayHeight(dh, rotation,
+                displayCutout);
         mDisplayInfo.rotation = rotation;
         mDisplayInfo.logicalWidth = dw;
         mDisplayInfo.logicalHeight = dh;
         mDisplayInfo.logicalDensityDpi = mBaseDisplayDensity;
-        mDisplayInfo.appWidth = appFrame.width();
-        mDisplayInfo.appHeight = appFrame.height();
+        mDisplayInfo.appWidth = appWidth;
+        mDisplayInfo.appHeight = appHeight;
         if (isDefaultDisplay) {
             mDisplayInfo.getLogicalMetrics(mRealDisplayMetrics,
                     CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO, null);
@@ -2050,7 +2052,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             mDisplayInfo.flags &= ~Display.FLAG_SCALING_DISABLED;
         }
 
-        computeSizeRangesAndScreenLayout(mDisplayInfo, rotated, dw, dh,
+        computeSizeRangesAndScreenLayout(mDisplayInfo, rotated, uiMode, dw, dh,
                 mDisplayMetrics.density, outConfig);
 
         mWmService.mDisplayManagerInternal.setDisplayInfoOverrideFromWindowManager(mDisplayId,
@@ -2134,8 +2136,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         outConfig.windowConfiguration.setMaxBounds(0, 0, dw, dh);
         outConfig.windowConfiguration.setBounds(outConfig.windowConfiguration.getMaxBounds());
 
-        final WmDisplayCutout wmDisplayCutout = calculateDisplayCutoutForRotation(rotation);
-        computeScreenAppConfiguration(outConfig, dw, dh, rotation, wmDisplayCutout);
+        final int uiMode = getConfiguration().uiMode;
+        final DisplayCutout displayCutout =
+                calculateDisplayCutoutForRotation(rotation).getDisplayCutout();
+        computeScreenAppConfiguration(outConfig, dw, dh, rotation, uiMode, displayCutout);
 
         final DisplayInfo displayInfo = new DisplayInfo(mDisplayInfo);
         displayInfo.rotation = rotation;
@@ -2144,33 +2148,38 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         final Rect appBounds = outConfig.windowConfiguration.getAppBounds();
         displayInfo.appWidth = appBounds.width();
         displayInfo.appHeight = appBounds.height();
-        final DisplayCutout displayCutout = wmDisplayCutout.getDisplayCutout();
         displayInfo.displayCutout = displayCutout.isEmpty() ? null : displayCutout;
-        computeSizeRangesAndScreenLayout(displayInfo, rotated, dw, dh,
+        computeSizeRangesAndScreenLayout(displayInfo, rotated, uiMode, dw, dh,
                 mDisplayMetrics.density, outConfig);
         return displayInfo;
     }
 
     /** Compute configuration related to application without changing current display. */
     private void computeScreenAppConfiguration(Configuration outConfig, int dw, int dh,
-            int rotation, WmDisplayCutout wmDisplayCutout) {
-        final Rect appFrame = mDisplayPolicy.getNonDecorDisplayFrame(dw, dh, rotation,
-                wmDisplayCutout);
+            int rotation, int uiMode, DisplayCutout displayCutout) {
+        final int appWidth = mDisplayPolicy.getNonDecorDisplayWidth(dw, dh, rotation, uiMode,
+                displayCutout);
+        final int appHeight = mDisplayPolicy.getNonDecorDisplayHeight(dh, rotation,
+                displayCutout);
+        mDisplayPolicy.getNonDecorInsetsLw(rotation, displayCutout, mTmpRect);
+        final int leftInset = mTmpRect.left;
+        final int topInset = mTmpRect.top;
         // AppBounds at the root level should mirror the app screen size.
-        outConfig.windowConfiguration.setAppBounds(appFrame);
+        outConfig.windowConfiguration.setAppBounds(leftInset /* left */, topInset /* top */,
+                leftInset + appWidth /* right */, topInset + appHeight /* bottom */);
         outConfig.windowConfiguration.setRotation(rotation);
         outConfig.orientation = (dw <= dh) ? ORIENTATION_PORTRAIT : ORIENTATION_LANDSCAPE;
 
         final float density = mDisplayMetrics.density;
-        final Point configSize = mDisplayPolicy.getConfigDisplaySize(dw, dh, rotation,
-                wmDisplayCutout);
-        outConfig.screenWidthDp = (int) (configSize.x / density);
-        outConfig.screenHeightDp = (int) (configSize.y / density);
+        outConfig.screenWidthDp = (int) (mDisplayPolicy.getConfigDisplayWidth(dw, dh, rotation,
+                uiMode, displayCutout) / density);
+        outConfig.screenHeightDp = (int) (mDisplayPolicy.getConfigDisplayHeight(dw, dh, rotation,
+                uiMode, displayCutout) / density);
         outConfig.compatScreenWidthDp = (int) (outConfig.screenWidthDp / mCompatibleScreenScale);
         outConfig.compatScreenHeightDp = (int) (outConfig.screenHeightDp / mCompatibleScreenScale);
 
         final boolean rotated = (rotation == ROTATION_90 || rotation == ROTATION_270);
-        outConfig.compatSmallestScreenWidthDp = computeCompatSmallestWidth(rotated, dw, dh);
+        outConfig.compatSmallestScreenWidthDp = computeCompatSmallestWidth(rotated, uiMode, dw, dh);
         outConfig.windowConfiguration.setDisplayRotation(rotation);
     }
 
@@ -2179,7 +2188,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      * Do not call if mDisplayReady == false.
      */
     void computeScreenConfiguration(Configuration config) {
-        final DisplayInfo displayInfo = updateDisplayAndOrientation(config);
+        final DisplayInfo displayInfo = updateDisplayAndOrientation(config.uiMode, config);
         final int dw = displayInfo.logicalWidth;
         final int dh = displayInfo.logicalHeight;
         mTmpRect.set(0, 0, dw, dh);
@@ -2188,8 +2197,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         config.windowConfiguration.setWindowingMode(getWindowingMode());
         config.windowConfiguration.setDisplayWindowingMode(getWindowingMode());
 
-        computeScreenAppConfiguration(config, dw, dh, displayInfo.rotation,
-                calculateDisplayCutoutForRotation(getRotation()));
+        computeScreenAppConfiguration(config, dw, dh, displayInfo.rotation, config.uiMode,
+                displayInfo.displayCutout);
 
         config.screenLayout = (config.screenLayout & ~Configuration.SCREENLAYOUT_ROUND_MASK)
                 | ((displayInfo.flags & Display.FLAG_ROUND) != 0
@@ -2278,7 +2287,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         mWmService.mPolicy.adjustConfigurationLw(config, keyboardPresence, navigationPresence);
     }
 
-    private int computeCompatSmallestWidth(boolean rotated, int dw, int dh) {
+    private int computeCompatSmallestWidth(boolean rotated, int uiMode, int dw, int dh) {
         mTmpDisplayMetrics.setTo(mDisplayMetrics);
         final DisplayMetrics tmpDm = mTmpDisplayMetrics;
         final int unrotDw, unrotDh;
@@ -2289,20 +2298,25 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             unrotDw = dw;
             unrotDh = dh;
         }
-        int sw = reduceCompatConfigWidthSize(0, Surface.ROTATION_0, tmpDm, unrotDw, unrotDh);
-        sw = reduceCompatConfigWidthSize(sw, Surface.ROTATION_90, tmpDm, unrotDh, unrotDw);
-        sw = reduceCompatConfigWidthSize(sw, Surface.ROTATION_180, tmpDm, unrotDw, unrotDh);
-        sw = reduceCompatConfigWidthSize(sw, Surface.ROTATION_270, tmpDm, unrotDh, unrotDw);
+        int sw = reduceCompatConfigWidthSize(0, Surface.ROTATION_0, uiMode, tmpDm, unrotDw,
+                unrotDh);
+        sw = reduceCompatConfigWidthSize(sw, Surface.ROTATION_90, uiMode, tmpDm, unrotDh,
+                unrotDw);
+        sw = reduceCompatConfigWidthSize(sw, Surface.ROTATION_180, uiMode, tmpDm, unrotDw,
+                unrotDh);
+        sw = reduceCompatConfigWidthSize(sw, Surface.ROTATION_270, uiMode, tmpDm, unrotDh,
+                unrotDw);
         return sw;
     }
 
-    private int reduceCompatConfigWidthSize(int curSize, int rotation,
+    private int reduceCompatConfigWidthSize(int curSize, int rotation, int uiMode,
             DisplayMetrics dm, int dw, int dh) {
-        final WmDisplayCutout wmDisplayCutout = calculateDisplayCutoutForRotation(rotation);
-        final Rect nonDecorSize = mDisplayPolicy.getNonDecorDisplayFrame(dw, dh, rotation,
-                wmDisplayCutout);
-        dm.noncompatWidthPixels = nonDecorSize.width();
-        dm.noncompatHeightPixels = nonDecorSize.height();
+        final DisplayCutout displayCutout = calculateDisplayCutoutForRotation(
+                rotation).getDisplayCutout();
+        dm.noncompatWidthPixels = mDisplayPolicy.getNonDecorDisplayWidth(dw, dh, rotation, uiMode,
+                displayCutout);
+        dm.noncompatHeightPixels = mDisplayPolicy.getNonDecorDisplayHeight(dh, rotation,
+                displayCutout);
         float scale = CompatibilityInfo.computeCompatibleScaling(dm, null);
         int size = (int)(((dm.noncompatWidthPixels / scale) / dm.density) + .5f);
         if (curSize == 0 || size < curSize) {
@@ -2312,7 +2326,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     }
 
     private void computeSizeRangesAndScreenLayout(DisplayInfo displayInfo, boolean rotated,
-            int dw, int dh, float density, Configuration outConfig) {
+            int uiMode, int dw, int dh, float density, Configuration outConfig) {
 
         // We need to determine the smallest width that will occur under normal
         // operation.  To this, start with the base screen size and compute the
@@ -2330,33 +2344,36 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         displayInfo.smallestNominalAppHeight = 1<<30;
         displayInfo.largestNominalAppWidth = 0;
         displayInfo.largestNominalAppHeight = 0;
-        adjustDisplaySizeRanges(displayInfo, Surface.ROTATION_0, unrotDw, unrotDh);
-        adjustDisplaySizeRanges(displayInfo, Surface.ROTATION_90, unrotDh, unrotDw);
-        adjustDisplaySizeRanges(displayInfo, Surface.ROTATION_180, unrotDw, unrotDh);
-        adjustDisplaySizeRanges(displayInfo, Surface.ROTATION_270, unrotDh, unrotDw);
+        adjustDisplaySizeRanges(displayInfo, Surface.ROTATION_0, uiMode, unrotDw, unrotDh);
+        adjustDisplaySizeRanges(displayInfo, Surface.ROTATION_90, uiMode, unrotDh, unrotDw);
+        adjustDisplaySizeRanges(displayInfo, Surface.ROTATION_180, uiMode, unrotDw, unrotDh);
+        adjustDisplaySizeRanges(displayInfo, Surface.ROTATION_270, uiMode, unrotDh, unrotDw);
 
         if (outConfig == null) {
             return;
         }
         int sl = Configuration.resetScreenLayout(outConfig.screenLayout);
-        sl = reduceConfigLayout(sl, Surface.ROTATION_0, density, unrotDw, unrotDh);
-        sl = reduceConfigLayout(sl, Surface.ROTATION_90, density, unrotDh, unrotDw);
-        sl = reduceConfigLayout(sl, Surface.ROTATION_180, density, unrotDw, unrotDh);
-        sl = reduceConfigLayout(sl, Surface.ROTATION_270, density, unrotDh, unrotDw);
+        sl = reduceConfigLayout(sl, Surface.ROTATION_0, density, unrotDw, unrotDh, uiMode);
+        sl = reduceConfigLayout(sl, Surface.ROTATION_90, density, unrotDh, unrotDw, uiMode);
+        sl = reduceConfigLayout(sl, Surface.ROTATION_180, density, unrotDw, unrotDh, uiMode);
+        sl = reduceConfigLayout(sl, Surface.ROTATION_270, density, unrotDh, unrotDw, uiMode);
         outConfig.smallestScreenWidthDp = (int)(displayInfo.smallestNominalAppWidth / density);
         outConfig.screenLayout = sl;
     }
 
-    private int reduceConfigLayout(int curLayout, int rotation, float density, int dw, int dh) {
+    private int reduceConfigLayout(int curLayout, int rotation, float density, int dw, int dh,
+            int uiMode) {
         // Get the display cutout at this rotation.
-        final WmDisplayCutout wmDisplayCutout = calculateDisplayCutoutForRotation(rotation);
+        final DisplayCutout displayCutout = calculateDisplayCutoutForRotation(
+                rotation).getDisplayCutout();
 
         // Get the app screen size at this rotation.
-        final Rect size = mDisplayPolicy.getNonDecorDisplayFrame(dw, dh, rotation, wmDisplayCutout);
+        int w = mDisplayPolicy.getNonDecorDisplayWidth(dw, dh, rotation, uiMode, displayCutout);
+        int h = mDisplayPolicy.getNonDecorDisplayHeight(dh, rotation, displayCutout);
 
         // Compute the screen layout size class for this rotation.
-        int longSize = size.width();
-        int shortSize = size.height();
+        int longSize = w;
+        int shortSize = h;
         if (longSize < shortSize) {
             int tmp = longSize;
             longSize = shortSize;
@@ -2367,20 +2384,25 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         return Configuration.reduceScreenLayout(curLayout, longSize, shortSize);
     }
 
-    private void adjustDisplaySizeRanges(DisplayInfo displayInfo, int rotation, int dw, int dh) {
-        final WmDisplayCutout wmDisplayCutout = calculateDisplayCutoutForRotation(rotation);
-        final Point size = mDisplayPolicy.getConfigDisplaySize(dw, dh, rotation, wmDisplayCutout);
-        if (size.x < displayInfo.smallestNominalAppWidth) {
-            displayInfo.smallestNominalAppWidth = size.x;
+    private void adjustDisplaySizeRanges(DisplayInfo displayInfo, int rotation,
+            int uiMode, int dw, int dh) {
+        final DisplayCutout displayCutout = calculateDisplayCutoutForRotation(
+                rotation).getDisplayCutout();
+        final int width = mDisplayPolicy.getConfigDisplayWidth(dw, dh, rotation, uiMode,
+                displayCutout);
+        if (width < displayInfo.smallestNominalAppWidth) {
+            displayInfo.smallestNominalAppWidth = width;
         }
-        if (size.x > displayInfo.largestNominalAppWidth) {
-            displayInfo.largestNominalAppWidth = size.x;
+        if (width > displayInfo.largestNominalAppWidth) {
+            displayInfo.largestNominalAppWidth = width;
         }
-        if (size.y < displayInfo.smallestNominalAppHeight) {
-            displayInfo.smallestNominalAppHeight = size.y;
+        final int height = mDisplayPolicy.getConfigDisplayHeight(dw, dh, rotation, uiMode,
+                displayCutout);
+        if (height < displayInfo.smallestNominalAppHeight) {
+            displayInfo.smallestNominalAppHeight = height;
         }
-        if (size.y > displayInfo.largestNominalAppHeight) {
-            displayInfo.largestNominalAppHeight = size.y;
+        if (height > displayInfo.largestNominalAppHeight) {
+            displayInfo.largestNominalAppHeight = height;
         }
     }
 
@@ -4248,17 +4270,17 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      */
     @VisibleForTesting
     SurfaceControl computeImeParent() {
+        if (mImeLayeringTarget != null && mImeInputTarget != null
+                && mImeLayeringTarget.mActivityRecord != mImeInputTarget.getActivityRecord()) {
+            // Do not change parent if the window hasn't requested IME.
+            return null;
+        }
         // Attach it to app if the target is part of an app and such app is covering the entire
         // screen. If it's not covering the entire screen the IME might extend beyond the apps
         // bounds.
         if (shouldImeAttachedToApp()) {
-            if (mImeLayeringTarget.mActivityRecord != mImeInputTarget.getActivityRecord()) {
-                // Do not change parent if the window hasn't requested IME.
-                return null;
-            }
             return mImeLayeringTarget.mActivityRecord.getSurfaceControl();
         }
-
         // Otherwise, we just attach it to where the display area policy put it.
         return mImeWindowsContainer.getParent() != null
                 ? mImeWindowsContainer.getParent().getSurfaceControl() : null;

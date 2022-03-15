@@ -102,7 +102,7 @@ public class QuickStatusBarHeader extends FrameLayout {
     private int mTopViewMeasureHeight;
 
     @NonNull
-    private List<String> mRssiIgnoredSlots;
+    private List<String> mRssiIgnoredSlots = List.of();
     private boolean mIsSingleCarrier;
 
     private boolean mHasCenterCutout;

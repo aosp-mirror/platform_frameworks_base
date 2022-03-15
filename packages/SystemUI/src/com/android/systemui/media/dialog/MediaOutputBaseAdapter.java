@@ -34,7 +34,6 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
@@ -129,7 +128,7 @@ public abstract class MediaOutputBaseAdapter extends
         final ImageView mTitleIcon;
         final ProgressBar mProgressBar;
         final SeekBar mSeekBar;
-        final RelativeLayout mTwoLineLayout;
+        final LinearLayout mTwoLineLayout;
         final ImageView mStatusIcon;
         final CheckBox mCheckBox;
         private String mDeviceId;

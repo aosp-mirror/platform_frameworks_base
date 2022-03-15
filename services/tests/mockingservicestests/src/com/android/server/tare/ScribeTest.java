@@ -109,6 +109,7 @@ public class ScribeTest {
         long lastReclamationTime = System.currentTimeMillis();
         long remainingConsumableNarcs = 2000L;
         long consumptionLimit = 500_000L;
+        when(mIrs.getConsumptionLimitLocked()).thenReturn(consumptionLimit);
 
         Ledger ledger = mScribeUnderTest.getLedgerLocked(TEST_USER_ID, TEST_PACKAGE);
         ledger.recordTransaction(new Ledger.Transaction(0, 1000L, 1, null, 2000, 0));
@@ -119,8 +120,13 @@ public class ScribeTest {
         mScribeUnderTest.setConsumptionLimitLocked(consumptionLimit);
         mScribeUnderTest.adjustRemainingConsumableNarcsLocked(
                 remainingConsumableNarcs - consumptionLimit);
-        mScribeUnderTest.writeImmediatelyForTesting();
 
+        assertEquals(lastReclamationTime, mScribeUnderTest.getLastReclamationTimeLocked());
+        assertEquals(remainingConsumableNarcs,
+                mScribeUnderTest.getRemainingConsumableNarcsLocked());
+        assertEquals(consumptionLimit, mScribeUnderTest.getSatiatedConsumptionLimitLocked());
+
+        mScribeUnderTest.writeImmediatelyForTesting();
         mScribeUnderTest.loadFromDiskLocked();
 
         assertEquals(lastReclamationTime, mScribeUnderTest.getLastReclamationTimeLocked());

@@ -78,10 +78,6 @@ public class WindowManagerWrapper {
     public static final int WINDOWING_MODE_MULTI_WINDOW =
             WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 
-    public static final int WINDOWING_MODE_SPLIT_SCREEN_PRIMARY =
-            WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
-    public static final int WINDOWING_MODE_SPLIT_SCREEN_SECONDARY =
-            WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
     public static final int WINDOWING_MODE_FREEFORM = WindowConfiguration.WINDOWING_MODE_FREEFORM;
 
     public static final int ITYPE_EXTRA_NAVIGATION_BAR = InsetsState.ITYPE_EXTRA_NAVIGATION_BAR;
