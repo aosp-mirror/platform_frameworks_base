@@ -552,7 +552,7 @@
     <string name="permlab_useBiometric" msgid="6314741124749633786">"erabili hardware biometrikoa"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"Autentifikatzeko hardware biometrikoa erabiltzeko baimena ematen die aplikazioei."</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"kudeatu hatz-marken hardwarea"</string>
-    <string name="permdesc_manageFingerprint" msgid="2025616816437339865">"Erreferentzia-gako digitalen txantiloiak gehitzeko eta ezabatzeko metodoei dei egitea baimentzen die aplikazioei."</string>
+    <string name="permdesc_manageFingerprint" msgid="2025616816437339865">"Aztarna digitalaren txantiloiak gehitzeko eta ezabatzeko metodoei dei egitea baimentzen die aplikazioei."</string>
     <string name="permlab_useFingerprint" msgid="1001421069766751922">"erabili hatz-marken hardwarea"</string>
     <string name="permdesc_useFingerprint" msgid="412463055059323742">"Autentifikatzeko hatz-marken hardwarea erabiltzeko baimena ematen die aplikazioei."</string>
     <string name="permlab_audioWrite" msgid="8501705294265669405">"musika-bilduma aldatu"</string>
@@ -1606,8 +1606,8 @@
     <string name="expires_on" msgid="1623640879705103121">"Iraungitze-data:"</string>
     <string name="serial_number" msgid="3479576915806623429">"Serie-zenbakia:"</string>
     <string name="fingerprints" msgid="148690767172613723">"Erreferentzia-fitxategiak:"</string>
-    <string name="sha256_fingerprint" msgid="7103976380961964600">"SHA-256 erreferentzia-gako digitala:"</string>
-    <string name="sha1_fingerprint" msgid="2339915142825390774">"SHA-1 erreferentzia-gako digitala:"</string>
+    <string name="sha256_fingerprint" msgid="7103976380961964600">"SHA-256 aztarna digitala:"</string>
+    <string name="sha1_fingerprint" msgid="2339915142825390774">"SHA-1 aztarna digitala:"</string>
     <string name="activity_chooser_view_see_all" msgid="3917045206812726099">"Ikusi guztiak"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="8880731437191978314">"Aukeratu jarduera"</string>
     <string name="share_action_provider_share_with" msgid="1904096863622941880">"Partekatu hauekin:"</string>
