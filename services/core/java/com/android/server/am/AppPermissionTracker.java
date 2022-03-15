@@ -17,7 +17,11 @@
 package com.android.server.am;
 
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
+import static android.Manifest.permission.CAMERA;
+import static android.Manifest.permission.RECORD_AUDIO;
+import static android.app.AppOpsManager.OPSTR_CAMERA;
 import static android.app.AppOpsManager.OPSTR_FINE_LOCATION;
+import static android.app.AppOpsManager.OPSTR_RECORD_AUDIO;
 import static android.app.AppOpsManager.OP_NONE;
 import static android.app.AppOpsManager.opToPublicName;
 import static android.app.AppOpsManager.strOpToOp;
@@ -515,6 +519,8 @@ final class AppPermissionTracker extends BaseAppStateTracker<AppPermissionPolicy
          */
         static final String[] DEFAULT_BG_PERMISSIONS_IN_MONITOR = new String[] {
             ACCESS_FINE_LOCATION, OPSTR_FINE_LOCATION,
+            CAMERA, OPSTR_CAMERA,
+            RECORD_AUDIO, OPSTR_RECORD_AUDIO,
         };
 
         /**
