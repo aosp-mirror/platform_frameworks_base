@@ -45,6 +45,8 @@
         android:layout_marginStart="@dimen/notification_icon_circle_start"
         android:background="@drawable/notification_icon_circle"
         android:padding="@dimen/notification_icon_circle_padding"
+        android:maxDrawableWidth="@dimen/notification_icon_circle_size"
+        android:maxDrawableHeight="@dimen/notification_icon_circle_size"
         />
 
     <FrameLayout
@@ -136,7 +138,7 @@
 
         </LinearLayout>
 
-        <ImageView
+        <com.android.internal.widget.CachingIconView
             android:id="@+id/right_icon"
             android:layout_width="@dimen/notification_right_icon_size"
             android:layout_height="@dimen/notification_right_icon_size"
@@ -148,6 +150,8 @@
             android:clipToOutline="true"
             android:importantForAccessibility="no"
             android:scaleType="centerCrop"
+            android:maxDrawableWidth="@dimen/notification_right_icon_size"
+            android:maxDrawableHeight="@dimen/notification_right_icon_size"
             />
 
         <FrameLayout
