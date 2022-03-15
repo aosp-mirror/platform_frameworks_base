@@ -191,7 +191,7 @@ public final class GameManager {
      */
     @TestApi
     @RequiresPermission(Manifest.permission.MANAGE_GAME_MODE)
-    public @GameMode boolean isAngleEnabled(@NonNull String packageName) {
+    public boolean isAngleEnabled(@NonNull String packageName) {
         try {
             return mService.isAngleEnabled(packageName, mContext.getUserId());
         } catch (RemoteException e) {
