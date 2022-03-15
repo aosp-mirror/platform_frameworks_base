@@ -4857,6 +4857,7 @@
         <item>0.25</item>
         <item>0.5</item>
         <item>0.75</item>
+        <item>0.875</item>
     </string-array>
 
     <!-- Messages that should not be shown to the user during face auth enrollment. This should be
