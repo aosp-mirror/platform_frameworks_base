@@ -600,6 +600,13 @@ public final class DeviceConfig {
     public static final String NAMESPACE_SELECTION_TOOLBAR = "selection_toolbar";
 
     /**
+     * Definitions for voice interaction related functions.
+     *
+     * @hide
+     */
+    public static final String NAMESPACE_VOICE_INTERACTION = "voice_interaction";
+
+    /**
      * List of namespaces which can be read without READ_DEVICE_CONFIG permission
      *
      * @hide
