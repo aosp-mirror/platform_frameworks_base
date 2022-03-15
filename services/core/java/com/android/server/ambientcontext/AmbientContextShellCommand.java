@@ -110,6 +110,8 @@ final class AmbientContextShellCommand extends ShellCommand {
                 return runStopDetection();
             case "get-last-status-code":
                 return getLastStatusCode();
+            case "get-last-package-name":
+                return getLastPackageName();
             case "query-service-status":
                 return runQueryServiceStatus();
             case "get-bound-package":
@@ -157,6 +159,13 @@ final class AmbientContextShellCommand extends ShellCommand {
         return lastResponse.getStatusCode();
     }
 
+    private int getLastPackageName() {
+        AmbientContextDetectionServiceStatus lastResponse =
+                sTestableCallbackInternal.getLastStatus();
+        out.println(lastResponse == null ? "" : lastResponse.getPackageName());
+        return 0;
+    }
+
     @Override
     public void onHelp() {
         PrintWriter pw = getOutPrintWriter();
@@ -167,6 +176,7 @@ final class AmbientContextShellCommand extends ShellCommand {
         pw.println("  start-detection USER_ID PACKAGE_NAME: Starts AmbientContextEvent detection.");
         pw.println("  stop-detection USER_ID: Stops AmbientContextEvent detection.");
         pw.println("  get-last-status-code: Prints the latest request status code.");
+        pw.println("  get-last-package-name: Prints the latest request package name.");
         pw.println("  query-event-status USER_ID PACKAGE_NAME: Prints the event status code.");
         pw.println("  get-bound-package USER_ID:"
                 + "     Print the bound package that implements the service.");
