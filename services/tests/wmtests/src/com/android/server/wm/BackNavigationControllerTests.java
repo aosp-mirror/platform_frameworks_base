@@ -30,7 +30,10 @@ import static org.mockito.Mockito.when;
 import android.annotation.NonNull;
 import android.hardware.HardwareBuffer;
 import android.platform.test.annotations.Presubmit;
+import android.window.BackEvent;
 import android.window.BackNavigationInfo;
+import android.window.IOnBackInvokedCallback;
+import android.window.OnBackInvokedDispatcher;
 import android.window.TaskSnapshot;
 
 import org.junit.Before;
@@ -42,15 +45,19 @@ import org.junit.runner.RunWith;
 public class BackNavigationControllerTests extends WindowTestsBase {
 
     private BackNavigationController mBackNavigationController;
+    private IOnBackInvokedCallback mOnBackInvokedCallback;
 
     @Before
     public void setUp() throws Exception {
         mBackNavigationController = new BackNavigationController();
+        mOnBackInvokedCallback = createBackCallback();
     }
 
     @Test
     public void backTypeHomeWhenBackToLauncher() {
         Task task = createTopTaskWithActivity();
+        registerSystemOnBackInvokedCallback();
+
         BackNavigationInfo backNavigationInfo =
                 mBackNavigationController.startBackNavigation(task, new StubTransaction());
         assertThat(backNavigationInfo).isNotNull();
@@ -63,6 +70,8 @@ public class BackNavigationControllerTests extends WindowTestsBase {
         Task taskA = createTask(mDefaultDisplay);
         createActivityRecord(taskA);
         Task task = createTopTaskWithActivity();
+        registerSystemOnBackInvokedCallback();
+
         BackNavigationInfo backNavigationInfo =
                 mBackNavigationController.startBackNavigation(task, new StubTransaction());
         assertThat(backNavigationInfo).isNotNull();
@@ -75,6 +84,8 @@ public class BackNavigationControllerTests extends WindowTestsBase {
         Task task = createTopTaskWithActivity();
         mAtm.setFocusedTask(task.mTaskId,
                 createAppWindow(task, FIRST_APPLICATION_WINDOW, "window").mActivityRecord);
+        registerSystemOnBackInvokedCallback();
+
         BackNavigationInfo backNavigationInfo =
                 mBackNavigationController.startBackNavigation(task, new StubTransaction());
         assertThat(backNavigationInfo).isNotNull();
@@ -89,6 +100,7 @@ public class BackNavigationControllerTests extends WindowTestsBase {
     public void backNavInfoFullyPopulated() {
         Task task = createTopTaskWithActivity();
         createAppWindow(task, FIRST_APPLICATION_WINDOW, "window");
+        registerSystemOnBackInvokedCallback();
 
         // We need a mock screenshot so
         TaskSnapshotController taskSnapshotController = createMockTaskSnapshotController();
@@ -102,6 +114,30 @@ public class BackNavigationControllerTests extends WindowTestsBase {
         assertThat(backNavigationInfo.getScreenshotSurface()).isNotNull();
         assertThat(backNavigationInfo.getScreenshotHardwareBuffer()).isNotNull();
         assertThat(backNavigationInfo.getTaskWindowConfiguration()).isNotNull();
+    }
+
+    @Test
+    public void preparesForBackToHome() {
+        Task task = createTopTaskWithActivity();
+        ActivityRecord activity = task.getTopActivity(false, false);
+        registerSystemOnBackInvokedCallback();
+
+        BackNavigationInfo backNavigationInfo =
+                mBackNavigationController.startBackNavigation(task, new StubTransaction());
+        assertThat(typeToString(backNavigationInfo.getType()))
+                .isEqualTo(typeToString(BackNavigationInfo.TYPE_RETURN_TO_HOME));
+    }
+
+    @Test
+    public void backTypeCallback() {
+        Task task = createTopTaskWithActivity();
+        ActivityRecord activity = task.getTopActivity(false, false);
+        registerApplicationOnBackInvokedCallback();
+
+        BackNavigationInfo backNavigationInfo =
+                mBackNavigationController.startBackNavigation(task, new StubTransaction());
+        assertThat(typeToString(backNavigationInfo.getType()))
+                .isEqualTo(typeToString(BackNavigationInfo.TYPE_CALLBACK));
     }
 
     @NonNull
@@ -125,5 +161,31 @@ public class BackNavigationControllerTests extends WindowTestsBase {
         when(record.mSurfaceControl.isValid()).thenReturn(true);
         mAtm.setFocusedTask(task.mTaskId, record);
         return task;
+    }
+
+    private void registerSystemOnBackInvokedCallback() {
+        mWm.getFocusedWindowLocked().setOnBackInvokedCallback(
+                mOnBackInvokedCallback, OnBackInvokedDispatcher.PRIORITY_SYSTEM);
+    }
+
+    private void registerApplicationOnBackInvokedCallback() {
+        mWm.getFocusedWindowLocked().setOnBackInvokedCallback(
+                mOnBackInvokedCallback, OnBackInvokedDispatcher.PRIORITY_DEFAULT);
+    }
+
+    private IOnBackInvokedCallback createBackCallback() {
+        return new IOnBackInvokedCallback.Stub() {
+            @Override
+            public void onBackStarted() { }
+
+            @Override
+            public void onBackProgressed(BackEvent backEvent) { }
+
+            @Override
+            public void onBackCancelled() { }
+
+            @Override
+            public void onBackInvoked() { }
+        };
     }
 }
