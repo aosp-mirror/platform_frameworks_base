@@ -84,6 +84,13 @@ public class ThreadUtils {
         getUiThreadHandler().post(runnable);
     }
 
+    /**
+     * Posts the runnable on the main thread with a delay.
+     */
+    public static void postOnMainThreadDelayed(Runnable runnable, long delayMillis) {
+        getUiThreadHandler().postDelayed(runnable, delayMillis);
+    }
+
     private static synchronized ExecutorService getThreadExecutor() {
         if (sThreadExecutor == null) {
             sThreadExecutor = Executors.newFixedThreadPool(
