@@ -405,8 +405,7 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
                     writeTo.write(buffer, 0, readByteCount);
                     writeTo.flush();
                 }
-            } catch (IOException ioe) {
-                Log.w(TAG, "Error while reading/writing to streams");
+            } catch (IOException ignored) {
             } finally {
                 IoUtils.closeQuietly(readFrom);
                 IoUtils.closeQuietly(writeTo);
