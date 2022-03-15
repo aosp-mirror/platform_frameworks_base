@@ -221,7 +221,6 @@ public abstract class BaseLockSettingsServiceTests {
                 Object[] args = invocation.getArguments();
                 mStorageManager.addUserKeyAuth((int) args[0] /* userId */,
                         (int) args[1] /* serialNumber */,
-                        (byte[]) args[2] /* token */,
                         (byte[]) args[3] /* secret */);
                 return null;
             }
@@ -233,7 +232,6 @@ public abstract class BaseLockSettingsServiceTests {
                 Object[] args = invocation.getArguments();
                 mStorageManager.clearUserKeyAuth((int) args[0] /* userId */,
                         (int) args[1] /* serialNumber */,
-                        (byte[]) args[2] /* token */,
                         (byte[]) args[3] /* secret */);
                 return null;
             }
