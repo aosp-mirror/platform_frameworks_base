@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_SYNC_ENGINE;
+import static com.android.server.wm.WindowManagerService.H.WINDOW_STATE_BLAST_SYNC_TIMEOUT;
 
 import android.annotation.NonNull;
 import android.os.Trace;
@@ -147,6 +148,33 @@ class BLASTSyncEngine {
             for (WindowContainer wc : mRootMembers) {
                 wc.finishSync(merged, false /* cancel */);
             }
+
+            final ArraySet<WindowContainer> wcAwaitingCommit = new ArraySet<>();
+            for (WindowContainer wc : mRootMembers) {
+                wc.waitForSyncTransactionCommit(wcAwaitingCommit);
+            }
+            final Runnable callback = new Runnable() {
+                // Can run a second time if the action completes after the timeout.
+                boolean ran = false;
+                public void run() {
+                    synchronized (mWm.mGlobalLock) {
+                        if (ran) {
+                            return;
+                        }
+                        mWm.mH.removeCallbacks(this);
+                        ran = true;
+                        SurfaceControl.Transaction t = new SurfaceControl.Transaction();
+                        for (WindowContainer wc : wcAwaitingCommit) {
+                            wc.onSyncTransactionCommitted(t);
+                        }
+                        t.apply();
+                        wcAwaitingCommit.clear();
+                    }
+                }
+            };
+            merged.addTransactionCommittedListener((r) -> { r.run(); }, callback::run);
+            mWm.mH.postDelayed(callback, WINDOW_STATE_BLAST_SYNC_TIMEOUT);
+
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "onTransactionReady");
             mListener.onTransactionReady(mSyncId, merged);
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
