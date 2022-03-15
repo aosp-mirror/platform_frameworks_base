@@ -29,6 +29,7 @@ import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.view.WindowManager.transitTypeToString;
 import static android.view.WindowManagerPolicyConstants.SPLIT_DIVIDER_LAYER;
+import static android.window.TransitionInfo.FLAG_IS_DISPLAY;
 
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
@@ -1171,6 +1172,8 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 updateUnfoldBounds();
                 return;
             }
+
+            mSplitLayout.update(null /* t */);
             onLayoutSizeChanged(mSplitLayout);
         }
     }
@@ -1198,7 +1201,6 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         if (!ENABLE_SHELL_TRANSITIONS) return;
 
         final SurfaceControl.Transaction t = mTransactionPool.acquire();
-        setDividerVisibility(false, t);
         mDisplayLayout.rotateTo(mContext.getResources(), toRotation);
         mSplitLayout.rotateTo(toRotation, mDisplayLayout.stableInsets());
         updateWindowBounds(mSplitLayout, wct);
@@ -1255,8 +1257,15 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             @Nullable TransitionRequestInfo request) {
         final ActivityManager.RunningTaskInfo triggerTask = request.getTriggerTask();
         if (triggerTask == null) {
-            // Still want to monitor everything while in split-screen, so return non-null.
-            return mMainStage.isActive() ? new WindowContainerTransaction() : null;
+            if (mMainStage.isActive()) {
+                if (request.getType() == TRANSIT_CHANGE && request.getDisplayChange() != null) {
+                    mSplitLayout.setFreezeDividerWindow(true);
+                }
+                // Still want to monitor everything while in split-screen, so return non-null.
+                return new WindowContainerTransaction();
+            } else {
+                return null;
+            }
         } else if (triggerTask.displayId != mDisplayId) {
             // Skip handling task on the other display.
             return null;
@@ -1352,8 +1361,14 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             // If we're not in split-mode, just abort so something else can handle it.
             if (!mMainStage.isActive()) return false;
 
+            mSplitLayout.setFreezeDividerWindow(false);
             for (int iC = 0; iC < info.getChanges().size(); ++iC) {
                 final TransitionInfo.Change change = info.getChanges().get(iC);
+                if (change.getMode() == TRANSIT_CHANGE
+                        && (change.getFlags() & FLAG_IS_DISPLAY) != 0) {
+                    mSplitLayout.update(startTransaction);
+                }
+
                 final ActivityManager.RunningTaskInfo taskInfo = change.getTaskInfo();
                 if (taskInfo == null || !taskInfo.hasParentTask()) continue;
                 final StageTaskListener stage = getStageOfTask(taskInfo);
@@ -1368,10 +1383,6 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                         Log.w(TAG, "Expected onTaskVanished on " + stage + " to have been called"
                                 + " with " + taskInfo.taskId + " before startAnimation().");
                     }
-                } else if (info.getType() == TRANSIT_CHANGE
-                        && change.getStartRotation() != change.getEndRotation()) {
-                    // Show the divider after transition finished.
-                    setDividerVisibility(true, finishTransaction);
                 }
             }
             if (mMainStage.getChildCount() == 0 || mSideStage.getChildCount() == 0) {
