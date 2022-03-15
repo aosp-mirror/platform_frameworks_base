@@ -1393,13 +1393,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     // TODO(b/161810301): Make the frame be passed from the client side.
-    void setFrame() {
-        // TODO(b/161810301): Set the window frame here. We don't have to do it now because
-        //                    DisplayPolicy has already done it for the window.
-
+    void setFrames(ClientWindowFrames clientWindowFrames) {
         mHaveFrame = true;
 
         final WindowFrames windowFrames = mWindowFrames;
+        windowFrames.mDisplayFrame.set(clientWindowFrames.displayFrame);
+        windowFrames.mParentFrame.set(clientWindowFrames.parentFrame);
+        windowFrames.mFrame.set(clientWindowFrames.frame);
 
         if (mRequestedWidth != mLastRequestedWidth || mRequestedHeight != mLastRequestedHeight) {
             mLastRequestedWidth = mRequestedWidth;
