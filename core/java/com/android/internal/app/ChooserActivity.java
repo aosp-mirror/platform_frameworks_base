@@ -220,9 +220,6 @@ public class ChooserActivity extends ResolverActivity implements
     private static final String PLURALS_COUNT = "count";
     private static final String PLURALS_FILE_NAME = "file_name";
 
-    @VisibleForTesting
-    public static final int LIST_VIEW_UPDATE_INTERVAL_IN_MILLIS = 250;
-
     private boolean mIsAppPredictorComponentAvailable;
     private Map<ChooserTarget, AppTarget> mDirectShareAppTargetCache;
     private Map<ChooserTarget, ShortcutInfo> mDirectShareShortcutInfoCache;
@@ -278,6 +275,13 @@ public class ChooserActivity extends ResolverActivity implements
             DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_SYSTEMUI,
                     SystemUiDeviceConfigFlags.IS_NEARBY_SHARE_FIRST_TARGET_IN_RANKED_APP,
                     DEFAULT_IS_NEARBY_SHARE_FIRST_TARGET_IN_RANKED_APP);
+
+    private static final int DEFAULT_LIST_VIEW_UPDATE_DELAY_MS = 250;
+
+    @VisibleForTesting
+    int mListViewUpdateDelayMs = DeviceConfig.getInt(DeviceConfig.NAMESPACE_SYSTEMUI,
+            SystemUiDeviceConfigFlags.SHARESHEET_LIST_VIEW_UPDATE_DELAY,
+            DEFAULT_LIST_VIEW_UPDATE_DELAY_MS);
 
     private Bundle mReplacementExtras;
     private IntentSender mChosenComponentSender;
@@ -2710,7 +2714,7 @@ public class ChooserActivity extends ResolverActivity implements
         Message msg = Message.obtain();
         msg.what = ChooserHandler.LIST_VIEW_UPDATE_MESSAGE;
         msg.obj = userHandle;
-        mChooserHandler.sendMessageDelayed(msg, LIST_VIEW_UPDATE_INTERVAL_IN_MILLIS);
+        mChooserHandler.sendMessageDelayed(msg, mListViewUpdateDelayMs);
     }
 
     @Override
