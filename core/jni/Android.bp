@@ -342,7 +342,7 @@ cc_library_shared {
                 "libhostgraphics",
             ],
         },
-        linux_glibc: {
+        host_linux: {
             srcs: [
                 "android_content_res_ApkAssets.cpp",
                 "android_database_CursorWindow.cpp",
