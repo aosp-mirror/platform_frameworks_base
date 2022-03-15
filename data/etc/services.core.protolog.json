@@ -1309,6 +1309,12 @@
       "group": "WM_DEBUG_STATES",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
+    "-711194343": {
+      "message": "Setting Activity.mLauncherTaskBehind to false. Activity=%s",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_BACK_PREVIEW",
+      "at": "com\/android\/server\/wm\/BackNavigationController.java"
+    },
     "-706481945": {
       "message": "TaskFragment parent info changed name=%s parentTaskId=%d",
       "level": "VERBOSE",
@@ -2587,6 +2593,12 @@
       "group": "WM_DEBUG_APP_TRANSITIONS",
       "at": "com\/android\/server\/wm\/WindowState.java"
     },
+    "599897753": {
+      "message": "Previous Activity is %s. Back type is %s",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_BACK_PREVIEW",
+      "at": "com\/android\/server\/wm\/BackNavigationController.java"
+    },
     "600140673": {
       "message": "checkBootAnimationComplete: Waiting for anim complete",
       "level": "INFO",
@@ -2670,12 +2682,6 @@
       "level": "WARN",
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
-    },
-    "664667685": {
-      "message": "Activity %s: enableOnBackInvokedCallback=false. Returning null BackNavigationInfo.",
-      "level": "DEBUG",
-      "group": "WM_DEBUG_BACK_PREVIEW",
-      "at": "com\/android\/server\/wm\/BackNavigationController.java"
     },
     "665256544": {
       "message": "All windows drawn!",
@@ -2886,6 +2892,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_STATES",
       "at": "com\/android\/server\/wm\/TaskFragment.java"
+    },
+    "948208142": {
+      "message": "Setting Activity.mLauncherTaskBehind to true. Activity=%s",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_BACK_PREVIEW",
+      "at": "com\/android\/server\/wm\/BackNavigationController.java"
     },
     "950074526": {
       "message": "setLockTaskMode: Can't lock due to auth",
@@ -3102,6 +3114,12 @@
       "level": "WARN",
       "group": "WM_DEBUG_APP_TRANSITIONS",
       "at": "com\/android\/server\/wm\/DisplayContent.java"
+    },
+    "1172542963": {
+      "message": "onBackNavigationDone backType=%s, task=%s, prevTaskTopActivity=%s",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_BACK_PREVIEW",
+      "at": "com\/android\/server\/wm\/BackNavigationController.java"
     },
     "1178653181": {
       "message": "Old wallpaper still the target.",
@@ -3415,11 +3433,11 @@
       "group": "WM_DEBUG_APP_TRANSITIONS",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
-    "1554795024": {
-      "message": "Previous Activity is %s",
+    "1544805551": {
+      "message": "Skipping app transition animation. task=%s",
       "level": "DEBUG",
       "group": "WM_DEBUG_BACK_PREVIEW",
-      "at": "com\/android\/server\/wm\/BackNavigationController.java"
+      "at": "com\/android\/server\/wm\/Task.java"
     },
     "1557732761": {
       "message": "For Intent %s bringing to top: %s",
