@@ -67,6 +67,7 @@ import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SharedMemory;
+import android.provider.DeviceConfig;
 import android.service.voice.HotwordDetectedResult;
 import android.service.voice.HotwordDetectionService;
 import android.service.voice.HotwordDetector;
@@ -110,6 +111,7 @@ final class HotwordDetectionConnection {
     private static final String TAG = "HotwordDetectionConnection";
     static final boolean DEBUG = false;
 
+    private static final String KEY_RESTART_PERIOD_IN_SECONDS = "restart_period_in_seconds";
     // TODO: These constants need to be refined.
     private static final long VALIDATION_TIMEOUT_MILLIS = 4000;
     private static final long MAX_UPDATE_TIMEOUT_MILLIS = 6000;
@@ -120,7 +122,9 @@ final class HotwordDetectionConnection {
      * Time after which each HotwordDetectionService process is stopped and replaced by a new one.
      * 0 indicates no restarts.
      */
-    private static final int RESTART_PERIOD_SECONDS = 0;
+    private static final int RESTART_PERIOD_SECONDS =
+            DeviceConfig.getInt(DeviceConfig.NAMESPACE_VOICE_INTERACTION,
+                    KEY_RESTART_PERIOD_IN_SECONDS, 0);
     private static final int MAX_ISOLATED_PROCESS_NUMBER = 10;
 
     // Hotword metrics
