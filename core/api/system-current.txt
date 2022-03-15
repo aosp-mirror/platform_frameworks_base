@@ -1129,7 +1129,7 @@ package android.app.admin {
     field @RequiresPermission(android.Manifest.permission.LAUNCH_DEVICE_MANAGER_SETUP) public static final String ACTION_ROLE_HOLDER_PROVISION_MANAGED_PROFILE = "android.app.action.ROLE_HOLDER_PROVISION_MANAGED_PROFILE";
     field public static final String ACTION_SET_PROFILE_OWNER = "android.app.action.SET_PROFILE_OWNER";
     field @Deprecated public static final String ACTION_STATE_USER_SETUP_COMPLETE = "android.app.action.STATE_USER_SETUP_COMPLETE";
-    field @RequiresPermission(android.Manifest.permission.LAUNCH_DEVICE_MANAGER_SETUP) public static final String ACTION_UPDATE_DEVICE_MANAGEMENT_ROLE_HOLDER = "android.app.action.UPDATE_DEVICE_MANAGEMENT_ROLE_HOLDER";
+    field @RequiresPermission(android.Manifest.permission.LAUNCH_DEVICE_MANAGER_SETUP) public static final String ACTION_UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER = "android.app.action.UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER";
     field public static final String EXTRA_FORCE_UPDATE_ROLE_HOLDER = "android.app.extra.FORCE_UPDATE_ROLE_HOLDER";
     field public static final String EXTRA_LOST_MODE_LOCATION = "android.app.extra.LOST_MODE_LOCATION";
     field public static final String EXTRA_PROFILE_OWNER_NAME = "android.app.extra.PROFILE_OWNER_NAME";
@@ -1162,8 +1162,8 @@ package android.app.admin {
     field public static final String REQUIRED_APP_MANAGED_PROFILE = "android.app.REQUIRED_APP_MANAGED_PROFILE";
     field public static final String REQUIRED_APP_MANAGED_USER = "android.app.REQUIRED_APP_MANAGED_USER";
     field public static final int RESULT_DEVICE_OWNER_SET = 123; // 0x7b
-    field public static final int RESULT_UPDATE_DEVICE_MANAGEMENT_ROLE_HOLDER_RECOVERABLE_ERROR = 1; // 0x1
-    field public static final int RESULT_UPDATE_DEVICE_MANAGEMENT_ROLE_HOLDER_UNRECOVERABLE_ERROR = 2; // 0x2
+    field public static final int RESULT_UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER_RECOVERABLE_ERROR = 1; // 0x1
+    field public static final int RESULT_UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER_UNRECOVERABLE_ERROR = 2; // 0x2
     field public static final int RESULT_UPDATE_ROLE_HOLDER = 2; // 0x2
     field public static final int RESULT_WORK_PROFILE_CREATED = 122; // 0x7a
     field public static final int STATE_USER_PROFILE_COMPLETE = 4; // 0x4
