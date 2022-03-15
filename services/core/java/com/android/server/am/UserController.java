@@ -714,15 +714,9 @@ class UserController implements Handler.Callback {
         if (!Objects.equals(info.lastLoggedInFingerprint, Build.FINGERPRINT)
                 || SystemProperties.getBoolean("persist.pm.mock-upgrade", false)) {
             // Suppress double notifications for managed profiles that
-            // were unlocked automatically as part of their parent user
-            // being unlocked.
-            final boolean quiet;
-            if (info.isManagedProfile()) {
-                quiet = !uss.tokenProvided
-                        || !mLockPatternUtils.isSeparateProfileChallengeEnabled(userId);
-            } else {
-                quiet = false;
-            }
+            // were unlocked automatically as part of their parent user being
+            // unlocked.  TODO(b/217442918): this code doesn't work correctly.
+            final boolean quiet = info.isManagedProfile();
             mInjector.sendPreBootBroadcast(userId, quiet,
                     () -> finishUserUnlockedCompleted(uss));
         } else {
@@ -1658,27 +1652,25 @@ class UserController implements Handler.Callback {
         }
     }
 
-    boolean unlockUser(final @UserIdInt int userId, byte[] token, byte[] secret,
-            IProgressListener listener) {
+    boolean unlockUser(final @UserIdInt int userId, byte[] secret, IProgressListener listener) {
         checkCallingPermission(INTERACT_ACROSS_USERS_FULL, "unlockUser");
         EventLog.writeEvent(EventLogTags.UC_UNLOCK_USER, userId);
         final long binderToken = Binder.clearCallingIdentity();
         try {
-            return unlockUserCleared(userId, token, secret, listener);
+            return unlockUserCleared(userId, secret, listener);
         } finally {
             Binder.restoreCallingIdentity(binderToken);
         }
     }
 
     /**
-     * Attempt to unlock user without a credential token. This typically
-     * succeeds when the device doesn't have credential-encrypted storage, or
-     * when the credential-encrypted storage isn't tied to a user-provided
-     * PIN or pattern.
+     * Attempt to unlock user without a secret. This typically succeeds when the
+     * device doesn't have credential-encrypted storage, or when the
+     * credential-encrypted storage isn't tied to a user-provided PIN or
+     * pattern.
      */
     private boolean maybeUnlockUser(final @UserIdInt int userId) {
-        // Try unlocking storage using empty token
-        return unlockUserCleared(userId, null, null, null);
+        return unlockUserCleared(userId, null, null);
     }
 
     private static void notifyFinished(@UserIdInt int userId, IProgressListener listener) {
@@ -1689,7 +1681,7 @@ class UserController implements Handler.Callback {
         }
     }
 
-    private boolean unlockUserCleared(final @UserIdInt int userId, byte[] token, byte[] secret,
+    private boolean unlockUserCleared(final @UserIdInt int userId, byte[] secret,
             IProgressListener listener) {
         UserState uss;
         if (!StorageManager.isUserKeyUnlocked(userId)) {
@@ -1697,7 +1689,7 @@ class UserController implements Handler.Callback {
             final IStorageManager storageManager = mInjector.getStorageManager();
             try {
                 // We always want to unlock user storage, even user is not started yet
-                storageManager.unlockUserKey(userId, userInfo.serialNumber, token, secret);
+                storageManager.unlockUserKey(userId, userInfo.serialNumber, secret);
             } catch (RemoteException | RuntimeException e) {
                 Slogf.w(TAG, "Failed to unlock: " + e.getMessage());
             }
@@ -1707,7 +1699,6 @@ class UserController implements Handler.Callback {
             uss = mStartedUsers.get(userId);
             if (uss != null) {
                 uss.mUnlockProgress.addListener(listener);
-                uss.tokenProvided = (token != null);
             }
         }
         // Bail if user isn't actually running
