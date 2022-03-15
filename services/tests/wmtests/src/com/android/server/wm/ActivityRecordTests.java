@@ -153,7 +153,6 @@ import androidx.test.filters.MediumTest;
 
 import com.android.internal.R;
 import com.android.server.wm.ActivityRecord.State;
-import com.android.server.wm.utils.WmDisplayCutout;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -543,8 +542,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         final Rect insets = new Rect();
         final DisplayInfo displayInfo = task.mDisplayContent.getDisplayInfo();
         final DisplayPolicy policy = task.mDisplayContent.getDisplayPolicy();
-        policy.getNonDecorInsetsLw(displayInfo.rotation, displayInfo.logicalWidth,
-                displayInfo.logicalHeight, WmDisplayCutout.NO_CUTOUT, insets);
+        policy.getNonDecorInsetsLw(displayInfo.rotation, displayInfo.displayCutout, insets);
         policy.convertNonDecorInsetsToStableInsets(insets, displayInfo.rotation);
         Task.intersectWithInsetsIfFits(stableRect, stableRect, insets);
 
@@ -585,8 +583,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         final Rect insets = new Rect();
         final DisplayInfo displayInfo = rootTask.mDisplayContent.getDisplayInfo();
         final DisplayPolicy policy = rootTask.mDisplayContent.getDisplayPolicy();
-        policy.getNonDecorInsetsLw(displayInfo.rotation, displayInfo.logicalWidth,
-                displayInfo.logicalHeight, WmDisplayCutout.NO_CUTOUT, insets);
+        policy.getNonDecorInsetsLw(displayInfo.rotation, displayInfo.displayCutout, insets);
         policy.convertNonDecorInsetsToStableInsets(insets, displayInfo.rotation);
         Task.intersectWithInsetsIfFits(stableRect, stableRect, insets);
 
@@ -3104,11 +3101,11 @@ public class ActivityRecordTests extends WindowTestsBase {
 
         // Simulate app re-start input or turning screen off/on then unlocked by un-secure
         // keyguard to back to the app, expect IME insets is not frozen
+        mDisplayContent.updateImeInputAndControlTarget(app);
+        assertFalse(app.mActivityRecord.mImeInsetsFrozenUntilStartInput);
         imeSource.setFrame(new Rect(100, 400, 500, 500));
         app.getInsetsState().addSource(imeSource);
         app.getInsetsState().setSourceVisible(ITYPE_IME, true);
-        mDisplayContent.updateImeInputAndControlTarget(app);
-        assertFalse(app.mActivityRecord.mImeInsetsFrozenUntilStartInput);
 
         // Verify when IME is visible and the app can receive the right IME insets from policy.
         makeWindowVisibleAndDrawn(app, mImeWindow);

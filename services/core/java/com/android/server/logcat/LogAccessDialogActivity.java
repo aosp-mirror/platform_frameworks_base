@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
@@ -56,7 +57,7 @@ public class LogAccessDialogActivity extends Activity implements
     private AlertDialog.Builder mAlertDialog;
     private AlertDialog mAlert;
 
-    private static final int DIALOG_TIME_OUT = 300000;
+    private static final int DIALOG_TIME_OUT = Build.IS_DEBUGGABLE ? 60000 : 300000;
     private static final int MSG_DISMISS_DIALOG = 0;
 
 

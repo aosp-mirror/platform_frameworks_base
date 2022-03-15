@@ -435,15 +435,15 @@ public class SystemConfig {
     }
 
     /** Get privapp permission allowlist for an apk-in-apex. */
-    public ArraySet<String> getApexPrivAppPermissions(String module, String packageName) {
-        return mApexPrivAppPermissions.getOrDefault(module, EMPTY_PERMISSIONS)
-                .get(packageName);
+    public ArraySet<String> getApexPrivAppPermissions(String apexName, String apkPackageName) {
+        return mApexPrivAppPermissions.getOrDefault(apexName, EMPTY_PERMISSIONS)
+                .get(apkPackageName);
     }
 
     /** Get privapp permissions denylist for an apk-in-apex. */
-    public ArraySet<String> getApexPrivAppDenyPermissions(String module, String packageName) {
-        return mApexPrivAppDenyPermissions.getOrDefault(module, EMPTY_PERMISSIONS)
-                .get(packageName);
+    public ArraySet<String> getApexPrivAppDenyPermissions(String apexName, String apkPackageName) {
+        return mApexPrivAppDenyPermissions.getOrDefault(apexName, EMPTY_PERMISSIONS)
+                .get(apkPackageName);
     }
 
     public ArraySet<String> getVendorPrivAppPermissions(String packageName) {

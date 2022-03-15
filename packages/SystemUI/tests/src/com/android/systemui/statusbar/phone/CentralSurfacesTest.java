@@ -131,6 +131,7 @@ import com.android.systemui.statusbar.notification.collection.legacy.VisualStabi
 import com.android.systemui.statusbar.notification.collection.render.NotifShadeEventSource;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
 import com.android.systemui.statusbar.notification.init.NotificationsController;
+import com.android.systemui.statusbar.notification.interruption.KeyguardNotificationVisibilityProvider;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptLogger;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderImpl;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
@@ -309,7 +310,9 @@ public class CentralSurfacesTest extends SysuiTestCase {
                         mDreamManager, mAmbientDisplayConfiguration, mNotificationFilter,
                         mStatusBarStateController, mBatteryController, mHeadsUpManager,
                         mock(NotificationInterruptLogger.class),
-                        new Handler(TestableLooper.get(this).getLooper()));
+                        new Handler(TestableLooper.get(this).getLooper()),
+                        mock(NotifPipelineFlags.class),
+                        mock(KeyguardNotificationVisibilityProvider.class));
 
         mContext.addMockSystemService(TrustManager.class, mock(TrustManager.class));
         mContext.addMockSystemService(FingerprintManager.class, mock(FingerprintManager.class));
@@ -994,9 +997,12 @@ public class CentralSurfacesTest extends SysuiTestCase {
                 BatteryController batteryController,
                 HeadsUpManager headsUpManager,
                 NotificationInterruptLogger logger,
-                Handler mainHandler) {
+                Handler mainHandler,
+                NotifPipelineFlags flags,
+                KeyguardNotificationVisibilityProvider keyguardNotificationVisibilityProvider) {
             super(contentResolver, powerManager, dreamManager, ambientDisplayConfiguration, filter,
-                    batteryController, controller, headsUpManager, logger, mainHandler);
+                    batteryController, controller, headsUpManager, logger, mainHandler,
+                    flags, keyguardNotificationVisibilityProvider);
             mUseHeadsUp = true;
         }
     }

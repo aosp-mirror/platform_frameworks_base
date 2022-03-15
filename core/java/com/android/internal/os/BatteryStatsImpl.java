@@ -2122,18 +2122,26 @@ public class BatteryStatsImpl extends BatteryStats {
         private final TimeBase mTimeBase;
         private final LongMultiStateCounter mCounter;
 
-        private TimeMultiStateCounter(TimeBase timeBase, Parcel in, long timestampMs) {
+        private TimeMultiStateCounter(TimeBase timeBase, int stateCount, long timestampMs) {
+            this(timeBase, new LongMultiStateCounter(stateCount), timestampMs);
+        }
+
+        private TimeMultiStateCounter(TimeBase timeBase, LongMultiStateCounter counter,
+                long timestampMs) {
             mTimeBase = timeBase;
-            mCounter = LongMultiStateCounter.CREATOR.createFromParcel(in);
+            mCounter = counter;
             mCounter.setEnabled(mTimeBase.isRunning(), timestampMs);
             timeBase.add(this);
         }
 
-        private TimeMultiStateCounter(TimeBase timeBase, int stateCount, long timestampMs) {
-            mTimeBase = timeBase;
-            mCounter = new LongMultiStateCounter(stateCount);
-            mCounter.setEnabled(mTimeBase.isRunning(), timestampMs);
-            timeBase.add(this);
+        @Nullable
+        private static TimeMultiStateCounter readFromParcel(Parcel in, TimeBase timeBase,
+                int stateCount, long timestampMs) {
+            LongMultiStateCounter counter = LongMultiStateCounter.CREATOR.createFromParcel(in);
+            if (counter.getStateCount() != stateCount) {
+                return null;
+            }
+            return new TimeMultiStateCounter(timeBase, counter, timestampMs);
         }
 
         private void writeToParcel(Parcel out) {
@@ -3703,11 +3711,8 @@ public class BatteryStatsImpl extends BatteryStats {
 
         private TimeMultiStateCounter readTimeMultiStateCounter(Parcel in, TimeBase timeBase) {
             if (in.readBoolean()) {
-                final TimeMultiStateCounter counter =
-                        new TimeMultiStateCounter(timeBase, in, mClock.elapsedRealtime());
-                if (counter.getStateCount() == BatteryConsumer.PROCESS_STATE_COUNT) {
-                    return counter;
-                }
+                return TimeMultiStateCounter.readFromParcel(in, timeBase,
+                        BatteryConsumer.PROCESS_STATE_COUNT, mClock.elapsedRealtime());
             }
             return null;
         }
@@ -3730,9 +3735,10 @@ public class BatteryStatsImpl extends BatteryStats {
                 // invalid.
                 TimeMultiStateCounter[] counters = new TimeMultiStateCounter[numCounters];
                 for (int i = 0; i < numCounters; i++) {
-                    final TimeMultiStateCounter counter =
-                            new TimeMultiStateCounter(timeBase, in, mClock.elapsedRealtime());
-                    if (counter.getStateCount() == BatteryConsumer.PROCESS_STATE_COUNT) {
+                    final TimeMultiStateCounter counter = TimeMultiStateCounter.readFromParcel(in,
+                            timeBase, BatteryConsumer.PROCESS_STATE_COUNT,
+                            mClock.elapsedRealtime());
+                    if (counter != null) {
                         counters[i] = counter;
                     } else {
                         valid = false;
@@ -10972,11 +10978,9 @@ public class BatteryStatsImpl extends BatteryStats {
                             = new LongSamplingCounter(mBsi.mOnBatteryTimeBase, in);
                 }
                 if (in.readBoolean()) {
-                    final TimeMultiStateCounter counter =
-                            new TimeMultiStateCounter(mBsi.mOnBatteryTimeBase, in, timestampMs);
-                    if (counter.getStateCount() == BatteryConsumer.PROCESS_STATE_COUNT) {
-                        mMobileRadioActiveTime = counter;
-                    }
+                    mMobileRadioActiveTime = TimeMultiStateCounter.readFromParcel(in,
+                            mBsi.mOnBatteryTimeBase, BatteryConsumer.PROCESS_STATE_COUNT,
+                            timestampMs);
                 }
 
                 mMobileRadioActiveCount = new LongSamplingCounter(mBsi.mOnBatteryTimeBase, in);
@@ -11022,11 +11026,9 @@ public class BatteryStatsImpl extends BatteryStats {
 
             int stateCount = in.readInt();
             if (stateCount != 0) {
-                final TimeMultiStateCounter counter = new TimeMultiStateCounter(
-                        mBsi.mOnBatteryTimeBase, in, timestampMs);
-                if (stateCount == BatteryConsumer.PROCESS_STATE_COUNT) {
-                    mCpuActiveTimeMs = counter;
-                }
+                mCpuActiveTimeMs = TimeMultiStateCounter.readFromParcel(in,
+                        mBsi.mOnBatteryTimeBase, BatteryConsumer.PROCESS_STATE_COUNT,
+                        timestampMs);
             }
             mCpuClusterTimesMs = new LongSamplingCounterArray(mBsi.mOnBatteryTimeBase, in);
 
@@ -17176,14 +17178,18 @@ public class BatteryStatsImpl extends BatteryStats {
         mNextMaxDailyDeadlineMs = in.readLong();
         mBatteryTimeToFullSeconds = in.readLong();
 
-        mMeasuredEnergyStatsConfig = MeasuredEnergyStats.Config.createFromParcel(in);
-
-        /**
-         * WARNING: Supported buckets may have changed across boots. Bucket mismatch is handled
-         *          later when {@link #initMeasuredEnergyStatsLocked} is called.
-         */
-        mGlobalMeasuredEnergyStats = MeasuredEnergyStats.createAndReadSummaryFromParcel(
-                mMeasuredEnergyStatsConfig, in);
+        final MeasuredEnergyStats.Config config = MeasuredEnergyStats.Config.createFromParcel(in);
+        final MeasuredEnergyStats measuredEnergyStats =
+                MeasuredEnergyStats.createAndReadSummaryFromParcel(mMeasuredEnergyStatsConfig, in);
+        if (config != null && Arrays.equals(config.getStateNames(),
+                getBatteryConsumerProcessStateNames())) {
+            /**
+             * WARNING: Supported buckets may have changed across boots. Bucket mismatch is handled
+             *          later when {@link #initMeasuredEnergyStatsLocked} is called.
+             */
+            mMeasuredEnergyStatsConfig = config;
+            mGlobalMeasuredEnergyStats = measuredEnergyStats;
+        }
 
         mStartCount++;
 
@@ -17282,7 +17288,6 @@ public class BatteryStatsImpl extends BatteryStats {
                 getScreenOffRpmTimerLocked(rpmName).readSummaryFromParcelLocked(in);
             }
         }
-
         int NKW = in.readInt();
         if (NKW > 10000) {
             throw new ParcelFormatException("File corrupt: too many kernel wake locks " + NKW);
@@ -17410,11 +17415,9 @@ public class BatteryStatsImpl extends BatteryStats {
                     u.mNetworkPacketActivityCounters[i].readSummaryFromParcelLocked(in);
                 }
                 if (in.readBoolean()) {
-                    TimeMultiStateCounter counter = new TimeMultiStateCounter(
-                            mOnBatteryTimeBase, in, elapsedRealtimeMs);
-                    if (counter.getStateCount() == BatteryConsumer.PROCESS_STATE_COUNT) {
-                        u.mMobileRadioActiveTime = counter;
-                    }
+                    u.mMobileRadioActiveTime = TimeMultiStateCounter.readFromParcel(in,
+                            mOnBatteryTimeBase, BatteryConsumer.PROCESS_STATE_COUNT,
+                            elapsedRealtimeMs);
                 }
                 u.mMobileRadioActiveCount.readSummaryFromParcelLocked(in);
             }
@@ -17464,11 +17467,9 @@ public class BatteryStatsImpl extends BatteryStats {
 
             int stateCount = in.readInt();
             if (stateCount != 0) {
-                final TimeMultiStateCounter counter = new TimeMultiStateCounter(
-                        mOnBatteryTimeBase, in, mClock.elapsedRealtime());
-                if (stateCount == BatteryConsumer.PROCESS_STATE_COUNT) {
-                    u.mCpuActiveTimeMs = counter;
-                }
+                u.mCpuActiveTimeMs = TimeMultiStateCounter.readFromParcel(in,
+                        mOnBatteryTimeBase, BatteryConsumer.PROCESS_STATE_COUNT,
+                        mClock.elapsedRealtime());
             }
             u.mCpuClusterTimesMs.readSummaryFromParcelLocked(in);
 
@@ -18314,9 +18315,15 @@ public class BatteryStatsImpl extends BatteryStats {
         mLastWriteTimeMs = in.readLong();
         mBatteryTimeToFullSeconds = in.readLong();
 
-        mMeasuredEnergyStatsConfig = MeasuredEnergyStats.Config.createFromParcel(in);
-        mGlobalMeasuredEnergyStats =
+
+        final MeasuredEnergyStats.Config config = MeasuredEnergyStats.Config.createFromParcel(in);
+        final MeasuredEnergyStats measuredEnergyStats =
                 MeasuredEnergyStats.createFromParcel(mMeasuredEnergyStatsConfig, in);
+        if (config != null && Arrays.equals(config.getStateNames(),
+                getBatteryConsumerProcessStateNames())) {
+            mMeasuredEnergyStatsConfig = config;
+            mGlobalMeasuredEnergyStats = measuredEnergyStats;
+        }
 
         mRpmStats.clear();
         int NRPMS = in.readInt();

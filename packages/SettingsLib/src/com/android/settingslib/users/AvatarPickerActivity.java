@@ -106,13 +106,13 @@ public class AvatarPickerActivity extends Activity {
 
         FooterButton secondaryButton =
                 new FooterButton.Builder(this)
-                        .setText("Cancel")
+                        .setText(getString(android.R.string.cancel))
                         .setListener(view -> cancel())
                         .build();
 
         mDoneButton =
                 new FooterButton.Builder(this)
-                        .setText("Done")
+                        .setText(getString(R.string.done))
                         .setListener(view -> mAdapter.returnSelectionResult())
                         .build();
         mDoneButton.setEnabled(false);
