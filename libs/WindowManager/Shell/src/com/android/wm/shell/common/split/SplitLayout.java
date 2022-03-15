@@ -98,6 +98,7 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
     private WindowContainerToken mWinToken2;
     private int mDividePosition;
     private boolean mInitialized = false;
+    private boolean mFreezeDividerWindow = false;
     private int mOrientation;
     private int mRotation;
 
@@ -225,11 +226,6 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         mDividerSnapAlgorithm = getSnapAlgorithm(mContext, mRootBounds, null);
         initDividerPosition(mTempRect);
 
-        if (mInitialized) {
-            release();
-            init();
-        }
-
         return true;
     }
 
@@ -298,18 +294,35 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
     }
 
     /** Releases the surface holding the current {@link DividerView}. */
-    public void release() {
+    public void release(SurfaceControl.Transaction t) {
         if (!mInitialized) return;
         mInitialized = false;
-        mSplitWindowManager.release();
+        mSplitWindowManager.release(t);
         mDisplayImeController.removePositionProcessor(mImePositionProcessor);
         mImePositionProcessor.reset();
+    }
+
+    public void release() {
+        release(null /* t */);
+    }
+
+    /** Releases and re-inflates {@link DividerView} on the root surface. */
+    public void update(SurfaceControl.Transaction t) {
+        if (!mInitialized) return;
+        mSplitWindowManager.release(t);
+        mImePositionProcessor.reset();
+        mSplitWindowManager.init(this, mInsetsState);
     }
 
     @Override
     public void insetsChanged(InsetsState insetsState) {
         mInsetsState.set(insetsState);
         if (!mInitialized) {
+            return;
+        }
+        if (mFreezeDividerWindow) {
+            // DO NOT change its layout before transition actually run because it might cause
+            // flicker.
             return;
         }
         mSplitWindowManager.onInsetsChanged(insetsState);
@@ -321,6 +334,10 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         if (!mInsetsState.equals(insetsState)) {
             insetsChanged(insetsState);
         }
+    }
+
+    public void setFreezeDividerWindow(boolean freezeDividerWindow) {
+        mFreezeDividerWindow = freezeDividerWindow;
     }
 
     /**
