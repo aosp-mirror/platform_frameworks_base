@@ -277,10 +277,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     }
 
     private boolean checkAutoRevokeAccess(AndroidPackage pkg, int callingUid) {
-        if (pkg == null) {
-            return false;
-        }
-
         final boolean isCallerPrivileged = mContext.checkCallingOrSelfPermission(
                 Manifest.permission.WHITELIST_AUTO_REVOKE_PERMISSIONS)
                 == PackageManager.PERMISSION_GRANTED;
@@ -292,6 +288,12 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                     + Manifest.permission.WHITELIST_AUTO_REVOKE_PERMISSIONS
                     + " or be the installer on record");
         }
+
+        if (pkg == null || mPackageManagerInt.filterAppAccess(pkg, callingUid,
+                UserHandle.getUserId(callingUid))) {
+            return false;
+        }
+
         return true;
     }
 
@@ -301,9 +303,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
         final AndroidPackage pkg = mPackageManagerInt.getPackage(packageName);
         final int callingUid = Binder.getCallingUid();
-        if (mPackageManagerInt.filterAppAccess(packageName, callingUid, userId)) {
-            return false;
-        }
 
         if (!checkAutoRevokeAccess(pkg, callingUid)) {
             return false;
