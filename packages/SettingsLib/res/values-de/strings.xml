@@ -68,7 +68,7 @@
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"Verbindung wird getrennt..."</string>
     <string name="bluetooth_connecting" msgid="5871702668260192755">"Verbindung wird hergestellt..."</string>
     <string name="bluetooth_connected" msgid="8065345572198502293">"Mit <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> verbunden"</string>
-    <string name="bluetooth_pairing" msgid="4269046942588193600">"Verbindung wird hergestellt…"</string>
+    <string name="bluetooth_pairing" msgid="4269046942588193600">"Wird gekoppelt…"</string>
     <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"Mit <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> verbunden (kein Telefon-Audio)"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"Mit <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> verbunden (kein Medien-Audio)"</string>
     <string name="bluetooth_connected_no_map" msgid="3381860077002724689">"Mit <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> verbunden (kein Nachrichtenzugriff)"</string>
