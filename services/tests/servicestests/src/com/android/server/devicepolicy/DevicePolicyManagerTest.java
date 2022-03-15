@@ -4137,8 +4137,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     @Test
     public void testSetPreferentialNetworkServiceConfig_noProfileOwner() throws Exception {
         assertExpectException(SecurityException.class, null,
-                () -> dpm.setPreferentialNetworkServiceConfig(
-                        PreferentialNetworkServiceConfig.DEFAULT));
+                () -> dpm.setPreferentialNetworkServiceConfigs(
+                        List.of(PreferentialNetworkServiceConfig.DEFAULT)));
     }
 
     @Test
@@ -4178,10 +4178,10 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         addManagedProfile(admin1, managedProfileAdminUid, admin1);
         mContext.binder.callingUid = managedProfileAdminUid;
 
-        dpm.setPreferentialNetworkServiceConfig(PreferentialNetworkServiceConfig.DEFAULT);
+        dpm.setPreferentialNetworkServiceConfigs(
+                List.of(PreferentialNetworkServiceConfig.DEFAULT));
         assertThat(dpm.isPreferentialNetworkServiceEnabled()).isFalse();
-        assertThat(dpm.getPreferentialNetworkServiceConfig()
-                .isEnabled()).isFalse();
+        assertThat(dpm.getPreferentialNetworkServiceConfigs().get(0).isEnabled()).isFalse();
 
         ProfileNetworkPreference preferenceDetails =
                 new ProfileNetworkPreference.Builder()
@@ -4207,8 +4207,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         addManagedProfile(admin1, managedProfileAdminUid, admin1);
         mContext.binder.callingUid = managedProfileAdminUid;
 
-        dpm.setPreferentialNetworkServiceConfig(preferentialNetworkServiceConfigEnabled);
-        assertThat(dpm.getPreferentialNetworkServiceConfig()
+        dpm.setPreferentialNetworkServiceConfigs(List.of(preferentialNetworkServiceConfigEnabled));
+        assertThat(dpm.getPreferentialNetworkServiceConfigs().get(0)
                 .isEnabled()).isTrue();
         ProfileNetworkPreference preferenceDetails =
                 new ProfileNetworkPreference.Builder()
@@ -4237,8 +4237,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                         .setFallbackToDefaultConnectionAllowed(false)
                         .setIncludedUids(new int[]{1, 2})
                         .build();
-        dpm.setPreferentialNetworkServiceConfig(preferentialNetworkServiceConfigEnabled);
-        assertThat(dpm.getPreferentialNetworkServiceConfig()
+        dpm.setPreferentialNetworkServiceConfigs(List.of(preferentialNetworkServiceConfigEnabled));
+        assertThat(dpm.getPreferentialNetworkServiceConfigs().get(0)
                 .isEnabled()).isTrue();
         List<Integer> includedList = new ArrayList<>();
         includedList.add(1);
@@ -4272,8 +4272,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                         .setExcludedUids(new int[]{1, 2})
                         .build();
 
-        dpm.setPreferentialNetworkServiceConfig(preferentialNetworkServiceConfigEnabled);
-        assertThat(dpm.getPreferentialNetworkServiceConfig()
+        dpm.setPreferentialNetworkServiceConfigs(List.of(preferentialNetworkServiceConfigEnabled));
+        assertThat(dpm.getPreferentialNetworkServiceConfigs().get(0)
                 .isEnabled()).isTrue();
         List<Integer> excludedUids = new ArrayList<>();
         excludedUids.add(1);
