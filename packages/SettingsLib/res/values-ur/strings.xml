@@ -533,6 +533,8 @@
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"کم وقت۔"</string>
     <string name="cancel" msgid="5665114069455378395">"منسوخ کریں"</string>
     <string name="okay" msgid="949938843324579502">"ٹھیک ہے"</string>
+    <!-- no translation found for done (381184316122520313) -->
+    <skip />
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"الارمز اور یاد دہانیاں"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"الارمز اور یاد دہانیاں سیٹ کرنے کی اجازت دیں"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"الارمز اور یاد دہانیاں"</string>
@@ -551,7 +553,9 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"ہر بار پوچھیں"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"یہاں تک کہ آپ آف کر دیں"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"ابھی ابھی"</string>
-    <string name="media_transfer_this_device_name" msgid="2357329267148436433">"یہ فون"</string>
+    <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"یہ فون"</string>
+    <!-- no translation found for media_transfer_this_device_name (3714653244000242800) -->
+    <skip />
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"یہ فون"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"منسلک کرنے میں مسئلہ پیش آ گیا۔ آلہ کو آف اور بیک آن کریں"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"وائرڈ آڈیو آلہ"</string>
@@ -591,7 +595,9 @@
     <string name="user_set_lock_button" msgid="1427128184982594856">"لاک سیٹ کریں"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"‫<xliff:g id="USER_NAME">%s</xliff:g> پر سوئچ کریں"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"نیا صارف تخلیق ہو رہا ہے…"</string>
+    <string name="creating_new_guest_dialog_message" msgid="1114905602181350690">"نیا مہمان تخلیق کیا جا رہا ہے…"</string>
     <string name="add_user_failed" msgid="4809887794313944872">"نیا صارف بنانے میں ناکام"</string>
+    <string name="add_guest_failed" msgid="8074548434469843443">"نیا مہمان بنانے میں ناکام"</string>
     <string name="user_nickname" msgid="262624187455825083">"عرفی نام"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"مہمان کو شامل کریں"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"مہمان کو ہٹائیں"</string>
@@ -644,4 +650,7 @@
     <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"کاسٹ کرنے کی معلومات"</string>
     <string name="avatar_picker_title" msgid="8492884172713170652">"پروفائل کی تصویر منتخب کریں"</string>
     <string name="default_user_icon_description" msgid="6554047177298972638">"ڈیفالٹ صارف کا آئیکن"</string>
+    <string name="physical_keyboard_title" msgid="4811935435315835220">"فزیکل کی بورڈ"</string>
+    <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"کی بورڈ لے آؤٹ منتخب کریں"</string>
+    <string name="keyboard_layout_default_label" msgid="1997292217218546957">"ڈیفالٹ"</string>
 </resources>

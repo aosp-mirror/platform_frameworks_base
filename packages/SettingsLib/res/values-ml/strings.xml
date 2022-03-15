@@ -533,6 +533,8 @@
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"കുറഞ്ഞ സമയം."</string>
     <string name="cancel" msgid="5665114069455378395">"റദ്ദാക്കുക"</string>
     <string name="okay" msgid="949938843324579502">"ശരി"</string>
+    <!-- no translation found for done (381184316122520313) -->
+    <skip />
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"അലാറങ്ങളും റിമെെൻഡറുകളും"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"അലാറവും റിമെെൻഡറും സജ്ജീകരിക്കാൻ അനുവദിക്കുക"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"അലാറങ്ങളും റിമെെൻഡറുകളും"</string>
@@ -551,7 +553,9 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"എപ്പോഴും ചോദിക്കുക"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"നിങ്ങൾ ഓഫാക്കുന്നത് വരെ"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"ഇപ്പോൾ"</string>
-    <string name="media_transfer_this_device_name" msgid="2357329267148436433">"ഈ ഫോൺ"</string>
+    <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"ഈ ഫോൺ"</string>
+    <!-- no translation found for media_transfer_this_device_name (3714653244000242800) -->
+    <skip />
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"ഈ ഫോൺ"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"കണക്‌റ്റ് ചെയ്യുന്നതിൽ പ്രശ്‌നമുണ്ടായി. ഉപകരണം ഓഫാക്കി വീണ്ടും ഓണാക്കുക"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"വയർ മുഖേന ബന്ധിപ്പിച്ച ഓഡിയോ ഉപകരണം"</string>
@@ -591,7 +595,9 @@
     <string name="user_set_lock_button" msgid="1427128184982594856">"ലോക്ക് സജ്ജീകരിക്കുക"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"<xliff:g id="USER_NAME">%s</xliff:g> എന്നതിലേക്ക് മാറുക"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"പുതിയ ഉപയോക്താവിനെ സൃഷ്‌ടിക്കുന്നു…"</string>
+    <string name="creating_new_guest_dialog_message" msgid="1114905602181350690">"പുതിയ അതിഥിയെ സൃഷ്‌ടിക്കുന്നു…"</string>
     <string name="add_user_failed" msgid="4809887794313944872">"പുതിയ ഉപയോക്താവിനെ സൃഷ്‌ടിക്കാനായില്ല"</string>
+    <string name="add_guest_failed" msgid="8074548434469843443">"പുതിയ അതിഥിയെ സൃഷ്‌ടിക്കാനായില്ല"</string>
     <string name="user_nickname" msgid="262624187455825083">"വിളിപ്പേര്"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"അതിഥിയെ ചേർക്കുക"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"അതിഥിയെ നീക്കം ചെയ്യുക"</string>
@@ -644,4 +650,7 @@
     <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"കാസ്റ്റ് വിവരങ്ങൾ"</string>
     <string name="avatar_picker_title" msgid="8492884172713170652">"പ്രൊഫൈൽ ചിത്രം തിരഞ്ഞെടുക്കുക"</string>
     <string name="default_user_icon_description" msgid="6554047177298972638">"ഡിഫോൾട്ട് ഉപയോക്തൃ ഐക്കൺ"</string>
+    <string name="physical_keyboard_title" msgid="4811935435315835220">"ഫിസിക്കൽ കീബോർഡ്"</string>
+    <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"കീബോർഡ് ലേഔട്ട് തിരഞ്ഞെടുക്കുക"</string>
+    <string name="keyboard_layout_default_label" msgid="1997292217218546957">"ഡിഫോൾട്ട്"</string>
 </resources>
