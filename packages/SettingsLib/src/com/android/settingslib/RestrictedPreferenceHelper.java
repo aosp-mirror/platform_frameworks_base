@@ -23,12 +23,15 @@ import static com.android.settingslib.RestrictedLockUtils.EnforcedAdmin;
 import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.os.Build;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.widget.TextView;
 
+import androidx.annotation.RequiresApi;
+import androidx.core.os.BuildCompat;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceViewHolder;
 
@@ -102,11 +105,9 @@ public class RestrictedPreferenceHelper {
         if (mDisabledSummary) {
             final TextView summaryView = (TextView) holder.findViewById(android.R.id.summary);
             if (summaryView != null) {
-                final CharSequence disabledText = mContext
-                        .getSystemService(DevicePolicyManager.class)
-                        .getString(CONTROLLED_BY_ADMIN_SUMMARY,
-                                () -> summaryView.getContext().getString(
-                                        R.string.disabled_by_admin_summary_text));
+                final CharSequence disabledText = BuildCompat.isAtLeastT()
+                        ? getDisabledByAdminUpdatableString()
+                        : mContext.getString(R.string.disabled_by_admin_summary_text);
                 if (mDisabledByAdmin) {
                     summaryView.setText(disabledText);
                 } else if (mDisabledByAppOps) {
@@ -117,6 +118,13 @@ public class RestrictedPreferenceHelper {
                 }
             }
         }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    private String getDisabledByAdminUpdatableString() {
+        return mContext.getSystemService(DevicePolicyManager.class).getString(
+                CONTROLLED_BY_ADMIN_SUMMARY,
+                () -> mContext.getString(R.string.disabled_by_admin_summary_text));
     }
 
     public void useAdminDisabledSummary(boolean useSummary) {
