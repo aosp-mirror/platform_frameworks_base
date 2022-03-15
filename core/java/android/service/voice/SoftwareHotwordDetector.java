@@ -30,6 +30,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.SharedMemory;
+import android.util.Log;
 import android.util.Slog;
 
 import com.android.internal.app.IHotwordRecognitionStatusCallback;
@@ -57,8 +58,6 @@ class SoftwareHotwordDetector extends AbstractHotwordDetector {
     SoftwareHotwordDetector(
             IVoiceInteractionManagerService managerService,
             AudioFormat audioFormat,
-            PersistableBundle options,
-            SharedMemory sharedMemory,
             HotwordDetector.Callback callback) {
         super(managerService, callback, DETECTOR_TYPE_TRUSTED_HOTWORD_SOFTWARE);
 
@@ -66,6 +65,12 @@ class SoftwareHotwordDetector extends AbstractHotwordDetector {
         mAudioFormat = audioFormat;
         mCallback = callback;
         mHandler = new Handler(Looper.getMainLooper());
+    }
+
+    @Override
+    void initialize(@Nullable PersistableBundle options, @Nullable SharedMemory sharedMemory) {
+        // TODO: transition to use an API that is not updateState to provide
+        //  onHotwordDetectionServiceInitialized status to external callback
         updateStateLocked(options, sharedMemory,
                 new InitializationStateListener(mHandler, mCallback),
                 DETECTOR_TYPE_TRUSTED_HOTWORD_SOFTWARE);
@@ -113,7 +118,11 @@ class SoftwareHotwordDetector extends AbstractHotwordDetector {
 
     @Override
     public void destroy() {
-        stopRecognition();
+        try {
+            stopRecognition();
+        } catch (Exception e) {
+            Log.i(TAG, "failed to stopRecognition in destroy", e);
+        }
         maybeCloseExistingSession();
 
         try {

@@ -504,6 +504,7 @@ final class HotwordDetectionConnection {
                     if (mValidatingDspTrigger) {
                         mValidatingDspTrigger = false;
                         enforcePermissionsForDataDelivery();
+                        enforceExtraKeyphraseIdNotLeaked(result, recognitionEvent);
                         externalCallback.onKeyphraseDetected(recognitionEvent, result);
                         if (result != null) {
                             Slog.i(TAG, "Egressed " + HotwordDetectedResult.getUsageSize(result)
@@ -579,6 +580,7 @@ final class HotwordDetectionConnection {
                     mValidatingDspTrigger = false;
                     try {
                         enforcePermissionsForDataDelivery();
+                        enforceExtraKeyphraseIdNotLeaked(result, recognitionEvent);
                     } catch (SecurityException e) {
                         HotwordMetricsLogger.writeKeyphraseTriggerEvent(
                                 mDetectorType,
@@ -1122,6 +1124,19 @@ final class HotwordDetectionConnection {
                             permission,
                             SoundTriggerSessionPermissionsDecorator.toString(identity)));
         }
+    }
+
+    private static void enforceExtraKeyphraseIdNotLeaked(HotwordDetectedResult result,
+            SoundTrigger.KeyphraseRecognitionEvent recognitionEvent) {
+        // verify the phrase ID in HotwordDetectedResult is not exposing extra phrases
+        // the DSP did not detect
+        for (SoundTrigger.KeyphraseRecognitionExtra keyphrase : recognitionEvent.keyphraseExtras) {
+            if (keyphrase.getKeyphraseId() == result.getHotwordPhraseId()) {
+                return;
+            }
+        }
+        throw new SecurityException("Ignoring #onDetected due to trusted service "
+                + "sharing a keyphrase ID which the DSP did not detect");
     }
 
     private static final String OP_MESSAGE =

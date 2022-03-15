@@ -381,12 +381,15 @@ public class VoiceInteractionService extends Service {
         synchronized (mLock) {
             // Allow only one concurrent recognition via the APIs.
             safelyShutdownAllHotwordDetectors();
-            mHotwordDetector = new AlwaysOnHotwordDetector(keyphrase, locale, callback,
+
+            mHotwordDetector = new AlwaysOnHotwordDetector(keyphrase, locale,
+                    callback,
                     mKeyphraseEnrollmentInfo, mSystemService,
                     getApplicationContext().getApplicationInfo().targetSdkVersion,
-                    supportHotwordDetectionService, options, sharedMemory);
+                    supportHotwordDetectionService);
             mHotwordDetector.registerOnDestroyListener((detector) -> onDspHotwordDetectorDestroyed(
                     (AlwaysOnHotwordDetector) detector));
+            mHotwordDetector.initialize(options, sharedMemory);
         }
         return mHotwordDetector;
     }
@@ -436,12 +439,14 @@ public class VoiceInteractionService extends Service {
         synchronized (mLock) {
             // Allow only one concurrent recognition via the APIs.
             safelyShutdownAllHotwordDetectors();
+
             mSoftwareHotwordDetector =
                     new SoftwareHotwordDetector(
-                            mSystemService, null, options, sharedMemory, callback);
+                            mSystemService, null, callback);
             mSoftwareHotwordDetector.registerOnDestroyListener(
                     (detector) -> onMicrophoneHotwordDetectorDestroyed(
                             (SoftwareHotwordDetector) detector));
+            mSoftwareHotwordDetector.initialize(options, sharedMemory);
         }
         return mSoftwareHotwordDetector;
     }
