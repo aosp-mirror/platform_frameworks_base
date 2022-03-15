@@ -1486,8 +1486,9 @@ public final class SystemServer implements Dumpable {
 
             // TelecomLoader hooks into classes with defined HFP logic,
             // so check for either telephony or microphone.
-            if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_MICROPHONE) ||
-                    mPackageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY)) {
+            if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_MICROPHONE)
+                    || mPackageManager.hasSystemFeature(PackageManager.FEATURE_TELECOM)
+                    || mPackageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY)) {
                 t.traceBegin("StartTelecomLoaderService");
                 mSystemServiceManager.startService(TelecomLoaderService.class);
                 t.traceEnd();
