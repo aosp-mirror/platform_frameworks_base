@@ -19,8 +19,11 @@ package com.android.systemui.privacy
 import android.app.ActivityManager
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ActivityInfo
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
+import android.content.pm.PackageManager.ResolveInfoFlags
+import android.content.pm.ResolveInfo
 import android.content.pm.UserInfo
 import android.os.Process.SYSTEM_UID
 import android.os.UserHandle
@@ -648,6 +651,77 @@ class PrivacyDialogControllerTest : SysuiTestCase() {
         }
     }
 
+    @Test
+    fun testCorrectIntentSubAttribution() {
+        val usage = createMockPermGroupUsage(
+                attributionTag = TEST_ATTRIBUTION_TAG,
+                attributionLabel = "TEST_LABEL"
+        )
+
+        val activityInfo = createMockActivityInfo()
+        val resolveInfo = createMockResolveInfo(activityInfo)
+        `when`(permissionManager.getIndicatorAppOpUsageData(anyBoolean())).thenReturn(listOf(usage))
+        `when`(packageManager.resolveActivity(any(), any<ResolveInfoFlags>()))
+                .thenAnswer { resolveInfo }
+        controller.showDialog(context)
+        exhaustExecutors()
+
+        dialogProvider.list?.let { list ->
+            val navigationIntent = list.get(0).navigationIntent!!
+            assertThat(navigationIntent.action).isEqualTo(Intent.ACTION_MANAGE_PERMISSION_USAGE)
+            assertThat(navigationIntent.getStringExtra(Intent.EXTRA_PERMISSION_GROUP_NAME))
+                    .isEqualTo(PERM_CAMERA)
+            assertThat(navigationIntent.getStringArrayExtra(Intent.EXTRA_ATTRIBUTION_TAGS))
+                    .isEqualTo(arrayOf(TEST_ATTRIBUTION_TAG.toString()))
+            assertThat(navigationIntent.getBooleanExtra(Intent.EXTRA_SHOWING_ATTRIBUTION, false))
+                    .isTrue()
+        }
+    }
+
+    @Test
+    fun testDefaultIntentOnMissingAttributionLabel() {
+        val usage = createMockPermGroupUsage(
+                attributionTag = TEST_ATTRIBUTION_TAG
+        )
+
+        val activityInfo = createMockActivityInfo()
+        val resolveInfo = createMockResolveInfo(activityInfo)
+        `when`(permissionManager.getIndicatorAppOpUsageData(anyBoolean())).thenReturn(listOf(usage))
+        `when`(packageManager.resolveActivity(any(), any<ResolveInfoFlags>()))
+                .thenAnswer { resolveInfo }
+        controller.showDialog(context)
+        exhaustExecutors()
+
+        dialogProvider.list?.let { list ->
+            assertThat(isIntentEqual(list.get(0).navigationIntent!!,
+                    controller.getDefaultManageAppPermissionsIntent(TEST_PACKAGE_NAME, USER_ID)))
+                    .isTrue()
+        }
+    }
+
+    @Test
+    fun testDefaultIntentOnIncorrectPermission() {
+        val usage = createMockPermGroupUsage(
+                attributionTag = TEST_ATTRIBUTION_TAG
+        )
+
+        val activityInfo = createMockActivityInfo(
+                permission = "INCORRECT_PERMISSION"
+        )
+        val resolveInfo = createMockResolveInfo(activityInfo)
+        `when`(permissionManager.getIndicatorAppOpUsageData(anyBoolean())).thenReturn(listOf(usage))
+        `when`(packageManager.resolveActivity(any(), any<ResolveInfoFlags>()))
+                .thenAnswer { resolveInfo }
+        controller.showDialog(context)
+        exhaustExecutors()
+
+        dialogProvider.list?.let { list ->
+            assertThat(isIntentEqual(list.get(0).navigationIntent!!,
+                    controller.getDefaultManageAppPermissionsIntent(TEST_PACKAGE_NAME, USER_ID)))
+                    .isTrue()
+        }
+    }
+
     private fun exhaustExecutors() {
         FakeExecutor.exhaustExecutors(backgroundExecutor, uiExecutor)
     }
@@ -678,6 +752,24 @@ class PrivacyDialogControllerTest : SysuiTestCase() {
 
     private fun generateUidForUser(user: Int): Int {
         return user * UserHandle.PER_USER_RANGE + nextUid++
+    }
+
+    private fun createMockResolveInfo(
+        activityInfo: ActivityInfo? = null
+    ): ResolveInfo {
+        val resolveInfo = mock(ResolveInfo::class.java)
+        resolveInfo.activityInfo = activityInfo
+        return resolveInfo
+    }
+
+    private fun createMockActivityInfo(
+        permission: String = android.Manifest.permission.START_VIEW_PERMISSION_USAGE,
+        className: String = "TEST_CLASS_NAME"
+    ): ActivityInfo {
+        val activityInfo = mock(ActivityInfo::class.java)
+        activityInfo.permission = permission
+        activityInfo.name = className
+        return activityInfo
     }
 
     private fun createMockPermGroupUsage(

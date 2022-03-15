@@ -47,6 +47,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.icu.text.ListFormatter;
+import android.location.LocationManager;
 import android.media.AudioManager;
 import android.os.Process;
 import android.os.UserHandle;
@@ -411,10 +412,13 @@ public class PermissionUsageHelper implements AppOpsManager.OnOpActiveChangedLis
     }
 
     /**
-     * Returns true if the app supports subattribution.
+     * Returns true if the app satisfies subattribution policies and supports it
      */
     private boolean isSubattributionSupported(String packageName, int uid) {
         try {
+            if (!isLocationProvider(packageName)) {
+                return false;
+            }
             PackageManager userPkgManager =
                     getUserContext(UserHandle.getUserHandleForUid(uid)).getPackageManager();
             ApplicationInfo appInfo = userPkgManager.getApplicationInfoAsUser(packageName,
@@ -427,6 +431,15 @@ public class PermissionUsageHelper implements AppOpsManager.OnOpActiveChangedLis
         } catch (PackageManager.NameNotFoundException e) {
             return false;
         }
+    }
+
+    /**
+     * @param packageName
+     * @return If the package is location provider
+     */
+    private boolean isLocationProvider(String packageName) {
+        return Objects.requireNonNull(
+                mContext.getSystemService(LocationManager.class)).isProviderPackage(packageName);
     }
 
     /**
