@@ -192,7 +192,10 @@ constructor(
     override fun onTouchEvent(event: MotionEvent): Boolean {
         val finishExpanding = (event.action == MotionEvent.ACTION_CANCEL ||
             event.action == MotionEvent.ACTION_UP) && isExpanding
-        if (!canHandleMotionEvent() && !finishExpanding) {
+
+        val isDraggingNotificationOrCanBypass = mStartingChild?.showingPulsing() == true ||
+                bypassController.canBypass()
+        if ((!canHandleMotionEvent() || !isDraggingNotificationOrCanBypass) && !finishExpanding) {
             // We allow cancellations/finishing to still go through here to clean up the state
             return false
         }
