@@ -445,7 +445,7 @@ public abstract class PanelViewController {
                 mLockscreenGestureLogger.log(LockscreenUiEvent.LOCKSCREEN_UNLOCK);
             }
             @Classifier.InteractionType int interactionType = vel == 0 ? GENERIC
-                    : vel > 0 ? QUICK_SETTINGS
+                    : y - mInitialTouchY > 0 ? QUICK_SETTINGS
                             : (mKeyguardStateController.canDismissLockScreen()
                                     ? UNLOCK : BOUNCER_UNLOCK);
 
@@ -532,7 +532,7 @@ public abstract class PanelViewController {
             return true;
         }
 
-        @Classifier.InteractionType int interactionType = vel > 0
+        @Classifier.InteractionType int interactionType = y - mInitialTouchY > 0
                 ? QUICK_SETTINGS : (
                         mKeyguardStateController.canDismissLockScreen() ? UNLOCK : BOUNCER_UNLOCK);
 
