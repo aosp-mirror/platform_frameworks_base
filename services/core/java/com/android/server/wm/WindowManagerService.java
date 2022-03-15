@@ -2483,8 +2483,6 @@ public class WindowManagerService extends IWindowManager.Stub
             ProtoLog.v(WM_DEBUG_FOCUS, "Relayout of %s: focusMayChange=%b",
                     win, focusMayChange);
 
-            result |= mInTouchMode ? WindowManagerGlobal.RELAYOUT_RES_IN_TOUCH_MODE : 0;
-
             if (DEBUG_LAYOUT) {
                 Slog.v(TAG_WM, "Relayout complete " + win + ": outFrames=" + outFrames);
             }
