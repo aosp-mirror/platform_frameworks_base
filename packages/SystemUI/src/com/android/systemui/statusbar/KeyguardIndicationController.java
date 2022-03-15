@@ -293,6 +293,14 @@ public class KeyguardIndicationController {
         }
     }
 
+    /**
+     * Cleanup
+     */
+    public void destroy() {
+        mHandler.removeCallbacksAndMessages(null);
+        mBroadcastDispatcher.unregisterReceiver(mBroadcastReceiver);
+    }
+
     private void handleAlignStateChanged(int alignState) {
         String alignmentIndication = "";
         if (alignState == DockManager.ALIGN_STATE_POOR) {
