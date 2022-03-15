@@ -78,6 +78,7 @@ public class BackAnimationControllerTest {
         MockitoAnnotations.initMocks(this);
         mController = new BackAnimationController(
                 mShellExecutor, mTransaction, mActivityTaskManager, mContext);
+        mController.setEnableAnimations(true);
     }
 
     private void createNavigationInfo(RemoteAnimationTarget topAnimationTarget,
