@@ -533,6 +533,8 @@
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Menos tiempo"</string>
     <string name="cancel" msgid="5665114069455378395">"Cancelar"</string>
     <string name="okay" msgid="949938843324579502">"Aceptar"</string>
+    <!-- no translation found for done (381184316122520313) -->
+    <skip />
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Alarmas y recordatorios"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Permitir configuración de alarmas y recordatorios"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Alarmas y recordatorios"</string>
@@ -551,7 +553,9 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Preguntar siempre"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"Hasta que lo desactives"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Recién"</string>
-    <string name="media_transfer_this_device_name" msgid="2357329267148436433">"Este teléfono"</string>
+    <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Este teléfono"</string>
+    <!-- no translation found for media_transfer_this_device_name (3714653244000242800) -->
+    <skip />
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Este teléfono"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Error al establecer la conexión. Apaga el dispositivo y vuelve a encenderlo."</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Dispositivo de audio con cable"</string>
@@ -591,7 +595,9 @@
     <string name="user_set_lock_button" msgid="1427128184982594856">"Configurar bloqueo"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"Cambiar a <xliff:g id="USER_NAME">%s</xliff:g>"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"Creando usuario nuevo…"</string>
+    <string name="creating_new_guest_dialog_message" msgid="1114905602181350690">"Creando nuevo invitado…"</string>
     <string name="add_user_failed" msgid="4809887794313944872">"No se pudo crear el usuario nuevo"</string>
+    <string name="add_guest_failed" msgid="8074548434469843443">"No se pudo crear un nuevo invitado"</string>
     <string name="user_nickname" msgid="262624187455825083">"Sobrenombre"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Agregar invitado"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Quitar invitado"</string>
@@ -644,4 +650,10 @@
     <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"Info de reparto"</string>
     <string name="avatar_picker_title" msgid="8492884172713170652">"Elige una foto de perfil"</string>
     <string name="default_user_icon_description" msgid="6554047177298972638">"Ícono de usuario predeterminado"</string>
+    <!-- no translation found for physical_keyboard_title (4811935435315835220) -->
+    <skip />
+    <!-- no translation found for keyboard_layout_dialog_title (3927180147005616290) -->
+    <skip />
+    <!-- no translation found for keyboard_layout_default_label (1997292217218546957) -->
+    <skip />
 </resources>

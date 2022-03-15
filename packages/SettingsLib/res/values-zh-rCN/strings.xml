@@ -533,6 +533,8 @@
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"减少时间。"</string>
     <string name="cancel" msgid="5665114069455378395">"取消"</string>
     <string name="okay" msgid="949938843324579502">"确定"</string>
+    <!-- no translation found for done (381184316122520313) -->
+    <skip />
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"闹钟和提醒"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"允许设置闹钟和提醒"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"闹钟和提醒"</string>
@@ -551,7 +553,9 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"每次都询问"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"直到您将其关闭"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"刚刚"</string>
-    <string name="media_transfer_this_device_name" msgid="2357329267148436433">"这部手机"</string>
+    <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"这部手机"</string>
+    <!-- no translation found for media_transfer_this_device_name (3714653244000242800) -->
+    <skip />
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"这部手机"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"连接时遇到问题。请关闭并重新开启设备"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"有线音频设备"</string>
@@ -591,7 +595,9 @@
     <string name="user_set_lock_button" msgid="1427128184982594856">"设置屏幕锁定方式"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"切换到<xliff:g id="USER_NAME">%s</xliff:g>"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"正在创建新用户…"</string>
+    <string name="creating_new_guest_dialog_message" msgid="1114905602181350690">"正在创建新的访客…"</string>
     <string name="add_user_failed" msgid="4809887794313944872">"无法创建新用户"</string>
+    <string name="add_guest_failed" msgid="8074548434469843443">"未能创建新的访客"</string>
     <string name="user_nickname" msgid="262624187455825083">"昵称"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"添加访客"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"移除访客"</string>
@@ -644,4 +650,7 @@
     <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"投射信息"</string>
     <string name="avatar_picker_title" msgid="8492884172713170652">"选择个人资料照片"</string>
     <string name="default_user_icon_description" msgid="6554047177298972638">"默认用户图标"</string>
+    <string name="physical_keyboard_title" msgid="4811935435315835220">"实体键盘"</string>
+    <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"选择键盘布局"</string>
+    <string name="keyboard_layout_default_label" msgid="1997292217218546957">"默认"</string>
 </resources>

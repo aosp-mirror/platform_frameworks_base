@@ -533,6 +533,8 @@
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"कमी वेळ."</string>
     <string name="cancel" msgid="5665114069455378395">"रद्द करा"</string>
     <string name="okay" msgid="949938843324579502">"ठीक आहे"</string>
+    <!-- no translation found for done (381184316122520313) -->
+    <skip />
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"अलार्म आणि रिमाइंडर"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"अलार्म आणि रिमाइंडर सेट करण्याची अनुमती द्या"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"अलार्म आणि रिमाइंडर"</string>
@@ -551,7 +553,9 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"प्रत्येक वेळी विचारा"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"तुम्ही बंद करेपर्यंत"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"आत्ताच"</string>
-    <string name="media_transfer_this_device_name" msgid="2357329267148436433">"हा फोन"</string>
+    <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"हा फोन"</string>
+    <!-- no translation found for media_transfer_this_device_name (3714653244000242800) -->
+    <skip />
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"हा फोन"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"कनेक्‍ट करण्‍यात समस्‍या आली. डिव्हाइस बंद करा आणि नंतर सुरू करा"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"वायर असलेले ऑडिओ डिव्हाइस"</string>
@@ -591,7 +595,9 @@
     <string name="user_set_lock_button" msgid="1427128184982594856">"लॉक सेट करा"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"<xliff:g id="USER_NAME">%s</xliff:g> वर स्विच करा"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"नवीन वापरकर्ता तयार करत आहे…"</string>
+    <string name="creating_new_guest_dialog_message" msgid="1114905602181350690">"नवीन अतिथी तयार करत आहे…"</string>
     <string name="add_user_failed" msgid="4809887794313944872">"नवीन वापरकर्ता तयार करता आला नाही"</string>
+    <string name="add_guest_failed" msgid="8074548434469843443">"नवीन अतिथी तयार करता आला नाही"</string>
     <string name="user_nickname" msgid="262624187455825083">"टोपणनाव"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"अतिथी जोडा"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"अतिथी काढून टाका"</string>
@@ -644,4 +650,7 @@
     <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"कास्टसंबंधित माहिती"</string>
     <string name="avatar_picker_title" msgid="8492884172713170652">"प्रोफाइल फोटो निवडा"</string>
     <string name="default_user_icon_description" msgid="6554047177298972638">"डीफॉल्ट वापरकर्ता आयकन"</string>
+    <string name="physical_keyboard_title" msgid="4811935435315835220">"वास्तविक कीबोर्ड"</string>
+    <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"किबोर्ड लेआउट निवडा"</string>
+    <string name="keyboard_layout_default_label" msgid="1997292217218546957">"डीफॉल्ट"</string>
 </resources>

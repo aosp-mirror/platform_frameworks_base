@@ -533,6 +533,8 @@
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"ຫຼຸດເວລາ."</string>
     <string name="cancel" msgid="5665114069455378395">"ຍົກເລີກ"</string>
     <string name="okay" msgid="949938843324579502">"ຕົກລົງ"</string>
+    <!-- no translation found for done (381184316122520313) -->
+    <skip />
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"ໂມງປຸກ ແລະ ການແຈ້ງເຕືອນ"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"ອະນຸຍາດໃຫ້ຕັ້ງໂມງປຸກ ແລະ ການແຈ້ງເຕືອນ"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"ໂມງປຸກ ແລະ ການແຈ້ງເຕືອນ"</string>
@@ -551,7 +553,9 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"ຖາມທຸກເທື່ອ"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"ຈົນກວ່າທ່ານຈະປິດ"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"ຕອນນີ້"</string>
-    <string name="media_transfer_this_device_name" msgid="2357329267148436433">"ໂທລະສັບນີ້"</string>
+    <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"ໂທລະສັບນີ້"</string>
+    <!-- no translation found for media_transfer_this_device_name (3714653244000242800) -->
+    <skip />
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"ໂທລະສັບນີ້"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"ເກີດບັນຫາໃນການເຊື່ອມຕໍ່. ປິດອຸປະກອນແລ້ວເປີດກັບຄືນມາໃໝ່"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"ອຸປະກອນສຽງແບບມີສາຍ"</string>
@@ -591,7 +595,9 @@
     <string name="user_set_lock_button" msgid="1427128184982594856">"ຕັ້ງການລັອກ"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"ສະຫຼັບໄປ <xliff:g id="USER_NAME">%s</xliff:g>"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"ກຳລັງສ້າງຜູ້ໃຊ້ໃໝ່…"</string>
+    <string name="creating_new_guest_dialog_message" msgid="1114905602181350690">"ກຳລັງສ້າງແຂກໃໝ່…"</string>
     <string name="add_user_failed" msgid="4809887794313944872">"ສ້າງຜູ້ໃຊ້ໃໝ່ບໍ່ສຳເລັດ"</string>
+    <string name="add_guest_failed" msgid="8074548434469843443">"ສ້າງແຂກໃໝ່ບໍ່ສຳເລັດ"</string>
     <string name="user_nickname" msgid="262624187455825083">"ຊື່ຫຼິ້ນ"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"ເພີ່ມແຂກ"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"ລຶບແຂກອອກ"</string>
@@ -644,4 +650,7 @@
     <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"ຂໍ້ມູນການສົ່ງສັນຍານ"</string>
     <string name="avatar_picker_title" msgid="8492884172713170652">"ເລືອກຮູບໂປຣໄຟລ໌"</string>
     <string name="default_user_icon_description" msgid="6554047177298972638">"ໄອຄອນຜູ້ໃຊ້ເລີ່ມຕົ້ນ"</string>
+    <string name="physical_keyboard_title" msgid="4811935435315835220">"ແປ້ນພິມພາຍນອກ"</string>
+    <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"ເລືອກຮູບແບບແປ້ນພິມ"</string>
+    <string name="keyboard_layout_default_label" msgid="1997292217218546957">"ຄ່າເລີ່ມຕົ້ນ"</string>
 </resources>
