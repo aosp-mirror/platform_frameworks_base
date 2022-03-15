@@ -76,5 +76,8 @@
         <permission name="android.permission.FORCE_STOP_PACKAGES" />
         <permission name="android.permission.ACCESS_FPS_COUNTER" />
         <permission name="android.permission.CHANGE_CONFIGURATION" />
+        <permission name="android.permission.LOG_COMPAT_CHANGE" />
+        <permission name="android.permission.READ_COMPAT_CHANGE_CONFIG" />
+        <permission name="android.permission.READ_DEVICE_CONFIG" />
     </privapp-permissions>
 </permissions>

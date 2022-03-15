@@ -37,7 +37,6 @@ import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 import javax.inject.Provider
-import org.mockito.Mockito.`when` as whenever
 
 private val DATA = MediaData(
     userId = -1,
@@ -83,7 +82,6 @@ class MediaCarouselControllerTest : SysuiTestCase() {
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
-        whenever(mediaFlags.areMediaSessionActionsEnabled()).thenReturn(true)
         mediaCarouselController = MediaCarouselController(
             context,
             mediaControlPanelFactory,
