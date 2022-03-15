@@ -371,7 +371,7 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
             mCentralSurfaces.startActivityDismissingKeyguard(cameraIntent,
                     false /* onlyProvisioned */, true /* dismissShade */,
                     true /* disallowEnterPictureInPictureWhileLaunching */, null /* callback */, 0,
-                    null /* animationController */);
+                    null /* animationController */, UserHandle.CURRENT);
         } else {
             if (!mCentralSurfaces.isDeviceInteractive()) {
                 // Avoid flickering of the scrim when we instant launch the camera and the bouncer
@@ -428,7 +428,7 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
             mCentralSurfaces.startActivityDismissingKeyguard(emergencyIntent,
                     false /* onlyProvisioned */, true /* dismissShade */,
                     true /* disallowEnterPictureInPictureWhileLaunching */, null /* callback */, 0,
-                    null /* animationController */);
+                    null /* animationController */, UserHandle.CURRENT);
             return;
         }
 
