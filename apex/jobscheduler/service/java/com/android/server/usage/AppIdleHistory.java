@@ -686,6 +686,17 @@ public class AppIdleHistory {
                 Integer.toString(userId)), APP_IDLE_FILENAME);
     }
 
+    void clearLastUsedTimestamps(String packageName, int userId) {
+        ArrayMap<String, AppUsageHistory> userHistory = getUserHistory(userId);
+        AppUsageHistory appUsageHistory = getPackageHistory(userHistory, packageName,
+                SystemClock.elapsedRealtime(), false /* create */);
+        if (appUsageHistory != null) {
+            appUsageHistory.lastUsedByUserElapsedTime = Integer.MIN_VALUE;
+            appUsageHistory.lastUsedElapsedTime = Integer.MIN_VALUE;
+            appUsageHistory.lastUsedScreenTime = Integer.MIN_VALUE;
+        }
+    }
+
     /**
      * Check if App Idle File exists on disk
      * @param userId
