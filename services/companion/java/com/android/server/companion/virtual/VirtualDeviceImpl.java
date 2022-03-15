@@ -173,6 +173,11 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         return flags;
     }
 
+    /** Returns the device display name. */
+    CharSequence getDisplayName() {
+        return mAssociationInfo.getDisplayName();
+    }
+
     @Override // Binder call
     public int getAssociationId() {
         return mAssociationInfo.getId();
@@ -596,6 +601,13 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
      * Shows a toast on virtual displays owned by this device which have a given uid running.
      */
     void showToastWhereUidIsRunning(int uid, @StringRes int resId, @Toast.Duration int duration) {
+        showToastWhereUidIsRunning(uid, mContext.getString(resId), duration);
+    }
+
+    /**
+     * Shows a toast on virtual displays owned by this device which have a given uid running.
+     */
+    void showToastWhereUidIsRunning(int uid, String text, @Toast.Duration int duration) {
         synchronized (mVirtualDeviceLock) {
             DisplayManager displayManager = mContext.getSystemService(DisplayManager.class);
             final int size = mWindowPolicyControllers.size();
@@ -604,7 +616,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                     int displayId = mWindowPolicyControllers.keyAt(i);
                     Display display = displayManager.getDisplay(displayId);
                     if (display != null && display.isValid()) {
-                        Toast.makeText(mContext.createDisplayContext(display), resId,
+                        Toast.makeText(mContext.createDisplayContext(display), text,
                                 duration).show();
                     }
                 }
