@@ -241,7 +241,13 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
 
     private void addNonFirstPageAnimators(int page) {
         Pair<HeightExpansionAnimator, TouchAnimator> pair = createSecondaryPageAnimators(page);
-        mNonFirstPageQSAnimators.put(page, pair);
+        if (pair != null) {
+            // pair is null in one of two cases:
+            // * mPagedTileLayout is null, meaning we are still setting up.
+            // * the page has no tiles
+            // In either case, don't add the animators to the map.
+            mNonFirstPageQSAnimators.put(page, pair);
+        }
     }
 
     @Override
@@ -518,6 +524,13 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
         SideLabelTileLayout qqsLayout = (SideLabelTileLayout) mQuickQsPanel.getTileLayout();
         View view = mQs.getView();
         List<String> specs = mPagedLayout.getSpecsForPage(page);
+        if (specs.isEmpty()) {
+            // specs should not be empty in a valid secondary page, as we scrolled to it.
+            // We may crash later on because there's a null animator.
+            specs = mQsPanelController.getHost().mTileSpecs;
+            Log.e(TAG, "Trying to create animators for empty page " + page + ". Tiles: " + specs);
+            // return null;
+        }
 
         int row = -1;
         int lastTileTop = -1;
