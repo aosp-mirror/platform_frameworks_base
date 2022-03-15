@@ -95,11 +95,11 @@ final class OverlayConfigParser {
         public final String policy;
 
         /** Information extracted from the manifest of the overlay. */
-        @NonNull
+        @Nullable
         public final ParsedOverlayInfo parsedInfo;
 
         ParsedConfiguration(@NonNull String packageName, boolean enabled, boolean mutable,
-                @NonNull String policy, @NonNull ParsedOverlayInfo parsedInfo) {
+                @NonNull String policy, @Nullable ParsedOverlayInfo parsedInfo) {
             this.packageName = packageName;
             this.enabled = enabled;
             this.mutable = mutable;
