@@ -2596,7 +2596,7 @@ public final class InputMethodManager {
                 try {
                     mService.hideSoftInput(mClient, windowToken, 0 /* flags */,
                             null /* resultReceiver */,
-                            SoftInputShowHideReason.HIDE_SOFT_INPUT);
+                            SoftInputShowHideReason.HIDE_SOFT_INPUT_BY_INSETS_API);
                 } catch (RemoteException e) {
                     throw e.rethrowFromSystemServer();
                 }
@@ -2989,7 +2989,8 @@ public final class InputMethodManager {
      */
     @Deprecated
     public void hideSoftInputFromInputMethod(IBinder token, int flags) {
-        InputMethodPrivilegedOperationsRegistry.get(token).hideMySoftInput(flags);
+        InputMethodPrivilegedOperationsRegistry.get(token).hideMySoftInput(
+                flags, SoftInputShowHideReason.HIDE_SOFT_INPUT_IMM_DEPRECATION);
     }
 
     /**
