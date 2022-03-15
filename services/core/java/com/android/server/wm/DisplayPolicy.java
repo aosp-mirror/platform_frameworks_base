@@ -133,6 +133,7 @@ import android.view.WindowManager.LayoutParams;
 import android.view.WindowManagerGlobal;
 import android.view.WindowManagerPolicyConstants;
 import android.view.accessibility.AccessibilityManager;
+import android.window.ClientWindowFrames;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
@@ -337,9 +338,7 @@ public class DisplayPolicy {
     private static final Rect sTmpRect2 = new Rect();
     private static final Rect sTmpLastParentFrame = new Rect();
     private static final Rect sTmpDisplayCutoutSafe = new Rect();
-    private static final Rect sTmpDisplayFrame = new Rect();
-    private static final Rect sTmpParentFrame = new Rect();
-    private static final Rect sTmpFrame = new Rect();
+    private static final ClientWindowFrames sTmpClientFrames = new ClientWindowFrames();
 
     private final WindowLayout mWindowLayout = new WindowLayout();
 
@@ -1490,8 +1489,8 @@ public class DisplayPolicy {
                     displayFrames.mUnrestricted, win.getWindowingMode(), UNSPECIFIED_LENGTH,
                     UNSPECIFIED_LENGTH, win.getRequestedVisibilities(),
                     null /* attachedWindowFrame */, win.mGlobalScale,
-                    sTmpDisplayFrame, sTmpParentFrame, sTmpFrame);
-            controller.computeSimulatedState(win, displayFrames, sTmpFrame);
+                    sTmpClientFrames);
+            controller.computeSimulatedState(win, displayFrames, sTmpClientFrames.frame);
         }
     }
 
@@ -1534,12 +1533,12 @@ public class DisplayPolicy {
 
         sTmpLastParentFrame.set(pf);
 
-        final boolean clippedByDisplayCutout = mWindowLayout.computeFrames(attrs,
-                win.getInsetsState(), displayFrames.mDisplayCutoutSafe,
+        mWindowLayout.computeFrames(attrs, win.getInsetsState(), displayFrames.mDisplayCutoutSafe,
                 win.getBounds(), win.getWindowingMode(), requestedWidth, requestedHeight,
                 win.getRequestedVisibilities(), attachedWindowFrame, win.mGlobalScale,
-                df, pf, f);
-        windowFrames.setParentFrameWasClippedByDisplayCutout(clippedByDisplayCutout);
+                sTmpClientFrames);
+        windowFrames.setParentFrameWasClippedByDisplayCutout(
+                sTmpClientFrames.isParentFrameClippedByDisplayCutout);
 
         if (DEBUG_LAYOUT) Slog.v(TAG, "Compute frame " + attrs.getTitle()
                 + ": sim=#" + Integer.toHexString(attrs.softInputMode)
@@ -1552,7 +1551,7 @@ public class DisplayPolicy {
             windowFrames.setContentChanged(true);
         }
 
-        win.setFrame();
+        win.setFrames(sTmpClientFrames);
     }
 
     WindowState getTopFullscreenOpaqueWindow() {
