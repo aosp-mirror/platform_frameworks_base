@@ -95,14 +95,14 @@
         <!-- Do NOT change the IDs of the buttons: they are referenced in CTS tests. -->
 
         <Button
-            android:id="@+id/btn_negative"
-            style="@style/NegativeButton"
-            android:text="@string/consent_no" />
-
-        <Button
             android:id="@+id/btn_positive"
             style="@style/PositiveButton"
             android:text="@string/consent_yes" />
+
+        <Button
+            android:id="@+id/btn_negative"
+            style="@style/NegativeButton"
+            android:text="@string/consent_no" />
 
         <Button
             android:id="@+id/btn_negative_multiple_devices"
