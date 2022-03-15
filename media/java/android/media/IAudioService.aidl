@@ -39,6 +39,7 @@ import android.media.IRecordingConfigDispatcher;
 import android.media.IRingtonePlayer;
 import android.media.IStrategyPreferredDevicesDispatcher;
 import android.media.ISpatializerCallback;
+import android.media.ISpatializerHeadTrackerAvailableCallback;
 import android.media.ISpatializerHeadTrackingModeCallback;
 import android.media.ISpatializerHeadToSoundStagePoseCallback;
 import android.media.ISpatializerOutputCallback;
@@ -413,6 +414,11 @@ interface IAudioService {
     void setHeadTrackerEnabled(boolean enabled, in AudioDeviceAttributes device);
 
     boolean isHeadTrackerEnabled(in AudioDeviceAttributes device);
+
+    boolean isHeadTrackerAvailable();
+
+    void registerSpatializerHeadTrackerAvailableCallback(
+            in ISpatializerHeadTrackerAvailableCallback cb, boolean register);
 
     void setSpatializerEnabled(boolean enabled);
 
