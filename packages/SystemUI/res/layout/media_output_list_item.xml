@@ -83,7 +83,7 @@
                 android:ellipsize="end"
                 android:maxLines="1"
                 android:fontFamily="@*android:string/config_headlineFontFamilyMedium"
-                android:textColor="@color/media_dialog_inactive_item_main_content"
+                android:textColor="@color/media_dialog_item_main_content"
                 android:textSize="16sp"/>
             <TextView
                 android:id="@+id/subtitle"
@@ -91,7 +91,7 @@
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
                 android:maxLines="1"
-                android:textColor="@color/media_dialog_inactive_item_main_content"
+                android:textColor="@color/media_dialog_item_main_content"
                 android:textSize="14sp"
                 android:fontFamily="@*android:string/config_bodyFontFamily"
                 android:visibility="gone"/>
