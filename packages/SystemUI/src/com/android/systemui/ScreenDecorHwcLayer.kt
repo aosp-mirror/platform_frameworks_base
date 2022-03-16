@@ -119,9 +119,13 @@ class ScreenDecorHwcLayer(context: Context, displayDecorationSupport: DisplayDec
         if (useInvertedAlphaColor) {
             canvas.drawColor(bgColor)
         }
+
+        // We may clear the color(if useInvertedAlphaColor is true) of the rounded corner rects
+        // before drawing rounded corners. If the cutout happens to be inside one of these rects, it
+        // will be cleared, so we have to draw rounded corners before cutout.
+        drawRoundedCorners(canvas)
         // Cutouts are drawn in DisplayCutoutBaseView.onDraw()
         super.onDraw(canvas)
-        drawRoundedCorners(canvas)
 
         debugTransparentRegionPaint?.let {
             calculateTransparentRect()

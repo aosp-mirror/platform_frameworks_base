@@ -1344,7 +1344,9 @@
     <string name="notice_header" translatable="false"></string>
 
     <!-- Name of the phone device. [CHAR LIMIT=30] -->
-    <string name="media_transfer_this_device_name">This phone</string>
+    <string name="media_transfer_this_device_name" product="default">This phone</string>
+    <!-- Name of the tablet device. [CHAR LIMIT=30] -->
+    <string name="media_transfer_this_device_name" product="tablet">This tablet</string>
     <!-- Name of the phone device with an active remote session. [CHAR LIMIT=30] -->
     <string name="media_transfer_this_phone">This phone</string>
 

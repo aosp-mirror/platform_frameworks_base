@@ -792,7 +792,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         public void onWakeUp() {
             synchronized (mLock) {
                 if (shouldEnableWakeGestureLp()
-                        && mBatteryManagerInternal.getPlugType() != BATTERY_PLUGGED_WIRELESS) {
+                        && getBatteryManagerInternal().getPlugType() != BATTERY_PLUGGED_WIRELESS) {
                     performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY, false,
                             "Wake Up");
                     wakeUp(SystemClock.uptimeMillis(), mAllowTheaterModeWakeFromWakeGesture,

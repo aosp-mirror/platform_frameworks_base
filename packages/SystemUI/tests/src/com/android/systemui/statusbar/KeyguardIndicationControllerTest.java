@@ -226,6 +226,10 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     @After
     public void tearDown() throws Exception {
         mTextView.setAnimationsEnabled(true);
+        if (mController != null) {
+            mController.destroy();
+            mController = null;
+        }
     }
 
     private void createController() {

@@ -758,29 +758,30 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             mDebugTextUsedYPositions.clear();
         }
         int y = mTopPadding;
-        drawDebugInfo(canvas, y, Color.RED, /* label= */ "mTopPadding");
+        drawDebugInfo(canvas, y, Color.RED, /* label= */ "mTopPadding = "+y);
 
         y = getLayoutHeight();
-        drawDebugInfo(canvas, y, Color.YELLOW, /* label= */ "getLayoutHeight()");
+        drawDebugInfo(canvas, y, Color.YELLOW, /* label= */ "getLayoutHeight() = "+y);
 
         y = (int) mMaxLayoutHeight;
-        drawDebugInfo(canvas, y, Color.MAGENTA, /* label= */ "mMaxLayoutHeight");
+        drawDebugInfo(canvas, y, Color.MAGENTA, /* label= */ "mMaxLayoutHeight = "+y);
 
         if (mKeyguardBottomPadding >= 0) {
             y = getHeight() - (int) mKeyguardBottomPadding;
             drawDebugInfo(canvas, y, Color.GRAY,
-                    /* label= */ "getHeight() - mKeyguardBottomPadding");
+                    /* label= */ "getHeight() - mKeyguardBottomPadding = "+y);
         }
 
         y = getHeight() - getEmptyBottomMargin();
-        drawDebugInfo(canvas, y, Color.GREEN, /* label= */ "getHeight() - getEmptyBottomMargin()");
+        drawDebugInfo(canvas, y, Color.GREEN,
+                /* label= */ "getHeight() - getEmptyBottomMargin() = "+y);
 
         y = (int) (mAmbientState.getStackY());
-        drawDebugInfo(canvas, y, Color.CYAN, /* label= */ "mAmbientState.getStackY()");
+        drawDebugInfo(canvas, y, Color.CYAN, /* label= */ "mAmbientState.getStackY() = "+y);
 
         y = (int) (mAmbientState.getStackY() + mAmbientState.getStackHeight());
         drawDebugInfo(canvas, y, Color.BLUE,
-                /* label= */ "mAmbientState.getStackY() + mAmbientState.getStackHeight()");
+                /* label= */ "mAmbientState.getStackY() + mAmbientState.getStackHeight() = "+y);
     }
 
     private void drawDebugInfo(Canvas canvas, int y, int color, String label) {

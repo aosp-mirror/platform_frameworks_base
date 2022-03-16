@@ -3901,7 +3901,7 @@ package android.animation {
     method public Object getAnimatedValue(String);
     method public long getCurrentPlayTime();
     method public long getDuration();
-    method @FloatRange(from=0, to=1) public static float getDurationScale();
+    method @FloatRange(from=0) public static float getDurationScale();
     method public static long getFrameDelay();
     method public int getRepeatCount();
     method public int getRepeatMode();
@@ -3941,7 +3941,7 @@ package android.animation {
   }
 
   public static interface ValueAnimator.DurationScaleChangeListener {
-    method public void onChanged(float);
+    method public void onChanged(@FloatRange(from=0) float);
   }
 
 }
@@ -11300,6 +11300,7 @@ package android.content.pm {
     method @RequiresPermission(anyOf={android.Manifest.permission.INTERACT_ACROSS_PROFILES, "android.permission.INTERACT_ACROSS_USERS"}) public void startActivity(@NonNull android.content.Intent, @NonNull android.os.UserHandle, @Nullable android.app.Activity);
     method @RequiresPermission(anyOf={android.Manifest.permission.INTERACT_ACROSS_PROFILES, "android.permission.INTERACT_ACROSS_USERS"}) public void startActivity(@NonNull android.content.Intent, @NonNull android.os.UserHandle, @Nullable android.app.Activity, @Nullable android.os.Bundle);
     method public void startMainActivity(@NonNull android.content.ComponentName, @NonNull android.os.UserHandle);
+    method public void startMainActivity(@NonNull android.content.ComponentName, @NonNull android.os.UserHandle, @Nullable android.app.Activity, @Nullable android.os.Bundle);
     field public static final String ACTION_CAN_INTERACT_ACROSS_PROFILES_CHANGED = "android.content.pm.action.CAN_INTERACT_ACROSS_PROFILES_CHANGED";
   }
 
@@ -16407,18 +16408,21 @@ package android.graphics.pdf {
 package android.graphics.text {
 
   public final class LineBreakConfig {
-    ctor public LineBreakConfig();
     method public int getLineBreakStyle();
     method public int getLineBreakWordStyle();
-    method public void set(@NonNull android.graphics.text.LineBreakConfig);
-    method public void setLineBreakStyle(int);
-    method public void setLineBreakWordStyle(int);
     field public static final int LINE_BREAK_STYLE_LOOSE = 1; // 0x1
     field public static final int LINE_BREAK_STYLE_NONE = 0; // 0x0
     field public static final int LINE_BREAK_STYLE_NORMAL = 2; // 0x2
     field public static final int LINE_BREAK_STYLE_STRICT = 3; // 0x3
     field public static final int LINE_BREAK_WORD_STYLE_NONE = 0; // 0x0
     field public static final int LINE_BREAK_WORD_STYLE_PHRASE = 1; // 0x1
+  }
+
+  public static final class LineBreakConfig.Builder {
+    ctor public LineBreakConfig.Builder();
+    method @NonNull public android.graphics.text.LineBreakConfig build();
+    method @NonNull public android.graphics.text.LineBreakConfig.Builder setLineBreakStyle(int);
+    method @NonNull public android.graphics.text.LineBreakConfig.Builder setLineBreakWordStyle(int);
   }
 
   public class LineBreaker {
@@ -17408,7 +17412,7 @@ package android.hardware.camera2 {
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.Long> REQUEST_RECOMMENDED_TEN_BIT_DYNAMIC_RANGE_PROFILE;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.Float> SCALER_AVAILABLE_MAX_DIGITAL_ZOOM;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<int[]> SCALER_AVAILABLE_ROTATE_AND_CROP_MODES;
-    field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<int[]> SCALER_AVAILABLE_STREAM_USE_CASES;
+    field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<long[]> SCALER_AVAILABLE_STREAM_USE_CASES;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.Integer> SCALER_CROPPING_TYPE;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<android.util.Size> SCALER_DEFAULT_SECURE_IMAGE_SIZE;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<android.hardware.camera2.params.MandatoryStreamCombination[]> SCALER_MANDATORY_CONCURRENT_STREAM_COMBINATIONS;
@@ -18193,7 +18197,7 @@ package android.hardware.camera2.params {
     method public int get10BitFormat();
     method @NonNull public java.util.List<android.util.Size> getAvailableSizes();
     method public int getFormat();
-    method public int getStreamUseCase();
+    method public long getStreamUseCase();
     method public boolean is10BitCapable();
     method public boolean isInput();
     method public boolean isMaximumSize();
@@ -18251,7 +18255,7 @@ package android.hardware.camera2.params {
     method public long getDynamicRangeProfile();
     method public int getMaxSharedSurfaceCount();
     method public int getMirrorMode();
-    method public int getStreamUseCase();
+    method public long getStreamUseCase();
     method @Nullable public android.view.Surface getSurface();
     method public int getSurfaceGroupId();
     method @NonNull public java.util.List<android.view.Surface> getSurfaces();
@@ -18261,7 +18265,7 @@ package android.hardware.camera2.params {
     method public void setDynamicRangeProfile(long);
     method public void setMirrorMode(int);
     method public void setPhysicalCameraId(@Nullable String);
-    method public void setStreamUseCase(int);
+    method public void setStreamUseCase(long);
     method public void setTimestampBase(int);
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.hardware.camera2.params.OutputConfiguration> CREATOR;
@@ -45062,7 +45066,7 @@ package android.text {
   public static final class PrecomputedText.Params {
     method public int getBreakStrategy();
     method public int getHyphenationFrequency();
-    method @Nullable public android.graphics.text.LineBreakConfig getLineBreakConfig();
+    method @NonNull public android.graphics.text.LineBreakConfig getLineBreakConfig();
     method @NonNull public android.text.TextDirectionHeuristic getTextDirection();
     method @NonNull public android.text.TextPaint getTextPaint();
   }
@@ -57352,7 +57356,8 @@ package android.widget {
     method public final android.text.Layout getLayout();
     method public float getLetterSpacing();
     method public int getLineBounds(int, android.graphics.Rect);
-    method @NonNull public android.graphics.text.LineBreakConfig getLineBreakConfig();
+    method public int getLineBreakStyle();
+    method public int getLineBreakWordStyle();
     method public int getLineCount();
     method public int getLineHeight();
     method public float getLineSpacingExtra();
@@ -57480,7 +57485,8 @@ package android.widget {
     method public void setKeyListener(android.text.method.KeyListener);
     method public void setLastBaselineToBottomHeight(@IntRange(from=0) @Px int);
     method public void setLetterSpacing(float);
-    method public void setLineBreakConfig(@NonNull android.graphics.text.LineBreakConfig);
+    method public void setLineBreakStyle(int);
+    method public void setLineBreakWordStyle(int);
     method public void setLineHeight(@IntRange(from=0) @Px int);
     method public void setLineSpacing(float, float);
     method public void setLines(int);

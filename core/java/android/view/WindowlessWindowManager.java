@@ -22,6 +22,7 @@ import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
@@ -217,9 +218,13 @@ public class WindowlessWindowManager implements IWindowSession {
             throw new IllegalArgumentException(
                     "Invalid window token (never added or removed already)");
         }
+        removeSurface(state.mSurfaceControl);
+    }
 
+    /** Separate from {@link #remove} so that subclasses can put removal on a sync transaction. */
+    protected void removeSurface(SurfaceControl sc) {
         try (SurfaceControl.Transaction t = new SurfaceControl.Transaction()) {
-            t.remove(state.mSurfaceControl).apply();
+            t.remove(sc).apply();
         }
     }
 
@@ -277,7 +282,7 @@ public class WindowlessWindowManager implements IWindowSession {
             int requestedWidth, int requestedHeight, int viewFlags, int flags,
             ClientWindowFrames outFrames, MergedConfiguration mergedConfiguration,
             SurfaceControl outSurfaceControl, InsetsState outInsetsState,
-            InsetsSourceControl[] outActiveControls) {
+            InsetsSourceControl[] outActiveControls, Bundle outSyncSeqIdBundle) {
         final State state;
         synchronized (this) {
             state = mStateForWindow.get(window.asBinder());
@@ -354,7 +359,7 @@ public class WindowlessWindowManager implements IWindowSession {
 
     @Override
     public void finishDrawing(android.view.IWindow window,
-            android.view.SurfaceControl.Transaction postDrawTransaction) {
+            android.view.SurfaceControl.Transaction postDrawTransaction, int seqId) {
         synchronized (this) {
             final ResizeCompleteCallback c =
                 mResizeCompletionForWindow.get(window.asBinder());
