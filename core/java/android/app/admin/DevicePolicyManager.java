@@ -14009,12 +14009,12 @@ public class DevicePolicyManager {
     /**
      * Deprecated. Use {@code markProfileOwnerOnOrganizationOwnedDevice} instead.
      * When called by an app targeting SDK level {@link android.os.Build.VERSION_CODES#Q} or
-     * below, will behave the same as {@link #markProfileOwnerOnOrganizationOwnedDevice}.
+     * below, will behave the same as {@link #setProfileOwnerOnOrganizationOwnedDevice}.
      *
      * When called by an app targeting SDK level {@link android.os.Build.VERSION_CODES#R}
      * or above, will throw an UnsupportedOperationException when called.
      *
-     * @deprecated Use {@link #markProfileOwnerOnOrganizationOwnedDevice} instead.
+     * @deprecated Use {@link #setProfileOwnerOnOrganizationOwnedDevice} instead.
      *
      * @hide
      */
@@ -14029,14 +14029,14 @@ public class DevicePolicyManager {
                     "This method is deprecated. use markProfileOwnerOnOrganizationOwnedDevice"
                     + " instead.");
         } else {
-            markProfileOwnerOnOrganizationOwnedDevice(who);
+            setProfileOwnerOnOrganizationOwnedDevice(who, true);
         }
     }
 
     /**
-     * Marks the profile owner of the given user as managing an organization-owned device.
-     * That will give it access to device identifiers (such as serial number, IMEI and MEID)
-     * as well as other privileges.
+     * Sets whether the profile owner of the given user as managing an organization-owned device.
+     * Managing an organization-owned device will give it access to device identifiers (such as
+     * serial number, IMEI and MEID) as well as other privileges.
      *
      * @hide
      */
@@ -14044,13 +14044,15 @@ public class DevicePolicyManager {
     @RequiresPermission(anyOf = {
             android.Manifest.permission.MARK_DEVICE_ORGANIZATION_OWNED,
             android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS
-    }, conditional = true)
-    public void markProfileOwnerOnOrganizationOwnedDevice(@NonNull ComponentName who) {
+            }, conditional = true)
+    public void setProfileOwnerOnOrganizationOwnedDevice(@NonNull ComponentName who,
+            boolean isProfileOwnerOnOrganizationOwnedDevice) {
         if (mService == null) {
             return;
         }
         try {
-            mService.markProfileOwnerOnOrganizationOwnedDevice(who, myUserId());
+            mService.setProfileOwnerOnOrganizationOwnedDevice(who, myUserId(),
+                    isProfileOwnerOnOrganizationOwnedDevice);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
