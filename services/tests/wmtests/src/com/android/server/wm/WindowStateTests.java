@@ -504,7 +504,7 @@ public class WindowStateTests extends WindowTestsBase {
         assertTrue(win.useBLASTSync());
         final SurfaceControl.Transaction drawT = new StubTransaction();
         win.prepareDrawHandlers();
-        assertTrue(win.finishDrawing(drawT));
+        assertTrue(win.finishDrawing(drawT, Integer.MAX_VALUE));
         assertEquals(drawT, handledT[0]);
         assertFalse(win.useBLASTSync());
 
@@ -693,7 +693,7 @@ public class WindowStateTests extends WindowTestsBase {
             doThrow(new RemoteException("test")).when(win.mClient).resized(any() /* frames */,
                     anyBoolean() /* reportDraw */, any() /* mergedConfig */,
                     anyBoolean() /* forceLayout */, anyBoolean() /* alwaysConsumeSystemBars */,
-                    anyInt() /* displayId */);
+                    anyInt() /* displayId */, anyInt() /* seqId */);
         } catch (RemoteException ignored) {
         }
         win.reportResized();

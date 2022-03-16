@@ -361,7 +361,7 @@ cc_library_shared {
                 "libwuffs_mirror_release_c",
             ],
         },
-        linux_glibc: {
+        host_linux: {
             srcs: [
                 "android_content_res_ApkAssets.cpp",
                 "android_database_CursorWindow.cpp",

@@ -17,46 +17,131 @@
 package com.android.server.pm;
 
 import android.os.Process;
+import android.util.Log;
 
+import com.android.server.utils.WatchedArrayList;
 import com.android.server.utils.WatchedSparseArray;
+import com.android.server.utils.Watcher;
 
 /**
- * A wrapper over {@link WatchedSparseArray} that tracks the current maximum App ID.
+ * A wrapper over {@link WatchedArrayList} that tracks the current (app ID -> SettingBase) mapping
+ * for non-system apps. Also tracks system app settings in an {@link WatchedSparseArray}.
  */
-public class AppIdSettingMap extends WatchedSparseArray<SettingBase> {
-    private int mCurrentMaxAppId;
+final class AppIdSettingMap {
+    /**
+     * We use an ArrayList instead of an SparseArray for non system apps because the number of apps
+     * might be big, and only ArrayList gives us a constant lookup time. For a given app ID, the
+     * index to the corresponding SettingBase object is (appId - FIRST_APPLICATION_ID). If an app ID
+     * doesn't exist (i.e., app is not installed), we fill the corresponding entry with null.
+     */
+    private WatchedArrayList<SettingBase> mNonSystemSettings = new WatchedArrayList<>();
+    private WatchedSparseArray<SettingBase> mSystemSettings = new WatchedSparseArray<>();
+    private int mFirstAvailableAppId = Process.FIRST_APPLICATION_UID;
 
-    @Override
-    public void put(int key, SettingBase value) {
-        if (key > mCurrentMaxAppId) {
-            mCurrentMaxAppId = key;
+    /** Returns true if the requested AppID was valid and not already registered. */
+    public boolean registerExistingAppId(int appId, SettingBase setting, Object name) {
+        if (appId >= Process.FIRST_APPLICATION_UID) {
+            int size = mNonSystemSettings.size();
+            final int index = appId - Process.FIRST_APPLICATION_UID;
+            // fill the array until our index becomes valid
+            while (index >= size) {
+                mNonSystemSettings.add(null);
+                size++;
+            }
+            if (mNonSystemSettings.get(index) != null) {
+                PackageManagerService.reportSettingsProblem(Log.WARN,
+                        "Adding duplicate app id: " + appId
+                                + " name=" + name);
+                return false;
+            }
+            mNonSystemSettings.set(index, setting);
+        } else {
+            if (mSystemSettings.get(appId) != null) {
+                PackageManagerService.reportSettingsProblem(Log.WARN,
+                        "Adding duplicate shared id: " + appId
+                                + " name=" + name);
+                return false;
+            }
+            mSystemSettings.put(appId, setting);
         }
-        super.put(key, value);
+        return true;
     }
 
-    @Override
+    public SettingBase getSetting(int appId) {
+        if (appId >= Process.FIRST_APPLICATION_UID) {
+            final int size = mNonSystemSettings.size();
+            final int index = appId - Process.FIRST_APPLICATION_UID;
+            return index < size ? mNonSystemSettings.get(index) : null;
+        } else {
+            return mSystemSettings.get(appId);
+        }
+    }
+
+    public void removeSetting(int appId) {
+        if (appId >= Process.FIRST_APPLICATION_UID) {
+            final int size = mNonSystemSettings.size();
+            final int index = appId - Process.FIRST_APPLICATION_UID;
+            if (index < size) {
+                mNonSystemSettings.set(index, null);
+            }
+        } else {
+            mSystemSettings.remove(appId);
+        }
+        setFirstAvailableAppId(appId + 1);
+    }
+
+    // This should be called (at least) whenever an application is removed
+    private void setFirstAvailableAppId(int uid) {
+        if (uid > mFirstAvailableAppId) {
+            mFirstAvailableAppId = uid;
+        }
+    }
+
+    public void replaceSetting(int appId, SettingBase setting) {
+        if (appId >= Process.FIRST_APPLICATION_UID) {
+            final int size = mNonSystemSettings.size();
+            final int index = appId - Process.FIRST_APPLICATION_UID;
+            if (index < size) {
+                mNonSystemSettings.set(index, setting);
+            } else {
+                PackageManagerService.reportSettingsProblem(Log.WARN,
+                        "Error in package manager settings: calling replaceAppIdLpw to"
+                                + " replace SettingBase at appId=" + appId
+                                + " but nothing is replaced.");
+            }
+        } else {
+            mSystemSettings.put(appId, setting);
+        }
+    }
+
+    /** Returns a new AppID or -1 if we could not find an available AppID to assign */
+    public int acquireAndRegisterNewAppId(SettingBase obj) {
+        final int size = mNonSystemSettings.size();
+        for (int i = mFirstAvailableAppId - Process.FIRST_APPLICATION_UID; i < size; i++) {
+            if (mNonSystemSettings.get(i) == null) {
+                mNonSystemSettings.set(i, obj);
+                return Process.FIRST_APPLICATION_UID + i;
+            }
+        }
+
+        // None left?
+        if (size > (Process.LAST_APPLICATION_UID - Process.FIRST_APPLICATION_UID)) {
+            return -1;
+        }
+
+        mNonSystemSettings.add(obj);
+        return Process.FIRST_APPLICATION_UID + size;
+    }
+
     public AppIdSettingMap snapshot() {
         AppIdSettingMap l = new AppIdSettingMap();
-        snapshot(l, this);
+        mNonSystemSettings.snapshot(l.mNonSystemSettings, mNonSystemSettings);
+        mSystemSettings.snapshot(l.mSystemSettings, mSystemSettings);
         return l;
     }
 
-    /**
-     * @return the maximum of all the App IDs that have been added to the map. 0 if map is empty.
-     */
-    public int getCurrentMaxAppId() {
-        return mCurrentMaxAppId;
-    }
-
-    /**
-     * @return the next available App ID that has not been added to the map
-     */
-    public int getNextAvailableAppId() {
-        if (mCurrentMaxAppId == 0) {
-            // No app id has been added yet
-            return Process.FIRST_APPLICATION_UID;
-        } else {
-            return mCurrentMaxAppId + 1;
-        }
+    public void registerObserver(Watcher observer) {
+        mNonSystemSettings.registerObserver(observer);
+        mSystemSettings.registerObserver(observer);
     }
 }

@@ -20,6 +20,7 @@ import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentat
 
 import android.app.Activity;
 import android.content.Context;
+import android.os.Bundle;
 import android.os.RemoteException;
 import android.perftests.utils.BenchmarkState;
 import android.perftests.utils.PerfStatusReporter;
@@ -153,7 +154,8 @@ public class RelayoutPerfTest extends WindowManagerPerfTestBase
             while (state.keepRunning()) {
                 session.relayout(mWindow, mParams, mWidth, mHeight,
                         mViewVisibility.getAsInt(), mFlags, mOutFrames,
-                        mOutMergedConfiguration, mOutSurfaceControl, mOutInsetsState, mOutControls);
+                        mOutMergedConfiguration, mOutSurfaceControl, mOutInsetsState, mOutControls,
+                        new Bundle());
             }
         }
     }

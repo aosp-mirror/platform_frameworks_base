@@ -48,8 +48,6 @@ enum {
     TRANSACTION_isObbMounted,
     TRANSACTION_getMountedObbPath,
     TRANSACTION_isExternalStorageEmulated,
-    TRANSACTION_decryptStorage,
-    TRANSACTION_encryptStorage,
 };
 
 class BpMountService: public BpInterface<IMountService>
@@ -516,40 +514,6 @@ public:
         }
         path = reply.readString16();
         return true;
-    }
-
-    int32_t decryptStorage(const String16& password)
-    {
-        Parcel data, reply;
-        data.writeInterfaceToken(IMountService::getInterfaceDescriptor());
-        data.writeString16(password);
-        if (remote()->transact(TRANSACTION_decryptStorage, data, &reply) != NO_ERROR) {
-            ALOGD("decryptStorage could not contact remote\n");
-            return -1;
-        }
-        int32_t err = reply.readExceptionCode();
-        if (err < 0) {
-            ALOGD("decryptStorage caught exception %d\n", err);
-            return err;
-        }
-        return reply.readInt32();
-    }
-
-    int32_t encryptStorage(const String16& password)
-    {
-        Parcel data, reply;
-        data.writeInterfaceToken(IMountService::getInterfaceDescriptor());
-        data.writeString16(password);
-        if (remote()->transact(TRANSACTION_encryptStorage, data, &reply) != NO_ERROR) {
-            ALOGD("encryptStorage could not contact remote\n");
-            return -1;
-        }
-        int32_t err = reply.readExceptionCode();
-        if (err < 0) {
-            ALOGD("encryptStorage caught exception %d\n", err);
-            return err;
-        }
-        return reply.readInt32();
     }
 };
 

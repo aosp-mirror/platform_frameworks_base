@@ -96,7 +96,7 @@ package android.accessibilityservice {
 package android.animation {
 
   public class ValueAnimator extends android.animation.Animator {
-    method @MainThread public static void setDurationScale(@FloatRange(from=0, to=1) float);
+    method @MainThread public static void setDurationScale(@FloatRange(from=0) float);
   }
 
 }

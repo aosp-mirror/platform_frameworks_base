@@ -13,14 +13,12 @@
   ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
--->
-<TextView
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/weather_view"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:paddingHorizontal="@dimen/dream_overlay_complication_shadow_padding"
-    android:textColor="@android:color/white"
-    android:shadowColor="@color/keyguard_shadow_color"
-    android:shadowRadius="?attr/shadowRadius"
-    android:textSize="@dimen/dream_overlay_complication_weather_text_size"/>
+  -->
+
+<com.android.internal.widget.CachingIconView
+          xmlns:android="http://schemas.android.com/apk/res/android"
+          android:id="@+id/caching_icon_view"
+          android:layout_width="120dp"
+          android:layout_height="120dp"
+          android:maxDrawableWidth="80dp"
+          android:maxDrawableHeight="80dp" />
