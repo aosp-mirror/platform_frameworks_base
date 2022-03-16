@@ -4087,6 +4087,28 @@ public abstract class PackageManager {
             "android.software.incremental_delivery";
 
     /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}: The device
+     * has the requisite kernel support for the EROFS filesystem present in 4.19 kernels as a
+     * staging driver, which lacks 0padding and big pcluster support.
+     *
+     * @hide
+     */
+    @SystemApi
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_EROFS_LEGACY = "android.software.erofs_legacy";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}: The device
+     * has the requisite kernel support for the EROFS filesystem present in 5.10 kernels, which
+     * has 0padding, big pcluster, and chunked index support.
+     *
+     * @hide
+     */
+    @SystemApi
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_EROFS = "android.software.erofs";
+
+    /**
      * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}:
      * The device has tuner hardware to support tuner operations.
      *
