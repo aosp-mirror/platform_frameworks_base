@@ -176,6 +176,7 @@ public class SpatializerHelper {
      */
     synchronized void reset(boolean featureEnabled) {
         Log.i(TAG, "Resetting");
+        releaseSpat();
         mState = STATE_UNINITIALIZED;
         mSpatLevel = Spatializer.SPATIALIZER_IMMERSIVE_LEVEL_NONE;
         mCapableSpatLevel = Spatializer.SPATIALIZER_IMMERSIVE_LEVEL_NONE;
@@ -517,10 +518,10 @@ public class SpatializerHelper {
             try {
                 mSpat.registerHeadTrackingCallback(null);
                 mSpat.release();
-                mSpat = null;
             } catch (RemoteException e) {
                 Log.e(TAG, "Can't set release spatializer cleanly", e);
             }
+            mSpat = null;
         }
     }
 
