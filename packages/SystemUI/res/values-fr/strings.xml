@@ -20,19 +20,17 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4811759950673118541">"Interface"</string>
-    <!-- no translation found for battery_low_title (5319680173344341779) -->
-    <skip />
-    <!-- no translation found for battery_low_description (3282977755476423966) -->
-    <skip />
-    <!-- no translation found for battery_low_intro (5148725009653088790) -->
-    <skip />
+    <string name="battery_low_title" msgid="5319680173344341779">"Activer l\'économiseur de batterie ?"</string>
+    <string name="battery_low_description" msgid="3282977755476423966">"Il vous reste <xliff:g id="PERCENTAGE">%s</xliff:g> de batterie. L\'économiseur de batterie active le thème sombre, limite les activités en arrière-plan et retarde les notifications."</string>
+    <string name="battery_low_intro" msgid="5148725009653088790">"L\'économiseur de batterie active le thème sombre, limite les activités en arrière-plan et retarde les notifications."</string>
     <string name="battery_low_percent_format" msgid="4276661262843170964">"<xliff:g id="PERCENTAGE">%s</xliff:g> restants"</string>
     <string name="invalid_charger_title" msgid="938685362320735167">"Impossible de recharger via USB"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"Utiliser le chargeur d\'origine fourni avec votre appareil"</string>
     <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Activer l\'économiseur de batterie ?"</string>
     <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"À propos de l\'économiseur de batterie"</string>
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"Activer"</string>
-    <string name="battery_saver_start_action" msgid="4553256017945469937">"Activer l\'économiseur de batterie"</string>
+    <string name="battery_saver_start_action" msgid="8353766979886287140">"Activer"</string>
+    <string name="battery_saver_dismiss_action" msgid="7199342621040014738">"Non, merci"</string>
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Rotation automatique de l\'écran"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"Autoriser <xliff:g id="APPLICATION">%1$s</xliff:g> à accéder à <xliff:g id="USB_DEVICE">%2$s</xliff:g> ?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"Autoriser <xliff:g id="APPLICATION">%1$s</xliff:g> à accéder à <xliff:g id="USB_DEVICE">%2$s</xliff:g> ?\nCette application n\'a pas été autorisée à effectuer des enregistrements, mais elle pourrait enregistrer du contenu audio via ce périphérique USB."</string>
@@ -133,8 +131,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Visage authentifié"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Confirmé"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Appuyez sur \"Confirmer\" pour terminer"</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face (1597899891472340950) -->
-    <skip />
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="1597899891472340950">"Déverrouillé par votre visage. Appuyez pour continuer."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Authentifié"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Utiliser un code PIN"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Utiliser un schéma"</string>
@@ -462,8 +459,8 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Déverrouiller pour utiliser"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Problème de récupération de vos cartes. Réessayez plus tard"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Paramètres de l\'écran de verrouillage"</string>
-    <string name="qr_code_scanner_title" msgid="5660820608548306581">"Code QR"</string>
-    <string name="qr_code_scanner_description" msgid="7937603775306661863">"Appuyer pour scanner"</string>
+    <!-- no translation found for qr_code_scanner_title (5290201053875420785) -->
+    <skip />
     <string name="status_bar_work" msgid="5238641949837091056">"Profil professionnel"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Mode Avion"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"Vous n\'entendrez pas votre prochaine alarme <xliff:g id="WHEN">%1$s</xliff:g>."</string>
@@ -549,7 +546,7 @@
     <string name="keyboard_key_enter" msgid="8633362970109751646">"Entrée"</string>
     <string name="keyboard_key_backspace" msgid="4095278312039628074">"Retour arrière"</string>
     <string name="keyboard_key_media_play_pause" msgid="8389984232732277478">"Lire ou suspendre la lecture"</string>
-    <string name="keyboard_key_media_stop" msgid="5344400947407134507">"Arrêter la diffusion"</string>
+    <string name="keyboard_key_media_stop" msgid="1509943745250377699">"Arrêter"</string>
     <string name="keyboard_key_media_next" msgid="8502476691227914952">"Suivant"</string>
     <string name="keyboard_key_media_previous" msgid="5637875709190955351">"Précédent"</string>
     <string name="keyboard_key_media_rewind" msgid="3450387734224327577">"Retour arrière"</string>
@@ -916,8 +913,6 @@
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"Wi‑Fi non disponible"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"Mode Prioritaire"</string>
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"Alarme réglée"</string>
-    <string name="dream_overlay_status_bar_assistant_guest_mode_enabled" msgid="3715897096012469615">"Mode Invité activé pour l\'Assistant"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"Appareil photo et micro désactivés"</string>
-    <!-- no translation found for dream_overlay_status_bar_notification_indicator (8091389255691081711) -->
-    <skip />
+    <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# notification}one{# notification}other{# notifications}}"</string>
 </resources>

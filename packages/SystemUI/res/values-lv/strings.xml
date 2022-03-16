@@ -20,19 +20,17 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4811759950673118541">"Sistēmas UI"</string>
-    <!-- no translation found for battery_low_title (5319680173344341779) -->
-    <skip />
-    <!-- no translation found for battery_low_description (3282977755476423966) -->
-    <skip />
-    <!-- no translation found for battery_low_intro (5148725009653088790) -->
-    <skip />
+    <string name="battery_low_title" msgid="5319680173344341779">"Vai ieslēgt akumulatora enerģijas taupīšanas režīmu?"</string>
+    <string name="battery_low_description" msgid="3282977755476423966">"Atlikušais akumulatora uzlādes līmenis: <xliff:g id="PERCENTAGE">%s</xliff:g>. Akumulatora enerģijas taupīšanas režīmā tiek ieslēgts tumšais motīvs, ierobežotas darbības fonā un aizkavēti paziņojumi."</string>
+    <string name="battery_low_intro" msgid="5148725009653088790">"Akumulatora enerģijas taupīšanas režīmā tiek ieslēgts tumšais motīvs, ierobežotas darbības fonā un aizkavēti paziņojumi."</string>
     <string name="battery_low_percent_format" msgid="4276661262843170964">"Atlikuši <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="invalid_charger_title" msgid="938685362320735167">"Nevar veikt uzlādi, izmantojot USB"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"Izmantojiet ierīces komplektācijā iekļauto lādētāju"</string>
     <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Vai ieslēgt akumulatora enerģijas taupīšanas režīmu?"</string>
     <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"Par akumulatora enerģijas taupīšanas režīmu"</string>
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"Ieslēgt"</string>
-    <string name="battery_saver_start_action" msgid="4553256017945469937">"Ieslēgt akumulatora enerģijas taupīšanas režīmu"</string>
+    <string name="battery_saver_start_action" msgid="8353766979886287140">"Ieslēgt"</string>
+    <string name="battery_saver_dismiss_action" msgid="7199342621040014738">"Nē, paldies"</string>
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Automātiska ekrāna pagriešana"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"Vai atļaut lietotnei <xliff:g id="APPLICATION">%1$s</xliff:g> piekļūt šai ierīcei: <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"Vai atļaut lietotnei <xliff:g id="APPLICATION">%1$s</xliff:g> piekļūt ierīcei “<xliff:g id="USB_DEVICE">%2$s</xliff:g>”?\nŠai lietotnei nav piešķirta ierakstīšanas atļauja, taču tā varētu tvert audio, izmantojot šo USB ierīci."</string>
@@ -133,8 +131,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Seja autentificēta"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Apstiprināts"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Lai pabeigtu, pieskarieties Apstiprināt"</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face (1597899891472340950) -->
-    <skip />
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="1597899891472340950">"Sākta autorizācija pēc sejas. Nospiediet, lai turpinātu."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Autentifikācija veikta"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Izmantot PIN"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Izmantot kombināciju"</string>
@@ -465,8 +462,8 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Lai izmantotu, atbloķējiet ekrānu"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Ienesot jūsu kartes, radās problēma. Lūdzu, vēlāk mēģiniet vēlreiz."</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Bloķēšanas ekrāna iestatījumi"</string>
-    <string name="qr_code_scanner_title" msgid="5660820608548306581">"Ātrās atbildes kods"</string>
-    <string name="qr_code_scanner_description" msgid="7937603775306661863">"Pieskarieties, lai skenētu"</string>
+    <!-- no translation found for qr_code_scanner_title (5290201053875420785) -->
+    <skip />
     <string name="status_bar_work" msgid="5238641949837091056">"Darba profils"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Lidojuma režīms"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"Nākamais signāls (<xliff:g id="WHEN">%1$s</xliff:g>) netiks atskaņots."</string>
@@ -554,7 +551,7 @@
     <string name="keyboard_key_enter" msgid="8633362970109751646">"Ievadīšanas taustiņš"</string>
     <string name="keyboard_key_backspace" msgid="4095278312039628074">"Atpakaļatkāpes taustiņš"</string>
     <string name="keyboard_key_media_play_pause" msgid="8389984232732277478">"Atskaņot/apturēt"</string>
-    <string name="keyboard_key_media_stop" msgid="5344400947407134507">"Apturēt apraidi"</string>
+    <string name="keyboard_key_media_stop" msgid="1509943745250377699">"Apturēt"</string>
     <string name="keyboard_key_media_next" msgid="8502476691227914952">"Nākamais"</string>
     <string name="keyboard_key_media_previous" msgid="5637875709190955351">"Iepriekšējais"</string>
     <string name="keyboard_key_media_rewind" msgid="3450387734224327577">"Attīt atpakaļ"</string>
@@ -923,8 +920,6 @@
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"Wi‑Fi nav pieejams"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"Prioritātes režīms"</string>
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"Signāls ir iestatīts"</string>
-    <string name="dream_overlay_status_bar_assistant_guest_mode_enabled" msgid="3715897096012469615">"Asistenta viesa režīms ir iespējots"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"Kamera un mikrofons ir izslēgti"</string>
-    <!-- no translation found for dream_overlay_status_bar_notification_indicator (8091389255691081711) -->
-    <skip />
+    <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# paziņojums}zero{# paziņojumu}one{# paziņojums}other{# paziņojumi}}"</string>
 </resources>
