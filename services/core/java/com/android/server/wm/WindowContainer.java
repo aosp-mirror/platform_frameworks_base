@@ -1196,6 +1196,23 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         return false;
     }
 
+    boolean isExitAnimationRunningSelfOrChild() {
+        if (!mTransitionController.isShellTransitionsEnabled()) {
+            return isAnimating(TRANSITION | CHILDREN, WindowState.EXIT_ANIMATING_TYPES);
+        }
+        if (mTransitionController.isCollecting(this)) {
+            return true;
+        }
+
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
+            WindowContainer child = mChildren.get(i);
+            if (child.isExitAnimationRunningSelfOrChild()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     void sendAppVisibilityToClients() {
         for (int i = mChildren.size() - 1; i >= 0; --i) {
             final WindowContainer wc = mChildren.get(i);
