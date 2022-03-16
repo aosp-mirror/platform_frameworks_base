@@ -3165,11 +3165,8 @@ public final class ViewRootImpl implements ViewParent,
             // possible that checking the most recent value is actually more
             // correct here.
             if (!mStopped || wasReportNextDraw) {
-                boolean focusChangedDueToTouchMode = ensureTouchModeLocally(
-                        (relayoutResult&WindowManagerGlobal.RELAYOUT_RES_IN_TOUCH_MODE) != 0);
-                if (focusChangedDueToTouchMode || mWidth != host.getMeasuredWidth()
-                        || mHeight != host.getMeasuredHeight() || dispatchApplyInsets ||
-                        updatedConfiguration) {
+                if (mWidth != host.getMeasuredWidth() || mHeight != host.getMeasuredHeight()
+                        || dispatchApplyInsets || updatedConfiguration) {
                     int childWidthMeasureSpec = getRootMeasureSpec(mWidth, lp.width,
                             lp.privateFlags);
                     int childHeightMeasureSpec = getRootMeasureSpec(mHeight, lp.height,
