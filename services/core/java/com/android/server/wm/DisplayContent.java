@@ -4877,6 +4877,23 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         void setOrganizer(IDisplayAreaOrganizer organizer, boolean skipDisplayAreaAppeared) {
             super.setOrganizer(organizer, skipDisplayAreaAppeared);
             mDisplayContent.updateImeParent();
+
+            // If the ImeContainer was previously unorganized then the framework might have
+            // reparented its surface control under an activity so we need to reparent it back
+            // under its parent.
+            if (organizer != null) {
+                final SurfaceControl imeParentSurfaceControl = getParentSurfaceControl();
+                if (mSurfaceControl != null && imeParentSurfaceControl != null) {
+                    ProtoLog.i(WM_DEBUG_IME, "ImeContainer just became organized. Reparenting "
+                            + "under parent. imeParentSurfaceControl=%s", imeParentSurfaceControl);
+                    getPendingTransaction().reparent(mSurfaceControl, imeParentSurfaceControl);
+                } else {
+                    ProtoLog.e(WM_DEBUG_IME, "ImeContainer just became organized but it doesn't "
+                            + "have a parent or the parent doesn't have a surface control."
+                            + " mSurfaceControl=%s imeParentSurfaceControl=%s",
+                            mSurfaceControl, imeParentSurfaceControl);
+                }
+            }
         }
     }
 
