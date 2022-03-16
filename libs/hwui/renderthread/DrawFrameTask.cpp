@@ -133,6 +133,7 @@ int DrawFrameTask::drawFrame() {
 }
 
 void DrawFrameTask::postAndWait() {
+    ATRACE_CALL();
     AutoMutex _lock(mLock);
     mRenderThread->queue().post([this]() { run(); });
     mSignal.wait(mLock);
