@@ -3702,11 +3702,12 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             try {
-                IBinder surfaceFlinger = ServiceManager.getService("SurfaceFlinger");
+                // TODO(b/221898546): remove the following and convert to jni
+                IBinder surfaceFlinger = ServiceManager.getService("SurfaceFlingerAIDL");
                 if (surfaceFlinger != null) {
                     ProtoLog.i(WM_ERROR, "******* TELLING SURFACE FLINGER WE ARE BOOTED!");
                     Parcel data = Parcel.obtain();
-                    data.writeInterfaceToken("android.ui.ISurfaceComposer");
+                    data.writeInterfaceToken("android.gui.ISurfaceComposer");
                     surfaceFlinger.transact(IBinder.FIRST_CALL_TRANSACTION, // BOOT_FINISHED
                             data, null, 0);
                     data.recycle();
