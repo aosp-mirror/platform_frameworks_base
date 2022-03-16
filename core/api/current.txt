@@ -25191,17 +25191,23 @@ package android.media.tv {
   }
 
   public final class CommandRequest extends android.media.tv.BroadcastInfoRequest implements android.os.Parcelable {
-    ctor public CommandRequest(int, int, @NonNull String, @NonNull String, @NonNull String);
+    ctor public CommandRequest(int, int, @NonNull String, @NonNull String, @NonNull String, @NonNull String);
+    method @NonNull public String getArgumentType();
     method @NonNull public String getArguments();
     method @NonNull public String getName();
-    method @NonNull public String getNameSpace();
+    method @NonNull public String getNamespace();
+    field public static final String ARGUMENT_TYPE_JSON = "json";
+    field public static final String ARGUMENT_TYPE_XML = "xml";
     field @NonNull public static final android.os.Parcelable.Creator<android.media.tv.CommandRequest> CREATOR;
   }
 
   public final class CommandResponse extends android.media.tv.BroadcastInfoResponse implements android.os.Parcelable {
-    ctor public CommandResponse(int, int, int, @Nullable String);
+    ctor public CommandResponse(int, int, int, @Nullable String, @NonNull String);
     method @Nullable public String getResponse();
+    method @NonNull public String getResponseType();
     field @NonNull public static final android.os.Parcelable.Creator<android.media.tv.CommandResponse> CREATOR;
+    field public static final String RESPONSE_TYPE_JSON = "json";
+    field public static final String RESPONSE_TYPE_XML = "xml";
   }
 
   public final class DsmccRequest extends android.media.tv.BroadcastInfoRequest implements android.os.Parcelable {
@@ -25266,7 +25272,7 @@ package android.media.tv {
     ctor public StreamEventResponse(int, int, int, int, long, @Nullable byte[]);
     method @Nullable public byte[] getData();
     method public int getEventId();
-    method public long getNpt();
+    method public long getNptMillis();
     field @NonNull public static final android.os.Parcelable.Creator<android.media.tv.StreamEventResponse> CREATOR;
   }
 
@@ -25296,7 +25302,7 @@ package android.media.tv {
 
   public final class TimelineResponse extends android.media.tv.BroadcastInfoResponse implements android.os.Parcelable {
     ctor public TimelineResponse(int, int, int, @Nullable String, int, int, long, long);
-    method @Nullable public String getSelector();
+    method @Nullable public android.net.Uri getSelector();
     method public long getTicks();
     method public int getUnitsPerSecond();
     method public int getUnitsPerTick();
