@@ -726,8 +726,8 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
 
         boolean isCameraPrivacyEnabled = false;
         if (error == BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE
-                && mSensorPrivacyManager.isSensorPrivacyEnabled(SensorPrivacyManager.Sensors.CAMERA,
-                mCurrentDialogArgs.argi1 /* userId */)) {
+                && mSensorPrivacyManager.isSensorPrivacyEnabled(
+                SensorPrivacyManager.TOGGLE_TYPE_SOFTWARE, SensorPrivacyManager.Sensors.CAMERA)) {
             isCameraPrivacyEnabled = true;
         }
         // TODO(b/141025588): Create separate methods for handling hard and soft errors.
