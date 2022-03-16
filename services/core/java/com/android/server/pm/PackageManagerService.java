@@ -80,7 +80,6 @@ import android.content.pm.FallbackCategoryProvider;
 import android.content.pm.FeatureInfo;
 import android.content.pm.IDexModuleRegisterCallback;
 import android.content.pm.IOnChecksumsReadyListener;
-import android.content.pm.IPackageChangeObserver;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageDeleteObserver2;
 import android.content.pm.IPackageInstallObserver2;
@@ -92,7 +91,6 @@ import android.content.pm.InstallSourceInfo;
 import android.content.pm.InstantAppInfo;
 import android.content.pm.InstantAppRequest;
 import android.content.pm.ModuleInfo;
-import android.content.pm.PackageChangeEvent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInfoLite;
 import android.content.pm.PackageInstaller;
@@ -228,7 +226,6 @@ import com.android.server.pm.resolution.ComponentResolverApi;
 import com.android.server.pm.verify.domain.DomainVerificationManagerInternal;
 import com.android.server.pm.verify.domain.DomainVerificationService;
 import com.android.server.pm.verify.domain.proxy.DomainVerificationProxy;
-import com.android.server.pm.verify.domain.proxy.DomainVerificationProxyV1;
 import com.android.server.sdksandbox.SdkSandboxManagerLocal;
 import com.android.server.storage.DeviceStorageMonitorInternal;
 import com.android.server.utils.SnapshotCache;
@@ -694,10 +691,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             PackagePartitions.getOrderedPartitions(ScanPartition::new));
 
     private @NonNull final OverlayConfig mOverlayConfig;
-
-    @GuardedBy("itself")
-    final ArrayList<IPackageChangeObserver> mPackageChangeObservers =
-        new ArrayList<>();
 
     // Cached parsed flag value. Invalidated on each flag change.
     PerUidReadTimeouts[] mPerUidReadTimeoutsCache;
@@ -3136,23 +3129,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             mBroadcastHelper.sendFirstLaunchBroadcast(
                     packageName, installerPackage, userIds, instantUserIds);
         });
-    }
-
-    void notifyPackageChangeObservers(PackageChangeEvent event) {
-        try {
-            Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "notifyPackageChangeObservers");
-            synchronized (mPackageChangeObservers) {
-                for (IPackageChangeObserver observer : mPackageChangeObservers) {
-                    try {
-                        observer.onPackageChanged(event);
-                    } catch (RemoteException e) {
-                        Log.wtf(TAG, e);
-                    }
-                }
-            }
-        } finally {
-            Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
-        }
     }
 
     VersionInfo getSettingsVersionForPackage(AndroidPackage pkg) {

@@ -39,7 +39,6 @@ import android.app.ApplicationPackageManager;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageDeleteObserver2;
-import android.content.pm.PackageChangeEvent;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.SharedLibraryInfo;
@@ -751,7 +750,6 @@ final class DeletePackageHelper {
             } catch (RemoteException e) {
                 Log.i(TAG, "Observer no longer exists.");
             } //end catch
-            notifyPackageChangeObserversOnDelete(packageName, versionCode);
 
             // Prune unused static shared libraries which have been cached a period of time
             mPm.schedulePruneUnusedStaticSharedLibraries(true /* delay */);
@@ -809,18 +807,6 @@ final class DeletePackageHelper {
             }
         }
         return result;
-    }
-
-    private void notifyPackageChangeObserversOnDelete(String packageName, long version) {
-        PackageChangeEvent pkgChangeEvent = new PackageChangeEvent();
-        pkgChangeEvent.packageName = packageName;
-        pkgChangeEvent.version = version;
-        pkgChangeEvent.lastUpdateTimeMillis = 0L;
-        pkgChangeEvent.newInstalled = false;
-        pkgChangeEvent.dataRemoved = false;
-        pkgChangeEvent.isDeleted = true;
-
-        mPm.notifyPackageChangeObservers(pkgChangeEvent);
     }
 
     private static class TempUserState {

@@ -129,8 +129,6 @@ import com.android.server.pm.parsing.PackageInfoUtils;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
-import com.android.server.pm.pkg.PackageState;
-import com.android.server.pm.pkg.PackageStateImpl;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.PackageStateUtils;
 import com.android.server.pm.pkg.PackageUserStateInternal;
@@ -4274,11 +4272,8 @@ public class ComputerEngine implements Computer {
 
     @Override
     public List<String> getAllPackages() {
-        // Allow iorapd to call this method.
-        if (Binder.getCallingUid() != Process.IORAPD_UID) {
-            PackageManagerServiceUtils.enforceSystemOrRootOrShell(
-                    "getAllPackages is limited to privileged callers");
-        }
+        PackageManagerServiceUtils.enforceSystemOrRootOrShell(
+                "getAllPackages is limited to privileged callers");
         final int callingUid = Binder.getCallingUid();
         final int callingUserId = UserHandle.getUserId(callingUid);
         if (canViewInstantApps(callingUid, callingUserId)) {

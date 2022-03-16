@@ -102,7 +102,6 @@ import android.content.IntentSender;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.DataLoaderType;
 import android.content.pm.IPackageInstallObserver2;
-import android.content.pm.PackageChangeEvent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInfoLite;
 import android.content.pm.PackageInstaller;
@@ -2348,27 +2347,9 @@ final class InstallPackageHelper {
             // BackgroundDexOptService will remove it from its denylist.
             // TODO: Layering violation
             BackgroundDexOptService.getService().notifyPackageChanged(packageName);
-
-            notifyPackageChangeObserversOnUpdate(reconciledPkg);
         }
         PackageManagerServiceUtils.waitForNativeBinariesExtractionForIncremental(
                 incrementalStorages);
-    }
-
-    private void notifyPackageChangeObserversOnUpdate(ReconciledPackage reconciledPkg) {
-        final PackageSetting pkgSetting = reconciledPkg.mPkgSetting;
-        final PackageInstalledInfo pkgInstalledInfo = reconciledPkg.mInstallResult;
-        final PackageRemovedInfo pkgRemovedInfo = pkgInstalledInfo.mRemovedInfo;
-
-        PackageChangeEvent pkgChangeEvent = new PackageChangeEvent();
-        pkgChangeEvent.packageName = pkgSetting.getPkg().getPackageName();
-        pkgChangeEvent.version = pkgSetting.getVersionCode();
-        pkgChangeEvent.lastUpdateTimeMillis = pkgSetting.getLastUpdateTime();
-        pkgChangeEvent.newInstalled = (pkgRemovedInfo == null || !pkgRemovedInfo.mIsUpdate);
-        pkgChangeEvent.dataRemoved = (pkgRemovedInfo != null && pkgRemovedInfo.mDataRemoved);
-        pkgChangeEvent.isDeleted = false;
-
-        mPm.notifyPackageChangeObservers(pkgChangeEvent);
     }
 
     public int installLocationPolicy(PackageInfoLite pkgLite, int installFlags) {
