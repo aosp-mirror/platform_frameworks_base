@@ -23,31 +23,32 @@ import java.util.Comparator;
  * Class which can compute the logical density for a display resolution. It holds a collection
  * of pre-configured densities, which are used for look-up and interpolation.
  */
-public class DensityMap {
+public class DensityMapping {
 
     // Instead of resolutions we store the squared diagonal size. Diagonals make the map
     // keys invariant to rotations and are useful for interpolation because they're scalars.
     // Squared diagonals have the same properties as diagonals (the square function is monotonic)
     // but also allow us to use integer types and avoid floating point arithmetics.
-    private final Entry[] mSortedDensityMapEntries;
+    private final Entry[] mSortedDensityMappingEntries;
 
     /**
-     * Creates a density map. The newly created object takes ownership of the passed array.
+     * Creates a density mapping. The newly created object takes ownership of the passed array.
      */
-    static DensityMap createByOwning(Entry[] densityMapEntries) {
-        return new DensityMap(densityMapEntries);
+    static DensityMapping createByOwning(Entry[] densityMappingEntries) {
+        return new DensityMapping(densityMappingEntries);
     }
 
-    private DensityMap(Entry[] densityMapEntries) {
-        Arrays.sort(densityMapEntries, Comparator.comparingInt(entry -> entry.squaredDiagonal));
-        mSortedDensityMapEntries = densityMapEntries;
-        verifyDensityMap(mSortedDensityMapEntries);
+    private DensityMapping(Entry[] densityMappingEntries) {
+        Arrays.sort(densityMappingEntries, Comparator.comparingInt(
+                entry -> entry.squaredDiagonal));
+        mSortedDensityMappingEntries = densityMappingEntries;
+        verifyDensityMapping(mSortedDensityMappingEntries);
     }
 
     /**
      * Returns the logical density for the given resolution.
      *
-     * If the resolution matches one of the entries in the map, the corresponding density is
+     * If the resolution matches one of the entries in the mapping, the corresponding density is
      * returned. Otherwise the return value is interpolated using the closest entries in the map.
      */
     public int getDensityForResolution(int width, int height) {
@@ -61,7 +62,7 @@ public class DensityMap {
         Entry left = Entry.ZEROES;
         Entry right = null;
 
-        for (Entry entry : mSortedDensityMapEntries) {
+        for (Entry entry : mSortedDensityMappingEntries) {
             if (entry.squaredDiagonal <= squaredDiagonal) {
                 left = entry;
             } else {
@@ -90,7 +91,7 @@ public class DensityMap {
                 / (rightDiagonal - leftDiagonal) + left.density);
     }
 
-    private static void verifyDensityMap(Entry[] sortedEntries) {
+    private static void verifyDensityMapping(Entry[] sortedEntries) {
         for (int i = 1; i < sortedEntries.length; i++) {
             Entry prev = sortedEntries[i - 1];
             Entry curr = sortedEntries[i];
@@ -100,10 +101,10 @@ public class DensityMap {
                 // resolution (AxB and AxB) or rotated resolution (AxB and BxA), but it can also
                 // happen in the very rare cases when two different resolutions happen to have
                 // the same diagonal (e.g. 100x700 and 500x500).
-                throw new IllegalStateException("Found two entries in the density map with"
+                throw new IllegalStateException("Found two entries in the density mapping with"
                         + " the same diagonal: " + prev + ", " + curr);
             } else if (prev.density > curr.density) {
-                throw new IllegalStateException("Found two entries in the density map with"
+                throw new IllegalStateException("Found two entries in the density mapping with"
                         + " increasing diagonal but decreasing density: " + prev + ", " + curr);
             }
         }
@@ -111,8 +112,8 @@ public class DensityMap {
 
     @Override
     public String toString() {
-        return "DensityMap{"
-                + "mDensityMapEntries=" + Arrays.toString(mSortedDensityMapEntries)
+        return "DensityMapping{"
+                + "mDensityMappingEntries=" + Arrays.toString(mSortedDensityMappingEntries)
                 + '}';
     }
 
@@ -129,7 +130,7 @@ public class DensityMap {
 
         @Override
         public String toString() {
-            return "DensityMapEntry{"
+            return "DensityMappingEntry{"
                     + "squaredDiagonal=" + squaredDiagonal
                     + ", density=" + density + '}';
         }
