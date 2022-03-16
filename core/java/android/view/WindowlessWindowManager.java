@@ -332,8 +332,7 @@ public class WindowlessWindowManager implements IWindowSession {
             outInsetsState.set(mInsetsState);
         }
 
-        // Include whether the window is in touch mode.
-        return isInTouchMode() ? WindowManagerGlobal.RELAYOUT_RES_IN_TOUCH_MODE : 0;
+        return 0;
     }
 
     @Override
