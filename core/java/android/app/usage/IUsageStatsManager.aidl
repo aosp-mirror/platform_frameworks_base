@@ -74,12 +74,12 @@ interface IUsageStatsManager {
     int getUsageSource();
     void forceUsageSourceSettingRead();
     long getLastTimeAnyComponentUsed(String packageName, String callingPackage);
-    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS)")
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.ACCESS_BROADCAST_RESPONSE_STATS)")
     BroadcastResponseStatsList queryBroadcastResponseStats(
             String packageName, long id, String callingPackage, int userId);
-    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS)")
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.ACCESS_BROADCAST_RESPONSE_STATS)")
     void clearBroadcastResponseStats(String packageName, long id, String callingPackage,
             int userId);
-    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS)")
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.ACCESS_BROADCAST_RESPONSE_STATS)")
     void clearBroadcastEvents(String callingPackage, int userId);
 }
