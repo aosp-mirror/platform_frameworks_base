@@ -20,19 +20,17 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4811759950673118541">"ສ່ວນຕິດຕໍ່ຜູ້ໃຊ້ຂອງລະບົບ"</string>
-    <!-- no translation found for battery_low_title (5319680173344341779) -->
-    <skip />
-    <!-- no translation found for battery_low_description (3282977755476423966) -->
-    <skip />
-    <!-- no translation found for battery_low_intro (5148725009653088790) -->
-    <skip />
+    <string name="battery_low_title" msgid="5319680173344341779">"ເປີດໃຊ້ຕົວປະຢັດແບັດເຕີຣີບໍ?"</string>
+    <string name="battery_low_description" msgid="3282977755476423966">"ທ່ານມີແບັດເຕີຣີເຫຼືອ <xliff:g id="PERCENTAGE">%s</xliff:g>. ຕົວປະຢັດແບັດເຕີຣີຈະເປີດໃຊ້ຮູບແບບສີສັນມືດ, ຈຳກັດການເຄື່ອນໄຫວໃນພື້ນຫຼັງ ແລະ ເລື່ອນການແຈ້ງເຕືອນອອກໄປ."</string>
+    <string name="battery_low_intro" msgid="5148725009653088790">"ຕົວປະຢັດແບັດເຕີຣີຈະເປີດໃຊ້ຮູບແບບສີສັນມືດ, ຈຳກັດການເຄື່ອນໄຫວໃນພື້ນຫຼັງ ແລະ ເລື່ອນການແຈ້ງເຕືອນອອກໄປ."</string>
     <string name="battery_low_percent_format" msgid="4276661262843170964">"ຍັງ​ເຫຼືອ <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="invalid_charger_title" msgid="938685362320735167">"ບໍ່ສາມາດສາກຜ່ານ USB ໄດ້"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"ກະລຸນາໃຊ້ຕົວສາກທີ່ມາພ້ອມກັບອຸປະກອນຂອງທ່ານ"</string>
     <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"ເປີດໃຊ້ຕົວປະຢັດແບັດເຕີຣີບໍ?"</string>
     <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"ກ່ຽວກັບຕົວປະຢັດແບັດເຕີຣີ"</string>
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"ເປີດ​ໃຊ້"</string>
-    <string name="battery_saver_start_action" msgid="4553256017945469937">"ເປີດໃຊ້ຕົວປະຢັດແບັດເຕີຣີ"</string>
+    <string name="battery_saver_start_action" msgid="8353766979886287140">"ເປີດໃຊ້"</string>
+    <string name="battery_saver_dismiss_action" msgid="7199342621040014738">"ບໍ່, ຂອບໃຈ"</string>
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"ໝຸນໜ້າຈໍອັດຕະໂນມັດ"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"ອະນຸຍາດໃຫ້ <xliff:g id="APPLICATION">%1$s</xliff:g> ເຂົ້າເຖິງ <xliff:g id="USB_DEVICE">%2$s</xliff:g> ໄດ້ບໍ?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"ອະນຸຍາດໃຫ້ <xliff:g id="APPLICATION">%1$s</xliff:g> ເຂົ້າເຖິງ <xliff:g id="USB_DEVICE">%2$s</xliff:g> ໄດ້ບໍ?\nແອັບນີ້ບໍ່ໄດ້ຮັບອະນຸາດໃຫ້ບັນທຶກໄດ້ແຕ່ສາມາດບັນທຶກສຽງໄດ້ຜ່ານອຸປະກອນ USB ນີ້."</string>
@@ -133,8 +131,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"ພິສູດຢືນຢັນໃບໜ້າແລ້ວ"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"ຢືນຢັນແລ້ວ"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"ແຕະຢືນຢັນເພື່ອສຳເລັດ"</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face (1597899891472340950) -->
-    <skip />
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="1597899891472340950">"ປົດລັອກດ້ວຍໜ້າຂອງທ່ານແລ້ວ. ກົດເພື່ອສືບຕໍ່."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"ຮັບຮອງຄວາມຖືກຕ້ອງແລ້ວ"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"ໃຊ້ PIN"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"ໃຊ້ຮູບແບບ"</string>
@@ -462,8 +459,8 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"ປົດລັອກເພື່ອໃຊ້"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"ເກີດບັນຫາໃນການໂຫຼດບັດຂອງທ່ານ, ກະລຸນາລອງໃໝ່ໃນພາຍຫຼັງ"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"ການຕັ້ງຄ່າໜ້າຈໍລັອກ"</string>
-    <string name="qr_code_scanner_title" msgid="5660820608548306581">"ລະຫັດ QR"</string>
-    <string name="qr_code_scanner_description" msgid="7937603775306661863">"ແຕະເພື່ອສະແກນ"</string>
+    <!-- no translation found for qr_code_scanner_title (5290201053875420785) -->
+    <skip />
     <string name="status_bar_work" msgid="5238641949837091056">"​ໂປຣ​ໄຟລ໌​ບ່ອນ​ເຮັດ​ວຽກ"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"ໂໝດເຮືອ​ບິນ"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"ທ່ານ​ຈະ​ບໍ່​ໄດ້​ຍິນ​ສຽງ​ໂມງ​ປ <xliff:g id="WHEN">%1$s</xliff:g>"</string>
@@ -827,6 +824,7 @@
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"ຈັບຄູ່ອຸປະກອນໃໝ່"</string>
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"ເພື່ອສົ່ງສັນຍານເຊດຊັນນີ້, ກະລຸນາເປີດແອັບ."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"ແອັບທີ່ບໍ່ຮູ້ຈັກ"</string>
+    <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"ຢຸດການສົ່ງສັນຍານ"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"ໝາຍເລກສ້າງ"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"ສຳເນົາໝາຍເລກສ້າງໄປໃສ່ຄລິບບອດແລ້ວ."</string>
     <string name="basic_status" msgid="2315371112182658176">"ເປີດການສົນທະນາ"</string>
@@ -916,8 +914,6 @@
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"ບໍ່ສາມາດໃຊ້ Wi‑Fi ໄດ້"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"ໂໝດຄວາມສຳຄັນ"</string>
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"ຕັ້ງໂມງປຸກແລ້ວ"</string>
-    <string name="dream_overlay_status_bar_assistant_guest_mode_enabled" msgid="3715897096012469615">"ເປີດການນຳໃຊ້ໂໝດແຂກຜູ້ຊ່ວຍແລ້ວ"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"ປິດກ້ອງຖ່າຍຮູບ ແລະ ໄມແລ້ວ"</string>
-    <!-- no translation found for dream_overlay_status_bar_notification_indicator (8091389255691081711) -->
-    <skip />
+    <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# ການແຈ້ງເຕືອນ}other{# ການແຈ້ງເຕືອນ}}"</string>
 </resources>
