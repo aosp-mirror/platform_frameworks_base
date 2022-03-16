@@ -39179,6 +39179,7 @@ package android.service.quickaccesswallet {
   public abstract class QuickAccessWalletService extends android.app.Service {
     ctor public QuickAccessWalletService();
     method @Nullable public android.app.PendingIntent getTargetActivityPendingIntent();
+    method public final boolean getUseTargetActivityForQuickAccess();
     method @Nullable public android.os.IBinder onBind(@NonNull android.content.Intent);
     method public abstract void onWalletCardSelected(@NonNull android.service.quickaccesswallet.SelectWalletCardRequest);
     method public abstract void onWalletCardsRequested(@NonNull android.service.quickaccesswallet.GetWalletCardsRequest, @NonNull android.service.quickaccesswallet.GetWalletCardsCallback);

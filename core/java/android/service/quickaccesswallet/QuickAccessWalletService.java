@@ -16,12 +16,20 @@
 
 package android.service.quickaccesswallet;
 
+import static android.content.pm.PackageManager.GET_META_DATA;
+import static android.content.pm.PackageManager.MATCH_DEFAULT_ONLY;
+import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
+import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.content.pm.ServiceInfo;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
@@ -29,6 +37,8 @@ import android.os.Looper;
 import android.os.RemoteException;
 import android.provider.Settings;
 import android.util.Log;
+
+import java.util.List;
 
 /**
  * A {@code QuickAccessWalletService} provides a list of {@code WalletCard}s shown in the Quick
@@ -339,6 +349,45 @@ public abstract class QuickAccessWalletService extends Service {
     @Nullable
     public PendingIntent getTargetActivityPendingIntent() {
         return null;
+    }
+
+    /**
+     * Returns the value specified by the attribute
+     * {@link android.R.styleable#QuickAccessWalletService_useTargetActivityForQuickAccess}
+     * in the QuickAccessWalletService's metadata configuration. If the attribute or metadata is
+     * not supplied, returns false.
+     */
+    public final boolean getUseTargetActivityForQuickAccess() {
+        Intent intent = new Intent(SERVICE_INTERFACE).setPackage(getPackageName());
+        List<ResolveInfo> matchedServices = getPackageManager()
+                .queryIntentServices(intent,
+                        PackageManager.ResolveInfoFlags.of(
+                                GET_META_DATA | MATCH_DIRECT_BOOT_UNAWARE | MATCH_DIRECT_BOOT_AWARE
+                                        | MATCH_DEFAULT_ONLY));
+
+        ResolveInfo resolveInfo = null;
+
+        for (ResolveInfo info : matchedServices) {
+            ServiceInfo serviceInfo = info.serviceInfo;
+            if (serviceInfo == null) {
+                continue;
+            }
+            String serviceName = serviceInfo.name;
+            if (serviceName == null) {
+                continue;
+            }
+            if (serviceName.equals(getClass().getCanonicalName())) {
+                resolveInfo = info;
+            }
+        }
+
+        if (resolveInfo == null || resolveInfo.serviceInfo == null) {
+            Log.i(TAG, "Matching QuickAccessWalletService not found.");
+            return false;
+        }
+        QuickAccessWalletServiceInfo.ServiceMetadata serviceMetadata =
+                QuickAccessWalletServiceInfo.parseServiceMetadata(this, resolveInfo.serviceInfo);
+        return serviceMetadata != null && serviceMetadata.mUseTargetActivityForQuickAccess;
     }
 
     private void sendWalletServiceEventInternal(WalletServiceEvent serviceEvent) {

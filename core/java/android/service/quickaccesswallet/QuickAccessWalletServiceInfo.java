@@ -135,7 +135,7 @@ class QuickAccessWalletServiceInfo {
         return null;
     }
 
-    private static class ServiceMetadata {
+    static class ServiceMetadata {
         @Nullable
         private final String mSettingsActivity;
         @Nullable
@@ -144,7 +144,7 @@ class QuickAccessWalletServiceInfo {
         private final CharSequence mShortcutShortLabel;
         @Nullable
         private final CharSequence mShortcutLongLabel;
-        private final boolean mUseTargetActivityForQuickAccess;
+        final boolean mUseTargetActivityForQuickAccess;
 
         private static ServiceMetadata empty() {
             return new ServiceMetadata(null, null, null, null, false);
@@ -164,7 +164,7 @@ class QuickAccessWalletServiceInfo {
         }
     }
 
-    private static ServiceMetadata parseServiceMetadata(Context context, ServiceInfo serviceInfo) {
+    static ServiceMetadata parseServiceMetadata(Context context, ServiceInfo serviceInfo) {
         PackageManager pm = context.getPackageManager();
         final XmlResourceParser parser =
                 serviceInfo.loadXmlMetaData(pm, QuickAccessWalletService.SERVICE_META_DATA);
