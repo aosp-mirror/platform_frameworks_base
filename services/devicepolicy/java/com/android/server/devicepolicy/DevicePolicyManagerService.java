@@ -17877,14 +17877,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             } else {
                 preferenceBuilder.setPreference(PROFILE_NETWORK_PREFERENCE_DEFAULT);
             }
-            List<Integer> allowedUids = Arrays.stream(
-                    preferentialNetworkServiceConfig.getIncludedUids()).boxed().collect(
-                    Collectors.toList());
-            List<Integer> excludedUids = Arrays.stream(
-                    preferentialNetworkServiceConfig.getExcludedUids()).boxed().collect(
-                    Collectors.toList());
-            preferenceBuilder.setIncludedUids(allowedUids);
-            preferenceBuilder.setExcludedUids(excludedUids);
+            preferenceBuilder.setIncludedUids(preferentialNetworkServiceConfig.getIncludedUids());
+            preferenceBuilder.setExcludedUids(preferentialNetworkServiceConfig.getExcludedUids());
             preferenceBuilder.setPreferenceEnterpriseId(
                     preferentialNetworkServiceConfig.getNetworkId());
 
