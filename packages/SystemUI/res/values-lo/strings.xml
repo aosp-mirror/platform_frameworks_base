@@ -31,6 +31,10 @@
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"ໝຸນໜ້າຈໍອັດຕະໂນມັດ"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"ອະນຸຍາດໃຫ້ <xliff:g id="APPLICATION">%1$s</xliff:g> ເຂົ້າເຖິງ <xliff:g id="USB_DEVICE">%2$s</xliff:g> ໄດ້ບໍ?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"ອະນຸຍາດໃຫ້ <xliff:g id="APPLICATION">%1$s</xliff:g> ເຂົ້າເຖິງ <xliff:g id="USB_DEVICE">%2$s</xliff:g> ໄດ້ບໍ?\nແອັບນີ້ບໍ່ໄດ້ຮັບອະນຸາດໃຫ້ບັນທຶກໄດ້ແຕ່ສາມາດບັນທຶກສຽງໄດ້ຜ່ານອຸປະກອນ USB ນີ້."</string>
+    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"ອະນຸຍາດໃຫ້ <xliff:g id="APPLICATION">%1$s</xliff:g> ເຂົ້າເຖິງ <xliff:g id="USB_DEVICE">%2$s</xliff:g> ໄດ້ບໍ?"</string>
+    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"ເປີດ <xliff:g id="APPLICATION">%1$s</xliff:g> ເພື່ອຈັດການ <xliff:g id="USB_DEVICE">%2$s</xliff:g> ບໍ?"</string>
+    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"ແອັບນີ້ບໍ່ໄດ້ຮັບການອະນຸຍາດໃນການບັນທຶກ ແຕ່ສາມາດບັນທຶກສຽງໄດ້ຜ່ານອຸປະກອນ USB ນີ້ໄດ້. ການໃຊ້ <xliff:g id="APPLICATION">%1$s</xliff:g> ກັບອຸປະກອນນີ້ອາດປ້ອງກັນບໍ່ໃຫ້ໄດ້ຍິນສຽງໂທລະສັບ, ການແຈ້ງເຕືອນ ແລະ ໂມງປຸກ."</string>
+    <string name="usb_audio_device_prompt" msgid="7944987408206252949">"ການໃຊ້ <xliff:g id="APPLICATION">%1$s</xliff:g> ກັບອຸປະກອນນີ້ອາດປ້ອງກັນບໍ່ໃຫ້ໄດ້ຍິນສຽງໂທລະສັບ, ການແຈ້ງເຕືອນ ແລະ ໂມງປຸກ."</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"ອະນຸຍາດໃຫ້ <xliff:g id="APPLICATION">%1$s</xliff:g> ເຂົ້າເຖິງ <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> ໄດ້ບໍ?"</string>
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"ເປີດ <xliff:g id="APPLICATION">%1$s</xliff:g> ເພື່ອໃຊ້ກັບ <xliff:g id="USB_DEVICE">%2$s</xliff:g> ບໍ?"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"ເປີດ <xliff:g id="APPLICATION">%1$s</xliff:g> ເພື່ອໃຊ້ <xliff:g id="USB_DEVICE">%2$s</xliff:g> ບໍ?\nແອັບນີ້ຍັງບໍ່ໄດ້ຮັບອະນຸຍາດໃຫ້ບັນທຶກເທື່ອ ແຕ່ສາມາດບັນທຶກສຽງຜ່ານອຸປະກອນ USB ນີ້ໄດ້."</string>

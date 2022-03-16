@@ -31,6 +31,10 @@
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"چرخش خودکار صفحه"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"به <xliff:g id="APPLICATION">%1$s</xliff:g> برای دسترسی به <xliff:g id="USB_DEVICE">%2$s</xliff:g> اجازه داده شود؟"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"‏به <xliff:g id="APPLICATION">%1$s</xliff:g> اجازه می‌دهید به <xliff:g id="USB_DEVICE">%2$s</xliff:g>دسترسی داشته باشد؟\nمجوز ضبط به این برنامه داده نشده است اما می‌تواند صدا را ازطریق این دستگاه USB ضبط کند."</string>
+    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"به <xliff:g id="APPLICATION">%1$s</xliff:g> اجازه دسترسی به <xliff:g id="USB_DEVICE">%2$s</xliff:g> داده شود؟"</string>
+    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"<xliff:g id="APPLICATION">%1$s</xliff:g> برای استفاده از <xliff:g id="USB_DEVICE">%2$s</xliff:g> باز شود؟"</string>
+    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"‏اجازه ضبط به این برنامه داده نشده است اما می‌تواند صدا را ازطریق این دستگاه USB ضبط کند. استفاده از <xliff:g id="APPLICATION">%1$s</xliff:g> با این دستگاه می‌تواند مانع از شنیدن تماس‌ها، اعلان‌ها، و زنگ‌های ساعت شود."</string>
+    <string name="usb_audio_device_prompt" msgid="7944987408206252949">"استفاده از <xliff:g id="APPLICATION">%1$s</xliff:g> با این دستگاه می‌تواند مانع از شنیدن تماس‌ها، اعلان‌ها، و زنگ‌های ساعت شود."</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"به <xliff:g id="APPLICATION">%1$s</xliff:g> برای دسترسی به <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> اجازه داده شود؟"</string>
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"برای استفاده از <xliff:g id="USB_DEVICE">%2$s</xliff:g>، <xliff:g id="APPLICATION">%1$s</xliff:g> باز شود؟"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"‏<xliff:g id="APPLICATION">%1$s</xliff:g> برای رسیدگی به <xliff:g id="USB_DEVICE">%2$s</xliff:g> باز شود؟\nمجوز ضبط به این برنامه داده نشده است اما می‌تواند صدا را ازطریق این دستگاه USB ضبط کند."</string>
@@ -279,7 +283,7 @@
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"تا طلوع"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"ساعت <xliff:g id="TIME">%s</xliff:g> روشن می‌شود"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"تا <xliff:g id="TIME">%s</xliff:g>"</string>
-    <string name="quick_settings_ui_mode_night_label" msgid="1398928270610780470">"طرح زمینه تیره"</string>
+    <string name="quick_settings_ui_mode_night_label" msgid="1398928270610780470">"زمینه تیره"</string>
     <string name="quick_settings_dark_mode_secondary_label_battery_saver" msgid="4990712734503013251">"بهینه‌سازی باتری"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at_sunset" msgid="6017379738102015710">"غروب روشن می‌شود"</string>
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"تا طلوع آفتاب"</string>

@@ -31,6 +31,10 @@
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Auto-rotate screen"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"Allow <xliff:g id="APPLICATION">%1$s</xliff:g> to access <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"Allow <xliff:g id="APPLICATION">%1$s</xliff:g> to access <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nThis app has not been granted record permission but could capture audio through this USB device."</string>
+    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"Allow <xliff:g id="APPLICATION">%1$s</xliff:g> to access <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"Open <xliff:g id="APPLICATION">%1$s</xliff:g> to handle <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"This app has not been granted record permission but could capture audio through this USB device. Using <xliff:g id="APPLICATION">%1$s</xliff:g> with this device might prevent hearing calls, notifications and alarms."</string>
+    <string name="usb_audio_device_prompt" msgid="7944987408206252949">"Using <xliff:g id="APPLICATION">%1$s</xliff:g> with this device might prevent hearing calls, notifications and alarms."</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"Allow <xliff:g id="APPLICATION">%1$s</xliff:g> to access <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"Open <xliff:g id="APPLICATION">%1$s</xliff:g> to handle <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"Open <xliff:g id="APPLICATION">%1$s</xliff:g> to handle <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nThis app has not been granted record permission but could capture audio through this USB device."</string>

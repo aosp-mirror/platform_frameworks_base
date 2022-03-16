@@ -31,6 +31,10 @@
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"自動旋轉螢幕"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"要允許「<xliff:g id="APPLICATION">%1$s</xliff:g>」存取「<xliff:g id="USB_DEVICE">%2$s</xliff:g>」嗎？"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"要允許「<xliff:g id="APPLICATION">%1$s</xliff:g>」存取「<xliff:g id="USB_DEVICE">%2$s</xliff:g>」嗎？\n這個應用程式未取得錄製權限，但可以透過這部 USB 裝置錄製音訊。"</string>
+    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"要允許「<xliff:g id="APPLICATION">%1$s</xliff:g>」存取「<xliff:g id="USB_DEVICE">%2$s</xliff:g>」嗎？"</string>
+    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"要開啟「<xliff:g id="APPLICATION">%1$s</xliff:g>」以控制「<xliff:g id="USB_DEVICE">%2$s</xliff:g>」嗎？"</string>
+    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"這個應用程式未取得錄音的權限，但可以透過這部 USB 裝置錄製音訊。如果將「<xliff:g id="APPLICATION">%1$s</xliff:g>」應用程式與這部裝置搭配使用，可能不會聽見來電、通知和鬧鐘的音效。"</string>
+    <string name="usb_audio_device_prompt" msgid="7944987408206252949">"如果將「<xliff:g id="APPLICATION">%1$s</xliff:g>」應用程式與這部裝置搭配使用，可能不會聽見來電、通知和鬧鐘的音效。"</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"要允許「<xliff:g id="APPLICATION">%1$s</xliff:g>」存取「<xliff:g id="USB_ACCESSORY">%2$s</xliff:g>」嗎？"</string>
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"要開啟「<xliff:g id="APPLICATION">%1$s</xliff:g>」處理「<xliff:g id="USB_DEVICE">%2$s</xliff:g>」嗎？"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"要開啟「<xliff:g id="APPLICATION">%1$s</xliff:g>」來使用「<xliff:g id="USB_DEVICE">%2$s</xliff:g>」嗎？\n這個應用程式未取得錄製內容的權限，但可以透過這部 USB 裝置錄製音訊。"</string>
