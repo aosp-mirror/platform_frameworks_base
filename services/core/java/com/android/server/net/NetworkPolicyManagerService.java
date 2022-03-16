@@ -4094,7 +4094,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     "updateNetworkStats: " + uid + "/" + (uidForeground ? "F" : "B"));
         }
         try {
-            mNetworkStats.setUidForeground(uid, uidForeground);
+            mNetworkStats.noteUidForeground(uid, uidForeground);
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_NETWORK);
         }
