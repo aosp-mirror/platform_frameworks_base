@@ -18,6 +18,7 @@ package com.android.systemui.dreams.complication;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -413,5 +414,38 @@ public class ComplicationLayoutEngineTest extends SysuiTestCase {
             assertThat(lp.topToTop == ConstraintLayout.LayoutParams.PARENT_ID).isTrue();
             assertThat(lp.endToEnd == ConstraintLayout.LayoutParams.PARENT_ID).isTrue();
         });
+    }
+
+    /**
+     * Ensures a second removal of a complication is a no-op.
+     */
+    @Test
+    public void testDoubleRemoval() {
+        final ComplicationLayoutEngine engine =
+                new ComplicationLayoutEngine(mLayout, 0, mTouchSession, 0, 0);
+
+        final ViewInfo firstViewInfo = new ViewInfo(
+                new ComplicationLayoutParams(
+                        100,
+                        100,
+                        ComplicationLayoutParams.POSITION_TOP
+                                | ComplicationLayoutParams.POSITION_END,
+                        ComplicationLayoutParams.DIRECTION_DOWN,
+                        0),
+                Complication.CATEGORY_STANDARD,
+                mLayout);
+
+        engine.addComplication(firstViewInfo.id, firstViewInfo.view, firstViewInfo.lp,
+                firstViewInfo.category);
+        verify(mLayout).addView(firstViewInfo.view);
+
+        assertThat(engine.removeComplication(firstViewInfo.id)).isTrue();
+        verify(firstViewInfo.view).getParent();
+        verify(mLayout).removeView(firstViewInfo.view);
+
+        Mockito.clearInvocations(mLayout, firstViewInfo.view);
+        assertThat(engine.removeComplication(firstViewInfo.id)).isFalse();
+        verify(firstViewInfo.view, never()).getParent();
+        verify(mLayout, never()).removeView(firstViewInfo.view);
     }
 }
