@@ -24,4 +24,5 @@
     <string name="pip_move" msgid="1544227837964635439">"PIP を移動"</string>
     <string name="pip_expand" msgid="7605396312689038178">"PIP を開く"</string>
     <string name="pip_collapse" msgid="5732233773786896094">"PIP を閉じる"</string>
+    <string name="pip_edu_text" msgid="3672999496647508701">" コントロールにアクセス: "<annotation icon="home_icon">" ホーム "</annotation>" を 2 回押します"</string>
 </resources>

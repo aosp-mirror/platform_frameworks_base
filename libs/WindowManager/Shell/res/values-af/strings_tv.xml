@@ -24,4 +24,5 @@
     <string name="pip_move" msgid="1544227837964635439">"Skuif PIP"</string>
     <string name="pip_expand" msgid="7605396312689038178">"Vou PIP uit"</string>
     <string name="pip_collapse" msgid="5732233773786896094">"Vou PIP in"</string>
+    <string name="pip_edu_text" msgid="3672999496647508701">" Dubbeldruk "<annotation icon="home_icon">" TUIS "</annotation>" vir kontroles"</string>
 </resources>

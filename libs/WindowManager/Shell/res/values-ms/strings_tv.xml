@@ -24,4 +24,5 @@
     <string name="pip_move" msgid="1544227837964635439">"Alihkan PIP"</string>
     <string name="pip_expand" msgid="7605396312689038178">"Kembangkan PIP"</string>
     <string name="pip_collapse" msgid="5732233773786896094">"Kuncupkan PIP"</string>
+    <string name="pip_edu_text" msgid="3672999496647508701">" Tekan dua kali "<annotation icon="home_icon">" LAMAN UTAMA "</annotation>" untuk mengakses kawalan"</string>
 </resources>

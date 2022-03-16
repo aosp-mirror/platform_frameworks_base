@@ -24,4 +24,5 @@
     <string name="pip_move" msgid="1544227837964635439">"Zhvendos PIP"</string>
     <string name="pip_expand" msgid="7605396312689038178">"Zgjero PIP"</string>
     <string name="pip_collapse" msgid="5732233773786896094">"Palos PIP"</string>
+    <string name="pip_edu_text" msgid="3672999496647508701">" Trokit dy herë "<annotation icon="home_icon">" KREU "</annotation>" për kontrollet"</string>
 </resources>

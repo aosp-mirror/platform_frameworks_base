@@ -24,4 +24,5 @@
     <string name="pip_move" msgid="1544227837964635439">"Премести слику у слици"</string>
     <string name="pip_expand" msgid="7605396312689038178">"Прошири слику у слици"</string>
     <string name="pip_collapse" msgid="5732233773786896094">"Скупи слику у слици"</string>
+    <string name="pip_edu_text" msgid="3672999496647508701">" Двапут притисните "<annotation icon="home_icon">" HOME "</annotation>" за контроле"</string>
 </resources>

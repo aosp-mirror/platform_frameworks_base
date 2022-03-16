@@ -24,4 +24,5 @@
     <string name="pip_move" msgid="1544227837964635439">"移動子母畫面"</string>
     <string name="pip_expand" msgid="7605396312689038178">"展開子母畫面"</string>
     <string name="pip_collapse" msgid="5732233773786896094">"收合子母畫面"</string>
+    <string name="pip_edu_text" msgid="3672999496647508701">" 按兩下"<annotation icon="home_icon">"主畫面按鈕"</annotation>"即可顯示控制選項"</string>
 </resources>

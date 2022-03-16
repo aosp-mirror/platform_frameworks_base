@@ -24,4 +24,5 @@
     <string name="pip_move" msgid="1544227837964635439">"PIP നീക്കുക"</string>
     <string name="pip_expand" msgid="7605396312689038178">"PIP വികസിപ്പിക്കുക"</string>
     <string name="pip_collapse" msgid="5732233773786896094">"PIP ചുരുക്കുക"</string>
+    <string name="pip_edu_text" msgid="3672999496647508701">" നിയന്ത്രണങ്ങൾക്കായി "<annotation icon="home_icon">" ഹോം "</annotation>" രണ്ട് തവണ അമർത്തുക"</string>
 </resources>
