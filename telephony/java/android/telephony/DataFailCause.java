@@ -1090,13 +1090,6 @@ public final class DataFailCause {
      */
     public static final int NO_RETRY_FAILURE = 0x1000B;
 
-    /**
-     * Traffic descriptors in DataCallResponse is empty.
-     *
-     * @hide
-     */
-    public static final int NO_TRAFFIC_DESCRIPTORS = 0x1000C;
-
     private static final Map<Integer, String> sFailCauseMap;
     static {
         sFailCauseMap = new HashMap<>();
@@ -1531,7 +1524,6 @@ public final class DataFailCause {
         sFailCauseMap.put(SERVICE_TEMPORARILY_UNAVAILABLE, "SERVICE_TEMPORARILY_UNAVAILABLE");
         sFailCauseMap.put(REQUEST_NOT_SUPPORTED, "REQUEST_NOT_SUPPORTED");
         sFailCauseMap.put(NO_RETRY_FAILURE, "NO_RETRY_FAILURE");
-        sFailCauseMap.put(NO_TRAFFIC_DESCRIPTORS, "NO_TRAFFIC_DESCRIPTORS");
     }
 
     private DataFailCause() {
