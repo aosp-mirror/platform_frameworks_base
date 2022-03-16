@@ -16,7 +16,6 @@
 
 package com.android.systemui.media
 
-import android.app.StatusBarManager
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
@@ -27,17 +26,16 @@ class MediaFlags @Inject constructor(private val featureFlags: FeatureFlags) {
     /**
      * Check whether media control actions should be based on PlaybackState instead of notification
      */
-    fun areMediaSessionActionsEnabled(packageName: String, userId: Int): Boolean {
-        val enabled = StatusBarManager.useMediaSessionActionsForApp(packageName, userId)
-        // Allow global override with flag
-        return enabled || featureFlags.isEnabled(Flags.MEDIA_SESSION_ACTIONS)
+    fun areMediaSessionActionsEnabled(): Boolean {
+        return featureFlags.isEnabled(Flags.MEDIA_SESSION_ACTIONS)
     }
 
     /**
      * Check whether media controls should use the new session-based layout
      */
     fun useMediaSessionLayout(): Boolean {
-        return featureFlags.isEnabled(Flags.MEDIA_SESSION_LAYOUT)
+        return featureFlags.isEnabled(Flags.MEDIA_SESSION_ACTIONS) &&
+            featureFlags.isEnabled(Flags.MEDIA_SESSION_LAYOUT)
     }
 
     /**
