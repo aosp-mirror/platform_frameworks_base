@@ -18790,4 +18790,18 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         mInjector.binderWithCleanCallingIdentity(() -> Settings.Secure.putInt(
                 mContext.getContentResolver(), MANAGED_PROVISIONING_DPC_DOWNLOADED, setTo));
     }
+
+    @Override
+    public boolean shouldAllowBypassingDevicePolicyManagementRoleQualification() {
+        Preconditions.checkCallAuthorization(hasCallingOrSelfPermission(
+                android.Manifest.permission.MANAGE_ROLE_HOLDERS));
+        return mInjector.binderWithCleanCallingIdentity(() -> {
+            if (mUserManager.getUserCount() > 1) {
+                return false;
+            }
+            AccountManager am = AccountManager.get(mContext);
+            Account[] accounts = am.getAccounts();
+            return accounts.length == 0;
+        });
+    }
 }
