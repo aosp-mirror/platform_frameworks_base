@@ -67,10 +67,12 @@
 
     <!-- media output dialog-->
     <color name="media_dialog_background">@color/material_dynamic_neutral10</color>
-    <color name="media_dialog_active_item_main_content">@color/material_dynamic_neutral10</color>
-    <color name="media_dialog_inactive_item_main_content">@color/material_dynamic_neutral10</color>
-    <color name="media_dialog_item_status">@color/material_dynamic_neutral10</color>
-    <color name="media_dialog_item_background">@color/material_dynamic_secondary95</color>
+    <color name="media_dialog_item_main_content">@color/material_dynamic_primary90</color>
+    <color name="media_dialog_item_background">@color/material_dynamic_neutral_variant20</color>
+    <color name="media_dialog_connected_item_background">@color/material_dynamic_secondary20</color>
+    <color name="media_dialog_seekbar_progress">@color/material_dynamic_secondary40</color>
+    <color name="media_dialog_button_background">@color/material_dynamic_primary70</color>
+    <color name="media_dialog_solid_button_text">@color/material_dynamic_secondary20</color>
 
     <!-- Biometric dialog colors -->
     <color name="biometric_dialog_gray">#ffcccccc</color>
