@@ -299,10 +299,7 @@ class RemoteInputViewControllerImpl @Inject constructor(
         view.clearAttachment()
         entry.remoteInputUri = null
         entry.remoteInputMimeType = null
-        val resultSource = entry.editedSuggestionInfo
-                ?.let { RemoteInput.SOURCE_FREE_FORM_INPUT }
-                ?: RemoteInput.SOURCE_CHOICE
-        RemoteInput.setResultsSource(fillInIntent, resultSource)
+        RemoteInput.setResultsSource(fillInIntent, remoteInputResultsSource)
         return fillInIntent
     }
 
@@ -332,10 +329,12 @@ class RemoteInputViewControllerImpl @Inject constructor(
         entry.remoteInputText = fullText
 
         // mirror prepareRemoteInputFromText for text input
-        val resultSource = entry.editedSuggestionInfo
-                ?.let { RemoteInput.SOURCE_FREE_FORM_INPUT }
-                ?: RemoteInput.SOURCE_CHOICE
-        RemoteInput.setResultsSource(fillInIntent, resultSource)
+        RemoteInput.setResultsSource(fillInIntent, remoteInputResultsSource)
         return fillInIntent
     }
+
+    private val remoteInputResultsSource
+        get() = entry.editedSuggestionInfo
+                ?.let { RemoteInput.SOURCE_CHOICE }
+                ?: RemoteInput.SOURCE_FREE_FORM_INPUT
 }
