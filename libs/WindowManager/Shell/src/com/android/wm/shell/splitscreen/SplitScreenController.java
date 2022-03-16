@@ -24,6 +24,7 @@ import static android.view.RemoteAnimationTarget.MODE_OPENING;
 import static com.android.wm.shell.common.ExecutorUtils.executeRemoteCallWithTaskPermission;
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
+import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_UNDEFINED;
 import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_SIDE;
 import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_UNDEFINED;
 import static com.android.wm.shell.transition.Transitions.ENABLE_SHELL_TRANSITIONS;
@@ -32,6 +33,7 @@ import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.app.PendingIntent;
 import android.content.ActivityNotFoundException;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.LauncherApps;
@@ -68,6 +70,7 @@ import com.android.wm.shell.common.SingleInstanceRemoteListener;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.common.annotations.ExternalThread;
+import com.android.wm.shell.common.split.SplitLayout;
 import com.android.wm.shell.common.split.SplitScreenConstants.SplitPosition;
 import com.android.wm.shell.draganddrop.DragAndDropPolicy;
 import com.android.wm.shell.recents.RecentTasksController;
@@ -196,11 +199,12 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
 
     @Nullable
     public ActivityManager.RunningTaskInfo getTaskInfo(@SplitPosition int splitPosition) {
-        if (isSplitScreenVisible()) {
-            int taskId = mStageCoordinator.getTaskId(splitPosition);
-            return mTaskOrganizer.getRunningTaskInfo(taskId);
+        if (!isSplitScreenVisible() || splitPosition == SPLIT_POSITION_UNDEFINED) {
+            return null;
         }
-        return null;
+
+        final int taskId = mStageCoordinator.getTaskId(splitPosition);
+        return mTaskOrganizer.getRunningTaskInfo(taskId);
     }
 
     public boolean isTaskInSplitScreen(int taskId) {
@@ -350,6 +354,18 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
                     IRemoteAnimationFinishedCallback finishedCallback,
                     SurfaceControl.Transaction t) {
                 if (apps == null || apps.length == 0) {
+                    final ActivityManager.RunningTaskInfo pairedTaskInfo =
+                            getTaskInfo(SplitLayout.reversePosition(position));
+                    final ComponentName pairedActivity =
+                            pairedTaskInfo != null ? pairedTaskInfo.baseActivity : null;
+                    final ComponentName intentActivity =
+                            intent.getIntent() != null ? intent.getIntent().getComponent() : null;
+                    if (pairedActivity != null && pairedActivity.equals(intentActivity)) {
+                        // Switch split position if dragging the same activity to another side.
+                        setSideStagePosition(SplitLayout.reversePosition(
+                                mStageCoordinator.getSideStagePosition()));
+                    }
+
                     // Do nothing when the animation was cancelled.
                     t.apply();
                     return;
