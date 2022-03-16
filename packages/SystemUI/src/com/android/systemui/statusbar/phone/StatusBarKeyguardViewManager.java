@@ -121,9 +121,13 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     private final FoldAodAnimationController mFoldAodAnimationController;
     private KeyguardMessageAreaController mKeyguardMessageAreaController;
     private final Lazy<ShadeController> mShadeController;
+
     private final BouncerExpansionCallback mExpansionCallback = new BouncerExpansionCallback() {
+        private boolean mBouncerAnimating;
+
         @Override
         public void onFullyShown() {
+            mBouncerAnimating = false;
             updateStates();
             mCentralSurfaces.wakeUpIfDozing(SystemClock.uptimeMillis(),
                     mCentralSurfaces.getBouncerContainer(), "BOUNCER_VISIBLE");
@@ -131,22 +135,28 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
 
         @Override
         public void onStartingToHide() {
+            mBouncerAnimating = true;
             updateStates();
         }
 
         @Override
         public void onStartingToShow() {
+            mBouncerAnimating = true;
             updateStates();
         }
 
         @Override
         public void onFullyHidden() {
+            mBouncerAnimating = false;
         }
 
         @Override
         public void onExpansionChanged(float expansion) {
             if (mAlternateAuthInterceptor != null) {
                 mAlternateAuthInterceptor.setBouncerExpansionChanged(expansion);
+            }
+            if (mBouncerAnimating) {
+                mCentralSurfaces.setBouncerHiddenFraction(expansion);
             }
             updateStates();
         }
@@ -155,6 +165,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         public void onVisibilityChanged(boolean isVisible) {
             if (!isVisible) {
                 cancelPostAuthActions();
+                mCentralSurfaces.setBouncerHiddenFraction(KeyguardBouncer.EXPANSION_HIDDEN);
             }
             if (mAlternateAuthInterceptor != null) {
                 mAlternateAuthInterceptor.onBouncerVisibilityChanged();
