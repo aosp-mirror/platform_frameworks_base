@@ -27,6 +27,7 @@ import android.os.CreateAppDataArgs;
 import android.os.CreateAppDataResult;
 import android.os.IBinder;
 import android.os.IInstalld;
+import android.os.ReconcileSdkDataArgs;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.storage.CrateMetadata;
@@ -215,6 +216,21 @@ public class Installer extends SystemService {
         return result;
     }
 
+    static ReconcileSdkDataArgs buildReconcileSdkDataArgs(String uuid, String packageName,
+            List<String> subDirNames, int userId, int appId,
+            String seInfo, int flags) {
+        final ReconcileSdkDataArgs args = new ReconcileSdkDataArgs();
+        args.uuid = uuid;
+        args.packageName = packageName;
+        args.subDirNames = subDirNames;
+        args.userId = userId;
+        args.appId = appId;
+        args.previousAppId = 0;
+        args.seInfo = seInfo;
+        args.flags = flags;
+        return args;
+    }
+
     public @NonNull CreateAppDataResult createAppData(@NonNull CreateAppDataArgs args)
             throws InstallerException {
         if (!checkBeforeRemote()) {
@@ -242,6 +258,18 @@ public class Installer extends SystemService {
         }
         try {
             return mInstalld.createAppDataBatched(args);
+        } catch (Exception e) {
+            throw InstallerException.from(e);
+        }
+    }
+
+    void reconcileSdkData(@NonNull ReconcileSdkDataArgs args)
+            throws InstallerException {
+        if (!checkBeforeRemote()) {
+            return;
+        }
+        try {
+            mInstalld.reconcileSdkData(args);
         } catch (Exception e) {
             throw InstallerException.from(e);
         }

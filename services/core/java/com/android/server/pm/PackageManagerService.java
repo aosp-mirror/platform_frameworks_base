@@ -132,6 +132,7 @@ import android.os.Parcel;
 import android.os.ParcelableException;
 import android.os.PersistableBundle;
 import android.os.Process;
+import android.os.ReconcileSdkDataArgs;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
@@ -6032,6 +6033,22 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     }
 
     private class PackageManagerLocalImpl implements PackageManagerLocal {
+        @Override
+        public void reconcileSdkData(@Nullable String volumeUuid, @NonNull String packageName,
+                @NonNull List<String> subDirNames, int userId, int appId, int previousAppId,
+                @NonNull String seInfo, int flags) throws IOException {
+            synchronized (mInstallLock) {
+                ReconcileSdkDataArgs args = mInstaller.buildReconcileSdkDataArgs(volumeUuid,
+                        packageName, subDirNames, userId, appId, seInfo,
+                        flags);
+                args.previousAppId = previousAppId;
+                try {
+                    mInstaller.reconcileSdkData(args);
+                } catch (InstallerException e) {
+                    throw new IOException(e.getMessage());
+                }
+            }
+        }
     }
 
     private class PackageManagerInternalImpl extends PackageManagerInternalBase {
