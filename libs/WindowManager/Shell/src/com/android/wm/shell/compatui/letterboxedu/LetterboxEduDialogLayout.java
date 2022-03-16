@@ -38,6 +38,7 @@ class LetterboxEduDialogLayout extends ConstraintLayout {
     // The alpha of a background is a number between 0 (fully transparent) to 255 (fully opaque).
     // 204 is simply 255 * 0.8.
     static final int BACKGROUND_DIM_ALPHA = 204;
+
     private View mDialogContainer;
     private TextView mDialogTitle;
     private Drawable mBackgroundDim;
