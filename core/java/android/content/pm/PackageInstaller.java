@@ -1586,6 +1586,18 @@ public class PackageInstaller {
         }
 
         /**
+         * @return Session's {@link SessionParams#installFlags}.
+         * @hide
+         */
+        public int getInstallFlags() {
+            try {
+                return mSession.getInstallFlags();
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        /**
          * @return the session ID of the multi-package session that this belongs to or
          * {@link SessionInfo#INVALID_ID} if it does not belong to a multi-package session.
          */
@@ -2421,15 +2433,6 @@ public class PackageInstaller {
         /** {@hide} */
         private static final int[] NO_SESSIONS = {};
 
-        /** @hide */
-        @IntDef(prefix = { "SESSION_" }, value = {
-                SESSION_NO_ERROR,
-                SESSION_VERIFICATION_FAILED,
-                SESSION_ACTIVATION_FAILED,
-                SESSION_UNKNOWN_ERROR,
-                SESSION_CONFLICT})
-        @Retention(RetentionPolicy.SOURCE)
-        public @interface SessionErrorCode {}
         /**
          * @deprecated use {@link #SESSION_NO_ERROR}.
          */
@@ -3113,7 +3116,7 @@ public class PackageInstaller {
          * If something went wrong with a staged session, clients can check this error code to
          * understand which kind of failure happened. Only meaningful if {@code isStaged} is true.
          */
-        public @SessionErrorCode int getStagedSessionErrorCode() {
+        public int getStagedSessionErrorCode() {
             checkSessionIsStaged();
             return mSessionErrorCode;
         }
@@ -3128,7 +3131,7 @@ public class PackageInstaller {
         }
 
         /** {@hide} */
-        public void setSessionErrorCode(@SessionErrorCode int errorCode, String errorMessage) {
+        public void setSessionErrorCode(int errorCode, String errorMessage) {
             mSessionErrorCode = errorCode;
             mSessionErrorMessage = errorMessage;
         }

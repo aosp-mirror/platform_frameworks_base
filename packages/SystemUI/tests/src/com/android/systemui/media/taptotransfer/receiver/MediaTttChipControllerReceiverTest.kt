@@ -22,6 +22,7 @@ import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import android.media.MediaRoute2Info
 import android.os.Handler
+import android.os.PowerManager
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.View
@@ -29,8 +30,10 @@ import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.ImageView
 import androidx.test.filters.SmallTest
+import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.media.taptotransfer.common.MediaTttLogger
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.gesture.TapGestureDetector
 import com.android.systemui.util.concurrency.FakeExecutor
@@ -60,6 +63,10 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
     @Mock
     private lateinit var applicationInfo: ApplicationInfo
     @Mock
+    private lateinit var logger: MediaTttLogger
+    @Mock
+    private lateinit var powerManager: PowerManager
+    @Mock
     private lateinit var windowManager: WindowManager
     @Mock
     private lateinit var viewUtil: ViewUtil
@@ -67,6 +74,8 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
     private lateinit var commandQueue: CommandQueue
     private lateinit var commandQueueCallback: CommandQueue.Callbacks
     private lateinit var fakeAppIconDrawable: Drawable
+    private lateinit var uiEventLoggerFake: UiEventLoggerFake
+    private lateinit var receiverUiEventLogger: MediaTttReceiverUiEventLogger
 
     @Before
     fun setUp() {
@@ -80,14 +89,20 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
         )).thenReturn(applicationInfo)
         context.setMockPackageManager(packageManager)
 
+        uiEventLoggerFake = UiEventLoggerFake()
+        receiverUiEventLogger = MediaTttReceiverUiEventLogger(uiEventLoggerFake)
+
         controllerReceiver = MediaTttChipControllerReceiver(
             commandQueue,
             context,
+            logger,
             windowManager,
             viewUtil,
             FakeExecutor(FakeSystemClock()),
             TapGestureDetector(context),
+            powerManager,
             Handler.getMain(),
+            receiverUiEventLogger,
         )
 
         val callbackCaptor = ArgumentCaptor.forClass(CommandQueue.Callbacks::class.java)
@@ -106,6 +121,9 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
         )
 
         assertThat(getChipView().getAppIconView().contentDescription).isEqualTo(appName)
+        assertThat(uiEventLoggerFake.eventId(0)).isEqualTo(
+            MediaTttReceiverUiEvents.MEDIA_TTT_RECEIVER_CLOSE_TO_SENDER.id
+        )
     }
 
     @Test
@@ -118,6 +136,9 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
         )
 
         verify(windowManager, never()).addView(any(), any())
+        assertThat(uiEventLoggerFake.eventId(0)).isEqualTo(
+            MediaTttReceiverUiEvents.MEDIA_TTT_RECEIVER_FAR_FROM_SENDER.id
+        )
     }
 
     @Test
@@ -142,41 +163,15 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
     }
 
     @Test
-    fun displayChip_nullAppIconDrawable_iconIsFromPackageName() {
-        val state = ChipStateReceiver(PACKAGE_NAME, appIconDrawable = null, "appName")
+    fun receivesNewStateFromCommandQueue_isLogged() {
+        commandQueueCallback.updateMediaTapToTransferReceiverDisplay(
+            StatusBarManager.MEDIA_TRANSFER_RECEIVER_STATE_CLOSE_TO_SENDER,
+            routeInfo,
+            null,
+            null
+        )
 
-        controllerReceiver.displayChip(state)
-
-        assertThat(getChipView().getAppIconView().drawable).isEqualTo(fakeAppIconDrawable)
-    }
-
-    @Test
-    fun displayChip_hasAppIconDrawable_iconIsDrawable() {
-        val drawable = context.getDrawable(R.drawable.ic_alarm)!!
-        val state = ChipStateReceiver(PACKAGE_NAME, drawable, "appName")
-
-        controllerReceiver.displayChip(state)
-
-        assertThat(getChipView().getAppIconView().drawable).isEqualTo(drawable)
-    }
-
-    @Test
-    fun displayChip_nullAppName_iconContentDescriptionIsFromPackageName() {
-        val state = ChipStateReceiver(PACKAGE_NAME, appIconDrawable = null, appName = null)
-
-        controllerReceiver.displayChip(state)
-
-        assertThat(getChipView().getAppIconView().contentDescription).isEqualTo(APP_NAME)
-    }
-
-    @Test
-    fun displayChip_hasAppName_iconContentDescriptionIsAppNameOverride() {
-        val appName = "Override App Name"
-        val state = ChipStateReceiver(PACKAGE_NAME, appIconDrawable = null, appName)
-
-        controllerReceiver.displayChip(state)
-
-        assertThat(getChipView().getAppIconView().contentDescription).isEqualTo(appName)
+        verify(logger).logStateChange(any(), any())
     }
 
     private fun getChipView(): ViewGroup {

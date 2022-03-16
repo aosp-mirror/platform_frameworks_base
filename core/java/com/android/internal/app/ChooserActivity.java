@@ -771,11 +771,6 @@ public class ChooserActivity extends ResolverActivity implements
             delegationIntent.setComponent(delegateActivity);
             delegationIntent.putExtra(Intent.EXTRA_INTENT, getIntent());
             delegationIntent.putExtra(ActivityTaskManager.EXTRA_PERMISSION_TOKEN, permissionToken);
-
-            // Query prediction availability; mIsAppPredictorComponentAvailable isn't initialized.
-            delegationIntent.putExtra(
-                    EXTRA_IS_APP_PREDICTION_SERVICE_AVAILABLE, isAppPredictionServiceAvailable());
-
             delegationIntent.addFlags(Intent.FLAG_ACTIVITY_PREVIOUS_IS_TOP);
 
             // Don't close until the delegate finishes, or the token will be invalidated.
@@ -972,34 +967,8 @@ public class ChooserActivity extends ResolverActivity implements
     /**
      * Returns true if app prediction service is defined and the component exists on device.
      */
-    @VisibleForTesting
-    public boolean isAppPredictionServiceAvailable() {
-        if (getPackageManager().getAppPredictionServicePackageName() == null) {
-            // Default AppPredictionService is not defined.
-            return false;
-        }
-
-        final String appPredictionServiceName =
-                getString(R.string.config_defaultAppPredictionService);
-        if (appPredictionServiceName == null) {
-            return false;
-        }
-        final ComponentName appPredictionComponentName =
-                ComponentName.unflattenFromString(appPredictionServiceName);
-        if (appPredictionComponentName == null) {
-            return false;
-        }
-
-        // Check if the app prediction component actually exists on the device. The component is
-        // only visible when this is running in a system activity; otherwise this check will fail.
-        Intent intent = new Intent();
-        intent.setComponent(appPredictionComponentName);
-        if (getPackageManager().resolveService(intent, PackageManager.MATCH_ALL) == null) {
-            Log.e(TAG, "App prediction service is defined, but does not exist: "
-                    + appPredictionServiceName);
-            return false;
-        }
-        return true;
+    private boolean isAppPredictionServiceAvailable() {
+        return getPackageManager().getAppPredictionServicePackageName() != null;
     }
 
     /**

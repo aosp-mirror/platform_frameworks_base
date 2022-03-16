@@ -201,18 +201,54 @@ public class LocationProviderManager extends
         @Override
         public void deliverOnLocationChanged(LocationResult locationResult,
                 @Nullable IRemoteCallback onCompleteCallback) throws RemoteException {
-            mListener.onLocationChanged(locationResult.asList(), onCompleteCallback);
+            try {
+                mListener.onLocationChanged(locationResult.asList(), onCompleteCallback);
+            } catch (RuntimeException e) {
+                // the only way a runtime exception can be thrown here is if the client is in the
+                // system server process (so that the binder call is executed directly, rather than
+                // asynchronously in another process), and the client is using a direct executor (so
+                // any client exceptions bubble directly back to us). we move any exception onto
+                // another thread so that it can't cause further problems
+                RuntimeException wrapper = new RuntimeException(e);
+                FgThread.getExecutor().execute(() -> {
+                    throw wrapper;
+                });
+            }
         }
 
         @Override
         public void deliverOnFlushComplete(int requestCode) throws RemoteException {
-            mListener.onFlushComplete(requestCode);
+            try {
+                mListener.onFlushComplete(requestCode);
+            } catch (RuntimeException e) {
+                // the only way a runtime exception can be thrown here is if the client is in the
+                // system server process (so that the binder call is executed directly, rather than
+                // asynchronously in another process), and the client is using a direct executor (so
+                // any client exceptions bubble directly back to us). we move any exception onto
+                // another thread so that it can't cause further problems
+                RuntimeException wrapper = new RuntimeException(e);
+                FgThread.getExecutor().execute(() -> {
+                    throw wrapper;
+                });
+            }
         }
 
         @Override
         public void deliverOnProviderEnabledChanged(String provider, boolean enabled)
                 throws RemoteException {
-            mListener.onProviderEnabledChanged(provider, enabled);
+            try {
+                mListener.onProviderEnabledChanged(provider, enabled);
+            } catch (RuntimeException e) {
+                // the only way a runtime exception can be thrown here is if the client is in the
+                // system server process (so that the binder call is executed directly, rather than
+                // asynchronously in another process), and the client is using a direct executor (so
+                // any client exceptions bubble directly back to us). we move any exception onto
+                // another thread so that it can't cause further problems
+                RuntimeException wrapper = new RuntimeException(e);
+                FgThread.getExecutor().execute(() -> {
+                    throw wrapper;
+                });
+            }
         }
     }
 
@@ -294,10 +330,23 @@ public class LocationProviderManager extends
                 throws RemoteException {
             // ILocationCallback doesn't currently support completion callbacks
             Preconditions.checkState(onCompleteCallback == null);
-            if (locationResult != null) {
-                mCallback.onLocation(locationResult.getLastLocation());
-            } else {
-                mCallback.onLocation(null);
+
+            try {
+                if (locationResult != null) {
+                    mCallback.onLocation(locationResult.getLastLocation());
+                } else {
+                    mCallback.onLocation(null);
+                }
+            } catch (RuntimeException e) {
+                // the only way a runtime exception can be thrown here is if the client is in the
+                // system server process (so that the binder call is executed directly, rather than
+                // asynchronously in another process), and the client is using a direct executor (so
+                // any client exceptions bubble directly back to us). we move any exception onto
+                // another thread so that it can't cause further problems
+                RuntimeException wrapper = new RuntimeException(e);
+                FgThread.getExecutor().execute(() -> {
+                    throw wrapper;
+                });
             }
         }
 

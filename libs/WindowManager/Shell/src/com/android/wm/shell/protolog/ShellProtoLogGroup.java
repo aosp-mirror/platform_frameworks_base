@@ -38,6 +38,8 @@ public enum ShellProtoLogGroup implements IProtoLogGroup {
             "ShellBackPreview"),
     WM_SHELL_RECENT_TASKS(Consts.ENABLE_DEBUG, Consts.ENABLE_LOG_TO_PROTO_DEBUG, false,
             Consts.TAG_WM_SHELL),
+    WM_SHELL_PICTURE_IN_PICTURE(Consts.ENABLE_DEBUG, Consts.ENABLE_LOG_TO_PROTO_DEBUG,
+            false, Consts.TAG_WM_SHELL),
     TEST_GROUP(true, true, false, "WindowManagerShellProtoLogTest");
 
     private final boolean mEnabled;

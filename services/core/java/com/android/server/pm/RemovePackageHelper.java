@@ -118,7 +118,8 @@ final class RemovePackageHelper {
 
     public void removePackageLI(AndroidPackage pkg, boolean chatty) {
         // Remove the parent package setting
-        PackageStateInternal ps = mPm.getPackageStateInternal(pkg.getPackageName());
+        PackageStateInternal ps = mPm.snapshotComputer()
+                .getPackageStateInternal(pkg.getPackageName());
         if (ps != null) {
             removePackageLI(ps.getPackageName(), chatty);
         } else if (DEBUG_REMOVE && chatty) {
@@ -239,6 +240,7 @@ final class RemovePackageHelper {
                     && deletedPkg.getStaticSharedLibName() != null;
             outInfo.populateUsers(deletedPs.queryInstalledUsers(
                     mUserManagerInternal.getUserIds(), true), deletedPs);
+            outInfo.mIsExternal = deletedPs.isExternalStorage();
         }
 
         removePackageLI(deletedPs.getPackageName(), (flags & PackageManager.DELETE_CHATTY) != 0);
@@ -270,8 +272,8 @@ final class RemovePackageHelper {
             synchronized (mPm.mLock) {
                 mPm.mDomainVerificationManager.clearPackage(deletedPs.getPackageName());
                 mPm.mSettings.getKeySetManagerService().removeAppKeySetDataLPw(packageName);
-                mPm.mAppsFilter.removePackage(mPm.getPackageStateInternal(packageName),
-                        false /* isReplace */);
+                mPm.mAppsFilter.removePackage(mPm.snapshotComputer()
+                                .getPackageStateInternal(packageName), false /* isReplace */);
                 removedAppId = mPm.mSettings.removePackageLPw(packageName);
                 if (outInfo != null) {
                     outInfo.mRemovedAppId = removedAppId;
@@ -283,7 +285,11 @@ final class RemovePackageHelper {
                     List<AndroidPackage> sharedUserPkgs =
                             sus != null ? sus.getPackages() : Collections.emptyList();
                     mPermissionManager.onPackageUninstalled(packageName, deletedPs.getAppId(),
-                            deletedPs.getPkg(), sharedUserPkgs, UserHandle.USER_ALL);
+                            deletedPkg, sharedUserPkgs, UserHandle.USER_ALL);
+                    // After permissions are handled, check if the shared user can be migrated
+                    if (sus != null) {
+                        mPm.mSettings.checkAndConvertSharedUserSettingsLPw(sus);
+                    }
                 }
                 mPm.clearPackagePreferredActivitiesLPw(
                         deletedPs.getPackageName(), changedUsers, UserHandle.USER_ALL);
@@ -293,7 +299,8 @@ final class RemovePackageHelper {
             if (changedUsers.size() > 0) {
                 final PreferredActivityHelper preferredActivityHelper =
                         new PreferredActivityHelper(mPm);
-                preferredActivityHelper.updateDefaultHomeNotLocked(changedUsers);
+                preferredActivityHelper.updateDefaultHomeNotLocked(mPm.snapshotComputer(),
+                        changedUsers);
                 mPm.postPreferredActivityChangedBroadcast(UserHandle.USER_ALL);
             }
         }

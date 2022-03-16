@@ -58,6 +58,7 @@ import android.os.IBinder;
 import android.os.IPowerManager;
 import android.os.IThermalService;
 import android.os.PowerManager;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.WorkSource;
 import android.platform.test.annotations.Presubmit;
@@ -136,6 +137,7 @@ public class VirtualDeviceManagerServiceTest {
         LocalServices.addService(DisplayManagerInternal.class, mDisplayManagerInternalMock);
 
         mContext = Mockito.spy(new ContextWrapper(InstrumentationRegistry.getTargetContext()));
+        doReturn(mContext).when(mContext).createContextAsUser(eq(Process.myUserHandle()), anyInt());
         doNothing().when(mContext).enforceCallingOrSelfPermission(
                 eq(Manifest.permission.CREATE_VIRTUAL_DEVICE), anyString());
         when(mContext.getSystemService(Context.DEVICE_POLICY_SERVICE)).thenReturn(

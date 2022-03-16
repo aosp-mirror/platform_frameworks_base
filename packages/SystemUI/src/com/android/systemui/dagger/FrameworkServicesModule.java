@@ -26,6 +26,7 @@ import android.app.IWallpaperManager;
 import android.app.KeyguardManager;
 import android.app.NotificationManager;
 import android.app.StatsManager;
+import android.app.UiModeManager;
 import android.app.WallpaperManager;
 import android.app.admin.DevicePolicyManager;
 import android.app.role.RoleManager;
@@ -329,6 +330,13 @@ public class FrameworkServicesModule {
     @Singleton
     static PowerManager providePowerManager(Context context) {
         return context.getSystemService(PowerManager.class);
+    }
+
+    /** */
+    @Provides
+    @Singleton
+    static UiModeManager provideUiModeManager(Context context) {
+        return context.getSystemService(UiModeManager.class);
     }
 
     @Provides

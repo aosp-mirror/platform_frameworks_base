@@ -136,9 +136,9 @@ public final class SensorPrivacyManager {
         public static final int OTHER = SensorPrivacyToggleSourceProto.OTHER;
 
         /**
-         * Constant for SAFETY_HUB.
+         * Constant for SAFETY_CENTER.
          */
-        public static final int SAFETY_HUB = SensorPrivacyToggleSourceProto.SAFETY_HUB;
+        public static final int SAFETY_CENTER = SensorPrivacyToggleSourceProto.SAFETY_CENTER;
 
         /**
          * Source for toggling sensors
@@ -151,7 +151,7 @@ public final class SensorPrivacyManager {
                 DIALOG,
                 SHELL,
                 OTHER,
-                SAFETY_HUB
+                SAFETY_CENTER
         })
         @Retention(RetentionPolicy.SOURCE)
         public @interface Source {}
@@ -652,7 +652,7 @@ public final class SensorPrivacyManager {
         String packageName = mContext.getOpPackageName();
         if (Objects.equals(packageName,
                 mContext.getPackageManager().getPermissionControllerPackageName())) {
-            return Sources.SAFETY_HUB;
+            return Sources.SAFETY_CENTER;
         }
         return Sources.OTHER;
     }

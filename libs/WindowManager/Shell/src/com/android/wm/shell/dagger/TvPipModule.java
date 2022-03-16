@@ -27,7 +27,6 @@ import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.SystemWindows;
 import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.common.annotations.ShellMainThread;
-import com.android.wm.shell.legacysplitscreen.LegacySplitScreenController;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.pip.PipAnimationController;
 import com.android.wm.shell.pip.PipMediaController;
@@ -68,8 +67,10 @@ public abstract class TvPipModule {
             PipTransitionController pipTransitionController,
             TvPipNotificationController tvPipNotificationController,
             TaskStackListenerImpl taskStackListener,
+            DisplayController displayController,
             WindowManagerShellWrapper windowManagerShellWrapper,
-            @ShellMainThread ShellExecutor mainExecutor) {
+            @ShellMainThread ShellExecutor mainExecutor,
+            @ShellMainThread Handler mainHandler) {
         return Optional.of(
                 TvPipController.create(
                         context,
@@ -81,8 +82,10 @@ public abstract class TvPipModule {
                         pipMediaController,
                         tvPipNotificationController,
                         taskStackListener,
+                        displayController,
                         windowManagerShellWrapper,
-                        mainExecutor));
+                        mainExecutor,
+                        mainHandler));
     }
 
     @WMSingleton
@@ -161,15 +164,14 @@ public abstract class TvPipModule {
             PipAnimationController pipAnimationController,
             PipTransitionController pipTransitionController,
             PipSurfaceTransactionHelper pipSurfaceTransactionHelper,
-            Optional<LegacySplitScreenController> splitScreenOptional,
-            Optional<SplitScreenController> newSplitScreenOptional,
+            Optional<SplitScreenController> splitScreenControllerOptional,
             DisplayController displayController,
             PipUiEventLogger pipUiEventLogger, ShellTaskOrganizer shellTaskOrganizer,
             @ShellMainThread ShellExecutor mainExecutor) {
         return new PipTaskOrganizer(context,
                 syncTransactionQueue, pipTransitionState, tvPipBoundsState, tvPipBoundsAlgorithm,
                 tvPipMenuController, pipAnimationController, pipSurfaceTransactionHelper,
-                pipTransitionController, splitScreenOptional, newSplitScreenOptional,
+                pipTransitionController, splitScreenControllerOptional,
                 displayController, pipUiEventLogger, shellTaskOrganizer, mainExecutor);
     }
 }

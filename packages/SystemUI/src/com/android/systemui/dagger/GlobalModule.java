@@ -23,9 +23,13 @@ import android.util.DisplayMetrics;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.UiEventLoggerImpl;
 import com.android.systemui.dagger.qualifiers.TestHarness;
+import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.plugins.PluginsModule;
 import com.android.systemui.unfold.UnfoldTransitionModule;
 import com.android.systemui.util.concurrency.GlobalConcurrencyModule;
+
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 import javax.inject.Singleton;
 
@@ -74,5 +78,17 @@ public class GlobalModule {
     @TestHarness
     static boolean provideIsTestHarness() {
         return ActivityManager.isRunningInUserTestHarness();
+    }
+
+    /**
+     * Provide an Executor specifically for running UI operations on a separate thread.
+     *
+     * Keep submitted runnables short and to the point, just as with any other UI code.
+     */
+    @Provides
+    @Singleton
+    @UiBackground
+    public static Executor provideUiBackgroundExecutor() {
+        return Executors.newSingleThreadExecutor();
     }
 }

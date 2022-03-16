@@ -71,7 +71,7 @@ public class NotificationShadeWindowViewTest extends SysuiTestCase {
     @Mock private DragDownHelper mDragDownHelper;
     @Mock private SysuiStatusBarStateController mStatusBarStateController;
     @Mock private ShadeController mShadeController;
-    @Mock private StatusBar mStatusBar;
+    @Mock private CentralSurfaces mCentralSurfaces;
     @Mock private DockManager mDockManager;
     @Mock private NotificationPanelViewController mNotificationPanelViewController;
     @Mock private NotificationStackScrollLayout mNotificationStackScrollLayout;
@@ -115,9 +115,10 @@ public class NotificationShadeWindowViewTest extends SysuiTestCase {
                 mStatusBarKeyguardViewManager,
                 mStatusBarWindowStateController,
                 mLockIconViewController,
-                Optional.of(mLowLightClockController));
+                Optional.of(mLowLightClockController),
+                mCentralSurfaces,
+                mNotificationShadeWindowController);
         mController.setupExpandedStatusBar();
-        mController.setService(mStatusBar, mNotificationShadeWindowController);
         mController.setDragDownHelper(mDragDownHelper);
     }
 

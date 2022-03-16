@@ -30,6 +30,7 @@ import static android.view.View.MeasureSpec.EXACTLY;
 import static android.view.View.MeasureSpec.getMode;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
+import static android.view.ViewRootImpl.CAPTION_ON_SHELL;
 import static android.view.Window.DECOR_CAPTION_SHADE_DARK;
 import static android.view.Window.DECOR_CAPTION_SHADE_LIGHT;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
@@ -2120,7 +2121,9 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
      * corresponding insets change to the InsetsController.
      */
     public void notifyCaptionHeightChanged() {
-        getWindowInsetsController().setCaptionInsetsHeight(getCaptionInsetsHeight());
+        if (!CAPTION_ON_SHELL) {
+            getWindowInsetsController().setCaptionInsetsHeight(getCaptionInsetsHeight());
+        }
     }
 
     void setWindow(PhoneWindow phoneWindow) {

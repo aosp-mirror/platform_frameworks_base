@@ -72,6 +72,7 @@ import android.util.Pair;
 import android.util.Slog;
 
 import com.android.server.DeviceIdleInternal;
+import com.android.server.sdksandbox.SdkSandboxManagerLocal;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -372,9 +373,10 @@ final class VerificationParams extends HandlerParams {
          * Determine if we have any installed package verifiers. If we
          * do, then we'll defer to them to verify the packages.
          */
+        final Computer snapshot = mPm.snapshotComputer();
         final int requiredUid = requiredVerifierPackage == null ? -1
-                : mPm.getPackageUid(requiredVerifierPackage, MATCH_DEBUG_TRIAGED_MISSING,
-                        verifierUserId);
+                : snapshot.getPackageUid(requiredVerifierPackage,
+                        MATCH_DEBUG_TRIAGED_MISSING, verifierUserId);
         verificationState.setRequiredVerifierUid(requiredUid);
         final boolean isVerificationEnabled = isVerificationEnabled(pkgLite,
                 verifierUserId);
@@ -391,8 +393,8 @@ final class VerificationParams extends HandlerParams {
         verification.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
         // Query all live verifiers based on current user state
-        final ParceledListSlice<ResolveInfo> receivers = mPm.queryIntentReceivers(verification,
-                PACKAGE_MIME_TYPE, 0, verifierUserId);
+        final ParceledListSlice<ResolveInfo> receivers = mPm.queryIntentReceivers(snapshot,
+                verification, PACKAGE_MIME_TYPE, 0, verifierUserId);
 
         if (DEBUG_VERIFY) {
             Slog.d(TAG, "Found " + receivers.getList().size() + " verifiers for intent "
@@ -440,8 +442,21 @@ final class VerificationParams extends HandlerParams {
         final long verificationTimeout = VerificationUtils.getVerificationTimeout(mPm.mContext,
                 streaming);
 
-        final List<ComponentName> sufficientVerifiers = matchVerifiers(pkgLite,
+        List<ComponentName> sufficientVerifiers = matchVerifiers(pkgLite,
                 receivers.getList(), verificationState);
+
+        // Add broadcastReceiver Component to verify Sdk before run in Sdk sandbox.
+        if (pkgLite.isSdkLibrary) {
+            if (sufficientVerifiers == null) {
+                sufficientVerifiers = new ArrayList<>();
+            }
+            ComponentName sdkSandboxComponentName = new ComponentName("android",
+                    SdkSandboxManagerLocal.VERIFIER_RECEIVER);
+            sufficientVerifiers.add(sdkSandboxComponentName);
+
+            // Add uid of system_server the same uid for SdkSandboxManagerService
+            verificationState.addSufficientVerifier(Process.myUid());
+        }
 
         DeviceIdleInternal idleController =
                 mPm.mInjector.getLocalService(DeviceIdleInternal.class);

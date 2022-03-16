@@ -33,6 +33,7 @@ import android.view.WindowManager
 import android.widget.ImageView
 import com.android.internal.policy.ScreenDecorationsUtils
 import com.android.systemui.R
+import com.android.systemui.broadcast.BroadcastSender
 import com.android.wm.shell.TaskView
 
 /**
@@ -42,6 +43,7 @@ import com.android.wm.shell.TaskView
  */
 class DetailDialog(
     val activityContext: Context,
+    val broadcastSender: BroadcastSender,
     val taskView: TaskView,
     val pendingIntent: PendingIntent,
     val cvh: ControlViewHolder
@@ -147,7 +149,7 @@ class DetailDialog(
                 // startActivity() below is called.
                 removeDetailTask()
                 dismiss()
-                context.sendBroadcast(Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS))
+                broadcastSender.closeSystemDialogs()
                 pendingIntent.send()
             }
         }

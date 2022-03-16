@@ -109,7 +109,8 @@ class FaceAuthenticationClient extends AuthenticationClient<IBiometricsFace> {
 
         if (mSensorPrivacyManager != null
                 && mSensorPrivacyManager
-                .isSensorPrivacyEnabled(SensorPrivacyManager.Sensors.CAMERA, getTargetUserId())) {
+                .isSensorPrivacyEnabled(SensorPrivacyManager.TOGGLE_TYPE_SOFTWARE,
+                SensorPrivacyManager.Sensors.CAMERA)) {
             onError(BiometricFaceConstants.FACE_ERROR_HW_UNAVAILABLE, 0 /* vendorCode */);
             mCallback.onClientFinished(this, false /* success */);
             return;

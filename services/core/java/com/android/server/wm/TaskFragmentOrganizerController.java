@@ -140,7 +140,7 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
                 mLastSentTaskFragmentInfos.put(tf, info);
                 tf.mTaskFragmentAppearedSent = true;
             } catch (RemoteException e) {
-                Slog.e(TAG, "Exception sending onTaskFragmentAppeared callback", e);
+                Slog.d(TAG, "Exception sending onTaskFragmentAppeared callback", e);
             }
             onTaskFragmentParentInfoChanged(organizer, tf);
         }
@@ -150,7 +150,7 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
             try {
                 organizer.onTaskFragmentVanished(tf.getTaskFragmentInfo());
             } catch (RemoteException e) {
-                Slog.e(TAG, "Exception sending onTaskFragmentVanished callback", e);
+                Slog.d(TAG, "Exception sending onTaskFragmentVanished callback", e);
             }
             tf.mTaskFragmentAppearedSent = false;
             mLastSentTaskFragmentInfos.remove(tf);
@@ -175,7 +175,7 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
                 organizer.onTaskFragmentInfoChanged(tf.getTaskFragmentInfo());
                 mLastSentTaskFragmentInfos.put(tf, info);
             } catch (RemoteException e) {
-                Slog.e(TAG, "Exception sending onTaskFragmentInfoChanged callback", e);
+                Slog.d(TAG, "Exception sending onTaskFragmentInfoChanged callback", e);
             }
         }
 
@@ -198,7 +198,7 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
                 organizer.onTaskFragmentParentInfoChanged(tf.getFragmentToken(), parentConfig);
                 mLastSentTaskFragmentParentConfigs.put(tf, new Configuration(parentConfig));
             } catch (RemoteException e) {
-                Slog.e(TAG, "Exception sending onTaskFragmentParentInfoChanged callback", e);
+                Slog.d(TAG, "Exception sending onTaskFragmentParentInfoChanged callback", e);
             }
         }
 
@@ -210,7 +210,7 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
             try {
                 organizer.onTaskFragmentError(errorCallbackToken, exceptionBundle);
             } catch (RemoteException e) {
-                Slog.e(TAG, "Exception sending onTaskFragmentError callback", e);
+                Slog.d(TAG, "Exception sending onTaskFragmentError callback", e);
             }
         }
     }

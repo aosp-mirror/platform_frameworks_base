@@ -171,16 +171,15 @@ final class AmbientContextManagerPerUserService extends
                 return;
             }
 
-            // Remove any existing intent and unregister for this package before adding a new one.
+            // Remove any existing PendingIntent for this package.
             String callingPackage = pendingIntent.getCreatorPackage();
             PendingIntent duplicatePendingIntent = findExistingRequestByPackage(callingPackage);
             if (duplicatePendingIntent != null) {
-                Slog.d(TAG, "Unregister duplicate request from " + callingPackage);
-                onUnregisterObserver(callingPackage);
+                Slog.d(TAG, "Replace duplicate request from " + callingPackage);
                 mExistingPendingIntents.remove(duplicatePendingIntent);
             }
 
-            // Register new package and add request to mExistingRequests
+            // Register package and add pendingIntent to mExistingPendingIntents
             startDetection(request, callingPackage, createDetectionResultRemoteCallback(),
                     getServerStatusCallback(clientStatusCallback));
             mExistingPendingIntents.add(pendingIntent);

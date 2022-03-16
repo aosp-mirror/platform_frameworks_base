@@ -124,6 +124,35 @@ public:
     // This never changes.  See top of header.
     Stream* getPairStream() const;
 
+    // Stream ID of ourselves, or the pair depending on who holds the AudioTrack
+    int getCorrespondingStreamID();
+
+protected:
+    // AudioTrack callback interface implementation
+    class StreamCallback : public AudioTrack::IAudioTrackCallback {
+      public:
+        StreamCallback(Stream * stream, bool toggle) : mStream(stream), mToggle(toggle) {}
+        size_t onMoreData(const AudioTrack::Buffer& buffer) override;
+        void onUnderrun() override;
+        void onLoopEnd(int32_t loopsRemaining) override;
+        void onMarker(uint32_t markerPosition) override;
+        void onNewPos(uint32_t newPos) override;
+        void onBufferEnd() override;
+        void onNewIAudioTrack() override;
+        void onStreamEnd() override;
+        size_t onCanWriteMoreData(const AudioTrack::Buffer& buffer) override;
+
+        // Holding a raw ptr is technically unsafe, but, Stream objects persist
+        // through the lifetime of the StreamManager through the use of a
+        // unique_ptr<Stream[]>. Ensuring lifetime will cause us to give up
+        // locality as well as pay RefBase/sp performance cost, which we are
+        // unwilling to do. Non-owning refs to unique_ptrs are idiomatically raw
+        // ptrs, as below.
+        Stream * const mStream;
+        const bool mToggle;
+    };
+
+    sp<StreamCallback> mCallback;
 private:
     // garbage is used to release tracks and data outside of any lock.
     void play_l(const std::shared_ptr<Sound>& sound, int streamID,
@@ -133,9 +162,7 @@ private:
     void setVolume_l(float leftVolume, float rightVolume) REQUIRES(mLock);
 
     // For use with AudioTrack callback.
-    static void staticCallback(int event, void* user, void* info);
-    void callback(int event, void* info, int toggle, int tries)
-            NO_THREAD_SAFETY_ANALYSIS; // uses unique_lock
+    void onBufferEnd(int toggle, int tries) NO_THREAD_SAFETY_ANALYSIS;
 
     // StreamManager should be set on construction and not changed.
     // release mLock before calling into StreamManager

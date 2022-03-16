@@ -57,7 +57,6 @@ public class PreferredComponent {
     private String mParseError;
 
     private final Callbacks mCallbacks;
-    private final String mSetupWizardPackageName;
 
     public interface Callbacks {
         public boolean onReadTag(String tagName, TypedXmlPullParser parser)
@@ -72,7 +71,6 @@ public class PreferredComponent {
         mAlways = always;
         mShortComponent = component.flattenToShortString();
         mParseError = null;
-        mSetupWizardPackageName = null;
         if (set != null) {
             final int N = set.length;
             String[] myPackages = new String[N];
@@ -174,8 +172,6 @@ public class PreferredComponent {
         mSetPackages = myPackages;
         mSetClasses = myClasses;
         mSetComponents = myComponents;
-        final PackageManagerInternal packageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
-        mSetupWizardPackageName = packageManagerInternal.getSetupWizardPackageName();
     }
 
     public String getParseError() {
@@ -209,6 +205,7 @@ public class PreferredComponent {
         final int NQ = query.size();
         final int NS = mSetPackages.length;
         final PackageManagerInternal pmi = LocalServices.getService(PackageManagerInternal.class);
+        String setupWizardPackageName = pmi.getSetupWizardPackageName();
         int numMatch = 0;
         for (int i=0; i<NQ; i++) {
             ResolveInfo ri = query.get(i);
@@ -217,7 +214,7 @@ public class PreferredComponent {
 
             // ignore SetupWizard package's launcher capability because it is only existed
             // during SetupWizard is running
-            if (excludeSetupWizardPackage && ai.packageName.equals(mSetupWizardPackageName)) {
+            if (excludeSetupWizardPackage && ai.packageName.equals(setupWizardPackageName)) {
                 continue;
             }
 
@@ -307,6 +304,8 @@ public class PreferredComponent {
         if (!excludeSetupWizardPackage && NS < NQ) {
             return false;
         }
+        final PackageManagerInternal pmi = LocalServices.getService(PackageManagerInternal.class);
+        String setupWizardPackageName = pmi.getSetupWizardPackageName();
         for (int i=0; i<NQ; i++) {
             ResolveInfo ri = query.get(i);
             ActivityInfo ai = ri.activityInfo;
@@ -314,7 +313,7 @@ public class PreferredComponent {
 
             // ignore SetupWizard package's launcher capability because it is only existed
             // during SetupWizard is running
-            if (excludeSetupWizardPackage && ai.packageName.equals(mSetupWizardPackageName)) {
+            if (excludeSetupWizardPackage && ai.packageName.equals(setupWizardPackageName)) {
                 continue;
             }
 

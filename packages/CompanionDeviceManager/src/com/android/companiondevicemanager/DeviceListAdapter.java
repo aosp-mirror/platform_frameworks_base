@@ -15,9 +15,10 @@
  */
 
 package com.android.companiondevicemanager;
+
+import static com.android.companiondevicemanager.Utils.getIcon;
+
 import android.content.Context;
-import android.graphics.Color;
-import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -60,11 +61,11 @@ class DeviceListAdapter extends RecyclerView.Adapter<DeviceListAdapter.ViewHolde
                 R.layout.list_item_device, parent, false);
         ViewHolder viewHolder = new ViewHolder(view);
         if (viewType == TYPE_WIFI) {
-            viewHolder.mImageView.setImageDrawable(getIcon(
-                    com.android.internal.R.drawable.ic_wifi_signal_3));
+            viewHolder.mImageView.setImageDrawable(
+                    getIcon(mContext, com.android.internal.R.drawable.ic_wifi_signal_3));
         } else {
-            viewHolder.mImageView.setImageDrawable(getIcon(
-                    android.R.drawable.stat_sys_data_bluetooth));
+            viewHolder.mImageView.setImageDrawable(
+                    getIcon(mContext, android.R.drawable.stat_sys_data_bluetooth));
         }
         return viewHolder;
     }
@@ -113,12 +114,6 @@ class DeviceListAdapter extends RecyclerView.Adapter<DeviceListAdapter.ViewHolde
 
     private boolean isWifiDevice(int position) {
         return mDevices.get(position).getDevice() instanceof android.net.wifi.ScanResult;
-    }
-
-    private Drawable getIcon(int resId) {
-        Drawable icon = mContext.getResources().getDrawable(resId, null);
-        icon.setTint(Color.DKGRAY);
-        return icon;
     }
 
     public interface OnItemClickListener {

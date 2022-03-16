@@ -125,13 +125,13 @@ public final class CellSignalStrengthLte extends CellSignalStrength implements P
     /**
      * Construct a cell signal strength
      *
-     * @param rssi in dBm [-113,-51], UNKNOWN
-     * @param rsrp in dBm [-140,-43], UNKNOWN
-     * @param rsrq in dB [-34, 3], UNKNOWN
-     * @param rssnr in dB [-20, +30], UNKNOWN
-     * @param cqiTableIndex [1, 6], UNKNOWN
-     * @param cqi [0, 15], UNKNOWN
-     * @param timingAdvance [0, 1282], UNKNOWN
+     * @param rssi in dBm [-113,-51], {@link CellInfo#UNAVAILABLE}
+     * @param rsrp in dBm [-140,-43], {@link CellInfo#UNAVAILABLE}
+     * @param rsrq in dB [-34, 3], {@link CellInfo#UNAVAILABLE}
+     * @param rssnr in dB [-20, +30], {@link CellInfo#UNAVAILABLE}
+     * @param cqiTableIndex [1, 6], {@link CellInfo#UNAVAILABLE}
+     * @param cqi [0, 15], {@link CellInfo#UNAVAILABLE}
+     * @param timingAdvance [0, 1282], {@link CellInfo#UNAVAILABLE}
      *
      */
     /** @hide */
@@ -151,12 +151,12 @@ public final class CellSignalStrengthLte extends CellSignalStrength implements P
     /**
      * Construct a cell signal strength
      *
-     * @param rssi in dBm [-113,-51], UNKNOWN
-     * @param rsrp in dBm [-140,-43], UNKNOWN
-     * @param rsrq in dB [-34, 3], UNKNOWN
-     * @param rssnr in dB [-20, +30], UNKNOWN
-     * @param cqi [0, 15], UNKNOWN
-     * @param timingAdvance [0, 1282], UNKNOWN
+     * @param rssi in dBm [-113,-51], {@link CellInfo#UNAVAILABLE}
+     * @param rsrp in dBm [-140,-43], {@link CellInfo#UNAVAILABLE}
+     * @param rsrq in dB [-34, 3], {@link CellInfo#UNAVAILABLE}
+     * @param rssnr in dB [-20, +30], {@link CellInfo#UNAVAILABLE}
+     * @param cqi [0, 15], {@link CellInfo#UNAVAILABLE}
+     * @param timingAdvance [0, 1282], {@link CellInfo#UNAVAILABLE}
      *
      */
     /** @hide */
@@ -403,10 +403,11 @@ public final class CellSignalStrengthLte extends CellSignalStrength implements P
     }
 
     /**
-     * Get reference signal signal-to-noise ratio
+     * Get reference signal signal-to-noise ratio in dB
+     * Range: -20 dB to +30 dB.
      *
      * @return the RSSNR if available or
-     *         {@link android.telephony.CellInfo#UNAVAILABLE UNAVAILABLE} if unavailable.
+     *         {@link android.telephony.CellInfo#UNAVAILABLE} if unavailable.
      */
     public int getRssnr() {
         return mRssnr;
@@ -414,8 +415,10 @@ public final class CellSignalStrengthLte extends CellSignalStrength implements P
 
     /**
      * Get reference signal received power in dBm
+     * Range: -140 dBm to -43 dBm.
      *
-     * @return the RSRP of the measured cell.
+     * @return the RSRP of the measured cell or {@link CellInfo#UNAVAILABLE} if
+     * unavailable.
      */
     public int getRsrp() {
         return mRsrp;

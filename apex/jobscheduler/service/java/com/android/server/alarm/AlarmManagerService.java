@@ -4891,13 +4891,15 @@ public class AlarmManagerService extends SystemService {
             filter.addAction(Intent.ACTION_PACKAGE_RESTARTED);
             filter.addAction(Intent.ACTION_QUERY_PACKAGE_RESTART);
             filter.addDataScheme(IntentFilter.SCHEME_PACKAGE);
-            getContext().registerReceiver(this, filter);
+            getContext().registerReceiverForAllUsers(this, filter,
+                    /* broadcastPermission */ null, /* scheduler */ null);
             // Register for events related to sdcard installation.
             IntentFilter sdFilter = new IntentFilter();
             sdFilter.addAction(Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE);
             sdFilter.addAction(Intent.ACTION_USER_STOPPED);
             sdFilter.addAction(Intent.ACTION_UID_REMOVED);
-            getContext().registerReceiver(this, sdFilter);
+            getContext().registerReceiverForAllUsers(this, sdFilter,
+                    /* broadcastPermission */ null, /* scheduler */ null);
         }
 
         @Override
@@ -4915,9 +4917,6 @@ public class AlarmManagerService extends SystemService {
                             }
                         }
                         return;
-                    case Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE:
-                        pkgList = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
-                        break;
                     case Intent.ACTION_USER_STOPPED:
                         final int userHandle = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
                         if (userHandle >= 0) {
@@ -4932,6 +4931,18 @@ public class AlarmManagerService extends SystemService {
                         mRemovalHistory.delete(uid);
                         mLastOpScheduleExactAlarm.delete(uid);
                         return;
+                    case Intent.ACTION_PACKAGE_ADDED:
+                        if (intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
+                            final String packageUpdated = intent.getData().getSchemeSpecificPart();
+                            mHandler.obtainMessage(
+                                    AlarmHandler.CHECK_EXACT_ALARM_PERMISSION_ON_UPDATE, uid, -1,
+                                    packageUpdated).sendToTarget();
+                        }
+                        mHandler.sendEmptyMessage(AlarmHandler.REFRESH_EXACT_ALARM_CANDIDATES);
+                        return;
+                    case Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE:
+                        pkgList = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
+                        break;
                     case Intent.ACTION_PACKAGE_REMOVED:
                         if (intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
                             // This package is being updated; don't kill its alarms.
@@ -4950,15 +4961,6 @@ public class AlarmManagerService extends SystemService {
                             }
                         }
                         break;
-                    case Intent.ACTION_PACKAGE_ADDED:
-                        if (intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
-                            final String packageUpdated = intent.getData().getSchemeSpecificPart();
-                            mHandler.obtainMessage(
-                                    AlarmHandler.CHECK_EXACT_ALARM_PERMISSION_ON_UPDATE, uid, -1,
-                                    packageUpdated).sendToTarget();
-                        }
-                        mHandler.sendEmptyMessage(AlarmHandler.REFRESH_EXACT_ALARM_CANDIDATES);
-                        return;
                 }
                 if (pkgList != null && (pkgList.length > 0)) {
                     for (String pkg : pkgList) {

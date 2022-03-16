@@ -136,7 +136,7 @@ final class HandwritingModeController {
      */
     @UiThread
     @Nullable
-    HandwritingSession startHandwritingSession(int requestId) {
+    HandwritingSession startHandwritingSession(int requestId, int imePid, int imeUid) {
         if (mHandwritingSurface == null) {
             Slog.e(TAG, "Cannot start handwriting session: Handwriting was not initialized.");
             return null;
@@ -160,7 +160,7 @@ final class HandwritingModeController {
             throw new IllegalStateException(
                     "Handwriting surface should not be already intercepting.");
         }
-        mHandwritingSurface.startIntercepting();
+        mHandwritingSurface.startIntercepting(imePid, imeUid);
 
         return new HandwritingSession(mCurrentRequestId, mHandwritingSurface.getInputChannel(),
                 mHandwritingBuffer);

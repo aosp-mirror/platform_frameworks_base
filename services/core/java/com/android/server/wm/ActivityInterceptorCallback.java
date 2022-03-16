@@ -43,9 +43,13 @@ public abstract class ActivityInterceptorCallback {
     public abstract @Nullable ActivityInterceptResult intercept(ActivityInterceptorInfo info);
 
     /**
-     * Called when an activity is successfully launched.
+     * Called when an activity is successfully launched. The intent included in the
+     * ActivityInterceptorInfo may have changed from the one sent in
+     * {@link #intercept(ActivityInterceptorInfo)}, due to the return from
+     * {@link #intercept(ActivityInterceptorInfo)}.
      */
-    public void onActivityLaunched(TaskInfo taskInfo, ActivityInfo activityInfo) {
+    public void onActivityLaunched(TaskInfo taskInfo, ActivityInfo activityInfo,
+            ActivityInterceptorInfo info) {
     }
 
     /**
@@ -54,6 +58,7 @@ public abstract class ActivityInterceptorCallback {
     @IntDef(suffix = { "_ORDERED_ID" }, value = {
             FIRST_ORDERED_ID,
             PERMISSION_POLICY_ORDERED_ID,
+            INTENT_RESOLVER_ORDERED_ID,
             VIRTUAL_DEVICE_SERVICE_ORDERED_ID,
             LAST_ORDERED_ID // Update this when adding new ids
     })
@@ -69,6 +74,11 @@ public abstract class ActivityInterceptorCallback {
      * The identifier for {@link com.android.server.policy.PermissionPolicyService} interceptor
      */
     public static final int PERMISSION_POLICY_ORDERED_ID = 1;
+
+    /**
+     * The identifier for {@link com.android.server.pm.IntentResolverInterceptor}.
+     */
+    public static final int INTENT_RESOLVER_ORDERED_ID = 2;
 
     /**
      * The identifier for {@link com.android.server.companion.virtual.VirtualDeviceManagerService}

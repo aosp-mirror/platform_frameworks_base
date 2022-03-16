@@ -199,10 +199,13 @@ public class Utils {
     /**
      * Gets the {@link R.dimen#split_shade_header_height}.
      *
-     * Currently, it's the same as {@link com.android.internal.R.dimen#quick_qs_offset_height}.
+     * It should be fine to not ignore cutouts as split shade might not want to react to them:
+     * for split shade header, which is only on bigger screens, either cutout won't be a problem
+     * (it's usually centered and in split shade that's likely empty area) or we probably want to
+     * handle it differently.
      */
     public static int getSplitShadeStatusBarHeight(Context context) {
-        return SystemBarUtils.getQuickQsOffsetHeight(context);
+        return context.getResources().getDimensionPixelSize(R.dimen.split_shade_header_height);
     }
 
     /**

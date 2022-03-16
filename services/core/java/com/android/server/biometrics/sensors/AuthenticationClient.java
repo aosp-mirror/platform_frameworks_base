@@ -86,6 +86,7 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
     private long mStartTimeMs;
 
     private boolean mAuthAttempted;
+    private boolean mAuthSuccess = false;
 
     // TODO: This is currently hard to maintain, as each AuthenticationClient subclass must update
     //  the state. We should think of a way to improve this in the future.
@@ -237,6 +238,7 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
                         "Successful background authentication!");
             }
 
+            mAuthSuccess = true;
             markAlreadyDone();
 
             if (mTaskStackListener != null) {
@@ -500,6 +502,11 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
 
     public boolean wasAuthAttempted() {
         return mAuthAttempted;
+    }
+
+    /** If an auth attempt completed successfully. */
+    public boolean wasAuthSuccessful() {
+        return mAuthSuccess;
     }
 
     protected int getShowOverlayReason() {

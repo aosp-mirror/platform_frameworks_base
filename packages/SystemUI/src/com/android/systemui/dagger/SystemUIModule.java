@@ -32,7 +32,6 @@ import com.android.systemui.assist.AssistModule;
 import com.android.systemui.biometrics.UdfpsHbmProvider;
 import com.android.systemui.biometrics.dagger.BiometricsModule;
 import com.android.systemui.classifier.FalsingModule;
-import com.android.systemui.communal.dagger.CommunalModule;
 import com.android.systemui.controls.dagger.ControlsModule;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.demomode.dagger.DemoModeModule;
@@ -49,6 +48,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.screenshot.dagger.ScreenshotModule;
 import com.android.systemui.settings.dagger.SettingsModule;
+import com.android.systemui.smartspace.dagger.SmartspaceModule;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
@@ -66,9 +66,9 @@ import com.android.systemui.statusbar.notification.people.PeopleHubModule;
 import com.android.systemui.statusbar.notification.row.dagger.ExpandableNotificationRowComponent;
 import com.android.systemui.statusbar.notification.row.dagger.NotificationRowComponent;
 import com.android.systemui.statusbar.notification.row.dagger.NotificationShelfComponent;
+import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.ShadeController;
-import com.android.systemui.statusbar.phone.StatusBar;
-import com.android.systemui.statusbar.phone.dagger.StatusBarComponent;
+import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.ZenModeController;
@@ -106,7 +106,6 @@ import dagger.Provides;
             AssistModule.class,
             BiometricsModule.class,
             ClockModule.class,
-            CommunalModule.class,
             DreamModule.class,
             ControlsModule.class,
             DemoModeModule.class,
@@ -121,6 +120,7 @@ import dagger.Provides;
             SettingsModule.class,
             SettingsUtilModule.class,
             SmartRepliesInflationModule.class,
+            SmartspaceModule.class,
             StatusBarPolicyModule.class,
             StatusBarWindowModule.class,
             SysUIConcurrencyModule.class,
@@ -131,7 +131,7 @@ import dagger.Provides;
             WalletModule.class
         },
         subcomponents = {
-            StatusBarComponent.class,
+            CentralSurfacesComponent.class,
             NotificationRowComponent.class,
             DozeComponent.class,
             ExpandableNotificationRowComponent.class,
@@ -175,7 +175,7 @@ public abstract class SystemUIModule {
     abstract Recents optionalRecents();
 
     @BindsOptionalOf
-    abstract StatusBar optionalStatusBar();
+    abstract CentralSurfaces optionalCentralSurfaces();
 
     @BindsOptionalOf
     abstract UdfpsHbmProvider optionalUdfpsHbmProvider();

@@ -19,6 +19,7 @@ package com.android.server.pm;
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.job.JobInfo;
 import android.app.job.JobParameters;
@@ -269,7 +270,7 @@ public final class BackgroundDexOptService {
             PackageManagerService pm = mInjector.getPackageManagerService();
             ArraySet<String> packagesToOptimize;
             if (packageNames == null) {
-                packagesToOptimize = mDexOptHelper.getOptimizablePackages();
+                packagesToOptimize = mDexOptHelper.getOptimizablePackages(pm.snapshotComputer());
             } else {
                 packagesToOptimize = new ArraySet<>(packageNames);
             }
@@ -334,7 +335,7 @@ public final class BackgroundDexOptService {
             return false;
         }
 
-        ArraySet<String> pkgs = mDexOptHelper.getOptimizablePackages();
+        ArraySet<String> pkgs = mDexOptHelper.getOptimizablePackages(pm.snapshotComputer());
         if (pkgs.isEmpty()) {
             Slog.i(TAG, "No packages to optimize");
             markPostBootUpdateCompleted(params);
@@ -556,8 +557,8 @@ public final class BackgroundDexOptService {
     }
 
     /** Gets the size of a package. */
-    private long getPackageSize(PackageManagerService pm, String pkg) {
-        PackageInfo info = pm.getPackageInfo(pkg, 0, UserHandle.USER_SYSTEM);
+    private long getPackageSize(@NonNull Computer snapshot, String pkg) {
+        PackageInfo info = snapshot.getPackageInfo(pkg, 0, UserHandle.USER_SYSTEM);
         long size = 0;
         if (info != null && info.applicationInfo != null) {
             File path = Paths.get(info.applicationInfo.sourceDir).toFile();
@@ -605,8 +606,9 @@ public final class BackgroundDexOptService {
                 Slog.d(TAG, "Should Downgrade " + shouldDowngrade);
             }
             if (shouldDowngrade) {
+                final Computer snapshot = pm.snapshotComputer();
                 Set<String> unusedPackages =
-                        pm.getUnusedPackages(mDowngradeUnusedAppsThresholdInMillis);
+                        snapshot.getUnusedPackages(mDowngradeUnusedAppsThresholdInMillis);
                 if (DEBUG) {
                     Slog.d(TAG, "Unsused Packages " + String.join(",", unusedPackages));
                 }
@@ -618,7 +620,7 @@ public final class BackgroundDexOptService {
                             // Should be aborted by the scheduler.
                             return abortCode;
                         }
-                        @DexOptResult int downgradeResult = downgradePackage(pm, pkg,
+                        @DexOptResult int downgradeResult = downgradePackage(snapshot, pm, pkg,
                                 /* isForPrimaryDex= */ true, isPostBootUpdate);
                         if (downgradeResult == PackageDexOptimizer.DEX_OPT_PERFORMED) {
                             updatedPackages.add(pkg);
@@ -629,7 +631,7 @@ public final class BackgroundDexOptService {
                             return status;
                         }
                         if (supportSecondaryDex) {
-                            downgradeResult = downgradePackage(pm, pkg,
+                            downgradeResult = downgradePackage(snapshot, pm, pkg,
                                     /* isForPrimaryDex= */false, isPostBootUpdate);
                             status = convertPackageDexOptimizerStatusToInternal(downgradeResult);
                             if (status != STATUS_OK) {
@@ -696,8 +698,8 @@ public final class BackgroundDexOptService {
      * @return PackageDexOptimizer.DEX_*
      */
     @DexOptResult
-    private int downgradePackage(PackageManagerService pm, String pkg, boolean isForPrimaryDex,
-            boolean isPostBootUpdate) {
+    private int downgradePackage(@NonNull Computer snapshot, PackageManagerService pm, String pkg,
+            boolean isForPrimaryDex, boolean isPostBootUpdate) {
         if (DEBUG) {
             Slog.d(TAG, "Downgrading " + pkg);
         }
@@ -709,15 +711,15 @@ public final class BackgroundDexOptService {
         if (!isPostBootUpdate) {
             dexoptFlags |= DexoptOptions.DEXOPT_IDLE_BACKGROUND_JOB;
         }
-        long package_size_before = getPackageSize(pm, pkg);
+        long package_size_before = getPackageSize(snapshot, pkg);
         int result = PackageDexOptimizer.DEX_OPT_SKIPPED;
         if (isForPrimaryDex || PLATFORM_PACKAGE_NAME.equals(pkg)) {
             // This applies for system apps or if packages location is not a directory, i.e.
             // monolithic install.
-            if (!pm.canHaveOatDir(pkg)) {
+            if (!pm.canHaveOatDir(snapshot, pkg)) {
                 // For apps that don't have the oat directory, instead of downgrading,
                 // remove their compiler artifacts from dalvik cache.
-                pm.deleteOatArtifactsOfPackage(pkg);
+                pm.deleteOatArtifactsOfPackage(snapshot, pkg);
             } else {
                 result = performDexOptPrimary(pkg, reason, dexoptFlags);
             }
@@ -726,8 +728,9 @@ public final class BackgroundDexOptService {
         }
 
         if (result == PackageDexOptimizer.DEX_OPT_PERFORMED) {
+            final Computer newSnapshot = pm.snapshotComputer();
             FrameworkStatsLog.write(FrameworkStatsLog.APP_DOWNGRADED, pkg, package_size_before,
-                    getPackageSize(pm, pkg), /*aggressive=*/ false);
+                    getPackageSize(newSnapshot, pkg), /*aggressive=*/ false);
         }
         return result;
     }

@@ -486,7 +486,7 @@
 
     <style name="MediaOutputItemInactiveTitle">
         <item name="android:textSize">16sp</item>
-        <item name="android:textColor">@color/media_dialog_inactive_item_main_content</item>
+        <item name="android:textColor">@color/media_dialog_item_main_content</item>
     </style>
 
     <style name="TunerSettings" parent="@android:style/Theme.DeviceDefault.Settings">
@@ -590,6 +590,7 @@
 
     <style name="MediaPlayer.ProgressBar" parent="@android:style/Widget.ProgressBar.Horizontal">
         <item name="android:thumbTint">?android:attr/textColorPrimary</item>
+        <item name="android:progressDrawable">@drawable/media_squiggly_progress</item>
         <item name="android:progressTint">?android:attr/textColorPrimary</item>
         <item name="android:progressBackgroundTint">?android:attr/textColorTertiary</item>
         <item name="android:clickable">true</item>

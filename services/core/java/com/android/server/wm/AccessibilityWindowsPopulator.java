@@ -27,6 +27,7 @@ import android.graphics.RectF;
 import android.graphics.Region;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.InputConfig;
 import android.os.Looper;
 import android.os.Message;
 import android.util.Slog;
@@ -145,10 +146,16 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
     @Override
     public void onWindowInfosChanged(InputWindowHandle[] windowHandles,
             DisplayInfo[] displayInfos) {
+        mHandler.post(() -> onWindowInfosChangedInternal(windowHandles, displayInfos));
+    }
+
+    private void onWindowInfosChangedInternal(InputWindowHandle[] windowHandles,
+            DisplayInfo[] displayInfos) {
         final List<InputWindowHandle> tempVisibleWindows = new ArrayList<>();
 
         for (InputWindowHandle window : windowHandles) {
-            if (window.visible && window.getWindow() != null) {
+            final boolean visible = (window.inputConfig & InputConfig.NOT_VISIBLE) == 0;
+            if (visible && window.getWindow() != null) {
                 tempVisibleWindows.add(window);
             }
         }
@@ -167,13 +174,14 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
                 mDisplayInfos.put(displayInfo.mDisplayId, displayInfo);
             }
 
-            if (!mHandler.hasMessages(
-                    MyHandler.MESSAGE_NOTIFY_WINDOWS_CHANGED_BY_TIMEOUT)) {
-                mHandler.sendEmptyMessageDelayed(
-                        MyHandler.MESSAGE_NOTIFY_WINDOWS_CHANGED_BY_TIMEOUT,
-                        WINDOWS_CHANGED_NOTIFICATION_MAX_DURATION_TIMES_MS);
+            if (mWindowsNotificationEnabled) {
+                if (!mHandler.hasMessages(MyHandler.MESSAGE_NOTIFY_WINDOWS_CHANGED_BY_TIMEOUT)) {
+                    mHandler.sendEmptyMessageDelayed(
+                            MyHandler.MESSAGE_NOTIFY_WINDOWS_CHANGED_BY_TIMEOUT,
+                            WINDOWS_CHANGED_NOTIFICATION_MAX_DURATION_TIMES_MS);
+                }
+                populateVisibleWindowHandlesAndNotifyWindowsChangeIfNeeded();
             }
-            populateVisibleWindowHandlesAndNotifyWindowsChangeIfNeeded();
         }
     }
 
@@ -635,7 +643,8 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
             final RecentsAnimationController controller = service.getRecentsAnimationController();
             instance.mIgnoreDuetoRecentsAnimation = windowState != null && controller != null
                     && controller.shouldIgnoreForAccessibility(windowState);
-            instance.mIsTrustedOverlay = inputWindowHandle.trustedOverlay;
+            instance.mIsTrustedOverlay =
+                    (inputWindowHandle.inputConfig & InputConfig.TRUSTED_OVERLAY) != 0;
 
             // TODO (b/199358388) : gets the letterbox bounds of the window from other way.
             if (windowState != null && windowState.areAppWindowBoundsLetterboxed()) {

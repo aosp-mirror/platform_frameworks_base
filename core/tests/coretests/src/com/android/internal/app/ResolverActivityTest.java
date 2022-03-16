@@ -39,6 +39,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.fail;
 
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
@@ -52,6 +53,7 @@ import android.widget.TextView;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.espresso.Espresso;
+import androidx.test.espresso.NoMatchingViewException;
 import androidx.test.rule.ActivityTestRule;
 import androidx.test.runner.AndroidJUnit4;
 
@@ -747,6 +749,34 @@ public class ResolverActivityTest {
         mActivityRule.launchActivity(sendIntent);
         waitForIdle();
         onView(withId(R.id.open_cross_profile)).check(matches(isDisplayed()));
+    }
+
+    @Test
+    public void testMiniResolver_noCurrentProfileTarget() {
+        ResolverActivity.ENABLE_TABBED_VIEW = true;
+        markWorkProfileUserAvailable();
+        List<ResolvedComponentInfo> personalResolvedComponentInfos =
+                createResolvedComponentsForTest(0);
+        List<ResolvedComponentInfo> workResolvedComponentInfos =
+                createResolvedComponentsForTest(1);
+        setupResolverControllers(personalResolvedComponentInfos, workResolvedComponentInfos);
+        Intent sendIntent = createSendImageIntent();
+        sendIntent.setType("TestType");
+
+        mActivityRule.launchActivity(sendIntent);
+        waitForIdle();
+
+        // Need to ensure mini resolver doesn't trigger here.
+        assertNotMiniResolver();
+    }
+
+    private void assertNotMiniResolver() {
+        try {
+            onView(withId(R.id.open_cross_profile)).check(matches(isDisplayed()));
+        } catch (NoMatchingViewException e) {
+            return;
+        }
+        fail("Mini resolver present but shouldn't be");
     }
 
     @Test

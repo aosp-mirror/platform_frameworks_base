@@ -787,6 +787,23 @@ public final class UsageStatsManager {
     }
 
     /**
+     * Return the lowest bucket this app can ever enter.
+     *
+     * @param packageName the package for which to fetch the minimum allowed standby bucket.
+     * {@hide}
+     */
+    @StandbyBuckets
+    @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS)
+    public int getAppMinStandbyBucket(String packageName) {
+        try {
+            return mService.getAppMinStandbyBucket(packageName, mContext.getOpPackageName(),
+                    mContext.getUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Changes an app's estimated launch time. An app is considered "launched" when a user opens
      * one of its {@link android.app.Activity Activities}. The provided time is persisted across
      * reboots and is used unless 1) the time is more than a week in the future and the platform

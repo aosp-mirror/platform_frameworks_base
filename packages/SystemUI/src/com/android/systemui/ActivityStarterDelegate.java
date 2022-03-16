@@ -23,7 +23,7 @@ import androidx.annotation.Nullable;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.plugins.ActivityStarter;
-import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.systemui.statusbar.phone.CentralSurfaces;
 
 import java.util.Optional;
 
@@ -33,17 +33,17 @@ import dagger.Lazy;
 
 /**
  * Single common instance of ActivityStarter that can be gotten and referenced from anywhere, but
- * delegates to an actual implementation (StatusBar).
+ * delegates to an actual implementation (CentralSurfaces).
  */
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 @SysUISingleton
 public class ActivityStarterDelegate implements ActivityStarter {
 
-    private Lazy<Optional<StatusBar>> mActualStarterOptionalLazy;
+    private Lazy<Optional<CentralSurfaces>> mActualStarterOptionalLazy;
 
     @Inject
-    public ActivityStarterDelegate(Lazy<Optional<StatusBar>> statusBarOptionalLazy) {
-        mActualStarterOptionalLazy = statusBarOptionalLazy;
+    public ActivityStarterDelegate(Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy) {
+        mActualStarterOptionalLazy = centralSurfacesOptionalLazy;
     }
 
     @Override

@@ -39,6 +39,7 @@ import android.media.IRecordingConfigDispatcher;
 import android.media.IRingtonePlayer;
 import android.media.IStrategyPreferredDevicesDispatcher;
 import android.media.ISpatializerCallback;
+import android.media.ISpatializerHeadTrackerAvailableCallback;
 import android.media.ISpatializerHeadTrackingModeCallback;
 import android.media.ISpatializerHeadToSoundStagePoseCallback;
 import android.media.ISpatializerOutputCallback;
@@ -360,7 +361,7 @@ interface IAudioService {
 
     boolean isMusicActive(in boolean remotely);
 
-    int getDevicesForStream(in int streamType);
+    int getDeviceMaskForStream(in int streamType);
 
     int[] getAvailableCommunicationDeviceIds();
 
@@ -413,6 +414,11 @@ interface IAudioService {
     void setHeadTrackerEnabled(boolean enabled, in AudioDeviceAttributes device);
 
     boolean isHeadTrackerEnabled(in AudioDeviceAttributes device);
+
+    boolean isHeadTrackerAvailable();
+
+    void registerSpatializerHeadTrackerAvailableCallback(
+            in ISpatializerHeadTrackerAvailableCallback cb, boolean register);
 
     void setSpatializerEnabled(boolean enabled);
 
@@ -480,7 +486,6 @@ interface IAudioService {
 
     boolean sendFocusLoss(in AudioFocusInfo focusLoser, in IAudioPolicyCallback apcb);
 
-
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)")
     void addAssistantServicesUids(in int[] assistantUID);
 
@@ -501,4 +506,6 @@ interface IAudioService {
             in IAudioDeviceVolumeDispatcher cb,
             in String packageName,
             in AudioDeviceAttributes device, in List<VolumeInfo> volumes);
+
+    String getHalVersion();
 }

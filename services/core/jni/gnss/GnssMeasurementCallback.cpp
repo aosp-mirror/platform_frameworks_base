@@ -73,6 +73,11 @@ jmethodID method_satellitePvtBuilderSetVelocityEcef;
 jmethodID method_satellitePvtBuilderSetClockInfo;
 jmethodID method_satellitePvtBuilderSetIonoDelayMeters;
 jmethodID method_satellitePvtBuilderSetTropoDelayMeters;
+jmethodID method_satellitePvtBuilderSetTimeOfClock;
+jmethodID method_satellitePvtBuilderSetTimeOfEphemeris;
+jmethodID method_satellitePvtBuilderSetIssueOfDataClock;
+jmethodID method_satellitePvtBuilderSetIssueOfDataEphemeris;
+jmethodID method_satellitePvtBuilderSetEphemerisSource;
 jmethodID method_positionEcef;
 jmethodID method_velocityEcef;
 jmethodID method_clockInfo;
@@ -166,6 +171,21 @@ void GnssMeasurement_class_init_once(JNIEnv* env, jclass& clazz) {
     method_satellitePvtBuilderSetTropoDelayMeters =
             env->GetMethodID(class_satellitePvtBuilder, "setTropoDelayMeters",
                              "(D)Landroid/location/SatellitePvt$Builder;");
+    method_satellitePvtBuilderSetTimeOfClock =
+            env->GetMethodID(class_satellitePvtBuilder, "setTimeOfClockSeconds",
+                             "(J)Landroid/location/SatellitePvt$Builder;");
+    method_satellitePvtBuilderSetTimeOfEphemeris =
+            env->GetMethodID(class_satellitePvtBuilder, "setTimeOfEphemerisSeconds",
+                             "(J)Landroid/location/SatellitePvt$Builder;");
+    method_satellitePvtBuilderSetIssueOfDataClock =
+            env->GetMethodID(class_satellitePvtBuilder, "setIssueOfDataClock",
+                             "(I)Landroid/location/SatellitePvt$Builder;");
+    method_satellitePvtBuilderSetIssueOfDataEphemeris =
+            env->GetMethodID(class_satellitePvtBuilder, "setIssueOfDataEphemeris",
+                             "(I)Landroid/location/SatellitePvt$Builder;");
+    method_satellitePvtBuilderSetEphemerisSource =
+            env->GetMethodID(class_satellitePvtBuilder, "setEphemerisSource",
+                             "(I)Landroid/location/SatellitePvt$Builder;");
     method_satellitePvtBuilderBuild = env->GetMethodID(class_satellitePvtBuilder, "build",
                                                        "()Landroid/location/SatellitePvt;");
 
@@ -427,6 +447,24 @@ void GnssMeasurementCallbackAidl::translateSingleGnssMeasurement(JNIEnv* env,
             callObjectMethodIgnoringResult(env, satellitePvtBuilderObject,
                                            method_satellitePvtBuilderSetTropoDelayMeters,
                                            satellitePvt.tropoDelayMeters);
+        }
+
+        if (this->getInterfaceVersion() >= 2) {
+            callObjectMethodIgnoringResult(env, satellitePvtBuilderObject,
+                                           method_satellitePvtBuilderSetTimeOfClock,
+                                           satellitePvt.timeOfClockSeconds);
+            callObjectMethodIgnoringResult(env, satellitePvtBuilderObject,
+                                           method_satellitePvtBuilderSetTimeOfEphemeris,
+                                           satellitePvt.timeOfEphemerisSeconds);
+            callObjectMethodIgnoringResult(env, satellitePvtBuilderObject,
+                                           method_satellitePvtBuilderSetIssueOfDataClock,
+                                           satellitePvt.issueOfDataClock);
+            callObjectMethodIgnoringResult(env, satellitePvtBuilderObject,
+                                           method_satellitePvtBuilderSetIssueOfDataEphemeris,
+                                           satellitePvt.issueOfDataEphemeris);
+            callObjectMethodIgnoringResult(env, satellitePvtBuilderObject,
+                                           method_satellitePvtBuilderSetEphemerisSource,
+                                           static_cast<int>(satellitePvt.ephemerisSource));
         }
 
         jobject satellitePvtObject =

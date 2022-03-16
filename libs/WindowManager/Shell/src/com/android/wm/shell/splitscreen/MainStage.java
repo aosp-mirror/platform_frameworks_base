@@ -18,7 +18,6 @@ package com.android.wm.shell.splitscreen;
 
 import android.annotation.Nullable;
 import android.content.Context;
-import android.graphics.Rect;
 import android.view.SurfaceSession;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
@@ -49,14 +48,13 @@ class MainStage extends StageTaskListener {
         return mIsActive;
     }
 
-    void activate(Rect rootBounds, WindowContainerTransaction wct, boolean includingTopTask) {
+    void activate(WindowContainerTransaction wct, boolean includingTopTask) {
         if (mIsActive) return;
 
         final WindowContainerToken rootToken = mRootTaskInfo.token;
-        wct.setBounds(rootToken, rootBounds)
-                // Moving the root task to top after the child tasks were re-parented , or the root
-                // task cannot be visible and focused.
-                .reorder(rootToken, true /* onTop */);
+        // Moving the root task to top after the child tasks were re-parented , or the root
+        // task cannot be visible and focused.
+        wct.reorder(rootToken, true /* onTop */);
         if (includingTopTask) {
             wct.reparentTasks(
                     null /* currentParent */,

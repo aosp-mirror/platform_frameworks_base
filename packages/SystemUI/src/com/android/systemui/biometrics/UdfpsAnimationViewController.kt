@@ -15,10 +15,12 @@
  */
 package com.android.systemui.biometrics
 
+import android.animation.ValueAnimator
 import android.graphics.PointF
 import android.graphics.RectF
 import com.android.systemui.Dumpable
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.animation.Interpolators
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.phone.SystemUIDialogManager
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionListener
@@ -50,7 +52,8 @@ abstract class UdfpsAnimationViewController<T : UdfpsAnimationView>(
     private val view: T
         get() = mView!!
 
-    private val dialogListener = SystemUIDialogManager.Listener { updatePauseAuth() }
+    private var dialogAlphaAnimator: ValueAnimator? = null
+    private val dialogListener = SystemUIDialogManager.Listener { runDialogAlphaAnimator() }
 
     private val panelExpansionListener =
         PanelExpansionListener { fraction, expanded, tracking ->
@@ -83,6 +86,29 @@ abstract class UdfpsAnimationViewController<T : UdfpsAnimationView>(
      */
     open val paddingY: Int = 0
 
+    open fun updateAlpha() {
+        view.updateAlpha()
+    }
+
+    fun runDialogAlphaAnimator() {
+        val hideAffordance = dialogManager.shouldHideAffordance()
+        dialogAlphaAnimator?.cancel()
+        dialogAlphaAnimator = ValueAnimator.ofFloat(
+                view.calculateAlpha() / 255f,
+                if (hideAffordance) 0f else 1f)
+                .apply {
+            duration = if (hideAffordance) 83L else 200L
+            interpolator = if (hideAffordance) Interpolators.LINEAR else Interpolators.ALPHA_IN
+
+            addUpdateListener { animatedValue ->
+                view.setDialogSuggestedAlpha(animatedValue.animatedValue as Float)
+                updateAlpha()
+                updatePauseAuth()
+            }
+            start()
+        }
+    }
+
     override fun onViewAttached() {
         panelExpansionStateManager.addExpansionListener(panelExpansionListener)
         dialogManager.registerListener(dialogListener)
@@ -106,6 +132,7 @@ abstract class UdfpsAnimationViewController<T : UdfpsAnimationView>(
         pw.println("mNotificationShadeVisible=$notificationShadeVisible")
         pw.println("shouldPauseAuth()=" + shouldPauseAuth())
         pw.println("isPauseAuth=" + view.isPauseAuth)
+        pw.println("dialogSuggestedAlpha=" + view.dialogSuggestedAlpha)
     }
 
     /**

@@ -300,7 +300,10 @@ class UdfpsControllerOverlay(
         when (context.display!!.rotation) {
             Surface.ROTATION_90 -> {
                 if (!shouldRotate(animation)) {
-                    Log.v(TAG, "skip rotating udfps location ROTATION_90")
+                    Log.v(TAG, "skip rotating udfps location ROTATION_90" +
+                            " animation=$animation" +
+                            " isGoingToSleep=${keyguardUpdateMonitor.isGoingToSleep}" +
+                            " isOccluded=${keyguardStateController.isOccluded}")
                 } else {
                     Log.v(TAG, "rotate udfps location ROTATION_90")
                     x = (location.sensorLocationY - location.sensorRadius - paddingX)
@@ -309,7 +312,10 @@ class UdfpsControllerOverlay(
             }
             Surface.ROTATION_270 -> {
                 if (!shouldRotate(animation)) {
-                    Log.v(TAG, "skip rotating udfps location ROTATION_270")
+                    Log.v(TAG, "skip rotating udfps location ROTATION_270" +
+                            " animation=$animation" +
+                            " isGoingToSleep=${keyguardUpdateMonitor.isGoingToSleep}" +
+                            " isOccluded=${keyguardStateController.isOccluded}")
                 } else {
                     Log.v(TAG, "rotate udfps location ROTATION_270")
                     x = (p.x - location.sensorLocationY - location.sensorRadius - paddingX)

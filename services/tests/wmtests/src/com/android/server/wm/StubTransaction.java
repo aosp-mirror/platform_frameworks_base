@@ -17,16 +17,20 @@
 package com.android.server.wm;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.graphics.ColorSpace;
 import android.graphics.GraphicBuffer;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.Region;
+import android.hardware.HardwareBuffer;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.view.InputWindowHandle;
 import android.view.Surface;
 import android.view.SurfaceControl;
+
+import java.util.concurrent.Executor;
 
 /**
  * Stubbed {@link android.view.SurfaceControl.Transaction} class that can be used when unit
@@ -133,6 +137,12 @@ public class StubTransaction extends SurfaceControl.Transaction {
     }
 
     @Override
+    @NonNull
+    public SurfaceControl.Transaction setCrop(@NonNull SurfaceControl sc, @Nullable Rect crop) {
+        return this;
+    }
+
+    @Override
     public SurfaceControl.Transaction setCornerRadius(SurfaceControl sc, float cornerRadius) {
         return this;
     }
@@ -219,6 +229,12 @@ public class StubTransaction extends SurfaceControl.Transaction {
     }
 
     @Override
+    public SurfaceControl.Transaction addTransactionCommittedListener(Executor executor,
+            SurfaceControl.TransactionCommittedListener listener) {
+        return this;
+    }
+
+    @Override
     public SurfaceControl.Transaction syncInputWindows() {
         return this;
     }
@@ -263,6 +279,13 @@ public class StubTransaction extends SurfaceControl.Transaction {
 
     @Override
     public SurfaceControl.Transaction setBuffer(SurfaceControl sc, GraphicBuffer buffer) {
+        return this;
+    }
+
+    @Override
+    @NonNull
+    public SurfaceControl.Transaction setBuffer(@NonNull SurfaceControl sc,
+            @Nullable HardwareBuffer buffer) {
         return this;
     }
 

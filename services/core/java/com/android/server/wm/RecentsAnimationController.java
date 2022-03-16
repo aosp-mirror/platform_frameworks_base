@@ -18,7 +18,6 @@ package com.android.server.wm;
 
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
-import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.view.RemoteAnimationTarget.MODE_CLOSING;
@@ -122,7 +121,6 @@ public class RecentsAnimationController implements DeathRecipient {
     private final int mDisplayId;
     private boolean mWillFinishToHome = false;
     private final Runnable mFailsafeRunnable = this::onFailsafe;
-    private Runnable mCheckRotationAfterCleanup;
 
     // The recents component app token that is shown behind the visibile tasks
     private ActivityRecord mTargetActivityRecord;
@@ -555,10 +553,6 @@ public class RecentsAnimationController implements DeathRecipient {
 
             mPendingStart = false;
 
-            // Perform layout if it was scheduled before to make sure that we get correct content
-            // insets for the target app window after a rotation
-            mDisplayContent.performLayout(false /* initial */, false /* updateInputWindows */);
-
             final Rect contentInsets;
             final WindowState targetAppMainWindow = getTargetAppMainWindow();
             if (targetAppMainWindow != null) {
@@ -611,8 +605,7 @@ public class RecentsAnimationController implements DeathRecipient {
             final TaskAnimationAdapter adapter = mPendingAnimations.get(i);
             final Task task = adapter.mTask;
             final TaskFragment adjacentTask = task.getRootTask().getAdjacentTaskFragment();
-            final boolean inSplitScreen = task.getWindowingMode() == WINDOWING_MODE_MULTI_WINDOW
-                    && adjacentTask != null;
+            final boolean inSplitScreen = task.inSplitScreen();
             if (task.isActivityTypeHomeOrRecents()
                     // Skip if the task is in split screen and in landscape.
                     || (inSplitScreen && isDisplayLandscape)
@@ -920,24 +913,6 @@ public class RecentsAnimationController implements DeathRecipient {
     }
 
     /**
-     * If the display rotation change is ignored while recents animation is running, make sure that
-     * the pending rotation change will be applied after the animation finishes.
-     */
-    void setCheckRotationAfterCleanup() {
-        if (mCheckRotationAfterCleanup != null) return;
-        mCheckRotationAfterCleanup = () -> {
-            synchronized (mService.mGlobalLock) {
-                if (mDisplayContent.getDisplayRotation()
-                        .updateRotationAndSendNewConfigIfChanged()) {
-                    if (mTargetActivityRecord != null) {
-                        mTargetActivityRecord.finishFixedRotationTransform();
-                    }
-                }
-            }
-        };
-    }
-
-    /**
      * @return Whether we should defer the cancel from a root task order change until the next app
      * transition.
      */
@@ -1036,10 +1011,6 @@ public class RecentsAnimationController implements DeathRecipient {
         // Notify that the animation has ended
         if (mStatusBar != null) {
             mStatusBar.onRecentsAnimationStateChanged(false /* running */);
-        }
-        if (mCheckRotationAfterCleanup != null) {
-            mService.mH.post(mCheckRotationAfterCleanup);
-            mCheckRotationAfterCleanup = null;
         }
     }
 

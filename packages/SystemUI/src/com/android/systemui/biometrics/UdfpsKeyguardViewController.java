@@ -28,6 +28,7 @@ import android.view.MotionEvent;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.R;
 import com.android.systemui.animation.ActivityLaunchAnimator;
+import com.android.systemui.animation.Interpolators;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
@@ -112,6 +113,7 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
         mActivityLaunchAnimator = activityLaunchAnimator;
 
         mUnlockedScreenOffDozeAnimator.setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD);
+        mUnlockedScreenOffDozeAnimator.setInterpolator(Interpolators.ALPHA_IN);
         mUnlockedScreenOffDozeAnimator.addUpdateListener(
                 new ValueAnimator.AnimatorUpdateListener() {
                     @Override
@@ -245,7 +247,7 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
             return false;
         }
 
-        if (getDialogManager().shouldHideAffordance()) {
+        if (mView.getDialogSuggestedAlpha() == 0f) {
             return true;
         }
 
@@ -321,7 +323,8 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
      * Update alpha for the UDFPS lock screen affordance. The AoD UDFPS visual affordance's
      * alpha is based on the doze amount.
      */
-    private void updateAlpha() {
+    @Override
+    public void updateAlpha() {
         // fade icon on transitions to showing the status bar, but if mUdfpsRequested, then
         // the keyguard is occluded by some application - so instead use the input bouncer
         // hidden amount to determine the fade
@@ -338,6 +341,10 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
             if (mIsLaunchingActivity && !mUdfpsRequested) {
                 alpha *= (1.0f - mActivityLaunchProgress);
             }
+
+            // Fade out alpha when a dialog is shown
+            // Fade in alpha when a dialog is hidden
+            alpha *= mView.getDialogSuggestedAlpha();
         }
         mView.setUnpausedAlpha(alpha);
     }
@@ -369,6 +376,7 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
         public void onStateChanged(int statusBarState) {
             mStatusBarState = statusBarState;
             mView.setStatusBarState(statusBarState);
+            updateAlpha();
             updatePauseAuth();
         }
     };

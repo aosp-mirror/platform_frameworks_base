@@ -30,7 +30,6 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
-import static com.android.server.wm.DisplayContent.IME_TARGET_INPUT;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 
 import static org.junit.Assert.assertEquals;
@@ -182,12 +181,13 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         // Make IME and stay visible during the test.
         mImeWindow.setHasSurface(true);
         getController().getSourceProvider(ITYPE_IME).setWindowContainer(mImeWindow, null, null);
-        getController().onImeControlTargetChanged(mDisplayContent.getImeTarget(IME_TARGET_INPUT));
+        getController().onImeControlTargetChanged(
+                mDisplayContent.getImeInputTarget().getWindowState());
         final InsetsVisibilities requestedVisibilities = new InsetsVisibilities();
         requestedVisibilities.setVisibility(ITYPE_IME, true);
-        mDisplayContent.getImeTarget(IME_TARGET_INPUT).getWindow()
+        mDisplayContent.getImeInputTarget().getWindowState()
                 .setRequestedVisibilities(requestedVisibilities);
-        getController().onInsetsModified(mDisplayContent.getImeTarget(IME_TARGET_INPUT));
+        getController().onInsetsModified(mDisplayContent.getImeInputTarget().getWindowState());
 
         // Send our spy window (app) into the system so that we can detect the invocation.
         final WindowState win = createWindow(null, TYPE_APPLICATION, "app");

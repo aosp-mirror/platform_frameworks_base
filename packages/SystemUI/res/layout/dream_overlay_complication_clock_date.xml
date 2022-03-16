@@ -19,6 +19,7 @@
     android:id="@+id/date_view"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
+    android:paddingHorizontal="@dimen/dream_overlay_complication_shadow_padding"
     android:gravity="center_horizontal"
     android:textColor="@android:color/white"
     android:shadowColor="@color/keyguard_shadow_color"

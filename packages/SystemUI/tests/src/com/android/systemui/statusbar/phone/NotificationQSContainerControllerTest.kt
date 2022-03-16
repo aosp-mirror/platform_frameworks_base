@@ -2,9 +2,16 @@ package com.android.systemui.statusbar.phone
 
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
+import android.view.View
+import android.view.ViewGroup
 import android.view.WindowInsets
 import android.view.WindowManagerPolicyConstants
+import androidx.annotation.AnyRes
+import androidx.annotation.IdRes
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.constraintlayout.widget.ConstraintSet
 import androidx.test.filters.SmallTest
+import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
@@ -12,6 +19,7 @@ import com.android.systemui.navigationbar.NavigationModeController
 import com.android.systemui.navigationbar.NavigationModeController.ModeChangedListener
 import com.android.systemui.recents.OverviewProxyService
 import com.android.systemui.recents.OverviewProxyService.OverviewProxyListener
+import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -40,6 +48,7 @@ class NotificationQSContainerControllerTest : SysuiTestCase() {
         const val GESTURES_NAVIGATION = WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL
         const val BUTTONS_NAVIGATION = WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON
         const val NOTIFICATIONS_MARGIN = 50
+        const val SCRIM_MARGIN = 10
     }
 
     @Mock
@@ -56,8 +65,10 @@ class NotificationQSContainerControllerTest : SysuiTestCase() {
     lateinit var taskbarVisibilityCaptor: ArgumentCaptor<OverviewProxyListener>
     @Captor
     lateinit var windowInsetsCallbackCaptor: ArgumentCaptor<Consumer<WindowInsets>>
+    @Captor
+    lateinit var constraintSetCaptor: ArgumentCaptor<ConstraintSet>
 
-    private lateinit var notificationsQSContainerController: NotificationsQSContainerController
+    private lateinit var controller: NotificationsQSContainerController
     private lateinit var navigationModeCallback: ModeChangedListener
     private lateinit var taskbarVisibilityCallback: OverviewProxyListener
     private lateinit var windowInsetsCallback: Consumer<WindowInsets>
@@ -65,31 +76,41 @@ class NotificationQSContainerControllerTest : SysuiTestCase() {
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
-        notificationsQSContainerController = NotificationsQSContainerController(
+        mContext.ensureTestableResources()
+        whenever(notificationsQSContainer.context).thenReturn(mContext)
+        whenever(notificationsQSContainer.resources).thenReturn(mContext.resources)
+        controller = NotificationsQSContainerController(
                 notificationsQSContainer,
                 navigationModeController,
                 overviewProxyService,
                 featureFlags
         )
-        whenever(notificationsQSContainer.defaultNotificationsMarginBottom)
-                .thenReturn(NOTIFICATIONS_MARGIN)
+
+        overrideResource(R.dimen.split_shade_notifications_scrim_margin_bottom, SCRIM_MARGIN)
+        overrideResource(R.dimen.notification_panel_margin_bottom, NOTIFICATIONS_MARGIN)
+        overrideResource(R.bool.config_use_split_notification_shade, false)
         whenever(navigationModeController.addListener(navigationModeCaptor.capture()))
                 .thenReturn(GESTURES_NAVIGATION)
         doNothing().`when`(overviewProxyService).addCallback(taskbarVisibilityCaptor.capture())
         doNothing().`when`(notificationsQSContainer)
                 .setInsetsChangedListener(windowInsetsCallbackCaptor.capture())
+        doNothing().`when`(notificationsQSContainer).applyConstraints(constraintSetCaptor.capture())
 
-        notificationsQSContainerController.init()
-        notificationsQSContainerController.onViewAttached()
+        controller.init()
+        controller.onViewAttached()
 
         navigationModeCallback = navigationModeCaptor.value
         taskbarVisibilityCallback = taskbarVisibilityCaptor.value
         windowInsetsCallback = windowInsetsCallbackCaptor.value
     }
 
+    private fun overrideResource(@AnyRes id: Int, value: Any) {
+        mContext.orCreateTestableResources.addOverride(id, value)
+    }
+
     @Test
     fun testTaskbarVisibleInSplitShade() {
-        notificationsQSContainerController.splitShadeEnabled = true
+        enableSplitShade()
         useNewFooter(false)
 
         given(taskbarVisible = true,
@@ -107,7 +128,7 @@ class NotificationQSContainerControllerTest : SysuiTestCase() {
 
     @Test
     fun testTaskbarVisibleInSplitShade_newFooter() {
-        notificationsQSContainerController.splitShadeEnabled = true
+        enableSplitShade()
         useNewFooter(true)
 
         given(taskbarVisible = true,
@@ -115,20 +136,20 @@ class NotificationQSContainerControllerTest : SysuiTestCase() {
                 insets = windowInsets().withStableBottom())
         then(expectedContainerPadding = 0, // taskbar should disappear when shade is expanded
                 expectedNotificationsMargin = NOTIFICATIONS_MARGIN,
-                expectedQsPadding = STABLE_INSET_BOTTOM)
+                expectedQsPadding = NOTIFICATIONS_MARGIN - SCRIM_MARGIN)
 
         given(taskbarVisible = true,
                 navigationMode = BUTTONS_NAVIGATION,
                 insets = windowInsets().withStableBottom())
         then(expectedContainerPadding = STABLE_INSET_BOTTOM,
                 expectedNotificationsMargin = NOTIFICATIONS_MARGIN,
-                expectedQsPadding = STABLE_INSET_BOTTOM)
+                expectedQsPadding = NOTIFICATIONS_MARGIN - SCRIM_MARGIN)
     }
 
     @Test
     fun testTaskbarNotVisibleInSplitShade() {
         // when taskbar is not visible, it means we're on the home screen
-        notificationsQSContainerController.splitShadeEnabled = true
+        enableSplitShade()
         useNewFooter(false)
 
         given(taskbarVisible = false,
@@ -146,26 +167,26 @@ class NotificationQSContainerControllerTest : SysuiTestCase() {
     @Test
     fun testTaskbarNotVisibleInSplitShade_newFooter() {
         // when taskbar is not visible, it means we're on the home screen
-        notificationsQSContainerController.splitShadeEnabled = true
+        enableSplitShade()
         useNewFooter(true)
 
         given(taskbarVisible = false,
                 navigationMode = GESTURES_NAVIGATION,
                 insets = windowInsets().withStableBottom())
         then(expectedContainerPadding = 0,
-                expectedQsPadding = STABLE_INSET_BOTTOM)
+                expectedQsPadding = NOTIFICATIONS_MARGIN - SCRIM_MARGIN)
 
         given(taskbarVisible = false,
                 navigationMode = BUTTONS_NAVIGATION,
                 insets = windowInsets().withStableBottom())
         then(expectedContainerPadding = 0, // qs goes full height as it's not obscuring nav buttons
                 expectedNotificationsMargin = STABLE_INSET_BOTTOM + NOTIFICATIONS_MARGIN,
-                expectedQsPadding = STABLE_INSET_BOTTOM)
+                expectedQsPadding = STABLE_INSET_BOTTOM + NOTIFICATIONS_MARGIN - SCRIM_MARGIN)
     }
 
     @Test
     fun testTaskbarNotVisibleInSplitShadeWithCutout() {
-        notificationsQSContainerController.splitShadeEnabled = true
+        enableSplitShade()
         useNewFooter(false)
 
         given(taskbarVisible = false,
@@ -182,25 +203,26 @@ class NotificationQSContainerControllerTest : SysuiTestCase() {
 
     @Test
     fun testTaskbarNotVisibleInSplitShadeWithCutout_newFooter() {
-        notificationsQSContainerController.splitShadeEnabled = true
+        enableSplitShade()
         useNewFooter(true)
 
         given(taskbarVisible = false,
                 navigationMode = GESTURES_NAVIGATION,
                 insets = windowInsets().withCutout())
-        then(expectedContainerPadding = CUTOUT_HEIGHT)
+        then(expectedContainerPadding = CUTOUT_HEIGHT,
+            expectedQsPadding = NOTIFICATIONS_MARGIN - SCRIM_MARGIN)
 
         given(taskbarVisible = false,
                 navigationMode = BUTTONS_NAVIGATION,
                 insets = windowInsets().withCutout().withStableBottom())
         then(expectedContainerPadding = 0,
                 expectedNotificationsMargin = STABLE_INSET_BOTTOM + NOTIFICATIONS_MARGIN,
-                expectedQsPadding = STABLE_INSET_BOTTOM)
+                expectedQsPadding = STABLE_INSET_BOTTOM + NOTIFICATIONS_MARGIN - SCRIM_MARGIN)
     }
 
     @Test
     fun testTaskbarVisibleInSinglePaneShade() {
-        notificationsQSContainerController.splitShadeEnabled = false
+        disableSplitShade()
         useNewFooter(false)
 
         given(taskbarVisible = true,
@@ -216,7 +238,7 @@ class NotificationQSContainerControllerTest : SysuiTestCase() {
 
     @Test
     fun testTaskbarVisibleInSinglePaneShade_newFooter() {
-        notificationsQSContainerController.splitShadeEnabled = false
+        disableSplitShade()
         useNewFooter(true)
 
         given(taskbarVisible = true,
@@ -234,7 +256,7 @@ class NotificationQSContainerControllerTest : SysuiTestCase() {
 
     @Test
     fun testTaskbarNotVisibleInSinglePaneShade() {
-        notificationsQSContainerController.splitShadeEnabled = false
+        disableSplitShade()
         useNewFooter(false)
 
         given(taskbarVisible = false,
@@ -255,7 +277,7 @@ class NotificationQSContainerControllerTest : SysuiTestCase() {
 
     @Test
     fun testTaskbarNotVisibleInSinglePaneShade_newFooter() {
-        notificationsQSContainerController.splitShadeEnabled = false
+        disableSplitShade()
         useNewFooter(true)
 
         given(taskbarVisible = false,
@@ -276,8 +298,8 @@ class NotificationQSContainerControllerTest : SysuiTestCase() {
 
     @Test
     fun testCustomizingInSinglePaneShade() {
-        notificationsQSContainerController.splitShadeEnabled = false
-        notificationsQSContainerController.setCustomizerShowing(true)
+        disableSplitShade()
+        controller.setCustomizerShowing(true)
         useNewFooter(false)
 
         // always sets spacings to 0
@@ -296,8 +318,8 @@ class NotificationQSContainerControllerTest : SysuiTestCase() {
 
     @Test
     fun testCustomizingInSinglePaneShade_newFooter() {
-        notificationsQSContainerController.splitShadeEnabled = false
-        notificationsQSContainerController.setCustomizerShowing(true)
+        disableSplitShade()
+        controller.setCustomizerShowing(true)
         useNewFooter(true)
 
         // always sets spacings to 0
@@ -316,8 +338,8 @@ class NotificationQSContainerControllerTest : SysuiTestCase() {
 
     @Test
     fun testDetailShowingInSinglePaneShade() {
-        notificationsQSContainerController.splitShadeEnabled = false
-        notificationsQSContainerController.setDetailShowing(true)
+        disableSplitShade()
+        controller.setDetailShowing(true)
         useNewFooter(false)
 
         // always sets spacings to 0
@@ -336,8 +358,8 @@ class NotificationQSContainerControllerTest : SysuiTestCase() {
 
     @Test
     fun testDetailShowingInSinglePaneShade_newFooter() {
-        notificationsQSContainerController.splitShadeEnabled = false
-        notificationsQSContainerController.setDetailShowing(true)
+        disableSplitShade()
+        controller.setDetailShowing(true)
         useNewFooter(true)
 
         // always sets spacings to 0
@@ -356,8 +378,8 @@ class NotificationQSContainerControllerTest : SysuiTestCase() {
 
     @Test
     fun testDetailShowingInSplitShade() {
-        notificationsQSContainerController.splitShadeEnabled = true
-        notificationsQSContainerController.setDetailShowing(true)
+        enableSplitShade()
+        controller.setDetailShowing(true)
         useNewFooter(false)
 
         given(taskbarVisible = false,
@@ -374,8 +396,8 @@ class NotificationQSContainerControllerTest : SysuiTestCase() {
 
     @Test
     fun testDetailShowingInSplitShade_newFooter() {
-        notificationsQSContainerController.splitShadeEnabled = true
-        notificationsQSContainerController.setDetailShowing(true)
+        enableSplitShade()
+        controller.setDetailShowing(true)
         useNewFooter(true)
 
         given(taskbarVisible = false,
@@ -392,14 +414,105 @@ class NotificationQSContainerControllerTest : SysuiTestCase() {
 
     @Test
     fun testNotificationsMarginBottomIsUpdated() {
-        notificationsQSContainerController.splitShadeEnabled = true
+        Mockito.clearInvocations(notificationsQSContainer)
+        enableSplitShade()
         verify(notificationsQSContainer).setNotificationsMarginBottom(NOTIFICATIONS_MARGIN)
 
-        whenever(notificationsQSContainer.defaultNotificationsMarginBottom).thenReturn(100)
-        notificationsQSContainerController.updateMargins()
-        notificationsQSContainerController.splitShadeEnabled = false
-
+        overrideResource(R.dimen.notification_panel_margin_bottom, 100)
+        disableSplitShade()
         verify(notificationsQSContainer).setNotificationsMarginBottom(100)
+    }
+
+    @Test
+    fun testSplitShadeLayout_isAlignedToGuideline() {
+        enableSplitShade()
+        controller.updateResources()
+        assertThat(getConstraintSetLayout(R.id.qs_frame).endToEnd)
+                .isEqualTo(R.id.qs_edge_guideline)
+        assertThat(getConstraintSetLayout(R.id.notification_stack_scroller).startToStart)
+                .isEqualTo(R.id.qs_edge_guideline)
+    }
+
+    @Test
+    fun testSinglePaneLayout_childrenHaveEqualMargins() {
+        disableSplitShade()
+        controller.updateResources()
+        val qsStartMargin = getConstraintSetLayout(R.id.qs_frame).startMargin
+        val qsEndMargin = getConstraintSetLayout(R.id.qs_frame).endMargin
+        val notifStartMargin = getConstraintSetLayout(R.id.notification_stack_scroller).startMargin
+        val notifEndMargin = getConstraintSetLayout(R.id.notification_stack_scroller).endMargin
+        assertThat(qsStartMargin == qsEndMargin &&
+                notifStartMargin == notifEndMargin &&
+                qsStartMargin == notifStartMargin
+        ).isTrue()
+    }
+
+    @Test
+    fun testSplitShadeLayout_childrenHaveInsideMarginsOfZero() {
+        enableSplitShade()
+        controller.updateResources()
+        assertThat(getConstraintSetLayout(R.id.qs_frame).endMargin).isEqualTo(0)
+        assertThat(getConstraintSetLayout(R.id.notification_stack_scroller).startMargin)
+                .isEqualTo(0)
+    }
+
+    @Test
+    fun testSplitShadeLayout_qsFrameHasHorizontalMarginsOfZero() {
+        enableSplitShade()
+        controller.updateResources()
+        assertThat(getConstraintSetLayout(R.id.qs_frame).endMargin).isEqualTo(0)
+        assertThat(getConstraintSetLayout(R.id.qs_frame).startMargin).isEqualTo(0)
+    }
+
+    @Test
+    fun testSinglePaneShadeLayout_qsFrameHasHorizontalMarginsSetToCorrectValue() {
+        disableSplitShade()
+        controller.updateResources()
+        val notificationPanelMarginHorizontal = context.resources
+                .getDimensionPixelSize(R.dimen.notification_panel_margin_horizontal)
+        assertThat(getConstraintSetLayout(R.id.qs_frame).endMargin)
+                .isEqualTo(notificationPanelMarginHorizontal)
+        assertThat(getConstraintSetLayout(R.id.qs_frame).startMargin)
+                .isEqualTo(notificationPanelMarginHorizontal)
+    }
+
+    @Test
+    fun testSinglePaneShadeLayout_isAlignedToParent() {
+        disableSplitShade()
+        controller.updateResources()
+        assertThat(getConstraintSetLayout(R.id.qs_frame).endToEnd)
+                .isEqualTo(ConstraintSet.PARENT_ID)
+        assertThat(getConstraintSetLayout(R.id.notification_stack_scroller).startToStart)
+                .isEqualTo(ConstraintSet.PARENT_ID)
+    }
+
+    @Test
+    fun testAllChildrenOfNotificationContainer_haveIds() {
+        // set dimen to 0 to avoid triggering updating bottom spacing
+        overrideResource(R.dimen.split_shade_notifications_scrim_margin_bottom, 0)
+        val container = NotificationsQuickSettingsContainer(context, null)
+        container.removeAllViews()
+        container.addView(newViewWithId(1))
+        container.addView(newViewWithId(View.NO_ID))
+        val controller = NotificationsQSContainerController(container, navigationModeController,
+                overviewProxyService, featureFlags)
+        controller.updateResources()
+
+        assertThat(container.getChildAt(0).id).isEqualTo(1)
+        assertThat(container.getChildAt(1).id).isNotEqualTo(View.NO_ID)
+    }
+
+    private fun disableSplitShade() {
+        setSplitShadeEnabled(false)
+    }
+
+    private fun enableSplitShade() {
+        setSplitShadeEnabled(true)
+    }
+
+    private fun setSplitShadeEnabled(enabled: Boolean) {
+        overrideResource(R.bool.config_use_split_notification_shade, enabled)
+        controller.updateResources()
     }
 
     private fun given(
@@ -447,5 +560,19 @@ class NotificationQSContainerControllerTest : SysuiTestCase() {
 
     private fun useNewFooter(useNewFooter: Boolean) {
         whenever(featureFlags.isEnabled(Flags.NEW_FOOTER)).thenReturn(useNewFooter)
+    }
+
+    private fun getConstraintSetLayout(@IdRes id: Int): ConstraintSet.Layout {
+        return constraintSetCaptor.value.getConstraint(id).layout
+    }
+
+    private fun newViewWithId(id: Int): View {
+        val view = View(mContext)
+        view.id = id
+        val layoutParams = ConstraintLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+        // required as cloning ConstraintSet fails if view doesn't have layout params
+        view.layoutParams = layoutParams
+        return view
     }
 }

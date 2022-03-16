@@ -18,13 +18,11 @@ package com.android.systemui.media
 
 import android.content.Context
 import android.content.res.Configuration
+import androidx.annotation.VisibleForTesting
 import androidx.constraintlayout.widget.ConstraintSet
 import com.android.systemui.R
 import com.android.systemui.statusbar.policy.ConfigurationController
-import com.android.systemui.util.animation.MeasurementOutput
-import com.android.systemui.util.animation.TransitionLayout
-import com.android.systemui.util.animation.TransitionLayoutController
-import com.android.systemui.util.animation.TransitionViewState
+import com.android.systemui.util.animation.*
 import javax.inject.Inject
 
 /**
@@ -270,7 +268,6 @@ class MediaViewController @Inject constructor(
             TYPE.PLAYER_SESSION -> PlayerSessionViewHolder.gutsIds
             TYPE.RECOMMENDATION -> RecommendationViewHolder.gutsIds
         }
-
         controlsIds.forEach { id ->
             viewState.widgetStates.get(id)?.let { state ->
                 // Make sure to use the unmodified state if guts are not visible.
@@ -282,59 +279,79 @@ class MediaViewController @Inject constructor(
             viewState.widgetStates.get(id)?.alpha = if (isGutsVisible) 1f else 0f
             viewState.widgetStates.get(id)?.gone = !isGutsVisible
         }
-
         if (shouldHideGutsSettings) {
             viewState.widgetStates.get(R.id.settings)?.gone = true
         }
     }
 
     /**
+     * Apply squishFraction to a copy of viewState such that the cached version is untouched.
+     */
+    private fun squishViewState(viewState: TransitionViewState,
+                                squishFraction: Float): TransitionViewState {
+        val squishedViewState = viewState.copy()
+        squishedViewState.height = (squishedViewState.height * squishFraction).toInt()
+        val albumArtViewState = viewState.widgetStates.get(R.id.album_art)
+        if (albumArtViewState != null) {
+            albumArtViewState.height = squishedViewState.height
+        }
+        return squishedViewState;
+    }
+
+    /**
      * Obtain a new viewState for a given media state. This usually returns a cached state, but if
      * it's not available, it will recreate one by measuring, which may be expensive.
      */
-    private fun obtainViewState(state: MediaHostState?): TransitionViewState? {
+    @VisibleForTesting
+    public fun obtainViewState(state: MediaHostState?): TransitionViewState? {
         if (state == null || state.measurementInput == null) {
             return null
         }
         // Only a subset of the state is relevant to get a valid viewState. Let's get the cachekey
         var cacheKey = getKey(state, isGutsVisible, tmpKey)
         val viewState = viewStates[cacheKey]
+
         if (viewState != null) {
             // we already have cached this measurement, let's continue
+            if (state.squishFraction < 1f) {
+                return squishViewState(viewState, state.squishFraction);
+            }
             return viewState
         }
         // Copy the key since this might call recursively into it and we're using tmpKey
         cacheKey = cacheKey.copy()
         val result: TransitionViewState?
-        if (transitionLayout != null) {
-            // Let's create a new measurement
-            if (state.expansion == 0.0f || state.expansion == 1.0f) {
-                result = transitionLayout!!.calculateViewState(
-                        state.measurementInput!!,
-                        constraintSetForExpansion(state.expansion),
-                        TransitionViewState())
-
-                setGutsViewState(result)
-                // We don't want to cache interpolated or null states as this could quickly fill up
-                // our cache. We only cache the start and the end states since the interpolation
-                // is cheap
-                viewStates[cacheKey] = result
-            } else {
-                // This is an interpolated state
-                val startState = state.copy().also { it.expansion = 0.0f }
-
-                // Given that we have a measurement and a view, let's get (guaranteed) viewstates
-                // from the start and end state and interpolate them
-                val startViewState = obtainViewState(startState) as TransitionViewState
-                val endState = state.copy().also { it.expansion = 1.0f }
-                val endViewState = obtainViewState(endState) as TransitionViewState
-                result = layoutController.getInterpolatedState(
-                        startViewState,
-                        endViewState,
-                        state.expansion)
-            }
+        if (transitionLayout == null) {
+            return null
+        }
+        // Not cached. Let's create a new measurement
+        if (state.expansion == 0.0f || state.expansion == 1.0f) {
+            result = transitionLayout!!.calculateViewState(
+                    state.measurementInput!!,
+                    constraintSetForExpansion(state.expansion),
+                    TransitionViewState())
+            // We don't want to cache interpolated or null states as this could quickly fill up
+            // our cache. We only cache the start and the end states since the interpolation
+            // is cheap
+            setGutsViewState(result)
+            viewStates[cacheKey] = result
         } else {
-            result = null
+            // This is an interpolated state
+            val startState = state.copy().also { it.expansion = 0.0f }
+
+            // Given that we have a measurement and a view, let's get (guaranteed) viewstates
+            // from the start and end state and interpolate them
+            val startViewState = obtainViewState(startState) as TransitionViewState
+            val endState = state.copy().also { it.expansion = 1.0f }
+
+            val endViewState = obtainViewState(endState) as TransitionViewState
+            result = layoutController.getInterpolatedState(
+                    startViewState,
+                    endViewState,
+                    state.expansion)
+        }
+        if (state.squishFraction < 1f) {
+            return squishViewState(result, state.squishFraction);
         }
         return result
     }

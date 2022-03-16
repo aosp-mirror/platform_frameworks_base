@@ -1366,7 +1366,10 @@ public abstract class WebSettings {
      * Sets the WebView's user-agent string. If the string is {@code null} or empty,
      * the system default value will be used.
      *
-     * Note that starting from {@link android.os.Build.VERSION_CODES#KITKAT} Android
+     * <p>If the user-agent is overridden in this way, the values of the User-Agent Client Hints
+     * headers and {@code navigator.userAgentData} for this WebView will be empty.
+     *
+     * <p>Note that starting from {@link android.os.Build.VERSION_CODES#KITKAT} Android
      * version, changing the user-agent while loading a web page causes WebView
      * to initiate loading once again.
      *
@@ -1554,7 +1557,7 @@ public abstract class WebSettings {
      * @see #getForceDark
      * @deprecated The "force dark" model previously implemented by WebView was complex
      * and didn't interoperate well with current Web standards for
-     * prefers-color-scheme and color-scheme. In apps with
+     * {@code prefers-color-scheme} and {@code color-scheme}. In apps with
      * {@code targetSdkVersion} &ge; {@link android.os.Build.VERSION_CODES#TIRAMISU}
      * this API is a no-op and WebView will always use the dark style defined by web content
      * authors if the app's theme is dark. To customize the behavior, refer to
@@ -1601,6 +1604,61 @@ public abstract class WebSettings {
      * <p>
      * If Android is applying Force Dark to WebView then WebView will ignore the value of
      * this setting and behave as if it were set to true.
+     *
+     * <p>
+     * The deprecated {@link #setForceDark} and related API are no-ops in apps with
+     * {@code targetSdkVersion} &ge; {@link android.os.Build.VERSION_CODES#TIRAMISU},
+     * but they still apply to apps with
+     * {@code targetSdkVersion} &lt; {@link android.os.Build.VERSION_CODES#TIRAMISU}.
+     *
+     * <p>
+     * The below table summarizes how APIs work with different apps.
+     *
+     * <table border="2" width="85%" align="center" cellpadding="5">
+     *     <thead>
+     *         <tr>
+     *             <th>App</th>
+     *             <th>Web content which uses {@code prefers-color-scheme}</th>
+     *             <th>Web content which does not use {@code prefers-color-scheme}</th>
+     *         </tr>
+     *     </thead>
+     *     <tbody>
+     *     <tr>
+     *         <td>App with {@code isLightTheme} True or not set</td>
+     *         <td>Renders with the light theme defined by the content author.</td>
+     *         <td>Renders with the default styling defined by the content author.</td>
+     *     </tr>
+     *     <tr>
+     *         <td>App with Android forceDark in effect</td>
+     *         <td>Renders with the dark theme defined by the content author.</td>
+     *         <td>Renders with the styling modified to dark colors by an algorithm
+     *             if allowed by the content author.</td>
+     *     </tr>
+     *     <tr>
+     *         <td>App with {@code isLightTheme} False,
+     *            {@code targetSdkVersion} &lt; {@link android.os.Build.VERSION_CODES#TIRAMISU},
+     *             and has {@code FORCE_DARK_AUTO}</td>
+     *         <td>Renders with the dark theme defined by the content author.</td>
+     *         <td>Renders with the default styling defined by the content author.</td>
+     *     </tr>
+     *     <tr>
+     *         <td>App with {@code isLightTheme} False,
+     *            {@code targetSdkVersion} &ge; {@link android.os.Build.VERSION_CODES#TIRAMISU},
+     *             and {@code setAlgorithmicDarkening(false)}</td>
+     *         <td>Renders with the dark theme defined by the content author.</td>
+     *         <td>Renders with the default styling defined by the content author.</td>
+     *     </tr>
+     *     <tr>
+     *         <td>App with {@code isLightTheme} False,
+     *            {@code targetSdkVersion} &ge; {@link android.os.Build.VERSION_CODES#TIRAMISU},
+     *             and {@code setAlgorithmicDarkening(true)}</td>
+     *         <td>Renders with the dark theme defined by the content author.</td>
+     *         <td>Renders with the styling modified to dark colors by an algorithm if allowed
+     *             by the content author.</td>
+     *     </tr>
+     *     </tbody>
+     * </table>
+     * </p>
      *
      * @param allow allow algorithmic darkening or not.
      */

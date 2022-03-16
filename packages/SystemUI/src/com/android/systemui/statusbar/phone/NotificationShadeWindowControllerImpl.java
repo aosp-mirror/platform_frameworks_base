@@ -386,10 +386,12 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
             }
             visible = true;
         }
-        if (visible) {
-            mNotificationShadeView.setVisibility(View.VISIBLE);
-        } else {
-            mNotificationShadeView.setVisibility(View.INVISIBLE);
+        if (mNotificationShadeView != null) {
+            if (visible) {
+                mNotificationShadeView.setVisibility(View.VISIBLE);
+            } else {
+                mNotificationShadeView.setVisibility(View.INVISIBLE);
+            }
         }
     }
 
@@ -840,7 +842,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
         Set<String> mComponentsForcingTopUi = new HashSet<>();
 
         /**
-         * The {@link StatusBar} state from the status bar.
+         * The status bar state from {@link CentralSurfaces}.
          */
         int mStatusBarState;
 

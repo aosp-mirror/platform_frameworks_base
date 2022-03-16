@@ -868,6 +868,7 @@ public final class ActivityThread extends ClientTransactionHandler
         String processName;
         @UnsupportedAppUsage
         ApplicationInfo appInfo;
+        String sdkSandboxClientAppPackage;
         @UnsupportedAppUsage
         List<ProviderInfo> providers;
         ComponentName instrumentationName;
@@ -1113,9 +1114,9 @@ public final class ActivityThread extends ClientTransactionHandler
 
         @Override
         public final void bindApplication(String processName, ApplicationInfo appInfo,
-                ProviderInfoList providerList, ComponentName instrumentationName,
-                ProfilerInfo profilerInfo, Bundle instrumentationArgs,
-                IInstrumentationWatcher instrumentationWatcher,
+                String sdkSandboxClientAppPackage, ProviderInfoList providerList,
+                ComponentName instrumentationName, ProfilerInfo profilerInfo,
+                Bundle instrumentationArgs, IInstrumentationWatcher instrumentationWatcher,
                 IUiAutomationConnection instrumentationUiConnection, int debugMode,
                 boolean enableBinderTracking, boolean trackAllocation,
                 boolean isRestrictedBackupMode, boolean persistent, Configuration config,
@@ -1155,6 +1156,7 @@ public final class ActivityThread extends ClientTransactionHandler
             AppBindData data = new AppBindData();
             data.processName = processName;
             data.appInfo = appInfo;
+            data.sdkSandboxClientAppPackage = sdkSandboxClientAppPackage;
             data.providers = providerList.getList();
             data.instrumentationName = instrumentationName;
             data.instrumentationArgs = instrumentationArgs;
@@ -3587,7 +3589,7 @@ public final class ActivityThread extends ClientTransactionHandler
         }
 
         try {
-            Application app = r.packageInfo.makeApplication(false, mInstrumentation);
+            Application app = r.packageInfo.makeApplicationInner(false, mInstrumentation);
 
             if (localLOGV) Slog.v(TAG, "Performing launch of " + r);
             if (localLOGV) Slog.v(
@@ -4286,7 +4288,7 @@ public final class ActivityThread extends ClientTransactionHandler
         BroadcastReceiver receiver;
         ContextImpl context;
         try {
-            app = packageInfo.makeApplication(false, mInstrumentation);
+            app = packageInfo.makeApplicationInner(false, mInstrumentation);
             context = (ContextImpl) app.getBaseContext();
             if (data.info.splitName != null) {
                 context = (ContextImpl) context.createContextForSplit(data.info.splitName);
@@ -4469,19 +4471,13 @@ public final class ActivityThread extends ClientTransactionHandler
         // we are back active so skip it.
         unscheduleGcIdler();
 
-        // To investigate "duplciate Application objects" bug (b/185177290)
-        if (UserHandle.myUserId() != UserHandle.getUserId(data.info.applicationInfo.uid)) {
-            Slog.wtf(TAG, "handleCreateService called with wrong appinfo UID: myUserId="
-                    + UserHandle.myUserId() + " appinfo.uid=" + data.info.applicationInfo.uid);
-        }
-
         LoadedApk packageInfo = getPackageInfoNoCheck(
                 data.info.applicationInfo, data.compatInfo);
         Service service = null;
         try {
             if (localLOGV) Slog.v(TAG, "Creating service " + data.info.name);
 
-            Application app = packageInfo.makeApplication(false, mInstrumentation);
+            Application app = packageInfo.makeApplicationInner(false, mInstrumentation);
 
             final java.lang.ClassLoader cl;
             if (data.info.splitName != null) {
@@ -6542,6 +6538,9 @@ public final class ActivityThread extends ClientTransactionHandler
         }
 
         data.info = getPackageInfoNoCheck(data.appInfo, data.compatInfo);
+        if (data.sdkSandboxClientAppPackage != null) {
+            data.info.setSdkSandboxStorage(data.sdkSandboxClientAppPackage);
+        }
 
         if (agent != null) {
             handleAttachAgent(agent, data.info);
@@ -6701,7 +6700,7 @@ public final class ActivityThread extends ClientTransactionHandler
         try {
             // If the app is being launched for full backup or restore, bring it up in
             // a restricted environment with the base application class.
-            app = data.info.makeApplication(data.restrictedBackupMode, null);
+            app = data.info.makeApplicationInner(data.restrictedBackupMode, null);
 
             // Propagate autofill compat state
             app.setAutofillOptions(data.autofillOptions);
@@ -7571,7 +7570,7 @@ public final class ActivityThread extends ClientTransactionHandler
                 mInstrumentation.basicInit(this);
                 ContextImpl context = ContextImpl.createAppContext(
                         this, getSystemContext().mPackageInfo);
-                mInitialApplication = context.mPackageInfo.makeApplication(true, null);
+                mInitialApplication = context.mPackageInfo.makeApplicationInner(true, null);
                 mInitialApplication.onCreate();
             } catch (Exception e) {
                 throw new RuntimeException(

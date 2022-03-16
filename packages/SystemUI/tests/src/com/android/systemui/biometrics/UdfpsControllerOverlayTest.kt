@@ -57,9 +57,9 @@ import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mock
 import org.mockito.Mockito.mock
-import org.mockito.Mockito.`when` as whenever
 import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnit
+import org.mockito.Mockito.`when` as whenever
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)

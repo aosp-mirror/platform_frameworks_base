@@ -17,12 +17,14 @@
 package android.window;
 
 import android.annotation.NonNull;
+import android.app.WindowConfiguration;
 import android.content.ComponentName;
 import android.content.pm.ActivityInfo;
 import android.util.ArraySet;
 
 import java.io.PrintWriter;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Abstract class to control the policies of the windows that can be displayed on the virtual
@@ -46,6 +48,22 @@ public abstract class DisplayWindowPolicyController {
     private int mSystemWindowFlags;
 
     /**
+     * The set of windowing mode that are supported in this display.
+     * @see android.app.WindowConfiguration.WindowingMode
+     */
+    private final Set<Integer> mSupportedWindowingModes = new ArraySet<>();
+
+    /**
+     * A controller to control the policies of the windows that can be displayed on the virtual
+     * display.
+     */
+    public DisplayWindowPolicyController() {
+        synchronized (mSupportedWindowingModes) {
+            mSupportedWindowingModes.add(WindowConfiguration.WINDOWING_MODE_FULLSCREEN);
+        }
+    }
+
+    /**
      * Returns {@code true} if the given window flags contain the flags that we're interested in.
      */
     public final boolean isInterestedWindowFlags(int windowFlags, int systemWindowFlags) {
@@ -62,9 +80,34 @@ public abstract class DisplayWindowPolicyController {
     }
 
     /**
-     * Returns {@code true} if the given activities can be displayed on this virtual display.
+     * Returns {@code true} if the given windowing mode is supported in this display.
      */
-    public abstract boolean canContainActivities(@NonNull List<ActivityInfo> activities);
+    public final boolean isWindowingModeSupported(
+            @WindowConfiguration.WindowingMode int windowingMode) {
+        synchronized (mSupportedWindowingModes) {
+            return mSupportedWindowingModes.contains(windowingMode);
+        }
+    }
+
+    /**
+     * Sets the windowing modes are supported in this display.
+     *
+     * @param supportedWindowingModes The set of
+     * {@link android.app.WindowConfiguration.WindowingMode}.
+     */
+    public final void setSupportedWindowingModes(Set<Integer> supportedWindowingModes) {
+        synchronized (mSupportedWindowingModes) {
+            mSupportedWindowingModes.clear();
+            mSupportedWindowingModes.addAll(supportedWindowingModes);
+        }
+    }
+
+    /**
+     * Returns {@code true} if the given activities can be displayed on this virtual display and
+     * the windowing mode is supported.
+     */
+    public abstract boolean canContainActivities(@NonNull List<ActivityInfo> activities,
+            @WindowConfiguration.WindowingMode int windowingMode);
 
     /**
      * Called when an Activity window is layouted with the new changes where contains the

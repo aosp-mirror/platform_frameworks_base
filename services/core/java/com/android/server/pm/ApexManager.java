@@ -29,7 +29,6 @@ import android.apex.CompressedApexInfoList;
 import android.apex.IApexService;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
-import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.SigningDetails;
 import android.content.pm.parsing.result.ParseResult;
@@ -834,7 +833,7 @@ public abstract class ApexManager {
                 throw new RuntimeException(re);
             } catch (Exception e) {
                 throw new PackageManagerException(
-                        PackageInstaller.SessionInfo.SESSION_VERIFICATION_FAILED,
+                        PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE,
                         "apexd verification failed : " + e.getMessage());
             }
         }
@@ -861,7 +860,7 @@ public abstract class ApexManager {
                 throw new RuntimeException(re);
             } catch (Exception e) {
                 throw new PackageManagerException(
-                        PackageInstaller.SessionInfo.SESSION_VERIFICATION_FAILED,
+                        PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE,
                         "Failed to mark apexd session as ready : " + e.getMessage());
             }
         }

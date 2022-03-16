@@ -31,6 +31,7 @@ import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.media.MediaRoute2Info;
 import android.media.MediaRouter2Manager;
+import android.media.NearbyDevice;
 import android.os.Parcel;
 
 import com.android.settingslib.bluetooth.A2dpProfile;
@@ -191,6 +192,18 @@ public class MediaDeviceTest {
     public void compareTo_carKit_nonCarKitBluetooth_carKitFirst() {
         when(mDevice1.getBluetoothClass()).thenReturn(mHeadreeClass);
         when(mDevice2.getBluetoothClass()).thenReturn(mCarkitClass);
+        mMediaDevices.add(mBluetoothMediaDevice1);
+        mMediaDevices.add(mBluetoothMediaDevice2);
+
+        assertThat(mMediaDevices.get(0)).isEqualTo(mBluetoothMediaDevice1);
+        Collections.sort(mMediaDevices, COMPARATOR);
+        assertThat(mMediaDevices.get(0)).isEqualTo(mBluetoothMediaDevice2);
+    }
+
+    @Test
+    public void compareTo_differentRange_sortWithRange() {
+        mBluetoothMediaDevice1.setRangeZone(NearbyDevice.RANGE_FAR);
+        mBluetoothMediaDevice2.setRangeZone(NearbyDevice.RANGE_CLOSE);
         mMediaDevices.add(mBluetoothMediaDevice1);
         mMediaDevices.add(mBluetoothMediaDevice2);
 

@@ -149,11 +149,11 @@ data class MediaButton(
     /**
      * First custom action space
      */
-    var startCustom: MediaAction? = null,
+    var custom0: MediaAction? = null,
     /**
-     * Last custom action space
+     * Second custom action space
      */
-    var endCustom: MediaAction? = null
+    var custom1: MediaAction? = null
 )
 
 /** State of a media action. */

@@ -41,7 +41,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntryB
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifStabilityManager;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.Pluggable;
 import com.android.systemui.statusbar.notification.collection.provider.VisualStabilityProvider;
-import com.android.systemui.statusbar.notification.collection.render.NotifPanelEventSource;
+import com.android.systemui.statusbar.phone.NotifPanelEvents;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
@@ -67,12 +67,12 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
     @Mock private StatusBarStateController mStatusBarStateController;
     @Mock private Pluggable.PluggableListener<NotifStabilityManager> mInvalidateListener;
     @Mock private HeadsUpManager mHeadsUpManager;
-    @Mock private NotifPanelEventSource mNotifPanelEventSource;
+    @Mock private NotifPanelEvents mNotifPanelEvents;
     @Mock private VisualStabilityProvider mVisualStabilityProvider;
 
     @Captor private ArgumentCaptor<WakefulnessLifecycle.Observer> mWakefulnessObserverCaptor;
     @Captor private ArgumentCaptor<StatusBarStateController.StateListener> mSBStateListenerCaptor;
-    @Captor private ArgumentCaptor<NotifPanelEventSource.Callbacks> mNotifPanelEventsCallbackCaptor;
+    @Captor private ArgumentCaptor<NotifPanelEvents.Listener> mNotifPanelEventsCallbackCaptor;
     @Captor private ArgumentCaptor<NotifStabilityManager> mNotifStabilityManagerCaptor;
 
     private FakeSystemClock mFakeSystemClock = new FakeSystemClock();
@@ -80,7 +80,7 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
 
     private WakefulnessLifecycle.Observer mWakefulnessObserver;
     private StatusBarStateController.StateListener mStatusBarStateListener;
-    private NotifPanelEventSource.Callbacks mNotifPanelEventsCallback;
+    private NotifPanelEvents.Listener mNotifPanelEventsCallback;
     private NotifStabilityManager mNotifStabilityManager;
     private NotificationEntry mEntry;
 
@@ -92,7 +92,7 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
                 mFakeExecutor,
                 mDumpManager,
                 mHeadsUpManager,
-                mNotifPanelEventSource,
+                mNotifPanelEvents,
                 mStatusBarStateController,
                 mVisualStabilityProvider,
                 mWakefulnessLifecycle);
@@ -106,7 +106,7 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
         verify(mStatusBarStateController).addCallback(mSBStateListenerCaptor.capture());
         mStatusBarStateListener = mSBStateListenerCaptor.getValue();
 
-        verify(mNotifPanelEventSource).registerCallbacks(mNotifPanelEventsCallbackCaptor.capture());
+        verify(mNotifPanelEvents).registerListener(mNotifPanelEventsCallbackCaptor.capture());
         mNotifPanelEventsCallback = mNotifPanelEventsCallbackCaptor.getValue();
 
         verify(mNotifPipeline).setVisualStabilityManager(mNotifStabilityManagerCaptor.capture());

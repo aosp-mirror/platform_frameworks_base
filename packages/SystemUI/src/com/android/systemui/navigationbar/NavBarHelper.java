@@ -49,8 +49,7 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shared.system.QuickStepContract;
-import com.android.systemui.statusbar.phone.StatusBar;
-import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
+import com.android.systemui.statusbar.phone.CentralSurfaces;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -79,7 +78,7 @@ public final class NavBarHelper implements
         Dumpable {
     private final AccessibilityManager mAccessibilityManager;
     private final Lazy<AssistManager> mAssistManagerLazy;
-    private final Lazy<Optional<StatusBar>> mStatusBarOptionalLazy;
+    private final Lazy<Optional<CentralSurfaces>> mCentralSurfacesOptionalLazy;
     private final UserTracker mUserTracker;
     private final SystemActions mSystemActions;
     private final AccessibilityButtonModeObserver mAccessibilityButtonModeObserver;
@@ -113,7 +112,7 @@ public final class NavBarHelper implements
             SystemActions systemActions,
             OverviewProxyService overviewProxyService,
             Lazy<AssistManager> assistManagerLazy,
-            Lazy<Optional<StatusBar>> statusBarOptionalLazy,
+            Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
             NavigationModeController navigationModeController,
             UserTracker userTracker,
             DumpManager dumpManager) {
@@ -121,7 +120,7 @@ public final class NavBarHelper implements
         mContentResolver = mContext.getContentResolver();
         mAccessibilityManager = accessibilityManager;
         mAssistManagerLazy = assistManagerLazy;
-        mStatusBarOptionalLazy = statusBarOptionalLazy;
+        mCentralSurfacesOptionalLazy = centralSurfacesOptionalLazy;
         mUserTracker = userTracker;
         mSystemActions = systemActions;
         accessibilityManager.addAccessibilityServicesStateChangeListener(
@@ -295,8 +294,8 @@ public final class NavBarHelper implements
      * {@link InputMethodService} and the keyguard states.
      */
     public boolean isImeShown(int vis) {
-        View shadeWindowView = mStatusBarOptionalLazy.get().get().getNotificationShadeWindowView();
-        boolean isKeyguardShowing = mStatusBarOptionalLazy.get().get().isKeyguardShowing();
+        View shadeWindowView = mCentralSurfacesOptionalLazy.get().get().getNotificationShadeWindowView();
+        boolean isKeyguardShowing = mCentralSurfacesOptionalLazy.get().get().isKeyguardShowing();
         boolean imeVisibleOnShade = shadeWindowView != null && shadeWindowView.isAttachedToWindow()
                 && shadeWindowView.getRootWindowInsets().isVisible(WindowInsets.Type.ime());
         return imeVisibleOnShade

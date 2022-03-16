@@ -41,6 +41,7 @@ import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.DialogLaunchAnimator
 import com.android.systemui.broadcast.BroadcastDispatcher
+import com.android.systemui.broadcast.BroadcastSender
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
@@ -64,7 +65,6 @@ import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.any
-import org.mockito.Mockito.anyString
 import org.mockito.Mockito.doNothing
 import org.mockito.Mockito.doReturn
 import org.mockito.Mockito.mock
@@ -84,6 +84,7 @@ class UserSwitcherControllerTest : SysuiTestCase() {
     @Mock private lateinit var userManager: UserManager
     @Mock private lateinit var activityStarter: ActivityStarter
     @Mock private lateinit var broadcastDispatcher: BroadcastDispatcher
+    @Mock private lateinit var broadcastSender: BroadcastSender
     @Mock private lateinit var telephonyListenerManager: TelephonyListenerManager
     @Mock private lateinit var secureSettings: SecureSettings
     @Mock private lateinit var falsingManager: FalsingManager
@@ -160,6 +161,7 @@ class UserSwitcherControllerTest : SysuiTestCase() {
                 handler,
                 activityStarter,
                 broadcastDispatcher,
+                broadcastSender,
                 uiEventLogger,
                 falsingManager,
                 telephonyListenerManager,
@@ -207,7 +209,7 @@ class UserSwitcherControllerTest : SysuiTestCase() {
         `when`(userTracker.userId).thenReturn(ownerId)
         `when`(userTracker.userInfo).thenReturn(ownerInfo)
 
-        `when`(userManager.createGuest(any(), anyString())).thenReturn(guestInfo)
+        `when`(userManager.createGuest(any())).thenReturn(guestInfo)
 
         userSwitcherController.onUserListItemClicked(emptyGuestUserRecord, null)
         testableLooper.processAllMessages()
@@ -232,7 +234,7 @@ class UserSwitcherControllerTest : SysuiTestCase() {
         `when`(userTracker.userId).thenReturn(ownerId)
         `when`(userTracker.userInfo).thenReturn(ownerInfo)
 
-        `when`(userManager.createGuest(any(), anyString())).thenReturn(guestInfo)
+        `when`(userManager.createGuest(any())).thenReturn(guestInfo)
 
         userSwitcherController.onUserListItemClicked(emptyGuestUserRecord, dialogShower)
         testableLooper.processAllMessages()

@@ -285,15 +285,14 @@ public class WMShellModule {
             PipAnimationController pipAnimationController,
             PipSurfaceTransactionHelper pipSurfaceTransactionHelper,
             PipTransitionController pipTransitionController,
-            Optional<LegacySplitScreenController> splitScreenOptional,
-            Optional<SplitScreenController> newSplitScreenOptional,
+            Optional<SplitScreenController> splitScreenControllerOptional,
             DisplayController displayController,
             PipUiEventLogger pipUiEventLogger, ShellTaskOrganizer shellTaskOrganizer,
             @ShellMainThread ShellExecutor mainExecutor) {
         return new PipTaskOrganizer(context,
                 syncTransactionQueue, pipTransitionState, pipBoundsState, pipBoundsAlgorithm,
                 menuPhoneController, pipAnimationController, pipSurfaceTransactionHelper,
-                pipTransitionController, splitScreenOptional, newSplitScreenOptional,
+                pipTransitionController, splitScreenControllerOptional,
                 displayController, pipUiEventLogger, shellTaskOrganizer, mainExecutor);
     }
 

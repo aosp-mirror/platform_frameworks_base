@@ -1669,14 +1669,14 @@ public class PreferencesHelper implements RankingConfig {
     }
 
     /**
-     * Gets all notification channels associated with the given pkg and userId that can bypass dnd
+     * Gets all notification channels associated with the given pkg and uid that can bypass dnd
      */
     public ParceledListSlice<NotificationChannel> getNotificationChannelsBypassingDnd(String pkg,
-            int userId) {
+            int uid) {
         List<NotificationChannel> channels = new ArrayList<>();
         synchronized (mPackagePreferences) {
             final PackagePreferences r = mPackagePreferences.get(
-                    packagePreferencesKey(pkg, userId));
+                    packagePreferencesKey(pkg, uid));
             if (r != null) {
                 for (NotificationChannel channel : r.channels.values()) {
                     if (channelIsLiveLocked(r, channel) && channel.canBypassDnd()) {

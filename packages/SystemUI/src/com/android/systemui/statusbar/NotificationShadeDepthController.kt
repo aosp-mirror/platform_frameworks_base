@@ -259,6 +259,7 @@ class NotificationShadeDepthController @Inject constructor(
                 addListener(object : AnimatorListenerAdapter() {
                     override fun onAnimationEnd(animation: Animator?) {
                         keyguardAnimator = null
+                        wakeAndUnlockBlurRadius = 0f
                         scheduleUpdate()
                     }
                 })
@@ -439,7 +440,7 @@ class NotificationShadeDepthController @Inject constructor(
             it.println("StatusBarWindowBlurController:")
             it.increaseIndent()
             it.println("shadeExpansion: $shadeExpansion")
-            it.println("shouldApplyShaeBlur: ${shouldApplyShadeBlur()}")
+            it.println("shouldApplyShadeBlur: ${shouldApplyShadeBlur()}")
             it.println("shadeAnimation: ${shadeAnimation.radius}")
             it.println("brightnessMirrorRadius: ${brightnessMirrorSpring.radius}")
             it.println("wakeAndUnlockBlur: $wakeAndUnlockBlurRadius")

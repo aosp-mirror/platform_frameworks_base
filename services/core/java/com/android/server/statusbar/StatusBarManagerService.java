@@ -36,6 +36,7 @@ import android.app.Notification;
 import android.app.StatusBarManager;
 import android.app.compat.CompatChanges;
 import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledAfter;
 import android.compat.annotation.EnabledSince;
 import android.content.ComponentName;
 import android.content.Context;
@@ -134,6 +135,17 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     @ChangeId
     @EnabledSince(targetSdkVersion = Build.VERSION_CODES.S)
     private static final long LOCK_DOWN_COLLAPSE_STATUS_BAR = 173031413L;
+
+    /**
+     * In apps targeting {@link android.os.Build.VERSION_CODES#TIRAMISU} or higher, calling
+     * {@link android.service.quicksettings.TileService#requestListeningState} will check that the 
+     * calling package (uid) and the package of the target {@link android.content.ComponentName} 
+     * match. It'll also make sure that the context used can take actions on behalf of the current 
+     * user.
+     */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.S_V2)
+    static final long REQUEST_LISTENING_MUST_MATCH_PACKAGE = 172251878L;
 
     private final Context mContext;
 
@@ -637,12 +649,14 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         }
 
         @Override
-        public void requestWindowMagnificationConnection(boolean request) {
+        public boolean requestWindowMagnificationConnection(boolean request) {
             if (mBar != null) {
                 try {
                     mBar.requestWindowMagnificationConnection(request);
+                    return true;
                 } catch (RemoteException ex) { }
             }
+            return false;
         }
 
         @Override
@@ -856,11 +870,11 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     }
 
     @Override
-    public void onBiometricAuthenticated() {
+    public void onBiometricAuthenticated(@Modality int modality) {
         enforceBiometricDialog();
         if (mBar != null) {
             try {
-                mBar.onBiometricAuthenticated();
+                mBar.onBiometricAuthenticated(modality);
             } catch (RemoteException ex) {
             }
         }
@@ -1650,6 +1664,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
 
     @Override
     public void hideCurrentInputMethodForBubbles() {
+        enforceStatusBarService();
         final long token = Binder.clearCallingIdentity();
         try {
             InputMethodManagerInternal.get().hideCurrentInputMethod(
@@ -1771,6 +1786,42 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
             return defaultValue;
         }
         return false;
+    }
+
+    @Override
+    public void requestTileServiceListeningState(
+            @NonNull ComponentName componentName,
+            int userId
+    ) {
+        int callingUid = Binder.getCallingUid();
+        String packageName = componentName.getPackageName();
+
+        boolean mustPerformChecks = CompatChanges.isChangeEnabled(
+                REQUEST_LISTENING_MUST_MATCH_PACKAGE, callingUid);
+
+        if (mustPerformChecks) {
+            // Check calling user can act on behalf of current user
+            userId = mActivityManagerInternal.handleIncomingUser(Binder.getCallingPid(), callingUid,
+                    userId, false, ActivityManagerInternal.ALLOW_NON_FULL,
+                    "requestTileServiceListeningState", packageName);
+
+            // Check calling uid matches package
+            checkCallingUidPackage(packageName, callingUid, userId);
+
+            int currentUser = mActivityManagerInternal.getCurrentUserId();
+
+            // Check current user
+            if (userId != currentUser) {
+                throw new IllegalArgumentException("User " + userId + " is not the current user.");
+            }
+        }
+        if (mBar != null) {
+            try {
+                mBar.requestTileServiceListeningState(componentName);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "requestTileServiceListeningState", e);
+            }
+        }
     }
 
     @Override
@@ -1952,8 +2003,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     public void setNavBarMode(@NavBarMode int navBarMode) {
         enforceStatusBar();
         if (navBarMode != NAV_BAR_MODE_DEFAULT && navBarMode != NAV_BAR_MODE_KIDS) {
-            throw new UnsupportedOperationException(
-                    "Supplied navBarMode not supported: " + navBarMode);
+            throw new IllegalArgumentException("Supplied navBarMode not supported: " + navBarMode);
         }
 
         final int userId = mCurrentUserId;
@@ -1961,6 +2011,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         try {
             Settings.Secure.putIntForUser(mContext.getContentResolver(),
                     Settings.Secure.NAV_BAR_KIDS_MODE, navBarMode, userId);
+            Settings.Secure.putIntForUser(mContext.getContentResolver(),
+                    Settings.Secure.NAV_BAR_FORCE_VISIBLE, navBarMode, userId);
 
             IOverlayManager overlayManager = getOverlayManager();
             if (overlayManager != null && navBarMode == NAV_BAR_MODE_KIDS

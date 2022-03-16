@@ -21,6 +21,8 @@ import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.MODE_FOREGROUND;
 import static android.app.AppOpsManager.MODE_IGNORED;
 import static android.app.AppOpsManager.OP_NONE;
+import static android.content.pm.PackageManager.ACTION_REQUEST_PERMISSIONS;
+import static android.content.pm.PackageManager.ACTION_REQUEST_PERMISSIONS_FOR_OTHER;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_APPLY_RESTRICTION;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_REVOKED_COMPAT;
@@ -34,6 +36,7 @@ import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
 import android.app.AppOpsManager;
 import android.app.AppOpsManagerInternal;
+import android.app.KeyguardManager;
 import android.app.TaskInfo;
 import android.app.compat.CompatChanges;
 import android.compat.annotation.ChangeId;
@@ -53,6 +56,8 @@ import android.content.pm.PackageManagerInternal.PackageListObserver;
 import android.content.pm.PermissionInfo;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -108,6 +113,7 @@ public final class PermissionPolicyService extends SystemService {
     private static final String SYSTEM_PKG = "android";
     private static final boolean DEBUG = false;
     private static final long USER_SENSITIVE_UPDATE_DELAY_MS = 60000;
+    private static final long ACTIVITY_START_DELAY_MS = 200;
 
     private final Object mLock = new Object();
 
@@ -148,15 +154,19 @@ public final class PermissionPolicyService extends SystemService {
     private List<String> mAppOpPermissions;
 
     private Context mContext;
+    private Handler mHandler;
     private PackageManagerInternal mPackageManagerInternal;
     private NotificationManagerInternal mNotificationManager;
+    private final KeyguardManager mKeyguardManager;
     private final PackageManager mPackageManager;
 
     public PermissionPolicyService(@NonNull Context context) {
         super(context);
 
         mContext = context;
+        mHandler = new Handler(Looper.getMainLooper());
         mPackageManager = context.getPackageManager();
+        mKeyguardManager = context.getSystemService(KeyguardManager.class);
         LocalServices.addService(PermissionPolicyInternal.class, new Internal());
     }
 
@@ -1013,7 +1023,7 @@ public final class PermissionPolicyService extends SystemService {
                             ActivityInterceptorInfo info) {
                         String action = info.intent.getAction();
                         ActivityInterceptResult result = null;
-                        if (!PackageManager.ACTION_REQUEST_PERMISSIONS_FOR_OTHER.equals(action)
+                        if (!ACTION_REQUEST_PERMISSIONS_FOR_OTHER.equals(action)
                                 && !PackageManager.ACTION_REQUEST_PERMISSIONS.equals(action)) {
                             return null;
                         }
@@ -1030,7 +1040,7 @@ public final class PermissionPolicyService extends SystemService {
                                 && !mContinueNotifGrantMessageUids.contains(info.realCallingUid)) {
                             return result;
                         }
-                        if (PackageManager.ACTION_REQUEST_PERMISSIONS_FOR_OTHER.equals(action)) {
+                        if (ACTION_REQUEST_PERMISSIONS_FOR_OTHER.equals(action)) {
                             String otherPkg = info.intent.getStringExtra(Intent.EXTRA_PACKAGE_NAME);
                             if (otherPkg == null || (mPackageManager.getPermissionFlags(
                                     POST_NOTIFICATIONS, otherPkg, UserHandle.of(info.userId))
@@ -1046,12 +1056,21 @@ public final class PermissionPolicyService extends SystemService {
                     }
 
                     @Override
-                    public void onActivityLaunched(TaskInfo taskInfo, ActivityInfo activityInfo) {
-                        super.onActivityLaunched(taskInfo, activityInfo);
-                        clearNotificationReviewFlagsIfNeeded(activityInfo.packageName,
-                                UserHandle.of(taskInfo.userId));
-                        showNotificationPromptIfNeeded(activityInfo.packageName,
-                                taskInfo.userId, taskInfo.taskId);
+                    public void onActivityLaunched(TaskInfo taskInfo, ActivityInfo activityInfo,
+                            ActivityInterceptorInfo info) {
+                        super.onActivityLaunched(taskInfo, activityInfo, info);
+                        if (!shouldShowNotificationDialogOrClearFlags(taskInfo,
+                                activityInfo.packageName, info.intent, info.checkedOptions, true)) {
+                            return;
+                        }
+                        UserHandle user = UserHandle.of(taskInfo.userId);
+                        if (CompatChanges.isChangeEnabled(NOTIFICATION_PERM_CHANGE_ID,
+                                activityInfo.packageName, user)) {
+                            clearNotificationReviewFlagsIfNeeded(activityInfo.packageName, user);
+                        } else {
+                            showNotificationPromptIfNeeded(activityInfo.packageName,
+                                    taskInfo.userId, taskInfo.taskId);
+                        }
                     }
                 };
 
@@ -1073,7 +1092,7 @@ public final class PermissionPolicyService extends SystemService {
                 return false;
             }
 
-            if (PackageManager.ACTION_REQUEST_PERMISSIONS_FOR_OTHER.equals(intent.getAction())
+            if (ACTION_REQUEST_PERMISSIONS_FOR_OTHER.equals(intent.getAction())
                     && (callingUid != Process.SYSTEM_UID || !SYSTEM_PKG.equals(callingPackage))) {
                 return false;
             }
@@ -1092,10 +1111,58 @@ public final class PermissionPolicyService extends SystemService {
             launchNotificationPermissionRequestDialog(packageName, user, taskId);
         }
 
+        @Override
+        public boolean isIntentToPermissionDialog(@NonNull Intent intent) {
+            return Objects.equals(intent.getPackage(),
+                    mPackageManager.getPermissionControllerPackageName())
+                    && (Objects.equals(intent.getAction(), ACTION_REQUEST_PERMISSIONS_FOR_OTHER)
+                    || Objects.equals(intent.getAction(), ACTION_REQUEST_PERMISSIONS));
+        }
+
+        @Override
+        public boolean shouldShowNotificationDialogForTask(TaskInfo taskInfo, String currPkg,
+                Intent intent) {
+            return shouldShowNotificationDialogOrClearFlags(
+                    taskInfo, currPkg, intent, null, false);
+        }
+
+        /**
+         * Determine if a particular task is in the proper state to show a system-triggered
+         * permission prompt. A prompt can be shown if the task is just starting, or the task is
+         * currently focused, visible, and running, and,
+         * 1. The isEligibleForLegacyPermissionPrompt ActivityOption is set, or
+         * 2. The intent is a launcher intent (action is ACTION_MAIN, category is LAUNCHER), or
+         * 3. The activity belongs to the same package as the one which launched the task
+         * originally, and the task was started with a launcher intent
+         * @param taskInfo The task to be checked
+         * @param currPkg The package of the current top visible activity
+         * @param intent The intent of the current top visible activity
+         */
+        private boolean shouldShowNotificationDialogOrClearFlags(TaskInfo taskInfo, String currPkg,
+                Intent intent, ActivityOptions options, boolean activityStart) {
+            if (intent == null || currPkg == null || taskInfo == null
+                    || (!(taskInfo.isFocused && taskInfo.isVisible && taskInfo.isRunning)
+                    && !activityStart)) {
+                return false;
+            }
+
+            return isLauncherIntent(intent)
+                    || (options != null && options.isEligibleForLegacyPermissionPrompt())
+                    || (currPkg.equals(taskInfo.baseActivity.getPackageName())
+                    && isLauncherIntent(taskInfo.baseIntent));
+        }
+
+        private boolean isLauncherIntent(Intent intent) {
+            return Intent.ACTION_MAIN.equals(intent.getAction())
+                    && intent.getCategories() != null
+                    && (intent.getCategories().contains(Intent.CATEGORY_LAUNCHER)
+                    || intent.getCategories().contains(Intent.CATEGORY_LEANBACK_LAUNCHER)
+                    || intent.getCategories().contains(Intent.CATEGORY_CAR_LAUNCHER));
+        }
+
         private void clearNotificationReviewFlagsIfNeeded(String packageName, UserHandle user) {
-            if (!CompatChanges.isChangeEnabled(NOTIFICATION_PERM_CHANGE_ID, packageName, user)
-                    || ((mPackageManager.getPermissionFlags(POST_NOTIFICATIONS, packageName, user)
-                    & FLAG_PERMISSION_REVIEW_REQUIRED) == 0)) {
+            if ((mPackageManager.getPermissionFlags(POST_NOTIFICATIONS, packageName, user)
+                    & FLAG_PERMISSION_REVIEW_REQUIRED) == 0) {
                 return;
             }
             try {
@@ -1114,14 +1181,15 @@ public final class PermissionPolicyService extends SystemService {
             Intent grantPermission = mPackageManager
                     .buildRequestPermissionsIntent(new String[] { POST_NOTIFICATIONS });
             grantPermission.setAction(
-                    PackageManager.ACTION_REQUEST_PERMISSIONS_FOR_OTHER);
+                    ACTION_REQUEST_PERMISSIONS_FOR_OTHER);
             grantPermission.putExtra(Intent.EXTRA_PACKAGE_NAME, pkgName);
 
             ActivityOptions options = new ActivityOptions(new Bundle());
             options.setTaskOverlay(true, false);
             options.setLaunchTaskId(taskId);
             try {
-                mContext.startActivityAsUser(grantPermission, options.toBundle(), user);
+                mHandler.postDelayed(() -> mContext.startActivityAsUser(
+                        grantPermission, options.toBundle(), user), ACTIVITY_START_DELAY_MS);
             } catch (Exception e) {
                 Log.e(LOG_TAG, "couldn't start grant permission dialog"
                         + "for other package " + pkgName, e);
@@ -1138,12 +1206,6 @@ public final class PermissionPolicyService extends SystemService {
             synchronized (mLock) {
                 mOnInitializedCallback = callback;
             }
-        }
-
-        @Override
-        public boolean canShowPermissionPromptForTask(@Nullable TaskInfo taskInfo) {
-            return taskInfo != null && taskInfo.isFocused && taskInfo.isVisible
-                    && taskInfo.isRunning;
         }
 
         /**
@@ -1210,8 +1272,8 @@ public final class PermissionPolicyService extends SystemService {
             }
 
             if (!pkg.getRequestedPermissions().contains(POST_NOTIFICATIONS)
-                    || CompatChanges.isChangeEnabled(NOTIFICATION_PERM_CHANGE_ID,
-                    pkg.getPackageName(), user)) {
+                    || CompatChanges.isChangeEnabled(NOTIFICATION_PERM_CHANGE_ID, pkgName, user)
+                    || mKeyguardManager.isKeyguardLocked()) {
                 return false;
             }
 
@@ -1220,7 +1282,7 @@ public final class PermissionPolicyService extends SystemService {
                 mNotificationManager = LocalServices.getService(NotificationManagerInternal.class);
             }
             boolean hasCreatedNotificationChannels = mNotificationManager
-                    .getNumNotificationChannelsForPackage(pkg.getPackageName(), uid, true) > 0;
+                    .getNumNotificationChannelsForPackage(pkgName, uid, true) > 0;
             int flags = mPackageManager.getPermissionFlags(POST_NOTIFICATIONS, pkgName, user);
             boolean explicitlySet = (flags & PermissionManager.EXPLICIT_SET_FLAGS) != 0;
             boolean needsReview = (flags & FLAG_PERMISSION_REVIEW_REQUIRED) != 0;

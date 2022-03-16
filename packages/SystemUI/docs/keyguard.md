@@ -40,7 +40,7 @@ More coming
 
 [1]: /frameworks/base/packages/SystemUI/docs/keyguard/bouncer.md
 [2]: /frameworks/base/services/core/java/com/android/server/power/PowerManagerService.java
-[3]: /frameworks/base/packages/SystemUI/docs/keyguard/aod.md
+[3]: /frameworks/base/packages/SystemUI/docs/keyguard/doze.md
 [4]: /frameworks/base/services/core/java/com/android/server/policy/PhoneWindowManager.java
 
 

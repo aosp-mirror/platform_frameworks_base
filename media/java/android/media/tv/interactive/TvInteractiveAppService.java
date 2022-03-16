@@ -16,9 +16,11 @@
 
 package android.media.tv.interactive;
 
+import android.annotation.CallSuper;
 import android.annotation.MainThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SdkConstant;
 import android.annotation.StringDef;
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
@@ -76,15 +78,14 @@ public abstract class TvInteractiveAppService extends Service {
 
     private static final int DETACH_MEDIA_VIEW_TIMEOUT_MS = 5000;
 
-    // TODO: cleanup and unhide APIs.
-
     /**
      * This is the interface name that a service implementing a TV Interactive App service should
      * say that it supports -- that is, this is the action it uses for its intent filter. To be
      * supported, the service must also require the
-     * android.Manifest.permission#BIND_TV_INTERACTIVE_APP permission so that other applications
-     * cannot abuse it.
+     * {@link android.Manifest.permission#BIND_TV_INTERACTIVE_APP} permission so that other
+     * applications cannot abuse it.
      */
+    @SdkConstant(SdkConstant.SdkConstantType.SERVICE_ACTION)
     public static final String SERVICE_INTERFACE =
             "android.media.tv.interactive.TvInteractiveAppService";
 
@@ -244,13 +245,13 @@ public abstract class TvInteractiveAppService extends Service {
     public abstract void onPrepare(@TvInteractiveAppInfo.InteractiveAppType int type);
 
     /**
-     * Registers App link info.
+     * Called when a request to register an Android application link info record is received.
      */
     public void onRegisterAppLinkInfo(@NonNull AppLinkInfo appLinkInfo) {
     }
 
     /**
-     * Unregisters App link info.
+     * Called when a request to unregister an Android application link info record is received.
      */
     public void onUnregisterAppLinkInfo(@NonNull AppLinkInfo appLinkInfo) {
     }
@@ -351,6 +352,7 @@ public abstract class TvInteractiveAppService extends Service {
          * @param enable {@code true} if you want to enable the media view. {@code false}
          *            otherwise.
          */
+        @CallSuper
         public void setMediaViewEnabled(final boolean enable) {
             mHandler.post(new Runnable() {
                 @Override
@@ -383,7 +385,7 @@ public abstract class TvInteractiveAppService extends Service {
         }
 
         /**
-         * Resets TvIAppService session.
+         * Resets TvInteractiveAppService session.
          */
         public void onResetInteractiveApp() {
         }
@@ -467,11 +469,11 @@ public abstract class TvInteractiveAppService extends Service {
          * in {@link #onSetSurface}. This method is always called at least once, after
          * {@link #onSetSurface} is called with non-null surface.
          *
-         * @param format The new PixelFormat of the surface.
+         * @param format The new {@link PixelFormat} of the surface.
          * @param width The new width of the surface.
          * @param height The new height of the surface.
          */
-        public void onSurfaceChanged(int format, int width, int height) {
+        public void onSurfaceChanged(@PixelFormat.Format int format, int width, int height) {
         }
 
         /**
@@ -631,6 +633,7 @@ public abstract class TvInteractiveAppService extends Service {
          * @param right Right position in pixels, relative to the overlay view.
          * @param bottom Bottom position in pixels, relative to the overlay view.
          */
+        @CallSuper
         public void layoutSurface(final int left, final int top, final int right,
                 final int bottom) {
             if (left > right || top > bottom) {
@@ -659,6 +662,7 @@ public abstract class TvInteractiveAppService extends Service {
          * Requests broadcast related information from the related TV input.
          * @param request the request for broadcast info
          */
+        @CallSuper
         public void requestBroadcastInfo(@NonNull final BroadcastInfoRequest request) {
             executeOrPostRunnableOnMainThread(new Runnable() {
                 @MainThread
@@ -683,6 +687,7 @@ public abstract class TvInteractiveAppService extends Service {
          * Remove broadcast information request from the related TV input.
          * @param requestId the ID of the request
          */
+        @CallSuper
         public void removeBroadcastInfo(final int requestId) {
             executeOrPostRunnableOnMainThread(new Runnable() {
                 @MainThread
@@ -709,6 +714,7 @@ public abstract class TvInteractiveAppService extends Service {
          * @param cmdType type of the specific command
          * @param parameters parameters of the specific command
          */
+        @CallSuper
         public void sendPlaybackCommandRequest(
                 @PlaybackCommandType @NonNull String cmdType, @Nullable Bundle parameters) {
             executeOrPostRunnableOnMainThread(new Runnable() {
@@ -733,6 +739,7 @@ public abstract class TvInteractiveAppService extends Service {
         /**
          * Sets broadcast video bounds.
          */
+        @CallSuper
         public void setVideoBounds(@NonNull Rect rect) {
             executeOrPostRunnableOnMainThread(new Runnable() {
                 @MainThread
@@ -755,6 +762,7 @@ public abstract class TvInteractiveAppService extends Service {
         /**
          * Requests the URI of the current channel.
          */
+        @CallSuper
         public void requestCurrentChannelUri() {
             executeOrPostRunnableOnMainThread(new Runnable() {
                 @MainThread
@@ -777,6 +785,7 @@ public abstract class TvInteractiveAppService extends Service {
         /**
          * Requests the logic channel number (LCN) of the current channel.
          */
+        @CallSuper
         public void requestCurrentChannelLcn() {
             executeOrPostRunnableOnMainThread(new Runnable() {
                 @MainThread
@@ -799,6 +808,7 @@ public abstract class TvInteractiveAppService extends Service {
         /**
          * Requests stream volume.
          */
+        @CallSuper
         public void requestStreamVolume() {
             executeOrPostRunnableOnMainThread(new Runnable() {
                 @MainThread
@@ -821,6 +831,7 @@ public abstract class TvInteractiveAppService extends Service {
         /**
          * Requests the list of {@link TvTrackInfo}.
          */
+        @CallSuper
         public void requestTrackInfoList() {
             executeOrPostRunnableOnMainThread(new Runnable() {
                 @MainThread
@@ -845,6 +856,7 @@ public abstract class TvInteractiveAppService extends Service {
          *
          * @see android.media.tv.TvInputInfo
          */
+        @CallSuper
         public void requestCurrentTvInputId() {
             executeOrPostRunnableOnMainThread(new Runnable() {
                 @MainThread
@@ -869,6 +881,7 @@ public abstract class TvInteractiveAppService extends Service {
          *
          * @param request The advertisement request
          */
+        @CallSuper
         public void requestAd(@NonNull final AdRequest request) {
             executeOrPostRunnableOnMainThread(new Runnable() {
                 @MainThread
@@ -986,7 +999,7 @@ public abstract class TvInteractiveAppService extends Service {
             if (DEBUG) {
                 Log.d(TAG, "notifyContentAllowed");
             }
-            notifyContentAllowed();
+            onContentAllowed();
         }
 
         void notifyContentBlocked(TvContentRating rating) {
@@ -1032,6 +1045,7 @@ public abstract class TvInteractiveAppService extends Service {
          *            used when the state is not
          *            {@link TvInteractiveAppManager#INTERACTIVE_APP_STATE_ERROR}.
          */
+        @CallSuper
         public void notifySessionStateChanged(
                 @TvInteractiveAppManager.InteractiveAppState int state,
                 @TvInteractiveAppManager.ErrorCode int err) {
@@ -1062,6 +1076,7 @@ public abstract class TvInteractiveAppService extends Service {
          *
          * @see #onCreateBiInteractiveApp(Uri, Bundle)
          */
+        @CallSuper
         public final void notifyBiInteractiveAppCreated(
                 @NonNull Uri biIAppUri, @Nullable String biIAppId) {
             executeOrPostRunnableOnMainThread(new Runnable() {
@@ -1087,6 +1102,7 @@ public abstract class TvInteractiveAppService extends Service {
          * Notifies when the digital teletext app state is changed.
          * @param state the current state.
          */
+        @CallSuper
         public final void notifyTeletextAppStateChanged(
                 @TvInteractiveAppManager.TeletextAppState int state) {
             executeOrPostRunnableOnMainThread(new Runnable() {

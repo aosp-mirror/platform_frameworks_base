@@ -989,7 +989,7 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      * Otherwise, this method might throw an exception or return {@code null}.
      *
      * @param key a String, or {@code null}
-     * @param clazz The type of the items inside the array
+     * @param clazz The type of the items inside the array. This is only verified when unparceling.
      * @return a Parcelable[] value, or {@code null}
      */
     @SuppressLint({"ArrayReturn", "NullableCollection"})
@@ -1053,13 +1053,15 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      * Otherwise, this method might throw an exception or return {@code null}.
      *
      * @param key   a String, or {@code null}
-     * @param clazz The type of the items inside the array list
+     * @param clazz The type of the items inside the array list. This is only verified when
+     *     unparceling.
      * @return an ArrayList<T> value, or {@code null}
      */
     @SuppressLint("NullableCollection")
     @SuppressWarnings("unchecked")
     @Nullable
-    public <T> ArrayList<T> getParcelableArrayList(@Nullable String key, @NonNull Class<T> clazz) {
+    public <T> ArrayList<T> getParcelableArrayList(@Nullable String key,
+            @NonNull Class<? extends T> clazz) {
         // The reason for not using <T extends Parcelable> is because the caller could provide a
         // super class to restrict the children that doesn't implement Parcelable itself while the
         // children do, more details at b/210800751 (same reasoning applies here).
@@ -1102,12 +1104,14 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      * </ul>
      *
      * @param key a String, or null
+     * @param clazz The type of the items inside the sparse array. This is only verified when
+     *     unparceling.
      * @return a SparseArray of T values, or null
      */
     @SuppressWarnings("unchecked")
     @Nullable
     public <T> SparseArray<T> getSparseParcelableArray(@Nullable String key,
-            @NonNull Class<T> clazz) {
+            @NonNull Class<? extends T> clazz) {
         // The reason for not using <T extends Parcelable> is because the caller could provide a
         // super class to restrict the children that doesn't implement Parcelable itself while the
         // children do, more details at b/210800751 (same reasoning applies here).

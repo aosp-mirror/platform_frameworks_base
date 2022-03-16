@@ -16,6 +16,7 @@
 
 package com.android.systemui.dreams.touch;
 
+import android.graphics.Region;
 import android.view.GestureDetector;
 import android.view.InputEvent;
 import android.view.MotionEvent;
@@ -34,6 +35,7 @@ import com.android.systemui.shared.system.InputChannelCompat;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.Executor;
@@ -100,6 +102,10 @@ public class DreamOverlayTouchMonitor {
         });
     }
 
+    private int getSessionCount() {
+        return mActiveTouchSessions.size();
+    }
+
     /**
      * {@link TouchSessionImpl} implements {@link DreamTouchHandler.TouchSession} for
      * {@link DreamOverlayTouchMonitor}. It enables the monitor to access the associated listeners
@@ -144,6 +150,11 @@ public class DreamOverlayTouchMonitor {
         @Override
         public ListenableFuture<DreamTouchHandler.TouchSession> pop() {
             return mTouchMonitor.pop(this);
+        }
+
+        @Override
+        public int getActiveSessionCount() {
+            return mTouchMonitor.getSessionCount();
         }
 
         /**
@@ -229,12 +240,39 @@ public class DreamOverlayTouchMonitor {
         public void onInputEvent(InputEvent ev) {
             // No Active sessions are receiving touches. Create sessions for each listener
             if (mActiveTouchSessions.isEmpty()) {
+                final HashMap<DreamTouchHandler, DreamTouchHandler.TouchSession> sessionMap =
+                        new HashMap<>();
+
                 for (DreamTouchHandler handler : mHandlers) {
+                    final Region initiationRegion = Region.obtain();
+                    handler.getTouchInitiationRegion(initiationRegion);
+
+                    if (!initiationRegion.isEmpty()) {
+                        // Initiation regions require a motion event to determine pointer location
+                        // within the region.
+                        if (!(ev instanceof MotionEvent)) {
+                            continue;
+                        }
+
+                        final MotionEvent motionEvent = (MotionEvent) ev;
+
+                        // If the touch event is outside the region, then ignore.
+                        if (!initiationRegion.contains(Math.round(motionEvent.getX()),
+                                Math.round(motionEvent.getY()))) {
+                            continue;
+                        }
+                    }
+
                     final TouchSessionImpl sessionStack =
                             new TouchSessionImpl(DreamOverlayTouchMonitor.this, null);
                     mActiveTouchSessions.add(sessionStack);
-                    handler.onSessionStart(sessionStack);
+                    sessionMap.put(handler, sessionStack);
                 }
+
+                // Informing handlers of new sessions is delayed until we have all created so the
+                // final session is correct.
+                sessionMap.forEach((dreamTouchHandler, touchSession)
+                        -> dreamTouchHandler.onSessionStart(touchSession));
             }
 
             // Find active sessions and invoke on InputEvent.

@@ -19,6 +19,7 @@ package android {
     field public static final String FORCE_STOP_PACKAGES = "android.permission.FORCE_STOP_PACKAGES";
     field public static final String INSTALL_TEST_ONLY_PACKAGE = "android.permission.INSTALL_TEST_ONLY_PACKAGE";
     field public static final String KEEP_UNINSTALLED_PACKAGES = "android.permission.KEEP_UNINSTALLED_PACKAGES";
+    field public static final String MAKE_UID_VISIBLE = "android.permission.MAKE_UID_VISIBLE";
     field @Deprecated public static final String MANAGE_ACTIVITY_STACKS = "android.permission.MANAGE_ACTIVITY_STACKS";
     field public static final String MANAGE_ACTIVITY_TASKS = "android.permission.MANAGE_ACTIVITY_TASKS";
     field public static final String MANAGE_CRATES = "android.permission.MANAGE_CRATES";
@@ -95,15 +96,14 @@ package android.accessibilityservice {
 package android.animation {
 
   public class ValueAnimator extends android.animation.Animator {
-    method public static float getDurationScale();
-    method public static void setDurationScale(float);
+    method @MainThread public static void setDurationScale(@FloatRange(from=0) float);
   }
 
 }
 
 package android.app {
 
-  @UiContext public class Activity extends android.view.ContextThemeWrapper implements android.content.ComponentCallbacks2 android.view.KeyEvent.Callback android.view.LayoutInflater.Factory2 android.view.OnBackInvokedDispatcherOwner android.view.View.OnCreateContextMenuListener android.view.Window.Callback {
+  @UiContext public class Activity extends android.view.ContextThemeWrapper implements android.content.ComponentCallbacks2 android.view.KeyEvent.Callback android.view.LayoutInflater.Factory2 android.window.OnBackInvokedDispatcherOwner android.view.View.OnCreateContextMenuListener android.view.Window.Callback {
     method public final boolean addDumpable(@NonNull android.util.Dumpable);
     method public void dumpInternal(@NonNull String, @Nullable java.io.FileDescriptor, @NonNull java.io.PrintWriter, @Nullable String[]);
     method public void onMovedToDisplay(int, android.content.res.Configuration);
@@ -154,9 +154,10 @@ package android.app {
   }
 
   public class ActivityOptions {
-    method @NonNull public static android.app.ActivityOptions fromBundle(@NonNull android.os.Bundle);
+    method public boolean isEligibleForLegacyPermissionPrompt();
     method @NonNull public static android.app.ActivityOptions makeCustomAnimation(@NonNull android.content.Context, int, int, int, @Nullable android.os.Handler, @Nullable android.app.ActivityOptions.OnAnimationStartedListener, @Nullable android.app.ActivityOptions.OnAnimationFinishedListener);
     method @NonNull @RequiresPermission(android.Manifest.permission.START_TASKS_FROM_RECENTS) public static android.app.ActivityOptions makeCustomTaskAnimation(@NonNull android.content.Context, int, int, @Nullable android.os.Handler, @Nullable android.app.ActivityOptions.OnAnimationStartedListener, @Nullable android.app.ActivityOptions.OnAnimationFinishedListener);
+    method public void setEligibleForLegacyPermissionPrompt(boolean);
     method public static void setExitTransitionTimeout(long);
     method public void setLaunchActivityType(int);
     method public void setLaunchWindowingMode(int);
@@ -355,14 +356,8 @@ package android.app {
   }
 
   public final class PictureInPictureParams implements android.os.Parcelable {
-    method public java.util.List<android.app.RemoteAction> getActions();
-    method public float getAspectRatio();
-    method @Nullable public android.app.RemoteAction getCloseAction();
-    method public float getExpandedAspectRatio();
-    method public android.graphics.Rect getSourceRectHint();
-    method @Nullable public CharSequence getSubtitle();
-    method @Nullable public CharSequence getTitle();
-    method public boolean isSeamlessResizeEnabled();
+    method public float getAspectRatioFloat();
+    method public float getExpandedAspectRatioFloat();
   }
 
   public final class PictureInPictureUiState implements android.os.Parcelable {
@@ -370,23 +365,25 @@ package android.app {
   }
 
   public class PropertyInvalidatedCache<Query, Result> {
-    ctor public PropertyInvalidatedCache(int, int, @NonNull String, @NonNull String, @NonNull android.app.PropertyInvalidatedCache.QueryHandler<Query,Result>);
-    method @NonNull public static String createPropertyName(int, @NonNull String);
-    method public final void disableForCurrentProcess();
+    ctor public PropertyInvalidatedCache(int, @NonNull String, @NonNull String, @NonNull String, @NonNull android.app.PropertyInvalidatedCache.QueryHandler<Query,Result>);
+    method @NonNull public static String createPropertyName(@NonNull String, @NonNull String);
+    method public void disableForCurrentProcess();
+    method public static void disableForCurrentProcess(@NonNull String);
     method public static void disableForTestMode();
     method public final void disableInstance();
     method public final void disableSystemWide();
     method public final void forgetDisableLocal();
     method public boolean getDisabledState();
-    method public final void invalidateCache();
-    method public static void invalidateCache(int, @NonNull String);
+    method public void invalidateCache();
+    method public static void invalidateCache(@NonNull String, @NonNull String);
     method public final boolean isDisabled();
-    method @Nullable public final Result query(@NonNull Query);
+    method @Nullable public Result query(@NonNull Query);
     method public static void setTestMode(boolean);
     method public void testPropertyName();
-    field public static final int MODULE_BLUETOOTH = 2; // 0x2
-    field public static final int MODULE_SYSTEM = 1; // 0x1
-    field public static final int MODULE_TEST = 0; // 0x0
+    field public static final String MODULE_BLUETOOTH = "bluetooth";
+    field public static final String MODULE_SYSTEM = "system_server";
+    field public static final String MODULE_TELEPHONY = "telephony";
+    field public static final String MODULE_TEST = "test";
   }
 
   public abstract static class PropertyInvalidatedCache.QueryHandler<Q, R> {
@@ -419,9 +416,9 @@ package android.app {
     method @NonNull public android.content.res.Configuration getConfiguration();
     method public int getParentTaskId();
     method @Nullable public android.app.PictureInPictureParams getPictureInPictureParams();
-    method public boolean getPreferDockBigOverlays();
     method @NonNull public android.window.WindowContainerToken getToken();
     method public boolean hasParentTask();
+    method public boolean shouldDockBigOverlays();
   }
 
   public class TimePickerDialog extends android.app.AlertDialog implements android.content.DialogInterface.OnClickListener android.widget.TimePicker.OnTimeChangedListener {
@@ -514,6 +511,7 @@ package android.app.admin {
     method public boolean isCurrentInputMethodSetByOwner();
     method public boolean isFactoryResetProtectionPolicySupported();
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS}) public boolean isNewUserDisclaimerAcknowledged();
+    method public boolean isRemovingAdmin(@NonNull android.content.ComponentName, int);
     method @RequiresPermission(anyOf={android.Manifest.permission.MARK_DEVICE_ORGANIZATION_OWNED, android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS}, conditional=true) public void markProfileOwnerOnOrganizationOwnedDevice(@NonNull android.content.ComponentName);
     method @NonNull public static String operationSafetyReasonToString(int);
     method @NonNull public static String operationToString(int);
@@ -618,7 +616,7 @@ package android.app.blob {
 package android.app.cloudsearch {
 
   public static final class SearchRequest.Builder {
-    method @NonNull public android.app.cloudsearch.SearchRequest.Builder setSource(@NonNull String);
+    method @NonNull public android.app.cloudsearch.SearchRequest.Builder setCallerPackageName(@NonNull String);
   }
 
 }
@@ -826,12 +824,13 @@ package android.content.pm {
     method @NonNull public java.util.List<android.content.pm.ApplicationInfo> getInstalledApplicationsAsUser(@NonNull android.content.pm.PackageManager.ApplicationInfoFlags, int);
     method @Nullable public abstract String[] getNamesForUids(int[]);
     method @NonNull public String getPermissionControllerPackageName();
+    method @NonNull public String getSdkSandboxPackageName();
     method @NonNull public abstract String getServicesSystemSharedLibraryPackageName();
     method @NonNull public abstract String getSharedSystemSharedLibraryPackageName();
-    method @NonNull public String getSupplementalProcessPackageName();
     method @Nullable public String getSystemTextClassifierPackageName();
     method @Nullable public String getWellbeingPackageName();
     method public void holdLock(android.os.IBinder, int);
+    method @RequiresPermission(android.Manifest.permission.MAKE_UID_VISIBLE) public void makeUidVisible(int, int);
     method @RequiresPermission(android.Manifest.permission.KEEP_UNINSTALLED_PACKAGES) public void setKeepUninstalledPackages(@NonNull java.util.List<java.lang.String>);
     field public static final String FEATURE_ADOPTABLE_STORAGE = "android.software.adoptable_storage";
     field public static final String FEATURE_COMMUNAL_MODE = "android.software.communal_mode";
@@ -1073,7 +1072,7 @@ package android.hardware {
     field public static final int DIALOG = 3; // 0x3
     field public static final int OTHER = 5; // 0x5
     field public static final int QS_TILE = 1; // 0x1
-    field public static final int SAFETY_HUB = 6; // 0x6
+    field public static final int SAFETY_CENTER = 6; // 0x6
     field public static final int SETTINGS = 2; // 0x2
     field public static final int SHELL = 4; // 0x4
   }
@@ -1462,6 +1461,7 @@ package android.media {
     method @NonNull @RequiresPermission(android.Manifest.permission.CALL_AUDIO_INTERCEPTION) public android.media.AudioTrack getCallUplinkInjectionAudioTrack(@NonNull android.media.AudioFormat);
     method @Nullable public static android.media.AudioDeviceInfo getDeviceInfoFromType(int);
     method @IntRange(from=0) @RequiresPermission("android.permission.QUERY_AUDIO_STATE") public long getFadeOutDurationOnFocusLossMillis(@NonNull android.media.AudioAttributes);
+    method @Nullable public static String getHalVersion();
     method public static final int[] getPublicStreamTypes();
     method @NonNull public java.util.List<java.lang.Integer> getReportedSurroundFormats();
     method public int getStreamMinVolumeInt(int);
@@ -1722,6 +1722,19 @@ package android.os {
     method @NonNull public static byte[] digest(@NonNull java.io.InputStream, @NonNull String) throws java.io.IOException, java.security.NoSuchAlgorithmException;
   }
 
+  public class IpcDataCache<Query, Result> extends android.app.PropertyInvalidatedCache<Query,Result> {
+    ctor public IpcDataCache(int, @NonNull String, @NonNull String, @NonNull String, @NonNull android.os.IpcDataCache.QueryHandler<Query,Result>);
+    method public static void disableForCurrentProcess(@NonNull String);
+    method public static void invalidateCache(@NonNull String, @NonNull String);
+    field public static final String MODULE_BLUETOOTH = "bluetooth";
+    field public static final String MODULE_SYSTEM = "system_server";
+    field public static final String MODULE_TEST = "test";
+  }
+
+  public abstract static class IpcDataCache.QueryHandler<Q, R> extends android.app.PropertyInvalidatedCache.QueryHandler<Q,R> {
+    ctor public IpcDataCache.QueryHandler();
+  }
+
   public final class MessageQueue {
     method public int postSyncBarrier();
     method public void removeSyncBarrier(int);
@@ -1773,14 +1786,17 @@ package android.os {
   }
 
   public class Process {
+    method public static final int getAppUidForSdkSandboxUid(int);
     method public static final int getThreadScheduler(int) throws java.lang.IllegalArgumentException;
-    method public static final int toSupplementalUid(int);
+    method public static final boolean isSdkSandboxUid(int);
+    method public static final int toSdkSandboxUid(int);
     field public static final int FIRST_APP_ZYGOTE_ISOLATED_UID = 90000; // 0x15f90
     field public static final int FIRST_ISOLATED_UID = 99000; // 0x182b8
     field public static final int LAST_APP_ZYGOTE_ISOLATED_UID = 98999; // 0x182b7
     field public static final int LAST_ISOLATED_UID = 99999; // 0x1869f
     field public static final int NFC_UID = 1027; // 0x403
     field public static final int NUM_UIDS_PER_APP_ZYGOTE = 100; // 0x64
+    field public static final int SDK_SANDBOX_VIRTUAL_UID = 1090; // 0x442
   }
 
   public final class StrictMode {
@@ -2157,6 +2173,7 @@ package android.provider {
     field @Deprecated public static final String NOTIFICATION_BUBBLES = "notification_bubbles";
     field public static final String OVERLAY_DISPLAY_DEVICES = "overlay_display_devices";
     field public static final String SHOW_FIRST_CRASH_DIALOG = "show_first_crash_dialog";
+    field public static final String STYLUS_HANDWRITING_ENABLED = "stylus_handwriting_enabled";
     field public static final String USER_DISABLED_HDR_FORMATS = "user_disabled_hdr_formats";
     field public static final String USER_PREFERRED_REFRESH_RATE = "user_preferred_refresh_rate";
     field public static final String USER_PREFERRED_RESOLUTION_HEIGHT = "user_preferred_resolution_height";
@@ -2829,10 +2846,6 @@ package android.view {
     field public static final int FLAG_IS_ACCESSIBILITY_EVENT = 2048; // 0x800
   }
 
-  public interface OnBackInvokedDispatcher {
-    field public static final long DISPATCH_BACK_INVOCATION_AHEAD_OF_TIME = 195946584L; // 0xbade858L
-  }
-
   @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.RUNTIME) @java.lang.annotation.Target({java.lang.annotation.ElementType.METHOD}) public @interface RemotableViewMethod {
     method public abstract String asyncImpl() default "";
   }
@@ -2874,6 +2887,7 @@ package android.view {
     method public static int getHoverTooltipHideTimeout();
     method public static int getHoverTooltipShowTimeout();
     method public static int getLongPressTooltipHideTimeout();
+    method public int getPreferKeepClearForFocusDelay();
   }
 
   public class ViewDebug {
@@ -3244,6 +3258,10 @@ package android.window {
     field public static final int FEATURE_VENDOR_FIRST = 10001; // 0x2711
     field public static final int FEATURE_WINDOWED_MAGNIFICATION = 4; // 0x4
     field public static final int FEATURE_WINDOW_TOKENS = 2; // 0x2
+  }
+
+  public interface OnBackInvokedDispatcher {
+    field public static final long DISPATCH_BACK_INVOCATION_AHEAD_OF_TIME = 195946584L; // 0xbade858L
   }
 
   public final class SplashScreenView extends android.widget.FrameLayout {

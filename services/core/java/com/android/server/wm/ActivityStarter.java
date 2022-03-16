@@ -1816,7 +1816,8 @@ class ActivityStarter {
         }
 
         if (mTargetRootTask == null) {
-            mTargetRootTask = getLaunchRootTask(mStartActivity, mLaunchFlags, targetTask, mOptions);
+            mTargetRootTask = getOrCreateRootTask(mStartActivity, mLaunchFlags, targetTask,
+                    mOptions);
         }
         if (newTask) {
             final Task taskToAffiliate = (mLaunchTaskBehind && mSourceRecord != null)
@@ -1925,7 +1926,7 @@ class ActivityStarter {
         } else if (mInTask != null) {
             return mInTask;
         } else {
-            final Task rootTask = getLaunchRootTask(mStartActivity, mLaunchFlags, null /* task */,
+            final Task rootTask = getOrCreateRootTask(mStartActivity, mLaunchFlags, null /* task */,
                     mOptions);
             final ActivityRecord top = rootTask.getTopNonFinishingActivity();
             if (top != null) {
@@ -2022,22 +2023,12 @@ class ActivityStarter {
     private boolean canEmbedActivity(@NonNull TaskFragment taskFragment,
             @NonNull ActivityRecord starting, boolean newTask, Task targetTask) {
         final Task hostTask = taskFragment.getTask();
-        if (hostTask == null) {
+        // Not allowed embedding a separate task or without host task.
+        if (hostTask == null || newTask || targetTask != hostTask) {
             return false;
         }
 
-        // Allowing the embedding if the task is owned by system.
-        final int hostUid = hostTask.effectiveUid;
-        if (UserHandle.getAppId(hostUid) == Process.SYSTEM_UID) {
-            return true;
-        }
-
-        if (!taskFragment.isAllowedToEmbedActivity(starting)) {
-            return false;
-        }
-
-        // Not allowed embedding task.
-        return !newTask && (targetTask == null || targetTask == hostTask);
+        return taskFragment.isAllowedToEmbedActivity(starting);
     }
 
     /**
@@ -2233,7 +2224,7 @@ class ActivityStarter {
                 if (targetTask.getRootTask() == null) {
                     // Target root task got cleared when we all activities were removed above.
                     // Go ahead and reset it.
-                    mTargetRootTask = getLaunchRootTask(mStartActivity, mLaunchFlags,
+                    mTargetRootTask = getOrCreateRootTask(mStartActivity, mLaunchFlags,
                         null /* task */, mOptions);
                     mTargetRootTask.addChild(targetTask, !mLaunchTaskBehind /* toTop */,
                             (mStartActivity.info.flags & FLAG_SHOW_FOR_ALL_USERS) != 0);
@@ -2695,10 +2686,11 @@ class ActivityStarter {
                 // launched into the same root task.
                 mTargetRootTask = Task.fromWindowContainerToken(mSourceRecord.mLaunchRootTask);
             } else {
-                final Task launchRootTask =
-                        getLaunchRootTask(mStartActivity, mLaunchFlags, intentTask, mOptions);
+                final Task rootTask =
+                        getOrCreateRootTask(mStartActivity, mLaunchFlags, intentTask, mOptions);
+                // TODO(b/184806710): #getOrCreateRootTask should never return null?
                 mTargetRootTask =
-                        launchRootTask != null ? launchRootTask : intentActivity.getRootTask();
+                        rootTask != null ? rootTask : intentActivity.getRootTask();
             }
         }
 
@@ -2929,7 +2921,7 @@ class ActivityStarter {
         return launchFlags;
     }
 
-    private Task getLaunchRootTask(ActivityRecord r, int launchFlags, Task task,
+    private Task getOrCreateRootTask(ActivityRecord r, int launchFlags, Task task,
             ActivityOptions aOptions) {
         // We are reusing a task, keep the root task!
         if (mReuseTask != null) {
@@ -2938,7 +2930,7 @@ class ActivityStarter {
 
         final boolean onTop =
                 (aOptions == null || !aOptions.getAvoidMoveToFront()) && !mLaunchTaskBehind;
-        return mRootWindowContainer.getLaunchRootTask(r, aOptions, task, mSourceRootTask, onTop,
+        return mRootWindowContainer.getOrCreateRootTask(r, aOptions, task, mSourceRootTask, onTop,
                 mLaunchParams, launchFlags);
     }
 

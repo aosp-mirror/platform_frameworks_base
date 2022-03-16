@@ -2379,6 +2379,40 @@ public class UsageStatsService extends SystemService implements
         }
 
         @Override
+        public int getAppMinStandbyBucket(String packageName, String callingPackage, int userId) {
+            final int callingUid = Binder.getCallingUid();
+            try {
+                userId = ActivityManager.getService().handleIncomingUser(
+                        Binder.getCallingPid(), callingUid, userId, false, false,
+                        "getAppStandbyBucket", null);
+            } catch (RemoteException re) {
+                throw re.rethrowFromSystemServer();
+            }
+            final int packageUid = mPackageManagerInternal.getPackageUid(packageName, 0, userId);
+            // If the calling app is asking about itself, continue, else check for permission.
+            if (packageUid != callingUid) {
+                if (!hasPermission(callingPackage)) {
+                    throw new SecurityException(
+                            "Don't have permission to query min app standby bucket");
+                }
+            }
+            if (packageUid < 0) {
+                throw new IllegalArgumentException(
+                        "Cannot get min standby bucket for non existent package ("
+                                + packageName + ")");
+            }
+            final boolean obfuscateInstantApps = shouldObfuscateInstantAppsForCaller(callingUid,
+                    userId);
+            final long token = Binder.clearCallingIdentity();
+            try {
+                return mAppStandby.getAppMinStandbyBucket(
+                        packageName, UserHandle.getAppId(packageUid), userId, obfuscateInstantApps);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override
         public void setEstimatedLaunchTime(String packageName, long estimatedLaunchTime,
                 int userId) {
             getContext().enforceCallingPermission(

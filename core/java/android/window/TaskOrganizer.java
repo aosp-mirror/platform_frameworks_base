@@ -199,7 +199,7 @@ public class TaskOrganizer extends WindowOrganizer {
         }
     }
 
-    /** Get the root task which contains the current ime target */
+    /** Get the {@link WindowContainerToken} of the task which contains the current ime target */
     @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
     @Nullable
     public WindowContainerToken getImeTarget(int display) {

@@ -98,15 +98,21 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
         default void onTaskInfoChanged(RunningTaskInfo taskInfo) {}
         default void onTaskVanished(RunningTaskInfo taskInfo) {}
         default void onBackPressedOnTaskRoot(RunningTaskInfo taskInfo) {}
-        /** Whether this task listener supports  compat UI. */
+        /** Whether this task listener supports compat UI. */
         default boolean supportCompatUI() {
             // All TaskListeners should support compat UI except PIP.
             return true;
         }
-        /** Attaches the a child window surface to the task surface. */
+        /** Attaches a child window surface to the task surface. */
         default void attachChildSurfaceToTask(int taskId, SurfaceControl.Builder b) {
             throw new IllegalStateException(
                     "This task listener doesn't support child surface attachment.");
+        }
+        /** Reparents a child window surface to the task surface. */
+        default void reparentChildSurfaceToTask(int taskId, SurfaceControl sc,
+                SurfaceControl.Transaction t) {
+            throw new IllegalStateException(
+                    "This task listener doesn't support child surface reparent.");
         }
         default void dump(@NonNull PrintWriter pw, String prefix) {};
     }
@@ -190,8 +196,8 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
     }
 
     @VisibleForTesting
-    ShellTaskOrganizer(ITaskOrganizerController taskOrganizerController, ShellExecutor mainExecutor,
-            Context context, @Nullable CompatUIController compatUI,
+    protected ShellTaskOrganizer(ITaskOrganizerController taskOrganizerController,
+            ShellExecutor mainExecutor, Context context, @Nullable CompatUIController compatUI,
             Optional<RecentTasksController> recentTasks) {
         super(taskOrganizerController, mainExecutor);
         mCompatUI = compatUI;
@@ -618,6 +624,23 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
             return;
         }
         updateCameraCompatControlState(info.getTaskInfo().token, state);
+    }
+
+    /** Reparents a child window surface to the task surface. */
+    public void reparentChildSurfaceToTask(int taskId, SurfaceControl sc,
+            SurfaceControl.Transaction t) {
+        final TaskListener taskListener;
+        synchronized (mLock) {
+            taskListener = mTasks.contains(taskId)
+                    ? getTaskListener(mTasks.get(taskId).getTaskInfo())
+                    : null;
+        }
+        if (taskListener == null) {
+            ProtoLog.w(WM_SHELL_TASK_ORG, "Failed to find Task to reparent surface taskId=%d",
+                    taskId);
+            return;
+        }
+        taskListener.reparentChildSurfaceToTask(taskId, sc, t);
     }
 
     private void logSizeCompatRestartButtonEventReported(@NonNull TaskAppearedInfo info,

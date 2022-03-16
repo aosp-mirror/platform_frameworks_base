@@ -640,7 +640,7 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
                 Slog.e(TAG, "unknown state " + state);
                 return;
             }
-            removeMessages(MSG_UPDATE_STATE);
+            if (configured == 0) removeMessages(MSG_UPDATE_STATE);
             if (connected == 1) removeMessages(MSG_FUNCTION_SWITCH_TIMEOUT);
             Message msg = Message.obtain(this, MSG_UPDATE_STATE);
             msg.arg1 = connected;
@@ -2187,7 +2187,7 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
      * @param uid Uid of the caller
      */
     public ParcelFileDescriptor openAccessory(UsbAccessory accessory,
-            UsbUserPermissionManager permissions, int uid) {
+            UsbUserPermissionManager permissions, int pid, int uid) {
         UsbAccessory currentAccessory = mHandler.getCurrentAccessory();
         if (currentAccessory == null) {
             throw new IllegalArgumentException("no accessory attached");
@@ -2198,7 +2198,7 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
                     + currentAccessory;
             throw new IllegalArgumentException(error);
         }
-        permissions.checkPermission(accessory, uid);
+        permissions.checkPermission(accessory, pid, uid);
         return nativeOpenAccessory();
     }
 

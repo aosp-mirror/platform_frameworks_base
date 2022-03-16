@@ -22,9 +22,10 @@ import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * A parcelable representing a nearby device that can be used for media transfer.
@@ -35,6 +36,7 @@ import java.lang.annotation.RetentionPolicy;
  *   <li>a range zone specifying how far away this device is from the device with the media route.
  *   </li>
  * </ul>
+ *
  * @hide
  */
 @SystemApi
@@ -69,7 +71,7 @@ public final class NearbyDevice implements Parcelable {
      *
      * @hide
      */
-    @IntDef(prefix = { "RANGE_" }, value = {
+    @IntDef(prefix = {"RANGE_"}, value = {
             RANGE_UNKNOWN,
             RANGE_FAR,
             RANGE_LONG,
@@ -77,10 +79,13 @@ public final class NearbyDevice implements Parcelable {
             RANGE_WITHIN_REACH
     })
     @Retention(RetentionPolicy.SOURCE)
-    public @interface RangeZone {}
+    public @interface RangeZone {
+    }
 
     /**
      * Gets a human-readable string of the range zone.
+     *
+     * @hide
      */
     @NonNull
     public static String rangeZoneToString(@RangeZone int rangeZone) {
@@ -100,16 +105,26 @@ public final class NearbyDevice implements Parcelable {
         }
     }
 
-    @NonNull private final String mMediaRoute2Id;
-    @RangeZone private final int mRangeZone;
+    /**
+     * A list stores all the range and list from far to close, used for range comparison.
+     */
+    private static final List<Integer> RANGE_WEIGHT_LIST =
+            Arrays.asList(RANGE_UNKNOWN,
+                    RANGE_FAR, RANGE_LONG, RANGE_CLOSE, RANGE_WITHIN_REACH);
 
-    public NearbyDevice(@NonNull String mediaRoute2Id, int rangeZone) {
+    @NonNull
+    private final String mMediaRoute2Id;
+    @RangeZone
+    private final int mRangeZone;
+
+    /** Creates a device object with the given ID and range zone. */
+    public NearbyDevice(@NonNull String mediaRoute2Id, @RangeZone int rangeZone) {
         mMediaRoute2Id = mediaRoute2Id;
         mRangeZone = rangeZone;
     }
 
     private NearbyDevice(@NonNull Parcel in) {
-        mMediaRoute2Id = in.readString();
+        mMediaRoute2Id = in.readString8();
         mRangeZone = in.readInt();
     }
 
@@ -125,6 +140,22 @@ public final class NearbyDevice implements Parcelable {
             return new NearbyDevice[size];
         }
     };
+
+    /**
+     * Compares two ranges and return result.
+     *
+     * @return 0 means two ranges are the same, -1 means first range is closer, 1 means farther
+     *
+     * @hide
+     */
+    public static int compareRangeZones(@RangeZone int rangeZone, @RangeZone int anotherRangeZone) {
+        if (rangeZone == anotherRangeZone) {
+            return 0;
+        } else {
+            return RANGE_WEIGHT_LIST.indexOf(rangeZone) > RANGE_WEIGHT_LIST.indexOf(
+                    anotherRangeZone) ? -1 : 1;
+        }
+    }
 
     @Override
     public int describeContents() {

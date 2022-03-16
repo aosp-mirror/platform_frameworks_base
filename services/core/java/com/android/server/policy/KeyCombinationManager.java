@@ -48,7 +48,7 @@ public class KeyCombinationManager {
     // The rule has been triggered by current keys.
     @GuardedBy("mLock")
     private TwoKeysCombinationRule mTriggeredRule;
-    private final Handler mHandler = new Handler();
+    private final Handler mHandler;
 
     // Keys in a key combination must be pressed within this interval of each other.
     private static final long COMBINE_KEY_DELAY_MILLIS = 150;
@@ -93,6 +93,11 @@ public class KeyCombinationManager {
             return false;
         }
 
+        // The excessive delay before it dispatching to client.
+        long getKeyInterceptDelayMs() {
+            return COMBINE_KEY_DELAY_MILLIS;
+        }
+
         abstract void execute();
         abstract void cancel();
 
@@ -103,7 +108,8 @@ public class KeyCombinationManager {
         }
     }
 
-    public KeyCombinationManager() {
+    public KeyCombinationManager(Handler handler) {
+        mHandler = handler;
     }
 
     void addRule(TwoKeysCombinationRule rule) {
@@ -195,10 +201,18 @@ public class KeyCombinationManager {
      */
     long getKeyInterceptTimeout(int keyCode) {
         synchronized (mLock) {
-            if (forAllActiveRules((rule) -> rule.shouldInterceptKey(keyCode))) {
-                return mDownTimes.get(keyCode) + COMBINE_KEY_DELAY_MILLIS;
+            if (mDownTimes.get(keyCode) == 0) {
+                return 0;
             }
-            return 0;
+            long delayMs = 0;
+            for (final TwoKeysCombinationRule rule : mActiveRules) {
+                if (rule.shouldInterceptKey(keyCode)) {
+                    delayMs = Math.max(delayMs, rule.getKeyInterceptDelayMs());
+                }
+            }
+            // Make sure the delay is less than COMBINE_KEY_DELAY_MILLIS.
+            delayMs = Math.min(delayMs, COMBINE_KEY_DELAY_MILLIS);
+            return mDownTimes.get(keyCode) + delayMs;
         }
     }
 

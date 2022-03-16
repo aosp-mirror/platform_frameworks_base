@@ -124,6 +124,7 @@ public class UdfpsKeyguardViewControllerTest extends SysuiTestCase {
         when(mView.getContext()).thenReturn(mResourceContext);
         when(mResourceContext.getString(anyInt())).thenReturn("test string");
         when(mKeyguardViewMediator.isAnimatingScreenOff()).thenReturn(false);
+        when(mView.getDialogSuggestedAlpha()).thenReturn(1f);
         mController = new UdfpsKeyguardViewController(
                 mView,
                 mStatusBarStateController,
@@ -144,7 +145,7 @@ public class UdfpsKeyguardViewControllerTest extends SysuiTestCase {
     @Test
     public void testRegistersExpansionChangedListenerOnAttached() {
         mController.onViewAttached();
-        captureExpansionListeners();
+        captureStatusBarExpansionListeners();
     }
 
     @Test
@@ -173,7 +174,7 @@ public class UdfpsKeyguardViewControllerTest extends SysuiTestCase {
     public void testListenersUnregisteredOnDetached() {
         mController.onViewAttached();
         captureStatusBarStateListeners();
-        captureExpansionListeners();
+        captureStatusBarExpansionListeners();
         captureKeyguardStateControllerCallback();
         mController.onViewDetached();
 
@@ -200,10 +201,41 @@ public class UdfpsKeyguardViewControllerTest extends SysuiTestCase {
     public void testShouldPauseAuthBouncerShowing() {
         mController.onViewAttached();
         captureStatusBarStateListeners();
-
         sendStatusBarStateChanged(StatusBarState.KEYGUARD);
 
-        assertFalse(mController.shouldPauseAuth());
+        captureAltAuthInterceptor();
+        when(mStatusBarKeyguardViewManager.isBouncerShowing()).thenReturn(true);
+        mAltAuthInterceptor.onBouncerVisibilityChanged();
+
+        assertTrue(mController.shouldPauseAuth());
+    }
+
+    @Test
+    public void testShouldPauseAuthDialogSuggestedAlpha0() {
+        mController.onViewAttached();
+        captureStatusBarStateListeners();
+
+        when(mView.getDialogSuggestedAlpha()).thenReturn(0f);
+        sendStatusBarStateChanged(StatusBarState.KEYGUARD);
+
+        assertTrue(mController.shouldPauseAuth());
+    }
+
+    @Test
+    public void testFadeFromDialogSuggestedAlpha() {
+        // GIVEN view is attached and status bar expansion is 1f
+        mController.onViewAttached();
+        captureStatusBarStateListeners();
+        captureStatusBarExpansionListeners();
+        updateStatusBarExpansion(1f, true);
+        reset(mView);
+
+        // WHEN dialog suggested alpha is .6f
+        when(mView.getDialogSuggestedAlpha()).thenReturn(.6f);
+        sendStatusBarStateChanged(StatusBarState.KEYGUARD);
+
+        // THEN alpha is updated based on dialog suggested alpha
+        verify(mView).setUnpausedAlpha((int) (.6f * 255));
     }
 
     @Test
@@ -367,7 +399,7 @@ public class UdfpsKeyguardViewControllerTest extends SysuiTestCase {
     public void testFadeInWithStatusBarExpansion() {
         // GIVEN view is attached
         mController.onViewAttached();
-        captureExpansionListeners();
+        captureStatusBarExpansionListeners();
         captureKeyguardStateControllerCallback();
         reset(mView);
 
@@ -382,7 +414,7 @@ public class UdfpsKeyguardViewControllerTest extends SysuiTestCase {
     public void testShowUdfpsBouncer() {
         // GIVEN view is attached and status bar expansion is 0
         mController.onViewAttached();
-        captureExpansionListeners();
+        captureStatusBarExpansionListeners();
         captureKeyguardStateControllerCallback();
         captureAltAuthInterceptor();
         updateStatusBarExpansion(0, true);
@@ -401,9 +433,10 @@ public class UdfpsKeyguardViewControllerTest extends SysuiTestCase {
     public void testTransitionToFullShadeProgress() {
         // GIVEN view is attached and status bar expansion is 1f
         mController.onViewAttached();
-        captureExpansionListeners();
+        captureStatusBarExpansionListeners();
         updateStatusBarExpansion(1f, true);
         reset(mView);
+        when(mView.getDialogSuggestedAlpha()).thenReturn(1f);
 
         // WHEN we're transitioning to the full shade
         float transitionProgress = .6f;
@@ -417,7 +450,7 @@ public class UdfpsKeyguardViewControllerTest extends SysuiTestCase {
     public void testShowUdfpsBouncer_transitionToFullShadeProgress() {
         // GIVEN view is attached and status bar expansion is 1f
         mController.onViewAttached();
-        captureExpansionListeners();
+        captureStatusBarExpansionListeners();
         captureKeyguardStateControllerCallback();
         captureAltAuthInterceptor();
         updateStatusBarExpansion(1f, true);
@@ -440,7 +473,7 @@ public class UdfpsKeyguardViewControllerTest extends SysuiTestCase {
         mStatusBarStateListener = mStateListenerCaptor.getValue();
     }
 
-    private void captureExpansionListeners() {
+    private void captureStatusBarExpansionListeners() {
         verify(mPanelExpansionStateManager, times(2))
                 .addExpansionListener(mExpansionListenerCaptor.capture());
         // first (index=0) is from super class, UdfpsAnimationViewController.
@@ -459,8 +492,6 @@ public class UdfpsKeyguardViewControllerTest extends SysuiTestCase {
                 mAltAuthInterceptorCaptor.capture());
         mAltAuthInterceptor = mAltAuthInterceptorCaptor.getValue();
     }
-
-
 
     private void captureKeyguardStateControllerCallback() {
         verify(mKeyguardStateController).addCallback(

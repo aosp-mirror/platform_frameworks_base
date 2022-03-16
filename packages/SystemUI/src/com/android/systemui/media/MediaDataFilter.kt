@@ -21,6 +21,7 @@ import android.os.SystemProperties
 import android.util.Log
 import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.broadcast.BroadcastDispatcher
+import com.android.systemui.broadcast.BroadcastSender
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.settings.CurrentUserTracker
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
@@ -56,6 +57,7 @@ internal val SMARTSPACE_MAX_AGE = SystemProperties
 class MediaDataFilter @Inject constructor(
     private val context: Context,
     private val broadcastDispatcher: BroadcastDispatcher,
+    private val broadcastSender: BroadcastSender,
     private val lockscreenUserManager: NotificationLockscreenUserManager,
     @Main private val executor: Executor,
     private val systemClock: SystemClock
@@ -249,7 +251,7 @@ class MediaDataFilter @Inject constructor(
                 // Dismiss the card Smartspace data through Smartspace trampoline activity.
                 context.startActivity(dismissIntent)
             } else {
-                context.sendBroadcast(dismissIntent)
+                broadcastSender.sendBroadcast(dismissIntent)
             }
             smartspaceMediaData = EMPTY_SMARTSPACE_MEDIA_DATA.copy(
                 targetId = smartspaceMediaData.targetId, isValid = smartspaceMediaData.isValid)

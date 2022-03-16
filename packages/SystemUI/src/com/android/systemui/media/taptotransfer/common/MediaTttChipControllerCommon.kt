@@ -19,15 +19,20 @@ package com.android.systemui.media.taptotransfer.common
 import android.annotation.LayoutRes
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.pm.PackageManager
 import android.graphics.PixelFormat
+import android.graphics.drawable.Drawable
+import android.os.PowerManager
+import android.os.SystemClock
+import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
-import androidx.annotation.VisibleForTesting
 import com.android.internal.widget.CachingIconView
+import com.android.settingslib.Utils
 import com.android.systemui.R
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.statusbar.gesture.TapGestureDetector
@@ -40,13 +45,18 @@ import com.android.systemui.util.view.ViewUtil
  *
  * Subclasses need to override and implement [updateChipView], which is where they can control what
  * gets displayed to the user.
+ *
+ * The generic type T is expected to contain all the information necessary for the subclasses to
+ * display the chip in a certain state, since they receive <T> in [updateChipView].
  */
-abstract class MediaTttChipControllerCommon<T : MediaTttChipState>(
+abstract class MediaTttChipControllerCommon<T : ChipInfoCommon>(
     internal val context: Context,
+    internal val logger: MediaTttLogger,
     private val windowManager: WindowManager,
     private val viewUtil: ViewUtil,
     @Main private val mainExecutor: DelayableExecutor,
     private val tapGestureDetector: TapGestureDetector,
+    private val powerManager: PowerManager,
     @LayoutRes private val chipLayoutRes: Int
 ) {
     /** The window layout parameters we'll use when attaching the view to a window. */
@@ -63,10 +73,10 @@ abstract class MediaTttChipControllerCommon<T : MediaTttChipState>(
     }
 
     /** The chip view currently being displayed. Null if the chip is not being displayed. */
-    var chipView: ViewGroup? = null
+    private var chipView: ViewGroup? = null
 
     /** A [Runnable] that, when run, will cancel the pending timeout of the chip. */
-    var cancelChipViewTimeout: Runnable? = null
+    private var cancelChipViewTimeout: Runnable? = null
 
     /**
      * Displays the chip with the current state.
@@ -74,7 +84,7 @@ abstract class MediaTttChipControllerCommon<T : MediaTttChipState>(
      * This method handles inflating and attaching the view, then delegates to [updateChipView] to
      * display the correct information in the chip.
      */
-    fun displayChip(chipState: T) {
+    fun displayChip(chipInfo: T) {
         val oldChipView = chipView
         if (chipView == null) {
             chipView = LayoutInflater
@@ -83,52 +93,94 @@ abstract class MediaTttChipControllerCommon<T : MediaTttChipState>(
         }
         val currentChipView = chipView!!
 
-        updateChipView(chipState, currentChipView)
+        updateChipView(chipInfo, currentChipView)
 
         // Add view if necessary
         if (oldChipView == null) {
             tapGestureDetector.addOnGestureDetectedCallback(TAG, this::onScreenTapped)
             windowManager.addView(chipView, windowLayoutParams)
+            // Wake the screen so the user will see the chip
+            powerManager.wakeUp(
+                SystemClock.uptimeMillis(),
+                PowerManager.WAKE_REASON_APPLICATION,
+                "com.android.systemui:media_tap_to_transfer_activated"
+            )
         }
 
         // Cancel and re-set the chip timeout each time we get a new state.
         cancelChipViewTimeout?.run()
-        cancelChipViewTimeout = mainExecutor.executeDelayed(this::removeChip, TIMEOUT_MILLIS)
-    }
-
-    /** Hides the chip. */
-    fun removeChip() {
-        // TODO(b/203800347): We may not want to hide the chip if we're currently in a
-        //  TransferTriggered state: Once the user has initiated the transfer, they should be able
-        //  to move away from the receiver device but still see the status of the transfer.
-        if (chipView == null) { return }
-        tapGestureDetector.removeOnGestureDetectedCallback(TAG)
-        windowManager.removeView(chipView)
-        chipView = null
+        cancelChipViewTimeout = mainExecutor.executeDelayed(
+            { removeChip(MediaTttRemovalReason.REASON_TIMEOUT) },
+            chipInfo.getTimeoutMs()
+        )
     }
 
     /**
-     * A method implemented by subclasses to update [currentChipView] based on [chipState].
+     * Hides the chip.
+     *
+     * @param removalReason a short string describing why the chip was removed (timeout, state
+     *     change, etc.)
      */
-    abstract fun updateChipView(chipState: T, currentChipView: ViewGroup)
+    open fun removeChip(removalReason: String) {
+        if (chipView == null) { return }
+        logger.logChipRemoval(removalReason)
+        tapGestureDetector.removeOnGestureDetectedCallback(TAG)
+        windowManager.removeView(chipView)
+        chipView = null
+        // No need to time the chip out since it's already gone
+        cancelChipViewTimeout?.run()
+    }
+
+    /**
+     * A method implemented by subclasses to update [currentChipView] based on [chipInfo].
+     */
+    abstract fun updateChipView(chipInfo: T, currentChipView: ViewGroup)
 
     /**
      * An internal method to set the icon on the view.
      *
      * This is in the common superclass since both the sender and the receiver show an icon.
+     *
+     * @param appPackageName the package name of the app playing the media. Will be used to fetch
+     *   the app icon and app name if overrides aren't provided.
      */
-    internal fun setIcon(chipState: T, currentChipView: ViewGroup) {
+    internal fun setIcon(
+        currentChipView: ViewGroup,
+        appPackageName: String?,
+        appIconDrawableOverride: Drawable? = null,
+        appNameOverride: CharSequence? = null,
+    ) {
         val appIconView = currentChipView.requireViewById<CachingIconView>(R.id.app_icon)
-        appIconView.contentDescription = chipState.getAppName(context)
+        val appInfo = getAppInfo(appPackageName)
+        appIconView.contentDescription = appNameOverride ?: appInfo.appName
+        appIconView.setImageDrawable(appIconDrawableOverride ?: appInfo.appIcon)
+    }
 
-        val appIcon = chipState.getAppIcon(context)
-        val visibility = if (appIcon != null) {
-            View.VISIBLE
-        } else {
-            View.GONE
+    /**
+     * Returns the app name and icon of the app playing media, or a default name and icon if we
+     * can't find the app name/icon.
+     */
+    private fun getAppInfo(appPackageName: String?): AppInfo {
+        if (appPackageName != null) {
+            try {
+                return AppInfo(
+                    appName = context.packageManager.getApplicationInfo(
+                        appPackageName, PackageManager.ApplicationInfoFlags.of(0)
+                    ).loadLabel(context.packageManager).toString(),
+                    appIcon = context.packageManager.getApplicationIcon(appPackageName)
+                )
+            } catch (e: PackageManager.NameNotFoundException) {
+                Log.w(TAG, "Cannot find package $appPackageName", e)
+            }
         }
-        appIconView.setImageDrawable(appIcon)
-        appIconView.visibility = visibility
+        return AppInfo(
+            appName = context.getString(R.string.media_output_dialog_unknown_launch_app_name),
+            appIcon = context.resources.getDrawable(R.drawable.ic_cast).apply {
+                this.setTint(
+                    Utils.getColorAttrDefaultColor(context, android.R.attr.textColorPrimary)
+                )
+            }
+        )
     }
 
     private fun onScreenTapped(e: MotionEvent) {
@@ -136,7 +188,7 @@ abstract class MediaTttChipControllerCommon<T : MediaTttChipState>(
         // If the tap is within the chip bounds, we shouldn't hide the chip (in case users think the
         // chip is tappable).
         if (!viewUtil.touchIsWithinView(view, e.x, e.y)) {
-            removeChip()
+            removeChip(MediaTttRemovalReason.REASON_SCREEN_TAP)
         }
     }
 }
@@ -145,5 +197,13 @@ abstract class MediaTttChipControllerCommon<T : MediaTttChipState>(
 // UpdateMediaTapToTransferReceiverDisplayTest
 private const val WINDOW_TITLE = "Media Transfer Chip View"
 private val TAG = MediaTttChipControllerCommon::class.simpleName!!
-@VisibleForTesting
-const val TIMEOUT_MILLIS = 3000L
+
+object MediaTttRemovalReason {
+    const val REASON_TIMEOUT = "TIMEOUT"
+    const val REASON_SCREEN_TAP = "SCREEN_TAP"
+}
+
+private data class AppInfo(
+    val appName: String,
+    val appIcon: Drawable
+)

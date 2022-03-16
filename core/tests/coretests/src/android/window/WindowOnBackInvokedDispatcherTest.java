@@ -27,8 +27,6 @@ import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 import android.view.IWindow;
 import android.view.IWindowSession;
-import android.view.OnBackInvokedCallback;
-import android.view.OnBackInvokedDispatcher;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;

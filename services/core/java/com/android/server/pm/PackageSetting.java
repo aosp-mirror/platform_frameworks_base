@@ -477,6 +477,7 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
 
     public void setSharedUserAppId(int sharedUserAppId) {
         mSharedUserAppId = sharedUserAppId;
+        onChanged();
     }
 
     @Override

@@ -21,6 +21,7 @@ import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.PointF
+import android.hardware.biometrics.BiometricFingerprintConstants
 import android.hardware.biometrics.BiometricSourceType
 import android.util.DisplayMetrics
 import android.util.Log
@@ -39,9 +40,9 @@ import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.commandline.Command
 import com.android.systemui.statusbar.commandline.CommandRegistry
 import com.android.systemui.statusbar.phone.BiometricUnlockController
+import com.android.systemui.statusbar.phone.CentralSurfaces
 import com.android.systemui.statusbar.phone.KeyguardBypassController
-import com.android.systemui.statusbar.phone.StatusBar
-import com.android.systemui.statusbar.phone.dagger.StatusBarComponent.StatusBarScope
+import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent.CentralSurfacesScope
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.ViewController
@@ -54,9 +55,9 @@ import javax.inject.Provider
  * Controls the ripple effect that shows when authentication is successful.
  * The ripple uses the accent color of the current theme.
  */
-@StatusBarScope
+@CentralSurfacesScope
 class AuthRippleController @Inject constructor(
-    private val statusBar: StatusBar,
+    private val centralSurfaces: CentralSurfaces,
     private val sysuiContext: Context,
     private val authController: AuthController,
     private val configurationController: ConfigurationController,
@@ -137,7 +138,7 @@ class AuthRippleController @Inject constructor(
 
     private fun showUnlockedRipple() {
         notificationShadeWindowController.setForcePluginOpen(true, this)
-        val lightRevealScrim = statusBar.lightRevealScrim
+        val lightRevealScrim = centralSurfaces.lightRevealScrim
         if (statusBarStateController.isDozing || biometricUnlockController.isWakeAndUnlock) {
             circleReveal?.let {
                 lightRevealScrim?.revealEffect = it
@@ -155,7 +156,7 @@ class AuthRippleController @Inject constructor(
 
     override fun onKeyguardFadingAwayChanged() {
         if (keyguardStateController.isKeyguardFadingAway) {
-            val lightRevealScrim = statusBar.lightRevealScrim
+            val lightRevealScrim = centralSurfaces.lightRevealScrim
             if (startLightRevealScrimOnKeyguardFadingAway && lightRevealScrim != null) {
                 ValueAnimator.ofFloat(.1f, 1f).apply {
                     interpolator = Interpolators.LINEAR_OUT_SLOW_IN
@@ -170,7 +171,7 @@ class AuthRippleController @Inject constructor(
                     }
                     addListener(object : AnimatorListenerAdapter() {
                         override fun onAnimationEnd(animation: Animator?) {
-                            // Reset light reveal scrim to the default, so the StatusBar
+                            // Reset light reveal scrim to the default, so the CentralSurfaces
                             // can handle any subsequent light reveal changes
                             // (ie: from dozing changes)
                             if (lightRevealScrim.revealEffect == circleReveal) {
@@ -199,8 +200,8 @@ class AuthRippleController @Inject constructor(
                 it.y,
                 0f,
                 Math.max(
-                    Math.max(it.x, statusBar.displayWidth - it.x),
-                    Math.max(it.y, statusBar.displayHeight - it.y)
+                    Math.max(it.x, centralSurfaces.displayWidth - it.x),
+                    Math.max(it.y, centralSurfaces.displayHeight - it.y)
                 )
             )
         }
@@ -256,6 +257,16 @@ class AuthRippleController @Inject constructor(
 
         override fun onBiometricAuthFailed(biometricSourceType: BiometricSourceType?) {
             mView.retractRipple()
+        }
+
+        override fun onBiometricAcquired(
+            biometricSourceType: BiometricSourceType?,
+            acquireInfo: Int
+        ) {
+            if (biometricSourceType == BiometricSourceType.FINGERPRINT &&
+                    acquireInfo == BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_PARTIAL) {
+                mView.retractRipple()
+            }
         }
     }
 

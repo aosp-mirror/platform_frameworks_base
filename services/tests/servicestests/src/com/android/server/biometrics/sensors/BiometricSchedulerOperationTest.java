@@ -40,12 +40,14 @@ import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.log.BiometricLogger;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 @Presubmit
 @RunWith(AndroidTestingRunner.class)
@@ -62,6 +64,9 @@ public class BiometricSchedulerOperationTest {
         }
     }
 
+    @Rule
+    public final MockitoRule mockito = MockitoJUnit.rule();
+
     @Mock
     private InterruptableMonitor<FakeHal> mClientMonitor;
     @Mock
@@ -76,7 +81,6 @@ public class BiometricSchedulerOperationTest {
 
     @Before
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
         mHandler = new Handler(TestableLooper.get(this).getLooper());
         mOperation = new BiometricSchedulerOperation(mClientMonitor, mClientCallback);
     }
@@ -311,10 +315,12 @@ public class BiometricSchedulerOperationTest {
     private void cancelWatchdog(boolean start) {
         when(mClientMonitor.getFreshDaemon()).thenReturn(mHal);
 
-        mOperation.start(mock(ClientMonitorCallback.class));
+        final ClientMonitorCallback opStartCallback = mock(ClientMonitorCallback.class);
+        mOperation.start(opStartCallback);
         if (start) {
             verify(mClientMonitor).start(mStartCallback.capture());
             mStartCallback.getValue().onClientStarted(mClientMonitor);
+            verify(opStartCallback).onClientStarted(eq(mClientMonitor));
         }
         mOperation.cancel(mHandler, mock(ClientMonitorCallback.class));
 
@@ -325,6 +331,7 @@ public class BiometricSchedulerOperationTest {
 
         assertThat(mOperation.isFinished()).isTrue();
         assertThat(mOperation.isCanceling()).isFalse();
+        verify(opStartCallback).onClientFinished(eq(mClientMonitor), eq(false));
         verify(mClientMonitor).destroy();
     }
 }

@@ -292,6 +292,18 @@ class MediaHierarchyManager @Inject constructor(
     }
 
     /**
+     * Returns the amount of translationY of the media container, during the current guided
+     * transformation, if running. If there is no guided transformation running, it will return 0.
+     */
+    fun getGuidedTransformationTranslationY(): Int {
+        if (!isCurrentlyInGuidedTransformation()) {
+            return -1
+        }
+        val startHost = getHost(previousLocation) ?: return 0
+        return targetBounds.top - startHost.currentBounds.top
+    }
+
+    /**
      * Is the shade currently collapsing from the expanded qs? If we're on the lockscreen and in qs,
      * we wouldn't want to transition in that case.
      */
@@ -741,10 +753,11 @@ class MediaHierarchyManager @Inject constructor(
      * Updates the bounds that the view wants to be in at the end of the animation.
      */
     private fun updateTargetState() {
-        if (isCurrentlyInGuidedTransformation() && !isCurrentlyFading()) {
+        var starthost = getHost(previousLocation)
+        var endHost = getHost(desiredLocation)
+        if (isCurrentlyInGuidedTransformation() && !isCurrentlyFading() && starthost != null &&
+            endHost != null) {
             val progress = getTransformationProgress()
-            var endHost = getHost(desiredLocation)!!
-            var starthost = getHost(previousLocation)!!
             // If either of the hosts are invisible, let's keep them at the other host location to
             // have a nicer disappear animation. Otherwise the currentBounds of the state might
             // be undefined
@@ -756,8 +769,8 @@ class MediaHierarchyManager @Inject constructor(
             val newBounds = endHost.currentBounds
             val previousBounds = starthost.currentBounds
             targetBounds = interpolateBounds(previousBounds, newBounds, progress)
-        } else {
-            val bounds = getHost(desiredLocation)?.currentBounds ?: return
+        } else if (endHost != null) {
+            val bounds = endHost.currentBounds
             targetBounds.set(bounds)
         }
     }

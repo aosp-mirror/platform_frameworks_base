@@ -35,6 +35,7 @@ import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.media.MediaRoute2Info;
 import android.media.MediaRouter2Manager;
+import android.media.NearbyDevice;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -77,6 +78,8 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
 
     private int mConnectedRecord;
     private int mState;
+    @NearbyDevice.RangeZone
+    private int mRangeZone = NearbyDevice.RANGE_UNKNOWN;
 
     protected final Context mContext;
     protected final MediaRoute2Info mRouteInfo;
@@ -134,6 +137,14 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
         ConnectionRecordManager.getInstance().fetchLastSelectedDevice(mContext);
         mConnectedRecord = ConnectionRecordManager.getInstance().fetchConnectionRecord(mContext,
                 getId());
+    }
+
+    public @NearbyDevice.RangeZone int getRangeZone() {
+        return mRangeZone;
+    }
+
+    public void setRangeZone(@NearbyDevice.RangeZone int rangeZone) {
+        mRangeZone = rangeZone;
     }
 
     /**
@@ -317,6 +328,11 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
             } else {
                 return 1;
             }
+        }
+
+        // Both devices have same connection status, compare the range zone
+        if (NearbyDevice.compareRangeZones(getRangeZone(), another.getRangeZone()) != 0) {
+            return NearbyDevice.compareRangeZones(getRangeZone(), another.getRangeZone());
         }
 
         if (mType == another.mType) {

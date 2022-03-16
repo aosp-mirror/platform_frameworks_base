@@ -25,7 +25,7 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.Dumpable;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.statusbar.dagger.StatusBarModule;
+import com.android.systemui.statusbar.dagger.CentralSurfacesModule;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
 
@@ -45,7 +45,7 @@ public class SmartReplyController implements Dumpable {
     private Callback mCallback;
 
     /**
-     * Injected constructor. See {@link StatusBarModule}.
+     * Injected constructor. See {@link CentralSurfacesModule}.
      */
     public SmartReplyController(
             DumpManager dumpManager,

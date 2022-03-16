@@ -46,9 +46,11 @@ import android.annotation.IntRange;
 import android.annotation.LayoutRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.Size;
 import android.annotation.StyleRes;
 import android.annotation.SuppressLint;
+import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.annotation.UiContext;
 import android.annotation.UiThread;
@@ -4744,6 +4746,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          */
         private List<Rect> mSystemGestureExclusionRects = null;
         private List<Rect> mKeepClearRects = null;
+        private List<Rect> mUnrestrictedKeepClearRects = null;
         private boolean mPreferKeepClear = false;
         private Rect mHandwritingArea = null;
 
@@ -4765,6 +4768,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     @UnsupportedAppUsage
     ListenerInfo mListenerInfo;
+
+    private boolean mPreferKeepClearForFocus;
+    private Runnable mMarkPreferKeepClearForFocus;
 
     private static class TooltipInfo {
         /**
@@ -8168,6 +8174,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
 
         notifyEnterOrExitForAutoFillIfNeeded(gainFocus);
+        updatePreferKeepClearForFocus();
     }
 
     /**
@@ -11729,6 +11736,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         final ListenerInfo info = getListenerInfo();
         if (getSystemGestureExclusionRects().isEmpty()
                 && collectPreferKeepClearRects().isEmpty()
+                && collectUnrestrictedPreferKeepClearRects().isEmpty()
                 && (info.mHandwritingArea == null || !isAutoHandwritingEnabled())) {
             if (info.mPositionUpdateListener != null) {
                 mRenderNode.removePositionUpdateListener(info.mPositionUpdateListener);
@@ -11803,8 +11811,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * <p>
      * The system will try to respect this preference, but when not possible will ignore it.
      * <p>
-     * Note: while this is set to {@code true}, the system will ignore the {@code Rect}s provided
-     * through {@link #setPreferKeepClearRects} (but not clear them).
+     * Note: This is independent from {@link #setPreferKeepClearRects}. If both are set, both will
+     * be taken into account.
      * <p>
      * @see #setPreferKeepClearRects
      * @see #isPreferKeepClear
@@ -11838,8 +11846,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * <p>
      * The system will try to respect this preference, but when not possible will ignore it.
      * <p>
-     * Note: While {@link #isPreferKeepClear} is {@code true}, the {@code Rect}s set here are
-     * ignored.
+     * Note: This is independent from {@link #setPreferKeepClear}. If both are set, both will be
+     * taken into account.
      * <p>
      * @see #setPreferKeepClear
      * @see #getPreferKeepClearRects
@@ -11871,6 +11879,52 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         return Collections.emptyList();
     }
 
+    /**
+     * Set a preference to keep the provided rects clear from floating windows above this
+     * view's window. This informs the system that these rects are considered vital areas for the
+     * user and that ideally they should not be covered. Setting this is only appropriate for UI
+     * where the user would likely take action to uncover it.
+     * <p>
+     * Note: The difference with {@link #setPreferKeepClearRects} is that the system won't apply
+     * restrictions to the rects set here.
+     * <p>
+     * @see #setPreferKeepClear
+     * @see #getPreferKeepClearRects
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.SET_UNRESTRICTED_KEEP_CLEAR_AREAS)
+    public final void setUnrestrictedPreferKeepClearRects(@NonNull List<Rect> rects) {
+        final ListenerInfo info = getListenerInfo();
+        if (info.mUnrestrictedKeepClearRects != null) {
+            info.mUnrestrictedKeepClearRects.clear();
+            info.mUnrestrictedKeepClearRects.addAll(rects);
+        } else {
+            info.mUnrestrictedKeepClearRects = new ArrayList<>(rects);
+        }
+        updatePositionUpdateListener();
+        postUpdate(this::updateKeepClearRects);
+    }
+
+    /**
+     * @return the list of rects, set by {@link #setPreferKeepClearRects}.
+     *
+     * @see #setPreferKeepClearRects
+     *
+     * @hide
+     */
+    @SystemApi
+    @NonNull
+    public final List<Rect> getUnrestrictedPreferKeepClearRects() {
+        final ListenerInfo info = mListenerInfo;
+        if (info != null && info.mKeepClearRects != null) {
+            return new ArrayList(info.mUnrestrictedKeepClearRects);
+        }
+
+        return Collections.emptyList();
+    }
+
     void updateKeepClearRects() {
         final AttachInfo ai = mAttachInfo;
         if (ai != null) {
@@ -11884,15 +11938,57 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     @NonNull
     List<Rect> collectPreferKeepClearRects() {
+        ListenerInfo info = mListenerInfo;
+        final List<Rect> list = new ArrayList<>();
+
+        if ((info != null && info.mPreferKeepClear) || mPreferKeepClearForFocus) {
+            list.add(new Rect(0, 0, getWidth(), getHeight()));
+        }
+
+        if (info != null && info.mKeepClearRects != null) {
+            list.addAll(info.mKeepClearRects);
+        }
+
+        return list;
+    }
+
+    private void updatePreferKeepClearForFocus() {
+        if (mMarkPreferKeepClearForFocus != null) {
+            removeCallbacks(mMarkPreferKeepClearForFocus);
+            mMarkPreferKeepClearForFocus = null;
+        }
+
+        final ViewConfiguration configuration = ViewConfiguration.get(mContext);
+        final int delay = configuration.getPreferKeepClearForFocusDelay();
+        if (delay >= 0) {
+            mMarkPreferKeepClearForFocus = () -> {
+                mPreferKeepClearForFocus = isFocused();
+                mMarkPreferKeepClearForFocus = null;
+
+                updatePositionUpdateListener();
+                post(this::updateKeepClearRects);
+            };
+            postDelayed(mMarkPreferKeepClearForFocus, delay);
+        }
+    }
+
+    private void cancelMarkPreferKeepClearForFocus() {
+        if (mMarkPreferKeepClearForFocus != null) {
+            removeCallbacks(mMarkPreferKeepClearForFocus);
+            mMarkPreferKeepClearForFocus = null;
+        }
+        mPreferKeepClearForFocus = false;
+    }
+
+    /**
+     * Retrieve the list of unrestricted areas within this view's post-layout coordinate space
+     * which the system will try to not cover with other floating elements, like the pip window.
+     */
+    @NonNull
+    List<Rect> collectUnrestrictedPreferKeepClearRects() {
         final ListenerInfo info = mListenerInfo;
-        if (info != null) {
-            final List<Rect> list = new ArrayList();
-            if (info.mPreferKeepClear) {
-                list.add(new Rect(0, 0, getWidth(), getHeight()));
-            } else if (info.mKeepClearRects != null) {
-                list.addAll(info.mKeepClearRects);
-            }
-            return list;
+        if (info != null && info.mUnrestrictedKeepClearRects != null) {
+            return info.mUnrestrictedKeepClearRects;
         }
 
         return Collections.emptyList();
@@ -11920,7 +12016,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     /**
      * Return the handwriting areas set on this view, in its local coordinates.
-     * Notice: the caller of this method should not modify the Rect returned.
      * @see #setHandwritingArea(Rect)
      *
      * @hide
@@ -11929,7 +12024,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public Rect getHandwritingArea() {
         final ListenerInfo info = mListenerInfo;
         if (info != null) {
-            return info.mHandwritingArea;
+            return new Rect(info.mHandwritingArea);
         }
         return null;
     }
@@ -13591,6 +13686,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             }
             invalidate();
             sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED);
+            updatePreferKeepClearForFocus();
             return true;
         }
         return false;
@@ -13670,6 +13766,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     sendAccessibilityEventUnchecked(event);
                 }
             }
+
+            updatePreferKeepClearForFocus();
         }
     }
 
@@ -15518,7 +15616,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param event the KeyEvent object that defines the button action
      */
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (event.hasNoModifiers() && KeyEvent.isConfirmKey(keyCode)) {
+        if (KeyEvent.isConfirmKey(keyCode) && event.hasNoModifiers()) {
             if ((mViewFlags & ENABLED_MASK) == DISABLED) {
                 return true;
             }
@@ -15575,7 +15673,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param event   The KeyEvent object that defines the button action.
      */
     public boolean onKeyUp(int keyCode, KeyEvent event) {
-        if (event.hasNoModifiers() && KeyEvent.isConfirmKey(keyCode)) {
+        if (KeyEvent.isConfirmKey(keyCode) && event.hasNoModifiers()) {
             if ((mViewFlags & ENABLED_MASK) == DISABLED) {
                 return true;
             }
@@ -20922,6 +21020,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         removePerformClickCallback();
         clearAccessibilityThrottles();
         stopNestedScroll();
+        cancelMarkPreferKeepClearForFocus();
 
         // Anything that started animating right before detach should already
         // be in its final state when re-attached.

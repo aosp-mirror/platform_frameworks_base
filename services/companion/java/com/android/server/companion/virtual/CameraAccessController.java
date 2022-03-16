@@ -33,17 +33,19 @@ import com.android.internal.annotations.GuardedBy;
 /**
  * Handles blocking access to the camera for apps running on virtual devices.
  */
-class CameraAccessController extends CameraManager.AvailabilityCallback {
+class CameraAccessController extends CameraManager.AvailabilityCallback implements AutoCloseable {
     private static final String TAG = "CameraAccessController";
 
     private final Object mLock = new Object();
 
     private final Context mContext;
-    private VirtualDeviceManagerInternal mVirtualDeviceManagerInternal;
-    CameraAccessBlockedCallback mBlockedCallback;
-    private CameraManager mCameraManager;
-    private boolean mListeningForCameraEvents;
-    private PackageManager mPackageManager;
+    private final VirtualDeviceManagerInternal mVirtualDeviceManagerInternal;
+    private final CameraAccessBlockedCallback mBlockedCallback;
+    private final CameraManager mCameraManager;
+    private final PackageManager mPackageManager;
+
+    @GuardedBy("mLock")
+    private int mObserverCount = 0;
 
     @GuardedBy("mLock")
     private ArrayMap<String, InjectionSessionData> mPackageToSessionData = new ArrayMap<>();
@@ -77,21 +79,36 @@ class CameraAccessController extends CameraManager.AvailabilityCallback {
      */
     public void startObservingIfNeeded() {
         synchronized (mLock) {
-            if (!mListeningForCameraEvents) {
+            if (mObserverCount == 0) {
                 mCameraManager.registerAvailabilityCallback(mContext.getMainExecutor(), this);
-                mListeningForCameraEvents = true;
             }
+            mObserverCount++;
         }
     }
 
     /**
      * Stop watching for camera access.
      */
-    public void stopObserving() {
+    public void stopObservingIfNeeded() {
         synchronized (mLock) {
-            mCameraManager.unregisterAvailabilityCallback(this);
-            mListeningForCameraEvents = false;
+            mObserverCount--;
+            if (mObserverCount <= 0) {
+                close();
+            }
         }
+    }
+
+
+    @Override
+    public void close() {
+        synchronized (mLock) {
+            if (mObserverCount < 0) {
+                Slog.wtf(TAG, "Unexpected negative mObserverCount: " + mObserverCount);
+            } else if (mObserverCount > 0) {
+                Slog.w(TAG, "Unexpected close with observers remaining: " + mObserverCount);
+            }
+        }
+        mCameraManager.unregisterAvailabilityCallback(this);
     }
 
     @Override

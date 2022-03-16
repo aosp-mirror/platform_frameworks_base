@@ -166,7 +166,7 @@ public class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    static final int VERSION = 206;
+    static final int VERSION = 207;
 
     // The maximum number of names wakelocks we will keep track of
     // per uid; once the limit is reached, we batch the remaining wakelocks
@@ -546,9 +546,9 @@ public class BatteryStatsImpl extends BatteryStats {
                 final LongArrayMultiStateCounter onBatteryScreenOffCounter =
                         u.getProcStateScreenOffTimeCounter().getCounter();
 
-                if (uid == parentUid) {
-                    mKernelSingleUidTimeReader.addDelta(uid, onBatteryCounter, timestampMs);
-                    mKernelSingleUidTimeReader.addDelta(uid, onBatteryScreenOffCounter,
+                if (uid == parentUid || Process.isSdkSandboxUid(uid)) {
+                    mKernelSingleUidTimeReader.addDelta(parentUid, onBatteryCounter, timestampMs);
+                    mKernelSingleUidTimeReader.addDelta(parentUid, onBatteryScreenOffCounter,
                             timestampMs);
                 } else {
                     Uid.ChildUid childUid = u.getChildUid(uid);
@@ -964,6 +964,16 @@ public class BatteryStatsImpl extends BatteryStats {
          * Timers for each combination of frequency range and signal strength.
          */
         public final StopwatchTimer[][] perStateTimers;
+        /**
+         * Counters tracking the time (in milliseconds) spent transmitting data in a given state.
+         */
+        @Nullable
+        private LongSamplingCounter[][] mPerStateTxDurationMs = null;
+        /**
+         * Counters tracking the time (in milliseconds) spent receiving data in at given frequency.
+         */
+        @Nullable
+        private LongSamplingCounter[] mPerFrequencyRxDurationMs = null;
 
         RadioAccessTechnologyBatteryStats(int freqCount, Clock clock, TimeBase timeBase) {
             perStateTimers =
@@ -1024,15 +1034,198 @@ public class BatteryStatsImpl extends BatteryStats {
         }
 
         /**
-         * Reset display timers.
+         * Returns the duration in milliseconds spent in a given state since the last mark.
+         */
+        public long getTimeSinceMark(@ServiceState.FrequencyRange int frequencyRange,
+                int signalStrength, long elapsedRealtimeMs) {
+            return perStateTimers[frequencyRange][signalStrength].getTimeSinceMarkLocked(
+                    elapsedRealtimeMs * 1000) / 1000;
+        }
+
+        /**
+         * Set mark for all timers.
+         */
+        public void setMark(long elapsedRealtimeMs) {
+            final int size = perStateTimers.length;
+            for (int i = 0; i < size; i++) {
+                for (int j = 0; j < CellSignalStrength.NUM_SIGNAL_STRENGTH_BINS; j++) {
+                    perStateTimers[i][j].setMark(elapsedRealtimeMs);
+                }
+            }
+        }
+
+        /**
+         * Returns numbers of frequencies tracked for this RAT.
+         */
+        public int getFrequencyRangeCount() {
+            return perStateTimers.length;
+        }
+
+        /**
+         * Add TX time for a given state.
+         */
+        public void incrementTxDuration(@ServiceState.FrequencyRange int frequencyRange,
+                int signalStrength, long durationMs) {
+            getTxDurationCounter(frequencyRange, signalStrength, true).addCountLocked(durationMs);
+        }
+
+        /**
+         * Add TX time for a given frequency.
+         */
+        public void incrementRxDuration(@ServiceState.FrequencyRange int frequencyRange,
+                long durationMs) {
+            getRxDurationCounter(frequencyRange, true).addCountLocked(durationMs);
+        }
+
+        /**
+         * Reset radio access technology timers and counts.
          */
         public void reset(long elapsedRealtimeUs) {
             final int size = perStateTimers.length;
             for (int i = 0; i < size; i++) {
                 for (int j = 0; j < CellSignalStrength.NUM_SIGNAL_STRENGTH_BINS; j++) {
                     perStateTimers[i][j].reset(false, elapsedRealtimeUs);
+                    if (mPerStateTxDurationMs == null) continue;
+                    mPerStateTxDurationMs[i][j].reset(false, elapsedRealtimeUs);
+                }
+                if (mPerFrequencyRxDurationMs == null) continue;
+                mPerFrequencyRxDurationMs[i].reset(false, elapsedRealtimeUs);
+            }
+        }
+
+        /**
+         * Write data to summary parcel
+         */
+        public void writeSummaryToParcel(Parcel out, long elapsedRealtimeUs) {
+            final int freqCount = perStateTimers.length;
+            out.writeInt(freqCount);
+            out.writeInt(CellSignalStrength.NUM_SIGNAL_STRENGTH_BINS);
+            for (int i = 0; i < freqCount; i++) {
+                for (int j = 0; j < CellSignalStrength.NUM_SIGNAL_STRENGTH_BINS; j++) {
+                    perStateTimers[i][j].writeSummaryFromParcelLocked(out, elapsedRealtimeUs);
                 }
             }
+
+            if (mPerStateTxDurationMs == null) {
+                out.writeInt(0);
+            } else {
+                out.writeInt(1);
+                for (int i = 0; i < freqCount; i++) {
+                    for (int j = 0; j < CellSignalStrength.NUM_SIGNAL_STRENGTH_BINS; j++) {
+                        mPerStateTxDurationMs[i][j].writeSummaryFromParcelLocked(out);
+                    }
+                }
+            }
+
+            if (mPerFrequencyRxDurationMs == null) {
+                out.writeInt(0);
+            } else {
+                out.writeInt(1);
+                for (int i = 0; i < freqCount; i++) {
+                    mPerFrequencyRxDurationMs[i].writeSummaryFromParcelLocked(out);
+                }
+            }
+        }
+
+        /**
+         * Read data from summary parcel
+         */
+        public void readSummaryFromParcel(Parcel in) {
+            final int oldFreqCount = in.readInt();
+            final int oldSignalStrengthCount = in.readInt();
+            final int currFreqCount = perStateTimers.length;
+            final int currSignalStrengthCount = CellSignalStrength.NUM_SIGNAL_STRENGTH_BINS;
+
+            for (int freq = 0; freq < oldFreqCount; freq++) {
+                for (int strength = 0; strength < oldSignalStrengthCount; strength++) {
+                    if (freq >= currFreqCount || strength >= currSignalStrengthCount) {
+                        // Mismatch with the summary parcel. Consume the data but don't use it.
+                        final StopwatchTimer temp = new StopwatchTimer(null, null, -1, null,
+                                new TimeBase());
+                        // Consume perStateTimers data.
+                        temp.readSummaryFromParcelLocked(in);
+                    } else {
+                        perStateTimers[freq][strength].readSummaryFromParcelLocked(in);
+                    }
+                }
+            }
+
+            if (in.readInt() == 1) {
+                for (int freq = 0; freq < oldFreqCount; freq++) {
+                    for (int strength = 0; strength < oldSignalStrengthCount; strength++) {
+                        if (freq >= currFreqCount || strength >= currSignalStrengthCount) {
+                            // Mismatch with the summary parcel. Consume the data but don't use it.
+                            final StopwatchTimer temp = new StopwatchTimer(null, null, -1, null,
+                                    new TimeBase());
+                            // Consume mPerStateTxDurationMs data.
+                            temp.readSummaryFromParcelLocked(in);
+                        }
+                        getTxDurationCounter(freq, strength, true).readSummaryFromParcelLocked(in);
+                    }
+                }
+            }
+
+            if (in.readInt() == 1) {
+                for (int freq = 0; freq < oldFreqCount; freq++) {
+                    if (freq >= currFreqCount) {
+                        // Mismatch with the summary parcel. Consume the data but don't use it.
+                        final StopwatchTimer
+                                temp = new StopwatchTimer(null, null, -1, null, new TimeBase());
+                        // Consume mPerFrequencyRxDurationMs data.
+                        temp.readSummaryFromParcelLocked(in);
+                        continue;
+                    }
+                    getRxDurationCounter(freq, true).readSummaryFromParcelLocked(in);
+                }
+            }
+        }
+
+        private LongSamplingCounter getTxDurationCounter(
+                @ServiceState.FrequencyRange int frequencyRange, int signalStrength, boolean make) {
+            if (mPerStateTxDurationMs == null) {
+                if (!make) return null;
+
+                final int freqCount = getFrequencyRangeCount();
+                final int signalStrengthCount = perStateTimers[0].length;
+                final TimeBase timeBase = perStateTimers[0][0].mTimeBase;
+                mPerStateTxDurationMs = new LongSamplingCounter[freqCount][signalStrengthCount];
+                for (int freq = 0; freq < freqCount; freq++) {
+                    for (int strength = 0; strength < signalStrengthCount; strength++) {
+                        mPerStateTxDurationMs[freq][strength] = new LongSamplingCounter(timeBase);
+                    }
+                }
+            }
+            if (frequencyRange < 0 || frequencyRange >= getFrequencyRangeCount()) {
+                Slog.w(TAG, "Unexpected frequency range (" + frequencyRange
+                        + ") requested in getTxDurationCounter");
+                return null;
+            }
+            if (signalStrength < 0 || signalStrength >= perStateTimers[0].length) {
+                Slog.w(TAG, "Unexpected signal strength (" + signalStrength
+                        + ") requested in getTxDurationCounter");
+                return null;
+            }
+            return mPerStateTxDurationMs[frequencyRange][signalStrength];
+        }
+
+        private LongSamplingCounter getRxDurationCounter(
+                @ServiceState.FrequencyRange int frequencyRange, boolean make) {
+            if (mPerFrequencyRxDurationMs == null) {
+                if (!make) return null;
+
+                final int freqCount = getFrequencyRangeCount();
+                final TimeBase timeBase = perStateTimers[0][0].mTimeBase;
+                mPerFrequencyRxDurationMs = new LongSamplingCounter[freqCount];
+                for (int freq = 0; freq < freqCount; freq++) {
+                    mPerFrequencyRxDurationMs[freq] = new LongSamplingCounter(timeBase);
+                }
+            }
+            if (frequencyRange < 0 || frequencyRange >= getFrequencyRangeCount()) {
+                Slog.w(TAG, "Unexpected frequency range (" + frequencyRange
+                        + ") requested in getRxDurationCounter");
+                return null;
+            }
+            return mPerFrequencyRxDurationMs[frequencyRange];
         }
     }
 
@@ -1929,18 +2122,26 @@ public class BatteryStatsImpl extends BatteryStats {
         private final TimeBase mTimeBase;
         private final LongMultiStateCounter mCounter;
 
-        private TimeMultiStateCounter(TimeBase timeBase, Parcel in, long timestampMs) {
+        private TimeMultiStateCounter(TimeBase timeBase, int stateCount, long timestampMs) {
+            this(timeBase, new LongMultiStateCounter(stateCount), timestampMs);
+        }
+
+        private TimeMultiStateCounter(TimeBase timeBase, LongMultiStateCounter counter,
+                long timestampMs) {
             mTimeBase = timeBase;
-            mCounter = LongMultiStateCounter.CREATOR.createFromParcel(in);
+            mCounter = counter;
             mCounter.setEnabled(mTimeBase.isRunning(), timestampMs);
             timeBase.add(this);
         }
 
-        private TimeMultiStateCounter(TimeBase timeBase, int stateCount, long timestampMs) {
-            mTimeBase = timeBase;
-            mCounter = new LongMultiStateCounter(stateCount);
-            mCounter.setEnabled(mTimeBase.isRunning(), timestampMs);
-            timeBase.add(this);
+        @Nullable
+        private static TimeMultiStateCounter readFromParcel(Parcel in, TimeBase timeBase,
+                int stateCount, long timestampMs) {
+            LongMultiStateCounter counter = LongMultiStateCounter.CREATOR.createFromParcel(in);
+            if (counter.getStateCount() != stateCount) {
+                return null;
+            }
+            return new TimeMultiStateCounter(timeBase, counter, timestampMs);
         }
 
         private void writeToParcel(Parcel out) {
@@ -3510,11 +3711,8 @@ public class BatteryStatsImpl extends BatteryStats {
 
         private TimeMultiStateCounter readTimeMultiStateCounter(Parcel in, TimeBase timeBase) {
             if (in.readBoolean()) {
-                final TimeMultiStateCounter counter =
-                        new TimeMultiStateCounter(timeBase, in, mClock.elapsedRealtime());
-                if (counter.getStateCount() == BatteryConsumer.PROCESS_STATE_COUNT) {
-                    return counter;
-                }
+                return TimeMultiStateCounter.readFromParcel(in, timeBase,
+                        BatteryConsumer.PROCESS_STATE_COUNT, mClock.elapsedRealtime());
             }
             return null;
         }
@@ -3537,9 +3735,10 @@ public class BatteryStatsImpl extends BatteryStats {
                 // invalid.
                 TimeMultiStateCounter[] counters = new TimeMultiStateCounter[numCounters];
                 for (int i = 0; i < numCounters; i++) {
-                    final TimeMultiStateCounter counter =
-                            new TimeMultiStateCounter(timeBase, in, mClock.elapsedRealtime());
-                    if (counter.getStateCount() == BatteryConsumer.PROCESS_STATE_COUNT) {
+                    final TimeMultiStateCounter counter = TimeMultiStateCounter.readFromParcel(in,
+                            timeBase, BatteryConsumer.PROCESS_STATE_COUNT,
+                            mClock.elapsedRealtime());
+                    if (counter != null) {
                         counters[i] = counter;
                     } else {
                         valid = false;
@@ -4560,7 +4759,10 @@ public class BatteryStatsImpl extends BatteryStats {
         mIsolatedUidRefCounts.put(uid, refCount + 1);
     }
 
-    public int mapUid(int uid) {
+    private int mapUid(int uid) {
+        if (Process.isSdkSandboxUid(uid)) {
+            return Process.getAppUidForSdkSandboxUid(uid);
+        }
         int isolated = mIsolatedUids.get(uid, -1);
         return isolated > 0 ? isolated : uid;
     }
@@ -4656,16 +4858,18 @@ public class BatteryStatsImpl extends BatteryStats {
             long elapsedRealtimeMs, long uptimeMs) {
         int parentUid = mapUid(uid);
         if (uid != parentUid) {
-            // Isolated UIDs process state is already rolled up into parent, so no need to track
-            // Otherwise the parent's process state will get downgraded incorrectly
-            return;
+            if (Process.isIsolated(uid)) {
+                // Isolated UIDs process state is already rolled up into parent, so no need to track
+                // Otherwise the parent's process state will get downgraded incorrectly
+                return;
+            }
         }
         // TODO(b/155216561): It is possible for isolated uids to be in a higher
         // state than its parent uid. We should track the highest state within the union of host
         // and isolated uids rather than only the parent uid.
         FrameworkStatsLog.write(FrameworkStatsLog.UID_PROCESS_STATE_CHANGED, uid,
                 ActivityManager.processStateAmToProto(state));
-        getUidStatsLocked(uid, elapsedRealtimeMs, uptimeMs)
+        getUidStatsLocked(parentUid, elapsedRealtimeMs, uptimeMs)
                 .updateUidProcessStateLocked(state, elapsedRealtimeMs, uptimeMs);
     }
 
@@ -7995,6 +8199,32 @@ public class BatteryStatsImpl extends BatteryStats {
                 elapsedRealtimeMs * 1000, STATS_SINCE_CHARGED) / 1000;
     }
 
+    @Override
+    public long getActiveTxRadioDurationMs(@RadioAccessTechnology int rat,
+            @ServiceState.FrequencyRange int frequencyRange, int signalStrength,
+            long elapsedRealtimeMs) {
+        final RadioAccessTechnologyBatteryStats stats = mPerRatBatteryStats[rat];
+        if (stats == null) return DURATION_UNAVAILABLE;
+
+        final LongSamplingCounter counter = stats.getTxDurationCounter(frequencyRange,
+                signalStrength, false);
+        if (counter == null) return DURATION_UNAVAILABLE;
+
+        return counter.getCountLocked(STATS_SINCE_CHARGED);
+    }
+
+    @Override
+    public long getActiveRxRadioDurationMs(@RadioAccessTechnology int rat,
+            @ServiceState.FrequencyRange int frequencyRange, long elapsedRealtimeMs) {
+        final RadioAccessTechnologyBatteryStats stats = mPerRatBatteryStats[rat];
+        if (stats == null) return DURATION_UNAVAILABLE;
+
+        final LongSamplingCounter counter = stats.getRxDurationCounter(frequencyRange, false);
+        if (counter == null) return DURATION_UNAVAILABLE;
+
+        return counter.getCountLocked(STATS_SINCE_CHARGED);
+    }
+
     @UnsupportedAppUsage
     @Override public long getMobileRadioActiveTime(long elapsedRealtimeUs, int which) {
         return mMobileRadioActiveTimer.getTotalTimeLocked(elapsedRealtimeUs, which);
@@ -10739,11 +10969,9 @@ public class BatteryStatsImpl extends BatteryStats {
                             = new LongSamplingCounter(mBsi.mOnBatteryTimeBase, in);
                 }
                 if (in.readBoolean()) {
-                    final TimeMultiStateCounter counter =
-                            new TimeMultiStateCounter(mBsi.mOnBatteryTimeBase, in, timestampMs);
-                    if (counter.getStateCount() == BatteryConsumer.PROCESS_STATE_COUNT) {
-                        mMobileRadioActiveTime = counter;
-                    }
+                    mMobileRadioActiveTime = TimeMultiStateCounter.readFromParcel(in,
+                            mBsi.mOnBatteryTimeBase, BatteryConsumer.PROCESS_STATE_COUNT,
+                            timestampMs);
                 }
 
                 mMobileRadioActiveCount = new LongSamplingCounter(mBsi.mOnBatteryTimeBase, in);
@@ -10789,11 +11017,9 @@ public class BatteryStatsImpl extends BatteryStats {
 
             int stateCount = in.readInt();
             if (stateCount != 0) {
-                final TimeMultiStateCounter counter = new TimeMultiStateCounter(
-                        mBsi.mOnBatteryTimeBase, in, timestampMs);
-                if (stateCount == BatteryConsumer.PROCESS_STATE_COUNT) {
-                    mCpuActiveTimeMs = counter;
-                }
+                mCpuActiveTimeMs = TimeMultiStateCounter.readFromParcel(in,
+                        mBsi.mOnBatteryTimeBase, BatteryConsumer.PROCESS_STATE_COUNT,
+                        timestampMs);
             }
             mCpuClusterTimesMs = new LongSamplingCounterArray(mBsi.mOnBatteryTimeBase, in);
 
@@ -13477,6 +13703,67 @@ public class BatteryStatsImpl extends BatteryStats {
                     addHistoryRecordLocked(elapsedRealtimeMs, uptimeMs);
                     mTmpRailStats.resetCellularTotalEnergyUsed();
                 }
+
+                // Proportionally smear Rx and Tx times across each RAt
+                final int levelCount = CellSignalStrength.getNumSignalStrengthLevels();
+                long[] perSignalStrengthActiveTimeMs = new long[levelCount];
+                long totalActiveTimeMs = 0;
+
+                for (int rat = 0; rat < RADIO_ACCESS_TECHNOLOGY_COUNT; rat++) {
+                    final RadioAccessTechnologyBatteryStats ratStats = mPerRatBatteryStats[rat];
+                    if (ratStats == null) continue;
+
+                    final int freqCount = ratStats.getFrequencyRangeCount();
+                    for (int freq = 0; freq < freqCount; freq++) {
+                        for (int level = 0; level < levelCount; level++) {
+                            final long durationMs = ratStats.getTimeSinceMark(freq, level,
+                                    elapsedRealtimeMs);
+                            perSignalStrengthActiveTimeMs[level] += durationMs;
+                            totalActiveTimeMs += durationMs;
+                        }
+                    }
+                }
+
+                if (totalActiveTimeMs != 0) {
+                    // Smear the provided Tx/Rx durations across each RAT, frequency, and signal
+                    // strength.
+                    for (int rat = 0; rat < RADIO_ACCESS_TECHNOLOGY_COUNT; rat++) {
+                        final RadioAccessTechnologyBatteryStats ratStats = mPerRatBatteryStats[rat];
+                        if (ratStats == null) continue;
+
+                        final int freqCount = ratStats.getFrequencyRangeCount();
+                        for (int freq = 0; freq < freqCount; freq++) {
+                            long frequencyDurationMs = 0;
+                            for (int level = 0; level < levelCount; level++) {
+                                final long durationMs = ratStats.getTimeSinceMark(freq, level,
+                                        elapsedRealtimeMs);
+                                final long totalLvlDurationMs =
+                                        perSignalStrengthActiveTimeMs[level];
+                                if (totalLvlDurationMs == 0) continue;
+                                final long totalTxLvlDurations =
+                                        deltaInfo.getTransmitDurationMillisAtPowerLevel(level);
+                                // Smear HAL provided Tx power level duration based on active modem
+                                // duration in a given state. (Add totalLvlDurationMs / 2 before
+                                // the integer division with totalLvlDurationMs for rounding.)
+                                final long proportionalTxDurationMs =
+                                        (durationMs * totalTxLvlDurations
+                                                + (totalLvlDurationMs / 2)) / totalLvlDurationMs;
+                                ratStats.incrementTxDuration(freq, level, proportionalTxDurationMs);
+                                frequencyDurationMs += durationMs;
+                            }
+                            final long totalRxDuration = deltaInfo.getReceiveTimeMillis();
+                            // Smear HAL provided Rx power duration based on active modem
+                            // duration in a given state.  (Add totalActiveTimeMs / 2 before the
+                            // integer division with totalActiveTimeMs for rounding.)
+                            final long proportionalRxDurationMs =
+                                    (frequencyDurationMs * totalRxDuration + (totalActiveTimeMs
+                                            / 2)) / totalActiveTimeMs;
+                            ratStats.incrementRxDuration(freq, proportionalRxDurationMs);
+                        }
+
+                        ratStats.setMark(elapsedRealtimeMs);
+                    }
+                }
             }
             long totalAppRadioTimeUs = mMobileRadioActivePerAppTimer.getTimeSinceMarkLocked(
                     elapsedRealtimeMs * 1000);
@@ -15970,6 +16257,9 @@ public class BatteryStatsImpl extends BatteryStats {
     public Uid getUidStatsLocked(int uid, long elapsedRealtimeMs, long uptimeMs) {
         Uid u = mUidStats.get(uid);
         if (u == null) {
+            if (Process.isSdkSandboxUid(uid)) {
+                Log.wtf(TAG, "Tracking an SDK Sandbox UID");
+            }
             u = new Uid(this, uid, elapsedRealtimeMs, uptimeMs);
             mUidStats.put(uid, u);
         }
@@ -16879,14 +17169,18 @@ public class BatteryStatsImpl extends BatteryStats {
         mNextMaxDailyDeadlineMs = in.readLong();
         mBatteryTimeToFullSeconds = in.readLong();
 
-        mMeasuredEnergyStatsConfig = MeasuredEnergyStats.Config.createFromParcel(in);
-
-        /**
-         * WARNING: Supported buckets may have changed across boots. Bucket mismatch is handled
-         *          later when {@link #initMeasuredEnergyStatsLocked} is called.
-         */
-        mGlobalMeasuredEnergyStats = MeasuredEnergyStats.createAndReadSummaryFromParcel(
-                mMeasuredEnergyStatsConfig, in);
+        final MeasuredEnergyStats.Config config = MeasuredEnergyStats.Config.createFromParcel(in);
+        final MeasuredEnergyStats measuredEnergyStats =
+                MeasuredEnergyStats.createAndReadSummaryFromParcel(mMeasuredEnergyStatsConfig, in);
+        if (config != null && Arrays.equals(config.getStateNames(),
+                getBatteryConsumerProcessStateNames())) {
+            /**
+             * WARNING: Supported buckets may have changed across boots. Bucket mismatch is handled
+             *          later when {@link #initMeasuredEnergyStatsLocked} is called.
+             */
+            mMeasuredEnergyStatsConfig = config;
+            mGlobalMeasuredEnergyStats = measuredEnergyStats;
+        }
 
         mStartCount++;
 
@@ -16918,6 +17212,13 @@ public class BatteryStatsImpl extends BatteryStats {
             mNetworkByteActivityCounters[i].readSummaryFromParcelLocked(in);
             mNetworkPacketActivityCounters[i].readSummaryFromParcelLocked(in);
         }
+
+        final int numRat = in.readInt();
+        for (int i = 0; i < numRat; i++) {
+            if (in.readInt() == 0) continue;
+            getRatBatteryStatsLocked(i).readSummaryFromParcel(in);
+        }
+
         mMobileRadioPowerState = DataConnectionRealTimeInfo.DC_POWER_STATE_LOW;
         mMobileRadioActiveTimer.readSummaryFromParcelLocked(in);
         mMobileRadioActivePerAppTimer.readSummaryFromParcelLocked(in);
@@ -16978,7 +17279,6 @@ public class BatteryStatsImpl extends BatteryStats {
                 getScreenOffRpmTimerLocked(rpmName).readSummaryFromParcelLocked(in);
             }
         }
-
         int NKW = in.readInt();
         if (NKW > 10000) {
             throw new ParcelFormatException("File corrupt: too many kernel wake locks " + NKW);
@@ -17106,11 +17406,9 @@ public class BatteryStatsImpl extends BatteryStats {
                     u.mNetworkPacketActivityCounters[i].readSummaryFromParcelLocked(in);
                 }
                 if (in.readBoolean()) {
-                    TimeMultiStateCounter counter = new TimeMultiStateCounter(
-                            mOnBatteryTimeBase, in, elapsedRealtimeMs);
-                    if (counter.getStateCount() == BatteryConsumer.PROCESS_STATE_COUNT) {
-                        u.mMobileRadioActiveTime = counter;
-                    }
+                    u.mMobileRadioActiveTime = TimeMultiStateCounter.readFromParcel(in,
+                            mOnBatteryTimeBase, BatteryConsumer.PROCESS_STATE_COUNT,
+                            elapsedRealtimeMs);
                 }
                 u.mMobileRadioActiveCount.readSummaryFromParcelLocked(in);
             }
@@ -17160,11 +17458,9 @@ public class BatteryStatsImpl extends BatteryStats {
 
             int stateCount = in.readInt();
             if (stateCount != 0) {
-                final TimeMultiStateCounter counter = new TimeMultiStateCounter(
-                        mOnBatteryTimeBase, in, mClock.elapsedRealtime());
-                if (stateCount == BatteryConsumer.PROCESS_STATE_COUNT) {
-                    u.mCpuActiveTimeMs = counter;
-                }
+                u.mCpuActiveTimeMs = TimeMultiStateCounter.readFromParcel(in,
+                        mOnBatteryTimeBase, BatteryConsumer.PROCESS_STATE_COUNT,
+                        mClock.elapsedRealtime());
             }
             u.mCpuClusterTimesMs.readSummaryFromParcelLocked(in);
 
@@ -17422,6 +17718,17 @@ public class BatteryStatsImpl extends BatteryStats {
         for (int i = 0; i < NUM_NETWORK_ACTIVITY_TYPES; i++) {
             mNetworkByteActivityCounters[i].writeSummaryFromParcelLocked(out);
             mNetworkPacketActivityCounters[i].writeSummaryFromParcelLocked(out);
+        }
+        final int numRat = mPerRatBatteryStats.length;
+        out.writeInt(numRat);
+        for (int i = 0; i < numRat; i++) {
+            final RadioAccessTechnologyBatteryStats ratStat = mPerRatBatteryStats[i];
+            if (ratStat == null) {
+                out.writeInt(0);
+                continue;
+            }
+            out.writeInt(1);
+            ratStat.writeSummaryToParcel(out, nowRealtime);
         }
         mMobileRadioActiveTimer.writeSummaryFromParcelLocked(out, nowRealtime);
         mMobileRadioActivePerAppTimer.writeSummaryFromParcelLocked(out, nowRealtime);
@@ -17999,9 +18306,15 @@ public class BatteryStatsImpl extends BatteryStats {
         mLastWriteTimeMs = in.readLong();
         mBatteryTimeToFullSeconds = in.readLong();
 
-        mMeasuredEnergyStatsConfig = MeasuredEnergyStats.Config.createFromParcel(in);
-        mGlobalMeasuredEnergyStats =
+
+        final MeasuredEnergyStats.Config config = MeasuredEnergyStats.Config.createFromParcel(in);
+        final MeasuredEnergyStats measuredEnergyStats =
                 MeasuredEnergyStats.createFromParcel(mMeasuredEnergyStatsConfig, in);
+        if (config != null && Arrays.equals(config.getStateNames(),
+                getBatteryConsumerProcessStateNames())) {
+            mMeasuredEnergyStatsConfig = config;
+            mGlobalMeasuredEnergyStats = measuredEnergyStats;
+        }
 
         mRpmStats.clear();
         int NRPMS = in.readInt();

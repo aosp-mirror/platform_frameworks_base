@@ -21,10 +21,13 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.graphics.Rect;
+import android.graphics.Region;
 import android.testing.AndroidTestingRunner;
 import android.util.Pair;
 import android.view.GestureDetector;
@@ -133,6 +136,81 @@ public class DreamOverlayTouchMonitorTest extends SysuiTestCase {
         void verifyInputSessionDispose() {
             verify(mInputSession).dispose();
             Mockito.clearInvocations(mInputSession);
+        }
+    }
+
+    @Test
+    public void testEntryTouchZone() {
+        final DreamTouchHandler touchHandler = Mockito.mock(DreamTouchHandler.class);
+        final Rect touchArea = new Rect(4, 4, 8 , 8);
+
+        doAnswer(invocation -> {
+            final Region region = (Region) invocation.getArguments()[0];
+            region.set(touchArea);
+            return null;
+        }).when(touchHandler).getTouchInitiationRegion(any());
+
+        final Environment environment = new Environment(Stream.of(touchHandler)
+                .collect(Collectors.toCollection(HashSet::new)));
+
+        // Ensure touch outside specified region is not delivered.
+        final MotionEvent initialEvent = Mockito.mock(MotionEvent.class);
+        when(initialEvent.getX()).thenReturn(0.0f);
+        when(initialEvent.getY()).thenReturn(1.0f);
+        environment.publishInputEvent(initialEvent);
+        verify(touchHandler, never()).onSessionStart(any());
+
+        // Make sure touch inside region causes session start.
+        when(initialEvent.getX()).thenReturn(5.0f);
+        when(initialEvent.getY()).thenReturn(5.0f);
+        environment.publishInputEvent(initialEvent);
+        verify(touchHandler).onSessionStart(any());
+    }
+
+    @Test
+    public void testSessionCount() {
+        final DreamTouchHandler touchHandler = Mockito.mock(DreamTouchHandler.class);
+        final Rect touchArea = new Rect(4, 4, 8 , 8);
+
+        final DreamTouchHandler unzonedTouchHandler = Mockito.mock(DreamTouchHandler.class);
+        doAnswer(invocation -> {
+            final Region region = (Region) invocation.getArguments()[0];
+            region.set(touchArea);
+            return null;
+        }).when(touchHandler).getTouchInitiationRegion(any());
+
+        final Environment environment = new Environment(Stream.of(touchHandler, unzonedTouchHandler)
+                .collect(Collectors.toCollection(HashSet::new)));
+
+        // Ensure touch outside specified region is delivered to unzoned touch handler.
+        final MotionEvent initialEvent = Mockito.mock(MotionEvent.class);
+        when(initialEvent.getX()).thenReturn(0.0f);
+        when(initialEvent.getY()).thenReturn(1.0f);
+        environment.publishInputEvent(initialEvent);
+
+        ArgumentCaptor<DreamTouchHandler.TouchSession> touchSessionCaptor = ArgumentCaptor.forClass(
+                DreamTouchHandler.TouchSession.class);
+
+        // Make sure only one active session.
+        {
+            verify(unzonedTouchHandler).onSessionStart(touchSessionCaptor.capture());
+            final DreamTouchHandler.TouchSession touchSession = touchSessionCaptor.getValue();
+            assertThat(touchSession.getActiveSessionCount()).isEqualTo(1);
+            touchSession.pop();
+            environment.executeAll();
+        }
+
+        // Make sure touch inside the touch region.
+        when(initialEvent.getX()).thenReturn(5.0f);
+        when(initialEvent.getY()).thenReturn(5.0f);
+        environment.publishInputEvent(initialEvent);
+
+        // Make sure there are two active sessions.
+        {
+            verify(touchHandler).onSessionStart(touchSessionCaptor.capture());
+            final DreamTouchHandler.TouchSession touchSession = touchSessionCaptor.getValue();
+            assertThat(touchSession.getActiveSessionCount()).isEqualTo(2);
+            touchSession.pop();
         }
     }
 

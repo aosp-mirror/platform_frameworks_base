@@ -154,6 +154,28 @@ public class LogModule {
         return factory.create("SwipeStatusBarAwayLog", 30);
     }
 
+    /**
+     * Provides a logging buffer for logs related to the media tap-to-transfer chip on the sender
+     * device. See {@link com.android.systemui.media.taptotransfer.sender.MediaTttSenderLogger}.
+     */
+    @Provides
+    @SysUISingleton
+    @MediaTttSenderLogBuffer
+    public static LogBuffer provideMediaTttSenderLogBuffer(LogBufferFactory factory) {
+        return factory.create("MediaTttSender", 20);
+    }
+
+    /**
+     * Provides a logging buffer for logs related to the media tap-to-transfer chip on the receiver
+     * device. See {@link com.android.systemui.media.taptotransfer.receiver.MediaTttReceiverLogger}.
+     */
+    @Provides
+    @SysUISingleton
+    @MediaTttReceiverLogBuffer
+    public static LogBuffer provideMediaTttReceiverLogBuffer(LogBufferFactory factory) {
+        return factory.create("MediaTttReceiver", 20);
+    }
+
     /** Allows logging buffers to be tweaked via adb on debug builds but not on prod builds. */
     @Provides
     @SysUISingleton

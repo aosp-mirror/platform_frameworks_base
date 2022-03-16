@@ -85,6 +85,7 @@ import com.android.systemui.statusbar.notification.collection.legacy.Notificatio
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
+import com.android.systemui.statusbar.notification.interruption.KeyguardNotificationVisibilityProvider;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptLogger;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationTestHelper;
@@ -309,7 +310,9 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
                         mock(BatteryController.class),
                         mock(HeadsUpManager.class),
                         mock(NotificationInterruptLogger.class),
-                        mock(Handler.class)
+                        mock(Handler.class),
+                        mock(NotifPipelineFlags.class),
+                        mock(KeyguardNotificationVisibilityProvider.class)
                 );
         when(mNotifPipelineFlags.isNewPipelineEnabled()).thenReturn(true);
         when(mShellTaskOrganizer.getExecutor()).thenReturn(syncExecutor);

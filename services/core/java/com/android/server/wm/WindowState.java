@@ -22,7 +22,6 @@ import static android.app.AppOpsManager.MODE_DEFAULT;
 import static android.app.AppOpsManager.OP_NONE;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_DREAM;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
-import static android.app.WindowConfiguration.isSplitScreenWindowingMode;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.graphics.GraphicsProtos.dumpPointProto;
 import static android.hardware.display.DisplayManager.SWITCHING_TYPE_NONE;
@@ -120,7 +119,6 @@ import static com.android.server.policy.WindowManagerPolicy.TRANSIT_ENTER;
 import static com.android.server.policy.WindowManagerPolicy.TRANSIT_EXIT;
 import static com.android.server.policy.WindowManagerPolicy.TRANSIT_PREVIEW_DONE;
 import static com.android.server.wm.AnimationSpecProto.MOVE;
-import static com.android.server.wm.DisplayContent.IME_TARGET_INPUT;
 import static com.android.server.wm.DisplayContent.IME_TARGET_LAYERING;
 import static com.android.server.wm.DisplayContent.logsGestureExclusionRestrictions;
 import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_DOCKED_DIVIDER;
@@ -136,6 +134,7 @@ import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITIO
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_RECENTS;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_STARTING_REVEAL;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_WINDOW_ANIMATION;
+import static com.android.server.wm.WindowContainer.AnimationFlags.CHILDREN;
 import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
 import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
 import static com.android.server.wm.WindowContainerChildProto.WINDOW;
@@ -182,6 +181,7 @@ import static com.android.server.wm.WindowStateProto.REQUESTED_WIDTH;
 import static com.android.server.wm.WindowStateProto.STACK_ID;
 import static com.android.server.wm.WindowStateProto.SURFACE_INSETS;
 import static com.android.server.wm.WindowStateProto.SURFACE_POSITION;
+import static com.android.server.wm.WindowStateProto.UNRESTRICTED_KEEP_CLEAR_AREAS;
 import static com.android.server.wm.WindowStateProto.VIEW_VISIBILITY;
 import static com.android.server.wm.WindowStateProto.WINDOW_CONTAINER;
 import static com.android.server.wm.WindowStateProto.WINDOW_FRAMES;
@@ -264,6 +264,7 @@ import dalvik.annotation.optimization.NeverCompile;
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.function.Consumer;
@@ -482,6 +483,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * Coordinates are relative to the window's position.
      */
     private final List<Rect> mKeepClearAreas = new ArrayList<>();
+
+    /**
+     * Like mKeepClearAreas, but the unrestricted ones can be trusted to behave nicely.
+     * Floating windows (like Pip) will be moved away from them without applying restrictions.
+     */
+    private final List<Rect> mUnrestrictedKeepClearAreas = new ArrayList<>();
 
     // 0 = left, 1 = right
     private final int[] mLastRequestedExclusionHeight = {0, 0};
@@ -1024,51 +1031,86 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     /**
-     * @return a list of rects that should ideally not be covered by floating windows like pip.
-     *         The returned rect coordinates are relative to the display origin.
+     * Collects all restricted and unrestricted keep-clear areas for this window.
+     * Keep-clear areas are rects that should ideally not be covered by floating windows like Pip.
+     * The system is more careful about restricted ones and may apply restrictions to them, while
+     * the unrestricted ones are considered safe.
+     *
+     * @param outRestricted collection to add restricted keep-clear areas to
+     * @param outUnrestricted collection to add unrestricted keep-clear areas to
      */
-    List<Rect> getKeepClearAreas() {
+    void getKeepClearAreas(Collection<Rect> outRestricted, Collection<Rect> outUnrestricted) {
         final Matrix tmpMatrix = new Matrix();
         final float[] tmpFloat9 = new float[9];
-        return getKeepClearAreas(tmpMatrix, tmpFloat9);
+        getKeepClearAreas(outRestricted, outUnrestricted, tmpMatrix, tmpFloat9);
     }
 
     /**
+     * Collects all restricted and unrestricted keep-clear areas for this window.
+     * Keep-clear areas are rects that should ideally not be covered by floating windows like Pip.
+     * The system is more careful about restricted ones and may apply restrictions to them, while
+     * the unrestricted ones are considered safe.
+     *
+     * @param outRestricted collection to add restricted keep-clear areas to
+     * @param outUnrestricted collection to add unrestricted keep-clear areas to
      * @param tmpMatrix a temporary matrix to be used for transformations
      * @param float9 a temporary array of 9 floats
-     *
-     * @return a list of rects that should ideally not be covered by floating windows like pip.
-     *         The returned rect coordinates are relative to the display origin.
      */
-    List<Rect> getKeepClearAreas(Matrix tmpMatrix, float[] float9) {
+    void getKeepClearAreas(Collection<Rect> outRestricted, Collection<Rect> outUnrestricted,
+            Matrix tmpMatrix, float[] float9) {
+        outRestricted.addAll(getRectsInScreenSpace(mKeepClearAreas, tmpMatrix, float9));
+        outUnrestricted.addAll(
+                getRectsInScreenSpace(mUnrestrictedKeepClearAreas, tmpMatrix, float9));
+    }
+
+    /**
+     * Transforms the given rects from window coordinate space to screen space.
+     */
+    List<Rect> getRectsInScreenSpace(List<Rect> rects, Matrix tmpMatrix, float[] float9) {
         getTransformationMatrix(float9, tmpMatrix);
 
-        // Translate all keep-clear rects to screen coordinates.
-        final List<Rect> transformedKeepClearAreas = new ArrayList<Rect>();
+        final List<Rect> transformedRects = new ArrayList<Rect>();
         final RectF tmpRect = new RectF();
         Rect curr;
-        for (Rect r : mKeepClearAreas) {
+        for (Rect r : rects) {
             tmpRect.set(r);
             tmpMatrix.mapRect(tmpRect);
             curr = new Rect();
             tmpRect.roundOut(curr);
-            transformedKeepClearAreas.add(curr);
+            transformedRects.add(curr);
         }
-        return transformedKeepClearAreas;
+        return transformedRects;
     }
 
     /**
-     * @param keepClearAreas the new keep-clear areas for this window. The rects should be defined
-     *                       in window coordinate space
+     * Sets the new keep-clear areas for this window. The rects should be defined in window
+     * coordinate space.
+     * Keep-clear areas can be restricted or unrestricted, depending on whether the app holds the
+     * {@link android.Manifest.permission.SET_UNRESTRICTED_KEEP_CLEAR_AREAS} system permission.
+     * Restricted ones will be handled more carefully by the system. Restrictions may be applied.
+     * Unrestricted ones are considered safe. The system should move floating windows away from them
+     * without applying restrictions.
+     *
+     * @param restricted the new restricted keep-clear areas for this window
+     * @param unrestricted the new unrestricted keep-clear areas for this window
      *
      * @return true if there is a change in the list of keep-clear areas; false otherwise
      */
-    boolean setKeepClearAreas(List<Rect> keepClearAreas) {
-        if (mKeepClearAreas.equals(keepClearAreas)) {
+    boolean setKeepClearAreas(List<Rect> restricted, List<Rect> unrestricted) {
+        final boolean newRestrictedAreas = !mKeepClearAreas.equals(restricted);
+        final boolean newUnrestrictedAreas = !mUnrestrictedKeepClearAreas.equals(unrestricted);
+        if (!newRestrictedAreas && !newUnrestrictedAreas) {
             return false;
         }
-        mKeepClearAreas.clear();
-        mKeepClearAreas.addAll(keepClearAreas);
+        if (newRestrictedAreas) {
+            mKeepClearAreas.clear();
+            mKeepClearAreas.addAll(restricted);
+        }
+
+        if (newUnrestrictedAreas) {
+            mUnrestrictedKeepClearAreas.clear();
+            mUnrestrictedKeepClearAreas.addAll(unrestricted);
+        }
         return true;
     }
 
@@ -1149,6 +1191,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 mActivityRecord != null
                         ? mActivityRecord.getInputApplicationHandle(false /* update */) : null,
                 getDisplayId()));
+        mInputWindowHandle.setFocusable(false);
         mInputWindowHandle.setOwnerPid(s.mPid);
         mInputWindowHandle.setOwnerUid(s.mUid);
         mInputWindowHandle.setName(getName());
@@ -1351,13 +1394,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     // TODO(b/161810301): Make the frame be passed from the client side.
-    void setFrame() {
-        // TODO(b/161810301): Set the window frame here. We don't have to do it now because
-        //                    DisplayPolicy has already done it for the window.
-
+    void setFrames(ClientWindowFrames clientWindowFrames) {
         mHaveFrame = true;
 
         final WindowFrames windowFrames = mWindowFrames;
+        windowFrames.mDisplayFrame.set(clientWindowFrames.displayFrame);
+        windowFrames.mParentFrame.set(clientWindowFrames.parentFrame);
+        windowFrames.mFrame.set(clientWindowFrames.frame);
 
         if (mRequestedWidth != mLastRequestedWidth || mRequestedHeight != mLastRequestedHeight) {
             mLastRequestedWidth = mRequestedWidth;
@@ -1602,14 +1645,14 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     @Override
-    DisplayContent getDisplayContent() {
+    public DisplayContent getDisplayContent() {
         return mToken.getDisplayContent();
     }
 
     @Override
     void onDisplayChanged(DisplayContent dc) {
         if (dc != null && mDisplayContent != null && dc != mDisplayContent
-                && getImeInputTarget() == this) {
+                && mDisplayContent.getImeInputTarget() == this) {
             dc.updateImeInputAndControlTarget(getImeInputTarget());
             mDisplayContent.setImeInputTarget(null);
         }
@@ -1747,6 +1790,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     @Override
     public int getPid() {
         return mSession.mPid;
+    }
+
+    @Override
+    public int getUid() {
+        return mSession.mUid;
     }
 
     Task getTask() {
@@ -2348,7 +2396,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     @Override
     public void onConfigurationChanged(Configuration newParentConfig) {
-        if (getDisplayContent().getImeTarget(IME_TARGET_INPUT) != this && !isImeLayeringTarget()) {
+        if (getDisplayContent().getImeInputTarget() != this && !isImeLayeringTarget()) {
             super.onConfigurationChanged(newParentConfig);
             return;
         }
@@ -2424,7 +2472,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             dc.setImeLayeringTarget(null);
             dc.computeImeTarget(true /* updateImeTarget */);
         }
-        if (dc.getImeTarget(IME_TARGET_INPUT) == this) {
+        if (dc.getImeInputTarget() == this) {
             dc.updateImeInputAndControlTarget(null);
         }
 
@@ -2563,8 +2611,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                         mWmService.mAccessibilityController.onWindowTransition(this, transit);
                     }
                 }
-                final boolean isAnimating = mAnimatingExit
-                        || isAnimating(TRANSITION | PARENTS, EXIT_ANIMATING_TYPES);
+                final boolean isAnimating = mAnimatingExit || isExitAnimationRunningSelfOrParent();
                 final boolean lastWindowIsStartingWindow = startingWindow && mActivityRecord != null
                         && mActivityRecord.isLastWindow(this);
                 // We delay the removal of a window if it has a showing surface that can be used to run
@@ -3538,6 +3585,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // Clear animating flags now, since the surface is now gone. (Note this is true even
         // if the surface is saved, to outside world the surface is still NO_SURFACE.)
         mAnimatingExit = false;
+
+        if (useBLASTSync()) {
+            immediatelyNotifyBlastSync();
+        }
     }
 
     void onSurfaceShownChanged(boolean shown) {
@@ -3578,11 +3629,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         final int requested = mLastRequestedExclusionHeight[side];
         final int granted = mLastGrantedExclusionHeight[side];
 
+        final boolean inSplitScreen = getTask() != null && getTask().inSplitScreen();
+
         FrameworkStatsLog.write(FrameworkStatsLog.EXCLUSION_RECT_STATE_CHANGED,
                 mAttrs.packageName, requested, requested - granted /* rejected */,
                 side + 1 /* Sides are 1-indexed in atoms.proto */,
                 (getConfiguration().orientation == ORIENTATION_LANDSCAPE),
-                isSplitScreenWindowingMode(getWindowingMode()), (int) duration);
+                inSplitScreen, (int) duration);
     }
 
     private void initExclusionRestrictions() {
@@ -3893,7 +3946,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         try {
             mClient.resized(mClientWindowFrames, reportDraw, mLastReportedConfiguration,
-                    forceRelayout, alwaysConsumeSystemBars, displayId);
+                forceRelayout, alwaysConsumeSystemBars, displayId, Integer.MAX_VALUE);
             if (drawPending && reportOrientation && mOrientationChanging) {
                 mOrientationChangeRedrawRequestTime = SystemClock.elapsedRealtime();
                 ProtoLog.v(WM_DEBUG_ORIENTATION,
@@ -4117,8 +4170,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (task == null) {
             return false;
         }
-        if (!inSplitScreenWindowingMode() && !inFreeformWindowingMode()
-                && !task.getRootTask().mCreatedByOrganizer) {
+        if (!inFreeformWindowingMode() && !task.getRootTask().mCreatedByOrganizer) {
             return false;
         }
         // TODO(157912944): formalize drag-resizing so that exceptions aren't hardcoded like this
@@ -4198,8 +4250,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         proto.write(FORCE_SEAMLESS_ROTATION, mForceSeamlesslyRotate);
         proto.write(HAS_COMPAT_SCALE, hasCompatScale());
         proto.write(GLOBAL_SCALE, mGlobalScale);
-        for (Rect r : getKeepClearAreas()) {
+        for (Rect r : mKeepClearAreas) {
             r.dumpDebug(proto, KEEP_CLEAR_AREAS);
+        }
+        for (Rect r : mUnrestrictedKeepClearAreas) {
+            r.dumpDebug(proto, UNRESTRICTED_KEEP_CLEAR_AREAS);
         }
         proto.end(token);
     }
@@ -4369,7 +4424,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
         pw.println(prefix + "isOnScreen=" + isOnScreen());
         pw.println(prefix + "isVisible=" + isVisible());
-        pw.println(prefix + "keepClearAreas=" + getKeepClearAreas());
+        pw.println(prefix + "keepClearAreas: restricted=" + mKeepClearAreas
+                          + ", unrestricted=" + mUnrestrictedKeepClearAreas);
         if (dumpAll) {
             final String visibilityString = mRequestedVisibilities.toString();
             if (!visibilityString.isEmpty()) {
@@ -4921,6 +4977,15 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return false;
     }
 
+    boolean isExitAnimationRunningSelfOrParent() {
+        return inAppOrRecentsTransition()
+                || isAnimating(0 /* flags */, ANIMATION_TYPE_WINDOW_ANIMATION);
+    }
+
+    boolean isExitAnimationRunningSelfOrChild() {
+        return isAnimating(CHILDREN, ANIMATION_TYPE_WINDOW_ANIMATION);
+    }
+
     private boolean shouldFinishAnimatingExit() {
         // Exit animation might be applied soon.
         if (inTransition()) {
@@ -4932,7 +4997,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return true;
         }
         // Exit animation is running.
-        if (isAnimating(TRANSITION | PARENTS, EXIT_ANIMATING_TYPES)) {
+        if (isExitAnimationRunningSelfOrParent()) {
             ProtoLog.d(WM_DEBUG_APP_TRANSITIONS, "shouldWaitAnimatingExit: isAnimating: %s",
                     this);
             return false;
@@ -5025,7 +5090,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     @Override
     boolean handleCompleteDeferredRemoval() {
-        if (mRemoveOnExit && !isSelfAnimating(0 /* flags */, EXIT_ANIMATING_TYPES)) {
+        if (mRemoveOnExit && !isSelfAnimating(0 /* flags */, ANIMATION_TYPE_WINDOW_ANIMATION)) {
             mRemoveOnExit = false;
             removeImmediately();
         }
@@ -5596,7 +5661,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * @return {@link InsetsControlTarget} of host that controls the IME.
      *         When window is doesn't have a parent, it is returned as-is.
      */
-    InsetsControlTarget getImeControlTarget() {
+    @Override
+    public InsetsControlTarget getImeControlTarget() {
         return getDisplayContent().getImeHostOrFallback(this);
     }
 
@@ -5731,8 +5797,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     WindowState getImeInputTarget() {
-        final InsetsControlTarget target = mDisplayContent.getImeTarget(IME_TARGET_INPUT);
-        return target != null ? target.getWindow() : null;
+        final InputTarget target = mDisplayContent.getImeInputTarget();
+        return target != null ? target.getWindowState() : null;
     }
 
     void forceReportingResized() {
@@ -5881,7 +5947,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         super.finishSync(outMergedTransaction, cancel);
     }
 
-    boolean finishDrawing(SurfaceControl.Transaction postDrawTransaction) {
+    boolean finishDrawing(SurfaceControl.Transaction postDrawTransaction, int syncSeqId) {
         if (mOrientationChangeRedrawRequestTime > 0) {
             final long duration =
                     SystemClock.elapsedRealtime() - mOrientationChangeRedrawRequestTime;
@@ -5928,18 +5994,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     void immediatelyNotifyBlastSync() {
         prepareDrawHandlers();
-        finishDrawing(null);
+        finishDrawing(null, Integer.MAX_VALUE);
         mWmService.mH.removeMessages(WINDOW_STATE_BLAST_SYNC_TIMEOUT, this);
         if (!useBLASTSync()) return;
-
-        final Task task = getTask();
-        if (task != null) {
-            final SurfaceControl.Transaction t = task.getMainWindowSizeChangeTransaction();
-            if (t != null) {
-                mSyncTransaction.merge(t);
-            }
-            task.setMainWindowSizeChangeTransaction(null);
-        }
     }
 
     @Override
@@ -5975,10 +6032,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     private boolean shouldSendRedrawForSync() {
         if (mRedrawForSyncReported) {
             return false;
-        }
-        final Task task = getTask();
-        if (task != null && task.getMainWindowSizeChangeTransaction() != null) {
-            return true;
         }
         return useBLASTSync();
     }
@@ -6116,5 +6169,38 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     void clearClientTouchableRegion() {
         mTouchableInsets = ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_FRAME;
         mGivenTouchableRegion.setEmpty();
+    }
+
+    @Override
+    public boolean shouldControlIme() {
+        return !inMultiWindowMode();
+    }
+
+    @Override
+    public boolean canScreenshotIme() {
+        return !isSecureLocked();
+    }
+
+    @Override
+    public ActivityRecord getActivityRecord() {
+        return mActivityRecord;
+    }
+
+    @Override
+    public void unfreezeInsetsAfterStartInput() {
+        if (mActivityRecord != null) {
+            mActivityRecord.mImeInsetsFrozenUntilStartInput = false;
+        }
+    }
+
+    @Override
+    public boolean isInputMethodClientFocus(int uid, int pid) {
+        return getDisplayContent().isInputMethodClientFocus(uid, pid);
+    }
+
+    @Override
+    public void dumpProto(ProtoOutputStream proto, long fieldId,
+                          @WindowTraceLogLevel int logLevel) {
+        dumpDebug(proto, fieldId, logLevel);
     }
 }

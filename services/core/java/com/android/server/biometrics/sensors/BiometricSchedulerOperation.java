@@ -84,6 +84,8 @@ public class BiometricSchedulerOperation {
     private final BaseClientMonitor mClientMonitor;
     @Nullable
     private final ClientMonitorCallback mClientCallback;
+    @Nullable
+    private ClientMonitorCallback mOnStartCallback;
     @OperationState
     private int mState;
     @VisibleForTesting
@@ -108,7 +110,8 @@ public class BiometricSchedulerOperation {
         mCancelWatchdog = () -> {
             if (!isFinished()) {
                 Slog.e(TAG, "[Watchdog Triggered]: " + this);
-                getWrappedCallback().onClientFinished(mClientMonitor, false /* success */);
+                getWrappedCallback(mOnStartCallback)
+                        .onClientFinished(mClientMonitor, false /* success */);
             }
         };
     }
@@ -174,6 +177,7 @@ public class BiometricSchedulerOperation {
     }
 
     private boolean doStart(@NonNull ClientMonitorCallback callback) {
+        mOnStartCallback = callback;
         final ClientMonitorCallback cb = getWrappedCallback(callback);
 
         if (mState == STATE_WAITING_IN_QUEUE_CANCELING) {

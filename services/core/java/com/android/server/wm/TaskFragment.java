@@ -63,8 +63,6 @@ import static com.android.server.wm.TaskFragmentProto.DISPLAY_ID;
 import static com.android.server.wm.TaskFragmentProto.MIN_HEIGHT;
 import static com.android.server.wm.TaskFragmentProto.MIN_WIDTH;
 import static com.android.server.wm.TaskFragmentProto.WINDOW_CONTAINER;
-import static com.android.server.wm.WindowContainer.AnimationFlags.CHILDREN;
-import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
 import static com.android.server.wm.WindowContainerChildProto.TASK_FRAGMENT;
 
 import android.annotation.IntDef;
@@ -242,7 +240,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
 
     /** Client assigned unique token for this TaskFragment if this is created by an organizer. */
     @Nullable
-    private IBinder mFragmentToken;
+    private final IBinder mFragmentToken;
 
     /**
      * Whether to delay the last activity of TaskFragment being immediately removed while finishing.
@@ -516,12 +514,13 @@ class TaskFragment extends WindowContainer<WindowContainer> {
      * @see #isAllowedToEmbedActivityInTrustedMode(ActivityRecord)
      */
     boolean isAllowedToEmbedActivity(@NonNull ActivityRecord a) {
-        if ((a.info.flags & FLAG_ALLOW_UNTRUSTED_ACTIVITY_EMBEDDING)
-                == FLAG_ALLOW_UNTRUSTED_ACTIVITY_EMBEDDING) {
-            return true;
-        }
+        return isAllowedToEmbedActivityInUntrustedMode(a)
+                || isAllowedToEmbedActivityInTrustedMode(a);
+    }
 
-        return isAllowedToEmbedActivityInTrustedMode(a);
+    boolean isAllowedToEmbedActivityInUntrustedMode(@NonNull ActivityRecord a) {
+        return (a.info.flags & FLAG_ALLOW_UNTRUSTED_ACTIVITY_EMBEDDING)
+                == FLAG_ALLOW_UNTRUSTED_ACTIVITY_EMBEDDING;
     }
 
     /**
@@ -531,7 +530,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
      * <li>the activity has declared the organizer host as trusted explicitly via known
      * certificate.</li>
      */
-    private boolean isAllowedToEmbedActivityInTrustedMode(@NonNull ActivityRecord a) {
+    boolean isAllowedToEmbedActivityInTrustedMode(@NonNull ActivityRecord a) {
         if (UserHandle.getAppId(mTaskFragmentOrganizerUid) == SYSTEM_UID) {
             // The system is trusted to embed other apps securely and for all users.
             return true;
@@ -1767,8 +1766,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         // Resolve override windowing mode to fullscreen for home task (even on freeform
         // display), or split-screen if in split-screen mode.
         if (getActivityType() == ACTIVITY_TYPE_HOME && windowingMode == WINDOWING_MODE_UNDEFINED) {
-            windowingMode = WindowConfiguration.isSplitScreenWindowingMode(parentWindowingMode)
-                    ? parentWindowingMode : WINDOWING_MODE_FULLSCREEN;
+            windowingMode = WINDOWING_MODE_FULLSCREEN;
             getResolvedOverrideConfiguration().windowConfiguration.setWindowingMode(windowingMode);
         }
 
@@ -2304,6 +2302,10 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         mMinHeight = minHeight;
     }
 
+    boolean shouldRemoveSelfOnLastChildRemoval() {
+        return !mCreatedByOrganizer || mIsRemovalRequested;
+    }
+
     @Override
     void removeChild(WindowContainer child) {
         removeChild(child, true /* removeSelfIfPossible */);
@@ -2319,7 +2321,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                 mBackScreenshots.remove(r.mActivityComponent.flattenToString());
             }
         }
-        if (removeSelfIfPossible && (!mCreatedByOrganizer || mIsRemovalRequested) && !hasChild()) {
+        if (removeSelfIfPossible && shouldRemoveSelfOnLastChildRemoval() && !hasChild()) {
             removeImmediately("removeLastChild " + child);
         }
     }
@@ -2337,13 +2339,18 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             return;
         }
         mIsRemovalRequested = true;
-        forAllActivities(r -> {
-            if (withTransition) {
+        // The task order may be changed by finishIfPossible() for adjusting focus if there are
+        // nested tasks, so add all activities into a list to avoid missed removals.
+        final ArrayList<ActivityRecord> removingActivities = new ArrayList<>();
+        forAllActivities((Consumer<ActivityRecord>) removingActivities::add);
+        for (int i = removingActivities.size() - 1; i >= 0; --i) {
+            final ActivityRecord r = removingActivities.get(i);
+            if (withTransition && r.isVisible()) {
                 r.finishIfPossible(reason, false /* oomAdj */);
             } else {
                 r.destroyIfPossible(reason);
             }
-        });
+        }
     }
 
     void setDelayLastActivityRemoval(boolean delay) {
@@ -2361,8 +2368,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         if (!hasChild()) {
             return false;
         }
-        return isAnimating(TRANSITION | CHILDREN, WindowState.EXIT_ANIMATING_TYPES)
-                || inTransition();
+        return isExitAnimationRunningSelfOrChild() || inTransition();
     }
 
     @Override
@@ -2383,8 +2389,16 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     void removeImmediately() {
         mIsRemovalRequested = false;
         resetAdjacentTaskFragment();
+        cleanUp();
         super.removeImmediately();
         sendTaskFragmentVanished();
+    }
+
+    /** Called on remove to cleanup. */
+    private void cleanUp() {
+        if (mIsEmbedded) {
+            mAtmService.mWindowOrganizerController.cleanUpEmbeddedTaskFragment(this);
+        }
     }
 
     @Override

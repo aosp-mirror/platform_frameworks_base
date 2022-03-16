@@ -131,7 +131,7 @@ public class MasterClearReceiver extends BroadcastReceiver {
         final UserManager userManager = context.getSystemService(UserManager.class);
         final int result = userManager.removeUserWhenPossible(
                 UserHandle.of(userId), /* overrideDevicePolicy= */ false);
-        if (result == UserManager.REMOVE_RESULT_ERROR) {
+        if (!UserManager.isRemoveResultSuccessful(result)) {
             Slogf.e(TAG, "Can't remove user %d", userId);
             return false;
         }

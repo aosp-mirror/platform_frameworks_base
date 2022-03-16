@@ -19,7 +19,7 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.RippleDrawable;
+import android.graphics.drawable.GradientDrawable;
 import android.os.PowerManager;
 import android.os.SystemClock;
 import android.util.AttributeSet;
@@ -132,9 +132,9 @@ public class NumPadKey extends ViewGroup {
         setContentDescription(mDigitText.getText().toString());
 
         Drawable background = getBackground();
-        if (background instanceof RippleDrawable) {
-            mAnimator = new NumPadAnimator(context, (RippleDrawable) background,
-                    R.style.NumPadKey);
+        if (background instanceof GradientDrawable) {
+            mAnimator = new NumPadAnimator(context, background.mutate(),
+                    R.style.NumPadKey, mDigitText);
         } else {
             mAnimator = null;
         }
@@ -161,11 +161,16 @@ public class NumPadKey extends ViewGroup {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
-            doHapticKeyClick();
-            if (mAnimator != null) mAnimator.start();
+        switch(event.getActionMasked()) {
+            case MotionEvent.ACTION_DOWN:
+                doHapticKeyClick();
+                if (mAnimator != null) mAnimator.expand();
+                break;
+            case MotionEvent.ACTION_UP:
+            case MotionEvent.ACTION_CANCEL:
+                if (mAnimator != null) mAnimator.contract();
+                break;
         }
-
         return super.onTouchEvent(event);
     }
 

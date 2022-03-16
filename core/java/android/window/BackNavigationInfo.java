@@ -61,7 +61,7 @@ public final class BackNavigationInfo implements Parcelable {
     public static final int TYPE_CROSS_TASK = 3;
 
     /**
-     * A {@link android.view.OnBackInvokedCallback} is available and needs to be called.
+     * A {@link OnBackInvokedCallback} is available and needs to be called.
      * <p>
      */
     public static final int TYPE_CALLBACK = 4;
@@ -206,13 +206,13 @@ public final class BackNavigationInfo implements Parcelable {
     }
 
     /**
-     * Returns the {@link android.view.OnBackInvokedCallback} of the top level window or null if
+     * Returns the {@link OnBackInvokedCallback} of the top level window or null if
      * the client didn't register a callback.
      * <p>
      * This is never null when {@link #getType} returns {@link #TYPE_CALLBACK}.
      *
-     * @see android.view.OnBackInvokedCallback
-     * @see android.view.OnBackInvokedDispatcher
+     * @see OnBackInvokedCallback
+     * @see OnBackInvokedDispatcher
      */
     @Nullable
     public IOnBackInvokedCallback getOnBackInvokedCallback() {

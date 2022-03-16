@@ -52,7 +52,7 @@ android_test {
         "service-blobstore",
         "service-jobscheduler",
         "service-permission.impl",
-        "service-supplementalprocess.impl",
+        "service-sdksandbox.impl",
         "services.companion",
         "services.core",
         "services.devicepolicy",

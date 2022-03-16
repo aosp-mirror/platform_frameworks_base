@@ -74,12 +74,12 @@
 
     <!-- The default tiles to display in QuickSettings -->
     <string name="quick_settings_tiles_default" translatable="false">
-        internet,bt,flashlight,dnd,alarm,airplane,controls,wallet,rotation,battery,cast,screenrecord,mictoggle,cameratoggle,custom(com.android.permissioncontroller/.permission.service.SafetyHubQsTileService)
+        internet,bt,flashlight,dnd,alarm,airplane,controls,wallet,rotation,battery,cast,screenrecord,mictoggle,cameratoggle,custom(com.android.permissioncontroller/.permission.service.SafetyCenterQsTileService)
     </string>
 
     <!-- The component name of the Safety Quick Settings Tile -->
     <string name="safety_quick_settings_tile" translatable="false">
-        custom(com.android.permissioncontroller/.permission.service.SafetyHubQsTileService)
+        custom(com.android.permissioncontroller/.permission.service.SafetyCenterQsTileService)
     </string>
 
     <!-- The minimum number of tiles to display in QuickSettings -->
@@ -487,6 +487,9 @@
      space -->
     <bool name="config_showBatteryEstimateQSBH">false</bool>
 
+    <!-- Whether to show a severe low battery dialog. -->
+    <bool name="config_severe_battery_dialog">false</bool>
+
     <!-- A path similar to frameworks/base/core/res/res/values/config.xml
       config_mainBuiltInDisplayCutout that describes a path larger than the exact path of a display
       cutout. If present as well as config_enableDisplayCutoutProtection is set to true, then
@@ -698,4 +701,10 @@
 
     <!-- How long in milliseconds before full burn-in protection is achieved. -->
     <integer name="config_dreamOverlayMillisUntilFullJitter">240000</integer>
+
+    <integer name="complicationFadeOutMs">500</integer>
+
+    <integer name="complicationFadeInMs">500</integer>
+
+    <integer name="complicationRestoreMs">1000</integer>
 </resources>

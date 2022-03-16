@@ -504,7 +504,12 @@ public class CarrierConfigManager {
     /** Control whether users can choose a network operator. */
     public static final String KEY_OPERATOR_SELECTION_EXPAND_BOOL = "operator_selection_expand_bool";
 
-    /** Used in Cellular Network Settings for preferred network type. */
+    /**
+     * Used in the Preferred Network Types menu to determine if the 2G option is displayed.
+     * Value defaults to false as of Android T to discourage the use of insecure 2G protocols.
+     *
+     * @see #KEY_HIDE_ENABLE_2G
+     */
     public static final String KEY_PREFER_2G_BOOL = "prefer_2g_bool";
 
     /**
@@ -3850,30 +3855,42 @@ public class CarrierConfigManager {
     public static final String KEY_OPPORTUNISTIC_ESIM_DOWNLOAD_VIA_WIFI_ONLY_BOOL =
             "opportunistic_esim_download_via_wifi_only_bool";
 
-    /**
-     * Controls RSRP threshold at which OpportunisticNetworkService will decide whether
+/**
+     * Controls RSRP threshold, in dBm, at which OpportunisticNetworkService will decide whether
      * the opportunistic network is good enough for internet data.
+     *
+     * <p>The value of {@link CellSignalStrengthLte#getRsrp()} will be compared with this
+     * threshold.
      */
     public static final String KEY_OPPORTUNISTIC_NETWORK_ENTRY_THRESHOLD_RSRP_INT =
             "opportunistic_network_entry_threshold_rsrp_int";
 
     /**
-     * Controls RSSNR threshold at which OpportunisticNetworkService will decide whether
-     * the opportunistic network is good enough for internet data.
+     * Controls RSSNR threshold, in dB, at which OpportunisticNetworkService will
+     * decide whether the opportunistic network is good enough for internet data.
+     *
+     * <p>The value of {@link CellSignalStrengthLte#getRssnr()} will be compared with this
+     * threshold.
      */
     public static final String KEY_OPPORTUNISTIC_NETWORK_ENTRY_THRESHOLD_RSSNR_INT =
             "opportunistic_network_entry_threshold_rssnr_int";
 
     /**
-     * Controls RSRP threshold below which OpportunisticNetworkService will decide whether
+     * Controls RSRP threshold, in dBm, below which OpportunisticNetworkService will decide whether
      * the opportunistic network available is not good enough for internet data.
+     *
+     * <p>The value of {@link CellSignalStrengthLte#getRsrp()} will be compared with this
+     * threshold.
      */
     public static final String KEY_OPPORTUNISTIC_NETWORK_EXIT_THRESHOLD_RSRP_INT =
             "opportunistic_network_exit_threshold_rsrp_int";
 
     /**
-     * Controls RSSNR threshold below which OpportunisticNetworkService will decide whether
-     * the opportunistic network available is not good enough for internet data.
+     * Controls RSSNR threshold, in dB, below which OpportunisticNetworkService will
+     * decide whether the opportunistic network available is not good enough for internet data.
+     *
+     * <p>The value of {@link CellSignalStrengthLte#getRssnr()} will be compared with this
+     * threshold.
      */
     public static final String KEY_OPPORTUNISTIC_NETWORK_EXIT_THRESHOLD_RSSNR_INT =
             "opportunistic_network_exit_threshold_rssnr_int";
@@ -3971,7 +3988,7 @@ public class CarrierConfigManager {
          * good enough for internet data. Note other factors may be considered for the final
          * decision.
          *
-         * <p>The value of {@link CellSignalStrengthNr#getSsRsrp} will be compared with this
+         * <p>The value of {@link CellSignalStrengthNr#getSsRsrp()} will be compared with this
          * threshold.
          *
          * @hide
@@ -3998,7 +4015,7 @@ public class CarrierConfigManager {
          * good enough for internet data. Note other factors may be considered for the final
          * decision.
          *
-         * <p>The value of {@link CellSignalStrengthNr#getSsRsrq} will be compared with this
+         * <p>The value of {@link CellSignalStrengthNr#getSsRsrq()} will be compared with this
          * threshold.
          *
          * @hide
@@ -4025,6 +4042,9 @@ public class CarrierConfigManager {
          * be considered good enough for internet data. Note other factors may be considered
          * for the final decision.
          *
+         * <p>The value of {@link CellSignalStrengthNr#getSsRsrp()} will be compared with this
+         * threshold.
+         *
          * @hide
          */
         public static final String KEY_EXIT_THRESHOLD_SS_RSRP_INT =
@@ -4047,6 +4067,9 @@ public class CarrierConfigManager {
          * Controls SS-RSRQ threshold in dB below which 5G opportunistic network available will not
          * be considered good enough for internet data. Note other factors may be considered
          * for the final decision.
+         *
+         * <p>The value of {@link CellSignalStrengthNr#getSsRsrq()} will be compared with this
+         * threshold.
          *
          * @hide
          */
@@ -8576,7 +8599,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_IGNORE_SIM_NETWORK_LOCKED_EVENTS_BOOL, false);
         sDefaults.putBoolean(KEY_MDN_IS_ADDITIONAL_VOICEMAIL_NUMBER_BOOL, false);
         sDefaults.putBoolean(KEY_OPERATOR_SELECTION_EXPAND_BOOL, true);
-        sDefaults.putBoolean(KEY_PREFER_2G_BOOL, true);
+        sDefaults.putBoolean(KEY_PREFER_2G_BOOL, false);
         sDefaults.putBoolean(KEY_4G_ONLY_BOOL, false);
         sDefaults.putBoolean(KEY_SHOW_APN_SETTING_CDMA_BOOL, false);
         sDefaults.putBoolean(KEY_SHOW_CDMA_CHOICES_BOOL, false);
@@ -8995,9 +9018,9 @@ public class CarrierConfigManager {
         /* Default value is minimum RSRP level needed for SIGNAL_STRENGTH_MODERATE */
         sDefaults.putInt(KEY_OPPORTUNISTIC_NETWORK_EXIT_THRESHOLD_RSRP_INT, -118);
         /* Default value is minimum RSSNR level needed for SIGNAL_STRENGTH_GOOD */
-        sDefaults.putInt(KEY_OPPORTUNISTIC_NETWORK_ENTRY_THRESHOLD_RSSNR_INT, 45);
+        sDefaults.putInt(KEY_OPPORTUNISTIC_NETWORK_ENTRY_THRESHOLD_RSSNR_INT, 5);
         /* Default value is minimum RSSNR level needed for SIGNAL_STRENGTH_MODERATE */
-        sDefaults.putInt(KEY_OPPORTUNISTIC_NETWORK_EXIT_THRESHOLD_RSSNR_INT, 10);
+        sDefaults.putInt(KEY_OPPORTUNISTIC_NETWORK_EXIT_THRESHOLD_RSSNR_INT, 1);
         /* Default value is 1024 kbps */
         sDefaults.putInt(KEY_OPPORTUNISTIC_NETWORK_ENTRY_THRESHOLD_BANDWIDTH_INT, 1024);
         /* Default value is 10 seconds */

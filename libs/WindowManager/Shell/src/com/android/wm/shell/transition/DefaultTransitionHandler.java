@@ -348,12 +348,13 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         for (int i = info.getChanges().size() - 1; i >= 0; --i) {
             final TransitionInfo.Change change = info.getChanges().get(i);
             final boolean isTask = change.getTaskInfo() != null;
+            boolean isSeamlessDisplayChange = false;
 
             if (change.getMode() == TRANSIT_CHANGE && (change.getFlags() & FLAG_IS_DISPLAY) != 0) {
                 if (info.getType() == TRANSIT_CHANGE) {
-                    boolean isSeamless = isRotationSeamless(info, mDisplayController);
+                    isSeamlessDisplayChange = isRotationSeamless(info, mDisplayController);
                     final int anim = getRotationAnimation(info);
-                    if (!(isSeamless || anim == ROTATION_ANIMATION_JUMPCUT)) {
+                    if (!(isSeamlessDisplayChange || anim == ROTATION_ANIMATION_JUMPCUT)) {
                         mRotationAnimation = new ScreenRotationAnimation(mContext, mSurfaceSession,
                                 mTransactionPool, startTransaction, change, info.getRootLeash(),
                                 anim);
@@ -387,6 +388,8 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
                 startTransaction.setPosition(change.getLeash(),
                         change.getEndAbsBounds().left - info.getRootOffset().x,
                         change.getEndAbsBounds().top - info.getRootOffset().y);
+                // Seamless display transition doesn't need to animate.
+                if (isSeamlessDisplayChange) continue;
                 if (isTask) {
                     // Skip non-tasks since those usually have null bounds.
                     startTransaction.setWindowCrop(change.getLeash(),
@@ -405,7 +408,8 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
                             || type == TRANSIT_CLOSE
                             || type == TRANSIT_TO_FRONT
                             || type == TRANSIT_TO_BACK;
-                    if (isOpenOrCloseTransition) {
+                    final boolean isTranslucent = (change.getFlags() & FLAG_TRANSLUCENT) != 0;
+                    if (isOpenOrCloseTransition && !isTranslucent) {
                         // Use the overview background as the background for the animation
                         final Context uiContext = ActivityThread.currentActivityThread()
                                 .getSystemUiContext();
@@ -726,14 +730,17 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
                         ? R.styleable.WindowAnimation_wallpaperCloseEnterAnimation
                         : R.styleable.WindowAnimation_wallpaperCloseExitAnimation;
             } else if (type == TRANSIT_OPEN) {
-                if (isTask) {
+                // We will translucent open animation for translucent activities and tasks. Choose
+                // WindowAnimation_activityOpenEnterAnimation and set translucent here, then
+                // TransitionAnimation loads appropriate animation later.
+                if ((changeFlags & FLAG_TRANSLUCENT) != 0 && enter) {
+                    translucent = true;
+                }
+                if (isTask && !translucent) {
                     animAttr = enter
                             ? R.styleable.WindowAnimation_taskOpenEnterAnimation
                             : R.styleable.WindowAnimation_taskOpenExitAnimation;
                 } else {
-                    if ((changeFlags & FLAG_TRANSLUCENT) != 0 && enter) {
-                        translucent = true;
-                    }
                     animAttr = enter
                             ? R.styleable.WindowAnimation_activityOpenEnterAnimation
                             : R.styleable.WindowAnimation_activityOpenExitAnimation;
@@ -767,7 +774,7 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
                             .loadAnimationAttr(options.getPackageName(), options.getAnimations(),
                                     animAttr, translucent);
                 } else {
-                    a = mTransitionAnimation.loadDefaultAnimationAttr(animAttr);
+                    a = mTransitionAnimation.loadDefaultAnimationAttr(animAttr, translucent);
                 }
             }
         }

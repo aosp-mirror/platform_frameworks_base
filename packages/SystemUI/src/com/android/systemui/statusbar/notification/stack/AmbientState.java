@@ -102,6 +102,16 @@ public class AmbientState {
     /** Whether we are swiping up. */
     private boolean mIsSwipingUp;
 
+    /** Whether we are flinging the shade open or closed. */
+    private boolean mIsFlinging;
+
+    /**
+     * Whether we need to do a fling down after swiping up on lockscreen.
+     * True right after we swipe up on lockscreen and have not finished the fling down that follows.
+     * False when we stop flinging or leave lockscreen.
+     */
+    private boolean mNeedFlingAfterLockscreenSwipeUp = false;
+
     /**
      * @return Height of the notifications panel without top padding when expansion completes.
      */
@@ -142,6 +152,10 @@ public class AmbientState {
      * @param isSwipingUp Whether we are swiping up.
      */
     public void setSwipingUp(boolean isSwipingUp) {
+        if (!isSwipingUp && mIsSwipingUp) {
+            // Just stopped swiping up.
+            mNeedFlingAfterLockscreenSwipeUp = true;
+        }
         mIsSwipingUp = isSwipingUp;
     }
 
@@ -150,6 +164,17 @@ public class AmbientState {
      */
     public boolean isSwipingUp() {
         return mIsSwipingUp;
+    }
+
+    /**
+     * @param isFlinging Whether we are flinging the shade open or closed.
+     */
+    public void setIsFlinging(boolean isFlinging) {
+        if (isOnKeyguard() && !isFlinging && mIsFlinging) {
+            // Just stopped flinging.
+            mNeedFlingAfterLockscreenSwipeUp = false;
+        }
+        mIsFlinging = isFlinging;
     }
 
     /**
@@ -459,6 +484,9 @@ public class AmbientState {
     }
 
     public void setStatusBarState(int statusBarState) {
+        if (mStatusBarState != StatusBarState.KEYGUARD) {
+            mNeedFlingAfterLockscreenSwipeUp = false;
+        }
         mStatusBarState = statusBarState;
     }
 
@@ -519,6 +547,13 @@ public class AmbientState {
 
     public boolean isUnlockHintRunning() {
         return mUnlockHintRunning;
+    }
+
+    /**
+     * @return Whether we need to do a fling down after swiping up on lockscreen.
+     */
+    public boolean isFlingingAfterSwipeUpOnLockscreen() {
+        return mIsFlinging && mNeedFlingAfterLockscreenSwipeUp;
     }
 
     /**

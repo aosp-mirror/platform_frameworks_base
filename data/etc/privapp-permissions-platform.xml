@@ -20,13 +20,6 @@ This XML file declares which signature|privileged permissions should be granted 
 applications that come with the platform
 -->
 <permissions>
-    <privapp-permissions package="android.ext.services">
-        <permission name="android.permission.PROVIDE_RESOLVER_RANKER_SERVICE" />
-        <permission name="android.permission.MONITOR_DEFAULT_SMS_PACKAGE" />
-        <permission name="android.permission.REQUEST_NOTIFICATION_ASSISTANT_SERVICE" />
-        <permission name="android.permission.INTERACT_ACROSS_USERS" />
-    </privapp-permissions>
-
     <!-- Needed for Build.getSerial(), which is used to send a unique number for serial, per HUIG. -->
     <privapp-permissions package="android.car.usb.handler">
         <permission name="android.permission.READ_PRIVILEGED_PHONE_STATE"/>
@@ -43,24 +36,6 @@ applications that come with the platform
     <privapp-permissions package="com.android.backupconfirm">
         <permission name="android.permission.BACKUP"/>
         <permission name="android.permission.CRYPT_KEEPER"/>
-    </privapp-permissions>
-
-    <privapp-permissions package="com.android.cellbroadcastreceiver.module">
-        <permission name="android.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS"/>
-        <permission name="android.permission.INTERACT_ACROSS_USERS"/>
-        <permission name="android.permission.MANAGE_USERS"/>
-        <permission name="android.permission.STATUS_BAR"/>
-        <permission name="android.permission.MODIFY_PHONE_STATE"/>
-        <permission name="android.permission.MODIFY_CELL_BROADCASTS"/>
-        <permission name="android.permission.READ_PRIVILEGED_PHONE_STATE"/>
-        <permission name="android.permission.RECEIVE_EMERGENCY_BROADCAST"/>
-        <permission name="android.permission.START_ACTIVITIES_FROM_BACKGROUND"/>
-    </privapp-permissions>
-
-    <privapp-permissions package="com.android.cellbroadcastservice">
-        <permission name="android.permission.MODIFY_PHONE_STATE"/>
-        <permission name="android.permission.READ_PRIVILEGED_PHONE_STATE"/>
-        <permission name="android.permission.RECEIVE_EMERGENCY_BROADCAST"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.externalstorage">
@@ -242,27 +217,6 @@ applications that come with the platform
         <permission name="android.permission.UPDATE_APP_OPS_STATS"/>
         <permission name="android.permission.UPDATE_DEVICE_STATS"/>
         <permission name="android.permission.CONNECTIVITY_USE_RESTRICTED_NETWORKS"/>
-    </privapp-permissions>
-
-    <privapp-permissions package="com.android.providers.media.module">
-        <permission name="android.permission.INTERACT_ACROSS_USERS"/>
-        <permission name="android.permission.MANAGE_USERS"/>
-        <permission name="android.permission.USE_RESERVED_DISK"/>
-        <permission name="android.permission.WRITE_MEDIA_STORAGE"/>
-        <permission name="android.permission.MANAGE_EXTERNAL_STORAGE"/>
-        <permission name="android.permission.WATCH_APPOPS"/>
-        <permission name="android.permission.UPDATE_APP_OPS_STATS"/>
-        <permission name="android.permission.UPDATE_DEVICE_STATS"/>
-        <!-- Permissions required for reading and logging compat changes -->
-        <permission name="android.permission.LOG_COMPAT_CHANGE" />
-        <permission name="android.permission.READ_COMPAT_CHANGE_CONFIG" />
-        <permission name="android.permission.REGISTER_STATS_PULL_ATOM" />
-        <!-- Permissions required for reading DeviceConfig -->
-        <permission name="android.permission.READ_DEVICE_CONFIG" />
-        <permission name="android.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND"/>
-        <permission name="android.permission.MODIFY_QUIET_MODE"/>
-        <!-- Permissions required to check if an app is in the foreground or not during IO -->
-        <permission name="android.permission.PACKAGE_USAGE_STATS"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.providers.telephony">
@@ -480,10 +434,11 @@ applications that come with the platform
         <permission name="android.permission.WIFI_ACCESS_COEX_UNSAFE_CHANNELS" />
         <permission name="android.permission.WIFI_UPDATE_COEX_UNSAFE_CHANNELS" />
         <permission name="android.permission.NEARBY_WIFI_DEVICES" />
+        <permission name="android.permission.MANAGE_WIFI_INTERFACES" />
         <permission name="android.permission.OVERRIDE_WIFI_CONFIG" />
         <!-- Permission needed for CTS test - ConcurrencyTest#testP2pExternalApprover
-             P2P external approver API sets require MANAGE_WIFI_AUTO_JOIN permission. -->
-        <permission name="android.permission.MANAGE_WIFI_AUTO_JOIN" />
+             P2P external approver API sets require MANAGE_WIFI_NETWORK_SELECTION permission. -->
+        <permission name="android.permission.MANAGE_WIFI_NETWORK_SELECTION" />
         <!-- Permission required for CTS test CarrierMessagingServiceWrapperTest -->
         <permission name="android.permission.BIND_CARRIER_SERVICES"/>
         <!-- Permission required for CTS test - MusicRecognitionManagerTest -->

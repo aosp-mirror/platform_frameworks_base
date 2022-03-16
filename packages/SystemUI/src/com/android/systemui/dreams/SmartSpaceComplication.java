@@ -17,6 +17,7 @@
 package com.android.systemui.dreams;
 
 import android.content.Context;
+import android.os.Parcelable;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
@@ -25,7 +26,10 @@ import com.android.systemui.CoreStartable;
 import com.android.systemui.dreams.complication.Complication;
 import com.android.systemui.dreams.complication.ComplicationLayoutParams;
 import com.android.systemui.dreams.complication.ComplicationViewModel;
-import com.android.systemui.statusbar.lockscreen.LockscreenSmartspaceController;
+import com.android.systemui.dreams.smartspace.DreamsSmartspaceController;
+import com.android.systemui.plugins.BcSmartspaceDataPlugin;
+
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -39,9 +43,21 @@ public class SmartSpaceComplication implements Complication {
      * SystemUI.
      */
     public static class Registrant extends CoreStartable {
-        private final LockscreenSmartspaceController mSmartSpaceController;
+        private final DreamsSmartspaceController mSmartSpaceController;
         private final DreamOverlayStateController mDreamOverlayStateController;
         private final SmartSpaceComplication mComplication;
+
+        private final BcSmartspaceDataPlugin.SmartspaceTargetListener mSmartspaceListener =
+                new BcSmartspaceDataPlugin.SmartspaceTargetListener() {
+            @Override
+            public void onSmartspaceTargetsUpdated(List<? extends Parcelable> targets) {
+                if (!targets.isEmpty()) {
+                    mDreamOverlayStateController.addComplication(mComplication);
+                } else {
+                    mDreamOverlayStateController.removeComplication(mComplication);
+                }
+            }
+        };
 
         /**
          * Default constructor for {@link SmartSpaceComplication}.
@@ -50,7 +66,7 @@ public class SmartSpaceComplication implements Complication {
         public Registrant(Context context,
                 DreamOverlayStateController dreamOverlayStateController,
                 SmartSpaceComplication smartSpaceComplication,
-                LockscreenSmartspaceController smartSpaceController) {
+                DreamsSmartspaceController smartSpaceController) {
             super(context);
             mDreamOverlayStateController = dreamOverlayStateController;
             mComplication = smartSpaceComplication;
@@ -59,32 +75,27 @@ public class SmartSpaceComplication implements Complication {
 
         @Override
         public void start() {
-            addOrRemoveOverlay();
             mDreamOverlayStateController.addCallback(new DreamOverlayStateController.Callback() {
                 @Override
                 public void onStateChanged() {
-                    addOrRemoveOverlay();
+                    if (mDreamOverlayStateController.isOverlayActive()) {
+                        mSmartSpaceController.addListener(mSmartspaceListener);
+                    } else {
+                        mSmartSpaceController.removeListener(mSmartspaceListener);
+                    }
                 }
             });
-        }
-
-        private void addOrRemoveOverlay() {
-            if (mDreamOverlayStateController.isPreviewMode()) {
-                mDreamOverlayStateController.removeComplication(mComplication);
-            } else if (mSmartSpaceController.isEnabled()) {
-                mDreamOverlayStateController.addComplication(mComplication);
-            }
         }
     }
 
     private static class SmartSpaceComplicationViewHolder implements ViewHolder {
         private static final int SMARTSPACE_COMPLICATION_WEIGHT = 10;
-        private final LockscreenSmartspaceController mSmartSpaceController;
+        private final DreamsSmartspaceController mSmartSpaceController;
         private final Context mContext;
 
         protected SmartSpaceComplicationViewHolder(
                 Context context,
-                LockscreenSmartspaceController smartSpaceController) {
+                DreamsSmartspaceController smartSpaceController) {
             mSmartSpaceController = smartSpaceController;
             mContext = context;
         }
@@ -109,12 +120,12 @@ public class SmartSpaceComplication implements Complication {
         }
     }
 
-    private final LockscreenSmartspaceController mSmartSpaceController;
+    private final DreamsSmartspaceController mSmartSpaceController;
     private final Context mContext;
 
     @Inject
     public SmartSpaceComplication(Context context,
-            LockscreenSmartspaceController smartSpaceController) {
+            DreamsSmartspaceController smartSpaceController) {
         mContext = context;
         mSmartSpaceController = smartSpaceController;
     }

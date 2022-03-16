@@ -16,6 +16,7 @@
 
 package com.android.systemui.media.taptotransfer
 
+import android.annotation.SuppressLint
 import android.app.StatusBarManager
 import android.content.Context
 import android.media.MediaRoute2Info
@@ -23,16 +24,12 @@ import android.util.Log
 import androidx.annotation.VisibleForTesting
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.media.taptotransfer.sender.AlmostCloseToEndCast
-import com.android.systemui.media.taptotransfer.sender.AlmostCloseToStartCast
-import com.android.systemui.media.taptotransfer.sender.TransferFailed
-import com.android.systemui.media.taptotransfer.sender.TransferToReceiverTriggered
-import com.android.systemui.media.taptotransfer.sender.TransferToThisDeviceSucceeded
-import com.android.systemui.media.taptotransfer.sender.TransferToThisDeviceTriggered
-import com.android.systemui.media.taptotransfer.sender.TransferToReceiverSucceeded
+import com.android.systemui.media.taptotransfer.receiver.ChipStateReceiver
+import com.android.systemui.media.taptotransfer.sender.ChipStateSender
 import com.android.systemui.statusbar.commandline.Command
 import com.android.systemui.statusbar.commandline.CommandRegistry
 import java.io.PrintWriter
+import java.lang.IllegalArgumentException
 import java.util.concurrent.Executor
 import javax.inject.Inject
 
@@ -46,28 +43,6 @@ class MediaTttCommandLineHelper @Inject constructor(
     private val context: Context,
     @Main private val mainExecutor: Executor
 ) {
-    /**
-     * A map from a display state string typed in the command line to the display int it represents.
-     */
-    private val stateStringToStateInt: Map<String, Int> = mapOf(
-        AlmostCloseToStartCast::class.simpleName!!
-                to StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_ALMOST_CLOSE_TO_START_CAST,
-        AlmostCloseToEndCast::class.simpleName!!
-                to StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_ALMOST_CLOSE_TO_END_CAST,
-        TransferToReceiverTriggered::class.simpleName!!
-                to StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_TRIGGERED,
-        TransferToThisDeviceTriggered::class.simpleName!!
-                to StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_TRIGGERED,
-        TransferToReceiverSucceeded::class.simpleName!!
-                to StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_SUCCEEDED,
-        TransferToThisDeviceSucceeded::class.simpleName!!
-                to StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_SUCCEEDED,
-        TransferFailed::class.simpleName!!
-                to StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_FAILED,
-        FAR_FROM_RECEIVER_STATE
-                to StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_FAR_FROM_RECEIVER
-    )
-
     init {
         commandRegistry.registerCommand(SENDER_COMMAND) { SenderCommand() }
         commandRegistry.registerCommand(RECEIVER_COMMAND) { ReceiverCommand() }
@@ -76,21 +51,23 @@ class MediaTttCommandLineHelper @Inject constructor(
     /** All commands for the sender device. */
     inner class SenderCommand : Command {
         override fun execute(pw: PrintWriter, args: List<String>) {
-            val routeInfo = MediaRoute2Info.Builder("id", args[0])
-                    .addFeature("feature")
-                    .setPackageName(TEST_PACKAGE_NAME)
-                    .build()
-
             val commandName = args[1]
             @StatusBarManager.MediaTransferSenderState
-            val displayState = stateStringToStateInt[commandName]
-            if (displayState == null) {
+            val displayState: Int?
+            try {
+                displayState = ChipStateSender.getSenderStateIdFromName(commandName)
+            }  catch (ex: IllegalArgumentException) {
                 pw.println("Invalid command name $commandName")
                 return
             }
 
+            @SuppressLint("WrongConstant") // sysui allowed to call STATUS_BAR_SERVICE
             val statusBarManager = context.getSystemService(Context.STATUS_BAR_SERVICE)
                     as StatusBarManager
+            val routeInfo = MediaRoute2Info.Builder("id", args[0])
+                    .addFeature("feature")
+                    .setPackageName(TEST_PACKAGE_NAME)
+                    .build()
             statusBarManager.updateMediaTapToTransferSenderDisplay(
                     displayState,
                     routeInfo,
@@ -136,6 +113,17 @@ class MediaTttCommandLineHelper @Inject constructor(
     /** All commands for the receiver device. */
     inner class ReceiverCommand : Command {
         override fun execute(pw: PrintWriter, args: List<String>) {
+            val commandName = args[0]
+            @StatusBarManager.MediaTransferReceiverState
+            val displayState: Int?
+            try {
+                displayState = ChipStateReceiver.getReceiverStateIdFromName(commandName)
+            } catch (ex: IllegalArgumentException) {
+                pw.println("Invalid command name $commandName")
+                return
+            }
+
+            @SuppressLint("WrongConstant") // sysui is allowed to call STATUS_BAR_SERVICE
             val statusBarManager = context.getSystemService(Context.STATUS_BAR_SERVICE)
                     as StatusBarManager
             val routeInfo = MediaRoute2Info.Builder("id", "Test Name")
@@ -143,24 +131,12 @@ class MediaTttCommandLineHelper @Inject constructor(
                 .setPackageName(TEST_PACKAGE_NAME)
                 .build()
 
-            when(val commandName = args[0]) {
-                CLOSE_TO_SENDER_STATE ->
-                    statusBarManager.updateMediaTapToTransferReceiverDisplay(
-                        StatusBarManager.MEDIA_TRANSFER_RECEIVER_STATE_CLOSE_TO_SENDER,
-                        routeInfo,
-                        null,
-                        null
-                    )
-                FAR_FROM_SENDER_STATE ->
-                    statusBarManager.updateMediaTapToTransferReceiverDisplay(
-                        StatusBarManager.MEDIA_TRANSFER_RECEIVER_STATE_FAR_FROM_SENDER,
-                        routeInfo,
-                        null,
-                        null
-                    )
-                else ->
-                    pw.println("Invalid command name $commandName")
-            }
+            statusBarManager.updateMediaTapToTransferReceiverDisplay(
+                    displayState,
+                    routeInfo,
+                    null,
+                    null
+                )
         }
 
         override fun help(pw: PrintWriter) {
@@ -173,11 +149,5 @@ class MediaTttCommandLineHelper @Inject constructor(
 const val SENDER_COMMAND = "media-ttt-chip-sender"
 @VisibleForTesting
 const val RECEIVER_COMMAND = "media-ttt-chip-receiver"
-@VisibleForTesting
-const val FAR_FROM_RECEIVER_STATE = "FarFromReceiver"
-@VisibleForTesting
-const val CLOSE_TO_SENDER_STATE = "CloseToSender"
-@VisibleForTesting
-const val FAR_FROM_SENDER_STATE = "FarFromSender"
 private const val CLI_TAG = "MediaTransferCli"
 private const val TEST_PACKAGE_NAME = "com.android.systemui"

@@ -105,7 +105,6 @@ filegroup {
         ":services.selectiontoolbar-sources",
         ":services.smartspace-sources",
         ":services.speech-sources",
-        ":services.startop.iorap-sources",
         ":services.systemcaptions-sources",
         ":services.translation-sources",
         ":services.texttospeech-sources",
@@ -162,7 +161,6 @@ java_library {
         "services.selectiontoolbar",
         "services.smartspace",
         "services.speech",
-        "services.startop",
         "services.systemcaptions",
         "services.translation",
         "services.texttospeech",
@@ -215,7 +213,6 @@ stubs_defaults {
         " --hide-annotation android.annotation.Hide" +
         " --hide InternalClasses" + // com.android.* classes are okay in this interface
         // TODO: remove the --hide options below
-        " --hide-package com.google.android.startop.iorap" +
         " --hide DeprecationMismatch" +
         " --hide HiddenTypedefConstant",
     visibility: ["//frameworks/base:__subpackages__"],

@@ -119,6 +119,8 @@ public final class UidBatteryConsumer extends BatteryConsumer {
                     skipEmptyComponents);
             appendProcessStateData(sb, BatteryConsumer.PROCESS_STATE_FOREGROUND_SERVICE,
                     skipEmptyComponents);
+            appendProcessStateData(sb, BatteryConsumer.PROCESS_STATE_CACHED,
+                    skipEmptyComponents);
             pw.print(sb);
         }
 
@@ -202,20 +204,24 @@ public final class UidBatteryConsumer extends BatteryConsumer {
         private static final String PACKAGE_NAME_UNINITIALIZED = "";
         private final BatteryStats.Uid mBatteryStatsUid;
         private final int mUid;
+        private final boolean mIsVirtualUid;
         private String mPackageWithHighestDrain = PACKAGE_NAME_UNINITIALIZED;
         private boolean mExcludeFromBatteryUsageStats;
 
         public Builder(BatteryConsumerData data, @NonNull BatteryStats.Uid batteryStatsUid) {
-            super(data, CONSUMER_TYPE_UID);
-            mBatteryStatsUid = batteryStatsUid;
-            mUid = batteryStatsUid.getUid();
-            data.putLong(COLUMN_INDEX_UID, mUid);
+            this(data, batteryStatsUid, batteryStatsUid.getUid());
         }
 
         public Builder(BatteryConsumerData data, int uid) {
+            this(data, null, uid);
+        }
+
+        private Builder(BatteryConsumerData data, @Nullable BatteryStats.Uid batteryStatsUid,
+                int uid) {
             super(data, CONSUMER_TYPE_UID);
-            mBatteryStatsUid = null;
+            mBatteryStatsUid = batteryStatsUid;
             mUid = uid;
+            mIsVirtualUid = mUid == Process.SDK_SANDBOX_VIRTUAL_UID;
             data.putLong(COLUMN_INDEX_UID, mUid);
         }
 
@@ -230,6 +236,10 @@ public final class UidBatteryConsumer extends BatteryConsumer {
 
         public int getUid() {
             return mUid;
+        }
+
+        public boolean isVirtualUid() {
+            return mIsVirtualUid;
         }
 
         /**

@@ -41,9 +41,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.IPackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.SuspendDialogInfo;
 import android.content.pm.UserInfo;
+import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.platform.test.annotations.Presubmit;
@@ -58,8 +60,6 @@ import com.android.internal.app.SuspendedAppActivity;
 import com.android.internal.app.UnlaunchableAppActivity;
 import com.android.server.LocalServices;
 import com.android.server.am.ActivityManagerService;
-import com.android.server.pm.PackageManagerService;
-import com.android.server.wm.ActivityInterceptorCallback.ActivityInterceptResult;
 
 import org.junit.After;
 import org.junit.Before;
@@ -113,7 +113,7 @@ public class ActivityStartInterceptorTest {
     @Mock
     private KeyguardManager mKeyguardManager;
     @Mock
-    private PackageManagerService mPackageManager;
+    private IPackageManager mPackageManager;
     @Mock
     private ActivityManagerInternal mAmInternal;
     @Mock
@@ -126,7 +126,7 @@ public class ActivityStartInterceptorTest {
             new SparseArray<>();
 
     @Before
-    public void setUp() {
+    public void setUp() throws RemoteException {
         MockitoAnnotations.initMocks(this);
         mService.mAmInternal = mAmInternal;
         mInterceptor = new ActivityStartInterceptor(
@@ -279,7 +279,7 @@ public class ActivityStartInterceptorTest {
     }
 
     @Test
-    public void testHarmfulAppWarning() {
+    public void testHarmfulAppWarning() throws RemoteException {
         // GIVEN the package we're about to launch has a harmful app warning set
         when(mPackageManager.getHarmfulAppWarning(TEST_PACKAGE_NAME, TEST_USER_ID))
                 .thenReturn("This app is bad");
@@ -352,6 +352,6 @@ public class ActivityStartInterceptorTest {
         spyOn(callback);
         mInterceptor.onActivityLaunched(null, null);
 
-        verify(callback, times(1)).onActivityLaunched(any(), any());
+        verify(callback, times(1)).onActivityLaunched(any(), any(), any());
     }
 }

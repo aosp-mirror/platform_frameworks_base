@@ -21,6 +21,9 @@ import static com.android.systemui.dreams.touch.dagger.BouncerSwipeModule.SWIPE_
 import static com.android.systemui.dreams.touch.dagger.BouncerSwipeModule.SWIPE_TO_BOUNCER_START_REGION;
 
 import android.animation.ValueAnimator;
+import android.graphics.Rect;
+import android.graphics.Region;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.InputEvent;
@@ -29,7 +32,7 @@ import android.view.VelocityTracker;
 
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.KeyguardBouncer;
-import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.wm.shell.animation.FlingAnimationUtils;
 
@@ -68,12 +71,14 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
 
     private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     private float mCurrentExpansion;
-    private final StatusBar mStatusBar;
+    private final CentralSurfaces mCentralSurfaces;
 
     private VelocityTracker mVelocityTracker;
 
     private final FlingAnimationUtils mFlingAnimationUtils;
     private final FlingAnimationUtils mFlingAnimationUtilsClosing;
+
+    private final DisplayMetrics mDisplayMetrics;
 
     private Boolean mCapture;
 
@@ -85,40 +90,9 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
 
     private final GestureDetector.OnGestureListener mOnGestureListener =
             new  GestureDetector.SimpleOnGestureListener() {
-                boolean mTrack;
-                boolean mBouncerPresent;
-
-                @Override
-                public boolean onDown(MotionEvent e) {
-                    // We only consider gestures that originate from the lower portion of the
-                    // screen.
-                    final float displayHeight = mStatusBar.getDisplayHeight();
-
-                    mBouncerPresent = mStatusBar.isBouncerShowing();
-
-                    // The target zone is either at the top or bottom of the screen, dependent on
-                    // whether the bouncer is present.
-                    final float zonePercentage =
-                            Math.abs(e.getY() - (mBouncerPresent ? 0 : displayHeight))
-                                    / displayHeight;
-
-                    mTrack =  zonePercentage < mBouncerZoneScreenPercentage;
-
-                    // Never capture onDown. While this might lead to some false positive touches
-                    // being sent to other windows/layers, this is necessary to make sure the
-                    // proper touch event sequence is received by others in the event we do not
-                    // consume the sequence here.
-                    return false;
-                }
-
                 @Override
                 public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX,
                         float distanceY) {
-                    // Do not handle scroll gestures if not tracking touch events.
-                    if (!mTrack) {
-                        return false;
-                    }
-
                     if (mCapture == null) {
                         // If the user scrolling favors a vertical direction, begin capturing
                         // scrolls.
@@ -140,10 +114,9 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
                     // is fully hidden at full expansion (1) and fully visible when fully collapsed
                     // (0).
                     final float screenTravelPercentage =
-                            Math.abs((e1.getY() - e2.getY()) / mStatusBar.getDisplayHeight());
-                    setPanelExpansion(
-                            mBouncerPresent ? screenTravelPercentage : 1 - screenTravelPercentage);
-
+                            Math.abs((e1.getY() - e2.getY()) / mCentralSurfaces.getDisplayHeight());
+                    setPanelExpansion(mCentralSurfaces.isBouncerShowing()
+                            ? screenTravelPercentage : 1 - screenTravelPercentage);
                     return true;
                 }
             };
@@ -155,8 +128,9 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
 
     @Inject
     public BouncerSwipeTouchHandler(
+            DisplayMetrics displayMetrics,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
-            StatusBar statusBar,
+            CentralSurfaces centralSurfaces,
             NotificationShadeWindowController notificationShadeWindowController,
             ValueAnimatorCreator valueAnimatorCreator,
             VelocityTrackerFactory velocityTrackerFactory,
@@ -165,7 +139,8 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
             @Named(SWIPE_TO_BOUNCER_FLING_ANIMATION_UTILS_OPENING)
                     FlingAnimationUtils flingAnimationUtilsClosing,
             @Named(SWIPE_TO_BOUNCER_START_REGION) float swipeRegionPercentage) {
-        mStatusBar = statusBar;
+        mDisplayMetrics = displayMetrics;
+        mCentralSurfaces = centralSurfaces;
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
         mNotificationShadeWindowController = notificationShadeWindowController;
         mBouncerZoneScreenPercentage = swipeRegionPercentage;
@@ -173,6 +148,21 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
         mFlingAnimationUtilsClosing = flingAnimationUtilsClosing;
         mValueAnimatorCreator = valueAnimatorCreator;
         mVelocityTrackerFactory = velocityTrackerFactory;
+    }
+
+    @Override
+    public void getTouchInitiationRegion(Region region) {
+        if (mCentralSurfaces.isBouncerShowing()) {
+            region.op(new Rect(0, 0, mDisplayMetrics.widthPixels,
+                    Math.round(mDisplayMetrics.heightPixels * mBouncerZoneScreenPercentage)),
+                    Region.Op.UNION);
+        } else {
+            region.op(new Rect(0,
+                    Math.round(mDisplayMetrics.heightPixels * (1 - mBouncerZoneScreenPercentage)),
+                    mDisplayMetrics.widthPixels,
+                    mDisplayMetrics.heightPixels),
+                    Region.Op.UNION);
+        }
     }
 
     @Override
@@ -202,7 +192,9 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
         final MotionEvent motionEvent = (MotionEvent) event;
 
         switch(motionEvent.getAction()) {
+            case MotionEvent.ACTION_CANCEL:
             case MotionEvent.ACTION_UP:
+                mTouchSession.pop();
                 // If we are not capturing any input, there is no need to consider animating to
                 // finish transition.
                 if (mCapture == null || !mCapture) {
@@ -226,7 +218,6 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
                 if (expansion == KeyguardBouncer.EXPANSION_HIDDEN) {
                     mStatusBarKeyguardViewManager.reset(false);
                 }
-                mTouchSession.pop();
                 break;
             default:
                 mVelocityTracker.addMovement(motionEvent);
@@ -255,7 +246,7 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
     }
 
     protected void flingToExpansion(float velocity, float expansion) {
-        final float viewHeight = mStatusBar.getDisplayHeight();
+        final float viewHeight = mCentralSurfaces.getDisplayHeight();
         final float currentHeight = viewHeight * mCurrentExpansion;
         final float targetHeight = viewHeight * expansion;
 

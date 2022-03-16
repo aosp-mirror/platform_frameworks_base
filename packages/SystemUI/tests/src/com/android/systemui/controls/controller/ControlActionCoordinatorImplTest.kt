@@ -23,6 +23,7 @@ import android.provider.Settings
 import android.test.suitebuilder.annotation.SmallTest
 import android.testing.AndroidTestingRunner
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.broadcast.BroadcastSender
 import com.android.systemui.controls.ControlsMetricsLogger
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.statusbar.VibratorHelper
@@ -62,6 +63,8 @@ class ControlActionCoordinatorImplTest : SysuiTestCase() {
     @Mock
     private lateinit var activityStarter: ActivityStarter
     @Mock
+    private lateinit var broadcastSender: BroadcastSender
+    @Mock
     private lateinit var taskViewFactory: Optional<TaskViewFactory>
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private lateinit var cvh: ControlViewHolder
@@ -94,6 +97,7 @@ class ControlActionCoordinatorImplTest : SysuiTestCase() {
                 bgExecutor,
                 uiExecutor,
                 activityStarter,
+                broadcastSender,
                 keyguardStateController,
                 taskViewFactory,
                 metricsLogger,

@@ -91,6 +91,7 @@ import com.android.internal.R;
 import com.android.internal.os.ClassLoaderFactory;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.XmlUtils;
+import com.android.server.pm.SharedUidMigration;
 import com.android.server.pm.permission.CompatibilityPermissionInfo;
 import com.android.server.pm.pkg.component.ComponentMutateUtils;
 import com.android.server.pm.pkg.component.ComponentParseUtils;
@@ -208,6 +209,8 @@ public class ParsingPackageUtils {
 
     public static final int SDK_VERSION = Build.VERSION.SDK_INT;
     public static final String[] SDK_CODENAMES = Build.VERSION.ACTIVE_CODENAMES;
+    public static final String[] PREVIOUS_CODENAMES =
+            Build.VERSION.KNOWN_CODENAMES.toArray(new String[]{});
 
     public static boolean sCompatibilityModeEnabled = true;
     public static boolean sUseRoundIcon = false;
@@ -235,6 +238,7 @@ public class ParsingPackageUtils {
      */
     public static final int PARSE_IGNORE_OVERLAY_REQUIRED_SYSTEM_PROPERTY = 1 << 7;
     public static final int PARSE_FRAMEWORK_RES_SPLITS = 1 << 8;
+    public static final int PARSE_CHECK_MAX_SDK_VERSION = 1 << 9;
 
     public static final int PARSE_CHATTY = 1 << 31;
 
@@ -893,9 +897,7 @@ public class ParsingPackageUtils {
                 .setTargetSandboxVersion(anInteger(PARSE_DEFAULT_TARGET_SANDBOX,
                         R.styleable.AndroidManifest_targetSandboxVersion, sa))
                 /* Set the global "on SD card" flag */
-                .setExternalStorage((flags & PARSE_EXTERNAL_STORAGE) != 0)
-                .setInheritKeyStoreKeys(bool(false,
-                        R.styleable.AndroidManifest_inheritKeyStoreKeys, sa));
+                .setExternalStorage((flags & PARSE_EXTERNAL_STORAGE) != 0);
 
         boolean foundApp = false;
         final int depth = parser.getDepth();
@@ -1003,7 +1005,7 @@ public class ParsingPackageUtils {
             case TAG_FEATURE_GROUP:
                 return parseFeatureGroup(input, pkg, res, parser);
             case TAG_USES_SDK:
-                return parseUsesSdk(input, pkg, res, parser);
+                return parseUsesSdk(input, pkg, res, parser, flags);
             case TAG_SUPPORT_SCREENS:
                 return parseSupportScreens(input, pkg, res, parser);
             case TAG_PROTECTED_BROADCAST:
@@ -1047,8 +1049,11 @@ public class ParsingPackageUtils {
             }
         }
 
-        int maxSdkVersion = anInteger(0, R.styleable.AndroidManifest_sharedUserMaxSdkVersion, sa);
-        boolean leaving = (maxSdkVersion != 0) && (maxSdkVersion < Build.VERSION.RESOURCES_SDK_INT);
+        boolean leaving = false;
+        if (!SharedUidMigration.isDisabled()) {
+            int max = anInteger(0, R.styleable.AndroidManifest_sharedUserMaxSdkVersion, sa);
+            leaving = (max != 0) && (max < Build.VERSION.RESOURCES_SDK_INT);
+        }
 
         return input.success(pkg
                 .setLeavingSharedUid(leaving)
@@ -1512,15 +1517,17 @@ public class ParsingPackageUtils {
     }
 
     private static ParseResult<ParsingPackage> parseUsesSdk(ParseInput input,
-            ParsingPackage pkg, Resources res, XmlResourceParser parser)
+            ParsingPackage pkg, Resources res, XmlResourceParser parser, int flags)
             throws IOException, XmlPullParserException {
         if (SDK_VERSION > 0) {
+            final boolean checkMaxSdkVersion = (flags & PARSE_CHECK_MAX_SDK_VERSION) != 0;
             TypedArray sa = res.obtainAttributes(parser, R.styleable.AndroidManifestUsesSdk);
             try {
                 int minVers = ParsingUtils.DEFAULT_MIN_SDK_VERSION;
                 String minCode = null;
                 int targetVers = ParsingUtils.DEFAULT_TARGET_SDK_VERSION;
                 String targetCode = null;
+                int maxVers = Integer.MAX_VALUE;
 
                 TypedValue val = sa.peekValue(R.styleable.AndroidManifestUsesSdk_minSdkVersion);
                 if (val != null) {
@@ -1548,6 +1555,14 @@ public class ParsingPackageUtils {
                     targetCode = minCode;
                 }
 
+                if (checkMaxSdkVersion) {
+                    val = sa.peekValue(R.styleable.AndroidManifestUsesSdk_maxSdkVersion);
+                    if (val != null) {
+                        // maxSdkVersion only supports integer
+                        maxVers = val.data;
+                    }
+                }
+
                 ParseResult<Integer> targetSdkVersionResult = FrameworkParsingPackageUtils
                         .computeTargetSdkVersion(targetVers, targetCode, SDK_CODENAMES, input);
                 if (targetSdkVersionResult.isError()) {
@@ -1572,6 +1587,15 @@ public class ParsingPackageUtils {
 
                 pkg.setMinSdkVersion(minSdkVersion)
                         .setTargetSdkVersion(targetSdkVersion);
+                if (checkMaxSdkVersion) {
+                    ParseResult<Integer> maxSdkVersionResult = FrameworkParsingPackageUtils
+                            .computeMaxSdkVersion(maxVers, SDK_VERSION, input);
+                    if (maxSdkVersionResult.isError()) {
+                        return input.error(maxSdkVersionResult);
+                    }
+                    int maxSdkVersion = maxSdkVersionResult.getResult();
+                    pkg.setMaxSdkVersion(maxSdkVersion);
+                }
 
                 int type;
                 final int innerDepth = parser.getDepth();

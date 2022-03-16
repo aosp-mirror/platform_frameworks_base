@@ -28,7 +28,6 @@ import static android.app.usage.UsageStatsManager.REASON_SUB_USAGE_USER_INTERACT
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.BatteryConsumer.POWER_COMPONENT_ANY;
 import static android.os.BatteryConsumer.PROCESS_STATE_BACKGROUND;
-import static android.os.BatteryConsumer.PROCESS_STATE_COUNT;
 import static android.os.BatteryConsumer.PROCESS_STATE_FOREGROUND;
 import static android.os.BatteryConsumer.PROCESS_STATE_FOREGROUND_SERVICE;
 import static android.os.BatteryConsumer.PROCESS_STATE_UNSPECIFIED;
@@ -38,7 +37,6 @@ import static android.util.TimeUtils.formatTime;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.AppRestrictionController.DEVICE_CONFIG_SUBNAMESPACE_PREFIX;
-import static com.android.server.am.BaseAppStateTracker.ONE_MINUTE;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -71,7 +69,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.am.AppBatteryTracker.AppBatteryPolicy;
 import com.android.server.am.AppRestrictionController.UidBatteryUsageProvider;
-import com.android.server.am.BaseAppStateTracker.Injector;
 import com.android.server.pm.UserManagerInternal;
 
 import java.io.PrintWriter;
@@ -684,7 +681,7 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
         static final int BATTERY_USAGE_INDEX_FOREGROUND = PROCESS_STATE_FOREGROUND;
         static final int BATTERY_USAGE_INDEX_BACKGROUND = PROCESS_STATE_BACKGROUND;
         static final int BATTERY_USAGE_INDEX_FOREGROUND_SERVICE = PROCESS_STATE_FOREGROUND_SERVICE;
-        static final int BATTERY_USAGE_COUNT = PROCESS_STATE_COUNT;
+        static final int BATTERY_USAGE_COUNT = 4;
 
         static final Dimensions[] BATT_DIMENS = new Dimensions[] {
                 new Dimensions(AppBatteryPolicy.DEFAULT_BG_CURRENT_DRAIN_POWER_COMPONENTS,
@@ -1217,7 +1214,7 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
             mDefaultBgCurrentDrainBgRestrictedThreshold =
                     isLowRamDeviceStatic() ? val[1] : val[0];
             mDefaultBgCurrentDrainWindowMs = resources.getInteger(
-                    R.integer.config_bg_current_drain_window);
+                    R.integer.config_bg_current_drain_window) * 1_000;
             val = getFloatArray(resources.obtainTypedArray(
                     R.array.config_bg_current_drain_high_threshold_to_restricted_bucket));
             mDefaultBgCurrentDrainRestrictedBucketHighThreshold =
@@ -1227,9 +1224,9 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
             mDefaultBgCurrentDrainBgRestrictedHighThreshold =
                     isLowRamDeviceStatic() ? val[1] : val[0];
             mDefaultBgCurrentDrainMediaPlaybackMinDuration = resources.getInteger(
-                    R.integer.config_bg_current_drain_media_playback_min_duration);
+                    R.integer.config_bg_current_drain_media_playback_min_duration) * 1_000;
             mDefaultBgCurrentDrainLocationMinDuration = resources.getInteger(
-                    R.integer.config_bg_current_drain_location_min_duration);
+                    R.integer.config_bg_current_drain_location_min_duration) * 1_000;
             mDefaultBgCurrentDrainEventDurationBasedThresholdEnabled = resources.getBoolean(
                     R.bool.config_bg_current_drain_event_duration_based_threshold_enabled);
             mDefaultCurrentDrainTypesToRestrictedBucket = resources.getInteger(

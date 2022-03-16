@@ -71,14 +71,6 @@ prebuilt_etc {
 }
 
 prebuilt_etc {
-    name: "privapp_whitelist_com.android.cellbroadcastreceiver",
-    system_ext_specific: true,
-    sub_dir: "permissions",
-    src: "com.android.cellbroadcastreceiver.xml",
-    filename_from_src: true,
-}
-
-prebuilt_etc {
     name: "privapp_whitelist_com.android.contacts",
     product_specific: true,
     sub_dir: "permissions",

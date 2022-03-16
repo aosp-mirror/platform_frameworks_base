@@ -197,7 +197,7 @@
     <string name="ThreeWCMmi">Three way calling</string>
     <string name="RuacMmi">Rejection of undesired annoying calls</string>
     <string name="CndMmi">Calling number delivery</string>
-    <string name="DndMmi" translatable="false">Priority mode</string>
+    <string name="DndMmi">Do not disturb</string>
 
     <!-- Displayed to confirm to the user that caller ID will be restricted on the next call as usual. -->
     <string name="CLIRDefaultOnNextCallOn">Caller ID defaults to restricted. Next call: Restricted</string>
@@ -234,9 +234,9 @@
     <!-- Displayed to tell the user that they should switch their network preference. -->
     <string name="NetworkPreferenceSwitchSummary">Try changing preferred network. Tap to change.</string>
     <!-- Displayed to tell the user that emergency calls might not be available. -->
-    <string name="EmergencyCallWarningTitle">Emergency calling unavailable</string>
+    <string name="EmergencyCallWarningTitle">Emergency calls may be unavailable</string>
     <!-- Displayed to tell the user that emergency calls might not be available. -->
-    <string name="EmergencyCallWarningSummary">Can\u2019t make emergency calls over Wi\u2011Fi</string>
+    <string name="EmergencyCallWarningSummary"><xliff:g id="spn" example="Operator">%s</xliff:g> doesn\'t support emergency calls over Wi-Fi. Tap for details.</string>
 
     <!-- Telephony notification channel name for a channel containing network alert notifications. -->
     <string name="notification_channel_network_alert">Alerts</string>
@@ -1248,14 +1248,13 @@
         Malicious apps may use this to erase or modify your call log.</string>
 
     <!-- Title of the body sensors permission, listed so the user can decide whether to allow the application to access body sensor data. [CHAR LIMIT=80] -->
-    <string name="permlab_bodySensors">access body sensors (like heart rate monitors)
-    </string>
+    <string name="permlab_bodySensors">Access body sensor data, like heart rate, while in use</string>
     <!-- Description of the body sensors permission, listed so the user can decide whether to allow the application to access data from body sensors. [CHAR LIMIT=NONE] -->
-    <string name="permdesc_bodySensors" product="default">Access to data from body sensors such as heart rate, temperature, blood oxygen percentage, etc.</string>
+    <string name="permdesc_bodySensors" product="default">Allows the app to access body sensor data, such as heart rate, temperature, and blood oxygen percentage, while the app is in use.</string>
     <!-- Title of the background body sensors permission, listed so the user can decide whether to allow the application to access body sensor data in the background. [CHAR LIMIT=80] -->
-    <string name="permlab_bodySensors_background">access body sensors (like heart rate monitors) while in the background</string>
+    <string name="permlab_bodySensors_background">Access body sensor data, like heart rate, while in the background</string>
     <!-- Description of the background body sensors permission, listed so the user can decide whether to allow the application to access data from body sensors in the background. [CHAR LIMIT=NONE] -->
-    <string name="permdesc_bodySensors_background" product="default">Access to data from body sensors such as heart rate, temperature, blood oxygen percentage, etc. while in the background.</string>
+    <string name="permdesc_bodySensors_background" product="default">Allows the app to access body sensor data, such as heart rate, temperature, and blood oxygen percentage, while the app is in the background.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_readCalendar">Read calendar events and details</string>
@@ -1919,9 +1918,9 @@
     <string name="permdesc_readMediaVideo">Allows the app to read video files from your shared storage.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. "shared storage" refers to a storage space on the device that all apps with this permission can read from. [CHAR LIMIT=none] -->
-    <string name="permlab_readMediaImage">read image files from shared storage</string>
+    <string name="permlab_readMediaImages">read image files from shared storage</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. "shared storage" refers to a storage space on the device that all apps with this permission can read from. [CHAR LIMIT=none] -->
-    <string name="permdesc_readMediaImage">Allows the app to read image files from your shared storage.</string>
+    <string name="permdesc_readMediaImages">Allows the app to read image files from your shared storage.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. "shared storage" refers to a storage space on the device that all apps with this permission can write to. [CHAR LIMIT=none] -->
     <string name="permlab_sdcardWrite">modify or delete the contents of your shared storage</string>
@@ -2036,9 +2035,9 @@
     <string name="permdesc_bindCarrierServices">Allows the holder to bind to carrier services. Should never be needed for normal apps.</string>
 
     <!-- Title of an application permission, for applications that wish to access notification policy. -->
-    <string name="permlab_access_notification_policy" translatable="false">access Priority mode</string>
+    <string name="permlab_access_notification_policy">access Do Not Disturb</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_access_notification_policy" translatable="false">Allows the app to read and write Priority mode configuration.</string>
+    <string name="permdesc_access_notification_policy">Allows the app to read and write Do Not Disturb configuration.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_startViewPermissionUsage">start view permission usage</string>
@@ -2415,7 +2414,7 @@
     <!-- On the unlock pattern screen, shown at the top of the unlock screen to tell the user what to do. Below this text is the place for theu ser to draw the pattern. -->
     <string name="lockscreen_pattern_instructions">Draw pattern to unlock</string>
     <!-- Button at the bottom of the unlock screen to make an emergency call or access other emergency assistance functions. -->
-    <string name="lockscreen_emergency_call">Emergency call</string>
+    <string name="lockscreen_emergency_call">Emergency</string>
     <!-- Button at the bottom of the unlock screen that lets the user return to a call -->
     <string name="lockscreen_return_to_call">Return to call</string>
     <!-- Shown to confirm that the user entered their lock pattern correctly. -->
@@ -4095,10 +4094,20 @@
     <!-- Description of an application permission that lets it query all other packages. [CHAR LIMIT=NONE] -->
     <string name="permdesc_queryAllPackages">Allows an app to see all installed packages.</string>
 
-    <!-- Title of an application permission that lets it access SupplementalApis. [CHAR LIMIT=NONE] -->
-    <string name="permlab_accessSupplementalApi">access SupplementalApis</string>
-    <!-- Description of an application permission that lets it access SupplementalApis. [CHAR LIMIT=NONE]-->
-    <string name="permdesc_accessSupplementalApi">Allows an application to access SupplementalApis.</string>
+    <!-- Title of an application permission that lets it access AdServices Topics API. [CHAR LIMIT=NONE] -->
+    <string name="permlab_accessAdServicesTopics">access AdServices Topics API</string>
+    <!-- Description of an application permission that lets it access AdServices Topics API. [CHAR LIMIT=NONE]-->
+    <string name="permdesc_accessAdServicesTopics">Allows an application to access AdServices Topics API.</string>
+
+    <!-- Title of an application permission that lets it access AdServices Attribution APIs. [CHAR LIMIT=NONE] -->
+    <string name="permlab_accessAdServicesAttribution">access AdServices Attribution APIs</string>
+    <!-- Description of an application permission that lets it access AdServices Attribution APIs. [CHAR LIMIT=NONE]-->
+    <string name="permdesc_accessAdServicesAttribution">Allows an application to access AdServices Attribution APIs.</string>
+
+    <!-- Title of an application permission that lets it access AdServices Custom Audiences API. [CHAR LIMIT=NONE] -->
+    <string name="permlab_accessAdServicesCustomAudiences">access AdServices Custom Audiences API</string>
+    <!-- Description of an application permission that lets it access AdServices Custom Audiences API. [CHAR LIMIT=NONE]-->
+    <string name="permdesc_accessAdServicesCustomAudiences">Allows an application to access AdServices Custom Audiences  API.</string>
 
     <!-- Shown in the tutorial for tap twice for zoom control. -->
     <string name="tutorial_double_tap_to_zoom_message_short">Tap twice for zoom control</string>
@@ -4894,6 +4903,8 @@
     <string name="user_logging_out_message">Logging out <xliff:g id="name" example="Bob">%1$s</xliff:g>\u2026</string>
     <!-- Default name of the owner user [CHAR LIMIT=20] -->
     <string name="owner_name" msgid="3879126011135546571">Owner</string>
+    <!-- Default name of the guest user [CHAR LIMIT=35] -->
+    <string name="guest_name">Guest</string>
     <!-- Error message title [CHAR LIMIT=35] -->
     <string name="error_message_title">Error</string>
     <!-- Message informing user that the change was disallowed by an administrator. [CHAR LIMIT=none] -->
@@ -5302,7 +5313,7 @@
     <string name="zen_mode_forever">Until you turn off</string>
 
     <!-- Zen mode condition: no exit criteria, includes the name of the feature for emphasis. [CHAR LIMIT=NONE] -->
-    <string name="zen_mode_forever_dnd" translatable="false">Until you turn off Priority mode</string>
+    <string name="zen_mode_forever_dnd">Until you turn off Do Not Disturb</string>
 
     <!-- Zen mode active automatic rule name separator. [CHAR LIMIT=NONE] -->
     <string name="zen_mode_rule_name_combination"><xliff:g id="first" example="Weeknights">%1$s</xliff:g> / <xliff:g id="rest" example="Meetings">%2$s</xliff:g></string>
@@ -5311,7 +5322,7 @@
     <string name="toolbar_collapse_description">Collapse</string>
 
     <!-- Zen mode - feature name. [CHAR LIMIT=40] -->
-    <string name="zen_mode_feature_name" translatable="false">Priority mode</string>
+    <string name="zen_mode_feature_name">Do not disturb</string>
 
     <!-- Zen mode - downtime legacy feature name. [CHAR LIMIT=40] -->
     <string name="zen_mode_downtime_feature_name">Downtime</string>
@@ -5719,16 +5730,17 @@
     <!-- Title for the harmful app warning dialog. [CHAR LIMIT=40] -->
     <string name="harmful_app_warning_title">Harmful app detected</string>
 
-    <!-- Title for the log access confirmation dialog. [CHAR LIMIT=40] -->
-    <string name="log_access_confirmation_title">System log access request</string>
+    <!-- Title for the log access confirmation dialog. [CHAR LIMIT=NONE] -->
+    <string name="log_access_confirmation_title">Allow <xliff:g id="log_access_app_name" example="Example App">%s</xliff:g> to access all device logs?</string>
     <!-- Label for the allow button on the log access confirmation dialog. [CHAR LIMIT=20] -->
     <string name="log_access_confirmation_allow">Only this time</string>
     <!-- Label for the deny button on the log access confirmation dialog. [CHAR LIMIT=20] -->
     <string name="log_access_confirmation_deny">Don\u2019t allow</string>
 
     <!-- Content for the log access confirmation dialog. [CHAR LIMIT=NONE]-->
-    <string name="log_access_confirmation_body"><xliff:g id="log_access_app_name" example="Example App">%s</xliff:g> requests system logs for functional debugging.
-        These logs might contain information that apps and services on your device have written.</string>
+    <string name="log_access_confirmation_body">Device logs record what happens on your device. Apps can use these logs to find and fix issues.\n\nSome logs may contain sensitive info, so only allow apps you trust to access all device logs.
+        \n\nIf you don’t allow this app to access all device logs, it can still access its own logs and your device manufacturer may still be able to access some logs or info on your device. Learn more
+    </string>
 
     <!-- Privacy notice do not show [CHAR LIMIT=20] -->
     <string name="log_access_do_not_show_again">Don\u2019t show again</string>
@@ -5745,14 +5757,14 @@
 
     <!-- Title for the notification channel notifying user of settings system changes. [CHAR LIMIT=NONE] -->
     <string name="notification_channel_system_changes">System changes</string>
-    <!-- Title for the notification channel notifying user of priority mode system changes (i.e. Priority mode has changed). [CHAR LIMIT=NONE] -->
-    <string name="notification_channel_do_not_disturb" translatable="false">Priority mode</string>
-    <!-- Title of notification indicating Priority mode visual interruption settings have changed when upgrading to P -->
-    <string name="zen_upgrade_notification_visd_title" translatable="false">New: Priority mode is hiding notifications</string>
+    <!-- Title for the notification channel notifying user of do not disturb system changes (i.e. Do Not Disturb has changed). [CHAR LIMIT=NONE] -->
+    <string name="notification_channel_do_not_disturb">Do Not Disturb</string>
+    <!-- Title of notification indicating do not disturb visual interruption settings have changed when upgrading to P -->
+    <string name="zen_upgrade_notification_visd_title">New: Do Not Disturb is hiding notifications</string>
     <!-- Content of notification indicating users can tap on the notification to go to dnd behavior settings -->
     <string name="zen_upgrade_notification_visd_content">Tap to learn more and change.</string>
-    <!-- Title of notification indicating priority mode settings have changed when upgrading to P -->
-    <string name="zen_upgrade_notification_title" translatable="false">Priority mode has changed</string>
+    <!-- Title of notification indicating do not disturb settings have changed when upgrading to P -->
+    <string name="zen_upgrade_notification_title">Do Not Disturb has changed</string>
     <!-- Content of notification indicating users can tap on the notification to go to dnd behavior settings -->
     <string name="zen_upgrade_notification_content">Tap to check what\'s blocked.</string>
 
@@ -5793,7 +5805,7 @@
     <!-- Label of notification action button to learn more about the enhanced notifications [CHAR LIMIT=20] -->
     <string name="nas_upgrade_notification_learn_more_action">Learn more</string>
     <!-- Content of notification learn more dialog about the enhanced notifications [CHAR LIMIT=NONE] -->
-    <string name="nas_upgrade_notification_learn_more_content" translatable="false">Enhanced notifications replaced Android Adaptive Notifications in Android 12. This feature shows suggested actions and replies, and organizes your notifications.\n\nEnhanced notifications can access notification content, including personal information like contact names and messages. This feature can also dismiss or respond to notifications, such as answering phone calls, and control Priority mode.</string>
+    <string name="nas_upgrade_notification_learn_more_content">Enhanced notifications replaced Android Adaptive Notifications in Android 12. This feature shows suggested actions and replies, and organizes your notifications.\n\nEnhanced notifications can access notification content, including personal information like contact names and messages. This feature can also dismiss or respond to notifications, such as answering phone calls, and control Do Not Disturb.</string>
 
 
     <!-- Dynamic mode battery saver strings -->

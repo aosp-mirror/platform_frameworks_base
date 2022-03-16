@@ -140,7 +140,8 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
             int ownerUid, InputController inputController, OnDeviceCloseListener listener,
             PendingTrampolineCallback pendingTrampolineCallback,
             IVirtualDeviceActivityListener activityListener, VirtualDeviceParams params) {
-        mContext = context;
+        UserHandle ownerUserHandle = UserHandle.getUserHandleForUid(ownerUid);
+        mContext = context.createContextAsUser(ownerUserHandle, 0);
         mAssociationInfo = associationInfo;
         mPendingTrampolineCallback = pendingTrampolineCallback;
         mActivityListener = activityListener;
@@ -505,6 +506,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                             getAllowedUserHandles(),
                             mParams.getAllowedActivities(),
                             mParams.getBlockedActivities(),
+                            mParams.getDefaultActivityPolicy(),
                             createListenerAdapter(displayId),
                             activityInfo -> onActivityBlocked(displayId, activityInfo));
             mWindowPolicyControllers.put(displayId, dwpc);

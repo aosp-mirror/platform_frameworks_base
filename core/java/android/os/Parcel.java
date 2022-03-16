@@ -201,7 +201,7 @@ import java.util.function.Supplier;
  * The methods to use are {@link #writeFileDescriptor(FileDescriptor)},
  * {@link #readFileDescriptor()}.
  *
- * <h3>Untyped Containers</h3>
+  * <h3>Parcelable Containers</h3>
  *
  * <p>A final class of methods are for writing and reading standard Java
  * containers of arbitrary types.  These all revolve around the
@@ -213,6 +213,19 @@ import java.util.function.Supplier;
  * {@link #writeMap(Map)}, {@link #readMap(Map, ClassLoader)},
  * {@link #writeSparseArray(SparseArray)},
  * {@link #readSparseArray(ClassLoader)}.
+ *
+ * <h3>Restricted Parcelable Containers</h3>
+ *
+ * <p>A final class of methods are for reading standard Java containers of restricted types.
+ * These methods replace methods for reading containers of arbitrary types from previous section
+ * starting from Android {@link Build.VERSION_CODES#TIRAMISU}. The pairing writing methods are
+ * still the same from previous section.
+ * These methods accepts additional {@code clazz} parameters as the required types.
+ * The Restricted Parcelable container methods are {@link #readArray(ClassLoader, Class)},
+ * {@link #readList(List, ClassLoader, Class)},
+ * {@link #readArrayList(ClassLoader, Class)},
+ * {@link #readMap(Map, ClassLoader, Class, Class)},
+ * {@link #readSparseArray(ClassLoader, Class)}.
  */
 public final class Parcel {
 
@@ -3839,7 +3852,7 @@ public final class Parcel {
      */
     @NonNull
     public <T> List<T> readParcelableList(@NonNull List<T> list,
-            @Nullable ClassLoader cl, @NonNull Class<T> clazz) {
+            @Nullable ClassLoader cl, @NonNull Class<? extends T> clazz) {
         Objects.requireNonNull(list);
         Objects.requireNonNull(clazz);
         return readParcelableListInternal(list, cl, clazz);
@@ -3850,7 +3863,7 @@ public final class Parcel {
      */
     @NonNull
     private <T> List<T> readParcelableListInternal(@NonNull List<T> list,
-            @Nullable ClassLoader cl, @Nullable Class<T> clazz) {
+            @Nullable ClassLoader cl, @Nullable Class<? extends T> clazz) {
         final int n = readInt();
         if (n == -1) {
             list.clear();

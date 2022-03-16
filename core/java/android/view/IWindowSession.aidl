@@ -104,7 +104,8 @@ interface IWindowSession {
             int requestedWidth, int requestedHeight, int viewVisibility,
             int flags, out ClientWindowFrames outFrames,
             out MergedConfiguration outMergedConfiguration, out SurfaceControl outSurfaceControl,
-            out InsetsState insetsState, out InsetsSourceControl[] activeControls);
+            out InsetsState insetsState, out InsetsSourceControl[] activeControls,
+            out Bundle bundle);
 
     /*
      * Notify the window manager that an application is relaunching and
@@ -142,7 +143,8 @@ interface IWindowSession {
      * is null if there is no sync required.
      */
     @UnsupportedAppUsage
-    oneway void finishDrawing(IWindow window, in SurfaceControl.Transaction postDrawTransaction);
+    oneway void finishDrawing(IWindow window, in SurfaceControl.Transaction postDrawTransaction,
+            int seqId);
 
     @UnsupportedAppUsage
     oneway void setInTouchMode(boolean showFocus);
@@ -290,7 +292,8 @@ interface IWindowSession {
     /**
      * Called when the keep-clear areas for this window have changed.
      */
-    oneway void reportKeepClearAreasChanged(IWindow window, in List<Rect> keepClearRects);
+    oneway void reportKeepClearAreasChanged(IWindow window, in List<Rect> restricted,
+           in List<Rect> unrestricted);
 
     /**
     * Request the server to call setInputWindowInfo on a given Surface, and return

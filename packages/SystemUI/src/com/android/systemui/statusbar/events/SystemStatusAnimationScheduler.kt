@@ -21,12 +21,12 @@ import android.animation.AnimatorListenerAdapter
 import android.animation.AnimatorSet
 import android.animation.ValueAnimator
 import android.annotation.IntDef
-import android.content.Context
 import android.os.Process
 import android.provider.DeviceConfig
 import android.util.Log
-import android.view.View
 import com.android.systemui.Dumpable
+import com.android.systemui.animation.Interpolators.STANDARD_ACCELERATE
+import com.android.systemui.animation.Interpolators.STANDARD_DECELERATE
 
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
@@ -45,7 +45,7 @@ import javax.inject.Inject
  * Dead-simple scheduler for system status events. Obeys the following principles (all values TBD):
  *      - Avoiding log spam by only allowing 12 events per minute (1event/5s)
  *      - Waits 100ms to schedule any event for debouncing/prioritization
- *      - Simple prioritization: Privacy > Battery > connectivity (encoded in StatusEvent)
+ *      - Simple prioritization: Privacy > Battery > connectivity (encoded in [StatusEvent])
  *      - Only schedules a single event, and throws away lowest priority events
  *
  * There are 4 basic stages of animation at play here:
@@ -111,7 +111,7 @@ class SystemStatusAnimationScheduler @Inject constructor(
             scheduleEvent(event)
         } else if (scheduledEvent?.shouldUpdateFromEvent(event) == true) {
             if (DEBUG) {
-                Log.d(TAG, "updating current event from: $event")
+                Log.d(TAG, "updating current event from: $event. animationState=$animationState")
             }
             scheduledEvent?.updateFromEvent(event)
             if (event.forceVisible) {
@@ -172,12 +172,14 @@ class SystemStatusAnimationScheduler @Inject constructor(
             entranceAnimator.duration = ENTRANCE_ANIM_LENGTH
             entranceAnimator.addListener(systemAnimatorAdapter)
             entranceAnimator.addUpdateListener(systemUpdateListener)
+            entranceAnimator.interpolator = STANDARD_ACCELERATE
 
             val chipAnimator = ValueAnimator.ofFloat(0f, 1f)
             chipAnimator.duration = CHIP_ANIM_LENGTH
             chipAnimator.addListener(
                     ChipAnimatorAdapter(RUNNING_CHIP_ANIM, scheduledEvent!!.viewCreator))
             chipAnimator.addUpdateListener(chipUpdateListener)
+            chipAnimator.interpolator = STANDARD_DECELERATE
 
             val aSet2 = AnimatorSet()
             aSet2.playSequentially(entranceAnimator, chipAnimator)
@@ -190,6 +192,12 @@ class SystemStatusAnimationScheduler @Inject constructor(
                 systemAnimator.duration = ENTRANCE_ANIM_LENGTH
                 systemAnimator.addListener(systemAnimatorAdapter)
                 systemAnimator.addUpdateListener(systemUpdateListener)
+                systemAnimator.interpolator = STANDARD_DECELERATE
+                systemAnimator.addListener(object : AnimatorListenerAdapter() {
+                    override fun onAnimationEnd(animation: Animator?) {
+                        statusBarWindowController.setForceStatusBarVisible(false)
+                    }
+                })
 
                 val chipAnimator = ValueAnimator.ofFloat(1f, 0f)
                 chipAnimator.duration = CHIP_ANIM_LENGTH
@@ -201,6 +209,7 @@ class SystemStatusAnimationScheduler @Inject constructor(
                 chipAnimator.addListener(
                     ChipAnimatorAdapter(endState, scheduledEvent!!.viewCreator))
                 chipAnimator.addUpdateListener(chipUpdateListener)
+                chipAnimator.interpolator = STANDARD_ACCELERATE
 
                 val aSet2 = AnimatorSet()
 
@@ -212,7 +221,6 @@ class SystemStatusAnimationScheduler @Inject constructor(
 
                 aSet2.start()
 
-                statusBarWindowController.setForceStatusBarVisible(false)
                 scheduledEvent = null
             }, DISPLAY_LENGTH)
         }, DELAY)
@@ -313,7 +321,7 @@ class SystemStatusAnimationScheduler @Inject constructor(
 
     inner class ChipAnimatorAdapter(
         @SystemAnimationState val endState: Int,
-        val viewCreator: (context: Context) -> View
+        val viewCreator: ViewCreator
     ) : AnimatorListenerAdapter() {
         override fun onAnimationEnd(p0: Animator?) {
             chipAnimationController.onChipAnimationEnd(animationState)
@@ -359,7 +367,7 @@ interface SystemStatusChipAnimationCallback {
     fun onChipAnimationUpdate(animator: ValueAnimator, @SystemAnimationState state: Int) {}
 
     fun onChipAnimationStart(
-        viewCreator: (context: Context) -> View,
+        viewCreator: ViewCreator,
         @SystemAnimationState state: Int
     ) {}
 
@@ -371,7 +379,7 @@ interface SystemStatusChipAnimationCallback {
 @Retention(AnnotationRetention.SOURCE)
 @IntDef(
         value = [
-            IDLE, ANIMATING_IN, RUNNING_CHIP_ANIM, ANIMATING_OUT
+            IDLE, ANIMATING_IN, RUNNING_CHIP_ANIM, ANIMATING_OUT, SHOWING_PERSISTENT_DOT
         ]
 )
 annotation class SystemAnimationState

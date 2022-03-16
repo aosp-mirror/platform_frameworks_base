@@ -29,6 +29,7 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.PINNED_WINDOWING_MODE_ELEVATION_IN_DIP;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.app.WindowConfiguration.activityTypeToString;
@@ -71,6 +72,7 @@ import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static com.android.internal.policy.DecorView.DECOR_SHADOW_FOCUSED_HEIGHT_IN_DIP;
 import static com.android.internal.policy.DecorView.DECOR_SHADOW_UNFOCUSED_HEIGHT_IN_DIP;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ADD_REMOVE;
+import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_BACK_PREVIEW;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_LOCKTASK;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_RECENTS_ANIMATIONS;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_STATES;
@@ -503,13 +505,6 @@ class Task extends TaskFragment {
      */
     boolean mInRemoveTask;
 
-    // When non-null, this is a transaction that will get applied on the next frame returned after
-    // a relayout is requested from the client. While this is only valid on a leaf task; since the
-    // transaction can effect an ancestor task, this also needs to keep track of the ancestor task
-    // that this transaction manipulates because deferUntilFrame acts on individual surfaces.
-    SurfaceControl.Transaction mMainWindowSizeChangeTransaction;
-    Task mMainWindowSizeChangeTask;
-
     private final AnimatingActivityRegistry mAnimatingActivityRegistry =
             new AnimatingActivityRegistry();
 
@@ -614,6 +609,12 @@ class Task extends TaskFragment {
     ActivityRecord mChildPipActivity;
 
     boolean mLastSurfaceShowing = true;
+
+    /**
+     * Tracks if a back gesture is in progress.
+     * Skips any system transition animations if this is set to {@code true}.
+     */
+    boolean mBackGestureStarted = false;
 
     private Task(ActivityTaskManagerService atmService, int _taskId, Intent _intent,
             Intent _affinityIntent, String _affinity, String _rootAffinity,
@@ -1529,7 +1530,7 @@ class Task extends TaskFragment {
                 mTaskSupervisor.removeTask(this, false /* killProcess */,
                         !REMOVE_FROM_RECENTS, reason);
             }
-        } else if (!mReuseTask && !mCreatedByOrganizer) {
+        } else if (!mReuseTask && shouldRemoveSelfOnLastChildRemoval()) {
             // Remove entire task if it doesn't have any activity left and it isn't marked for reuse
             // or created by task organizer.
             if (!isRootTask()) {
@@ -1629,12 +1630,16 @@ class Task extends TaskFragment {
     }
 
     ActivityRecord performClearTop(ActivityRecord newR, int launchFlags) {
+        // The task should be preserved for putting new activity in case the last activity is
+        // finished if it is normal launch mode and not single top ("clear-task-top").
+        mReuseTask = true;
         mTaskSupervisor.beginDeferResume();
         final ActivityRecord result;
         try {
             result = clearTopActivities(newR, launchFlags);
         } finally {
             mTaskSupervisor.endDeferResume();
+            mReuseTask = false;
         }
         return result;
     }
@@ -1720,6 +1725,13 @@ class Task extends TaskFragment {
         final Task topTask = getTopMostTask();
         return super.supportsSplitScreenWindowingMode()
                 && (topTask == null || topTask.supportsSplitScreenWindowingModeInner(tda));
+    }
+
+    /** Returns {@code true} if this task is currently in split-screen. */
+    boolean inSplitScreen() {
+        return getWindowingMode() == WINDOWING_MODE_MULTI_WINDOW
+                && getRootTask() != null
+                && getRootTask().getAdjacentTaskFragment() != null;
     }
 
     private boolean supportsSplitScreenWindowingModeInner(@Nullable TaskDisplayArea tda) {
@@ -2035,8 +2047,10 @@ class Task extends TaskFragment {
         Rect outOverrideBounds = getResolvedOverrideConfiguration().windowConfiguration.getBounds();
 
         if (windowingMode == WINDOWING_MODE_FULLSCREEN) {
-            // Use empty bounds to indicate "fill parent".
-            outOverrideBounds.setEmpty();
+            if (!mCreatedByOrganizer) {
+                // Use empty bounds to indicate "fill parent".
+                outOverrideBounds.setEmpty();
+            }
             // The bounds for fullscreen mode shouldn't be adjusted by minimal size. Otherwise if
             // the parent or display is smaller than the size, the content may be cropped.
             return;
@@ -3292,7 +3306,7 @@ class Task extends TaskFragment {
         // We intend to let organizer manage task visibility but it doesn't
         // have enough information until we finish shell transitions.
         // In the mean time we do an easy fix here.
-        final boolean show = isVisible() || isAnimating(TRANSITION | PARENTS);
+        final boolean show = isVisible() || isAnimating(TRANSITION | PARENTS | CHILDREN);
         if (mSurfaceControl != null) {
             if (show != mLastSurfaceShowing) {
                 getSyncTransaction().setVisibility(mSurfaceControl, show);
@@ -3319,6 +3333,14 @@ class Task extends TaskFragment {
                     }
                 });
             }
+        } else if (mBackGestureStarted) {
+            // Cancel playing transitions if a back navigation animation is in progress.
+            // This bit is set by {@link BackNavigationController} when a back gesture is started.
+            // It is used as a one-off transition overwrite that is cleared when the back gesture
+            // is committed and triggers a transition, or when the gesture is cancelled.
+            mBackGestureStarted = false;
+            mDisplayContent.mSkipAppTransitionAnimation = true;
+            ProtoLog.d(WM_DEBUG_BACK_PREVIEW, "Skipping app transition animation. task=%s", this);
         } else {
             super.applyAnimationUnchecked(lp, enter, transit, isVoiceInteraction, sources);
         }
@@ -3400,7 +3422,7 @@ class Task extends TaskFragment {
         info.positionInParent = getRelativePosition();
 
         info.pictureInPictureParams = getPictureInPictureParams(top);
-        info.preferDockBigOverlays = getPreferDockBigOverlays();
+        info.shouldDockBigOverlays = shouldDockBigOverlays();
         if (info.pictureInPictureParams != null
                 && info.pictureInPictureParams.isLaunchIntoPip()
                 && top.getTopMostActivity().getLastParentBeforePip() != null) {
@@ -3453,9 +3475,9 @@ class Task extends TaskFragment {
                 ? null : new PictureInPictureParams(topMostActivity.pictureInPictureArgs);
     }
 
-    private boolean getPreferDockBigOverlays() {
+    private boolean shouldDockBigOverlays() {
         final ActivityRecord topMostActivity = getTopMostActivity();
-        return topMostActivity != null && topMostActivity.preferDockBigOverlays;
+        return topMostActivity != null && topMostActivity.shouldDockBigOverlays;
     }
 
     Rect getDisplayCutoutInsets() {
@@ -4279,7 +4301,7 @@ class Task extends TaskFragment {
     /**
      * @return true if the task is currently focused.
      */
-    private boolean isFocused() {
+    boolean isFocused() {
         if (mDisplayContent == null || mDisplayContent.mFocusedApp == null) {
             return false;
         }
@@ -4351,7 +4373,7 @@ class Task extends TaskFragment {
         }
     }
 
-    void onPreferDockBigOverlaysChanged() {
+    void onShouldDockBigOverlaysChanged() {
         dispatchTaskInfoChangedIfNeeded(true /* force */);
     }
 
@@ -4382,17 +4404,16 @@ class Task extends TaskFragment {
             leaf.setMainWindowSizeChangeTransaction(t, origin);
             return;
         }
-        mMainWindowSizeChangeTransaction = t;
-        mMainWindowSizeChangeTask = t == null ? null : origin;
+        final WindowState w = getTopVisibleAppMainWindow();
+        if (w != null) {
+            w.applyWithNextDraw((d) -> {
+                d.merge(t);
+            });
+        } else {
+            t.apply();
+        }
     }
 
-    SurfaceControl.Transaction getMainWindowSizeChangeTransaction() {
-        return mMainWindowSizeChangeTransaction;
-    }
-
-    Task getMainWindowSizeChangeTask() {
-        return mMainWindowSizeChangeTask;
-    }
 
     void setActivityWindowingMode(int windowingMode) {
         PooledConsumer c = PooledLambda.obtainConsumer(ActivityRecord::setWindowingMode,
@@ -6020,9 +6041,6 @@ class Task extends TaskFragment {
     }
 
     boolean shouldIgnoreInput() {
-        if (inSplitScreenPrimaryWindowingMode() && !isFocusable()) {
-            return true;
-        }
         if (mAtmService.mHasLeanbackFeature && inPinnedWindowingMode()
                 && !isFocusedRootTaskOnDisplay()) {
             // Preventing Picture-in-Picture root task from receiving input on TVs.

@@ -54,6 +54,7 @@ import com.android.settingslib.widget.AdaptiveIcon;
 import com.android.systemui.R;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.animation.GhostedViewLaunchAnimatorController;
+import com.android.systemui.broadcast.BroadcastSender;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.media.dialog.MediaOutputDialogFactory;
 import com.android.systemui.monet.ColorScheme;
@@ -104,10 +105,18 @@ public class MediaControlPanel {
             R.id.action4
     };
 
+    // Buttons to show in small player when using semantic actions
+    private static final List<Integer> SEMANTIC_ACTION_IDS = List.of(
+            R.id.actionPlayPause,
+            R.id.actionPrev,
+            R.id.actionNext
+    );
+
     private final SeekBarViewModel mSeekBarViewModel;
     private SeekBarObserver mSeekBarObserver;
     protected final Executor mBackgroundExecutor;
     private final ActivityStarter mActivityStarter;
+    private final BroadcastSender mBroadcastSender;
 
     private Context mContext;
     private MediaViewHolder mMediaViewHolder;
@@ -142,14 +151,16 @@ public class MediaControlPanel {
      */
     @Inject
     public MediaControlPanel(Context context, @Background Executor backgroundExecutor,
-            ActivityStarter activityStarter, MediaViewController mediaViewController,
-            SeekBarViewModel seekBarViewModel, Lazy<MediaDataManager> lazyMediaDataManager,
+            ActivityStarter activityStarter, BroadcastSender broadcastSender,
+            MediaViewController mediaViewController, SeekBarViewModel seekBarViewModel,
+            Lazy<MediaDataManager> lazyMediaDataManager,
             MediaOutputDialogFactory mediaOutputDialogFactory,
             MediaCarouselController mediaCarouselController,
             FalsingManager falsingManager, MediaFlags mediaFlags, SystemClock systemClock) {
         mContext = context;
         mBackgroundExecutor = backgroundExecutor;
         mActivityStarter = activityStarter;
+        mBroadcastSender = broadcastSender;
         mSeekBarViewModel = seekBarViewModel;
         mMediaViewController = mediaViewController;
         mMediaDataManagerLazy = lazyMediaDataManager;
@@ -501,11 +512,11 @@ public class MediaControlPanel {
             MediaButton semanticActions = data.getSemanticActions();
 
             actionIcons = new ArrayList<MediaAction>();
-            actionIcons.add(semanticActions.getStartCustom());
+            actionIcons.add(semanticActions.getCustom0());
             actionIcons.add(semanticActions.getPrevOrCustom());
             actionIcons.add(semanticActions.getPlayOrPause());
             actionIcons.add(semanticActions.getNextOrCustom());
-            actionIcons.add(semanticActions.getEndCustom());
+            actionIcons.add(semanticActions.getCustom1());
 
             actionsWhenCollapsed = new ArrayList<Integer>();
             actionsWhenCollapsed.add(1);
@@ -562,6 +573,9 @@ public class MediaControlPanel {
 
     /** Bind elements specific to PlayerSessionViewHolder */
     private void bindSessionPlayer(@NonNull MediaData data, String key) {
+        ConstraintSet expandedSet = mMediaViewController.getExpandedLayout();
+        ConstraintSet collapsedSet = mMediaViewController.getCollapsedLayout();
+
         // Default colors
         int surfaceColor = mBackgroundColor;
         int accentPrimary = com.android.settingslib.Utils.getColorAttr(mContext,
@@ -574,25 +588,6 @@ public class MediaControlPanel {
                 com.android.internal.R.attr.textColorSecondary).getDefaultColor();
         int textTertiary = com.android.settingslib.Utils.getColorAttr(mContext,
                 com.android.internal.R.attr.textColorTertiary).getDefaultColor();
-
-        // App icon - use launcher icon
-        ImageView appIconView = mMediaViewHolder.getAppIcon();
-        appIconView.clearColorFilter();
-        try {
-            Drawable icon = mContext.getPackageManager().getApplicationIcon(
-                    data.getPackageName());
-            appIconView.setImageDrawable(icon);
-        } catch (PackageManager.NameNotFoundException e) {
-            Log.w(TAG, "Cannot find icon for package " + data.getPackageName(), e);
-            // Fall back to notification icon
-            if (data.getAppIcon() != null) {
-                appIconView.setImageIcon(data.getAppIcon());
-            } else {
-                appIconView.setImageResource(R.drawable.ic_music_note);
-            }
-            int color = mContext.getColor(R.color.material_dynamic_secondary10);
-            appIconView.setColorFilter(color);
-        }
 
         // Album art
         ColorScheme colorScheme = null;
@@ -640,6 +635,25 @@ public class MediaControlPanel {
                 ColorStateList.valueOf(surfaceColor));
         mMediaViewHolder.getPlayer().setBackgroundTintList(bgColorList);
 
+        // App icon - use notification icon
+        ImageView appIconView = mMediaViewHolder.getAppIcon();
+        appIconView.clearColorFilter();
+        if (data.getAppIcon() != null && !data.getResumption()) {
+            appIconView.setImageIcon(data.getAppIcon());
+            appIconView.setColorFilter(accentPrimary);
+        } else {
+            // Resume players use launcher icon
+            appIconView.setColorFilter(getGrayscaleFilter());
+            try {
+                Drawable icon = mContext.getPackageManager().getApplicationIcon(
+                        data.getPackageName());
+                appIconView.setImageDrawable(icon);
+            } catch (PackageManager.NameNotFoundException e) {
+                Log.w(TAG, "Cannot find icon for package " + data.getPackageName(), e);
+                appIconView.setImageResource(R.drawable.ic_music_note);
+            }
+        }
+
         // Metadata text
         mMediaViewHolder.getTitleText().setTextColor(textPrimary);
         mMediaViewHolder.getArtistText().setTextColor(textSecondary);
@@ -660,25 +674,67 @@ public class MediaControlPanel {
 
         // Media action buttons
         MediaButton semanticActions = data.getSemanticActions();
+        PlayerSessionViewHolder sessionHolder = (PlayerSessionViewHolder) mMediaViewHolder;
+        ImageButton[] genericButtons = new ImageButton[]{
+                sessionHolder.getAction0(),
+                sessionHolder.getAction1(),
+                sessionHolder.getAction2(),
+                sessionHolder.getAction3(),
+                sessionHolder.getAction4()};
+
+        ImageButton[] semanticButtons = new ImageButton[]{
+                sessionHolder.getActionPlayPause(),
+                sessionHolder.getActionNext(),
+                sessionHolder.getActionPrev()};
+
         if (semanticActions != null) {
-            PlayerSessionViewHolder sessionHolder = (PlayerSessionViewHolder) mMediaViewHolder;
+            // Hide all the generic buttons
+            for (ImageButton b: genericButtons) {
+                setVisibleAndAlpha(collapsedSet, b.getId(), false);
+                setVisibleAndAlpha(expandedSet, b.getId(), false);
+            }
 
             // Play/pause button has a background
             sessionHolder.getActionPlayPause().setBackgroundTintList(accentColorList);
             setSemanticButton(sessionHolder.getActionPlayPause(), semanticActions.getPlayOrPause(),
-                    ColorStateList.valueOf(textPrimaryInverse));
+                    ColorStateList.valueOf(textPrimaryInverse), collapsedSet, expandedSet, true);
 
             setSemanticButton(sessionHolder.getActionNext(), semanticActions.getNextOrCustom(),
-                    textColorList);
+                    textColorList, collapsedSet, expandedSet, true);
             setSemanticButton(sessionHolder.getActionPrev(), semanticActions.getPrevOrCustom(),
-                    textColorList);
-            setSemanticButton(sessionHolder.getActionStart(), semanticActions.getStartCustom(),
-                    textColorList);
-            setSemanticButton(sessionHolder.getActionEnd(), semanticActions.getEndCustom(),
-                    textColorList);
+                    textColorList, collapsedSet, expandedSet, true);
+            setSemanticButton(sessionHolder.getAction0(), semanticActions.getCustom0(),
+                    textColorList, collapsedSet, expandedSet, false);
+            setSemanticButton(sessionHolder.getAction1(), semanticActions.getCustom1(),
+                    textColorList, collapsedSet, expandedSet, false);
         } else {
-            Log.w(TAG, "Using semantic player, but did not get buttons");
+            // Hide all the semantic buttons
+            for (int id : SEMANTIC_ACTION_IDS) {
+                setVisibleAndAlpha(collapsedSet, id, false);
+                setVisibleAndAlpha(expandedSet, id, false);
+            }
+
+            // Set all the generic buttons
+            List<Integer> actionsWhenCollapsed = data.getActionsToShowInCompact();
+            List<MediaAction> actions = data.getActions();
+            int i = 0;
+            for (; i < actions.size(); i++) {
+                boolean showInCompact = actionsWhenCollapsed.contains(i);
+                setSemanticButton(genericButtons[i], actions.get(i), textColorList, collapsedSet,
+                        expandedSet, showInCompact);
+            }
+            for (; i < 5; i++) {
+                // Hide any unused buttons
+                setSemanticButton(genericButtons[i], null, textColorList, collapsedSet,
+                        expandedSet, false);
+            }
         }
+
+        // If disabled, set progress bar to INVISIBLE instead of GONE so layout weights still work
+        boolean seekbarEnabled = mSeekBarViewModel.getEnabled();
+        expandedSet.setVisibility(R.id.media_progress_bar,
+                seekbarEnabled ? ConstraintSet.VISIBLE : ConstraintSet.INVISIBLE);
+        expandedSet.setAlpha(R.id.media_progress_bar, seekbarEnabled ? 1.0f : 0.0f);
 
         // Long press buttons
         mMediaViewHolder.getLongPressText().setTextColor(textColorList);
@@ -688,11 +744,11 @@ public class MediaControlPanel {
         mMediaViewHolder.getCancelText().setBackgroundTintList(accentColorList);
         mMediaViewHolder.getDismissText().setTextColor(textColorList);
         mMediaViewHolder.getDismissText().setBackgroundTintList(accentColorList);
-
     }
 
     private void setSemanticButton(final ImageButton button, MediaAction mediaAction,
-            ColorStateList fgColor) {
+            ColorStateList fgColor, ConstraintSet collapsedSet, ConstraintSet expandedSet,
+            boolean showInCompact) {
         button.setImageTintList(fgColor);
         if (mediaAction != null) {
             button.setImageIcon(mediaAction.getIcon());
@@ -716,6 +772,9 @@ public class MediaControlPanel {
             button.setContentDescription(null);
             button.setEnabled(false);
         }
+
+        setVisibleAndAlpha(collapsedSet, button.getId(), mediaAction != null && showInCompact);
+        setVisibleAndAlpha(expandedSet, button.getId(), mediaAction != null);
     }
 
     @Nullable
@@ -899,7 +958,7 @@ public class MediaControlPanel {
                 // Dismiss the card Smartspace data through Smartspace trampoline activity.
                 mContext.startActivity(dismissIntent);
             } else {
-                mContext.sendBroadcast(dismissIntent);
+                mBroadcastSender.sendBroadcast(dismissIntent);
             }
         });
 

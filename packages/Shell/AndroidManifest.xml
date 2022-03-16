@@ -210,6 +210,7 @@
     <uses-permission android:name="android.permission.MANAGE_CREDENTIAL_MANAGEMENT_APP" />
     <uses-permission android:name="android.permission.MANAGE_DEVICE_ADMINS" />
     <uses-permission android:name="android.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS" />
+    <uses-permission android:name="android.permission.PROVISION_DEMO_DEVICE" />
     <uses-permission android:name="android.permission.QUERY_ADMIN_POLICY" />
     <uses-permission android:name="android.permission.UPDATE_DEVICE_MANAGEMENT_RESOURCES" />
     <uses-permission android:name="android.permission.FORCE_DEVICE_POLICY_MANAGER_LOGS" />
@@ -535,10 +536,11 @@
     <uses-permission android:name="android.permission.WIFI_ACCESS_COEX_UNSAFE_CHANNELS" />
     <uses-permission android:name="android.permission.WIFI_UPDATE_COEX_UNSAFE_CHANNELS" />
     <uses-permission android:name="android.permission.NEARBY_WIFI_DEVICES" />
+    <uses-permission android:name="android.permission.MANAGE_WIFI_INTERFACES" />
     <uses-permission android:name="android.permission.OVERRIDE_WIFI_CONFIG" />
     <!-- Permission needed for CTS test - ConcurrencyTest#testP2pExternalApprover
-         P2P external approver API sets require MANAGE_WIFI_AUTO_JOIN permission. -->
-    <uses-permission android:name="android.permission.MANAGE_WIFI_AUTO_JOIN" />
+         P2P external approver API sets require MANAGE_WIFI_NETWORK_SELECTION permission. -->
+    <uses-permission android:name="android.permission.MANAGE_WIFI_NETWORK_SELECTION" />
 
     <!-- Permission required for CTS tests to enable/disable rate limiting toasts. -->
     <uses-permission android:name="android.permission.MANAGE_TOAST_RATE_LIMITING" />
@@ -666,6 +668,9 @@
 
     <!-- Permission required for CTS test - CtsTelephonyTestCases -->
     <uses-permission android:name="android.permission.BIND_TELECOM_CONNECTION_SERVICE" />
+
+    <!-- Permission required for CTS test - CtsAppEnumerationTestCases -->
+    <uses-permission android:name="android.permission.MAKE_UID_VISIBLE" />
 
     <application android:label="@string/app_label"
                 android:theme="@android:style/Theme.DeviceDefault.DayNight"

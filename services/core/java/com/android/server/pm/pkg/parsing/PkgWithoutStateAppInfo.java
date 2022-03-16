@@ -250,6 +250,11 @@ public interface PkgWithoutStateAppInfo {
     int getMinSdkVersion();
 
     /**
+     * @see R.styleable#AndroidManifestUsesSdk_maxSdkVersion
+     */
+    int getMaxSdkVersion();
+
+    /**
      * @see ApplicationInfo#getNativeHeapZeroInitialized()
      * @see R.styleable#AndroidManifestApplication_nativeHeapZeroInitialized
      */

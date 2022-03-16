@@ -1453,7 +1453,7 @@ public class BaseBundle {
 
     @SuppressWarnings("unchecked")
     @Nullable
-    <T> ArrayList<T> getArrayList(@Nullable String key, @NonNull Class<T> clazz) {
+    <T> ArrayList<T> getArrayList(@Nullable String key, @NonNull Class<? extends T> clazz) {
         unparcel();
         try {
             return getValue(key, ArrayList.class, requireNonNull(clazz));

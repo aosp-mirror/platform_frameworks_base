@@ -26,7 +26,7 @@ import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.statusbar.LightRevealScrim
 import com.android.systemui.statusbar.phone.ScreenOffAnimation
-import com.android.systemui.statusbar.phone.StatusBar
+import com.android.systemui.statusbar.phone.CentralSurfaces
 import com.android.systemui.statusbar.policy.CallbackController
 import com.android.systemui.unfold.FoldAodAnimationController.FoldAodAnimationStatus
 import com.android.systemui.util.settings.GlobalSettings
@@ -50,7 +50,7 @@ constructor(
     private val globalSettings: GlobalSettings
 ) : CallbackController<FoldAodAnimationStatus>, ScreenOffAnimation, WakefulnessLifecycle.Observer {
 
-    private lateinit var statusBar: StatusBar
+    private lateinit var mCentralSurfaces: CentralSurfaces
 
     private var isFolded = false
     private var isFoldHandled = true
@@ -66,14 +66,14 @@ constructor(
     private val statusListeners = arrayListOf<FoldAodAnimationStatus>()
 
     private val startAnimationRunnable = Runnable {
-        statusBar.notificationPanelViewController.startFoldToAodAnimation {
+        mCentralSurfaces.notificationPanelViewController.startFoldToAodAnimation {
             // End action
             setAnimationState(playing = false)
         }
     }
 
-    override fun initialize(statusBar: StatusBar, lightRevealScrim: LightRevealScrim) {
-        this.statusBar = statusBar
+    override fun initialize(centralSurfaces: CentralSurfaces, lightRevealScrim: LightRevealScrim) {
+        this.mCentralSurfaces = centralSurfaces
 
         deviceStateManager.registerCallback(executor, FoldListener())
         wakefulnessLifecycle.addObserver(this)
@@ -88,7 +88,7 @@ constructor(
             globalSettings.getString(Settings.Global.ANIMATOR_DURATION_SCALE) != "0"
         ) {
             setAnimationState(playing = true)
-            statusBar.notificationPanelViewController.prepareFoldToAodAnimation()
+            mCentralSurfaces.notificationPanelViewController.prepareFoldToAodAnimation()
             true
         } else {
             setAnimationState(playing = false)
@@ -98,7 +98,7 @@ constructor(
     override fun onStartedWakingUp() {
         if (isAnimationPlaying) {
             handler.removeCallbacks(startAnimationRunnable)
-            statusBar.notificationPanelViewController.cancelFoldToAodAnimation()
+            mCentralSurfaces.notificationPanelViewController.cancelFoldToAodAnimation()
         }
 
         setAnimationState(playing = false)
@@ -131,12 +131,14 @@ constructor(
             // We should play the folding to AOD animation
 
             setAnimationState(playing = true)
-            statusBar.notificationPanelViewController.prepareFoldToAodAnimation()
+            mCentralSurfaces.notificationPanelViewController.prepareFoldToAodAnimation()
 
             // We don't need to wait for the scrim as it is already displayed
             // but we should wait for the initial animation preparations to be drawn
             // (setting initial alpha/translation)
-            OneShotPreDrawListener.add(statusBar.notificationPanelViewController.view, onReady)
+            OneShotPreDrawListener.add(
+                mCentralSurfaces.notificationPanelViewController.view, onReady
+            )
         } else {
             // No animation, call ready callback immediately
             onReady.run()

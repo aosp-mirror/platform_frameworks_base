@@ -70,7 +70,9 @@ final class ScanResult {
         mPkgSetting = pkgSetting;
         mChangedAbiCodePath = changedAbiCodePath;
         mExistingSettingCopied = existingSettingCopied;
-        mPreviousAppId = previousAppId;
+        // Hardcode mPreviousAppId to INVALID_UID (http://b/221088088)
+        // This will disable all migration code paths in PMS and PermMS
+        mPreviousAppId = Process.INVALID_UID;
         mSdkSharedLibraryInfo = sdkSharedLibraryInfo;
         mStaticSharedLibraryInfo = staticSharedLibraryInfo;
         mDynamicSharedLibraryInfos = dynamicSharedLibraryInfos;

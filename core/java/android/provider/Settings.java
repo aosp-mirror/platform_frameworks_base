@@ -85,8 +85,10 @@ import android.util.ArraySet;
 import android.util.Log;
 import android.util.MemoryIntArray;
 import android.view.Display;
+import android.view.MotionEvent;
 import android.view.Window;
 import android.view.WindowManager.LayoutParams;
+import android.widget.Editor;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.Preconditions;
@@ -238,6 +240,20 @@ public final class Settings {
     @SystemApi
     public static final String ACTION_TETHER_PROVISIONING_UI =
             "android.settings.TETHER_PROVISIONING_UI";
+
+    /**
+     * Activity Action: Show a dialog activity to notify tethering is NOT supported by carrier.
+     *
+     * When {@link android.telephony.CarrierConfigManager#KEY_CARRIER_SUPPORTS_TETHERING_BOOL}
+     * is false, and tethering is started by Settings, this dialog activity will be started to
+     * tell the user that tethering is not supported by carrier.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    @SystemApi
+    public static final String ACTION_TETHER_UNSUPPORTED_CARRIER_UI =
+            "android.settings.TETHER_UNSUPPORTED_CARRIER_UI";
 
     /**
      * Activity Action: Show settings to allow entering/exiting airplane mode.
@@ -9971,6 +9987,13 @@ public final class Settings {
                 "lockscreen_use_double_line_clock";
 
         /**
+         * Whether to show the vibrate icon in the Status Bar (default off)
+         *
+         * @hide
+         */
+        public static final String STATUS_BAR_SHOW_VIBRATE_ICON = "status_bar_show_vibrate_icon";
+
+        /**
          * Specifies whether the web action API is enabled.
          *
          * @hide
@@ -10265,6 +10288,14 @@ public final class Settings {
         @Readable
         public static final String THEME_CUSTOMIZATION_OVERLAY_PACKAGES =
                 "theme_customization_overlay_packages";
+
+        /**
+         * Indicates whether the nav bar is forced to always be visible, even in immersive mode.
+         * <p>Type: int (0 for false, 1 for true)
+         *
+         * @hide
+         */
+        public static final String NAV_BAR_FORCE_VISIBLE = "nav_bar_force_visible";
 
         /**
          * Indicates whether the device is in kids nav mode.
@@ -10696,14 +10727,6 @@ public final class Settings {
          */
         public static final String COMMUNAL_MODE_TRUSTED_NETWORKS =
                 "communal_mode_trusted_networks";
-
-        /**
-         * Setting to allow Fast Pair scans to be enabled.
-         * @hide
-         */
-        @SystemApi
-        @Readable
-        public static final String FAST_PAIR_SCAN_ENABLED = "fast_pair_scan_enabled";
 
         /**
          * Setting to store denylisted system languages by the CEC {@code <Set Menu Language>}
@@ -15487,6 +15510,17 @@ public final class Settings {
          */
         @Readable
         public static final String AUTOFILL_MAX_VISIBLE_DATASETS = "autofill_max_visible_datasets";
+
+        /**
+         * Toggle for enabling stylus handwriting. When enabled, current Input method receives
+         * stylus {@link MotionEvent}s if an {@link Editor} is focused.
+         *
+         * @hide
+         */
+        @TestApi
+        @Readable
+        @SuppressLint("NoSettingsProvider")
+        public static final String STYLUS_HANDWRITING_ENABLED = "stylus_handwriting_enabled";
 
         /**
          * Exemptions to the hidden API blacklist.

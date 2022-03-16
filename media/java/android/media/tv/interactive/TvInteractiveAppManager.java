@@ -626,6 +626,7 @@ public final class TvInteractiveAppManager {
         /**
          * This is called when the state of the interactive app service is changed.
          *
+         * @param iAppServiceId The ID of the TV Interactive App service.
          * @param type the interactive app type
          * @param state the current state of the service of the given type
          * @param err the error code for error state. {@link #ERROR_NONE} is used when the state is
@@ -760,7 +761,12 @@ public final class TvInteractiveAppManager {
     }
 
     /**
-     * Registers app link info.
+     * Registers an Android application link info record which can be used to launch the specific
+     * Android application by TV interactive App RTE.
+     *
+     * @param tvIAppServiceId The ID of TV interactive service which the command to be sent to. The
+     *                        ID can be found in {@link TvInputInfo#getId()}.
+     * @param appLinkInfo The Android application link info record to be registered.
      */
     public void registerAppLinkInfo(
             @NonNull String tvIAppServiceId, @NonNull AppLinkInfo appLinkInfo) {
@@ -772,7 +778,12 @@ public final class TvInteractiveAppManager {
     }
 
     /**
-     * Unregisters app link info.
+     * Unregisters an Android application link info record which can be used to launch the specific
+     * Android application by TV interactive App RTE.
+     *
+     * @param tvIAppServiceId The ID of TV interactive service which the command to be sent to. The
+     *                        ID can be found in {@link TvInputInfo#getId()}.
+     * @param appLinkInfo The Android application link info record to be unregistered.
      */
     public void unregisterAppLinkInfo(
             @NonNull String tvIAppServiceId, @NonNull AppLinkInfo appLinkInfo) {
@@ -805,8 +816,8 @@ public final class TvInteractiveAppManager {
      * @param executor A {@link Executor} that the status change will be delivered to.
      */
     public void registerCallback(
-            @NonNull TvInteractiveAppCallback callback,
-            @CallbackExecutor @NonNull Executor executor) {
+            @CallbackExecutor @NonNull Executor executor,
+            @NonNull TvInteractiveAppCallback callback) {
         Preconditions.checkNotNull(callback);
         Preconditions.checkNotNull(executor);
         synchronized (mLock) {
@@ -1813,8 +1824,8 @@ public final class TvInteractiveAppManager {
         }
 
         /**
-         * This is called when {@link TvIAppService.Session#notifyTeletextAppStateChanged} is
-         * called.
+         * This is called when {@link TvInteractiveAppService.Session#notifyTeletextAppStateChanged}
+         * is called.
          *
          * @param session A {@link TvInteractiveAppManager.Session} associated with this callback.
          * @param state the current state.

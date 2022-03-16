@@ -71,7 +71,7 @@ final class PackageManagerNative extends IPackageManagerNative.Stub {
 
     @Override
     public String[] getAllPackages() {
-        return mPm.getAllPackages().toArray(new String[0]);
+        return mPm.snapshotComputer().getAllPackages().toArray(new String[0]);
     }
 
     @Override
@@ -82,7 +82,7 @@ final class PackageManagerNative extends IPackageManagerNative.Stub {
             if (uids == null || uids.length == 0) {
                 return null;
             }
-            names = mPm.getNamesForUids(uids);
+            names = mPm.snapshotComputer().getNamesForUids(uids);
             results = (names != null) ? names : new String[uids.length];
             // massage results so they can be parsed by the native binder
             for (int i = results.length - 1; i >= 0; --i) {
@@ -104,13 +104,14 @@ final class PackageManagerNative extends IPackageManagerNative.Stub {
     // NB: this differentiates between preloads and sideloads
     @Override
     public String getInstallerForPackage(String packageName) throws RemoteException {
-        final String installerName = mPm.getInstallerPackageName(packageName);
+        final Computer snapshot = mPm.snapshotComputer();
+        final String installerName = snapshot.getInstallerPackageName(packageName);
         if (!TextUtils.isEmpty(installerName)) {
             return installerName;
         }
         // differentiate between preload and sideload
         int callingUser = UserHandle.getUserId(Binder.getCallingUid());
-        ApplicationInfo appInfo = mPm.getApplicationInfo(packageName,
+        ApplicationInfo appInfo = snapshot.getApplicationInfo(packageName,
                 /*flags*/ 0,
                 /*userId*/ callingUser);
         if (appInfo != null && (appInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
@@ -123,7 +124,8 @@ final class PackageManagerNative extends IPackageManagerNative.Stub {
     public long getVersionCodeForPackage(String packageName) throws RemoteException {
         try {
             int callingUser = UserHandle.getUserId(Binder.getCallingUid());
-            PackageInfo pInfo = mPm.getPackageInfo(packageName, 0, callingUser);
+            PackageInfo pInfo = mPm.snapshotComputer()
+                    .getPackageInfo(packageName, 0, callingUser);
             if (pInfo != null) {
                 return pInfo.getLongVersionCode();
             }
@@ -134,7 +136,7 @@ final class PackageManagerNative extends IPackageManagerNative.Stub {
 
     @Override
     public int getTargetSdkVersionForPackage(String packageName) throws RemoteException {
-        int targetSdk = mPm.getTargetSdkVersion(packageName);
+        int targetSdk = mPm.snapshotComputer().getTargetSdkVersion(packageName);
         if (targetSdk != -1) {
             return targetSdk;
         }
@@ -145,7 +147,8 @@ final class PackageManagerNative extends IPackageManagerNative.Stub {
     @Override
     public boolean isPackageDebuggable(String packageName) throws RemoteException {
         int callingUser = UserHandle.getCallingUserId();
-        ApplicationInfo appInfo = mPm.getApplicationInfo(packageName, 0, callingUser);
+        ApplicationInfo appInfo = mPm.snapshotComputer()
+                .getApplicationInfo(packageName, 0, callingUser);
         if (appInfo != null) {
             return (0 != (appInfo.flags & ApplicationInfo.FLAG_DEBUGGABLE));
         }
@@ -157,9 +160,10 @@ final class PackageManagerNative extends IPackageManagerNative.Stub {
     public boolean[] isAudioPlaybackCaptureAllowed(String[] packageNames)
             throws RemoteException {
         int callingUser = UserHandle.getUserId(Binder.getCallingUid());
+        final Computer snapshot = mPm.snapshotComputer();
         boolean[] results = new boolean[packageNames.length];
         for (int i = results.length - 1; i >= 0; --i) {
-            ApplicationInfo appInfo = mPm.getApplicationInfo(packageNames[i], 0, callingUser);
+            ApplicationInfo appInfo = snapshot.getApplicationInfo(packageNames[i], 0, callingUser);
             results[i] = appInfo != null && appInfo.isAudioPlaybackCaptureAllowed();
         }
         return results;
@@ -168,7 +172,7 @@ final class PackageManagerNative extends IPackageManagerNative.Stub {
     @Override
     public int getLocationFlags(String packageName) throws RemoteException {
         int callingUser = UserHandle.getUserId(Binder.getCallingUid());
-        ApplicationInfo appInfo = mPm.getApplicationInfo(packageName,
+        ApplicationInfo appInfo = mPm.snapshotComputer().getApplicationInfo(packageName,
                 /*flags*/ 0,
                 /*userId*/ callingUser);
         if (appInfo == null) {
@@ -188,7 +192,8 @@ final class PackageManagerNative extends IPackageManagerNative.Stub {
     @Override
     public boolean hasSha256SigningCertificate(String packageName, byte[] certificate)
             throws RemoteException {
-        return mPm.hasSigningCertificate(packageName, certificate, CERT_INPUT_SHA256);
+        return mPm.snapshotComputer()
+                .hasSigningCertificate(packageName, certificate, CERT_INPUT_SHA256);
     }
 
     @Override

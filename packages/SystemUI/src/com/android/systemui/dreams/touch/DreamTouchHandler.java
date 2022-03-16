@@ -16,6 +16,7 @@
 
 package com.android.systemui.dreams.touch;
 
+import android.graphics.Region;
 import android.view.GestureDetector;
 
 import com.android.systemui.shared.system.InputChannelCompat;
@@ -71,6 +72,19 @@ public interface DreamTouchHandler {
          * if the popped {@link TouchSession} was the initial session or has already been popped.
          */
         ListenableFuture<TouchSession> pop();
+
+        /**
+         * Returns the number of currently active sessions.
+         */
+        int getActiveSessionCount();
+    }
+
+    /**
+     * Returns the region the touch handler is interested in. By default, no region is specified,
+     * indicating the entire screen should be considered.
+     * @param region A {@link Region} that is passed in to the target entry touch region.
+     */
+    default void getTouchInitiationRegion(Region region) {
     }
 
     /**

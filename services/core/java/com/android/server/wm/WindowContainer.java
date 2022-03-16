@@ -47,6 +47,7 @@ import static com.android.server.wm.IdentifierProto.TITLE;
 import static com.android.server.wm.IdentifierProto.USER_ID;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_ALL;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
+import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_RECENTS;
 import static com.android.server.wm.WindowContainer.AnimationFlags.CHILDREN;
 import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
 import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
@@ -72,6 +73,7 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Debug;
@@ -1023,7 +1025,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         return mProvidedInsetsSources;
     }
 
-    DisplayContent getDisplayContent() {
+    public DisplayContent getDisplayContent() {
         return mDisplayContent;
     }
 
@@ -1171,6 +1173,44 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
     boolean inTransition() {
         return mTransitionController.inTransition(this);
+    }
+
+    boolean inAppOrRecentsTransition() {
+        if (!mTransitionController.isShellTransitionsEnabled()) {
+            return isAnimating(PARENTS | TRANSITION,
+                    ANIMATION_TYPE_APP_TRANSITION | ANIMATION_TYPE_RECENTS);
+        }
+        for (WindowContainer p = this; p != null; p = p.getParent()) {
+            if (mTransitionController.isCollecting(p)) {
+                return true;
+            }
+        }
+        if (inTransition() || mTransitionController.inRecentsTransition(this)) return true;
+
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
+            WindowContainer child = mChildren.get(i);
+            if (child.inAppOrRecentsTransition()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    boolean isExitAnimationRunningSelfOrChild() {
+        if (!mTransitionController.isShellTransitionsEnabled()) {
+            return isAnimating(TRANSITION | CHILDREN, WindowState.EXIT_ANIMATING_TYPES);
+        }
+        if (mTransitionController.isCollecting(this)) {
+            return true;
+        }
+
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
+            WindowContainer child = mChildren.get(i);
+            if (child.isExitAnimationRunningSelfOrChild()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     void sendAppVisibilityToClients() {
@@ -3785,7 +3825,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         private void setTaskBackgroundColor(@ColorInt int backgroundColor) {
             TaskDisplayArea taskDisplayArea = getTaskDisplayArea();
 
-            if (taskDisplayArea != null) {
+            if (taskDisplayArea != null && backgroundColor != Color.TRANSPARENT) {
                 taskDisplayArea.setBackgroundColor(backgroundColor);
 
                 // Atomic counter to make sure the clearColor callback is only called one.

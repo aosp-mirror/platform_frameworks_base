@@ -98,6 +98,10 @@ import com.android.internal.inputmethod.InputConnectionCommandHeader;
     void requestCursorUpdates(in InputConnectionCommandHeader header, int cursorUpdateMode,
             int imeDisplayId, in AndroidFuture future /* T=Boolean */);
 
+    void requestCursorUpdatesWithFilter(in InputConnectionCommandHeader header,
+                int cursorUpdateMode, int cursorUpdateFilter, int imeDisplayId,
+                 in AndroidFuture future /* T=Boolean */);
+
     void commitContent(in InputConnectionCommandHeader header, in InputContentInfo inputContentInfo,
             int flags, in Bundle opts, in AndroidFuture future /* T=Boolean */);
 

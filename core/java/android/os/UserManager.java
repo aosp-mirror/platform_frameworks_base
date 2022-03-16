@@ -1703,12 +1703,40 @@ public class UserManager {
 
     /**
      * A response code from {@link #removeUserWhenPossible(UserHandle, boolean)} indicating that
-     * an error occurred that prevented the user from being removed or set as ephemeral.
+     * an unknown error occurred that prevented the user from being removed or set as ephemeral.
      *
      * @hide
      */
     @SystemApi
-    public static final int REMOVE_RESULT_ERROR = 3;
+    public static final int REMOVE_RESULT_ERROR_UNKNOWN = -1;
+
+    /**
+     * A response code from {@link #removeUserWhenPossible(UserHandle, boolean)} indicating that
+     * the user could not be removed due to a {@link #DISALLOW_REMOVE_MANAGED_PROFILE} or
+     * {@link #DISALLOW_REMOVE_USER} user restriction.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int REMOVE_RESULT_ERROR_USER_RESTRICTION = -2;
+
+    /**
+     * A response code from {@link #removeUserWhenPossible(UserHandle, boolean)} indicating that
+     * user being removed does not exist.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int REMOVE_RESULT_ERROR_USER_NOT_FOUND = -3;
+
+    /**
+     * A response code from {@link #removeUserWhenPossible(UserHandle, boolean)} indicating that
+     * user being removed is a {@link UserHandle#SYSTEM} user which can't be removed.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int REMOVE_RESULT_ERROR_SYSTEM_USER = -4;
 
     /**
      * Possible response codes from {@link #removeUserWhenPossible(UserHandle, boolean)}.
@@ -1719,7 +1747,10 @@ public class UserManager {
             REMOVE_RESULT_REMOVED,
             REMOVE_RESULT_DEFERRED,
             REMOVE_RESULT_ALREADY_BEING_REMOVED,
-            REMOVE_RESULT_ERROR,
+            REMOVE_RESULT_ERROR_USER_RESTRICTION,
+            REMOVE_RESULT_ERROR_USER_NOT_FOUND,
+            REMOVE_RESULT_ERROR_SYSTEM_USER,
+            REMOVE_RESULT_ERROR_UNKNOWN,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface RemoveResult {}
@@ -2574,6 +2605,9 @@ public class UserManager {
     /**
      * Checks if the context user is a managed profile.
      *
+     * Note that this applies specifically to <em>managed</em> profiles. For profiles in general,
+     * use {@link #isProfile()} instead.
+     *
      * @return whether the context user is a managed profile.
      */
     @UserHandleAware(
@@ -2592,6 +2626,9 @@ public class UserManager {
      * {@link android.Manifest.permission#INTERACT_ACROSS_USERS} or
      * {@link android.Manifest.permission#QUERY_USERS} permission, otherwise the caller
      * must be in the same profile group of specified user.
+     *
+     * Note that this applies specifically to <em>managed</em> profiles. For profiles in general,
+     * use {@link #isProfile()} instead.
      *
      * @return whether the specified user is a managed profile.
      * @hide
@@ -3322,7 +3359,7 @@ public class UserManager {
      *
      * <p>This method can be used by OEMs to "warm" up the user creation by pre-creating some users
      * at the first boot, so they when the "real" user is created (for example,
-     * by {@link #createUser(String, String, int)} or {@link #createGuest(Context, String)}), it
+     * by {@link #createUser(String, String, int)} or {@link #createGuest(Context)}), it
      * takes less time.
      *
      * <p>This method completes the majority of work necessary for user creation: it
@@ -3359,7 +3396,6 @@ public class UserManager {
     /**
      * Creates a guest user and configures it.
      * @param context an application context
-     * @param name the name to set for the user
      * @return the {@link UserInfo} object for the created user, or {@code null} if the user
      *         could not be created.
      *
@@ -3367,20 +3403,19 @@ public class UserManager {
      */
     @RequiresPermission(anyOf = {Manifest.permission.MANAGE_USERS,
             Manifest.permission.CREATE_USERS})
-    public UserInfo createGuest(Context context, String name) {
-        UserInfo guest = null;
+    public UserInfo createGuest(Context context) {
         try {
-            guest = mService.createUserWithThrow(name, USER_TYPE_FULL_GUEST, 0);
+            final UserInfo guest = mService.createUserWithThrow(null, USER_TYPE_FULL_GUEST, 0);
             if (guest != null) {
                 Settings.Secure.putStringForUser(context.getContentResolver(),
                         Settings.Secure.SKIP_FIRST_USE_HINTS, "1", guest.id);
             }
+            return guest;
         } catch (ServiceSpecificException e) {
             return null;
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
-        return guest;
     }
 
     /**
@@ -4759,7 +4794,7 @@ public class UserManager {
     }
 
     /**
-     * Returns {@code true} if the user shares lock settings credential with its parent user
+     * Returns whether the user can have shared lockscreen credential with its parent user.
      *
      * This API only works for {@link UserManager#isProfile() profiles}
      * and will always return false for any other user type.
@@ -4772,9 +4807,9 @@ public class UserManager {
                     Manifest.permission.MANAGE_USERS,
                     Manifest.permission.INTERACT_ACROSS_USERS})
     @SuppressAutoDoc
-    public boolean isCredentialSharedWithParent() {
+    public boolean isCredentialSharableWithParent() {
         try {
-            return mService.isCredentialSharedWithParent(mUserId);
+            return mService.isCredentialSharableWithParent(mUserId);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -4842,8 +4877,10 @@ public class UserManager {
      * the {@link #DISALLOW_REMOVE_USER} or {@link #DISALLOW_REMOVE_MANAGED_PROFILE} restriction
      *
      * @return the {@link RemoveResult} code: {@link #REMOVE_RESULT_REMOVED},
-     * {@link #REMOVE_RESULT_DEFERRED}, {@link #REMOVE_RESULT_ALREADY_BEING_REMOVED}, or
-     * {@link #REMOVE_RESULT_ERROR}.
+     * {@link #REMOVE_RESULT_DEFERRED}, {@link #REMOVE_RESULT_ALREADY_BEING_REMOVED},
+     * {@link #REMOVE_RESULT_ERROR_USER_RESTRICTION}, {@link #REMOVE_RESULT_ERROR_USER_NOT_FOUND},
+     * {@link #REMOVE_RESULT_ERROR_SYSTEM_USER}, or {@link #REMOVE_RESULT_ERROR_UNKNOWN}. All error
+     * codes have negative values.
      *
      * @hide
      */
@@ -4857,6 +4894,19 @@ public class UserManager {
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Check if {@link #removeUserWhenPossible} returned a success code which means that the user
+     * has been removed or is slated for removal.
+     *
+     * @param result is {@link #RemoveResult} code return by {@link #removeUserWhenPossible}.
+     * @return {@code true} if it is a success code.
+     * @hide
+     */
+    @SystemApi
+    public static boolean isRemoveResultSuccessful(@RemoveResult int result) {
+        return result >= 0;
     }
 
     /**

@@ -949,7 +949,7 @@ public class RootWindowContainerTests extends WindowTestsBase {
         LaunchParamsController.LaunchParams launchParams =
                 new LaunchParamsController.LaunchParams();
         launchParams.mPreferredTaskDisplayArea = taskDisplayArea;
-        Task root = mRootWindowContainer.getLaunchRootTask(null /* r */, null /* options */,
+        Task root = mRootWindowContainer.getOrCreateRootTask(null /* r */, null /* options */,
                 null /* candidateTask */, null /* sourceTask */, true /* onTop */, launchParams,
                 0 /* launchParams */);
         assertEquals(taskDisplayArea, root.getTaskDisplayArea());
@@ -957,7 +957,7 @@ public class RootWindowContainerTests extends WindowTestsBase {
         // Making sure still getting the root task from the preferred TDA when passing in a
         // launching activity.
         ActivityRecord r = new ActivityBuilder(mAtm).build();
-        root = mRootWindowContainer.getLaunchRootTask(r, null /* options */,
+        root = mRootWindowContainer.getOrCreateRootTask(r, null /* options */,
                 null /* candidateTask */, null /* sourceTask */, true /* onTop */, launchParams,
                 0 /* launchParams */);
         assertEquals(taskDisplayArea, root.getTaskDisplayArea());

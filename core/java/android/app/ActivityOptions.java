@@ -174,6 +174,13 @@ public class ActivityOptions extends ComponentOptions {
     public static final String KEY_SPLASH_SCREEN_THEME = "android.activity.splashScreenTheme";
 
     /**
+     * Indicates that this activity launch is eligible to show a legacy permission prompt
+     * @hide
+     */
+    public static final String KEY_LEGACY_PERMISSION_PROMPT_ELIGIBLE =
+            "android:activity.legacyPermissionPromptEligible";
+
+    /**
      * Callback for when the last frame of the animation is played.
      * @hide
      */
@@ -445,6 +452,7 @@ public class ActivityOptions extends ComponentOptions {
     private String mSplashScreenThemeResName;
     @SplashScreen.SplashScreenStyle
     private int mSplashScreenStyle = SplashScreen.SPLASH_SCREEN_STYLE_UNDEFINED;
+    private boolean mIsEligibleForLegacyPermissionPrompt;
     private boolean mRemoveWithTaskOrganizer;
     private boolean mLaunchedFromBubble;
     private boolean mTransientLaunch;
@@ -1243,6 +1251,8 @@ public class ActivityOptions extends ComponentOptions {
         mTransientLaunch = opts.getBoolean(KEY_TRANSIENT_LAUNCH);
         mSplashScreenStyle = opts.getInt(KEY_SPLASH_SCREEN_STYLE);
         mLaunchIntoPipParams = opts.getParcelable(KEY_LAUNCH_INTO_PIP_PARAMS);
+        mIsEligibleForLegacyPermissionPrompt =
+                opts.getBoolean(KEY_LEGACY_PERMISSION_PROMPT_ELIGIBLE);
     }
 
     /**
@@ -1411,17 +1421,9 @@ public class ActivityOptions extends ComponentOptions {
         return mRemoteTransition;
     }
 
-    /**
-     * Creates an ActivityOptions from the Bundle generated from {@link ActivityOptions#toBundle()}.
-     * Returns an instance of ActivityOptions populated with options with known keys from the
-     * provided Bundle, stripping out unknown entries.
-     * @hide
-     */
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
-    @TestApi
-    @NonNull
-    public static ActivityOptions fromBundle(@NonNull Bundle bOptions) {
-        return new ActivityOptions(bOptions);
+    /** @hide */
+    public static ActivityOptions fromBundle(Bundle bOptions) {
+        return bOptions != null ? new ActivityOptions(bOptions) : null;
     }
 
     /** @hide */
@@ -1462,15 +1464,33 @@ public class ActivityOptions extends ComponentOptions {
      * Sets the preferred splash screen style of the opening activities. This only applies if the
      * Activity or Process is not yet created.
      * @param style Can be either {@link SplashScreen#SPLASH_SCREEN_STYLE_ICON} or
-     *              {@link SplashScreen#SPLASH_SCREEN_STYLE_EMPTY}
+     *              {@link SplashScreen#SPLASH_SCREEN_STYLE_SOLID_COLOR}
      */
     @NonNull
     public ActivityOptions setSplashScreenStyle(@SplashScreen.SplashScreenStyle int style) {
         if (style == SplashScreen.SPLASH_SCREEN_STYLE_ICON
-                || style == SplashScreen.SPLASH_SCREEN_STYLE_EMPTY) {
+                || style == SplashScreen.SPLASH_SCREEN_STYLE_SOLID_COLOR) {
             mSplashScreenStyle = style;
         }
         return this;
+    }
+
+    /**
+     * Whether the activity is eligible to show a legacy permission prompt
+     * @hide
+     */
+    @TestApi
+    public boolean isEligibleForLegacyPermissionPrompt() {
+        return mIsEligibleForLegacyPermissionPrompt;
+    }
+
+    /**
+     * Sets whether the activity is eligible to show a legacy permission prompt
+     * @hide
+     */
+    @TestApi
+    public void setEligibleForLegacyPermissionPrompt(boolean eligible) {
+        mIsEligibleForLegacyPermissionPrompt = eligible;
     }
 
     /**
@@ -1909,6 +1929,7 @@ public class ActivityOptions extends ComponentOptions {
         mSpecsFuture = otherOptions.mSpecsFuture;
         mRemoteAnimationAdapter = otherOptions.mRemoteAnimationAdapter;
         mLaunchIntoPipParams = otherOptions.mLaunchIntoPipParams;
+        mIsEligibleForLegacyPermissionPrompt = otherOptions.mIsEligibleForLegacyPermissionPrompt;
     }
 
     /**
@@ -2083,6 +2104,10 @@ public class ActivityOptions extends ComponentOptions {
         }
         if (mLaunchIntoPipParams != null) {
             b.putParcelable(KEY_LAUNCH_INTO_PIP_PARAMS, mLaunchIntoPipParams);
+        }
+        if (mIsEligibleForLegacyPermissionPrompt) {
+            b.putBoolean(KEY_LEGACY_PERMISSION_PROMPT_ELIGIBLE,
+                    mIsEligibleForLegacyPermissionPrompt);
         }
         return b;
     }

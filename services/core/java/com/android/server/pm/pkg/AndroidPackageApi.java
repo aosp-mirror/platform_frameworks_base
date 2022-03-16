@@ -268,6 +268,9 @@ public interface AndroidPackageApi {
     List<FeatureGroupInfo> getFeatureGroups();
 
     @NonNull
+    List<String> getImplicitPermissions();
+
+    @NonNull
     List<ParsedInstrumentation> getInstrumentations();
 
     long getLongVersionCode();

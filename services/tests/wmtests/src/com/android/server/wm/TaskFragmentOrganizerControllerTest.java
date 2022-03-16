@@ -359,17 +359,11 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
     public void testApplyTransaction_enforceHierarchyChange_createTaskFragment()
             throws RemoteException {
         mController.registerOrganizer(mIOrganizer);
-        final ActivityRecord activity = createActivityRecord(mDisplayContent);
-        final int uid = Binder.getCallingUid();
-        activity.info.applicationInfo.uid = uid;
-        activity.getTask().effectiveUid = uid;
+        final ActivityRecord ownerActivity = createActivityRecord(mDisplayContent);
         final IBinder fragmentToken = new Binder();
-        final TaskFragmentCreationParams params = new TaskFragmentCreationParams.Builder(
-                mOrganizerToken, fragmentToken, activity.token).build();
-        mOrganizer.applyTransaction(mTransaction);
 
         // Allow organizer to create TaskFragment and start/reparent activity to TaskFragment.
-        mTransaction.createTaskFragment(params);
+        createTaskFragmentFromOrganizer(mTransaction, ownerActivity, fragmentToken);
         mTransaction.startActivityInTaskFragment(
                 mFragmentToken, null /* callerToken */, new Intent(), null /* activityOptions */);
         mTransaction.reparentActivityToTaskFragment(mFragmentToken, mock(IBinder.class));
@@ -381,7 +375,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         final TaskFragment taskFragment = mAtm.mWindowOrganizerController
                 .getTaskFragment(fragmentToken);
         assertNotNull(taskFragment);
-        assertEquals(activity.getTask(), taskFragment.getTask());
+        assertEquals(ownerActivity.getTask(), taskFragment.getTask());
     }
 
     @Test
@@ -522,5 +516,44 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         mController.onTaskFragmentInfoChanged(mIOrganizer, taskFragment);
         mController.dispatchPendingEvents();
         verify(mOrganizer).onTaskFragmentInfoChanged(any());
+    }
+
+    /**
+     * When an embedded {@link TaskFragment} is removed, we should clean up the reference in the
+     * {@link WindowOrganizerController}.
+     */
+    @Test
+    public void testTaskFragmentRemoved_cleanUpEmbeddedTaskFragment()
+            throws RemoteException {
+        mController.registerOrganizer(mIOrganizer);
+        final ActivityRecord ownerActivity = createActivityRecord(mDisplayContent);
+        final IBinder fragmentToken = new Binder();
+        createTaskFragmentFromOrganizer(mTransaction, ownerActivity, fragmentToken);
+        mAtm.getWindowOrganizerController().applyTransaction(mTransaction);
+        final TaskFragment taskFragment = mAtm.mWindowOrganizerController
+                .getTaskFragment(fragmentToken);
+
+        assertNotNull(taskFragment);
+
+        taskFragment.removeImmediately();
+
+        assertNull(mAtm.mWindowOrganizerController.getTaskFragment(fragmentToken));
+    }
+
+    /**
+     * Creates a {@link TaskFragment} with the {@link WindowContainerTransaction}. Calls
+     * {@link WindowOrganizerController#applyTransaction} to apply the transaction,
+     */
+    private void createTaskFragmentFromOrganizer(WindowContainerTransaction wct,
+            ActivityRecord ownerActivity, IBinder fragmentToken) {
+        final int uid = Binder.getCallingUid();
+        ownerActivity.info.applicationInfo.uid = uid;
+        ownerActivity.getTask().effectiveUid = uid;
+        final TaskFragmentCreationParams params = new TaskFragmentCreationParams.Builder(
+                mOrganizerToken, fragmentToken, ownerActivity.token).build();
+        mOrganizer.applyTransaction(wct);
+
+        // Allow organizer to create TaskFragment and start/reparent activity to TaskFragment.
+        wct.createTaskFragment(params);
     }
 }

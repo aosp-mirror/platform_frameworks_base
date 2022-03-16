@@ -94,6 +94,9 @@ class AsyncRotationController extends FadeAnimationController implements Consume
     /** Whether the start transaction of the transition is committed (by shell). */
     private boolean mIsStartTransactionCommitted;
 
+    /** Whether the target windows have been requested to sync their draw transactions. */
+    private boolean mIsSyncDrawRequested;
+
     private SeamlessRotator mRotator;
 
     private final int mOriginalRotation;
@@ -139,22 +142,10 @@ class AsyncRotationController extends FadeAnimationController implements Consume
         displayContent.forAllWindows(this, true /* traverseTopToBottom */);
 
         // Legacy animation doesn't need to wait for the start transaction.
-        mIsStartTransactionCommitted = mTransitionOp == OP_LEGACY;
-        if (mIsStartTransactionCommitted) return;
-        // The transition sync group may be finished earlier because it doesn't wait for these
-        // target windows. But the windows still need to use sync transaction to keep the appearance
-        // in previous rotation, so request a no-op sync to keep the state.
-        for (int i = mTargetWindowTokens.size() - 1; i >= 0; i--) {
-            if (mHasScreenRotationAnimation
-                    && mTargetWindowTokens.valueAt(i).mAction == Operation.ACTION_FADE) {
-                // The windows are hidden (leash is alpha 0) before finishing drawing so it is
-                // unnecessary to request sync.
-                continue;
-            }
-            final WindowToken token = mTargetWindowTokens.keyAt(i);
-            for (int j = token.getChildCount() - 1; j >= 0; j--) {
-                token.getChildAt(j).applyWithNextDraw(t -> {});
-            }
+        if (mTransitionOp == OP_LEGACY) {
+            mIsStartTransactionCommitted = true;
+        } else if (displayContent.mTransitionController.useShellTransitionsRotation()) {
+            keepAppearanceInPreviousRotation();
         }
     }
 
@@ -192,6 +183,30 @@ class AsyncRotationController extends FadeAnimationController implements Consume
         final int action = mTransitionOp == OP_CHANGE_MAY_SEAMLESS || w.mForceSeamlesslyRotate
                 ? Operation.ACTION_SEAMLESS : Operation.ACTION_FADE;
         mTargetWindowTokens.put(w.mToken, new Operation(action));
+    }
+
+    /**
+     * Enables {@link #handleFinishDrawing(WindowState, SurfaceControl.Transaction)} to capture the
+     * draw transactions of the target windows if needed.
+     */
+    void keepAppearanceInPreviousRotation() {
+        // The transition sync group may be finished earlier because it doesn't wait for these
+        // target windows. But the windows still need to use sync transaction to keep the appearance
+        // in previous rotation, so request a no-op sync to keep the state.
+        for (int i = mTargetWindowTokens.size() - 1; i >= 0; i--) {
+            if (mHasScreenRotationAnimation
+                    && mTargetWindowTokens.valueAt(i).mAction == Operation.ACTION_FADE) {
+                // The windows are hidden (leash is alpha 0) before finishing drawing so it is
+                // unnecessary to request sync.
+                continue;
+            }
+            final WindowToken token = mTargetWindowTokens.keyAt(i);
+            for (int j = token.getChildCount() - 1; j >= 0; j--) {
+                token.getChildAt(j).applyWithNextDraw(t -> {});
+            }
+        }
+        mIsSyncDrawRequested = true;
+        if (DEBUG) Slog.d(TAG, "Requested to sync draw transaction");
     }
 
     /** Lets the window fit in new rotation naturally. */
@@ -314,8 +329,12 @@ class AsyncRotationController extends FadeAnimationController implements Consume
     void hideImmediately(WindowToken windowToken) {
         final boolean original = mHideImmediately;
         mHideImmediately = true;
+        final Operation op = new Operation(Operation.ACTION_FADE);
+        mTargetWindowTokens.put(windowToken, op);
         fadeWindowToken(false /* show */, windowToken, ANIMATION_TYPE_FIXED_TRANSFORM);
+        op.mLeash = windowToken.getAnimationLeash();
         mHideImmediately = original;
+        if (DEBUG) Slog.d(TAG, "hideImmediately " + windowToken.getTopChild());
     }
 
     /** Returns {@code true} if the window will rotate independently. */
@@ -433,7 +452,7 @@ class AsyncRotationController extends FadeAnimationController implements Consume
      */
     boolean handleFinishDrawing(WindowState w, SurfaceControl.Transaction postDrawTransaction) {
         if (mTransitionOp == OP_LEGACY || postDrawTransaction == null
-                || !w.mTransitionController.inTransition()) {
+                || !mIsSyncDrawRequested || !w.mTransitionController.inTransition()) {
             return false;
         }
         final Operation op = mTargetWindowTokens.get(w.mToken);

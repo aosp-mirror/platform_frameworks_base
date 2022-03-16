@@ -43,6 +43,31 @@ public class WifiUtils {
     private static final int INVALID_RSSI = -127;
 
     /**
+     * The intent action shows Wi-Fi dialog to connect Wi-Fi network.
+     * <p>
+     * Input: The calling package should put the chosen
+     * com.android.wifitrackerlib.WifiEntry#getKey() to a string extra in the request bundle into
+     * the {@link #EXTRA_CHOSEN_WIFI_ENTRY_KEY}.
+     * <p>
+     * Output: Nothing.
+     */
+    @VisibleForTesting
+    static final String ACTION_WIFI_DIALOG = "com.android.settings.WIFI_DIALOG";
+
+    /**
+     * Specify a key that indicates the WifiEntry to be configured.
+     */
+    @VisibleForTesting
+    static final String EXTRA_CHOSEN_WIFI_ENTRY_KEY = "key_chosen_wifientry_key";
+
+    /**
+     * The lookup key for a boolean that indicates whether a chosen WifiEntry request to connect to.
+     * {@code true} means a chosen WifiEntry request to connect to.
+     */
+    @VisibleForTesting
+    static final String EXTRA_CONNECT_FOR_CALLER = "connect_for_caller";
+
+    /**
      * The intent action shows network details settings to allow configuration of Wi-Fi.
      * <p>
      * In some cases, a matching Activity may not exist, so ensure you
@@ -322,6 +347,19 @@ public class WifiUtils {
 
     public static boolean isMeteredOverridden(WifiConfiguration config) {
         return config.meteredOverride != WifiConfiguration.METERED_OVERRIDE_NONE;
+    }
+
+    /**
+     * Returns the Intent for Wi-Fi dialog.
+     *
+     * @param key              The Wi-Fi entry key
+     * @param connectForCaller True if a chosen WifiEntry request to connect to
+     */
+    public static Intent getWifiDialogIntent(String key, boolean connectForCaller) {
+        final Intent intent = new Intent(ACTION_WIFI_DIALOG);
+        intent.putExtra(EXTRA_CHOSEN_WIFI_ENTRY_KEY, key);
+        intent.putExtra(EXTRA_CONNECT_FOR_CALLER, connectForCaller);
+        return intent;
     }
 
     /**

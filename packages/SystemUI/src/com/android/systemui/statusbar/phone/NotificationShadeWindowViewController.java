@@ -44,6 +44,7 @@ import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
+import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent;
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
 import com.android.systemui.statusbar.window.StatusBarWindowStateController;
 import com.android.systemui.tuner.TunerService;
@@ -57,6 +58,7 @@ import javax.inject.Inject;
 /**
  * Controller for {@link NotificationShadeWindowView}.
  */
+@CentralSurfacesComponent.CentralSurfacesScope
 public class NotificationShadeWindowViewController {
     private static final String TAG = "NotifShadeWindowVC";
     private final FalsingCollector mFalsingCollector;
@@ -77,8 +79,8 @@ public class NotificationShadeWindowViewController {
     private boolean mExpandAnimationRunning;
     private NotificationStackScrollLayout mStackScrollLayout;
     private PhoneStatusBarViewController mStatusBarViewController;
-    private StatusBar mService;
-    private NotificationShadeWindowController mNotificationShadeWindowController;
+    private final CentralSurfaces mService;
+    private final NotificationShadeWindowController mNotificationShadeWindowController;
     private DragDownHelper mDragDownHelper;
     private boolean mDoubleTapEnabled;
     private boolean mSingleTapEnabled;
@@ -105,7 +107,9 @@ public class NotificationShadeWindowViewController {
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             StatusBarWindowStateController statusBarWindowStateController,
             LockIconViewController lockIconViewController,
-            Optional<LowLightClockController> lowLightClockController) {
+            Optional<LowLightClockController> lowLightClockController,
+            CentralSurfaces centralSurfaces,
+            NotificationShadeWindowController controller) {
         mLockscreenShadeTransitionController = transitionController;
         mFalsingCollector = falsingCollector;
         mTunerService = tunerService;
@@ -120,6 +124,8 @@ public class NotificationShadeWindowViewController {
         mStatusBarWindowStateController = statusBarWindowStateController;
         mLockIconViewController = lockIconViewController;
         mLowLightClockController = lowLightClockController;
+        mService = centralSurfaces;
+        mNotificationShadeWindowController = controller;
 
         // This view is not part of the newly inflated expanded status bar.
         mBrightnessMirror = mView.findViewById(R.id.brightness_mirror_container);
@@ -450,11 +456,6 @@ public class NotificationShadeWindowViewController {
 
     public void setStatusBarViewController(PhoneStatusBarViewController statusBarViewController) {
         mStatusBarViewController = statusBarViewController;
-    }
-
-    public void setService(StatusBar statusBar, NotificationShadeWindowController controller) {
-        mService = statusBar;
-        mNotificationShadeWindowController = controller;
     }
 
     /**

@@ -61,7 +61,7 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
     @Mock
     private lateinit var mStatusBarStateController: SysuiStatusBarStateController
     @Mock
-    private lateinit var mStatusBar: StatusBar
+    private lateinit var mCentralSurfaces: CentralSurfaces
     @Mock
     private lateinit var mDockManager: DockManager
     @Mock
@@ -107,10 +107,11 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
             mStatusBarKeyguardViewManager,
             mStatusBarWindowStateController,
             mLockIconViewController,
-            Optional.of(mLowLightClockController)
+            Optional.of(mLowLightClockController),
+            mCentralSurfaces,
+            mNotificationShadeWindowController
         )
         mController.setupExpandedStatusBar()
-        mController.setService(mStatusBar, mNotificationShadeWindowController)
 
         mInteractionEventHandlerCaptor =
             ArgumentCaptor.forClass(InteractionEventHandler::class.java)

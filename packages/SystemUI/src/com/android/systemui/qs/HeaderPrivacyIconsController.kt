@@ -118,7 +118,7 @@ class HeaderPrivacyIconsController @Inject constructor(
             // If the privacy chip is visible, it means there were some indicators
             uiEventLogger.log(PrivacyChipEvent.ONGOING_INDICATORS_CHIP_CLICK)
             if (safetyCenterEnabled) {
-                showSafetyHub()
+                showSafetyCenter()
             } else {
                 privacyDialogController.showDialog(privacyChip.context)
             }
@@ -131,16 +131,16 @@ class HeaderPrivacyIconsController @Inject constructor(
         updatePrivacyIconSlots()
     }
 
-    private fun showSafetyHub() {
+    private fun showSafetyCenter() {
         backgroundExecutor.execute {
             val usage = ArrayList(permGroupUsage())
             privacyLogger.logUnfilteredPermGroupUsage(usage)
-            val startSafetyHub = Intent(Intent.ACTION_VIEW_SAFETY_HUB)
-            startSafetyHub.putParcelableArrayListExtra(PermissionManager.EXTRA_PERMISSION_USAGES,
+            val startSafetyCenter = Intent(Intent.ACTION_VIEW_SAFETY_CENTER_QS)
+            startSafetyCenter.putParcelableArrayListExtra(PermissionManager.EXTRA_PERMISSION_USAGES,
                 usage)
-            startSafetyHub.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            startSafetyCenter.flags = Intent.FLAG_ACTIVITY_NEW_TASK
             uiExecutor.execute {
-                activityStarter.startActivity(startSafetyHub, true,
+                activityStarter.startActivity(startSafetyCenter, true,
                     ActivityLaunchAnimator.Controller.fromView(privacyChip))
             }
         }

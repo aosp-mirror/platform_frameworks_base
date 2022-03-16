@@ -51,6 +51,7 @@ import com.android.internal.view.SurfaceCallbackHelper;
 
 import java.util.ArrayList;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Consumer;
 
 /**
  * Provides a dedicated drawing surface embedded inside of a view hierarchy.
@@ -390,8 +391,10 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
         }
     }
 
-    private void performDrawFinished(Transaction t) {
-        mSyncTransaction.merge(t);
+    private void performDrawFinished(@Nullable Transaction t) {
+        if (t != null) {
+            mSyncTransaction.merge(t);
+        }
 
         if (mPendingReportDraws > 0) {
             mDrawFinished = true;
@@ -787,8 +790,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
         if (mPositionListener != null) {
             mRenderNode.removePositionUpdateListener(mPositionListener);
         }
-        mPositionListener = new SurfaceViewPositionUpdateListener(surfaceWidth, surfaceHeight,
-                mSurfaceControl);
+        mPositionListener = new SurfaceViewPositionUpdateListener(surfaceWidth, surfaceHeight);
         mRenderNode.addPositionUpdateListener(mPositionListener);
     }
 
@@ -1039,16 +1041,24 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                                 callbacks = getSurfaceCallbacks();
                             }
 
-                            final Transaction t = new Transaction();
-                            if (viewRoot.wasRelayoutRequested()) {
-                                mBlastBufferQueue.setSyncTransaction(t,
-                                        false /* acquireSingleBuffer */);
+                            final boolean wasRelayoutRequested = viewRoot.wasRelayoutRequested();
+                            if (wasRelayoutRequested && (mBlastBufferQueue != null)) {
+                                mBlastBufferQueue.syncNextTransaction(
+                                        false /* acquireSingleBuffer */,
+                                        this::onDrawFinished);
                             }
                             mPendingReportDraws++;
                             viewRoot.drawPending();
                             SurfaceCallbackHelper sch = new SurfaceCallbackHelper(() -> {
-                                mBlastBufferQueue.setSyncTransaction(null);
-                                onDrawFinished(t);
+                                if (mBlastBufferQueue != null) {
+                                    mBlastBufferQueue.stopContinuousSyncTransaction();
+                                }
+                                // If relayout was requested, then a callback from BBQ will
+                                // be invoked with the sync transaction. onDrawFinished will be
+                                // called in there
+                                if (!wasRelayoutRequested) {
+                                    onDrawFinished(null);
+                                }
                             });
                             sch.dispatchSurfaceRedrawNeededAsync(mSurfaceHolder, callbacks);
                         }
@@ -1179,7 +1189,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
         mBlastBufferQueue.update(mBlastSurfaceControl, mSurfaceWidth, mSurfaceHeight, mFormat);
     }
 
-    private void onDrawFinished(Transaction t) {
+    private void onDrawFinished(@Nullable Transaction t) {
         if (DEBUG) {
             Log.i(TAG, System.identityHashCode(this) + " "
                     + "finishedDrawing");
@@ -1251,13 +1261,10 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
         private final int mRtSurfaceHeight;
         private final SurfaceControl.Transaction mPositionChangedTransaction =
                 new SurfaceControl.Transaction();
-        private final SurfaceControl mRtSurfaceControl = new SurfaceControl();
 
-        SurfaceViewPositionUpdateListener(int surfaceWidth, int surfaceHeight,
-                SurfaceControl surfaceControl) {
+        SurfaceViewPositionUpdateListener(int surfaceWidth, int surfaceHeight) {
             mRtSurfaceWidth = surfaceWidth;
             mRtSurfaceHeight = surfaceHeight;
-            mRtSurfaceControl.copyFrom(surfaceControl, "SurfaceViewPositionUpdateListener");
         }
 
         @Override
@@ -1278,18 +1285,21 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                             System.identityHashCode(SurfaceView.this), frameNumber,
                             left, top, right, bottom, mRtSurfaceWidth, mRtSurfaceHeight));
                 }
-                mRTLastReportedPosition.set(left, top, right, bottom);
-                mRTLastReportedSurfaceSize.set(mRtSurfaceWidth, mRtSurfaceHeight);
-                onSetSurfacePositionAndScale(mPositionChangedTransaction, mRtSurfaceControl,
-                        mRTLastReportedPosition.left /*positionLeft*/,
-                        mRTLastReportedPosition.top /*positionTop*/,
-                        mRTLastReportedPosition.width()
-                                / (float) mRtSurfaceWidth /*postScaleX*/,
-                        mRTLastReportedPosition.height()
-                                / (float) mRtSurfaceHeight /*postScaleY*/);
-                if (mViewVisibility) {
-                    // b/131239825
-                    mPositionChangedTransaction.show(mRtSurfaceControl);
+                synchronized (mSurfaceControlLock) {
+                    if (mSurfaceControl == null) return;
+                    mRTLastReportedPosition.set(left, top, right, bottom);
+                    mRTLastReportedSurfaceSize.set(mRtSurfaceWidth, mRtSurfaceHeight);
+                    onSetSurfacePositionAndScale(mPositionChangedTransaction, mSurfaceControl,
+                            mRTLastReportedPosition.left /*positionLeft*/,
+                            mRTLastReportedPosition.top /*positionTop*/,
+                            mRTLastReportedPosition.width()
+                                    / (float) mRtSurfaceWidth /*postScaleX*/,
+                            mRTLastReportedPosition.height()
+                                    / (float) mRtSurfaceHeight /*postScaleY*/);
+                    if (mViewVisibility) {
+                        // b/131239825
+                        mPositionChangedTransaction.show(mSurfaceControl);
+                    }
                 }
                 applyOrMergeTransaction(mPositionChangedTransaction, frameNumber);
             } catch (Exception ex) {
@@ -1302,7 +1312,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                 float vecX, float vecY, float maxStretchX, float maxStretchY,
                 float childRelativeLeft, float childRelativeTop, float childRelativeRight,
                 float childRelativeBottom) {
-            mRtTransaction.setStretchEffect(mRtSurfaceControl, width, height, vecX, vecY,
+            mRtTransaction.setStretchEffect(mSurfaceControl, width, height, vecX, vecY,
                     maxStretchX, maxStretchY, childRelativeLeft, childRelativeTop,
                     childRelativeRight, childRelativeBottom);
             applyOrMergeTransaction(mRtTransaction, frameNumber);
@@ -1788,5 +1798,12 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
         } else {
             t.apply();
         }
+    }
+
+    /**
+     * @hide
+     */
+    public void syncNextFrame(Consumer<Transaction> t) {
+        mBlastBufferQueue.syncNextTransaction(t);
     }
 }

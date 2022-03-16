@@ -462,11 +462,15 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
     private boolean checkRoutedToBluetoothW(int stream) {
         boolean changed = false;
         if (stream == AudioManager.STREAM_MUSIC) {
+            // Note: Here we didn't use DEVICE_OUT_BLE_SPEAKER and DEVICE_OUT_BLE_BROADCAST
+            //       Since their values overlap with DEVICE_OUT_EARPIECE and DEVICE_OUT_SPEAKER.
+            //       Anyway, we can check BLE devices by using just DEVICE_OUT_BLE_HEADSET.
             final boolean routedToBluetooth =
                     (mAudio.getDevicesForStream(AudioManager.STREAM_MUSIC) &
                             (AudioManager.DEVICE_OUT_BLUETOOTH_A2DP |
                             AudioManager.DEVICE_OUT_BLUETOOTH_A2DP_HEADPHONES |
-                            AudioManager.DEVICE_OUT_BLUETOOTH_A2DP_SPEAKER)) != 0;
+                            AudioManager.DEVICE_OUT_BLUETOOTH_A2DP_SPEAKER |
+                            AudioManager.DEVICE_OUT_BLE_HEADSET)) != 0;
             changed |= updateStreamRoutedToBluetoothW(stream, routedToBluetooth);
         }
         return changed;

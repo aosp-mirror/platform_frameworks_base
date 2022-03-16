@@ -1038,6 +1038,13 @@ bool static ParseGroupImpl(xml::XmlPullParser* parser, ParsedResource* out_resou
         continue;
       }
 
+      if (maybe_name.value().substr(0, std::strlen("removed_")) == "removed_") {
+        // Skip resources that have been removed from the framework, but leave a hole so that
+        // other staged resources don't shift and break apps previously compiled against them
+        next_id.id++;
+        continue;
+      }
+
       ParsedResource& entry_res = out_resource->child_resources.emplace_back(ParsedResource{
           .name = ResourceName{{}, *parsed_type, maybe_name.value().to_string()},
           .source = item_source,

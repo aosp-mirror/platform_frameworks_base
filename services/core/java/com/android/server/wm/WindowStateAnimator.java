@@ -442,50 +442,6 @@ class WindowStateAnimator {
         return mService.useBLASTSync() && mWin.useBLASTSync();
     }
 
-    private boolean shouldConsumeMainWindowSizeTransaction() {
-        // We only consume the transaction when the client is calling relayout
-        // because this is the only time we know the frameNumber will be valid
-        // due to the client renderer being paused. Put otherwise, only when
-        // mInRelayout is true can we guarantee the next frame will contain
-        // the most recent configuration.
-        if (!mWin.mInRelayout) return false;
-        // Since we can only do this for one window, we focus on the main application window
-        if (mAttrType != TYPE_BASE_APPLICATION) return false;
-        final Task task = mWin.getTask();
-        if (task == null) return false;
-        if (task.getMainWindowSizeChangeTransaction() == null) return false;
-        // Likewise we only focus on the task root, since we can only use one window
-        if (!mWin.mActivityRecord.isRootOfTask()) return false;
-        return true;
-    }
-
-    void setSurfaceBoundariesLocked(SurfaceControl.Transaction t) {
-        if (mSurfaceController == null) {
-            return;
-        }
-
-        final WindowState w = mWin;
-        final Task task = w.getTask();
-        if (shouldConsumeMainWindowSizeTransaction()) {
-            if (isInBlastSync()) {
-                // If we're in a sync transaction, there's no need to call defer transaction.
-                // The sync transaction will contain the buffer so the bounds change transaction
-                // will only be applied with the buffer.
-                t.merge(task.getMainWindowSizeChangeTransaction());
-                task.setMainWindowSizeChangeTransaction(null);
-            } else {
-                mWin.applyWithNextDraw(finishedFrame -> {
-                      final SurfaceControl.Transaction sizeChangedTransaction =
-                          task.getMainWindowSizeChangeTransaction();
-                      if (sizeChangedTransaction != null) {
-                          finishedFrame.merge(sizeChangedTransaction);
-                          task.setMainWindowSizeChangeTransaction(null);
-                      }
-                });
-            }
-        }
-    }
-
     void prepareSurfaceLocked(SurfaceControl.Transaction t) {
         final WindowState w = mWin;
         if (!hasSurface()) {
@@ -500,8 +456,6 @@ class WindowStateAnimator {
         }
 
         computeShownFrameLocked();
-
-        setSurfaceBoundariesLocked(t);
 
         if (w.isParentWindowHidden() || !w.isOnScreen()) {
             hide(t, "prepareSurfaceLocked");

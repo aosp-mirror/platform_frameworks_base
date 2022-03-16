@@ -94,7 +94,7 @@ public class OverlayPackagesProvider {
 
         String getActiveApexPackageNameContainingPackage(String packageName);
 
-        String getDeviceManagerRoleHolderPackageName(Context context);
+        String getDevicePolicyManagementRoleHolderPackageName(Context context);
     }
 
     private static final class DefaultInjector implements Injector {
@@ -110,11 +110,11 @@ public class OverlayPackagesProvider {
         }
 
         @Override
-        public String getDeviceManagerRoleHolderPackageName(Context context) {
+        public String getDevicePolicyManagementRoleHolderPackageName(Context context) {
             return Binder.withCleanCallingIdentity(() -> {
                 RoleManager roleManager = context.getSystemService(RoleManager.class);
                 List<String> roleHolders =
-                        roleManager.getRoleHolders(RoleManager.ROLE_DEVICE_MANAGER);
+                        roleManager.getRoleHolders(RoleManager.ROLE_DEVICE_POLICY_MANAGEMENT);
                 if (roleHolders.isEmpty()) {
                     return null;
                 }
@@ -166,7 +166,7 @@ public class OverlayPackagesProvider {
     private Set<String> getDeviceManagerRoleHolders() {
         HashSet<String> result = new HashSet<>();
         String deviceManagerRoleHolderPackageName =
-                mInjector.getDeviceManagerRoleHolderPackageName(mContext);
+                mInjector.getDevicePolicyManagementRoleHolderPackageName(mContext);
         if (deviceManagerRoleHolderPackageName != null) {
             result.add(deviceManagerRoleHolderPackageName);
         }

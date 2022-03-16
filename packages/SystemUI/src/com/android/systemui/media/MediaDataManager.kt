@@ -550,12 +550,12 @@ class MediaDataManager(
 
         // Album art
         val notif: Notification = sbn.notification
-        var artworkBitmap = metadata?.getBitmap(MediaMetadata.METADATA_KEY_ART)
+        var artworkBitmap = metadata?.let { loadBitmapFromUri(it) }
+        if (artworkBitmap == null) {
+            artworkBitmap = metadata?.getBitmap(MediaMetadata.METADATA_KEY_ART)
+        }
         if (artworkBitmap == null) {
             artworkBitmap = metadata?.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART)
-        }
-        if (artworkBitmap == null && metadata != null) {
-            artworkBitmap = loadBitmapFromUri(metadata)
         }
         val artWorkIcon = if (artworkBitmap == null) {
             notif.getLargeIcon()
@@ -752,8 +752,8 @@ class MediaDataManager(
                 null
             }
 
-            actions.startCustom = customActions[customIdx++]
-            actions.endCustom = customActions[customIdx++]
+            actions.custom0 = customActions[customIdx++]
+            actions.custom1 = customActions[customIdx++]
         }
         return actions
     }

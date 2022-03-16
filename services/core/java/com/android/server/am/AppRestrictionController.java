@@ -77,6 +77,7 @@ import static com.android.internal.notification.SystemNotificationChannels.ABUSI
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.AppFGSTracker.foregroundServiceTypeToIndex;
+import static com.android.server.am.BaseAppStateTracker.ONE_DAY;
 
 import android.annotation.ElapsedRealtimeLong;
 import android.annotation.IntDef;
@@ -181,7 +182,7 @@ public final class AppRestrictionController {
     /**
      * Whether or not to show the foreground service manager on tapping notifications.
      */
-    private static final boolean ENABLE_SHOW_FOREGROUND_SERVICE_MANAGER = false;
+    private static final boolean ENABLE_SHOW_FOREGROUND_SERVICE_MANAGER = true;
 
     private final Context mContext;
     private final HandlerThread mBgHandlerThread;
@@ -240,7 +241,7 @@ public final class AppRestrictionController {
     /**
      * The pre-config packages that are exempted from the background restrictions.
      */
-    private ArraySet<String> mBgRestrictionExemptioFromSysConfig;
+    ArraySet<String> mBgRestrictionExemptioFromSysConfig;
 
     /**
      * Lock specifically for bookkeeping around the carrier-privileged app set.
@@ -398,23 +399,24 @@ public final class AppRestrictionController {
                 return sb.toString();
             }
 
-            @GuardedBy("mSettingsLock")
             void dump(PrintWriter pw, @ElapsedRealtimeLong long nowElapsed) {
-                pw.print(toString());
-                if (mLastRestrictionLevel != RESTRICTION_LEVEL_UNKNOWN) {
-                    pw.print('/');
-                    pw.print(ActivityManager.restrictionLevelToName(mLastRestrictionLevel));
-                }
-                pw.print(" levelChange=");
-                TimeUtils.formatDuration(mLevelChangeTimeElapsed - nowElapsed, pw);
-                if (mLastNotificationShownTimeElapsed != null) {
-                    for (int i = 0; i < mLastNotificationShownTimeElapsed.length; i++) {
-                        if (mLastNotificationShownTimeElapsed[i] > 0) {
-                            pw.print(" lastNoti(");
-                            pw.print(mNotificationHelper.notificationTypeToString(i));
-                            pw.print(")=");
-                            TimeUtils.formatDuration(
-                                    mLastNotificationShownTimeElapsed[i] - nowElapsed, pw);
+                synchronized (mSettingsLock) {
+                    pw.print(toString());
+                    if (mLastRestrictionLevel != RESTRICTION_LEVEL_UNKNOWN) {
+                        pw.print('/');
+                        pw.print(ActivityManager.restrictionLevelToName(mLastRestrictionLevel));
+                    }
+                    pw.print(" levelChange=");
+                    TimeUtils.formatDuration(mLevelChangeTimeElapsed - nowElapsed, pw);
+                    if (mLastNotificationShownTimeElapsed != null) {
+                        for (int i = 0; i < mLastNotificationShownTimeElapsed.length; i++) {
+                            if (mLastNotificationShownTimeElapsed[i] > 0) {
+                                pw.print(" lastNoti(");
+                                pw.print(mNotificationHelper.notificationTypeToString(i));
+                                pw.print(")=");
+                                TimeUtils.formatDuration(
+                                        mLastNotificationShownTimeElapsed[i] - nowElapsed, pw);
+                            }
                         }
                     }
                 }
@@ -612,10 +614,11 @@ public final class AppRestrictionController {
             }
         }
 
-        @GuardedBy("mSettingsLock")
-        void dumpLocked(PrintWriter pw, String prefix) {
+        void dump(PrintWriter pw, String prefix) {
             final ArrayList<PkgSettings> settings = new ArrayList<>();
-            mRestrictionLevels.forEach(setting -> settings.add(setting));
+            synchronized (mSettingsLock) {
+                mRestrictionLevels.forEach(setting -> settings.add(setting));
+            }
             Collections.sort(settings, Comparator.comparingInt(PkgSettings::getUid));
             final long nowElapsed = SystemClock.elapsedRealtime();
             for (int i = 0, size = settings.size(); i < size; i++) {
@@ -646,6 +649,13 @@ public final class AppRestrictionController {
                 DEVICE_CONFIG_SUBNAMESPACE_PREFIX + "abusive_notification_minimal_interval";
 
         /**
+         * The minimal interval in ms before posting a notification again on long running FGS
+         * from a certain package.
+         */
+        static final String KEY_BG_LONG_FGS_NOTIFICATION_MINIMAL_INTERVAL =
+                DEVICE_CONFIG_SUBNAMESPACE_PREFIX + "long_fgs_notification_minimal_interval";
+
+        /**
          * The behavior for an app with a FGS and its notification is still showing, when the system
          * detects it's abusive and should be put into bg restricted level. {@code true} - we'll
          * show the prompt to user, {@code false} - we'll not show it.
@@ -659,8 +669,20 @@ public final class AppRestrictionController {
         static final String KEY_BG_RESTRICTION_EXEMPTED_PACKAGES =
                 DEVICE_CONFIG_SUBNAMESPACE_PREFIX + "restriction_exempted_packages";
 
+        /**
+         * Default value to {@link #mBgAutoRestrictedBucket}.
+         */
         static final boolean DEFAULT_BG_AUTO_RESTRICTED_BUCKET_ON_BG_RESTRICTION = false;
-        static final long DEFAULT_BG_ABUSIVE_NOTIFICATION_MINIMAL_INTERVAL_MS = 24 * 60 * 60 * 1000;
+
+        /**
+         * Default value to {@link #mBgAbusiveNotificationMinIntervalMs}.
+         */
+        static final long DEFAULT_BG_ABUSIVE_NOTIFICATION_MINIMAL_INTERVAL_MS = ONE_DAY;
+
+        /**
+         * Default value to {@link #mBgAbusiveNotificationMinIntervalMs}.
+         */
+        static final long DEFAULT_BG_LONG_FGS_NOTIFICATION_MINIMAL_INTERVAL_MS = 30 * ONE_DAY;
 
         /**
          * Default value to {@link #mBgPromptFgsWithNotiToBgRestricted}.
@@ -671,7 +693,9 @@ public final class AppRestrictionController {
 
         volatile boolean mRestrictedBucketEnabled;
 
-        volatile long mBgNotificationMinIntervalMs;
+        volatile long mBgAbusiveNotificationMinIntervalMs;
+
+        volatile long mBgLongFgsNotificationMinIntervalMs;
 
         /**
          * @see #KEY_BG_RESTRICTION_EXEMPTED_PACKAGES.
@@ -703,6 +727,9 @@ public final class AppRestrictionController {
                         break;
                     case KEY_BG_ABUSIVE_NOTIFICATION_MINIMAL_INTERVAL:
                         updateBgAbusiveNotificationMinimalInterval();
+                        break;
+                    case KEY_BG_LONG_FGS_NOTIFICATION_MINIMAL_INTERVAL:
+                        updateBgLongFgsNotificationMinimalInterval();
                         break;
                     case KEY_BG_PROMPT_FGS_WITH_NOTIFICATION_TO_BG_RESTRICTED:
                         updateBgPromptFgsWithNotiToBgRestricted();
@@ -741,6 +768,7 @@ public final class AppRestrictionController {
         void updateDeviceConfig() {
             updateBgAutoRestrictedBucketChanged();
             updateBgAbusiveNotificationMinimalInterval();
+            updateBgLongFgsNotificationMinimalInterval();
             updateBgPromptFgsWithNotiToBgRestricted();
             updateBgRestrictionExemptedPackages();
         }
@@ -757,10 +785,17 @@ public final class AppRestrictionController {
         }
 
         private void updateBgAbusiveNotificationMinimalInterval() {
-            mBgNotificationMinIntervalMs = DeviceConfig.getLong(
+            mBgAbusiveNotificationMinIntervalMs = DeviceConfig.getLong(
                     DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                     KEY_BG_ABUSIVE_NOTIFICATION_MINIMAL_INTERVAL,
                     DEFAULT_BG_ABUSIVE_NOTIFICATION_MINIMAL_INTERVAL_MS);
+        }
+
+        private void updateBgLongFgsNotificationMinimalInterval() {
+            mBgLongFgsNotificationMinIntervalMs = DeviceConfig.getLong(
+                    DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                    KEY_BG_LONG_FGS_NOTIFICATION_MINIMAL_INTERVAL,
+                    DEFAULT_BG_LONG_FGS_NOTIFICATION_MINIMAL_INTERVAL_MS);
         }
 
         private void updateBgPromptFgsWithNotiToBgRestricted() {
@@ -799,7 +834,11 @@ public final class AppRestrictionController {
             pw.print(prefix);
             pw.print(KEY_BG_ABUSIVE_NOTIFICATION_MINIMAL_INTERVAL);
             pw.print('=');
-            pw.println(mBgNotificationMinIntervalMs);
+            pw.println(mBgAbusiveNotificationMinIntervalMs);
+            pw.print(prefix);
+            pw.print(KEY_BG_LONG_FGS_NOTIFICATION_MINIMAL_INTERVAL);
+            pw.print('=');
+            pw.println(mBgLongFgsNotificationMinIntervalMs);
             pw.print(prefix);
             pw.print(KEY_BG_PROMPT_FGS_WITH_NOTIFICATION_TO_BG_RESTRICTED);
             pw.print('=');
@@ -1322,9 +1361,7 @@ public final class AppRestrictionController {
         prefix = "  " + prefix;
         pw.print(prefix);
         pw.println("BACKGROUND RESTRICTION LEVEL SETTINGS");
-        synchronized (mSettingsLock) {
-            mRestrictionSettings.dumpLocked(pw, "  " + prefix);
-        }
+        mRestrictionSettings.dump(pw, "  " + prefix);
         mConstantsObserver.dump(pw, "  " + prefix);
         for (int i = 0, size = mAppStateTrackers.size(); i < size; i++) {
             pw.println();
@@ -1558,8 +1595,8 @@ public final class AppRestrictionController {
                         cancelRequestBgRestrictedIfNecessary(packageName, uid);
                         final Intent newIntent = new Intent(ACTION_SHOW_FOREGROUND_SERVICE_MANAGER);
                         newIntent.addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
-                        mContext.sendBroadcastAsUser(newIntent,
-                                UserHandle.of(UserHandle.getUserId(uid)));
+                        // Task manager runs in SystemUI, which is SYSTEM user only.
+                        mContext.sendBroadcastAsUser(newIntent, UserHandle.SYSTEM);
                         break;
                 }
             }
@@ -1633,9 +1670,10 @@ public final class AppRestrictionController {
             if (ENABLE_SHOW_FOREGROUND_SERVICE_MANAGER) {
                 final Intent intent = new Intent(ACTION_SHOW_FOREGROUND_SERVICE_MANAGER);
                 intent.addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
+                // Task manager runs in SystemUI, which is SYSTEM user only.
                 pendingIntent = PendingIntent.getBroadcastAsUser(mContext, 0,
                         intent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE,
-                        UserHandle.of(UserHandle.getUserId(uid)));
+                        UserHandle.SYSTEM);
             } else {
                 final Intent intent = new Intent(Settings.ACTION_VIEW_ADVANCED_POWER_USAGE_DETAIL);
                 intent.setData(Uri.fromParts(PACKAGE_SCHEME, packageName, null));
@@ -1648,6 +1686,17 @@ public final class AppRestrictionController {
                     com.android.internal.R.string.notification_title_abusive_bg_apps,
                     com.android.internal.R.string.notification_content_long_running_fgs,
                     pendingIntent, packageName, uid, null);
+        }
+
+        long getNotificationMinInterval(@NotificationType int notificationType) {
+            switch (notificationType) {
+                case NOTIFICATION_TYPE_ABUSIVE_CURRENT_DRAIN:
+                    return mBgController.mConstantsObserver.mBgAbusiveNotificationMinIntervalMs;
+                case NOTIFICATION_TYPE_LONG_RUNNING_FGS:
+                    return mBgController.mConstantsObserver.mBgLongFgsNotificationMinIntervalMs;
+                default:
+                    return 0L;
+            }
         }
 
         int getNotificationIdIfNecessary(@NotificationType int notificationType,
@@ -1663,7 +1712,7 @@ public final class AppRestrictionController {
                 final long lastNotificationShownTimeElapsed =
                         settings.getLastNotificationTime(notificationType);
                 if (lastNotificationShownTimeElapsed != 0 && (lastNotificationShownTimeElapsed
-                        + mBgController.mConstantsObserver.mBgNotificationMinIntervalMs > now)) {
+                        + getNotificationMinInterval(notificationType) > now)) {
                     if (DEBUG_BG_RESTRICTION_CONTROLLER) {
                         Slog.i(TAG, "Not showing notification as last notification was shown "
                                 + TimeUtils.formatDuration(now - lastNotificationShownTimeElapsed)
@@ -1702,7 +1751,7 @@ public final class AppRestrictionController {
                     SYSTEM_UID, UserHandle.getUserId(uid));
             final String title = mContext.getString(titleRes);
             final String message = mContext.getString(messageRes,
-                    ai != null ? pm.getText(packageName, ai.labelRes, ai) : packageName);
+                    ai != null ? ai.loadLabel(pm) : packageName);
             final Icon icon = ai != null ? Icon.createWithResource(packageName, ai.icon) : null;
 
             postNotification(notificationId, packageName, uid, title, message, icon, pendingIntent,

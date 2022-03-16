@@ -20,6 +20,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricSourceType;
 import android.os.Build;
 
@@ -78,7 +79,8 @@ public class LatencyTester extends CoreStartable {
     }
 
     private void fakeWakeAndUnlock(BiometricSourceType type) {
-        mBiometricUnlockController.onBiometricAcquired(type);
+        mBiometricUnlockController.onBiometricAcquired(type,
+                BiometricConstants.BIOMETRIC_ACQUIRED_GOOD);
         mBiometricUnlockController.onBiometricAuthenticated(
                 KeyguardUpdateMonitor.getCurrentUser(), type, true /* isStrongBiometric */);
     }

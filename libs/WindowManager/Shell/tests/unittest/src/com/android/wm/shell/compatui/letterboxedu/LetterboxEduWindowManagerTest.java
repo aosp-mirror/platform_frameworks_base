@@ -41,9 +41,11 @@ import android.testing.AndroidTestingRunner;
 import android.view.DisplayCutout;
 import android.view.DisplayInfo;
 import android.view.SurfaceControlViewHost;
+import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.MarginLayoutParams;
 import android.view.WindowManager;
+import android.view.accessibility.AccessibilityEvent;
 
 import androidx.test.filters.SmallTest;
 
@@ -52,6 +54,7 @@ import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.SyncTransactionQueue;
+import com.android.wm.shell.transition.Transitions;
 
 import org.junit.After;
 import org.junit.Before;
@@ -84,11 +87,14 @@ public class LetterboxEduWindowManagerTest extends ShellTestCase {
     private ArgumentCaptor<WindowManager.LayoutParams> mWindowAttrsCaptor;
     @Captor
     private ArgumentCaptor<Runnable> mEndCallbackCaptor;
+    @Captor
+    private ArgumentCaptor<Runnable> mRunOnIdleCaptor;
 
     @Mock private LetterboxEduAnimationController mAnimationController;
     @Mock private SyncTransactionQueue mSyncTransactionQueue;
     @Mock private ShellTaskOrganizer.TaskListener mTaskListener;
     @Mock private SurfaceControlViewHost mViewHost;
+    @Mock private Transitions mTransitions;
     @Mock private Runnable mOnDismissCallback;
 
     private SharedPreferences mSharedPreferences;
@@ -173,13 +179,19 @@ public class LetterboxEduWindowManagerTest extends ShellTestCase {
         verifyLayout(layout, mWindowAttrsCaptor.getValue(), /* expectedWidth= */ TASK_WIDTH,
                 /* expectedHeight= */ TASK_HEIGHT, /* expectedExtraTopMargin= */ DISPLAY_CUTOUT_TOP,
                 /* expectedExtraBottomMargin= */ DISPLAY_CUTOUT_BOTTOM);
+        View dialogTitle = layout.getDialogTitle();
+        assertNotNull(dialogTitle);
+        spyOn(dialogTitle);
 
         // Clicking the layout does nothing until enter animation is done.
         layout.performClick();
         verify(mAnimationController, never()).startExitAnimation(any(), any());
+        // The dialog title shouldn't be focused for Accessibility until enter animation is done.
+        verify(dialogTitle, never()).sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_FOCUSED);
 
         verifyAndFinishEnterAnimation(layout);
 
+        verify(dialogTitle).sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_FOCUSED);
         // Exit animation should start following a click on the layout.
         layout.performClick();
 
@@ -193,6 +205,23 @@ public class LetterboxEduWindowManagerTest extends ShellTestCase {
 
         verify(windowManager).release();
         verify(mOnDismissCallback).run();
+    }
+
+    @Test
+    public void testCreateLayout_windowManagerReleasedBeforeTransitionsIsIdle_doesNotStartAnim() {
+        LetterboxEduWindowManager windowManager = createWindowManager(/* eligible= */ true);
+
+        assertTrue(windowManager.createLayout(/* canShow= */ true));
+
+        assertTrue(mSharedPreferences.getBoolean(mPrefKey, /* default= */ false));
+
+        verify(mTransitions).runOnIdle(mRunOnIdleCaptor.capture());
+
+        windowManager.release();
+
+        mRunOnIdleCaptor.getValue().run();
+
+        verify(mAnimationController, never()).startEnterAnimation(any(), any());
     }
 
     @Test
@@ -295,6 +324,13 @@ public class LetterboxEduWindowManagerTest extends ShellTestCase {
     }
 
     private void verifyAndFinishEnterAnimation(LetterboxEduDialogLayout layout) {
+        verify(mTransitions).runOnIdle(mRunOnIdleCaptor.capture());
+
+        // startEnterAnimation isn't called until run-on-idle runnable is called.
+        verify(mAnimationController, never()).startEnterAnimation(any(), any());
+
+        mRunOnIdleCaptor.getValue().run();
+
         verify(mAnimationController).startEnterAnimation(eq(layout), mEndCallbackCaptor.capture());
         mEndCallbackCaptor.getValue().run();
     }
@@ -312,7 +348,8 @@ public class LetterboxEduWindowManagerTest extends ShellTestCase {
             boolean isTaskbarEduShowing) {
         LetterboxEduWindowManager windowManager = new LetterboxEduWindowManager(mContext,
                 createTaskInfo(eligible), mSyncTransactionQueue, mTaskListener,
-                createDisplayLayout(), mOnDismissCallback, mAnimationController);
+                createDisplayLayout(), mTransitions, mOnDismissCallback,
+                mAnimationController);
 
         spyOn(windowManager);
         doReturn(mViewHost).when(windowManager).createSurfaceViewHost();

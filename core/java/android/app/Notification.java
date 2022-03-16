@@ -9009,6 +9009,10 @@ public class Notification implements Parcelable
          * information that will replace the default values for the output switcher chip on the
          * media control, as well as an intent to use when the output switcher chip is tapped,
          * on devices where this is supported.
+         * <p>
+         * This method is intended for system applications to provide information and/or
+         * functionality that would otherwise be unavailable to the default output switcher because
+         * the media originated on a remote device.
          *
          * @param deviceName The name of the remote device to display
          * @param iconResource Icon resource representing the device

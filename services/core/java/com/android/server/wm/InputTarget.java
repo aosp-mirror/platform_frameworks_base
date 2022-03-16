@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import android.view.IWindow;
+import android.util.proto.ProtoOutputStream;
 
 /**
  * Common interface between focusable objects.
@@ -36,6 +37,7 @@ interface InputTarget {
 
     /* Owning pid of the target. */
     int getPid();
+    int getUid();
 
     /**
      * Indicates whether a target should receive focus from server side
@@ -45,7 +47,25 @@ interface InputTarget {
      */
     boolean receiveFocusFromTapOutside();
 
+    // Gaining focus
     void handleTapOutsideFocusInsideSelf();
+    // Losing focus
     void handleTapOutsideFocusOutsideSelf();
+
+    // Whether this input target can control the IME itself
+    boolean shouldControlIme();
+    // Whether this input target can be screenshoted by the IME system
+    boolean canScreenshotIme();
+
+    ActivityRecord getActivityRecord();
+    void unfreezeInsetsAfterStartInput();
+
+    boolean isInputMethodClientFocus(int uid, int pid);
+
+    DisplayContent getDisplayContent();
+    InsetsControlTarget getImeControlTarget();
+
+    void dumpProto(ProtoOutputStream proto, long fieldId,
+                   @WindowTraceLogLevel int logLevel);
 }
 

@@ -47,7 +47,13 @@ public class ExternalVibration implements Parcelable {
         this(uid, pkg, attrs, controller, new Binder());
     }
 
-    private ExternalVibration(int uid, @NonNull String pkg, @NonNull AudioAttributes attrs,
+    /**
+     * Full constructor, but exposed to construct the ExternalVibration with an explicit binder
+     * token (for mocks).
+     *
+     * @hide
+     */
+    public ExternalVibration(int uid, @NonNull String pkg, @NonNull AudioAttributes attrs,
             @NonNull IExternalVibrationController controller, @NonNull IBinder token) {
         mUid = uid;
         mPkg = Preconditions.checkNotNull(pkg);
@@ -166,7 +172,7 @@ public class ExternalVibration implements Parcelable {
             + "pkg=" + mPkg + ", "
             + "attrs=" + mAttrs + ", "
             + "controller=" + mController
-            + "token=" + mController
+            + "token=" + mToken
             + "}";
     }
 

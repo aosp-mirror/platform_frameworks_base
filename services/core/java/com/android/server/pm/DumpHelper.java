@@ -55,6 +55,7 @@ final class DumpHelper {
 
     @NeverCompile // Avoid size overhead of debugging code.
     public void doDump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        final Computer snapshot = mPm.snapshotComputer();
         DumpState dumpState = new DumpState();
         ArraySet<String> permissionNames = null;
 
@@ -121,7 +122,7 @@ final class DumpHelper {
                 }
 
                 // Normalize package name to handle renamed packages and static libs
-                pkg = mPm.resolveInternalPackageName(pkg, PackageManager.VERSION_CODE_HIGHEST);
+                pkg = snapshot.resolveInternalPackageName(pkg, PackageManager.VERSION_CODE_HIGHEST);
 
                 pw.println(mPm.checkPermission(perm, pkg, user));
                 return;
@@ -243,7 +244,7 @@ final class DumpHelper {
 
         // Return if the package doesn't exist.
         if (packageName != null
-                && mPm.getPackageStateInternal(packageName) == null
+                && snapshot.getPackageStateInternal(packageName) == null
                 && !mPm.mApexManager.isApexPackage(packageName)) {
             pw.println("Unable to find package: " + packageName);
             return;
@@ -257,7 +258,7 @@ final class DumpHelper {
         if (!checkin
                 && dumpState.isDumping(DumpState.DUMP_VERSION)
                 && packageName == null) {
-            mPm.dumpComputer(DumpState.DUMP_VERSION, fd, pw, dumpState);
+            snapshot.dump(DumpState.DUMP_VERSION, fd, pw, dumpState);
         }
 
         if (!checkin
@@ -273,7 +274,7 @@ final class DumpHelper {
                 final String knownPackage = PackageManagerInternal.knownPackageToString(i);
                 ipw.print(knownPackage);
                 ipw.println(":");
-                final String[] pkgNames = mPm.getKnownPackageNamesInternal(i,
+                final String[] pkgNames = mPm.getKnownPackageNamesInternal(snapshot, i,
                         UserHandle.USER_SYSTEM);
                 ipw.increaseIndent();
                 if (ArrayUtils.isEmpty(pkgNames)) {
@@ -299,14 +300,14 @@ final class DumpHelper {
                 pw.print("  Required: ");
                 pw.print(requiredVerifierPackage);
                 pw.print(" (uid=");
-                pw.print(mPm.getPackageUid(requiredVerifierPackage, MATCH_DEBUG_TRIAGED_MISSING,
-                        UserHandle.USER_SYSTEM));
+                pw.print(snapshot.getPackageUid(requiredVerifierPackage,
+                        MATCH_DEBUG_TRIAGED_MISSING, UserHandle.USER_SYSTEM));
                 pw.println(")");
             } else if (requiredVerifierPackage != null) {
                 pw.print("vrfy,"); pw.print(requiredVerifierPackage);
                 pw.print(",");
-                pw.println(mPm.getPackageUid(requiredVerifierPackage, MATCH_DEBUG_TRIAGED_MISSING,
-                        UserHandle.USER_SYSTEM));
+                pw.println(snapshot.getPackageUid(requiredVerifierPackage,
+                        MATCH_DEBUG_TRIAGED_MISSING, UserHandle.USER_SYSTEM));
             }
         }
 
@@ -324,14 +325,14 @@ final class DumpHelper {
                     pw.print("  Using: ");
                     pw.print(verifierPackageName);
                     pw.print(" (uid=");
-                    pw.print(mPm.getPackageUid(verifierPackageName, MATCH_DEBUG_TRIAGED_MISSING,
-                            UserHandle.USER_SYSTEM));
+                    pw.print(snapshot.getPackageUid(verifierPackageName,
+                            MATCH_DEBUG_TRIAGED_MISSING, UserHandle.USER_SYSTEM));
                     pw.println(")");
                 } else if (verifierPackageName != null) {
                     pw.print("dv,"); pw.print(verifierPackageName);
                     pw.print(",");
-                    pw.println(mPm.getPackageUid(verifierPackageName, MATCH_DEBUG_TRIAGED_MISSING,
-                            UserHandle.USER_SYSTEM));
+                    pw.println(snapshot.getPackageUid(verifierPackageName,
+                            MATCH_DEBUG_TRIAGED_MISSING, UserHandle.USER_SYSTEM));
                 }
             } else {
                 pw.println();
@@ -341,7 +342,7 @@ final class DumpHelper {
 
         if (dumpState.isDumping(DumpState.DUMP_LIBS)
                 && packageName == null) {
-            mPm.dumpComputer(DumpState.DUMP_LIBS, fd, pw, dumpState);
+            snapshot.dump(DumpState.DUMP_LIBS, fd, pw, dumpState);
         }
 
         if (dumpState.isDumping(DumpState.DUMP_FEATURES)
@@ -387,17 +388,17 @@ final class DumpHelper {
         }
 
         if (!checkin && dumpState.isDumping(DumpState.DUMP_PREFERRED)) {
-            mPm.dumpComputer(DumpState.DUMP_PREFERRED, fd, pw, dumpState);
+            snapshot.dump(DumpState.DUMP_PREFERRED, fd, pw, dumpState);
         }
 
         if (!checkin
                 && dumpState.isDumping(DumpState.DUMP_PREFERRED_XML)
                 && packageName == null) {
-            mPm.dumpComputer(DumpState.DUMP_PREFERRED_XML, fd, pw, dumpState);
+            snapshot.dump(DumpState.DUMP_PREFERRED_XML, fd, pw, dumpState);
         }
 
         if (!checkin && dumpState.isDumping(DumpState.DUMP_DOMAIN_PREFERRED)) {
-            mPm.dumpComputer(DumpState.DUMP_DOMAIN_PREFERRED, fd, pw, dumpState);
+            snapshot.dump(DumpState.DUMP_DOMAIN_PREFERRED, fd, pw, dumpState);
         }
 
         if (!checkin && dumpState.isDumping(DumpState.DUMP_PERMISSIONS)) {
@@ -405,7 +406,7 @@ final class DumpHelper {
         }
 
         if (!checkin && dumpState.isDumping(DumpState.DUMP_PROVIDERS)) {
-            mPm.mComponentResolver.dumpContentProviders(mPm.snapshotComputer(), pw, dumpState,
+            mPm.mComponentResolver.dumpContentProviders(snapshot, pw, dumpState,
                     packageName);
         }
 
@@ -427,7 +428,7 @@ final class DumpHelper {
 
         if (!checkin
                 && dumpState.isDumping(DumpState.DUMP_QUERIES)) {
-            mPm.dumpComputer(DumpState.DUMP_QUERIES, fd, pw, dumpState);
+            snapshot.dump(DumpState.DUMP_QUERIES, fd, pw, dumpState);
         }
 
         if (dumpState.isDumping(DumpState.DUMP_SHARED_USERS)) {
@@ -527,12 +528,12 @@ final class DumpHelper {
 
         if (!checkin
                 && dumpState.isDumping(DumpState.DUMP_DEXOPT)) {
-            mPm.dumpComputer(DumpState.DUMP_DEXOPT, fd, pw, dumpState);
+            snapshot.dump(DumpState.DUMP_DEXOPT, fd, pw, dumpState);
         }
 
         if (!checkin
                 && dumpState.isDumping(DumpState.DUMP_COMPILER_STATS)) {
-            mPm.dumpComputer(DumpState.DUMP_COMPILER_STATS, fd, pw, dumpState);
+            snapshot.dump(DumpState.DUMP_COMPILER_STATS, fd, pw, dumpState);
         }
 
         if (dumpState.isDumping(DumpState.DUMP_MESSAGES)
@@ -579,7 +580,7 @@ final class DumpHelper {
             pw.println("    Known digesters list flag: "
                     + PackageManagerService.getKnownDigestersList());
 
-            PerUidReadTimeouts[] items = mPm.getPerUidReadTimeouts();
+            PerUidReadTimeouts[] items = mPm.getPerUidReadTimeouts(snapshot);
             pw.println("    Timeouts (" + items.length + "):");
             for (PerUidReadTimeouts item : items) {
                 pw.print("        (");
@@ -661,13 +662,14 @@ final class DumpHelper {
         final ProtoOutputStream proto = new ProtoOutputStream(fd);
 
         synchronized (mPm.mLock) {
+            final Computer snapshot = mPm.snapshotComputer();
             final long requiredVerifierPackageToken =
                     proto.start(PackageServiceDumpProto.REQUIRED_VERIFIER_PACKAGE);
             proto.write(PackageServiceDumpProto.PackageShortProto.NAME,
                     mPm.mRequiredVerifierPackage);
             proto.write(
                     PackageServiceDumpProto.PackageShortProto.UID,
-                    mPm.getPackageUid(
+                    snapshot.getPackageUid(
                             mPm.mRequiredVerifierPackage,
                             MATCH_DEBUG_TRIAGED_MISSING,
                             UserHandle.USER_SYSTEM));
@@ -682,7 +684,7 @@ final class DumpHelper {
                 proto.write(PackageServiceDumpProto.PackageShortProto.NAME, verifierPackageName);
                 proto.write(
                         PackageServiceDumpProto.PackageShortProto.UID,
-                        mPm.getPackageUid(
+                        snapshot.getPackageUid(
                                 verifierPackageName,
                                 MATCH_DEBUG_TRIAGED_MISSING,
                                 UserHandle.USER_SYSTEM));

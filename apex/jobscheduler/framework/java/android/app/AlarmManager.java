@@ -210,6 +210,8 @@ public class AlarmManager {
      * on how frequently it can be scheduled.  Only available (and automatically applied) to
      * system alarms.
      *
+     * <p>Note that alarms set with a {@link WorkSource} <b>do not</b> get this flag.
+     *
      * @hide
      */
     @UnsupportedAppUsage

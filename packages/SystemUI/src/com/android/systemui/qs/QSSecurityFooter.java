@@ -83,6 +83,8 @@ import com.android.systemui.R;
 import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.qs.dagger.QSScope;
 import com.android.systemui.settings.UserTracker;
@@ -119,7 +121,7 @@ class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListen
     protected H mHandler;
 
     // Does it move between footer and header? Remove this once all the flagging is removed
-    private boolean mIsMovable = true;
+    private final boolean mNewQsFooter;
 
     private boolean mIsVisible;
     @Nullable
@@ -135,7 +137,7 @@ class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListen
     QSSecurityFooter(@Named(QS_SECURITY_FOOTER_VIEW) View rootView,
             UserTracker userTracker, @Main Handler mainHandler, ActivityStarter activityStarter,
             SecurityController securityController, DialogLaunchAnimator dialogLaunchAnimator,
-            @Background Looper bgLooper) {
+            @Background Looper bgLooper, FeatureFlags featureFlags) {
         mRootView = rootView;
         mRootView.setOnClickListener(this);
         mFooterText = mRootView.findViewById(R.id.footer_text);
@@ -149,6 +151,7 @@ class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListen
         mHandler = new H(bgLooper);
         mUserTracker = userTracker;
         mDialogLaunchAnimator = dialogLaunchAnimator;
+        mNewQsFooter = featureFlags.isEnabled(Flags.NEW_FOOTER);
     }
 
     public void setListening(boolean listening) {
@@ -168,13 +171,10 @@ class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListen
 
     public void onConfigurationChanged() {
         FontSizeUtils.updateFontSize(mFooterText, R.dimen.qs_tile_text_size);
+        Resources r = mContext.getResources();
 
-        if (mIsMovable) {
-            Resources r = mContext.getResources();
-
+        if (!mNewQsFooter) {
             mFooterText.setMaxLines(r.getInteger(R.integer.qs_security_footer_maxLines));
-            int padding = r.getDimensionPixelSize(R.dimen.qs_footer_padding);
-            mRootView.setPaddingRelative(padding, padding, padding, padding);
 
             int bottomMargin = r.getDimensionPixelSize(R.dimen.qs_footers_margin_bottom);
             ViewGroup.MarginLayoutParams lp =
@@ -183,8 +183,10 @@ class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListen
             lp.width = r.getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT
                     ? MATCH_PARENT : WRAP_CONTENT;
             mRootView.setLayoutParams(lp);
-
         }
+
+        int padding = r.getDimensionPixelSize(R.dimen.qs_footer_padding);
+        mRootView.setPaddingRelative(padding, padding, padding, padding);
         mRootView.setBackground(mContext.getDrawable(R.drawable.qs_security_footer_background));
     }
 

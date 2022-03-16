@@ -667,8 +667,8 @@ public class AppIdleHistory {
     long getBucketExpiryTimeMs(String packageName, int userId, int bucket, long elapsedRealtimeMs) {
         ArrayMap<String, AppUsageHistory> userHistory = getUserHistory(userId);
         AppUsageHistory appUsageHistory = getPackageHistory(userHistory, packageName,
-                elapsedRealtimeMs, true);
-        if (appUsageHistory.bucketExpiryTimesMs == null) {
+                elapsedRealtimeMs, false /* create */);
+        if (appUsageHistory == null || appUsageHistory.bucketExpiryTimesMs == null) {
             return 0;
         }
         return appUsageHistory.bucketExpiryTimesMs.get(bucket, 0);

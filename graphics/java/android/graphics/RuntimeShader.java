@@ -19,12 +19,228 @@ package android.graphics;
 import android.annotation.ColorInt;
 import android.annotation.ColorLong;
 import android.annotation.NonNull;
+import android.view.Window;
 
 import libcore.util.NativeAllocationRegistry;
 
 /**
- * Shader that calculates per-pixel color via a user defined Android Graphics Shading Language
- * (AGSL) function.
+ * <p>A {@link RuntimeShader} calculates a per-pixel color based on the output of a user defined
+ * Android Graphics Shading Language (AGSL) function.</p>
+ *
+ * <h3>Android Graphics Shading Language</h3>
+ * <p>The AGSL syntax is very similar to OpenGL ES Shading Language, but there are some important
+ * differences that are highlighted here. Most of these differences are summed up in one basic fact:
+ * <b>With GPU shading languages, you are programming a stage of the GPU pipeline. With AGSL, you
+ * are programming a stage of the {@link Canvas} or {@link RenderNode} drawing pipeline.</b></p>
+ *
+ * <p>In particular, a GLSL fragment shader controls the entire behavior of the GPU between the
+ * rasterizer and the blending hardware. That shader does all of the work to compute a color, and
+ * the color it generates is exactly what is fed to the blending stage of the pipeline.</p>
+ *
+ * <p>In contrast, AGSL functions exist as part of a larger pipeline. When you issue a
+ * {@link Canvas} drawing operation, Android (generally) assembles a single GPU fragment shader to
+ * do all of the required work. This shader typically includes several pieces. For example, it might
+ * include:</p>
+ * <ul>
+ *  <li>Evaluating whether a pixel falls inside or outside of the shape being drawn (or on the
+ *  border, where it might apply antialiasing).</li>
+ *  <li>Evaluating whether a pixel falls inside or outside of the clipping region (again, with
+ *  possible antialiasing logic for border pixels).</li>
+ *  <li>Logic for the {@link Shader}, {@link ColorFilter}, and {@link BlendMode} on the
+ *  {@link Paint}.</li>
+ *  <li>Color space conversion code, as part of Android’s color management.</li>
+ * </ul>
+ *
+ * <p>A {@link RuntimeShader}, like other {@link Shader} types, effectively contributes a function
+ * to the GPU’s fragment shader.</p>
+ *
+ * <h3>AGSL Shader Execution</h3>
+ * <p>Just like a GLSL shader, an AGSL shader begins execution in a main function. Unlike GLSL, the
+ * function receives as an input parameter the position of the pixel within the {@link Canvas} or
+ * {@link RenderNode} coordinate space (similar to gl_fragCoord) and returns the color to be shaded
+ * as a vec4 (similar to out vec4 color or gl_FragColor in GLSL).</p>
+ *
+ * <pre class="prettyprint">
+ * vec4 main(vec2 canvas_coordinates);
+ * </pre>
+ *
+ * <p>AGSL and GLSL use different coordinate spaces by default. In GLSL, the fragment coordinate
+ * (fragCoord) is relative to the lower left. AGSL matches the screen coordinate system of the
+ * Android {@link Canvas} which has its origin as the upper left corner. This means that the
+ * coordinates provided as a parameter in the main function are local to the canvas with the
+ * exception of any {@link Shader#getLocalMatrix(Matrix)} transformations applied to this shader.
+ * Additionally, if the shader is invoked by another using {@link #setInputShader(String, Shader)},
+ * then that parent shader may modify the input coordinates arbitrarily.</p>
+ *
+ * <h3>AGSL and Color Spaces</h3>
+ * <p>Android Graphics and by extension {@link RuntimeShader} are color managed.  The working
+ * {@link ColorSpace} for an AGSL shader is defined to be the color space of the destination, which
+ * in most cases is determined by {@link Window#setColorMode(int)}.</p>
+ *
+ * <p>When authoring an AGSL shader, you won’t know what the working color space is. For many
+ * effects, this is fine because by default color inputs are automatically converted into the
+ * working color space. For certain effects, it may be important to do some math in a fixed, known
+ * color space. A common example is lighting – to get physically accurate lighting, math should be
+ * done in a linear color space. To help with this, AGSL provides two intrinsic functions that
+ * convert colors between the working color space and the
+ * {@link ColorSpace.Named#LINEAR_EXTENDED_SRGB} color space:
+ *
+ * <pre class="prettyprint">
+ * vec3 toLinearSrgb(vec3 color);
+ * vec3 fromLinearSrgb(vec3 color);</pre>
+ *
+ * <h3>AGSL and Premultiplied Alpha</h3>
+ * <p>When dealing with transparent colors, there are two (common) possible representations:
+ * straight (unassociated) alpha and premultiplied (associated) alpha. In ASGL the color returned
+ * by the main function is expected to be premultiplied.  AGSL’s use of premultiplied alpha
+ * implies:
+ * </p>
+ *
+ * <ul>
+ *  <li>If your AGSL shader will return transparent colors, be sure to multiply the RGB by A.  The
+ *  resulting color should be [R*A, G*A, B*A, A], not [R, G, B, A].</li>
+ *  <li>For more complex shaders, you must understand which of your colors are premultiplied vs.
+ *  straight. Many operations don’t make sense if you mix both kinds of color together.</li>
+ * </ul>
+ *
+ * <h3>Uniforms</h3>
+ * <p>AGSL, like GLSL, exposes the concept of uniforms. An AGSL uniform is defined as a read-only,
+ * global variable that is accessible by the AGSL code and is initialized by a number of setter
+ * methods on {@link RuntimeShader}. AGSL exposes two primitive uniform data types (float, int) and
+ * two specialized types (colors, shaders) that are outlined below.</p>
+ *
+ * <h4>Primitive Uniforms</h4>
+ * <p>There are two primitive uniform types supported by AGSL, float and int. For these types and
+ * uniforms representing a grouping of these types, like arrays and matrices, there are
+ * corresponding {@link RuntimeShader} methods to initialize them.
+ * <table border="2" width="85%" align="center" cellpadding="5">
+ *     <thead>
+ *         <tr><th>Java Type</th> <th>AGSL Type</th> <th>Method</th> </tr>
+ *     </thead>
+ *
+ *     <tbody>
+ *     <tr>
+ *         <td rowspan="4">Floats</td>
+ *         <td>float</td>
+ *         <td>{@link RuntimeShader#setFloatUniform(String, float)}</td>
+ *     </tr>
+ *     <tr>
+ *         <td>vec2</td>
+ *         <td>{@link RuntimeShader#setFloatUniform(String, float, float)}</td>
+ *     </tr>
+ *     <tr>
+ *         <td>vec3</td>
+ *         <td>{@link RuntimeShader#setFloatUniform(String, float, float, float)}</td>
+ *     </tr>
+ *     <tr>
+ *         <td>vec4</td>
+ *         <td>{@link RuntimeShader#setFloatUniform(String, float, float, float, float)}</td>
+ *     </tr>
+ *     <tr>
+ *         <td rowspan="4">Integers</td>
+ *         <td>int</td>
+ *         <td>{@link RuntimeShader#setIntUniform(String, int)}</td>
+ *     </tr>
+ *     <tr>
+ *         <td>ivec2</td>
+ *         <td>{@link RuntimeShader#setIntUniform(String, int, int)}</td>
+ *     </tr>
+ *     <tr>
+ *         <td>ivec3</td>
+ *         <td>{@link RuntimeShader#setIntUniform(String, int, int, int)}</td>
+ *     </tr>
+ *     <tr>
+ *         <td>ivec4</td>
+ *         <td>{@link RuntimeShader#setIntUniform(String, int, int, int, int)}</td>
+ *     </tr>
+ *     <tr>
+ *         <td rowspan="2">Matrices and Arrays</td>
+ *         <td>mat2, mat3, and mat4, and float[]</td>
+ *         <td>{@link RuntimeShader#setFloatUniform(String, float[])}</td>
+ *     </tr>
+ *     <tr>
+ *         <td>int[]</td>
+ *         <td>{@link RuntimeShader#setIntUniform(String, int[])}</td>
+ *     </tr>
+ *     </tbody>
+ * </table>
+ *
+ * For example, a simple AGSL shader making use of a float uniform to modulate the transparency
+ * of the output color would look like:</p>
+ *
+ * <pre class="prettyprint">
+ * uniform float alpha;
+ * vec4 main(vec2 canvas_coordinates) {
+ *     vec3 red = vec3(1.0, 0.0, 0.0);
+ *     return vec4(red * alpha, alpha);
+ * }</pre>
+ *
+ * <p>After creating a {@link RuntimeShader} with that program the uniform can then be initialized
+ * and updated per frame by calling {@link RuntimeShader#setFloatUniform(String, float)} with the
+ * value of alpha.  The value of a primitive uniform defaults to 0 if it is declared in the AGSL
+ * shader but not initialized.</p>
+ *
+ * <h4>Color Uniforms</h4>
+ * <p>AGSL doesn't know if uniform variables contain colors, it won't automatically convert them to
+ * the working colorspace of the shader at runtime.  However, you can label your vec4 uniform with
+ * the "layout(color)" qualifier which lets Android know that the uniform will be used as a color.
+ * Doing so allows AGSL to transform the uniform value to the working color space. In AGSL, declare
+ * the uniform like this:
+ *
+ * <pre class="prettyprint">
+ * layout(color) uniform vec4 inputColorA;
+ * layout(color) uniform vec4 inputColorB;
+ * vec4 main(vec2 canvas_coordinates) {
+ *     // blend the two colors together and return the resulting color
+ *     return mix(inputColorA, inputColorB, 0.5);
+ * }</pre>
+ *
+ * <p>After creating a {@link RuntimeShader} with that program the uniforms can
+ * then be initialized and updated per frame by calling
+ * {@link RuntimeShader#setColorUniform(String, int)},
+ * {@link RuntimeShader#setColorUniform(String, long)}, or
+ * {@link RuntimeShader#setColorUniform(String, Color)} with the desired colors.  The value of a
+ * color uniform is undefined if it is declared in the AGSL shader but not initialized.</p>
+ *
+ * <h4>Shader Uniforms</h4>
+ * In GLSL, a fragment shader can sample a texture. For AGSL instead of sampling textures you can
+ * sample from any {@link Shader}, which includes but is not limited to {@link BitmapShader}. To
+ * make it clear that you are operating on an {@link Shader} object there is no "sample"
+ * method. Instead, the shader uniform has an "eval()" method. This distinction enables AGSL shaders
+ * to sample from existing bitmap and gradient shaders as well as other {@link RuntimeShader}
+ * objects.  In AGSL, declare the uniform like this:
+ *
+ * <pre class="prettyprint">
+ * uniform shader myShader;
+ * vec4 main(vec2 canvas_coordinates) {
+ *     // swap the red and blue color channels when sampling from myShader
+ *     return myShader.sample(canvas_coordinates).bgra;
+ * }</pre>
+ *
+ * <p>After creating a {@link RuntimeShader} with that program the shader uniform can
+ * then be initialized and updated per frame by calling
+ * {@link RuntimeShader#setInputShader(String, Shader)} with the desired shader. The value of a
+ * shader uniform is undefined if it is declared in the AGSL shader but not initialized.</p>
+ *
+ * <p>Although most {@link BitmapShader}s contain colors that should be color managed, some contain
+ * data that isn’t actually colors. This includes bitmaps storing normals, material properties
+ * (e.g. roughness), heightmaps, or any other purely mathematical data that happens to be stored in
+ * a bitmap. When using these kinds of shaders in AGSL, you probably want to initialize them with
+ * {@link #setInputBuffer(String, BitmapShader)}. Shaders initialized this way work much like
+ * a regular {@link BitmapShader} (including filtering and tiling), with a few major differences:
+ * <ul>
+ *  <li>No color space transformation is applied (the color space of the bitmap is ignored).</li>
+ *  <li>Bitmaps that return false for {@link Bitmap#isPremultiplied()} are not automatically
+ *  premultiplied.</li>
+ * </ul>
+ *
+ * <p>In addition, when sampling from a {@link BitmapShader} be aware that the shader does not use
+ * normalized coordinates (like a texture in GLSL). It uses (0, 0) in the upper-left corner, and
+ * (width, height) in the bottom-right corner. Normally, this is exactly what you want. If you’re
+ * evaluating the shader with coordinates based on the ones passed to your AGSL program, the scale
+ * is correct. However, if you want to adjust those coordinates (to do some kind of re-mapping of
+ * the bitmap), remember that the coordinates are local to the canvas.</p>
+ *
  */
 public class RuntimeShader extends Shader {
 

@@ -48,10 +48,10 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
+import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.KeyguardLiftController;
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
-import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.util.DeviceConfigProxy;
@@ -64,7 +64,7 @@ import dagger.Module;
 import dagger.Provides;
 
 /**
- * Dagger Module providing {@link StatusBar}.
+ * Dagger Module providing keyguard.
  */
 @Module(subcomponents = {
         KeyguardQsUserSwitchComponent.class,

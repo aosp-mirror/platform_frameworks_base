@@ -565,7 +565,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                 return new BpfMap<U32, U8>(UID_COUNTERSET_MAP_PATH, BpfMap.BPF_F_RDWR,
                         U32.class, U8.class);
             } catch (ErrnoException e) {
-                Log.wtf(TAG, "Cannot create uid counter set map: " + e);
+                Log.wtf(TAG, "Cannot open uid counter set map: " + e);
                 return null;
             }
         }
@@ -576,7 +576,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                 return new BpfMap<CookieTagMapKey, CookieTagMapValue>(COOKIE_TAG_MAP_PATH,
                         BpfMap.BPF_F_RDWR, CookieTagMapKey.class, CookieTagMapValue.class);
             } catch (ErrnoException e) {
-                Log.wtf(TAG, "Cannot create cookie tag map: " + e);
+                Log.wtf(TAG, "Cannot open cookie tag map: " + e);
                 return null;
             }
         }
@@ -587,7 +587,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                 return new BpfMap<StatsMapKey, StatsMapValue>(STATS_MAP_A_PATH,
                         BpfMap.BPF_F_RDWR, StatsMapKey.class, StatsMapValue.class);
             } catch (ErrnoException e) {
-                Log.wtf(TAG, "Cannot create stats map A: " + e);
+                Log.wtf(TAG, "Cannot open stats map A: " + e);
                 return null;
             }
         }
@@ -598,7 +598,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                 return new BpfMap<StatsMapKey, StatsMapValue>(STATS_MAP_B_PATH,
                         BpfMap.BPF_F_RDWR, StatsMapKey.class, StatsMapValue.class);
             } catch (ErrnoException e) {
-                Log.wtf(TAG, "Cannot create stats map B: " + e);
+                Log.wtf(TAG, "Cannot open stats map B: " + e);
                 return null;
             }
         }
@@ -609,7 +609,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                 return new BpfMap<UidStatsMapKey, StatsMapValue>(APP_UID_STATS_MAP_PATH,
                         BpfMap.BPF_F_RDWR, UidStatsMapKey.class, StatsMapValue.class);
             } catch (ErrnoException e) {
-                Log.wtf(TAG, "Cannot create app uid stats map: " + e);
+                Log.wtf(TAG, "Cannot open app uid stats map: " + e);
                 return null;
             }
         }
@@ -1194,7 +1194,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     }
 
     @VisibleForTesting
-    public void setUidForeground(int uid, boolean uidForeground) {
+    public void noteUidForeground(int uid, boolean uidForeground) {
         PermissionUtils.enforceNetworkStackPermission(mContext);
         synchronized (mStatsLock) {
             final int set = uidForeground ? SET_FOREGROUND : SET_DEFAULT;
@@ -2132,15 +2132,15 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
         // TODO Right now it writes all history.  Should it limit to the "since-boot" log?
 
-        dumpInterfaces(proto, NetworkStatsServiceDumpProto.ACTIVE_INTERFACES_FIELD_NUMBER,
+        dumpInterfaces(proto, NetworkStatsServiceDumpProto.ACTIVE_INTERFACES,
                 mActiveIfaces);
-        dumpInterfaces(proto, NetworkStatsServiceDumpProto.ACTIVE_UID_INTERFACES_FIELD_NUMBER,
+        dumpInterfaces(proto, NetworkStatsServiceDumpProto.ACTIVE_UID_INTERFACES,
                 mActiveUidIfaces);
-        mDevRecorder.dumpDebugLocked(proto, NetworkStatsServiceDumpProto.DEV_STATS_FIELD_NUMBER);
-        mXtRecorder.dumpDebugLocked(proto, NetworkStatsServiceDumpProto.XT_STATS_FIELD_NUMBER);
-        mUidRecorder.dumpDebugLocked(proto, NetworkStatsServiceDumpProto.UID_STATS_FIELD_NUMBER);
+        mDevRecorder.dumpDebugLocked(proto, NetworkStatsServiceDumpProto.DEV_STATS);
+        mXtRecorder.dumpDebugLocked(proto, NetworkStatsServiceDumpProto.XT_STATS);
+        mUidRecorder.dumpDebugLocked(proto, NetworkStatsServiceDumpProto.UID_STATS);
         mUidTagRecorder.dumpDebugLocked(proto,
-                NetworkStatsServiceDumpProto.UID_TAG_STATS_FIELD_NUMBER);
+                NetworkStatsServiceDumpProto.UID_TAG_STATS);
 
         proto.flush();
     }
@@ -2150,8 +2150,8 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         for (int i = 0; i < ifaces.size(); i++) {
             final long start = proto.start(tag);
 
-            proto.write(NetworkInterfaceProto.INTERFACE_FIELD_NUMBER, ifaces.keyAt(i));
-            ifaces.valueAt(i).dumpDebug(proto, NetworkInterfaceProto.IDENTITIES_FIELD_NUMBER);
+            proto.write(NetworkInterfaceProto.INTERFACE, ifaces.keyAt(i));
+            ifaces.valueAt(i).dumpDebug(proto, NetworkInterfaceProto.IDENTITIES);
 
             proto.end(start);
         }
@@ -2393,10 +2393,17 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         }
 
         @Override
-        public void notifyWarningOrLimitReached() {
-            Log.d(TAG, mTag + ": notifyWarningOrLimitReached");
+        public void notifyWarningReached() {
+            Log.d(TAG, mTag + ": notifyWarningReached");
             BinderUtils.withCleanCallingIdentity(() ->
-                    mNetworkPolicyManager.notifyStatsProviderWarningOrLimitReached());
+                    mNetworkPolicyManager.notifyStatsProviderWarningReached());
+        }
+
+        @Override
+        public void notifyLimitReached() {
+            Log.d(TAG, mTag + ": notifyLimitReached");
+            BinderUtils.withCleanCallingIdentity(() ->
+                    mNetworkPolicyManager.notifyStatsProviderLimitReached());
         }
 
         @Override

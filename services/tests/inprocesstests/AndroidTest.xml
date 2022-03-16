@@ -18,6 +18,8 @@
     <option name="test-suite-tag" value="apct" />
     <option name="test-suite-tag" value="apct-instrumentation" />
 
+    <target_preparer class="com.android.tradefed.targetprep.RootTargetPreparer"/>
+
     <target_preparer class="com.android.tradefed.targetprep.suite.SuiteApkInstaller">
         <option name="cleanup-apks" value="true"/>
         <option name="test-file-name" value="FrameworksInProcessTests.apk"/>

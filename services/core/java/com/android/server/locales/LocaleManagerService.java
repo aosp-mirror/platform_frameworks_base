@@ -78,10 +78,20 @@ public class LocaleManagerService extends SystemService {
                 Process.THREAD_PRIORITY_BACKGROUND);
         broadcastHandlerThread.start();
 
+        SystemAppUpdateTracker systemAppUpdateTracker =
+                new SystemAppUpdateTracker(this);
+        broadcastHandlerThread.getThreadHandler().postAtFrontOfQueue(new Runnable() {
+            @Override
+            public void run() {
+                systemAppUpdateTracker.init();
+            }
+        });
+
         mBackupHelper = new LocaleManagerBackupHelper(this,
                 mPackageManagerInternal, broadcastHandlerThread);
 
-        mPackageMonitor = new LocaleManagerServicePackageMonitor(mBackupHelper);
+        mPackageMonitor = new LocaleManagerServicePackageMonitor(mBackupHelper,
+                systemAppUpdateTracker);
         mPackageMonitor.register(context, broadcastHandlerThread.getLooper(),
                 UserHandle.ALL,
                 true);
@@ -246,7 +256,7 @@ public class LocaleManagerService extends SystemService {
      * <p><b>Note:</b> This is can be used by installers to deal with cases such as
      * language-based APK Splits.
      */
-    private void notifyInstallerOfAppWhoseLocaleChanged(String appPackageName, int userId,
+    void notifyInstallerOfAppWhoseLocaleChanged(String appPackageName, int userId,
             LocaleList locales) {
         String installingPackageName = getInstallingPackageName(appPackageName);
         if (installingPackageName != null) {
@@ -271,7 +281,7 @@ public class LocaleManagerService extends SystemService {
         mContext.sendBroadcastAsUser(intent, UserHandle.of(userId));
     }
 
-    private static Intent createBaseIntent(String intentAction, String appPackageName,
+    static Intent createBaseIntent(String intentAction, String appPackageName,
             LocaleList locales) {
         return new Intent(intentAction)
                 .putExtra(Intent.EXTRA_PACKAGE_NAME, appPackageName)
@@ -406,7 +416,7 @@ public class LocaleManagerService extends SystemService {
     }
 
     @Nullable
-    private String getInstallingPackageName(String packageName) {
+    String getInstallingPackageName(String packageName) {
         try {
             return mContext.getPackageManager()
                     .getInstallSourceInfo(packageName).getInstallingPackageName();

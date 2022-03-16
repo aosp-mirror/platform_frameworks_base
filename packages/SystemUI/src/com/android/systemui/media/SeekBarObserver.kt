@@ -50,25 +50,46 @@ class SeekBarObserver(
                 .getDimensionPixelSize(R.dimen.qs_media_disabled_seekbar_vertical_padding)
     }
 
+    init {
+        val seekBarProgressWavelength = holder.seekBar.context.resources
+                .getDimensionPixelSize(R.dimen.qs_media_seekbar_progress_wavelength).toFloat()
+        val seekBarProgressAmplitude = holder.seekBar.context.resources
+                .getDimensionPixelSize(R.dimen.qs_media_seekbar_progress_amplitude).toFloat()
+        val seekBarProgressPhase = holder.seekBar.context.resources
+                .getDimensionPixelSize(R.dimen.qs_media_seekbar_progress_phase).toFloat()
+        val seekBarProgressStrokeWidth = holder.seekBar.context.resources
+                .getDimensionPixelSize(R.dimen.qs_media_seekbar_progress_stroke_width).toFloat()
+        val progressDrawable = holder.seekBar.progressDrawable as? SquigglyProgress
+        progressDrawable?.let {
+            it.waveLength = seekBarProgressWavelength
+            it.lineAmplitude = seekBarProgressAmplitude
+            it.phaseSpeed = seekBarProgressPhase
+            it.strokeWidth = seekBarProgressStrokeWidth
+        }
+    }
+
     /** Updates seek bar views when the data model changes. */
     @UiThread
     override fun onChanged(data: SeekBarViewModel.Progress) {
+        val progressDrawable = holder.seekBar.progressDrawable as? SquigglyProgress
         if (!data.enabled) {
             if (holder.seekBar.maxHeight != seekBarDisabledHeight) {
                 holder.seekBar.maxHeight = seekBarDisabledHeight
                 setVerticalPadding(seekBarDisabledVerticalPadding)
             }
-            holder.seekBar.setEnabled(false)
-            holder.seekBar.getThumb().setAlpha(0)
-            holder.seekBar.setProgress(0)
-            holder.elapsedTimeView?.setText("")
-            holder.totalTimeView?.setText("")
+            holder.seekBar.isEnabled = false
+            progressDrawable?.animate = false
+            holder.seekBar.thumb.alpha = 0
+            holder.seekBar.progress = 0
+            holder.elapsedTimeView?.text = ""
+            holder.totalTimeView?.text = ""
             holder.seekBar.contentDescription = ""
             return
         }
 
-        holder.seekBar.getThumb().setAlpha(if (data.seekAvailable) 255 else 0)
-        holder.seekBar.setEnabled(data.seekAvailable)
+        holder.seekBar.thumb.alpha = if (data.seekAvailable) 255 else 0
+        holder.seekBar.isEnabled = data.seekAvailable
+        progressDrawable?.animate = data.playing
 
         if (holder.seekBar.maxHeight != seekBarEnabledMaxHeight) {
             holder.seekBar.maxHeight = seekBarEnabledMaxHeight

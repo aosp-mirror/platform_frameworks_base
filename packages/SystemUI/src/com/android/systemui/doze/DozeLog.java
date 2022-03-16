@@ -132,14 +132,6 @@ public class DozeLog implements Dumpable {
     }
 
     /**
-     * Appends dozing event to the logs
-     * @param suppressed true if dozing is suppressed
-     */
-    public void traceDozingSuppressed(boolean suppressed) {
-        mLogger.logDozingSuppressed(suppressed);
-    }
-
-    /**
      * Appends fling event to the logs
      */
     public void traceFling(boolean expand, boolean aboveThreshold, boolean thresholdNeeded,
@@ -325,15 +317,40 @@ public class DozeLog implements Dumpable {
     }
 
     /**
-     * Appends doze suppressed event to the logs
+     * Appends the doze state that was suppressed to the doze event log
      * @param suppressedState The {@link DozeMachine.State} that was suppressed
      */
-    public void traceDozeSuppressed(DozeMachine.State suppressedState) {
-        mLogger.logDozeSuppressed(suppressedState);
+    public void traceAlwaysOnSuppressed(DozeMachine.State suppressedState) {
+        mLogger.logAlwaysOnSuppressed(suppressedState);
     }
 
     /**
-     * Appends new AOD sreen brightness to logs
+     * Appends reason why doze immediately ended.
+     */
+    public void traceImmediatelyEndDoze(String reason) {
+        mLogger.logImmediatelyEndDoze(reason);
+    }
+
+    /**
+     * Appends power save changes that may cause a new doze state
+     * @param powerSaveActive true if power saving is active
+     * @param nextState the state that we'll transition to
+     */
+    public void tracePowerSaveChanged(boolean powerSaveActive, DozeMachine.State nextState) {
+        mLogger.logPowerSaveChanged(powerSaveActive, nextState);
+    }
+
+    /**
+     * Appends an event on AOD suppression change
+     * @param suppressed true if AOD is being suppressed
+     * @param nextState the state that we'll transition to
+     */
+    public void traceAlwaysOnSuppressedChange(boolean suppressed, DozeMachine.State nextState) {
+        mLogger.logAlwaysOnSuppressedChange(suppressed, nextState);
+    }
+
+    /**
+     * Appends new AOD screen brightness to logs
      * @param brightness display brightness setting
      */
     public void traceDozeScreenBrightness(int brightness) {

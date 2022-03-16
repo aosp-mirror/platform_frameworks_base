@@ -3121,17 +3121,19 @@ public final class AutofillManager {
     }
 
     /**
-     * If autofill suggestions for a dialog-style UI are available for {@code view}, shows a dialog
-     * allowing the user to select a suggestion and returns {@code true}.
+     * If autofill suggestions for a
+     * <a href="{@docRoot}reference/android/service/autofill/Dataset.html#FillDialogUI">
+     * dialog-style UI</a> are available for {@code view}, shows a dialog allowing the user to
+     * select a suggestion and returns {@code true}.
      * <p>
      * The dialog may not be available if the autofill service does not support it, or if the
      * autofill request has not returned a response yet.
      * <p>
-     * It is recommended to call this method the first time a user focuses on an autofill-able form,
-     * and to avoid showing the input method if the dialog is shown. If this method returns
-     * {@code false}, you should then instead show the input method (assuming that is how the
-     * view normally handles the focus event). If the user re-focuses on the view, you should not
-     * call this method again so as to not disrupt usage of the input method.
+     * It is recommended apps to call this method the first time a user focuses on
+     * an autofill-able form, and to avoid showing the input method if the dialog is shown. If
+     * this method returns {@code false}, you should then instead show the input method (assuming
+     * that is how the view normally handles the focus event). If the user re-focuses on the view,
+     * you should not call this method again so as to not disrupt usage of the input method.
      *
      * @param view the view for which to show autofill suggestions. This is typically a view
      *             receiving a focus event. The autofill suggestions shown will include content for

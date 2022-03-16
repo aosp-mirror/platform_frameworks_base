@@ -45,6 +45,7 @@ import android.util.AttributeSet;
 import android.util.IntArray;
 import android.util.Log;
 import android.util.SparseArray;
+import android.util.TypedValue;
 import android.view.HapticFeedbackConstants;
 import android.view.MotionEvent;
 import android.view.RenderNodeAnimator;
@@ -82,10 +83,12 @@ public class LockPatternView extends View {
     private static final int DOT_ACTIVATION_DURATION_MILLIS = 50;
     private static final int DOT_RADIUS_INCREASE_DURATION_MILLIS = 96;
     private static final int DOT_RADIUS_DECREASE_DURATION_MILLIS = 192;
+    private static final float MIN_DOT_HIT_FACTOR = 0.2f;
     private final CellState[][] mCellStates;
 
     private final int mDotSize;
     private final int mDotSizeActivated;
+    private final float mDotHitFactor;
     private final int mPathWidth;
 
     private boolean mDrawingProfilingStarted = false;
@@ -143,12 +146,11 @@ public class LockPatternView extends View {
     private boolean mPatternInProgress = false;
     private boolean mFadePattern = true;
 
-    private float mHitFactor = 0.6f;
-
     @UnsupportedAppUsage
     private float mSquareWidth;
     @UnsupportedAppUsage
     private float mSquareHeight;
+    private float mDotHitRadius;
     private final LinearGradient mFadeOutGradientShader;
 
     private final Path mCurrentPath = new Path();
@@ -164,8 +166,7 @@ public class LockPatternView extends View {
 
     private final Interpolator mFastOutSlowInInterpolator;
     private final Interpolator mLinearOutSlowInInterpolator;
-    private PatternExploreByTouchHelper mExploreByTouchHelper;
-    private AudioManager mAudioManager;
+    private final PatternExploreByTouchHelper mExploreByTouchHelper;
 
     private Drawable mSelectedDrawable;
     private Drawable mNotSelectedDrawable;
@@ -349,6 +350,9 @@ public class LockPatternView extends View {
         mDotSize = getResources().getDimensionPixelSize(R.dimen.lock_pattern_dot_size);
         mDotSizeActivated = getResources().getDimensionPixelSize(
                 R.dimen.lock_pattern_dot_size_activated);
+        TypedValue outValue = new TypedValue();
+        getResources().getValue(R.dimen.lock_pattern_dot_hit_factor, outValue, true);
+        mDotHitFactor = Math.max(Math.min(outValue.getFloat(), 1f), MIN_DOT_HIT_FACTOR);
 
         mUseLockPatternDrawable = getResources().getBoolean(R.bool.use_lock_pattern_drawable);
         if (mUseLockPatternDrawable) {
@@ -375,7 +379,6 @@ public class LockPatternView extends View {
                 AnimationUtils.loadInterpolator(context, android.R.interpolator.linear_out_slow_in);
         mExploreByTouchHelper = new PatternExploreByTouchHelper(this);
         setAccessibilityDelegate(mExploreByTouchHelper);
-        mAudioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
 
         int fadeAwayGradientWidth = getResources().getDimensionPixelSize(
                 R.dimen.lock_pattern_fade_away_gradient_width);
@@ -679,6 +682,7 @@ public class LockPatternView extends View {
         final int height = h - mPaddingTop - mPaddingBottom;
         mSquareHeight = height / 3.0f;
         mExploreByTouchHelper.invalidateRoot();
+        mDotHitRadius = Math.min(mSquareHeight / 2, mSquareWidth / 2) * mDotHitFactor;
 
         if (mUseLockPatternDrawable) {
             mNotSelectedDrawable.setBounds(mPaddingLeft, mPaddingTop, width, height);
@@ -890,63 +894,30 @@ public class LockPatternView extends View {
         return set;
     }
 
-    // helper method to find which cell a point maps to
+    @Nullable
     private Cell checkForNewHit(float x, float y) {
-
-        final int rowHit = getRowHit(y);
-        if (rowHit < 0) {
-            return null;
+        Cell cellHit = detectCellHit(x, y);
+        if (cellHit != null && !mPatternDrawLookup[cellHit.row][cellHit.column]) {
+            return cellHit;
         }
-        final int columnHit = getColumnHit(x);
-        if (columnHit < 0) {
-            return null;
-        }
-
-        if (mPatternDrawLookup[rowHit][columnHit]) {
-            return null;
-        }
-        return Cell.of(rowHit, columnHit);
+        return null;
     }
 
-    /**
-     * Helper method to find the row that y falls into.
-     * @param y The y coordinate
-     * @return The row that y falls in, or -1 if it falls in no row.
-     */
-    private int getRowHit(float y) {
-
-        final float squareHeight = mSquareHeight;
-        float hitSize = squareHeight * mHitFactor;
-
-        float offset = mPaddingTop + (squareHeight - hitSize) / 2f;
-        for (int i = 0; i < 3; i++) {
-
-            final float hitTop = offset + squareHeight * i;
-            if (y >= hitTop && y <= hitTop + hitSize) {
-                return i;
+    /** Helper method to find which cell a point maps to. */
+    @Nullable
+    private Cell detectCellHit(float x, float y) {
+        final float hitRadiusSquared = mDotHitRadius * mDotHitRadius;
+        for (int row = 0; row < 3; row++) {
+            for (int column = 0; column < 3; column++) {
+                float centerY = getCenterYForRow(row);
+                float centerX = getCenterXForColumn(column);
+                if ((x - centerX) * (x - centerX) + (y - centerY) * (y - centerY)
+                        < hitRadiusSquared) {
+                    return Cell.of(row, column);
+                }
             }
         }
-        return -1;
-    }
-
-    /**
-     * Helper method to find the column x fallis into.
-     * @param x The x coordinate.
-     * @return The column that x falls in, or -1 if it falls in no column.
-     */
-    private int getColumnHit(float x) {
-        final float squareWidth = mSquareWidth;
-        float hitSize = squareWidth * mHitFactor;
-
-        float offset = mPaddingLeft + (squareWidth - hitSize) / 2f;
-        for (int i = 0; i < 3; i++) {
-
-            final float hitLeft = offset + squareWidth * i;
-            if (x >= hitLeft && x <= hitLeft + hitSize) {
-                return i;
-            }
-        }
-        return -1;
+        return null;
     }
 
     @Override
@@ -1553,8 +1524,7 @@ public class LockPatternView extends View {
         protected int getVirtualViewAt(float x, float y) {
             // This must use the same hit logic for the screen to ensure consistency whether
             // accessibility is on or off.
-            int id = getVirtualViewIdForHit(x, y);
-            return id;
+            return getVirtualViewIdForHit(x, y);
         }
 
         @Override
@@ -1670,12 +1640,11 @@ public class LockPatternView extends View {
             final int col = ordinal % 3;
             float centerX = getCenterXForColumn(col);
             float centerY = getCenterYForRow(row);
-            float cellheight = mSquareHeight * mHitFactor * 0.5f;
-            float cellwidth = mSquareWidth * mHitFactor * 0.5f;
-            bounds.left = (int) (centerX - cellwidth);
-            bounds.right = (int) (centerX + cellwidth);
-            bounds.top = (int) (centerY - cellheight);
-            bounds.bottom = (int) (centerY + cellheight);
+            float cellHitRadius = mDotHitRadius;
+            bounds.left = (int) (centerX - cellHitRadius);
+            bounds.right = (int) (centerX + cellHitRadius);
+            bounds.top = (int) (centerY - cellHitRadius);
+            bounds.bottom = (int) (centerY + cellHitRadius);
             return bounds;
         }
 
@@ -1694,16 +1663,12 @@ public class LockPatternView extends View {
          * @return VIRTUAL_BASE_VIEW_ID+id or 0 if no view was hit
          */
         private int getVirtualViewIdForHit(float x, float y) {
-            final int rowHit = getRowHit(y);
-            if (rowHit < 0) {
+            Cell cellHit = detectCellHit(x, y);
+            if (cellHit == null) {
                 return ExploreByTouchHelper.INVALID_ID;
             }
-            final int columnHit = getColumnHit(x);
-            if (columnHit < 0) {
-                return ExploreByTouchHelper.INVALID_ID;
-            }
-            boolean dotAvailable = mPatternDrawLookup[rowHit][columnHit];
-            int dotId = (rowHit * 3 + columnHit) + VIRTUAL_BASE_VIEW_ID;
+            boolean dotAvailable = mPatternDrawLookup[cellHit.row][cellHit.column];
+            int dotId = (cellHit.row * 3 + cellHit.column) + VIRTUAL_BASE_VIEW_ID;
             int view = dotAvailable ? dotId : ExploreByTouchHelper.INVALID_ID;
             if (DEBUG_A11Y) Log.v(TAG, "getVirtualViewIdForHit(" + x + "," + y + ") => "
                     + view + "avail =" + dotAvailable);

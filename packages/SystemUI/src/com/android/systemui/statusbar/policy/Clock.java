@@ -88,10 +88,11 @@ public class Clock extends TextView implements
     private boolean mAttached;
     private boolean mScreenReceiverRegistered;
     private Calendar mCalendar;
-    private String mClockFormatString;
+    private String mContentDescriptionFormatString;
     private SimpleDateFormat mClockFormat;
     private SimpleDateFormat mContentDescriptionFormat;
     private Locale mLocale;
+    private DateTimePatternGenerator mDateTimePatternGenerator;
 
     private static final int AM_PM_STYLE_NORMAL  = 0;
     private static final int AM_PM_STYLE_SMALL   = 1;
@@ -196,7 +197,8 @@ public class Clock extends TextView implements
 
         // The time zone may have changed while the receiver wasn't registered, so update the Time
         mCalendar = Calendar.getInstance(TimeZone.getDefault());
-        mClockFormatString = "";
+        mContentDescriptionFormatString = "";
+        mDateTimePatternGenerator = null;
 
         // Make sure we update to the current time
         updateClock();
@@ -247,7 +249,9 @@ public class Clock extends TextView implements
                 handler.post(() -> {
                     if (!newLocale.equals(mLocale)) {
                         mLocale = newLocale;
-                        mClockFormatString = ""; // force refresh
+                         // Force refresh of dependent variables.
+                        mContentDescriptionFormatString = "";
+                        mDateTimePatternGenerator = null;
                     }
                 });
             }
@@ -367,17 +371,22 @@ public class Clock extends TextView implements
     private final CharSequence getSmallTime() {
         Context context = getContext();
         boolean is24 = DateFormat.is24HourFormat(context, mCurrentUserId);
-        DateTimePatternGenerator dtpg = DateTimePatternGenerator.getInstance(
+        if (mDateTimePatternGenerator == null) {
+            // Despite its name, getInstance creates a cloned instance, so reuse the generator to
+            // avoid unnecessary churn.
+            mDateTimePatternGenerator = DateTimePatternGenerator.getInstance(
                 context.getResources().getConfiguration().locale);
+        }
 
         final char MAGIC1 = '\uEF00';
         final char MAGIC2 = '\uEF01';
 
-        SimpleDateFormat sdf;
-        String format = mShowSeconds
-                ? is24 ? dtpg.getBestPattern("Hms") : dtpg.getBestPattern("hms")
-                : is24 ? dtpg.getBestPattern("Hm") : dtpg.getBestPattern("hm");
-        if (!format.equals(mClockFormatString)) {
+        final String formatSkeleton = mShowSeconds
+                ? is24 ? "Hms" : "hms"
+                : is24 ? "Hm" : "hm";
+        String format = mDateTimePatternGenerator.getBestPattern(formatSkeleton);
+        if (!format.equals(mContentDescriptionFormatString)) {
+            mContentDescriptionFormatString = format;
             mContentDescriptionFormat = new SimpleDateFormat(format);
             /*
              * Search for an unquoted "a" in the format string, so we can
@@ -409,12 +418,9 @@ public class Clock extends TextView implements
                         + "a" + MAGIC2 + format.substring(b + 1);
                 }
             }
-            mClockFormat = sdf = new SimpleDateFormat(format);
-            mClockFormatString = format;
-        } else {
-            sdf = mClockFormat;
+            mClockFormat = new SimpleDateFormat(format);
         }
-        String result = sdf.format(mCalendar.getTime());
+        String result = mClockFormat.format(mCalendar.getTime());
 
         if (mAmPmStyle != AM_PM_STYLE_NORMAL) {
             int magic1 = result.indexOf(MAGIC1);

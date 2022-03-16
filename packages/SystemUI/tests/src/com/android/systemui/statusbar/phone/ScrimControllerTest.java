@@ -1234,10 +1234,8 @@ public class ScrimControllerTest extends SysuiTestCase {
         mScrimController.transitionTo(ScrimState.KEYGUARD);
         mScrimController.setUnocclusionAnimationRunning(true);
 
-        assertAlphaAfterExpansion(mNotificationsScrim, /* alpha */ KEYGUARD_SCRIM_ALPHA,
-                /* expansion */ 0.0f);
-        assertAlphaAfterExpansion(mNotificationsScrim, /* alpha */ KEYGUARD_SCRIM_ALPHA,
-                /* expansion */ 1.0f);
+        assertAlphaAfterExpansion(mNotificationsScrim, /* alpha */ 0f, /* expansion */ 0f);
+        assertAlphaAfterExpansion(mNotificationsScrim, /* alpha */ 0f, /* expansion */ 1.0f);
 
         // Verify normal behavior after
         mScrimController.setUnocclusionAnimationRunning(false);

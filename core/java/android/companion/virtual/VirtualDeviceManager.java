@@ -278,8 +278,8 @@ public final class VirtualDeviceManager {
          *
          * @param display the display that the events inputted through this device should target
          * @param inputDeviceName the name to call this input device
-         * @param vendorId the vendor id, as defined by uinput's uinput_setup struct (PCI vendor id)
-         * @param productId the product id, as defined by uinput's uinput_setup struct
+         * @param vendorId the PCI vendor id
+         * @param productId the product id, as defined by the vendor
          */
         @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
         @NonNull
@@ -304,8 +304,8 @@ public final class VirtualDeviceManager {
          *
          * @param display the display that the events inputted through this device should target
          * @param inputDeviceName the name to call this input device
-         * @param vendorId the vendor id, as defined by uinput's uinput_setup struct (PCI vendor id)
-         * @param productId the product id, as defined by uinput's uinput_setup struct
+         * @param vendorId the PCI vendor id
+         * @param productId the product id, as defined by the vendor
          */
         @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
         @NonNull
@@ -330,8 +330,8 @@ public final class VirtualDeviceManager {
          *
          * @param display the display that the events inputted through this device should target
          * @param inputDeviceName the name to call this input device
-         * @param vendorId the vendor id, as defined by uinput's uinput_setup struct (PCI vendor id)
-         * @param productId the product id, as defined by uinput's uinput_setup struct
+         * @param vendorId the PCI vendor id
+         * @param productId the product id, as defined by the vendor
          */
         @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
         @NonNull
@@ -425,23 +425,12 @@ public final class VirtualDeviceManager {
          * Adds an activity listener to listen for events such as top activity change or virtual
          * display task stack became empty.
          *
+         * @param executor The executor where the listener is executed on.
          * @param listener The listener to add.
-         * @see #removeActivityListener(ActivityListener)
-         */
-        public void addActivityListener(@NonNull ActivityListener listener) {
-            addActivityListener(listener, mContext.getMainExecutor());
-        }
-
-        /**
-         * Adds an activity listener to listen for events such as top activity change or virtual
-         * display task stack became empty.
-         *
-         * @param listener The listener to add.
-         * @param executor The executor where the callback is executed on.
          * @see #removeActivityListener(ActivityListener)
          */
         public void addActivityListener(
-                @NonNull ActivityListener listener, @NonNull Executor executor) {
+                @CallbackExecutor @NonNull Executor executor, @NonNull ActivityListener listener) {
             mActivityListeners.put(listener, new ActivityListenerDelegate(listener, executor));
         }
 

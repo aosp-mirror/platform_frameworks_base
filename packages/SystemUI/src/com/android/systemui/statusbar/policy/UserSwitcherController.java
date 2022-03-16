@@ -67,6 +67,7 @@ import com.android.systemui.R;
 import com.android.systemui.SystemUISecondaryUserService;
 import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.broadcast.BroadcastSender;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -122,6 +123,7 @@ public class UserSwitcherController implements Dumpable {
     protected final Handler mHandler;
     private final ActivityStarter mActivityStarter;
     private final BroadcastDispatcher mBroadcastDispatcher;
+    private final BroadcastSender mBroadcastSender;
     private final TelephonyListenerManager mTelephonyListenerManager;
     private final InteractionJankMonitor mInteractionJankMonitor;
     private final LatencyTracker mLatencyTracker;
@@ -165,6 +167,7 @@ public class UserSwitcherController implements Dumpable {
             @Main Handler handler,
             ActivityStarter activityStarter,
             BroadcastDispatcher broadcastDispatcher,
+            BroadcastSender broadcastSender,
             UiEventLogger uiEventLogger,
             FalsingManager falsingManager,
             TelephonyListenerManager telephonyListenerManager,
@@ -179,6 +182,7 @@ public class UserSwitcherController implements Dumpable {
         mActivityManager = activityManager;
         mUserTracker = userTracker;
         mBroadcastDispatcher = broadcastDispatcher;
+        mBroadcastSender = broadcastSender;
         mTelephonyListenerManager = telephonyListenerManager;
         mUiEventLogger = uiEventLogger;
         mFalsingManager = falsingManager;
@@ -584,13 +588,6 @@ public class UserSwitcherController implements Dumpable {
                 .setPackage(mCreateSupervisedUserPackage)
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
-        // TODO(b/209659998): [to-be-removed] fallback activity for supervised user creation.
-        if (mContext.getPackageManager().resolveActivity(intent, 0) == null) {
-            intent.setPackage(null)
-                    .setClassName("com.android.settings",
-                        "com.android.settings.users.AddSupervisedUserActivity");
-        }
-
         mContext.startActivity(intent);
     }
 
@@ -855,8 +852,7 @@ public class UserSwitcherController implements Dumpable {
     public @UserIdInt int createGuest() {
         UserInfo guest;
         try {
-            guest = mUserManager.createGuest(mContext,
-                    mContext.getString(com.android.settingslib.R.string.guest_nickname));
+            guest = mUserManager.createGuest(mContext);
         } catch (UserManager.UserOperationException e) {
             Log.e(TAG, "Couldn't create guest user", e);
             return UserHandle.USER_NULL;
@@ -990,9 +986,9 @@ public class UserSwitcherController implements Dumpable {
         protected static Drawable getIconDrawable(Context context, UserRecord item) {
             int iconRes;
             if (item.isAddUser) {
-                iconRes = R.drawable.ic_account_circle;
-            } else if (item.isGuest) {
                 iconRes = R.drawable.ic_account_circle_filled;
+            } else if (item.isGuest) {
+                iconRes = R.drawable.ic_account_circle;
             } else if (item.isAddSupervisedUser) {
                 iconRes = R.drawable.ic_add_supervised_user;
             } else {
@@ -1202,7 +1198,7 @@ public class UserSwitcherController implements Dumpable {
                 }
                 // Use broadcast instead of ShadeController, as this dialog may have started in
                 // another process and normal dagger bindings are not available
-                getContext().sendBroadcast(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
+                mBroadcastSender.closeSystemDialogs();
                 getContext().startActivityAsUser(
                         CreateUserActivity.createIntentForStart(getContext()),
                         mUserTracker.getUserHandle());

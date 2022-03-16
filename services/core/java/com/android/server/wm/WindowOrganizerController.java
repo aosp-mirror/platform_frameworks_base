@@ -21,11 +21,13 @@ import static android.app.ActivityManager.isStartResultSuccessful;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.window.WindowContainerTransaction.Change.CHANGE_BOUNDS_TRANSACTION;
 import static android.window.WindowContainerTransaction.Change.CHANGE_BOUNDS_TRANSACTION_RECT;
+import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_ADD_RECT_INSETS_PROVIDER;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_CHILDREN_TASKS_REPARENT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_CREATE_TASK_FRAGMENT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_DELETE_TASK_FRAGMENT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_LAUNCH_TASK;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_PENDING_INTENT;
+import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REMOVE_INSETS_PROVIDER;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REORDER;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REPARENT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REPARENT_ACTIVITY_TO_TASK_FRAGMENT;
@@ -699,6 +701,8 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                     sendTaskFragmentOperationFailure(tf.getTaskFragmentOrganizer(),
                             errorCallbackToken,
                             convertStartFailureToThrowable(result, activityIntent));
+                } else {
+                    effects |= TRANSACT_EFFECTS_LIFECYCLE;
                 }
                 break;
             }
@@ -895,6 +899,17 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 taskDisplayArea.moveRootTaskBehindRootTask(thisTask.getRootTask(), restoreAt);
                 break;
             }
+            case HIERARCHY_OP_TYPE_ADD_RECT_INSETS_PROVIDER:
+                final Rect insetsProviderWindowContainer = hop.getInsetsProviderFrame();
+                final WindowContainer receiverWindowContainer =
+                        WindowContainer.fromBinder(hop.getContainer());
+                receiverWindowContainer.addLocalRectInsetsSourceProvider(
+                        insetsProviderWindowContainer, hop.getInsetsTypes());
+                break;
+            case HIERARCHY_OP_TYPE_REMOVE_INSETS_PROVIDER:
+                WindowContainer.fromBinder(hop.getContainer())
+                        .removeLocalInsetsSourceProvider(hop.getInsetsTypes());
+                break;
         }
         return effects;
     }
@@ -1453,6 +1468,10 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
     @Nullable
     TaskFragment getTaskFragment(IBinder tfToken) {
         return mLaunchTaskFragments.get(tfToken);
+    }
+
+    void cleanUpEmbeddedTaskFragment(TaskFragment taskFragment) {
+        mLaunchTaskFragments.remove(taskFragment.getFragmentToken());
     }
 
     static class CallerInfo {

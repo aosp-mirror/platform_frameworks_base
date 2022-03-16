@@ -66,6 +66,12 @@ interface ITelecomService {
             String callingFeatureId);
 
     /**
+     * @see TelecomServiceImpl#getOwnSelfManagedPhoneAccounts
+     */
+    List<PhoneAccountHandle> getOwnSelfManagedPhoneAccounts(String callingPackage,
+            String callingFeatureId);
+
+    /**
      * @see TelecomManager#getPhoneAccountsSupportingScheme
      */
     List<PhoneAccountHandle> getPhoneAccountsSupportingScheme(in String uriScheme,

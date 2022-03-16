@@ -1293,6 +1293,8 @@
     <string name="cancel">Cancel</string>
     <!-- Button label for generic OK action [CHAR LIMIT=20] -->
     <string name="okay">OK</string>
+    <!-- Button label for generic Done action, to be pressed when an action has been completed [CHAR LIMIT=20] -->
+    <string name="done">Done</string>
 
     <!-- Label for the settings activity for controlling apps that can schedule alarms [CHAR LIMIT=30] -->
     <string name="alarms_and_reminders_label">Alarms and reminders</string>
@@ -1311,8 +1313,8 @@
 
     <!--  Do not disturb: Label for button in enable zen dialog that will turn on zen mode. [CHAR LIMIT=30] -->
     <string name="zen_mode_enable_dialog_turn_on">Turn on</string>
-    <!-- Priority mode: Title for the Priority mode dialog to turn on Priority mode. [CHAR LIMIT=50]-->
-    <string name="zen_mode_settings_turn_on_dialog_title" translatable="false">Turn on Priority mode</string>
+    <!-- Do not disturb: Title for the Do not Disturb dialog to turn on Do not disturb. [CHAR LIMIT=50]-->
+    <string name="zen_mode_settings_turn_on_dialog_title">Turn on Do Not Disturb</string>
     <!-- Sound: Summary for the Do not Disturb option when there is no automatic rules turned on. [CHAR LIMIT=NONE]-->
     <string name="zen_mode_settings_summary_off">Never</string>
     <!--[CHAR LIMIT=40] Zen Interruption level: Priority.  -->
@@ -1342,7 +1344,9 @@
     <string name="notice_header" translatable="false"></string>
 
     <!-- Name of the phone device. [CHAR LIMIT=30] -->
-    <string name="media_transfer_this_device_name">This phone</string>
+    <string name="media_transfer_this_device_name" product="default">This phone</string>
+    <!-- Name of the tablet device. [CHAR LIMIT=30] -->
+    <string name="media_transfer_this_device_name" product="tablet">This tablet</string>
     <!-- Name of the phone device with an active remote session. [CHAR LIMIT=30] -->
     <string name="media_transfer_this_phone">This phone</string>
 
@@ -1426,8 +1430,12 @@
     <string name="user_switch_to_user">Switch to <xliff:g id="user_name" example="John Doe">%s</xliff:g></string>
     <!-- Dialog message when creating a new user [CHAR LIMIT=NONE] -->
     <string name="creating_new_user_dialog_message">Creating new user…</string>
+    <!-- Dialog message when creating a new guest [CHAR LIMIT=NONE] -->
+    <string name="creating_new_guest_dialog_message">Creating new guest…</string>
     <!-- Text shown to notify that the creation of new user has failed. [CHAR LIMIT=40] -->
     <string name="add_user_failed">Failed to create a new user</string>
+    <!-- Text shown to notify that the creation of new guest has failed. [CHAR LIMIT=40] -->
+    <string name="add_guest_failed">Failed to create a new guest</string>
 
     <!-- Title for the preference to enter the nickname of the user to display in the user switcher [CHAR LIMIT=25]-->
     <string name="user_nickname">Nickname</string>
@@ -1568,4 +1576,10 @@
     <!-- Content description for a default user icon. [CHAR LIMIT=NONE] -->
     <string name="default_user_icon_description">Default user icon</string>
 
+    <!-- Title for the 'physical keyboard' settings screen. [CHAR LIMIT=35] -->
+    <string name="physical_keyboard_title">Physical keyboard</string>
+    <!-- Title for the keyboard layout preference dialog. [CHAR LIMIT=35] -->
+    <string name="keyboard_layout_dialog_title">Choose keyboard layout</string>
+    <!-- Label of the default keyboard layout.  [CHAR LIMIT=35] -->
+    <string name="keyboard_layout_default_label">Default</string>
 </resources>

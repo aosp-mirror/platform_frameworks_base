@@ -18,11 +18,13 @@ package com.google.android.test.handwritingime;
 import android.annotation.Nullable;
 import android.inputmethodservice.InputMethodService;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.FrameLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.Random;
@@ -79,6 +81,14 @@ public class HandwritingIme extends InputMethodService {
         view.setPadding(0, 0, 0, 0);
         view.addView(inner, new FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.MATCH_PARENT, height));
+        TextView text = new TextView(this);
+        text.setText("Handwriting IME");
+        text.setTextSize(13f);
+        text.setTextColor(getColor(android.R.color.white));
+        text.setGravity(Gravity.CENTER);
+        text.setLayoutParams(new FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT, height));
+        view.addView(text);
         inner.setBackgroundColor(0xff0110fe); // blue
 
         return view;

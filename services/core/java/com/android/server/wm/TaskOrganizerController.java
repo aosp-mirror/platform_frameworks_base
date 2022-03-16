@@ -729,6 +729,16 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
             // Skip if task still not appeared.
             return;
         }
+        if (force && mPendingTaskEvents.isEmpty()) {
+            // There are task-info changed events do not result in
+            // - RootWindowContainer#performSurfacePlacementNoTrace OR
+            // - WindowAnimator#animate
+            // For instance, when an app requesting aspect ratio change when in PiP mode.
+            // To solve this, we directly dispatch the pending event if there are no events queued (
+            // otherwise, all pending events should be dispatched on next drawn).
+            dispatchTaskInfoChanged(task, true /* force */);
+            return;
+        }
 
         // Defer task info reporting while layout is deferred. This is because layout defer
         // blocks tend to do lots of re-ordering which can mess up animations in receivers.
@@ -790,17 +800,24 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
-                DisplayContent dc = mService.mWindowManager.mRoot
+                final DisplayContent dc = mService.mWindowManager.mRoot
                         .getDisplayContent(displayId);
-                if (dc == null || dc.getImeTarget(IME_TARGET_LAYERING) == null) {
+                if (dc == null) {
                     return null;
                 }
+
+                final InsetsControlTarget imeLayeringTarget = dc.getImeTarget(IME_TARGET_LAYERING);
+                if (imeLayeringTarget == null || imeLayeringTarget.getWindow() == null) {
+                    return null;
+                }
+
                 // Avoid WindowState#getRootTask() so we don't attribute system windows to a task.
-                final Task task = dc.getImeTarget(IME_TARGET_LAYERING).getWindow().getTask();
+                final Task task = imeLayeringTarget.getWindow().asTask();
                 if (task == null) {
                     return null;
                 }
-                return task.getRootTask().mRemoteToken.toWindowContainerToken();
+
+                return task.mRemoteToken.toWindowContainerToken();
             }
         } finally {
             Binder.restoreCallingIdentity(origId);

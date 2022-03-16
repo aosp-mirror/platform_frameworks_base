@@ -335,7 +335,7 @@ public class StatusBarManager {
      * Constant for {@link #setNavBarMode(int)} indicating kids navbar mode.
      *
      * <p>When used, back and home icons will change drawables and layout, recents will be hidden,
-     * and the navbar will remain visible when apps are in immersive mode.
+     * and enables the setting to force navbar visible, even when apps are in immersive mode.
      *
      * @hide
      */
@@ -838,6 +838,24 @@ public class StatusBarManager {
             }
 
             return new DisableInfo(flags[0], flags[1]);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Sets an active {@link android.service.quicksettings.TileService} to listening state
+     *
+     * The {@code componentName}'s package must match the calling package.
+     *
+     * @param componentName the tile to set into listening state
+     * @see android.service.quicksettings.TileService#requestListeningState
+     * @hide
+     */
+    public void requestTileServiceListeningState(@NonNull ComponentName componentName) {
+        Objects.requireNonNull(componentName);
+        try {
+            getService().requestTileServiceListeningState(componentName, mContext.getUserId());
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }

@@ -316,7 +316,8 @@ public class BiometricScheduler {
             }
         } else {
             try {
-                mBiometricService.onReadyForAuthentication(cookie);
+                mBiometricService.onReadyForAuthentication(
+                        mCurrentOperation.getClientMonitor().getRequestId(), cookie);
             } catch (RemoteException e) {
                 Slog.e(getTag(), "Remote exception when contacting BiometricService", e);
             }

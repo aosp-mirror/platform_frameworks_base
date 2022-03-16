@@ -18,7 +18,6 @@ package com.android.systemui.dreams.touch;
 
 import static com.google.common.truth.Truth.assertThat;
 
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyFloat;
@@ -27,19 +26,21 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.animation.ValueAnimator;
+import android.graphics.Rect;
+import android.graphics.Region;
 import android.testing.AndroidTestingRunner;
+import android.util.DisplayMetrics;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 
-import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.shared.system.InputChannelCompat;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.KeyguardBouncer;
-import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.wm.shell.animation.FlingAnimationUtils;
 
@@ -51,8 +52,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-import java.util.Random;
-
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
@@ -60,7 +59,7 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
     StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
 
     @Mock
-    StatusBar mStatusBar;
+    CentralSurfaces mCentralSurfaces;
 
     @Mock
     NotificationShadeWindowController mNotificationShadeWindowController;
@@ -89,38 +88,51 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
     @Mock
     VelocityTracker mVelocityTracker;
 
+    final DisplayMetrics mDisplayMetrics = new DisplayMetrics();
+
     private static final float TOUCH_REGION = .3f;
-    private static final float SCREEN_HEIGHT_PX = 100;
+    private static final int SCREEN_WIDTH_PX = 1024;
+    private static final int SCREEN_HEIGHT_PX = 100;
 
     @Before
     public void setup() {
+        mDisplayMetrics.widthPixels = SCREEN_WIDTH_PX;
+        mDisplayMetrics.heightPixels = SCREEN_HEIGHT_PX;
+
         MockitoAnnotations.initMocks(this);
         mTouchHandler = new BouncerSwipeTouchHandler(
+                mDisplayMetrics,
                 mStatusBarKeyguardViewManager,
-                mStatusBar,
+                mCentralSurfaces,
                 mNotificationShadeWindowController,
                 mValueAnimatorCreator,
                 mVelocityTrackerFactory,
                 mFlingAnimationUtils,
                 mFlingAnimationUtilsClosing,
                 TOUCH_REGION);
-        when(mStatusBar.getDisplayHeight()).thenReturn(SCREEN_HEIGHT_PX);
+
+        when(mCentralSurfaces.getDisplayHeight()).thenReturn((float) SCREEN_HEIGHT_PX);
         when(mValueAnimatorCreator.create(anyFloat(), anyFloat())).thenReturn(mValueAnimator);
         when(mVelocityTrackerFactory.obtain()).thenReturn(mVelocityTracker);
-    }
-
-    private static void beginValidSwipe(GestureDetector.OnGestureListener listener) {
-        listener.onDown(MotionEvent.obtain(0, 0,
-                MotionEvent.ACTION_DOWN, 0,
-                SCREEN_HEIGHT_PX - (.5f * TOUCH_REGION * SCREEN_HEIGHT_PX), 0));
     }
 
     /**
      * Ensures expansion only happens when touch down happens in valid part of the screen.
      */
-    @FlakyTest
     @Test
     public void testSessionStart() {
+        final Region region = Region.obtain();
+        mTouchHandler.getTouchInitiationRegion(region);
+
+        final Rect bounds = region.getBounds();
+
+        final Rect expected = new Rect();
+
+        expected.set(0, Math.round(SCREEN_HEIGHT_PX * (1 - TOUCH_REGION)), SCREEN_WIDTH_PX,
+                SCREEN_HEIGHT_PX);
+
+        assertThat(bounds).isEqualTo(expected);
+
         mTouchHandler.onSessionStart(mTouchSession);
         verify(mNotificationShadeWindowController).setForcePluginOpen(eq(true), any());
         ArgumentCaptor<InputChannelCompat.InputEventListener> eventListenerCaptor =
@@ -130,34 +142,12 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
         verify(mTouchSession).registerGestureListener(gestureListenerCaptor.capture());
         verify(mTouchSession).registerInputListener(eventListenerCaptor.capture());
 
-        final Random random = new Random(System.currentTimeMillis());
-
-        // If an initial touch down meeting criteria has been met, scroll behavior should be
-        // ignored.
-        assertThat(gestureListenerCaptor.getValue()
-                .onScroll(Mockito.mock(MotionEvent.class),
-                        Mockito.mock(MotionEvent.class),
-                        random.nextFloat(),
-                        random.nextFloat())).isFalse();
-
-        // A touch at the top of the screen should also not trigger listening.
-        final MotionEvent touchDownEvent = MotionEvent.obtain(0, 0, MotionEvent.ACTION_DOWN,
-                0, 0, 0);
-
-        gestureListenerCaptor.getValue().onDown(touchDownEvent);
-        assertThat(gestureListenerCaptor.getValue()
-                .onScroll(Mockito.mock(MotionEvent.class),
-                        Mockito.mock(MotionEvent.class),
-                        random.nextFloat(),
-                        random.nextFloat())).isFalse();
-
         // A touch within range at the bottom of the screen should trigger listening
-        beginValidSwipe(gestureListenerCaptor.getValue());
         assertThat(gestureListenerCaptor.getValue()
                 .onScroll(Mockito.mock(MotionEvent.class),
                         Mockito.mock(MotionEvent.class),
-                        random.nextFloat(),
-                        random.nextFloat())).isTrue();
+                        1,
+                        2)).isTrue();
     }
 
     /**
@@ -169,8 +159,6 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
         ArgumentCaptor<GestureDetector.OnGestureListener> gestureListenerCaptor =
                 ArgumentCaptor.forClass(GestureDetector.OnGestureListener.class);
         verify(mTouchSession).registerGestureListener(gestureListenerCaptor.capture());
-
-        beginValidSwipe(gestureListenerCaptor.getValue());
 
         final float scrollAmount = .3f;
         final float distanceY = SCREEN_HEIGHT_PX * scrollAmount;
@@ -202,8 +190,6 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
         verify(mTouchSession).registerInputListener(inputEventListenerCaptor.capture());
 
         when(mVelocityTracker.getYVelocity()).thenReturn(velocityY);
-
-        beginValidSwipe(gestureListenerCaptor.getValue());
 
         final float distanceY = SCREEN_HEIGHT_PX * position;
 

@@ -98,6 +98,7 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
     private WindowContainerToken mWinToken2;
     private int mDividePosition;
     private boolean mInitialized = false;
+    private boolean mFreezeDividerWindow = false;
     private int mOrientation;
     private int mRotation;
 
@@ -225,11 +226,6 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         mDividerSnapAlgorithm = getSnapAlgorithm(mContext, mRootBounds, null);
         initDividerPosition(mTempRect);
 
-        if (mInitialized) {
-            release();
-            init();
-        }
-
         return true;
     }
 
@@ -298,18 +294,35 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
     }
 
     /** Releases the surface holding the current {@link DividerView}. */
-    public void release() {
+    public void release(SurfaceControl.Transaction t) {
         if (!mInitialized) return;
         mInitialized = false;
-        mSplitWindowManager.release();
+        mSplitWindowManager.release(t);
         mDisplayImeController.removePositionProcessor(mImePositionProcessor);
         mImePositionProcessor.reset();
+    }
+
+    public void release() {
+        release(null /* t */);
+    }
+
+    /** Releases and re-inflates {@link DividerView} on the root surface. */
+    public void update(SurfaceControl.Transaction t) {
+        if (!mInitialized) return;
+        mSplitWindowManager.release(t);
+        mImePositionProcessor.reset();
+        mSplitWindowManager.init(this, mInsetsState);
     }
 
     @Override
     public void insetsChanged(InsetsState insetsState) {
         mInsetsState.set(insetsState);
         if (!mInitialized) {
+            return;
+        }
+        if (mFreezeDividerWindow) {
+            // DO NOT change its layout before transition actually run because it might cause
+            // flicker.
             return;
         }
         mSplitWindowManager.onInsetsChanged(insetsState);
@@ -321,6 +334,10 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         if (!mInsetsState.equals(insetsState)) {
             insetsChanged(insetsState);
         }
+    }
+
+    public void setFreezeDividerWindow(boolean freezeDividerWindow) {
+        mFreezeDividerWindow = freezeDividerWindow;
     }
 
     /**
@@ -502,14 +519,24 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
 
         if (!mBounds1.equals(mWinBounds1) || !task1.token.equals(mWinToken1)) {
             wct.setBounds(task1.token, mBounds1);
+            wct.setSmallestScreenWidthDp(task1.token, getSmallestWidthDp(mBounds1));
             mWinBounds1.set(mBounds1);
             mWinToken1 = task1.token;
         }
         if (!mBounds2.equals(mWinBounds2) || !task2.token.equals(mWinToken2)) {
             wct.setBounds(task2.token, mBounds2);
+            wct.setSmallestScreenWidthDp(task2.token, getSmallestWidthDp(mBounds2));
             mWinBounds2.set(mBounds2);
             mWinToken2 = task2.token;
         }
+    }
+
+    private int getSmallestWidthDp(Rect bounds) {
+        mTempRect.set(bounds);
+        mTempRect.inset(getDisplayInsets(mContext));
+        final int minWidth = Math.min(mTempRect.width(), mTempRect.height());
+        final float density = mContext.getResources().getDisplayMetrics().density;
+        return (int) (minWidth / density);
     }
 
     /**

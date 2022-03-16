@@ -31,11 +31,11 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import android.annotation.NonNull;
@@ -1101,6 +1101,59 @@ public class PackageManagerSettingsTests {
         packageSetting.setUsesSdkLibraries(files.toArray(new String[files.size()]));
 
         assertThat(countDownLatch.getCount(), is(0L));
+    }
+
+    @Test
+    public void testRegisterAndRemoveAppId() throws PackageManagerException {
+        // Test that the first new app UID should start from FIRST_APPLICATION_UID
+        final Settings settings = makeSettings();
+        final PackageSetting ps = createPackageSetting("com.foo");
+        assertTrue(settings.registerAppIdLPw(ps, false));
+        assertEquals(10000, ps.getAppId());
+        // Set up existing app IDs: 10000, 10001, 10003
+        final PackageSetting ps1 = createPackageSetting("com.foo1");
+        ps1.setAppId(10001);
+        final PackageSetting ps2 = createPackageSetting("com.foo2");
+        ps2.setAppId(10003);
+        final PackageSetting ps3 = createPackageSetting("com.foo3");
+        assertEquals(0, ps3.getAppId());
+        assertTrue(settings.registerAppIdLPw(ps1, false));
+        assertTrue(settings.registerAppIdLPw(ps2, false));
+        assertTrue(settings.registerAppIdLPw(ps3, false));
+        assertEquals(10001, ps1.getAppId());
+        assertEquals(10003, ps2.getAppId());
+        // Expecting the new one to start with the next available uid
+        assertEquals(10002, ps3.getAppId());
+        // Remove and insert a new one and the new one should not reuse the same uid
+        settings.removeAppIdLPw(10002);
+        final PackageSetting ps4 = createPackageSetting("com.foo4");
+        assertTrue(settings.registerAppIdLPw(ps4, false));
+        assertEquals(10004, ps4.getAppId());
+        // Keep adding more
+        final PackageSetting ps5 = createPackageSetting("com.foo5");
+        assertTrue(settings.registerAppIdLPw(ps5, false));
+        assertEquals(10005, ps5.getAppId());
+        // Remove the last one and the new one should use incremented uid
+        settings.removeAppIdLPw(10005);
+        final PackageSetting ps6 = createPackageSetting("com.foo6");
+        assertTrue(settings.registerAppIdLPw(ps6, false));
+        assertEquals(10006, ps6.getAppId());
+    }
+
+    /**
+     * Test replacing a PackageSetting with a SharedUserSetting in mAppIds
+     */
+    @Test
+    public void testAddPackageSetting() throws PackageManagerException {
+        final Settings settings = makeSettings();
+        final SharedUserSetting sus1 = new SharedUserSetting(
+                "TestUser", 0 /*pkgFlags*/, 0 /*pkgPrivateFlags*/);
+        sus1.mAppId = 10001;
+        final PackageSetting ps1 = createPackageSetting("com.foo");
+        ps1.setAppId(10001);
+        assertTrue(settings.registerAppIdLPw(ps1, false));
+        settings.addPackageSettingLPw(ps1, sus1);
+        assertSame(sus1, settings.getSharedUserSettingLPr(ps1));
     }
 
     private void verifyUserState(PackageUserState userState,

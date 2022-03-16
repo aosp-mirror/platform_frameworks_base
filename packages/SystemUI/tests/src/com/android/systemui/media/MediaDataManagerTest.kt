@@ -659,11 +659,11 @@ class MediaDataManagerTest : SysuiTestCase() {
         actions.nextOrCustom!!.action!!.run()
         verify(transportControls).skipToNext()
 
-        assertThat(actions.startCustom).isNotNull()
-        assertThat(actions.startCustom!!.contentDescription).isEqualTo(customDesc[0])
+        assertThat(actions.custom0).isNotNull()
+        assertThat(actions.custom0!!.contentDescription).isEqualTo(customDesc[0])
 
-        assertThat(actions.endCustom).isNotNull()
-        assertThat(actions.endCustom!!.contentDescription).isEqualTo(customDesc[1])
+        assertThat(actions.custom1).isNotNull()
+        assertThat(actions.custom1!!.contentDescription).isEqualTo(customDesc[1])
     }
 
     @Test
@@ -697,11 +697,11 @@ class MediaDataManagerTest : SysuiTestCase() {
         assertThat(actions.nextOrCustom).isNotNull()
         assertThat(actions.nextOrCustom!!.contentDescription).isEqualTo(customDesc[1])
 
-        assertThat(actions.startCustom).isNotNull()
-        assertThat(actions.startCustom!!.contentDescription).isEqualTo(customDesc[2])
+        assertThat(actions.custom0).isNotNull()
+        assertThat(actions.custom0!!.contentDescription).isEqualTo(customDesc[2])
 
-        assertThat(actions.endCustom).isNotNull()
-        assertThat(actions.endCustom!!.contentDescription).isEqualTo(customDesc[3])
+        assertThat(actions.custom1).isNotNull()
+        assertThat(actions.custom1!!.contentDescription).isEqualTo(customDesc[3])
     }
 
     @Test
@@ -737,10 +737,10 @@ class MediaDataManagerTest : SysuiTestCase() {
         assertThat(actions.prevOrCustom).isNull()
         assertThat(actions.nextOrCustom).isNull()
 
-        assertThat(actions.startCustom).isNotNull()
-        assertThat(actions.startCustom!!.contentDescription).isEqualTo(customDesc[0])
+        assertThat(actions.custom0).isNotNull()
+        assertThat(actions.custom0!!.contentDescription).isEqualTo(customDesc[0])
 
-        assertThat(actions.endCustom).isNotNull()
-        assertThat(actions.endCustom!!.contentDescription).isEqualTo(customDesc[1])
+        assertThat(actions.custom1).isNotNull()
+        assertThat(actions.custom1!!.contentDescription).isEqualTo(customDesc[1])
     }
 }

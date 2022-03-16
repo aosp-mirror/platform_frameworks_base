@@ -668,6 +668,9 @@
     <dimen name="lock_pattern_dot_line_width">22dp</dimen>
     <dimen name="lock_pattern_dot_size">14dp</dimen>
     <dimen name="lock_pattern_dot_size_activated">30dp</dimen>
+    <!-- How much of the cell space is classified as hit areas [0..1] where 1 means that hit area is
+         a circle with diameter equals to cell minimum side min(width, height). -->
+    <item type="dimen" format="float" name="lock_pattern_dot_hit_factor">0.6</item>
     <!-- Width of a gradient applied to a lock pattern line while its disappearing animation. -->
     <dimen name="lock_pattern_fade_away_gradient_width">8dp</dimen>
 
@@ -871,7 +874,7 @@
     <integer name="autofill_max_visible_datasets">3</integer>
 
     <!-- Size of an icon in the Autolfill fill dialog -->
-    <dimen name="autofill_dialog_icon_size">56dp</dimen>
+    <dimen name="autofill_dialog_icon_size">24dp</dimen>
 
     <!-- Size of a slice shortcut view -->
     <dimen name="slice_shortcut_size">56dp</dimen>

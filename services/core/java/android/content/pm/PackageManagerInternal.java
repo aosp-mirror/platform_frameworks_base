@@ -45,9 +45,9 @@ import android.util.SparseArray;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.pm.PackageList;
 import com.android.server.pm.PackageSetting;
+import com.android.server.pm.dex.DynamicCodeLogger;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.pkg.AndroidPackageApi;
-import com.android.server.pm.pkg.PackageState;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.SharedUserApi;
 import com.android.server.pm.pkg.component.ParsedMainComponent;
@@ -68,6 +68,7 @@ import java.util.function.Consumer;
  * @hide Only for use within the system server.
  */
 public abstract class PackageManagerInternal {
+
     @IntDef(prefix = "PACKAGE_", value = {
             PACKAGE_SYSTEM,
             PACKAGE_SETUP_WIZARD,
@@ -193,6 +194,19 @@ public abstract class PackageManagerInternal {
      * @return True a permissions review is required.
      */
     public abstract boolean isPermissionsReviewRequired(String packageName, int userId);
+
+
+    /**
+     * Gets whether a given package name belongs to the calling uid. If the calling uid is an
+     * {@link Process#isSdkSandboxUid(int) sdk sandbox uid}, checks whether the package name is
+     * equal to {@link PackageManager#getSdkSandboxPackageName()}.
+     *
+     * @param packageName The package name to check.
+     * @param callingUid The calling uid.
+     * @param userId The user under which to check.
+     * @return True if the package name belongs to the calling uid.
+     */
+    public abstract boolean isSameApp(String packageName, int callingUid, int userId);
 
     /**
      * Retrieve all of the information we know about a particular package/application.
@@ -657,6 +671,11 @@ public abstract class PackageManagerInternal {
     public abstract void notifyPackageUse(String packageName, int reason);
 
     /**
+     * Notify the package is force stopped.
+     */
+    public abstract void onPackageProcessKilledForUninstall(String packageName);
+
+    /**
      * Returns a package object for the given package name.
      */
     public abstract @Nullable AndroidPackage getPackage(@NonNull String packageName);
@@ -669,8 +688,6 @@ public abstract class PackageManagerInternal {
 
     @Nullable
     public abstract PackageStateInternal getPackageStateInternal(@NonNull String packageName);
-
-    public abstract @Nullable PackageState getPackageState(@NonNull String packageName);
 
     @NonNull
     public abstract ArrayMap<String, ? extends PackageStateInternal> getPackageStates();
@@ -883,6 +900,11 @@ public abstract class PackageManagerInternal {
      */
     public abstract void freeStorage(String volumeUuid, long bytes,
             @StorageManager.AllocateFlags int flags) throws IOException;
+
+    /**
+     * Blocking call to clear all cached app data above quota.
+     */
+    public abstract void freeAllAppCacheAboveQuota(@NonNull String volumeUuid) throws IOException;
 
     /** Returns {@code true} if the specified component is enabled and matches the given flags. */
     public abstract boolean isEnabledAndMatches(@NonNull ParsedMainComponent component,
@@ -1344,4 +1366,8 @@ public abstract class PackageManagerInternal {
      */
     @NonNull
     public abstract PackageDataSnapshot snapshot();
+
+    public abstract void shutdown();
+
+    public abstract DynamicCodeLogger getDynamicCodeLogger();
 }

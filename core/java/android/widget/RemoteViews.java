@@ -6681,7 +6681,13 @@ public class RemoteViews implements Parcelable, Filter {
                 opts = ActivityOptions.makeBasic();
                 opts.setPendingIntentLaunchFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             }
-            opts.setLaunchDisplayId(view.getDisplay().getDisplayId());
+            if (view.getDisplay() != null) {
+                opts.setLaunchDisplayId(view.getDisplay().getDisplayId());
+            } else {
+                // TODO(b/218409359): Remove once bug is fixed.
+                Log.w(LOG_TAG, "getLaunchOptions: view.getDisplay() is null!",
+                        new Exception());
+            }
             return Pair.create(intent, opts);
         }
     }

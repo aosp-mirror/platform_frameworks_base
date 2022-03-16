@@ -28,7 +28,7 @@ import org.junit.Test;
 
 public class ComponentAliasEnableWithDeviceConfigTest {
     protected static final DeviceConfigStateHelper sDeviceConfig = new DeviceConfigStateHelper(
-            DeviceConfig.NAMESPACE_ACTIVITY_MANAGER);
+            DeviceConfig.NAMESPACE_ACTIVITY_MANAGER_COMPONENT_ALIAS);
 
     @AfterClass
     public static void restoreDeviceConfig() throws Exception {

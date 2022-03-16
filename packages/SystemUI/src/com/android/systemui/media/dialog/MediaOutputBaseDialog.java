@@ -21,7 +21,6 @@ import static android.view.WindowInsets.Type.statusBars;
 
 import android.app.WallpaperColors;
 import android.content.Context;
-import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -55,6 +54,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.systemui.R;
+import com.android.systemui.broadcast.BroadcastSender;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 
 /**
@@ -71,6 +71,7 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
 
     final Context mContext;
     final MediaOutputController mMediaOutputController;
+    final BroadcastSender mBroadcastSender;
 
     @VisibleForTesting
     View mDialogView;
@@ -98,11 +99,13 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
         }
     };
 
-    public MediaOutputBaseDialog(Context context, MediaOutputController mediaOutputController) {
+    public MediaOutputBaseDialog(Context context, BroadcastSender broadcastSender,
+            MediaOutputController mediaOutputController) {
         super(context, R.style.Theme_SystemUI_Dialog_Media);
 
         // Save the context that is wrapped with our theme.
         mContext = getContext();
+        mBroadcastSender = broadcastSender;
         mMediaOutputController = mediaOutputController;
         mLayoutManager = new LinearLayoutManager(mContext);
         mListMaxHeight = context.getResources().getDimensionPixelSize(
@@ -152,7 +155,7 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
             dismiss();
         });
         mAppButton.setOnClickListener(v -> {
-            mContext.sendBroadcast(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
+            mBroadcastSender.closeSystemDialogs();
             if (mMediaOutputController.getAppLaunchIntent() != null) {
                 mContext.startActivity(mMediaOutputController.getAppLaunchIntent());
             }
@@ -211,10 +214,9 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
                 ColorFilter buttonColorFilter = new PorterDuffColorFilter(
                         mAdapter.getController().getColorButtonBackground(),
                         PorterDuff.Mode.SRC_IN);
-                ColorFilter onlineButtonColorFilter = new PorterDuffColorFilter(
-                        mAdapter.getController().getColorInactiveItem(), PorterDuff.Mode.SRC_IN);
                 mDoneButton.getBackground().setColorFilter(buttonColorFilter);
-                mStopButton.getBackground().setColorFilter(onlineButtonColorFilter);
+                mStopButton.getBackground().setColorFilter(buttonColorFilter);
+                mDoneButton.setTextColor(mAdapter.getController().getColorPositiveButtonText());
             }
             mHeaderIcon.setVisibility(View.VISIBLE);
             mHeaderIcon.setImageIcon(icon);

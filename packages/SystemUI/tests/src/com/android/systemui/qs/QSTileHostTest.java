@@ -65,7 +65,7 @@ import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.statusbar.phone.AutoTileManager;
-import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.util.settings.FakeSettings;
@@ -112,7 +112,7 @@ public class QSTileHostTest extends SysuiTestCase {
     @Mock
     private QSTile.State mMockState;
     @Mock
-    private StatusBar mStatusBar;
+    private CentralSurfaces mCentralSurfaces;
     @Mock
     private QSLogger mQSLogger;
     @Mock
@@ -152,7 +152,7 @@ public class QSTileHostTest extends SysuiTestCase {
                 QSTileHost.TILES_SETTING, "", "", false, mUserTracker.getUserId(), false);
         mQSTileHost = new TestQSTileHost(mContext, mIconController, mDefaultFactory, mHandler,
                 mLooper.getLooper(), mPluginManager, mTunerService, mAutoTiles, mDumpManager,
-                mBroadcastDispatcher, mStatusBar, mQSLogger, mUiEventLogger, mUserTracker,
+                mBroadcastDispatcher, mCentralSurfaces, mQSLogger, mUiEventLogger, mUserTracker,
                 mSecureSettings, mCustomTileStatePersister, mTileServiceRequestControllerBuilder,
                 mTileLifecycleManagerFactory);
         setUpTileFactory();
@@ -437,15 +437,15 @@ public class QSTileHostTest extends SysuiTestCase {
                 QSFactory defaultFactory, Handler mainHandler, Looper bgLooper,
                 PluginManager pluginManager, TunerService tunerService,
                 Provider<AutoTileManager> autoTiles, DumpManager dumpManager,
-                BroadcastDispatcher broadcastDispatcher, StatusBar statusBar, QSLogger qsLogger,
-                UiEventLogger uiEventLogger, UserTracker userTracker,
+                BroadcastDispatcher broadcastDispatcher, CentralSurfaces centralSurfaces,
+                QSLogger qsLogger, UiEventLogger uiEventLogger, UserTracker userTracker,
                 SecureSettings secureSettings, CustomTileStatePersister customTileStatePersister,
                 TileServiceRequestController.Builder tileServiceRequestControllerBuilder,
                 TileLifecycleManager.Factory tileLifecycleManagerFactory) {
             super(context, iconController, defaultFactory, mainHandler, bgLooper, pluginManager,
                     tunerService, autoTiles, dumpManager, broadcastDispatcher,
-                    Optional.of(statusBar), qsLogger, uiEventLogger, userTracker, secureSettings,
-                    customTileStatePersister, tileServiceRequestControllerBuilder,
+                    Optional.of(centralSurfaces), qsLogger, uiEventLogger, userTracker,
+                    secureSettings, customTileStatePersister, tileServiceRequestControllerBuilder,
                     tileLifecycleManagerFactory);
         }
 

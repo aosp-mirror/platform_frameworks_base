@@ -121,6 +121,9 @@ public abstract class PackageManager {
     /** {@hide} */
     public static final boolean APPLY_DEFAULT_TO_DEVICE_PROTECTED_STORAGE = true;
 
+    /** {@hide} */
+    public static final boolean ENABLE_SHARED_UID_MIGRATION = true;
+
     /**
      * This exception is thrown when a given package, application, or component
      * name cannot be found.
@@ -2202,6 +2205,14 @@ public abstract class PackageManager {
      */
     public static final int INSTALL_FAILED_BAD_PERMISSION_GROUP = -127;
 
+    /**
+     * Installation failed return code: an error occurred during the activation phase of this
+     * session.
+     *
+     * @hide
+     */
+    public static final int INSTALL_ACTIVATION_FAILED = -128;
+
     /** @hide */
     @IntDef(flag = true, prefix = { "DELETE_" }, value = {
             DELETE_KEEP_DATA,
@@ -4251,8 +4262,9 @@ public abstract class PackageManager {
      * for more details.
      * @hide
      */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final String EXTRA_VERIFICATION_ROOT_HASH =
-            "android.content.pm.extra.EXTRA_VERIFICATION_ROOT_HASH";
+            "android.content.pm.extra.VERIFICATION_ROOT_HASH";
 
     /**
      * Extra field name for the ID of a intent filter pending verification.
@@ -5772,16 +5784,16 @@ public abstract class PackageManager {
     }
 
     /**
-     * Returns the package name of the component implementing supplemental process service.
+     * Returns the package name of the component implementing sdk sandbox service.
      *
-     * @return the package name of the component implementing supplemental process service
+     * @return the package name of the component implementing sdk sandbox service
      *
      * @hide
      */
     @NonNull
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     @TestApi
-    public String getSupplementalProcessPackageName() {
+    public String getSdkSandboxPackageName() {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
     }
 
@@ -10269,17 +10281,36 @@ public abstract class PackageManager {
     }
 
     /**
-     * Grants implicit visibility of the package that provides an authority to a querying UID.
+     * Makes a package that provides an authority {@code visibleAuthority} become visible to the
+     * application {@code recipientUid}.
      *
      * @throws SecurityException when called by a package other than the contacts provider
      * @hide
      */
-    public void grantImplicitAccess(int queryingUid, String visibleAuthority) {
+    public void makeProviderVisible(int recipientUid, String visibleAuthority) {
         try {
-            ActivityThread.getPackageManager().grantImplicitAccess(queryingUid, visibleAuthority);
+            ActivityThread.getPackageManager().makeProviderVisible(recipientUid, visibleAuthority);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Makes the package associated with the uid {@code visibleUid} become visible to the
+     * recipient uid application.
+     *
+     * @param recipientUid The uid of the application that is being given access to {@code
+     *                     visibleUid}
+     * @param visibleUid The uid of the application that is becoming accessible to {@code
+     *                   recipientAppId}
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MAKE_UID_VISIBLE)
+    @TestApi
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public void makeUidVisible(int recipientUid, int visibleUid) {
+        throw new UnsupportedOperationException(
+                "makeUidVisible not implemented in subclass");
     }
 
     // Some of the flags don't affect the query result, but let's be conservative and cache

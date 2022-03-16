@@ -16,6 +16,8 @@
 
 package android.app.admin;
 
+import static android.net.NetworkCapabilities.NET_ENTERPRISE_ID_1;
+
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 
 import android.Manifest.permission;
@@ -242,6 +244,17 @@ public class DevicePolicyManager {
      * the provisioning flow was successful, although this doesn't guarantee the full flow will
      * succeed. Conversely a result code of {@link android.app.Activity#RESULT_CANCELED} implies
      * that the user backed-out of provisioning, or some precondition for provisioning wasn't met.
+     *
+     * <p>If a device policy management role holder (DPMRH) updater is present on the device, an
+     * internet connection attempt must be made prior to launching this intent. If internet
+     * connection could not be established, provisioning will fail unless {@link
+     * #EXTRA_PROVISIONING_ALLOW_OFFLINE} is explicitly set to {@code true}, in which case
+     * provisioning will continue without using the DPMRH. If an internet connection has been
+     * established, the DPMRH updater will be launched, which will update the DPMRH if it's not
+     * present on the device, or if it's present and not valid.
+     *
+     * <p>If a DPMRH is present on the device and valid, the provisioning flow will be deferred to
+     * it.
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_PROVISION_MANAGED_PROFILE
@@ -398,6 +411,23 @@ public class DevicePolicyManager {
      * by a privileged app with the permission
      * {@link android.Manifest.permission#DISPATCH_PROVISIONING_MESSAGE}.
      *
+     * <p>If a device policy management role holder (DPMRH) updater is present on the device, an
+     * internet connection attempt must be made prior to launching this intent. If internet
+     * connection could not be established, provisioning will fail unless {@link
+     * #EXTRA_PROVISIONING_ALLOW_OFFLINE} is explicitly set to {@code true}, in which case
+     * provisioning will continue without using the DPMRH. If an internet connection has been
+     * established, the DPMRH updater will be launched via {@link
+     * #ACTION_UPDATE_DEVICE_MANAGEMENT_ROLE_HOLDER}, which will update the DPMRH if it's not
+     * present on the device, or if it's present and not valid.
+     *
+     * <p>A DPMRH is considered valid if it has intent filters for {@link
+     * #ACTION_ROLE_HOLDER_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE}, {@link
+     * #ACTION_ROLE_HOLDER_PROVISION_MANAGED_PROFILE} and {@link
+     * #ACTION_ROLE_HOLDER_PROVISION_FINALIZATION}.
+     *
+     * <p>If a DPMRH is present on the device and valid, the provisioning flow will be deferred to
+     * it via the {@link #ACTION_ROLE_HOLDER_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE} intent.
+     *
      * <p>The provisioning intent contains the following properties:
      * <ul>
      * <li>{@link #EXTRA_PROVISIONING_DEVICE_ADMIN_COMPONENT_NAME}</li>
@@ -537,6 +567,10 @@ public class DevicePolicyManager {
      * <li>{@link #STATE_USER_PROFILE_COMPLETE}</li>
      * </ul>
      *
+     * <p>If a device policy management role holder (DPMRH) is present on the device and
+     * valid, the provisioning flow will be deferred to it via the {@link
+     * #ACTION_ROLE_HOLDER_PROVISION_FINALIZATION} intent.
+     *
      * @hide
      */
     @SystemApi
@@ -545,15 +579,16 @@ public class DevicePolicyManager {
             = "android.app.action.PROVISION_FINALIZATION";
 
     /**
-     * Activity action: starts the managed profile provisioning flow inside the device management
-     * role holder.
+     * Activity action: starts the managed profile provisioning flow inside the device policy
+     * management role holder.
      *
      * <p>During the managed profile provisioning flow, the platform-provided provisioning handler
-     * will delegate provisioning to the device management role holder, by firing this intent.
-     * Third-party mobile device management applications attempting to fire this intent will
+     * will delegate provisioning to the device policy management role holder, by firing this
+     * intent. Third-party mobile device management applications attempting to fire this intent will
      * receive a {@link SecurityException}.
      *
-     * <p>Device management role holders are required to have a handler for this intent action.
+     * <p>Device policy management role holders are required to have a handler for this intent
+     * action.
      *
      * <p>If {@link #EXTRA_ROLE_HOLDER_STATE} is supplied to this intent, it is the responsibility
      * of the role holder to restore its state from this extra. This is the same {@link Bundle}
@@ -596,15 +631,16 @@ public class DevicePolicyManager {
     public static final int RESULT_DEVICE_OWNER_SET = 123;
 
     /**
-     * Activity action: starts the trusted source provisioning flow inside the device management
-     * role holder.
+     * Activity action: starts the trusted source provisioning flow inside the device policy
+     * management role holder.
      *
      * <p>During the trusted source provisioning flow, the platform-provided provisioning handler
-     * will delegate provisioning to the device management role holder, by firing this intent.
-     * Third-party mobile device management applications attempting to fire this intent will
+     * will delegate provisioning to the device policy management role holder, by firing this
+     * intent. Third-party mobile device management applications attempting to fire this intent will
      * receive a {@link SecurityException}.
      *
-     * <p>Device management role holders are required to have a handler for this intent action.
+     * <p>Device policy management role holders are required to have a handler for this intent
+     * action.
      *
      * <p>If {@link #EXTRA_ROLE_HOLDER_STATE} is supplied to this intent, it is the responsibility
      * of the role holder to restore its state from this extra. This is the same {@link Bundle}
@@ -624,15 +660,16 @@ public class DevicePolicyManager {
             "android.app.action.ROLE_HOLDER_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE";
 
     /**
-     * Activity action: starts the provisioning finalization flow inside the device management
-     * role holder.
+     * Activity action: starts the provisioning finalization flow inside the device policy
+     * management role holder.
      *
      * <p>During the provisioning finalization flow, the platform-provided provisioning handler
-     * will delegate provisioning to the device management role holder, by firing this intent.
-     * Third-party mobile device management applications attempting to fire this intent will
+     * will delegate provisioning to the device policy management role holder, by firing this
+     * intent. Third-party mobile device management applications attempting to fire this intent will
      * receive a {@link SecurityException}.
      *
-     * <p>Device management role holders are required to have a handler for this intent action.
+     * <p>Device policy management role holders are required to have a handler for this intent
+     * action.
      *
      * <p>This handler forwards the result from the admin app's {@link
      * #ACTION_ADMIN_POLICY_COMPLIANCE} handler. Result code {@link Activity#RESULT_CANCELED}
@@ -682,10 +719,11 @@ public class DevicePolicyManager {
 
     /**
      * A {@code boolean} extra which determines whether to force a role holder update, regardless
-     * of any internal conditions {@link #ACTION_UPDATE_DEVICE_MANAGEMENT_ROLE_HOLDER} might have.
+     * of any internal conditions {@link #ACTION_UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER} might
+     * have.
      *
      * <p>This extra can be provided to intents with action {@link
-     * #ACTION_UPDATE_DEVICE_MANAGEMENT_ROLE_HOLDER}.
+     * #ACTION_UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER}.
      *
      * @hide
      */
@@ -697,9 +735,9 @@ public class DevicePolicyManager {
      * A boolean extra indicating whether offline provisioning is allowed.
      *
      * <p>For the online provisioning flow, there will be an attempt to download and install
-     * the latest version of the device management role holder. The platform will then delegate
-     * provisioning to the device management role holder via role holder-specific provisioning
-     * actions.
+     * the latest version of the device policy management role holder. The platform will then
+     * delegate provisioning to the device policy management role holder via role holder-specific
+     * provisioning actions.
      *
      * <p>For the offline provisioning flow, the provisioning flow will always be handled by
      * the platform.
@@ -720,8 +758,8 @@ public class DevicePolicyManager {
             "android.app.extra.PROVISIONING_ALLOW_OFFLINE";
 
     /**
-     * A String extra holding a url that specifies the download location of the device manager
-     * role holder package.
+     * A String extra holding a url that specifies the download location of the device policy
+     * management role holder package.
      *
      * <p>This is only meant to be used in cases when a specific variant of the role holder package
      * is needed (such as a debug variant). If not provided, the default variant of the device
@@ -777,13 +815,13 @@ public class DevicePolicyManager {
 
     /**
      * An extra of type {@link android.os.PersistableBundle} that allows the provisioning initiator
-     * to pass data to the device manager role holder.
+     * to pass data to the device policy management role holder.
      *
-     * <p>The device manager role holder will receive this extra via the {@link
+     * <p>The device policy management role holder will receive this extra via the {@link
      * #ACTION_ROLE_HOLDER_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE} intent.
      *
      * <p>The contents of this extra are up to the contract between the provisioning initiator
-     * and the device manager role holder.
+     * and the device policy management role holder.
      *
      * <p>Use in an intent with action {@link #ACTION_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE}
      * or in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
@@ -814,18 +852,19 @@ public class DevicePolicyManager {
      * <p>If {@link #EXTRA_PROVISIONING_SHOULD_LAUNCH_RESULT_INTENT} is set to {@code false},
      * this result will be supplied as part of the result {@link Intent} for provisioning actions
      * such as {@link #ACTION_PROVISION_MANAGED_PROFILE}. This result will also be supplied as
-     * part of the result {@link Intent} for the device manager role holder provisioning actions.
+     * part of the result {@link Intent} for the device policy management role holder provisioning
+     * actions.
      */
     public static final String EXTRA_RESULT_LAUNCH_INTENT =
             "android.app.extra.RESULT_LAUNCH_INTENT";
 
     /**
      * A boolean extra that determines whether the provisioning flow should launch the resulting
-     * launch intent, if one is supplied by the device manager role holder via {@link
+     * launch intent, if one is supplied by the device policy management role holder via {@link
      * #EXTRA_RESULT_LAUNCH_INTENT}. Default value is {@code false}.
      *
      * <p>If {@code true}, the resulting intent will be launched by the provisioning flow, if one
-     * is supplied by the device manager role holder.
+     * is supplied by the device policy management role holder.
      *
      * <p>If {@code false}, the resulting intent will be returned as {@link
      * #EXTRA_RESULT_LAUNCH_INTENT} to the provisioning initiator, if one is supplied by the device
@@ -1376,6 +1415,9 @@ public class DevicePolicyManager {
      * <p>Use only for device owner provisioning. This extra can be returned by the
      * admin app when performing the admin-integrated provisioning flow as a result of the
      * {@link #ACTION_GET_PROVISIONING_MODE} activity.
+     *
+     * <p>This extra may also be provided to the admin app via an intent extra for {@link
+     * #ACTION_GET_PROVISIONING_MODE}.
      *
      * @see #ACTION_GET_PROVISIONING_MODE
      */
@@ -3026,6 +3068,8 @@ public class DevicePolicyManager {
      *     <li>{@link #EXTRA_PROVISIONING_ADMIN_EXTRAS_BUNDLE}</li>
      *     <li>{@link #EXTRA_PROVISIONING_IMEI}</li>
      *     <li>{@link #EXTRA_PROVISIONING_SERIAL_NUMBER}</li>
+     *     <li>{@link #EXTRA_PROVISIONING_ALLOWED_PROVISIONING_MODES}</li>
+     *     <li>{@link #EXTRA_PROVISIONING_SENSORS_PERMISSION_GRANT_OPT_OUT}</li>
      * </ul>
      *
      * <p>The target activity should return one of the following values in
@@ -3049,8 +3093,22 @@ public class DevicePolicyManager {
      * activity, along with the values of the {@link #EXTRA_PROVISIONING_ADMIN_EXTRAS_BUNDLE} extra
      * that are already supplied to this activity.
      *
-     * @see #EXTRA_PROVISIONING_KEEP_ACCOUNT_ON_MIGRATION
-     * @see #EXTRA_PROVISIONING_LEAVE_ALL_SYSTEM_APPS_ENABLED
+     * <p>Other extras the target activity may include in the intent result:
+     * <ul>
+     *     <li>{@link #EXTRA_PROVISIONING_DISCLAIMERS}</li>
+     *     <li>{@link #EXTRA_PROVISIONING_SKIP_ENCRYPTION}</li>
+     *     <li>{@link #EXTRA_PROVISIONING_KEEP_SCREEN_ON}</li>
+     *     <li>{@link #EXTRA_PROVISIONING_KEEP_ACCOUNT_ON_MIGRATION} for work profile
+     *     provisioning</li>
+     *     <li>{@link #EXTRA_PROVISIONING_LEAVE_ALL_SYSTEM_APPS_ENABLED} for work profile
+     *     provisioning</li>
+     *     <li>{@link #EXTRA_PROVISIONING_SENSORS_PERMISSION_GRANT_OPT_OUT} for fully-managed
+     *     device provisioning</li>
+     *     <li>{@link #EXTRA_PROVISIONING_LOCALE} for fully-managed device provisioning</li>
+     *     <li>{@link #EXTRA_PROVISIONING_LOCAL_TIME} for fully-managed device provisioning</li>
+     *     <li>{@link #EXTRA_PROVISIONING_TIME_ZONE} for fully-managed device provisioning</li>
+     * </ul>
+     *
      * @see #ACTION_ADMIN_POLICY_COMPLIANCE
      */
     public static final String ACTION_GET_PROVISIONING_MODE =
@@ -3220,50 +3278,54 @@ public class DevicePolicyManager {
             "android.app.action.ADMIN_POLICY_COMPLIANCE";
 
     /**
-     * Activity action: Starts the device management role holder updater.
+     * Activity action: Starts the device policy management role holder updater.
      *
-     * <p>The activity must handle the device management role holder update and set the intent
-     * result to either {@link Activity#RESULT_OK} if the update was successful, {@link
-     * #RESULT_UPDATE_DEVICE_MANAGEMENT_ROLE_HOLDER_RECOVERABLE_ERROR} if it encounters a problem
-     * that may be solved by relaunching it again, or {@link
-     * #RESULT_UPDATE_DEVICE_MANAGEMENT_ROLE_HOLDER_UNRECOVERABLE_ERROR} if it encounters a problem
-     * that will not be solved by relaunching it again.
+     * <p>The activity must handle the device policy management role holder update and set the
+     * intent result to either {@link Activity#RESULT_OK} if the update was successful, {@link
+     * #RESULT_UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER_RECOVERABLE_ERROR} if it encounters a
+     * problem that may be solved by relaunching it again, or {@link
+     * #RESULT_UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER_UNRECOVERABLE_ERROR} if it encounters a
+     * problem that will not be solved by relaunching it again.
      *
      * <p>If this activity has additional internal conditions which are not met, it should return
-     * {@link #RESULT_UPDATE_DEVICE_MANAGEMENT_ROLE_HOLDER_UNRECOVERABLE_ERROR}.
+     * {@link #RESULT_UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER_UNRECOVERABLE_ERROR}.
      *
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.LAUNCH_DEVICE_MANAGER_SETUP)
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     @SystemApi
-    public static final String ACTION_UPDATE_DEVICE_MANAGEMENT_ROLE_HOLDER =
-            "android.app.action.UPDATE_DEVICE_MANAGEMENT_ROLE_HOLDER";
+    public static final String ACTION_UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER =
+            "android.app.action.UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER";
 
     /**
-     * Result code that can be returned by the {@link #ACTION_UPDATE_DEVICE_MANAGEMENT_ROLE_HOLDER}
-     * handler if it encounters a problem that may be solved by relaunching it again.
+     * Result code that can be returned by the {@link
+     * #ACTION_UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER} handler if it encounters a problem
+     * that may be solved by relaunching it again.
      *
      * @hide
      */
     @SystemApi
-    public static final int RESULT_UPDATE_DEVICE_MANAGEMENT_ROLE_HOLDER_RECOVERABLE_ERROR = 1;
+    public static final int RESULT_UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER_RECOVERABLE_ERROR =
+            1;
 
     /**
-     * Result code that can be returned by the {@link #ACTION_UPDATE_DEVICE_MANAGEMENT_ROLE_HOLDER}
-     * handler if it encounters a problem that will not be solved by relaunching it again.
+     * Result code that can be returned by the {@link
+     * #ACTION_UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER} handler if it encounters a problem that
+     * will not be solved by relaunching it again.
      *
      * @hide
      */
     @SystemApi
-    public static final int RESULT_UPDATE_DEVICE_MANAGEMENT_ROLE_HOLDER_UNRECOVERABLE_ERROR = 2;
+    public static final int RESULT_UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER_UNRECOVERABLE_ERROR =
+            2;
 
     /**
      * An {@link Intent} extra which resolves to a custom user consent screen.
      *
-     * <p>If this extra is provided to the device management role holder via either {@link
+     * <p>If this extra is provided to the device policy management role holder via either {@link
      * #ACTION_ROLE_HOLDER_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE} or {@link
-     * #ACTION_ROLE_HOLDER_PROVISION_MANAGED_PROFILE}, the device management role holder must
+     * #ACTION_ROLE_HOLDER_PROVISION_MANAGED_PROFILE}, the device policy management role holder must
      * launch this intent which shows the custom user consent screen, replacing its own standard
      * consent screen.
      *
@@ -3279,9 +3341,9 @@ public class DevicePolicyManager {
      * </ul>
      *
      * <p>If the custom consent screens are granted by the user {@link Activity#RESULT_OK} is
-     * returned, otherwise {@link Activity#RESULT_CANCELED} is returned. The device management
-     * role holder should ensure that the provisioning flow terminates immediately if consent
-     * is not granted by the user.
+     * returned, otherwise {@link Activity#RESULT_CANCELED} is returned. The device policy
+     * management role holder should ensure that the provisioning flow terminates immediately if
+     * consent is not granted by the user.
      *
      * @hide
      */
@@ -3762,6 +3824,7 @@ public class DevicePolicyManager {
      * for the user.
      * @hide
      */
+    @TestApi
     public boolean isRemovingAdmin(@NonNull ComponentName admin, int userId) {
         if (mService != null) {
             try {
@@ -10975,7 +11038,7 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Sets whether preferential network service is enabled on the work profile.
+     * Sets whether preferential network service is enabled.
      * For example, an organization can have a deal/agreement with a carrier that all of
      * the work data from its employees’ devices will be sent via a network service dedicated
      * for enterprise use.
@@ -10983,75 +11046,72 @@ public class DevicePolicyManager {
      * An example of a supported preferential network service is the Enterprise
      * slice on 5G networks.
      *
-     * By default, preferential network service is disabled on the work profile on supported
-     * carriers and devices. Admins can explicitly enable it with this API.
-     * On fully-managed devices this method is unsupported because all traffic is considered
-     * work traffic.
+     * By default, preferential network service is disabled on the work profile and
+     * fully managed devices, on supported carriers and devices.
+     * Admins can explicitly enable it with this API.
      *
      * <p> This method enables preferential network service with a default configuration.
-     * To fine-tune the configuration, use {@link #setPreferentialNetworkServiceConfig) instead.
+     * To fine-tune the configuration, use {@link #setPreferentialNetworkServiceConfigs) instead.
+     * <p> Before Android version {@link android.os.Build.VERSION_CODES#TIRAMISU}:
+     * this method can be called by the profile owner of a managed profile.
+     * <p> Starting from Android version {@link android.os.Build.VERSION_CODES#TIRAMISU}:
+     * This method can be called by the profile owner of a managed profile
+     * or device owner.
      *
-     * <p>This method can only be called by the profile owner of a managed profile.
      * @param enabled whether preferential network service should be enabled.
-     * @throws SecurityException if the caller is not the profile owner.
+     * @throws SecurityException if the caller is not the profile owner or device owner.
      **/
     public void setPreferentialNetworkServiceEnabled(boolean enabled) {
         throwIfParentInstance("setPreferentialNetworkServiceEnabled");
-        if (mService == null) {
-            return;
+        PreferentialNetworkServiceConfig.Builder configBuilder =
+                new PreferentialNetworkServiceConfig.Builder();
+        configBuilder.setEnabled(enabled);
+        if (enabled) {
+            configBuilder.setNetworkId(NET_ENTERPRISE_ID_1);
         }
-
-        try {
-            mService.setPreferentialNetworkServiceEnabled(enabled);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        setPreferentialNetworkServiceConfigs(List.of(configBuilder.build()));
     }
 
     /**
      * Indicates whether preferential network service is enabled.
      *
-     * <p>This method can be called by the profile owner of a managed profile.
+     * <p> Before Android version {@link android.os.Build.VERSION_CODES#TIRAMISU}:
+     * This method can be called by the profile owner of a managed profile.
+     * <p> Starting from Android version {@link android.os.Build.VERSION_CODES#TIRAMISU}:
+     * This method can be called by the profile owner of a managed profile
+     * or device owner.
      *
      * @return whether preferential network service is enabled.
-     * @throws SecurityException if the caller is not the profile owner.
+     * @throws SecurityException if the caller is not the profile owner or device owner.
      */
     public boolean isPreferentialNetworkServiceEnabled() {
         throwIfParentInstance("isPreferentialNetworkServiceEnabled");
-        if (mService == null) {
-            return false;
-        }
-        try {
-            return mService.isPreferentialNetworkServiceEnabled(myUserId());
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        return getPreferentialNetworkServiceConfigs().stream().anyMatch(c -> c.isEnabled());
     }
 
     /**
-     * Sets preferential network configuration on the work profile.
+     * Sets preferential network configurations.
      * {@see PreferentialNetworkServiceConfig}
      *
      * An example of a supported preferential network service is the Enterprise
      * slice on 5G networks.
      *
-     * By default, preferential network service is disabled on the work profile on supported
-     * carriers and devices. Admins can explicitly enable it with this API.
-     * On fully-managed devices this method is unsupported because all traffic is considered
-     * work traffic.
+     * By default, preferential network service is disabled on the work profile and fully managed
+     * devices, on supported carriers and devices. Admins can explicitly enable it with this API.
+     * If admin wants to have multiple enterprise slices,
+     * it can be configured by passing list of {@link PreferentialNetworkServiceConfig} objects.
      *
-     * <p>This method can only be called by the profile owner of a managed profile.
-     * @param preferentialNetworkServiceConfig preferential network configuration.
-     * @throws SecurityException if the caller is not the profile owner.
+     * @param preferentialNetworkServiceConfigs list of preferential network configurations.
+     * @throws SecurityException if the caller is not the profile owner or device owner.
      **/
-    public void setPreferentialNetworkServiceConfig(
-            @NonNull PreferentialNetworkServiceConfig preferentialNetworkServiceConfig) {
-        throwIfParentInstance("setPreferentialNetworkServiceConfig");
+    public void setPreferentialNetworkServiceConfigs(
+            @NonNull List<PreferentialNetworkServiceConfig> preferentialNetworkServiceConfigs) {
+        throwIfParentInstance("setPreferentialNetworkServiceConfigs");
         if (mService == null) {
             return;
         }
         try {
-            mService.setPreferentialNetworkServiceConfig(preferentialNetworkServiceConfig);
+            mService.setPreferentialNetworkServiceConfigs(preferentialNetworkServiceConfigs);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -11061,18 +11121,16 @@ public class DevicePolicyManager {
      * Get preferential network configuration
      * {@see PreferentialNetworkServiceConfig}
      *
-     * <p>This method can be called by the profile owner of a managed profile.
-     *
      * @return preferential network configuration.
-     * @throws SecurityException if the caller is not the profile owner.
+     * @throws SecurityException if the caller is not the profile owner or device owner.
      */
-    public @NonNull PreferentialNetworkServiceConfig getPreferentialNetworkServiceConfig() {
-        throwIfParentInstance("getPreferentialNetworkServiceConfig");
+    public @NonNull List<PreferentialNetworkServiceConfig> getPreferentialNetworkServiceConfigs() {
+        throwIfParentInstance("getPreferentialNetworkServiceConfigs");
         if (mService == null) {
-            return PreferentialNetworkServiceConfig.DEFAULT;
+            return List.of(PreferentialNetworkServiceConfig.DEFAULT);
         }
         try {
-            return mService.getPreferentialNetworkServiceConfig();
+            return mService.getPreferentialNetworkServiceConfigs();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -13556,13 +13614,18 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by device owner to add an override APN.
+     * Called by device owner or profile owner to add an override APN.
      *
      * <p>This method may returns {@code -1} if {@code apnSetting} conflicts with an existing
      * override APN. Update the existing conflicted APN with
      * {@link #updateOverrideApn(ComponentName, int, ApnSetting)} instead of adding a new entry.
      * <p>Two override APNs are considered to conflict when all the following APIs return
      * the same values on both override APNs:
+     * <p> Before Android version {@link android.os.Build.VERSION_CODES#TIRAMISU}:
+     * Only device owners can add APNs.
+     * <p> Starting from Android version {@link android.os.Build.VERSION_CODES#TIRAMISU}:
+     * Device and profile owners can add enterprise APNs
+     * ({@link ApnSetting#TYPE_ENTERPRISE}), while only device owners can add other type of APNs.
      * <ul>
      *   <li>{@link ApnSetting#getOperatorNumeric()}</li>
      *   <li>{@link ApnSetting#getApnName()}</li>
@@ -13581,7 +13644,8 @@ public class DevicePolicyManager {
      * @param apnSetting the override APN to insert
      * @return The {@code id} of inserted override APN. Or {@code -1} when failed to insert into
      *         the database.
-     * @throws SecurityException if {@code admin} is not a device owner.
+     * @throws SecurityException If request is for enterprise APN {@code admin} is either device
+     * owner or profile owner and in all other types of APN if {@code admin} is not a device owner.
      *
      * @see #setOverrideApnsEnabled(ComponentName, boolean)
      */
@@ -13598,20 +13662,26 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by device owner to update an override APN.
+     * Called by device owner or profile owner to update an override APN.
      *
      * <p>This method may returns {@code false} if there is no override APN with the given
      * {@code apnId}.
      * <p>This method may also returns {@code false} if {@code apnSetting} conflicts with an
      * existing override APN. Update the existing conflicted APN instead.
      * <p>See {@link #addOverrideApn} for the definition of conflict.
+     * <p> Before Android version {@link android.os.Build.VERSION_CODES#TIRAMISU}:
+     * Only device owners can update APNs.
+     * <p> Starting from Android version {@link android.os.Build.VERSION_CODES#TIRAMISU}:
+     * Device and profile owners can update enterprise APNs
+     * ({@link ApnSetting#TYPE_ENTERPRISE}), while only device owners can update other type of APNs.
      *
      * @param admin which {@link DeviceAdminReceiver} this request is associated with
      * @param apnId the {@code id} of the override APN to update
      * @param apnSetting the override APN to update
      * @return {@code true} if the required override APN is successfully updated,
      *         {@code false} otherwise.
-     * @throws SecurityException if {@code admin} is not a device owner.
+     * @throws SecurityException If request is for enterprise APN {@code admin} is either device
+     * owner or profile owner and in all other types of APN if {@code admin} is not a device owner.
      *
      * @see #setOverrideApnsEnabled(ComponentName, boolean)
      */
@@ -13629,16 +13699,22 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by device owner to remove an override APN.
+     * Called by device owner or profile owner to remove an override APN.
      *
      * <p>This method may returns {@code false} if there is no override APN with the given
      * {@code apnId}.
+     * <p> Before Android version {@link android.os.Build.VERSION_CODES#TIRAMISU}:
+     * Only device owners can remove APNs.
+     * <p> Starting from Android version {@link android.os.Build.VERSION_CODES#TIRAMISU}:
+     * Device and profile owners can remove enterprise APNs
+     * ({@link ApnSetting#TYPE_ENTERPRISE}), while only device owners can remove other type of APNs.
      *
      * @param admin which {@link DeviceAdminReceiver} this request is associated with
      * @param apnId the {@code id} of the override APN to remove
      * @return {@code true} if the required override APN is successfully removed, {@code false}
      *         otherwise.
-     * @throws SecurityException if {@code admin} is not a device owner.
+     * @throws SecurityException If request is for enterprise APN {@code admin} is either device
+     * owner or profile owner and in all other types of APN if {@code admin} is not a device owner.
      *
      * @see #setOverrideApnsEnabled(ComponentName, boolean)
      */
@@ -14739,17 +14815,20 @@ public class DevicePolicyManager {
      * <p>The method {@link #checkProvisioningPrecondition} must be returning {@link #STATUS_OK}
      * before calling this method.
      *
+     * <p>Holders of {@link android.Manifest.permission#PROVISION_DEMO_DEVICE} can call this API
+     * only if {@link FullyManagedDeviceProvisioningParams#isDemoDevice()} is {@code true}.</p>
+     *
      * @param provisioningParams Params required to provision a fully managed device,
      * see {@link FullyManagedDeviceProvisioningParams}.
      *
-     * @throws SecurityException if the caller does not hold
-     * {@link android.Manifest.permission#MANAGE_PROFILE_AND_DEVICE_OWNERS}.
      * @throws ProvisioningException if an error occurred during provisioning.
      *
      * @hide
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS,
+            android.Manifest.permission.PROVISION_DEMO_DEVICE})
     public void provisionFullyManagedDevice(
             @NonNull FullyManagedDeviceProvisioningParams provisioningParams)
             throws ProvisioningException {
@@ -15606,7 +15685,9 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Returns a boolean for whether the DPC has been downloaded during provisioning.
+     * Returns a boolean for whether the DPC
+     * (Device Policy Controller, the agent responsible for enforcing policy)
+     * has been downloaded during provisioning.
      *
      * <p>If true is returned, then any attempts to begin setup again should result in factory reset
      *
@@ -15627,9 +15708,11 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Use to indicate that the DPC has or has not been downloaded during provisioning.
+     * Indicates that the DPC (Device Policy Controller, the agent responsible for enforcing policy)
+     * has or has not been downloaded during provisioning.
      *
-     * @param downloaded {@code true} if the dpc has been downloaded during provisioning. false otherwise.
+     * @param downloaded {@code true} if the dpc has been downloaded during provisioning.
+     *                               {@code false} otherwise.
      *
      * @hide
      */
@@ -15647,14 +15730,15 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Returns the package name of the device manager role holder.
+     * Returns the package name of the device policy management role holder.
      *
-     * <p>If the device manager role holder is not configured for this device, returns {@code null}.
+     * <p>If the device policy management role holder is not configured for this device, returns
+     * {@code null}.
      */
     @Nullable
-    public String getDeviceManagerRoleHolderPackageName() {
-        String deviceManagerConfig =
-                mContext.getString(com.android.internal.R.string.config_deviceManager);
+    public String getDevicePolicyManagementRoleHolderPackage() {
+        String deviceManagerConfig = mContext.getString(
+                com.android.internal.R.string.config_devicePolicyManagement);
         return extractPackageNameFromDeviceManagerConfig(deviceManagerConfig);
     }
 
@@ -15680,5 +15764,24 @@ public class DevicePolicyManager {
             return deviceManagerConfig.split(":")[0];
         }
         return deviceManagerConfig;
+    }
+
+    /**
+     * @return {@code true} if bypassing the device policy management role qualification is allowed
+     * with the current state of the device.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_ROLE_HOLDERS)
+    public boolean shouldAllowBypassingDevicePolicyManagementRoleQualification() {
+        if (mService != null) {
+            try {
+                return mService.shouldAllowBypassingDevicePolicyManagementRoleQualification();
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return false;
     }
 }

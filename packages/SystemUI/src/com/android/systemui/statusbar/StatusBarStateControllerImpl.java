@@ -420,8 +420,9 @@ public class StatusBarStateControllerImpl implements
      * notified before unranked, and we will sort ranked listeners from low to high
      *
      * @deprecated This method exists only to solve latent inter-dependencies from refactoring
-     * StatusBarState out of StatusBar.java. Any new listeners should be built not to need ranking
-     * (i.e., they are non-dependent on the order of operations of StatusBarState listeners).
+     * StatusBarState out of CentralSurfaces.java. Any new listeners should be built not to need
+     * ranking (i.e., they are non-dependent on the order of operations of StatusBarState
+     * listeners).
      */
     @Deprecated
     @Override

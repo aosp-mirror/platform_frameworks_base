@@ -107,6 +107,7 @@ public class LocaleManagerBackupRestoreTest {
     private PackageManager mMockPackageManager;
     @Mock
     private LocaleManagerService mMockLocaleManagerService;
+
     BroadcastReceiver mUserMonitor;
     PackageMonitor mPackageMonitor;
 
@@ -131,6 +132,7 @@ public class LocaleManagerBackupRestoreTest {
         mMockPackageManagerInternal = mock(PackageManagerInternal.class);
         mMockPackageManager = mock(PackageManager.class);
         mMockLocaleManagerService = mock(LocaleManagerService.class);
+        SystemAppUpdateTracker systemAppUpdateTracker = mock(SystemAppUpdateTracker.class);
 
         doReturn(mMockPackageManager).when(mMockContext).getPackageManager();
 
@@ -144,7 +146,8 @@ public class LocaleManagerBackupRestoreTest {
         doNothing().when(mBackupHelper).notifyBackupManager();
 
         mUserMonitor = mBackupHelper.getUserMonitor();
-        mPackageMonitor = new LocaleManagerServicePackageMonitor(mBackupHelper);
+        mPackageMonitor = new LocaleManagerServicePackageMonitor(mBackupHelper,
+            systemAppUpdateTracker);
         setCurrentTimeMillis(DEFAULT_CREATION_TIME_MILLIS);
     }
 

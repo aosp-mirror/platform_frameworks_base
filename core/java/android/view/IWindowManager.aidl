@@ -32,6 +32,7 @@ import android.graphics.Region;
 import android.os.Bundle;
 import android.os.IRemoteCallback;
 import android.os.ParcelFileDescriptor;
+import android.view.ContentRecordingSession;
 import android.view.DisplayCutout;
 import android.view.DisplayInfo;
 import android.view.IAppTransitionAnimationSpecsFuture;
@@ -200,7 +201,12 @@ interface IWindowManager
     boolean isKeyguardSecure(int userId);
     void dismissKeyguard(IKeyguardDismissCallback callback, CharSequence message);
 
+    @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
+            + ".permission.SUBSCRIBE_TO_KEYGUARD_LOCKED_STATE)")
     void addKeyguardLockedStateListener(in IKeyguardLockedStateListener listener);
+
+    @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
+            + ".permission.SUBSCRIBE_TO_KEYGUARD_LOCKED_STATE)")
     void removeKeyguardLockedStateListener(in IKeyguardLockedStateListener listener);
 
     // Requires INTERACT_ACROSS_USERS_FULL permission
@@ -879,6 +885,17 @@ interface IWindowManager
     void detachWindowContextFromWindowContainer(IBinder clientToken);
 
     /**
+     * Updates the content recording session. If a different session is already in progress, then
+     * the pre-existing session is stopped, and the new incoming session takes over.
+     *
+     * The DisplayContent for the new session will begin recording when
+     * {@link RootWindowContainer#onDisplayChanged} is invoked for the new {@link VirtualDisplay}.
+     *
+     * @param incomingSession the nullable incoming content recording session
+     */
+    void setContentRecordingSession(in ContentRecordingSession incomingSession);
+
+    /**
      * Registers a listener, which is to be called whenever cross-window blur is enabled/disabled.
      *
      * @param listener the listener to be registered
@@ -955,4 +972,10 @@ interface IWindowManager
      * @hide
      */
     Bitmap snapshotTaskForRecents(int taskId);
+
+    /**
+     * Informs the system whether the recents app is currently behind the system bars. If so,
+     * means the recents app can control the SystemUI flags, and vice-versa.
+     */
+    void setRecentsAppBehindSystemBars(boolean behindSystemBars);
 }

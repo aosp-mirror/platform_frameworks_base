@@ -44,7 +44,6 @@ import static org.mockito.Mockito.mock;
 
 import android.annotation.NonNull;
 import android.app.ActivityManager;
-import android.graphics.Rect;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.view.SurfaceControl;
@@ -421,8 +420,7 @@ public class SplitTransitionTests extends ShellTestCase {
                 mock(SurfaceControl.Transaction.class),
                 mock(SurfaceControl.Transaction.class),
                 mock(Transitions.TransitionFinishCallback.class));
-        mMainStage.activate(new Rect(0, 0, 100, 100), new WindowContainerTransaction(),
-                true /* includingTopTask */);
+        mMainStage.activate(new WindowContainerTransaction(), true /* includingTopTask */);
     }
 
     private boolean containsSplitEnter(@NonNull WindowContainerTransaction wct) {

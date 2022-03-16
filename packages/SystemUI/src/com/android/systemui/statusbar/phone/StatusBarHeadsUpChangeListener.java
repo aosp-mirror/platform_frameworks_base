@@ -22,14 +22,16 @@ import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.init.NotificationsController;
-import com.android.systemui.statusbar.phone.dagger.StatusBarComponent;
+import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 import com.android.systemui.statusbar.window.StatusBarWindowController;
 
 import javax.inject.Inject;
 
-/** Ties the {@link StatusBar} to {@link com.android.systemui.statusbar.policy.HeadsUpManager}. */
-@StatusBarComponent.StatusBarScope
+/**
+ * Ties the {@link CentralSurfaces} to {@link com.android.systemui.statusbar.policy.HeadsUpManager}.
+ */
+@CentralSurfacesComponent.CentralSurfacesScope
 public class StatusBarHeadsUpChangeListener implements OnHeadsUpChangedListener {
     private final NotificationShadeWindowController mNotificationShadeWindowController;
     private final StatusBarWindowController mStatusBarWindowController;

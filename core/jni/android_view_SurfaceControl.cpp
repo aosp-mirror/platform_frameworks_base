@@ -62,6 +62,7 @@
 
 namespace android {
 
+using gui::CaptureArgs;
 using gui::FocusRequest;
 
 static void doThrowNPE(JNIEnv* env) {

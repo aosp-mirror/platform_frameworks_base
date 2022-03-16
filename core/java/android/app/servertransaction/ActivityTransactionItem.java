@@ -64,11 +64,11 @@ public abstract class ActivityTransactionItem extends ClientTransactionItem {
         final ActivityClientRecord r = client.getActivityClient(token);
         if (r == null) {
             throw new IllegalArgumentException("Activity client record must not be null to execute "
-                    + "transaction item");
+                    + "transaction item: " + this);
         }
         if (client.getActivity(token) == null) {
             throw new IllegalArgumentException("Activity must not be null to execute "
-                    + "transaction item");
+                    + "transaction item: " + this);
         }
         return r;
     }

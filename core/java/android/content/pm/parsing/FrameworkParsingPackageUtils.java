@@ -379,6 +379,30 @@ public class FrameworkParsingPackageUtils {
     }
 
     /**
+     * Computes the maxSdkVersion. If the package is not compatible with this platform, populates
+     * {@code outError[0]} with an error message.
+     * <p>
+     * {@code maxVers} is compared against {@code platformSdkVersion}. If {@code maxVers} is less
+     * than the {@code platformSdkVersion} then populates {@code outError[0]} with an error message.
+     * Otherwise, it returns {@code maxVers} unmodified.
+     *
+     * @param maxVers maxSdkVersion number, if specified in the application manifest, or {@code
+     *                Integer.MAX_VALUE} otherwise
+     * @param platformSdkVersion   platform SDK version number, typically Build.VERSION.SDK_INT
+     * @return the maxSdkVersion that was recognised or an error if the condition is not satisfied
+     */
+    public static ParseResult<Integer> computeMaxSdkVersion(@IntRange(from = 0) int maxVers,
+            @IntRange(from = 1) int platformSdkVersion, @NonNull ParseInput input) {
+        if (platformSdkVersion > maxVers) {
+            return input.error(PackageManager.INSTALL_FAILED_NEWER_SDK,
+                    "Requires max SDK version " + maxVers + " but is "
+                            + platformSdkVersion);
+        } else {
+            return input.success(maxVers);
+        }
+    }
+
+    /**
      * Matches a given {@code targetCode} against a set of release codeNames. Target codes can
      * either be of the form {@code [codename]}" (e.g {@code "Q"}) or of the form {@code
      * [codename].[fingerprint]} (e.g {@code "Q.cafebc561"}).

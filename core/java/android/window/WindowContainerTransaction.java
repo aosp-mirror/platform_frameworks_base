@@ -31,6 +31,7 @@ import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.ArrayMap;
+import android.view.InsetsState;
 import android.view.SurfaceControl;
 
 import java.util.ArrayList;
@@ -589,6 +590,56 @@ public final class WindowContainerTransaction implements Parcelable {
     }
 
     /**
+     * Adds a given {@code Rect} as a rect insets provider on the {@code receiverWindowContainer}.
+     * This will trigger a change of insets for all the children in the subtree of
+     * {@code receiverWindowContainer}.
+     *
+     * @param receiverWindowContainer the window container which the insets provider need to be
+     *                                added to
+     * @param insetsProviderFrame the frame that will be added as Insets provider
+     * @param insetsTypes types of insets the rect provides
+     * @hide
+     */
+    @NonNull
+    public WindowContainerTransaction addRectInsetsProvider(
+            @NonNull WindowContainerToken receiverWindowContainer,
+            @NonNull Rect insetsProviderFrame,
+            @InsetsState.InternalInsetsType int[] insetsTypes) {
+        final HierarchyOp hierarchyOp =
+                new HierarchyOp.Builder(
+                        HierarchyOp.HIERARCHY_OP_TYPE_ADD_RECT_INSETS_PROVIDER)
+                        .setContainer(receiverWindowContainer.asBinder())
+                        .setInsetsProviderFrame(insetsProviderFrame)
+                        .setInsetsTypes(insetsTypes)
+                        .build();
+        mHierarchyOps.add(hierarchyOp);
+        return this;
+    }
+
+    /**
+     * Removes the insets provider for the given types from the
+     * {@code receiverWindowContainer}. This will trigger a change of insets for all the children
+     * in the subtree of {@code receiverWindowContainer}.
+     *
+     * @param receiverWindowContainer the window container which the insets-override-provider has
+     *                                to be removed from
+     * @param insetsTypes types of insets that have to be removed
+     * @hide
+     */
+    @NonNull
+    public WindowContainerTransaction removeInsetsProvider(
+            @NonNull WindowContainerToken receiverWindowContainer,
+            @InsetsState.InternalInsetsType int[] insetsTypes) {
+        final HierarchyOp hierarchyOp =
+                new HierarchyOp.Builder(HierarchyOp.HIERARCHY_OP_TYPE_REMOVE_INSETS_PROVIDER)
+                        .setContainer(receiverWindowContainer.asBinder())
+                        .setInsetsTypes(insetsTypes)
+                        .build();
+        mHierarchyOps.add(hierarchyOp);
+        return this;
+    }
+
+    /**
      * When this {@link WindowContainerTransaction} failed to finish on the server side, it will
      * trigger callback with this {@param errorCallbackToken}.
      * @param errorCallbackToken    client provided token that will be passed back as parameter in
@@ -993,6 +1044,8 @@ public final class WindowContainerTransaction implements Parcelable {
         public static final int HIERARCHY_OP_TYPE_SET_ADJACENT_TASK_FRAGMENTS = 13;
         public static final int HIERARCHY_OP_TYPE_START_SHORTCUT = 14;
         public static final int HIERARCHY_OP_TYPE_RESTORE_TRANSIENT_ORDER = 15;
+        public static final int HIERARCHY_OP_TYPE_ADD_RECT_INSETS_PROVIDER = 16;
+        public static final int HIERARCHY_OP_TYPE_REMOVE_INSETS_PROVIDER = 17;
 
         // The following key(s) are for use with mLaunchOptions:
         // When launching a task (eg. from recents), this is the taskId to be launched.
@@ -1011,6 +1064,10 @@ public final class WindowContainerTransaction implements Parcelable {
         // If this is same as mContainer, then only change position, don't reparent.
         @Nullable
         private IBinder mReparent;
+
+        private @InsetsState.InternalInsetsType int[] mInsetsTypes;
+
+        private Rect mInsetsProviderFrame;
 
         // Moves/reparents to top of parent when {@code true}, otherwise moves/reparents to bottom.
         private boolean mToTop;
@@ -1130,6 +1187,8 @@ public final class WindowContainerTransaction implements Parcelable {
             mType = copy.mType;
             mContainer = copy.mContainer;
             mReparent = copy.mReparent;
+            mInsetsTypes = copy.mInsetsTypes;
+            mInsetsProviderFrame = copy.mInsetsProviderFrame;
             mToTop = copy.mToTop;
             mReparentTopOnly = copy.mReparentTopOnly;
             mMoveAdjacentTogether = copy.mMoveAdjacentTogether;
@@ -1146,6 +1205,12 @@ public final class WindowContainerTransaction implements Parcelable {
             mType = in.readInt();
             mContainer = in.readStrongBinder();
             mReparent = in.readStrongBinder();
+            mInsetsTypes = in.createIntArray();
+            if (in.readInt() != 0) {
+                mInsetsProviderFrame = Rect.CREATOR.createFromParcel(in);
+            } else {
+                mInsetsProviderFrame = null;
+            }
             mToTop = in.readBoolean();
             mReparentTopOnly = in.readBoolean();
             mMoveAdjacentTogether = in.readBoolean();
@@ -1169,6 +1234,15 @@ public final class WindowContainerTransaction implements Parcelable {
         @Nullable
         public IBinder getNewParent() {
             return mReparent;
+        }
+
+        @Nullable
+        public @InsetsState.InternalInsetsType int[] getInsetsTypes() {
+            return mInsetsTypes;
+        }
+
+        public Rect getInsetsProviderFrame() {
+            return mInsetsProviderFrame;
         }
 
         @NonNull
@@ -1276,6 +1350,13 @@ public final class WindowContainerTransaction implements Parcelable {
                 case HIERARCHY_OP_TYPE_START_SHORTCUT:
                     return "{StartShortcut: options=" + mLaunchOptions + " info=" + mShortcutInfo
                             + "}";
+                case HIERARCHY_OP_TYPE_ADD_RECT_INSETS_PROVIDER:
+                    return "{addRectInsetsProvider: container=" + mContainer
+                            + " insetsProvidingFrame=" + mInsetsProviderFrame
+                            + " insetsType=" + Arrays.toString(mInsetsTypes) + "}";
+                case HIERARCHY_OP_TYPE_REMOVE_INSETS_PROVIDER:
+                    return "{removeLocalInsetsProvider: container=" + mContainer
+                            + " insetsType=" + Arrays.toString(mInsetsTypes) + "}";
                 default:
                     return "{mType=" + mType + " container=" + mContainer + " reparent=" + mReparent
                             + " mToTop=" + mToTop
@@ -1289,6 +1370,13 @@ public final class WindowContainerTransaction implements Parcelable {
             dest.writeInt(mType);
             dest.writeStrongBinder(mContainer);
             dest.writeStrongBinder(mReparent);
+            dest.writeIntArray(mInsetsTypes);
+            if (mInsetsProviderFrame != null) {
+                dest.writeInt(1);
+                mInsetsProviderFrame.writeToParcel(dest, 0);
+            } else {
+                dest.writeInt(0);
+            }
             dest.writeBoolean(mToTop);
             dest.writeBoolean(mReparentTopOnly);
             dest.writeBoolean(mMoveAdjacentTogether);
@@ -1328,6 +1416,10 @@ public final class WindowContainerTransaction implements Parcelable {
             @Nullable
             private IBinder mReparent;
 
+            private int[] mInsetsTypes;
+
+            private Rect mInsetsProviderFrame;
+
             private boolean mToTop;
 
             private boolean mReparentTopOnly;
@@ -1366,6 +1458,16 @@ public final class WindowContainerTransaction implements Parcelable {
 
             Builder setReparentContainer(@Nullable IBinder reparentContainer) {
                 mReparent = reparentContainer;
+                return this;
+            }
+
+            Builder setInsetsTypes(int[] insetsTypes) {
+                mInsetsTypes = insetsTypes;
+                return this;
+            }
+
+            Builder setInsetsProviderFrame(Rect insetsProviderFrame) {
+                mInsetsProviderFrame = insetsProviderFrame;
                 return this;
             }
 
@@ -1430,6 +1532,8 @@ public final class WindowContainerTransaction implements Parcelable {
                 hierarchyOp.mActivityTypes = mActivityTypes != null
                         ? Arrays.copyOf(mActivityTypes, mActivityTypes.length)
                         : null;
+                hierarchyOp.mInsetsTypes = mInsetsTypes;
+                hierarchyOp.mInsetsProviderFrame = mInsetsProviderFrame;
                 hierarchyOp.mToTop = mToTop;
                 hierarchyOp.mReparentTopOnly = mReparentTopOnly;
                 hierarchyOp.mMoveAdjacentTogether = mMoveAdjacentTogether;

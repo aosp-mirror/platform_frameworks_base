@@ -37,9 +37,10 @@ import com.android.settingslib.media.LocalMediaManager;
 import com.android.settingslib.media.MediaDevice;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.DialogLaunchAnimator;
+import com.android.systemui.broadcast.BroadcastSender;
+import com.android.systemui.media.nearby.NearbyMediaDevicesManager;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
-import com.android.systemui.statusbar.phone.ShadeController;
 
 import org.junit.After;
 import org.junit.Before;
@@ -48,6 +49,7 @@ import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -59,14 +61,16 @@ public class MediaOutputDialogTest extends SysuiTestCase {
     // Mock
     private final MediaSessionManager mMediaSessionManager = mock(MediaSessionManager.class);
     private final LocalBluetoothManager mLocalBluetoothManager = mock(LocalBluetoothManager.class);
-    private final ShadeController mShadeController = mock(ShadeController.class);
     private final ActivityStarter mStarter = mock(ActivityStarter.class);
+    private final BroadcastSender mBroadcastSender = mock(BroadcastSender.class);
     private final LocalMediaManager mLocalMediaManager = mock(LocalMediaManager.class);
     private final MediaDevice mMediaDevice = mock(MediaDevice.class);
     private final NotificationEntryManager mNotificationEntryManager =
             mock(NotificationEntryManager.class);
     private final UiEventLogger mUiEventLogger = mock(UiEventLogger.class);
     private final DialogLaunchAnimator mDialogLaunchAnimator = mock(DialogLaunchAnimator.class);
+    private final NearbyMediaDevicesManager mNearbyMediaDevicesManager = mock(
+            NearbyMediaDevicesManager.class);
 
     private MediaOutputDialog mMediaOutputDialog;
     private MediaOutputController mMediaOutputController;
@@ -74,11 +78,12 @@ public class MediaOutputDialogTest extends SysuiTestCase {
 
     @Before
     public void setUp() {
-        mMediaOutputController = new MediaOutputController(mContext, TEST_PACKAGE, false,
-                mMediaSessionManager, mLocalBluetoothManager, mShadeController, mStarter,
-                mNotificationEntryManager, mUiEventLogger, mDialogLaunchAnimator);
+        mMediaOutputController = new MediaOutputController(mContext, TEST_PACKAGE,
+                mMediaSessionManager, mLocalBluetoothManager, mStarter,
+                mNotificationEntryManager, mDialogLaunchAnimator,
+                Optional.of(mNearbyMediaDevicesManager));
         mMediaOutputController.mLocalMediaManager = mLocalMediaManager;
-        mMediaOutputDialog = new MediaOutputDialog(mContext, false,
+        mMediaOutputDialog = new MediaOutputDialog(mContext, false, mBroadcastSender,
                 mMediaOutputController, mUiEventLogger);
         mMediaOutputDialog.show();
 
@@ -124,7 +129,7 @@ public class MediaOutputDialogTest extends SysuiTestCase {
     // Check the visibility metric logging by creating a new MediaOutput dialog,
     // and verify if the calling times increases.
     public void onCreate_ShouldLogVisibility() {
-        MediaOutputDialog testDialog = new MediaOutputDialog(mContext, false,
+        MediaOutputDialog testDialog = new MediaOutputDialog(mContext, false, mBroadcastSender,
                 mMediaOutputController, mUiEventLogger);
         testDialog.show();
 

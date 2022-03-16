@@ -211,6 +211,8 @@ public class UserManagerService extends IUserManager.Stub {
     private static final String TAG_SEED_ACCOUNT_OPTIONS = "seedAccountOptions";
     private static final String TAG_LAST_REQUEST_QUIET_MODE_ENABLED_CALL =
             "lastRequestQuietModeEnabledCall";
+    private static final String TAG_IGNORE_PREPARE_STORAGE_ERRORS =
+            "ignorePrepareStorageErrors";
     private static final String ATTR_KEY = "key";
     private static final String ATTR_VALUE_TYPE = "type";
     private static final String ATTR_MULTIPLE = "m";
@@ -320,12 +322,39 @@ public class UserManagerService extends IUserManager.Stub {
 
         private long mLastRequestQuietModeEnabledMillis;
 
+        /**
+         * {@code true} if the system should ignore errors when preparing the
+         * storage directories for this user. This is {@code false} for all new
+         * users; it will only be {@code true} for users that already existed
+         * on-disk from an older version of Android.
+         */
+        private boolean mIgnorePrepareStorageErrors;
+
         void setLastRequestQuietModeEnabledMillis(long millis) {
             mLastRequestQuietModeEnabledMillis = millis;
         }
 
         long getLastRequestQuietModeEnabledMillis() {
             return mLastRequestQuietModeEnabledMillis;
+        }
+
+        boolean getIgnorePrepareStorageErrors() {
+            return mIgnorePrepareStorageErrors;
+        }
+
+        @SuppressWarnings("AndroidFrameworkCompatChange")  // This is not an app-visible API.
+        void setIgnorePrepareStorageErrors() {
+            // This method won't be called for new users.  But to fully rule out
+            // the possibility of mIgnorePrepareStorageErrors ever being true
+            // for any user on any device that launched with T or later, we also
+            // explicitly check that DEVICE_INITIAL_SDK_INT is below T before
+            // honoring the request to set mIgnorePrepareStorageErrors to true.
+            if (Build.VERSION.DEVICE_INITIAL_SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+                mIgnorePrepareStorageErrors = true;
+                return;
+            }
+            Slog.w(LOG_TAG, "Not setting mIgnorePrepareStorageErrors to true"
+                    + " since this is a new device");
         }
 
         void clearSeedAccountData() {
@@ -1059,7 +1088,7 @@ public class UserManagerService extends IUserManager.Stub {
         intent.putExtra(Intent.EXTRA_QUIET_MODE, inQuietMode);
         intent.putExtra(Intent.EXTRA_USER, profileHandle);
         intent.putExtra(Intent.EXTRA_USER_HANDLE, profileHandle.getIdentifier());
-        getDevicePolicyManagerInternal().broadcastIntentToCrossProfileManifestReceiversAsUser(
+        getDevicePolicyManagerInternal().broadcastIntentToManifestReceivers(
                 intent, parentHandle, /* requiresPermission= */ true);
         intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
         mContext.sendBroadcastAsUser(intent, parentHandle);
@@ -1399,21 +1428,28 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     /**
-     * Returns a UserInfo object with the name filled in, for Owner, or the original
+     * Returns a UserInfo object with the name filled in, for Owner and Guest, or the original
      * if the name is already set.
      */
     private UserInfo userWithName(UserInfo orig) {
-        if (orig != null && orig.name == null && orig.id == UserHandle.USER_SYSTEM) {
-            if (DBG_ALLOCATION) {
-                final int number = mUser0Allocations.incrementAndGet();
-                Slog.w(LOG_TAG, "System user instantiated at least " + number + " times");
+        if (orig != null && orig.name == null) {
+            String name = null;
+            if (orig.id == UserHandle.USER_SYSTEM) {
+                if (DBG_ALLOCATION) {
+                    final int number = mUser0Allocations.incrementAndGet();
+                    Slog.w(LOG_TAG, "System user instantiated at least " + number + " times");
+                }
+                name = getOwnerName();
+            } else if (orig.isGuest()) {
+                name = getGuestName();
             }
-            UserInfo withName = new UserInfo(orig);
-            withName.name = getOwnerName();
-            return withName;
-        } else {
-            return orig;
+            if (name != null) {
+                final UserInfo withName = new UserInfo(orig);
+                withName.name = name;
+                return withName;
+            }
         }
+        return orig;
     }
 
     /** Returns whether the given user type is one of the FULL user types. */
@@ -1557,13 +1593,13 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     @Override
-    public boolean isCredentialSharedWithParent(@UserIdInt int userId) {
+    public boolean isCredentialSharableWithParent(@UserIdInt int userId) {
         checkManageOrInteractPermissionIfCallerInOtherProfileGroup(userId,
-                "isCredentialSharedWithParent");
+                "isCredentialSharableWithParent");
         synchronized (mUsersLock) {
             UserTypeDetails userTypeDetails = getUserTypeDetailsNoChecks(userId);
             return userTypeDetails != null && userTypeDetails.isProfile()
-                    && userTypeDetails.isCredentialSharedWithParent();
+                    && userTypeDetails.isCredentialSharableWithParent();
         }
     }
 
@@ -3259,6 +3295,10 @@ public class UserManagerService extends IUserManager.Stub {
         return mOwnerName.get();
     }
 
+    private String getGuestName() {
+        return mContext.getString(com.android.internal.R.string.guest_name);
+    }
+
     private void invalidateOwnerNameIfNecessary(@NonNull Resources res, boolean forceUpdate) {
         final int configChanges = mLastConfiguration.updateFrom(res.getConfiguration());
         if (forceUpdate || (configChanges & mOwnerNameTypedValue.changingConfigurations) != 0) {
@@ -3397,6 +3437,10 @@ public class UserManagerService extends IUserManager.Stub {
             serializer.endTag(/* namespace */ null, TAG_LAST_REQUEST_QUIET_MODE_ENABLED_CALL);
         }
 
+        serializer.startTag(/* namespace */ null, TAG_IGNORE_PREPARE_STORAGE_ERRORS);
+        serializer.text(String.valueOf(userData.getIgnorePrepareStorageErrors()));
+        serializer.endTag(/* namespace */ null, TAG_IGNORE_PREPARE_STORAGE_ERRORS);
+
         serializer.endTag(null, TAG_USER);
 
         serializer.endDocument();
@@ -3506,6 +3550,7 @@ public class UserManagerService extends IUserManager.Stub {
         Bundle legacyLocalRestrictions = null;
         RestrictionsSet localRestrictions = null;
         Bundle globalRestrictions = null;
+        boolean ignorePrepareStorageErrors = true; // default is true for old users
 
         final TypedXmlPullParser parser = Xml.resolvePullParser(is);
         int type;
@@ -3584,6 +3629,11 @@ public class UserManagerService extends IUserManager.Stub {
                     if (type == XmlPullParser.TEXT) {
                         lastRequestQuietModeEnabledTimestamp = Long.parseLong(parser.getText());
                     }
+                } else if (TAG_IGNORE_PREPARE_STORAGE_ERRORS.equals(tag)) {
+                    type = parser.next();
+                    if (type == XmlPullParser.TEXT) {
+                        ignorePrepareStorageErrors = Boolean.parseBoolean(parser.getText());
+                    }
                 }
             }
         }
@@ -3611,6 +3661,9 @@ public class UserManagerService extends IUserManager.Stub {
         userData.persistSeedData = persistSeedData;
         userData.seedAccountOptions = seedAccountOptions;
         userData.setLastRequestQuietModeEnabledMillis(lastRequestQuietModeEnabledTimestamp);
+        if (ignorePrepareStorageErrors) {
+            userData.setIgnorePrepareStorageErrors();
+        }
 
         synchronized (mRestrictionsLock) {
             if (baseRestrictions != null) {
@@ -4095,11 +4148,11 @@ public class UserManagerService extends IUserManager.Stub {
                 continue;
             }
             if (filter.direction == DefaultCrossProfileIntentFilter.Direction.TO_PARENT) {
-                mPm.addCrossProfileIntentFilter(
+                mPm.addCrossProfileIntentFilter(mPm.snapshotComputer(),
                         filter.filter, mContext.getOpPackageName(), profileUserId, parentUserId,
                         filter.flags);
             } else {
-                mPm.addCrossProfileIntentFilter(
+                mPm.addCrossProfileIntentFilter(mPm.snapshotComputer(),
                         filter.filter, mContext.getOpPackageName(), parentUserId, profileUserId,
                         filter.flags);
             }
@@ -4585,12 +4638,12 @@ public class UserManagerService extends IUserManager.Stub {
             final String restriction = getUserRemovalRestriction(userId);
             if (getUserRestrictions(UserHandle.getCallingUserId()).getBoolean(restriction, false)) {
                 Slog.w(LOG_TAG, "Cannot remove user. " + restriction + " is enabled.");
-                return UserManager.REMOVE_RESULT_ERROR;
+                return UserManager.REMOVE_RESULT_ERROR_USER_RESTRICTION;
             }
         }
         if (userId == UserHandle.USER_SYSTEM) {
             Slog.e(LOG_TAG, "System user cannot be removed.");
-            return UserManager.REMOVE_RESULT_ERROR;
+            return UserManager.REMOVE_RESULT_ERROR_SYSTEM_USER;
         }
 
         final long ident = Binder.clearCallingIdentity();
@@ -4602,7 +4655,7 @@ public class UserManagerService extends IUserManager.Stub {
                     if (userData == null) {
                         Slog.e(LOG_TAG,
                                 "Cannot remove user " + userId + ", invalid user id provided.");
-                        return UserManager.REMOVE_RESULT_ERROR;
+                        return UserManager.REMOVE_RESULT_ERROR_USER_NOT_FOUND;
                     }
 
                     if (mRemovingUserIds.get(userId)) {
@@ -4766,7 +4819,7 @@ public class UserManagerService extends IUserManager.Stub {
         managedProfileIntent.putExtra(Intent.EXTRA_USER, new UserHandle(removedUserId));
         managedProfileIntent.putExtra(Intent.EXTRA_USER_HANDLE, removedUserId);
         final UserHandle parentHandle = new UserHandle(parentUserId);
-        getDevicePolicyManagerInternal().broadcastIntentToCrossProfileManifestReceiversAsUser(
+        getDevicePolicyManagerInternal().broadcastIntentToManifestReceivers(
                 managedProfileIntent, parentHandle, /* requiresPermission= */ false);
         managedProfileIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY
                 | Intent.FLAG_RECEIVER_FOREGROUND);
@@ -5721,6 +5774,9 @@ public class UserManagerService extends IUserManager.Stub {
                 pw.println();
             }
         }
+
+        pw.println("    Ignore errors preparing storage: "
+                + userData.getIgnorePrepareStorageErrors());
     }
 
     private static void dumpTimeAgo(PrintWriter pw, StringBuilder sb, long nowTime, long time) {
@@ -6124,6 +6180,14 @@ public class UserManagerService extends IUserManager.Stub {
             UserManagerService.this.setDefaultCrossProfileIntentFilters(
                     profileUserId, userTypeDetails, restrictions, parentUserId);
         }
+
+        @Override
+        public boolean shouldIgnorePrepareStorageErrors(int userId) {
+            synchronized (mUsersLock) {
+                UserData userData = mUsers.get(userId);
+                return userData != null && userData.getIgnorePrepareStorageErrors();
+            }
+        }
     }
 
     /**
@@ -6263,11 +6327,11 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     /**
-     * Checks if the given user has a managed profile associated with it.
+     * Checks if the given user has a profile associated with it.
      * @param userId The parent user
      * @return
      */
-    boolean hasManagedProfile(@UserIdInt int userId) {
+    boolean hasProfile(@UserIdInt int userId) {
         synchronized (mUsersLock) {
             UserInfo userInfo = getUserInfoLU(userId);
             final int userSize = mUsers.size();
@@ -6286,7 +6350,8 @@ public class UserManagerService extends IUserManager.Stub {
      * {@link SecurityException} if not.
      */
     private void verifyCallingPackage(String callingPackage, int callingUid) {
-        int packageUid = mPm.getPackageUid(callingPackage, 0,  UserHandle.getUserId(callingUid));
+        int packageUid = mPm.snapshotComputer()
+                .getPackageUid(callingPackage, 0,  UserHandle.getUserId(callingUid));
         if (packageUid != callingUid) {
             throw new SecurityException("Specified package " + callingPackage
                     + " does not match the calling uid " + callingUid);

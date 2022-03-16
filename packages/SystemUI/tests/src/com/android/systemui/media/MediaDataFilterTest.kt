@@ -23,6 +23,7 @@ import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastDispatcher
+import com.android.systemui.broadcast.BroadcastSender
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
@@ -65,6 +66,8 @@ class MediaDataFilterTest : SysuiTestCase() {
     @Mock
     private lateinit var broadcastDispatcher: BroadcastDispatcher
     @Mock
+    private lateinit var broadcastSender: BroadcastSender
+    @Mock
     private lateinit var mediaResumeListener: MediaResumeListener
     @Mock
     private lateinit var mediaDataManager: MediaDataManager
@@ -87,7 +90,7 @@ class MediaDataFilterTest : SysuiTestCase() {
     fun setup() {
         MockitoAnnotations.initMocks(this)
         MediaPlayerData.clear()
-        mediaDataFilter = MediaDataFilter(context, broadcastDispatcher,
+        mediaDataFilter = MediaDataFilter(context, broadcastDispatcher, broadcastSender,
                 lockscreenUserManager, executor, clock)
         mediaDataFilter.mediaDataManager = mediaDataManager
         mediaDataFilter.addListener(listener)

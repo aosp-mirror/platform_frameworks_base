@@ -23,11 +23,8 @@ import android.util.MathUtils;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.android.internal.annotations.VisibleForTesting;
-import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dreams.complication.ComplicationHostViewController;
-import com.android.systemui.dreams.complication.dagger.ComplicationHostViewComponent;
 import com.android.systemui.dreams.dagger.DreamOverlayComponent;
 import com.android.systemui.dreams.dagger.DreamOverlayModule;
 import com.android.systemui.util.ViewController;
@@ -40,9 +37,6 @@ import javax.inject.Named;
  */
 @DreamOverlayComponent.DreamOverlayScope
 public class DreamOverlayContainerViewController extends ViewController<DreamOverlayContainerView> {
-    // The height of the area at the top of the dream overlay to allow dragging down the
-    // notifications shade.
-    private final int mDreamOverlayNotificationsDragAreaHeight;
     private final DreamOverlayStatusBarViewController mStatusBarViewController;
 
     private final ComplicationHostViewController mComplicationHostViewController;
@@ -69,7 +63,7 @@ public class DreamOverlayContainerViewController extends ViewController<DreamOve
     @Inject
     public DreamOverlayContainerViewController(
             DreamOverlayContainerView containerView,
-            ComplicationHostViewComponent.Factory complicationHostViewFactory,
+            ComplicationHostViewController complicationHostViewController,
             @Named(DreamOverlayModule.DREAM_OVERLAY_CONTENT_VIEW) ViewGroup contentView,
             DreamOverlayStatusBarViewController statusBarViewController,
             @Main Handler handler,
@@ -80,11 +74,8 @@ public class DreamOverlayContainerViewController extends ViewController<DreamOve
         super(containerView);
         mDreamOverlayContentView = contentView;
         mStatusBarViewController = statusBarViewController;
-        mDreamOverlayNotificationsDragAreaHeight =
-                mView.getResources().getDimensionPixelSize(
-                        R.dimen.dream_overlay_notifications_drag_area_height);
 
-        mComplicationHostViewController = complicationHostViewFactory.create().getController();
+        mComplicationHostViewController = complicationHostViewController;
         final View view = mComplicationHostViewController.getView();
 
         mDreamOverlayContentView.addView(view,
@@ -116,11 +107,6 @@ public class DreamOverlayContainerViewController extends ViewController<DreamOve
 
     View getContainerView() {
         return mView;
-    }
-
-    @VisibleForTesting
-    int getDreamOverlayNotificationsDragAreaHeight() {
-        return mDreamOverlayNotificationsDragAreaHeight;
     }
 
     private void updateBurnInOffsets() {

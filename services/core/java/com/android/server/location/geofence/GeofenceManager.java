@@ -19,7 +19,6 @@ package com.android.server.location.geofence;
 import static android.location.LocationManager.FUSED_PROVIDER;
 import static android.location.LocationManager.KEY_PROXIMITY_ENTERING;
 
-import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
 import static com.android.server.location.LocationPermissions.PERMISSION_FINE;
 
 import android.annotation.Nullable;
@@ -41,6 +40,7 @@ import android.stats.location.LocationStatsEnums;
 import android.util.ArraySet;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.server.FgThread;
 import com.android.server.PendingIntentUtils;
 import com.android.server.location.LocationPermissions;
 import com.android.server.location.injector.Injector;
@@ -396,7 +396,7 @@ public class GeofenceManager extends
     protected boolean registerWithService(LocationRequest locationRequest,
             Collection<GeofenceRegistration> registrations) {
         getLocationManager().requestLocationUpdates(FUSED_PROVIDER, locationRequest,
-                DIRECT_EXECUTOR, this);
+                FgThread.getExecutor(), this);
         return true;
     }
 

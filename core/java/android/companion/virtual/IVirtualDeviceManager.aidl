@@ -37,6 +37,7 @@ interface IVirtualDeviceManager {
      *   CDM. Virtual devices must have a corresponding association with CDM in order to be created.
      * @param params The parameters for creating this virtual device. See {@link
      *   VirtualDeviceManager.VirtualDeviceParams}.
+     * @param activityListener The listener to listen for activity changes in a virtual device.
      */
     IVirtualDevice createVirtualDevice(
             in IBinder token, String packageName, int associationId,

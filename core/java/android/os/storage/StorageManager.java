@@ -83,7 +83,6 @@ import android.os.UserHandle;
 import android.provider.DeviceConfig;
 import android.provider.MediaStore;
 import android.provider.Settings;
-import android.sysprop.VoldProperties;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
@@ -273,12 +272,15 @@ public class StorageManager {
     public static final int FLAG_STORAGE_CE = IInstalld.FLAG_STORAGE_CE;
     /** {@hide} */
     public static final int FLAG_STORAGE_EXTERNAL = IInstalld.FLAG_STORAGE_EXTERNAL;
+    /** @hide */
+    public static final int FLAG_STORAGE_SDK = IInstalld.FLAG_STORAGE_SDK;
 
     /** {@hide} */
     @IntDef(prefix = "FLAG_STORAGE_",  value = {
             FLAG_STORAGE_DE,
             FLAG_STORAGE_CE,
-            FLAG_STORAGE_EXTERNAL
+            FLAG_STORAGE_EXTERNAL,
+            FLAG_STORAGE_SDK,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface StorageFlags {}
@@ -677,9 +679,7 @@ public class StorageManager {
     }
 
     /**
-     * Mount an Opaque Binary Blob (OBB) file. If a <code>key</code> is
-     * specified, it is supplied to the mounting process to be used in any
-     * encryption used in the OBB.
+     * Mount an Opaque Binary Blob (OBB) file.
      * <p>
      * The OBB will remain mounted for as long as the StorageManager reference
      * is held by the application. As soon as this reference is lost, the OBBs
@@ -692,19 +692,22 @@ public class StorageManager {
      * application's OBB that shares its UID.
      *
      * @param rawPath the path to the OBB file
-     * @param key secret used to encrypt the OBB; may be <code>null</code> if no
-     *            encryption was used on the OBB.
+     * @param key must be <code>null</code>. Previously, some Android device
+     *            implementations accepted a non-<code>null</code> key to mount
+     *            an encrypted OBB file. However, this never worked reliably and
+     *            is no longer supported.
      * @param listener will receive the success or failure of the operation
      * @return whether the mount call was successfully queued or not
      */
     public boolean mountObb(String rawPath, String key, OnObbStateChangeListener listener) {
         Preconditions.checkNotNull(rawPath, "rawPath cannot be null");
+        Preconditions.checkArgument(key == null, "mounting encrypted OBBs is no longer supported");
         Preconditions.checkNotNull(listener, "listener cannot be null");
 
         try {
             final String canonicalPath = new File(rawPath).getCanonicalPath();
             final int nonce = mObbActionListener.addListener(listener);
-            mStorageManager.mountObb(rawPath, canonicalPath, key, mObbActionListener, nonce,
+            mStorageManager.mountObb(rawPath, canonicalPath, mObbActionListener, nonce,
                     getObbInfo(canonicalPath));
             return true;
         } catch (IOException e) {
@@ -1735,10 +1738,7 @@ public class StorageManager {
      *         false not encrypted or file encrypted
      */
     public static boolean isBlockEncrypted() {
-        if (!isEncrypted()) {
-            return false;
-        }
-        return RoSystemProperties.CRYPTO_BLOCK_ENCRYPTED;
+        return false;
     }
 
     /** {@hide}
@@ -1748,18 +1748,7 @@ public class StorageManager {
      *         false not encrypted, file encrypted or default block encrypted
      */
     public static boolean isNonDefaultBlockEncrypted() {
-        if (!isBlockEncrypted()) {
-            return false;
-        }
-
-        try {
-            IStorageManager storageManager = IStorageManager.Stub.asInterface(
-                    ServiceManager.getService("mount"));
-            return storageManager.getPasswordType() != CRYPT_TYPE_DEFAULT;
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error getting encryption type");
-            return false;
-        }
+        return false;
     }
 
     /** {@hide}
@@ -1773,8 +1762,7 @@ public class StorageManager {
      * framework, so no service needs to check for changes during their lifespan
      */
     public static boolean isBlockEncrypting() {
-        final String state = VoldProperties.encrypt_progress().orElse("");
-        return !"".equalsIgnoreCase(state);
+        return false;
     }
 
     /** {@hide}
@@ -1789,8 +1777,7 @@ public class StorageManager {
      * framework, so no service needs to check for changes during their lifespan
      */
     public static boolean inCryptKeeperBounce() {
-        final String status = VoldProperties.decrypt().orElse("");
-        return "trigger_restart_min_framework".equals(status);
+        return false;
     }
 
     /** {@hide} */
@@ -3057,14 +3044,4 @@ public class StorageManager {
     public static final int CRYPT_TYPE_PATTERN = IVold.PASSWORD_TYPE_PATTERN;
     /** @hide */
     public static final int CRYPT_TYPE_PIN = IVold.PASSWORD_TYPE_PIN;
-
-    // Constants for the data available via StorageManagerService.getField.
-    /** @hide */
-    public static final String SYSTEM_LOCALE_KEY = "SystemLocale";
-    /** @hide */
-    public static final String OWNER_INFO_KEY = "OwnerInfo";
-    /** @hide */
-    public static final String PATTERN_VISIBLE_KEY = "PatternVisible";
-    /** @hide */
-    public static final String PASSWORD_VISIBLE_KEY = "PasswordVisible";
 }

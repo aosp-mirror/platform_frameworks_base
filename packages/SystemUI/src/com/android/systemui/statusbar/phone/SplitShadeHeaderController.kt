@@ -30,7 +30,7 @@ import com.android.systemui.flags.Flags
 import com.android.systemui.qs.ChipVisibilityListener
 import com.android.systemui.qs.HeaderPrivacyIconsController
 import com.android.systemui.qs.carrier.QSCarrierGroupController
-import com.android.systemui.statusbar.phone.dagger.StatusBarComponent.StatusBarScope
+import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent.CentralSurfacesScope
 import com.android.systemui.statusbar.phone.dagger.StatusBarViewModule.SPLIT_SHADE_BATTERY_CONTROLLER
 import com.android.systemui.statusbar.phone.dagger.StatusBarViewModule.SPLIT_SHADE_HEADER
 import java.io.FileDescriptor
@@ -38,7 +38,7 @@ import java.io.PrintWriter
 import javax.inject.Inject
 import javax.inject.Named
 
-@StatusBarScope
+@CentralSurfacesScope
 class SplitShadeHeaderController @Inject constructor(
     @Named(SPLIT_SHADE_HEADER) private val statusBar: View,
     private val statusBarIconController: StatusBarIconController,

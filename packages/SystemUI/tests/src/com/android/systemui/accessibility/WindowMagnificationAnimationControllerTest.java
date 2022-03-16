@@ -60,6 +60,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Ignore
@@ -215,6 +217,29 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
         verifyFinalSpec(targetScale, targetCenterX, targetCenterY);
         verify(mAnimationCallback).onResult(false);
         verify(mAnimationCallback2).onResult(true);
+    }
+
+    @Test
+    public void enableWindowMagnificationWithUnchanged_enabling_expectedValuesToDefault()
+            throws InterruptedException {
+        final CountDownLatch countDownLatch = new CountDownLatch(2);
+        final MockMagnificationAnimationCallback animationCallback =
+                new MockMagnificationAnimationCallback(countDownLatch);
+
+        enableWindowMagnificationAndWaitAnimating(mWaitIntermediateAnimationPeriod,
+                animationCallback);
+        mInstrumentation.runOnMainSync(
+                () -> {
+                    mWindowMagnificationAnimationController.enableWindowMagnification(Float.NaN,
+                            Float.NaN, Float.NaN, animationCallback);
+                });
+
+        assertTrue(countDownLatch.await(mWaitingAnimationPeriod, TimeUnit.MILLISECONDS));
+        // The callback in 2nd enableWindowMagnification will return true
+        assertEquals(1, animationCallback.getSuccessCount());
+        // The callback in 1st enableWindowMagnification will return false
+        assertEquals(1, animationCallback.getFailedCount());
+        verifyFinalSpec(DEFAULT_SCALE, DEFAULT_CENTER_X, DEFAULT_CENTER_Y);
     }
 
     @Test
@@ -425,6 +450,102 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void moveWindowMagnifierToPosition_enabled_expectedValues()
+            throws InterruptedException {
+        final CountDownLatch countDownLatch = new CountDownLatch(1);
+        final MockMagnificationAnimationCallback animationCallback =
+                new MockMagnificationAnimationCallback(countDownLatch);
+        final float targetCenterX = DEFAULT_CENTER_X + 100;
+        final float targetCenterY = DEFAULT_CENTER_Y + 100;
+        enableWindowMagnificationWithoutAnimation();
+
+        mInstrumentation.runOnMainSync(() -> {
+            mWindowMagnificationAnimationController.moveWindowMagnifierToPosition(
+                    targetCenterX, targetCenterY, animationCallback);
+        });
+
+        assertTrue(countDownLatch.await(mWaitingAnimationPeriod, TimeUnit.MILLISECONDS));
+        assertEquals(1, animationCallback.getSuccessCount());
+        assertEquals(0, animationCallback.getFailedCount());
+        verifyFinalSpec(DEFAULT_SCALE, targetCenterX, targetCenterY);
+    }
+
+    @Test
+    public void moveWindowMagnifierToPositionMultipleTimes_enabled_expectedValuesToLastOne()
+            throws InterruptedException {
+        final CountDownLatch countDownLatch = new CountDownLatch(4);
+        final MockMagnificationAnimationCallback animationCallback =
+                new MockMagnificationAnimationCallback(countDownLatch);
+        enableWindowMagnificationWithoutAnimation();
+
+        mInstrumentation.runOnMainSync(() -> {
+            mWindowMagnificationAnimationController.moveWindowMagnifierToPosition(
+                    DEFAULT_CENTER_X + 10, DEFAULT_CENTER_Y + 10, animationCallback);
+            mWindowMagnificationAnimationController.moveWindowMagnifierToPosition(
+                    DEFAULT_CENTER_X + 20, DEFAULT_CENTER_Y + 20, animationCallback);
+            mWindowMagnificationAnimationController.moveWindowMagnifierToPosition(
+                    DEFAULT_CENTER_X + 30, DEFAULT_CENTER_Y + 30, animationCallback);
+            mWindowMagnificationAnimationController.moveWindowMagnifierToPosition(
+                    DEFAULT_CENTER_X + 40, DEFAULT_CENTER_Y + 40, animationCallback);
+        });
+
+        assertTrue(countDownLatch.await(mWaitingAnimationPeriod, TimeUnit.MILLISECONDS));
+        // only the last one callback will return true
+        assertEquals(1, animationCallback.getSuccessCount());
+        // the others will return false
+        assertEquals(3, animationCallback.getFailedCount());
+        verifyFinalSpec(DEFAULT_SCALE, DEFAULT_CENTER_X + 40, DEFAULT_CENTER_Y + 40);
+    }
+
+    @Test
+    public void moveWindowMagnifierToPosition_enabling_expectedValuesToLastOne()
+            throws InterruptedException {
+        final CountDownLatch countDownLatch = new CountDownLatch(2);
+        final MockMagnificationAnimationCallback animationCallback =
+                new MockMagnificationAnimationCallback(countDownLatch);
+        final float targetCenterX = DEFAULT_CENTER_X + 100;
+        final float targetCenterY = DEFAULT_CENTER_Y + 100;
+
+        enableWindowMagnificationAndWaitAnimating(mWaitIntermediateAnimationPeriod,
+                animationCallback);
+        mInstrumentation.runOnMainSync(
+                () -> {
+                    mWindowMagnificationAnimationController.moveWindowMagnifierToPosition(
+                            targetCenterX, targetCenterY, animationCallback);
+                });
+
+        assertTrue(countDownLatch.await(mWaitingAnimationPeriod, TimeUnit.MILLISECONDS));
+        // The callback in moveWindowMagnifierToPosition will return true
+        assertEquals(1, animationCallback.getSuccessCount());
+        // The callback in enableWindowMagnification will return false
+        assertEquals(1, animationCallback.getFailedCount());
+        verifyFinalSpec(DEFAULT_SCALE, targetCenterX, targetCenterY);
+    }
+
+    @Test
+    public void moveWindowMagnifierToPositionWithCenterUnchanged_enabling_expectedValuesToDefault()
+            throws InterruptedException {
+        final CountDownLatch countDownLatch = new CountDownLatch(2);
+        final MockMagnificationAnimationCallback animationCallback =
+                new MockMagnificationAnimationCallback(countDownLatch);
+
+        enableWindowMagnificationAndWaitAnimating(mWaitIntermediateAnimationPeriod,
+                animationCallback);
+        mInstrumentation.runOnMainSync(
+                () -> {
+                    mWindowMagnificationAnimationController.moveWindowMagnifierToPosition(
+                            Float.NaN, Float.NaN, animationCallback);
+                });
+
+        assertTrue(countDownLatch.await(mWaitingAnimationPeriod, TimeUnit.MILLISECONDS));
+        // The callback in moveWindowMagnifierToPosition will return true
+        assertEquals(1, animationCallback.getSuccessCount());
+        // The callback in enableWindowMagnification will return false
+        assertEquals(1, animationCallback.getFailedCount());
+        verifyFinalSpec(DEFAULT_SCALE, DEFAULT_CENTER_X, DEFAULT_CENTER_Y);
+    }
+
+    @Test
     public void enableWindowMagnificationWithSameScale_enabled_doNothingButInvokeCallback()
             throws RemoteException {
         enableWindowMagnificationAndWaitAnimating(mWaitingAnimationPeriod, null);
@@ -569,6 +690,20 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
         verifyFinalSpec(DEFAULT_SCALE, DEFAULT_CENTER_X + 100f, DEFAULT_CENTER_Y + 100f);
     }
 
+    @Test
+    public void moveWindowMagnifierToPosition_enabled() {
+        final float targetCenterX = DEFAULT_CENTER_X + 100;
+        final float targetCenterY = DEFAULT_CENTER_Y + 100;
+        enableWindowMagnificationWithoutAnimation();
+
+        mInstrumentation.runOnMainSync(
+                () -> mController.moveWindowMagnifierToPosition(targetCenterX, targetCenterY,
+                        mAnimationCallback));
+        SystemClock.sleep(mWaitingAnimationPeriod);
+
+        verifyFinalSpec(DEFAULT_SCALE, targetCenterX, targetCenterY);
+    }
+
     private void verifyFinalSpec(float expectedScale, float expectedCenterX,
             float expectedCenterY) {
         assertEquals(expectedScale, mController.getScale(), 0f);
@@ -660,6 +795,13 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
         void moveWindowMagnifier(float offsetX, float offsetY) {
             super.moveWindowMagnifier(offsetX, offsetX);
             mSpyController.moveWindowMagnifier(offsetX, offsetY);
+        }
+
+        @Override
+        void moveWindowMagnifierToPosition(float positionX, float positionY,
+                IRemoteMagnificationAnimationCallback callback) {
+            super.moveWindowMagnifierToPosition(positionX, positionY, callback);
+            mSpyController.moveWindowMagnifierToPosition(positionX, positionY, callback);
         }
 
         @Override

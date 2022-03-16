@@ -70,6 +70,8 @@ public class LetterboxEduDialogLayoutTest extends ShellTestCase {
     public void testOnFinishInflate() {
         assertEquals(mLayout.getDialogContainer(),
                 mLayout.findViewById(R.id.letterbox_education_dialog_container));
+        assertEquals(mLayout.getDialogTitle(),
+                mLayout.findViewById(R.id.letterbox_education_dialog_title));
         assertEquals(mLayout.getBackgroundDim(), mLayout.getBackground());
         assertEquals(mLayout.getBackground().getAlpha(), 0);
     }

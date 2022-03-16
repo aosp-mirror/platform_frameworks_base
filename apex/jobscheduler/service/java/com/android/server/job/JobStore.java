@@ -548,7 +548,7 @@ public final class JobStore {
             out.attribute(null, "sourceUserId", String.valueOf(jobStatus.getSourceUserId()));
             out.attribute(null, "uid", Integer.toString(jobStatus.getUid()));
             out.attribute(null, "bias", String.valueOf(jobStatus.getBias()));
-            out.attribute(null, "priority", String.valueOf(jobStatus.getEffectivePriority()));
+            out.attribute(null, "priority", String.valueOf(jobStatus.getJob().getPriority()));
             out.attribute(null, "flags", String.valueOf(jobStatus.getFlags()));
             if (jobStatus.getInternalFlags() != 0) {
                 out.attribute(null, "internalFlags", String.valueOf(jobStatus.getInternalFlags()));
