@@ -54,6 +54,7 @@ import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.SyncTransactionQueue;
+import com.android.wm.shell.transition.Transitions;
 
 import org.junit.After;
 import org.junit.Before;
@@ -86,11 +87,14 @@ public class LetterboxEduWindowManagerTest extends ShellTestCase {
     private ArgumentCaptor<WindowManager.LayoutParams> mWindowAttrsCaptor;
     @Captor
     private ArgumentCaptor<Runnable> mEndCallbackCaptor;
+    @Captor
+    private ArgumentCaptor<Runnable> mRunOnIdleCaptor;
 
     @Mock private LetterboxEduAnimationController mAnimationController;
     @Mock private SyncTransactionQueue mSyncTransactionQueue;
     @Mock private ShellTaskOrganizer.TaskListener mTaskListener;
     @Mock private SurfaceControlViewHost mViewHost;
+    @Mock private Transitions mTransitions;
     @Mock private Runnable mOnDismissCallback;
 
     private SharedPreferences mSharedPreferences;
@@ -204,6 +208,23 @@ public class LetterboxEduWindowManagerTest extends ShellTestCase {
     }
 
     @Test
+    public void testCreateLayout_windowManagerReleasedBeforeTransitionsIsIdle_doesNotStartAnim() {
+        LetterboxEduWindowManager windowManager = createWindowManager(/* eligible= */ true);
+
+        assertTrue(windowManager.createLayout(/* canShow= */ true));
+
+        assertTrue(mSharedPreferences.getBoolean(mPrefKey, /* default= */ false));
+
+        verify(mTransitions).runOnIdle(mRunOnIdleCaptor.capture());
+
+        windowManager.release();
+
+        mRunOnIdleCaptor.getValue().run();
+
+        verify(mAnimationController, never()).startEnterAnimation(any(), any());
+    }
+
+    @Test
     public void testUpdateCompatInfo_updatesLayoutCorrectly() {
         LetterboxEduWindowManager windowManager = createWindowManager(/* eligible= */ true);
 
@@ -303,6 +324,13 @@ public class LetterboxEduWindowManagerTest extends ShellTestCase {
     }
 
     private void verifyAndFinishEnterAnimation(LetterboxEduDialogLayout layout) {
+        verify(mTransitions).runOnIdle(mRunOnIdleCaptor.capture());
+
+        // startEnterAnimation isn't called until run-on-idle runnable is called.
+        verify(mAnimationController, never()).startEnterAnimation(any(), any());
+
+        mRunOnIdleCaptor.getValue().run();
+
         verify(mAnimationController).startEnterAnimation(eq(layout), mEndCallbackCaptor.capture());
         mEndCallbackCaptor.getValue().run();
     }
@@ -320,7 +348,8 @@ public class LetterboxEduWindowManagerTest extends ShellTestCase {
             boolean isTaskbarEduShowing) {
         LetterboxEduWindowManager windowManager = new LetterboxEduWindowManager(mContext,
                 createTaskInfo(eligible), mSyncTransactionQueue, mTaskListener,
-                createDisplayLayout(), mOnDismissCallback, mAnimationController);
+                createDisplayLayout(), mTransitions, mOnDismissCallback,
+                mAnimationController);
 
         spyOn(windowManager);
         doReturn(mViewHost).when(windowManager).createSurfaceViewHost();

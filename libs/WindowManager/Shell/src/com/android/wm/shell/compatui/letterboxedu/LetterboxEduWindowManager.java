@@ -36,6 +36,7 @@ import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.compatui.CompatUIWindowManagerAbstract;
+import com.android.wm.shell.transition.Transitions;
 
 /**
  * Window manager for the Letterbox Education.
@@ -63,6 +64,8 @@ public class LetterboxEduWindowManager extends CompatUIWindowManagerAbstract {
 
     private final LetterboxEduAnimationController mAnimationController;
 
+    private final Transitions mTransitions;
+
     // Remember the last reported state in case visibility changes due to keyguard or IME updates.
     private boolean mEligibleForLetterboxEducation;
 
@@ -80,17 +83,19 @@ public class LetterboxEduWindowManager extends CompatUIWindowManagerAbstract {
 
     public LetterboxEduWindowManager(Context context, TaskInfo taskInfo,
             SyncTransactionQueue syncQueue, ShellTaskOrganizer.TaskListener taskListener,
-            DisplayLayout displayLayout, Runnable onDismissCallback) {
-        this(context, taskInfo, syncQueue, taskListener, displayLayout, onDismissCallback,
-                new LetterboxEduAnimationController(context));
+            DisplayLayout displayLayout, Transitions transitions,
+            Runnable onDismissCallback) {
+        this(context, taskInfo, syncQueue, taskListener, displayLayout, transitions,
+                onDismissCallback, new LetterboxEduAnimationController(context));
     }
 
     @VisibleForTesting
     LetterboxEduWindowManager(Context context, TaskInfo taskInfo,
             SyncTransactionQueue syncQueue, ShellTaskOrganizer.TaskListener taskListener,
-            DisplayLayout displayLayout, Runnable onDismissCallback,
+            DisplayLayout displayLayout, Transitions transitions, Runnable onDismissCallback,
             LetterboxEduAnimationController animationController) {
         super(context, taskInfo, syncQueue, taskListener, displayLayout);
+        mTransitions = transitions;
         mOnDismissCallback = onDismissCallback;
         mAnimationController = animationController;
         mEligibleForLetterboxEducation = taskInfo.topActivityEligibleForLetterboxEducation;
@@ -132,8 +137,8 @@ public class LetterboxEduWindowManager extends CompatUIWindowManagerAbstract {
         mLayout = inflateLayout();
         updateDialogMargins();
 
-        mAnimationController.startEnterAnimation(mLayout, /* endCallback= */
-                this::onDialogEnterAnimationEnded);
+        // startEnterAnimation will be called immediately if shell-transitions are disabled.
+        mTransitions.runOnIdle(this::startEnterAnimation);
 
         return mLayout;
     }
@@ -158,8 +163,18 @@ public class LetterboxEduWindowManager extends CompatUIWindowManagerAbstract {
                 R.layout.letterbox_education_dialog_layout, null);
     }
 
+    private void startEnterAnimation() {
+        if (mLayout == null) {
+            // Dialog has already been released.
+            return;
+        }
+        mAnimationController.startEnterAnimation(mLayout, /* endCallback= */
+                this::onDialogEnterAnimationEnded);
+    }
+
     private void onDialogEnterAnimationEnded() {
         if (mLayout == null) {
+            // Dialog has already been released.
             return;
         }
         mLayout.setDismissOnClickListener(this::onDismiss);
