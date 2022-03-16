@@ -44232,6 +44232,9 @@ package android.telephony.ims {
     method @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public void unregisterImsRegistrationCallback(@NonNull android.telephony.ims.RegistrationManager.RegistrationCallback);
     method public void unregisterImsStateCallback(@NonNull android.telephony.ims.ImsStateCallback);
     field public static final String ACTION_SHOW_CAPABILITY_DISCOVERY_OPT_IN = "android.telephony.ims.action.SHOW_CAPABILITY_DISCOVERY_OPT_IN";
+    field public static final int CAPABILITY_TYPE_NONE = 0; // 0x0
+    field public static final int CAPABILITY_TYPE_OPTIONS_UCE = 1; // 0x1
+    field public static final int CAPABILITY_TYPE_PRESENCE_UCE = 2; // 0x2
   }
 
   public final class ImsReasonInfo implements android.os.Parcelable {
@@ -44453,10 +44456,10 @@ package android.telephony.ims {
     method public void unregisterFeatureProvisioningChangedCallback(@NonNull android.telephony.ims.ProvisioningManager.FeatureProvisioningCallback);
   }
 
-  public static class ProvisioningManager.FeatureProvisioningCallback {
+  public abstract static class ProvisioningManager.FeatureProvisioningCallback {
     ctor public ProvisioningManager.FeatureProvisioningCallback();
-    method public void onFeatureProvisioningChanged(int, int, boolean);
-    method public void onRcsFeatureProvisioningChanged(int, int, boolean);
+    method public abstract void onFeatureProvisioningChanged(int, int, boolean);
+    method public abstract void onRcsFeatureProvisioningChanged(int, int, boolean);
   }
 
   public class RcsUceAdapter {
@@ -44497,15 +44500,6 @@ package android.telephony.ims.feature {
     field public static final int CAPABILITY_TYPE_UT = 4; // 0x4
     field public static final int CAPABILITY_TYPE_VIDEO = 2; // 0x2
     field public static final int CAPABILITY_TYPE_VOICE = 1; // 0x1
-  }
-
-  public class RcsFeature {
-  }
-
-  public static class RcsFeature.RcsImsCapabilities {
-    field public static final int CAPABILITY_TYPE_NONE = 0; // 0x0
-    field public static final int CAPABILITY_TYPE_OPTIONS_UCE = 1; // 0x1
-    field public static final int CAPABILITY_TYPE_PRESENCE_UCE = 2; // 0x2
   }
 
 }
