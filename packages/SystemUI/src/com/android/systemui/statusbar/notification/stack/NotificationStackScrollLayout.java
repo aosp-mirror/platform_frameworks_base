@@ -782,6 +782,14 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         y = (int) (mAmbientState.getStackY() + mAmbientState.getStackHeight());
         drawDebugInfo(canvas, y, Color.BLUE,
                 /* label= */ "mAmbientState.getStackY() + mAmbientState.getStackHeight() = "+y);
+
+        y = (int) mAmbientState.getStackY() + mContentHeight;
+        drawDebugInfo(canvas, y, Color.MAGENTA,
+                /* label= */ "mAmbientState.getStackY() + mContentHeight = " + y);
+
+        y = (int) mAmbientState.getStackY() + mIntrinsicContentHeight;
+        drawDebugInfo(canvas, y, Color.YELLOW,
+                /* label= */ "mAmbientState.getStackY() + mIntrinsicContentHeight = " + y);
     }
 
     private void drawDebugInfo(Canvas canvas, int y, int color, String label) {
@@ -1293,14 +1301,13 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             mOnStackYChanged.accept(listenerNeedsAnimation);
         }
         if (mQsExpansionFraction <= 0 && !shouldSkipHeightUpdate()) {
-            final float endHeight = updateStackEndHeight(
-                    getHeight(), getEmptyBottomMargin(), mTopPadding);
+            final float endHeight = updateStackEndHeight();
             updateStackHeight(endHeight, fraction);
         }
     }
 
-    public float updateStackEndHeight(float height, float bottomMargin, float topPadding) {
-        final float stackEndHeight = Math.max(0f, height - bottomMargin - topPadding);
+    private float updateStackEndHeight() {
+        final float stackEndHeight = Math.max(0f, mIntrinsicContentHeight);
         mAmbientState.setStackEndHeight(stackEndHeight);
         return stackEndHeight;
     }
