@@ -81,6 +81,9 @@ class MediaTttChipControllerCommonTest : SysuiTestCase() {
         whenever(packageManager.getApplicationIcon(PACKAGE_NAME)).thenReturn(appIconFromPackageName)
         whenever(applicationInfo.loadLabel(packageManager)).thenReturn(APP_NAME)
         whenever(packageManager.getApplicationInfo(
+            any(), any<PackageManager.ApplicationInfoFlags>()
+        )).thenThrow(PackageManager.NameNotFoundException())
+        whenever(packageManager.getApplicationInfo(
             eq(PACKAGE_NAME), any<PackageManager.ApplicationInfoFlags>()
         )).thenReturn(applicationInfo)
         context.setMockPackageManager(packageManager)
@@ -189,6 +192,28 @@ class MediaTttChipControllerCommonTest : SysuiTestCase() {
 
         verify(windowManager, never()).removeView(any())
     }
+    
+    @Test
+    fun displayChip_nullAppIconDrawableAndNullPackageName_stillHasIcon() {
+        controllerCommon.displayChip(getState())
+        val chipView = getChipView()
+
+        controllerCommon.setIcon(chipView, appPackageName = null, appIconDrawableOverride = null)
+
+        assertThat(chipView.getAppIconView().drawable).isNotNull()
+    }
+
+    @Test
+    fun displayChip_nullAppIconDrawableAndInvalidPackageName_stillHasIcon() {
+        controllerCommon.displayChip(getState())
+        val chipView = getChipView()
+
+        controllerCommon.setIcon(
+            chipView, appPackageName = "fakePackageName", appIconDrawableOverride = null
+        )
+
+        assertThat(chipView.getAppIconView().drawable).isNotNull()
+    }
 
     @Test
     fun setIcon_nullAppIconDrawable_iconIsFromPackageName() {
@@ -209,6 +234,28 @@ class MediaTttChipControllerCommonTest : SysuiTestCase() {
         controllerCommon.setIcon(chipView, PACKAGE_NAME, drawable, null)
 
         assertThat(chipView.getAppIconView().drawable).isEqualTo(drawable)
+    }
+
+    @Test
+    fun displayChip_nullAppNameAndNullPackageName_stillHasContentDescription() {
+        controllerCommon.displayChip(getState())
+        val chipView = getChipView()
+
+        controllerCommon.setIcon(chipView, appPackageName = null, appNameOverride = null)
+
+        assertThat(chipView.getAppIconView().contentDescription.toString()).isNotEmpty()
+    }
+
+    @Test
+    fun displayChip_nullAppNameAndInvalidPackageName_stillHasContentDescription() {
+        controllerCommon.displayChip(getState())
+        val chipView = getChipView()
+
+        controllerCommon.setIcon(
+            chipView, appPackageName = "fakePackageName", appNameOverride = null
+        )
+
+        assertThat(chipView.getAppIconView().contentDescription.toString()).isNotEmpty()
     }
 
     @Test
