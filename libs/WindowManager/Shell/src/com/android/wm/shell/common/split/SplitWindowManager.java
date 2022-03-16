@@ -58,6 +58,9 @@ public final class SplitWindowManager extends WindowlessWindowManager {
     private SurfaceControl mLeash;
     private DividerView mDividerView;
 
+    // Used to "pass" a transaction to WWM.remove so that view removal can be synchronized.
+    private SurfaceControl.Transaction mSyncTransaction = null;
+
     public interface ParentContainerCallbacks {
         void attachToParentSurface(SurfaceControl.Builder b);
         void onLeashReady(SurfaceControl leash);
@@ -130,19 +133,35 @@ public final class SplitWindowManager extends WindowlessWindowManager {
      * Releases the surface control of the current {@link DividerView} and tear down the view
      * hierarchy.
      */
-    void release() {
+    void release(@Nullable SurfaceControl.Transaction t) {
         if (mDividerView != null) {
             mDividerView = null;
         }
 
         if (mViewHost != null){
+            mSyncTransaction = t;
             mViewHost.release();
+            mSyncTransaction = null;
             mViewHost = null;
         }
 
         if (mLeash != null) {
-            new SurfaceControl.Transaction().remove(mLeash).apply();
+            if (t == null) {
+                new SurfaceControl.Transaction().remove(mLeash).apply();
+            } else {
+                t.remove(mLeash);
+            }
             mLeash = null;
+        }
+    }
+
+    @Override
+    protected void removeSurface(SurfaceControl sc) {
+        // This gets called via SurfaceControlViewHost.release()
+        if (mSyncTransaction != null) {
+            mSyncTransaction.remove(sc);
+        } else {
+            super.removeSurface(sc);
         }
     }
 

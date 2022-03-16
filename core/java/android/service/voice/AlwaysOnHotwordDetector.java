@@ -279,7 +279,7 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
     private KeyphraseMetadata mKeyphraseMetadata;
     private final KeyphraseEnrollmentInfo mKeyphraseEnrollmentInfo;
     private final IVoiceInteractionManagerService mModelManagementService;
-    private final IVoiceInteractionSoundTriggerSession mSoundTriggerSession;
+    private IVoiceInteractionSoundTriggerSession mSoundTriggerSession;
     private final SoundTriggerListener mInternalCallback;
     private final Callback mExternalCallback;
     private final Handler mHandler;
@@ -788,8 +788,7 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
     public AlwaysOnHotwordDetector(String text, Locale locale, Callback callback,
             KeyphraseEnrollmentInfo keyphraseEnrollmentInfo,
             IVoiceInteractionManagerService modelManagementService, int targetSdkVersion,
-            boolean supportHotwordDetectionService, @Nullable PersistableBundle options,
-            @Nullable SharedMemory sharedMemory) {
+            boolean supportHotwordDetectionService) {
         super(modelManagementService, callback,
                 supportHotwordDetectionService ? DETECTOR_TYPE_TRUSTED_HOTWORD_DSP
                         : DETECTOR_TYPE_NORMAL);
@@ -803,6 +802,12 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
         mModelManagementService = modelManagementService;
         mTargetSdkVersion = targetSdkVersion;
         mSupportHotwordDetectionService = supportHotwordDetectionService;
+    }
+
+    @Override
+    void initialize(@Nullable PersistableBundle options, @Nullable SharedMemory sharedMemory) {
+        // TODO: transition to use an API that is not updateState to provide
+        //  onHotwordDetectionServiceInitialized status to external callback
         if (mSupportHotwordDetectionService) {
             updateStateLocked(options, sharedMemory, mInternalCallback,
                     DETECTOR_TYPE_TRUSTED_HOTWORD_DSP);
@@ -851,7 +856,8 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
     @RequiresPermission(allOf = {RECORD_AUDIO, CAPTURE_AUDIO_HOTWORD})
     public void triggerHardwareRecognitionEventForTest(int status, int soundModelHandle,
             boolean captureAvailable, int captureSession, int captureDelayMs, int capturePreambleMs,
-            boolean triggerInData, @NonNull AudioFormat captureFormat, @Nullable byte[] data) {
+            boolean triggerInData, @NonNull AudioFormat captureFormat, @Nullable byte[] data,
+            @NonNull List<KeyphraseRecognitionExtra> keyphraseRecognitionExtras) {
         Log.d(TAG, "triggerHardwareRecognitionEventForTest()");
         synchronized (mLock) {
             if (mAvailability == STATE_INVALID || mAvailability == STATE_ERROR) {
@@ -862,7 +868,8 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
                 mModelManagementService.triggerHardwareRecognitionEventForTest(
                         new KeyphraseRecognitionEvent(status, soundModelHandle, captureAvailable,
                                 captureSession, captureDelayMs, capturePreambleMs, triggerInData,
-                                captureFormat, data, null /* keyphraseExtras */),
+                                captureFormat, data, keyphraseRecognitionExtras.toArray(
+                                new KeyphraseRecognitionExtra[0])),
                         mInternalCallback);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
@@ -1210,7 +1217,11 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
     public void destroy() {
         synchronized (mLock) {
             if (mAvailability == STATE_KEYPHRASE_ENROLLED) {
-                stopRecognition();
+                try {
+                    stopRecognition();
+                } catch (Exception e) {
+                    Log.i(TAG, "failed to stopRecognition in destroy", e);
+                }
             }
 
             mAvailability = STATE_INVALID;

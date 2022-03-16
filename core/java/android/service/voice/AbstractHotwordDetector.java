@@ -65,6 +65,13 @@ abstract class AbstractHotwordDetector implements HotwordDetector {
     }
 
     /**
+     * Method to be called for the detector to ready/register itself with underlying system
+     * services.
+     */
+    abstract void initialize(@Nullable PersistableBundle options,
+            @Nullable SharedMemory sharedMemory);
+
+    /**
      * Detect hotword from an externally supplied stream of data.
      *
      * @return true if the request to start recognition succeeded

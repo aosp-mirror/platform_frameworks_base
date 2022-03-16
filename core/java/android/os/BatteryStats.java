@@ -2683,7 +2683,7 @@ public abstract class BatteryStats implements Parcelable {
     public static final String[] RADIO_ACCESS_TECHNOLOGY_NAMES = {"Other", "LTE", "NR"};
 
     /**
-     * Returns the time in microseconds that the mobile radio has been active on a
+     * Returns the time in milliseconds that the mobile radio has been active on a
      * given Radio Access Technology (RAT), at a given frequency (NR RAT only), for a given
      * transmission power level.
      *
@@ -2703,7 +2703,7 @@ public abstract class BatteryStats implements Parcelable {
             long elapsedRealtimeMs);
 
     /**
-     * Returns the time in microseconds that the mobile radio has been actively transmitting data on
+     * Returns the time in milliseconds that the mobile radio has been actively transmitting data on
      * a given Radio Access Technology (RAT), at a given frequency (NR RAT only), for a given
      * transmission power level.
      *
@@ -2724,7 +2724,7 @@ public abstract class BatteryStats implements Parcelable {
             long elapsedRealtimeMs);
 
     /**
-     * Returns the time in microseconds that the mobile radio has been actively receiving data on a
+     * Returns the time in milliseconds that the mobile radio has been actively receiving data on a
      * given Radio Access Technology (RAT), at a given frequency (NR RAT only), for a given
      * transmission power level.
      *

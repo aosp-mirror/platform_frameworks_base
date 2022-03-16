@@ -516,8 +516,6 @@ public class ResolverActivityTest {
         onView(withText(R.string.resolver_work_tab))
                 .perform(click());
         waitForIdle();
-        // wait for the share sheet to expand
-        Thread.sleep(ChooserActivity.LIST_VIEW_UPDATE_INTERVAL_IN_MILLIS);
         onView(first(allOf(withText(workResolvedComponentInfos.get(0)
                 .getResolveInfoAt(0).activityInfo.applicationInfo.name), isCompletelyDisplayed())))
                 .perform(click());
@@ -616,8 +614,6 @@ public class ResolverActivityTest {
         onView(withText(R.string.resolver_work_tab))
                 .perform(click());
         waitForIdle();
-        // wait for the share sheet to expand
-        Thread.sleep(ChooserActivity.LIST_VIEW_UPDATE_INTERVAL_IN_MILLIS);
         onView(first(allOf(
                 withText(workResolvedComponentInfos.get(0)
                         .getResolveInfoAt(0).activityInfo.applicationInfo.name),

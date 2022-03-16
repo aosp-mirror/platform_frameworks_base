@@ -39,13 +39,18 @@ import com.android.systemui.statusbar.notification.interruption.KeyguardNotifica
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+/**
+ * TODO(b/224771204) Create test cases
+ */
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
+@Ignore
 public class KeyguardCoordinatorTest extends SysuiTestCase {
     private static final int NOTIF_USER_ID = 0;
     private static final int CURR_USER_ID = 1;

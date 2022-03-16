@@ -467,7 +467,9 @@ public final class DreamManagerService extends SystemService {
         }
         mCurrentDreamDozeScreenState = Display.STATE_UNKNOWN;
         mCurrentDreamDozeScreenBrightness = PowerManager.BRIGHTNESS_DEFAULT;
-        mAtmInternal.notifyDreamStateChanged(false);
+        mHandler.post(() -> {
+            mAtmInternal.notifyDreamStateChanged(false);
+        });
     }
 
     private void checkPermission(String permission) {

@@ -1393,13 +1393,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     // TODO(b/161810301): Make the frame be passed from the client side.
-    void setFrame() {
-        // TODO(b/161810301): Set the window frame here. We don't have to do it now because
-        //                    DisplayPolicy has already done it for the window.
-
+    void setFrames(ClientWindowFrames clientWindowFrames) {
         mHaveFrame = true;
 
         final WindowFrames windowFrames = mWindowFrames;
+        windowFrames.mDisplayFrame.set(clientWindowFrames.displayFrame);
+        windowFrames.mParentFrame.set(clientWindowFrames.parentFrame);
+        windowFrames.mFrame.set(clientWindowFrames.frame);
 
         if (mRequestedWidth != mLastRequestedWidth || mRequestedHeight != mLastRequestedHeight) {
             mLastRequestedWidth = mRequestedWidth;
@@ -3946,7 +3946,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         try {
             mClient.resized(mClientWindowFrames, reportDraw, mLastReportedConfiguration,
-                    forceRelayout, alwaysConsumeSystemBars, displayId);
+                forceRelayout, alwaysConsumeSystemBars, displayId, Integer.MAX_VALUE);
             if (drawPending && reportOrientation && mOrientationChanging) {
                 mOrientationChangeRedrawRequestTime = SystemClock.elapsedRealtime();
                 ProtoLog.v(WM_DEBUG_ORIENTATION,
@@ -5938,7 +5938,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         super.finishSync(outMergedTransaction, cancel);
     }
 
-    boolean finishDrawing(SurfaceControl.Transaction postDrawTransaction) {
+    boolean finishDrawing(SurfaceControl.Transaction postDrawTransaction, int syncSeqId) {
         if (mOrientationChangeRedrawRequestTime > 0) {
             final long duration =
                     SystemClock.elapsedRealtime() - mOrientationChangeRedrawRequestTime;
@@ -5985,7 +5985,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     void immediatelyNotifyBlastSync() {
         prepareDrawHandlers();
-        finishDrawing(null);
+        finishDrawing(null, Integer.MAX_VALUE);
         mWmService.mH.removeMessages(WINDOW_STATE_BLAST_SYNC_TIMEOUT, this);
         if (!useBLASTSync()) return;
     }

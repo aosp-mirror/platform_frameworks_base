@@ -55,7 +55,8 @@ oneway interface IWindow {
 
     void resized(in ClientWindowFrames frames, boolean reportDraw,
             in MergedConfiguration newMergedConfiguration,
-            boolean forceLayout, boolean alwaysConsumeSystemBars, int displayId);
+            boolean forceLayout, boolean alwaysConsumeSystemBars, int displayId,
+            int syncSeqId);
 
     /**
      * Called when the window insets configuration has changed.

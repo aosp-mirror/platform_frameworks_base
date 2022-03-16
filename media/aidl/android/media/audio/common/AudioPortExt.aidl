@@ -34,6 +34,9 @@ union AudioPortExt {
     AudioPortDeviceExt device;
     /** Information specific to mix ports. */
     AudioPortMixExt mix;
-    /** Audio session identifier. */
+    /**
+     * NOT USED. Framework audio session identifier.
+     * Use android.media.AudioPortExtSys.session on the system side.
+     */
     int session;
 }
