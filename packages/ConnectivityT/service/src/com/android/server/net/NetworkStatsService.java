@@ -1194,7 +1194,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     }
 
     @VisibleForTesting
-    public void setUidForeground(int uid, boolean uidForeground) {
+    public void noteUidForeground(int uid, boolean uidForeground) {
         PermissionUtils.enforceNetworkStackPermission(mContext);
         synchronized (mStatsLock) {
             final int set = uidForeground ? SET_FOREGROUND : SET_DEFAULT;
