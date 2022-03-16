@@ -189,4 +189,9 @@ abstract class BaseIDevicePolicyManager extends IDevicePolicyManager.Stub {
     public ParcelableResource getString(String stringId) {
         return null;
     }
+
+    @Override
+    public boolean shouldAllowBypassingDevicePolicyManagementRoleQualification() {
+        return false;
+    }
 }

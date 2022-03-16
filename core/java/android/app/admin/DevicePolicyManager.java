@@ -15765,4 +15765,23 @@ public class DevicePolicyManager {
         }
         return deviceManagerConfig;
     }
+
+    /**
+     * @return {@code true} if bypassing the device policy management role qualification is allowed
+     * with the current state of the device.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_ROLE_HOLDERS)
+    public boolean shouldAllowBypassingDevicePolicyManagementRoleQualification() {
+        if (mService != null) {
+            try {
+                return mService.shouldAllowBypassingDevicePolicyManagementRoleQualification();
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return false;
+    }
 }
