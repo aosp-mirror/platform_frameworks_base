@@ -3346,6 +3346,34 @@ public class DevicePolicyManager {
             RESULT_UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER_PROVISIONING_DISABLED = 3;
 
     /**
+     * An {@code int} extra which contains the result code of the last attempt to update
+     * the device policy management role holder.
+     *
+     * <p>This extra is provided to the device policy management role holder via either {@link
+     * #ACTION_ROLE_HOLDER_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE} or {@link
+     * #ACTION_ROLE_HOLDER_PROVISION_MANAGED_PROFILE} when started after the role holder
+     * had previously returned {@link #RESULT_UPDATE_ROLE_HOLDER}.
+     *
+     * <p>If the role holder update had failed, the role holder can use the value of this extra to
+     * make a decision whether to fail the provisioning flow or to carry on with the older version
+     * of the role holder.
+     *
+     * <p>Possible values can be:
+     * <ul>
+     *    <li>{@link Activity#RESULT_OK} if the update was successful
+     *    <li>{@link #RESULT_UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER_RECOVERABLE_ERROR} if it
+     *    encounters a problem that may be solved by relaunching it again.
+     *    <li>{@link #RESULT_UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER_UNRECOVERABLE_ERROR} if
+     *    it encounters a problem that will not be solved by relaunching it again.
+     * </ul>
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_ROLE_HOLDER_UPDATE_RESULT_CODE =
+            "android.app.extra.ROLE_HOLDER_UPDATE_RESULT_CODE";
+
+    /**
      * An {@link Intent} extra which resolves to a custom user consent screen.
      *
      * <p>If this extra is provided to the device policy management role holder via either {@link
