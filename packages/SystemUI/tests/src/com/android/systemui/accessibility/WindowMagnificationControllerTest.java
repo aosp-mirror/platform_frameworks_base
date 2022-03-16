@@ -172,15 +172,24 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
 
     @Test
     public void enableWindowMagnification_notifySourceBoundsChanged() {
-        mInstrumentation.runOnMainSync(() -> {
-            mWindowMagnificationController.enableWindowMagnification(Float.NaN, Float.NaN,
-                    Float.NaN, /* magnificationFrameOffsetRatioX= */ 0,
-                    /* magnificationFrameOffsetRatioY= */ 0, null);
-        });
+        mInstrumentation.runOnMainSync(
+                () -> mWindowMagnificationController.enableWindowMagnification(Float.NaN, Float.NaN,
+                        Float.NaN, /* magnificationFrameOffsetRatioX= */ 0,
+                /* magnificationFrameOffsetRatioY= */ 0, null));
 
         // Waits for the surface created
         verify(mWindowMagnifierCallback, timeout(LAYOUT_CHANGE_TIMEOUT_MS)).onSourceBoundsChanged(
                 (eq(mContext.getDisplayId())), any());
+    }
+
+    @Test
+    public void enableWindowMagnification_disabled_notifySourceBoundsChanged() {
+        enableWindowMagnification_notifySourceBoundsChanged();
+        mInstrumentation.runOnMainSync(
+                () -> mWindowMagnificationController.deleteWindowMagnification(null));
+        Mockito.reset(mWindowMagnifierCallback);
+
+        enableWindowMagnification_notifySourceBoundsChanged();
     }
 
     @Test
