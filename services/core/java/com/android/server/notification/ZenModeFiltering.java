@@ -33,6 +33,7 @@ import android.telecom.TelecomManager;
 import android.telephony.PhoneNumberUtils;
 import android.telephony.TelephonyManager;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.Slog;
 
 import com.android.internal.messages.nano.SystemMessageProto;
@@ -126,7 +127,7 @@ public class ZenModeFiltering {
     }
 
     protected void recordCall(NotificationRecord record) {
-        REPEAT_CALLERS.recordCall(mContext, extras(record));
+        REPEAT_CALLERS.recordCall(mContext, extras(record), record.getPhoneNumbers());
     }
 
     /**
@@ -325,6 +326,10 @@ public class ZenModeFiltering {
         }
     }
 
+    protected void cleanUpCallersAfter(long timeThreshold) {
+        REPEAT_CALLERS.cleanUpCallsAfter(timeThreshold);
+    }
+
     private static class RepeatCallers {
         // We keep a separate map per uri scheme to do more generous number-matching
         // handling on telephone numbers specifically. For other inputs, we
@@ -333,7 +338,8 @@ public class ZenModeFiltering {
         private final ArrayMap<String, Long> mOtherCalls = new ArrayMap<>();
         private int mThresholdMinutes;
 
-        private synchronized void recordCall(Context context, Bundle extras) {
+        private synchronized void recordCall(Context context, Bundle extras,
+                ArraySet<String> phoneNumbers) {
             setThresholdMinutes(context);
             if (mThresholdMinutes <= 0 || extras == null) return;
             final String[] extraPeople = ValidateNotificationPeople.getExtraPeople(extras);
@@ -341,7 +347,7 @@ public class ZenModeFiltering {
             final long now = System.currentTimeMillis();
             cleanUp(mTelCalls, now);
             cleanUp(mOtherCalls, now);
-            recordCallers(extraPeople, now);
+            recordCallers(extraPeople, phoneNumbers, now);
         }
 
         private synchronized boolean isRepeat(Context context, Bundle extras) {
@@ -365,6 +371,23 @@ public class ZenModeFiltering {
             }
         }
 
+        // Clean up all calls that occurred after the given time.
+        // Used only for tests, to clean up after testing.
+        private synchronized void cleanUpCallsAfter(long timeThreshold) {
+            for (int i = mTelCalls.size() - 1; i >= 0; i--) {
+                final long time = mTelCalls.valueAt(i);
+                if (time > timeThreshold) {
+                    mTelCalls.removeAt(i);
+                }
+            }
+            for (int j = mOtherCalls.size() - 1; j >= 0; j--) {
+                final long time = mOtherCalls.valueAt(j);
+                if (time > timeThreshold) {
+                    mOtherCalls.removeAt(j);
+                }
+            }
+        }
+
         private void setThresholdMinutes(Context context) {
             if (mThresholdMinutes <= 0) {
                 mThresholdMinutes = context.getResources().getInteger(com.android.internal.R.integer
@@ -372,7 +395,8 @@ public class ZenModeFiltering {
             }
         }
 
-        private synchronized void recordCallers(String[] people, long now) {
+        private synchronized void recordCallers(String[] people, ArraySet<String> phoneNumbers,
+                long now) {
             for (int i = 0; i < people.length; i++) {
                 String person = people[i];
                 if (person == null) continue;
@@ -391,6 +415,14 @@ public class ZenModeFiltering {
                 } else {
                     // for non-tel calls, store the entire string, uri-component and all
                     mOtherCalls.put(person, now);
+                }
+            }
+
+            // record any additional numbers from the notification record if
+            // provided; these are in the format of just a phone number string
+            if (phoneNumbers != null) {
+                for (String num : phoneNumbers) {
+                    mTelCalls.put(num, now);
                 }
             }
         }
