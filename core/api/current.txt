@@ -6645,6 +6645,15 @@ package android.app {
 
   public final class PictureInPictureParams implements android.os.Parcelable {
     method public int describeContents();
+    method @NonNull public java.util.List<android.app.RemoteAction> getActions();
+    method @Nullable public android.util.Rational getAspectRatio();
+    method @Nullable public android.app.RemoteAction getCloseAction();
+    method @Nullable public android.util.Rational getExpandedAspectRatio();
+    method @Nullable public android.graphics.Rect getSourceRectHint();
+    method @Nullable public CharSequence getSubtitle();
+    method @Nullable public CharSequence getTitle();
+    method public boolean isAutoEnterEnabled();
+    method public boolean isSeamlessResizeEnabled();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.PictureInPictureParams> CREATOR;
   }

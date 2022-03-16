@@ -3523,8 +3523,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 }
                 // Only update the saved args from the args that are set
                 r.setPictureInPictureParams(params);
-                final float aspectRatio = r.pictureInPictureArgs.getAspectRatio();
-                final float expandedAspectRatio = r.pictureInPictureArgs.getExpandedAspectRatio();
+                final float aspectRatio = r.pictureInPictureArgs.getAspectRatioFloat();
+                final float expandedAspectRatio =
+                        r.pictureInPictureArgs.getExpandedAspectRatioFloat();
                 final List<RemoteAction> actions = r.pictureInPictureArgs.getActions();
                 mRootWindowContainer.moveActivityToPinnedRootTask(r,
                         null /* launchIntoPipHostActivity */, "enterPictureInPictureMode");
