@@ -24,6 +24,8 @@ import android.os.Parcelable;
  * A request for command from broadcast signal.
  */
 public final class CommandRequest extends BroadcastInfoRequest implements Parcelable {
+    public static final String ARGUMENT_TYPE_XML = "xml";
+    public static final String ARGUMENT_TYPE_JSON = "json";
     private static final @TvInputManager.BroadcastInfoType int REQUEST_TYPE =
             TvInputManager.BROADCAST_INFO_TYPE_COMMAND;
 
@@ -41,35 +43,38 @@ public final class CommandRequest extends BroadcastInfoRequest implements Parcel
                 }
             };
 
-    private final String mNameSpace;
+    private final String mNamespace;
     private final String mName;
     private final String mArguments;
+    private final String mArgumentType;
 
     static CommandRequest createFromParcelBody(Parcel in) {
         return new CommandRequest(in);
     }
 
-    public CommandRequest(int requestId, @RequestOption int option, @NonNull String nameSpace,
-            @NonNull String name, @NonNull String arguments) {
+    public CommandRequest(int requestId, @RequestOption int option, @NonNull String namespace,
+            @NonNull String name, @NonNull String arguments, @NonNull String argumentType) {
         super(REQUEST_TYPE, requestId, option);
-        mNameSpace = nameSpace;
+        mNamespace = namespace;
         mName = name;
         mArguments = arguments;
+        mArgumentType = argumentType;
     }
 
     CommandRequest(Parcel source) {
         super(REQUEST_TYPE, source);
-        mNameSpace = source.readString();
+        mNamespace = source.readString();
         mName = source.readString();
         mArguments = source.readString();
+        mArgumentType = source.readString();
     }
 
     /**
      * Gets the namespace of the command.
      */
     @NonNull
-    public String getNameSpace() {
-        return mNameSpace;
+    public String getNamespace() {
+        return mNamespace;
     }
 
     /**
@@ -89,6 +94,15 @@ public final class CommandRequest extends BroadcastInfoRequest implements Parcel
         return mArguments;
     }
 
+    /**
+     * Gets the argument type of the command.
+     * It could be either JSON or XML.
+     */
+    @NonNull
+    public String getArgumentType() {
+        return mArgumentType;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -97,8 +111,9 @@ public final class CommandRequest extends BroadcastInfoRequest implements Parcel
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
-        dest.writeString(mNameSpace);
+        dest.writeString(mNamespace);
         dest.writeString(mName);
         dest.writeString(mArguments);
+        dest.writeString(mArgumentType);
     }
 }
