@@ -4260,14 +4260,11 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         dpm.setPreferentialNetworkServiceConfigs(List.of(preferentialNetworkServiceConfigEnabled));
         assertThat(dpm.getPreferentialNetworkServiceConfigs().get(0)
                 .isEnabled()).isTrue();
-        List<Integer> includedList = new ArrayList<>();
-        includedList.add(1);
-        includedList.add(2);
         ProfileNetworkPreference preferenceDetails =
                 new ProfileNetworkPreference.Builder()
                         .setPreference(PROFILE_NETWORK_PREFERENCE_ENTERPRISE_NO_FALLBACK)
                         .setPreferenceEnterpriseId(NET_ENTERPRISE_ID_1)
-                        .setIncludedUids(includedList)
+                        .setIncludedUids(new int[]{1, 2})
                         .build();
         List<ProfileNetworkPreference> preferences = new ArrayList<>();
         preferences.add(preferenceDetails);
@@ -4295,14 +4292,11 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         dpm.setPreferentialNetworkServiceConfigs(List.of(preferentialNetworkServiceConfigEnabled));
         assertThat(dpm.getPreferentialNetworkServiceConfigs().get(0)
                 .isEnabled()).isTrue();
-        List<Integer> excludedUids = new ArrayList<>();
-        excludedUids.add(1);
-        excludedUids.add(2);
         ProfileNetworkPreference preferenceDetails =
                 new ProfileNetworkPreference.Builder()
                         .setPreference(PROFILE_NETWORK_PREFERENCE_ENTERPRISE_NO_FALLBACK)
                         .setPreferenceEnterpriseId(NET_ENTERPRISE_ID_1)
-                        .setExcludedUids(excludedUids)
+                        .setExcludedUids(new int[]{1, 2})
                         .build();
         List<ProfileNetworkPreference> preferences = new ArrayList<>();
         preferences.clear();
