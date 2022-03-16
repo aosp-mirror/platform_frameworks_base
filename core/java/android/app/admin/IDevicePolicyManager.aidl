@@ -17,6 +17,7 @@
 
 package android.app.admin;
 
+import android.accounts.Account;
 import android.app.admin.DevicePolicyDrawableResource;
 import android.app.admin.DevicePolicyStringResource;
 import android.app.admin.ParcelableResource;
@@ -527,6 +528,8 @@ interface IDevicePolicyManager {
 
     UserHandle createAndProvisionManagedProfile(in ManagedProfileProvisioningParams provisioningParams, in String callerPackage);
     void provisionFullyManagedDevice(in FullyManagedDeviceProvisioningParams provisioningParams, in String callerPackage);
+
+    void finalizeWorkProfileProvisioning(in UserHandle managedProfileUser, in Account migratedAccount);
 
     void setDeviceOwnerType(in ComponentName admin, in int deviceOwnerType);
     int getDeviceOwnerType(in ComponentName admin);
