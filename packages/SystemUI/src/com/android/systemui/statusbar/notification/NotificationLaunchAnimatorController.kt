@@ -25,7 +25,7 @@ class NotificationLaunchAnimatorControllerProvider @Inject constructor(
     @JvmOverloads
     fun getAnimatorController(
         notification: ExpandableNotificationRow,
-        onFinishAnimationCallback: Runnable = Runnable {}
+        onFinishAnimationCallback: Runnable? = null
     ): NotificationLaunchAnimatorController {
         return NotificationLaunchAnimatorController(
             notificationShadeWindowViewController,
@@ -49,7 +49,7 @@ class NotificationLaunchAnimatorController(
     private val headsUpManager: HeadsUpManagerPhone,
     private val notification: ExpandableNotificationRow,
     private val jankMonitor: InteractionJankMonitor,
-    private val onFinishAnimationCallback: Runnable
+    private val onFinishAnimationCallback: Runnable?
 ) : ActivityLaunchAnimator.Controller {
 
     companion object {
@@ -123,7 +123,7 @@ class NotificationLaunchAnimatorController(
 
         if (!willAnimate) {
             removeHun(animate = true)
-            onFinishAnimationCallback.run()
+            onFinishAnimationCallback?.run()
         }
     }
 
@@ -142,7 +142,7 @@ class NotificationLaunchAnimatorController(
         notificationShadeWindowViewController.setExpandAnimationRunning(false)
         notificationEntry.isExpandAnimationRunning = false
         removeHun(animate = true)
-        onFinishAnimationCallback.run()
+        onFinishAnimationCallback?.run()
     }
 
     override fun onLaunchAnimationStart(isExpandingFullyAbove: Boolean) {
@@ -162,7 +162,7 @@ class NotificationLaunchAnimatorController(
         notificationListContainer.setExpandingNotification(null)
         applyParams(null)
         removeHun(animate = false)
-        onFinishAnimationCallback.run()
+        onFinishAnimationCallback?.run()
     }
 
     private fun applyParams(params: ExpandAnimationParameters?) {
