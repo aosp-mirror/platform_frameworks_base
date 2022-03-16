@@ -535,7 +535,7 @@ public class TaskSnapshotWindow {
         @Override
         public void resized(ClientWindowFrames frames, boolean reportDraw,
                 MergedConfiguration mergedConfiguration, boolean forceLayout,
-                boolean alwaysConsumeSystemBars, int displayId, int seqId) {
+                boolean alwaysConsumeSystemBars, int displayId, int seqId, int resizeMode) {
             if (mOuter != null) {
                 mOuter.mSplashScreenExecutor.execute(() -> {
                     if (mergedConfiguration != null

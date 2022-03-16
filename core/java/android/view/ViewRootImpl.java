@@ -53,8 +53,8 @@ import static android.view.ViewRootImplProto.WIDTH;
 import static android.view.ViewRootImplProto.WINDOW_ATTRIBUTES;
 import static android.view.ViewRootImplProto.WIN_FRAME;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION;
-import static android.view.WindowCallbacks.RESIZE_MODE_DOCKED_DIVIDER;
 import static android.view.WindowCallbacks.RESIZE_MODE_FREEFORM;
+import static android.view.WindowCallbacks.RESIZE_MODE_INVALID;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_LOW_PROFILE_BARS;
@@ -85,8 +85,6 @@ import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_ADDITIONAL
 import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 import static android.view.WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY;
-import static android.view.WindowManagerGlobal.RELAYOUT_RES_DRAG_RESIZING_DOCKED;
-import static android.view.WindowManagerGlobal.RELAYOUT_RES_DRAG_RESIZING_FREEFORM;
 import static android.view.WindowManagerGlobal.RELAYOUT_RES_SURFACE_CHANGED;
 import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodClientsTraceProto.ClientSideProto.IME_FOCUS_CONTROLLER;
 import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodClientsTraceProto.ClientSideProto.INSETS_CONTROLLER;
@@ -503,9 +501,10 @@ public final class ViewRootImpl implements ViewParent,
     public boolean mIsAnimating;
 
     private boolean mUseMTRenderer;
+    private boolean mPendingDragResizing;
     private boolean mDragResizing;
     private boolean mInvalidateRootRequested;
-    private int mResizeMode;
+    private int mResizeMode = RESIZE_MODE_INVALID;
     private int mCanvasOffsetX;
     private int mCanvasOffsetY;
     private boolean mActivityRelaunched;
@@ -1711,16 +1710,21 @@ public final class ViewRootImpl implements ViewParent,
         final MergedConfiguration mergedConfiguration = (MergedConfiguration) args.arg2;
         final boolean forceNextWindowRelayout = args.argi1 != 0;
         final int displayId = args.argi3;
+        final int resizeMode = args.argi5;
         final Rect backdropFrame = frames.backdropFrame;
 
         final boolean frameChanged = !mWinFrame.equals(frames.frame);
         final boolean backdropFrameChanged = !mPendingBackDropFrame.equals(backdropFrame);
         final boolean configChanged = !mLastReportedMergedConfiguration.equals(mergedConfiguration);
         final boolean displayChanged = mDisplay.getDisplayId() != displayId;
+        final boolean resizeModeChanged = mResizeMode != resizeMode;
         if (msg == MSG_RESIZED && !frameChanged && !backdropFrameChanged && !configChanged
-                && !displayChanged && !forceNextWindowRelayout) {
+                && !displayChanged && !resizeModeChanged && !forceNextWindowRelayout) {
             return;
         }
+
+        mPendingDragResizing = resizeMode != RESIZE_MODE_INVALID;
+        mResizeMode = resizeMode;
 
         if (configChanged) {
             // If configuration changed - notify about that and, maybe, about move to display.
@@ -2920,11 +2924,7 @@ public final class ViewRootImpl implements ViewParent,
                     mViewFrameInfo.flags |= FrameInfo.FLAG_WINDOW_VISIBILITY_CHANGED;
                 }
                 relayoutResult = relayoutWindow(params, viewVisibility, insetsPending);
-                final boolean freeformResizing = (relayoutResult
-                        & RELAYOUT_RES_DRAG_RESIZING_FREEFORM) != 0;
-                final boolean dockedResizing = (relayoutResult
-                        & RELAYOUT_RES_DRAG_RESIZING_DOCKED) != 0;
-                final boolean dragResizing = freeformResizing || dockedResizing;
+                final boolean dragResizing = mPendingDragResizing;
                 if (mSyncSeqId > mLastSyncSeqId) {
                     mLastSyncSeqId = mSyncSeqId;
                     if (DEBUG_BLAST) {
@@ -3065,9 +3065,6 @@ public final class ViewRootImpl implements ViewParent,
 
                 if (mDragResizing != dragResizing) {
                     if (dragResizing) {
-                        mResizeMode = freeformResizing
-                                ? RESIZE_MODE_FREEFORM
-                                : RESIZE_MODE_DOCKED_DIVIDER;
                         final boolean backdropSizeMatchesFrame =
                                 mWinFrame.width() == mPendingBackDropFrame.width()
                                         && mWinFrame.height() == mPendingBackDropFrame.height();
@@ -7982,11 +7979,9 @@ public final class ViewRootImpl implements ViewParent,
                 (mDisplayInstallOrientation + mDisplay.getRotation()) % 4);
 
         final WindowConfiguration winConfig = getConfiguration().windowConfiguration;
-        final boolean dragResizing = (relayoutResult
-                & (RELAYOUT_RES_DRAG_RESIZING_DOCKED | RELAYOUT_RES_DRAG_RESIZING_FREEFORM)) != 0;
         WindowLayout.computeSurfaceSize(mWindowAttributes, winConfig.getMaxBounds(), requestedWidth,
-                requestedHeight, mTmpFrames.frame, dragResizing, mSurfaceSize);
-      
+                requestedHeight, mTmpFrames.frame, mPendingDragResizing, mSurfaceSize);
+
         final boolean transformHintChanged = transformHint != mLastTransformHint;
         final boolean sizeChanged = !mLastSurfaceSize.equals(mSurfaceSize);
         final boolean surfaceControlChanged =
@@ -8476,7 +8471,7 @@ public final class ViewRootImpl implements ViewParent,
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private void dispatchResized(ClientWindowFrames frames, boolean reportDraw,
             MergedConfiguration mergedConfiguration, boolean forceLayout,
-                                 boolean alwaysConsumeSystemBars, int displayId, int seqId) {
+            boolean alwaysConsumeSystemBars, int displayId, int seqId, int resizeMode) {
         final Rect frame = frames.frame;
         final Rect backDropFrame = frames.backdropFrame;
         if (DEBUG_LAYOUT) Log.v(mTag, "Resizing " + this + ": frame=" + frame.toShortString()
@@ -8508,6 +8503,7 @@ public final class ViewRootImpl implements ViewParent,
         args.argi2 = alwaysConsumeSystemBars ? 1 : 0;
         args.argi3 = displayId;
         args.argi4 = seqId;
+        args.argi5 = resizeMode;
         msg.obj = args;
         mHandler.sendMessage(msg);
     }
@@ -9897,11 +9893,11 @@ public final class ViewRootImpl implements ViewParent,
         @Override
         public void resized(ClientWindowFrames frames, boolean reportDraw,
                 MergedConfiguration mergedConfiguration, boolean forceLayout,
-                boolean alwaysConsumeSystemBars, int displayId, int seqId) {
+                boolean alwaysConsumeSystemBars, int displayId, int seqId, int resizeMode) {
             final ViewRootImpl viewAncestor = mViewAncestor.get();
             if (viewAncestor != null) {
                 viewAncestor.dispatchResized(frames, reportDraw, mergedConfiguration, forceLayout,
-                        alwaysConsumeSystemBars, displayId, seqId);
+                        alwaysConsumeSystemBars, displayId, seqId, resizeMode);
             }
         }
 
