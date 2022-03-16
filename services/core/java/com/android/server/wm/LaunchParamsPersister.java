@@ -214,6 +214,9 @@ class LaunchParamsPersister {
 
     void saveTask(Task task, DisplayContent display) {
         final ComponentName name = task.realActivity;
+        if (name == null) {
+            return;
+        }
         final int userId = task.mUserId;
         PersistableLaunchParams params;
         ArrayMap<ComponentName, PersistableLaunchParams> map = mLaunchParamsMap.get(userId);
