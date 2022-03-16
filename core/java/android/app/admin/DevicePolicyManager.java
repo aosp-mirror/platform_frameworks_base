@@ -15842,6 +15842,29 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Returns a {@link List} of managed profiles managed by some profile owner within the profile
+     * group of the given user, or an empty {@link List} if there is not one.
+     *
+     * @param user the user whose profile group to look within to return managed profiles
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS)
+    @NonNull
+    public List<UserHandle> getPolicyManagedProfiles(@NonNull UserHandle user) {
+        Objects.requireNonNull(user);
+        if (mService != null) {
+            try {
+                return mService.getPolicyManagedProfiles(user);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return Collections.emptyList();
+    }
+
+    /**
      * Retrieves the package name for a given {@code deviceManagerConfig}.
      *
      * <p>Valid configs look like:
