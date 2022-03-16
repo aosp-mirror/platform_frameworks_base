@@ -24,4 +24,5 @@
     <string name="pip_move" msgid="1544227837964635439">"Flytta BIB"</string>
     <string name="pip_expand" msgid="7605396312689038178">"Utöka bild-i-bild"</string>
     <string name="pip_collapse" msgid="5732233773786896094">"Komprimera bild-i-bild"</string>
+    <string name="pip_edu_text" msgid="3672999496647508701">" Tryck snabbt två gånger på "<annotation icon="home_icon">" HEM "</annotation>" för kontroller"</string>
 </resources>

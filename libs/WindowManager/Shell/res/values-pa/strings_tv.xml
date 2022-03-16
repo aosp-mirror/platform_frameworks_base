@@ -24,4 +24,5 @@
     <string name="pip_move" msgid="1544227837964635439">"PIP ਨੂੰ ਲਿਜਾਓ"</string>
     <string name="pip_expand" msgid="7605396312689038178">"PIP ਦਾ ਵਿਸਤਾਰ ਕਰੋ"</string>
     <string name="pip_collapse" msgid="5732233773786896094">"PIP ਨੂੰ ਸਮੇਟੋ"</string>
+    <string name="pip_edu_text" msgid="3672999496647508701">" ਕੰਟਰੋਲਾਂ ਲਈ "<annotation icon="home_icon">" ਹੋਮ ਬਟਨ "</annotation>" ਨੂੰ ਦੋ ਵਾਰ ਦਬਾਓ"</string>
 </resources>
