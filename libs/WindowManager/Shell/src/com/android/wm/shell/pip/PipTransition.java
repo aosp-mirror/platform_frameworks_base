@@ -166,8 +166,7 @@ public class PipTransition extends PipTransitionController {
             mExitTransition = null;
             mHasFadeOut = false;
             if (mFinishCallback != null) {
-                mFinishCallback.onTransitionFinished(null, null);
-                mFinishCallback = null;
+                callFinishCallback(null /* wct */);
                 mFinishTransaction = null;
                 throw new RuntimeException("Previous callback not called, aborting exit PIP.");
             }
@@ -232,6 +231,11 @@ public class PipTransition extends PipTransitionController {
         return false;
     }
 
+    /** Helper to identify whether this handler is currently the one playing an animation */
+    private boolean isAnimatingLocally() {
+        return mFinishTransaction != null;
+    }
+
     @Nullable
     @Override
     public WindowContainerTransaction handleRequest(@NonNull IBinder transition,
@@ -282,9 +286,11 @@ public class PipTransition extends PipTransitionController {
         if (enteringPip) {
             mPipTransitionState.setTransitionState(ENTERED_PIP);
         }
-        // If there is an expected exit transition, then the exit will be "merged" into this
-        // transition so don't fire the finish-callback in that case.
-        if (mExitTransition == null && mFinishCallback != null) {
+        // If we have an exit transition, but aren't playing a transition locally, it
+        // means we're expecting the exit transition will be "merged" into another transition
+        // (likely a remote like launcher), so don't fire the finish-callback here -- wait until
+        // the exit transition is merged.
+        if ((mExitTransition == null || isAnimatingLocally()) && mFinishCallback != null) {
             WindowContainerTransaction wct = new WindowContainerTransaction();
             prepareFinishResizeTransaction(taskInfo, destinationBounds,
                     direction, wct);
@@ -305,10 +311,17 @@ public class PipTransition extends PipTransitionController {
                 mSurfaceTransactionHelper.crop(mFinishTransaction, leash, finishBounds);
             }
             mFinishTransaction = null;
-            mFinishCallback.onTransitionFinished(wct, null /* callback */);
-            mFinishCallback = null;
+            callFinishCallback(wct);
         }
         finishResizeForMenu(destinationBounds);
+    }
+
+    private void callFinishCallback(WindowContainerTransaction wct) {
+        // Need to unset mFinishCallback first because onTransitionFinished can re-enter this
+        // handler if there is a pending PiP animation.
+        final Transitions.TransitionFinishCallback finishCallback = mFinishCallback;
+        mFinishCallback = null;
+        finishCallback.onTransitionFinished(wct, null /* callback */);
     }
 
     @Override
@@ -572,8 +585,7 @@ public class PipTransition extends PipTransitionController {
         mHasFadeOut = false;
 
         if (mFinishCallback != null) {
-            mFinishCallback.onTransitionFinished(null /* wct */, null /* callback */);
-            mFinishCallback = null;
+            callFinishCallback(null /* wct */);
             mFinishTransaction = null;
             throw new RuntimeException("Previous callback not called, aborting entering PIP.");
         }
