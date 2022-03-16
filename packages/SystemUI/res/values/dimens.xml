@@ -941,6 +941,9 @@
     <!--  Three privacy items. This value must not be exceeded  -->
     <dimen name="ongoing_appops_chip_max_width">76dp</dimen>
     <dimen name="ongoing_appops_dot_diameter">6dp</dimen>
+    <dimen name="ongoing_appops_chip_min_animation_width">10dp</dimen>
+    <dimen name="ongoing_appops_chip_animation_in_status_bar_translation_x">15dp</dimen>
+    <dimen name="ongoing_appops_chip_animation_out_status_bar_translation_x">7dp</dimen>
     <!--  Total minimum padding to enforce to ensure that the dot can always show  -->
     <dimen name="ongoing_appops_dot_min_padding">20dp</dimen>
 
