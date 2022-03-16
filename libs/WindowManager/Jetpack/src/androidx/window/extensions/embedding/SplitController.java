@@ -501,7 +501,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         final  TaskFragmentContainer container = getContainerWithActivity(
                 activity.getActivityToken());
         // Don't launch placeholder if the container is occluded.
-        if (container != getTopActiveContainer()) {
+        if (container != null && container != getTopActiveContainer()) {
             return false;
         }
 
