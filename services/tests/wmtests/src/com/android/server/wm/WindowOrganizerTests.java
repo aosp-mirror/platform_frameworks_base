@@ -932,7 +932,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
         mWm.mAtmService.mTaskOrganizerController.dispatchPendingEvents();
         assertNotNull(o.mChangedInfo);
         assertNotNull(o.mChangedInfo.pictureInPictureParams);
-        final Rational ratio = o.mChangedInfo.pictureInPictureParams.getAspectRatioRational();
+        final Rational ratio = o.mChangedInfo.pictureInPictureParams.getAspectRatio();
         assertEquals(3, ratio.getNumerator());
         assertEquals(4, ratio.getDenominator());
     }
