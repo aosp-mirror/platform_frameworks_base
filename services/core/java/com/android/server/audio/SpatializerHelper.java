@@ -139,6 +139,7 @@ public class SpatializerHelper {
     private @Nullable SpatializerCallback mSpatCallback;
     private @Nullable SpatializerHeadTrackingCallback mSpatHeadTrackingCallback;
     private @Nullable HelperDynamicSensorCallback mDynSensorCallback;
+    private boolean mIsHeadTrackingSupported = false;
 
     // default attributes and format that determine basic availability of spatialization
     private static final AudioAttributes DEFAULT_ATTRIBUTES = new AudioAttributes.Builder()
@@ -813,8 +814,9 @@ public class SpatializerHelper {
             mSpat = AudioSystem.getSpatializer(mSpatCallback);
             try {
                 mSpat.setLevel((byte)  Spatializer.SPATIALIZER_IMMERSIVE_LEVEL_MULTICHANNEL);
+                mIsHeadTrackingSupported = mSpat.isHeadTrackingSupported();
                 //TODO: register heatracking callback only when sensors are registered
-                if (mSpat.isHeadTrackingSupported()) {
+                if (mIsHeadTrackingSupported) {
                     mSpat.registerHeadTrackingCallback(mSpatHeadTrackingCallback);
                 }
             } catch (RemoteException e) {
@@ -832,12 +834,15 @@ public class SpatializerHelper {
         if (mSpat != null) {
             mSpatCallback = null;
             try {
-                mSpat.registerHeadTrackingCallback(null);
+                if (mIsHeadTrackingSupported) {
+                    mSpat.registerHeadTrackingCallback(null);
+                }
                 mHeadTrackerAvailable = false;
                 mSpat.release();
             } catch (RemoteException e) {
                 Log.e(TAG, "Can't set release spatializer cleanly", e);
             }
+            mIsHeadTrackingSupported = false;
             mSpat = null;
         }
     }
@@ -1124,7 +1129,7 @@ public class SpatializerHelper {
                 }
                 break;
         }
-        return true;
+        return mIsHeadTrackingSupported;
     }
 
     private void dispatchActualHeadTrackingMode(int newMode) {
@@ -1314,13 +1319,8 @@ public class SpatializerHelper {
             Log.e(TAG, "not " + action + " sensors, null spatializer");
             return;
         }
-        try {
-            if (!mSpat.isHeadTrackingSupported()) {
-                Log.e(TAG, "not " + action + " sensors, spatializer doesn't support headtracking");
-                return;
-            }
-        } catch (RemoteException e) {
-            Log.e(TAG, "not " + action + " sensors, error querying headtracking", e);
+        if (!mIsHeadTrackingSupported) {
+            Log.e(TAG, "not " + action + " sensors, spatializer doesn't support headtracking");
             return;
         }
         int headHandle = -1;
