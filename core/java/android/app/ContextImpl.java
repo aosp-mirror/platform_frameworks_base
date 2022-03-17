@@ -217,6 +217,12 @@ class ContextImpl extends Context {
     @UnsupportedAppUsage
     private @Nullable ClassLoader mClassLoader;
 
+    /**
+     * The {@link com.android.server.wm.WindowToken} representing this instance if it is
+     * {@link #CONTEXT_TYPE_WINDOW_CONTEXT} or {@link #CONTEXT_TYPE_SYSTEM_OR_SYSTEM_UI}.
+     * If the type is {@link #CONTEXT_TYPE_ACTIVITY}, then represents the
+     * {@link android.window.WindowContainerToken} of the activity.
+     */
     private final @Nullable IBinder mToken;
 
     private final @NonNull UserHandle mUser;

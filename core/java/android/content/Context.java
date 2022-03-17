@@ -7146,8 +7146,9 @@ public abstract class Context {
     }
 
     /**
-     * Returns token if the {@link Context} is a {@link android.app.WindowContext}. Returns
-     * {@code null} otherwise.
+     * Returns the {@link IBinder} representing the associated
+     * {@link com.android.server.wm.WindowToken} if the {@link Context} is a
+     * {@link android.app.WindowContext}. Returns {@code null} otherwise.
      *
      * @hide
      */
