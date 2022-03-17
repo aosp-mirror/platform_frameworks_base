@@ -26105,21 +26105,8 @@ package android.media.tv.interactive {
     method @NonNull public android.media.tv.interactive.AppLinkInfo.Builder setUriScheme(@NonNull String);
   }
 
-  public final class TvInteractiveAppInfo implements android.os.Parcelable {
-    ctor public TvInteractiveAppInfo(@NonNull android.content.Context, @NonNull android.content.ComponentName);
-    method public int describeContents();
-    method @NonNull public String getId();
-    method @Nullable public android.content.pm.ServiceInfo getServiceInfo();
-    method @NonNull public int getSupportedTypes();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.media.tv.interactive.TvInteractiveAppInfo> CREATOR;
-    field public static final int INTERACTIVE_APP_TYPE_ATSC = 2; // 0x2
-    field public static final int INTERACTIVE_APP_TYPE_GINGA = 4; // 0x4
-    field public static final int INTERACTIVE_APP_TYPE_HBBTV = 1; // 0x1
-  }
-
   public final class TvInteractiveAppManager {
-    method @NonNull public java.util.List<android.media.tv.interactive.TvInteractiveAppInfo> getTvInteractiveAppServiceList();
+    method @NonNull public java.util.List<android.media.tv.interactive.TvInteractiveAppServiceInfo> getTvInteractiveAppServiceList();
     method public void prepare(@NonNull String, int);
     method public void registerAppLinkInfo(@NonNull String, @NonNull android.media.tv.interactive.AppLinkInfo);
     method public void registerCallback(@NonNull java.util.concurrent.Executor, @NonNull android.media.tv.interactive.TvInteractiveAppManager.TvInteractiveAppCallback);
@@ -26240,6 +26227,19 @@ package android.media.tv.interactive {
     method @CallSuper public void sendPlaybackCommandRequest(@NonNull String, @Nullable android.os.Bundle);
     method @CallSuper public void setMediaViewEnabled(boolean);
     method @CallSuper public void setVideoBounds(@NonNull android.graphics.Rect);
+  }
+
+  public final class TvInteractiveAppServiceInfo implements android.os.Parcelable {
+    ctor public TvInteractiveAppServiceInfo(@NonNull android.content.Context, @NonNull android.content.ComponentName);
+    method public int describeContents();
+    method @NonNull public String getId();
+    method @Nullable public android.content.pm.ServiceInfo getServiceInfo();
+    method @NonNull public int getSupportedTypes();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.tv.interactive.TvInteractiveAppServiceInfo> CREATOR;
+    field public static final int INTERACTIVE_APP_TYPE_ATSC = 2; // 0x2
+    field public static final int INTERACTIVE_APP_TYPE_GINGA = 4; // 0x4
+    field public static final int INTERACTIVE_APP_TYPE_HBBTV = 1; // 0x1
   }
 
   public class TvInteractiveAppView extends android.view.ViewGroup {

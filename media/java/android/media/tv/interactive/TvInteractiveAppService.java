@@ -242,7 +242,7 @@ public abstract class TvInteractiveAppService extends Service {
     /**
      * Prepares TV Interactive App service for the given type.
      */
-    public abstract void onPrepare(@TvInteractiveAppInfo.InteractiveAppType int type);
+    public abstract void onPrepare(@TvInteractiveAppServiceInfo.InteractiveAppType int type);
 
     /**
      * Called when a request to register an Android application link info record is received.
@@ -277,7 +277,7 @@ public abstract class TvInteractiveAppService extends Service {
     @Nullable
     public abstract Session onCreateSession(
             @NonNull String iAppServiceId,
-            @TvInteractiveAppInfo.InteractiveAppType int type);
+            @TvInteractiveAppServiceInfo.InteractiveAppType int type);
 
     /**
      * Notifies the system when the state of the interactive app RTE has been changed.
@@ -289,7 +289,7 @@ public abstract class TvInteractiveAppService extends Service {
      *              {@link TvInteractiveAppManager#SERVICE_STATE_ERROR}.
      */
     public final void notifyStateChanged(
-            @TvInteractiveAppInfo.InteractiveAppType int type,
+            @TvInteractiveAppServiceInfo.InteractiveAppType int type,
             @TvInteractiveAppManager.ServiceState int state,
             @TvInteractiveAppManager.ErrorCode int error) {
         SomeArgs args = SomeArgs.obtain();
