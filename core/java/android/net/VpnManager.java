@@ -420,6 +420,21 @@ public class VpnManager {
     }
 
     /**
+     * Retrieve the VpnProfileState for the profile provisioned by the calling package.
+     *
+     * @return the VpnProfileState with current information, or null if there was no profile
+     *         provisioned by the calling package.
+     */
+    @Nullable
+    public VpnProfileState getProvisionedVpnProfileState() {
+        try {
+            return mService.getProvisionedVpnProfileState(mContext.getOpPackageName());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Resets all VPN settings back to factory defaults.
      * @hide
      */

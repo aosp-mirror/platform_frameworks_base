@@ -25507,6 +25507,7 @@ package android.net {
 
   public class VpnManager {
     method public void deleteProvisionedVpnProfile();
+    method @Nullable public android.net.VpnProfileState getProvisionedVpnProfileState();
     method @Nullable public android.content.Intent provisionVpnProfile(@NonNull android.net.PlatformVpnProfile);
     method @Deprecated public void startProvisionedVpnProfile();
     method @NonNull public String startProvisionedVpnProfileSession();
