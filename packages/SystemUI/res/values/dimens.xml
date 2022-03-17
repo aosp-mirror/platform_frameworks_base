@@ -1141,6 +1141,12 @@
          the shade (in alpha) -->
     <dimen name="lockscreen_shade_scrim_transition_distance">@dimen/lockscreen_shade_full_transition_distance</dimen>
 
+    <!-- Distance that it takes in order for the notifications scrim fade in to start. -->
+    <dimen name="lockscreen_shade_notifications_scrim_transition_delay">0dp</dimen>
+
+    <!-- Distance that it takes for the notifications scrim to fully fade if after it started. -->
+    <dimen name="lockscreen_shade_notifications_scrim_transition_distance">@dimen/lockscreen_shade_scrim_transition_distance</dimen>
+
     <!-- Distance that the full shade transition takes in order for the keyguard content on
          NotificationPanelViewController to fully fade (e.g. Clock & Smartspace) -->
     <dimen name="lockscreen_shade_npvc_keyguard_content_alpha_transition_distance">@dimen/lockscreen_shade_full_transition_distance</dimen>
