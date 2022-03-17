@@ -64,6 +64,7 @@ import android.util.proto.ProtoOutputStream;
 import android.view.Surface.OutOfResourcesException;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.Preconditions;
 import com.android.internal.util.VirtualRefBasePtr;
 
 import dalvik.system.CloseGuard;
@@ -2961,6 +2962,8 @@ public final class SurfaceControl implements Parcelable {
         @NonNull
         public Transaction setScale(@NonNull SurfaceControl sc, float scaleX, float scaleY) {
             checkPreconditions(sc);
+            Preconditions.checkArgument(scaleX >= 0, "Negative value passed in for scaleX");
+            Preconditions.checkArgument(scaleY >= 0, "Negative value passed in for scaleY");
             nativeSetScale(mNativeObject, sc.mNativeObject, scaleX, scaleY);
             return this;
         }
@@ -3205,6 +3208,7 @@ public final class SurfaceControl implements Parcelable {
         public @NonNull Transaction setCrop(@NonNull SurfaceControl sc, @Nullable Rect crop) {
             checkPreconditions(sc);
             if (crop != null) {
+                Preconditions.checkArgument(crop.isValid(), "Crop isn't valid.");
                 nativeSetWindowCrop(mNativeObject, sc.mNativeObject,
                         crop.left, crop.top, crop.right, crop.bottom);
             } else {

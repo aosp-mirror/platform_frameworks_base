@@ -30,6 +30,7 @@ import android.media.INativeSpatializerCallback;
 import android.media.ISpatializer;
 import android.media.ISpatializerCallback;
 import android.media.ISpatializerHeadToSoundStagePoseCallback;
+import android.media.ISpatializerHeadTrackerAvailableCallback;
 import android.media.ISpatializerHeadTrackingCallback;
 import android.media.ISpatializerHeadTrackingModeCallback;
 import android.media.ISpatializerOutputCallback;
@@ -126,6 +127,7 @@ public class SpatializerHelper {
     private boolean mBinauralSupported = false;
     private int mActualHeadTrackingMode = Spatializer.HEAD_TRACKING_MODE_UNSUPPORTED;
     private int mDesiredHeadTrackingMode = Spatializer.HEAD_TRACKING_MODE_RELATIVE_WORLD;
+    private boolean mHeadTrackerAvailable = false;
     /**
      *  The desired head tracking mode when enabling head tracking, tracks mDesiredHeadTrackingMode,
      *  except when head tracking gets disabled through setting the desired mode to
@@ -275,6 +277,7 @@ public class SpatializerHelper {
      */
     synchronized void reset(boolean featureEnabled) {
         Log.i(TAG, "Resetting");
+        releaseSpat();
         mState = STATE_UNINITIALIZED;
         mSpatLevel = Spatializer.SPATIALIZER_IMMERSIVE_LEVEL_NONE;
         mCapableSpatLevel = Spatializer.SPATIALIZER_IMMERSIVE_LEVEL_NONE;
@@ -830,11 +833,12 @@ public class SpatializerHelper {
             mSpatCallback = null;
             try {
                 mSpat.registerHeadTrackingCallback(null);
+                mHeadTrackerAvailable = false;
                 mSpat.release();
-                mSpat = null;
             } catch (RemoteException e) {
                 Log.e(TAG, "Can't set release spatializer cleanly", e);
             }
+            mSpat = null;
         }
     }
 
@@ -887,6 +891,18 @@ public class SpatializerHelper {
     synchronized void unregisterHeadTrackingModeCallback(
             @NonNull ISpatializerHeadTrackingModeCallback callback) {
         mHeadTrackingModeCallbacks.unregister(callback);
+    }
+
+    final RemoteCallbackList<ISpatializerHeadTrackerAvailableCallback> mHeadTrackerCallbacks =
+            new RemoteCallbackList<>();
+
+    synchronized void registerHeadTrackerAvailableCallback(
+            @NonNull ISpatializerHeadTrackerAvailableCallback cb, boolean register) {
+        if (register) {
+            mHeadTrackerCallbacks.register(cb);
+        } else {
+            mHeadTrackerCallbacks.unregister(cb);
+        }
     }
 
     synchronized int[] getSupportedHeadTrackingModes() {
@@ -1089,6 +1105,10 @@ public class SpatializerHelper {
         return false;
     }
 
+    synchronized boolean isHeadTrackerAvailable() {
+        return mHeadTrackerAvailable;
+    }
+
     private boolean checkSpatForHeadTracking(String funcName) {
         switch (mState) {
             case STATE_UNINITIALIZED:
@@ -1114,7 +1134,8 @@ public class SpatializerHelper {
                 mHeadTrackingModeCallbacks.getBroadcastItem(i)
                         .dispatchSpatializerActualHeadTrackingModeChanged(newMode);
             } catch (RemoteException e) {
-                Log.e(TAG, "Error in dispatchSpatializerActualHeadTrackingModeChanged", e);
+                Log.e(TAG, "Error in dispatchSpatializerActualHeadTrackingModeChanged("
+                        + newMode + ")", e);
             }
         }
         mHeadTrackingModeCallbacks.finishBroadcast();
@@ -1127,10 +1148,25 @@ public class SpatializerHelper {
                 mHeadTrackingModeCallbacks.getBroadcastItem(i)
                         .dispatchSpatializerDesiredHeadTrackingModeChanged(newMode);
             } catch (RemoteException e) {
-                Log.e(TAG, "Error in dispatchSpatializerDesiredHeadTrackingModeChanged", e);
+                Log.e(TAG, "Error in dispatchSpatializerDesiredHeadTrackingModeChanged("
+                        + newMode + ")", e);
             }
         }
         mHeadTrackingModeCallbacks.finishBroadcast();
+    }
+
+    private void dispatchHeadTrackerAvailable(boolean available) {
+        final int nbCallbacks = mHeadTrackerCallbacks.beginBroadcast();
+        for (int i = 0; i < nbCallbacks; i++) {
+            try {
+                mHeadTrackerCallbacks.getBroadcastItem(i)
+                        .dispatchSpatializerHeadTrackerAvailable(available);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Error in dispatchSpatializerHeadTrackerAvailable("
+                        + available + ")", e);
+            }
+        }
+        mHeadTrackerCallbacks.finishBroadcast();
     }
 
     //------------------------------------------------------
@@ -1347,6 +1383,10 @@ public class SpatializerHelper {
         try {
             Log.i(TAG, "setHeadSensor:" + headHandle);
             mSpat.setHeadSensor(headHandle);
+            if (mHeadTrackerAvailable != (headHandle != -1)) {
+                mHeadTrackerAvailable = (headHandle != -1);
+                dispatchHeadTrackerAvailable(mHeadTrackerAvailable);
+            }
         } catch (Exception e) {
             Log.e(TAG, "Error calling setHeadSensor:" + headHandle, e);
         }

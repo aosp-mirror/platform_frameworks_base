@@ -170,14 +170,16 @@ public abstract class MediaOutputBaseAdapter extends
         void setSingleLineLayout(CharSequence title, boolean bFocused, boolean showSeekBar,
                 boolean showProgressBar, boolean showStatus) {
             mTwoLineLayout.setVisibility(View.GONE);
+            boolean isActive = showSeekBar || showProgressBar;
             final Drawable backgroundDrawable =
-                    showSeekBar || showProgressBar
+                    isActive
                             ? mContext.getDrawable(R.drawable.media_output_item_background_active)
                                     .mutate() : mContext.getDrawable(
                             R.drawable.media_output_item_background)
                             .mutate();
             backgroundDrawable.setColorFilter(new PorterDuffColorFilter(
-                    mController.getColorItemBackground(),
+                    isActive ? mController.getColorConnectedItemBackground()
+                            : mController.getColorItemBackground(),
                     PorterDuff.Mode.SRC_IN));
             mItemLayout.setBackground(backgroundDrawable);
             mProgressBar.setVisibility(showProgressBar ? View.VISIBLE : View.GONE);
@@ -366,7 +368,7 @@ public abstract class MediaOutputBaseAdapter extends
                     .mutate();
             drawable.setColorFilter(
                     new PorterDuffColorFilter(Utils.getColorStateListDefaultColor(mContext,
-                            R.color.media_dialog_active_item_main_content),
+                            R.color.media_dialog_item_main_content),
                             PorterDuff.Mode.SRC_IN));
             return drawable;
         }

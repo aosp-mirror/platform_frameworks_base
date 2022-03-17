@@ -23,7 +23,6 @@ import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.Configuration;
-import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
@@ -36,9 +35,6 @@ import android.view.RemotableViewMethod;
 import android.widget.ImageView;
 import android.widget.RemoteViews;
 
-import com.android.internal.R;
-
-import java.io.IOException;
 import java.util.Objects;
 import java.util.function.Consumer;
 
@@ -59,42 +55,9 @@ public class CachingIconView extends ImageView {
     private int mBackgroundColor;
     private boolean mWillBeForceHidden;
 
-    private int mMaxDrawableWidth = -1;
-    private int mMaxDrawableHeight = -1;
-
-    public CachingIconView(Context context) {
-        this(context, null, 0, 0);
-    }
-
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public CachingIconView(Context context, @Nullable AttributeSet attrs) {
-        this(context, attrs, 0, 0);
-    }
-
-    public CachingIconView(Context context, @Nullable AttributeSet attrs,
-            int defStyleAttr) {
-        this(context, attrs, defStyleAttr, 0);
-    }
-
-    public CachingIconView(Context context, @Nullable AttributeSet attrs,
-            int defStyleAttr, int defStyleRes) {
-        super(context, attrs, defStyleAttr, defStyleRes);
-        init(context, attrs, defStyleAttr, defStyleRes);
-    }
-
-    private void init(Context context, @Nullable AttributeSet attrs, int defStyleAttr,
-            int defStyleRes) {
-        if (attrs == null) {
-            return;
-        }
-
-        TypedArray ta = context.obtainStyledAttributes(attrs,
-                R.styleable.CachingIconView, defStyleAttr, defStyleRes);
-        mMaxDrawableWidth = ta.getDimensionPixelSize(R.styleable
-                .CachingIconView_maxDrawableWidth, -1);
-        mMaxDrawableHeight = ta.getDimensionPixelSize(R.styleable
-                .CachingIconView_maxDrawableHeight, -1);
-        ta.recycle();
+        super(context, attrs);
     }
 
     @Override
@@ -103,31 +66,15 @@ public class CachingIconView extends ImageView {
         if (!testAndSetCache(icon)) {
             mInternalSetDrawable = true;
             // This calls back to setImageDrawable, make sure we don't clear the cache there.
-            Drawable drawable = loadSizeRestrictedIcon(icon);
-            if (drawable == null) {
-                super.setImageIcon(icon);
-            } else {
-                super.setImageDrawable(drawable);
-            }
+            super.setImageIcon(icon);
             mInternalSetDrawable = false;
         }
     }
 
-    @Nullable
-    private Drawable loadSizeRestrictedIcon(@Nullable Icon icon) {
-        try {
-            return LocalImageResolver.resolveImage(icon, getContext(), mMaxDrawableWidth,
-                    mMaxDrawableHeight);
-        } catch (IOException e) {
-            return null;
-        }
-    }
-
     @Override
-    public Runnable setImageIconAsync(@Nullable final Icon icon) {
+    public Runnable setImageIconAsync(@Nullable Icon icon) {
         resetCache();
-        Drawable drawable = loadSizeRestrictedIcon(icon);
-        return () -> setImageDrawable(drawable);
+        return super.setImageIconAsync(icon);
     }
 
     @Override
@@ -136,34 +83,14 @@ public class CachingIconView extends ImageView {
         if (!testAndSetCache(resId)) {
             mInternalSetDrawable = true;
             // This calls back to setImageDrawable, make sure we don't clear the cache there.
-            Drawable drawable = loadSizeRestrictedDrawable(resId);
-            if (drawable == null) {
-                super.setImageResource(resId);
-            } else {
-                super.setImageDrawable(drawable);
-            }
+            super.setImageResource(resId);
             mInternalSetDrawable = false;
-        }
-    }
-
-    @Nullable
-    private Drawable loadSizeRestrictedDrawable(@DrawableRes int resId) {
-        try {
-            return LocalImageResolver.resolveImage(resId, getContext(), mMaxDrawableWidth,
-                    mMaxDrawableHeight);
-        } catch (IOException e) {
-            return null;
         }
     }
 
     @Override
     public Runnable setImageResourceAsync(@DrawableRes int resId) {
         resetCache();
-        Drawable drawable = loadSizeRestrictedDrawable(resId);
-        if (drawable != null) {
-            return () -> setImageDrawable(drawable);
-        }
-
         return super.setImageResourceAsync(resId);
     }
 
@@ -171,35 +98,13 @@ public class CachingIconView extends ImageView {
     @RemotableViewMethod(asyncImpl="setImageURIAsync")
     public void setImageURI(@Nullable Uri uri) {
         resetCache();
-        Drawable drawable = loadSizeRestrictedUri(uri);
-        if (drawable == null) {
-            super.setImageURI(uri);
-        } else {
-            mInternalSetDrawable = true;
-            super.setImageDrawable(drawable);
-            mInternalSetDrawable = false;
-        }
-    }
-
-    @Nullable
-    private Drawable loadSizeRestrictedUri(@Nullable Uri uri) {
-        try {
-            return LocalImageResolver.resolveImage(uri, getContext(), mMaxDrawableWidth,
-                    mMaxDrawableHeight);
-        } catch (IOException e) {
-            return null;
-        }
+        super.setImageURI(uri);
     }
 
     @Override
     public Runnable setImageURIAsync(@Nullable Uri uri) {
         resetCache();
-        Drawable drawable = loadSizeRestrictedUri(uri);
-        if (drawable == null) {
-            return super.setImageURIAsync(uri);
-        } else {
-            return () -> setImageDrawable(drawable);
-        }
+        return super.setImageURIAsync(uri);
     }
 
     @Override
@@ -401,19 +306,5 @@ public class CachingIconView extends ImageView {
      */
     public void setWillBeForceHidden(boolean forceHidden) {
         mWillBeForceHidden = forceHidden;
-    }
-
-    /**
-     * Returns the set maximum width of drawable in pixels. -1 if not set.
-     */
-    public int getMaxDrawableWidth() {
-        return mMaxDrawableWidth;
-    }
-
-    /**
-     * Returns the set maximum height of drawable in pixels. -1 if not set.
-     */
-    public int getMaxDrawableHeight() {
-        return mMaxDrawableHeight;
     }
 }

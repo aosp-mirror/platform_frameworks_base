@@ -110,11 +110,12 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
 
     private MediaOutputMetricLogger mMetricLogger;
 
-    private int mColorActiveItem;
-    private int mColorInactiveItem;
+    private int mColorItemContent;
     private int mColorSeekbarProgress;
     private int mColorButtonBackground;
     private int mColorItemBackground;
+    private int mColorConnectedItemBackground;
+    private int mColorPositiveButtonText;
 
     @Inject
     public MediaOutputController(@NonNull Context context, String packageName,
@@ -133,16 +134,18 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
         mMetricLogger = new MediaOutputMetricLogger(mContext, mPackageName);
         mDialogLaunchAnimator = dialogLaunchAnimator;
         mNearbyMediaDevicesManager = nearbyMediaDevicesManagerOptional.orElse(null);
-        mColorActiveItem = Utils.getColorStateListDefaultColor(mContext,
-                R.color.media_dialog_active_item_main_content);
-        mColorInactiveItem = Utils.getColorStateListDefaultColor(mContext,
-                R.color.media_dialog_inactive_item_main_content);
+        mColorItemContent = Utils.getColorStateListDefaultColor(mContext,
+                R.color.media_dialog_item_main_content);
         mColorSeekbarProgress = Utils.getColorStateListDefaultColor(mContext,
-                android.R.color.system_accent1_200);
+                R.color.media_dialog_seekbar_progress);
         mColorButtonBackground = Utils.getColorStateListDefaultColor(mContext,
-                R.color.media_dialog_item_background);
+                R.color.media_dialog_button_background);
         mColorItemBackground = Utils.getColorStateListDefaultColor(mContext,
-                android.R.color.system_accent2_50);
+                R.color.media_dialog_item_background);
+        mColorConnectedItemBackground = Utils.getColorStateListDefaultColor(mContext,
+                R.color.media_dialog_connected_item_background);
+        mColorPositiveButtonText = Utils.getColorStateListDefaultColor(mContext,
+                R.color.media_dialog_solid_button_text);
     }
 
     void start(@NonNull Callback cb) {
@@ -322,8 +325,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
     }
 
     void setColorFilter(Drawable drawable, boolean isActive) {
-        drawable.setColorFilter(new PorterDuffColorFilter(isActive
-                ? mColorActiveItem : mColorInactiveItem,
+        drawable.setColorFilter(new PorterDuffColorFilter(mColorItemContent,
                 PorterDuff.Mode.SRC_IN));
     }
 
@@ -358,26 +360,32 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
         ColorScheme mCurrentColorScheme = new ColorScheme(wallpaperColors,
                 isDarkTheme);
         if (isDarkTheme) {
-            mColorActiveItem = mCurrentColorScheme.getNeutral1().get(10);
-            mColorInactiveItem = mCurrentColorScheme.getNeutral1().get(10);
-            mColorSeekbarProgress = mCurrentColorScheme.getAccent1().get(2);
-            mColorButtonBackground = mCurrentColorScheme.getAccent1().get(2);
-            mColorItemBackground = mCurrentColorScheme.getAccent2().get(0);
+            mColorItemContent = mCurrentColorScheme.getAccent1().get(2); // A1-100
+            mColorSeekbarProgress = mCurrentColorScheme.getAccent2().get(7); // A2-600
+            mColorButtonBackground = mCurrentColorScheme.getAccent1().get(4); // A1-300
+            mColorItemBackground = mCurrentColorScheme.getNeutral2().get(9); // N2-800
+            mColorConnectedItemBackground = mCurrentColorScheme.getAccent2().get(9); // A2-800
+            mColorPositiveButtonText = mCurrentColorScheme.getAccent2().get(9); // A2-800
         } else {
-            mColorActiveItem = mCurrentColorScheme.getNeutral1().get(10);
-            mColorInactiveItem = mCurrentColorScheme.getAccent1().get(7);
-            mColorSeekbarProgress = mCurrentColorScheme.getAccent1().get(3);
-            mColorButtonBackground = mCurrentColorScheme.getAccent1().get(3);
-            mColorItemBackground = mCurrentColorScheme.getAccent2().get(0);
+            mColorItemContent = mCurrentColorScheme.getAccent1().get(9); // A1-800
+            mColorSeekbarProgress = mCurrentColorScheme.getAccent1().get(4); // A1-300
+            mColorButtonBackground = mCurrentColorScheme.getAccent1().get(7); // A1-600
+            mColorItemBackground = mCurrentColorScheme.getAccent2().get(1); // A2-50
+            mColorConnectedItemBackground = mCurrentColorScheme.getAccent1().get(2); // A1-100
+            mColorPositiveButtonText = mCurrentColorScheme.getNeutral1().get(1); // N1-50
         }
     }
 
-    public int getColorActiveItem() {
-        return mColorActiveItem;
+    public int getColorConnectedItemBackground() {
+        return mColorConnectedItemBackground;
     }
 
-    public int getColorInactiveItem() {
-        return mColorInactiveItem;
+    public int getColorPositiveButtonText() {
+        return mColorPositiveButtonText;
+    }
+
+    public int getColorItemContent() {
+        return mColorItemContent;
     }
 
     public int getColorSeekbarProgress() {

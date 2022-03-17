@@ -119,7 +119,9 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
             mCheckBox.setVisibility(View.GONE);
             mStatusIcon.setVisibility(View.GONE);
             mContainerLayout.setOnClickListener(null);
-            mTitleText.setTextColor(mController.getColorInactiveItem());
+            mTitleText.setTextColor(mController.getColorItemContent());
+            mSubTitleText.setTextColor(mController.getColorItemContent());
+            mTwoLineTitleText.setTextColor(mController.getColorItemContent());
             mSeekBar.getProgressDrawable().setColorFilter(
                     new PorterDuffColorFilter(mController.getColorSeekbarProgress(),
                             PorterDuff.Mode.SRC_IN));
@@ -140,7 +142,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                         && !mController.hasAdjustVolumeUserRestriction()) {
                     mProgressBar.getIndeterminateDrawable().setColorFilter(
                             new PorterDuffColorFilter(
-                                    mController.getColorInactiveItem(),
+                                    mController.getColorItemContent(),
                                     PorterDuff.Mode.SRC_IN));
                     setSingleLineLayout(getItemTitle(device), true /* bFocused */,
                             false /* showSeekBar*/,
@@ -155,7 +157,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                     mTitleIcon.setAlpha(DEVICE_CONNECTED_ALPHA);
                     mStatusIcon.setImageDrawable(
                             mContext.getDrawable(R.drawable.media_output_status_failed));
-                    mStatusIcon.setColorFilter(mController.getColorInactiveItem());
+                    mStatusIcon.setColorFilter(mController.getColorItemContent());
                     setTwoLineLayout(device, false /* bFocused */,
                             false /* showSeekBar */, false /* showProgressBar */,
                             true /* showSubtitle */, true /* showStatus */);
@@ -163,7 +165,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                     mContainerLayout.setOnClickListener(v -> onItemClick(v, device));
                 } else if (mController.getSelectedMediaDevice().size() > 1
                         && isDeviceIncluded(mController.getSelectedMediaDevice(), device)) {
-                    mTitleText.setTextColor(mController.getColorActiveItem());
+                    mTitleText.setTextColor(mController.getColorItemContent());
                     setSingleLineLayout(getItemTitle(device), true /* bFocused */,
                             true /* showSeekBar */,
                             false /* showProgressBar */, false /* showStatus */);
@@ -173,13 +175,13 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                     mCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
                         onCheckBoxClicked(false, device);
                     });
-                    setCheckBoxColor(mCheckBox, mController.getColorActiveItem());
+                    setCheckBoxColor(mCheckBox, mController.getColorItemContent());
                     initSeekbar(device);
                 } else if (!mController.hasAdjustVolumeUserRestriction() && currentlyConnected) {
                     mStatusIcon.setImageDrawable(
                             mContext.getDrawable(R.drawable.media_output_status_check));
-                    mStatusIcon.setColorFilter(mController.getColorActiveItem());
-                    mTitleText.setTextColor(mController.getColorActiveItem());
+                    mStatusIcon.setColorFilter(mController.getColorItemContent());
+                    mTitleText.setTextColor(mController.getColorItemContent());
                     setSingleLineLayout(getItemTitle(device), true /* bFocused */,
                             true /* showSeekBar */,
                             false /* showProgressBar */, true /* showStatus */);
@@ -192,7 +194,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                     mCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
                         onCheckBoxClicked(true, device);
                     });
-                    setCheckBoxColor(mCheckBox, mController.getColorInactiveItem());
+                    setCheckBoxColor(mCheckBox, mController.getColorItemContent());
                     setSingleLineLayout(getItemTitle(device), false /* bFocused */,
                             false /* showSeekBar */,
                             false /* showProgressBar */, false /* showStatus */);
@@ -214,7 +216,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
         @Override
         void onBind(int customizedItem, boolean topMargin, boolean bottomMargin) {
             if (customizedItem == CUSTOMIZED_ITEM_PAIR_NEW) {
-                mTitleText.setTextColor(mController.getColorInactiveItem());
+                mTitleText.setTextColor(mController.getColorItemContent());
                 mCheckBox.setVisibility(View.GONE);
                 setSingleLineLayout(mContext.getText(R.string.media_output_dialog_pairing_new),
                         false /* bFocused */);

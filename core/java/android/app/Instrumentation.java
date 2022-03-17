@@ -393,6 +393,15 @@ public class Instrumentation {
     }
 
     /**
+     * Resets the {@link #setInTouchMode touch mode} to the device default.
+     */
+    public void resetInTouchMode() {
+        final boolean defaultInTouchMode = getContext().getResources().getBoolean(
+                com.android.internal.R.bool.config_defaultInTouchMode);
+        setInTouchMode(defaultInTouchMode);
+    }
+
+    /**
      * Schedule a callback for when the application's main thread goes idle
      * (has no more events to process).
      *

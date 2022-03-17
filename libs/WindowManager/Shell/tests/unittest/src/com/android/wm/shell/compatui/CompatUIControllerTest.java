@@ -53,6 +53,7 @@ import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.compatui.letterboxedu.LetterboxEduWindowManager;
+import com.android.wm.shell.transition.Transitions;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -61,6 +62,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import dagger.Lazy;
 
 /**
  * Tests for {@link CompatUIController}.
@@ -82,6 +85,7 @@ public class CompatUIControllerTest extends ShellTestCase {
     private @Mock ShellTaskOrganizer.TaskListener mMockTaskListener;
     private @Mock SyncTransactionQueue mMockSyncQueue;
     private @Mock ShellExecutor mMockExecutor;
+    private @Mock Lazy<Transitions> mMockTransitionsLazy;
     private @Mock CompatUIWindowManager mMockCompatLayout;
     private @Mock LetterboxEduWindowManager mMockLetterboxEduLayout;
 
@@ -102,7 +106,8 @@ public class CompatUIControllerTest extends ShellTestCase {
         doReturn(true).when(mMockLetterboxEduLayout).createLayout(anyBoolean());
         doReturn(true).when(mMockLetterboxEduLayout).updateCompatInfo(any(), any(), anyBoolean());
         mController = new CompatUIController(mContext, mMockDisplayController,
-                mMockDisplayInsetsController, mMockImeController, mMockSyncQueue, mMockExecutor) {
+                mMockDisplayInsetsController, mMockImeController, mMockSyncQueue, mMockExecutor,
+                mMockTransitionsLazy) {
             @Override
             CompatUIWindowManager createCompatUiWindowManager(Context context, TaskInfo taskInfo,
                     ShellTaskOrganizer.TaskListener taskListener) {

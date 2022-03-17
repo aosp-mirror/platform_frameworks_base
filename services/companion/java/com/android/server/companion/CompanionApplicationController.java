@@ -49,7 +49,7 @@ import java.util.Map;
  * The following is the list of the APIs provided by {@link CompanionApplicationController} (to be
  * utilized by {@link CompanionDeviceManagerService}):
  * <ul>
- * <li> {@link #bindCompanionApplication(int, String)}
+ * <li> {@link #bindCompanionApplication(int, String, boolean)}
  * <li> {@link #unbindCompanionApplication(int, String)}
  * <li> {@link #notifyCompanionApplicationDeviceAppeared(AssociationInfo)}
  * <li> {@link #notifyCompanionApplicationDeviceDisappeared(AssociationInfo)}
@@ -103,8 +103,12 @@ class CompanionApplicationController {
         mCompanionServicesRegister.invalidate(userId);
     }
 
-    void bindCompanionApplication(@UserIdInt int userId, @NonNull String packageName) {
-        if (DEBUG) Log.i(TAG, "bind() u" + userId + "/" + packageName);
+    void bindCompanionApplication(@UserIdInt int userId, @NonNull String packageName,
+            boolean bindImportant) {
+        if (DEBUG) {
+            Log.i(TAG, "bind() u" + userId + "/" + packageName
+                    + " important=" + bindImportant);
+        }
 
         final List<ComponentName> companionServices =
                 mCompanionServicesRegister.forPackage(userId, packageName);
@@ -125,7 +129,8 @@ class CompanionApplicationController {
             }
 
             serviceConnectors = CollectionUtils.map(companionServices, componentName ->
-                            new CompanionDeviceServiceConnector(mContext, userId, componentName));
+                            CompanionDeviceServiceConnector.newInstance(mContext, userId,
+                                    componentName, bindImportant));
             mBoundCompanionApplications.setValueForPackage(userId, packageName, serviceConnectors);
         }
 
