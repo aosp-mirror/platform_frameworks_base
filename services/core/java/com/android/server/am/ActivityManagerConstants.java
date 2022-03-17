@@ -216,8 +216,12 @@ final class ActivityManagerConstants extends ContentObserver {
     private static final String DEFAULT_COMPONENT_ALIAS_OVERRIDES = "";
 
     private static final int DEFAULT_DEFER_BOOT_COMPLETED_BROADCAST =
-            DEFER_BOOT_COMPLETED_BROADCAST_BACKGROUND_RESTRICTED_ONLY
-            | DEFER_BOOT_COMPLETED_BROADCAST_TARGET_T_ONLY;
+             DEFER_BOOT_COMPLETED_BROADCAST_BACKGROUND_RESTRICTED_ONLY
+             | DEFER_BOOT_COMPLETED_BROADCAST_TARGET_T_ONLY;
+
+    private static final int DEFAULT_SERVICE_START_FOREGROUND_TIMEOUT_MS = 30 * 1000;
+
+    private static final int DEFAULT_SERVICE_START_FOREGROUND_ANR_DELAY_MS = 10 * 1000;
 
     // Flag stored in the DeviceConfig API.
     /**
@@ -310,6 +314,12 @@ final class ActivityManagerConstants extends ContentObserver {
 
     private static final String KEY_DEFER_BOOT_COMPLETED_BROADCAST =
             "defer_boot_completed_broadcast";
+
+    private static final String KEY_SERVICE_START_FOREGROUND_TIMEOUT_MS =
+            "service_start_foreground_timeout_ms";
+
+    private static final String KEY_SERVICE_START_FOREGROUND_ANR_DELAY_MS =
+            "service_start_foreground_anr_delay_ms";
 
     // Maximum number of cached processes we will allow.
     public int MAX_CACHED_PROCESSES = DEFAULT_MAX_CACHED_PROCESSES;
@@ -631,6 +641,19 @@ final class ActivityManagerConstants extends ContentObserver {
             DEFAULT_DEFER_BOOT_COMPLETED_BROADCAST;
 
     /**
+     * How long the Context.startForegroundService() grace period is to get around to
+     * calling Service.startForeground() before we generate ANR.
+     */
+    volatile int mServiceStartForegroundTimeoutMs = DEFAULT_SERVICE_START_FOREGROUND_TIMEOUT_MS;
+
+    /**
+     *  How long from Service.startForeground() timed-out to when we generate ANR of the user app.
+     *  This delay is after the timeout {@link #mServiceStartForegroundTimeoutMs}.
+     */
+    volatile int mServiceStartForegroundAnrDelayMs =
+            DEFAULT_SERVICE_START_FOREGROUND_ANR_DELAY_MS;
+
+    /**
      * Defines component aliases. Format
      * ComponentName ":" ComponentName ( "," ComponentName ":" ComponentName )*
      */
@@ -912,6 +935,12 @@ final class ActivityManagerConstants extends ContentObserver {
                                 break;
                             case KEY_DEFER_BOOT_COMPLETED_BROADCAST:
                                 updateDeferBootCompletedBroadcast();
+                                break;
+                            case KEY_SERVICE_START_FOREGROUND_TIMEOUT_MS:
+                                updateServiceStartForegroundTimeoutMs();
+                                break;
+                            case KEY_SERVICE_START_FOREGROUND_ANR_DELAY_MS:
+                                updateServiceStartForegroundAnrDealyMs();
                                 break;
                             case KEY_NO_KILL_CACHED_PROCESSES_UNTIL_BOOT_COMPLETED:
                                 updateNoKillCachedProcessesUntilBootCompleted();
@@ -1389,6 +1418,20 @@ final class ActivityManagerConstants extends ContentObserver {
                 DEFAULT_MAX_EMPTY_TIME_MILLIS);
     }
 
+    private void updateServiceStartForegroundTimeoutMs() {
+        mServiceStartForegroundTimeoutMs = DeviceConfig.getInt(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_SERVICE_START_FOREGROUND_TIMEOUT_MS,
+                DEFAULT_SERVICE_START_FOREGROUND_TIMEOUT_MS);
+    }
+
+    private void updateServiceStartForegroundAnrDealyMs() {
+        mServiceStartForegroundAnrDelayMs = DeviceConfig.getInt(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_SERVICE_START_FOREGROUND_ANR_DELAY_MS,
+                DEFAULT_SERVICE_START_FOREGROUND_ANR_DELAY_MS);
+    }
+
     private long[] parseLongArray(@NonNull String key, @NonNull long[] def) {
         final String val = DeviceConfig.getString(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                 key, null);
@@ -1669,6 +1712,10 @@ final class ActivityManagerConstants extends ContentObserver {
         pw.print("="); pw.println(mNoKillCachedProcessesPostBootCompletedDurationMillis);
         pw.print("  "); pw.print(KEY_MAX_EMPTY_TIME_MILLIS);
         pw.print("="); pw.println(mMaxEmptyTimeMillis);
+        pw.print("  "); pw.print(KEY_SERVICE_START_FOREGROUND_TIMEOUT_MS);
+        pw.print("="); pw.println(mServiceStartForegroundTimeoutMs);
+        pw.print("  "); pw.print(KEY_SERVICE_START_FOREGROUND_ANR_DELAY_MS);
+        pw.print("="); pw.println(mServiceStartForegroundAnrDelayMs);
 
         pw.println();
         if (mOverrideMaxCachedProcesses >= 0) {
