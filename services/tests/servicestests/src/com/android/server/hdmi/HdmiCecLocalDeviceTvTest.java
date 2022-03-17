@@ -30,8 +30,10 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.hardware.hdmi.HdmiControlManager;
@@ -770,7 +772,7 @@ public class HdmiCecLocalDeviceTvTest {
         // When the device reports its physical address, the listener eventually is invoked.
         HdmiCecMessage reportPhysicalAddress =
                 HdmiCecMessageBuilder.buildReportPhysicalAddressCommand(
-                ADDR_PLAYBACK_2, 0x1000, HdmiDeviceInfo.DEVICE_PLAYBACK);
+                        ADDR_PLAYBACK_2, 0x1000, HdmiDeviceInfo.DEVICE_PLAYBACK);
         mNativeWrapper.onCecMessage(reportPhysicalAddress);
         mTestLooper.dispatchAll();
 
@@ -779,6 +781,54 @@ public class HdmiCecLocalDeviceTvTest {
         assertThat(mDeviceEventListeners.size()).isEqualTo(1);
         assertThat(mDeviceEventListeners.get(0).getStatus())
                 .isEqualTo(HdmiControlManager.DEVICE_EVENT_ADD_DEVICE);
+    }
 
+    @Test
+    public void receiveSetAudioVolumeLevel_samNotActivated_noFeatureAbort_volumeChanges() {
+        when(mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)).thenReturn(25);
+
+        // Max volume of STREAM_MUSIC is retrieved on boot
+        mHdmiControlService.onBootPhase(PHASE_SYSTEM_SERVICES_READY);
+        mTestLooper.dispatchAll();
+
+        mNativeWrapper.onCecMessage(SetAudioVolumeLevelMessage.build(
+                ADDR_PLAYBACK_1,
+                ADDR_TV,
+                20));
+        mTestLooper.dispatchAll();
+
+        // <Feature Abort>[Not in correct mode] not sent
+        HdmiCecMessage featureAbortMessage = HdmiCecMessageBuilder.buildFeatureAbortCommand(
+                ADDR_TV,
+                ADDR_PLAYBACK_1,
+                Constants.MESSAGE_SET_AUDIO_VOLUME_LEVEL,
+                Constants.ABORT_NOT_IN_CORRECT_MODE);
+        assertThat(mNativeWrapper.getResultMessages()).doesNotContain(featureAbortMessage);
+
+        // <Set Audio Volume Level> uses volume range [0, 100]; STREAM_MUSIC uses range [0, 25]
+        verify(mAudioManager).setStreamVolume(eq(AudioManager.STREAM_MUSIC), eq(5), anyInt());
+    }
+
+    @Test
+    public void receiveSetAudioVolumeLevel_samActivated_respondsFeatureAbort_noVolumeChange() {
+        mNativeWrapper.onCecMessage(HdmiCecMessageBuilder.buildSetSystemAudioMode(
+                ADDR_AUDIO_SYSTEM, ADDR_TV, true));
+        mTestLooper.dispatchAll();
+
+        mNativeWrapper.onCecMessage(SetAudioVolumeLevelMessage.build(
+                ADDR_PLAYBACK_1, ADDR_TV, 50));
+        mTestLooper.dispatchAll();
+
+        // <Feature Abort>[Not in correct mode] sent
+        HdmiCecMessage featureAbortMessage = HdmiCecMessageBuilder.buildFeatureAbortCommand(
+                ADDR_TV,
+                ADDR_PLAYBACK_1,
+                Constants.MESSAGE_SET_AUDIO_VOLUME_LEVEL,
+                Constants.ABORT_NOT_IN_CORRECT_MODE);
+        assertThat(mNativeWrapper.getResultMessages()).contains(featureAbortMessage);
+
+        // AudioManager not notified of volume change
+        verify(mAudioManager, never()).setStreamVolume(eq(AudioManager.STREAM_MUSIC), anyInt(),
+                anyInt());
     }
 }

@@ -1166,6 +1166,19 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         return Constants.HANDLED;
     }
 
+    @Override
+    @Constants.HandleMessageResult
+    protected int handleSetAudioVolumeLevel(SetAudioVolumeLevelMessage message) {
+        // <Set Audio Volume Level> should only be sent to the System Audio device, so we don't
+        // handle it when System Audio Mode is enabled.
+        if (mService.isSystemAudioActivated()) {
+            return Constants.ABORT_NOT_IN_CORRECT_MODE;
+        } else {
+            mService.setStreamMusicVolume(message.getAudioVolumeLevel(), 0);
+            return Constants.HANDLED;
+        }
+    }
+
     void announceOneTouchRecordResult(int recorderAddress, int result) {
         mService.invokeOneTouchRecordResult(recorderAddress, result);
     }
@@ -1596,6 +1609,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         return DeviceFeatures.NO_FEATURES_SUPPORTED.toBuilder()
                 .setRecordTvScreenSupport(FEATURE_SUPPORTED)
                 .setArcTxSupport(hasArcPort ? FEATURE_SUPPORTED : FEATURE_NOT_SUPPORTED)
+                .setSetAudioVolumeLevelSupport(FEATURE_SUPPORTED)
                 .build();
     }
 

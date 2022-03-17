@@ -4176,9 +4176,7 @@ public class HdmiControlService extends SystemService {
         List<AudioDeviceAttributes> streamMusicDevices =
                 getAudioManager().getDevicesForAttributes(STREAM_MUSIC_ATTRIBUTES);
         if (streamMusicDevices.contains(getAvcAudioOutputDevice())) {
-            getAudioManager().setStreamVolume(AudioManager.STREAM_MUSIC,
-                    volume * mStreamMusicMaxVolume / AudioStatus.MAX_VOLUME,
-                    AudioManager.FLAG_ABSOLUTE_VOLUME);
+            setStreamMusicVolume(volume, AudioManager.FLAG_ABSOLUTE_VOLUME);
         }
     }
 
@@ -4195,5 +4193,14 @@ public class HdmiControlService extends SystemService {
             getAudioManager().adjustStreamVolume(AudioManager.STREAM_MUSIC, direction,
                     AudioManager.FLAG_ABSOLUTE_VOLUME);
         }
+    }
+
+    /**
+     * Sets the volume index of {@link AudioManager#STREAM_MUSIC}. Rescales the input volume index
+     * from HDMI-CEC volume range to STREAM_MUSIC's.
+     */
+    void setStreamMusicVolume(int volume, int flags) {
+        getAudioManager().setStreamVolume(AudioManager.STREAM_MUSIC,
+                volume * mStreamMusicMaxVolume / AudioStatus.MAX_VOLUME, flags);
     }
 }

@@ -303,6 +303,13 @@ abstract class HdmiCecLocalDevice {
         if (dispatchMessageToAction(message)) {
             return Constants.HANDLED;
         }
+
+        // If a message type has its own class, all valid messages of that type
+        // will be represented by an instance of that class.
+        if (message instanceof SetAudioVolumeLevelMessage) {
+            return handleSetAudioVolumeLevel((SetAudioVolumeLevelMessage) message);
+        }
+
         switch (message.getOpcode()) {
             case Constants.MESSAGE_ACTIVE_SOURCE:
                 return handleActiveSource(message);
@@ -634,6 +641,11 @@ abstract class HdmiCecLocalDevice {
 
     @Constants.HandleMessageResult
     protected int handleReportShortAudioDescriptor(HdmiCecMessage message) {
+        return Constants.NOT_HANDLED;
+    }
+
+    @Constants.HandleMessageResult
+    protected int handleSetAudioVolumeLevel(SetAudioVolumeLevelMessage message) {
         return Constants.NOT_HANDLED;
     }
 
