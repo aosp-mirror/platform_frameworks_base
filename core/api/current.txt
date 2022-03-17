@@ -25532,6 +25532,21 @@ package android.net {
     field public static final String EXTRA_VPN_PROFILE_STATE = "android.net.extra.VPN_PROFILE_STATE";
   }
 
+  public final class VpnProfileState implements android.os.Parcelable {
+    ctor public VpnProfileState(int, @Nullable String, boolean, boolean);
+    method public int describeContents();
+    method @Nullable public String getSessionId();
+    method public int getState();
+    method public boolean isAlwaysOn();
+    method public boolean isLockdownEnabled();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.VpnProfileState> CREATOR;
+    field public static final int STATE_CONNECTED = 2; // 0x2
+    field public static final int STATE_CONNECTING = 1; // 0x1
+    field public static final int STATE_DISCONNECTED = 0; // 0x0
+    field public static final int STATE_FAILED = 3; // 0x3
+  }
+
   public class VpnService extends android.app.Service {
     ctor public VpnService();
     method public final boolean isAlwaysOn();
