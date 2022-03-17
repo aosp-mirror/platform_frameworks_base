@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Copyright (C) 2021 The Android Open Source Project
-
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
      You may obtain a copy of the License at
@@ -20,35 +19,26 @@
     <!-- A header for selfManaged devices only. -->
     <include layout="@layout/vendor_header" />
 
+    <!-- Do NOT change the ID of the root LinearLayout above: it's referenced in CTS tests. -->
+
     <ImageView
         android:id="@+id/profile_icon"
         android:layout_width="match_parent"
         android:layout_height="32dp"
         android:gravity="center"
-        android:layout_marginBottom="12dp"
-        android:layout_marginTop="1dp"
+        android:layout_marginTop="18dp"
         android:tint="@android:color/system_accent1_600"/>
 
-    <!-- Do NOT change the ID of the root LinearLayout above: it's referenced in CTS tests. -->
+    <LinearLayout style="@style/Description">
+        <TextView
+            android:id="@+id/title"
+            style="@style/DescriptionTitle" />
 
-    <TextView
-        android:id="@+id/title"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:paddingHorizontal="12dp"
-        android:layout_marginBottom="12dp"
-        style="@*android:style/TextAppearance.Widget.Toolbar.Title" />
+        <TextView
+            android:id="@+id/summary"
+            style="@style/DescriptionSummary" />
 
-    <TextView
-        android:id="@+id/summary"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:layout_marginBottom="12dp"
-        android:gravity="center"
-        android:textColor="?android:attr/textColorSecondary"
-        android:textSize="14sp" />
+    </LinearLayout>
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -59,18 +49,20 @@
             android:id="@+id/multiple_device_list"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="12dp"
             android:orientation="vertical"
             android:visibility="gone">
 
             <View
                 android:id="@+id/border_top"
-                android:layout_marginTop="12dp"
                 style="@style/DeviceListBorder" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/device_list"
                 android:layout_width="match_parent"
                 android:scrollbars="vertical"
+                android:layout_marginBottom="12dp"
                 android:layout_height="200dp" />
 
             <View
@@ -99,8 +91,9 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:gravity="center"
         android:orientation="vertical"
-        android:layout_marginTop="24dp">
+        android:layout_marginTop="16dp">
 
         <!-- Do NOT change the IDs of the buttons: they are referenced in CTS tests. -->
 
@@ -111,18 +104,28 @@
 
         <Button
             android:id="@+id/btn_negative"
+            android:layout_marginBottom="12dp"
             style="@style/NegativeButton"
             android:text="@string/consent_no" />
 
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="bottom|right"
+        android:orientation="vertical"
+        android:layout_marginRight="16dp"
+        android:layout_marginBottom="16dp">
+
+        <!-- Do NOT change the IDs of the buttons: they are referenced in CTS tests. -->
+
         <Button
             android:id="@+id/btn_negative_multiple_devices"
-            android:layout_marginLeft="170dp"
-            android:layout_marginBottom="10dp"
             style="@style/NegativeButtonMultipleDevices"
-            android:textColor = "?android:textColorPrimary"
+            android:textColor="?android:textColorPrimary"
             android:visibility="gone"
             android:text="@string/consent_no" />
-
     </LinearLayout>
 
 </LinearLayout>

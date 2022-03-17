@@ -28,6 +28,7 @@
         android:id="@android:id/icon"
         android:layout_width="24dp"
         android:layout_height="24dp"
+        android:layout_marginLeft="24dp"
         android:layout_marginRight="12dp"
         android:tint="@android:color/system_accent1_600"/>
 

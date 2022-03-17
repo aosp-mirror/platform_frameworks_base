@@ -511,7 +511,7 @@ public class CompanionDeviceActivity extends FragmentActivity implements
         CompanionDeviceDiscoveryService.getScanResult().observe(this,
                 deviceFilterPairs -> {
                     // Dismiss the progress bar once there's one device found for multiple devices.
-                    if (deviceFilterPairs.size() == 1) {
+                    if (deviceFilterPairs.size() >= 1) {
                         mProgressIndicator.setVisibility(View.GONE);
                     }
 
@@ -571,7 +571,7 @@ public class CompanionDeviceActivity extends FragmentActivity implements
                 CompanionVendorHelperDialogFragment.newInstance(mRequest.getPackageName(),
                         mRequest.getUserId(), mRequest.getDeviceProfile());
 
-        mAssociationConfirmationDialog.setVisibility(View.GONE);
+        mAssociationConfirmationDialog.setVisibility(View.INVISIBLE);
 
         fragmentDialog.show(fragmentManager, /* Tag */ FRAGMENT_DIALOG_TAG);
     }
