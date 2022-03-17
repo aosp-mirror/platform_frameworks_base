@@ -205,7 +205,7 @@ public class TrafficStats {
      *                server context.
      * @hide
      */
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @SystemApi(client = MODULE_LIBRARIES)
     @SuppressLint("VisiblySynchronized")
     public static synchronized void init(@NonNull final Context context) {
         if (sStatsService != null) {
@@ -376,7 +376,7 @@ public class TrafficStats {
      *
      * @hide
      */
-    @SystemApi
+    @SystemApi(client = MODULE_LIBRARIES)
     public static void setThreadStatsTagDownload() {
         setThreadStatsTag(TAG_SYSTEM_DOWNLOAD);
     }
@@ -468,7 +468,7 @@ public class TrafficStats {
      *
      * @see #setThreadStatsTag(int)
      */
-    public static void tagSocket(Socket socket) throws SocketException {
+    public static void tagSocket(@NonNull Socket socket) throws SocketException {
         SocketTagger.get().tag(socket);
     }
 
@@ -483,7 +483,7 @@ public class TrafficStats {
      * calling {@code untagSocket()} before sending the socket to another
      * process.
      */
-    public static void untagSocket(Socket socket) throws SocketException {
+    public static void untagSocket(@NonNull Socket socket) throws SocketException {
         SocketTagger.get().untag(socket);
     }
 
@@ -496,14 +496,14 @@ public class TrafficStats {
      *
      * @see #setThreadStatsTag(int)
      */
-    public static void tagDatagramSocket(DatagramSocket socket) throws SocketException {
+    public static void tagDatagramSocket(@NonNull DatagramSocket socket) throws SocketException {
         SocketTagger.get().tag(socket);
     }
 
     /**
      * Remove any statistics parameters from the given {@link DatagramSocket}.
      */
-    public static void untagDatagramSocket(DatagramSocket socket) throws SocketException {
+    public static void untagDatagramSocket(@NonNull DatagramSocket socket) throws SocketException {
         SocketTagger.get().untag(socket);
     }
 
@@ -516,7 +516,7 @@ public class TrafficStats {
      *
      * @see #setThreadStatsTag(int)
      */
-    public static void tagFileDescriptor(FileDescriptor fd) throws IOException {
+    public static void tagFileDescriptor(@NonNull FileDescriptor fd) throws IOException {
         SocketTagger.get().tag(fd);
     }
 
@@ -524,7 +524,7 @@ public class TrafficStats {
      * Remove any statistics parameters from the given {@link FileDescriptor}
      * socket.
      */
-    public static void untagFileDescriptor(FileDescriptor fd) throws IOException {
+    public static void untagFileDescriptor(@NonNull FileDescriptor fd) throws IOException {
         SocketTagger.get().untag(fd);
     }
 
