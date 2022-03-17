@@ -5620,19 +5620,23 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         }
 
         @Override
-        public void reportImeControl(@Nullable IBinder windowToken, boolean imeParentChanged) {
+        public void reportImeControl(@Nullable IBinder windowToken) {
             synchronized (ImfLock.class) {
                 if (mCurFocusedWindow != windowToken) {
                     // mCurPerceptible was set by the focused window, but it is no longer in
                     // control, so we reset mCurPerceptible.
                     mCurPerceptible = true;
                 }
-                if (imeParentChanged) {
-                    // Hide the IME method menu earlier when the IME surface parent will change in
-                    // case seeing the dialog dismiss flickering during the next focused window
-                    // starting the input connection.
-                    mMenuController.hideInputMethodMenu();
-                }
+            }
+        }
+
+        @Override
+        public void onImeParentChanged() {
+            synchronized (ImfLock.class) {
+                // Hide the IME method menu when the IME surface parent will change in
+                // case seeing the dialog dismiss flickering during the next focused window
+                // starting the input connection.
+                mMenuController.hideInputMethodMenu();
             }
         }
 

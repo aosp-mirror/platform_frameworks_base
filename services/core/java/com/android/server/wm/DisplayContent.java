@@ -4257,18 +4257,15 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         // Update Ime parent when IME insets leash created or the new IME layering target might
         // updated from setImeLayeringTarget, which is the best time that default IME visibility
         // has been settled down after IME control target changed.
-        final boolean imeParentChanged =
-                prevImeControlTarget != mImeControlTarget || forceUpdateImeParent;
-        if (imeParentChanged) {
+        final boolean imeControlChanged = prevImeControlTarget != mImeControlTarget;
+        if (imeControlChanged || forceUpdateImeParent) {
             updateImeParent();
         }
 
         final WindowState win = InsetsControlTarget.asWindowOrNull(mImeControlTarget);
         final IBinder token = win != null ? win.mClient.asBinder() : null;
         // Note: not allowed to call into IMMS with the WM lock held, hence the post.
-        mWmService.mH.post(() ->
-                InputMethodManagerInternal.get().reportImeControl(token, imeParentChanged)
-        );
+        mWmService.mH.post(() -> InputMethodManagerInternal.get().reportImeControl(token));
     }
 
     void updateImeParent() {
@@ -4290,6 +4287,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             // do a force update to make sure there is a layer set for the new parent.
             assignRelativeLayerForIme(getSyncTransaction(), true /* forceUpdate */);
             scheduleAnimation();
+
+            mWmService.mH.post(() -> InputMethodManagerInternal.get().onImeParentChanged());
         }
     }
 
