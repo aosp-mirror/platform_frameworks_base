@@ -16,6 +16,7 @@
 
 package android.trust.test
 
+import android.service.trust.TrustAgentService.FLAG_GRANT_TRUST_TEMPORARY_AND_RENEWABLE
 import android.trust.BaseTrustAgentService
 import android.trust.TrustTestActivity
 import android.trust.test.lib.LockStateTrackingRule
@@ -32,16 +33,16 @@ import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 
 /**
- * Test for testing revokeTrust & grantTrust for non-renewable trust.
+ * Test for testing revokeTrust & grantTrust for renewable trust.
  *
- * atest TrustTests:GrantAndRevokeTrustTest
+ * atest TrustTests:TemporaryAndRenewableTrustTest
  */
 @RunWith(AndroidJUnit4::class)
-class GrantAndRevokeTrustTest {
+class TemporaryAndRenewableTrustTest {
     private val uiDevice = UiDevice.getInstance(getInstrumentation())
     private val activityScenarioRule = ActivityScenarioRule(TrustTestActivity::class.java)
     private val lockStateTrackingRule = LockStateTrackingRule()
-    private val trustAgentRule = TrustAgentRule<GrantAndRevokeTrustAgent>()
+    private val trustAgentRule = TrustAgentRule<TemporaryAndRenewableTrustAgent>()
 
     @get:Rule
     val rule: RuleChain = RuleChain
@@ -65,28 +66,59 @@ class GrantAndRevokeTrustTest {
     }
 
     @Test
-    fun grantKeepsDeviceUnlocked() {
-        trustAgentRule.agent.grantTrust(GRANT_MESSAGE, 10000, 0)
+    fun grantTrustLockedDevice_deviceStaysLocked() {
         uiDevice.sleep()
+        lockStateTrackingRule.assertLocked()
+
+        trustAgentRule.agent.grantTrust(GRANT_MESSAGE, 0, FLAG_GRANT_TRUST_TEMPORARY_AND_RENEWABLE)
+        uiDevice.wakeUp()
+
+        lockStateTrackingRule.assertLocked()
+    }
+
+    @Test
+    fun grantTrustUnlockedDevice_deviceLocksOnScreenOff() {
+        trustAgentRule.agent.grantTrust(GRANT_MESSAGE, 0, FLAG_GRANT_TRUST_TEMPORARY_AND_RENEWABLE)
+        uiDevice.sleep()
+
+        lockStateTrackingRule.assertLocked()
+    }
+
+    @Test
+    fun grantTrustLockedDevice_grantTrustOnLockedDeviceUnlocksDevice() {
+        trustAgentRule.agent.grantTrust(GRANT_MESSAGE, 0, FLAG_GRANT_TRUST_TEMPORARY_AND_RENEWABLE)
+        uiDevice.sleep()
+
+        lockStateTrackingRule.assertLocked()
+
+        trustAgentRule.agent.grantTrust(GRANT_MESSAGE, 0, FLAG_GRANT_TRUST_TEMPORARY_AND_RENEWABLE)
+        uiDevice.wakeUp()
 
         lockStateTrackingRule.assertUnlocked()
     }
 
     @Test
-    fun grantKeepsDeviceUnlocked_untilRevoked() {
-        trustAgentRule.agent.grantTrust(GRANT_MESSAGE, 0, 0)
-        await()
+    fun grantTrustLockedDevice_revokeTrustPreventsSubsequentUnlock() {
+        trustAgentRule.agent.grantTrust(GRANT_MESSAGE, 0, FLAG_GRANT_TRUST_TEMPORARY_AND_RENEWABLE)
         uiDevice.sleep()
+
+        lockStateTrackingRule.assertLocked()
+
         trustAgentRule.agent.revokeTrust()
+        await(500)
+        uiDevice.wakeUp()
+        await(500)
+
+        trustAgentRule.agent.grantTrust(GRANT_MESSAGE, 0, FLAG_GRANT_TRUST_TEMPORARY_AND_RENEWABLE)
 
         lockStateTrackingRule.assertLocked()
     }
 
     companion object {
-        private const val TAG = "GrantAndRevokeTrustTest"
+        private const val TAG = "TemporaryAndRenewableTrustTest"
         private const val GRANT_MESSAGE = "granted by test"
-        private fun await() = Thread.sleep(250)
+        private fun await(millis: Long) = Thread.sleep(millis)
     }
 }
 
-class GrantAndRevokeTrustAgent : BaseTrustAgentService()
+class TemporaryAndRenewableTrustAgent : BaseTrustAgentService()
