@@ -3666,6 +3666,12 @@
     <permission android:name="android.permission.BIND_ATTESTATION_VERIFICATION_SERVICE"
                 android:protectionLevel="signature" />
 
+    <!-- Allows the caller to generate keymint keys with the INCLUDE_UNIQUE_ID tag, which
+         uniquely identifies the device via the attestation certificate.
+         @hide @TestApi -->
+    <permission android:name="android.permission.REQUEST_UNIQUE_ID_ATTESTATION"
+         android:protectionLevel="signature" />
+
     <!-- ========================================= -->
     <!-- Permissions for special development tools -->
     <!-- ========================================= -->
