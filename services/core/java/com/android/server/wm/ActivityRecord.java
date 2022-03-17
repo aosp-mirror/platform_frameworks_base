@@ -5603,19 +5603,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     "makeInvisible", true /* beforeStopping */);
             // Defer telling the client it is hidden if it can enter Pip and isn't current paused,
             // stopped or stopping. This gives it a chance to enter Pip in onPause().
-            // TODO: There is still a question surrounding activities in multi-window mode that want
-            // to enter Pip after they are paused, but are still visible. I they should be okay to
-            // enter Pip in those cases, but not "auto-Pip" which is what this condition covers and
-            // the current contract for "auto-Pip" is that the app should enter it before onPause
-            // returns. Just need to confirm this reasoning makes sense.
             final boolean deferHidingClient = canEnterPictureInPicture
                     && !isState(STARTED, STOPPING, STOPPED, PAUSED);
-            if (!mTransitionController.isShellTransitionsEnabled()
-                    && deferHidingClient && pictureInPictureArgs.isAutoEnterEnabled()) {
-                // Go ahead and just put the activity in pip if it supports auto-pip.
-                mAtmService.enterPictureInPictureMode(this, pictureInPictureArgs);
-                return;
-            }
             setDeferHidingClient(deferHidingClient);
             setVisibility(false);
 
