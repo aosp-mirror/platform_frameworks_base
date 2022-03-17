@@ -2424,7 +2424,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         // Bounds need to be relative, as the dim layer is a child.
         final Rect dimBounds = getBounds();
         dimBounds.offsetTo(0 /* newLeft */, 0 /* newTop */);
-        if (mDimmer.updateDims(getPendingTransaction(), dimBounds)) {
+        if (mDimmer.updateDims(getSyncTransaction(), dimBounds)) {
             scheduleAnimation();
         }
     }
