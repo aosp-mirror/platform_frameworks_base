@@ -854,7 +854,8 @@ public class DisplayContentTests extends WindowTestsBase {
         final Rect[] bounds = new Rect[]{zeroRect, new Rect(left, top, right, bottom), zeroRect,
                 zeroRect};
         final DisplayCutout.CutoutPathParserInfo info = new DisplayCutout.CutoutPathParserInfo(
-                displayWidth, displayHeight, density, "", Surface.ROTATION_0, 1f);
+                displayWidth, displayHeight, displayWidth, displayHeight, density, "",
+                Surface.ROTATION_0, 1f, 1f);
         final DisplayCutout cutout = new WmDisplayCutout(
                 DisplayCutout.constructDisplayCutout(bounds, Insets.NONE, info), null)
                         .computeSafeInsets(displayWidth, displayHeight).getDisplayCutout();
@@ -874,7 +875,8 @@ public class DisplayContentTests extends WindowTestsBase {
         final Rect[] bounds90 = new Rect[]{new Rect(top, left, bottom, right), zeroRect, zeroRect,
                 zeroRect};
         final DisplayCutout.CutoutPathParserInfo info90 = new DisplayCutout.CutoutPathParserInfo(
-                displayWidth, displayHeight, density, "", Surface.ROTATION_90, 1f);
+                displayWidth, displayHeight, displayWidth, displayHeight, density, "",
+                Surface.ROTATION_90, 1f, 1f);
         assertEquals(new WmDisplayCutout(
                         DisplayCutout.constructDisplayCutout(bounds90, Insets.NONE, info90), null)
                         .computeSafeInsets(displayHeight, displayWidth).getDisplayCutout(),
