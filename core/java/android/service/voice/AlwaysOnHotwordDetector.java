@@ -53,6 +53,7 @@ import android.os.SharedMemory;
 import android.util.Log;
 import android.util.Slog;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IHotwordRecognitionStatusCallback;
 import com.android.internal.app.IVoiceInteractionManagerService;
 import com.android.internal.app.IVoiceInteractionSoundTriggerSession;
@@ -62,8 +63,10 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 /**
  * A class that lets a VoiceInteractionService implementation interact with
@@ -275,6 +278,7 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
      * The metadata of the Keyphrase, derived from the enrollment application.
      * This may be null if this keyphrase isn't supported by the enrollment application.
      */
+    @GuardedBy("mLock")
     @Nullable
     private KeyphraseMetadata mKeyphraseMetadata;
     private final KeyphraseEnrollmentInfo mKeyphraseEnrollmentInfo;
@@ -287,6 +291,9 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
     private final int mTargetSdkVersion;
     private final boolean mSupportHotwordDetectionService;
 
+    @GuardedBy("mLock")
+    private boolean mIsAvailabilityOverriddenByTestApi = false;
+    @GuardedBy("mLock")
     private int mAvailability = STATE_NOT_READY;
 
     /**
@@ -815,12 +822,13 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
         try {
             Identity identity = new Identity();
             identity.packageName = ActivityThread.currentOpPackageName();
-            mSoundTriggerSession = mModelManagementService.createSoundTriggerSessionAsOriginator(
-                    identity, mBinder);
+            mSoundTriggerSession =
+                    mModelManagementService.createSoundTriggerSessionAsOriginator(
+                            identity, mBinder);
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }
-        new RefreshAvailabiltyTask().execute();
+        new RefreshAvailabilityTask().execute();
     }
 
     /**
@@ -845,6 +853,47 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
         }
 
         super.updateState(options, sharedMemory);
+    }
+
+    /**
+     * Test API for manipulating the voice engine and sound model availability.
+     *
+     * After overriding the availability status, the client's
+     * {@link Callback#onAvailabilityChanged(int)} will be called to reflect the updated state.
+     *
+     * When this override is set, all system updates to availability will be ignored.
+     * @hide
+     */
+    @TestApi
+    public void overrideAvailability(int availability) {
+        synchronized (mLock) {
+            mAvailability = availability;
+            mIsAvailabilityOverriddenByTestApi = true;
+            // ENROLLED state requires there to be metadata about the sound model so a fake one
+            // is created.
+            if (mKeyphraseMetadata == null && mAvailability == STATE_KEYPHRASE_ENROLLED) {
+                Set<Locale> fakeSupportedLocales = new HashSet<>();
+                fakeSupportedLocales.add(mLocale);
+                mKeyphraseMetadata = new KeyphraseMetadata(1, mText, fakeSupportedLocales,
+                        AlwaysOnHotwordDetector.RECOGNITION_MODE_VOICE_TRIGGER);
+            }
+            notifyStateChangedLocked();
+        }
+    }
+
+    /**
+     * Test API for clearing an availability override set by {@link #overrideAvailability(int)}
+     *
+     * This method will restore the availability to the current system state.
+     * @hide
+     */
+    @TestApi
+    public void resetAvailability() {
+        synchronized (mLock) {
+            mIsAvailabilityOverriddenByTestApi = false;
+        }
+        // Execute a refresh availability task - which should then notify of a change.
+        new RefreshAvailabilityTask().execute();
     }
 
     /**
@@ -897,6 +946,7 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
         }
     }
 
+    @GuardedBy("mLock")
     private int getSupportedRecognitionModesLocked() {
         if (mAvailability == STATE_INVALID || mAvailability == STATE_ERROR) {
             throw new IllegalStateException(
@@ -931,6 +981,7 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
         }
     }
 
+    @GuardedBy("mLock")
     private int getSupportedAudioCapabilitiesLocked() {
         try {
             ModuleProperties properties =
@@ -1210,6 +1261,7 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
         }
     }
 
+    @GuardedBy("mLock")
     private Intent getManageIntentLocked(@KeyphraseEnrollmentInfo.ManageActions int action) {
         if (mAvailability == STATE_INVALID || mAvailability == STATE_ERROR) {
             throw new IllegalStateException(
@@ -1242,6 +1294,7 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
             }
 
             mAvailability = STATE_INVALID;
+            mIsAvailabilityOverriddenByTestApi = false;
             notifyStateChangedLocked();
 
             if (mSupportHotwordDetectionService) {
@@ -1270,6 +1323,15 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
                 return;
             }
 
+            // Because this method reflects an update from the system service models, we should not
+            // update the client of an availability change when the availability has been overridden
+            // via a test API.
+            if (mIsAvailabilityOverriddenByTestApi) {
+                Slog.w(TAG, "Suppressing system availability update. "
+                        + "Availability is overridden by test API.");
+                return;
+            }
+
             // Stop the recognition before proceeding.
             // This is done because we want to stop the recognition on an older model if it changed
             // or was deleted.
@@ -1289,10 +1351,11 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
             }
 
             // Execute a refresh availability task - which should then notify of a change.
-            new RefreshAvailabiltyTask().execute();
+            new RefreshAvailabilityTask().execute();
         }
     }
 
+    @GuardedBy("mLock")
     private int startRecognitionLocked(int recognitionFlags,
             @Nullable byte[] data) {
         if (DBG) {
@@ -1346,6 +1409,7 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
         return code;
     }
 
+    @GuardedBy("mLock")
     private int stopRecognitionLocked() {
         int code;
         try {
@@ -1361,6 +1425,7 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
         return code;
     }
 
+    @GuardedBy("mLock")
     private int setParameterLocked(@ModelParams int modelParam, int value) {
         try {
             int code = mSoundTriggerSession.setParameter(mKeyphraseMetadata.getId(), modelParam,
@@ -1376,6 +1441,7 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
         }
     }
 
+    @GuardedBy("mLock")
     private int getParameterLocked(@ModelParams int modelParam) {
         try {
             return mSoundTriggerSession.getParameter(mKeyphraseMetadata.getId(), modelParam);
@@ -1384,6 +1450,7 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
         }
     }
 
+    @GuardedBy("mLock")
     @Nullable
     private ModelParamRange queryParameterLocked(@ModelParams int modelParam) {
         try {
@@ -1400,15 +1467,19 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
         }
     }
 
+    @GuardedBy("mLock")
     private void updateAndNotifyStateChangedLocked(int availability) {
         if (DBG) {
             Slog.d(TAG, "Hotword availability changed from " + mAvailability
                     + " -> " + availability);
         }
-        mAvailability = availability;
+        if (!mIsAvailabilityOverriddenByTestApi) {
+            mAvailability = availability;
+        }
         notifyStateChangedLocked();
     }
 
+    @GuardedBy("mLock")
     private void notifyStateChangedLocked() {
         Message message = Message.obtain(mHandler, MSG_AVAILABILITY_CHANGED);
         message.arg1 = mAvailability;
@@ -1530,7 +1601,7 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
         }
     }
 
-    class RefreshAvailabiltyTask extends AsyncTask<Void, Void, Void> {
+    class RefreshAvailabilityTask extends AsyncTask<Void, Void, Void> {
 
         @Override
         public Void doInBackground(Void... params) {
