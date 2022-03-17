@@ -18,8 +18,9 @@ package android.net;
 
 import android.net.IpConfiguration;
 import android.net.IEthernetServiceListener;
-import android.net.IEthernetNetworkManagementListener;
+import android.net.EthernetNetworkManagementException;
 import android.net.EthernetNetworkUpdateRequest;
+import android.net.INetworkInterfaceOutcomeReceiver;
 import android.net.ITetheredInterfaceCallback;
 
 /**
@@ -39,7 +40,7 @@ interface IEthernetManager
     void requestTetheredInterface(in ITetheredInterfaceCallback callback);
     void releaseTetheredInterface(in ITetheredInterfaceCallback callback);
     void updateConfiguration(String iface, in EthernetNetworkUpdateRequest request,
-        in IEthernetNetworkManagementListener listener);
-    void connectNetwork(String iface, in IEthernetNetworkManagementListener listener);
-    void disconnectNetwork(String iface, in IEthernetNetworkManagementListener listener);
+        in INetworkInterfaceOutcomeReceiver listener);
+    void connectNetwork(String iface, in INetworkInterfaceOutcomeReceiver listener);
+    void disconnectNetwork(String iface, in INetworkInterfaceOutcomeReceiver listener);
 }
