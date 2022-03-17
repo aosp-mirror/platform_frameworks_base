@@ -76,7 +76,6 @@ import com.android.internal.annotations.Immutable;
 import com.android.internal.util.CollectionUtils;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -620,19 +619,6 @@ public final class PermissionManager {
         try {
             mPermissionManager
                     .revokeRuntimePermission(packageName, permName, user.getIdentifier(), reason);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * @see Context#revokeOwnPermissionsOnKill(Collection)
-     * @hide
-     */
-    public void revokeOwnPermissionsOnKill(@NonNull Collection<String> permissions) {
-        try {
-            mPermissionManager.revokeOwnPermissionsOnKill(mContext.getPackageName(),
-                    new ArrayList<String>(permissions));
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
