@@ -3278,7 +3278,7 @@ public class WindowManagerService extends IWindowManager.Stub
         mContext.enforceCallingOrSelfPermission(
                 Manifest.permission.SUBSCRIBE_TO_KEYGUARD_LOCKED_STATE,
                 Manifest.permission.SUBSCRIBE_TO_KEYGUARD_LOCKED_STATE
-                        + " permission required to read keyguard visibility");
+                        + " permission required to subscribe to keyguard locked state changes");
     }
 
     private void dispatchKeyguardLockedState() {
