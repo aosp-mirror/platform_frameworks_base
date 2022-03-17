@@ -78,8 +78,7 @@ public class UsbConfirmActivity extends AlertActivity
         String appName = mResolveInfo.loadLabel(packageManager).toString();
 
         final AlertController.AlertParams ap = mAlertParams;
-        final int titleId = mUsbConfirmMessageHandler.getPromptTitleId();
-        ap.mTitle = getString(titleId, appName, mDevice.getProductName());
+        ap.mTitle = appName;
         boolean useRecordWarning = false;
         if (mDevice == null) {
             final int messageId = mUsbConfirmMessageHandler.getUsbAccessoryPromptId();
@@ -96,6 +95,8 @@ public class UsbConfirmActivity extends AlertActivity
             useRecordWarning = isAudioCaptureDevice && !hasRecordPermission;
 
             final int messageId = mUsbConfirmMessageHandler.getMessageId();
+            final int titleId = mUsbConfirmMessageHandler.getPromptTitleId();
+            ap.mTitle = getString(titleId, appName, mDevice.getProductName());
             ap.mMessage = (messageId != Resources.ID_NULL) ? getString(messageId, appName,
                     mDevice.getProductName()) : null;
             mDisconnectedReceiver = new UsbDisconnectedReceiver(this, mDevice);

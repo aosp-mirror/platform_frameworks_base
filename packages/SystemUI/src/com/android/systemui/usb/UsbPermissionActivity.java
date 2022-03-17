@@ -90,8 +90,7 @@ public class UsbPermissionActivity extends AlertActivity
         String appName = aInfo.loadLabel(packageManager).toString();
 
         final AlertController.AlertParams ap = mAlertParams;
-        final int titleId = mUsbAudioPermissionMessageHandler.getPromptTitleId();
-        ap.mTitle = getString(titleId, appName, mDevice.getProductName());
+        ap.mTitle = appName;
         boolean useRecordWarning = false;
         if (mDevice == null) {
             // Accessory Case
@@ -109,6 +108,8 @@ public class UsbPermissionActivity extends AlertActivity
             useRecordWarning = isAudioCaptureDevice && !hasRecordPermission;
 
             final int messageId =  mUsbAudioPermissionMessageHandler.getMessageId();
+            final int titleId = mUsbAudioPermissionMessageHandler.getPromptTitleId();
+            ap.mTitle = getString(titleId, appName, mDevice.getProductName());
             ap.mMessage = (messageId != Resources.ID_NULL) ? getString(messageId, appName,
                     mDevice.getProductName()) : null;
             mDisconnectedReceiver = new UsbDisconnectedReceiver(this, mDevice);
