@@ -229,7 +229,6 @@ import com.android.server.pm.resolution.ComponentResolverApi;
 import com.android.server.pm.verify.domain.DomainVerificationManagerInternal;
 import com.android.server.pm.verify.domain.DomainVerificationService;
 import com.android.server.pm.verify.domain.proxy.DomainVerificationProxy;
-import com.android.server.pm.verify.domain.proxy.DomainVerificationProxyV1;
 import com.android.server.sdksandbox.SdkSandboxManagerLocal;
 import com.android.server.storage.DeviceStorageMonitorInternal;
 import com.android.server.utils.SnapshotCache;
@@ -936,7 +935,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     private final BroadcastHelper mBroadcastHelper;
     private final RemovePackageHelper mRemovePackageHelper;
     private final DeletePackageHelper mDeletePackageHelper;
-    private final InitAndSystemPackageHelper mInitAndSystemPackageHelper;
+    private final InitAppsHelper mInitAppsHelper;
     private final AppDataHelper mAppDataHelper;
     private final InstallPackageHelper mInstallPackageHelper;
     private final PreferredActivityHelper mPreferredActivityHelper;
@@ -1671,7 +1670,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         mAppDataHelper = testParams.appDataHelper;
         mInstallPackageHelper = testParams.installPackageHelper;
         mRemovePackageHelper = testParams.removePackageHelper;
-        mInitAndSystemPackageHelper = testParams.initAndSystemPackageHelper;
+        mInitAppsHelper = testParams.initAndSystemPackageHelper;
         mDeletePackageHelper = testParams.deletePackageHelper;
         mPreferredActivityHelper = testParams.preferredActivityHelper;
         mResolveIntentHelper = testParams.resolveIntentHelper;
@@ -1821,7 +1820,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         mAppDataHelper = new AppDataHelper(this);
         mInstallPackageHelper = new InstallPackageHelper(this, mAppDataHelper);
         mRemovePackageHelper = new RemovePackageHelper(this, mAppDataHelper);
-        mInitAndSystemPackageHelper = new InitAndSystemPackageHelper(this);
+        mInitAppsHelper = new InitAppsHelper(this, mApexManager, mInstallPackageHelper,
+                mInjector.getSystemPartitions());
         mDeletePackageHelper = new DeletePackageHelper(this, mRemovePackageHelper,
                 mAppDataHelper);
         mSharedLibraries.setDeletePackageHelper(mDeletePackageHelper);
@@ -1956,8 +1956,11 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                     mIsEngBuild, mIsUserDebugBuild, mIncrementalVersion);
 
             final int[] userIds = mUserManager.getUserIds();
-            mOverlayConfig = mInitAndSystemPackageHelper.initPackages(packageSettings,
-                    userIds, startTime);
+            PackageParser2 packageParser = mInjector.getScanningCachingPackageParser();
+            mOverlayConfig = mInitAppsHelper.initSystemApps(packageParser, packageSettings, userIds,
+                    startTime);
+            mInitAppsHelper.initNonSystemApps(packageParser, userIds, startTime);
+            packageParser.close();
 
             // Resolve the storage manager.
             mStorageManagerPackage = getStorageManagerPackageName(computer);
@@ -7030,7 +7033,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     }
 
     boolean isExpectingBetter(String packageName) {
-        return mInitAndSystemPackageHelper.isExpectingBetter(packageName);
+        return mInitAppsHelper.isExpectingBetter(packageName);
     }
 
     int getDefParseFlags() {
@@ -7129,13 +7132,12 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     }
 
     boolean isOverlayMutable(String packageName) {
-        return (mOverlayConfig != null ? mOverlayConfig
-                : OverlayConfig.getSystemInstance()).isMutable(packageName);
+        return mOverlayConfig.isMutable(packageName);
     }
 
     @ScanFlags int getSystemPackageScanFlags(File codePath) {
         List<ScanPartition> dirsToScanAsSystem =
-                mInitAndSystemPackageHelper.getDirsToScanAsSystem();
+                mInitAppsHelper.getDirsToScanAsSystem();
         @PackageManagerService.ScanFlags int scanFlags = SCAN_AS_SYSTEM;
         for (int i = dirsToScanAsSystem.size() - 1; i >= 0; i--) {
             ScanPartition partition = dirsToScanAsSystem.get(i);
@@ -7153,7 +7155,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     Pair<Integer, Integer> getSystemPackageRescanFlagsAndReparseFlags(File scanFile,
             int systemScanFlags, int systemParseFlags) {
         List<ScanPartition> dirsToScanAsSystem =
-                mInitAndSystemPackageHelper.getDirsToScanAsSystem();
+                mInitAppsHelper.getDirsToScanAsSystem();
         @ParsingPackageUtils.ParseFlags int reparseFlags = 0;
         @PackageManagerService.ScanFlags int rescanFlags = 0;
         for (int i1 = dirsToScanAsSystem.size() - 1; i1 >= 0; i1--) {
