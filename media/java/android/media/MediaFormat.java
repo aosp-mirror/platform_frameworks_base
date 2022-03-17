@@ -793,8 +793,11 @@ public final class MediaFormat {
      * By default, the decoder will output the same number of channels as present in the encoded
      * stream, if supported. Set this value to limit the number of output channels, and use
      * the downmix information in the stream, if available.
-     * <p>Values larger than the number of channels in the content to decode are ignored.
+     * <p>Values larger than the number of channels in the content to decode behave just
+     * like the actual channel count of the content (e.g. passing 99 for the decoding of 5.1 content
+     * will behave like using 6).
      * <p>This key is only used during decoding.
+     * @deprecated Use the non-AAC-specific key {@link #KEY_MAX_OUTPUT_CHANNEL_COUNT} instead
      */
     public static final String KEY_AAC_MAX_OUTPUT_CHANNEL_COUNT = "aac-max-output-channel_count";
 
