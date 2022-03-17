@@ -441,11 +441,6 @@ public final class JobStatus {
     /** The reason a job most recently went from ready to not ready. */
     private int mReasonReadyToUnready = JobParameters.STOP_REASON_UNDEFINED;
 
-    /** Provide a handle to the service that this job will be run on. */
-    public int getServiceToken() {
-        return callingUid;
-    }
-
     /**
      * Core constructor for JobStatus instances.  All other ctors funnel down to this one.
      *

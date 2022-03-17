@@ -102,6 +102,7 @@ import android.media.IRecordingConfigDispatcher;
 import android.media.IRingtonePlayer;
 import android.media.ISpatializerCallback;
 import android.media.ISpatializerHeadToSoundStagePoseCallback;
+import android.media.ISpatializerHeadTrackerAvailableCallback;
 import android.media.ISpatializerHeadTrackingModeCallback;
 import android.media.ISpatializerOutputCallback;
 import android.media.IStrategyPreferredDevicesDispatcher;
@@ -8723,6 +8724,11 @@ public class AudioService extends IAudioService.Stub
         return mSpatializerHelper.isHeadTrackerEnabled(Objects.requireNonNull(device));
     }
 
+    /** @see Spatializer#isHeadTrackerAvailable() */
+    public boolean isHeadTrackerAvailable() {
+        return mSpatializerHelper.isHeadTrackerAvailable();
+    }
+
     /** @see Spatializer#setSpatializerEnabled(boolean) */
     public void setSpatializerEnabled(boolean enabled) {
         enforceModifyDefaultAudioEffectsPermission();
@@ -8765,6 +8771,13 @@ public class AudioService extends IAudioService.Stub
         enforceModifyDefaultAudioEffectsPermission();
         Objects.requireNonNull(cb);
         mSpatializerHelper.unregisterHeadTrackingModeCallback(cb);
+    }
+
+    /** @see Spatializer.SpatializerHeadTrackerAvailableDispatcherStub */
+    public void registerSpatializerHeadTrackerAvailableCallback(
+            @NonNull ISpatializerHeadTrackerAvailableCallback cb, boolean register) {
+        Objects.requireNonNull(cb);
+        mSpatializerHelper.registerHeadTrackerAvailableCallback(cb, register);
     }
 
     /** @see Spatializer#setOnHeadToSoundstagePoseUpdatedListener */

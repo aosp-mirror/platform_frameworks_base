@@ -558,4 +558,6 @@ interface IDevicePolicyManager {
     void setStrings(in List<DevicePolicyStringResource> strings);
     void resetStrings(in String[] stringIds);
     ParcelableResource getString(String stringId);
+
+    boolean shouldAllowBypassingDevicePolicyManagementRoleQualification();
 }

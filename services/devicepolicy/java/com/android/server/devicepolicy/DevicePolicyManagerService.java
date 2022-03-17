@@ -18384,14 +18384,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             } else {
                 preferenceBuilder.setPreference(PROFILE_NETWORK_PREFERENCE_DEFAULT);
             }
-            List<Integer> allowedUids = Arrays.stream(
-                    preferentialNetworkServiceConfig.getIncludedUids()).boxed().collect(
-                    Collectors.toList());
-            List<Integer> excludedUids = Arrays.stream(
-                    preferentialNetworkServiceConfig.getExcludedUids()).boxed().collect(
-                    Collectors.toList());
-            preferenceBuilder.setIncludedUids(allowedUids);
-            preferenceBuilder.setExcludedUids(excludedUids);
+            preferenceBuilder.setIncludedUids(preferentialNetworkServiceConfig.getIncludedUids());
+            preferenceBuilder.setExcludedUids(preferentialNetworkServiceConfig.getExcludedUids());
             preferenceBuilder.setPreferenceEnterpriseId(
                     preferentialNetworkServiceConfig.getNetworkId());
 
@@ -18789,5 +18783,19 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         mInjector.binderWithCleanCallingIdentity(() -> Settings.Secure.putInt(
                 mContext.getContentResolver(), MANAGED_PROVISIONING_DPC_DOWNLOADED, setTo));
+    }
+
+    @Override
+    public boolean shouldAllowBypassingDevicePolicyManagementRoleQualification() {
+        Preconditions.checkCallAuthorization(hasCallingOrSelfPermission(
+                android.Manifest.permission.MANAGE_ROLE_HOLDERS));
+        return mInjector.binderWithCleanCallingIdentity(() -> {
+            if (mUserManager.getUserCount() > 1) {
+                return false;
+            }
+            AccountManager am = AccountManager.get(mContext);
+            Account[] accounts = am.getAccounts();
+            return accounts.length == 0;
+        });
     }
 }

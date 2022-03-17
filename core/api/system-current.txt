@@ -244,7 +244,6 @@ package android {
     field public static final String READ_APP_SPECIFIC_LOCALES = "android.permission.READ_APP_SPECIFIC_LOCALES";
     field public static final String READ_CARRIER_APP_INFO = "android.permission.READ_CARRIER_APP_INFO";
     field public static final String READ_CELL_BROADCASTS = "android.permission.READ_CELL_BROADCASTS";
-    field public static final String READ_CLIPBOARD_IN_BACKGROUND = "android.permission.READ_CLIPBOARD_IN_BACKGROUND";
     field public static final String READ_CONTENT_RATING_SYSTEMS = "android.permission.READ_CONTENT_RATING_SYSTEMS";
     field public static final String READ_DEVICE_CONFIG = "android.permission.READ_DEVICE_CONFIG";
     field public static final String READ_DREAM_STATE = "android.permission.READ_DREAM_STATE";
@@ -1115,6 +1114,7 @@ package android.app.admin {
     method public void setSecondaryLockscreenEnabled(@NonNull android.content.ComponentName, boolean);
     method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_MANAGEMENT_RESOURCES) public void setStrings(@NonNull java.util.Set<android.app.admin.DevicePolicyStringResource>);
     method @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS) public void setUserProvisioningState(int, @NonNull android.os.UserHandle);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_ROLE_HOLDERS) public boolean shouldAllowBypassingDevicePolicyManagementRoleQualification();
     field public static final String ACCOUNT_FEATURE_DEVICE_OR_PROFILE_OWNER_ALLOWED = "android.account.DEVICE_OR_PROFILE_OWNER_ALLOWED";
     field public static final String ACCOUNT_FEATURE_DEVICE_OR_PROFILE_OWNER_DISALLOWED = "android.account.DEVICE_OR_PROFILE_OWNER_DISALLOWED";
     field public static final String ACTION_BIND_SECONDARY_LOCKSCREEN_SERVICE = "android.app.action.BIND_SECONDARY_LOCKSCREEN_SERVICE";
@@ -10865,10 +10865,11 @@ package android.service.ambientcontext {
   }
 
   public static final class AmbientContextDetectionResult.Builder {
-    ctor public AmbientContextDetectionResult.Builder();
+    ctor public AmbientContextDetectionResult.Builder(@NonNull String);
     method @NonNull public android.service.ambientcontext.AmbientContextDetectionResult.Builder addEvent(@NonNull android.app.ambientcontext.AmbientContextEvent);
+    method @NonNull public android.service.ambientcontext.AmbientContextDetectionResult.Builder addEvents(@NonNull java.util.List<android.app.ambientcontext.AmbientContextEvent>);
     method @NonNull public android.service.ambientcontext.AmbientContextDetectionResult build();
-    method @NonNull public android.service.ambientcontext.AmbientContextDetectionResult.Builder setPackageName(@NonNull String);
+    method @NonNull public android.service.ambientcontext.AmbientContextDetectionResult.Builder clearEvents();
   }
 
   public abstract class AmbientContextDetectionService extends android.app.Service {
@@ -10889,9 +10890,8 @@ package android.service.ambientcontext {
   }
 
   public static final class AmbientContextDetectionServiceStatus.Builder {
-    ctor public AmbientContextDetectionServiceStatus.Builder();
+    ctor public AmbientContextDetectionServiceStatus.Builder(@NonNull String);
     method @NonNull public android.service.ambientcontext.AmbientContextDetectionServiceStatus build();
-    method @NonNull public android.service.ambientcontext.AmbientContextDetectionServiceStatus.Builder setPackageName(@NonNull String);
     method @NonNull public android.service.ambientcontext.AmbientContextDetectionServiceStatus.Builder setStatusCode(int);
   }
 

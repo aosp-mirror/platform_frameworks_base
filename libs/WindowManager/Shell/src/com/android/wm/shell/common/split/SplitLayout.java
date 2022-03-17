@@ -532,7 +532,9 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
     }
 
     private int getSmallestWidthDp(Rect bounds) {
-        final int minWidth = Math.min(bounds.width(), bounds.height());
+        mTempRect.set(bounds);
+        mTempRect.inset(getDisplayInsets(mContext));
+        final int minWidth = Math.min(mTempRect.width(), mTempRect.height());
         final float density = mContext.getResources().getDisplayMetrics().density;
         return (int) (minWidth / density);
     }
