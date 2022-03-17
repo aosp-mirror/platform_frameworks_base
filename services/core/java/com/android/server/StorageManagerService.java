@@ -333,13 +333,15 @@ class StorageManagerService extends IStorageManager.Stub
 
     @Nullable public static String sMediaStoreAuthorityProcessName;
 
-    // Run period in hour for smart idle maintenance
-    static final int SMART_IDLE_MAINT_PERIOD = 1;
+    // Smart idle maintenance running period in minute
+    static volatile int sSmartIdleMaintPeriod = 60;
 
     private final AtomicFile mSettingsFile;
-    private final AtomicFile mHourlyWriteFile;
+    private final AtomicFile mWriteRecordFile;
 
-    private static final int MAX_HOURLY_WRITE_RECORDS = 72;
+    // 72 hours (3 days)
+    private static final int MAX_PERIOD_WRITE_RECORD = 72 * 60;
+    private volatile int mMaxWriteRecords;
 
     /**
      * Default config values for smart idle maintenance
@@ -347,6 +349,10 @@ class StorageManagerService extends IStorageManager.Stub
      */
     // Decide whether smart idle maintenance is enabled or not
     private static final boolean DEFAULT_SMART_IDLE_MAINT_ENABLED = false;
+    // Run period in minute for smart idle maintenance
+    private static final int DEFAULT_SMART_IDLE_MAINT_PERIOD = 60;
+    private static final int MIN_SMART_IDLE_MAINT_PERIOD = 10;
+    private static final int MAX_SMART_IDLE_MAINT_PERIOD = 24 * 60;
     // Storage lifetime percentage threshold to decide to turn off the feature
     private static final int DEFAULT_LIFETIME_PERCENT_THRESHOLD = 70;
     // Minimum required number of dirty + free segments to trigger GC
@@ -369,8 +375,8 @@ class StorageManagerService extends IStorageManager.Stub
     private volatile boolean mNeedGC;
 
     private volatile boolean mPassedLifetimeThresh;
-    // Tracking storage hourly write amounts
-    private volatile int[] mStorageHourlyWrites;
+    // Tracking storage write amounts in one period
+    private volatile int[] mStorageWriteRecords;
 
     /**
      * <em>Never</em> hold the lock while performing downcalls into vold, since
@@ -933,7 +939,7 @@ class StorageManagerService extends IStorageManager.Stub
 
     private void handleSystemReady() {
         if (prepareSmartIdleMaint()) {
-            SmartStorageMaintIdler.scheduleSmartIdlePass(mContext, SMART_IDLE_MAINT_PERIOD);
+            SmartStorageMaintIdler.scheduleSmartIdlePass(mContext, sSmartIdleMaintPeriod);
         }
 
         // Start scheduling nominally-daily fstrim operations
@@ -1908,10 +1914,19 @@ class StorageManagerService extends IStorageManager.Stub
 
         mSettingsFile = new AtomicFile(
                 new File(Environment.getDataSystemDirectory(), "storage.xml"), "storage-settings");
-        mHourlyWriteFile = new AtomicFile(
-                new File(Environment.getDataSystemDirectory(), "storage-hourly-writes"));
+        mWriteRecordFile = new AtomicFile(
+                new File(Environment.getDataSystemDirectory(), "storage-write-records"));
 
-        mStorageHourlyWrites = new int[MAX_HOURLY_WRITE_RECORDS];
+        sSmartIdleMaintPeriod = DeviceConfig.getInt(DeviceConfig.NAMESPACE_STORAGE_NATIVE_BOOT,
+            "smart_idle_maint_period", DEFAULT_SMART_IDLE_MAINT_PERIOD);
+        if (sSmartIdleMaintPeriod < MIN_SMART_IDLE_MAINT_PERIOD) {
+            sSmartIdleMaintPeriod = MIN_SMART_IDLE_MAINT_PERIOD;
+        } else if (sSmartIdleMaintPeriod > MAX_SMART_IDLE_MAINT_PERIOD) {
+            sSmartIdleMaintPeriod = MAX_SMART_IDLE_MAINT_PERIOD;
+        }
+
+        mMaxWriteRecords = MAX_PERIOD_WRITE_RECORD / sSmartIdleMaintPeriod;
+        mStorageWriteRecords = new int[mMaxWriteRecords];
 
         synchronized (mLock) {
             readSettingsLocked();
@@ -2657,7 +2672,7 @@ class StorageManagerService extends IStorageManager.Stub
             // maintenance to avoid the conflict
             mNeedGC = false;
 
-            loadStorageHourlyWrites();
+            loadStorageWriteRecords();
             try {
                 mVold.refreshLatestWrite();
             } catch (Exception e) {
@@ -2673,13 +2688,17 @@ class StorageManagerService extends IStorageManager.Stub
         return mPassedLifetimeThresh;
     }
 
-    private void loadStorageHourlyWrites() {
+    private void loadStorageWriteRecords() {
         FileInputStream fis = null;
 
         try {
-            fis = mHourlyWriteFile.openRead();
+            fis = mWriteRecordFile.openRead();
             ObjectInputStream ois = new ObjectInputStream(fis);
-            mStorageHourlyWrites = (int[])ois.readObject();
+
+            int periodValue = ois.readInt();
+            if (periodValue == sSmartIdleMaintPeriod) {
+                mStorageWriteRecords = (int[]) ois.readObject();
+            }
         } catch (FileNotFoundException e) {
             // Missing data is okay, probably first boot
         } catch (Exception e) {
@@ -2689,24 +2708,26 @@ class StorageManagerService extends IStorageManager.Stub
         }
     }
 
-    private int getAverageHourlyWrite() {
-        return Arrays.stream(mStorageHourlyWrites).sum() / MAX_HOURLY_WRITE_RECORDS;
+    private int getAverageWriteAmount() {
+        return Arrays.stream(mStorageWriteRecords).sum() / mMaxWriteRecords;
     }
 
-    private void updateStorageHourlyWrites(int latestWrite) {
+    private void updateStorageWriteRecords(int latestWrite) {
         FileOutputStream fos = null;
 
-        System.arraycopy(mStorageHourlyWrites,0, mStorageHourlyWrites, 1,
-                     MAX_HOURLY_WRITE_RECORDS - 1);
-        mStorageHourlyWrites[0] = latestWrite;
+        System.arraycopy(mStorageWriteRecords, 0, mStorageWriteRecords, 1,
+                     mMaxWriteRecords - 1);
+        mStorageWriteRecords[0] = latestWrite;
         try {
-            fos = mHourlyWriteFile.startWrite();
+            fos = mWriteRecordFile.startWrite();
             ObjectOutputStream oos = new ObjectOutputStream(fos);
-            oos.writeObject(mStorageHourlyWrites);
-            mHourlyWriteFile.finishWrite(fos);
+
+            oos.writeInt(sSmartIdleMaintPeriod);
+            oos.writeObject(mStorageWriteRecords);
+            mWriteRecordFile.finishWrite(fos);
         } catch (IOException e) {
             if (fos != null) {
-                mHourlyWriteFile.failWrite(fos);
+                mWriteRecordFile.failWrite(fos);
             }
         }
     }
@@ -2770,22 +2791,23 @@ class StorageManagerService extends IStorageManager.Stub
                     return;
                 }
 
-                int latestHourlyWrite = mVold.getWriteAmount();
-                if (latestHourlyWrite == -1) {
-                    Slog.w(TAG, "Failed to get storage hourly write");
+                int latestWrite = mVold.getWriteAmount();
+                if (latestWrite == -1) {
+                    Slog.w(TAG, "Failed to get storage write record");
                     return;
                 }
 
-                updateStorageHourlyWrites(latestHourlyWrite);
-                int avgHourlyWrite = getAverageHourlyWrite();
+                updateStorageWriteRecords(latestWrite);
+                int avgWriteAmount = getAverageWriteAmount();
 
-                Slog.i(TAG, "Set smart idle maintenance: " + "latest hourly write: " +
-                            latestHourlyWrite + ", average hourly write: " + avgHourlyWrite +
+                Slog.i(TAG, "Set smart idle maintenance: " + "latest write amount: " +
+                            latestWrite + ", average write amount: " + avgWriteAmount +
                             ", min segment threshold: " + mMinSegmentsThreshold +
                             ", dirty reclaim rate: " + mDirtyReclaimRate +
-                            ", segment reclaim weight:" + mSegmentReclaimWeight);
-                mVold.setGCUrgentPace(avgHourlyWrite, mMinSegmentsThreshold, mDirtyReclaimRate,
-                                      mSegmentReclaimWeight);
+                            ", segment reclaim weight: " + mSegmentReclaimWeight +
+                            ", period: " + sSmartIdleMaintPeriod);
+                mVold.setGCUrgentPace(avgWriteAmount, mMinSegmentsThreshold, mDirtyReclaimRate,
+                                      mSegmentReclaimWeight, sSmartIdleMaintPeriod);
             } else {
                 Slog.i(TAG, "Skipping smart idle maintenance - block based checkpoint in progress");
             }
