@@ -8903,10 +8903,29 @@ public class Intent implements Parcelable, Cloneable {
      * @return the value of an item previously added with putExtra(),
      * or null if no Parcelable value was found.
      *
+     * @deprecated Use the type-safer {@link #getParcelableExtra(String, Class)} starting from
+     *      Android {@link Build.VERSION_CODES#TIRAMISU}.
+     *
      * @see #putExtra(String, Parcelable)
      */
+    @Deprecated
     public @Nullable <T extends Parcelable> T getParcelableExtra(String name) {
         return mExtras == null ? null : mExtras.<T>getParcelable(name);
+    }
+
+    /**
+     * Retrieve extended data from the intent.
+     *
+     * @param name The name of the desired item.
+     * @param clazz The type of the object expected.
+     *
+     * @return the value of an item previously added with putExtra(),
+     * or null if no Parcelable value was found.
+     *
+     * @see #putExtra(String, Parcelable)
+     */
+    public @Nullable <T> T getParcelableExtra(@Nullable String name, @NonNull Class<T> clazz) {
+        return mExtras == null ? null : mExtras.getParcelable(name, clazz);
     }
 
     /**
@@ -8917,10 +8936,31 @@ public class Intent implements Parcelable, Cloneable {
      * @return the value of an item previously added with putExtra(),
      * or null if no Parcelable[] value was found.
      *
+     * @deprecated Use the type-safer {@link #getParcelableArrayExtra(String, Class)} starting from
+     *      Android {@link Build.VERSION_CODES#TIRAMISU}.
+     *
      * @see #putExtra(String, Parcelable[])
      */
+    @Deprecated
     public @Nullable Parcelable[] getParcelableArrayExtra(String name) {
         return mExtras == null ? null : mExtras.getParcelableArray(name);
+    }
+
+    /**
+     * Retrieve extended data from the intent.
+     *
+     * @param name The name of the desired item.
+     * @param clazz The type of the items inside the array. This is only verified when unparceling.
+     *
+     * @return the value of an item previously added with putExtra(),
+     * or null if no Parcelable[] value was found.
+     *
+     * @see #putExtra(String, Parcelable[])
+     */
+    @SuppressLint({"ArrayReturn", "NullableCollection"})
+    public @Nullable <T> T[] getParcelableArrayExtra(@Nullable String name,
+            @NonNull Class<T> clazz) {
+        return mExtras == null ? null : mExtras.getParcelableArray(name, clazz);
     }
 
     /**
@@ -8932,10 +8972,33 @@ public class Intent implements Parcelable, Cloneable {
      * putParcelableArrayListExtra(), or null if no
      * ArrayList<Parcelable> value was found.
      *
+     * @deprecated Use the type-safer {@link #getParcelableArrayListExtra(String, Class)} starting
+     *      from Android {@link Build.VERSION_CODES#TIRAMISU}.
+     *
      * @see #putParcelableArrayListExtra(String, ArrayList)
      */
+    @Deprecated
     public @Nullable <T extends Parcelable> ArrayList<T> getParcelableArrayListExtra(String name) {
         return mExtras == null ? null : mExtras.<T>getParcelableArrayList(name);
+    }
+
+    /**
+     * Retrieve extended data from the intent.
+     *
+     * @param name The name of the desired item.
+     * @param clazz The type of the items inside the array list. This is only verified when
+     *     unparceling.
+     *
+     * @return the value of an item previously added with
+     * putParcelableArrayListExtra(), or null if no
+     * ArrayList<Parcelable> value was found.
+     *
+     * @see #putParcelableArrayListExtra(String, ArrayList)
+     */
+    @SuppressLint({"ConcreteCollection", "NullableCollection"})
+    public @Nullable <T> ArrayList<T> getParcelableArrayListExtra(@Nullable String name,
+            @NonNull Class<? extends T> clazz) {
+        return mExtras == null ? null : mExtras.<T>getParcelableArrayList(name, clazz);
     }
 
     /**
@@ -8946,10 +9009,29 @@ public class Intent implements Parcelable, Cloneable {
      * @return the value of an item previously added with putExtra(),
      * or null if no Serializable value was found.
      *
+     * @deprecated Use the type-safer {@link #getSerializableExtra(String, Class)} starting from
+     *      Android {@link Build.VERSION_CODES#TIRAMISU}.
+     *
      * @see #putExtra(String, Serializable)
      */
     public @Nullable Serializable getSerializableExtra(String name) {
         return mExtras == null ? null : mExtras.getSerializable(name);
+    }
+
+    /**
+     * Retrieve extended data from the intent.
+     *
+     * @param name The name of the desired item.
+     * @param clazz The type of the object expected.
+     *
+     * @return the value of an item previously added with putExtra(),
+     * or null if no Serializable value was found.
+     *
+     * @see #putExtra(String, Serializable)
+     */
+    public @Nullable <T extends Serializable> T getSerializableExtra(@Nullable String name,
+            @NonNull Class<T> clazz) {
+        return mExtras == null ? null : mExtras.getSerializable(name, clazz);
     }
 
     /**
