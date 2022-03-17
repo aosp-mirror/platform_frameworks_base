@@ -148,7 +148,7 @@ final class DeadZone {
             if (DEBUG) {
                 Log.v(TAG, this + " ACTION_DOWN: " + event.getX() + "," + event.getY());
             }
-            //TODO(b/205803355): call mNavBarController.touchAutoDim(mDisplayId); here
+            //TODO(b/215443343): call mNavBarController.touchAutoDim(mDisplayId); here
             int size = (int) getSize(event.getEventTime());
             // In the vertical orientation consume taps along the left edge.
             // In horizontal orientation consume taps along the top edge.
