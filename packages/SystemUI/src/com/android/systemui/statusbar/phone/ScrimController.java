@@ -116,6 +116,15 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
     private float mTransitionToFullShadeProgress;
 
     /**
+     * Same as {@link #mTransitionToFullShadeProgress}, but specifically for the notifications scrim
+     * on the lock screen.
+     *
+     * On split shade lock screen we want the different scrims to fade in at different times and
+     * rates.
+     */
+    private float mTransitionToLockScreenFullShadeNotificationsProgress;
+
+    /**
      * If we're currently transitioning to the full shade.
      */
     private boolean mTransitioningToFullShade;
@@ -574,11 +583,17 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
      * Set the amount of progress we are currently in if we're transitioning to the full shade.
      * 0.0f means we're not transitioning yet, while 1 means we're all the way in the full
      * shade.
+     *
+     * @param progress the progress for all scrims.
+     * @param lockScreenNotificationsProgress the progress specifically for the notifications scrim.
      */
-    public void setTransitionToFullShadeProgress(float progress) {
-        if (progress != mTransitionToFullShadeProgress) {
+    public void setTransitionToFullShadeProgress(float progress,
+            float lockScreenNotificationsProgress) {
+        if (progress != mTransitionToFullShadeProgress || lockScreenNotificationsProgress
+                != mTransitionToLockScreenFullShadeNotificationsProgress) {
             mTransitionToFullShadeProgress = progress;
-            setTransitionToFullShade(progress > 0.0f);
+            mTransitionToLockScreenFullShadeNotificationsProgress = lockScreenNotificationsProgress;
+            setTransitionToFullShade(progress > 0.0f || lockScreenNotificationsProgress > 0.0f);
             applyAndDispatchState();
         }
     }
@@ -754,12 +769,13 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
                 } else {
                     mNotificationsAlpha = Math.max(1.0f - getInterpolatedFraction(), mQsExpansion);
                 }
-                if (mState == ScrimState.KEYGUARD && mTransitionToFullShadeProgress > 0.0f) {
+                if (mState == ScrimState.KEYGUARD
+                        && mTransitionToLockScreenFullShadeNotificationsProgress > 0.0f) {
                     // Interpolate the notification alpha when transitioning!
                     mNotificationsAlpha = MathUtils.lerp(
                             mNotificationsAlpha,
                             getInterpolatedFraction(),
-                            mTransitionToFullShadeProgress);
+                            mTransitionToLockScreenFullShadeNotificationsProgress);
                 }
                 mNotificationsTint = mState.getNotifTint();
                 mBehindTint = behindTint;
