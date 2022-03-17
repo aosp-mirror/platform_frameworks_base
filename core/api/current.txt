@@ -42036,6 +42036,7 @@ package android.telephony.data {
     method public int getNetworkTypeBitmask();
     method public String getOperatorNumeric();
     method public String getPassword();
+    method public int getProfileId();
     method public int getProtocol();
     method @Deprecated public java.net.InetAddress getProxyAddress();
     method public String getProxyAddressAsString();
@@ -42043,6 +42044,7 @@ package android.telephony.data {
     method public int getRoamingProtocol();
     method public String getUser();
     method public boolean isEnabled();
+    method public boolean isPersistent();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field public static final int AUTH_TYPE_CHAP = 2; // 0x2
     field public static final int AUTH_TYPE_NONE = 0; // 0x0
