@@ -2988,9 +2988,6 @@
     <!-- Displayed to the user to confirm that they have copied text from a web page to the clipboard. -->
     <string name="text_copied">Text copied to clipboard.</string>
 
-    <!-- Displayed to the user to confirm that they have copied text/images to the clipboard [CHAR LIMIT=NONE] -->
-    <string name="copied">Copied</string>
-
     <!-- Displayed to the user to inform them that an app has accessed clipboard data (pasted as in "copy and paste") that was copied from another app [CHAR LIMIT=50] -->
     <string name="pasted_from_app"><xliff:g id="pasting_app_name" example="Gmail">%1$s</xliff:g> pasted from <xliff:g id="source_app_name" example="Chrome">%2$s</xliff:g></string>
 
