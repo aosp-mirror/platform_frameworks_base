@@ -22191,7 +22191,7 @@ package android.media {
     field public static final String KEY_AAC_DRC_OUTPUT_LOUDNESS = "aac-drc-output-loudness";
     field public static final String KEY_AAC_DRC_TARGET_REFERENCE_LEVEL = "aac-target-ref-level";
     field public static final String KEY_AAC_ENCODED_TARGET_LEVEL = "aac-encoded-target-level";
-    field public static final String KEY_AAC_MAX_OUTPUT_CHANNEL_COUNT = "aac-max-output-channel_count";
+    field @Deprecated public static final String KEY_AAC_MAX_OUTPUT_CHANNEL_COUNT = "aac-max-output-channel_count";
     field public static final String KEY_AAC_PROFILE = "aac-profile";
     field public static final String KEY_AAC_SBR_MODE = "aac-sbr-mode";
     field public static final String KEY_ALLOW_FRAME_DROP = "allow-frame-drop";
