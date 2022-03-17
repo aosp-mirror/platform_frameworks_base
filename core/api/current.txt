@@ -22195,6 +22195,10 @@ package android.media {
     field public static final String KEY_COLOR_TRANSFER_REQUEST = "color-transfer-request";
     field public static final String KEY_COMPLEXITY = "complexity";
     field public static final String KEY_CREATE_INPUT_SURFACE_SUSPENDED = "create-input-buffers-suspended";
+    field public static final String KEY_CROP_BOTTOM = "crop-bottom";
+    field public static final String KEY_CROP_LEFT = "crop-left";
+    field public static final String KEY_CROP_RIGHT = "crop-right";
+    field public static final String KEY_CROP_TOP = "crop-top";
     field public static final String KEY_DURATION = "durationUs";
     field public static final String KEY_ENCODER_DELAY = "encoder-delay";
     field public static final String KEY_ENCODER_PADDING = "encoder-padding";
