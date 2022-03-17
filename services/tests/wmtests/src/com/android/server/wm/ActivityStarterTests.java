@@ -500,6 +500,23 @@ public class ActivityStarterTests extends WindowTestsBase {
         return Pair.create(splitPrimaryActivity, splitSecondActivity);
     }
 
+    @Test
+    public void testMoveVisibleTaskToFront() {
+        final ActivityRecord activity = new TaskBuilder(mSupervisor)
+                .setCreateActivity(true).build().getTopMostActivity();
+        final ActivityRecord translucentActivity = new TaskBuilder(mSupervisor)
+                .setCreateActivity(true).build().getTopMostActivity();
+        assertTrue(activity.mVisibleRequested);
+
+        final ActivityStarter starter = prepareStarter(FLAG_ACTIVITY_NEW_TASK,
+                false /* mockGetRootTask */);
+        starter.getIntent().setComponent(activity.mActivityComponent);
+        final int result = starter.setReason("testMoveVisibleTaskToFront").execute();
+
+        assertEquals(START_TASK_TO_FRONT, result);
+        assertEquals(1, activity.compareTo(translucentActivity));
+    }
+
     /**
      * Tests activity is cleaned up properly in a task mode violation.
      */
