@@ -82,7 +82,7 @@
     <string name="permission_notification">Notifications</string>
 
     <!-- Description of notification permission of COMPUTER profile [CHAR LIMIT=NONE] -->
-    <string name="permission_notification_summary">Can read all notifications, including information like contracts, messages, and photos</string>
+    <string name="permission_notification_summary">Can read all notifications, including information like contacts, messages, and photos</string>
 
     <!-- Storage permission will be granted of COMPUTER profile [CHAR LIMIT=30] -->
     <string name="permission_storage">Photos and media</string>

@@ -194,7 +194,7 @@ public class PipBoundsAlgorithm {
     public float getAspectRatioOrDefault(
             @android.annotation.Nullable PictureInPictureParams params) {
         return params != null && params.hasSetAspectRatio()
-                ? params.getAspectRatio()
+                ? params.getAspectRatioFloat()
                 : getDefaultAspectRatio();
     }
 

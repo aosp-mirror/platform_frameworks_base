@@ -18,6 +18,7 @@ package com.android.wm.shell.compatui.letterboxedu;
 
 import static com.android.internal.R.styleable.WindowAnimation_windowEnterAnimation;
 import static com.android.internal.R.styleable.WindowAnimation_windowExitAnimation;
+import static com.android.wm.shell.transition.Transitions.ENABLE_SHELL_TRANSITIONS;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -42,7 +43,9 @@ import com.android.internal.policy.TransitionAnimation;
 class LetterboxEduAnimationController {
     private static final String TAG = "LetterboxEduAnimation";
 
-    private static final int ENTER_ANIM_START_DELAY_MILLIS = 500;
+    // If shell transitions are enabled, startEnterAnimation will be called after all transitions
+    // have finished, and therefore the start delay should be shorter.
+    private static final int ENTER_ANIM_START_DELAY_MILLIS = ENABLE_SHELL_TRANSITIONS ? 300 : 500;
 
     private final TransitionAnimation mTransitionAnimation;
     private final String mPackageName;

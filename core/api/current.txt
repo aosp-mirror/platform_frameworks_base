@@ -5630,6 +5630,7 @@ package android.app {
     method public boolean onException(Object, Throwable);
     method public void onStart();
     method public void removeMonitor(android.app.Instrumentation.ActivityMonitor);
+    method public void resetInTouchMode();
     method public void runOnMainSync(Runnable);
     method public void sendCharacterSync(int);
     method public void sendKeyDownUpSync(int);
@@ -6644,6 +6645,15 @@ package android.app {
 
   public final class PictureInPictureParams implements android.os.Parcelable {
     method public int describeContents();
+    method @NonNull public java.util.List<android.app.RemoteAction> getActions();
+    method @Nullable public android.util.Rational getAspectRatio();
+    method @Nullable public android.app.RemoteAction getCloseAction();
+    method @Nullable public android.util.Rational getExpandedAspectRatio();
+    method @Nullable public android.graphics.Rect getSourceRectHint();
+    method @Nullable public CharSequence getSubtitle();
+    method @Nullable public CharSequence getTitle();
+    method public boolean isAutoEnterEnabled();
+    method public boolean isSeamlessResizeEnabled();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.PictureInPictureParams> CREATOR;
   }
@@ -19478,26 +19488,26 @@ package android.location {
     method @NonNull public static String convert(@FloatRange double, int);
     method @FloatRange public static double convert(@NonNull String);
     method public int describeContents();
-    method public static void distanceBetween(@FloatRange double, @FloatRange double, @FloatRange double, @FloatRange double, float[]);
-    method @FloatRange public float distanceTo(@NonNull android.location.Location);
-    method public void dump(@NonNull android.util.Printer, @Nullable String);
-    method @FloatRange public float getAccuracy();
+    method public static void distanceBetween(@FloatRange(from=-90.0, to=90.0) double, @FloatRange(from=-180.0, to=180.0) double, @FloatRange(from=-90.0, to=90.0) double, @FloatRange(from=-180.0, to=180.0) double, float[]);
+    method @FloatRange(from=0.0) public float distanceTo(@NonNull android.location.Location);
+    method @Deprecated public void dump(@NonNull android.util.Printer, @Nullable String);
+    method @FloatRange(from=0.0) public float getAccuracy();
     method @FloatRange public double getAltitude();
-    method @FloatRange(from=0.0f, to=360.0f, toInclusive=false) public float getBearing();
-    method @FloatRange public float getBearingAccuracyDegrees();
-    method @IntRange public long getElapsedRealtimeAgeMillis();
-    method @IntRange public long getElapsedRealtimeAgeMillis(@IntRange long);
-    method @IntRange public long getElapsedRealtimeMillis();
-    method @IntRange public long getElapsedRealtimeNanos();
-    method @FloatRange public double getElapsedRealtimeUncertaintyNanos();
+    method @FloatRange(from=0.0, to=360.0, toInclusive=false) public float getBearing();
+    method @FloatRange(from=0.0) public float getBearingAccuracyDegrees();
+    method @IntRange(from=0) public long getElapsedRealtimeAgeMillis();
+    method public long getElapsedRealtimeAgeMillis(@IntRange(from=0) long);
+    method @IntRange(from=0) public long getElapsedRealtimeMillis();
+    method @IntRange(from=0) public long getElapsedRealtimeNanos();
+    method @FloatRange(from=0.0) public double getElapsedRealtimeUncertaintyNanos();
     method @Nullable public android.os.Bundle getExtras();
-    method @FloatRange public double getLatitude();
-    method @FloatRange public double getLongitude();
+    method @FloatRange(from=-90.0, to=90.0) public double getLatitude();
+    method @FloatRange(from=-180.0, to=180.0) public double getLongitude();
     method @Nullable public String getProvider();
-    method @FloatRange public float getSpeed();
-    method @FloatRange public float getSpeedAccuracyMetersPerSecond();
-    method @IntRange public long getTime();
-    method @FloatRange public float getVerticalAccuracyMeters();
+    method @FloatRange(from=0.0) public float getSpeed();
+    method @FloatRange(from=0.0) public float getSpeedAccuracyMetersPerSecond();
+    method @IntRange(from=0) public long getTime();
+    method @FloatRange(from=0.0) public float getVerticalAccuracyMeters();
     method public boolean hasAccuracy();
     method public boolean hasAltitude();
     method public boolean hasBearing();
@@ -19519,21 +19529,21 @@ package android.location {
     method public void removeVerticalAccuracy();
     method public void reset();
     method public void set(@NonNull android.location.Location);
-    method public void setAccuracy(@FloatRange float);
+    method public void setAccuracy(@FloatRange(from=0.0) float);
     method public void setAltitude(@FloatRange double);
     method public void setBearing(@FloatRange(fromInclusive=false, toInclusive=false) float);
-    method public void setBearingAccuracyDegrees(@FloatRange float);
-    method public void setElapsedRealtimeNanos(@IntRange long);
-    method public void setElapsedRealtimeUncertaintyNanos(@FloatRange double);
+    method public void setBearingAccuracyDegrees(@FloatRange(from=0.0) float);
+    method public void setElapsedRealtimeNanos(@IntRange(from=0) long);
+    method public void setElapsedRealtimeUncertaintyNanos(@FloatRange(from=0.0) double);
     method public void setExtras(@Nullable android.os.Bundle);
-    method public void setLatitude(@FloatRange double);
-    method public void setLongitude(@FloatRange double);
+    method public void setLatitude(@FloatRange(from=-90.0, to=90.0) double);
+    method public void setLongitude(@FloatRange(from=-180.0, to=180.0) double);
     method public void setMock(boolean);
     method public void setProvider(@Nullable String);
-    method public void setSpeed(@FloatRange float);
-    method public void setSpeedAccuracyMetersPerSecond(@FloatRange float);
-    method public void setTime(@IntRange long);
-    method public void setVerticalAccuracyMeters(@FloatRange float);
+    method public void setSpeed(@FloatRange(from=0.0) float);
+    method public void setSpeedAccuracyMetersPerSecond(@FloatRange(from=0.0) float);
+    method public void setTime(@IntRange(from=0) long);
+    method public void setVerticalAccuracyMeters(@FloatRange(from=0.0) float);
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.location.Location> CREATOR;
     field public static final int FORMAT_DEGREES = 0; // 0x0
@@ -23539,15 +23549,22 @@ package android.media {
   }
 
   public class Spatializer {
+    method public void addOnHeadTrackerAvailableListener(@NonNull java.util.concurrent.Executor, @NonNull android.media.Spatializer.OnHeadTrackerAvailableListener);
     method public void addOnSpatializerStateChangedListener(@NonNull java.util.concurrent.Executor, @NonNull android.media.Spatializer.OnSpatializerStateChangedListener);
     method public boolean canBeSpatialized(@NonNull android.media.AudioAttributes, @NonNull android.media.AudioFormat);
     method public int getImmersiveAudioLevel();
     method public boolean isAvailable();
     method public boolean isEnabled();
+    method public boolean isHeadTrackerAvailable();
+    method public void removeOnHeadTrackerAvailableListener(@NonNull android.media.Spatializer.OnHeadTrackerAvailableListener);
     method public void removeOnSpatializerStateChangedListener(@NonNull android.media.Spatializer.OnSpatializerStateChangedListener);
     field public static final int SPATIALIZER_IMMERSIVE_LEVEL_MULTICHANNEL = 1; // 0x1
     field public static final int SPATIALIZER_IMMERSIVE_LEVEL_NONE = 0; // 0x0
     field public static final int SPATIALIZER_IMMERSIVE_LEVEL_OTHER = -1; // 0xffffffff
+  }
+
+  public static interface Spatializer.OnHeadTrackerAvailableListener {
+    method public void onHeadTrackerAvailableChanged(@NonNull android.media.Spatializer, boolean);
   }
 
   public static interface Spatializer.OnSpatializerStateChangedListener {
@@ -25182,17 +25199,23 @@ package android.media.tv {
   }
 
   public final class CommandRequest extends android.media.tv.BroadcastInfoRequest implements android.os.Parcelable {
-    ctor public CommandRequest(int, int, @NonNull String, @NonNull String, @NonNull String);
+    ctor public CommandRequest(int, int, @NonNull String, @NonNull String, @NonNull String, @NonNull String);
+    method @NonNull public String getArgumentType();
     method @NonNull public String getArguments();
     method @NonNull public String getName();
-    method @NonNull public String getNameSpace();
+    method @NonNull public String getNamespace();
+    field public static final String ARGUMENT_TYPE_JSON = "json";
+    field public static final String ARGUMENT_TYPE_XML = "xml";
     field @NonNull public static final android.os.Parcelable.Creator<android.media.tv.CommandRequest> CREATOR;
   }
 
   public final class CommandResponse extends android.media.tv.BroadcastInfoResponse implements android.os.Parcelable {
-    ctor public CommandResponse(int, int, int, @Nullable String);
+    ctor public CommandResponse(int, int, int, @Nullable String, @NonNull String);
     method @Nullable public String getResponse();
+    method @NonNull public String getResponseType();
     field @NonNull public static final android.os.Parcelable.Creator<android.media.tv.CommandResponse> CREATOR;
+    field public static final String RESPONSE_TYPE_JSON = "json";
+    field public static final String RESPONSE_TYPE_XML = "xml";
   }
 
   public final class DsmccRequest extends android.media.tv.BroadcastInfoRequest implements android.os.Parcelable {
@@ -25257,7 +25280,7 @@ package android.media.tv {
     ctor public StreamEventResponse(int, int, int, int, long, @Nullable byte[]);
     method @Nullable public byte[] getData();
     method public int getEventId();
-    method public long getNpt();
+    method public long getNptMillis();
     field @NonNull public static final android.os.Parcelable.Creator<android.media.tv.StreamEventResponse> CREATOR;
   }
 
@@ -25287,7 +25310,7 @@ package android.media.tv {
 
   public final class TimelineResponse extends android.media.tv.BroadcastInfoResponse implements android.os.Parcelable {
     ctor public TimelineResponse(int, int, int, @Nullable String, int, int, long, long);
-    method @Nullable public String getSelector();
+    method @Nullable public android.net.Uri getSelector();
     method public long getTicks();
     method public int getUnitsPerSecond();
     method public int getUnitsPerTick();
@@ -39163,6 +39186,7 @@ package android.service.quickaccesswallet {
   public abstract class QuickAccessWalletService extends android.app.Service {
     ctor public QuickAccessWalletService();
     method @Nullable public android.app.PendingIntent getTargetActivityPendingIntent();
+    method public final boolean getUseTargetActivityForQuickAccess();
     method @Nullable public android.os.IBinder onBind(@NonNull android.content.Intent);
     method public abstract void onWalletCardSelected(@NonNull android.service.quickaccesswallet.SelectWalletCardRequest);
     method public abstract void onWalletCardsRequested(@NonNull android.service.quickaccesswallet.GetWalletCardsRequest, @NonNull android.service.quickaccesswallet.GetWalletCardsCallback);
@@ -43790,6 +43814,7 @@ package android.telephony.data {
     method public int getNetworkTypeBitmask();
     method public String getOperatorNumeric();
     method public String getPassword();
+    method public int getProfileId();
     method public int getProtocol();
     method @Deprecated public java.net.InetAddress getProxyAddress();
     method public String getProxyAddressAsString();
@@ -43797,6 +43822,7 @@ package android.telephony.data {
     method public int getRoamingProtocol();
     method public String getUser();
     method public boolean isEnabled();
+    method public boolean isPersistent();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field public static final int AUTH_TYPE_CHAP = 2; // 0x2
     field public static final int AUTH_TYPE_NONE = 0; // 0x0

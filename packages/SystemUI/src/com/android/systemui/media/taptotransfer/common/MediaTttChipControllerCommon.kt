@@ -32,6 +32,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import com.android.internal.widget.CachingIconView
+import com.android.settingslib.Utils
 import com.android.systemui.R
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.statusbar.gesture.TapGestureDetector
@@ -150,40 +151,36 @@ abstract class MediaTttChipControllerCommon<T : ChipInfoCommon>(
         appNameOverride: CharSequence? = null,
     ) {
         val appIconView = currentChipView.requireViewById<CachingIconView>(R.id.app_icon)
-        appIconView.contentDescription = appNameOverride ?: getAppName(appPackageName)
-
-        val appIcon = appIconDrawableOverride ?: getAppIcon(appPackageName)
-        val visibility = if (appIcon != null) {
-            View.VISIBLE
-        } else {
-            View.GONE
-        }
-        appIconView.setImageDrawable(appIcon)
-        appIconView.visibility = visibility
+        val appInfo = getAppInfo(appPackageName)
+        appIconView.contentDescription = appNameOverride ?: appInfo.appName
+        appIconView.setImageDrawable(appIconDrawableOverride ?: appInfo.appIcon)
     }
 
-    /** Returns the icon of the app playing the media or null if we can't find it. */
-    private fun getAppIcon(appPackageName: String?): Drawable? {
-        appPackageName ?: return null
-        return try {
-            context.packageManager.getApplicationIcon(appPackageName)
-        } catch (e: PackageManager.NameNotFoundException) {
-            Log.w(TAG, "Cannot find icon for package $appPackageName", e)
-            null
+    /**
+     * Returns the app name and icon of the app playing media, or a default name and icon if we
+     * can't find the app name/icon.
+     */
+    private fun getAppInfo(appPackageName: String?): AppInfo {
+        if (appPackageName != null) {
+            try {
+                return AppInfo(
+                    appName = context.packageManager.getApplicationInfo(
+                        appPackageName, PackageManager.ApplicationInfoFlags.of(0)
+                    ).loadLabel(context.packageManager).toString(),
+                    appIcon = context.packageManager.getApplicationIcon(appPackageName)
+                )
+            } catch (e: PackageManager.NameNotFoundException) {
+                Log.w(TAG, "Cannot find package $appPackageName", e)
+            }
         }
-    }
-
-    /** Returns the name of the app playing the media or null if we can't find it. */
-    private fun getAppName(appPackageName: String?): String? {
-        appPackageName ?: return null
-        return try {
-            context.packageManager.getApplicationInfo(
-                    appPackageName, PackageManager.ApplicationInfoFlags.of(0)
-            ).loadLabel(context.packageManager).toString()
-        } catch (e: PackageManager.NameNotFoundException) {
-            Log.w(TAG, "Cannot find name for package $appPackageName", e)
-            null
-        }
+        return AppInfo(
+            appName = context.getString(R.string.media_output_dialog_unknown_launch_app_name),
+            appIcon = context.resources.getDrawable(R.drawable.ic_cast).apply {
+                this.setTint(
+                    Utils.getColorAttrDefaultColor(context, android.R.attr.textColorPrimary)
+                )
+            }
+        )
     }
 
     private fun onScreenTapped(e: MotionEvent) {
@@ -205,3 +202,8 @@ object MediaTttRemovalReason {
     const val REASON_TIMEOUT = "TIMEOUT"
     const val REASON_SCREEN_TAP = "SCREEN_TAP"
 }
+
+private data class AppInfo(
+    val appName: String,
+    val appIcon: Drawable
+)

@@ -119,7 +119,6 @@ import static com.android.server.wm.DisplayContent.IME_TARGET_LAYERING;
 import static com.android.server.wm.RootWindowContainer.MATCH_ATTACHED_TASK_OR_RECENT_TASKS;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_ALL;
 import static com.android.server.wm.WindowContainer.AnimationFlags.CHILDREN;
-import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
 import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_DISPLAY;
@@ -2503,8 +2502,6 @@ public class WindowManagerService extends IWindowManager.Stub
             ProtoLog.v(WM_DEBUG_FOCUS, "Relayout of %s: focusMayChange=%b",
                     win, focusMayChange);
 
-            result |= mInTouchMode ? WindowManagerGlobal.RELAYOUT_RES_IN_TOUCH_MODE : 0;
-
             if (DEBUG_LAYOUT) {
                 Slog.v(TAG_WM, "Relayout complete " + win + ": outFrames=" + outFrames);
             }
@@ -2563,8 +2560,7 @@ public class WindowManagerService extends IWindowManager.Stub
         if (win.isWinVisibleLw() && winAnimator.applyAnimationLocked(transit, false)) {
             focusMayChange = true;
             win.mAnimatingExit = true;
-        } else if (win.mDisplayContent.okToAnimate() && win.isAnimating(TRANSITION | PARENTS,
-                WindowState.EXIT_ANIMATING_TYPES)) {
+        } else if (win.mDisplayContent.okToAnimate() && win.isExitAnimationRunningSelfOrParent()) {
             // Currently in a hide animation... turn this into
             // an exit.
             win.mAnimatingExit = true;
