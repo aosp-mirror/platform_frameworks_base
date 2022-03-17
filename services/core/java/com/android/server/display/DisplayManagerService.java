@@ -3880,8 +3880,8 @@ public final class DisplayManagerService extends SystemService {
                 if (device == null) {
                     return null;
                 }
+                return device.getDisplaySurfaceDefaultSizeLocked();
             }
-            return device.getDisplaySurfaceDefaultSize();
         }
 
         @Override
