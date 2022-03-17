@@ -6,6 +6,7 @@ patb@google.com
 
 per-file PackageParser.java = set noparent
 per-file PackageParser.java = chiuwinson@google.com,patb@google.com,toddke@google.com
+per-file *Capability* = file:/core/java/android/content/pm/SHORTCUT_OWNERS
 per-file *Shortcut* = file:/core/java/android/content/pm/SHORTCUT_OWNERS
 per-file AppSearchPerson.java = file:/core/java/android/content/pm/SHORTCUT_OWNERS
 per-file *Launcher* = file:/core/java/android/content/pm/LAUNCHER_OWNERS
