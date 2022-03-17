@@ -316,6 +316,8 @@ public class GlobalSettingsValidators {
         VALIDATORS.put(Global.Wearable.WET_MODE_ON, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.Wearable.COOLDOWN_MODE_ON, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.Wearable.TOUCH_AND_HOLD_WATCH_FACE, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Global.Wearable.SCREEN_UNLOCK_SOUND_ENABLED, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Global.Wearable.CHARGING_SOUNDS_ENABLED, BOOLEAN_VALIDATOR);
     }
 }
 

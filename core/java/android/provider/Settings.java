@@ -17428,6 +17428,18 @@ public final class Settings {
              * @hide
              */
             public static final String WET_MODE_ON = "wet_mode_on";
+
+            /*
+             * Whether the screen-unlock (keyguard) sound is enabled.
+             * @hide
+             */
+            public static final String SCREEN_UNLOCK_SOUND_ENABLED = "screen_unlock_sound_enabled";
+
+            /*
+             * Whether charging sounds are enabled.
+             * @hide
+             */
+            public static final String CHARGING_SOUNDS_ENABLED = "charging_sounds_enabled";
         }
     }
 
