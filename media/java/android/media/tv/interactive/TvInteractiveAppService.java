@@ -218,11 +218,6 @@ public abstract class TvInteractiveAppService extends Service {
             }
 
             @Override
-            public void prepare(int type) {
-                onPrepare(type);
-            }
-
-            @Override
             public void registerAppLinkInfo(AppLinkInfo appLinkInfo) {
                 onRegisterAppLinkInfo(appLinkInfo);
             }
@@ -239,11 +234,6 @@ public abstract class TvInteractiveAppService extends Service {
         };
         return tvIAppServiceBinder;
     }
-
-    /**
-     * Prepares TV Interactive App service for the given type.
-     */
-    public abstract void onPrepare(@TvInteractiveAppServiceInfo.InteractiveAppType int type);
 
     /**
      * Called when a request to register an Android application link info record is received.
