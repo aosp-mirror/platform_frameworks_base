@@ -100,6 +100,7 @@ public class QuickAccessWalletControllerTest extends SysuiTestCase {
                 mContext,
                 MoreExecutors.directExecutor(),
                 MoreExecutors.directExecutor(),
+                MoreExecutors.directExecutor(),
                 mSecureSettings,
                 mQuickAccessWalletClient,
                 mClock);
