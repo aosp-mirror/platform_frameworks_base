@@ -47,7 +47,7 @@ import java.util.Set;
  * default locale.</p>
  */
 public class LocalePickerWithRegion extends ListFragment implements SearchView.OnQueryTextListener {
-    private static final String TAG = LocalePickerWithRegion.class.getSimpleName();;
+    private static final String TAG = LocalePickerWithRegion.class.getSimpleName();
     private static final String PARENT_FRAGMENT_NAME = "localeListEditor";
 
     private SuggestedLocaleAdapter mAdapter;
