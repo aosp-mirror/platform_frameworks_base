@@ -17,9 +17,9 @@
 package android.net;
 
 import android.net.EthernetNetworkManagementException;
-import android.net.Network;
 
 /** @hide */
-oneway interface IEthernetNetworkManagementListener {
-    void onComplete(in Network network, in EthernetNetworkManagementException exception);
+oneway interface INetworkInterfaceOutcomeReceiver {
+    void onResult(in String iface);
+    void onError(in EthernetNetworkManagementException e);
 }
