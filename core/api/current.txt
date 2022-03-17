@@ -25213,6 +25213,7 @@ package android.net {
 
   public final class Ikev2VpnProfile extends android.net.PlatformVpnProfile {
     method @NonNull public java.util.List<java.lang.String> getAllowedAlgorithms();
+    method @Nullable public android.net.ipsec.ike.IkeTunnelConnectionParams getIkeTunnelConnectionParams();
     method public int getMaxMtu();
     method @Nullable public String getPassword();
     method @Nullable public byte[] getPresharedKey();
