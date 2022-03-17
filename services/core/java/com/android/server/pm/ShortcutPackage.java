@@ -19,9 +19,12 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.Person;
+import android.app.appsearch.AppSearchBatchResult;
 import android.app.appsearch.AppSearchManager;
 import android.app.appsearch.AppSearchResult;
 import android.app.appsearch.AppSearchSession;
+import android.app.appsearch.BatchResultCallback;
+import android.app.appsearch.GenericDocument;
 import android.app.appsearch.GetByDocumentIdRequest;
 import android.app.appsearch.PackageIdentifier;
 import android.app.appsearch.PutDocumentsRequest;
@@ -2384,14 +2387,24 @@ class ShortcutPackage extends ShortcutPackageItem {
         }
         runAsSystem(() -> fromAppSearch().thenAccept(session -> {
             session.getByDocumentId(new GetByDocumentIdRequest.Builder(getPackageName())
-                    .addIds(ids).build(), mShortcutUser.mExecutor, result -> {
-                    final List<ShortcutInfo> ret = result.getSuccesses().values()
-                            .stream().map(doc ->
-                                    ShortcutInfo.createFromGenericDocument(
-                                            mShortcutUser.getUserId(), doc))
-                            .collect(Collectors.toList());
-                    cb.accept(ret);
-                });
+                            .addIds(ids).build(), mShortcutUser.mExecutor,
+                    new BatchResultCallback<String, GenericDocument>() {
+                        @Override
+                        public void onResult(
+                                @NonNull AppSearchBatchResult<String, GenericDocument> result) {
+                            final List<ShortcutInfo> ret = result.getSuccesses().values()
+                                    .stream().map(doc ->
+                                            ShortcutInfo.createFromGenericDocument(
+                                                    mShortcutUser.getUserId(), doc))
+                                    .collect(Collectors.toList());
+                            cb.accept(ret);
+                        }
+                        @Override
+                        public void onSystemError(
+                                @Nullable Throwable throwable) {
+                            Slog.d(TAG, "Error retrieving shortcuts", throwable);
+                        }
+                    });
         }));
     }
 
@@ -2407,14 +2420,23 @@ class ShortcutPackage extends ShortcutPackageItem {
         runAsSystem(() -> fromAppSearch().thenAccept(session ->
                 session.remove(
                         new RemoveByDocumentIdRequest.Builder(getPackageName()).addIds(ids).build(),
-                        mShortcutUser.mExecutor, result -> {
-                            if (!result.isSuccess()) {
-                                final Map<String, AppSearchResult<Void>> failures =
-                                        result.getFailures();
-                                for (String key : failures.keySet()) {
-                                    Slog.e(TAG, "Failed deleting " + key + ", error message:"
-                                            + failures.get(key).getErrorMessage());
+                        mShortcutUser.mExecutor,
+                        new BatchResultCallback<String, Void>() {
+                            @Override
+                            public void onResult(
+                                    @NonNull AppSearchBatchResult<String, Void> result) {
+                                if (!result.isSuccess()) {
+                                    final Map<String, AppSearchResult<Void>> failures =
+                                            result.getFailures();
+                                    for (String key : failures.keySet()) {
+                                        Slog.e(TAG, "Failed deleting " + key + ", error message:"
+                                                + failures.get(key).getErrorMessage());
+                                    }
                                 }
+                            }
+                            @Override
+                            public void onSystemError(@Nullable Throwable throwable) {
+                                Slog.e(TAG, "Error removing shortcuts", throwable);
                             }
                         })));
     }
@@ -2452,11 +2474,19 @@ class ShortcutPackage extends ShortcutPackageItem {
                                     AppSearchShortcutInfo.toGenericDocuments(shortcuts))
                             .build(),
                     mShortcutUser.mExecutor,
-                    result -> {
-                        if (!result.isSuccess()) {
-                            for (AppSearchResult<Void> k : result.getFailures().values()) {
-                                Slog.e(TAG, k.getErrorMessage());
+                    new BatchResultCallback<String, Void>() {
+                        @Override
+                        public void onResult(
+                                @NonNull AppSearchBatchResult<String, Void> result) {
+                            if (!result.isSuccess()) {
+                                for (AppSearchResult<Void> k : result.getFailures().values()) {
+                                    Slog.e(TAG, k.getErrorMessage());
+                                }
                             }
+                        }
+                        @Override
+                        public void onSystemError(@Nullable Throwable throwable) {
+                            Slog.d(TAG, "Error persisting shortcuts", throwable);
                         }
                     });
         }));
