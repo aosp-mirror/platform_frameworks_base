@@ -545,7 +545,6 @@ public class ApnSetting implements Parcelable {
      * Returns the profile id to which the APN saved in modem.
      *
      * @return the profile id of the APN
-     * @hide
      */
     public int getProfileId() {
         return mProfileId;
@@ -554,8 +553,7 @@ public class ApnSetting implements Parcelable {
     /**
      * Returns if the APN setting is persistent on the modem.
      *
-     * @return is the APN setting to be set in modem
-     * @hide
+     * @return {@code true} if the APN setting is persistent on the modem.
      */
     public boolean isPersistent() {
         return mPersistent;
