@@ -43,27 +43,62 @@ public final class CinematicEffectResponse implements Parcelable {
                     CINEMATIC_EFFECT_STATUS_OK,
                     CINEMATIC_EFFECT_STATUS_NOT_READY,
                     CINEMATIC_EFFECT_STATUS_PENDING,
-                    CINEMATIC_EFFECT_STATUS_TOO_MANY_REQUESTS
+                    CINEMATIC_EFFECT_STATUS_TOO_MANY_REQUESTS,
+                    CINEMATIC_EFFECT_STATUS_FEATURE_DISABLED,
+                    CINEMATIC_EFFECT_STATUS_IMAGE_FORMAT_NOT_SUITABLE,
+                    CINEMATIC_EFFECT_STATUS_CONTENT_UNSUPPORTED,
+                    CINEMATIC_EFFECT_STATUS_CONTENT_TARGET_ERROR,
+                    CINEMATIC_EFFECT_STATUS_CONTENT_TOO_FLAT,
+                    CINEMATIC_EFFECT_STATUS_ANIMATION_FAILURE
             })
     @Retention(RetentionPolicy.SOURCE)
     public @interface CinematicEffectStatusCode {}
 
-    /** Cinematic effect generation failure with internal error. */
+    /** Cinematic effect generation failure with generic error. */
     public static final int CINEMATIC_EFFECT_STATUS_ERROR = 0;
 
     /** Cinematic effect generation success. */
     public static final int CINEMATIC_EFFECT_STATUS_OK = 1;
 
-    /** Service not ready for cinematic effect generation. */
+    /**
+     * Service not ready for cinematic effect generation, e.g. a
+     * dependency is unavailable.
+     */
     public static final int CINEMATIC_EFFECT_STATUS_NOT_READY = 2;
+
     /**
      * There is already a task being processed for the same task id.
      * Client should wait for the response and not send the same request
      * again.
      */
     public static final int CINEMATIC_EFFECT_STATUS_PENDING = 3;
-    /** Too many requests for server to handle. */
+
+    /** Too many requests (with different task id) for server to handle. */
     public static final int CINEMATIC_EFFECT_STATUS_TOO_MANY_REQUESTS = 4;
+
+    /** Feature is disabled, for example, in an emergency situation. */
+    public static final int CINEMATIC_EFFECT_STATUS_FEATURE_DISABLED = 5;
+
+    /** Image format related problems (i.e. resolution or aspect ratio problems). */
+    public static final int CINEMATIC_EFFECT_STATUS_IMAGE_FORMAT_NOT_SUITABLE = 6;
+
+    /**
+     * The cinematic effect feature is not supported on certain types of images,
+     * for example, some implementation only support portrait.
+     */
+    public static final int CINEMATIC_EFFECT_STATUS_CONTENT_UNSUPPORTED = 7;
+
+    /**
+     * Cannot generate cinematic effect with the targets on the image, for example,
+     * too many targets on the image.
+     */
+    public static final int CINEMATIC_EFFECT_STATUS_CONTENT_TARGET_ERROR = 8;
+
+    /** Image is too flat to generate cinematic effect. */
+    public static final int CINEMATIC_EFFECT_STATUS_CONTENT_TOO_FLAT = 9;
+
+    /** Something is wrong with generating animation. */
+    public static final int CINEMATIC_EFFECT_STATUS_ANIMATION_FAILURE = 10;
 
     /** @hide */
     @IntDef(prefix = {"IMAGE_CONTENT_TYPE_"},
