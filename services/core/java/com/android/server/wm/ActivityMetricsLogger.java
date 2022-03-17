@@ -193,6 +193,35 @@ class ActivityMetricsLogger {
         private long mCurrentTransitionStartTimeNs;
         /** Non-null when a {@link TransitionInfo} is created for this state. */
         private TransitionInfo mAssociatedTransitionInfo;
+        /** The sequence id for trace. It is used to map the traces before resolving intent. */
+        private static int sTraceSeqId;
+        /** The trace format is "launchingActivity#$seqId:$state(:$packageName)". */
+        final String mTraceName;
+
+        LaunchingState() {
+            if (!Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER)) {
+                mTraceName = null;
+                return;
+            }
+            // Use an id because the launching app is not yet known before resolving intent.
+            sTraceSeqId++;
+            mTraceName = "launchingActivity#" + sTraceSeqId;
+            Trace.asyncTraceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, mTraceName, 0);
+        }
+
+        void stopTrace(boolean abort) {
+            if (mTraceName == null) return;
+            Trace.asyncTraceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER, mTraceName, 0);
+            final String launchResult;
+            if (mAssociatedTransitionInfo == null) {
+                launchResult = ":failed";
+            } else {
+                launchResult = (abort ? ":canceled:" : ":completed:")
+                        + mAssociatedTransitionInfo.mLastLaunchedActivity.packageName;
+            }
+            // Put a supplement trace as the description of the async trace with the same id.
+            Trace.instant(Trace.TRACE_TAG_ACTIVITY_MANAGER, mTraceName + launchResult);
+        }
 
         @VisibleForTesting
         boolean allDrawn() {
@@ -551,10 +580,10 @@ class ActivityMetricsLogger {
         }
 
         if (existingInfo == null) {
-            // Only notify the observer for a new launching event.
-            launchObserverNotifyIntentStarted(intent, transitionStartTimeNs);
             final LaunchingState launchingState = new LaunchingState();
             launchingState.mCurrentTransitionStartTimeNs = transitionStartTimeNs;
+            // Only notify the observer for a new launching event.
+            launchObserverNotifyIntentStarted(intent, transitionStartTimeNs);
             return launchingState;
         }
         existingInfo.mLaunchingState.mCurrentTransitionStartTimeNs = transitionStartTimeNs;
@@ -576,7 +605,7 @@ class ActivityMetricsLogger {
             @Nullable ActivityOptions options) {
         if (launchedActivity == null) {
             // The launch is aborted, e.g. intent not resolved, class not found.
-            abort(null /* info */, "nothing launched");
+            abort(launchingState, "nothing launched");
             return;
         }
 
@@ -603,7 +632,7 @@ class ActivityMetricsLogger {
 
         if (launchedActivity.isReportedDrawn() && launchedActivity.isVisible()) {
             // Launched activity is already visible. We cannot measure windows drawn delay.
-            abort(info, "launched activity already visible");
+            abort(launchingState, "launched activity already visible");
             return;
         }
 
@@ -635,7 +664,7 @@ class ActivityMetricsLogger {
         final TransitionInfo newInfo = TransitionInfo.create(launchedActivity, launchingState,
                 options, processRunning, processSwitch, newActivityCreated, resultCode);
         if (newInfo == null) {
-            abort(info, "unrecognized launch");
+            abort(launchingState, "unrecognized launch");
             return;
         }
 
@@ -882,23 +911,29 @@ class ActivityMetricsLogger {
         }
     }
 
+    private void abort(@NonNull LaunchingState state, String cause) {
+        if (state.mAssociatedTransitionInfo != null) {
+            abort(state.mAssociatedTransitionInfo, cause);
+            return;
+        }
+        if (DEBUG_METRICS) Slog.i(TAG, "abort launch cause=" + cause);
+        state.stopTrace(true /* abort */);
+        launchObserverNotifyIntentFailed();
+    }
+
     /** Aborts tracking of current launch metrics. */
-    private void abort(TransitionInfo info, String cause) {
+    private void abort(@NonNull TransitionInfo info, String cause) {
         done(true /* abort */, info, cause, 0L /* timestampNs */);
     }
 
     /** Called when the given transition (info) is no longer active. */
-    private void done(boolean abort, @Nullable TransitionInfo info, String cause,
+    private void done(boolean abort, @NonNull TransitionInfo info, String cause,
             long timestampNs) {
         if (DEBUG_METRICS) {
             Slog.i(TAG, "done abort=" + abort + " cause=" + cause + " timestamp=" + timestampNs
                     + " info=" + info);
         }
-        if (info == null) {
-            launchObserverNotifyIntentFailed();
-            return;
-        }
-
+        info.mLaunchingState.stopTrace(abort);
         stopLaunchTrace(info);
         final Boolean isHibernating =
                 mLastHibernationStates.remove(info.mLastLaunchedActivity.packageName);
@@ -1465,7 +1500,7 @@ class ActivityMetricsLogger {
     /** Starts trace for an activity is actually launching. */
     private void startLaunchTrace(@NonNull TransitionInfo info) {
         if (DEBUG_METRICS) Slog.i(TAG, "startLaunchTrace " + info);
-        if (!Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER)) {
+        if (info.mLaunchingState.mTraceName == null) {
             return;
         }
         info.mLaunchTraceName = "launching: " + info.mLastLaunchedActivity.packageName;
