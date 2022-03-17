@@ -5409,6 +5409,21 @@ public class UserManagerService extends IUserManager.Stub {
         (new Shell()).exec(this, in, out, err, args, callback, resultReceiver);
     }
 
+    private static final String PREFIX_HELP_COMMAND = "  ";
+    private static final String PREFIX_HELP_DESCRIPTION = "    ";
+    private static final String PREFIX_HELP_DESCRIPTION_EXTRA_LINES = "      ";
+
+    private static final String CMD_HELP = "help";
+    private static final String CMD_LIST = "list";
+    private static final String CMD_REPORT_SYSTEM_USER_PACKAGE_ALLOWLIST_PROBLEMS =
+            "report-system-user-package-whitelist-problems";
+
+    private static final String ARG_V = "-v";
+    private static final String ARG_VERBOSE = "--verbose";
+    private static final String ARG_ALL = "--all";
+    private static final String ARG_CRITICAL_ONLY = "--critical-only";
+    private static final String ARG_MODE = "--mode";
+
     private int onShellCommand(Shell shell, String cmd) {
         if (cmd == null) {
             return shell.handleDefaultCommands(cmd);
@@ -5417,9 +5432,9 @@ public class UserManagerService extends IUserManager.Stub {
         final PrintWriter pw = shell.getOutPrintWriter();
         try {
             switch(cmd) {
-                case "list":
+                case CMD_LIST:
                     return runList(pw, shell);
-                case "report-system-user-package-whitelist-problems":
+                case CMD_REPORT_SYSTEM_USER_PACKAGE_ALLOWLIST_PROBLEMS:
                     return runReportPackageWhitelistProblems(pw, shell);
                 default:
                     return shell.handleDefaultCommands(cmd);
@@ -5436,10 +5451,10 @@ public class UserManagerService extends IUserManager.Stub {
         String opt;
         while ((opt = shell.getNextOption()) != null) {
             switch (opt) {
-                case "-v":
+                case ARG_V:
                     verbose = true;
                     break;
-                case "--all":
+                case ARG_ALL:
                     all = true;
                     break;
                 default:
@@ -5520,14 +5535,14 @@ public class UserManagerService extends IUserManager.Stub {
         String opt;
         while ((opt = shell.getNextOption()) != null) {
             switch (opt) {
-                case "-v":
-                case "--verbose":
+                case ARG_V:
+                case ARG_VERBOSE:
                     verbose = true;
                     break;
-                case "--critical-only":
+                case ARG_CRITICAL_ONLY:
                     criticalOnly = true;
                     break;
-                case "--mode":
+                case ARG_MODE:
                     mode = Integer.parseInt(shell.getNextArgRequired());
                     break;
                 default:
@@ -6248,20 +6263,28 @@ public class UserManagerService extends IUserManager.Stub {
         @Override
         public void onHelp() {
             final PrintWriter pw = getOutPrintWriter();
-            pw.println("User manager (user) commands:");
-            pw.println("  help");
-            pw.println("    Prints this help text.");
-            pw.println("");
-            pw.println("  list [-v] [-all]");
-            pw.println("    Prints all users on the system.");
-            pw.println("  report-system-user-package-whitelist-problems [-v | --verbose] "
-                    + "[--critical-only] [--mode MODE]");
-            pw.println("    Reports all issues on user-type package whitelist XML files. Options:");
-            pw.println("    -v | --verbose : shows extra info, like number of issues");
-            pw.println("    --critical-only: show only critical issues, excluding warnings");
-            pw.println("    --mode MODE: shows what errors would be if device used mode MODE (where"
-                    + " MODE is the whitelist mode integer as defined by "
-                    + "config_userTypePackageWhitelistMode)");
+            pw.printf("User manager (user) commands:\n");
+
+            pw.printf("%s%s\n", PREFIX_HELP_COMMAND, CMD_HELP);
+            pw.printf("%sPrints this help text.\n\n", PREFIX_HELP_DESCRIPTION);
+
+            pw.printf("%s%s [%s] [%s]\n", PREFIX_HELP_COMMAND, CMD_LIST, ARG_V, ARG_ALL);
+            pw.printf("%sPrints all users on the system.\n\n", PREFIX_HELP_DESCRIPTION);
+
+            pw.printf("%s%s [%s | %s] [%s] [%s MODE]\n", PREFIX_HELP_COMMAND,
+                    CMD_REPORT_SYSTEM_USER_PACKAGE_ALLOWLIST_PROBLEMS,
+                    ARG_V, ARG_VERBOSE, ARG_CRITICAL_ONLY, ARG_MODE);
+
+            pw.printf("%sReports all issues on user-type package allowlist XML files. Options:\n",
+                    PREFIX_HELP_DESCRIPTION);
+            pw.printf("%s%s | %s: shows extra info, like number of issues\n",
+                    PREFIX_HELP_DESCRIPTION, ARG_V, ARG_VERBOSE);
+            pw.printf("%s%s: show only critical issues, excluding warnings\n",
+                    PREFIX_HELP_DESCRIPTION, ARG_CRITICAL_ONLY);
+            pw.printf("%s%s MODE: shows what errors would be if device used mode MODE\n"
+                    + "%s(where MODE is the allowlist mode integer as defined by "
+                    + "config_userTypePackageWhitelistMode)\n\n",
+                    PREFIX_HELP_DESCRIPTION, ARG_MODE, PREFIX_HELP_DESCRIPTION_EXTRA_LINES);
         }
     }
 
