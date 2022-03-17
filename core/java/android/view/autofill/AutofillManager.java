@@ -16,9 +16,9 @@
 
 package android.view.autofill;
 
-import static android.service.autofill.FillRequest.FLAG_ACTIVITY_START;
 import static android.service.autofill.FillRequest.FLAG_MANUAL_REQUEST;
 import static android.service.autofill.FillRequest.FLAG_PASSWORD_INPUT_TYPE;
+import static android.service.autofill.FillRequest.FLAG_SUPPORTS_FILL_DIALOG;
 import static android.service.autofill.FillRequest.FLAG_VIEW_NOT_FOCUSED;
 import static android.view.ContentInfo.SOURCE_AUTOFILL;
 import static android.view.autofill.Helper.sDebug;
@@ -1118,7 +1118,7 @@ public final class AutofillManager {
             return;
         }
 
-        int flags = FLAG_ACTIVITY_START;
+        int flags = FLAG_SUPPORTS_FILL_DIALOG;
         flags |= FLAG_VIEW_NOT_FOCUSED;
         notifyViewEntered(view, flags);
     }
