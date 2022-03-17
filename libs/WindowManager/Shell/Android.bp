@@ -138,6 +138,11 @@ android_library {
         "dagger2",
         "jsr330",
     ],
+    libs: [
+        // Soong fails to automatically add this dependency because all the
+        // *.kt sources are inside a filegroup.
+        "kotlin-annotations",
+    ],
     kotlincflags: ["-Xjvm-default=enable"],
     manifest: "AndroidManifest.xml",
     plugins: ["dagger2-compiler"],
