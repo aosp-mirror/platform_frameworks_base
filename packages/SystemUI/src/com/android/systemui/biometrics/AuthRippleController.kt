@@ -116,7 +116,7 @@ class AuthRippleController @Inject constructor(
     }
 
     fun showRipple(biometricSourceType: BiometricSourceType?) {
-        if (!keyguardUpdateMonitor.isKeyguardVisible ||
+        if (!(keyguardUpdateMonitor.isKeyguardVisible || keyguardUpdateMonitor.isDreaming) ||
             keyguardUpdateMonitor.userNeedsStrongAuth()) {
             return
         }
