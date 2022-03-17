@@ -1038,23 +1038,6 @@
     <!-- Developer settings: text for the WebView provider selection toast shown if an invalid provider was chosen (i.e. the setting list was stale). [CHAR LIMIT=NONE] -->
     <string name="select_webview_provider_toast_text">This choice is no longer valid. Try again.</string>
 
-    <!-- Developer settings screen, convert userdata to file encryption option name -->
-    <string name="convert_to_file_encryption">Convert to file encryption</string>
-    <!-- Developer settings screen, convert userdata to file encryption summary when option is available -->
-    <string name="convert_to_file_encryption_enabled">Convert\u2026</string>
-    <!-- Developer settings screen, convert userdata to file encryption summary when option is already done -->
-    <string name="convert_to_file_encryption_done">Already file encrypted</string>
-    <!-- Title used on dialog with final prompt for converting to file encryption -->
-    <string name="title_convert_fbe">Converting to file based encryption</string>
-    <!-- Warning displayed on dialog with final prompt for converting to file encryption -->
-    <string name="convert_to_fbe_warning">
-        Convert data partition to file based encryption.\n
-        !!Warning!! This will erase all your data.\n
-        This feature is alpha, and may not work correctly.\n
-        Press \'Wipe and convert\u2026\' to continue.</string>
-    <!-- Button on dialog that triggers convertion to file encryption -->
-    <string name="button_convert_fbe">Wipe and convert\u2026</string>
-
     <!-- Name of feature to change color setting for the display [CHAR LIMIT=60] -->
     <string name="picture_color_mode">Picture color mode</string>
 
