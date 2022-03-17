@@ -31,7 +31,7 @@ import static com.android.server.pm.PackageManagerService.SCAN_NO_DEX;
 import static com.android.server.pm.PackageManagerService.SCAN_REQUIRE_KNOWN;
 import static com.android.server.pm.PackageManagerService.SYSTEM_PARTITIONS;
 import static com.android.server.pm.PackageManagerService.TAG;
-import static com.android.server.pm.pkg.parsing.ParsingPackageUtils.PARSE_CHECK_MAX_SDK_VERSION;
+import static com.android.server.pm.pkg.parsing.ParsingPackageUtils.PARSE_APK_IN_APEX;
 import static com.android.server.pm.pkg.parsing.ParsingPackageUtils.PARSE_FRAMEWORK_RES_SPLITS;
 
 import android.annotation.NonNull;
@@ -366,7 +366,7 @@ final class InitAppsHelper {
         try {
             if ((scanFlags & SCAN_AS_APK_IN_APEX) != 0) {
                 // when scanning apk in apexes, we want to check the maxSdkVersion
-                parseFlags |= PARSE_CHECK_MAX_SDK_VERSION;
+                parseFlags |= PARSE_APK_IN_APEX;
             }
             mInstallPackageHelper.installPackagesFromDir(scanDir, frameworkSplits, parseFlags,
                     scanFlags, packageParser, executorService);
