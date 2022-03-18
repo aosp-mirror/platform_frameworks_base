@@ -1008,6 +1008,9 @@
     <!-- Media tap-to-transfer chip for receiver device -->
     <dimen name="media_ttt_chip_size_receiver">100dp</dimen>
     <dimen name="media_ttt_icon_size_receiver">95dp</dimen>
+    <!-- Since the generic icon isn't circular, we need to scale it down so it still fits within
+         the circular chip. -->
+    <dimen name="media_ttt_generic_icon_size_receiver">70dp</dimen>
 
     <!-- Window magnification -->
     <dimen name="magnification_border_drag_size">35dp</dimen>
