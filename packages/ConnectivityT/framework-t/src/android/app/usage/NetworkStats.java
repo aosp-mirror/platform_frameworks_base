@@ -17,6 +17,7 @@
 package android.app.usage;
 
 import android.annotation.IntDef;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.net.INetworkStatsService;
 import android.net.INetworkStatsSession;
@@ -474,10 +475,11 @@ public final class NetworkStats implements AutoCloseable {
 
     /**
      * Fills the recycled bucket with data of the next bin in the enumeration.
-     * @param bucketOut Bucket to be filled with data.
+     * @param bucketOut Bucket to be filled with data. If null, the method does
+     *                  nothing and returning false.
      * @return true if successfully filled the bucket, false otherwise.
      */
-    public boolean getNextBucket(Bucket bucketOut) {
+    public boolean getNextBucket(@Nullable Bucket bucketOut) {
         if (mSummary != null) {
             return getNextSummaryBucket(bucketOut);
         } else {
@@ -651,7 +653,7 @@ public final class NetworkStats implements AutoCloseable {
      * @param bucketOut Next item will be set here.
      * @return true if a next item could be set.
      */
-    private boolean getNextSummaryBucket(Bucket bucketOut) {
+    private boolean getNextSummaryBucket(@Nullable Bucket bucketOut) {
         if (bucketOut != null && mEnumerationIndex < mSummary.size()) {
             mRecycledSummaryEntry = mSummary.getValues(mEnumerationIndex++, mRecycledSummaryEntry);
             fillBucketFromSummaryEntry(bucketOut);
@@ -678,7 +680,7 @@ public final class NetworkStats implements AutoCloseable {
      * @param bucketOut Next item will be set here.
      * @return true if a next item could be set.
      */
-    private boolean getNextHistoryBucket(Bucket bucketOut) {
+    private boolean getNextHistoryBucket(@Nullable Bucket bucketOut) {
         if (bucketOut != null && mHistory != null) {
             if (mEnumerationIndex < mHistory.size()) {
                 mRecycledHistoryEntry = mHistory.getValues(mEnumerationIndex++,

@@ -18,6 +18,7 @@ package com.android.server.accessibility.magnification;
 
 import static android.accessibilityservice.AccessibilityTrace.FLAGS_WINDOW_MANAGER_INTERNAL;
 import static android.accessibilityservice.MagnificationConfig.MAGNIFICATION_MODE_FULLSCREEN;
+import static android.util.TypedValue.COMPLEX_UNIT_DIP;
 import static android.view.accessibility.MagnificationAnimationCallback.STUB_ANIMATION_CALLBACK;
 
 import static com.android.server.accessibility.AccessibilityManagerService.INVALID_SERVICE_ID;
@@ -31,15 +32,20 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.CompatibilityInfo;
 import android.graphics.Rect;
 import android.graphics.Region;
+import android.hardware.display.DisplayManagerInternal;
 import android.os.Handler;
 import android.os.Message;
 import android.text.TextUtils;
+import android.util.DisplayMetrics;
 import android.util.MathUtils;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.TypedValue;
 import android.view.Display;
+import android.view.DisplayInfo;
 import android.view.MagnificationSpec;
 import android.view.View;
 import android.view.accessibility.MagnificationAnimationCallback;
@@ -92,6 +98,8 @@ public class FullScreenMagnificationController implements
     private final Rect mTempRect = new Rect();
     // Whether the following typing focus feature for magnification is enabled.
     private boolean mMagnificationFollowTypingEnabled = true;
+
+    private final DisplayManagerInternal mDisplayManagerInternal;
 
     /**
      * This class implements {@link WindowManagerInternal.MagnificationCallbacks} and holds
@@ -395,6 +403,18 @@ public class FullScreenMagnificationController implements
             outRegion.set(mMagnificationRegion);
         }
 
+        private DisplayMetrics getDisplayMetricsForId() {
+            final DisplayMetrics outMetrics = new DisplayMetrics();
+            final DisplayInfo displayInfo = mDisplayManagerInternal.getDisplayInfo(mDisplayId);
+            if (displayInfo != null) {
+                displayInfo.getLogicalMetrics(outMetrics,
+                        CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO, null);
+            } else {
+                outMetrics.setToDefaults();
+            }
+            return outMetrics;
+        }
+
         void requestRectangleOnScreen(int left, int top, int right, int bottom) {
             synchronized (mLock) {
                 final Rect magnifiedFrame = mTempRect;
@@ -408,6 +428,12 @@ public class FullScreenMagnificationController implements
 
                 final float scrollX;
                 final float scrollY;
+                // We offset an additional distance for a user to know the surrounding context.
+                DisplayMetrics metrics = getDisplayMetricsForId();
+                final float offsetViewportX = (float) magnifFrameInScreenCoords.width() / 4;
+                final float offsetViewportY =
+                        TypedValue.applyDimension(COMPLEX_UNIT_DIP, 10, metrics);
+
                 if (right - left > magnifFrameInScreenCoords.width()) {
                     final int direction = TextUtils
                             .getLayoutDirectionFromLocale(Locale.getDefault());
@@ -417,9 +443,9 @@ public class FullScreenMagnificationController implements
                         scrollX = right - magnifFrameInScreenCoords.right;
                     }
                 } else if (left < magnifFrameInScreenCoords.left) {
-                    scrollX = left - magnifFrameInScreenCoords.left;
+                    scrollX = left - magnifFrameInScreenCoords.left - offsetViewportX;
                 } else if (right > magnifFrameInScreenCoords.right) {
-                    scrollX = right - magnifFrameInScreenCoords.right;
+                    scrollX = right - magnifFrameInScreenCoords.right + offsetViewportX;
                 } else {
                     scrollX = 0;
                 }
@@ -427,9 +453,9 @@ public class FullScreenMagnificationController implements
                 if (bottom - top > magnifFrameInScreenCoords.height()) {
                     scrollY = top - magnifFrameInScreenCoords.top;
                 } else if (top < magnifFrameInScreenCoords.top) {
-                    scrollY = top - magnifFrameInScreenCoords.top;
+                    scrollY = top - magnifFrameInScreenCoords.top - offsetViewportY;
                 } else if (bottom > magnifFrameInScreenCoords.bottom) {
-                    scrollY = bottom - magnifFrameInScreenCoords.bottom;
+                    scrollY = bottom - magnifFrameInScreenCoords.bottom + offsetViewportY;
                 } else {
                     scrollY = 0;
                 }
@@ -687,6 +713,7 @@ public class FullScreenMagnificationController implements
         mScreenStateObserver = new ScreenStateObserver(mControllerCtx.getContext(), this);
         mMagnificationInfoChangedCallback = magnificationInfoChangedCallback;
         mScaleProvider = scaleProvider;
+        mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
     }
 
     /**

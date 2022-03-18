@@ -293,8 +293,8 @@ final class DexOptHelper {
         MetricsLogger.histogram(mPm.mContext, "opt_dialog_time_s", elapsedTimeSeconds);
     }
 
-    public ArraySet<String> getOptimizablePackages(@NonNull Computer snapshot) {
-        ArraySet<String> pkgs = new ArraySet<>();
+    public List<String> getOptimizablePackages(@NonNull Computer snapshot) {
+        ArrayList<String> pkgs = new ArrayList<>();
         mPm.forEachPackageState(snapshot, packageState -> {
             final AndroidPackage pkg = packageState.getPkg();
             if (pkg != null && mPm.mPackageDexOptimizer.canOptimizePackage(pkg)) {

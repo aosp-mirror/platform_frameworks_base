@@ -6508,22 +6508,22 @@ public abstract class Context {
 
 
     /**
-     * Triggers the asynchronous revocation of a permission.
+     * Triggers the asynchronous revocation of a runtime permission. If the permission is not
+     * currently granted, nothing happens (even if later granted by the user).
      *
      * @param permName The name of the permission to be revoked.
-     * @see #revokeOwnPermissionsOnKill(Collection)
+     * @see #revokeSelfPermissionsOnKill(Collection)
+     * @throws IllegalArgumentException if the permission is not a runtime permission
      */
-    public void revokeOwnPermissionOnKill(@NonNull String permName) {
-        revokeOwnPermissionsOnKill(Collections.singletonList(permName));
+    public void revokeSelfPermissionOnKill(@NonNull String permName) {
+        revokeSelfPermissionsOnKill(Collections.singletonList(permName));
     }
 
     /**
      * Triggers the revocation of one or more permissions for the calling package. A package is only
-     * able to revoke a permission under the following conditions:
-     * <ul>
-     * <li>Each permission in {@code permissions} must be granted to the calling package.
-     * <li>Each permission in {@code permissions} must be a runtime permission.
-     * </ul>
+     * able to revoke runtime permissions. If a permission is not currently granted, it is ignored
+     * and will not get revoked (even if later granted by the user). Ultimately, you should never
+     * make assumptions about a permission status as users may grant or revoke them at any time.
      * <p>
      * Background permissions which have no corresponding foreground permission still granted once
      * the revocation is effective will also be revoked.
@@ -6549,8 +6549,9 @@ public abstract class Context {
      * @param permissions Collection of permissions to be revoked.
      * @see PackageManager#getGroupOfPlatformPermission(String, Executor, Consumer)
      * @see PackageManager#getPlatformPermissionsForGroup(String, Executor, Consumer)
+     * @throws IllegalArgumentException if any of the permissions is not a runtime permission
      */
-    public void revokeOwnPermissionsOnKill(@NonNull Collection<String> permissions) {
+    public void revokeSelfPermissionsOnKill(@NonNull Collection<String> permissions) {
         throw new AbstractMethodError("Must be overridden in implementing class");
     }
 
@@ -7145,8 +7146,9 @@ public abstract class Context {
     }
 
     /**
-     * Returns token if the {@link Context} is a {@link android.app.WindowContext}. Returns
-     * {@code null} otherwise.
+     * Returns the {@link IBinder} representing the associated
+     * {@link com.android.server.wm.WindowToken} if the {@link Context} is a
+     * {@link android.app.WindowContext}. Returns {@code null} otherwise.
      *
      * @hide
      */
