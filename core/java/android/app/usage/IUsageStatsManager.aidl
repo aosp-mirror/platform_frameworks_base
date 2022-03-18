@@ -82,4 +82,6 @@ interface IUsageStatsManager {
             int userId);
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS)")
     void clearBroadcastEvents(String callingPackage, int userId);
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.READ_DEVICE_CONFIG)")
+    String getAppStandbyConstant(String key);
 }
