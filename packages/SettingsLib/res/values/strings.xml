@@ -1038,23 +1038,6 @@
     <!-- Developer settings: text for the WebView provider selection toast shown if an invalid provider was chosen (i.e. the setting list was stale). [CHAR LIMIT=NONE] -->
     <string name="select_webview_provider_toast_text">This choice is no longer valid. Try again.</string>
 
-    <!-- Developer settings screen, convert userdata to file encryption option name -->
-    <string name="convert_to_file_encryption">Convert to file encryption</string>
-    <!-- Developer settings screen, convert userdata to file encryption summary when option is available -->
-    <string name="convert_to_file_encryption_enabled">Convert\u2026</string>
-    <!-- Developer settings screen, convert userdata to file encryption summary when option is already done -->
-    <string name="convert_to_file_encryption_done">Already file encrypted</string>
-    <!-- Title used on dialog with final prompt for converting to file encryption -->
-    <string name="title_convert_fbe">Converting to file based encryption</string>
-    <!-- Warning displayed on dialog with final prompt for converting to file encryption -->
-    <string name="convert_to_fbe_warning">
-        Convert data partition to file based encryption.\n
-        !!Warning!! This will erase all your data.\n
-        This feature is alpha, and may not work correctly.\n
-        Press \'Wipe and convert\u2026\' to continue.</string>
-    <!-- Button on dialog that triggers convertion to file encryption -->
-    <string name="button_convert_fbe">Wipe and convert\u2026</string>
-
     <!-- Name of feature to change color setting for the display [CHAR LIMIT=60] -->
     <string name="picture_color_mode">Picture color mode</string>
 
@@ -1582,4 +1565,11 @@
     <string name="keyboard_layout_dialog_title">Choose keyboard layout</string>
     <!-- Label of the default keyboard layout.  [CHAR LIMIT=35] -->
     <string name="keyboard_layout_default_label">Default</string>
+
+    <!-- Special access > Title for managing turn screen on settings. [CHAR LIMIT=50] -->
+    <string name="turn_screen_on_title">Turn screen on</string>
+    <!-- Label for a setting which controls whether an app can turn the screen on [CHAR LIMIT=45] -->
+    <string name="allow_turn_screen_on">Allow turning the screen on</string>
+    <!-- Description for a setting which controls whether an app can turn the screen on [CHAR LIMIT=NONE] -->
+    <string name="allow_turn_screen_on_description">Allow an app to turn the screen on. If granted, the app may turn on the screen at any time without your explicit intent.</string>
 </resources>

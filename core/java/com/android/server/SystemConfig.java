@@ -35,6 +35,7 @@ import android.os.VintfRuntimeInfo;
 import android.os.incremental.IncrementalManager;
 import android.os.storage.StorageManager;
 import android.permission.PermissionManager.SplitPermissionInfo;
+import android.sysprop.ApexProperties;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -1191,7 +1192,8 @@ public class SystemConfig {
                             boolean systemExt = permFile.toPath().startsWith(
                                     Environment.getSystemExtDirectory().toPath() + "/");
                             boolean apex = permFile.toPath().startsWith(
-                                    Environment.getApexDirectory().toPath() + "/");
+                                    Environment.getApexDirectory().toPath() + "/")
+                                    && ApexProperties.updatable().orElse(false);
                             if (vendor) {
                                 readPrivAppPermissions(parser, mVendorPrivAppPermissions,
                                         mVendorPrivAppDenyPermissions);

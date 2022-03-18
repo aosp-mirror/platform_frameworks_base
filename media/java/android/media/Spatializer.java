@@ -882,8 +882,12 @@ public class Spatializer {
 
     /**
      * @hide
-     * Returns the id of the output stream used for the spatializer effect playback
+     * Returns the id of the output stream used for the spatializer effect playback.
+     * This getter or associated listener {@link OnSpatializerOutputChangedListener} can be used for
+     * handling spatializer output-specific configurations (e.g. disabling speaker post-processing
+     * to avoid double-processing of the spatialized path).
      * @return id of the output stream, or 0 if no spatializer playback is active
+     * @see #setOnSpatializerOutputChangedListener(Executor, OnSpatializerOutputChangedListener)
      */
     @SystemApi(client = SystemApi.Client.PRIVILEGED_APPS)
     @RequiresPermission(android.Manifest.permission.MODIFY_DEFAULT_AUDIO_EFFECTS)
@@ -920,6 +924,8 @@ public class Spatializer {
             mOutputDispatcher = new SpatializerOutputDispatcherStub();
             try {
                 mAm.getService().registerSpatializerOutputCallback(mOutputDispatcher);
+                // immediately report the current output
+                mOutputDispatcher.dispatchSpatializerOutputChanged(getOutput());
             } catch (RemoteException e) {
                 mOutputListener = null;
                 mOutputDispatcher = null;

@@ -5815,6 +5815,7 @@ package android.app {
   public class LocaleManager {
     method @NonNull public android.os.LocaleList getApplicationLocales();
     method @NonNull @RequiresPermission(value="android.permission.READ_APP_SPECIFIC_LOCALES", conditional=true) public android.os.LocaleList getApplicationLocales(@NonNull String);
+    method @NonNull public android.os.LocaleList getSystemLocales();
     method public void setApplicationLocales(@NonNull android.os.LocaleList);
   }
 
@@ -9736,8 +9737,8 @@ package android.content {
     method @Nullable public abstract android.content.Intent registerReceiver(android.content.BroadcastReceiver, android.content.IntentFilter, @Nullable String, @Nullable android.os.Handler, int);
     method @Deprecated @RequiresPermission(android.Manifest.permission.BROADCAST_STICKY) public abstract void removeStickyBroadcast(@RequiresPermission android.content.Intent);
     method @Deprecated @RequiresPermission(allOf={"android.permission.INTERACT_ACROSS_USERS", android.Manifest.permission.BROADCAST_STICKY}) public abstract void removeStickyBroadcastAsUser(@RequiresPermission android.content.Intent, android.os.UserHandle);
-    method public void revokeOwnPermissionOnKill(@NonNull String);
-    method public void revokeOwnPermissionsOnKill(@NonNull java.util.Collection<java.lang.String>);
+    method public void revokeSelfPermissionOnKill(@NonNull String);
+    method public void revokeSelfPermissionsOnKill(@NonNull java.util.Collection<java.lang.String>);
     method public abstract void revokeUriPermission(android.net.Uri, int);
     method public abstract void revokeUriPermission(String, android.net.Uri, int);
     method public abstract void sendBroadcast(@RequiresPermission android.content.Intent);
@@ -10125,12 +10126,16 @@ package android.content {
     method @Nullable public long[] getLongArrayExtra(String);
     method public long getLongExtra(String, long);
     method @Nullable public String getPackage();
-    method @Nullable public android.os.Parcelable[] getParcelableArrayExtra(String);
-    method @Nullable public <T extends android.os.Parcelable> java.util.ArrayList<T> getParcelableArrayListExtra(String);
-    method @Nullable public <T extends android.os.Parcelable> T getParcelableExtra(String);
+    method @Deprecated @Nullable public android.os.Parcelable[] getParcelableArrayExtra(String);
+    method @Nullable public <T> T[] getParcelableArrayExtra(@Nullable String, @NonNull Class<T>);
+    method @Deprecated @Nullable public <T extends android.os.Parcelable> java.util.ArrayList<T> getParcelableArrayListExtra(String);
+    method @Nullable public <T> java.util.ArrayList<T> getParcelableArrayListExtra(@Nullable String, @NonNull Class<? extends T>);
+    method @Deprecated @Nullable public <T extends android.os.Parcelable> T getParcelableExtra(String);
+    method @Nullable public <T> T getParcelableExtra(@Nullable String, @NonNull Class<T>);
     method @Nullable public String getScheme();
     method @Nullable public android.content.Intent getSelector();
-    method @Nullable public java.io.Serializable getSerializableExtra(String);
+    method @Deprecated @Nullable public java.io.Serializable getSerializableExtra(String);
+    method @Nullable public <T extends java.io.Serializable> T getSerializableExtra(@Nullable String, @NonNull Class<T>);
     method @Nullable public short[] getShortArrayExtra(String);
     method public short getShortExtra(String, short);
     method @Nullable public android.graphics.Rect getSourceBounds();
@@ -22187,7 +22192,7 @@ package android.media {
     field public static final String KEY_AAC_DRC_OUTPUT_LOUDNESS = "aac-drc-output-loudness";
     field public static final String KEY_AAC_DRC_TARGET_REFERENCE_LEVEL = "aac-target-ref-level";
     field public static final String KEY_AAC_ENCODED_TARGET_LEVEL = "aac-encoded-target-level";
-    field public static final String KEY_AAC_MAX_OUTPUT_CHANNEL_COUNT = "aac-max-output-channel_count";
+    field @Deprecated public static final String KEY_AAC_MAX_OUTPUT_CHANNEL_COUNT = "aac-max-output-channel_count";
     field public static final String KEY_AAC_PROFILE = "aac-profile";
     field public static final String KEY_AAC_SBR_MODE = "aac-sbr-mode";
     field public static final String KEY_ALLOW_FRAME_DROP = "allow-frame-drop";
@@ -26106,21 +26111,8 @@ package android.media.tv.interactive {
     method @NonNull public android.media.tv.interactive.AppLinkInfo.Builder setUriScheme(@NonNull String);
   }
 
-  public final class TvInteractiveAppInfo implements android.os.Parcelable {
-    ctor public TvInteractiveAppInfo(@NonNull android.content.Context, @NonNull android.content.ComponentName);
-    method public int describeContents();
-    method @NonNull public String getId();
-    method @Nullable public android.content.pm.ServiceInfo getServiceInfo();
-    method @NonNull public int getSupportedTypes();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.media.tv.interactive.TvInteractiveAppInfo> CREATOR;
-    field public static final int INTERACTIVE_APP_TYPE_ATSC = 2; // 0x2
-    field public static final int INTERACTIVE_APP_TYPE_GINGA = 4; // 0x4
-    field public static final int INTERACTIVE_APP_TYPE_HBBTV = 1; // 0x1
-  }
-
   public final class TvInteractiveAppManager {
-    method @NonNull public java.util.List<android.media.tv.interactive.TvInteractiveAppInfo> getTvInteractiveAppServiceList();
+    method @NonNull public java.util.List<android.media.tv.interactive.TvInteractiveAppServiceInfo> getTvInteractiveAppServiceList();
     method public void prepare(@NonNull String, int);
     method public void registerAppLinkInfo(@NonNull String, @NonNull android.media.tv.interactive.AppLinkInfo);
     method public void registerCallback(@NonNull java.util.concurrent.Executor, @NonNull android.media.tv.interactive.TvInteractiveAppManager.TvInteractiveAppCallback);
@@ -26241,6 +26233,19 @@ package android.media.tv.interactive {
     method @CallSuper public void sendPlaybackCommandRequest(@NonNull String, @Nullable android.os.Bundle);
     method @CallSuper public void setMediaViewEnabled(boolean);
     method @CallSuper public void setVideoBounds(@NonNull android.graphics.Rect);
+  }
+
+  public final class TvInteractiveAppServiceInfo implements android.os.Parcelable {
+    ctor public TvInteractiveAppServiceInfo(@NonNull android.content.Context, @NonNull android.content.ComponentName);
+    method public int describeContents();
+    method @NonNull public String getId();
+    method @Nullable public android.content.pm.ServiceInfo getServiceInfo();
+    method @NonNull public int getSupportedTypes();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.tv.interactive.TvInteractiveAppServiceInfo> CREATOR;
+    field public static final int INTERACTIVE_APP_TYPE_ATSC = 2; // 0x2
+    field public static final int INTERACTIVE_APP_TYPE_GINGA = 4; // 0x4
+    field public static final int INTERACTIVE_APP_TYPE_HBBTV = 1; // 0x1
   }
 
   public class TvInteractiveAppView extends android.view.ViewGroup {
@@ -44232,6 +44237,9 @@ package android.telephony.ims {
     method @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public void unregisterImsRegistrationCallback(@NonNull android.telephony.ims.RegistrationManager.RegistrationCallback);
     method public void unregisterImsStateCallback(@NonNull android.telephony.ims.ImsStateCallback);
     field public static final String ACTION_SHOW_CAPABILITY_DISCOVERY_OPT_IN = "android.telephony.ims.action.SHOW_CAPABILITY_DISCOVERY_OPT_IN";
+    field public static final int CAPABILITY_TYPE_NONE = 0; // 0x0
+    field public static final int CAPABILITY_TYPE_OPTIONS_UCE = 1; // 0x1
+    field public static final int CAPABILITY_TYPE_PRESENCE_UCE = 2; // 0x2
   }
 
   public final class ImsReasonInfo implements android.os.Parcelable {
@@ -44453,10 +44461,10 @@ package android.telephony.ims {
     method public void unregisterFeatureProvisioningChangedCallback(@NonNull android.telephony.ims.ProvisioningManager.FeatureProvisioningCallback);
   }
 
-  public static class ProvisioningManager.FeatureProvisioningCallback {
+  public abstract static class ProvisioningManager.FeatureProvisioningCallback {
     ctor public ProvisioningManager.FeatureProvisioningCallback();
-    method public void onFeatureProvisioningChanged(int, int, boolean);
-    method public void onRcsFeatureProvisioningChanged(int, int, boolean);
+    method public abstract void onFeatureProvisioningChanged(int, int, boolean);
+    method public abstract void onRcsFeatureProvisioningChanged(int, int, boolean);
   }
 
   public class RcsUceAdapter {
@@ -44497,15 +44505,6 @@ package android.telephony.ims.feature {
     field public static final int CAPABILITY_TYPE_UT = 4; // 0x4
     field public static final int CAPABILITY_TYPE_VIDEO = 2; // 0x2
     field public static final int CAPABILITY_TYPE_VOICE = 1; // 0x1
-  }
-
-  public class RcsFeature {
-  }
-
-  public static class RcsFeature.RcsImsCapabilities {
-    field public static final int CAPABILITY_TYPE_NONE = 0; // 0x0
-    field public static final int CAPABILITY_TYPE_OPTIONS_UCE = 1; // 0x1
-    field public static final int CAPABILITY_TYPE_PRESENCE_UCE = 2; // 0x2
   }
 
 }

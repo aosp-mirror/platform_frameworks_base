@@ -941,6 +941,9 @@
     <!--  Three privacy items. This value must not be exceeded  -->
     <dimen name="ongoing_appops_chip_max_width">76dp</dimen>
     <dimen name="ongoing_appops_dot_diameter">6dp</dimen>
+    <dimen name="ongoing_appops_chip_min_animation_width">10dp</dimen>
+    <dimen name="ongoing_appops_chip_animation_in_status_bar_translation_x">15dp</dimen>
+    <dimen name="ongoing_appops_chip_animation_out_status_bar_translation_x">7dp</dimen>
     <!--  Total minimum padding to enforce to ensure that the dot can always show  -->
     <dimen name="ongoing_appops_dot_min_padding">20dp</dimen>
 
@@ -1137,6 +1140,12 @@
     <!-- Distance that the full shade transition takes in order for scrim to fully transition to
          the shade (in alpha) -->
     <dimen name="lockscreen_shade_scrim_transition_distance">@dimen/lockscreen_shade_full_transition_distance</dimen>
+
+    <!-- Distance that it takes in order for the notifications scrim fade in to start. -->
+    <dimen name="lockscreen_shade_notifications_scrim_transition_delay">0dp</dimen>
+
+    <!-- Distance that it takes for the notifications scrim to fully fade if after it started. -->
+    <dimen name="lockscreen_shade_notifications_scrim_transition_distance">@dimen/lockscreen_shade_scrim_transition_distance</dimen>
 
     <!-- Distance that the full shade transition takes in order for the keyguard content on
          NotificationPanelViewController to fully fade (e.g. Clock & Smartspace) -->

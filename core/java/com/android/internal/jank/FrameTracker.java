@@ -33,6 +33,7 @@ import android.annotation.Nullable;
 import android.graphics.HardwareRendererObserver;
 import android.os.Handler;
 import android.os.Trace;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.Choreographer;
@@ -188,6 +189,7 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
                             if (mBeginVsyncId != INVALID_ID) {
                                 mSurfaceControlWrapper.addJankStatsListener(
                                         FrameTracker.this, mSurfaceControl);
+                                markEvent("FT#deferMonitoring");
                                 postTraceStartMarker();
                             }
                         }
@@ -241,8 +243,9 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
             }
             if (mSurfaceControl != null) {
                 if (mDeferMonitoring) {
+                    markEvent("FT#deferMonitoring");
                     // Normal case, we begin the instrument from the very beginning,
-                    // except the first frame.
+                    // will exclude the first frame.
                     postTraceStartMarker();
                 } else {
                     // If we don't begin the instrument from the very beginning,
@@ -272,6 +275,7 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
                 return;
             }
             mTracingStarted = true;
+            markEvent("FT#begin");
             Trace.beginAsyncSection(mSession.getName(), (int) mBeginVsyncId);
         }
     }
@@ -295,6 +299,7 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
                     Log.d(TAG, "end: " + mSession.getName()
                             + ", end=" + mEndVsyncId + ", reason=" + reason);
                 }
+                markEvent("FT#end#" + reason);
                 Trace.endAsyncSection(mSession.getName(), (int) mBeginVsyncId);
                 mSession.setReason(reason);
 
@@ -322,6 +327,7 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
                     reason == REASON_CANCEL_NOT_BEGUN || reason == REASON_CANCEL_SAME_VSYNC;
             if (mCancelled || (mEndVsyncId != INVALID_ID && !cancelFromEnd)) return false;
             mCancelled = true;
+            markEvent("FT#cancel#" + reason);
             // We don't need to end the trace section if it never begun.
             if (mTracingStarted) {
                 Trace.endAsyncSection(mSession.getName(), (int) mBeginVsyncId);
@@ -341,6 +347,11 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
             notifyCujEvent(ACTION_SESSION_CANCEL);
             return true;
         }
+    }
+
+    private void markEvent(String desc) {
+        Trace.beginSection(TextUtils.formatSimple("%s#%s", mSession.getName(), desc));
+        Trace.endSection();
     }
 
     private void notifyCujEvent(String action) {

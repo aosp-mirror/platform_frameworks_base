@@ -52,8 +52,29 @@ class LockStateTrackingRule : TestRule {
         }
     }
 
-    fun assertLocked() = assertThat(lockState.locked).isTrue()
-    fun assertUnlocked() = assertThat(lockState.locked).isFalse()
+    fun assertLocked() {
+        val maxWaits = 50
+        var waitCount = 0
+
+        while ((lockState.locked == false) && waitCount < maxWaits) {
+            Log.i(TAG, "phone still locked, wait 50ms more ($waitCount)")
+            Thread.sleep(50)
+            waitCount++
+        }
+        assertThat(lockState.locked).isTrue()
+    }
+
+    fun assertUnlocked() {
+        val maxWaits = 50
+        var waitCount = 0
+
+        while ((lockState.locked == true) && waitCount < maxWaits) {
+            Log.i(TAG, "phone still unlocked, wait 50ms more ($waitCount)")
+            Thread.sleep(50)
+            waitCount++
+        }
+        assertThat(lockState.locked).isFalse()
+    }
 
     inner class Listener : TrustListener {
         override fun onTrustChanged(

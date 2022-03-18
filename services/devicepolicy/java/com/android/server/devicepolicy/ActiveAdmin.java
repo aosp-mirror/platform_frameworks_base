@@ -1227,5 +1227,12 @@ class ActiveAdmin {
 
         pw.print("mSsidDenylist=");
         pw.println(mSsidDenylist);
+
+        if (mFactoryResetProtectionPolicy != null) {
+            pw.println("mFactoryResetProtectionPolicy:");
+            pw.increaseIndent();
+            mFactoryResetProtectionPolicy.dump(pw);
+            pw.decreaseIndent();
+        }
     }
 }

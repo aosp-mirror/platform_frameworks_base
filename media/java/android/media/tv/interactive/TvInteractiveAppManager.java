@@ -249,7 +249,7 @@ public final class TvInteractiveAppManager {
      *
      * @see #sendAppLinkCommand(String, Bundle)
      * @see #ACTION_APP_LINK_COMMAND
-     * @see android.media.tv.interactive.TvInteractiveAppInfo#getId()
+     * @see android.media.tv.interactive.TvInteractiveAppServiceInfo#getId()
      */
     public static final String INTENT_KEY_INTERACTIVE_APP_SERVICE_ID = "interactive_app_id";
 
@@ -269,7 +269,7 @@ public final class TvInteractiveAppManager {
      *
      * @see #sendAppLinkCommand(String, Bundle)
      * @see #ACTION_APP_LINK_COMMAND
-     * @see android.media.tv.interactive.TvInteractiveAppInfo#getSupportedTypes()
+     * @see android.media.tv.interactive.TvInteractiveAppServiceInfo#getSupportedTypes()
      * @see android.media.tv.interactive.TvInteractiveAppView#createBiInteractiveApp(Uri, Bundle)
      */
     public static final String INTENT_KEY_BI_INTERACTIVE_APP_TYPE = "bi_interactive_app_type";
@@ -543,11 +543,11 @@ public final class TvInteractiveAppManager {
             }
 
             @Override
-            public void onTvInteractiveAppInfoUpdated(TvInteractiveAppInfo iAppInfo) {
+            public void onTvInteractiveAppServiceInfoUpdated(TvInteractiveAppServiceInfo iAppInfo) {
                 // TODO: add public API updateInteractiveAppInfo()
                 synchronized (mLock) {
                     for (TvInteractiveAppCallbackRecord record : mCallbackRecords) {
-                        record.postTvInteractiveAppInfoUpdated(iAppInfo);
+                        record.postTvInteractiveAppServiceInfoUpdated(iAppInfo);
                     }
                 }
             }
@@ -611,16 +611,17 @@ public final class TvInteractiveAppManager {
          * This is called when the information about an existing TV Interactive App service has been
          * updated.
          *
-         * <p>Because the system automatically creates a <code>TvInteractiveAppInfo</code> object
-         * for each TV Interactive App service based on the information collected from the
+         * <p>Because the system automatically creates a <code>TvInteractiveAppServiceInfo</code>
+         * object for each TV Interactive App service based on the information collected from the
          * <code>AndroidManifest.xml</code>, this method is only called back when such information
          * has changed dynamically.
          *
-         * @param iAppInfo The <code>TvInteractiveAppInfo</code> object that contains new
+         * @param iAppInfo The <code>TvInteractiveAppServiceInfo</code> object that contains new
          *                 information.
          * @hide
          */
-        public void onTvInteractiveAppInfoUpdated(@NonNull TvInteractiveAppInfo iAppInfo) {
+        public void onTvInteractiveAppServiceInfoUpdated(
+                @NonNull TvInteractiveAppServiceInfo iAppInfo) {
         }
 
         /**
@@ -634,7 +635,7 @@ public final class TvInteractiveAppManager {
          */
         public void onTvInteractiveAppServiceStateChanged(
                 @NonNull String iAppServiceId,
-                @TvInteractiveAppInfo.InteractiveAppType int type,
+                @TvInteractiveAppServiceInfo.InteractiveAppType int type,
                 @ServiceState int state,
                 @ErrorCode int err) {
         }
@@ -680,11 +681,12 @@ public final class TvInteractiveAppManager {
             });
         }
 
-        public void postTvInteractiveAppInfoUpdated(final TvInteractiveAppInfo iAppInfo) {
+        public void postTvInteractiveAppServiceInfoUpdated(
+                final TvInteractiveAppServiceInfo iAppInfo) {
             mExecutor.execute(new Runnable() {
                 @Override
                 public void run() {
-                    mCallback.onTvInteractiveAppInfoUpdated(iAppInfo);
+                    mCallback.onTvInteractiveAppServiceInfoUpdated(iAppInfo);
                 }
             });
         }
@@ -737,11 +739,11 @@ public final class TvInteractiveAppManager {
     /**
      * Returns the complete list of TV Interactive App service on the system.
      *
-     * @return List of {@link TvInteractiveAppInfo} for each TV Interactive App service that
+     * @return List of {@link TvInteractiveAppServiceInfo} for each TV Interactive App service that
      *         describes its meta information.
      */
     @NonNull
-    public List<TvInteractiveAppInfo> getTvInteractiveAppServiceList() {
+    public List<TvInteractiveAppServiceInfo> getTvInteractiveAppServiceList() {
         try {
             return mService.getTvInteractiveAppServiceList(mUserId);
         } catch (RemoteException e) {

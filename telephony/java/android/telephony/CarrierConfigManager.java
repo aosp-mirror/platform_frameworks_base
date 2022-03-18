@@ -176,7 +176,7 @@ public class CarrierConfigManager {
      * This flag specifies whether VoLTE availability is based on provisioning. By default this is
      * false.
      * Used for UCE to determine if EAB provisioning checks should be based on provisioning.
-     * @deprecated Use {@link Ims#KEY_MMTEL_REQUIRES_PROVISIONING_BUNDLE} instead.
+     * @deprecated Use {@link Ims#KEY_CARRIER_RCS_PROVISIONING_REQUIRED_BOOL} instead.
      */
     @Deprecated
     public static final String
