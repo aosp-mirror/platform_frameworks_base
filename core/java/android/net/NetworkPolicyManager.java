@@ -525,9 +525,11 @@ public class NetworkPolicyManager {
      *
      * @param subId the subscriber to get the subscription plans for.
      * @param callingPackage the name of the package making the call.
+     * @return the active {@link SubscriptionPlan}s for the given subscription id, or
+     *         {@code null} if not found.
      * @hide
      */
-    @NonNull
+    @Nullable
     public SubscriptionPlan[] getSubscriptionPlans(int subId, @NonNull String callingPackage) {
         try {
             return mService.getSubscriptionPlans(subId, callingPackage);
@@ -540,7 +542,7 @@ public class NetworkPolicyManager {
      * Get subscription plan for the given networkTemplate.
      *
      * @param template the networkTemplate to get the subscription plan for.
-     * @return the active {@link SubscriptionPlan} for the given template, or
+     * @return the active {@link SubscriptionPlan}s for the given template, or
      *         {@code null} if not found.
      * @hide
      */
