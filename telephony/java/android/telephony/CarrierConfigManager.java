@@ -4379,12 +4379,14 @@ public class CarrierConfigManager {
      * The data stall recovery timers array in milliseconds, each element is the delay before
      * performining next recovery action.
      *
-     * The default value of timers array are: [180000ms, 180000ms, 180000ms] (3 minutes)
+     * The default value of timers array are: [180000ms, 180000ms, 180000ms, 180000ms] (3 minutes)
      * Array[0]: It's the timer between RECOVERY_ACTION GET_DATA_CALL_LIST and CLEANUP, if data
      * stall symptom still occurred, it will perform next recovery action after 180000ms.
-     * Array[1]: It's the timer between RECOVERY_ACTION CLEANUP and RADIO_RESTART, if data stall
+     * Array[1]: It's the timer between RECOVERY_ACTION CLEANUP and RE-REGISTER, if data stall
      * symptom still occurred, it will perform next recovery action after 180000ms.
-     * Array[2]: It's the timer between RECOVERY_ACTION RADIO_RESTART and RESET_MODEM, if data stall
+     * Array[2]: It's the timer between RECOVERY_ACTION RE-REGISTER and RADIO_RESTART, if data stall
+     * symptom still occurred, it will perform next recovery action after 180000ms.
+     * Array[3]: It's the timer between RECOVERY_ACTION RADIO_RESTART and RESET_MODEM, if data stall
      * symptom still occurred, it will perform next recovery action after 180000ms.
      *
      * See the {@code RECOVERY_ACTION_*} constants in
@@ -4404,7 +4406,7 @@ public class CarrierConfigManager {
      * RECOVERY_ACTION_CLEANUP to true, then it can be ignored to speed up the recovery
      * action procedure.
      *
-     * The default value of boolean array are: [false, false, false, false]
+     * The default value of boolean array are: [false, false, true, false, false]
      * Array[0]: When performing the recovery action, we can use this boolean value to determine
      * if we need to perform RECOVERY_ACTION_GET_DATA_CALL_LIST.
      * Array[1]: If data stall symptom still occurred, we can use this boolean value to determine
@@ -4414,8 +4416,10 @@ public class CarrierConfigManager {
      * variable of action RECOVERY_ACTION_CLEANUP to true, then it can be ignored to speed up the
      * recovery action procedure.
      * Array[2]: If data stall symptom still occurred, we can use this boolean value to determine
-     * if we need to perform RECOVERY_ACTION_RADIO_RESTART.
+     * if we need to perform RE-REGISTER.
      * Array[3]: If data stall symptom still occurred, we can use this boolean value to determine
+     * if we need to perform RECOVERY_ACTION_RADIO_RESTART.
+     * Array[4]: If data stall symptom still occurred, we can use this boolean value to determine
      * if we need to perform RECOVERY_ACTION_MODEM_RESET.
      *
      * See the {@code RECOVERY_ACTION_*} constants in
@@ -9154,9 +9158,9 @@ public class CarrierConfigManager {
                 SubscriptionManager.USAGE_SETTING_UNKNOWN);
         // Default data stall recovery configurations.
         sDefaults.putLongArray(KEY_DATA_STALL_RECOVERY_TIMERS_LONG_ARRAY,
-                new long[] {180000, 180000, 180000});
+                new long[] {180000, 180000, 180000, 180000});
         sDefaults.putBooleanArray(KEY_DATA_STALL_RECOVERY_SHOULD_SKIP_BOOL_ARRAY,
-                new boolean[] {false, false, false, false});
+                new boolean[] {false, false, true, false, false});
     }
 
     /**
