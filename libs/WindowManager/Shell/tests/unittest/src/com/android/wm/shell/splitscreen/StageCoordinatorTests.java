@@ -309,7 +309,7 @@ public class StageCoordinatorTests extends ShellTestCase {
     public void testFinishEnterSplitScreen_applySurfaceLayout() {
         mStageCoordinator.finishEnterSplitScreen(new SurfaceControl.Transaction());
 
-        verify(mSplitLayout).applySurfaceChanges(any(), any(), any(), any(), any());
+        verify(mSplitLayout).applySurfaceChanges(any(), any(), any(), any(), any(), eq(false));
     }
 
     private class UnfoldControllerProvider implements

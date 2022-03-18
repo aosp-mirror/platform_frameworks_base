@@ -73,7 +73,7 @@ public class SplitLayoutTests extends ShellTestCase {
                 mCallbacks,
                 mDisplayImeController,
                 mTaskOrganizer,
-                false /* applyDismissingParallax */));
+                SplitLayout.PARALLAX_NONE));
     }
 
     @Test
