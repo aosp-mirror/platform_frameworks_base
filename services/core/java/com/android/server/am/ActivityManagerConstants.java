@@ -668,11 +668,11 @@ final class ActivityManagerConstants extends ContentObserver {
             "no_kill_cached_processes_post_boot_completed_duration_millis";
 
     /** @see #mNoKillCachedProcessesUntilBootCompleted */
-    private static final boolean DEFAULT_NO_KILL_CACHED_PROCESSES_UNTIL_BOOT_COMPLETED = false;
+    private static final boolean DEFAULT_NO_KILL_CACHED_PROCESSES_UNTIL_BOOT_COMPLETED = true;
 
     /** @see #mNoKillCachedProcessesPostBootCompletedDurationMillis */
     private static final long
-            DEFAULT_NO_KILL_CACHED_PROCESSES_POST_BOOT_COMPLETED_DURATION_MILLIS = 0;
+            DEFAULT_NO_KILL_CACHED_PROCESSES_POST_BOOT_COMPLETED_DURATION_MILLIS = 600_000;
 
     /**
      * If true, do not kill excessive cached processes proactively, until user-0 is unlocked.
