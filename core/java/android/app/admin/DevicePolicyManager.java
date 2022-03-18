@@ -3295,9 +3295,11 @@ public class DevicePolicyManager {
      * <p>The activity must handle the device policy management role holder update and set the
      * intent result to either {@link Activity#RESULT_OK} if the update was successful, {@link
      * #RESULT_UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER_RECOVERABLE_ERROR} if it encounters a
-     * problem that may be solved by relaunching it again, or {@link
-     * #RESULT_UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER_UNRECOVERABLE_ERROR} if it encounters a
-     * problem that will not be solved by relaunching it again.
+     * problem that may be solved by relaunching it again, {@link
+     * #RESULT_UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER_PROVISIONING_DISABLED} if role holder
+     * provisioning is disabled, or {@link
+     * #RESULT_UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER_UNRECOVERABLE_ERROR} if it encounters
+     * any other problem that will not be solved by relaunching it again.
      *
      * <p>If this activity has additional internal conditions which are not met, it should return
      * {@link #RESULT_UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER_UNRECOVERABLE_ERROR}.
@@ -3331,6 +3333,17 @@ public class DevicePolicyManager {
     @SystemApi
     public static final int RESULT_UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER_UNRECOVERABLE_ERROR =
             2;
+
+    /**
+     * Result code that can be returned by the {@link
+     * #ACTION_UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER} handler if role holder provisioning
+     * is disabled.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int
+            RESULT_UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER_PROVISIONING_DISABLED = 3;
 
     /**
      * An {@link Intent} extra which resolves to a custom user consent screen.
