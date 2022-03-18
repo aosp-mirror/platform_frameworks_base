@@ -248,6 +248,28 @@ public class AccountManagerServiceTest extends AndroidTestCase {
     }
 
     @SmallTest
+    public void testCheckAddAccountLongName() throws Exception {
+        unlockSystemUser();
+        String longString = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                + "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                + "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                + "aaaaa";
+        Account a11 = new Account(longString, AccountManagerServiceTestFixtures.ACCOUNT_TYPE_1);
+        Account a21 = new Account("account2", longString);
+
+        mAms.addAccountExplicitly(
+                a11, /* password= */ "p11", /* extras= */ null, /* callerPackage= */ null);
+        mAms.addAccountExplicitly(
+                a21, /* password= */ "p12", /* extras= */ null, /* callerPackage= */ null);
+
+        String[] list = new String[]{AccountManagerServiceTestFixtures.CALLER_PACKAGE};
+        when(mMockPackageManager.getPackagesForUid(anyInt())).thenReturn(list);
+        Account[] accounts = mAms.getAccountsAsUser(null,
+                UserHandle.getCallingUserId(), mContext.getOpPackageName());
+        assertEquals(0, accounts);
+    }
+
+    @SmallTest
     public void testPasswords() throws Exception {
         unlockSystemUser();
         Account a11 = new Account("account1", AccountManagerServiceTestFixtures.ACCOUNT_TYPE_1);
