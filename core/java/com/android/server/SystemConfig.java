@@ -31,6 +31,7 @@ import android.os.FileUtils;
 import android.os.Process;
 import android.os.SystemProperties;
 import android.os.Trace;
+import android.os.VintfRuntimeInfo;
 import android.os.incremental.IncrementalManager;
 import android.os.storage.StorageManager;
 import android.permission.PermissionManager.SplitPermissionInfo;
@@ -57,7 +58,10 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -1447,6 +1451,14 @@ public class SystemConfig {
             addFeature(PackageManager.FEATURE_IPSEC_TUNNELS, 0);
         }
 
+        if (isFilesystemSupported("erofs")) {
+            if (isKernelVersionAtLeast(5, 10)) {
+                addFeature(PackageManager.FEATURE_EROFS, 0);
+            } else if (isKernelVersionAtLeast(4, 19)) {
+                addFeature(PackageManager.FEATURE_EROFS_LEGACY, 0);
+            }
+        }
+
         for (String featureName : mUnavailableFeatures) {
             removeFeature(featureName);
         }
@@ -1815,5 +1827,30 @@ public class SystemConfig {
 
     private static boolean isSystemProcess() {
         return Process.myUid() == Process.SYSTEM_UID;
+    }
+
+    private static boolean isFilesystemSupported(String fs) {
+        try {
+            final byte[] fsTableData = Files.readAllBytes(Paths.get("/proc/filesystems"));
+            final String fsTable = new String(fsTableData, StandardCharsets.UTF_8);
+            return fsTable.contains("\t" + fs + "\n");
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    private static boolean isKernelVersionAtLeast(int major, int minor) {
+        final String kernelVersion = VintfRuntimeInfo.getKernelVersion();
+        final String[] parts = kernelVersion.split("\\.");
+        if (parts.length < 2) {
+            return false;
+        }
+        try {
+            final int majorVersion = Integer.parseInt(parts[0]);
+            final int minorVersion = Integer.parseInt(parts[1]);
+            return majorVersion > major || (majorVersion == major && minorVersion >= minor);
+        } catch (NumberFormatException e) {
+            return false;
+        }
     }
 }
