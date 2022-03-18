@@ -1024,9 +1024,9 @@ public class SpatializerHelper {
                 mDesiredHeadTrackingMode = mode;
                 dispatchDesiredHeadTrackingMode(mode);
             }
-            if (mode != headTrackingModeTypeToSpatializerInt(mSpat.getActualHeadTrackingMode())) {
-                mSpat.setDesiredHeadTrackingMode(spatializerIntToHeadTrackingModeType(mode));
-            }
+            Log.i(TAG, "setDesiredHeadTrackingMode("
+                    + Spatializer.headtrackingModeToString(mode) + ")");
+            mSpat.setDesiredHeadTrackingMode(spatializerIntToHeadTrackingModeType(mode));
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling setDesiredHeadTrackingMode", e);
         }
@@ -1340,32 +1340,14 @@ public class SpatializerHelper {
                 }
             }
             // initialize sensor handles
-            UUID routingDeviceUuid = mAudioService.getDeviceSensorUuid(ROUTING_DEVICES[0]);
-            List<Sensor> sensors = new ArrayList<Sensor>(0);
-            sensors.addAll(mSensorManager.getDynamicSensorList(Sensor.TYPE_HEAD_TRACKER));
-            sensors.addAll(mSensorManager.getDynamicSensorList(Sensor.TYPE_DEVICE_PRIVATE_BASE));
-            for (Sensor sensor : sensors) {
-                if (sensor.getType() == Sensor.TYPE_HEAD_TRACKER
-                        || sensor.getStringType().equals(HEADTRACKER_SENSOR)) {
-                    UUID uuid = sensor.getUuid();
-                    if (uuid.equals(routingDeviceUuid)) {
-                        headHandle = sensor.getHandle();
-                        // TODO check risk of race condition:
-                        //     does this happen before routing is updated?
-                        //     avoid by supporting adding device here AND in onRoutingUpdated()
-                        if (!setHasHeadTracker(ROUTING_DEVICES[0])) {
-                            headHandle = -1;
-                        }
-                        break;
-                    }
-                    if (uuid.equals(UuidUtils.STANDALONE_UUID)) {
-                        headHandle = sensor.getHandle();
-                    }
-                }
-            }
-
-            Sensor screenSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
-            screenHandle = screenSensor.getHandle();
+            // TODO check risk of race condition for updating the association of a head tracker
+            //  and an audio device:
+            //     does this happen before routing is updated?
+            //     avoid by supporting adding device here AND in onRoutingUpdated()
+            headHandle = getHeadSensorHandleUpdateTracker();
+            Log.i(TAG, "head tracker sensor handle initialized to " + headHandle);
+            screenHandle = getScreenSensorHandle();
+            Log.i(TAG, "found screen sensor handle initialized to " + screenHandle);
         } else {
             if (mSensorManager != null && mDynSensorCallback != null) {
                 mSensorManager.unregisterDynamicSensorCallback(mDynSensorCallback);
@@ -1497,5 +1479,40 @@ public class SpatializerHelper {
             }
         }
         return false;
+    }
+
+    private int getHeadSensorHandleUpdateTracker() {
+        int headHandle = -1;
+        UUID routingDeviceUuid = mAudioService.getDeviceSensorUuid(ROUTING_DEVICES[0]);
+        List<Sensor> sensors = new ArrayList<Sensor>(0);
+        sensors.addAll(mSensorManager.getDynamicSensorList(Sensor.TYPE_HEAD_TRACKER));
+        sensors.addAll(mSensorManager.getDynamicSensorList(Sensor.TYPE_DEVICE_PRIVATE_BASE));
+        for (Sensor sensor : sensors) {
+            if (sensor.getType() == Sensor.TYPE_HEAD_TRACKER
+                    || sensor.getStringType().equals(HEADTRACKER_SENSOR)) {
+                UUID uuid = sensor.getUuid();
+                if (uuid.equals(routingDeviceUuid)) {
+                    headHandle = sensor.getHandle();
+                    if (!setHasHeadTracker(ROUTING_DEVICES[0])) {
+                        headHandle = -1;
+                    }
+                    break;
+                }
+                if (uuid.equals(UuidUtils.STANDALONE_UUID)) {
+                    headHandle = sensor.getHandle();
+                    break;
+                }
+            }
+        }
+        return headHandle;
+    }
+
+    private int getScreenSensorHandle() {
+        int screenHandle = -1;
+        Sensor screenSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
+        if (screenSensor != null) {
+            screenHandle = screenSensor.getHandle();
+        }
+        return screenHandle;
     }
 }
