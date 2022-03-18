@@ -249,7 +249,7 @@ public final class TvInteractiveAppManager {
      *
      * @see #sendAppLinkCommand(String, Bundle)
      * @see #ACTION_APP_LINK_COMMAND
-     * @see android.media.tv.interactive.TvInteractiveAppServiceInfo#getId()
+     * @see TvInteractiveAppServiceInfo#getId()
      */
     public static final String INTENT_KEY_INTERACTIVE_APP_SERVICE_ID = "interactive_app_id";
 
@@ -284,6 +284,16 @@ public final class TvInteractiveAppManager {
      * @see android.media.tv.interactive.TvInteractiveAppView#createBiInteractiveApp(Uri, Bundle)
      */
     public static final String INTENT_KEY_BI_INTERACTIVE_APP_URI = "bi_interactive_app_uri";
+
+    /**
+     * Intent key for command type. It's used to send app command to TV app. The value of this key
+     * could vary according to TV apps.
+     * <p>Type: String
+     *
+     * @see #sendAppLinkCommand(String, Bundle)
+     * @see #ACTION_APP_LINK_COMMAND
+     */
+    public static final String INTENT_KEY_COMMAND_TYPE = "command_type";
 
     private final ITvInteractiveAppManager mService;
     private final int mUserId;
@@ -474,6 +484,19 @@ public final class TvInteractiveAppManager {
                         return;
                     }
                     record.postRequestCurrentTvInputId();
+                }
+            }
+
+            @Override
+            public void onRequestSigning(
+                    String id, String algorithm, String alias, byte[] data, int seq) {
+                synchronized (mSessionCallbackRecordMap) {
+                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
+                    if (record == null) {
+                        Log.e(TAG, "Callback not found for seq " + seq);
+                        return;
+                    }
+                    record.postRequestSigning(id, algorithm, alias, data);
                 }
             }
 
@@ -1019,6 +1042,18 @@ public final class TvInteractiveAppManager {
             }
             try {
                 mService.sendCurrentTvInputId(mToken, inputId, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        void sendSigningResult(@NonNull String signingId, @NonNull byte[] result) {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.sendSigningResult(mToken, signingId, result, mUserId);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -1657,6 +1692,15 @@ public final class TvInteractiveAppManager {
             });
         }
 
+        void postRequestSigning(String id, String algorithm, String alias, byte[] data) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSessionCallback.onRequestSigning(mSession, id, algorithm, alias, data);
+                }
+            });
+        }
+
         void postAdRequest(final AdRequest request) {
             mHandler.post(new Runnable() {
                 @Override
@@ -1794,9 +1838,24 @@ public final class TvInteractiveAppManager {
          * called.
          *
          * @param session A {@link TvInteractiveAppService.Session} associated with this callback.
-         * @hide
          */
         public void onRequestCurrentTvInputId(Session session) {
+        }
+
+        /**
+         * This is called when
+         * {@link TvInteractiveAppService.Session#requestSigning(String, String, String, byte[])} is
+         * called.
+         *
+         * @param session A {@link TvInteractiveAppService.Session} associated with this callback.
+         * @param signingId the ID to identify the request.
+         * @param algorithm the standard name of the signature algorithm requested, such as
+         *                  MD5withRSA, SHA256withDSA, etc.
+         * @param alias the alias of the corresponding {@link java.security.KeyStore}.
+         * @param data the original bytes to be signed.
+         */
+        public void onRequestSigning(
+                Session session, String signingId, String algorithm, String alias, byte[] data) {
         }
 
         /**

@@ -452,6 +452,17 @@ public abstract class TvInteractiveAppService extends Service {
         }
 
         /**
+         * Receives signing result.
+         * @param signingId the ID to identify the request. It's the same as the corresponding ID in
+         *        {@link Session#requestSigning(String, String, String, byte[])}
+         * @param result the signed result.
+         *
+         * @see #requestSigning(String, String, String, byte[])
+         */
+        public void onSigningResult(@NonNull String signingId, @NonNull byte[] result) {
+        }
+
+        /**
          * Called when the application sets the surface.
          *
          * <p>The TV Interactive App service should render interactive app UI onto the given
@@ -877,6 +888,47 @@ public abstract class TvInteractiveAppService extends Service {
         }
 
         /**
+         * Requests signing of the given data.
+         *
+         * <p>This is used when the corresponding server of the broadcast-independent interactive
+         * app requires signing during handshaking, and the interactive app service doesn't have
+         * the built-in private key. The private key is provided by the content providers and
+         * pre-built in the related app, such as TV app.
+         *
+         * @param signingId the ID to identify the request. When a result is received, this ID can
+         *                  be used to correlate the result with the request.
+         * @param algorithm the standard name of the signature algorithm requested, such as
+         *                  MD5withRSA, SHA256withDSA, etc. The name is from standards like
+         *                  FIPS PUB 186-4 and PKCS #1.
+         * @param alias the alias of the corresponding {@link java.security.KeyStore}.
+         * @param data the original bytes to be signed.
+         *
+         * @see #onSigningResult(String, byte[])
+         * @see TvInteractiveAppView#createBiInteractiveApp(Uri, Bundle)
+         * @see TvInteractiveAppView#BI_INTERACTIVE_APP_KEY_ALIAS
+         */
+        @CallSuper
+        public void requestSigning(@NonNull String signingId, @NonNull String algorithm,
+                @NonNull String alias, @NonNull byte[] data) {
+            executeOrPostRunnableOnMainThread(new Runnable() {
+                @MainThread
+                @Override
+                public void run() {
+                    try {
+                        if (DEBUG) {
+                            Log.d(TAG, "requestSigning");
+                        }
+                        if (mSessionCallback != null) {
+                            mSessionCallback.onRequestSigning(signingId, algorithm, alias, data);
+                        }
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "error in requestSigning", e);
+                    }
+                }
+            });
+        }
+
+        /**
          * Sends an advertisement request to be processed by the related TV input.
          *
          * @param request The advertisement request
@@ -943,6 +995,10 @@ public abstract class TvInteractiveAppService extends Service {
 
         void sendCurrentTvInputId(@Nullable String inputId) {
             onCurrentTvInputId(inputId);
+        }
+
+        void sendSigningResult(String signingId, byte[] result) {
+            onSigningResult(signingId, result);
         }
 
         void release() {
@@ -1410,6 +1466,11 @@ public abstract class TvInteractiveAppService extends Service {
         @Override
         public void sendCurrentTvInputId(@Nullable String inputId) {
             mSessionImpl.sendCurrentTvInputId(inputId);
+        }
+
+        @Override
+        public void sendSigningResult(@NonNull String signingId, @NonNull byte[] result) {
+            mSessionImpl.sendSigningResult(signingId, result);
         }
 
         @Override
