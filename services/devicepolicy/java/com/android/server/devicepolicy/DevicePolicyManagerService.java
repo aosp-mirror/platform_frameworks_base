@@ -12268,7 +12268,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                         + " only profile owner or device owner may control the preferential"
                         + " network service");
         synchronized (getLockObject()) {
-            final ActiveAdmin requiredAdmin = getProfileOwnerAdminLocked(
+            final ActiveAdmin requiredAdmin = getDeviceOrProfileOwnerAdminLocked(
                     caller.getUserId());
             if (!requiredAdmin.mPreferentialNetworkServiceConfigs.equals(
                     preferentialNetworkServiceConfigs)) {
@@ -12298,7 +12298,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                         + " only profile owner or device owner may retrieve the preferential"
                         + " network service configurations");
         synchronized (getLockObject()) {
-            final ActiveAdmin requiredAdmin = getProfileOwnerAdminLocked(caller.getUserId());
+            final ActiveAdmin requiredAdmin = getDeviceOrProfileOwnerAdminLocked(
+                    caller.getUserId());
             return requiredAdmin.mPreferentialNetworkServiceConfigs;
         }
     }
