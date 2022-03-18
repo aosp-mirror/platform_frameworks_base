@@ -8,9 +8,6 @@ package android {
   public static final class Manifest.permission {
     ctor public Manifest.permission();
     field public static final String ACCEPT_HANDOVER = "android.permission.ACCEPT_HANDOVER";
-    field public static final String ACCESS_ADSERVICES_ATTRIBUTION = "android.permission.ACCESS_ADSERVICES_ATTRIBUTION";
-    field public static final String ACCESS_ADSERVICES_CUSTOM_AUDIENCES = "android.permission.ACCESS_ADSERVICES_CUSTOM_AUDIENCES";
-    field public static final String ACCESS_ADSERVICES_TOPICS = "android.permission.ACCESS_ADSERVICES_TOPICS";
     field public static final String ACCESS_BACKGROUND_LOCATION = "android.permission.ACCESS_BACKGROUND_LOCATION";
     field public static final String ACCESS_BLOBS_ACROSS_USERS = "android.permission.ACCESS_BLOBS_ACROSS_USERS";
     field public static final String ACCESS_CHECKIN_PROPERTIES = "android.permission.ACCESS_CHECKIN_PROPERTIES";

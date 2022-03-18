@@ -3730,29 +3730,6 @@
     <permission android:name="android.permission.REQUEST_INCIDENT_REPORT_APPROVAL"
         android:protectionLevel="signature|privileged" />
 
-    <!-- ========================================= -->
-    <!-- Permissions for AdServices -->
-    <!-- ========================================= -->
-    <eat-comment />
-
-    <!-- Allows an application to access AdServices Topics API. -->
-    <permission android:name="android.permission.ACCESS_ADSERVICES_TOPICS"
-        android:label="@string/permlab_accessAdServicesTopics"
-        android:description="@string/permdesc_accessAdServicesTopics"
-        android:protectionLevel="normal" />
-
-    <!-- Allows an application to access AdServices Attribution APIs. -->
-    <permission android:name="android.permission.ACCESS_ADSERVICES_ATTRIBUTION"
-        android:label="@string/permlab_accessAdServicesAttribution"
-        android:description="@string/permdesc_accessAdServicesAttribution"
-        android:protectionLevel="normal" />
-
-    <!-- Allows an application to access AdServices Custom Audiences APIs. -->
-    <permission android:name="android.permission.ACCESS_ADSERVICES_CUSTOM_AUDIENCES"
-        android:label="@string/permlab_accessAdServicesCustomAudiences"
-        android:description="@string/permdesc_accessAdServicesCustomAudiences"
-        android:protectionLevel="normal" />
-
     <!-- ==================================== -->
     <!-- Private permissions                  -->
     <!-- ==================================== -->
