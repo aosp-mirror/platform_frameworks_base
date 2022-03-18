@@ -43,4 +43,5 @@ interface IEthernetManager
         in INetworkInterfaceOutcomeReceiver listener);
     void connectNetwork(String iface, in INetworkInterfaceOutcomeReceiver listener);
     void disconnectNetwork(String iface, in INetworkInterfaceOutcomeReceiver listener);
+    void setEthernetEnabled(boolean enabled);
 }
