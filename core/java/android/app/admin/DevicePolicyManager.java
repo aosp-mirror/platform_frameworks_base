@@ -1623,14 +1623,26 @@ public class DevicePolicyManager {
             "android.app.extra.PROVISIONING_SKIP_EDUCATION_SCREENS";
 
     /**
-     * A boolean extra indicating if mobile data should be used during NFC device owner provisioning
-     * for downloading the mobile device management application. If {@link
-     * #EXTRA_PROVISIONING_WIFI_SSID} is also specified, wifi network will be used instead.
+     * A boolean extra indicating if mobile data should be used during the provisioning flow
+     * for downloading the admin app. If {@link #EXTRA_PROVISIONING_WIFI_SSID} is also specified,
+     * wifi network will be used instead.
      *
-     * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
-     * provisioning via an NFC bump.
+     * <p>Default value is {@code false}.
      *
-     * @hide
+     * <p>If this extra is set to {@code true} and {@link #EXTRA_PROVISIONING_WIFI_SSID} is not
+     * specified, this extra has different behaviour depending on the way provisioning is triggered:
+     * <ul>
+     * <li>
+     *     For provisioning started via a QR code or an NFC tag, mobile data is always used for
+     *     downloading the admin app.
+     * </li>
+     * <li>
+     *     For all other provisioning methods, a mobile data connection check is made at the start
+     *     of provisioning. If mobile data is connected at that point, the admin app download will
+     *     happen using mobile data. If mobile data is not connected at that point, the end-user
+     *     will be asked to pick a wifi network and the admin app download will proceed over wifi.
+     * </li>
+     * </ul>
      */
     public static final String EXTRA_PROVISIONING_USE_MOBILE_DATA =
             "android.app.extra.PROVISIONING_USE_MOBILE_DATA";
