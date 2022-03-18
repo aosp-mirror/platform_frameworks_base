@@ -153,9 +153,10 @@ public final class PermissionPolicyService extends SystemService {
 
     private List<String> mAppOpPermissions;
 
-    private Context mContext;
-    private Handler mHandler;
+    private final Context mContext;
+    private final Handler mHandler;
     private PackageManagerInternal mPackageManagerInternal;
+    private PermissionManagerServiceInternal mPermissionManagerInternal;
     private NotificationManagerInternal mNotificationManager;
     private final KeyguardManager mKeyguardManager;
     private final PackageManager mPackageManager;
@@ -174,7 +175,7 @@ public final class PermissionPolicyService extends SystemService {
     public void onStart() {
         mPackageManagerInternal = LocalServices.getService(
                 PackageManagerInternal.class);
-        PermissionManagerServiceInternal permissionManagerInternal = LocalServices.getService(
+        mPermissionManagerInternal = LocalServices.getService(
                 PermissionManagerServiceInternal.class);
         final IAppOpsService appOpsService = IAppOpsService.Stub.asInterface(
                 ServiceManager.getService(Context.APP_OPS_SERVICE));
@@ -206,7 +207,7 @@ public final class PermissionPolicyService extends SystemService {
             }
         });
 
-        permissionManagerInternal.addOnRuntimePermissionStateChangedListener(
+        mPermissionManagerInternal.addOnRuntimePermissionStateChangedListener(
                 this::synchronizePackagePermissionsAndAppOpsAsyncForUser);
 
         mAppOpsCallback = new IAppOpsCallback.Stub() {
@@ -218,7 +219,7 @@ public final class PermissionPolicyService extends SystemService {
         };
 
         final ArrayList<PermissionInfo> dangerousPerms =
-                permissionManagerInternal.getAllPermissionsWithProtection(
+                mPermissionManagerInternal.getAllPermissionsWithProtection(
                         PermissionInfo.PROTECTION_DANGEROUS);
         try {
             int numDangerousPerms = dangerousPerms.size();
@@ -243,7 +244,7 @@ public final class PermissionPolicyService extends SystemService {
         }
 
         final List<PermissionInfo> appOpPermissionInfos =
-                permissionManagerInternal.getAllPermissionsWithProtectionFlags(
+                mPermissionManagerInternal.getAllPermissionsWithProtectionFlags(
                         PermissionInfo.PROTECTION_FLAG_APPOP);
         mAppOpPermissions = new ArrayList<>();
         final int appOpPermissionInfosSize = appOpPermissionInfos.size();
@@ -1283,10 +1284,12 @@ public final class PermissionPolicyService extends SystemService {
             }
             boolean hasCreatedNotificationChannels = mNotificationManager
                     .getNumNotificationChannelsForPackage(pkgName, uid, true) > 0;
+            boolean granted = mPermissionManagerInternal.checkUidPermission(uid, POST_NOTIFICATIONS)
+                    == PackageManager.PERMISSION_GRANTED;
             int flags = mPackageManager.getPermissionFlags(POST_NOTIFICATIONS, pkgName, user);
             boolean explicitlySet = (flags & PermissionManager.EXPLICIT_SET_FLAGS) != 0;
             boolean needsReview = (flags & FLAG_PERMISSION_REVIEW_REQUIRED) != 0;
-            return hasCreatedNotificationChannels && (needsReview || !explicitlySet);
+            return !granted && hasCreatedNotificationChannels && (needsReview || !explicitlySet);
         }
     }
 }
