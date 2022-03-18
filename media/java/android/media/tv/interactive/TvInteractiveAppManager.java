@@ -28,9 +28,9 @@ import android.media.tv.AdResponse;
 import android.media.tv.BroadcastInfoRequest;
 import android.media.tv.BroadcastInfoResponse;
 import android.media.tv.TvContentRating;
-import android.media.tv.TvInputInfo;
 import android.media.tv.TvInputManager;
 import android.media.tv.TvTrackInfo;
+import android.media.tv.interactive.TvInteractiveAppServiceInfo.InteractiveAppType;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -776,8 +776,16 @@ public final class TvInteractiveAppManager {
 
     /**
      * Prepares TV Interactive App service environment for the given type.
+     *
+     * <p>This method brings up the corresponding {@link TvInteractiveAppService} and prepare needed
+     * resources. It's used to set up the resources in advance, or handle non-session operations.
+     *
+     * @param tvIAppServiceId The ID of TV interactive service to prepare the resources. The
+     *                        ID can be found in {@link TvInteractiveAppServiceInfo#getId()}.
+     *
+     * @see TvInteractiveAppService.Session
      */
-    public void prepare(@NonNull String tvIAppServiceId, int type) {
+    public void prepare(@NonNull String tvIAppServiceId, @InteractiveAppType int type) {
         try {
             mService.prepare(tvIAppServiceId, type, mUserId);
         } catch (RemoteException e) {
@@ -790,7 +798,7 @@ public final class TvInteractiveAppManager {
      * Android application by TV interactive App RTE.
      *
      * @param tvIAppServiceId The ID of TV interactive service which the command to be sent to. The
-     *                        ID can be found in {@link TvInputInfo#getId()}.
+     *                        ID can be found in {@link TvInteractiveAppServiceInfo#getId()}.
      * @param appLinkInfo The Android application link info record to be registered.
      */
     public void registerAppLinkInfo(
@@ -807,7 +815,7 @@ public final class TvInteractiveAppManager {
      * Android application by TV interactive App RTE.
      *
      * @param tvIAppServiceId The ID of TV interactive service which the command to be sent to. The
-     *                        ID can be found in {@link TvInputInfo#getId()}.
+     *                        ID can be found in {@link TvInteractiveAppServiceInfo#getId()}.
      * @param appLinkInfo The Android application link info record to be unregistered.
      */
     public void unregisterAppLinkInfo(
@@ -823,7 +831,7 @@ public final class TvInteractiveAppManager {
      * Sends app link command.
      *
      * @param tvIAppServiceId The ID of TV interactive service which the command to be sent to. The
-     *                        ID can be found in {@link TvInputInfo#getId()}.
+     *                        ID can be found in {@link TvInteractiveAppServiceInfo#getId()}.
      * @param command The command to be sent.
      */
     public void sendAppLinkCommand(@NonNull String tvIAppServiceId, @NonNull Bundle command) {

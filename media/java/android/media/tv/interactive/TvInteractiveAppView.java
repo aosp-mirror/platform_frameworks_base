@@ -265,7 +265,9 @@ public class TvInteractiveAppView extends ViewGroup {
     }
 
     /**
-     * Resets this TvInteractiveAppView.
+     * Resets this TvInteractiveAppView to release its resources.
+     *
+     * <p>It can be reused by call {@link #prepareInteractiveApp(String, int)}.
      */
     public void reset() {
         if (DEBUG) Log.d(TAG, "reset()");
@@ -391,6 +393,19 @@ public class TvInteractiveAppView extends ViewGroup {
         mOnUnhandledInputEventListener = listener;
         // TODO: handle CallbackExecutor
     }
+
+    /**
+     * Gets the {@link OnUnhandledInputEventListener}.
+     * <p>Returns {@code null} if the listener is not set or is cleared.
+     *
+     * @see #setOnUnhandledInputEventListener(Executor, OnUnhandledInputEventListener)
+     * @see #clearOnUnhandledInputEventListener()
+     */
+    @Nullable
+    public OnUnhandledInputEventListener getOnUnhandledInputEventListener() {
+        return mOnUnhandledInputEventListener;
+    }
+
     /**
      * Clears the {@link OnUnhandledInputEventListener}.
      */
@@ -413,7 +428,8 @@ public class TvInteractiveAppView extends ViewGroup {
     }
 
     /**
-     * Prepares the interactive application.
+     * Prepares the interactive application runtime environment of corresponding
+     * {@link TvInteractiveAppService}.
      *
      * @param iAppServiceId the interactive app service ID, which can be found in
      *                      {@link TvInteractiveAppServiceInfo#getId()}.
@@ -459,6 +475,8 @@ public class TvInteractiveAppView extends ViewGroup {
 
     /**
      * Resets the interactive application.
+     *
+     * <p>This releases the resources of the corresponding {@link TvInteractiveAppService.Session}.
      */
     public void resetInteractiveApp() {
         if (DEBUG) {
@@ -498,6 +516,8 @@ public class TvInteractiveAppView extends ViewGroup {
 
     /**
      * Sends stream volume to related TV interactive app.
+     *
+     * @param volume a volume value between {@code 0.0f} and {@code 1.0f}, inclusive.
      */
     public void sendStreamVolume(float volume) {
         if (DEBUG) {
