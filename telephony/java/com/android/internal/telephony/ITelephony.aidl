@@ -2541,4 +2541,15 @@ interface ITelephony {
      * PhoneAccount#CAPABILITY_VOICE_CALLING_AVAILABLE.
      */
     void setVoiceServiceStateOverride(int subId, boolean hasService, String callingPackage);
+
+    /**
+     * Returns the package name that provides the {@link CarrierService} implementation for the
+     * specified {@code logicalSlotIndex}, or {@code null} if no package with carrier privileges
+     * declares one.
+     *
+     * @param logicalSlotIndex The slot index to fetch the {@link CarrierService} package for
+     * @return The system-selected package that provides the {@link CarrierService} implementation
+     * for the slot, or {@code null} if none is resolved
+     */
+    String getCarrierServicePackageNameForLogicalSlot(int logicalSlotIndex);
 }
