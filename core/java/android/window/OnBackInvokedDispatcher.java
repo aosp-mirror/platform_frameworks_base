@@ -94,15 +94,15 @@ public interface OnBackInvokedDispatcher {
      * Within the same priority level, callbacks are invoked in the reverse order in which
      * they are registered. Higher priority callbacks are invoked before lower priority ones.
      *
+     * @param priority The priority of the callback.
      * @param callback The callback to be registered. If the callback instance has been already
      *                 registered, the existing instance (no matter its priority) will be
      *                 unregistered and registered again.
-     * @param priority The priority of the callback.
      * @throws {@link IllegalArgumentException} if the priority is negative.
      */
-    @SuppressLint({"SamShouldBeLast", "ExecutorRegistration"})
+    @SuppressLint({"ExecutorRegistration"})
     void registerOnBackInvokedCallback(
-            @NonNull OnBackInvokedCallback callback, @Priority @IntRange(from = 0) int priority);
+            @Priority @IntRange(from = 0) int priority, @NonNull OnBackInvokedCallback callback);
 
     /**
      * Unregisters a {@link OnBackInvokedCallback}.

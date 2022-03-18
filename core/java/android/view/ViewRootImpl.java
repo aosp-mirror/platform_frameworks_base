@@ -10923,7 +10923,7 @@ public final class ViewRootImpl implements ViewParent,
             }
         };
         mOnBackInvokedDispatcher.registerOnBackInvokedCallback(
-                mCompatOnBackInvokedCallback, OnBackInvokedDispatcher.PRIORITY_DEFAULT);
+                OnBackInvokedDispatcher.PRIORITY_DEFAULT, mCompatOnBackInvokedCallback);
     }
 
     private void unregisterCompatOnBackInvokedCallback() {
