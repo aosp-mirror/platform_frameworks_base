@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -407,9 +407,10 @@ public abstract class TvInteractiveAppService extends Service {
          * no matter if it's created successfully or not.
          *
          * @see #notifyBiInteractiveAppCreated(Uri, String)
-         * @see #onDestroyBiInteractiveApp(String)
+         * @see #onDestroyBiInteractiveAppRequest(String)
          */
-        public void onCreateBiInteractiveApp(@NonNull Uri biIAppUri, @Nullable Bundle params) {
+        public void onCreateBiInteractiveAppRequest(
+                @NonNull Uri biIAppUri, @Nullable Bundle params) {
         }
 
 
@@ -417,11 +418,11 @@ public abstract class TvInteractiveAppService extends Service {
          * Destroys broadcast-independent(BI) interactive application.
          *
          * @param biIAppId the BI interactive app ID from
-         *                 {@link #onCreateBiInteractiveApp(Uri, Bundle)}}
+         *                 {@link #onCreateBiInteractiveAppRequest(Uri, Bundle)}
          *
-         * @see #onCreateBiInteractiveApp(Uri, Bundle)
+         * @see #onCreateBiInteractiveAppRequest(Uri, Bundle)
          */
-        public void onDestroyBiInteractiveApp(@NonNull String biIAppId) {
+        public void onDestroyBiInteractiveAppRequest(@NonNull String biIAppId) {
         }
 
         /**
@@ -978,11 +979,11 @@ public abstract class TvInteractiveAppService extends Service {
         }
 
         void createBiInteractiveApp(@NonNull Uri biIAppUri, @Nullable Bundle params) {
-            onCreateBiInteractiveApp(biIAppUri, params);
+            onCreateBiInteractiveAppRequest(biIAppUri, params);
         }
 
         void destroyBiInteractiveApp(@NonNull String biIAppId) {
-            onDestroyBiInteractiveApp(biIAppId);
+            onDestroyBiInteractiveAppRequest(biIAppId);
         }
 
         void setTeletextAppEnabled(boolean enable) {
@@ -1142,7 +1143,7 @@ public abstract class TvInteractiveAppService extends Service {
          * @param biIAppId BI interactive app ID, which can be used to destroy the BI interactive
          *                 app. {@code null} if it's not created successfully.
          *
-         * @see #onCreateBiInteractiveApp(Uri, Bundle)
+         * @see #onCreateBiInteractiveAppRequest(Uri, Bundle)
          */
         @CallSuper
         public final void notifyBiInteractiveAppCreated(
