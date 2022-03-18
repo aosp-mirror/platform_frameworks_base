@@ -2009,10 +2009,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             return;
         }
 
-        ApnSetting apnSetting = preciseState.getApnSetting();
-
         synchronized (mRecords) {
-            if (validatePhoneId(phoneId)) {
+            if (validatePhoneId(phoneId) && preciseState.getApnSetting() != null) {
                 Pair<Integer, ApnSetting> key = Pair.create(preciseState.getTransportType(),
                         preciseState.getApnSetting());
                 PreciseDataConnectionState oldState = mPreciseDataConnectionStates.get(phoneId)
