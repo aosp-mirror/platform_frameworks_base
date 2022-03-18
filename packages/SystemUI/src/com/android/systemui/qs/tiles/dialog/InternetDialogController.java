@@ -635,7 +635,7 @@ public class InternetDialogController implements AccessPointController.AccessPoi
         startActivity(getSettingsIntent(), view);
     }
 
-    void launchWifiNetworkDetailsSetting(String key, View view) {
+    void launchWifiDetailsSetting(String key, View view) {
         Intent intent = getWifiDetailsSettingsIntent(key);
         if (intent != null) {
             startActivity(intent, view);
