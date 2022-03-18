@@ -421,6 +421,18 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
         }
 
         /**
+         * Set if BiometricPrompt is being used by the legacy fingerprint manager API.
+         * @param sensorId sensor id
+         * @return This builder.
+         * @hide
+         */
+        @NonNull
+        public Builder setIsForLegacyFingerprintManager(int sensorId) {
+            mPromptInfo.setIsForLegacyFingerprintManager(sensorId);
+            return this;
+        }
+
+        /**
          * Creates a {@link BiometricPrompt}.
          *
          * @return An instance of {@link BiometricPrompt}.
@@ -861,28 +873,36 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
             @NonNull @CallbackExecutor Executor executor,
             @NonNull AuthenticationCallback callback,
             int userId) {
-        authenticateUserForOperation(cancel, executor, callback, userId, 0 /* operationId */);
+        if (cancel == null) {
+            throw new IllegalArgumentException("Must supply a cancellation signal");
+        }
+        if (executor == null) {
+            throw new IllegalArgumentException("Must supply an executor");
+        }
+        if (callback == null) {
+            throw new IllegalArgumentException("Must supply a callback");
+        }
+
+        authenticateInternal(0 /* operationId */, cancel, executor, callback, userId);
     }
 
     /**
-     * Authenticates for the given user and keystore operation.
+     * Authenticates for the given keystore operation.
      *
      * @param cancel An object that can be used to cancel authentication
      * @param executor An executor to handle callback events
      * @param callback An object to receive authentication events
-     * @param userId The user to authenticate
      * @param operationId The keystore operation associated with authentication
      *
      * @return A requestId that can be used to cancel this operation.
      *
      * @hide
      */
-    @RequiresPermission(USE_BIOMETRIC_INTERNAL)
-    public long authenticateUserForOperation(
+    @RequiresPermission(USE_BIOMETRIC)
+    public long authenticateForOperation(
             @NonNull CancellationSignal cancel,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull AuthenticationCallback callback,
-            int userId,
             long operationId) {
         if (cancel == null) {
             throw new IllegalArgumentException("Must supply a cancellation signal");
@@ -894,7 +914,7 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
             throw new IllegalArgumentException("Must supply a callback");
         }
 
-        return authenticateInternal(operationId, cancel, executor, callback, userId);
+        return authenticateInternal(operationId, cancel, executor, callback, mContext.getUserId());
     }
 
     /**
@@ -1028,7 +1048,7 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
     private void cancelAuthentication(long requestId) {
         if (mService != null) {
             try {
-                mService.cancelAuthentication(mToken, mContext.getOpPackageName(), requestId);
+                mService.cancelAuthentication(mToken, mContext.getPackageName(), requestId);
             } catch (RemoteException e) {
                 Log.e(TAG, "Unable to cancel authentication", e);
             }
@@ -1087,7 +1107,7 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
             }
 
             final long authId = mService.authenticate(mToken, operationId, userId,
-                    mBiometricServiceReceiver, mContext.getOpPackageName(), promptInfo);
+                    mBiometricServiceReceiver, mContext.getPackageName(), promptInfo);
             cancel.setOnCancelListener(new OnAuthenticationCancelListener(authId));
             return authId;
         } catch (RemoteException e) {
