@@ -1831,9 +1831,9 @@ class ShortcutPackage extends ShortcutPackageItem {
             ShortcutService.writeTagExtra(out, TAG_EXTRAS, si.getExtras());
 
             final Map<String, Map<String, List<String>>> capabilityBindings =
-                    si.getCapabilityBindings();
+                    si.getCapabilityBindingsInternal();
             if (capabilityBindings != null && !capabilityBindings.isEmpty()) {
-                XmlUtils.writeMapXml(si.getCapabilityBindings(), NAME_CAPABILITY, out);
+                XmlUtils.writeMapXml(capabilityBindings, NAME_CAPABILITY, out);
             }
         }
 
