@@ -173,7 +173,7 @@ final class DisplayDeviceInfo {
     public static final int TOUCH_VIRTUAL = 3;
 
     /**
-     * Diff result: The {@link #state} fields differ.
+     * Diff result: The {@link #state} or {@link #committedState} fields differ.
      */
     public static final int DIFF_STATE = 1 << 0;
 
@@ -335,6 +335,13 @@ final class DisplayDeviceInfo {
     public int state = Display.STATE_ON;
 
     /**
+     * Display committed state.
+     *
+     * This matches {@link DisplayDeviceInfo#state} only after the power state change finishes.
+     */
+    public int committedState = Display.STATE_UNKNOWN;
+
+    /**
      * The UID of the application that owns this display, or zero if it is owned by the system.
      * <p>
      * If the display is private, then only the owner can use it.
@@ -387,7 +394,7 @@ final class DisplayDeviceInfo {
      */
     public int diff(DisplayDeviceInfo other) {
         int diff = 0;
-        if (state != other.state) {
+        if (state != other.state || committedState != other.committedState) {
             diff |= DIFF_STATE;
         }
         if (colorMode != other.colorMode) {
@@ -461,6 +468,7 @@ final class DisplayDeviceInfo {
         address = other.address;
         deviceProductInfo = other.deviceProductInfo;
         state = other.state;
+        committedState = other.committedState;
         ownerUid = other.ownerUid;
         ownerPackageName = other.ownerPackageName;
         frameRateOverrides = other.frameRateOverrides;
@@ -501,6 +509,7 @@ final class DisplayDeviceInfo {
         }
         sb.append(", deviceProductInfo ").append(deviceProductInfo);
         sb.append(", state ").append(Display.stateToString(state));
+        sb.append(", committedState ").append(Display.stateToString(committedState));
         if (ownerUid != 0 || ownerPackageName != null) {
             sb.append(", owner ").append(ownerPackageName);
             sb.append(" (uid ").append(ownerUid).append(")");

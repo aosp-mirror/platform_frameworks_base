@@ -41,6 +41,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.Trace;
 import android.util.Log;
 import android.util.Pair;
 import android.util.SparseArray;
@@ -987,7 +988,8 @@ public final class DisplayManagerGlobal {
         @Override
         public void onDisplayEvent(int displayId, @DisplayEvent int event) {
             if (DEBUG) {
-                Log.d(TAG, "onDisplayEvent: displayId=" + displayId + ", event=" + event);
+                Log.d(TAG, "onDisplayEvent: displayId=" + displayId + ", event=" + eventToString(
+                        event));
             }
             handleDisplayEvent(displayId, event);
         }
@@ -1021,6 +1023,12 @@ public final class DisplayManagerGlobal {
 
         @Override
         public void handleMessage(Message msg) {
+            if (DEBUG) {
+                Trace.beginSection(
+                        "DisplayListenerDelegate(" + eventToString(msg.what)
+                                + ", display=" + msg.arg1
+                                + ", listener=" + mListener.getClass() + ")");
+            }
             switch (msg.what) {
                 case EVENT_DISPLAY_ADDED:
                     if ((mEventsMask & DisplayManager.EVENT_FLAG_DISPLAY_ADDED) != 0) {
@@ -1046,6 +1054,9 @@ public final class DisplayManagerGlobal {
                         mListener.onDisplayRemoved(msg.arg1);
                     }
                     break;
+            }
+            if (DEBUG) {
+                Trace.endSection();
             }
         }
     }
@@ -1149,5 +1160,19 @@ public final class DisplayManagerGlobal {
             mDispatchNativeCallbacks = false;
             updateCallbackIfNeededLocked();
         }
+    }
+
+    private static String eventToString(@DisplayEvent int event) {
+        switch (event) {
+            case EVENT_DISPLAY_ADDED:
+                return "ADDED";
+            case EVENT_DISPLAY_CHANGED:
+                return "CHANGED";
+            case EVENT_DISPLAY_REMOVED:
+                return "REMOVED";
+            case EVENT_DISPLAY_BRIGHTNESS_CHANGED:
+                return "BRIGHTNESS_CHANGED";
+        }
+        return "UNKNOWN";
     }
 }
