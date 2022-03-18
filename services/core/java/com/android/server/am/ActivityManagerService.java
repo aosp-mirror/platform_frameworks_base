@@ -418,6 +418,7 @@ import com.android.server.uri.GrantUri;
 import com.android.server.uri.NeededUriGrants;
 import com.android.server.uri.UriGrantsManagerInternal;
 import com.android.server.utils.PriorityDump;
+import com.android.server.utils.Slogf;
 import com.android.server.utils.TimingsTraceAndSlog;
 import com.android.server.vr.VrManagerInternal;
 import com.android.server.wm.ActivityMetricsLaunchObserver;
@@ -9480,7 +9481,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     opti++;
                 }
                 synchronized (this) {
-                    dumpBroadcastsLocked(fd, pw, args, opti, true, dumpPackage);
+                    dumpBroadcastsLocked(fd, pw, args, opti, /* dumpAll= */ true, dumpPackage);
                 }
             } else if ("broadcast-stats".equals(cmd)) {
                 if (opti < args.length) {
@@ -10419,6 +10420,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         boolean needSep = false;
         boolean onlyHistory = false;
         boolean printedAnything = false;
+        boolean onlyReceivers = false;
+        int filteredUid = Process.INVALID_UID;
 
         if ("history".equals(dumpPackage)) {
             if (opti < args.length && "-s".equals(args[opti])) {
@@ -10426,6 +10429,31 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             onlyHistory = true;
             dumpPackage = null;
+        }
+        if ("receivers".equals(dumpPackage)) {
+            onlyReceivers = true;
+            dumpPackage = null;
+            if (opti + 2 <= args.length) {
+                for (int i = opti; i < args.length; i++) {
+                    String arg = args[i];
+                    switch (arg) {
+                        case "--uid":
+                            filteredUid = getIntArg(pw, args, ++i, Process.INVALID_UID);
+                            if (filteredUid == Process.INVALID_UID) {
+                                return;
+                            }
+                            break;
+                        default:
+                            pw.printf("Invalid argument at index %d: %s\n", i, arg);
+                            return;
+                    }
+                }
+            }
+        }
+        if (DEBUG_BROADCAST) {
+            Slogf.d(TAG_BROADCAST, "dumpBroadcastsLocked(): dumpPackage=%s, onlyHistory=%b, "
+                    + "onlyReceivers=%b, filteredUid=%d", dumpPackage, onlyHistory, onlyReceivers,
+                    filteredUid);
         }
 
         pw.println("ACTIVITY MANAGER BROADCAST STATE (dumpsys activity broadcasts)");
@@ -10439,6 +10467,13 @@ public class ActivityManagerService extends IActivityManager.Stub
                             !dumpPackage.equals(r.app.info.packageName))) {
                         continue;
                     }
+                    if (filteredUid != Process.INVALID_UID && filteredUid != r.app.uid) {
+                        if (DEBUG_BROADCAST) {
+                            Slogf.v(TAG_BROADCAST, "dumpBroadcastsLocked(): skipping receiver whose"
+                                    + " uid (%d) is not %d: %s", r.app.uid, filteredUid, r.app);
+                        }
+                        continue;
+                    }
                     if (!printed) {
                         pw.println("  Registered Receivers:");
                         needSep = true;
@@ -10448,24 +10483,32 @@ public class ActivityManagerService extends IActivityManager.Stub
                     pw.print("  * "); pw.println(r);
                     r.dump(pw, "    ");
                 }
+            } else {
+                if (onlyReceivers) {
+                    pw.println("  (no registered receivers)");
+                }
             }
 
-            if (mReceiverResolver.dump(pw, needSep ?
-                    "\n  Receiver Resolver Table:" : "  Receiver Resolver Table:",
-                    "    ", dumpPackage, false, false)) {
-                needSep = true;
-                printedAnything = true;
+            if (!onlyReceivers) {
+                if (mReceiverResolver.dump(pw, needSep
+                        ? "\n  Receiver Resolver Table:" : "  Receiver Resolver Table:",
+                        "    ", dumpPackage, false, false)) {
+                    needSep = true;
+                    printedAnything = true;
+                }
             }
         }
 
-        for (BroadcastQueue q : mBroadcastQueues) {
-            needSep = q.dumpLocked(fd, pw, args, opti, dumpAll, dumpPackage, needSep);
-            printedAnything |= needSep;
+        if (!onlyReceivers) {
+            for (BroadcastQueue q : mBroadcastQueues) {
+                needSep = q.dumpLocked(fd, pw, args, opti, dumpAll, dumpPackage, needSep);
+                printedAnything |= needSep;
+            }
         }
 
         needSep = true;
 
-        if (!onlyHistory && mStickyBroadcasts != null && dumpPackage == null) {
+        if (!onlyHistory && !onlyReceivers && mStickyBroadcasts != null && dumpPackage == null) {
             for (int user=0; user<mStickyBroadcasts.size(); user++) {
                 if (needSep) {
                     pw.println();
@@ -10500,7 +10543,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
 
-        if (!onlyHistory && dumpAll) {
+        if (!onlyHistory && !onlyReceivers && dumpAll) {
             pw.println();
             for (BroadcastQueue queue : mBroadcastQueues) {
                 pw.println("  mBroadcastsScheduled [" + queue.mQueueName + "]="
@@ -18389,6 +18432,26 @@ public class ActivityManagerService extends IActivityManager.Stub
     static void traceBegin(long traceTag, String methodName, String subInfo) {
         if (Trace.isTagEnabled(traceTag)) {
             Trace.traceBegin(traceTag, methodName + subInfo);
+        }
+    }
+
+    /**
+     * Gets an {@code int} argument from the given {@code index} on {@code args}, logging an error
+     * message on {@code pw} when it cannot be parsed.
+     *
+     * Returns {@code int} argument or {@code invalidValue} if it could not be parsed.
+     */
+    private static int getIntArg(PrintWriter pw, String[] args, int index, int invalidValue) {
+        if (index > args.length) {
+            pw.println("Missing argument");
+            return invalidValue;
+        }
+        String arg = args[index];
+        try {
+            return Integer.parseInt(arg);
+        } catch (Exception e) {
+            pw.printf("Non-numeric argument at index %d: %s\n", index, arg);
+            return invalidValue;
         }
     }
 }
