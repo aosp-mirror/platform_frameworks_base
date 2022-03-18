@@ -143,6 +143,9 @@ public class PipController implements PipTransitionController.PipTransitionCallb
      */
     private final DisplayChangeController.OnDisplayChangingListener mRotationController = (
             int displayId, int fromRotation, int toRotation, WindowContainerTransaction t) -> {
+        if (mPipTransitionController.handleRotateDisplay(fromRotation, toRotation, t)) {
+            return;
+        }
         if (mPipBoundsState.getDisplayLayout().rotation() == toRotation) {
             // The same rotation may have been set by auto PiP-able or fixed rotation. So notify
             // the change with fromRotation=false to apply the rotated destination bounds from

@@ -89,6 +89,8 @@ public class PipTransition extends PipTransitionController {
     private final Rect mExitDestinationBounds = new Rect();
     @Nullable
     private IBinder mExitTransition;
+    private IBinder mRequestedEnterTransition;
+    private WindowContainerToken mRequestedEnterTask;
     /** The Task window that is currently in PIP windowing mode. */
     @Nullable
     private WindowContainerToken mCurrentPipTaskToken;
@@ -202,6 +204,9 @@ public class PipTransition extends PipTransitionController {
             }
             mCurrentPipTaskToken = null;
             return true;
+        } else if (transition == mRequestedEnterTransition) {
+            mRequestedEnterTransition = null;
+            mRequestedEnterTask = null;
         }
 
         // The previous PIP Task is no longer in PIP, but this is not an exit transition (This can
@@ -239,6 +244,8 @@ public class PipTransition extends PipTransitionController {
         if (request.getType() == TRANSIT_PIP) {
             WindowContainerTransaction wct = new WindowContainerTransaction();
             if (mOneShotAnimationType == ANIM_TYPE_ALPHA) {
+                mRequestedEnterTransition = transition;
+                mRequestedEnterTask = request.getTriggerTask().token;
                 wct.setActivityWindowingMode(request.getTriggerTask().token,
                         WINDOWING_MODE_UNDEFINED);
                 final Rect destinationBounds = mPipBoundsAlgorithm.getEntryDestinationBounds();
@@ -248,6 +255,23 @@ public class PipTransition extends PipTransitionController {
         } else {
             return null;
         }
+    }
+
+    @Override
+    public boolean handleRotateDisplay(int startRotation, int endRotation,
+            WindowContainerTransaction wct) {
+        if (mRequestedEnterTransition != null && mOneShotAnimationType == ANIM_TYPE_ALPHA) {
+            // A fade-in was requested but not-yet started. In this case, just recalculate the
+            // initial state under the new rotation.
+            int rotationDelta = deltaRotation(startRotation, endRotation);
+            if (rotationDelta != Surface.ROTATION_0) {
+                mPipBoundsState.getDisplayLayout().rotateTo(mContext.getResources(), endRotation);
+                final Rect destinationBounds = mPipBoundsAlgorithm.getEntryDestinationBounds();
+                wct.setBounds(mRequestedEnterTask, destinationBounds);
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
