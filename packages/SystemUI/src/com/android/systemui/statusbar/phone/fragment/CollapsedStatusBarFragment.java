@@ -72,6 +72,7 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.settings.SecureSettings;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Executor;
 
@@ -217,11 +218,23 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     void updateBlockedIcons() {
         mBlockedIcons.clear();
 
-        if (mSecureSettings.getInt(Settings.Secure.STATUS_BAR_SHOW_VIBRATE_ICON, 0) == 0) {
-            mBlockedIcons.add(getString(com.android.internal.R.string.status_bar_volume));
+        // Reload the blocklist from res
+        List<String> blockList = Arrays.asList(getResources().getStringArray(
+                R.array.config_collapsed_statusbar_icon_blocklist));
+        String vibrateIconSlot = getString(com.android.internal.R.string.status_bar_volume);
+        boolean showVibrateIcon =
+                mSecureSettings.getInt(Settings.Secure.STATUS_BAR_SHOW_VIBRATE_ICON, 0) == 0;
+
+        // Filter out vibrate icon from the blocklist if the setting is on
+        for (int i = 0; i < blockList.size(); i++) {
+            if (blockList.get(i).equals(vibrateIconSlot)) {
+                if (showVibrateIcon) {
+                    mBlockedIcons.add(blockList.get(i));
+                }
+            } else {
+                mBlockedIcons.add(blockList.get(i));
+            }
         }
-        mBlockedIcons.add(getString(com.android.internal.R.string.status_bar_alarm_clock));
-        mBlockedIcons.add(getString(com.android.internal.R.string.status_bar_call_strength));
 
         mMainExecutor.execute(() -> mDarkIconManager.setBlockList(mBlockedIcons));
     }
