@@ -2143,10 +2143,10 @@ public final class Settings {
     /**
      * Intent extra: The id of a setting restricted by supervisors.
      * <p>
-     * Type: Integer with a value from the SupervisorVerificationSetting annotation below.
+     * Type: Integer with a value from the one of the SUPERVISOR_VERIFICATION_* constants below.
      * <ul>
-     * <li>{@link #SUPERVISOR_VERIFICATION_SETTING_UNKNOWN}
-     * <li>{@link #SUPERVISOR_VERIFICATION_SETTING_BIOMETRICS}
+     * <li>{@see #SUPERVISOR_VERIFICATION_SETTING_UNKNOWN}
+     * <li>{@see #SUPERVISOR_VERIFICATION_SETTING_BIOMETRICS}
      * </ul>
      * </p>
      */
@@ -2154,12 +2154,14 @@ public final class Settings {
             "android.provider.extra.SUPERVISOR_RESTRICTED_SETTING_KEY";
 
     /**
-     * Unknown setting.
+     * The unknown setting can usually be ignored and is used for compatibility with future
+     * supervisor settings.
      */
     public static final int SUPERVISOR_VERIFICATION_SETTING_UNKNOWN = 0;
 
     /**
-     * Biometric settings for supervisors.
+     * Settings for supervisors to control what kinds of biometric sensors, such a face and
+     * fingerprint scanners, can be used on the device.
      */
     public static final int SUPERVISOR_VERIFICATION_SETTING_BIOMETRICS = 1;
 
