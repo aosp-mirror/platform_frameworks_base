@@ -4763,8 +4763,11 @@ public class BatteryStatsImpl extends BatteryStats {
         if (Process.isSdkSandboxUid(uid)) {
             return Process.getAppUidForSdkSandboxUid(uid);
         }
-        int isolated = mIsolatedUids.get(uid, -1);
-        return isolated > 0 ? isolated : uid;
+        return mapIsolatedUid(uid);
+    }
+
+    private int mapIsolatedUid(int uid) {
+        return mIsolatedUids.get(/*key=*/uid, /*valueIfKeyNotFound=*/uid);
     }
 
     @GuardedBy("this")
@@ -5215,7 +5218,7 @@ public class BatteryStatsImpl extends BatteryStats {
                         FrameworkStatsLog.WAKELOCK_STATE_CHANGED__STATE__ACQUIRE);
             } else {
                 FrameworkStatsLog.write_non_chained(FrameworkStatsLog.WAKELOCK_STATE_CHANGED,
-                        mappedUid, null, getPowerManagerWakeLockLevel(type), name,
+                        mapIsolatedUid(uid), null, getPowerManagerWakeLockLevel(type), name,
                         FrameworkStatsLog.WAKELOCK_STATE_CHANGED__STATE__ACQUIRE);
             }
         }
@@ -5269,7 +5272,7 @@ public class BatteryStatsImpl extends BatteryStats {
                         FrameworkStatsLog.WAKELOCK_STATE_CHANGED__STATE__RELEASE);
             } else {
                 FrameworkStatsLog.write_non_chained(FrameworkStatsLog.WAKELOCK_STATE_CHANGED,
-                        mappedUid, null, getPowerManagerWakeLockLevel(type), name,
+                        mapIsolatedUid(uid), null, getPowerManagerWakeLockLevel(type), name,
                         FrameworkStatsLog.WAKELOCK_STATE_CHANGED__STATE__RELEASE);
             }
 
@@ -5702,7 +5705,10 @@ public class BatteryStatsImpl extends BatteryStats {
     @GuardedBy("this")
     private void noteStartGpsLocked(int uid, WorkChain workChain,
             long elapsedRealtimeMs, long uptimeMs) {
-        uid = getAttributionUid(uid, workChain);
+        if (workChain != null) {
+            uid = workChain.getAttributionUid();
+        }
+        final int mappedUid = mapUid(uid);
         if (mGpsNesting == 0) {
             mHistoryCur.states |= HistoryItem.STATE_GPS_ON_FLAG;
             if (DEBUG_HISTORY) Slog.v(TAG, "Start GPS to: "
@@ -5712,21 +5718,24 @@ public class BatteryStatsImpl extends BatteryStats {
         mGpsNesting++;
 
         if (workChain == null) {
-            FrameworkStatsLog.write_non_chained(FrameworkStatsLog.GPS_SCAN_STATE_CHANGED, uid, null,
-                    FrameworkStatsLog.GPS_SCAN_STATE_CHANGED__STATE__ON);
+            FrameworkStatsLog.write_non_chained(FrameworkStatsLog.GPS_SCAN_STATE_CHANGED,
+                    mapIsolatedUid(uid), null, FrameworkStatsLog.GPS_SCAN_STATE_CHANGED__STATE__ON);
         } else {
             FrameworkStatsLog.write(FrameworkStatsLog.GPS_SCAN_STATE_CHANGED,
                     workChain.getUids(), workChain.getTags(),
                     FrameworkStatsLog.GPS_SCAN_STATE_CHANGED__STATE__ON);
         }
 
-        getUidStatsLocked(uid, elapsedRealtimeMs, uptimeMs).noteStartGps(elapsedRealtimeMs);
+        getUidStatsLocked(mappedUid, elapsedRealtimeMs, uptimeMs).noteStartGps(elapsedRealtimeMs);
     }
 
     @GuardedBy("this")
     private void noteStopGpsLocked(int uid, WorkChain workChain,
             long elapsedRealtimeMs, long uptimeMs) {
-        uid = getAttributionUid(uid, workChain);
+        if (workChain != null) {
+            uid = workChain.getAttributionUid();
+        }
+        final int mappedUid = mapUid(uid);
         mGpsNesting--;
         if (mGpsNesting == 0) {
             mHistoryCur.states &= ~HistoryItem.STATE_GPS_ON_FLAG;
@@ -5738,14 +5747,15 @@ public class BatteryStatsImpl extends BatteryStats {
         }
 
         if (workChain == null) {
-            FrameworkStatsLog.write_non_chained(FrameworkStatsLog.GPS_SCAN_STATE_CHANGED, uid, null,
+            FrameworkStatsLog.write_non_chained(FrameworkStatsLog.GPS_SCAN_STATE_CHANGED,
+                    mapIsolatedUid(uid), null,
                     FrameworkStatsLog.GPS_SCAN_STATE_CHANGED__STATE__OFF);
         } else {
             FrameworkStatsLog.write(FrameworkStatsLog.GPS_SCAN_STATE_CHANGED, workChain.getUids(),
                     workChain.getTags(), FrameworkStatsLog.GPS_SCAN_STATE_CHANGED__STATE__OFF);
         }
 
-        getUidStatsLocked(uid, elapsedRealtimeMs, uptimeMs).noteStopGps(elapsedRealtimeMs);
+        getUidStatsLocked(mappedUid, elapsedRealtimeMs, uptimeMs).noteStopGps(elapsedRealtimeMs);
     }
 
     @GuardedBy("this")
@@ -7163,7 +7173,10 @@ public class BatteryStatsImpl extends BatteryStats {
     @GuardedBy("this")
     private void noteBluetoothScanStartedLocked(WorkChain workChain, int uid,
             boolean isUnoptimized, long elapsedRealtimeMs, long uptimeMs) {
-        uid = getAttributionUid(uid, workChain);
+        if (workChain != null) {
+            uid = workChain.getAttributionUid();
+        }
+        uid = mapUid(uid);
         if (mBluetoothScanNesting == 0) {
             mHistoryCur.states2 |= HistoryItem.STATE2_BLUETOOTH_SCAN_FLAG;
             if (DEBUG_HISTORY) Slog.v(TAG, "BLE scan started for: "
@@ -7203,7 +7216,10 @@ public class BatteryStatsImpl extends BatteryStats {
     @GuardedBy("this")
     private void noteBluetoothScanStoppedLocked(WorkChain workChain, int uid,
             boolean isUnoptimized, long elapsedRealtimeMs, long uptimeMs) {
-        uid = getAttributionUid(uid, workChain);
+        if (workChain != null) {
+            uid = workChain.getAttributionUid();
+        }
+        uid = mapUid(uid);
         mBluetoothScanNesting--;
         if (mBluetoothScanNesting == 0) {
             mHistoryCur.states2 &= ~HistoryItem.STATE2_BLUETOOTH_SCAN_FLAG;
@@ -7214,14 +7230,6 @@ public class BatteryStatsImpl extends BatteryStats {
         }
         getUidStatsLocked(uid, elapsedRealtimeMs, uptimeMs)
                 .noteBluetoothScanStoppedLocked(elapsedRealtimeMs, isUnoptimized);
-    }
-
-    private int getAttributionUid(int uid, WorkChain workChain) {
-        if (workChain != null) {
-            return mapUid(workChain.getAttributionUid());
-        }
-
-        return mapUid(uid);
     }
 
     @GuardedBy("this")
