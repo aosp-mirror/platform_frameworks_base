@@ -297,11 +297,11 @@ public class FingerprintService extends SystemService {
                     provider.second.getSensorProperties(sensorId);
             if (!isKeyguard && !Utils.isSettings(getContext(), opPackageName)
                     && sensorProps != null && sensorProps.isAnyUdfpsType()) {
-                identity = Binder.clearCallingIdentity();
                 try {
-                    authenticateWithPrompt(operationId, sensorProps, userId, receiver);
-                } finally {
-                    Binder.restoreCallingIdentity(identity);
+                    authenticateWithPrompt(operationId, sensorProps, userId, receiver,
+                            opPackageName);
+                } catch (PackageManager.NameNotFoundException e) {
+                    Slog.e(TAG, "Invalid package", e);
                 }
             } else {
                 provider.second.scheduleAuthenticate(provider.first, token, operationId, userId,
@@ -314,12 +314,15 @@ public class FingerprintService extends SystemService {
                 final long operationId,
                 @NonNull final FingerprintSensorPropertiesInternal props,
                 final int userId,
-                final IFingerprintServiceReceiver receiver) {
+                final IFingerprintServiceReceiver receiver,
+                final String opPackageName) throws PackageManager.NameNotFoundException {
 
             final Context context = getUiContext();
+            final Context promptContext = context.createPackageContextAsUser(
+                    opPackageName, 0 /* flags */, UserHandle.getUserHandleForUid(userId));
             final Executor executor = context.getMainExecutor();
 
-            final BiometricPrompt biometricPrompt = new BiometricPrompt.Builder(context)
+            final BiometricPrompt biometricPrompt = new BiometricPrompt.Builder(promptContext)
                     .setTitle(context.getString(R.string.biometric_dialog_default_title))
                     .setSubtitle(context.getString(R.string.fingerprint_dialog_default_subtitle))
                     .setNegativeButton(
@@ -333,8 +336,7 @@ public class FingerprintService extends SystemService {
                                     Slog.e(TAG, "Remote exception in negative button onClick()", e);
                                 }
                             })
-                    .setAllowedSensorIds(new ArrayList<>(
-                            Collections.singletonList(props.sensorId)))
+                    .setIsForLegacyFingerprintManager(props.sensorId)
                     .build();
 
             final BiometricPrompt.AuthenticationCallback promptCallback =
@@ -387,8 +389,8 @@ public class FingerprintService extends SystemService {
                         }
                     };
 
-            biometricPrompt.authenticateUserForOperation(
-                    new CancellationSignal(), executor, promptCallback, userId, operationId);
+            biometricPrompt.authenticateForOperation(
+                    new CancellationSignal(), executor, promptCallback, operationId);
         }
 
         @Override
