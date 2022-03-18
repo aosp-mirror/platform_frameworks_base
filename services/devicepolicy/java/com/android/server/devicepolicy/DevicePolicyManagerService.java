@@ -2124,7 +2124,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 + "profile: %d", doUserId, poUserId);
 
         Slogf.i(LOG_TAG, "Giving the PO additional power...");
-        markProfileOwnerOnOrganizationOwnedDeviceUncheckedLocked(poAdminComponent, poUserId);
+        setProfileOwnerOnOrganizationOwnedDeviceUncheckedLocked(poAdminComponent, poUserId, true);
         Slogf.i(LOG_TAG, "Migrating DO policies to PO...");
         moveDoPoliciesToProfileParentAdminLocked(doAdmin, poAdmin.getParentActiveAdmin());
         migratePersonalAppSuspensionLocked(doUserId, poUserId, poAdmin);
@@ -14774,7 +14774,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
-    public void markProfileOwnerOnOrganizationOwnedDevice(ComponentName who, int userId) {
+    public void setProfileOwnerOnOrganizationOwnedDevice(ComponentName who, int userId,
+            boolean isProfileOwnerOnOrganizationOwnedDevice) {
         if (!mHasFeature) {
             return;
         }
@@ -14806,13 +14807,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         // Grant access under lock.
         synchronized (getLockObject()) {
-            markProfileOwnerOnOrganizationOwnedDeviceUncheckedLocked(who, userId);
+            setProfileOwnerOnOrganizationOwnedDeviceUncheckedLocked(who, userId,
+                    isProfileOwnerOnOrganizationOwnedDevice);
         }
     }
 
     @GuardedBy("getLockObject()")
-    private void markProfileOwnerOnOrganizationOwnedDeviceUncheckedLocked(
-            ComponentName who, int userId) {
+    private void setProfileOwnerOnOrganizationOwnedDeviceUncheckedLocked(
+            ComponentName who, int userId, boolean isProfileOwnerOnOrganizationOwnedDevice) {
         // Make sure that the user has a profile owner and that the specified
         // component is the profile owner of that user.
         if (!isProfileOwner(who, userId)) {
@@ -14821,7 +14823,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     who.flattenToString(), userId));
         }
 
-        Slogf.i(LOG_TAG, "Marking %s as profile owner on organization-owned device for user %d",
+        Slogf.i(LOG_TAG, "%s %s as profile owner on organization-owned device for user %d",
+                isProfileOwnerOnOrganizationOwnedDevice ? "Marking" : "Unmarking",
                 who.flattenToString(), userId);
 
         // First, set restriction on removing the profile.
@@ -14838,15 +14841,18 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                                 + " on user %d", parentUser.getIdentifier()));
             }
 
-            mUserManager.setUserRestriction(UserManager.DISALLOW_REMOVE_MANAGED_PROFILE, true,
+            mUserManager.setUserRestriction(UserManager.DISALLOW_REMOVE_MANAGED_PROFILE,
+                    isProfileOwnerOnOrganizationOwnedDevice,
                     parentUser);
-            mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_USER, true,
+            mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_USER,
+                    isProfileOwnerOnOrganizationOwnedDevice,
                     parentUser);
         });
 
-        // markProfileOwnerOfOrganizationOwnedDevice will trigger writing of the profile owner
+        // setProfileOwnerOfOrganizationOwnedDevice will trigger writing of the profile owner
         // data, no need to do it manually.
-        mOwners.markProfileOwnerOfOrganizationOwnedDevice(userId);
+        mOwners.setProfileOwnerOfOrganizationOwnedDevice(userId,
+                isProfileOwnerOnOrganizationOwnedDevice);
     }
 
     private void pushMeteredDisabledPackagesLocked(int userId) {
@@ -17783,7 +17789,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
             if (provisioningParams.isOrganizationOwnedProvisioning()) {
                 synchronized (getLockObject()) {
-                    markProfileOwnerOnOrganizationOwnedDeviceUncheckedLocked(admin, userInfo.id);
+                    setProfileOwnerOnOrganizationOwnedDeviceUncheckedLocked(admin, userInfo.id,
+                            true);
                 }
             }
 
