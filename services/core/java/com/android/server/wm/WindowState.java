@@ -3869,25 +3869,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             outFrames.displayFrame.scale(mInvGlobalScale);
         }
 
-        final Rect backdropFrame = outFrames.backdropFrame;
-        // When the task is docked, we send fullscreen sized backdropFrame as soon as resizing
-        // start even if we haven't received the relayout window, so that the client requests
-        // the relayout sooner. When dragging stops, backdropFrame needs to stay fullscreen
-        // until the window to small size, otherwise the multithread renderer will shift last
-        // one or more frame to wrong offset. So here we send fullscreen backdrop if either
-        // isDragResizing() or isDragResizeChanged() is true.
-        final boolean resizing = isDragResizing() || isDragResizeChanged();
-        if (!resizing || getWindowConfiguration().useWindowFrameForBackdrop()) {
-            // Surface position is now inherited from parent, and BackdropFrameRenderer uses
-            // backdrop frame to position content. Thus we just keep the size of backdrop frame,
-            // and remove the offset to avoid double offset from display origin.
-            backdropFrame.set(outFrames.frame);
-            backdropFrame.offsetTo(0, 0);
-        } else {
-            final DisplayInfo displayInfo = getDisplayInfo();
-            backdropFrame.set(0, 0, displayInfo.logicalWidth, displayInfo.logicalHeight);
-        }
-
         // Note: in the cases where the window is tied to an activity, we should not send a
         // configuration update when the window has requested to be hidden. Doing so can lead to
         // the client erroneously accepting a configuration that would have otherwise caused an
