@@ -928,7 +928,8 @@ public class FingerprintService extends SystemService {
         }
 
         @Override
-        public void onPointerDown(int sensorId, int x, int y, float minor, float major) {
+        public void onPointerDown(long requestId, int sensorId, int x, int y,
+                float minor, float major) {
             Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);
 
             final ServiceProvider provider = getProviderForSensor(sensorId);
@@ -936,11 +937,11 @@ public class FingerprintService extends SystemService {
                 Slog.w(TAG, "No matching provider for onFingerDown, sensorId: " + sensorId);
                 return;
             }
-            provider.onPointerDown(sensorId, x, y, minor, major);
+            provider.onPointerDown(requestId, sensorId, x, y, minor, major);
         }
 
         @Override
-        public void onPointerUp(int sensorId) {
+        public void onPointerUp(long requestId, int sensorId) {
             Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);
 
             final ServiceProvider provider = getProviderForSensor(sensorId);
@@ -948,11 +949,11 @@ public class FingerprintService extends SystemService {
                 Slog.w(TAG, "No matching provider for onFingerUp, sensorId: " + sensorId);
                 return;
             }
-            provider.onPointerUp(sensorId);
+            provider.onPointerUp(requestId, sensorId);
         }
 
         @Override
-        public void onUiReady(int sensorId) {
+        public void onUiReady(long requestId, int sensorId) {
             Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);
 
             final ServiceProvider provider = getProviderForSensor(sensorId);
@@ -960,7 +961,7 @@ public class FingerprintService extends SystemService {
                 Slog.w(TAG, "No matching provider for onUiReady, sensorId: " + sensorId);
                 return;
             }
-            provider.onUiReady(sensorId);
+            provider.onUiReady(requestId, sensorId);
         }
 
         @Override

@@ -155,13 +155,13 @@ interface IFingerprintService {
     void addAuthenticatorsRegisteredCallback(IFingerprintAuthenticatorsRegisteredCallback callback);
 
     // Notifies about a finger touching the sensor area.
-    void onPointerDown(int sensorId, int x, int y, float minor, float major);
+    void onPointerDown(long requestId, int sensorId, int x, int y, float minor, float major);
 
     // Notifies about a finger leaving the sensor area.
-    void onPointerUp(int sensorId);
+    void onPointerUp(long requestId, int sensorId);
 
     // Notifies about the fingerprint UI being ready (e.g. HBM illumination is enabled).
-    void onUiReady(int sensorId);
+    void onUiReady(long requestId, int sensorId);
 
     // Sets the controller for managing the UDFPS overlay.
     void setUdfpsOverlayController(in IUdfpsOverlayController controller);
