@@ -30,6 +30,7 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Build;
+import android.os.OutcomeReceiver;
 import android.os.RemoteException;
 
 import com.android.internal.annotations.GuardedBy;
@@ -40,7 +41,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.concurrent.Executor;
-import java.util.function.BiConsumer;
 
 /**
  * A class that manages and configures Ethernet interfaces.
@@ -443,41 +443,45 @@ public class EthernetManager {
         return new TetheredInterfaceRequest(mService, cbInternal);
     }
 
-    private static final class InternalNetworkManagementListener
-            extends IEthernetNetworkManagementListener.Stub {
+    private static final class NetworkInterfaceOutcomeReceiver
+            extends INetworkInterfaceOutcomeReceiver.Stub {
         @NonNull
         private final Executor mExecutor;
         @NonNull
-        private final BiConsumer<Network, EthernetNetworkManagementException> mListener;
+        private final OutcomeReceiver<String, EthernetNetworkManagementException> mCallback;
 
-        InternalNetworkManagementListener(
+        NetworkInterfaceOutcomeReceiver(
                 @NonNull final Executor executor,
-                @NonNull final BiConsumer<Network, EthernetNetworkManagementException> listener) {
+                @NonNull final OutcomeReceiver<String, EthernetNetworkManagementException>
+                        callback) {
             Objects.requireNonNull(executor, "Pass a non-null executor");
-            Objects.requireNonNull(listener, "Pass a non-null listener");
+            Objects.requireNonNull(callback, "Pass a non-null callback");
             mExecutor = executor;
-            mListener = listener;
+            mCallback = callback;
         }
 
         @Override
-        public void onComplete(
-                @Nullable final Network network,
-                @Nullable final EthernetNetworkManagementException e) {
-            mExecutor.execute(() -> mListener.accept(network, e));
+        public void onResult(@NonNull String iface) {
+            mExecutor.execute(() -> mCallback.onResult(iface));
+        }
+
+        @Override
+        public void onError(@NonNull EthernetNetworkManagementException e) {
+            mExecutor.execute(() -> mCallback.onError(e));
         }
     }
 
-    private InternalNetworkManagementListener getInternalNetworkManagementListener(
+    private NetworkInterfaceOutcomeReceiver makeNetworkInterfaceOutcomeReceiver(
             @Nullable final Executor executor,
-            @Nullable final BiConsumer<Network, EthernetNetworkManagementException> listener) {
-        if (null != listener) {
-            Objects.requireNonNull(executor, "Pass a non-null executor, or a null listener");
+            @Nullable final OutcomeReceiver<String, EthernetNetworkManagementException> callback) {
+        if (null != callback) {
+            Objects.requireNonNull(executor, "Pass a non-null executor, or a null callback");
         }
-        final InternalNetworkManagementListener proxy;
-        if (null == listener) {
+        final NetworkInterfaceOutcomeReceiver proxy;
+        if (null == callback) {
             proxy = null;
         } else {
-            proxy = new InternalNetworkManagementListener(executor, listener);
+            proxy = new NetworkInterfaceOutcomeReceiver(executor, callback);
         }
         return proxy;
     }
@@ -492,14 +496,17 @@ public class EthernetManager {
      * Similarly, use {@link NetworkCapabilities.Builder} to build a {@code NetworkCapabilities}
      * object for this network to put inside the {@code request}.
      *
-     * If non-null, the listener will be called exactly once after this is called, unless
-     * a synchronous exception was thrown.
+     * This function accepts an {@link OutcomeReceiver} that is called once the operation has
+     * finished execution.
      *
      * @param iface the name of the interface to act upon.
      * @param request the {@link EthernetNetworkUpdateRequest} used to set an ethernet network's
      *                {@link StaticIpConfiguration} and {@link NetworkCapabilities} values.
-     * @param executor an {@link Executor} to execute the listener on. Optional if listener is null.
-     * @param listener an optional {@link BiConsumer} to listen for completion of the operation.
+     * @param executor an {@link Executor} to execute the callback on. Optional if callback is null.
+     * @param callback an optional {@link OutcomeReceiver} to listen for completion of the
+     *                 operation. On success, {@link OutcomeReceiver#onResult} is called with the
+     *                 interface name. On error, {@link OutcomeReceiver#onError} is called with more
+     *                 information about the error.
      * @throws SecurityException if the process doesn't hold
      *                          {@link android.Manifest.permission.MANAGE_ETHERNET_NETWORKS}.
      * @throws UnsupportedOperationException if called on a non-automotive device or on an
@@ -515,11 +522,11 @@ public class EthernetManager {
             @NonNull String iface,
             @NonNull EthernetNetworkUpdateRequest request,
             @Nullable @CallbackExecutor Executor executor,
-            @Nullable BiConsumer<Network, EthernetNetworkManagementException> listener) {
+            @Nullable OutcomeReceiver<String, EthernetNetworkManagementException> callback) {
         Objects.requireNonNull(iface, "iface must be non-null");
         Objects.requireNonNull(request, "request must be non-null");
-        final InternalNetworkManagementListener proxy = getInternalNetworkManagementListener(
-                executor, listener);
+        final NetworkInterfaceOutcomeReceiver proxy = makeNetworkInterfaceOutcomeReceiver(
+                executor, callback);
         try {
             mService.updateConfiguration(iface, request, proxy);
         } catch (RemoteException e) {
@@ -530,15 +537,17 @@ public class EthernetManager {
     /**
      * Set an ethernet network's link state up.
      *
-     * When the link is successfully turned up, the listener will be called with the resulting
-     * network. If any error or unexpected condition happens while the system tries to turn the
-     * interface up, the listener will be called with an appropriate exception.
-     * The listener is guaranteed to be called exactly once for each call to this method, but this
-     * may take an unbounded amount of time depending on the actual network conditions.
+     * When the link is successfully turned up, the callback will be called with the network
+     * interface was torn down, if any. If any error or unexpected condition happens while the
+     * system tries to turn the interface down, the callback will be called with an appropriate
+     * exception. The callback is guaranteed to be called exactly once for each call to this method.
      *
      * @param iface the name of the interface to act upon.
-     * @param executor an {@link Executor} to execute the listener on. Optional if listener is null.
-     * @param listener an optional {@link BiConsumer} to listen for completion of the operation.
+     * @param executor an {@link Executor} to execute the callback on. Optional if callback is null.
+     * @param callback an optional {@link OutcomeReceiver} to listen for completion of the
+     *                 operation. On success, {@link OutcomeReceiver#onResult} is called with the
+     *                 interface name. On error, {@link OutcomeReceiver#onError} is called with more
+     *                 information about the error.
      * @throws SecurityException if the process doesn't hold
      *                          {@link android.Manifest.permission.MANAGE_ETHERNET_NETWORKS}.
      * @throws UnsupportedOperationException if called on a non-automotive device.
@@ -553,10 +562,10 @@ public class EthernetManager {
     public void connectNetwork(
             @NonNull String iface,
             @Nullable @CallbackExecutor Executor executor,
-            @Nullable BiConsumer<Network, EthernetNetworkManagementException> listener) {
+            @Nullable OutcomeReceiver<String, EthernetNetworkManagementException> callback) {
         Objects.requireNonNull(iface, "iface must be non-null");
-        final InternalNetworkManagementListener proxy = getInternalNetworkManagementListener(
-                executor, listener);
+        final NetworkInterfaceOutcomeReceiver proxy = makeNetworkInterfaceOutcomeReceiver(
+                executor, callback);
         try {
             mService.connectNetwork(iface, proxy);
         } catch (RemoteException e) {
@@ -567,14 +576,17 @@ public class EthernetManager {
     /**
      * Set an ethernet network's link state down.
      *
-     * When the link is successfully turned down, the listener will be called with the network that
-     * was torn down, if any. If any error or unexpected condition happens while the system tries to
-     * turn the interface down, the listener will be called with an appropriate exception.
-     * The listener is guaranteed to be called exactly once for each call to this method.
+     * When the link is successfully turned down, the callback will be called with the network
+     * interface was torn down, if any. If any error or unexpected condition happens while the
+     * system tries to turn the interface down, the callback will be called with an appropriate
+     * exception. The callback is guaranteed to be called exactly once for each call to this method.
      *
      * @param iface the name of the interface to act upon.
-     * @param executor an {@link Executor} to execute the listener on. Optional if listener is null.
-     * @param listener an optional {@link BiConsumer} to listen for completion of the operation.
+     * @param executor an {@link Executor} to execute the callback on. Optional if callback is null.
+     * @param callback an optional {@link OutcomeReceiver} to listen for completion of the
+     *                 operation. On success, {@link OutcomeReceiver#onResult} is called with the
+     *                 interface name. On error, {@link OutcomeReceiver#onError} is called with more
+     *                 information about the error.
      * @throws SecurityException if the process doesn't hold
      *                          {@link android.Manifest.permission.MANAGE_ETHERNET_NETWORKS}.
      * @throws UnsupportedOperationException if called on a non-automotive device.
@@ -589,10 +601,10 @@ public class EthernetManager {
     public void disconnectNetwork(
             @NonNull String iface,
             @Nullable @CallbackExecutor Executor executor,
-            @Nullable BiConsumer<Network, EthernetNetworkManagementException> listener) {
+            @Nullable OutcomeReceiver<String, EthernetNetworkManagementException> callback) {
         Objects.requireNonNull(iface, "iface must be non-null");
-        final InternalNetworkManagementListener proxy = getInternalNetworkManagementListener(
-                executor, listener);
+        final NetworkInterfaceOutcomeReceiver proxy = makeNetworkInterfaceOutcomeReceiver(
+                executor, callback);
         try {
             mService.disconnectNetwork(iface, proxy);
         } catch (RemoteException e) {
