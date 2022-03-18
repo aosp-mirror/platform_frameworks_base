@@ -11248,6 +11248,33 @@ package android.content.pm {
     field @NonNull public static final android.os.Parcelable.Creator<android.content.pm.Attribution> CREATOR;
   }
 
+  public final class Capability implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public String getName();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.content.pm.Capability> CREATOR;
+  }
+
+  public static final class Capability.Builder {
+    ctor public Capability.Builder(@NonNull String);
+    method @NonNull public android.content.pm.Capability build();
+  }
+
+  public final class CapabilityParams implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public java.util.List<java.lang.String> getAliases();
+    method @NonNull public String getName();
+    method @NonNull public String getValue();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.content.pm.CapabilityParams> CREATOR;
+  }
+
+  public static final class CapabilityParams.Builder {
+    ctor public CapabilityParams.Builder(@NonNull String, @NonNull String);
+    method @NonNull public android.content.pm.CapabilityParams.Builder addAlias(@NonNull String);
+    method @NonNull public android.content.pm.CapabilityParams build();
+  }
+
   public final class ChangedPackages implements android.os.Parcelable {
     ctor public ChangedPackages(int, @NonNull java.util.List<java.lang.String>);
     method public int describeContents();
@@ -12309,7 +12336,8 @@ package android.content.pm {
     method @NonNull public static android.content.pm.ShortcutInfo createFromGenericDocument(@NonNull android.content.Context, @NonNull android.app.appsearch.GenericDocument);
     method public int describeContents();
     method @Nullable public android.content.ComponentName getActivity();
-    method @NonNull public java.util.List<java.lang.String> getCapabilityParameterValues(@NonNull String, @NonNull String);
+    method @NonNull public java.util.List<android.content.pm.Capability> getCapabilities();
+    method @NonNull public java.util.List<android.content.pm.CapabilityParams> getCapabilityParams(@NonNull android.content.pm.Capability);
     method @Nullable public java.util.Set<java.lang.String> getCategories();
     method @Nullable public CharSequence getDisabledMessage();
     method public int getDisabledReason();
@@ -12324,7 +12352,6 @@ package android.content.pm {
     method public int getRank();
     method @Nullable public CharSequence getShortLabel();
     method public android.os.UserHandle getUserHandle();
-    method public boolean hasCapability(@NonNull String);
     method public boolean hasKeyFieldsOnly();
     method public boolean isCached();
     method public boolean isDeclaredInManifest();
@@ -12349,7 +12376,7 @@ package android.content.pm {
 
   public static class ShortcutInfo.Builder {
     ctor public ShortcutInfo.Builder(android.content.Context, String);
-    method @NonNull public android.content.pm.ShortcutInfo.Builder addCapabilityBinding(@NonNull String, @Nullable String, @Nullable java.util.List<java.lang.String>);
+    method @NonNull public android.content.pm.ShortcutInfo.Builder addCapabilityBinding(@NonNull android.content.pm.Capability, @Nullable android.content.pm.CapabilityParams);
     method @NonNull public android.content.pm.ShortcutInfo build();
     method @NonNull public android.content.pm.ShortcutInfo.Builder setActivity(@NonNull android.content.ComponentName);
     method @NonNull public android.content.pm.ShortcutInfo.Builder setCategories(java.util.Set<java.lang.String>);
