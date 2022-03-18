@@ -724,6 +724,7 @@
     <protected-broadcast android:name="android.intent.action.SHOW_FOREGROUND_SERVICE_MANAGER" />
     <protected-broadcast android:name="android.service.autofill.action.DELAYED_FILL" />
     <protected-broadcast android:name="android.app.action.PROVISIONING_COMPLETED" />
+    <protected-broadcast android:name="android.app.action.LOST_MODE_LOCATION_UPDATE" />
 
     <!-- ====================================================================== -->
     <!--                          RUNTIME PERMISSIONS                           -->
