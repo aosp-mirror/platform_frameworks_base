@@ -295,7 +295,8 @@ public class SntpClientTest {
 
     @Test
     public void testDnsResolutionFailure() throws Exception {
-        assertFalse(mClient.requestTime("ntp.server.doesnotexist.example", 5000, mNetwork));
+        assertFalse(mClient.requestTime("ntp.server.doesnotexist.example",
+                SntpClient.STANDARD_NTP_PORT, 5000, mNetwork));
     }
 
     @Test
