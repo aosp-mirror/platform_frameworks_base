@@ -152,6 +152,7 @@ public class KeyguardSecurityContainer extends FrameLayout {
     private SwipeListener mSwipeListener;
     private ViewMode mViewMode = new DefaultViewMode();
     private @Mode int mCurrentMode = MODE_DEFAULT;
+    private int mWidth = -1;
 
     private final WindowInsetsAnimation.Callback mWindowInsetsAnimationCallback =
             new WindowInsetsAnimation.Callback(DISPATCH_MODE_STOP) {
@@ -649,9 +650,11 @@ public class KeyguardSecurityContainer extends FrameLayout {
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
 
-        // After a layout pass, we need to re-place the inner bouncer, as our bounds may have
-        // changed.
-        mViewMode.updateSecurityViewLocation();
+        int width = right - left;
+        if (changed && mWidth != width) {
+            mWidth = width;
+            mViewMode.updateSecurityViewLocation();
+        }
     }
 
     @Override
