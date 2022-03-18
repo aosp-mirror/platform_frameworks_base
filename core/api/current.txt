@@ -26079,7 +26079,7 @@ package android.media.tv {
     method public void onContentAllowed(String);
     method public void onContentBlocked(String, android.media.tv.TvContentRating);
     method public void onDisconnected(String);
-    method public void onSignalStrength(@NonNull String, int);
+    method public void onSignalStrengthUpdated(@NonNull String, int);
     method public void onTimeShiftStatusChanged(String, int);
     method public void onTrackSelected(String, int, String);
     method public void onTracksChanged(String, java.util.List<android.media.tv.TvTrackInfo>);
@@ -26187,6 +26187,7 @@ package android.media.tv.interactive {
 
   public abstract static class TvInteractiveAppService.Session implements android.view.KeyEvent.Callback {
     ctor public TvInteractiveAppService.Session(@NonNull android.content.Context);
+    method public boolean isMediaViewEnabled();
     method @CallSuper public void layoutSurface(int, int, int, int);
     method @CallSuper public final void notifyBiInteractiveAppCreated(@NonNull android.net.Uri, @Nullable String);
     method @CallSuper public void notifySessionStateChanged(int, int);
@@ -26206,7 +26207,7 @@ package android.media.tv.interactive {
     method public boolean onKeyLongPress(int, @NonNull android.view.KeyEvent);
     method public boolean onKeyMultiple(int, int, @NonNull android.view.KeyEvent);
     method public boolean onKeyUp(int, @NonNull android.view.KeyEvent);
-    method public void onMediaViewSizeChanged(int, int);
+    method public void onMediaViewSizeChanged(@Px int, @Px int);
     method public abstract void onRelease();
     method public void onResetInteractiveApp();
     method public abstract boolean onSetSurface(@Nullable android.view.Surface);
@@ -26261,6 +26262,7 @@ package android.media.tv.interactive {
     method public void createBiInteractiveApp(@NonNull android.net.Uri, @Nullable android.os.Bundle);
     method public void destroyBiInteractiveApp(@NonNull String);
     method public boolean dispatchUnhandledInputEvent(@NonNull android.view.InputEvent);
+    method @Nullable public android.media.tv.interactive.TvInteractiveAppView.OnUnhandledInputEventListener getOnUnhandledInputEventListener();
     method public void onAttachedToWindow();
     method public void onDetachedFromWindow();
     method public void onLayout(boolean, int, int, int, int);

@@ -20,6 +20,7 @@ import android.annotation.CallSuper;
 import android.annotation.MainThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.Px;
 import android.annotation.SdkConstant;
 import android.annotation.StringDef;
 import android.annotation.SuppressLint;
@@ -373,6 +374,15 @@ public abstract class TvInteractiveAppService extends Service {
         }
 
         /**
+         * Returns {@code true} if media view is enabled, {@code false} otherwise.
+         *
+         * @see #setMediaViewEnabled(boolean)
+         */
+        public boolean isMediaViewEnabled() {
+            return mMediaViewEnabled;
+        }
+
+        /**
          * Starts TvInteractiveAppService session.
          */
         public void onStartInteractiveApp() {
@@ -435,6 +445,8 @@ public abstract class TvInteractiveAppService extends Service {
 
         /**
          * Receives current stream volume.
+         *
+         * @param volume a volume value between {@code 0.0f} and {@code 1.0f}, inclusive.
          */
         public void onStreamVolume(float volume) {
         }
@@ -495,10 +507,10 @@ public abstract class TvInteractiveAppService extends Service {
          * containing {@link TvInteractiveAppView}. Note that the size of the underlying surface can
          * be different if the surface was changed by calling {@link #layoutSurface}.
          *
-         * @param width The width of the media view.
-         * @param height The height of the media view.
+         * @param width The width of the media view, in pixels.
+         * @param height The height of the media view, in pixels.
          */
-        public void onMediaViewSizeChanged(int width, int height) {
+        public void onMediaViewSizeChanged(@Px int width, @Px int height) {
         }
 
         /**
