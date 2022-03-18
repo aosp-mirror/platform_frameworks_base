@@ -20,8 +20,29 @@ import static android.Manifest.permission.CAPTURE_AUDIO_HOTWORD;
 import static android.Manifest.permission.RECORD_AUDIO;
 import static android.service.voice.HotwordDetectionService.AUDIO_SOURCE_EXTERNAL;
 import static android.service.voice.HotwordDetectionService.AUDIO_SOURCE_MICROPHONE;
+import static android.service.voice.HotwordDetectionService.INITIALIZATION_STATUS_SUCCESS;
 import static android.service.voice.HotwordDetectionService.INITIALIZATION_STATUS_UNKNOWN;
 import static android.service.voice.HotwordDetectionService.KEY_INITIALIZATION_STATUS;
+
+import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTION_SERVICE_INIT_RESULT_REPORTED__RESULT__CALLBACK_INIT_STATE_ERROR;
+import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTION_SERVICE_INIT_RESULT_REPORTED__RESULT__CALLBACK_INIT_STATE_SUCCESS;
+import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTION_SERVICE_INIT_RESULT_REPORTED__RESULT__CALLBACK_INIT_STATE_UNKNOWN_NO_VALUE;
+import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTION_SERVICE_INIT_RESULT_REPORTED__RESULT__CALLBACK_INIT_STATE_UNKNOWN_OVER_MAX_CUSTOM_VALUE;
+import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTION_SERVICE_INIT_RESULT_REPORTED__RESULT__CALLBACK_INIT_STATE_UNKNOWN_TIMEOUT;
+import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTION_SERVICE_RESTARTED__REASON__AUDIO_SERVICE_DIED;
+import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTION_SERVICE_RESTARTED__REASON__SCHEDULE;
+import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_EVENTS__EVENT__CALLBACK_UPDATE_STATE_AFTER_TIMEOUT;
+import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_EVENTS__EVENT__ON_CONNECTED;
+import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_EVENTS__EVENT__REQUEST_BIND_SERVICE;
+import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_EVENTS__EVENT__REQUEST_BIND_SERVICE_FAIL;
+import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_EVENTS__EVENT__REQUEST_UPDATE_STATE;
+import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__DETECTOR_TYPE__NORMAL_DETECTOR;
+import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__DETECTOR_TYPE__TRUSTED_DETECTOR_DSP;
+import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__DETECTED;
+import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__DETECT_EXCEPTION;
+import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__DETECT_TIMEOUT;
+import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__KEYPHRASE_TRIGGER;
+import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__REJECTED;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -89,11 +110,23 @@ final class HotwordDetectionConnection {
     static final boolean DEBUG = false;
 
     // TODO: These constants need to be refined.
-    private static final long VALIDATION_TIMEOUT_MILLIS = 3000;
+    private static final long VALIDATION_TIMEOUT_MILLIS = 4000;
     private static final long MAX_UPDATE_TIMEOUT_MILLIS = 6000;
     private static final Duration MAX_UPDATE_TIMEOUT_DURATION =
             Duration.ofMillis(MAX_UPDATE_TIMEOUT_MILLIS);
     private static final long RESET_DEBUG_HOTWORD_LOGGING_TIMEOUT_MILLIS = 60 * 60 * 1000; // 1 hour
+
+    // Hotword metrics
+    private static final int METRICS_INIT_UNKNOWN_TIMEOUT =
+            HOTWORD_DETECTION_SERVICE_INIT_RESULT_REPORTED__RESULT__CALLBACK_INIT_STATE_UNKNOWN_TIMEOUT;
+    private static final int METRICS_INIT_UNKNOWN_NO_VALUE =
+            HOTWORD_DETECTION_SERVICE_INIT_RESULT_REPORTED__RESULT__CALLBACK_INIT_STATE_UNKNOWN_NO_VALUE;
+    private static final int METRICS_INIT_UNKNOWN_OVER_MAX_CUSTOM_VALUE =
+            HOTWORD_DETECTION_SERVICE_INIT_RESULT_REPORTED__RESULT__CALLBACK_INIT_STATE_UNKNOWN_OVER_MAX_CUSTOM_VALUE;
+    private static final int METRICS_INIT_CALLBACK_STATE_ERROR =
+            HOTWORD_DETECTION_SERVICE_INIT_RESULT_REPORTED__RESULT__CALLBACK_INIT_STATE_ERROR;
+    private static final int METRICS_INIT_CALLBACK_STATE_SUCCESS =
+            HOTWORD_DETECTION_SERVICE_INIT_RESULT_REPORTED__RESULT__CALLBACK_INIT_STATE_SUCCESS;
 
     private final Executor mAudioCopyExecutor = Executors.newCachedThreadPool();
     // TODO: This may need to be a Handler(looper)
@@ -103,6 +136,7 @@ final class HotwordDetectionConnection {
     private final IBinder.DeathRecipient mAudioServerDeathRecipient = this::audioServerDied;
     private final @NonNull ServiceConnectionFactory mServiceConnectionFactory;
     private final IHotwordRecognitionStatusCallback mCallback;
+    private final int mDetectorType;
 
     final Object mLock;
     final int mVoiceInteractionServiceUid;
@@ -114,6 +148,7 @@ final class HotwordDetectionConnection {
     private Instant mLastRestartInstant;
 
     private ScheduledFuture<?> mCancellationTaskFuture;
+    private ScheduledFuture<?> mCancellationKeyPhraseDetectionFuture;
     private ScheduledFuture<?> mDebugHotwordLoggingTimeoutFuture = null;
 
     /** Identity used for attributing app ops when delivering data to the Interactor. */
@@ -134,7 +169,7 @@ final class HotwordDetectionConnection {
             Identity voiceInteractorIdentity, ComponentName serviceName, int userId,
             boolean bindInstantServiceAllowed, @Nullable PersistableBundle options,
             @Nullable SharedMemory sharedMemory,
-            @NonNull IHotwordRecognitionStatusCallback callback) {
+            @NonNull IHotwordRecognitionStatusCallback callback, int detectorType) {
         if (callback == null) {
             Slog.w(TAG, "Callback is null while creating connection");
             throw new IllegalArgumentException("Callback is null while creating connection");
@@ -146,6 +181,7 @@ final class HotwordDetectionConnection {
         mDetectionComponentName = serviceName;
         mUser = userId;
         mCallback = callback;
+        mDetectorType = detectorType;
         final Intent intent = new Intent(HotwordDetectionService.SERVICE_INTERFACE);
         intent.setComponent(mDetectionComponentName);
         initAudioFlingerLocked();
@@ -163,6 +199,8 @@ final class HotwordDetectionConnection {
             Slog.v(TAG, "Time to restart the process, TTL has passed");
             synchronized (mLock) {
                 restartProcessLocked();
+                HotwordMetricsLogger.writeServiceRestartEvent(mDetectorType,
+                        HOTWORD_DETECTION_SERVICE_RESTARTED__REASON__SCHEDULE);
             }
         }, 30, 30, TimeUnit.MINUTES);
     }
@@ -195,6 +233,8 @@ final class HotwordDetectionConnection {
             // We restart the process instead of simply sending over the new binder, to avoid race
             // conditions with audio reading in the service.
             restartProcessLocked();
+            HotwordMetricsLogger.writeServiceRestartEvent(mDetectorType,
+                    HOTWORD_DETECTION_SERVICE_RESTARTED__REASON__AUDIO_SERVICE_DIED);
         }
     }
 
@@ -214,26 +254,30 @@ final class HotwordDetectionConnection {
                     future.complete(null);
                     if (mUpdateStateAfterStartFinished.getAndSet(true)) {
                         Slog.w(TAG, "call callback after timeout");
+                        HotwordMetricsLogger.writeDetectorEvent(mDetectorType,
+                                HOTWORD_DETECTOR_EVENTS__EVENT__CALLBACK_UPDATE_STATE_AFTER_TIMEOUT,
+                                mVoiceInteractionServiceUid);
                         return;
                     }
-                    int status = bundle != null ? bundle.getInt(
-                            KEY_INITIALIZATION_STATUS,
-                            INITIALIZATION_STATUS_UNKNOWN)
-                            : INITIALIZATION_STATUS_UNKNOWN;
-                    // Add the protection to avoid unexpected status
-                    if (status > HotwordDetectionService.getMaxCustomInitializationStatus()
-                            && status != INITIALIZATION_STATUS_UNKNOWN) {
-                        status = INITIALIZATION_STATUS_UNKNOWN;
-                    }
+                    Pair<Integer, Integer> statusResultPair = getInitStatusAndMetricsResult(bundle);
+                    int status = statusResultPair.first;
+                    int initResultMetricsResult = statusResultPair.second;
                     try {
                         mCallback.onStatusReported(status);
+                        HotwordMetricsLogger.writeServiceInitResultEvent(mDetectorType,
+                                initResultMetricsResult);
                     } catch (RemoteException e) {
                         Slog.w(TAG, "Failed to report initialization status: " + e);
+                        HotwordMetricsLogger.writeServiceInitResultEvent(mDetectorType,
+                                METRICS_INIT_CALLBACK_STATE_ERROR);
                     }
                 }
             };
             try {
                 service.updateState(options, sharedMemory, statusCallback);
+                HotwordMetricsLogger.writeDetectorEvent(mDetectorType,
+                        HOTWORD_DETECTOR_EVENTS__EVENT__REQUEST_UPDATE_STATE,
+                        mVoiceInteractionServiceUid);
             } catch (RemoteException e) {
                 // TODO: (b/181842909) Report an error to voice interactor
                 Slog.w(TAG, "Failed to updateState for HotwordDetectionService", e);
@@ -248,8 +292,12 @@ final class HotwordDetectionConnection {
                         }
                         try {
                             mCallback.onStatusReported(INITIALIZATION_STATUS_UNKNOWN);
+                            HotwordMetricsLogger.writeServiceInitResultEvent(mDetectorType,
+                                    METRICS_INIT_UNKNOWN_TIMEOUT);
                         } catch (RemoteException e) {
                             Slog.w(TAG, "Failed to report initialization status UNKNOWN", e);
+                            HotwordMetricsLogger.writeServiceInitResultEvent(mDetectorType,
+                                    METRICS_INIT_CALLBACK_STATE_ERROR);
                         }
                     } else if (err != null) {
                         Slog.w(TAG, "Failed to update state: " + err);
@@ -257,6 +305,24 @@ final class HotwordDetectionConnection {
                         // NOTE: so far we don't need to take any action.
                     }
                 });
+    }
+
+    private static Pair<Integer, Integer> getInitStatusAndMetricsResult(Bundle bundle) {
+        if (bundle == null) {
+            return new Pair<>(INITIALIZATION_STATUS_UNKNOWN, METRICS_INIT_UNKNOWN_NO_VALUE);
+        }
+        int status = bundle.getInt(KEY_INITIALIZATION_STATUS, INITIALIZATION_STATUS_UNKNOWN);
+        if (status > HotwordDetectionService.getMaxCustomInitializationStatus()) {
+            return new Pair<>(INITIALIZATION_STATUS_UNKNOWN,
+                    status == INITIALIZATION_STATUS_UNKNOWN
+                            ? METRICS_INIT_UNKNOWN_NO_VALUE
+                            :METRICS_INIT_UNKNOWN_OVER_MAX_CUSTOM_VALUE);
+        }
+        // TODO: should guard against negative here
+        int metricsResult = status == INITIALIZATION_STATUS_SUCCESS
+                ? METRICS_INIT_CALLBACK_STATE_SUCCESS
+                : METRICS_INIT_CALLBACK_STATE_ERROR;
+        return new Pair<>(status, metricsResult);
     }
 
     private boolean isBound() {
@@ -473,12 +539,31 @@ final class HotwordDetectionConnection {
                     Slog.d(TAG, "onDetected");
                 }
                 synchronized (mLock) {
+                    // TODO: If the dsp trigger comes in after the timeout, we will log both events.
+                    // Because we don't enforce the timeout yet. We should add some synchronizations
+                    // within the runnable to prevent the race condition to log both events.
+                    if (mCancellationKeyPhraseDetectionFuture != null) {
+                        mCancellationKeyPhraseDetectionFuture.cancel(true);
+                    }
+                    HotwordMetricsLogger.writeKeyphraseTriggerEvent(
+                            mDetectorType,
+                            HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__DETECTED);
                     if (!mValidatingDspTrigger) {
                         Slog.i(TAG, "Ignoring #onDetected due to a process restart");
+                        HotwordMetricsLogger.writeKeyphraseTriggerEvent(
+                                mDetectorType,
+                                HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__DETECT_EXCEPTION);
                         return;
                     }
                     mValidatingDspTrigger = false;
-                    enforcePermissionsForDataDelivery();
+                    try {
+                        enforcePermissionsForDataDelivery();
+                    } catch (SecurityException e) {
+                        HotwordMetricsLogger.writeKeyphraseTriggerEvent(
+                                mDetectorType,
+                                HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__DETECT_EXCEPTION);
+                        throw e;
+                    }
                     externalCallback.onKeyphraseDetected(recognitionEvent, result);
                     if (result != null) {
                         Slog.i(TAG, "Egressed " + HotwordDetectedResult.getUsageSize(result)
@@ -496,8 +581,17 @@ final class HotwordDetectionConnection {
                     Slog.d(TAG, "onRejected");
                 }
                 synchronized (mLock) {
+                    if (mCancellationKeyPhraseDetectionFuture != null) {
+                        mCancellationKeyPhraseDetectionFuture.cancel(true);
+                    }
+                    HotwordMetricsLogger.writeKeyphraseTriggerEvent(
+                            mDetectorType,
+                            HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__REJECTED);
                     if (!mValidatingDspTrigger) {
                         Slog.i(TAG, "Ignoring #onRejected due to a process restart");
+                        HotwordMetricsLogger.writeKeyphraseTriggerEvent(
+                                mDetectorType,
+                                HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__DETECT_EXCEPTION);
                         return;
                     }
                     mValidatingDspTrigger = false;
@@ -512,11 +606,20 @@ final class HotwordDetectionConnection {
         synchronized (mLock) {
             mValidatingDspTrigger = true;
             mRemoteHotwordDetectionService.run(
-                    service -> service.detectFromDspSource(
-                            recognitionEvent,
-                            recognitionEvent.getCaptureFormat(),
-                            VALIDATION_TIMEOUT_MILLIS,
-                            internalCallback));
+                    service -> {
+                        // TODO: avoid allocate every time
+                        mCancellationKeyPhraseDetectionFuture = mScheduledExecutorService.schedule(
+                                () -> HotwordMetricsLogger
+                                        .writeKeyphraseTriggerEvent(mDetectorType,
+                                                HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__DETECT_TIMEOUT),
+                                VALIDATION_TIMEOUT_MILLIS,
+                                TimeUnit.MILLISECONDS);
+                        service.detectFromDspSource(
+                                recognitionEvent,
+                                recognitionEvent.getCaptureFormat(),
+                                VALIDATION_TIMEOUT_MILLIS,
+                                internalCallback);
+                    });
         }
     }
 
@@ -617,10 +720,16 @@ final class HotwordDetectionConnection {
             }
             final boolean useHotwordDetectionService = mHotwordDetectionConnection != null;
             if (useHotwordDetectionService) {
+                HotwordMetricsLogger.writeKeyphraseTriggerEvent(
+                        HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__DETECTOR_TYPE__TRUSTED_DETECTOR_DSP,
+                        HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__KEYPHRASE_TRIGGER);
                 mRecognitionEvent = recognitionEvent;
                 mHotwordDetectionConnection.detectFromDspSource(
                         recognitionEvent, mExternalCallback);
             } else {
+                HotwordMetricsLogger.writeKeyphraseTriggerEvent(
+                        HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__DETECTOR_TYPE__NORMAL_DETECTOR,
+                        HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__KEYPHRASE_TRIGGER);
                 mExternalCallback.onKeyphraseDetected(recognitionEvent, null);
             }
         }
@@ -783,6 +892,7 @@ final class HotwordDetectionConnection {
 
         private boolean mRespectServiceConnectionStatusChanged = true;
         private boolean mIsBound = false;
+        private boolean mIsLoggedFirstConnect = false;
 
         ServiceConnection(@NonNull Context context,
                 @NonNull Intent intent, int bindingFlags, int userId,
@@ -806,6 +916,12 @@ final class HotwordDetectionConnection {
                     return;
                 }
                 mIsBound = connected;
+                if (connected && !mIsLoggedFirstConnect) {
+                    mIsLoggedFirstConnect = true;
+                    HotwordMetricsLogger.writeDetectorEvent(mDetectorType,
+                            HOTWORD_DETECTOR_EVENTS__EVENT__ON_CONNECTED,
+                            mVoiceInteractionServiceUid);
+                }
             }
         }
 
@@ -836,13 +952,25 @@ final class HotwordDetectionConnection {
         protected boolean bindService(
                 @NonNull android.content.ServiceConnection serviceConnection) {
             try {
-                return mContext.bindIsolatedService(
+                HotwordMetricsLogger.writeDetectorEvent(mDetectorType,
+                        HOTWORD_DETECTOR_EVENTS__EVENT__REQUEST_BIND_SERVICE,
+                        mVoiceInteractionServiceUid);
+                boolean bindResult = mContext.bindIsolatedService(
                         mIntent,
                         Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE | mBindingFlags,
                         "hotword_detector_" + mInstanceNumber,
                         mExecutor,
                         serviceConnection);
+                if (!bindResult) {
+                    HotwordMetricsLogger.writeDetectorEvent(mDetectorType,
+                            HOTWORD_DETECTOR_EVENTS__EVENT__REQUEST_BIND_SERVICE_FAIL,
+                            mVoiceInteractionServiceUid);
+                }
+                return bindResult;
             } catch (IllegalArgumentException e) {
+                HotwordMetricsLogger.writeDetectorEvent(mDetectorType,
+                        HOTWORD_DETECTOR_EVENTS__EVENT__REQUEST_BIND_SERVICE_FAIL,
+                        mVoiceInteractionServiceUid);
                 Slog.wtf(TAG, "Can't bind to the hotword detection service!", e);
                 return false;
             }

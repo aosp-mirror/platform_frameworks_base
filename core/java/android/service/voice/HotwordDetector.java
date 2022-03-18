@@ -37,6 +37,27 @@ import android.os.SharedMemory;
 public interface HotwordDetector {
 
     /**
+     * Indicates that it is a non-trusted hotword detector.
+     *
+     * @hide
+     */
+    int DETECTOR_TYPE_NORMAL = 0;
+
+    /**
+     * Indicates that it is a DSP trusted hotword detector.
+     *
+     * @hide
+     */
+    int DETECTOR_TYPE_TRUSTED_HOTWORD_DSP = 1;
+
+    /**
+     * Indicates that it is a software trusted hotword detector.
+     *
+     * @hide
+     */
+    int DETECTOR_TYPE_TRUSTED_HOTWORD_SOFTWARE = 2;
+
+    /**
      * Starts hotword recognition.
      * <p>
      * On calling this, the system streams audio from the device microphone to this application's
@@ -96,6 +117,22 @@ public interface HotwordDetector {
      * {@link HotwordDetectionService} when it was created.
      */
     void updateState(@Nullable PersistableBundle options, @Nullable SharedMemory sharedMemory);
+
+    /**
+     * @hide
+     */
+    static String detectorTypeToString(int detectorType) {
+        switch (detectorType) {
+            case DETECTOR_TYPE_NORMAL:
+                return "normal";
+            case DETECTOR_TYPE_TRUSTED_HOTWORD_DSP:
+                return "trusted_hotword_dsp";
+            case DETECTOR_TYPE_TRUSTED_HOTWORD_SOFTWARE:
+                return "trusted_hotword_software";
+            default:
+                return Integer.toString(detectorType);
+        }
+    }
 
     /**
      * The callback to notify of detection events.
