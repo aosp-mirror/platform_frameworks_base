@@ -39,6 +39,7 @@ import android.util.SparseArray;
 import android.view.Display;
 import android.view.IWindowManager;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 
 import androidx.annotation.NonNull;
@@ -323,7 +324,8 @@ public class NavigationBarController implements
         final Context context = isOnDefaultDisplay
                 ? mContext
                 : mContext.createDisplayContext(display);
-        NavigationBar navBar = mNavigationBarFactory.create(context);
+        NavigationBar navBar = mNavigationBarFactory.create(
+                context, context.getSystemService(WindowManager.class));
 
         mNavigationBars.put(displayId, navBar);
 
