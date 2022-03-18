@@ -2157,6 +2157,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         w.mGivenTouchableRegion.scale(w.mGlobalScale);
                     }
                     w.setDisplayLayoutNeeded();
+                    w.updateSourceFrame(w.getFrame());
                     mWindowPlacerLocked.performSurfacePlacement();
                     w.getDisplayContent().getInputMonitor().updateInputWindowsLw(true);
 
