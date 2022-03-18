@@ -15,6 +15,7 @@
  */
 package com.android.server.devicepolicy;
 
+import android.accounts.Account;
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.app.admin.DevicePolicyDrawableResource;
@@ -136,6 +137,11 @@ abstract class BaseIDevicePolicyManager extends IDevicePolicyManager.Stub {
     public UserHandle createAndProvisionManagedProfile(
             @NonNull ManagedProfileProvisioningParams provisioningParams, String callerPackage) {
         return null;
+    }
+
+    public void finalizeWorkProfileProvisioning(
+            UserHandle managedProfileUser, Account migratedAccount) {
+
     }
 
     public void provisionFullyManagedDevice(
