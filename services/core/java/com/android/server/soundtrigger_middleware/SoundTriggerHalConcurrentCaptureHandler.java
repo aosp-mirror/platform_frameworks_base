@@ -20,12 +20,10 @@ import android.annotation.NonNull;
 import android.media.permission.SafeCloseable;
 import android.media.soundtrigger.ModelParameterRange;
 import android.media.soundtrigger.PhraseRecognitionEvent;
-import android.media.soundtrigger.PhraseRecognitionExtra;
 import android.media.soundtrigger.PhraseSoundModel;
 import android.media.soundtrigger.Properties;
 import android.media.soundtrigger.RecognitionConfig;
 import android.media.soundtrigger.RecognitionEvent;
-import android.media.soundtrigger.RecognitionStatus;
 import android.media.soundtrigger.SoundModel;
 import android.media.soundtrigger.SoundModelType;
 import android.media.soundtrigger.Status;
@@ -392,21 +390,14 @@ public class SoundTriggerHalConcurrentCaptureHandler implements ISoundTriggerHal
     /** Notify the client that recognition has been aborted. */
     private static void notifyAbort(int modelHandle, LoadedModel model) {
         switch (model.type) {
-            case SoundModelType.GENERIC: {
-                RecognitionEvent event = newEmptyRecognitionEvent();
-                event.status = RecognitionStatus.ABORTED;
-                event.type = SoundModelType.GENERIC;
-                model.callback.recognitionCallback(modelHandle, event);
-            }
-            break;
+            case SoundModelType.GENERIC:
+                model.callback.recognitionCallback(modelHandle, AidlUtil.newAbortEvent());
+                break;
 
-            case SoundModelType.KEYPHRASE: {
-                PhraseRecognitionEvent event = newEmptyPhraseRecognitionEvent();
-                event.common.status = RecognitionStatus.ABORTED;
-                event.common.type = SoundModelType.KEYPHRASE;
-                model.callback.phraseRecognitionCallback(modelHandle, event);
-            }
-            break;
+            case SoundModelType.KEYPHRASE:
+                model.callback.phraseRecognitionCallback(modelHandle,
+                        AidlUtil.newAbortPhraseEvent());
+                break;
         }
     }
 
@@ -414,19 +405,6 @@ public class SoundTriggerHalConcurrentCaptureHandler implements ISoundTriggerHal
     public void detach() {
         mDelegate.detach();
         mNotifier.unregisterListener(this);
-    }
-
-    private static PhraseRecognitionEvent newEmptyPhraseRecognitionEvent() {
-        PhraseRecognitionEvent result = new PhraseRecognitionEvent();
-        result.common = newEmptyRecognitionEvent();
-        result.phraseExtras = new PhraseRecognitionExtra[0];
-        return result;
-    }
-
-    private static RecognitionEvent newEmptyRecognitionEvent() {
-        RecognitionEvent result = new RecognitionEvent();
-        result.data = new byte[0];
-        return result;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
