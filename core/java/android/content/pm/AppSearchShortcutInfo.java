@@ -349,7 +349,7 @@ public class AppSearchShortcutInfo extends GenericDocument {
                 .setDisabledReason(shortcutInfo.getDisabledReason())
                 .setPersons(shortcutInfo.getPersons())
                 .setLocusId(shortcutInfo.getLocusId())
-                .setCapabilityBindings(shortcutInfo.getCapabilityBindings())
+                .setCapabilityBindings(shortcutInfo.getCapabilityBindingsInternal())
                 .setTtlMillis(SHORTCUT_TTL)
                 .build();
     }
