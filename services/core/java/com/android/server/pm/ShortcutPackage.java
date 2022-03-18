@@ -490,18 +490,14 @@ class ShortcutPackage extends ShortcutPackageItem {
             forceReplaceShortcutInner(newShortcut);
         }
         if (isAppSearchEnabled()) {
-            runAsSystem(() -> fromAppSearch().thenAccept(session -> {
-                if (!verifyIsUserUnlockingOrUnlocked()) {
-                    return;
-                }
-                session.reportUsage(new ReportUsageRequest.Builder(
-                        getPackageName(), newShortcut.getId()).build(), mExecutor, result -> {
-                        if (!result.isSuccess()) {
-                            Slog.e(TAG, "Failed to report usage via AppSearch. "
-                                    + result.getErrorMessage());
-                        }
-                    });
-            }));
+            runAsSystem(() -> fromAppSearch().thenAccept(session ->
+                    session.reportUsage(new ReportUsageRequest.Builder(
+                            getPackageName(), newShortcut.getId()).build(), mExecutor, result -> {
+                                    if (!result.isSuccess()) {
+                                        Slog.e(TAG, "Failed to report usage via AppSearch. "
+                                                + result.getErrorMessage());
+                                    }
+                            })));
         }
         return deleted;
     }
@@ -2326,26 +2322,16 @@ class ShortcutPackage extends ShortcutPackageItem {
                             AppSearchShortcutInfo.SCHEMA_TYPE, true, pi);
         }
         final AndroidFuture<AppSearchSession> future = new AndroidFuture<>();
-        if (!verifyIsUserUnlockingOrUnlocked()) {
-            future.completeExceptionally(new RuntimeException(
-                    "User " + mShortcutUser.getUserId() + " is locked"));
-            return future;
-        }
         session.setSchema(
                 schemaBuilder.build(), mExecutor, mShortcutUser.mExecutor, result -> {
-                    if (!result.isSuccess()) {
-                        future.completeExceptionally(
-                                new IllegalArgumentException(result.getErrorMessage()));
-                        return;
-                    }
-                    future.complete(session);
-                });
+            if (!result.isSuccess()) {
+                future.completeExceptionally(
+                        new IllegalArgumentException(result.getErrorMessage()));
+                return;
+            }
+            future.complete(session);
+        });
         return future;
-    }
-
-    private boolean verifyIsUserUnlockingOrUnlocked() {
-        return mShortcutUser.mService.mUserManagerInternal.isUserUnlockingOrUnlocked(
-                mShortcutUser.getUserId());
     }
 
     @NonNull
@@ -2381,17 +2367,13 @@ class ShortcutPackage extends ShortcutPackageItem {
         if (!isAppSearchEnabled()) {
             return;
         }
-        runAsSystem(() -> fromAppSearch().thenAccept(session -> {
-            if (!verifyIsUserUnlockingOrUnlocked()) {
-                return;
-            }
-            session.remove("", getSearchSpec(), mShortcutUser.mExecutor, result -> {
-                if (!result.isSuccess()) {
-                    Slog.e(TAG, "Failed to remove shortcuts from AppSearch. "
-                            + result.getErrorMessage());
-                }
-            });
-        }));
+        runAsSystem(() -> fromAppSearch().thenAccept(session ->
+                session.remove("", getSearchSpec(), mShortcutUser.mExecutor, result -> {
+                    if (!result.isSuccess()) {
+                        Slog.e(TAG, "Failed to remove shortcuts from AppSearch. "
+                                + result.getErrorMessage());
+                    }
+                })));
     }
 
     void getShortcutByIdsAsync(@NonNull final Set<String> ids,
@@ -2401,9 +2383,6 @@ class ShortcutPackage extends ShortcutPackageItem {
             return;
         }
         runAsSystem(() -> fromAppSearch().thenAccept(session -> {
-            if (!verifyIsUserUnlockingOrUnlocked()) {
-                return;
-            }
             session.getByDocumentId(new GetByDocumentIdRequest.Builder(getPackageName())
                     .addIds(ids).build(), mShortcutUser.mExecutor, result -> {
                     final List<ShortcutInfo> ret = result.getSuccesses().values()
@@ -2425,23 +2404,19 @@ class ShortcutPackage extends ShortcutPackageItem {
         if (!isAppSearchEnabled()) {
             return;
         }
-        runAsSystem(() -> fromAppSearch().thenAccept(session -> {
-            if (!verifyIsUserUnlockingOrUnlocked()) {
-                return;
-            }
-            session.remove(
-                    new RemoveByDocumentIdRequest.Builder(getPackageName()).addIds(ids).build(),
-                    mShortcutUser.mExecutor, result -> {
-                        if (!result.isSuccess()) {
-                            final Map<String, AppSearchResult<Void>> failures =
-                                    result.getFailures();
-                            for (String key : failures.keySet()) {
-                                Slog.e(TAG, "Failed deleting " + key + ", error message:"
-                                        + failures.get(key).getErrorMessage());
+        runAsSystem(() -> fromAppSearch().thenAccept(session ->
+                session.remove(
+                        new RemoveByDocumentIdRequest.Builder(getPackageName()).addIds(ids).build(),
+                        mShortcutUser.mExecutor, result -> {
+                            if (!result.isSuccess()) {
+                                final Map<String, AppSearchResult<Void>> failures =
+                                        result.getFailures();
+                                for (String key : failures.keySet()) {
+                                    Slog.e(TAG, "Failed deleting " + key + ", error message:"
+                                            + failures.get(key).getErrorMessage());
+                                }
                             }
-                        }
-                    });
-        }));
+                        })));
     }
 
     void persistsAllShortcutsAsync() {
@@ -2469,7 +2444,7 @@ class ShortcutPackage extends ShortcutPackageItem {
                     .map(ShortcutInfo::getId).collect(Collectors.joining(",", "[", "]")));
         }
         runAsSystem(() -> fromAppSearch().thenAccept(session -> {
-            if (shortcuts.isEmpty() || !verifyIsUserUnlockingOrUnlocked()) {
+            if (shortcuts.isEmpty()) {
                 return;
             }
             session.put(new PutDocumentsRequest.Builder()
@@ -2493,11 +2468,6 @@ class ShortcutPackage extends ShortcutPackageItem {
             cb.complete(null);
         }
         runAsSystem(() -> fromAppSearch().thenAccept(session -> {
-            if (!verifyIsUserUnlockingOrUnlocked()) {
-                cb.completeExceptionally(new IllegalStateException(
-                        "User " + mShortcutUser.getUserId() + " is locked."));
-                return;
-            }
             SearchResults res = session.search("", getSearchSpec());
             res.getNextPage(mShortcutUser.mExecutor, results -> {
                 if (!results.isSuccess()) {
