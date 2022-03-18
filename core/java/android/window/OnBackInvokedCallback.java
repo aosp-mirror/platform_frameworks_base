@@ -33,7 +33,7 @@ import android.view.View;
  * within the same priority. Between different pirorities, callbacks with higher priority
  * are invoked first.
  *
- * See {@link OnBackInvokedDispatcher#registerOnBackInvokedCallback(OnBackInvokedCallback, int)}
+ * See {@link OnBackInvokedDispatcher#registerOnBackInvokedCallback(int, OnBackInvokedCallback)}
  * for specifying callback priority.
  */
 public interface OnBackInvokedCallback {
