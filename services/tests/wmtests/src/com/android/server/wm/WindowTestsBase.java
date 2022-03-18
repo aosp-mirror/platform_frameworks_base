@@ -1264,7 +1264,6 @@ class WindowTestsBase extends SystemServiceTestsBase {
                         mOrganizer.getOrganizerToken(), DEFAULT_TASK_FRAGMENT_ORGANIZER_UID,
                         DEFAULT_TASK_FRAGMENT_ORGANIZER_PROCESS_NAME);
             }
-            spyOn(taskFragment);
             return taskFragment;
         }
     }
