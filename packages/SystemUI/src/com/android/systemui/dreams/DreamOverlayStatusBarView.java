@@ -88,10 +88,6 @@ public class DreamOverlayStatusBarView extends ConstraintLayout {
                 fetchStatusIconForResId(R.id.dream_overlay_priority_mode));
     }
 
-    void showIcon(@StatusIconType int iconType, boolean show) {
-        showIcon(iconType, show, null);
-    }
-
     void showIcon(@StatusIconType int iconType, boolean show, @Nullable String contentDescription) {
         View icon = mStatusIcons.get(iconType);
         if (icon == null) {
