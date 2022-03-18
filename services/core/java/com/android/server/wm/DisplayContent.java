@@ -4046,11 +4046,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         private SurfaceControl createImeSurface(SurfaceControl.ScreenshotHardwareBuffer b,
                 Transaction t) {
             final HardwareBuffer buffer = b.getHardwareBuffer();
-            if (DEBUG_INPUT_METHOD) {
-                Slog.d(TAG, "create IME snapshot for "
-                        + mImeTarget + ", buff width=" + buffer.getWidth()
-                        + ", height=" + buffer.getHeight());
-            }
+            ProtoLog.i(WM_DEBUG_IME, "create IME snapshot for %s, buff width=%s, height=%s",
+                    mImeTarget, buffer.getWidth(), buffer.getHeight());
             final WindowState imeWindow = mImeTarget.getDisplayContent().mInputMethodWindow;
             final ActivityRecord activity = mImeTarget.mActivityRecord;
             final SurfaceControl imeParent = mImeTarget.mAttrs.type == TYPE_BASE_APPLICATION
@@ -4086,12 +4083,14 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                         mImeTarget.mAttrs.surfaceInsets.top);
                 t.setPosition(imeSurface, surfacePosition.x, surfacePosition.y);
             }
+            ProtoLog.i(WM_DEBUG_IME, "Set IME snapshot position: (%d, %d)", surfacePosition.x,
+                    surfacePosition.y);
             return imeSurface;
         }
 
         private void removeImeSurface(Transaction t) {
             if (mImeSurface != null) {
-                if (DEBUG_INPUT_METHOD) Slog.d(TAG, "remove IME snapshot");
+                ProtoLog.i(WM_DEBUG_IME, "remove IME snapshot, caller=%s", Debug.getCallers(6));
                 t.remove(mImeSurface);
                 mImeSurface = null;
             }
@@ -4121,9 +4120,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             // to reflect the true IME insets visibility and the app task layout as possible.
             if (isValidSnapshot
                     && dc.getInsetsStateController().getImeSourceProvider().isImeShowing()) {
-                if (DEBUG_INPUT_METHOD) {
-                    Slog.d(TAG, "show IME snapshot, ime target=" + mImeTarget);
-                }
+                ProtoLog.i(WM_DEBUG_IME, "show IME snapshot, ime target=%s, callers=%s",
+                        mImeTarget, Debug.getCallers(6));
                 t.show(mImeSurface);
             } else if (!isValidSnapshot) {
                 removeImeSurface(t);
@@ -4490,6 +4488,12 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      * hierarchy.
      */
     void onWindowAnimationFinished(@NonNull WindowContainer wc, int type) {
+        if (mImeScreenshot != null) {
+            ProtoLog.i(WM_DEBUG_IME,
+                    "onWindowAnimationFinished, wc=%s, type=%s, imeSnapshot=%s, target=%s",
+                    wc, SurfaceAnimator.animationTypeToString(type), mImeScreenshot,
+                    mImeScreenshot.getImeTarget());
+        }
         if (mImeScreenshot != null && (wc == mImeScreenshot.getImeTarget()
                 || wc.getWindow(w -> w == mImeScreenshot.getImeTarget()) != null)
                 && (type & WindowState.EXIT_ANIMATING_TYPES) != 0) {

@@ -19,6 +19,12 @@
       "group": "WM_DEBUG_LOCKTASK",
       "at": "com\/android\/server\/wm\/LockTaskController.java"
     },
+    "-2111539867": {
+      "message": "remove IME snapshot, caller=%s",
+      "level": "INFO",
+      "group": "WM_DEBUG_IME",
+      "at": "com\/android\/server\/wm\/DisplayContent.java"
+    },
     "-2109936758": {
       "message": "removeAppToken make exiting: %s",
       "level": "VERBOSE",
@@ -265,6 +271,12 @@
       "group": "WM_DEBUG_RESIZE",
       "at": "com\/android\/server\/wm\/WindowState.java"
     },
+    "-1814361639": {
+      "message": "Set IME snapshot position: (%d, %d)",
+      "level": "INFO",
+      "group": "WM_DEBUG_IME",
+      "at": "com\/android\/server\/wm\/DisplayContent.java"
+    },
     "-1810446914": {
       "message": "Trying to update display configuration for system\/invalid process.",
       "level": "WARN",
@@ -306,6 +318,12 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_REMOTE_ANIMATIONS",
       "at": "com\/android\/server\/wm\/RemoteAnimationController.java"
+    },
+    "-1777010776": {
+      "message": "create IME snapshot for %s, buff width=%s, height=%s",
+      "level": "INFO",
+      "group": "WM_DEBUG_IME",
+      "at": "com\/android\/server\/wm\/DisplayContent.java"
     },
     "-1770075711": {
       "message": "Adding window client %s that is dead, aborting.",
@@ -1375,6 +1393,12 @@
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/RootWindowContainer.java"
     },
+    "-658964693": {
+      "message": "onWindowAnimationFinished, wc=%s, type=%s, imeSnapshot=%s, target=%s",
+      "level": "INFO",
+      "group": "WM_DEBUG_IME",
+      "at": "com\/android\/server\/wm\/DisplayContent.java"
+    },
     "-655104359": {
       "message": "Frontmost changed immersion: %s",
       "level": "DEBUG",
@@ -1938,6 +1962,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_WINDOW_ORGANIZER",
       "at": "com\/android\/server\/wm\/TaskFragmentOrganizerController.java"
+    },
+    "-57750640": {
+      "message": "show IME snapshot, ime target=%s, callers=%s",
+      "level": "INFO",
+      "group": "WM_DEBUG_IME",
+      "at": "com\/android\/server\/wm\/DisplayContent.java"
     },
     "-55185509": {
       "message": "setFocusedTask: taskId=%d touchedActivity=%s",
