@@ -898,8 +898,11 @@ public class AppStandbyController
                     }
                 }
 
+                final long elapsedLastUsedByUserTimeDelta = app.lastUsedByUserElapsedTime >= 0
+                        ? elapsedTimeAdjusted - app.lastUsedByUserElapsedTime
+                        : Long.MAX_VALUE;
                 if (app.lastRestrictAttemptElapsedTime > app.lastUsedByUserElapsedTime
-                        && elapsedTimeAdjusted - app.lastUsedByUserElapsedTime
+                        && elapsedLastUsedByUserTimeDelta
                         >= mInjector.getAutoRestrictedBucketDelayMs()) {
                     newBucket = STANDBY_BUCKET_RESTRICTED;
                     reason = app.lastRestrictReason;
