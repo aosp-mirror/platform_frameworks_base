@@ -26139,7 +26139,6 @@ package android.media.tv.interactive {
 
   public final class TvInteractiveAppManager {
     method @NonNull public java.util.List<android.media.tv.interactive.TvInteractiveAppServiceInfo> getTvInteractiveAppServiceList();
-    method public void prepare(@NonNull String, int);
     method public void registerAppLinkInfo(@NonNull String, @NonNull android.media.tv.interactive.AppLinkInfo);
     method public void registerCallback(@NonNull java.util.concurrent.Executor, @NonNull android.media.tv.interactive.TvInteractiveAppManager.TvInteractiveAppCallback);
     method public void sendAppLinkCommand(@NonNull String, @NonNull android.os.Bundle);
@@ -26191,7 +26190,6 @@ package android.media.tv.interactive {
     method public void onAppLinkCommand(@NonNull android.os.Bundle);
     method @Nullable public final android.os.IBinder onBind(@NonNull android.content.Intent);
     method @Nullable public abstract android.media.tv.interactive.TvInteractiveAppService.Session onCreateSession(@NonNull String, int);
-    method public abstract void onPrepare(int);
     method public void onRegisterAppLinkInfo(@NonNull android.media.tv.interactive.AppLinkInfo);
     method public void onUnregisterAppLinkInfo(@NonNull android.media.tv.interactive.AppLinkInfo);
     field public static final String COMMAND_PARAMETER_KEY_CHANGE_CHANNEL_QUIETLY = "command_change_channel_quietly";
