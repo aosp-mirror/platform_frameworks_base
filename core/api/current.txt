@@ -26884,11 +26884,13 @@ package android.net {
 
   public class VpnManager {
     method public void deleteProvisionedVpnProfile();
+    method @Nullable public android.net.VpnProfileState getProvisionedVpnProfileState();
     method @Nullable public android.content.Intent provisionVpnProfile(@NonNull android.net.PlatformVpnProfile);
     method @Deprecated public void startProvisionedVpnProfile();
     method @NonNull public String startProvisionedVpnProfileSession();
     method public void stopProvisionedVpnProfile();
     field public static final String ACTION_VPN_MANAGER_EVENT = "android.net.action.VPN_MANAGER_EVENT";
+    field public static final String CATEGORY_EVENT_ALWAYS_ON_STATE_CHANGED = "android.net.category.EVENT_ALWAYS_ON_STATE_CHANGED";
     field public static final String CATEGORY_EVENT_DEACTIVATED_BY_USER = "android.net.category.EVENT_DEACTIVATED_BY_USER";
     field public static final String CATEGORY_EVENT_IKE_ERROR = "android.net.category.EVENT_IKE_ERROR";
     field public static final String CATEGORY_EVENT_NETWORK_ERROR = "android.net.category.EVENT_NETWORK_ERROR";
@@ -26905,6 +26907,22 @@ package android.net {
     field public static final String EXTRA_UNDERLYING_LINK_PROPERTIES = "android.net.extra.UNDERLYING_LINK_PROPERTIES";
     field public static final String EXTRA_UNDERLYING_NETWORK = "android.net.extra.UNDERLYING_NETWORK";
     field public static final String EXTRA_UNDERLYING_NETWORK_CAPABILITIES = "android.net.extra.UNDERLYING_NETWORK_CAPABILITIES";
+    field public static final String EXTRA_VPN_PROFILE_STATE = "android.net.extra.VPN_PROFILE_STATE";
+  }
+
+  public final class VpnProfileState implements android.os.Parcelable {
+    ctor public VpnProfileState(int, @Nullable String, boolean, boolean);
+    method public int describeContents();
+    method @Nullable public String getSessionId();
+    method public int getState();
+    method public boolean isAlwaysOn();
+    method public boolean isLockdownEnabled();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.VpnProfileState> CREATOR;
+    field public static final int STATE_CONNECTED = 2; // 0x2
+    field public static final int STATE_CONNECTING = 1; // 0x1
+    field public static final int STATE_DISCONNECTED = 0; // 0x0
+    field public static final int STATE_FAILED = 3; // 0x3
   }
 
   public class VpnService extends android.app.Service {
