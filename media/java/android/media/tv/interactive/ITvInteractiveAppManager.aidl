@@ -50,6 +50,8 @@ interface ITvInteractiveAppManager {
     void sendStreamVolume(in IBinder sessionToken, float volume, int userId);
     void sendTrackInfoList(in IBinder sessionToken, in List<TvTrackInfo> tracks, int userId);
     void sendCurrentTvInputId(in IBinder sessionToken, in String inputId, int userId);
+    void sendSigningResult(in IBinder sessionToken, in String signingId, in byte[] result,
+            int userId);
     void createSession(in ITvInteractiveAppClient client, in String iAppServiceId, int type,
             int seq, int userId);
     void releaseSession(in IBinder sessionToken, int userId);

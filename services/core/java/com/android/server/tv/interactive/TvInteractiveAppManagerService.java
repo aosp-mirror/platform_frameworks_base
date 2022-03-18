@@ -1360,6 +1360,32 @@ public class TvInteractiveAppManagerService extends SystemService {
         }
 
         @Override
+        public void sendSigningResult(
+                IBinder sessionToken, String signingId, byte[] result, int userId) {
+            if (DEBUG) {
+                Slogf.d(TAG, "sendSigningResult(signingId=%s)", signingId);
+            }
+            final int callingUid = Binder.getCallingUid();
+            final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
+                    userId, "sendSigningResult");
+            SessionState sessionState = null;
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    try {
+                        sessionState = getSessionStateLocked(sessionToken, callingUid,
+                                resolvedUserId);
+                        getSessionLocked(sessionState).sendSigningResult(signingId, result);
+                    } catch (RemoteException | SessionNotFoundException e) {
+                        Slogf.e(TAG, "error in sendSigningResult", e);
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
         public void setSurface(IBinder sessionToken, Surface surface, int userId) {
             final int callingUid = Binder.getCallingUid();
             final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
@@ -2216,6 +2242,24 @@ public class TvInteractiveAppManagerService extends SystemService {
                     mSessionState.mClient.onRequestCurrentTvInputId(mSessionState.mSeq);
                 } catch (RemoteException e) {
                     Slogf.e(TAG, "error in onRequestCurrentTvInputId", e);
+                }
+            }
+        }
+
+        @Override
+        public void onRequestSigning(String id, String algorithm, String alias, byte[] data) {
+            synchronized (mLock) {
+                if (DEBUG) {
+                    Slogf.d(TAG, "onRequestSigning");
+                }
+                if (mSessionState.mSession == null || mSessionState.mClient == null) {
+                    return;
+                }
+                try {
+                    mSessionState.mClient.onRequestSigning(
+                            id, algorithm, alias, data, mSessionState.mSeq);
+                } catch (RemoteException e) {
+                    Slogf.e(TAG, "error in onRequestSigning", e);
                 }
             }
         }

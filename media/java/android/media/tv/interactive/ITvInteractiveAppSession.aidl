@@ -42,6 +42,7 @@ oneway interface ITvInteractiveAppSession {
     void sendStreamVolume(float volume);
     void sendTrackInfoList(in List<TvTrackInfo> tracks);
     void sendCurrentTvInputId(in String inputId);
+    void sendSigningResult(in String signingId, in byte[] result);
     void release();
     void notifyTuned(in Uri channelUri);
     void notifyTrackSelected(int type, in String trackId);

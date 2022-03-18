@@ -44,5 +44,7 @@ oneway interface ITvInteractiveAppClient {
     void onRequestStreamVolume(int seq);
     void onRequestTrackInfoList(int seq);
     void onRequestCurrentTvInputId(int seq);
+    void onRequestSigning(
+            in String id, in String algorithm, in String alias, in byte[] data, int seq);
     void onAdRequest(in AdRequest request, int Seq);
 }
