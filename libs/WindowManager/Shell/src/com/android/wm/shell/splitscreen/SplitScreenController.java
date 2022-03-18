@@ -18,6 +18,7 @@ package com.android.wm.shell.splitscreen;
 
 import static android.app.ActivityManager.START_SUCCESS;
 import static android.app.ActivityManager.START_TASK_TO_FRONT;
+import static android.content.Intent.FLAG_ACTIVITY_NO_USER_ACTION;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.RemoteAnimationTarget.MODE_OPENING;
 
@@ -325,8 +326,8 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         }
     }
 
-    public void startIntent(PendingIntent intent, Intent fillInIntent, @SplitPosition int position,
-            @Nullable Bundle options) {
+    public void startIntent(PendingIntent intent, @Nullable Intent fillInIntent,
+            @SplitPosition int position, @Nullable Bundle options) {
         if (!ENABLE_SHELL_TRANSITIONS) {
             startIntentLegacy(intent, fillInIntent, position, options);
             return;
@@ -335,6 +336,15 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         try {
             options = mStageCoordinator.resolveStartStage(STAGE_TYPE_UNDEFINED, position, options,
                     null /* wct */);
+
+            // Flag this as a no-user-action launch to prevent sending user leaving event to the
+            // current top activity since it's going to be put into another side of the split. This
+            // prevents the current top activity from going into pip mode due to user leaving event.
+            if (fillInIntent == null) {
+                fillInIntent = new Intent();
+            }
+            fillInIntent.addFlags(FLAG_ACTIVITY_NO_USER_ACTION);
+
             intent.send(mContext, 0, fillInIntent, null /* onFinished */, null /* handler */,
                     null /* requiredPermission */, options);
         } catch (PendingIntent.CanceledException e) {
@@ -342,7 +352,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         }
     }
 
-    private void startIntentLegacy(PendingIntent intent, Intent fillInIntent,
+    private void startIntentLegacy(PendingIntent intent, @Nullable Intent fillInIntent,
             @SplitPosition int position, @Nullable Bundle options) {
         final WindowContainerTransaction evictWct = new WindowContainerTransaction();
         mStageCoordinator.prepareEvictChildTasks(position, evictWct);
@@ -393,6 +403,15 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
 
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         options = mStageCoordinator.resolveStartStage(STAGE_TYPE_UNDEFINED, position, options, wct);
+
+        // Flag this as a no-user-action launch to prevent sending user leaving event to the current
+        // top activity since it's going to be put into another side of the split. This prevents the
+        // current top activity from going into pip mode due to user leaving event.
+        if (fillInIntent == null) {
+            fillInIntent = new Intent();
+        }
+        fillInIntent.addFlags(FLAG_ACTIVITY_NO_USER_ACTION);
+
         wct.sendPendingIntent(intent, fillInIntent, options);
         mSyncQueue.queue(transition, WindowManager.TRANSIT_OPEN, wct);
     }
