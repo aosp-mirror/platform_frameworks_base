@@ -23,7 +23,7 @@ import android.media.tv.TvTrackInfo;
 import android.media.tv.interactive.AppLinkInfo;
 import android.media.tv.interactive.ITvInteractiveAppClient;
 import android.media.tv.interactive.ITvInteractiveAppManagerCallback;
-import android.media.tv.interactive.TvInteractiveAppInfo;
+import android.media.tv.interactive.TvInteractiveAppServiceInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.Surface;
@@ -33,7 +33,7 @@ import android.view.Surface;
  * @hide
  */
 interface ITvInteractiveAppManager {
-    List<TvInteractiveAppInfo> getTvInteractiveAppServiceList(int userId);
+    List<TvInteractiveAppServiceInfo> getTvInteractiveAppServiceList(int userId);
     void prepare(String tiasId, int type, int userId);
     void registerAppLinkInfo(String tiasId, in AppLinkInfo info, int userId);
     void unregisterAppLinkInfo(String tiasId, in AppLinkInfo info, int userId);

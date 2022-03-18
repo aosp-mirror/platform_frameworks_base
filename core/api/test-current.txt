@@ -300,7 +300,6 @@ package android.app {
   }
 
   public class LocaleManager {
-    method @Nullable public android.os.LocaleList getSystemLocales();
     method public void setSystemLocales(@NonNull android.os.LocaleList);
   }
 

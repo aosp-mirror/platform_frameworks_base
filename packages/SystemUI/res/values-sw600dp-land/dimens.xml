@@ -54,6 +54,14 @@
          the shade (in alpha) -->
     <dimen name="lockscreen_shade_scrim_transition_distance">80dp</dimen>
 
+    <!-- The notifications scrim transition should start when the other scrims' transition is at
+         95%. -->
+    <dimen name="lockscreen_shade_notifications_scrim_transition_delay">76dp</dimen>
+
+    <!-- The notifications scrim transition duration is 66.6% of the duration of the other scrims'
+         transition. -->
+    <dimen name="lockscreen_shade_notifications_scrim_transition_distance">53.28dp</dimen>
+
     <!-- Distance that the full shade transition takes in order for the keyguard content on
          NotificationPanelViewController to fully fade (e.g. Clock & Smartspace) -->
     <dimen name="lockscreen_shade_npvc_keyguard_content_alpha_transition_distance">80dp</dimen>
