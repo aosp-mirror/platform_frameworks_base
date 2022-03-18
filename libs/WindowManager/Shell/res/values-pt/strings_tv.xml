@@ -24,4 +24,5 @@
     <string name="pip_move" msgid="1544227837964635439">"Mover picture-in-picture"</string>
     <string name="pip_expand" msgid="7605396312689038178">"Abrir picture-in-picture"</string>
     <string name="pip_collapse" msgid="5732233773786896094">"Fechar picture-in-picture"</string>
+    <string name="pip_edu_text" msgid="3672999496647508701">" Pressione o botão "<annotation icon="home_icon">"home"</annotation>" duas vezes para acessar os controles"</string>
 </resources>
