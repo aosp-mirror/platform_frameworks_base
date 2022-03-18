@@ -520,16 +520,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                 || isAllowedToEmbedActivityInTrustedMode(a);
     }
 
-    /**
-     * Checks if the organized task fragment is allowed to embed activity in untrusted mode.
-     */
     boolean isAllowedToEmbedActivityInUntrustedMode(@NonNull ActivityRecord a) {
-        final WindowContainer parent = getParent();
-        if (parent == null || !parent.getBounds().contains(getBounds())) {
-            // Without full trust between the host and the embedded activity, we don't allow
-            // TaskFragment to have bounds outside of the parent bounds.
-            return false;
-        }
         return (a.info.flags & FLAG_ALLOW_UNTRUSTED_ACTIVITY_EMBEDDING)
                 == FLAG_ALLOW_UNTRUSTED_ACTIVITY_EMBEDDING;
     }
