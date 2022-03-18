@@ -46,6 +46,7 @@ import android.content.Context;
 import android.content.pm.ServiceInfo;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.os.AppBatteryStatsProto;
 import android.os.BatteryConsumer;
 import android.os.BatteryConsumer.Dimensions;
 import android.os.BatteryStatsInternal;
@@ -62,6 +63,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.util.TimeUtils;
+import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
@@ -676,6 +678,63 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
         super.dump(pw, prefix);
     }
 
+    @Override
+    void dumpAsProto(ProtoOutputStream proto, int uid) {
+        synchronized (mLock) {
+            final SparseArray<ImmutableBatteryUsage> uidConsumers = mUidBatteryUsageInWindow;
+            if (uid != android.os.Process.INVALID_UID) {
+                final BatteryUsage usage = uidConsumers.get(uid);
+                if (usage != null) {
+                    dumpUidStats(proto, uid, usage);
+                }
+            } else {
+                for (int i = 0, size = uidConsumers.size(); i < size; i++) {
+                    final int aUid = uidConsumers.keyAt(i);
+                    final BatteryUsage usage = uidConsumers.valueAt(i);
+                    dumpUidStats(proto, aUid, usage);
+                }
+            }
+        }
+    }
+
+    private void dumpUidStats(ProtoOutputStream proto, int uid, BatteryUsage usage) {
+        if (usage.mUsage == null) {
+            return;
+        }
+
+        final double foregroundUsage = usage.getUsagePowerMah(PROCESS_STATE_FOREGROUND);
+        final double backgroundUsage = usage.getUsagePowerMah(PROCESS_STATE_BACKGROUND);
+        final double fgsUsage = usage.getUsagePowerMah(PROCESS_STATE_FOREGROUND_SERVICE);
+
+        if (foregroundUsage == 0 && backgroundUsage == 0 && fgsUsage == 0) {
+            return;
+        }
+
+        final long token = proto.start(AppBatteryStatsProto.UID_STATS);
+        proto.write(AppBatteryStatsProto.UidStats.UID, uid);
+        dumpProcessStateStats(proto,
+                AppBatteryStatsProto.UidStats.ProcessStateStats.FOREGROUND,
+                foregroundUsage);
+        dumpProcessStateStats(proto,
+                AppBatteryStatsProto.UidStats.ProcessStateStats.BACKGROUND,
+                backgroundUsage);
+        dumpProcessStateStats(proto,
+                AppBatteryStatsProto.UidStats.ProcessStateStats.FOREGROUND_SERVICE,
+                fgsUsage);
+        proto.end(token);
+    }
+
+    private void dumpProcessStateStats(ProtoOutputStream proto, int processState, double powerMah) {
+        if (powerMah == 0) {
+            return;
+        }
+
+        final long token = proto.start(AppBatteryStatsProto.UidStats.PROCESS_STATE_STATS);
+        proto.write(AppBatteryStatsProto.UidStats.ProcessStateStats.PROCESS_STATE, processState);
+        proto.write(AppBatteryStatsProto.UidStats.ProcessStateStats.POWER_MAH, powerMah);
+        proto.end(token);
+    }
+
     static class BatteryUsage {
         static final int BATTERY_USAGE_INDEX_UNSPECIFIED = PROCESS_STATE_UNSPECIFIED;
         static final int BATTERY_USAGE_INDEX_FOREGROUND = PROCESS_STATE_FOREGROUND;
@@ -793,6 +852,15 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
         @Override
         public String toString() {
             return formatBatteryUsage(mUsage);
+        }
+
+        double getUsagePowerMah(@BatteryConsumer.ProcessState int processState) {
+            switch (processState) {
+                case PROCESS_STATE_FOREGROUND: return mUsage[1];
+                case PROCESS_STATE_BACKGROUND: return mUsage[2];
+                case PROCESS_STATE_FOREGROUND_SERVICE: return mUsage[3];
+            }
+            return 0;
         }
 
         boolean isValid() {

@@ -35,6 +35,7 @@ import android.os.BatteryStatsInternal;
 import android.os.Handler;
 import android.permission.PermissionManager;
 import android.util.Slog;
+import android.util.proto.ProtoOutputStream;
 
 import com.android.server.DeviceIdleInternal;
 import com.android.server.LocalServices;
@@ -248,6 +249,9 @@ public abstract class BaseAppStateTracker<T extends BaseAppStatePolicy> {
      */
     void dump(PrintWriter pw, String prefix) {
         mInjector.getPolicy().dump(pw, "  " + prefix);
+    }
+
+    void dumpAsProto(ProtoOutputStream proto, int uid) {
     }
 
     static class Injector<T extends BaseAppStatePolicy> {
