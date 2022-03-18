@@ -3365,6 +3365,16 @@ public class DevicePolicyManager {
      *     <li>General disclaimer relevant to the provisioning mode</li>
      * </ul>
      *
+     * <p>When this {@link Intent} is started, the following intent extras will be supplied:
+     * <ul>
+     *     <li>{@link #EXTRA_PROVISIONING_DISCLAIMERS}</li>
+     *     <li>{@link #EXTRA_PROVISIONING_MODE}</li>
+     *     <li>{@link #EXTRA_PROVISIONING_LOCALE}</li>
+     *     <li>{@link #EXTRA_PROVISIONING_LOCAL_TIME}</li>
+     *     <li>{@link #EXTRA_PROVISIONING_TIME_ZONE}</li>
+     *     <li>{@link #EXTRA_PROVISIONING_SKIP_EDUCATION_SCREENS}</li>
+     * </ul>
+     *
      * <p>If the custom consent screens are granted by the user {@link Activity#RESULT_OK} is
      * returned, otherwise {@link Activity#RESULT_CANCELED} is returned. The device policy
      * management role holder should ensure that the provisioning flow terminates immediately if
