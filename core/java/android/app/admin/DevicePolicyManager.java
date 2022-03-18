@@ -15772,9 +15772,28 @@ public class DevicePolicyManager {
      */
     @Nullable
     public String getDevicePolicyManagementRoleHolderPackage() {
-        String deviceManagerConfig = mContext.getString(
+        String devicePolicyManagementConfig = mContext.getString(
                 com.android.internal.R.string.config_devicePolicyManagement);
-        return extractPackageNameFromDeviceManagerConfig(deviceManagerConfig);
+        return extractPackageNameFromDeviceManagerConfig(devicePolicyManagementConfig);
+    }
+
+    /**
+     * Returns the package name of the device policy management role holder updater.
+     *
+     * <p>If the device policy management role holder updater is not configured for this device,
+     * returns {@code null}.
+     *
+     * @hide
+     */
+    @Nullable
+    @TestApi
+    public String getDevicePolicyManagementRoleHolderUpdaterPackage() {
+        String devicePolicyManagementUpdaterConfig = mContext.getString(
+                com.android.internal.R.string.config_devicePolicyManagementUpdater);
+        if (TextUtils.isEmpty(devicePolicyManagementUpdaterConfig)) {
+            return null;
+        }
+        return devicePolicyManagementUpdaterConfig;
     }
 
     /**
