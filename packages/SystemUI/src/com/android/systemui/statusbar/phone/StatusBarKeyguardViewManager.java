@@ -1016,6 +1016,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         if (bouncerShowing != mLastBouncerShowing || mFirstUpdate) {
             mNotificationShadeWindowController.setBouncerShowing(bouncerShowing);
             mCentralSurfaces.setBouncerShowing(bouncerShowing);
+            mKeyguardMessageAreaController.setBouncerShowing(bouncerShowing);
         }
 
         if (occluded != mLastOccluded || mFirstUpdate) {

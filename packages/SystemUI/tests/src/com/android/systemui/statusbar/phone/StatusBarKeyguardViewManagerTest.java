@@ -95,6 +95,8 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     @Mock
     private KeyguardMessageAreaController.Factory mKeyguardMessageAreaFactory;
     @Mock
+    private KeyguardMessageAreaController mKeyguardMessageAreaController;
+    @Mock
     private KeyguardBouncer mBouncer;
     @Mock
     private StatusBarKeyguardViewManager.AlternateAuthInterceptor mAlternateAuthInterceptor;
@@ -120,6 +122,8 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                 .thenReturn(mBouncer);
         when(mCentralSurfaces.getBouncerContainer()).thenReturn(mContainer);
         when(mContainer.findViewById(anyInt())).thenReturn(mKeyguardMessageArea);
+        when(mKeyguardMessageAreaFactory.create(any(KeyguardMessageArea.class)))
+                .thenReturn(mKeyguardMessageAreaController);
         mStatusBarKeyguardViewManager = new StatusBarKeyguardViewManager(
                 getContext(),
                 mViewMediatorCallback,
