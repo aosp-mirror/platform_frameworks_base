@@ -322,28 +322,28 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         @Override
         public void setImeSessionEnabled(SparseArray<IInputMethodSession> sessions,
                 boolean enabled) {
-            mService.setImeSessionEnabled(sessions, enabled);
+            mService.scheduleSetImeSessionEnabled(sessions, enabled);
         }
 
         @Override
         public void unbindInput() {
-            mService.unbindInput();
+            mService.scheduleUnbindInput();
         }
 
         @Override
         public void bindInput(InputBinding binding) {
-            mService.bindInput(binding);
+            mService.scheduleBindInput(binding);
         }
 
         @Override
         public void createImeSession(ArraySet<Integer> ignoreSet) {
-            mService.createImeSession(ignoreSet);
+            mService.scheduleCreateImeSession(ignoreSet);
         }
 
         @Override
         public void startInput(IBinder startInputToken, IInputContext inputContext,
                 EditorInfo editorInfo, boolean restarting) {
-            mService.startInput(startInputToken, inputContext, editorInfo, restarting);
+            mService.scheduleStartInput(startInputToken, inputContext, editorInfo, restarting);
         }
     }
 
@@ -4377,12 +4377,16 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      *
      * @param binding Information given to an accessibility service about a client connecting to it.
      */
-    public void bindInput(InputBinding binding) {
-        AccessibilityUserState userState;
+    public void scheduleBindInput(InputBinding binding) {
+        mMainHandler.sendMessage(obtainMessage(AccessibilityManagerService::bindInput, this,
+                binding));
+    }
+
+    private void bindInput(InputBinding binding) {
         synchronized (mLock) {
             // Keep records of these in case new Accessibility Services are enabled.
             mInputBinding = binding;
-            userState = getCurrentUserStateLocked();
+            AccessibilityUserState userState = getCurrentUserStateLocked();
             for (int i = userState.mBoundServices.size() - 1; i >= 0; i--) {
                 final AccessibilityServiceConnection service = userState.mBoundServices.get(i);
                 if (service.requestImeApis()) {
@@ -4395,11 +4399,13 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     /**
      * Unbind input for accessibility services which request ime capabilities.
      */
-    public void unbindInput() {
-        AccessibilityUserState userState;
-        // TODO(b/218182733): Resolve the Imf lock and mLock possible deadlock
+    public void scheduleUnbindInput() {
+        mMainHandler.sendMessage(obtainMessage(AccessibilityManagerService::unbindInput, this));
+    }
+
+    private void unbindInput() {
         synchronized (mLock) {
-            userState = getCurrentUserStateLocked();
+            AccessibilityUserState userState = getCurrentUserStateLocked();
             for (int i = userState.mBoundServices.size() - 1; i >= 0; i--) {
                 final AccessibilityServiceConnection service = userState.mBoundServices.get(i);
                 if (service.requestImeApis()) {
@@ -4412,16 +4418,21 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     /**
      * Start input for accessibility services which request ime capabilities.
      */
-    public void startInput(IBinder startInputToken, IInputContext inputContext,
+    public void scheduleStartInput(IBinder startInputToken, IInputContext inputContext,
             EditorInfo editorInfo, boolean restarting) {
-        AccessibilityUserState userState;
+        mMainHandler.sendMessage(obtainMessage(AccessibilityManagerService::startInput, this,
+                startInputToken, inputContext, editorInfo, restarting));
+    }
+
+    private void startInput(IBinder startInputToken, IInputContext inputContext,
+            EditorInfo editorInfo, boolean restarting) {
         synchronized (mLock) {
             // Keep records of these in case new Accessibility Services are enabled.
             mStartInputToken = startInputToken;
             mInputContext = inputContext;
             mEditorInfo = editorInfo;
             mRestarting = restarting;
-            userState = getCurrentUserStateLocked();
+            AccessibilityUserState userState = getCurrentUserStateLocked();
             for (int i = userState.mBoundServices.size() - 1; i >= 0; i--) {
                 final AccessibilityServiceConnection service = userState.mBoundServices.get(i);
                 if (service.requestImeApis()) {
@@ -4435,11 +4446,15 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      * Request input sessions from all accessibility services which request ime capabilities and
      * whose id is not in the ignoreSet
      */
-    public void createImeSession(ArraySet<Integer> ignoreSet) {
-        AccessibilityUserState userState;
+    public void scheduleCreateImeSession(ArraySet<Integer> ignoreSet) {
+        mMainHandler.sendMessage(obtainMessage(AccessibilityManagerService::createImeSession,
+                this, ignoreSet));
+    }
+
+    private void createImeSession(ArraySet<Integer> ignoreSet) {
         synchronized (mLock) {
             mInputSessionRequested = true;
-            userState = getCurrentUserStateLocked();
+            AccessibilityUserState userState = getCurrentUserStateLocked();
             for (int i = userState.mBoundServices.size() - 1; i >= 0; i--) {
                 final AccessibilityServiceConnection service = userState.mBoundServices.get(i);
                 if ((!ignoreSet.contains(service.mId)) && service.requestImeApis()) {
@@ -4455,10 +4470,15 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      * @param sessions Sessions to enable or disable.
      * @param enabled True if enable the sessions or false if disable the sessions.
      */
-    public void setImeSessionEnabled(SparseArray<IInputMethodSession> sessions, boolean enabled) {
-        AccessibilityUserState userState;
+    public void scheduleSetImeSessionEnabled(SparseArray<IInputMethodSession> sessions,
+            boolean enabled) {
+        mMainHandler.sendMessage(obtainMessage(AccessibilityManagerService::setImeSessionEnabled,
+                this, sessions, enabled));
+    }
+
+    private void setImeSessionEnabled(SparseArray<IInputMethodSession> sessions, boolean enabled) {
         synchronized (mLock) {
-            userState = getCurrentUserStateLocked();
+            AccessibilityUserState userState = getCurrentUserStateLocked();
             for (int i = userState.mBoundServices.size() - 1; i >= 0; i--) {
                 final AccessibilityServiceConnection service = userState.mBoundServices.get(i);
                 if (sessions.contains(service.mId) && service.requestImeApis()) {
