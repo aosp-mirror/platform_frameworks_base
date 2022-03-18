@@ -19,6 +19,8 @@ package com.android.server.wm;
 import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
 import static android.app.ActivityManager.isStartResultSuccessful;
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.window.WindowContainerTransaction.Change.CHANGE_BOUNDS_TRANSACTION;
+import static android.window.WindowContainerTransaction.Change.CHANGE_BOUNDS_TRANSACTION_RECT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_ADD_RECT_INSETS_PROVIDER;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_CHILDREN_TASKS_REPARENT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_CREATE_TASK_FRAGMENT;
@@ -678,7 +680,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                         break;
                     }
                 }
-                effects |= deleteTaskFragment(taskFragment, organizer, errorCallbackToken);
+                effects |= deleteTaskFragment(taskFragment, errorCallbackToken);
                 break;
             }
             case HIERARCHY_OP_TYPE_START_ACTIVITY_IN_TASK_FRAGMENT: {
@@ -696,7 +698,8 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                         .startActivityInTaskFragment(tf, activityIntent, activityOptions,
                                 hop.getCallingActivity(), caller.mUid, caller.mPid);
                 if (!isStartResultSuccessful(result)) {
-                    sendTaskFragmentOperationFailure(organizer, errorCallbackToken,
+                    sendTaskFragmentOperationFailure(tf.getTaskFragmentOrganizer(),
+                            errorCallbackToken,
                             convertStartFailureToThrowable(result, activityIntent));
                 } else {
                     effects |= TRANSACT_EFFECTS_LIFECYCLE;
@@ -706,20 +709,13 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             case HIERARCHY_OP_TYPE_REPARENT_ACTIVITY_TO_TASK_FRAGMENT: {
                 final IBinder fragmentToken = hop.getNewParent();
                 final ActivityRecord activity = ActivityRecord.forTokenLocked(hop.getContainer());
-                final TaskFragment parent = mLaunchTaskFragments.get(fragmentToken);
-                if (parent == null || activity == null) {
+                if (!mLaunchTaskFragments.containsKey(fragmentToken) || activity == null) {
                     final Throwable exception = new IllegalArgumentException(
                             "Not allowed to operate with invalid fragment token or activity.");
                     sendTaskFragmentOperationFailure(organizer, errorCallbackToken, exception);
                     break;
                 }
-                if (!parent.isAllowedToEmbedActivity(activity)) {
-                    final Throwable exception = new SecurityException(
-                            "The task fragment is not trusted to embed the given activity.");
-                    sendTaskFragmentOperationFailure(organizer, errorCallbackToken, exception);
-                    break;
-                }
-                activity.reparent(parent, POSITION_TOP);
+                activity.reparent(mLaunchTaskFragments.get(fragmentToken), POSITION_TOP);
                 effects |= TRANSACT_EFFECTS_LIFECYCLE;
                 break;
             }
@@ -881,14 +877,12 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 final WindowContainer newParent = hop.getNewParent() != null
                         ? WindowContainer.fromBinder(hop.getNewParent())
                         : null;
-                if (oldParent == null || oldParent.asTaskFragment() == null
-                        || !oldParent.isAttached()) {
+                if (oldParent == null || !oldParent.isAttached()) {
                     Slog.e(TAG, "Attempt to operate on unknown or detached container: "
                             + oldParent);
                     break;
                 }
-                reparentTaskFragment(oldParent.asTaskFragment(), newParent, organizer,
-                        errorCallbackToken);
+                reparentTaskFragment(oldParent, newParent, errorCallbackToken);
                 effects |= TRANSACT_EFFECTS_LIFECYCLE;
                 break;
             }
@@ -1244,7 +1238,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         mService.enforceTaskPermission(func);
     }
 
-    private void enforceTaskPermission(String func, @Nullable WindowContainerTransaction t) {
+    private void enforceTaskPermission(String func, WindowContainerTransaction t) {
         if (t == null || t.getTaskFragmentOrganizer() == null) {
             enforceTaskPermission(func);
             return;
@@ -1269,10 +1263,13 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         while (entries.hasNext()) {
             final Map.Entry<IBinder, WindowContainerTransaction.Change> entry = entries.next();
             // Only allow to apply changes to TaskFragment that is created by this organizer.
-            final WindowContainer wc = WindowContainer.fromBinder(entry.getKey());
+            WindowContainer wc = WindowContainer.fromBinder(entry.getKey());
             enforceTaskFragmentOrganized(func, wc, organizer);
             enforceTaskFragmentConfigChangeAllowed(func, wc, entry.getValue(), organizer);
         }
+
+        // TODO(b/197364677): Enforce safety of hierarchy operations in untrusted mode. E.g. one
+        // could first change a trusted TF, and then start/reparent untrusted activity there.
 
         // Hierarchy changes
         final List<WindowContainerTransaction.HierarchyOp> hops = t.getHierarchyOps();
@@ -1347,6 +1344,8 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
      * Makes sure that SurfaceControl transactions and the ability to set bounds outside of the
      * parent bounds are not allowed for embedding without full trust between the host and the
      * target.
+     * TODO(b/197364677): Allow SC transactions when the client-driven animations are protected from
+     * tapjacking.
      */
     private void enforceTaskFragmentConfigChangeAllowed(String func, @Nullable WindowContainer wc,
             WindowContainerTransaction.Change change, ITaskFragmentOrganizer organizer) {
@@ -1354,62 +1353,38 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             Slog.e(TAG, "Attempt to operate on task fragment that no longer exists");
             return;
         }
-        if (change == null) {
-            return;
-        }
-        final int changeMask = change.getChangeMask();
-        if (changeMask != 0) {
-            // None of the change should be requested from a TaskFragment organizer.
-            String msg = "Permission Denial: " + func + " from pid="
-                    + Binder.getCallingPid() + ", uid=" + Binder.getCallingUid()
-                    + " trying to apply changes of " + changeMask + " to TaskFragment"
-                    + " TaskFragmentOrganizer=" + organizer;
-            Slog.w(TAG, msg);
-            throw new SecurityException(msg);
-        }
-        // Check if TaskFragment is embedded in fully trusted mode.
+        // Check if TaskFragment is embedded in fully trusted mode
         if (wc.asTaskFragment().isAllowedToBeEmbeddedInTrustedMode()) {
             // Fully trusted, no need to check further
             return;
         }
-        final WindowContainer wcParent = wc.getParent();
-        if (wcParent == null) {
-            Slog.e(TAG, "Attempt to apply config change on task fragment that has no parent");
+
+        if (change == null) {
             return;
         }
-        final Configuration requestedConfig = change.getConfiguration();
-        final Configuration parentConfig = wcParent.getConfiguration();
-        if (parentConfig.screenWidthDp < requestedConfig.screenWidthDp
-                || parentConfig.screenHeightDp < requestedConfig.screenHeightDp
-                || parentConfig.smallestScreenWidthDp < requestedConfig.smallestScreenWidthDp) {
+        final int changeMask = change.getChangeMask();
+        if ((changeMask & (CHANGE_BOUNDS_TRANSACTION | CHANGE_BOUNDS_TRANSACTION_RECT)) != 0) {
             String msg = "Permission Denial: " + func + " from pid="
                     + Binder.getCallingPid() + ", uid=" + Binder.getCallingUid()
-                    + " trying to apply screen width/height greater than parent's for non-trusted"
-                    + " host, TaskFragmentOrganizer=" + organizer;
+                    + " trying to apply SurfaceControl changes to TaskFragment in non-trusted "
+                    + "embedding mode, TaskFragmentOrganizer=" + organizer;
             Slog.w(TAG, msg);
             throw new SecurityException(msg);
         }
         if (change.getWindowSetMask() == 0) {
-            // No bounds change.
+            // Nothing else to check.
             return;
         }
-        final WindowConfiguration requestedWindowConfig = requestedConfig.windowConfiguration;
-        final WindowConfiguration parentWindowConfig = parentConfig.windowConfiguration;
-        if (!parentWindowConfig.getBounds().contains(requestedWindowConfig.getBounds())) {
+        WindowConfiguration requestedWindowConfig = change.getConfiguration().windowConfiguration;
+        WindowContainer wcParent = wc.getParent();
+        if (wcParent == null) {
+            Slog.e(TAG, "Attempt to set bounds on task fragment that has no parent");
+            return;
+        }
+        if (!wcParent.getBounds().contains(requestedWindowConfig.getBounds())) {
             String msg = "Permission Denial: " + func + " from pid="
                     + Binder.getCallingPid() + ", uid=" + Binder.getCallingUid()
                     + " trying to apply bounds outside of parent for non-trusted host,"
-                    + " TaskFragmentOrganizer=" + organizer;
-            Slog.w(TAG, msg);
-            throw new SecurityException(msg);
-        }
-        if (requestedWindowConfig.getAppBounds() != null
-                && parentWindowConfig.getAppBounds() != null
-                && !parentWindowConfig.getAppBounds().contains(
-                        requestedWindowConfig.getAppBounds())) {
-            String msg = "Permission Denial: " + func + " from pid="
-                    + Binder.getCallingPid() + ", uid=" + Binder.getCallingUid()
-                    + " trying to apply app bounds outside of parent for non-trusted host,"
                     + " TaskFragmentOrganizer=" + organizer;
             Slog.w(TAG, msg);
             throw new SecurityException(msg);
@@ -1439,7 +1414,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         if (ownerActivity.getTask().effectiveUid != ownerActivity.getUid()
                 || ownerActivity.getTask().effectiveUid != caller.mUid) {
             final Throwable exception =
-                    new SecurityException("Not allowed to operate with the ownerToken while "
+                    new IllegalArgumentException("Not allowed to operate with the ownerToken while "
                             + "the root activity of the target task belong to the different app");
             sendTaskFragmentOperationFailure(organizer, errorCallbackToken, exception);
             return;
@@ -1456,46 +1431,33 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         mLaunchTaskFragments.put(creationParams.getFragmentToken(), taskFragment);
     }
 
-    void reparentTaskFragment(@NonNull TaskFragment oldParent, @Nullable WindowContainer newParent,
-            @Nullable ITaskFragmentOrganizer organizer, @Nullable IBinder errorCallbackToken) {
-        final TaskFragment newParentTF;
-        if (newParent == null) {
-            // Use the old parent's parent if the caller doesn't specify the new parent.
-            newParentTF = oldParent.getTask();
-        } else {
-            newParentTF = newParent.asTaskFragment();
+    void reparentTaskFragment(@NonNull WindowContainer oldParent,
+            @Nullable WindowContainer newParent,  @Nullable IBinder errorCallbackToken) {
+        WindowContainer parent = newParent;
+        if (parent == null && oldParent.asTaskFragment() != null) {
+            parent = oldParent.asTaskFragment().getTask();
         }
-        if (newParentTF == null) {
+        if (parent == null) {
             final Throwable exception =
                     new IllegalArgumentException("Not allowed to operate with invalid container");
-            sendTaskFragmentOperationFailure(organizer, errorCallbackToken, exception);
+            sendTaskFragmentOperationFailure(oldParent.asTaskFragment().getTaskFragmentOrganizer(),
+                    errorCallbackToken, exception);
             return;
         }
-        if (newParentTF.getTaskFragmentOrganizer() != null) {
-            // We are reparenting activities to a new embedded TaskFragment, this operation is only
-            // allowed if the new parent is trusted by all reparent activities.
-            final boolean isEmbeddingDisallowed = oldParent.forAllActivities(activity ->
-                    !newParentTF.isAllowedToEmbedActivity(activity));
-            if (isEmbeddingDisallowed) {
-                final Throwable exception = new SecurityException(
-                        "The new parent is not trusted to embed the activities.");
-                sendTaskFragmentOperationFailure(organizer, errorCallbackToken, exception);
-                return;
-            }
-        }
         while (oldParent.hasChild()) {
-            oldParent.getChildAt(0).reparent(newParentTF, POSITION_TOP);
+            oldParent.getChildAt(0).reparent(parent, POSITION_TOP);
         }
     }
 
     private int deleteTaskFragment(@NonNull TaskFragment taskFragment,
-            @Nullable ITaskFragmentOrganizer organizer, @Nullable IBinder errorCallbackToken) {
+            @Nullable IBinder errorCallbackToken) {
         final int index = mLaunchTaskFragments.indexOfValue(taskFragment);
         if (index < 0) {
             final Throwable exception =
                     new IllegalArgumentException("Not allowed to operate with invalid "
                             + "taskFragment");
-            sendTaskFragmentOperationFailure(organizer, errorCallbackToken, exception);
+            sendTaskFragmentOperationFailure(taskFragment.getTaskFragmentOrganizer(),
+                    errorCallbackToken, exception);
             return 0;
         }
         mLaunchTaskFragments.removeAt(index);
