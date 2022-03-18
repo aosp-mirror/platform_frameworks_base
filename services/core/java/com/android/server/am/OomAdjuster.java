@@ -547,7 +547,6 @@ public class OomAdjuster {
                 uids.clear();
                 uids.put(uidRec.getUid(), uidRec);
                 updateUidsLSP(uids, SystemClock.elapsedRealtime());
-                mProcessList.incrementProcStateSeqAndNotifyAppsLOSP(uids);
             }
         }
 
@@ -1268,8 +1267,6 @@ public class OomAdjuster {
             }
         }
 
-        mProcessList.incrementProcStateSeqAndNotifyAppsLOSP(activeUids);
-
         return mService.mAppProfiler.updateLowMemStateLSP(numCached, numEmpty, numTrimming);
     }
 
@@ -1304,6 +1301,11 @@ public class OomAdjuster {
 
     @GuardedBy({"mService", "mProcLock"})
     private void updateUidsLSP(ActiveUids activeUids, final long nowElapsed) {
+        // This compares previously set procstate to the current procstate in regards to whether
+        // or not the app's network access will be blocked. So, this needs to be called before
+        // we update the UidRecord's procstate by calling {@link UidRecord#setSetProcState}.
+        mProcessList.incrementProcStateSeqAndNotifyAppsLOSP(activeUids);
+
         ArrayList<UidRecord> becameIdle = mTmpBecameIdle;
         becameIdle.clear();
 
