@@ -4076,12 +4076,12 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             t.setColorSpace(activity.mSurfaceControl, ColorSpace.get(ColorSpace.Named.SRGB));
             t.setLayer(imeSurface, 1);
 
-            final Point surfacePosition = new Point(
-                    imeWindow.getFrame().left - mImeTarget.getFrame().left,
-                    imeWindow.getFrame().top - mImeTarget.getFrame().top);
+            final Point surfacePosition = new Point(imeWindow.getFrame().left,
+                    imeWindow.getFrame().top);
             if (imeParent == activity.getSurfaceControl()) {
                 t.setPosition(imeSurface, surfacePosition.x, surfacePosition.y);
             } else {
+                surfacePosition.offset(-mImeTarget.getFrame().left, -mImeTarget.getFrame().top);
                 surfacePosition.offset(mImeTarget.mAttrs.surfaceInsets.left,
                         mImeTarget.mAttrs.surfaceInsets.top);
                 t.setPosition(imeSurface, surfacePosition.x, surfacePosition.y);
