@@ -20,6 +20,7 @@
 #define LOG_TAG "SoundPool-JNI"
 
 #include <utils/Log.h>
+#include <audio_utils/string.h>
 #include <jni.h>
 #include <nativehelper/JNIPlatformHelp.h>
 #include <nativehelper/ScopedUtfChars.h>
@@ -453,32 +454,34 @@ static jint
 android_media_SoundPool_native_setup(JNIEnv *env, jobject thiz, jobject weakRef,
         jint maxChannels, jobject jaa, jstring opPackageName)
 {
+    ALOGV("android_media_SoundPool_native_setup");
     if (jaa == nullptr) {
         ALOGE("Error creating SoundPool: invalid audio attributes");
         return -1;
     }
 
-    audio_attributes_t *paa = nullptr;
+    // Use the AUDIO_ATTRIBUTES_INITIALIZER here to ensure all non-relevant fields are
+    // initialized properly. (note that .source is not explicitly initialized here).
+    audio_attributes_t audioAttributes = AUDIO_ATTRIBUTES_INITIALIZER;
     // read the AudioAttributes values
-    paa = (audio_attributes_t *) calloc(1, sizeof(audio_attributes_t));
     const auto jtags =
             (jstring) env->GetObjectField(jaa, javaAudioAttrFields.fieldFormattedTags);
     const char* tags = env->GetStringUTFChars(jtags, nullptr);
-    // copying array size -1, char array for tags was calloc'd, no need to NULL-terminate it
-    strncpy(paa->tags, tags, AUDIO_ATTRIBUTES_TAGS_MAX_SIZE - 1);
+    // infers array size and guarantees zero termination (does not zero fill to the end).
+    audio_utils_strlcpy(audioAttributes.tags, tags);
     env->ReleaseStringUTFChars(jtags, tags);
-    paa->usage = (audio_usage_t) env->GetIntField(jaa, javaAudioAttrFields.fieldUsage);
-    paa->content_type =
+    audioAttributes.usage =
+            (audio_usage_t) env->GetIntField(jaa, javaAudioAttrFields.fieldUsage);
+    audioAttributes.content_type =
             (audio_content_type_t) env->GetIntField(jaa, javaAudioAttrFields.fieldContentType);
-    paa->flags = (audio_flags_mask_t) env->GetIntField(jaa, javaAudioAttrFields.fieldFlags);
-
-    ALOGV("android_media_SoundPool_native_setup");
+    audioAttributes.flags =
+            (audio_flags_mask_t) env->GetIntField(jaa, javaAudioAttrFields.fieldFlags);
     ScopedUtfChars opPackageNameStr(env, opPackageName);
-    auto soundPool = std::make_shared<SoundPool>(maxChannels, paa, opPackageNameStr.c_str());
+    auto soundPool = std::make_shared<SoundPool>(
+            maxChannels, &audioAttributes, opPackageNameStr.c_str());
     soundPool->setCallback(android_media_callback, nullptr /* user */);
 
     // register with SoundPoolManager.
-
     auto oldSoundPool = setSoundPool(env, thiz, soundPool);
     // register Java SoundPool WeakRef using native SoundPool * as the key, for the callback.
     auto oldSoundPoolJavaRef = getSoundPoolJavaRefManager().set(
@@ -486,10 +489,6 @@ android_media_SoundPool_native_setup(JNIEnv *env, jobject thiz, jobject weakRef,
 
     ALOGW_IF(oldSoundPool != nullptr, "%s: Aliased SoundPool object %p",
             __func__, oldSoundPool.get());
-
-    // audio attributes were copied in SoundPool creation
-    free(paa);
-
     return 0;
 }
 
