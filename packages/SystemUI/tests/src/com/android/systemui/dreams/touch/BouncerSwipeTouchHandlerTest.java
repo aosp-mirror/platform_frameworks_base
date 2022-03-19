@@ -39,8 +39,8 @@ import androidx.test.filters.SmallTest;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.shared.system.InputChannelCompat;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
-import com.android.systemui.statusbar.phone.KeyguardBouncer;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
+import com.android.systemui.statusbar.phone.KeyguardBouncer;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.wm.shell.animation.FlingAnimationUtils;
 
@@ -112,8 +112,10 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
                 TOUCH_REGION);
 
         when(mCentralSurfaces.getDisplayHeight()).thenReturn((float) SCREEN_HEIGHT_PX);
+        when(mCentralSurfaces.isBouncerShowing()).thenReturn(false);
         when(mValueAnimatorCreator.create(anyFloat(), anyFloat())).thenReturn(mValueAnimator);
         when(mVelocityTrackerFactory.obtain()).thenReturn(mVelocityTracker);
+        when(mFlingAnimationUtils.getMinVelocityPxPerSecond()).thenReturn(Float.MAX_VALUE);
     }
 
     /**
@@ -154,7 +156,7 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
      * Makes sure expansion amount is proportional to scroll.
      */
     @Test
-    public void testExpansionAmount() {
+    public void testExpansionAmount_whenBouncerHidden_setsCorrectValue() {
         mTouchHandler.onSessionStart(mTouchSession);
         ArgumentCaptor<GestureDetector.OnGestureListener> gestureListenerCaptor =
                 ArgumentCaptor.forClass(GestureDetector.OnGestureListener.class);
@@ -166,9 +168,9 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
         final MotionEvent event1 = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE,
                 0, SCREEN_HEIGHT_PX, 0);
         final MotionEvent event2 = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE,
-                0, SCREEN_HEIGHT_PX  - distanceY, 0);
+                0, SCREEN_HEIGHT_PX - distanceY, 0);
 
-        assertThat(gestureListenerCaptor.getValue().onScroll(event1, event2, 0 , distanceY))
+        assertThat(gestureListenerCaptor.getValue().onScroll(event1, event2, 0, distanceY))
                 .isTrue();
 
         // Ensure only called once
@@ -178,6 +180,38 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
         // Ensure correct expansion passed in.
         verify(mStatusBarKeyguardViewManager)
                 .onPanelExpansionChanged(eq(1 - scrollAmount), eq(false), eq(true));
+    }
+
+    /**
+     * Makes sure expansion amount is proportional to scroll.
+     */
+    @Test
+    public void testExpansionAmount_whenBouncerShown_setsCorrectValue() {
+        when(mCentralSurfaces.isBouncerShowing()).thenReturn(true);
+
+        mTouchHandler.onSessionStart(mTouchSession);
+        ArgumentCaptor<GestureDetector.OnGestureListener> gestureListenerCaptor =
+                ArgumentCaptor.forClass(GestureDetector.OnGestureListener.class);
+        verify(mTouchSession).registerGestureListener(gestureListenerCaptor.capture());
+
+        final float scrollAmount = .3f;
+        final float distanceY = SCREEN_HEIGHT_PX * scrollAmount;
+
+        final MotionEvent event1 = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE,
+                0, SCREEN_HEIGHT_PX, 0);
+        final MotionEvent event2 = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE,
+                0, SCREEN_HEIGHT_PX - distanceY, 0);
+
+        assertThat(gestureListenerCaptor.getValue().onScroll(event1, event2, 0, distanceY))
+                .isTrue();
+
+        // Ensure only called once
+        verify(mStatusBarKeyguardViewManager)
+                .onPanelExpansionChanged(anyFloat(), anyBoolean(), anyBoolean());
+
+        // Ensure correct expansion passed in.
+        verify(mStatusBarKeyguardViewManager)
+                .onPanelExpansionChanged(eq(scrollAmount), eq(false), eq(true));
     }
 
     private void swipeToPosition(float position, float velocityY) {
@@ -196,9 +230,9 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
         final MotionEvent event1 = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE,
                 0, SCREEN_HEIGHT_PX, 0);
         final MotionEvent event2 = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE,
-                0, SCREEN_HEIGHT_PX  - distanceY, 0);
+                0, SCREEN_HEIGHT_PX - distanceY, 0);
 
-        assertThat(gestureListenerCaptor.getValue().onScroll(event1, event2, 0 , distanceY))
+        assertThat(gestureListenerCaptor.getValue().onScroll(event1, event2, 0, distanceY))
                 .isTrue();
 
         final MotionEvent upEvent = MotionEvent.obtain(0, 0, MotionEvent.ACTION_UP,
@@ -212,14 +246,18 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
      * down.
      */
     @Test
-    public void testCollapseOnThreshold() {
+    public void testSwipeBelowThreshold_collapsesBouncer() {
         final float swipeUpPercentage = .3f;
-        swipeToPosition(swipeUpPercentage, -1);
+        final float expansion = 1 - swipeUpPercentage;
+        // The upward velocity is ignored.
+        final float velocityY = -1;
+        swipeToPosition(swipeUpPercentage, velocityY);
 
-        verify(mValueAnimatorCreator).create(eq(1 - swipeUpPercentage),
-                eq(KeyguardBouncer.EXPANSION_VISIBLE));
-        verify(mFlingAnimationUtilsClosing).apply(eq(mValueAnimator), anyFloat(), anyFloat(),
-                anyFloat(), anyFloat());
+        verify(mValueAnimatorCreator).create(eq(expansion), eq(KeyguardBouncer.EXPANSION_HIDDEN));
+        verify(mFlingAnimationUtilsClosing).apply(eq(mValueAnimator),
+                eq(SCREEN_HEIGHT_PX * expansion),
+                eq(SCREEN_HEIGHT_PX * KeyguardBouncer.EXPANSION_HIDDEN),
+                eq(velocityY), eq((float) SCREEN_HEIGHT_PX));
         verify(mValueAnimator).start();
     }
 
@@ -227,14 +265,59 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
      * Tests that ending a swipe above the set expansion threshold will continue the expansion.
      */
     @Test
-    public void testExpandOnThreshold() {
+    public void testSwipeAboveThreshold_expandsBouncer() {
         final float swipeUpPercentage = .7f;
-        swipeToPosition(swipeUpPercentage, 1);
+        final float expansion = 1 - swipeUpPercentage;
+        // The downward velocity is ignored.
+        final float velocityY = 1;
+        swipeToPosition(swipeUpPercentage, velocityY);
 
-        verify(mValueAnimatorCreator).create(eq(1 - swipeUpPercentage),
-                eq(KeyguardBouncer.EXPANSION_HIDDEN));
-        verify(mFlingAnimationUtils).apply(eq(mValueAnimator), anyFloat(), anyFloat(),
-                anyFloat(), anyFloat());
+        verify(mValueAnimatorCreator).create(eq(expansion), eq(KeyguardBouncer.EXPANSION_VISIBLE));
+        verify(mFlingAnimationUtils).apply(eq(mValueAnimator), eq(SCREEN_HEIGHT_PX * expansion),
+                eq(SCREEN_HEIGHT_PX * KeyguardBouncer.EXPANSION_VISIBLE),
+                eq(velocityY), eq((float) SCREEN_HEIGHT_PX));
+        verify(mValueAnimator).start();
+    }
+
+    /**
+     * Tests that swiping down with a speed above the set threshold leads to bouncer collapsing
+     * down.
+     */
+    @Test
+    public void testSwipeDownVelocityAboveMin_collapsesBouncer() {
+        when(mFlingAnimationUtils.getMinVelocityPxPerSecond()).thenReturn((float) 0);
+
+        // The swipe amount above the set expansion threshold is ignored.
+        final float swipeUpPercentage = .7f;
+        final float expansion = 1 - swipeUpPercentage;
+        final float velocityY = 1;
+        swipeToPosition(swipeUpPercentage, velocityY);
+
+        verify(mValueAnimatorCreator).create(eq(expansion), eq(KeyguardBouncer.EXPANSION_HIDDEN));
+        verify(mFlingAnimationUtilsClosing).apply(eq(mValueAnimator),
+                eq(SCREEN_HEIGHT_PX * expansion),
+                eq(SCREEN_HEIGHT_PX * KeyguardBouncer.EXPANSION_HIDDEN),
+                eq(velocityY), eq((float) SCREEN_HEIGHT_PX));
+        verify(mValueAnimator).start();
+    }
+
+    /**
+     * Tests that swiping up with a speed above the set threshold will continue the expansion.
+     */
+    @Test
+    public void testSwipeUpVelocityAboveMin_expandsBouncer() {
+        when(mFlingAnimationUtils.getMinVelocityPxPerSecond()).thenReturn((float) 0);
+
+        // The swipe amount below the set expansion threshold is ignored.
+        final float swipeUpPercentage = .3f;
+        final float expansion = 1 - swipeUpPercentage;
+        final float velocityY = -1;
+        swipeToPosition(swipeUpPercentage, velocityY);
+
+        verify(mValueAnimatorCreator).create(eq(expansion), eq(KeyguardBouncer.EXPANSION_VISIBLE));
+        verify(mFlingAnimationUtils).apply(eq(mValueAnimator), eq(SCREEN_HEIGHT_PX * expansion),
+                eq(SCREEN_HEIGHT_PX * KeyguardBouncer.EXPANSION_VISIBLE),
+                eq(velocityY), eq((float) SCREEN_HEIGHT_PX));
         verify(mValueAnimator).start();
     }
 }

@@ -31,8 +31,8 @@ import android.view.MotionEvent;
 import android.view.VelocityTracker;
 
 import com.android.systemui.statusbar.NotificationShadeWindowController;
-import com.android.systemui.statusbar.phone.KeyguardBouncer;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
+import com.android.systemui.statusbar.phone.KeyguardBouncer;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.wm.shell.animation.FlingAnimationUtils;
 
@@ -89,7 +89,7 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
     private VelocityTrackerFactory mVelocityTrackerFactory;
 
     private final GestureDetector.OnGestureListener mOnGestureListener =
-            new  GestureDetector.SimpleOnGestureListener() {
+            new GestureDetector.SimpleOnGestureListener() {
                 @Override
                 public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX,
                         float distanceY) {
@@ -134,9 +134,9 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
             NotificationShadeWindowController notificationShadeWindowController,
             ValueAnimatorCreator valueAnimatorCreator,
             VelocityTrackerFactory velocityTrackerFactory,
-            @Named(SWIPE_TO_BOUNCER_FLING_ANIMATION_UTILS_CLOSING)
-                    FlingAnimationUtils flingAnimationUtils,
             @Named(SWIPE_TO_BOUNCER_FLING_ANIMATION_UTILS_OPENING)
+                    FlingAnimationUtils flingAnimationUtils,
+            @Named(SWIPE_TO_BOUNCER_FLING_ANIMATION_UTILS_CLOSING)
                     FlingAnimationUtils flingAnimationUtilsClosing,
             @Named(SWIPE_TO_BOUNCER_START_REGION) float swipeRegionPercentage) {
         mDisplayMetrics = displayMetrics;
@@ -154,13 +154,16 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
     public void getTouchInitiationRegion(Region region) {
         if (mCentralSurfaces.isBouncerShowing()) {
             region.op(new Rect(0, 0, mDisplayMetrics.widthPixels,
-                    Math.round(mDisplayMetrics.heightPixels * mBouncerZoneScreenPercentage)),
+                            Math.round(
+                                    mDisplayMetrics.heightPixels * mBouncerZoneScreenPercentage)),
                     Region.Op.UNION);
         } else {
             region.op(new Rect(0,
-                    Math.round(mDisplayMetrics.heightPixels * (1 - mBouncerZoneScreenPercentage)),
-                    mDisplayMetrics.widthPixels,
-                    mDisplayMetrics.heightPixels),
+                            Math.round(
+                                    mDisplayMetrics.heightPixels
+                                            * (1 - mBouncerZoneScreenPercentage)),
+                            mDisplayMetrics.widthPixels,
+                            mDisplayMetrics.heightPixels),
                     Region.Op.UNION);
         }
     }
@@ -191,7 +194,7 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
 
         final MotionEvent motionEvent = (MotionEvent) event;
 
-        switch(motionEvent.getAction()) {
+        switch (motionEvent.getAction()) {
             case MotionEvent.ACTION_CANCEL:
             case MotionEvent.ACTION_UP:
                 mTouchSession.pop();
@@ -210,9 +213,8 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
                 final float velocityVector =
                         (float) Math.hypot(horizontalVelocity, verticalVelocity);
 
-
                 final float expansion = flingRevealsOverlay(verticalVelocity, velocityVector)
-                            ? KeyguardBouncer.EXPANSION_HIDDEN : KeyguardBouncer.EXPANSION_VISIBLE;
+                        ? KeyguardBouncer.EXPANSION_HIDDEN : KeyguardBouncer.EXPANSION_VISIBLE;
                 flingToExpansion(verticalVelocity, expansion);
 
                 if (expansion == KeyguardBouncer.EXPANSION_HIDDEN) {
@@ -236,8 +238,8 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
     }
 
     protected boolean flingRevealsOverlay(float velocity, float velocityVector) {
-        // Fully expand if the user has expanded the bouncer less than halfway or final velocity was
-        // positive, indicating an downward direction.
+        // Fully expand the space above the bouncer, if the user has expanded the bouncer less
+        // than halfway or final velocity was positive, indicating a downward direction.
         if (Math.abs(velocityVector) < mFlingAnimationUtils.getMinVelocityPxPerSecond()) {
             return mCurrentExpansion > FLING_PERCENTAGE_THRESHOLD;
         } else {
@@ -246,17 +248,20 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
     }
 
     protected void flingToExpansion(float velocity, float expansion) {
+        // The animation utils deal in pixel units, rather than expansion height.
         final float viewHeight = mCentralSurfaces.getDisplayHeight();
         final float currentHeight = viewHeight * mCurrentExpansion;
         final float targetHeight = viewHeight * expansion;
 
         final ValueAnimator animator = createExpansionAnimator(expansion);
         if (expansion == KeyguardBouncer.EXPANSION_HIDDEN) {
-            // The animation utils deal in pixel units, rather than expansion height.
-            mFlingAnimationUtils.apply(animator, currentHeight, targetHeight, velocity, viewHeight);
+            // Hides the bouncer, i.e., fully expands the space above the bouncer.
+            mFlingAnimationUtilsClosing.apply(animator, currentHeight, targetHeight, velocity,
+                    viewHeight);
         } else {
-            mFlingAnimationUtilsClosing.apply(
-                    animator, mCurrentExpansion, currentHeight, targetHeight, viewHeight);
+            // Shows the bouncer, i.e., fully collapses the space above the bouncer.
+            mFlingAnimationUtils.apply(
+                    animator, currentHeight, targetHeight, velocity, viewHeight);
         }
 
         animator.start();
