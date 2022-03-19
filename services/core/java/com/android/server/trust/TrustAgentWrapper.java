@@ -198,6 +198,8 @@ public class TrustAgentWrapper {
                     // Fall through.
                 case MSG_REVOKE_TRUST:
                     mTrusted = false;
+                    mTrustable = false;
+                    mWaitingForTrustableDowngrade = false;
                     mDisplayTrustGrantedMessage = false;
                     mMessage = null;
                     mHandler.removeMessages(MSG_TRUST_TIMEOUT);

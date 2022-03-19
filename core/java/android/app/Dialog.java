@@ -465,7 +465,8 @@ public class Dialog implements DialogInterface, Window.Callback,
                     onBackPressed();
                 }
             };
-            getOnBackInvokedDispatcher().registerSystemOnBackInvokedCallback(mDefaultBackCallback);
+            getOnBackInvokedDispatcher().registerOnBackInvokedCallback(
+                    OnBackInvokedDispatcher.PRIORITY_DEFAULT, mDefaultBackCallback);
             mDefaultBackCallback = null;
         }
     }

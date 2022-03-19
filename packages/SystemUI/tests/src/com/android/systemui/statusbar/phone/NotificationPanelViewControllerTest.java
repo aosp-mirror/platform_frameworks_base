@@ -104,7 +104,6 @@ import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.KeyguardAffordanceView;
 import com.android.systemui.statusbar.KeyguardIndicationController;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
-import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
@@ -119,12 +118,12 @@ import com.android.systemui.statusbar.notification.ConversationNotificationManag
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
-import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
 import com.android.systemui.statusbar.notification.stack.AmbientState;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.notification.stack.NotificationRoundnessManager;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
+import com.android.systemui.statusbar.notification.stack.NotificationStackSizeCalculator;
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardQsUserSwitchController;
@@ -174,8 +173,6 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     @Mock
     private NotificationShelfController mNotificationShelfController;
     @Mock
-    private NotificationGroupManagerLegacy mGroupManager;
-    @Mock
     private KeyguardStatusBarView mKeyguardStatusBar;
     @Mock
     private KeyguardUserSwitcherView mUserSwitcherView;
@@ -199,10 +196,6 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     private FeatureFlags mFeatureFlags;
     @Mock
     private DynamicPrivacyController mDynamicPrivacyController;
-    @Mock
-    private ShadeController mShadeController;
-    @Mock
-    private NotificationLockscreenUserManager mNotificationLockscreenUserManager;
     @Mock
     private NotificationEntryManager mNotificationEntryManager;
     @Mock
@@ -336,6 +329,8 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     private SysUiState mSysUiState;
     @Mock
     private NotificationListContainer mNotificationListContainer;
+    @Mock
+    private NotificationStackSizeCalculator mNotificationStackSizeCalculator;
     private NotificationPanelViewController.PanelEventsEmitter mPanelEventsEmitter;
     private Optional<SysUIUnfoldComponent> mSysUIUnfoldComponent = Optional.empty();
     private SysuiStatusBarStateController mStatusBarStateController;
@@ -466,7 +461,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 mFeatureFlags,
                 coordinator, expansionHandler, mDynamicPrivacyController, mKeyguardBypassController,
                 mFalsingManager, new FalsingCollectorFake(),
-                mNotificationLockscreenUserManager, mNotificationEntryManager,
+                mNotificationEntryManager,
                 mKeyguardStateController,
                 mStatusBarStateController,
                 mStatusBarWindowStateController,
@@ -484,7 +479,6 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 mKeyguardUserSwitcherComponentFactory,
                 mKeyguardStatusBarViewComponentFactory,
                 mLockscreenShadeTransitionController,
-                mGroupManager,
                 mNotificationAreaController,
                 mAuthController,
                 mScrimController,
@@ -516,7 +510,8 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 mSysUiState,
                 mKeyguardUnlockAnimationController,
                 mNotificationListContainer,
-                mPanelEventsEmitter);
+                mPanelEventsEmitter,
+                mNotificationStackSizeCalculator);
         mNotificationPanelViewController.initDependencies(
                 mCentralSurfaces,
                 () -> {},

@@ -4532,20 +4532,34 @@ package android.app {
   }
 
   public static class ActivityManager.TaskDescription implements android.os.Parcelable {
-    ctor public ActivityManager.TaskDescription(String, @DrawableRes int, int);
-    ctor public ActivityManager.TaskDescription(String, @DrawableRes int);
-    ctor public ActivityManager.TaskDescription(String);
-    ctor public ActivityManager.TaskDescription();
+    ctor @Deprecated public ActivityManager.TaskDescription(String, @DrawableRes int, int);
+    ctor @Deprecated public ActivityManager.TaskDescription(String, @DrawableRes int);
+    ctor @Deprecated public ActivityManager.TaskDescription(String);
+    ctor @Deprecated public ActivityManager.TaskDescription();
     ctor @Deprecated public ActivityManager.TaskDescription(String, android.graphics.Bitmap, int);
     ctor @Deprecated public ActivityManager.TaskDescription(String, android.graphics.Bitmap);
     ctor public ActivityManager.TaskDescription(android.app.ActivityManager.TaskDescription);
     method public int describeContents();
+    method @ColorInt public int getBackgroundColor();
     method @Deprecated public android.graphics.Bitmap getIcon();
     method public String getLabel();
-    method public int getPrimaryColor();
+    method @ColorInt public int getNavigationBarColor();
+    method @ColorInt public int getPrimaryColor();
+    method @ColorInt public int getStatusBarColor();
     method public void readFromParcel(android.os.Parcel);
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.ActivityManager.TaskDescription> CREATOR;
+  }
+
+  public static final class ActivityManager.TaskDescription.Builder {
+    ctor public ActivityManager.TaskDescription.Builder();
+    method @NonNull public android.app.ActivityManager.TaskDescription build();
+    method @NonNull public android.app.ActivityManager.TaskDescription.Builder setBackgroundColor(@ColorInt int);
+    method @NonNull public android.app.ActivityManager.TaskDescription.Builder setIcon(@DrawableRes int);
+    method @NonNull public android.app.ActivityManager.TaskDescription.Builder setLabel(@Nullable String);
+    method @NonNull public android.app.ActivityManager.TaskDescription.Builder setNavigationBarColor(@ColorInt int);
+    method @NonNull public android.app.ActivityManager.TaskDescription.Builder setPrimaryColor(@ColorInt int);
+    method @NonNull public android.app.ActivityManager.TaskDescription.Builder setStatusBarColor(@ColorInt int);
   }
 
   public class ActivityOptions {
@@ -7466,6 +7480,8 @@ package android.app.admin {
     method public CharSequence getStartUserSessionMessage(@NonNull android.content.ComponentName);
     method @Deprecated public boolean getStorageEncryption(@Nullable android.content.ComponentName);
     method public int getStorageEncryptionStatus();
+    method @Nullable public String getString(@NonNull String, @NonNull java.util.function.Supplier<java.lang.String>);
+    method @Nullable public String getString(@NonNull String, @NonNull java.util.function.Supplier<java.lang.String>, @NonNull java.lang.Object...);
     method @Nullable public android.app.admin.SystemUpdatePolicy getSystemUpdatePolicy();
     method @Nullable public android.os.PersistableBundle getTransferOwnershipBundle();
     method @Nullable public java.util.List<android.os.PersistableBundle> getTrustAgentConfiguration(@Nullable android.content.ComponentName, @NonNull android.content.ComponentName);
@@ -7707,6 +7723,7 @@ package android.app.admin {
     field public static final String EXTRA_PROVISIONING_SKIP_ENCRYPTION = "android.app.extra.PROVISIONING_SKIP_ENCRYPTION";
     field @Deprecated public static final String EXTRA_PROVISIONING_SKIP_USER_CONSENT = "android.app.extra.PROVISIONING_SKIP_USER_CONSENT";
     field public static final String EXTRA_PROVISIONING_TIME_ZONE = "android.app.extra.PROVISIONING_TIME_ZONE";
+    field public static final String EXTRA_PROVISIONING_USE_MOBILE_DATA = "android.app.extra.PROVISIONING_USE_MOBILE_DATA";
     field public static final String EXTRA_PROVISIONING_WIFI_ANONYMOUS_IDENTITY = "android.app.extra.PROVISIONING_WIFI_ANONYMOUS_IDENTITY";
     field public static final String EXTRA_PROVISIONING_WIFI_CA_CERTIFICATE = "android.app.extra.PROVISIONING_WIFI_CA_CERTIFICATE";
     field public static final String EXTRA_PROVISIONING_WIFI_DOMAIN = "android.app.extra.PROVISIONING_WIFI_DOMAIN";
@@ -11245,6 +11262,33 @@ package android.content.pm {
     field @NonNull public static final android.os.Parcelable.Creator<android.content.pm.Attribution> CREATOR;
   }
 
+  public final class Capability implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public String getName();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.content.pm.Capability> CREATOR;
+  }
+
+  public static final class Capability.Builder {
+    ctor public Capability.Builder(@NonNull String);
+    method @NonNull public android.content.pm.Capability build();
+  }
+
+  public final class CapabilityParams implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public java.util.List<java.lang.String> getAliases();
+    method @NonNull public String getName();
+    method @NonNull public String getValue();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.content.pm.CapabilityParams> CREATOR;
+  }
+
+  public static final class CapabilityParams.Builder {
+    ctor public CapabilityParams.Builder(@NonNull String, @NonNull String);
+    method @NonNull public android.content.pm.CapabilityParams.Builder addAlias(@NonNull String);
+    method @NonNull public android.content.pm.CapabilityParams build();
+  }
+
   public final class ChangedPackages implements android.os.Parcelable {
     ctor public ChangedPackages(int, @NonNull java.util.List<java.lang.String>);
     method public int describeContents();
@@ -12306,7 +12350,8 @@ package android.content.pm {
     method @NonNull public static android.content.pm.ShortcutInfo createFromGenericDocument(@NonNull android.content.Context, @NonNull android.app.appsearch.GenericDocument);
     method public int describeContents();
     method @Nullable public android.content.ComponentName getActivity();
-    method @NonNull public java.util.List<java.lang.String> getCapabilityParameterValues(@NonNull String, @NonNull String);
+    method @NonNull public java.util.List<android.content.pm.Capability> getCapabilities();
+    method @NonNull public java.util.List<android.content.pm.CapabilityParams> getCapabilityParams(@NonNull android.content.pm.Capability);
     method @Nullable public java.util.Set<java.lang.String> getCategories();
     method @Nullable public CharSequence getDisabledMessage();
     method public int getDisabledReason();
@@ -12321,7 +12366,6 @@ package android.content.pm {
     method public int getRank();
     method @Nullable public CharSequence getShortLabel();
     method public android.os.UserHandle getUserHandle();
-    method public boolean hasCapability(@NonNull String);
     method public boolean hasKeyFieldsOnly();
     method public boolean isCached();
     method public boolean isDeclaredInManifest();
@@ -12346,7 +12390,7 @@ package android.content.pm {
 
   public static class ShortcutInfo.Builder {
     ctor public ShortcutInfo.Builder(android.content.Context, String);
-    method @NonNull public android.content.pm.ShortcutInfo.Builder addCapabilityBinding(@NonNull String, @Nullable String, @Nullable java.util.List<java.lang.String>);
+    method @NonNull public android.content.pm.ShortcutInfo.Builder addCapabilityBinding(@NonNull android.content.pm.Capability, @Nullable android.content.pm.CapabilityParams);
     method @NonNull public android.content.pm.ShortcutInfo build();
     method @NonNull public android.content.pm.ShortcutInfo.Builder setActivity(@NonNull android.content.ComponentName);
     method @NonNull public android.content.pm.ShortcutInfo.Builder setCategories(java.util.Set<java.lang.String>);
@@ -22210,6 +22254,10 @@ package android.media {
     field public static final String KEY_COLOR_TRANSFER_REQUEST = "color-transfer-request";
     field public static final String KEY_COMPLEXITY = "complexity";
     field public static final String KEY_CREATE_INPUT_SURFACE_SUSPENDED = "create-input-buffers-suspended";
+    field public static final String KEY_CROP_BOTTOM = "crop-bottom";
+    field public static final String KEY_CROP_LEFT = "crop-left";
+    field public static final String KEY_CROP_RIGHT = "crop-right";
+    field public static final String KEY_CROP_TOP = "crop-top";
     field public static final String KEY_DURATION = "durationUs";
     field public static final String KEY_ENCODER_DELAY = "encoder-delay";
     field public static final String KEY_ENCODER_PADDING = "encoder-padding";
@@ -22899,7 +22947,6 @@ package android.media {
     method public int describeContents();
     method @Nullable public String getClientPackageName();
     method public int getConnectionState();
-    method @NonNull public java.util.Set<java.lang.String> getDeduplicationIds();
     method @Nullable public CharSequence getDescription();
     method @Nullable public android.os.Bundle getExtras();
     method @NonNull public java.util.List<java.lang.String> getFeatures();
@@ -22933,7 +22980,6 @@ package android.media {
     method @NonNull public android.media.MediaRoute2Info.Builder clearFeatures();
     method @NonNull public android.media.MediaRoute2Info.Builder setClientPackageName(@Nullable String);
     method @NonNull public android.media.MediaRoute2Info.Builder setConnectionState(int);
-    method @NonNull public android.media.MediaRoute2Info.Builder setDeduplicationIds(@NonNull java.util.Set<java.lang.String>);
     method @NonNull public android.media.MediaRoute2Info.Builder setDescription(@Nullable CharSequence);
     method @NonNull public android.media.MediaRoute2Info.Builder setExtras(@Nullable android.os.Bundle);
     method @NonNull public android.media.MediaRoute2Info.Builder setIconUri(@Nullable android.net.Uri);
@@ -23460,11 +23506,8 @@ package android.media {
 
   public final class RouteDiscoveryPreference implements android.os.Parcelable {
     method public int describeContents();
-    method @NonNull public java.util.List<java.lang.String> getAllowedPackages();
-    method @NonNull public java.util.List<java.lang.String> getDeduplicationPackageOrder();
     method @NonNull public java.util.List<java.lang.String> getPreferredFeatures();
     method public boolean shouldPerformActiveScan();
-    method public boolean shouldRemoveDuplicates();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.media.RouteDiscoveryPreference> CREATOR;
   }
@@ -23473,8 +23516,6 @@ package android.media {
     ctor public RouteDiscoveryPreference.Builder(@NonNull java.util.List<java.lang.String>, boolean);
     ctor public RouteDiscoveryPreference.Builder(@NonNull android.media.RouteDiscoveryPreference);
     method @NonNull public android.media.RouteDiscoveryPreference build();
-    method @NonNull public android.media.RouteDiscoveryPreference.Builder setAllowedPackages(@NonNull java.util.List<java.lang.String>);
-    method @NonNull public android.media.RouteDiscoveryPreference.Builder setDeduplicationPackageOrder(@NonNull java.util.List<java.lang.String>);
     method @NonNull public android.media.RouteDiscoveryPreference.Builder setPreferredFeatures(@NonNull java.util.List<java.lang.String>);
     method @NonNull public android.media.RouteDiscoveryPreference.Builder setShouldPerformActiveScan(boolean);
   }
@@ -26077,7 +26118,7 @@ package android.media.tv {
     method public void onContentAllowed(String);
     method public void onContentBlocked(String, android.media.tv.TvContentRating);
     method public void onDisconnected(String);
-    method public void onSignalStrength(@NonNull String, int);
+    method public void onSignalStrengthUpdated(@NonNull String, int);
     method public void onTimeShiftStatusChanged(String, int);
     method public void onTrackSelected(String, int, String);
     method public void onTracksChanged(String, java.util.List<android.media.tv.TvTrackInfo>);
@@ -26092,27 +26133,16 @@ package android.media.tv {
 package android.media.tv.interactive {
 
   public final class AppLinkInfo implements android.os.Parcelable {
+    ctor public AppLinkInfo(@NonNull String, @NonNull String, @NonNull String);
     method public int describeContents();
-    method @NonNull public String getClassName();
-    method @NonNull public String getPackageName();
-    method @Nullable public String getUriHost();
-    method @Nullable public String getUriPrefix();
-    method @Nullable public String getUriScheme();
+    method @NonNull public android.content.ComponentName getComponentName();
+    method @NonNull public android.net.Uri getUri();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.media.tv.interactive.AppLinkInfo> CREATOR;
   }
 
-  public static final class AppLinkInfo.Builder {
-    ctor public AppLinkInfo.Builder(@NonNull String, @NonNull String);
-    method @NonNull public android.media.tv.interactive.AppLinkInfo build();
-    method @NonNull public android.media.tv.interactive.AppLinkInfo.Builder setUriHost(@NonNull String);
-    method @NonNull public android.media.tv.interactive.AppLinkInfo.Builder setUriPrefix(@NonNull String);
-    method @NonNull public android.media.tv.interactive.AppLinkInfo.Builder setUriScheme(@NonNull String);
-  }
-
   public final class TvInteractiveAppManager {
     method @NonNull public java.util.List<android.media.tv.interactive.TvInteractiveAppServiceInfo> getTvInteractiveAppServiceList();
-    method public void prepare(@NonNull String, int);
     method public void registerAppLinkInfo(@NonNull String, @NonNull android.media.tv.interactive.AppLinkInfo);
     method public void registerCallback(@NonNull java.util.concurrent.Executor, @NonNull android.media.tv.interactive.TvInteractiveAppManager.TvInteractiveAppCallback);
     method public void sendAppLinkCommand(@NonNull String, @NonNull android.os.Bundle);
@@ -26135,6 +26165,7 @@ package android.media.tv.interactive {
     field public static final String INTENT_KEY_BI_INTERACTIVE_APP_TYPE = "bi_interactive_app_type";
     field public static final String INTENT_KEY_BI_INTERACTIVE_APP_URI = "bi_interactive_app_uri";
     field public static final String INTENT_KEY_CHANNEL_URI = "channel_uri";
+    field public static final String INTENT_KEY_COMMAND_TYPE = "command_type";
     field public static final String INTENT_KEY_INTERACTIVE_APP_SERVICE_ID = "interactive_app_id";
     field public static final String INTENT_KEY_TV_INPUT_ID = "tv_input_id";
     field public static final int INTERACTIVE_APP_STATE_ERROR = 3; // 0x3
@@ -26163,7 +26194,6 @@ package android.media.tv.interactive {
     method public void onAppLinkCommand(@NonNull android.os.Bundle);
     method @Nullable public final android.os.IBinder onBind(@NonNull android.content.Intent);
     method @Nullable public abstract android.media.tv.interactive.TvInteractiveAppService.Session onCreateSession(@NonNull String, int);
-    method public abstract void onPrepare(int);
     method public void onRegisterAppLinkInfo(@NonNull android.media.tv.interactive.AppLinkInfo);
     method public void onUnregisterAppLinkInfo(@NonNull android.media.tv.interactive.AppLinkInfo);
     field public static final String COMMAND_PARAMETER_KEY_CHANGE_CHANNEL_QUIETLY = "command_change_channel_quietly";
@@ -26184,6 +26214,7 @@ package android.media.tv.interactive {
 
   public abstract static class TvInteractiveAppService.Session implements android.view.KeyEvent.Callback {
     ctor public TvInteractiveAppService.Session(@NonNull android.content.Context);
+    method public boolean isMediaViewEnabled();
     method @CallSuper public void layoutSurface(int, int, int, int);
     method @CallSuper public final void notifyBiInteractiveAppCreated(@NonNull android.net.Uri, @Nullable String);
     method @CallSuper public void notifySessionStateChanged(int, int);
@@ -26192,23 +26223,24 @@ package android.media.tv.interactive {
     method public void onBroadcastInfoResponse(@NonNull android.media.tv.BroadcastInfoResponse);
     method public void onContentAllowed();
     method public void onContentBlocked(@NonNull android.media.tv.TvContentRating);
-    method public void onCreateBiInteractiveApp(@NonNull android.net.Uri, @Nullable android.os.Bundle);
+    method public void onCreateBiInteractiveAppRequest(@NonNull android.net.Uri, @Nullable android.os.Bundle);
     method @Nullable public android.view.View onCreateMediaView();
     method public void onCurrentChannelLcn(int);
     method public void onCurrentChannelUri(@Nullable android.net.Uri);
     method public void onCurrentTvInputId(@Nullable String);
-    method public void onDestroyBiInteractiveApp(@NonNull String);
+    method public void onDestroyBiInteractiveAppRequest(@NonNull String);
     method public boolean onGenericMotionEvent(@NonNull android.view.MotionEvent);
     method public boolean onKeyDown(int, @NonNull android.view.KeyEvent);
     method public boolean onKeyLongPress(int, @NonNull android.view.KeyEvent);
     method public boolean onKeyMultiple(int, int, @NonNull android.view.KeyEvent);
     method public boolean onKeyUp(int, @NonNull android.view.KeyEvent);
-    method public void onMediaViewSizeChanged(int, int);
+    method public void onMediaViewSizeChanged(@Px int, @Px int);
     method public abstract void onRelease();
     method public void onResetInteractiveApp();
     method public abstract boolean onSetSurface(@Nullable android.view.Surface);
     method public void onSetTeletextAppEnabled(boolean);
     method public void onSignalStrength(int);
+    method public void onSigningResult(@NonNull String, @NonNull byte[]);
     method public void onStartInteractiveApp();
     method public void onStopInteractiveApp();
     method public void onStreamVolume(float);
@@ -26227,6 +26259,7 @@ package android.media.tv.interactive {
     method @CallSuper public void requestCurrentChannelLcn();
     method @CallSuper public void requestCurrentChannelUri();
     method @CallSuper public void requestCurrentTvInputId();
+    method @CallSuper public void requestSigning(@NonNull String, @NonNull String, @NonNull String, @NonNull byte[]);
     method @CallSuper public void requestStreamVolume();
     method @CallSuper public void requestTrackInfoList();
     method @CallSuper public void sendPlaybackCommandRequest(@NonNull String, @Nullable android.os.Bundle);
@@ -26256,6 +26289,7 @@ package android.media.tv.interactive {
     method public void createBiInteractiveApp(@NonNull android.net.Uri, @Nullable android.os.Bundle);
     method public void destroyBiInteractiveApp(@NonNull String);
     method public boolean dispatchUnhandledInputEvent(@NonNull android.view.InputEvent);
+    method @Nullable public android.media.tv.interactive.TvInteractiveAppView.OnUnhandledInputEventListener getOnUnhandledInputEventListener();
     method public void onAttachedToWindow();
     method public void onDetachedFromWindow();
     method public void onLayout(boolean, int, int, int, int);
@@ -26268,6 +26302,7 @@ package android.media.tv.interactive {
     method public void sendCurrentChannelLcn(int);
     method public void sendCurrentChannelUri(@Nullable android.net.Uri);
     method public void sendCurrentTvInputId(@Nullable String);
+    method public void sendSigningResult(@NonNull String, @NonNull byte[]);
     method public void sendStreamVolume(float);
     method public void sendTrackInfoList(@Nullable java.util.List<android.media.tv.TvTrackInfo>);
     method public void setCallback(@NonNull java.util.concurrent.Executor, @NonNull android.media.tv.interactive.TvInteractiveAppView.TvInteractiveAppCallback);
@@ -26276,6 +26311,11 @@ package android.media.tv.interactive {
     method public int setTvView(@Nullable android.media.tv.TvView);
     method public void startInteractiveApp();
     method public void stopInteractiveApp();
+    field public static final String BI_INTERACTIVE_APP_KEY_ALIAS = "alias";
+    field public static final String BI_INTERACTIVE_APP_KEY_CERTIFICATE = "certificate";
+    field public static final String BI_INTERACTIVE_APP_KEY_HTTP_ADDITIONAL_HEADERS = "http_additional_headers";
+    field public static final String BI_INTERACTIVE_APP_KEY_HTTP_USER_AGENT = "http_user_agent";
+    field public static final String BI_INTERACTIVE_APP_KEY_PRIVATE_KEY = "private_key";
   }
 
   public static interface TvInteractiveAppView.OnUnhandledInputEventListener {
@@ -26289,6 +26329,7 @@ package android.media.tv.interactive {
     method public void onRequestCurrentChannelLcn(@NonNull String);
     method public void onRequestCurrentChannelUri(@NonNull String);
     method public void onRequestCurrentTvInputId(@NonNull String);
+    method public void onRequestSigning(@NonNull String, @NonNull String, @NonNull String, @NonNull String, @NonNull byte[]);
     method public void onRequestStreamVolume(@NonNull String);
     method public void onRequestTrackInfoList(@NonNull String);
     method public void onSetVideoBounds(@NonNull String, @NonNull android.graphics.Rect);
@@ -26843,11 +26884,13 @@ package android.net {
 
   public class VpnManager {
     method public void deleteProvisionedVpnProfile();
+    method @Nullable public android.net.VpnProfileState getProvisionedVpnProfileState();
     method @Nullable public android.content.Intent provisionVpnProfile(@NonNull android.net.PlatformVpnProfile);
     method @Deprecated public void startProvisionedVpnProfile();
     method @NonNull public String startProvisionedVpnProfileSession();
     method public void stopProvisionedVpnProfile();
     field public static final String ACTION_VPN_MANAGER_EVENT = "android.net.action.VPN_MANAGER_EVENT";
+    field public static final String CATEGORY_EVENT_ALWAYS_ON_STATE_CHANGED = "android.net.category.EVENT_ALWAYS_ON_STATE_CHANGED";
     field public static final String CATEGORY_EVENT_DEACTIVATED_BY_USER = "android.net.category.EVENT_DEACTIVATED_BY_USER";
     field public static final String CATEGORY_EVENT_IKE_ERROR = "android.net.category.EVENT_IKE_ERROR";
     field public static final String CATEGORY_EVENT_NETWORK_ERROR = "android.net.category.EVENT_NETWORK_ERROR";
@@ -26864,6 +26907,22 @@ package android.net {
     field public static final String EXTRA_UNDERLYING_LINK_PROPERTIES = "android.net.extra.UNDERLYING_LINK_PROPERTIES";
     field public static final String EXTRA_UNDERLYING_NETWORK = "android.net.extra.UNDERLYING_NETWORK";
     field public static final String EXTRA_UNDERLYING_NETWORK_CAPABILITIES = "android.net.extra.UNDERLYING_NETWORK_CAPABILITIES";
+    field public static final String EXTRA_VPN_PROFILE_STATE = "android.net.extra.VPN_PROFILE_STATE";
+  }
+
+  public final class VpnProfileState implements android.os.Parcelable {
+    ctor public VpnProfileState(int, @Nullable String, boolean, boolean);
+    method public int describeContents();
+    method @Nullable public String getSessionId();
+    method public int getState();
+    method public boolean isAlwaysOn();
+    method public boolean isLockdownEnabled();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.VpnProfileState> CREATOR;
+    field public static final int STATE_CONNECTED = 2; // 0x2
+    field public static final int STATE_CONNECTING = 1; // 0x1
+    field public static final int STATE_DISCONNECTED = 0; // 0x0
+    field public static final int STATE_FAILED = 3; // 0x3
   }
 
   public class VpnService extends android.app.Service {
@@ -57926,7 +57985,7 @@ package android.window {
   }
 
   public interface OnBackInvokedDispatcher {
-    method public void registerOnBackInvokedCallback(@NonNull android.window.OnBackInvokedCallback, @IntRange(from=0) int);
+    method public void registerOnBackInvokedCallback(@IntRange(from=0) int, @NonNull android.window.OnBackInvokedCallback);
     method public void unregisterOnBackInvokedCallback(@NonNull android.window.OnBackInvokedCallback);
     field public static final int PRIORITY_DEFAULT = 0; // 0x0
     field public static final int PRIORITY_OVERLAY = 1000000; // 0xf4240

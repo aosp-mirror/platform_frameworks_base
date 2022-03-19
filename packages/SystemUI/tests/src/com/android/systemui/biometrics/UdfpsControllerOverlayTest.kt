@@ -61,6 +61,8 @@ import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnit
 import org.mockito.Mockito.`when` as whenever
 
+private const val REQUEST_ID = 2L
+
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
 @RunWithLooper(setAsMainLooper = true)
@@ -119,7 +121,7 @@ class UdfpsControllerOverlayTest : SysuiTestCase() {
             statusBarStateController, panelExpansionStateManager, statusBarKeyguardViewManager,
             keyguardUpdateMonitor, dialogManager, dumpManager, transitionController,
             configurationController, systemClock, keyguardStateController,
-            unlockedScreenOffAnimationController, sensorProps, hbmProvider, reason,
+            unlockedScreenOffAnimationController, sensorProps, hbmProvider, REQUEST_ID, reason,
             controllerCallback, onTouch, activityLaunchAnimator)
         block()
     }
@@ -262,6 +264,12 @@ class UdfpsControllerOverlayTest : SysuiTestCase() {
         controllerOverlay.show(udfpsController)
         controllerOverlay.hide()
         verify(udfpsView).stopIllumination()
+    }
+
+    @Test
+    fun matchesRequestIds() = withReason(REASON_AUTH_BP) {
+        assertThat(controllerOverlay.matchesRequestId(REQUEST_ID)).isTrue()
+        assertThat(controllerOverlay.matchesRequestId(REQUEST_ID + 1)).isFalse()
     }
 }
 

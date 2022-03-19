@@ -16,6 +16,7 @@
 
 package com.android.systemui.dreams;
 
+import android.annotation.Nullable;
 import android.app.AlarmManager;
 import android.content.res.Resources;
 import android.hardware.SensorPrivacyManager;
@@ -45,6 +46,7 @@ import com.android.systemui.util.time.DateFormatUtil;
 
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 
@@ -62,6 +64,9 @@ public class DreamOverlayStatusBarViewController extends ViewController<DreamOve
     private final IndividualSensorPrivacyController mSensorPrivacyController;
     private final NotificationListener mNotificationListener;
     private final ZenModeController mZenModeController;
+    private final Executor mMainExecutor;
+
+    private boolean mIsAttached;
 
     private final NetworkRequest mNetworkRequest = new NetworkRequest.Builder()
             .clearCapabilities()
@@ -131,6 +136,7 @@ public class DreamOverlayStatusBarViewController extends ViewController<DreamOve
     public DreamOverlayStatusBarViewController(
             DreamOverlayStatusBarView view,
             @Main Resources resources,
+            @Main Executor mainExecutor,
             ConnectivityManager connectivityManager,
             TouchInsetManager.TouchInsetSession touchInsetSession,
             AlarmManager alarmManager,
@@ -141,6 +147,7 @@ public class DreamOverlayStatusBarViewController extends ViewController<DreamOve
             ZenModeController zenModeController) {
         super(view);
         mResources = resources;
+        mMainExecutor = mainExecutor;
         mConnectivityManager = connectivityManager;
         mTouchInsetSession = touchInsetSession;
         mAlarmManager = alarmManager;
@@ -157,6 +164,8 @@ public class DreamOverlayStatusBarViewController extends ViewController<DreamOve
 
     @Override
     protected void onViewAttached() {
+        mIsAttached = true;
+
         updateNotificationsStatusIcon();
 
         mConnectivityManager.registerNetworkCallback(mNetworkRequest, mNetworkCallback);
@@ -181,6 +190,8 @@ public class DreamOverlayStatusBarViewController extends ViewController<DreamOve
         mNextAlarmController.removeCallback(mNextAlarmCallback);
         mConnectivityManager.unregisterNetworkCallback(mNetworkCallback);
         mTouchInsetSession.clear();
+
+        mIsAttached = false;
     }
 
     private void updateWifiUnavailableStatusIcon() {
@@ -189,14 +200,14 @@ public class DreamOverlayStatusBarViewController extends ViewController<DreamOve
                         mConnectivityManager.getActiveNetwork());
         final boolean available = capabilities != null
                 && capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI);
-        mView.showIcon(DreamOverlayStatusBarView.STATUS_ICON_WIFI_UNAVAILABLE, !available);
+        showIcon(DreamOverlayStatusBarView.STATUS_ICON_WIFI_UNAVAILABLE, !available);
     }
 
     private void updateAlarmStatusIcon() {
         final AlarmManager.AlarmClockInfo alarm =
                 mAlarmManager.getNextAlarmClock(UserHandle.USER_CURRENT);
         final boolean hasAlarm = alarm != null && alarm.getTriggerTime() > 0;
-        mView.showIcon(
+        showIcon(
                 DreamOverlayStatusBarView.STATUS_ICON_ALARM_SET,
                 hasAlarm,
                 hasAlarm ? buildAlarmContentDescription(alarm) : null);
@@ -215,7 +226,7 @@ public class DreamOverlayStatusBarViewController extends ViewController<DreamOve
                 .isSensorBlocked(SensorPrivacyManager.Sensors.MICROPHONE);
         final boolean cameraBlocked = mSensorPrivacyController
                 .isSensorBlocked(SensorPrivacyManager.Sensors.CAMERA);
-        mView.showIcon(
+        showIcon(
                 DreamOverlayStatusBarView.STATUS_ICON_MIC_CAMERA_DISABLED,
                 micBlocked && cameraBlocked);
     }
@@ -230,7 +241,7 @@ public class DreamOverlayStatusBarViewController extends ViewController<DreamOve
         final StatusBarNotification[] notifications =
                 mNotificationListener.getActiveNotifications();
         final int notificationCount = notifications != null ? notifications.length : 0;
-        mView.showIcon(
+        showIcon(
                 DreamOverlayStatusBarView.STATUS_ICON_NOTIFICATIONS,
                 notificationCount > 0,
                 notificationCount > 0
@@ -246,8 +257,23 @@ public class DreamOverlayStatusBarViewController extends ViewController<DreamOve
     }
 
     private void updatePriorityModeStatusIcon() {
-        mView.showIcon(
+        showIcon(
                 DreamOverlayStatusBarView.STATUS_ICON_PRIORITY_MODE_ON,
                 mZenModeController.getZen() != Settings.Global.ZEN_MODE_OFF);
+    }
+
+    private void showIcon(@DreamOverlayStatusBarView.StatusIconType int iconType, boolean show) {
+        showIcon(iconType, show, null);
+    }
+
+    private void showIcon(
+            @DreamOverlayStatusBarView.StatusIconType int iconType,
+            boolean show,
+            @Nullable String contentDescription) {
+        mMainExecutor.execute(() -> {
+            if (mIsAttached) {
+                mView.showIcon(iconType, show, contentDescription);
+            }
+        });
     }
 }

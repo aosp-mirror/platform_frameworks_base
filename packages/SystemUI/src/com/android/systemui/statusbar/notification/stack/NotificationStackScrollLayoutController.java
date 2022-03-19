@@ -181,6 +181,7 @@ public class NotificationStackScrollLayoutController {
     private final SectionHeaderController mSilentHeaderController;
     private final LockscreenShadeTransitionController mLockscreenShadeTransitionController;
     private final InteractionJankMonitor mJankMonitor;
+    private final NotificationStackSizeCalculator mNotificationStackSizeCalculator;
     private final StackStateLogger mStackStateLogger;
     private final NotificationStackScrollLogger mLogger;
 
@@ -307,6 +308,7 @@ public class NotificationStackScrollLayoutController {
                 R.dimen.lockscreen_shade_notification_movement);
         mTotalDistanceForFullShadeTransition = mResources.getDimensionPixelSize(
                 R.dimen.lockscreen_shade_qs_transition_distance);
+        mNotificationStackSizeCalculator.updateResources();
     }
 
     private final StatusBarStateController.StateListener mStateListener =
@@ -662,7 +664,8 @@ public class NotificationStackScrollLayoutController {
             ShadeController shadeController,
             InteractionJankMonitor jankMonitor,
             StackStateLogger stackLogger,
-            NotificationStackScrollLogger logger) {
+            NotificationStackScrollLogger logger,
+            NotificationStackSizeCalculator notificationStackSizeCalculator) {
         mStackStateLogger = stackLogger;
         mLogger = logger;
         mAllowLongPress = allowLongPress;
@@ -688,6 +691,7 @@ public class NotificationStackScrollLayoutController {
         mCentralSurfaces = centralSurfaces;
         mScrimController = scrimController;
         mJankMonitor = jankMonitor;
+        mNotificationStackSizeCalculator = notificationStackSizeCalculator;
         groupManager.registerGroupExpansionChangeListener(
                 (changedRow, expanded) -> mView.onGroupExpandChanged(changedRow, expanded));
         legacyGroupManager.registerGroupChangeListener(new OnGroupChangeListener() {
@@ -758,7 +762,7 @@ public class NotificationStackScrollLayoutController {
             });
         }
 
-        mView.initView(mView.getContext(), mSwipeHelper);
+        mView.initView(mView.getContext(), mSwipeHelper, mNotificationStackSizeCalculator);
         mView.setKeyguardBypassEnabled(mKeyguardBypassController.getBypassEnabled());
         mKeyguardBypassController
                 .registerOnBypassStateChangedListener(mView::setKeyguardBypassEnabled);
@@ -905,6 +909,13 @@ public class NotificationStackScrollLayoutController {
      */
     public int getTop() {
         return mView.getTop();
+    }
+
+    /**
+     * @return the bottom of the view.
+     */
+    public int getBottom() {
+        return mView.getBottom();
     }
 
     public float getTranslationX() {
@@ -1296,8 +1307,14 @@ public class NotificationStackScrollLayoutController {
      * appear on the keyguard.
      * Setting a negative number will disable rendering this line.
      */
-    public void setKeyguardBottomPadding(float keyguardBottomPadding) {
+    public void setKeyguardBottomPaddingForDebug(float keyguardBottomPadding) {
         mView.setKeyguardBottomPadding(keyguardBottomPadding);
+    }
+
+    /** For debugging only. */
+    public void mKeyguardNotificationAvailableSpaceForDebug(
+            float keyguardNotificationAvailableSpace) {
+        mView.setKeyguardAvailableSpaceForDebug(keyguardNotificationAvailableSpace);
     }
 
     public RemoteInputController.Delegate createDelegate() {

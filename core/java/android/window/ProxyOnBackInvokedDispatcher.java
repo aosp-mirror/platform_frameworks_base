@@ -44,7 +44,7 @@ public class ProxyOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
     /**
      * List of pair representing an {@link OnBackInvokedCallback} and its associated priority.
      *
-     * @see OnBackInvokedDispatcher#registerOnBackInvokedCallback(OnBackInvokedCallback, int)
+     * @see OnBackInvokedDispatcher#registerOnBackInvokedCallback(int, OnBackInvokedCallback)
      */
     private final List<Pair<OnBackInvokedCallback, Integer>> mCallbacks = new ArrayList<>();
     private final Object mLock = new Object();
@@ -52,7 +52,7 @@ public class ProxyOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
 
     @Override
     public void registerOnBackInvokedCallback(
-            @NonNull OnBackInvokedCallback callback, int priority) {
+            int priority, @NonNull OnBackInvokedCallback callback) {
         if (DEBUG) {
             Log.v(TAG, String.format("Pending register %s. Actual=%s", callback,
                     mActualDispatcherOwner));
@@ -91,7 +91,7 @@ public class ProxyOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
             mCallbacks.add(Pair.create(callback, priority));
             if (mActualDispatcherOwner != null) {
                 mActualDispatcherOwner.getOnBackInvokedDispatcher().registerOnBackInvokedCallback(
-                        callback, priority);
+                        priority, callback);
             }
         }
     }
@@ -115,7 +115,7 @@ public class ProxyOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
         for (Pair<OnBackInvokedCallback, Integer> callbackPair : mCallbacks) {
             int priority = callbackPair.second;
             if (priority >= 0) {
-                dispatcher.registerOnBackInvokedCallback(callbackPair.first, priority);
+                dispatcher.registerOnBackInvokedCallback(priority, callbackPair.first);
             } else {
                 dispatcher.registerSystemOnBackInvokedCallback(callbackPair.first);
             }

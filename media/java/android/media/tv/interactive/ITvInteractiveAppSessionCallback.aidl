@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,5 +43,6 @@ oneway interface ITvInteractiveAppSessionCallback {
     void onRequestStreamVolume();
     void onRequestTrackInfoList();
     void onRequestCurrentTvInputId();
+    void onRequestSigning(in String id, in String algorithm, in String alias, in byte[] data);
     void onAdRequest(in AdRequest request);
 }

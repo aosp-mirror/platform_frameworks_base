@@ -620,18 +620,15 @@ class Owners {
         }
     }
 
-    /**
-     * Sets the indicator that the profile owner manages an organization-owned device,
-     * then write to file.
-     */
-    void markProfileOwnerOfOrganizationOwnedDevice(int userId) {
+    /** Set whether the profile owner manages an organization-owned device, then write to file. */
+    void setProfileOwnerOfOrganizationOwnedDevice(int userId, boolean isOrganizationOwnedDevice) {
         synchronized (mLock) {
             OwnerInfo profileOwner = mProfileOwners.get(userId);
             if (profileOwner != null) {
-                profileOwner.isOrganizationOwnedDevice = true;
+                profileOwner.isOrganizationOwnedDevice = isOrganizationOwnedDevice;
             } else {
                 Slog.e(TAG, String.format(
-                        "No profile owner for user %d to set as org-owned.", userId));
+                        "No profile owner for user %d to set org-owned flag.", userId));
             }
             writeProfileOwner(userId);
         }

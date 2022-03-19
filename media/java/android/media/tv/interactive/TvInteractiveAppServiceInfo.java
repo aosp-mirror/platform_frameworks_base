@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,6 +71,12 @@ public final class TvInteractiveAppServiceInfo implements Parcelable {
     private final String mId;
     private int mTypes;
 
+    /**
+     * Constructs a TvInteractiveAppServiceInfo object.
+     *
+     * @param context the application context
+     * @param component the component name of the TvInteractiveAppService
+     */
     public TvInteractiveAppServiceInfo(@NonNull Context context, @NonNull ComponentName component) {
         if (context == null) {
             throw new IllegalArgumentException("context cannot be null.");

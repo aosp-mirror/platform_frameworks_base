@@ -60,7 +60,6 @@ class GrantAndRevokeTrustTest {
     @Test
     fun sleepingDeviceWithoutGrantLocksDevice() {
         uiDevice.sleep()
-        await()
 
         lockStateTrackingRule.assertLocked()
     }
@@ -69,7 +68,6 @@ class GrantAndRevokeTrustTest {
     fun grantKeepsDeviceUnlocked() {
         trustAgentRule.agent.grantTrust(GRANT_MESSAGE, 10000, 0)
         uiDevice.sleep()
-        await()
 
         lockStateTrackingRule.assertUnlocked()
     }
@@ -80,7 +78,6 @@ class GrantAndRevokeTrustTest {
         await()
         uiDevice.sleep()
         trustAgentRule.agent.revokeTrust()
-        await()
 
         lockStateTrackingRule.assertLocked()
     }

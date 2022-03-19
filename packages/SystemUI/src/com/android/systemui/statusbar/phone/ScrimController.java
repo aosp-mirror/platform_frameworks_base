@@ -41,6 +41,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.colorextraction.ColorExtractor.GradientColors;
 import com.android.internal.graphics.ColorUtils;
 import com.android.internal.util.function.TriConsumer;
+import com.android.keyguard.BouncerPanelExpansionCalculator;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.settingslib.Utils;
@@ -808,7 +809,15 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
     private Pair<Integer, Float> calculateBackStateForState(ScrimState state) {
         // Either darken of make the scrim transparent when you
         // pull down the shade
-        float interpolatedFract = getInterpolatedFraction();
+        float interpolatedFract;
+
+        if (state == ScrimState.KEYGUARD)  {
+            interpolatedFract = BouncerPanelExpansionCalculator
+                    .getBackScrimScaledExpansion(mPanelExpansionFraction);
+        } else {
+            interpolatedFract = getInterpolatedFraction();
+        }
+
         float stateBehind = mClipsQsScrim ? state.getNotifAlpha() : state.getBehindAlpha();
         float behindAlpha;
         int behindTint;
