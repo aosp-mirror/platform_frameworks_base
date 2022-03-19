@@ -61,6 +61,7 @@ import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -129,6 +130,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
         mViewMediator.onSystemReady();
     }
 
+    @Ignore("flaky, b/223385977")
     @Test
     public void testOnGoingToSleep_UpdatesKeyguardGoingAway() {
         mViewMediator.onStartedGoingToSleep(OFF_BECAUSE_OF_USER);
@@ -136,12 +138,14 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
         verify(mStatusBarKeyguardViewManager, never()).setKeyguardGoingAwayState(anyBoolean());
     }
 
+    @Ignore("flaky, b/223385977")
     @Test
     public void testRegisterDumpable() {
         verify(mDumpManager).registerDumpable(KeyguardViewMediator.class.getName(), mViewMediator);
         verify(mStatusBarKeyguardViewManager, never()).setKeyguardGoingAwayState(anyBoolean());
     }
 
+    @Ignore("flaky, b/223385977")
     @Test
     public void testKeyguardGone_notGoingaway() {
         mViewMediator.mViewMediatorCallback.keyguardGone();

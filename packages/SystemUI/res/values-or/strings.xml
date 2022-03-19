@@ -249,7 +249,7 @@
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"ବିଜ୍ଞପ୍ତି ଶେଡ୍‍।"</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"କ୍ୱିକ୍ ସେଟିଂସ୍।"</string>
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"ଲକ୍‌ ସ୍କ୍ରୀନ୍‌।"</string>
-    <string name="accessibility_desc_settings" msgid="6728577365389151969">"ସେଟିଂସ୍"</string>
+    <string name="accessibility_desc_settings" msgid="6728577365389151969">"ସେଟିଂସ"</string>
     <string name="accessibility_desc_recent_apps" msgid="1748675199348914194">"ସଂକ୍ଷିପ୍ତ ବିବରଣୀ"</string>
     <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"ୱର୍କ ଲକ୍‍ ସ୍କ୍ରୀନ୍‍"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"ବନ୍ଦ କରନ୍ତୁ"</string>
@@ -568,7 +568,7 @@
     <string name="monitoring_description_personal_profile_named_vpn" msgid="8179722332380953673">"ଆପଣଙ୍କ ବ୍ୟକ୍ତିଗତ ପ୍ରୋଫାଇଲ୍‍ <xliff:g id="VPN_APP">%1$s</xliff:g>ରେ ସଂଯୁକ୍ତ, ଯାହା ଇମେଲ୍‍, ଆପ୍‌ ଓ ୱେବସାଇଟ୍‍ ସମେତ ଆପଣଙ୍କ ନେଟୱର୍କ ଗତିବିଧିକୁ ନିରୀକ୍ଷଣ କରିପାରେ।"</string>
     <string name="monitoring_description_do_header_generic" msgid="6130190408164834986">"ଆପଣଙ୍କ ଡିଭାଇସ୍‌ <xliff:g id="DEVICE_OWNER_APP">%1$s</xliff:g> ଦ୍ୱାରା ପରିଚାଳିତ ହେଉଛି।"</string>
     <string name="monitoring_description_do_header_with_name" msgid="2696255132542779511">"ଆପଣଙ୍କ ଡିଭାଇସ୍‍ ପରିଚାଳନା କରିବାକୁ <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>, <xliff:g id="DEVICE_OWNER_APP">%2$s</xliff:g> ବ୍ୟବହାର କରନ୍ତି।"</string>
-    <string name="monitoring_description_do_body" msgid="7700878065625769970">"ଆପଣଙ୍କ ଆଡମିନ୍‍ ସେଟିଙ୍ଗ, କର୍ପୋରେଟ୍‍ ଆକ୍ସେସ୍‍, ଆପ୍‍, ଆପଣଙ୍କ ଡିଭାଇସ୍‍ ସମ୍ବନ୍ଧୀୟ ଡାଟା ଏବଂ ଆପଣଙ୍କ ଡିଭାଇସର ଲୋକେସନ୍‍ ନିରୀକ୍ଷଣ ଓ ପରିଚାଳନା କରିପାରନ୍ତି।"</string>
+    <string name="monitoring_description_do_body" msgid="7700878065625769970">"ସେଟିଂସ, କର୍ପୋରେଟ ଆକ୍ସେସ, ଆପ, ଆପଣଙ୍କ ଡିଭାଇସ ସହ ସମ୍ବନ୍ଧିତ ଡାଟା ଏବଂ ଡିଭାଇସର ଲୋକେସନକୁ ଆପଣଙ୍କ ଆଡମିନ ନିରୀକ୍ଷଣ ଓ ପରିଚାଳନା କରିପାରନ୍ତି।"</string>
     <string name="monitoring_description_do_learn_more_separator" msgid="1467280496376492558">" "</string>
     <string name="monitoring_description_do_learn_more" msgid="645149183455573790">"ଅଧିକ ଜାଣନ୍ତୁ"</string>
     <string name="monitoring_description_do_body_vpn" msgid="7699280130070502303">"ଆପଣ <xliff:g id="VPN_APP">%1$s</xliff:g>ରେ ସଂଯୁକ୍ତ ଅଛନ୍ତି, ଯାହା ଇମେଲ୍‍, ଆପ୍‌ ଓ ୱେବସାଇଟ୍‍ ସମେତ ଆପଣଙ୍କ ନେଟ୍‌ୱର୍କର ଗତିବିଧିକୁ ନିରୀକ୍ଷଣ କରିପାରେ।"</string>
@@ -922,7 +922,7 @@
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"ଦ୍ରୁତ ସେଟିଙ୍ଗ ଏଡିଟର୍।"</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"<xliff:g id="ID_1">%1$s</xliff:g> ବିଜ୍ଞପ୍ତି: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_settings" msgid="7098489591715844713">"ସେଟିଂସ୍ ଖୋଲନ୍ତୁ।"</string>
-    <string name="accessibility_quick_settings_expand" msgid="2609275052412521467">"ଦ୍ରୁତ ସେଟିଙ୍ଗ ଖୋଲନ୍ତୁ।"</string>
+    <string name="accessibility_quick_settings_expand" msgid="2609275052412521467">"କ୍ଵିକ ସେଟିଂସ ଖୋଲନ୍ତୁ।"</string>
     <string name="accessibility_quick_settings_collapse" msgid="4674876336725041982">"ଦ୍ରୁତ ସେଟିଂସ୍ ବନ୍ଦ କରନ୍ତୁ।"</string>
     <string name="accessibility_quick_settings_alarm_set" msgid="7237918261045099853">"ଆଲାର୍ମ ସେଟ୍‍।"</string>
     <string name="accessibility_quick_settings_user" msgid="505821942882668619">"<xliff:g id="ID_1">%s</xliff:g> ଭାବରେ ସାଇନ୍‌ ଇନ୍‌ କରିଛନ୍ତି"</string>
@@ -1021,7 +1021,7 @@
     <string name="music_controls_no_title" msgid="4166497066552290938">"କୌଣସି ଶୀର୍ଷକ ନାହିଁ"</string>
     <string name="bubble_accessibility_action_move" msgid="3185080443743819178">"ନିଅନ୍ତୁ"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"ସିଷ୍ଟମ୍ ନାଭିଗେସନ୍ ଅପ୍‌ଡେଟ୍ ହୋଇଛି। ପରିବର୍ତ୍ତନ କରିବା ପାଇଁ, ସେଟିଂସ୍‌କୁ ଯାଆନ୍ତୁ।"</string>
-    <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"ସିଷ୍ଟମ୍ ନାଭିଗେସନ୍ ଅପ୍‌ଡେଟ୍ କରିବା ପାଇଁ ସେଟିଂସ୍‍କୁ ଯାଆନ୍ତୁ"</string>
+    <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"ସିଷ୍ଟମ ନାଭିଗେସନ ଅପଡେଟ କରିବା ପାଇଁ ସେଟିଂସକୁ ଯାଆନ୍ତୁ"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"ଷ୍ଟାଣ୍ଡବାଏ"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"ମ୍ୟାଗ୍ନିଫିକେସନ୍ ୱିଣ୍ଡୋ"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"ମ୍ୟାଗ୍ନିଫିକେସନ୍ ୱିଣ୍ଡୋ ନିୟନ୍ତ୍ରଣଗୁଡ଼ିକ"</string>
