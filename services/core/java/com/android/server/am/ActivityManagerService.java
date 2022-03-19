@@ -9209,6 +9209,10 @@ public class ActivityManagerService extends IActivityManager.Stub
         mAppRestrictionController.dump(pw, "");
     }
 
+    void dumpAppRestrictionController(ProtoOutputStream proto, int uid) {
+        mAppRestrictionController.dumpAsProto(proto, uid);
+    }
+
     /**
      * Wrapper function to print out debug data filtered by specified arguments.
     */
@@ -9320,6 +9324,29 @@ public class ActivityManagerService extends IActivityManager.Stub
                     synchronized (mProcLock) {
                         mProcessList.writeProcessesToProtoLSP(proto, dumpPackage);
                     }
+                }
+            } else if ("app-restrictions".equals(cmd)) {
+                int uid = Process.INVALID_UID;
+                boolean error = false;
+                for (int i = 0; i < args.length; i++) {
+                    if ("--uid".equals(args[i])) {
+                        if (i + 1 < args.length) {
+                            try {
+                                uid = Integer.parseInt(args[i + 1]);
+                            } catch (NumberFormatException e) {
+                                error = true;
+                            }
+                        } else {
+                            error = true;
+                        }
+                        break;
+                    }
+                }
+                if (error) {
+                    pw.println("Invalid --uid argument");
+                    pw.println("Use -h for help.");
+                } else {
+                    dumpAppRestrictionController(proto, uid);
                 }
             } else {
                 // default option, dump everything, output is ActivityManagerServiceProto
