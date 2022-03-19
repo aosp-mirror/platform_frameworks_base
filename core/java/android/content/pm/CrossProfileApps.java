@@ -326,7 +326,7 @@ public class CrossProfileApps {
 
         final boolean isManagedProfile = mUserManager.isManagedProfile(userHandle.getIdentifier());
         final DevicePolicyManager dpm = mContext.getSystemService(DevicePolicyManager.class);
-        return dpm.getString(
+        return dpm.getResources().getString(
                 getUpdatableProfileSwitchingLabelId(isManagedProfile),
                 () -> getDefaultProfileSwitchingLabel(isManagedProfile));
     }

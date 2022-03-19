@@ -20,7 +20,6 @@ import android.annotation.DrawableRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
-import android.app.admin.DevicePolicyResources.Drawables;
 import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -29,21 +28,21 @@ import java.util.Objects;
 
 /**
  * Used to pass in the required information for updating an enterprise drawable resource using
- * {@link DevicePolicyManager#setDrawables}.
+ * {@link DevicePolicyResourcesManager#setDrawables}.
  *
  * @hide
  */
 @SystemApi
 public final class DevicePolicyDrawableResource implements Parcelable {
-    @NonNull private final @DevicePolicyResources.UpdatableDrawableId String mDrawableId;
-    @NonNull private final @DevicePolicyResources.UpdatableDrawableStyle String mDrawableStyle;
-    @NonNull private final @DevicePolicyResources.UpdatableDrawableSource String mDrawableSource;
+    @NonNull private final String mDrawableId;
+    @NonNull private final String mDrawableStyle;
+    @NonNull private final String mDrawableSource;
     private final @DrawableRes int mResourceIdInCallingPackage;
     @NonNull private ParcelableResource mResource;
 
     /**
      * Creates an object containing the required information for updating an enterprise drawable
-     * resource using {@link DevicePolicyManager#setDrawables}.
+     * resource using {@link DevicePolicyResourcesManager#setDrawables}.
      *
      * <p>It will be used to update the drawable defined by {@code drawableId} with style
      * {@code drawableStyle} located in source {@code drawableSource} to the drawable with ID
@@ -60,9 +59,9 @@ public final class DevicePolicyDrawableResource implements Parcelable {
      */
     public DevicePolicyDrawableResource(
             @NonNull Context context,
-            @NonNull @DevicePolicyResources.UpdatableDrawableId String drawableId,
-            @NonNull @DevicePolicyResources.UpdatableDrawableStyle String drawableStyle,
-            @NonNull @DevicePolicyResources.UpdatableDrawableSource String drawableSource,
+            @NonNull String drawableId,
+            @NonNull String drawableStyle,
+            @NonNull String drawableSource,
             @DrawableRes int resourceIdInCallingPackage) {
         this(drawableId, drawableStyle, drawableSource, resourceIdInCallingPackage,
                 new ParcelableResource(context, resourceIdInCallingPackage,
@@ -70,9 +69,9 @@ public final class DevicePolicyDrawableResource implements Parcelable {
     }
 
     private DevicePolicyDrawableResource(
-            @NonNull @DevicePolicyResources.UpdatableDrawableId String drawableId,
-            @NonNull @DevicePolicyResources.UpdatableDrawableStyle String drawableStyle,
-            @NonNull @DevicePolicyResources.UpdatableDrawableSource String drawableSource,
+            @NonNull String drawableId,
+            @NonNull String drawableStyle,
+            @NonNull String drawableSource,
             @DrawableRes int resourceIdInCallingPackage,
             @NonNull ParcelableResource resource) {
 
@@ -90,7 +89,7 @@ public final class DevicePolicyDrawableResource implements Parcelable {
 
     /**
      * Creates an object containing the required information for updating an enterprise drawable
-     * resource using {@link DevicePolicyManager#setDrawables}.
+     * resource using {@link DevicePolicyResourcesManager#setDrawables}.
      * <p>It will be used to update the drawable defined by {@code drawableId} with style
      * {@code drawableStyle} to the drawable with ID {@code resourceIdInCallingPackage} in the
      * calling package</p>
@@ -105,10 +104,10 @@ public final class DevicePolicyDrawableResource implements Parcelable {
      */
     public DevicePolicyDrawableResource(
             @NonNull Context context,
-            @NonNull @DevicePolicyResources.UpdatableDrawableId String drawableId,
-            @NonNull @DevicePolicyResources.UpdatableDrawableStyle String drawableStyle,
+            @NonNull String drawableId,
+            @NonNull String drawableStyle,
             @DrawableRes int resourceIdInCallingPackage) {
-       this(context, drawableId, drawableStyle, Drawables.Source.UNDEFINED,
+       this(context, drawableId, drawableStyle, DevicePolicyResources.UNDEFINED,
                resourceIdInCallingPackage);
     }
 
@@ -116,7 +115,6 @@ public final class DevicePolicyDrawableResource implements Parcelable {
      * Returns the ID of the drawable to update.
      */
     @NonNull
-    @DevicePolicyResources.UpdatableDrawableId
     public String getDrawableId() {
         return mDrawableId;
     }
@@ -125,7 +123,6 @@ public final class DevicePolicyDrawableResource implements Parcelable {
      * Returns the style of the drawable to update
      */
     @NonNull
-    @DevicePolicyResources.UpdatableDrawableStyle
     public String getDrawableStyle() {
         return mDrawableStyle;
     }
@@ -134,7 +131,6 @@ public final class DevicePolicyDrawableResource implements Parcelable {
      * Returns the source of the drawable to update.
      */
     @NonNull
-    @DevicePolicyResources.UpdatableDrawableSource
     public String getDrawableSource() {
         return mDrawableSource;
     }
