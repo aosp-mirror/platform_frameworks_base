@@ -49369,6 +49369,7 @@ package android.view {
     method @NonNull public android.view.SurfaceControl.Transaction setAlpha(@NonNull android.view.SurfaceControl, @FloatRange(from=0.0, to=1.0) float);
     method @NonNull public android.view.SurfaceControl.Transaction setBuffer(@NonNull android.view.SurfaceControl, @Nullable android.hardware.HardwareBuffer);
     method @NonNull public android.view.SurfaceControl.Transaction setBuffer(@NonNull android.view.SurfaceControl, @Nullable android.hardware.HardwareBuffer, @Nullable android.hardware.SyncFence);
+    method @NonNull public android.view.SurfaceControl.Transaction setBuffer(@NonNull android.view.SurfaceControl, @Nullable android.hardware.HardwareBuffer, @Nullable android.hardware.SyncFence, @Nullable java.util.function.Consumer<android.hardware.SyncFence>);
     method @NonNull public android.view.SurfaceControl.Transaction setBufferSize(@NonNull android.view.SurfaceControl, @IntRange(from=0) int, @IntRange(from=0) int);
     method @NonNull public android.view.SurfaceControl.Transaction setBufferTransform(@NonNull android.view.SurfaceControl, int);
     method @NonNull public android.view.SurfaceControl.Transaction setCrop(@NonNull android.view.SurfaceControl, @Nullable android.graphics.Rect);
