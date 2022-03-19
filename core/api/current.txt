@@ -4532,20 +4532,34 @@ package android.app {
   }
 
   public static class ActivityManager.TaskDescription implements android.os.Parcelable {
-    ctor public ActivityManager.TaskDescription(String, @DrawableRes int, int);
-    ctor public ActivityManager.TaskDescription(String, @DrawableRes int);
-    ctor public ActivityManager.TaskDescription(String);
-    ctor public ActivityManager.TaskDescription();
+    ctor @Deprecated public ActivityManager.TaskDescription(String, @DrawableRes int, int);
+    ctor @Deprecated public ActivityManager.TaskDescription(String, @DrawableRes int);
+    ctor @Deprecated public ActivityManager.TaskDescription(String);
+    ctor @Deprecated public ActivityManager.TaskDescription();
     ctor @Deprecated public ActivityManager.TaskDescription(String, android.graphics.Bitmap, int);
     ctor @Deprecated public ActivityManager.TaskDescription(String, android.graphics.Bitmap);
     ctor public ActivityManager.TaskDescription(android.app.ActivityManager.TaskDescription);
     method public int describeContents();
+    method @ColorInt public int getBackgroundColor();
     method @Deprecated public android.graphics.Bitmap getIcon();
     method public String getLabel();
-    method public int getPrimaryColor();
+    method @ColorInt public int getNavigationBarColor();
+    method @ColorInt public int getPrimaryColor();
+    method @ColorInt public int getStatusBarColor();
     method public void readFromParcel(android.os.Parcel);
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.ActivityManager.TaskDescription> CREATOR;
+  }
+
+  public static final class ActivityManager.TaskDescription.Builder {
+    ctor public ActivityManager.TaskDescription.Builder();
+    method @NonNull public android.app.ActivityManager.TaskDescription build();
+    method @NonNull public android.app.ActivityManager.TaskDescription.Builder setBackgroundColor(@ColorInt int);
+    method @NonNull public android.app.ActivityManager.TaskDescription.Builder setIcon(@DrawableRes int);
+    method @NonNull public android.app.ActivityManager.TaskDescription.Builder setLabel(@Nullable String);
+    method @NonNull public android.app.ActivityManager.TaskDescription.Builder setNavigationBarColor(@ColorInt int);
+    method @NonNull public android.app.ActivityManager.TaskDescription.Builder setPrimaryColor(@ColorInt int);
+    method @NonNull public android.app.ActivityManager.TaskDescription.Builder setStatusBarColor(@ColorInt int);
   }
 
   public class ActivityOptions {
