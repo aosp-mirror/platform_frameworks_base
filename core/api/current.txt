@@ -26118,22 +26118,12 @@ package android.media.tv {
 package android.media.tv.interactive {
 
   public final class AppLinkInfo implements android.os.Parcelable {
+    ctor public AppLinkInfo(@NonNull String, @NonNull String, @NonNull String);
     method public int describeContents();
-    method @NonNull public String getClassName();
-    method @NonNull public String getPackageName();
-    method @Nullable public String getUriHost();
-    method @Nullable public String getUriPrefix();
-    method @Nullable public String getUriScheme();
+    method @NonNull public android.content.ComponentName getComponentName();
+    method @NonNull public android.net.Uri getUri();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.media.tv.interactive.AppLinkInfo> CREATOR;
-  }
-
-  public static final class AppLinkInfo.Builder {
-    ctor public AppLinkInfo.Builder(@NonNull String, @NonNull String);
-    method @NonNull public android.media.tv.interactive.AppLinkInfo build();
-    method @NonNull public android.media.tv.interactive.AppLinkInfo.Builder setUriHost(@NonNull String);
-    method @NonNull public android.media.tv.interactive.AppLinkInfo.Builder setUriPrefix(@NonNull String);
-    method @NonNull public android.media.tv.interactive.AppLinkInfo.Builder setUriScheme(@NonNull String);
   }
 
   public final class TvInteractiveAppManager {
