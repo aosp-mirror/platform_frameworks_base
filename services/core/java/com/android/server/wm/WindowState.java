@@ -860,6 +860,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     /**
      * @see #setOnBackInvokedCallback(IOnBackInvokedCallback)
      */
+    // TODO(b/224856664): Consolidate application and system callback into one.
     private IOnBackInvokedCallback mApplicationOnBackInvokedCallback;
     private IOnBackInvokedCallback mSystemOnBackInvokedCallback;
 
@@ -1125,7 +1126,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 this, onBackInvokedCallback);
         if (priority >= 0) {
             mApplicationOnBackInvokedCallback = onBackInvokedCallback;
+            mSystemOnBackInvokedCallback = null;
         } else {
+            mApplicationOnBackInvokedCallback = null;
             mSystemOnBackInvokedCallback = onBackInvokedCallback;
         }
     }

@@ -163,13 +163,13 @@ public class IntentForwarderActivity extends Activity  {
     }
 
     private String getForwardToPersonalMessage() {
-        return getSystemService(DevicePolicyManager.class).getString(
+        return getSystemService(DevicePolicyManager.class).getResources().getString(
                 FORWARD_INTENT_TO_PERSONAL,
                 () -> getString(com.android.internal.R.string.forward_intent_to_owner));
     }
 
     private String getForwardToWorkMessage() {
-        return getSystemService(DevicePolicyManager.class).getString(
+        return getSystemService(DevicePolicyManager.class).getResources().getString(
                 FORWARD_INTENT_TO_WORK,
                 () -> getString(com.android.internal.R.string.forward_intent_to_work));
     }

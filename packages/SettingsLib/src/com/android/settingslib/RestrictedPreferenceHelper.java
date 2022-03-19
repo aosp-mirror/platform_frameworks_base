@@ -122,7 +122,7 @@ public class RestrictedPreferenceHelper {
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     private String getDisabledByAdminUpdatableString() {
-        return mContext.getSystemService(DevicePolicyManager.class).getString(
+        return mContext.getSystemService(DevicePolicyManager.class).getResources().getString(
                 CONTROLLED_BY_ADMIN_SUMMARY,
                 () -> mContext.getString(R.string.disabled_by_admin_summary_text));
     }

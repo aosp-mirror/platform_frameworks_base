@@ -406,6 +406,7 @@ import com.android.server.pm.permission.PermissionManagerServiceInternal;
 import com.android.server.pm.pkg.SELinuxUtil;
 import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
 import com.android.server.pm.snapshot.PackageDataSnapshot;
+import com.android.server.sdksandbox.SdkSandboxManagerLocal;
 import com.android.server.uri.GrantUri;
 import com.android.server.uri.NeededUriGrants;
 import com.android.server.uri.UriGrantsManagerInternal;
@@ -6584,6 +6585,30 @@ public class ActivityManagerService extends IActivityManager.Stub
     final ProcessRecord addAppLocked(ApplicationInfo info, String customProcess, boolean isolated,
             boolean disableHiddenApiChecks, boolean disableTestApiChecks,
             String abiOverride, int zygotePolicyFlags) {
+        return addAppLocked(
+                info,
+                customProcess,
+                isolated,
+                /* isSdkSandbox= */ false,
+                /* sdkSandboxUid= */ 0,
+                /* sdkSandboxClientAppPackage= */ null,
+                disableHiddenApiChecks,
+                disableTestApiChecks,
+                abiOverride,
+                zygotePolicyFlags);
+    }
+
+    final ProcessRecord addAppLocked(
+            ApplicationInfo info,
+            String customProcess,
+            boolean isolated,
+            boolean isSdkSandbox,
+            int sdkSandboxUid,
+            @Nullable String sdkSandboxClientAppPackage,
+            boolean disableHiddenApiChecks,
+            boolean disableTestApiChecks,
+            String abiOverride,
+            int zygotePolicyFlags) {
         ProcessRecord app;
         if (!isolated) {
             app = getProcessRecordLocked(customProcess != null ? customProcess : info.processName,
@@ -6593,10 +6618,16 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         if (app == null) {
-            app = mProcessList.newProcessRecordLocked(info, customProcess, isolated, 0,
-                    false, 0, null,
+            app = mProcessList.newProcessRecordLocked(
+                    info,
+                    customProcess,
+                    isolated,
+                    /* isolatedUid= */0,
+                    isSdkSandbox,
+                    sdkSandboxUid,
+                    sdkSandboxClientAppPackage,
                     new HostingRecord("added application",
-                        customProcess != null ? customProcess : info.processName));
+                            customProcess != null ? customProcess : info.processName));
             updateLruProcessLocked(app, false, null);
             updateOomAdjLocked(app, OomAdjuster.OOM_ADJ_REASON_PROCESS_BEGIN);
         }
@@ -6606,13 +6637,16 @@ public class ActivityManagerService extends IActivityManager.Stub
                 Event.APP_COMPONENT_USED);
 
         // This package really, really can not be stopped.
-        try {
-            AppGlobals.getPackageManager().setPackageStoppedState(
-                    info.packageName, false, UserHandle.getUserId(app.uid));
-        } catch (RemoteException e) {
-        } catch (IllegalArgumentException e) {
-            Slog.w(TAG, "Failed trying to unstop package "
-                    + info.packageName + ": " + e);
+        // TODO: how set package stopped state should work for sdk sandboxes?
+        if (!isSdkSandbox) {
+            try {
+                AppGlobals.getPackageManager().setPackageStoppedState(
+                        info.packageName, false, UserHandle.getUserId(app.uid));
+            } catch (RemoteException e) {
+            } catch (IllegalArgumentException e) {
+                Slog.w(TAG, "Failed trying to unstop package "
+                        + info.packageName + ": " + e);
+            }
         }
 
         if ((info.flags & PERSISTENT_MASK) == PERSISTENT_MASK) {
@@ -13505,8 +13539,13 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
 
             if (brOptions.getIdForResponseEvent() > 0) {
-                enforceUsageStatsPermission(callerPackage, callingUid, callingPid,
-                        "recordResponseEventWhileInBackground()");
+                // STOPSHIP (206518114): Temporarily check for PACKAGE_USAGE_STATS permission as
+                // well until the clients switch to using the new permission.
+                if (checkPermission(android.Manifest.permission.ACCESS_BROADCAST_RESPONSE_STATS,
+                        callingPid, callingUid) != PERMISSION_GRANTED) {
+                    enforceUsageStatsPermission(callerPackage, callingUid, callingPid,
+                            "recordResponseEventWhileInBackground()");
+                }
             }
         }
 
@@ -14437,6 +14476,32 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
             }
 
+            boolean disableHiddenApiChecks = ai.usesNonSdkApi()
+                    || (flags & INSTR_FLAG_DISABLE_HIDDEN_API_CHECKS) != 0;
+            boolean disableTestApiChecks = disableHiddenApiChecks
+                    || (flags & INSTR_FLAG_DISABLE_TEST_API_CHECKS) != 0;
+
+            if (disableHiddenApiChecks || disableTestApiChecks) {
+                enforceCallingPermission(android.Manifest.permission.DISABLE_HIDDEN_API_CHECKS,
+                        "disable hidden API checks");
+            }
+
+            if ((flags & ActivityManager.INSTR_FLAG_INSTRUMENT_SDK_SANDBOX) != 0) {
+                return startInstrumentationOfSdkSandbox(
+                        className,
+                        profileFile,
+                        arguments,
+                        watcher,
+                        uiAutomationConnection,
+                        userId,
+                        abiOverride,
+                        ii,
+                        ai,
+                        noRestart,
+                        disableHiddenApiChecks,
+                        disableTestApiChecks);
+            }
+
             ActiveInstrumentation activeInstr = new ActiveInstrumentation(this);
             activeInstr.mClass = className;
             String defProcess = ai.processName;;
@@ -14461,15 +14526,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                     START_FOREGROUND_SERVICES_FROM_BACKGROUND, callingPid, callingUid)
                             == PackageManager.PERMISSION_GRANTED;
             activeInstr.mNoRestart = noRestart;
-            boolean disableHiddenApiChecks = ai.usesNonSdkApi()
-                    || (flags & INSTR_FLAG_DISABLE_HIDDEN_API_CHECKS) != 0;
-            boolean disableTestApiChecks = disableHiddenApiChecks
-                    || (flags & INSTR_FLAG_DISABLE_TEST_API_CHECKS) != 0;
-
-            if (disableHiddenApiChecks || disableTestApiChecks) {
-                enforceCallingPermission(android.Manifest.permission.DISABLE_HIDDEN_API_CHECKS,
-                        "disable hidden API checks");
-            }
 
             final long origId = Binder.clearCallingIdentity();
 
@@ -14510,6 +14566,111 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (noRestart) {
                 instrumentWithoutRestart(activeInstr, ai);
             }
+        }
+
+        return true;
+    }
+
+    @GuardedBy("this")
+    private boolean startInstrumentationOfSdkSandbox(
+            ComponentName className,
+            String profileFile,
+            Bundle arguments,
+            IInstrumentationWatcher watcher,
+            IUiAutomationConnection uiAutomationConnection,
+            int userId,
+            String abiOverride,
+            InstrumentationInfo instrumentationInfo,
+            ApplicationInfo sdkSandboxClientAppInfo,
+            boolean noRestart,
+            boolean disableHiddenApiChecks,
+            boolean disableTestApiChecks) {
+
+        if (noRestart) {
+            reportStartInstrumentationFailureLocked(
+                    watcher,
+                    className,
+                    "Instrumenting sdk sandbox with --no-restart flag is not supported");
+            return false;
+        }
+
+        final ApplicationInfo sdkSandboxInfo;
+        try {
+            final PackageManager pm = mContext.getPackageManager();
+            sdkSandboxInfo = pm.getApplicationInfoAsUser(pm.getSdkSandboxPackageName(), 0, userId);
+        } catch (NameNotFoundException e) {
+            reportStartInstrumentationFailureLocked(
+                    watcher, className, "Can't find SdkSandbox package");
+            return false;
+        }
+
+        final SdkSandboxManagerLocal sandboxManagerLocal =
+                LocalManagerRegistry.getManager(SdkSandboxManagerLocal.class);
+        if (sandboxManagerLocal == null) {
+            reportStartInstrumentationFailureLocked(
+                    watcher, className, "Can't locate SdkSandboxManagerLocal");
+            return false;
+        }
+
+        final String processName = sandboxManagerLocal.getSdkSandboxProcessNameForInstrumentation(
+                sdkSandboxClientAppInfo);
+
+        ActiveInstrumentation activeInstr = new ActiveInstrumentation(this);
+        activeInstr.mClass = className;
+        activeInstr.mTargetProcesses = new String[]{processName};
+        activeInstr.mTargetInfo = sdkSandboxInfo;
+        activeInstr.mProfileFile = profileFile;
+        activeInstr.mArguments = arguments;
+        activeInstr.mWatcher = watcher;
+        activeInstr.mUiAutomationConnection = uiAutomationConnection;
+        activeInstr.mResultClass = className;
+        activeInstr.mHasBackgroundActivityStartsPermission = false;
+        activeInstr.mHasBackgroundForegroundServiceStartsPermission = false;
+        // Instrumenting sdk sandbox without a restart is not supported
+        activeInstr.mNoRestart = false;
+
+        final int callingUid = Binder.getCallingUid();
+        final long token = Binder.clearCallingIdentity();
+        try {
+            sandboxManagerLocal.notifyInstrumentationStarted(
+                    sdkSandboxClientAppInfo.packageName, sdkSandboxClientAppInfo.uid);
+            synchronized (mProcLock) {
+                int sdkSandboxUid = Process.toSdkSandboxUid(sdkSandboxClientAppInfo.uid);
+                // Kill the package sdk sandbox process belong to. At this point sdk sandbox is
+                // already killed.
+                forceStopPackageLocked(
+                        instrumentationInfo.targetPackage,
+                        /* appId= */ -1,
+                        /* callerWillRestart= */ true,
+                        /* purgeCache= */ false,
+                        /* doIt= */ true,
+                        /* evenPersistent= */ true,
+                        /* uninstalling= */ false,
+                        userId,
+                        "start instr");
+
+                ProcessRecord app = addAppLocked(
+                        sdkSandboxInfo,
+                        processName,
+                        /* isolated= */ false,
+                        /* isSdkSandbox= */ true,
+                        sdkSandboxUid,
+                        sdkSandboxClientAppInfo.packageName,
+                        disableHiddenApiChecks,
+                        disableTestApiChecks,
+                        abiOverride,
+                        ZYGOTE_POLICY_FLAG_EMPTY);
+
+                app.setActiveInstrumentation(activeInstr);
+                activeInstr.mFinished = false;
+                activeInstr.mSourceUid = callingUid;
+                activeInstr.mRunningProcesses.add(app);
+                if (!mActiveInstrumentation.contains(activeInstr)) {
+                    mActiveInstrumentation.add(activeInstr);
+                }
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
         }
 
         return true;
@@ -14637,7 +14798,17 @@ public class ActivityManagerService extends IActivityManager.Stub
             app.setActiveInstrumentation(null);
         }
 
-        if (!instr.mNoRestart) {
+        if (app.isSdkSandbox) {
+            // For sharedUid apps this will kill all sdk sandbox processes, which is not ideal.
+            // TODO(b/209061624): should we call ProcessList.removeProcessLocked instead?
+            killUid(UserHandle.getAppId(app.uid), UserHandle.getUserId(app.uid), "finished instr");
+            final SdkSandboxManagerLocal sandboxManagerLocal =
+                    LocalManagerRegistry.getManager(SdkSandboxManagerLocal.class);
+            if (sandboxManagerLocal != null) {
+                sandboxManagerLocal.notifyInstrumentationFinished(
+                        app.sdkSandboxClientAppPackage, Process.getAppUidForSdkSandboxUid(app.uid));
+            }
+        } else if (!instr.mNoRestart) {
             forceStopPackageLocked(app.info.packageName, -1, false, false, true, true, false,
                     app.userId,
                     "finished inst");

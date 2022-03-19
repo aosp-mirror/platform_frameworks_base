@@ -1447,7 +1447,7 @@ public final class UsageStatsManager {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS)
+    @RequiresPermission(android.Manifest.permission.ACCESS_BROADCAST_RESPONSE_STATS)
     @UserHandleAware
     @NonNull
     public List<BroadcastResponseStats> queryBroadcastResponseStats(
@@ -1480,7 +1480,7 @@ public final class UsageStatsManager {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS)
+    @RequiresPermission(android.Manifest.permission.ACCESS_BROADCAST_RESPONSE_STATS)
     @UserHandleAware
     public void clearBroadcastResponseStats(@Nullable String packageName,
             @IntRange(from = 0) long id) {
@@ -1497,7 +1497,7 @@ public final class UsageStatsManager {
      *
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS)
+    @RequiresPermission(android.Manifest.permission.ACCESS_BROADCAST_RESPONSE_STATS)
     @UserHandleAware
     public void clearBroadcastEvents() {
         try {

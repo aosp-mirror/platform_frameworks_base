@@ -5,6 +5,7 @@ package android {
     field public static final String ACCESS_AMBIENT_CONTEXT_EVENT = "android.permission.ACCESS_AMBIENT_CONTEXT_EVENT";
     field public static final String ACCESS_AMBIENT_LIGHT_STATS = "android.permission.ACCESS_AMBIENT_LIGHT_STATS";
     field public static final String ACCESS_BROADCAST_RADIO = "android.permission.ACCESS_BROADCAST_RADIO";
+    field public static final String ACCESS_BROADCAST_RESPONSE_STATS = "android.permission.ACCESS_BROADCAST_RESPONSE_STATS";
     field public static final String ACCESS_CACHE_FILESYSTEM = "android.permission.ACCESS_CACHE_FILESYSTEM";
     field public static final String ACCESS_CONTEXT_HUB = "android.permission.ACCESS_CONTEXT_HUB";
     field public static final String ACCESS_DRM_CERTIFICATES = "android.permission.ACCESS_DRM_CERTIFICATES";
@@ -1103,16 +1104,12 @@ package android.app.admin {
     method @RequiresPermission("android.permission.NOTIFY_PENDING_SYSTEM_UPDATE") public void notifyPendingSystemUpdate(long, boolean);
     method @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL) public boolean packageHasActiveAdmins(String);
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS, android.Manifest.permission.PROVISION_DEMO_DEVICE}) public void provisionFullyManagedDevice(@NonNull android.app.admin.FullyManagedDeviceProvisioningParams) throws android.app.admin.ProvisioningException;
-    method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_MANAGEMENT_RESOURCES) public void resetDrawables(@NonNull java.util.Set<java.lang.String>);
-    method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_MANAGEMENT_RESOURCES) public void resetStrings(@NonNull java.util.Set<java.lang.String>);
     method @RequiresPermission(android.Manifest.permission.SEND_LOST_MODE_LOCATION_UPDATES) public void sendLostModeLocationUpdate(@NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Boolean>);
     method @Deprecated @RequiresPermission(android.Manifest.permission.MANAGE_DEVICE_ADMINS) public boolean setActiveProfileOwner(@NonNull android.content.ComponentName, String) throws java.lang.IllegalArgumentException;
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public void setDeviceProvisioningConfigApplied();
     method @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS) public void setDpcDownloaded(boolean);
-    method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_MANAGEMENT_RESOURCES) public void setDrawables(@NonNull java.util.Set<android.app.admin.DevicePolicyDrawableResource>);
     method @Deprecated @RequiresPermission(value=android.Manifest.permission.GRANT_PROFILE_OWNER_DEVICE_IDS_ACCESS, conditional=true) public void setProfileOwnerCanAccessDeviceIds(@NonNull android.content.ComponentName);
     method public void setSecondaryLockscreenEnabled(@NonNull android.content.ComponentName, boolean);
-    method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_MANAGEMENT_RESOURCES) public void setStrings(@NonNull java.util.Set<android.app.admin.DevicePolicyStringResource>);
     method @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS) public void setUserProvisioningState(int, @NonNull android.os.UserHandle);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ROLE_HOLDERS) public boolean shouldAllowBypassingDevicePolicyManagementRoleQualification();
     field public static final String ACCOUNT_FEATURE_DEVICE_OR_PROFILE_OWNER_ALLOWED = "android.account.DEVICE_OR_PROFILE_OWNER_ALLOWED";
@@ -1192,43 +1189,6 @@ package android.app.admin {
   }
 
   public static final class DevicePolicyResources.Strings {
-    field public static final String UNDEFINED = "UNDEFINED";
-  }
-
-  public static final class DevicePolicyResources.Strings.Dialer {
-    field public static final String NOTIFICATION_INCOMING_WORK_CALL_TITLE = "Dialer.NOTIFICATION_INCOMING_WORK_CALL_TITLE";
-    field public static final String NOTIFICATION_MISSED_WORK_CALL_TITLE = "Dialer.NOTIFICATION_MISSED_WORK_CALL_TITLE";
-    field public static final String NOTIFICATION_ONGOING_WORK_CALL_TITLE = "Dialer.NOTIFICATION_ONGOING_WORK_CALL_TITLE";
-    field public static final String NOTIFICATION_WIFI_WORK_CALL_LABEL = "Dialer.NOTIFICATION_WIFI_WORK_CALL_LABEL";
-  }
-
-  public static final class DevicePolicyResources.Strings.DocumentsUi {
-    field public static final String CANT_SAVE_TO_PERSONAL_MESSAGE = "DocumentsUi.CANT_SAVE_TO_PERSONAL_MESSAGE";
-    field public static final String CANT_SAVE_TO_PERSONAL_TITLE = "DocumentsUi.CANT_SAVE_TO_PERSONAL_TITLE";
-    field public static final String CANT_SAVE_TO_WORK_MESSAGE = "DocumentsUi.CANT_SAVE_TO_WORK_MESSAGE";
-    field public static final String CANT_SAVE_TO_WORK_TITLE = "DocumentsUi.CANT_SAVE_TO_WORK_TITLE";
-    field public static final String CANT_SELECT_PERSONAL_FILES_MESSAGE = "DocumentsUi.CANT_SELECT_PERSONAL_FILES_MESSAGE";
-    field public static final String CANT_SELECT_PERSONAL_FILES_TITLE = "DocumentsUi.CANT_SELECT_PERSONAL_FILES_TITLE";
-    field public static final String CANT_SELECT_WORK_FILES_MESSAGE = "DocumentsUi.CANT_SELECT_WORK_FILES_MESSAGE";
-    field public static final String CANT_SELECT_WORK_FILES_TITLE = "DocumentsUi.CANT_SELECT_WORK_FILES_TITLE";
-    field public static final String CROSS_PROFILE_NOT_ALLOWED_MESSAGE = "DocumentsUi.CROSS_PROFILE_NOT_ALLOWED_MESSAGE";
-    field public static final String CROSS_PROFILE_NOT_ALLOWED_TITLE = "DocumentsUi.CROSS_PROFILE_NOT_ALLOWED_TITLE";
-    field public static final String PERSONAL_TAB = "DocumentsUi.PERSONAL_TAB";
-    field public static final String PREVIEW_WORK_FILE_ACCESSIBILITY = "DocumentsUi.PREVIEW_WORK_FILE_ACCESSIBILITY";
-    field public static final String WORK_ACCESSIBILITY = "DocumentsUi.WORK_ACCESSIBILITY";
-    field public static final String WORK_PROFILE_OFF_ENABLE_BUTTON = "DocumentsUi.WORK_PROFILE_OFF_ENABLE_BUTTON";
-    field public static final String WORK_PROFILE_OFF_ERROR_TITLE = "DocumentsUi.WORK_PROFILE_OFF_ERROR_TITLE";
-    field public static final String WORK_TAB = "DocumentsUi.WORK_TAB";
-  }
-
-  public static final class DevicePolicyResources.Strings.MediaProvider {
-    field public static final String BLOCKED_BY_ADMIN_TITLE = "MediaProvider.BLOCKED_BY_ADMIN_TITLE";
-    field public static final String BLOCKED_FROM_PERSONAL_MESSAGE = "MediaProvider.BLOCKED_FROM_PERSONAL_MESSAGE";
-    field public static final String BLOCKED_FROM_WORK_MESSAGE = "MediaProvider.BLOCKED_FROM_WORK_MESSAGE";
-    field public static final String SWITCH_TO_PERSONAL_MESSAGE = "MediaProvider.SWITCH_TO_PERSONAL_MESSAGE";
-    field public static final String SWITCH_TO_WORK_MESSAGE = "MediaProvider.SWITCH_TO_WORK_MESSAGE";
-    field public static final String WORK_PROFILE_PAUSED_MESSAGE = "MediaProvider.WORK_PROFILE_PAUSED_MESSAGE";
-    field public static final String WORK_PROFILE_PAUSED_TITLE = "MediaProvider.WORK_PROFILE_PAUSED_TITLE";
   }
 
   public static final class DevicePolicyResources.Strings.PermissionController {
@@ -1238,6 +1198,13 @@ package android.app.admin {
     field public static final String HOME_MISSING_WORK_PROFILE_SUPPORT_MESSAGE = "PermissionController.HOME_MISSING_WORK_PROFILE_SUPPORT_MESSAGE";
     field public static final String LOCATION_AUTO_GRANTED_MESSAGE = "PermissionController.LOCATION_AUTO_GRANTED_MESSAGE";
     field public static final String WORK_PROFILE_DEFAULT_APPS_TITLE = "PermissionController.WORK_PROFILE_DEFAULT_APPS_TITLE";
+  }
+
+  public class DevicePolicyResourcesManager {
+    method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_MANAGEMENT_RESOURCES) public void resetDrawables(@NonNull java.util.Set<java.lang.String>);
+    method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_MANAGEMENT_RESOURCES) public void resetStrings(@NonNull java.util.Set<java.lang.String>);
+    method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_MANAGEMENT_RESOURCES) public void setDrawables(@NonNull java.util.Set<android.app.admin.DevicePolicyDrawableResource>);
+    method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_MANAGEMENT_RESOURCES) public void setStrings(@NonNull java.util.Set<android.app.admin.DevicePolicyStringResource>);
   }
 
   public final class DevicePolicyStringResource implements android.os.Parcelable {
@@ -2624,13 +2591,13 @@ package android.app.usage {
   }
 
   public final class UsageStatsManager {
-    method @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public void clearBroadcastResponseStats(@Nullable String, @IntRange(from=0) long);
+    method @RequiresPermission(android.Manifest.permission.ACCESS_BROADCAST_RESPONSE_STATS) public void clearBroadcastResponseStats(@Nullable String, @IntRange(from=0) long);
     method @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public int getAppStandbyBucket(String);
     method @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public java.util.Map<java.lang.String,java.lang.Integer> getAppStandbyBuckets();
     method @RequiresPermission(allOf={android.Manifest.permission.INTERACT_ACROSS_USERS, android.Manifest.permission.PACKAGE_USAGE_STATS}) public long getLastTimeAnyComponentUsed(@NonNull String);
     method public int getUsageSource();
     method @RequiresPermission(android.Manifest.permission.BIND_CARRIER_SERVICES) public void onCarrierPrivilegedAppsChanged();
-    method @NonNull @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public java.util.List<android.app.usage.BroadcastResponseStats> queryBroadcastResponseStats(@Nullable String, @IntRange(from=0) long);
+    method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_BROADCAST_RESPONSE_STATS) public java.util.List<android.app.usage.BroadcastResponseStats> queryBroadcastResponseStats(@Nullable String, @IntRange(from=0) long);
     method @RequiresPermission(allOf={android.Manifest.permission.SUSPEND_APPS, android.Manifest.permission.OBSERVE_APP_USAGE}) public void registerAppUsageLimitObserver(int, @NonNull String[], @NonNull java.time.Duration, @NonNull java.time.Duration, @Nullable android.app.PendingIntent);
     method @RequiresPermission(android.Manifest.permission.OBSERVE_APP_USAGE) public void registerAppUsageObserver(int, @NonNull String[], long, @NonNull java.util.concurrent.TimeUnit, @NonNull android.app.PendingIntent);
     method @RequiresPermission(android.Manifest.permission.OBSERVE_APP_USAGE) public void registerUsageSessionObserver(int, @NonNull String[], @NonNull java.time.Duration, @NonNull java.time.Duration, @NonNull android.app.PendingIntent, @Nullable android.app.PendingIntent);
@@ -5875,9 +5842,9 @@ package android.location {
     ctor public LastLocationRequest.Builder();
     ctor public LastLocationRequest.Builder(@NonNull android.location.LastLocationRequest);
     method @NonNull public android.location.LastLocationRequest build();
-    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.WRITE_SECURE_SETTINGS, android.Manifest.permission.LOCATION_BYPASS}) public android.location.LastLocationRequest.Builder setAdasGnssBypass(boolean);
+    method @NonNull @RequiresPermission(android.Manifest.permission.LOCATION_BYPASS) public android.location.LastLocationRequest.Builder setAdasGnssBypass(boolean);
     method @NonNull @RequiresPermission(android.Manifest.permission.UPDATE_APP_OPS_STATS) public android.location.LastLocationRequest.Builder setHiddenFromAppOps(boolean);
-    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.WRITE_SECURE_SETTINGS, android.Manifest.permission.LOCATION_BYPASS}) public android.location.LastLocationRequest.Builder setLocationSettingsIgnored(boolean);
+    method @NonNull @RequiresPermission(android.Manifest.permission.LOCATION_BYPASS) public android.location.LastLocationRequest.Builder setLocationSettingsIgnored(boolean);
   }
 
   public class Location implements android.os.Parcelable {
@@ -5906,7 +5873,7 @@ package android.location {
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void requestLocationUpdates(@Nullable android.location.LocationRequest, @NonNull android.location.LocationListener, @Nullable android.os.Looper);
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void requestLocationUpdates(@Nullable android.location.LocationRequest, @NonNull java.util.concurrent.Executor, @NonNull android.location.LocationListener);
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void requestLocationUpdates(@Nullable android.location.LocationRequest, @NonNull android.app.PendingIntent);
-    method @RequiresPermission(anyOf={android.Manifest.permission.WRITE_SECURE_SETTINGS, android.Manifest.permission.LOCATION_BYPASS}) public void setAdasGnssLocationEnabled(boolean);
+    method @RequiresPermission(android.Manifest.permission.LOCATION_BYPASS) public void setAdasGnssLocationEnabled(boolean);
     method @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public void setExtraLocationControllerPackage(@Nullable String);
     method @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public void setExtraLocationControllerPackageEnabled(boolean);
     method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void setLocationEnabledForUser(boolean, @NonNull android.os.UserHandle);
@@ -5939,7 +5906,7 @@ package android.location {
     method @Deprecated @NonNull public android.location.LocationRequest setFastestInterval(long);
     method @Deprecated public void setHideFromAppOps(boolean);
     method @Deprecated @NonNull public android.location.LocationRequest setInterval(long);
-    method @Deprecated @NonNull @RequiresPermission(anyOf={android.Manifest.permission.WRITE_SECURE_SETTINGS, android.Manifest.permission.LOCATION_BYPASS}) public android.location.LocationRequest setLocationSettingsIgnored(boolean);
+    method @Deprecated @NonNull @RequiresPermission(android.Manifest.permission.LOCATION_BYPASS) public android.location.LocationRequest setLocationSettingsIgnored(boolean);
     method @Deprecated @NonNull public android.location.LocationRequest setLowPowerMode(boolean);
     method @Deprecated @NonNull public android.location.LocationRequest setNumUpdates(int);
     method @Deprecated @NonNull public android.location.LocationRequest setProvider(@NonNull String);
@@ -5955,9 +5922,9 @@ package android.location {
   }
 
   public static final class LocationRequest.Builder {
-    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.WRITE_SECURE_SETTINGS, android.Manifest.permission.LOCATION_BYPASS}) public android.location.LocationRequest.Builder setAdasGnssBypass(boolean);
+    method @NonNull @RequiresPermission(android.Manifest.permission.LOCATION_BYPASS) public android.location.LocationRequest.Builder setAdasGnssBypass(boolean);
     method @NonNull @RequiresPermission(android.Manifest.permission.UPDATE_APP_OPS_STATS) public android.location.LocationRequest.Builder setHiddenFromAppOps(boolean);
-    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.WRITE_SECURE_SETTINGS, android.Manifest.permission.LOCATION_BYPASS}) public android.location.LocationRequest.Builder setLocationSettingsIgnored(boolean);
+    method @NonNull @RequiresPermission(android.Manifest.permission.LOCATION_BYPASS) public android.location.LocationRequest.Builder setLocationSettingsIgnored(boolean);
     method @NonNull @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public android.location.LocationRequest.Builder setLowPower(boolean);
     method @NonNull @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public android.location.LocationRequest.Builder setWorkSource(@Nullable android.os.WorkSource);
   }
@@ -11410,7 +11377,7 @@ package android.service.games {
     method @RequiresPermission(android.Manifest.permission.MANAGE_GAME_ACTIVITY) public final boolean restartGame();
     method public void setTaskOverlayView(@NonNull android.view.View, @NonNull android.view.ViewGroup.LayoutParams);
     method @RequiresPermission(android.Manifest.permission.MANAGE_GAME_ACTIVITY) public final void startActivityFromGameSessionForResult(@NonNull android.content.Intent, @Nullable android.os.Bundle, @NonNull java.util.concurrent.Executor, @NonNull android.service.games.GameSessionActivityCallback);
-    method public void takeScreenshot(@NonNull java.util.concurrent.Executor, @NonNull android.service.games.GameSession.ScreenshotCallback);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_GAME_ACTIVITY) public void takeScreenshot(@NonNull java.util.concurrent.Executor, @NonNull android.service.games.GameSession.ScreenshotCallback);
   }
 
   public static interface GameSession.ScreenshotCallback {
