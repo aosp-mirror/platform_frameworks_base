@@ -38250,6 +38250,7 @@ package android.service.autofill {
     field @NonNull public static final android.os.Parcelable.Creator<android.service.autofill.FillRequest> CREATOR;
     field public static final int FLAG_COMPATIBILITY_MODE_REQUEST = 2; // 0x2
     field public static final int FLAG_MANUAL_REQUEST = 1; // 0x1
+    field public static final int FLAG_SUPPORTS_FILL_DIALOG = 64; // 0x40
   }
 
   public final class FillResponse implements android.os.Parcelable {

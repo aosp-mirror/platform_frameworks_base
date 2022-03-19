@@ -18,9 +18,9 @@ package com.android.server.autofill;
 
 import static android.service.autofill.AutofillFieldClassificationService.EXTRA_SCORES;
 import static android.service.autofill.AutofillService.EXTRA_FILL_RESPONSE;
-import static android.service.autofill.FillRequest.FLAG_ACTIVITY_START;
 import static android.service.autofill.FillRequest.FLAG_MANUAL_REQUEST;
 import static android.service.autofill.FillRequest.FLAG_PASSWORD_INPUT_TYPE;
+import static android.service.autofill.FillRequest.FLAG_SUPPORTS_FILL_DIALOG;
 import static android.service.autofill.FillRequest.FLAG_VIEW_NOT_FOCUSED;
 import static android.service.autofill.FillRequest.INVALID_REQUEST_ID;
 import static android.view.autofill.AutofillManager.ACTION_RESPONSE_EXPIRED;
@@ -965,7 +965,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 mService.getRemoteInlineSuggestionRenderServiceLocked();
         if ((mSessionFlags.mInlineSupportedByService || mSessionFlags.mClientSuggestionsEnabled)
                 && remoteRenderService != null
-                && (isViewFocusedLocked(flags) || (isRequestFromActivityStarted(flags)))) {
+                && (isViewFocusedLocked(flags) || (isRequestSupportFillDialog(flags)))) {
             final Consumer<InlineSuggestionsRequest> inlineSuggestionsRequestConsumer;
             if (mSessionFlags.mClientSuggestionsEnabled) {
                 final int finalRequestId = requestId;
@@ -1011,8 +1011,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         requestAssistStructureLocked(requestId, flags);
     }
 
-    private boolean isRequestFromActivityStarted(int flags) {
-        return (flags & FLAG_ACTIVITY_START) != 0;
+    private boolean isRequestSupportFillDialog(int flags) {
+        return (flags & FLAG_SUPPORTS_FILL_DIALOG) != 0;
     }
 
     @GuardedBy("mLock")
@@ -3002,7 +3002,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 // View is triggering autofill.
                 mCurrentViewId = viewState.id;
                 viewState.update(value, virtualBounds, flags);
-                if (!isRequestFromActivityStarted(flags)) {
+                if (!isRequestSupportFillDialog(flags)) {
                     mSessionFlags.mFillDialogDisabled = true;
                 }
                 requestNewFillResponseLocked(viewState, ViewState.STATE_STARTED_SESSION, flags);
