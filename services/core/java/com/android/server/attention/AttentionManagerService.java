@@ -74,6 +74,8 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * An attention service implementation that runs in System Server process.
@@ -86,6 +88,9 @@ public class AttentionManagerService extends SystemService {
 
     /** Service will unbind if connection is not used for that amount of time. */
     private static final long CONNECTION_TTL_MILLIS = 60_000;
+
+    /** How long AttentionManagerService will wait for service binding after lazy binding. */
+    private static final long SERVICE_BINDING_WAIT_MILLIS = 1000;
 
     /** DeviceConfig flag name, if {@code true}, enables AttentionManagerService features. */
     @VisibleForTesting
@@ -129,6 +134,7 @@ public class AttentionManagerService extends SystemService {
     @GuardedBy("mLock")
     private boolean mBinding;
     private AttentionHandler mAttentionHandler;
+    private CountDownLatch mServiceBindingLatch;
 
     @VisibleForTesting
     ComponentName mComponentName;
@@ -161,6 +167,7 @@ public class AttentionManagerService extends SystemService {
         mLock = lock;
         mAttentionHandler = handler;
         mPrivacyManager = SensorPrivacyManager.getInstance(context);
+        mServiceBindingLatch = new CountDownLatch(1);
     }
 
     @Override
@@ -275,13 +282,16 @@ public class AttentionManagerService extends SystemService {
         }
 
         synchronized (mLock) {
-            final long now = SystemClock.uptimeMillis();
             // schedule shutting down the connection if no one resets this timer
             freeIfInactiveLocked();
 
             // lazily start the service, which should be very lightweight to start
             bindLocked();
-
+        }
+        final long now = SystemClock.uptimeMillis();
+        // Proceed when the service binding is complete.
+        awaitServiceBinding(Math.min(SERVICE_BINDING_WAIT_MILLIS, timeout));
+        synchronized (mLock) {
             // throttle frequent requests
             final AttentionCheckCache cache = mAttentionCheckCacheBuffer == null ? null
                     : mAttentionCheckCacheBuffer.getLast();
@@ -361,7 +371,10 @@ public class AttentionManagerService extends SystemService {
 
             // lazily start the service, which should be very lightweight to start
             bindLocked();
-
+        }
+        // Proceed when the service binding is complete.
+        awaitServiceBinding(SERVICE_BINDING_WAIT_MILLIS);
+        synchronized (mLock) {
             /*
             Prevent spamming with multiple requests, only one at a time is allowed.
             If there are use-cases for keeping track of multiple requests, we
@@ -417,6 +430,14 @@ public class AttentionManagerService extends SystemService {
 
     private static String getServiceConfigPackage(Context context) {
         return context.getPackageManager().getAttentionServicePackageName();
+    }
+
+    private void awaitServiceBinding(long millis) {
+        try {
+            mServiceBindingLatch.await(millis, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException e) {
+            Slog.e(LOG_TAG, "Interrupted while waiting to bind Attention Service.", e);
+        }
     }
 
     /**
@@ -711,6 +732,7 @@ public class AttentionManagerService extends SystemService {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             init(IAttentionService.Stub.asInterface(service));
+            mServiceBindingLatch.countDown();
         }
 
         @Override
@@ -730,6 +752,7 @@ public class AttentionManagerService extends SystemService {
 
         void cleanupService() {
             init(null);
+            mServiceBindingLatch = new CountDownLatch(1);
         }
 
         private void init(@Nullable IAttentionService service) {
