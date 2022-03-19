@@ -59,6 +59,7 @@ import static com.android.server.am.AppPermissionTracker.AppPermissionPolicy;
 import static com.android.server.am.AppRestrictionController.STOCK_PM_FLAGS;
 import static com.android.server.am.BaseAppStateTracker.STATE_TYPE_FGS_LOCATION;
 import static com.android.server.am.BaseAppStateTracker.STATE_TYPE_FGS_MEDIA_PLAYBACK;
+import static com.android.server.am.BaseAppStateTracker.STATE_TYPE_FGS_WITH_NOTIFICATION;
 import static com.android.server.am.BaseAppStateTracker.STATE_TYPE_MEDIA_SESSION;
 import static com.android.server.am.BaseAppStateTracker.STATE_TYPE_PERMISSION;
 
@@ -113,6 +114,7 @@ import android.os.UidBatteryConsumer;
 import android.os.UserHandle;
 import android.permission.PermissionManager;
 import android.provider.DeviceConfig;
+import android.service.notification.StatusBarNotification;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.util.Pair;
@@ -566,6 +568,7 @@ public final class BackgroundRestrictionTest {
         DeviceConfigSession<Float> bgCurrentDrainBgRestrictedThreshold = null;
         DeviceConfigSession<Boolean> bgPromptFgsWithNotiToBgRestricted = null;
         DeviceConfigSession<Long> bgNotificationMinInterval = null;
+        DeviceConfigSession<Integer> bgBatteryExemptionTypes = null;
 
         mBgRestrictionController.addAppBackgroundRestrictionListener(listener);
 
@@ -627,16 +630,25 @@ public final class BackgroundRestrictionTest {
                     ConstantsObserver.DEFAULT_BG_ABUSIVE_NOTIFICATION_MINIMAL_INTERVAL_MS);
             bgNotificationMinInterval.set(windowMs);
 
+            bgBatteryExemptionTypes = new DeviceConfigSession<>(
+                    DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                    AppBatteryPolicy.KEY_BG_CURRENT_DRAIN_EXEMPTED_TYPES,
+                    DeviceConfig::getInt,
+                    mContext.getResources().getInteger(
+                            R.integer.config_bg_current_drain_exempted_types));
+            bgBatteryExemptionTypes.set(0);
+
             mCurrentTimeMillis = 10_000L;
             doReturn(mCurrentTimeMillis - windowMs).when(stats).getStatsStartTimestamp();
             doReturn(mCurrentTimeMillis).when(stats).getStatsEndTimestamp();
             doReturn(statsList).when(mBatteryStatsInternal).getBatteryUsageStats(anyObject());
-            doReturn(true).when(mNotificationManagerInternal).isNotificationShown(
-                    testPkgName, null, notificationId, testUser);
             mAppFGSTracker.onForegroundServiceStateChanged(testPkgName, testUid,
                     testPid, true);
             mAppFGSTracker.onForegroundServiceNotificationUpdated(
                     testPkgName, testUid, notificationId);
+            mAppFGSTracker.mNotificationListener.onNotificationPosted(new StatusBarNotification(
+                    testPkgName, null, notificationId, null, testUid, testPid,
+                    new Notification(), UserHandle.of(testUser), null, mCurrentTimeMillis), null);
 
             runTestBgCurrentDrainMonitorOnce(listener, stats, uids,
                     new double[]{restrictBucketThresholdMah - 1, 0},
@@ -915,6 +927,7 @@ public final class BackgroundRestrictionTest {
             closeIfNotNull(bgCurrentDrainBgRestrictedThreshold);
             closeIfNotNull(bgPromptFgsWithNotiToBgRestricted);
             closeIfNotNull(bgNotificationMinInterval);
+            closeIfNotNull(bgBatteryExemptionTypes);
         }
     }
 
@@ -1250,14 +1263,15 @@ public final class BackgroundRestrictionTest {
             List<Pair<List<MediaController>, Long>> mediaControllers, List<Long> topStateChanges,
             VerificationMode mode) throws Exception {
         runExemptionTestOnce(
-                packageName, uid, pid, serviceType, sleepMs, true, perm, mediaControllers,
+                packageName, uid, pid, serviceType, sleepMs, true, false, perm, mediaControllers,
                 topStateChanges, true, true,
                 () -> checkNotificationShown(new String[] {packageName}, mode, false)
         );
     }
 
     private void runExemptionTestOnce(String packageName, int uid, int pid,
-            int serviceType, long sleepMs, boolean stopAfterSleep, String perm,
+            int serviceType, long sleepMs, boolean stopAfterSleep,
+            boolean withNotification, String perm,
             List<Pair<List<MediaController>, Long>> mediaControllers,
             List<Long> topStateChanges, boolean resetFGSTracker, boolean resetController,
             RunnableWithException r) throws Exception {
@@ -1302,7 +1316,20 @@ public final class BackgroundRestrictionTest {
                         FOREGROUND_SERVICE_TYPE_NONE);
             }
         }
-
+        if (withNotification) {
+            final int notificationId = 1000;
+            mAppFGSTracker.onForegroundServiceNotificationUpdated(
+                    packageName, uid, notificationId);
+            final StatusBarNotification noti = new StatusBarNotification(
+                    packageName, null, notificationId, null, uid, pid,
+                    new Notification(), UserHandle.of(UserHandle.getUserId(uid)),
+                    null, mCurrentTimeMillis);
+            mAppFGSTracker.mNotificationListener.onNotificationPosted(noti, null);
+            Thread.sleep(sleepMs);
+            if (stopAfterSleep) {
+                mAppFGSTracker.mNotificationListener.onNotificationRemoved(noti, null, 0);
+            }
+        }
         if (perm != null) {
             doReturn(PERMISSION_GRANTED)
                     .when(mPermissionManagerServiceInternal)
@@ -1513,7 +1540,8 @@ public final class BackgroundRestrictionTest {
                     mContext.getResources().getInteger(
                             R.integer.config_bg_current_drain_exempted_types));
             bgBatteryExemptionTypes.set(STATE_TYPE_MEDIA_SESSION | STATE_TYPE_FGS_MEDIA_PLAYBACK
-                    | STATE_TYPE_FGS_LOCATION | STATE_TYPE_PERMISSION);
+                    | STATE_TYPE_FGS_LOCATION | STATE_TYPE_PERMISSION
+                    | STATE_TYPE_FGS_WITH_NOTIFICATION);
 
             bgPermissionMonitorEnabled = new DeviceConfigSession<>(
                     DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
@@ -1546,7 +1574,7 @@ public final class BackgroundRestrictionTest {
             // Run with a media playback service which starts/stops immediately, we should
             // goto the restricted bucket.
             runTestBgCurrentDrainExemptionOnce(testPkgName1, testUid1, testPid1,
-                    FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK, 0, true,
+                    FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK, 0, true, false,
                     null, null, null, listener, stats, uids,
                     new double[]{restrictBucketThresholdMah + 1, 0},
                     new double[]{0, restrictBucketThresholdMah - 1}, zeros, zeros,
@@ -1556,7 +1584,7 @@ public final class BackgroundRestrictionTest {
             // Run with a media playback service with extended time. We should be back to normal.
             runTestBgCurrentDrainExemptionOnce(testPkgName1, testUid1, testPid1,
                     FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK, bgMediaPlaybackMinDuration * 2, false,
-                    null, null, null, listener, stats, uids,
+                    false, null, null, null, listener, stats, uids,
                     new double[]{restrictBucketThresholdMah + 1, 0},
                     new double[]{0, restrictBucketThresholdMah - 1}, zeros, zeros,
                     true, RESTRICTION_LEVEL_ADAPTIVE_BUCKET, timeout, false,
@@ -1585,7 +1613,7 @@ public final class BackgroundRestrictionTest {
             // Run with a media playback service with extended time, with higher current drain.
             runTestBgCurrentDrainExemptionOnce(testPkgName1, testUid1, testPid1,
                     FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK, bgMediaPlaybackMinDuration * 2, false,
-                    null, null, null, listener, stats, uids,
+                    false, null, null, null, listener, stats, uids,
                     new double[]{restrictBucketHighThresholdMah - 1, 0},
                     new double[]{0, restrictBucketThresholdMah - 1}, zeros, zeros,
                     true, RESTRICTION_LEVEL_RESTRICTED_BUCKET, timeout, true,
@@ -1594,7 +1622,7 @@ public final class BackgroundRestrictionTest {
             // Run with a media playback service with extended time, with even higher current drain.
             runTestBgCurrentDrainExemptionOnce(testPkgName1, testUid1, testPid1,
                     FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK, bgMediaPlaybackMinDuration * 2, false,
-                    null, null, null, listener, stats, uids,
+                    false, null, null, null, listener, stats, uids,
                     new double[]{restrictBucketHighThresholdMah + 1, 0},
                     new double[]{0, restrictBucketThresholdMah - 1}, zeros, zeros,
                     false, RESTRICTION_LEVEL_RESTRICTED_BUCKET, timeout, false,
@@ -1607,8 +1635,8 @@ public final class BackgroundRestrictionTest {
 
             // Run with a media session with extended time, with higher current drain.
             runTestBgCurrentDrainExemptionOnce(testPkgName1, testUid1, testPid1,
-                    FOREGROUND_SERVICE_TYPE_NONE, bgMediaPlaybackMinDuration * 2, false, null,
-                    List.of(Pair.create(createMediaControllers(new String[] {testPkgName1},
+                    FOREGROUND_SERVICE_TYPE_NONE, bgMediaPlaybackMinDuration * 2, false, false,
+                    null, List.of(Pair.create(createMediaControllers(new String[] {testPkgName1},
                                 new int[] {testUid1}), bgMediaPlaybackMinDuration * 2)),
                     null, listener, stats, uids,
                     new double[]{restrictBucketHighThresholdMah - 1, 0},
@@ -1618,8 +1646,8 @@ public final class BackgroundRestrictionTest {
 
             // Run with a media session with extended time, with even higher current drain.
             runTestBgCurrentDrainExemptionOnce(testPkgName1, testUid1, testPid1,
-                    FOREGROUND_SERVICE_TYPE_NONE, bgMediaPlaybackMinDuration * 2, false, null,
-                    List.of(Pair.create(createMediaControllers(new String[] {testPkgName1},
+                    FOREGROUND_SERVICE_TYPE_NONE, bgMediaPlaybackMinDuration * 2, false, false,
+                    null, List.of(Pair.create(createMediaControllers(new String[] {testPkgName1},
                                 new int[] {testUid1}), bgMediaPlaybackMinDuration * 2)),
                     null, listener, stats, uids,
                     new double[]{restrictBucketHighThresholdMah + 1, 0},
@@ -1635,8 +1663,8 @@ public final class BackgroundRestrictionTest {
             // Run with a media session with extended time, with moderate current drain,
             // but it ran on the top when the location service is active.
             runTestBgCurrentDrainExemptionOnce(testPkgName1, testUid1, testPid1,
-                    FOREGROUND_SERVICE_TYPE_NONE, bgMediaPlaybackMinDuration * 2, false, null,
-                    List.of(Pair.create(createMediaControllers(new String[] {testPkgName1},
+                    FOREGROUND_SERVICE_TYPE_NONE, bgMediaPlaybackMinDuration * 2, false, false,
+                    null, List.of(Pair.create(createMediaControllers(new String[] {testPkgName1},
                                 new int[] {testUid1}), bgMediaPlaybackMinDuration * 2)),
                     List.of(0L, timeout * 2), listener, stats, uids,
                     new double[]{restrictBucketThresholdMah + 1, 0},
@@ -1651,7 +1679,7 @@ public final class BackgroundRestrictionTest {
 
             // Run with a location service with extended time, with higher current drain.
             runTestBgCurrentDrainExemptionOnce(testPkgName1, testUid1, testPid1,
-                    FOREGROUND_SERVICE_TYPE_LOCATION, bgMediaPlaybackMinDuration * 2, false,
+                    FOREGROUND_SERVICE_TYPE_LOCATION, bgMediaPlaybackMinDuration * 2, false, false,
                     null, null, null, listener, stats, uids,
                     new double[]{restrictBucketHighThresholdMah - 1, 0},
                     new double[]{0, restrictBucketThresholdMah - 1}, zeros, zeros,
@@ -1660,7 +1688,7 @@ public final class BackgroundRestrictionTest {
 
             // Run with a location service with extended time, with even higher current drain.
             runTestBgCurrentDrainExemptionOnce(testPkgName1, testUid1, testPid1,
-                    FOREGROUND_SERVICE_TYPE_LOCATION, bgMediaPlaybackMinDuration * 2, false,
+                    FOREGROUND_SERVICE_TYPE_LOCATION, bgMediaPlaybackMinDuration * 2, false, false,
                     null, null, null, listener, stats, uids,
                     new double[]{restrictBucketHighThresholdMah + 1, 0},
                     new double[]{0, restrictBucketThresholdMah - 1}, zeros, zeros,
@@ -1675,7 +1703,7 @@ public final class BackgroundRestrictionTest {
             // Run with a location service with extended time, with moderate current drain,
             // but it ran on the top when the location service is active.
             runTestBgCurrentDrainExemptionOnce(testPkgName1, testUid1, testPid1,
-                    FOREGROUND_SERVICE_TYPE_LOCATION, bgMediaPlaybackMinDuration * 2, false,
+                    FOREGROUND_SERVICE_TYPE_LOCATION, bgMediaPlaybackMinDuration * 2, false, false,
                     null, null, List.of(0L, timeout * 2), listener, stats, uids,
                     new double[]{restrictBucketThresholdMah + 1, 0},
                     new double[]{0, restrictBucketThresholdMah - 1}, zeros, zeros,
@@ -1692,7 +1720,7 @@ public final class BackgroundRestrictionTest {
 
             // Run with bg location permission, with moderate current drain.
             runTestBgCurrentDrainExemptionOnce(testPkgName1, testUid1, testPid1,
-                    FOREGROUND_SERVICE_TYPE_NONE, 0, false,
+                    FOREGROUND_SERVICE_TYPE_NONE, 0, false, false,
                     ACCESS_BACKGROUND_LOCATION, null, null, listener, stats, uids,
                     new double[]{restrictBucketThresholdMah - 1, 0},
                     new double[]{0, restrictBucketThresholdMah - 1}, zeros, zeros,
@@ -1701,7 +1729,7 @@ public final class BackgroundRestrictionTest {
 
             // Run with bg location permission, with a bit higher current drain.
             runTestBgCurrentDrainExemptionOnce(testPkgName1, testUid1, testPid1,
-                    FOREGROUND_SERVICE_TYPE_NONE, 0, false,
+                    FOREGROUND_SERVICE_TYPE_NONE, 0, false, false,
                     ACCESS_BACKGROUND_LOCATION, null, null, listener, stats, uids,
                     new double[]{restrictBucketThresholdMah + 1, 0},
                     new double[]{0, restrictBucketThresholdMah - 1}, zeros, zeros,
@@ -1718,7 +1746,7 @@ public final class BackgroundRestrictionTest {
 
             // Run with bg location permission, with higher current drain.
             runTestBgCurrentDrainExemptionOnce(testPkgName1, testUid1, testPid1,
-                    FOREGROUND_SERVICE_TYPE_NONE, 0, false,
+                    FOREGROUND_SERVICE_TYPE_NONE, 0, false, false,
                     ACCESS_BACKGROUND_LOCATION , null, null, listener, stats, uids,
                     new double[]{restrictBucketHighThresholdMah - 1, 0},
                     new double[]{0, restrictBucketThresholdMah - 1}, zeros, zeros,
@@ -1727,7 +1755,7 @@ public final class BackgroundRestrictionTest {
 
             // Run with bg location permission, with even higher current drain.
             runTestBgCurrentDrainExemptionOnce(testPkgName1, testUid1, testPid1,
-                    FOREGROUND_SERVICE_TYPE_NONE, 0, false,
+                    FOREGROUND_SERVICE_TYPE_NONE, 0, false, false,
                     ACCESS_BACKGROUND_LOCATION , null, null, listener, stats, uids,
                     new double[]{restrictBucketHighThresholdMah + 1, 0},
                     new double[]{0, restrictBucketThresholdMah - 1}, zeros, zeros,
@@ -1749,7 +1777,7 @@ public final class BackgroundRestrictionTest {
             // Run with a media playback service which starts/stops immediately, we should
             // goto the restricted bucket.
             runTestBgCurrentDrainExemptionOnce(testPkgName1, testUid1, testPid1,
-                    FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK, 0, true,
+                    FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK, 0, true, false,
                     null, null, null, listener, stats, uids,
                     new double[]{restrictBucketThresholdMah + 1, 0},
                     new double[]{0, restrictBucketThresholdMah - 1}, zeros, zeros,
@@ -1759,7 +1787,7 @@ public final class BackgroundRestrictionTest {
             // Run with a media playback service with extended time. We should be back to normal.
             runTestBgCurrentDrainExemptionOnce(testPkgName1, testUid1, testPid1,
                     FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK, bgMediaPlaybackMinDuration * 2, false,
-                    null, null, null, listener, stats, uids,
+                    false, null, null, null, listener, stats, uids,
                     new double[]{restrictBucketThresholdMah + 1, 0},
                     new double[]{0, restrictBucketThresholdMah - 1}, zeros, zeros,
                     true, RESTRICTION_LEVEL_ADAPTIVE_BUCKET, timeout, false,
@@ -1791,7 +1819,7 @@ public final class BackgroundRestrictionTest {
             // Run with a media playback service with extended time, with higher current drain.
             runTestBgCurrentDrainExemptionOnce(testPkgName1, testUid1, testPid1,
                     FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK, bgMediaPlaybackMinDuration * 2, false,
-                    null, null, null, listener, stats, uids,
+                    false, null, null, null, listener, stats, uids,
                     new double[]{restrictBucketHighThresholdMah - 1, 0},
                     new double[]{0, restrictBucketThresholdMah - 1}, zeros, zeros,
                     true, RESTRICTION_LEVEL_RESTRICTED_BUCKET, timeout, true,
@@ -1802,7 +1830,7 @@ public final class BackgroundRestrictionTest {
             // playback.
             runTestBgCurrentDrainExemptionOnce(testPkgName1, testUid1, testPid1,
                     FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK, bgMediaPlaybackMinDuration * 2, false,
-                    null, null, null, listener, stats, uids,
+                    false, null, null, null, listener, stats, uids,
                     new double[]{restrictBucketHighThresholdMah + 100, 0},
                     new double[]{0, restrictBucketThresholdMah - 1}, zeros, zeros,
                     true, RESTRICTION_LEVEL_RESTRICTED_BUCKET, timeout, false,
@@ -1817,7 +1845,7 @@ public final class BackgroundRestrictionTest {
 
             // Run with coarse location permission, with high current drain.
             runTestBgCurrentDrainExemptionOnce(testPkgName1, testUid1, testPid1,
-                    FOREGROUND_SERVICE_TYPE_NONE, 0, false,
+                    FOREGROUND_SERVICE_TYPE_NONE, 0, false, false,
                     ACCESS_COARSE_LOCATION, null, null, listener, stats, uids,
                     new double[]{restrictBucketThresholdMah + 1, 0},
                     new double[]{0, restrictBucketThresholdMah - 1}, zeros, zeros,
@@ -1831,7 +1859,7 @@ public final class BackgroundRestrictionTest {
 
             // Run with fine location permission, with high current drain.
             runTestBgCurrentDrainExemptionOnce(testPkgName1, testUid1, testPid1,
-                    FOREGROUND_SERVICE_TYPE_NONE, 0, false,
+                    FOREGROUND_SERVICE_TYPE_NONE, 0, false, false,
                     ACCESS_FINE_LOCATION, null, null, listener, stats, uids,
                     new double[]{restrictBucketThresholdMah + 1, 0},
                     new double[]{0, restrictBucketThresholdMah - 1}, zeros, zeros,
@@ -1845,8 +1873,8 @@ public final class BackgroundRestrictionTest {
 
             // Run with a media session with extended time, with higher current drain.
             runTestBgCurrentDrainExemptionOnce(testPkgName1, testUid1, testPid1,
-                    FOREGROUND_SERVICE_TYPE_NONE, bgMediaPlaybackMinDuration * 2, false, null,
-                    List.of(Pair.create(createMediaControllers(new String[] {testPkgName1},
+                    FOREGROUND_SERVICE_TYPE_NONE, bgMediaPlaybackMinDuration * 2, false, false,
+                    null, List.of(Pair.create(createMediaControllers(new String[] {testPkgName1},
                                 new int[] {testUid1}), bgMediaPlaybackMinDuration * 2)),
                     null, listener, stats, uids,
                     new double[]{restrictBucketHighThresholdMah - 1, 0},
@@ -1858,8 +1886,8 @@ public final class BackgroundRestrictionTest {
             // it still should stay in the current restriction level as we exempt the media
             // session.
             runTestBgCurrentDrainExemptionOnce(testPkgName1, testUid1, testPid1,
-                    FOREGROUND_SERVICE_TYPE_NONE, bgMediaPlaybackMinDuration * 2, false, null,
-                    List.of(Pair.create(createMediaControllers(new String[] {testPkgName1},
+                    FOREGROUND_SERVICE_TYPE_NONE, bgMediaPlaybackMinDuration * 2, false, false,
+                    null, List.of(Pair.create(createMediaControllers(new String[] {testPkgName1},
                                 new int[] {testUid1}), bgMediaPlaybackMinDuration * 2)),
                     null, listener, stats, uids,
                     new double[]{restrictBucketHighThresholdMah + 100, 0},
@@ -1867,9 +1895,51 @@ public final class BackgroundRestrictionTest {
                     true, RESTRICTION_LEVEL_RESTRICTED_BUCKET, timeout, true,
                     null, windowMs, initialBg, initialFgs, initialFg, initialCached);
 
+            // Set the policy to exempt fgs with notifications.
+            bgBatteryExemptionTypes.set(STATE_TYPE_FGS_WITH_NOTIFICATION);
+            // Start over.
+            resetBgRestrictionController();
+            setUidBatteryConsumptions(stats, uids, zeros, zeros, zeros);
+            mAppBatteryPolicy.reset();
+
+            // Run with a FGS with notification posted/removed immediately, we should
+            // goto the restricted bucket.
+            runTestBgCurrentDrainExemptionOnce(testPkgName1, testUid1, testPid1,
+                    FOREGROUND_SERVICE_TYPE_NONE, 0, true, true,
+                    null, null, null, listener, stats, uids,
+                    new double[]{restrictBucketThresholdMah + 1, 0},
+                    new double[]{0, restrictBucketThresholdMah - 1}, zeros,
+                    false, RESTRICTION_LEVEL_RESTRICTED_BUCKET, timeout, true,
+                    null, windowMs, null, null, null);
+
+            // Run with a service with notification for extended time. We should be back to normal.
+            runTestBgCurrentDrainExemptionOnce(testPkgName1, testUid1, testPid1,
+                    FOREGROUND_SERVICE_TYPE_NONE, bgMediaPlaybackMinDuration * 2, false,
+                    true, null, null, null, listener, stats, uids,
+                    new double[]{restrictBucketThresholdMah + 1, 0},
+                    new double[]{0, restrictBucketThresholdMah - 1}, zeros,
+                    true, RESTRICTION_LEVEL_ADAPTIVE_BUCKET, timeout, false,
+                    () -> {
+                        // A user interaction will bring it back to normal.
+                        mIdleStateListener.onUserInteractionStarted(testPkgName1,
+                                UserHandle.getUserId(testUid1));
+                        waitForIdleHandler(mBgRestrictionController.getBackgroundHandler());
+                        // It should have been back to normal.
+                        listener.verify(timeout, testUid1, testPkgName1,
+                                RESTRICTION_LEVEL_ADAPTIVE_BUCKET);
+                        verify(mInjector.getAppStandbyInternal(), times(1)).maybeUnrestrictApp(
+                                eq(testPkgName1),
+                                eq(UserHandle.getUserId(testUid1)),
+                                eq(REASON_MAIN_FORCED_BY_SYSTEM),
+                                eq(REASON_SUB_FORCED_SYSTEM_FLAG_ABUSE),
+                                eq(REASON_MAIN_USAGE),
+                                eq(REASON_SUB_USAGE_USER_INTERACTION));
+                    }, windowMs, null, null, null);
+
             // Set the policy to exempt all.
             bgBatteryExemptionTypes.set(STATE_TYPE_MEDIA_SESSION | STATE_TYPE_FGS_MEDIA_PLAYBACK
-                    | STATE_TYPE_FGS_LOCATION | STATE_TYPE_PERMISSION);
+                    | STATE_TYPE_FGS_LOCATION | STATE_TYPE_PERMISSION
+                    | STATE_TYPE_FGS_WITH_NOTIFICATION);
 
             // Start over.
             resetBgRestrictionController();
@@ -1878,7 +1948,7 @@ public final class BackgroundRestrictionTest {
 
             // Run with a location service with extended time, with higher current drain.
             runTestBgCurrentDrainExemptionOnce(testPkgName1, testUid1, testPid1,
-                    FOREGROUND_SERVICE_TYPE_LOCATION, bgMediaPlaybackMinDuration * 2, false,
+                    FOREGROUND_SERVICE_TYPE_LOCATION, bgMediaPlaybackMinDuration * 2, false, false,
                     null, null, null, listener, stats, uids,
                     new double[]{restrictBucketHighThresholdMah - 1, 0},
                     new double[]{0, restrictBucketThresholdMah - 1}, zeros, zeros,
@@ -1888,7 +1958,7 @@ public final class BackgroundRestrictionTest {
             // Run with a location service with extended time, with even higher current drain.
             // it still should stay in the current restriction level as we exempt the location.
             runTestBgCurrentDrainExemptionOnce(testPkgName1, testUid1, testPid1,
-                    FOREGROUND_SERVICE_TYPE_LOCATION, bgMediaPlaybackMinDuration * 2, false,
+                    FOREGROUND_SERVICE_TYPE_LOCATION, bgMediaPlaybackMinDuration * 2, false, false,
                     null, null, null, listener, stats, uids,
                     new double[]{restrictBucketHighThresholdMah + 100, 0},
                     new double[]{0, restrictBucketThresholdMah - 1}, zeros, zeros,
@@ -1913,8 +1983,8 @@ public final class BackgroundRestrictionTest {
     }
 
     private void runTestBgCurrentDrainExemptionOnce(String packageName, int uid, int pid,
-            int serviceType, long sleepMs, boolean stopAfterSleep, String perm,
-            List<Pair<List<MediaController>, Long>> mediaControllers,
+            int serviceType, long sleepMs, boolean stopAfterSleep, boolean withNotification,
+            String perm, List<Pair<List<MediaController>, Long>> mediaControllers,
             List<Long> topStateChanges, TestAppRestrictionLevelListener listener,
             BatteryUsageStats stats, int[] uids, double[] bg, double[] fgs, double[] fg,
             double[] cached, boolean expectingTimeout, int expectingLevel, long timeout,
@@ -1941,7 +2011,7 @@ public final class BackgroundRestrictionTest {
         }
         waitForIdleHandler(mBgRestrictionController.getBackgroundHandler());
         runExemptionTestOnce(
-                packageName, uid, pid, serviceType, sleepMs, stopAfterSleep,
+                packageName, uid, pid, serviceType, sleepMs, stopAfterSleep, withNotification,
                 perm, mediaControllers, topStateChanges, resetFGSTracker, false,
                 () -> {
                     clearInvocations(mInjector.getAppStandbyInternal());

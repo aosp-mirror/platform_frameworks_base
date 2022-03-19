@@ -5796,7 +5796,7 @@
     <!-- The types of state where we'll exempt its battery usage during that state.
          The state here must be one or a combination of STATE_TYPE_* in BaseAppStateTracker.
     -->
-    <integer name="config_bg_current_drain_exempted_types">9</integer>
+    <integer name="config_bg_current_drain_exempted_types">25</integer>
 
     <!-- The behavior when an app has the permission ACCESS_BACKGROUND_LOCATION granted,
          whether or not the system will use a higher threshold towards its background battery usage

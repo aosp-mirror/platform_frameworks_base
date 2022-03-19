@@ -31,6 +31,7 @@
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <uses-permission
         android:name="android.permission.OVERRIDE_COMPAT_CHANGE_CONFIG_ON_RELEASE_BUILD"/>
+    <uses-permission android:name="android.permission.STATUS_BAR_SERVICE" />
 
     <!-- needed by MasterClearReceiverTest to display a system dialog -->
     <uses-permission android:name="android.permission.INTERNAL_SYSTEM_WINDOW"/>
