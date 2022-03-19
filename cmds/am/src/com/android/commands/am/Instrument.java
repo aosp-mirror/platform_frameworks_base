@@ -20,6 +20,7 @@ import static android.app.ActivityManager.INSTR_FLAG_ALWAYS_CHECK_SIGNATURE;
 import static android.app.ActivityManager.INSTR_FLAG_DISABLE_HIDDEN_API_CHECKS;
 import static android.app.ActivityManager.INSTR_FLAG_DISABLE_ISOLATED_STORAGE;
 import static android.app.ActivityManager.INSTR_FLAG_DISABLE_TEST_API_CHECKS;
+import static android.app.ActivityManager.INSTR_FLAG_INSTRUMENT_SDK_SANDBOX;
 import static android.app.ActivityManager.INSTR_FLAG_NO_RESTART;
 
 import android.app.IActivityManager;
@@ -97,6 +98,7 @@ public class Instrument {
     // Required
     public String componentNameArg;
     public boolean alwaysCheckSignature = false;
+    public boolean instrumentSdkSandbox = false;
 
     /**
      * Construct the instrument command runner.
@@ -523,6 +525,9 @@ public class Instrument {
             }
             if (alwaysCheckSignature) {
                 flags |= INSTR_FLAG_ALWAYS_CHECK_SIGNATURE;
+            }
+            if (instrumentSdkSandbox) {
+                flags |= INSTR_FLAG_INSTRUMENT_SDK_SANDBOX;
             }
             if (!mAm.startInstrumentation(cn, profileFile, flags, args, watcher, connection, userId,
                         abi)) {
