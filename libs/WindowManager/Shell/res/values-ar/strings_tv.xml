@@ -24,4 +24,5 @@
     <string name="pip_move" msgid="1544227837964635439">"‏نقل نافذة داخل النافذة (PIP)"</string>
     <string name="pip_expand" msgid="7605396312689038178">"‏توسيع نافذة داخل النافذة (PIP)"</string>
     <string name="pip_collapse" msgid="5732233773786896094">"‏تصغير نافذة داخل النافذة (PIP)"</string>
+    <string name="pip_edu_text" msgid="3672999496647508701">" انقر مرتين على "<annotation icon="home_icon">" الصفحة الرئيسية "</annotation>" للوصول لعناصر التحكم."</string>
 </resources>

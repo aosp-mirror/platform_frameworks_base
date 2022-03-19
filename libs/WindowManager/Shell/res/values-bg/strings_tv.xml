@@ -24,4 +24,5 @@
     <string name="pip_move" msgid="1544227837964635439">"„Картина в картина“: Преместв."</string>
     <string name="pip_expand" msgid="7605396312689038178">"Разгъване на прозореца за PIP"</string>
     <string name="pip_collapse" msgid="5732233773786896094">"Свиване на прозореца за PIP"</string>
+    <string name="pip_edu_text" msgid="3672999496647508701">" За достъп до контролите натиснете 2 пъти "<annotation icon="home_icon">"НАЧАЛО"</annotation></string>
 </resources>
