@@ -301,9 +301,9 @@
     <string name="accessibility_brightness" msgid="5391187016177823721">"Bistaratu distira"</string>
     <string name="accessibility_ambient_display_charging" msgid="7725523068728128968">"Kargatzen"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5716594205739750015">"2G-3G datuen erab. pausatu da"</string>
-    <string name="data_usage_disabled_dialog_4g_title" msgid="1490779000057752281">"4G datuen erabilera pausatu da"</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="1490779000057752281">"4G datu-erabilera pausatu da"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="2286843518689837719">"Datu-konexioa pausatu egin da"</string>
-    <string name="data_usage_disabled_dialog_title" msgid="9131615296036724838">"Datuen erabilera pausatu da"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="9131615296036724838">"Datu-erabilera pausatu da"</string>
     <string name="data_usage_disabled_dialog" msgid="7933201635215099780">"Iritsi zara ezarri zenuen datu-mugara. Datu-konexioa erabiltzeari utzi diozu.\n\nDatu-konexioa erabiltzeari berrekiten badiozu, baliteke zerbait ordaindu behar izatea datuak erabiltzeagatik."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="2796648546086408937">"Jarraitu erabiltzen"</string>
     <string name="gps_notification_searching_text" msgid="231304732649348313">"GPS seinalearen bila"</string>
@@ -404,7 +404,7 @@
     <string name="quick_settings_flashlight_label" msgid="4904634272006284185">"Linterna"</string>
     <string name="quick_settings_flashlight_camera_in_use" msgid="4820591564526512571">"Kamera abian da"</string>
     <string name="quick_settings_cellular_detail_title" msgid="792977203299358893">"Datu-konexioa"</string>
-    <string name="quick_settings_cellular_detail_data_usage" msgid="6105969068871138427">"Datuen erabilera"</string>
+    <string name="quick_settings_cellular_detail_data_usage" msgid="6105969068871138427">"Datu-erabilera"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="1136599216568805644">"Geratzen diren datuak"</string>
     <string name="quick_settings_cellular_detail_over_limit" msgid="4561921367680636235">"Mugaren gainetik"</string>
     <string name="quick_settings_cellular_detail_data_used" msgid="6798849610647988987">"<xliff:g id="DATA_USED">%s</xliff:g> erabilita"</string>
@@ -804,7 +804,7 @@
     <string name="battery_panel_title" msgid="5931157246673665963">"Bateria-erabilera"</string>
     <string name="battery_detail_charging_summary" msgid="8821202155297559706">"Bateria-aurrezlea ez dago erabilgarri gailua kargatzen ari denean"</string>
     <string name="battery_detail_switch_title" msgid="6940976502957380405">"Bateria-aurrezlea"</string>
-    <string name="battery_detail_switch_summary" msgid="3668748557848025990">"Errendimendua eta atzeko planoko datuen erabilera murrizten ditu"</string>
+    <string name="battery_detail_switch_summary" msgid="3668748557848025990">"Errendimendua eta atzeko planoko datu-erabilera murrizten ditu"</string>
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"<xliff:g id="NAME">%1$s</xliff:g> botoia"</string>
     <string name="keyboard_key_home" msgid="3734400625170020657">"Hasiera"</string>
     <string name="keyboard_key_back" msgid="4185420465469481999">"Atzera"</string>
@@ -985,7 +985,7 @@
     <string name="qs_dnd_keep" msgid="3829697305432866434">"Utzi bere horretan"</string>
     <string name="qs_dnd_replace" msgid="7712119051407052689">"Ordeztu"</string>
     <string name="running_foreground_services_title" msgid="5137313173431186685">"Aplikazioak abian dira atzeko planoan"</string>
-    <string name="running_foreground_services_msg" msgid="3009459259222695385">"Sakatu bateria eta datuen erabilerari buruzko xehetasunak ikusteko"</string>
+    <string name="running_foreground_services_msg" msgid="3009459259222695385">"Sakatu bateria eta datu-erabilerari buruzko xehetasunak ikusteko"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"Datu-konexioa desaktibatu nahi duzu?"</string>
     <string name="mobile_data_disable_message" msgid="8604966027899770415">"<xliff:g id="CARRIER">%s</xliff:g> erabilita ezingo dituzu erabili datuak edo Internet. Wifi-sare baten bidez soilik konektatu ahal izango zara Internetera."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"Zure operadorea"</string>
