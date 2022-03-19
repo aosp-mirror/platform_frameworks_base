@@ -369,7 +369,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     private boolean mDragResizingChangeReported = true;
     private int mResizeMode;
     private boolean mRedrawForSyncReported;
-    boolean mNextRelayoutUseSync;
+    int mSyncSeqId = 0;
+    int mLastSeqIdSentToRelayout = 0;
 
     /**
      * {@code true} when the client was still drawing for sync when the sync-set was finished or
@@ -5926,7 +5927,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // to draw even if the children draw first or don't need to sync, so we start
         // in WAITING state rather than READY.
         mSyncState = SYNC_STATE_WAITING_FOR_DRAW;
-        mNextRelayoutUseSync = true;
+        mSyncSeqId++;
         requestRedrawForSync();
         return true;
     }
@@ -6069,7 +6070,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      */
     void applyWithNextDraw(Consumer<SurfaceControl.Transaction> consumer) {
         mPendingDrawHandlers.add(consumer);
-        mNextRelayoutUseSync = true;
+        mSyncSeqId++;
         requestRedrawForSync();
 
         mWmService.mH.sendNewMessageDelayed(WINDOW_STATE_BLAST_SYNC_TIMEOUT, this,
