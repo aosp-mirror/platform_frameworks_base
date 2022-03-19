@@ -349,7 +349,7 @@ public class PhoneStatusBarPolicy
     }
 
     private String getManagedProfileAccessibilityString() {
-        return mDevicePolicyManager.getString(
+        return mDevicePolicyManager.getResources().getString(
                 STATUS_BAR_WORK_ICON_ACCESSIBILITY,
                 () -> mResources.getString(R.string.accessibility_managed_profile));
     }

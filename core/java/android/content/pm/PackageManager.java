@@ -4992,8 +4992,8 @@ public abstract class PackageManager {
      *         applications (which includes installed applications as well as
      *         applications with data directory i.e. applications which had been
      *         deleted with {@code DELETE_KEEP_DATA} flag set).
-     * @throws NameNotFoundException if a package with the given name cannot be
-     *             found on the system.
+     * @throws NameNotFoundException if no such package is available to the
+     *             caller.
      * @deprecated Use {@link #getPackageInfo(String, PackageInfoFlags)} instead.
      */
     @Deprecated
@@ -5029,8 +5029,8 @@ public abstract class PackageManager {
      *         applications (which includes installed applications as well as
      *         applications with data directory i.e. applications which had been
      *         deleted with {@code DELETE_KEEP_DATA} flag set).
-     * @throws NameNotFoundException if a package with the given name cannot be
-     *             found on the system.
+     * @throws NameNotFoundException if no such package is available to the
+     *             caller.
      * @deprecated Use {@link #getPackageInfo(VersionedPackage, PackageInfoFlags)} instead.
      */
     @Deprecated
@@ -5062,8 +5062,8 @@ public abstract class PackageManager {
      *         applications (which includes installed applications as well as
      *         applications with data directory i.e. applications which had been
      *         deleted with {@code DELETE_KEEP_DATA} flag set).
-     * @throws NameNotFoundException if a package with the given name cannot be
-     *             found on the system.
+     * @throws NameNotFoundException if no such package is available to the
+     *             caller.
      * @deprecated Use {@link #getPackageInfoAsUser(String, PackageInfoFlags, int)} instead.
      * @hide
      */
@@ -5188,8 +5188,8 @@ public abstract class PackageManager {
      *            desired package.
      * @return Returns an int array of the assigned GIDs, or null if there are
      *         none.
-     * @throws NameNotFoundException if a package with the given name cannot be
-     *             found on the system.
+     * @throws NameNotFoundException if no such package is available to the
+     *             caller.
      */
     public abstract int[] getPackageGids(@NonNull String packageName)
             throws NameNotFoundException;
@@ -5205,8 +5205,8 @@ public abstract class PackageManager {
      *            desired package.
      * @return Returns an int array of the assigned gids, or null if there are
      *         none.
-     * @throws NameNotFoundException if a package with the given name cannot be
-     *             found on the system.
+     * @throws NameNotFoundException if no such package is available to the
+     *             caller.
      * @deprecated Use {@link #getPackageGids(String, PackageInfoFlags)} instead.
      */
     @Deprecated
@@ -5232,8 +5232,8 @@ public abstract class PackageManager {
      * @param packageName The full name (i.e. com.google.apps.contacts) of the
      *            desired package.
      * @return Returns an integer UID who owns the given package name.
-     * @throws NameNotFoundException if a package with the given name can not be
-     *             found on the system.
+     * @throws NameNotFoundException if no such package is available to the
+     *             caller.
      * @deprecated Use {@link #getPackageUid(String, PackageInfoFlags)} instead.
      */
     @Deprecated
@@ -5259,8 +5259,8 @@ public abstract class PackageManager {
      *            desired package.
      * @param userId The user handle identifier to look up the package under.
      * @return Returns an integer UID who owns the given package name.
-     * @throws NameNotFoundException if a package with the given name can not be
-     *             found on the system.
+     * @throws NameNotFoundException if no such package is available to the
+     *             caller.
      * @hide
      */
     @SuppressWarnings("HiddenAbstractMethod")
@@ -5278,8 +5278,8 @@ public abstract class PackageManager {
      *            desired package.
      * @param userId The user handle identifier to look up the package under.
      * @return Returns an integer UID who owns the given package name.
-     * @throws NameNotFoundException if a package with the given name can not be
-     *             found on the system.
+     * @throws NameNotFoundException if no such package is available to the
+     *             caller.
      * @deprecated Use {@link #getPackageUidAsUser(String, PackageInfoFlags, int)} instead.
      * @hide
      */

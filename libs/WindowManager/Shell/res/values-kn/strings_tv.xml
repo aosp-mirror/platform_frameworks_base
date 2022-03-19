@@ -24,4 +24,5 @@
     <string name="pip_move" msgid="1544227837964635439">"PIP ಅನ್ನು ಸರಿಸಿ"</string>
     <string name="pip_expand" msgid="7605396312689038178">"ಚಿತ್ರದಲ್ಲಿ ಚಿತ್ರವನ್ನು ವಿಸ್ತರಿಸಿ"</string>
     <string name="pip_collapse" msgid="5732233773786896094">"ಚಿತ್ರದಲ್ಲಿ ಚಿತ್ರವನ್ನು ಕುಗ್ಗಿಸಿ"</string>
+    <string name="pip_edu_text" msgid="3672999496647508701">" ಕಂಟ್ರೋಲ್‌ಗಳಿಗಾಗಿ "<annotation icon="home_icon">" ಹೋಮ್ "</annotation>" ಅನ್ನು ಎರಡು ಬಾರಿ ಒತ್ತಿ"</string>
 </resources>

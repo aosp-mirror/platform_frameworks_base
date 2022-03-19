@@ -854,7 +854,6 @@ package android {
     field public static final int indicatorRight = 16843022; // 0x101010e
     field public static final int indicatorStart = 16843729; // 0x10103d1
     field public static final int inflatedId = 16842995; // 0x10100f3
-    field public static final int inheritKeyStoreKeys;
     field public static final int inheritShowWhenLocked = 16844188; // 0x101059c
     field public static final int initOrder = 16842778; // 0x101001a
     field public static final int initialKeyguardLayout = 16843714; // 0x10103c2
@@ -7422,12 +7421,6 @@ package android.app.admin {
     method @NonNull public java.util.List<java.lang.String> getDelegatedScopes(@Nullable android.content.ComponentName, @NonNull String);
     method public CharSequence getDeviceOwnerLockScreenInfo();
     method @Nullable public String getDevicePolicyManagementRoleHolderPackage();
-    method @Nullable public android.graphics.drawable.Drawable getDrawable(@NonNull String, @NonNull String, @NonNull java.util.function.Supplier<android.graphics.drawable.Drawable>);
-    method @Nullable public android.graphics.drawable.Drawable getDrawable(@NonNull String, @NonNull String, @NonNull String, @NonNull java.util.function.Supplier<android.graphics.drawable.Drawable>);
-    method @Nullable public android.graphics.drawable.Icon getDrawableAsIcon(@NonNull String, @NonNull String, @NonNull String, @Nullable android.graphics.drawable.Icon);
-    method @Nullable public android.graphics.drawable.Icon getDrawableAsIcon(@NonNull String, @NonNull String, @Nullable android.graphics.drawable.Icon);
-    method @Nullable public android.graphics.drawable.Drawable getDrawableForDensity(@NonNull String, @NonNull String, int, @NonNull java.util.function.Supplier<android.graphics.drawable.Drawable>);
-    method @Nullable public android.graphics.drawable.Drawable getDrawableForDensity(@NonNull String, @NonNull String, @NonNull String, int, @NonNull java.util.function.Supplier<android.graphics.drawable.Drawable>);
     method public CharSequence getEndUserSessionMessage(@NonNull android.content.ComponentName);
     method @NonNull public String getEnrollmentSpecificId();
     method @Nullable public android.app.admin.FactoryResetProtectionPolicy getFactoryResetProtectionPolicy(@Nullable android.content.ComponentName);
@@ -7474,14 +7467,13 @@ package android.app.admin {
     method @NonNull public java.util.List<android.app.admin.PreferentialNetworkServiceConfig> getPreferentialNetworkServiceConfigs();
     method public int getRequiredPasswordComplexity();
     method public long getRequiredStrongAuthTimeout(@Nullable android.content.ComponentName);
+    method @NonNull public android.app.admin.DevicePolicyResourcesManager getResources();
     method public boolean getScreenCaptureDisabled(@Nullable android.content.ComponentName);
     method public java.util.List<android.os.UserHandle> getSecondaryUsers(@NonNull android.content.ComponentName);
     method public CharSequence getShortSupportMessage(@NonNull android.content.ComponentName);
     method public CharSequence getStartUserSessionMessage(@NonNull android.content.ComponentName);
     method @Deprecated public boolean getStorageEncryption(@Nullable android.content.ComponentName);
     method public int getStorageEncryptionStatus();
-    method @Nullable public String getString(@NonNull String, @NonNull java.util.function.Supplier<java.lang.String>);
-    method @Nullable public String getString(@NonNull String, @NonNull java.util.function.Supplier<java.lang.String>, @NonNull java.lang.Object...);
     method @Nullable public android.app.admin.SystemUpdatePolicy getSystemUpdatePolicy();
     method @Nullable public android.os.PersistableBundle getTransferOwnershipBundle();
     method @Nullable public java.util.List<android.os.PersistableBundle> getTrustAgentConfiguration(@Nullable android.content.ComponentName, @NonNull android.content.ComponentName);
@@ -7843,31 +7835,18 @@ package android.app.admin {
   }
 
   public final class DevicePolicyResources {
-  }
-
-  public static final class DevicePolicyResources.Drawables {
-    field public static final String UNDEFINED = "UNDEFINED";
-    field public static final String WORK_PROFILE_ICON = "WORK_PROFILE_ICON";
-    field public static final String WORK_PROFILE_ICON_BADGE = "WORK_PROFILE_ICON_BADGE";
-    field public static final String WORK_PROFILE_OFF_ICON = "WORK_PROFILE_OFF_ICON";
-    field public static final String WORK_PROFILE_USER_ICON = "WORK_PROFILE_USER_ICON";
-  }
-
-  public static final class DevicePolicyResources.Drawables.Source {
-    field public static final String HOME_WIDGET = "HOME_WIDGET";
-    field public static final String LAUNCHER_OFF_BUTTON = "LAUNCHER_OFF_BUTTON";
-    field public static final String NOTIFICATION = "NOTIFICATION";
-    field public static final String PROFILE_SWITCH_ANIMATION = "PROFILE_SWITCH_ANIMATION";
-    field public static final String QUICK_SETTINGS = "QUICK_SETTINGS";
-    field public static final String STATUS_BAR = "STATUS_BAR";
     field public static final String UNDEFINED = "UNDEFINED";
   }
 
-  public static final class DevicePolicyResources.Drawables.Style {
-    field public static final String DEFAULT = "DEFAULT";
-    field public static final String OUTLINE = "OUTLINE";
-    field public static final String SOLID_COLORED = "SOLID_COLORED";
-    field public static final String SOLID_NOT_COLORED = "SOLID_NOT_COLORED";
+  public class DevicePolicyResourcesManager {
+    method @Nullable public android.graphics.drawable.Drawable getDrawable(@NonNull String, @NonNull String, @NonNull java.util.function.Supplier<android.graphics.drawable.Drawable>);
+    method @Nullable public android.graphics.drawable.Drawable getDrawable(@NonNull String, @NonNull String, @NonNull String, @NonNull java.util.function.Supplier<android.graphics.drawable.Drawable>);
+    method @Nullable public android.graphics.drawable.Icon getDrawableAsIcon(@NonNull String, @NonNull String, @NonNull String, @Nullable android.graphics.drawable.Icon);
+    method @Nullable public android.graphics.drawable.Icon getDrawableAsIcon(@NonNull String, @NonNull String, @Nullable android.graphics.drawable.Icon);
+    method @Nullable public android.graphics.drawable.Drawable getDrawableForDensity(@NonNull String, @NonNull String, int, @NonNull java.util.function.Supplier<android.graphics.drawable.Drawable>);
+    method @Nullable public android.graphics.drawable.Drawable getDrawableForDensity(@NonNull String, @NonNull String, @NonNull String, int, @NonNull java.util.function.Supplier<android.graphics.drawable.Drawable>);
+    method @Nullable public String getString(@NonNull String, @NonNull java.util.function.Supplier<java.lang.String>);
+    method @Nullable public String getString(@NonNull String, @NonNull java.util.function.Supplier<java.lang.String>, @NonNull java.lang.Object...);
   }
 
   public final class DnsEvent extends android.app.admin.NetworkEvent implements android.os.Parcelable {
@@ -10461,13 +10440,11 @@ package android.content {
     field public static final String EXTRA_LOCAL_ONLY = "android.intent.extra.LOCAL_ONLY";
     field public static final String EXTRA_LOCUS_ID = "android.intent.extra.LOCUS_ID";
     field public static final String EXTRA_MIME_TYPES = "android.intent.extra.MIME_TYPES";
-    field public static final String EXTRA_NEW_UID = "android.intent.extra.NEW_UID";
     field public static final String EXTRA_NOT_UNKNOWN_SOURCE = "android.intent.extra.NOT_UNKNOWN_SOURCE";
     field public static final String EXTRA_ORIGINATING_URI = "android.intent.extra.ORIGINATING_URI";
     field public static final String EXTRA_PACKAGE_NAME = "android.intent.extra.PACKAGE_NAME";
     field public static final String EXTRA_PERMISSION_GROUP_NAME = "android.intent.extra.PERMISSION_GROUP_NAME";
     field public static final String EXTRA_PHONE_NUMBER = "android.intent.extra.PHONE_NUMBER";
-    field public static final String EXTRA_PREVIOUS_UID = "android.intent.extra.PREVIOUS_UID";
     field public static final String EXTRA_PROCESS_TEXT = "android.intent.extra.PROCESS_TEXT";
     field public static final String EXTRA_PROCESS_TEXT_READONLY = "android.intent.extra.PROCESS_TEXT_READONLY";
     field public static final String EXTRA_QUICK_VIEW_FEATURES = "android.intent.extra.QUICK_VIEW_FEATURES";
@@ -10499,7 +10476,6 @@ package android.content {
     field public static final String EXTRA_TIMEZONE = "time-zone";
     field public static final String EXTRA_TITLE = "android.intent.extra.TITLE";
     field public static final String EXTRA_UID = "android.intent.extra.UID";
-    field public static final String EXTRA_UID_CHANGING = "android.intent.extra.UID_CHANGING";
     field public static final String EXTRA_USER = "android.intent.extra.USER";
     field public static final String EXTRA_USER_INITIATED = "android.intent.extra.USER_INITIATED";
     field public static final int FILL_IN_ACTION = 1; // 0x1
@@ -26590,6 +26566,7 @@ package android.net {
 
   public final class Ikev2VpnProfile extends android.net.PlatformVpnProfile {
     method @NonNull public java.util.List<java.lang.String> getAllowedAlgorithms();
+    method @Nullable public android.net.ipsec.ike.IkeTunnelConnectionParams getIkeTunnelConnectionParams();
     method public int getMaxMtu();
     method @Nullable public String getPassword();
     method @Nullable public byte[] getPresharedKey();
@@ -38251,6 +38228,7 @@ package android.service.autofill {
     field @NonNull public static final android.os.Parcelable.Creator<android.service.autofill.FillRequest> CREATOR;
     field public static final int FLAG_COMPATIBILITY_MODE_REQUEST = 2; // 0x2
     field public static final int FLAG_MANUAL_REQUEST = 1; // 0x1
+    field public static final int FLAG_SUPPORTS_FILL_DIALOG = 64; // 0x40
   }
 
   public final class FillResponse implements android.os.Parcelable {
@@ -49369,6 +49347,7 @@ package android.view {
     method @NonNull public android.view.SurfaceControl.Transaction setAlpha(@NonNull android.view.SurfaceControl, @FloatRange(from=0.0, to=1.0) float);
     method @NonNull public android.view.SurfaceControl.Transaction setBuffer(@NonNull android.view.SurfaceControl, @Nullable android.hardware.HardwareBuffer);
     method @NonNull public android.view.SurfaceControl.Transaction setBuffer(@NonNull android.view.SurfaceControl, @Nullable android.hardware.HardwareBuffer, @Nullable android.hardware.SyncFence);
+    method @NonNull public android.view.SurfaceControl.Transaction setBuffer(@NonNull android.view.SurfaceControl, @Nullable android.hardware.HardwareBuffer, @Nullable android.hardware.SyncFence, @Nullable java.util.function.Consumer<android.hardware.SyncFence>);
     method @NonNull public android.view.SurfaceControl.Transaction setBufferSize(@NonNull android.view.SurfaceControl, @IntRange(from=0) int, @IntRange(from=0) int);
     method @NonNull public android.view.SurfaceControl.Transaction setBufferTransform(@NonNull android.view.SurfaceControl, int);
     method @NonNull public android.view.SurfaceControl.Transaction setCrop(@NonNull android.view.SurfaceControl, @Nullable android.graphics.Rect);

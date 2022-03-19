@@ -98,7 +98,7 @@ public class UserIconDrawable extends Drawable implements Drawable.Callback {
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     private static Drawable getUpdatableManagedUserDrawable(Context context) {
         DevicePolicyManager dpm = context.getSystemService(DevicePolicyManager.class);
-        return dpm.getDrawableForDensity(
+        return dpm.getResources().getDrawableForDensity(
                 WORK_PROFILE_USER_ICON,
                 SOLID_COLORED,
                 context.getResources().getDisplayMetrics().densityDpi,
@@ -233,7 +233,7 @@ public class UserIconDrawable extends Drawable implements Drawable.Callback {
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     private static Drawable getUpdatableManagementBadge(Context context) {
         DevicePolicyManager dpm = context.getSystemService(DevicePolicyManager.class);
-        return dpm.getDrawableForDensity(
+        return dpm.getResources().getDrawableForDensity(
                 WORK_PROFILE_ICON,
                 SOLID_COLORED,
                 context.getResources().getDisplayMetrics().densityDpi,
