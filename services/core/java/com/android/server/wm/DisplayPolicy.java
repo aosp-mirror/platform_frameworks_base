@@ -114,6 +114,7 @@ import android.os.UserHandle;
 import android.util.ArraySet;
 import android.util.PrintWriterPrinter;
 import android.util.Slog;
+import android.util.SparseArray;
 import android.view.DisplayCutout;
 import android.view.DisplayInfo;
 import android.view.Gravity;
@@ -1151,9 +1152,8 @@ public class DisplayPolicy {
                             }
                         },
 
-                        // For IME we use regular frame.
                         (displayFrames, windowContainer, inOutFrame) -> {
-                            inOutFrame.set(win.getFrame());
+                            // For IME, we don't modify the frame.
                         });
 
                 mDisplayContent.setInsetProvider(ITYPE_BOTTOM_MANDATORY_GESTURES, win,
@@ -1488,9 +1488,30 @@ public class DisplayPolicy {
                     displayFrames.mInsetsState, displayFrames.mDisplayCutoutSafe,
                     displayFrames.mUnrestricted, win.getWindowingMode(), UNSPECIFIED_LENGTH,
                     UNSPECIFIED_LENGTH, win.getRequestedVisibilities(),
-                    null /* attachedWindowFrame */, win.mGlobalScale,
-                    sTmpClientFrames);
-            controller.computeSimulatedState(win, displayFrames, sTmpClientFrames.frame);
+                    null /* attachedWindowFrame */, win.mGlobalScale, sTmpClientFrames);
+            final SparseArray<InsetsSource> sources = win.getProvidedInsetsSources();
+            final InsetsState state = displayFrames.mInsetsState;
+            for (int index = sources.size() - 1; index >= 0; index--) {
+                final int type = sources.keyAt(index);
+                state.addSource(controller.getSourceProvider(type).createSimulatedSource(
+                        displayFrames, sTmpClientFrames.frame));
+            }
+        }
+    }
+
+    // TODO(b/161810301): No one is calling this since we haven't moved window layout to the client.
+    //                    When that happens, this should be called when the display rotation is
+    //                    changed, so that we can dispatch the correct insets to all the clients
+    //                    before the insets source windows report their frames to the server.
+    void updateInsetsSourceFramesExceptIme(DisplayFrames displayFrames) {
+        for (int i = mInsetsSourceWindowsExceptIme.size() - 1; i >= 0; i--) {
+            final WindowState win = mInsetsSourceWindowsExceptIme.valueAt(i);
+            mWindowLayout.computeFrames(win.getLayoutingAttrs(displayFrames.mRotation),
+                    displayFrames.mInsetsState, displayFrames.mDisplayCutoutSafe,
+                    displayFrames.mUnrestricted, win.getWindowingMode(), UNSPECIFIED_LENGTH,
+                    UNSPECIFIED_LENGTH, win.getRequestedVisibilities(),
+                    null /* attachedWindowFrame */, win.mGlobalScale, sTmpClientFrames);
+            win.updateSourceFrame(sTmpClientFrames.frame);
         }
     }
 
@@ -1519,10 +1540,6 @@ public class DisplayPolicy {
         displayFrames = win.getDisplayFrames(displayFrames);
 
         final WindowManager.LayoutParams attrs = win.getLayoutingAttrs(displayFrames.mRotation);
-        final WindowFrames windowFrames = win.getWindowFrames();
-        final Rect pf = windowFrames.mParentFrame;
-        final Rect df = windowFrames.mDisplayFrame;
-        final Rect f = windowFrames.mFrame;
         final Rect attachedWindowFrame = attached != null ? attached.getFrame() : null;
 
         // If this window has different LayoutParams for rotations, we cannot trust its requested
@@ -1531,25 +1548,10 @@ public class DisplayPolicy {
         final int requestedWidth = trustedSize ? win.mRequestedWidth : UNSPECIFIED_LENGTH;
         final int requestedHeight = trustedSize ? win.mRequestedHeight : UNSPECIFIED_LENGTH;
 
-        sTmpLastParentFrame.set(pf);
-
         mWindowLayout.computeFrames(attrs, win.getInsetsState(), displayFrames.mDisplayCutoutSafe,
                 win.getBounds(), win.getWindowingMode(), requestedWidth, requestedHeight,
                 win.getRequestedVisibilities(), attachedWindowFrame, win.mGlobalScale,
                 sTmpClientFrames);
-        windowFrames.setParentFrameWasClippedByDisplayCutout(
-                sTmpClientFrames.isParentFrameClippedByDisplayCutout);
-
-        if (DEBUG_LAYOUT) Slog.v(TAG, "Compute frame " + attrs.getTitle()
-                + ": sim=#" + Integer.toHexString(attrs.softInputMode)
-                + " attach=" + attached + " type=" + attrs.type
-                + " flags=" + ViewDebug.flagsToString(LayoutParams.class, "flags", attrs.flags)
-                + " pf=" + pf.toShortString() + " df=" + df.toShortString()
-                + " f=" + f.toShortString());
-
-        if (!sTmpLastParentFrame.equals(pf)) {
-            windowFrames.setContentChanged(true);
-        }
 
         win.setFrames(sTmpClientFrames);
     }
