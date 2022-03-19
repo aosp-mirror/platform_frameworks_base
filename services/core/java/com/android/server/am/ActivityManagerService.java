@@ -13539,8 +13539,13 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
 
             if (brOptions.getIdForResponseEvent() > 0) {
-                enforceUsageStatsPermission(callerPackage, callingUid, callingPid,
-                        "recordResponseEventWhileInBackground()");
+                // STOPSHIP (206518114): Temporarily check for PACKAGE_USAGE_STATS permission as
+                // well until the clients switch to using the new permission.
+                if (checkPermission(android.Manifest.permission.ACCESS_BROADCAST_RESPONSE_STATS,
+                        callingPid, callingUid) != PERMISSION_GRANTED) {
+                    enforceUsageStatsPermission(callerPackage, callingUid, callingPid,
+                            "recordResponseEventWhileInBackground()");
+                }
             }
         }
 

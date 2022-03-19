@@ -5152,6 +5152,14 @@
         android:protectionLevel="signature|privileged|development|appop|retailDemo" />
     <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" />
 
+    <!-- Allows an application to query broadcast response stats (see
+         {@link android.app.usage.BroadcastResponseStats}).
+         @SystemApi
+         @hide
+    -->
+    <permission android:name="android.permission.ACCESS_BROADCAST_RESPONSE_STATS"
+        android:protectionLevel="signature|privileged|development" />
+
     <!-- Allows a data loader to read a package's access logs. The access logs contain the
          set of pages referenced over time.
          <p>Declaring the permission implies intention to use the API and the user of the
