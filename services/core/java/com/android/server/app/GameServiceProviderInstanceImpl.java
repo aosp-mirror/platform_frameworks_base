@@ -192,8 +192,11 @@ final class GameServiceProviderInstanceImpl implements GameServiceProviderInstan
     private final IGameSessionController mGameSessionController =
             new IGameSessionController.Stub() {
                 @Override
+                @RequiresPermission(android.Manifest.permission.MANAGE_GAME_ACTIVITY)
                 public void takeScreenshot(int taskId,
                         @NonNull AndroidFuture gameScreenshotResultFuture) {
+                    mContext.enforceCallingPermission(Manifest.permission.MANAGE_GAME_ACTIVITY,
+                            "takeScreenshot()");
                     mBackgroundExecutor.execute(() -> {
                         GameServiceProviderInstanceImpl.this.takeScreenshot(taskId,
                                 gameScreenshotResultFuture);

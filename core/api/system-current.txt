@@ -11418,7 +11418,7 @@ package android.service.games {
     method @RequiresPermission(android.Manifest.permission.MANAGE_GAME_ACTIVITY) public final boolean restartGame();
     method public void setTaskOverlayView(@NonNull android.view.View, @NonNull android.view.ViewGroup.LayoutParams);
     method @RequiresPermission(android.Manifest.permission.MANAGE_GAME_ACTIVITY) public final void startActivityFromGameSessionForResult(@NonNull android.content.Intent, @Nullable android.os.Bundle, @NonNull java.util.concurrent.Executor, @NonNull android.service.games.GameSessionActivityCallback);
-    method public void takeScreenshot(@NonNull java.util.concurrent.Executor, @NonNull android.service.games.GameSession.ScreenshotCallback);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_GAME_ACTIVITY) public void takeScreenshot(@NonNull java.util.concurrent.Executor, @NonNull android.service.games.GameSession.ScreenshotCallback);
   }
 
   public static interface GameSession.ScreenshotCallback {
