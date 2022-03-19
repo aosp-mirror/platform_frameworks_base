@@ -29,6 +29,7 @@ import static android.content.pm.PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
 import static android.content.pm.PackageManager.INSTALL_FAILED_INVALID_APK;
 import static android.content.pm.PackageManager.INSTALL_FAILED_MEDIA_UNAVAILABLE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_MISSING_SPLIT;
+import static android.content.pm.PackageManager.INSTALL_FROM_ADB;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_NO_CERTIFICATES;
 import static android.content.pm.PackageManager.INSTALL_STAGED;
 import static android.content.pm.PackageManager.INSTALL_SUCCEEDED;
@@ -956,12 +957,17 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                         "DataLoader installation of APEX modules is not allowed.");
             }
 
-            if (isSystemDataLoaderInstallation() && mContext.checkCallingOrSelfPermission(
-                    Manifest.permission.USE_SYSTEM_DATA_LOADERS)
-                    != PackageManager.PERMISSION_GRANTED) {
-                throw new SecurityException("You need the "
-                        + "com.android.permission.USE_SYSTEM_DATA_LOADERS permission "
-                        + "to use system data loaders");
+            if (isSystemDataLoaderInstallation()) {
+                if (mContext.checkCallingOrSelfPermission(
+                        Manifest.permission.USE_SYSTEM_DATA_LOADERS)
+                        != PackageManager.PERMISSION_GRANTED) {
+                    throw new SecurityException("You need the "
+                            + "com.android.permission.USE_SYSTEM_DATA_LOADERS permission "
+                            + "to use system data loaders");
+                }
+
+                // All installations using system dataloaders marked as ADB.
+                this.params.installFlags |= INSTALL_FROM_ADB;
             }
         }
 
