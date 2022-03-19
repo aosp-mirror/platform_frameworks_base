@@ -17,6 +17,7 @@
 package com.android.server.translation;
 
 import static android.view.translation.TranslationManager.EXTRA_CAPABILITIES;
+import static android.view.translation.UiTranslationManager.EXTRA_PACKAGE_NAME;
 import static android.view.translation.UiTranslationManager.EXTRA_SOURCE_LOCALE;
 import static android.view.translation.UiTranslationManager.EXTRA_STATE;
 import static android.view.translation.UiTranslationManager.EXTRA_TARGET_LOCALE;
@@ -184,7 +185,7 @@ final class TranslationManagerServiceImpl extends
                         componentName.getPackageName(), 0, userId).uid;
             }
         } catch (PackageManager.NameNotFoundException e) {
-            Slog.d(TAG, "Cannot find packageManager for" +  componentName);
+            Slog.d(TAG, "Cannot find packageManager for" + componentName);
         }
         return translationActivityUid;
     }
@@ -192,19 +193,22 @@ final class TranslationManagerServiceImpl extends
     @GuardedBy("mLock")
     public void onTranslationFinishedLocked(boolean activityDestroyed, IBinder token,
             ComponentName componentName) {
-        int translationActivityUid =
+        final int translationActivityUid =
                 getActivityUidByComponentName(getContext(), componentName, getUserId());
+        final String packageName = componentName.getPackageName();
         if (activityDestroyed) {
             // In the Activity destroy case, we only calls onTranslationFinished() in
             // non-finisTranslation() state. If there is a finisTranslation() calls by apps, we
             // should remove the waiting callback to avoid callback twice.
-            invokeCallbacks(STATE_UI_TRANSLATION_FINISHED, /* sourceSpec= */
-                    null, /* targetSpec= */null, translationActivityUid);
+            invokeCallbacks(STATE_UI_TRANSLATION_FINISHED,
+                    /* sourceSpec= */ null, /* targetSpec= */ null,
+                    packageName, translationActivityUid);
             mWaitingFinishedCallbackActivities.remove(token);
         } else {
             if (mWaitingFinishedCallbackActivities.contains(token)) {
-                invokeCallbacks(STATE_UI_TRANSLATION_FINISHED, /* sourceSpec= */
-                        null, /* targetSpec= */null, translationActivityUid);
+                invokeCallbacks(STATE_UI_TRANSLATION_FINISHED,
+                        /* sourceSpec= */ null, /* targetSpec= */ null,
+                        packageName, translationActivityUid);
                 mWaitingFinishedCallbackActivities.remove(token);
             }
         }
@@ -223,25 +227,25 @@ final class TranslationManagerServiceImpl extends
                     + "state for token=" + token + " taskId=" + taskId + " for state= " + state);
             return;
         }
+        mLastActivityTokens = new WeakReference<>(taskTopActivityTokens);
         if (state == STATE_UI_TRANSLATION_FINISHED) {
             mWaitingFinishedCallbackActivities.add(token);
         }
-        int translationActivityUid = -1;
+        IBinder activityToken = taskTopActivityTokens.getActivityToken();
         try {
-            IBinder activityToken = taskTopActivityTokens.getActivityToken();
             taskTopActivityTokens.getApplicationThread().updateUiTranslationState(
                     activityToken, state, sourceSpec, targetSpec,
                     viewIds, uiTranslationSpec);
-            mLastActivityTokens = new WeakReference<>(taskTopActivityTokens);
-            ComponentName componentName =
-                    mActivityTaskManagerInternal.getActivityName(activityToken);
-            translationActivityUid =
-                    getActivityUidByComponentName(getContext(), componentName, getUserId());
         } catch (RemoteException e) {
             Slog.w(TAG, "Update UiTranslationState fail: " + e);
         }
+
+        ComponentName componentName = mActivityTaskManagerInternal.getActivityName(activityToken);
+        int translationActivityUid =
+                getActivityUidByComponentName(getContext(), componentName, getUserId());
         if (state != STATE_UI_TRANSLATION_FINISHED) {
-            invokeCallbacks(state, sourceSpec, targetSpec, translationActivityUid);
+            invokeCallbacks(state, sourceSpec, targetSpec, componentName.getPackageName(),
+                    translationActivityUid);
         }
     }
 
@@ -255,7 +259,7 @@ final class TranslationManagerServiceImpl extends
             try (TransferPipe tp = new TransferPipe()) {
                 activityTokens.getApplicationThread().dumpActivity(tp.getWriteFd(),
                         activityTokens.getActivityToken(), prefix,
-                        new String[] {
+                        new String[]{
                                 Activity.DUMP_ARG_DUMP_DUMPABLE,
                                 UiTranslationController.DUMPABLE_NAME
                         });
@@ -266,20 +270,24 @@ final class TranslationManagerServiceImpl extends
                 pw.println(prefix + "Got a RemoteException while dumping the activity");
             }
         } else {
-            pw.print(prefix); pw.println("No requested UiTranslation Activity.");
+            pw.print(prefix);
+            pw.println("No requested UiTranslation Activity.");
         }
         final int waitingFinishCallbackSize = mWaitingFinishedCallbackActivities.size();
         if (waitingFinishCallbackSize > 0) {
-            pw.print(prefix); pw.print("number waiting finish callback activities: ");
+            pw.print(prefix);
+            pw.print("number waiting finish callback activities: ");
             pw.println(waitingFinishCallbackSize);
             for (IBinder activityToken : mWaitingFinishedCallbackActivities) {
-                pw.print(prefix); pw.print("activityToken: "); pw.println(activityToken);
+                pw.print(prefix);
+                pw.print("activityToken: ");
+                pw.println(activityToken);
             }
         }
     }
 
     private void invokeCallbacks(
-            int state, TranslationSpec sourceSpec, TranslationSpec targetSpec,
+            int state, TranslationSpec sourceSpec, TranslationSpec targetSpec, String packageName,
             int translationActivityUid) {
         Bundle res = new Bundle();
         res.putInt(EXTRA_STATE, state);
@@ -288,6 +296,7 @@ final class TranslationManagerServiceImpl extends
             res.putSerializable(EXTRA_SOURCE_LOCALE, sourceSpec.getLocale());
             res.putSerializable(EXTRA_TARGET_LOCALE, targetSpec.getLocale());
         }
+        res.putString(EXTRA_PACKAGE_NAME, packageName);
         // TODO(177500482): Only support the *current* Input Method.
         List<InputMethodInfo> enabledInputMethods =
                 LocalServices.getService(InputMethodManagerInternal.class)
@@ -299,6 +308,7 @@ final class TranslationManagerServiceImpl extends
                 } catch (RemoteException e) {
                     Slog.w(TAG, "Failed to invoke UiTranslationStateCallback: " + e);
                 }
+                return;
             }
             // Code here is non-optimal since it's temporary..
             boolean isIme = false;
