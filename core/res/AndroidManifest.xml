@@ -994,10 +994,12 @@
 
     <!-- Allows an application to read audio files from external storage.
       <p>This permission is enforced starting in API level
-      {@link android.os.Build.VERSION_CODES#TIRAMISU}.
+      {@link android.os.Build.VERSION_CODES#TIRAMISU}. An app which targets
+      {@link android.os.Build.VERSION_CODES#TIRAMISU} or higher and needs to read audio files from
+      external storage must hold this permission; {@link #READ_EXTERNAL_STORAGE} is not required.
       For apps with a <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code
-      targetSdkVersion}</a> of {@link android.os.Build.VERSION_CODES#S} or lower, this permission
-      must not be used and the READ_EXTERNAL_STORAGE permission must be used instead.
+      targetSdkVersion}</a> of {@link android.os.Build.VERSION_CODES#S_V2} or lower, the
+      {@link #READ_EXTERNAL_STORAGE} permission is required, instead, to read audio files.
      <p>Protection level: dangerous -->
     <permission android:name="android.permission.READ_MEDIA_AUDIO"
                 android:permissionGroup="android.permission-group.UNDEFINED"
@@ -1013,12 +1015,14 @@
                       android:description="@string/permgroupdesc_readMediaVisual"
                       android:priority="1000" />
 
-    <!-- Allows an application to read audio files from external storage.
-    <p>This permission is enforced starting in API level
-    {@link android.os.Build.VERSION_CODES#TIRAMISU}.
-    For apps with a <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code
-    targetSdkVersion}</a> of {@link android.os.Build.VERSION_CODES#S} or lower, this permission
-    must not be used and the READ_EXTERNAL_STORAGE permission must be used instead.
+    <!-- Allows an application to read video files from external storage.
+      <p>This permission is enforced starting in API level
+      {@link android.os.Build.VERSION_CODES#TIRAMISU}. An app which targets
+      {@link android.os.Build.VERSION_CODES#TIRAMISU} or higher and needs to read video files from
+      external storage must hold this permission; {@link #READ_EXTERNAL_STORAGE} is not required.
+      For apps with a <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code
+      targetSdkVersion}</a> of {@link android.os.Build.VERSION_CODES#S_V2} or lower, the
+      {@link #READ_EXTERNAL_STORAGE} permission is required, instead, to read video files.
    <p>Protection level: dangerous -->
     <permission android:name="android.permission.READ_MEDIA_VIDEO"
                 android:permissionGroup="android.permission-group.UNDEFINED"
@@ -1028,11 +1032,13 @@
 
     <!-- Allows an application to read image files from external storage.
       <p>This permission is enforced starting in API level
-      {@link android.os.Build.VERSION_CODES#TIRAMISU}.
+      {@link android.os.Build.VERSION_CODES#TIRAMISU}. An app which targets
+      {@link android.os.Build.VERSION_CODES#TIRAMISU} or higher and needs to read image files from
+      external storage must hold this permission; {@link #READ_EXTERNAL_STORAGE} is not required.
       For apps with a <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code
-      targetSdkVersion}</a> of {@link android.os.Build.VERSION_CODES#S} or lower, this permission
-      must not be used and the READ_EXTERNAL_STORAGE permission must be used instead.
-     <p>Protection level: dangerous -->
+      targetSdkVersion}</a> of {@link android.os.Build.VERSION_CODES#S_V2} or lower, the
+      {@link #READ_EXTERNAL_STORAGE} permission is required, instead, to read image files.
+   <p>Protection level: dangerous -->
     <permission android:name="android.permission.READ_MEDIA_IMAGES"
                 android:permissionGroup="android.permission-group.UNDEFINED"
                 android:label="@string/permlab_readMediaImages"
