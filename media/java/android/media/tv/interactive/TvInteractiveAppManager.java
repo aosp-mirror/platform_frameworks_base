@@ -30,7 +30,6 @@ import android.media.tv.BroadcastInfoResponse;
 import android.media.tv.TvContentRating;
 import android.media.tv.TvInputManager;
 import android.media.tv.TvTrackInfo;
-import android.media.tv.interactive.TvInteractiveAppServiceInfo.InteractiveAppType;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -769,25 +768,6 @@ public final class TvInteractiveAppManager {
     public List<TvInteractiveAppServiceInfo> getTvInteractiveAppServiceList() {
         try {
             return mService.getTvInteractiveAppServiceList(mUserId);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Prepares TV Interactive App service environment for the given type.
-     *
-     * <p>This method brings up the corresponding {@link TvInteractiveAppService} and prepare needed
-     * resources. It's used to set up the resources in advance, or handle non-session operations.
-     *
-     * @param tvIAppServiceId The ID of TV interactive service to prepare the resources. The
-     *                        ID can be found in {@link TvInteractiveAppServiceInfo#getId()}.
-     *
-     * @see TvInteractiveAppService.Session
-     */
-    public void prepare(@NonNull String tvIAppServiceId, @InteractiveAppType int type) {
-        try {
-            mService.prepare(tvIAppServiceId, type, mUserId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
