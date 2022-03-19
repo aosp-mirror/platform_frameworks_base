@@ -6665,7 +6665,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         configureContextForAccess(mContext, false);
 
         assertExpectException(SecurityException.class, /* messageRegex= */ null,
-                () -> dpm.markProfileOwnerOnOrganizationOwnedDevice(admin2));
+                () -> dpm.setProfileOwnerOnOrganizationOwnedDevice(admin2, true));
     }
 
     @Test
@@ -6674,7 +6674,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         configureContextForAccess(mContext, false);
 
         assertExpectException(SecurityException.class, /* messageRegex= */ null,
-                () -> dpm.markProfileOwnerOnOrganizationOwnedDevice(admin1));
+                () -> dpm.setProfileOwnerOnOrganizationOwnedDevice(admin1, true));
     }
 
     @Test
@@ -6709,7 +6709,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                         DpmMockContext.CALLER_MANAGED_PROVISIONING_UID);
         try {
             runAsCaller(mServiceContext, dpms, dpm -> {
-                dpm.markProfileOwnerOnOrganizationOwnedDevice(admin1);
+                dpm.setProfileOwnerOnOrganizationOwnedDevice(admin1, true);
             });
         } finally {
             mServiceContext.binder.restoreCallingIdentity(ident);
@@ -7044,7 +7044,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         configureContextForAccess(mServiceContext, true);
         runAsCaller(mServiceContext, dpms, dpm -> {
-            dpm.markProfileOwnerOnOrganizationOwnedDevice(who);
+            dpm.setProfileOwnerOnOrganizationOwnedDevice(who, true);
         });
         mServiceContext.binder.restoreCallingIdentity(ident);
     }

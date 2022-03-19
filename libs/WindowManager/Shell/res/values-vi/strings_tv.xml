@@ -24,4 +24,5 @@
     <string name="pip_move" msgid="1544227837964635439">"Di chuyển PIP (Ảnh trong ảnh)"</string>
     <string name="pip_expand" msgid="7605396312689038178">"Mở rộng PIP (Ảnh trong ảnh)"</string>
     <string name="pip_collapse" msgid="5732233773786896094">"Thu gọn PIP (Ảnh trong ảnh)"</string>
+    <string name="pip_edu_text" msgid="3672999496647508701">" Nhấn đúp vào nút "<annotation icon="home_icon">" MÀN HÌNH CHÍNH "</annotation>" để mở trình đơn điều khiển"</string>
 </resources>

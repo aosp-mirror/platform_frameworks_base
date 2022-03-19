@@ -211,6 +211,23 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         mDownDetected = false;
         updateBurnInOffsets();
         updateVisibility();
+
+        updateAccessibility();
+    }
+
+    private void updateAccessibility() {
+        if (mAccessibilityManager.isTouchExplorationEnabled()) {
+            mView.setOnClickListener(
+                    new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            onLongPress();
+                        }
+                    }
+            );
+        } else {
+            mView.setOnClickListener(null);
+        }
     }
 
     @Override

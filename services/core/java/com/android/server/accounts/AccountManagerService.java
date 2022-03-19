@@ -1820,6 +1820,14 @@ public class AccountManagerService
         if (account == null) {
             return false;
         }
+        if (account.name != null && account.name.length() > 200) {
+            Log.w(TAG, "Account cannot be added - Name longer than 200 chars");
+            return false;
+        }
+        if (account.type != null && account.type.length() > 200) {
+            Log.w(TAG, "Account cannot be added - Name longer than 200 chars");
+            return false;
+        }
         if (!isLocalUnlockedUser(accounts.userId)) {
             Log.w(TAG, "Account " + account.toSafeString() + " cannot be added - user "
                     + accounts.userId + " is locked. callingUid=" + callingUid);
@@ -2095,6 +2103,10 @@ public class AccountManagerService
     private Account renameAccountInternal(
             UserAccounts accounts, Account accountToRename, String newName) {
         Account resultAccount = null;
+        if (newName != null && newName.length() > 200) {
+            Log.e(TAG, "renameAccount failed - account name longer than 200");
+            return null;
+        }
         /*
          * Cancel existing notifications. Let authenticators
          * re-post notifications as required. But we don't know if

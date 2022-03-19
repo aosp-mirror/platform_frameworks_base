@@ -792,36 +792,34 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
     }
 
     @Override
-    public void onPointerDown(int sensorId, int x, int y, float minor, float major) {
-        final BaseClientMonitor client = mScheduler.getCurrentClient();
+    public void onPointerDown(long requestId, int sensorId, int x, int y,
+            float minor, float major) {
+        final BaseClientMonitor client = mScheduler.getCurrentClientIfMatches(requestId);
         if (!(client instanceof Udfps)) {
             Slog.w(TAG, "onFingerDown received during client: " + client);
             return;
         }
-        final Udfps udfps = (Udfps) client;
-        udfps.onPointerDown(x, y, minor, major);
+        ((Udfps) client).onPointerDown(x, y, minor, major);
     }
 
     @Override
-    public void onPointerUp(int sensorId) {
-        final BaseClientMonitor client = mScheduler.getCurrentClient();
+    public void onPointerUp(long requestId, int sensorId) {
+        final BaseClientMonitor client = mScheduler.getCurrentClientIfMatches(requestId);
         if (!(client instanceof Udfps)) {
             Slog.w(TAG, "onFingerDown received during client: " + client);
             return;
         }
-        final Udfps udfps = (Udfps) client;
-        udfps.onPointerUp();
+        ((Udfps) client).onPointerUp();
     }
 
     @Override
-    public void onUiReady(int sensorId) {
-        final BaseClientMonitor client = mScheduler.getCurrentClient();
+    public void onUiReady(long requestId, int sensorId) {
+        final BaseClientMonitor client = mScheduler.getCurrentClientIfMatches(requestId);
         if (!(client instanceof Udfps)) {
             Slog.w(TAG, "onUiReady received during client: " + client);
             return;
         }
-        final Udfps udfps = (Udfps) client;
-        udfps.onUiReady();
+        ((Udfps) client).onUiReady();
     }
 
     @Override

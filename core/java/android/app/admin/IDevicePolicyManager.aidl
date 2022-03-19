@@ -17,6 +17,7 @@
 
 package android.app.admin;
 
+import android.accounts.Account;
 import android.app.admin.DevicePolicyDrawableResource;
 import android.app.admin.DevicePolicyStringResource;
 import android.app.admin.ParcelableResource;
@@ -476,7 +477,7 @@ interface IDevicePolicyManager {
     int getGlobalPrivateDnsMode(in ComponentName admin);
     String getGlobalPrivateDnsHost(in ComponentName admin);
 
-    void markProfileOwnerOnOrganizationOwnedDevice(in ComponentName who, int userId);
+    void setProfileOwnerOnOrganizationOwnedDevice(in ComponentName who, int userId, boolean isProfileOwnerOnOrganizationOwnedDevice);
 
     void installUpdateFromFile(in ComponentName admin, in ParcelFileDescriptor updateFileDescriptor, in StartInstallingUpdateCallback listener);
 
@@ -527,6 +528,8 @@ interface IDevicePolicyManager {
 
     UserHandle createAndProvisionManagedProfile(in ManagedProfileProvisioningParams provisioningParams, in String callerPackage);
     void provisionFullyManagedDevice(in FullyManagedDeviceProvisioningParams provisioningParams, in String callerPackage);
+
+    void finalizeWorkProfileProvisioning(in UserHandle managedProfileUser, in Account migratedAccount);
 
     void setDeviceOwnerType(in ComponentName admin, in int deviceOwnerType);
     int getDeviceOwnerType(in ComponentName admin);

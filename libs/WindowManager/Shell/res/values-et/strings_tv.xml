@@ -24,4 +24,5 @@
     <string name="pip_move" msgid="1544227837964635439">"Teisalda PIP-režiimi"</string>
     <string name="pip_expand" msgid="7605396312689038178">"Laienda PIP-akent"</string>
     <string name="pip_collapse" msgid="5732233773786896094">"Ahenda PIP-aken"</string>
+    <string name="pip_edu_text" msgid="3672999496647508701">" Nuppude nägemiseks vajutage 2 korda nuppu "<annotation icon="home_icon">"AVAKUVA"</annotation></string>
 </resources>

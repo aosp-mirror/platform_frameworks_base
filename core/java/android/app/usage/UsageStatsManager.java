@@ -16,6 +16,7 @@
 
 package android.app.usage;
 
+import android.Manifest;
 import android.annotation.CurrentTimeMillisLong;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
@@ -1501,6 +1502,17 @@ public final class UsageStatsManager {
     public void clearBroadcastEvents() {
         try {
             mService.clearBroadcastEvents(mContext.getOpPackageName(), mContext.getUserId());
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /** @hide */
+    @RequiresPermission(Manifest.permission.READ_DEVICE_CONFIG)
+    @Nullable
+    public String getAppStandbyConstant(@NonNull String key) {
+        try {
+            return mService.getAppStandbyConstant(key);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }

@@ -128,7 +128,6 @@ import static com.android.server.wm.DisplayContentProto.RESUMED_ACTIVITY;
 import static com.android.server.wm.DisplayContentProto.ROOT_DISPLAY_AREA;
 import static com.android.server.wm.DisplayContentProto.SCREEN_ROTATION_ANIMATION;
 import static com.android.server.wm.DisplayContentProto.SLEEP_TOKENS;
-import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_ALL;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_RECENTS;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_WINDOW_ANIMATION;
@@ -5001,10 +5000,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         // docked divider while keeping the app itself below the docked divider, so instead
         // we will put the docked divider below the IME. @see #assignRelativeLayerForImeTargetChild
         //
-        // In the case the IME target is animating, the animation Z order may be different
-        // than the WindowContainer Z order, so it's difficult to be sure we have the correct
-        // IME target. In this case we just layer the IME over its parent surface.
-        //
         // In the case where we have no IME target we let its window parent to place it.
         //
         // Keep IME window in surface parent as long as app's starting window
@@ -5020,9 +5015,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                     // We don't need to set relative layer if the IME target in non-multi-window
                     // mode is the activity main window since updateImeParent will ensure the IME
                     // surface be attached on the fullscreen activity.
-                    && imeTarget.mAttrs.type != TYPE_BASE_APPLICATION
-                    && imeTarget.mToken.getActivity(app -> app.isAnimating(TRANSITION | PARENTS,
-                            ANIMATION_TYPE_ALL & ~ANIMATION_TYPE_RECENTS)) == null;
+                    && imeTarget.mAttrs.type != TYPE_BASE_APPLICATION;
             if (canImeTargetSetRelativeLayer) {
                 mImeWindowsContainer.assignRelativeLayer(t, imeTarget.getSurfaceControl(),
                         // TODO: We need to use an extra level on the app surface to ensure

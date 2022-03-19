@@ -83,7 +83,7 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
     // TODO: Take an Executor for the callback to run on.
     @Override
     public void registerOnBackInvokedCallback(
-            @NonNull OnBackInvokedCallback callback, @Priority int priority) {
+            @Priority int priority, @NonNull OnBackInvokedCallback callback) {
         if (priority < 0) {
             throw new IllegalArgumentException("Application registered OnBackInvokedCallback "
                     + "cannot have negative priority. Priority: " + priority);
