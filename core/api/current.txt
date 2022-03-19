@@ -54124,9 +54124,13 @@ package android.view.translation {
 
   public interface UiTranslationStateCallback {
     method public void onFinished();
+    method public default void onFinished(@NonNull String);
     method public void onPaused();
+    method public default void onPaused(@NonNull String);
     method public default void onResumed(@NonNull android.icu.util.ULocale, @NonNull android.icu.util.ULocale);
+    method public default void onResumed(@NonNull android.icu.util.ULocale, @NonNull android.icu.util.ULocale, @NonNull String);
     method public default void onStarted(@NonNull android.icu.util.ULocale, @NonNull android.icu.util.ULocale);
+    method public default void onStarted(@NonNull android.icu.util.ULocale, @NonNull android.icu.util.ULocale, @NonNull String);
   }
 
   @UiThread public interface ViewTranslationCallback {
