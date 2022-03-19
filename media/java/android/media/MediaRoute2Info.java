@@ -539,6 +539,7 @@ public final class MediaRoute2Info implements Parcelable {
     /**
      * Gets the Deduplication ID of the route if available.
      * @see RouteDiscoveryPreference#shouldRemoveDuplicates()
+     * @hide
      */
     @NonNull
     public Set<String> getDeduplicationIds() {
@@ -968,6 +969,7 @@ public final class MediaRoute2Info implements Parcelable {
          * <p>
          * If it's {@code null}, the route will not be removed.
          * @see RouteDiscoveryPreference#shouldRemoveDuplicates()
+         * @hide
          */
         @NonNull
         public Builder setDeduplicationIds(@NonNull Set<String> id) {

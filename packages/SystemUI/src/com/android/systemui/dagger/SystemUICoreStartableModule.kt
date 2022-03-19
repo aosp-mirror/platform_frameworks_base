@@ -35,6 +35,7 @@ import com.android.systemui.power.PowerUI
 import com.android.systemui.recents.Recents
 import com.android.systemui.shortcut.ShortcutKeyDispatcher
 import com.android.systemui.statusbar.notification.InstantAppNotifier
+import com.android.systemui.statusbar.phone.KeyguardLiftController
 import com.android.systemui.theme.ThemeOverlayController
 import com.android.systemui.toast.ToastUI
 import com.android.systemui.usb.StorageNotification
@@ -198,4 +199,10 @@ abstract class SystemUICoreStartableModule {
     @IntoMap
     @ClassKey(WMShell::class)
     abstract fun bindWMShell(sysui: WMShell): CoreStartable
+
+    /** Inject into KeyguardLiftController.  */
+    @Binds
+    @IntoMap
+    @ClassKey(KeyguardLiftController::class)
+    abstract fun bindKeyguardLiftController(sysui: KeyguardLiftController): CoreStartable
 }

@@ -610,7 +610,8 @@ class MediaDataManager(
         var actionIcons: List<MediaAction> = emptyList()
         var actionsToShowCollapsed: List<Int> = emptyList()
         var semanticActions: MediaButton? = null
-        if (mediaFlags.areMediaSessionActionsEnabled() && mediaController.playbackState != null) {
+        if (mediaFlags.areMediaSessionActionsEnabled(sbn.packageName, sbn.user) &&
+                mediaController.playbackState != null) {
             semanticActions = createActionsFromState(sbn.packageName, mediaController)
         } else {
             val actions = createActionsFromNotification(sbn)
@@ -726,7 +727,7 @@ class MediaDataManager(
                 }
             }
 
-            // Finally, assign the remaining button slots: C A play/pause B D
+            // Finally, assign the remaining button slots: play/pause A B C D
             // A = previous, else custom action (if not reserved)
             // B = next, else custom action (if not reserved)
             // C and D are always custom actions

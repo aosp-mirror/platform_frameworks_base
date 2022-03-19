@@ -135,6 +135,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseArrayMap;
 import android.util.TimeUtils;
+import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -1366,6 +1367,12 @@ public final class AppRestrictionController {
         for (int i = 0, size = mAppStateTrackers.size(); i < size; i++) {
             pw.println();
             mAppStateTrackers.get(i).dump(pw, prefix);
+        }
+    }
+
+    void dumpAsProto(ProtoOutputStream proto, int uid) {
+        for (int i = 0, size = mAppStateTrackers.size(); i < size; i++) {
+            mAppStateTrackers.get(i).dumpAsProto(proto, uid);
         }
     }
 

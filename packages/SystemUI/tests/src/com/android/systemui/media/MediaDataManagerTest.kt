@@ -26,6 +26,7 @@ import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.statusbar.SbnBuilder
 import com.android.systemui.tuner.TunerService
 import com.android.systemui.util.concurrency.FakeExecutor
+import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.time.FakeSystemClock
@@ -167,7 +168,7 @@ class MediaDataManagerTest : SysuiTestCase() {
         whenever(mediaSmartspaceTarget.featureType).thenReturn(SmartspaceTarget.FEATURE_MEDIA)
         whenever(mediaSmartspaceTarget.iconGrid).thenReturn(listOf(mediaRecommendationItem))
         whenever(mediaSmartspaceTarget.creationTimeMillis).thenReturn(1234L)
-        whenever(mediaFlags.areMediaSessionActionsEnabled()).thenReturn(false)
+        whenever(mediaFlags.areMediaSessionActionsEnabled(any(), any())).thenReturn(false)
     }
 
     @After
@@ -594,7 +595,7 @@ class MediaDataManagerTest : SysuiTestCase() {
     @Test
     fun testPlaybackActions_noState_usesNotification() {
         val desc = "Notification Action"
-        whenever(mediaFlags.areMediaSessionActionsEnabled()).thenReturn(true)
+        whenever(mediaFlags.areMediaSessionActionsEnabled(any(), any())).thenReturn(true)
         whenever(controller.playbackState).thenReturn(null)
 
         val notifWithAction = SbnBuilder().run {
@@ -621,7 +622,7 @@ class MediaDataManagerTest : SysuiTestCase() {
     @Test
     fun testPlaybackActions_hasPrevNext() {
         val customDesc = arrayOf("custom 1", "custom 2", "custom 3", "custom 4")
-        whenever(mediaFlags.areMediaSessionActionsEnabled()).thenReturn(true)
+        whenever(mediaFlags.areMediaSessionActionsEnabled(any(), any())).thenReturn(true)
         val stateActions = PlaybackState.ACTION_PLAY or
                 PlaybackState.ACTION_SKIP_TO_PREVIOUS or
                 PlaybackState.ACTION_SKIP_TO_NEXT
@@ -669,7 +670,7 @@ class MediaDataManagerTest : SysuiTestCase() {
     @Test
     fun testPlaybackActions_noPrevNext_usesCustom() {
         val customDesc = arrayOf("custom 1", "custom 2", "custom 3", "custom 4", "custom 5")
-        whenever(mediaFlags.areMediaSessionActionsEnabled()).thenReturn(true)
+        whenever(mediaFlags.areMediaSessionActionsEnabled(any(), any())).thenReturn(true)
         val stateActions = PlaybackState.ACTION_PLAY
         val stateBuilder = PlaybackState.Builder()
                 .setActions(stateActions)
@@ -707,7 +708,7 @@ class MediaDataManagerTest : SysuiTestCase() {
     @Test
     fun testPlaybackActions_reservedSpace() {
         val customDesc = arrayOf("custom 1", "custom 2", "custom 3", "custom 4")
-        whenever(mediaFlags.areMediaSessionActionsEnabled()).thenReturn(true)
+        whenever(mediaFlags.areMediaSessionActionsEnabled(any(), any())).thenReturn(true)
         val stateActions = PlaybackState.ACTION_PLAY
         val stateBuilder = PlaybackState.Builder()
                 .setActions(stateActions)

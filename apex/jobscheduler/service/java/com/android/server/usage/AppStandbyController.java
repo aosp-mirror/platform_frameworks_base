@@ -100,6 +100,7 @@ import android.os.UserHandle;
 import android.provider.DeviceConfig;
 import android.provider.Settings.Global;
 import android.telephony.TelephonyManager;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.IndentingPrintWriter;
 import android.util.Slog;
@@ -130,6 +131,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 
@@ -373,6 +375,15 @@ public class AppStandbyController
      */
     volatile int mBroadcastResponseFgThresholdState =
             ConstantsObserver.DEFAULT_BROADCAST_RESPONSE_FG_THRESHOLD_STATE;
+
+    /**
+     * Map of last known values of keys in {@link DeviceConfig#NAMESPACE_APP_STANDBY}.
+     *
+     * Note: We are intentionally not guarding this by any lock since this is only updated on
+     * a handler thread and when querying, if we do end up seeing slightly older values, it is fine
+     * since the values are only used in tests and doesn't need to be queried in any other cases.
+     */
+    private final Map<String, String> mAppStandbyProperties = new ArrayMap<>();
 
     /**
      * Whether we should allow apps into the
@@ -887,8 +898,11 @@ public class AppStandbyController
                     }
                 }
 
+                final long elapsedLastUsedByUserTimeDelta = app.lastUsedByUserElapsedTime >= 0
+                        ? elapsedTimeAdjusted - app.lastUsedByUserElapsedTime
+                        : Long.MAX_VALUE;
                 if (app.lastRestrictAttemptElapsedTime > app.lastUsedByUserElapsedTime
-                        && elapsedTimeAdjusted - app.lastUsedByUserElapsedTime
+                        && elapsedLastUsedByUserTimeDelta
                         >= mInjector.getAutoRestrictedBucketDelayMs()) {
                     newBucket = STANDBY_BUCKET_RESTRICTED;
                     reason = app.lastRestrictReason;
@@ -1837,6 +1851,12 @@ public class AppStandbyController
     }
 
     @Override
+    @Nullable
+    public String getAppStandbyConstant(@NonNull String key) {
+        return mAppStandbyProperties.get(key);
+    }
+
+    @Override
     public void flushToDisk() {
         synchronized (mAppIdleLock) {
             mAppIdleHistory.writeAppIdleTimes(mInjector.elapsedRealtime());
@@ -2774,6 +2794,7 @@ public class AppStandbyController
                             }
                             break;
                     }
+                    mAppStandbyProperties.put(name, properties.getString(name, null));
                 }
             }
         }

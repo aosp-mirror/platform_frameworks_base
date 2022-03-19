@@ -16,32 +16,32 @@
 
 package com.android.systemui.dreams.complication;
 
-import static com.android.systemui.dreams.complication.dagger.DreamClockTimeComplicationComponent.DreamClockTimeComplicationModule.DREAM_CLOCK_TIME_COMPLICATION_LAYOUT_PARAMS;
-import static com.android.systemui.dreams.complication.dagger.DreamClockTimeComplicationComponent.DreamClockTimeComplicationModule.DREAM_CLOCK_TIME_COMPLICATION_VIEW;
+import static com.android.systemui.dreams.complication.dagger.DreamClockTimeComplicationModule.DREAM_CLOCK_TIME_COMPLICATION_LAYOUT_PARAMS;
+import static com.android.systemui.dreams.complication.dagger.DreamClockTimeComplicationModule.DREAM_CLOCK_TIME_COMPLICATION_VIEW;
 
 import android.content.Context;
 import android.view.View;
 
 import com.android.systemui.CoreStartable;
 import com.android.systemui.dreams.DreamOverlayStateController;
-import com.android.systemui.dreams.complication.dagger.DreamClockTimeComplicationComponent;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.inject.Provider;
 
 /**
  * Clock Time Complication that produce Clock Time view holder.
  */
 public class DreamClockTimeComplication implements Complication {
-    DreamClockTimeComplicationComponent.Factory mComponentFactory;
+    private final Provider<DreamClockTimeViewHolder> mDreamClockTimeViewHolderProvider;
 
     /**
      * Default constructor for {@link DreamClockTimeComplication}.
      */
     @Inject
     public DreamClockTimeComplication(
-            DreamClockTimeComplicationComponent.Factory componentFactory) {
-        mComponentFactory = componentFactory;
+            Provider<DreamClockTimeViewHolder> dreamClockTimeViewHolderProvider) {
+        mDreamClockTimeViewHolderProvider = dreamClockTimeViewHolderProvider;
     }
 
     @Override
@@ -54,11 +54,11 @@ public class DreamClockTimeComplication implements Complication {
      */
     @Override
     public ViewHolder createView(ComplicationViewModel model) {
-        return mComponentFactory.create().getViewHolder();
+        return mDreamClockTimeViewHolderProvider.get();
     }
 
     /**
-     * {@link CoreStartable} responsbile for registering {@link DreamClockTimeComplication} with
+     * {@link CoreStartable} responsible for registering {@link DreamClockTimeComplication} with
      * SystemUI.
      */
     public static class Registrant extends CoreStartable {
@@ -84,7 +84,7 @@ public class DreamClockTimeComplication implements Complication {
     }
 
     /**
-     * ViewHolder to contain value/logic associated with a Clock Time Complication View.
+     * {@link ViewHolder} to contain value/logic associated with {@link DreamClockTimeComplication}.
      */
     public static class DreamClockTimeViewHolder implements ViewHolder {
         private final View mView;

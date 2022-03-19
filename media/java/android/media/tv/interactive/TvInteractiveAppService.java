@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import android.annotation.CallSuper;
 import android.annotation.MainThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.Px;
 import android.annotation.SdkConstant;
 import android.annotation.StringDef;
 import android.annotation.SuppressLint;
@@ -217,11 +218,6 @@ public abstract class TvInteractiveAppService extends Service {
             }
 
             @Override
-            public void prepare(int type) {
-                onPrepare(type);
-            }
-
-            @Override
             public void registerAppLinkInfo(AppLinkInfo appLinkInfo) {
                 onRegisterAppLinkInfo(appLinkInfo);
             }
@@ -238,11 +234,6 @@ public abstract class TvInteractiveAppService extends Service {
         };
         return tvIAppServiceBinder;
     }
-
-    /**
-     * Prepares TV Interactive App service for the given type.
-     */
-    public abstract void onPrepare(@TvInteractiveAppServiceInfo.InteractiveAppType int type);
 
     /**
      * Called when a request to register an Android application link info record is received.
@@ -373,6 +364,15 @@ public abstract class TvInteractiveAppService extends Service {
         }
 
         /**
+         * Returns {@code true} if media view is enabled, {@code false} otherwise.
+         *
+         * @see #setMediaViewEnabled(boolean)
+         */
+        public boolean isMediaViewEnabled() {
+            return mMediaViewEnabled;
+        }
+
+        /**
          * Starts TvInteractiveAppService session.
          */
         public void onStartInteractiveApp() {
@@ -397,9 +397,10 @@ public abstract class TvInteractiveAppService extends Service {
          * no matter if it's created successfully or not.
          *
          * @see #notifyBiInteractiveAppCreated(Uri, String)
-         * @see #onDestroyBiInteractiveApp(String)
+         * @see #onDestroyBiInteractiveAppRequest(String)
          */
-        public void onCreateBiInteractiveApp(@NonNull Uri biIAppUri, @Nullable Bundle params) {
+        public void onCreateBiInteractiveAppRequest(
+                @NonNull Uri biIAppUri, @Nullable Bundle params) {
         }
 
 
@@ -407,11 +408,11 @@ public abstract class TvInteractiveAppService extends Service {
          * Destroys broadcast-independent(BI) interactive application.
          *
          * @param biIAppId the BI interactive app ID from
-         *                 {@link #onCreateBiInteractiveApp(Uri, Bundle)}}
+         *                 {@link #onCreateBiInteractiveAppRequest(Uri, Bundle)}
          *
-         * @see #onCreateBiInteractiveApp(Uri, Bundle)
+         * @see #onCreateBiInteractiveAppRequest(Uri, Bundle)
          */
-        public void onDestroyBiInteractiveApp(@NonNull String biIAppId) {
+        public void onDestroyBiInteractiveAppRequest(@NonNull String biIAppId) {
         }
 
         /**
@@ -435,6 +436,8 @@ public abstract class TvInteractiveAppService extends Service {
 
         /**
          * Receives current stream volume.
+         *
+         * @param volume a volume value between {@code 0.0f} and {@code 1.0f}, inclusive.
          */
         public void onStreamVolume(float volume) {
         }
@@ -449,6 +452,17 @@ public abstract class TvInteractiveAppService extends Service {
          * Receives current TV input ID.
          */
         public void onCurrentTvInputId(@Nullable String inputId) {
+        }
+
+        /**
+         * Receives signing result.
+         * @param signingId the ID to identify the request. It's the same as the corresponding ID in
+         *        {@link Session#requestSigning(String, String, String, byte[])}
+         * @param result the signed result.
+         *
+         * @see #requestSigning(String, String, String, byte[])
+         */
+        public void onSigningResult(@NonNull String signingId, @NonNull byte[] result) {
         }
 
         /**
@@ -484,10 +498,10 @@ public abstract class TvInteractiveAppService extends Service {
          * containing {@link TvInteractiveAppView}. Note that the size of the underlying surface can
          * be different if the surface was changed by calling {@link #layoutSurface}.
          *
-         * @param width The width of the media view.
-         * @param height The height of the media view.
+         * @param width The width of the media view, in pixels.
+         * @param height The height of the media view, in pixels.
          */
-        public void onMediaViewSizeChanged(int width, int height) {
+        public void onMediaViewSizeChanged(@Px int width, @Px int height) {
         }
 
         /**
@@ -877,6 +891,47 @@ public abstract class TvInteractiveAppService extends Service {
         }
 
         /**
+         * Requests signing of the given data.
+         *
+         * <p>This is used when the corresponding server of the broadcast-independent interactive
+         * app requires signing during handshaking, and the interactive app service doesn't have
+         * the built-in private key. The private key is provided by the content providers and
+         * pre-built in the related app, such as TV app.
+         *
+         * @param signingId the ID to identify the request. When a result is received, this ID can
+         *                  be used to correlate the result with the request.
+         * @param algorithm the standard name of the signature algorithm requested, such as
+         *                  MD5withRSA, SHA256withDSA, etc. The name is from standards like
+         *                  FIPS PUB 186-4 and PKCS #1.
+         * @param alias the alias of the corresponding {@link java.security.KeyStore}.
+         * @param data the original bytes to be signed.
+         *
+         * @see #onSigningResult(String, byte[])
+         * @see TvInteractiveAppView#createBiInteractiveApp(Uri, Bundle)
+         * @see TvInteractiveAppView#BI_INTERACTIVE_APP_KEY_ALIAS
+         */
+        @CallSuper
+        public void requestSigning(@NonNull String signingId, @NonNull String algorithm,
+                @NonNull String alias, @NonNull byte[] data) {
+            executeOrPostRunnableOnMainThread(new Runnable() {
+                @MainThread
+                @Override
+                public void run() {
+                    try {
+                        if (DEBUG) {
+                            Log.d(TAG, "requestSigning");
+                        }
+                        if (mSessionCallback != null) {
+                            mSessionCallback.onRequestSigning(signingId, algorithm, alias, data);
+                        }
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "error in requestSigning", e);
+                    }
+                }
+            });
+        }
+
+        /**
          * Sends an advertisement request to be processed by the related TV input.
          *
          * @param request The advertisement request
@@ -914,11 +969,11 @@ public abstract class TvInteractiveAppService extends Service {
         }
 
         void createBiInteractiveApp(@NonNull Uri biIAppUri, @Nullable Bundle params) {
-            onCreateBiInteractiveApp(biIAppUri, params);
+            onCreateBiInteractiveAppRequest(biIAppUri, params);
         }
 
         void destroyBiInteractiveApp(@NonNull String biIAppId) {
-            onDestroyBiInteractiveApp(biIAppId);
+            onDestroyBiInteractiveAppRequest(biIAppId);
         }
 
         void setTeletextAppEnabled(boolean enable) {
@@ -943,6 +998,10 @@ public abstract class TvInteractiveAppService extends Service {
 
         void sendCurrentTvInputId(@Nullable String inputId) {
             onCurrentTvInputId(inputId);
+        }
+
+        void sendSigningResult(String signingId, byte[] result) {
+            onSigningResult(signingId, result);
         }
 
         void release() {
@@ -1074,7 +1133,7 @@ public abstract class TvInteractiveAppService extends Service {
          * @param biIAppId BI interactive app ID, which can be used to destroy the BI interactive
          *                 app. {@code null} if it's not created successfully.
          *
-         * @see #onCreateBiInteractiveApp(Uri, Bundle)
+         * @see #onCreateBiInteractiveAppRequest(Uri, Bundle)
          */
         @CallSuper
         public final void notifyBiInteractiveAppCreated(
@@ -1410,6 +1469,11 @@ public abstract class TvInteractiveAppService extends Service {
         @Override
         public void sendCurrentTvInputId(@Nullable String inputId) {
             mSessionImpl.sendCurrentTvInputId(inputId);
+        }
+
+        @Override
+        public void sendSigningResult(@NonNull String signingId, @NonNull byte[] result) {
+            mSessionImpl.sendSigningResult(signingId, result);
         }
 
         @Override

@@ -217,6 +217,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private HashSet<View> mFromMoreCardAdditions = new HashSet<>();
     private ArrayList<AnimationEvent> mAnimationEvents = new ArrayList<>();
     private ArrayList<View> mSwipedOutViews = new ArrayList<>();
+    private NotificationStackSizeCalculator mNotificationStackSizeCalculator;
     private final StackStateAnimator mStateAnimator = new StackStateAnimator(this);
     private boolean mAnimationsEnabled;
     private boolean mChangePositionInProgress;
@@ -415,6 +416,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private NotificationShelf mShelf;
     private int mMaxDisplayedNotifications = -1;
     private float mKeyguardBottomPadding = -1;
+    private float mKeyguardNotificationAvailableSpace = -1;
     @VisibleForTesting int mStatusBarHeight;
     private int mMinInteractionHeight;
     private final Rect mClipRect = new Rect();
@@ -757,31 +759,34 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         } else {
             mDebugTextUsedYPositions.clear();
         }
-        int y = mTopPadding;
-        drawDebugInfo(canvas, y, Color.RED, /* label= */ "mTopPadding = "+y);
+        int y = 0;
+        drawDebugInfo(canvas, y, Color.RED, /* label= */ "y = " + y);
+
+        y = mTopPadding;
+        drawDebugInfo(canvas, y, Color.RED, /* label= */ "mTopPadding = " + y);
 
         y = getLayoutHeight();
-        drawDebugInfo(canvas, y, Color.YELLOW, /* label= */ "getLayoutHeight() = "+y);
+        drawDebugInfo(canvas, y, Color.YELLOW, /* label= */ "getLayoutHeight() = " + y);
 
         y = (int) mMaxLayoutHeight;
-        drawDebugInfo(canvas, y, Color.MAGENTA, /* label= */ "mMaxLayoutHeight = "+y);
+        drawDebugInfo(canvas, y, Color.MAGENTA, /* label= */ "mMaxLayoutHeight = " + y);
 
         if (mKeyguardBottomPadding >= 0) {
             y = getHeight() - (int) mKeyguardBottomPadding;
             drawDebugInfo(canvas, y, Color.GRAY,
-                    /* label= */ "getHeight() - mKeyguardBottomPadding = "+y);
+                    /* label= */ "getHeight() - mKeyguardBottomPadding = " + y);
         }
 
         y = getHeight() - getEmptyBottomMargin();
         drawDebugInfo(canvas, y, Color.GREEN,
-                /* label= */ "getHeight() - getEmptyBottomMargin() = "+y);
+                /* label= */ "getHeight() - getEmptyBottomMargin() = " + y);
 
         y = (int) (mAmbientState.getStackY());
-        drawDebugInfo(canvas, y, Color.CYAN, /* label= */ "mAmbientState.getStackY() = "+y);
+        drawDebugInfo(canvas, y, Color.CYAN, /* label= */ "mAmbientState.getStackY() = " + y);
 
         y = (int) (mAmbientState.getStackY() + mAmbientState.getStackHeight());
         drawDebugInfo(canvas, y, Color.BLUE,
-                /* label= */ "mAmbientState.getStackY() + mAmbientState.getStackHeight() = "+y);
+                /* label= */ "mAmbientState.getStackY() + mAmbientState.getStackHeight() = " + y);
 
         y = (int) mAmbientState.getStackY() + mContentHeight;
         drawDebugInfo(canvas, y, Color.MAGENTA,
@@ -790,6 +795,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         y = (int) mAmbientState.getStackY() + mIntrinsicContentHeight;
         drawDebugInfo(canvas, y, Color.YELLOW,
                 /* label= */ "mAmbientState.getStackY() + mIntrinsicContentHeight = " + y);
+
+        y = (int) (mAmbientState.getStackY() + mKeyguardNotificationAvailableSpace);
+        drawDebugInfo(canvas, y, Color.RED, /* label= */
+                "mAmbientState.getStackY() + mKeyguardNotificationAvailableSpace = " + y);
     }
 
     private void drawDebugInfo(Canvas canvas, int y, int color, String label) {
@@ -956,13 +965,15 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     private void reinitView() {
-        initView(getContext(), mSwipeHelper);
+        initView(getContext(), mSwipeHelper, mNotificationStackSizeCalculator);
     }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
-    void initView(Context context, NotificationSwipeHelper swipeHelper) {
+    void initView(Context context, NotificationSwipeHelper swipeHelper,
+            NotificationStackSizeCalculator notificationStackSizeCalculator) {
         mScroller = new OverScroller(getContext());
         mSwipeHelper = swipeHelper;
+        mNotificationStackSizeCalculator = notificationStackSizeCalculator;
 
         setDescendantFocusability(FOCUS_AFTER_DESCENDANTS);
         setClipChildren(false);
@@ -2248,48 +2259,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     private void updateContentHeight() {
         final float scrimTopPadding = mAmbientState.isOnKeyguard() ? 0 : mMinimumPaddings;
-        int height = (int) scrimTopPadding;
-        float previousPaddingRequest = mPaddingBetweenElements;
-        int numShownItems = 0;
-        int numShownNotifs = 0;
-        boolean finish = false;
-        int maxDisplayedNotifications = mMaxDisplayedNotifications;
-        ExpandableView previousView = null;
-
-        for (int i = 0; i < getChildCount(); i++) {
-            ExpandableView expandableView = (ExpandableView) getChildAt(i);
-            boolean footerViewOnLockScreen = expandableView == mFooterView && onKeyguard();
-
-            if (expandableView.getVisibility() != View.GONE
-                    && !expandableView.hasNoContentHeight() && !footerViewOnLockScreen) {
-
-                boolean limitReached = maxDisplayedNotifications != -1
-                        && numShownNotifs >= maxDisplayedNotifications;
-                final float viewHeight;
-                if (limitReached) {
-                    viewHeight = mShelf.getIntrinsicHeight();
-                    finish = true;
-                } else {
-                    viewHeight = expandableView.getIntrinsicHeight();
-                }
-                if (height != 0) {
-                    height += mPaddingBetweenElements;
-                }
-                float gapHeight = calculateGapHeight(previousView, expandableView, numShownNotifs);
-                height += gapHeight;
-                height += viewHeight;
-
-                numShownItems++;
-                if (viewHeight > 0 || !(expandableView instanceof MediaContainerView)) {
-                    // Only count the media as a notification if it has a positive height.
-                    numShownNotifs++;
-                }
-                previousView = expandableView;
-                if (finish) {
-                    break;
-                }
-            }
-        }
+        final int height =
+                (int) scrimTopPadding + (int) mNotificationStackSizeCalculator.computeHeight(
+                        /* notificationStackScrollLayout= */ this, mMaxDisplayedNotifications,
+                        mShelf != null ? mShelf.getIntrinsicHeight() : 0);
         mIntrinsicContentHeight = height;
 
         // The topPadding can be bigger than the regular padding when qs is expanded, in that
@@ -4931,6 +4904,15 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     public void setKeyguardBottomPadding(float keyguardBottomPadding) {
         mKeyguardBottomPadding = keyguardBottomPadding;
     }
+
+    /**
+     * For debugging only. Enables to draw a line related to the available size for notifications in
+     * keyguard.
+     */
+    public void setKeyguardAvailableSpaceForDebug(float keyguardNotificationAvailableSpace) {
+        mKeyguardNotificationAvailableSpace = keyguardNotificationAvailableSpace;
+    }
+
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public void setShouldShowShelfOnly(boolean shouldShowShelfOnly) {

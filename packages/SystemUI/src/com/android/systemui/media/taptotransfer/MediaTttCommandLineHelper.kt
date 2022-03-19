@@ -128,19 +128,21 @@ class MediaTttCommandLineHelper @Inject constructor(
                     as StatusBarManager
             val routeInfo = MediaRoute2Info.Builder("id", "Test Name")
                 .addFeature("feature")
-                .setPackageName(TEST_PACKAGE_NAME)
-                .build()
+            if (args.size >= 2 && args[1] == "useAppIcon=true") {
+                routeInfo.setPackageName(TEST_PACKAGE_NAME)
+            }
 
             statusBarManager.updateMediaTapToTransferReceiverDisplay(
                     displayState,
-                    routeInfo,
+                    routeInfo.build(),
                     null,
                     null
                 )
         }
 
         override fun help(pw: PrintWriter) {
-            pw.println("Usage: adb shell cmd statusbar $RECEIVER_COMMAND <chipState>")
+            pw.println("Usage: adb shell cmd statusbar $RECEIVER_COMMAND " +
+                    "<chipState> useAppIcon=[true|false]")
         }
     }
 }
