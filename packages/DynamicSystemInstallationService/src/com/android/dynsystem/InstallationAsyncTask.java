@@ -44,7 +44,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 
-class InstallationAsyncTask extends AsyncTask<String, InstallationAsyncTask.Progress, Throwable> {
+class InstallationAsyncTask extends AsyncTask<String, Long, Throwable> {
 
     private static final String TAG = "InstallationAsyncTask";
 
@@ -106,14 +106,22 @@ class InstallationAsyncTask extends AsyncTask<String, InstallationAsyncTask.Prog
 
     static class Progress {
         public final String partitionName;
+        public final long installedSize;
         public final long partitionSize;
-        public final int numInstalledPartitions;
-        public long installedSize;
+        public final int partitionNumber;
+        public final int totalPartitionNumber;
 
-        Progress(String partitionName, long partitionSize, int numInstalledPartitions) {
+        Progress(
+                String partitionName,
+                long installedSize,
+                long partitionSize,
+                int partitionNumber,
+                int totalPartitionNumber) {
             this.partitionName = partitionName;
+            this.installedSize = installedSize;
             this.partitionSize = partitionSize;
-            this.numInstalledPartitions = numInstalledPartitions;
+            this.partitionNumber = partitionNumber;
+            this.totalPartitionNumber = totalPartitionNumber;
         }
     }
 
@@ -139,7 +147,10 @@ class InstallationAsyncTask extends AsyncTask<String, InstallationAsyncTask.Prog
     private boolean mIsZip;
     private boolean mIsCompleted;
 
-    private int mNumInstalledPartitions;
+    private String mPartitionName;
+    private long mPartitionSize;
+    private int mPartitionNumber;
+    private int mTotalPartitionNumber;
 
     private InputStream mStream;
     private ZipFile mZipFile;
@@ -175,11 +186,15 @@ class InstallationAsyncTask extends AsyncTask<String, InstallationAsyncTask.Prog
     protected Throwable doInBackground(String... voids) {
         Log.d(TAG, "Start doInBackground(), URL: " + mUrl);
 
+        final boolean wantScratchPartition = Build.IS_DEBUGGABLE;
         try {
             // call DynamicSystemManager to cleanup stuff
             mDynSystem.remove();
 
             verifyAndPrepare();
+            if (wantScratchPartition) {
+                ++mTotalPartitionNumber;
+            }
 
             mDynSystem.startInstallation(mDsuSlot);
 
@@ -198,7 +213,7 @@ class InstallationAsyncTask extends AsyncTask<String, InstallationAsyncTask.Prog
                 return null;
             }
 
-            if (Build.IS_DEBUGGABLE) {
+            if (wantScratchPartition) {
                 // If host is debuggable, then install a scratch partition so that we can do
                 // adb remount in the guest system.
                 try {
@@ -262,9 +277,14 @@ class InstallationAsyncTask extends AsyncTask<String, InstallationAsyncTask.Prog
     }
 
     @Override
-    protected void onProgressUpdate(Progress... values) {
-        Progress progress = values[0];
-        mListener.onProgressUpdate(progress);
+    protected void onProgressUpdate(Long... installedSize) {
+        mListener.onProgressUpdate(
+                new Progress(
+                        mPartitionName,
+                        installedSize[0],
+                        mPartitionSize,
+                        mPartitionNumber,
+                        mTotalPartitionNumber));
     }
 
     private void verifyAndPrepare() throws Exception {
@@ -281,12 +301,16 @@ class InstallationAsyncTask extends AsyncTask<String, InstallationAsyncTask.Prog
             throw new UnsupportedFormatException(
                 String.format(Locale.US, "Unsupported file format: %s", mUrl));
         }
+        // At least two partitions, {system, userdata}
+        mTotalPartitionNumber = 2;
 
         if (mIsNetworkUrl) {
             mStream = new URL(mUrl).openStream();
         } else if (URLUtil.isFileUrl(mUrl)) {
             if (mIsZip) {
                 mZipFile = new ZipFile(new File(new URL(mUrl).toURI()));
+                // {*.img in zip} + {userdata}
+                mTotalPartitionNumber = calculateNumberOfImagesInLocalZip(mZipFile) + 1;
             } else {
                 mStream = new URL(mUrl).openStream();
             }
@@ -333,9 +357,13 @@ class InstallationAsyncTask extends AsyncTask<String, InstallationAsyncTask.Prog
             }
         };
 
-        thread.start();
-        Progress progress = new Progress(partitionName, partitionSize, mNumInstalledPartitions++);
+        mPartitionName = partitionName;
+        mPartitionSize = partitionSize;
+        ++mPartitionNumber;
+        publishProgress(/* installedSize = */ 0L);
 
+        long prevInstalledSize = 0;
+        thread.start();
         while (thread.isAlive()) {
             if (isCancelled()) {
                 return;
@@ -343,9 +371,9 @@ class InstallationAsyncTask extends AsyncTask<String, InstallationAsyncTask.Prog
 
             final long installedSize = mDynSystem.getInstallationProgress().bytes_processed;
 
-            if (installedSize > progress.installedSize + MIN_PROGRESS_TO_PUBLISH) {
-                progress.installedSize = installedSize;
-                publishProgress(progress);
+            if (installedSize > prevInstalledSize + MIN_PROGRESS_TO_PUBLISH) {
+                publishProgress(installedSize);
+                prevInstalledSize = installedSize;
             }
 
             try {
@@ -392,14 +420,42 @@ class InstallationAsyncTask extends AsyncTask<String, InstallationAsyncTask.Prog
         installImage("system", mSystemSize, new GZIPInputStream(mStream));
     }
 
+    private boolean shouldInstallEntry(String name) {
+        if (!name.endsWith(".img")) {
+            return false;
+        }
+        String partitionName = name.substring(0, name.length() - 4);
+        if (UNSUPPORTED_PARTITIONS.contains(partitionName)) {
+            return false;
+        }
+        return true;
+    }
+
+    private int calculateNumberOfImagesInLocalZip(ZipFile zipFile) {
+        int total = 0;
+        Enumeration<? extends ZipEntry> entries = zipFile.entries();
+        while (entries.hasMoreElements()) {
+            ZipEntry entry = entries.nextElement();
+            if (shouldInstallEntry(entry.getName())) {
+                ++total;
+            }
+        }
+        return total;
+    }
+
     private void installStreamingZipUpdate() throws IOException, ImageValidationException {
         Log.d(TAG, "To install a streaming ZIP update");
 
         ZipInputStream zis = new ZipInputStream(mStream);
-        ZipEntry zipEntry = null;
+        ZipEntry entry = null;
 
-        while ((zipEntry = zis.getNextEntry()) != null) {
-            installImageFromAnEntry(zipEntry, zis);
+        while ((entry = zis.getNextEntry()) != null) {
+            String name = entry.getName();
+            if (shouldInstallEntry(name)) {
+                installImageFromAnEntry(entry, zis);
+            } else {
+                Log.d(TAG, name + " installation is not supported, skip it.");
+            }
 
             if (isCancelled()) {
                 break;
@@ -414,7 +470,12 @@ class InstallationAsyncTask extends AsyncTask<String, InstallationAsyncTask.Prog
 
         while (entries.hasMoreElements()) {
             ZipEntry entry = entries.nextElement();
-            installImageFromAnEntry(entry, mZipFile.getInputStream(entry));
+            String name = entry.getName();
+            if (shouldInstallEntry(name)) {
+                installImageFromAnEntry(entry, mZipFile.getInputStream(entry));
+            } else {
+                Log.d(TAG, name + " installation is not supported, skip it.");
+            }
 
             if (isCancelled()) {
                 break;
@@ -422,28 +483,16 @@ class InstallationAsyncTask extends AsyncTask<String, InstallationAsyncTask.Prog
         }
     }
 
-    private boolean installImageFromAnEntry(ZipEntry entry, InputStream is)
+    private void installImageFromAnEntry(ZipEntry entry, InputStream is)
             throws IOException, ImageValidationException {
         String name = entry.getName();
 
         Log.d(TAG, "ZipEntry: " + name);
 
-        if (!name.endsWith(".img")) {
-            return false;
-        }
-
         String partitionName = name.substring(0, name.length() - 4);
-
-        if (UNSUPPORTED_PARTITIONS.contains(partitionName)) {
-            Log.d(TAG, name + " installation is not supported, skip it.");
-            return false;
-        }
-
         long uncompressedSize = entry.getSize();
 
         installImage(partitionName, uncompressedSize, is);
-
-        return true;
     }
 
     private void installImage(String partitionName, long uncompressedSize, InputStream is)
@@ -497,8 +546,12 @@ class InstallationAsyncTask extends AsyncTask<String, InstallationAsyncTask.Prog
 
         mInstallationSession.setAshmem(pfd, READ_BUFFER_SIZE);
 
-        Progress progress = new Progress(partitionName, partitionSize, mNumInstalledPartitions++);
+        mPartitionName = partitionName;
+        mPartitionSize = partitionSize;
+        ++mPartitionNumber;
+        publishProgress(/* installedSize = */ 0L);
 
+        long prevInstalledSize = 0;
         long installedSize = 0;
         byte[] bytes = new byte[READ_BUFFER_SIZE];
         int numBytesRead;
@@ -516,9 +569,9 @@ class InstallationAsyncTask extends AsyncTask<String, InstallationAsyncTask.Prog
 
             installedSize += numBytesRead;
 
-            if (installedSize > progress.installedSize + MIN_PROGRESS_TO_PUBLISH) {
-                progress.installedSize = installedSize;
-                publishProgress(progress);
+            if (installedSize > prevInstalledSize + MIN_PROGRESS_TO_PUBLISH) {
+                publishProgress(installedSize);
+                prevInstalledSize = installedSize;
             }
         }
 
