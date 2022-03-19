@@ -38,7 +38,6 @@ import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.ForceShowNavigationBarSettingsObserver;
@@ -48,7 +47,6 @@ import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
-import com.android.wm.shell.compatui.CompatUIController;
 import com.android.wm.shell.recents.RecentTasksController;
 import com.android.wm.shell.startingsurface.StartingWindowController;
 
@@ -136,13 +134,12 @@ public class KidsModeTaskOrganizer extends ShellTaskOrganizer {
             ShellExecutor mainExecutor,
             Handler mainHandler,
             Context context,
-            @Nullable CompatUIController compatUI,
             SyncTransactionQueue syncTransactionQueue,
             DisplayController displayController,
             DisplayInsetsController displayInsetsController,
             Optional<RecentTasksController> recentTasks,
             ForceShowNavigationBarSettingsObserver forceShowNavigationBarSettingsObserver) {
-        super(taskOrganizerController, mainExecutor, context, compatUI, recentTasks);
+        super(taskOrganizerController, mainExecutor, context, /* compatUI= */ null, recentTasks);
         mContext = context;
         mMainHandler = mainHandler;
         mSyncQueue = syncTransactionQueue;
@@ -155,12 +152,11 @@ public class KidsModeTaskOrganizer extends ShellTaskOrganizer {
             ShellExecutor mainExecutor,
             Handler mainHandler,
             Context context,
-            @Nullable CompatUIController compatUI,
             SyncTransactionQueue syncTransactionQueue,
             DisplayController displayController,
             DisplayInsetsController displayInsetsController,
             Optional<RecentTasksController> recentTasks) {
-        super(mainExecutor, context, compatUI, recentTasks);
+        super(mainExecutor, context, /* compatUI= */ null, recentTasks);
         mContext = context;
         mMainHandler = mainHandler;
         mSyncQueue = syncTransactionQueue;

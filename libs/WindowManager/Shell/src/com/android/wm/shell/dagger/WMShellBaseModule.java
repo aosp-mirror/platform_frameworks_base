@@ -190,15 +190,13 @@ public abstract class WMShellBaseModule {
             @ShellMainThread ShellExecutor mainExecutor,
             @ShellMainThread Handler mainHandler,
             Context context,
-            CompatUIController compatUI,
             SyncTransactionQueue syncTransactionQueue,
             DisplayController displayController,
             DisplayInsetsController displayInsetsController,
             Optional<RecentTasksController> recentTasksOptional
     ) {
-        return new KidsModeTaskOrganizer(mainExecutor, mainHandler, context, compatUI,
-                syncTransactionQueue, displayController, displayInsetsController,
-                recentTasksOptional);
+        return new KidsModeTaskOrganizer(mainExecutor, mainHandler, context, syncTransactionQueue,
+                displayController, displayInsetsController, recentTasksOptional);
     }
 
     @WMSingleton
