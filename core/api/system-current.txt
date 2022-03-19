@@ -1931,6 +1931,7 @@ package android.app.prediction {
     field public static final int ACTION_DISMISS = 2; // 0x2
     field public static final int ACTION_LAUNCH = 1; // 0x1
     field public static final int ACTION_PIN = 3; // 0x3
+    field public static final int ACTION_UNDISMISS = 5; // 0x5
     field public static final int ACTION_UNPIN = 4; // 0x4
     field @NonNull public static final android.os.Parcelable.Creator<android.app.prediction.AppTargetEvent> CREATOR;
   }
