@@ -685,19 +685,19 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     private String getEncryptionNotificationTitle() {
-        return mInjector.getDevicePolicyManager().getString(
+        return mInjector.getDevicePolicyManager().getResources().getString(
                 PROFILE_ENCRYPTED_TITLE,
                 () -> mContext.getString(R.string.profile_encrypted_title));
     }
 
     private String getEncryptionNotificationDetail() {
-        return mInjector.getDevicePolicyManager().getString(
+        return mInjector.getDevicePolicyManager().getResources().getString(
                 PROFILE_ENCRYPTED_DETAIL,
                 () -> mContext.getString(R.string.profile_encrypted_detail));
     }
 
     private String getEncryptionNotificationMessage() {
-        return mInjector.getDevicePolicyManager().getString(
+        return mInjector.getDevicePolicyManager().getResources().getString(
                 PROFILE_ENCRYPTED_MESSAGE,
                 () -> mContext.getString(R.string.profile_encrypted_message));
     }

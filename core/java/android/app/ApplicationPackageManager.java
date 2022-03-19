@@ -18,9 +18,9 @@ package android.app;
 
 import static android.app.admin.DevicePolicyResources.Drawables.Style.SOLID_COLORED;
 import static android.app.admin.DevicePolicyResources.Drawables.Style.SOLID_NOT_COLORED;
-import static android.app.admin.DevicePolicyResources.Drawables.UNDEFINED;
 import static android.app.admin.DevicePolicyResources.Drawables.WORK_PROFILE_ICON;
 import static android.app.admin.DevicePolicyResources.Drawables.WORK_PROFILE_ICON_BADGE;
+import static android.app.admin.DevicePolicyResources.UNDEFINED;
 import static android.content.pm.Checksum.TYPE_PARTIAL_MERKLE_ROOT_1M_SHA256;
 import static android.content.pm.Checksum.TYPE_PARTIAL_MERKLE_ROOT_1M_SHA512;
 import static android.content.pm.Checksum.TYPE_WHOLE_MD5;
@@ -1886,7 +1886,7 @@ public class ApplicationPackageManager extends PackageManager {
             return icon;
         }
 
-        final Drawable badgeForeground = getDevicePolicyManager().getDrawable(
+        final Drawable badgeForeground = getDevicePolicyManager().getResources().getDrawable(
                 getUpdatableUserIconBadgeId(user),
                 SOLID_COLORED,
                 () -> getDefaultUserIconBadge(user));
@@ -1938,11 +1938,12 @@ public class ApplicationPackageManager extends PackageManager {
             return null;
         }
 
-        final Drawable badgeForeground = getDevicePolicyManager().getDrawableForDensity(
-                getUpdatableUserBadgeId(user),
-                SOLID_COLORED,
-                density,
-                () -> getDefaultUserBadgeForDensity(user, density));
+        final Drawable badgeForeground = getDevicePolicyManager().getResources()
+                .getDrawableForDensity(
+                        getUpdatableUserBadgeId(user),
+                        SOLID_COLORED,
+                        density,
+                        () -> getDefaultUserBadgeForDensity(user, density));
 
         badgeForeground.setTint(getUserBadgeColor(user, false));
         Drawable badge = new LayerDrawable(new Drawable[] {badgeColor, badgeForeground });
@@ -1968,7 +1969,7 @@ public class ApplicationPackageManager extends PackageManager {
             return null;
         }
 
-        final Drawable badge = getDevicePolicyManager().getDrawableForDensity(
+        final Drawable badge = getDevicePolicyManager().getResources().getDrawableForDensity(
                 getUpdatableUserBadgeId(user),
                 SOLID_NOT_COLORED,
                 density,
