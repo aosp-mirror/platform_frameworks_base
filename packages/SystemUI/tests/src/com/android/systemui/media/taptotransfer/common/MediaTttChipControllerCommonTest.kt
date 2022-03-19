@@ -192,9 +192,9 @@ class MediaTttChipControllerCommonTest : SysuiTestCase() {
 
         verify(windowManager, never()).removeView(any())
     }
-    
+
     @Test
-    fun displayChip_nullAppIconDrawableAndNullPackageName_stillHasIcon() {
+    fun setIcon_nullAppIconDrawableAndNullPackageName_stillHasIcon() {
         controllerCommon.displayChip(getState())
         val chipView = getChipView()
 
@@ -204,7 +204,7 @@ class MediaTttChipControllerCommonTest : SysuiTestCase() {
     }
 
     @Test
-    fun displayChip_nullAppIconDrawableAndInvalidPackageName_stillHasIcon() {
+    fun setIcon_nullAppIconDrawableAndInvalidPackageName_stillHasIcon() {
         controllerCommon.displayChip(getState())
         val chipView = getChipView()
 
@@ -226,7 +226,7 @@ class MediaTttChipControllerCommonTest : SysuiTestCase() {
     }
 
     @Test
-    fun displayChip_hasAppIconDrawable_iconIsDrawable() {
+    fun setIcon_hasAppIconDrawable_iconIsDrawable() {
         controllerCommon.displayChip(getState())
         val chipView = getChipView()
 
@@ -237,7 +237,7 @@ class MediaTttChipControllerCommonTest : SysuiTestCase() {
     }
 
     @Test
-    fun displayChip_nullAppNameAndNullPackageName_stillHasContentDescription() {
+    fun setIcon_nullAppNameAndNullPackageName_stillHasContentDescription() {
         controllerCommon.displayChip(getState())
         val chipView = getChipView()
 
@@ -247,7 +247,7 @@ class MediaTttChipControllerCommonTest : SysuiTestCase() {
     }
 
     @Test
-    fun displayChip_nullAppNameAndInvalidPackageName_stillHasContentDescription() {
+    fun setIcon_nullAppNameAndInvalidPackageName_stillHasContentDescription() {
         controllerCommon.displayChip(getState())
         val chipView = getChipView()
 
@@ -259,7 +259,7 @@ class MediaTttChipControllerCommonTest : SysuiTestCase() {
     }
 
     @Test
-    fun displayChip_nullAppName_iconContentDescriptionIsFromPackageName() {
+    fun setIcon_nullAppName_iconContentDescriptionIsFromPackageName() {
         controllerCommon.displayChip(getState())
         val chipView = getChipView()
 
@@ -269,7 +269,7 @@ class MediaTttChipControllerCommonTest : SysuiTestCase() {
     }
 
     @Test
-    fun displayChip_hasAppName_iconContentDescriptionIsAppNameOverride() {
+    fun setIcon_hasAppName_iconContentDescriptionIsAppNameOverride() {
         controllerCommon.displayChip(getState())
         val chipView = getChipView()
 
@@ -277,6 +277,21 @@ class MediaTttChipControllerCommonTest : SysuiTestCase() {
         controllerCommon.setIcon(chipView, PACKAGE_NAME, null, appName)
 
         assertThat(chipView.getAppIconView().contentDescription).isEqualTo(appName)
+    }
+
+    @Test
+    fun setIcon_iconSizeMatchesGetIconSize() {
+        controllerCommon.displayChip(getState())
+        val chipView = getChipView()
+
+        controllerCommon.setIcon(chipView, PACKAGE_NAME)
+        chipView.measure(
+            View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
+            View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
+        )
+
+        assertThat(chipView.getAppIconView().measuredWidth).isEqualTo(ICON_SIZE)
+        assertThat(chipView.getAppIconView().measuredHeight).isEqualTo(ICON_SIZE)
     }
 
     @Test
@@ -344,6 +359,8 @@ class MediaTttChipControllerCommonTest : SysuiTestCase() {
         override fun updateChipView(chipInfo: ChipInfo, currentChipView: ViewGroup) {
 
         }
+
+        override fun getIconSize(isAppIcon: Boolean): Int? = ICON_SIZE
     }
 
     inner class ChipInfo : ChipInfoCommon {
@@ -354,3 +371,4 @@ class MediaTttChipControllerCommonTest : SysuiTestCase() {
 private const val PACKAGE_NAME = "com.android.systemui"
 private const val APP_NAME = "Fake App Name"
 private const val TIMEOUT_MS = 10000L
+private const val ICON_SIZE = 47
