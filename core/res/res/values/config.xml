@@ -5742,13 +5742,13 @@
         exceeds the threshold, it'll be moved to restricted standby bucket. The value must be
         one of or combination of the definitions in AppBatteryPolicy.
     -->
-    <integer name="config_bg_current_drain_types_to_restricted_bucket">4</integer>
+    <integer name="config_bg_current_drain_types_to_restricted_bucket">20</integer>
 
     <!-- The types of battery drain we're checking on each app; if the sum of the battery drain
         exceeds the threshold, it'll be moved to background restricted level. The value must be
         one of or combination of the definitions in AppBatteryPolicy.
     -->
-    <integer name="config_bg_current_drain_types_to_bg_restricted">12</integer>
+    <integer name="config_bg_current_drain_types_to_bg_restricted">28</integer>
 
     <!-- The power usage components we're monitoring. Must one of the definition in BatteryConsumer.
     -->
