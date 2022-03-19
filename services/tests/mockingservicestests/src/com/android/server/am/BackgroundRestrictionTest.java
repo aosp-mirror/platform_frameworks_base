@@ -1899,7 +1899,7 @@ public final class BackgroundRestrictionTest {
             bgBatteryExemptionTypes.set(STATE_TYPE_FGS_WITH_NOTIFICATION);
             // Start over.
             resetBgRestrictionController();
-            setUidBatteryConsumptions(stats, uids, zeros, zeros, zeros);
+            setUidBatteryConsumptions(stats, uids, zeros, zeros, zeros, zeros);
             mAppBatteryPolicy.reset();
 
             // Run with a FGS with notification posted/removed immediately, we should
@@ -1908,16 +1908,16 @@ public final class BackgroundRestrictionTest {
                     FOREGROUND_SERVICE_TYPE_NONE, 0, true, true,
                     null, null, null, listener, stats, uids,
                     new double[]{restrictBucketThresholdMah + 1, 0},
-                    new double[]{0, restrictBucketThresholdMah - 1}, zeros,
+                    new double[]{0, restrictBucketThresholdMah - 1}, zeros, zeros,
                     false, RESTRICTION_LEVEL_RESTRICTED_BUCKET, timeout, true,
-                    null, windowMs, null, null, null);
+                    null, windowMs, null, null, null, null);
 
             // Run with a service with notification for extended time. We should be back to normal.
             runTestBgCurrentDrainExemptionOnce(testPkgName1, testUid1, testPid1,
                     FOREGROUND_SERVICE_TYPE_NONE, bgMediaPlaybackMinDuration * 2, false,
                     true, null, null, null, listener, stats, uids,
                     new double[]{restrictBucketThresholdMah + 1, 0},
-                    new double[]{0, restrictBucketThresholdMah - 1}, zeros,
+                    new double[]{0, restrictBucketThresholdMah - 1}, zeros, zeros,
                     true, RESTRICTION_LEVEL_ADAPTIVE_BUCKET, timeout, false,
                     () -> {
                         // A user interaction will bring it back to normal.
@@ -1934,7 +1934,7 @@ public final class BackgroundRestrictionTest {
                                 eq(REASON_SUB_FORCED_SYSTEM_FLAG_ABUSE),
                                 eq(REASON_MAIN_USAGE),
                                 eq(REASON_SUB_USAGE_USER_INTERACTION));
-                    }, windowMs, null, null, null);
+                    }, windowMs, null, null, null, null);
 
             // Set the policy to exempt all.
             bgBatteryExemptionTypes.set(STATE_TYPE_MEDIA_SESSION | STATE_TYPE_FGS_MEDIA_PLAYBACK
