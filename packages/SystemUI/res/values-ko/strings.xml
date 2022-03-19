@@ -31,6 +31,10 @@
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"화면 자동 회전"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"<xliff:g id="APPLICATION">%1$s</xliff:g> 앱이 <xliff:g id="USB_DEVICE">%2$s</xliff:g>에 액세스하도록 허용하시겠습니까?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"<xliff:g id="APPLICATION">%1$s</xliff:g>에서 <xliff:g id="USB_DEVICE">%2$s</xliff:g>에 액세스하도록 허용하시겠습니까?\n이 앱에는 녹음 권한이 부여되지 않았지만, 이 USB 기기를 통해 오디오를 녹음할 수 있습니다."</string>
+    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"<xliff:g id="APPLICATION">%1$s</xliff:g> 앱이 <xliff:g id="USB_DEVICE">%2$s</xliff:g>에 액세스하도록 허용하시겠습니까?"</string>
+    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"<xliff:g id="APPLICATION">%1$s</xliff:g> 앱을 열어 <xliff:g id="USB_DEVICE">%2$s</xliff:g>을 처리하시겠습니까?"</string>
+    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"이 앱에는 녹음 권한이 부여되지 않았지만, 이 USB 기기를 통해 오디오를 녹음할 수 있습니다. 이 기기와 함께 <xliff:g id="APPLICATION">%1$s</xliff:g> 앱을 사용하면 전화, 알림, 알람 소리가 들리지 않을 수 있습니다."</string>
+    <string name="usb_audio_device_prompt" msgid="7944987408206252949">"이 기기와 함께 <xliff:g id="APPLICATION">%1$s</xliff:g> 앱을 사용하면 전화, 알림, 알람 소리가 들리지 않을 수 있습니다."</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"<xliff:g id="APPLICATION">%1$s</xliff:g> 앱이 <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>에 액세스하도록 허용하시겠습니까?"</string>
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"<xliff:g id="APPLICATION">%1$s</xliff:g> 앱을 열어 <xliff:g id="USB_DEVICE">%2$s</xliff:g>을(를) 처리하시겠습니까?"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"<xliff:g id="USB_DEVICE">%2$s</xliff:g>을(를) 처리하기 위해 <xliff:g id="APPLICATION">%1$s</xliff:g>을(를) 여시겠습니까?\n이 앱에는 녹음 권한이 부여되지 않았지만, 이 USB 기기를 통해 오디오를 녹음할 수 있습니다."</string>

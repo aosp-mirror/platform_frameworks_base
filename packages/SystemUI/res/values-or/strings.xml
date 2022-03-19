@@ -31,6 +31,10 @@
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"ଅଟୋ-ରୋଟେଟ୍‌ ସ୍କ୍ରିନ୍"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> ଆକ୍ସେସ୍‍ କରିବାକୁ <xliff:g id="APPLICATION">%1$s</xliff:g>କୁ ଅନୁମତି ଦେବେ?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> ଆକ୍ସେସ୍ କରିବାକୁ <xliff:g id="APPLICATION">%1$s</xliff:g>କୁ ଅନୁମତି ଦେବେ କି?\nଏହି ଆପ୍‌କୁ ରେକର୍ଡ କରିବାକୁ ଅନୁମତି ଦିଆଯାଇ ନାହିଁ କିନ୍ତୁ ଏହି USB ଡିଭାଇସ୍ ଜରିଆରେ ଅଡିଓ କ୍ୟାପ୍ଟର୍ କରିପାରିବ।"</string>
+    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"<xliff:g id="USB_DEVICE">%2$s</xliff:g>କୁ ଆକ୍ସେସ କରିବା ପାଇଁ <xliff:g id="APPLICATION">%1$s</xliff:g>କୁ ଅନୁମତି ଦେବେ?"</string>
+    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"<xliff:g id="USB_DEVICE">%2$s</xliff:g>କୁ ନିୟନ୍ତ୍ରଣ କରିବା ପାଇଁ <xliff:g id="APPLICATION">%1$s</xliff:g>କୁ ଖୋଲିବେ?"</string>
+    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"ଏହି ଆପକୁ ରେକର୍ଡ କରିବା ପାଇଁ ଅନୁମତି ଦିଆଯାଇନାହିଁ, କିନ୍ତୁ ଏହି USB ଡିଭାଇସ ମାଧ୍ୟମରେ ଏହା ଅଡିଓକୁ କ୍ୟାପଚର କରିପାରିବ। ଏହି ଡିଭାଇସରେ <xliff:g id="APPLICATION">%1$s</xliff:g> ବ୍ୟବହାର କରିବା କଲ, ବିଜ୍ଞପ୍ତି ଏବଂ ଆଲାରାମଗୁଡ଼ିକୁ ଶୁଣିବାରୁ ପ୍ରତିରୋଧ କରିପାରେ।"</string>
+    <string name="usb_audio_device_prompt" msgid="7944987408206252949">"ଏହି ଡିଭାଇସରେ <xliff:g id="APPLICATION">%1$s</xliff:g> ବ୍ୟବହାର କରିବା କଲ, ବିଜ୍ଞପ୍ତି ଏବଂ ଆଲାରାମଗୁଡ଼ିକୁ ଶୁଣିବାରୁ ପ୍ରତିରୋଧ କରିପାରେ।"</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"<xliff:g id="USB_ACCESSORY">%2$s</xliff:g> ଆକ୍ସେସ୍‍ କରିବାକୁ <xliff:g id="APPLICATION">%1$s</xliff:g>କୁ ଅନୁମତି ଦେବେ?"</string>
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> ନିୟନ୍ତ୍ରଣ କରିବାକୁ <xliff:g id="APPLICATION">%1$s</xliff:g> ଖୋଲିବେ?"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> ପରିଚାଳନା କରିବାକୁ <xliff:g id="APPLICATION">%1$s</xliff:g>କୁ ଖୋଲିବେ?\nଏହି ଆପ୍‌କୁ ରେକର୍ଡ କରିବାକୁ ଅନୁମତି ଦିଆଯାଇ ନାହିଁ କିନ୍ତୁ ଏହି USB ଡିଭାଇସ୍ ଜରିଆରେ, ଏହା ଅଡିଓ କ୍ୟାପ୍ଟର୍ କରିପାରିବ।"</string>
@@ -645,7 +649,7 @@
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"ଦ୍ରୁତ ସେଟିଙ୍ଗ ଏଡିଟର୍।"</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"<xliff:g id="ID_1">%1$s</xliff:g> ବିଜ୍ଞପ୍ତି: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_settings" msgid="7098489591715844713">"ସେଟିଂସ୍ ଖୋଲନ୍ତୁ।"</string>
-    <string name="accessibility_quick_settings_expand" msgid="2609275052412521467">"ଦ୍ରୁତ ସେଟିଙ୍ଗ ଖୋଲନ୍ତୁ।"</string>
+    <string name="accessibility_quick_settings_expand" msgid="2609275052412521467">"କ୍ଵିକ ସେଟିଂସ ଖୋଲନ୍ତୁ।"</string>
     <string name="accessibility_quick_settings_collapse" msgid="4674876336725041982">"ଦ୍ରୁତ ସେଟିଂସ୍ ବନ୍ଦ କରନ୍ତୁ।"</string>
     <string name="accessibility_quick_settings_user" msgid="505821942882668619">"<xliff:g id="ID_1">%s</xliff:g> ଭାବରେ ସାଇନ୍‌ ଇନ୍‌ କରିଛନ୍ତି"</string>
     <string name="accessibility_quick_settings_choose_user_action" msgid="4554388498186576087">"ଉପଯୋଗକର୍ତ୍ତା ବାଛନ୍ତୁ"</string>
