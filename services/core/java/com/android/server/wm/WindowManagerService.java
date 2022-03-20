@@ -89,7 +89,6 @@ import static android.view.WindowManager.REMOVE_CONTENT_MODE_UNDEFINED;
 import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_RELAUNCH;
 import static android.view.WindowManagerGlobal.ADD_OKAY;
-import static android.view.WindowManagerGlobal.RELAYOUT_RES_BLAST_SYNC;
 import static android.view.WindowManagerGlobal.RELAYOUT_RES_SURFACE_CHANGED;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_INVALID;
 import static android.view.WindowManagerPolicyConstants.TYPE_LAYER_MULTIPLIER;
@@ -2157,6 +2156,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         w.mGivenTouchableRegion.scale(w.mGlobalScale);
                     }
                     w.setDisplayLayoutNeeded();
+                    w.updateSourceFrame(w.getFrame());
                     mWindowPlacerLocked.performSurfacePlacement();
                     w.getDisplayContent().getInputMonitor().updateInputWindowsLw(true);
 
@@ -2508,11 +2508,14 @@ public class WindowManagerService extends IWindowManager.Stub
             win.mInRelayout = false;
 
             if (mUseBLASTSync && win.useBLASTSync() && viewVisibility != View.GONE
-                    && win.mNextRelayoutUseSync) {
+                    && (win.mSyncSeqId > win.mLastSeqIdSentToRelayout)) {
                 win.prepareDrawHandlers();
                 win.markRedrawForSyncReported();
-                win.mNextRelayoutUseSync = false;
-                result |= RELAYOUT_RES_BLAST_SYNC;
+
+                win.mLastSeqIdSentToRelayout = win.mSyncSeqId;
+                outSyncIdBundle.putInt("seqid", win.mSyncSeqId);
+            } else {
+                outSyncIdBundle.putInt("seqid", -1);
             }
 
             if (configChanged) {
