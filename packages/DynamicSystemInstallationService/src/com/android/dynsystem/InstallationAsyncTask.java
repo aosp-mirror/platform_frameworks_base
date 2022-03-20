@@ -16,17 +16,18 @@
 
 package com.android.dynsystem;
 
+import android.annotation.NonNull;
 import android.content.Context;
 import android.gsi.AvbPublicKey;
 import android.gsi.IGsiService;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
-import android.os.MemoryFile;
-import android.os.ParcelFileDescriptor;
+import android.os.SharedMemory;
 import android.os.SystemProperties;
 import android.os.image.DynamicSystemManager;
 import android.service.persistentdata.PersistentDataBlockManager;
+import android.system.ErrnoException;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Range;
@@ -39,6 +40,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.List;
@@ -152,6 +154,22 @@ class InstallationAsyncTask extends AsyncTask<String, Long, Throwable> {
         void onProgressUpdate(Progress progress);
 
         void onResult(int resultCode, Throwable detail);
+    }
+
+    private static class MappedMemoryBuffer implements AutoCloseable {
+        public ByteBuffer mBuffer;
+
+        MappedMemoryBuffer(@NonNull ByteBuffer buffer) {
+            mBuffer = buffer;
+        }
+
+        @Override
+        public void close() {
+            if (mBuffer != null) {
+                SharedMemory.unmap(mBuffer);
+                mBuffer = null;
+            }
+        }
     }
 
     private final int mSharedMemorySize;
@@ -674,59 +692,66 @@ class InstallationAsyncTask extends AsyncTask<String, Long, Throwable> {
 
         Log.d(TAG, "Start installing: " + partitionName);
 
-        MemoryFile memoryFile = new MemoryFile("dsu_" + partitionName, mSharedMemorySize);
-        ParcelFileDescriptor pfd = new ParcelFileDescriptor(memoryFile.getFileDescriptor());
-
-        mInstallationSession.setAshmem(pfd, memoryFile.length());
-
-        initPartitionProgress(partitionName, partitionSize, /* readonly = */ true);
-        publishProgress(/* installedSize = */ 0L);
-
         long prevInstalledSize = 0;
-        long installedSize = 0;
-        byte[] bytes = new byte[memoryFile.length()];
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        Future<Boolean> submitPromise = null;
+        try (SharedMemory sharedMemory =
+                        SharedMemory.create("dsu_buffer_" + partitionName, mSharedMemorySize);
+                MappedMemoryBuffer mappedBuffer =
+                        new MappedMemoryBuffer(sharedMemory.mapReadWrite())) {
+            mInstallationSession.setAshmem(sharedMemory.getFdDup(), sharedMemory.getSize());
 
-        while (true) {
-            final int numBytesRead = sis.read(bytes, 0, bytes.length);
+            initPartitionProgress(partitionName, partitionSize, /* readonly = */ true);
+            publishProgress(/* installedSize = */ 0L);
 
-            if (submitPromise != null) {
-                // Wait until the previous submit task is complete.
-                while (true) {
-                    try {
-                        if (!submitPromise.get()) {
-                            throw new IOException("Failed submitFromAshmem() to DynamicSystem");
+            long installedSize = 0;
+            byte[] readBuffer = new byte[sharedMemory.getSize()];
+            ByteBuffer buffer = mappedBuffer.mBuffer;
+            ExecutorService executor = Executors.newSingleThreadExecutor();
+            Future<Boolean> submitPromise = null;
+
+            while (true) {
+                final int numBytesRead = sis.read(readBuffer, 0, readBuffer.length);
+
+                if (submitPromise != null) {
+                    // Wait until the previous submit task is complete.
+                    while (true) {
+                        try {
+                            if (!submitPromise.get()) {
+                                throw new IOException("Failed submitFromAshmem() to DynamicSystem");
+                            }
+                            break;
+                        } catch (InterruptedException e) {
+                            // Ignore.
                         }
-                        break;
-                    } catch (InterruptedException e) {
-                        // Ignore.
+                    }
+
+                    // Publish the progress of the previous submit task.
+                    if (installedSize > prevInstalledSize + MIN_PROGRESS_TO_PUBLISH) {
+                        publishProgress(installedSize);
+                        prevInstalledSize = installedSize;
                     }
                 }
 
-                // Publish the progress of the previous submit task.
-                if (installedSize > prevInstalledSize + MIN_PROGRESS_TO_PUBLISH) {
-                    publishProgress(installedSize);
-                    prevInstalledSize = installedSize;
+                // Ensure the previous submit task (submitPromise) is complete before exiting the
+                // loop.
+                if (numBytesRead < 0) {
+                    break;
                 }
+
+                if (isCancelled()) {
+                    return;
+                }
+
+                buffer.position(0);
+                buffer.put(readBuffer, 0, numBytesRead);
+                submitPromise =
+                        executor.submit(() -> mInstallationSession.submitFromAshmem(numBytesRead));
+
+                // Even though we update the bytes counter here, the actual progress is updated only
+                // after the submit task (submitPromise) is complete.
+                installedSize += numBytesRead;
             }
-
-            // Ensure the previous submit task (submitPromise) is complete before exiting the loop.
-            if (numBytesRead < 0) {
-                break;
-            }
-
-            if (isCancelled()) {
-                return;
-            }
-
-            memoryFile.writeBytes(bytes, 0, 0, numBytesRead);
-            submitPromise =
-                    executor.submit(() -> mInstallationSession.submitFromAshmem(numBytesRead));
-
-            // Even though we update the bytes counter here, the actual progress is updated only
-            // after the submit task (submitPromise) is complete.
-            installedSize += numBytesRead;
+        } catch (ErrnoException e) {
+            e.rethrowAsIOException();
         }
 
         AvbPublicKey avbPublicKey = new AvbPublicKey();
