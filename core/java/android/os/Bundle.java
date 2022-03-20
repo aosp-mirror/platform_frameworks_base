@@ -989,7 +989,7 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      * Otherwise, this method might throw an exception or return {@code null}.
      *
      * @param key a String, or {@code null}
-     * @param clazz The type of the items inside the array
+     * @param clazz The type of the items inside the array. This is only verified when unparceling.
      * @return a Parcelable[] value, or {@code null}
      */
     @SuppressLint({"ArrayReturn", "NullableCollection"})
@@ -1053,7 +1053,8 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      * Otherwise, this method might throw an exception or return {@code null}.
      *
      * @param key   a String, or {@code null}
-     * @param clazz The type of the items inside the array list
+     * @param clazz The type of the items inside the array list. This is only verified when
+     *     unparceling.
      * @return an ArrayList<T> value, or {@code null}
      */
     @SuppressLint("NullableCollection")
@@ -1103,6 +1104,8 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      * </ul>
      *
      * @param key a String, or null
+     * @param clazz The type of the items inside the sparse array. This is only verified when
+     *     unparceling.
      * @return a SparseArray of T values, or null
      */
     @SuppressWarnings("unchecked")

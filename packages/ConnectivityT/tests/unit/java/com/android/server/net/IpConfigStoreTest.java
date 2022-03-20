@@ -48,10 +48,16 @@ import java.util.Arrays;
  */
 @RunWith(AndroidJUnit4.class)
 public class IpConfigStoreTest {
+    private static final int KEY_CONFIG = 17;
+    private static final String IFACE_1 = "eth0";
+    private static final String IFACE_2 = "eth1";
+    private static final String IP_ADDR_1 = "192.168.1.10/24";
+    private static final String IP_ADDR_2 = "192.168.1.20/24";
+    private static final String DNS_IP_ADDR_1 = "1.2.3.4";
+    private static final String DNS_IP_ADDR_2 = "5.6.7.8";
 
     @Test
     public void backwardCompatibility2to3() throws IOException {
-        final int KEY_CONFIG = 17;
         ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
         DataOutputStream outputStream = new DataOutputStream(byteStream);
 
@@ -73,13 +79,6 @@ public class IpConfigStoreTest {
 
     @Test
     public void staticIpMultiNetworks() throws Exception {
-        final String IFACE_1 = "eth0";
-        final String IFACE_2 = "eth1";
-        final String IP_ADDR_1 = "192.168.1.10/24";
-        final String IP_ADDR_2 = "192.168.1.20/24";
-        final String DNS_IP_ADDR_1 = "1.2.3.4";
-        final String DNS_IP_ADDR_2 = "5.6.7.8";
-
         final ArrayList<InetAddress> dnsServers = new ArrayList<>();
         dnsServers.add(InetAddresses.parseNumericAddress(DNS_IP_ADDR_1));
         dnsServers.add(InetAddresses.parseNumericAddress(DNS_IP_ADDR_2));
@@ -144,11 +143,11 @@ public class IpConfigStoreTest {
 
     /** Synchronously writes into given byte steam */
     private static class MockedDelayedDiskWrite extends DelayedDiskWrite {
-        final ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+        final ByteArrayOutputStream mByteStream = new ByteArrayOutputStream();
 
         @Override
         public void write(String filePath, Writer w) {
-            DataOutputStream outputStream = new DataOutputStream(byteStream);
+            DataOutputStream outputStream = new DataOutputStream(mByteStream);
 
             try {
                 w.onWriteCalled(outputStream);

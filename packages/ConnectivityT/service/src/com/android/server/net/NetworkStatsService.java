@@ -1194,7 +1194,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     }
 
     @VisibleForTesting
-    public void setUidForeground(int uid, boolean uidForeground) {
+    public void noteUidForeground(int uid, boolean uidForeground) {
         PermissionUtils.enforceNetworkStackPermission(mContext);
         synchronized (mStatsLock) {
             final int set = uidForeground ? SET_FOREGROUND : SET_DEFAULT;
@@ -2393,10 +2393,17 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         }
 
         @Override
-        public void notifyWarningOrLimitReached() {
-            Log.d(TAG, mTag + ": notifyWarningOrLimitReached");
+        public void notifyWarningReached() {
+            Log.d(TAG, mTag + ": notifyWarningReached");
             BinderUtils.withCleanCallingIdentity(() ->
-                    mNetworkPolicyManager.notifyStatsProviderWarningOrLimitReached());
+                    mNetworkPolicyManager.notifyStatsProviderWarningReached());
+        }
+
+        @Override
+        public void notifyLimitReached() {
+            Log.d(TAG, mTag + ": notifyLimitReached");
+            BinderUtils.withCleanCallingIdentity(() ->
+                    mNetworkPolicyManager.notifyStatsProviderLimitReached());
         }
 
         @Override

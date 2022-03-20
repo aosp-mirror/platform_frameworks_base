@@ -1120,8 +1120,7 @@ class StorageManagerService extends IStorageManager.Stub
                     if (initLocked) {
                         mVold.lockUserKey(user.id);
                     } else {
-                        mVold.unlockUserKey(user.id, user.serialNumber, encodeBytes(null),
-                                encodeBytes(null));
+                        mVold.unlockUserKey(user.id, user.serialNumber, encodeBytes(null));
                     }
                 } catch (Exception e) {
                     Slog.wtf(TAG, e);
@@ -3072,220 +3071,6 @@ class StorageManagerService extends IStorageManager.Stub
         }
     }
 
-    @Override
-    public int getEncryptionState() {
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.CRYPT_KEEPER,
-                "no permission to access the crypt keeper");
-
-        try {
-            return mVold.fdeComplete();
-        } catch (Exception e) {
-            Slog.wtf(TAG, e);
-            return StorageManager.ENCRYPTION_STATE_ERROR_UNKNOWN;
-        }
-    }
-
-    @Override
-    public int decryptStorage(String password) {
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.CRYPT_KEEPER,
-                "no permission to access the crypt keeper");
-
-        if (TextUtils.isEmpty(password)) {
-            throw new IllegalArgumentException("password cannot be empty");
-        }
-
-        if (DEBUG_EVENTS) {
-            Slog.i(TAG, "decrypting storage...");
-        }
-
-        try {
-            mVold.fdeCheckPassword(password);
-            mHandler.postDelayed(() -> {
-                try {
-                    mVold.fdeRestart();
-                } catch (Exception e) {
-                    Slog.wtf(TAG, e);
-                }
-            }, DateUtils.SECOND_IN_MILLIS);
-            return 0;
-        } catch (ServiceSpecificException e) {
-            Slog.e(TAG, "fdeCheckPassword failed", e);
-            return e.errorCode;
-        } catch (Exception e) {
-            Slog.wtf(TAG, e);
-            return StorageManager.ENCRYPTION_STATE_ERROR_UNKNOWN;
-        }
-    }
-
-    @Override
-    public int encryptStorage(int type, String password) {
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.CRYPT_KEEPER,
-            "no permission to access the crypt keeper");
-
-        if (type == StorageManager.CRYPT_TYPE_DEFAULT) {
-            password = "";
-        } else if (TextUtils.isEmpty(password)) {
-            throw new IllegalArgumentException("password cannot be empty");
-        }
-
-        if (DEBUG_EVENTS) {
-            Slog.i(TAG, "encrypting storage...");
-        }
-
-        try {
-            mVold.fdeEnable(type, password, 0);
-        } catch (Exception e) {
-            Slog.wtf(TAG, e);
-            return -1;
-        }
-
-        return 0;
-    }
-
-    /** Set the password for encrypting the main key.
-     *  @param type One of the CRYPTO_TYPE_XXX consts defined in StorageManager.
-     *  @param password The password to set.
-     */
-    @Override
-    public int changeEncryptionPassword(int type, String password) {
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.CRYPT_KEEPER,
-            "no permission to access the crypt keeper");
-
-        if (StorageManager.isFileEncryptedNativeOnly()) {
-            // Not supported on FBE devices
-            return -1;
-        }
-
-        if (type == StorageManager.CRYPT_TYPE_DEFAULT) {
-            password = "";
-        } else if (TextUtils.isEmpty(password)) {
-            throw new IllegalArgumentException("password cannot be empty");
-        }
-
-        if (DEBUG_EVENTS) {
-            Slog.i(TAG, "changing encryption password...");
-        }
-
-        try {
-            mVold.fdeChangePassword(type, password);
-            return 0;
-        } catch (Exception e) {
-            Slog.wtf(TAG, e);
-            return -1;
-        }
-    }
-
-    /**
-     * Validate a user-supplied password string with cryptfs
-     */
-    @Override
-    public int verifyEncryptionPassword(String password) throws RemoteException {
-        // Only the system process is permitted to validate passwords
-        if (Binder.getCallingUid() != android.os.Process.SYSTEM_UID) {
-            throw new SecurityException("no permission to access the crypt keeper");
-        }
-
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.CRYPT_KEEPER,
-            "no permission to access the crypt keeper");
-
-        if (TextUtils.isEmpty(password)) {
-            throw new IllegalArgumentException("password cannot be empty");
-        }
-
-        if (DEBUG_EVENTS) {
-            Slog.i(TAG, "validating encryption password...");
-        }
-
-        try {
-            mVold.fdeVerifyPassword(password);
-            return 0;
-        } catch (Exception e) {
-            Slog.wtf(TAG, e);
-            return -1;
-        }
-    }
-
-    /**
-     * Get the type of encryption used to encrypt the main key.
-     * @return The type, one of the CRYPT_TYPE_XXX consts from StorageManager.
-     */
-    @Override
-    public int getPasswordType() {
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.CRYPT_KEEPER,
-            "no permission to access the crypt keeper");
-
-        try {
-            return mVold.fdeGetPasswordType();
-        } catch (Exception e) {
-            Slog.wtf(TAG, e);
-            return -1;
-        }
-    }
-
-    /**
-     * Set a field in the crypto header.
-     * @param field field to set
-     * @param contents contents to set in field
-     */
-    @Override
-    public void setField(String field, String contents) throws RemoteException {
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.CRYPT_KEEPER,
-            "no permission to access the crypt keeper");
-
-        if (!StorageManager.isBlockEncrypted()) {
-            // Only supported on FDE devices
-            return;
-        }
-
-        try {
-            mVold.fdeSetField(field, contents);
-            return;
-        } catch (Exception e) {
-            Slog.wtf(TAG, e);
-            return;
-        }
-    }
-
-    /**
-     * Gets a field from the crypto header.
-     * @param field field to get
-     * @return contents of field
-     */
-    @Override
-    public String getField(String field) throws RemoteException {
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.CRYPT_KEEPER,
-            "no permission to access the crypt keeper");
-
-        if (!StorageManager.isBlockEncrypted()) {
-            // Only supported on FDE devices
-            return null;
-        }
-
-        try {
-            return mVold.fdeGetField(field);
-        } catch (Exception e) {
-            Slog.wtf(TAG, e);
-            return null;
-        }
-    }
-
-    /**
-     * Is userdata convertible to file based encryption?
-     * @return non zero for convertible
-     */
-    @Override
-    public boolean isConvertibleToFBE() throws RemoteException {
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.CRYPT_KEEPER,
-            "no permission to access the crypt keeper");
-
-        try {
-            return mVold.isConvertibleToFbe();
-        } catch (Exception e) {
-            Slog.wtf(TAG, e);
-            return false;
-        }
-    }
-
     /**
      * Check whether the device supports filesystem checkpointing.
      *
@@ -3351,33 +3136,6 @@ class StorageManagerService extends IStorageManager.Stub
     }
 
     @Override
-    public String getPassword() throws RemoteException {
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.CRYPT_KEEPER,
-                "only keyguard can retrieve password");
-
-        try {
-            return mVold.fdeGetPassword();
-        } catch (Exception e) {
-            Slog.wtf(TAG, e);
-            return null;
-        }
-    }
-
-    @Override
-    public void clearPassword() throws RemoteException {
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.CRYPT_KEEPER,
-                "only keyguard can clear password");
-
-        try {
-            mVold.fdeClearPassword();
-            return;
-        } catch (Exception e) {
-            Slog.wtf(TAG, e);
-            return;
-        }
-    }
-
-    @Override
     public void createUserKey(int userId, int serialNumber, boolean ephemeral) {
         enforcePermission(android.Manifest.permission.STORAGE_INTERNAL);
 
@@ -3408,43 +3166,45 @@ class StorageManagerService extends IStorageManager.Stub
     }
 
     /*
-     * Add this token/secret pair to the set of ways we can recover a disk encryption key.
-     * Changing the token/secret for a disk encryption key is done in two phases: first, adding
-     * a new token/secret pair with this call, then delting all other pairs with
-     * fixateNewestUserKeyAuth. This allows other places where a credential is used, such as
-     * Gatekeeper, to be updated between the two calls.
+     * Add this secret to the set of ways we can recover a user's disk
+     * encryption key.  Changing the secret for a disk encryption key is done in
+     * two phases.  First, this method is called to add the new secret binding.
+     * Second, fixateNewestUserKeyAuth is called to delete all other bindings.
+     * This allows other places where a credential is used, such as Gatekeeper,
+     * to be updated between the two calls.
      */
     @Override
-    public void addUserKeyAuth(int userId, int serialNumber, byte[] token, byte[] secret) {
+    public void addUserKeyAuth(int userId, int serialNumber, byte[] secret) {
         enforcePermission(android.Manifest.permission.STORAGE_INTERNAL);
 
         try {
-            mVold.addUserKeyAuth(userId, serialNumber, encodeBytes(token), encodeBytes(secret));
+            mVold.addUserKeyAuth(userId, serialNumber, encodeBytes(secret));
         } catch (Exception e) {
             Slog.wtf(TAG, e);
         }
     }
 
     /*
-     * Clear disk encryption key bound to the associated token / secret pair. Removing the user
-     * binding of the Disk encryption key is done in two phases: first, this call will retrieve
-     * the disk encryption key using the provided token / secret pair and store it by
-     * encrypting it with a keymaster key not bound to the user, then fixateNewestUserKeyAuth
-     * is called to delete all other bindings of the disk encryption key.
+     * Store a user's disk encryption key without secret binding.  Removing the
+     * secret for a disk encryption key is done in two phases.  First, this
+     * method is called to retrieve the key using the provided secret and store
+     * it encrypted with a keystore key not bound to the user.  Second,
+     * fixateNewestUserKeyAuth is called to delete the key's other bindings.
      */
     @Override
-    public void clearUserKeyAuth(int userId, int serialNumber, byte[] token, byte[] secret) {
+    public void clearUserKeyAuth(int userId, int serialNumber, byte[] secret) {
         enforcePermission(android.Manifest.permission.STORAGE_INTERNAL);
 
         try {
-            mVold.clearUserKeyAuth(userId, serialNumber, encodeBytes(token), encodeBytes(secret));
+            mVold.clearUserKeyAuth(userId, serialNumber, encodeBytes(secret));
         } catch (Exception e) {
             Slog.wtf(TAG, e);
         }
     }
 
     /*
-     * Delete all disk encryption token/secret pairs except the most recently added one
+     * Delete all bindings of a user's disk encryption key except the most
+     * recently added one.
      */
     @Override
     public void fixateNewestUserKeyAuth(int userId) {
@@ -3458,11 +3218,10 @@ class StorageManagerService extends IStorageManager.Stub
     }
 
     @Override
-    public void unlockUserKey(int userId, int serialNumber, byte[] token, byte[] secret) {
+    public void unlockUserKey(int userId, int serialNumber, byte[] secret) {
         boolean isFsEncrypted = StorageManager.isFileEncryptedNativeOrEmulated();
         Slog.d(TAG, "unlockUserKey: " + userId
                 + " isFileEncryptedNativeOrEmulated: " + isFsEncrypted
-                + " hasToken: " + (token != null)
                 + " hasSecret: " + (secret != null));
         enforcePermission(android.Manifest.permission.STORAGE_INTERNAL);
 
@@ -3482,8 +3241,7 @@ class StorageManagerService extends IStorageManager.Stub
                 return;
             }
             try {
-                mVold.unlockUserKey(userId, serialNumber, encodeBytes(token),
-                        encodeBytes(secret));
+                mVold.unlockUserKey(userId, serialNumber, encodeBytes(secret));
             } catch (Exception e) {
                 Slog.wtf(TAG, e);
                 return;

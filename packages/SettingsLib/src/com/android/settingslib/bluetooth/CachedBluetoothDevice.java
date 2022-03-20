@@ -751,7 +751,10 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         ParcelUuid[] uuids = mDevice.getUuids();
         if (uuids == null) return false;
 
-        ParcelUuid[] localUuids = mLocalAdapter.getUuids();
+        List<ParcelUuid> uuidsList = mLocalAdapter.getUuidsList();
+        ParcelUuid[] localUuids = new ParcelUuid[uuidsList.size()];
+        uuidsList.toArray(localUuids);
+
         if (localUuids == null) return false;
 
         /*
@@ -1115,7 +1118,8 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
                 final boolean isOnCall = Utils.isAudioModeOngoingCall(mContext);
                 if ((mIsActiveDeviceHearingAid)
                         || (mIsActiveDeviceHeadset && isOnCall)
-                        || (mIsActiveDeviceA2dp && !isOnCall)) {
+                        || (mIsActiveDeviceA2dp && !isOnCall)
+                        || mIsActiveDeviceLeAudio) {
                     if (isTwsBatteryAvailable(leftBattery, rightBattery) && !shortSummary) {
                         stringRes = R.string.bluetooth_active_battery_level_untethered;
                     } else if (batteryLevelPercentageString != null && !shortSummary) {

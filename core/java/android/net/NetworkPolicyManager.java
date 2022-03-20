@@ -525,9 +525,11 @@ public class NetworkPolicyManager {
      *
      * @param subId the subscriber to get the subscription plans for.
      * @param callingPackage the name of the package making the call.
+     * @return the active {@link SubscriptionPlan}s for the given subscription id, or
+     *         {@code null} if not found.
      * @hide
      */
-    @NonNull
+    @Nullable
     public SubscriptionPlan[] getSubscriptionPlans(int subId, @NonNull String callingPackage) {
         try {
             return mService.getSubscriptionPlans(subId, callingPackage);
@@ -540,7 +542,7 @@ public class NetworkPolicyManager {
      * Get subscription plan for the given networkTemplate.
      *
      * @param template the networkTemplate to get the subscription plan for.
-     * @return the active {@link SubscriptionPlan} for the given template, or
+     * @return the active {@link SubscriptionPlan}s for the given template, or
      *         {@code null} if not found.
      * @hide
      */
@@ -558,6 +560,24 @@ public class NetworkPolicyManager {
     }
 
     /**
+     * Notifies that the specified {@link NetworkStatsProvider} has reached its warning threshold
+     * which was set through {@link NetworkStatsProvider#onSetWarningAndLimit(String, long, long)}.
+     *
+     * @hide
+     */
+    @RequiresPermission(anyOf = {
+            NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
+            android.Manifest.permission.NETWORK_STACK})
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public void notifyStatsProviderWarningReached() {
+        try {
+            mService.notifyStatsProviderWarningOrLimitReached();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Notifies that the specified {@link NetworkStatsProvider} has reached its quota
      * which was set through {@link NetworkStatsProvider#onSetLimit(String, long)} or
      * {@link NetworkStatsProvider#onSetWarningAndLimit(String, long, long)}.
@@ -568,7 +588,7 @@ public class NetworkPolicyManager {
             NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
             android.Manifest.permission.NETWORK_STACK})
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
-    public void notifyStatsProviderWarningOrLimitReached() {
+    public void notifyStatsProviderLimitReached() {
         try {
             mService.notifyStatsProviderWarningOrLimitReached();
         } catch (RemoteException e) {

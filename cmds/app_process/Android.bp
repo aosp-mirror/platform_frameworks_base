@@ -64,8 +64,6 @@ cc_binary {
         "libwilhelm",
     ],
 
-    header_libs: ["bionic_libc_platform_headers"],
-
     compile_multilib: "both",
 
     cflags: [
