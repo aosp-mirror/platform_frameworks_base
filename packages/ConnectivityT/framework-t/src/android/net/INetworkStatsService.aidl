@@ -91,7 +91,7 @@ interface INetworkStatsService {
             in INetworkStatsProvider provider);
 
     /** Mark given UID as being in foreground for stats purposes. */
-    void setUidForeground(int uid, boolean uidForeground);
+    void noteUidForeground(int uid, boolean uidForeground);
 
     /** Advise persistence threshold; may be overridden internally. */
     void advisePersistThreshold(long thresholdBytes);

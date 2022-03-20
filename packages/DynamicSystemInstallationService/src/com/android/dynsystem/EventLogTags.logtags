@@ -1,0 +1,7 @@
+# See system/logging/logcat/event.logtags for a description of the format of this file.
+
+option java_package com.android.dynsystem
+
+120000 dsu_progress_update (partition|3),(installed_size|2|5),(partition_size|2|5),(partition_number|1|5),(total_partition_number|1|5)
+120001 dsu_install_complete
+120002 dsu_install_failed (cause|3)

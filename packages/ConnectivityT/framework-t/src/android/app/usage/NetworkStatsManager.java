@@ -1061,9 +1061,9 @@ public class NetworkStatsManager {
     @RequiresPermission(anyOf = {
             NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
             android.Manifest.permission.NETWORK_STACK})
-    public void setUidForeground(int uid, boolean uidForeground) {
+    public void noteUidForeground(int uid, boolean uidForeground) {
         try {
-            mService.setUidForeground(uid, uidForeground);
+            mService.noteUidForeground(uid, uidForeground);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

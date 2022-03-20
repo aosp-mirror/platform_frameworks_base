@@ -102,17 +102,16 @@ filegroup {
     ],
     path: "src",
     visibility: [
-        "//frameworks/opt/net/ethernet",
+        "//frameworks/opt/net/ethernet/tests",
     ],
 }
 
 // Connectivity-T common libraries.
 
+// TODO: remove this empty filegroup.
 filegroup {
     name: "services.connectivity-tiramisu-sources",
-    srcs: [
-        ":services.connectivity-ethernet-sources",
-    ],
+    srcs: [],
     path: "src",
     visibility: ["//frameworks/base/services/core"],
 }
@@ -120,6 +119,7 @@ filegroup {
 filegroup {
     name: "services.connectivity-tiramisu-updatable-sources",
     srcs: [
+        ":services.connectivity-ethernet-sources",
         ":services.connectivity-ipsec-sources",
         ":services.connectivity-netstats-sources",
         ":services.connectivity-nsd-sources",
