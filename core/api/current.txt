@@ -38220,6 +38220,7 @@ package android.service.autofill {
     method public int getNoSaveUiReason();
     method @NonNull public java.util.Set<java.lang.String> getSelectedDatasetIds();
     method public int getType();
+    method public int getUiType();
     field public static final int NO_SAVE_UI_REASON_DATASET_MATCH = 6; // 0x6
     field public static final int NO_SAVE_UI_REASON_FIELD_VALIDATION_FAILED = 5; // 0x5
     field public static final int NO_SAVE_UI_REASON_HAS_EMPTY_REQUIRED = 3; // 0x3
@@ -38233,6 +38234,10 @@ package android.service.autofill {
     field public static final int TYPE_DATASET_AUTHENTICATION_SELECTED = 1; // 0x1
     field public static final int TYPE_DATASET_SELECTED = 0; // 0x0
     field public static final int TYPE_SAVE_SHOWN = 3; // 0x3
+    field public static final int UI_TYPE_DIALOG = 3; // 0x3
+    field public static final int UI_TYPE_INLINE = 2; // 0x2
+    field public static final int UI_TYPE_MENU = 1; // 0x1
+    field public static final int UI_TYPE_UNKNOWN = 0; // 0x0
   }
 
   public final class FillRequest implements android.os.Parcelable {
