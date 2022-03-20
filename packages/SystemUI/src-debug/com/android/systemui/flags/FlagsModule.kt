@@ -19,11 +19,12 @@ package com.android.systemui.flags
 import android.content.Context
 import android.os.Handler
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.flags.FeatureFlagsDebug.ALL_FLAGS
 import com.android.systemui.util.settings.SettingsUtilModule
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
-import java.util.function.Supplier
+import javax.inject.Named
 
 @Module(includes = [
     SettingsUtilModule::class
@@ -42,6 +43,7 @@ abstract class FlagsModule {
 
         @JvmStatic
         @Provides
-        fun providesFlagCollector(): Supplier<Map<Int, Flag<*>>>? = null
+        @Named(ALL_FLAGS)
+        fun providesAllFlags(): Map<Int, Flag<*>> = Flags.collectFlags()
     }
 }
