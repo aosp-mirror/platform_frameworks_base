@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,6 +83,19 @@ public class TvInteractiveAppView extends ViewGroup {
      * @see java.security.PrivateKey
      */
     public static final String BI_INTERACTIVE_APP_KEY_PRIVATE_KEY = "private_key";
+    /**
+     * Additional HTTP headers to be used by {@link TvInteractiveAppService} to load the
+     * broadcast-independent interactive application.
+     * @see #createBiInteractiveApp(Uri, Bundle)
+     */
+    public static final String BI_INTERACTIVE_APP_KEY_HTTP_ADDITIONAL_HEADERS =
+            "http_additional_headers";
+    /**
+     * HTTP user agent to be used by {@link TvInteractiveAppService} for broadcast-independent
+     * interactive application.
+     * @see #createBiInteractiveApp(Uri, Bundle)
+     */
+    public static final String BI_INTERACTIVE_APP_KEY_HTTP_USER_AGENT = "http_user_agent";
 
     private final TvInteractiveAppManager mTvInteractiveAppManager;
     private final Handler mHandler = new Handler();
@@ -595,7 +608,14 @@ public class TvInteractiveAppView extends ViewGroup {
      * <p>{@link TvInteractiveAppCallback#onBiInteractiveAppCreated(String, Uri, String)} will be
      * called for the result.
      *
+     * @param biIAppUri URI associated this BI interactive app.
+     * @param params optional parameters for broadcast-independent interactive application, such as
+     *               {@link #BI_INTERACTIVE_APP_KEY_CERTIFICATE}.
+     *
      * @see TvInteractiveAppCallback#onBiInteractiveAppCreated(String, Uri, String)
+     * @see #BI_INTERACTIVE_APP_KEY_CERTIFICATE
+     * @see #BI_INTERACTIVE_APP_KEY_HTTP_ADDITIONAL_HEADERS
+     * @see #BI_INTERACTIVE_APP_KEY_HTTP_USER_AGENT
      */
     public void createBiInteractiveApp(@NonNull Uri biIAppUri, @Nullable Bundle params) {
         if (DEBUG) {

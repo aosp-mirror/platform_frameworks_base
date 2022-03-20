@@ -5,6 +5,7 @@ package android {
     field public static final String ACCESS_AMBIENT_CONTEXT_EVENT = "android.permission.ACCESS_AMBIENT_CONTEXT_EVENT";
     field public static final String ACCESS_AMBIENT_LIGHT_STATS = "android.permission.ACCESS_AMBIENT_LIGHT_STATS";
     field public static final String ACCESS_BROADCAST_RADIO = "android.permission.ACCESS_BROADCAST_RADIO";
+    field public static final String ACCESS_BROADCAST_RESPONSE_STATS = "android.permission.ACCESS_BROADCAST_RESPONSE_STATS";
     field public static final String ACCESS_CACHE_FILESYSTEM = "android.permission.ACCESS_CACHE_FILESYSTEM";
     field public static final String ACCESS_CONTEXT_HUB = "android.permission.ACCESS_CONTEXT_HUB";
     field public static final String ACCESS_DRM_CERTIFICATES = "android.permission.ACCESS_DRM_CERTIFICATES";
@@ -1931,6 +1932,7 @@ package android.app.prediction {
     field public static final int ACTION_DISMISS = 2; // 0x2
     field public static final int ACTION_LAUNCH = 1; // 0x1
     field public static final int ACTION_PIN = 3; // 0x3
+    field public static final int ACTION_UNDISMISS = 5; // 0x5
     field public static final int ACTION_UNPIN = 4; // 0x4
     field @NonNull public static final android.os.Parcelable.Creator<android.app.prediction.AppTargetEvent> CREATOR;
   }
@@ -2626,13 +2628,13 @@ package android.app.usage {
   }
 
   public final class UsageStatsManager {
-    method @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public void clearBroadcastResponseStats(@Nullable String, @IntRange(from=0) long);
+    method @RequiresPermission(android.Manifest.permission.ACCESS_BROADCAST_RESPONSE_STATS) public void clearBroadcastResponseStats(@Nullable String, @IntRange(from=0) long);
     method @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public int getAppStandbyBucket(String);
     method @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public java.util.Map<java.lang.String,java.lang.Integer> getAppStandbyBuckets();
     method @RequiresPermission(allOf={android.Manifest.permission.INTERACT_ACROSS_USERS, android.Manifest.permission.PACKAGE_USAGE_STATS}) public long getLastTimeAnyComponentUsed(@NonNull String);
     method public int getUsageSource();
     method @RequiresPermission(android.Manifest.permission.BIND_CARRIER_SERVICES) public void onCarrierPrivilegedAppsChanged();
-    method @NonNull @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public java.util.List<android.app.usage.BroadcastResponseStats> queryBroadcastResponseStats(@Nullable String, @IntRange(from=0) long);
+    method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_BROADCAST_RESPONSE_STATS) public java.util.List<android.app.usage.BroadcastResponseStats> queryBroadcastResponseStats(@Nullable String, @IntRange(from=0) long);
     method @RequiresPermission(allOf={android.Manifest.permission.SUSPEND_APPS, android.Manifest.permission.OBSERVE_APP_USAGE}) public void registerAppUsageLimitObserver(int, @NonNull String[], @NonNull java.time.Duration, @NonNull java.time.Duration, @Nullable android.app.PendingIntent);
     method @RequiresPermission(android.Manifest.permission.OBSERVE_APP_USAGE) public void registerAppUsageObserver(int, @NonNull String[], long, @NonNull java.util.concurrent.TimeUnit, @NonNull android.app.PendingIntent);
     method @RequiresPermission(android.Manifest.permission.OBSERVE_APP_USAGE) public void registerUsageSessionObserver(int, @NonNull String[], @NonNull java.time.Duration, @NonNull java.time.Duration, @NonNull android.app.PendingIntent, @Nullable android.app.PendingIntent);
@@ -5882,9 +5884,9 @@ package android.location {
     ctor public LastLocationRequest.Builder();
     ctor public LastLocationRequest.Builder(@NonNull android.location.LastLocationRequest);
     method @NonNull public android.location.LastLocationRequest build();
-    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.WRITE_SECURE_SETTINGS, android.Manifest.permission.LOCATION_BYPASS}) public android.location.LastLocationRequest.Builder setAdasGnssBypass(boolean);
+    method @NonNull @RequiresPermission(android.Manifest.permission.LOCATION_BYPASS) public android.location.LastLocationRequest.Builder setAdasGnssBypass(boolean);
     method @NonNull @RequiresPermission(android.Manifest.permission.UPDATE_APP_OPS_STATS) public android.location.LastLocationRequest.Builder setHiddenFromAppOps(boolean);
-    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.WRITE_SECURE_SETTINGS, android.Manifest.permission.LOCATION_BYPASS}) public android.location.LastLocationRequest.Builder setLocationSettingsIgnored(boolean);
+    method @NonNull @RequiresPermission(android.Manifest.permission.LOCATION_BYPASS) public android.location.LastLocationRequest.Builder setLocationSettingsIgnored(boolean);
   }
 
   public class Location implements android.os.Parcelable {
@@ -5913,7 +5915,7 @@ package android.location {
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void requestLocationUpdates(@Nullable android.location.LocationRequest, @NonNull android.location.LocationListener, @Nullable android.os.Looper);
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void requestLocationUpdates(@Nullable android.location.LocationRequest, @NonNull java.util.concurrent.Executor, @NonNull android.location.LocationListener);
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void requestLocationUpdates(@Nullable android.location.LocationRequest, @NonNull android.app.PendingIntent);
-    method @RequiresPermission(anyOf={android.Manifest.permission.WRITE_SECURE_SETTINGS, android.Manifest.permission.LOCATION_BYPASS}) public void setAdasGnssLocationEnabled(boolean);
+    method @RequiresPermission(android.Manifest.permission.LOCATION_BYPASS) public void setAdasGnssLocationEnabled(boolean);
     method @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public void setExtraLocationControllerPackage(@Nullable String);
     method @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public void setExtraLocationControllerPackageEnabled(boolean);
     method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void setLocationEnabledForUser(boolean, @NonNull android.os.UserHandle);
@@ -5946,7 +5948,7 @@ package android.location {
     method @Deprecated @NonNull public android.location.LocationRequest setFastestInterval(long);
     method @Deprecated public void setHideFromAppOps(boolean);
     method @Deprecated @NonNull public android.location.LocationRequest setInterval(long);
-    method @Deprecated @NonNull @RequiresPermission(anyOf={android.Manifest.permission.WRITE_SECURE_SETTINGS, android.Manifest.permission.LOCATION_BYPASS}) public android.location.LocationRequest setLocationSettingsIgnored(boolean);
+    method @Deprecated @NonNull @RequiresPermission(android.Manifest.permission.LOCATION_BYPASS) public android.location.LocationRequest setLocationSettingsIgnored(boolean);
     method @Deprecated @NonNull public android.location.LocationRequest setLowPowerMode(boolean);
     method @Deprecated @NonNull public android.location.LocationRequest setNumUpdates(int);
     method @Deprecated @NonNull public android.location.LocationRequest setProvider(@NonNull String);
@@ -5962,9 +5964,9 @@ package android.location {
   }
 
   public static final class LocationRequest.Builder {
-    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.WRITE_SECURE_SETTINGS, android.Manifest.permission.LOCATION_BYPASS}) public android.location.LocationRequest.Builder setAdasGnssBypass(boolean);
+    method @NonNull @RequiresPermission(android.Manifest.permission.LOCATION_BYPASS) public android.location.LocationRequest.Builder setAdasGnssBypass(boolean);
     method @NonNull @RequiresPermission(android.Manifest.permission.UPDATE_APP_OPS_STATS) public android.location.LocationRequest.Builder setHiddenFromAppOps(boolean);
-    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.WRITE_SECURE_SETTINGS, android.Manifest.permission.LOCATION_BYPASS}) public android.location.LocationRequest.Builder setLocationSettingsIgnored(boolean);
+    method @NonNull @RequiresPermission(android.Manifest.permission.LOCATION_BYPASS) public android.location.LocationRequest.Builder setLocationSettingsIgnored(boolean);
     method @NonNull @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public android.location.LocationRequest.Builder setLowPower(boolean);
     method @NonNull @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public android.location.LocationRequest.Builder setWorkSource(@Nullable android.os.WorkSource);
   }
@@ -11417,7 +11419,7 @@ package android.service.games {
     method @RequiresPermission(android.Manifest.permission.MANAGE_GAME_ACTIVITY) public final boolean restartGame();
     method public void setTaskOverlayView(@NonNull android.view.View, @NonNull android.view.ViewGroup.LayoutParams);
     method @RequiresPermission(android.Manifest.permission.MANAGE_GAME_ACTIVITY) public final void startActivityFromGameSessionForResult(@NonNull android.content.Intent, @Nullable android.os.Bundle, @NonNull java.util.concurrent.Executor, @NonNull android.service.games.GameSessionActivityCallback);
-    method public void takeScreenshot(@NonNull java.util.concurrent.Executor, @NonNull android.service.games.GameSession.ScreenshotCallback);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_GAME_ACTIVITY) public void takeScreenshot(@NonNull java.util.concurrent.Executor, @NonNull android.service.games.GameSession.ScreenshotCallback);
   }
 
   public static interface GameSession.ScreenshotCallback {

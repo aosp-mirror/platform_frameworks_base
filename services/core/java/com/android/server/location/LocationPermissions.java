@@ -19,7 +19,6 @@ package com.android.server.location;
 import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 import static android.Manifest.permission.LOCATION_BYPASS;
-import static android.Manifest.permission.WRITE_SECURE_SETTINGS;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 import android.annotation.IntDef;
@@ -134,15 +133,11 @@ public final class LocationPermissions {
      * perissions.
      */
     public static void enforceBypassPermission(Context context, int uid, int pid) {
-        if (context.checkPermission(WRITE_SECURE_SETTINGS, pid, uid) == PERMISSION_GRANTED) {
-            // TODO: disallow WRITE_SECURE_SETTINGS permission.
-            return;
-        }
         if (context.checkPermission(LOCATION_BYPASS, pid, uid) == PERMISSION_GRANTED) {
             return;
         }
         throw new SecurityException("uid" + uid + " does not have " + LOCATION_BYPASS
-                + "or " + WRITE_SECURE_SETTINGS + ".");
+                + ".");
     }
 
     /**

@@ -854,7 +854,6 @@ package android {
     field public static final int indicatorRight = 16843022; // 0x101010e
     field public static final int indicatorStart = 16843729; // 0x10103d1
     field public static final int inflatedId = 16842995; // 0x10100f3
-    field public static final int inheritKeyStoreKeys;
     field public static final int inheritShowWhenLocked = 16844188; // 0x101059c
     field public static final int initOrder = 16842778; // 0x101001a
     field public static final int initialKeyguardLayout = 16843714; // 0x10103c2
@@ -4532,20 +4531,34 @@ package android.app {
   }
 
   public static class ActivityManager.TaskDescription implements android.os.Parcelable {
-    ctor public ActivityManager.TaskDescription(String, @DrawableRes int, int);
-    ctor public ActivityManager.TaskDescription(String, @DrawableRes int);
-    ctor public ActivityManager.TaskDescription(String);
-    ctor public ActivityManager.TaskDescription();
+    ctor @Deprecated public ActivityManager.TaskDescription(String, @DrawableRes int, int);
+    ctor @Deprecated public ActivityManager.TaskDescription(String, @DrawableRes int);
+    ctor @Deprecated public ActivityManager.TaskDescription(String);
+    ctor @Deprecated public ActivityManager.TaskDescription();
     ctor @Deprecated public ActivityManager.TaskDescription(String, android.graphics.Bitmap, int);
     ctor @Deprecated public ActivityManager.TaskDescription(String, android.graphics.Bitmap);
     ctor public ActivityManager.TaskDescription(android.app.ActivityManager.TaskDescription);
     method public int describeContents();
+    method @ColorInt public int getBackgroundColor();
     method @Deprecated public android.graphics.Bitmap getIcon();
     method public String getLabel();
-    method public int getPrimaryColor();
+    method @ColorInt public int getNavigationBarColor();
+    method @ColorInt public int getPrimaryColor();
+    method @ColorInt public int getStatusBarColor();
     method public void readFromParcel(android.os.Parcel);
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.ActivityManager.TaskDescription> CREATOR;
+  }
+
+  public static final class ActivityManager.TaskDescription.Builder {
+    ctor public ActivityManager.TaskDescription.Builder();
+    method @NonNull public android.app.ActivityManager.TaskDescription build();
+    method @NonNull public android.app.ActivityManager.TaskDescription.Builder setBackgroundColor(@ColorInt int);
+    method @NonNull public android.app.ActivityManager.TaskDescription.Builder setIcon(@DrawableRes int);
+    method @NonNull public android.app.ActivityManager.TaskDescription.Builder setLabel(@Nullable String);
+    method @NonNull public android.app.ActivityManager.TaskDescription.Builder setNavigationBarColor(@ColorInt int);
+    method @NonNull public android.app.ActivityManager.TaskDescription.Builder setPrimaryColor(@ColorInt int);
+    method @NonNull public android.app.ActivityManager.TaskDescription.Builder setStatusBarColor(@ColorInt int);
   }
 
   public class ActivityOptions {
@@ -10445,13 +10458,11 @@ package android.content {
     field public static final String EXTRA_LOCAL_ONLY = "android.intent.extra.LOCAL_ONLY";
     field public static final String EXTRA_LOCUS_ID = "android.intent.extra.LOCUS_ID";
     field public static final String EXTRA_MIME_TYPES = "android.intent.extra.MIME_TYPES";
-    field public static final String EXTRA_NEW_UID = "android.intent.extra.NEW_UID";
     field public static final String EXTRA_NOT_UNKNOWN_SOURCE = "android.intent.extra.NOT_UNKNOWN_SOURCE";
     field public static final String EXTRA_ORIGINATING_URI = "android.intent.extra.ORIGINATING_URI";
     field public static final String EXTRA_PACKAGE_NAME = "android.intent.extra.PACKAGE_NAME";
     field public static final String EXTRA_PERMISSION_GROUP_NAME = "android.intent.extra.PERMISSION_GROUP_NAME";
     field public static final String EXTRA_PHONE_NUMBER = "android.intent.extra.PHONE_NUMBER";
-    field public static final String EXTRA_PREVIOUS_UID = "android.intent.extra.PREVIOUS_UID";
     field public static final String EXTRA_PROCESS_TEXT = "android.intent.extra.PROCESS_TEXT";
     field public static final String EXTRA_PROCESS_TEXT_READONLY = "android.intent.extra.PROCESS_TEXT_READONLY";
     field public static final String EXTRA_QUICK_VIEW_FEATURES = "android.intent.extra.QUICK_VIEW_FEATURES";
@@ -10483,7 +10494,6 @@ package android.content {
     field public static final String EXTRA_TIMEZONE = "time-zone";
     field public static final String EXTRA_TITLE = "android.intent.extra.TITLE";
     field public static final String EXTRA_UID = "android.intent.extra.UID";
-    field public static final String EXTRA_UID_CHANGING = "android.intent.extra.UID_CHANGING";
     field public static final String EXTRA_USER = "android.intent.extra.USER";
     field public static final String EXTRA_USER_INITIATED = "android.intent.extra.USER_INITIATED";
     field public static final int FILL_IN_ACTION = 1; // 0x1
@@ -26118,27 +26128,16 @@ package android.media.tv {
 package android.media.tv.interactive {
 
   public final class AppLinkInfo implements android.os.Parcelable {
+    ctor public AppLinkInfo(@NonNull String, @NonNull String, @NonNull String);
     method public int describeContents();
-    method @NonNull public String getClassName();
-    method @NonNull public String getPackageName();
-    method @Nullable public String getUriHost();
-    method @Nullable public String getUriPrefix();
-    method @Nullable public String getUriScheme();
+    method @NonNull public android.content.ComponentName getComponentName();
+    method @NonNull public android.net.Uri getUri();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.media.tv.interactive.AppLinkInfo> CREATOR;
   }
 
-  public static final class AppLinkInfo.Builder {
-    ctor public AppLinkInfo.Builder(@NonNull String, @NonNull String);
-    method @NonNull public android.media.tv.interactive.AppLinkInfo build();
-    method @NonNull public android.media.tv.interactive.AppLinkInfo.Builder setUriHost(@NonNull String);
-    method @NonNull public android.media.tv.interactive.AppLinkInfo.Builder setUriPrefix(@NonNull String);
-    method @NonNull public android.media.tv.interactive.AppLinkInfo.Builder setUriScheme(@NonNull String);
-  }
-
   public final class TvInteractiveAppManager {
     method @NonNull public java.util.List<android.media.tv.interactive.TvInteractiveAppServiceInfo> getTvInteractiveAppServiceList();
-    method public void prepare(@NonNull String, int);
     method public void registerAppLinkInfo(@NonNull String, @NonNull android.media.tv.interactive.AppLinkInfo);
     method public void registerCallback(@NonNull java.util.concurrent.Executor, @NonNull android.media.tv.interactive.TvInteractiveAppManager.TvInteractiveAppCallback);
     method public void sendAppLinkCommand(@NonNull String, @NonNull android.os.Bundle);
@@ -26190,7 +26189,6 @@ package android.media.tv.interactive {
     method public void onAppLinkCommand(@NonNull android.os.Bundle);
     method @Nullable public final android.os.IBinder onBind(@NonNull android.content.Intent);
     method @Nullable public abstract android.media.tv.interactive.TvInteractiveAppService.Session onCreateSession(@NonNull String, int);
-    method public abstract void onPrepare(int);
     method public void onRegisterAppLinkInfo(@NonNull android.media.tv.interactive.AppLinkInfo);
     method public void onUnregisterAppLinkInfo(@NonNull android.media.tv.interactive.AppLinkInfo);
     field public static final String COMMAND_PARAMETER_KEY_CHANGE_CHANNEL_QUIETLY = "command_change_channel_quietly";
@@ -26220,12 +26218,12 @@ package android.media.tv.interactive {
     method public void onBroadcastInfoResponse(@NonNull android.media.tv.BroadcastInfoResponse);
     method public void onContentAllowed();
     method public void onContentBlocked(@NonNull android.media.tv.TvContentRating);
-    method public void onCreateBiInteractiveApp(@NonNull android.net.Uri, @Nullable android.os.Bundle);
+    method public void onCreateBiInteractiveAppRequest(@NonNull android.net.Uri, @Nullable android.os.Bundle);
     method @Nullable public android.view.View onCreateMediaView();
     method public void onCurrentChannelLcn(int);
     method public void onCurrentChannelUri(@Nullable android.net.Uri);
     method public void onCurrentTvInputId(@Nullable String);
-    method public void onDestroyBiInteractiveApp(@NonNull String);
+    method public void onDestroyBiInteractiveAppRequest(@NonNull String);
     method public boolean onGenericMotionEvent(@NonNull android.view.MotionEvent);
     method public boolean onKeyDown(int, @NonNull android.view.KeyEvent);
     method public boolean onKeyLongPress(int, @NonNull android.view.KeyEvent);
@@ -26310,6 +26308,8 @@ package android.media.tv.interactive {
     method public void stopInteractiveApp();
     field public static final String BI_INTERACTIVE_APP_KEY_ALIAS = "alias";
     field public static final String BI_INTERACTIVE_APP_KEY_CERTIFICATE = "certificate";
+    field public static final String BI_INTERACTIVE_APP_KEY_HTTP_ADDITIONAL_HEADERS = "http_additional_headers";
+    field public static final String BI_INTERACTIVE_APP_KEY_HTTP_USER_AGENT = "http_user_agent";
     field public static final String BI_INTERACTIVE_APP_KEY_PRIVATE_KEY = "private_key";
   }
 
@@ -26585,6 +26585,7 @@ package android.net {
 
   public final class Ikev2VpnProfile extends android.net.PlatformVpnProfile {
     method @NonNull public java.util.List<java.lang.String> getAllowedAlgorithms();
+    method @Nullable public android.net.ipsec.ike.IkeTunnelConnectionParams getIkeTunnelConnectionParams();
     method public int getMaxMtu();
     method @Nullable public String getPassword();
     method @Nullable public byte[] getPresharedKey();
@@ -26879,11 +26880,13 @@ package android.net {
 
   public class VpnManager {
     method public void deleteProvisionedVpnProfile();
+    method @Nullable public android.net.VpnProfileState getProvisionedVpnProfileState();
     method @Nullable public android.content.Intent provisionVpnProfile(@NonNull android.net.PlatformVpnProfile);
     method @Deprecated public void startProvisionedVpnProfile();
     method @NonNull public String startProvisionedVpnProfileSession();
     method public void stopProvisionedVpnProfile();
     field public static final String ACTION_VPN_MANAGER_EVENT = "android.net.action.VPN_MANAGER_EVENT";
+    field public static final String CATEGORY_EVENT_ALWAYS_ON_STATE_CHANGED = "android.net.category.EVENT_ALWAYS_ON_STATE_CHANGED";
     field public static final String CATEGORY_EVENT_DEACTIVATED_BY_USER = "android.net.category.EVENT_DEACTIVATED_BY_USER";
     field public static final String CATEGORY_EVENT_IKE_ERROR = "android.net.category.EVENT_IKE_ERROR";
     field public static final String CATEGORY_EVENT_NETWORK_ERROR = "android.net.category.EVENT_NETWORK_ERROR";
@@ -26900,6 +26903,22 @@ package android.net {
     field public static final String EXTRA_UNDERLYING_LINK_PROPERTIES = "android.net.extra.UNDERLYING_LINK_PROPERTIES";
     field public static final String EXTRA_UNDERLYING_NETWORK = "android.net.extra.UNDERLYING_NETWORK";
     field public static final String EXTRA_UNDERLYING_NETWORK_CAPABILITIES = "android.net.extra.UNDERLYING_NETWORK_CAPABILITIES";
+    field public static final String EXTRA_VPN_PROFILE_STATE = "android.net.extra.VPN_PROFILE_STATE";
+  }
+
+  public final class VpnProfileState implements android.os.Parcelable {
+    ctor public VpnProfileState(int, @Nullable String, boolean, boolean);
+    method public int describeContents();
+    method @Nullable public String getSessionId();
+    method public int getState();
+    method public boolean isAlwaysOn();
+    method public boolean isLockdownEnabled();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.VpnProfileState> CREATOR;
+    field public static final int STATE_CONNECTED = 2; // 0x2
+    field public static final int STATE_CONNECTING = 1; // 0x1
+    field public static final int STATE_DISCONNECTED = 0; // 0x0
+    field public static final int STATE_FAILED = 3; // 0x3
   }
 
   public class VpnService extends android.app.Service {
@@ -38228,6 +38247,7 @@ package android.service.autofill {
     field @NonNull public static final android.os.Parcelable.Creator<android.service.autofill.FillRequest> CREATOR;
     field public static final int FLAG_COMPATIBILITY_MODE_REQUEST = 2; // 0x2
     field public static final int FLAG_MANUAL_REQUEST = 1; // 0x1
+    field public static final int FLAG_SUPPORTS_FILL_DIALOG = 64; // 0x40
   }
 
   public final class FillResponse implements android.os.Parcelable {
@@ -49344,6 +49364,7 @@ package android.view {
     method @NonNull public android.view.SurfaceControl.Transaction setAlpha(@NonNull android.view.SurfaceControl, @FloatRange(from=0.0, to=1.0) float);
     method @NonNull public android.view.SurfaceControl.Transaction setBuffer(@NonNull android.view.SurfaceControl, @Nullable android.hardware.HardwareBuffer);
     method @NonNull public android.view.SurfaceControl.Transaction setBuffer(@NonNull android.view.SurfaceControl, @Nullable android.hardware.HardwareBuffer, @Nullable android.hardware.SyncFence);
+    method @NonNull public android.view.SurfaceControl.Transaction setBuffer(@NonNull android.view.SurfaceControl, @Nullable android.hardware.HardwareBuffer, @Nullable android.hardware.SyncFence, @Nullable java.util.function.Consumer<android.hardware.SyncFence>);
     method @NonNull public android.view.SurfaceControl.Transaction setBufferSize(@NonNull android.view.SurfaceControl, @IntRange(from=0) int, @IntRange(from=0) int);
     method @NonNull public android.view.SurfaceControl.Transaction setBufferTransform(@NonNull android.view.SurfaceControl, int);
     method @NonNull public android.view.SurfaceControl.Transaction setCrop(@NonNull android.view.SurfaceControl, @Nullable android.graphics.Rect);

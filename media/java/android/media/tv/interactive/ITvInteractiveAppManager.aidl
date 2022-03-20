@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,6 @@ import android.view.Surface;
  */
 interface ITvInteractiveAppManager {
     List<TvInteractiveAppServiceInfo> getTvInteractiveAppServiceList(int userId);
-    void prepare(String tiasId, int type, int userId);
     void registerAppLinkInfo(String tiasId, in AppLinkInfo info, int userId);
     void unregisterAppLinkInfo(String tiasId, in AppLinkInfo info, int userId);
     void sendAppLinkCommand(String tiasId, in Bundle command, int userId);

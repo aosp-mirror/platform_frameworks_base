@@ -142,7 +142,6 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_CONFIGURATION;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_INPUT_METHOD;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYOUT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_POWER;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STARTING_WINDOW_VERBOSE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_VISIBILITY;
@@ -369,7 +368,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     private boolean mDragResizingChangeReported = true;
     private int mResizeMode;
     private boolean mRedrawForSyncReported;
-    boolean mNextRelayoutUseSync;
+    int mSyncSeqId = 0;
+    int mLastSeqIdSentToRelayout = 0;
 
     /**
      * {@code true} when the client was still drawing for sync when the sync-set was finished or
@@ -860,6 +860,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     /**
      * @see #setOnBackInvokedCallback(IOnBackInvokedCallback)
      */
+    // TODO(b/224856664): Consolidate application and system callback into one.
     private IOnBackInvokedCallback mApplicationOnBackInvokedCallback;
     private IOnBackInvokedCallback mSystemOnBackInvokedCallback;
 
@@ -1125,7 +1126,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 this, onBackInvokedCallback);
         if (priority >= 0) {
             mApplicationOnBackInvokedCallback = onBackInvokedCallback;
+            mSystemOnBackInvokedCallback = null;
         } else {
+            mApplicationOnBackInvokedCallback = null;
             mSystemOnBackInvokedCallback = onBackInvokedCallback;
         }
     }
@@ -1398,11 +1401,15 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mHaveFrame = true;
 
         final WindowFrames windowFrames = mWindowFrames;
+        mTmpRect.set(windowFrames.mParentFrame);
         windowFrames.mDisplayFrame.set(clientWindowFrames.displayFrame);
         windowFrames.mParentFrame.set(clientWindowFrames.parentFrame);
         windowFrames.mFrame.set(clientWindowFrames.frame);
+        windowFrames.setParentFrameWasClippedByDisplayCutout(
+                clientWindowFrames.isParentFrameClippedByDisplayCutout);
 
-        if (mRequestedWidth != mLastRequestedWidth || mRequestedHeight != mLastRequestedHeight) {
+        if (mRequestedWidth != mLastRequestedWidth || mRequestedHeight != mLastRequestedHeight
+                || !mTmpRect.equals(windowFrames.mParentFrame)) {
             mLastRequestedWidth = mRequestedWidth;
             mLastRequestedHeight = mRequestedHeight;
             windowFrames.setContentChanged(true);
@@ -1431,16 +1438,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         windowFrames.mRelFrame.offsetTo(windowFrames.mFrame.left - parentLeft,
                 windowFrames.mFrame.top - parentTop);
 
-        if (DEBUG_LAYOUT || DEBUG) {
-            final int pw = windowFrames.mParentFrame.width();
-            final int ph = windowFrames.mParentFrame.height();
-            Slog.v(TAG, "Resolving (mRequestedWidth="
-                    + mRequestedWidth + ", mRequestedheight="
-                    + mRequestedHeight + ") to" + " (pw=" + pw + ", ph=" + ph
-                    + "): frame=" + windowFrames.mFrame.toShortString()
-                    + " " + mAttrs.getTitle());
-        }
-
         if (mAttrs.type == TYPE_DOCK_DIVIDER) {
             if (!windowFrames.mFrame.equals(windowFrames.mLastFrame)) {
                 mMovedByResize = true;
@@ -1455,9 +1452,19 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             }
         }
 
-        // Update the source frame to provide insets to other windows during layout.
-        if (mControllableInsetProvider != null) {
-            mControllableInsetProvider.updateSourceFrame();
+        updateSourceFrame(windowFrames.mFrame);
+    }
+
+    void updateSourceFrame(Rect winFrame) {
+        if (mGivenInsetsPending) {
+            // The given insets are pending, and they are not reliable for now. The source frame
+            // should be updated after the new given insets are sent to window manager.
+            return;
+        }
+        final SparseArray<InsetsSource> providedSources = getProvidedInsetsSources();
+        final InsetsStateController controller = getDisplayContent().getInsetsStateController();
+        for (int i = providedSources.size() - 1; i >= 0; i--) {
+            controller.getSourceProvider(providedSources.keyAt(i)).updateSourceFrame(winFrame);
         }
     }
 
@@ -5923,7 +5930,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // to draw even if the children draw first or don't need to sync, so we start
         // in WAITING state rather than READY.
         mSyncState = SYNC_STATE_WAITING_FOR_DRAW;
-        mNextRelayoutUseSync = true;
+        mSyncSeqId++;
         requestRedrawForSync();
         return true;
     }
@@ -6066,7 +6073,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      */
     void applyWithNextDraw(Consumer<SurfaceControl.Transaction> consumer) {
         mPendingDrawHandlers.add(consumer);
-        mNextRelayoutUseSync = true;
+        mSyncSeqId++;
         requestRedrawForSync();
 
         mWmService.mH.sendNewMessageDelayed(WINDOW_STATE_BLAST_SYNC_TIMEOUT, this,

@@ -53,6 +53,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.concurrent.Executor;
+
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
@@ -90,6 +92,8 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
     @Mock
     ZenModeController mZenModeController;
 
+    private final Executor mMainExecutor = Runnable::run;
+
     DreamOverlayStatusBarViewController mController;
 
     @Before
@@ -102,6 +106,7 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
         mController = new DreamOverlayStatusBarViewController(
                 mView,
                 mResources,
+                mMainExecutor,
                 mConnectivityManager,
                 mTouchSession,
                 mAlarmManager,
@@ -134,7 +139,8 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
                 .thenReturn(false);
         when(mConnectivityManager.getNetworkCapabilities(any())).thenReturn(mNetworkCapabilities);
         mController.onViewAttached();
-        verify(mView).showIcon(DreamOverlayStatusBarView.STATUS_ICON_WIFI_UNAVAILABLE, true);
+        verify(mView).showIcon(
+                DreamOverlayStatusBarView.STATUS_ICON_WIFI_UNAVAILABLE, true, null);
     }
 
     @Test
@@ -143,13 +149,16 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
                 .thenReturn(true);
         when(mConnectivityManager.getNetworkCapabilities(any())).thenReturn(mNetworkCapabilities);
         mController.onViewAttached();
-        verify(mView).showIcon(DreamOverlayStatusBarView.STATUS_ICON_WIFI_UNAVAILABLE, false);
+        verify(mView).showIcon(
+                DreamOverlayStatusBarView.STATUS_ICON_WIFI_UNAVAILABLE, false, null);
     }
 
     @Test
     public void testOnViewAttachedShowsWifiIconWhenNetworkCapabilitiesUnavailable() {
         when(mConnectivityManager.getNetworkCapabilities(any())).thenReturn(null);
         mController.onViewAttached();
+        verify(mView).showIcon(
+                DreamOverlayStatusBarView.STATUS_ICON_WIFI_UNAVAILABLE, true, null);
     }
 
     @Test
@@ -176,7 +185,8 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
         when(mSensorPrivacyController.isSensorBlocked(SensorPrivacyManager.Sensors.CAMERA))
                 .thenReturn(true);
         mController.onViewAttached();
-        verify(mView).showIcon(DreamOverlayStatusBarView.STATUS_ICON_MIC_CAMERA_DISABLED, true);
+        verify(mView).showIcon(
+                DreamOverlayStatusBarView.STATUS_ICON_MIC_CAMERA_DISABLED, true, null);
     }
 
     @Test
@@ -186,7 +196,8 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
         when(mSensorPrivacyController.isSensorBlocked(SensorPrivacyManager.Sensors.CAMERA))
                 .thenReturn(false);
         mController.onViewAttached();
-        verify(mView).showIcon(DreamOverlayStatusBarView.STATUS_ICON_MIC_CAMERA_DISABLED, false);
+        verify(mView).showIcon(
+                DreamOverlayStatusBarView.STATUS_ICON_MIC_CAMERA_DISABLED, false, null);
     }
 
     @Test
@@ -211,7 +222,8 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
         when(mZenModeController.getZen()).thenReturn(
                 Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS);
         mController.onViewAttached();
-        verify(mView).showIcon(DreamOverlayStatusBarView.STATUS_ICON_PRIORITY_MODE_ON, true);
+        verify(mView).showIcon(
+                DreamOverlayStatusBarView.STATUS_ICON_PRIORITY_MODE_ON, true, null);
     }
 
     @Test
@@ -219,7 +231,8 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
         when(mZenModeController.getZen()).thenReturn(
                 Settings.Global.ZEN_MODE_OFF);
         mController.onViewAttached();
-        verify(mView).showIcon(DreamOverlayStatusBarView.STATUS_ICON_PRIORITY_MODE_ON, false);
+        verify(mView).showIcon(
+                DreamOverlayStatusBarView.STATUS_ICON_PRIORITY_MODE_ON, false, null);
     }
 
     @Test
@@ -250,7 +263,9 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
                 ArgumentCaptor.forClass(ConnectivityManager.NetworkCallback.class);
         verify(mConnectivityManager).registerNetworkCallback(any(), callbackCapture.capture());
         callbackCapture.getValue().onAvailable(mNetwork);
-        verify(mView).showIcon(DreamOverlayStatusBarView.STATUS_ICON_WIFI_UNAVAILABLE, false);
+
+        verify(mView).showIcon(
+                DreamOverlayStatusBarView.STATUS_ICON_WIFI_UNAVAILABLE, false, null);
     }
 
     @Test
@@ -266,7 +281,9 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
                 ArgumentCaptor.forClass(ConnectivityManager.NetworkCallback.class);
         verify(mConnectivityManager).registerNetworkCallback(any(), callbackCapture.capture());
         callbackCapture.getValue().onLost(mNetwork);
-        verify(mView).showIcon(DreamOverlayStatusBarView.STATUS_ICON_WIFI_UNAVAILABLE, true);
+
+        verify(mView).showIcon(
+                DreamOverlayStatusBarView.STATUS_ICON_WIFI_UNAVAILABLE, true, null);
     }
 
     @Test
@@ -283,7 +300,9 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
         when(mNetworkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI))
                 .thenReturn(true);
         callbackCapture.getValue().onCapabilitiesChanged(mNetwork, mNetworkCapabilities);
-        verify(mView).showIcon(DreamOverlayStatusBarView.STATUS_ICON_WIFI_UNAVAILABLE, false);
+
+        verify(mView).showIcon(
+                DreamOverlayStatusBarView.STATUS_ICON_WIFI_UNAVAILABLE, false, null);
     }
 
     @Test
@@ -333,7 +352,8 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
         callbackCapture.getValue().onSensorBlockedChanged(
                 SensorPrivacyManager.Sensors.MICROPHONE, true);
 
-        verify(mView).showIcon(DreamOverlayStatusBarView.STATUS_ICON_MIC_CAMERA_DISABLED, true);
+        verify(mView).showIcon(
+                DreamOverlayStatusBarView.STATUS_ICON_MIC_CAMERA_DISABLED, true, null);
     }
 
     @Test
@@ -350,7 +370,8 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
         callbackCapture.getValue().onSensorBlockedChanged(
                 SensorPrivacyManager.Sensors.MICROPHONE, false);
 
-        verify(mView).showIcon(DreamOverlayStatusBarView.STATUS_ICON_MIC_CAMERA_DISABLED, false);
+        verify(mView).showIcon(
+                DreamOverlayStatusBarView.STATUS_ICON_MIC_CAMERA_DISABLED, false, null);
     }
 
     @Test
@@ -364,7 +385,8 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
         verify(mZenModeController).addCallback(callbackCapture.capture());
         callbackCapture.getValue().onZenChanged(Settings.Global.ZEN_MODE_NO_INTERRUPTIONS);
 
-        verify(mView).showIcon(DreamOverlayStatusBarView.STATUS_ICON_PRIORITY_MODE_ON, true);
+        verify(mView).showIcon(
+                DreamOverlayStatusBarView.STATUS_ICON_PRIORITY_MODE_ON, true, null);
     }
 
     @Test
@@ -373,12 +395,12 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
                 .thenReturn(Settings.Global.ZEN_MODE_OFF);
         mController.onViewAttached();
 
-
         final ArgumentCaptor<ZenModeController.Callback> callbackCapture =
                 ArgumentCaptor.forClass(ZenModeController.Callback.class);
         verify(mZenModeController).addCallback(callbackCapture.capture());
         callbackCapture.getValue().onZenChanged(Settings.Global.ZEN_MODE_OFF);
 
-        verify(mView).showIcon(DreamOverlayStatusBarView.STATUS_ICON_PRIORITY_MODE_ON, false);
+        verify(mView).showIcon(
+                DreamOverlayStatusBarView.STATUS_ICON_PRIORITY_MODE_ON, false, null);
     }
 }

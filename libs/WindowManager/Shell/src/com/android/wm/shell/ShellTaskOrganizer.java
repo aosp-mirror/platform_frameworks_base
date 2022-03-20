@@ -165,8 +165,12 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
     private StartingWindowController mStartingWindow;
 
     /**
-     * In charge of showing compat UI. Can be {@code null} if device doesn't support size
-     * compat.
+     * In charge of showing compat UI. Can be {@code null} if the device doesn't support size
+     * compat or if this isn't the main {@link ShellTaskOrganizer}.
+     *
+     * <p>NOTE: only the main {@link ShellTaskOrganizer} should have a {@link CompatUIController},
+     * and register itself as a {@link CompatUIController.CompatUICallback}. Subclasses should be
+     * initialized with a {@code null} {@link CompatUIController}.
      */
     @Nullable
     private final CompatUIController mCompatUI;
