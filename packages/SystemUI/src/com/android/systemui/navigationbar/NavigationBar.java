@@ -47,6 +47,7 @@ import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_A
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_IME_SHOWING;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_IME_SWITCHER_SHOWING;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NAV_BAR_HIDDEN;
+import static com.android.systemui.shared.system.QuickStepContract.isGesturalMode;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_LIGHTS_OUT;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_LIGHTS_OUT_TRANSPARENT;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_OPAQUE;
@@ -61,7 +62,6 @@ import android.app.ActivityTaskManager;
 import android.app.IActivityTaskManager;
 import android.app.StatusBarManager;
 import android.content.BroadcastReceiver;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -107,13 +107,15 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.LatencyTracker;
 import com.android.internal.view.AppearanceRegion;
+import com.android.systemui.Gefingerpoken;
 import com.android.systemui.R;
-import com.android.systemui.accessibility.AccessibilityButtonModeObserver;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.model.SysUiState;
+import com.android.systemui.navigationbar.NavigationModeController.ModeChangedListener;
 import com.android.systemui.navigationbar.buttons.ButtonDispatcher;
+import com.android.systemui.navigationbar.buttons.DeadZone;
 import com.android.systemui.navigationbar.buttons.KeyButtonView;
 import com.android.systemui.navigationbar.buttons.RotationContextButton;
 import com.android.systemui.navigationbar.gestural.QuickswitchOrientedNavHandle;
@@ -125,6 +127,7 @@ import com.android.systemui.shared.rotation.RotationButton;
 import com.android.systemui.shared.rotation.RotationButtonController;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.QuickStepContract;
+import com.android.systemui.shared.system.SysUiStatsLog;
 import com.android.systemui.statusbar.AutoHideUiElement;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.CommandQueue.Callbacks;
@@ -146,15 +149,15 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-import javax.inject.Inject;
-
 import dagger.Lazy;
+import dagger.assisted.Assisted;
+import dagger.assisted.AssistedFactory;
+import dagger.assisted.AssistedInject;
 
 /**
  * Contains logic for a navigation bar view.
  */
-public class NavigationBar implements View.OnAttachStateChangeListener,
-        Callbacks, NavigationModeController.ModeChangedListener {
+public class NavigationBar implements View.OnAttachStateChangeListener, Callbacks {
 
     public static final String TAG = "NavigationBar";
     private static final boolean DEBUG = false;
@@ -181,7 +184,6 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
     private final NotificationRemoteInputManager mNotificationRemoteInputManager;
     private final OverviewProxyService mOverviewProxyService;
     private final NavigationModeController mNavigationModeController;
-    private final AccessibilityButtonModeObserver mAccessibilityButtonModeObserver;
     private final BroadcastDispatcher mBroadcastDispatcher;
     private final CommandQueue mCommandQueue;
     private final Optional<Pip> mPipOptional;
@@ -200,8 +202,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
     private @WindowVisibleState int mNavigationBarWindowState = WINDOW_STATE_SHOWING;
 
     private int mNavigationIconHints = 0;
-    private @TransitionMode int mNavigationBarMode;
-    private ContentResolver mContentResolver;
+    private @TransitionMode int mTransitionMode;
     private boolean mLongPressHomeEnabled;
 
     private int mDisabledFlags1;
@@ -255,7 +256,8 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
     private int mCurrentRotation;
     private ViewTreeObserver.OnGlobalLayoutListener mOrientationHandleGlobalLayoutListener;
     private boolean mShowOrientedHandleForImmersiveMode;
-
+    private DeadZone mDeadZone;
+    private boolean mImeVisible;
 
     @com.android.internal.annotations.VisibleForTesting
     public enum NavBarActionEvent implements UiEventLogger.UiEventEnum {
@@ -471,15 +473,16 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
                 }
             };
 
-    private NavigationBar(Context context,
-            WindowManager windowManager,
+    @AssistedInject
+    NavigationBar(
+            @Assisted Context context,
+            @Assisted WindowManager windowManager,
             Lazy<AssistManager> assistManagerLazy,
             AccessibilityManager accessibilityManager,
             DeviceProvisionedController deviceProvisionedController,
             MetricsLogger metricsLogger,
             OverviewProxyService overviewProxyService,
             NavigationModeController navigationModeController,
-            AccessibilityButtonModeObserver accessibilityButtonModeObserver,
             StatusBarStateController statusBarStateController,
             SysUiState sysUiFlagsContainer,
             BroadcastDispatcher broadcastDispatcher,
@@ -514,7 +517,6 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         mNotificationRemoteInputManager = notificationRemoteInputManager;
         mOverviewProxyService = overviewProxyService;
         mNavigationModeController = navigationModeController;
-        mAccessibilityButtonModeObserver = accessibilityButtonModeObserver;
         mBroadcastDispatcher = broadcastDispatcher;
         mCommandQueue = commandQueue;
         mPipOptional = pipOptional;
@@ -532,7 +534,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         mTelecomManagerOptional = telecomManagerOptional;
         mInputMethodManager = inputMethodManager;
 
-        mNavBarMode = mNavigationModeController.addListener(this);
+        mNavBarMode = mNavigationModeController.addListener(mModeChangedListener);
     }
 
     public NavigationBarView getView() {
@@ -546,6 +548,11 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
                 R.layout.navigation_bar, mFrame);
         barView.addOnAttachStateChangeListener(this);
         mNavigationBarView = barView.findViewById(R.id.navigation_bar_view);
+        mDeadZone = new DeadZone(mNavigationBarView);
+        mNavigationBarView.setTouchHandler(mTouchHandler);
+        mNavigationBarView.setNavBarMode(mNavBarMode);
+
+        mNavigationBarView.updateRotationButton();
 
         mNavigationBarView.setVisibility(initialVisibility ? View.VISIBLE : View.INVISIBLE);
 
@@ -558,7 +565,6 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
 
         mCommandQueue.addCallback(this);
         mLongPressHomeEnabled = mNavBarHelper.getLongPressHomeEnabled();
-        mContentResolver = mContext.getContentResolver();
         mNavBarHelper.init();
         mAllowForceNavBarHandleOpaque = mContext.getResources().getBoolean(
                 R.bool.allow_force_nav_bar_handle_opaque);
@@ -597,7 +603,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         setAutoHideController(/* autoHideController */ null);
         mCommandQueue.removeCallback(this);
         mWindowManager.removeViewImmediate(mNavigationBarView.getRootView());
-        mNavigationModeController.removeListener(this);
+        mNavigationModeController.removeListener(mModeChangedListener);
 
         mNavBarHelper.removeNavTaskStateUpdater(mNavbarTaskbarStateUpdater);
         mNavBarHelper.destroy();
@@ -612,15 +618,16 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         final Display display = v.getDisplay();
         mNavigationBarView.setComponents(mRecentsOptional);
         mNavigationBarView.setComponents(mCentralSurfacesOptionalLazy.get().get().getPanelController());
-        mNavigationBarView.setDisabledFlags(mDisabledFlags1);
+        mNavigationBarView.setDisabledFlags(mDisabledFlags1, mSysUiFlagsContainer);
         mNavigationBarView.setOnVerticalChangedListener(this::onVerticalChanged);
         mNavigationBarView.setOnTouchListener(this::onNavigationTouch);
         if (mSavedState != null) {
             mNavigationBarView.getLightTransitionsController().restoreState(mSavedState);
         }
-        mNavigationBarView.setNavigationIconHints(mNavigationIconHints);
+        setNavigationIconHints(mNavigationIconHints);
         mNavigationBarView.setWindowVisible(isNavBarWindowVisible());
         mNavigationBarView.setBehavior(mBehavior);
+        mNavigationBarView.setNavBarMode(mNavBarMode);
 
         mNavBarHelper.registerNavTaskStateUpdater(mNavbarTaskbarStateUpdater);
 
@@ -865,8 +872,8 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         pw.println("  mLongPressHomeEnabled=" + mLongPressHomeEnabled);
         pw.println("  mNavigationBarWindowState="
                 + windowStateToString(mNavigationBarWindowState));
-        pw.println("  mNavigationBarMode="
-                + BarTransitions.modeToString(mNavigationBarMode));
+        pw.println("  mTransitionMode="
+                + BarTransitions.modeToString(mTransitionMode));
         pw.println("  mTransientShown=" + mTransientShown);
         pw.println("  mTransientShownFromGestureOnSystemBar="
                 + mTransientShownFromGestureOnSystemBar);
@@ -888,11 +895,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
                 imeShown, showImeSwitcher);
         if (hints == mNavigationIconHints) return;
 
-        mNavigationIconHints = hints;
-        if (!isTablet(mContext)) {
-            // All IME functions handled by launcher via Sysui flags for large screen
-            mNavigationBarView.setNavigationIconHints(hints);
-        }
+        setNavigationIconHints(hints);
         checkBarModes();
         updateSystemUiStateFlags();
     }
@@ -952,15 +955,15 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
 
     /** Restores the appearance and the transient saved state to {@link NavigationBar}. */
     public void restoreAppearanceAndTransientState() {
-        final int barMode = barMode(mTransientShown, mAppearance);
-        mNavigationBarMode = barMode;
+        final int transitionMode = transitionMode(mTransientShown, mAppearance);
+        mTransitionMode = transitionMode;
         checkNavBarModes();
         if (mAutoHideController != null) {
             mAutoHideController.touchAutoHide();
         }
         if (mLightBarController != null) {
             mLightBarController.onNavigationBarAppearanceChanged(mAppearance,
-                    true /* nbModeChanged */, barMode, false /* navbarColorManagedByIme */);
+                    true /* nbModeChanged */, transitionMode, false /* navbarColorManagedByIme */);
         }
     }
 
@@ -974,11 +977,11 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         boolean nbModeChanged = false;
         if (mAppearance != appearance) {
             mAppearance = appearance;
-            nbModeChanged = updateBarMode(barMode(mTransientShown, appearance));
+            nbModeChanged = updateTransitionMode(transitionMode(mTransientShown, appearance));
         }
         if (mLightBarController != null) {
             mLightBarController.onNavigationBarAppearanceChanged(appearance, nbModeChanged,
-                    mNavigationBarMode, navbarColorManagedByIme);
+                    mTransitionMode, navbarColorManagedByIme);
         }
         if (mBehavior != behavior) {
             mBehavior = behavior;
@@ -1025,16 +1028,16 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
     private void handleTransientChanged() {
         mNavigationBarView.onTransientStateChanged(mTransientShown,
                 mTransientShownFromGestureOnSystemBar);
-        final int barMode = barMode(mTransientShown, mAppearance);
-        if (updateBarMode(barMode) && mLightBarController != null) {
-            mLightBarController.onNavigationBarModeChanged(barMode);
+        final int transitionMode = transitionMode(mTransientShown, mAppearance);
+        if (updateTransitionMode(transitionMode) && mLightBarController != null) {
+            mLightBarController.onNavigationBarModeChanged(transitionMode);
         }
     }
 
     // Returns true if the bar mode is changed.
-    private boolean updateBarMode(int barMode) {
-        if (mNavigationBarMode != barMode) {
-            mNavigationBarMode = barMode;
+    private boolean updateTransitionMode(int barMode) {
+        if (mTransitionMode != barMode) {
+            mTransitionMode = barMode;
             checkNavBarModes();
             if (mAutoHideController != null) {
                 mAutoHideController.touchAutoHide();
@@ -1044,7 +1047,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         return false;
     }
 
-    private static @TransitionMode int barMode(boolean isTransient, int appearance) {
+    private static @TransitionMode int transitionMode(boolean isTransient, int appearance) {
         final int lightsOutOpaque = APPEARANCE_LOW_PROFILE_BARS | APPEARANCE_OPAQUE_NAVIGATION_BARS;
         if (isTransient) {
             return MODE_SEMI_TRANSPARENT;
@@ -1073,7 +1076,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
                 | StatusBarManager.DISABLE_SEARCH);
         if (masked != mDisabledFlags1) {
             mDisabledFlags1 = masked;
-            mNavigationBarView.setDisabledFlags(state1);
+            mNavigationBarView.setDisabledFlags(state1, mSysUiFlagsContainer);
             updateScreenPinningGestures();
         }
 
@@ -1455,24 +1458,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
                 mCentralSurfacesOptionalLazy.get().map(CentralSurfaces::isDeviceInteractive)
                         .orElse(false)
                 && mNavigationBarWindowState != WINDOW_STATE_HIDDEN;
-        mNavigationBarView.getBarTransitions().transitionTo(mNavigationBarMode, anim);
-    }
-
-    @Override
-    public void onNavigationModeChanged(int mode) {
-        mNavBarMode = mode;
-
-        if (!QuickStepContract.isGesturalMode(mode)) {
-            // Reset the override alpha
-            if (getBarTransitions() != null) {
-                getBarTransitions().setBackgroundOverrideAlpha(1f);
-            }
-        }
-        updateScreenPinningGestures();
-
-        if (!canShowSecondaryHandle()) {
-            resetSecondaryHandle();
-        }
+        mNavigationBarView.getBarTransitions().transitionTo(mTransitionMode, anim);
     }
 
     public void disableAnimationsDuringHide(long delay) {
@@ -1613,114 +1599,102 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         return mNavigationIconHints;
     }
 
+    private void setNavigationIconHints(int hints) {
+        if (hints == mNavigationIconHints) return;
+        if (!isTablet(mContext)) {
+            // All IME functions handled by launcher via Sysui flags for large screen
+            final boolean newBackAlt = (hints & StatusBarManager.NAVIGATION_HINT_BACK_ALT) != 0;
+            final boolean oldBackAlt =
+                    (mNavigationIconHints & StatusBarManager.NAVIGATION_HINT_BACK_ALT) != 0;
+            if (newBackAlt != oldBackAlt) {
+                mNavigationBarView.onImeVisibilityChanged(newBackAlt);
+                mImeVisible = newBackAlt;
+            }
+
+            mNavigationBarView.setNavigationIconHints(hints);
+        }
+        if (DEBUG) {
+            android.widget.Toast.makeText(mContext,
+                    "Navigation icon hints = " + hints,
+                    500).show();
+        }
+        mNavigationIconHints = hints;
+    }
+
+    private final ModeChangedListener mModeChangedListener = new ModeChangedListener() {
+        @Override
+        public void onNavigationModeChanged(int mode) {
+            mNavBarMode = mode;
+
+            if (!QuickStepContract.isGesturalMode(mode)) {
+                // Reset the override alpha
+                if (getBarTransitions() != null) {
+                    getBarTransitions().setBackgroundOverrideAlpha(1f);
+                }
+            }
+            updateScreenPinningGestures();
+
+            if (!canShowSecondaryHandle()) {
+                resetSecondaryHandle();
+            }
+            if (mNavigationBarView != null) {
+                mNavigationBarView.setNavBarMode(mode);
+            }
+        }
+    };
+
+    private final Gefingerpoken mTouchHandler = new Gefingerpoken() {
+        private boolean mDeadZoneConsuming;
+
+        @Override
+        public boolean onInterceptTouchEvent(MotionEvent ev) {
+            if (isGesturalMode(mNavBarMode) && mImeVisible
+                    && ev.getAction() == MotionEvent.ACTION_DOWN) {
+                SysUiStatsLog.write(SysUiStatsLog.IME_TOUCH_REPORTED,
+                        (int) ev.getX(), (int) ev.getY());
+            }
+            return shouldDeadZoneConsumeTouchEvents(ev);
+        }
+
+        @Override
+        public boolean onTouchEvent(MotionEvent ev) {
+            shouldDeadZoneConsumeTouchEvents(ev);
+            return false;
+        }
+
+        private boolean shouldDeadZoneConsumeTouchEvents(MotionEvent event) {
+            int action = event.getActionMasked();
+            if (action == MotionEvent.ACTION_DOWN) {
+                mDeadZoneConsuming = false;
+            }
+            if (mDeadZone.onTouchEvent(event) || mDeadZoneConsuming) {
+                switch (action) {
+                    case MotionEvent.ACTION_DOWN:
+                        // Allow gestures starting in the deadzone to be slippery
+                        mNavigationBarView.setSlippery(true);
+                        mDeadZoneConsuming = true;
+                        break;
+                    case MotionEvent.ACTION_CANCEL:
+                    case MotionEvent.ACTION_UP:
+                        // When a gesture started in the deadzone is finished, restore
+                        // slippery state
+                        mNavigationBarView.updateSlippery();
+                        mDeadZoneConsuming = false;
+                        break;
+                }
+                return true;
+            }
+            return false;
+        }
+    };
+
+
     /**
      * Injectable factory for construction a {@link NavigationBar}.
      */
-    public static class Factory {
-        private final Lazy<AssistManager> mAssistManagerLazy;
-        private final AccessibilityManager mAccessibilityManager;
-        private final DeviceProvisionedController mDeviceProvisionedController;
-        private final MetricsLogger mMetricsLogger;
-        private final OverviewProxyService mOverviewProxyService;
-        private final NavigationModeController mNavigationModeController;
-        private final AccessibilityButtonModeObserver mAccessibilityButtonModeObserver;
-        private final StatusBarStateController mStatusBarStateController;
-        private final SysUiState mSysUiFlagsContainer;
-        private final BroadcastDispatcher mBroadcastDispatcher;
-        private final CommandQueue mCommandQueue;
-        private final Optional<Pip> mPipOptional;
-        private final Optional<Recents> mRecentsOptional;
-        private final Lazy<Optional<CentralSurfaces>> mCentralSurfacesOptionalLazy;
-        private final ShadeController mShadeController;
-        private final NotificationRemoteInputManager mNotificationRemoteInputManager;
-        private final NotificationShadeDepthController mNotificationShadeDepthController;
-        private final Handler mMainHandler;
-        private final NavigationBarOverlayController mNavbarOverlayController;
-        private final UiEventLogger mUiEventLogger;
-        private final NavBarHelper mNavBarHelper;
-        private final LightBarController mMainLightBarController;
-        private final LightBarController.Factory mLightBarControllerFactory;
-        private final AutoHideController mMainAutoHideController;
-        private final AutoHideController.Factory mAutoHideControllerFactory;
-        private final Optional<TelecomManager> mTelecomManagerOptional;
-        private final InputMethodManager mInputMethodManager;
-        private final Optional<BackAnimation> mBackAnimation;
-
-        @Inject
-        public Factory(
-                Lazy<AssistManager> assistManagerLazy,
-                AccessibilityManager accessibilityManager,
-                DeviceProvisionedController deviceProvisionedController,
-                MetricsLogger metricsLogger,
-                OverviewProxyService overviewProxyService,
-                NavigationModeController navigationModeController,
-                AccessibilityButtonModeObserver accessibilityButtonModeObserver,
-                StatusBarStateController statusBarStateController,
-                SysUiState sysUiFlagsContainer,
-                BroadcastDispatcher broadcastDispatcher,
-                CommandQueue commandQueue,
-                Optional<Pip> pipOptional,
-                Optional<Recents> recentsOptional,
-                Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
-                ShadeController shadeController,
-                NotificationRemoteInputManager notificationRemoteInputManager,
-                NotificationShadeDepthController notificationShadeDepthController,
-                @Main Handler mainHandler,
-                NavigationBarOverlayController navbarOverlayController,
-                UiEventLogger uiEventLogger,
-                NavBarHelper navBarHelper,
-                LightBarController mainLightBarController,
-                LightBarController.Factory lightBarControllerFactory,
-                AutoHideController mainAutoHideController,
-                AutoHideController.Factory autoHideControllerFactory,
-                Optional<TelecomManager> telecomManagerOptional,
-                InputMethodManager inputMethodManager,
-                Optional<BackAnimation> backAnimation) {
-            mAssistManagerLazy = assistManagerLazy;
-            mAccessibilityManager = accessibilityManager;
-            mDeviceProvisionedController = deviceProvisionedController;
-            mMetricsLogger = metricsLogger;
-            mOverviewProxyService = overviewProxyService;
-            mNavigationModeController = navigationModeController;
-            mAccessibilityButtonModeObserver = accessibilityButtonModeObserver;
-            mStatusBarStateController = statusBarStateController;
-            mSysUiFlagsContainer = sysUiFlagsContainer;
-            mBroadcastDispatcher = broadcastDispatcher;
-            mCommandQueue = commandQueue;
-            mPipOptional = pipOptional;
-            mRecentsOptional = recentsOptional;
-            mCentralSurfacesOptionalLazy = centralSurfacesOptionalLazy;
-            mShadeController = shadeController;
-            mNotificationRemoteInputManager = notificationRemoteInputManager;
-            mNotificationShadeDepthController = notificationShadeDepthController;
-            mMainHandler = mainHandler;
-            mNavbarOverlayController = navbarOverlayController;
-            mUiEventLogger = uiEventLogger;
-            mNavBarHelper = navBarHelper;
-            mMainLightBarController = mainLightBarController;
-            mLightBarControllerFactory = lightBarControllerFactory;
-            mMainAutoHideController = mainAutoHideController;
-            mAutoHideControllerFactory = autoHideControllerFactory;
-            mTelecomManagerOptional = telecomManagerOptional;
-            mInputMethodManager = inputMethodManager;
-            mBackAnimation = backAnimation;
-        }
-
+    @AssistedFactory
+    public interface Factory {
         /** Construct a {@link NavigationBar} */
-        public NavigationBar create(Context context) {
-            final WindowManager wm = context.getSystemService(WindowManager.class);
-            return new NavigationBar(context, wm, mAssistManagerLazy,
-                    mAccessibilityManager, mDeviceProvisionedController, mMetricsLogger,
-                    mOverviewProxyService, mNavigationModeController,
-                    mAccessibilityButtonModeObserver, mStatusBarStateController,
-                    mSysUiFlagsContainer, mBroadcastDispatcher, mCommandQueue, mPipOptional,
-                    mRecentsOptional, mCentralSurfacesOptionalLazy,
-                    mShadeController, mNotificationRemoteInputManager,
-                    mNotificationShadeDepthController, mMainHandler,
-                    mNavbarOverlayController, mUiEventLogger, mNavBarHelper,
-                    mMainLightBarController, mLightBarControllerFactory,
-                    mMainAutoHideController, mAutoHideControllerFactory, mTelecomManagerOptional,
-                    mInputMethodManager, mBackAnimation);
-        }
+        NavigationBar create(Context context, WindowManager windowManager);
     }
 }
