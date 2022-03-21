@@ -320,17 +320,6 @@ public final class BroadcastHelper {
                 broadcastAllowlist, null);
     }
 
-    public void sendDistractingPackagesChanged(String[] pkgList, int[] uidList, int userId,
-            int distractionFlags) {
-        final Bundle extras = new Bundle(3);
-        extras.putStringArray(Intent.EXTRA_CHANGED_PACKAGE_LIST, pkgList);
-        extras.putIntArray(Intent.EXTRA_CHANGED_UID_LIST, uidList);
-        extras.putInt(Intent.EXTRA_DISTRACTION_RESTRICTIONS, distractionFlags);
-        sendPackageBroadcast(Intent.ACTION_DISTRACTING_PACKAGES_CHANGED, null, extras,
-                Intent.FLAG_RECEIVER_REGISTERED_ONLY, null, null, new int[]{userId}, null, null,
-                null);
-    }
-
     public void sendFirstLaunchBroadcast(String pkgName, String installerPkg,
             int[] userIds, int[] instantUserIds) {
         sendPackageBroadcast(Intent.ACTION_PACKAGE_FIRST_LAUNCH, pkgName, null, 0,
