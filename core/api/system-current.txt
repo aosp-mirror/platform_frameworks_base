@@ -10084,10 +10084,10 @@ package android.permission {
 
   public final class PermissionManager {
     method public int checkDeviceIdentifierAccess(@Nullable String, @Nullable String, @Nullable String, int, int);
-    method public int checkPermissionForDataDelivery(@NonNull String, @NonNull android.content.AttributionSource, @Nullable String);
-    method public int checkPermissionForDataDeliveryFromDataSource(@NonNull String, @NonNull android.content.AttributionSource, @Nullable String);
+    method @RequiresPermission(value=android.Manifest.permission.UPDATE_APP_OPS_STATS, conditional=true) public int checkPermissionForDataDelivery(@NonNull String, @NonNull android.content.AttributionSource, @Nullable String);
+    method @RequiresPermission(value=android.Manifest.permission.UPDATE_APP_OPS_STATS, conditional=true) public int checkPermissionForDataDeliveryFromDataSource(@NonNull String, @NonNull android.content.AttributionSource, @Nullable String);
     method public int checkPermissionForPreflight(@NonNull String, @NonNull android.content.AttributionSource);
-    method public int checkPermissionForStartDataDelivery(@NonNull String, @NonNull android.content.AttributionSource, @Nullable String);
+    method @RequiresPermission(value=android.Manifest.permission.UPDATE_APP_OPS_STATS, conditional=true) public int checkPermissionForStartDataDelivery(@NonNull String, @NonNull android.content.AttributionSource, @Nullable String);
     method public void finishDataDelivery(@NonNull String, @NonNull android.content.AttributionSource);
     method @NonNull @RequiresPermission(android.Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY) public java.util.Set<java.lang.String> getAutoRevokeExemptionGrantedPackages();
     method @NonNull @RequiresPermission(android.Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY) public java.util.Set<java.lang.String> getAutoRevokeExemptionRequestedPackages();
