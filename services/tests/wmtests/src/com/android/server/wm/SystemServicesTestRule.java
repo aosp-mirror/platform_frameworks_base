@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.provider.DeviceConfig.NAMESPACE_CONSTRAIN_DISPLAY_APIS;
 import static android.testing.DexmakerShareClassLoaderRule.runWithDexmakerShareClassLoader;
 import static android.view.Display.DEFAULT_DISPLAY;
 
@@ -190,7 +191,11 @@ public class SystemServicesTestRule implements TestRule {
     private void setUpSystemCore() {
         doReturn(mock(Watchdog.class)).when(Watchdog::getInstance);
         doAnswer(invocation -> {
-            mDeviceConfigListeners.add(invocation.getArgument(2));
+            // Exclude CONSTRAIN_DISPLAY_APIS because ActivityRecord#sConstrainDisplayApisConfig
+            // only registers once and it doesn't reference to outside.
+            if (!NAMESPACE_CONSTRAIN_DISPLAY_APIS.equals(invocation.getArgument(0))) {
+                mDeviceConfigListeners.add(invocation.getArgument(2));
+            }
             // SizeCompatTests uses setNeverConstrainDisplayApisFlag, and ActivityRecordTests
             // uses splash_screen_exception_list. So still execute real registration.
             return invocation.callRealMethod();
