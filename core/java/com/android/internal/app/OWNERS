@@ -9,3 +9,6 @@ per-file *BatteryStats* = file:/BATTERY_STATS_OWNERS
 per-file *Assist* = file:/core/java/android/service/voice/OWNERS
 per-file *Hotword* = file:/core/java/android/service/voice/OWNERS
 per-file *Voice* = file:/core/java/android/service/voice/OWNERS
+
+# System language settings
+per-file *Locale* = file:platform/packages/apps/Settings:/src/com/android/settings/localepicker/OWNERS
