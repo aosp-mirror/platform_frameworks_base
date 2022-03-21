@@ -1841,6 +1841,9 @@ public final class AppRestrictionController {
     }
 
     void handleUidInactive(int uid, boolean disabled) {
+        if (!mConstantsObserver.mBgAutoRestrictedBucket) {
+            return;
+        }
         final ArrayList<Runnable> pendingTasks = mTmpRunnables;
         synchronized (mSettingsLock) {
             final int index = mActiveUids.indexOfKey(uid);
@@ -1863,6 +1866,9 @@ public final class AppRestrictionController {
     }
 
     void handleUidActive(int uid) {
+        if (!mConstantsObserver.mBgAutoRestrictedBucket) {
+            return;
+        }
         synchronized (mSettingsLock) {
             final AppStandbyInternal appStandbyInternal = mInjector.getAppStandbyInternal();
             final int userId = UserHandle.getUserId(uid);
