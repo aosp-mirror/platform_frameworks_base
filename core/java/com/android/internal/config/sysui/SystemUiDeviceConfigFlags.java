@@ -519,6 +519,13 @@ public final class SystemUiDeviceConfigFlags {
     public static final String USE_DELEGATE_CHOOSER = "use_delegate_chooser";
 
     /**
+     * (int) The delay (in ms) before refreshing the Sharesheet UI after a change to the share
+     * target data model. For more info see go/sharesheet-list-view-update-delay.
+     */
+    public static final String SHARESHEET_LIST_VIEW_UPDATE_DELAY =
+            "sharesheet_list_view_update_delay";
+
+    /**
      * (string) Name of the default QR code scanner activity. On the eligible devices this activity
      * is provided by GMS core.
      */
