@@ -6439,7 +6439,7 @@
 
     <!-- Allows an UID to be visible to the application based on an interaction between the
          two apps. This permission is not intended to be held by apps.
-         @hide @TestApi  -->
+         @hide @TestApi @SystemApi(client=android.annotation.SystemApi.Client.MODULE_LIBRARIES) -->
     <permission android:name="android.permission.MAKE_UID_VISIBLE"
                 android:protectionLevel="signature" />
 
