@@ -633,7 +633,7 @@ public class StartingSurfaceDrawer {
                     Slog.e(TAG, "Found empty splash screen, remove!");
                     removeWindowInner(record.mDecorView, false);
                 }
-                mStartingWindowRecords.remove(taskId);
+
             }
             if (record.mTaskSnapshotWindow != null) {
                 ProtoLog.v(ShellProtoLogGroup.WM_SHELL_STARTING_WINDOW,
@@ -641,10 +641,10 @@ public class StartingSurfaceDrawer {
                 if (immediately) {
                     record.mTaskSnapshotWindow.removeImmediately();
                 } else {
-                    record.mTaskSnapshotWindow.scheduleRemove(() ->
-                            mStartingWindowRecords.remove(taskId), removalInfo.deferRemoveForIme);
+                    record.mTaskSnapshotWindow.scheduleRemove(removalInfo.deferRemoveForIme);
                 }
             }
+            mStartingWindowRecords.remove(taskId);
         }
     }
 
