@@ -212,19 +212,14 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         updateBurnInOffsets();
         updateVisibility();
 
+        mAccessibilityManager.addTouchExplorationStateChangeListener(
+                mTouchExplorationStateChangeListener);
         updateAccessibility();
     }
 
     private void updateAccessibility() {
         if (mAccessibilityManager.isTouchExplorationEnabled()) {
-            mView.setOnClickListener(
-                    new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            onLongPress();
-                        }
-                    }
-            );
+            mView.setOnClickListener(mA11yClickListener);
         } else {
             mView.setOnClickListener(null);
         }
@@ -242,6 +237,9 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
             mCancelDelayedUpdateVisibilityRunnable.run();
             mCancelDelayedUpdateVisibilityRunnable = null;
         }
+
+        mAccessibilityManager.removeTouchExplorationStateChangeListener(
+                mTouchExplorationStateChangeListener);
     }
 
     public float getTop() {
@@ -267,7 +265,6 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
             return;
         }
 
-        boolean wasShowingUnlock = mShowUnlockIcon;
         boolean wasShowingFpIcon = mUdfpsEnrolled && !mShowUnlockIcon && !mShowLockIcon
                 && !mShowAodUnlockedIcon && !mShowAodLockIcon;
         mShowLockIcon = !mCanDismissLockScreen && !mUserUnlockedWithBiometric && isLockScreen()
@@ -702,6 +699,14 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         mView.setAlpha(alpha);
     }
 
+    private void updateUdfpsConfig() {
+        // must be called from the main thread since it may update the views
+        mExecutor.execute(() -> {
+            updateIsUdfpsEnrolled();
+            updateConfiguration();
+        });
+    }
+
     private final AuthController.Callback mAuthControllerCallback = new AuthController.Callback() {
         @Override
         public void onAllAuthenticatorsRegistered() {
@@ -714,11 +719,8 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         }
     };
 
-    private void updateUdfpsConfig() {
-        // must be called from the main thread since it may update the views
-        mExecutor.execute(() -> {
-            updateIsUdfpsEnrolled();
-            updateConfiguration();
-        });
-    }
+    private final View.OnClickListener mA11yClickListener = v -> onLongPress();
+
+    private final AccessibilityManager.TouchExplorationStateChangeListener
+            mTouchExplorationStateChangeListener = enabled -> updateAccessibility();
 }
