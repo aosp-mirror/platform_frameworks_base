@@ -357,7 +357,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
         }
         Trace.beginSection("BiometricUnlockController#onBiometricAcquired");
         releaseBiometricWakeLock();
-        if (isWakeAndUnlock()) {
+        if (mStatusBarStateController.isDozing()) {
             if (mLatencyTracker.isEnabled()) {
                 int action = LatencyTracker.ACTION_FINGERPRINT_WAKE_AND_UNLOCK;
                 if (biometricSourceType == BiometricSourceType.FACE) {
