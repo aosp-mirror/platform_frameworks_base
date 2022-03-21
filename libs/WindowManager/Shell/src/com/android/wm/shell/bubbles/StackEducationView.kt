@@ -129,21 +129,22 @@ class StackEducationView constructor(
         if (visibility == VISIBLE) return false
 
         controller.updateWindowFlagsForBackpress(true /* interceptBack */)
-        layoutParams.width = if (positioner.isLargeScreen)
-            context.resources.getDimensionPixelSize(
-                    R.dimen.bubbles_user_education_width_large_screen)
+        layoutParams.width = if (positioner.isLargeScreen || positioner.isLandscape)
+            context.resources.getDimensionPixelSize(R.dimen.bubbles_user_education_width)
         else ViewGroup.LayoutParams.MATCH_PARENT
 
+        val stackPadding = context.resources.getDimensionPixelSize(
+                R.dimen.bubble_user_education_stack_padding)
         setAlpha(0f)
         setVisibility(View.VISIBLE)
         post {
             requestFocus()
             with(view) {
                 if (resources.configuration.layoutDirection == View.LAYOUT_DIRECTION_LTR) {
-                    setPadding(positioner.bubbleSize + paddingRight, paddingTop, paddingRight,
+                    setPadding(positioner.bubbleSize + stackPadding, paddingTop, paddingRight,
                             paddingBottom)
                 } else {
-                    setPadding(paddingLeft, paddingTop, positioner.bubbleSize + paddingLeft,
+                    setPadding(paddingLeft, paddingTop, positioner.bubbleSize + stackPadding,
                             paddingBottom)
                 }
                 translationY = stackPosition.y + positioner.bubbleSize / 2 - getHeight() / 2
