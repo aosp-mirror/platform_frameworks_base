@@ -2153,9 +2153,9 @@ interface ITelephony {
              String callingFeatureId);
 
     /**
-     * Get the mapping from logical slots to physical slots.
+     * Get the mapping from logical slots to port index.
      */
-    int[] getSlotsMapping(String callingPackage);
+    List<UiccSlotMapping> getSlotsMapping(String callingPackage);
 
     /**
      * Get the IRadio HAL Version encoded as 100 * MAJOR_VERSION + MINOR_VERSION or -1 if unknown

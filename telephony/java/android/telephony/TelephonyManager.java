@@ -3475,14 +3475,38 @@ public class TelephonyManager {
      * @see #SIM_STATE_PRESENT
      *
      * @hide
+     * @deprecated instead use {@link #getSimCardState(int, int)}
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @Deprecated
     public @SimState int getSimCardState(int physicalSlotIndex) {
-        int simState = getSimState(getLogicalSlotIndex(physicalSlotIndex));
+        int simState = getSimState(getLogicalSlotIndex(physicalSlotIndex, DEFAULT_PORT_INDEX));
         return getSimCardStateFromSimState(simState);
     }
 
+    /**
+     * Returns a constant indicating the state of the device SIM card in a physical slot and
+     * port index.
+     *
+     * @param physicalSlotIndex physical slot index
+     * @param portIndex The port index is an enumeration of the ports available on the UICC.
+     *                  Use {@link UiccPortInfo#getPortIndex()} to get portIndex.
+     *
+     * @see #SIM_STATE_UNKNOWN
+     * @see #SIM_STATE_ABSENT
+     * @see #SIM_STATE_CARD_IO_ERROR
+     * @see #SIM_STATE_CARD_RESTRICTED
+     * @see #SIM_STATE_PRESENT
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public @SimState int getSimCardState(int physicalSlotIndex, int portIndex) {
+        int simState = getSimState(getLogicalSlotIndex(physicalSlotIndex, portIndex));
+        return getSimCardStateFromSimState(simState);
+    }
     /**
      * Converts SIM state to SIM card state.
      * @param simState
@@ -3503,13 +3527,19 @@ public class TelephonyManager {
     /**
      * Converts a physical slot index to logical slot index.
      * @param physicalSlotIndex physical slot index
+     * @param portIndex The port index is an enumeration of the ports available on the UICC.
+     *                  Use {@link UiccPortInfo#getPortIndex()} to get portIndex.
      * @return logical slot index
      */
-    private int getLogicalSlotIndex(int physicalSlotIndex) {
+    private int getLogicalSlotIndex(int physicalSlotIndex, int portIndex) {
         UiccSlotInfo[] slotInfos = getUiccSlotsInfo();
         if (slotInfos != null && physicalSlotIndex >= 0 && physicalSlotIndex < slotInfos.length
                 && slotInfos[physicalSlotIndex] != null) {
-            return slotInfos[physicalSlotIndex].getLogicalSlotIdx();
+            for (UiccPortInfo portInfo : slotInfos[physicalSlotIndex].getPorts()) {
+                if (portInfo.getPortIndex() == portIndex) {
+                    return portInfo.getLogicalSlotIndex();
+                }
+            }
         }
 
         return SubscriptionManager.INVALID_SIM_SLOT_INDEX;
@@ -3549,12 +3579,42 @@ public class TelephonyManager {
      * @see #SIM_STATE_LOADED
      *
      * @hide
+     * @deprecated instead use {@link #getSimApplicationState(int, int)}
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @Deprecated
     public @SimState int getSimApplicationState(int physicalSlotIndex) {
         int simState =
-                SubscriptionManager.getSimStateForSlotIndex(getLogicalSlotIndex(physicalSlotIndex));
+                SubscriptionManager.getSimStateForSlotIndex(getLogicalSlotIndex(physicalSlotIndex,
+                        DEFAULT_PORT_INDEX));
+        return getSimApplicationStateFromSimState(simState);
+    }
+
+    /**
+     * Returns a constant indicating the state of the card applications on the device SIM card in
+     * a physical slot.
+     *
+     * @param physicalSlotIndex physical slot index
+     * @param portIndex The port index is an enumeration of the ports available on the UICC.
+     *                  Use {@link UiccPortInfo#getPortIndex()} to get portIndex.
+     *
+     * @see #SIM_STATE_UNKNOWN
+     * @see #SIM_STATE_PIN_REQUIRED
+     * @see #SIM_STATE_PUK_REQUIRED
+     * @see #SIM_STATE_NETWORK_LOCKED
+     * @see #SIM_STATE_NOT_READY
+     * @see #SIM_STATE_PERM_DISABLED
+     * @see #SIM_STATE_LOADED
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public @SimState int getSimApplicationState(int physicalSlotIndex, int portIndex) {
+        int simState =
+                SubscriptionManager.getSimStateForSlotIndex(getLogicalSlotIndex(physicalSlotIndex,
+                        portIndex));
         return getSimApplicationStateFromSimState(simState);
     }
 
@@ -4153,18 +4213,21 @@ public class TelephonyManager {
      * should be {@link #getPhoneCount()} if success, otherwise return an empty map.
      *
      * @hide
+     * @deprecated use {@link #getSimSlotMapping()} instead.
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     @NonNull
+    @Deprecated
     public Map<Integer, Integer> getLogicalToPhysicalSlotMapping() {
         Map<Integer, Integer> slotMapping = new HashMap<>();
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                int[] slotMappingArray = telephony.getSlotsMapping(mContext.getOpPackageName());
-                for (int i = 0; i < slotMappingArray.length; i++) {
-                    slotMapping.put(i, slotMappingArray[i]);
+                List<UiccSlotMapping> simSlotsMapping = telephony.getSlotsMapping(
+                        mContext.getOpPackageName());
+                for (UiccSlotMapping slotMap : simSlotsMapping) {
+                    slotMapping.put(slotMap.getLogicalSlotIndex(), slotMap.getPhysicalSlotIndex());
                 }
             }
         } catch (RemoteException e) {
@@ -4173,6 +4236,33 @@ public class TelephonyManager {
         return slotMapping;
     }
 
+    /**
+     * Get the mapping from logical slots to physical sim slots and port indexes. Initially the
+     * logical slot index was mapped to physical slot index, but with support for multi-enabled
+     * profile(MEP) logical slot is now mapped to port index.
+     *
+     * @return a collection of {@link UiccSlotMapping} which indicates the mapping from logical
+     *         slots to ports and physical slots.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @NonNull
+    public Collection<UiccSlotMapping> getSimSlotMapping() {
+        List<UiccSlotMapping> slotMap = new ArrayList<>();
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                slotMap = telephony.getSlotsMapping(mContext.getOpPackageName());
+            } else {
+                throw new IllegalStateException("telephony service is null.");
+            }
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+        return slotMap;
+    }
     //
     //
     // Subscriber Info
