@@ -23,7 +23,6 @@
 
     <dimen name="keyguard_split_shade_top_margin">72dp</dimen>
 
-    <dimen name="split_shade_header_height">56dp</dimen>
     <dimen name="status_bar_header_height_keyguard">56dp</dimen>
 
     <dimen name="qs_media_session_height_expanded">184dp</dimen>

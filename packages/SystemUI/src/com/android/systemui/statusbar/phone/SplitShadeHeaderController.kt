@@ -87,13 +87,13 @@ class SplitShadeHeaderController @Inject constructor(
             onShadeExpandedChanged()
         }
 
-    var splitShadeMode = false
+    var active = false
         set(value) {
             if (field == value) {
                 return
             }
             field = value
-            onSplitShadeModeChanged()
+            onHeaderStateChanged()
         }
 
     var shadeExpandedFraction = -1f
@@ -179,7 +179,7 @@ class SplitShadeHeaderController @Inject constructor(
     }
 
     private fun updateScrollY() {
-        if (!splitShadeMode && combinedHeaders) {
+        if (!active && combinedHeaders) {
             statusBar.scrollY = qsScrollY
         }
     }
@@ -194,8 +194,8 @@ class SplitShadeHeaderController @Inject constructor(
         updatePosition()
     }
 
-    private fun onSplitShadeModeChanged() {
-        if (splitShadeMode || combinedHeaders) {
+    private fun onHeaderStateChanged() {
+        if (active || combinedHeaders) {
             privacyIconsController.onParentVisible()
         } else {
             privacyIconsController.onParentInvisible()
@@ -205,7 +205,7 @@ class SplitShadeHeaderController @Inject constructor(
     }
 
     private fun updateVisibility() {
-        val visibility = if (!splitShadeMode && !combinedHeaders) {
+        val visibility = if (!active && !combinedHeaders) {
             View.GONE
         } else if (shadeExpanded) {
             View.VISIBLE
@@ -223,7 +223,7 @@ class SplitShadeHeaderController @Inject constructor(
             return
         }
         statusBar as MotionLayout
-        if (splitShadeMode) {
+        if (active) {
             statusBar.setTransition(SPLIT_HEADER_TRANSITION_ID)
         } else {
             statusBar.setTransition(HEADER_TRANSITION_ID)
@@ -234,7 +234,7 @@ class SplitShadeHeaderController @Inject constructor(
     }
 
     private fun updatePosition() {
-        if (statusBar is MotionLayout && !splitShadeMode && visible) {
+        if (statusBar is MotionLayout && !active && visible) {
             statusBar.setProgress(qsExpandedFraction)
         }
     }
@@ -263,7 +263,7 @@ class SplitShadeHeaderController @Inject constructor(
         pw.println("visible: $visible")
         pw.println("shadeExpanded: $shadeExpanded")
         pw.println("shadeExpandedFraction: $shadeExpandedFraction")
-        pw.println("splitShadeMode: $splitShadeMode")
+        pw.println("active: $active")
         pw.println("qsExpandedFraction: $qsExpandedFraction")
         pw.println("qsScrollY: $qsScrollY")
         if (combinedHeaders) {

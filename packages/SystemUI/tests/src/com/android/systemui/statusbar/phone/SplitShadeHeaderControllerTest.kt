@@ -76,11 +76,11 @@ class SplitShadeHeaderControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun setVisible_onlyInSplitShade() {
+    fun setVisible_onlyWhenActive() {
         makeShadeVisible()
         assertThat(viewVisibility).isEqualTo(View.VISIBLE)
 
-        splitShadeHeaderController.splitShadeMode = false
+        splitShadeHeaderController.active = false
         assertThat(viewVisibility).isEqualTo(View.GONE)
     }
 
@@ -117,7 +117,7 @@ class SplitShadeHeaderControllerTest : SysuiTestCase() {
     }
 
     private fun makeShadeVisible() {
-        splitShadeHeaderController.splitShadeMode = true
+        splitShadeHeaderController.active = true
         splitShadeHeaderController.shadeExpanded = true
     }
 }

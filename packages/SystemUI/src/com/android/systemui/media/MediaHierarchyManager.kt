@@ -43,7 +43,7 @@ import com.android.systemui.statusbar.notification.stack.StackStateAnimator
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.KeyguardStateController
-import com.android.systemui.util.Utils
+import com.android.systemui.util.LargeScreenUtils
 import com.android.systemui.util.animation.UniqueObjectHostView
 import javax.inject.Inject
 
@@ -514,7 +514,7 @@ class MediaHierarchyManager @Inject constructor(
     private fun updateConfiguration() {
         distanceForFullShadeTransition = context.resources.getDimensionPixelSize(
                 R.dimen.lockscreen_shade_media_transition_distance)
-        inSplitShade = Utils.shouldUseSplitNotificationShade(context.resources)
+        inSplitShade = LargeScreenUtils.shouldUseSplitNotificationShade(context.resources)
     }
 
     /**

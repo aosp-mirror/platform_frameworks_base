@@ -918,6 +918,18 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
         verify(mKeyguardStatusViewController, never()).displayClock(LARGE, /* animate */ true);
     }
 
+    @Test
+    public void testLargeScreenHeaderMadeActiveForLargeScreen() {
+        mStatusBarStateController.setState(SHADE);
+        when(mResources.getBoolean(R.bool.config_use_large_screen_shade_header)).thenReturn(true);
+        mNotificationPanelViewController.updateResources();
+        verify(mSplitShadeHeaderController).setActive(true);
+
+        when(mResources.getBoolean(R.bool.config_use_large_screen_shade_header)).thenReturn(false);
+        mNotificationPanelViewController.updateResources();
+        verify(mSplitShadeHeaderController).setActive(false);
+    }
+
     private void triggerPositionClockAndNotifications() {
         mNotificationPanelViewController.closeQs();
     }
