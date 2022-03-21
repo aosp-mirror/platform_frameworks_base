@@ -237,6 +237,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
     private static final int MSG_RESET_HANDWRITING = 1090;
     private static final int MSG_START_HANDWRITING = 1100;
+    private static final int MSG_FINISH_HANDWRITING = 1110;
 
     private static final int MSG_UNBIND_CLIENT = 3000;
     private static final int MSG_UNBIND_ACCESSIBILITY_SERVICE = 3001;
@@ -4496,7 +4497,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @BinderThread
-    private void finishStylusHandwriting(int requestId) {
+    private void resetStylusHandwriting(int requestId) {
         synchronized (ImfLock.class) {
             final OptionalInt curRequest = mHwController.getCurrentRequestId();
             if (!curRequest.isPresent() || curRequest.getAsInt() != requestId) {
@@ -4860,6 +4861,14 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                         // When failed to issue IPCs, re-initialize handwriting state.
                         Slog.w(TAG, "Resetting handwriting mode.");
                         mHwController.initializeHandwritingSpy(mCurTokenDisplayId);
+                    }
+                }
+                return true;
+            case MSG_FINISH_HANDWRITING:
+                synchronized (ImfLock.class) {
+                    IInputMethodInvoker curMethod = getCurMethodLocked();
+                    if (curMethod != null && mHwController.getCurrentRequestId().isPresent()) {
+                        curMethod.finishStylusHandwriting();
                     }
                 }
                 return true;
@@ -5500,6 +5509,12 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                     }
                 }
             }
+        }
+
+        @Override
+        public void maybeFinishStylusHandwriting() {
+            mHandler.removeMessages(MSG_FINISH_HANDWRITING);
+            mHandler.obtainMessage(MSG_FINISH_HANDWRITING).sendToTarget();
         }
     }
 
@@ -6454,8 +6469,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
         @BinderThread
         @Override
-        public void finishStylusHandwriting(int requestId) {
-            mImms.finishStylusHandwriting(requestId);
+        public void resetStylusHandwriting(int requestId) {
+            mImms.resetStylusHandwriting(requestId);
         }
     }
 }

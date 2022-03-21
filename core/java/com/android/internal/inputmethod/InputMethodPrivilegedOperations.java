@@ -416,13 +416,13 @@ public final class InputMethodPrivilegedOperations {
      * @param requestId
      */
     @AnyThread
-    public void finishStylusHandwriting(int requestId) {
+    public void resetStylusHandwriting(int requestId) {
         final IInputMethodPrivilegedOperations ops = mOps.getAndWarnIfNull();
         if (ops == null) {
             return;
         }
         try {
-            ops.finishStylusHandwriting(requestId);
+            ops.resetStylusHandwriting(requestId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
