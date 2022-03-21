@@ -403,6 +403,7 @@ package android {
 
   public static final class R.drawable {
     field public static final int ic_info = 17301684; // 0x10800b4
+    field public static final int ic_safety_protection;
   }
 
   public static final class R.raw {
@@ -448,6 +449,7 @@ package android {
     field public static final int config_systemVisualIntelligence = 17039415; // 0x1040037
     field public static final int config_systemWellbeing = 17039408; // 0x1040030
     field public static final int config_systemWifiCoexManager = 17039407; // 0x104002f
+    field public static final int safety_protection_display_text;
   }
 
   public static final class R.style {
