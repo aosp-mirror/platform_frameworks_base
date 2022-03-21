@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.phone;
 import static com.android.systemui.DejankUtils.whitelistIpcs;
 
 import android.content.Intent;
+import android.os.UserHandle;
 import android.os.UserManager;
 import android.view.View;
 import android.view.ViewGroup;
@@ -62,7 +63,7 @@ public class MultiUserSwitchController extends ViewController<MultiUserSwitch> {
 
                 mActivityStarter.startActivity(intent, true /* dismissShade */,
                         ActivityLaunchAnimator.Controller.fromView(v, null),
-                        true /* showOverlockscreenwhenlocked */);
+                        true /* showOverlockscreenwhenlocked */, UserHandle.SYSTEM);
             } else {
                 mUserSwitchDialogController.showDialog(v);
             }
