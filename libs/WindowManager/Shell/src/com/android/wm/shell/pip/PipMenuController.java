@@ -66,7 +66,7 @@ public interface PipMenuController {
     /**
      * Given a set of actions, update the menu.
      */
-    void setAppActions(ParceledListSlice<RemoteAction> appActions);
+    void setAppActions(ParceledListSlice<RemoteAction> appActions, RemoteAction closeAction);
 
     /**
      * Resize the PiP menu with the given bounds. The PiP SurfaceControl is given if there is a
