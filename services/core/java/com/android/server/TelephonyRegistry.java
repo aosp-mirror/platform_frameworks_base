@@ -1030,12 +1030,6 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 callingFeatureId, callback, eventList, notifyNow, subId);
     }
 
-    private void listen(String callingPackage, @Nullable String callingFeatureId,
-            IPhoneStateListener callback, Set<Integer> events, boolean notifyNow, int subId) {
-        listen(false, false, callingPackage,
-                callingFeatureId, callback, events, notifyNow, subId);
-    }
-
     private void listen(boolean renounceFineLocationAccess,
             boolean renounceCoarseLocationAccess, String callingPackage,
             @Nullable String callingFeatureId, IPhoneStateListener callback,
