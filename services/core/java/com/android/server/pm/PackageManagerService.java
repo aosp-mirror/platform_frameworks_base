@@ -1254,9 +1254,18 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         if (applicationInfo == null) {
             throw new ParcelableException(new PackageManager.NameNotFoundException(packageName));
         }
+
         final InstallSourceInfo installSourceInfo = snapshot.getInstallSourceInfo(packageName);
-        final String installerPackageName =
-                installSourceInfo != null ? installSourceInfo.getInitiatingPackageName() : null;
+        final String installerPackageName;
+        if (installSourceInfo != null) {
+            if (!TextUtils.isEmpty(installSourceInfo.getInitiatingPackageName())) {
+                installerPackageName = installSourceInfo.getInitiatingPackageName();
+            } else {
+                installerPackageName = installSourceInfo.getInstallingPackageName();
+            }
+        } else {
+            installerPackageName = null;
+        }
 
         List<Pair<String, File>> filesToChecksum = new ArrayList<>();
 
