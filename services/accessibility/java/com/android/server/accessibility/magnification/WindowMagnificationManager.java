@@ -108,6 +108,17 @@ public class WindowMagnificationManager implements
     private @interface ConnectionState {
     }
 
+    private static String connectionStateToString(@ConnectionState int state) {
+        switch (state) {
+            case CONNECTING: return "CONNECTING";
+            case CONNECTED: return "CONNECTED";
+            case DISCONNECTING: return "DISCONNECTING";
+            case DISCONNECTED: return "DISCONNECTED";
+            default:
+                return "UNKNOWN:" + state;
+        }
+    }
+
     @ConnectionState
     private int mConnectionState = DISCONNECTED;
 
@@ -205,7 +216,8 @@ public class WindowMagnificationManager implements
      */
     public void setConnection(@Nullable IWindowMagnificationConnection connection) {
         if (DBG) {
-            Slog.d(TAG, "setConnection :" + connection + " ,mConnectionState=" + mConnectionState);
+            Slog.d(TAG, "setConnection :" + connection + ", mConnectionState="
+                    + connectionStateToString(mConnectionState));
         }
         synchronized (mLock) {
             // Reset connectionWrapper.
@@ -275,9 +287,8 @@ public class WindowMagnificationManager implements
             if ((connect && (mConnectionState == CONNECTED || mConnectionState == CONNECTING))
                     || (!connect && (mConnectionState == DISCONNECTED
                     || mConnectionState == DISCONNECTING))) {
-                Slog.w(TAG,
-                        "requestConnection duplicated request: connect=" + connect
-                                + " ,mConnectionState=" + mConnectionState);
+                Slog.w(TAG, "requestConnection duplicated request: connect=" + connect
+                        + ", mConnectionState=" + connectionStateToString(mConnectionState));
                 return false;
             }
 
@@ -321,14 +332,14 @@ public class WindowMagnificationManager implements
     /**
      * Returns window magnification connection state.
      */
-    public int getConnectionState() {
-        return mConnectionState;
+    public String getConnectionState() {
+        return connectionStateToString(mConnectionState);
     }
 
     private void setConnectionState(@ConnectionState int state) {
         if (DBG) {
-            Slog.d(TAG, "setConnectionState : state=" + state + " ,mConnectionState="
-                    + mConnectionState);
+            Slog.d(TAG, "setConnectionState : state=" + state + ", mConnectionState="
+                    + connectionStateToString(mConnectionState));
         }
         mConnectionState = state;
     }
@@ -1114,7 +1125,7 @@ public class WindowMagnificationManager implements
         if (mConnectionWrapper == null) {
             Slog.w(TAG,
                     "enableWindowMagnificationInternal mConnectionWrapper is null. "
-                            + "mConnectionState=" + mConnectionState);
+                            + "mConnectionState=" + connectionStateToString(mConnectionState));
             return false;
         }
         return mConnectionWrapper.enableWindowMagnification(
