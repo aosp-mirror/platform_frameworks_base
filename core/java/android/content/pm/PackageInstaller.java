@@ -682,7 +682,9 @@ public class PackageInstaller {
      * </ul>
      *
      * @param packageName The package to uninstall.
-     * @param statusReceiver Where to deliver the result.
+     * @param statusReceiver Where to deliver the result of the operation indicated by the extra
+     *                       {@link #EXTRA_STATUS}. Refer to the individual status codes
+     *                       on how to handle them.
      *
      * @see android.app.admin.DevicePolicyManager
      */
@@ -700,7 +702,9 @@ public class PackageInstaller {
      *
      * @param packageName The package to uninstall.
      * @param flags Flags for uninstall.
-     * @param statusReceiver Where to deliver the result.
+     * @param statusReceiver Where to deliver the result of the operation indicated by the extra
+     *                       {@link #EXTRA_STATUS}. Refer to the individual status codes
+     *                       on how to handle them.
      *
      * @hide
      */
@@ -725,7 +729,9 @@ public class PackageInstaller {
      * </ul>
      *
      * @param versionedPackage The versioned package to uninstall.
-     * @param statusReceiver Where to deliver the result.
+     * @param statusReceiver Where to deliver the result of the operation indicated by the extra
+     *                       {@link #EXTRA_STATUS}. Refer to the individual status codes
+     *                       on how to handle them.
      *
      * @see android.app.admin.DevicePolicyManager
      */
@@ -747,7 +753,9 @@ public class PackageInstaller {
      *
      * @param versionedPackage The versioned package to uninstall.
      * @param flags Flags for uninstall.
-     * @param statusReceiver Where to deliver the result.
+     * @param statusReceiver Where to deliver the result of the operation indicated by the extra
+     *                       {@link #EXTRA_STATUS}. Refer to the individual status codes
+     *                       on how to handle them.
      *
      * @hide
      */
@@ -775,7 +783,9 @@ public class PackageInstaller {
      *
      * @param packageName The package to install.
      * @param installReason Reason for install.
-     * @param statusReceiver Where to deliver the result.
+     * @param statusReceiver Where to deliver the result of the operation indicated by the extra
+     *                       {@link #EXTRA_STATUS}. Refer to the individual status codes
+     *                       on how to handle them.
      */
     @RequiresPermission(allOf = {
             Manifest.permission.INSTALL_PACKAGES,
@@ -797,8 +807,10 @@ public class PackageInstaller {
      * Uninstall the given package for the user for which this installer was created if the package
      * will still exist for other users on the device.
      *
-     * @param packageName The package to install.
-     * @param statusReceiver Where to deliver the result.
+     * @param packageName The package to uninstall.
+     * @param statusReceiver Where to deliver the result of the operation indicated by the extra
+     *                       {@link #EXTRA_STATUS}. Refer to the individual status codes
+     *                       on how to handle them.
      */
     @RequiresPermission(Manifest.permission.DELETE_PACKAGES)
     public void uninstallExistingPackage(@NonNull String packageName,
