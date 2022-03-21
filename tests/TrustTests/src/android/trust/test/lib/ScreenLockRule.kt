@@ -42,7 +42,7 @@ class ScreenLockRule : TestRule {
     override fun apply(base: Statement, description: Description) = object : Statement() {
         override fun evaluate() {
             verifyNoScreenLockAlreadySet()
-            verifyKeyguardDismissed()
+            dismissKeyguard()
             setScreenLock()
             setLockOnPowerButton()
 
@@ -51,7 +51,7 @@ class ScreenLockRule : TestRule {
             } finally {
                 removeScreenLock()
                 revertLockOnPowerButton()
-                verifyKeyguardDismissed()
+                dismissKeyguard()
             }
         }
     }
@@ -62,30 +62,21 @@ class ScreenLockRule : TestRule {
                 .isFalse()
     }
 
-    private fun verifyKeyguardDismissed() {
-        val maxWaits = 30
-        var waitCount = 0
-
-        while (windowManager.isKeyguardLocked && waitCount < maxWaits) {
-            Log.i(TAG, "Keyguard still showing; attempting to dismiss and wait 50ms ($waitCount)")
+    fun dismissKeyguard() {
+        wait("keyguard dismissed") { count ->
             windowManager.dismissKeyguard(null, null)
 
             // Sometimes, bouncer gets shown due to a race, so we have to put display to sleep
             // and wake it back up to get it to go away
-            if (waitCount >= 10 && waitCount % 5 == 0) {
-                Log.i(TAG, "Escalation: attempting screen off/on to get rid of bouncer (+500ms)")
+            if (count >= 10 && count % 5 == 0) {
+                Log.i(TAG, "Escalation: attempting screen off/on to get rid of bouncer")
                 uiDevice.sleep()
                 Thread.sleep(250)
                 uiDevice.wakeUp()
-                Thread.sleep(250)
             }
 
-            Thread.sleep(50)
-            waitCount++
+            !windowManager.isKeyguardLocked
         }
-        assertWithMessage("Keyguard should be unlocked")
-                .that(windowManager.isKeyguardLocked)
-                .isFalse()
     }
 
     private fun setScreenLock() {
@@ -94,9 +85,7 @@ class ScreenLockRule : TestRule {
                 LockscreenCredential.createNone(),
                 context.userId
         )
-        assertWithMessage("Screen Lock should now be set")
-                .that(lockPatternUtils.isSecure(context.userId))
-                .isTrue()
+        wait("screen lock set") { lockPatternUtils.isSecure(context.userId) }
         Log.i(TAG, "Device PIN set to $PIN")
     }
 
@@ -110,21 +99,16 @@ class ScreenLockRule : TestRule {
                 LockscreenCredential.createNone(),
                 LockscreenCredential.createPin(PIN),
                 context.userId)
-        Thread.sleep(100)
+        Log.i(TAG, "Removing screen lock")
         assertWithMessage("Lock screen credential should be unset")
                 .that(lockCredentialUnset)
                 .isTrue()
 
         lockPatternUtils.setLockScreenDisabled(true, context.userId)
-        Thread.sleep(100)
-        assertWithMessage("Lockscreen needs to be disabled")
-                .that(lockPatternUtils.isLockScreenDisabled(context.userId))
-                .isTrue()
-
-        // this is here because somehow it helps the keyguard not get stuck
-        uiDevice.sleep()
-        Thread.sleep(500) // delay added to avoid initiating camera by double clicking power
-        uiDevice.wakeUp()
+        wait("screen lock un-set") {
+            lockPatternUtils.isLockScreenDisabled(context.userId)
+        }
+        wait("screen lock insecure") { !lockPatternUtils.isSecure(context.userId) }
     }
 
     private fun revertLockOnPowerButton() {
