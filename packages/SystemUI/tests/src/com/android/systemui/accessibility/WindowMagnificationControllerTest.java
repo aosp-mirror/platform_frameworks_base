@@ -80,6 +80,7 @@ import com.android.systemui.utils.os.FakeHandler;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Answers;
@@ -302,6 +303,7 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
         verify(mSfVsyncFrameProvider, atLeastOnce()).postFrameCallback(any());
     }
 
+    @Ignore("b/224717753")
     @Test
     public void moveWindowMagnifierToPositionWithAnimation_expectedValuesAndInvokeCallback()
             throws InterruptedException {
@@ -336,6 +338,7 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
         assertEquals(mWindowMagnificationController.getCenterY(), targetCenterY, 0);
     }
 
+    @Ignore("b/224717753")
     @Test
     public void moveWindowMagnifierToPositionMultipleTimes_expectedValuesAndInvokeCallback()
             throws InterruptedException {
