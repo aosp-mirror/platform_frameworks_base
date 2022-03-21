@@ -5272,6 +5272,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (mControllableInsetProvider != null) {
             return;
         }
+        if (mDisplayContent.inTransition()) {
+            // Skip because the animation is usually unnoticeable (e.g. covered by rotation
+            // animation) and the animation bounds could be inconsistent, such as depending
+            // on when the window applies its draw transaction with new rotation.
+            return;
+        }
 
         final DisplayInfo displayInfo = getDisplayInfo();
         anim.initialize(mWindowFrames.mFrame.width(), mWindowFrames.mFrame.height(),
@@ -5516,10 +5522,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
         float newHScale = mHScale * mGlobalScale * mWallpaperScale;
         float newVScale = mVScale * mGlobalScale * mWallpaperScale;
-        if (mLastHScale != newHScale ||
-            mLastVScale != newVScale ) {
-            getPendingTransaction().setMatrix(getSurfaceControl(),
-                newHScale, 0, 0, newVScale);
+        if (mLastHScale != newHScale || mLastVScale != newVScale) {
+            getSyncTransaction().setMatrix(mSurfaceControl, newHScale, 0, 0, newVScale);
             mLastHScale = newHScale;
             mLastVScale = newVScale;
         }

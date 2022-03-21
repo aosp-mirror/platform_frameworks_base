@@ -3297,9 +3297,10 @@ class Task extends TaskFragment {
             mTmpDimBoundsRect.offsetTo(0, 0);
         }
 
-        updateShadowsRadius(isFocused(), getSyncTransaction());
+        final SurfaceControl.Transaction t = getSyncTransaction();
+        updateShadowsRadius(isFocused(), t);
 
-        if (mDimmer.updateDims(getPendingTransaction(), mTmpDimBoundsRect)) {
+        if (mDimmer.updateDims(t, mTmpDimBoundsRect)) {
             scheduleAnimation();
         }
 
@@ -3309,7 +3310,7 @@ class Task extends TaskFragment {
         final boolean show = isVisible() || isAnimating(TRANSITION | PARENTS | CHILDREN);
         if (mSurfaceControl != null) {
             if (show != mLastSurfaceShowing) {
-                getSyncTransaction().setVisibility(mSurfaceControl, show);
+                t.setVisibility(mSurfaceControl, show);
             }
         }
         mLastSurfaceShowing = show;
