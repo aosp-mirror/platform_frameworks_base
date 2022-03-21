@@ -474,7 +474,8 @@ public class PhonePipMenuController implements PipMenuController {
      * Sets the menu actions to the actions provided by the current PiP menu.
      */
     @Override
-    public void setAppActions(ParceledListSlice<RemoteAction> appActions) {
+    public void setAppActions(ParceledListSlice<RemoteAction> appActions,
+            RemoteAction closeAction) {
         mAppActions = appActions;
         updateMenuActions();
     }
