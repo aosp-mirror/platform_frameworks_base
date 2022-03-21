@@ -662,7 +662,7 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
                 mDimmer.resetDimStates();
             }
 
-            if (mDimmer.updateDims(getPendingTransaction(), mTmpDimBoundsRect)) {
+            if (mDimmer.updateDims(getSyncTransaction(), mTmpDimBoundsRect)) {
                 scheduleAnimation();
             }
         }
