@@ -36,7 +36,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -56,7 +55,7 @@ public final class ShutdownCheckPoints {
     private static final SimpleDateFormat DATE_FORMAT =
             new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS z");
 
-    private final LinkedList<CheckPoint> mCheckPoints;
+    private final ArrayList<CheckPoint> mCheckPoints;
     private final Injector mInjector;
 
     private ShutdownCheckPoints() {
@@ -85,7 +84,7 @@ public final class ShutdownCheckPoints {
 
     @VisibleForTesting
     ShutdownCheckPoints(Injector injector) {
-        mCheckPoints = new LinkedList<>();
+        mCheckPoints = new ArrayList<>();
         mInjector = injector;
     }
 
@@ -144,8 +143,8 @@ public final class ShutdownCheckPoints {
 
     private void recordCheckPointInternal(CheckPoint checkPoint) {
         synchronized (mCheckPoints) {
-            mCheckPoints.addLast(checkPoint);
-            if (mCheckPoints.size() > mInjector.maxCheckPoints()) mCheckPoints.removeFirst();
+            mCheckPoints.add(checkPoint);
+            if (mCheckPoints.size() > mInjector.maxCheckPoints()) mCheckPoints.remove(0);
         }
     }
 
