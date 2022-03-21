@@ -386,7 +386,8 @@ public class ApexManagerTest {
                 ApexManager.MATCH_ACTIVE_PACKAGE);
         assertThat(newInfo.applicationInfo.sourceDir).isEqualTo(finalApex.getAbsolutePath());
         assertThat(newInfo.applicationInfo.longVersionCode).isEqualTo(2);
-        assertThat(newInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM).isEqualTo(0);
+        assertThat(newInfo.applicationInfo.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP)
+                .isEqualTo(ApplicationInfo.FLAG_UPDATED_SYSTEM_APP);
         assertThat(newInfo.applicationInfo.flags & ApplicationInfo.FLAG_INSTALLED)
             .isEqualTo(ApplicationInfo.FLAG_INSTALLED);
 
@@ -424,7 +425,8 @@ public class ApexManagerTest {
                 ApexManager.MATCH_ACTIVE_PACKAGE);
         assertThat(newInfo.applicationInfo.sourceDir).isEqualTo(finalApex.getAbsolutePath());
         assertThat(newInfo.applicationInfo.longVersionCode).isEqualTo(2);
-        assertThat(newInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM).isEqualTo(0);
+        assertThat(newInfo.applicationInfo.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP)
+                .isEqualTo(ApplicationInfo.FLAG_UPDATED_SYSTEM_APP);
         assertThat(newInfo.applicationInfo.flags & ApplicationInfo.FLAG_INSTALLED)
             .isEqualTo(ApplicationInfo.FLAG_INSTALLED);
 
