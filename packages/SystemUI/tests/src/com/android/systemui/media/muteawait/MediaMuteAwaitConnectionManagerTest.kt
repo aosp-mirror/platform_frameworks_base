@@ -24,7 +24,7 @@ import android.media.AudioDeviceAttributes
 import android.media.AudioDeviceInfo
 import android.media.AudioManager
 import android.media.AudioManager.MuteAwaitConnectionCallback.EVENT_CONNECTION
-import android.test.suitebuilder.annotation.SmallTest
+import androidx.test.filters.SmallTest
 import com.android.settingslib.media.DeviceIconUtil
 import com.android.settingslib.media.LocalMediaManager
 import com.android.systemui.R
@@ -95,7 +95,7 @@ class MediaMuteAwaitConnectionManagerTest : SysuiTestCase() {
 
         muteAwaitConnectionManager.startListening()
 
-        verify(localMediaManager, never()).dispatchAboutToConnectDeviceChanged(any(), any())
+        verify(localMediaManager, never()).dispatchAboutToConnectDeviceAdded(any(), any(), any())
     }
 
     @Test
@@ -104,7 +104,9 @@ class MediaMuteAwaitConnectionManagerTest : SysuiTestCase() {
 
         muteAwaitConnectionManager.startListening()
 
-        verify(localMediaManager).dispatchAboutToConnectDeviceChanged(eq(DEVICE_NAME), eq(icon))
+        verify(localMediaManager).dispatchAboutToConnectDeviceAdded(
+            eq(DEVICE_ADDRESS), eq(DEVICE_NAME), eq(icon)
+        )
     }
 
     @Test
@@ -114,7 +116,7 @@ class MediaMuteAwaitConnectionManagerTest : SysuiTestCase() {
 
         muteAwaitListener.onMutedUntilConnection(DEVICE, intArrayOf(USAGE_UNKNOWN))
 
-        verify(localMediaManager, never()).dispatchAboutToConnectDeviceChanged(any(), any())
+        verify(localMediaManager, never()).dispatchAboutToConnectDeviceAdded(any(), any(), any())
     }
 
     @Test
@@ -125,7 +127,9 @@ class MediaMuteAwaitConnectionManagerTest : SysuiTestCase() {
 
         muteAwaitListener.onMutedUntilConnection(DEVICE, intArrayOf(USAGE_MEDIA))
 
-        verify(localMediaManager).dispatchAboutToConnectDeviceChanged(eq(DEVICE_NAME), eq(icon))
+        verify(localMediaManager).dispatchAboutToConnectDeviceAdded(
+            eq(DEVICE_ADDRESS), eq(DEVICE_NAME), eq(icon)
+        )
     }
 
     @Test
@@ -135,7 +139,7 @@ class MediaMuteAwaitConnectionManagerTest : SysuiTestCase() {
 
         muteAwaitListener.onUnmutedEvent(EVENT_CONNECTION, DEVICE, intArrayOf(USAGE_MEDIA))
 
-        verify(localMediaManager, never()).dispatchAboutToConnectDeviceChanged(any(), any())
+        verify(localMediaManager, never()).dispatchAboutToConnectDeviceAdded(any(), any(), any())
     }
 
     @Test
@@ -155,7 +159,7 @@ class MediaMuteAwaitConnectionManagerTest : SysuiTestCase() {
         )
         muteAwaitListener.onUnmutedEvent(EVENT_CONNECTION, otherDevice, intArrayOf(USAGE_MEDIA))
 
-        verify(localMediaManager, never()).dispatchAboutToConnectDeviceChanged(any(), any())
+        verify(localMediaManager, never()).dispatchAboutToConnectDeviceAdded(any(), any(), any())
     }
 
     @Test
@@ -167,7 +171,7 @@ class MediaMuteAwaitConnectionManagerTest : SysuiTestCase() {
 
         muteAwaitListener.onUnmutedEvent(EVENT_CONNECTION, DEVICE, intArrayOf(USAGE_UNKNOWN))
 
-        verify(localMediaManager, never()).dispatchAboutToConnectDeviceChanged(any(), any())
+        verify(localMediaManager, never()).dispatchAboutToConnectDeviceAdded(any(), any(), any())
     }
 
     @Test
@@ -179,7 +183,7 @@ class MediaMuteAwaitConnectionManagerTest : SysuiTestCase() {
 
         muteAwaitListener.onUnmutedEvent(EVENT_CONNECTION, DEVICE, intArrayOf(USAGE_MEDIA))
 
-        verify(localMediaManager).dispatchAboutToConnectDeviceChanged(eq(null), eq(null))
+        verify(localMediaManager).dispatchAboutToConnectDeviceRemoved()
     }
 
     private fun getMuteAwaitListener(): AudioManager.MuteAwaitConnectionCallback {
@@ -191,11 +195,12 @@ class MediaMuteAwaitConnectionManagerTest : SysuiTestCase() {
     }
 }
 
+private const val DEVICE_ADDRESS = "DeviceAddress"
 private const val DEVICE_NAME = "DeviceName"
 private val DEVICE = AudioDeviceAttributes(
         AudioDeviceAttributes.ROLE_OUTPUT,
         AudioDeviceInfo.TYPE_USB_HEADSET,
-        "address",
+        DEVICE_ADDRESS,
         DEVICE_NAME,
         listOf(),
         listOf(),

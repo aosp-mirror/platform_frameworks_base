@@ -52,7 +52,9 @@ class MediaMuteAwaitConnectionManager constructor(
                 // There should only be one device that's mutedUntilConnection at a time, so we can
                 // safely override any previous value.
                 currentMutedDevice = device
-                localMediaManager.dispatchAboutToConnectDeviceChanged(device.name, device.getIcon())
+                localMediaManager.dispatchAboutToConnectDeviceAdded(
+                    device.address, device.name, device.getIcon()
+                )
             }
         }
 
@@ -63,7 +65,7 @@ class MediaMuteAwaitConnectionManager constructor(
         ) {
             if (currentMutedDevice == device && USAGE_MEDIA in mutedUsages) {
                 currentMutedDevice = null
-                localMediaManager.dispatchAboutToConnectDeviceChanged(null, null)
+                localMediaManager.dispatchAboutToConnectDeviceRemoved()
             }
         }
     }
@@ -76,8 +78,8 @@ class MediaMuteAwaitConnectionManager constructor(
         val currentDevice = audioManager.mutingExpectedDevice
         if (currentDevice != null) {
             currentMutedDevice = currentDevice
-            localMediaManager.dispatchAboutToConnectDeviceChanged(
-                currentDevice.name, currentDevice.getIcon()
+            localMediaManager.dispatchAboutToConnectDeviceAdded(
+                currentDevice.address, currentDevice.name, currentDevice.getIcon()
             )
         }
     }
