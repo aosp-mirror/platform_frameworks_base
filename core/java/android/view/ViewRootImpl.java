@@ -4156,6 +4156,11 @@ public final class ViewRootImpl implements ViewParent,
         return true;
     }
 
+
+    public boolean isInSync() {
+        return mLastSyncId != -1;
+    }
+
     private void addFrameCommitCallbackIfNeeded() {
         if (!isHardwareEnabled()) {
             return;

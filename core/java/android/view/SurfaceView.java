@@ -968,7 +968,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                         || (mVisible && !mDrawFinished);
                 final TransactionCallback transactionCallback =
                         redrawNeeded ? new TransactionCallback() : null;
-                if (redrawNeeded && viewRoot.wasRelayoutRequested()) {
+                if (redrawNeeded && viewRoot.wasRelayoutRequested() && viewRoot.isInSync()) {
                     mBlastBufferQueue.syncNextTransaction(
                             false /* acquireSingleBuffer */,
                             transactionCallback::onTransactionReady);
