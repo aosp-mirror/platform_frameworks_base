@@ -530,5 +530,10 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
 
             return true;
         }
+
+        @Override
+        public Context createContextAsUser(UserHandle user) {
+            return context;
+        }
     }
 }
