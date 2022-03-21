@@ -69,6 +69,17 @@ class ScreenLockRule : TestRule {
         while (windowManager.isKeyguardLocked && waitCount < maxWaits) {
             Log.i(TAG, "Keyguard still showing; attempting to dismiss and wait 50ms ($waitCount)")
             windowManager.dismissKeyguard(null, null)
+
+            // Sometimes, bouncer gets shown due to a race, so we have to put display to sleep
+            // and wake it back up to get it to go away
+            if (waitCount >= 10 && waitCount % 5 == 0) {
+                Log.i(TAG, "Escalation: attempting screen off/on to get rid of bouncer (+500ms)")
+                uiDevice.sleep()
+                Thread.sleep(250)
+                uiDevice.wakeUp()
+                Thread.sleep(250)
+            }
+
             Thread.sleep(50)
             waitCount++
         }
