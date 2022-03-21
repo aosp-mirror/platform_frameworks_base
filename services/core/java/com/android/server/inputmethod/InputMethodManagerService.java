@@ -166,6 +166,7 @@ import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.os.TransferPipe;
+import com.android.internal.util.ConcurrentUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.view.IInlineSuggestionsRequestCallback;
 import com.android.internal.view.IInlineSuggestionsResponseCallback;
@@ -179,6 +180,7 @@ import com.android.server.AccessibilityManagerInternal;
 import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
+import com.android.server.SystemServerInitThreadPool;
 import com.android.server.SystemService;
 import com.android.server.inputmethod.InputMethodManagerInternal.InputMethodListListener;
 import com.android.server.inputmethod.InputMethodSubtypeSwitchingController.ImeSubtypeListItem;
@@ -207,6 +209,7 @@ import java.util.OptionalInt;
 import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -351,6 +354,9 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     @GuardedBy("ImfLock.class")
     @Nullable
     private OverlayableSystemBooleanResourceWrapper mImeDrawsImeNavBarRes;
+    @GuardedBy("ImfLock.class")
+    @Nullable
+    Future<?> mImeDrawsImeNavBarResLazyInitFuture;
 
     static class SessionState {
         final ClientState client;
@@ -1742,7 +1748,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @GuardedBy("ImfLock.class")
-    private void recreateImeDrawsImeNavBarResIfNecessary(@UserIdInt int targetUserId) {
+    private void maybeInitImeNavbarConfigLocked(@UserIdInt int targetUserId) {
         // Currently, com.android.internal.R.bool.config_imeDrawsImeNavBar is overlaid only for the
         // profile parent user.
         // TODO(b/221443458): See if we can make OverlayManager be aware of profile groups.
@@ -1786,7 +1792,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         if (DEBUG) Slog.d(TAG, "Switching user stage 1/3. newUserId=" + newUserId
                 + " currentUserId=" + mSettings.getCurrentUserId());
 
-        recreateImeDrawsImeNavBarResIfNecessary(newUserId);
+        maybeInitImeNavbarConfigLocked(newUserId);
 
         // ContentObserver should be registered again when the user is changed
         mSettingsObserver.registerContentObserverLocked(newUserId);
@@ -1892,7 +1898,22 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                     });
                 }
 
-                recreateImeDrawsImeNavBarResIfNecessary(currentUserId);
+                // TODO(b/32343335): The entire systemRunning() method needs to be revisited.
+                mImeDrawsImeNavBarResLazyInitFuture = SystemServerInitThreadPool.submit(() -> {
+                    // Note that the synchronization block below guarantees that the task
+                    // can never be completed before the returned Future<?> object is assigned to
+                    // the "mImeDrawsImeNavBarResLazyInitFuture" field.
+                    synchronized (ImfLock.class) {
+                        mImeDrawsImeNavBarResLazyInitFuture = null;
+                        if (currentUserId != mSettings.getCurrentUserId()) {
+                            // This means that the current user is already switched to other user
+                            // before the background task is executed. In this scenario the relevant
+                            // field should already be initialized.
+                            return;
+                        }
+                        maybeInitImeNavbarConfigLocked(currentUserId);
+                    }
+                }, "Lazily initialize IMMS#mImeDrawsImeNavBarRes");
 
                 mMyPackageMonitor.register(mContext, null, UserHandle.ALL, true);
                 mSettingsObserver.registerContentObserverLocked(currentUserId);
@@ -3028,6 +3049,11 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     @GuardedBy("ImfLock.class")
     @InputMethodNavButtonFlags
     private int getInputMethodNavButtonFlagsLocked() {
+        if (mImeDrawsImeNavBarResLazyInitFuture != null) {
+            // TODO(b/225366708): Avoid Future.get(), which is internally used here.
+            ConcurrentUtils.waitForFutureNoInterrupt(mImeDrawsImeNavBarResLazyInitFuture,
+                    "Waiting for the lazy init of mImeDrawsImeNavBarRes");
+        }
         final boolean canImeDrawsImeNavBar =
                 mImeDrawsImeNavBarRes != null && mImeDrawsImeNavBarRes.get();
         final boolean shouldShowImeSwitcherWhenImeIsShown = shouldShowImeSwitcherLocked(
