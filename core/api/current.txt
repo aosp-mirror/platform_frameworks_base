@@ -44778,7 +44778,7 @@ package android.text {
   public class BoringLayout extends android.text.Layout implements android.text.TextUtils.EllipsizeCallback {
     ctor public BoringLayout(CharSequence, android.text.TextPaint, int, android.text.Layout.Alignment, float, float, android.text.BoringLayout.Metrics, boolean);
     ctor public BoringLayout(CharSequence, android.text.TextPaint, int, android.text.Layout.Alignment, float, float, android.text.BoringLayout.Metrics, boolean, android.text.TextUtils.TruncateAt, int);
-    ctor public BoringLayout(@NonNull CharSequence, @NonNull android.text.TextPaint, @IntRange(from=0) int, @NonNull android.text.Layout.Alignment, float, float, @NonNull android.text.BoringLayout.Metrics, boolean, @NonNull android.text.TextUtils.TruncateAt, @IntRange(from=0) int, boolean);
+    ctor public BoringLayout(@NonNull CharSequence, @NonNull android.text.TextPaint, @IntRange(from=0) int, @NonNull android.text.Layout.Alignment, float, float, @NonNull android.text.BoringLayout.Metrics, boolean, @Nullable android.text.TextUtils.TruncateAt, @IntRange(from=0) int, boolean);
     method public void ellipsized(int, int);
     method public int getBottomPadding();
     method public int getEllipsisCount(int);
@@ -44796,9 +44796,9 @@ package android.text {
     method @Nullable public static android.text.BoringLayout.Metrics isBoring(@NonNull CharSequence, @NonNull android.text.TextPaint, @NonNull android.text.TextDirectionHeuristic, boolean, @Nullable android.text.BoringLayout.Metrics);
     method public static android.text.BoringLayout make(CharSequence, android.text.TextPaint, int, android.text.Layout.Alignment, float, float, android.text.BoringLayout.Metrics, boolean);
     method public static android.text.BoringLayout make(CharSequence, android.text.TextPaint, int, android.text.Layout.Alignment, float, float, android.text.BoringLayout.Metrics, boolean, android.text.TextUtils.TruncateAt, int);
-    method @NonNull public static android.text.BoringLayout make(@NonNull CharSequence, @NonNull android.text.TextPaint, @IntRange(from=0) int, @NonNull android.text.Layout.Alignment, @NonNull android.text.BoringLayout.Metrics, boolean, @NonNull android.text.TextUtils.TruncateAt, @IntRange(from=0) int, boolean);
+    method @NonNull public static android.text.BoringLayout make(@NonNull CharSequence, @NonNull android.text.TextPaint, @IntRange(from=0) int, @NonNull android.text.Layout.Alignment, @NonNull android.text.BoringLayout.Metrics, boolean, @Nullable android.text.TextUtils.TruncateAt, @IntRange(from=0) int, boolean);
     method public android.text.BoringLayout replaceOrMake(CharSequence, android.text.TextPaint, int, android.text.Layout.Alignment, float, float, android.text.BoringLayout.Metrics, boolean);
-    method @NonNull public android.text.BoringLayout replaceOrMake(@NonNull CharSequence, @NonNull android.text.TextPaint, @IntRange(from=0) int, @NonNull android.text.Layout.Alignment, @NonNull android.text.BoringLayout.Metrics, boolean, @NonNull android.text.TextUtils.TruncateAt, @IntRange(from=0) int, boolean);
+    method @NonNull public android.text.BoringLayout replaceOrMake(@NonNull CharSequence, @NonNull android.text.TextPaint, @IntRange(from=0) int, @NonNull android.text.Layout.Alignment, @NonNull android.text.BoringLayout.Metrics, boolean, @Nullable android.text.TextUtils.TruncateAt, @IntRange(from=0) int, boolean);
     method public android.text.BoringLayout replaceOrMake(CharSequence, android.text.TextPaint, int, android.text.Layout.Alignment, float, float, android.text.BoringLayout.Metrics, boolean, android.text.TextUtils.TruncateAt, int);
   }
 
