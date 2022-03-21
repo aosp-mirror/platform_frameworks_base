@@ -21,8 +21,6 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.InputDevice.SOURCE_CLASS_NONE;
 import static android.view.InsetsState.ITYPE_IME;
-import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
-import static android.view.InsetsState.ITYPE_STATUS_BAR;
 import static android.view.InsetsState.SIZE;
 import static android.view.View.PFLAG_DRAW_ANIMATION;
 import static android.view.View.SYSTEM_UI_FLAG_FULLSCREEN;
@@ -2247,11 +2245,12 @@ public final class ViewRootImpl implements ViewParent,
      */
     void updateCompatSysUiVisibility(@InternalInsetsType int type, boolean visible,
             boolean hasControl) {
-        if (type != ITYPE_STATUS_BAR && type != ITYPE_NAVIGATION_BAR) {
+        @InsetsType final int publicType = InsetsState.toPublicType(type);
+        if (publicType != Type.statusBars() && publicType != Type.navigationBars()) {
             return;
         }
         final SystemUiVisibilityInfo info = mCompatibleVisibilityInfo;
-        final int systemUiFlag = type == ITYPE_STATUS_BAR
+        final int systemUiFlag = publicType == Type.statusBars()
                 ? View.SYSTEM_UI_FLAG_FULLSCREEN
                 : View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
         final boolean wasVisible = (info.globalVisibility & systemUiFlag) == 0;
