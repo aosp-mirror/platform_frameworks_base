@@ -37,6 +37,6 @@
         <permission name="android.car.permission.USE_CAR_WATCHDOG" />
         <permission name="android.car.permission.COLLECT_CAR_WATCHDOG_METRICS" />
         <permission name="android.car.permission.CONTROL_CAR_WATCHDOG_CONFIG" />
-        <permission name="android.car.permission.USE_CAR_TELEMETRY_SERVICE"/>
+        <permission name="com.android.car.permission.USE_CAR_TELEMETRY_SERVICE"/>
     </privapp-permissions>
 </permissions>
