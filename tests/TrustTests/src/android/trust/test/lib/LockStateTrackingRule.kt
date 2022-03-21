@@ -56,12 +56,22 @@ class LockStateTrackingRule : TestRule {
         val maxWaits = 50
         var waitCount = 0
 
+        // First verify we get the call in LockState via TrustListener
         while ((lockState.locked == false) && waitCount < maxWaits) {
-            Log.i(TAG, "phone still locked, wait 50ms more ($waitCount)")
+            Log.i(TAG, "phone still unlocked (TrustListener), wait 50ms more ($waitCount)")
             Thread.sleep(50)
             waitCount++
         }
         assertThat(lockState.locked).isTrue()
+
+        // TODO(b/225231929): refactor checks into one loop and re-use for assertUnlocked
+        // Then verify we get the window manager locked
+        while (!windowManager.isKeyguardLocked && waitCount < maxWaits) {
+            Log.i(TAG, "phone still unlocked (WindowManager), wait 50ms more ($waitCount)")
+            Thread.sleep(50)
+            waitCount++
+        }
+        assertThat(windowManager.isKeyguardLocked).isTrue()
     }
 
     fun assertUnlocked() {

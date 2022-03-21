@@ -11804,11 +11804,23 @@ package android.service.translation {
 
 package android.service.trust {
 
+  public final class GrantTrustResult implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getStatus();
+    method @NonNull public static String statusToString(int);
+    method @NonNull public static android.service.trust.GrantTrustResult withStatus(int);
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.service.trust.GrantTrustResult> CREATOR;
+    field public static final int STATUS_UNKNOWN = 0; // 0x0
+    field public static final int STATUS_UNLOCKED_BY_GRANT = 1; // 0x1
+  }
+
   public class TrustAgentService extends android.app.Service {
     ctor public TrustAgentService();
     method public final void addEscrowToken(byte[], android.os.UserHandle);
     method @Deprecated public final void grantTrust(CharSequence, long, boolean);
-    method public final void grantTrust(CharSequence, long, int);
+    method @Deprecated public final void grantTrust(CharSequence, long, int);
+    method public final void grantTrust(@NonNull CharSequence, long, int, @Nullable java.util.function.Consumer<android.service.trust.GrantTrustResult>);
     method public final void isEscrowTokenActive(long, android.os.UserHandle);
     method public final void lockUser();
     method public final android.os.IBinder onBind(android.content.Intent);
@@ -11821,7 +11833,8 @@ package android.service.trust {
     method public void onEscrowTokenStateReceived(long, int);
     method public void onTrustTimeout();
     method public void onUnlockAttempt(boolean);
-    method public void onUserRequestedUnlock();
+    method public void onUserMayRequestUnlock();
+    method public void onUserRequestedUnlock(boolean);
     method public final void removeEscrowToken(long, android.os.UserHandle);
     method public final void revokeTrust();
     method public final void setManagingTrust(boolean);

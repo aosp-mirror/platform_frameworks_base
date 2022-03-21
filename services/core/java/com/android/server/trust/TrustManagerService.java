@@ -61,6 +61,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
 import android.security.Authorization;
+import android.service.trust.GrantTrustResult;
 import android.service.trust.TrustAgentService;
 import android.text.TextUtils;
 import android.util.ArrayMap;
@@ -77,6 +78,7 @@ import android.view.WindowManagerGlobal;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.content.PackageMonitor;
+import com.android.internal.infra.AndroidFuture;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.LocalServices;
@@ -131,6 +133,7 @@ public class TrustManagerService extends SystemService {
     private static final int MSG_SCHEDULE_TRUST_TIMEOUT = 15;
     private static final int MSG_USER_REQUESTED_UNLOCK = 16;
     private static final int MSG_REFRESH_TRUSTABLE_TIMERS_AFTER_AUTH = 17;
+    private static final int MSG_USER_MAY_REQUEST_UNLOCK = 18;
 
     private static final String REFRESH_DEVICE_LOCKED_EXCEPT_USER = "except";
 
@@ -495,13 +498,28 @@ public class TrustManagerService extends SystemService {
         }
     }
 
-    public void updateTrust(int userId, int flags) {
-        updateTrust(userId, flags, false /* isFromUnlock */);
+    /** Triggers a trust update. */
+    public void updateTrust(
+            int userId,
+            int flags) {
+        updateTrust(userId, flags, null);
     }
 
-    private void updateTrust(int userId, int flags, boolean isFromUnlock) {
+    /** Triggers a trust update. */
+    public void updateTrust(
+            int userId,
+            int flags,
+            @Nullable AndroidFuture<GrantTrustResult> resultCallback) {
+        updateTrust(userId, flags, false /* isFromUnlock */, resultCallback);
+    }
+
+    private void updateTrust(
+            int userId,
+            int flags,
+            boolean isFromUnlock,
+            @Nullable AndroidFuture<GrantTrustResult> resultCallback) {
         if (ENABLE_ACTIVE_UNLOCK_FLAG) {
-            updateTrustWithRenewableUnlock(userId, flags, isFromUnlock);
+            updateTrustWithRenewableUnlock(userId, flags, isFromUnlock, resultCallback);
         } else {
             updateTrustWithNonrenewableTrust(userId, flags, isFromUnlock);
         }
@@ -553,7 +571,11 @@ public class TrustManagerService extends SystemService {
         }
     }
 
-    private void updateTrustWithRenewableUnlock(int userId, int flags, boolean isFromUnlock) {
+    private void updateTrustWithRenewableUnlock(
+            int userId,
+            int flags,
+            boolean isFromUnlock,
+            @Nullable AndroidFuture<GrantTrustResult> resultCallback) {
         boolean managed = aggregateIsTrustManaged(userId);
         dispatchOnTrustManagedChanged(managed, userId);
         if (mStrongAuthTracker.isTrustAllowedForUser(userId)
@@ -614,8 +636,18 @@ public class TrustManagerService extends SystemService {
                         isTrustableTimeout /* isTrustableTimeout */);
             }
         }
-    }
 
+        boolean wasLocked = !alreadyUnlocked;
+        boolean shouldSendCallback = wasLocked && pendingTrustState == TrustState.TRUSTED;
+        if (shouldSendCallback) {
+            if (resultCallback != null) {
+                if (DEBUG) Slog.d(TAG, "calling back with UNLOCKED_BY_GRANT");
+                resultCallback.complete(
+                        GrantTrustResult.withStatus(
+                                GrantTrustResult.STATUS_UNLOCKED_BY_GRANT));
+            }
+        }
+    }
 
     private void updateTrustUsuallyManaged(int userId, boolean managed) {
         synchronized (mTrustUsuallyManagedForUser) {
@@ -1190,7 +1222,7 @@ public class TrustManagerService extends SystemService {
         if (successful) {
             mStrongAuthTracker.allowTrustFromUnlock(userId);
             // Allow the presence of trust on a successful unlock attempt to extend unlock
-            updateTrust(userId, 0 /* flags */, true);
+            updateTrust(userId, 0 /* flags */, true, null);
             mHandler.obtainMessage(MSG_REFRESH_TRUSTABLE_TIMERS_AFTER_AUTH, userId).sendToTarget();
         }
 
@@ -1202,11 +1234,27 @@ public class TrustManagerService extends SystemService {
         }
     }
 
-    private void dispatchUserRequestedUnlock(int userId) {
+    private void dispatchUserRequestedUnlock(int userId, boolean dismissKeyguard) {
+        if (DEBUG) {
+            Slog.d(TAG, "dispatchUserRequestedUnlock(user=" + userId + ", dismissKeyguard="
+                    + dismissKeyguard + ")");
+        }
         for (int i = 0; i < mActiveAgents.size(); i++) {
             AgentInfo info = mActiveAgents.valueAt(i);
             if (info.userId == userId) {
-                info.agent.onUserRequestedUnlock();
+                info.agent.onUserRequestedUnlock(dismissKeyguard);
+            }
+        }
+    }
+
+    private void dispatchUserMayRequestUnlock(int userId) {
+        if (DEBUG) {
+            Slog.d(TAG, "dispatchUserMayRequestUnlock(user=" + userId + ")");
+        }
+        for (int i = 0; i < mActiveAgents.size(); i++) {
+            AgentInfo info = mActiveAgents.valueAt(i);
+            if (info.userId == userId) {
+                info.agent.onUserMayRequestUnlock();
             }
         }
     }
@@ -1341,9 +1389,17 @@ public class TrustManagerService extends SystemService {
         }
 
         @Override
-        public void reportUserRequestedUnlock(int userId) throws RemoteException {
+        public void reportUserRequestedUnlock(int userId, boolean dismissKeyguard)
+                throws RemoteException {
             enforceReportPermission();
-            mHandler.obtainMessage(MSG_USER_REQUESTED_UNLOCK, userId).sendToTarget();
+            mHandler.obtainMessage(MSG_USER_REQUESTED_UNLOCK, userId, dismissKeyguard ? 1 : 0)
+                    .sendToTarget();
+        }
+
+        @Override
+        public void reportUserMayRequestUnlock(int userId) throws RemoteException {
+            enforceReportPermission();
+            mHandler.obtainMessage(MSG_USER_MAY_REQUEST_UNLOCK, userId).sendToTarget();
         }
 
         @Override
@@ -1683,7 +1739,10 @@ public class TrustManagerService extends SystemService {
                     dispatchUnlockAttempt(msg.arg1 != 0, msg.arg2);
                     break;
                 case MSG_USER_REQUESTED_UNLOCK:
-                    dispatchUserRequestedUnlock(msg.arg1);
+                    dispatchUserRequestedUnlock(msg.arg1, msg.arg2 != 0);
+                    break;
+                case MSG_USER_MAY_REQUEST_UNLOCK:
+                    dispatchUserMayRequestUnlock(msg.arg1);
                     break;
                 case MSG_DISPATCH_UNLOCK_LOCKOUT:
                     dispatchUnlockLockout(msg.arg1, msg.arg2);
@@ -1725,7 +1784,7 @@ public class TrustManagerService extends SystemService {
                     break;
                 case MSG_REFRESH_DEVICE_LOCKED_FOR_USER:
                     if (msg.arg2 == 1) {
-                        updateTrust(msg.arg1, 0 /* flags */, true /* isFromUnlock */);
+                        updateTrust(msg.arg1, 0 /* flags */, true /* isFromUnlock */, null);
                     }
                     final int unlockedUser = msg.getData().getInt(
                             REFRESH_DEVICE_LOCKED_EXCEPT_USER, UserHandle.USER_NULL);
