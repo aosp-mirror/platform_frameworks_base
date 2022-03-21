@@ -101,10 +101,10 @@ class ScreenDecorHwcLayer(context: Context, displayDecorationSupport: DisplayDec
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
+        parent.requestTransparentRegion(this)
         if (!DEBUG_COLOR) {
-            parent.requestTransparentRegion(this)
+            viewRootImpl.setDisplayDecoration(true)
         }
-        viewRootImpl.setDisplayDecoration(true)
 
         if (useInvertedAlphaColor) {
             paint.set(clearPaint)
@@ -128,7 +128,6 @@ class ScreenDecorHwcLayer(context: Context, displayDecorationSupport: DisplayDec
         super.onDraw(canvas)
 
         debugTransparentRegionPaint?.let {
-            calculateTransparentRect()
             canvas.drawRect(transparentRect, it)
         }
     }
@@ -136,7 +135,16 @@ class ScreenDecorHwcLayer(context: Context, displayDecorationSupport: DisplayDec
     override fun gatherTransparentRegion(region: Region?): Boolean {
         region?.let {
             calculateTransparentRect()
-            region.op(transparentRect, Region.Op.INTERSECT)
+            if (DEBUG_COLOR) {
+                // Since we're going to draw a rectangle where the layer would
+                // normally be transparent, treat the transparent region as
+                // empty. We still want this method to be called, though, so
+                // that it calculates the transparent rect at the right time
+                // to match !DEBUG_COLOR.
+                region.setEmpty()
+            } else {
+                region.op(transparentRect, Region.Op.INTERSECT)
+            }
         }
         // Always return false - views underneath this should always be visible.
         return false
