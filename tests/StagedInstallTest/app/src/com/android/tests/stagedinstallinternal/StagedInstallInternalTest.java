@@ -114,6 +114,63 @@ public class StagedInstallInternalTest {
         Uninstall.packages(TestApp.A, TestApp.B);
     }
 
+    private boolean isSystem(PackageInfo info) {
+        return (info.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
+    }
+
+    private boolean isUpdatedSystem(PackageInfo info) {
+        return (info.applicationInfo.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0;
+    }
+
+    @Test
+    public void testUpdateSystemApp_InstallV2() throws Exception {
+        assertThat(InstallUtils.getInstalledVersion(TestApp.A)).isEqualTo(1);
+
+        PackageManager pm =
+                InstrumentationRegistry.getInstrumentation().getContext().getPackageManager();
+        PackageInfo info;
+        // Check factory version
+        info = pm.getPackageInfo(TestApp.A,
+                PackageManager.PackageInfoFlags.of(PackageManager.MATCH_FACTORY_ONLY));
+        assertThat(isSystem(info)).isTrue();
+        assertThat(isUpdatedSystem(info)).isFalse();
+        // Check active version
+        info = pm.getPackageInfo(TestApp.A, PackageManager.PackageInfoFlags.of(0));
+        assertThat(isSystem(info)).isTrue();
+        assertThat(isUpdatedSystem(info)).isFalse();
+
+        Install.single(TestApp.A2).commit();
+        assertThat(InstallUtils.getInstalledVersion(TestApp.A)).isEqualTo(2);
+
+        // Check factory version
+        info = pm.getPackageInfo(TestApp.A,
+                PackageManager.PackageInfoFlags.of(PackageManager.MATCH_FACTORY_ONLY));
+        assertThat(isSystem(info)).isTrue();
+        assertThat(isUpdatedSystem(info)).isFalse();
+        // Check active version
+        info = pm.getPackageInfo(TestApp.A, PackageManager.PackageInfoFlags.of(0));
+        assertThat(isSystem(info)).isTrue();
+        assertThat(isUpdatedSystem(info)).isTrue();
+    }
+
+    @Test
+    public void testUpdateSystemApp_PostInstallV2() throws Exception {
+        assertThat(InstallUtils.getInstalledVersion(TestApp.A)).isEqualTo(2);
+
+        PackageManager pm =
+                InstrumentationRegistry.getInstrumentation().getContext().getPackageManager();
+        PackageInfo info;
+        // Check factory version
+        info = pm.getPackageInfo(TestApp.A,
+                PackageManager.PackageInfoFlags.of(PackageManager.MATCH_FACTORY_ONLY));
+        assertThat(isSystem(info)).isTrue();
+        assertThat(isUpdatedSystem(info)).isFalse();
+        // Check active version
+        info = pm.getPackageInfo(TestApp.A, PackageManager.PackageInfoFlags.of(0));
+        assertThat(isSystem(info)).isTrue();
+        assertThat(isUpdatedSystem(info)).isTrue();
+    }
+
     @Test
     public void testDuplicateApkInApexShouldFail_Commit() throws Exception {
         assertThat(InstallUtils.getInstalledVersion(TestApp.A)).isEqualTo(1);
