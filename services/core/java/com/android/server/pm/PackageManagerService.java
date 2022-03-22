@@ -1901,6 +1901,16 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                     /* excludePreCreated= */ false));
             t.traceEnd();
 
+            if (mFirstBoot) {
+                t.traceBegin("setFirstBoot: ");
+                try {
+                    mInstaller.setFirstBoot();
+                } catch (InstallerException e) {
+                    Slog.w(TAG, "Could not set First Boot: ", e);
+                }
+                t.traceEnd();
+            }
+
             mPermissionManager.readLegacyPermissionsTEMP(mSettings.mPermissions);
             mPermissionManager.readLegacyPermissionStateTEMP();
 

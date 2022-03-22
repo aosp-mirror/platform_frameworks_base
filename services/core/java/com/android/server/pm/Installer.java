@@ -284,6 +284,17 @@ public class Installer extends SystemService {
     }
 
     /**
+     * Sets in Installd that it is first boot after data wipe
+     */
+    public void setFirstBoot() throws InstallerException {
+        try {
+            mInstalld.setFirstBoot();
+        } catch (RemoteException e) {
+            throw InstallerException.from(e);
+        }
+    }
+
+    /**
      * Class that collects multiple {@code installd} operations together in an
      * attempt to more efficiently execute them in bulk.
      * <p>
