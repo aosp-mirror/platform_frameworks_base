@@ -362,11 +362,9 @@ final class UiModeManagerService extends SystemService {
         getContext().getContentResolver().unregisterContentObserver(mSetupWizardObserver);
         verifySetupWizardCompleted();
         synchronized (mLock) {
-            // only update if the value is actually changed
-            if (updateNightModeFromSettingsLocked(getContext(), getContext().getResources(),
-                    to.getUserIdentifier())) {
-                updateLocked(0, 0);
-            }
+            updateNightModeFromSettingsLocked(getContext(), getContext().getResources(),
+                    to.getUserIdentifier());
+            updateLocked(0, 0);
         }
     }
 
@@ -534,19 +532,16 @@ final class UiModeManagerService extends SystemService {
     }
 
     /**
-     * Updates the night mode setting in Settings.Secure and returns if the value was successfully
-     * changed.
+     * Updates the night mode setting in Settings.Secure
      *
      * @param context A valid context
      * @param res     A valid resource object
      * @param userId  The user to update the setting for
-     * @return True if the new value is different from the old value. False otherwise.
      */
-    private boolean updateNightModeFromSettingsLocked(Context context, Resources res, int userId) {
+    private void updateNightModeFromSettingsLocked(Context context, Resources res, int userId) {
         if (mCarModeEnabled || mCar) {
-            return false;
+            return;
         }
-        int oldNightMode = mNightMode;
         if (mSetupWizardComplete) {
             mNightMode = Secure.getIntForUser(context.getContentResolver(),
                     Secure.UI_NIGHT_MODE, res.getInteger(
@@ -570,8 +565,6 @@ final class UiModeManagerService extends SystemService {
                         Secure.UI_NIGHT_MODE_LAST_COMPUTED, 0, userId) != 0;
             }
         }
-
-        return oldNightMode != mNightMode;
     }
 
     private static long toMilliSeconds(LocalTime t) {
