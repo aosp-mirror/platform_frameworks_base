@@ -59,9 +59,9 @@
         android:gravity="end">
 
         <Button
-            android:id="@+id/btn_ok"
-            style="@style/VendorHelperOkButton"
-            android:text="@string/consent_ok" />
+            android:id="@+id/btn_back"
+            style="@style/VendorHelperBackButton"
+            android:text="@string/consent_back" />
 
     </LinearLayout>
 
