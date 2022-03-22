@@ -1705,20 +1705,22 @@ public class PackageInstaller {
         public @interface UserActionRequirement {}
 
         /**
-         * The installer did not call {@link SessionParams#setRequireUserAction(int)} to
-         * specify whether user action should be required for the install.
+         * This value is passed by the installer to {@link SessionParams#setRequireUserAction(int)}
+         * to indicate that user action is unspecified for this install.
+         * {@code requireUserAction} also defaults to this value unless modified by
+         * {@link SessionParams#setRequireUserAction(int)}
          */
         public static final int USER_ACTION_UNSPECIFIED = 0;
 
         /**
-         * The installer called {@link SessionParams#setRequireUserAction(int)} with
-         * {@code true} to require user action for the install to complete.
+         * This value is passed by the installer to {@link SessionParams#setRequireUserAction(int)}
+         * to indicate that user action is required for this install.
          */
         public static final int USER_ACTION_REQUIRED = 1;
 
         /**
-         * The installer called {@link SessionParams#setRequireUserAction(int)} with
-         * {@code false} to request that user action not be required for this install.
+         * This value is passed by the installer to {@link SessionParams#setRequireUserAction(int)}
+         * to indicate that user action is not required for this install.
          */
         public static final int USER_ACTION_NOT_REQUIRED = 2;
 
