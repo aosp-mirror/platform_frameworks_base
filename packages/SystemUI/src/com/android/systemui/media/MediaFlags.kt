@@ -35,13 +35,6 @@ class MediaFlags @Inject constructor(private val featureFlags: FeatureFlags) {
     }
 
     /**
-     * Check whether media controls should use the new session-based layout
-     */
-    fun useMediaSessionLayout(): Boolean {
-        return featureFlags.isEnabled(Flags.MEDIA_SESSION_LAYOUT)
-    }
-
-    /**
      * Check whether we support displaying information about mute await connections.
      */
     fun areMuteAwaitConnectionsEnabled() = featureFlags.isEnabled(Flags.MEDIA_MUTE_AWAIT)
