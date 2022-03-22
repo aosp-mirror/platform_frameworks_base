@@ -1238,14 +1238,52 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
     }
 
     /**
-     * Locks the keyguard if {@link #mPendingLock} is true, unless we're playing the screen off
-     * animation.
+     * Locks the keyguard if {@link #mPendingLock} is true, and there are no reasons to further
+     * delay the pending lock.
      *
-     * If we are, we will lock the keyguard either when the screen off animation ends, or in
-     * {@link #onStartedWakingUp} if the animation is cancelled.
+     * If you do delay handling the pending lock, you must ensure that this method is ALWAYS called
+     * again when the condition causing the delay changes. Otherwise, the device may remain unlocked
+     * indefinitely.
      */
     public void maybeHandlePendingLock() {
-        if (mPendingLock && !mScreenOffAnimationController.isKeyguardShowDelayed()) {
+        if (mPendingLock) {
+
+            // The screen off animation is playing, so if we lock now, the foreground app will
+            // vanish and the keyguard will jump-cut in. Delay it, until either:
+            //   - The screen off animation ends. We will call maybeHandlePendingLock from
+            //     the end action in UnlockedScreenOffAnimationController#animateInKeyguard.
+            //   - The screen off animation is cancelled by the device waking back up. We will call
+            //     maybeHandlePendingLock from KeyguardViewMediator#onStartedWakingUp.
+            if (mScreenOffAnimationController.isKeyguardShowDelayed()) {
+                if (DEBUG) {
+                    Log.d(TAG, "#maybeHandlePendingLock: not handling because the screen off "
+                            + "animation's isKeyguardShowDelayed() returned true. This should be "
+                            + "handled soon by #onStartedWakingUp, or by the end actions of the "
+                            + "screen off animation.");
+                }
+
+                return;
+            }
+
+            // The device was re-locked while in the process of unlocking. If we lock now, callbacks
+            // in the unlock sequence might end up re-unlocking the device. Delay the lock until the
+            // keyguard is done going away. We'll call maybeHandlePendingLock again in
+            // StatusBar#finishKeyguardFadingAway, which is always responsible for setting
+            // isKeyguardGoingAway to false.
+            if (mKeyguardStateController.isKeyguardGoingAway()) {
+                if (DEBUG) {
+                    Log.d(TAG, "#maybeHandlePendingLock: not handling because the keyguard is "
+                            + "going away. This should be handled shortly by "
+                            + "StatusBar#finishKeyguardFadingAway.");
+                }
+
+                return;
+            }
+
+            if (DEBUG) {
+                Log.d(TAG, "#maybeHandlePendingLock: handling pending lock; locking keyguard.");
+            }
+
             doKeyguardLocked(null);
             mPendingLock = false;
         }
