@@ -414,6 +414,33 @@ public class DisplayContentTests extends WindowTestsBase {
         imeContainer.setOrganizer(null);
     }
 
+    @Test
+    public void testImeContainerIsReparentedUnderParentWhenOrganized() {
+        final DisplayArea.Tokens imeContainer = mDisplayContent.getImeContainer();
+        final ActivityRecord activity = createActivityRecord(mDisplayContent);
+
+        final WindowState startingWin = createWindow(null, TYPE_APPLICATION_STARTING, activity,
+                "startingWin");
+        startingWin.setHasSurface(true);
+        assertTrue(startingWin.canBeImeTarget());
+
+        final Transaction transaction = mDisplayContent.getPendingTransaction();
+        spyOn(transaction);
+
+        // Organized the ime container.
+        final IDisplayAreaOrganizer mockImeOrganizer = mock(IDisplayAreaOrganizer.class);
+        when(mockImeOrganizer.asBinder()).thenReturn(new Binder());
+        imeContainer.setOrganizer(mockImeOrganizer);
+
+        // Verify that the ime container surface is reparented under
+        // its parent surface as a consequence of the setOrganizer call.
+        SurfaceControl imeParentSurfaceControl = imeContainer.getParentSurfaceControl();
+        verify(transaction).reparent(imeContainer.getSurfaceControl(), imeParentSurfaceControl);
+
+        // Clean up organizer.
+        imeContainer.setOrganizer(null);
+    }
+
     /**
      * This tests root task movement between displays and proper root task's, task's and app token's
      * display container references updates.
