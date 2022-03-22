@@ -724,7 +724,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     }
 
     @Watched
-    final AppsFilter mAppsFilter;
+    final AppsFilterImpl mAppsFilter;
 
     final PackageParser2.Callback mPackageParserCallback;
 
@@ -981,7 +981,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         public final InstantAppRegistry instantAppRegistry;
         public final ApplicationInfo androidApplication;
         public final String appPredictionServicePackage;
-        public final AppsFilter appsFilter;
+        public final AppsFilterSnapshot appsFilter;
         public final ComponentResolverApi componentResolver;
         public final PackageManagerService service;
         public final WatchedArrayMap<String, Integer> frozenPackages;
@@ -1433,7 +1433,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                         RuntimePermissionsPersistence.createInstance(),
                         i.getPermissionManagerServiceInternal(),
                         domainVerificationService, lock),
-                (i, pm) -> AppsFilter.create(i, i.getLocalService(PackageManagerInternal.class)),
+                (i, pm) -> AppsFilterImpl.create(i,
+                        i.getLocalService(PackageManagerInternal.class)),
                 (i, pm) -> (PlatformCompat) ServiceManager.getService("platform_compat"),
                 (i, pm) -> SystemConfig.getInstance(),
                 (i, pm) -> new PackageDexOptimizer(i.getInstaller(), i.getInstallLock(),
