@@ -630,7 +630,7 @@
     </style>
 
     <style name="MediaPlayer.OutlineButton">
-        <item name="android:background">@drawable/qs_media_button_background</item>
+        <item name="android:background">@drawable/qs_media_outline_button</item>
         <item name="android:textColor">?android:attr/textColorPrimary</item>
         <item name="android:backgroundTint">@color/media_player_outline_button_bg</item>
         <item name="android:fontFamily">@*android:string/config_headlineFontFamilyMedium</item>
