@@ -4048,7 +4048,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             }
             if (subtype != null) {
                 setInputMethodWithSubtypeIdLocked(token, id,
-                        InputMethodUtils.getSubtypeIdFromHashCode(mMethodMap.get(id),
+                        SubtypeUtils.getSubtypeIdFromHashCode(mMethodMap.get(id),
                                 subtype.hashCode()));
             } else {
                 setInputMethod(token, id);
@@ -4092,7 +4092,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 // defined, there is no need to switch to the last IME.
                 if (!imiIdIsSame || lastSubtypeHash != currentSubtypeHash) {
                     targetLastImiId = lastIme.first;
-                    subtypeId = InputMethodUtils.getSubtypeIdFromHashCode(lastImi, lastSubtypeHash);
+                    subtypeId = SubtypeUtils.getSubtypeIdFromHashCode(lastImi, lastSubtypeHash);
                 }
             }
 
@@ -4111,13 +4111,13 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                         final InputMethodInfo imi = enabled.get(i);
                         if (imi.getSubtypeCount() > 0 && imi.isSystem()) {
                             InputMethodSubtype keyboardSubtype =
-                                    InputMethodUtils.findLastResortApplicableSubtypeLocked(mRes,
-                                            InputMethodUtils.getSubtypes(imi),
+                                    SubtypeUtils.findLastResortApplicableSubtypeLocked(mRes,
+                                            SubtypeUtils.getSubtypes(imi),
                                             SubtypeUtils.SUBTYPE_MODE_KEYBOARD, locale, true);
                             if (keyboardSubtype != null) {
                                 targetLastImiId = imi.getId();
-                                subtypeId = InputMethodUtils.getSubtypeIdFromHashCode(
-                                        imi, keyboardSubtype.hashCode());
+                                subtypeId = SubtypeUtils.getSubtypeIdFromHashCode(imi,
+                                        keyboardSubtype.hashCode());
                                 if(keyboardSubtype.getLocale().equals(locale)) {
                                     break;
                                 }
@@ -4187,8 +4187,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             if (lastImi == null) return null;
             try {
                 final int lastSubtypeHash = Integer.parseInt(lastIme.second);
-                final int lastSubtypeId =
-                        InputMethodUtils.getSubtypeIdFromHashCode(lastImi, lastSubtypeHash);
+                final int lastSubtypeId = SubtypeUtils.getSubtypeIdFromHashCode(lastImi,
+                        lastSubtypeHash);
                 if (lastSubtypeId < 0 || lastSubtypeId >= lastImi.getSubtypeCount()) {
                     return null;
                 }
@@ -5192,8 +5192,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             String subtypeHashCode = mSettings.getLastSubtypeForInputMethodLocked(newDefaultIme);
             if (subtypeHashCode != null) {
                 try {
-                    lastSubtypeId = InputMethodUtils.getSubtypeIdFromHashCode(
-                            imi, Integer.parseInt(subtypeHashCode));
+                    lastSubtypeId = SubtypeUtils.getSubtypeIdFromHashCode(imi,
+                            Integer.parseInt(subtypeHashCode));
                 } catch (NumberFormatException e) {
                     Slog.w(TAG, "HashCode for subtype looks broken: " + subtypeHashCode, e);
                 }
@@ -5228,7 +5228,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             return null;
         }
         if (!subtypeIsSelected || mCurrentSubtype == null
-                || !InputMethodUtils.isValidSubtypeId(imi, mCurrentSubtype.hashCode())) {
+                || !SubtypeUtils.isValidSubtypeId(imi, mCurrentSubtype.hashCode())) {
             int subtypeId = mSettings.getSelectedInputMethodSubtypeId(selectedMethodId);
             if (subtypeId == NOT_A_SUBTYPE_ID) {
                 // If there are no selected subtypes, the framework will try to find
@@ -5241,17 +5241,16 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 if (explicitlyOrImplicitlyEnabledSubtypes.size() == 1) {
                     mCurrentSubtype = explicitlyOrImplicitlyEnabledSubtypes.get(0);
                 } else if (explicitlyOrImplicitlyEnabledSubtypes.size() > 1) {
-                    mCurrentSubtype = InputMethodUtils.findLastResortApplicableSubtypeLocked(
+                    mCurrentSubtype = SubtypeUtils.findLastResortApplicableSubtypeLocked(
                             mRes, explicitlyOrImplicitlyEnabledSubtypes,
                             SubtypeUtils.SUBTYPE_MODE_KEYBOARD, null, true);
                     if (mCurrentSubtype == null) {
-                        mCurrentSubtype = InputMethodUtils.findLastResortApplicableSubtypeLocked(
-                                mRes, explicitlyOrImplicitlyEnabledSubtypes, null, null,
-                                true);
+                        mCurrentSubtype = SubtypeUtils.findLastResortApplicableSubtypeLocked(
+                                mRes, explicitlyOrImplicitlyEnabledSubtypes, null, null, true);
                     }
                 }
             } else {
-                mCurrentSubtype = InputMethodUtils.getSubtypes(imi).get(subtypeId);
+                mCurrentSubtype = SubtypeUtils.getSubtypes(imi).get(subtypeId);
             }
         }
         return mCurrentSubtype;

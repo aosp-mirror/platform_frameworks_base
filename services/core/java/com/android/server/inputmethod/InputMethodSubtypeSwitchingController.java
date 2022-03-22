@@ -241,8 +241,8 @@ final class InputMethodSubtypeSwitchingController {
     }
 
     private static int calculateSubtypeId(InputMethodInfo imi, InputMethodSubtype subtype) {
-        return subtype != null ? InputMethodUtils.getSubtypeIdFromHashCode(imi,
-                subtype.hashCode()) : NOT_A_SUBTYPE_ID;
+        return subtype != null ? SubtypeUtils.getSubtypeIdFromHashCode(imi, subtype.hashCode())
+                : NOT_A_SUBTYPE_ID;
     }
 
     private static class StaticRotationList {

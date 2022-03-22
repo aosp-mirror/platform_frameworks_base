@@ -105,7 +105,7 @@ final class InputMethodMenuController {
                 if (currentSubtype != null) {
                     final String curMethodId = mService.getSelectedMethodIdLocked();
                     final InputMethodInfo currentImi = mMethodMap.get(curMethodId);
-                    lastInputMethodSubtypeId = InputMethodUtils.getSubtypeIdFromHashCode(
+                    lastInputMethodSubtypeId = SubtypeUtils.getSubtypeIdFromHashCode(
                             currentImi, currentSubtype.hashCode());
                 }
             }
