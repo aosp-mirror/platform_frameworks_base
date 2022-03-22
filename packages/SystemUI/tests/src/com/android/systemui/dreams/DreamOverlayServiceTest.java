@@ -38,6 +38,7 @@ import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.LifecycleRegistry;
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.logging.UiEventLogger;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dreams.complication.DreamPreviewComplication;
@@ -104,6 +105,9 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
     @Mock
     ViewGroup mDreamOverlayContainerViewParent;
 
+    @Mock
+    UiEventLogger mUiEventLogger;
+
     DreamOverlayService mService;
 
     @Before
@@ -129,7 +133,22 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
                 mDreamOverlayComponentFactory,
                 mStateController,
                 mKeyguardUpdateMonitor,
-                mPreviewComplication);
+                mPreviewComplication,
+                mUiEventLogger);
+    }
+
+    @Test
+    public void testOnStartMetricsLogged() throws Exception {
+        final IBinder proxy = mService.onBind(new Intent());
+        final IDreamOverlay overlay = IDreamOverlay.Stub.asInterface(proxy);
+
+        // Inform the overlay service of dream starting.
+        overlay.startDream(mWindowParams, mDreamOverlayCallback);
+        mMainExecutor.runAllReady();
+
+        verify(mUiEventLogger).log(DreamOverlayService.DreamOverlayEvent.DREAM_OVERLAY_ENTER_START);
+        verify(mUiEventLogger).log(
+                DreamOverlayService.DreamOverlayEvent.DREAM_OVERLAY_COMPLETE_START);
     }
 
     @Test
