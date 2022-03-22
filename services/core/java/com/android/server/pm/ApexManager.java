@@ -523,7 +523,7 @@ public abstract class ApexManager {
         @Override
         public List<ActiveApexInfo> getActiveApexInfos() {
             final TimingsTraceAndSlog t = new TimingsTraceAndSlog(TAG + "Timing",
-                    Trace.TRACE_TAG_APEX_MANAGER);
+                    Trace.TRACE_TAG_PACKAGE_MANAGER);
             synchronized (mLock) {
                 if (mActiveApexInfosCache == null) {
                     t.traceBegin("getActiveApexInfos_noCache");
