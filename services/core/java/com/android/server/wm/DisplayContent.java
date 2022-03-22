@@ -3973,7 +3973,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             boolean nonAppImeTargetAnimatingExit = mImeLayeringTarget.mAnimatingExit
                     && mImeLayeringTarget.mAttrs.type != TYPE_BASE_APPLICATION
                     && mImeLayeringTarget.isSelfAnimating(0, ANIMATION_TYPE_WINDOW_ANIMATION);
-            if (mImeLayeringTarget.inAppOrRecentsTransition() || nonAppImeTargetAnimatingExit) {
+            if (mImeLayeringTarget.inTransitionSelfOrParent() || nonAppImeTargetAnimatingExit) {
                 showImeScreenshot();
             }
         }
@@ -4167,7 +4167,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     void removeImeScreenshotIfPossible() {
         if (mImeLayeringTarget == null
                 || mImeLayeringTarget.mAttrs.type != TYPE_APPLICATION_STARTING
-                && !mImeLayeringTarget.inAppOrRecentsTransition()) {
+                && !mImeLayeringTarget.inTransitionSelfOrParent()) {
             removeImeSurfaceImmediately();
         }
     }
