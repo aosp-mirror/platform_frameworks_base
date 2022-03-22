@@ -1162,6 +1162,7 @@ public class ActivityOptions extends ComponentOptions {
             case ANIM_CUSTOM:
                 mCustomEnterResId = opts.getInt(KEY_ANIM_ENTER_RES_ID, 0);
                 mCustomExitResId = opts.getInt(KEY_ANIM_EXIT_RES_ID, 0);
+                mCustomBackgroundColor = opts.getInt(KEY_ANIM_BACKGROUND_COLOR, 0);
                 mAnimationStartedListener = IRemoteCallback.Stub.asInterface(
                         opts.getBinder(KEY_ANIM_START_LISTENER));
                 break;
