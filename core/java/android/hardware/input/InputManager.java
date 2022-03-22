@@ -1377,6 +1377,7 @@ public final class InputManager {
      * </p>
      * @hide
      */
+    @TestApi
     public void addUniqueIdAssociation(@NonNull String inputPort, @NonNull String displayUniqueId) {
         try {
             mIm.addUniqueIdAssociation(inputPort, displayUniqueId);
@@ -1393,6 +1394,7 @@ public final class InputManager {
      * </p>
      * @hide
      */
+    @TestApi
     public void removeUniqueIdAssociation(@NonNull String inputPort) {
         try {
             mIm.removeUniqueIdAssociation(inputPort);
