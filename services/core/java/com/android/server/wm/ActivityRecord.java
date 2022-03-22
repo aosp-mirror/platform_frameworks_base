@@ -116,6 +116,7 @@ import static android.view.WindowManager.TRANSIT_FLAG_OPEN_BEHIND;
 import static android.view.WindowManager.TRANSIT_OLD_UNSET;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ADD_REMOVE;
+import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ANIM;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_APP_TRANSITIONS;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_APP_TRANSITIONS_ANIM;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_CONFIGURATION;
@@ -216,7 +217,6 @@ import static com.android.server.wm.WindowContainer.AnimationFlags.CHILDREN;
 import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
 import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
 import static com.android.server.wm.WindowContainerChildProto.ACTIVITY;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_CONFIGURATION;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYOUT_REPEATS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STARTING_WINDOW_VERBOSE;
@@ -7237,11 +7237,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         getDisplayContent().computeImeTargetIfNeeded(this);
 
-        if (DEBUG_ANIM) Slog.v(TAG, "Animation done in " + this
-                + ": reportedVisible=" + reportedVisible
-                + " okToDisplay=" + okToDisplay()
-                + " okToAnimate=" + okToAnimate()
-                + " startingDisplayed=" + startingDisplayed);
+        ProtoLog.v(WM_DEBUG_ANIM, "Animation done in %s"
+                + ": reportedVisible=%b okToDisplay=%b okToAnimate=%b startingDisplayed=%b",
+                this, reportedVisible, okToDisplay(), okToAnimate(), startingDisplayed);
 
         // clean up thumbnail window
         if (mThumbnail != null) {

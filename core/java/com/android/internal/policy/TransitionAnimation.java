@@ -29,6 +29,8 @@ import static android.view.WindowManager.TRANSIT_OLD_WALLPAPER_INTRA_CLOSE;
 import static android.view.WindowManager.TRANSIT_OLD_WALLPAPER_INTRA_OPEN;
 import static android.view.WindowManager.TRANSIT_OPEN;
 
+import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ANIM;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
@@ -60,6 +62,7 @@ import android.view.animation.ScaleAnimation;
 import android.view.animation.TranslateAnimation;
 
 import com.android.internal.R;
+import com.android.internal.protolog.common.ProtoLog;
 
 import java.util.List;
 
@@ -295,9 +298,9 @@ public class TransitionAnimation {
     @Nullable
     private AttributeCache.Entry getCachedAnimations(LayoutParams lp) {
         if (mDebug) {
-            Slog.v(mTag, "Loading animations: layout params pkg="
-                    + (lp != null ? lp.packageName : null)
-                    + " resId=0x" + (lp != null ? Integer.toHexString(lp.windowAnimations) : null));
+            ProtoLog.v(WM_DEBUG_ANIM, "Loading animations: layout params pkg=%s resId=0x%x",
+                    lp != null ? lp.packageName : null,
+                    lp != null ? lp.windowAnimations : 0);
         }
         if (lp != null && lp.windowAnimations != 0) {
             // If this is a system resource, don't try to load it from the
@@ -309,7 +312,7 @@ public class TransitionAnimation {
                 packageName = DEFAULT_PACKAGE;
             }
             if (mDebug) {
-                Slog.v(mTag, "Loading animations: picked package=" + packageName);
+                ProtoLog.v(WM_DEBUG_ANIM, "Loading animations: picked package=%s", packageName);
             }
             return AttributeCache.instance().get(packageName, resId,
                     com.android.internal.R.styleable.WindowAnimation);
@@ -320,16 +323,16 @@ public class TransitionAnimation {
     @Nullable
     private AttributeCache.Entry getCachedAnimations(String packageName, int resId) {
         if (mDebug) {
-            Slog.v(mTag, "Loading animations: package="
-                    + packageName + " resId=0x" + Integer.toHexString(resId));
+            ProtoLog.v(WM_DEBUG_ANIM, "Loading animations: package=%s resId=0x%x",
+                    packageName, resId);
         }
         if (packageName != null) {
             if ((resId & 0xFF000000) == 0x01000000) {
                 packageName = DEFAULT_PACKAGE;
             }
             if (mDebug) {
-                Slog.v(mTag, "Loading animations: picked package="
-                        + packageName);
+                ProtoLog.v(WM_DEBUG_ANIM, "Loading animations: picked package=%s",
+                        packageName);
             }
             return AttributeCache.instance().get(packageName, resId,
                     com.android.internal.R.styleable.WindowAnimation);
