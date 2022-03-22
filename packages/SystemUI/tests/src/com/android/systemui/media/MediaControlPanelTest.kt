@@ -122,8 +122,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
     private lateinit var actionPrev: ImageButton
     @Mock private lateinit var longPressText: TextView
     @Mock private lateinit var handler: Handler
-    private lateinit var settings: View
-    private lateinit var settingsText: TextView
+    private lateinit var settings: ImageButton
     private lateinit var cancel: View
     private lateinit var cancelText: TextView
     private lateinit var dismiss: FrameLayout
@@ -161,8 +160,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
         seekBar = SeekBar(context)
         elapsedTimeView = TextView(context)
         totalTimeView = TextView(context)
-        settings = View(context)
-        settingsText = TextView(context)
+        settings = ImageButton(context)
         cancel = View(context)
         cancelText = TextView(context)
         dismiss = FrameLayout(context)
@@ -252,7 +250,6 @@ public class MediaControlPanelTest : SysuiTestCase() {
         whenever(viewHolder.longPressText).thenReturn(longPressText)
         whenever(longPressText.handler).thenReturn(handler)
         whenever(viewHolder.settings).thenReturn(settings)
-        whenever(viewHolder.settingsText).thenReturn(settingsText)
         whenever(viewHolder.cancel).thenReturn(cancel)
         whenever(viewHolder.cancelText).thenReturn(cancelText)
         whenever(viewHolder.dismiss).thenReturn(dismiss)
