@@ -103,7 +103,7 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
      * @param includePad set whether to include extra space beyond font ascent and descent which is
      *                   needed to avoid clipping in some scripts
      * @param ellipsize whether to ellipsize the text if width of the text is longer than the
-     *                  requested width
+     *                  requested width. null if ellipsis is not applied.
      * @param ellipsizedWidth the width to which this Layout is ellipsizing. If {@code ellipsize} is
      *                        {@code null}, or is {@link TextUtils.TruncateAt#MARQUEE} this value is
      *                        not used, {@code outerWidth} is used instead
@@ -116,7 +116,7 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
             @NonNull CharSequence source, @NonNull TextPaint paint,
             @IntRange(from = 0) int outerWidth,
             @NonNull Alignment align, @NonNull BoringLayout.Metrics metrics,
-            boolean includePad, @NonNull TextUtils.TruncateAt ellipsize,
+            boolean includePad, @Nullable TextUtils.TruncateAt ellipsize,
             @IntRange(from = 0) int ellipsizedWidth, boolean useFallbackLineSpacing) {
         return new BoringLayout(source, paint, outerWidth, align, 1f, 0f, metrics, includePad,
                 ellipsize, ellipsizedWidth, useFallbackLineSpacing);
@@ -170,7 +170,7 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
      * @param includePad set whether to include extra space beyond font ascent and descent which is
      *                   needed to avoid clipping in some scripts
      * @param ellipsize whether to ellipsize the text if width of the text is longer than the
-     *                  requested width
+     *                  requested width. null if ellipsis not applied.
      * @param ellipsizedWidth the width to which this Layout is ellipsizing. If {@code ellipsize} is
      *                        {@code null}, or is {@link TextUtils.TruncateAt#MARQUEE} this value is
      *                        not used, {@code outerWidth} is used instead
@@ -182,7 +182,7 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
     public @NonNull BoringLayout replaceOrMake(@NonNull CharSequence source,
             @NonNull TextPaint paint, @IntRange(from = 0) int outerWidth,
             @NonNull Alignment align, @NonNull BoringLayout.Metrics metrics, boolean includePad,
-            @NonNull TextUtils.TruncateAt ellipsize, @IntRange(from = 0) int ellipsizedWidth,
+            @Nullable TextUtils.TruncateAt ellipsize, @IntRange(from = 0) int ellipsizedWidth,
             boolean useFallbackLineSpacing) {
         boolean trust;
 
@@ -298,7 +298,7 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
      * @param includePad set whether to include extra space beyond font ascent and descent which is
      *                   needed to avoid clipping in some scripts
      * @param ellipsize whether to ellipsize the text if width of the text is longer than the
-     *                  requested {@code outerWidth}
+     *                  requested {@code outerWidth}. null if ellipsis is not applied.
      * @param ellipsizedWidth the width to which this Layout is ellipsizing. If {@code ellipsize} is
      *                        {@code null}, or is {@link TextUtils.TruncateAt#MARQUEE} this value is
      *                        not used, {@code outerWidth} is used instead
@@ -311,7 +311,7 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
             @NonNull CharSequence source, @NonNull TextPaint paint,
             @IntRange(from = 0) int outerWidth, @NonNull Alignment align, float spacingMult,
             float spacingAdd, @NonNull BoringLayout.Metrics metrics, boolean includePad,
-            @NonNull TextUtils.TruncateAt ellipsize, @IntRange(from = 0) int ellipsizedWidth,
+            @Nullable TextUtils.TruncateAt ellipsize, @IntRange(from = 0) int ellipsizedWidth,
             boolean useFallbackLineSpacing) {
         /*
          * It is silly to have to call super() and then replaceWith(),
