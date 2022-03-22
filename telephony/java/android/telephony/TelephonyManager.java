@@ -16914,7 +16914,7 @@ public class TelephonyManager {
      * @param executor The executor where {@code listener} will be invoked
      * @param listener The callback to register
      * @hide
-     * @deprecated Use {@link #unregisterCarrierPrivilegesCallback} instead. This API will be
+     * @deprecated Use {@link #registerCarrierPrivilegesCallback} instead. This API will be
      * removed prior to API finalization.
      */
     @Deprecated
