@@ -18,6 +18,7 @@ package com.android.systemui.power;
 
 import static android.app.PendingIntent.FLAG_IMMUTABLE;
 
+import android.app.Dialog;
 import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -60,19 +61,24 @@ import com.android.settingslib.fuelgauge.BatterySaverUtils;
 import com.android.settingslib.utils.PowerUtil;
 import com.android.systemui.R;
 import com.android.systemui.SystemUIApplication;
+import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.broadcast.BroadcastSender;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
+import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.util.NotificationChannels;
 import com.android.systemui.volume.Events;
 
 import java.io.PrintWriter;
+import java.lang.ref.WeakReference;
 import java.text.NumberFormat;
 import java.util.Locale;
 import java.util.Objects;
 
 import javax.inject.Inject;
+
+import dagger.Lazy;
 
 /**
  */
@@ -164,11 +170,15 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     private ActivityStarter mActivityStarter;
     private final BroadcastSender mBroadcastSender;
 
+    private final Lazy<BatteryController> mBatteryControllerLazy;
+    private final DialogLaunchAnimator mDialogLaunchAnimator;
+
     /**
      */
     @Inject
     public PowerNotificationWarnings(Context context, ActivityStarter activityStarter,
-            BroadcastSender broadcastSender) {
+            BroadcastSender broadcastSender, Lazy<BatteryController> batteryControllerLazy,
+            DialogLaunchAnimator dialogLaunchAnimator) {
         mContext = context;
         mNoMan = mContext.getSystemService(NotificationManager.class);
         mPowerMan = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
@@ -176,6 +186,8 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         mReceiver.init();
         mActivityStarter = activityStarter;
         mBroadcastSender = broadcastSender;
+        mBatteryControllerLazy = batteryControllerLazy;
+        mDialogLaunchAnimator = dialogLaunchAnimator;
         mUseSevereDialog = mContext.getResources().getBoolean(R.bool.config_severe_battery_dialog);
     }
 
@@ -685,8 +697,19 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         }
         d.setShowForAllUsers(true);
         d.setOnDismissListener((dialog) -> mSaverConfirmation = null);
-        d.show();
+        WeakReference<View> ref = mBatteryControllerLazy.get().getLastPowerSaverStartView();
+        if (ref != null && ref.get() != null && ref.get().isAggregatedVisible()) {
+            mDialogLaunchAnimator.showFromView(d, ref.get());
+        } else {
+            d.show();
+        }
         mSaverConfirmation = d;
+        mBatteryControllerLazy.get().clearLastPowerSaverStartView();
+    }
+
+    @VisibleForTesting
+    Dialog getSaverConfirmationDialog() {
+        return mSaverConfirmation;
     }
 
     private boolean isEnglishLocale() {
