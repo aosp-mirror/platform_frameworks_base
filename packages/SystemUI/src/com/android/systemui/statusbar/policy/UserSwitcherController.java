@@ -447,14 +447,6 @@ public class UserSwitcherController implements Dumpable {
         mResumeUserOnGuestLogout = resume;
     }
 
-    public void logoutCurrentUser() {
-        int currentUser = mUserTracker.getUserId();
-        if (currentUser != UserHandle.USER_SYSTEM) {
-            pauseRefreshUsers();
-            ActivityManager.logoutCurrentUser();
-        }
-    }
-
     /**
      * Returns whether the current user is a system user.
      */
