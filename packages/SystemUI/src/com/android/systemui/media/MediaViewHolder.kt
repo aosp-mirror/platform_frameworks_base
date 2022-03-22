@@ -58,8 +58,7 @@ class MediaViewHolder constructor(itemView: View) {
     val cancelText = itemView.requireViewById<TextView>(R.id.cancel_text)
     val dismiss = itemView.requireViewById<ViewGroup>(R.id.dismiss)
     val dismissText = itemView.requireViewById<TextView>(R.id.dismiss_text)
-    val settings = itemView.requireViewById<View>(R.id.settings)
-    val settingsText = itemView.requireViewById<TextView>(R.id.settings_text)
+    val settings = itemView.requireViewById<ImageButton>(R.id.settings)
 
     // Action Buttons
     val actionPlayPause = itemView.requireViewById<ImageButton>(R.id.actionPlayPause)
