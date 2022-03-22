@@ -309,6 +309,51 @@ public class WindowOrganizerTests extends WindowTestsBase {
     }
 
     @Test
+    public void testOrganizerDeathReturnsRegistrationToPrevious() throws RemoteException {
+        final Task rootTask = createRootTask();
+        final Task task = createTask(rootTask);
+        final Task rootTask2 = createRootTask();
+        final Task task2 = createTask(rootTask2);
+        final Task rootTask3 = createRootTask();
+        final Task task3 = createTask(rootTask3);
+        final ArrayList<TaskAppearedInfo> existingTasks = new ArrayList<>();
+        final ITaskOrganizer organizer = registerMockOrganizer(existingTasks);
+        // Ensure events dispatch to organizer.
+        mWm.mAtmService.mTaskOrganizerController.dispatchPendingEvents();
+
+        // verify that tasks are returned and taskAppeared is not called
+        assertContainsTasks(existingTasks, rootTask, rootTask2, rootTask3);
+        verify(organizer, times(0)).onTaskAppeared(any(RunningTaskInfo.class),
+                any(SurfaceControl.class));
+        verify(organizer, times(0)).onTaskVanished(any());
+        assertTrue(rootTask.isOrganized());
+
+        // Now we replace the registration and verify the new organizer receives existing tasks
+        final ArrayList<TaskAppearedInfo> existingTasks2 = new ArrayList<>();
+        final ITaskOrganizer organizer2 = registerMockOrganizer(existingTasks2);
+        // Ensure events dispatch to organizer.
+        mWm.mAtmService.mTaskOrganizerController.dispatchPendingEvents();
+        assertContainsTasks(existingTasks2, rootTask, rootTask2, rootTask3);
+        verify(organizer2, times(0)).onTaskAppeared(any(RunningTaskInfo.class),
+                any(SurfaceControl.class));
+        verify(organizer2, times(0)).onTaskVanished(any());
+        // Removed tasks from the original organizer
+        assertTaskVanished(organizer, true /* expectVanished */, rootTask, rootTask2, rootTask3);
+        assertTrue(rootTask2.isOrganized());
+
+        // Trigger binderDied for second one, the first one should automatically be reregistered
+        // so we verify that it's now seeing changes.
+        mWm.mAtmService.mTaskOrganizerController.getTaskOrganizerState(organizer2.asBinder())
+                .getDeathRecipient().binderDied();
+
+        // Ensure events dispatch to organizer.
+        mWm.mAtmService.mTaskOrganizerController.dispatchPendingEvents();
+        verify(organizer, times(3))
+                .onTaskAppeared(any(RunningTaskInfo.class), any(SurfaceControl.class));
+        assertTaskVanished(organizer2, true /* expectVanished */, rootTask, rootTask2, rootTask3);
+    }
+
+    @Test
     public void testRegisterTaskOrganizerWithExistingTasks() throws RemoteException {
         final Task rootTask = createRootTask();
         final Task task = createTask(rootTask);
