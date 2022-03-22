@@ -243,9 +243,13 @@ class TransitionController {
         return isCollecting() || isPlaying();
     }
 
-    /** @return {@code true} if wc is in a participant subtree */
+    /** @return {@code true} if a transition is running in a participant subtree of wc */
     boolean inTransition(@NonNull WindowContainer wc) {
-        if (isCollecting(wc)) return true;
+        if (isCollecting()) {
+            for (WindowContainer p = wc; p != null; p = p.getParent()) {
+                if (isCollecting(p)) return true;
+            }
+        }
         for (int i = mPlayingTransitions.size() - 1; i >= 0; --i) {
             for (WindowContainer p = wc; p != null; p = p.getParent()) {
                 if (mPlayingTransitions.get(i).mParticipants.contains(p)) {
