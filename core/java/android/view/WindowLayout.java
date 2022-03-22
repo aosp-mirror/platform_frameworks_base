@@ -179,6 +179,8 @@ public class WindowLayout {
         final boolean hasCompatScale = compatScale != 1f;
         final int pw = outParentFrame.width();
         final int ph = outParentFrame.height();
+        final boolean extendedByCutout =
+                (attrs.privateFlags & PRIVATE_FLAG_LAYOUT_SIZE_EXTENDED_BY_CUTOUT) != 0;
         int rw = requestedWidth;
         int rh = requestedHeight;
         float x, y;
@@ -186,11 +188,13 @@ public class WindowLayout {
 
         // If the view hierarchy hasn't been measured, the requested width and height would be
         // UNSPECIFIED_LENGTH. This can happen in the first layout of a window or in the simulated
-        // layout.
-        if (rw == UNSPECIFIED_LENGTH) {
+        // layout. If extendedByCutout is true, we cannot use the requested lengths. Otherwise,
+        // the window frame might be extended again because the requested lengths may come from the
+        // window frame.
+        if (rw == UNSPECIFIED_LENGTH || extendedByCutout) {
             rw = attrs.width >= 0 ? attrs.width : pw;
         }
-        if (rh == UNSPECIFIED_LENGTH) {
+        if (rh == UNSPECIFIED_LENGTH || extendedByCutout) {
             rh = attrs.height >= 0 ? attrs.height : ph;
         }
 
@@ -262,29 +266,15 @@ public class WindowLayout {
             Gravity.applyDisplay(attrs.gravity, outDisplayFrame, outFrame);
         }
 
-        if ((attrs.privateFlags & PRIVATE_FLAG_LAYOUT_SIZE_EXTENDED_BY_CUTOUT) != 0
-                && !cutout.isEmpty()) {
-            // If the actual frame covering a display cutout, and the window is requesting to extend
-            // it's requested frame, re-do the frame calculation after getting the new requested
-            // size.
+        if (extendedByCutout && !displayCutoutSafe.contains(outFrame)) {
             mTempRect.set(outFrame);
-            // Do nothing if the display cutout and window don't overlap entirely. This may happen
-            // when the cutout is not on the same side with the window.
-            boolean shouldExpand = false;
-            final Rect [] cutoutBounds = cutout.getBoundingRectsAll();
-            for (Rect cutoutBound : cutoutBounds) {
-                if (cutoutBound.isEmpty()) continue;
-                if (mTempRect.contains(cutoutBound) || cutoutBound.contains(mTempRect)) {
-                    shouldExpand = true;
-                    break;
-                }
-            }
-            if (shouldExpand) {
-                // Try to fit move the bar to avoid the display cutout first. Make sure the clip
-                // flags are not set to make the window move.
-                final int clipFlags = DISPLAY_CLIP_VERTICAL | DISPLAY_CLIP_HORIZONTAL;
-                Gravity.applyDisplay(attrs.gravity & ~clipFlags, displayCutoutSafe,
-                        mTempRect);
+
+            // Move the frame into displayCutoutSafe.
+            final int clipFlags = DISPLAY_CLIP_VERTICAL | DISPLAY_CLIP_HORIZONTAL;
+            Gravity.applyDisplay(attrs.gravity & ~clipFlags, displayCutoutSafe,
+                    mTempRect);
+
+            if (mTempRect.intersect(outDisplayFrame)) {
                 outFrame.union(mTempRect);
             }
         }
