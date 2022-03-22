@@ -102,8 +102,9 @@ class RoundedCornerResDelegateTest : SysuiTestCase() {
     fun testUpdateTuningSizeFactor() {
         mContext.orCreateTestableResources.addOverrides(
                 mockTypeArray = mockTypedArray,
+                radius = 1,
                 radiusTop = 0,
-                radiusBottom = 0,
+                radiusBottom = 2,
                 multipleRadius = false)
 
         roundedCornerResDelegate = RoundedCornerResDelegate(mContext.resources, null)
@@ -115,11 +116,6 @@ class RoundedCornerResDelegateTest : SysuiTestCase() {
         assertEquals(Size(length, length), roundedCornerResDelegate.topRoundedSize)
         assertEquals(Size(length, length), roundedCornerResDelegate.bottomRoundedSize)
 
-        mContext.orCreateTestableResources.addOverrides(
-                mockTypeArray = mockTypedArray,
-                radiusTop = 1,
-                radiusBottom = 2,
-                multipleRadius = false)
         roundedCornerResDelegate.updateTuningSizeFactor(null, 2)
 
         assertEquals(Size(1, 1), roundedCornerResDelegate.topRoundedSize)
