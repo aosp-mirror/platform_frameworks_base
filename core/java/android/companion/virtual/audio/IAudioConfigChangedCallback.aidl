@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,15 +20,11 @@ import android.media.AudioPlaybackConfiguration;
 import android.media.AudioRecordingConfiguration;
 
 /**
- * Callback to control audio rerouting, notify playback and recording state of applications running
- * on virtual device.
+ * Callback to notify playback and recording state of applications running on virtual device.
  *
  * @hide
  */
-oneway interface IAudioSessionCallback {
-
-    /** Updates the set of applications that need to have their audio rerouted. */
-    void onAppsNeedingAudioRoutingChanged(in int[] appUids);
+oneway interface IAudioConfigChangedCallback {
 
     /**
      * Called whenever the playback configuration of applications running on virtual device has
