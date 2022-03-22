@@ -18,8 +18,8 @@
     xmlns:systemui="http://schemas.android.com/apk/res-auto"
     android:id="@+id/split_shade_status_bar"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/split_shade_header_height"
-    android:minHeight="@dimen/split_shade_header_min_height"
+    android:layout_height="@dimen/large_screen_shade_header_height"
+    android:minHeight="@dimen/large_screen_shade_header_min_height"
     android:clickable="false"
     android:focusable="true"
     android:paddingLeft="@dimen/qs_panel_padding"
@@ -32,7 +32,7 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:minWidth="48dp"
-        android:minHeight="@dimen/split_shade_header_min_height"
+        android:minHeight="@dimen/large_screen_shade_header_min_height"
         android:gravity="start|center_vertical"
         android:paddingStart="@dimen/status_bar_left_clock_starting_padding"
         android:paddingEnd="@dimen/status_bar_left_clock_end_padding"
@@ -69,7 +69,7 @@
                 android:layout_gravity="end|center_vertical"
                 android:layout_marginStart="8dp"
                 android:focusable="false"
-                android:minHeight="@dimen/split_shade_header_min_height"
+                android:minHeight="@dimen/large_screen_shade_header_min_height"
                 android:minWidth="48dp" />
 
             <com.android.systemui.statusbar.phone.StatusIconContainer

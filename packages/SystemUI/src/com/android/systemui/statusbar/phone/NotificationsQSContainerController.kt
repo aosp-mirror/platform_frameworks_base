@@ -123,7 +123,7 @@ class NotificationsQSContainerController @Inject constructor(
         notificationsBottomMargin = resources.getDimensionPixelSize(
                 R.dimen.notification_panel_margin_bottom)
         largeScreenShadeHeaderHeight =
-                resources.getDimensionPixelSize(R.dimen.split_shade_header_height)
+                resources.getDimensionPixelSize(R.dimen.large_screen_shade_header_height)
         panelMarginHorizontal = resources.getDimensionPixelSize(
                 R.dimen.notification_panel_margin_horizontal)
         topMargin = if (largeScreenShadeHeaderActive) {

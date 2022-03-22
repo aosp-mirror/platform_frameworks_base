@@ -471,7 +471,7 @@ class NotificationQSContainerControllerTest : SysuiTestCase() {
     fun testLargeScreenLayout_qsAndNotifsTopMarginIsOfHeaderHeight() {
         setLargeScreen()
         val largeScreenHeaderHeight = 100
-        overrideResource(R.dimen.split_shade_header_height, largeScreenHeaderHeight)
+        overrideResource(R.dimen.large_screen_shade_header_height, largeScreenHeaderHeight)
 
         controller.updateResources()
 

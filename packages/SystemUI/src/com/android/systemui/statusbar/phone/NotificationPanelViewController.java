@@ -312,7 +312,7 @@ public class NotificationPanelViewController extends PanelViewController {
 
     private final LockscreenShadeTransitionController mLockscreenShadeTransitionController;
     private final TapAgainViewController mTapAgainViewController;
-    private final SplitShadeHeaderController mSplitShadeHeaderController;
+    private final LargeScreenShadeHeaderController mLargeScreenShadeHeaderController;
     private final RecordingController mRecordingController;
     private final PanelEventsEmitter mPanelEventsEmitter;
     private boolean mShouldUseSplitNotificationShade;
@@ -734,7 +734,7 @@ public class NotificationPanelViewController extends PanelViewController {
             RecordingController recordingController,
             @Main Executor uiExecutor,
             SecureSettings secureSettings,
-            SplitShadeHeaderController splitShadeHeaderController,
+            LargeScreenShadeHeaderController largeScreenShadeHeaderController,
             ScreenOffAnimationController screenOffAnimationController,
             LockscreenGestureLogger lockscreenGestureLogger,
             PanelExpansionStateManager panelExpansionStateManager,
@@ -794,7 +794,7 @@ public class NotificationPanelViewController extends PanelViewController {
         mShouldUseSplitNotificationShade =
                 LargeScreenUtils.shouldUseSplitNotificationShade(mResources);
         mView.setWillNotDraw(!DEBUG);
-        mSplitShadeHeaderController = splitShadeHeaderController;
+        mLargeScreenShadeHeaderController = largeScreenShadeHeaderController;
         mLayoutInflater = layoutInflater;
         mFeatureFlags = featureFlags;
         mFalsingManager = falsingManager;
@@ -1088,12 +1088,12 @@ public class NotificationPanelViewController extends PanelViewController {
             mQs.setInSplitShade(mShouldUseSplitNotificationShade);
         }
         mLargeScreenShadeHeaderHeight =
-                mResources.getDimensionPixelSize(R.dimen.split_shade_header_height);
+                mResources.getDimensionPixelSize(R.dimen.large_screen_shade_header_height);
         mQuickQsHeaderHeight = useLargeScreenShadeHeader ? mLargeScreenShadeHeaderHeight :
                 SystemBarUtils.getQuickQsOffsetHeight(mView.getContext());
         int topMargin = useLargeScreenShadeHeader ? mLargeScreenShadeHeaderHeight :
                 mResources.getDimensionPixelSize(R.dimen.notification_panel_margin_top);
-        mSplitShadeHeaderController.setActive(useLargeScreenShadeHeader);
+        mLargeScreenShadeHeaderController.setActive(useLargeScreenShadeHeader);
         mAmbientState.setStackTopMargin(topMargin);
         mNotificationsQSContainerController.updateResources();
 
@@ -2273,9 +2273,9 @@ public class NotificationPanelViewController extends PanelViewController {
         float shadeExpandedFraction = mTransitioningToFullShadeProgress > 0
                 ? mLockscreenShadeTransitionController.getQSDragProgress()
                 : getExpandedFraction();
-        mSplitShadeHeaderController.setShadeExpandedFraction(shadeExpandedFraction);
-        mSplitShadeHeaderController.setQsExpandedFraction(qsExpansionFraction);
-        mSplitShadeHeaderController.setShadeExpanded(mQsVisible);
+        mLargeScreenShadeHeaderController.setShadeExpandedFraction(shadeExpandedFraction);
+        mLargeScreenShadeHeaderController.setQsExpandedFraction(qsExpansionFraction);
+        mLargeScreenShadeHeaderController.setShadeExpanded(mQsVisible);
     }
 
     private void onStackYChanged(boolean shouldAnimate) {
@@ -3538,7 +3538,7 @@ public class NotificationPanelViewController extends PanelViewController {
     public final QS.ScrollListener mScrollListener = new QS.ScrollListener() {
         @Override
         public void onQsPanelScrollChanged(int scrollY) {
-            mSplitShadeHeaderController.setQsScrollY(scrollY);
+            mLargeScreenShadeHeaderController.setQsScrollY(scrollY);
             if (scrollY > 0 && !mQsFullyExpanded) {
                 if (DEBUG) Log.d(TAG, "Scrolling while not expanded. Forcing expand");
                 // If we are scrolling QS, we should be fully expanded.

@@ -288,7 +288,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     @Mock
     private SecureSettings mSecureSettings;
     @Mock
-    private SplitShadeHeaderController mSplitShadeHeaderController;
+    private LargeScreenShadeHeaderController mLargeScreenShadeHeaderController;
     @Mock
     private ContentResolver mContentResolver;
     @Mock
@@ -498,7 +498,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 mRecordingController,
                 mExecutor,
                 mSecureSettings,
-                mSplitShadeHeaderController,
+                mLargeScreenShadeHeaderController,
                 mScreenOffAnimationController,
                 mLockscreenGestureLogger,
                 new PanelExpansionStateManager(),
@@ -923,11 +923,11 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
         mStatusBarStateController.setState(SHADE);
         when(mResources.getBoolean(R.bool.config_use_large_screen_shade_header)).thenReturn(true);
         mNotificationPanelViewController.updateResources();
-        verify(mSplitShadeHeaderController).setActive(true);
+        verify(mLargeScreenShadeHeaderController).setActive(true);
 
         when(mResources.getBoolean(R.bool.config_use_large_screen_shade_header)).thenReturn(false);
         mNotificationPanelViewController.updateResources();
-        verify(mSplitShadeHeaderController).setActive(false);
+        verify(mLargeScreenShadeHeaderController).setActive(false);
     }
 
     private void triggerPositionClockAndNotifications() {

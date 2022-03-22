@@ -16,7 +16,7 @@ object LargeScreenUtils {
 
     /**
      * Returns true if we should use large screen shade header:
-     * [com.android.systemui.statusbar.phone.SplitShadeHeaderController]
+     * [com.android.systemui.statusbar.phone.LargeScreenShadeHeaderController]
      * That should be true when we have enough horizontal space to show all info in one row.
      */
     @JvmStatic
