@@ -65,6 +65,9 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
 
     // User can actively move the PiP via the DPAD.
     private boolean mInMoveMode;
+    // Used when only showing the move menu since we want to close the menu completely when
+    // exiting the move menu instead of showing the regular button menu.
+    private boolean mCloseAfterExitMoveMenu;
 
     private final List<RemoteAction> mMediaActions = new ArrayList<>();
     private final List<RemoteAction> mAppActions = new ArrayList<>();
@@ -102,7 +105,7 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
         final BroadcastReceiver closeSystemDialogsBroadcastReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                hideMenu();
+                closeMenu();
             }
         };
         context.registerReceiverForAllUsers(closeSystemDialogsBroadcastReceiver,
@@ -155,29 +158,49 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
                 0, SHELL_ROOT_LAYER_PIP);
     }
 
+    void showMovementMenuOnly() {
+        if (DEBUG) {
+            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: showMovementMenuOnly()", TAG);
+        }
+        mInMoveMode = true;
+        mCloseAfterExitMoveMenu = true;
+        showMenuInternal();
+    }
+
     @Override
     public void showMenu() {
         if (DEBUG) {
             ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                     "%s: showMenu()", TAG);
         }
+        mInMoveMode = false;
+        mCloseAfterExitMoveMenu = false;
+        showMenuInternal();
+    }
 
-        if (mPipMenuView != null) {
-            Rect menuBounds = getMenuBounds(mTvPipBoundsState.getBounds());
-            mSystemWindows.updateViewLayout(mPipMenuView, getPipMenuLayoutParams(
-                    MENU_WINDOW_TITLE, menuBounds.width(), menuBounds.height()));
-            maybeUpdateMenuViewActions();
-            updateExpansionState();
+    private void showMenuInternal() {
+        if (mPipMenuView == null) {
+            return;
+        }
+        Rect menuBounds = getMenuBounds(mTvPipBoundsState.getBounds());
+        mSystemWindows.updateViewLayout(mPipMenuView, getPipMenuLayoutParams(
+                MENU_WINDOW_TITLE, menuBounds.width(), menuBounds.height()));
+        maybeUpdateMenuViewActions();
+        updateExpansionState();
 
-            SurfaceControl menuSurfaceControl = getSurfaceControl();
-            if (menuSurfaceControl != null) {
-                SurfaceControl.Transaction t = new SurfaceControl.Transaction();
-                t.setRelativeLayer(mPipMenuView.getWindowSurfaceControl(), mLeash, 1);
-                t.setPosition(menuSurfaceControl, menuBounds.left, menuBounds.top);
-                t.apply();
-            }
-            grantPipMenuFocus(true);
-            mPipMenuView.show(mInMoveMode, mDelegate.getPipGravity());
+        SurfaceControl menuSurfaceControl = getSurfaceControl();
+        if (menuSurfaceControl != null) {
+            SurfaceControl.Transaction t = new SurfaceControl.Transaction();
+            t.setRelativeLayer(mPipMenuView.getWindowSurfaceControl(), mLeash, 1);
+            t.setPosition(menuSurfaceControl, menuBounds.left, menuBounds.top);
+            t.apply();
+        }
+        grantPipMenuFocus(true);
+        if (mInMoveMode) {
+            mPipMenuView.showMoveMenu(mDelegate.getPipGravity());
+        } else {
+            mPipMenuView.showButtonMenu();
         }
     }
 
@@ -199,25 +222,18 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
         return menuBounds;
     }
 
-    void hideMenu() {
-        if (!isMenuVisible()) {
-            if (DEBUG) {
-                ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                        "%s: hideMenu() - Menu isn't visible, so don't hide", TAG);
-            }
+    void closeMenu() {
+        if (DEBUG) {
+            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: closeMenu()", TAG);
+        }
+        if (mPipMenuView == null) {
             return;
-        } else {
-            if (DEBUG) {
-                ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                        "%s: hideMenu()", TAG);
-            }
         }
 
-        mPipMenuView.hide();
-        if (!mInMoveMode) {
-            grantPipMenuFocus(false);
-            mDelegate.closeMenu();
-        }
+        mPipMenuView.hideAll();
+        grantPipMenuFocus(false);
+        mDelegate.onMenuClosed();
     }
 
     boolean isInMoveMode() {
@@ -228,25 +244,29 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
     public void onEnterMoveMode() {
         if (DEBUG) {
             ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                    "%s: onEnterMoveMode - %b", TAG, mInMoveMode);
+                    "%s: onEnterMoveMode - %b, close when exiting move menu: %b", TAG, mInMoveMode,
+                    mCloseAfterExitMoveMenu);
         }
         mInMoveMode = true;
-        mPipMenuView.showMenuButtons(false);
-        mPipMenuView.showMovementHints(mDelegate.getPipGravity());
-        mDelegate.onInMoveModeChanged();
+        mPipMenuView.showMoveMenu(mDelegate.getPipGravity());
     }
 
     @Override
     public boolean onExitMoveMode() {
         if (DEBUG) {
             ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                    "%s: onExitMoveMode - %b", TAG, mInMoveMode);
+                    "%s: onExitMoveMode - %b, close when exiting move menu: %b", TAG, mInMoveMode,
+                    mCloseAfterExitMoveMenu);
+        }
+        if (mCloseAfterExitMoveMenu) {
+            mInMoveMode = false;
+            mCloseAfterExitMoveMenu = false;
+            closeMenu();
+            return true;
         }
         if (mInMoveMode) {
             mInMoveMode = false;
-            mPipMenuView.showMenuButtons(true);
-            mPipMenuView.hideMovementHints();
-            mDelegate.onInMoveModeChanged();
+            mPipMenuView.showButtonMenu();
             return true;
         }
         return false;
@@ -266,7 +286,7 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
 
     @Override
     public void detach() {
-        hideMenu();
+        closeMenu();
         detachPipMenuView();
         mLeash = null;
     }
@@ -486,7 +506,7 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
     @Override
     public void onBackPress() {
         if (!onExitMoveMode()) {
-            hideMenu();
+            closeMenu();
         }
     }
 
@@ -516,7 +536,7 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
 
         void togglePipExpansion();
 
-        void closeMenu();
+        void onMenuClosed();
 
         void closePip();
     }
