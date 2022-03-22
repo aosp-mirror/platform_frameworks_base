@@ -114,6 +114,10 @@ class ScreenDecorHwcLayer(context: Context, displayDecorationSupport: DisplayDec
         }
     }
 
+    override fun onUpdate() {
+        parent.requestTransparentRegion(this)
+    }
+
     override fun onDraw(canvas: Canvas) {
         // If updating onDraw, also update gatherTransparentRegion
         if (useInvertedAlphaColor) {
