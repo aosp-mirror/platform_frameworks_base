@@ -2802,7 +2802,14 @@ public class BubbleStackView extends FrameLayout
             mExpandedViewContainer.setVisibility(View.INVISIBLE);
             mExpandedViewContainer.setAlpha(0f);
             mExpandedViewContainer.addView(bev);
-            bev.setManageClickListener((view) -> showManageMenu(!mShowingManage));
+
+            postDelayed(() -> {
+                // Set the Manage button click handler from postDelayed. This appears to resolve
+                // a race condition with adding the BubbleExpandedView view to the expanded view
+                // container. Due to the race condition the click handler sometimes is not set up
+                // correctly and is never called.
+                bev.setManageClickListener((view) -> showManageMenu(true /* show */));
+            }, 0);
 
             if (!mIsExpansionAnimating) {
                 mSurfaceSynchronizer.syncSurfaceAndRun(() -> {
