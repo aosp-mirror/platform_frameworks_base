@@ -903,11 +903,11 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
             this.radius = radius;
         }
 
-        Animator createCircularRevealAnimator(View view) {
+        Animator createCircularHideAnimator(View view) {
             return ViewAnimationUtils.createCircularReveal(view, centerX, centerY, radius, 0);
         }
 
-        Animator createCircularHideAnimator(View view) {
+        Animator createCircularRevealAnimator(View view) {
             return ViewAnimationUtils.createCircularReveal(view, centerX, centerY, 0, radius);
         }
     }
