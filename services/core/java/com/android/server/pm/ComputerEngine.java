@@ -1429,7 +1429,8 @@ public class ComputerEngine implements Computer {
         if (userId == UserHandle.USER_SYSTEM) {
             return resolveInfos;
         }
-        for (int i = resolveInfos.size() - 1; i >= 0; i--) {
+
+        for (int i = CollectionUtils.size(resolveInfos) - 1; i >= 0; i--) {
             ResolveInfo info = resolveInfos.get(i);
             if ((info.activityInfo.flags & ActivityInfo.FLAG_SYSTEM_USER_ONLY) != 0) {
                 resolveInfos.remove(i);
