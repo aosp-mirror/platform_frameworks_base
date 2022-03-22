@@ -1000,7 +1000,7 @@ public class RippleDrawable extends LayerDrawable {
     }
 
     private int clampAlpha(@ColorInt int color) {
-        if (Color.alpha(color) > 128) {
+        if (Color.alpha(color) < 128) {
             return  (color & 0x00FFFFFF) | 0x80000000;
         }
         return color;

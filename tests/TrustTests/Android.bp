@@ -25,6 +25,8 @@ android_test {
         "androidx.test.rules",
         "androidx.test.ext.junit",
         "androidx.test.uiautomator",
+        "mockito-target-minus-junit4",
+        "servicestests-utils",
         "truth-prebuilt",
     ],
     libs: [

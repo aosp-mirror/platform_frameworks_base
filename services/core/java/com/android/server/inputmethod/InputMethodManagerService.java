@@ -49,6 +49,7 @@ import static android.view.WindowManager.DISPLAY_IME_POLICY_HIDE;
 import static android.view.WindowManager.DISPLAY_IME_POLICY_LOCAL;
 
 import static com.android.server.inputmethod.InputMethodBindingController.TIME_TO_RECONNECT;
+import static com.android.server.inputmethod.InputMethodUtils.isSoftInputModeStateVisibleAllowed;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
@@ -187,6 +188,8 @@ import com.android.server.statusbar.StatusBarManagerService;
 import com.android.server.utils.PriorityDump;
 import com.android.server.wm.WindowManagerInternal;
 
+import com.google.android.collect.Sets;
+
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -201,6 +204,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.OptionalInt;
+import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -266,6 +270,14 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
      * starting from {@link android.os.Build.VERSION_CODES#P}.
      */
     private final boolean mPreventImeStartupUnlessTextEditor;
+
+    /**
+     * These IMEs are known not to behave well when evicted from memory and thus are exempt
+     * from the IME startup avoidance behavior that is enabled by
+     * {@link #mPreventImeStartupUnlessTextEditor}.
+     */
+    @NonNull
+    private final Set<String> mNonPreemptibleInputMethods;
 
     @UserIdInt
     private int mLastSwitchUserId;
@@ -1692,6 +1704,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         mBindingController = new InputMethodBindingController(this);
         mPreventImeStartupUnlessTextEditor = mRes.getBoolean(
                 com.android.internal.R.bool.config_preventImeStartupUnlessTextEditor);
+        mNonPreemptibleInputMethods = Sets.newHashSet(mRes.getStringArray(
+                com.android.internal.R.array.config_nonPreemptibleInputMethods));
         mHwController = new HandwritingModeController(thread.getLooper(),
                 new InkWindowInitializer());
     }
@@ -2548,7 +2562,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             @StartInputFlags int startInputFlags, @StartInputReason int startInputReason,
             int unverifiedTargetSdkVersion) {
         // If no method is currently selected, do nothing.
-        String selectedMethodId = getSelectedMethodIdLocked();
+        final String selectedMethodId = getSelectedMethodIdLocked();
         if (selectedMethodId == null) {
             return InputBindResult.NO_IME;
         }
@@ -2592,10 +2606,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         mCurAttribute = attribute;
 
         // If configured, we want to avoid starting up the IME if it is not supposed to be showing
-        if (mPreventImeStartupUnlessTextEditor
-                && !InputMethodUtils.isSoftInputModeStateVisibleAllowed(unverifiedTargetSdkVersion,
-                startInputFlags)
-                && !mShowRequested) {
+        if (shouldPreventImeStartupLocked(selectedMethodId, startInputFlags,
+                unverifiedTargetSdkVersion)) {
             if (DEBUG) {
                 Slog.d(TAG, "Avoiding IME startup and unbinding current input method.");
             }
@@ -2634,6 +2646,34 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         mBindingController.unbindCurrentMethod();
 
         return mBindingController.bindCurrentMethod();
+    }
+
+    @GuardedBy("ImfLock.class")
+    private boolean shouldPreventImeStartupLocked(
+            @NonNull String selectedMethodId,
+            @StartInputFlags int startInputFlags,
+            int unverifiedTargetSdkVersion) {
+        // Fast-path for the majority of cases
+        if (!mPreventImeStartupUnlessTextEditor) {
+            return false;
+        }
+
+        final boolean imeVisibleAllowed =
+                isSoftInputModeStateVisibleAllowed(unverifiedTargetSdkVersion, startInputFlags);
+
+        return !(imeVisibleAllowed
+                || mShowRequested
+                || isNonPreemptibleImeLocked(selectedMethodId));
+    }
+
+    /** Return {@code true} if the given IME is non-preemptible like the tv remote service. */
+    @GuardedBy("ImfLock.class")
+    private boolean isNonPreemptibleImeLocked(@NonNull  String selectedMethodId) {
+        final InputMethodInfo imi = mMethodMap.get(selectedMethodId);
+        if (imi != null) {
+            return mNonPreemptibleInputMethods.contains(imi.getPackageName());
+        }
+        return false;
     }
 
     @GuardedBy("ImfLock.class")
@@ -3826,7 +3866,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             case LayoutParams.SOFT_INPUT_STATE_VISIBLE:
                 if ((softInputMode & LayoutParams.SOFT_INPUT_IS_FORWARD_NAVIGATION) != 0) {
                     if (DEBUG) Slog.v(TAG, "Window asks to show input going forward");
-                    if (InputMethodUtils.isSoftInputModeStateVisibleAllowed(
+                    if (isSoftInputModeStateVisibleAllowed(
                             unverifiedTargetSdkVersion, startInputFlags)) {
                         if (attribute != null) {
                             res = startInputUncheckedLocked(cs, inputContext, attribute,
@@ -3844,7 +3884,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 break;
             case LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE:
                 if (DEBUG) Slog.v(TAG, "Window asks to always show input");
-                if (InputMethodUtils.isSoftInputModeStateVisibleAllowed(
+                if (isSoftInputModeStateVisibleAllowed(
                         unverifiedTargetSdkVersion, startInputFlags)) {
                     if (!sameWindowFocused) {
                         if (attribute != null) {

@@ -37,6 +37,9 @@ import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_FRAME;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_VISIBLE;
+import static android.view.WindowCallbacks.RESIZE_MODE_DOCKED_DIVIDER;
+import static android.view.WindowCallbacks.RESIZE_MODE_FREEFORM;
+import static android.view.WindowCallbacks.RESIZE_MODE_INVALID;
 import static android.view.WindowInsets.Type.systemBars;
 import static android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
 import static android.view.WindowLayout.UNSPECIFIED_LENGTH;
@@ -98,8 +101,6 @@ import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 import static android.view.WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.isSystemAlertWindowType;
-import static android.view.WindowManagerGlobal.RELAYOUT_RES_DRAG_RESIZING_DOCKED;
-import static android.view.WindowManagerGlobal.RELAYOUT_RES_DRAG_RESIZING_FREEFORM;
 import static android.view.WindowManagerGlobal.RELAYOUT_RES_FIRST_TIME;
 import static android.view.WindowManagerPolicyConstants.TYPE_LAYER_MULTIPLIER;
 import static android.view.WindowManagerPolicyConstants.TYPE_LAYER_OFFSET;
@@ -3943,17 +3944,34 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 true /* useLatestConfig */, false /* relayoutVisible */);
         final boolean syncRedraw = shouldSendRedrawForSync();
         final boolean reportDraw = syncRedraw || drawPending;
-        final boolean forceRelayout = syncRedraw || reportOrientation || isDragResizeChanged();
+        final boolean isDragResizeChanged = isDragResizeChanged();
+        final boolean forceRelayout = syncRedraw || reportOrientation || isDragResizeChanged;
         final DisplayContent displayContent = getDisplayContent();
         final boolean alwaysConsumeSystemBars =
                 displayContent.getDisplayPolicy().areSystemBarsForcedShownLw();
         final int displayId = displayContent.getDisplayId();
 
+        if (isDragResizeChanged) {
+            setDragResizing();
+        }
+        int resizeMode = RESIZE_MODE_INVALID;
+        if (isDragResizing()) {
+            switch (getResizeMode()) {
+                case DRAG_RESIZE_MODE_FREEFORM:
+                    resizeMode = RESIZE_MODE_FREEFORM;
+                    break;
+                case DRAG_RESIZE_MODE_DOCKED_DIVIDER:
+                    resizeMode = RESIZE_MODE_DOCKED_DIVIDER;
+                    break;
+            }
+        }
+
         markRedrawForSyncReported();
 
         try {
             mClient.resized(mClientWindowFrames, reportDraw, mLastReportedConfiguration,
-                forceRelayout, alwaysConsumeSystemBars, displayId, Integer.MAX_VALUE);
+                    forceRelayout, alwaysConsumeSystemBars, displayId, Integer.MAX_VALUE,
+                    resizeMode);
             if (drawPending && reportOrientation && mOrientationChanging) {
                 mOrientationChangeRedrawRequestTime = SystemClock.elapsedRealtime();
                 ProtoLog.v(WM_DEBUG_ORIENTATION,
@@ -5217,15 +5235,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
 
-        if (isDragResizeChanged()) {
-            setDragResizing();
-        }
-        final boolean freeformResizing = isDragResizing()
-                && getResizeMode() == DRAG_RESIZE_MODE_FREEFORM;
-        final boolean dockedResizing = isDragResizing()
-                && getResizeMode() == DRAG_RESIZE_MODE_DOCKED_DIVIDER;
-        result |= freeformResizing ? RELAYOUT_RES_DRAG_RESIZING_FREEFORM : 0;
-        result |= dockedResizing ? RELAYOUT_RES_DRAG_RESIZING_DOCKED : 0;
         return result;
     }
 
@@ -5261,6 +5270,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         // If we are an inset provider, all our animations are driven by the inset client.
         if (mControllableInsetProvider != null) {
+            return;
+        }
+        if (mDisplayContent.inTransition()) {
+            // Skip because the animation is usually unnoticeable (e.g. covered by rotation
+            // animation) and the animation bounds could be inconsistent, such as depending
+            // on when the window applies its draw transaction with new rotation.
             return;
         }
 
@@ -5507,10 +5522,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
         float newHScale = mHScale * mGlobalScale * mWallpaperScale;
         float newVScale = mVScale * mGlobalScale * mWallpaperScale;
-        if (mLastHScale != newHScale ||
-            mLastVScale != newVScale ) {
-            getPendingTransaction().setMatrix(getSurfaceControl(),
-                newHScale, 0, 0, newVScale);
+        if (mLastHScale != newHScale || mLastVScale != newVScale) {
+            getSyncTransaction().setMatrix(mSurfaceControl, newHScale, 0, 0, newVScale);
             mLastHScale = newHScale;
             mLastVScale = newVScale;
         }

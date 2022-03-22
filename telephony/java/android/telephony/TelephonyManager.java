@@ -41,6 +41,7 @@ import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.annotation.WorkerThread;
 import android.app.PendingIntent;
+import android.app.PropertyInvalidatedCache;
 import android.app.role.RoleManager;
 import android.compat.Compatibility;
 import android.compat.annotation.ChangeId;
@@ -360,6 +361,42 @@ public class TelephonyManager {
     private static ISms sISms;
     @GuardedBy("sCacheLock")
     private static final DeathRecipient sServiceDeath = new DeathRecipient();
+
+    /**
+     * Cache key for a {@link PropertyInvalidatedCache} which maps from {@link PhoneAccountHandle}
+     * to subscription Id.  The cache is initialized in {@code PhoneInterfaceManager}'s constructor
+     * when {@link PropertyInvalidatedCache#invalidateCache(String)} is called.
+     * The cache is cleared from {@code TelecomAccountRegistry#tearDown} when all phone accounts are
+     * removed from Telecom.
+     * @hide
+     */
+    public static final String CACHE_KEY_PHONE_ACCOUNT_TO_SUBID =
+            "cache_key.telephony.phone_account_to_subid";
+    private static final int CACHE_MAX_SIZE = 4;
+
+    /**
+     * A {@link PropertyInvalidatedCache} which lives in an app's {@link TelephonyManager} instance.
+     * Caches any queries for a mapping between {@link PhoneAccountHandle} and {@code subscription
+     * id}.  The cache may be invalidated from Telephony when phone account re-registration takes
+     * place.
+     */
+    private PropertyInvalidatedCache<PhoneAccountHandle, Integer> mPhoneAccountHandleToSubIdCache =
+            new PropertyInvalidatedCache<PhoneAccountHandle, Integer>(CACHE_MAX_SIZE,
+                    CACHE_KEY_PHONE_ACCOUNT_TO_SUBID) {
+                @Override
+                public Integer recompute(PhoneAccountHandle phoneAccountHandle) {
+                    try {
+                        ITelephony telephony = getITelephony();
+                        if (telephony != null) {
+                            return telephony.getSubIdForPhoneAccountHandle(phoneAccountHandle,
+                                    mContext.getOpPackageName(), mContext.getAttributionTag());
+                        }
+                    } catch (RemoteException e) {
+                        throw e.rethrowAsRuntimeException();
+                    }
+                    return SubscriptionManager.INVALID_SUBSCRIPTION_ID;
+                }
+            };
 
     /** Enum indicating multisim variants
      *  DSDS - Dual SIM Dual Standby
@@ -11880,19 +11917,7 @@ public class TelephonyManager {
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
     @RequiresFeature(PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION)
     public int getSubscriptionId(@NonNull PhoneAccountHandle phoneAccountHandle) {
-        int retval = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
-        try {
-            ITelephony service = getITelephony();
-            if (service != null) {
-                retval = service.getSubIdForPhoneAccountHandle(
-                        phoneAccountHandle, mContext.getOpPackageName(),
-                        mContext.getAttributionTag());
-            }
-        } catch (RemoteException ex) {
-            Log.e(TAG, "getSubscriptionId RemoteException", ex);
-            ex.rethrowAsRuntimeException();
-        }
-        return retval;
+        return mPhoneAccountHandleToSubIdCache.query(phoneAccountHandle);
     }
 
     /**

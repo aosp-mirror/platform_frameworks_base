@@ -70,7 +70,7 @@ public class KeyguardCoordinator implements Coordinator {
     private final NotifFilter mNotifFilter = new NotifFilter(TAG) {
         @Override
         public boolean shouldFilterOut(NotificationEntry entry, long now) {
-            return mKeyguardNotificationVisibilityProvider.hideNotification(entry);
+            return mKeyguardNotificationVisibilityProvider.shouldHideNotification(entry);
         }
     };
 

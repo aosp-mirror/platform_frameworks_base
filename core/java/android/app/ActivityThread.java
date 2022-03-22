@@ -5885,19 +5885,17 @@ public final class ActivityThread extends ClientTransactionHandler
         final boolean movedToDifferentDisplay = isDifferentDisplay(activity.getDisplayId(),
                 displayId);
         final Configuration currentConfig = activity.mCurrentConfig;
-        final int diff = (currentConfig == null) ? 0xffffffff
-                : currentConfig.diffPublicOnly(newConfig);
+        final int diff = currentConfig.diffPublicOnly(newConfig);
         final boolean hasPublicConfigChange = diff != 0;
+        final ActivityClientRecord r = getActivityClient(activityToken);
         // TODO(b/173090263): Use diff instead after the improvement of AssetManager and
         // ResourcesImpl constructions.
         final boolean shouldUpdateResources = hasPublicConfigChange
                 || shouldUpdateResources(activityToken, currentConfig, newConfig, amOverrideConfig,
                 movedToDifferentDisplay, hasPublicConfigChange);
-        final boolean shouldReportChange = hasPublicConfigChange
-                // If this activity doesn't handle any of the config changes, then don't bother
-                // calling onConfigurationChanged. Otherwise, report to the activity for the
-                // changes.
-                && (~activity.mActivityInfo.getRealConfigChanged() & diff) == 0;
+        final boolean shouldReportChange = shouldReportChange(diff, currentConfig, newConfig,
+                r != null ? r.mSizeConfigurations : null,
+                activity.mActivityInfo.getRealConfigChanged());
         // Nothing significant, don't proceed with updating and reporting.
         if (!shouldUpdateResources) {
             return null;
@@ -5942,6 +5940,40 @@ public final class ActivityThread extends ClientTransactionHandler
         }
 
         return configToReport;
+    }
+
+    /**
+     * Returns {@code true} if {@link Activity#onConfigurationChanged(Configuration)} should be
+     * dispatched.
+     *
+     * @param publicDiff Usually computed by {@link Configuration#diffPublicOnly(Configuration)}.
+     *                   This parameter is to prevent we compute it again.
+     * @param currentConfig The current configuration cached in {@link Activity#mCurrentConfig}.
+     *                      It is {@code null} before the first config update from the server side.
+     * @param newConfig The updated {@link Configuration}
+     * @param sizeBuckets The Activity's {@link SizeConfigurationBuckets} if not {@code null}
+     * @param handledConfigChanges Bit mask of configuration changes that the activity can handle
+     * @return {@code true} if the config change should be reported to the Activity
+     */
+    @VisibleForTesting
+    public static boolean shouldReportChange(int publicDiff, @Nullable Configuration currentConfig,
+            @NonNull Configuration newConfig, @Nullable SizeConfigurationBuckets sizeBuckets,
+            int handledConfigChanges) {
+        // Don't report the change if there's no public diff between current and new config.
+        if (publicDiff == 0) {
+            return false;
+        }
+        final int diffWithBucket = SizeConfigurationBuckets.filterDiff(publicDiff, currentConfig,
+                newConfig, sizeBuckets);
+        // Compare to the diff which filter the change without crossing size buckets with
+        // {@code handledConfigChanges}. The small changes should not block Activity to receive
+        // its handled config updates. Also, if Activity handles all small changes, we should
+        // dispatch the updated config to it.
+        final int diff = diffWithBucket != 0 ? diffWithBucket : publicDiff;
+        // If this activity doesn't handle any of the config changes, then don't bother
+        // calling onConfigurationChanged. Otherwise, report to the activity for the
+        // changes.
+        return (~handledConfigChanges & diff) == 0;
     }
 
     public final void applyConfigurationToResources(Configuration config) {
