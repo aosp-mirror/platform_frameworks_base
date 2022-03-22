@@ -14,6 +14,7 @@ import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.systemui.CoreStartable
 import com.android.systemui.broadcast.BroadcastDispatcher
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
@@ -22,13 +23,49 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.provider.HighPriorityProvider
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.ListenerSet
+import com.android.systemui.util.settings.GlobalSettings
+import com.android.systemui.util.settings.SecureSettings
+import dagger.Binds
+import dagger.Module
+import dagger.multibindings.ClassKey
+import dagger.multibindings.IntoMap
 import java.util.function.Consumer
 import javax.inject.Inject
 
-/**
- * Determines if notifications should be visible based on the state of the keyguard
- */
-class KeyguardNotificationVisibilityProvider @Inject constructor(
+/** Determines if notifications should be visible based on the state of the keyguard. */
+interface KeyguardNotificationVisibilityProvider {
+    /**
+     * Determines if the given notification should be hidden based on the current keyguard state.
+     * If a [Consumer] registered via [addOnStateChangedListener] is invoked, the results of this
+     * method may no longer be valid and should be re-queried.
+     */
+    fun shouldHideNotification(entry: NotificationEntry): Boolean
+
+    /** Registers a listener to be notified when the internal keyguard state has been updated. */
+    fun addOnStateChangedListener(listener: Consumer<String>)
+
+    /** Unregisters a listener previously registered with [addOnStateChangedListener]. */
+    fun removeOnStateChangedListener(listener: Consumer<String>)
+}
+
+/** Provides a [KeyguardNotificationVisibilityProvider] in [SysUISingleton] scope. */
+@Module(includes = [KeyguardNotificationVisibilityProviderImplModule::class])
+object KeyguardNotificationVisibilityProviderModule
+
+@Module
+private interface KeyguardNotificationVisibilityProviderImplModule {
+    @Binds
+    fun bindImpl(impl: KeyguardNotificationVisibilityProviderImpl):
+            KeyguardNotificationVisibilityProvider
+
+    @Binds
+    @IntoMap
+    @ClassKey(KeyguardNotificationVisibilityProvider::class)
+    fun bindStartable(impl: KeyguardNotificationVisibilityProviderImpl): CoreStartable
+}
+
+@SysUISingleton
+private class KeyguardNotificationVisibilityProviderImpl @Inject constructor(
     context: Context,
     @Main private val handler: Handler,
     private val keyguardStateController: KeyguardStateController,
@@ -36,8 +73,10 @@ class KeyguardNotificationVisibilityProvider @Inject constructor(
     private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
     private val highPriorityProvider: HighPriorityProvider,
     private val statusBarStateController: StatusBarStateController,
-    private val broadcastDispatcher: BroadcastDispatcher
-) : CoreStartable(context) {
+    private val broadcastDispatcher: BroadcastDispatcher,
+    private val secureSettings: SecureSettings,
+    private val globalSettings: GlobalSettings
+) : CoreStartable(context), KeyguardNotificationVisibilityProvider {
     private val onStateChangedListeners = ListenerSet<Consumer<String>>()
     private var hideSilentNotificationsOnLockscreen: Boolean = false
 
@@ -60,33 +99,28 @@ class KeyguardNotificationVisibilityProvider @Inject constructor(
 
         // register lockscreen settings changed callbacks:
         val settingsObserver: ContentObserver = object : ContentObserver(handler) {
-            override fun onChange(selfChange: Boolean, uri: Uri) {
+            override fun onChange(selfChange: Boolean, uri: Uri?) {
                 if (keyguardStateController.isShowing) {
                     notifyStateChanged("Settings $uri changed")
                 }
             }
         }
 
-        mContext.contentResolver.registerContentObserver(
-                Settings.Secure.getUriFor(Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS),
-                false,
+        secureSettings.registerContentObserverForUser(
+                Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS,
                 settingsObserver,
                 UserHandle.USER_ALL)
 
-        mContext.contentResolver.registerContentObserver(
-                Settings.Secure.getUriFor(Settings.Secure.LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS),
+        secureSettings.registerContentObserverForUser(
+                Settings.Secure.LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS,
                 true,
                 settingsObserver,
                 UserHandle.USER_ALL)
 
-        mContext.contentResolver.registerContentObserver(
-                Settings.Global.getUriFor(Settings.Global.ZEN_MODE),
-                false,
-                settingsObserver)
+        globalSettings.registerContentObserver(Settings.Global.ZEN_MODE, settingsObserver)
 
-        mContext.contentResolver.registerContentObserver(
-                Settings.Secure.getUriFor(Settings.Secure.LOCK_SCREEN_SHOW_SILENT_NOTIFICATIONS),
-                false,
+        secureSettings.registerContentObserverForUser(
+                Settings.Secure.LOCK_SCREEN_SHOW_SILENT_NOTIFICATIONS,
                 settingsObserver,
                 UserHandle.USER_ALL)
 
@@ -98,41 +132,36 @@ class KeyguardNotificationVisibilityProvider @Inject constructor(
         })
         broadcastDispatcher.registerReceiver(object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
-                if (keyguardStateController.isShowing()) {
+                if (keyguardStateController.isShowing) {
                     // maybe public mode changed
-                    notifyStateChanged(intent.action)
+                    notifyStateChanged(intent.action!!)
                 }
             }
         }, IntentFilter(Intent.ACTION_USER_SWITCHED))
     }
 
-    fun addOnStateChangedListener(listener: Consumer<String>) {
+    override fun addOnStateChangedListener(listener: Consumer<String>) {
         onStateChangedListeners.addIfAbsent(listener)
     }
 
-    fun removeOnStateChangedListener(listener: Consumer<String>) {
+    override fun removeOnStateChangedListener(listener: Consumer<String>) {
         onStateChangedListeners.remove(listener)
     }
 
     private fun notifyStateChanged(reason: String) {
-        onStateChangedListeners.forEach({ it.accept(reason) })
+        onStateChangedListeners.forEach { it.accept(reason) }
     }
 
-    /**
-     * Determines if the given notification should be hidden based on the current keyguard state.
-     * If Listener#onKeyguardStateChanged is invoked, the results of this method may no longer
-     * be valid, and so should be re-queried
-     */
-    fun hideNotification(entry: NotificationEntry): Boolean {
+    override fun shouldHideNotification(entry: NotificationEntry): Boolean {
         val sbn = entry.sbn
         // FILTER OUT the notification when the keyguard is showing and...
-        if (keyguardStateController.isShowing()) {
+        if (keyguardStateController.isShowing) {
             // ... user settings or the device policy manager doesn't allow lockscreen
             // notifications;
             if (!lockscreenUserManager.shouldShowLockscreenNotifications()) {
                 return true
             }
-            val currUserId: Int = lockscreenUserManager.getCurrentUserId()
+            val currUserId: Int = lockscreenUserManager.currentUserId
             val notifUserId =
                     if (sbn.user.identifier == UserHandle.USER_ALL) currUserId
                     else sbn.user.identifier
@@ -178,9 +207,7 @@ class KeyguardNotificationVisibilityProvider @Inject constructor(
         }
 
     private fun readShowSilentNotificationSetting() {
-        hideSilentNotificationsOnLockscreen = Settings.Secure.getInt(
-                mContext.getContentResolver(),
-                Settings.Secure.LOCK_SCREEN_SHOW_SILENT_NOTIFICATIONS,
-                1) == 0
+        hideSilentNotificationsOnLockscreen =
+                secureSettings.getBool(Settings.Secure.LOCK_SCREEN_SHOW_SILENT_NOTIFICATIONS, true)
     }
 }

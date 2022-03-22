@@ -1486,6 +1486,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 @Override
                 public void onAuthenticationFailed() {
                     handleFingerprintAuthFailed();
+
+                    // TODO(b/225231929): Refactor as needed, add tests, etc.
+                    mTrustManager.reportUserRequestedUnlock(
+                            KeyguardUpdateMonitor.getCurrentUser(), true);
                 }
 
                 @Override
@@ -2258,7 +2262,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         }
 
         if (shouldTriggerActiveUnlock()) {
-            mTrustManager.reportUserRequestedUnlock(KeyguardUpdateMonitor.getCurrentUser());
+            // TODO(b/225231929): Refactor surrounding code to reflect calling of new method
+            mTrustManager.reportUserMayRequestUnlock(KeyguardUpdateMonitor.getCurrentUser());
         }
     }
 

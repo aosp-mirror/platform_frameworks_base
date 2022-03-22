@@ -144,7 +144,8 @@ class AsyncRotationController extends FadeAnimationController implements Consume
         // Legacy animation doesn't need to wait for the start transaction.
         if (mTransitionOp == OP_LEGACY) {
             mIsStartTransactionCommitted = true;
-        } else if (displayContent.mTransitionController.useShellTransitionsRotation()) {
+        } else if (displayContent.mTransitionController.useShellTransitionsRotation()
+                || displayContent.mTransitionController.isCollecting(displayContent)) {
             keepAppearanceInPreviousRotation();
         }
     }

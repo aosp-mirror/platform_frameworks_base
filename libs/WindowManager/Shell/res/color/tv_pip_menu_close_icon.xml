@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  ~ Copyright (C) 2021 The Android Open Source Project
+  ~ Copyright (C) 2022 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -14,13 +14,6 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<resources>
-    <color name="tv_pip_menu_icon_focused">#0E0E0F</color>
-    <color name="tv_pip_menu_icon_unfocused">#F8F9FA</color>
-    <color name="tv_pip_menu_icon_disabled">#80868B</color>
-    <color name="tv_pip_menu_close_icon_bg_focused">#D93025</color>
-    <color name="tv_pip_menu_close_icon_bg_unfocused">#D69F261F</color>
-    <color name="tv_pip_menu_icon_bg_focused">#E8EAED</color>
-    <color name="tv_pip_menu_icon_bg_unfocused">#990E0E0F</color>
-    <color name="tv_pip_menu_focus_border">#E8EAED</color>
-</resources>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:color="@color/tv_pip_menu_icon_unfocused" />
+</selector>

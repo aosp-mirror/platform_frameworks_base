@@ -2915,9 +2915,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      */
     boolean supportsPictureInPicture() {
         return mAtmService.mSupportsPictureInPicture && isActivityTypeStandardOrUndefined()
-                && info.supportsPictureInPicture()
-                && (mDisplayContent != null && mDisplayContent.mDwpcHelper.isWindowingModeSupported(
-                WINDOWING_MODE_PINNED));
+                && info.supportsPictureInPicture();
     }
 
     /**
@@ -3012,6 +3010,14 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         // Check to see if we are in VR mode, and disallow PiP if so
         if (mAtmService.shouldDisableNonVrUiLocked()) {
+            return false;
+        }
+
+        // Check to see if PiP is supported for the display this container is on.
+        if (mDisplayContent != null && !mDisplayContent.mDwpcHelper.isWindowingModeSupported(
+                WINDOWING_MODE_PINNED)) {
+            Slog.w(TAG, "Display " + mDisplayContent.getDisplayId()
+                    + " doesn't support enter picture-in-picture mode. caller = " + caller);
             return false;
         }
 

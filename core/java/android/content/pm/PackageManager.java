@@ -10319,7 +10319,11 @@ public abstract class PackageManager {
 
     /**
      * Makes the package associated with the uid {@code visibleUid} become visible to the
-     * recipient uid application.
+     * recipient application. The recipient application can receive the details about the
+     * visible package if successful.
+     * <p>
+     * Read <a href="/training/basics/intents/package-visibility">package visibility</a> for more
+     * information.
      *
      * @param recipientUid The uid of the application that is being given access to {@code
      *                     visibleUid}
