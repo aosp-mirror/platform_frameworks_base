@@ -29,7 +29,7 @@ import android.view.animation.Interpolator
  * A class that allows changes in bounds within a view hierarchy to animate seamlessly between the
  * start and end state.
  */
-class ViewBoundAnimator {
+class ViewHierarchyAnimator {
     // TODO(b/221418522): make this private once it can't be passed as an arg anymore.
     enum class Bound(val label: String, val overrideTag: Int) {
         LEFT("left", R.id.tag_override_left) {
