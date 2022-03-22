@@ -67,7 +67,8 @@ import java.util.function.Consumer;
 class TaskOrganizerController extends ITaskOrganizerController.Stub {
     private static final String TAG = "TaskOrganizerController";
 
-    private class DeathRecipient implements IBinder.DeathRecipient {
+    @VisibleForTesting
+    class DeathRecipient implements IBinder.DeathRecipient {
         ITaskOrganizer mTaskOrganizer;
 
         DeathRecipient(ITaskOrganizer organizer) {
@@ -77,7 +78,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         @Override
         public void binderDied() {
             synchronized (mGlobalLock) {
-                final TaskOrganizerState state = mTaskOrganizerStates.remove(
+                final TaskOrganizerState state = mTaskOrganizerStates.get(
                         mTaskOrganizer.asBinder());
                 if (state != null) {
                     state.dispose();
@@ -170,7 +171,8 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         }
     }
 
-    private class TaskOrganizerState {
+    @VisibleForTesting
+    class TaskOrganizerState {
         private final TaskOrganizerCallbacks mOrganizer;
         private final DeathRecipient mDeathRecipient;
         private final ArrayList<Task> mOrganizedTasks = new ArrayList<>();
@@ -189,6 +191,11 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                 Slog.e(TAG, "TaskOrganizer failed to register death recipient");
             }
             mUid = uid;
+        }
+
+        @VisibleForTesting
+        DeathRecipient getDeathRecipient() {
+            return mDeathRecipient;
         }
 
         /**
@@ -265,7 +272,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
 
             // Remove organizer state after removing tasks so we get a chance to send
             // onTaskVanished.
-            mTaskOrganizerStates.remove(asBinder());
+            mTaskOrganizerStates.remove(mOrganizer.getBinder());
         }
 
         void unlinkDeath() {
@@ -596,7 +603,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
     private void onTaskVanishedInternal(ITaskOrganizer organizer, Task task) {
         for (int i = mPendingTaskEvents.size() - 1; i >= 0; i--) {
             PendingTaskEvent entry = mPendingTaskEvents.get(i);
-            if (task.mTaskId == entry.mTask.mTaskId) {
+            if (task.mTaskId == entry.mTask.mTaskId && entry.mTaskOrg == organizer) {
                 // This task is vanished so remove all pending event of it.
                 mPendingTaskEvents.remove(i);
                 if (entry.mEventType == PendingTaskEvent.EVENT_APPEARED) {
@@ -693,9 +700,16 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                     }
                     break;
                 case PendingTaskEvent.EVENT_VANISHED:
-                    state = mTaskOrganizerStates.get(event.mTaskOrg.asBinder());
-                    if (state != null) {
-                        state.mOrganizer.onTaskVanished(task);
+                    // TaskOrganizerState cannot be used here because it might have already been
+                    // removed.
+                    // The state is removed when an organizer dies or is unregistered. In order to
+                    // send the pending vanished task events, the mTaskOrg from event is used.
+                    // These events should not ideally be sent and will be removed as part of
+                    // b/224812558.
+                    try {
+                        event.mTaskOrg.onTaskVanished(task.getTaskInfo());
+                    } catch (RemoteException ex) {
+                        Slog.e(TAG, "Exception sending onTaskVanished callback", ex);
                     }
                     mLastSentTaskInfos.remove(task);
                     break;
@@ -1044,5 +1058,10 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
 
         }
         pw.println();
+    }
+
+    @VisibleForTesting
+    TaskOrganizerState getTaskOrganizerState(IBinder taskOrganizer) {
+        return mTaskOrganizerStates.get(taskOrganizer);
     }
 }
