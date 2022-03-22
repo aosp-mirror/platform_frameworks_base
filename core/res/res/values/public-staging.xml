@@ -176,6 +176,8 @@
     <public name="config_defaultAutomotiveNavigation" />
     <!-- @hide @SystemApi -->
     <public name="safety_protection_display_text" />
+    <!-- @hide @SystemApi -->
+    <public name="config_systemSettingsIntelligence" />
   </staging-public-group>
 
   <staging-public-group type="dimen" first-id="0x01db0000">
