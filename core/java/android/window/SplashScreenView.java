@@ -233,14 +233,6 @@ public final class SplashScreenView extends FrameLayout {
         }
 
         /**
-         * Set the animation duration if icon is animatable.
-         */
-        public Builder setAnimationDurationMillis(long duration) {
-            mIconAnimationDuration = Duration.ofMillis(duration);
-            return this;
-        }
-
-        /**
          * Set the Runnable that can receive the task which should be executed on UI thread.
          * @param uiThreadInitTask
          */
@@ -294,8 +286,7 @@ public final class SplashScreenView extends FrameLayout {
                 } else {
                     view.mIconView = createSurfaceView(view);
                 }
-                view.initIconAnimation(mIconDrawable,
-                        mIconAnimationDuration != null ? mIconAnimationDuration.toMillis() : 0);
+                view.initIconAnimation(mIconDrawable);
                 view.mIconAnimationStart = mIconAnimationStart;
                 view.mIconAnimationDuration = mIconAnimationDuration;
             } else if (mIconSize != 0) {
@@ -463,6 +454,11 @@ public final class SplashScreenView extends FrameLayout {
     /**
      * Returns the duration of the icon animation if icon is animatable.
      *
+     * Note the return value can be null or 0 if the
+     * {@link android.R.attr#windowSplashScreenAnimatedIcon} is not
+     * {@link android.graphics.drawable.AnimationDrawable} or
+     * {@link android.graphics.drawable.AnimatedVectorDrawable}.
+     *
      * @see android.R.attr#windowSplashScreenAnimatedIcon
      * @see android.R.attr#windowSplashScreenAnimationDuration
      */
@@ -497,12 +493,12 @@ public final class SplashScreenView extends FrameLayout {
         mSurfaceView.setChildSurfacePackage(mSurfacePackage);
     }
 
-    void initIconAnimation(Drawable iconDrawable, long duration) {
+    void initIconAnimation(Drawable iconDrawable) {
         if (!(iconDrawable instanceof IconAnimateListener)) {
             return;
         }
         IconAnimateListener aniDrawable = (IconAnimateListener) iconDrawable;
-        aniDrawable.prepareAnimate(duration, this::animationStartCallback);
+        aniDrawable.prepareAnimate(this::animationStartCallback);
         aniDrawable.setAnimationJankMonitoring(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationCancel(Animator animation) {
@@ -524,7 +520,7 @@ public final class SplashScreenView extends FrameLayout {
 
     private void animationStartCallback(long animDuration) {
         mIconAnimationStart = Instant.now();
-        if (animDuration > 0) {
+        if (animDuration >= 0) {
             mIconAnimationDuration = Duration.ofMillis(animDuration);
         }
     }
@@ -695,10 +691,9 @@ public final class SplashScreenView extends FrameLayout {
     public interface IconAnimateListener {
         /**
          * Prepare the animation if this drawable also be animatable.
-         * @param duration The animation duration.
          * @param startListener The callback listener used to receive the start of the animation.
          */
-        void prepareAnimate(long duration, LongConsumer startListener);
+        void prepareAnimate(LongConsumer startListener);
 
         /**
          * Stop animation.
