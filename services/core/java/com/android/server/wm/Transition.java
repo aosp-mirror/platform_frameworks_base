@@ -521,7 +521,6 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                     // Legacy dispatch relies on this (for now).
                     ar.mEnteringAnimation = visibleAtTransitionEnd;
                 }
-                mController.dispatchLegacyAppTransitionFinished(ar);
             }
             final WallpaperWindowToken wt = mParticipants.valueAt(i).asWallpaperToken();
             if (wt != null) {
@@ -531,6 +530,15 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                             "  Commit wallpaper becoming invisible: %s", wt);
                     wt.commitVisibility(false /* visible */);
                 }
+            }
+        }
+        // dispatch legacy callback in a different loop. This is because multiple legacy handlers
+        // (fixed-rotation/displaycontent) make global changes, so we want to ensure that we've
+        // processed all the participants first (in particular, we want to trigger pip-enter first)
+        for (int i = 0; i < mParticipants.size(); ++i) {
+            final ActivityRecord ar = mParticipants.valueAt(i).asActivityRecord();
+            if (ar != null) {
+                mController.dispatchLegacyAppTransitionFinished(ar);
             }
         }
         if (activitiesWentInvisible) {
