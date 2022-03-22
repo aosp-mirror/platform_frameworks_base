@@ -1101,7 +1101,9 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
             mIndicationArea.setPadding(mIndicationPadding, 0, mIndicationPadding, 0);
         } else {
             mQRCodeScannerButton.setVisibility(GONE);
-            mIndicationArea.setPadding(0, 0, 0, 0);
+            if (mControlsButton.getVisibility() == GONE) {
+                mIndicationArea.setPadding(0, 0, 0, 0);
+            }
         }
     }
 
