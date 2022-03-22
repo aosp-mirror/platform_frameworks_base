@@ -24461,6 +24461,7 @@ package android.media.metrics {
     method public void close();
     method @NonNull public android.media.metrics.LogSessionId getSessionId();
     method public void reportBundleMetrics(@NonNull android.os.PersistableBundle);
+    field public static final String KEY_STATSD_ATOM = "bundlesession-statsd-atom";
   }
 
   public final class EditingSession implements java.lang.AutoCloseable {
@@ -24484,6 +24485,7 @@ package android.media.metrics {
     method @NonNull public android.media.metrics.PlaybackSession createPlaybackSession();
     method @NonNull public android.media.metrics.RecordingSession createRecordingSession();
     method @NonNull public android.media.metrics.TranscodingSession createTranscodingSession();
+    method @NonNull public void releaseSessionId(@NonNull String);
     field public static final long INVALID_TIMESTAMP = -1L; // 0xffffffffffffffffL
   }
 
