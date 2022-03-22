@@ -22,7 +22,6 @@ import android.content.Context
 import android.util.Log
 import android.view.WindowManagerGlobal
 import androidx.test.core.app.ApplicationProvider.getApplicationContext
-import com.google.common.truth.Truth.assertThat
 import org.junit.rules.TestRule
 import org.junit.runner.Description
 import org.junit.runners.model.Statement
@@ -53,37 +52,12 @@ class LockStateTrackingRule : TestRule {
     }
 
     fun assertLocked() {
-        val maxWaits = 50
-        var waitCount = 0
-
-        // First verify we get the call in LockState via TrustListener
-        while ((lockState.locked == false) && waitCount < maxWaits) {
-            Log.i(TAG, "phone still unlocked (TrustListener), wait 50ms more ($waitCount)")
-            Thread.sleep(50)
-            waitCount++
-        }
-        assertThat(lockState.locked).isTrue()
-
-        // TODO(b/225231929): refactor checks into one loop and re-use for assertUnlocked
-        // Then verify we get the window manager locked
-        while (!windowManager.isKeyguardLocked && waitCount < maxWaits) {
-            Log.i(TAG, "phone still unlocked (WindowManager), wait 50ms more ($waitCount)")
-            Thread.sleep(50)
-            waitCount++
-        }
-        assertThat(windowManager.isKeyguardLocked).isTrue()
+        wait("un-locked per TrustListener") { lockState.locked == true }
+        wait("keyguard lock") { windowManager.isKeyguardLocked }
     }
 
     fun assertUnlocked() {
-        val maxWaits = 50
-        var waitCount = 0
-
-        while ((lockState.locked == true) && waitCount < maxWaits) {
-            Log.i(TAG, "phone still unlocked, wait 50ms more ($waitCount)")
-            Thread.sleep(50)
-            waitCount++
-        }
-        assertThat(lockState.locked).isFalse()
+        wait("locked per TrustListener") { lockState.locked == false }
     }
 
     inner class Listener : TrustListener {
