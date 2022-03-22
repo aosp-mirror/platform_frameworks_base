@@ -6293,4 +6293,7 @@ ul.</string>
     <!-- Strings for VirtualDeviceManager -->
     <!-- Error message indicating the camera cannot be accessed when running on a virtual device. [CHAR LIMIT=NONE] -->
     <string name="vdm_camera_access_denied">Cannot access camera from this device</string>
+
+    <!-- Title for preference of the system default locale. [CHAR LIMIT=50]-->
+    <string name="system_locale_title">System language</string>
 </resources>
