@@ -57,7 +57,6 @@ class LockUserTest {
 
     companion object {
         private const val TAG = "LockUserTest"
-        private fun await() = Thread.sleep(250)
     }
 }
 
