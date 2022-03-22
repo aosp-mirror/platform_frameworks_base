@@ -129,7 +129,6 @@ import static com.android.server.wm.DisplayContentProto.ROOT_DISPLAY_AREA;
 import static com.android.server.wm.DisplayContentProto.SCREEN_ROTATION_ANIMATION;
 import static com.android.server.wm.DisplayContentProto.SLEEP_TOKENS;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
-import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_RECENTS;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_WINDOW_ANIMATION;
 import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
 import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
@@ -5011,11 +5010,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                             ? mImeControlTarget.getWindow().mToken : null;
             final boolean canImeTargetSetRelativeLayer = imeTarget.getSurfaceControl() != null
                     && imeTarget.mToken == imeControlTargetToken
-                    && !imeTarget.inMultiWindowMode()
-                    // We don't need to set relative layer if the IME target in non-multi-window
-                    // mode is the activity main window since updateImeParent will ensure the IME
-                    // surface be attached on the fullscreen activity.
-                    && imeTarget.mAttrs.type != TYPE_BASE_APPLICATION;
+                    && !imeTarget.inMultiWindowMode();
             if (canImeTargetSetRelativeLayer) {
                 mImeWindowsContainer.assignRelativeLayer(t, imeTarget.getSurfaceControl(),
                         // TODO: We need to use an extra level on the app surface to ensure
