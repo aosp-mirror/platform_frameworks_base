@@ -2687,11 +2687,8 @@ class ActivityStarter {
                 // launched into the same root task.
                 mTargetRootTask = Task.fromWindowContainerToken(mSourceRecord.mLaunchRootTask);
             } else {
-                final Task rootTask =
-                        getOrCreateRootTask(mStartActivity, mLaunchFlags, intentTask, mOptions);
-                // TODO(b/184806710): #getOrCreateRootTask should never return null?
-                mTargetRootTask =
-                        rootTask != null ? rootTask : intentActivity.getRootTask();
+                mTargetRootTask = getOrCreateRootTask(mStartActivity, mLaunchFlags, intentTask,
+                        mOptions);
             }
         }
 
