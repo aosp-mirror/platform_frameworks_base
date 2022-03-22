@@ -63,8 +63,12 @@ public final class StreamEventResponse extends BroadcastInfoResponse implements 
         mEventId = source.readInt();
         mNptMillis = source.readLong();
         int dataLength = source.readInt();
-        mData = new byte[dataLength];
-        source.readByteArray(mData);
+        if (dataLength > 0) {
+            mData = new byte[dataLength];
+            source.readByteArray(mData);
+        } else {
+            mData = null;
+        }
     }
 
     /**
@@ -100,7 +104,11 @@ public final class StreamEventResponse extends BroadcastInfoResponse implements 
         super.writeToParcel(dest, flags);
         dest.writeInt(mEventId);
         dest.writeLong(mNptMillis);
-        dest.writeInt(mData.length);
-        dest.writeByteArray(mData);
+        if (mData != null && mData.length > 0) {
+            dest.writeInt(mData.length);
+            dest.writeByteArray(mData);
+        } else {
+            dest.writeInt(0);
+        }
     }
 }
