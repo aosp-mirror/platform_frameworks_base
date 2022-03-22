@@ -3130,6 +3130,10 @@ public class CentralSurfaces extends CoreStartable implements
     public void finishKeyguardFadingAway() {
         mKeyguardStateController.notifyKeyguardDoneFading();
         mScrimController.setExpansionAffectsAlpha(true);
+
+        // If the device was re-locked while unlocking, we might have a pending lock that was
+        // delayed because the keyguard was in the middle of going away.
+        mKeyguardViewMediator.maybeHandlePendingLock();
     }
 
     /**
