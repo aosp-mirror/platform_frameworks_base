@@ -126,7 +126,7 @@
     <public name="allowGameDownscaling" />
     <public name="allowGameFpsOverride" />
     <public name="localeConfig" />
-    <public name="showBackground" />
+    <public name="showBackdrop" />
     <public name="removed_useTargetActivityForQuickAccess"/>
     <public name="removed_inheritKeyStoreKeys" />
     <public name="preferKeepClear" />
@@ -152,6 +152,7 @@
     <public name="maxDrawableWidth" />
     <!-- @hide -->
     <public name="maxDrawableHeight" />
+    <public name="backdropColor" />
   </staging-public-group>
 
   <staging-public-group type="id" first-id="0x01de0000">
