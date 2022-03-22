@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.phone.userswitcher
 
 import android.content.Intent
+import android.os.UserHandle
 import android.view.View
 import com.android.systemui.animation.ActivityLaunchAnimator
 import com.android.systemui.flags.FeatureFlags
@@ -67,7 +68,7 @@ class StatusBarUserSwitcherControllerImpl @Inject constructor(
 
                 activityStarter.startActivity(intent, true /* dismissShade */,
                         ActivityLaunchAnimator.Controller.fromView(view, null),
-                        true /* showOverlockscreenwhenlocked */)
+                        true /* showOverlockscreenwhenlocked */, UserHandle.SYSTEM)
             } else {
                 userSwitcherDialogController.showDialog(view)
             }

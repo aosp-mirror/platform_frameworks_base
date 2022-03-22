@@ -563,4 +563,6 @@ interface IDevicePolicyManager {
     ParcelableResource getString(String stringId);
 
     boolean shouldAllowBypassingDevicePolicyManagementRoleQualification();
+
+    List<UserHandle> getPolicyManagedProfiles(in UserHandle userHandle);
 }

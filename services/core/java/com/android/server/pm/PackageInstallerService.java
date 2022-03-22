@@ -640,7 +640,8 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                 && params.installerPackageName.length() < SessionParams.MAX_PACKAGE_NAME_LENGTH)
                 ? params.installerPackageName : installerPackageName;
 
-        if ((callingUid == Process.SHELL_UID) || (callingUid == Process.ROOT_UID)) {
+        if ((callingUid == Process.SHELL_UID) || (callingUid == Process.ROOT_UID)
+                || PackageInstallerSession.isSystemDataLoaderInstallation(params)) {
             params.installFlags |= PackageManager.INSTALL_FROM_ADB;
             // adb installs can override the installingPackageName, but not the
             // initiatingPackageName
@@ -666,8 +667,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                     && !mPm.isCallerVerifier(snapshot, callingUid)) {
                 params.installFlags &= ~PackageManager.INSTALL_VIRTUAL_PRELOAD;
             }
-            if (mContext.checkCallingOrSelfPermission(
-                    Manifest.permission.INSTALL_TEST_ONLY_PACKAGE)
+            if (mContext.checkCallingOrSelfPermission(Manifest.permission.INSTALL_TEST_ONLY_PACKAGE)
                     != PackageManager.PERMISSION_GRANTED) {
                 params.installFlags &= ~PackageManager.INSTALL_ALLOW_TEST;
             }

@@ -1695,12 +1695,20 @@ public class CentralSurfaces extends CoreStartable implements
     public void startActivity(Intent intent, boolean dismissShade,
             @Nullable ActivityLaunchAnimator.Controller animationController,
             boolean showOverLockscreenWhenLocked) {
+        startActivity(intent, dismissShade, animationController, showOverLockscreenWhenLocked,
+                UserHandle.CURRENT);
+    }
+
+    @Override
+    public void startActivity(Intent intent, boolean dismissShade,
+            @Nullable ActivityLaunchAnimator.Controller animationController,
+            boolean showOverLockscreenWhenLocked, UserHandle userHandle) {
         // Make sure that we dismiss the keyguard if it is directly dismissable or when we don't
         // want to show the activity above it.
         if (mKeyguardStateController.isUnlocked() || !showOverLockscreenWhenLocked) {
             startActivityDismissingKeyguard(intent, false, dismissShade,
-                false /* disallowEnterPictureInPictureWhileLaunching */, null /* callback */,
-                0 /* flags */, animationController);
+                    false /* disallowEnterPictureInPictureWhileLaunching */, null /* callback */,
+                    0 /* flags */, animationController, userHandle);
             return;
         }
 
@@ -1755,7 +1763,7 @@ public class CentralSurfaces extends CoreStartable implements
                         .create(mContext)
                         .addNextIntent(intent)
                         .startActivities(getActivityOptions(getDisplayId(), adapter),
-                                UserHandle.CURRENT));
+                                userHandle));
     }
 
     /**
@@ -1775,7 +1783,7 @@ public class CentralSurfaces extends CoreStartable implements
     public void startActivity(Intent intent, boolean dismissShade, Callback callback) {
         startActivityDismissingKeyguard(intent, false, dismissShade,
                 false /* disallowEnterPictureInPictureWhileLaunching */, callback, 0,
-                null /* animationController */);
+                null /* animationController */, UserHandle.CURRENT);
     }
 
     public void setQsExpanded(boolean expanded) {
@@ -2417,7 +2425,7 @@ public class CentralSurfaces extends CoreStartable implements
             boolean dismissShade, int flags) {
         startActivityDismissingKeyguard(intent, onlyProvisioned, dismissShade,
                 false /* disallowEnterPictureInPictureWhileLaunching */, null /* callback */,
-                flags, null /* animationController */);
+                flags, null /* animationController */, UserHandle.CURRENT);
     }
 
     public void startActivityDismissingKeyguard(final Intent intent, boolean onlyProvisioned,
@@ -2428,7 +2436,8 @@ public class CentralSurfaces extends CoreStartable implements
     void startActivityDismissingKeyguard(final Intent intent, boolean onlyProvisioned,
             final boolean dismissShade, final boolean disallowEnterPictureInPictureWhileLaunching,
             final Callback callback, int flags,
-            @Nullable ActivityLaunchAnimator.Controller animationController) {
+            @Nullable ActivityLaunchAnimator.Controller animationController,
+            final UserHandle userHandle) {
         if (onlyProvisioned && !mDeviceProvisionedController.isDeviceProvisioned()) return;
 
         final boolean willLaunchResolverActivity =
@@ -2487,7 +2496,7 @@ public class CentralSurfaces extends CoreStartable implements
                                     intent,
                                     intent.resolveTypeIfNeeded(mContext.getContentResolver()),
                                     null, null, 0, Intent.FLAG_ACTIVITY_NEW_TASK, null,
-                                    options.toBundle(), UserHandle.CURRENT.getIdentifier());
+                                    options.toBundle(), userHandle.getIdentifier());
                         } catch (RemoteException e) {
                             Log.w(TAG, "Unable to start activity", e);
                         }
@@ -2860,7 +2869,8 @@ public class CentralSurfaces extends CoreStartable implements
                                 false /* disallowEnterPictureInPictureWhileLaunching */,
                                 null /* callback */,
                                 0 /* flags */,
-                                animationController),
+                                animationController,
+                                UserHandle.CURRENT),
                 delay);
     }
 

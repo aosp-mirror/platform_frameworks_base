@@ -18836,4 +18836,22 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return accounts.length == 0;
         });
     }
+
+    @Override
+    public List<UserHandle> getPolicyManagedProfiles(@NonNull UserHandle user) {
+        Preconditions.checkCallAuthorization(hasCallingOrSelfPermission(
+                android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS));
+        int userId = user.getIdentifier();
+        return mInjector.binderWithCleanCallingIdentity(() -> {
+            List<UserInfo> userProfiles = mUserManager.getProfiles(userId);
+            List<UserHandle> result = new ArrayList<>();
+            for (int i = 0; i < userProfiles.size(); i++) {
+                UserInfo userInfo = userProfiles.get(i);
+                if (userInfo.isManagedProfile() && hasProfileOwner(userInfo.id)) {
+                    result.add(new UserHandle(userInfo.id));
+                }
+            }
+            return result;
+        });
+    }
 }

@@ -17,6 +17,7 @@ package com.android.systemui.plugins;
 import android.annotation.Nullable;
 import android.app.PendingIntent;
 import android.content.Intent;
+import android.os.UserHandle;
 import android.view.View;
 
 import com.android.systemui.animation.ActivityLaunchAnimator;
@@ -70,6 +71,9 @@ public interface ActivityStarter {
     void startActivity(Intent intent, boolean dismissShade,
             @Nullable ActivityLaunchAnimator.Controller animationController,
             boolean showOverLockscreenWhenLocked);
+    void startActivity(Intent intent, boolean dismissShade,
+            @Nullable ActivityLaunchAnimator.Controller animationController,
+            boolean showOverLockscreenWhenLocked, UserHandle userHandle);
     void startActivity(Intent intent, boolean onlyProvisioned, boolean dismissShade);
     void startActivity(Intent intent, boolean dismissShade, Callback callback);
     void postStartActivityDismissingKeyguard(Intent intent, int delay);
