@@ -5446,8 +5446,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         VibrationAttributes attrs = getVibrationAttributes(effectId);
         if (always) {
             attrs = new VibrationAttributes.Builder(attrs)
-                    .setFlags(VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF,
-                            VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF)
+                    .setFlags(VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF)
                     .build();
         }
         mVibrator.vibrate(uid, packageName, effect, reason, attrs);

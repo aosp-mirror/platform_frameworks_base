@@ -401,6 +401,12 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                     uid, opPkg, reason);
             fillVibrationFallbacks(vib, effect);
 
+            if (attrs.isFlagSet(VibrationAttributes.FLAG_INVALIDATE_SETTINGS_CACHE)) {
+                // Force update of user settings before checking if this vibration effect should
+                // be ignored or scaled.
+                mVibrationSettings.update();
+            }
+
             synchronized (mLock) {
                 if (DEBUG) {
                     Slog.d(TAG, "Starting vibrate for vibration  " + vib.id);
@@ -1506,12 +1512,20 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                 return IExternalVibratorService.SCALE_MUTE;
             }
 
+            VibrationAttributes attrs = fixupVibrationAttributes(vib.getVibrationAttributes(),
+                    /* effect= */ null);
+            if (attrs.isFlagSet(VibrationAttributes.FLAG_INVALIDATE_SETTINGS_CACHE)) {
+                // Force update of user settings before checking if this vibration effect should
+                // be ignored or scaled.
+                mVibrationSettings.update();
+            }
+
             boolean alreadyUnderExternalControl = false;
             boolean waitForCompletion = false;
             int scale;
             synchronized (mLock) {
                 Vibration.Status ignoreStatus = shouldIgnoreVibrationLocked(
-                        vib.getUid(), vib.getPackage(), vib.getVibrationAttributes());
+                        vib.getUid(), vib.getPackage(), attrs);
                 if (ignoreStatus != null) {
                     ExternalVibrationHolder vibHolder = new ExternalVibrationHolder(vib);
                     vibHolder.scale = IExternalVibratorService.SCALE_MUTE;
@@ -1549,7 +1563,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                 mCurrentExternalVibration = new ExternalVibrationHolder(vib);
                 vib.linkToDeath(mCurrentExternalVibration);
                 mCurrentExternalVibration.scale = mVibrationScaler.getExternalVibrationScale(
-                        vib.getVibrationAttributes().getUsage());
+                        attrs.getUsage());
                 scale = mCurrentExternalVibration.scale;
             }
 
@@ -1908,7 +1922,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
             final int flags =
                     commonOptions.force ? VibrationAttributes.FLAG_BYPASS_INTERRUPTION_POLICY : 0;
             return new VibrationAttributes.Builder()
-                    .setFlags(flags, VibrationAttributes.FLAG_ALL_SUPPORTED)
+                    .setFlags(flags)
                     // Used to apply Settings.System.HAPTIC_FEEDBACK_INTENSITY to scale effects.
                     .setUsage(VibrationAttributes.USAGE_TOUCH)
                     .build();
