@@ -8502,6 +8502,7 @@ public final class ViewRootImpl implements ViewParent,
                 return;
             }
             mRemoved = true;
+            mOnBackInvokedDispatcher.detachFromWindow();
             if (mAdded) {
                 dispatchDetachedFromWindow();
             }
@@ -8536,8 +8537,6 @@ public final class ViewRootImpl implements ViewParent,
 
             mAdded = false;
         }
-        unregisterCompatOnBackInvokedCallback();
-        mOnBackInvokedDispatcher.detachFromWindow();
         WindowManagerGlobal.getInstance().doRemoveView(this);
     }
 

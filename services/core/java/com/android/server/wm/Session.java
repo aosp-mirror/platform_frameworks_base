@@ -915,12 +915,12 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     public void setOnBackInvokedCallback(
             IWindow window,
             IOnBackInvokedCallback onBackInvokedCallback,
-            @OnBackInvokedDispatcher.Priority int priority) throws RemoteException {
+            @OnBackInvokedDispatcher.Priority int priority) {
         synchronized (mService.mGlobalLock) {
-            WindowState windowState = mService.windowForClientLocked(this, window, true);
+            WindowState windowState = mService.windowForClientLocked(this, window, false);
             if (windowState == null) {
                 Slog.e(TAG_WM,
-                        "setOnBackInvokedCallback(): Can't find window state for package:"
+                        "setOnBackInvokedCallback(): No window state for package:"
                                 + mPackageName);
             } else {
                 windowState.setOnBackInvokedCallback(onBackInvokedCallback, priority);

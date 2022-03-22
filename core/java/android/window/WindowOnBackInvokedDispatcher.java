@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.compat.CompatChanges;
 import android.content.Context;
+import android.os.Debug;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.SystemProperties;
@@ -35,11 +36,11 @@ import java.util.TreeMap;
 
 /**
  * Provides window based implementation of {@link OnBackInvokedDispatcher}.
- *
+ * <p>
  * Callbacks with higher priorities receive back dispatching first.
  * Within the same priority, callbacks receive back dispatching in the reverse order
  * in which they are added.
- *
+ * <p>
  * When the top priority callback is updated, the new callback is propagated to the Window Manager
  * if the window the instance is associated with has been attached. It is allowed to register /
  * unregister {@link OnBackInvokedCallback}s before the window is attached, although
@@ -166,6 +167,10 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
                 mWindowSession.setOnBackInvokedCallback(
                         mWindow, new OnBackInvokedCallbackWrapper(callback), priority);
             }
+            if (DEBUG && callback == null) {
+                Log.d(TAG, TextUtils.formatSimple("setTopOnBackInvokedCallback(null) Callers:%s",
+                        Debug.getCallers(5, "  ")));
+            }
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to set OnBackInvokedCallback to WM. Error: " + e);
         }
@@ -243,7 +248,7 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
 
     /**
      * Returns if the legacy back behavior should be used.
-     *
+     * <p>
      * Legacy back behavior dispatches KEYCODE_BACK instead of invoking the application registered
      * {@link OnBackInvokedCallback}.
      */
