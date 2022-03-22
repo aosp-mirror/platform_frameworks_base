@@ -598,12 +598,6 @@ class StorageManagerService extends IStorageManager.Stub
         }
     }
 
-    /** List of crypto types.
-      * These must match CRYPT_TYPE_XXX in cryptfs.h AND their
-      * corresponding commands in CommandListener.cpp */
-    public static final String[] CRYPTO_TYPES
-        = { "password", "default", "pattern", "pin" };
-
     private final Context mContext;
     private final ContentResolver mResolver;
 
