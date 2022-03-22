@@ -2754,7 +2754,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         // First preference goes to the launch root task set in the activity options.
         if (options != null) {
             final Task candidateRoot = Task.fromWindowContainerToken(options.getLaunchRootTask());
-            if (canLaunchOnDisplay(r, candidateRoot)) {
+            if (candidateRoot != null && canLaunchOnDisplay(r, candidateRoot)) {
                 return candidateRoot;
             }
         }
