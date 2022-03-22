@@ -229,11 +229,11 @@
     <string name="bluetooth_active_no_battery_level">Active</string>
 
     <!-- Connected device settings. Message when the left-side hearing aid device is active. [CHAR LIMIT=NONE] -->
-    <string name="bluetooth_hearing_aid_left_active">Active, left ear</string>
+    <string name="bluetooth_hearing_aid_left_active">Active, left only</string>
     <!-- Connected device settings. Message when the right-side hearing aid device is active. [CHAR LIMIT=NONE] -->
-    <string name="bluetooth_hearing_aid_right_active">Active, right ear</string>
+    <string name="bluetooth_hearing_aid_right_active">Active, right only</string>
     <!-- Connected device settings. Message when the left-side and right-side hearing aids device are active. [CHAR LIMIT=NONE] -->
-    <string name="bluetooth_hearing_aid_left_and_right_active">Active, left and right ears</string>
+    <string name="bluetooth_hearing_aid_left_and_right_active">Active, left and right</string>
 
     <!-- Bluetooth settings.  The user-visible string that is used whenever referring to the A2DP profile. -->
     <string name="bluetooth_profile_a2dp">Media audio</string>
