@@ -5641,6 +5641,13 @@ public class CarrierConfigManager {
             "telephony_data_handover_retry_rules_string_array";
 
     /**
+     * Indicates whether delay tearing down IMS data network until voice call ends.
+     * @hide
+     */
+    public static final String KEY_DELAY_IMS_TEAR_DOWN_UNTIL_CALL_END_BOOL =
+            "delay_ims_tear_down_until_call_end_bool";
+
+    /**
      * The patterns of missed incoming call sms. This is the regular expression used for
      * matching the missed incoming call's date, time, and caller id. The pattern should match
      * fields for at least month, day, hour, and minute. Year is optional although it is encouraged.
@@ -6458,6 +6465,7 @@ public class CarrierConfigManager {
                 KEY_TELEPHONY_DATA_HANDOVER_RETRY_RULES_STRING_ARRAY, new String[] {
                         "retry_interval=1000|2000|4000|8000|16000, maximum_retries=5"
                 });
+        sDefaults.putBoolean(KEY_DELAY_IMS_TEAR_DOWN_UNTIL_CALL_END_BOOL, false);
         sDefaults.putStringArray(KEY_MISSED_INCOMING_CALL_SMS_PATTERN_STRING_ARRAY, new String[0]);
         sDefaults.putBoolean(KEY_DISABLE_DUN_APN_WHILE_ROAMING_WITH_PRESET_APN_BOOL, false);
         sDefaults.putString(KEY_DEFAULT_PREFERRED_APN_NAME_STRING, "");
