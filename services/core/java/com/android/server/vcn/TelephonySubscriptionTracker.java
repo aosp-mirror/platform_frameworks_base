@@ -146,7 +146,7 @@ public class TelephonySubscriptionTracker extends BroadcastReceiver {
         filter.addAction(ACTION_CARRIER_CONFIG_CHANGED);
         filter.addAction(ACTION_MULTI_SIM_CONFIG_CHANGED);
 
-        mContext.registerReceiver(this, filter, null, mHandler, Context.RECEIVER_NOT_EXPORTED);
+        mContext.registerReceiver(this, filter, null, mHandler);
         mSubscriptionManager.addOnSubscriptionsChangedListener(
                 executor, mSubscriptionChangedListener);
         mTelephonyManager.registerTelephonyCallback(executor, mActiveDataSubIdListener);
