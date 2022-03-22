@@ -5303,14 +5303,19 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     /**
      * Returns {@code true} if the process represented by the pid passed as argument is
-     * instrumented.
+     * instrumented and the instrumentation source was granted with the permission also
+     * passed as argument.
      */
-    boolean isInstrumenting(int pid) {
+    boolean instrumentationSourceHasPermission(int pid, String permission) {
         final WindowProcessController process;
         synchronized (mGlobalLock) {
             process = mProcessMap.getProcess(pid);
         }
-        return process != null ? process.isInstrumenting() : false;
+        if (process == null || !process.isInstrumenting()) {
+            return false;
+        }
+        final int sourceUid = process.getInstrumentationSourceUid();
+        return checkPermission(permission, -1, sourceUid) == PackageManager.PERMISSION_GRANTED;
     }
 
     final class H extends Handler {

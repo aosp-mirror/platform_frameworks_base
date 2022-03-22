@@ -3760,7 +3760,8 @@ public class WindowManagerService extends IWindowManager.Stub
      * Sets the touch mode state.
      *
      * To be able to change touch mode state, the caller must either own the focused window, or must
-     * have the MODIFY_TOUCH_MODE_STATE permission. Instrumented processes are allowed to switch
+     * have the {@link android.Manifest.permission#MODIFY_TOUCH_MODE_STATE} permission. Instrumented
+     * process, sourced with {@link android.Manifest.permission#MODIFY_TOUCH_MODE_STATE}, may switch
      * touch mode at any time.
      *
      * @param mode the touch mode to set
@@ -3773,9 +3774,9 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             final int pid = Binder.getCallingPid();
             final int uid = Binder.getCallingUid();
-
-            final boolean hasPermission = mAtmService.isInstrumenting(pid)
-                    || checkCallingPermission(MODIFY_TOUCH_MODE_STATE, "setInTouchMode()");
+            final boolean hasPermission =
+                    mAtmService.instrumentationSourceHasPermission(pid, MODIFY_TOUCH_MODE_STATE)
+                            || checkCallingPermission(MODIFY_TOUCH_MODE_STATE, "setInTouchMode()");
             final long token = Binder.clearCallingIdentity();
             try {
                 if (mInputManager.setInTouchMode(mode, pid, uid, hasPermission)) {
