@@ -606,12 +606,29 @@ public class MediaControlPanel {
                 setSemanticButton(genericButtons[i], null,  collapsedSet, expandedSet, false);
             }
         }
+        expandedSet.setVisibility(R.id.media_progress_bar, getSeekBarVisibility());
+        expandedSet.setAlpha(R.id.media_progress_bar, mSeekBarViewModel.getEnabled() ? 1.0f : 0.0f);
+    }
 
-        // If disabled, set progress bar to INVISIBLE instead of GONE so layout weights still work
+    private int getSeekBarVisibility() {
         boolean seekbarEnabled = mSeekBarViewModel.getEnabled();
-        expandedSet.setVisibility(R.id.media_progress_bar,
-                seekbarEnabled ? ConstraintSet.VISIBLE : ConstraintSet.INVISIBLE);
-        expandedSet.setAlpha(R.id.media_progress_bar, seekbarEnabled ? 1.0f : 0.0f);
+        if (seekbarEnabled) {
+            return ConstraintSet.VISIBLE;
+        }
+        // If disabled and "neighbours" are visible, set progress bar to INVISIBLE instead of GONE
+        // so layout weights still work.
+        return areAnyExpandedBottomActionsVisible() ? ConstraintSet.INVISIBLE : ConstraintSet.GONE;
+    }
+
+    private boolean areAnyExpandedBottomActionsVisible() {
+        ConstraintSet expandedSet = mMediaViewController.getExpandedLayout();
+        int[] referencedIds = mMediaViewHolder.getActionsTopBarrier().getReferencedIds();
+        for (int id : referencedIds) {
+            if (expandedSet.getVisibility(id) == ConstraintSet.VISIBLE) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void setSemanticButton(final ImageButton button, MediaAction mediaAction,

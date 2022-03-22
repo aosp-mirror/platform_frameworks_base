@@ -24,6 +24,7 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.SeekBar
 import android.widget.TextView
+import androidx.constraintlayout.widget.Barrier
 import com.android.systemui.R
 import com.android.systemui.util.animation.TransitionLayout
 
@@ -69,6 +70,8 @@ class MediaViewHolder constructor(itemView: View) {
     val action2 = itemView.requireViewById<ImageButton>(R.id.action2)
     val action3 = itemView.requireViewById<ImageButton>(R.id.action3)
     val action4 = itemView.requireViewById<ImageButton>(R.id.action4)
+
+    val actionsTopBarrier = itemView.requireViewById<Barrier>(R.id.media_action_barrier_top)
 
     init {
         (player.background as IlluminationDrawable).let {
