@@ -484,6 +484,40 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         verify(mOrganizer, never()).onTaskFragmentInfoChanged(any());
     }
 
+    @Test
+    public void testCanSendPendingTaskFragmentEventsAfterActivityResumed() {
+        // Task - TaskFragment - Activity.
+        final Task task = createTask(mDisplayContent);
+        final TaskFragment taskFragment = new TaskFragmentBuilder(mAtm)
+                .setParentTask(task)
+                .setOrganizer(mOrganizer)
+                .setFragmentToken(mFragmentToken)
+                .createActivityCount(1)
+                .build();
+        final ActivityRecord activity = taskFragment.getTopMostActivity();
+
+        // Mock the task to invisible
+        doReturn(false).when(task).shouldBeVisible(any());
+        taskFragment.setResumedActivity(null, "test");
+
+        // Sending events
+        mController.registerOrganizer(mIOrganizer);
+        taskFragment.mTaskFragmentAppearedSent = true;
+        mController.onTaskFragmentInfoChanged(mIOrganizer, taskFragment);
+        mController.dispatchPendingEvents();
+
+        // Verifies that event was not sent
+        verify(mOrganizer, never()).onTaskFragmentInfoChanged(any());
+
+        // Mock the task becomes visible, and activity resumed
+        doReturn(true).when(task).shouldBeVisible(any());
+        taskFragment.setResumedActivity(activity, "test");
+
+        // Verifies that event is sent.
+        mController.dispatchPendingEvents();
+        verify(mOrganizer).onTaskFragmentInfoChanged(any());
+    }
+
     /**
      * Tests that a task fragment info changed event is still sent if the task is invisible only
      * when the info changed event is because of the last activity in a task finishing.

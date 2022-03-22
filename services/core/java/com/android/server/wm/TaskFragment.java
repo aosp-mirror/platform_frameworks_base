@@ -405,6 +405,12 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             Slog.d(TAG, "setResumedActivity taskFrag:" + this + " + from: "
                     + mResumedActivity + " to:" + r + " reason:" + reason);
         }
+
+        if (r != null && mResumedActivity == null) {
+            // Task is becoming active.
+            getTask().touchActiveTime();
+        }
+
         final ActivityRecord prevR = mResumedActivity;
         mResumedActivity = r;
         mTaskSupervisor.updateTopResumedActivityIfNeeded();
