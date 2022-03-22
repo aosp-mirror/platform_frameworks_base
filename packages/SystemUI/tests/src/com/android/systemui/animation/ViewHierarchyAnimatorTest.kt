@@ -19,7 +19,7 @@ import org.junit.runner.RunWith
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
 @TestableLooper.RunWithLooper
-class ViewBoundAnimatorTest : SysuiTestCase() {
+class ViewHierarchyAnimatorTest : SysuiTestCase() {
     companion object {
         private const val TEST_DURATION = 1000L
         private val TEST_INTERPOLATOR = Interpolators.LINEAR
@@ -34,14 +34,14 @@ class ViewBoundAnimatorTest : SysuiTestCase() {
 
     @After
     fun tearDown() {
-        ViewBoundAnimator.stopAnimating(rootView)
+        ViewHierarchyAnimator.stopAnimating(rootView)
     }
 
     @Test
     fun respectsAnimationParameters() {
         rootView.layout(10 /* l */, 10 /* t */, 50 /* r */, 50 /* b */)
 
-        ViewBoundAnimator.animate(
+        ViewHierarchyAnimator.animate(
             rootView, interpolator = TEST_INTERPOLATOR, duration = TEST_DURATION
         )
         rootView.layout(0 /* l */, 0 /* t */, 100 /* r */, 100 /* b */)
@@ -56,7 +56,7 @@ class ViewBoundAnimatorTest : SysuiTestCase() {
     fun animatesFromStartToEnd() {
         rootView.layout(10 /* l */, 10 /* t */, 50 /* r */, 50 /* b */)
 
-        ViewBoundAnimator.animate(rootView)
+        ViewHierarchyAnimator.animate(rootView)
         // Change all bounds.
         rootView.layout(0 /* l */, 15 /* t */, 70 /* r */, 80 /* b */)
 
@@ -73,7 +73,7 @@ class ViewBoundAnimatorTest : SysuiTestCase() {
     fun animatesSuccessiveLayoutChanges() {
         rootView.layout(10 /* l */, 10 /* t */, 50 /* r */, 50 /* b */)
 
-        ViewBoundAnimator.animate(rootView)
+        ViewHierarchyAnimator.animate(rootView)
         // Change all bounds.
         rootView.layout(0 /* l */, 15 /* t */, 70 /* r */, 80 /* b */)
 
@@ -103,7 +103,7 @@ class ViewBoundAnimatorTest : SysuiTestCase() {
     fun animatesFromPreviousAnimationProgress() {
         rootView.layout(10 /* l */, 10 /* t */, 50 /* r */, 50 /* b */)
 
-        ViewBoundAnimator.animateNextUpdate(rootView, interpolator = TEST_INTERPOLATOR)
+        ViewHierarchyAnimator.animateNextUpdate(rootView, interpolator = TEST_INTERPOLATOR)
         // Change all bounds.
         rootView.layout(0 /* l */, 20 /* t */, 70 /* r */, 80 /* b */)
 
@@ -131,7 +131,7 @@ class ViewBoundAnimatorTest : SysuiTestCase() {
         firstChild.layout(0 /* l */, 0 /* t */, 100 /* r */, 100 /* b */)
         secondChild.layout(100 /* l */, 0 /* t */, 150 /* r */, 100 /* b */)
 
-        ViewBoundAnimator.animate(rootView)
+        ViewHierarchyAnimator.animate(rootView)
         // Change all bounds.
         rootView.layout(10 /* l */, 20 /* t */, 200 /* r */, 120 /* b */)
         firstChild.layout(10 /* l */, 20 /* t */, 150 /* r */, 120 /* b */)
@@ -154,7 +154,7 @@ class ViewBoundAnimatorTest : SysuiTestCase() {
     fun doesNotAnimateInvisibleViews() {
         rootView.layout(10 /* l */, 10 /* t */, 50 /* r */, 50 /* b */)
 
-        ViewBoundAnimator.animate(rootView)
+        ViewHierarchyAnimator.animate(rootView)
         // GONE.
         rootView.visibility = View.GONE
         rootView.layout(0 /* l */, 15 /* t */, 55 /* r */, 80 /* b */)
@@ -171,7 +171,7 @@ class ViewBoundAnimatorTest : SysuiTestCase() {
     fun doesNotAnimateUnchangingBounds() {
         rootView.layout(10 /* l */, 10 /* t */, 50 /* r */, 50 /* b */)
 
-        ViewBoundAnimator.animate(rootView)
+        ViewHierarchyAnimator.animate(rootView)
         // No bounds are changed.
         rootView.layout(10 /* l */, 10 /* t */, 50 /* r */, 50 /* b */)
 
@@ -191,9 +191,9 @@ class ViewBoundAnimatorTest : SysuiTestCase() {
     fun doesNotAnimateExcludedBounds() {
         rootView.layout(10 /* l */, 10 /* t */, 50 /* r */, 50 /* b */)
 
-        ViewBoundAnimator.animate(
+        ViewHierarchyAnimator.animate(
             rootView,
-            bounds = setOf(ViewBoundAnimator.Bound.LEFT, ViewBoundAnimator.Bound.TOP),
+            bounds = setOf(ViewHierarchyAnimator.Bound.LEFT, ViewHierarchyAnimator.Bound.TOP),
             interpolator = TEST_INTERPOLATOR
         )
         // Change all bounds.
@@ -211,7 +211,7 @@ class ViewBoundAnimatorTest : SysuiTestCase() {
     fun stopsAnimatingAfterSingleLayout() {
         rootView.layout(10 /* l */, 10 /* t */, 50 /* r */, 50 /* b */)
 
-        ViewBoundAnimator.animateNextUpdate(rootView)
+        ViewHierarchyAnimator.animateNextUpdate(rootView)
         // Change all bounds.
         rootView.layout(0 /* l */, 15 /* t */, 70 /* r */, 80 /* b */)
 
@@ -231,7 +231,7 @@ class ViewBoundAnimatorTest : SysuiTestCase() {
     fun stopsAnimatingWhenInstructed() {
         rootView.layout(10 /* l */, 10 /* t */, 50 /* r */, 50 /* b */)
 
-        ViewBoundAnimator.animate(rootView)
+        ViewHierarchyAnimator.animate(rootView)
         // Change all bounds.
         rootView.layout(0 /* l */, 15 /* t */, 70 /* r */, 80 /* b */)
 
@@ -240,7 +240,7 @@ class ViewBoundAnimatorTest : SysuiTestCase() {
         assertNull(rootView.getTag(R.id.tag_animator))
         checkBounds(rootView, l = 0, t = 15, r = 70, b = 80)
 
-        ViewBoundAnimator.stopAnimating(rootView)
+        ViewHierarchyAnimator.stopAnimating(rootView)
         // Change all bounds again.
         rootView.layout(10 /* l */, 10 /* t */, 50/* r */, 50 /* b */)
 
