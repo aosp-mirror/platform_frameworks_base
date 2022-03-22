@@ -673,6 +673,42 @@ public class VibratorManagerServiceTest {
     }
 
     @Test
+    public void vibrate_withVibrationAttributesEnforceFreshSettings_refreshesVibrationSettings()
+            throws Exception {
+        mockVibrators(0);
+        mVibratorProviders.get(0).setSupportedEffects(VibrationEffect.EFFECT_CLICK,
+                VibrationEffect.EFFECT_TICK);
+        setUserSetting(Settings.System.NOTIFICATION_VIBRATION_INTENSITY,
+                Vibrator.VIBRATION_INTENSITY_HIGH);
+        VibratorManagerService service = createSystemReadyService();
+
+        VibrationAttributes enforceFreshAttrs = new VibrationAttributes.Builder()
+                .setUsage(VibrationAttributes.USAGE_NOTIFICATION)
+                .setFlags(VibrationAttributes.FLAG_INVALIDATE_SETTINGS_CACHE)
+                .build();
+
+        setUserSetting(Settings.System.NOTIFICATION_VIBRATION_INTENSITY,
+                Vibrator.VIBRATION_INTENSITY_LOW);
+        vibrate(service, VibrationEffect.get(VibrationEffect.EFFECT_CLICK), NOTIFICATION_ATTRS);
+        // VibrationThread will start this vibration async, so wait before vibrating a second time.
+        assertTrue(waitUntil(s -> mVibratorProviders.get(0).getAllEffectSegments().size() > 0,
+                service, TEST_TIMEOUT_MILLIS));
+
+        vibrate(service, VibrationEffect.get(VibrationEffect.EFFECT_TICK), enforceFreshAttrs);
+        // VibrationThread will start this vibration async, so wait before checking.
+        assertTrue(waitUntil(s -> mVibratorProviders.get(0).getAllEffectSegments().size() > 1,
+                service, TEST_TIMEOUT_MILLIS));
+
+        assertEquals(
+                Arrays.asList(
+                        expectedPrebaked(VibrationEffect.EFFECT_CLICK,
+                                VibrationEffect.EFFECT_STRENGTH_STRONG),
+                        expectedPrebaked(VibrationEffect.EFFECT_TICK,
+                                VibrationEffect.EFFECT_STRENGTH_LIGHT)),
+                mVibratorProviders.get(0).getAllEffectSegments());
+    }
+
+    @Test
     public void vibrate_withAttributesUnknownUsage_usesEffectToIdentifyTouchUsage() {
         VibratorManagerService service = createSystemReadyService();
 
@@ -1280,7 +1316,11 @@ public class VibratorManagerServiceTest {
     }
 
     private VibrationEffectSegment expectedPrebaked(int effectId) {
-        return new PrebakedSegment(effectId, false, VibrationEffect.EFFECT_STRENGTH_MEDIUM);
+        return expectedPrebaked(effectId, VibrationEffect.EFFECT_STRENGTH_MEDIUM);
+    }
+
+    private VibrationEffectSegment expectedPrebaked(int effectId, int effectStrength) {
+        return new PrebakedSegment(effectId, false, effectStrength);
     }
 
     private void mockCapabilities(long... capabilities) {
