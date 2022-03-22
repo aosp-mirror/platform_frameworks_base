@@ -271,6 +271,9 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
             mPlaySound = false;
             return;
         }
+        if (!showLowBatteryNotification()) {
+            return;
+        }
 
         final int warningLevel = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_lowBatteryWarningLevel);
@@ -321,6 +324,29 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     private boolean showSevereLowBatteryDialog() {
         final boolean isSevereState = !mCurrentBatterySnapshot.isHybrid() || mBucket < -1;
         return isSevereState && mUseSevereDialog;
+    }
+
+    /**
+     * Disable low battery warning notification if battery saver schedule mode set as
+     * "Based on percentage".
+     *
+     * return {@code false} if scheduled by percentage.
+     */
+    private boolean showLowBatteryNotification() {
+        final ContentResolver resolver = mContext.getContentResolver();
+        final int mode = Settings.Global.getInt(resolver, Global.AUTOMATIC_POWER_SAVE_MODE,
+                PowerManager.POWER_SAVE_MODE_TRIGGER_PERCENTAGE);
+
+        // Return true if battery saver schedule mode will not trigger by percentage.
+        if (mode != PowerManager.POWER_SAVE_MODE_TRIGGER_PERCENTAGE) {
+            return true;
+        }
+
+        // Return true if battery saver mode trigger percentage is less than 0, which means it is
+        // set as "Based on routine" mode, otherwise it will be "Based on percentage" mode.
+        final int threshold =
+                Settings.Global.getInt(resolver, Global.LOW_POWER_MODE_TRIGGER_LEVEL, 0);
+        return threshold <= 0;
     }
 
     private void showAutoSaverSuggestionNotification() {
