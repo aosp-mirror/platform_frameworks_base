@@ -1755,7 +1755,7 @@ package android {
     field public static final int windowShowWallpaper = 16843410; // 0x1010292
     field public static final int windowSoftInputMode = 16843307; // 0x101022b
     field public static final int windowSplashScreenAnimatedIcon = 16844333; // 0x101062d
-    field public static final int windowSplashScreenAnimationDuration = 16844334; // 0x101062e
+    field @Deprecated public static final int windowSplashScreenAnimationDuration = 16844334; // 0x101062e
     field public static final int windowSplashScreenBackground = 16844332; // 0x101062c
     field public static final int windowSplashScreenBehavior;
     field public static final int windowSplashScreenBrandingImage = 16844335; // 0x101062f
