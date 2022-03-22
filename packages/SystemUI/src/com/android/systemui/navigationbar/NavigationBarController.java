@@ -39,7 +39,6 @@ import android.util.SparseArray;
 import android.view.Display;
 import android.view.IWindowManager;
 import android.view.View;
-import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 
 import androidx.annotation.NonNull;
@@ -84,7 +83,7 @@ public class NavigationBarController implements
 
     private final Context mContext;
     private final Handler mHandler;
-    private final NavigationBar.Factory mNavigationBarFactory;
+    private final NavigationBarComponent.Factory mNavigationBarComponentFactory;
     private final DisplayManager mDisplayManager;
     private final TaskbarDelegate mTaskbarDelegate;
     private final StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
@@ -110,7 +109,7 @@ public class NavigationBarController implements
             ConfigurationController configurationController,
             NavBarHelper navBarHelper,
             TaskbarDelegate taskbarDelegate,
-            NavigationBar.Factory navigationBarFactory,
+            NavigationBarComponent.Factory navigationBarComponentFactory,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             DumpManager dumpManager,
             AutoHideController autoHideController,
@@ -119,7 +118,7 @@ public class NavigationBarController implements
             Optional<BackAnimation> backAnimation) {
         mContext = context;
         mHandler = mainHandler;
-        mNavigationBarFactory = navigationBarFactory;
+        mNavigationBarComponentFactory = navigationBarComponentFactory;
         mDisplayManager = mContext.getSystemService(DisplayManager.class);
         commandQueue.addCallback(this);
         configurationController.addCallback(this);
@@ -324,14 +323,13 @@ public class NavigationBarController implements
         final Context context = isOnDefaultDisplay
                 ? mContext
                 : mContext.createDisplayContext(display);
-        NavigationBar navBar = mNavigationBarFactory.create(
-                context, context.getSystemService(WindowManager.class));
-
+        NavigationBarComponent component = mNavigationBarComponentFactory.create(
+                context, savedState);
+        NavigationBar navBar = component.getNavigationBar();
+        navBar.init();
         mNavigationBars.put(displayId, navBar);
 
-        boolean navBarVisible = mStatusBarKeyguardViewManager.isNavBarVisible();
-        View navigationBarView = navBar.createView(savedState, navBarVisible);
-        navigationBarView.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
+        navBar.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
             @Override
             public void onViewAttachedToWindow(View v) {
                 if (result != null) {
