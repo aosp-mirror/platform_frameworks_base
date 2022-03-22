@@ -33,6 +33,7 @@ import static android.view.SurfaceControl.Transaction;
 import static android.view.WindowManager.LayoutParams.INVALID_WINDOW_TYPE;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 
+import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ANIM;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_APP_TRANSITIONS;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_APP_TRANSITIONS_ANIM;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ORIENTATION;
@@ -58,10 +59,8 @@ import static com.android.server.wm.WindowContainerProto.SURFACE_ANIMATOR;
 import static com.android.server.wm.WindowContainerProto.SURFACE_CONTROL;
 import static com.android.server.wm.WindowContainerProto.VISIBLE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
-import static com.android.server.wm.WindowManagerService.logWithStack;
 import static com.android.server.wm.WindowStateAnimator.ROOT_TASK_CLIP_AFTER_ANIM;
 
 import android.annotation.CallSuper;
@@ -106,6 +105,7 @@ import android.window.WindowContainerToken;
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.ColorUtils;
+import com.android.internal.protolog.ProtoLogImpl;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.ToBooleanFunction;
 import com.android.server.wm.SurfaceAnimator.Animatable;
@@ -2726,9 +2726,8 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             @Nullable OnAnimationFinishedCallback animationFinishedCallback,
             @Nullable Runnable animationCancelledCallback,
             @Nullable AnimationAdapter snapshotAnim) {
-        if (DEBUG_ANIM) {
-            Slog.v(TAG, "Starting animation on " + this + ": type=" + type + ", anim=" + anim);
-        }
+        ProtoLog.v(WM_DEBUG_ANIM, "Starting animation on %s: type=%d, anim=%s",
+                this, type, anim);
 
         // TODO: This should use isVisible() but because isVisible has a really weird meaning at
         // the moment this doesn't work for all animatable window containers.
@@ -3097,9 +3096,9 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                 // ActivityOption#makeCustomAnimation or WindowManager#overridePendingTransition.
                 a.restrictDuration(MAX_APP_TRANSITION_DURATION);
             }
-            if (DEBUG_ANIM) {
-                logWithStack(TAG, "Loaded animation " + a + " for " + this
-                        + ", duration: " + ((a != null) ? a.getDuration() : 0));
+            if (ProtoLogImpl.isEnabled(WM_DEBUG_ANIM)) {
+                ProtoLog.i(WM_DEBUG_ANIM, "Loaded animation %s for %s, duration: %d, stack=%s",
+                        a, this, ((a != null) ? a.getDuration() : 0), Debug.getCallers(20));
             }
             final int containingWidth = frame.width();
             final int containingHeight = frame.height();
@@ -3871,7 +3870,8 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         try {
             overlay.getRemoteInterface().onConfigurationChanged(getConfiguration());
         } catch (Exception e) {
-            Slog.e(TAG, "Error sending initial configuration change to WindowContainer overlay");
+            ProtoLog.e(WM_DEBUG_ANIM,
+                    "Error sending initial configuration change to WindowContainer overlay");
             removeTrustedOverlay(overlay);
         }
     }

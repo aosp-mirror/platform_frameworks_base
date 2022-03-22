@@ -24,6 +24,7 @@ import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_JUMPCUT
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_ROTATE;
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_SEAMLESS;
 
+import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ANIM;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ORIENTATION;
 import static com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs.LID_OPEN;
 import static com.android.server.wm.DisplayRotationProto.FIXED_TO_USER_ROTATION_MODE;
@@ -32,7 +33,6 @@ import static com.android.server.wm.DisplayRotationProto.IS_FIXED_TO_USER_ROTATI
 import static com.android.server.wm.DisplayRotationProto.LAST_ORIENTATION;
 import static com.android.server.wm.DisplayRotationProto.ROTATION;
 import static com.android.server.wm.DisplayRotationProto.USER_ROTATION;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.WINDOWS_FREEZING_SCREENS_ACTIVE;
@@ -747,10 +747,11 @@ public class DisplayRotation {
         final boolean forceJumpcut = !mDisplayPolicy.isScreenOnFully()
                 || !mService.mPolicy.okToAnimate(false /* ignoreScreenOn */);
         final WindowState topFullscreen = mDisplayPolicy.getTopFullscreenOpaqueWindow();
-        if (DEBUG_ANIM) Slog.i(TAG, "selectRotationAnimation topFullscreen="
-                + topFullscreen + " rotationAnimation="
-                + (topFullscreen == null ? 0 : topFullscreen.getAttrs().rotationAnimation)
-                + " forceJumpcut=" + forceJumpcut);
+        ProtoLog.i(WM_DEBUG_ANIM, "selectRotationAnimation topFullscreen=%s"
+                + " rotationAnimation=%d forceJumpcut=%b",
+                topFullscreen,
+                topFullscreen == null ? 0 : topFullscreen.getAttrs().rotationAnimation,
+                forceJumpcut);
         if (forceJumpcut) {
             mTmpRotationAnim.mExit = R.anim.rotation_animation_jump_exit;
             mTmpRotationAnim.mEnter = R.anim.rotation_animation_enter;
