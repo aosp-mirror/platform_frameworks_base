@@ -19,6 +19,8 @@ package com.android.server.inputmethod;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.Context;
+import android.content.res.Resources;
 import android.icu.util.ULocale;
 import android.os.LocaleList;
 import android.text.TextUtils;
@@ -205,6 +207,27 @@ final class LocaleUtils {
         Arrays.sort(result);
         for (final ScoreEntry entry : result) {
             dest.add(sources.get(entry.mIndex));
+        }
+    }
+
+    /**
+     * Returns the language component of a given locale string.
+     * TODO: Use {@link Locale#toLanguageTag()} and {@link Locale#forLanguageTag(String)}
+     */
+    static String getLanguageFromLocaleString(String locale) {
+        final int idx = locale.indexOf('_');
+        if (idx < 0) {
+            return locale;
+        } else {
+            return locale.substring(0, idx);
+        }
+    }
+
+    static Locale getSystemLocaleFromContext(Context context) {
+        try {
+            return context.getResources().getConfiguration().locale;
+        } catch (Resources.NotFoundException ex) {
+            return null;
         }
     }
 }

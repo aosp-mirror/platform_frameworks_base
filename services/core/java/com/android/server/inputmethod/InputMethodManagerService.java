@@ -1787,7 +1787,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         if (selectedMethodId != null && !mMethodMap.get(selectedMethodId).isSystem()) {
             return;
         }
-        final List<InputMethodInfo> suitableImes = InputMethodUtils.getDefaultEnabledImes(
+        final List<InputMethodInfo> suitableImes = InputMethodInfoUtils.getDefaultEnabledImes(
                 context, mSettings.getEnabledInputMethodListLocked());
         if (suitableImes.isEmpty()) {
             Slog.i(TAG, "No default found");
@@ -4113,7 +4113,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                             InputMethodSubtype keyboardSubtype =
                                     InputMethodUtils.findLastResortApplicableSubtypeLocked(mRes,
                                             InputMethodUtils.getSubtypes(imi),
-                                            InputMethodUtils.SUBTYPE_MODE_KEYBOARD, locale, true);
+                                            SubtypeUtils.SUBTYPE_MODE_KEYBOARD, locale, true);
                             if (keyboardSubtype != null) {
                                 targetLastImiId = imi.getId();
                                 subtypeId = InputMethodUtils.getSubtypeIdFromHashCode(
@@ -4867,7 +4867,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
     @GuardedBy("ImfLock.class")
     private boolean chooseNewDefaultIMELocked() {
-        final InputMethodInfo imi = InputMethodUtils.getMostApplicableDefaultIME(
+        final InputMethodInfo imi = InputMethodInfoUtils.getMostApplicableDefaultIME(
                 mSettings.getEnabledInputMethodListLocked());
         if (imi != null) {
             if (DEBUG) {
@@ -5010,7 +5010,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
         if (resetDefaultEnabledIme || reenableMinimumNonAuxSystemImes) {
             final ArrayList<InputMethodInfo> defaultEnabledIme =
-                    InputMethodUtils.getDefaultEnabledImes(mContext, mMethodList,
+                    InputMethodInfoUtils.getDefaultEnabledImes(mContext, mMethodList,
                             reenableMinimumNonAuxSystemImes);
             final int N = defaultEnabledIme.size();
             for (int i = 0; i < N; ++i) {
@@ -5066,7 +5066,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         final String systemSpeechRecognizer =
                 mContext.getString(com.android.internal.R.string.config_systemSpeechRecognizer);
         final String currentDefaultVoiceImeId = mSettings.getDefaultVoiceInputMethod();
-        final InputMethodInfo newSystemVoiceIme = InputMethodUtils.chooseSystemVoiceIme(
+        final InputMethodInfo newSystemVoiceIme = InputMethodInfoUtils.chooseSystemVoiceIme(
                 mMethodMap, systemSpeechRecognizer, currentDefaultVoiceImeId);
         if (newSystemVoiceIme == null) {
             if (DEBUG) {
@@ -5243,7 +5243,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 } else if (explicitlyOrImplicitlyEnabledSubtypes.size() > 1) {
                     mCurrentSubtype = InputMethodUtils.findLastResortApplicableSubtypeLocked(
                             mRes, explicitlyOrImplicitlyEnabledSubtypes,
-                            InputMethodUtils.SUBTYPE_MODE_KEYBOARD, null, true);
+                            SubtypeUtils.SUBTYPE_MODE_KEYBOARD, null, true);
                     if (mCurrentSubtype == null) {
                         mCurrentSubtype = InputMethodUtils.findLastResortApplicableSubtypeLocked(
                                 mRes, explicitlyOrImplicitlyEnabledSubtypes, null, null,
@@ -6168,8 +6168,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                         setInputMethodEnabledLocked(inputMethodInfo.getId(), false);
                     }
                     // Re-enable with default enabled IMEs.
-                    for (InputMethodInfo imi :
-                            InputMethodUtils.getDefaultEnabledImes(mContext, mMethodList)) {
+                    for (InputMethodInfo imi : InputMethodInfoUtils.getDefaultEnabledImes(
+                            mContext, mMethodList)) {
                         setInputMethodEnabledLocked(imi.getId(), true);
                     }
                     updateInputMethodsFromSettingsLocked(true /* enabledMayChange */);
@@ -6190,8 +6190,10 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                             mContext.getResources(), mContext.getContentResolver(), methodMap,
                             userId, false);
 
-                    nextEnabledImes = InputMethodUtils.getDefaultEnabledImes(mContext, methodList);
-                    nextIme = InputMethodUtils.getMostApplicableDefaultIME(nextEnabledImes).getId();
+                    nextEnabledImes = InputMethodInfoUtils.getDefaultEnabledImes(mContext,
+                            methodList);
+                    nextIme = InputMethodInfoUtils.getMostApplicableDefaultIME(
+                            nextEnabledImes).getId();
 
                     // Reset enabled IMEs.
                     settings.putEnabledInputMethodsStr("");

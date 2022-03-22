@@ -50,7 +50,6 @@ import com.android.server.textservices.TextServicesManagerInternal;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.function.Predicate;
@@ -66,10 +65,7 @@ import java.util.function.Predicate;
 final class InputMethodUtils {
     public static final boolean DEBUG = false;
     static final int NOT_A_SUBTYPE_ID = -1;
-    private static final String SUBTYPE_MODE_ANY = null;
-    static final String SUBTYPE_MODE_KEYBOARD = "keyboard";
     private static final String TAG = "InputMethodUtils";
-    private static final Locale ENGLISH_LOCALE = new Locale("en");
     private static final String NOT_A_SUBTYPE_ID_STR = String.valueOf(NOT_A_SUBTYPE_ID);
     private static final String TAG_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE =
             "EnabledWhenDefaultIsNotAsciiCapable";
@@ -78,17 +74,6 @@ final class InputMethodUtils {
     // example: ("ime0;subtype0;subtype1;subtype2:ime1:ime2;subtype0")
     private static final char INPUT_METHOD_SEPARATOR = ':';
     private static final char INPUT_METHOD_SUBTYPE_SEPARATOR = ';';
-    /**
-     * Used in {@link #getFallbackLocaleForDefaultIme(ArrayList, Context)} to find the fallback IMEs
-     * that are mainly used until the system becomes ready. Note that {@link Locale} in this array
-     * is checked with {@link Locale#equals(Object)}, which means that {@code Locale.ENGLISH}
-     * doesn't automatically match {@code Locale("en", "IN")}.
-     */
-    private static final Locale[] SEARCH_ORDER_OF_FALLBACK_LOCALES = {
-        Locale.ENGLISH, // "en"
-        Locale.US, // "en_US"
-        Locale.UK, // "en_GB"
-    };
 
     // A temporary workaround for the performance concerns in
     // #getImplicitlyApplicableSubtypesLocked(Resources, InputMethodInfo).
@@ -130,289 +115,6 @@ final class InputMethodUtils {
     }
     // ----------------------------------------------------------------------
 
-    private static boolean isSystemImeThatHasSubtypeOf(InputMethodInfo imi, Context context,
-            boolean checkDefaultAttribute, @Nullable Locale requiredLocale, boolean checkCountry,
-            String requiredSubtypeMode) {
-        if (!imi.isSystem()) {
-            return false;
-        }
-        if (checkDefaultAttribute && !imi.isDefault(context)) {
-            return false;
-        }
-        if (!containsSubtypeOf(imi, requiredLocale, checkCountry, requiredSubtypeMode)) {
-            return false;
-        }
-        return true;
-    }
-
-    @Nullable
-    private static Locale getFallbackLocaleForDefaultIme(ArrayList<InputMethodInfo> imis,
-            Context context) {
-        // At first, find the fallback locale from the IMEs that are declared as "default" in the
-        // current locale.  Note that IME developers can declare an IME as "default" only for
-        // some particular locales but "not default" for other locales.
-        for (final Locale fallbackLocale : SEARCH_ORDER_OF_FALLBACK_LOCALES) {
-            for (int i = 0; i < imis.size(); ++i) {
-                if (isSystemImeThatHasSubtypeOf(imis.get(i), context,
-                        true /* checkDefaultAttribute */, fallbackLocale,
-                        true /* checkCountry */, SUBTYPE_MODE_KEYBOARD)) {
-                    return fallbackLocale;
-                }
-            }
-        }
-        // If no fallback locale is found in the above condition, find fallback locales regardless
-        // of the "default" attribute as a last resort.
-        for (final Locale fallbackLocale : SEARCH_ORDER_OF_FALLBACK_LOCALES) {
-            for (int i = 0; i < imis.size(); ++i) {
-                if (isSystemImeThatHasSubtypeOf(imis.get(i), context,
-                        false /* checkDefaultAttribute */, fallbackLocale,
-                        true /* checkCountry */, SUBTYPE_MODE_KEYBOARD)) {
-                    return fallbackLocale;
-                }
-            }
-        }
-        Slog.w(TAG, "Found no fallback locale. imis=" + Arrays.toString(imis.toArray()));
-        return null;
-    }
-
-    private static boolean isSystemAuxilialyImeThatHasAutomaticSubtype(InputMethodInfo imi,
-            Context context, boolean checkDefaultAttribute) {
-        if (!imi.isSystem()) {
-            return false;
-        }
-        if (checkDefaultAttribute && !imi.isDefault(context)) {
-            return false;
-        }
-        if (!imi.isAuxiliaryIme()) {
-            return false;
-        }
-        final int subtypeCount = imi.getSubtypeCount();
-        for (int i = 0; i < subtypeCount; ++i) {
-            final InputMethodSubtype s = imi.getSubtypeAt(i);
-            if (s.overridesImplicitlyEnabledSubtype()) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private static Locale getSystemLocaleFromContext(Context context) {
-        try {
-            return context.getResources().getConfiguration().locale;
-        } catch (Resources.NotFoundException ex) {
-            return null;
-        }
-    }
-
-    private static final class InputMethodListBuilder {
-        // Note: We use LinkedHashSet instead of android.util.ArraySet because the enumeration
-        // order can have non-trivial effect in the call sites.
-        @NonNull
-        private final LinkedHashSet<InputMethodInfo> mInputMethodSet = new LinkedHashSet<>();
-
-        InputMethodListBuilder fillImes(ArrayList<InputMethodInfo> imis, Context context,
-                boolean checkDefaultAttribute, @Nullable Locale locale, boolean checkCountry,
-                String requiredSubtypeMode) {
-            for (int i = 0; i < imis.size(); ++i) {
-                final InputMethodInfo imi = imis.get(i);
-                if (isSystemImeThatHasSubtypeOf(imi, context, checkDefaultAttribute, locale,
-                        checkCountry, requiredSubtypeMode)) {
-                    mInputMethodSet.add(imi);
-                }
-            }
-            return this;
-        }
-
-        // TODO: The behavior of InputMethodSubtype#overridesImplicitlyEnabledSubtype() should be
-        // documented more clearly.
-        InputMethodListBuilder fillAuxiliaryImes(ArrayList<InputMethodInfo> imis, Context context) {
-            // If one or more auxiliary input methods are available, OK to stop populating the list.
-            for (final InputMethodInfo imi : mInputMethodSet) {
-                if (imi.isAuxiliaryIme()) {
-                    return this;
-                }
-            }
-            boolean added = false;
-            for (int i = 0; i < imis.size(); ++i) {
-                final InputMethodInfo imi = imis.get(i);
-                if (isSystemAuxilialyImeThatHasAutomaticSubtype(imi, context,
-                        true /* checkDefaultAttribute */)) {
-                    mInputMethodSet.add(imi);
-                    added = true;
-                }
-            }
-            if (added) {
-                return this;
-            }
-            for (int i = 0; i < imis.size(); ++i) {
-                final InputMethodInfo imi = imis.get(i);
-                if (isSystemAuxilialyImeThatHasAutomaticSubtype(imi, context,
-                        false /* checkDefaultAttribute */)) {
-                    mInputMethodSet.add(imi);
-                }
-            }
-            return this;
-        }
-
-        public boolean isEmpty() {
-            return mInputMethodSet.isEmpty();
-        }
-
-        @NonNull
-        public ArrayList<InputMethodInfo> build() {
-            return new ArrayList<>(mInputMethodSet);
-        }
-    }
-
-    private static InputMethodListBuilder getMinimumKeyboardSetWithSystemLocale(
-            ArrayList<InputMethodInfo> imis, Context context, @Nullable Locale systemLocale,
-            @Nullable Locale fallbackLocale) {
-        // Once the system becomes ready, we pick up at least one keyboard in the following order.
-        // Secondary users fall into this category in general.
-        // 1. checkDefaultAttribute: true, locale: systemLocale, checkCountry: true
-        // 2. checkDefaultAttribute: true, locale: systemLocale, checkCountry: false
-        // 3. checkDefaultAttribute: true, locale: fallbackLocale, checkCountry: true
-        // 4. checkDefaultAttribute: true, locale: fallbackLocale, checkCountry: false
-        // 5. checkDefaultAttribute: false, locale: fallbackLocale, checkCountry: true
-        // 6. checkDefaultAttribute: false, locale: fallbackLocale, checkCountry: false
-        // TODO: We should check isAsciiCapable instead of relying on fallbackLocale.
-
-        final InputMethodListBuilder builder = new InputMethodListBuilder();
-        builder.fillImes(imis, context, true /* checkDefaultAttribute */, systemLocale,
-                true /* checkCountry */, SUBTYPE_MODE_KEYBOARD);
-        if (!builder.isEmpty()) {
-            return builder;
-        }
-        builder.fillImes(imis, context, true /* checkDefaultAttribute */, systemLocale,
-                false /* checkCountry */, SUBTYPE_MODE_KEYBOARD);
-        if (!builder.isEmpty()) {
-            return builder;
-        }
-        builder.fillImes(imis, context, true /* checkDefaultAttribute */, fallbackLocale,
-                true /* checkCountry */, SUBTYPE_MODE_KEYBOARD);
-        if (!builder.isEmpty()) {
-            return builder;
-        }
-        builder.fillImes(imis, context, true /* checkDefaultAttribute */, fallbackLocale,
-                false /* checkCountry */, SUBTYPE_MODE_KEYBOARD);
-        if (!builder.isEmpty()) {
-            return builder;
-        }
-        builder.fillImes(imis, context, false /* checkDefaultAttribute */, fallbackLocale,
-                true /* checkCountry */, SUBTYPE_MODE_KEYBOARD);
-        if (!builder.isEmpty()) {
-            return builder;
-        }
-        builder.fillImes(imis, context, false /* checkDefaultAttribute */, fallbackLocale,
-                false /* checkCountry */, SUBTYPE_MODE_KEYBOARD);
-        if (!builder.isEmpty()) {
-            return builder;
-        }
-        Slog.w(TAG, "No software keyboard is found. imis=" + Arrays.toString(imis.toArray())
-                + " systemLocale=" + systemLocale + " fallbackLocale=" + fallbackLocale);
-        return builder;
-    }
-
-    static ArrayList<InputMethodInfo> getDefaultEnabledImes(
-            Context context, ArrayList<InputMethodInfo> imis, boolean onlyMinimum) {
-        final Locale fallbackLocale = getFallbackLocaleForDefaultIme(imis, context);
-        // We will primarily rely on the system locale, but also keep relying on the fallback locale
-        // as a last resort.
-        // Also pick up suitable IMEs regardless of the software keyboard support (e.g. Voice IMEs),
-        // then pick up suitable auxiliary IMEs when necessary (e.g. Voice IMEs with "automatic"
-        // subtype)
-        final Locale systemLocale = getSystemLocaleFromContext(context);
-        final InputMethodListBuilder builder =
-                getMinimumKeyboardSetWithSystemLocale(imis, context, systemLocale, fallbackLocale);
-        if (!onlyMinimum) {
-            builder.fillImes(imis, context, true /* checkDefaultAttribute */, systemLocale,
-                    true /* checkCountry */, SUBTYPE_MODE_ANY)
-                    .fillAuxiliaryImes(imis, context);
-        }
-        return builder.build();
-    }
-
-    static ArrayList<InputMethodInfo> getDefaultEnabledImes(
-            Context context, ArrayList<InputMethodInfo> imis) {
-        return getDefaultEnabledImes(context, imis, false /* onlyMinimum */);
-    }
-
-    /**
-     * Chooses an eligible system voice IME from the given IMEs.
-     *
-     * @param methodMap Map from the IME ID to {@link InputMethodInfo}.
-     * @param systemSpeechRecognizerPackageName System speech recognizer configured by the system
-     *                                          config.
-     * @param currentDefaultVoiceImeId IME ID currently set to
-     *                                 {@link Settings.Secure#DEFAULT_VOICE_INPUT_METHOD}
-     * @return {@link InputMethodInfo} that is found in {@code methodMap} and most suitable for
-     *                                 the system voice IME.
-     */
-    @Nullable
-    static InputMethodInfo chooseSystemVoiceIme(
-            @NonNull ArrayMap<String, InputMethodInfo> methodMap,
-            @Nullable String systemSpeechRecognizerPackageName,
-            @Nullable String currentDefaultVoiceImeId) {
-        if (TextUtils.isEmpty(systemSpeechRecognizerPackageName)) {
-            return null;
-        }
-        final InputMethodInfo defaultVoiceIme = methodMap.get(currentDefaultVoiceImeId);
-        // If the config matches the package of the setting, use the current one.
-        if (defaultVoiceIme != null && defaultVoiceIme.isSystem()
-                && defaultVoiceIme.getPackageName().equals(systemSpeechRecognizerPackageName)) {
-            return defaultVoiceIme;
-        }
-        InputMethodInfo firstMatchingIme = null;
-        final int methodCount = methodMap.size();
-        for (int i = 0; i < methodCount; ++i) {
-            final InputMethodInfo imi = methodMap.valueAt(i);
-            if (!imi.isSystem()) {
-                continue;
-            }
-            if (!TextUtils.equals(imi.getPackageName(), systemSpeechRecognizerPackageName)) {
-                continue;
-            }
-            if (firstMatchingIme != null) {
-                Slog.e(TAG, "At most one InputMethodService can be published in "
-                        + "systemSpeechRecognizer: " + systemSpeechRecognizerPackageName
-                        + ". Ignoring all of them.");
-                return null;
-            }
-            firstMatchingIme = imi;
-        }
-        return firstMatchingIme;
-    }
-
-    static boolean containsSubtypeOf(InputMethodInfo imi, @Nullable Locale locale,
-            boolean checkCountry, String mode) {
-        if (locale == null) {
-            return false;
-        }
-        final int N = imi.getSubtypeCount();
-        for (int i = 0; i < N; ++i) {
-            final InputMethodSubtype subtype = imi.getSubtypeAt(i);
-            if (checkCountry) {
-                final Locale subtypeLocale = subtype.getLocaleObject();
-                if (subtypeLocale == null ||
-                        !TextUtils.equals(subtypeLocale.getLanguage(), locale.getLanguage()) ||
-                        !TextUtils.equals(subtypeLocale.getCountry(), locale.getCountry())) {
-                    continue;
-                }
-            } else {
-                final Locale subtypeLocale = new Locale(getLanguageFromLocaleString(
-                        subtype.getLocale()));
-                if (!TextUtils.equals(subtypeLocale.getLanguage(), locale.getLanguage())) {
-                    continue;
-                }
-            }
-            if (mode == SUBTYPE_MODE_ANY || TextUtils.isEmpty(mode) ||
-                    mode.equalsIgnoreCase(subtype.getMode())) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     static ArrayList<InputMethodSubtype> getSubtypes(InputMethodInfo imi) {
         ArrayList<InputMethodSubtype> subtypes = new ArrayList<>();
         final int subtypeCount = imi.getSubtypeCount();
@@ -420,30 +122,6 @@ final class InputMethodUtils {
             subtypes.add(imi.getSubtypeAt(i));
         }
         return subtypes;
-    }
-
-    static InputMethodInfo getMostApplicableDefaultIME(List<InputMethodInfo> enabledImes) {
-        if (enabledImes == null || enabledImes.isEmpty()) {
-            return null;
-        }
-        // We'd prefer to fall back on a system IME, since that is safer.
-        int i = enabledImes.size();
-        int firstFoundSystemIme = -1;
-        while (i > 0) {
-            i--;
-            final InputMethodInfo imi = enabledImes.get(i);
-            if (imi.isAuxiliaryIme()) {
-                continue;
-            }
-            if (imi.isSystem() && containsSubtypeOf(
-                    imi, ENGLISH_LOCALE, false /* checkCountry */, SUBTYPE_MODE_KEYBOARD)) {
-                return imi;
-            }
-            if (firstFoundSystemIme < 0 && imi.isSystem()) {
-                firstFoundSystemIme = i;
-            }
-        }
-        return enabledImes.get(Math.max(firstFoundSystemIme, 0));
     }
 
     static boolean isValidSubtypeId(InputMethodInfo imi, int subtypeHashCode) {
@@ -529,7 +207,7 @@ final class InputMethodUtils {
         for (int i = 0; i < numSubtypes; ++i) {
             final InputMethodSubtype subtype = subtypes.get(i);
             final String mode = subtype.getMode();
-            if (SUBTYPE_MODE_KEYBOARD.equals(mode)) {
+            if (SubtypeUtils.SUBTYPE_MODE_KEYBOARD.equals(mode)) {
                 keyboardSubtypes.add(subtype);
             } else {
                 if (!nonKeyboardSubtypesMap.containsKey(mode)) {
@@ -558,7 +236,8 @@ final class InputMethodUtils {
                 for (int i = 0; i < numKeyboardSubtypes; ++i) {
                     final InputMethodSubtype subtype = keyboardSubtypes.get(i);
                     final String mode = subtype.getMode();
-                    if (SUBTYPE_MODE_KEYBOARD.equals(mode) && subtype.containsExtraValueKey(
+                    if (SubtypeUtils.SUBTYPE_MODE_KEYBOARD.equals(mode)
+                            && subtype.containsExtraValueKey(
                             TAG_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE)) {
                         applicableSubtypes.add(subtype);
                     }
@@ -568,7 +247,7 @@ final class InputMethodUtils {
 
         if (applicableSubtypes.isEmpty()) {
             InputMethodSubtype lastResortKeyboardSubtype = findLastResortApplicableSubtypeLocked(
-                    res, subtypes, SUBTYPE_MODE_KEYBOARD, systemLocale, true);
+                    res, subtypes, SubtypeUtils.SUBTYPE_MODE_KEYBOARD, systemLocale, true);
             if (lastResortKeyboardSubtype != null) {
                 applicableSubtypes.add(lastResortKeyboardSubtype);
             }
@@ -583,18 +262,6 @@ final class InputMethodUtils {
         return applicableSubtypes;
     }
 
-    /**
-     * Returns the language component of a given locale string.
-     * TODO: Use {@link Locale#toLanguageTag()} and {@link Locale#forLanguageTag(String)}
-     */
-    private static String getLanguageFromLocaleString(String locale) {
-        final int idx = locale.indexOf('_');
-        if (idx < 0) {
-            return locale;
-        } else {
-            return locale.substring(0, idx);
-        }
-    }
 
     /**
      * If there are no selected subtypes, tries finding the most applicable one according to the
@@ -615,7 +282,7 @@ final class InputMethodUtils {
         if (TextUtils.isEmpty(locale)) {
             locale = res.getConfiguration().locale.toString();
         }
-        final String language = getLanguageFromLocaleString(locale);
+        final String language = LocaleUtils.getLanguageFromLocaleString(locale);
         boolean partialMatchFound = false;
         InputMethodSubtype applicableSubtype = null;
         InputMethodSubtype firstMatchedModeSubtype = null;
@@ -623,7 +290,7 @@ final class InputMethodUtils {
         for (int i = 0; i < N; ++i) {
             InputMethodSubtype subtype = subtypes.get(i);
             final String subtypeLocale = subtype.getLocale();
-            final String subtypeLanguage = getLanguageFromLocaleString(subtypeLocale);
+            final String subtypeLanguage = LocaleUtils.getLanguageFromLocaleString(subtypeLocale);
             // An applicable subtype should match "mode". If mode is null, mode will be ignored,
             // and all subtypes with all modes can be candidates.
             if (mode == null || subtypes.get(i).getMode().equalsIgnoreCase(mode)) {
