@@ -1927,6 +1927,12 @@
       "group": "WM_SHOW_TRANSACTIONS",
       "at": "com\/android\/server\/wm\/Session.java"
     },
+    "-81121442": {
+      "message": "ImeContainer just became organized but it doesn't have a parent or the parent doesn't have a surface control. mSurfaceControl=%s imeParentSurfaceControl=%s",
+      "level": "ERROR",
+      "group": "WM_DEBUG_IME",
+      "at": "com\/android\/server\/wm\/DisplayContent.java"
+    },
     "-80004683": {
       "message": "Resume failed; resetting state to %s: %s",
       "level": "VERBOSE",
@@ -2767,12 +2773,6 @@
       "group": "WM_DEBUG_WALLPAPER",
       "at": "com\/android\/server\/wm\/WallpaperWindowToken.java"
     },
-    "736003885": {
-      "message": "Unable to retrieve the task token to start recording for display %d",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_CONTENT_RECORDING",
-      "at": "com\/android\/server\/wm\/ContentRecorder.java"
-    },
     "736692676": {
       "message": "Config is relaunching %s",
       "level": "VERBOSE",
@@ -3138,6 +3138,12 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_BACK_PREVIEW",
       "at": "com\/android\/server\/wm\/BackNavigationController.java"
+    },
+    "1175495463": {
+      "message": "ImeContainer just became organized. Reparenting under parent. imeParentSurfaceControl=%s",
+      "level": "INFO",
+      "group": "WM_DEBUG_IME",
+      "at": "com\/android\/server\/wm\/DisplayContent.java"
     },
     "1178653181": {
       "message": "Old wallpaper still the target.",
