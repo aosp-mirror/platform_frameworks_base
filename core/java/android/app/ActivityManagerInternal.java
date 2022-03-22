@@ -586,8 +586,9 @@ public abstract class ActivityManagerInternal {
     /**
      * Delete uid from the ActivityManagerService PendingStartActivityUids list.
      * @param uid uid
+     * @param nowElapsed starting time of updateOomAdj
      */
-    public abstract void deletePendingTopUid(int uid);
+    public abstract void deletePendingTopUid(int uid, long nowElapsed);
 
     /**
      * Is the uid in ActivityManagerService PendingStartActivityUids list?
