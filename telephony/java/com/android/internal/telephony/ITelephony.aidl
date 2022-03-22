@@ -68,6 +68,7 @@ import com.android.ims.internal.IImsServiceFeatureCallback;
 import com.android.internal.telephony.CellNetworkScanResult;
 import com.android.internal.telephony.IBooleanConsumer;
 import com.android.internal.telephony.ICallForwardingInfoCallback;
+import com.android.internal.telephony.IccLogicalChannelRequest;
 import com.android.internal.telephony.IImsStateCallback;
 import com.android.internal.telephony.IIntegerConsumer;
 import com.android.internal.telephony.INumberVerificationCallback;
@@ -585,59 +586,24 @@ interface ITelephony {
     void setCellInfoListRate(int rateInMillis);
 
     /**
-     * Opens a logical channel to the ICC card using the physical slot index and port index.
-     *
-     * Input parameters equivalent to TS 27.007 AT+CCHO command.
-     *
-     * @param slotIndex The physical slot index of the target ICC card
-     * @param portIndex The unique index referring to a port belonging to the SIM slot
-     * @param callingPackage the name of the package making the call.
-     * @param AID Application id. See ETSI 102.221 and 101.220.
-     * @param p2 P2 parameter (described in ISO 7816-4).
-     * @return an IccOpenLogicalChannelResponse object.
-     */
-    IccOpenLogicalChannelResponse iccOpenLogicalChannelByPort(
-            int slotIndex, int portIndex, String callingPackage, String AID, int p2);
-
-    /**
      * Opens a logical channel to the ICC card.
      *
      * Input parameters equivalent to TS 27.007 AT+CCHO command.
      *
-     * @param subId The subscription to use.
-     * @param callingPackage the name of the package making the call.
-     * @param AID Application id. See ETSI 102.221 and 101.220.
-     * @param p2 P2 parameter (described in ISO 7816-4).
+     * @param request the parcelable used to indicate how to open the logical channel.
      * @return an IccOpenLogicalChannelResponse object.
      */
-    IccOpenLogicalChannelResponse iccOpenLogicalChannel(
-            int subId, String callingPackage, String AID, int p2);
-
-    /**
-     * Closes a previously opened logical channel to the ICC card using the physical slot index and port index.
-     *
-     * Input parameters equivalent to TS 27.007 AT+CCHC command.
-     *
-     * @param slotIndex The physical slot index of the target ICC card
-     * @param portIndex The unique index referring to a port belonging to the SIM slot
-     * @param channel is the channel id to be closed as returned by a
-     *            successful iccOpenLogicalChannel.
-     * @return true if the channel was closed successfully.
-     */
-    boolean iccCloseLogicalChannelByPort(int slotIndex, int portIndex, int channel);
+    IccOpenLogicalChannelResponse iccOpenLogicalChannel(in IccLogicalChannelRequest request);
 
     /**
      * Closes a previously opened logical channel to the ICC card.
      *
      * Input parameters equivalent to TS 27.007 AT+CCHC command.
      *
-     * @param subId The subscription to use.
-     * @param channel is the channel id to be closed as returned by a
-     *            successful iccOpenLogicalChannel.
+     * @param request the parcelable used to indicate how to close the logical channel.
      * @return true if the channel was closed successfully.
      */
-    @UnsupportedAppUsage(trackingBug = 171933273)
-    boolean iccCloseLogicalChannel(int subId, int channel);
+    boolean iccCloseLogicalChannel(in IccLogicalChannelRequest request);
 
     /**
      * Transmit an APDU to the ICC card over a logical channel using the physical slot index and port index.
