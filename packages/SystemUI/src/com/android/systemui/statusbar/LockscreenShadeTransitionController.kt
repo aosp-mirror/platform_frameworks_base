@@ -441,7 +441,9 @@ class LockscreenShadeTransitionController @Inject constructor(
     }
 
     private fun transitionToShadeAmountCommon(dragDownAmount: Float) {
-        if (depthControllerTransitionDistance > 0) {
+        if (depthControllerTransitionDistance == 0) { // split shade
+            depthController.transitionToFullShadeProgress = 0f
+        } else {
             val depthProgress =
                 MathUtils.saturate(dragDownAmount / depthControllerTransitionDistance)
             depthController.transitionToFullShadeProgress = depthProgress
