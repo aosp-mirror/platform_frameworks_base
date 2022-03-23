@@ -18,8 +18,6 @@ package com.android.systemui.statusbar.notification.collection;
 
 import static com.android.systemui.statusbar.notification.collection.ListDumper.dumpTree;
 
-import static com.google.common.truth.Truth.assertThat;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -29,16 +27,14 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 
 import android.os.SystemClock;
@@ -46,14 +42,11 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.util.ArrayMap;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.statusbar.NotificationInteractionTracker;
-import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.collection.ShadeListBuilder.OnRenderListListener;
 import com.android.systemui.statusbar.notification.collection.listbuilder.NotifSection;
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeFinalizeFilterListener;
@@ -61,7 +54,6 @@ import com.android.systemui.statusbar.notification.collection.listbuilder.OnBefo
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeSortListener;
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeTransformGroupsListener;
 import com.android.systemui.statusbar.notification.collection.listbuilder.ShadeListBuilderLogger;
-import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.Invalidator;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifComparator;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifPromoter;
@@ -83,8 +75,6 @@ import org.mockito.Spy;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -98,9 +88,7 @@ public class ShadeListBuilderTest extends SysuiTestCase {
     private ShadeListBuilder mListBuilder;
     private FakeSystemClock mSystemClock = new FakeSystemClock();
 
-    @Mock private NotifPipelineFlags mNotifPipelineFlags;
     @Mock private ShadeListBuilderLogger mLogger;
-    @Mock private DumpManager mDumpManager;
     @Mock private NotifCollection mNotifCollection;
     @Mock private NotificationInteractionTracker mInteractionTracker;
     @Spy private OnBeforeTransformGroupsListener mOnBeforeTransformGroupsListener;
@@ -111,14 +99,10 @@ public class ShadeListBuilderTest extends SysuiTestCase {
 
     @Captor private ArgumentCaptor<CollectionReadyForBuildListener> mBuildListenerCaptor;
 
-    private final FakeNotifPipelineChoreographer mPipelineChoreographer =
-            new FakeNotifPipelineChoreographer();
     private CollectionReadyForBuildListener mReadyForBuildListener;
     private List<NotificationEntryBuilder> mPendingSet = new ArrayList<>();
     private List<NotificationEntry> mEntrySet = new ArrayList<>();
-    private List<ListEntry> mBuiltList = new ArrayList<>();
-    private TestableStabilityManager mStabilityManager;
-    private TestableNotifFilter mFinalizeFilter;
+    private List<ListEntry> mBuiltList;
 
     private Map<String, Integer> mNextIdMap = new ArrayMap<>();
     private int mNextRank = 0;
@@ -129,21 +113,10 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         allowTestableLooperAsMainThread();
 
         mListBuilder = new ShadeListBuilder(
-                mDumpManager,
-                mPipelineChoreographer,
-                mNotifPipelineFlags,
-                mInteractionTracker,
-                mLogger,
-                mSystemClock
-        );
+                mSystemClock, mLogger, mock(DumpManager.class), mInteractionTracker);
         mListBuilder.setOnRenderListListener(mOnRenderListListener);
 
         mListBuilder.attach(mNotifCollection);
-
-        mStabilityManager = spy(new TestableStabilityManager());
-        mListBuilder.setNotifStabilityManager(mStabilityManager);
-        mFinalizeFilter = spy(new TestableNotifFilter());
-        mListBuilder.addFinalizeFilter(mFinalizeFilter);
 
         Mockito.verify(mNotifCollection).setBuildListener(mBuildListenerCaptor.capture());
         mReadyForBuildListener = Objects.requireNonNull(mBuildListenerCaptor.getValue());
@@ -373,50 +346,6 @@ public class ShadeListBuilderTest extends SysuiTestCase {
     }
 
     @Test
-    public void testGroupsWhoLoseAllChildrenToPromotionSuppressSummary() {
-        // GIVEN a group with two children
-        addGroupChild(0, PACKAGE_2, GROUP_1);
-        addGroupSummary(1, PACKAGE_2, GROUP_1);
-        addGroupChild(2, PACKAGE_2, GROUP_1);
-
-        // GIVEN a promoter that will promote one of children to top level
-        mListBuilder.addPromoter(new IdPromoter(0, 2));
-
-        // WHEN we build the list
-        dispatchBuild();
-
-        // THEN both children end up at top level (because group is now too small)
-        verifyBuiltList(
-                notif(0),
-                notif(2)
-        );
-
-        // THEN the summary is discarded
-        assertNull(mEntrySet.get(1).getParent());
-    }
-
-    @Test
-    public void testGroupsWhoLoseOnlyChildToPromotionSuppressSummary() {
-        // GIVEN a group with two children
-        addGroupChild(0, PACKAGE_2, GROUP_1);
-        addGroupSummary(1, PACKAGE_2, GROUP_1);
-
-        // GIVEN a promoter that will promote one of children to top level
-        mListBuilder.addPromoter(new IdPromoter(0));
-
-        // WHEN we build the list
-        dispatchBuild();
-
-        // THEN both children end up at top level (because group is now too small)
-        verifyBuiltList(
-                notif(0)
-        );
-
-        // THEN the summary is discarded
-        assertNull(mEntrySet.get(1).getParent());
-    }
-
-    @Test
     public void testPreviousParentsAreSetProperly() {
         // GIVEN a notification that is initially added to the list
         PackageFilter filter = new PackageFilter(PACKAGE_2);
@@ -460,6 +389,7 @@ public class ShadeListBuilderTest extends SysuiTestCase {
 
         // THEN the summary has a null parent and an unset firstAddedIteration
         assertNull(mEntrySet.get(1).getParent());
+        assertEquals(-1, mEntrySet.get(1).mFirstAddedIteration);
     }
 
     @Test
@@ -570,7 +500,6 @@ public class ShadeListBuilderTest extends SysuiTestCase {
 
         // WHEN the pipeline is kicked off
         mReadyForBuildListener.onBuildList(singletonList(entry));
-        mPipelineChoreographer.runIfScheduled();
 
         // THEN the entry's initialization time is reset
         assertFalse(entry.hasFinishedInitialization());
@@ -679,57 +608,6 @@ public class ShadeListBuilderTest extends SysuiTestCase {
     }
 
     @Test
-    public void testNotifSectionsChildrenUpdated() {
-        ArrayList<ListEntry> pkg1Entries = new ArrayList<>();
-        ArrayList<ListEntry> pkg2Entries = new ArrayList<>();
-        ArrayList<ListEntry> pkg3Entries = new ArrayList<>();
-        final NotifSectioner pkg1Sectioner = spy(new PackageSectioner(PACKAGE_1) {
-            @Override
-            public void onEntriesUpdated(List<ListEntry> entries) {
-                super.onEntriesUpdated(entries);
-                pkg1Entries.addAll(entries);
-            }
-        });
-        final NotifSectioner pkg2Sectioner = spy(new PackageSectioner(PACKAGE_2) {
-            @Override
-            public void onEntriesUpdated(List<ListEntry> entries) {
-                super.onEntriesUpdated(entries);
-                pkg2Entries.addAll(entries);
-            }
-        });
-        final NotifSectioner pkg3Sectioner = spy(new PackageSectioner(PACKAGE_3) {
-            @Override
-            public void onEntriesUpdated(List<ListEntry> entries) {
-                super.onEntriesUpdated(entries);
-                pkg3Entries.addAll(entries);
-            }
-        });
-        mListBuilder.setSectioners(asList(pkg1Sectioner, pkg2Sectioner, pkg3Sectioner));
-
-        addNotif(0, PACKAGE_1);
-        addNotif(1, PACKAGE_1);
-        addNotif(2, PACKAGE_3);
-        addNotif(3, PACKAGE_3);
-        addNotif(4, PACKAGE_3);
-
-        dispatchBuild();
-
-        verify(pkg1Sectioner).onEntriesUpdated(any());
-        verify(pkg2Sectioner).onEntriesUpdated(any());
-        verify(pkg3Sectioner).onEntriesUpdated(any());
-        assertThat(pkg1Entries).containsExactly(
-                mEntrySet.get(0),
-                mEntrySet.get(1)
-        ).inOrder();
-        assertThat(pkg2Entries).isEmpty();
-        assertThat(pkg3Entries).containsExactly(
-                mEntrySet.get(2),
-                mEntrySet.get(3),
-                mEntrySet.get(4)
-        ).inOrder();
-    }
-
-    @Test
     public void testNotifSections() {
         // GIVEN a filter that removes all PACKAGE_4 notifs and sections that divide
         // notifs based on package name
@@ -741,7 +619,7 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         final NotifSectioner pkg4Sectioner = spy(new PackageSectioner(PACKAGE_4));
         final NotifSectioner pkg5Sectioner = spy(new PackageSectioner(PACKAGE_5));
         mListBuilder.setSectioners(
-                asList(pkg1Sectioner, pkg2Sectioner, pkg4Sectioner, pkg5Sectioner));
+                Arrays.asList(pkg1Sectioner, pkg2Sectioner, pkg4Sectioner, pkg5Sectioner));
 
         final NotifSection pkg1Section = new NotifSection(pkg1Sectioner, 0);
         final NotifSection pkg2Section = new NotifSection(pkg2Sectioner, 1);
@@ -853,7 +731,7 @@ public class ShadeListBuilderTest extends SysuiTestCase {
     @Test
     public void testThatNotifComparatorsAreCalled() {
         // GIVEN a set of comparators that care about specific packages
-        mListBuilder.setComparators(asList(
+        mListBuilder.setComparators(Arrays.asList(
                 new HypeComparator(PACKAGE_4),
                 new HypeComparator(PACKAGE_1, PACKAGE_3),
                 new HypeComparator(PACKAGE_2)
@@ -875,73 +753,6 @@ public class ShadeListBuilderTest extends SysuiTestCase {
                 notif(4),
                 notif(1)
         );
-    }
-
-    @Test
-    public void testThatSectionComparatorsAreCalled() {
-        // GIVEN a section with a comparator that elevates some packages over others
-        NotifComparator comparator = spy(new HypeComparator(PACKAGE_2, PACKAGE_4));
-        NotifSectioner sectioner = new PackageSectioner(
-                List.of(PACKAGE_1, PACKAGE_2, PACKAGE_4, PACKAGE_5), comparator);
-        mListBuilder.setSectioners(List.of(sectioner));
-
-        // WHEN the pipeline is kicked off on a bunch of notifications
-        addNotif(0, PACKAGE_0);
-        addNotif(1, PACKAGE_1);
-        addNotif(2, PACKAGE_2);
-        addNotif(3, PACKAGE_3);
-        addNotif(4, PACKAGE_4);
-        addNotif(5, PACKAGE_5);
-        dispatchBuild();
-
-        // THEN the notifs are sorted according to both sectioning and the section's comparator
-        verifyBuiltList(
-                notif(2),
-                notif(4),
-                notif(1),
-                notif(5),
-                notif(0),
-                notif(3)
-        );
-
-        // VERIFY that the comparator is invoked at least 3 times
-        verify(comparator, atLeast(3)).compare(any(), any());
-
-        // VERIFY that the comparator is never invoked with the entry from package 0 or 3.
-        final NotificationEntry package0Entry = mEntrySet.get(0);
-        verify(comparator, never()).compare(eq(package0Entry), any());
-        verify(comparator, never()).compare(any(), eq(package0Entry));
-        final NotificationEntry package3Entry = mEntrySet.get(3);
-        verify(comparator, never()).compare(eq(package3Entry), any());
-        verify(comparator, never()).compare(any(), eq(package3Entry));
-    }
-
-    @Test
-    public void testThatSectionComparatorsAreNotCalledForSectionWithSingleEntry() {
-        // GIVEN a section with a comparator that will have only 1 element
-        NotifComparator comparator = spy(new HypeComparator(PACKAGE_3));
-        NotifSectioner sectioner = new PackageSectioner(List.of(PACKAGE_3), comparator);
-        mListBuilder.setSectioners(List.of(sectioner));
-
-        // WHEN the pipeline is kicked off on a bunch of notifications
-        addNotif(0, PACKAGE_1);
-        addNotif(1, PACKAGE_2);
-        addNotif(2, PACKAGE_3);
-        addNotif(3, PACKAGE_4);
-        addNotif(4, PACKAGE_5);
-        dispatchBuild();
-
-        // THEN the notifs are sorted according to the sectioning
-        verifyBuiltList(
-                notif(2),
-                notif(0),
-                notif(1),
-                notif(3),
-                notif(4)
-        );
-
-        // VERIFY that the comparator is never invoked
-        verify(comparator, never()).compare(any(), any());
     }
 
     @Test
@@ -1007,16 +818,13 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         // GIVEN a variety of pluggables
         NotifFilter packageFilter = new PackageFilter(PACKAGE_1);
         NotifPromoter idPromoter = new IdPromoter(4);
-        NotifComparator sectionComparator = new HypeComparator(PACKAGE_1);
-        NotifSectioner section = new PackageSectioner(List.of(PACKAGE_1), sectionComparator);
+        NotifSectioner section = new PackageSectioner(PACKAGE_1);
         NotifComparator hypeComparator = new HypeComparator(PACKAGE_2);
-        Invalidator preRenderInvalidator = new Invalidator("PreRenderInvalidator") {};
 
         mListBuilder.addPreGroupFilter(packageFilter);
         mListBuilder.addPromoter(idPromoter);
         mListBuilder.setSectioners(singletonList(section));
         mListBuilder.setComparators(singletonList(hypeComparator));
-        mListBuilder.addPreRenderInvalidator(preRenderInvalidator);
 
         // GIVEN a set of random notifs
         addNotif(0, PACKAGE_1);
@@ -1028,38 +836,18 @@ public class ShadeListBuilderTest extends SysuiTestCase {
 
         clearInvocations(mOnRenderListListener);
         packageFilter.invalidateList();
-        assertTrue(mPipelineChoreographer.isScheduled());
-        mPipelineChoreographer.runIfScheduled();
         verify(mOnRenderListListener).onRenderList(anyList());
 
         clearInvocations(mOnRenderListListener);
         idPromoter.invalidateList();
-        assertTrue(mPipelineChoreographer.isScheduled());
-        mPipelineChoreographer.runIfScheduled();
         verify(mOnRenderListListener).onRenderList(anyList());
 
         clearInvocations(mOnRenderListListener);
         section.invalidateList();
-        assertTrue(mPipelineChoreographer.isScheduled());
-        mPipelineChoreographer.runIfScheduled();
         verify(mOnRenderListListener).onRenderList(anyList());
 
         clearInvocations(mOnRenderListListener);
         hypeComparator.invalidateList();
-        assertTrue(mPipelineChoreographer.isScheduled());
-        mPipelineChoreographer.runIfScheduled();
-        verify(mOnRenderListListener).onRenderList(anyList());
-
-        clearInvocations(mOnRenderListListener);
-        sectionComparator.invalidateList();
-        assertTrue(mPipelineChoreographer.isScheduled());
-        mPipelineChoreographer.runIfScheduled();
-        verify(mOnRenderListListener).onRenderList(anyList());
-
-        clearInvocations(mOnRenderListListener);
-        preRenderInvalidator.invalidateList();
-        assertTrue(mPipelineChoreographer.isScheduled());
-        mPipelineChoreographer.runIfScheduled();
         verify(mOnRenderListListener).onRenderList(anyList());
     }
 
@@ -1120,11 +908,13 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         );
 
         // THEN all the new notifs, including the new GroupEntry, are passed to the listener
-        assertThat(listener.mEntriesReceived).containsExactly(
-                mEntrySet.get(0),
-                mBuiltList.get(1),
-                mEntrySet.get(4)
-        ).inOrder(); // Order is a bonus because this listener is before sort
+        assertEquals(
+                Arrays.asList(
+                        mEntrySet.get(0),
+                        mBuiltList.get(1),
+                        mEntrySet.get(4)),
+                listener.mEntriesReceived
+        );
     }
 
     @Test
@@ -1164,23 +954,26 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         );
 
         // THEN all the new notifs, including the new GroupEntry, are passed to the listener
-        assertThat(listener.mEntriesReceived).containsExactly(
-                mEntrySet.get(0),
-                mEntrySet.get(1),
-                mBuiltList.get(2),
-                mEntrySet.get(7)
-        ).inOrder(); // Order is a bonus because this listener is before sort
+        assertEquals(
+                Arrays.asList(
+                        mEntrySet.get(0),
+                        mBuiltList.get(2),
+                        mEntrySet.get(7),
+                        mEntrySet.get(1)),
+                listener.mEntriesReceived
+        );
     }
 
     @Test
-    public void testStabilizeGroupsDoesNotAllowGroupingExistingNotifications() {
+    public void testStabilizeGroupsDoesNotAllowGrouping() {
         // GIVEN one group child without a summary yet
         addGroupChild(0, PACKAGE_1, GROUP_1);
 
         dispatchBuild();
 
         // GIVEN visual stability manager doesn't allow any group changes
-        mStabilityManager.setAllowGroupChanges(false);
+        mListBuilder.setNotifStabilityManager(
+                new TestableStabilityManager().setAllowGroupChanges(false));
 
         // WHEN we run the pipeline with the addition of a group summary & child
         addGroupSummary(1, PACKAGE_1, GROUP_1);
@@ -1192,17 +985,15 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         // because group changes aren't allowed by the stability manager
         verifyBuiltList(
                 notif(0),
-                group(
-                        summary(1),
-                        child(2)
-                )
+                notif(2)
         );
     }
 
     @Test
     public void testStabilizeGroupsAllowsGroupingAllNewNotifications() {
         // GIVEN visual stability manager doesn't allow any group changes
-        mStabilityManager.setAllowGroupChanges(false);
+        mListBuilder.setNotifStabilityManager(
+                new TestableStabilityManager().setAllowGroupChanges(false));
 
         // WHEN we run the pipeline with all new notification groups
         addGroupChild(0, PACKAGE_1, GROUP_1);
@@ -1238,7 +1029,8 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         dispatchBuild();
 
         // GIVEN visual stability manager doesn't allow any group changes
-        mStabilityManager.setAllowGroupChanges(false);
+        mListBuilder.setNotifStabilityManager(
+                new TestableStabilityManager().setAllowGroupChanges(false));
 
         // WHEN we run the pipeline with the addition of a group summary & child
         addGroupSummary(1, PACKAGE_1, GROUP_1);
@@ -1249,256 +1041,41 @@ public class ShadeListBuilderTest extends SysuiTestCase {
 
         dispatchBuild();
 
-        // THEN first notification stays top-level but the other notifications are grouped.
+        // THEN all notifications are top-level and the summary doesn't show yet
+        // because group changes aren't allowed by the stability manager
         verifyBuiltList(
                 notif(0),
-                group(
-                        summary(1),
-                        child(2)
-                ),
                 group(
                         summary(3),
                         child(4),
                         child(5)
-                )
-        );
-    }
-
-    @Test
-    public void testFinalizeFilteringGroupSummaryDoesNotBreakSort() {
-        // GIVEN children from 3 packages, with one in the middle of the sort order being a group
-        addNotif(0, PACKAGE_1);
-        addNotif(1, PACKAGE_2);
-        addNotif(2, PACKAGE_3);
-        addNotif(3, PACKAGE_1);
-        addNotif(4, PACKAGE_2);
-        addNotif(5, PACKAGE_3);
-        addGroupSummary(6, PACKAGE_2, GROUP_1);
-        addGroupChild(7, PACKAGE_2, GROUP_1);
-        addGroupChild(8, PACKAGE_2, GROUP_1);
-
-        // GIVEN that they should be sorted by package
-        mListBuilder.setComparators(asList(
-                new HypeComparator(PACKAGE_1),
-                new HypeComparator(PACKAGE_2),
-                new HypeComparator(PACKAGE_3)
-        ));
-
-        // WHEN a finalize filter removes the summary
-        mListBuilder.addFinalizeFilter(new NotifFilter("Test") {
-            @Override
-            public boolean shouldFilterOut(@NonNull NotificationEntry entry, long now) {
-                return entry == notif(6).entry;
-            }
-        });
-
-        dispatchBuild();
-
-        // THEN the notifications remain ordered by package, even though the children were promoted
-        verifyBuiltList(
-                notif(0),
-                notif(3),
-                notif(1),
-                notif(4),
-                notif(7),  // promoted child
-                notif(8),  // promoted child
-                notif(2),
-                notif(5)
-        );
-    }
-
-    @Test
-    public void testFinalizeFilteringGroupChildDoesNotBreakSort() {
-        // GIVEN children from 3 packages, with one in the middle of the sort order being a group
-        addNotif(0, PACKAGE_1);
-        addNotif(1, PACKAGE_2);
-        addNotif(2, PACKAGE_3);
-        addNotif(3, PACKAGE_1);
-        addNotif(4, PACKAGE_2);
-        addNotif(5, PACKAGE_3);
-        addGroupSummary(6, PACKAGE_2, GROUP_1);
-        addGroupChild(7, PACKAGE_2, GROUP_1);
-        addGroupChild(8, PACKAGE_2, GROUP_1);
-
-        // GIVEN that they should be sorted by package
-        mListBuilder.setComparators(asList(
-                new HypeComparator(PACKAGE_1),
-                new HypeComparator(PACKAGE_2),
-                new HypeComparator(PACKAGE_3)
-        ));
-
-        // WHEN a finalize filter one of the 2 children from a group
-        mListBuilder.addFinalizeFilter(new NotifFilter("Test") {
-            @Override
-            public boolean shouldFilterOut(@NonNull NotificationEntry entry, long now) {
-                return entry == notif(7).entry;
-            }
-        });
-
-        dispatchBuild();
-
-        // THEN the notifications remain ordered by package, even though the children were promoted
-        verifyBuiltList(
-                notif(0),
-                notif(3),
-                notif(1),
-                notif(4),
-                notif(8),  // promoted child
-                notif(2),
-                notif(5)
-        );
-    }
-
-    @Test
-    public void testStabilityIsolationAllowsGroupToHaveSingleChild() {
-        // GIVEN a group with only one child was already drawn
-        addGroupSummary(0, PACKAGE_1, GROUP_1);
-        addGroupChild(1, PACKAGE_1, GROUP_1);
-
-        dispatchBuild();
-        // NOTICE that the group is pruned and the child is moved to the top level
-        verifyBuiltList(
-                notif(1)  // group with only one child is promoted
-        );
-
-        // WHEN another child is added while group changes are disabled.
-        mStabilityManager.setAllowGroupChanges(false);
-        addGroupChild(2, PACKAGE_1, GROUP_1);
-
-        dispatchBuild();
-
-        // THEN the new child should be added to the group
-        verifyBuiltList(
-                group(
-                        summary(0),
-                        child(2)
                 ),
-                notif(1)
-        );
-    }
-
-    @Test
-    public void testStabilityIsolationExemptsGroupWithFinalizeFilteredChildFromShowingSummary() {
-        // GIVEN a group with only one child was already drawn
-        addGroupSummary(0, PACKAGE_1, GROUP_1);
-        addGroupChild(1, PACKAGE_1, GROUP_1);
-
-        dispatchBuild();
-        // NOTICE that the group is pruned and the child is moved to the top level
-        verifyBuiltList(
-                notif(1)  // group with only one child is promoted
-        );
-
-        // WHEN another child is added but still filtered while group changes are disabled.
-        mStabilityManager.setAllowGroupChanges(false);
-        mFinalizeFilter.mIndicesToFilter.add(2);
-        addGroupChild(2, PACKAGE_1, GROUP_1);
-
-        dispatchBuild();
-
-        // THEN the new child should be shown without the summary
-        verifyBuiltList(
-                notif(1)  // previously promoted child
-        );
-    }
-
-    @Test
-    public void testStabilityIsolationOfRemovedChildDoesNotExemptGroupFromPrune() {
-        // GIVEN a group with only one child was already drawn
-        addGroupSummary(0, PACKAGE_1, GROUP_1);
-        addGroupChild(1, PACKAGE_1, GROUP_1);
-
-        dispatchBuild();
-        // NOTICE that the group is pruned and the child is moved to the top level
-        verifyBuiltList(
-                notif(1)  // group with only one child is promoted
-        );
-
-        // WHEN a new child is added and the old one gets filtered while group changes are disabled.
-        mStabilityManager.setAllowGroupChanges(false);
-        mFinalizeFilter.mIndicesToFilter.add(1);
-        addGroupChild(2, PACKAGE_1, GROUP_1);
-
-        dispatchBuild();
-
-        // THEN the new child should be shown without a group
-        verifyBuiltList(
-                notif(2)  // previously promoted child
-        );
-    }
-
-    @Test
-    public void testFinalizeFilteredSummaryPromotesChildren() {
-        // GIVEN a group with only one child was already drawn
-        addGroupSummary(0, PACKAGE_1, GROUP_1);
-        addGroupChild(1, PACKAGE_1, GROUP_1);
-        addGroupChild(2, PACKAGE_1, GROUP_1);
-
-        // WHEN the parent is filtered out at the finalize step
-        mFinalizeFilter.mIndicesToFilter.add(0);
-
-        dispatchBuild();
-
-        // THEN the children should be promoted to the top level
-        verifyBuiltList(
-                notif(1),
                 notif(2)
         );
     }
 
     @Test
-    public void testFinalizeFilteredChildrenPromotesSummary() {
-        // GIVEN a group with only one child was already drawn
-        addGroupSummary(0, PACKAGE_1, GROUP_1);
-        addGroupChild(1, PACKAGE_1, GROUP_1);
+    public void testStabilizeGroupsHidesGroupSummary() {
+        // GIVEN one group child with a summary
+        addGroupChild(0, PACKAGE_1, GROUP_1);
+        addGroupSummary(1, PACKAGE_1, GROUP_1);
+
+        dispatchBuild(); // group summary is hidden because it needs at least 2 children to group
+
+        // GIVEN visual stability manager doesn't allow any group changes
+        mListBuilder.setNotifStabilityManager(
+                new TestableStabilityManager().setAllowGroupChanges(false));
+
+        // WHEN we run the pipeline with the addition of a child
         addGroupChild(2, PACKAGE_1, GROUP_1);
 
-        // WHEN the parent is filtered out at the finalize step
-        mFinalizeFilter.mIndicesToFilter.add(1);
-        mFinalizeFilter.mIndicesToFilter.add(2);
-
         dispatchBuild();
 
-        // THEN the children should be promoted to the top level
-        verifyBuiltList(
-                notif(0)
-        );
-    }
-
-    @Test
-    public void testFinalizeFilteredChildPromotesSibling() {
-        // GIVEN a group with only one child was already drawn
-        addGroupSummary(0, PACKAGE_1, GROUP_1);
-        addGroupChild(1, PACKAGE_1, GROUP_1);
-        addGroupChild(2, PACKAGE_1, GROUP_1);
-
-        // WHEN the parent is filtered out at the finalize step
-        mFinalizeFilter.mIndicesToFilter.add(1);
-
-        dispatchBuild();
-
-        // THEN the children should be promoted to the top level
-        verifyBuiltList(
-                notif(2)
-        );
-    }
-
-    @Test
-    public void testBrokenGroupNotificationOrdering() {
-        // GIVEN two group children with different sections & without a summary yet
-        addGroupChild(0, PACKAGE_2, GROUP_1);
-        addNotif(1, PACKAGE_1);
-        addGroupChild(2, PACKAGE_2, GROUP_1);
-        addGroupChild(3, PACKAGE_2, GROUP_1);
-
-        dispatchBuild();
-
-        // THEN all notifications are not grouped and posted in order by index
+        // THEN the children notifications are top-level and the summary still doesn't show yet
+        // because group changes aren't allowed by the stability manager
         verifyBuiltList(
                 notif(0),
-                notif(1),
-                notif(2),
-                notif(3)
+                notif(2)
         );
     }
 
@@ -1513,25 +1090,27 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         dispatchBuild();
 
         // GIVEN visual stability manager doesn't allow any group changes
-        mStabilityManager.setAllowGroupChanges(false);
+        final TestableStabilityManager stabilityManager =
+                new TestableStabilityManager().setAllowGroupChanges(false);
+        mListBuilder.setNotifStabilityManager(stabilityManager);
 
         // WHEN the delayed summary is posted
         addGroupSummary(4, PACKAGE_1, GROUP_1);
 
         dispatchBuild();
 
-        // THEN all entries are top-level, but summary is suppressed
+        // THEN all entries are top-level since group changes aren't allowed
         verifyBuiltList(
                 notif(0),
                 notif(1),
                 notif(2),
-                notif(3)
+                notif(3),
+                notif(4)
         );
 
         // WHEN visual stability manager allows group changes again
-        mStabilityManager.setAllowGroupChanges(true);
-        mStabilityManager.invalidateList();
-        mPipelineChoreographer.runIfScheduled();
+        stabilityManager.setAllowGroupChanges(true);
+        stabilityManager.invalidateList();
 
         // THEN entries are grouped
         verifyBuiltList(
@@ -1557,7 +1136,9 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         assertEquals(originalSectioner, mEntrySet.get(0).getSection().getSectioner());
 
         // WHEN section changes aren't allowed
-        mStabilityManager.setAllowSectionChanges(false);
+        final TestableStabilityManager stabilityManager =
+                new TestableStabilityManager().setAllowSectionChanges(false);
+        mListBuilder.setNotifStabilityManager(stabilityManager);
 
         // WHEN we try to change the section
         final NotifSectioner newSectioner = new PackageSectioner(PACKAGE_1);
@@ -1568,9 +1149,8 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         assertEquals(originalSectioner, mEntrySet.get(0).getSection().getSectioner());
 
         // WHEN section changes are allowed again
-        mStabilityManager.setAllowSectionChanges(true);
-        mStabilityManager.invalidateList();
-        mPipelineChoreographer.runIfScheduled();
+        stabilityManager.setAllowSectionChanges(true);
+        stabilityManager.invalidateList();
 
         // THEN the section updates
         assertEquals(newSectioner, mEntrySet.get(0).getSection().getSectioner());
@@ -1593,11 +1173,13 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         dispatchBuild();
 
         // THEN all the new notifs are passed to the listener out of order
-        assertThat(listener.mEntriesReceived).containsExactly(
-                mEntrySet.get(0),
-                mEntrySet.get(1),
-                mEntrySet.get(2)
-        ).inOrder();  // Checking out-of-order input to validate sorted output
+        assertEquals(
+                Arrays.asList(
+                        mEntrySet.get(0),
+                        mEntrySet.get(1),
+                        mEntrySet.get(2)),
+                listener.mEntriesReceived
+        );
 
         // THEN the final list is in order
         verifyBuiltList(
@@ -1623,11 +1205,13 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         dispatchBuild();
 
         // THEN all the new notifs are passed to the listener
-        assertThat(listener.mEntriesReceived).containsExactly(
-                mEntrySet.get(0),
-                mEntrySet.get(1),
-                mEntrySet.get(2)
-        ).inOrder();
+        assertEquals(
+                Arrays.asList(
+                        mEntrySet.get(0),
+                        mEntrySet.get(1),
+                        mEntrySet.get(2)),
+                listener.mEntriesReceived
+        );
     }
 
     @Test
@@ -1724,45 +1308,6 @@ public class ShadeListBuilderTest extends SysuiTestCase {
     }
 
     @Test
-    public void testStableOrdering() {
-        mStabilityManager.setAllowEntryReordering(false);
-        assertOrder("ABCDEFG", "ACDEFXBG", "XABCDEFG"); // X
-        assertOrder("ABCDEFG", "ACDEFBG", "ABCDEFG"); // no change
-        assertOrder("ABCDEFG", "ACDEFBXZG", "XZABCDEFG"); // Z and X
-        assertOrder("ABCDEFG", "AXCDEZFBG", "XZABCDEFG"); // Z and X + gap
-        verify(mStabilityManager, times(4)).onEntryReorderSuppressed();
-    }
-
-    @Test
-    public void testActiveOrdering() {
-        assertOrder("ABCDEFG", "ACDEFXBG", "ACDEFXBG"); // X
-        assertOrder("ABCDEFG", "ACDEFBG", "ACDEFBG"); // no change
-        assertOrder("ABCDEFG", "ACDEFBXZG", "ACDEFBXZG"); // Z and X
-        assertOrder("ABCDEFG", "AXCDEZFBG", "AXCDEZFBG"); // Z and X + gap
-        verify(mStabilityManager, never()).onEntryReorderSuppressed();
-    }
-
-    @Test
-    public void testStableMultipleSectionOrdering() {
-        mListBuilder.setSectioners(asList(
-                new PackageSectioner(PACKAGE_1), new PackageSectioner(PACKAGE_2)));
-        mStabilityManager.setAllowEntryReordering(false);
-
-        addNotif(0, PACKAGE_1).setRank(1);
-        addNotif(1, PACKAGE_1).setRank(2);
-        addNotif(2, PACKAGE_2).setRank(0);
-        addNotif(3, PACKAGE_1).setRank(3);
-        dispatchBuild();
-
-        verifyBuiltList(
-                notif(0),
-                notif(1),
-                notif(3),
-                notif(2)
-        );
-    }
-
-    @Test
     public void testInOrderPreRenderFilter() {
         // GIVEN a PreRenderFilter that gets invalidated during the grouping stage
         NotifFilter filter = new PackageFilter(PACKAGE_5);
@@ -1775,63 +1320,6 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         dispatchBuild();
 
         // THEN no exception thrown
-    }
-
-    @Test
-    public void testPipelineRunDisallowedDueToVisualStability() {
-        // GIVEN pipeline run not allowed due to visual stability
-        mStabilityManager.setAllowPipelineRun(false);
-
-        // WHEN we try to run the pipeline with a change
-        addNotif(0, PACKAGE_1);
-        dispatchBuild();
-
-        // THEN there is no change; the pipeline did not run
-        verifyBuiltList();
-    }
-
-    @Test
-    public void testMultipleInvalidationsCoalesce() {
-        // GIVEN a PreGroupFilter and a FinalizeFilter
-        NotifFilter filter1 = new PackageFilter(PACKAGE_5);
-        NotifFilter filter2 = new PackageFilter(PACKAGE_0);
-        mListBuilder.addPreGroupFilter(filter1);
-        mListBuilder.addFinalizeFilter(filter2);
-
-        // WHEN both filters invalidate
-        filter1.invalidateList();
-        filter2.invalidateList();
-
-        // THEN the pipeline choreographer is scheduled to evaluate, AND the pipeline hasn't
-        // actually run.
-        assertTrue(mPipelineChoreographer.isScheduled());
-        verify(mOnRenderListListener, never()).onRenderList(anyList());
-
-        // WHEN the pipeline choreographer actually runs
-        mPipelineChoreographer.runIfScheduled();
-
-        // THEN the pipeline runs
-        verify(mOnRenderListListener).onRenderList(anyList());
-    }
-
-    @Test
-    public void testIsSorted() {
-        Comparator<Integer> intCmp = Integer::compare;
-        assertTrue(ShadeListBuilder.isSorted(Collections.emptyList(), intCmp));
-        assertTrue(ShadeListBuilder.isSorted(Collections.singletonList(1), intCmp));
-        assertTrue(ShadeListBuilder.isSorted(Arrays.asList(1, 2), intCmp));
-        assertTrue(ShadeListBuilder.isSorted(Arrays.asList(1, 2, 3), intCmp));
-        assertTrue(ShadeListBuilder.isSorted(Arrays.asList(1, 2, 3, 4), intCmp));
-        assertTrue(ShadeListBuilder.isSorted(Arrays.asList(1, 2, 3, 4, 5), intCmp));
-        assertTrue(ShadeListBuilder.isSorted(Arrays.asList(1, 1, 1, 1, 1), intCmp));
-        assertTrue(ShadeListBuilder.isSorted(Arrays.asList(1, 1, 2, 2, 3, 3), intCmp));
-
-        assertFalse(ShadeListBuilder.isSorted(Arrays.asList(2, 1), intCmp));
-        assertFalse(ShadeListBuilder.isSorted(Arrays.asList(2, 1, 2), intCmp));
-        assertFalse(ShadeListBuilder.isSorted(Arrays.asList(1, 2, 1), intCmp));
-        assertFalse(ShadeListBuilder.isSorted(Arrays.asList(1, 2, 3, 2, 5), intCmp));
-        assertFalse(ShadeListBuilder.isSorted(Arrays.asList(5, 2, 3, 4, 5), intCmp));
-        assertFalse(ShadeListBuilder.isSorted(Arrays.asList(1, 2, 3, 4, 1), intCmp));
     }
 
     /**
@@ -1901,37 +1389,6 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         return addGroupChildWithTag(index, packageId, groupId, null);
     }
 
-    private void assertOrder(String visible, String active, String expected) {
-        StringBuilder differenceSb = new StringBuilder();
-        for (char c : active.toCharArray()) {
-            if (visible.indexOf(c) < 0) differenceSb.append(c);
-        }
-        String difference = differenceSb.toString();
-
-        for (int i = 0; i < visible.length(); i++) {
-            addNotif(i, String.valueOf(visible.charAt(i)))
-                    .setRank(active.indexOf(visible.charAt(i)))
-                    .setStableIndex(i);
-
-        }
-
-        for (int i = 0; i < difference.length(); i++) {
-            addNotif(i + visible.length(), String.valueOf(difference.charAt(i)))
-                    .setRank(active.indexOf(difference.charAt(i)))
-                    .setStableIndex(-1);
-        }
-
-        dispatchBuild();
-        StringBuilder resultSb = new StringBuilder();
-        for (int i = 0; i < expected.length(); i++) {
-            resultSb.append(mBuiltList.get(i).getRepresentativeEntry().getSbn().getPackageName());
-        }
-
-        assertEquals("visible [" + visible + "] active [" + active + "]",
-                expected, resultSb.toString());
-        mEntrySet.clear();
-    }
-
     private int nextId(String packageName) {
         Integer nextId = mNextIdMap.get(packageName);
         if (nextId == null) {
@@ -1956,7 +1413,6 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         }
 
         mReadyForBuildListener.onBuildList(mEntrySet);
-        mPipelineChoreographer.runIfScheduled();
     }
 
     private void verifyBuiltList(ExpectedEntry ...expectedEntries) {
@@ -2122,7 +1578,7 @@ public class ShadeListBuilderTest extends SysuiTestCase {
 
         IdPromoter(Integer... ids) {
             super("IdPromoter");
-            mIds = asList(ids);
+            mIds = Arrays.asList(ids);
         }
 
         @Override
@@ -2138,11 +1594,11 @@ public class ShadeListBuilderTest extends SysuiTestCase {
 
         HypeComparator(String ...preferredPackages) {
             super("HypeComparator");
-            mPreferredPackages = asList(preferredPackages);
+            mPreferredPackages = Arrays.asList(preferredPackages);
         }
 
         @Override
-        public int compare(@NonNull ListEntry o1, @NonNull ListEntry o2) {
+        public int compare(ListEntry o1, ListEntry o2) {
             boolean contains1 = mPreferredPackages.contains(
                     o1.getRepresentativeEntry().getSbn().getPackageName());
             boolean contains2 = mPreferredPackages.contains(
@@ -2154,30 +1610,16 @@ public class ShadeListBuilderTest extends SysuiTestCase {
 
     /** Represents a section for the passed pkg */
     private static class PackageSectioner extends NotifSectioner {
-        private final List<String> mPackages;
-        private final NotifComparator mComparator;
-
-        PackageSectioner(List<String> pkgs, NotifComparator comparator) {
-            super("PackageSection_" + pkgs, 0);
-            mPackages = pkgs;
-            mComparator = comparator;
-        }
+        private final String mPackage;
 
         PackageSectioner(String pkg) {
-            super("PackageSection_" + pkg, 0);
-            mPackages = List.of(pkg);
-            mComparator = null;
-        }
-
-        @Nullable
-        @Override
-        public NotifComparator getComparator() {
-            return mComparator;
+            super("PackageSection_" + pkg);
+            mPackage = pkg;
         }
 
         @Override
         public boolean isInSection(ListEntry entry) {
-            return mPackages.contains(entry.getRepresentativeEntry().getSbn().getPackageName());
+            return entry.getRepresentativeEntry().getSbn().getPackageName().equals(mPackage);
         }
     }
 
@@ -2211,24 +1653,9 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         }
     }
 
-    private class TestableNotifFilter extends NotifFilter {
-        ArrayList<Integer> mIndicesToFilter = new ArrayList<>();
-
-        protected TestableNotifFilter() {
-            super("TestFilter");
-        }
-
-        @Override
-        public boolean shouldFilterOut(@NonNull NotificationEntry entry, long now) {
-            return mIndicesToFilter.stream().anyMatch(i -> notif(i).entry == entry);
-        }
-    }
-
     private static class TestableStabilityManager extends NotifStabilityManager {
-        boolean mAllowPipelineRun = true;
         boolean mAllowGroupChanges = true;
         boolean mAllowSectionChanges = true;
-        boolean mAllowEntryReodering = true;
 
         TestableStabilityManager() {
             super("Test");
@@ -2244,51 +1671,21 @@ public class ShadeListBuilderTest extends SysuiTestCase {
             return this;
         }
 
-        TestableStabilityManager setAllowEntryReordering(boolean allowSectionChanges) {
-            mAllowEntryReodering = allowSectionChanges;
-            return this;
-        }
-
-        TestableStabilityManager setAllowPipelineRun(boolean allowPipelineRun) {
-            mAllowPipelineRun = allowPipelineRun;
-            return this;
-        }
-
-        @Override
-        public boolean isPipelineRunAllowed() {
-            return mAllowPipelineRun;
-        }
-
         @Override
         public void onBeginRun() {
         }
 
         @Override
-        public boolean isGroupChangeAllowed(@NonNull NotificationEntry entry) {
+        public boolean isGroupChangeAllowed(NotificationEntry entry) {
             return mAllowGroupChanges;
         }
 
         @Override
-        public boolean isSectionChangeAllowed(@NonNull NotificationEntry entry) {
+        public boolean isSectionChangeAllowed(NotificationEntry entry) {
             return mAllowSectionChanges;
-        }
-
-        @Override
-        public boolean isEntryReorderingAllowed(@NonNull ListEntry entry) {
-            return mAllowEntryReodering;
-        }
-
-        @Override
-        public boolean isEveryChangeAllowed() {
-            return mAllowEntryReodering && mAllowGroupChanges && mAllowSectionChanges;
-        }
-
-        @Override
-        public void onEntryReorderSuppressed() {
         }
     }
 
-    private static final String PACKAGE_0 = "com.test0";
     private static final String PACKAGE_1 = "com.test1";
     private static final String PACKAGE_2 = "com.test2";
     private static final String PACKAGE_3 = "org.test3";

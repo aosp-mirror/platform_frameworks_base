@@ -19,13 +19,10 @@ package com.android.systemui.statusbar;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import android.annotation.IntDef;
-import android.view.InsetsVisibilities;
 import android.view.View;
-import android.view.WindowInsetsController.Appearance;
-import android.view.WindowInsetsController.Behavior;
 
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.statusbar.phone.CentralSurfaces;
+import com.android.systemui.statusbar.phone.StatusBar;
 
 import java.lang.annotation.Retention;
 
@@ -51,9 +48,8 @@ public interface SysuiStatusBarStateController extends StatusBarStateController 
      * notified before unranked, and we will sort ranked listeners from low to high
      *
      * @deprecated This method exists only to solve latent inter-dependencies from refactoring
-     * StatusBarState out of CentralSurfaces.java. Any new listeners should be built not to need
-     * ranking (i.e., they are non-dependent on the order of operations of StatusBarState
-     * listeners).
+     * StatusBarState out of StatusBar.java. Any new listeners should be built not to need ranking
+     * (i.e., they are non-dependent on the order of operations of StatusBarState listeners).
      */
     @Deprecated
     void addCallback(StateListener listener, int rank);
@@ -92,7 +88,7 @@ public interface SysuiStatusBarStateController extends StatusBarStateController 
     int getCurrentOrUpcomingState();
 
     /**
-     * Update the dozing state from {@link CentralSurfaces}'s perspective
+     * Update the dozing state from {@link StatusBar}'s perspective
      * @param isDozing well, are we dozing?
      * @return {@code true} if the state changed, else {@code false}
      */
@@ -117,7 +113,7 @@ public interface SysuiStatusBarStateController extends StatusBarStateController 
     void setAndInstrumentDozeAmount(View view, float dozeAmount, boolean animated);
 
     /**
-     * Update the expanded state from {@link CentralSurfaces}'s perspective
+     * Update the expanded state from {@link StatusBar}'s perspective
      * @param expanded are we expanded?
      * @return {@code true} if the state changed, else {@code false}
      */
@@ -159,10 +155,9 @@ public interface SysuiStatusBarStateController extends StatusBarStateController 
     boolean isKeyguardRequested();
 
     /**
-     * Set the system bar attributes
+     * Set the fullscreen state
      */
-    void setSystemBarAttributes(@Appearance int appearance, @Behavior int behavior,
-            InsetsVisibilities requestedVisibilities, String packageName);
+    void setFullscreenState(boolean isFullscreen);
 
     /**
      * Set pulsing

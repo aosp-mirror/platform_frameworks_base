@@ -24,9 +24,6 @@
 #include "VulkanManager.h"
 #include "utils/Color.h"
 
-#undef LOG_TAG
-#define LOG_TAG "VulkanSurface"
-
 namespace android {
 namespace uirenderer {
 namespace renderthread {
@@ -200,9 +197,8 @@ bool VulkanSurface::InitializeWindowInfoStruct(ANativeWindow* window, ColorMode 
     outWindowInfo->bufferFormat = ColorTypeToBufferFormat(colorType);
     outWindowInfo->colorspace = colorSpace;
     outWindowInfo->dataspace = ColorSpaceToADataSpace(colorSpace.get(), colorType);
-    LOG_ALWAYS_FATAL_IF(
-            outWindowInfo->dataspace == HAL_DATASPACE_UNKNOWN && colorType != kAlpha_8_SkColorType,
-            "Unsupported colorspace");
+    LOG_ALWAYS_FATAL_IF(outWindowInfo->dataspace == HAL_DATASPACE_UNKNOWN,
+                        "Unsupported colorspace");
 
     VkFormat vkPixelFormat;
     switch (colorType) {
@@ -214,9 +210,6 @@ bool VulkanSurface::InitializeWindowInfoStruct(ANativeWindow* window, ColorMode 
             break;
         case kRGBA_1010102_SkColorType:
             vkPixelFormat = VK_FORMAT_A2B10G10R10_UNORM_PACK32;
-            break;
-        case kAlpha_8_SkColorType:
-            vkPixelFormat = VK_FORMAT_R8_UNORM;
             break;
         default:
             LOG_ALWAYS_FATAL("Unsupported colorType: %d", (int)colorType);
@@ -433,7 +426,7 @@ VulkanSurface::NativeBufferInfo* VulkanSurface::dequeueNativeBuffer() {
     if (bufferInfo->skSurface.get() == nullptr) {
         bufferInfo->skSurface = SkSurface::MakeFromAHardwareBuffer(
                 mGrContext, ANativeWindowBuffer_getHardwareBuffer(bufferInfo->buffer.get()),
-                kTopLeft_GrSurfaceOrigin, mWindowInfo.colorspace, nullptr, /*from_window=*/true);
+                kTopLeft_GrSurfaceOrigin, mWindowInfo.colorspace, nullptr);
         if (bufferInfo->skSurface.get() == nullptr) {
             ALOGE("SkSurface::MakeFromAHardwareBuffer failed");
             mNativeWindow->cancelBuffer(mNativeWindow.get(), buffer,

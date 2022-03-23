@@ -1,0 +1,403 @@
+#!/bin/bash
+#
+# Copyright 2017, The Android Open Source Project
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+APP_STARTUP_DIR="$DIR/../app_startup/"
+source "$DIR/common"
+
+usage() {
+    cat <<EOF
+Usage: collector [OPTIONS]...
+
+Runs an application, causes an iorap trace to be collected for it, and then invokes the iorap
+compiler to generate a TraceFile.pb.
+
+    -p, --package               package of the app to test
+    -a, --activity              activity of the app to test
+    -h, --help                  usage information (this)
+    -v, --verbose               enable extra verbose printing
+    -i, --inodes                path to inodes file (system/extras/pagecache/pagecache.py -d inodes)
+    -b, --trace_buffer_size     how big to make trace buffer size (default 32768)
+    -w, --wait_time             how long to run systrace for (default 10) in seconds
+    -c, --compiler-filter       override the compilation filter if set (default none)
+    -o, --output                output trace file protobuf (default 'TraceFile.pb')
+EOF
+}
+
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+trace_buffer_size=32768
+wait_time=10
+comp_filter=""
+output_dest="TraceFile.pb"
+
+parse_arguments() {
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      -a|--activity)
+        activity="$2"
+        shift
+        ;;
+      -h|--help)
+        usage
+        exit 0
+        ;;
+      -p|--package)
+        package="$2"
+        shift
+        ;;
+      -i|--inodes)
+        inodes="$2"
+        shift
+        ;;
+      -b|--trace_buffer_size)
+        trace_buffer_size="$2"
+        shift
+        ;;
+      -w|--wait_time)
+        wait_time="$2"
+        shift
+        ;;
+      -c|--compiler-filter)
+        comp_filter="$2"
+        shift
+        ;;
+      -o|--output)
+        output_dest="$2"
+        shift
+        ;;
+      -v|--verbose)
+        verbose="y"
+        ;;
+    esac
+    shift
+  done
+}
+
+remote_pidof() {
+  local procname="$1"
+  adb shell ps | grep "$procname" | awk '{print $2;}'
+}
+
+remote_pkill() {
+  local procname="$1"
+  shift
+
+  local the_pids=$(remote_pidof "$procname")
+  local pid
+
+  for pid in $the_pids; do
+    verbose_print adb shell kill "$@" "$pid"
+    adb shell kill "$@" "$pid"
+  done
+}
+
+force_package_compilation() {
+  local arg_comp_filter="$1"
+  local arg_package="$2"
+
+  if [[ $arg_comp_filter == speed-profile ]]; then
+    # Force the running app to dump its profiles to disk.
+    remote_pkill "$arg_package" -SIGUSR1
+    sleep 1 # give some time for above to complete.
+  fi
+
+  adb shell cmd package compile -m "$arg_comp_filter" -f "$arg_package"
+}
+
+parse_package_dumpsys_line() {
+  local what_left="$1"
+  local what_right="$2"
+  local line="$3"
+
+  if [[ $line == *${what_left}*${what_right}* ]]; then
+    found="${line#*$what_left}"
+    found="${found%$what_right*}"
+    echo "$found"
+    return 0
+  fi
+
+  return 1
+}
+
+parse_package_dumpsys_section() {
+  local what_left="$1"
+  local what_right="$2"
+  shift
+  local lines="$@"
+
+  lines="${lines//$'\n'/}"
+
+  local new_lines=()
+
+  local current_line=""
+  local newline=n
+  local line
+  for line in "${lines[@]}"; do
+    if [[ $line == *: ]]; then
+      newline=y
+      current_line=""
+      new_lines+=("$current_line")
+
+      parse_package_dumpsys_line "$what_left" "$what_right" "$current_line" && return 0
+    else
+      # strip all spaces from the start
+      line="${line//$' '/}"
+      current_line+="$line"
+      #prepend to current line
+    fi
+  done
+  [[ "$current_line" != "" ]] && new_lines+=("$current_line")
+
+  parse_package_dumpsys_line "$what_left" "$what_right" "$current_line" && return 0
+
+  return 1
+}
+
+parse_package_compilation() {
+  local pkg="$1"
+#    [com.google.android.apps.maps]
+
+  local compilation_filter
+  local is_prebuilt
+  local isa
+  local etc
+
+  local ret_code
+
+  read compilation_filter is_prebuilt isa etc <<< "$("$APP_STARTUP_DIR"/query_compiler_filter.py --package "$pkg")"
+  ret_code=$?
+
+  if [[ $ret_code -eq 0 && x$compilation_filter != x ]]; then
+    verbose_print "Package compilation info for $pkg was '$compilation_filter'"
+    echo "$compilation_filter"
+    return 0
+  else
+    verbose_print "query failed ret code $ret_code filter=$compilation_filter"
+  fi
+
+  return $ret_code
+}
+
+# Main entry point
+if [[ $# -eq 0 ]]; then
+  usage
+  exit 1
+else
+  parse_arguments "$@"
+
+  # if we do not have have package exit early with an error
+  [[ "$package" == "" ]] && echo "--package not specified" 1>&2 && exit 1
+
+  if [[ -z "$inodes" ]] || ! [[ -f $inodes ]]; then
+    echo "--inodes not specified" 1>&2
+    exit 1
+  fi
+
+  if [[ "$activity" == "" ]]; then
+    activity="$(get_activity_name "$package")"
+    if [[ "$activity" == "" ]]; then
+      echo "Activity name could not be found, invalid package name?" 1>&2
+      exit 1
+    else
+      verbose_print "Activity name inferred: " "$activity"
+    fi
+  fi
+fi
+
+adb root > /dev/null
+
+if [[ "$(adb shell getenforce)" != "Permissive" ]]; then
+  adb shell setenforce 0
+  adb shell stop
+  adb shell start
+  adb wait-for-device
+fi
+
+compilation_was="$(parse_package_compilation "$package")"
+if [[ $? -ne 0 ]]; then
+  echo "Could not determine package compilation filter; was this package installed?" >&2
+  exit 1
+fi
+verbose_print "Package compilation: $compilation_was"
+
+# Cannot downgrade (e.g. from speed-profile to quicken) without forceful recompilation.
+# Forceful recompilation will recompile even if compilation filter was unchanged.
+# Therefore avoid recompiling unless the filter is actually different than what we asked for.
+if [[ "x$comp_filter" != "x" ]] && [[ "$compilation_was" != "$comp_filter" ]]; then
+  echo "Current compilation filter is '$compilation_was'; force recompile to '$comp_filter'" >&2
+  #TODO: this matching seems hopelessly broken, it will always recompile.
+
+  force_package_compilation "$comp_filter" "$package"
+fi
+
+# Drop all caches prior to beginning a systrace, otherwise we won't record anything already in pagecache.
+adb shell "echo 3 > /proc/sys/vm/drop_caches"
+
+trace_tmp_file="$(mktemp -t trace.XXXXXXXXX.html)"
+
+function finish {
+  [[ -f "$trace_tmp_file" ]] &&  rm "$trace_tmp_file"
+}
+trap finish EXIT
+
+launch_application_and_wait_for_trace() {
+  local package="$1"
+  local activity="$2"
+  local timeout=30 # seconds
+
+  # Ensure application isn't running already.
+  remote_pkill "$package"
+
+  # 5 second trace of Home screen causes
+  # a trace of the home screen.
+  # There is no way to abort the trace
+  # so just wait for it to complete instead.
+  sleep 30
+
+  local time_now="$(logcat_save_timestamp)"
+  local retcode=0
+
+  verbose_print "Drop caches for non-warm start."
+  # Drop all caches to get cold starts.
+  adb shell "echo 3 > /proc/sys/vm/drop_caches"
+
+  verbose_print "now launching application"
+  # Launch an application
+  "$APP_STARTUP_DIR"/launch_application "$package" "$activity"
+  retcode=$?
+  if [[ $retcode -ne 0 ]]; then
+    echo "FATAL: Application launch failed." >&2
+    return $retcode
+  fi
+
+  # This blocks until 'am start' returns at which point the application is
+  # already to be considered "started" as the first frame has been drawn.
+
+  # TODO: check for cold start w.r.t to activitymanager?
+
+  # Wait for application to start from the point of view of ActivityTaskManager.
+  local pattern="ActivityTaskManager: Displayed $package"
+  logcat_wait_for_pattern "$timeout" "$time_now" "$pattern"
+  retcode=$?
+  if [[ $retcode -ne 0 ]]; then
+    echo "FATAL: Could not find '$pattern' in logcat." >&2
+    return $retcode
+  fi
+
+  # Wait for iorapd to finish writing out the perfetto traces for this app.
+  iorapd_perfetto_wait_for_app_trace "$package" "$activity" "$timeout" "$time_now"
+  retcode=$?
+  if [[ $retcode -ne 0 ]]; then
+    echo "FATAL: Could not save perfetto app trace file." >&2
+    return $retcode
+  fi
+
+  verbose_print "iorapd has finished collecting app trace file for $package/$activity"
+}
+
+collector_main() {
+  # don't even bother trying to run anything until the screen is unlocked.
+  "$APP_STARTUP_DIR"/unlock_screen
+
+  # Don't mutate state while iorapd is running.
+  iorapd_stop || return $?
+
+  # Remove all existing metadata for a package/activity in iorapd.
+  iorapd_perfetto_purge_app_trace "$package" "$activity" || return $?
+  iorapd_compiler_purge_trace_file "$package" "$activity" || return $?
+
+  iorapd_perfetto_enable || return $?
+  iorapd_readahead_disable || return $?
+  iorapd_start || return $?
+
+  # Wait for perfetto trace to finished writing itself out.
+  launch_application_and_wait_for_trace "$package" "$activity" || return $?
+
+  # Pull the perfetto trace for manual inspection.
+  iorapd_perfetto_pull_trace_file "$package" "$activity" "perfetto_trace.pb"
+
+  # Compile the trace so that the next app run can use prefetching.
+  iorapd_compiler_for_app_trace "$package" "$activity" "$inodes" || return $?
+
+  # Save TraceFile.pb to local file.
+  iorapd_compiler_pull_trace_file "$package" "$activity" "$output_dest" || return $?
+  # Remove the TraceFile.pb from the device.
+  iorapd_compiler_purge_trace_file "$package" "$activity" || return $?
+
+  # TODO: better transactional support for restoring iorapd global properties
+  iorapd_perfetto_disable || return $?
+}
+
+collector_main "$@"
+
+verbose_print "Collector finished. Children: "
+if [[ $verbose == y ]]; then
+  jobs -p
+  ps f -g$$
+fi
+
+exit $?
+
+
+verbose_print "About to begin systrace"
+coproc systrace_fd {
+  # Disable stdout buffering since we need to know the output of systrace RIGHT AWAY.
+  stdbuf -oL "$ANDROID_BUILD_TOP"/external/chromium-trace/systrace.py --target=android -b "$trace_buffer_size" -t "$wait_time" am pagecache dalvik -o "$trace_tmp_file"
+}
+
+verbose_print "Systrace began"
+
+systrace_pid="$!"
+
+while read -r -u "${systrace_fd[0]}" systrace_output; do
+  verbose_print "$systrace_output"
+  if [[ "$systrace_output" == *"Starting tracing"* ]]; then
+    verbose_print "WE DID SEE STARTING TRACING."
+    break
+  fi
+done
+# Systrace has begun recording the tracing.
+# Run the application and collect the results.
+
+am_output="$(adb shell am start -S -W "$package"/"$activity")"
+if [[ $? -ne 0 ]]; then
+  echo "am start failed" >&2
+
+  exit 1
+fi
+
+verbose_print "$am_output"
+total_time="$(echo "$am_output" | grep 'TotalTime:' | sed 's/TotalTime: //g')"
+verbose_print "total time: $total_time"
+
+# Now wait for systrace to finish.
+
+wait "$systrace_pid" || { echo "Systrace finished before am start was finished, try a longer --wait_time"; exit 1; }
+verbose_print "Systrace has now finished"
+verbose_print "$(ls -la "$trace_tmp_file")"
+
+
+iorapd_perfetto_disable
+
+# Now that systrace has finished, convert the trace file html file to a protobuf.
+
+"$ANDROID_BUILD_TOP"/system/iorap/src/py/collector/trace_parser.py -i "$inodes" -t "$trace_tmp_file" -o "$output_dest" || exit 1
+
+echo "Trace file collection complete, trace file saved to \"$output_dest\"!" >&2
+
+finish

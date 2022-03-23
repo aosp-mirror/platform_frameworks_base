@@ -103,8 +103,7 @@ public class ThemeOverlayApplierTest extends SysuiTestCase {
     @Before
     public void setup() throws Exception {
         MockitoAnnotations.initMocks(this);
-        mManager = new ThemeOverlayApplier(mOverlayManager,
-                MoreExecutors.directExecutor(), MoreExecutors.directExecutor(),
+        mManager = new ThemeOverlayApplier(mOverlayManager, MoreExecutors.directExecutor(),
                 LAUNCHER_PACKAGE, THEMEPICKER_PACKAGE, mDumpManager) {
             @Override
             protected OverlayManagerTransaction.Builder getTransactionBuilder() {

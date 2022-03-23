@@ -31,7 +31,7 @@ public class FakeAppOpsHelper extends AppOpsHelper {
     private static class AppOp {
         AppOp() {}
         boolean mAllowed = true;
-        int mStarted = 0;
+        boolean mStarted = false;
         int mNoteCount = 0;
     }
 
@@ -49,7 +49,7 @@ public class FakeAppOpsHelper extends AppOpsHelper {
 
     public boolean isAppOpStarted(int appOp, String packageName) {
         AppOp myAppOp = getOp(packageName, appOp);
-        return myAppOp.mStarted > 0;
+        return myAppOp.mStarted;
     }
 
     public int getAppOpNoteCount(int appOp, String packageName) {
@@ -63,15 +63,16 @@ public class FakeAppOpsHelper extends AppOpsHelper {
         if (!myAppOp.mAllowed) {
             return false;
         }
-        myAppOp.mStarted++;
+        Preconditions.checkState(!myAppOp.mStarted);
+        myAppOp.mStarted = true;
         return true;
     }
 
     @Override
     public void finishOp(int appOp, CallerIdentity callerIdentity) {
         AppOp myAppOp = getOp(callerIdentity.getPackageName(), appOp);
-        Preconditions.checkState(myAppOp.mStarted > 0);
-        myAppOp.mStarted--;
+        Preconditions.checkState(myAppOp.mStarted);
+        myAppOp.mStarted = false;
     }
 
     @Override

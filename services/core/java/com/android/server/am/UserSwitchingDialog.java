@@ -91,8 +91,8 @@ class UserSwitchingDialog extends AlertDialog
         setCancelable(false);
         Resources res = getContext().getResources();
         // Custom view due to alignment and font size requirements
-        TextView view = (TextView) LayoutInflater.from(getContext()).inflate(
-                R.layout.user_switching_dialog, null);
+        View view = LayoutInflater.from(getContext()).inflate(R.layout.user_switching_dialog,
+            null);
 
         String viewMessage = null;
         if (UserManager.isSplitSystemUser() && mNewUser.id == UserHandle.USER_SYSTEM) {
@@ -115,12 +115,9 @@ class UserSwitchingDialog extends AlertDialog
             if (viewMessage == null) {
                 viewMessage = res.getString(R.string.user_switching_message, mNewUser.name);
             }
-
-            view.setCompoundDrawablesWithIntrinsicBounds(null,
-                    getContext().getDrawable(R.drawable.ic_swap_horiz), null, null);
         }
         view.setAccessibilityPaneTitle(viewMessage);
-        view.setText(viewMessage);
+        ((TextView) view.findViewById(R.id.message)).setText(viewMessage);
         setView(view);
     }
 

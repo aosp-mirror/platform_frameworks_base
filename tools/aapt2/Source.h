@@ -17,20 +17,21 @@
 #ifndef AAPT_SOURCE_H
 #define AAPT_SOURCE_H
 
-#include <optional>
 #include <ostream>
 #include <string>
 
 #include "android-base/stringprintf.h"
 #include "androidfw/StringPiece.h"
 
+#include "util/Maybe.h"
+
 namespace aapt {
 
 // Represents a file on disk. Used for logging and showing errors.
 struct Source {
   std::string path;
-  std::optional<size_t> line;
-  std::optional<std::string> archive;
+  Maybe<size_t> line;
+  Maybe<std::string> archive;
 
   Source() = default;
 

@@ -189,10 +189,6 @@ public class ZenModeHelper {
         mFiltering.recordCall(record);
     }
 
-    protected void cleanUpCallersAfter(long timeThreshold) {
-        mFiltering.cleanUpCallersAfter(timeThreshold);
-    }
-
     public boolean shouldIntercept(NotificationRecord record) {
         synchronized (mConfig) {
             return mFiltering.shouldIntercept(mZenMode, mConsolidatedPolicy, record);

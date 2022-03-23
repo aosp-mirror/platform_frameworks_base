@@ -27,7 +27,6 @@ import com.android.systemui.qs.SlashDrawable;
 
 public class SlashImageView extends ImageView {
 
-    @Nullable
     @VisibleForTesting
     protected SlashDrawable mSlash;
     private boolean mAnimationEnabled = true;
@@ -36,7 +35,6 @@ public class SlashImageView extends ImageView {
         super(context);
     }
 
-    @Nullable
     protected SlashDrawable getSlash() {
         return mSlash;
     }
@@ -54,7 +52,7 @@ public class SlashImageView extends ImageView {
     }
 
     @Override
-    public void setImageDrawable(@Nullable Drawable drawable) {
+    public void setImageDrawable(Drawable drawable) {
         if (drawable == null) {
             mSlash = null;
             super.setImageDrawable(null);

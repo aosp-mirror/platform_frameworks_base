@@ -16,7 +16,6 @@
 
 package com.android.systemui.recents;
 
-import static com.android.systemui.shared.recents.utilities.Utilities.isTablet;
 import static com.android.systemui.util.leak.RotationUtils.ROTATION_LANDSCAPE;
 import static com.android.systemui.util.leak.RotationUtils.ROTATION_NONE;
 import static com.android.systemui.util.leak.RotationUtils.ROTATION_SEASCAPE;
@@ -52,11 +51,11 @@ import android.widget.TextView;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
-import com.android.systemui.navigationbar.NavigationBarView;
-import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.shared.system.WindowManagerWrapper;
-import com.android.systemui.statusbar.phone.CentralSurfaces;
+import com.android.systemui.navigationbar.NavigationBarView;
+import com.android.systemui.navigationbar.NavigationModeController;
+import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.util.leak.RotationUtils;
 
 import java.util.ArrayList;
@@ -70,7 +69,7 @@ public class ScreenPinningRequest implements View.OnClickListener,
         NavigationModeController.ModeChangedListener {
 
     private final Context mContext;
-    private final Lazy<Optional<CentralSurfaces>> mCentralSurfacesOptionalLazy;
+    private final Optional<Lazy<StatusBar>> mStatusBarOptionalLazy;
 
     private final AccessibilityManager mAccessibilityService;
     private final WindowManager mWindowManager;
@@ -83,11 +82,9 @@ public class ScreenPinningRequest implements View.OnClickListener,
     private int taskId;
 
     @Inject
-    public ScreenPinningRequest(
-            Context context,
-            Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy) {
+    public ScreenPinningRequest(Context context, Optional<Lazy<StatusBar>> statusBarOptionalLazy) {
         mContext = context;
-        mCentralSurfacesOptionalLazy = centralSurfacesOptionalLazy;
+        mStatusBarOptionalLazy = statusBarOptionalLazy;
         mAccessibilityService = (AccessibilityManager)
                 mContext.getSystemService(Context.ACCESSIBILITY_SERVICE);
         mWindowManager = (WindowManager)
@@ -251,8 +248,8 @@ public class ScreenPinningRequest implements View.OnClickListener,
                     .setLayoutDirection(View.LAYOUT_DIRECTION_LOCALE);
             View buttons = mLayout.findViewById(R.id.screen_pinning_buttons);
             WindowManagerWrapper wm = WindowManagerWrapper.getInstance();
-            if (!QuickStepContract.isGesturalMode(mNavBarMode)
-            	    && wm.hasSoftNavigationBar(mContext.getDisplayId()) && !isTablet(mContext)) {
+            if (!QuickStepContract.isGesturalMode(mNavBarMode) 
+            	    && wm.hasSoftNavigationBar(mContext.getDisplayId())) {
                 buttons.setLayoutDirection(View.LAYOUT_DIRECTION_LOCALE);
                 swapChildrenIfRtlAndVertical(buttons);
             } else {
@@ -269,10 +266,8 @@ public class ScreenPinningRequest implements View.OnClickListener,
                         .setVisibility(View.INVISIBLE);
             }
 
-            final Optional<CentralSurfaces> centralSurfacesOptional =
-                    mCentralSurfacesOptionalLazy.get();
-            NavigationBarView navigationBarView =
-                    centralSurfacesOptional.map(CentralSurfaces::getNavigationBarView).orElse(null);
+            NavigationBarView navigationBarView = mStatusBarOptionalLazy.map(
+                    statusBarLazy -> statusBarLazy.get().getNavigationBarView()).orElse(null);
             final boolean recentsVisible = navigationBarView != null
                     && navigationBarView.isRecentsButtonVisible();
             boolean touchExplorationEnabled = mAccessibilityService.isTouchExplorationEnabled();

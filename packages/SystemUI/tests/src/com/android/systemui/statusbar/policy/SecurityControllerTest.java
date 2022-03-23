@@ -49,7 +49,6 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
-import com.android.systemui.dump.DumpManager;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
 
@@ -57,7 +56,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -107,8 +105,7 @@ public class SecurityControllerTest extends SysuiTestCase {
                 mContext,
                 mHandler,
                 mBroadcastDispatcher,
-                mBgExecutor,
-                Mockito.mock(DumpManager.class));
+                mBgExecutor);
 
         verify(mBroadcastDispatcher).registerReceiverWithHandler(
                 brCaptor.capture(),

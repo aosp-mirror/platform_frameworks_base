@@ -16,8 +16,6 @@
 
 package com.android.systemui.statusbar;
 
-import static com.google.common.truth.Truth.assertThat;
-
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNull;
@@ -39,7 +37,6 @@ import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Icon;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
@@ -133,12 +130,7 @@ public class StatusBarIconViewTest extends SysuiTestCase {
         Icon icon = Icon.createWithBitmap(largeBitmap);
         StatusBarIcon largeIcon = new StatusBarIcon(UserHandle.ALL, "mockPackage",
                 icon, 0, 0, "");
-        assertTrue(mIconView.set(largeIcon));
-
-        // The view should downscale the bitmap.
-        BitmapDrawable drawable = (BitmapDrawable) mIconView.getDrawable();
-        assertThat(drawable.getBitmap().getWidth()).isLessThan(1000);
-        assertThat(drawable.getBitmap().getHeight()).isLessThan(1000);
+        assertFalse(mIconView.set(largeIcon));
     }
 
     @Test
@@ -154,20 +146,5 @@ public class StatusBarIconViewTest extends SysuiTestCase {
         mIconView.setNotification(null);
         mIconView.getIcon(largeIcon);
         // no crash? good
-    }
-
-    @Test
-    public void testNullIcon() {
-        Icon mockIcon = mock(Icon.class);
-        when(mockIcon.loadDrawableAsUser(any(), anyInt())).thenReturn(null);
-        mStatusBarIcon.icon = mockIcon;
-        mIconView.set(mStatusBarIcon);
-
-        Bitmap bitmap = Bitmap.createBitmap(60, 60, Bitmap.Config.ARGB_8888);
-        Icon icon = Icon.createWithBitmap(bitmap);
-        StatusBarIcon largeIcon = new StatusBarIcon(UserHandle.ALL, "mockPackage",
-                icon, 0, 0, "");
-        mIconView.getIcon(largeIcon);
-        // No crash? good
     }
 }

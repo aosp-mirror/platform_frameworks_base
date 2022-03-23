@@ -126,13 +126,6 @@ public class UserPowerCalculatorTest {
     }
 
     private static class FakeAudioPowerCalculator extends PowerCalculator {
-
-        @Override
-        public boolean isPowerComponentSupported(
-                @BatteryConsumer.PowerComponent int powerComponent) {
-            return powerComponent == BatteryConsumer.POWER_COMPONENT_AUDIO;
-        }
-
         @Override
         protected void calculateApp(UidBatteryConsumer.Builder app, BatteryStats.Uid u,
                 long rawRealtimeUs, long rawUptimeUs, BatteryUsageStatsQuery query) {
@@ -142,13 +135,6 @@ public class UserPowerCalculatorTest {
     }
 
     private static class FakeVideoPowerCalculator extends PowerCalculator {
-
-        @Override
-        public boolean isPowerComponentSupported(
-                @BatteryConsumer.PowerComponent int powerComponent) {
-            return powerComponent == BatteryConsumer.POWER_COMPONENT_VIDEO;
-        }
-
         @Override
         protected void calculateApp(UidBatteryConsumer.Builder app, BatteryStats.Uid u,
                 long rawRealtimeUs, long rawUptimeUs, BatteryUsageStatsQuery query) {

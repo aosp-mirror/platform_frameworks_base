@@ -27,8 +27,7 @@ import com.android.internal.util.FrameworkStatsLog;
 @VisibleForTesting
 public class HdmiCecAtomWriter {
 
-    @VisibleForTesting
-    protected static final int FEATURE_ABORT_OPCODE_UNKNOWN = 0x100;
+    private static final int FEATURE_ABORT_OPCODE_UNKNOWN = 0x100;
     private static final int ERROR_CODE_UNKNOWN = -1;
 
     /**
@@ -104,32 +103,26 @@ public class HdmiCecAtomWriter {
             HdmiCecMessage message) {
         MessageReportedSpecialArgs specialArgs = new MessageReportedSpecialArgs();
 
-        if (message.getParams().length > 0) {
-            int keycode = message.getParams()[0];
-            if (keycode >= 0x1E && keycode <= 0x29) {
-                specialArgs.mUserControlPressedCommand = HdmiStatsEnums.NUMBER;
-            } else {
-                specialArgs.mUserControlPressedCommand = keycode + 0x100;
-            }
+        int keycode = message.getParams()[0];
+        if (keycode >= 0x1E && keycode <= 0x29) {
+            specialArgs.mUserControlPressedCommand = HdmiStatsEnums.NUMBER;
+        } else {
+            specialArgs.mUserControlPressedCommand = keycode + 0x100;
         }
 
         return specialArgs;
     }
 
     /**
-     * Constructs the special arguments for a <Feature Abort> message.
+     * Constructs method for constructing the special arguments for a <Feature Abort> message.
      *
      * @param message The HDMI CEC message to log
      */
     private MessageReportedSpecialArgs createFeatureAbortSpecialArgs(HdmiCecMessage message) {
         MessageReportedSpecialArgs specialArgs = new MessageReportedSpecialArgs();
 
-        if (message.getParams().length > 0) {
-            specialArgs.mFeatureAbortOpcode = message.getParams()[0] & 0xFF; // Unsigned byte
-            if (message.getParams().length > 1) {
-                specialArgs.mFeatureAbortReason = message.getParams()[1] + 10;
-            }
-        }
+        specialArgs.mFeatureAbortOpcode = message.getParams()[0] & 0xFF; // Unsigned byte
+        specialArgs.mFeatureAbortReason = message.getParams()[1] + 10;
 
         return specialArgs;
     }
@@ -142,7 +135,8 @@ public class HdmiCecAtomWriter {
      */
     private void messageReportedBase(MessageReportedGenericArgs genericArgs,
             MessageReportedSpecialArgs specialArgs) {
-        writeHdmiCecMessageReportedAtom(
+        FrameworkStatsLog.write(
+                FrameworkStatsLog.HDMI_CEC_MESSAGE_REPORTED,
                 genericArgs.mUid,
                 genericArgs.mDirection,
                 genericArgs.mInitiatorLogicalAddress,
@@ -154,26 +148,6 @@ public class HdmiCecAtomWriter {
                 specialArgs.mFeatureAbortReason);
     }
 
-    /**
-     * Writes a HdmiCecMessageReported atom representing an incoming or outgoing HDMI-CEC message.
-     */
-    @VisibleForTesting
-    protected void writeHdmiCecMessageReportedAtom(int uid, int direction,
-            int initiatorLogicalAddress, int destinationLogicalAddress, int opcode,
-            int sendMessageResult, int userControlPressedCommand, int featureAbortOpcode,
-            int featureAbortReason) {
-        FrameworkStatsLog.write(
-                FrameworkStatsLog.HDMI_CEC_MESSAGE_REPORTED,
-                uid,
-                direction,
-                initiatorLogicalAddress,
-                destinationLogicalAddress,
-                opcode,
-                sendMessageResult,
-                userControlPressedCommand,
-                featureAbortOpcode,
-                featureAbortReason);
-    }
 
     /**
      * Writes a HdmiCecActiveSourceChanged atom representing a change in the active source.

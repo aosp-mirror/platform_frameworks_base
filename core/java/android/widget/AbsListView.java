@@ -2543,32 +2543,33 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             return;
         }
 
-        boolean isItemActionable = isEnabled();
+        boolean isItemEnabled = view.isEnabled() && isEnabled();
         final ViewGroup.LayoutParams lp = view.getLayoutParams();
         if (lp instanceof AbsListView.LayoutParams) {
-            isItemActionable &= ((AbsListView.LayoutParams) lp).isEnabled;
+            isItemEnabled &= ((AbsListView.LayoutParams) lp).isEnabled;
         }
+
+        info.setEnabled(isItemEnabled);
 
         if (position == getSelectedItemPosition()) {
             info.setSelected(true);
-            addAccessibilityActionIfEnabled(info, isItemActionable,
+            addAccessibilityActionIfEnabled(info, isItemEnabled,
                     AccessibilityAction.ACTION_CLEAR_SELECTION);
         } else  {
-            addAccessibilityActionIfEnabled(info, isItemActionable,
+            addAccessibilityActionIfEnabled(info, isItemEnabled,
                     AccessibilityAction.ACTION_SELECT);
         }
 
         if (isItemClickable(view)) {
-            addAccessibilityActionIfEnabled(info, isItemActionable,
-                    AccessibilityAction.ACTION_CLICK);
+            addAccessibilityActionIfEnabled(info, isItemEnabled, AccessibilityAction.ACTION_CLICK);
             // A disabled item is a separator which should not be clickable.
-            info.setClickable(isItemActionable);
+            info.setClickable(isItemEnabled);
         }
 
         if (isLongClickable()) {
-            addAccessibilityActionIfEnabled(info, isItemActionable,
+            addAccessibilityActionIfEnabled(info, isItemEnabled,
                     AccessibilityAction.ACTION_LONG_CLICK);
-            info.setLongClickable(isItemActionable);
+            info.setLongClickable(true);
         }
     }
 
@@ -2654,27 +2655,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 selector.setHotspot(x, y);
             }
         }
-    }
-
-    /**
-     * Returns whether the selected child view (from the adapter's getView) is enabled.
-     *
-     * @return true if enabled
-     */
-    public boolean isSelectedChildViewEnabled() {
-        return mIsChildViewEnabled;
-    }
-
-    /**
-     * Set whether the selected child view (from the adapter's getView) is enabled.
-     *
-     * When refreshDrawableState is called, AbsListView will control the "enabled" state
-     * of the selector based on this.
-     *
-     * @param selectedChildViewEnabled true if enabled
-     */
-    public void setSelectedChildViewEnabled(boolean selectedChildViewEnabled) {
-        mIsChildViewEnabled = selectedChildViewEnabled;
     }
 
     @Override
@@ -3702,14 +3682,14 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                                     if (!mEdgeGlowBottom.isFinished()) {
                                         mEdgeGlowBottom.onRelease();
                                     }
-                                    invalidateEdgeEffects();
+                                    invalidateTopGlow();
                                 } else if (incrementalDeltaY < 0) {
                                     mEdgeGlowBottom.onPullDistance((float) overscroll / getHeight(),
                                             1.f - (float) x / getWidth());
                                     if (!mEdgeGlowTop.isFinished()) {
                                         mEdgeGlowTop.onRelease();
                                     }
-                                    invalidateEdgeEffects();
+                                    invalidateBottomGlow();
                                 }
                             }
                         }
@@ -3749,7 +3729,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                             if (!mEdgeGlowBottom.isFinished()) {
                                 mEdgeGlowBottom.onRelease();
                             }
-                            invalidateEdgeEffects();
+                            invalidateTopGlow();
                         } else if (rawDeltaY < 0) {
                             mEdgeGlowBottom.onPullDistance(
                                     (float) -overScrollDistance / getHeight(),
@@ -3757,7 +3737,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                             if (!mEdgeGlowTop.isFinished()) {
                                 mEdgeGlowTop.onRelease();
                             }
-                            invalidateEdgeEffects();
+                            invalidateBottomGlow();
                         }
                     }
                 }
@@ -3803,21 +3783,17 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         // First allow releasing existing overscroll effect:
         float consumed = 0;
         if (mEdgeGlowTop.getDistance() != 0) {
-            if (canScrollUp()) {
-                mEdgeGlowTop.onRelease();
-            } else {
-                consumed = mEdgeGlowTop.onPullDistance((float) deltaY / getHeight(),
-                        (float) x / getWidth());
+            consumed = mEdgeGlowTop.onPullDistance((float) deltaY / getHeight(),
+                    (float) x / getWidth());
+            if (consumed != 0f) {
+                invalidateTopGlow();
             }
-            invalidateEdgeEffects();
         } else if (mEdgeGlowBottom.getDistance() != 0) {
-            if (canScrollDown()) {
-                mEdgeGlowBottom.onRelease();
-            } else {
-                consumed = -mEdgeGlowBottom.onPullDistance((float) -deltaY / getHeight(),
-                        1f - (float) x / getWidth());
+            consumed = -mEdgeGlowBottom.onPullDistance((float) -deltaY / getHeight(),
+                    1f - (float) x / getWidth());
+            if (consumed != 0f) {
+                invalidateBottomGlow();
             }
-            invalidateEdgeEffects();
         }
         int pixelsConsumed = Math.round(consumed * getHeight());
         return deltaY - pixelsConsumed;
@@ -3827,16 +3803,30 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * @return <code>true</code> if either the top or bottom edge glow is currently active or
      * <code>false</code> if it has no value to release.
      */
-    private boolean doesTouchStopStretch() {
-        return (mEdgeGlowBottom.getDistance() != 0 && !canScrollDown())
-                || (mEdgeGlowTop.getDistance() != 0 && !canScrollUp());
+    private boolean isGlowActive() {
+        return mEdgeGlowBottom.getDistance() != 0 || mEdgeGlowTop.getDistance() != 0;
     }
 
-    private void invalidateEdgeEffects() {
+    private void invalidateTopGlow() {
         if (!shouldDisplayEdgeEffects()) {
             return;
         }
-        invalidate();
+        final boolean clipToPadding = getClipToPadding();
+        final int top = clipToPadding ? mPaddingTop : 0;
+        final int left = clipToPadding ? mPaddingLeft : 0;
+        final int right = clipToPadding ? getWidth() - mPaddingRight : getWidth();
+        invalidate(left, top, right, top + mEdgeGlowTop.getMaxHeight());
+    }
+
+    private void invalidateBottomGlow() {
+        if (!shouldDisplayEdgeEffects()) {
+            return;
+        }
+        final boolean clipToPadding = getClipToPadding();
+        final int bottom = clipToPadding ? getHeight() - mPaddingBottom : getHeight();
+        final int left = clipToPadding ? mPaddingLeft : 0;
+        final int right = clipToPadding ? getWidth() - mPaddingRight : getWidth();
+        invalidate(left, bottom - mEdgeGlowBottom.getMaxHeight(), right, bottom);
     }
 
     @Override
@@ -4479,7 +4469,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 final int edgeY = Math.min(0, scrollY + mFirstPositionDistanceGuess) + translateY;
                 canvas.translate(translateX, edgeY);
                 if (mEdgeGlowTop.draw(canvas)) {
-                    invalidateEdgeEffects();
+                    invalidateTopGlow();
                 }
                 canvas.restoreToCount(restoreCount);
             }
@@ -4493,7 +4483,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 canvas.translate(edgeX, edgeY);
                 canvas.rotate(180, width, 0);
                 if (mEdgeGlowBottom.draw(canvas)) {
-                    invalidateEdgeEffects();
+                    invalidateBottomGlow();
                 }
                 canvas.restoreToCount(restoreCount);
             }
@@ -4583,7 +4573,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 mActivePointerId = ev.getPointerId(0);
 
                 int motionPosition = findMotionRow(y);
-                if (doesTouchStopStretch()) {
+                if (isGlowActive()) {
                     // Pressed during edge effect, so this is considered the same as a fling catch.
                     touchMode = mTouchMode = TOUCH_MODE_FLING;
                 } else if (touchMode != TOUCH_MODE_FLING && motionPosition >= 0) {
@@ -5948,37 +5938,36 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         boolean handled = false;
         boolean okToSend = true;
         switch (keyCode) {
-            case KeyEvent.KEYCODE_DPAD_UP:
-            case KeyEvent.KEYCODE_DPAD_DOWN:
-            case KeyEvent.KEYCODE_DPAD_LEFT:
-            case KeyEvent.KEYCODE_DPAD_RIGHT:
-            case KeyEvent.KEYCODE_DPAD_CENTER:
-            case KeyEvent.KEYCODE_ENTER:
-            case KeyEvent.KEYCODE_NUMPAD_ENTER:
-                okToSend = false;
-                break;
-            case KeyEvent.KEYCODE_BACK:
-            case KeyEvent.KEYCODE_ESCAPE:
-                if (mFiltered && mPopup != null && mPopup.isShowing()) {
-                    if (event.getAction() == KeyEvent.ACTION_DOWN
-                            && event.getRepeatCount() == 0) {
-                        KeyEvent.DispatcherState state = getKeyDispatcherState();
-                        if (state != null) {
-                            state.startTracking(event, this);
-                        }
-                        handled = true;
-                    } else if (event.getAction() == KeyEvent.ACTION_UP
-                            && event.isTracking() && !event.isCanceled()) {
-                        handled = true;
-                        mTextFilter.setText("");
+        case KeyEvent.KEYCODE_DPAD_UP:
+        case KeyEvent.KEYCODE_DPAD_DOWN:
+        case KeyEvent.KEYCODE_DPAD_LEFT:
+        case KeyEvent.KEYCODE_DPAD_RIGHT:
+        case KeyEvent.KEYCODE_DPAD_CENTER:
+        case KeyEvent.KEYCODE_ENTER:
+        case KeyEvent.KEYCODE_NUMPAD_ENTER:
+            okToSend = false;
+            break;
+        case KeyEvent.KEYCODE_BACK:
+            if (mFiltered && mPopup != null && mPopup.isShowing()) {
+                if (event.getAction() == KeyEvent.ACTION_DOWN
+                        && event.getRepeatCount() == 0) {
+                    KeyEvent.DispatcherState state = getKeyDispatcherState();
+                    if (state != null) {
+                        state.startTracking(event, this);
                     }
+                    handled = true;
+                } else if (event.getAction() == KeyEvent.ACTION_UP
+                        && event.isTracking() && !event.isCanceled()) {
+                    handled = true;
+                    mTextFilter.setText("");
                 }
-                okToSend = false;
-                break;
-            case KeyEvent.KEYCODE_SPACE:
-                // Only send spaces once we are filtered
-                okToSend = mFiltered;
-                break;
+            }
+            okToSend = false;
+            break;
+        case KeyEvent.KEYCODE_SPACE:
+            // Only send spaces once we are filtered
+            okToSend = mFiltered;
+            break;
         }
 
         if (okToSend) {
@@ -6177,11 +6166,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         @Override
         public boolean requestCursorUpdates(int cursorUpdateMode) {
             return getTarget().requestCursorUpdates(cursorUpdateMode);
-        }
-
-        @Override
-        public boolean requestCursorUpdates(int cursorUpdateMode, int cursorUpdateFilter) {
-            return getTarget().requestCursorUpdates(cursorUpdateMode, cursorUpdateFilter);
         }
 
         @Override
@@ -6595,7 +6579,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      */
     public void setBottomEdgeEffectColor(@ColorInt int color) {
         mEdgeGlowBottom.setColor(color);
-        invalidateEdgeEffects();
+        invalidateBottomGlow();
     }
 
     /**
@@ -6609,7 +6593,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      */
     public void setTopEdgeEffectColor(@ColorInt int color) {
         mEdgeGlowTop.setColor(color);
-        invalidateEdgeEffects();
+        invalidateTopGlow();
     }
 
     /**

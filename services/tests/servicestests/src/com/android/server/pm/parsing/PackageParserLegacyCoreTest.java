@@ -17,20 +17,24 @@
 package com.android.server.pm.parsing;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import android.apex.ApexInfo;
 import android.content.Context;
-import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageParser;
 import android.content.pm.PermissionInfo;
-import android.content.pm.SigningDetails;
-import android.content.pm.parsing.FrameworkParsingPackageUtils;
+import android.content.pm.parsing.PackageInfoWithoutStateUtils;
+import android.content.pm.parsing.ParsingPackage;
+import android.content.pm.parsing.ParsingPackageUtils;
+import android.content.pm.parsing.component.ParsedComponent;
+import android.content.pm.parsing.component.ParsedPermission;
 import android.content.pm.parsing.result.ParseResult;
-import android.content.pm.parsing.result.ParseTypeImpl;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.FileUtils;
@@ -44,17 +48,8 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.frameworks.servicestests.R;
 import com.android.internal.util.ArrayUtils;
-import com.android.server.pm.PackageManagerException;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.ParsedPackage;
-import com.android.server.pm.pkg.component.ParsedActivityUtils;
-import com.android.server.pm.pkg.component.ParsedComponent;
-import com.android.server.pm.pkg.component.ParsedIntentInfo;
-import com.android.server.pm.pkg.component.ParsedPermission;
-import com.android.server.pm.pkg.component.ParsedPermissionUtils;
-import com.android.server.pm.pkg.parsing.PackageInfoWithoutStateUtils;
-import com.android.server.pm.pkg.parsing.ParsingPackage;
-import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
 
 import com.google.common.truth.Expect;
 
@@ -66,7 +61,6 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -105,19 +99,20 @@ public class PackageParserLegacyCoreTest {
 
     private void verifyComputeMinSdkVersion(int minSdkVersion, String minSdkCodename,
             boolean isPlatformReleased, int expectedMinSdk) {
-        final ParseTypeImpl input = ParseTypeImpl.forParsingWithoutPlatformCompat();
-        final ParseResult<Integer> result = FrameworkParsingPackageUtils.computeMinSdkVersion(
+        final String[] outError = new String[1];
+        final int result = PackageParser.computeMinSdkVersion(
                 minSdkVersion,
                 minSdkCodename,
                 PLATFORM_VERSION,
                 isPlatformReleased ? CODENAMES_RELEASED : CODENAMES_PRE_RELEASE,
-                input);
+                outError);
+
+        assertEquals("Error msg: " + outError[0], expectedMinSdk, result);
 
         if (expectedMinSdk == -1) {
-            assertTrue(result.isError());
+            assertNotNull(outError[0]);
         } else {
-            assertTrue(result.isSuccess());
-            assertEquals(expectedMinSdk, (int) result.getResult());
+            assertNull(outError[0]);
         }
     }
 
@@ -200,18 +195,19 @@ public class PackageParserLegacyCoreTest {
 
     private void verifyComputeTargetSdkVersion(int targetSdkVersion, String targetSdkCodename,
             boolean isPlatformReleased, int expectedTargetSdk) {
-        final ParseTypeImpl input = ParseTypeImpl.forParsingWithoutPlatformCompat();
-        final ParseResult<Integer> result = FrameworkParsingPackageUtils.computeTargetSdkVersion(
+        final String[] outError = new String[1];
+        final int result = PackageParser.computeTargetSdkVersion(
                 targetSdkVersion,
                 targetSdkCodename,
                 isPlatformReleased ? CODENAMES_RELEASED : CODENAMES_PRE_RELEASE,
-                input);
+                outError);
+
+        assertEquals(result, expectedTargetSdk);
 
         if (expectedTargetSdk == -1) {
-            assertTrue(result.isError());
+            assertNotNull(outError[0]);
         } else {
-            assertTrue(result.isSuccess());
-            assertEquals(expectedTargetSdk, (int) result.getResult());
+            assertNull(outError[0]);
         }
     }
 
@@ -304,34 +300,34 @@ public class PackageParserLegacyCoreTest {
         // Not set in either configChanges or recreateOnConfigChanges.
         int configChanges = 0x0000; // 00000000.
         int recreateOnConfigChanges = 0x0000; // 00000000.
-        int finalConfigChanges = ParsedActivityUtils.getActivityConfigChanges(configChanges,
-                recreateOnConfigChanges);
+        int finalConfigChanges =
+                PackageParser.getActivityConfigChanges(configChanges, recreateOnConfigChanges);
         assertEquals(0x0003, finalConfigChanges); // Should be 00000011.
 
         // Not set in configChanges, but set in recreateOnConfigChanges.
         configChanges = 0x0000; // 00000000.
         recreateOnConfigChanges = 0x0003; // 00000011.
-        finalConfigChanges = ParsedActivityUtils.getActivityConfigChanges(configChanges,
-                recreateOnConfigChanges);
+        finalConfigChanges =
+                PackageParser.getActivityConfigChanges(configChanges, recreateOnConfigChanges);
         assertEquals(0x0000, finalConfigChanges); // Should be 00000000.
 
         // Set in configChanges.
         configChanges = 0x0003; // 00000011.
         recreateOnConfigChanges = 0X0000; // 00000000.
-        finalConfigChanges = ParsedActivityUtils.getActivityConfigChanges(configChanges,
-                recreateOnConfigChanges);
+        finalConfigChanges =
+                PackageParser.getActivityConfigChanges(configChanges, recreateOnConfigChanges);
         assertEquals(0x0003, finalConfigChanges); // Should be 00000011.
 
         recreateOnConfigChanges = 0x0003; // 00000011.
-        finalConfigChanges = ParsedActivityUtils.getActivityConfigChanges(configChanges,
-                recreateOnConfigChanges);
+        finalConfigChanges =
+                PackageParser.getActivityConfigChanges(configChanges, recreateOnConfigChanges);
         assertEquals(0x0003, finalConfigChanges); // Should still be 00000011.
 
         // Other bit set in configChanges.
         configChanges = 0x0080; // 10000000, orientation.
         recreateOnConfigChanges = 0x0000; // 00000000.
-        finalConfigChanges = ParsedActivityUtils.getActivityConfigChanges(configChanges,
-                recreateOnConfigChanges);
+        finalConfigChanges =
+                PackageParser.getActivityConfigChanges(configChanges, recreateOnConfigChanges);
         assertEquals(0x0083, finalConfigChanges); // Should be 10000011.
     }
 
@@ -339,7 +335,7 @@ public class PackageParserLegacyCoreTest {
      * Copies a specified {@code resourceId} to a file. Returns a non-null file if the copy
      * succeeded, or {@code null} otherwise.
      */
-    File copyRawResourceToFile(String baseName, int resourceId) {
+    File copyRawResourceToFile(String baseName, int resourceId) throws Exception {
         // Copy the resource to a file.
         Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
         InputStream is = context.getResources().openRawResource(resourceId);
@@ -411,7 +407,7 @@ public class PackageParserLegacyCoreTest {
 
     private void assertPermission(String name, int protectionLevel, ParsedPermission permission) {
         assertEquals(name, permission.getName());
-        assertEquals(protectionLevel, ParsedPermissionUtils.getProtection(permission));
+        assertEquals(protectionLevel, permission.getProtection());
     }
 
     private void assertMetadata(Bundle b, String... keysAndValues) {
@@ -514,13 +510,12 @@ public class PackageParserLegacyCoreTest {
         findAndRemoveAppDetailsActivity(p);
 
         assertEquals("Expected exactly one activity", 1, p.getActivities().size());
-        List<ParsedIntentInfo> intentInfos = p.getActivities().get(0).getIntents();
-        assertEquals("Expected exactly one intent filter", 1, intentInfos.size());
-        IntentFilter intentFilter = intentInfos.get(0).getIntentFilter();
-        assertEquals("Expected exactly one mime group in intent filter", 1,
-                intentFilter.countMimeGroups());
+        assertEquals("Expected exactly one intent filter",
+                1, p.getActivities().get(0).getIntents().size());
+        assertEquals("Expected exactly one mime group in intent filter",
+                1, p.getActivities().get(0).getIntents().get(0).countMimeGroups());
         assertTrue("Did not find expected mime group 'mime_group_1'",
-                intentFilter.hasMimeGroup("mime_group_1"));
+                p.getActivities().get(0).getIntents().get(0).hasMimeGroup("mime_group_1"));
     }
 
     @Test
@@ -542,14 +537,8 @@ public class PackageParserLegacyCoreTest {
             throw new IllegalStateException(result.getErrorMessage(), result.getException());
         }
 
-        ParseTypeImpl input = ParseTypeImpl.forDefaultParsing();
         ParsingPackage pkg = result.getResult();
-        ParseResult<SigningDetails> ret = ParsingPackageUtils.getSigningDetails(
-                input, pkg, false /*skipVerify*/);
-        if (ret.isError()) {
-            throw new IllegalStateException(ret.getErrorMessage(), ret.getException());
-        }
-        pkg.setSigningDetails(ret.getResult());
+        pkg.setSigningDetails(ParsingPackageUtils.getSigningDetails(pkg, false));
         PackageInfo pi = PackageInfoWithoutStateUtils.generate(pkg, apexInfo, flags);
 
         assertEquals("com.google.android.tzdata", pi.applicationInfo.packageName);
@@ -607,7 +596,7 @@ public class PackageParserLegacyCoreTest {
             try {
                 parsePackage(filename, resId, x -> x);
                 expect.withMessage("Expected parsing error %d from %s", result, filename).fail();
-            } catch (PackageManagerException expected) {
+            } catch (PackageParser.PackageParserException expected) {
                 expect.that(expected.error).isEqualTo(result);
             }
         }

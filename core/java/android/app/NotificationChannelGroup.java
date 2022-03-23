@@ -100,7 +100,7 @@ public final class NotificationChannelGroup implements Parcelable {
         } else {
             mDescription = null;
         }
-        in.readParcelableList(mChannels, NotificationChannel.class.getClassLoader(), android.app.NotificationChannel.class);
+        in.readParcelableList(mChannels, NotificationChannel.class.getClassLoader());
         mBlocked = in.readBoolean();
         mUserLockedFields = in.readInt();
     }

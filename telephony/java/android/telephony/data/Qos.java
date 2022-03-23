@@ -48,10 +48,12 @@ public abstract class Qos {
     final QosBandwidth downlink;
     final QosBandwidth uplink;
 
-    Qos(int type, QosBandwidth downlink, QosBandwidth uplink) {
+    Qos(int type,
+            @NonNull android.hardware.radio.V1_6.QosBandwidth downlink,
+            @NonNull android.hardware.radio.V1_6.QosBandwidth uplink) {
         this.type = type;
-        this.downlink = downlink;
-        this.uplink = uplink;
+        this.downlink = new QosBandwidth(downlink.maxBitrateKbps, downlink.guaranteedBitrateKbps);
+        this.uplink = new QosBandwidth(uplink.maxBitrateKbps, uplink.guaranteedBitrateKbps);
     }
 
     public QosBandwidth getDownlinkBandwidth() {
@@ -66,7 +68,10 @@ public abstract class Qos {
         int maxBitrateKbps;
         int guaranteedBitrateKbps;
 
-        public QosBandwidth(int maxBitrateKbps, int guaranteedBitrateKbps) {
+        QosBandwidth() {
+        }
+
+        QosBandwidth(int maxBitrateKbps, int guaranteedBitrateKbps) {
             this.maxBitrateKbps = maxBitrateKbps;
             this.guaranteedBitrateKbps = guaranteedBitrateKbps;
         }
@@ -136,8 +141,8 @@ public abstract class Qos {
 
     protected Qos(@NonNull Parcel source) {
         type = source.readInt();
-        downlink = source.readParcelable(QosBandwidth.class.getClassLoader(), android.telephony.data.Qos.QosBandwidth.class);
-        uplink = source.readParcelable(QosBandwidth.class.getClassLoader(), android.telephony.data.Qos.QosBandwidth.class);
+        downlink = source.readParcelable(QosBandwidth.class.getClassLoader());
+        uplink = source.readParcelable(QosBandwidth.class.getClassLoader());
     }
 
     /**
@@ -150,6 +155,18 @@ public abstract class Qos {
         dest.writeInt(type);
         dest.writeParcelable(downlink, flags);
         dest.writeParcelable(uplink, flags);
+    }
+
+    /** @hide */
+    public static @NonNull Qos create(@NonNull android.hardware.radio.V1_6.Qos qos) {
+        switch (qos.getDiscriminator()) {
+            case android.hardware.radio.V1_6.Qos.hidl_discriminator.eps:
+                  return new EpsQos(qos.eps());
+            case android.hardware.radio.V1_6.Qos.hidl_discriminator.nr:
+                  return new NrQos(qos.nr());
+            default:
+                  return null;
+        }
     }
 
     /** @hide */

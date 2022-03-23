@@ -21,12 +21,10 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.testng.Assert.expectThrows;
 
-import android.os.Build;
 import android.platform.test.annotations.Presubmit;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
-import android.util.Xml;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -38,12 +36,9 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Arrays;
@@ -64,15 +59,12 @@ public class SystemConfigTest {
     private static final String LOG_TAG = "SystemConfigTest";
 
     private SystemConfig mSysConfig;
-    private File mFooJar;
 
     @Rule public TemporaryFolder mTemporaryFolder = new TemporaryFolder();
 
     @Before
     public void setUp() throws Exception {
         mSysConfig = new SystemConfigTestClass();
-        mFooJar = createTempFile(
-                mTemporaryFolder.getRoot().getCanonicalFile(), "foo.jar", "JAR");
     }
 
     /**
@@ -82,11 +74,6 @@ public class SystemConfigTest {
         SystemConfigTestClass() {
             super(false);
         }
-    }
-
-    private void readPermissions(File libraryDir, int permissionFlag) {
-        final XmlPullParser parser = Xml.newPullParser();
-        mSysConfig.readPermissions(parser, libraryDir, permissionFlag);
     }
 
     /**
@@ -139,17 +126,16 @@ public class SystemConfigTest {
                 new ArraySet<>(Arrays.asList("GUEST", "PROFILE")));
 
         final File folder1 = createTempSubfolder("folder1");
-        createTempFile(folder1, "permissionFile1.xml", contents1);
+        createTempFile(folder1, "permFile1.xml", contents1);
 
         final File folder2 = createTempSubfolder("folder2");
-        createTempFile(folder2, "permissionFile2.xml", contents2);
+        createTempFile(folder2, "permFile2.xml", contents2);
 
-        // Also, make a third file, but with the name folder1/permissionFile2.xml, to prove no
-        // conflicts.
-        createTempFile(folder1, "permissionFile2.xml", contents3);
+        // Also, make a third file, but with the name folder1/permFile2.xml, to prove no conflicts.
+        createTempFile(folder1, "permFile2.xml", contents3);
 
-        readPermissions(folder1, /* No permission needed anyway */ 0);
-        readPermissions(folder2, /* No permission needed anyway */ 0);
+        mSysConfig.readPermissions(folder1, /* No permission needed anyway */ 0);
+        mSysConfig.readPermissions(folder2, /* No permission needed anyway */ 0);
 
         Map<String, Set<String>> actualWhite = mSysConfig.getAndClearPackageToUserTypeWhitelist();
         Map<String, Set<String>> actualBlack = mSysConfig.getAndClearPackageToUserTypeBlacklist();
@@ -179,7 +165,7 @@ public class SystemConfigTest {
         final File folder = createTempSubfolder("folder");
         createTempFile(folder, "component-override.xml", contents);
 
-        readPermissions(folder, /* No permission needed anyway */ 0);
+        mSysConfig.readPermissions(folder, /* No permission needed anyway */ 0);
 
         final ArrayMap<String, Boolean> packageOneExpected = new ArrayMap<>();
         packageOneExpected.put("com.android.package1.Full", true);
@@ -211,7 +197,7 @@ public class SystemConfigTest {
         final File folder = createTempSubfolder("folder");
         createTempFile(folder, "staged-installer-whitelist.xml", contents);
 
-        readPermissions(folder, /* Grant all permission flags */ ~0);
+        mSysConfig.readPermissions(folder, /* Grant all permission flags */ ~0);
 
         assertThat(mSysConfig.getWhitelistedStagedInstallers())
                 .containsExactly("com.android.package1");
@@ -229,7 +215,7 @@ public class SystemConfigTest {
         final File folder = createTempSubfolder("folder");
         createTempFile(folder, "staged-installer-whitelist.xml", contents);
 
-        readPermissions(folder, /* Grant all permission flags */ ~0);
+        mSysConfig.readPermissions(folder, /* Grant all permission flags */ ~0);
 
         assertThat(mSysConfig.getWhitelistedStagedInstallers())
                 .containsExactly("com.android.package1");
@@ -252,7 +238,7 @@ public class SystemConfigTest {
 
         IllegalStateException e = expectThrows(
                 IllegalStateException.class,
-                () -> readPermissions(folder, /* Grant all permission flags */ ~0));
+                () -> mSysConfig.readPermissions(folder, /* Grant all permission flags */ ~0));
 
         assertThat(e).hasMessageThat().contains("Multiple modules installers");
     }
@@ -271,7 +257,7 @@ public class SystemConfigTest {
         final File folder = createTempSubfolder("folder");
         createTempFile(folder, "staged-installer-whitelist.xml", contents);
 
-        readPermissions(folder, /* Grant all but ALLOW_APP_CONFIGS flag */ ~0x08);
+        mSysConfig.readPermissions(folder, /* Grant all but ALLOW_APP_CONFIGS flag */ ~0x08);
 
         assertThat(mSysConfig.getWhitelistedStagedInstallers()).isEmpty();
     }
@@ -291,7 +277,7 @@ public class SystemConfigTest {
         final File folder = createTempSubfolder("folder");
         createTempFile(folder, "vendor-apex-allowlist.xml", contents);
 
-        readPermissions(folder, /* Grant all permission flags */ ~0);
+        mSysConfig.readPermissions(folder, /* Grant all permission flags */ ~0);
 
         assertThat(mSysConfig.getAllowedVendorApexes())
                 .containsExactly("com.android.apex1", "com.installer");
@@ -311,7 +297,7 @@ public class SystemConfigTest {
         final File folder = createTempSubfolder("folder");
         createTempFile(folder, "vendor-apex-allowlist.xml", contents);
 
-        readPermissions(folder, /* Grant all permission flags */ ~0);
+        mSysConfig.readPermissions(folder, /* Grant all permission flags */ ~0);
 
         assertThat(mSysConfig.getAllowedVendorApexes()).isEmpty();
     }
@@ -331,271 +317,9 @@ public class SystemConfigTest {
         final File folder = createTempSubfolder("folder");
         createTempFile(folder, "vendor-apex-allowlist.xml", contents);
 
-        readPermissions(folder, /* Grant all but ALLOW_VENDOR_APEX flag */ ~0x400);
+        mSysConfig.readPermissions(folder, /* Grant all but ALLOW_VENDOR_APEX flag */ ~0x400);
 
         assertThat(mSysConfig.getAllowedVendorApexes()).isEmpty();
-    }
-
-    @Test
-    public void readApexPrivAppPermissions_addAllPermissions()
-            throws Exception {
-        final String contents =
-                "<privapp-permissions package=\"com.android.apk_in_apex\">"
-                        + "<permission name=\"android.permission.FOO\"/>"
-                        + "<deny-permission name=\"android.permission.BAR\"/>"
-                        + "</privapp-permissions>";
-        File apexDir = createTempSubfolder("apex");
-        File permissionFile = createTempFile(
-                createTempSubfolder("apex/com.android.my_module/etc/permissions"),
-                    "permissions.xml", contents);
-        XmlPullParser parser = readXmlUntilStartTag(permissionFile);
-
-        mSysConfig.readApexPrivAppPermissions(parser, permissionFile, apexDir.toPath());
-
-        assertThat(mSysConfig.getApexPrivAppPermissions("com.android.my_module",
-                "com.android.apk_in_apex"))
-            .containsExactly("android.permission.FOO");
-        assertThat(mSysConfig.getApexPrivAppDenyPermissions("com.android.my_module",
-                "com.android.apk_in_apex"))
-            .containsExactly("android.permission.BAR");
-    }
-
-    @Test
-    public void pruneVendorApexPrivappAllowlists_removeVendor()
-            throws Exception {
-        File apexDir = createTempSubfolder("apex");
-
-        // Read non-vendor apex permission allowlists
-        final String allowlistNonVendorContents =
-                "<privapp-permissions package=\"com.android.apk_in_non_vendor_apex\">"
-                        + "<permission name=\"android.permission.FOO\"/>"
-                        + "<deny-permission name=\"android.permission.BAR\"/>"
-                        + "</privapp-permissions>";
-        File nonVendorPermDir =
-                createTempSubfolder("apex/com.android.non_vendor/etc/permissions");
-        File nonVendorPermissionFile =
-                createTempFile(nonVendorPermDir, "permissions.xml", allowlistNonVendorContents);
-        XmlPullParser nonVendorParser = readXmlUntilStartTag(nonVendorPermissionFile);
-        mSysConfig.readApexPrivAppPermissions(nonVendorParser, nonVendorPermissionFile,
-                apexDir.toPath());
-
-        // Read vendor apex permission allowlists
-        final String allowlistVendorContents =
-                "<privapp-permissions package=\"com.android.apk_in_vendor_apex\">"
-                        + "<permission name=\"android.permission.BAZ\"/>"
-                        + "<deny-permission name=\"android.permission.BAT\"/>"
-                        + "</privapp-permissions>";
-        File vendorPermissionFile =
-                createTempFile(createTempSubfolder("apex/com.android.vendor/etc/permissions"),
-                        "permissions.xml", allowlistNonVendorContents);
-        XmlPullParser vendorParser = readXmlUntilStartTag(vendorPermissionFile);
-        mSysConfig.readApexPrivAppPermissions(vendorParser, vendorPermissionFile,
-                apexDir.toPath());
-
-        // Read allowed vendor apex list
-        final String allowedVendorContents =
-                "<config>\n"
-                        + "    <allowed-vendor-apex package=\"com.android.vendor\" "
-                        + "installerPackage=\"com.installer\" />\n"
-                        + "</config>";
-        final File allowedVendorFolder = createTempSubfolder("folder");
-        createTempFile(allowedVendorFolder, "vendor-apex-allowlist.xml", allowedVendorContents);
-        readPermissions(allowedVendorFolder, /* Grant all permission flags */ ~0);
-
-        // Finally, prune non-vendor allowlists.
-        // There is no guarantee in which order the above reads will be done, however pruning
-        // will always happen last.
-        mSysConfig.pruneVendorApexPrivappAllowlists();
-
-        assertThat(mSysConfig.getApexPrivAppPermissions("com.android.non_vendor",
-                "com.android.apk_in_non_vendor_apex"))
-            .containsExactly("android.permission.FOO");
-        assertThat(mSysConfig.getApexPrivAppDenyPermissions("com.android.non_vendor",
-                "com.android.apk_in_non_vendor_apex"))
-            .containsExactly("android.permission.BAR");
-        assertThat(mSysConfig.getApexPrivAppPermissions("com.android.vendor",
-                "com.android.apk_in_vendor_apex"))
-            .isNull();
-        assertThat(mSysConfig.getApexPrivAppDenyPermissions("com.android.vendor",
-                "com.android.apk_in_vendor_apex"))
-            .isNull();
-    }
-
-    /**
-     * Tests that readPermissions works correctly for a library with on-bootclasspath-before
-     * and on-bootclasspath-since.
-     */
-    @Test
-    public void readPermissions_allowLibs_parsesSimpleLibrary() throws IOException {
-        String contents =
-                "<permissions>\n"
-                + "    <library \n"
-                + "        name=\"foo\"\n"
-                + "        file=\"" + mFooJar + "\"\n"
-                + "        on-bootclasspath-before=\"10\"\n"
-                + "        on-bootclasspath-since=\"20\"\n"
-                + "     />\n\n"
-                + " </permissions>";
-        parseSharedLibraries(contents);
-        assertFooIsOnlySharedLibrary();
-        SystemConfig.SharedLibraryEntry entry = mSysConfig.getSharedLibraries().get("foo");
-        assertThat(entry.onBootclasspathBefore).isEqualTo(10);
-        assertThat(entry.onBootclasspathSince).isEqualTo(20);
-    }
-
-    /**
-     * Tests that readPermissions works correctly for a library using the new
-     * {@code apex-library} tag.
-     */
-    @Test
-    public void readPermissions_allowLibs_parsesUpdatableLibrary() throws IOException {
-        String contents =
-                "<permissions>\n"
-                        + "    <apex-library \n"
-                        + "        name=\"foo\"\n"
-                        + "        file=\"" + mFooJar + "\"\n"
-                        + "        on-bootclasspath-before=\"10\"\n"
-                        + "        on-bootclasspath-since=\"20\"\n"
-                        + "     />\n\n"
-                        + " </permissions>";
-        parseSharedLibraries(contents);
-        assertFooIsOnlySharedLibrary();
-        SystemConfig.SharedLibraryEntry entry = mSysConfig.getSharedLibraries().get("foo");
-        assertThat(entry.onBootclasspathBefore).isEqualTo(10);
-        assertThat(entry.onBootclasspathSince).isEqualTo(20);
-    }
-
-    /**
-     * Tests that readPermissions for a library with {@code min-device-sdk} lower than the current
-     * SDK results in the library being added to the shared libraries.
-     */
-    @Test
-    public void readPermissions_allowLibs_allowsOldMinSdk() throws IOException {
-        String contents =
-                "<permissions>\n"
-                + "    <library \n"
-                + "        name=\"foo\"\n"
-                + "        file=\"" + mFooJar + "\"\n"
-                + "        min-device-sdk=\"30\"\n"
-                + "     />\n\n"
-                + " </permissions>";
-        parseSharedLibraries(contents);
-        assertFooIsOnlySharedLibrary();
-    }
-
-    /**
-     * Tests that readPermissions for a library with {@code min-device-sdk} equal to the current
-     * SDK results in the library being added to the shared libraries.
-     */
-    @Test
-    public void readPermissions_allowLibs_allowsCurrentMinSdk() throws IOException {
-        String contents =
-                "<permissions>\n"
-                + "    <library \n"
-                + "        name=\"foo\"\n"
-                + "        file=\"" + mFooJar + "\"\n"
-                + "        min-device-sdk=\"" + Build.VERSION.SDK_INT + "\"\n"
-                + "     />\n\n"
-                + " </permissions>";
-        parseSharedLibraries(contents);
-        assertFooIsOnlySharedLibrary();
-    }
-
-    /**
-     * Tests that readPermissions for a library with {@code min-device-sdk} greater than the current
-     * SDK results in the library being ignored.
-     */
-    @Test
-    public void readPermissions_allowLibs_ignoresMinSdkInFuture() throws IOException {
-        String contents =
-                "<permissions>\n"
-                + "    <library \n"
-                + "        name=\"foo\"\n"
-                + "        file=\"" + mFooJar + "\"\n"
-                + "        min-device-sdk=\"" + (Build.VERSION.SDK_INT + 1) + "\"\n"
-                + "     />\n\n"
-                + " </permissions>";
-        parseSharedLibraries(contents);
-        assertThat(mSysConfig.getSharedLibraries()).isEmpty();
-    }
-
-    /**
-     * Tests that readPermissions for a library with {@code max-device-sdk} less than the current
-     * SDK results in the library being ignored.
-     */
-    @Test
-    public void readPermissions_allowLibs_ignoredOldMaxSdk() throws IOException {
-        String contents =
-                "<permissions>\n"
-                + "    <library \n"
-                + "        name=\"foo\"\n"
-                + "        file=\"" + mFooJar + "\"\n"
-                + "        max-device-sdk=\"30\"\n"
-                + "     />\n\n"
-                + " </permissions>";
-        parseSharedLibraries(contents);
-        assertThat(mSysConfig.getSharedLibraries()).isEmpty();
-    }
-
-    /**
-     * Tests that readPermissions for a library with {@code max-device-sdk} equal to the current
-     * SDK results in the library being added to the shared libraries.
-     */
-    @Test
-    public void readPermissions_allowLibs_allowsCurrentMaxSdk() throws IOException {
-        String contents =
-                "<permissions>\n"
-                + "    <library \n"
-                + "        name=\"foo\"\n"
-                + "        file=\"" + mFooJar + "\"\n"
-                + "        max-device-sdk=\"" + Build.VERSION.SDK_INT + "\"\n"
-                + "     />\n\n"
-                + " </permissions>";
-        parseSharedLibraries(contents);
-        assertFooIsOnlySharedLibrary();
-    }
-
-    /**
-     * Tests that readPermissions for a library with {@code max-device-sdk} greater than the current
-     * SDK results in the library being added to the shared libraries.
-     */
-    @Test
-    public void readPermissions_allowLibs_allowsMaxSdkInFuture() throws IOException {
-        String contents =
-                "<permissions>\n"
-                + "    <library \n"
-                + "        name=\"foo\"\n"
-                + "        file=\"" + mFooJar + "\"\n"
-                + "        max-device-sdk=\"" + (Build.VERSION.SDK_INT + 1) + "\"\n"
-                + "     />\n\n"
-                + " </permissions>";
-        parseSharedLibraries(contents);
-        assertFooIsOnlySharedLibrary();
-    }
-
-    private void parseSharedLibraries(String contents) throws IOException {
-        File folder = createTempSubfolder("permissions_folder");
-        createTempFile(folder, "permissions.xml", contents);
-        readPermissions(folder, /* permissionFlag = ALLOW_LIBS */ 0x02);
-    }
-
-    /**
-     * Create an {@link XmlPullParser} for {@param permissionFile} and begin parsing it until
-     * reaching the root tag.
-     */
-    private XmlPullParser readXmlUntilStartTag(File permissionFile)
-            throws IOException, XmlPullParserException {
-        FileReader permReader = new FileReader(permissionFile);
-        XmlPullParser parser = Xml.newPullParser();
-        parser.setInput(permReader);
-        int type;
-        do {
-            type = parser.next();
-        } while (type != parser.START_TAG && type != parser.END_DOCUMENT);
-        if (type != parser.START_TAG) {
-            throw new XmlPullParserException("No start tag found");
-        }
-        return parser;
     }
 
     /**
@@ -607,7 +331,7 @@ public class SystemConfigTest {
     private File createTempSubfolder(String folderName)
             throws IOException {
         File folder = new File(mTemporaryFolder.getRoot(), folderName);
-        folder.mkdirs();
+        folder.mkdir();
         return folder;
     }
 
@@ -617,7 +341,7 @@ public class SystemConfigTest {
      * @param folder   pre-existing subdirectory of mTemporaryFolder to put the file
      * @param fileName name of the file (e.g. filename.xml) to create
      * @param contents contents to write to the file
-     * @return the newly created file
+     * @return the folder containing the newly created file (not the file itself!)
      */
     private File createTempFile(File folder, String fileName, String contents)
             throws IOException {
@@ -633,13 +357,6 @@ public class SystemConfigTest {
             Log.d(LOG_TAG, input.nextLine());
         }
 
-        return file;
-    }
-
-    private void assertFooIsOnlySharedLibrary() {
-        assertThat(mSysConfig.getSharedLibraries().size()).isEqualTo(1);
-        SystemConfig.SharedLibraryEntry entry = mSysConfig.getSharedLibraries().get("foo");
-        assertThat(entry.name).isEqualTo("foo");
-        assertThat(entry.filename).isEqualTo(mFooJar.toString());
+        return folder;
     }
 }

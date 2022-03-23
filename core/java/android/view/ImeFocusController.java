@@ -54,11 +54,13 @@ public final class ImeFocusController {
 
     @NonNull
     private InputMethodManagerDelegate getImmDelegate() {
-        if (mDelegate == null) {
-            mDelegate = mViewRootImpl.mContext.getSystemService(
-                    InputMethodManager.class).getDelegate();
+        InputMethodManagerDelegate delegate = mDelegate;
+        if (delegate != null) {
+            return delegate;
         }
-        return mDelegate;
+        delegate = mViewRootImpl.mContext.getSystemService(InputMethodManager.class).getDelegate();
+        mDelegate = delegate;
+        return delegate;
     }
 
     /** Called when the view root is moved to a different display. */
@@ -201,10 +203,8 @@ public final class ImeFocusController {
         if (!getImmDelegate().isCurrentRootView(view.getViewRootImpl())) {
             return;
         }
-        if (mNextServedView == view) {
-            mNextServedView = null;
-        }
         if (mServedView == view) {
+            mNextServedView = null;
             mViewRootImpl.dispatchCheckFocus();
         }
     }

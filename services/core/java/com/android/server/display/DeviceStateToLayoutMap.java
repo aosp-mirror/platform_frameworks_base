@@ -111,8 +111,8 @@ class DeviceStateToLayoutMap {
                 for (com.android.server.display.config.layout.Display d: l.getDisplay()) {
                     layout.createDisplayLocked(
                             DisplayAddress.fromPhysicalDisplayId(d.getAddress().longValue()),
-                            d.isDefaultDisplay(),
-                            d.isEnabled());
+                            d.getIsDefault(),
+                            d.getEnabled());
                 }
             }
         } catch (IOException | DatatypeConfigurationException | XmlPullParserException e) {

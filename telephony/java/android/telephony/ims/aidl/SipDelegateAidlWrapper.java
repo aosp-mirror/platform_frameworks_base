@@ -31,7 +31,6 @@ import android.telephony.ims.SipMessage;
 import android.telephony.ims.stub.SipDelegate;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.Executor;
 
@@ -48,9 +47,6 @@ public class SipDelegateAidlWrapper implements DelegateStateCallback, DelegateMe
         @Override
         public void sendMessage(SipMessage sipMessage, long configVersion) {
             SipDelegate d = mDelegate;
-            if (d == null) {
-                return;
-            }
             final long token = Binder.clearCallingIdentity();
             try {
                 mExecutor.execute(() -> d.sendMessage(sipMessage, configVersion));
@@ -62,9 +58,6 @@ public class SipDelegateAidlWrapper implements DelegateStateCallback, DelegateMe
         @Override
         public void notifyMessageReceived(String viaTransactionId)  {
             SipDelegate d = mDelegate;
-            if (d == null) {
-                return;
-            }
             final long token = Binder.clearCallingIdentity();
             try {
                 mExecutor.execute(() -> d.notifyMessageReceived(viaTransactionId));
@@ -77,9 +70,6 @@ public class SipDelegateAidlWrapper implements DelegateStateCallback, DelegateMe
         @Override
         public void notifyMessageReceiveError(String viaTransactionId, int reason) {
             SipDelegate d = mDelegate;
-            if (d == null) {
-                return;
-            }
             final long token = Binder.clearCallingIdentity();
             try {
                 mExecutor.execute(() -> d.notifyMessageReceiveError(viaTransactionId, reason));
@@ -92,9 +82,6 @@ public class SipDelegateAidlWrapper implements DelegateStateCallback, DelegateMe
         @Override
         public void cleanupSession(String callId)  {
             SipDelegate d = mDelegate;
-            if (d == null) {
-                return;
-            }
             final long token = Binder.clearCallingIdentity();
             try {
                 mExecutor.execute(() -> d.cleanupSession(callId));
@@ -154,7 +141,6 @@ public class SipDelegateAidlWrapper implements DelegateStateCallback, DelegateMe
     public void onCreated(@NonNull SipDelegate delegate,
             @Nullable Set<FeatureTagState> deniedTags) {
         mDelegate = delegate;
-        deniedTags = (deniedTags == null) ? Collections.emptySet() : deniedTags;
         try {
             mStateBinder.onCreated(mDelegateBinder, new ArrayList<>(deniedTags));
         } catch (RemoteException e) {

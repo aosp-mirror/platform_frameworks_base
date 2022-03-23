@@ -38,7 +38,6 @@ import com.android.settingslib.core.lifecycle.events.OnStart;
 import com.android.settingslib.core.lifecycle.events.OnStop;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
@@ -159,7 +158,6 @@ public class LifecycleTest {
     }
 
     @Test
-    @Ignore("b/188888268")
     public void runThroughActivityLifecycles_shouldObserveEverything() {
         ActivityController<TestActivity> ac = Robolectric.buildActivity(TestActivity.class);
         TestActivity activity = ac.setup().get();
@@ -181,7 +179,6 @@ public class LifecycleTest {
     }
 
     @Test
-    @Ignore("b/188888268")
     public void runThroughDialogFragmentLifecycles_shouldObserveEverything() {
         final TestDialogFragment fragment = new TestDialogFragment();
         FragmentController.setupFragment(fragment);
@@ -205,7 +202,6 @@ public class LifecycleTest {
     }
 
     @Test
-    @Ignore("b/188888268")
     public void runThroughFragmentLifecycles_shouldObserveEverything() {
         final TestFragment fragment = new TestFragment();
         FragmentController.setupFragment(fragment);
@@ -245,7 +241,6 @@ public class LifecycleTest {
     }
 
     @Test
-    @Ignore("b/188888268")
     public void onOptionItemSelectedShortCircuitsIfAnObserverHandlesTheMenuItem() {
         final TestFragment fragment = new TestFragment();
         FragmentController.setupFragment(fragment);

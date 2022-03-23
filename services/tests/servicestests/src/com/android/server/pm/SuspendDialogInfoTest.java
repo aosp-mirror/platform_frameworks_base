@@ -24,7 +24,6 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
 
 import android.content.pm.SuspendDialogInfo;
-import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -32,7 +31,6 @@ import androidx.test.runner.AndroidJUnit4;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-@Presubmit
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class SuspendDialogInfoTest {

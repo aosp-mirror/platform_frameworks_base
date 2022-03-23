@@ -2,7 +2,6 @@ package com.android.settingslib.bluetooth;
 
 import static com.android.settingslib.widget.AdaptiveOutlineDrawable.ICON_TYPE_ADVANCED;
 
-import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
@@ -71,12 +70,6 @@ public class BluetoothUtils {
         void onShowError(Context context, String name, int messageResId);
     }
 
-    /**
-     * @param context to access resources from
-     * @param cachedDevice to get class from
-     * @return pair containing the drawable and the description of the Bluetooth class
-     *         of the device.
-     */
     public static Pair<Drawable, String> getBtClassDrawableWithDescription(Context context,
             CachedBluetoothDevice cachedDevice) {
         BluetoothClass btClass = cachedDevice.getBtClass();
@@ -117,13 +110,13 @@ public class BluetoothUtils {
             }
         }
         if (btClass != null) {
-            if (doesClassMatch(btClass, BluetoothClass.PROFILE_HEADSET)) {
+            if (btClass.doesClassMatch(BluetoothClass.PROFILE_HEADSET)) {
                 return new Pair<>(
                         getBluetoothDrawable(context,
                                 com.android.internal.R.drawable.ic_bt_headset_hfp),
                         context.getString(R.string.bluetooth_talkback_headset));
             }
-            if (doesClassMatch(btClass, BluetoothClass.PROFILE_A2DP)) {
+            if (btClass.doesClassMatch(BluetoothClass.PROFILE_A2DP)) {
                 return new Pair<>(
                         getBluetoothDrawable(context,
                                 com.android.internal.R.drawable.ic_bt_headphones_a2dp),
@@ -382,10 +375,5 @@ public class BluetoothUtils {
             return null;
         }
         return Uri.parse(data);
-    }
-
-    @SuppressLint("NewApi") // Hidden API made public
-    private static boolean doesClassMatch(BluetoothClass btClass, int classId) {
-        return btClass.doesClassMatch(classId);
     }
 }

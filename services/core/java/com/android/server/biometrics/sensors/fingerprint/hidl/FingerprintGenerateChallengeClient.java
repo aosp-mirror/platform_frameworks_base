@@ -23,12 +23,8 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
 
-import com.android.server.biometrics.log.BiometricContext;
-import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.GenerateChallengeClient;
-
-import java.util.function.Supplier;
 
 /**
  * Fingerprint-specific generateChallenge/preEnroll client supporting the
@@ -41,12 +37,10 @@ public class FingerprintGenerateChallengeClient
     private static final String TAG = "FingerprintGenerateChallengeClient";
 
     FingerprintGenerateChallengeClient(@NonNull Context context,
-            @NonNull Supplier<IBiometricsFingerprint> lazyDaemon, @NonNull IBinder token,
+            @NonNull LazyDaemon<IBiometricsFingerprint> lazyDaemon, @NonNull IBinder token,
             @NonNull ClientMonitorCallbackConverter listener, int userId, @NonNull String owner,
-            int sensorId, @NonNull BiometricLogger logger,
-            @NonNull BiometricContext biometricContext) {
-        super(context, lazyDaemon, token, listener, userId, owner, sensorId, logger,
-                biometricContext);
+            int sensorId) {
+        super(context, lazyDaemon, token, listener, userId, owner, sensorId);
     }
 
     @Override

@@ -15,8 +15,6 @@
 package com.android.systemui.statusbar;
 
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FACE;
-import static android.inputmethodservice.InputMethodService.BACK_DISPOSITION_DEFAULT;
-import static android.inputmethodservice.InputMethodService.IME_INVISIBLE;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
@@ -35,7 +33,6 @@ import android.hardware.biometrics.IBiometricSysuiReceiver;
 import android.hardware.biometrics.PromptInfo;
 import android.hardware.fingerprint.IUdfpsHbmListener;
 import android.os.Bundle;
-import android.view.InsetsVisibilities;
 import android.view.WindowInsetsController.Appearance;
 import android.view.WindowInsetsController.Behavior;
 
@@ -127,41 +124,40 @@ public class CommandQueueTest extends SysuiTestCase {
     public void testOnSystemBarAttributesChanged() {
         doTestOnSystemBarAttributesChanged(DEFAULT_DISPLAY, 1,
                 new AppearanceRegion[]{new AppearanceRegion(2, new Rect())}, false,
-                BEHAVIOR_DEFAULT, new InsetsVisibilities(), "test");
+                BEHAVIOR_DEFAULT, false);
     }
 
     @Test
     public void testOnSystemBarAttributesChangedForSecondaryDisplay() {
         doTestOnSystemBarAttributesChanged(SECONDARY_DISPLAY, 1,
                 new AppearanceRegion[]{new AppearanceRegion(2, new Rect())}, false,
-                BEHAVIOR_DEFAULT, new InsetsVisibilities(), "test");
+                BEHAVIOR_DEFAULT, false);
     }
 
     private void doTestOnSystemBarAttributesChanged(int displayId, @Appearance int appearance,
             AppearanceRegion[] appearanceRegions, boolean navbarColorManagedByIme,
-            @Behavior int behavior, InsetsVisibilities requestedVisibilities, String packageName) {
+            @Behavior int behavior, boolean isFullscreen) {
         mCommandQueue.onSystemBarAttributesChanged(displayId, appearance, appearanceRegions,
-                navbarColorManagedByIme, behavior, requestedVisibilities, packageName);
+                navbarColorManagedByIme, behavior, isFullscreen);
         waitForIdleSync();
         verify(mCallbacks).onSystemBarAttributesChanged(eq(displayId), eq(appearance),
-                eq(appearanceRegions), eq(navbarColorManagedByIme), eq(behavior),
-                eq(requestedVisibilities), eq(packageName));
+                eq(appearanceRegions), eq(navbarColorManagedByIme), eq(behavior), eq(isFullscreen));
     }
 
     @Test
     public void testShowTransient() {
         int[] types = new int[]{ITYPE_STATUS_BAR, ITYPE_NAVIGATION_BAR};
-        mCommandQueue.showTransient(DEFAULT_DISPLAY, types, true /* isGestureOnSystemBar */);
+        mCommandQueue.showTransient(DEFAULT_DISPLAY, types);
         waitForIdleSync();
-        verify(mCallbacks).showTransient(eq(DEFAULT_DISPLAY), eq(types), eq(true));
+        verify(mCallbacks).showTransient(eq(DEFAULT_DISPLAY), eq(types));
     }
 
     @Test
     public void testShowTransientForSecondaryDisplay() {
         int[] types = new int[]{ITYPE_STATUS_BAR, ITYPE_NAVIGATION_BAR};
-        mCommandQueue.showTransient(SECONDARY_DISPLAY, types, true /* isGestureOnSystemBar */);
+        mCommandQueue.showTransient(SECONDARY_DISPLAY, types);
         waitForIdleSync();
-        verify(mCallbacks).showTransient(eq(SECONDARY_DISPLAY), eq(types), eq(true));
+        verify(mCallbacks).showTransient(eq(SECONDARY_DISPLAY), eq(types));
     }
 
     @Test
@@ -182,7 +178,7 @@ public class CommandQueueTest extends SysuiTestCase {
 
     @Test
     public void testShowImeButton() {
-        mCommandQueue.setImeWindowStatus(DEFAULT_DISPLAY, null, 1, 2, true);
+        mCommandQueue.setImeWindowStatus(DEFAULT_DISPLAY, null, 1, 2, true, false);
         waitForIdleSync();
         verify(mCallbacks).setImeWindowStatus(
                 eq(DEFAULT_DISPLAY), eq(null), eq(1), eq(2), eq(true));
@@ -190,13 +186,8 @@ public class CommandQueueTest extends SysuiTestCase {
 
     @Test
     public void testShowImeButtonForSecondaryDisplay() {
-        // First show in default display to update the "last updated ime display"
-        testShowImeButton();
-
-        mCommandQueue.setImeWindowStatus(SECONDARY_DISPLAY, null, 1, 2, true);
+        mCommandQueue.setImeWindowStatus(SECONDARY_DISPLAY, null, 1, 2, true, false);
         waitForIdleSync();
-        verify(mCallbacks).setImeWindowStatus(eq(DEFAULT_DISPLAY), eq(null), eq(IME_INVISIBLE),
-                eq(BACK_DISPOSITION_DEFAULT), eq(false));
         verify(mCallbacks).setImeWindowStatus(
                 eq(SECONDARY_DISPLAY), eq(null), eq(1), eq(2), eq(true));
     }
@@ -432,26 +423,24 @@ public class CommandQueueTest extends SysuiTestCase {
         final boolean credentialAllowed = true;
         final boolean requireConfirmation = true;
         final int userId = 10;
-        final long operationId = 1;
         final String packageName = "test";
-        final long requestId = 10;
+        final long operationId = 1;
         final int multiSensorConfig = BiometricManager.BIOMETRIC_MULTI_SENSOR_DEFAULT;
 
         mCommandQueue.showAuthenticationDialog(promptInfo, receiver, sensorIds,
-                credentialAllowed, requireConfirmation, userId, operationId, packageName, requestId,
+                credentialAllowed, requireConfirmation , userId, packageName, operationId,
                 multiSensorConfig);
         waitForIdleSync();
         verify(mCallbacks).showAuthenticationDialog(eq(promptInfo), eq(receiver), eq(sensorIds),
-                eq(credentialAllowed), eq(requireConfirmation), eq(userId), eq(operationId),
-                eq(packageName), eq(requestId), eq(multiSensorConfig));
+                eq(credentialAllowed), eq(requireConfirmation), eq(userId), eq(packageName),
+                eq(operationId), eq(multiSensorConfig));
     }
 
     @Test
     public void testOnBiometricAuthenticated() {
-        final int id = 12;
-        mCommandQueue.onBiometricAuthenticated(id);
+        mCommandQueue.onBiometricAuthenticated();
         waitForIdleSync();
-        verify(mCallbacks).onBiometricAuthenticated(eq(id));
+        verify(mCallbacks).onBiometricAuthenticated();
     }
 
     @Test

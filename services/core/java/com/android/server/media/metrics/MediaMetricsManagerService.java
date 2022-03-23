@@ -18,7 +18,6 @@ package com.android.server.media.metrics;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.media.MediaMetrics;
 import android.media.metrics.IMediaMetricsManager;
 import android.media.metrics.NetworkEvent;
 import android.media.metrics.PlaybackErrorEvent;
@@ -26,7 +25,6 @@ import android.media.metrics.PlaybackMetrics;
 import android.media.metrics.PlaybackStateEvent;
 import android.media.metrics.TrackChangeEvent;
 import android.os.Binder;
-import android.os.PersistableBundle;
 import android.provider.DeviceConfig;
 import android.provider.DeviceConfig.Properties;
 import android.util.Base64;
@@ -66,8 +64,6 @@ public final class MediaMetricsManagerService extends SystemService {
     private static final int LOGGING_LEVEL_EVERYTHING = 0;
     private static final int LOGGING_LEVEL_NO_UID = 1000;
     private static final int LOGGING_LEVEL_BLOCKED = 99999;
-
-    private static final String mMetricsId = MediaMetrics.Name.METRICS_MANAGER;
 
     private static final String FAILED_TO_GET = "failed_to_get";
     private final SecureRandom mSecureRandom;
@@ -181,20 +177,6 @@ public final class MediaMetricsManagerService extends SystemService {
             StatsLog.write(statsEvent);
         }
 
-        public void reportBundleMetrics(String sessionId, PersistableBundle metrics, int userId) {
-            int level = loggingLevel();
-            if (level == LOGGING_LEVEL_BLOCKED) {
-                return;
-            }
-
-            int atomid = metrics.getInt("KEY_STATSD_ATOM_NUMBER");
-            switch (atomid) {
-                default:
-                    return;
-                // to be extended as we define statsd atoms
-            }
-        }
-
         @Override
         public void reportPlaybackStateEvent(
                 String sessionId, PlaybackStateEvent event, int userId) {
@@ -217,12 +199,6 @@ public final class MediaMetricsManagerService extends SystemService {
             mSecureRandom.nextBytes(byteId);
             String id = Base64.encodeToString(
                     byteId, Base64.NO_PADDING | Base64.NO_WRAP | Base64.URL_SAFE);
-
-            // Authorize these session ids in the native mediametrics service.
-            new MediaMetrics.Item(mMetricsId)
-                    .set(MediaMetrics.Property.EVENT, "create")
-                    .set(MediaMetrics.Property.LOG_SESSION_ID, id)
-                    .record();
             return id;
         }
 
@@ -233,21 +209,6 @@ public final class MediaMetricsManagerService extends SystemService {
 
         @Override
         public String getRecordingSessionId(int userId) {
-            return getSessionIdInternal(userId);
-        }
-
-        @Override
-        public String getTranscodingSessionId(int userId) {
-            return getSessionIdInternal(userId);
-        }
-
-        @Override
-        public String getEditingSessionId(int userId) {
-            return getSessionIdInternal(userId);
-        }
-
-        @Override
-        public String getBundleSessionId(int userId) {
             return getSessionIdInternal(userId);
         }
 
@@ -336,7 +297,6 @@ public final class MediaMetricsManagerService extends SystemService {
                     return LOGGING_LEVEL_EVERYTHING;
                 }
                 if (mMode == MEDIA_METRICS_MODE_OFF) {
-                    Slog.v(TAG, "Logging level blocked: MEDIA_METRICS_MODE_OFF");
                     return LOGGING_LEVEL_BLOCKED;
                 }
 
@@ -357,8 +317,6 @@ public final class MediaMetricsManagerService extends SystemService {
                         mBlockList = getListLocked(PLAYER_METRICS_APP_BLOCKLIST);
                         if (mBlockList == null) {
                             // failed to get the blocklist. Block it.
-                            Slog.v(TAG, "Logging level blocked: Failed to get "
-                                    + "PLAYER_METRICS_APP_BLOCKLIST.");
                             return LOGGING_LEVEL_BLOCKED;
                         }
                     }
@@ -372,8 +330,6 @@ public final class MediaMetricsManagerService extends SystemService {
                                 getListLocked(PLAYER_METRICS_PER_APP_ATTRIBUTION_BLOCKLIST);
                         if (mNoUidBlocklist == null) {
                             // failed to get the blocklist. Block it.
-                            Slog.v(TAG, "Logging level blocked: Failed to get "
-                                    + "PLAYER_METRICS_PER_APP_ATTRIBUTION_BLOCKLIST.");
                             return LOGGING_LEVEL_BLOCKED;
                         }
                     }
@@ -393,8 +349,6 @@ public final class MediaMetricsManagerService extends SystemService {
                                 getListLocked(PLAYER_METRICS_PER_APP_ATTRIBUTION_ALLOWLIST);
                         if (mNoUidAllowlist == null) {
                             // failed to get the allowlist. Block it.
-                            Slog.v(TAG, "Logging level blocked: Failed to get "
-                                    + "PLAYER_METRICS_PER_APP_ATTRIBUTION_ALLOWLIST.");
                             return LOGGING_LEVEL_BLOCKED;
                         }
                     }
@@ -409,8 +363,6 @@ public final class MediaMetricsManagerService extends SystemService {
                         mAllowlist = getListLocked(PLAYER_METRICS_APP_ALLOWLIST);
                         if (mAllowlist == null) {
                             // failed to get the allowlist. Block it.
-                            Slog.v(TAG, "Logging level blocked: Failed to get "
-                                    + "PLAYER_METRICS_APP_ALLOWLIST.");
                             return LOGGING_LEVEL_BLOCKED;
                         }
                     }
@@ -420,12 +372,10 @@ public final class MediaMetricsManagerService extends SystemService {
                         return level;
                     }
                     // Not detected in any allowlist. Block.
-                    Slog.v(TAG, "Logging level blocked: Not detected in any allowlist.");
                     return LOGGING_LEVEL_BLOCKED;
                 }
             }
             // Blocked by default.
-            Slog.v(TAG, "Logging level blocked: Blocked by default.");
             return LOGGING_LEVEL_BLOCKED;
         }
 

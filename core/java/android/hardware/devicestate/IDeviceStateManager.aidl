@@ -41,9 +41,8 @@ interface IDeviceStateManager {
      * previously registered with {@link #registerCallback(IDeviceStateManagerCallback)} before a
      * call to this method.
      *
-     * @param token the request token provided
-     * @param state the state of device the request is asking for
-     * @param flags any flags that correspond to the request
+     * @param token the request token previously registered with
+     *        {@link #requestState(IBinder, int, int)}
      *
      * @throws IllegalStateException if a callback has not yet been registered for the calling
      *         process.
@@ -53,11 +52,14 @@ interface IDeviceStateManager {
     void requestState(IBinder token, int state, int flags);
 
     /**
-     * Cancels the active request previously submitted with a call to
+     * Cancels a request previously submitted with a call to
      * {@link #requestState(IBinder, int, int)}.
      *
-     * @throws IllegalStateException if a callback has not yet been registered for the calling
-     *         process.
+     * @param token the request token previously registered with
+     *        {@link #requestState(IBinder, int, int)}
+     *
+     * @throws IllegalStateException if the supplied {@code token} has not been previously
+     *         requested.
      */
-    void cancelStateRequest();
+    void cancelRequest(IBinder token);
 }

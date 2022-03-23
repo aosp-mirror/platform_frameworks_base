@@ -489,9 +489,9 @@ public final class TextSelection implements Parcelable {
             final CharSequence text = in.readCharSequence();
             final int startIndex = in.readInt();
             final int endIndex = in.readInt();
-            final LocaleList defaultLocales = in.readParcelable(null, android.os.LocaleList.class);
+            final LocaleList defaultLocales = in.readParcelable(null);
             final Bundle extras = in.readBundle();
-            final SystemTextClassifierMetadata systemTcMetadata = in.readParcelable(null, android.view.textclassifier.SystemTextClassifierMetadata.class);
+            final SystemTextClassifierMetadata systemTcMetadata = in.readParcelable(null);
             final boolean includeTextClassification = in.readBoolean();
 
             final Request request = new Request(text, startIndex, endIndex, defaultLocales,
@@ -548,6 +548,6 @@ public final class TextSelection implements Parcelable {
         mEntityConfidence = EntityConfidence.CREATOR.createFromParcel(in);
         mId = in.readString();
         mExtras = in.readBundle();
-        mTextClassification = in.readParcelable(TextClassification.class.getClassLoader(), android.view.textclassifier.TextClassification.class);
+        mTextClassification = in.readParcelable(TextClassification.class.getClassLoader());
     }
 }

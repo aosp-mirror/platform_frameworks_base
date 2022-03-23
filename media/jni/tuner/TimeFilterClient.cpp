@@ -16,15 +16,14 @@
 
 #define LOG_TAG "TimeFilterClient"
 
-#include "TimeFilterClient.h"
-
-#include <aidl/android/hardware/tv/tuner/Constant64Bit.h>
 #include <android-base/logging.h>
 #include <utils/Log.h>
 
 #include "ClientHelper.h"
+#include "TimeFilterClient.h"
 
-using ::aidl::android::hardware::tv::tuner::Constant64Bit;
+using ::android::hardware::tv::tuner::V1_0::Result;
+using ::android::hardware::tv::tuner::V1_1::Constant64Bit;
 
 namespace android {
 
@@ -35,58 +34,106 @@ TimeFilterClient::TimeFilterClient(shared_ptr<ITunerTimeFilter> tunerTimeFilter)
 }
 
 TimeFilterClient::~TimeFilterClient() {
-    mTunerTimeFilter = nullptr;
+    mTunerTimeFilter = NULL;
+    mTimeFilter = NULL;
 }
 
-Result TimeFilterClient::setTimeStamp(int64_t timeStamp) {
-    if (mTunerTimeFilter != nullptr) {
+// TODO: remove after migration to Tuner Service is done.
+void TimeFilterClient::setHidlTimeFilter(sp<ITimeFilter> timeFilter) {
+    mTimeFilter = timeFilter;
+}
+
+Result TimeFilterClient::setTimeStamp(long timeStamp) {
+    if (mTunerTimeFilter != NULL) {
         Status s = mTunerTimeFilter->setTimeStamp(timeStamp);
         return ClientHelper::getServiceSpecificErrorCode(s);
+    }
+
+    if (mTimeFilter != NULL) {
+        return mTimeFilter->setTimeStamp(timeStamp);
     }
 
     return Result::INVALID_STATE;
 }
 
 Result TimeFilterClient::clearTimeStamp() {
-    if (mTunerTimeFilter != nullptr) {
+    if (mTunerTimeFilter != NULL) {
         Status s = mTunerTimeFilter->clearTimeStamp();
         return ClientHelper::getServiceSpecificErrorCode(s);
+    }
+
+    if (mTimeFilter != NULL) {
+        return mTimeFilter->clearTimeStamp();
     }
 
     return Result::INVALID_STATE;
 }
 
-int64_t TimeFilterClient::getTimeStamp() {
-    if (mTunerTimeFilter != nullptr) {
+long TimeFilterClient::getTimeStamp() {
+    if (mTunerTimeFilter != NULL) {
         int64_t timeStamp;
         Status s = mTunerTimeFilter->getTimeStamp(&timeStamp);
-        if (!s.isOk()) {
-            return static_cast<int64_t>(Constant64Bit::INVALID_PRESENTATION_TIME_STAMP);
+        if (ClientHelper::getServiceSpecificErrorCode(s) != Result::SUCCESS) {
+            return (long)Constant64Bit::INVALID_PRESENTATION_TIME_STAMP;
         }
         return timeStamp;
     }
 
-    return static_cast<int64_t>(Constant64Bit::INVALID_PRESENTATION_TIME_STAMP);
+    if (mTimeFilter != NULL) {
+        Result res;
+        long timestamp;
+        mTimeFilter->getTimeStamp(
+                [&](Result r, uint64_t t) {
+                    res = r;
+                    timestamp = t;
+                });
+        if (res != Result::SUCCESS) {
+            return (long)Constant64Bit::INVALID_PRESENTATION_TIME_STAMP;
+        }
+        return timestamp;
+    }
+
+    return (long)Constant64Bit::INVALID_PRESENTATION_TIME_STAMP;
 }
 
-int64_t TimeFilterClient::getSourceTime() {
-    if (mTunerTimeFilter != nullptr) {
+long TimeFilterClient::getSourceTime() {
+    if (mTunerTimeFilter != NULL) {
         int64_t sourceTime;
         Status s = mTunerTimeFilter->getTimeStamp(&sourceTime);
-        if (!s.isOk()) {
-            return static_cast<int64_t>(Constant64Bit::INVALID_PRESENTATION_TIME_STAMP);
+        if (ClientHelper::getServiceSpecificErrorCode(s) != Result::SUCCESS) {
+            return (long)Constant64Bit::INVALID_PRESENTATION_TIME_STAMP;
         }
         return sourceTime;
     }
 
-    return static_cast<int64_t>(Constant64Bit::INVALID_PRESENTATION_TIME_STAMP);
+    if (mTimeFilter != NULL) {
+        Result res;
+        long sourceTime;
+        mTimeFilter->getSourceTime(
+                [&](Result r, uint64_t t) {
+                    res = r;
+                    sourceTime = t;
+                });
+        if (res != Result::SUCCESS) {
+            return (long)Constant64Bit::INVALID_PRESENTATION_TIME_STAMP;
+        }
+        return sourceTime;
+    }
+
+    return (long)Constant64Bit::INVALID_PRESENTATION_TIME_STAMP;
 }
 
 Result TimeFilterClient::close() {
-    if (mTunerTimeFilter != nullptr) {
+    if (mTunerTimeFilter != NULL) {
         Status s = mTunerTimeFilter->close();
-        mTunerTimeFilter = nullptr;
+        mTunerTimeFilter = NULL;
         return ClientHelper::getServiceSpecificErrorCode(s);
+    }
+
+    if (mTimeFilter != NULL) {
+        Result res = mTimeFilter->close();
+        mTimeFilter = NULL;
+        return res;
     }
 
     return Result::INVALID_STATE;

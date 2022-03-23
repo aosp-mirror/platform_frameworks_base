@@ -30,7 +30,6 @@ import android.widget.Switch;
 import android.widget.TextView;
 
 import androidx.annotation.ColorInt;
-import androidx.annotation.Nullable;
 
 import com.android.settingslib.utils.BuildCompatUtils;
 
@@ -98,10 +97,6 @@ public class MainSwitchBar extends LinearLayout implements CompoundButton.OnChec
         }
         addOnSwitchChangeListener((switchView, isChecked) -> setChecked(isChecked));
 
-        if (mSwitch.getVisibility() == VISIBLE) {
-            mSwitch.setOnCheckedChangeListener(this);
-        }
-
         setChecked(mSwitch.isChecked());
 
         if (attrs != null) {
@@ -120,12 +115,6 @@ public class MainSwitchBar extends LinearLayout implements CompoundButton.OnChec
     @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
         propagateChecked(isChecked);
-    }
-
-    @Override
-    public void setOnClickListener(@Nullable OnClickListener l) {
-        super.setOnClickListener(l);
-        mSwitch.setOnClickListener(l);
     }
 
     @Override

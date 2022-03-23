@@ -79,7 +79,7 @@ public class LockoutFrameworkImpl implements LockoutTracker {
         mLockoutReceiver = new LockoutReceiver();
 
         context.registerReceiver(mLockoutReceiver, new IntentFilter(ACTION_LOCKOUT_RESET),
-                RESET_FINGERPRINT_LOCKOUT, null /* handler */, Context.RECEIVER_EXPORTED);
+                RESET_FINGERPRINT_LOCKOUT, null /* handler */);
     }
 
     // Attempt counter should only be cleared when Keyguard goes away or when

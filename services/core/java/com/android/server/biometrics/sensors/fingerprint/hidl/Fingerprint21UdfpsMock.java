@@ -37,13 +37,11 @@ import android.util.Slog;
 import android.util.SparseBooleanArray;
 
 import com.android.internal.R;
-import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.sensors.AuthenticationConsumer;
 import com.android.server.biometrics.sensors.BaseClientMonitor;
 import com.android.server.biometrics.sensors.BiometricScheduler;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.LockoutResetDispatcher;
-import com.android.server.biometrics.sensors.fingerprint.FingerprintStateCallback;
 import com.android.server.biometrics.sensors.fingerprint.GestureAvailabilityDispatcher;
 
 import java.util.ArrayList;
@@ -135,15 +133,42 @@ public class Fingerprint21UdfpsMock extends Fingerprint21 implements TrustManage
     @NonNull private final RestartAuthRunnable mRestartAuthRunnable;
 
     private static class TestableBiometricScheduler extends BiometricScheduler {
+        @NonNull private final TestableInternalCallback mInternalCallback;
         @NonNull private Fingerprint21UdfpsMock mFingerprint21;
 
-        TestableBiometricScheduler(@NonNull String tag, @NonNull Handler handler,
+        TestableBiometricScheduler(@NonNull String tag,
                 @Nullable GestureAvailabilityDispatcher gestureAvailabilityDispatcher) {
-            super(tag, BiometricScheduler.SENSOR_TYPE_FP_OTHER, gestureAvailabilityDispatcher);
+            super(tag, BiometricScheduler.SENSOR_TYPE_FP_OTHER,
+                    gestureAvailabilityDispatcher);
+            mInternalCallback = new TestableInternalCallback();
+        }
+
+        class TestableInternalCallback extends InternalCallback {
+            @Override
+            public void onClientStarted(BaseClientMonitor clientMonitor) {
+                super.onClientStarted(clientMonitor);
+                Slog.d(TAG, "Client started: " + clientMonitor);
+                mFingerprint21.setDebugMessage("Started: " + clientMonitor);
+            }
+
+            @Override
+            public void onClientFinished(BaseClientMonitor clientMonitor, boolean success) {
+                super.onClientFinished(clientMonitor, success);
+                Slog.d(TAG, "Client finished: " + clientMonitor);
+                mFingerprint21.setDebugMessage("Finished: " + clientMonitor);
+            }
         }
 
         void init(@NonNull Fingerprint21UdfpsMock fingerprint21) {
             mFingerprint21 = fingerprint21;
+        }
+
+        /**
+         * Expose the internal finish callback so it can be used for testing
+         */
+        @Override
+        @NonNull protected InternalCallback getInternalCallback() {
+            return mInternalCallback;
         }
     }
 
@@ -245,20 +270,18 @@ public class Fingerprint21UdfpsMock extends Fingerprint21 implements TrustManage
     }
 
     public static Fingerprint21UdfpsMock newInstance(@NonNull Context context,
-            @NonNull FingerprintStateCallback fingerprintStateCallback,
             @NonNull FingerprintSensorPropertiesInternal sensorProps,
             @NonNull LockoutResetDispatcher lockoutResetDispatcher,
-            @NonNull GestureAvailabilityDispatcher gestureAvailabilityDispatcher,
-            @NonNull BiometricContext biometricContext) {
+            @NonNull GestureAvailabilityDispatcher gestureAvailabilityDispatcher) {
         Slog.d(TAG, "Creating Fingerprint23Mock!");
 
         final Handler handler = new Handler(Looper.getMainLooper());
         final TestableBiometricScheduler scheduler =
-                new TestableBiometricScheduler(TAG, handler, gestureAvailabilityDispatcher);
+                new TestableBiometricScheduler(TAG, gestureAvailabilityDispatcher);
         final MockHalResultController controller =
                 new MockHalResultController(sensorProps.sensorId, context, handler, scheduler);
-        return new Fingerprint21UdfpsMock(context, fingerprintStateCallback, sensorProps, scheduler,
-                handler, lockoutResetDispatcher, controller, biometricContext);
+        return new Fingerprint21UdfpsMock(context, sensorProps, scheduler, handler,
+                lockoutResetDispatcher, controller);
     }
 
     private static abstract class FakeFingerRunnable implements Runnable {
@@ -366,7 +389,7 @@ public class Fingerprint21UdfpsMock extends Fingerprint21 implements TrustManage
             final ClientMonitorCallbackConverter listener = client.getListener();
             final String opPackageName = client.getOwnerString();
             final boolean restricted = authClient.isRestricted();
-            final int statsClient = client.getLogger().getStatsClient();
+            final int statsClient = client.getStatsClient();
             final boolean isKeyguard = authClient.isKeyguard();
 
             // Don't actually send cancel() to the HAL, since successful auth already finishes
@@ -377,20 +400,17 @@ public class Fingerprint21UdfpsMock extends Fingerprint21 implements TrustManage
             // internal preemption logic is not run.
             mFingerprint21.scheduleAuthenticate(mFingerprint21.mSensorProperties.sensorId, token,
                     operationId, user, cookie, listener, opPackageName, restricted, statsClient,
-                    isKeyguard);
+                    isKeyguard, null /* fingerprintStateCallback */);
         }
     }
 
     private Fingerprint21UdfpsMock(@NonNull Context context,
-            @NonNull FingerprintStateCallback fingerprintStateCallback,
             @NonNull FingerprintSensorPropertiesInternal sensorProps,
             @NonNull TestableBiometricScheduler scheduler,
             @NonNull Handler handler,
             @NonNull LockoutResetDispatcher lockoutResetDispatcher,
-            @NonNull MockHalResultController controller,
-            @NonNull BiometricContext biometricContext) {
-        super(context, fingerprintStateCallback, sensorProps, scheduler, handler,
-                lockoutResetDispatcher, controller, biometricContext);
+            @NonNull MockHalResultController controller) {
+        super(context, sensorProps, scheduler, handler, lockoutResetDispatcher, controller);
         mScheduler = scheduler;
         mScheduler.init(this);
         mHandler = handler;
@@ -401,7 +421,8 @@ public class Fingerprint21UdfpsMock extends Fingerprint21 implements TrustManage
         mSensorProperties = new FingerprintSensorPropertiesInternal(sensorProps.sensorId,
                 sensorProps.sensorStrength, maxTemplatesAllowed, sensorProps.componentInfo,
                 FingerprintSensorProperties.TYPE_UDFPS_OPTICAL,
-                resetLockoutRequiresHardwareAuthToken, sensorProps.getAllLocations());
+                resetLockoutRequiresHardwareAuthToken, sensorProps.sensorLocationX,
+                sensorProps.sensorLocationY, sensorProps.sensorRadius);
         mMockHalResultController = controller;
         mUserHasTrust = new SparseBooleanArray();
         mTrustManager = context.getSystemService(TrustManager.class);
@@ -417,8 +438,7 @@ public class Fingerprint21UdfpsMock extends Fingerprint21 implements TrustManage
     }
 
     @Override
-    public void onTrustChanged(boolean enabled, int userId, int flags,
-            List<String> trustGrantedMessages) {
+    public void onTrustChanged(boolean enabled, int userId, int flags) {
         mUserHasTrust.put(userId, enabled);
     }
 
@@ -441,8 +461,7 @@ public class Fingerprint21UdfpsMock extends Fingerprint21 implements TrustManage
     }
 
     @Override
-    public void onPointerDown(long requestId, int sensorId, int x, int y, float minor,
-            float major) {
+    public void onPointerDown(int sensorId, int x, int y, float minor, float major) {
         mHandler.post(() -> {
             Slog.d(TAG, "onFingerDown");
             final AuthenticationConsumer lastAuthenticatedConsumer =
@@ -489,7 +508,7 @@ public class Fingerprint21UdfpsMock extends Fingerprint21 implements TrustManage
     }
 
     @Override
-    public void onPointerUp(long requestId, int sensorId) {
+    public void onPointerUp(int sensorId) {
         mHandler.post(() -> {
             Slog.d(TAG, "onFingerUp");
 

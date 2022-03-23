@@ -18,18 +18,15 @@ package com.android.server.biometrics.sensors.face.hidl;
 
 import android.annotation.NonNull;
 import android.content.Context;
+import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.face.V1_0.IBiometricsFace;
 import android.os.RemoteException;
 import android.util.Slog;
 
 import com.android.server.biometrics.BiometricsProto;
-import com.android.server.biometrics.log.BiometricContext;
-import com.android.server.biometrics.log.BiometricLogger;
-import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.HalClientMonitor;
 
 import java.util.ArrayList;
-import java.util.function.Supplier;
 
 /**
  * Face-specific resetLockout client supporting the {@link android.hardware.biometrics.face.V1_0}
@@ -42,11 +39,11 @@ public class FaceResetLockoutClient extends HalClientMonitor<IBiometricsFace> {
     private final ArrayList<Byte> mHardwareAuthToken;
 
     FaceResetLockoutClient(@NonNull Context context,
-            @NonNull Supplier<IBiometricsFace> lazyDaemon, int userId, String owner, int sensorId,
-            @NonNull BiometricLogger logger, @NonNull BiometricContext biometricContext,
+            @NonNull LazyDaemon<IBiometricsFace> lazyDaemon, int userId, String owner, int sensorId,
             @NonNull byte[] hardwareAuthToken) {
         super(context, lazyDaemon, null /* token */, null /* listener */, userId, owner,
-                0 /* cookie */, sensorId, logger, biometricContext);
+                0 /* cookie */, sensorId, BiometricsProtoEnums.MODALITY_UNKNOWN,
+                BiometricsProtoEnums.ACTION_UNKNOWN, BiometricsProtoEnums.CLIENT_UNKNOWN);
 
         mHardwareAuthToken = new ArrayList<>();
         for (byte b : hardwareAuthToken) {
@@ -60,7 +57,7 @@ public class FaceResetLockoutClient extends HalClientMonitor<IBiometricsFace> {
     }
 
     @Override
-    public void start(@NonNull ClientMonitorCallback callback) {
+    public void start(@NonNull Callback callback) {
         super.start(callback);
         startHalOperation();
     }

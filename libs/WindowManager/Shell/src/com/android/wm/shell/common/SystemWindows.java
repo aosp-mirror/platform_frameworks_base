@@ -21,6 +21,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.graphics.Point;
 import android.graphics.Region;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -191,19 +192,6 @@ public class SystemWindows {
         return null;
     }
 
-    /**
-     * Gets a token associated with the view that can be used to grant the view focus.
-     */
-    public IBinder getFocusGrantToken(View view) {
-        SurfaceControlViewHost root = mViewRoots.get(view);
-        if (root == null) {
-            Slog.e(TAG, "Couldn't get focus grant token since view does not exist in "
-                    + "SystemWindow:" + view);
-            return null;
-        }
-        return root.getFocusGrantToken();
-    }
-
     private class PerDisplay {
         final int mDisplayId;
         private final SparseArray<SysUiWindowManager> mWwms = new SparseArray<>();
@@ -344,7 +332,10 @@ public class SystemWindows {
         @Override
         public void resized(ClientWindowFrames frames, boolean reportDraw,
                 MergedConfiguration newMergedConfiguration, boolean forceLayout,
-                boolean alwaysConsumeSystemBars, int displayId, int syncSeqId, int resizeMode) {}
+                boolean alwaysConsumeSystemBars, int displayId) {}
+
+        @Override
+        public void locationInParentDisplayChanged(Point offset) {}
 
         @Override
         public void insetsChanged(InsetsState insetsState, boolean willMove, boolean willResize) {}
@@ -367,6 +358,9 @@ public class SystemWindows {
 
         @Override
         public void dispatchGetNewSurface() {}
+
+        @Override
+        public void windowFocusChanged(boolean hasFocus, boolean inTouchMode) {}
 
         @Override
         public void executeCommand(String command, String parameters, ParcelFileDescriptor out) {}

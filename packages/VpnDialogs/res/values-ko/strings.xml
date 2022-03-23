@@ -18,7 +18,6 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="prompt" msgid="3183836924226407828">"연결 요청"</string>
     <string name="warning" msgid="809658604548412033">"<xliff:g id="APP">%s</xliff:g>에서 네트워크 트래픽을 모니터링하도록 허용하는 VPN 연결을 설정하려고 합니다. 출처를 신뢰할 수 있는 경우에만 수락하세요. VPN이 활성화되면 &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt;이 화면 위에 표시됩니다."</string>
-    <string name="warning" product="tv" msgid="5188957997628124947">"<xliff:g id="APP">%s</xliff:g>에서 네트워크 트래픽을 모니터링할 수 있도록 VPN 연결을 설정하려고 합니다. 소스를 신뢰할 수 있는 경우에만 수락하세요. VPN이 활성 상태일 때는 &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; 아이콘이 화면에 표시됩니다."</string>
     <string name="legacy_title" msgid="192936250066580964">"VPN이 연결되었습니다."</string>
     <string name="session" msgid="6470628549473641030">"세션:"</string>
     <string name="duration" msgid="3584782459928719435">"기간:"</string>

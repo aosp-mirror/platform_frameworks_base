@@ -25,7 +25,6 @@ import android.graphics.fonts.FontVariationAxis;
 import android.os.Build;
 import android.os.LocaleList;
 import android.text.FontConfig;
-import android.util.ArraySet;
 import android.util.Xml;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -38,7 +37,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.regex.Pattern;
 
 /**
@@ -122,23 +120,7 @@ public class FontListParser {
         }
     }
 
-    /**
-     * Parses the familyset tag in font.xml
-     * @param parser a XML pull parser
-     * @param fontDir A system font directory, e.g. "/system/fonts"
-     * @param customization A OEM font customization
-     * @param updatableFontMap A map of updated font files
-     * @param lastModifiedDate A date that the system font is updated.
-     * @param configVersion A version of system font config.
-     * @param allowNonExistingFile true if allowing non-existing font files during parsing fonts.xml
-     * @return result of fonts.xml
-     *
-     * @throws XmlPullParserException
-     * @throws IOException
-     *
-     * @hide
-     */
-    public static FontConfig readFamilies(
+    private static FontConfig readFamilies(
             @NonNull XmlPullParser parser,
             @NonNull String fontDir,
             @NonNull FontCustomizationParser.Result customization,
@@ -177,24 +159,7 @@ public class FontListParser {
         }
 
         families.addAll(oemNamedFamilies.values());
-
-        // Filters aliases that point to non-existing families.
-        Set<String> namedFamilies = new ArraySet<>();
-        for (int i = 0; i < families.size(); ++i) {
-            String name = families.get(i).getName();
-            if (name != null) {
-                namedFamilies.add(name);
-            }
-        }
-        List<FontConfig.Alias> filtered = new ArrayList<>();
-        for (int i = 0; i < aliases.size(); ++i) {
-            FontConfig.Alias alias = aliases.get(i);
-            if (namedFamilies.contains(alias.getOriginal())) {
-                filtered.add(alias);
-            }
-        }
-
-        return new FontConfig(families, filtered, lastModifiedDate, configVersion);
+        return new FontConfig(families, aliases, lastModifiedDate, configVersion);
     }
 
     private static boolean keepReading(XmlPullParser parser)
@@ -218,7 +183,6 @@ public class FontListParser {
         final String name = parser.getAttributeValue(null, "name");
         final String lang = parser.getAttributeValue("", "lang");
         final String variant = parser.getAttributeValue(null, "variant");
-        final String ignore = parser.getAttributeValue(null, "ignore");
         final List<FontConfig.Font> fonts = new ArrayList<>();
         while (keepReading(parser)) {
             if (parser.getEventType() != XmlPullParser.START_TAG) continue;
@@ -241,9 +205,7 @@ public class FontListParser {
                 intVariant = FontConfig.FontFamily.VARIANT_ELEGANT;
             }
         }
-
-        boolean skip = (ignore != null && (ignore.equals("true") || ignore.equals("1")));
-        if (skip || fonts.isEmpty()) {
+        if (fonts.isEmpty()) {
             return null;
         }
         return new FontConfig.FontFamily(fonts, name, LocaleList.forLanguageTags(lang), intVariant);

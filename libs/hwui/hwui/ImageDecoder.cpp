@@ -24,6 +24,7 @@
 #include <SkBlendMode.h>
 #include <SkCanvas.h>
 #include <SkEncodedOrigin.h>
+#include <SkFilterQuality.h>
 #include <SkPaint.h>
 
 #undef LOG_TAG
@@ -158,8 +159,6 @@ bool ImageDecoder::setOutColorType(SkColorType colorType) {
         case kN32_SkColorType:
             break;
         case kRGBA_F16_SkColorType:
-            break;
-        case kRGBA_1010102_SkColorType:
             break;
         default:
             return false;

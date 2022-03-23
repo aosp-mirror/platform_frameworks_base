@@ -28,15 +28,13 @@ import static com.android.systemui.statusbar.notification.stack.NotificationStac
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.ROWS_GENTLE;
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.ROWS_HIGH_PRIORITY;
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.SelectedRows;
-import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.canChildBeCleared;
+import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.canChildBeDismissed;
 import static com.android.systemui.statusbar.phone.NotificationIconAreaController.HIGH_PRIORITY;
 
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.PointF;
-import android.os.Trace;
-import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
@@ -50,9 +48,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowInsets;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.colorextraction.ColorExtractor;
 import com.android.internal.jank.InteractionJankMonitor;
@@ -61,6 +56,7 @@ import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.statusbar.IStatusBarService;
+import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.ExpandHelper;
 import com.android.systemui.Gefingerpoken;
 import com.android.systemui.R;
@@ -76,6 +72,7 @@ import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin.OnMenuEventListener;
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager.UserChangedListener;
@@ -86,7 +83,7 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.ExpandAnimationParameters;
-import com.android.systemui.statusbar.notification.NotifPipelineFlags;
+import com.android.systemui.statusbar.notification.ForegroundServiceDismissalFeatureController;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
@@ -94,31 +91,30 @@ import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
+import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy.NotificationGroup;
 import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy.OnGroupChangeListener;
 import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.notifcollection.DismissedByUserStats;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
 import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManager;
-import com.android.systemui.statusbar.notification.collection.render.NotifStackController;
-import com.android.systemui.statusbar.notification.collection.render.NotifStats;
-import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
 import com.android.systemui.statusbar.notification.collection.render.SectionHeaderController;
 import com.android.systemui.statusbar.notification.dagger.SilentHeader;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
+import com.android.systemui.statusbar.notification.row.ForegroundServiceDungeonView;
 import com.android.systemui.statusbar.notification.row.NotificationGuts;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.row.NotificationSnooze;
-import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.HeadsUpAppearanceController;
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.HeadsUpTouchHelper;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.ShadeController;
-import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent;
+import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.systemui.statusbar.phone.dagger.StatusBarComponent;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
@@ -126,7 +122,6 @@ import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceP
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.tuner.TunerService;
-import com.android.systemui.util.Compile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -141,14 +136,13 @@ import kotlin.Unit;
 /**
  * Controller for {@link NotificationStackScrollLayout}.
  */
-@CentralSurfacesComponent.CentralSurfacesScope
+@StatusBarComponent.StatusBarScope
 public class NotificationStackScrollLayoutController {
     private static final String TAG = "StackScrollerController";
-    private static final boolean DEBUG = Compile.IS_DEBUG && Log.isLoggable(TAG, Log.DEBUG);
+    private static final boolean DEBUG = false;
 
     private final boolean mAllowLongPress;
     private final NotificationGutsManager mNotificationGutsManager;
-    private final NotificationVisibilityProvider mVisibilityProvider;
     private final HeadsUpManagerPhone mHeadsUpManager;
     private final NotificationRoundnessManager mNotificationRoundnessManager;
     private final TunerService mTunerService;
@@ -162,12 +156,14 @@ public class NotificationStackScrollLayoutController {
     private final Resources mResources;
     private final NotificationSwipeHelper.Builder mNotificationSwipeHelperBuilder;
     private final ScrimController mScrimController;
-    private final NotifPipelineFlags mNotifPipelineFlags;
+    private final FeatureFlags mFeatureFlags;
     private final NotifPipeline mNotifPipeline;
     private final NotifCollection mNotifCollection;
     private final NotificationEntryManager mNotificationEntryManager;
     private final IStatusBarService mIStatusBarService;
     private final UiEventLogger mUiEventLogger;
+    private final ForegroundServiceDismissalFeatureController mFgFeatureController;
+    private final ForegroundServiceSectionController mFgServicesSectionController;
     private final LayoutInflater mLayoutInflater;
     private final NotificationRemoteInputManager mRemoteInputManager;
     private final VisualStabilityManager mVisualStabilityManager;
@@ -176,32 +172,20 @@ public class NotificationStackScrollLayoutController {
     private final SysuiStatusBarStateController mStatusBarStateController;
     private final KeyguardBypassController mKeyguardBypassController;
     private final NotificationLockscreenUserManager mLockscreenUserManager;
-    // TODO: CentralSurfaces should be encapsulated behind a Controller
-    private final CentralSurfaces mCentralSurfaces;
+    // TODO: StatusBar should be encapsulated behind a Controller
+    private final StatusBar mStatusBar;
     private final SectionHeaderController mSilentHeaderController;
     private final LockscreenShadeTransitionController mLockscreenShadeTransitionController;
-    private final InteractionJankMonitor mJankMonitor;
-    private final NotificationStackSizeCalculator mNotificationStackSizeCalculator;
-    private final StackStateLogger mStackStateLogger;
-    private final NotificationStackScrollLogger mLogger;
 
     private NotificationStackScrollLayout mView;
     private boolean mFadeNotificationsOnDismiss;
     private NotificationSwipeHelper mSwipeHelper;
     private boolean mShowEmptyShadeView;
-    @Nullable private Boolean mHistoryEnabled;
     private int mBarState;
     private HeadsUpAppearanceController mHeadsUpAppearanceController;
 
-    private View mLongPressedView;
-
     private final NotificationListContainerImpl mNotificationListContainer =
             new NotificationListContainerImpl();
-    private final NotifStackController mNotifStackController =
-            new NotifStackControllerImpl();
-
-    @Nullable
-    private NotificationActivityStarter mNotificationActivityStarter;
 
     private ColorExtractor.OnColorsChangedListener mOnColorsChangedListener;
 
@@ -280,6 +264,15 @@ public class NotificationStackScrollLayoutController {
         }
 
         @Override
+        public void onOverlayChanged() {
+            updateShowEmptyShadeView();
+            mView.updateCornerRadius();
+            mView.updateBgColor();
+            mView.updateDecorViews();
+            mView.reinflateViews();
+        }
+
+        @Override
         public void onUiModeChanged() {
             mView.updateBgColor();
             mView.updateDecorViews();
@@ -287,11 +280,6 @@ public class NotificationStackScrollLayoutController {
 
         @Override
         public void onThemeChanged() {
-            mView.updateCornerRadius();
-            mView.updateBgColor();
-            mView.updateDecorViews();
-            mView.reinflateViews();
-            updateShowEmptyShadeView();
             updateFooter();
         }
 
@@ -301,14 +289,11 @@ public class NotificationStackScrollLayoutController {
         }
     };
 
-    private NotifStats mNotifStats = NotifStats.getEmpty();
-
     private void updateResources() {
         mNotificationDragDownMovement = mResources.getDimensionPixelSize(
                 R.dimen.lockscreen_shade_notification_movement);
         mTotalDistanceForFullShadeTransition = mResources.getDimensionPixelSize(
                 R.dimen.lockscreen_shade_qs_transition_distance);
-        mNotificationStackSizeCalculator.updateResources();
     }
 
     private final StatusBarStateController.StateListener mStateListener =
@@ -332,7 +317,7 @@ public class NotificationStackScrollLayoutController {
                     mView.updateSensitiveness(mStatusBarStateController.goingToFullShade(),
                             mLockscreenUserManager.isAnyProfilePublicMode());
                     mView.onStatePostChange(mStatusBarStateController.fromShadeLocked());
-                    mNotificationEntryManager.updateNotifications("CentralSurfaces state changed");
+                    mNotificationEntryManager.updateNotifications("StatusBar state changed");
                 }
             };
 
@@ -340,8 +325,6 @@ public class NotificationStackScrollLayoutController {
         @Override
         public void onUserChanged(int userId) {
             mView.updateSensitiveness(false, mLockscreenUserManager.isAnyProfilePublicMode());
-            mHistoryEnabled = null;
-            updateFooter();
         }
     };
 
@@ -433,7 +416,7 @@ public class NotificationStackScrollLayoutController {
                 @Override
                 public void onSnooze(StatusBarNotification sbn,
                         NotificationSwipeActionHelper.SnoozeOption snoozeOption) {
-                    mCentralSurfaces.setNotificationSnoozed(sbn, snoozeOption);
+                    mStatusBar.setNotificationSnoozed(sbn, snoozeOption);
                 }
 
                 @Override
@@ -459,7 +442,10 @@ public class NotificationStackScrollLayoutController {
                     if (!row.isDismissed()) {
                         handleChildViewDismissed(view);
                     }
-                    row.removeFromTransientContainer();
+                    ViewGroup transientContainer = row.getTransientContainer();
+                    if (transientContainer != null) {
+                        transientContainer.removeTransientView(view);
+                    }
                 }
 
                 /**
@@ -470,7 +456,7 @@ public class NotificationStackScrollLayoutController {
                  */
 
                 public void handleChildViewDismissed(View view) {
-                    if (mView.getClearAllInProgress()) {
+                    if (mView.getDismissAllInProgress()) {
                         return;
                     }
                     mView.onSwipeEnd();
@@ -486,7 +472,7 @@ public class NotificationStackScrollLayoutController {
                     mView.addSwipedOutView(view);
                     mFalsingCollector.onNotificationDismissed();
                     if (mFalsingCollector.shouldEnforceBouncer()) {
-                        mCentralSurfaces.executeRunnableDismissingKeyguard(
+                        mStatusBar.executeRunnableDismissingKeyguard(
                                 null,
                                 null /* cancelAction */,
                                 false /* dismissShade */,
@@ -514,7 +500,7 @@ public class NotificationStackScrollLayoutController {
                                 && (parent.areGutsExposed()
                                 || mSwipeHelper.getExposedMenuView() == parent
                                 || (parent.getAttachedChildren().size() == 1
-                                && parent.getEntry().isDismissable()))) {
+                                && parent.getEntry().isClearable()))) {
                             // In this case the group is expanded and showing the menu for the
                             // group, further interaction should apply to the group, not any
                             // child notifications so we use the parent of the child. We also do the
@@ -523,11 +509,6 @@ public class NotificationStackScrollLayoutController {
                         }
                     }
                     return child;
-                }
-
-                @Override
-                public void onLongPressSent(View v) {
-                    mLongPressedView = v;
                 }
 
                 @Override
@@ -559,7 +540,7 @@ public class NotificationStackScrollLayoutController {
 
                 @Override
                 public float getFalsingThresholdFactor() {
-                    return mCentralSurfaces.isWakeUpComingFromTouch() ? 1.5f : 1.0f;
+                    return mStatusBar.isWakeUpComingFromTouch() ? 1.5f : 1.0f;
                 }
 
                 @Override
@@ -628,7 +609,6 @@ public class NotificationStackScrollLayoutController {
     public NotificationStackScrollLayoutController(
             @Named(ALLOW_NOTIFICATION_LONG_PRESS_NAME) boolean allowLongPress,
             NotificationGutsManager notificationGutsManager,
-            NotificationVisibilityProvider visibilityProvider,
             HeadsUpManagerPhone headsUpManager,
             NotificationRoundnessManager notificationRoundnessManager,
             TunerService tunerService,
@@ -646,31 +626,26 @@ public class NotificationStackScrollLayoutController {
             FalsingManager falsingManager,
             @Main Resources resources,
             NotificationSwipeHelper.Builder notificationSwipeHelperBuilder,
-            CentralSurfaces centralSurfaces,
+            StatusBar statusBar,
             ScrimController scrimController,
             NotificationGroupManagerLegacy legacyGroupManager,
             GroupExpansionManager groupManager,
             @SilentHeader SectionHeaderController silentHeaderController,
-            NotifPipelineFlags notifPipelineFlags,
+            FeatureFlags featureFlags,
             NotifPipeline notifPipeline,
             NotifCollection notifCollection,
             NotificationEntryManager notificationEntryManager,
             LockscreenShadeTransitionController lockscreenShadeTransitionController,
             IStatusBarService iStatusBarService,
             UiEventLogger uiEventLogger,
+            ForegroundServiceDismissalFeatureController fgFeatureController,
+            ForegroundServiceSectionController fgServicesSectionController,
             LayoutInflater layoutInflater,
             NotificationRemoteInputManager remoteInputManager,
             VisualStabilityManager visualStabilityManager,
-            ShadeController shadeController,
-            InteractionJankMonitor jankMonitor,
-            StackStateLogger stackLogger,
-            NotificationStackScrollLogger logger,
-            NotificationStackSizeCalculator notificationStackSizeCalculator) {
-        mStackStateLogger = stackLogger;
-        mLogger = logger;
+            ShadeController shadeController) {
         mAllowLongPress = allowLongPress;
         mNotificationGutsManager = notificationGutsManager;
-        mVisibilityProvider = visibilityProvider;
         mHeadsUpManager = headsUpManager;
         mNotificationRoundnessManager = notificationRoundnessManager;
         mTunerService = tunerService;
@@ -688,25 +663,30 @@ public class NotificationStackScrollLayoutController {
         mFalsingManager = falsingManager;
         mResources = resources;
         mNotificationSwipeHelperBuilder = notificationSwipeHelperBuilder;
-        mCentralSurfaces = centralSurfaces;
+        mStatusBar = statusBar;
         mScrimController = scrimController;
-        mJankMonitor = jankMonitor;
-        mNotificationStackSizeCalculator = notificationStackSizeCalculator;
         groupManager.registerGroupExpansionChangeListener(
                 (changedRow, expanded) -> mView.onGroupExpandChanged(changedRow, expanded));
         legacyGroupManager.registerGroupChangeListener(new OnGroupChangeListener() {
             @Override
+            public void onGroupCreatedFromChildren(NotificationGroup group) {
+                mStatusBar.requestNotificationUpdate("onGroupCreatedFromChildren");
+            }
+
+            @Override
             public void onGroupsChanged() {
-                mCentralSurfaces.requestNotificationUpdate("onGroupsChanged");
+                mStatusBar.requestNotificationUpdate("onGroupsChanged");
             }
         });
-        mNotifPipelineFlags = notifPipelineFlags;
         mSilentHeaderController = silentHeaderController;
+        mFeatureFlags = featureFlags;
         mNotifPipeline = notifPipeline;
         mNotifCollection = notifCollection;
         mNotificationEntryManager = notificationEntryManager;
         mIStatusBarService = iStatusBarService;
         mUiEventLogger = uiEventLogger;
+        mFgFeatureController = fgFeatureController;
+        mFgServicesSectionController = fgServicesSectionController;
         mLayoutInflater = layoutInflater;
         mRemoteInputManager = remoteInputManager;
         mVisualStabilityManager = visualStabilityManager;
@@ -716,29 +696,22 @@ public class NotificationStackScrollLayoutController {
 
     public void attach(NotificationStackScrollLayout view) {
         mView = view;
-        mView.setLogger(mStackStateLogger);
         mView.setController(this);
-        mView.setLogger(mLogger);
         mView.setTouchHandler(new TouchHandler());
-        mView.setCentralSurfaces(mCentralSurfaces);
-        mView.setClearAllAnimationListener(this::onAnimationEnd);
-        mView.setClearAllListener((selection) -> mUiEventLogger.log(
+        mView.setStatusBar(mStatusBar);
+        mView.setDismissAllAnimationListener(this::onAnimationEnd);
+        mView.setDismissListener((selection) -> mUiEventLogger.log(
                 NotificationPanelEvent.fromSelection(selection)));
-        mView.setFooterClearAllListener(() ->
+        mView.setFooterDismissListener(() ->
                 mMetricsLogger.action(MetricsEvent.ACTION_DISMISS_ALL_NOTES));
-        mView.setIsRemoteInputActive(mRemoteInputManager.isRemoteInputActive());
-        mRemoteInputManager.addControllerCallback(new RemoteInputController.Callback() {
-            @Override
-            public void onRemoteInputActive(boolean active) {
-                mView.setIsRemoteInputActive(active);
-            }
-        });
+        mView.setRemoteInputManager(mRemoteInputManager);
         mView.setShadeController(mShadeController);
 
-        mKeyguardBypassController.registerOnBypassStateChangedListener(
-                isEnabled -> mNotificationRoundnessManager.setShouldRoundPulsingViews(!isEnabled));
-        mNotificationRoundnessManager.setShouldRoundPulsingViews(
-                !mKeyguardBypassController.getBypassEnabled());
+        if (mFgFeatureController.isForegroundServiceDismissalEnabled()) {
+            mView.initializeForegroundServiceSection(
+                    (ForegroundServiceDungeonView) mFgServicesSectionController.createView(
+                            mLayoutInflater));
+        }
 
         mSwipeHelper = mNotificationSwipeHelperBuilder
                 .setSwipeDirection(SwipeHelper.X)
@@ -746,7 +719,7 @@ public class NotificationStackScrollLayoutController {
                 .setOnMenuEventListener(mMenuEventListener)
                 .build();
 
-        if (mNotifPipelineFlags.isNewPipelineEnabled()) {
+        if (mFeatureFlags.isNewNotifPipelineRenderingEnabled()) {
             mNotifPipeline.addCollectionListener(new NotifCollectionListener() {
                 @Override
                 public void onEntryUpdated(NotificationEntry entry) {
@@ -762,15 +735,8 @@ public class NotificationStackScrollLayoutController {
             });
         }
 
-        mView.initView(mView.getContext(), mSwipeHelper, mNotificationStackSizeCalculator);
-        mView.setKeyguardBypassEnabled(mKeyguardBypassController.getBypassEnabled());
-        mKeyguardBypassController
-                .registerOnBypassStateChangedListener(mView::setKeyguardBypassEnabled);
-        mView.setManageButtonClickListener(v -> {
-            if (mNotificationActivityStarter != null) {
-                mNotificationActivityStarter.startHistoryIntent(v, mView.isHistoryShown());
-            }
-        });
+        mView.initView(mView.getContext(), mKeyguardBypassController::getBypassEnabled,
+                mSwipeHelper);
 
         mHeadsUpManager.addListener(mOnHeadsUpChangedListener);
         mHeadsUpManager.setAnimationStateHandler(mView::setHeadsUpGoingAwayAnimationsAllowed);
@@ -793,8 +759,10 @@ public class NotificationStackScrollLayoutController {
         mTunerService.addTunable(
                 (key, newValue) -> {
                     switch (key) {
+                        case Settings.Secure.NOTIFICATION_DISMISS_RTL:
+                            mView.updateDismissRtlSetting("1".equals(newValue));
+                            break;
                         case Settings.Secure.NOTIFICATION_HISTORY_ENABLED:
-                            mHistoryEnabled = null;  // invalidate
                             updateFooter();
                             break;
                         case HIGH_PRIORITY:
@@ -803,6 +771,7 @@ public class NotificationStackScrollLayoutController {
                     }
                 },
                 HIGH_PRIORITY,
+                Settings.Secure.NOTIFICATION_DISMISS_RTL,
                 Settings.Secure.NOTIFICATION_HISTORY_ENABLED);
 
         mKeyguardMediaController.setVisibilityChangedListener(visible -> {
@@ -817,15 +786,14 @@ public class NotificationStackScrollLayoutController {
             return Unit.INSTANCE;
         });
 
-        // attach callback, and then call it to update mView immediately
+        // callback is invoked synchronously, updating mView immediately
         mDeviceProvisionedController.addCallback(mDeviceProvisionedListener);
-        mDeviceProvisionedListener.onDeviceProvisionedChanged();
 
         if (mView.isAttachedToWindow()) {
             mOnAttachStateChangeListener.onViewAttachedToWindow(mView);
         }
         mView.addOnAttachStateChangeListener(mOnAttachStateChangeListener);
-        mSilentHeaderController.setOnClearSectionClickListener(v -> clearSilentNotifications());
+        mSilentHeaderController.setOnClearAllClickListener(v -> clearSilentNotifications());
     }
 
     private boolean isInVisibleLocation(NotificationEntry entry) {
@@ -869,14 +837,6 @@ public class NotificationStackScrollLayoutController {
         mView.setHeadsUpAppearanceController(controller);
     }
 
-    public float getAppearFraction() {
-        return mView.getAppearFraction();
-    }
-
-    public float getExpandedHeight() {
-        return mView.getExpandedHeight();
-    }
-
     public void requestLayout() {
         mView.requestLayout();
     }
@@ -909,13 +869,6 @@ public class NotificationStackScrollLayoutController {
      */
     public int getTop() {
         return mView.getTop();
-    }
-
-    /**
-     * @return the bottom of the view.
-     */
-    public int getBottom() {
-        return mView.getBottom();
     }
 
     public float getTranslationX() {
@@ -1006,21 +959,7 @@ public class NotificationStackScrollLayoutController {
     }
 
     public int getVisibleNotificationCount() {
-        return mNotifStats.getNumActiveNotifs();
-    }
-
-    public boolean isHistoryEnabled() {
-        Boolean historyEnabled = mHistoryEnabled;
-        if (historyEnabled == null) {
-            if (mView == null || mView.getContext() == null) {
-                Log.wtf(TAG, "isHistoryEnabled failed to initialize its value");
-                return false;
-            }
-            mHistoryEnabled = historyEnabled =
-                    Settings.Secure.getIntForUser(mView.getContext().getContentResolver(),
-                    Settings.Secure.NOTIFICATION_HISTORY_ENABLED, 0, UserHandle.USER_CURRENT) == 1;
-        }
-        return historyEnabled;
+        return mView.getVisibleNotificationCount();
     }
 
     public int getIntrinsicContentHeight() {
@@ -1097,8 +1036,8 @@ public class NotificationStackScrollLayoutController {
         }
     }
 
-    public void setQsFullScreen(boolean fullScreen) {
-        mView.setQsFullScreen(fullScreen);
+    public void setQsExpanded(boolean expanded) {
+        mView.setQsExpanded(expanded);
         updateShowEmptyShadeView();
     }
 
@@ -1112,10 +1051,6 @@ public class NotificationStackScrollLayoutController {
 
     public void setOnStackYChanged(Consumer<Boolean> onStackYChanged) {
         mView.setOnStackYChanged(onStackYChanged);
-    }
-
-    public float getNotificationSquishinessFraction() {
-        return mView.getNotificationSquishinessFraction();
     }
 
     public float calculateAppearFractionBypass() {
@@ -1207,25 +1142,14 @@ public class NotificationStackScrollLayoutController {
     /**
      * Update whether we should show the empty shade view (no notifications in the shade).
      * If so, send the update to our view.
-     *
-     * When in split mode, notifications are always visible regardless of the state of the
-     * QuickSettings panel. That being the case, empty view is always shown if the other conditions
-     * are true.
      */
     public void updateShowEmptyShadeView() {
-        Trace.beginSection("NSSLC.updateShowEmptyShadeView");
         mShowEmptyShadeView = mBarState != KEYGUARD
-                && !mView.isQsFullScreen()
-                && getVisibleNotificationCount() == 0;
-
+                && !mView.isQsExpanded()
+                && mView.getVisibleNotificationCount() == 0;
         mView.updateEmptyShadeView(
                 mShowEmptyShadeView,
                 mZenModeController.areNotificationsHiddenInShade());
-        Trace.endSection();
-    }
-
-    public boolean areNotificationsHiddenInShade() {
-        return mZenModeController.areNotificationsHiddenInShade();
     }
 
     public boolean isShowingEmptyShadeView() {
@@ -1242,6 +1166,10 @@ public class NotificationStackScrollLayoutController {
 
     public void forceNoOverlappingRendering(boolean force) {
         mView.forceNoOverlappingRendering(force);
+    }
+
+    public void setTranslationX(float translation) {
+        mView.setTranslationX(translation);
     }
 
     public void setExpandingVelocity(float velocity) {
@@ -1272,26 +1200,22 @@ public class NotificationStackScrollLayoutController {
      * Return whether there are any clearable notifications
      */
     public boolean hasActiveClearableNotifications(@SelectedRows int selection) {
-        return hasNotifications(selection, true /* clearable */);
-    }
-
-    public boolean hasNotifications(@SelectedRows int selection, boolean isClearable) {
-        boolean hasAlertingMatchingClearable = isClearable
-                ? mNotifStats.getHasClearableAlertingNotifs()
-                : mNotifStats.getHasNonClearableAlertingNotifs();
-        boolean hasSilentMatchingClearable = isClearable
-                ? mNotifStats.getHasClearableSilentNotifs()
-                : mNotifStats.getHasNonClearableSilentNotifs();
-        switch (selection) {
-            case ROWS_GENTLE:
-                return hasSilentMatchingClearable;
-            case ROWS_HIGH_PRIORITY:
-                return hasAlertingMatchingClearable;
-            case ROWS_ALL:
-                return hasSilentMatchingClearable || hasAlertingMatchingClearable;
-            default:
-                throw new IllegalStateException("Bad selection: " + selection);
+        if (mDynamicPrivacyController.isInLockedDownShade()) {
+            return false;
         }
+        int childCount = getChildCount();
+        for (int i = 0; i < childCount; i++) {
+            View child = getChildAt(i);
+            if (!(child instanceof ExpandableNotificationRow)) {
+                continue;
+            }
+            final ExpandableNotificationRow row = (ExpandableNotificationRow) child;
+            if (row.canViewBeDismissed() &&
+                    NotificationStackScrollLayout.matchesSelection(row, selection)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -1299,22 +1223,6 @@ public class NotificationStackScrollLayoutController {
      */
     public void setMaxDisplayedNotifications(int maxNotifications) {
         mNotificationListContainer.setMaxDisplayedNotifications(maxNotifications);
-    }
-
-    /**
-     * This is used for debugging only; it will be used to draw the otherwise invisible line which
-     * NotificationPanelViewController treats as the bottom when calculating how many notifications
-     * appear on the keyguard.
-     * Setting a negative number will disable rendering this line.
-     */
-    public void setKeyguardBottomPaddingForDebug(float keyguardBottomPadding) {
-        mView.setKeyguardBottomPadding(keyguardBottomPadding);
-    }
-
-    /** For debugging only. */
-    public void mKeyguardNotificationAvailableSpaceForDebug(
-            float keyguardNotificationAvailableSpace) {
-        mView.setKeyguardAvailableSpaceForDebug(keyguardNotificationAvailableSpace);
     }
 
     public RemoteInputController.Delegate createDelegate() {
@@ -1338,18 +1246,11 @@ public class NotificationStackScrollLayoutController {
     }
 
     public void updateSectionBoundaries(String reason) {
-        if (mNotifPipelineFlags.isNewPipelineEnabled()) {
-            return;
-        }
-        Trace.beginSection("NSSLC.updateSectionBoundaries");
         mView.updateSectionBoundaries(reason);
-        Trace.endSection();
     }
 
     public void updateFooter() {
-        Trace.beginSection("NSSLC.updateFooter");
         mView.updateFooter();
-        Trace.endSection();
     }
 
     public void onUpdateRowStates() {
@@ -1412,23 +1313,38 @@ public class NotificationStackScrollLayoutController {
         return mNotificationRoundnessManager;
     }
 
-    NotificationListContainer getNotificationListContainer() {
+    public NotificationListContainer getNotificationListContainer() {
         return mNotificationListContainer;
-    }
-
-    public NotifStackController getNotifStackController() {
-        return mNotifStackController;
     }
 
     public void resetCheckSnoozeLeavebehind() {
         mView.resetCheckSnoozeLeavebehind();
     }
 
-    private DismissedByUserStats getDismissedByUserStats(NotificationEntry entry) {
+    private DismissedByUserStats getDismissedByUserStats(
+            NotificationEntry entry,
+            int numVisibleEntries
+    ) {
         return new DismissedByUserStats(
                 DISMISSAL_SHADE,
                 DISMISS_SENTIMENT_NEUTRAL,
-                mVisibilityProvider.obtain(entry, true));
+                NotificationVisibility.obtain(
+                        entry.getKey(),
+                        entry.getRanking().getRank(),
+                        numVisibleEntries,
+                        true,
+                        NotificationLogger.getNotificationLocation(entry)));
+    }
+
+    /**
+     * @return if the shade has currently any active notifications.
+     */
+    public boolean hasActiveNotifications() {
+        if (mFeatureFlags.isNewNotifPipelineRenderingEnabled()) {
+            return !mNotifPipeline.getShadeList().isEmpty();
+        } else {
+            return mNotificationEntryManager.hasActiveNotifications();
+        }
     }
 
     public void closeControlsIfOutsideTouch(MotionEvent ev) {
@@ -1461,26 +1377,31 @@ public class NotificationStackScrollLayoutController {
 
     private void onAnimationEnd(List<ExpandableNotificationRow> viewsToRemove,
             @SelectedRows int selectedRows) {
-        if (mNotifPipelineFlags.isNewPipelineEnabled()) {
+        if (mFeatureFlags.isNewNotifPipelineRenderingEnabled()) {
             if (selectedRows == ROWS_ALL) {
                 mNotifCollection.dismissAllNotifications(
                         mLockscreenUserManager.getCurrentUserId());
             } else {
                 final List<Pair<NotificationEntry, DismissedByUserStats>>
                         entriesWithRowsDismissedFromShade = new ArrayList<>();
+                final int numVisibleEntries = mNotifPipeline.getShadeListCount();
                 for (ExpandableNotificationRow row : viewsToRemove) {
                     final NotificationEntry entry = row.getEntry();
                     entriesWithRowsDismissedFromShade.add(
-                            new Pair<>(entry, getDismissedByUserStats(entry)));
+                            new Pair<>(
+                                    entry,
+                                    getDismissedByUserStats(entry, numVisibleEntries)));
                 }
                 mNotifCollection.dismissNotifications(entriesWithRowsDismissedFromShade);
             }
         } else {
             for (ExpandableNotificationRow rowToRemove : viewsToRemove) {
-                if (canChildBeCleared(rowToRemove)) {
+                if (canChildBeDismissed(rowToRemove)) {
                     mNotificationEntryManager.performRemoveNotification(
                             rowToRemove.getEntry().getSbn(),
-                            getDismissedByUserStats(rowToRemove.getEntry()),
+                            getDismissedByUserStats(
+                                    rowToRemove.getEntry(),
+                                    mNotificationEntryManager.getActiveNotificationsCount()),
                             NotificationListenerService.REASON_CANCEL_ALL);
                 } else {
                     rowToRemove.resetTranslation();
@@ -1511,10 +1432,6 @@ public class NotificationStackScrollLayoutController {
         return mDynamicPrivacyController.isInLockedDownShade();
     }
 
-    public boolean isLongPressInProgress() {
-        return mLongPressedView != null;
-    }
-
     /**
      * Set the dimmed state for all of the notification views.
      */
@@ -1528,7 +1445,7 @@ public class NotificationStackScrollLayoutController {
      *         from the keyguard host to the quick settings one.
      */
     public int getFullShadeTransitionInset() {
-        MediaContainerView view = mKeyguardMediaController.getSinglePaneContainer();
+        MediaHeaderView view = mKeyguardMediaController.getSinglePaneContainer();
         if (view == null || view.getHeight() == 0
                 || mStatusBarStateController.getState() != KEYGUARD) {
             return 0;
@@ -1537,18 +1454,10 @@ public class NotificationStackScrollLayoutController {
     }
 
     /**
-     * @param amount The amount of pixels we have currently dragged down
-     *               for the lockscreen to shade transition. 0f for all other states.
-     * @param fraction The fraction of lockscreen to shade transition.
-     *                 0f for all other states.
-     *
-     * Once the lockscreen to shade transition completes and the shade is 100% open,
-     * LockscreenShadeTransitionController resets amount and fraction to 0, where they remain
-     * until the next lockscreen-to-shade transition.
+     * Set the amount of pixels we have currently dragged down if we're transitioning to the full
+     * shade. 0.0f means we're not transitioning yet.
      */
-    public void setTransitionToFullShadeAmount(float amount, float fraction) {
-        mView.setFractionToShade(fraction);
-
+    public void setTransitionToFullShadeAmount(float amount) {
         float extraTopInset = 0.0f;
         if (mStatusBarStateController.getState() == KEYGUARD) {
             float overallProgress = MathUtils.saturate(amount / mView.getHeight());
@@ -1558,11 +1467,6 @@ public class NotificationStackScrollLayoutController {
             extraTopInset = transitionProgress * mNotificationDragDownMovement;
         }
         mView.setExtraTopInsetForFullShadeTransition(extraTopInset);
-    }
-
-    /** */
-    public void setWillExpand(boolean willExpand) {
-        mView.setWillExpand(willExpand);
     }
 
     /**
@@ -1585,10 +1489,6 @@ public class NotificationStackScrollLayoutController {
      */
     public void animateNextTopPaddingChange() {
         mView.animateNextTopPaddingChange();
-    }
-
-    public void setNotificationActivityStarter(NotificationActivityStarter activityStarter) {
-        mNotificationActivityStarter = activityStarter;
     }
 
     /**
@@ -1662,8 +1562,7 @@ public class NotificationStackScrollLayoutController {
         @Override
         public void setNotificationActivityStarter(
                 NotificationActivityStarter notificationActivityStarter) {
-            NotificationStackScrollLayoutController.this
-                    .setNotificationActivityStarter(notificationActivityStarter);
+            mView.setNotificationActivityStarter(notificationActivityStarter);
         }
 
         @Override
@@ -1777,23 +1676,17 @@ public class NotificationStackScrollLayoutController {
             mView.handleEmptySpaceClick(ev);
 
             NotificationGuts guts = mNotificationGutsManager.getExposedGuts();
-
-            boolean longPressWantsIt = false;
-            if (mLongPressedView != null) {
-                longPressWantsIt = mSwipeHelper.onInterceptTouchEvent(ev);
-            }
             boolean expandWantsIt = false;
-            if (mLongPressedView == null && !mSwipeHelper.isSwiping()
+            if (!mSwipeHelper.isSwiping()
                     && !mView.getOnlyScrollingInThisMotion() && guts == null) {
                 expandWantsIt = mView.getExpandHelper().onInterceptTouchEvent(ev);
             }
             boolean scrollWantsIt = false;
-            if (mLongPressedView == null && !mSwipeHelper.isSwiping()
-                    && !mView.isExpandingNotification()) {
+            if (!mSwipeHelper.isSwiping() && !mView.isExpandingNotification()) {
                 scrollWantsIt = mView.onInterceptTouchEventScroll(ev);
             }
             boolean swipeWantsIt = false;
-            if (mLongPressedView == null && !mView.isBeingDragged()
+            if (!mView.isBeingDragged()
                     && !mView.isExpandingNotification()
                     && !mView.getExpandedInThisMotion()
                     && !mView.getOnlyScrollingInThisMotion()
@@ -1817,11 +1710,11 @@ public class NotificationStackScrollLayoutController {
             // We log any touches other than down, which will be captured by onTouchEvent.
             // In the intercept we only start tracing when it's not a down (otherwise that down
             // would be duplicated when intercepted).
-            if (mJankMonitor != null && scrollWantsIt
-                    && ev.getActionMasked() != MotionEvent.ACTION_DOWN) {
-                mJankMonitor.begin(mView, CUJ_NOTIFICATION_SHADE_SCROLL_FLING);
+            if (scrollWantsIt && ev.getActionMasked() != MotionEvent.ACTION_DOWN) {
+                InteractionJankMonitor.getInstance().begin(mView,
+                        CUJ_NOTIFICATION_SHADE_SCROLL_FLING);
             }
-            return swipeWantsIt || scrollWantsIt || expandWantsIt || longPressWantsIt;
+            return swipeWantsIt || scrollWantsIt || expandWantsIt;
         }
 
         @Override
@@ -1830,15 +1723,11 @@ public class NotificationStackScrollLayoutController {
             boolean isCancelOrUp = ev.getActionMasked() == MotionEvent.ACTION_CANCEL
                     || ev.getActionMasked() == MotionEvent.ACTION_UP;
             mView.handleEmptySpaceClick(ev);
-            boolean longPressWantsIt = false;
-            if (guts != null && mLongPressedView != null) {
-                longPressWantsIt = mSwipeHelper.onTouchEvent(ev);
-            }
             boolean expandWantsIt = false;
             boolean onlyScrollingInThisMotion = mView.getOnlyScrollingInThisMotion();
             boolean expandingNotification = mView.isExpandingNotification();
-            if (mLongPressedView == null && mView.getIsExpanded()
-                    && !mSwipeHelper.isSwiping() && !onlyScrollingInThisMotion && guts == null) {
+            if (mView.getIsExpanded() && !mSwipeHelper.isSwiping() && !onlyScrollingInThisMotion
+                    && guts == null) {
                 ExpandHelper expandHelper = mView.getExpandHelper();
                 if (isCancelOrUp) {
                     expandHelper.onlyObserveMovements(false);
@@ -1852,12 +1741,12 @@ public class NotificationStackScrollLayoutController {
                 }
             }
             boolean scrollerWantsIt = false;
-            if (mLongPressedView == null && mView.isExpanded() && !mSwipeHelper.isSwiping()
-                    && !expandingNotification && !mView.getDisallowScrollingInThisMotion()) {
+            if (mView.isExpanded() && !mSwipeHelper.isSwiping() && !expandingNotification
+                    && !mView.getDisallowScrollingInThisMotion()) {
                 scrollerWantsIt = mView.onScrollTouch(ev);
             }
             boolean horizontalSwipeWantsIt = false;
-            if (mLongPressedView == null && !mView.isBeingDragged()
+            if (!mView.isBeingDragged()
                     && !expandingNotification
                     && !mView.getExpandedInThisMotion()
                     && !onlyScrollingInThisMotion
@@ -1883,41 +1772,31 @@ public class NotificationStackScrollLayoutController {
                 mView.setCheckForLeaveBehind(true);
             }
             traceJankOnTouchEvent(ev.getActionMasked(), scrollerWantsIt);
-            return horizontalSwipeWantsIt || scrollerWantsIt || expandWantsIt || longPressWantsIt;
+            return horizontalSwipeWantsIt || scrollerWantsIt || expandWantsIt;
         }
 
         private void traceJankOnTouchEvent(int action, boolean scrollerWantsIt) {
-            if (mJankMonitor == null) {
-                Log.w(TAG, "traceJankOnTouchEvent, mJankMonitor is null");
-                return;
-            }
             // Handle interaction jank monitor cases.
             switch (action) {
                 case MotionEvent.ACTION_DOWN:
                     if (scrollerWantsIt) {
-                        mJankMonitor.begin(mView, CUJ_NOTIFICATION_SHADE_SCROLL_FLING);
+                        InteractionJankMonitor.getInstance()
+                                .begin(mView, CUJ_NOTIFICATION_SHADE_SCROLL_FLING);
                     }
                     break;
                 case MotionEvent.ACTION_UP:
                     if (scrollerWantsIt && !mView.isFlingAfterUpEvent()) {
-                        mJankMonitor.end(CUJ_NOTIFICATION_SHADE_SCROLL_FLING);
+                        InteractionJankMonitor.getInstance()
+                                .end(CUJ_NOTIFICATION_SHADE_SCROLL_FLING);
                     }
                     break;
                 case MotionEvent.ACTION_CANCEL:
                     if (scrollerWantsIt) {
-                        mJankMonitor.cancel(CUJ_NOTIFICATION_SHADE_SCROLL_FLING);
+                        InteractionJankMonitor.getInstance()
+                                .cancel(CUJ_NOTIFICATION_SHADE_SCROLL_FLING);
                     }
                     break;
             }
-        }
-    }
-
-    private class NotifStackControllerImpl implements NotifStackController {
-        @Override
-        public void setNotifStats(@NonNull NotifStats notifStats) {
-            mNotifStats = notifStats;
-            updateFooter();
-            updateShowEmptyShadeView();
         }
     }
 }

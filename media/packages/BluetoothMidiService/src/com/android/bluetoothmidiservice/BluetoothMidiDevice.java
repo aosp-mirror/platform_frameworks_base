@@ -24,7 +24,6 @@ import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
-import android.media.midi.MidiDevice;
 import android.media.midi.MidiDeviceInfo;
 import android.media.midi.MidiDeviceServer;
 import android.media.midi.MidiDeviceStatus;
@@ -40,6 +39,7 @@ import com.android.internal.midi.MidiEventScheduler.MidiEvent;
 import libcore.io.IoUtils;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -50,8 +50,7 @@ public final class BluetoothMidiDevice {
     private static final String TAG = "BluetoothMidiDevice";
     private static final boolean DEBUG = false;
 
-    private static final int DEFAULT_PACKET_SIZE = 20;
-    private static final int MAX_PACKET_SIZE = 512;
+    private static final int MAX_PACKET_SIZE = 20;
 
     //  Bluetooth MIDI Gatt service UUID
     private static final UUID MIDI_SERVICE = UUID.fromString(
@@ -64,7 +63,6 @@ public final class BluetoothMidiDevice {
             "00002902-0000-1000-8000-00805f9b34fb");
 
     private final BluetoothDevice mBluetoothDevice;
-    private final Context mContext;
     private final BluetoothMidiService mService;
     private final MidiManager mMidiManager;
     private MidiReceiver mOutputReceiver;
@@ -105,11 +103,6 @@ public final class BluetoothMidiDevice {
                 Log.d(TAG, "Connected to GATT server.");
                 Log.d(TAG, "Attempting to start service discovery:" +
                         mBluetoothGatt.discoverServices());
-                if (!mBluetoothGatt.requestMtu(MAX_PACKET_SIZE)) {
-                    Log.e(TAG, "request mtu failed");
-                    mPacketEncoder.setMaxPacketSize(DEFAULT_PACKET_SIZE);
-                    mPacketDecoder.setMaxPacketSize(DEFAULT_PACKET_SIZE);
-                }
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 Log.i(TAG, "Disconnected from GATT server.");
                 close();
@@ -138,8 +131,6 @@ public final class BluetoothMidiDevice {
                         // switch to receiving notifications
                         mBluetoothGatt.readCharacteristic(characteristic);
                     }
-
-                    openBluetoothDevice(mBluetoothDevice);
                 }
             } else {
                 Log.e(TAG, "onServicesDiscovered received: " + status);
@@ -191,58 +182,37 @@ public final class BluetoothMidiDevice {
             }
             mPacketDecoder.decodePacket(characteristic.getValue(), mOutputReceiver);
         }
-
-        @Override
-        public void onMtuChanged(BluetoothGatt gatt, int mtu, int status) {
-            Log.d(TAG, "onMtuChanged callback received. mtu: " + mtu + ", status: " + status);
-            if (status == BluetoothGatt.GATT_SUCCESS) {
-                mPacketEncoder.setMaxPacketSize(Math.min(mtu, MAX_PACKET_SIZE));
-                mPacketDecoder.setMaxPacketSize(Math.min(mtu, MAX_PACKET_SIZE));
-            } else {
-                mPacketEncoder.setMaxPacketSize(DEFAULT_PACKET_SIZE);
-                mPacketDecoder.setMaxPacketSize(DEFAULT_PACKET_SIZE);
-            }
-        }
     };
 
     // This receives MIDI data that has already been passed through our MidiEventScheduler
     // and has been normalized by our MidiFramer.
 
     private class PacketReceiver implements PacketEncoder.PacketReceiver {
-        private byte[] mCachedBuffer;
+        // buffers of every possible packet size
+        private final byte[][] mWriteBuffers;
 
         public PacketReceiver() {
+            // Create buffers of every possible packet size
+            mWriteBuffers = new byte[MAX_PACKET_SIZE + 1][];
+            for (int i = 0; i <= MAX_PACKET_SIZE; i++) {
+                mWriteBuffers[i] = new byte[i];
+            }
         }
 
         @Override
-        public boolean writePacket(byte[] buffer, int count) {
+        public void writePacket(byte[] buffer, int count) {
             if (mCharacteristic == null) {
                 Log.w(TAG, "not ready to send packet yet");
-                return false;
+                return;
             }
-
-            // Cache the previous buffer for writePacket so buffers aren't
-            // consistently created if the buffer sizes are consistent.
-            if ((mCachedBuffer == null) || (mCachedBuffer.length != count)) {
-                mCachedBuffer = new byte[count];
-            }
-            System.arraycopy(buffer, 0, mCachedBuffer, 0, count);
-            if (!mCharacteristic.setValue(mCachedBuffer)) {
-                Log.w(TAG, "could not set characteristic value");
-                return false;
-            }
-
+            byte[] writeBuffer = mWriteBuffers[count];
+            System.arraycopy(buffer, 0, writeBuffer, 0, count);
+            mCharacteristic.setValue(writeBuffer);
             if (DEBUG) {
                 logByteArray("Sent ", mCharacteristic.getValue(), 0,
                        mCharacteristic.getValue().length);
             }
-
-            if (!mBluetoothGatt.writeCharacteristic(mCharacteristic)) {
-                Log.w(TAG, "could not write characteristic to Bluetooth GATT");
-                return false;
-            }
-
-            return true;
+            mBluetoothGatt.writeCharacteristic(mCharacteristic);
         }
     }
 
@@ -253,7 +223,6 @@ public final class BluetoothMidiDevice {
 
         mBluetoothGatt = mBluetoothDevice.connectGatt(context, false, mGattCallback);
 
-        mContext = context;
         mMidiManager = (MidiManager)context.getSystemService(Context.MIDI_SERVICE);
 
         Bundle properties = new Bundle();
@@ -265,8 +234,7 @@ public final class BluetoothMidiDevice {
         inputPortReceivers[0] = mEventScheduler.getReceiver();
 
         mDeviceServer = mMidiManager.createDeviceServer(inputPortReceivers, 1,
-                null, null, properties, MidiDeviceInfo.TYPE_BLUETOOTH,
-                MidiDeviceInfo.PROTOCOL_UNKNOWN, mDeviceServerCallback);
+                null, null, properties, MidiDeviceInfo.TYPE_BLUETOOTH, mDeviceServerCallback);
 
         mOutputReceiver = mDeviceServer.getOutputPortReceivers()[0];
 
@@ -313,18 +281,6 @@ public final class BluetoothMidiDevice {
                 mBluetoothGatt = null;
             }
         }
-    }
-
-    void openBluetoothDevice(BluetoothDevice btDevice) {
-        Log.d(TAG, "openBluetoothDevice() device: " + btDevice);
-
-        MidiManager midiManager = mContext.getSystemService(MidiManager.class);
-        midiManager.openBluetoothDevice(btDevice,
-                new MidiManager.OnDeviceOpenedListener() {
-                    @Override
-                    public void onDeviceOpened(MidiDevice device) {
-                    }
-                }, null);
     }
 
     public IBinder getBinder() {

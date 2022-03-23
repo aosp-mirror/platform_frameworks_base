@@ -42,8 +42,7 @@ public class MediaPlayerDataTest : SysuiTestCase() {
     val mockito = MockitoJUnit.rule()
 
     companion object {
-        val LOCAL = MediaData.PLAYBACK_LOCAL
-        val REMOTE = MediaData.PLAYBACK_CAST_LOCAL
+        val LOCAL = true
         val RESUMPTION = true
         val PLAYING = true
         val UNDETERMINED = null
@@ -59,7 +58,7 @@ public class MediaPlayerDataTest : SysuiTestCase() {
         val dataIsPlaying = createMediaData("app1", PLAYING, LOCAL, !RESUMPTION)
 
         val playerIsRemote = mock(MediaControlPanel::class.java)
-        val dataIsRemote = createMediaData("app2", PLAYING, REMOTE, !RESUMPTION)
+        val dataIsRemote = createMediaData("app2", PLAYING, !LOCAL, !RESUMPTION)
 
         MediaPlayerData.addMediaPlayer("2", dataIsRemote, playerIsRemote, systemClock)
         MediaPlayerData.addMediaPlayer("1", dataIsPlaying, playerIsPlaying, systemClock)
@@ -101,13 +100,13 @@ public class MediaPlayerDataTest : SysuiTestCase() {
         val dataIsPlaying = createMediaData("app1", PLAYING, LOCAL, !RESUMPTION)
 
         val playerIsPlayingAndRemote = mock(MediaControlPanel::class.java)
-        val dataIsPlayingAndRemote = createMediaData("app2", PLAYING, REMOTE, !RESUMPTION)
+        val dataIsPlayingAndRemote = createMediaData("app2", PLAYING, !LOCAL, !RESUMPTION)
 
         val playerIsStoppedAndLocal = mock(MediaControlPanel::class.java)
         val dataIsStoppedAndLocal = createMediaData("app3", !PLAYING, LOCAL, !RESUMPTION)
 
         val playerIsStoppedAndRemote = mock(MediaControlPanel::class.java)
-        val dataIsStoppedAndRemote = createMediaData("app4", !PLAYING, REMOTE, !RESUMPTION)
+        val dataIsStoppedAndRemote = createMediaData("app4", !PLAYING, !LOCAL, !RESUMPTION)
 
         val playerCanResume = mock(MediaControlPanel::class.java)
         val dataCanResume = createMediaData("app5", !PLAYING, LOCAL, RESUMPTION)
@@ -128,8 +127,8 @@ public class MediaPlayerDataTest : SysuiTestCase() {
         val players = MediaPlayerData.players()
         assertThat(players).hasSize(6)
         assertThat(players).containsExactly(playerIsPlaying, playerIsPlayingAndRemote,
-            playerIsStoppedAndRemote, playerIsStoppedAndLocal, playerUndetermined,
-            playerCanResume).inOrder()
+            playerIsStoppedAndLocal, playerCanResume, playerIsStoppedAndRemote,
+            playerUndetermined).inOrder()
     }
 
     @Test
@@ -161,29 +160,9 @@ public class MediaPlayerDataTest : SysuiTestCase() {
     private fun createMediaData(
         app: String,
         isPlaying: Boolean?,
-        location: Int,
+        isLocalSession: Boolean,
         resumption: Boolean
-    ) = MediaData(
-        userId = 0,
-        initialized = false,
-        backgroundColor = 0,
-        app = app,
-        appIcon = null,
-        artist = null,
-        song = null,
-        artwork = null,
-        actions = emptyList(),
-        actionsToShowInCompact = emptyList(),
-        packageName = "package: $app",
-        token = null,
-        clickIntent = null,
-        device = null,
-        active = true,
-        resumeAction = null,
-        playbackLocation = location,
-        resumption = resumption,
-        notificationKey = "key: $app",
-        hasCheckedForResume = false,
-        isPlaying = isPlaying
-    )
+    ) =
+        MediaData(0, false, 0, app, null, null, null, null, emptyList(), emptyList<Int>(), "",
+            null, null, null, true, null, isLocalSession, resumption, null, false, isPlaying)
 }

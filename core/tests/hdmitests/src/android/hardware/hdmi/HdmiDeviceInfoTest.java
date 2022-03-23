@@ -43,32 +43,44 @@ public class HdmiDeviceInfoTest {
         int adopterId = 2;
 
         new EqualsTester()
-                .addEqualityGroup(HdmiDeviceInfo.INACTIVE_DEVICE)
+                .addEqualityGroup(new HdmiDeviceInfo())
                 .addEqualityGroup(
-                        HdmiDeviceInfo.hardwarePort(phyAddr, portId),
-                        HdmiDeviceInfo.hardwarePort(phyAddr, portId))
+                        new HdmiDeviceInfo(phyAddr, portId), new HdmiDeviceInfo(phyAddr, portId))
                 .addEqualityGroup(
-                        HdmiDeviceInfo.mhlDevice(phyAddr, portId, adopterId, deviceId),
-                        HdmiDeviceInfo.mhlDevice(phyAddr, portId, adopterId, deviceId))
+                        new HdmiDeviceInfo(phyAddr, portId, adopterId, deviceId),
+                        new HdmiDeviceInfo(phyAddr, portId, adopterId, deviceId))
                 .addEqualityGroup(
-                        HdmiDeviceInfo.cecDeviceBuilder()
-                                .setLogicalAddress(logicalAddr)
-                                .setPhysicalAddress(phyAddr)
-                                .setPortId(portId)
-                                .setDeviceType(deviceType)
-                                .setVendorId(vendorId)
-                                .setDisplayName(displayName)
-                                .setDevicePowerStatus(powerStatus)
-                                .setCecVersion(cecVersion).build(),
-                        HdmiDeviceInfo.cecDeviceBuilder()
-                                .setLogicalAddress(logicalAddr)
-                                .setPhysicalAddress(phyAddr)
-                                .setPortId(portId)
-                                .setDeviceType(deviceType)
-                                .setVendorId(vendorId)
-                                .setDisplayName(displayName)
-                                .setDevicePowerStatus(powerStatus)
-                                .setCecVersion(cecVersion).build())
+                        new HdmiDeviceInfo(
+                                logicalAddr, phyAddr, portId, deviceType, vendorId, displayName),
+                        new HdmiDeviceInfo(
+                                logicalAddr, phyAddr, portId, deviceType, vendorId, displayName))
+                .addEqualityGroup(
+                        new HdmiDeviceInfo(
+                                logicalAddr,
+                                phyAddr,
+                                portId,
+                                deviceType,
+                                vendorId,
+                                displayName,
+                                powerStatus),
+                        new HdmiDeviceInfo(
+                                logicalAddr,
+                                phyAddr,
+                                portId,
+                                deviceType,
+                                vendorId,
+                                displayName,
+                                powerStatus))
+                .addEqualityGroup(
+                        new HdmiDeviceInfo(
+                                logicalAddr,
+                                phyAddr,
+                                portId,
+                                deviceType,
+                                vendorId,
+                                displayName,
+                                powerStatus,
+                                cecVersion))
                 .testEquals();
     }
 }

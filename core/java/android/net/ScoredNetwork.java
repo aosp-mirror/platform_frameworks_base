@@ -29,10 +29,8 @@ import java.util.Set;
 /**
  * A network identifier along with a score for the quality of that network.
  *
- * @deprecated as part of the {@link NetworkScoreManager} deprecation.
  * @hide
  */
-@Deprecated
 @SystemApi
 public class ScoredNetwork implements Parcelable {
 

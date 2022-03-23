@@ -19,9 +19,6 @@
     },
     {
       "name": "CtsPackageUninstallTestCases"
-    },
-    {
-      "name": "PackageInstallerTests"
     }
   ]
 }

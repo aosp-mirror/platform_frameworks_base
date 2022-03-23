@@ -17,27 +17,25 @@ package com.android.systemui.plugins;
 import android.util.ArrayMap;
 
 import com.android.systemui.Dependency;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.plugins.PluginDependency.DependencyProvider;
 import com.android.systemui.shared.plugins.PluginManager;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
-
-import dagger.Lazy;
 
 /**
  */
-@Singleton
+@SysUISingleton
 public class PluginDependencyProvider extends DependencyProvider {
 
     private final ArrayMap<Class<?>, Object> mDependencies = new ArrayMap<>();
-    private final Lazy<PluginManager> mManagerLazy;
+    private final PluginManager mManager;
 
     /**
      */
     @Inject
-    public PluginDependencyProvider(Lazy<PluginManager> managerLazy) {
-        mManagerLazy = managerLazy;
+    public PluginDependencyProvider(PluginManager manager) {
+        mManager = manager;
         PluginDependency.sProvider = this;
     }
 
@@ -53,7 +51,7 @@ public class PluginDependencyProvider extends DependencyProvider {
 
     @Override
     <T> T get(Plugin p, Class<T> cls) {
-        if (!mManagerLazy.get().dependsOn(p, cls)) {
+        if (!mManager.dependsOn(p, cls)) {
             throw new IllegalArgumentException(p.getClass() + " does not depend on " + cls);
         }
         synchronized (mDependencies) {

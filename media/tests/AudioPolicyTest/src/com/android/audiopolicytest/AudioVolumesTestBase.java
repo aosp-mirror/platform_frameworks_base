@@ -37,9 +37,14 @@ public class AudioVolumesTestBase extends ActivityInstrumentationTestCase2<Audio
     // Default matches the invalid (empty) attributes from native.
     // The difference is the input source default which is not aligned between native and java
     public static final AudioAttributes sDefaultAttributes =
-            AudioProductStrategy.getDefaultAttributes();
+            AudioProductStrategy.sDefaultAttributes;
 
     public static final AudioAttributes sInvalidAttributes = new AudioAttributes.Builder().build();
+
+    public final int[] PUBLIC_STREAM_TYPES = { AudioManager.STREAM_VOICE_CALL,
+            AudioManager.STREAM_SYSTEM, AudioManager.STREAM_RING, AudioManager.STREAM_MUSIC,
+            AudioManager.STREAM_ALARM, AudioManager.STREAM_NOTIFICATION,
+            AudioManager.STREAM_DTMF,  AudioManager.STREAM_ACCESSIBILITY };
 
     public AudioVolumesTestBase() {
         super("com.android.audiopolicytest", AudioPolicyTest.class);
@@ -58,7 +63,7 @@ public class AudioVolumesTestBase extends ActivityInstrumentationTestCase2<Audio
             }
             AudioAttributes avgAttributes = sDefaultAttributes;
             for (final AudioAttributes aa : avg.getAudioAttributes()) {
-                if (!aa.equals(AudioProductStrategy.getDefaultAttributes())) {
+                if (!aa.equals(AudioProductStrategy.sDefaultAttributes)) {
                     avgAttributes = aa;
                     break;
                 }
@@ -84,7 +89,7 @@ public class AudioVolumesTestBase extends ActivityInstrumentationTestCase2<Audio
                     assertTrue(!avg.getAudioAttributes().isEmpty());
                     AudioAttributes avgAttributes = sDefaultAttributes;
                     for (final AudioAttributes aa : avg.getAudioAttributes()) {
-                        if (!aa.equals(AudioProductStrategy.getDefaultAttributes())) {
+                        if (!aa.equals(AudioProductStrategy.sDefaultAttributes)) {
                             avgAttributes = aa;
                             break;
                         }
@@ -109,7 +114,7 @@ public class AudioVolumesTestBase extends ActivityInstrumentationTestCase2<Audio
 
         // Store the original volumes that that they can be recovered in tearDown().
         mOriginalStreamVolumes.clear();
-        for (int streamType : AudioManager.getPublicStreamTypes()) {
+        for (int streamType : PUBLIC_STREAM_TYPES) {
             mOriginalStreamVolumes.put(streamType, mAudioManager.getStreamVolume(streamType));
         }
         // Store the original volume per attributes so that they can be recovered in tearDown()

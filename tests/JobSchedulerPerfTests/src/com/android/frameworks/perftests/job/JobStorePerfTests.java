@@ -82,10 +82,11 @@ public class JobStorePerfTests {
 
         long elapsedTimeNs = 0;
         while (benchmarkState.keepRunning(elapsedTimeNs)) {
-            sJobStore.clearForTesting();
+            sJobStore.clear();
             for (JobStatus job : jobList) {
-                sJobStore.addForTesting(job);
+                sJobStore.add(job);
             }
+            sJobStore.waitForWriteToCompleteForTesting(10_000);
 
             final long startTime = SystemClock.elapsedRealtimeNanos();
             sJobStore.writeStatusToDiskForTesting();
@@ -109,11 +110,11 @@ public class JobStorePerfTests {
 
         long elapsedTimeNs = 0;
         while (benchmarkState.keepRunning(elapsedTimeNs)) {
-            sJobStore.clearForTesting();
+            sJobStore.clear();
             for (JobStatus job : jobList) {
-                sJobStore.addForTesting(job);
+                sJobStore.add(job);
             }
-            sJobStore.writeStatusToDiskForTesting();
+            sJobStore.waitForWriteToCompleteForTesting(10_000);
 
             JobSet jobSet = new JobSet();
 
