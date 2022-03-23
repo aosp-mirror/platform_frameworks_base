@@ -201,24 +201,24 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
 
     /** Applies new configuration, returns {@code false} if there's no effect to the layout. */
     public boolean updateConfiguration(Configuration configuration) {
+        // Always update configuration after orientation changed to make sure to render divider bar
+        // with proper resources that matching screen orientation.
+        final int orientation = configuration.orientation;
+        if (mOrientation != orientation) {
+            mContext = mContext.createConfigurationContext(configuration);
+            mSplitWindowManager.setConfiguration(configuration);
+            mOrientation = orientation;
+        }
+
         // Update the split bounds when necessary. Besides root bounds changed, split bounds need to
         // be updated when the rotation changed to cover the case that users rotated the screen 180
         // degrees.
-        // Make sure to render the divider bar with proper resources that matching the screen
-        // orientation.
         final int rotation = configuration.windowConfiguration.getRotation();
         final Rect rootBounds = configuration.windowConfiguration.getBounds();
-        final int orientation = configuration.orientation;
-
-        if (mOrientation == orientation
-                && rotation == mRotation
-                && mRootBounds.equals(rootBounds)) {
+        if (mRotation == rotation && mRootBounds.equals(rootBounds)) {
             return false;
         }
 
-        mContext = mContext.createConfigurationContext(configuration);
-        mSplitWindowManager.setConfiguration(configuration);
-        mOrientation = orientation;
         mTempRect.set(mRootBounds);
         mRootBounds.set(rootBounds);
         mRotation = rotation;

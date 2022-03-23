@@ -369,12 +369,20 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
             }
 
             if (change.getMode() == TRANSIT_CHANGE) {
-                // If task is child task, only set position in parent.
+                // If task is child task, only set position in parent and update crop when needed.
                 if (isTask && change.getParent() != null
                         && info.getChange(change.getParent()).getTaskInfo() != null) {
                     final Point positionInParent = change.getTaskInfo().positionInParent;
                     startTransaction.setPosition(change.getLeash(),
                             positionInParent.x, positionInParent.y);
+
+                    if (!change.getEndAbsBounds().equals(
+                            info.getChange(change.getParent()).getEndAbsBounds())) {
+                        startTransaction.setWindowCrop(change.getLeash(),
+                                change.getEndAbsBounds().width(),
+                                change.getEndAbsBounds().height());
+                    }
+
                     continue;
                 }
 
