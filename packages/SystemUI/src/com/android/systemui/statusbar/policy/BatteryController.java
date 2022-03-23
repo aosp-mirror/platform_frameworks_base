@@ -22,7 +22,6 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.demomode.DemoMode;
 import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
 public interface BatteryController extends DemoMode, Dumpable,
@@ -30,7 +29,7 @@ public interface BatteryController extends DemoMode, Dumpable,
     /**
      * Prints the current state of the {@link BatteryController} to the given {@link PrintWriter}.
      */
-    void dump(FileDescriptor fd, PrintWriter pw, String[] args);
+    void dump(PrintWriter pw, String[] args);
 
     /**
      * Sets if the current device is in power save mode.

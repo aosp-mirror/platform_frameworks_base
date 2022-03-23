@@ -194,7 +194,6 @@ import com.android.systemui.util.settings.SecureSettings;
 import com.android.systemui.wallet.controller.QuickAccessWalletController;
 import com.android.wm.shell.animation.FlingAnimationUtils;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -3817,14 +3816,14 @@ public class NotificationPanelViewController extends PanelViewController {
     }
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        super.dump(fd, pw, args);
+    public void dump(PrintWriter pw, String[] args) {
+        super.dump(pw, args);
         pw.println("    gestureExclusionRect: " + calculateGestureExclusionRect()
                 + " applyQSClippingImmediately: top(" + mQsClipTop + ") bottom(" + mQsClipBottom
                 + ") qsVisible(" + mQsVisible
         );
         if (mKeyguardStatusBarViewController != null) {
-            mKeyguardStatusBarViewController.dump(fd, pw, args);
+            mKeyguardStatusBarViewController.dump(pw, args);
         }
     }
 

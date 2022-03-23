@@ -111,7 +111,6 @@ import com.android.systemui.util.Assert;
 import com.android.systemui.util.DumpUtilsKt;
 import com.android.systemui.util.LargeScreenUtils;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.util.ArrayList;
@@ -5013,7 +5012,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
-    public void dump(FileDescriptor fd, PrintWriter pwOriginal, String[] args) {
+    public void dump(PrintWriter pwOriginal, String[] args) {
         IndentingPrintWriter pw = DumpUtilsKt.asIndenting(pwOriginal);
         StringBuilder sb = new StringBuilder("[")
                 .append(this.getClass().getSimpleName()).append(":")
@@ -5040,20 +5039,20 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
             for (int i = 0; i < childCount; i++) {
                 ExpandableView child = (ExpandableView) getChildAt(i);
-                child.dump(fd, pw, args);
+                child.dump(pw, args);
                 pw.println();
             }
             int transientViewCount = getTransientViewCount();
             pw.println("Transient Views: " + transientViewCount);
             for (int i = 0; i < transientViewCount; i++) {
                 ExpandableView child = (ExpandableView) getTransientView(i);
-                child.dump(fd, pw, args);
+                child.dump(pw, args);
             }
             View swipedView = mSwipeHelper.getSwipedView();
             pw.println("Swiped view: " + swipedView);
             if (swipedView instanceof ExpandableView) {
                 ExpandableView expandableView = (ExpandableView) swipedView;
-                expandableView.dump(fd, pw, args);
+                expandableView.dump(pw, args);
             }
         });
     }
