@@ -46,6 +46,7 @@ import android.window.IRemoteTransition;
 import android.window.IRemoteTransitionFinishedCallback;
 import android.window.PictureInPictureSurfaceTransaction;
 import android.window.RemoteTransition;
+import android.window.TaskSnapshot;
 import android.window.TransitionFilter;
 import android.window.TransitionInfo;
 import android.window.WindowContainerToken;
@@ -299,7 +300,16 @@ public class RemoteTransitionCompat implements Parcelable {
         }
 
         @Override public ThumbnailData screenshotTask(int taskId) {
-            return mWrapped != null ? mWrapped.screenshotTask(taskId) : null;
+            try {
+                final TaskSnapshot snapshot =
+                        ActivityTaskManager.getService().takeTaskSnapshot(taskId);
+                if (snapshot != null) {
+                    return new ThumbnailData(snapshot);
+                }
+            } catch (RemoteException e) {
+                Log.e(TAG, "Failed to screenshot task", e);
+            }
+            return null;
         }
 
         @Override public void setInputConsumerEnabled(boolean enabled) {

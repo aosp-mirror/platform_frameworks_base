@@ -3652,25 +3652,41 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         mAmInternal.enforceCallingPermission(READ_FRAME_BUFFER, "getTaskSnapshot()");
         final long ident = Binder.clearCallingIdentity();
         try {
-            return getTaskSnapshot(taskId, isLowResolution, true /* restoreFromDisk */);
+            final Task task;
+            synchronized (mGlobalLock) {
+                task = mRootWindowContainer.anyTaskForId(taskId,
+                        MATCH_ATTACHED_TASK_OR_RECENT_TASKS);
+                if (task == null) {
+                    Slog.w(TAG, "getTaskSnapshot: taskId=" + taskId + " not found");
+                    return null;
+                }
+            }
+            // Don't call this while holding the lock as this operation might hit the disk.
+            return mWindowManager.mTaskSnapshotController.getSnapshot(taskId, task.mUserId,
+                    true /* restoreFromDisk */, isLowResolution);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
     }
 
-    private TaskSnapshot getTaskSnapshot(int taskId, boolean isLowResolution,
-            boolean restoreFromDisk) {
-        final Task task;
-        synchronized (mGlobalLock) {
-            task = mRootWindowContainer.anyTaskForId(taskId,
-                    MATCH_ATTACHED_TASK_OR_RECENT_TASKS);
-            if (task == null) {
-                Slog.w(TAG, "getTaskSnapshot: taskId=" + taskId + " not found");
-                return null;
+    @Override
+    public TaskSnapshot takeTaskSnapshot(int taskId) {
+        mAmInternal.enforceCallingPermission(READ_FRAME_BUFFER, "takeTaskSnapshot()");
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                final Task task = mRootWindowContainer.anyTaskForId(taskId,
+                        MATCH_ATTACHED_TASK_OR_RECENT_TASKS);
+                if (task == null || !task.isVisible()) {
+                    Slog.w(TAG, "takeTaskSnapshot: taskId=" + taskId + " not found or not visible");
+                    return null;
+                }
+                return mWindowManager.mTaskSnapshotController.captureTaskSnapshot(
+                        task, false /* snapshotHome */);
             }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
         }
-        // Don't call this while holding the lock as this operation might hit the disk.
-        return task.getSnapshot(isLowResolution, restoreFromDisk);
     }
 
     /** Return the user id of the last resumed activity. */
@@ -6621,8 +6637,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         @Override
         public TaskSnapshot getTaskSnapshotBlocking(
                 int taskId, boolean isLowResolution) {
-            return ActivityTaskManagerService.this.getTaskSnapshot(taskId, isLowResolution,
-                    true /* restoreFromDisk */);
+            return ActivityTaskManagerService.this.getTaskSnapshot(taskId, isLowResolution);
         }
 
         @Override

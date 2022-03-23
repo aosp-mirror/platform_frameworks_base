@@ -280,6 +280,12 @@ interface IActivityTaskManager {
     android.window.TaskSnapshot getTaskSnapshot(int taskId, boolean isLowResolution);
 
     /**
+     * @param taskId the id of the task to take a snapshot of
+     * @return a graphic buffer representing a screenshot of a task
+     */
+    android.window.TaskSnapshot takeTaskSnapshot(int taskId);
+
+    /**
      * Return the user id of last resumed activity.
      */
     int getLastResumedActivityUserId();
