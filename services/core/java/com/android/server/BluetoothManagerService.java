@@ -193,6 +193,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
     // used inside handler thread
     private boolean mQuietEnable = false;
     private boolean mEnable;
+    private boolean mShutdownInProgress = false;
 
     private static CharSequence timeToLog(long timestamp) {
         return android.text.format.DateFormat.format("MM-dd HH:mm:ss", timestamp);
@@ -464,6 +465,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                 }
             } else if (action.equals(Intent.ACTION_SHUTDOWN)) {
                 Slog.i(TAG, "Device is shutting down.");
+                mShutdownInProgress = true;
                 mBluetoothLock.readLock().lock();
                 try {
                     mEnable = false;
@@ -1867,6 +1869,11 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                 case MESSAGE_ENABLE:
                     int quietEnable = msg.arg1;
                     int isBle  = msg.arg2;
+                    if (mShutdownInProgress) {
+                        Slog.i(TAG, "Skip Bluetooth Enable in device shutdown process");
+                        break;
+                    }
+
                     if (mHandler.hasMessages(MESSAGE_HANDLE_DISABLE_DELAYED)
                             || mHandler.hasMessages(MESSAGE_HANDLE_ENABLE_DELAYED)) {
                         // We are handling enable or disable right now, wait for it.
