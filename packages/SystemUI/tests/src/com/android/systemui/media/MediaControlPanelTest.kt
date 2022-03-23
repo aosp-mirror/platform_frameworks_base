@@ -16,6 +16,7 @@
 
 package com.android.systemui.media
 
+import org.mockito.Mockito.`when` as whenever
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
@@ -35,6 +36,7 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.SeekBar
 import android.widget.TextView
+import androidx.constraintlayout.widget.Barrier
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.lifecycle.LiveData
 import androidx.test.filters.SmallTest
@@ -63,7 +65,6 @@ import org.mockito.Mockito.never
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnit
-import org.mockito.Mockito.`when` as whenever
 
 private const val KEY = "TEST_KEY"
 private const val APP = "APP"
@@ -120,6 +121,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
     private lateinit var actionPlayPause: ImageButton
     private lateinit var actionNext: ImageButton
     private lateinit var actionPrev: ImageButton
+    private lateinit var actionsTopBarrier: Barrier
     @Mock private lateinit var longPressText: TextView
     @Mock private lateinit var handler: Handler
     private lateinit var settings: ImageButton
@@ -175,6 +177,21 @@ public class MediaControlPanelTest : SysuiTestCase() {
         actionPlayPause = ImageButton(context).also { it.setId(R.id.actionPlayPause) }
         actionPrev = ImageButton(context).also { it.setId(R.id.actionPrev) }
         actionNext = ImageButton(context).also { it.setId(R.id.actionNext) }
+
+        actionsTopBarrier =
+            Barrier(context).also {
+                it.id = R.id.media_action_barrier_top
+                it.referencedIds =
+                    intArrayOf(
+                        actionPrev.id,
+                        seekBar.id,
+                        actionNext.id,
+                        action0.id,
+                        action1.id,
+                        action2.id,
+                        action3.id,
+                        action4.id)
+            }
 
         initMediaViewHolderMocks()
 
@@ -254,6 +271,8 @@ public class MediaControlPanelTest : SysuiTestCase() {
         whenever(viewHolder.cancelText).thenReturn(cancelText)
         whenever(viewHolder.dismiss).thenReturn(dismiss)
         whenever(viewHolder.dismissText).thenReturn(dismissText)
+
+        whenever(viewHolder.actionsTopBarrier).thenReturn(actionsTopBarrier)
     }
 
     @After
@@ -313,6 +332,35 @@ public class MediaControlPanelTest : SysuiTestCase() {
 
         verify(collapsedSet).setVisibility(R.id.action4, ConstraintSet.GONE)
         verify(expandedSet).setVisibility(R.id.action4, ConstraintSet.GONE)
+    }
+
+    @Test
+    fun bind_seekBarDisabled_seekBarVisibilityIsSetToInvisible() {
+        whenever(seekBarViewModel.getEnabled()).thenReturn(false)
+
+        val icon = Icon.createWithResource(context, android.R.drawable.ic_media_play)
+        val semanticActions = MediaButton(
+            playOrPause = MediaAction(icon, Runnable {}, "play"),
+            nextOrCustom = MediaAction(icon, Runnable {}, "next")
+        )
+        val state = mediaData.copy(semanticActions = semanticActions)
+
+        player.attachPlayer(viewHolder)
+        player.bindPlayer(state, PACKAGE)
+
+        verify(expandedSet).setVisibility(R.id.media_progress_bar, ConstraintSet.INVISIBLE)
+    }
+
+    @Test
+    fun bind_seekBarDisabled_noActions_seekBarVisibilityIsSetToGone() {
+        whenever(seekBarViewModel.getEnabled()).thenReturn(false)
+
+        val state = mediaData.copy(semanticActions = MediaButton())
+
+        player.attachPlayer(viewHolder)
+        player.bindPlayer(state, PACKAGE)
+
+        verify(expandedSet).setVisibility(R.id.media_progress_bar, ConstraintSet.INVISIBLE)
     }
 
     @Test
