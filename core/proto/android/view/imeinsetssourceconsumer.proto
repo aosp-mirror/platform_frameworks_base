@@ -16,6 +16,7 @@
 
 syntax = "proto2";
 
+import "frameworks/base/core/proto/android/view/inputmethod/editorinfo.proto";
 import "frameworks/base/core/proto/android/view/insetssourceconsumer.proto";
 
 package android.view;

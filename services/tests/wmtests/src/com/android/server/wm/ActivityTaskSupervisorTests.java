@@ -19,7 +19,6 @@ package com.android.server.wm;
 import static android.app.ActivityManager.START_DELIVERED_TO_TOP;
 import static android.app.ActivityManager.START_TASK_TO_FRONT;
 import static android.app.ITaskStackListener.FORCED_RESIZEABLE_REASON_SECONDARY_DISPLAY;
-import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
@@ -31,22 +30,18 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.timeout;
 
 import android.app.WaitResult;
 import android.content.ComponentName;
-import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.ConditionVariable;
-import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 import android.view.Display;
 
@@ -54,7 +49,6 @@ import androidx.test.filters.MediumTest;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentMatchers;
 
 import java.util.concurrent.TimeUnit;
 
@@ -114,18 +108,16 @@ public class ActivityTaskSupervisorTests extends WindowTestsBase {
         final ActivityMetricsLogger.LaunchingState launchingState =
                 new ActivityMetricsLogger.LaunchingState();
         spyOn(launchingState);
-        doReturn(true).when(launchingState).hasActiveTransitionInfo();
-        doReturn(true).when(launchingState).contains(
-                ArgumentMatchers.argThat(r -> r == firstActivity || r == secondActivity));
+        doReturn(true).when(launchingState).contains(eq(secondActivity));
         // The test case already runs inside global lock, so above thread can only execute after
         // this waiting method that releases the lock.
         mSupervisor.waitActivityVisibleOrLaunched(taskToFrontWait, firstActivity, launchingState);
 
         // Assert that the thread is finished.
         assertTrue(condition.block(TIMEOUT_MS));
-        assertEquals(START_TASK_TO_FRONT, taskToFrontWait.result);
-        assertEquals(secondActivity.mActivityComponent, taskToFrontWait.who);
-        assertEquals(WaitResult.LAUNCH_STATE_HOT, taskToFrontWait.launchState);
+        assertEquals(taskToFrontWait.result, START_TASK_TO_FRONT);
+        assertEquals(taskToFrontWait.who, secondActivity.mActivityComponent);
+        assertEquals(taskToFrontWait.launchState, WaitResult.LAUNCH_STATE_HOT);
         // START_TASK_TO_FRONT means that another component will be visible, so the component
         // should not be assigned as the first activity.
         assertNull(launchedComponent[0]);
@@ -195,24 +187,6 @@ public class ActivityTaskSupervisorTests extends WindowTestsBase {
         verify(taskChangeNotifier, never()).notifyActivityDismissingDockedRootTask();
     }
 
-    /** Ensures that the calling package name passed to client complies with package visibility. */
-    @Test
-    public void testFilteredReferred() {
-        final ActivityRecord activity = new ActivityBuilder(mAtm)
-                .setLaunchedFromPackage("other.package").setCreateTask(true).build();
-        assertNotNull(activity.launchedFromPackage);
-        try {
-            mSupervisor.realStartActivityLocked(activity, activity.app, false /* andResume */,
-                    false /* checkConfig */);
-        } catch (RemoteException ignored) {
-        }
-        verify(activity).getFilteredReferrer(eq(activity.launchedFromPackage));
-
-        activity.deliverNewIntentLocked(ActivityBuilder.DEFAULT_FAKE_UID,
-                new Intent(), null /* intentGrants */, "other.package2");
-        verify(activity).getFilteredReferrer(eq("other.package2"));
-    }
-
     /**
      * Ensures that notify focus task changes.
      */
@@ -265,30 +239,6 @@ public class ActivityTaskSupervisorTests extends WindowTestsBase {
                 callingUid, display.getDisplayId(), activityInfo);
 
         assertThat(allowedOnUntrusted).isFalse();
-    }
-
-    /**
-     * Verifies that process state will be updated with pending top without activity state change.
-     * E.g. switch focus between resumed activities in multi-window mode.
-     */
-    @Test
-    public void testUpdatePendingTopForTopResumed() {
-        final Task task1 = new TaskBuilder(mSupervisor)
-                .setWindowingMode(WINDOWING_MODE_MULTI_WINDOW).build();
-        final ActivityRecord activity1 = new ActivityBuilder(mAtm)
-                .setTask(task1).setUid(ActivityBuilder.DEFAULT_FAKE_UID + 1).build();
-        task1.setResumedActivity(activity1, "test");
-
-        final ActivityRecord activity2 = new TaskBuilder(mSupervisor)
-                .setWindowingMode(WINDOWING_MODE_MULTI_WINDOW)
-                .setCreateActivity(true).build().getTopMostActivity();
-        activity2.getTask().setResumedActivity(activity2, "test");
-
-        mAtm.mAmInternal.deletePendingTopUid(activity1.getUid());
-        clearInvocations(mAtm);
-        activity1.moveFocusableActivityToTop("test");
-        assertTrue(mAtm.mAmInternal.isPendingTopUid(activity1.getUid()));
-        verify(mAtm).updateOomAdj();
     }
 
     /**

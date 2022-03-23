@@ -24,13 +24,12 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.provider.Settings;
 import android.view.ContextThemeWrapper;
-import android.view.DisplayCutout;
 import android.view.View;
 
-import com.android.internal.policy.SystemBarUtils;
 import com.android.systemui.R;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.FeatureFlags;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -162,19 +161,13 @@ public class Utils {
     }
 
     /**
-     * Returns true if the device should use the collapsed layout for the media player when in
-     * landscape (or seascape) orientation
+     * Returns true if the device should use the split notification shade, based on feature flags,
+     * orientation and screen width.
      */
-    public static boolean useCollapsedMediaInLandscape(Resources resources) {
-        return resources.getBoolean(R.bool.config_quickSettingsMediaLandscapeCollapsed);
-    }
-
-    /**
-     * Returns true if the device should use the split notification shade, based on orientation and
-     * screen width.
-     */
-    public static boolean shouldUseSplitNotificationShade(Resources resources) {
-        return resources.getBoolean(R.bool.config_use_split_notification_shade);
+    public static boolean shouldUseSplitNotificationShade(FeatureFlags featureFlags,
+            Resources resources) {
+        return featureFlags.isTwoColumnNotificationShadeEnabled()
+                && resources.getBoolean(R.bool.config_use_split_notification_shade);
     }
 
     /**
@@ -196,42 +189,4 @@ public class Utils {
         return color;
     }
 
-    /**
-     * Gets the {@link R.dimen#split_shade_header_height}.
-     *
-     * It should be fine to not ignore cutouts as split shade might not want to react to them:
-     * for split shade header, which is only on bigger screens, either cutout won't be a problem
-     * (it's usually centered and in split shade that's likely empty area) or we probably want to
-     * handle it differently.
-     */
-    public static int getSplitShadeStatusBarHeight(Context context) {
-        return context.getResources().getDimensionPixelSize(R.dimen.split_shade_header_height);
-    }
-
-    /**
-     * Gets the {@link R.dimen#qs_header_system_icons_area_height}.
-     *
-     * It's the same as {@link com.android.internal.R.dimen#quick_qs_offset_height} except for
-     * sw600dp-land.
-     */
-    public static int getQsHeaderSystemIconsAreaHeight(Context context) {
-        final Resources res = context.getResources();
-        if (Utils.shouldUseSplitNotificationShade(res)) {
-            return res.getDimensionPixelSize(R.dimen.qs_header_system_icons_area_height);
-        } else {
-            return SystemBarUtils.getQuickQsOffsetHeight(context);
-        }
-    }
-
-    /**
-     * Gets the {@link R.dimen#status_bar_header_height_keyguard}.
-     */
-    public static int getStatusBarHeaderHeightKeyguard(Context context) {
-        final int statusBarHeight = SystemBarUtils.getStatusBarHeight(context);
-        final DisplayCutout cutout = context.getDisplay().getCutout();
-        final int waterfallInsetTop = cutout == null ? 0 : cutout.getWaterfallInsets().top;
-        final int statusBarHeaderHeightKeyguard = context.getResources()
-                .getDimensionPixelSize(R.dimen.status_bar_header_height_keyguard);
-        return Math.max(statusBarHeight, statusBarHeaderHeightKeyguard + waterfallInsetTop);
-    }
 }

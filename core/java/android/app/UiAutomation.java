@@ -22,7 +22,6 @@ import android.accessibilityservice.AccessibilityService.IAccessibilityServiceCl
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.IAccessibilityServiceClient;
 import android.accessibilityservice.IAccessibilityServiceConnection;
-import android.accessibilityservice.MagnificationConfig;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -50,7 +49,6 @@ import android.util.SparseArray;
 import android.view.Display;
 import android.view.InputEvent;
 import android.view.KeyEvent;
-import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.View;
@@ -63,14 +61,9 @@ import android.view.accessibility.AccessibilityInteractionClient;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityWindowInfo;
 import android.view.accessibility.IAccessibilityInteractionConnection;
-import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputBinding;
-import android.view.inputmethod.InputConnection;
-import android.view.inputmethod.InputMethodSession;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.function.pooled.PooledLambda;
-import com.android.internal.view.IInputSessionWithIdCallback;
 
 import libcore.io.IoUtils;
 
@@ -644,7 +637,7 @@ public final class UiAutomation {
         final IAccessibilityServiceConnection connection;
         synchronized (mLock) {
             throwIfNotConnectedLocked();
-            AccessibilityInteractionClient.getInstance().clearCache(mConnectionId);
+            AccessibilityInteractionClient.getInstance().clearCache();
             connection = AccessibilityInteractionClient.getInstance()
                     .getConnection(mConnectionId);
         }
@@ -733,8 +726,7 @@ public final class UiAutomation {
         }
         // Calling out without a lock held.
         return AccessibilityInteractionClient.getInstance()
-                .getRootInActiveWindow(connectionId,
-                        AccessibilityNodeInfo.FLAG_PREFETCH_DESCENDANTS_HYBRID);
+                .getRootInActiveWindow(connectionId);
     }
 
     /**
@@ -783,33 +775,6 @@ public final class UiAutomation {
             Log.e(LOG_TAG, "Error while injecting input event!", re);
         }
         return false;
-    }
-
-    /**
-     * Sets the system settings values that control the scaling factor for animations. The scale
-     * controls the animation playback speed for animations that respect these settings. Animations
-     * that do not respect the settings values will not be affected by this function. A lower scale
-     * value results in a faster speed. A value of <code>0</code> disables animations entirely. When
-     * animations are disabled services receive window change events more quickly which can reduce
-     * the potential by confusion by reducing the time during which windows are in transition.
-     *
-     * @see AccessibilityEvent#TYPE_WINDOWS_CHANGED
-     * @see AccessibilityEvent#TYPE_WINDOW_STATE_CHANGED
-     * @see android.provider.Settings.Global#WINDOW_ANIMATION_SCALE
-     * @see android.provider.Settings.Global#TRANSITION_ANIMATION_SCALE
-     * @see android.provider.Settings.Global#ANIMATOR_DURATION_SCALE
-     * @param scale The scaling factor for all animations.
-     */
-    public void setAnimationScale(float scale) {
-        final IAccessibilityServiceConnection connection =
-                AccessibilityInteractionClient.getInstance().getConnection(mConnectionId);
-        if (connection != null) {
-            try {
-                connection.setAnimationScale(scale);
-            } catch (RemoteException re) {
-                throw new RuntimeException(re);
-            }
-        }
     }
 
     /**
@@ -1209,9 +1174,7 @@ public final class UiAutomation {
      * @see android.view.WindowAnimationFrameStats
      * @see #getWindowAnimationFrameStats()
      * @see android.R.styleable#WindowAnimation
-     * @deprecated animation-frames are no-longer used.
      */
-    @Deprecated
     public void clearWindowAnimationFrameStats() {
         try {
             if (DEBUG) {
@@ -1250,9 +1213,7 @@ public final class UiAutomation {
      * @see android.view.WindowAnimationFrameStats
      * @see #clearWindowAnimationFrameStats()
      * @see android.R.styleable#WindowAnimation
-     * @deprecated animation-frames are no-longer used.
      */
-    @Deprecated
     public WindowAnimationFrameStats getWindowAnimationFrameStats() {
         try {
             if (DEBUG) {
@@ -1572,41 +1533,9 @@ public final class UiAutomation {
                 }
 
                 @Override
-                public void createImeSession(IInputSessionWithIdCallback callback) {
-                    /* do nothing */
-                }
-
-                @Override
-                public void setImeSessionEnabled(InputMethodSession session, boolean enabled) {
-                }
-
-                @Override
-                public void bindInput(InputBinding binding) {
-                }
-
-                @Override
-                public void unbindInput() {
-                }
-
-                @Override
-                public void startInput(@Nullable InputConnection inputConnection,
-                        @NonNull EditorInfo editorInfo, boolean restarting,
-                        @NonNull IBinder startInputToken) {
-                }
-
-                @Override
                 public boolean onGesture(AccessibilityGestureEvent gestureEvent) {
                     /* do nothing */
                     return false;
-                }
-
-                public void onMotionEvent(MotionEvent event) {
-                    /* do nothing */
-                }
-
-                @Override
-                public void onTouchStateChanged(int displayId, int state) {
-                    /* do nothing */
                 }
 
                 @Override
@@ -1638,7 +1567,7 @@ public final class UiAutomation {
 
                 @Override
                 public void onMagnificationChanged(int displayId, @NonNull Region region,
-                        MagnificationConfig config) {
+                        float scale, float centerX, float centerY) {
                     /* do nothing */
                 }
 

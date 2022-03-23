@@ -24,7 +24,6 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.ProviderInfo;
 import android.net.Uri;
 import android.os.UserHandle;
-import android.platform.test.annotations.Presubmit;
 
 import androidx.test.runner.AndroidJUnit4;
 
@@ -33,7 +32,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Answers;
 
-@Presubmit
 @RunWith(AndroidJUnit4.class)
 public class ContentProviderTest {
 

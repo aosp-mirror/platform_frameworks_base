@@ -19,18 +19,18 @@ package com.android.server.backup.params;
 import android.content.pm.PackageInfo;
 
 import com.android.server.backup.internal.OnTaskFinishedListener;
-import com.android.server.backup.transport.TransportConnection;
+import com.android.server.backup.transport.TransportClient;
 
 public class ClearParams {
-    public TransportConnection mTransportConnection;
+    public TransportClient transportClient;
     public PackageInfo packageInfo;
     public OnTaskFinishedListener listener;
 
     public ClearParams(
-            TransportConnection transportConnection,
+            TransportClient transportClient,
             PackageInfo packageInfo,
             OnTaskFinishedListener listener) {
-        this.mTransportConnection = transportConnection;
+        this.transportClient = transportClient;
         this.packageInfo = packageInfo;
         this.listener = listener;
     }

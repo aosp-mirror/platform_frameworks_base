@@ -48,8 +48,8 @@ public final class UriPathPair implements Parcelable {
 
     /** @hide */
     private UriPathPair(Parcel in) {
-        mFilePathUri = in.readParcelable(Uri.class.getClassLoader(), android.net.Uri.class);
-        mContentUri = in.readParcelable(Uri.class.getClassLoader(), android.net.Uri.class);
+        mFilePathUri = in.readParcelable(Uri.class.getClassLoader());
+        mContentUri = in.readParcelable(Uri.class.getClassLoader());
     }
 
     public static final @android.annotation.NonNull Creator<UriPathPair> CREATOR = new Creator<UriPathPair>() {

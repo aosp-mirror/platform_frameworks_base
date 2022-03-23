@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_checked="true"
+          android:color="?android:attr/colorAccent" />
+    <item android:color="@color/notification_primary_text_color"
+          android:alpha=".54" />
+</selector>

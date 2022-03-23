@@ -23,66 +23,49 @@ import android.annotation.Nullable;
 import com.android.internal.annotations.GuardedBy;
 
 import java.util.ArrayList;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * A utility class, which works as both a factory class of a cancellation signal to cancel
  * all the completable objects.
- *
- * <p>TODO: Make this lock-free.</p>
  */
 public final class CancellationGroup {
     private final Object mLock = new Object();
 
     /**
-     * List of {@link CompletableFuture}, which can be used to propagate {@link #cancelAll()} to
+     * List of {@link CountDownLatch}, which can be used to propagate {@link #cancelAll()} to
      * completable objects.
      *
      * <p>This will be lazily instantiated to avoid unnecessary object allocations.</p>
      */
     @Nullable
     @GuardedBy("mLock")
-    private ArrayList<CompletableFuture<?>> mFutureList = null;
+    private ArrayList<CountDownLatch> mLatchList = null;
 
     @GuardedBy("mLock")
     private boolean mCanceled = false;
 
-    /**
-     * Tries to register the given {@link CompletableFuture} into the callback list if this
-     * {@link CancellationGroup} is not yet cancelled.
-     *
-     * <p>If this {@link CancellationGroup} is already cancelled, then this method will immediately
-     * call {@link CompletableFuture#cancel(boolean)} then return {@code false}.</p>
-     *
-     * <p>When this method returns {@code true}, call {@link #unregisterFuture(CompletableFuture)}
-     * to remove the unnecessary object reference.</p>
-     *
-     * @param future {@link CompletableFuture} to be added to the cancellation callback list.
-     * @return {@code true} if the given {@code future} is added to the callback list.
-     *         {@code false} otherwise.
-     */
     @AnyThread
-    boolean tryRegisterFutureOrCancelImmediately(@NonNull CompletableFuture<?> future) {
+    boolean registerLatch(@NonNull CountDownLatch latch) {
         synchronized (mLock) {
             if (mCanceled) {
-                future.cancel(false);
                 return false;
             }
-            if (mFutureList == null) {
+            if (mLatchList == null) {
                 // Set the initial capacity to 1 with an assumption that usually there is up to 1
                 // on-going operation.
-                mFutureList = new ArrayList<>(1);
+                mLatchList = new ArrayList<>(1);
             }
-            mFutureList.add(future);
+            mLatchList.add(latch);
             return true;
         }
     }
 
     @AnyThread
-    void unregisterFuture(@NonNull CompletableFuture<?> future) {
+    void unregisterLatch(@NonNull CountDownLatch latch) {
         synchronized (mLock) {
-            if (mFutureList != null) {
-                mFutureList.remove(future);
+            if (mLatchList != null) {
+                mLatchList.remove(latch);
             }
         }
     }
@@ -97,10 +80,10 @@ public final class CancellationGroup {
         synchronized (mLock) {
             if (!mCanceled) {
                 mCanceled = true;
-                if (mFutureList != null) {
-                    mFutureList.forEach(future -> future.cancel(false));
-                    mFutureList.clear();
-                    mFutureList = null;
+                if (mLatchList != null) {
+                    mLatchList.forEach(CountDownLatch::countDown);
+                    mLatchList.clear();
+                    mLatchList = null;
                 }
             }
         }

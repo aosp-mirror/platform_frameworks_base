@@ -20,7 +20,6 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
-import android.os.UserHandle;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodSubtype;
 
@@ -113,8 +112,7 @@ public class InputMethodPreferenceTest {
                 createInputMethodInfo(systemIme, name),
                 title,
                 true /* isAllowedByOrganization */,
-                p -> {} /* onSavePreferenceListener */,
-                UserHandle.myUserId());
+                p -> {} /* onSavePreferenceListener */);
     }
 
     private static InputMethodInfo createInputMethodInfo(

@@ -40,25 +40,16 @@ import android.telephony.ims.stub.ImsRegistrationImplBase;
 import android.telephony.ims.stub.ImsSmsImplBase;
 import android.telephony.ims.stub.ImsUtImplBase;
 import android.util.ArraySet;
-import android.util.Log;
 
 import com.android.ims.internal.IImsCallSession;
 import com.android.ims.internal.IImsEcbm;
 import com.android.ims.internal.IImsMultiEndpoint;
 import com.android.ims.internal.IImsUt;
-import com.android.internal.telephony.util.TelephonyUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.CancellationException;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Supplier;
 
 /**
  * Base implementation for Voice and SMS (IR-92) and Video (IR-94) IMS support.
@@ -69,7 +60,6 @@ import java.util.function.Supplier;
 public class MmTelFeature extends ImsFeature {
 
     private static final String LOG_TAG = "MmTelFeature";
-    private Executor mExecutor;
 
     /**
      * @hide
@@ -78,261 +68,160 @@ public class MmTelFeature extends ImsFeature {
     public MmTelFeature() {
     }
 
-    /**
-     * Create a new MmTelFeature using the Executor specified for methods being called by the
-     * framework.
-     * @param executor The executor for the framework to use when executing the methods overridden
-     * by the implementation of MmTelFeature.
-     * @hide
-     */
-    @SystemApi
-    public MmTelFeature(@NonNull Executor executor) {
-        super();
-        mExecutor = executor;
-    }
-
     private final IImsMmTelFeature mImsMMTelBinder = new IImsMmTelFeature.Stub() {
 
         @Override
         public void setListener(IImsMmTelListener l) {
-            executeMethodAsyncNoException(() -> MmTelFeature.this.setListener(l), "setListener");
+            MmTelFeature.this.setListener(l);
         }
 
         @Override
         public int getFeatureState() throws RemoteException {
-            return executeMethodAsyncForResult(() -> MmTelFeature.this.getFeatureState(),
-                    "getFeatureState");
+            try {
+                return MmTelFeature.this.getFeatureState();
+            } catch (Exception e) {
+                throw new RemoteException(e.getMessage());
+            }
         }
+
 
         @Override
         public ImsCallProfile createCallProfile(int callSessionType, int callType)
                 throws RemoteException {
-            return executeMethodAsyncForResult(() -> MmTelFeature.this.createCallProfile(
-                    callSessionType, callType), "createCallProfile");
+            synchronized (mLock) {
+                try {
+                    return MmTelFeature.this.createCallProfile(callSessionType, callType);
+                } catch (Exception e) {
+                    throw new RemoteException(e.getMessage());
+                }
+            }
         }
 
         @Override
         public void changeOfferedRtpHeaderExtensionTypes(List<RtpHeaderExtensionType> types)
                 throws RemoteException {
-            executeMethodAsync(() -> MmTelFeature.this.changeOfferedRtpHeaderExtensionTypes(
-                    new ArraySet<>(types)), "changeOfferedRtpHeaderExtensionTypes");
+            synchronized (mLock) {
+                try {
+                    MmTelFeature.this.changeOfferedRtpHeaderExtensionTypes(new ArraySet<>(types));
+                } catch (Exception e) {
+                    throw new RemoteException(e.getMessage());
+                }
+            }
         }
 
         @Override
         public IImsCallSession createCallSession(ImsCallProfile profile) throws RemoteException {
-            AtomicReference<RemoteException> exceptionRef = new AtomicReference<>();
-            IImsCallSession result = executeMethodAsyncForResult(() -> {
-                try {
-                    return createCallSessionInterface(profile);
-                } catch (RemoteException e) {
-                    exceptionRef.set(e);
-                    return null;
-                }
-            }, "createCallSession");
-
-            if (exceptionRef.get() != null) {
-                throw exceptionRef.get();
+            synchronized (mLock) {
+                return createCallSessionInterface(profile);
             }
-
-            return result;
         }
 
         @Override
         public int shouldProcessCall(String[] numbers) {
-            Integer result = executeMethodAsyncForResultNoException(() ->
-                    MmTelFeature.this.shouldProcessCall(numbers), "shouldProcessCall");
-            if (result != null) {
-                return result.intValue();
-            } else {
-                return PROCESS_CALL_CSFB;
+            synchronized (mLock) {
+                return MmTelFeature.this.shouldProcessCall(numbers);
             }
         }
 
         @Override
         public IImsUt getUtInterface() throws RemoteException {
-            AtomicReference<RemoteException> exceptionRef = new AtomicReference<>();
-            IImsUt result = executeMethodAsyncForResult(() -> {
-                try {
-                    return MmTelFeature.this.getUtInterface();
-                } catch (RemoteException e) {
-                    exceptionRef.set(e);
-                    return null;
-                }
-            }, "getUtInterface");
-
-            if (exceptionRef.get() != null) {
-                throw exceptionRef.get();
+            synchronized (mLock) {
+                return MmTelFeature.this.getUtInterface();
             }
-
-            return result;
         }
 
         @Override
         public IImsEcbm getEcbmInterface() throws RemoteException {
-            AtomicReference<RemoteException> exceptionRef = new AtomicReference<>();
-            IImsEcbm result = executeMethodAsyncForResult(() -> {
-                try {
-                    return MmTelFeature.this.getEcbmInterface();
-                } catch (RemoteException e) {
-                    exceptionRef.set(e);
-                    return null;
-                }
-            }, "getEcbmInterface");
-
-            if (exceptionRef.get() != null) {
-                throw exceptionRef.get();
+            synchronized (mLock) {
+                return MmTelFeature.this.getEcbmInterface();
             }
-
-            return result;
         }
 
         @Override
         public void setUiTtyMode(int uiTtyMode, Message onCompleteMessage) throws RemoteException {
-            executeMethodAsync(() -> MmTelFeature.this.setUiTtyMode(uiTtyMode, onCompleteMessage),
-                    "setUiTtyMode");
+            synchronized (mLock) {
+                try {
+                    MmTelFeature.this.setUiTtyMode(uiTtyMode, onCompleteMessage);
+                } catch (Exception e) {
+                    throw new RemoteException(e.getMessage());
+                }
+            }
         }
 
         @Override
         public IImsMultiEndpoint getMultiEndpointInterface() throws RemoteException {
-            AtomicReference<RemoteException> exceptionRef = new AtomicReference<>();
-            IImsMultiEndpoint result = executeMethodAsyncForResult(() -> {
-                try {
-                    return MmTelFeature.this.getMultiEndpointInterface();
-                } catch (RemoteException e) {
-                    exceptionRef.set(e);
-                    return null;
-                }
-            }, "getMultiEndpointInterface");
-
-            if (exceptionRef.get() != null) {
-                throw exceptionRef.get();
+            synchronized (mLock) {
+                return MmTelFeature.this.getMultiEndpointInterface();
             }
-
-            return result;
         }
 
         @Override
         public int queryCapabilityStatus() {
-            Integer result = executeMethodAsyncForResultNoException(() -> MmTelFeature.this
-                    .queryCapabilityStatus().mCapabilities, "queryCapabilityStatus");
-
-            if (result != null) {
-                return result.intValue();
-            } else {
-                return 0;
-            }
+            return MmTelFeature.this.queryCapabilityStatus().mCapabilities;
         }
 
         @Override
         public void addCapabilityCallback(IImsCapabilityCallback c) {
-            executeMethodAsyncNoException(() -> MmTelFeature.this
-                    .addCapabilityCallback(c), "addCapabilityCallback");
+            // no need to lock, structure already handles multithreading.
+            MmTelFeature.this.addCapabilityCallback(c);
         }
 
         @Override
         public void removeCapabilityCallback(IImsCapabilityCallback c) {
-            executeMethodAsyncNoException(() -> MmTelFeature.this
-                    .removeCapabilityCallback(c), "removeCapabilityCallback");
+            // no need to lock, structure already handles multithreading.
+            MmTelFeature.this.removeCapabilityCallback(c);
         }
 
         @Override
         public void changeCapabilitiesConfiguration(CapabilityChangeRequest request,
                 IImsCapabilityCallback c) {
-            executeMethodAsyncNoException(() -> MmTelFeature.this
-                    .requestChangeEnabledCapabilities(request, c),
-                    "changeCapabilitiesConfiguration");
+            MmTelFeature.this.requestChangeEnabledCapabilities(request, c);
         }
 
         @Override
         public void queryCapabilityConfiguration(int capability, int radioTech,
                 IImsCapabilityCallback c) {
-            executeMethodAsyncNoException(() -> queryCapabilityConfigurationInternal(
-                    capability, radioTech, c), "queryCapabilityConfiguration");
+            queryCapabilityConfigurationInternal(capability, radioTech, c);
         }
 
         @Override
         public void setSmsListener(IImsSmsListener l) {
-            executeMethodAsyncNoException(() -> MmTelFeature.this.setSmsListener(l),
-                    "setSmsListener");
+            MmTelFeature.this.setSmsListener(l);
         }
 
         @Override
         public void sendSms(int token, int messageRef, String format, String smsc, boolean retry,
                 byte[] pdu) {
-            executeMethodAsyncNoException(() -> MmTelFeature.this
-                    .sendSms(token, messageRef, format, smsc, retry, pdu), "sendSms");
+            synchronized (mLock) {
+                MmTelFeature.this.sendSms(token, messageRef, format, smsc, retry, pdu);
+            }
         }
 
         @Override
         public void acknowledgeSms(int token, int messageRef, int result) {
-            executeMethodAsyncNoException(() -> MmTelFeature.this
-                    .acknowledgeSms(token, messageRef, result), "acknowledgeSms");
+            synchronized (mLock) {
+                MmTelFeature.this.acknowledgeSms(token, messageRef, result);
+            }
         }
 
         @Override
         public void acknowledgeSmsReport(int token, int messageRef, int result) {
-            executeMethodAsyncNoException(() -> MmTelFeature.this
-                    .acknowledgeSmsReport(token, messageRef, result), "acknowledgeSmsReport");
+            synchronized (mLock) {
+                MmTelFeature.this.acknowledgeSmsReport(token, messageRef, result);
+            }
         }
 
         @Override
         public String getSmsFormat() {
-            return executeMethodAsyncForResultNoException(() -> MmTelFeature.this
-                    .getSmsFormat(), "getSmsFormat");
+            synchronized (mLock) {
+                return MmTelFeature.this.getSmsFormat();
+            }
         }
 
         @Override
         public void onSmsReady() {
-            executeMethodAsyncNoException(() -> MmTelFeature.this.onSmsReady(),
-                    "onSmsReady");
-        }
-
-        // Call the methods with a clean calling identity on the executor and wait indefinitely for
-        // the future to return.
-        private void executeMethodAsync(Runnable r, String errorLogName) throws RemoteException {
-            try {
-                CompletableFuture.runAsync(
-                        () -> TelephonyUtils.runWithCleanCallingIdentity(r), mExecutor).join();
-            } catch (CancellationException | CompletionException e) {
-                Log.w(LOG_TAG, "MmTelFeature Binder - " + errorLogName + " exception: "
-                        + e.getMessage());
-                throw new RemoteException(e.getMessage());
-            }
-        }
-
-        private void executeMethodAsyncNoException(Runnable r, String errorLogName) {
-            try {
-                CompletableFuture.runAsync(
-                        () -> TelephonyUtils.runWithCleanCallingIdentity(r), mExecutor).join();
-            } catch (CancellationException | CompletionException e) {
-                Log.w(LOG_TAG, "MmTelFeature Binder - " + errorLogName + " exception: "
-                        + e.getMessage());
-            }
-        }
-
-        private <T> T executeMethodAsyncForResult(Supplier<T> r,
-                String errorLogName) throws RemoteException {
-            CompletableFuture<T> future = CompletableFuture.supplyAsync(
-                    () -> TelephonyUtils.runWithCleanCallingIdentity(r), mExecutor);
-            try {
-                return future.get();
-            } catch (ExecutionException | InterruptedException e) {
-                Log.w(LOG_TAG, "MmTelFeature Binder - " + errorLogName + " exception: "
-                        + e.getMessage());
-                throw new RemoteException(e.getMessage());
-            }
-        }
-
-        private <T> T executeMethodAsyncForResultNoException(Supplier<T> r,
-                String errorLogName) {
-            CompletableFuture<T> future = CompletableFuture.supplyAsync(
-                    () -> TelephonyUtils.runWithCleanCallingIdentity(r), mExecutor);
-            try {
-                return future.get();
-            } catch (ExecutionException | InterruptedException e) {
-                Log.w(LOG_TAG, "MmTelFeature Binder - " + errorLogName + " exception: "
-                        + e.getMessage());
-                return null;
+            synchronized (mLock) {
+                MmTelFeature.this.onSmsReady();
             }
         }
     };
@@ -394,13 +283,6 @@ public class MmTelFeature extends ImsFeature {
         public @interface MmTelCapability {}
 
         /**
-         * Undefined capability type for initialization
-         * This is used to check the upper range of MmTel capability
-         * {@hide}
-         */
-        public static final int CAPABILITY_TYPE_NONE = 0;
-
-        /**
          * This MmTelFeature supports Voice calling (IR.92)
          */
         public static final int CAPABILITY_TYPE_VOICE = 1 << 0;
@@ -424,12 +306,6 @@ public class MmTelFeature extends ImsFeature {
          * This MmTelFeature supports Call Composer (section 2.4 of RC.20)
          */
         public static final int CAPABILITY_TYPE_CALL_COMPOSER = 1 << 4;
-
-        /**
-         * This is used to check the upper range of MmTel capability
-         * {@hide}
-         */
-        public static final int CAPABILITY_TYPE_MAX = CAPABILITY_TYPE_CALL_COMPOSER + 1;
 
         /**
          * @hide
@@ -796,12 +672,7 @@ public class MmTelFeature extends ImsFeature {
     public IImsCallSession createCallSessionInterface(ImsCallProfile profile)
             throws RemoteException {
         ImsCallSessionImplBase s = MmTelFeature.this.createCallSession(profile);
-        if (s != null) {
-            s.setDefaultExecutor(mExecutor);
-            return s.getServiceImpl();
-        } else {
-            return null;
-        }
+        return s != null ? s.getServiceImpl() : null;
     }
 
     /**
@@ -842,12 +713,7 @@ public class MmTelFeature extends ImsFeature {
      */
     protected IImsUt getUtInterface() throws RemoteException {
         ImsUtImplBase utImpl = getUt();
-        if (utImpl != null) {
-            utImpl.setDefaultExecutor(mExecutor);
-            return utImpl.getInterface();
-        } else {
-            return null;
-        }
+        return utImpl != null ? utImpl.getInterface() : null;
     }
 
     /**
@@ -855,12 +721,7 @@ public class MmTelFeature extends ImsFeature {
      */
     protected IImsEcbm getEcbmInterface() throws RemoteException {
         ImsEcbmImplBase ecbmImpl = getEcbm();
-        if (ecbmImpl != null) {
-            ecbmImpl.setDefaultExecutor(mExecutor);
-            return ecbmImpl.getImsEcbm();
-        } else {
-            return null;
-        }
+        return ecbmImpl != null ? ecbmImpl.getImsEcbm() : null;
     }
 
     /**
@@ -868,12 +729,7 @@ public class MmTelFeature extends ImsFeature {
      */
     public IImsMultiEndpoint getMultiEndpointInterface() throws RemoteException {
         ImsMultiEndpointImplBase multiendpointImpl = getMultiEndpoint();
-        if (multiendpointImpl != null) {
-            multiendpointImpl.setDefaultExecutor(mExecutor);
-            return multiendpointImpl.getIImsMultiEndpoint();
-        } else {
-            return null;
-        }
+        return multiendpointImpl != null ? multiendpointImpl.getIImsMultiEndpoint() : null;
     }
 
     /**
@@ -1002,17 +858,5 @@ public class MmTelFeature extends ImsFeature {
     @Override
     public final IImsMmTelFeature getBinder() {
         return mImsMMTelBinder;
-    }
-
-    /**
-     * Set default Executor from ImsService.
-     * @param executor The default executor for the framework to use when executing the methods
-     * overridden by the implementation of MmTelFeature.
-     * @hide
-     */
-    public final void setDefaultExecutor(@NonNull Executor executor) {
-        if (mExecutor == null) {
-            mExecutor = executor;
-        }
     }
 }

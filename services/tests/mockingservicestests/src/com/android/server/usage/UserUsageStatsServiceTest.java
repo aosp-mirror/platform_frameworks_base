@@ -18,11 +18,8 @@ package com.android.server.usage;
 
 import static android.app.usage.UsageEvents.Event.ACTIVITY_RESUMED;
 import static android.app.usage.UsageEvents.Event.APP_COMPONENT_USED;
-import static android.app.usage.UsageEvents.Event.NOTIFICATION_SEEN;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mockitoSession;
 
@@ -31,7 +28,6 @@ import android.app.usage.UsageEvents.Event;
 import android.content.Context;
 import android.os.SystemClock;
 import android.text.format.DateUtils;
-import android.util.Log;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
@@ -51,16 +47,12 @@ import java.util.HashMap;
 
 @RunWith(AndroidJUnit4.class)
 public class UserUsageStatsServiceTest {
-    private static final String TAG = UserUsageStatsServiceTest.class.getSimpleName();
-
     private static final int TEST_USER_ID = 0;
     private static final String TEST_PACKAGE_NAME = "test.package";
     private static final long TIME_INTERVAL_MILLIS = DateUtils.DAY_IN_MILLIS;
 
     private UserUsageStatsService mService;
     private MockitoSession mMockitoSession;
-
-    private File mDir;
 
     @Mock
     private Context mContext;
@@ -74,11 +66,8 @@ public class UserUsageStatsServiceTest {
                 .strictness(Strictness.LENIENT)
                 .startMocking();
 
-        // Deleting in tearDown() doesn't always work, so adding a unique suffix to each test
-        // directory to ensure sequential test runs don't interfere with each other.
-        mDir = new File(InstrumentationRegistry.getContext().getCacheDir(),
-                "test_" + System.currentTimeMillis());
-        mService = new UserUsageStatsService(mContext, TEST_USER_ID, mDir, mStatsUpdatedListener);
+        File dir = new File(InstrumentationRegistry.getContext().getCacheDir(), "test");
+        mService = new UserUsageStatsService(mContext, TEST_USER_ID, dir, mStatsUpdatedListener);
 
         HashMap<String, Long> installedPkgs = new HashMap<>();
         installedPkgs.put(TEST_PACKAGE_NAME, System.currentTimeMillis());
@@ -88,9 +77,6 @@ public class UserUsageStatsServiceTest {
 
     @After
     public void tearDown() {
-        if (mDir != null && mDir.exists() && !mDir.delete()) {
-            Log.d(TAG, "Failed to delete test directory");
-        }
         if (mMockitoSession != null) {
             mMockitoSession.finishMocking();
         }
@@ -101,9 +87,6 @@ public class UserUsageStatsServiceTest {
         Event event = new Event(ACTIVITY_RESUMED, SystemClock.elapsedRealtime());
         event.mPackage = TEST_PACKAGE_NAME;
         mService.reportEvent(event);
-
-        // Force persist the event instead of waiting for it to be processed on the handler.
-        mService.persistActiveStats();
 
         long now = System.currentTimeMillis();
         long startTime = now - TIME_INTERVAL_MILLIS;
@@ -129,9 +112,6 @@ public class UserUsageStatsServiceTest {
         event.mPackage = TEST_PACKAGE_NAME;
         mService.reportEvent(event);
 
-        // Force persist the event instead of waiting for it to be processed on the handler.
-        mService.persistActiveStats();
-
         long now = System.currentTimeMillis();
         long startTime = now - TIME_INTERVAL_MILLIS;
         UsageEvents events = mService.queryEventsForPackage(
@@ -146,37 +126,5 @@ public class UserUsageStatsServiceTest {
             }
         }
         assertFalse(hasTestEvent);
-    }
-
-    @Test
-    public void testQueryEarliestEventsForPackage() {
-        Event event1 = new Event(NOTIFICATION_SEEN, SystemClock.elapsedRealtime());
-        event1.mPackage = TEST_PACKAGE_NAME;
-        mService.reportEvent(event1);
-        Event event2 = new Event(ACTIVITY_RESUMED, SystemClock.elapsedRealtime());
-        event2.mPackage = TEST_PACKAGE_NAME;
-        mService.reportEvent(event2);
-
-        // Force persist the events instead of waiting for them to be processed on the handler.
-        mService.persistActiveStats();
-
-        long now = System.currentTimeMillis();
-        long startTime = now - TIME_INTERVAL_MILLIS;
-        UsageEvents events = mService.queryEarliestEventsForPackage(
-                startTime, now, TEST_PACKAGE_NAME, ACTIVITY_RESUMED);
-
-        assertNotNull(events);
-        boolean hasTestEvent = false;
-        int count = 0;
-        while (events.hasNextEvent()) {
-            count++;
-            Event outEvent = new Event();
-            events.getNextEvent(outEvent);
-            if (outEvent.mEventType == ACTIVITY_RESUMED) {
-                hasTestEvent = true;
-            }
-        }
-        assertTrue(hasTestEvent);
-        assertEquals(2, count);
     }
 }

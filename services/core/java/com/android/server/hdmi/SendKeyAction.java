@@ -20,7 +20,6 @@ import static com.android.server.hdmi.HdmiConfig.IRT_MS;
 import android.hardware.tv.cec.V1_0.SendMessageResult;
 import android.util.Slog;
 import android.view.KeyEvent;
-
 import com.android.server.hdmi.HdmiControlService.SendMessageCallback;
 
 /**
@@ -153,7 +152,7 @@ final class SendKeyAction extends HdmiCecFeatureAction {
         // audio system device is still plugged in. Framework checks if the volume key forwarding is
         // successful or not every time to make sure the System Audio Mode status is still updated.
         if (mTargetAddress == Constants.ADDR_AUDIO_SYSTEM
-                && localDevice().getDeviceInfo().getLogicalAddress() != Constants.ADDR_TV) {
+            && localDevice().mAddress != Constants.ADDR_TV) {
             sendCommand(HdmiCecMessageBuilder.buildUserControlPressed(getSourceAddress(),
                 mTargetAddress, cecKeycodeAndParams), new SendMessageCallback() {
                 @Override

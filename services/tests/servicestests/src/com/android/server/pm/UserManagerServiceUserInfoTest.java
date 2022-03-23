@@ -46,7 +46,6 @@ import android.os.Looper;
 import android.os.Parcel;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.platform.test.annotations.Presubmit;
 import android.text.TextUtils;
 
 import androidx.test.InstrumentationRegistry;
@@ -70,7 +69,6 @@ import java.util.List;
  * runtest -c com.android.server.pm.UserManagerServiceUserInfoTest frameworks-services
  * </pre>
  */
-@Presubmit
 @RunWith(AndroidJUnit4.class)
 @MediumTest
 public class UserManagerServiceUserInfoTest {

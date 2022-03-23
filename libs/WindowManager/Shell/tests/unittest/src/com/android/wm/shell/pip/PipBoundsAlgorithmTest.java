@@ -29,7 +29,6 @@ import android.view.Gravity;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.common.DisplayLayout;
 
@@ -73,16 +72,16 @@ public class PipBoundsAlgorithmTest extends ShellTestCase {
     private void initializeMockResources() {
         final TestableResources res = mContext.getOrCreateTestableResources();
         res.addOverride(
-                R.dimen.config_pictureInPictureDefaultAspectRatio,
+                com.android.internal.R.dimen.config_pictureInPictureDefaultAspectRatio,
                 DEFAULT_ASPECT_RATIO);
         res.addOverride(
-                R.integer.config_defaultPictureInPictureGravity,
+                com.android.internal.R.integer.config_defaultPictureInPictureGravity,
                 Gravity.END | Gravity.BOTTOM);
         res.addOverride(
-                R.dimen.default_minimal_size_pip_resizable_task,
+                com.android.internal.R.dimen.default_minimal_size_pip_resizable_task,
                 DEFAULT_MIN_EDGE_SIZE);
         res.addOverride(
-                R.string.config_defaultPictureInPictureScreenEdgeInsets,
+                com.android.internal.R.string.config_defaultPictureInPictureScreenEdgeInsets,
                 "16x16");
         res.addOverride(
                 com.android.internal.R.dimen.config_pictureInPictureMinAspectRatio,
@@ -108,7 +107,7 @@ public class PipBoundsAlgorithmTest extends ShellTestCase {
     public void onConfigurationChanged_reloadResources() {
         final float newDefaultAspectRatio = (DEFAULT_ASPECT_RATIO + MAX_ASPECT_RATIO) / 2;
         final TestableResources res = mContext.getOrCreateTestableResources();
-        res.addOverride(R.dimen.config_pictureInPictureDefaultAspectRatio,
+        res.addOverride(com.android.internal.R.dimen.config_pictureInPictureDefaultAspectRatio,
                 newDefaultAspectRatio);
 
         mPipBoundsAlgorithm.onConfigurationChanged(mContext);
@@ -464,7 +463,7 @@ public class PipBoundsAlgorithmTest extends ShellTestCase {
     private void overrideDefaultAspectRatio(float aspectRatio) {
         final TestableResources res = mContext.getOrCreateTestableResources();
         res.addOverride(
-                R.dimen.config_pictureInPictureDefaultAspectRatio,
+                com.android.internal.R.dimen.config_pictureInPictureDefaultAspectRatio,
                 aspectRatio);
         mPipBoundsAlgorithm.onConfigurationChanged(mContext);
     }
@@ -472,7 +471,7 @@ public class PipBoundsAlgorithmTest extends ShellTestCase {
     private void overrideDefaultStackGravity(int stackGravity) {
         final TestableResources res = mContext.getOrCreateTestableResources();
         res.addOverride(
-                R.integer.config_defaultPictureInPictureGravity,
+                com.android.internal.R.integer.config_defaultPictureInPictureGravity,
                 stackGravity);
         mPipBoundsAlgorithm.onConfigurationChanged(mContext);
     }

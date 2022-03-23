@@ -50,13 +50,12 @@ public class DataServiceCallback {
      */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({RESULT_SUCCESS, RESULT_ERROR_UNSUPPORTED, RESULT_ERROR_INVALID_ARG, RESULT_ERROR_BUSY,
-            RESULT_ERROR_ILLEGAL_STATE, RESULT_ERROR_TEMPORARILY_UNAVAILABLE,
-            RESULT_ERROR_INVALID_RESPONSE})
+            RESULT_ERROR_ILLEGAL_STATE})
     public @interface ResultCode {}
 
     /** Request is completed successfully */
     public static final int RESULT_SUCCESS              = 0;
-    /** Request is not supported */
+    /** Request is not support */
     public static final int RESULT_ERROR_UNSUPPORTED    = 1;
     /** Request contains invalid arguments */
     public static final int RESULT_ERROR_INVALID_ARG    = 2;
@@ -69,11 +68,6 @@ public class DataServiceCallback {
      * @hide
      */
     public static final int RESULT_ERROR_TEMPORARILY_UNAVAILABLE = 5;
-    /**
-     * Request failed to complete due to an invalid response.
-     * @hide
-     */
-    public static final int RESULT_ERROR_INVALID_RESPONSE = 6;
 
     private final IDataServiceCallback mCallback;
 
@@ -259,20 +253,15 @@ public class DataServiceCallback {
                 return "RESULT_ERROR_BUSY";
             case RESULT_ERROR_ILLEGAL_STATE:
                 return "RESULT_ERROR_ILLEGAL_STATE";
-            case RESULT_ERROR_TEMPORARILY_UNAVAILABLE:
-                return "RESULT_ERROR_TEMPORARILY_UNAVAILABLE";
-            case RESULT_ERROR_INVALID_RESPONSE:
-                return "RESULT_ERROR_INVALID_RESPONSE";
             default:
-                return "Unknown(" + resultCode + ")";
+                return "Missing case for result code=" + resultCode;
         }
     }
 
     /**
-     * Unthrottles the APN on the current transport.
-     * The APN is throttled when {@link IDataService#setupDataCall} fails within
-     * the time specified by {@link DataCallResponse#getRetryDurationMillis} and will remain
-     * throttled until this method is called.
+     * Unthrottles the APN on the current transport.  There is no matching "APN throttle" method.
+     * Instead, the APN is throttled for the time specified in
+     * {@link DataCallResponse#getRetryDurationMillis}.
      * <p/>
      * see: {@link DataCallResponse#getRetryDurationMillis}
      *
@@ -288,29 +277,6 @@ public class DataServiceCallback {
             }
         } else {
             Rlog.e(TAG, "onApnUnthrottled: callback is null!");
-        }
-    }
-
-    /**
-     * Unthrottles the DataProfile on the current transport.
-     * The DataProfile is throttled when {@link IDataService#setupDataCall} fails within
-     * the time specified by {@link DataCallResponse#getRetryDurationMillis} and will remain
-     * throttled until this method is called.
-     * <p/>
-     * see: {@link DataCallResponse#getRetryDurationMillis}
-     *
-     * @param dataProfile DataProfile containing the APN to be throttled
-     */
-    public void onDataProfileUnthrottled(final @NonNull DataProfile dataProfile) {
-        if (mCallback != null) {
-            try {
-                if (DBG) Rlog.d(TAG, "onDataProfileUnthrottled");
-                mCallback.onDataProfileUnthrottled(dataProfile);
-            } catch (RemoteException e) {
-                Rlog.e(TAG, "onDataProfileUnthrottled: remote exception", e);
-            }
-        } else {
-            Rlog.e(TAG, "onDataProfileUnthrottled: callback is null!");
         }
     }
 }

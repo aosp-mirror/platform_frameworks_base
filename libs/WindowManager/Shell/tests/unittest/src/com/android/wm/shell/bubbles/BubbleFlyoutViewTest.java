@@ -63,7 +63,7 @@ public class BubbleFlyoutViewTest extends ShellTestCase {
         mFlyoutMessage.senderName = "Josh";
         mFlyoutMessage.message = "Hello";
 
-        mFlyout = new BubbleFlyoutView(getContext(), mPositioner);
+        mFlyout = new BubbleFlyoutView(getContext());
 
         mFlyoutText = mFlyout.findViewById(R.id.bubble_flyout_text);
         mSenderName = mFlyout.findViewById(R.id.bubble_flyout_name);
@@ -75,8 +75,9 @@ public class BubbleFlyoutViewTest extends ShellTestCase {
     public void testShowFlyout_isVisible() {
         mFlyout.setupFlyoutStartingAsDot(
                 mFlyoutMessage,
-                new PointF(100, 100), true, Color.WHITE, null, null, mDotCenter,
-                false);
+                new PointF(100, 100), 500, true, Color.WHITE, null, null, mDotCenter,
+                false,
+                mPositioner);
         mFlyout.setVisibility(View.VISIBLE);
 
         assertEquals("Hello", mFlyoutText.getText());
@@ -88,8 +89,9 @@ public class BubbleFlyoutViewTest extends ShellTestCase {
     public void testFlyoutHide_runsCallback() {
         Runnable after = mock(Runnable.class);
         mFlyout.setupFlyoutStartingAsDot(mFlyoutMessage,
-                new PointF(100, 100), true, Color.WHITE, null, after, mDotCenter,
-                false);
+                new PointF(100, 100), 500, true, Color.WHITE, null, after, mDotCenter,
+                false,
+                mPositioner);
         mFlyout.hideFlyout();
 
         verify(after).run();
@@ -98,8 +100,9 @@ public class BubbleFlyoutViewTest extends ShellTestCase {
     @Test
     public void testSetCollapsePercent() {
         mFlyout.setupFlyoutStartingAsDot(mFlyoutMessage,
-                new PointF(100, 100), true, Color.WHITE, null, null, mDotCenter,
-                false);
+                new PointF(100, 100), 500, true, Color.WHITE, null, null, mDotCenter,
+                false,
+                mPositioner);
         mFlyout.setVisibility(View.VISIBLE);
 
         mFlyout.setCollapsePercent(1f);

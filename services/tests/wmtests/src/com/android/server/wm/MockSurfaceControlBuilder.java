@@ -20,8 +20,6 @@ import static org.mockito.Mockito.mock;
 
 import android.view.SurfaceControl;
 
-import org.mockito.Mockito;
-
 /**
  * Stubbed {@link SurfaceControl.Builder} class that returns a mocked SurfaceControl instance
  * that can be used for unit testing.
@@ -34,8 +32,6 @@ class MockSurfaceControlBuilder extends SurfaceControl.Builder {
 
     @Override
     public SurfaceControl build() {
-        SurfaceControl mockSurfaceControl = mock(SurfaceControl.class);
-        Mockito.doReturn(true).when(mockSurfaceControl).isValid();
-        return mockSurfaceControl;
+        return mock(SurfaceControl.class);
     }
 }

@@ -23,15 +23,12 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.telephony.Annotation.NetworkType;
 
-import com.android.telephony.Rlog;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
 import java.util.Objects;
 
 public final class PhysicalChannelConfig implements Parcelable {
-    static final String TAG = "PhysicalChannelConfig";
 
     // TODO(b/72993578) consolidate these enums in a central location.
     /** @hide */
@@ -245,11 +242,6 @@ public final class PhysicalChannelConfig implements Parcelable {
     }
 
     /**
-     * The physical cell ID which differentiates cells using the same radio channel.
-     *
-     * In GERAN, this value is the BSIC. The range is [0-63].
-     * Reference: 3GPP TS 3.03 section 4.2.2.
-     *
      * In UTRAN, this value is primary scrambling code. The range is [0, 511].
      * Reference: 3GPP TS 25.213 section 5.2.2.
      *
@@ -571,21 +563,19 @@ public final class PhysicalChannelConfig implements Parcelable {
 
         public @NonNull Builder setNetworkType(@NetworkType int networkType) {
             if (!TelephonyManager.isNetworkTypeValid(networkType)) {
-                Rlog.e(TAG, "Builder.setNetworkType: Network type " + networkType + " is invalid.");
-            } else {
-                mNetworkType = networkType;
+                throw new IllegalArgumentException("Network type: " + networkType + " is invalid.");
             }
+            mNetworkType = networkType;
             return this;
         }
 
         public @NonNull Builder setFrequencyRange(int frequencyRange) {
             if (!ServiceState.isFrequencyRangeValid(frequencyRange)
                     && frequencyRange != ServiceState.FREQUENCY_RANGE_UNKNOWN) {
-                Rlog.e(TAG, "Builder.setFrequencyRange: Frequency range " + frequencyRange
-                        + " is invalid.");
-            } else {
-                mFrequencyRange = frequencyRange;
+                throw new IllegalArgumentException("Frequency range: " + frequencyRange +
+                        " is invalid.");
             }
+            mFrequencyRange = frequencyRange;
             return this;
         }
 
@@ -601,21 +591,19 @@ public final class PhysicalChannelConfig implements Parcelable {
 
         public @NonNull Builder setCellBandwidthDownlinkKhz(int cellBandwidthDownlinkKhz) {
             if (cellBandwidthDownlinkKhz < CELL_BANDWIDTH_UNKNOWN) {
-                Rlog.e(TAG, "Builder.setCellBandwidthDownlinkKhz: Cell downlink bandwidth(kHz) "
-                        + cellBandwidthDownlinkKhz + " is invalid.");
-            } else {
-                mCellBandwidthDownlinkKhz = cellBandwidthDownlinkKhz;
+                throw new IllegalArgumentException("Cell downlink bandwidth(kHz): " +
+                        cellBandwidthDownlinkKhz + " is invalid.");
             }
+            mCellBandwidthDownlinkKhz = cellBandwidthDownlinkKhz;
             return this;
         }
 
         public @NonNull Builder setCellBandwidthUplinkKhz(int cellBandwidthUplinkKhz) {
             if (cellBandwidthUplinkKhz < CELL_BANDWIDTH_UNKNOWN) {
-                Rlog.e(TAG, "Builder.setCellBandwidthUplinkKhz: Cell uplink bandwidth(kHz) "
-                        + cellBandwidthUplinkKhz + " is invalid.");
-            } else {
-                mCellBandwidthUplinkKhz = cellBandwidthUplinkKhz;
+                throw new IllegalArgumentException("Cell uplink bandwidth(kHz): "+
+                        cellBandwidthUplinkKhz +" is invalid.");
             }
+            mCellBandwidthUplinkKhz = cellBandwidthUplinkKhz;
             return this;
         }
 
@@ -632,20 +620,19 @@ public final class PhysicalChannelConfig implements Parcelable {
 
         public @NonNull Builder setPhysicalCellId(int physicalCellId) {
             if (physicalCellId > PHYSICAL_CELL_ID_MAXIMUM_VALUE) {
-                Rlog.e(TAG, "Builder.setPhysicalCellId: Physical cell ID " + physicalCellId
-                        + " is over limit.");
-            } else {
-                mPhysicalCellId = physicalCellId;
+                throw new IllegalArgumentException("Physical cell Id: " + physicalCellId +
+                        " is over limit.");
             }
+            mPhysicalCellId = physicalCellId;
             return this;
         }
 
         public @NonNull Builder setBand(int band) {
             if (band <= BAND_UNKNOWN) {
-                Rlog.e(TAG, "Builder.setBand: Band " + band + " is invalid.");
-            } else {
-                mBand = band;
+                throw new IllegalArgumentException("Band: " + band +
+                        " is invalid.");
             }
+            mBand = band;
             return this;
         }
     }

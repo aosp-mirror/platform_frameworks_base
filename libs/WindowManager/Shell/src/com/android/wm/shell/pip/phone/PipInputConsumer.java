@@ -22,15 +22,14 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
+import android.util.Log;
 import android.view.BatchedInputEventReceiver;
 import android.view.Choreographer;
 import android.view.IWindowManager;
 import android.view.InputChannel;
 import android.view.InputEvent;
 
-import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.common.ShellExecutor;
-import com.android.wm.shell.protolog.ShellProtoLogGroup;
 
 import java.io.PrintWriter;
 
@@ -142,13 +141,11 @@ public class PipInputConsumer {
             mWindowManager.destroyInputConsumer(mName, DEFAULT_DISPLAY);
             mWindowManager.createInputConsumer(mToken, mName, DEFAULT_DISPLAY, inputChannel);
         } catch (RemoteException e) {
-            ProtoLog.e(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                    "%s: Failed to create input consumer, %s", TAG, e);
+            Log.e(TAG, "Failed to create input consumer", e);
         }
         mMainExecutor.execute(() -> {
             // Choreographer.getSfInstance() must be called on the thread that the input event
             // receiver should be receiving events
-            // TODO(b/222697646): remove getSfInstance usage and use vsyncId for transactions
             mInputEventReceiver = new InputEventReceiver(inputChannel,
                 Looper.myLooper(), Choreographer.getSfInstance());
             if (mRegistrationListener != null) {
@@ -168,8 +165,7 @@ public class PipInputConsumer {
             // TODO(b/113087003): Support Picture-in-picture in multi-display.
             mWindowManager.destroyInputConsumer(mName, DEFAULT_DISPLAY);
         } catch (RemoteException e) {
-            ProtoLog.e(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                    "%s: Failed to destroy input consumer, %s", TAG, e);
+            Log.e(TAG, "Failed to destroy input consumer", e);
         }
         mInputEventReceiver.dispose();
         mInputEventReceiver = null;

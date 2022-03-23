@@ -34,7 +34,6 @@ import org.mockito.ArgumentCaptor
 import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito
-import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoMoreInteractions
 import org.mockito.MockitoAnnotations
@@ -87,15 +86,14 @@ class RingerModeLiveDataTest : SysuiTestCase() {
     @Test
     fun testOnActive_broadcastRegistered() {
         liveData.observeForever(observer)
-        verify(broadcastDispatcher)
-                .registerReceiver(any(), any(), eq(executor), eq(UserHandle.ALL), anyInt())
+        verify(broadcastDispatcher).registerReceiver(any(), any(), eq(executor), eq(UserHandle.ALL))
     }
 
     @Test
     fun testOnActive_intentFilterHasIntent() {
         liveData.observeForever(observer)
         verify(broadcastDispatcher).registerReceiver(any(), capture(intentFilterCaptor), any(),
-                any(), anyInt())
+                any())
         assertTrue(intentFilterCaptor.value.hasAction(INTENT))
     }
 

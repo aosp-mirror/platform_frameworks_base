@@ -16,7 +16,8 @@
 
 package com.android.server.pm.parsing.pkg;
 
-import android.content.pm.SigningDetails;
+import android.annotation.Nullable;
+import android.content.pm.PackageParser;
 
 /**
  * Methods used for mutation after direct package parsing, mostly done inside
@@ -42,9 +43,9 @@ public interface ParsedPackage extends AndroidPackage {
 
     ParsedPackage clearProtectedBroadcasts();
 
-    ParsedPackage setBaseApkPath(String baseApkPath);
+    ParsedPackage setBaseCodePath(String baseCodePath);
 
-    ParsedPackage setPath(String path);
+    ParsedPackage setCodePath(String codePath);
 
     ParsedPackage setNativeLibraryDir(String nativeLibraryDir);
 
@@ -54,9 +55,11 @@ public interface ParsedPackage extends AndroidPackage {
 
     ParsedPackage setPrimaryCpuAbi(String primaryCpuAbi);
 
+    ParsedPackage setRealPackage(@Nullable String realPackage);
+
     ParsedPackage setSecondaryCpuAbi(String secondaryCpuAbi);
 
-    ParsedPackage setSigningDetails(SigningDetails signingDetails);
+    ParsedPackage setSigningDetails(PackageParser.SigningDetails signingDetails);
 
     ParsedPackage setSplitCodePaths(String[] splitCodePaths);
 
@@ -97,6 +100,8 @@ public interface ParsedPackage extends AndroidPackage {
     ParsedPackage setRestrictUpdateHash(byte[] restrictUpdateHash);
 
     ParsedPackage setSeInfo(String seInfo);
+
+    ParsedPackage setSeInfoUser(String seInfoUser);
 
     ParsedPackage setSecondaryNativeLibraryDir(String secondaryNativeLibraryDir);
 

@@ -120,18 +120,18 @@ class ResourceEntry {
   const std::string name;
 
   // The entry ID for this resource (the EEEE in 0xPPTTEEEE).
-  std::optional<ResourceId> id;
+  Maybe<ResourceId> id;
 
   // Whether this resource is public (and must maintain the same entry ID across builds).
   Visibility visibility;
 
-  std::optional<AllowNew> allow_new;
+  Maybe<AllowNew> allow_new;
 
   // The declarations of this resource as overlayable for RROs
-  std::optional<OverlayableItem> overlayable_item;
+  Maybe<OverlayableItem> overlayable_item;
 
   // The staged resource id for a finalized resource.
-  std::optional<StagedId> staged_id;
+  Maybe<StagedId> staged_id;
 
   // The resource's values for each configuration.
   std::vector<std::unique_ptr<ResourceConfigValue>> values;
@@ -205,11 +205,11 @@ class ResourceTablePackage {
 
 struct ResourceTableEntryView {
   std::string name;
-  std::optional<uint16_t> id;
+  Maybe<uint16_t> id;
   Visibility visibility;
-  std::optional<AllowNew> allow_new;
-  std::optional<OverlayableItem> overlayable_item;
-  std::optional<StagedId> staged_id;
+  Maybe<AllowNew> allow_new;
+  Maybe<OverlayableItem> overlayable_item;
+  Maybe<StagedId> staged_id;
   std::vector<const ResourceConfigValue*> values;
 
   const ResourceConfigValue* FindValue(const android::ConfigDescription& config,
@@ -218,7 +218,7 @@ struct ResourceTableEntryView {
 
 struct ResourceTableTypeView {
   ResourceType type;
-  std::optional<uint8_t> id;
+  Maybe<uint8_t> id;
   Visibility::Level visibility_level = Visibility::Level::kUndefined;
 
   // Entries sorted in ascending entry id order. If ids have not been assigned, the entries are
@@ -228,7 +228,7 @@ struct ResourceTableTypeView {
 
 struct ResourceTablePackageView {
   std::string name;
-  std::optional<uint8_t> id;
+  Maybe<uint8_t> id;
   // Types sorted in ascending type id order. If ids have not been assigned, the types are sorted by
   // their declaration order in the ResourceType enum.
   std::vector<ResourceTableTypeView> types;
@@ -309,8 +309,8 @@ class ResourceTable {
     ResourceEntry* entry;
   };
 
-  std::optional<SearchResult> FindResource(const ResourceNameRef& name) const;
-  std::optional<SearchResult> FindResource(const ResourceNameRef& name, ResourceId id) const;
+  Maybe<SearchResult> FindResource(const ResourceNameRef& name) const;
+  Maybe<SearchResult> FindResource(const ResourceNameRef& name, ResourceId id) const;
   bool RemoveResource(const ResourceNameRef& name, ResourceId id) const;
 
   // Returns the package struct with the given name, or nullptr if such a package does not

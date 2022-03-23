@@ -34,7 +34,6 @@ import android.view.ScrollCaptureResponse;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.internal.logging.testing.UiEventLoggerFake;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.screenshot.ScrollCaptureClient.Session;
 
@@ -275,8 +274,7 @@ public class ScrollCaptureControllerTest extends SysuiTestCase {
             when(client.start(/* response */ any(), /* maxPages */ anyFloat()))
                     .thenReturn(immediateFuture(session));
             return new ScrollCaptureController(context, context.getMainExecutor(),
-                    client, new ImageTileSet(context.getMainThreadHandler()),
-                    new UiEventLoggerFake());
+                    client, new ImageTileSet(context.getMainThreadHandler()));
         }
     }
 }

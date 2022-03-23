@@ -72,19 +72,17 @@ public class SuspendedAppActivity extends AlertActivity
     private Resources mSuspendingAppResources;
     private SuspendDialogInfo mSuppliedDialogInfo;
     private Bundle mOptions;
-    private BroadcastReceiver mSuspendModifiedReceiver = new BroadcastReceiver() {
+    private BroadcastReceiver mUnsuspendReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (Intent.ACTION_PACKAGES_SUSPENSION_CHANGED.equals(intent.getAction())) {
-                // Suspension conditions were modified, dismiss any related visible dialogs.
-                final String[] modified = intent.getStringArrayExtra(
+            if (Intent.ACTION_PACKAGES_UNSUSPENDED.equals(intent.getAction())) {
+                final String[] unsuspended = intent.getStringArrayExtra(
                         Intent.EXTRA_CHANGED_PACKAGE_LIST);
-                if (ArrayUtils.contains(modified, mSuspendedPackage)) {
+                if (ArrayUtils.contains(unsuspended, mSuspendedPackage)) {
                     if (!isFinishing()) {
-                        Slog.w(TAG, "Package " + mSuspendedPackage + " has modified"
-                                + " suspension conditions while dialog was visible. Finishing.");
+                        Slog.w(TAG, "Package " + mSuspendedPackage
+                                + " got unsuspended while the dialog was visible. Finishing.");
                         SuspendedAppActivity.this.finish();
-                        // TODO (b/198201994): reload the suspend dialog to show most relevant info
                     }
                 }
             }
@@ -247,16 +245,15 @@ public class SuspendedAppActivity extends AlertActivity
 
         setupAlert();
 
-        final IntentFilter suspendModifiedFilter =
-                new IntentFilter(Intent.ACTION_PACKAGES_SUSPENSION_CHANGED);
-        registerReceiverAsUser(mSuspendModifiedReceiver, UserHandle.of(mUserId),
-                suspendModifiedFilter, null, null);
+        final IntentFilter unsuspendFilter = new IntentFilter(Intent.ACTION_PACKAGES_UNSUSPENDED);
+        registerReceiverAsUser(mUnsuspendReceiver, UserHandle.of(mUserId), unsuspendFilter, null,
+                null);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        unregisterReceiver(mSuspendModifiedReceiver);
+        unregisterReceiver(mUnsuspendReceiver);
     }
 
     private void requestDismissKeyguardIfNeeded(CharSequence dismissMessage) {

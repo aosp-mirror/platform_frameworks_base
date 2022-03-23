@@ -19,10 +19,6 @@ package com.android.server.wm;
 import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_DEFAULT;
 import static android.content.pm.ApplicationInfo.FLAG_SUSPENDED;
 
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 
@@ -32,25 +28,20 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
 
-import android.annotation.Nullable;
 import android.app.ActivityManagerInternal;
-import android.app.ActivityOptions;
 import android.app.KeyguardManager;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.IPackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.SuspendDialogInfo;
 import android.content.pm.UserInfo;
-import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.platform.test.annotations.Presubmit;
 import android.testing.DexmakerShareClassLoaderRule;
-import android.util.SparseArray;
 
 import androidx.test.filters.SmallTest;
 
@@ -60,6 +51,7 @@ import com.android.internal.app.SuspendedAppActivity;
 import com.android.internal.app.UnlaunchableAppActivity;
 import com.android.server.LocalServices;
 import com.android.server.am.ActivityManagerService;
+import com.android.server.pm.PackageManagerService;
 
 import org.junit.After;
 import org.junit.Before;
@@ -72,7 +64,7 @@ import org.mockito.MockitoAnnotations;
  * Unit tests for {@link ActivityStartInterceptorTest}.
  *
  * Build/Install/Run:
- * atest WmTests:ActivityStartInterceptorTest
+ *  atest WmTests:ActivityStartInterceptorTest
  */
 @SmallTest
 @Presubmit
@@ -113,7 +105,7 @@ public class ActivityStartInterceptorTest {
     @Mock
     private KeyguardManager mKeyguardManager;
     @Mock
-    private IPackageManager mPackageManager;
+    private PackageManagerService mPackageManager;
     @Mock
     private ActivityManagerInternal mAmInternal;
     @Mock
@@ -122,11 +114,8 @@ public class ActivityStartInterceptorTest {
     private ActivityStartInterceptor mInterceptor;
     private ActivityInfo mAInfo = new ActivityInfo();
 
-    private SparseArray<ActivityInterceptorCallback> mActivityInterceptorCallbacks =
-            new SparseArray<>();
-
     @Before
-    public void setUp() throws RemoteException {
+    public void setUp() {
         MockitoAnnotations.initMocks(this);
         mService.mAmInternal = mAmInternal;
         mInterceptor = new ActivityStartInterceptor(
@@ -167,9 +156,6 @@ public class ActivityStartInterceptorTest {
         when(mLockTaskController.isActivityAllowed(
                 TEST_USER_ID, TEST_PACKAGE_NAME, LOCK_TASK_LAUNCH_MODE_DEFAULT))
                 .thenReturn(true);
-
-        // Mock the activity start callbacks
-        when(mService.getActivityInterceptorCallbacks()).thenReturn(mActivityInterceptorCallbacks);
 
         // Initialise activity info
         mAInfo.applicationInfo = new ApplicationInfo();
@@ -279,7 +265,7 @@ public class ActivityStartInterceptorTest {
     }
 
     @Test
-    public void testHarmfulAppWarning() throws RemoteException {
+    public void testHarmfulAppWarning() {
         // GIVEN the package we're about to launch has a harmful app warning set
         when(mPackageManager.getHarmfulAppWarning(TEST_PACKAGE_NAME, TEST_USER_ID))
                 .thenReturn("This app is bad");
@@ -298,60 +284,5 @@ public class ActivityStartInterceptorTest {
 
         // THEN calling intercept returns false
         assertFalse(mInterceptor.intercept(null, null, mAInfo, null, null, 0, 0, null));
-    }
-
-    public void addMockInterceptorCallback(
-            @Nullable Intent intent, @Nullable ActivityOptions activityOptions) {
-        int size = mActivityInterceptorCallbacks.size();
-        mActivityInterceptorCallbacks.put(size, new ActivityInterceptorCallback() {
-            @Override
-            public ActivityInterceptResult intercept(ActivityInterceptorInfo info) {
-                if (intent == null && activityOptions == null) {
-                    return null;
-                }
-                return new ActivityInterceptResult(
-                        intent != null ? intent : info.intent,
-                        activityOptions != null ? activityOptions : info.checkedOptions);
-            }
-        });
-    }
-
-    @Test
-    public void testInterceptionCallback_singleCallback() {
-        addMockInterceptorCallback(
-                new Intent("android.test.foo"),
-                ActivityOptions.makeBasic().setLaunchDisplayId(3));
-
-        assertTrue(mInterceptor.intercept(null, null, mAInfo, null, null, 0, 0, null));
-        assertEquals("android.test.foo", mInterceptor.mIntent.getAction());
-        assertEquals(3, mInterceptor.mActivityOptions.getLaunchDisplayId());
-    }
-
-    @Test
-    public void testInterceptionCallback_singleCallbackReturnsNull() {
-        addMockInterceptorCallback(null, null);
-
-        assertFalse(mInterceptor.intercept(null, null, mAInfo, null, null, 0, 0, null));
-    }
-
-    @Test
-    public void testInterceptionCallback_fallbackToSecondCallback() {
-        addMockInterceptorCallback(null, null);
-        addMockInterceptorCallback(new Intent("android.test.second"), null);
-
-        assertTrue(mInterceptor.intercept(null, null, mAInfo, null, null, 0, 0, null));
-        assertEquals("android.test.second", mInterceptor.mIntent.getAction());
-    }
-
-    @Test
-    public void testActivityLaunchedCallback_singleCallback() {
-        addMockInterceptorCallback(null, null);
-
-        assertEquals(1, mActivityInterceptorCallbacks.size());
-        final ActivityInterceptorCallback callback = mActivityInterceptorCallbacks.valueAt(0);
-        spyOn(callback);
-        mInterceptor.onActivityLaunched(null, null);
-
-        verify(callback, times(1)).onActivityLaunched(any(), any(), any());
     }
 }

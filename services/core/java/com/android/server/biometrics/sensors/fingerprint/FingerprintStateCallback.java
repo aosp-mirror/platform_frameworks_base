@@ -31,21 +31,17 @@ import android.util.Slog;
 import com.android.server.biometrics.Utils;
 import com.android.server.biometrics.sensors.AuthenticationClient;
 import com.android.server.biometrics.sensors.BaseClientMonitor;
-import com.android.server.biometrics.sensors.ClientMonitorCallback;
-import com.android.server.biometrics.sensors.EnrollClient;
-import com.android.server.biometrics.sensors.EnrollmentModifier;
+import com.android.server.biometrics.sensors.fingerprint.hidl.FingerprintEnrollClient;
 
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * A callback for receiving notifications about changes in fingerprint state.
  */
-public class FingerprintStateCallback implements ClientMonitorCallback {
-
-    @NonNull private final CopyOnWriteArrayList<IFingerprintStateListener>
-            mFingerprintStateListeners = new CopyOnWriteArrayList<>();
-
+public class FingerprintStateCallback implements BaseClientMonitor.Callback {
     private @FingerprintStateListener.State int mFingerprintState;
+    @NonNull private final CopyOnWriteArrayList<IFingerprintStateListener>
+        mFingerprintStateListeners = new CopyOnWriteArrayList<>();
 
     public FingerprintStateCallback() {
         mFingerprintState = STATE_IDLE;
@@ -58,9 +54,8 @@ public class FingerprintStateCallback implements ClientMonitorCallback {
     @Override
     public void onClientStarted(@NonNull BaseClientMonitor client) {
         final int previousFingerprintState = mFingerprintState;
-
         if (client instanceof AuthenticationClient) {
-            final AuthenticationClient<?> authClient = (AuthenticationClient<?>) client;
+            AuthenticationClient authClient = (AuthenticationClient) client;
             if (authClient.isKeyguard()) {
                 mFingerprintState = STATE_KEYGUARD_AUTH;
             } else if (authClient.isBiometricPrompt()) {
@@ -68,14 +63,13 @@ public class FingerprintStateCallback implements ClientMonitorCallback {
             } else {
                 mFingerprintState = STATE_AUTH_OTHER;
             }
-        } else if (client instanceof EnrollClient) {
+        } else if (client instanceof FingerprintEnrollClient) {
             mFingerprintState = STATE_ENROLLING;
         } else {
             Slog.w(FingerprintService.TAG,
                     "Other authentication client: " + Utils.getClientName(client));
             mFingerprintState = STATE_IDLE;
         }
-
         Slog.d(FingerprintService.TAG, "Fps state updated from " + previousFingerprintState
                 + " to " + mFingerprintState + ", client " + client);
         notifyFingerprintStateListeners(mFingerprintState);
@@ -87,18 +81,6 @@ public class FingerprintStateCallback implements ClientMonitorCallback {
         Slog.d(FingerprintService.TAG,
                 "Client finished, fps state updated to " + mFingerprintState + ", client "
                         + client);
-
-        if (client instanceof EnrollmentModifier) {
-            EnrollmentModifier enrollmentModifier = (EnrollmentModifier) client;
-            final boolean enrollmentStateChanged = enrollmentModifier.hasEnrollmentStateChanged();
-            Slog.d(FingerprintService.TAG, "Enrollment state changed: " + enrollmentStateChanged);
-            if (enrollmentStateChanged) {
-                notifyAllFingerprintEnrollmentStateChanged(client.getTargetUserId(),
-                        client.getSensorId(),
-                        enrollmentModifier.hasEnrollments());
-            }
-        }
-
         notifyFingerprintStateListeners(mFingerprintState);
     }
 
@@ -113,35 +95,8 @@ public class FingerprintStateCallback implements ClientMonitorCallback {
     }
 
     /**
-     * This should be invoked when:
-     *  1) Enrolled --> None-enrolled
-     *  2) None-enrolled --> enrolled
-     *  3) HAL becomes ready
-     *  4) Listener is registered
-     */
-    void notifyAllFingerprintEnrollmentStateChanged(int userId, int sensorId,
-            boolean hasEnrollments) {
-        for (IFingerprintStateListener listener : mFingerprintStateListeners) {
-            notifyFingerprintEnrollmentStateChanged(listener, userId, sensorId, hasEnrollments);
-        }
-    }
-
-    /**
-     * Notifies the listener of enrollment state changes.
-     */
-    void notifyFingerprintEnrollmentStateChanged(@NonNull IFingerprintStateListener listener,
-            int userId, int sensorId, boolean hasEnrollments) {
-        try {
-            listener.onEnrollmentsChanged(userId, sensorId, hasEnrollments);
-        } catch (RemoteException e) {
-            Slog.e(FingerprintService.TAG, "Remote exception", e);
-        }
-    }
-
-    /**
      * Enables clients to register a FingerprintStateListener. Used by FingerprintService to forward
      * updates in fingerprint sensor state to the SideFpNsEventHandler
-     *
      * @param listener
      */
     public void registerFingerprintStateListener(@NonNull IFingerprintStateListener listener) {

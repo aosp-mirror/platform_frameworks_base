@@ -16,9 +16,6 @@
 
 package android.debug;
 
-import android.debug.FingerprintAndPairDevice;
-import android.debug.IAdbCallback;
-
 /**
  * Interface to communicate remotely with the {@code AdbService} in the system server.
  *
@@ -61,10 +58,9 @@ interface IAdbManager {
     void denyWirelessDebugging();
 
     /**
-     * Returns an array of NamedPairDevice with the key fingerprint mapped to the device
-     * information.
+     * Returns a Map<String, PairDevice> with the key fingerprint mapped to the device information.
      */
-    FingerprintAndPairDevice[] getPairedDevices();
+    Map getPairedDevices();
 
     /**
      * Unpair the device identified by the key fingerprint it uses.
@@ -112,14 +108,4 @@ interface IAdbManager {
      * QR code.
      */
     boolean isAdbWifiQrSupported();
-
-    /**
-     * Register callback for ADB debugging changed notification.
-     */
-    void registerCallback(IAdbCallback callback);
-
-    /**
-     * Unregister callback for ADB debugging changed notification.
-     */
-    void unregisterCallback(IAdbCallback callback);
 }

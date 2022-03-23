@@ -133,7 +133,7 @@ public class ViewRootInsetsControllerHost implements InsetsController.Host {
             //  frame instead.
             final SurfaceControl.Transaction t = new SurfaceControl.Transaction();
             mApplier.applyParams(t, params);
-            t.apply();
+            mApplier.applyTransaction(t, -1);
         }
     }
 
@@ -149,10 +149,10 @@ public class ViewRootInsetsControllerHost implements InsetsController.Host {
     }
 
     @Override
-    public void updateRequestedVisibilities(InsetsVisibilities vis) {
+    public void onInsetsModified(InsetsState insetsState) {
         try {
             if (mViewRoot.mAdded) {
-                mViewRoot.mWindowSession.updateRequestedVisibilities(mViewRoot.mWindow, vis);
+                mViewRoot.mWindowSession.insetsModified(mViewRoot.mWindow, insetsState);
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to call insetsModified", e);

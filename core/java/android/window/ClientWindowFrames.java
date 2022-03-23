@@ -27,49 +27,47 @@ import android.os.Parcelable;
  */
 public class ClientWindowFrames implements Parcelable {
     /** The actual window bounds. */
-    public final @NonNull Rect frame = new Rect();
+    public final @NonNull Rect frame;
 
     /**
      * The container frame that is usually the same as display size. It may exclude the area of
      * insets if the window layout parameter has specified fit-insets-sides.
      */
-    public final @NonNull Rect displayFrame = new Rect();
+    public final @NonNull Rect displayFrame;
 
-    /**
-     * The frame to be referenced while applying gravity and MATCH_PARENT.
-     */
-    public final @NonNull Rect parentFrame = new Rect();
-
-    public boolean isParentFrameClippedByDisplayCutout;
+    /** The background area while the window is resizing. */
+    public final @NonNull Rect backdropFrame;
 
     public ClientWindowFrames() {
+        frame = new Rect();
+        displayFrame = new Rect();
+        backdropFrame = new Rect();
     }
 
     public ClientWindowFrames(ClientWindowFrames other) {
-        frame.set(other.frame);
-        displayFrame.set(other.displayFrame);
-        parentFrame.set(other.parentFrame);
-        isParentFrameClippedByDisplayCutout = other.isParentFrameClippedByDisplayCutout;
+        frame = new Rect(other.frame);
+        displayFrame = new Rect(other.displayFrame);
+        backdropFrame = new Rect(other.backdropFrame);
     }
 
     private ClientWindowFrames(Parcel in) {
-        readFromParcel(in);
+        frame = Rect.CREATOR.createFromParcel(in);
+        displayFrame = Rect.CREATOR.createFromParcel(in);
+        backdropFrame = Rect.CREATOR.createFromParcel(in);
     }
 
     /** Needed for AIDL out parameters. */
     public void readFromParcel(Parcel in) {
         frame.readFromParcel(in);
         displayFrame.readFromParcel(in);
-        parentFrame.readFromParcel(in);
-        isParentFrameClippedByDisplayCutout = in.readBoolean();
+        backdropFrame.readFromParcel(in);
     }
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         frame.writeToParcel(dest, flags);
         displayFrame.writeToParcel(dest, flags);
-        parentFrame.writeToParcel(dest, flags);
-        dest.writeBoolean(isParentFrameClippedByDisplayCutout);
+        backdropFrame.writeToParcel(dest, flags);
     }
 
     @Override
@@ -77,8 +75,7 @@ public class ClientWindowFrames implements Parcelable {
         final StringBuilder sb = new StringBuilder(32);
         return "ClientWindowFrames{frame=" + frame.toShortString(sb)
                 + " display=" + displayFrame.toShortString(sb)
-                + " parentFrame=" + parentFrame.toShortString(sb)
-                + " parentClippedByDisplayCutout=" + isParentFrameClippedByDisplayCutout + "}";
+                + " backdrop=" + backdropFrame.toShortString(sb) + "}";
     }
 
     @Override

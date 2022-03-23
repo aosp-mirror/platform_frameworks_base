@@ -19,13 +19,13 @@ package android.window;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.app.ActivityManager;
 import android.app.TaskInfo;
 import android.content.pm.ActivityInfo;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.view.InsetsState;
-import android.view.InsetsVisibilities;
 import android.view.WindowManager;
 
 /**
@@ -33,6 +33,7 @@ import android.view.WindowManager;
  * start in the system.
  * @hide
  */
+@TestApi
 public final class StartingWindowInfo implements Parcelable {
     /**
      * Prefer nothing or not care the type of starting window.
@@ -50,10 +51,10 @@ public final class StartingWindowInfo implements Parcelable {
      */
     public static final int STARTING_WINDOW_TYPE_SNAPSHOT = 2;
     /**
-     * Prefer solid color splash screen starting window.
+     * Prefer empty splash screen starting window.
      * @hide
      */
-    public static final int STARTING_WINDOW_TYPE_SOLID_COLOR_SPLASH_SCREEN = 3;
+    public static final int STARTING_WINDOW_TYPE_EMPTY_SPLASH_SCREEN = 3;
 
     /** @hide **/
     public static final int STARTING_WINDOW_TYPE_LEGACY_SPLASH_SCREEN = 4;
@@ -65,7 +66,7 @@ public final class StartingWindowInfo implements Parcelable {
             STARTING_WINDOW_TYPE_NONE,
             STARTING_WINDOW_TYPE_SPLASH_SCREEN,
             STARTING_WINDOW_TYPE_SNAPSHOT,
-            STARTING_WINDOW_TYPE_SOLID_COLOR_SPLASH_SCREEN,
+            STARTING_WINDOW_TYPE_EMPTY_SPLASH_SCREEN,
             STARTING_WINDOW_TYPE_LEGACY_SPLASH_SCREEN
     })
     public @interface StartingWindowType {}
@@ -115,8 +116,7 @@ public final class StartingWindowInfo implements Parcelable {
             TYPE_PARAMETER_PROCESS_RUNNING,
             TYPE_PARAMETER_ALLOW_TASK_SNAPSHOT,
             TYPE_PARAMETER_ACTIVITY_CREATED,
-            TYPE_PARAMETER_USE_SOLID_COLOR_SPLASH_SCREEN,
-            TYPE_PARAMETER_ALLOW_HANDLE_SOLID_COLOR_SCREEN,
+            TYPE_PARAMETER_USE_EMPTY_SPLASH_SCREEN,
             TYPE_PARAMETER_LEGACY_SPLASH_SCREEN
     })
     public @interface StartingTypeParams {}
@@ -135,17 +135,7 @@ public final class StartingWindowInfo implements Parcelable {
     /** @hide */
     public static final int TYPE_PARAMETER_ACTIVITY_CREATED = 0x00000010;
     /** @hide */
-    public static final int TYPE_PARAMETER_USE_SOLID_COLOR_SPLASH_SCREEN = 0x00000020;
-    /**
-     * The parameter which indicates if the activity has finished drawing.
-     * @hide
-     */
-    public static final int TYPE_PARAMETER_ACTIVITY_DRAWN = 0x00000040;
-    /**
-     * Application is allowed to handle solid color splash screen.
-     * @hide
-     */
-    public static final int TYPE_PARAMETER_ALLOW_HANDLE_SOLID_COLOR_SCREEN = 0x00000080;
+    public static final int TYPE_PARAMETER_USE_EMPTY_SPLASH_SCREEN = 0x00000020;
     /**
      * Application is allowed to use the legacy splash screen
      * @hide
@@ -175,13 +165,7 @@ public final class StartingWindowInfo implements Parcelable {
      * TaskSnapshot.
      * @hide
      */
-    public TaskSnapshot taskSnapshot;
-
-    /**
-     * The requested insets visibility of the top main window.
-     * @hide
-     */
-    public final InsetsVisibilities requestedVisibilities = new InsetsVisibilities();
+    public TaskSnapshot mTaskSnapshot;
 
     public StartingWindowInfo() {
 
@@ -189,13 +173,6 @@ public final class StartingWindowInfo implements Parcelable {
 
     private StartingWindowInfo(@NonNull Parcel source) {
         readFromParcel(source);
-    }
-
-    /**
-     * Return whether the application allow to handle the solid color style splash screen.
-     */
-    public boolean allowHandleSolidColorSplashScreen() {
-        return (startingWindowTypeParameter & TYPE_PARAMETER_ALLOW_HANDLE_SOLID_COLOR_SCREEN) != 0;
     }
 
     @Override
@@ -213,8 +190,7 @@ public final class StartingWindowInfo implements Parcelable {
         dest.writeTypedObject(mainWindowLayoutParams, flags);
         dest.writeInt(splashScreenThemeResId);
         dest.writeBoolean(isKeyguardOccluded);
-        dest.writeTypedObject(taskSnapshot, flags);
-        requestedVisibilities.writeToParcel(dest, flags);
+        dest.writeTypedObject(mTaskSnapshot, flags);
     }
 
     void readFromParcel(@NonNull Parcel source) {
@@ -227,8 +203,7 @@ public final class StartingWindowInfo implements Parcelable {
         mainWindowLayoutParams = source.readTypedObject(WindowManager.LayoutParams.CREATOR);
         splashScreenThemeResId = source.readInt();
         isKeyguardOccluded = source.readBoolean();
-        taskSnapshot = source.readTypedObject(TaskSnapshot.CREATOR);
-        requestedVisibilities.readFromParcel(source);
+        mTaskSnapshot = source.readTypedObject(TaskSnapshot.CREATOR);
     }
 
     @Override

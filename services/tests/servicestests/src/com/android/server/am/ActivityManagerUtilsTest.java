@@ -17,7 +17,7 @@ package com.android.server.am;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import androidx.test.filters.SmallTest;
 
@@ -89,20 +89,18 @@ public class ActivityManagerUtilsTest {
     }
 
     @Test
-    public void testCheckShouldSamplePackage() {
+    public void testSheckShouldSamplePackage() {
         // Just make sure checkShouldSamplePackage is actually working...
-        assertFailure(() -> checkShouldSamplePackage(0.3f, 0.6f, false, true));
-        assertFailure(() -> checkShouldSamplePackage(0.6f, 0.3f, true, false));
-    }
-
-    private static void assertFailure(Runnable r) {
-        boolean failed = false;
         try {
-            r.run();
-        } catch (AssertionError e) {
-            failed = true;
+            checkShouldSamplePackage(0.3f, 0.6f, false, true);
+            fail();
+        } catch (AssertionError expected) {
         }
-        assertTrue(failed);
+        try {
+            checkShouldSamplePackage(0.6f, 0.3f, true, false);
+            fail();
+        } catch (AssertionError expected) {
+        }
     }
 
     private void checkShouldSamplePackage(float inputSampleRate, float expectedRate,

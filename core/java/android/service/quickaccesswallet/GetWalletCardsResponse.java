@@ -63,7 +63,7 @@ public final class GetWalletCardsResponse implements Parcelable {
     private static GetWalletCardsResponse readFromParcel(Parcel source) {
         int size = source.readInt();
         List<WalletCard> walletCards =
-                source.readParcelableList(new ArrayList<>(size), WalletCard.class.getClassLoader(), android.service.quickaccesswallet.WalletCard.class);
+                source.readParcelableList(new ArrayList<>(size), WalletCard.class.getClassLoader());
         int selectedIndex = source.readInt();
         return new GetWalletCardsResponse(walletCards, selectedIndex);
     }

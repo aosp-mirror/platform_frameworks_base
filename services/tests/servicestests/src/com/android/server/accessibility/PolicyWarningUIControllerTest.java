@@ -116,7 +116,8 @@ public class PolicyWarningUIControllerTest {
         mMockResolveInfo.serviceInfo = mMockServiceInfo;
         when(mMockA11yServiceInfo.getResolveInfo()).thenReturn(mMockResolveInfo);
         when(mMockA11yServiceInfo.getComponentName()).thenReturn(TEST_COMPONENT_NAME);
-        when(mMockA11yServiceInfo.isAccessibilityTool()).thenReturn(false);
+        when(mAccessibilitySecurityPolicy.isA11yCategoryService(
+                mMockA11yServiceInfo)).thenReturn(false);
 
         mFakeNotificationController.onReceive(mContext,
                 PolicyWarningUIController.createIntent(mContext, TEST_USER_ID,

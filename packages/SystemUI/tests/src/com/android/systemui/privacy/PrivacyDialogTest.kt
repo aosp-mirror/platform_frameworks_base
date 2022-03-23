@@ -34,7 +34,6 @@ import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
-import android.content.Intent
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
@@ -44,11 +43,11 @@ class PrivacyDialogTest : SysuiTestCase() {
     companion object {
         private const val TEST_PACKAGE_NAME = "test_pkg"
         private const val TEST_USER_ID = 0
-        private const val TEST_PERM_GROUP = "test_perm_group"
     }
 
     @Mock
-    private lateinit var starter: (String, Int, CharSequence?, Intent?) -> Unit
+    private lateinit var starter: (String, Int) -> Unit
+
     private lateinit var dialog: PrivacyDialog
 
     @Before
@@ -72,20 +71,16 @@ class PrivacyDialogTest : SysuiTestCase() {
                         TEST_USER_ID,
                         "App",
                         null,
-                        null,
-                        null,
                         0L,
                         false,
                         false,
-                        false,
-                        TEST_PERM_GROUP,
-                        null
+                        false
                 )
         )
         dialog = PrivacyDialog(context, list, starter)
         dialog.show()
         dialog.requireViewById<View>(R.id.privacy_item).callOnClick()
-        verify(starter).invoke(TEST_PACKAGE_NAME, TEST_USER_ID, null, null)
+        verify(starter).invoke(TEST_PACKAGE_NAME, TEST_USER_ID)
     }
 
     @Test
@@ -120,14 +115,10 @@ class PrivacyDialogTest : SysuiTestCase() {
                         TEST_USER_ID,
                         "App",
                         null,
-                        null,
-                        null,
                         0L,
                         true,
                         false,
-                        false,
-                        TEST_PERM_GROUP,
-                        null
+                        false
                 ),
                 PrivacyDialog.PrivacyElement(
                         PrivacyType.TYPE_MICROPHONE,
@@ -135,14 +126,10 @@ class PrivacyDialogTest : SysuiTestCase() {
                         TEST_USER_ID,
                         "App",
                         null,
-                        null,
-                        null,
                         0L,
                         false,
                         false,
-                        false,
-                        TEST_PERM_GROUP,
-                        null
+                        false
                 )
         )
         dialog = PrivacyDialog(context, list, starter)
@@ -158,14 +145,10 @@ class PrivacyDialogTest : SysuiTestCase() {
                 TEST_USER_ID,
                 "App",
                 null,
-                null,
-                null,
                 0L,
                 true,
                 false,
-                false,
-                TEST_PERM_GROUP,
-                null
+                false
         )
 
         val list = listOf(element)
@@ -188,14 +171,10 @@ class PrivacyDialogTest : SysuiTestCase() {
                 TEST_USER_ID,
                 "App",
                 null,
-                null,
-                null,
                 0L,
                 false,
                 false,
-                false,
-                TEST_PERM_GROUP,
-                null
+                false
         )
 
         val list = listOf(element)
@@ -218,14 +197,10 @@ class PrivacyDialogTest : SysuiTestCase() {
                 TEST_USER_ID,
                 "App",
                 null,
-                null,
-                null,
                 0L,
                 false,
                 true,
-                false,
-                TEST_PERM_GROUP,
-                null
+                false
         )
 
         val list = listOf(element)
@@ -244,14 +219,10 @@ class PrivacyDialogTest : SysuiTestCase() {
                 TEST_USER_ID,
                 "App",
                 null,
-                null,
-                null,
                 0L,
                 false,
                 false,
-                true,
-                TEST_PERM_GROUP,
-                null
+                true
         )
 
         val list = listOf(element)
@@ -270,14 +241,10 @@ class PrivacyDialogTest : SysuiTestCase() {
                 TEST_USER_ID,
                 "App",
                 null,
-                null,
-                null,
                 0L,
                 false,
                 false,
-                true,
-                TEST_PERM_GROUP,
-                null
+                true
         )
 
         val list = listOf(element)
@@ -288,21 +255,17 @@ class PrivacyDialogTest : SysuiTestCase() {
     }
 
     @Test
-    fun testProxyLabel() {
+    fun testAttribution() {
         val element = PrivacyDialog.PrivacyElement(
                 PrivacyType.TYPE_MICROPHONE,
                 TEST_PACKAGE_NAME,
                 TEST_USER_ID,
                 "App",
-                null,
-                null,
-                "proxyLabel",
+                "attribution",
                 0L,
                 false,
                 false,
-                true,
-                TEST_PERM_GROUP,
-                null
+                true
         )
 
         val list = listOf(element)
@@ -311,65 +274,7 @@ class PrivacyDialogTest : SysuiTestCase() {
         assertThat(dialog.requireViewById<TextView>(R.id.text).text.toString()).contains(
                 context.getString(
                         R.string.ongoing_privacy_dialog_attribution_text,
-                        element.proxyLabel
-                )
-        )
-    }
-
-    @Test
-    fun testSubattribution() {
-        val element = PrivacyDialog.PrivacyElement(
-                PrivacyType.TYPE_MICROPHONE,
-                TEST_PACKAGE_NAME,
-                TEST_USER_ID,
-                "App",
-                null,
-                "For subattribution",
-                null,
-                0L,
-                true,
-                false,
-                false,
-                TEST_PERM_GROUP,
-                null
-        )
-
-        val list = listOf(element)
-        dialog = PrivacyDialog(context, list, starter)
-        dialog.show()
-        assertThat(dialog.requireViewById<TextView>(R.id.text).text.toString()).contains(
-                context.getString(
-                        R.string.ongoing_privacy_dialog_attribution_label,
-                        element.attributionLabel
-                )
-        )
-    }
-
-    @Test
-    fun testSubattributionAndProxyLabel() {
-        val element = PrivacyDialog.PrivacyElement(
-                PrivacyType.TYPE_MICROPHONE,
-                TEST_PACKAGE_NAME,
-                TEST_USER_ID,
-                "App",
-                null,
-                "For subattribution",
-                "proxy label",
-                0L,
-                true,
-                false,
-                false,
-                TEST_PERM_GROUP,
-                null
-        )
-
-        val list = listOf(element)
-        dialog = PrivacyDialog(context, list, starter)
-        dialog.show()
-        assertThat(dialog.requireViewById<TextView>(R.id.text).text.toString()).contains(
-                context.getString(
-                        R.string.ongoing_privacy_dialog_attribution_proxy_label,
-                        element.attributionLabel, element.proxyLabel
+                        element.attribution
                 )
         )
     }

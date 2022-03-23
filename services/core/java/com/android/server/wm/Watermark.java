@@ -31,7 +31,6 @@ import android.util.TypedValue;
 import android.view.Surface;
 import android.view.Surface.OutOfResourcesException;
 import android.view.SurfaceControl;
-import android.view.WindowManagerPolicyConstants;
 
 /**
  * Displays a watermark on top of the window manager's windows.
@@ -118,7 +117,7 @@ class Watermark {
                     .setFormat(PixelFormat.TRANSLUCENT)
                     .setCallsite(TITLE)
                     .build();
-            t.setLayer(ctrl, WindowManagerPolicyConstants.WATERMARK_LAYER)
+            t.setLayer(ctrl, WindowManagerService.TYPE_LAYER_MULTIPLIER * 100)
                     .setPosition(ctrl, 0, 0)
                     .show(ctrl);
             // Ensure we aren't considered as obscuring for Input purposes.

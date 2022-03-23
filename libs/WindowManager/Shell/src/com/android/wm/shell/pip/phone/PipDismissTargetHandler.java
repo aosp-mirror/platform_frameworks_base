@@ -23,17 +23,22 @@ import android.content.res.Resources;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.graphics.drawable.TransitionDrawable;
+import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.SurfaceControl;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
-import android.view.WindowInsets;
 import android.view.WindowManager;
+import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
+import androidx.dynamicanimation.animation.DynamicAnimation;
+import androidx.dynamicanimation.animation.SpringForce;
 
 import com.android.wm.shell.R;
-import com.android.wm.shell.bubbles.DismissView;
+import com.android.wm.shell.animation.PhysicsAnimator;
 import com.android.wm.shell.common.DismissCircleView;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.magnetictarget.MagnetizedObject;
@@ -49,6 +54,9 @@ public class PipDismissTargetHandler implements ViewTreeObserver.OnPreDrawListen
     /* The multiplier to apply scale the target size by when applying the magnetic field radius */
     private static final float MAGNETIC_FIELD_RADIUS_MULTIPLIER = 1.25f;
 
+    /** Duration of the dismiss scrim fading in/out. */
+    private static final int DISMISS_TRANSITION_DURATION_MS = 200;
+
     /**
      * MagnetizedObject wrapper for PIP. This allows the magnetic target library to locate and move
      * PIP.
@@ -59,7 +67,7 @@ public class PipDismissTargetHandler implements ViewTreeObserver.OnPreDrawListen
      * Container for the dismiss circle, so that it can be animated within the container via
      * translation rather than within the WindowManager via slow layout animations.
      */
-    private DismissView mTargetViewContainer;
+    private ViewGroup mTargetViewContainer;
 
     /** Circle view used to render the dismiss target. */
     private DismissCircleView mTargetView;
@@ -69,13 +77,22 @@ public class PipDismissTargetHandler implements ViewTreeObserver.OnPreDrawListen
      */
     private MagnetizedObject.MagneticTarget mMagneticTarget;
 
+    /**
+     * PhysicsAnimator instance for animating the dismiss target in/out.
+     */
+    private PhysicsAnimator<View> mMagneticTargetAnimator;
+
+    /** Default configuration to use for springing the dismiss target in/out. */
+    private final PhysicsAnimator.SpringConfig mTargetSpringConfig =
+            new PhysicsAnimator.SpringConfig(
+                    SpringForce.STIFFNESS_LOW, SpringForce.DAMPING_RATIO_LOW_BOUNCY);
+
     // Allow dragging the PIP to a location to close it
     private boolean mEnableDismissDragToEdge;
 
     private int mTargetSize;
     private int mDismissAreaHeight;
     private float mMagneticFieldRadiusPercent = 1f;
-    private WindowInsets mWindowInsets;
 
     private SurfaceControl mTaskLeash;
     private boolean mHasDismissTargetSurface;
@@ -100,23 +117,14 @@ public class PipDismissTargetHandler implements ViewTreeObserver.OnPreDrawListen
         mEnableDismissDragToEdge = res.getBoolean(R.bool.config_pipEnableDismissDragToEdge);
         mDismissAreaHeight = res.getDimensionPixelSize(R.dimen.floating_dismiss_gradient_height);
 
-        if (mTargetViewContainer != null) {
-            // init can be called multiple times, remove the old one from view hierarchy first.
-            cleanUpDismissTarget();
-        }
-
-        mTargetViewContainer = new DismissView(mContext);
-        mTargetView = mTargetViewContainer.getCircle();
-        mTargetViewContainer.setOnApplyWindowInsetsListener((view, windowInsets) -> {
-            if (!windowInsets.equals(mWindowInsets)) {
-                mWindowInsets = windowInsets;
-                updateMagneticTargetSize();
-            }
-            return windowInsets;
-        });
+        mTargetView = new DismissCircleView(mContext);
+        mTargetViewContainer = new FrameLayout(mContext);
+        mTargetViewContainer.setBackgroundDrawable(
+                mContext.getDrawable(R.drawable.floating_dismiss_gradient_transition));
+        mTargetViewContainer.setClipChildren(false);
+        mTargetViewContainer.addView(mTargetView);
 
         mMagnetizedPip = mMotionHelper.getMagnetizedPip();
-        mMagnetizedPip.clearAllTargets();
         mMagneticTarget = mMagnetizedPip.addTarget(mTargetView, 0);
         updateMagneticTargetSize();
 
@@ -150,19 +158,18 @@ public class PipDismissTargetHandler implements ViewTreeObserver.OnPreDrawListen
 
             @Override
             public void onReleasedInTarget(@NonNull MagnetizedObject.MagneticTarget target) {
-                if (mEnableDismissDragToEdge) {
-                    mMainExecutor.executeDelayed(() -> {
-                        mMotionHelper.notifyDismissalPending();
-                        mMotionHelper.animateDismiss();
-                        hideDismissTargetMaybe();
+                mMainExecutor.executeDelayed(() -> {
+                    mMotionHelper.notifyDismissalPending();
+                    mMotionHelper.animateDismiss();
+                    hideDismissTargetMaybe();
 
-                        mPipUiEventLogger.log(
-                                PipUiEventLogger.PipUiEventEnum.PICTURE_IN_PICTURE_DRAG_TO_REMOVE);
-                    }, 0);
-                }
+                    mPipUiEventLogger.log(
+                            PipUiEventLogger.PipUiEventEnum.PICTURE_IN_PICTURE_DRAG_TO_REMOVE);
+                }, 0);
             }
         });
 
+        mMagneticTargetAnimator = PhysicsAnimator.getInstance(mTargetView);
     }
 
     @Override
@@ -188,13 +195,16 @@ public class PipDismissTargetHandler implements ViewTreeObserver.OnPreDrawListen
         if (mTargetView == null) {
             return;
         }
-        if (mTargetViewContainer != null) {
-            mTargetViewContainer.updateResources();
-        }
 
         final Resources res = mContext.getResources();
         mTargetSize = res.getDimensionPixelSize(R.dimen.dismiss_circle_size);
         mDismissAreaHeight = res.getDimensionPixelSize(R.dimen.floating_dismiss_gradient_height);
+        final FrameLayout.LayoutParams newParams =
+                new FrameLayout.LayoutParams(mTargetSize, mTargetSize);
+        newParams.gravity = Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM;
+        newParams.bottomMargin = mContext.getResources().getDimensionPixelSize(
+                R.dimen.floating_dismiss_bottom_margin);
+        mTargetView.setLayoutParams(newParams);
 
         // Set the magnetic field radius equal to the target size from the center of the target
         setMagneticFieldRadiusPercent(mMagneticFieldRadiusPercent);
@@ -230,7 +240,7 @@ public class PipDismissTargetHandler implements ViewTreeObserver.OnPreDrawListen
     /** Adds the magnetic target view to the WindowManager so it's ready to be animated in. */
     public void createOrUpdateDismissTarget() {
         if (!mTargetViewContainer.isAttachedToWindow()) {
-            mTargetViewContainer.cancelAnimators();
+            mMagneticTargetAnimator.cancel();
 
             mTargetViewContainer.setVisibility(View.INVISIBLE);
             mTargetViewContainer.getViewTreeObserver().removeOnPreDrawListener(this);
@@ -253,11 +263,11 @@ public class PipDismissTargetHandler implements ViewTreeObserver.OnPreDrawListen
     private WindowManager.LayoutParams getDismissTargetLayoutParams() {
         final Point windowSize = new Point();
         mWindowManager.getDefaultDisplay().getRealSize(windowSize);
-        int height = Math.min(windowSize.y, mDismissAreaHeight);
+
         final WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
                 WindowManager.LayoutParams.MATCH_PARENT,
-                height,
-                0, windowSize.y - height,
+                mDismissAreaHeight,
+                0, windowSize.y - mDismissAreaHeight,
                 WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL,
                 WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
                         | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
@@ -281,8 +291,18 @@ public class PipDismissTargetHandler implements ViewTreeObserver.OnPreDrawListen
         createOrUpdateDismissTarget();
 
         if (mTargetViewContainer.getVisibility() != View.VISIBLE) {
+            mTargetView.setTranslationY(mTargetViewContainer.getHeight());
+            mTargetViewContainer.setVisibility(View.VISIBLE);
             mTargetViewContainer.getViewTreeObserver().addOnPreDrawListener(this);
-            mTargetViewContainer.show();
+
+            // Cancel in case we were in the middle of animating it out.
+            mMagneticTargetAnimator.cancel();
+            mMagneticTargetAnimator
+                    .spring(DynamicAnimation.TRANSLATION_Y, 0f, mTargetSpringConfig)
+                    .start();
+
+            ((TransitionDrawable) mTargetViewContainer.getBackground()).startTransition(
+                    DISMISS_TRANSITION_DURATION_MS);
         }
     }
 
@@ -291,7 +311,16 @@ public class PipDismissTargetHandler implements ViewTreeObserver.OnPreDrawListen
         if (!mEnableDismissDragToEdge) {
             return;
         }
-        mTargetViewContainer.hide();
+
+        mMagneticTargetAnimator
+                .spring(DynamicAnimation.TRANSLATION_Y,
+                        mTargetViewContainer.getHeight(),
+                        mTargetSpringConfig)
+                .withEndActions(() -> mTargetViewContainer.setVisibility(View.GONE))
+                .start();
+
+        ((TransitionDrawable) mTargetViewContainer.getBackground()).reverseTransition(
+                DISMISS_TRANSITION_DURATION_MS);
     }
 
     /**

@@ -1,0 +1,10 @@
+# Bug component: 1344
+hdmoon@google.com
+hkuang@google.com
+jinpark@google.com
+klhyun@google.com
+lnilsson@google.com
+sungsoo@google.com
+
+# go/android-fwk-media-solutions for info on areas of ownership.
+include platform/frameworks/av:/media/janitors/media_solutions_OWNERS

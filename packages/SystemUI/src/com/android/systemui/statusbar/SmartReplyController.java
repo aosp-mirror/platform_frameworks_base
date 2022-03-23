@@ -19,43 +19,35 @@ import android.app.Notification;
 import android.os.RemoteException;
 import android.util.ArraySet;
 
-import androidx.annotation.NonNull;
-
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
-import com.android.systemui.Dumpable;
-import com.android.systemui.dump.DumpManager;
-import com.android.systemui.statusbar.dagger.CentralSurfacesModule;
+import com.android.systemui.statusbar.dagger.StatusBarModule;
+import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
-import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
+import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 
-import java.io.FileDescriptor;
-import java.io.PrintWriter;
 import java.util.Set;
 
 /**
  * Handles when smart replies are added to a notification
  * and clicked upon.
  */
-public class SmartReplyController implements Dumpable {
+public class SmartReplyController {
     private final IStatusBarService mBarService;
-    private final NotificationVisibilityProvider mVisibilityProvider;
+    private final NotificationEntryManager mEntryManager;
     private final NotificationClickNotifier mClickNotifier;
-    private final Set<String> mSendingKeys = new ArraySet<>();
+    private Set<String> mSendingKeys = new ArraySet<>();
     private Callback mCallback;
 
     /**
-     * Injected constructor. See {@link CentralSurfacesModule}.
+     * Injected constructor. See {@link StatusBarModule}.
      */
-    public SmartReplyController(
-            DumpManager dumpManager,
-            NotificationVisibilityProvider visibilityProvider,
+    public SmartReplyController(NotificationEntryManager entryManager,
             IStatusBarService statusBarService,
             NotificationClickNotifier clickNotifier) {
         mBarService = statusBarService;
-        mVisibilityProvider = visibilityProvider;
+        mEntryManager = entryManager;
         mClickNotifier = clickNotifier;
-        dumpManager.registerDumpable(this);
     }
 
     public void setCallback(Callback callback) {
@@ -83,7 +75,12 @@ public class SmartReplyController implements Dumpable {
     public void smartActionClicked(
             NotificationEntry entry, int actionIndex, Notification.Action action,
             boolean generatedByAssistant) {
-        final NotificationVisibility nv = mVisibilityProvider.obtain(entry, true);
+        final int count = mEntryManager.getActiveNotificationsCount();
+        final int rank = entry.getRanking().getRank();
+        NotificationVisibility.NotificationLocation location =
+                NotificationLogger.getNotificationLocation(entry);
+        final NotificationVisibility nv = NotificationVisibility.obtain(
+                entry.getKey(), rank, count, true, location);
         mClickNotifier.onNotificationActionClick(
                 entry.getKey(), actionIndex, action, nv, generatedByAssistant);
     }
@@ -112,14 +109,6 @@ public class SmartReplyController implements Dumpable {
     public void stopSending(final NotificationEntry entry) {
         if (entry != null) {
             mSendingKeys.remove(entry.getSbn().getKey());
-        }
-    }
-
-    @Override
-    public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
-        pw.println("mSendingKeys: " + mSendingKeys.size());
-        for (String key : mSendingKeys) {
-            pw.println(" * " + key);
         }
     }
 

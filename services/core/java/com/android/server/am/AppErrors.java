@@ -27,7 +27,6 @@ import static com.android.server.am.ActivityManagerService.MY_PID;
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_FREE_RESIZE;
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_NONE;
 
-import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.AnrController;
@@ -41,7 +40,6 @@ import android.content.pm.VersionedPackage;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
-import android.os.Bundle;
 import android.os.Message;
 import android.os.Process;
 import android.os.SystemClock;
@@ -491,7 +489,7 @@ class AppErrors {
      * @param message
      */
     void scheduleAppCrashLocked(int uid, int initialPid, String packageName, int userId,
-            String message, boolean force, int exceptionTypeId, @Nullable Bundle extras) {
+            String message, boolean force, int exceptionTypeId) {
         ProcessRecord proc = null;
 
         // Figure out which process to kill.  We don't trust that initialPid
@@ -523,7 +521,7 @@ class AppErrors {
             return;
         }
 
-        proc.scheduleCrashLocked(message, exceptionTypeId, extras);
+        proc.scheduleCrashLocked(message, exceptionTypeId);
         if (force) {
             // If the app is responsive, the scheduled crash will happen as expected
             // and then the delayed summary kill will be a no-op.
@@ -1018,7 +1016,6 @@ class AppErrors {
                         Settings.Secure.SHOW_FIRST_CRASH_DIALOG_DEV_OPTION,
                         0,
                         mService.mUserController.getCurrentUserId()) != 0;
-                final String packageName = proc.info.packageName;
                 final boolean crashSilenced = mAppsNotReportingCrashes != null
                         && mAppsNotReportingCrashes.contains(proc.info.packageName);
                 final long now = SystemClock.uptimeMillis();
@@ -1027,7 +1024,6 @@ class AppErrors {
                 if ((mService.mAtmInternal.canShowErrorDialogs() || showBackground)
                         && !crashSilenced && !shouldThottle
                         && (showFirstCrash || showFirstCrashDevOption || data.repeating)) {
-                    Slog.i(TAG, "Showing crash dialog for package " + packageName + " u" + userId);
                     errState.getDialogController().showCrashDialogs(data);
                     if (!proc.isolated) {
                         mProcessCrashShowDialogTimes.put(proc.processName, proc.uid, now);
@@ -1062,7 +1058,6 @@ class AppErrors {
         }
         synchronized (mProcLock) {
             final ProcessErrorStateRecord errState = proc.mErrorState;
-            errState.setAnrData(data);
             if (!proc.isPersistent()) {
                 packageList = proc.getPackageListWithVersionCode();
             }
@@ -1111,24 +1106,6 @@ class AppErrors {
         if (packageList != null) {
             mPackageWatchdog.onPackageFailure(packageList,
                     PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING);
-        }
-    }
-
-    void handleDismissAnrDialogs(ProcessRecord proc) {
-        synchronized (mProcLock) {
-            final ProcessErrorStateRecord errState = proc.mErrorState;
-
-            // Cancel any rescheduled ANR dialogs
-            mService.mUiHandler.removeMessages(
-                    ActivityManagerService.SHOW_NOT_RESPONDING_UI_MSG, errState.getAnrData());
-
-            // Dismiss any ANR dialogs currently visible
-            if (errState.getDialogController().hasAnrDialogs()) {
-                errState.setNotResponding(false);
-                errState.setNotRespondingReport(null);
-                errState.getDialogController().clearAnrDialogs();
-            }
-            proc.mErrorState.setAnrData(null);
         }
     }
 

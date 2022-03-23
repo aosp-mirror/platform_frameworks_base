@@ -61,9 +61,4 @@ public abstract class SensorPrivacyManagerInternal {
      */
     public abstract void addSensorPrivacyListenerForAllUsers(int sensor,
             OnUserSensorPrivacyChangedListener listener);
-
-    /**
-     *  Set the HW toggle sensor value based on HW switch states, called from InputManagerService
-     */
-    public abstract void setPhysicalToggleSensorPrivacy(int userId, int sensor, boolean enable);
 }

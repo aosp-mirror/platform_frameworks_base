@@ -50,17 +50,15 @@ public class HeadsUpViewBinder {
     private final NotificationMessagingUtil mNotificationMessagingUtil;
     private final Map<NotificationEntry, CancellationSignal> mOngoingBindCallbacks =
             new ArrayMap<>();
-    private final HeadsUpViewBinderLogger mLogger;
 
     private NotificationPresenter mNotificationPresenter;
 
     @Inject
     HeadsUpViewBinder(
             NotificationMessagingUtil notificationMessagingUtil,
-            RowContentBindStage bindStage, HeadsUpViewBinderLogger logger) {
+            RowContentBindStage bindStage) {
         mNotificationMessagingUtil = notificationMessagingUtil;
         mStage = bindStage;
-        mLogger = logger;
     }
 
     /**
@@ -83,18 +81,12 @@ public class HeadsUpViewBinder {
         params.setUseIncreasedHeadsUpHeight(useIncreasedHeadsUp);
         params.requireContentViews(FLAG_CONTENT_VIEW_HEADS_UP);
         CancellationSignal signal = mStage.requestRebind(entry, en -> {
-            mLogger.entryBoundSuccessfully(entry.getKey());
             en.getRow().setUsesIncreasedHeadsUpHeight(params.useIncreasedHeadsUpHeight());
-            // requestRebing promises that if we called cancel before this callback would be
-            // invoked, then we will not enter this callback, and because we always cancel before
-            // adding to this map, we know this will remove the correct signal.
-            mOngoingBindCallbacks.remove(entry);
             if (callback != null) {
                 callback.onBindFinished(en);
             }
         });
         abortBindCallback(entry);
-        mLogger.startBindingHun(entry.getKey());
         mOngoingBindCallbacks.put(entry, signal);
     }
 
@@ -105,7 +97,6 @@ public class HeadsUpViewBinder {
     public void abortBindCallback(NotificationEntry entry) {
         CancellationSignal ongoingBindCallback = mOngoingBindCallbacks.remove(entry);
         if (ongoingBindCallback != null) {
-            mLogger.currentOngoingBindingAborted(entry.getKey());
             ongoingBindCallback.cancel();
         }
     }
@@ -116,7 +107,6 @@ public class HeadsUpViewBinder {
     public void unbindHeadsUpView(NotificationEntry entry) {
         abortBindCallback(entry);
         mStage.getStageParams(entry).markContentViewsFreeable(FLAG_CONTENT_VIEW_HEADS_UP);
-        mLogger.entryContentViewMarkedFreeable(entry.getKey());
-        mStage.requestRebind(entry, e -> mLogger.entryUnbound(e.getKey()));
+        mStage.requestRebind(entry, null);
     }
 }

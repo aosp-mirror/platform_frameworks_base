@@ -236,7 +236,7 @@ public class PresRlmiInfo implements Parcelable {
         mListName = source.readString();
         mRequestId = source.readInt();
         mPresSubscriptionState = source.readParcelable(
-                                  PresSubscriptionState.class.getClassLoader(), com.android.ims.internal.uce.presence.PresSubscriptionState.class);
+                                  PresSubscriptionState.class.getClassLoader());
         mSubscriptionExpireTime = source.readInt();
         mSubscriptionTerminatedReason = source.readString();
     }

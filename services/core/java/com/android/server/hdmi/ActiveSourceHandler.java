@@ -88,7 +88,7 @@ final class ActiveSourceHandler {
                 tv.updateActiveSource(current, "ActiveSourceHandler");
                 invokeCallback(HdmiControlManager.RESULT_SUCCESS);
             } else {
-                tv.startRoutingControl(newActive.physicalAddress, current.physicalAddress,
+                tv.startRoutingControl(newActive.physicalAddress, current.physicalAddress, true,
                         mCallback);
             }
         }
