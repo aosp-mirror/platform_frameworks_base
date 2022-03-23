@@ -41,6 +41,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.concurrent.Executor;
+import java.util.function.IntConsumer;
 
 /**
  * A class that manages and configures Ethernet interfaces.
@@ -53,15 +54,31 @@ public class EthernetManager {
     private static final String TAG = "EthernetManager";
 
     private final IEthernetManager mService;
-    @GuardedBy("mListeners")
-    private final ArrayList<ListenerInfo> mListeners = new ArrayList<>();
+    @GuardedBy("mListenerLock")
+    private final ArrayList<ListenerInfo<InterfaceStateListener>> mIfaceListeners =
+            new ArrayList<>();
+    @GuardedBy("mListenerLock")
+    private final ArrayList<ListenerInfo<IntConsumer>> mEthernetStateListeners =
+            new ArrayList<>();
+    final Object mListenerLock = new Object();
     private final IEthernetServiceListener.Stub mServiceListener =
             new IEthernetServiceListener.Stub() {
                 @Override
+                public void onEthernetStateChanged(int state) {
+                    synchronized (mListenerLock) {
+                        for (ListenerInfo<IntConsumer> li : mEthernetStateListeners) {
+                            li.executor.execute(() -> {
+                                li.listener.accept(state);
+                            });
+                        }
+                    }
+                }
+
+                @Override
                 public void onInterfaceStateChanged(String iface, int state, int role,
                         IpConfiguration configuration) {
-                    synchronized (mListeners) {
-                        for (ListenerInfo li : mListeners) {
+                    synchronized (mListenerLock) {
+                        for (ListenerInfo<InterfaceStateListener> li : mIfaceListeners) {
                             li.executor.execute(() ->
                                     li.listener.onInterfaceStateChanged(iface, state, role,
                                             configuration));
@@ -70,13 +87,29 @@ public class EthernetManager {
                 }
             };
 
-    private static class ListenerInfo {
+    /**
+     * Indicates that Ethernet is disabled.
+     *
+     * @hide
+     */
+    @SystemApi(client = MODULE_LIBRARIES)
+    public static final int ETHERNET_STATE_DISABLED = 0;
+
+    /**
+     * Indicates that Ethernet is enabled.
+     *
+     * @hide
+     */
+    @SystemApi(client = MODULE_LIBRARIES)
+    public static final int ETHERNET_STATE_ENABLED  = 1;
+
+    private static class ListenerInfo<T> {
         @NonNull
         public final Executor executor;
         @NonNull
-        public final InterfaceStateListener listener;
+        public final T listener;
 
-        private ListenerInfo(@NonNull Executor executor, @NonNull InterfaceStateListener listener) {
+        private ListenerInfo(@NonNull Executor executor, @NonNull T listener) {
             this.executor = executor;
             this.listener = listener;
         }
@@ -289,16 +322,22 @@ public class EthernetManager {
         if (listener == null || executor == null) {
             throw new NullPointerException("listener and executor must not be null");
         }
-        synchronized (mListeners) {
-            mListeners.add(new ListenerInfo(executor, listener));
-            if (mListeners.size() == 1) {
-                try {
-                    mService.addListener(mServiceListener);
-                } catch (RemoteException e) {
-                    throw e.rethrowFromSystemServer();
-                }
-            }
+        synchronized (mListenerLock) {
+            maybeAddServiceListener();
+            mIfaceListeners.add(new ListenerInfo<InterfaceStateListener>(executor, listener));
         }
+    }
+
+    @GuardedBy("mListenerLock")
+    private void maybeAddServiceListener() {
+        if (!mIfaceListeners.isEmpty() || !mEthernetStateListeners.isEmpty()) return;
+
+        try {
+            mService.addListener(mServiceListener);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+
     }
 
     /**
@@ -323,15 +362,20 @@ public class EthernetManager {
     @SystemApi(client = MODULE_LIBRARIES)
     public void removeInterfaceStateListener(@NonNull InterfaceStateListener listener) {
         Objects.requireNonNull(listener);
-        synchronized (mListeners) {
-            mListeners.removeIf(l -> l.listener == listener);
-            if (mListeners.isEmpty()) {
-                try {
-                    mService.removeListener(mServiceListener);
-                } catch (RemoteException e) {
-                    throw e.rethrowFromSystemServer();
-                }
-            }
+        synchronized (mListenerLock) {
+            mIfaceListeners.removeIf(l -> l.listener == listener);
+            maybeRemoveServiceListener();
+        }
+    }
+
+    @GuardedBy("mListenerLock")
+    private void maybeRemoveServiceListener() {
+        if (!mIfaceListeners.isEmpty() || !mEthernetStateListeners.isEmpty()) return;
+
+        try {
+            mService.removeListener(mServiceListener);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -609,6 +653,63 @@ public class EthernetManager {
             mService.disconnectNetwork(iface, proxy);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Change ethernet setting.
+     *
+     * @param enabled enable or disable ethernet settings.
+     *
+     * @hide
+     */
+    @RequiresPermission(anyOf = {
+            NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
+            android.Manifest.permission.NETWORK_STACK,
+            android.Manifest.permission.NETWORK_SETTINGS})
+    @SystemApi(client = MODULE_LIBRARIES)
+    public void setEthernetEnabled(boolean enabled) {
+        try {
+            mService.setEthernetEnabled(enabled);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Listen to changes in the state of ethernet.
+     *
+     * @param executor to run callbacks on.
+     * @param listener to listen ethernet state changed.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)
+    @SystemApi(client = MODULE_LIBRARIES)
+    public void addEthernetStateListener(@NonNull Executor executor,
+            @NonNull IntConsumer listener) {
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(listener);
+        synchronized (mListenerLock) {
+            maybeAddServiceListener();
+            mEthernetStateListeners.add(new ListenerInfo<IntConsumer>(executor, listener));
+        }
+    }
+
+    /**
+     * Removes a listener.
+     *
+     * @param listener to listen ethernet state changed.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)
+    @SystemApi(client = MODULE_LIBRARIES)
+    public void removeEthernetStateListener(@NonNull IntConsumer listener) {
+        Objects.requireNonNull(listener);
+        synchronized (mListenerLock) {
+            mEthernetStateListeners.removeIf(l -> l.listener == listener);
+            maybeRemoveServiceListener();
         }
     }
 }
