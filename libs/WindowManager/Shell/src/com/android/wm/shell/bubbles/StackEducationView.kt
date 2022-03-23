@@ -122,7 +122,7 @@ class StackEducationView constructor(
      * If necessary, shows the user education view for the bubble stack. This appears the first
      * time a user taps on a bubble.
      *
-     * @return true if user education was shown, false otherwise.
+     * @return true if user education was shown and wasn't showing before, false otherwise.
      */
     fun show(stackPosition: PointF): Boolean {
         isHiding = false
