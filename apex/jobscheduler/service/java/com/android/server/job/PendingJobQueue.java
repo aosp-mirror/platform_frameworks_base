@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.util.Pools;
 import android.util.SparseArray;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.job.controllers.JobStatus;
 
 import java.util.ArrayList;
@@ -65,6 +66,21 @@ class PendingJobQueue {
             });
 
     private int mSize = 0;
+
+    /**
+     * Whether to batch iteration so that we pull several of an app's jobs from the queue at the
+     * same time (resulting in some out of order pulls) instead of pulling purely based on the
+     * sort order. Batching it this way will mean we try to run several jobs of the same app at the
+     * same, resulting in fewer process restarts, and can allow the iteration runtime to amortize
+     * to O(A*J) instead of O(A*J*log(A)), where A = # apps and J = average # jobs per app.
+     */
+    private boolean mOptimizeIteration = true;
+
+    /**
+     * Number of jobs that have been pulled from the queue in succession. Used when
+     * {@link #mOptimizeIteration} is true to know when to switch to the next AppJobQueue.
+     */
+    private int mPullCount = 0;
 
     private boolean mNeedToResetIterators = false;
 
@@ -139,16 +155,44 @@ class PendingJobQueue {
                 mOrderedQueues.offer(ajq);
             }
             mNeedToResetIterators = false;
+            // Reset the pull count when the front of the queue changes.
+            mPullCount = 0;
         } else if (mOrderedQueues.size() == 0) {
+            // Something significant changed, so the priority queue was cleared. Lazily regenerate
+            // the queue.
             for (int i = mCurrentQueues.size() - 1; i >= 0; --i) {
                 final AppJobQueue ajq = mCurrentQueues.valueAt(i);
                 mOrderedQueues.offer(ajq);
             }
+            // Reset the pull count when the front of the queue changes.
+            mPullCount = 0;
         }
-        final AppJobQueue earliestQueue = mOrderedQueues.poll();
+        final int numQueues = mOrderedQueues.size();
+        if (numQueues == 0) {
+            return null;
+        }
+
+        // Increase the pull limit at a slightly faster rate than log(A) increases (until A>=33).
+        // The pull limit increase is intended to balance fairness (one app can't starve out others)
+        // with efficiency (reducing process restarts).
+        // 1-4 apps --> pullLimit = 1, 5-8 apps --> pullLimit = 2, 9+ apps --> pullLimit = 3
+        final int pullLimit = mOptimizeIteration ? Math.min(3, ((numQueues - 1) >>> 2) + 1) : 1;
+
+        final AppJobQueue earliestQueue = mOrderedQueues.peek();
         if (earliestQueue != null) {
-            JobStatus job = earliestQueue.next();
-            mOrderedQueues.offer(earliestQueue);
+            final JobStatus job = earliestQueue.next();
+            // Change the front of the queue if we've pulled pullLimit jobs from the current head
+            // or the current head has no more jobs to provide.
+            if (++mPullCount >= pullLimit
+                    || earliestQueue.peekNextTimestamp() == AppJobQueue.NO_NEXT_TIMESTAMP) {
+                mOrderedQueues.poll();
+                if (earliestQueue.peekNextTimestamp() != AppJobQueue.NO_NEXT_TIMESTAMP) {
+                    // No need to put back in the queue if it has no more jobs to give.
+                    mOrderedQueues.offer(earliestQueue);
+                }
+                // Reset the pull count when the front of the queue changes.
+                mPullCount = 0;
+            }
             return job;
         }
         return null;
@@ -184,6 +228,11 @@ class PendingJobQueue {
         // Lazily reset the iterating indices (avoid looping through all the current queues until
         // absolutely necessary).
         mNeedToResetIterators = true;
+    }
+
+    @VisibleForTesting
+    void setOptimizeIteration(boolean optimize) {
+        mOptimizeIteration = optimize;
     }
 
     int size() {

@@ -211,13 +211,26 @@ public class PendingJobQueueTest {
         jobQueue.add(eC11);
 
         checkPendingJobInvariants(jobQueue);
-        final JobStatus[] expectedOrder = new JobStatus[]{
-                eA7, rA1, eB6, rB2, eC3, rD4, eE5, eF9, rH8, rF8, eC11, rC10, rG12, rG13, eE14};
-        int idx = 0;
         JobStatus job;
+        final JobStatus[] expectedPureOrder = new JobStatus[]{
+                eC3, rD4, eE5, eB6, rB2, eA7, rA1, rH8, eF9, rF8, eC11, rC10, rG12, rG13, eE14};
+        int idx = 0;
+        jobQueue.setOptimizeIteration(false);
+        jobQueue.resetIterator();
         while ((job = jobQueue.next()) != null) {
             assertEquals("List wasn't correctly sorted @ index " + idx,
-                    expectedOrder[idx].getJobId(), job.getJobId());
+                    expectedPureOrder[idx].getJobId(), job.getJobId());
+            idx++;
+        }
+
+        final JobStatus[] expectedOptimizedOrder = new JobStatus[]{
+                eC3, eC11, rD4, eE5, eE14, eB6, rB2, eA7, rA1, rH8, eF9, rF8,  rC10, rG12, rG13};
+        idx = 0;
+        jobQueue.setOptimizeIteration(true);
+        jobQueue.resetIterator();
+        while ((job = jobQueue.next()) != null) {
+            assertEquals("Optimized list wasn't correctly sorted @ index " + idx,
+                    expectedOptimizedOrder[idx].getJobId(), job.getJobId());
             idx++;
         }
     }
@@ -379,7 +392,9 @@ public class PendingJobQueueTest {
 
         JobStatus job;
         jobQueue.resetIterator();
+        int count = 0;
         while ((job = jobQueue.next()) != null) {
+            count++;
             final int uid = job.getSourceUid();
 
             // Invariant #1: All jobs are sorted by override state
@@ -436,6 +451,7 @@ public class PendingJobQueueTest {
                 fail("UID " + uid + " had an EJ ordered after a regular job");
             }
         }
+        assertEquals("Iterator didn't go through all jobs", jobQueue.size(), count);
     }
 
     private static String testJobToString(JobStatus job) {
