@@ -26,7 +26,6 @@ import android.app.appsearch.AppSearchSession;
 import android.app.appsearch.BatchResultCallback;
 import android.app.appsearch.GenericDocument;
 import android.app.appsearch.GetByDocumentIdRequest;
-import android.app.appsearch.PackageIdentifier;
 import android.app.appsearch.PutDocumentsRequest;
 import android.app.appsearch.RemoveByDocumentIdRequest;
 import android.app.appsearch.ReportUsageRequest;
@@ -182,11 +181,6 @@ class ShortcutPackage extends ShortcutPackageItem {
      * All the share targets from the package
      */
     private final ArrayList<ShareTargetInfo> mShareTargets = new ArrayList<>(0);
-
-    /**
-     * All external packages that have gained access to the shortcuts from this package
-     */
-    private final Map<String, PackageIdentifier> mPackageIdentifiers = new ArrayMap<>(0);
 
     /**
      * # of times the package has called rate-limited APIs.
@@ -2316,14 +2310,15 @@ class ShortcutPackage extends ShortcutPackageItem {
         }
         SetSchemaRequest.Builder schemaBuilder = new SetSchemaRequest.Builder()
                 .addSchemas(AppSearchShortcutPerson.SCHEMA, AppSearchShortcutInfo.SCHEMA)
-                .setForceOverride(true);
-        for (PackageIdentifier pi : mPackageIdentifiers.values()) {
-            schemaBuilder = schemaBuilder
-                    .setSchemaTypeVisibilityForPackage(
-                            AppSearchShortcutPerson.SCHEMA_TYPE, true, pi)
-                    .setSchemaTypeVisibilityForPackage(
-                            AppSearchShortcutInfo.SCHEMA_TYPE, true, pi);
-        }
+                .setForceOverride(true)
+                .addRequiredPermissionsForSchemaTypeVisibility(AppSearchShortcutInfo.SCHEMA_TYPE,
+                        Collections.singleton(SetSchemaRequest.READ_HOME_APP_SEARCH_DATA))
+                .addRequiredPermissionsForSchemaTypeVisibility(AppSearchShortcutInfo.SCHEMA_TYPE,
+                        Collections.singleton(SetSchemaRequest.READ_ASSISTANT_APP_SEARCH_DATA))
+                .addRequiredPermissionsForSchemaTypeVisibility(AppSearchShortcutPerson.SCHEMA_TYPE,
+                        Collections.singleton(SetSchemaRequest.READ_HOME_APP_SEARCH_DATA))
+                .addRequiredPermissionsForSchemaTypeVisibility(AppSearchShortcutPerson.SCHEMA_TYPE,
+                        Collections.singleton(SetSchemaRequest.READ_ASSISTANT_APP_SEARCH_DATA));
         final AndroidFuture<AppSearchSession> future = new AndroidFuture<>();
         session.setSchema(
                 schemaBuilder.build(), mExecutor, mShortcutUser.mExecutor, result -> {
