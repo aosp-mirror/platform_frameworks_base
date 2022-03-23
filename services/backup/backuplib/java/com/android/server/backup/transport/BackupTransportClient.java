@@ -34,6 +34,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -374,7 +375,8 @@ public class BackupTransportClient {
     private <T> T getFutureResult(AndroidFuture<T> future) {
         try {
             return future.get(600, TimeUnit.SECONDS);
-        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+        } catch (InterruptedException | ExecutionException | TimeoutException
+                | CancellationException e) {
             Slog.w(TAG, "Failed to get result from transport:", e);
             return null;
         } finally {
@@ -403,7 +405,11 @@ public class BackupTransportClient {
         void cancelActiveFutures() {
             synchronized (mActiveFuturesLock) {
                 for (AndroidFuture<?> future : mActiveFutures) {
-                    future.cancel(true);
+                    try {
+                        future.cancel(true);
+                    } catch (CancellationException ignored) {
+                        // This is expected, so ignore the exception.
+                    }
                 }
                 mActiveFutures.clear();
             }
