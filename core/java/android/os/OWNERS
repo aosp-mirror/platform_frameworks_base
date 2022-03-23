@@ -52,6 +52,9 @@ per-file *Power* = file:/services/core/java/com/android/server/power/OWNERS
 per-file *Telephony* = file:/telephony/OWNERS
 per-file *Zygote* = file:/ZYGOTE_OWNERS
 
+# Time
+per-file *Clock* = file:/services/core/java/com/android/server/timezonedetector/OWNERS
+
 # RecoverySystem
 per-file *Recovery* = file:/services/core/java/com/android/server/recoverysystem/OWNERS
 

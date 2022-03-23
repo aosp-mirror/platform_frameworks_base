@@ -571,7 +571,7 @@ public class ClipboardService extends SystemService {
                         final boolean canCopyIntoProfile = !hasRestriction(
                                 UserManager.DISALLOW_SHARE_INTO_MANAGED_PROFILE, id);
                         if (canCopyIntoProfile) {
-                            setPrimaryClipInternalLocked(
+                            setPrimaryClipInternalNoClassifyLocked(
                                     getClipboardLocked(id), clip, uid, sourcePackage);
                         }
                     }
@@ -639,7 +639,7 @@ public class ClipboardService extends SystemService {
                         clipboard.primaryClipListeners.getBroadcastItem(i)
                                 .dispatchPrimaryClipChanged();
                     }
-                } catch (RemoteException e) {
+                } catch (RemoteException | SecurityException e) {
                     // The RemoteCallbackList will take care of removing
                     // the dead object for us.
                 }

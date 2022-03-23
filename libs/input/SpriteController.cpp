@@ -153,8 +153,7 @@ void SpriteController::doUpdateSprites() {
                     || update.state.surfaceHeight < desiredHeight) {
                 needApplyTransaction = true;
 
-                t.setSize(update.state.surfaceControl,
-                        desiredWidth, desiredHeight);
+                update.state.surfaceControl->updateDefaultBufferSize(desiredWidth, desiredHeight);
                 update.state.surfaceWidth = desiredWidth;
                 update.state.surfaceHeight = desiredHeight;
                 update.state.surfaceDrawn = false;

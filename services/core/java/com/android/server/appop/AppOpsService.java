@@ -1314,6 +1314,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                                     event.getAttributionFlags(), event.getAttributionChainId());
                         }
 
+                        events = isRunning ? mInProgressEvents : mPausedInProgressEvents;
                         InProgressStartOpEvent newEvent = events.get(binders.get(i));
                         if (newEvent != null) {
                             newEvent.numUnfinishedStarts += numPreviousUnfinishedStarts - 1;

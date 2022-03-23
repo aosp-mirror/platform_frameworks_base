@@ -29,4 +29,5 @@ message SurfaceControlProto {
 
     optional int32 hash_code = 1;
     optional string name = 2 [ (android.privacy).dest = DEST_EXPLICIT ];
+    optional int32 layerId = 3;
 }

@@ -66,6 +66,11 @@ public class AndroidKeyStoreProvider extends Provider {
     private static final String DESEDE_SYSTEM_PROPERTY =
             "ro.hardware.keystore_desede";
 
+    // Conscrypt returns the Ed25519 OID as the JCA key algorithm.
+    private static final String ED25519_OID = "1.3.101.112";
+    // Conscrypt returns "XDH" as the X25519 JCA key algorithm.
+    private static final String X25519_ALIAS = "XDH";
+
     /** @hide **/
     public AndroidKeyStoreProvider() {
         super(PROVIDER_NAME, 1.0, "Android KeyStore security provider");
@@ -78,10 +83,12 @@ public class AndroidKeyStoreProvider extends Provider {
         // java.security.KeyPairGenerator
         put("KeyPairGenerator.EC", PACKAGE_NAME + ".AndroidKeyStoreKeyPairGeneratorSpi$EC");
         put("KeyPairGenerator.RSA", PACKAGE_NAME +  ".AndroidKeyStoreKeyPairGeneratorSpi$RSA");
+        put("KeyPairGenerator.XDH", PACKAGE_NAME +  ".AndroidKeyStoreKeyPairGeneratorSpi$XDH");
 
         // java.security.KeyFactory
         putKeyFactoryImpl("EC");
         putKeyFactoryImpl("RSA");
+        putKeyFactoryImpl("XDH");
 
         // javax.crypto.KeyGenerator
         put("KeyGenerator.AES", PACKAGE_NAME + ".AndroidKeyStoreKeyGeneratorSpi$AES");
@@ -219,12 +226,17 @@ public class AndroidKeyStoreProvider extends Provider {
 
         KeyStoreSecurityLevel securityLevel = iSecurityLevel;
         if (KeyProperties.KEY_ALGORITHM_EC.equalsIgnoreCase(jcaKeyAlgorithm)) {
-
             return new AndroidKeyStoreECPublicKey(descriptor, metadata,
                     iSecurityLevel, (ECPublicKey) publicKey);
         } else if (KeyProperties.KEY_ALGORITHM_RSA.equalsIgnoreCase(jcaKeyAlgorithm)) {
             return new AndroidKeyStoreRSAPublicKey(descriptor, metadata,
                     iSecurityLevel, (RSAPublicKey) publicKey);
+        } else if (ED25519_OID.equalsIgnoreCase(jcaKeyAlgorithm)) {
+            //TODO(b/214203951) missing classes in conscrypt
+            throw new ProviderException("Curve " + ED25519_OID + " not supported yet");
+        } else if (X25519_ALIAS.equalsIgnoreCase(jcaKeyAlgorithm)) {
+            //TODO(b/214203951) missing classes in conscrypt
+            throw new ProviderException("Curve " + X25519_ALIAS + " not supported yet");
         } else {
             throw new ProviderException("Unsupported Android Keystore public key algorithm: "
                     + jcaKeyAlgorithm);

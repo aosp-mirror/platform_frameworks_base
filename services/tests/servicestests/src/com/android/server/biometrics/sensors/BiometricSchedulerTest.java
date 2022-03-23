@@ -143,8 +143,8 @@ public class BiometricSchedulerTest {
 
         final ClientMonitorCallbackConverter listener1 = mock(ClientMonitorCallbackConverter.class);
 
-        final BiometricPromptClientMonitor client1 =
-                new BiometricPromptClientMonitor(mContext, mToken, lazyDaemon1, listener1);
+        final TestAuthenticationClient client1 =
+                new TestAuthenticationClient(mContext, lazyDaemon1, mToken, listener1);
         final TestClientMonitor client2 = new TestClientMonitor(mContext, mToken, lazyDaemon2);
 
         final BaseClientMonitor.Callback callback1 = mock(BaseClientMonitor.Callback.class);
@@ -180,8 +180,8 @@ public class BiometricSchedulerTest {
     @Test
     public void testCancelNotInvoked_whenOperationWaitingForCookie() {
         final HalClientMonitor.LazyDaemon<Object> lazyDaemon1 = () -> mock(Object.class);
-        final BiometricPromptClientMonitor client1 = new BiometricPromptClientMonitor(mContext,
-                mToken, lazyDaemon1, mock(ClientMonitorCallbackConverter.class));
+        final TestAuthenticationClient client1 = new TestAuthenticationClient(mContext,
+                lazyDaemon1, mToken, mock(ClientMonitorCallbackConverter.class));
         final BaseClientMonitor.Callback callback1 = mock(BaseClientMonitor.Callback.class);
 
         // Schedule a BiometricPrompt authentication request
@@ -195,6 +195,8 @@ public class BiometricSchedulerTest {
         // should go back to idle, since in this case the framework has not even requested the HAL
         // to authenticate yet.
         mScheduler.cancelAuthenticationOrDetection(mToken, 1 /* requestId */);
+        assertTrue(client1.isAlreadyDone());
+        assertTrue(client1.mDestroyed);
         assertNull(mScheduler.mCurrentOperation);
     }
 
@@ -316,6 +318,10 @@ public class BiometricSchedulerTest {
                 eq(BiometricConstants.BIOMETRIC_ERROR_CANCELED),
                 eq(0) /* vendorCode */);
         assertNull(mScheduler.getCurrentClient());
+        assertTrue(client1.isAlreadyDone());
+        assertTrue(client1.mDestroyed);
+        assertTrue(client2.isAlreadyDone());
+        assertTrue(client2.mDestroyed);
     }
 
     @Test
@@ -465,39 +471,9 @@ public class BiometricSchedulerTest {
         return BiometricSchedulerProto.parseFrom(mScheduler.dumpProtoState(clearSchedulerBuffer));
     }
 
-    private static class BiometricPromptClientMonitor extends AuthenticationClient<Object> {
-
-        public BiometricPromptClientMonitor(@NonNull Context context, @NonNull IBinder token,
-                @NonNull LazyDaemon<Object> lazyDaemon, ClientMonitorCallbackConverter listener) {
-            super(context, lazyDaemon, token, listener, 0 /* targetUserId */, 0 /* operationId */,
-                    false /* restricted */, TAG, 1 /* cookie */, false /* requireConfirmation */,
-                    TEST_SENSOR_ID, true /* isStrongBiometric */, 0 /* statsModality */,
-                    0 /* statsClient */, null /* taskStackListener */, mock(LockoutTracker.class),
-                    false /* isKeyguard */, true /* shouldVibrate */,
-                    false /* isKeyguardBypassEnabled */);
-        }
-
-        @Override
-        protected void stopHalOperation() {
-        }
-
-        @Override
-        protected void startHalOperation() {
-        }
-
-        @Override
-        protected void handleLifecycleAfterAuth(boolean authenticated) {
-
-        }
-
-        @Override
-        public boolean wasUserDetected() {
-            return false;
-        }
-    }
-
     private static class TestAuthenticationClient extends AuthenticationClient<Object> {
         int mNumCancels = 0;
+        boolean mDestroyed = false;
 
         public TestAuthenticationClient(@NonNull Context context,
                 @NonNull LazyDaemon<Object> lazyDaemon, @NonNull IBinder token,
@@ -530,6 +506,13 @@ public class BiometricSchedulerTest {
             return false;
         }
 
+        @Override
+        public void destroy() {
+            mDestroyed = true;
+            super.destroy();
+        }
+
+        @Override
         public void cancel() {
             mNumCancels++;
             super.cancel();
@@ -595,6 +578,7 @@ public class BiometricSchedulerTest {
 
         @Override
         public void destroy() {
+            super.destroy();
             mDestroyed = true;
         }
 

@@ -22,14 +22,12 @@ import static android.net.NetworkStats.TAG_ALL;
 import static android.net.NetworkStats.TAG_NONE;
 import static android.net.NetworkStats.UID_ALL;
 
-import static com.android.server.NetworkManagementSocketTagger.kernelToTag;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
-import android.net.ConnectivityManager;
 import android.net.NetworkStats;
 import android.net.UnderlyingNetworkInfo;
+import android.os.ServiceSpecificException;
 import android.os.StrictMode;
 import android.os.SystemClock;
 
@@ -37,6 +35,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ProcFileReader;
 import com.android.net.module.util.CollectionUtils;
+import com.android.server.BpfNetMaps;
 
 import libcore.io.IoUtils;
 
@@ -56,6 +55,10 @@ import java.util.concurrent.ConcurrentHashMap;
  * @hide
  */
 public class NetworkStatsFactory {
+    static {
+        System.loadLibrary("service-connectivity");
+    }
+
     private static final String TAG = "NetworkStatsFactory";
 
     private static final boolean USE_NATIVE_PARSING = true;
@@ -71,6 +74,8 @@ public class NetworkStatsFactory {
     private final boolean mUseBpfStats;
 
     private final Context mContext;
+
+    private final BpfNetMaps mBpfNetMaps;
 
     /**
      * Guards persistent data access in this class
@@ -168,6 +173,7 @@ public class NetworkStatsFactory {
         mStatsXtIfaceFmt = new File(procRoot, "net/xt_qtaguid/iface_stat_fmt");
         mStatsXtUid = new File(procRoot, "net/xt_qtaguid/stats");
         mUseBpfStats = useBpfStats;
+        mBpfNetMaps = new BpfNetMaps();
         synchronized (mPersistentDataLock) {
             mPersistSnapshot = new NetworkStats(SystemClock.elapsedRealtime(), -1);
             mTunAnd464xlatAdjustedStats = new NetworkStats(SystemClock.elapsedRealtime(), -1);
@@ -295,12 +301,14 @@ public class NetworkStatsFactory {
     }
 
     @GuardedBy("mPersistentDataLock")
-    private void requestSwapActiveStatsMapLocked() {
-        // Do a active map stats swap. When the binder call successfully returns,
-        // the system server should be able to safely read and clean the inactive map
-        // without race problem.
-        final ConnectivityManager cm = mContext.getSystemService(ConnectivityManager.class);
-        cm.swapActiveStatsMap();
+    private void requestSwapActiveStatsMapLocked() throws IOException {
+        try {
+            // Do a active map stats swap. Once the swap completes, this code
+            // can read and clean the inactive map without races.
+            mBpfNetMaps.swapActiveStatsMap();
+        } catch (ServiceSpecificException e) {
+            throw new IOException(e);
+        }
     }
 
     /**
@@ -326,11 +334,7 @@ public class NetworkStatsFactory {
                 final NetworkStats stats =
                         new NetworkStats(SystemClock.elapsedRealtime(), 0 /* initialSize */);
                 if (mUseBpfStats) {
-                    try {
-                        requestSwapActiveStatsMapLocked();
-                    } catch (RuntimeException e) {
-                        throw new IOException(e);
-                    }
+                    requestSwapActiveStatsMapLocked();
                     // Stats are always read from the inactive map, so they must be read after the
                     // swap
                     if (nativeReadNetworkStatsDetail(stats, mStatsXtUid.getAbsolutePath(), UID_ALL,
@@ -466,6 +470,19 @@ public class NetworkStatsFactory {
                 throw new AssertionError(
                         "Expected row " + i + ": " + expectedRow + ", actual row " + actualRow);
             }
+        }
+    }
+
+    /**
+     * Convert {@code /proc/} tag format to {@link Integer}. Assumes incoming
+     * format like {@code 0x7fffffff00000000}.
+     */
+    public static int kernelToTag(String string) {
+        int length = string.length();
+        if (length > 10) {
+            return Long.decode(string.substring(0, length - 8)).intValue();
+        } else {
+            return 0;
         }
     }
 

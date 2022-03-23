@@ -118,11 +118,9 @@ public class ApnSetting implements Parcelable {
     public static final int TYPE_VSIM = 1 << 12;  // TODO: Refer to ApnTypes.VSIM
     /** APN type for BIP. */
     public static final int TYPE_BIP = 1 << 13;   // TODO: Refer to ApnTypes.BIP
-    /**
-     * APN type for ENTERPRISE.
-     * @hide
-     */
-    public static final int TYPE_ENTERPRISE = TYPE_BIP << 1;
+    /** APN type for ENTERPRISE. */
+    public static final int TYPE_ENTERPRISE = 1 << 14; //TODO: In future should be referenced from
+    // hardware.interfaces.radio.data.ApnTypes
 
     /** @hide */
     @IntDef(flag = true, prefix = {"TYPE_"}, value = {
@@ -355,6 +353,7 @@ public class ApnSetting implements Parcelable {
      * modem components or carriers. Non-system apps should use the integer variants instead.
      * @hide
      */
+    @SystemApi
     public static final String TYPE_ENTERPRISE_STRING = "enterprise";
 
 
@@ -521,11 +520,11 @@ public class ApnSetting implements Parcelable {
     private final boolean mAlwaysOn;
 
     /**
-     * Returns the MTU size of the IPv4 mobile interface to which the APN connected. Note this value
-     * is used only if MTU size is not provided in {@link DataCallResponse}.
+     * Returns the default MTU (Maximum Transmission Unit) size in bytes of the IPv4 routes brought
+     * up by this APN setting. Note this value will only be used when MTU size is not provided
+     * in {@link DataCallResponse#getMtuV4()} during network bring up.
      *
-     * @return the MTU size of the APN
-     * @hide
+     * @return the MTU size in bytes of the route.
      */
     public int getMtuV4() {
         return mMtuV4;
@@ -533,10 +532,10 @@ public class ApnSetting implements Parcelable {
 
     /**
      * Returns the MTU size of the IPv6 mobile interface to which the APN connected. Note this value
-     * is used only if MTU size is not provided in {@link DataCallResponse}.
+     * will only be used when MTU size is not provided in {@link DataCallResponse#getMtuV6()}
+     * during network bring up.
      *
-     * @return the MTU size of the APN
-     * @hide
+     * @return the MTU size in bytes of the route.
      */
     public int getMtuV6() {
         return mMtuV6;
@@ -546,7 +545,6 @@ public class ApnSetting implements Parcelable {
      * Returns the profile id to which the APN saved in modem.
      *
      * @return the profile id of the APN
-     * @hide
      */
     public int getProfileId() {
         return mProfileId;
@@ -555,8 +553,7 @@ public class ApnSetting implements Parcelable {
     /**
      * Returns if the APN setting is persistent on the modem.
      *
-     * @return is the APN setting to be set in modem
-     * @hide
+     * @return {@code true} if the APN setting is persistent on the modem.
      */
     public boolean isPersistent() {
         return mPersistent;
@@ -1275,24 +1272,34 @@ public class ApnSetting implements Parcelable {
      */
     public boolean similar(ApnSetting other) {
         return (!this.canHandleType(TYPE_DUN)
-            && !other.canHandleType(TYPE_DUN)
-            && Objects.equals(this.mApnName, other.mApnName)
-            && !typeSameAny(this, other)
-            && xorEqualsString(this.mProxyAddress, other.mProxyAddress)
-            && xorEqualsInt(this.mProxyPort, other.mProxyPort)
-            && xorEquals(this.mProtocol, other.mProtocol)
-            && xorEquals(this.mRoamingProtocol, other.mRoamingProtocol)
-            && Objects.equals(this.mCarrierEnabled, other.mCarrierEnabled)
-            && Objects.equals(this.mProfileId, other.mProfileId)
-            && Objects.equals(this.mMvnoType, other.mMvnoType)
-            && Objects.equals(this.mMvnoMatchData, other.mMvnoMatchData)
-            && xorEquals(this.mMmsc, other.mMmsc)
-            && xorEqualsString(this.mMmsProxyAddress, other.mMmsProxyAddress)
-            && xorEqualsInt(this.mMmsProxyPort, other.mMmsProxyPort))
-            && Objects.equals(this.mNetworkTypeBitmask, other.mNetworkTypeBitmask)
-            && Objects.equals(mApnSetId, other.mApnSetId)
-            && Objects.equals(mCarrierId, other.mCarrierId)
-            && Objects.equals(mSkip464Xlat, other.mSkip464Xlat);
+                && !other.canHandleType(TYPE_DUN)
+                && Objects.equals(this.mApnName, other.mApnName)
+                && xorEqualsString(this.mProxyAddress, other.mProxyAddress)
+                && xorEqualsInt(this.mProxyPort, other.mProxyPort)
+                && xorEquals(this.mMmsc, other.mMmsc)
+                && xorEqualsString(this.mMmsProxyAddress, other.mMmsProxyAddress)
+                && xorEqualsInt(this.mMmsProxyPort, other.mMmsProxyPort))
+                && xorEqualsString(this.mUser, other.mUser)
+                && xorEqualsString(this.mPassword, other.mPassword)
+                && xorEqualsInt(this.mAuthType, other.mAuthType)
+                && !typeSameAny(this, other)
+                && Objects.equals(this.mOperatorNumeric, other.mOperatorNumeric)
+                && Objects.equals(this.mProtocol, other.mProtocol)
+                && Objects.equals(this.mRoamingProtocol, other.mRoamingProtocol)
+                && xorEqualsInt(this.mMtuV4, other.mMtuV4)
+                && xorEqualsInt(this.mMtuV6, other.mMtuV6)
+                && Objects.equals(this.mCarrierEnabled, other.mCarrierEnabled)
+                && Objects.equals(this.mNetworkTypeBitmask, other.mNetworkTypeBitmask)
+                && Objects.equals(this.mLingeringNetworkTypeBitmask,
+                other.mLingeringNetworkTypeBitmask)
+                && Objects.equals(this.mProfileId, other.mProfileId)
+                && Objects.equals(this.mPersistent, other.mPersistent)
+                && Objects.equals(this.mMvnoType, other.mMvnoType)
+                && Objects.equals(this.mMvnoMatchData, other.mMvnoMatchData)
+                && Objects.equals(this.mApnSetId, other.mApnSetId)
+                && Objects.equals(this.mCarrierId, other.mCarrierId)
+                && Objects.equals(this.mSkip464Xlat, other.mSkip464Xlat)
+                && Objects.equals(this.mAlwaysOn, other.mAlwaysOn);
     }
 
     // Equal or one is null.
@@ -1753,25 +1760,25 @@ public class ApnSetting implements Parcelable {
         }
 
         /**
-         * Set the MTU size of the IPv4 mobile interface to which the APN connected. Note this value
-         * is used only if MTU size is not provided in {@link DataCallResponse}.
+         * Set the default MTU (Maximum Transmission Unit) size in bytes of the IPv4 routes brought
+         * up by this APN setting. Note this value will only be used when MTU size is not provided
+         * in {@link DataCallResponse#getMtuV4()} during network bring up.
          *
-         * @param mtuV4 the MTU size to set for the APN
-         * @hide
+         * @param mtuV4 the MTU size in bytes of the route.
          */
-        public Builder setMtuV4(int mtuV4) {
+        public @NonNull Builder setMtuV4(int mtuV4) {
             this.mMtuV4 = mtuV4;
             return this;
         }
 
         /**
-         * Set the MTU size of the IPv6 mobile interface to which the APN connected. Note this value
-         * is used only if MTU size is not provided in {@link DataCallResponse}.
+         * Set the default MTU (Maximum Transmission Unit) size in bytes of the IPv6 routes brought
+         * up by this APN setting. Note this value will only be used when MTU size is not provided
+         * in {@link DataCallResponse#getMtuV6()} during network bring up.
          *
-         * @param mtuV6 the MTU size to set for the APN
-         * @hide
+         * @param mtuV6 the MTU size in bytes of the route.
          */
-        public Builder setMtuV6(int mtuV6) {
+        public @NonNull Builder setMtuV6(int mtuV6) {
             this.mMtuV6 = mtuV6;
             return this;
         }
@@ -1779,12 +1786,22 @@ public class ApnSetting implements Parcelable {
         /**
          * Sets the profile id to which the APN saved in modem.
          *
-         * @param profileId the profile id to set for the APN
-         * @hide
+         * @param profileId the profile id to set for the APN.
          */
-        public Builder setProfileId(int profileId) {
+        public @NonNull Builder setProfileId(int profileId) {
             this.mProfileId = profileId;
             return this;
+        }
+
+        /**
+         * Set if the APN setting should be persistent/non-persistent in modem.
+         *
+         * @param isPersistent {@code true} if this APN setting should be persistent/non-persistent
+         * in modem.
+         * @return The same instance of the builder.
+         */
+        public @NonNull Builder setPersistent(boolean isPersistent) {
+            return setModemCognitive(isPersistent);
         }
 
         /**
@@ -2158,8 +2175,7 @@ public class ApnSetting implements Parcelable {
                     | TYPE_FOTA | TYPE_IMS | TYPE_CBS | TYPE_IA | TYPE_EMERGENCY | TYPE_MCX
                     | TYPE_XCAP | TYPE_VSIM | TYPE_BIP | TYPE_ENTERPRISE)) == 0
                 || TextUtils.isEmpty(mApnName) || TextUtils.isEmpty(mEntryName)) {
-                throw new IllegalArgumentException("mApName=" + mApnName + ", mEntryName="
-                        + mEntryName + ", mApnTypeBitmask=" + mApnTypeBitmask);
+                return null;
             }
             return new ApnSetting(this);
         }

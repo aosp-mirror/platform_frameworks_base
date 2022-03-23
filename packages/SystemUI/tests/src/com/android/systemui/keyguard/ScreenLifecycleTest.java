@@ -26,6 +26,7 @@ import android.testing.AndroidTestingRunner;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.dump.DumpManager;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -43,7 +44,7 @@ public class ScreenLifecycleTest extends SysuiTestCase {
 
     @Before
     public void setUp() throws Exception {
-        mScreen = new ScreenLifecycle();
+        mScreen = new ScreenLifecycle(mock(DumpManager.class));
         mScreenObserverMock = mock(ScreenLifecycle.Observer.class);
         mScreen.addObserver(mScreenObserverMock);
     }

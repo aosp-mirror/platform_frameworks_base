@@ -4,11 +4,11 @@ package com.android.server.display.config.layout {
   public class Display {
     ctor public Display();
     method public java.math.BigInteger getAddress();
-    method public boolean getEnabled();
-    method public boolean getIsDefault();
+    method public boolean isDefaultDisplay();
+    method public boolean isEnabled();
     method public void setAddress(java.math.BigInteger);
+    method public void setDefaultDisplay(boolean);
     method public void setEnabled(boolean);
-    method public void setIsDefault(boolean);
   }
 
   public class Layout {

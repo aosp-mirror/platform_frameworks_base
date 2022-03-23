@@ -743,6 +743,7 @@ public class PhoneStateListener {
      * @see TelephonyManager#DATA_CONNECTING
      * @see TelephonyManager#DATA_CONNECTED
      * @see TelephonyManager#DATA_SUSPENDED
+     * @see TelephonyManager#DATA_HANDOVER_IN_PROGRESS
      * @deprecated Use {@link TelephonyCallback.DataConnectionStateListener} instead.
      */
     @Deprecated

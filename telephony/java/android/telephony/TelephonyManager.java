@@ -118,6 +118,7 @@ import com.android.internal.telephony.ISms;
 import com.android.internal.telephony.ISub;
 import com.android.internal.telephony.ITelephony;
 import com.android.internal.telephony.IUpdateAvailableNetworksCallback;
+import com.android.internal.telephony.IccLogicalChannelRequest;
 import com.android.internal.telephony.OperatorInfo;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.RILConstants;
@@ -140,6 +141,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Executor;
 import java.util.concurrent.RejectedExecutionException;
@@ -3475,14 +3477,38 @@ public class TelephonyManager {
      * @see #SIM_STATE_PRESENT
      *
      * @hide
+     * @deprecated instead use {@link #getSimCardState(int, int)}
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @Deprecated
     public @SimState int getSimCardState(int physicalSlotIndex) {
-        int simState = getSimState(getLogicalSlotIndex(physicalSlotIndex));
+        int simState = getSimState(getLogicalSlotIndex(physicalSlotIndex, DEFAULT_PORT_INDEX));
         return getSimCardStateFromSimState(simState);
     }
 
+    /**
+     * Returns a constant indicating the state of the device SIM card in a physical slot and
+     * port index.
+     *
+     * @param physicalSlotIndex physical slot index
+     * @param portIndex The port index is an enumeration of the ports available on the UICC.
+     *                  Use {@link UiccPortInfo#getPortIndex()} to get portIndex.
+     *
+     * @see #SIM_STATE_UNKNOWN
+     * @see #SIM_STATE_ABSENT
+     * @see #SIM_STATE_CARD_IO_ERROR
+     * @see #SIM_STATE_CARD_RESTRICTED
+     * @see #SIM_STATE_PRESENT
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public @SimState int getSimCardState(int physicalSlotIndex, int portIndex) {
+        int simState = getSimState(getLogicalSlotIndex(physicalSlotIndex, portIndex));
+        return getSimCardStateFromSimState(simState);
+    }
     /**
      * Converts SIM state to SIM card state.
      * @param simState
@@ -3503,13 +3529,19 @@ public class TelephonyManager {
     /**
      * Converts a physical slot index to logical slot index.
      * @param physicalSlotIndex physical slot index
+     * @param portIndex The port index is an enumeration of the ports available on the UICC.
+     *                  Use {@link UiccPortInfo#getPortIndex()} to get portIndex.
      * @return logical slot index
      */
-    private int getLogicalSlotIndex(int physicalSlotIndex) {
+    private int getLogicalSlotIndex(int physicalSlotIndex, int portIndex) {
         UiccSlotInfo[] slotInfos = getUiccSlotsInfo();
         if (slotInfos != null && physicalSlotIndex >= 0 && physicalSlotIndex < slotInfos.length
                 && slotInfos[physicalSlotIndex] != null) {
-            return slotInfos[physicalSlotIndex].getLogicalSlotIdx();
+            for (UiccPortInfo portInfo : slotInfos[physicalSlotIndex].getPorts()) {
+                if (portInfo.getPortIndex() == portIndex) {
+                    return portInfo.getLogicalSlotIndex();
+                }
+            }
         }
 
         return SubscriptionManager.INVALID_SIM_SLOT_INDEX;
@@ -3549,12 +3581,42 @@ public class TelephonyManager {
      * @see #SIM_STATE_LOADED
      *
      * @hide
+     * @deprecated instead use {@link #getSimApplicationState(int, int)}
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @Deprecated
     public @SimState int getSimApplicationState(int physicalSlotIndex) {
         int simState =
-                SubscriptionManager.getSimStateForSlotIndex(getLogicalSlotIndex(physicalSlotIndex));
+                SubscriptionManager.getSimStateForSlotIndex(getLogicalSlotIndex(physicalSlotIndex,
+                        DEFAULT_PORT_INDEX));
+        return getSimApplicationStateFromSimState(simState);
+    }
+
+    /**
+     * Returns a constant indicating the state of the card applications on the device SIM card in
+     * a physical slot.
+     *
+     * @param physicalSlotIndex physical slot index
+     * @param portIndex The port index is an enumeration of the ports available on the UICC.
+     *                  Use {@link UiccPortInfo#getPortIndex()} to get portIndex.
+     *
+     * @see #SIM_STATE_UNKNOWN
+     * @see #SIM_STATE_PIN_REQUIRED
+     * @see #SIM_STATE_PUK_REQUIRED
+     * @see #SIM_STATE_NETWORK_LOCKED
+     * @see #SIM_STATE_NOT_READY
+     * @see #SIM_STATE_PERM_DISABLED
+     * @see #SIM_STATE_LOADED
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public @SimState int getSimApplicationState(int physicalSlotIndex, int portIndex) {
+        int simState =
+                SubscriptionManager.getSimStateForSlotIndex(getLogicalSlotIndex(physicalSlotIndex,
+                        portIndex));
         return getSimApplicationStateFromSimState(simState);
     }
 
@@ -4153,18 +4215,21 @@ public class TelephonyManager {
      * should be {@link #getPhoneCount()} if success, otherwise return an empty map.
      *
      * @hide
+     * @deprecated use {@link #getSimSlotMapping()} instead.
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     @NonNull
+    @Deprecated
     public Map<Integer, Integer> getLogicalToPhysicalSlotMapping() {
         Map<Integer, Integer> slotMapping = new HashMap<>();
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                int[] slotMappingArray = telephony.getSlotsMapping(mContext.getOpPackageName());
-                for (int i = 0; i < slotMappingArray.length; i++) {
-                    slotMapping.put(i, slotMappingArray[i]);
+                List<UiccSlotMapping> simSlotsMapping = telephony.getSlotsMapping(
+                        mContext.getOpPackageName());
+                for (UiccSlotMapping slotMap : simSlotsMapping) {
+                    slotMapping.put(slotMap.getLogicalSlotIndex(), slotMap.getPhysicalSlotIndex());
                 }
             }
         } catch (RemoteException e) {
@@ -4173,6 +4238,33 @@ public class TelephonyManager {
         return slotMapping;
     }
 
+    /**
+     * Get the mapping from logical slots to physical sim slots and port indexes. Initially the
+     * logical slot index was mapped to physical slot index, but with support for multi-enabled
+     * profile(MEP) logical slot is now mapped to port index.
+     *
+     * @return a collection of {@link UiccSlotMapping} which indicates the mapping from logical
+     *         slots to ports and physical slots.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @NonNull
+    public Collection<UiccSlotMapping> getSimSlotMapping() {
+        List<UiccSlotMapping> slotMap = new ArrayList<>();
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                slotMap = telephony.getSlotsMapping(mContext.getOpPackageName());
+            } else {
+                throw new IllegalStateException("telephony service is null.");
+            }
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+        return slotMap;
+    }
     //
     //
     // Subscriber Info
@@ -5985,6 +6077,7 @@ public class TelephonyManager {
             DATA_CONNECTED,
             DATA_SUSPENDED,
             DATA_DISCONNECTING,
+            DATA_HANDOVER_IN_PROGRESS,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface DataState{}
@@ -6009,6 +6102,12 @@ public class TelephonyManager {
     public static final int DATA_DISCONNECTING = 4;
 
     /**
+     * Data connection state: Handover in progress. The connection is being transited from cellular
+     * network to IWLAN, or from IWLAN to cellular network.
+     */
+    public static final int DATA_HANDOVER_IN_PROGRESS = 5;
+
+    /**
      * Used for checking if the SDK version for {@link TelephonyManager#getDataState} is above Q.
      */
     @ChangeId
@@ -6024,6 +6123,7 @@ public class TelephonyManager {
      * @see #DATA_CONNECTED
      * @see #DATA_SUSPENDED
      * @see #DATA_DISCONNECTING
+     * @see #DATA_HANDOVER_IN_PROGRESS
      */
     public int getDataState() {
         try {
@@ -6685,8 +6785,13 @@ public class TelephonyManager {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                return telephony.iccOpenLogicalChannelBySlot(slotIndex, getOpPackageName(), aid,
-                        p2);
+                IccLogicalChannelRequest request = new IccLogicalChannelRequest();
+                request.slotIndex = slotIndex;
+                request.aid = aid;
+                request.p2 = p2;
+                request.callingPackage = getOpPackageName();
+                request.binder = new Binder();
+                return telephony.iccOpenLogicalChannel(request);
             }
         } catch (RemoteException ex) {
         } catch (NullPointerException ex) {
@@ -6753,8 +6858,15 @@ public class TelephonyManager {
     public IccOpenLogicalChannelResponse iccOpenLogicalChannel(int subId, String AID, int p2) {
         try {
             ITelephony telephony = getITelephony();
-            if (telephony != null)
-                return telephony.iccOpenLogicalChannel(subId, getOpPackageName(), AID, p2);
+            if (telephony != null) {
+                IccLogicalChannelRequest request = new IccLogicalChannelRequest();
+                request.subId = subId;
+                request.callingPackage = getOpPackageName();
+                request.aid = AID;
+                request.p2 = p2;
+                request.binder = new Binder();
+                return telephony.iccOpenLogicalChannel(request);
+            }
         } catch (RemoteException ex) {
         } catch (NullPointerException ex) {
         }
@@ -6784,7 +6896,10 @@ public class TelephonyManager {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                return telephony.iccCloseLogicalChannelBySlot(slotIndex, channel);
+                IccLogicalChannelRequest request = new IccLogicalChannelRequest();
+                request.slotIndex = slotIndex;
+                request.channel = channel;
+                return telephony.iccCloseLogicalChannel(request);
             }
         } catch (RemoteException ex) {
         } catch (NullPointerException ex) {
@@ -6827,8 +6942,12 @@ public class TelephonyManager {
     public boolean iccCloseLogicalChannel(int subId, int channel) {
         try {
             ITelephony telephony = getITelephony();
-            if (telephony != null)
-                return telephony.iccCloseLogicalChannel(subId, channel);
+            if (telephony != null) {
+                IccLogicalChannelRequest request = new IccLogicalChannelRequest();
+                request.subId = subId;
+                request.channel = channel;
+                return telephony.iccCloseLogicalChannel(request);
+            }
         } catch (RemoteException ex) {
         } catch (NullPointerException ex) {
         }
@@ -6868,8 +6987,8 @@ public class TelephonyManager {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                return telephony.iccTransmitApduLogicalChannelBySlot(slotIndex, channel, cla,
-                        instruction, p1, p2, p3, data);
+                return telephony.iccTransmitApduLogicalChannelByPort(slotIndex, DEFAULT_PORT_INDEX,
+                         channel, cla, instruction, p1, p2, p3, data);
             }
         } catch (RemoteException ex) {
         } catch (NullPointerException ex) {
@@ -6971,8 +7090,8 @@ public class TelephonyManager {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                return telephony.iccTransmitApduBasicChannelBySlot(slotIndex, getOpPackageName(),
-                        cla, instruction, p1, p2, p3, data);
+                return telephony.iccTransmitApduBasicChannelByPort(slotIndex, DEFAULT_PORT_INDEX,
+                         getOpPackageName(), cla, instruction, p1, p2, p3, data);
             }
         } catch (RemoteException ex) {
         } catch (NullPointerException ex) {
@@ -8765,7 +8884,8 @@ public class TelephonyManager {
      * @param allowedNetworkTypes The bitmask of allowed network types.
      * @return true on success; false on any failure.
      * @hide
-     * @deprecated Use {@link #setAllowedNetworkTypesForReason} instead.
+     * @deprecated Use {@link #setAllowedNetworkTypesForReason} instead with reason
+     * {@link #ALLOWED_NETWORK_TYPES_REASON_CARRIER}.
      */
     @Deprecated
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
@@ -8799,10 +8919,7 @@ public class TelephonyManager {
 
     /**
      * To indicate allowed network type change is requested by user.
-     *
-     * @hide
      */
-    @SystemApi
     public static final int ALLOWED_NETWORK_TYPES_REASON_USER = 0;
 
     /**
@@ -8821,10 +8938,7 @@ public class TelephonyManager {
      * Carrier configuration won't affect the settings configured through
      * other reasons and will result in allowing network types that are in both
      * configurations (i.e intersection of both sets).
-     *
-     * @hide
      */
-    @SystemApi
     public static final int ALLOWED_NETWORK_TYPES_REASON_CARRIER = 2;
 
     /**
@@ -8838,35 +8952,23 @@ public class TelephonyManager {
     /**
      * Set the allowed network types of the device and provide the reason triggering the allowed
      * network change.
+     * <p>Requires permission: android.Manifest.MODIFY_PHONE_STATE or
+     * that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     *
      * This can be called for following reasons
      * <ol>
      * <li>Allowed network types control by USER {@link #ALLOWED_NETWORK_TYPES_REASON_USER}
-     * <li>Allowed network types control by power manager
-     * {@link #ALLOWED_NETWORK_TYPES_REASON_POWER}
      * <li>Allowed network types control by carrier {@link #ALLOWED_NETWORK_TYPES_REASON_CARRIER}
-     * <li>Allowed network types control by the user-controlled "Allow 2G" toggle
-     * {@link #ALLOWED_NETWORK_TYPES_REASON_ENABLE_2G}
      * </ol>
      * This API will result in allowing an intersection of allowed network types for all reasons,
      * including the configuration done through other reasons.
      *
-     * The functionality of this API with the parameter
-     * {@link #ALLOWED_NETWORK_TYPES_REASON_CARRIER} is the same as the API
-     * {@link TelephonyManager#setAllowedNetworkTypes}. Use this API instead of
-     * {@link TelephonyManager#setAllowedNetworkTypes}.
-     * <p>
-     * If {@link android.telephony.TelephonyManager#isRadioInterfaceCapabilitySupported}
-     * ({@link TelephonyManager#CAPABILITY_USES_ALLOWED_NETWORK_TYPES_BITMASK}) returns true, then
-     * setAllowedNetworkTypesBitmap is used on the radio interface. Otherwise,
-     * setPreferredNetworkTypesBitmap is used instead.
-     *
      * @param reason the reason the allowed network type change is taking place
-     * @param allowedNetworkTypes The bitmask of allowed network types.
+     * @param allowedNetworkTypes The bitmask of allowed network type
      * @throws IllegalStateException if the Telephony process is not currently available.
      * @throws IllegalArgumentException if invalid AllowedNetworkTypesReason is passed.
-     * @hide
+     * @throws SecurityException if the caller does not have the required privileges
      */
-    @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     @RequiresFeature(
             enforcement = "android.telephony.TelephonyManager#isRadioInterfaceCapabilitySupported",
@@ -8896,18 +8998,19 @@ public class TelephonyManager {
      *
      * {@link #getAllowedNetworkTypesForReason} returns allowed network type for a
      * specific reason.
+     * <p>Requires permission: android.Manifest.READ_PRIVILEGED_PHONE_STATE or
+     * that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
      * @param reason the reason the allowed network type change is taking place
      * @return the allowed network type bitmask
      * @throws IllegalStateException    if the Telephony process is not currently available.
      * @throws IllegalArgumentException if invalid AllowedNetworkTypesReason is passed.
-     * @hide
+     * @throws SecurityException if the caller does not have the required permission/privileges
      */
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     @RequiresFeature(
             enforcement = "android.telephony.TelephonyManager#isRadioInterfaceCapabilitySupported",
             value = TelephonyManager.CAPABILITY_USES_ALLOWED_NETWORK_TYPES_BITMASK)
-    @SystemApi
     public @NetworkTypeBitMask long getAllowedNetworkTypesForReason(
             @AllowedNetworkTypesReason int reason) {
         if (!isValidAllowedNetworkTypesReason(reason)) {
@@ -12127,12 +12230,15 @@ public class TelephonyManager {
         if (carriers == null || !SubscriptionManager.isValidPhoneId(slotIndex)) {
             return -1;
         }
-        // Execute the method setCarrierRestrictionRules with an empty excluded list and
-        // indicating priority for the allowed list.
+        // Execute the method setCarrierRestrictionRules with an empty excluded list.
+        // If the allowed list is empty, it means that all carriers are allowed (default allowed),
+        // otherwise it means that only specified carriers are allowed (default not allowed).
         CarrierRestrictionRules carrierRestrictionRules = CarrierRestrictionRules.newBuilder()
                 .setAllowedCarriers(carriers)
                 .setDefaultCarrierRestriction(
-                    CarrierRestrictionRules.CARRIER_RESTRICTION_DEFAULT_NOT_ALLOWED)
+                    carriers.isEmpty()
+                        ? CarrierRestrictionRules.CARRIER_RESTRICTION_DEFAULT_ALLOWED
+                        : CarrierRestrictionRules.CARRIER_RESTRICTION_DEFAULT_NOT_ALLOWED)
                 .build();
 
         int result = setCarrierRestrictionRules(carrierRestrictionRules);
@@ -12547,6 +12653,25 @@ public class TelephonyManager {
     @Retention(RetentionPolicy.SOURCE)
     public @interface DataEnabledReason{}
 
+    /** @hide */
+    @IntDef({
+            DATA_ENABLED_REASON_UNKNOWN,
+            DATA_ENABLED_REASON_USER,
+            DATA_ENABLED_REASON_POLICY,
+            DATA_ENABLED_REASON_CARRIER,
+            DATA_ENABLED_REASON_THERMAL,
+            DATA_ENABLED_REASON_OVERRIDE
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface DataEnabledChangedReason{}
+
+    /**
+     * To indicate that data was enabled or disabled due to an unknown reason.
+     * Note that this is not a valid reason for {@link #setDataEnabledForReason(int, boolean)} and
+     * is only used to indicate that data enabled was changed.
+     */
+    public static final int DATA_ENABLED_REASON_UNKNOWN = -1;
+
     /**
      * To indicate that user enabled or disabled data.
      */
@@ -12572,6 +12697,13 @@ public class TelephonyManager {
      * settings and turns off data internally if set to {@code false}.
      */
     public static final int DATA_ENABLED_REASON_THERMAL = 3;
+
+    /**
+     * To indicate data was enabled or disabled due to {@link MobileDataPolicy} overrides.
+     * Note that this is not a valid reason for {@link #setDataEnabledForReason(int, boolean)} and
+     * is only used to indicate that data enabled was changed due to an override.
+     */
+    public static final int DATA_ENABLED_REASON_OVERRIDE = 4;
 
     /**
      * Control of data connection and provide the reason triggering the data connection control.
@@ -13026,127 +13158,88 @@ public class TelephonyManager {
     // 2G
     /**
      * network type bitmask unknown.
-     * @hide
      */
-    @SystemApi
     public static final long NETWORK_TYPE_BITMASK_UNKNOWN = 0L;
     /**
      * network type bitmask indicating the support of radio tech GSM.
-     * @hide
      */
-    @SystemApi
     public static final long NETWORK_TYPE_BITMASK_GSM = (1 << (NETWORK_TYPE_GSM -1));
     /**
      * network type bitmask indicating the support of radio tech GPRS.
-     * @hide
      */
-    @SystemApi
     public static final long NETWORK_TYPE_BITMASK_GPRS = (1 << (NETWORK_TYPE_GPRS -1));
     /**
      * network type bitmask indicating the support of radio tech EDGE.
-     * @hide
      */
-    @SystemApi
     public static final long NETWORK_TYPE_BITMASK_EDGE = (1 << (NETWORK_TYPE_EDGE -1));
     /**
      * network type bitmask indicating the support of radio tech CDMA(IS95A/IS95B).
-     * @hide
      */
-    @SystemApi
     public static final long NETWORK_TYPE_BITMASK_CDMA = (1 << (NETWORK_TYPE_CDMA -1));
     /**
      * network type bitmask indicating the support of radio tech 1xRTT.
-     * @hide
      */
-    @SystemApi
+    @SuppressLint("AllUpper")
     public static final long NETWORK_TYPE_BITMASK_1xRTT = (1 << (NETWORK_TYPE_1xRTT - 1));
     // 3G
     /**
      * network type bitmask indicating the support of radio tech EVDO 0.
-     * @hide
      */
-    @SystemApi
     public static final long NETWORK_TYPE_BITMASK_EVDO_0 = (1 << (NETWORK_TYPE_EVDO_0 -1));
     /**
      * network type bitmask indicating the support of radio tech EVDO A.
-     * @hide
      */
-    @SystemApi
     public static final long NETWORK_TYPE_BITMASK_EVDO_A = (1 << (NETWORK_TYPE_EVDO_A - 1));
     /**
      * network type bitmask indicating the support of radio tech EVDO B.
-     * @hide
      */
-    @SystemApi
     public static final long NETWORK_TYPE_BITMASK_EVDO_B = (1 << (NETWORK_TYPE_EVDO_B -1));
     /**
      * network type bitmask indicating the support of radio tech EHRPD.
-     * @hide
      */
-    @SystemApi
     public static final long NETWORK_TYPE_BITMASK_EHRPD = (1 << (NETWORK_TYPE_EHRPD -1));
     /**
      * network type bitmask indicating the support of radio tech HSUPA.
-     * @hide
      */
-    @SystemApi
     public static final long NETWORK_TYPE_BITMASK_HSUPA = (1 << (NETWORK_TYPE_HSUPA -1));
     /**
      * network type bitmask indicating the support of radio tech HSDPA.
-     * @hide
      */
-    @SystemApi
     public static final long NETWORK_TYPE_BITMASK_HSDPA = (1 << (NETWORK_TYPE_HSDPA -1));
     /**
      * network type bitmask indicating the support of radio tech HSPA.
-     * @hide
      */
-    @SystemApi
     public static final long NETWORK_TYPE_BITMASK_HSPA = (1 << (NETWORK_TYPE_HSPA -1));
     /**
      * network type bitmask indicating the support of radio tech HSPAP.
-     * @hide
      */
-    @SystemApi
     public static final long NETWORK_TYPE_BITMASK_HSPAP = (1 << (NETWORK_TYPE_HSPAP -1));
     /**
      * network type bitmask indicating the support of radio tech UMTS.
-     * @hide
      */
-    @SystemApi
     public static final long NETWORK_TYPE_BITMASK_UMTS = (1 << (NETWORK_TYPE_UMTS -1));
     /**
      * network type bitmask indicating the support of radio tech TD_SCDMA.
-     * @hide
      */
-    @SystemApi
     public static final long NETWORK_TYPE_BITMASK_TD_SCDMA = (1 << (NETWORK_TYPE_TD_SCDMA -1));
     // 4G
     /**
      * network type bitmask indicating the support of radio tech LTE.
-     * @hide
      */
-    @SystemApi
     public static final long NETWORK_TYPE_BITMASK_LTE = (1 << (NETWORK_TYPE_LTE -1));
     /**
      * network type bitmask indicating the support of radio tech LTE CA (carrier aggregation).
-     * @hide
      */
-    @SystemApi
     public static final long NETWORK_TYPE_BITMASK_LTE_CA = (1 << (NETWORK_TYPE_LTE_CA -1));
 
     /**
      * network type bitmask indicating the support of radio tech NR(New Radio) 5G.
-     * @hide
      */
-    @SystemApi
     public static final long NETWORK_TYPE_BITMASK_NR = (1 << (NETWORK_TYPE_NR -1));
 
     /**
      * network type bitmask indicating the support of radio tech IWLAN.
-     * @hide
      */
-    @SystemApi
     public static final long NETWORK_TYPE_BITMASK_IWLAN = (1 << (NETWORK_TYPE_IWLAN -1));
 
     /** @hide */
@@ -13201,12 +13294,11 @@ public class TelephonyManager {
     /**
      * @return Modem supported radio access family bitmask
      *
-     * <p>Requires permission: {@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE} or
+     * <p>Requires permission: android.Manifest.READ_PRIVILEGED_PHONE_STATE or
      * that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
-     * @hide
+     *
+     * @throws SecurityException if the caller does not have the required permission
      */
-    @SystemApi
-    @TestApi
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public @NetworkTypeBitMask long getSupportedRadioAccessFamily() {
         try {
@@ -16157,7 +16249,10 @@ public class TelephonyManager {
      * Callback to listen for when the set of packages with carrier privileges for a SIM changes.
      *
      * @hide
+     * @deprecated Use {@link CarrierPrivilegesCallback} instead. This API will be removed soon
+     * prior to API finalization.
      */
+    @Deprecated
     @SystemApi
     public interface CarrierPrivilegesListener {
         /**
@@ -16177,6 +16272,54 @@ public class TelephonyManager {
     }
 
     /**
+     * Callbacks to listen for when the set of packages with carrier privileges for a SIM changes.
+     *
+     * <p>Of note, when multiple callbacks are registered, they may be triggered one after another.
+     * The ordering of them is not guaranteed and thus should not be depend on.
+     *
+     * @hide
+     */
+    @SystemApi
+    public interface CarrierPrivilegesCallback {
+        /**
+         * Called when the set of packages with carrier privileges has changed.
+         *
+         * <p>Of note, this callback will <b>not</b> be fired if a carrier triggers a SIM profile
+         * switch and the same set of packages remains privileged after the switch.
+         *
+         * <p>At registration, the callback will receive the current set of privileged packages.
+         *
+         * @param privilegedPackageNames The updated set of package names that have carrier
+         *                               privileges
+         * @param privilegedUids         The updated set of UIDs that have carrier privileges
+         */
+        void onCarrierPrivilegesChanged(
+                @NonNull Set<String> privilegedPackageNames, @NonNull Set<Integer> privilegedUids);
+
+        /**
+         * Called when the {@link CarrierService} for the current user profile has changed.
+         *
+         * <p>This method does nothing by default. Clients that are interested in the carrier
+         * service change should override this method to get package name and UID info.
+         *
+         * <p>At registration, the callback will receive the current carrier service info.
+         *
+         * <p>Of note, this callback will <b>not</b> be fired if a carrier triggers a SIM profile
+         * switch and the same carrier service remains after switch.
+         *
+         * @param carrierServicePackageName package name of the {@link CarrierService}. May be
+         *                                  {@code null} when no carrier service is detected.
+         * @param carrierServiceUid         UID of the {@link CarrierService}. May be
+         *                                  {@link android.os.Process#INVALID_UID} if no carrier
+         *                                  service is detected.
+         */
+        default void onCarrierServiceChanged(
+                @Nullable String carrierServicePackageName, int carrierServiceUid) {
+            // do nothing by default
+        }
+    }
+
+    /**
      * Registers a {@link CarrierPrivilegesListener} on the given {@code logicalSlotIndex} to
      * receive callbacks when the set of packages with carrier privileges changes. The callback will
      * immediately be called with the latest state.
@@ -16185,7 +16328,10 @@ public class TelephonyManager {
      * @param executor The executor where {@code listener} will be invoked
      * @param listener The callback to register
      * @hide
+     * @deprecated Use {@link #registerCarrierPrivilegesCallback} instead. This API will be
+     * removed prior to API finalization.
      */
+    @Deprecated
     @SystemApi
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public void addCarrierPrivilegesListener(
@@ -16209,7 +16355,10 @@ public class TelephonyManager {
      * Unregisters an existing {@link CarrierPrivilegesListener}.
      *
      * @hide
+     * @deprecated Use {@link #unregisterCarrierPrivilegesCallback} instead. This API will be
+     * removed prior to API finalization.
      */
+    @Deprecated
     @SystemApi
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public void removeCarrierPrivilegesListener(@NonNull CarrierPrivilegesListener listener) {
@@ -16223,5 +16372,54 @@ public class TelephonyManager {
             throw new IllegalStateException("Telephony registry service is null");
         }
         mTelephonyRegistryMgr.removeCarrierPrivilegesListener(listener);
+    }
+
+    /**
+     * Registers a {@link CarrierPrivilegesCallback} on the given {@code logicalSlotIndex} to
+     * receive callbacks when the set of packages with carrier privileges changes. The callback will
+     * immediately be called with the latest state.
+     *
+     * @param logicalSlotIndex The SIM slot to listen on
+     * @param executor The executor where {@code callback} will be invoked
+     * @param callback The callback to register
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public void registerCarrierPrivilegesCallback(
+            int logicalSlotIndex,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull CarrierPrivilegesCallback callback) {
+        if (mContext == null) {
+            throw new IllegalStateException("Telephony service is null");
+        } else if (executor == null || callback == null) {
+            throw new IllegalArgumentException(
+                    "CarrierPrivilegesCallback and executor must be non-null");
+        }
+        mTelephonyRegistryMgr = mContext.getSystemService(TelephonyRegistryManager.class);
+        if (mTelephonyRegistryMgr == null) {
+            throw new IllegalStateException("Telephony registry service is null");
+        }
+        mTelephonyRegistryMgr.addCarrierPrivilegesCallback(logicalSlotIndex, executor, callback);
+    }
+
+    /**
+     * Unregisters an existing {@link CarrierPrivilegesCallback}.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public void unregisterCarrierPrivilegesCallback(@NonNull CarrierPrivilegesCallback callback) {
+        if (mContext == null) {
+            throw new IllegalStateException("Telephony service is null");
+        } else if (callback == null) {
+            throw new IllegalArgumentException("CarrierPrivilegesCallback must be non-null");
+        }
+        mTelephonyRegistryMgr = mContext.getSystemService(TelephonyRegistryManager.class);
+        if (mTelephonyRegistryMgr == null) {
+            throw new IllegalStateException("Telephony registry service is null");
+        }
+        mTelephonyRegistryMgr.removeCarrierPrivilegesCallback(callback);
     }
 }

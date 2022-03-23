@@ -16,6 +16,8 @@
 
 package android.os;
 
+import static java.util.Objects.requireNonNull;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -31,7 +33,7 @@ import com.android.internal.util.IndentingPrintWriter;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Set;
-import java.util.function.Supplier;
+import java.util.function.BiFunction;
 
 /**
  * A mapping from String keys to values of various types. In most cases, you
@@ -252,11 +254,10 @@ public class BaseBundle {
         if (size == 0) {
             return null;
         }
-        Object o = getValueAt(0);
         try {
-            return (String) o;
-        } catch (ClassCastException e) {
-            typeWarning("getPairValue()", o, "String", e);
+            return getValueAt(0, String.class);
+        } catch (ClassCastException | BadTypeParcelableException e) {
+            typeWarning("getPairValue()", "String", e);
             return null;
         }
     }
@@ -309,7 +310,7 @@ public class BaseBundle {
                 }
                 for (int i = 0, n = mMap.size(); i < n; i++) {
                     // Triggers deserialization of i-th item, if needed
-                    getValueAt(i);
+                    getValueAt(i, /* clazz */ null);
                 }
             }
         }
@@ -321,26 +322,59 @@ public class BaseBundle {
      * This call should always be made after {@link #unparcel()} or inside a lock after making sure
      * {@code mMap} is not null.
      *
+     * @deprecated Use {@link #getValue(String, Class, Class[])}. This method should only be used in
+     *      other deprecated APIs.
+     *
      * @hide
      */
+    @Deprecated
+    @Nullable
     final Object getValue(String key) {
-        int i = mMap.indexOfKey(key);
-        return (i >= 0) ? getValueAt(i) : null;
+        return getValue(key, /* clazz */ null);
+    }
+
+    /** Same as {@link #getValue(String, Class, Class[])} with no item types. */
+    @Nullable
+    final <T> T getValue(String key, @Nullable Class<T> clazz) {
+        // Avoids allocating Class[0] array
+        return getValue(key, clazz, (Class<?>[]) null);
     }
 
     /**
-     * Returns the value for a certain position in the array map.
+     * Returns the value for key {@code key} for expected return type {@code clazz} (or pass {@code
+     * null} for no type check).
+     *
+     * For {@code itemTypes}, see {@link Parcel#readValue(int, ClassLoader, Class, Class[])}.
      *
      * This call should always be made after {@link #unparcel()} or inside a lock after making sure
      * {@code mMap} is not null.
      *
      * @hide
      */
-    final Object getValueAt(int i) {
+    @Nullable
+    final <T> T getValue(String key, @Nullable Class<T> clazz, @Nullable Class<?>... itemTypes) {
+        int i = mMap.indexOfKey(key);
+        return (i >= 0) ? getValueAt(i, clazz, itemTypes) : null;
+    }
+
+    /**
+     * Returns the value for a certain position in the array map for expected return type {@code
+     * clazz} (or pass {@code null} for no type check).
+     *
+     * For {@code itemTypes}, see {@link Parcel#readValue(int, ClassLoader, Class, Class[])}.
+     *
+     * This call should always be made after {@link #unparcel()} or inside a lock after making sure
+     * {@code mMap} is not null.
+     *
+     * @hide
+     */
+    @SuppressWarnings("unchecked")
+    @Nullable
+    final <T> T getValueAt(int i, @Nullable Class<T> clazz, @Nullable Class<?>... itemTypes) {
         Object object = mMap.valueAt(i);
-        if (object instanceof Supplier<?>) {
+        if (object instanceof BiFunction<?, ?, ?>) {
             try {
-                object = ((Supplier<?>) object).get();
+                object = ((BiFunction<Class<?>, Class<?>[], ?>) object).apply(clazz, itemTypes);
             } catch (BadParcelableException e) {
                 if (sShouldDefuse) {
                     Log.w(TAG, "Failed to parse item " + mMap.keyAt(i) + ", returning null.", e);
@@ -351,7 +385,7 @@ public class BaseBundle {
             }
             mMap.setValueAt(i, object);
         }
-        return object;
+        return (clazz != null) ? clazz.cast(object) : (T) object;
     }
 
     private void initializeFromParcelLocked(@NonNull Parcel parcelledData, boolean recycleParcel,
@@ -528,7 +562,7 @@ public class BaseBundle {
         } else {
             // Following semantic above of failing in case we get a serialized value vs a
             // deserialized one, we'll compare the map. If a certain element hasn't been
-            // deserialized yet, it's a Supplier (or more specifically a LazyValue, but let's
+            // deserialized yet, it's a function object (or more specifically a LazyValue, but let's
             // pretend we don't know that here :P), we'll use that element's equality comparison as
             // map naturally does. That will takes care of comparing the payload if needed (see
             // Parcel.readLazyValue() for details).
@@ -602,11 +636,41 @@ public class BaseBundle {
      *
      * @param key a String key
      * @return an Object, or null
+     *
+     * @deprecated Use the type-safe specific APIs depending on the type of the item to be
+     *      retrieved, eg. {@link #getString(String)}.
      */
+    @Deprecated
     @Nullable
     public Object get(String key) {
         unparcel();
         return getValue(key);
+    }
+
+    /**
+     * Returns the object of type {@code clazz} for the given {@code key}, or {@code null} if:
+     * <ul>
+     *     <li>No mapping of the desired type exists for the given key.
+     *     <li>A {@code null} value is explicitly associated with the key.
+     *     <li>The object is not of type {@code clazz}.
+     * </ul>
+     *
+     * <p>Use the more specific APIs where possible, especially in the case of containers such as
+     * lists, since those APIs allow you to specify the type of the items.
+     *
+     * @param key String key
+     * @param clazz The type of the object expected
+     * @return an Object, or null
+     */
+    @Nullable
+    <T> T get(@Nullable String key, @NonNull Class<T> clazz) {
+        unparcel();
+        try {
+            return getValue(key, requireNonNull(clazz));
+        } catch (ClassCastException | BadTypeParcelableException e) {
+            typeWarning(key, clazz.getCanonicalName(), e);
+            return null;
+        }
     }
 
     /**
@@ -982,15 +1046,19 @@ public class BaseBundle {
     }
 
     // Log a message if the value was non-null but not of the expected type
-    void typeWarning(String key, Object value, String className,
-            Object defaultValue, ClassCastException e) {
+    void typeWarning(String key, @Nullable Object value, String className,
+            Object defaultValue, RuntimeException e) {
         StringBuilder sb = new StringBuilder();
         sb.append("Key ");
         sb.append(key);
         sb.append(" expected ");
         sb.append(className);
-        sb.append(" but value was a ");
-        sb.append(value.getClass().getName());
+        if (value != null) {
+            sb.append(" but value was a ");
+            sb.append(value.getClass().getName());
+        } else {
+            sb.append(" but value was of a different type");
+        }
         sb.append(".  The default value ");
         sb.append(defaultValue);
         sb.append(" was returned.");
@@ -998,9 +1066,12 @@ public class BaseBundle {
         Log.w(TAG, "Attempt to cast generated internal exception:", e);
     }
 
-    void typeWarning(String key, Object value, String className,
-            ClassCastException e) {
+    void typeWarning(String key, @Nullable Object value, String className, RuntimeException e) {
         typeWarning(key, value, className, "<null>", e);
+    }
+
+    void typeWarning(String key, String className, RuntimeException e) {
+        typeWarning(key, /* value */ null, className, "<null>", e);
     }
 
     /**
@@ -1342,7 +1413,11 @@ public class BaseBundle {
      *
      * @param key a String, or null
      * @return a Serializable value, or null
+     *
+     * @deprecated Use {@link #getSerializable(String, Class)}. This method should only be used in
+     *      other deprecated APIs.
      */
+    @Deprecated
     @Nullable
     Serializable getSerializable(@Nullable String key) {
         unparcel();
@@ -1359,6 +1434,36 @@ public class BaseBundle {
     }
 
     /**
+     * Returns the value associated with the given key, or {@code null} if:
+     * <ul>
+     *     <li>No mapping of the desired type exists for the given key.
+     *     <li>A {@code null} value is explicitly associated with the key.
+     *     <li>The object is not of type {@code clazz}.
+     * </ul>
+     *
+     * @param key a String, or null
+     * @param clazz The expected class of the returned type
+     * @return a Serializable value, or null
+     */
+    @Nullable
+    <T extends Serializable> T getSerializable(@Nullable String key, @NonNull Class<T> clazz) {
+        return get(key, clazz);
+    }
+
+
+    @SuppressWarnings("unchecked")
+    @Nullable
+    <T> ArrayList<T> getArrayList(@Nullable String key, @NonNull Class<? extends T> clazz) {
+        unparcel();
+        try {
+            return getValue(key, ArrayList.class, requireNonNull(clazz));
+        } catch (ClassCastException | BadTypeParcelableException e) {
+            typeWarning(key, "ArrayList<" + clazz.getCanonicalName() + ">", e);
+            return null;
+        }
+    }
+
+    /**
      * Returns the value associated with the given key, or null if
      * no mapping of the desired type exists for the given key or a null
      * value is explicitly associated with the key.
@@ -1368,17 +1473,7 @@ public class BaseBundle {
      */
     @Nullable
     ArrayList<Integer> getIntegerArrayList(@Nullable String key) {
-        unparcel();
-        Object o = getValue(key);
-        if (o == null) {
-            return null;
-        }
-        try {
-            return (ArrayList<Integer>) o;
-        } catch (ClassCastException e) {
-            typeWarning(key, o, "ArrayList<Integer>", e);
-            return null;
-        }
+        return getArrayList(key, Integer.class);
     }
 
     /**
@@ -1391,17 +1486,7 @@ public class BaseBundle {
      */
     @Nullable
     ArrayList<String> getStringArrayList(@Nullable String key) {
-        unparcel();
-        Object o = getValue(key);
-        if (o == null) {
-            return null;
-        }
-        try {
-            return (ArrayList<String>) o;
-        } catch (ClassCastException e) {
-            typeWarning(key, o, "ArrayList<String>", e);
-            return null;
-        }
+        return getArrayList(key, String.class);
     }
 
     /**
@@ -1414,17 +1499,7 @@ public class BaseBundle {
      */
     @Nullable
     ArrayList<CharSequence> getCharSequenceArrayList(@Nullable String key) {
-        unparcel();
-        Object o = getValue(key);
-        if (o == null) {
-            return null;
-        }
-        try {
-            return (ArrayList<CharSequence>) o;
-        } catch (ClassCastException e) {
-            typeWarning(key, o, "ArrayList<CharSequence>", e);
-            return null;
-        }
+        return getArrayList(key, CharSequence.class);
     }
 
     /**

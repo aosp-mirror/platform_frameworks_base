@@ -37,9 +37,6 @@
 -keep class com.android.systemui.fragments.FragmentService$FragmentCreator {
     *;
 }
--keep class com.android.systemui.util.InjectionInflationController$ViewInstanceCreator {
-    *;
-}
 -keep class androidx.core.app.CoreComponentFactory
 
 -keep public class * extends com.android.systemui.SystemUI {

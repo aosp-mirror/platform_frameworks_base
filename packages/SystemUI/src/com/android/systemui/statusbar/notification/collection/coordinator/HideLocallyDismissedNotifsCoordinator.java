@@ -20,13 +20,21 @@ import static com.android.systemui.statusbar.notification.collection.Notificatio
 
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.collection.coordinator.dagger.CoordinatorScope;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
+
+import javax.inject.Inject;
 
 /**
  * Filters out notifications that have been dismissed locally (by the user) but that system server
  * hasn't yet confirmed the removal of.
  */
+@CoordinatorScope
 public class HideLocallyDismissedNotifsCoordinator implements Coordinator {
+
+    @Inject
+    HideLocallyDismissedNotifsCoordinator() { }
+
     @Override
     public void attach(NotifPipeline pipeline) {
         pipeline.addPreGroupFilter(mFilter);

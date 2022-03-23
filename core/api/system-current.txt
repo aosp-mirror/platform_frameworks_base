@@ -26,6 +26,7 @@ package android {
     field public static final String ADJUST_RUNTIME_PERMISSIONS_POLICY = "android.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY";
     field public static final String ALLOCATE_AGGRESSIVE = "android.permission.ALLOCATE_AGGRESSIVE";
     field public static final String ALLOW_ANY_CODEC_FOR_PLAYBACK = "android.permission.ALLOW_ANY_CODEC_FOR_PLAYBACK";
+    field public static final String ALLOW_PLACE_IN_MULTI_PANE_SETTINGS = "android.permission.ALLOW_PLACE_IN_MULTI_PANE_SETTINGS";
     field public static final String AMBIENT_WALLPAPER = "android.permission.AMBIENT_WALLPAPER";
     field public static final String APPROVE_INCIDENT_REPORTS = "android.permission.APPROVE_INCIDENT_REPORTS";
     field public static final String ASSOCIATE_COMPANION_DEVICES = "android.permission.ASSOCIATE_COMPANION_DEVICES";
@@ -63,6 +64,7 @@ package android {
     field public static final String BIND_TELEPHONY_NETWORK_SERVICE = "android.permission.BIND_TELEPHONY_NETWORK_SERVICE";
     field public static final String BIND_TEXTCLASSIFIER_SERVICE = "android.permission.BIND_TEXTCLASSIFIER_SERVICE";
     field public static final String BIND_TIME_ZONE_PROVIDER_SERVICE = "android.permission.BIND_TIME_ZONE_PROVIDER_SERVICE";
+    field public static final String BIND_TRACE_REPORT_SERVICE = "android.permission.BIND_TRACE_REPORT_SERVICE";
     field public static final String BIND_TRANSLATION_SERVICE = "android.permission.BIND_TRANSLATION_SERVICE";
     field public static final String BIND_TRUST_AGENT = "android.permission.BIND_TRUST_AGENT";
     field public static final String BIND_TV_REMOTE_SERVICE = "android.permission.BIND_TV_REMOTE_SERVICE";
@@ -144,6 +146,7 @@ package android {
     field public static final String MANAGE_CONTENT_CAPTURE = "android.permission.MANAGE_CONTENT_CAPTURE";
     field public static final String MANAGE_CONTENT_SUGGESTIONS = "android.permission.MANAGE_CONTENT_SUGGESTIONS";
     field public static final String MANAGE_DEBUGGING = "android.permission.MANAGE_DEBUGGING";
+    field public static final String MANAGE_ETHERNET_NETWORKS = "android.permission.MANAGE_ETHERNET_NETWORKS";
     field public static final String MANAGE_FACTORY_RESET_PROTECTION = "android.permission.MANAGE_FACTORY_RESET_PROTECTION";
     field public static final String MANAGE_HOTWORD_DETECTION = "android.permission.MANAGE_HOTWORD_DETECTION";
     field public static final String MANAGE_IPSEC_TUNNELS = "android.permission.MANAGE_IPSEC_TUNNELS";
@@ -438,6 +441,11 @@ package android.app {
 
   public static interface ActivityManager.OnUidImportanceListener {
     method public void onUidImportance(int, int);
+  }
+
+  public class ActivityOptions {
+    method public int getLaunchTaskId();
+    method @RequiresPermission("android.permission.START_TASKS_FROM_RECENTS") public void setLaunchTaskId(int);
   }
 
   public class AlarmManager {
@@ -1850,13 +1858,6 @@ package android.app.usage {
     field public static final String SERVICE_INTERFACE = "android.app.usage.CacheQuotaService";
   }
 
-  public class NetworkStatsManager {
-    method @NonNull @RequiresPermission(android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK) public android.net.NetworkStats getMobileUidStats();
-    method @NonNull @RequiresPermission(android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK) public android.net.NetworkStats getWifiUidStats();
-    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_STATS_PROVIDER, android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK}) public void registerNetworkStatsProvider(@NonNull String, @NonNull android.net.netstats.provider.NetworkStatsProvider);
-    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_STATS_PROVIDER, android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK}) public void unregisterNetworkStatsProvider(@NonNull android.net.netstats.provider.NetworkStatsProvider);
-  }
-
   public static final class UsageEvents.Event {
     method public int getInstanceId();
     method @Nullable public String getNotificationChannelId();
@@ -1912,455 +1913,6 @@ package android.apphibernation {
     method @RequiresPermission(android.Manifest.permission.MANAGE_APP_HIBERNATION) public boolean isHibernatingGlobally(@NonNull String);
     method @RequiresPermission(android.Manifest.permission.MANAGE_APP_HIBERNATION) public void setHibernatingForUser(@NonNull String, boolean);
     method @RequiresPermission(android.Manifest.permission.MANAGE_APP_HIBERNATION) public void setHibernatingGlobally(@NonNull String, boolean);
-  }
-
-}
-
-package android.bluetooth {
-
-  public final class BluetoothA2dp implements android.bluetooth.BluetoothProfile {
-    method @Nullable @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public android.bluetooth.BufferConstraints getBufferConstraints();
-    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public int getConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice);
-    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public int getDynamicBufferSupport();
-    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public boolean setBufferLengthMillis(int, int);
-    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public boolean setConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice, int);
-    field public static final int DYNAMIC_BUFFER_SUPPORT_A2DP_OFFLOAD = 1; // 0x1
-    field public static final int DYNAMIC_BUFFER_SUPPORT_A2DP_SOFTWARE_ENCODING = 2; // 0x2
-    field public static final int DYNAMIC_BUFFER_SUPPORT_NONE = 0; // 0x0
-    field public static final int OPTIONAL_CODECS_NOT_SUPPORTED = 0; // 0x0
-    field public static final int OPTIONAL_CODECS_PREF_DISABLED = 0; // 0x0
-    field public static final int OPTIONAL_CODECS_PREF_ENABLED = 1; // 0x1
-    field public static final int OPTIONAL_CODECS_PREF_UNKNOWN = -1; // 0xffffffff
-    field public static final int OPTIONAL_CODECS_SUPPORTED = 1; // 0x1
-    field public static final int OPTIONAL_CODECS_SUPPORT_UNKNOWN = -1; // 0xffffffff
-  }
-
-  public final class BluetoothA2dpSink implements android.bluetooth.BluetoothProfile {
-    method public void finalize();
-    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public int getConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice);
-    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public boolean isAudioPlaying(@NonNull android.bluetooth.BluetoothDevice);
-    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public boolean setConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice, int);
-    field @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public static final String ACTION_CONNECTION_STATE_CHANGED = "android.bluetooth.a2dp-sink.profile.action.CONNECTION_STATE_CHANGED";
-  }
-
-  public final class BluetoothActivityEnergyInfo implements android.os.Parcelable {
-    method public int getBluetoothStackState();
-    method public long getControllerEnergyUsed();
-    method public long getControllerIdleTimeMillis();
-    method public long getControllerRxTimeMillis();
-    method public long getControllerTxTimeMillis();
-    method public long getTimestampMillis();
-    method @NonNull public java.util.List<android.bluetooth.UidTraffic> getUidTraffic();
-    method public boolean isValid();
-    field public static final int BT_STACK_STATE_INVALID = 0; // 0x0
-    field public static final int BT_STACK_STATE_STATE_ACTIVE = 1; // 0x1
-    field public static final int BT_STACK_STATE_STATE_IDLE = 3; // 0x3
-    field public static final int BT_STACK_STATE_STATE_SCANNING = 2; // 0x2
-    field @NonNull public static final android.os.Parcelable.Creator<android.bluetooth.BluetoothActivityEnergyInfo> CREATOR;
-  }
-
-  public final class BluetoothAdapter {
-    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public boolean addOnMetadataChangedListener(@NonNull android.bluetooth.BluetoothDevice, @NonNull java.util.concurrent.Executor, @NonNull android.bluetooth.BluetoothAdapter.OnMetadataChangedListener);
-    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public boolean disable(boolean);
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public boolean disableBLE();
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public boolean enableBLE();
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public boolean enableNoAutoConnect();
-    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public void generateLocalOobData(int, @NonNull java.util.concurrent.Executor, @NonNull android.bluetooth.BluetoothAdapter.OobDataCallback);
-    method @NonNull @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public java.util.List<android.bluetooth.BluetoothDevice> getActiveDevices(int);
-    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public long getDiscoveryEndMillis();
-    method public boolean isBleScanAlwaysAvailable();
-    method public boolean isLeEnabled();
-    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED, android.Manifest.permission.MODIFY_PHONE_STATE}) public boolean removeActiveDevice(int);
-    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public boolean removeOnMetadataChangedListener(@NonNull android.bluetooth.BluetoothDevice, @NonNull android.bluetooth.BluetoothAdapter.OnMetadataChangedListener);
-    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED, android.Manifest.permission.MODIFY_PHONE_STATE}) public boolean setActiveDevice(@NonNull android.bluetooth.BluetoothDevice, int);
-    field public static final String ACTION_BLE_STATE_CHANGED = "android.bluetooth.adapter.action.BLE_STATE_CHANGED";
-    field public static final String ACTION_REQUEST_BLE_SCAN_ALWAYS_AVAILABLE = "android.bluetooth.adapter.action.REQUEST_BLE_SCAN_ALWAYS_AVAILABLE";
-    field public static final int ACTIVE_DEVICE_ALL = 2; // 0x2
-    field public static final int ACTIVE_DEVICE_AUDIO = 0; // 0x0
-    field public static final int ACTIVE_DEVICE_PHONE_CALL = 1; // 0x1
-  }
-
-  public static interface BluetoothAdapter.OnMetadataChangedListener {
-    method public void onMetadataChanged(@NonNull android.bluetooth.BluetoothDevice, int, @Nullable byte[]);
-  }
-
-  public static interface BluetoothAdapter.OobDataCallback {
-    method public void onError(int);
-    method public void onOobData(int, @NonNull android.bluetooth.OobData);
-  }
-
-  public final class BluetoothCsipSetCoordinator implements java.lang.AutoCloseable android.bluetooth.BluetoothProfile {
-    method @NonNull @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public java.util.List<java.lang.Integer> getAllGroupIds(@Nullable android.os.ParcelUuid);
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public int getConnectionPolicy(@Nullable android.bluetooth.BluetoothDevice);
-    method @NonNull @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public java.util.Map getGroupUuidMapByDevice(@Nullable android.bluetooth.BluetoothDevice);
-    method @Nullable @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public java.util.UUID groupLock(int, @Nullable java.util.concurrent.Executor, @Nullable android.bluetooth.BluetoothCsipSetCoordinator.ClientLockCallback);
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean groupUnlock(@NonNull java.util.UUID);
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean setConnectionPolicy(@Nullable android.bluetooth.BluetoothDevice, int);
-    field @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public static final String ACTION_CSIS_DEVICE_AVAILABLE = "android.bluetooth.action.CSIS_DEVICE_AVAILABLE";
-    field @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public static final String ACTION_CSIS_SET_MEMBER_AVAILABLE = "android.bluetooth.action.CSIS_SET_MEMBER_AVAILABLE";
-  }
-
-  public static interface BluetoothCsipSetCoordinator.ClientLockCallback {
-    method public void onGroupLockSet(int, int, boolean);
-  }
-
-  public final class BluetoothDevice implements android.os.Parcelable {
-    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public boolean canBondWithoutDialog();
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public boolean cancelBondProcess();
-    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED, android.Manifest.permission.MODIFY_PHONE_STATE}) public int connect();
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public boolean createBond(int);
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public boolean createBondOutOfBand(int, @Nullable android.bluetooth.OobData, @Nullable android.bluetooth.OobData);
-    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public int disconnect();
-    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public boolean fetchUuidsWithSdp(int);
-    method @Nullable @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public byte[] getMetadata(int);
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public int getSimAccessPermission();
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public boolean isConnected();
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public boolean isEncrypted();
-    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public boolean isInSilenceMode();
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public boolean removeBond();
-    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public boolean setLowLatencyAudioAllowed(boolean);
-    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public boolean setMessageAccessPermission(int);
-    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public boolean setMetadata(int, @NonNull byte[]);
-    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public boolean setPhonebookAccessPermission(int);
-    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public boolean setSilenceMode(boolean);
-    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public boolean setSimAccessPermission(int);
-    field public static final int ACCESS_ALLOWED = 1; // 0x1
-    field public static final int ACCESS_REJECTED = 2; // 0x2
-    field public static final int ACCESS_UNKNOWN = 0; // 0x0
-    field @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public static final String ACTION_SILENCE_MODE_CHANGED = "android.bluetooth.device.action.SILENCE_MODE_CHANGED";
-    field @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public static final String ACTION_SWITCH_BUFFER_SIZE = "android.bluetooth.device.action.SWITCH_BUFFER_SIZE";
-    field public static final String DEVICE_TYPE_DEFAULT = "Default";
-    field public static final String DEVICE_TYPE_UNTETHERED_HEADSET = "Untethered Headset";
-    field public static final String DEVICE_TYPE_WATCH = "Watch";
-    field public static final String EXTRA_LOW_LATENCY_BUFFER_SIZE = "android.bluetooth.device.extra.LOW_LATENCY_BUFFER_SIZE";
-    field public static final int METADATA_COMPANION_APP = 4; // 0x4
-    field public static final int METADATA_DEVICE_TYPE = 17; // 0x11
-    field public static final int METADATA_ENHANCED_SETTINGS_UI_URI = 16; // 0x10
-    field public static final int METADATA_HARDWARE_VERSION = 3; // 0x3
-    field public static final int METADATA_IS_UNTETHERED_HEADSET = 6; // 0x6
-    field public static final int METADATA_MAIN_BATTERY = 18; // 0x12
-    field public static final int METADATA_MAIN_CHARGING = 19; // 0x13
-    field public static final int METADATA_MAIN_ICON = 5; // 0x5
-    field public static final int METADATA_MAIN_LOW_BATTERY_THRESHOLD = 20; // 0x14
-    field public static final int METADATA_MANUFACTURER_NAME = 0; // 0x0
-    field public static final int METADATA_MAX_LENGTH = 2048; // 0x800
-    field public static final int METADATA_MODEL_NAME = 1; // 0x1
-    field public static final int METADATA_SOFTWARE_VERSION = 2; // 0x2
-    field public static final int METADATA_UNTETHERED_CASE_BATTERY = 12; // 0xc
-    field public static final int METADATA_UNTETHERED_CASE_CHARGING = 15; // 0xf
-    field public static final int METADATA_UNTETHERED_CASE_ICON = 9; // 0x9
-    field public static final int METADATA_UNTETHERED_CASE_LOW_BATTERY_THRESHOLD = 23; // 0x17
-    field public static final int METADATA_UNTETHERED_LEFT_BATTERY = 10; // 0xa
-    field public static final int METADATA_UNTETHERED_LEFT_CHARGING = 13; // 0xd
-    field public static final int METADATA_UNTETHERED_LEFT_ICON = 7; // 0x7
-    field public static final int METADATA_UNTETHERED_LEFT_LOW_BATTERY_THRESHOLD = 21; // 0x15
-    field public static final int METADATA_UNTETHERED_RIGHT_BATTERY = 11; // 0xb
-    field public static final int METADATA_UNTETHERED_RIGHT_CHARGING = 14; // 0xe
-    field public static final int METADATA_UNTETHERED_RIGHT_ICON = 8; // 0x8
-    field public static final int METADATA_UNTETHERED_RIGHT_LOW_BATTERY_THRESHOLD = 22; // 0x16
-  }
-
-  public final class BluetoothHeadset implements android.bluetooth.BluetoothProfile {
-    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.MODIFY_PHONE_STATE}) public boolean connect(android.bluetooth.BluetoothDevice);
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public boolean disconnect(android.bluetooth.BluetoothDevice);
-    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public int getConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice);
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean isInbandRingingEnabled();
-    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED, android.Manifest.permission.MODIFY_PHONE_STATE}) public boolean setConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice, int);
-    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.MODIFY_PHONE_STATE}) public boolean startScoUsingVirtualVoiceCall();
-    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.MODIFY_PHONE_STATE}) public boolean stopScoUsingVirtualVoiceCall();
-  }
-
-  public final class BluetoothHeadsetClient implements java.lang.AutoCloseable android.bluetooth.BluetoothProfile {
-    method @NonNull @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public java.util.List<android.bluetooth.BluetoothDevice> getConnectedDevices();
-    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public int getConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice);
-    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public int getConnectionState(@NonNull android.bluetooth.BluetoothDevice);
-    method @NonNull @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public java.util.List<android.bluetooth.BluetoothDevice> getDevicesMatchingConnectionStates(@NonNull int[]);
-    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public boolean setConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice, int);
-    field @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public static final String ACTION_CONNECTION_STATE_CHANGED = "android.bluetooth.headsetprofile.action.CONNECTION_STATE_CHANGED";
-  }
-
-  public final class BluetoothHearingAid implements android.bluetooth.BluetoothProfile {
-    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public int getConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice);
-    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public long getHiSyncId(@NonNull android.bluetooth.BluetoothDevice);
-    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public boolean setConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice, int);
-  }
-
-  public final class BluetoothHidDevice implements android.bluetooth.BluetoothProfile {
-    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public boolean setConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice, int);
-  }
-
-  public final class BluetoothHidHost implements android.bluetooth.BluetoothProfile {
-    method @NonNull @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public java.util.List<android.bluetooth.BluetoothDevice> getConnectedDevices();
-    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public int getConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice);
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public int getConnectionState(@NonNull android.bluetooth.BluetoothDevice);
-    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public boolean setConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice, int);
-    field @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public static final String ACTION_CONNECTION_STATE_CHANGED = "android.bluetooth.input.profile.action.CONNECTION_STATE_CHANGED";
-  }
-
-  public final class BluetoothLeAudio implements java.lang.AutoCloseable android.bluetooth.BluetoothProfile {
-    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public int getAudioLocation(@NonNull android.bluetooth.BluetoothDevice);
-  }
-
-  public final class BluetoothMap implements java.lang.AutoCloseable android.bluetooth.BluetoothProfile {
-    method public void close();
-    method protected void finalize();
-    method @NonNull @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public java.util.List<android.bluetooth.BluetoothDevice> getConnectedDevices();
-    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public int getConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice);
-    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public boolean setConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice, int);
-    field @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public static final String ACTION_CONNECTION_STATE_CHANGED = "android.bluetooth.map.profile.action.CONNECTION_STATE_CHANGED";
-  }
-
-  public final class BluetoothMapClient implements java.lang.AutoCloseable android.bluetooth.BluetoothProfile {
-    method @NonNull @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public java.util.List<android.bluetooth.BluetoothDevice> getConnectedDevices();
-    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public int getConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice);
-    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public int getConnectionState(@NonNull android.bluetooth.BluetoothDevice);
-    method @NonNull @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public java.util.List<android.bluetooth.BluetoothDevice> getDevicesMatchingConnectionStates(@NonNull int[]);
-    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.SEND_SMS}) public boolean sendMessage(@NonNull android.bluetooth.BluetoothDevice, @NonNull java.util.Collection<android.net.Uri>, @NonNull String, @Nullable android.app.PendingIntent, @Nullable android.app.PendingIntent);
-    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public boolean setConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice, int);
-    field @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public static final String ACTION_CONNECTION_STATE_CHANGED = "android.bluetooth.mapmce.profile.action.CONNECTION_STATE_CHANGED";
-  }
-
-  public final class BluetoothPan implements android.bluetooth.BluetoothProfile {
-    method @NonNull @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public java.util.List<android.bluetooth.BluetoothDevice> getConnectedDevices();
-    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public int getConnectionState(@NonNull android.bluetooth.BluetoothDevice);
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public boolean isTetheringOn();
-    method @Deprecated @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED, android.Manifest.permission.TETHER_PRIVILEGED}) public void setBluetoothTethering(boolean);
-    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public boolean setConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice, int);
-    field @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public static final String ACTION_CONNECTION_STATE_CHANGED = "android.bluetooth.pan.profile.action.CONNECTION_STATE_CHANGED";
-    field public static final String ACTION_TETHERING_STATE_CHANGED = "android.bluetooth.action.TETHERING_STATE_CHANGED";
-    field public static final String EXTRA_LOCAL_ROLE = "android.bluetooth.pan.extra.LOCAL_ROLE";
-    field public static final String EXTRA_TETHERING_STATE = "android.bluetooth.extra.TETHERING_STATE";
-    field public static final int LOCAL_NAP_ROLE = 1; // 0x1
-    field public static final int LOCAL_PANU_ROLE = 2; // 0x2
-    field public static final int PAN_ROLE_NONE = 0; // 0x0
-    field public static final int REMOTE_NAP_ROLE = 1; // 0x1
-    field public static final int REMOTE_PANU_ROLE = 2; // 0x2
-    field public static final int TETHERING_STATE_OFF = 1; // 0x1
-    field public static final int TETHERING_STATE_ON = 2; // 0x2
-  }
-
-  public class BluetoothPbap implements android.bluetooth.BluetoothProfile {
-    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public int getConnectionState(@NonNull android.bluetooth.BluetoothDevice);
-    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public boolean setConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice, int);
-    field @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public static final String ACTION_CONNECTION_STATE_CHANGED = "android.bluetooth.pbap.profile.action.CONNECTION_STATE_CHANGED";
-  }
-
-  public final class BluetoothPbapClient implements java.lang.AutoCloseable android.bluetooth.BluetoothProfile {
-    method @NonNull @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public java.util.List<android.bluetooth.BluetoothDevice> getConnectedDevices();
-    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public int getConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice);
-    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public int getConnectionState(@NonNull android.bluetooth.BluetoothDevice);
-    method @NonNull @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public java.util.List<android.bluetooth.BluetoothDevice> getDevicesMatchingConnectionStates(@NonNull int[]);
-    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public boolean setConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice, int);
-    field @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public static final String ACTION_CONNECTION_STATE_CHANGED = "android.bluetooth.pbapclient.profile.action.CONNECTION_STATE_CHANGED";
-  }
-
-  public interface BluetoothProfile {
-    field public static final int A2DP_SINK = 11; // 0xb
-    field public static final int AVRCP_CONTROLLER = 12; // 0xc
-    field public static final int CONNECTION_POLICY_ALLOWED = 100; // 0x64
-    field public static final int CONNECTION_POLICY_FORBIDDEN = 0; // 0x0
-    field public static final int CONNECTION_POLICY_UNKNOWN = -1; // 0xffffffff
-    field public static final int HEADSET_CLIENT = 16; // 0x10
-    field public static final int MAP_CLIENT = 18; // 0x12
-    field public static final int PAN = 5; // 0x5
-    field public static final int PBAP_CLIENT = 17; // 0x11
-    field @Deprecated public static final int PRIORITY_OFF = 0; // 0x0
-    field @Deprecated public static final int PRIORITY_ON = 100; // 0x64
-    field public static final int VOLUME_CONTROL = 23; // 0x17
-  }
-
-  public final class BluetoothStatusCodes {
-    field public static final int ERROR_ANOTHER_ACTIVE_OOB_REQUEST = 1000; // 0x3e8
-  }
-
-  public final class BluetoothUuid {
-    method public static boolean containsAnyUuid(@Nullable android.os.ParcelUuid[], @Nullable android.os.ParcelUuid[]);
-    method @NonNull public static android.os.ParcelUuid parseUuidFrom(@Nullable byte[]);
-    field @NonNull public static final android.os.ParcelUuid A2DP_SINK;
-    field @NonNull public static final android.os.ParcelUuid A2DP_SOURCE;
-    field @NonNull public static final android.os.ParcelUuid ADV_AUDIO_DIST;
-    field @NonNull public static final android.os.ParcelUuid AVRCP_CONTROLLER;
-    field @NonNull public static final android.os.ParcelUuid AVRCP_TARGET;
-    field @NonNull public static final android.os.ParcelUuid BASE_UUID;
-    field @NonNull public static final android.os.ParcelUuid BNEP;
-    field @NonNull public static final android.os.ParcelUuid CAP;
-    field @NonNull public static final android.os.ParcelUuid COORDINATED_SET;
-    field @NonNull public static final android.os.ParcelUuid DIP;
-    field @NonNull public static final android.os.ParcelUuid GENERIC_MEDIA_CONTROL;
-    field @NonNull public static final android.os.ParcelUuid HAS;
-    field @NonNull public static final android.os.ParcelUuid HEARING_AID;
-    field @NonNull public static final android.os.ParcelUuid HFP;
-    field @NonNull public static final android.os.ParcelUuid HFP_AG;
-    field @NonNull public static final android.os.ParcelUuid HID;
-    field @NonNull public static final android.os.ParcelUuid HOGP;
-    field @NonNull public static final android.os.ParcelUuid HSP;
-    field @NonNull public static final android.os.ParcelUuid HSP_AG;
-    field @NonNull public static final android.os.ParcelUuid LE_AUDIO;
-    field @NonNull public static final android.os.ParcelUuid MAP;
-    field @NonNull public static final android.os.ParcelUuid MAS;
-    field @NonNull public static final android.os.ParcelUuid MEDIA_CONTROL;
-    field @NonNull public static final android.os.ParcelUuid MNS;
-    field @NonNull public static final android.os.ParcelUuid NAP;
-    field @NonNull public static final android.os.ParcelUuid OBEX_OBJECT_PUSH;
-    field @NonNull public static final android.os.ParcelUuid PANU;
-    field @NonNull public static final android.os.ParcelUuid PBAP_PCE;
-    field @NonNull public static final android.os.ParcelUuid PBAP_PSE;
-    field @NonNull public static final android.os.ParcelUuid SAP;
-    field public static final int UUID_BYTES_128_BIT = 16; // 0x10
-    field public static final int UUID_BYTES_16_BIT = 2; // 0x2
-    field public static final int UUID_BYTES_32_BIT = 4; // 0x4
-    field @NonNull public static final android.os.ParcelUuid VOLUME_CONTROL;
-  }
-
-  public final class BluetoothVolumeControl implements java.lang.AutoCloseable android.bluetooth.BluetoothProfile {
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public void close();
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) protected void finalize();
-    method @NonNull @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public java.util.List<android.bluetooth.BluetoothDevice> getConnectedDevices();
-    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public int getConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice);
-    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public boolean setConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice, int);
-    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public void setVolume(@Nullable android.bluetooth.BluetoothDevice, @IntRange(from=0, to=255) int);
-    field @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public static final String ACTION_CONNECTION_STATE_CHANGED = "android.bluetooth.volume-control.profile.action.CONNECTION_STATE_CHANGED";
-  }
-
-  public final class BufferConstraint implements android.os.Parcelable {
-    ctor public BufferConstraint(int, int, int);
-    method public int describeContents();
-    method public int getDefaultMillis();
-    method public int getMaxMillis();
-    method public int getMinMillis();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.bluetooth.BufferConstraint> CREATOR;
-  }
-
-  public final class BufferConstraints implements android.os.Parcelable {
-    ctor public BufferConstraints(@NonNull java.util.List<android.bluetooth.BufferConstraint>);
-    method public int describeContents();
-    method @Nullable public android.bluetooth.BufferConstraint forCodec(int);
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field public static final int BUFFER_CODEC_MAX_NUM = 32; // 0x20
-    field @NonNull public static final android.os.Parcelable.Creator<android.bluetooth.BufferConstraints> CREATOR;
-  }
-
-  public final class OobData implements android.os.Parcelable {
-    method @NonNull public byte[] getClassOfDevice();
-    method @NonNull public byte[] getClassicLength();
-    method @NonNull public byte[] getConfirmationHash();
-    method @NonNull public byte[] getDeviceAddressWithType();
-    method @Nullable public byte[] getDeviceName();
-    method @Nullable public byte[] getLeAppearance();
-    method @NonNull public int getLeDeviceRole();
-    method @NonNull public int getLeFlags();
-    method @Nullable public byte[] getLeTemporaryKey();
-    method @NonNull public byte[] getRandomizerHash();
-    field public static final int CLASS_OF_DEVICE_OCTETS = 3; // 0x3
-    field public static final int CONFIRMATION_OCTETS = 16; // 0x10
-    field @NonNull public static final android.os.Parcelable.Creator<android.bluetooth.OobData> CREATOR;
-    field public static final int DEVICE_ADDRESS_OCTETS = 7; // 0x7
-    field public static final int LE_APPEARANCE_OCTETS = 2; // 0x2
-    field public static final int LE_DEVICE_FLAG_OCTETS = 1; // 0x1
-    field public static final int LE_DEVICE_ROLE_BOTH_PREFER_CENTRAL = 3; // 0x3
-    field public static final int LE_DEVICE_ROLE_BOTH_PREFER_PERIPHERAL = 2; // 0x2
-    field public static final int LE_DEVICE_ROLE_CENTRAL_ONLY = 1; // 0x1
-    field public static final int LE_DEVICE_ROLE_OCTETS = 1; // 0x1
-    field public static final int LE_DEVICE_ROLE_PERIPHERAL_ONLY = 0; // 0x0
-    field public static final int LE_FLAG_BREDR_NOT_SUPPORTED = 2; // 0x2
-    field public static final int LE_FLAG_GENERAL_DISCOVERY_MODE = 1; // 0x1
-    field public static final int LE_FLAG_LIMITED_DISCOVERY_MODE = 0; // 0x0
-    field public static final int LE_FLAG_SIMULTANEOUS_CONTROLLER = 3; // 0x3
-    field public static final int LE_FLAG_SIMULTANEOUS_HOST = 4; // 0x4
-    field public static final int LE_TK_OCTETS = 16; // 0x10
-    field public static final int OOB_LENGTH_OCTETS = 2; // 0x2
-    field public static final int RANDOMIZER_OCTETS = 16; // 0x10
-  }
-
-  public static final class OobData.ClassicBuilder {
-    ctor public OobData.ClassicBuilder(@NonNull byte[], @NonNull byte[], @NonNull byte[]);
-    method @NonNull public android.bluetooth.OobData build();
-    method @NonNull public android.bluetooth.OobData.ClassicBuilder setClassOfDevice(@NonNull byte[]);
-    method @NonNull public android.bluetooth.OobData.ClassicBuilder setDeviceName(@NonNull byte[]);
-    method @NonNull public android.bluetooth.OobData.ClassicBuilder setRandomizerHash(@NonNull byte[]);
-  }
-
-  public static final class OobData.LeBuilder {
-    ctor public OobData.LeBuilder(@NonNull byte[], @NonNull byte[], int);
-    method @NonNull public android.bluetooth.OobData build();
-    method @NonNull public android.bluetooth.OobData.LeBuilder setDeviceName(@NonNull byte[]);
-    method @NonNull public android.bluetooth.OobData.LeBuilder setLeFlags(int);
-    method @NonNull public android.bluetooth.OobData.LeBuilder setLeTemporaryKey(@NonNull byte[]);
-    method @NonNull public android.bluetooth.OobData.LeBuilder setRandomizerHash(@NonNull byte[]);
-  }
-
-  public final class UidTraffic implements java.lang.Cloneable android.os.Parcelable {
-    method public long getRxBytes();
-    method public long getTxBytes();
-    method public int getUid();
-    field @NonNull public static final android.os.Parcelable.Creator<android.bluetooth.UidTraffic> CREATOR;
-  }
-
-}
-
-package android.bluetooth.le {
-
-  public final class AdvertiseSettings implements android.os.Parcelable {
-    method public int getOwnAddressType();
-  }
-
-  public static final class AdvertiseSettings.Builder {
-    method @NonNull public android.bluetooth.le.AdvertiseSettings.Builder setOwnAddressType(int);
-  }
-
-  public final class AdvertisingSetParameters implements android.os.Parcelable {
-    method public int getOwnAddressType();
-    field public static final int ADDRESS_TYPE_DEFAULT = -1; // 0xffffffff
-    field public static final int ADDRESS_TYPE_PUBLIC = 0; // 0x0
-    field public static final int ADDRESS_TYPE_RANDOM = 1; // 0x1
-  }
-
-  public static final class AdvertisingSetParameters.Builder {
-    method @NonNull public android.bluetooth.le.AdvertisingSetParameters.Builder setOwnAddressType(int);
-  }
-
-  public final class BluetoothLeScanner {
-    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_SCAN, android.Manifest.permission.UPDATE_DEVICE_STATS}) public void startScanFromSource(android.os.WorkSource, android.bluetooth.le.ScanCallback);
-    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_SCAN, android.Manifest.permission.UPDATE_DEVICE_STATS}) public void startScanFromSource(java.util.List<android.bluetooth.le.ScanFilter>, android.bluetooth.le.ScanSettings, android.os.WorkSource, android.bluetooth.le.ScanCallback);
-    method @Deprecated @RequiresPermission(android.Manifest.permission.BLUETOOTH_SCAN) public void startTruncatedScan(java.util.List<android.bluetooth.le.TruncatedFilter>, android.bluetooth.le.ScanSettings, android.bluetooth.le.ScanCallback);
-  }
-
-  @Deprecated public final class ResultStorageDescriptor implements android.os.Parcelable {
-    ctor @Deprecated public ResultStorageDescriptor(int, int, int);
-    method @Deprecated public int describeContents();
-    method @Deprecated public int getLength();
-    method @Deprecated public int getOffset();
-    method @Deprecated public int getType();
-    method @Deprecated public void writeToParcel(android.os.Parcel, int);
-    field @Deprecated @NonNull public static final android.os.Parcelable.Creator<android.bluetooth.le.ResultStorageDescriptor> CREATOR;
-  }
-
-  public final class ScanFilter implements android.os.Parcelable {
-    method public int getAddressType();
-    method @Nullable public byte[] getIrk();
-  }
-
-  public static final class ScanFilter.Builder {
-    method @NonNull public android.bluetooth.le.ScanFilter.Builder setDeviceAddress(@NonNull String, int);
-    method @NonNull public android.bluetooth.le.ScanFilter.Builder setDeviceAddress(@NonNull String, int, @NonNull byte[]);
-    field public static final int LEN_IRK_OCTETS = 16; // 0x10
-  }
-
-  public final class ScanSettings implements android.os.Parcelable {
-    field public static final int SCAN_MODE_AMBIENT_DISCOVERY = 3; // 0x3
-    field public static final int SCAN_RESULT_TYPE_ABBREVIATED = 1; // 0x1
-    field public static final int SCAN_RESULT_TYPE_FULL = 0; // 0x0
-  }
-
-  public static final class ScanSettings.Builder {
-    method public android.bluetooth.le.ScanSettings.Builder setScanResultType(int);
-  }
-
-  @Deprecated public final class TruncatedFilter {
-    ctor @Deprecated public TruncatedFilter(android.bluetooth.le.ScanFilter, java.util.List<android.bluetooth.le.ResultStorageDescriptor>);
-    method @Deprecated public android.bluetooth.le.ScanFilter getFilter();
-    method @Deprecated public java.util.List<android.bluetooth.le.ResultStorageDescriptor> getStorageDescriptors();
   }
 
 }
@@ -2443,6 +1995,7 @@ package android.content {
     field public static final String HDMI_CONTROL_SERVICE = "hdmi_control";
     field public static final String MEDIA_TRANSCODING_SERVICE = "media_transcoding";
     field public static final String MUSIC_RECOGNITION_SERVICE = "music_recognition";
+    field public static final String NEARBY_SERVICE = "nearby";
     field public static final String NETD_SERVICE = "netd";
     field public static final String NETWORK_SCORE_SERVICE = "network_score";
     field public static final String OEM_LOCK_SERVICE = "oem_lock";
@@ -3384,11 +2937,13 @@ package android.hardware.display {
   public final class DisplayManager {
     method @RequiresPermission(android.Manifest.permission.ACCESS_AMBIENT_LIGHT_STATS) public java.util.List<android.hardware.display.AmbientBrightnessDayStats> getAmbientBrightnessStats();
     method @RequiresPermission(android.Manifest.permission.CONFIGURE_DISPLAY_BRIGHTNESS) public android.hardware.display.BrightnessConfiguration getBrightnessConfiguration();
+    method @Nullable @RequiresPermission(android.Manifest.permission.CONFIGURE_DISPLAY_BRIGHTNESS) public android.hardware.display.BrightnessConfiguration getBrightnessConfigurationForDisplay(@NonNull String);
     method @RequiresPermission(android.Manifest.permission.BRIGHTNESS_SLIDER_USAGE) public java.util.List<android.hardware.display.BrightnessChangeEvent> getBrightnessEvents();
     method @Nullable @RequiresPermission(android.Manifest.permission.CONFIGURE_DISPLAY_BRIGHTNESS) public android.hardware.display.BrightnessConfiguration getDefaultBrightnessConfiguration();
     method public android.util.Pair<float[],float[]> getMinimumBrightnessCurve();
     method public android.graphics.Point getStableDisplaySize();
     method @RequiresPermission(android.Manifest.permission.CONFIGURE_DISPLAY_BRIGHTNESS) public void setBrightnessConfiguration(android.hardware.display.BrightnessConfiguration);
+    method @RequiresPermission(android.Manifest.permission.CONFIGURE_DISPLAY_BRIGHTNESS) public void setBrightnessConfigurationForDisplay(@NonNull android.hardware.display.BrightnessConfiguration, @NonNull String);
     method @Deprecated @RequiresPermission(android.Manifest.permission.CONTROL_DISPLAY_SATURATION) public void setSaturationLevel(float);
   }
 
@@ -3401,6 +2956,7 @@ package android.hardware.hdmi {
     method public void sendKeyEvent(int, boolean);
     method public void sendVendorCommand(int, byte[], boolean);
     method public void setVendorCommandListener(@NonNull android.hardware.hdmi.HdmiControlManager.VendorCommandListener);
+    method public void setVendorCommandListener(@NonNull android.hardware.hdmi.HdmiControlManager.VendorCommandListener, int);
   }
 
   public final class HdmiControlManager {
@@ -5493,6 +5049,46 @@ package android.media {
     field public static final android.media.RouteDiscoveryPreference EMPTY;
   }
 
+  public class Spatializer {
+    method @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public void addCompatibleAudioDevice(@NonNull android.media.AudioDeviceAttributes);
+    method @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public void addOnHeadTrackingModeChangedListener(@NonNull java.util.concurrent.Executor, @NonNull android.media.Spatializer.OnHeadTrackingModeChangedListener);
+    method @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public void clearOnHeadToSoundstagePoseUpdatedListener();
+    method @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public void clearOnSpatializerOutputChangedListener();
+    method @NonNull @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public java.util.List<android.media.AudioDeviceAttributes> getCompatibleAudioDevices();
+    method @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public int getDesiredHeadTrackingMode();
+    method @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public void getEffectParameter(int, @NonNull byte[]);
+    method @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public int getHeadTrackingMode();
+    method @IntRange(from=0) @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public int getOutput();
+    method @NonNull @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public java.util.List<java.lang.Integer> getSupportedHeadTrackingModes();
+    method @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public void recenterHeadTracker();
+    method @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public void removeCompatibleAudioDevice(@NonNull android.media.AudioDeviceAttributes);
+    method @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public void removeOnHeadTrackingModeChangedListener(@NonNull android.media.Spatializer.OnHeadTrackingModeChangedListener);
+    method @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public void setDesiredHeadTrackingMode(int);
+    method @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public void setEffectParameter(int, @NonNull byte[]);
+    method @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public void setEnabled(boolean);
+    method @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public void setGlobalTransform(@NonNull float[]);
+    method @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public void setOnHeadToSoundstagePoseUpdatedListener(@NonNull java.util.concurrent.Executor, @NonNull android.media.Spatializer.OnHeadToSoundstagePoseUpdatedListener);
+    method @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public void setOnSpatializerOutputChangedListener(@NonNull java.util.concurrent.Executor, @NonNull android.media.Spatializer.OnSpatializerOutputChangedListener);
+    field @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public static final int HEAD_TRACKING_MODE_DISABLED = -1; // 0xffffffff
+    field @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public static final int HEAD_TRACKING_MODE_OTHER = 0; // 0x0
+    field @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public static final int HEAD_TRACKING_MODE_RELATIVE_DEVICE = 2; // 0x2
+    field @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public static final int HEAD_TRACKING_MODE_RELATIVE_WORLD = 1; // 0x1
+    field @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public static final int HEAD_TRACKING_MODE_UNSUPPORTED = -2; // 0xfffffffe
+  }
+
+  public static interface Spatializer.OnHeadToSoundstagePoseUpdatedListener {
+    method public void onHeadToSoundstagePoseUpdated(@NonNull android.media.Spatializer, @NonNull float[]);
+  }
+
+  public static interface Spatializer.OnHeadTrackingModeChangedListener {
+    method public void onDesiredHeadTrackingModeChanged(@NonNull android.media.Spatializer, int);
+    method public void onHeadTrackingModeChanged(@NonNull android.media.Spatializer, int);
+  }
+
+  public static interface Spatializer.OnSpatializerOutputChangedListener {
+    method public void onSpatializerOutputChanged(@NonNull android.media.Spatializer, @IntRange(from=0) int);
+  }
+
 }
 
 package android.media.audiofx {
@@ -7467,36 +7063,6 @@ package android.metrics {
 
 package android.net {
 
-  public class EthernetManager {
-    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_STACK, android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK}) public android.net.EthernetManager.TetheredInterfaceRequest requestTetheredInterface(@NonNull java.util.concurrent.Executor, @NonNull android.net.EthernetManager.TetheredInterfaceCallback);
-  }
-
-  public static interface EthernetManager.TetheredInterfaceCallback {
-    method public void onAvailable(@NonNull String);
-    method public void onUnavailable();
-  }
-
-  public static class EthernetManager.TetheredInterfaceRequest {
-    method public void release();
-  }
-
-  public final class IpSecManager {
-    method @RequiresPermission(android.Manifest.permission.MANAGE_IPSEC_TUNNELS) public void applyTunnelModeTransform(@NonNull android.net.IpSecManager.IpSecTunnelInterface, int, @NonNull android.net.IpSecTransform) throws java.io.IOException;
-    method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_IPSEC_TUNNELS) public android.net.IpSecManager.IpSecTunnelInterface createIpSecTunnelInterface(@NonNull java.net.InetAddress, @NonNull java.net.InetAddress, @NonNull android.net.Network) throws java.io.IOException, android.net.IpSecManager.ResourceUnavailableException;
-  }
-
-  public static final class IpSecManager.IpSecTunnelInterface implements java.lang.AutoCloseable {
-    method @RequiresPermission(android.Manifest.permission.MANAGE_IPSEC_TUNNELS) public void addAddress(@NonNull java.net.InetAddress, int) throws java.io.IOException;
-    method public void close();
-    method @NonNull public String getInterfaceName();
-    method @RequiresPermission(android.Manifest.permission.MANAGE_IPSEC_TUNNELS) public void removeAddress(@NonNull java.net.InetAddress, int) throws java.io.IOException;
-    method @RequiresPermission(android.Manifest.permission.MANAGE_IPSEC_TUNNELS) public void setUnderlyingNetwork(@NonNull android.net.Network) throws java.io.IOException;
-  }
-
-  public static class IpSecTransform.Builder {
-    method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_IPSEC_TUNNELS) public android.net.IpSecTransform buildTunnelModeTransform(@NonNull java.net.InetAddress, @NonNull android.net.IpSecManager.SecurityParameterIndex) throws java.io.IOException, android.net.IpSecManager.ResourceUnavailableException, android.net.IpSecManager.SpiUnavailableException;
-  }
-
   public final class MatchAllNetworkSpecifier extends android.net.NetworkSpecifier implements android.os.Parcelable {
     ctor public MatchAllNetworkSpecifier();
     method public int describeContents();
@@ -7558,48 +7124,6 @@ package android.net {
     field public static final String PERMISSION_MAINLINE_NETWORK_STACK = "android.permission.MAINLINE_NETWORK_STACK";
   }
 
-  public final class NetworkStats implements java.lang.Iterable<android.net.NetworkStats.Entry> android.os.Parcelable {
-    ctor public NetworkStats(long, int);
-    method @NonNull public android.net.NetworkStats add(@NonNull android.net.NetworkStats);
-    method @NonNull public android.net.NetworkStats addEntry(@NonNull android.net.NetworkStats.Entry);
-    method public int describeContents();
-    method @NonNull public java.util.Iterator<android.net.NetworkStats.Entry> iterator();
-    method @NonNull public android.net.NetworkStats subtract(@NonNull android.net.NetworkStats);
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.net.NetworkStats> CREATOR;
-    field public static final int DEFAULT_NETWORK_ALL = -1; // 0xffffffff
-    field public static final int DEFAULT_NETWORK_NO = 0; // 0x0
-    field public static final int DEFAULT_NETWORK_YES = 1; // 0x1
-    field public static final String IFACE_VT = "vt_data0";
-    field public static final int METERED_ALL = -1; // 0xffffffff
-    field public static final int METERED_NO = 0; // 0x0
-    field public static final int METERED_YES = 1; // 0x1
-    field public static final int ROAMING_ALL = -1; // 0xffffffff
-    field public static final int ROAMING_NO = 0; // 0x0
-    field public static final int ROAMING_YES = 1; // 0x1
-    field public static final int SET_ALL = -1; // 0xffffffff
-    field public static final int SET_DEFAULT = 0; // 0x0
-    field public static final int SET_FOREGROUND = 1; // 0x1
-    field public static final int TAG_NONE = 0; // 0x0
-    field public static final int UID_ALL = -1; // 0xffffffff
-    field public static final int UID_TETHERING = -5; // 0xfffffffb
-  }
-
-  public static class NetworkStats.Entry {
-    ctor public NetworkStats.Entry(@Nullable String, int, int, int, int, int, int, long, long, long, long, long);
-    method public int getDefaultNetwork();
-    method public int getMetered();
-    method public long getOperations();
-    method public int getRoaming();
-    method public long getRxBytes();
-    method public long getRxPackets();
-    method public int getSet();
-    method public int getTag();
-    method public long getTxBytes();
-    method public long getTxPackets();
-    method public int getUid();
-  }
-
   public class RssiCurve implements android.os.Parcelable {
     ctor public RssiCurve(int, int, byte[]);
     ctor public RssiCurve(int, int, byte[], int);
@@ -7629,19 +7153,6 @@ package android.net {
     field public final boolean meteredHint;
     field public final android.net.NetworkKey networkKey;
     field public final android.net.RssiCurve rssiCurve;
-  }
-
-  public class TrafficStats {
-    method public static void setThreadStatsTagApp();
-    method public static void setThreadStatsTagBackup();
-    method public static void setThreadStatsTagDownload();
-    method public static void setThreadStatsTagRestore();
-    field public static final int TAG_NETWORK_STACK_IMPERSONATION_RANGE_END = -113; // 0xffffff8f
-    field public static final int TAG_NETWORK_STACK_IMPERSONATION_RANGE_START = -128; // 0xffffff80
-    field public static final int TAG_NETWORK_STACK_RANGE_END = -257; // 0xfffffeff
-    field public static final int TAG_NETWORK_STACK_RANGE_START = -768; // 0xfffffd00
-    field public static final int TAG_SYSTEM_IMPERSONATION_RANGE_END = -241; // 0xffffff0f
-    field public static final int TAG_SYSTEM_IMPERSONATION_RANGE_START = -256; // 0xffffff00
   }
 
   public abstract class Uri implements java.lang.Comparable<android.net.Uri> android.os.Parcelable {
@@ -7820,23 +7331,6 @@ package android.net.metrics {
     method @Deprecated @NonNull public android.net.metrics.ValidationProbeEvent.Builder setDurationMs(long);
     method @Deprecated @NonNull public android.net.metrics.ValidationProbeEvent.Builder setProbeType(int, boolean);
     method @Deprecated @NonNull public android.net.metrics.ValidationProbeEvent.Builder setReturnCode(int);
-  }
-
-}
-
-package android.net.netstats.provider {
-
-  public abstract class NetworkStatsProvider {
-    ctor public NetworkStatsProvider();
-    method public void notifyAlertReached();
-    method public void notifyLimitReached();
-    method public void notifyStatsUpdated(int, @NonNull android.net.NetworkStats, @NonNull android.net.NetworkStats);
-    method public void notifyWarningReached();
-    method public abstract void onRequestStatsUpdate(int);
-    method public abstract void onSetAlert(long);
-    method public abstract void onSetLimit(@NonNull String, long);
-    method public void onSetWarningAndLimit(@NonNull String, long, long);
-    field public static final int QUOTA_UNLIMITED = -1; // 0xffffffff
   }
 
 }
@@ -8276,6 +7770,7 @@ package android.os {
   }
 
   public static class Build.VERSION {
+    field @NonNull public static final java.util.Set<java.lang.String> KNOWN_CODENAMES;
     field @NonNull public static final String PREVIEW_SDK_FINGERPRINT;
   }
 
@@ -9448,6 +8943,7 @@ package android.provider {
     field public static final String ACTION_SHOW_ADMIN_SUPPORT_DETAILS = "android.settings.SHOW_ADMIN_SUPPORT_DETAILS";
     field public static final String ACTION_TETHER_PROVISIONING_UI = "android.settings.TETHER_PROVISIONING_UI";
     field public static final String ACTION_TETHER_SETTINGS = "android.settings.TETHER_SETTINGS";
+    field public static final String ACTION_TETHER_UNSUPPORTED_CARRIER_UI = "android.settings.TETHER_UNSUPPORTED_CARRIER_UI";
   }
 
   public static final class Settings.Global extends android.provider.Settings.NameValueTable {
@@ -10565,6 +10061,20 @@ package android.service.timezone {
     method @NonNull public android.service.timezone.TimeZoneProviderSuggestion build();
     method @NonNull public android.service.timezone.TimeZoneProviderSuggestion.Builder setElapsedRealtimeMillis(long);
     method @NonNull public android.service.timezone.TimeZoneProviderSuggestion.Builder setTimeZoneIds(@NonNull java.util.List<java.lang.String>);
+  }
+
+}
+
+package android.service.tracing {
+
+  public class TraceReportService extends android.app.Service {
+    ctor public TraceReportService();
+    method public void onReportTrace(@NonNull android.service.tracing.TraceReportService.TraceParams);
+  }
+
+  public static final class TraceReportService.TraceParams {
+    method @NonNull public android.os.ParcelFileDescriptor getFd();
+    method @NonNull public java.util.UUID getUuid();
   }
 
 }
@@ -12084,7 +11594,7 @@ package android.telephony {
   }
 
   public class TelephonyManager {
-    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void addCarrierPrivilegesListener(int, @NonNull java.util.concurrent.Executor, @NonNull android.telephony.TelephonyManager.CarrierPrivilegesListener);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void addCarrierPrivilegesListener(int, @NonNull java.util.concurrent.Executor, @NonNull android.telephony.TelephonyManager.CarrierPrivilegesListener);
     method @RequiresPermission(anyOf={android.Manifest.permission.MODIFY_PHONE_STATE, android.Manifest.permission.PERFORM_IMS_SINGLE_REGISTRATION}) @WorkerThread public void bootstrapAuthenticationRequest(int, @NonNull android.net.Uri, @NonNull android.telephony.gba.UaSecurityProtocolIdentifier, boolean, @NonNull java.util.concurrent.Executor, @NonNull android.telephony.TelephonyManager.BootstrapAuthenticationCallback);
     method @Deprecated @RequiresPermission(android.Manifest.permission.CALL_PHONE) public void call(String, String);
     method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public android.telephony.PinResult changeIccLockPin(@NonNull String, @NonNull String);
@@ -12099,7 +11609,6 @@ package android.telephony {
     method @Deprecated @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public java.util.List<android.service.carrier.CarrierIdentifier> getAllowedCarriers(int);
     method @Deprecated @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public long getAllowedNetworkTypes();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public long getAllowedNetworkTypesBitmask();
-    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public long getAllowedNetworkTypesForReason(int);
     method @Nullable @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS) public android.content.ComponentName getAndUpdateDefaultRespondViaMessageApplication();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void getCallForwarding(int, @NonNull java.util.concurrent.Executor, @NonNull android.telephony.TelephonyManager.CallForwardingInfoCallback);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void getCallWaitingStatus(@NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>);
@@ -12130,7 +11639,7 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public int getEmergencyNumberDbVersion();
     method @Nullable @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public String getIsimDomain();
     method @Nullable @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public String getIsimIst();
-    method @NonNull @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public java.util.Map<java.lang.Integer,java.lang.Integer> getLogicalToPhysicalSlotMapping();
+    method @Deprecated @NonNull @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public java.util.Map<java.lang.Integer,java.lang.Integer> getLogicalToPhysicalSlotMapping();
     method public int getMaxNumberOfSimultaneouslyActiveSims();
     method public static long getMaxNumberVerificationTimeoutMillis();
     method @NonNull @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public String[] getMergedImsisFromGroup();
@@ -12138,11 +11647,13 @@ package android.telephony {
     method @Deprecated @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public long getPreferredNetworkTypeBitmask();
     method @RequiresPermission(anyOf={android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, android.Manifest.permission.READ_PHONE_STATE}) public int getRadioPowerState();
     method public int getSimApplicationState();
-    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public int getSimApplicationState(int);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public int getSimApplicationState(int);
+    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public int getSimApplicationState(int, int);
     method public int getSimCardState();
-    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public int getSimCardState(int);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public int getSimCardState(int);
+    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public int getSimCardState(int, int);
     method @Nullable @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public java.util.Locale getSimLocale();
-    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public long getSupportedRadioAccessFamily();
+    method @NonNull @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public java.util.Collection<android.telephony.UiccSlotMapping> getSimSlotMapping();
     method @NonNull @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public java.util.List<android.telephony.RadioAccessSpecifier> getSystemSelectionChannels();
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public java.util.List<android.telephony.TelephonyHistogram> getTelephonyHistograms();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public android.telephony.UiccSlotInfo[] getUiccSlotsInfo();
@@ -12179,7 +11690,8 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void notifyOtaEmergencyNumberDbInstalled();
     method @RequiresPermission(android.Manifest.permission.REBOOT) public int prepareForUnattendedReboot();
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean rebootRadio();
-    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void removeCarrierPrivilegesListener(@NonNull android.telephony.TelephonyManager.CarrierPrivilegesListener);
+    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void registerCarrierPrivilegesCallback(int, @NonNull java.util.concurrent.Executor, @NonNull android.telephony.TelephonyManager.CarrierPrivilegesCallback);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void removeCarrierPrivilegesListener(@NonNull android.telephony.TelephonyManager.CarrierPrivilegesListener);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void reportDefaultNetworkStatus(boolean);
     method @RequiresPermission(allOf={android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.MODIFY_PHONE_STATE}) public void requestCellInfoUpdate(@NonNull android.os.WorkSource, @NonNull java.util.concurrent.Executor, @NonNull android.telephony.TelephonyManager.CellInfoCallback);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void requestModemActivityInfo(@NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<android.telephony.ModemActivityInfo,android.telephony.TelephonyManager.ModemActivityInfoException>);
@@ -12193,7 +11705,6 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public int sendThermalMitigationRequest(@NonNull android.telephony.ThermalMitigationRequest);
     method @Deprecated @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public int setAllowedCarriers(int, java.util.List<android.service.carrier.CarrierIdentifier>);
     method @Deprecated @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean setAllowedNetworkTypes(long);
-    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setAllowedNetworkTypesForReason(int, long);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setCallForwarding(@NonNull android.telephony.CallForwardingInfo, @Nullable java.util.concurrent.Executor, @Nullable java.util.function.Consumer<java.lang.Integer>);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setCallWaitingEnabled(boolean, @Nullable java.util.concurrent.Executor, @Nullable java.util.function.Consumer<java.lang.Integer>);
     method @Deprecated @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setCarrierDataEnabled(boolean);
@@ -12230,6 +11741,7 @@ package android.telephony {
     method @Deprecated @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public int[] supplyPukReportResult(String, String);
     method @Deprecated @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean switchSlots(int[]);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void toggleRadioOnOff();
+    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void unregisterCarrierPrivilegesCallback(@NonNull android.telephony.TelephonyManager.CarrierPrivilegesCallback);
     method @RequiresPermission(android.Manifest.permission.READ_ACTIVE_EMERGENCY_SESSION) public void updateOtaEmergencyNumberDbFilePath(@NonNull android.os.ParcelFileDescriptor);
     method public void updateServiceLocation();
     field @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public static final String ACTION_ANOMALY_REPORTED = "android.telephony.action.ANOMALY_REPORTED";
@@ -12243,10 +11755,8 @@ package android.telephony {
     field public static final String ACTION_SIM_APPLICATION_STATE_CHANGED = "android.telephony.action.SIM_APPLICATION_STATE_CHANGED";
     field public static final String ACTION_SIM_CARD_STATE_CHANGED = "android.telephony.action.SIM_CARD_STATE_CHANGED";
     field public static final String ACTION_SIM_SLOT_STATUS_CHANGED = "android.telephony.action.SIM_SLOT_STATUS_CHANGED";
-    field public static final int ALLOWED_NETWORK_TYPES_REASON_CARRIER = 2; // 0x2
     field public static final int ALLOWED_NETWORK_TYPES_REASON_ENABLE_2G = 3; // 0x3
     field public static final int ALLOWED_NETWORK_TYPES_REASON_POWER = 1; // 0x1
-    field public static final int ALLOWED_NETWORK_TYPES_REASON_USER = 0; // 0x0
     field public static final int CALL_WAITING_STATUS_DISABLED = 2; // 0x2
     field public static final int CALL_WAITING_STATUS_ENABLED = 1; // 0x1
     field public static final int CALL_WAITING_STATUS_NOT_SUPPORTED = 4; // 0x4
@@ -12285,26 +11795,6 @@ package android.telephony {
     field public static final int KEY_TYPE_WLAN = 2; // 0x2
     field public static final int MOBILE_DATA_POLICY_DATA_ON_NON_DEFAULT_DURING_VOICE_CALL = 1; // 0x1
     field public static final int MOBILE_DATA_POLICY_MMS_ALWAYS_ALLOWED = 2; // 0x2
-    field public static final long NETWORK_TYPE_BITMASK_1xRTT = 64L; // 0x40L
-    field public static final long NETWORK_TYPE_BITMASK_CDMA = 8L; // 0x8L
-    field public static final long NETWORK_TYPE_BITMASK_EDGE = 2L; // 0x2L
-    field public static final long NETWORK_TYPE_BITMASK_EHRPD = 8192L; // 0x2000L
-    field public static final long NETWORK_TYPE_BITMASK_EVDO_0 = 16L; // 0x10L
-    field public static final long NETWORK_TYPE_BITMASK_EVDO_A = 32L; // 0x20L
-    field public static final long NETWORK_TYPE_BITMASK_EVDO_B = 2048L; // 0x800L
-    field public static final long NETWORK_TYPE_BITMASK_GPRS = 1L; // 0x1L
-    field public static final long NETWORK_TYPE_BITMASK_GSM = 32768L; // 0x8000L
-    field public static final long NETWORK_TYPE_BITMASK_HSDPA = 128L; // 0x80L
-    field public static final long NETWORK_TYPE_BITMASK_HSPA = 512L; // 0x200L
-    field public static final long NETWORK_TYPE_BITMASK_HSPAP = 16384L; // 0x4000L
-    field public static final long NETWORK_TYPE_BITMASK_HSUPA = 256L; // 0x100L
-    field public static final long NETWORK_TYPE_BITMASK_IWLAN = 131072L; // 0x20000L
-    field public static final long NETWORK_TYPE_BITMASK_LTE = 4096L; // 0x1000L
-    field public static final long NETWORK_TYPE_BITMASK_LTE_CA = 262144L; // 0x40000L
-    field public static final long NETWORK_TYPE_BITMASK_NR = 524288L; // 0x80000L
-    field public static final long NETWORK_TYPE_BITMASK_TD_SCDMA = 65536L; // 0x10000L
-    field public static final long NETWORK_TYPE_BITMASK_UMTS = 4L; // 0x4L
-    field public static final long NETWORK_TYPE_BITMASK_UNKNOWN = 0L; // 0x0L
     field public static final int NR_DUAL_CONNECTIVITY_DISABLE = 2; // 0x2
     field public static final int NR_DUAL_CONNECTIVITY_DISABLE_IMMEDIATE = 3; // 0x3
     field public static final int NR_DUAL_CONNECTIVITY_ENABLE = 1; // 0x1
@@ -12356,8 +11846,13 @@ package android.telephony {
     field public static final int RESULT_SUCCESS = 0; // 0x0
   }
 
-  public static interface TelephonyManager.CarrierPrivilegesListener {
-    method public void onCarrierPrivilegesChanged(@NonNull java.util.List<java.lang.String>, @NonNull int[]);
+  public static interface TelephonyManager.CarrierPrivilegesCallback {
+    method public void onCarrierPrivilegesChanged(@NonNull java.util.Set<java.lang.String>, @NonNull java.util.Set<java.lang.Integer>);
+    method public default void onCarrierServiceChanged(@Nullable String, int);
+  }
+
+  @Deprecated public static interface TelephonyManager.CarrierPrivilegesListener {
+    method @Deprecated public void onCarrierPrivilegesChanged(@NonNull java.util.List<java.lang.String>, @NonNull int[]);
   }
 
   public static class TelephonyManager.ModemActivityInfoException extends java.lang.Exception {
@@ -12475,6 +11970,7 @@ package android.telephony.data {
     field public static final String TYPE_DEFAULT_STRING = "default";
     field public static final String TYPE_DUN_STRING = "dun";
     field public static final String TYPE_EMERGENCY_STRING = "emergency";
+    field public static final String TYPE_ENTERPRISE_STRING = "enterprise";
     field public static final String TYPE_FOTA_STRING = "fota";
     field public static final String TYPE_HIPRI_STRING = "hipri";
     field public static final String TYPE_IA_STRING = "ia";
@@ -12546,21 +12042,23 @@ package android.telephony.data {
 
   public final class DataProfile implements android.os.Parcelable {
     method public int describeContents();
-    method @NonNull public String getApn();
-    method public int getAuthType();
-    method public int getBearerBitmask();
+    method @Deprecated @NonNull public String getApn();
+    method @Nullable public android.telephony.data.ApnSetting getApnSetting();
+    method @Deprecated public int getAuthType();
+    method @Deprecated public int getBearerBitmask();
     method @Deprecated public int getMtu();
-    method public int getMtuV4();
-    method public int getMtuV6();
-    method @Nullable public String getPassword();
-    method public int getProfileId();
-    method public int getProtocolType();
-    method public int getRoamingProtocolType();
-    method public int getSupportedApnTypesBitmask();
+    method @Deprecated public int getMtuV4();
+    method @Deprecated public int getMtuV6();
+    method @Deprecated @Nullable public String getPassword();
+    method @Deprecated public int getProfileId();
+    method @Deprecated public int getProtocolType();
+    method @Deprecated public int getRoamingProtocolType();
+    method @Deprecated public int getSupportedApnTypesBitmask();
+    method @Nullable public android.telephony.data.TrafficDescriptor getTrafficDescriptor();
     method public int getType();
-    method @Nullable public String getUserName();
+    method @Deprecated @Nullable public String getUserName();
     method public boolean isEnabled();
-    method public boolean isPersistent();
+    method @Deprecated public boolean isPersistent();
     method public boolean isPreferred();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.data.DataProfile> CREATOR;
@@ -12573,21 +12071,23 @@ package android.telephony.data {
     ctor public DataProfile.Builder();
     method @NonNull public android.telephony.data.DataProfile build();
     method @NonNull public android.telephony.data.DataProfile.Builder enable(boolean);
-    method @NonNull public android.telephony.data.DataProfile.Builder setApn(@NonNull String);
-    method @NonNull public android.telephony.data.DataProfile.Builder setAuthType(int);
-    method @NonNull public android.telephony.data.DataProfile.Builder setBearerBitmask(int);
+    method @Deprecated @NonNull public android.telephony.data.DataProfile.Builder setApn(@NonNull String);
+    method @NonNull public android.telephony.data.DataProfile.Builder setApnSetting(@NonNull android.telephony.data.ApnSetting);
+    method @Deprecated @NonNull public android.telephony.data.DataProfile.Builder setAuthType(int);
+    method @Deprecated @NonNull public android.telephony.data.DataProfile.Builder setBearerBitmask(int);
     method @Deprecated @NonNull public android.telephony.data.DataProfile.Builder setMtu(int);
-    method @NonNull public android.telephony.data.DataProfile.Builder setMtuV4(int);
-    method @NonNull public android.telephony.data.DataProfile.Builder setMtuV6(int);
-    method @NonNull public android.telephony.data.DataProfile.Builder setPassword(@NonNull String);
-    method @NonNull public android.telephony.data.DataProfile.Builder setPersistent(boolean);
+    method @Deprecated @NonNull public android.telephony.data.DataProfile.Builder setMtuV4(int);
+    method @Deprecated @NonNull public android.telephony.data.DataProfile.Builder setMtuV6(int);
+    method @Deprecated @NonNull public android.telephony.data.DataProfile.Builder setPassword(@NonNull String);
+    method @Deprecated @NonNull public android.telephony.data.DataProfile.Builder setPersistent(boolean);
     method @NonNull public android.telephony.data.DataProfile.Builder setPreferred(boolean);
-    method @NonNull public android.telephony.data.DataProfile.Builder setProfileId(int);
-    method @NonNull public android.telephony.data.DataProfile.Builder setProtocolType(int);
-    method @NonNull public android.telephony.data.DataProfile.Builder setRoamingProtocolType(int);
-    method @NonNull public android.telephony.data.DataProfile.Builder setSupportedApnTypesBitmask(int);
+    method @Deprecated @NonNull public android.telephony.data.DataProfile.Builder setProfileId(int);
+    method @Deprecated @NonNull public android.telephony.data.DataProfile.Builder setProtocolType(int);
+    method @Deprecated @NonNull public android.telephony.data.DataProfile.Builder setRoamingProtocolType(int);
+    method @Deprecated @NonNull public android.telephony.data.DataProfile.Builder setSupportedApnTypesBitmask(int);
+    method @NonNull public android.telephony.data.DataProfile.Builder setTrafficDescriptor(@NonNull android.telephony.data.TrafficDescriptor);
     method @NonNull public android.telephony.data.DataProfile.Builder setType(int);
-    method @NonNull public android.telephony.data.DataProfile.Builder setUserName(@NonNull String);
+    method @Deprecated @NonNull public android.telephony.data.DataProfile.Builder setUserName(@NonNull String);
   }
 
   public abstract class DataService extends android.app.Service {
@@ -13330,13 +12830,21 @@ package android.telephony.ims {
 
   public class ImsService extends android.app.Service {
     ctor public ImsService();
-    method public android.telephony.ims.feature.MmTelFeature createMmTelFeature(int);
-    method public android.telephony.ims.feature.RcsFeature createRcsFeature(int);
-    method public void disableIms(int);
-    method public void enableIms(int);
-    method public android.telephony.ims.stub.ImsConfigImplBase getConfig(int);
+    method @Nullable public android.telephony.ims.feature.MmTelFeature createEmergencyOnlyMmTelFeature(int);
+    method @Deprecated public android.telephony.ims.feature.MmTelFeature createMmTelFeature(int);
+    method @Nullable public android.telephony.ims.feature.MmTelFeature createMmTelFeatureForSubscription(int, int);
+    method @Deprecated public android.telephony.ims.feature.RcsFeature createRcsFeature(int);
+    method @Nullable public android.telephony.ims.feature.RcsFeature createRcsFeatureForSubscription(int, int);
+    method @Deprecated public void disableIms(int);
+    method public void disableImsForSubscription(int, int);
+    method @Deprecated public void enableIms(int);
+    method public void enableImsForSubscription(int, int);
+    method @Deprecated public android.telephony.ims.stub.ImsConfigImplBase getConfig(int);
+    method @NonNull public android.telephony.ims.stub.ImsConfigImplBase getConfigForSubscription(int, int);
+    method @NonNull public java.util.concurrent.Executor getExecutor();
     method public long getImsServiceCapabilities();
-    method public android.telephony.ims.stub.ImsRegistrationImplBase getRegistration(int);
+    method @Deprecated public android.telephony.ims.stub.ImsRegistrationImplBase getRegistration(int);
+    method @NonNull public android.telephony.ims.stub.ImsRegistrationImplBase getRegistrationForSubscription(int, int);
     method @Nullable public android.telephony.ims.stub.SipTransportImplBase getSipTransport(int);
     method public final void onUpdateSupportedImsFeatures(android.telephony.ims.stub.ImsFeatureConfiguration) throws android.os.RemoteException;
     method public android.telephony.ims.stub.ImsFeatureConfiguration querySupportedImsFeatures();
@@ -13560,18 +13068,16 @@ package android.telephony.ims {
   public class ProvisioningManager {
     method @NonNull public static android.telephony.ims.ProvisioningManager createForSubscriptionId(int);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) @WorkerThread public int getProvisioningIntValue(int);
-    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) @WorkerThread public boolean getProvisioningStatusForCapability(int, int);
     method @Nullable @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) @WorkerThread public String getProvisioningStringValue(int);
-    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) @WorkerThread public boolean getRcsProvisioningStatusForCapability(int);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) @WorkerThread public boolean getRcsProvisioningStatusForCapability(int);
     method @RequiresPermission(anyOf={android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, android.Manifest.permission.PERFORM_IMS_SINGLE_REGISTRATION}) public boolean isRcsVolteSingleRegistrationCapable() throws android.telephony.ims.ImsException;
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void notifyRcsAutoConfigurationReceived(@NonNull byte[], boolean);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void registerProvisioningChangedCallback(@NonNull java.util.concurrent.Executor, @NonNull android.telephony.ims.ProvisioningManager.Callback) throws android.telephony.ims.ImsException;
     method @RequiresPermission(anyOf={android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, android.Manifest.permission.PERFORM_IMS_SINGLE_REGISTRATION}) public void registerRcsProvisioningCallback(@NonNull java.util.concurrent.Executor, @NonNull android.telephony.ims.ProvisioningManager.RcsProvisioningCallback) throws android.telephony.ims.ImsException;
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) @WorkerThread public int setProvisioningIntValue(int, int);
-    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) @WorkerThread public void setProvisioningStatusForCapability(int, int, boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) @WorkerThread public int setProvisioningStringValue(int, @NonNull String);
     method @RequiresPermission(android.Manifest.permission.PERFORM_IMS_SINGLE_REGISTRATION) public void setRcsClientConfiguration(@NonNull android.telephony.ims.RcsClientConfiguration) throws android.telephony.ims.ImsException;
-    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) @WorkerThread public void setRcsProvisioningStatusForCapability(int, boolean);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) @WorkerThread public void setRcsProvisioningStatusForCapability(int, boolean);
     method @RequiresPermission(android.Manifest.permission.PERFORM_IMS_SINGLE_REGISTRATION) public void triggerRcsReconfiguration();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void unregisterProvisioningChangedCallback(@NonNull android.telephony.ims.ProvisioningManager.Callback);
     method @RequiresPermission(anyOf={android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, android.Manifest.permission.PERFORM_IMS_SINGLE_REGISTRATION}) public void unregisterRcsProvisioningCallback(@NonNull android.telephony.ims.ProvisioningManager.RcsProvisioningCallback);
@@ -13618,6 +13124,7 @@ package android.telephony.ims {
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.ims.RcsClientConfiguration> CREATOR;
     field public static final String RCS_PROFILE_1_0 = "UP_1.0";
     field public static final String RCS_PROFILE_2_3 = "UP_2.3";
+    field public static final String RCS_PROFILE_2_4 = "UP_2.4";
   }
 
   public final class RcsContactPresenceTuple implements android.os.Parcelable {
@@ -13685,6 +13192,7 @@ package android.telephony.ims {
     method @Nullable public android.telephony.ims.RcsContactPresenceTuple getCapabilityTuple(@NonNull String);
     method @NonNull public java.util.List<android.telephony.ims.RcsContactPresenceTuple> getCapabilityTuples();
     method @NonNull public android.net.Uri getContactUri();
+    method @Nullable public android.net.Uri getEntityUri();
     method @NonNull public java.util.Set<java.lang.String> getFeatureTags();
     method public int getRequestResult();
     method public int getSourceType();
@@ -13713,6 +13221,7 @@ package android.telephony.ims {
     method @NonNull public android.telephony.ims.RcsContactUceCapability.PresenceBuilder addCapabilityTuple(@NonNull android.telephony.ims.RcsContactPresenceTuple);
     method @NonNull public android.telephony.ims.RcsContactUceCapability.PresenceBuilder addCapabilityTuples(@NonNull java.util.List<android.telephony.ims.RcsContactPresenceTuple>);
     method @NonNull public android.telephony.ims.RcsContactUceCapability build();
+    method @NonNull public android.telephony.ims.RcsContactUceCapability.PresenceBuilder setEntityUri(@NonNull android.net.Uri);
   }
 
   public class RcsUceAdapter {
@@ -13954,6 +13463,7 @@ package android.telephony.ims.feature {
 
   public class MmTelFeature extends android.telephony.ims.feature.ImsFeature {
     ctor public MmTelFeature();
+    ctor public MmTelFeature(@NonNull java.util.concurrent.Executor);
     method public void changeEnabledCapabilities(@NonNull android.telephony.ims.feature.CapabilityChangeRequest, @NonNull android.telephony.ims.feature.ImsFeature.CapabilityCallbackProxy);
     method public void changeOfferedRtpHeaderExtensionTypes(@NonNull java.util.Set<android.telephony.ims.RtpHeaderExtensionType>);
     method @Nullable public android.telephony.ims.ImsCallProfile createCallProfile(int, int);
@@ -13987,7 +13497,7 @@ package android.telephony.ims.feature {
   }
 
   public class RcsFeature extends android.telephony.ims.feature.ImsFeature {
-    ctor @Deprecated public RcsFeature();
+    ctor public RcsFeature();
     ctor public RcsFeature(@NonNull java.util.concurrent.Executor);
     method public void changeEnabledCapabilities(@NonNull android.telephony.ims.feature.CapabilityChangeRequest, @NonNull android.telephony.ims.feature.ImsFeature.CapabilityCallbackProxy);
     method @NonNull public android.telephony.ims.stub.RcsCapabilityExchangeImplBase createCapabilityExchangeImpl(@NonNull android.telephony.ims.stub.CapabilityExchangeEventListener);
@@ -14004,9 +13514,6 @@ package android.telephony.ims.feature {
     method public void addCapabilities(int);
     method public boolean isCapable(int);
     method public void removeCapabilities(int);
-    field public static final int CAPABILITY_TYPE_NONE = 0; // 0x0
-    field public static final int CAPABILITY_TYPE_OPTIONS_UCE = 1; // 0x1
-    field public static final int CAPABILITY_TYPE_PRESENCE_UCE = 2; // 0x2
   }
 
 }
@@ -14092,6 +13599,7 @@ package android.telephony.ims.stub {
   }
 
   public class ImsConfigImplBase {
+    ctor public ImsConfigImplBase(@NonNull java.util.concurrent.Executor);
     ctor public ImsConfigImplBase();
     method public int getConfigInt(int);
     method public String getConfigString(int);
@@ -14144,6 +13652,7 @@ package android.telephony.ims.stub {
 
   public class ImsRegistrationImplBase {
     ctor public ImsRegistrationImplBase();
+    ctor public ImsRegistrationImplBase(@NonNull java.util.concurrent.Executor);
     method public final void onDeregistered(android.telephony.ims.ImsReasonInfo);
     method public final void onRegistered(int);
     method public final void onRegistered(@NonNull android.telephony.ims.ImsRegistrationAttributes);
@@ -14154,11 +13663,6 @@ package android.telephony.ims.stub {
     method public void triggerFullNetworkRegistration(@IntRange(from=100, to=699) int, @Nullable String);
     method public void triggerSipDelegateDeregistration();
     method public void updateSipDelegateRegistration();
-    field public static final int REGISTRATION_TECH_CROSS_SIM = 2; // 0x2
-    field public static final int REGISTRATION_TECH_IWLAN = 1; // 0x1
-    field public static final int REGISTRATION_TECH_LTE = 0; // 0x0
-    field public static final int REGISTRATION_TECH_NONE = -1; // 0xffffffff
-    field public static final int REGISTRATION_TECH_NR = 3; // 0x3
   }
 
   public class ImsSmsImplBase {
@@ -14256,6 +13760,7 @@ package android.telephony.ims.stub {
   }
 
   public class SipTransportImplBase {
+    ctor public SipTransportImplBase();
     ctor public SipTransportImplBase(@NonNull java.util.concurrent.Executor);
     method public void createSipDelegate(int, @NonNull android.telephony.ims.DelegateRequest, @NonNull android.telephony.ims.DelegateStateCallback, @NonNull android.telephony.ims.DelegateMessageCallback);
     method public void destroySipDelegate(@NonNull android.telephony.ims.stub.SipDelegate, int);
@@ -14621,6 +14126,7 @@ package android.view.contentcapture {
     method public int getFlags();
     method @Nullable public android.view.contentcapture.ContentCaptureSessionId getParentSessionId();
     method public int getTaskId();
+    method @Nullable public android.os.IBinder getWindowToken();
     field public static final int FLAG_DISABLED_BY_APP = 1; // 0x1
     field public static final int FLAG_DISABLED_BY_FLAG_SECURE = 2; // 0x2
     field public static final int FLAG_RECONNECTED = 4; // 0x4
@@ -14628,6 +14134,7 @@ package android.view.contentcapture {
 
   public final class ContentCaptureEvent implements android.os.Parcelable {
     method public int describeContents();
+    method @Nullable public android.graphics.Rect getBounds();
     method @Nullable public android.view.contentcapture.ContentCaptureContext getContentCaptureContext();
     method public long getEventTime();
     method @Nullable public android.view.autofill.AutofillId getId();
@@ -14647,6 +14154,7 @@ package android.view.contentcapture {
     field public static final int TYPE_VIEW_TEXT_CHANGED = 3; // 0x3
     field public static final int TYPE_VIEW_TREE_APPEARED = 5; // 0x5
     field public static final int TYPE_VIEW_TREE_APPEARING = 4; // 0x4
+    field public static final int TYPE_WINDOW_BOUNDS_CHANGED = 10; // 0xa
   }
 
   public final class ContentCaptureManager {

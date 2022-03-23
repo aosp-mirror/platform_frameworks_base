@@ -26,6 +26,7 @@ import android.util.Pools;
 import androidx.collection.ArraySet;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.policy.SystemBarUtils;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -121,7 +122,7 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
             }
 
             @Override
-            public void onOverlayChanged() {
+            public void onThemeChanged() {
                 updateResources();
             }
         });
@@ -137,9 +138,8 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
 
     private void updateResources() {
         Resources resources = mContext.getResources();
-        mHeadsUpInset =
-                resources.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_height)
-                        + resources.getDimensionPixelSize(R.dimen.heads_up_status_bar_padding);
+        mHeadsUpInset = SystemBarUtils.getStatusBarHeight(mContext)
+                + resources.getDimensionPixelSize(R.dimen.heads_up_status_bar_padding);
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////

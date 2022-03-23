@@ -917,7 +917,7 @@ public final class MultiClientInputMethodManagerService {
                             .putExtra(Intent.EXTRA_CLIENT_INTENT, PendingIntent.getActivity(
                                     context, 0,
                                     new Intent(Settings.ACTION_INPUT_METHOD_SETTINGS),
-                                    PendingIntent.FLAG_MUTABLE));
+                                    PendingIntent.FLAG_IMMUTABLE));
 
             // Note: Instead of re-dispatching callback from the main thread to the worker thread
             // where OnWorkerThreadCallback is running, we pass the Handler object here so that

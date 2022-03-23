@@ -16,13 +16,12 @@
 
 package com.android.settingslib.net;
 
+import android.app.usage.NetworkStats;
+import android.app.usage.NetworkStatsManager;
 import android.content.AsyncTaskLoader;
 import android.content.Context;
-import android.net.INetworkStatsSession;
-import android.net.NetworkStats;
 import android.net.NetworkTemplate;
 import android.os.Bundle;
-import android.os.RemoteException;
 
 /**
  * Framework loader is deprecated, use the compat version instead.
@@ -35,7 +34,7 @@ public class SummaryForAllUidLoader extends AsyncTaskLoader<NetworkStats> {
     private static final String KEY_START = "start";
     private static final String KEY_END = "end";
 
-    private final INetworkStatsSession mSession;
+    private final NetworkStatsManager mNetworkStatsManager;
     private final Bundle mArgs;
 
     public static Bundle buildArgs(NetworkTemplate template, long start, long end) {
@@ -46,9 +45,9 @@ public class SummaryForAllUidLoader extends AsyncTaskLoader<NetworkStats> {
         return args;
     }
 
-    public SummaryForAllUidLoader(Context context, INetworkStatsSession session, Bundle args) {
+    public SummaryForAllUidLoader(Context context, Bundle args) {
         super(context);
-        mSession = session;
+        mNetworkStatsManager = context.getSystemService(NetworkStatsManager.class);
         mArgs = args;
     }
 
@@ -63,12 +62,7 @@ public class SummaryForAllUidLoader extends AsyncTaskLoader<NetworkStats> {
         final NetworkTemplate template = mArgs.getParcelable(KEY_TEMPLATE);
         final long start = mArgs.getLong(KEY_START);
         final long end = mArgs.getLong(KEY_END);
-
-        try {
-            return mSession.getSummaryForAllUid(template, start, end, false);
-        } catch (RemoteException e) {
-            return null;
-        }
+        return mNetworkStatsManager.querySummary(template, start, end);
     }
 
     @Override

@@ -179,7 +179,7 @@ public class NotificationComparator
     }
 
     private boolean isMediaNotification(NotificationRecord record) {
-        return record.getNotification().hasMediaSession();
+        return record.getNotification().isMediaNotification();
     }
 
     private boolean isCallCategory(NotificationRecord record) {

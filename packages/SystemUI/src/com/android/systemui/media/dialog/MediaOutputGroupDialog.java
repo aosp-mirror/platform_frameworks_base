@@ -20,10 +20,12 @@ import android.content.Context;
 import android.os.Bundle;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.LinearLayout;
 
 import androidx.core.graphics.drawable.IconCompat;
 
 import com.android.systemui.R;
+import com.android.systemui.statusbar.phone.SystemUIDialogManager;
 
 /**
  * Dialog for media output group.
@@ -31,14 +33,13 @@ import com.android.systemui.R;
 public class MediaOutputGroupDialog extends MediaOutputBaseDialog {
 
     MediaOutputGroupDialog(Context context, boolean aboveStatusbar, MediaOutputController
-            mediaOutputController) {
-        super(context, mediaOutputController);
+            mediaOutputController, SystemUIDialogManager dialogManager) {
+        super(context, mediaOutputController, dialogManager);
         mMediaOutputController.resetGroupMediaDevices();
         mAdapter = new MediaOutputGroupAdapter(mMediaOutputController);
         if (!aboveStatusbar) {
             getWindow().setType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY);
         }
-        show();
     }
 
     @Override
@@ -77,12 +78,23 @@ public class MediaOutputGroupDialog extends MediaOutputBaseDialog {
     }
 
     @Override
+    void refresh() {
+        super.refresh();
+        final int size = getHeaderIconSize();
+        final int padding = mContext.getResources().getDimensionPixelSize(
+                R.dimen.media_output_dialog_header_icon_padding);
+        mHeaderIcon.setLayoutParams(new LinearLayout.LayoutParams(size + padding, size));
+    }
+
+    @Override
     int getStopButtonVisibility() {
         return View.VISIBLE;
     }
 
     @Override
     void onHeaderIconClick() {
-        mMediaOutputController.launchMediaOutputDialog();
+        // Given that we launched the media output group dialog from the media output dialog,
+        // dismissing this dialog will show the media output dialog again.
+        dismiss();
     }
 }

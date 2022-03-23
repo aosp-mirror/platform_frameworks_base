@@ -40,6 +40,8 @@ import android.view.ViewTreeObserver;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
+import com.android.wm.shell.common.SyncTransactionQueue;
+
 import java.io.PrintWriter;
 import java.util.concurrent.Executor;
 
@@ -74,6 +76,7 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
 
     private final ShellTaskOrganizer mTaskOrganizer;
     private final Executor mShellExecutor;
+    private final SyncTransactionQueue mSyncQueue;
 
     private ActivityManager.RunningTaskInfo mTaskInfo;
     private WindowContainerToken mTaskToken;
@@ -89,11 +92,12 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
     private final Rect mTmpRootRect = new Rect();
     private final int[] mTmpLocation = new int[2];
 
-    public TaskView(Context context, ShellTaskOrganizer organizer) {
+    public TaskView(Context context, ShellTaskOrganizer organizer, SyncTransactionQueue syncQueue) {
         super(context, null, 0, 0, true /* disableBackgroundLayer */);
 
         mTaskOrganizer = organizer;
         mShellExecutor = organizer.getExecutor();
+        mSyncQueue = syncQueue;
         setUseAlpha();
         getHolder().addCallback(this);
         mGuard.open("release");
@@ -189,8 +193,7 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
 
         WindowContainerTransaction wct = new WindowContainerTransaction();
         wct.setBounds(mTaskToken, mTmpRect);
-        // TODO(b/151449487): Enable synchronization
-        mTaskOrganizer.applyTransaction(wct);
+        mSyncQueue.queue(wct);
     }
 
     /**
@@ -236,14 +239,16 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
     private void updateTaskVisibility() {
         WindowContainerTransaction wct = new WindowContainerTransaction();
         wct.setHidden(mTaskToken, !mSurfaceCreated /* hidden */);
-        mTaskOrganizer.applyTransaction(wct);
-        // TODO(b/151449487): Only call callback once we enable synchronization
-        if (mListener != null) {
-            final int taskId = mTaskInfo.taskId;
+        mSyncQueue.queue(wct);
+        if (mListener == null) {
+            return;
+        }
+        int taskId = mTaskInfo.taskId;
+        mSyncQueue.runInSync((t) -> {
             mListenerExecutor.execute(() -> {
                 mListener.onTaskVisibilityChanged(taskId, mSurfaceCreated);
             });
-        }
+        });
     }
 
     @Override
@@ -264,10 +269,12 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
             updateTaskVisibility();
         }
         mTaskOrganizer.setInterceptBackPressedOnTaskRoot(mTaskToken, true);
-        // TODO: Synchronize show with the resize
         onLocationChanged();
         if (taskInfo.taskDescription != null) {
-            setResizeBackgroundColor(taskInfo.taskDescription.getBackgroundColor());
+            int backgroundColor = taskInfo.taskDescription.getBackgroundColor();
+            mSyncQueue.runInSync((t) -> {
+                setResizeBackgroundColor(t, backgroundColor);
+            });
         }
 
         if (mListener != null) {

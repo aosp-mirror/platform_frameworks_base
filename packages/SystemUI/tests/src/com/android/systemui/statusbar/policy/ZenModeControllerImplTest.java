@@ -34,6 +34,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.statusbar.policy.ZenModeController.Callback;
 
 import org.junit.Before;
@@ -54,6 +55,8 @@ public class ZenModeControllerImplTest extends SysuiTestCase {
     ZenModeConfig mConfig;
     @Mock
     BroadcastDispatcher mBroadcastDispatcher;
+    @Mock
+    DumpManager mDumpManager;
 
     private ZenModeControllerImpl mController;
 
@@ -63,8 +66,11 @@ public class ZenModeControllerImplTest extends SysuiTestCase {
         mContext.addMockSystemService(NotificationManager.class, mNm);
         when(mNm.getZenModeConfig()).thenReturn(mConfig);
 
-        mController = new ZenModeControllerImpl(mContext, Handler.createAsync(Looper.myLooper()),
-                mBroadcastDispatcher);
+        mController = new ZenModeControllerImpl(
+                mContext,
+                Handler.createAsync(Looper.myLooper()),
+                mBroadcastDispatcher,
+                mDumpManager);
     }
 
     @Test

@@ -149,6 +149,7 @@ import android.app.NotificationHistory.HistoricalNotification;
 import android.app.NotificationManager;
 import android.app.NotificationManager.Policy;
 import android.app.PendingIntent;
+import android.app.RemoteServiceException.BadForegroundServiceNotificationException;
 import android.app.StatsManager;
 import android.app.StatusBarManager;
 import android.app.UriGrantsManager;
@@ -265,7 +266,6 @@ import com.android.internal.logging.InstanceIdSequence;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.internal.messages.nano.SystemMessageProto;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.SomeArgs;
@@ -614,12 +614,6 @@ public class NotificationManagerService extends SystemService {
     private NotificationRecordLogger mNotificationRecordLogger;
     private InstanceIdSequence mNotificationInstanceIdSequence;
     private Set<String> mMsgPkgsAllowedAsConvos = new HashSet();
-    protected static final String ACTION_ENABLE_NAS =
-            "android.server.notification.action.ENABLE_NAS";
-    protected static final String ACTION_DISABLE_NAS =
-            "android.server.notification.action.DISABLE_NAS";
-    protected static final String ACTION_LEARNMORE_NAS =
-            "android.server.notification.action.LEARNMORE_NAS";
 
     static class Archive {
         final SparseArray<Boolean> mEnabled;
@@ -754,95 +748,25 @@ public class NotificationManagerService extends SystemService {
         setDefaultAssistantForUser(userId);
     }
 
-    protected void migrateDefaultNASShowNotificationIfNecessary() {
+    protected void migrateDefaultNAS() {
         final List<UserInfo> activeUsers = mUm.getUsers();
         for (UserInfo userInfo : activeUsers) {
             int userId = userInfo.getUserHandle().getIdentifier();
             if (isNASMigrationDone(userId) || mUm.isManagedProfile(userId)) {
                 continue;
             }
-            if (mAssistants.hasUserSet(userId)) {
-                ComponentName defaultFromConfig = mAssistants.getDefaultFromConfig();
-                List<ComponentName> allowedComponents = mAssistants.getAllowedComponents(userId);
-                if (allowedComponents.size() == 0) {
-                    setNASMigrationDone(userId);
-                    mAssistants.clearDefaults();
-                    continue;
-                } else if (allowedComponents.contains(defaultFromConfig)) {
-                    setNASMigrationDone(userId);
-                    mAssistants.resetDefaultFromConfig();
-                    continue;
-                }
-                // TODO(b/192450820): re-enable when "user set" isn't over triggering
-                //User selected different NAS, need onboarding
-                /*enqueueNotificationInternal(getContext().getPackageName(),
-                        getContext().getOpPackageName(), Binder.getCallingUid(),
-                        Binder.getCallingPid(), TAG,
-                        SystemMessageProto.SystemMessage.NOTE_NAS_UPGRADE,
-                        createNASUpgradeNotification(userId), userId);*/
+            List<ComponentName> allowedComponents = mAssistants.getAllowedComponents(userId);
+            if (allowedComponents.size() == 0) { // user set to none
+                Slog.d(TAG, "NAS Migration: user set to none, disable new NAS setting");
+                setNASMigrationDone(userId);
+                mAssistants.clearDefaults();
+            } else {
+                Slog.d(TAG, "Reset NAS setting and migrate to new default");
+                resetAssistantUserSet(userId);
+                // migrate to new default and set migration done
+                mAssistants.resetDefaultAssistantsIfNecessary();
             }
         }
-    }
-
-    protected Notification createNASUpgradeNotification(int userId) {
-        final Bundle extras = new Bundle();
-        extras.putString(Notification.EXTRA_SUBSTITUTE_APP_NAME,
-                getContext().getResources().getString(R.string.global_action_settings));
-        int title = R.string.nas_upgrade_notification_title;
-        int content = R.string.nas_upgrade_notification_content;
-
-        Intent onboardingIntent = new Intent(Settings.ACTION_NOTIFICATION_ASSISTANT_SETTINGS);
-        onboardingIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-
-        Intent enableIntent = new Intent(ACTION_ENABLE_NAS);
-        enableIntent.putExtra(Intent.EXTRA_USER_ID, userId);
-        PendingIntent enableNASPendingIntent = PendingIntent.getBroadcast(getContext(),
-                0, enableIntent, PendingIntent.FLAG_IMMUTABLE);
-
-        Intent disableIntent = new Intent(ACTION_DISABLE_NAS);
-        disableIntent.putExtra(Intent.EXTRA_USER_ID, userId);
-        PendingIntent disableNASPendingIntent = PendingIntent.getBroadcast(getContext(),
-                0, disableIntent, PendingIntent.FLAG_IMMUTABLE);
-
-        Intent learnMoreIntent = new Intent(ACTION_LEARNMORE_NAS);
-        learnMoreIntent.putExtra(Intent.EXTRA_USER_ID, userId);
-        PendingIntent learnNASPendingIntent = PendingIntent.getBroadcast(getContext(),
-                0, learnMoreIntent, PendingIntent.FLAG_IMMUTABLE);
-
-        Notification.Action enableNASAction = new Notification.Action.Builder(
-                0,
-                getContext().getResources().getString(
-                        R.string.nas_upgrade_notification_enable_action),
-                enableNASPendingIntent).build();
-
-        Notification.Action disableNASAction = new Notification.Action.Builder(
-                0,
-                getContext().getResources().getString(
-                        R.string.nas_upgrade_notification_disable_action),
-                disableNASPendingIntent).build();
-
-        Notification.Action learnMoreNASAction = new Notification.Action.Builder(
-                0,
-                getContext().getResources().getString(
-                        R.string.nas_upgrade_notification_learn_more_action),
-                learnNASPendingIntent).build();
-
-
-        return new Notification.Builder(getContext(), SystemNotificationChannels.SYSTEM_CHANGES)
-                .setAutoCancel(false)
-                .setOngoing(true)
-                .setTicker(getContext().getResources().getString(title))
-                .setSmallIcon(R.drawable.ic_settings_24dp)
-                .setContentTitle(getContext().getResources().getString(title))
-                .setContentText(getContext().getResources().getString(content))
-                .setContentIntent(PendingIntent.getActivity(getContext(), 0, onboardingIntent,
-                        PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE))
-                .setLocalOnly(true)
-                .setStyle(new Notification.BigTextStyle())
-                .addAction(enableNASAction)
-                .addAction(disableNASAction)
-                .addAction(learnMoreNASAction)
-                .build();
     }
 
     @VisibleForTesting
@@ -1256,10 +1180,11 @@ public class NotificationManagerService extends SystemService {
                 // Still crash for foreground services, preventing the not-crash behaviour abused
                 // by apps to give us a garbage notification and silently start a fg service.
                 Binder.withCleanCallingIdentity(
-                        () -> mAm.crashApplication(uid, initialPid, pkg, -1,
+                        () -> mAm.crashApplicationWithType(uid, initialPid, pkg, -1,
                             "Bad notification(tag=" + tag + ", id=" + id + ") posted from package "
                                 + pkg + ", crashing app(uid=" + uid + ", pid=" + initialPid + "): "
-                                + message, true /* force */));
+                                + message, true /* force */,
+                                BadForegroundServiceNotificationException.TYPE_ID));
             }
         }
 
@@ -1859,41 +1784,6 @@ public class NotificationManagerService extends SystemService {
         }
     };
 
-    private final BroadcastReceiver mNASIntentReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            final String action = intent.getAction();
-            int userId = intent.getIntExtra(Intent.EXTRA_USER_ID, -1);
-            if (ACTION_ENABLE_NAS.equals(action)) {
-                mAssistants.resetDefaultFromConfig();
-                setNotificationAssistantAccessGrantedForUserInternal(
-                        CollectionUtils.firstOrNull(mAssistants.getDefaultComponents()),
-                        userId, true, true);
-                setNASMigrationDone(userId);
-                cancelNotificationInternal(getContext().getPackageName(),
-                        getContext().getOpPackageName(), Binder.getCallingUid(),
-                        Binder.getCallingPid(), TAG,
-                        SystemMessageProto.SystemMessage.NOTE_NAS_UPGRADE, userId);
-            } else if (ACTION_DISABLE_NAS.equals(action)) {
-                //Set default NAS to be null if user selected none during migration
-                mAssistants.clearDefaults();
-                setNotificationAssistantAccessGrantedForUserInternal(
-                        null, userId, true, true);
-                setNASMigrationDone(userId);
-                cancelNotificationInternal(getContext().getPackageName(),
-                        getContext().getOpPackageName(), Binder.getCallingUid(),
-                        Binder.getCallingPid(), TAG,
-                        SystemMessageProto.SystemMessage.NOTE_NAS_UPGRADE, userId);
-            } else if (ACTION_LEARNMORE_NAS.equals(action)) {
-                Intent i = new Intent(getContext(), NASLearnMoreActivity.class);
-                i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                getContext().sendBroadcastAsUser(
-                        new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS), UserHandle.of(userId));
-                getContext().startActivity(i);
-            }
-        }
-    };
-
     private final class SettingsObserver extends ContentObserver {
         private final Uri NOTIFICATION_BADGING_URI
                 = Settings.Secure.getUriFor(Settings.Secure.NOTIFICATION_BADGING);
@@ -2405,12 +2295,6 @@ public class NotificationManagerService extends SystemService {
 
         IntentFilter localeChangedFilter = new IntentFilter(Intent.ACTION_LOCALE_CHANGED);
         getContext().registerReceiver(mLocaleChangeReceiver, localeChangedFilter);
-
-        IntentFilter nasFilter = new IntentFilter();
-        nasFilter.addAction(ACTION_ENABLE_NAS);
-        nasFilter.addAction(ACTION_DISABLE_NAS);
-        nasFilter.addAction(ACTION_LEARNMORE_NAS);
-        getContext().registerReceiver(mNASIntentReceiver, nasFilter);
     }
 
     /**
@@ -2422,7 +2306,6 @@ public class NotificationManagerService extends SystemService {
         getContext().unregisterReceiver(mNotificationTimeoutReceiver);
         getContext().unregisterReceiver(mRestoreReceiver);
         getContext().unregisterReceiver(mLocaleChangeReceiver);
-        getContext().unregisterReceiver(mNASIntentReceiver);
 
         if (mDeviceConfigChangedListener != null) {
             DeviceConfig.removeOnPropertiesChangedListener(mDeviceConfigChangedListener);
@@ -2689,7 +2572,7 @@ public class NotificationManagerService extends SystemService {
             mConditionProviders.onBootPhaseAppsCanStart();
             mHistoryManager.onBootPhaseAppsCanStart();
             registerDeviceConfigChange();
-            migrateDefaultNASShowNotificationIfNecessary();
+            migrateDefaultNAS();
         } else if (phase == SystemService.PHASE_ACTIVITY_MANAGER_READY) {
             mSnoozeHelper.scheduleRepostsForPersistedNotifications(System.currentTimeMillis());
         }
@@ -2803,7 +2686,7 @@ public class NotificationManagerService extends SystemService {
         }
     }
 
-    private void createNotificationChannelGroup(String pkg, int uid, NotificationChannelGroup group,
+    void createNotificationChannelGroup(String pkg, int uid, NotificationChannelGroup group,
             boolean fromApp, boolean fromListener) {
         Objects.requireNonNull(group);
         Objects.requireNonNull(pkg);
@@ -3851,7 +3734,8 @@ public class NotificationManagerService extends SystemService {
 
             final int callingUid = Binder.getCallingUid();
             NotificationChannelGroup groupToDelete =
-                    mPreferencesHelper.getNotificationChannelGroup(groupId, pkg, callingUid);
+                    mPreferencesHelper.getNotificationChannelGroupWithChannels(
+                            pkg, callingUid, groupId, false);
             if (groupToDelete != null) {
                 // Preflight for allowability
                 final int userId = UserHandle.getUserId(callingUid);
@@ -5227,10 +5111,6 @@ public class NotificationManagerService extends SystemService {
         public void setNASMigrationDoneAndResetDefault(int userId, boolean loadFromConfig) {
             checkCallerIsSystem();
             setNASMigrationDone(userId);
-            cancelNotificationInternal(getContext().getPackageName(),
-                    getContext().getOpPackageName(), Binder.getCallingUid(),
-                    Binder.getCallingPid(), TAG,
-                    SystemMessageProto.SystemMessage.NOTE_NAS_UPGRADE, userId);
             if (loadFromConfig) {
                 mAssistants.resetDefaultFromConfig();
             } else {
@@ -7065,7 +6945,9 @@ public class NotificationManagerService extends SystemService {
                     if (index < 0) {
                         mNotificationList.add(r);
                         mUsageStats.registerPostedByApp(r);
-                        r.setInterruptive(isVisuallyInterruptive(null, r));
+                        final boolean isInterruptive = isVisuallyInterruptive(null, r);
+                        r.setInterruptive(isInterruptive);
+                        r.setTextChanged(isInterruptive);
                     } else {
                         old = mNotificationList.get(index);  // Potentially *changes* old
                         mNotificationList.set(index, r);
@@ -7076,7 +6958,6 @@ public class NotificationManagerService extends SystemService {
                         r.isUpdate = true;
                         final boolean isInterruptive = isVisuallyInterruptive(old, r);
                         r.setTextChanged(isInterruptive);
-                        r.setInterruptive(isInterruptive);
                     }
 
                     mNotificationsByKey.put(n.getKey(), r);
@@ -7700,7 +7581,10 @@ public class NotificationManagerService extends SystemService {
                     final int waitMs = mAudioManager.getFocusRampTimeMs(
                             AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK,
                             record.getAudioAttributes());
-                    if (DBG) Slog.v(TAG, "Delaying vibration by " + waitMs + "ms");
+                    if (DBG) {
+                        Slog.v(TAG, "Delaying vibration for notification "
+                                + record.getKey() + " by " + waitMs + "ms");
+                    }
                     try {
                         Thread.sleep(waitMs);
                     } catch (InterruptedException e) { }
@@ -7708,9 +7592,17 @@ public class NotificationManagerService extends SystemService {
                     // so need to check the notification still valide for vibrate.
                     synchronized (mNotificationLock) {
                         if (mNotificationsByKey.get(record.getKey()) != null) {
-                            vibrate(record, effect, true);
+                            if (record.getKey().equals(mVibrateNotificationKey)) {
+                                vibrate(record, effect, true);
+                            } else {
+                                if (DBG) {
+                                    Slog.v(TAG, "No vibration for notification "
+                                            + record.getKey() + ": a new notification is "
+                                            + "vibrating, or effects were cleared while waiting");
+                                }
+                            }
                         } else {
-                            Slog.e(TAG, "No vibration for canceled notification : "
+                            Slog.w(TAG, "No vibration for canceled notification "
                                     + record.getKey());
                         }
                     }
@@ -9424,7 +9316,7 @@ public class NotificationManagerService extends SystemService {
                     record.getSystemGeneratedSmartActions(),
                     record.getSmartReplies(),
                     record.canBubble(),
-                    record.isInterruptive(),
+                    record.isTextChanged(),
                     record.isConversation(),
                     record.getShortcutInfo(),
                     record.getRankingScore() == 0

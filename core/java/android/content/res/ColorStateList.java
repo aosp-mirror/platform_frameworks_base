@@ -198,7 +198,7 @@ public class ColorStateList extends ComplexColor implements Parcelable {
             // Prune the cache before adding new items.
             final int N = sCache.size();
             for (int i = N - 1; i >= 0; i--) {
-                if (sCache.valueAt(i).get() == null) {
+                if (sCache.valueAt(i).refersTo(null)) {
                     sCache.removeAt(i);
                 }
             }

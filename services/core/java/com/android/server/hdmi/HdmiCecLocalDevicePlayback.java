@@ -64,6 +64,7 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
 
     HdmiCecLocalDevicePlayback(HdmiControlService service) {
         super(service, HdmiDeviceInfo.DEVICE_PLAYBACK);
+        mStandbyHandler = new HdmiCecStandbyModeHandler(service, this);
     }
 
     @Override

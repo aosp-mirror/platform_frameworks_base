@@ -121,6 +121,26 @@ class NotifCollectionLogger @Inject constructor(
         })
     }
 
+    fun logNotifInternalUpdate(key: String, name: String, reason: String) {
+        buffer.log(TAG, INFO, {
+            str1 = key
+            str2 = name
+            str3 = reason
+        }, {
+            "UPDATED INTERNALLY $str1 BY $str2 BECAUSE $str3"
+        })
+    }
+
+    fun logNotifInternalUpdateFailed(key: String, name: String, reason: String) {
+        buffer.log(TAG, INFO, {
+            str1 = key
+            str2 = name
+            str3 = reason
+        }, {
+            "FAILED INTERNAL UPDATE $str1 BY $str2 BECAUSE $str3"
+        })
+    }
+
     fun logNoNotificationToRemoveWithKey(key: String) {
         buffer.log(TAG, ERROR, {
             str1 = key

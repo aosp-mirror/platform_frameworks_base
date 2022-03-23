@@ -152,19 +152,19 @@ public abstract class NetworkStatsProvider {
         try {
             // Reuse the code path to notify warning reached with limit reached
             // since framework handles them in the same way.
-            getProviderCallbackBinderOrThrow().notifyWarningOrLimitReached();
+            getProviderCallbackBinderOrThrow().notifyWarningReached();
         } catch (RemoteException e) {
             e.rethrowAsRuntimeException();
         }
     }
 
     /**
-     * Notify system that the quota set by {@link #onSetLimit} or limit set by
+     * Notify system that the limit set by {@link #onSetLimit} or limit set by
      * {@link #onSetWarningAndLimit} has been reached.
      */
     public void notifyLimitReached() {
         try {
-            getProviderCallbackBinderOrThrow().notifyWarningOrLimitReached();
+            getProviderCallbackBinderOrThrow().notifyLimitReached();
         } catch (RemoteException e) {
             e.rethrowAsRuntimeException();
         }

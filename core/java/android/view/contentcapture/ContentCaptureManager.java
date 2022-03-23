@@ -483,6 +483,8 @@ public final class ContentCaptureManager {
     /**
      * Returns the component name of the system service that is consuming the captured events for
      * the current user.
+     *
+     * @throws RuntimeException if getting the component name is timed out.
      */
     @Nullable
     public ComponentName getServiceComponentName() {

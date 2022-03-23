@@ -28,6 +28,7 @@ import android.annotation.SystemService;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
+import android.net.NetworkCapabilities;
 import android.net.ipsec.ike.SaProposal;
 import android.os.Build;
 import android.os.PersistableBundle;
@@ -47,6 +48,7 @@ import android.telephony.ims.feature.RcsFeature;
 import com.android.internal.telephony.ICarrierConfigLoader;
 import com.android.telephony.Rlog;
 
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -168,7 +170,10 @@ public class CarrierConfigManager {
     /**
      * This flag specifies whether VoLTE availability is based on provisioning. By default this is
      * false.
+     * Used for UCE to determine if EAB provisioning checks should be based on provisioning.
+     * @deprecated Use {@link Ims#KEY_MMTEL_REQUIRES_PROVISIONING_BUNDLE} instead.
      */
+    @Deprecated
     public static final String
             KEY_CARRIER_VOLTE_PROVISIONED_BOOL = "carrier_volte_provisioned_bool";
 
@@ -347,6 +352,12 @@ public class CarrierConfigManager {
      */
     public static final String
             KEY_REQUIRE_ENTITLEMENT_CHECKS_BOOL = "require_entitlement_checks_bool";
+
+    /**
+     * Flag indicating if the carrier supports tethering of mobile data.
+     */
+    public static final String KEY_CARRIER_SUPPORTS_TETHERING_BOOL =
+            "carrier_supports_tethering_bool";
 
     /**
      * Flag indicating whether radio is to be restarted on error PDP_FAIL_REGULAR_DEACTIVATION
@@ -549,9 +560,9 @@ public class CarrierConfigManager {
             KEY_DISABLE_CDMA_ACTIVATION_CODE_BOOL = "disable_cdma_activation_code_bool";
 
     /**
-     * List of RIL radio technologies (See {@link ServiceState} {@code RIL_RADIO_TECHNOLOGY_*}
-     * constants) which support only a single data connection at a time. Some carriers do not
-     * support multiple pdp on UMTS.
+     * List of network type constants which support only a single data connection at a time.
+     * Some carriers do not support multiple PDP on UMTS.
+     * @see TelephonyManager NETWORK_TYPE_*
      */
     public static final String
             KEY_ONLY_SINGLE_DC_ALLOWED_INT_ARRAY = "only_single_dc_allowed_int_array";
@@ -858,7 +869,12 @@ public class CarrierConfigManager {
     /**
      * Flag specifying whether provisioning is required for VoLTE, Video Telephony, and WiFi
      * Calling.
+
+     * Combines VoLTE, VT, VoWiFI calling provisioning into one parameter.
+     * @deprecated Use {@link Ims#KEY_MMTEL_REQUIRES_PROVISIONING_BUNDLE} instead for
+     * finer-grained control.
      */
+    @Deprecated
     public static final String KEY_CARRIER_VOLTE_PROVISIONING_REQUIRED_BOOL
             = "carrier_volte_provisioning_required_bool";
 
@@ -872,7 +888,11 @@ public class CarrierConfigManager {
      * and enable the UT over IMS capability for the subscription when the subscription is loaded.
      *
      * The default value for this key is {@code false}.
+     *
+     * @deprecated Use {@link Ims#KEY_MMTEL_REQUIRES_PROVISIONING_BUNDLE} instead for
+     * determining if UT requires provisioning.
      */
+    @Deprecated
     public static final String KEY_CARRIER_UT_PROVISIONING_REQUIRED_BOOL =
             "carrier_ut_provisioning_required_bool";
 
@@ -1054,6 +1074,12 @@ public class CarrierConfigManager {
     @Deprecated
     public static final String KEY_ALWAYS_SHOW_EMERGENCY_ALERT_ONOFF_BOOL =
             "always_show_emergency_alert_onoff_bool";
+
+    /**
+     * Default mobile network MTU value, in bytes.
+     * @hide
+     */
+    public static final String KEY_DEFAULT_MTU_INT = "default_mtu_int";
 
     /**
      * The data call retry configuration for different types of APN.
@@ -2913,18 +2939,23 @@ public class CarrierConfigManager {
 
     /**
      * String array of default bandwidth values per network type.
-     * The entries should be of form "network_name:downstream,upstream", with values in Kbps.
+     * The entries should be of form: "network_name:downlink,uplink", with values in Kbps.
+     * For NR (5G), the following network names should be used:
+     * - NR_NSA: NR NSA, sub-6 frequencies
+     * - NR_NSA_MMWAVE: NR NSA, mmwave frequencies
+     * - NR_SA: NR SA, sub-6 frequencies
+     * - NR_SA_MMWAVE: NR SA, mmwave frequencies
      * @hide
      */
     public static final String KEY_BANDWIDTH_STRING_ARRAY = "bandwidth_string_array";
 
     /**
      * For NR (non-standalone), whether to use the LTE value instead of NR value as the default for
-     * upstream bandwidth. Downstream bandwidth will still use the NR value as the default.
+     * uplink bandwidth. Downlink bandwidth will still use the NR value as the default.
      * @hide
      */
-    public static final String KEY_BANDWIDTH_NR_NSA_USE_LTE_VALUE_FOR_UPSTREAM_BOOL =
-            "bandwidth_nr_nsa_use_lte_value_for_upstream_bool";
+    public static final String KEY_BANDWIDTH_NR_NSA_USE_LTE_VALUE_FOR_UPLINK_BOOL =
+            "bandwidth_nr_nsa_use_lte_value_for_uplink_bool";
 
     /**
      * Key identifying if voice call barring notification is required to be shown to the user.
@@ -3626,6 +3657,47 @@ public class CarrierConfigManager {
     public static final String KEY_5G_WATCHDOG_TIME_MS_LONG = "5g_watchdog_time_ms_long";
 
     /**
+     * Which network types are unmetered. A string array that can contain network type names from
+     * {@link TelephonyManager#getNetworkTypeName(int)} in addition to the following NR keys:
+     * NR_NSA - NR NSA is unmetered for sub-6 frequencies
+     * NR_NSA_MMWAVE - NR NSA is unmetered for mmwave frequencies
+     * NR_SA - NR SA is unmetered for sub-6 frequencies
+     * NR_SA_MMWAVE - NR SA is unmetered for mmwave frequencies
+     *
+     * Note that this config only applies if an unmetered SubscriptionPlan is set via
+     * {@link SubscriptionManager#setSubscriptionPlans(int, List)} or an unmetered override is set
+     * via {@link SubscriptionManager#setSubscriptionOverrideUnmetered(int, boolean, int[], long)}
+     * or {@link SubscriptionManager#setSubscriptionOverrideUnmetered(int, boolean, long)}.
+     * If neither SubscriptionPlans nor an override are set, then no network types can be unmetered
+     * regardless of the value of this config.
+     * TODO: remove other unmetered keys and replace with this
+     * @hide
+     */
+    public static final String KEY_UNMETERED_NETWORK_TYPES_STRING_ARRAY =
+            "unmetered_network_types_string_array";
+
+    /**
+     * Which network types are unmetered when roaming. A string array that can contain network type
+     * names from {@link TelephonyManager#getNetworkTypeName(int)} in addition to the following
+     * NR keys:
+     * NR_NSA - NR NSA is unmetered when roaming for sub-6 frequencies
+     * NR_NSA_MMWAVE - NR NSA is unmetered when roaming for mmwave frequencies
+     * NR_SA - NR SA is unmetered when roaming for sub-6 frequencies
+     * NR_SA_MMWAVE - NR SA is unmetered when roaming for mmwave frequencies
+     *
+     * Note that this config only applies if an unmetered SubscriptionPlan is set via
+     * {@link SubscriptionManager#setSubscriptionPlans(int, List)} or an unmetered override is set
+     * via {@link SubscriptionManager#setSubscriptionOverrideUnmetered(int, boolean, int[], long)}
+     * or {@link SubscriptionManager#setSubscriptionOverrideUnmetered(int, boolean, long)}.
+     * If neither SubscriptionPlans nor an override are set, then no network types can be unmetered
+     * when roaming regardless of the value of this config.
+     * TODO: remove KEY_UNMETERED_NR_NSA_WHEN_ROAMING_BOOL and replace with this
+     * @hide
+     */
+    public static final String KEY_ROAMING_UNMETERED_NETWORK_TYPES_STRING_ARRAY =
+            "roaming_unmetered_network_types_string_array";
+
+    /**
      * Whether NR (non-standalone) should be unmetered for all frequencies.
      * If either {@link #KEY_UNMETERED_NR_NSA_MMWAVE_BOOL} or
      * {@link #KEY_UNMETERED_NR_NSA_SUB6_BOOL} are true, then this value will be ignored.
@@ -3705,7 +3777,7 @@ public class CarrierConfigManager {
     /**
      * SMDP+ server address for downloading opportunistic eSIM profile.
      * FQDN (Fully Qualified Domain Name) of the SM-DP+ (e.g., smdp.gsma.com) restricted to the
-     * Alphanumeric mode character set defined in table 5 of ISO/IEC 18004 [15] excluding '$'.
+     * Alphanumeric mode character set defined in table 5 of ISO/IEC 18004 excluding '$'.
      */
     public static final String KEY_SMDP_SERVER_ADDRESS_STRING =
             "smdp_server_address_string";
@@ -3749,29 +3821,52 @@ public class CarrierConfigManager {
             "opportunistic_carrier_ids_int_array";
 
     /**
-     * Controls RSRP threshold at which OpportunisticNetworkService will decide whether
+     * Boolean configuration to control auto provisioning eSIM download in
+     * OpportunisticNetworkService using only WiFi or both WiFi/Data.
+     * True will download esim only via WiFi.
+     * False will use both WiFi and Data connection.
+     *
+     * @hide
+     */
+    public static final String KEY_OPPORTUNISTIC_ESIM_DOWNLOAD_VIA_WIFI_ONLY_BOOL =
+            "opportunistic_esim_download_via_wifi_only_bool";
+
+/**
+     * Controls RSRP threshold, in dBm, at which OpportunisticNetworkService will decide whether
      * the opportunistic network is good enough for internet data.
+     *
+     * <p>The value of {@link CellSignalStrengthLte#getRsrp()} will be compared with this
+     * threshold.
      */
     public static final String KEY_OPPORTUNISTIC_NETWORK_ENTRY_THRESHOLD_RSRP_INT =
             "opportunistic_network_entry_threshold_rsrp_int";
 
     /**
-     * Controls RSSNR threshold at which OpportunisticNetworkService will decide whether
-     * the opportunistic network is good enough for internet data.
+     * Controls RSSNR threshold, in dB, at which OpportunisticNetworkService will
+     * decide whether the opportunistic network is good enough for internet data.
+     *
+     * <p>The value of {@link CellSignalStrengthLte#getRssnr()} will be compared with this
+     * threshold.
      */
     public static final String KEY_OPPORTUNISTIC_NETWORK_ENTRY_THRESHOLD_RSSNR_INT =
             "opportunistic_network_entry_threshold_rssnr_int";
 
     /**
-     * Controls RSRP threshold below which OpportunisticNetworkService will decide whether
+     * Controls RSRP threshold, in dBm, below which OpportunisticNetworkService will decide whether
      * the opportunistic network available is not good enough for internet data.
+     *
+     * <p>The value of {@link CellSignalStrengthLte#getRsrp()} will be compared with this
+     * threshold.
      */
     public static final String KEY_OPPORTUNISTIC_NETWORK_EXIT_THRESHOLD_RSRP_INT =
             "opportunistic_network_exit_threshold_rsrp_int";
 
     /**
-     * Controls RSSNR threshold below which OpportunisticNetworkService will decide whether
-     * the opportunistic network available is not good enough for internet data.
+     * Controls RSSNR threshold, in dB, below which OpportunisticNetworkService will
+     * decide whether the opportunistic network available is not good enough for internet data.
+     *
+     * <p>The value of {@link CellSignalStrengthLte#getRssnr()} will be compared with this
+     * threshold.
      */
     public static final String KEY_OPPORTUNISTIC_NETWORK_EXIT_THRESHOLD_RSSNR_INT =
             "opportunistic_network_exit_threshold_rssnr_int";
@@ -3855,101 +3950,248 @@ public class CarrierConfigManager {
     public static final String KEY_OPPORTUNISTIC_NETWORK_MAX_BACKOFF_TIME_LONG =
             "opportunistic_network_max_backoff_time_long";
 
-    /**
-    * Controls SS-RSRP threshold in dBm at which 5G opportunistic network will be considered good
-    * enough for internet data.
-    *
-    * @hide
-    */
-    public static final String KEY_OPPORTUNISTIC_NETWORK_ENTRY_THRESHOLD_SS_RSRP_INT =
-            "opportunistic_network_entry_threshold_ss_rsrp_int";
+    /** @hide */
+    public static class OpportunisticNetwork {
+        /**
+         * Prefix of all {@code OpportunisticNetwork.KEY_*} constants.
+         *
+         * @hide
+         */
+        public static final String PREFIX = "opportunistic.";
 
-    /**
-    * Controls SS-RSRQ threshold in dB at which 5G opportunistic network will be considered good
-    * enough for internet data.
-    *
-    * @hide
-    */
-    public static final String KEY_OPPORTUNISTIC_NETWORK_ENTRY_THRESHOLD_SS_RSRQ_DOUBLE =
-            "opportunistic_network_entry_threshold_ss_rsrq_double";
+        /**
+         * Controls SS-RSRP threshold in dBm at which 5G opportunistic network will be considered
+         * good enough for internet data. Note other factors may be considered for the final
+         * decision.
+         *
+         * <p>The value of {@link CellSignalStrengthNr#getSsRsrp()} will be compared with this
+         * threshold.
+         *
+         * @hide
+         */
+        public static final String KEY_ENTRY_THRESHOLD_SS_RSRP_INT =
+                PREFIX + "entry_threshold_ss_rsrp_int";
 
-    /**
-    * Controls SS-RSRP threshold in dBm below which 5G opportunistic network available will not
-    * be considered good enough for internet data.
-    *
-    * @hide
-    */
-    public static final String KEY_OPPORTUNISTIC_NETWORK_EXIT_THRESHOLD_SS_RSRP_INT =
-            "opportunistic_network_exit_threshold_ss_rsrp_int";
+        /**
+         * Similar to {@link #KEY_ENTRY_THRESHOLD_SS_RSRP_INT} but supports different
+         * thresholds for different 5G bands. For bands not specified here, the threshold
+         * will be {@link #KEY_ENTRY_THRESHOLD_SS_RSRP_INT}.
+         *
+         * <p>For each key-value in the bundle: the key is the band number in string, which
+         * shall be a decimal integer as defined in {@code NgranBands.BAND_*} constants;
+         * the value is the threshold in int.
+         *
+         * @hide
+         */
+        public static final String KEY_ENTRY_THRESHOLD_SS_RSRP_INT_BUNDLE =
+                PREFIX + "entry_threshold_ss_rsrp_int_bundle";
 
-    /**
-    * Controls SS-RSRQ threshold in dB below which 5G opportunistic network available will not
-    * be considered good enough for internet data.
-    *
-    * @hide
-    */
-    public static final String KEY_OPPORTUNISTIC_NETWORK_EXIT_THRESHOLD_SS_RSRQ_DOUBLE =
-            "opportunistic_network_exit_threshold_ss_rsrq_double";
+        /**
+         * Controls SS-RSRQ threshold in dB at which 5G opportunistic network will be considered
+         * good enough for internet data. Note other factors may be considered for the final
+         * decision.
+         *
+         * <p>The value of {@link CellSignalStrengthNr#getSsRsrq()} will be compared with this
+         * threshold.
+         *
+         * @hide
+         */
+        public static final String KEY_ENTRY_THRESHOLD_SS_RSRQ_DOUBLE =
+                PREFIX + "entry_threshold_ss_rsrq_double";
 
-    /**
-     * Controls back off time in milliseconds for switching back to
-     * 5G opportunistic subscription. This time will be added to
-     * {@link CarrierConfigManager#KEY_OPPORTUNISTIC_NETWORK_5G_DATA_SWITCH_HYSTERESIS_TIME_LONG} to
-     * determine hysteresis time if there is ping pong situation
-     * (determined by system app or 1st party app) between primary and 5G opportunistic
-     * subscription. Ping ping situation is defined in
-     * #KEY_OPPORTUNISTIC_NETWORK_5G_PING_PONG_TIME_LONG.
-     * If ping pong situation continuous #KEY_OPPORTUNISTIC_5G_NETWORK_BACKOFF_TIME_LONG
-     * will be added to previously determined hysteresis time.
-     *
-     * @hide
-     */
-    public static final String KEY_OPPORTUNISTIC_NETWORK_5G_BACKOFF_TIME_LONG =
-            "opportunistic_network_5g_backoff_time_long";
+        /**
+         * Similar to {@link #KEY_ENTRY_THRESHOLD_SS_RSRQ_DOUBLE} but supports different
+         * thresholds for different 5G bands. For bands not specified here, the threshold
+         * will be {@link #KEY_ENTRY_THRESHOLD_SS_RSRQ_DOUBLE}.
+         *
+         * <p>For each key-value in the bundle: the key is the band number in string, which
+         * shall be a decimal integer as defined in {@code NgranBands.BAND_*} constants;
+         * the value is the threshold in double.
+         *
+         * @hide
+         */
+        public static final String KEY_ENTRY_THRESHOLD_SS_RSRQ_DOUBLE_BUNDLE =
+                PREFIX + "entry_threshold_ss_rsrq_double_bundle";
 
-    /**
-     * Controls the max back off time in milliseconds for switching back to
-     * 5G opportunistic subscription.
-     * This time will be the max hysteresis that can be determined irrespective of there is
-     * continuous ping pong situation or not as described in
-     * #KEY_OPPORTUNISTIC_NETWORK_5G_PING_PONG_TIME_LONG and
-     * #KEY_OPPORTUNISTIC_NETWORK_5G_BACKOFF_TIME_LONG.
-     *
-     * @hide
-     */
-    public static final String KEY_OPPORTUNISTIC_NETWORK_5G_MAX_BACKOFF_TIME_LONG =
-            "opportunistic_network_5g_max_backoff_time_long";
+        /**
+         * Controls SS-RSRP threshold in dBm below which 5G opportunistic network available will not
+         * be considered good enough for internet data. Note other factors may be considered
+         * for the final decision.
+         *
+         * <p>The value of {@link CellSignalStrengthNr#getSsRsrp()} will be compared with this
+         * threshold.
+         *
+         * @hide
+         */
+        public static final String KEY_EXIT_THRESHOLD_SS_RSRP_INT =
+                PREFIX + "exit_threshold_ss_rsrp_int";
 
-    /**
-    * Controls the ping pong determination of 5G opportunistic network.
-    * If opportunistic network is determined as out of service or below
-    * #KEY_OPPORTUNISTIC_NETWORK_EXIT_THRESHOLD_SS_RSRP_INT or
-    * #KEY_OPPORTUNISTIC_NETWORK_EXIT_THRESHOLD_SS_RSRQ_INT within
-    * #KEY_OPPORTUNISTIC_NETWORK_5G_PING_PONG_TIME_LONG of switching to opportunistic network,
-    * it will be determined as ping pong situation by system app or 1st party app.
-     *
-    * @hide
-    */
-    public static final String KEY_OPPORTUNISTIC_NETWORK_5G_PING_PONG_TIME_LONG =
-            "opportunistic_network_5g_ping_pong_time_long";
+        /**
+         * Similar to {@link #KEY_EXIT_THRESHOLD_SS_RSRP_INT} but supports different
+         * thresholds for different 5G bands. For bands not specified here, the threshold
+         * will be {@link #KEY_EXIT_THRESHOLD_SS_RSRP_INT}.
+         *
+         * <p>The syntax of its value is similar to
+         * {@link #KEY_ENTRY_THRESHOLD_SS_RSRP_INT_BUNDLE}.
+         *
+         * @hide
+         */
+        public static final String KEY_EXIT_THRESHOLD_SS_RSRP_INT_BUNDLE =
+                PREFIX + "exit_threshold_ss_rsrp_int_bundle";
 
-    /**
-     * Controls hysteresis time in milliseconds for which will be waited before switching
-     * data to a 5G opportunistic network.
-     *
-     * @hide
-     */
-    public static final String KEY_OPPORTUNISTIC_NETWORK_5G_DATA_SWITCH_HYSTERESIS_TIME_LONG =
-            "opportunistic_network_5g_data_switch_hysteresis_time_long";
+        /**
+         * Controls SS-RSRQ threshold in dB below which 5G opportunistic network available will not
+         * be considered good enough for internet data. Note other factors may be considered
+         * for the final decision.
+         *
+         * <p>The value of {@link CellSignalStrengthNr#getSsRsrq()} will be compared with this
+         * threshold.
+         *
+         * @hide
+         */
+        public static final String KEY_EXIT_THRESHOLD_SS_RSRQ_DOUBLE =
+                PREFIX + "exit_threshold_ss_rsrq_double";
 
-    /**
-     * Controls hysteresis time in milliseconds for which will be waited before switching from
-     * 5G opportunistic network to primary network.
-     *
-     * @hide
-     */
-    public static final String KEY_OPPORTUNISTIC_NETWORK_5G_DATA_SWITCH_EXIT_HYSTERESIS_TIME_LONG =
-            "opportunistic_network_5g_data_switch_exit_hysteresis_time_long";
+        /**
+         * Similar to {@link #KEY_EXIT_THRESHOLD_SS_RSRQ_DOUBLE} but supports different
+         * thresholds for different 5G bands. For bands not specified here, the threshold
+         * will be {@link #KEY_EXIT_THRESHOLD_SS_RSRQ_DOUBLE}.
+         *
+         * <p>The syntax of its value is similar to
+         * {@link #KEY_ENTRY_THRESHOLD_SS_RSRQ_DOUBLE_BUNDLE}.
+         *
+         * @hide
+         */
+        public static final String KEY_EXIT_THRESHOLD_SS_RSRQ_DOUBLE_BUNDLE =
+                PREFIX + "exit_threshold_ss_rsrq_double_bundle";
+
+        /**
+         * Controls hysteresis time in milliseconds for which will be waited before switching
+         * data to a 5G opportunistic network.
+         *
+         * @hide
+         */
+        public static final String KEY_5G_DATA_SWITCH_HYSTERESIS_TIME_LONG =
+                PREFIX + "5g_data_switch_hysteresis_time_long";
+
+        /**
+         * Similar to {@link #KEY_5G_DATA_SWITCH_HYSTERESIS_TIME_LONG} but supports
+         * different values for different 5G bands. For bands not specified here, the threshold
+         * will be {@link #KEY_5G_DATA_SWITCH_HYSTERESIS_TIME_LONG}.
+         *
+         * <p>For each key-value in the bundle: the key is the band number in string, which
+         * shall be a decimal integer as defined in {@code NgranBands.BAND_*} constants;
+         * the value is the time in long.
+         *
+         * @hide
+         */
+        public static final String KEY_5G_DATA_SWITCH_HYSTERESIS_TIME_LONG_BUNDLE =
+                PREFIX + "5g_data_switch_hysteresis_time_long_bundle";
+
+        /**
+         * Controls hysteresis time in milliseconds for which will be waited before switching from
+         * 5G opportunistic network to primary network.
+         *
+         * @hide
+         */
+        public static final String KEY_5G_DATA_SWITCH_EXIT_HYSTERESIS_TIME_LONG =
+                PREFIX + "5g_data_switch_exit_hysteresis_time_long";
+
+        /**
+         * Similar to {@link #KEY_5G_DATA_SWITCH_EXIT_HYSTERESIS_TIME_LONG} but supports
+         * different values for different 5G bands. For bands not specified here, the threshold
+         * will be {@link #KEY_5G_DATA_SWITCH_EXIT_HYSTERESIS_TIME_LONG}.
+         *
+         * <p>The syntax is similar to
+         * {@link KEY_5G_DATA_SWITCH_HYSTERESIS_TIME_LONG_BUNDLE}.
+         *
+         * @hide
+         */
+        public static final String KEY_5G_DATA_SWITCH_EXIT_HYSTERESIS_TIME_LONG_BUNDLE =
+                PREFIX + "5g_data_switch_exit_hysteresis_time_long_bundle";
+
+        /**
+         * Controls back off time in milliseconds for switching back to
+         * 5G opportunistic subscription. This time will be added to
+         * {@link #KEY_5G_DATA_SWITCH_HYSTERESIS_TIME_LONG} to
+         * determine hysteresis time if there is ping pong situation
+         * (determined by system app or 1st party app) between primary and 5G opportunistic
+         * subscription. Ping ping situation is defined in
+         * {@link #KEY_5G_PING_PONG_TIME_LONG}.
+         * If ping pong situation continuous {@link #KEY_5G_NETWORK_BACKOFF_TIME_LONG}
+         * will be added to previously determined hysteresis time.
+         *
+         * @hide
+         */
+        public static final String KEY_5G_BACKOFF_TIME_LONG =
+                PREFIX + "5g_backoff_time_long";
+
+        /**
+         * Controls the max back off time in milliseconds for switching back to
+         * 5G opportunistic subscription.
+         * This time will be the max hysteresis that can be determined irrespective of there is
+         * continuous ping pong situation or not as described in
+         * {@link #KEY_5G_PING_PONG_TIME_LONG} and
+         * {@link #KEY_5G_BACKOFF_TIME_LONG}.
+         *
+         * @hide
+         */
+        public static final String KEY_5G_MAX_BACKOFF_TIME_LONG =
+                PREFIX + "5g_max_backoff_time_long";
+
+        /**
+         * Controls the ping pong determination of 5G opportunistic network.
+         * If opportunistic network is determined as out of service or below
+         * {@link #KEY_EXIT_THRESHOLD_SS_RSRP_INT} or
+         * {@link #KEY_EXIT_THRESHOLD_SS_RSRQ_DOUBLE} within
+         * {@link #KEY_5G_PING_PONG_TIME_LONG} of switching to opportunistic network,
+         * it will be determined as ping pong situation by system app or 1st party app.
+         *
+         * @hide
+         */
+        public static final String KEY_5G_PING_PONG_TIME_LONG =
+                PREFIX + "5g_ping_pong_time_long";
+
+        private static PersistableBundle getDefaults() {
+            PersistableBundle defaults = new PersistableBundle();
+            // Default value is -111 dBm for all bands.
+            sDefaults.putInt(KEY_ENTRY_THRESHOLD_SS_RSRP_INT, -111);
+            sDefaults.putPersistableBundle(KEY_ENTRY_THRESHOLD_SS_RSRP_INT_BUNDLE,
+                                           PersistableBundle.EMPTY);
+            // Default value is -18.5 dB for all bands.
+            sDefaults.putDouble(KEY_ENTRY_THRESHOLD_SS_RSRQ_DOUBLE, -18.5);
+            sDefaults.putPersistableBundle(
+                    KEY_ENTRY_THRESHOLD_SS_RSRQ_DOUBLE_BUNDLE,
+                    PersistableBundle.EMPTY);
+            // Default value is -120 dBm for all bands.
+            sDefaults.putInt(KEY_EXIT_THRESHOLD_SS_RSRP_INT, -120);
+            sDefaults.putPersistableBundle(KEY_EXIT_THRESHOLD_SS_RSRP_INT_BUNDLE,
+                                           PersistableBundle.EMPTY);
+            // Default value is -18.5 dB for all bands.
+            sDefaults.putDouble(KEY_EXIT_THRESHOLD_SS_RSRQ_DOUBLE, -18.5);
+            sDefaults.putPersistableBundle(
+                    KEY_EXIT_THRESHOLD_SS_RSRQ_DOUBLE_BUNDLE,
+                    PersistableBundle.EMPTY);
+            // Default value is 2 seconds for all bands.
+            defaults.putLong(KEY_5G_DATA_SWITCH_HYSTERESIS_TIME_LONG, 2000);
+            defaults.putPersistableBundle(
+                    KEY_5G_DATA_SWITCH_HYSTERESIS_TIME_LONG_BUNDLE,
+                    PersistableBundle.EMPTY);
+            // Default value is 2 seconds for all bands.
+            defaults.putLong(KEY_5G_DATA_SWITCH_EXIT_HYSTERESIS_TIME_LONG, 2000);
+            defaults.putPersistableBundle(
+                    KEY_5G_DATA_SWITCH_EXIT_HYSTERESIS_TIME_LONG_BUNDLE,
+                    PersistableBundle.EMPTY);
+            // Default value is 10 seconds.
+            sDefaults.putLong(KEY_5G_BACKOFF_TIME_LONG, 10000);
+            // Default value is 60 seconds.
+            sDefaults.putLong(KEY_5G_MAX_BACKOFF_TIME_LONG, 60000);
+            // Default value is 60 seconds.
+            sDefaults.putLong(KEY_5G_PING_PONG_TIME_LONG, 60000);
+            return defaults;
+        }
+    }
+
     /**
      * Controls whether 4G opportunistic networks should be scanned for possible data switch.
      *
@@ -4108,6 +4350,56 @@ public class CarrierConfigManager {
     @SystemApi
     public static final String KEY_GBA_UA_TLS_CIPHER_SUITE_INT =
             "gba_ua_tls_cipher_suite_int";
+
+    /**
+     * The data stall recovery timers array in milliseconds, each element is the delay before
+     * performining next recovery action.
+     *
+     * The default value of timers array are: [180000ms, 180000ms, 180000ms] (3 minutes)
+     * Array[0]: It's the timer between RECOVERY_ACTION GET_DATA_CALL_LIST and CLEANUP, if data
+     * stall symptom still occurred, it will perform next recovery action after 180000ms.
+     * Array[1]: It's the timer between RECOVERY_ACTION CLEANUP and RADIO_RESTART, if data stall
+     * symptom still occurred, it will perform next recovery action after 180000ms.
+     * Array[2]: It's the timer between RECOVERY_ACTION RADIO_RESTART and RESET_MODEM, if data stall
+     * symptom still occurred, it will perform next recovery action after 180000ms.
+     *
+     * See the {@code RECOVERY_ACTION_*} constants in
+     * {@link com.android.internal.telephony.data.DataStallRecoveryManager}
+     * @hide
+     */
+    public static final String KEY_DATA_STALL_RECOVERY_TIMERS_LONG_ARRAY =
+            "data_stall_recovery_timers_long_array";
+
+    /**
+     * The data stall recovery action boolean array, we use this array to determine if the
+     * data stall recovery action needs to be skipped.
+     *
+     * For example, if the carrier use the same APN for both of IA and default type,
+     * the data call will not disconnect in modem side (so the RECOVERY_ACTION_CLEANUP
+     * did not effect). In this case, we can config the boolean variable of action
+     * RECOVERY_ACTION_CLEANUP to true, then it can be ignored to speed up the recovery
+     * action procedure.
+     *
+     * The default value of boolean array are: [false, false, false, false]
+     * Array[0]: When performing the recovery action, we can use this boolean value to determine
+     * if we need to perform RECOVERY_ACTION_GET_DATA_CALL_LIST.
+     * Array[1]: If data stall symptom still occurred, we can use this boolean value to determine
+     * if we need to perform RECOVERY_ACTION_CLEANUP. For example, if the carrier use the same APN
+     * for both of IA and default type, the data call will not disconnect in modem side
+     * (so the RECOVERY_ACTION_CLEANUP did not effect). In this case, we can config the boolean
+     * variable of action RECOVERY_ACTION_CLEANUP to true, then it can be ignored to speed up the
+     * recovery action procedure.
+     * Array[2]: If data stall symptom still occurred, we can use this boolean value to determine
+     * if we need to perform RECOVERY_ACTION_RADIO_RESTART.
+     * Array[3]: If data stall symptom still occurred, we can use this boolean value to determine
+     * if we need to perform RECOVERY_ACTION_MODEM_RESET.
+     *
+     * See the {@code RECOVERY_ACTION_*} constants in
+     * {@link com.android.internal.telephony.data.DataStallRecoveryManager}
+     * @hide
+     */
+    public static final String KEY_DATA_STALL_RECOVERY_SHOULD_SKIP_BOOL_ARRAY =
+            "data_stall_recovery_should_skip_bool_array";
 
     /**
      * Configs used by ImsServiceEntitlement.
@@ -4402,12 +4694,10 @@ public class CarrierConfigManager {
             "carrier_auto_cancel_cs_notification";
 
     /**
-     * Passing this value as {@link KEY_SUBSCRIPTION_GROUP_UUID_STRING} will remove the
+     * Passing this value as {@link #KEY_SUBSCRIPTION_GROUP_UUID_STRING} will remove the
      * subscription from a group instead of adding it to a group.
      *
-     * TODO: Expose in a future release.
-     *
-     * @hide
+     * <p>This value will work all the way back to {@link android.os.Build.VERSION_CODES#Q}.
      */
     public static final String REMOVE_GROUP_UUID_STRING = "00000000-0000-0000-0000-000000000000";
 
@@ -4420,9 +4710,7 @@ public class CarrierConfigManager {
      * <p>If set to {@link #REMOVE_GROUP_UUID_STRING}, then the subscription will be removed from
      * its current group.
      *
-     * TODO: unhide this key.
-     *
-     * @hide
+     * <p>This key will work all the way back to {@link android.os.Build.VERSION_CODES#Q}.
      */
     public static final String KEY_SUBSCRIPTION_GROUP_UUID_STRING =
             "subscription_group_uuid_string";
@@ -4447,17 +4735,15 @@ public class CarrierConfigManager {
             "data_switch_validation_min_gap_long";
 
     /**
-    * A boolean property indicating whether this subscription should be managed as an opportunistic
-    * subscription.
-    *
-    * If true, then this subscription will be selected based on available coverage and will not be
-    * available for a user in settings menus for selecting macro network providers. If unset,
-    * defaults to “false”.
-    *
-    * TODO: unhide this key.
-    *
-    * @hide
-    */
+     * A boolean property indicating whether this subscription should be managed as an opportunistic
+     * subscription.
+     *
+     * If true, then this subscription will be selected based on available coverage and will not be
+     * available for a user in settings menus for selecting macro network providers. If unset,
+     * defaults to “false”.
+     *
+     * <p>This key will work all the way back to {@link android.os.Build.VERSION_CODES#Q}.
+     */
     public static final String KEY_IS_OPPORTUNISTIC_SUBSCRIPTION_BOOL =
             "is_opportunistic_subscription_bool";
 
@@ -4596,6 +4882,15 @@ public class CarrierConfigManager {
                 KEY_PREFIX + "enable_presence_group_subscribe_bool";
 
         /**
+         * Flag indicating whether or not to use SIP URI when send a presence subscribe.
+         * When {@code true}, the device sets the To and Contact header to be SIP URI using
+         * the TelephonyManager#getIsimDomain" API.
+         * If {@code false}, the device uses a TEL URI.
+         */
+        public static final String KEY_USE_SIP_URI_FOR_PRESENCE_SUBSCRIBE_BOOL =
+                KEY_PREFIX + "use_sip_uri_for_presence_subscribe_bool";
+
+        /**
          * An integer key associated with the period of time in seconds the non-rcs capability
          * information of each contact is cached on the device.
          * <p>
@@ -4637,6 +4932,134 @@ public class CarrierConfigManager {
         public static final String KEY_RCS_REQUEST_RETRY_INTERVAL_MILLIS_LONG =
                 KEY_PREFIX + "rcs_request_retry_interval_millis_long";
 
+        /**
+         * A bundle which specifies the MMTEL capability and registration technology
+         * that requires provisioning. If a tuple is not present, the
+         * framework will not require that the tuple requires provisioning before
+         * enabling the capability.
+         * <p> Possible keys in this bundle are
+         * <ul>
+         *     <li>{@link #KEY_CAPABILITY_TYPE_VOICE_INT_ARRAY}</li>
+         *     <li>{@link #KEY_CAPABILITY_TYPE_VIDEO_INT_ARRAY}</li>
+         *     <li>{@link #KEY_CAPABILITY_TYPE_UT_INT_ARRAY}</li>
+         *     <li>{@link #KEY_CAPABILITY_TYPE_SMS_INT_ARRAY}</li>
+         *     <li>{@link #KEY_CAPABILITY_TYPE_CALL_COMPOSER_INT_ARRAY}</li>
+         * </ul>
+         * <p> The values are defined in
+         * {@link android.telephony.ims.stub.ImsRegistrationImplBase.ImsRegistrationTech}
+         */
+        public static final String KEY_MMTEL_REQUIRES_PROVISIONING_BUNDLE =
+                KEY_PREFIX + "mmtel_requires_provisioning_bundle";
+
+        /**
+         * List of different RAT technologies on which Provisioning for Voice calling (IR.92)
+         * is supported.
+         * @see MmTelFeature.MmTelCapabilities#CAPABILITY_TYPE_VOICE
+         * <p>Possible values are,
+         * {@link android.telephony.ims.stub.ImsRegistrationImplBase.ImsRegistrationTech#REGISTRATION_TECH_LTE}
+         * {@link android.telephony.ims.stub.ImsRegistrationImplBase.ImsRegistrationTech#REGISTRATION_TECH_IWLAN}
+         * {@link android.telephony.ims.stub.ImsRegistrationImplBase.ImsRegistrationTech#REGISTRATION_TECH_CROSS_SIM}
+         * {@link android.telephony.ims.stub.ImsRegistrationImplBase.ImsRegistrationTech#REGISTRATION_TECH_NR}
+         */
+        public static final String KEY_CAPABILITY_TYPE_VOICE_INT_ARRAY =
+                KEY_PREFIX + "capability_type_voice_int_array";
+
+        /**
+         * List of different RAT technologies on which Provisioning for Video Telephony (IR.94)
+         * is supported.
+         * @see MmTelFeature.MmTelCapabilities#CAPABILITY_TYPE_VIDEO
+         * <p>Possible values are,
+         * {@link android.telephony.ims.stub.ImsRegistrationImplBase.ImsRegistrationImplBase.ImsRegistrationTech#REGISTRATION_TECH_LTE}
+         * {@link android.telephony.ims.stub.ImsRegistrationImplBase.ImsRegistrationImplBase.ImsRegistrationTech#REGISTRATION_TECH_IWLAN}
+         * {@link android.telephony.ims.stub.ImsRegistrationImplBase.ImsRegistrationImplBase.ImsRegistrationTech#REGISTRATION_TECH_CROSS_SIM}
+         * {@link android.telephony.ims.stub.ImsRegistrationImplBase.ImsRegistrationImplBase.ImsRegistrationTech#REGISTRATION_TECH_NR}
+         */
+        public static final String KEY_CAPABILITY_TYPE_VIDEO_INT_ARRAY =
+                KEY_PREFIX + "capability_type_video_int_array";
+
+        /**
+         * List of different RAT technologies on which Provisioning for XCAP over Ut for
+         * supplementary services. (IR.92) is supported.
+         * @see MmTelFeature.MmTelCapabilities#CAPABILITY_TYPE_UT
+         * <p>Possible values are,
+         * {@link android.telephony.ims.stub.ImsRegistrationImplBase.ImsRegistrationImplBase.ImsRegistrationTech#REGISTRATION_TECH_LTE}
+         * {@link android.telephony.ims.stub.ImsRegistrationImplBase.ImsRegistrationImplBase.ImsRegistrationTech#REGISTRATION_TECH_IWLAN}
+         * {@link android.telephony.ims.stub.ImsRegistrationImplBase.ImsRegistrationImplBase.ImsRegistrationTech#REGISTRATION_TECH_CROSS_SIM}
+         * {@link android.telephony.ims.stub.ImsRegistrationImplBase.ImsRegistrationImplBase.ImsRegistrationTech#REGISTRATION_TECH_NR}
+         */
+        public static final String KEY_CAPABILITY_TYPE_UT_INT_ARRAY =
+                KEY_PREFIX + "capability_type_ut_int_array";
+
+        /**
+         * List of different RAT technologies on which Provisioning for SMS (IR.92) is supported.
+         * @see MmTelFeature.MmTelCapabilities#CAPABILITY_TYPE_SMS
+         * <p>Possible values are,
+         * {@link android.telephony.ims.stub.ImsRegistrationImplBase.ImsRegistrationImplBase.ImsRegistrationTech#REGISTRATION_TECH_LTE}
+         * {@link android.telephony.ims.stub.ImsRegistrationImplBase.ImsRegistrationImplBase.ImsRegistrationTech#REGISTRATION_TECH_IWLAN}
+         * {@link android.telephony.ims.stub.ImsRegistrationImplBase.ImsRegistrationImplBase.ImsRegistrationTech#REGISTRATION_TECH_CROSS_SIM}
+         * {@link android.telephony.ims.stub.ImsRegistrationImplBase.ImsRegistrationImplBase.ImsRegistrationTech#REGISTRATION_TECH_NR}
+         */
+        public static final String KEY_CAPABILITY_TYPE_SMS_INT_ARRAY =
+                KEY_PREFIX + "capability_type_sms_int_array";
+
+        /**
+         * List of different RAT technologies on which Provisioning for Call Composer
+         * (section 2.4 of RCC.20) is supported.
+         * @see MmTelFeature.MmTelCapabilities#CAPABILITY_TYPE_CALL_COMPOSER
+         * <p>Possible values are,
+         * {@link android.telephony.ims.stub.ImsRegistrationImplBase.ImsRegistrationImplBase.ImsRegistrationTech#REGISTRATION_TECH_LTE}
+         * {@link android.telephony.ims.stub.ImsRegistrationImplBase.ImsRegistrationImplBase.ImsRegistrationTech#REGISTRATION_TECH_IWLAN}
+         * {@link android.telephony.ims.stub.ImsRegistrationImplBase.ImsRegistrationImplBase.ImsRegistrationTech#REGISTRATION_TECH_CROSS_SIM}
+         * {@link android.telephony.ims.stub.ImsRegistrationImplBase.ImsRegistrationImplBase.ImsRegistrationTech#REGISTRATION_TECH_NR}
+         */
+        public static final String KEY_CAPABILITY_TYPE_CALL_COMPOSER_INT_ARRAY =
+                KEY_PREFIX + "capability_type_call_composer_int_array";
+
+        /**
+         * A bundle which specifies the RCS capability and registration technology
+         * that requires provisioning. If a tuple is not present, the
+         * framework will not require that the tuple requires provisioning before
+         * enabling the capability.
+         * <p> Possible keys in this bundle are
+         * <ul>
+         *     <li>{@link #KEY_CAPABILITY_TYPE_OPTIONS_UCE_INT_ARRAY}</li>
+         *     <li>{@link #KEY_CAPABILITY_TYPE_PRESENCE_UCE_INT_ARRAY}</li>
+         * </ul>
+         * <p> The values are defined in
+         * {@link android.telephony.ims.stub.ImsRegistrationImplBase.ImsRegistrationTech}
+         */
+        public static final String KEY_RCS_REQUIRES_PROVISIONING_BUNDLE =
+                KEY_PREFIX + "rcs_requires_provisioning_bundle";
+
+        /**
+         * This carrier supports User Capability Exchange using SIP OPTIONS as defined by the
+         * framework. If set, the RcsFeature should support capability exchange using SIP OPTIONS.
+         * If not set, this RcsFeature should not service capability requests.
+         * @see RcsFeature.RcsImsCapabilities#CAPABILITY_TYPE_OPTIONS_UCE
+         * <p>Possible values are,
+         * {@link android.telephony.ims.stub.ImsRegistrationImplBase.ImsRegistrationImplBase.ImsRegistrationTech#REGISTRATION_TECH_LTE}
+         * {@link android.telephony.ims.stub.ImsRegistrationImplBase.ImsRegistrationImplBase.ImsRegistrationTech#REGISTRATION_TECH_IWLAN}
+         * {@link android.telephony.ims.stub.ImsRegistrationImplBase.ImsRegistrationImplBase.ImsRegistrationTech#REGISTRATION_TECH_CROSS_SIM}
+         * {@link android.telephony.ims.stub.ImsRegistrationImplBase.ImsRegistrationImplBase.ImsRegistrationTech#REGISTRATION_TECH_NR}
+         */
+        public static final String KEY_CAPABILITY_TYPE_OPTIONS_UCE_INT_ARRAY =
+                KEY_PREFIX + "capability_type_options_uce_int_array";
+
+        /**
+         * This carrier supports User Capability Exchange using a presence server as defined by the
+         * framework. If set, the RcsFeature should support capability exchange using a presence
+         * server. If not set, this RcsFeature should not publish capabilities or service capability
+         * requests using presence.
+         * @see RcsFeature.RcsImsCapabilities#CAPABILITY_TYPE_PRESENCE_UCE
+         * <p>Possible values are,
+         * {@link android.telephony.ims.stub.ImsRegistrationImplBase.ImsRegistrationImplBase.ImsRegistrationTech#REGISTRATION_TECH_LTE}
+         * {@link android.telephony.ims.stub.ImsRegistrationImplBase.ImsRegistrationImplBase.ImsRegistrationTech#REGISTRATION_TECH_IWLAN}
+         * {@link android.telephony.ims.stub.ImsRegistrationImplBase.ImsRegistrationImplBase.ImsRegistrationTech#REGISTRATION_TECH_CROSS_SIM}
+         * {@link android.telephony.ims.stub.ImsRegistrationImplBase.ImsRegistrationImplBase.ImsRegistrationTech#REGISTRATION_TECH_NR}
+         */
+        public static final String KEY_CAPABILITY_TYPE_PRESENCE_UCE_INT_ARRAY =
+                KEY_PREFIX + "capability_type_presence_uce_int_array";
+
         private Ims() {}
 
         private static PersistableBundle getDefaults() {
@@ -4649,6 +5072,7 @@ public class CarrierConfigManager {
             defaults.putBoolean(KEY_ENABLE_PRESENCE_CAPABILITY_EXCHANGE_BOOL, false);
             defaults.putBoolean(KEY_RCS_BULK_CAPABILITY_EXCHANGE_BOOL, false);
             defaults.putBoolean(KEY_ENABLE_PRESENCE_GROUP_SUBSCRIBE_BOOL, false);
+            defaults.putBoolean(KEY_USE_SIP_URI_FOR_PRESENCE_SUBSCRIBE_BOOL, false);
             defaults.putInt(KEY_NON_RCS_CAPABILITIES_CACHE_EXPIRATION_SEC_INT, 30 * 24 * 60 * 60);
             defaults.putBoolean(KEY_RCS_REQUEST_FORBIDDEN_BY_SIP_489_BOOL, false);
             defaults.putLong(KEY_RCS_REQUEST_RETRY_INTERVAL_MILLIS_LONG, 20 * 60 * 1000);
@@ -4672,6 +5096,17 @@ public class CarrierConfigManager {
                     "+g.3gpp.iari-ref=\"urn%3Aurn-7%3A3gpp-application.ims.iari.rcs.chatbot.sa\"",
                     "+g.gsma.rcs.botversion=\"#=1,#=2\"",
                     "+g.gsma.rcs.cpimext"});
+
+            /**
+             * @see #KEY_MMTEL_REQUIRES_PROVISIONING_BUNDLE
+             */
+            defaults.putPersistableBundle(
+                    KEY_MMTEL_REQUIRES_PROVISIONING_BUNDLE, new PersistableBundle());
+            /**
+             * @see #KEY_RCS_REQUIRES_PROVISIONING_BUNDLE
+             */
+            defaults.putPersistableBundle(
+                    KEY_RCS_REQUIRES_PROVISIONING_BUNDLE, new PersistableBundle());
 
             return defaults;
         }
@@ -5133,6 +5568,86 @@ public class CarrierConfigManager {
     public static final String KEY_APN_PRIORITY_STRING_ARRAY = "apn_priority_string_array";
 
     /**
+     * Network capability priority for determine the satisfy order in telephony. The priority is
+     * from the lowest 0 to the highest 100. The long-lived network shall have the lowest priority.
+     * This allows other short-lived requests like MMS requests to be established. Emergency request
+     * always has the highest priority.
+     *
+     * @hide
+     */
+    public static final String KEY_TELEPHONY_NETWORK_CAPABILITY_PRIORITIES_STRING_ARRAY =
+            "telephony_network_capability_priorities_string_array";
+
+    /**
+     * Defines the rules for data setup retry.
+     *
+     * The syntax of the retry rule:
+     * 1. Retry based on {@link NetworkCapabilities}. Note that only APN-type network capabilities
+     *    are supported.
+     * "capabilities=[netCaps1|netCaps2|...], [retry_interval=n1|n2|n3|n4...], [maximum_retries=n]"
+     *
+     * 2. Retry based on {@link DataFailCause}
+     * "fail_causes=[cause1|cause2|cause3|..], [retry_interval=n1|n2|n3|n4...], [maximum_retries=n]"
+     *
+     * 3. Retry based on {@link NetworkCapabilities} and {@link DataFailCause}. Note that only
+     *    APN-type network capabilities are supported.
+     * "capabilities=[netCaps1|netCaps2|...], fail_causes=[cause1|cause2|cause3|...],
+     *     [retry_interval=n1|n2|n3|n4...], [maximum_retries=n]"
+     *
+     * For example,
+     * "capabilities=eims, retry_interval=1000, maximum_retries=20" means if the attached
+     * network request is emergency, then retry data network setup every 1 second for up to 20
+     * times.
+     *
+     * "fail_causes=8|27|28|29|30|32|33|35|50|51|111|-5|-6|65537|65538|-3|2253|2254
+     * , maximum_retries=0" means for those fail causes, never retry with timers. Note that
+     * when environment changes, retry can still happen.
+     *
+     * "capabilities=internet|enterprise|dun|ims|fota, retry_interval=2500|3000|"
+     * "5000|10000|15000|20000|40000|60000|120000|240000|600000|1200000|1800000"
+     * "1800000, maximum_retries=20" means for those capabilities, retry happens in 2.5s, 3s, 5s,
+     * 10s, 15s, 20s, 40s, 1m, 2m, 4m, 10m, 20m, 30m, 30m, 30m, until reaching 20 retries.
+     *
+     * // TODO: remove KEY_CARRIER_DATA_CALL_RETRY_CONFIG_STRINGS
+     * @hide
+     */
+    public static final String KEY_TELEPHONY_DATA_SETUP_RETRY_RULES_STRING_ARRAY =
+            "telephony_data_setup_retry_rules_string_array";
+
+    /**
+     * Defines the rules for data handover retry.
+     *
+     * The syntax of the retry rule:
+     * 1. Retry when handover fails.
+     * "retry_interval=[n1|n2|n3|...], [maximum_retries=n]"
+     *
+     * For example,
+     * "retry_interval=1000|3000|5000, maximum_retries=10" means handover retry will happen in 1s,
+     * 3s, 5s, 5s, 5s....up to 10 times.
+     *
+     * 2. Retry when handover fails with certain fail causes.
+     * "retry_interval=[n1|n2|n3|...], fail_causes=[cause1|cause2|cause3|...], [maximum_retries=n]
+     *
+     * For example,
+     * "retry_interval=1000, maximum_retries=3, fail_causes=5" means handover retry every 1 second
+     * for up to 3 times when handover fails with the cause 5.
+     *
+     * "maximum_retries=0, fail_causes=6|10|67" means handover retry should not happen for those
+     * causes.
+     *
+     * @hide
+     */
+    public static final String KEY_TELEPHONY_DATA_HANDOVER_RETRY_RULES_STRING_ARRAY =
+            "telephony_data_handover_retry_rules_string_array";
+
+    /**
+     * Indicates whether delay tearing down IMS data network until voice call ends.
+     * @hide
+     */
+    public static final String KEY_DELAY_IMS_TEAR_DOWN_UNTIL_CALL_END_BOOL =
+            "delay_ims_tear_down_until_call_end_bool";
+
+    /**
      * The patterns of missed incoming call sms. This is the regular expression used for
      * matching the missed incoming call's date, time, and caller id. The pattern should match
      * fields for at least month, day, hour, and minute. Year is optional although it is encouraged.
@@ -5315,6 +5830,34 @@ public class CarrierConfigManager {
     public static final String KEY_UNTHROTTLE_DATA_RETRY_WHEN_TAC_CHANGES_BOOL =
             "unthrottle_data_retry_when_tac_changes_bool";
 
+    /**
+     * IWLAN handover rules that determine whether handover is allowed or disallowed between
+     * cellular and IWLAN.
+     *
+     * The handover rules will be matched in the order. Here are some sample rules.
+     * <string-array name="iwlan_handover_rules" num="5">
+     *     <!-- Handover from IWLAN to 2G/3G is not allowed -->
+     *     <item value="source=IWLAN, target=GERAN|UTRAN, type=disallowed"/>
+     *     <!-- Handover from 2G/3G to IWLAN is not allowed -->
+     *     <item value="source=GERAN|UTRAN, target:IWLAN, type=disallowed"/>
+     *     <!-- Handover from IWLAN to 3G/4G/5G is not allowed if the device is roaming. -->
+     *     <item value="source=IWLAN, target=UTRAN|EUTRAN|NGRAN, roaming=true, type=disallowed"/>
+     *     <!-- Handover from 4G to IWLAN is not allowed -->
+     *     <item value="source=EUTRAN, target=IWLAN, type=disallowed"/>
+     *     <!-- Handover is always allowed in any condition. -->
+     *     <item value="source=GERAN|UTRAN|EUTRAN|NGRAN|IWLAN,
+     *         target=GERAN|UTRAN|EUTRAN|NGRAN|IWLAN, type=allowed"/>
+     * </string-array>
+     *
+     * When handover is not allowed, frameworks will tear down the data network on source transport,
+     * and then setup a new one on the target transport when Qualified Network Service changes the
+     * preferred access networks for particular APN types.
+     *
+     * @hide
+     */
+    public static final String KEY_IWLAN_HANDOVER_POLICY_STRING_ARRAY =
+            "iwlan_handover_policy_string_array";
+
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
 
@@ -5421,6 +5964,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_VOICE_PRIVACY_DISABLE_UI_BOOL, false);
         sDefaults.putBoolean(KEY_WORLD_PHONE_BOOL, false);
         sDefaults.putBoolean(KEY_REQUIRE_ENTITLEMENT_CHECKS_BOOL, true);
+        sDefaults.putBoolean(KEY_CARRIER_SUPPORTS_TETHERING_BOOL, true);
         sDefaults.putBoolean(KEY_RESTART_RADIO_ON_PDP_FAIL_REGULAR_DEACTIVATION_BOOL, false);
         sDefaults.putIntArray(KEY_RADIO_RESTART_FAILURE_CAUSES_INT_ARRAY, new int[]{});
         sDefaults.putInt(KEY_VOLTE_REPLACEMENT_RAT_INT, 0);
@@ -5452,6 +5996,7 @@ public class CarrierConfigManager {
 
         sDefaults.putBoolean(KEY_BROADCAST_EMERGENCY_CALL_STATE_CHANGES_BOOL, false);
         sDefaults.putBoolean(KEY_ALWAYS_SHOW_EMERGENCY_ALERT_ONOFF_BOOL, false);
+        sDefaults.putInt(KEY_DEFAULT_MTU_INT, 1500);
         sDefaults.putStringArray(KEY_CARRIER_DATA_CALL_RETRY_CONFIG_STRINGS, new String[]{
                 "default:default_randomization=2000,5000,10000,20000,40000,80000:5000,160000:5000,"
                         + "320000:5000,640000:5000,1280000:5000,1800000:5000",
@@ -5461,7 +6006,7 @@ public class CarrierConfigManager {
                 "others:max_retries=3, 5000, 5000, 5000"});
         sDefaults.putLong(KEY_CARRIER_DATA_CALL_APN_DELAY_DEFAULT_LONG, 20000);
         sDefaults.putLong(KEY_CARRIER_DATA_CALL_APN_DELAY_FASTER_LONG, 3000);
-        sDefaults.putLong(KEY_CARRIER_DATA_CALL_APN_RETRY_AFTER_DISCONNECT_LONG, 10000);
+        sDefaults.putLong(KEY_CARRIER_DATA_CALL_APN_RETRY_AFTER_DISCONNECT_LONG, 3000);
         sDefaults.putInt(KEY_CARRIER_DATA_CALL_RETRY_NETWORK_REQUESTED_MAX_COUNT_INT, 3);
         sDefaults.putString(KEY_CARRIER_ERI_FILE_NAME_STRING, "eri.xml");
         sDefaults.putInt(KEY_DURATION_BLOCKING_DISABLED_AFTER_EMERGENCY_INT, 7200);
@@ -5474,14 +6019,9 @@ public class CarrierConfigManager {
         sDefaults.putStringArray(KEY_CARRIER_WLAN_DISALLOWED_APN_TYPES_STRING_ARRAY,
                 new String[]{""});
         sDefaults.putIntArray(KEY_ONLY_SINGLE_DC_ALLOWED_INT_ARRAY,
-                new int[]{
-                    4, /* IS95A */
-                    5, /* IS95B */
-                    6, /* 1xRTT */
-                    7, /* EVDO_0 */
-                    8, /* EVDO_A */
-                    12 /* EVDO_B */
-                });
+                new int[] {TelephonyManager.NETWORK_TYPE_CDMA, TelephonyManager.NETWORK_TYPE_1xRTT,
+                        TelephonyManager.NETWORK_TYPE_EVDO_0, TelephonyManager.NETWORK_TYPE_EVDO_A,
+                        TelephonyManager.NETWORK_TYPE_EVDO_B});
         sDefaults.putStringArray(KEY_GSM_ROAMING_NETWORKS_STRING_ARRAY, null);
         sDefaults.putStringArray(KEY_GSM_NONROAMING_NETWORKS_STRING_ARRAY, null);
         sDefaults.putString(KEY_CONFIG_IMS_PACKAGE_OVERRIDE_STRING, null);
@@ -5770,12 +6310,13 @@ public class CarrierConfigManager {
                 CellSignalStrengthNr.USE_SSRSRP);
         sDefaults.putBoolean(KEY_SIGNAL_STRENGTH_NR_NSA_USE_LTE_AS_PRIMARY_BOOL, true);
         sDefaults.putStringArray(KEY_BANDWIDTH_STRING_ARRAY, new String[]{
-                "GPRS:24,24", "EDGE:70,18", "UMTS:115,115", "CDMA-IS95A:14,14", "CDMA-IS95B:14,14",
-                "1xRTT:30,30", "EvDo-rev.0:750,48", "EvDo-rev.A:950,550", "HSDPA:4300,620",
-                "HSUPA:4300,1800", "HSPA:4300,1800", "EvDo-rev.B:1500,550", "eHRPD:750,48",
-                "HSPAP:13000,3400", "TD-SCDMA:115,115", "LTE:30000,15000", "NR_NSA:47000,18000",
-                "NR_NSA_MMWAVE:145000,60000", "NR_SA:145000,60000"});
-        sDefaults.putBoolean(KEY_BANDWIDTH_NR_NSA_USE_LTE_VALUE_FOR_UPSTREAM_BOOL, false);
+                "GPRS:24,24", "EDGE:70,18", "UMTS:115,115", "CDMA:14,14",
+                "1xRTT:30,30", "EvDo_0:750,48", "EvDo_A:950,550", "HSDPA:4300,620",
+                "HSUPA:4300,1800", "HSPA:4300,1800", "EvDo_B:1500,550", "eHRPD:750,48",
+                "iDEN:14,14", "LTE:30000,15000", "HSPA+:13000,3400", "GSM:24,24",
+                "TD_SCDMA:115,115", "LTE_CA:30000,15000", "NR_NSA:47000,18000",
+                "NR_NSA_MMWAVE:145000,60000", "NR_SA:145000,60000", "NR_SA_MMWAVE:145000,60000"});
+        sDefaults.putBoolean(KEY_BANDWIDTH_NR_NSA_USE_LTE_VALUE_FOR_UPLINK_BOOL, false);
         sDefaults.putString(KEY_WCDMA_DEFAULT_SIGNAL_STRENGTH_MEASUREMENT_STRING, "rssi");
         sDefaults.putBoolean(KEY_CONFIG_SHOW_ORIG_DIAL_STRING_FOR_CDMA_BOOL, false);
         sDefaults.putBoolean(KEY_SHOW_CALL_BLOCKING_DISABLED_NOTIFICATION_ALWAYS_BOOL, false);
@@ -5801,6 +6342,9 @@ public class CarrierConfigManager {
         sDefaults.putInt(KEY_NR_ADVANCED_CAPABLE_PCO_ID_INT, 0);
         sDefaults.putBoolean(KEY_ENABLE_NR_ADVANCED_WHILE_ROAMING_BOOL, true);
         sDefaults.putBoolean(KEY_LTE_ENDC_USING_USER_DATA_FOR_RRC_DETECTION_BOOL, false);
+        sDefaults.putStringArray(KEY_UNMETERED_NETWORK_TYPES_STRING_ARRAY, new String[] {
+                "NR_NSA", "NR_NSA_MMWAVE", "NR_SA", "NR_SA_MMWAVE"});
+        sDefaults.putStringArray(KEY_ROAMING_UNMETERED_NETWORK_TYPES_STRING_ARRAY, new String[0]);
         sDefaults.putBoolean(KEY_UNMETERED_NR_NSA_BOOL, false);
         sDefaults.putBoolean(KEY_UNMETERED_NR_NSA_MMWAVE_BOOL, false);
         sDefaults.putBoolean(KEY_UNMETERED_NR_NSA_SUB6_BOOL, false);
@@ -5815,14 +6359,15 @@ public class CarrierConfigManager {
         sDefaults.putInt(KEY_ESIM_MAX_DOWNLOAD_RETRY_ATTEMPTS_INT, 5);
         sDefaults.putInt(KEY_ESIM_DOWNLOAD_RETRY_BACKOFF_TIMER_SEC_INT, 60);
         sDefaults.putIntArray(KEY_OPPORTUNISTIC_CARRIER_IDS_INT_ARRAY, new int[] {0});
+        sDefaults.putBoolean(KEY_OPPORTUNISTIC_ESIM_DOWNLOAD_VIA_WIFI_ONLY_BOOL, false);
         /* Default value is minimum RSRP level needed for SIGNAL_STRENGTH_GOOD */
         sDefaults.putInt(KEY_OPPORTUNISTIC_NETWORK_ENTRY_THRESHOLD_RSRP_INT, -108);
         /* Default value is minimum RSRP level needed for SIGNAL_STRENGTH_MODERATE */
         sDefaults.putInt(KEY_OPPORTUNISTIC_NETWORK_EXIT_THRESHOLD_RSRP_INT, -118);
         /* Default value is minimum RSSNR level needed for SIGNAL_STRENGTH_GOOD */
-        sDefaults.putInt(KEY_OPPORTUNISTIC_NETWORK_ENTRY_THRESHOLD_RSSNR_INT, 45);
+        sDefaults.putInt(KEY_OPPORTUNISTIC_NETWORK_ENTRY_THRESHOLD_RSSNR_INT, 5);
         /* Default value is minimum RSSNR level needed for SIGNAL_STRENGTH_MODERATE */
-        sDefaults.putInt(KEY_OPPORTUNISTIC_NETWORK_EXIT_THRESHOLD_RSSNR_INT, 10);
+        sDefaults.putInt(KEY_OPPORTUNISTIC_NETWORK_EXIT_THRESHOLD_RSSNR_INT, 1);
         /* Default value is 1024 kbps */
         sDefaults.putInt(KEY_OPPORTUNISTIC_NETWORK_ENTRY_THRESHOLD_BANDWIDTH_INT, 1024);
         /* Default value is 10 seconds */
@@ -5831,6 +6376,7 @@ public class CarrierConfigManager {
         sDefaults.putLong(KEY_OPPORTUNISTIC_NETWORK_DATA_SWITCH_HYSTERESIS_TIME_LONG, 10000);
         /* Default value is 3 seconds. */
         sDefaults.putLong(KEY_OPPORTUNISTIC_NETWORK_DATA_SWITCH_EXIT_HYSTERESIS_TIME_LONG, 3000);
+        sDefaults.putAll(OpportunisticNetwork.getDefaults());
         sDefaults.putBoolean(KEY_PING_TEST_BEFORE_DATA_SWITCH_BOOL, true);
         sDefaults.putBoolean(KEY_SWITCH_DATA_TO_PRIMARY_IF_PRIMARY_IS_OOS_BOOL, true);
         /* Default value is 60 seconds. */
@@ -5839,24 +6385,6 @@ public class CarrierConfigManager {
         sDefaults.putLong(KEY_OPPORTUNISTIC_NETWORK_BACKOFF_TIME_LONG, 10000);
         /* Default value is 60 seconds. */
         sDefaults.putLong(KEY_OPPORTUNISTIC_NETWORK_MAX_BACKOFF_TIME_LONG, 60000);
-        /* Default value is -111 dBm. */
-        sDefaults.putInt(KEY_OPPORTUNISTIC_NETWORK_ENTRY_THRESHOLD_SS_RSRP_INT, -111);
-        /* Default value is -18.5 dB. */
-        sDefaults.putDouble(KEY_OPPORTUNISTIC_NETWORK_ENTRY_THRESHOLD_SS_RSRQ_DOUBLE, -18.5);
-        /* Default value is -120 dBm. */
-        sDefaults.putInt(KEY_OPPORTUNISTIC_NETWORK_EXIT_THRESHOLD_SS_RSRP_INT, -120);
-        /* Default value is -18.5 dB. */
-        sDefaults.putDouble(KEY_OPPORTUNISTIC_NETWORK_EXIT_THRESHOLD_SS_RSRQ_DOUBLE, -18.5);
-        /* Default value is 10 seconds. */
-        sDefaults.putLong(KEY_OPPORTUNISTIC_NETWORK_5G_BACKOFF_TIME_LONG, 10000);
-        /* Default value is 60 seconds. */
-        sDefaults.putLong(KEY_OPPORTUNISTIC_NETWORK_5G_MAX_BACKOFF_TIME_LONG, 60000);
-        /* Default value is 60 seconds. */
-        sDefaults.putLong(KEY_OPPORTUNISTIC_NETWORK_5G_PING_PONG_TIME_LONG, 60000);
-        /* Default value is 2 seconds. */
-        sDefaults.putLong(KEY_OPPORTUNISTIC_NETWORK_5G_DATA_SWITCH_HYSTERESIS_TIME_LONG, 2000);
-        /* Default value is 2 seconds. */
-        sDefaults.putLong(KEY_OPPORTUNISTIC_NETWORK_5G_DATA_SWITCH_EXIT_HYSTERESIS_TIME_LONG, 2000);
         sDefaults.putBoolean(KEY_ENABLE_4G_OPPORTUNISTIC_NETWORK_SCAN_BOOL, true);
         sDefaults.putLong(KEY_TIME_TO_SWITCH_BACK_TO_PRIMARY_IF_OPPORTUNISTIC_OOS_LONG, 60000L);
         sDefaults.putLong(
@@ -5915,6 +6443,29 @@ public class CarrierConfigManager {
                 "enterprise:0", "default:1", "mms:2", "supl:2", "dun:2", "hipri:3", "fota:2",
                 "ims:2", "cbs:2", "ia:2", "emergency:2", "mcx:3", "xcap:3"
         });
+
+        // Do not modify the priority unless you know what you are doing. This will have significant
+        // impacts on the order of data network setup.
+        sDefaults.putStringArray(
+                KEY_TELEPHONY_NETWORK_CAPABILITY_PRIORITIES_STRING_ARRAY, new String[] {
+                        "eims:90", "supl:80", "mms:70", "xcap:70", "cbs:50", "mcx:50", "fota:50",
+                        "ims:40", "dun:30", "enterprise:20", "internet:20"
+                });
+        sDefaults.putStringArray(
+                KEY_TELEPHONY_DATA_SETUP_RETRY_RULES_STRING_ARRAY, new String[] {
+                        "capabilities=eims, retry_interval=1000, maximum_retries=20",
+                        "fail_causes=8|27|28|29|30|32|33|35|50|51|111|-5|-6|65537|65538|-3|2252|"
+                                + "2253|2254, maximum_retries=0", // No retry for those causes
+                        "capabilities=mms|supl|cbs, retry_interval=2000",
+                        "capabilities=internet|enterprise|dun|ims|fota, retry_interval=2500|3000|"
+                                + "5000|10000|15000|20000|40000|60000|120000|240000|"
+                                + "600000|1200000|1800000, maximum_retries=20"
+                });
+        sDefaults.putStringArray(
+                KEY_TELEPHONY_DATA_HANDOVER_RETRY_RULES_STRING_ARRAY, new String[] {
+                        "retry_interval=1000|2000|4000|8000|16000, maximum_retries=5"
+                });
+        sDefaults.putBoolean(KEY_DELAY_IMS_TEAR_DOWN_UNTIL_CALL_END_BOOL, false);
         sDefaults.putStringArray(KEY_MISSED_INCOMING_CALL_SMS_PATTERN_STRING_ARRAY, new String[0]);
         sDefaults.putBoolean(KEY_DISABLE_DUN_APN_WHILE_ROAMING_WITH_PRESET_APN_BOOL, false);
         sDefaults.putString(KEY_DEFAULT_PREFERRED_APN_NAME_STRING, "");
@@ -5926,15 +6477,24 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_STORE_SIM_PIN_FOR_UNATTENDED_REBOOT_BOOL, true);
         sDefaults.putBoolean(KEY_HIDE_ENABLE_2G, false);
         sDefaults.putStringArray(KEY_ALLOWED_INITIAL_ATTACH_APN_TYPES_STRING_ARRAY,
-                new String[]{"ia", "default", "mms", "dun"});
+                new String[]{"ia", "default"});
         sDefaults.putBoolean(KEY_CARRIER_PROVISIONS_WIFI_MERGED_NETWORKS_BOOL, false);
         sDefaults.putBoolean(KEY_USE_IP_FOR_CALLING_INDICATOR_BOOL, false);
         sDefaults.putBoolean(KEY_DISPLAY_CALL_STRENGTH_INDICATOR_BOOL, true);
         sDefaults.putString(KEY_CARRIER_PROVISIONING_APP_STRING, "");
         sDefaults.putBoolean(KEY_DISPLAY_NO_DATA_NOTIFICATION_ON_PERMANENT_FAILURE_BOOL, false);
         sDefaults.putBoolean(KEY_UNTHROTTLE_DATA_RETRY_WHEN_TAC_CHANGES_BOOL, false);
-        sDefaults.putBoolean(KEY_VONR_SETTING_VISIBILITY_BOOL, false);
+        sDefaults.putBoolean(KEY_VONR_SETTING_VISIBILITY_BOOL, true);
         sDefaults.putBoolean(KEY_VONR_ENABLED_BOOL, false);
+        sDefaults.putStringArray(KEY_IWLAN_HANDOVER_POLICY_STRING_ARRAY, new String[]{
+                "source=GERAN|UTRAN|EUTRAN|NGRAN|IWLAN, "
+                        + "target=GERAN|UTRAN|EUTRAN|NGRAN|IWLAN, type=allowed"});
+
+        // Default data stall recovery configurations.
+        sDefaults.putLongArray(KEY_DATA_STALL_RECOVERY_TIMERS_LONG_ARRAY,
+                new long[] {180000, 180000, 180000});
+        sDefaults.putBooleanArray(KEY_DATA_STALL_RECOVERY_SHOULD_SKIP_BOOL_ARRAY,
+                new boolean[] {false, false, false, false});
     }
 
     /**

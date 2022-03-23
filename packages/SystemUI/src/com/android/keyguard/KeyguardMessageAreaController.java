@@ -17,6 +17,7 @@
 package com.android.keyguard;
 
 import android.content.res.ColorStateList;
+import android.content.res.Configuration;
 
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
@@ -47,6 +48,11 @@ public class KeyguardMessageAreaController extends ViewController<KeyguardMessag
     };
 
     private ConfigurationListener mConfigurationListener = new ConfigurationListener() {
+        @Override
+        public void onConfigChanged(Configuration newConfig) {
+            mView.onConfigChanged();
+        }
+
         @Override
         public void onThemeChanged() {
             mView.onThemeChanged();

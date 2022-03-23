@@ -1036,7 +1036,8 @@ public class BiometricService extends SystemService {
         promptInfo.setAuthenticators(authenticators);
 
         return PreAuthInfo.create(mTrustManager, mDevicePolicyManager, mSettingObserver, mSensors,
-                userId, promptInfo, opPackageName, false /* checkDevicePolicyManager */);
+                userId, promptInfo, opPackageName, false /* checkDevicePolicyManager */,
+                getContext());
     }
 
     /**
@@ -1375,15 +1376,20 @@ public class BiometricService extends SystemService {
             try {
                 final PreAuthInfo preAuthInfo = PreAuthInfo.create(mTrustManager,
                         mDevicePolicyManager, mSettingObserver, mSensors, userId, promptInfo,
-                        opPackageName, promptInfo.isDisallowBiometricsIfPolicyExists());
+                        opPackageName, promptInfo.isDisallowBiometricsIfPolicyExists(),
+                        getContext());
 
                 final Pair<Integer, Integer> preAuthStatus = preAuthInfo.getPreAuthenticateStatus();
 
                 Slog.d(TAG, "handleAuthenticate: modality(" + preAuthStatus.first
                         + "), status(" + preAuthStatus.second + "), preAuthInfo: " + preAuthInfo
-                        + " requestId: " + requestId);
-
-                if (preAuthStatus.second == BiometricConstants.BIOMETRIC_SUCCESS) {
+                        + " requestId: " + requestId + " promptInfo.isIgnoreEnrollmentState: "
+                        + promptInfo.isIgnoreEnrollmentState());
+                // BIOMETRIC_ERROR_SENSOR_PRIVACY_ENABLED is added so that BiometricPrompt can
+                // be shown for this case.
+                if (preAuthStatus.second == BiometricConstants.BIOMETRIC_SUCCESS
+                        || preAuthStatus.second
+                        == BiometricConstants.BIOMETRIC_ERROR_SENSOR_PRIVACY_ENABLED) {
                     // If BIOMETRIC_WEAK or BIOMETRIC_STRONG are allowed, but not enrolled, but
                     // CREDENTIAL is requested and available, set the bundle to only request
                     // CREDENTIAL.

@@ -253,15 +253,18 @@ public class DataServiceCallback {
                 return "RESULT_ERROR_BUSY";
             case RESULT_ERROR_ILLEGAL_STATE:
                 return "RESULT_ERROR_ILLEGAL_STATE";
+            case RESULT_ERROR_TEMPORARILY_UNAVAILABLE:
+                return "RESULT_ERROR_TEMPORARILY_UNAVAILABLE";
             default:
-                return "Missing case for result code=" + resultCode;
+                return "Unknown(" + resultCode + ")";
         }
     }
 
     /**
-     * Unthrottles the APN on the current transport.  There is no matching "APN throttle" method.
-     * Instead, the APN is throttled when {@link IDataService#setupDataCall} fails within
-     * the time specified by {@link DataCallResponse#getRetryDurationMillis}.
+     * Unthrottles the APN on the current transport.
+     * The APN is throttled when {@link IDataService#setupDataCall} fails within
+     * the time specified by {@link DataCallResponse#getRetryDurationMillis} and will remain
+     * throttled until this method is called.
      * <p/>
      * see: {@link DataCallResponse#getRetryDurationMillis}
      *
@@ -282,9 +285,9 @@ public class DataServiceCallback {
 
     /**
      * Unthrottles the DataProfile on the current transport.
-     * There is no matching "DataProfile throttle" method.
-     * Instead, the DataProfile is throttled when {@link IDataService#setupDataCall} fails within
-     * the time specified by {@link DataCallResponse#getRetryDurationMillis}.
+     * The DataProfile is throttled when {@link IDataService#setupDataCall} fails within
+     * the time specified by {@link DataCallResponse#getRetryDurationMillis} and will remain
+     * throttled until this method is called.
      * <p/>
      * see: {@link DataCallResponse#getRetryDurationMillis}
      *

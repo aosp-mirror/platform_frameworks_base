@@ -19,7 +19,6 @@ package com.android.systemui.statusbar
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
-import android.app.WallpaperManager
 import android.os.SystemClock
 import android.os.Trace
 import android.util.IndentingPrintWriter
@@ -33,15 +32,17 @@ import androidx.dynamicanimation.animation.SpringAnimation
 import androidx.dynamicanimation.animation.SpringForce
 import com.android.systemui.Dumpable
 import com.android.systemui.animation.Interpolators
+import com.android.systemui.animation.ShadeInterpolation
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.phone.BiometricUnlockController
 import com.android.systemui.statusbar.phone.BiometricUnlockController.MODE_WAKE_AND_UNLOCK
 import com.android.systemui.statusbar.phone.DozeParameters
-import com.android.systemui.statusbar.phone.PanelExpansionListener
 import com.android.systemui.statusbar.phone.ScrimController
+import com.android.systemui.statusbar.phone.panelstate.PanelExpansionListener
 import com.android.systemui.statusbar.policy.KeyguardStateController
+import com.android.systemui.util.WallpaperController
 import java.io.FileDescriptor
 import java.io.PrintWriter
 import javax.inject.Inject
@@ -58,7 +59,7 @@ class NotificationShadeDepthController @Inject constructor(
     private val biometricUnlockController: BiometricUnlockController,
     private val keyguardStateController: KeyguardStateController,
     private val choreographer: Choreographer,
-    private val wallpaperManager: WallpaperManager,
+    private val wallpaperController: WallpaperController,
     private val notificationShadeWindowController: NotificationShadeWindowController,
     private val dozeParameters: DozeParameters,
     dumpManager: DumpManager
@@ -181,12 +182,12 @@ class NotificationShadeDepthController @Inject constructor(
         val animationRadius = MathUtils.constrain(shadeAnimation.radius,
                 blurUtils.minBlurRadius.toFloat(), blurUtils.maxBlurRadius.toFloat())
         val expansionRadius = blurUtils.blurRadiusOfRatio(
-                Interpolators.getNotificationScrimAlpha(
-                        if (shouldApplyShadeBlur()) shadeExpansion else 0f, false))
+                ShadeInterpolation.getNotificationScrimAlpha(
+                        if (shouldApplyShadeBlur()) shadeExpansion else 0f))
         var combinedBlur = (expansionRadius * INTERACTION_BLUR_FRACTION +
                 animationRadius * ANIMATION_BLUR_FRACTION)
-        val qsExpandedRatio = Interpolators.getNotificationScrimAlpha(qsPanelExpansion,
-                false /* notification */) * shadeExpansion
+        val qsExpandedRatio = ShadeInterpolation.getNotificationScrimAlpha(qsPanelExpansion) *
+                shadeExpansion
         combinedBlur = max(combinedBlur, blurUtils.blurRadiusOfRatio(qsExpandedRatio))
         combinedBlur = max(combinedBlur, blurUtils.blurRadiusOfRatio(transitionToFullShadeProgress))
         var shadeRadius = max(combinedBlur, wakeAndUnlockBlurRadius)
@@ -215,15 +216,7 @@ class NotificationShadeDepthController @Inject constructor(
         Trace.traceCounter(Trace.TRACE_TAG_APP, "shade_blur_radius", blur)
         blurUtils.applyBlur(blurRoot?.viewRootImpl ?: root.viewRootImpl, blur, opaque)
         lastAppliedBlur = blur
-        try {
-            if (root.isAttachedToWindow && root.windowToken != null) {
-                wallpaperManager.setWallpaperZoomOut(root.windowToken, zoomOut)
-            } else {
-                Log.i(TAG, "Won't set zoom. Window not attached $root")
-            }
-        } catch (e: IllegalArgumentException) {
-            Log.w(TAG, "Can't set zoom. Window is gone: ${root.windowToken}", e)
-        }
+        wallpaperController.setNotificationShadeZoom(zoomOut)
         listeners.forEach {
             it.onWallpaperZoomOutChanged(zoomOut)
             it.onBlurRadiusChanged(blur)
@@ -316,10 +309,12 @@ class NotificationShadeDepthController @Inject constructor(
     /**
      * Update blurs when pulling down the shade
      */
-    override fun onPanelExpansionChanged(rawExpansion: Float, tracking: Boolean) {
+    override fun onPanelExpansionChanged(
+        rawFraction: Float, expanded: Boolean, tracking: Boolean
+    ) {
         val timestamp = SystemClock.elapsedRealtimeNanos()
         val expansion = MathUtils.saturate(
-                (rawExpansion - panelPullDownMinFraction) / (1f - panelPullDownMinFraction))
+                (rawFraction - panelPullDownMinFraction) / (1f - panelPullDownMinFraction))
 
         if (shadeExpansion == expansion && prevTracking == tracking) {
             prevTimestamp = timestamp

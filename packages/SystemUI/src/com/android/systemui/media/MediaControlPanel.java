@@ -55,9 +55,11 @@ import com.android.systemui.animation.GhostedViewLaunchAnimatorController;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.media.dialog.MediaOutputDialogFactory;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.shared.system.SysUiStatsLog;
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil;
 import com.android.systemui.util.animation.TransitionLayout;
+import com.android.systemui.util.time.SystemClock;
 
 import java.net.URISyntaxException;
 import java.util.List;
@@ -119,6 +121,10 @@ public class MediaControlPanel {
     private int mSmartspaceMediaItemsCount;
     private MediaCarouselController mMediaCarouselController;
     private final MediaOutputDialogFactory mMediaOutputDialogFactory;
+    private final FalsingManager mFalsingManager;
+    // Used for swipe-to-dismiss logging.
+    protected boolean mIsImpressed = false;
+    private SystemClock mSystemClock;
 
     /**
      * Initialize a new control panel
@@ -131,7 +137,8 @@ public class MediaControlPanel {
             ActivityStarter activityStarter, MediaViewController mediaViewController,
             SeekBarViewModel seekBarViewModel, Lazy<MediaDataManager> lazyMediaDataManager,
             KeyguardDismissUtil keyguardDismissUtil, MediaOutputDialogFactory
-            mediaOutputDialogFactory, MediaCarouselController mediaCarouselController) {
+            mediaOutputDialogFactory, MediaCarouselController mediaCarouselController,
+            FalsingManager falsingManager, SystemClock systemClock) {
         mContext = context;
         mBackgroundExecutor = backgroundExecutor;
         mActivityStarter = activityStarter;
@@ -141,6 +148,9 @@ public class MediaControlPanel {
         mKeyguardDismissUtil = keyguardDismissUtil;
         mMediaOutputDialogFactory = mediaOutputDialogFactory;
         mMediaCarouselController = mediaCarouselController;
+        mFalsingManager = falsingManager;
+        mSystemClock = systemClock;
+
         loadDimens();
 
         mSeekBarViewModel.setLogSmartspaceClick(() -> {
@@ -235,10 +245,14 @@ public class MediaControlPanel {
             }
         });
         mPlayerViewHolder.getCancel().setOnClickListener(v -> {
-            closeGuts();
+            if (!mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
+                closeGuts();
+            }
         });
         mPlayerViewHolder.getSettings().setOnClickListener(v -> {
-            mActivityStarter.startActivity(SETTINGS_INTENT, true /* dismissShade */);
+            if (!mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
+                mActivityStarter.startActivity(SETTINGS_INTENT, true /* dismissShade */);
+            }
         });
     }
 
@@ -259,10 +273,14 @@ public class MediaControlPanel {
             }
         });
         mRecommendationViewHolder.getCancel().setOnClickListener(v -> {
-            closeGuts();
+            if (!mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
+                closeGuts();
+            }
         });
         mRecommendationViewHolder.getSettings().setOnClickListener(v -> {
-            mActivityStarter.startActivity(SETTINGS_INTENT, true /* dismissShade */);
+            if (!mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
+                mActivityStarter.startActivity(SETTINGS_INTENT, true /* dismissShade */);
+            }
         });
     }
 
@@ -279,7 +297,10 @@ public class MediaControlPanel {
         } catch (PackageManager.NameNotFoundException e) {
             Log.e(TAG, "Unable to look up package name", e);
         }
-        mInstanceId = SmallHash.hash(mUid);
+        // Only assigns instance id if it's unassigned.
+        if (mInstanceId == -1) {
+            mInstanceId = SmallHash.hash(mUid + (int) mSystemClock.currentTimeMillis());
+        }
 
         mBackgroundColor = data.getBackgroundColor();
         if (mToken == null || !mToken.equals(token)) {
@@ -299,6 +320,7 @@ public class MediaControlPanel {
         PendingIntent clickIntent = data.getClickIntent();
         if (clickIntent != null) {
             mPlayerViewHolder.getPlayer().setOnClickListener(v -> {
+                if (mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) return;
                 if (mMediaViewController.isGutsVisible()) return;
 
                 logSmartspaceCardReported(760, // SMARTSPACE_CARD_CLICK
@@ -364,9 +386,13 @@ public class MediaControlPanel {
         seamlessView.setVisibility(View.VISIBLE);
         setVisibleAndAlpha(collapsedSet, R.id.media_seamless, true /*visible */);
         setVisibleAndAlpha(expandedSet, R.id.media_seamless, true /*visible */);
-        seamlessView.setOnClickListener(v -> {
-            mMediaOutputDialogFactory.create(data.getPackageName(), true);
-        });
+        seamlessView.setOnClickListener(
+                v -> {
+                    if (!mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
+                        mMediaOutputDialogFactory.create(data.getPackageName(), true,
+                                mPlayerViewHolder.getSeamlessButton());
+                    }
+                });
 
         ImageView iconView = mPlayerViewHolder.getSeamlessIcon();
         TextView deviceName = mPlayerViewHolder.getSeamlessText();
@@ -417,9 +443,11 @@ public class MediaControlPanel {
             } else {
                 button.setEnabled(true);
                 button.setOnClickListener(v -> {
-                    logSmartspaceCardReported(760, // SMARTSPACE_CARD_CLICK
-                            /* isRecommendationCard */ false);
-                    action.run();
+                    if (!mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
+                        logSmartspaceCardReported(760, // SMARTSPACE_CARD_CLICK
+                                /* isRecommendationCard */ false);
+                        action.run();
+                    }
                 });
             }
             boolean visibleInCompat = actionsWhenCollapsed.contains(i);
@@ -451,6 +479,8 @@ public class MediaControlPanel {
         mPlayerViewHolder.getDismissLabel().setAlpha(isDismissible ? 1 : DISABLED_ALPHA);
         mPlayerViewHolder.getDismiss().setEnabled(isDismissible);
         mPlayerViewHolder.getDismiss().setOnClickListener(v -> {
+            if (mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) return;
+
             logSmartspaceCardReported(761, // SMARTSPACE_CARD_DISMISS
                     /* isRecommendationCard */ false);
 
@@ -633,6 +663,8 @@ public class MediaControlPanel {
         mSmartspaceMediaItemsCount = uiComponentIndex;
         // Set up long press to show guts setting panel.
         mRecommendationViewHolder.getDismiss().setOnClickListener(v -> {
+            if (mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) return;
+
             logSmartspaceCardReported(761, // SMARTSPACE_CARD_DISMISS
                     /* isRecommendationCard */ true);
             closeGuts();
@@ -788,6 +820,8 @@ public class MediaControlPanel {
         }
 
         view.setOnClickListener(v -> {
+            if (mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) return;
+
             logSmartspaceCardReported(760, // SMARTSPACE_CARD_CLICK
                     /* isRecommendationCard */ true,
                     interactedSubcardRank,
@@ -860,7 +894,7 @@ public class MediaControlPanel {
                 mInstanceId,
                 mUid,
                 isRecommendationCard,
-                getSurfaceForSmartspaceLogging(),
+                new int[]{getSurfaceForSmartspaceLogging()},
                 interactedSubcardRank,
                 interactedSubcardCardinality);
     }

@@ -36,6 +36,11 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.demomode.dagger.DemoModeModule;
 import com.android.systemui.doze.dagger.DozeComponent;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.flags.FeatureFlagManager;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.FlagReader;
+import com.android.systemui.flags.FlagWriter;
+import com.android.systemui.flags.FlagsModule;
 import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.log.dagger.LogModule;
 import com.android.systemui.model.SysUiState;
@@ -46,7 +51,6 @@ import com.android.systemui.screenshot.dagger.ScreenshotModule;
 import com.android.systemui.settings.dagger.SettingsModule;
 import com.android.systemui.shared.system.smartspace.SmartspaceTransitionController;
 import com.android.systemui.statusbar.CommandQueue;
-import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
@@ -67,7 +71,9 @@ import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.statusbar.policy.dagger.SmartRepliesInflationModule;
 import com.android.systemui.statusbar.policy.dagger.StatusBarPolicyModule;
+import com.android.systemui.statusbar.window.StatusBarWindowModule;
 import com.android.systemui.tuner.dagger.TunerModule;
+import com.android.systemui.unfold.SysUIUnfoldModule;
 import com.android.systemui.user.UserModule;
 import com.android.systemui.util.concurrency.SysUIConcurrencyModule;
 import com.android.systemui.util.dagger.UtilModule;
@@ -75,7 +81,6 @@ import com.android.systemui.util.sensors.SensorModule;
 import com.android.systemui.util.settings.SettingsUtilModule;
 import com.android.systemui.util.time.SystemClock;
 import com.android.systemui.util.time.SystemClockImpl;
-import com.android.systemui.volume.dagger.VolumeModule;
 import com.android.systemui.wallet.dagger.WalletModule;
 import com.android.systemui.wmshell.BubblesManager;
 import com.android.wm.shell.bubbles.Bubbles;
@@ -99,6 +104,7 @@ import dagger.Provides;
             ControlsModule.class,
             DemoModeModule.class,
             FalsingModule.class,
+            FlagsModule.class,
             LogModule.class,
             PeopleHubModule.class,
             PluginModule.class,
@@ -108,11 +114,12 @@ import dagger.Provides;
             SettingsUtilModule.class,
             SmartRepliesInflationModule.class,
             StatusBarPolicyModule.class,
+            StatusBarWindowModule.class,
             SysUIConcurrencyModule.class,
+            SysUIUnfoldModule.class,
             TunerModule.class,
             UserModule.class,
             UtilModule.class,
-            VolumeModule.class,
             WalletModule.class
         },
         subcomponents = {
@@ -141,9 +148,17 @@ public abstract class SystemUIModule {
 
     @SysUISingleton
     @Provides
-    static SysUiState provideSysUiState() {
-        return new SysUiState();
+    static SysUiState provideSysUiState(DumpManager dumpManager) {
+        final SysUiState state = new SysUiState();
+        dumpManager.registerDumpable(state);
+        return state;
     }
+
+    @Binds
+    abstract FlagReader provideFlagReader(FeatureFlagManager impl);
+
+    @Binds
+    abstract FlagWriter provideFlagWriter(FeatureFlagManager impl);
 
     @BindsOptionalOf
     abstract CommandQueue optionalCommandQueue();

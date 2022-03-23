@@ -38,6 +38,17 @@ filegroup {
     path: "src",
 }
 
+// Sources that have no dependencies that can be used directly downstream of this library
+filegroup {
+    name: "wm_shell_util-sources",
+    srcs: [
+        "src/com/android/wm/shell/util/**/*.java",
+        "src/com/android/wm/shell/common/split/SplitScreenConstants.java"
+    ],
+    path: "src",
+}
+
+// Aidls which can be used directly downstream of this library
 filegroup {
     name: "wm_shell-aidls",
     srcs: [
@@ -122,11 +133,12 @@ android_library {
         "kotlinx-coroutines-android",
         "kotlinx-coroutines-core",
         "iconloader_base",
-        "jsr330",
         "protolog-lib",
         "WindowManager-Shell-proto",
+        "dagger2",
         "jsr330",
     ],
     kotlincflags: ["-Xjvm-default=enable"],
     manifest: "AndroidManifest.xml",
+    plugins: ["dagger2-compiler"],
 }

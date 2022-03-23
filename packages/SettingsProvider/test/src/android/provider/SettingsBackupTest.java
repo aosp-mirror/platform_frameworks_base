@@ -137,7 +137,6 @@ public class SettingsBackupTest {
                     Settings.Global.AUTOFILL_LOGGING_LEVEL,
                     Settings.Global.AUTOFILL_MAX_PARTITIONS_SIZE,
                     Settings.Global.AUTOFILL_MAX_VISIBLE_DATASETS,
-                    Settings.Global.AUTOMATIC_POWER_SAVE_MODE,
                     Settings.Global.AVERAGE_TIME_TO_DISCHARGE,
                     Settings.Global.BATTERY_CHARGING_STATE_UPDATE_DELAY,
                     Settings.Global.BATTERY_ESTIMATES_LAST_UPDATE_TIME,
@@ -592,8 +591,7 @@ public class SettingsBackupTest {
                     Settings.Global.INTEGRITY_CHECK_INCLUDES_RULE_PROVIDER,
                     Settings.Global.CACHED_APPS_FREEZER_ENABLED,
                     Settings.Global.APP_INTEGRITY_VERIFICATION_TIMEOUT,
-                    Settings.Global.KEY_CHORD_POWER_VOLUME_UP,
-                    Settings.Global.ADVANCED_BATTERY_USAGE_AMOUNT);
+                    Settings.Global.KEY_CHORD_POWER_VOLUME_UP);
 
     private static final Set<String> BACKUP_DENY_LIST_SECURE_SETTINGS =
              newHashSet(

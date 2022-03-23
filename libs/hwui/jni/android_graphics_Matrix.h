@@ -25,6 +25,9 @@ namespace android {
 /* Gets the underlying SkMatrix from a Matrix object. */
 SkMatrix* android_graphics_Matrix_getSkMatrix(JNIEnv* env, jobject matrixObj);
 
+/* Creates a new Matrix java object. */
+jobject android_graphics_Matrix_newInstance(JNIEnv* env);
+
 } // namespace android
 
 #endif // _ANDROID_GRAPHICS_MATRIX_H_

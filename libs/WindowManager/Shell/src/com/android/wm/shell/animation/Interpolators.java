@@ -62,4 +62,10 @@ public class Interpolators {
      */
     public static final Interpolator PANEL_CLOSE_ACCELERATED =
             new PathInterpolator(0.3f, 0, 0.5f, 1);
+
+    public static final PathInterpolator SLOWDOWN_INTERPOLATOR =
+            new PathInterpolator(0.5f, 1f, 0.5f, 1f);
+
+    public static final PathInterpolator DIM_INTERPOLATOR =
+            new PathInterpolator(.23f, .87f, .52f, -0.11f);
 }

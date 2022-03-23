@@ -16,6 +16,8 @@
 
 package com.android.server.accessibility.gestures;
 
+import static android.accessibilityservice.AccessibilityTrace.FLAGS_GESTURE;
+import static android.accessibilityservice.AccessibilityTrace.FLAGS_INPUT_FILTER;
 import static android.view.MotionEvent.ACTION_CANCEL;
 import static android.view.MotionEvent.ACTION_DOWN;
 import static android.view.MotionEvent.ACTION_HOVER_ENTER;
@@ -82,6 +84,7 @@ public class TouchExplorer extends BaseEventStreamTransformation
         implements GestureManifold.Listener {
 
     static final boolean DEBUG = false;
+    private static final long LOGGING_FLAGS = FLAGS_GESTURE | FLAGS_INPUT_FILTER;
 
     // Tag for logging received events.
     private static final String LOG_TAG = "TouchExplorer";
@@ -254,6 +257,10 @@ public class TouchExplorer extends BaseEventStreamTransformation
 
     @Override
     public void onMotionEvent(MotionEvent event, MotionEvent rawEvent, int policyFlags) {
+        if (mAms.getTraceManager().isA11yTracingEnabledForTypes(LOGGING_FLAGS)) {
+            mAms.getTraceManager().logTrace(LOG_TAG + ".onMotionEvent", LOGGING_FLAGS,
+                    "event=" + event + ";rawEvent=" + rawEvent + ";policyFlags=" + policyFlags);
+        }
         if (!event.isFromSource(InputDevice.SOURCE_TOUCHSCREEN)) {
             super.onMotionEvent(event, rawEvent, policyFlags);
             return;
@@ -308,6 +315,10 @@ public class TouchExplorer extends BaseEventStreamTransformation
 
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
+        if (mAms.getTraceManager().isA11yTracingEnabledForTypes(LOGGING_FLAGS)) {
+            mAms.getTraceManager().logTrace(LOG_TAG + ".onAccessibilityEvent",
+                    LOGGING_FLAGS, "event=" + event);
+        }
         final int eventType = event.getEventType();
 
         if (eventType == TYPE_VIEW_HOVER_EXIT) {
@@ -346,6 +357,10 @@ public class TouchExplorer extends BaseEventStreamTransformation
 
     @Override
     public void onDoubleTapAndHold(MotionEvent event, MotionEvent rawEvent, int policyFlags) {
+        if (mAms.getTraceManager().isA11yTracingEnabledForTypes(LOGGING_FLAGS)) {
+            mAms.getTraceManager().logTrace(LOG_TAG + ".onDoubleTapAndHold", LOGGING_FLAGS,
+                    "event=" + event + ";rawEvent=" + rawEvent + ";policyFlags=" + policyFlags);
+        }
         if (mDispatcher.longPressWithTouchEvents(event, policyFlags)) {
             sendHoverExitAndTouchExplorationGestureEndIfNeeded(policyFlags);
             if (isSendMotionEventsEnabled()) {
@@ -362,6 +377,10 @@ public class TouchExplorer extends BaseEventStreamTransformation
 
     @Override
     public boolean onDoubleTap(MotionEvent event, MotionEvent rawEvent, int policyFlags) {
+        if (mAms.getTraceManager().isA11yTracingEnabledForTypes(LOGGING_FLAGS)) {
+            mAms.getTraceManager().logTrace(LOG_TAG + ".onDoubleTap", LOGGING_FLAGS,
+                    "event=" + event + ";rawEvent=" + rawEvent + ";policyFlags=" + policyFlags);
+        }
         mAms.onTouchInteractionEnd();
         // Remove pending event deliveries.
         mSendHoverEnterAndMoveDelayed.cancel();
@@ -394,6 +413,9 @@ public class TouchExplorer extends BaseEventStreamTransformation
 
     @Override
     public boolean onGestureStarted() {
+        if (mAms.getTraceManager().isA11yTracingEnabledForTypes(LOGGING_FLAGS)) {
+            mAms.getTraceManager().logTrace(LOG_TAG + ".onGestureStarted", LOGGING_FLAGS);
+        }
         // We have to perform gesture detection, so
         // clear the current state and try to detect.
         mSendHoverEnterAndMoveDelayed.cancel();
@@ -407,6 +429,10 @@ public class TouchExplorer extends BaseEventStreamTransformation
 
     @Override
     public boolean onGestureCompleted(AccessibilityGestureEvent gestureEvent) {
+        if (mAms.getTraceManager().isA11yTracingEnabledForTypes(LOGGING_FLAGS)) {
+            mAms.getTraceManager().logTrace(LOG_TAG + ".onGestureCompleted",
+                    LOGGING_FLAGS, "event=" + gestureEvent);
+        }
         endGestureDetection(true);
         mSendTouchInteractionEndDelayed.cancel();
         dispatchGesture(gestureEvent);
@@ -415,6 +441,10 @@ public class TouchExplorer extends BaseEventStreamTransformation
 
     @Override
     public boolean onGestureCancelled(MotionEvent event, MotionEvent rawEvent, int policyFlags) {
+        if (mAms.getTraceManager().isA11yTracingEnabledForTypes(LOGGING_FLAGS)) {
+            mAms.getTraceManager().logTrace(LOG_TAG + ".onGestureCancelled", LOGGING_FLAGS,
+                    "event=" + event + ";rawEvent=" + rawEvent + ";policyFlags=" + policyFlags);
+        }
         if (mState.isGestureDetecting()) {
             endGestureDetection(event.getActionMasked() == ACTION_UP);
             return true;

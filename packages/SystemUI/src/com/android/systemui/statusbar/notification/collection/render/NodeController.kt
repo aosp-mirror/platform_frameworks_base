@@ -78,7 +78,7 @@ fun treeSpecToStr(tree: NodeSpec): String {
 }
 
 private fun treeSpecToStrHelper(tree: NodeSpec, sb: StringBuilder, indent: String) {
-    sb.append("${indent}ns{${tree.controller.nodeLabel}")
+    sb.append("${indent}{${tree.controller.nodeLabel}}\n")
     if (tree.children.isNotEmpty()) {
         val childIndent = "$indent  "
         for (child in tree.children) {

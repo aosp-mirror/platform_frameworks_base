@@ -186,7 +186,7 @@ public class StatusBarMobileView extends FrameLayout implements DarkReceiver,
 
         setContentDescription(state.contentDescription);
         int newVisibility = state.visible && !mForceHidden ? View.VISIBLE : View.GONE;
-        if (newVisibility != mMobileGroup.getVisibility()) {
+        if (newVisibility != mMobileGroup.getVisibility() && STATE_ICON == mVisibleState) {
             mMobileGroup.setVisibility(newVisibility);
             needsLayout = true;
         }

@@ -288,7 +288,7 @@ public class SurfaceTexture {
      * context at a time.
      *
      * @param texName The name of the OpenGL ES texture that will be created.  This texture name
-     * must be unusued in the OpenGL ES context that is current on the calling thread.
+     * must be unused in the OpenGL ES context that is current on the calling thread.
      */
     public void attachToGLContext(int texName) {
         int err = nativeAttachToGLContext(texName);

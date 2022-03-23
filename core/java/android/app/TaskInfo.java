@@ -17,6 +17,7 @@
 package android.app;
 
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
+import static android.window.DisplayAreaOrganizer.FEATURE_UNDEFINED;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -117,6 +118,12 @@ public class TaskInfo {
      * @hide
      */
     public int displayId;
+
+    /**
+     * The feature id of {@link com.android.server.wm.TaskDisplayArea} this task is associated with.
+     * @hide
+     */
+    public int displayAreaFeatureId = FEATURE_UNDEFINED;
 
     /**
      * The recent activity values for the highest activity in the stack to have set the values.
@@ -243,12 +250,25 @@ public class TaskInfo {
      */
     public boolean isVisible;
 
+    /**
+     * Whether this task is sleeping due to sleeping display.
+     * @hide
+     */
+    public boolean isSleeping;
+
     TaskInfo() {
         // Do nothing
     }
 
     private TaskInfo(Parcel source) {
         readFromParcel(source);
+    }
+
+    /**
+     * Whether this task is visible.
+     */
+    public boolean isVisible() {
+        return isVisible;
     }
 
     /**
@@ -329,11 +349,10 @@ public class TaskInfo {
     }
 
     /**
-      * Returns {@code true} if parameters that are important for task organizers have changed
-      * and {@link com.android.server.wm.TaskOrginizerController} needs to notify listeners
-      * about that.
-      * @hide
-      */
+     * Returns {@code true} if the parameters that are important for task organizers are equal
+     * between this {@link TaskInfo} and {@param that}.
+     * @hide
+     */
     public boolean equalsForTaskOrganizer(@Nullable TaskInfo that) {
         if (that == null) {
             return false;
@@ -341,13 +360,16 @@ public class TaskInfo {
         return topActivityType == that.topActivityType
                 && isResizeable == that.isResizeable
                 && supportsMultiWindow == that.supportsMultiWindow
+                && displayAreaFeatureId == that.displayAreaFeatureId
                 && Objects.equals(positionInParent, that.positionInParent)
                 && Objects.equals(pictureInPictureParams, that.pictureInPictureParams)
                 && Objects.equals(displayCutoutInsets, that.displayCutoutInsets)
                 && getWindowingMode() == that.getWindowingMode()
                 && Objects.equals(taskDescription, that.taskDescription)
                 && isFocused == that.isFocused
-                && isVisible == that.isVisible;
+                && isVisible == that.isVisible
+                && isSleeping == that.isSleeping
+                && Objects.equals(mTopActivityLocusId, that.mTopActivityLocusId);
     }
 
     /**
@@ -402,8 +424,10 @@ public class TaskInfo {
         parentTaskId = source.readInt();
         isFocused = source.readBoolean();
         isVisible = source.readBoolean();
+        isSleeping = source.readBoolean();
         topActivityInSizeCompat = source.readBoolean();
         mTopActivityLocusId = source.readTypedObject(LocusId.CREATOR);
+        displayAreaFeatureId = source.readInt();
     }
 
     /**
@@ -440,8 +464,10 @@ public class TaskInfo {
         dest.writeInt(parentTaskId);
         dest.writeBoolean(isFocused);
         dest.writeBoolean(isVisible);
+        dest.writeBoolean(isSleeping);
         dest.writeBoolean(topActivityInSizeCompat);
         dest.writeTypedObject(mTopActivityLocusId, flags);
+        dest.writeInt(displayAreaFeatureId);
     }
 
     @Override
@@ -468,8 +494,10 @@ public class TaskInfo {
                 + " parentTaskId=" + parentTaskId
                 + " isFocused=" + isFocused
                 + " isVisible=" + isVisible
+                + " isSleeping=" + isSleeping
                 + " topActivityInSizeCompat=" + topActivityInSizeCompat
-                + " locusId= " + mTopActivityLocusId
+                + " locusId=" + mTopActivityLocusId
+                + " displayAreaFeatureId=" + displayAreaFeatureId
                 + "}";
     }
 }

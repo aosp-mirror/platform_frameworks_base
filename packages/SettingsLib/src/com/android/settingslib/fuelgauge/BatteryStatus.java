@@ -109,6 +109,15 @@ public class BatteryStatus {
     }
 
     /**
+     * Determine whether the device is plugged in wireless.
+     *
+     * @return true if the device is plugged in wireless
+     */
+    public boolean isPluggedInWireless() {
+        return plugged == BatteryManager.BATTERY_PLUGGED_WIRELESS;
+    }
+
+    /**
      * Whether or not the device is charged. Note that some devices never return 100% for
      * battery level, so this allows either battery level or status to determine if the
      * battery is charged.

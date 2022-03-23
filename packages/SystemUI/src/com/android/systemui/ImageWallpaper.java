@@ -126,7 +126,13 @@ public class ImageWallpaper extends WallpaperService {
             mRenderer = getRendererInstance();
             setFixedSizeAllowed(true);
             updateSurfaceSize();
-            mRenderer.setOnBitmapChanged(this::updateMiniBitmap);
+
+            mRenderer.setOnBitmapChanged(b -> {
+                mLocalColorsToAdd.addAll(mColorAreas);
+                if (mLocalColorsToAdd.size() > 0) {
+                    updateMiniBitmapAndNotify(b);
+                }
+            });
             getDisplayContext().getSystemService(DisplayManager.class)
                     .registerDisplayListener(this, mWorker.getThreadHandler());
             Trace.endSection();
@@ -170,7 +176,7 @@ public class ImageWallpaper extends WallpaperService {
                     computeAndNotifyLocalColors(new ArrayList<>(mColorAreas), mMiniBitmap));
         }
 
-        private void updateMiniBitmap(Bitmap b) {
+        private void updateMiniBitmapAndNotify(Bitmap b) {
             if (b == null) return;
             int size = Math.min(b.getWidth(), b.getHeight());
             float scale = 1.0f;
@@ -186,11 +192,13 @@ public class ImageWallpaper extends WallpaperService {
         }
 
         private void updateSurfaceSize() {
+            Trace.beginSection("ImageWallpaper#updateSurfaceSize");
             SurfaceHolder holder = getSurfaceHolder();
             Size frameSize = mRenderer.reportSurfaceSize();
             int width = Math.max(MIN_SURFACE_WIDTH, frameSize.getWidth());
             int height = Math.max(MIN_SURFACE_HEIGHT, frameSize.getHeight());
             holder.setFixedSize(width, height);
+            Trace.endSection();
         }
 
         @Override
@@ -209,12 +217,10 @@ public class ImageWallpaper extends WallpaperService {
                     .unregisterDisplayListener(this);
             mMiniBitmap = null;
             mWorker.getThreadHandler().post(() -> {
-                Trace.beginSection("ImageWallpaper.Engine#onDestroy");
                 mRenderer.finish();
                 mRenderer = null;
                 mEglHelper.finish();
                 mEglHelper = null;
-                Trace.endSection();
             });
         }
 
@@ -232,6 +238,7 @@ public class ImageWallpaper extends WallpaperService {
                 Bitmap bitmap = mMiniBitmap;
                 if (bitmap == null) {
                     mLocalColorsToAdd.addAll(regions);
+                    if (mRenderer != null) mRenderer.use(this::updateMiniBitmapAndNotify);
                 } else {
                     computeAndNotifyLocalColors(regions, bitmap);
                 }
@@ -437,10 +444,8 @@ public class ImageWallpaper extends WallpaperService {
 
         public void postRender() {
             // This method should only be invoked from worker thread.
-            Trace.beginSection("ImageWallpaper#postRender");
             scheduleFinishRendering();
             reportEngineShown(false /* waitForEngineShown */);
-            Trace.endSection();
         }
 
         private void cancelFinishRenderingTask() {

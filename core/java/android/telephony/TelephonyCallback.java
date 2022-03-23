@@ -792,6 +792,7 @@ public class TelephonyCallback {
          * @see TelephonyManager#DATA_CONNECTING
          * @see TelephonyManager#DATA_CONNECTED
          * @see TelephonyManager#DATA_SUSPENDED
+         * @see TelephonyManager#DATA_HANDOVER_IN_PROGRESS
          */
         void onDataConnectionStateChanged(@TelephonyManager.DataState int state,
                 @Annotation.NetworkType int networkType);
@@ -1408,10 +1409,11 @@ public class TelephonyCallback {
          *
          * @param enabled {@code true} if data is enabled, otherwise disabled.
          * @param reason  Reason for data enabled/disabled.
-         *                See {@link TelephonyManager.DataEnabledReason}.
+         *                See {@link TelephonyManager.DataEnabledChangedReason}.
          */
         @RequiresPermission(Manifest.permission.READ_PRECISE_PHONE_STATE)
-        void onDataEnabledChanged(boolean enabled, @TelephonyManager.DataEnabledReason int reason);
+        void onDataEnabledChanged(boolean enabled,
+                @TelephonyManager.DataEnabledChangedReason int reason);
     }
 
     /**

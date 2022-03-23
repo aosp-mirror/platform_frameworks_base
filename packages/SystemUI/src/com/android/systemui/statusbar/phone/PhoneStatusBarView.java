@@ -16,58 +16,36 @@
 
 package com.android.systemui.statusbar.phone;
 
-import static com.android.systemui.ScreenDecorations.DisplayCutoutView.boundsFromDirection;
-
-import static java.lang.Float.isNaN;
 
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Configuration;
-import android.graphics.Point;
 import android.graphics.Rect;
 import android.util.AttributeSet;
-import android.util.EventLog;
+import android.util.Log;
 import android.util.Pair;
 import android.view.DisplayCutout;
-import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowInsets;
 import android.view.accessibility.AccessibilityEvent;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
+import com.android.internal.policy.SystemBarUtils;
 import com.android.systemui.Dependency;
-import com.android.systemui.EventLogTags;
 import com.android.systemui.R;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
-import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.util.leak.RotationUtils;
 
-import java.util.List;
 import java.util.Objects;
 
-public class PhoneStatusBarView extends PanelBar {
+public class PhoneStatusBarView extends FrameLayout {
     private static final String TAG = "PhoneStatusBarView";
-    private static final boolean DEBUG = StatusBar.DEBUG;
-    private static final boolean DEBUG_GESTURES = false;
-    private final CommandQueue mCommandQueue;
     private final StatusBarContentInsetsProvider mContentInsetsProvider;
 
-    StatusBar mBar;
-
-    boolean mIsFullyOpenedPanel = false;
-    private ScrimController mScrimController;
-    private float mMinFraction;
-    private Runnable mHideExpandedRunnable = new Runnable() {
-        @Override
-        public void run() {
-            if (mPanelFraction == 0.0f) {
-                mBar.makeExpandedInvisible();
-            }
-        }
-    };
     private DarkReceiver mBattery;
     private DarkReceiver mClock;
     private int mRotationOrientation = -1;
@@ -79,31 +57,20 @@ public class PhoneStatusBarView extends PanelBar {
     private DisplayCutout mDisplayCutout;
     private int mStatusBarHeight;
     @Nullable
-    private List<StatusBar.ExpansionChangedListener> mExpansionChangedListeners;
+    private TouchEventHandler mTouchEventHandler;
 
     /**
      * Draw this many pixels into the left/right side of the cutout to optimally use the space
      */
     private int mCutoutSideNudge = 0;
-    private boolean mHeadsUpVisible;
 
     public PhoneStatusBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        mCommandQueue = Dependency.get(CommandQueue.class);
         mContentInsetsProvider = Dependency.get(StatusBarContentInsetsProvider.class);
     }
 
-    public void setBar(StatusBar bar) {
-        mBar = bar;
-    }
-
-    public void setExpansionChangedListeners(
-            @Nullable List<StatusBar.ExpansionChangedListener> listeners) {
-        mExpansionChangedListeners = listeners;
-    }
-
-    public void setScrimController(ScrimController scrimController) {
-        mScrimController = scrimController;
+    void setTouchEventHandler(TouchEventHandler handler) {
+        mTouchEventHandler = handler;
     }
 
     @Override
@@ -176,11 +143,6 @@ public class PhoneStatusBarView extends PanelBar {
     }
 
     @Override
-    public boolean panelEnabled() {
-        return mCommandQueue.panelsEnabled();
-    }
-
-    @Override
     public boolean onRequestSendAccessibilityEventInternal(View child, AccessibilityEvent event) {
         if (super.onRequestSendAccessibilityEventInternal(child, event)) {
             // The status bar is very small so augment the view that the user is touching
@@ -196,112 +158,25 @@ public class PhoneStatusBarView extends PanelBar {
     }
 
     @Override
-    public void onPanelPeeked() {
-        super.onPanelPeeked();
-        mBar.makeExpandedVisible(false);
-    }
-
-    @Override
-    public void onPanelCollapsed() {
-        super.onPanelCollapsed();
-        // Close the status bar in the next frame so we can show the end of the animation.
-        post(mHideExpandedRunnable);
-        mIsFullyOpenedPanel = false;
-    }
-
-    public void removePendingHideExpandedRunnables() {
-        removeCallbacks(mHideExpandedRunnable);
-    }
-
-    @Override
-    public void onPanelFullyOpened() {
-        super.onPanelFullyOpened();
-        if (!mIsFullyOpenedPanel) {
-            mPanel.getView().sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
-        }
-        mIsFullyOpenedPanel = true;
-    }
-
-    @Override
     public boolean onTouchEvent(MotionEvent event) {
-        boolean barConsumedEvent = mBar.interceptTouchEvent(event);
-
-        if (DEBUG_GESTURES) {
-            if (event.getActionMasked() != MotionEvent.ACTION_MOVE) {
-                EventLog.writeEvent(EventLogTags.SYSUI_PANELBAR_TOUCH,
-                        event.getActionMasked(), (int) event.getX(), (int) event.getY(),
-                        barConsumedEvent ? 1 : 0);
-            }
+        if (mTouchEventHandler == null) {
+            Log.w(
+                    TAG,
+                    String.format(
+                            "onTouch: No touch handler provided; eating gesture at (%d,%d)",
+                            (int) event.getX(),
+                            (int) event.getY()
+                    )
+            );
+            return true;
         }
-
-        return barConsumedEvent || super.onTouchEvent(event);
-    }
-
-    @Override
-    public void onTrackingStarted() {
-        super.onTrackingStarted();
-        mBar.onTrackingStarted();
-        mScrimController.onTrackingStarted();
-        removePendingHideExpandedRunnables();
-    }
-
-    @Override
-    public void onClosingFinished() {
-        super.onClosingFinished();
-        mBar.onClosingFinished();
-    }
-
-    @Override
-    public void onTrackingStopped(boolean expand) {
-        super.onTrackingStopped(expand);
-        mBar.onTrackingStopped(expand);
-    }
-
-    @Override
-    public void onExpandingFinished() {
-        super.onExpandingFinished();
-        mScrimController.onExpandingFinished();
+        return mTouchEventHandler.handleTouchEvent(event);
     }
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent event) {
-        return mBar.interceptTouchEvent(event) || super.onInterceptTouchEvent(event);
-    }
-
-    @Override
-    public void onPanelMinFractionChanged(float minFraction) {
-        if (isNaN(minFraction)) {
-            throw new IllegalArgumentException("minFraction cannot be NaN");
-        }
-        super.onPanelMinFractionChanged(minFraction);
-        if (mMinFraction != minFraction) {
-            mMinFraction = minFraction;
-            updateScrimFraction();
-        }
-    }
-
-    @Override
-    public void panelExpansionChanged(float frac, boolean expanded) {
-        super.panelExpansionChanged(frac, expanded);
-        updateScrimFraction();
-        if ((frac == 0 || frac == 1) && mBar.getNavigationBarView() != null) {
-            mBar.getNavigationBarView().onStatusBarPanelStateChanged();
-        }
-
-        if (mExpansionChangedListeners != null) {
-            for (StatusBar.ExpansionChangedListener listener : mExpansionChangedListeners) {
-                listener.onExpansionChanged(frac, expanded);
-            }
-        }
-    }
-
-    private void updateScrimFraction() {
-        float scrimFraction = mPanelFraction;
-        if (mMinFraction < 1.0f) {
-            scrimFraction = Math.max((mPanelFraction - mMinFraction) / (1.0f - mMinFraction),
-                    0);
-        }
-        mScrimController.setPanelExpansion(scrimFraction);
+        mTouchEventHandler.onInterceptTouchEvent(event);
+        return super.onInterceptTouchEvent(event);
     }
 
     public void updateResources() {
@@ -315,7 +190,7 @@ public class PhoneStatusBarView extends PanelBar {
         final int waterfallTopInset =
                 mDisplayCutout == null ? 0 : mDisplayCutout.getWaterfallInsets().top;
         ViewGroup.LayoutParams layoutParams = getLayoutParams();
-        mStatusBarHeight = getResources().getDimensionPixelSize(R.dimen.status_bar_height);
+        mStatusBarHeight = SystemBarUtils.getStatusBarHeight(mContext);
         layoutParams.height = mStatusBarHeight - waterfallTopInset;
 
         int statusBarPaddingTop = getResources().getDimensionPixelSize(
@@ -340,17 +215,18 @@ public class PhoneStatusBarView extends PanelBar {
 
     private void updateLayoutForCutout() {
         updateStatusBarHeight();
-        updateCutoutLocation(StatusBarWindowView.cornerCutoutMargins(mDisplayCutout, getDisplay()));
+        updateCutoutLocation();
         updateSafeInsets();
     }
 
-    private void updateCutoutLocation(Pair<Integer, Integer> cornerCutoutMargins) {
+    private void updateCutoutLocation() {
         // Not all layouts have a cutout (e.g., Car)
         if (mCutoutSpace == null) {
             return;
         }
 
-        if (mDisplayCutout == null || mDisplayCutout.isEmpty() || cornerCutoutMargins != null) {
+        boolean hasCornerCutout = mContentInsetsProvider.currentRotationHasCornerCutout();
+        if (mDisplayCutout == null || mDisplayCutout.isEmpty() || hasCornerCutout) {
             mCenterIconSpace.setVisibility(View.VISIBLE);
             mCutoutSpace.setVisibility(View.GONE);
             return;
@@ -360,8 +236,7 @@ public class PhoneStatusBarView extends PanelBar {
         mCutoutSpace.setVisibility(View.VISIBLE);
         LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) mCutoutSpace.getLayoutParams();
 
-        Rect bounds = new Rect();
-        boundsFromDirection(mDisplayCutout, Gravity.TOP, bounds);
+        Rect bounds = mDisplayCutout.getBoundingRectTop();
 
         bounds.left = bounds.left + mCutoutSideNudge;
         bounds.right = bounds.right - mCutoutSideNudge;
@@ -370,26 +245,37 @@ public class PhoneStatusBarView extends PanelBar {
     }
 
     private void updateSafeInsets() {
-        Rect contentRect = mContentInsetsProvider
-                .getStatusBarContentInsetsForRotation(RotationUtils.getExactRotation(getContext()));
-
-        Point size = new Point();
-        getDisplay().getRealSize(size);
+        Pair<Integer, Integer> insets = mContentInsetsProvider
+                .getStatusBarContentInsetsForCurrentRotation();
 
         setPadding(
-                contentRect.left,
+                insets.first,
                 getPaddingTop(),
-                size.x - contentRect.right,
+                insets.second,
                 getPaddingBottom());
     }
 
-    public void setHeadsUpVisible(boolean headsUpVisible) {
-        mHeadsUpVisible = headsUpVisible;
-        updateVisibility();
-    }
+    /**
+     * A handler responsible for all touch event handling on the status bar.
+     *
+     * Touches that occur on the status bar view may have ramifications for the notification
+     * panel (e.g. a touch that pulls down the shade could start on the status bar), so this
+     * interface provides a way to notify the panel controller when these touches occur.
+     *
+     * The handler will be notified each time {@link PhoneStatusBarView#onTouchEvent} and
+     * {@link PhoneStatusBarView#onInterceptTouchEvent} are called.
+     **/
+    public interface TouchEventHandler {
+        /** Called each time {@link PhoneStatusBarView#onInterceptTouchEvent} is called. */
+        void onInterceptTouchEvent(MotionEvent event);
 
-    @Override
-    protected boolean shouldPanelBeVisible() {
-        return mHeadsUpVisible || super.shouldPanelBeVisible();
+        /**
+         * Called each time {@link PhoneStatusBarView#onTouchEvent} is called.
+         *
+         * Should return true if the touch was handled by this handler and false otherwise. The
+         * return value from the handler will be returned from
+         * {@link PhoneStatusBarView#onTouchEvent}.
+         */
+        boolean handleTouchEvent(MotionEvent event);
     }
 }

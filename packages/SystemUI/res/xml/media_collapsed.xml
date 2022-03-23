@@ -58,7 +58,7 @@
     <!-- Song name -->
     <Constraint
         android:id="@+id/header_title"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/qs_media_info_margin"
         android:layout_marginEnd="@dimen/qs_center_guideline_padding"
@@ -71,7 +71,7 @@
     <!-- Artist name -->
     <Constraint
         android:id="@+id/header_artist"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constrainedWidth="true"
         android:layout_marginTop="@dimen/qs_media_info_spacing"

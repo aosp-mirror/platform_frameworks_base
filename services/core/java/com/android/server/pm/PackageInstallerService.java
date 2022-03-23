@@ -392,7 +392,11 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                 if (age >= MAX_SESSION_AGE_ON_LOW_STORAGE_MILLIS) {
                     // Aggressively close old sessions because we are running low on storage
                     // Their staging dirs will be removed too
-                    session.abandon();
+                    PackageInstallerSession root = !session.hasParentSessionId()
+                            ? session : mSessions.get(session.getParentSessionId());
+                    if (!root.isDestroyed()) {
+                        root.abandon();
+                    }
                 } else {
                     // Session is new enough, so it deserves to be kept even on low storage
                     unclaimedStagingDirsOnVolume.remove(session.stageDir);

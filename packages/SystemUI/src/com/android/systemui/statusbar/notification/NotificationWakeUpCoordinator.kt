@@ -27,8 +27,8 @@ import com.android.systemui.statusbar.notification.stack.NotificationStackScroll
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator
 import com.android.systemui.statusbar.phone.DozeParameters
 import com.android.systemui.statusbar.phone.KeyguardBypassController
-import com.android.systemui.statusbar.phone.PanelExpansionListener
 import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController
+import com.android.systemui.statusbar.phone.panelstate.PanelExpansionListener
 import com.android.systemui.statusbar.policy.HeadsUpManager
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener
 import javax.inject.Inject
@@ -294,8 +294,8 @@ class NotificationWakeUpCoordinator @Inject constructor(
         this.state = newState
     }
 
-    override fun onPanelExpansionChanged(expansion: Float, tracking: Boolean) {
-        val collapsedEnough = expansion <= 0.9f
+    override fun onPanelExpansionChanged(fraction: Float, expanded: Boolean, tracking: Boolean) {
+        val collapsedEnough = fraction <= 0.9f
         if (collapsedEnough != this.collapsedEnoughToHide) {
             val couldShowPulsingHuns = canShowPulsingHuns
             this.collapsedEnoughToHide = collapsedEnough

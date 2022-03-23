@@ -26,8 +26,8 @@
     <string name="bugreport_finished_text" product="tv" msgid="5758325479058638893">"برای هم‌رسانی گزارش اشکالتان، انتخاب کنید"</string>
     <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"برای هم‌رسانی گزارش اشکال، ضربه بزنید"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="tv" msgid="2343263822812016950">"انتخاب کنید تا گزارش اشکالتان بدون نماگرفت به اشتراک گذاشته شود یا منتظر بمانید گرفتن عکس از صفحه‌نمایش تمام شود"</string>
-    <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"برای هم‌رسانی گزارش مشکل بدون نماگرفت، ضربه بزنید یا صبر کنید تا نماگرفت گرفته شود."</string>
-    <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"برای هم‌رسانی گزارش مشکل بدون نماگرفت، ضربه بزنید یا صبر کنید تا نماگرفت گرفته شود."</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"برای اشتراک‌گذاری گزارش مشکل بدون نماگرفت، ضربه بزنید یا صبر کنید تا نماگرفت گرفته شود."</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"برای اشتراک‌گذاری گزارش مشکل بدون نماگرفت، ضربه بزنید یا صبر کنید تا نماگرفت گرفته شود."</string>
     <string name="bugreport_confirm" msgid="5917407234515812495">"گزارش‌های اشکال حاوی داده‌هایی از فایل‌های مختلف گزارش سیستم هستند، که ممکن است حاوی داده‌های حساس شما (از قبیل داده‌های استفاده از برنامه و مکان) باشند. گزارش‌های اشکال را فقط با افراد و برنامه‌هایی که به آن‌ها اعتماد دارید به‌اشتراک بگذارید."</string>
     <string name="bugreport_confirm_dont_repeat" msgid="6179945398364357318">"دوباره نشان داده نشود"</string>
     <string name="bugreport_storage_title" msgid="5332488144740527109">"گزارش اشکال"</string>

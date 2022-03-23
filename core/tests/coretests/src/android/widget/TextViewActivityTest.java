@@ -17,6 +17,7 @@
 package android.widget;
 
 import static android.widget.espresso.CustomViewActions.longPressAtRelativeCoordinates;
+import static android.widget.espresso.DragHandleUtils.assertNoSelectionHandles;
 import static android.widget.espresso.DragHandleUtils.onHandleView;
 import static android.widget.espresso.FloatingToolbarEspressoUtils.assertFloatingToolbarContainsItem;
 import static android.widget.espresso.FloatingToolbarEspressoUtils.assertFloatingToolbarDoesNotContainItem;
@@ -423,6 +424,41 @@ public class TextViewActivityTest {
         mInstrumentation.waitForIdleSync();
 
         assertEquals(latestItem[0], clickedItem[0]);
+    }
+
+    @Test
+    public void testSelectionOnCreateActionModeReturnsFalse() throws Throwable {
+        final String text = "hello world";
+        mActivityRule.runOnUiThread(() -> {
+            final TextView textView = mActivity.findViewById(R.id.textview);
+            textView.setText(text);
+            textView.setCustomSelectionActionModeCallback(
+                    new ActionMode.Callback() {
+                        @Override
+                        public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+                            return false;
+                        }
+
+                        @Override
+                        public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+                            return false;
+                        }
+
+                        @Override
+                        public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+                            return false;
+                        }
+
+
+                        @Override
+                        public void onDestroyActionMode(ActionMode mode) {
+                        }
+                    });
+        });
+        mInstrumentation.waitForIdleSync();
+        onView(withId(R.id.textview)).perform(longPressOnTextAtIndex(text.indexOf("d")));
+        mInstrumentation.waitForIdleSync();
+        assertNoSelectionHandles();
     }
 
     @Test

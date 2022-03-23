@@ -920,7 +920,8 @@ public final class NetworkStatsHistory implements Parcelable {
         for (int i = 0; i < bucketCount; i++) {
             final long startBucket = proto.start(NetworkStatsHistoryProto.BUCKETS);
 
-            proto.write(NetworkStatsHistoryBucketProto.BUCKET_START_MS, bucketStart[i]);
+            proto.write(NetworkStatsHistoryBucketProto.BUCKET_START_MS,
+                    bucketStart[i]);
             dumpDebug(proto, NetworkStatsHistoryBucketProto.RX_BYTES, rxBytes, i);
             dumpDebug(proto, NetworkStatsHistoryBucketProto.RX_PACKETS, rxPackets, i);
             dumpDebug(proto, NetworkStatsHistoryBucketProto.TX_BYTES, txBytes, i);

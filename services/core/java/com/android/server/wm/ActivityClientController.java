@@ -30,6 +30,11 @@ import static android.view.Display.INVALID_DISPLAY;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_CONFIGURATION;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_IMMERSIVE;
+import static com.android.server.wm.ActivityRecord.State.DESTROYED;
+import static com.android.server.wm.ActivityRecord.State.DESTROYING;
+import static com.android.server.wm.ActivityRecord.State.PAUSING;
+import static com.android.server.wm.ActivityRecord.State.RESTARTING_PROCESS;
+import static com.android.server.wm.ActivityRecord.State.RESUMED;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_ALL;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_SWITCH;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
@@ -37,10 +42,9 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLAS
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_NONE;
 import static com.android.server.wm.ActivityTaskManagerService.TAG_SWITCH;
 import static com.android.server.wm.ActivityTaskManagerService.enforceNotIsolatedCaller;
-import static com.android.server.wm.Task.ActivityState.DESTROYED;
-import static com.android.server.wm.Task.ActivityState.DESTROYING;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
@@ -72,6 +76,7 @@ import android.service.voice.VoiceInteractionManagerInternal;
 import android.util.Slog;
 import android.view.RemoteAnimationDefinition;
 import android.window.SizeConfigurationBuckets;
+import android.window.TransitionInfo;
 
 import com.android.internal.app.AssistUtils;
 import com.android.internal.policy.IKeyguardDismissCallback;
@@ -193,7 +198,7 @@ class ActivityClientController extends IActivityClientController.Stub {
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "activityStopped");
             r = ActivityRecord.isInRootTaskLocked(token);
             if (r != null) {
-                if (r.attachedToProcess() && r.isState(Task.ActivityState.RESTARTING_PROCESS)) {
+                if (r.attachedToProcess() && r.isState(RESTARTING_PROCESS)) {
                     // The activity was requested to restart from
                     // {@link #restartActivityProcessIfVisible}.
                     restartingName = r.app.mName;
@@ -537,6 +542,29 @@ class ActivityClientController extends IActivityClientController.Stub {
         synchronized (mGlobalLock) {
             return ActivityRecord.getTaskForActivityLocked(token, onlyRoot);
         }
+    }
+
+    @Override
+    @Nullable
+    public IBinder getActivityTokenBelow(IBinder activityToken) {
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                final ActivityRecord ar = ActivityRecord.isInAnyTask(activityToken);
+                if (ar == null) {
+                    return null;
+                }
+                // Exclude finishing activity.
+                final ActivityRecord below = ar.getTask().getActivity((r) -> !r.finishing,
+                        ar, false /*includeBoundary*/, true /*traverseTopToBottom*/);
+                if (below != null && below.getUid() == ar.getUid()) {
+                    return below.appToken.asBinder();
+                }
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+        return null;
     }
 
     @Override
@@ -1040,10 +1068,14 @@ class ActivityClientController extends IActivityClientController.Stub {
         final long origId = Binder.clearCallingIdentity();
         synchronized (mGlobalLock) {
             final ActivityRecord r = ActivityRecord.isInRootTaskLocked(token);
-            if (r != null && r.isState(Task.ActivityState.RESUMED, Task.ActivityState.PAUSING)) {
+            if (r != null && r.isState(RESUMED, PAUSING)) {
                 r.mDisplayContent.mAppTransition.overridePendingAppTransition(
                         packageName, enterAnim, exitAnim, null, null,
                         r.mOverrideTaskTransition);
+                r.mTransitionController.setOverrideAnimation(
+                        TransitionInfo.AnimationOptions.makeCustomAnimOptions(packageName,
+                                enterAnim, exitAnim, r.mOverrideTaskTransition),
+                        null /* startCallback */, null /* finishCallback */);
             }
         }
         Binder.restoreCallingIdentity(origId);
@@ -1183,7 +1215,7 @@ class ActivityClientController extends IActivityClientController.Stub {
         try {
             final Intent baseActivityIntent;
             final boolean launchedFromHome;
-
+            final boolean isLastRunningActivity;
             synchronized (mGlobalLock) {
                 final ActivityRecord r = ActivityRecord.isInRootTaskLocked(token);
                 if (r == null) return;
@@ -1195,22 +1227,25 @@ class ActivityClientController extends IActivityClientController.Stub {
                     return;
                 }
 
-                final Intent baseIntent = r.getTask().getBaseIntent();
-                final boolean activityIsBaseActivity = baseIntent != null
-                        && r.mActivityComponent.equals(baseIntent.getComponent());
-                baseActivityIntent = activityIsBaseActivity ? r.intent : null;
+                final Task task = r.getTask();
+                isLastRunningActivity = task.topRunningActivity() == r;
+
+                final boolean isBaseActivity = r.mActivityComponent.equals(task.realActivity);
+                baseActivityIntent = isBaseActivity ? r.intent : null;
+
                 launchedFromHome = r.isLaunchSourceType(ActivityRecord.LAUNCH_SOURCE_TYPE_HOME);
             }
 
             // If the activity is one of the main entry points for the application, then we should
             // refrain from finishing the activity and instead move it to the back to keep it in
             // memory. The requirements for this are:
-            //   1. The current activity is the base activity for the task.
-            //   2. a. If the activity was launched by the home process, we trust that its intent
+            //   1. The activity is the last running activity in the task.
+            //   2. The current activity is the base activity for the task.
+            //   3. a. If the activity was launched by the home process, we trust that its intent
             //         was resolved, so we check if the it is a main intent for the application.
             //      b. Otherwise, we query Package Manager to verify whether the activity is a
             //         launcher activity for the application.
-            if (baseActivityIntent != null
+            if (baseActivityIntent != null && isLastRunningActivity
                     && ((launchedFromHome && ActivityRecord.isMainIntent(baseActivityIntent))
                         || isLauncherActivity(baseActivityIntent.getComponent()))) {
                 moveActivityTaskToBack(token, false /* nonRoot */);

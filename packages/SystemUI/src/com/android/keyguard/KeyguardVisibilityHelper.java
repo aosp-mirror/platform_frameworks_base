@@ -121,6 +121,13 @@ public class KeyguardVisibilityHelper {
                             .setStartDelay(delay);
                 }
                 animator.start();
+            } else if (mUnlockedScreenOffAnimationController.shouldAnimateInKeyguard()) {
+                mKeyguardViewVisibilityAnimating = true;
+
+                // Ask the screen off animation controller to animate the keyguard visibility for us
+                // since it may need to be cancelled due to keyguard lifecycle events.
+                mUnlockedScreenOffAnimationController.animateInKeyguard(
+                        mView, mAnimateKeyguardStatusViewVisibleEndRunnable);
             } else if (mLastOccludedState && !isOccluded) {
                 // An activity was displayed over the lock screen, and has now gone away
                 mView.setVisibility(View.VISIBLE);
@@ -132,13 +139,6 @@ public class KeyguardVisibilityHelper {
                         .alpha(1f)
                         .withEndAction(mAnimateKeyguardStatusViewVisibleEndRunnable)
                         .start();
-            } else if (mUnlockedScreenOffAnimationController.shouldAnimateInKeyguard()) {
-                mKeyguardViewVisibilityAnimating = true;
-
-                // Ask the screen off animation controller to animate the keyguard visibility for us
-                // since it may need to be cancelled due to keyguard lifecycle events.
-                mUnlockedScreenOffAnimationController.animateInKeyguard(
-                        mView, mAnimateKeyguardStatusViewVisibleEndRunnable);
             } else {
                 mView.setVisibility(View.VISIBLE);
                 mView.setAlpha(1f);

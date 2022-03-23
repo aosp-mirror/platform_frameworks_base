@@ -2303,6 +2303,38 @@ public abstract class BatteryStats implements Parcelable {
     public abstract Timer getScreenBrightnessTimer(int brightnessBin);
 
     /**
+     * Returns the number of physical displays on the device.
+     *
+     * {@hide}
+     */
+    public abstract int getDisplayCount();
+
+    /**
+     * Returns the time in microseconds that the screen has been on for a display while the
+     * device was running on battery.
+     *
+     * {@hide}
+     */
+    public abstract long getDisplayScreenOnTime(int display, long elapsedRealtimeUs);
+
+    /**
+     * Returns the time in microseconds that a display has been dozing while the device was
+     * running on battery.
+     *
+     * {@hide}
+     */
+    public abstract long getDisplayScreenDozeTime(int display, long elapsedRealtimeUs);
+
+    /**
+     * Returns the time in microseconds that a display has been on with the given brightness
+     * level while the device was running on battery.
+     *
+     * {@hide}
+     */
+    public abstract long getDisplayScreenBrightnessTime(int display, int brightnessBin,
+            long elapsedRealtimeUs);
+
+    /**
      * Returns the time in microseconds that power save mode has been enabled while the device was
      * running on battery.
      *
@@ -5035,6 +5067,71 @@ public abstract class BatteryStats implements Parcelable {
             sb.append(prefix);
             sb.append("  Total WiFi Multicast wakelock time: ");
             formatTimeMsNoSpace(sb, (multicastWakeLockTimeTotalMicros + 500) / 1000);
+            pw.println(sb.toString());
+        }
+
+        final int numDisplays = getDisplayCount();
+        if (numDisplays > 1) {
+            pw.println("");
+            pw.print(prefix);
+            sb.setLength(0);
+            sb.append(prefix);
+            sb.append("  MULTI-DISPLAY POWER SUMMARY START");
+            pw.println(sb.toString());
+
+            for (int display = 0; display < numDisplays; display++) {
+                sb.setLength(0);
+                sb.append(prefix);
+                sb.append("  Display ");
+                sb.append(display);
+                sb.append(" Statistics:");
+                pw.println(sb.toString());
+
+                final long displayScreenOnTime = getDisplayScreenOnTime(display, rawRealtime);
+                sb.setLength(0);
+                sb.append(prefix);
+                sb.append("    Screen on: ");
+                formatTimeMs(sb, displayScreenOnTime / 1000);
+                sb.append("(");
+                sb.append(formatRatioLocked(displayScreenOnTime, whichBatteryRealtime));
+                sb.append(") ");
+                pw.println(sb.toString());
+
+                sb.setLength(0);
+                sb.append("    Screen brightness levels:");
+                didOne = false;
+                for (int bin = 0; bin < NUM_SCREEN_BRIGHTNESS_BINS; bin++) {
+                    final long timeUs = getDisplayScreenBrightnessTime(display, bin, rawRealtime);
+                    if (timeUs == 0) {
+                        continue;
+                    }
+                    didOne = true;
+                    sb.append("\n      ");
+                    sb.append(prefix);
+                    sb.append(SCREEN_BRIGHTNESS_NAMES[bin]);
+                    sb.append(" ");
+                    formatTimeMs(sb, timeUs / 1000);
+                    sb.append("(");
+                    sb.append(formatRatioLocked(timeUs, displayScreenOnTime));
+                    sb.append(")");
+                }
+                if (!didOne) sb.append(" (no activity)");
+                pw.println(sb.toString());
+
+                final long displayScreenDozeTimeUs = getDisplayScreenDozeTime(display, rawRealtime);
+                sb.setLength(0);
+                sb.append(prefix);
+                sb.append("    Screen Doze: ");
+                formatTimeMs(sb, displayScreenDozeTimeUs / 1000);
+                sb.append("(");
+                sb.append(formatRatioLocked(displayScreenDozeTimeUs, whichBatteryRealtime));
+                sb.append(") ");
+                pw.println(sb.toString());
+            }
+            pw.print(prefix);
+            sb.setLength(0);
+            sb.append(prefix);
+            sb.append("  MULTI-DISPLAY POWER SUMMARY END");
             pw.println(sb.toString());
         }
 

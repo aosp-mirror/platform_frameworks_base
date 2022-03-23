@@ -35,10 +35,13 @@ import android.hardware.camera2.params.SessionConfiguration;
 import android.hardware.camera2.params.StreamConfiguration;
 import android.hardware.camera2.utils.CameraIdAndSessionConfiguration;
 import android.hardware.camera2.utils.ConcurrentCameraIdCombination;
+import android.hardware.devicestate.DeviceStateManager;
 import android.hardware.display.DisplayManager;
 import android.os.Binder;
 import android.os.DeadObjectException;
 import android.os.Handler;
+import android.os.HandlerExecutor;
+import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -50,6 +53,10 @@ import android.util.Log;
 import android.util.Size;
 import android.view.Display;
 
+import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.ArrayUtils;
+
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -96,6 +103,90 @@ public final class CameraManager {
     public CameraManager(Context context) {
         synchronized(mLock) {
             mContext = context;
+        }
+
+        mHandlerThread = new HandlerThread(TAG);
+        mHandlerThread.start();
+        mHandler = new Handler(mHandlerThread.getLooper());
+        mFoldStateListener = new FoldStateListener(context);
+        try {
+            context.getSystemService(DeviceStateManager.class)
+                    .registerCallback(new HandlerExecutor(mHandler), mFoldStateListener);
+        } catch (IllegalStateException e) {
+            Log.v(TAG, "Failed to register device state listener!");
+            Log.v(TAG, "Device state dependent characteristics updates will not be functional!");
+            mHandlerThread.quitSafely();
+            mHandler = null;
+            mFoldStateListener = null;
+        }
+    }
+
+    private HandlerThread mHandlerThread;
+    private Handler mHandler;
+    private FoldStateListener mFoldStateListener;
+    @GuardedBy("mLock")
+    private ArrayList<WeakReference<DeviceStateListener>> mDeviceStateListeners = new ArrayList<>();
+    private boolean mFoldedDeviceState;
+
+    /**
+     * @hide
+     */
+    public interface DeviceStateListener {
+        void onDeviceStateChanged(boolean folded);
+    }
+
+    private final class FoldStateListener implements DeviceStateManager.DeviceStateCallback {
+        private final int[] mFoldedDeviceStates;
+
+        public FoldStateListener(Context context) {
+            mFoldedDeviceStates = context.getResources().getIntArray(
+                    com.android.internal.R.array.config_foldedDeviceStates);
+        }
+
+        private void handleStateChange(int state) {
+            boolean folded = ArrayUtils.contains(mFoldedDeviceStates, state);
+            synchronized (mLock) {
+                mFoldedDeviceState = folded;
+                ArrayList<WeakReference<DeviceStateListener>> invalidListeners = new ArrayList<>();
+                for (WeakReference<DeviceStateListener> listener : mDeviceStateListeners) {
+                    DeviceStateListener callback = listener.get();
+                    if (callback != null) {
+                        callback.onDeviceStateChanged(folded);
+                    } else {
+                        invalidListeners.add(listener);
+                    }
+                }
+                if (!invalidListeners.isEmpty()) {
+                    mDeviceStateListeners.removeAll(invalidListeners);
+                }
+            }
+        }
+
+        @Override
+        public final void onBaseStateChanged(int state) {
+            handleStateChange(state);
+        }
+
+        @Override
+        public final void onStateChanged(int state) {
+            handleStateChange(state);
+        }
+    }
+
+    /**
+     * Register a {@link CameraCharacteristics} device state listener
+     *
+     * @param chars Camera characteristics that need to receive device state updates
+     *
+     * @hide
+     */
+    public void registerDeviceStateListener(@NonNull CameraCharacteristics chars) {
+        synchronized (mLock) {
+            DeviceStateListener listener = chars.getDeviceStateListener();
+            listener.onDeviceStateChanged(mFoldedDeviceState);
+            if (mFoldStateListener != null) {
+                mDeviceStateListeners.add(new WeakReference<>(listener));
+            }
         }
     }
 
@@ -504,6 +595,7 @@ public final class CameraManager {
                         "Camera service is currently unavailable", e);
             }
         }
+        registerDeviceStateListener(characteristics);
         return characteristics;
     }
 
@@ -1327,8 +1419,7 @@ public final class CameraManager {
         private ICameraService mCameraService;
 
         // Singleton, don't allow construction
-        private CameraManagerGlobal() {
-        }
+        private CameraManagerGlobal() { }
 
         public static final boolean sCameraServiceDisabled =
                 SystemProperties.getBoolean("config.disable_cameraservice", false);

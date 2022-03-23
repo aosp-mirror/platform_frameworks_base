@@ -30,6 +30,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.res.CompatibilityInfo;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.LocaleList;
 import android.os.RemoteException;
 import android.service.voice.IVoiceInteractionSession;
 import android.util.IntArray;
@@ -595,9 +596,54 @@ public abstract class ActivityTaskManagerInternal {
     public abstract boolean isBaseOfLockedTask(String packageName);
 
     /**
-     * Create an interface to update configuration for an application.
+     * Creates an interface to update configuration for the calling application.
      */
     public abstract PackageConfigurationUpdater createPackageConfigurationUpdater();
+
+    /**
+     * Creates an interface to update configuration for an arbitrary application specified by it's
+     * packageName and userId.
+     */
+    public abstract PackageConfigurationUpdater createPackageConfigurationUpdater(
+            String packageName, int userId);
+
+    /**
+     * Retrieves and returns the app-specific configuration for an arbitrary application specified
+     * by its packageName and userId. Returns null if no app-specific configuration has been set.
+     */
+    @Nullable
+    public abstract PackageConfig getApplicationConfig(String packageName,
+            int userId);
+
+    /**
+     * Holds app-specific configurations.
+     */
+    public static class PackageConfig {
+        /**
+         * nightMode for the application, null if app-specific nightMode is not set.
+         */
+        @Nullable
+        public final Integer mNightMode;
+
+        /**
+         * {@link LocaleList} for the application, null if app-specific locales are not set.
+         */
+        @Nullable
+        public final LocaleList mLocales;
+
+        PackageConfig(Integer nightMode, LocaleList locales) {
+            mNightMode = nightMode;
+            mLocales = locales;
+        }
+
+        /**
+         * Returns the string representation of the app-specific configuration.
+         */
+        @Override
+        public String toString() {
+            return "PackageConfig: nightMode " + mNightMode + " locales " + mLocales;
+        }
+    }
 
     /**
      * An interface to update configuration for an application, and will persist override
@@ -611,6 +657,14 @@ public abstract class ActivityTaskManagerInternal {
         PackageConfigurationUpdater setNightMode(int nightMode);
 
         /**
+         * Sets the app-specific locales for the application referenced by this updater.
+         * This setting is persisted and will overlay on top of the system locales for
+         * the said application.
+         * @return the current {@link PackageConfigurationUpdater} updated with the provided locale.
+         */
+        PackageConfigurationUpdater setLocales(LocaleList locales);
+
+        /**
          * Commit changes.
          */
         void commit();
@@ -621,4 +675,15 @@ public abstract class ActivityTaskManagerInternal {
      */
     public abstract boolean hasSystemAlertWindowPermission(int callingUid, int callingPid,
             String callingPackage);
+
+    /** Called when the device is waking up */
+    public abstract void notifyWakingUp();
+
+    /**
+     * Registers a callback which can intercept activity starts.
+     * @throws IllegalArgumentException if duplicate ids are provided
+     */
+    public abstract void registerActivityStartInterceptor(
+            @ActivityInterceptorCallback.OrderedId int id,
+            ActivityInterceptorCallback callback);
 }

@@ -164,7 +164,7 @@ public class WindowAnimator {
                 final DisplayContent dc = root.getDisplayContent(displayId);
 
                 dc.checkAppWindowsReadyToShow();
-                if (accessibilityController != null) {
+                if (accessibilityController.hasCallbacks()) {
                     accessibilityController.drawMagnifiedRegionBorderIfNeeded(displayId,
                             mTransaction);
                 }

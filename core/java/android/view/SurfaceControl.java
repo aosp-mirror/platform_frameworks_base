@@ -23,6 +23,7 @@ import static android.graphics.Matrix.MSKEW_Y;
 import static android.graphics.Matrix.MTRANS_X;
 import static android.graphics.Matrix.MTRANS_Y;
 import static android.view.SurfaceControlProto.HASH_CODE;
+import static android.view.SurfaceControlProto.LAYER_ID;
 import static android.view.SurfaceControlProto.NAME;
 
 import android.annotation.FloatRange;
@@ -41,6 +42,7 @@ import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
+import android.gui.DropInputMode;
 import android.hardware.HardwareBuffer;
 import android.hardware.display.DeviceProductInfo;
 import android.hardware.display.DisplayedContentSample;
@@ -150,7 +152,8 @@ public final class SurfaceControl implements Parcelable {
             float childRelativeTop, float childRelativeRight, float childRelativeBottom);
     private static native void nativeSetTrustedOverlay(long transactionObj, long nativeObject,
             boolean isTrustedOverlay);
-
+    private static native void nativeSetDropInputMode(
+            long transactionObj, long nativeObject, int flags);
     private static native boolean nativeClearContentFrameStats(long nativeObject);
     private static native boolean nativeGetContentFrameStats(long nativeObject, WindowContentFrameStats outStats);
     private static native boolean nativeClearAnimationFrameStats();
@@ -165,6 +168,8 @@ public final class SurfaceControl implements Parcelable {
             IBinder displayToken, long nativeSurfaceObject);
     private static native void nativeSetDisplayLayerStack(long transactionObj,
             IBinder displayToken, int layerStack);
+    private static native void nativeSetDisplayFlags(long transactionObj,
+            IBinder displayToken, int flags);
     private static native void nativeSetDisplayProjection(long transactionObj,
             IBinder displayToken, int orientation,
             int l, int t, int r, int b,
@@ -236,8 +241,80 @@ public final class SurfaceControl implements Parcelable {
     private static native void nativeRemoveJankDataListener(long nativeListener);
     private static native long nativeCreateJankDataListenerWrapper(OnJankDataListener listener);
     private static native int nativeGetGPUContextPriority();
-    private static native void nativeSetTransformHint(long nativeObject, int transformHint);
+    private static native void nativeSetTransformHint(long nativeObject,
+            @SurfaceControl.BufferTransform int transformHint);
     private static native int nativeGetTransformHint(long nativeObject);
+    private static native int nativeGetLayerId(long nativeObject);
+
+    /**
+     * Transforms that can be applied to buffers as they are displayed to a window.
+     *
+     * Supported transforms are any combination of horizontal mirror, vertical mirror, and
+     * clock-wise 90 degree rotation, in that order. Rotations of 180 and 270 degrees are made up
+     * of those basic transforms.
+     * Mirrors {@code ANativeWindowTransform} definitions.
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"BUFFER_TRANSFORM_"},
+            value = {BUFFER_TRANSFORM_IDENTITY, BUFFER_TRANSFORM_MIRROR_HORIZONTAL,
+                    BUFFER_TRANSFORM_MIRROR_VERTICAL, BUFFER_TRANSFORM_ROTATE_90,
+                    BUFFER_TRANSFORM_ROTATE_180, BUFFER_TRANSFORM_ROTATE_270,
+                    BUFFER_TRANSFORM_MIRROR_HORIZONTAL | BUFFER_TRANSFORM_ROTATE_90,
+                    BUFFER_TRANSFORM_MIRROR_VERTICAL | BUFFER_TRANSFORM_ROTATE_90})
+    public @interface BufferTransform {
+    }
+
+    /**
+     * Identity transform.
+     *
+     * These transforms that can be applied to buffers as they are displayed to a window.
+     * @see HardwareBuffer
+     *
+     * Supported transforms are any combination of horizontal mirror, vertical mirror, and
+     * clock-wise 90 degree rotation, in that order. Rotations of 180 and 270 degrees are
+     * made up of those basic transforms.
+     */
+    public static final int BUFFER_TRANSFORM_IDENTITY = 0x00;
+    /**
+     * Mirror horizontally. Can be combined with {@link #BUFFER_TRANSFORM_MIRROR_VERTICAL}
+     * and {@link #BUFFER_TRANSFORM_ROTATE_90}.
+     */
+    public static final int BUFFER_TRANSFORM_MIRROR_HORIZONTAL = 0x01;
+    /**
+     * Mirror vertically. Can be combined with {@link #BUFFER_TRANSFORM_MIRROR_HORIZONTAL}
+     * and {@link #BUFFER_TRANSFORM_ROTATE_90}.
+     */
+    public static final int BUFFER_TRANSFORM_MIRROR_VERTICAL = 0x02;
+    /**
+     * Rotate 90 degrees clock-wise. Can be combined with {@link
+     * #BUFFER_TRANSFORM_MIRROR_HORIZONTAL} and {@link #BUFFER_TRANSFORM_MIRROR_VERTICAL}.
+     */
+    public static final int BUFFER_TRANSFORM_ROTATE_90 = 0x04;
+    /**
+     * Rotate 180 degrees clock-wise. Cannot be combined with other transforms.
+     */
+    public static final int BUFFER_TRANSFORM_ROTATE_180 =
+            BUFFER_TRANSFORM_MIRROR_HORIZONTAL | BUFFER_TRANSFORM_MIRROR_VERTICAL;
+    /**
+     * Rotate 270 degrees clock-wise. Cannot be combined with other transforms.
+     */
+    public static final int BUFFER_TRANSFORM_ROTATE_270 =
+            BUFFER_TRANSFORM_ROTATE_180 | BUFFER_TRANSFORM_ROTATE_90;
+
+    /**
+     * @hide
+     */
+    public static @BufferTransform int rotationToBufferTransform(@Surface.Rotation int rotation) {
+        switch (rotation) {
+            case Surface.ROTATION_0: return BUFFER_TRANSFORM_IDENTITY;
+            case Surface.ROTATION_90: return BUFFER_TRANSFORM_ROTATE_90;
+            case Surface.ROTATION_180: return BUFFER_TRANSFORM_ROTATE_180;
+            case Surface.ROTATION_270: return BUFFER_TRANSFORM_ROTATE_270;
+        }
+        Log.e(TAG, "Trying to convert unknown rotation=" + rotation);
+        return BUFFER_TRANSFORM_IDENTITY;
+    }
 
     @Nullable
     @GuardedBy("mLock")
@@ -352,8 +429,6 @@ public final class SurfaceControl implements Parcelable {
     private int mWidth;
     @GuardedBy("mLock")
     private int mHeight;
-
-    private int mTransformHint;
 
     private WeakReference<View> mLocalOwnerView;
 
@@ -550,6 +625,15 @@ public final class SurfaceControl implements Parcelable {
      * Updates the value set during Surface creation (see {@link #OPAQUE}).
      */
     private static final int SURFACE_OPAQUE = 0x02;
+
+    /* flags used with setDisplayFlags() (keep in sync with DisplayDevice.h) */
+
+    /**
+     * DisplayDevice flag: This display's transform is sent to inputflinger and used for input
+     * dispatch. This flag is used to disambiguate displays which share a layerstack.
+     * @hide
+     */
+    public static final int DISPLAY_RECEIVES_INPUT = 0x01;
 
     // Display power modes.
     /**
@@ -1528,6 +1612,7 @@ public final class SurfaceControl implements Parcelable {
         final long token = proto.start(fieldId);
         proto.write(HASH_CODE, System.identityHashCode(this));
         proto.write(NAME, mName);
+        proto.write(LAYER_ID, getLayerId());
         proto.end(token);
     }
 
@@ -3179,6 +3264,17 @@ public final class SurfaceControl implements Parcelable {
         /**
          * @hide
          */
+        public Transaction setDisplayFlags(IBinder displayToken, int flags) {
+            if (displayToken == null) {
+                throw new IllegalArgumentException("displayToken must not be null");
+            }
+            nativeSetDisplayFlags(mNativeObject, displayToken, flags);
+            return this;
+        }
+
+        /**
+         * @hide
+         */
         public Transaction setDisplayProjection(IBinder displayToken,
                 int orientation, Rect layerStackRect, Rect displayRect) {
             if (displayToken == null) {
@@ -3436,7 +3532,18 @@ public final class SurfaceControl implements Parcelable {
             return this;
         }
 
-         /**
+        /**
+         * Sets the input event drop mode on this SurfaceControl and its children. The caller must
+         * hold the ACCESS_SURFACE_FLINGER permission. See {@code InputEventDropMode}.
+         * @hide
+         */
+        public Transaction setDropInputMode(SurfaceControl sc, @DropInputMode int mode) {
+            checkPreconditions(sc);
+            nativeSetDropInputMode(mNativeObject, sc.mNativeObject, mode);
+            return this;
+        }
+
+        /**
          * Merge the other transaction into this transaction, clearing the
          * other transaction as if it had been applied.
          *
@@ -3623,7 +3730,7 @@ public final class SurfaceControl implements Parcelable {
     /**
      * @hide
      */
-    public int getTransformHint() {
+    public @SurfaceControl.BufferTransform int getTransformHint() {
         checkNotReleased();
         return nativeGetTransformHint(mNativeObject);
     }
@@ -3637,7 +3744,18 @@ public final class SurfaceControl implements Parcelable {
      * with the same size.
      * @hide
      */
-    public void setTransformHint(@Surface.Rotation int transformHint) {
+    public void setTransformHint(@SurfaceControl.BufferTransform int transformHint) {
         nativeSetTransformHint(mNativeObject, transformHint);
+    }
+
+    /**
+     * @hide
+     */
+    public int getLayerId() {
+        if (mNativeObject != 0) {
+            return nativeGetLayerId(mNativeObject);
+        }
+
+        return -1;
     }
 }

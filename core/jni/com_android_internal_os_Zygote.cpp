@@ -202,6 +202,8 @@ static constexpr unsigned int STORAGE_DIR_CHECK_MAX_INTERVAL_US = 1000;
  */
 static constexpr int STORAGE_DIR_CHECK_TIMEOUT_US = 1000 * 1000 * 60 * 5;
 
+static void WaitUntilDirReady(const std::string& target, fail_fn_t fail_fn);
+
 /**
  * A helper class containing accounting information for USAPs.
  */
@@ -893,7 +895,7 @@ void SetThreadName(const std::string& thread_name) {
 
   // pthread_setname_np fails rather than truncating long strings.
   char buf[16];       // MAX_TASK_COMM_LEN=16 is hard-coded into bionic
-  strlcpy(buf, name_start_ptr, sizeof(buf) - 1);
+  strlcpy(buf, name_start_ptr, sizeof(buf));
   errno = pthread_setname_np(pthread_self(), buf);
   if (errno != 0) {
     ALOGW("Unable to set the name of current thread to '%s': %s", buf, strerror(errno));
@@ -1249,7 +1251,11 @@ static void isolateAppData(JNIEnv* env, const std::vector<std::string>& merged_d
     auto volPath = StringPrintf("%s/%s", externalPrivateMountPath, ent->d_name);
     auto cePath = StringPrintf("%s/user", volPath.c_str());
     auto dePath = StringPrintf("%s/user_de", volPath.c_str());
+    // Wait until dir user is created.
+    WaitUntilDirReady(cePath.c_str(), fail_fn);
     MountAppDataTmpFs(cePath.c_str(), fail_fn);
+    // Wait until dir user_de is created.
+    WaitUntilDirReady(dePath.c_str(), fail_fn);
     MountAppDataTmpFs(dePath.c_str(), fail_fn);
   }
   closedir(dir);
@@ -1620,7 +1626,7 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids, 
         }
         // Also prefetch standalone system server jars. The reason for doing this here is the same
         // as above.
-        env->CallStaticObjectMethod(gZygoteInitClass, gPrefetchStandaloneSystemServerJars);
+        env->CallStaticVoidMethod(gZygoteInitClass, gPrefetchStandaloneSystemServerJars);
         if (env->ExceptionCheck()) {
             env->ExceptionClear();
         }

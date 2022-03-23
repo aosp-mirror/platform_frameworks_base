@@ -19,13 +19,13 @@ package android.window;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.TestApi;
 import android.app.ActivityManager;
 import android.app.TaskInfo;
 import android.content.pm.ActivityInfo;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.view.InsetsState;
+import android.view.InsetsVisibilities;
 import android.view.WindowManager;
 
 /**
@@ -33,7 +33,6 @@ import android.view.WindowManager;
  * start in the system.
  * @hide
  */
-@TestApi
 public final class StartingWindowInfo implements Parcelable {
     /**
      * Prefer nothing or not care the type of starting window.
@@ -165,7 +164,13 @@ public final class StartingWindowInfo implements Parcelable {
      * TaskSnapshot.
      * @hide
      */
-    public TaskSnapshot mTaskSnapshot;
+    public TaskSnapshot taskSnapshot;
+
+    /**
+     * The requested insets visibility of the top main window.
+     * @hide
+     */
+    public final InsetsVisibilities requestedVisibilities = new InsetsVisibilities();
 
     public StartingWindowInfo() {
 
@@ -190,7 +195,8 @@ public final class StartingWindowInfo implements Parcelable {
         dest.writeTypedObject(mainWindowLayoutParams, flags);
         dest.writeInt(splashScreenThemeResId);
         dest.writeBoolean(isKeyguardOccluded);
-        dest.writeTypedObject(mTaskSnapshot, flags);
+        dest.writeTypedObject(taskSnapshot, flags);
+        requestedVisibilities.writeToParcel(dest, flags);
     }
 
     void readFromParcel(@NonNull Parcel source) {
@@ -203,7 +209,8 @@ public final class StartingWindowInfo implements Parcelable {
         mainWindowLayoutParams = source.readTypedObject(WindowManager.LayoutParams.CREATOR);
         splashScreenThemeResId = source.readInt();
         isKeyguardOccluded = source.readBoolean();
-        mTaskSnapshot = source.readTypedObject(TaskSnapshot.CREATOR);
+        taskSnapshot = source.readTypedObject(TaskSnapshot.CREATOR);
+        requestedVisibilities.readFromParcel(source);
     }
 
     @Override

@@ -805,7 +805,7 @@ public class AudioManager {
     }
 
     @UnsupportedAppUsage
-    private static IAudioService getService()
+    static IAudioService getService()
     {
         if (sService != null) {
             return sService;
@@ -2437,6 +2437,19 @@ public class AudioManager {
             throw new NullPointerException("Illegal null AudioAttributes");
         }
         return AudioSystem.getOffloadSupport(format, attributes);
+    }
+
+    //====================================================================
+    // Immersive audio
+
+    /**
+     * Return a handle to the optional platform's {@link Spatializer}
+     * @return the {@code Spatializer} instance.
+     * @see Spatializer#getImmersiveAudioLevel() to check for the level of support of the effect
+     *   on the platform
+     */
+    public @NonNull Spatializer getSpatializer() {
+        return new Spatializer(this);
     }
 
     //====================================================================
@@ -5404,6 +5417,10 @@ public class AudioManager {
      */
     public static final int DEVICE_OUT_BLE_SPEAKER = AudioSystem.DEVICE_OUT_BLE_SPEAKER;
     /** @hide
+     * The audio output device code for a BLE audio brodcast group.
+     */
+    public static final int DEVICE_OUT_BLE_BROADCAST = AudioSystem.DEVICE_OUT_BLE_BROADCAST;
+    /** @hide
      * This is not used as a returned value from {@link #getDevicesForStream}, but could be
      *  used in the future in a set method to select whatever default device is chosen by the
      *  platform-specific implementation.
@@ -5806,13 +5823,14 @@ public class AudioManager {
      * @param newDevice Bluetooth device connected or null if there is no new devices
      * @param previousDevice Bluetooth device disconnected or null if there is no disconnected
      * devices
-     * @param info contain all info related to the device. {@link BtProfileConnectionInfo}
+     * @param info contain all info related to the device. {@link BluetoothProfileConnectionInfo}
      * {@hide}
      */
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_STACK)
     public void handleBluetoothActiveDeviceChanged(@Nullable BluetoothDevice newDevice,
-            @Nullable BluetoothDevice previousDevice, @NonNull BtProfileConnectionInfo info) {
+            @Nullable BluetoothDevice previousDevice,
+            @NonNull BluetoothProfileConnectionInfo info) {
         final IAudioService service = getService();
         try {
             service.handleBluetoothActiveDeviceChanged(newDevice, previousDevice, info);
@@ -6813,7 +6831,8 @@ public class AudioManager {
         for (Integer format : formatsList) {
             int btSourceCodec = AudioSystem.audioFormatToBluetoothSourceCodec(format);
             if (btSourceCodec != BluetoothCodecConfig.SOURCE_CODEC_TYPE_INVALID) {
-                codecConfigList.add(new BluetoothCodecConfig(btSourceCodec));
+                codecConfigList.add(
+                        new BluetoothCodecConfig.Builder().setCodecType(btSourceCodec).build());
             }
         }
         return codecConfigList;

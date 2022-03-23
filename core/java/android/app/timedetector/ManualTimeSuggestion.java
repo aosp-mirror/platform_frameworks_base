@@ -31,9 +31,9 @@ import java.util.Objects;
 /**
  * A time signal from a manual (user provided) source.
  *
- * <p>{@code utcTime} is the suggested time. The {@code utcTime.value} is the number of milliseconds
- * elapsed since 1/1/1970 00:00:00 UTC. The {@code utcTime.referenceTimeMillis} is the value of the
- * elapsed realtime clock when the {@code utcTime.value} was established.
+ * <p>{@code unixEpochTime} is the suggested time. The {@code unixEpochTime.value} is the number of
+ * milliseconds elapsed since 1/1/1970 00:00:00 UTC. The {@code unixEpochTime.referenceTimeMillis}
+ * is the value of the elapsed realtime clock when the {@code unixEpochTime.value} was established.
  * Note that the elapsed realtime clock is considered accurate but it is volatile, so time
  * suggestions cannot be persisted across device resets.
  *
@@ -57,17 +57,17 @@ public final class ManualTimeSuggestion implements Parcelable {
                 }
             };
 
-    @NonNull private final TimestampedValue<Long> mUtcTime;
+    @NonNull private final TimestampedValue<Long> mUnixEpochTime;
     @Nullable private ArrayList<String> mDebugInfo;
 
-    public ManualTimeSuggestion(@NonNull TimestampedValue<Long> utcTime) {
-        mUtcTime = Objects.requireNonNull(utcTime);
-        Objects.requireNonNull(utcTime.getValue());
+    public ManualTimeSuggestion(@NonNull TimestampedValue<Long> unixEpochTime) {
+        mUnixEpochTime = Objects.requireNonNull(unixEpochTime);
+        Objects.requireNonNull(unixEpochTime.getValue());
     }
 
     private static ManualTimeSuggestion createFromParcel(Parcel in) {
-        TimestampedValue<Long> utcTime = in.readParcelable(null /* classLoader */);
-        ManualTimeSuggestion suggestion = new ManualTimeSuggestion(utcTime);
+        TimestampedValue<Long> unixEpochTime = in.readParcelable(null /* classLoader */);
+        ManualTimeSuggestion suggestion = new ManualTimeSuggestion(unixEpochTime);
         @SuppressWarnings("unchecked")
         ArrayList<String> debugInfo = (ArrayList<String>) in.readArrayList(null /* classLoader */);
         suggestion.mDebugInfo = debugInfo;
@@ -81,13 +81,13 @@ public final class ManualTimeSuggestion implements Parcelable {
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
-        dest.writeParcelable(mUtcTime, 0);
+        dest.writeParcelable(mUnixEpochTime, 0);
         dest.writeList(mDebugInfo);
     }
 
     @NonNull
-    public TimestampedValue<Long> getUtcTime() {
-        return mUtcTime;
+    public TimestampedValue<Long> getUnixEpochTime() {
+        return mUnixEpochTime;
     }
 
     @NonNull
@@ -117,18 +117,18 @@ public final class ManualTimeSuggestion implements Parcelable {
             return false;
         }
         ManualTimeSuggestion that = (ManualTimeSuggestion) o;
-        return Objects.equals(mUtcTime, that.mUtcTime);
+        return Objects.equals(mUnixEpochTime, that.mUnixEpochTime);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mUtcTime);
+        return Objects.hash(mUnixEpochTime);
     }
 
     @Override
     public String toString() {
         return "ManualTimeSuggestion{"
-                + "mUtcTime=" + mUtcTime
+                + "mUnixEpochTime=" + mUnixEpochTime
                 + ", mDebugInfo=" + mDebugInfo
                 + '}';
     }

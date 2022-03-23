@@ -261,8 +261,6 @@ public class WifiStatusTracker {
     private void updateWifiState() {
         state = mWifiManager.getWifiState();
         enabled = state == WifiManager.WIFI_STATE_ENABLED;
-        isCarrierMerged = false;
-        subId = 0;
     }
 
     private void updateRssi(int newRssi) {

@@ -60,6 +60,7 @@ import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.InsetsState.InternalInsetsType;
+import android.view.InsetsVisibilities;
 import android.view.WindowInsetsController.Appearance;
 import android.view.WindowInsetsController.Behavior;
 
@@ -526,23 +527,25 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         @Override
         public void onSystemBarAttributesChanged(int displayId, @Appearance int appearance,
                 AppearanceRegion[] appearanceRegions, boolean navbarColorManagedByIme,
-                @Behavior int behavior, boolean isFullscreen) {
+                @Behavior int behavior, InsetsVisibilities requestedVisibilities,
+                String packageName) {
             getUiState(displayId).setBarAttributes(appearance, appearanceRegions,
-                    navbarColorManagedByIme, behavior, isFullscreen);
+                    navbarColorManagedByIme, behavior, requestedVisibilities, packageName);
             if (mBar != null) {
                 try {
                     mBar.onSystemBarAttributesChanged(displayId, appearance, appearanceRegions,
-                            navbarColorManagedByIme, behavior, isFullscreen);
+                            navbarColorManagedByIme, behavior, requestedVisibilities, packageName);
                 } catch (RemoteException ex) { }
             }
         }
 
         @Override
-        public void showTransient(int displayId, @InternalInsetsType int[] types) {
+        public void showTransient(int displayId, @InternalInsetsType int[] types,
+                boolean isGestureOnSystemBar) {
             getUiState(displayId).showTransient(types);
             if (mBar != null) {
                 try {
-                    mBar.showTransient(displayId, types);
+                    mBar.showTransient(displayId, types, isGestureOnSystemBar);
                 } catch (RemoteException ex) { }
             }
         }
@@ -1104,13 +1107,14 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         return state;
     }
 
-    private class UiState {
+    private static class UiState {
         private @Appearance int mAppearance = 0;
         private AppearanceRegion[] mAppearanceRegions = new AppearanceRegion[0];
-        private ArraySet<Integer> mTransientBarTypes = new ArraySet<>();
+        private final ArraySet<Integer> mTransientBarTypes = new ArraySet<>();
         private boolean mNavbarColorManagedByIme = false;
         private @Behavior int mBehavior;
-        private boolean mFullscreen = false;
+        private InsetsVisibilities mRequestedVisibilities = new InsetsVisibilities();
+        private String mPackageName = "none";
         private int mDisabled1 = 0;
         private int mDisabled2 = 0;
         private int mImeWindowVis = 0;
@@ -1120,12 +1124,14 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
 
         private void setBarAttributes(@Appearance int appearance,
                 AppearanceRegion[] appearanceRegions, boolean navbarColorManagedByIme,
-                @Behavior int behavior, boolean isFullscreen) {
+                @Behavior int behavior, InsetsVisibilities requestedVisibilities,
+                String packageName) {
             mAppearance = appearance;
             mAppearanceRegions = appearanceRegions;
             mNavbarColorManagedByIme = navbarColorManagedByIme;
             mBehavior = behavior;
-            mFullscreen = isFullscreen;
+            mRequestedVisibilities = requestedVisibilities;
+            mPackageName = packageName;
         }
 
         private void showTransient(@InternalInsetsType int[] types) {
@@ -1245,8 +1251,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
                     state.mAppearance, state.mAppearanceRegions, state.mImeWindowVis,
                     state.mImeBackDisposition, state.mShowImeSwitcher,
                     gatherDisableActionsLocked(mCurrentUserId, 2), state.mImeToken,
-                    state.mNavbarColorManagedByIme, state.mBehavior, state.mFullscreen,
-                    transientBarTypes);
+                    state.mNavbarColorManagedByIme, state.mBehavior, state.mRequestedVisibilities,
+                    state.mPackageName, transientBarTypes);
         }
     }
 

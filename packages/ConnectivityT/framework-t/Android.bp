@@ -39,7 +39,6 @@ filegroup {
         "src/android/net/TrafficStats.java",
         "src/android/net/UnderlyingNetworkInfo.*",
         "src/android/net/netstats/**/*.*",
-        "src/com/android/server/NetworkManagementSocketTagger.java",
     ],
     path: "src",
     visibility: [
@@ -126,14 +125,14 @@ filegroup {
     name: "framework-connectivity-ethernet-sources",
     srcs: [
         "src/android/net/EthernetManager.java",
+        "src/android/net/EthernetNetworkManagementException.java",
+        "src/android/net/EthernetNetworkManagementException.aidl",
         "src/android/net/EthernetNetworkSpecifier.java",
+        "src/android/net/EthernetNetworkUpdateRequest.java",
+        "src/android/net/EthernetNetworkUpdateRequest.aidl",
         "src/android/net/IEthernetManager.aidl",
         "src/android/net/IEthernetServiceListener.aidl",
-        "src/android/net/IInternalNetworkManagementListener.aidl",
-        "src/android/net/InternalNetworkUpdateRequest.java",
-        "src/android/net/InternalNetworkUpdateRequest.aidl",
-        "src/android/net/InternalNetworkManagementException.java",
-        "src/android/net/InternalNetworkManagementException.aidl",
+        "src/android/net/INetworkInterfaceOutcomeReceiver.aidl",
         "src/android/net/ITetheredInterfaceCallback.aidl",
     ],
     path: "src",
@@ -155,24 +154,52 @@ filegroup {
     ],
 }
 
+// TODO: remove this empty filegroup.
 filegroup {
     name: "framework-connectivity-tiramisu-sources",
-    srcs: [
-        ":framework-connectivity-ethernet-sources",
-        ":framework-connectivity-ipsec-sources",
-        ":framework-connectivity-netstats-sources",
-    ],
+    srcs: [],
     visibility: ["//frameworks/base"],
 }
 
 filegroup {
     name: "framework-connectivity-tiramisu-updatable-sources",
     srcs: [
+        ":framework-connectivity-ethernet-sources",
+        ":framework-connectivity-ipsec-sources",
+        ":framework-connectivity-netstats-sources",
         ":framework-connectivity-nsd-sources",
         ":framework-connectivity-tiramisu-internal-sources",
     ],
     visibility: [
         "//frameworks/base",
         "//packages/modules/Connectivity:__subpackages__",
+    ],
+}
+
+cc_library_shared {
+    name: "libframework-connectivity-tiramisu-jni",
+    min_sdk_version: "30",
+    cflags: [
+        "-Wall",
+        "-Werror",
+        "-Wno-unused-parameter",
+        // Don't warn about S API usage even with
+        // min_sdk 30: the library is only loaded
+        // on S+ devices
+        "-Wno-unguarded-availability",
+        "-Wthread-safety",
+    ],
+    srcs: [
+        "jni/android_net_TrafficStats.cpp",
+        "jni/onload.cpp",
+    ],
+    shared_libs: [
+        "libandroid",
+        "liblog",
+        "libnativehelper",
+    ],
+    stl: "none",
+    apex_available: [
+        "com.android.tethering",
     ],
 }

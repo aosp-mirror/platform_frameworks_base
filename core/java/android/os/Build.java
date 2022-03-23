@@ -31,6 +31,7 @@ import android.sysprop.DeviceProperties;
 import android.sysprop.SocProperties;
 import android.sysprop.TelephonyProperties;
 import android.text.TextUtils;
+import android.util.ArraySet;
 import android.util.Slog;
 import android.view.View;
 
@@ -39,6 +40,7 @@ import dalvik.system.VMRuntime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -283,11 +285,18 @@ public class Build {
         public static final String RELEASE = getString("ro.build.version.release");
 
         /**
-         * The version string we show to the user; may be {@link #RELEASE} or
-         * {@link #CODENAME} if not a final release build.
+         * The version string.  May be {@link #RELEASE} or {@link #CODENAME} if
+         * not a final release build.
          */
         @NonNull public static final String RELEASE_OR_CODENAME = getString(
                 "ro.build.version.release_or_codename");
+
+        /**
+         * The version string we show to the user; may be {@link #RELEASE} or
+         * a descriptive string if not a final release build.
+         */
+        @NonNull public static final String RELEASE_OR_PREVIEW_DISPLAY = getString(
+                "ro.build.version.release_or_preview_display");
 
         /**
          * The base OS build the product is based on.
@@ -395,6 +404,22 @@ public class Build {
          * a release build.
          */
         public static final String CODENAME = getString("ro.build.version.codename");
+
+        /**
+         * All known codenames starting from {@link VERSION_CODES.Q}.
+         *
+         * <p>This includes in development codenames as well, i.e. if {@link #CODENAME} is not "REL"
+         * then the value of that is present in this set.
+         *
+         * <p>If a particular string is not present in this set, then it is either not a codename
+         * or a codename for a future release. For example, during Android R development, "Tiramisu"
+         * was not a known codename.
+         *
+         * @hide
+         */
+        @SystemApi
+        @NonNull public static final Set<String> KNOWN_CODENAMES =
+                new ArraySet<>(getStringList("ro.build.version.known_codenames", ","));
 
         private static final String[] ALL_CODENAMES
                 = getStringList("ro.build.version.all_codenames", ",");
@@ -1024,7 +1049,7 @@ public class Build {
          * will also enable {@link StrictMode.ThreadPolicy.Builder#detectUnbufferedIo}.</li>
          * <li>{@link android.provider.DocumentsContract}'s various methods will throw failure
          * exceptions back to the caller instead of returning null.
-         * <li>{@link View#hasFocusable View.hasFocusable} now includes auto-focusable views.</li>
+         * <li>{@link View#hasFocusable() View.hasFocusable} now includes auto-focusable views.</li>
          * <li>{@link android.view.SurfaceView} will no longer always change the underlying
          * Surface object when something about it changes; apps need to look at the current
          * state of the object to determine which things they are interested in have changed.</li>
@@ -1130,6 +1155,13 @@ public class Build {
          * S.
          */
         public static final int S = 31;
+
+        /**
+         * S V2.
+         *
+         * Once more unto the breach, dear friends, once more.
+         */
+        public static final int S_V2 = 32;
 
         /**
          * Tiramisu.

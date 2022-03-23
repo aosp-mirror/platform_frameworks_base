@@ -37,14 +37,17 @@ class TvPipMenuTests : TvPipTestBase() {
     private val systemUiResources =
             packageManager.getResourcesForApplication(SYSTEM_UI_PACKAGE_NAME)
     private val pipBoundsWhileInMenu: Rect = systemUiResources.run {
-        val bounds = getString(getIdentifier("pip_menu_bounds", "string", SYSTEM_UI_PACKAGE_NAME))
+        val bounds = getString(getIdentifier("pip_menu_bounds", "string",
+                SYSTEM_UI_PACKAGE_NAME))
         Rect.unflattenFromString(bounds) ?: error("Could not retrieve PiP menu bounds")
     }
     private val playButtonDescription = systemUiResources.run {
-        getString(getIdentifier("pip_play", "string", SYSTEM_UI_PACKAGE_NAME))
+        getString(getIdentifier("pip_play", "string",
+                SYSTEM_UI_PACKAGE_NAME))
     }
     private val pauseButtonDescription = systemUiResources.run {
-        getString(getIdentifier("pip_pause", "string", SYSTEM_UI_PACKAGE_NAME))
+        getString(getIdentifier("pip_pause", "string",
+                SYSTEM_UI_PACKAGE_NAME))
     }
 
     @Before

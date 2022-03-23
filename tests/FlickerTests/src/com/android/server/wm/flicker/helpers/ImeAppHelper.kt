@@ -17,19 +17,21 @@
 package com.android.server.wm.flicker.helpers
 
 import android.app.Instrumentation
-import android.content.ComponentName
 import android.support.test.launcherhelper.ILauncherStrategy
 import android.support.test.launcherhelper.LauncherStrategyFactory
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.Until
 import com.android.server.wm.flicker.testapp.ActivityOptions
+import com.android.server.wm.traces.common.FlickerComponentName
+import com.android.server.wm.traces.parser.toFlickerComponent
 import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 
 open class ImeAppHelper @JvmOverloads constructor(
     instr: Instrumentation,
     launcherName: String = ActivityOptions.IME_ACTIVITY_LAUNCHER_NAME,
-    component: ComponentName = ActivityOptions.IME_ACTIVITY_COMPONENT_NAME,
+    component: FlickerComponentName =
+        ActivityOptions.IME_ACTIVITY_COMPONENT_NAME.toFlickerComponent(),
     launcherStrategy: ILauncherStrategy = LauncherStrategyFactory
             .getInstance(instr)
             .launcherStrategy
@@ -61,7 +63,8 @@ open class ImeAppHelper @JvmOverloads constructor(
         if (wmHelper == null) {
             device.waitForIdle()
         } else {
-            wmHelper.waitImeWindowShown()
+            wmHelper.waitImeShown()
+            wmHelper.waitForAppTransitionIdle()
         }
     }
 
@@ -78,7 +81,23 @@ open class ImeAppHelper @JvmOverloads constructor(
         if (wmHelper == null) {
             device.waitForIdle()
         } else {
-            wmHelper.waitImeWindowGone()
+            wmHelper.waitImeGone()
+        }
+    }
+
+    @JvmOverloads
+    open fun finishActivity(device: UiDevice, wmHelper: WindowManagerStateHelper? = null) {
+        val finishButton = device.wait(
+                Until.findObject(By.res(getPackage(), "finish_activity_btn")),
+                FIND_TIMEOUT)
+        require(finishButton != null) {
+            "Finish activity button not found, probably IME activity is not on the screen ?"
+        }
+        finishButton.click()
+        if (wmHelper == null) {
+            device.waitForIdle()
+        } else {
+            wmHelper.waitForActivityRemoved(component)
         }
     }
 }

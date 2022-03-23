@@ -28,6 +28,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.Process;
 import android.os.SystemClock;
+import android.text.TextUtils;
 import android.util.SparseBooleanArray;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -326,16 +327,11 @@ public final class NetworkStats implements Parcelable, Iterable<NetworkStats.Ent
          * @param uid uid of this {@link Entry}. {@link #UID_TETHERING} if this {@link Entry} is
          *            for tethering. Or {@link #UID_ALL} if this {@link NetworkStats} is only
          *            counting iface stats.
-         * @param set usage state of this {@link Entry}. Should be one of the following
-         *            values: {@link #SET_DEFAULT}, {@link #SET_FOREGROUND}.
+         * @param set usage state of this {@link Entry}.
          * @param tag tag of this {@link Entry}.
-         * @param metered metered state of this {@link Entry}. Should be one of the following
-         *                values: {link #METERED_YES}, {link #METERED_NO}.
-         * @param roaming roaming state of this {@link Entry}. Should be one of the following
-         *                values: {link #ROAMING_YES}, {link #ROAMING_NO}.
-         * @param defaultNetwork default network status of this {@link Entry}. Should be one
-         *                       of the following values: {link #DEFAULT_NETWORK_YES},
-         *                       {link #DEFAULT_NETWORK_NO}.
+         * @param metered metered state of this {@link Entry}.
+         * @param roaming roaming state of this {@link Entry}.
+         * @param defaultNetwork default network status of this {@link Entry}.
          * @param rxBytes Number of bytes received for this {@link Entry}. Statistics should
          *                represent the contents of IP packets, including IP headers.
          * @param rxPackets Number of packets received for this {@link Entry}. Statistics should
@@ -400,8 +396,7 @@ public final class NetworkStats implements Parcelable, Iterable<NetworkStats.Ent
         }
 
         /**
-         * @return the set state of this entry. Should be one of the following
-         * values: {@link #SET_DEFAULT}, {@link #SET_FOREGROUND}.
+         * @return the set state of this entry.
          */
         @State public int getSet() {
             return set;
@@ -415,24 +410,21 @@ public final class NetworkStats implements Parcelable, Iterable<NetworkStats.Ent
         }
 
         /**
-         * @return the metered state. Should be one of the following
-         * values: {link #METERED_YES}, {link #METERED_NO}.
+         * @return the metered state.
          */
         @Meteredness public int getMetered() {
             return metered;
         }
 
         /**
-         * @return the roaming state. Should be one of the following
-         * values: {link #ROAMING_YES}, {link #ROAMING_NO}.
+         * @return the roaming state.
          */
         @Roaming public int getRoaming() {
             return roaming;
         }
 
         /**
-         * @return the default network state. Should be one of the following
-         * values: {link #DEFAULT_NETWORK_YES}, {link #DEFAULT_NETWORK_NO}.
+         * @return the default network state.
          */
         @DefaultNetwork public int getDefaultNetwork() {
             return defaultNetwork;
@@ -500,7 +492,7 @@ public final class NetworkStats implements Parcelable, Iterable<NetworkStats.Ent
                         && roaming == e.roaming && defaultNetwork == e.defaultNetwork
                         && rxBytes == e.rxBytes && rxPackets == e.rxPackets
                         && txBytes == e.txBytes && txPackets == e.txPackets
-                        && operations == e.operations && iface.equals(e.iface);
+                        && operations == e.operations && TextUtils.equals(iface, e.iface);
             }
             return false;
         }

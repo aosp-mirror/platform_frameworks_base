@@ -457,6 +457,9 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
             }, FgThread.getExecutor()).whenComplete(uncheckExceptions((association, err) -> {
                 if (err == null) {
                     addAssociation(association, userId);
+                    mServiceConnectors.forUser(userId).post(service -> {
+                        service.onAssociationCreated();
+                    });
                 } else {
                     Slog.e(LOG_TAG, "Failed to discover device(s)", err);
                     callback.onFailure("No devices found: " + err.getMessage());
@@ -566,7 +569,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
                 return PendingIntent.getActivityAsUser(getContext(),
                         0 /* request code */,
                         NotificationAccessConfirmationActivityContract.launcherIntent(
-                                userId, component, packageTitle),
+                                getContext(), userId, component, packageTitle),
                         PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_ONE_SHOT
                                 | PendingIntent.FLAG_CANCEL_CURRENT,
                         null /* options */,
@@ -1448,8 +1451,12 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
     }
 
     void restartBleScan() {
-        mBluetoothAdapter.getBluetoothLeScanner().stopScan(mBleScanCallback);
-        startBleScan();
+        if (mBluetoothAdapter.getBluetoothLeScanner() != null) {
+            mBluetoothAdapter.getBluetoothLeScanner().stopScan(mBleScanCallback);
+            startBleScan();
+        } else {
+            Slog.w(LOG_TAG, "BluetoothLeScanner is null (likely BLE isn't ON yet).");
+        }
     }
 
     private List<ScanFilter> getBleScanFilters() {
@@ -1569,7 +1576,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
         }
 
         @Override
-        public void onDeviceDisconnected(BluetoothDevice device, @DisconnectReason int reason) {
+        public void onDeviceDisconnected(BluetoothDevice device, int reason) {
             Slog.d(LOG_TAG, device.getAddress() + " disconnected w/ reason: (" + reason + ") "
                     + BluetoothAdapter.BluetoothConnectionCallback.disconnectReasonText(reason));
             CompanionDeviceManagerService.this.onDeviceDisconnected(device.getAddress());

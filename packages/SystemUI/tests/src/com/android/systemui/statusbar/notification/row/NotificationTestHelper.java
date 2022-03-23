@@ -46,6 +46,7 @@ import android.widget.RemoteViews;
 import com.android.systemui.TestableDependency;
 import com.android.systemui.classifier.FalsingCollectorFake;
 import com.android.systemui.classifier.FalsingManagerFake;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.media.MediaFeatureFlag;
 import com.android.systemui.media.dialog.MediaOutputDialogFactory;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -125,7 +126,8 @@ public class NotificationTestHelper {
         mGroupMembershipManager = new NotificationGroupManagerLegacy(
                 mStatusBarStateController,
                 () -> mock(PeopleNotificationIdentifier.class),
-                Optional.of((mock(Bubbles.class))));
+                Optional.of((mock(Bubbles.class))),
+                mock(DumpManager.class));
         mGroupExpansionManager = mGroupMembershipManager;
         mHeadsUpManager = new HeadsUpManagerPhone(mContext, mStatusBarStateController,
                 mock(KeyguardBypassController.class), mock(NotificationGroupManagerLegacy.class),
@@ -243,6 +245,22 @@ public class NotificationTestHelper {
             throws Exception {
         Notification n = createNotification(false /* isGroupSummary */,
                 null /* groupKey */, makeBubbleMetadata(null));
+        n.flags |= FLAG_BUBBLE;
+        ExpandableNotificationRow row = generateRow(n, PKG, UID, USER_HANDLE,
+                0 /* extraInflationFlags */, IMPORTANCE_HIGH);
+        modifyRanking(row.getEntry())
+                .setCanBubble(true)
+                .build();
+        return row;
+    }
+
+    /**
+     * Returns an {@link ExpandableNotificationRow} that should be shown as a bubble.
+     */
+    public ExpandableNotificationRow createShortcutBubble(String shortcutId)
+            throws Exception {
+        Notification n = createNotification(false /* isGroupSummary */,
+                null /* groupKey */, makeShortcutBubbleMetadata(shortcutId));
         n.flags |= FLAG_BUBBLE;
         ExpandableNotificationRow row = generateRow(n, PKG, UID, USER_HANDLE,
                 0 /* extraInflationFlags */, IMPORTANCE_HIGH);
@@ -500,6 +518,12 @@ public class NotificationTestHelper {
         return new BubbleMetadata.Builder(bubbleIntent,
                         Icon.createWithResource(mContext, R.drawable.android))
                 .setDeleteIntent(deleteIntent)
+                .setDesiredHeight(314)
+                .build();
+    }
+
+    private BubbleMetadata makeShortcutBubbleMetadata(String shortcutId) {
+        return new BubbleMetadata.Builder(shortcutId)
                 .setDesiredHeight(314)
                 .build();
     }

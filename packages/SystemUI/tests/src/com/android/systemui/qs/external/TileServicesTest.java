@@ -27,7 +27,9 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Handler;
 import android.os.Looper;
@@ -43,12 +45,12 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSFactoryImpl;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shared.plugins.PluginManager;
-import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.phone.AutoTileManager;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
@@ -140,6 +142,16 @@ public class TileServicesTest extends SysuiTestCase {
         verify(mBroadcastDispatcher).registerReceiver(any(), captor.capture(), any(), eq(
                 UserHandle.ALL));
         assertTrue(captor.getValue().hasAction(TileService.ACTION_REQUEST_LISTENING));
+    }
+
+    @Test
+    public void testBadComponentName_doesntCrash() {
+        ArgumentCaptor<BroadcastReceiver> captor = ArgumentCaptor.forClass(BroadcastReceiver.class);
+        verify(mBroadcastDispatcher).registerReceiver(captor.capture(), any(), any(), eq(
+                UserHandle.ALL));
+        Intent intent = new Intent(TileService.ACTION_REQUEST_LISTENING)
+                .putExtra(Intent.EXTRA_COMPONENT_NAME, "abc");
+        captor.getValue().onReceive(mContext, intent);
     }
 
     @Test

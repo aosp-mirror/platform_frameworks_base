@@ -15,7 +15,8 @@ import com.android.systemui.statusbar.phone.SystemUIDialog
 class SensorUseDialog(
     context: Context,
     val sensor: Int,
-    val clickListener: DialogInterface.OnClickListener
+    val clickListener: DialogInterface.OnClickListener,
+    val dismissListener: DialogInterface.OnDismissListener
 ) : SystemUIDialog(context) {
 
     // TODO move to onCreate (b/200815309)
@@ -68,6 +69,8 @@ class SensorUseDialog(
         setButton(BUTTON_NEGATIVE,
                 context.getString(com.android.internal.R.string
                         .cancel), clickListener)
+
+        setOnDismissListener(dismissListener)
 
         setCancelable(false)
     }

@@ -121,6 +121,7 @@
     <uses-permission android:name="android.permission.SET_ORIENTATION" />
     <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
     <uses-permission android:name="android.permission.MONITOR_INPUT" />
+    <uses-permission android:name="android.permission.ALLOW_SLIPPERY_TOUCHES" />
     <uses-permission android:name="android.permission.INPUT_CONSUMER" />
 
     <!-- DreamManager -->
@@ -182,6 +183,9 @@
 
     <permission android:name="com.android.systemui.permission.PLUGIN"
             android:protectionLevel="signature" />
+
+    <permission android:name="com.android.systemui.permission.FLAGS"
+                android:protectionLevel="signature" />
 
     <!-- Adding Quick Settings tiles -->
     <uses-permission android:name="android.permission.BIND_QUICK_SETTINGS_TILE" />
@@ -355,10 +359,6 @@
                   android:exported="false"
                   android:finishOnTaskLaunch="true" />
 
-        <activity android:name=".screenrecord.ScreenRecordDialog"
-            android:theme="@style/ScreenRecord"
-            android:showForAllUsers="true"
-            android:excludeFromRecents="true" />
         <service android:name=".screenrecord.RecordingService" />
 
         <receiver android:name=".SysuiRestartReceiver"
@@ -580,21 +580,6 @@
             android:excludeFromRecents="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </activity>
-
-        <activity android:name=".egg.MLandActivity"
-                  android:theme="@android:style/Theme.Material.NoActionBar"
-                  android:exported="true"
-                  android:icon="@drawable/icon"
-                  android:label="@string/mland"
-                  android:launchMode="singleInstance"
-                  android:screenOrientation="locked"
-                  android:process=":sweetsweetdesserts"
-                  android:excludeFromRecents="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>

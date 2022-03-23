@@ -20,6 +20,8 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.UserInfo;
 import android.os.Environment;
 import android.os.SystemClock;
@@ -34,6 +36,7 @@ import com.android.internal.os.SystemServerClassLoaderFactory;
 import com.android.internal.util.Preconditions;
 import com.android.server.SystemService.TargetUser;
 import com.android.server.am.EventLogTags;
+import com.android.server.pm.ApexManager;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.utils.TimingsTraceAndSlog;
 
@@ -42,6 +45,8 @@ import dalvik.system.PathClassLoader;
 import java.io.File;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 
 /**
@@ -114,10 +119,29 @@ public final class SystemServiceManager implements Dumpable {
      * @return The service instance.
      */
     public SystemService startServiceFromJar(String className, String path) {
-        PathClassLoader pathClassLoader = SystemServerClassLoaderFactory.getOrCreateClassLoader(
-                path, this.getClass().getClassLoader());
+        PathClassLoader pathClassLoader =
+                SystemServerClassLoaderFactory.getOrCreateClassLoader(
+                        path, this.getClass().getClassLoader(), isJarInTestApex(path));
         final Class<SystemService> serviceClass = loadClassFromLoader(className, pathClassLoader);
         return startService(serviceClass);
+    }
+
+    /**
+     * Returns true if the jar is in a test APEX.
+     */
+    private static boolean isJarInTestApex(String pathStr) {
+        Path path = Paths.get(pathStr);
+        if (path.getNameCount() >= 2 && path.getName(0).toString().equals("apex")) {
+            String apexModuleName = path.getName(1).toString();
+            ApexManager apexManager = ApexManager.getInstance();
+            String packageName = apexManager.getActivePackageNameForApexModuleName(apexModuleName);
+            PackageInfo packageInfo = apexManager.getPackageInfo(
+                    packageName, ApexManager.MATCH_ACTIVE_PACKAGE);
+            if (packageInfo != null) {
+                return (packageInfo.applicationInfo.flags & ApplicationInfo.FLAG_TEST_ONLY) != 0;
+            }
+        }
+        return false;
     }
 
     /*

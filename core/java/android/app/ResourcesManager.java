@@ -678,8 +678,7 @@ public class ResourcesManager {
         int refCount = mResourceImpls.size();
         for (int i = 0; i < refCount; i++) {
             WeakReference<ResourcesImpl> weakImplRef = mResourceImpls.valueAt(i);
-            ResourcesImpl impl = weakImplRef != null ? weakImplRef.get() : null;
-            if (resourceImpl == impl) {
+            if (weakImplRef != null && weakImplRef.refersTo(resourceImpl)) {
                 return mResourceImpls.keyAt(i);
             }
         }
@@ -693,7 +692,7 @@ public class ResourcesManager {
      * @return true if activity resources override config matches the provided one or they are both
      *         null, false otherwise.
      */
-    boolean isSameResourcesOverrideConfig(@Nullable IBinder activityToken,
+    public boolean isSameResourcesOverrideConfig(@Nullable IBinder activityToken,
             @Nullable Configuration overrideConfig) {
         synchronized (mLock) {
             final ActivityResources activityResources
@@ -1671,7 +1670,7 @@ public class ResourcesManager {
                 for (int i = mResourceImpls.size() - 1; i >= 0; i--) {
                     final ResourcesKey key = mResourceImpls.keyAt(i);
                     final WeakReference<ResourcesImpl> impl = mResourceImpls.valueAt(i);
-                    if (impl == null || impl.get() == null
+                    if (impl == null || impl.refersTo(null)
                             || !ArrayUtils.contains(key.mLoaders, loader)) {
                         continue;
                     }

@@ -1425,25 +1425,6 @@ public final class Telephony {
         public static final String KEY_TYPE = "key_type";
 
         /**
-         * MVNO type:
-         * {@code SPN (Service Provider Name), IMSI, GID (Group Identifier Level 1)}.
-         * <P> Type: TEXT </P>
-         */
-        public static final String MVNO_TYPE = "mvno_type";
-
-        /**
-         * MVNO data.
-         * Use the following examples.
-         * <ul>
-         *     <li>SPN: A MOBILE, BEN NL, ...</li>
-         *     <li>IMSI: 302720x94, 2060188, ...</li>
-         *     <li>GID: 4E, 33, ...</li>
-         * </ul>
-         * <P> Type: TEXT </P>
-         */
-        public static final String MVNO_MATCH_DATA = "mvno_match_data";
-
-        /**
          * The carrier public key that is used for the IMSI encryption.
          * <P> Type: TEXT </P>
          */
@@ -1469,6 +1450,11 @@ public final class Telephony {
          */
         public static final String LAST_MODIFIED = "last_modified";
 
+        /**
+         * Carrier ID of the operetor.
+         * <P> Type: TEXT </P>
+         */
+        public static final String CARRIER_ID = "carrier_id";
         /**
          * The {@code content://} style URL for this table.
          */
@@ -3582,6 +3568,30 @@ public final class Telephony {
          */
         public static final Uri ENFORCE_MANAGED_URI = Uri.parse(
                 "content://telephony/carriers/enforce_managed");
+
+        /**
+         * The {@code content://} style URL for the perferred APN used for internet.
+         *
+         * @hide
+         */
+        public static final Uri PREFERRED_APN_URI = Uri.parse(
+                "content://telephony/carriers/preferapn/subId");
+
+        /**
+         * The {@code content://} style URL for the perferred APN set id.
+         *
+         * @hide
+         */
+        public static final Uri PREFERRED_APN_SET_URI = Uri.parse(
+                "content://telephony/carriers/preferapnset/subId");
+
+        /**
+         * The id of preferred APN.
+         *
+         * @see #PREFERRED_APN_URI
+         * @hide
+         */
+        public static final String APN_ID = "apn_id";
 
         /**
          * The column name for ENFORCE_MANAGED_URI, indicates whether DPC-owned APNs are enforced.
