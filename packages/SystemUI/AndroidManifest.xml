@@ -385,6 +385,7 @@
                   android:theme="@style/LongScreenshotActivity"
                   android:process=":screenshot"
                   android:exported="false"
+                  android:label="@string/screenshot_scroll_label"
                   android:finishOnTaskLaunch="true" />
 
         <service android:name=".screenrecord.RecordingService" />
