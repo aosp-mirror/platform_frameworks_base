@@ -1164,7 +1164,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                             policy.mAdminList.remove(i);
                             policy.mAdminMap.remove(aa.info.getComponent());
                             pushActiveAdminPackagesLocked(userHandle);
-                            pushMeteredDisabledPackagesLocked(userHandle);
+                            pushMeteredDisabledPackages(userHandle);
                         }
                     }
                 } catch (RemoteException re) {
@@ -3571,7 +3571,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             for (int i = users.size() - 1; i >= 0; --i) {
                 final int userId = users.get(i).id;
                 mInjector.getNetworkPolicyManagerInternal().setMeteredRestrictedPackagesAsync(
-                        getMeteredDisabledPackagesLocked(userId), userId);
+                        getMeteredDisabledPackages(userId), userId);
             }
         }
     }
@@ -14692,7 +14692,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 final List<String> excludedPkgs = removeInvalidPkgsForMeteredDataRestriction(
                         caller.getUserId(), packageNames);
                 admin.meteredDisabledPackages = packageNames;
-                pushMeteredDisabledPackagesLocked(caller.getUserId());
+                pushMeteredDisabledPackages(caller.getUserId());
                 saveSettingsLocked(caller.getUserId());
                 return excludedPkgs;
             });
@@ -14844,21 +14844,22 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 isProfileOwnerOnOrganizationOwnedDevice);
     }
 
-    private void pushMeteredDisabledPackagesLocked(int userId) {
+    private void pushMeteredDisabledPackages(int userId) {
+        wtfIfInLock();
         mInjector.getNetworkPolicyManagerInternal().setMeteredRestrictedPackages(
-                getMeteredDisabledPackagesLocked(userId), userId);
+                getMeteredDisabledPackages(userId), userId);
     }
 
-    private Set<String> getMeteredDisabledPackagesLocked(int userId) {
-        final ComponentName who = getOwnerComponent(userId);
-        final Set<String> restrictedPkgs = new ArraySet<>();
-        if (who != null) {
-            final ActiveAdmin admin = getActiveAdminUncheckedLocked(who, userId);
+    private Set<String> getMeteredDisabledPackages(int userId) {
+        synchronized (getLockObject()) {
+            final Set<String> restrictedPkgs = new ArraySet<>();
+            final ActiveAdmin admin = getDeviceOrProfileOwnerAdminLocked(userId);
             if (admin != null && admin.meteredDisabledPackages != null) {
                 restrictedPkgs.addAll(admin.meteredDisabledPackages);
             }
+
+            return restrictedPkgs;
         }
-        return restrictedPkgs;
     }
 
     @Override
@@ -15302,13 +15303,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 resetGlobalProxyLocked(policy);
             }
             pushActiveAdminPackagesLocked(userHandle);
-            pushMeteredDisabledPackagesLocked(userHandle);
             saveSettingsLocked(userHandle);
             updateMaximumTimeToLockLocked(userHandle);
             policy.mRemovingAdmins.remove(adminReceiver);
 
             Slogf.i(LOG_TAG, "Device admin " + adminReceiver + " removed from user " + userHandle);
         }
+        pushMeteredDisabledPackages(userHandle);
         // The removed admin might have disabled camera, so update user
         // restrictions.
         pushUserRestrictions(userHandle);
