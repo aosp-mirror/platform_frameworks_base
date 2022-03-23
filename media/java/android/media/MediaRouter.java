@@ -48,7 +48,6 @@ import android.util.SparseIntArray;
 import android.view.Display;
 import android.view.DisplayAddress;
 
-import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.lang.annotation.Retention;
@@ -60,21 +59,21 @@ import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
- * This API is not recommended for new applications. Use the
- * <a href="{@docRoot}jetpack/androidx.html">AndroidX</a>
- * <a href="{@docRoot}reference/androidx/mediarouter/media/package-summary.html">Media Router
- * Library</a> for consistent behavior across all devices.
- *
- * <p>MediaRouter allows applications to control the routing of media channels
+ * MediaRouter allows applications to control the routing of media channels
  * and streams from the current device to external speakers and destination devices.
  *
  * <p>A MediaRouter is retrieved through {@link Context#getSystemService(String)
  * Context.getSystemService()} of a {@link Context#MEDIA_ROUTER_SERVICE
  * Context.MEDIA_ROUTER_SERVICE}.
  *
- * <p>This API is not thread-safe; all interactions with it must be done from the main thread of the
- * process.
+ * <p>The media router API is not thread-safe; all interactions with it must be
+ * done from the main thread of the process.</p>
+ *
+ * <p>
+ * We recommend using {@link android.media.MediaRouter2} APIs for new applications.
+ * </p>
  */
+//TODO: Link androidx.media2.MediaRouter when we are ready.
 @SystemService(Context.MEDIA_ROUTER_SERVICE)
 public class MediaRouter {
     private static final String TAG = "MediaRouter";
@@ -149,7 +148,7 @@ public class MediaRouter {
                     ServiceManager.getService(Context.MEDIA_ROUTER_SERVICE));
 
             mSystemCategory = new RouteCategory(
-                    R.string.default_audio_route_category_name,
+                    com.android.internal.R.string.default_audio_route_category_name,
                     ROUTE_TYPE_LIVE_AUDIO | ROUTE_TYPE_LIVE_VIDEO, false);
             mSystemCategory.mIsSystem = true;
 
@@ -164,15 +163,14 @@ public class MediaRouter {
         // Called after sStatic is initialized
         void startMonitoringRoutes(Context appContext) {
             mDefaultAudioVideo = new RouteInfo(mSystemCategory);
-            mDefaultAudioVideo.mNameResId = R.string.default_audio_route_name;
+            mDefaultAudioVideo.mNameResId = com.android.internal.R.string.default_audio_route_name;
             mDefaultAudioVideo.mSupportedTypes = ROUTE_TYPE_LIVE_AUDIO | ROUTE_TYPE_LIVE_VIDEO;
             mDefaultAudioVideo.updatePresentationDisplay();
             if (((AudioManager) appContext.getSystemService(Context.AUDIO_SERVICE))
                     .isVolumeFixed()) {
                 mDefaultAudioVideo.mVolumeHandling = RouteInfo.PLAYBACK_VOLUME_FIXED;
             }
-            mDefaultAudioVideo.mGlobalRouteId = sStatic.mResources.getString(
-                    R.string.default_audio_route_id);
+
             addRouteStatic(mDefaultAudioVideo);
 
             // This will select the active wifi display route if there is one.
@@ -217,15 +215,15 @@ public class MediaRouter {
                 int name;
                 if ((newRoutes.mainType & AudioRoutesInfo.MAIN_HEADPHONES) != 0
                         || (newRoutes.mainType & AudioRoutesInfo.MAIN_HEADSET) != 0) {
-                    name = R.string.default_audio_route_name_headphones;
+                    name = com.android.internal.R.string.default_audio_route_name_headphones;
                 } else if ((newRoutes.mainType & AudioRoutesInfo.MAIN_DOCK_SPEAKERS) != 0) {
-                    name = R.string.default_audio_route_name_dock_speakers;
+                    name = com.android.internal.R.string.default_audio_route_name_dock_speakers;
                 } else if ((newRoutes.mainType&AudioRoutesInfo.MAIN_HDMI) != 0) {
-                    name = R.string.default_audio_route_name_hdmi;
+                    name = com.android.internal.R.string.default_audio_route_name_hdmi;
                 } else if ((newRoutes.mainType&AudioRoutesInfo.MAIN_USB) != 0) {
-                    name = R.string.default_audio_route_name_usb;
+                    name = com.android.internal.R.string.default_audio_route_name_usb;
                 } else {
-                    name = R.string.default_audio_route_name;
+                    name = com.android.internal.R.string.default_audio_route_name;
                 }
                 mDefaultAudioVideo.mNameResId = name;
                 dispatchRouteChanged(mDefaultAudioVideo);
@@ -245,12 +243,9 @@ public class MediaRouter {
                         final RouteInfo info = new RouteInfo(mSystemCategory);
                         info.mName = newRoutes.bluetoothName;
                         info.mDescription = mResources.getText(
-                                R.string.bluetooth_a2dp_audio_route_name);
+                                com.android.internal.R.string.bluetooth_a2dp_audio_route_name);
                         info.mSupportedTypes = ROUTE_TYPE_LIVE_AUDIO;
                         info.mDeviceType = RouteInfo.DEVICE_TYPE_BLUETOOTH;
-                        info.mGlobalRouteId = sStatic.mResources.getString(
-                                R.string.bluetooth_a2dp_audio_route_id);
-
                         mBluetoothA2dpRoute = info;
                         addRouteStatic(mBluetoothA2dpRoute);
                     } else {
@@ -513,9 +508,6 @@ public class MediaRouter {
             outer: for (int i = mRoutes.size(); i-- > 0; ) {
                 final RouteInfo route = mRoutes.get(i);
                 final String globalRouteId = route.mGlobalRouteId;
-                if (route.isDefault() || route.isBluetooth()) {
-                    continue;
-                }
                 if (globalRouteId != null) {
                     for (int j = 0; j < globalRouteCount; j++) {
                         MediaRouterClientState.RouteInfo globalRoute = globalRoutes.get(j);
@@ -662,12 +654,9 @@ public class MediaRouter {
         final class Client extends IMediaRouterClient.Stub {
             @Override
             public void onStateChanged() {
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (Client.this == mClient) {
-                            updateClientState();
-                        }
+                mHandler.post(() -> {
+                    if (Client.this == mClient) {
+                        updateClientState();
                     }
                 });
             }
@@ -698,6 +687,26 @@ public class MediaRouter {
                 mHandler.post(() -> {
                     if (Client.this == mClient) {
                         handleGroupRouteSelected(groupRouteId);
+                    }
+                });
+            }
+
+            // Called when the selection of a connected device (phone speaker or BT devices)
+            // is changed.
+            @Override
+            public void onGlobalA2dpChanged(boolean a2dpOn) {
+                mHandler.post(() -> {
+                    if (mSelectedRoute == null || mBluetoothA2dpRoute == null) {
+                        return;
+                    }
+                    if (mSelectedRoute.isDefault() && a2dpOn) {
+                        setSelectedRoute(mBluetoothA2dpRoute, /*explicit=*/ false);
+                        dispatchRouteUnselected(ROUTE_TYPE_LIVE_AUDIO, mDefaultAudioVideo);
+                        dispatchRouteSelected(ROUTE_TYPE_LIVE_AUDIO, mBluetoothA2dpRoute);
+                    } else if (mSelectedRoute.isBluetooth() && !a2dpOn) {
+                        setSelectedRoute(mDefaultAudioVideo, /*explicit=*/ false);
+                        dispatchRouteUnselected(ROUTE_TYPE_LIVE_AUDIO, mBluetoothA2dpRoute);
+                        dispatchRouteSelected(ROUTE_TYPE_LIVE_AUDIO, mDefaultAudioVideo);
                     }
                 });
             }
@@ -1078,8 +1087,7 @@ public class MediaRouter {
                 && (types & ROUTE_TYPE_LIVE_AUDIO) != 0
                 && (route.isBluetooth() || route.isDefault())) {
             try {
-                sStatic.mMediaRouterService.setBluetoothA2dpOn(sStatic.mClient,
-                        route.isBluetooth());
+                sStatic.mAudioService.setBluetoothA2dpOn(route.isBluetooth());
             } catch (RemoteException e) {
                 Log.e(TAG, "Error changing Bluetooth A2DP state", e);
             }
@@ -1359,6 +1367,9 @@ public class MediaRouter {
     }
 
     static void dispatchRouteSelected(int type, RouteInfo info) {
+        if (DEBUG) {
+            Log.d(TAG, "Dispatching route selected: " + info);
+        }
         for (CallbackInfo cbi : sStatic.mCallbacks) {
             if (cbi.filterRouteEvent(info)) {
                 cbi.cb.onRouteSelected(cbi.router, type, info);
@@ -1367,6 +1378,9 @@ public class MediaRouter {
     }
 
     static void dispatchRouteUnselected(int type, RouteInfo info) {
+        if (DEBUG) {
+            Log.d(TAG, "Dispatching route unselected: " + info);
+        }
         for (CallbackInfo cbi : sStatic.mCallbacks) {
             if (cbi.filterRouteEvent(info)) {
                 cbi.cb.onRouteUnselected(cbi.router, type, info);
@@ -1581,7 +1595,7 @@ public class MediaRouter {
         newRoute.mEnabled = isWifiDisplayEnabled(display, wfdStatus);
         newRoute.mName = display.getFriendlyDisplayName();
         newRoute.mDescription = sStatic.mResources.getText(
-                R.string.wireless_display_route_description);
+                com.android.internal.R.string.wireless_display_route_description);
         newRoute.updatePresentationDisplay();
         newRoute.mDeviceType = RouteInfo.DEVICE_TYPE_TV;
         return newRoute;
@@ -1876,19 +1890,19 @@ public class MediaRouter {
             int resId;
             switch (statusCode) {
                 case STATUS_SCANNING:
-                    resId = R.string.media_route_status_scanning;
+                    resId = com.android.internal.R.string.media_route_status_scanning;
                     break;
                 case STATUS_CONNECTING:
-                    resId = R.string.media_route_status_connecting;
+                    resId = com.android.internal.R.string.media_route_status_connecting;
                     break;
                 case STATUS_AVAILABLE:
-                    resId = R.string.media_route_status_available;
+                    resId = com.android.internal.R.string.media_route_status_available;
                     break;
                 case STATUS_NOT_AVAILABLE:
-                    resId = R.string.media_route_status_not_available;
+                    resId = com.android.internal.R.string.media_route_status_not_available;
                     break;
                 case STATUS_IN_USE:
-                    resId = R.string.media_route_status_in_use;
+                    resId = com.android.internal.R.string.media_route_status_in_use;
                     break;
                 case STATUS_CONNECTED:
                 case STATUS_NONE:
@@ -2020,8 +2034,8 @@ public class MediaRouter {
         public void requestSetVolume(int volume) {
             if (mPlaybackType == PLAYBACK_TYPE_LOCAL) {
                 try {
-                    sStatic.mAudioService.setStreamVolumeWithAttribution(mPlaybackStream, volume, 0,
-                            ActivityThread.currentPackageName(), null);
+                    sStatic.mAudioService.setStreamVolume(mPlaybackStream, volume, 0,
+                            ActivityThread.currentPackageName());
                 } catch (RemoteException e) {
                     Log.e(TAG, "Error setting local stream volume", e);
                 }
@@ -2039,8 +2053,8 @@ public class MediaRouter {
                 try {
                     final int volume =
                             Math.max(0, Math.min(getVolume() + direction, getVolumeMax()));
-                    sStatic.mAudioService.setStreamVolumeWithAttribution(mPlaybackStream, volume, 0,
-                            ActivityThread.currentPackageName(), null);
+                    sStatic.mAudioService.setStreamVolume(mPlaybackStream, volume, 0,
+                            ActivityThread.currentPackageName());
                 } catch (RemoteException e) {
                     Log.e(TAG, "Error setting local stream volume", e);
                 }

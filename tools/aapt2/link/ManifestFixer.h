@@ -22,7 +22,7 @@
 #include "android-base/macros.h"
 
 #include "process/IResourceTableConsumer.h"
-
+#include "util/Maybe.h"
 #include "xml/XmlActionExecutor.h"
 #include "xml/XmlDom.h"
 
@@ -30,47 +30,47 @@ namespace aapt {
 
 struct ManifestFixerOptions {
   // The minimum SDK version to set if no 'android:minSdkVersion' is defined in a <uses-sdk> tag.
-  std::optional<std::string> min_sdk_version_default;
+  Maybe<std::string> min_sdk_version_default;
 
   // The target SDK version to set if no 'android:targetSdkVersion' is defined in a <uses-sdk> tag.
-  std::optional<std::string> target_sdk_version_default;
+  Maybe<std::string> target_sdk_version_default;
 
   // The Android package to use instead of the one defined in 'package' in <manifest>.
   // This also renames all relative package/class names in the manifest to fully qualified
   // Java names.
-  std::optional<std::string> rename_manifest_package;
+  Maybe<std::string> rename_manifest_package;
 
   // The Android package to use instead of the one defined in 'android:targetPackage' in
   // <instrumentation>.
-  std::optional<std::string> rename_instrumentation_target_package;
+  Maybe<std::string> rename_instrumentation_target_package;
 
   // The Android package to use instead of the one defined in 'android:targetPackage' in
   // <overlay>.
-  std::optional<std::string> rename_overlay_target_package;
+  Maybe<std::string> rename_overlay_target_package;
 
   // The version name to set if 'android:versionName' is not defined in <manifest> or if
   // replace_version is set.
-  std::optional<std::string> version_name_default;
+  Maybe<std::string> version_name_default;
 
   // The version code to set if 'android:versionCode' is not defined in <manifest> or if
   // replace_version is set.
-  std::optional<std::string> version_code_default;
+  Maybe<std::string> version_code_default;
 
   // The version code to set if 'android:versionCodeMajor' is not defined in <manifest> or if
   // replace_version is set.
-  std::optional<std::string> version_code_major_default;
+  Maybe<std::string> version_code_major_default;
 
   // The revision code to set if 'android:revisionCode' is not defined in <manifest> or if
   // replace_version is set.
-  std::optional<std::string> revision_code_default;
+  Maybe<std::string> revision_code_default;
 
   // The version of the framework being compiled against to set for 'android:compileSdkVersion' in
   // the <manifest> tag.
-  std::optional<std::string> compile_sdk_version;
+  Maybe<std::string> compile_sdk_version;
 
   // The version codename of the framework being compiled against to set for
   // 'android:compileSdkVersionCodename' in the <manifest> tag.
-  std::optional<std::string> compile_sdk_version_codename;
+  Maybe<std::string> compile_sdk_version_codename;
 
   // Whether validation errors should be treated only as warnings. If this is 'true', then an
   // incorrect node will not result in an error, but only as a warning, and the parsing will

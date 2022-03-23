@@ -142,7 +142,7 @@ public final class HdmiAudioSystemClient extends HdmiClient {
      * @hide
      */
     public void setSystemAudioMode(boolean state, @NonNull SetSystemAudioModeCallback callback) {
-        // TODO(b/217509829): implement this when needed.
+        // TODO(amyjojo): implement this when needed.
     }
 
     /**

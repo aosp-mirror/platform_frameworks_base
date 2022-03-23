@@ -26,8 +26,8 @@ import android.os.Build;
 import android.os.CreateAppDataArgs;
 import android.os.CreateAppDataResult;
 import android.os.IBinder;
+import android.os.IBinder.DeathRecipient;
 import android.os.IInstalld;
-import android.os.ReconcileSdkDataArgs;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.storage.CrateMetadata;
@@ -40,6 +40,7 @@ import com.android.server.SystemService;
 import dalvik.system.BlockGuard;
 import dalvik.system.VMRuntime;
 
+import java.io.FileDescriptor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -89,19 +90,10 @@ public class Installer extends SystemService {
      */
     public static final int PROFILE_ANALYSIS_DONT_OPTIMIZE_EMPTY_PROFILES = 3;
 
-    /**
-     * The results of {@code getOdexVisibility}. See
-     * {@link #getOdexVisibility(String, String, String)} for details.
-     */
-    public static final int ODEX_NOT_FOUND = 0;
-    public static final int ODEX_IS_PUBLIC = 1;
-    public static final int ODEX_IS_PRIVATE = 2;
-
 
     public static final int FLAG_STORAGE_DE = IInstalld.FLAG_STORAGE_DE;
     public static final int FLAG_STORAGE_CE = IInstalld.FLAG_STORAGE_CE;
     public static final int FLAG_STORAGE_EXTERNAL = IInstalld.FLAG_STORAGE_EXTERNAL;
-    public static final int FLAG_STORAGE_SDK = IInstalld.FLAG_STORAGE_SDK;
 
     public static final int FLAG_CLEAR_CACHE_ONLY = IInstalld.FLAG_CLEAR_CACHE_ONLY;
     public static final int FLAG_CLEAR_CODE_CACHE_ONLY = IInstalld.FLAG_CLEAR_CODE_CACHE_ONLY;
@@ -109,8 +101,6 @@ public class Installer extends SystemService {
     public static final int FLAG_FREE_CACHE_V2 = IInstalld.FLAG_FREE_CACHE_V2;
     public static final int FLAG_FREE_CACHE_V2_DEFY_QUOTA = IInstalld.FLAG_FREE_CACHE_V2_DEFY_QUOTA;
     public static final int FLAG_FREE_CACHE_NOOP = IInstalld.FLAG_FREE_CACHE_NOOP;
-    public static final int FLAG_FREE_CACHE_DEFY_TARGET_FREE_BYTES =
-            IInstalld.FLAG_FREE_CACHE_DEFY_TARGET_FREE_BYTES;
 
     public static final int FLAG_USE_QUOTA = IInstalld.FLAG_USE_QUOTA;
     public static final int FLAG_FORCE = IInstalld.FLAG_FORCE;
@@ -158,9 +148,12 @@ public class Installer extends SystemService {
         IBinder binder = ServiceManager.getService("installd");
         if (binder != null) {
             try {
-                binder.linkToDeath(() -> {
-                    Slog.w(TAG, "installd died; reconnecting");
-                    connect();
+                binder.linkToDeath(new DeathRecipient() {
+                    @Override
+                    public void binderDied() {
+                        Slog.w(TAG, "installd died; reconnecting");
+                        connect();
+                    }
                 }, 0);
             } catch (RemoteException e) {
                 binder = null;
@@ -175,7 +168,9 @@ public class Installer extends SystemService {
             }
         } else {
             Slog.w(TAG, "installd not found; trying again");
-            BackgroundThread.getHandler().postDelayed(this::connect, DateUtils.SECOND_IN_MILLIS);
+            BackgroundThread.getHandler().postDelayed(() -> {
+                connect();
+            }, DateUtils.SECOND_IN_MILLIS);
         }
     }
 
@@ -197,19 +192,13 @@ public class Installer extends SystemService {
         }
     }
 
-    // We explicitly do NOT set previousAppId because the default value should always be 0.
-    // Manually override previousAppId after building CreateAppDataArgs for specific behaviors.
-    static CreateAppDataArgs buildCreateAppDataArgs(String uuid, String packageName,
-            int userId, int flags, int appId, String seInfo, int targetSdkVersion,
-            boolean usesSdk) {
+    private static CreateAppDataArgs buildCreateAppDataArgs(String uuid, String packageName,
+            int userId, int flags, int appId, String seInfo, int targetSdkVersion) {
         final CreateAppDataArgs args = new CreateAppDataArgs();
         args.uuid = uuid;
         args.packageName = packageName;
         args.userId = userId;
         args.flags = flags;
-        if (usesSdk) {
-            args.flags |= FLAG_STORAGE_SDK;
-        }
         args.appId = appId;
         args.seInfo = seInfo;
         args.targetSdkVersion = targetSdkVersion;
@@ -224,19 +213,21 @@ public class Installer extends SystemService {
         return result;
     }
 
-    static ReconcileSdkDataArgs buildReconcileSdkDataArgs(String uuid, String packageName,
-            List<String> subDirNames, int userId, int appId,
-            String seInfo, int flags) {
-        final ReconcileSdkDataArgs args = new ReconcileSdkDataArgs();
-        args.uuid = uuid;
-        args.packageName = packageName;
-        args.subDirNames = subDirNames;
-        args.userId = userId;
-        args.appId = appId;
-        args.previousAppId = 0;
-        args.seInfo = seInfo;
-        args.flags = flags;
-        return args;
+    /**
+     * @deprecated callers are encouraged to migrate to using {@link Batch} to
+     *             more efficiently handle operations in bulk.
+     */
+    @Deprecated
+    public long createAppData(String uuid, String packageName, int userId, int flags, int appId,
+            String seInfo, int targetSdkVersion) throws InstallerException {
+        final CreateAppDataArgs args = buildCreateAppDataArgs(uuid, packageName, userId, flags,
+                appId, seInfo, targetSdkVersion);
+        final CreateAppDataResult result = createAppData(args);
+        if (result.exceptionCode == 0) {
+            return result.ceDataInode;
+        } else {
+            throw new InstallerException(result.exceptionMessage);
+        }
     }
 
     public @NonNull CreateAppDataResult createAppData(@NonNull CreateAppDataArgs args)
@@ -244,8 +235,6 @@ public class Installer extends SystemService {
         if (!checkBeforeRemote()) {
             return buildPlaceholderCreateAppDataResult();
         }
-        // Hardcode previousAppId to 0 to disable any data migration (http://b/221088088)
-        args.previousAppId = 0;
         try {
             return mInstalld.createAppData(args);
         } catch (Exception e) {
@@ -260,36 +249,9 @@ public class Installer extends SystemService {
             Arrays.fill(results, buildPlaceholderCreateAppDataResult());
             return results;
         }
-        // Hardcode previousAppId to 0 to disable any data migration (http://b/221088088)
-        for (final CreateAppDataArgs arg : args) {
-            arg.previousAppId = 0;
-        }
         try {
             return mInstalld.createAppDataBatched(args);
         } catch (Exception e) {
-            throw InstallerException.from(e);
-        }
-    }
-
-    void reconcileSdkData(@NonNull ReconcileSdkDataArgs args)
-            throws InstallerException {
-        if (!checkBeforeRemote()) {
-            return;
-        }
-        try {
-            mInstalld.reconcileSdkData(args);
-        } catch (Exception e) {
-            throw InstallerException.from(e);
-        }
-    }
-
-    /**
-     * Sets in Installd that it is first boot after data wipe
-     */
-    public void setFirstBoot() throws InstallerException {
-        try {
-            mInstalld.setFirstBoot();
-        } catch (RemoteException e) {
             throw InstallerException.from(e);
         }
     }
@@ -322,11 +284,13 @@ public class Installer extends SystemService {
          * Callers of this method are not required to hold a monitor lock on an
          * {@link Installer} object.
          */
-        @NonNull
-        public synchronized CompletableFuture<Long> createAppData(CreateAppDataArgs args) {
-            if (mExecuted) {
-                throw new IllegalStateException();
-            }
+        public synchronized @NonNull CompletableFuture<Long> createAppData(String uuid,
+                String packageName, int userId, int flags, int appId, String seInfo,
+                int targetSdkVersion) {
+            if (mExecuted) throw new IllegalStateException();
+
+            final CreateAppDataArgs args = buildCreateAppDataArgs(uuid, packageName, userId, flags,
+                    appId, seInfo, targetSdkVersion);
             final CompletableFuture<Long> future = new CompletableFuture<>();
             mArgs.add(args);
             mFutures.add(future);
@@ -410,20 +374,6 @@ public class Installer extends SystemService {
         if (!checkBeforeRemote()) return;
         try {
             mInstalld.fixupAppData(uuid, flags);
-        } catch (Exception e) {
-            throw InstallerException.from(e);
-        }
-    }
-
-    /**
-     * Remove all invalid dirs under app data folder.
-     * All dirs are supposed to be valid file and package names.
-     */
-    public void cleanupInvalidPackageDirs(String uuid, int userId, int flags)
-            throws InstallerException {
-        if (!checkBeforeRemote()) return;
-        try {
-            mInstalld.cleanupInvalidPackageDirs(uuid, userId, flags);
         } catch (Exception e) {
             throw InstallerException.from(e);
         }
@@ -537,42 +487,9 @@ public class Installer extends SystemService {
         }
     }
 
-    /**
-     * Runs dex optimization.
-     *
-     * @param apkPath Path of target APK
-     * @param uid UID of the package
-     * @param pkgName Name of the package
-     * @param instructionSet Target instruction set to run dex optimization.
-     * @param dexoptNeeded Necessary dex optimization for this request. Check
-     *        {@link dalvik.system.DexFile#NO_DEXOPT_NEEDED},
-     *        {@link dalvik.system.DexFile#DEX2OAT_FROM_SCRATCH},
-     *        {@link dalvik.system.DexFile#DEX2OAT_FOR_BOOT_IMAGE}, and
-     *        {@link dalvik.system.DexFile#DEX2OAT_FOR_FILTER}.
-     * @param outputPath Output path of generated dex optimization.
-     * @param dexFlags Check {@code DEXOPT_*} for allowed flags.
-     * @param compilerFilter Compiler filter like "verify", "speed-profile". Check
-     *                       {@code art/libartbase/base/compiler_filter.cc} for full list.
-     * @param volumeUuid UUID of the volume where the package data is stored. {@code null}
-     *                   represents internal storage.
-     * @param classLoaderContext This encodes the class loader chain (class loader type + class
-     *                           path) in a format compatible to dex2oat. Check
-     *                           {@code DexoptUtils.processContextForDexLoad} for further details.
-     * @param seInfo Selinux context to set for generated outputs.
-     * @param downgrade If set, allows downgrading {@code compilerFilter}. If downgrading is not
-     *                  allowed and requested {@code compilerFilter} is considered as downgrade,
-     *                  the request will be ignored.
-     * @param targetSdkVersion Target SDK version of the package.
-     * @param profileName Name of reference profile file.
-     * @param dexMetadataPath Specifies the location of dex metadata file.
-     * @param compilationReason Specifies the reason for the compilation like "install".
-     * @return {@code true} if {@code dexopt} is completed. {@code false} if it was cancelled.
-     *
-     * @throws InstallerException if {@code dexopt} fails.
-     */
-    public boolean dexopt(String apkPath, int uid, String pkgName, String instructionSet,
+    public void dexopt(String apkPath, int uid, @Nullable String pkgName, String instructionSet,
             int dexoptNeeded, @Nullable String outputPath, int dexFlags,
-            String compilerFilter, @Nullable String volumeUuid, @Nullable String classLoaderContext,
+            String compilerFilter, @Nullable String volumeUuid, @Nullable String sharedLibraries,
             @Nullable String seInfo, boolean downgrade, int targetSdkVersion,
             @Nullable String profileName, @Nullable String dexMetadataPath,
             @Nullable String compilationReason) throws InstallerException {
@@ -580,30 +497,13 @@ public class Installer extends SystemService {
         BlockGuard.getVmPolicy().onPathAccess(apkPath);
         BlockGuard.getVmPolicy().onPathAccess(outputPath);
         BlockGuard.getVmPolicy().onPathAccess(dexMetadataPath);
-        if (!checkBeforeRemote()) return false;
+        if (!checkBeforeRemote()) return;
         try {
-            return mInstalld.dexopt(apkPath, uid, pkgName, instructionSet, dexoptNeeded, outputPath,
-                    dexFlags, compilerFilter, volumeUuid, classLoaderContext, seInfo, downgrade,
+            mInstalld.dexopt(apkPath, uid, pkgName, instructionSet, dexoptNeeded, outputPath,
+                    dexFlags, compilerFilter, volumeUuid, sharedLibraries, seInfo, downgrade,
                     targetSdkVersion, profileName, dexMetadataPath, compilationReason);
         } catch (Exception e) {
             throw InstallerException.from(e);
-        }
-    }
-
-    /**
-     * Enables or disables dex optimization blocking.
-     *
-     * <p> Enabling blocking will also involve cancelling pending dexopt call and killing child
-     * processes forked from installd to run dexopt. The pending dexopt call will return false
-     * when it is cancelled.
-     *
-     * @param block set to true to enable blocking / false to disable blocking.
-     */
-    public void controlDexOptBlocking(boolean block) {
-        try {
-            mInstalld.controlDexOptBlocking(block);
-        } catch (Exception e) {
-            Slog.w(TAG, "blockDexOpt failed", e);
         }
     }
 
@@ -658,14 +558,11 @@ public class Installer extends SystemService {
         }
     }
 
-    /**
-     * Remove a directory belonging to a package.
-     */
-    public void rmPackageDir(String packageName, String packageDir) throws InstallerException {
+    public void rmPackageDir(String packageDir) throws InstallerException {
         if (!checkBeforeRemote()) return;
         BlockGuard.getVmPolicy().onPathAccess(packageDir);
         try {
-            mInstalld.rmPackageDir(packageName, packageDir);
+            mInstalld.rmPackageDir(packageDir);
         } catch (Exception e) {
             throw InstallerException.from(e);
         }
@@ -708,15 +605,11 @@ public class Installer extends SystemService {
         }
     }
 
-    /**
-     * Deletes cache from specified uuid until targetFreeBytes amount of space is free.
-     * flag denotes aggressive or non-aggresive mode where cache under quota is eligible or not
-     * respectively for clearing.
-     */
-    public void freeCache(String uuid, long targetFreeBytes, int flags) throws InstallerException {
+    public void freeCache(String uuid, long targetFreeBytes, long cacheReservedBytes, int flags)
+            throws InstallerException {
         if (!checkBeforeRemote()) return;
         try {
-            mInstalld.freeCache(uuid, targetFreeBytes, flags);
+            mInstalld.freeCache(uuid, targetFreeBytes, cacheReservedBytes, flags);
         } catch (Exception e) {
             throw InstallerException.from(e);
         }
@@ -738,44 +631,35 @@ public class Installer extends SystemService {
         }
     }
 
-    /**
-     * Creates an oat dir for given package and instruction set.
-     */
-    public void createOatDir(String packageName, String oatDir, String dexInstructionSet)
+    public void createOatDir(String oatDir, String dexInstructionSet)
             throws InstallerException {
         if (!checkBeforeRemote()) return;
         try {
-            mInstalld.createOatDir(packageName, oatDir, dexInstructionSet);
+            mInstalld.createOatDir(oatDir, dexInstructionSet);
         } catch (Exception e) {
             throw InstallerException.from(e);
         }
     }
 
-    /**
-     * Creates a hardlink for a path.
-     */
-    public void linkFile(String packageName, String relativePath, String fromBase, String toBase)
+    public void linkFile(String relativePath, String fromBase, String toBase)
             throws InstallerException {
         if (!checkBeforeRemote()) return;
         BlockGuard.getVmPolicy().onPathAccess(fromBase);
         BlockGuard.getVmPolicy().onPathAccess(toBase);
         try {
-            mInstalld.linkFile(packageName, relativePath, fromBase, toBase);
+            mInstalld.linkFile(relativePath, fromBase, toBase);
         } catch (Exception e) {
             throw InstallerException.from(e);
         }
     }
 
-    /**
-     * Moves oat/vdex/art from "B" set defined by ro.boot.slot_suffix to the default set.
-     */
-    public void moveAb(String packageName, String apkPath, String instructionSet, String outputPath)
+    public void moveAb(String apkPath, String instructionSet, String outputPath)
             throws InstallerException {
         if (!checkBeforeRemote()) return;
         BlockGuard.getVmPolicy().onPathAccess(apkPath);
         BlockGuard.getVmPolicy().onPathAccess(outputPath);
         try {
-            mInstalld.moveAb(packageName, apkPath, instructionSet, outputPath);
+            mInstalld.moveAb(apkPath, instructionSet, outputPath);
         } catch (Exception e) {
             throw InstallerException.from(e);
         }
@@ -785,13 +669,35 @@ public class Installer extends SystemService {
      * Deletes the optimized artifacts generated by ART and returns the number
      * of freed bytes.
      */
-    public long deleteOdex(String packageName, String apkPath, String instructionSet,
-            String outputPath) throws InstallerException {
+    public long deleteOdex(String apkPath, String instructionSet, String outputPath)
+            throws InstallerException {
         if (!checkBeforeRemote()) return -1;
         BlockGuard.getVmPolicy().onPathAccess(apkPath);
         BlockGuard.getVmPolicy().onPathAccess(outputPath);
         try {
-            return mInstalld.deleteOdex(packageName, apkPath, instructionSet, outputPath);
+            return mInstalld.deleteOdex(apkPath, instructionSet, outputPath);
+        } catch (Exception e) {
+            throw InstallerException.from(e);
+        }
+    }
+
+    public void installApkVerity(String filePath, FileDescriptor verityInput, int contentSize)
+            throws InstallerException {
+        if (!checkBeforeRemote()) return;
+        BlockGuard.getVmPolicy().onPathAccess(filePath);
+        try {
+            mInstalld.installApkVerity(filePath, verityInput, contentSize);
+        } catch (Exception e) {
+            throw InstallerException.from(e);
+        }
+    }
+
+    public void assertFsverityRootHashMatches(String filePath, @NonNull byte[] expectedHash)
+            throws InstallerException {
+        if (!checkBeforeRemote()) return;
+        BlockGuard.getVmPolicy().onPathAccess(filePath);
+        try {
+            mInstalld.assertFsverityRootHashMatches(filePath, expectedHash);
         } catch (Exception e) {
             throw InstallerException.from(e);
         }
@@ -885,15 +791,6 @@ public class Installer extends SystemService {
         }
     }
 
-    /**
-     * Prepares the app profile for the package at the given path:
-     * <ul>
-     *   <li>Creates the current profile for the given user ID, unless the user ID is
-     *     {@code UserHandle.USER_NULL}.</li>
-     *   <li>Merges the profile from the dex metadata file (if present) into the reference
-     *     profile.</li>
-     * </ul>
-     */
     public boolean prepareAppProfile(String pkg, @UserIdInt int userId, @AppIdInt int appId,
             String profileName, String codePath, String dexMetadataPath) throws InstallerException {
         if (!checkBeforeRemote()) return false;
@@ -1041,33 +938,6 @@ public class Installer extends SystemService {
             return mInstalld.compileLayouts(apkPath, packageName, outDexFile, uid);
         } catch (RemoteException e) {
             return false;
-        }
-    }
-
-    /**
-     * Returns the visibility of the optimized artifacts.
-     *
-     * @param packageName name of the package.
-     * @param apkPath path to the APK.
-     * @param instructionSet instruction set of the optimized artifacts.
-     * @param outputPath path to the directory that contains the optimized artifacts (i.e., the
-     *   directory that {@link #dexopt} outputs to).
-     *
-     * @return {@link #ODEX_NOT_FOUND} if the optimized artifacts are not found, or
-     *   {@link #ODEX_IS_PUBLIC} if the optimized artifacts are accessible by all apps, or
-     *   {@link #ODEX_IS_PRIVATE} if the optimized artifacts are only accessible by this app.
-     *
-     * @throws InstallerException if failed to get the visibility of the optimized artifacts.
-     */
-    public int getOdexVisibility(String packageName, String apkPath, String instructionSet,
-            String outputPath) throws InstallerException {
-        if (!checkBeforeRemote()) return -1;
-        BlockGuard.getVmPolicy().onPathAccess(apkPath);
-        BlockGuard.getVmPolicy().onPathAccess(outputPath);
-        try {
-            return mInstalld.getOdexVisibility(packageName, apkPath, instructionSet, outputPath);
-        } catch (Exception e) {
-            throw InstallerException.from(e);
         }
     }
 

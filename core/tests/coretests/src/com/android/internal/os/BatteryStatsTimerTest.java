@@ -22,6 +22,7 @@ import android.util.StringBuilderPrinter;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.os.BatteryStatsImpl.Clocks;
 import com.android.internal.os.BatteryStatsImpl.TimeBase;
 import com.android.internal.os.BatteryStatsImpl.Timer;
 
@@ -40,12 +41,12 @@ public class BatteryStatsTimerTest extends TestCase {
 
         int nextComputeCurrentCount;
 
-        TestTimer(Clock clock, int type, TimeBase timeBase, Parcel in) {
-            super(clock, type, timeBase, in);
+        TestTimer(Clocks clocks, int type, TimeBase timeBase, Parcel in) {
+            super(clocks, type, timeBase, in);
         }
 
-        TestTimer(Clock clock, int type, TimeBase timeBase) {
-            super(clock, type, timeBase);
+        TestTimer(Clocks clocks, int type, TimeBase timeBase) {
+            super(clocks, type, timeBase);
         }
 
         @Override
@@ -90,7 +91,7 @@ public class BatteryStatsTimerTest extends TestCase {
     @SmallTest
     public void testRunning() throws Exception {
         TimeBase timeBase = new TimeBase();
-        MockClock clocks = new MockClock();
+        MockClocks clocks = new MockClocks();
 
         TestTimer timer = new TestTimer(clocks, 0, timeBase);
         timer.nextComputeCurrentCount = 3000;
@@ -111,7 +112,7 @@ public class BatteryStatsTimerTest extends TestCase {
     @SmallTest
     public void testParceling() throws Exception {
         TimeBase timeBase = new TimeBase();
-        MockClock clocks = new MockClock();
+        MockClocks clocks = new MockClocks();
 
         // Test write then read
         TestTimer timer1 = new TestTimer(clocks, 0, timeBase);
@@ -156,7 +157,7 @@ public class BatteryStatsTimerTest extends TestCase {
     @SmallTest
     public void testResetNoDetach() throws Exception {
         TimeBase timeBase = new TimeBase();
-        MockClock clocks = new MockClock();
+        MockClocks clocks = new MockClocks();
 
         TestTimer timer = new TestTimer(clocks, 0, timeBase);
         timer.setCount(1);
@@ -179,7 +180,7 @@ public class BatteryStatsTimerTest extends TestCase {
     @SmallTest
     public void testResetDetach() throws Exception {
         TimeBase timeBase = new TimeBase();
-        MockClock clocks = new MockClock();
+        MockClocks clocks = new MockClocks();
 
         TestTimer timer = new TestTimer(clocks, 0, timeBase);
         timer.setCount(1);
@@ -207,7 +208,7 @@ public class BatteryStatsTimerTest extends TestCase {
         Assert.assertEquals(40, timeBase.getRealtime(200));
         // the past uptime is 35 and the past runtime is 40
 
-        MockClock clocks = new MockClock();
+        MockClocks clocks = new MockClocks();
 
         TestTimer timer1 = new TestTimer(clocks, 0, timeBase);
         timer1.setCount(1);
@@ -249,7 +250,7 @@ public class BatteryStatsTimerTest extends TestCase {
         timeBase.setRunning(false, 45, 60);
         Assert.assertEquals(40, timeBase.getRealtime(200));
 
-        MockClock clocks = new MockClock();
+        MockClocks clocks = new MockClocks();
 
         TestTimer timer = new TestTimer(clocks, 0, timeBase);
         timer.setCount(1);
@@ -274,7 +275,7 @@ public class BatteryStatsTimerTest extends TestCase {
         timeBase.setRunning(false, 45, 60);
         Assert.assertEquals(40, timeBase.getRealtime(200));
 
-        MockClock clocks = new MockClock();
+        MockClocks clocks = new MockClocks();
 
         TestTimer timer = new TestTimer(clocks, 0, timeBase);
         timer.setCount(1);
@@ -295,7 +296,7 @@ public class BatteryStatsTimerTest extends TestCase {
         timeBase.setRunning(false, 45, 60);
         Assert.assertEquals(40, timeBase.getRealtime(200));
 
-        MockClock clocks = new MockClock();
+        MockClocks clocks = new MockClocks();
 
         TestTimer timer = new TestTimer(clocks, 0, timeBase);
         timer.setCount(1);
@@ -312,7 +313,7 @@ public class BatteryStatsTimerTest extends TestCase {
     @SmallTest
     public void testLogState() throws Exception {
         TimeBase timeBase = new TimeBase();
-        MockClock clocks = new MockClock();
+        MockClocks clocks = new MockClocks();
 
         TestTimer timer = new TestTimer(clocks, 0, timeBase);
         timer.setTotalTime(100);

@@ -19,7 +19,6 @@
     <!-- Only using in Settings application -->
     <style name="Theme.SettingsBase" parent="@android:style/Theme.DeviceDefault.Settings">
         <item name="preferenceTheme">@style/PreferenceThemeOverlay</item>
-        <item name="android:spinnerStyle">@style/Spinner.SettingsLib</item>
     </style>
 
     <!-- Using in SubSettings page including injected settings page -->

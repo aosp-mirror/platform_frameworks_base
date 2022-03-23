@@ -75,7 +75,8 @@ private fun fingerprintModel(user: Int) = KeyguardFingerprintListenModel(
     shouldListenForFingerprintAssistant = false,
     switchingUser = false,
     udfps = false,
-    userDoesNotHaveTrust = false
+    userDoesNotHaveTrust = false,
+    userNeedsStrongAuth = false
 )
 
 private fun faceModel(user: Int) = KeyguardFaceListenModel(

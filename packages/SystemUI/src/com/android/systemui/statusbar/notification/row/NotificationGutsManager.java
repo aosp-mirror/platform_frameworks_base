@@ -50,7 +50,6 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.dump.DumpManager;
 import com.android.systemui.people.widget.PeopleSpaceWidgetManager;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -65,13 +64,11 @@ import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.provider.HighPriorityProvider;
-import com.android.systemui.statusbar.notification.collection.render.NotifGutsViewListener;
-import com.android.systemui.statusbar.notification.collection.render.NotifGutsViewManager;
 import com.android.systemui.statusbar.notification.dagger.NotificationsModule;
 import com.android.systemui.statusbar.notification.row.NotificationInfo.CheckSaveListener;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
-import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.ShadeController;
+import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.wmshell.BubblesManager;
 
@@ -85,8 +82,7 @@ import dagger.Lazy;
  * Handles various NotificationGuts related tasks, such as binding guts to a row, opening and
  * closing guts, and keeping track of the currently exposed notification guts.
  */
-public class NotificationGutsManager implements Dumpable, NotificationLifetimeExtender,
-        NotifGutsViewManager {
+public class NotificationGutsManager implements Dumpable, NotificationLifetimeExtender {
     private static final String TAG = "NotificationGutsManager";
 
     // Must match constant in Settings. Used to highlight preferences when linking to Settings.
@@ -120,12 +116,13 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
     @VisibleForTesting
     protected String mKeyToRemoveOnGutsClosed;
 
-    private final Lazy<Optional<CentralSurfaces>> mCentralSurfacesOptionalLazy;
+    private final Lazy<StatusBar> mStatusBarLazy;
     private final Handler mMainHandler;
     private final Handler mBgHandler;
     private final Optional<BubblesManager> mBubblesManagerOptional;
     private Runnable mOpenRunnable;
     private final INotificationManager mNotificationManager;
+    private final NotificationEntryManager mNotificationEntryManager;
     private final PeopleSpaceWidgetManager mPeopleSpaceWidgetManager;
     private final LauncherApps mLauncherApps;
     private final ShortcutManager mShortcutManager;
@@ -133,13 +130,12 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
     private final UiEventLogger mUiEventLogger;
     private final ShadeController mShadeController;
     private final AppWidgetManager mAppWidgetManager;
-    private NotifGutsViewListener mGutsListener;
 
     /**
      * Injected constructor. See {@link NotificationsModule}.
      */
     public NotificationGutsManager(Context context,
-            Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
+            Lazy<StatusBar> statusBarLazy,
             @Main Handler mainHandler,
             @Background Handler bgHandler,
             AccessibilityManager accessibilityManager,
@@ -155,15 +151,15 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
             Optional<BubblesManager> bubblesManagerOptional,
             UiEventLogger uiEventLogger,
             OnUserInteractionCallback onUserInteractionCallback,
-            ShadeController shadeController,
-            DumpManager dumpManager) {
+            ShadeController shadeController) {
         mContext = context;
-        mCentralSurfacesOptionalLazy = centralSurfacesOptionalLazy;
+        mStatusBarLazy = statusBarLazy;
         mMainHandler = mainHandler;
         mBgHandler = bgHandler;
         mAccessibilityManager = accessibilityManager;
         mHighPriorityProvider = highPriorityProvider;
         mNotificationManager = notificationManager;
+        mNotificationEntryManager = notificationEntryManager;
         mPeopleSpaceWidgetManager = peopleSpaceWidgetManager;
         mLauncherApps = launcherApps;
         mShortcutManager = shortcutManager;
@@ -175,8 +171,6 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
         mOnUserInteractionCallback = onUserInteractionCallback;
         mShadeController = shadeController;
         mAppWidgetManager = AppWidgetManager.getInstance(context);
-
-        dumpManager.registerDumpable(this);
     }
 
     public void setUpWithPresenter(NotificationPresenter presenter,
@@ -260,10 +254,10 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
     @VisibleForTesting
     protected boolean bindGuts(final ExpandableNotificationRow row,
             NotificationMenuRowPlugin.MenuItem item) {
-        NotificationEntry entry = row.getEntry();
+        StatusBarNotification sbn = row.getEntry().getSbn();
 
         row.setGutsView(item);
-        row.setTag(entry.getSbn().getPackageName());
+        row.setTag(sbn.getPackageName());
         row.getGuts().setClosedListener((NotificationGuts g) -> {
             row.onGutsClosed();
             if (!g.willBeRemoved() && !row.isRemoved()) {
@@ -274,10 +268,7 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
                 mNotificationGutsExposed = null;
                 mGutsMenuItem = null;
             }
-            if (mGutsListener != null) {
-                mGutsListener.onGutsClose(entry);
-            }
-            String key = entry.getKey();
+            String key = sbn.getKey();
             if (key.equals(mKeyToRemoveOnGutsClosed)) {
                 mKeyToRemoveOnGutsClosed = null;
                 if (mNotificationLifetimeFinishedCallback != null) {
@@ -337,15 +328,14 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
     private void initializeFeedbackInfo(
             final ExpandableNotificationRow row,
             FeedbackInfo feedbackInfo) {
-        if (mAssistantFeedbackController.getFeedbackIcon(row.getEntry()) == null) {
-            return;
-        }
         StatusBarNotification sbn = row.getEntry().getSbn();
         UserHandle userHandle = sbn.getUser();
-        PackageManager pmUser = CentralSurfaces.getPackageManagerForUser(mContext,
+        PackageManager pmUser = StatusBar.getPackageManagerForUser(mContext,
                 userHandle.getIdentifier());
 
-        feedbackInfo.bindGuts(pmUser, sbn, row.getEntry(), row, mAssistantFeedbackController);
+        if (mAssistantFeedbackController.showFeedbackIndicator(row.getEntry())) {
+            feedbackInfo.bindGuts(pmUser, sbn, row.getEntry(), row, mAssistantFeedbackController);
+        }
     }
 
     /**
@@ -363,7 +353,7 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
         // Settings link is only valid for notifications that specify a non-system user
         NotificationInfo.OnSettingsClickListener onSettingsClick = null;
         UserHandle userHandle = sbn.getUser();
-        PackageManager pmUser = CentralSurfaces.getPackageManagerForUser(
+        PackageManager pmUser = StatusBar.getPackageManagerForUser(
                 mContext, userHandle.getIdentifier());
         final NotificationInfo.OnAppSettingsClickListener onAppSettingsClick =
                 (View v, Intent intent) -> {
@@ -416,7 +406,7 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
         // Settings link is only valid for notifications that specify a non-system user
         NotificationInfo.OnSettingsClickListener onSettingsClick = null;
         UserHandle userHandle = sbn.getUser();
-        PackageManager pmUser = CentralSurfaces.getPackageManagerForUser(
+        PackageManager pmUser = StatusBar.getPackageManagerForUser(
                 mContext, userHandle.getIdentifier());
 
         if (!userHandle.equals(UserHandle.ALL)
@@ -458,7 +448,7 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
         // Settings link is only valid for notifications that specify a non-system user
         NotificationConversationInfo.OnSettingsClickListener onSettingsClick = null;
         UserHandle userHandle = sbn.getUser();
-        PackageManager pmUser = CentralSurfaces.getPackageManagerForUser(
+        PackageManager pmUser = StatusBar.getPackageManagerForUser(
                 mContext, userHandle.getIdentifier());
         final NotificationConversationInfo.OnAppSettingsClickListener onAppSettingsClick =
                 (View v, Intent intent) -> {
@@ -571,23 +561,17 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
                             .setLeaveOpenOnKeyguardHide(true);
                 }
 
-                Optional<CentralSurfaces> centralSurfacesOptional =
-                        mCentralSurfacesOptionalLazy.get();
-                if (centralSurfacesOptional.isPresent()) {
-                    Runnable r = () -> mMainHandler.post(
-                            () -> openGutsInternal(view, x, y, menuItem));
-                    centralSurfacesOptional.get().executeRunnableDismissingKeyguard(
-                            r,
-                            null /* cancelAction */,
-                            false /* dismissShade */,
-                            true /* afterKeyguardGone */,
-                            true /* deferred */);
-                    return true;
-                }
-                /**
-                 * When {@link CentralSurfaces} doesn't exist, falling through to call
-                 * {@link #openGutsInternal(View,int,int,NotificationMenuRowPlugin.MenuItem)}.
-                 */
+                Runnable r = () -> mMainHandler.post(
+                        () -> openGutsInternal(view, x, y, menuItem));
+
+                mStatusBarLazy.get().executeRunnableDismissingKeyguard(
+                        r,
+                        null /* cancelAction */,
+                        false /* dismissShade */,
+                        true /* afterKeyguardGone */,
+                        true /* deferred */);
+
+                return true;
             }
         }
         return openGutsInternal(view, x, y, menuItem);
@@ -657,10 +641,6 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
                         needsFalsingProtection,
                         row::onGutsOpened);
 
-                if (mGutsListener != null) {
-                    mGutsListener.onGutsOpen(row.getEntry(), guts);
-                }
-
                 row.closeRemoteInput();
                 mListContainer.onHeightChanged(row, true /* needsAnimation */);
                 mGutsMenuItem = menuItem;
@@ -706,15 +686,8 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println("NotificationGutsManager state:");
-        pw.print("  mKeyToRemoveOnGutsClosed (legacy): ");
+        pw.print("  mKeyToRemoveOnGutsClosed: ");
         pw.println(mKeyToRemoveOnGutsClosed);
-    }
-
-    /**
-     * @param gutsListener the listener for open and close guts events
-     */
-    public void setGutsListener(NotifGutsViewListener gutsListener) {
-        mGutsListener = gutsListener;
     }
 
     public interface OnSettingsClickListener {

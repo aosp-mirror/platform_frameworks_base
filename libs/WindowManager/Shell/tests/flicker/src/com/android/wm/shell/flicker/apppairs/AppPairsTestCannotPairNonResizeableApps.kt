@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.flicker.apppairs
 
+import android.os.SystemClock
 import android.platform.test.annotations.Presubmit
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
@@ -24,7 +25,7 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group1
 import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.wm.shell.flicker.appPairsDividerIsInvisibleAtEnd
+import com.android.wm.shell.flicker.appPairsDividerIsInvisible
 import com.android.wm.shell.flicker.helpers.AppPairsHelper
 import com.android.wm.shell.flicker.helpers.MultiWindowHelper.Companion.resetMultiWindowConfig
 import com.android.wm.shell.flicker.helpers.MultiWindowHelper.Companion.setSupportsNonResizableMultiWindow
@@ -52,15 +53,15 @@ class AppPairsTestCannotPairNonResizeableApps(
     testSpec: FlickerTestParameter
 ) : AppPairsTransition(testSpec) {
 
-    override val transition: FlickerBuilder.() -> Unit
+    override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
         get() = {
-            super.transition(this)
+            super.transition(this, it)
             transitions {
                 nonResizeableApp?.launchViaIntent(wmHelper)
                 // TODO pair apps through normal UX flow
                 executeShellCommand(
                     composePairsCommand(primaryTaskId, nonResizeableTaskId, pair = true))
-                nonResizeableApp?.run { wmHelper.waitForFullScreenApp(nonResizeableApp.component) }
+                SystemClock.sleep(AppPairsHelper.TIMEOUT_MS)
             }
         }
 
@@ -80,17 +81,19 @@ class AppPairsTestCannotPairNonResizeableApps(
     @Test
     override fun navBarLayerRotatesAndScales() = super.navBarLayerRotatesAndScales()
 
-    @FlakyTest(bugId = 206753786)
+    @FlakyTest
     @Test
     override fun statusBarLayerRotatesScales() = super.statusBarLayerRotatesScales()
 
-    @Presubmit
+    @FlakyTest
     @Test
-    override fun navBarLayerIsVisible() = super.navBarLayerIsVisible()
+    override fun navBarLayerIsAlwaysVisible() {
+        super.navBarLayerIsAlwaysVisible()
+    }
 
     @Presubmit
     @Test
-    fun appPairsDividerIsInvisibleAtEnd() = testSpec.appPairsDividerIsInvisibleAtEnd()
+    fun appPairsDividerIsInvisible() = testSpec.appPairsDividerIsInvisible()
 
     @Presubmit
     @Test
@@ -100,8 +103,8 @@ class AppPairsTestCannotPairNonResizeableApps(
             "Non resizeable app not initialized"
         }
         testSpec.assertWmEnd {
-            isAppWindowVisible(nonResizeableApp.component)
-            isAppWindowInvisible(primaryApp.component)
+            isVisible(nonResizeableApp.defaultWindowName)
+            isInvisible(primaryApp.defaultWindowName)
         }
     }
 

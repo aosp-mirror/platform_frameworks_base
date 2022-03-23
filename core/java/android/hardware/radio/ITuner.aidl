@@ -80,14 +80,14 @@ interface ITuner {
     void setConfigFlag(int flag, boolean value);
 
     /**
-     * @param parameters Vendor-specific key-value pairs
-     * @return Vendor-specific key-value pairs
+     * @param parameters Vendor-specific key-value pairs, must be Map<String, String>
+     * @return Vendor-specific key-value pairs, must be Map<String, String>
      */
-    Map<String, String> setParameters(in Map<String, String> parameters);
+    Map setParameters(in Map parameters);
 
     /**
      * @param keys Parameter keys to fetch
-     * @return Vendor-specific key-value pairs
+     * @return Vendor-specific key-value pairs, must be Map<String, String>
      */
-    Map<String, String> getParameters(in List<String> keys);
+    Map getParameters(in List<String> keys);
 }

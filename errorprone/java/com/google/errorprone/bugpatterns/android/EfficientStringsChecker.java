@@ -16,7 +16,6 @@
 
 package com.google.errorprone.bugpatterns.android;
 
-import static com.google.errorprone.BugPattern.LinkType.NONE;
 import static com.google.errorprone.BugPattern.SeverityLevel.WARNING;
 import static com.google.errorprone.matchers.Matchers.allOf;
 import static com.google.errorprone.matchers.Matchers.anyOf;
@@ -64,7 +63,6 @@ import javax.lang.model.element.Modifier;
 @BugPattern(
     name = "AndroidFrameworkEfficientStrings",
     summary = "Verifies efficient Strings best-practices",
-    linkType = NONE,
     severity = WARNING)
 public final class EfficientStringsChecker extends BugChecker
         implements MethodInvocationTreeMatcher, NewClassTreeMatcher, CompoundAssignmentTreeMatcher {

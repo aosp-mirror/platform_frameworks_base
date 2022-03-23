@@ -21,8 +21,6 @@ import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
-import static android.os.Process.INVALID_UID;
-import static android.os.Process.SYSTEM_UID;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.service.voice.VoiceInteractionSession.SHOW_SOURCE_APPLICATION;
 import static android.view.Display.DEFAULT_DISPLAY;
@@ -30,11 +28,6 @@ import static android.view.Display.INVALID_DISPLAY;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_CONFIGURATION;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_IMMERSIVE;
-import static com.android.server.wm.ActivityRecord.State.DESTROYED;
-import static com.android.server.wm.ActivityRecord.State.DESTROYING;
-import static com.android.server.wm.ActivityRecord.State.PAUSING;
-import static com.android.server.wm.ActivityRecord.State.RESTARTING_PROCESS;
-import static com.android.server.wm.ActivityRecord.State.RESUMED;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_ALL;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_SWITCH;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
@@ -42,15 +35,14 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLAS
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_NONE;
 import static com.android.server.wm.ActivityTaskManagerService.TAG_SWITCH;
 import static com.android.server.wm.ActivityTaskManagerService.enforceNotIsolatedCaller;
+import static com.android.server.wm.Task.ActivityState.DESTROYED;
+import static com.android.server.wm.Task.ActivityState.DESTROYING;
 
-import android.annotation.ColorInt;
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.app.IActivityClientController;
-import android.app.ICompatCameraControlCallback;
 import android.app.IRequestFinishCallback;
 import android.app.PictureInPictureParams;
 import android.app.PictureInPictureUiState;
@@ -61,7 +53,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
-import android.content.pm.PackageManagerInternal;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
@@ -73,19 +64,16 @@ import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.Trace;
-import android.os.UserHandle;
 import android.service.voice.VoiceInteractionManagerInternal;
 import android.util.Slog;
 import android.view.RemoteAnimationDefinition;
 import android.window.SizeConfigurationBuckets;
-import android.window.TransitionInfo;
 
 import com.android.internal.app.AssistUtils;
 import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.server.LocalServices;
 import com.android.server.Watchdog;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.uri.NeededUriGrants;
 import com.android.server.vr.VrManagerInternal;
 
@@ -200,7 +188,7 @@ class ActivityClientController extends IActivityClientController.Stub {
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "activityStopped");
             r = ActivityRecord.isInRootTaskLocked(token);
             if (r != null) {
-                if (r.attachedToProcess() && r.isState(RESTARTING_PROCESS)) {
+                if (r.attachedToProcess() && r.isState(Task.ActivityState.RESTARTING_PROCESS)) {
                     // The activity was requested to restart from
                     // {@link #restartActivityProcessIfVisible}.
                     restartingName = r.app.mName;
@@ -547,29 +535,6 @@ class ActivityClientController extends IActivityClientController.Stub {
     }
 
     @Override
-    @Nullable
-    public IBinder getActivityTokenBelow(IBinder activityToken) {
-        final long ident = Binder.clearCallingIdentity();
-        try {
-            synchronized (mGlobalLock) {
-                final ActivityRecord ar = ActivityRecord.isInAnyTask(activityToken);
-                if (ar == null) {
-                    return null;
-                }
-                // Exclude finishing activity.
-                final ActivityRecord below = ar.getTask().getActivity((r) -> !r.finishing,
-                        ar, false /*includeBoundary*/, true /*traverseTopToBottom*/);
-                if (below != null && below.getUid() == ar.getUid()) {
-                    return below.token;
-                }
-            }
-        } finally {
-            Binder.restoreCallingIdentity(ident);
-        }
-        return null;
-    }
-
-    @Override
     public ComponentName getCallingActivity(IBinder token) {
         synchronized (mGlobalLock) {
             final ActivityRecord r = getCallingRecord(token);
@@ -592,43 +557,18 @@ class ActivityClientController extends IActivityClientController.Stub {
 
     @Override
     public int getLaunchedFromUid(IBinder token) {
-        if (!canGetLaunchedFrom()) {
-            return INVALID_UID;
-        }
         synchronized (mGlobalLock) {
             final ActivityRecord r = ActivityRecord.forTokenLocked(token);
-            return r != null ? r.launchedFromUid : INVALID_UID;
+            return r != null ? r.launchedFromUid : android.os.Process.INVALID_UID;
         }
     }
 
     @Override
     public String getLaunchedFromPackage(IBinder token) {
-        if (!canGetLaunchedFrom()) {
-            return null;
-        }
         synchronized (mGlobalLock) {
             final ActivityRecord r = ActivityRecord.forTokenLocked(token);
             return r != null ? r.launchedFromPackage : null;
         }
-    }
-
-    /** Whether the caller can get the package or uid that launched its activity. */
-    private boolean canGetLaunchedFrom() {
-        final int uid = Binder.getCallingUid();
-        if (UserHandle.getAppId(uid) == SYSTEM_UID) {
-            return true;
-        }
-        final PackageManagerInternal pm = mService.mWindowManager.mPmInternal;
-        final AndroidPackage callingPkg = pm.getPackage(uid);
-        if (callingPkg == null) {
-            return false;
-        }
-        if (callingPkg.isSignedWithPlatformKey()) {
-            return true;
-        }
-        final String[] installerNames = pm.getKnownPackageNames(
-                PackageManagerInternal.PACKAGE_INSTALLER, UserHandle.getUserId(uid));
-        return installerNames.length > 0 && callingPkg.getPackageName().equals(installerNames[0]);
     }
 
     @Override
@@ -747,24 +687,9 @@ class ActivityClientController extends IActivityClientController.Stub {
                     // be used the next time the activity enters PiP.
                     final Task rootTask = r.getRootTask();
                     rootTask.setPictureInPictureAspectRatio(
-                            r.pictureInPictureArgs.getAspectRatioFloat(),
-                            r.pictureInPictureArgs.getExpandedAspectRatioFloat());
-                    rootTask.setPictureInPictureActions(r.pictureInPictureArgs.getActions(),
-                            r.pictureInPictureArgs.getCloseAction());
+                            r.pictureInPictureArgs.getAspectRatio());
+                    rootTask.setPictureInPictureActions(r.pictureInPictureArgs.getActions());
                 }
-            }
-        } finally {
-            Binder.restoreCallingIdentity(origId);
-        }
-    }
-
-    @Override
-    public void setShouldDockBigOverlays(IBinder token, boolean shouldDockBigOverlays) {
-        final long origId = Binder.clearCallingIdentity();
-        try {
-            synchronized (mGlobalLock) {
-                final ActivityRecord r = ActivityRecord.forTokenLocked(token);
-                r.setShouldDockBigOverlays(shouldDockBigOverlays);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -781,22 +706,6 @@ class ActivityClientController extends IActivityClientController.Stub {
             ActivityRecord.splashScreenAttachedLocked(token);
         }
         Binder.restoreCallingIdentity(origId);
-    }
-
-    @Override
-    public void requestCompatCameraControl(IBinder token, boolean showControl,
-            boolean transformationApplied, ICompatCameraControlCallback callback) {
-        final long origId = Binder.clearCallingIdentity();
-        try {
-            synchronized (mGlobalLock) {
-                final ActivityRecord r = ActivityRecord.isInRootTaskLocked(token);
-                if (r != null) {
-                    r.updateCameraCompatState(showControl, transformationApplied, callback);
-                }
-            }
-        } finally {
-            Binder.restoreCallingIdentity(origId);
-        }
     }
 
     /**
@@ -823,25 +732,15 @@ class ActivityClientController extends IActivityClientController.Stub {
                     + ": Current activity does not support picture-in-picture.");
         }
 
-        final float minAspectRatio = mContext.getResources().getFloat(
-                com.android.internal.R.dimen.config_pictureInPictureMinAspectRatio);
-        final float maxAspectRatio = mContext.getResources().getFloat(
-                com.android.internal.R.dimen.config_pictureInPictureMaxAspectRatio);
-
         if (params.hasSetAspectRatio()
                 && !mService.mWindowManager.isValidPictureInPictureAspectRatio(
-                r.mDisplayContent, params.getAspectRatioFloat())) {
+                r.mDisplayContent, params.getAspectRatio())) {
+            final float minAspectRatio = mContext.getResources().getFloat(
+                    com.android.internal.R.dimen.config_pictureInPictureMinAspectRatio);
+            final float maxAspectRatio = mContext.getResources().getFloat(
+                    com.android.internal.R.dimen.config_pictureInPictureMaxAspectRatio);
             throw new IllegalArgumentException(String.format(caller
                             + ": Aspect ratio is too extreme (must be between %f and %f).",
-                    minAspectRatio, maxAspectRatio));
-        }
-
-        if (mService.mSupportsExpandedPictureInPicture && params.hasSetExpandedAspectRatio()
-                && !mService.mWindowManager.isValidExpandedPictureInPictureAspectRatio(
-                r.mDisplayContent, params.getExpandedAspectRatioFloat())) {
-            throw new IllegalArgumentException(String.format(caller
-                            + ": Expanded aspect ratio is not extreme enough (must not be between"
-                            + " %f and %f).",
                     minAspectRatio, maxAspectRatio));
         }
 
@@ -1107,18 +1006,14 @@ class ActivityClientController extends IActivityClientController.Stub {
 
     @Override
     public void overridePendingTransition(IBinder token, String packageName,
-            int enterAnim, int exitAnim, @ColorInt int backgroundColor) {
+            int enterAnim, int exitAnim) {
         final long origId = Binder.clearCallingIdentity();
         synchronized (mGlobalLock) {
             final ActivityRecord r = ActivityRecord.isInRootTaskLocked(token);
-            if (r != null && r.isState(RESUMED, PAUSING)) {
+            if (r != null && r.isState(Task.ActivityState.RESUMED, Task.ActivityState.PAUSING)) {
                 r.mDisplayContent.mAppTransition.overridePendingAppTransition(
-                        packageName, enterAnim, exitAnim, backgroundColor, null, null,
+                        packageName, enterAnim, exitAnim, null, null,
                         r.mOverrideTaskTransition);
-                r.mTransitionController.setOverrideAnimation(
-                        TransitionInfo.AnimationOptions.makeCustomAnimOptions(packageName,
-                                enterAnim, exitAnim, backgroundColor, r.mOverrideTaskTransition),
-                        null /* startCallback */, null /* finishCallback */);
             }
         }
         Binder.restoreCallingIdentity(origId);
@@ -1160,13 +1055,13 @@ class ActivityClientController extends IActivityClientController.Stub {
     }
 
     @Override
-    public void setRecentsScreenshotEnabled(IBinder token, boolean enabled) {
+    public void setDisablePreviewScreenshots(IBinder token, boolean disable) {
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
                 final ActivityRecord r = ActivityRecord.isInRootTaskLocked(token);
                 if (r != null) {
-                    r.setRecentsScreenshotEnabled(enabled);
+                    r.setDisablePreviewScreenshots(disable);
                 }
             }
         } finally {
@@ -1258,7 +1153,7 @@ class ActivityClientController extends IActivityClientController.Stub {
         try {
             final Intent baseActivityIntent;
             final boolean launchedFromHome;
-            final boolean isLastRunningActivity;
+
             synchronized (mGlobalLock) {
                 final ActivityRecord r = ActivityRecord.isInRootTaskLocked(token);
                 if (r == null) return;
@@ -1270,25 +1165,22 @@ class ActivityClientController extends IActivityClientController.Stub {
                     return;
                 }
 
-                final Task task = r.getTask();
-                isLastRunningActivity = task.topRunningActivity() == r;
-
-                final boolean isBaseActivity = r.mActivityComponent.equals(task.realActivity);
-                baseActivityIntent = isBaseActivity ? r.intent : null;
-
+                final Intent baseIntent = r.getTask().getBaseIntent();
+                final boolean activityIsBaseActivity = baseIntent != null
+                        && r.mActivityComponent.equals(baseIntent.getComponent());
+                baseActivityIntent = activityIsBaseActivity ? r.intent : null;
                 launchedFromHome = r.isLaunchSourceType(ActivityRecord.LAUNCH_SOURCE_TYPE_HOME);
             }
 
             // If the activity is one of the main entry points for the application, then we should
             // refrain from finishing the activity and instead move it to the back to keep it in
             // memory. The requirements for this are:
-            //   1. The activity is the last running activity in the task.
-            //   2. The current activity is the base activity for the task.
-            //   3. a. If the activity was launched by the home process, we trust that its intent
+            //   1. The current activity is the base activity for the task.
+            //   2. a. If the activity was launched by the home process, we trust that its intent
             //         was resolved, so we check if the it is a main intent for the application.
             //      b. Otherwise, we query Package Manager to verify whether the activity is a
             //         launcher activity for the application.
-            if (baseActivityIntent != null && isLastRunningActivity
+            if (baseActivityIntent != null
                     && ((launchedFromHome && ActivityRecord.isMainIntent(baseActivityIntent))
                         || isLauncherActivity(baseActivityIntent.getComponent()))) {
                 moveActivityTaskToBack(token, false /* nonRoot */);

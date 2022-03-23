@@ -223,7 +223,8 @@ public class WalletScreenController implements
         }
         mUiEventLogger.log(WalletUiEvent.QAW_CLICK_CARD);
 
-        mActivityStarter.startPendingIntentDismissingKeyguard(cardInfo.getPendingIntent());
+        mActivityStarter.startActivity(
+                ((QAWalletCardViewInfo) cardInfo).mWalletCard.getPendingIntent().getIntent(), true);
     }
 
     @Override

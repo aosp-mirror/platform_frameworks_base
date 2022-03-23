@@ -376,8 +376,6 @@ public class WebChromeClient {
     *                     must be used to inform the WebView of the new quota.
     * @deprecated This method is no longer called; WebView now uses the HTML5 / JavaScript Quota
     *             Management API.
-    * @removed This method is no longer called; WebView now uses the HTML5 / JavaScript Quota
-    *          Management API.
     */
     @Deprecated
     public void onReachedMaxAppCacheSize(long requiredStorage, long quota,

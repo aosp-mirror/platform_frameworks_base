@@ -116,7 +116,7 @@ public class TaskSnapshotControllerTest extends WindowTestsBase {
     public void testGetSnapshotMode() {
         final WindowState disabledWindow = createWindow(null,
                 FIRST_APPLICATION_WINDOW, mDisplayContent, "disabledWindow");
-        disabledWindow.mActivityRecord.setRecentsScreenshotEnabled(false);
+        disabledWindow.mActivityRecord.setDisablePreviewScreenshots(true);
         assertEquals(SNAPSHOT_MODE_APP_THEME,
                 mWm.mTaskSnapshotController.getSnapshotMode(disabledWindow.getTask()));
 
@@ -144,8 +144,7 @@ public class TaskSnapshotControllerTest extends WindowTestsBase {
         final int orientation = Configuration.ORIENTATION_PORTRAIT;
         final float scaleFraction = 0.25f;
         final Rect contentInsets = new Rect(1, 2, 3, 4);
-        final Rect letterboxInsets = new Rect(5, 6, 7, 8);
-        final Point taskSize = new Point(9, 10);
+        final Point taskSize = new Point(5, 6);
 
         try {
             TaskSnapshot.Builder builder =
@@ -157,7 +156,6 @@ public class TaskSnapshotControllerTest extends WindowTestsBase {
             builder.setColorSpace(sRGB);
             builder.setOrientation(orientation);
             builder.setContentInsets(contentInsets);
-            builder.setLetterboxInsets(letterboxInsets);
             builder.setIsTranslucent(true);
             builder.setSnapshot(buffer);
             builder.setIsRealSnapshot(true);
@@ -178,7 +176,6 @@ public class TaskSnapshotControllerTest extends WindowTestsBase {
             assertFalse(snapshot.isLowResolution());
             assertEquals(orientation, snapshot.getOrientation());
             assertEquals(contentInsets, snapshot.getContentInsets());
-            assertEquals(letterboxInsets, snapshot.getLetterboxInsets());
             assertTrue(snapshot.isTranslucent());
             assertSame(buffer, snapshot.getHardwareBuffer());
             assertTrue(snapshot.isRealSnapshot());

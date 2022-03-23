@@ -16,7 +16,6 @@
 
 package com.android.server.wm;
 
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.server.wm.RunningTasks.FLAG_ALLOWED;
 import static com.android.server.wm.RunningTasks.FLAG_CROSS_USERS;
 import static com.android.server.wm.RunningTasks.FLAG_KEEP_INTENT_EXTRA;
@@ -82,9 +81,7 @@ public class RunningTasksTest extends WindowTestsBase {
             rootTasks.add(task);
         }, false /* traverseTopToBottom */);
         for (int i = 0; i < numTasks; i++) {
-            final Task task =
-                    createTask(rootTasks.get(i % numStacks), ".Task" + i, i, activeTime++, null);
-            doReturn(false).when(task).isVisible();
+            createTask(rootTasks.get(i % numStacks), ".Task" + i, i, activeTime++, null);
         }
 
         // Ensure that the latest tasks were returned in order of decreasing last active time,
@@ -161,36 +158,6 @@ public class RunningTasksTest extends WindowTestsBase {
         }
     }
 
-    @Test
-    public void testUpdateLastActiveTimeOfVisibleTasks() {
-        final DisplayContent display = new TestDisplayContent.Builder(mAtm, 1000, 2500).build();
-        final int numTasks = 10;
-        final ArrayList<Task> tasks = new ArrayList<>();
-        for (int i = 0; i < numTasks; i++) {
-            final Task task = createTask(null, ".Task" + i, i, i, null);
-            doReturn(false).when(task).isVisible();
-            tasks.add(task);
-        }
-
-        final Task visibleTask = tasks.get(0);
-        doReturn(true).when(visibleTask).isVisible();
-
-        final Task focusedTask = tasks.get(1);
-        doReturn(true).when(focusedTask).isVisible();
-        doReturn(true).when(focusedTask).isFocused();
-
-        // Ensure that the last active time of visible tasks were updated while the focused one had
-        // the largest last active time.
-        final int numFetchTasks = 5;
-        final ArrayList<RunningTaskInfo> fetchTasks = new ArrayList<>();
-        mRunningTasks.getTasks(numFetchTasks, fetchTasks,
-                FLAG_ALLOWED | FLAG_CROSS_USERS | FLAG_KEEP_INTENT_EXTRA, mRootWindowContainer,
-                -1 /* callingUid */, PROFILE_IDS);
-        assertThat(fetchTasks).hasSize(numFetchTasks);
-        assertEquals(fetchTasks.get(0).id, focusedTask.mTaskId);
-        assertEquals(fetchTasks.get(1).id, visibleTask.mTaskId);
-    }
-
     /**
      * Create a task with a single activity in it, with the given last active time.
      */
@@ -199,7 +166,7 @@ public class RunningTasksTest extends WindowTestsBase {
         final Task task = new TaskBuilder(mAtm.mTaskSupervisor)
                 .setComponent(new ComponentName(mContext.getPackageName(), className))
                 .setTaskId(taskId)
-                .setParentTaskFragment(stack)
+                .setParentTask(stack)
                 .build();
         task.lastActiveTime = lastActiveTime;
         final ActivityRecord activity = new ActivityBuilder(mAtm)

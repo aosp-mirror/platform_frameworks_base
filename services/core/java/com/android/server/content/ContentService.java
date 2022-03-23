@@ -20,19 +20,14 @@ import static android.content.PermissionChecker.PERMISSION_GRANTED;
 
 import android.Manifest;
 import android.accounts.Account;
-import android.accounts.AccountManagerInternal;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
-import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
-import android.app.compat.CompatChanges;
 import android.app.job.JobInfo;
-import android.compat.annotation.ChangeId;
-import android.compat.annotation.EnabledAfter;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -110,13 +105,6 @@ public final class ContentService extends IContentService.Stub {
      */
     private static final long BACKGROUND_OBSERVER_DELAY = 10 * DateUtils.SECOND_IN_MILLIS;
 
-    /**
-     * Enables checking for account access for the calling uid on all sync-related APIs.
-     */
-    @ChangeId
-    @EnabledAfter(targetSdkVersion = android.os.Build.VERSION_CODES.S_V2)
-    public static final long ACCOUNT_ACCESS_CHECK_CHANGE_ID = 201794303L;
-
     public static class Lifecycle extends SystemService {
         private ContentService mService;
 
@@ -167,8 +155,6 @@ public final class ContentService extends IContentService.Stub {
 
     private SyncManager mSyncManager = null;
     private final Object mSyncManagerLock = new Object();
-
-    private final AccountManagerInternal mAccountManagerInternal;
 
     private static final BinderDeathDispatcher<IContentObserver> sObserverDeathDispatcher =
             new BinderDeathDispatcher<>();
@@ -330,8 +316,6 @@ public final class ContentService extends IContentService.Stub {
         localeFilter.addAction(Intent.ACTION_LOCALE_CHANGED);
         mContext.registerReceiverAsUser(mCacheReceiver, UserHandle.ALL,
                 localeFilter, null, null);
-
-        mAccountManagerInternal = LocalServices.getService(AccountManagerInternal.class);
     }
 
     void onBootPhase(int phase) {
@@ -608,10 +592,6 @@ public final class ContentService extends IContentService.Stub {
         final int callingUid = Binder.getCallingUid();
         final int callingPid = Binder.getCallingPid();
 
-        if (!hasAccountAccess(true, account, callingUid)) {
-            return;
-        }
-
         validateExtras(callingUid, extras);
         final int syncExemption = getSyncExemptionAndCleanUpExtrasForCaller(callingUid, extras);
 
@@ -661,14 +641,11 @@ public final class ContentService extends IContentService.Stub {
     @Override
     public void syncAsUser(SyncRequest request, int userId, String callingPackage) {
         enforceCrossUserPermission(userId, "no permission to request sync as user: " + userId);
-
         final int callingUid = Binder.getCallingUid();
         final int callingPid = Binder.getCallingPid();
-        if (!hasAccountAccess(true, request.getAccount(), callingUid)) {
-            return;
-        }
 
         final Bundle extras = request.getBundle();
+
         validateExtras(callingUid, extras);
         final int syncExemption = getSyncExemptionAndCleanUpExtrasForCaller(callingUid, extras);
 
@@ -846,21 +823,6 @@ public final class ContentService extends IContentService.Stub {
     }
 
     @Override
-    public String getSyncAdapterPackageAsUser(@NonNull String accountType,
-            @NonNull String authority, @UserIdInt int userId) {
-        enforceCrossUserPermission(userId,
-                "no permission to read sync settings for user " + userId);
-        final int callingUid = Binder.getCallingUid();
-        final long identityToken = clearCallingIdentity();
-        try {
-            return getSyncManager().getSyncAdapterPackageAsUser(accountType, authority,
-                    callingUid, userId);
-        } finally {
-            restoreCallingIdentity(identityToken);
-        }
-    }
-
-    @Override
     public boolean getSyncAutomatically(Account account, String providerName) {
         return getSyncAutomaticallyAsUser(account, providerName, UserHandle.getCallingUserId());
     }
@@ -875,9 +837,6 @@ public final class ContentService extends IContentService.Stub {
                 "no permission to read the sync settings for user " + userId);
         mContext.enforceCallingOrSelfPermission(Manifest.permission.READ_SYNC_SETTINGS,
                 "no permission to read the sync settings");
-        if (!hasAccountAccess(true, account, Binder.getCallingUid())) {
-            return false;
-        }
 
         final long identityToken = clearCallingIdentity();
         try {
@@ -907,13 +866,8 @@ public final class ContentService extends IContentService.Stub {
                 "no permission to write the sync settings");
         enforceCrossUserPermission(userId,
                 "no permission to modify the sync settings for user " + userId);
-
         final int callingUid = Binder.getCallingUid();
         final int callingPid = Binder.getCallingPid();
-        if (!hasAccountAccess(true, account, callingUid)) {
-            return;
-        }
-
         final int syncExemptionFlag = getSyncExemptionForCaller(callingUid);
 
         final long identityToken = clearCallingIdentity();
@@ -942,11 +896,7 @@ public final class ContentService extends IContentService.Stub {
         mContext.enforceCallingOrSelfPermission(Manifest.permission.WRITE_SYNC_SETTINGS,
                 "no permission to write the sync settings");
 
-        final int callingUid = Binder.getCallingUid();
-        if (!hasAccountAccess(true, account, callingUid)) {
-            return;
-        }
-        validateExtras(callingUid, extras);
+        validateExtras(Binder.getCallingUid(), extras);
 
         int userId = UserHandle.getCallingUserId();
 
@@ -976,11 +926,9 @@ public final class ContentService extends IContentService.Stub {
         mContext.enforceCallingOrSelfPermission(Manifest.permission.WRITE_SYNC_SETTINGS,
                 "no permission to write the sync settings");
 
+        validateExtras(Binder.getCallingUid(), extras);
+
         final int callingUid = Binder.getCallingUid();
-        if (!hasAccountAccess(true, account, callingUid)) {
-            return;
-        }
-        validateExtras(callingUid, extras);
 
         int userId = UserHandle.getCallingUserId();
         final long identityToken = clearCallingIdentity();
@@ -1005,9 +953,6 @@ public final class ContentService extends IContentService.Stub {
         }
         mContext.enforceCallingOrSelfPermission(Manifest.permission.READ_SYNC_SETTINGS,
                 "no permission to read the sync settings");
-        if (!hasAccountAccess(true, account, Binder.getCallingUid())) {
-            return new ArrayList<>(); // return a new empty list for consistent behavior
-        }
 
         int userId = UserHandle.getCallingUserId();
         final long identityToken = clearCallingIdentity();
@@ -1034,9 +979,6 @@ public final class ContentService extends IContentService.Stub {
                 "no permission to read the sync settings for user " + userId);
         mContext.enforceCallingOrSelfPermission(Manifest.permission.READ_SYNC_SETTINGS,
                 "no permission to read the sync settings");
-        if (!hasAccountAccess(true, account, Binder.getCallingUid())) {
-            return SyncStorageEngine.AuthorityInfo.NOT_SYNCABLE; // to keep behavior consistent
-        }
 
         final long identityToken = clearCallingIdentity();
         try {
@@ -1073,9 +1015,6 @@ public final class ContentService extends IContentService.Stub {
         syncable = normalizeSyncable(syncable);
         final int callingUid = Binder.getCallingUid();
         final int callingPid = Binder.getCallingPid();
-        if (!hasAccountAccess(true, account, callingUid)) {
-            return;
-        }
 
         final long identityToken = clearCallingIdentity();
         try {
@@ -1148,10 +1087,6 @@ public final class ContentService extends IContentService.Stub {
     public boolean isSyncActive(Account account, String authority, ComponentName cname) {
         mContext.enforceCallingOrSelfPermission(Manifest.permission.READ_SYNC_STATS,
                 "no permission to read the sync stats");
-        if (!hasAccountAccess(true, account, Binder.getCallingUid())) {
-            return false;
-        }
-
         int userId = UserHandle.getCallingUserId();
         final long identityToken = clearCallingIdentity();
         try {
@@ -1214,9 +1149,6 @@ public final class ContentService extends IContentService.Stub {
                 "no permission to read the sync stats for user " + userId);
         mContext.enforceCallingOrSelfPermission(Manifest.permission.READ_SYNC_STATS,
                 "no permission to read the sync stats");
-        if (!hasAccountAccess(true, account, Binder.getCallingUid())) {
-            return null;
-        }
 
         final long identityToken = clearCallingIdentity();
         try {
@@ -1248,10 +1180,6 @@ public final class ContentService extends IContentService.Stub {
                 "no permission to read the sync stats");
         enforceCrossUserPermission(userId,
                 "no permission to retrieve the sync settings for user " + userId);
-        if (!hasAccountAccess(true, account, Binder.getCallingUid())) {
-            return false;
-        }
-
         final long identityToken = clearCallingIdentity();
         SyncManager syncManager = getSyncManager();
         if (syncManager == null) return false;
@@ -1277,7 +1205,7 @@ public final class ContentService extends IContentService.Stub {
             SyncManager syncManager = getSyncManager();
             if (syncManager != null && callback != null) {
                 syncManager.getSyncStorageEngine().addStatusChangeListener(
-                        mask, callingUid, callback);
+                        mask, UserHandle.getUserId(callingUid), callback);
             }
         } finally {
             restoreCallingIdentity(identityToken);
@@ -1459,32 +1387,6 @@ public final class ContentService extends IContentService.Stub {
 
         mContext.enforceCallingOrSelfPermission(
                 Manifest.permission.INTERACT_ACROSS_USERS_FULL, message);
-    }
-
-    /**
-     * Checks to see if the given account is accessible by the provided uid.
-     *
-     * @param checkCompatFlag whether to check if the ACCOUNT_ACCESS_CHECK_CHANGE_ID flag is enabled
-     * @param account the account trying to be accessed
-     * @param uid the uid trying to access the account
-     * @return {@code true} if the account is accessible by the given uid, {@code false} otherwise
-     */
-    private boolean hasAccountAccess(boolean checkCompatFlag, Account account, int uid) {
-        if (account == null) {
-            // If the account is null, it means to check for all accounts hence skip the check here.
-            return true;
-        }
-        if (checkCompatFlag
-                && !CompatChanges.isChangeEnabled(ACCOUNT_ACCESS_CHECK_CHANGE_ID, uid)) {
-            return true;
-        }
-
-        final long identityToken = clearCallingIdentity();
-        try {
-            return mAccountManagerInternal.hasAccountAccess(account, uid);
-        } finally {
-            restoreCallingIdentity(identityToken);
-        }
     }
 
     private static int normalizeSyncable(int syncable) {

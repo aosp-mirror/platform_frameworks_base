@@ -109,11 +109,11 @@ import com.android.systemui.people.SharedPreferencesHelper;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationListener.NotificationHandler;
 import com.android.systemui.statusbar.SbnBuilder;
+import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NoManSimulator;
 import com.android.systemui.statusbar.notification.collection.NoManSimulator.NotifEvent;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
-import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
 import com.android.wm.shell.bubbles.Bubbles;
@@ -239,7 +239,7 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
     @Mock
     private LauncherApps mLauncherApps;
     @Mock
-    private CommonNotifCollection mNotifCollection;
+    private NotificationEntryManager mNotificationEntryManager;
     @Mock
     private PackageManager mPackageManager;
     @Mock
@@ -269,8 +269,9 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         mLauncherApps = mock(LauncherApps.class);
+        mDependency.injectTestDependency(NotificationEntryManager.class, mNotificationEntryManager);
         mManager = new PeopleSpaceWidgetManager(mContext, mAppWidgetManager, mIPeopleManager,
-                mPeopleManager, mLauncherApps, mNotifCollection, mPackageManager,
+                mPeopleManager, mLauncherApps, mNotificationEntryManager, mPackageManager,
                 Optional.of(mBubbles), mUserManager, mBackupManager, mINotificationManager,
                 mNotificationManager, mFakeExecutor);
         mManager.attach(mListenerService);
@@ -632,7 +633,7 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
                 .setShortcutInfo(mShortcutInfo)
                 .setId(1);
         NotificationEntry entry = builder.build();
-        when(mNotifCollection.getAllNotifs()).thenReturn(List.of(entry));
+        when(mNotificationEntryManager.getVisibleNotifications()).thenReturn(List.of(entry));
 
         NotifEvent notif1 = mNoMan.postNotif(builder);
         mClock.advanceTime(MIN_LINGER_DURATION);
@@ -691,7 +692,7 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
                 .setShortcutInfo(mShortcutInfo)
                 .setId(1);
         NotificationEntry entry = builder.build();
-        when(mNotifCollection.getAllNotifs()).thenReturn(List.of(entry));
+        when(mNotificationEntryManager.getVisibleNotifications()).thenReturn(List.of(entry));
 
         NotifEvent notif1 = mNoMan.postNotif(builder);
         mClock.advanceTime(MIN_LINGER_DURATION);
@@ -715,7 +716,7 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
                 .setShortcutInfo(mShortcutInfo)
                 .setId(1);
         NotificationEntry entry = builder.build();
-        when(mNotifCollection.getAllNotifs()).thenReturn(List.of(entry));
+        when(mNotificationEntryManager.getVisibleNotifications()).thenReturn(List.of(entry));
 
         NotifEvent notif1 = mNoMan.postNotif(builder);
         mClock.advanceTime(MIN_LINGER_DURATION);
@@ -739,7 +740,7 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
                 .setShortcutInfo(mShortcutInfo)
                 .setId(1);
         NotificationEntry entry = builder.build();
-        when(mNotifCollection.getAllNotifs()).thenReturn(List.of(entry));
+        when(mNotificationEntryManager.getVisibleNotifications()).thenReturn(List.of(entry));
 
         NotifEvent notif1 = mNoMan.postNotif(builder);
         mClock.advanceTime(MIN_LINGER_DURATION);
@@ -770,12 +771,12 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
                 .setId(1);
 
         NotificationEntry entry = builder.build();
-        when(mNotifCollection.getAllNotifs()).thenReturn(List.of(entry));
+        when(mNotificationEntryManager.getVisibleNotifications()).thenReturn(List.of(entry));
 
         NotifEvent notif1 = mNoMan.postNotif(builder);
         mClock.advanceTime(MIN_LINGER_DURATION);
 
-        when(mNotifCollection.getAllNotifs()).thenReturn(List.of());
+        when(mNotificationEntryManager.getVisibleNotifications()).thenReturn(List.of());
         NotifEvent notif1b = mNoMan.retractNotif(notif1.sbn.cloneLight(), 0);
         mClock.advanceTime(MIN_LINGER_DURATION);
 
@@ -813,7 +814,7 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
                 .setSbn(sbn)
                 .setId(1);
         NotificationEntry entry = builder.build();
-        when(mNotifCollection.getAllNotifs()).thenReturn(List.of(entry));
+        when(mNotificationEntryManager.getVisibleNotifications()).thenReturn(List.of(entry));
 
         NotifEvent notif1 = mNoMan.postNotif(builder);
         mClock.advanceTime(MIN_LINGER_DURATION);
@@ -857,7 +858,7 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
                 .setShortcutInfo(mShortcutInfo)
                 .setId(1);
         NotificationEntry entry = builder.build();
-        when(mNotifCollection.getAllNotifs()).thenReturn(List.of(entry));
+        when(mNotificationEntryManager.getVisibleNotifications()).thenReturn(List.of(entry));
 
         NotifEvent notif1 = mNoMan.postNotif(builder);
 
@@ -890,7 +891,7 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
                 .setShortcutInfo(mShortcutInfo)
                 .setId(1);
         NotificationEntry entry = builder.build();
-        when(mNotifCollection.getAllNotifs()).thenReturn(List.of(entry));
+        when(mNotificationEntryManager.getVisibleNotifications()).thenReturn(List.of(entry));
 
         NotifEvent notif1 = mNoMan.postNotif(builder);
         mClock.advanceTime(MIN_LINGER_DURATION);
@@ -921,7 +922,7 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
                 .setShortcutInfo(mShortcutInfo)
                 .setId(1);
         NotificationEntry entry = builder.build();
-        when(mNotifCollection.getAllNotifs()).thenReturn(List.of(entry));
+        when(mNotificationEntryManager.getVisibleNotifications()).thenReturn(List.of(entry));
 
         NotifEvent notif1 = mNoMan.postNotif(builder);
         mClock.advanceTime(MIN_LINGER_DURATION);
@@ -1214,7 +1215,8 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
                         .setPackageName(TEST_PACKAGE_A)
                         .setUserHandle(new UserHandle(0))
                         .build();
-        when(mNotifCollection.getAllNotifs()).thenReturn(List.of(mNotificationEntry));
+        when(mNotificationEntryManager.getVisibleNotifications())
+                .thenReturn(List.of(mNotificationEntry));
 
         PeopleSpaceTile actual =
                 mManager.augmentTileFromNotificationEntryManager(tile,
@@ -1222,7 +1224,8 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
 
         assertThat(actual.getNotificationContent().toString()).isEqualTo(NOTIFICATION_CONTENT_1);
 
-        verify(mNotifCollection, times(1)).getAllNotifs();
+        verify(mNotificationEntryManager, times(1))
+                .getVisibleNotifications();
     }
 
     @Test
@@ -1234,7 +1237,8 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
                         .setPackageName(TEST_PACKAGE_A)
                         .setUserHandle(new UserHandle(0))
                         .build();
-        when(mNotifCollection.getAllNotifs()).thenReturn(List.of(mNotificationEntry));
+        when(mNotificationEntryManager.getVisibleNotifications())
+                .thenReturn(List.of(mNotificationEntry));
 
         PeopleSpaceTile actual =
                 mManager.augmentTileFromNotificationEntryManager(tile,
@@ -1242,7 +1246,8 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
 
         assertThat(TextUtils.isEmpty(actual.getNotificationContent())).isTrue();
 
-        verify(mNotifCollection, times(1)).getAllNotifs();
+        verify(mNotificationEntryManager, times(1))
+                .getVisibleNotifications();
     }
 
     @Test

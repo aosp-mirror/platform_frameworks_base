@@ -104,8 +104,8 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 
 import com.android.internal.graphics.drawable.BackgroundBlurDrawable;
-import com.android.internal.view.RotationPolicy;
 import com.android.settingslib.Utils;
+import com.android.systemui.Dependency;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
@@ -234,10 +234,6 @@ public class VolumeDialogImpl implements VolumeDialog,
     private final Object mSafetyWarningLock = new Object();
     private final Accessibility mAccessibility = new Accessibility();
 
-    private final ConfigurationController mConfigurationController;
-    private final MediaOutputDialogFactory mMediaOutputDialogFactory;
-    private final ActivityStarter mActivityStarter;
-
     private boolean mShowing;
     private boolean mShowA11yStream;
 
@@ -259,24 +255,14 @@ public class VolumeDialogImpl implements VolumeDialog,
     private Consumer<Boolean> mCrossWindowBlurEnabledListener;
     private BackgroundBlurDrawable mDialogRowsViewBackground;
 
-    public VolumeDialogImpl(
-            Context context,
-            VolumeDialogController volumeDialogController,
-            AccessibilityManagerWrapper accessibilityManagerWrapper,
-            DeviceProvisionedController deviceProvisionedController,
-            ConfigurationController configurationController,
-            MediaOutputDialogFactory mediaOutputDialogFactory,
-            ActivityStarter activityStarter) {
+    public VolumeDialogImpl(Context context) {
         mContext =
                 new ContextThemeWrapper(context, R.style.volume_dialog_theme);
-        mController = volumeDialogController;
+        mController = Dependency.get(VolumeDialogController.class);
         mKeyguard = (KeyguardManager) mContext.getSystemService(Context.KEYGUARD_SERVICE);
         mActivityManager = (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
-        mAccessibilityMgr = accessibilityManagerWrapper;
-        mDeviceProvisionedController = deviceProvisionedController;
-        mConfigurationController = configurationController;
-        mMediaOutputDialogFactory = mediaOutputDialogFactory;
-        mActivityStarter = activityStarter;
+        mAccessibilityMgr = Dependency.get(AccessibilityManagerWrapper.class);
+        mDeviceProvisionedController = Dependency.get(DeviceProvisionedController.class);
         mShowActiveStreamOnly = showActiveStreamOnly();
         mHasSeenODICaptionsTooltip =
                 Prefs.getBoolean(context, Prefs.Key.HAS_SEEN_ODI_CAPTIONS_TOOLTIP, false);
@@ -319,14 +305,14 @@ public class VolumeDialogImpl implements VolumeDialog,
         mController.addCallback(mControllerCallbackH, mHandler);
         mController.getState();
 
-        mConfigurationController.addCallback(this);
+        Dependency.get(ConfigurationController.class).addCallback(this);
     }
 
     @Override
     public void destroy() {
         mController.removeCallback(mControllerCallbackH);
         mHandler.removeCallbacksAndMessages(null);
-        mConfigurationController.removeCallback(this);
+        Dependency.get(ConfigurationController.class).removeCallback(this);
     }
 
     @Override
@@ -414,9 +400,7 @@ public class VolumeDialogImpl implements VolumeDialog,
         mDialog.setCanceledOnTouchOutside(true);
         mDialog.setOnShowListener(dialog -> {
             mDialogView.getViewTreeObserver().addOnComputeInternalInsetsListener(this);
-            if (!shouldSlideInVolumeTray()) {
-                mDialogView.setTranslationX(mDialogView.getWidth() / 2.0f);
-            }
+            if (!isLandscape()) mDialogView.setTranslationX(mDialogView.getWidth() / 2.0f);
             mDialogView.setAlpha(0);
             mDialogView.animate()
                     .alpha(1)
@@ -601,10 +585,6 @@ public class VolumeDialogImpl implements VolumeDialog,
         float alpha = ta.getFloat(0, 0);
         ta.recycle();
         return (int) (alpha * 255);
-    }
-
-    private boolean shouldSlideInVolumeTray() {
-        return mContext.getDisplay().getRotation() != RotationPolicy.NATURAL_ROTATION;
     }
 
     private boolean isLandscape() {
@@ -1030,8 +1010,9 @@ public class VolumeDialogImpl implements VolumeDialog,
                 Events.writeEvent(Events.EVENT_SETTINGS_CLICK);
                 Intent intent = new Intent(Settings.Panel.ACTION_VOLUME);
                 dismissH(DISMISS_REASON_SETTINGS_CLICKED);
-                mMediaOutputDialogFactory.dismiss();
-                mActivityStarter.startActivity(intent, true /* dismissShade */);
+                Dependency.get(MediaOutputDialogFactory.class).dismiss();
+                Dependency.get(ActivityStarter.class).startActivity(intent,
+                        true /* dismissShade */);
             });
         }
     }
@@ -1179,6 +1160,11 @@ public class VolumeDialogImpl implements VolumeDialog,
         boolean captionsEnabled = mController.areCaptionsEnabled();
         if (mODICaptionsIcon.getCaptionsEnabled() != captionsEnabled) {
             mHandler.post(mODICaptionsIcon.setCaptionsEnabled(captionsEnabled));
+        }
+
+        boolean isOptedOut = mController.isCaptionStreamOptedOut();
+        if (mODICaptionsIcon.getOptedOut() != isOptedOut) {
+            mHandler.post(() -> mODICaptionsIcon.setOptedOut(isOptedOut));
         }
     }
 
@@ -1334,7 +1320,7 @@ public class VolumeDialogImpl implements VolumeDialog,
 
                     hideRingerDrawer();
                 }, 50));
-        if (!shouldSlideInVolumeTray()) animator.translationX(mDialogView.getWidth() / 2.0f);
+        if (!isLandscape()) animator.translationX(mDialogView.getWidth() / 2.0f);
         animator.start();
         checkODICaptionsTooltip(true);
         mController.notifyVisible(false);

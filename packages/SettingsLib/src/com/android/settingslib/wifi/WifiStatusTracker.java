@@ -30,7 +30,6 @@ import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiNetworkScoreCache;
 import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.Looper;
 import android.provider.Settings;
 
@@ -54,14 +53,20 @@ public class WifiStatusTracker {
     private final WifiManager mWifiManager;
     private final NetworkScoreManager mNetworkScoreManager;
     private final ConnectivityManager mConnectivityManager;
-    private final Handler mHandler;
-    private final Handler mMainThreadHandler;
+    private final Handler mHandler = new Handler(Looper.getMainLooper());
     private final Set<Integer> mNetworks = new HashSet<>();
     // Save the previous HISTORY_SIZE states for logging.
     private final String[] mHistory = new String[HISTORY_SIZE];
     // Where to copy the next state into.
     private int mHistoryIndex;
-    private final WifiNetworkScoreCache.CacheListener mCacheListener;
+    private final WifiNetworkScoreCache.CacheListener mCacheListener =
+            new WifiNetworkScoreCache.CacheListener(mHandler) {
+                @Override
+                public void networkCacheUpdated(List<ScoredNetwork> updatedNetworks) {
+                    updateStatusLabel();
+                    mCallback.run();
+                }
+            };
     private final NetworkRequest mNetworkRequest = new NetworkRequest.Builder()
             .clearCapabilities()
             .addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VPN)
@@ -108,7 +113,7 @@ public class WifiStatusTracker {
             }
             updateWifiInfo(wifiInfo);
             updateStatusLabel();
-            mMainThreadHandler.post(() -> postResults());
+            mCallback.run();
         }
 
         @Override
@@ -123,7 +128,7 @@ public class WifiStatusTracker {
                 mNetworks.remove(network.getNetId());
                 updateWifiInfo(null);
                 updateStatusLabel();
-                mMainThreadHandler.post(() -> postResults());
+                mCallback.run();
             }
         }
     };
@@ -138,7 +143,7 @@ public class WifiStatusTracker {
             mDefaultNetwork = network;
             mDefaultNetworkCapabilities = nc;
             updateStatusLabel();
-            mMainThreadHandler.post(() -> postResults());
+            mCallback.run();
         }
         @Override
         public void onLost(Network network) {
@@ -146,12 +151,13 @@ public class WifiStatusTracker {
             mDefaultNetwork = null;
             mDefaultNetworkCapabilities = null;
             updateStatusLabel();
-            mMainThreadHandler.post(() -> postResults());
+            mCallback.run();
         }
     };
     private Network mDefaultNetwork = null;
     private NetworkCapabilities mDefaultNetworkCapabilities = null;
     private final Runnable mCallback;
+    private final boolean mSupportMergedUi;
 
     private WifiInfo mWifiInfo;
     public boolean enabled;
@@ -169,35 +175,13 @@ public class WifiStatusTracker {
     public WifiStatusTracker(Context context, WifiManager wifiManager,
             NetworkScoreManager networkScoreManager, ConnectivityManager connectivityManager,
             Runnable callback) {
-        this(context, wifiManager, networkScoreManager, connectivityManager, callback, null, null);
-    }
-
-    public WifiStatusTracker(Context context, WifiManager wifiManager,
-            NetworkScoreManager networkScoreManager, ConnectivityManager connectivityManager,
-            Runnable callback, Handler foregroundHandler, Handler backgroundHandler) {
         mContext = context;
         mWifiManager = wifiManager;
         mWifiNetworkScoreCache = new WifiNetworkScoreCache(context);
         mNetworkScoreManager = networkScoreManager;
         mConnectivityManager = connectivityManager;
         mCallback = callback;
-        if (backgroundHandler == null) {
-            HandlerThread handlerThread = new HandlerThread("WifiStatusTrackerHandler");
-            handlerThread.start();
-            mHandler = new Handler(handlerThread.getLooper());
-        } else {
-            mHandler = backgroundHandler;
-        }
-        mMainThreadHandler = foregroundHandler == null
-                ? new Handler(Looper.getMainLooper()) : foregroundHandler;
-        mCacheListener =
-                new WifiNetworkScoreCache.CacheListener(mHandler) {
-                    @Override
-                    public void networkCacheUpdated(List<ScoredNetwork> updatedNetworks) {
-                        updateStatusLabel();
-                        mMainThreadHandler.post(() -> postResults());
-                    }
-                };
+        mSupportMergedUi = false;
     }
 
     public void setListening(boolean listening) {
@@ -239,8 +223,10 @@ public class WifiStatusTracker {
                 } else {
                     ssid = getValidSsid(mWifiInfo);
                 }
-                isCarrierMerged = mWifiInfo.isCarrierMerged();
-                subId = mWifiInfo.getSubscriptionId();
+                if (mSupportMergedUi) {
+                    isCarrierMerged = mWifiInfo.isCarrierMerged();
+                    subId = mWifiInfo.getSubscriptionId();
+                }
                 updateRssi(mWifiInfo.getRssi());
                 maybeRequestNetworkScore();
             }
@@ -269,8 +255,10 @@ public class WifiStatusTracker {
             } else {
                 ssid = getValidSsid(mWifiInfo);
             }
-            isCarrierMerged = mWifiInfo.isCarrierMerged();
-            subId = mWifiInfo.getSubscriptionId();
+            if (mSupportMergedUi) {
+                isCarrierMerged = mWifiInfo.isCarrierMerged();
+                subId = mWifiInfo.getSubscriptionId();
+            }
             updateRssi(mWifiInfo.getRssi());
             maybeRequestNetworkScore();
         }
@@ -279,6 +267,8 @@ public class WifiStatusTracker {
     private void updateWifiState() {
         state = mWifiManager.getWifiState();
         enabled = state == WifiManager.WIFI_STATE_ENABLED;
+        isCarrierMerged = false;
+        subId = 0;
     }
 
     private void updateRssi(int newRssi) {
@@ -350,7 +340,7 @@ public class WifiStatusTracker {
     /** Refresh the status label on Locale changed. */
     public void refreshLocale() {
         updateStatusLabel();
-        mMainThreadHandler.post(() -> postResults());
+        mCallback.run();
     }
 
     private String getValidSsid(WifiInfo info) {
@@ -364,10 +354,6 @@ public class WifiStatusTracker {
     private void recordLastWifiNetwork(String log) {
         mHistory[mHistoryIndex] = log;
         mHistoryIndex = (mHistoryIndex + 1) % HISTORY_SIZE;
-    }
-
-    private void postResults() {
-        mCallback.run();
     }
 
     /** Dump function. */

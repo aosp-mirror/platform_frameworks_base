@@ -18,6 +18,7 @@ package com.android.server.biometrics.sensors.face.hidl;
 
 import android.annotation.NonNull;
 import android.content.Context;
+import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.face.V1_0.IBiometricsFace;
 import android.hardware.biometrics.face.V1_0.Status;
 import android.os.IBinder;
@@ -25,14 +26,10 @@ import android.os.RemoteException;
 import android.util.Slog;
 
 import com.android.server.biometrics.BiometricsProto;
-import com.android.server.biometrics.log.BiometricContext;
-import com.android.server.biometrics.log.BiometricLogger;
-import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.HalClientMonitor;
 
 import java.util.ArrayList;
-import java.util.function.Supplier;
 
 /**
  * Face-specific setFeature client supporting the {@link android.hardware.biometrics.face.V1_0}
@@ -47,13 +44,13 @@ public class FaceSetFeatureClient extends HalClientMonitor<IBiometricsFace> {
     private final ArrayList<Byte> mHardwareAuthToken;
     private final int mFaceId;
 
-    FaceSetFeatureClient(@NonNull Context context, @NonNull Supplier<IBiometricsFace> lazyDaemon,
+    FaceSetFeatureClient(@NonNull Context context, @NonNull LazyDaemon<IBiometricsFace> lazyDaemon,
             @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener, int userId,
-            @NonNull String owner, int sensorId,
-            @NonNull BiometricLogger logger, @NonNull BiometricContext biometricContext,
-            int feature, boolean enabled, byte[] hardwareAuthToken, int faceId) {
+            @NonNull String owner, int sensorId, int feature, boolean enabled,
+            byte[] hardwareAuthToken, int faceId) {
         super(context, lazyDaemon, token, listener, userId, owner, 0 /* cookie */, sensorId,
-                logger, biometricContext);
+                BiometricsProtoEnums.MODALITY_UNKNOWN, BiometricsProtoEnums.ACTION_UNKNOWN,
+                BiometricsProtoEnums.CLIENT_UNKNOWN);
         mFeature = feature;
         mEnabled = enabled;
         mFaceId = faceId;
@@ -74,7 +71,7 @@ public class FaceSetFeatureClient extends HalClientMonitor<IBiometricsFace> {
     }
 
     @Override
-    public void start(@NonNull ClientMonitorCallback callback) {
+    public void start(@NonNull Callback callback) {
         super.start(callback);
 
         startHalOperation();

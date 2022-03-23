@@ -31,8 +31,6 @@ import android.util.Log;
 import android.util.SparseIntArray;
 import android.view.KeyCharacterMap.KeyData;
 
-import java.util.concurrent.TimeUnit;
-
 /**
  * Object used to report key and button events.
  * <p>
@@ -295,8 +293,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
     /** Key code constant: Fast Forward media key. */
     public static final int KEYCODE_MEDIA_FAST_FORWARD = 90;
     /** Key code constant: Mute key.
-     * Mute key for the microphone (unlike {@link #KEYCODE_VOLUME_MUTE}, which is the speaker mute
-     * key). */
+     * Mutes the microphone, unlike {@link #KEYCODE_VOLUME_MUTE}. */
     public static final int KEYCODE_MUTE            = 91;
     /** Key code constant: Page Up key. */
     public static final int KEYCODE_PAGE_UP         = 92;
@@ -483,10 +480,9 @@ public class KeyEvent extends InputEvent implements Parcelable {
     /** Key code constant: Numeric keypad ')' key. */
     public static final int KEYCODE_NUMPAD_RIGHT_PAREN = 163;
     /** Key code constant: Volume Mute key.
-     * Mute key for speaker (unlike {@link #KEYCODE_MUTE}, which is the mute key for the
-     * microphone). This key should normally be implemented as a toggle such that the first press
-     * mutes the speaker and the second press restores the original volume.
-     */
+     * Mutes the speaker, unlike {@link #KEYCODE_MUTE}.
+     * This key should normally be implemented as a toggle such that the first press
+     * mutes the speaker and the second press restores the original volume. */
     public static final int KEYCODE_VOLUME_MUTE     = 164;
     /** Key code constant: Info key.
      * Common on TV remotes to show additional information related to what is
@@ -834,45 +830,13 @@ public class KeyEvent extends InputEvent implements Parcelable {
      * consuming content. May be consumed by system to set account globally.
      */
     public static final int KEYCODE_PROFILE_SWITCH = 288;
-    /** Key code constant: Video Application key #1. */
-    public static final int KEYCODE_VIDEO_APP_1 = 289;
-    /** Key code constant: Video Application key #2. */
-    public static final int KEYCODE_VIDEO_APP_2 = 290;
-    /** Key code constant: Video Application key #3. */
-    public static final int KEYCODE_VIDEO_APP_3 = 291;
-    /** Key code constant: Video Application key #4. */
-    public static final int KEYCODE_VIDEO_APP_4 = 292;
-    /** Key code constant: Video Application key #5. */
-    public static final int KEYCODE_VIDEO_APP_5 = 293;
-    /** Key code constant: Video Application key #6. */
-    public static final int KEYCODE_VIDEO_APP_6 = 294;
-    /** Key code constant: Video Application key #7. */
-    public static final int KEYCODE_VIDEO_APP_7 = 295;
-    /** Key code constant: Video Application key #8. */
-    public static final int KEYCODE_VIDEO_APP_8 = 296;
-    /** Key code constant: Featured Application key #1. */
-    public static final int KEYCODE_FEATURED_APP_1 = 297;
-    /** Key code constant: Featured Application key #2. */
-    public static final int KEYCODE_FEATURED_APP_2 = 298;
-    /** Key code constant: Featured Application key #3. */
-    public static final int KEYCODE_FEATURED_APP_3 = 299;
-    /** Key code constant: Featured Application key #4. */
-    public static final int KEYCODE_FEATURED_APP_4 = 300;
-    /** Key code constant: Demo Application key #1. */
-    public static final int KEYCODE_DEMO_APP_1 = 301;
-    /** Key code constant: Demo Application key #2. */
-    public static final int KEYCODE_DEMO_APP_2 = 302;
-    /** Key code constant: Demo Application key #3. */
-    public static final int KEYCODE_DEMO_APP_3 = 303;
-    /** Key code constant: Demo Application key #4. */
-    public static final int KEYCODE_DEMO_APP_4 = 304;
 
-   /**
+    /**
      * Integer value of the last KEYCODE. Increases as new keycodes are added to KeyEvent.
      * @hide
      */
     @TestApi
-    public static final int LAST_KEYCODE = KEYCODE_DEMO_APP_4;
+    public static final int LAST_KEYCODE = KEYCODE_PROFILE_SWITCH;
 
     // NOTE: If you add a new keycode here you must also add it to:
     //  isSystem()
@@ -1334,16 +1298,9 @@ public class KeyEvent extends InputEvent implements Parcelable {
     private int mRepeatCount;
     @UnsupportedAppUsage
     private int mFlags;
-    /**
-     * The time when the key initially was pressed, in nanoseconds. Only millisecond precision is
-     * exposed as public api, so this must always be converted to / from milliseconds when used.
-     */
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private long mDownTime;
-    /**
-     * The time when the current key event occurred. If mAction is ACTION_DOWN, then this is equal
-     * to mDownTime. Only millisecond precision is exposed as public api, so this must always be
-     * converted to / from milliseconds when used.
-     */
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private long mEventTime;
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private String mCharacters;
@@ -1443,8 +1400,8 @@ public class KeyEvent extends InputEvent implements Parcelable {
     public KeyEvent(long downTime, long eventTime, int action,
                     int code, int repeat) {
         mId = nativeNextId();
-        mDownTime = TimeUnit.NANOSECONDS.convert(downTime, TimeUnit.MILLISECONDS);
-        mEventTime = TimeUnit.NANOSECONDS.convert(eventTime, TimeUnit.MILLISECONDS);
+        mDownTime = downTime;
+        mEventTime = eventTime;
         mAction = action;
         mKeyCode = code;
         mRepeatCount = repeat;
@@ -1468,8 +1425,8 @@ public class KeyEvent extends InputEvent implements Parcelable {
     public KeyEvent(long downTime, long eventTime, int action,
                     int code, int repeat, int metaState) {
         mId = nativeNextId();
-        mDownTime = TimeUnit.NANOSECONDS.convert(downTime, TimeUnit.MILLISECONDS);
-        mEventTime = TimeUnit.NANOSECONDS.convert(eventTime, TimeUnit.MILLISECONDS);
+        mDownTime = downTime;
+        mEventTime = eventTime;
         mAction = action;
         mKeyCode = code;
         mRepeatCount = repeat;
@@ -1497,8 +1454,8 @@ public class KeyEvent extends InputEvent implements Parcelable {
                     int code, int repeat, int metaState,
                     int deviceId, int scancode) {
         mId = nativeNextId();
-        mDownTime = TimeUnit.NANOSECONDS.convert(downTime, TimeUnit.MILLISECONDS);
-        mEventTime = TimeUnit.NANOSECONDS.convert(eventTime, TimeUnit.MILLISECONDS);
+        mDownTime = downTime;
+        mEventTime = eventTime;
         mAction = action;
         mKeyCode = code;
         mRepeatCount = repeat;
@@ -1528,8 +1485,8 @@ public class KeyEvent extends InputEvent implements Parcelable {
                     int code, int repeat, int metaState,
                     int deviceId, int scancode, int flags) {
         mId = nativeNextId();
-        mDownTime = TimeUnit.NANOSECONDS.convert(downTime, TimeUnit.MILLISECONDS);
-        mEventTime = TimeUnit.NANOSECONDS.convert(eventTime, TimeUnit.MILLISECONDS);
+        mDownTime = downTime;
+        mEventTime = eventTime;
         mAction = action;
         mKeyCode = code;
         mRepeatCount = repeat;
@@ -1561,8 +1518,8 @@ public class KeyEvent extends InputEvent implements Parcelable {
                     int code, int repeat, int metaState,
                     int deviceId, int scancode, int flags, int source) {
         mId = nativeNextId();
-        mDownTime = TimeUnit.NANOSECONDS.convert(downTime, TimeUnit.MILLISECONDS);
-        mEventTime = TimeUnit.NANOSECONDS.convert(eventTime, TimeUnit.MILLISECONDS);
+        mDownTime = downTime;
+        mEventTime = eventTime;
         mAction = action;
         mKeyCode = code;
         mRepeatCount = repeat;
@@ -1588,8 +1545,8 @@ public class KeyEvent extends InputEvent implements Parcelable {
      */
     public KeyEvent(long time, String characters, int deviceId, int flags) {
         mId = nativeNextId();
-        mDownTime = TimeUnit.NANOSECONDS.convert(time, TimeUnit.MILLISECONDS);
-        mEventTime = TimeUnit.NANOSECONDS.convert(time, TimeUnit.MILLISECONDS);
+        mDownTime = time;
+        mEventTime = time;
         mCharacters = characters;
         mAction = ACTION_MULTIPLE;
         mKeyCode = KEYCODE_UNKNOWN;
@@ -1635,7 +1592,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
     public KeyEvent(KeyEvent origEvent, long eventTime, int newRepeat) {
         mId = nativeNextId();  // Not an exact copy so assign a new ID.
         mDownTime = origEvent.mDownTime;
-        mEventTime = TimeUnit.NANOSECONDS.convert(eventTime, TimeUnit.MILLISECONDS);
+        mEventTime = eventTime;
         mAction = origEvent.mAction;
         mKeyCode = origEvent.mKeyCode;
         mRepeatCount = newRepeat;
@@ -1669,14 +1626,14 @@ public class KeyEvent extends InputEvent implements Parcelable {
      *
      * @hide
      */
-    private static KeyEvent obtain(int id, long downTimeNanos, long eventTimeNanos, int action,
+    public static KeyEvent obtain(int id, long downTime, long eventTime, int action,
             int code, int repeat, int metaState,
             int deviceId, int scancode, int flags, int source, int displayId, @Nullable byte[] hmac,
             String characters) {
         KeyEvent ev = obtain();
         ev.mId = id;
-        ev.mDownTime = downTimeNanos;
-        ev.mEventTime = eventTimeNanos;
+        ev.mDownTime = downTime;
+        ev.mEventTime = eventTime;
         ev.mAction = action;
         ev.mKeyCode = code;
         ev.mRepeatCount = repeat;
@@ -1699,8 +1656,6 @@ public class KeyEvent extends InputEvent implements Parcelable {
     public static KeyEvent obtain(long downTime, long eventTime, int action,
             int code, int repeat, int metaState,
             int deviceId, int scanCode, int flags, int source, int displayId, String characters) {
-        downTime = TimeUnit.NANOSECONDS.convert(downTime, TimeUnit.MILLISECONDS);
-        eventTime = TimeUnit.NANOSECONDS.convert(eventTime, TimeUnit.MILLISECONDS);
         return obtain(nativeNextId(), downTime, eventTime, action, code, repeat, metaState,
                 deviceId, scanCode, flags, source, displayId, null /* hmac */, characters);
     }
@@ -1714,8 +1669,6 @@ public class KeyEvent extends InputEvent implements Parcelable {
     public static KeyEvent obtain(long downTime, long eventTime, int action,
             int code, int repeat, int metaState,
             int deviceId, int scancode, int flags, int source, String characters) {
-        // Do not convert downTime and eventTime here. We are calling the obtain method above,
-        // which will do the conversion. Just specify INVALID_DISPLAY and forward the request.
         return obtain(downTime, eventTime, action, code, repeat, metaState, deviceId, scancode,
                 flags, source, INVALID_DISPLAY, characters);
     }
@@ -1815,7 +1768,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
             int newRepeat, int newFlags) {
         KeyEvent ret = new KeyEvent(event);
         ret.mId = nativeNextId();  // Not an exact copy so assign a new ID.
-        ret.mEventTime = TimeUnit.NANOSECONDS.convert(eventTime, TimeUnit.MILLISECONDS);
+        ret.mEventTime = eventTime;
         ret.mRepeatCount = newRepeat;
         ret.mFlags = newFlags;
         return ret;
@@ -2664,8 +2617,8 @@ public class KeyEvent extends InputEvent implements Parcelable {
      * @hide
      */
     public final void setTime(long downTime, long eventTime) {
-        mDownTime = TimeUnit.NANOSECONDS.convert(downTime, TimeUnit.MILLISECONDS);
-        mEventTime = TimeUnit.NANOSECONDS.convert(eventTime, TimeUnit.MILLISECONDS);
+        mDownTime = downTime;
+        mEventTime = eventTime;
     }
 
     /**
@@ -2680,7 +2633,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
      * {@link android.os.SystemClock#uptimeMillis} time base
      */
     public final long getDownTime() {
-        return TimeUnit.MILLISECONDS.convert(mDownTime, TimeUnit.NANOSECONDS);
+        return mDownTime;
     }
 
     /**
@@ -2692,7 +2645,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
      */
     @Override
     public final long getEventTime() {
-        return TimeUnit.MILLISECONDS.convert(mEventTime, TimeUnit.NANOSECONDS);
+        return mEventTime;
     }
 
     /**
@@ -2711,7 +2664,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
      */
     @Override
     public final long getEventTimeNano() {
-        return mEventTime;
+        return mEventTime * 1000000L;
     }
 
     /**

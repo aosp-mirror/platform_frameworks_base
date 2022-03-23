@@ -71,7 +71,7 @@ public class TsRecordEvent extends FilterEvent {
     }
 
     /**
-     * Gets the record data offset from the beginning of the record buffer.
+     * Gets data size in bytes of filtered data.
      */
     @BytesLong
     public long getDataLength() {

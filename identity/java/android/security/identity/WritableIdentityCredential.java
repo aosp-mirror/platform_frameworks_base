@@ -59,8 +59,7 @@ public abstract class WritableIdentityCredential {
      * @param challenge is a non-empty byte array whose contents should be unique, fresh and
      *                  provided by the issuing authority. The value provided is embedded in the
      *                  attestation extension and enables the issuing authority to verify that the
-     *                  attestation certificate is fresh. Implementations are required to support
-     *                  challenges at least 32 bytes of length.
+     *                  attestation certificate is fresh.
      * @return the X.509 certificate for this credential's CredentialKey.
      */
     public abstract @NonNull Collection<X509Certificate> getCredentialKeyCertificateChain(

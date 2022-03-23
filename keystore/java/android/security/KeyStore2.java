@@ -108,7 +108,7 @@ public class KeyStore2 {
             try {
                 return request.execute(service);
             } catch (ServiceSpecificException e) {
-                throw getKeyStoreException(e.errorCode, e.getMessage());
+                throw getKeyStoreException(e.errorCode);
             } catch (RemoteException e) {
                 if (firstTry) {
                     Log.w(TAG, "Looks like we may have lost connection to the Keystore "
@@ -120,7 +120,7 @@ public class KeyStore2 {
                     firstTry = false;
                 } else {
                     Log.e(TAG, "Cannot connect to Keystore daemon.", e);
-                    throw new KeyStoreException(ResponseCode.SYSTEM_ERROR, "", e.getMessage());
+                    throw new KeyStoreException(ResponseCode.SYSTEM_ERROR, "");
                 }
             }
         }
@@ -322,32 +322,26 @@ public class KeyStore2 {
         }
     }
 
-    static KeyStoreException getKeyStoreException(int errorCode, String serviceErrorMessage) {
+    static KeyStoreException getKeyStoreException(int errorCode) {
         if (errorCode > 0) {
             // KeyStore layer error
             switch (errorCode) {
                 case ResponseCode.LOCKED:
-                    return new KeyStoreException(errorCode, "User authentication required",
-                            serviceErrorMessage);
+                    return new KeyStoreException(errorCode, "User authentication required");
                 case ResponseCode.UNINITIALIZED:
-                    return new KeyStoreException(errorCode, "Keystore not initialized",
-                            serviceErrorMessage);
+                    return new KeyStoreException(errorCode, "Keystore not initialized");
                 case ResponseCode.SYSTEM_ERROR:
-                    return new KeyStoreException(errorCode, "System error", serviceErrorMessage);
+                    return new KeyStoreException(errorCode, "System error");
                 case ResponseCode.PERMISSION_DENIED:
-                    return new KeyStoreException(errorCode, "Permission denied",
-                            serviceErrorMessage);
+                    return new KeyStoreException(errorCode, "Permission denied");
                 case ResponseCode.KEY_NOT_FOUND:
-                    return new KeyStoreException(errorCode, "Key not found", serviceErrorMessage);
+                    return new KeyStoreException(errorCode, "Key not found");
                 case ResponseCode.VALUE_CORRUPTED:
-                    return new KeyStoreException(errorCode, "Key blob corrupted",
-                            serviceErrorMessage);
+                    return new KeyStoreException(errorCode, "Key blob corrupted");
                 case ResponseCode.KEY_PERMANENTLY_INVALIDATED:
-                    return new KeyStoreException(errorCode, "Key permanently invalidated",
-                            serviceErrorMessage);
+                    return new KeyStoreException(errorCode, "Key permanently invalidated");
                 default:
-                    return new KeyStoreException(errorCode, String.valueOf(errorCode),
-                            serviceErrorMessage);
+                    return new KeyStoreException(errorCode, String.valueOf(errorCode));
             }
         } else {
             // Keymaster layer error
@@ -356,12 +350,10 @@ public class KeyStore2 {
                     // The name of this parameter significantly differs between Keymaster and
                     // framework APIs. Use the framework wording to make life easier for developers.
                     return new KeyStoreException(errorCode,
-                            "Invalid user authentication validity duration",
-                            serviceErrorMessage);
+                            "Invalid user authentication validity duration");
                 default:
                     return new KeyStoreException(errorCode,
-                            KeymasterDefs.getErrorMessage(errorCode),
-                            serviceErrorMessage);
+                            KeymasterDefs.getErrorMessage(errorCode));
             }
         }
     }

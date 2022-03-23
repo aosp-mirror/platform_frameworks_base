@@ -1,0 +1,3 @@
+rule junit.** repackaged.junit.@1
+rule android.test.** repackaged.android.test.@1
+rule com.android.internal.util.** repackaged.com.android.internal.util.@1

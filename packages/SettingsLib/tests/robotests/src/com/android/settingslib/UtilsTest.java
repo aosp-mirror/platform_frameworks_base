@@ -320,17 +320,8 @@ public class UtilsTest {
         final Intent intent = new Intent().putExtra(BatteryManager.EXTRA_LEVEL, 100);
         final Resources resources = mContext.getResources();
 
-        assertThat(Utils.getBatteryStatus(mContext, intent, /* compactStatus= */ false)).isEqualTo(
+        assertThat(Utils.getBatteryStatus(mContext, intent)).isEqualTo(
                 resources.getString(R.string.battery_info_status_full));
-    }
-
-    @Test
-    public void getBatteryStatus_statusIsFullAndUseCompactStatus_returnFullyChargedString() {
-        final Intent intent = new Intent().putExtra(BatteryManager.EXTRA_LEVEL, 100);
-        final Resources resources = mContext.getResources();
-
-        assertThat(Utils.getBatteryStatus(mContext, intent, /* compactStatus= */ true)).isEqualTo(
-                resources.getString(R.string.battery_info_status_full_charged));
     }
 
     @Test
@@ -339,18 +330,8 @@ public class UtilsTest {
                 BatteryManager.BATTERY_STATUS_FULL);
         final Resources resources = mContext.getResources();
 
-        assertThat(Utils.getBatteryStatus(mContext, intent, /* compactStatus= */ false)).isEqualTo(
+        assertThat(Utils.getBatteryStatus(mContext, intent)).isEqualTo(
                 resources.getString(R.string.battery_info_status_full));
-    }
-
-    @Test
-    public void getBatteryStatus_batteryLevelIs100AndUseCompactStatus_returnFullyString() {
-        final Intent intent = new Intent().putExtra(BatteryManager.EXTRA_STATUS,
-                BatteryManager.BATTERY_STATUS_FULL);
-        final Resources resources = mContext.getResources();
-
-        assertThat(Utils.getBatteryStatus(mContext, intent, /* compactStatus= */ true)).isEqualTo(
-                resources.getString(R.string.battery_info_status_full_charged));
     }
 
     @Test
@@ -360,7 +341,7 @@ public class UtilsTest {
         intent.putExtra(BatteryManager.EXTRA_PLUGGED, BatteryManager.BATTERY_PLUGGED_USB);
         final Resources resources = mContext.getResources();
 
-        assertThat(Utils.getBatteryStatus(mContext, intent, /* compactStatus= */ false)).isEqualTo(
+        assertThat(Utils.getBatteryStatus(mContext, intent)).isEqualTo(
                 resources.getString(R.string.battery_info_status_charging));
     }
 
@@ -371,29 +352,7 @@ public class UtilsTest {
         intent.putExtra(BatteryManager.EXTRA_PLUGGED, BatteryManager.BATTERY_PLUGGED_WIRELESS);
         final Resources resources = mContext.getResources();
 
-        assertThat(Utils.getBatteryStatus(mContext, intent, /* compactStatus= */ false)).isEqualTo(
+        assertThat(Utils.getBatteryStatus(mContext, intent)).isEqualTo(
                 resources.getString(R.string.battery_info_status_charging_wireless));
-    }
-
-    @Test
-    public void getBatteryStatus_chargingAndUseCompactStatus_returnCompactString() {
-        final Intent intent = new Intent();
-        intent.putExtra(BatteryManager.EXTRA_STATUS, BatteryManager.BATTERY_STATUS_CHARGING);
-        intent.putExtra(BatteryManager.EXTRA_PLUGGED, BatteryManager.BATTERY_PLUGGED_USB);
-        final Resources resources = mContext.getResources();
-
-        assertThat(Utils.getBatteryStatus(mContext, intent, /* compactStatus= */ true)).isEqualTo(
-                resources.getString(R.string.battery_info_status_charging));
-    }
-
-    @Test
-    public void getBatteryStatus_chargingWirelessAndUseCompactStatus_returnCompactString() {
-        final Intent intent = new Intent();
-        intent.putExtra(BatteryManager.EXTRA_STATUS, BatteryManager.BATTERY_STATUS_CHARGING);
-        intent.putExtra(BatteryManager.EXTRA_PLUGGED, BatteryManager.BATTERY_PLUGGED_WIRELESS);
-        final Resources resources = mContext.getResources();
-
-        assertThat(Utils.getBatteryStatus(mContext, intent, /* compactStatus= */ true)).isEqualTo(
-                resources.getString(R.string.battery_info_status_charging));
     }
 }

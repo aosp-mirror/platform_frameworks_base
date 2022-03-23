@@ -1,4 +1,3 @@
 # Bug component: 36824
 
-per-file *AttestationVerification* = file:/core/java/android/security/attestationverification/OWNERS
 per-file FileIntegrityService.java = victorhsieh@google.com

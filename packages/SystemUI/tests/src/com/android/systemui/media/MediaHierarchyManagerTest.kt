@@ -22,22 +22,19 @@ import android.testing.TestableLooper
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.test.filters.SmallTest
-import com.android.keyguard.KeyguardViewController
-import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.controls.controller.ControlsControllerImplTest.Companion.eq
-import com.android.systemui.dreams.DreamOverlayStateController
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.phone.KeyguardBypassController
-import com.android.systemui.statusbar.policy.FakeConfigurationController
+import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
+import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.animation.UniqueObjectHostView
-import com.android.systemui.util.mockito.any
-import com.google.common.truth.Truth.assertThat
+import junit.framework.Assert
 import org.junit.Assert.assertNotNull
 import org.junit.Before
 import org.junit.Rule
@@ -45,16 +42,16 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers
-import org.mockito.ArgumentMatchers.anyBoolean
-import org.mockito.ArgumentMatchers.anyLong
 import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
+import org.mockito.Mockito.any
+import org.mockito.Mockito.anyBoolean
+import org.mockito.Mockito.anyLong
 import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnit
-import org.mockito.Mockito.`when` as whenever
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
@@ -82,11 +79,9 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
     @Mock
     private lateinit var wakefulnessLifecycle: WakefulnessLifecycle
     @Mock
-    private lateinit var keyguardViewController: KeyguardViewController
+    private lateinit var statusBarKeyguardViewManager: StatusBarKeyguardViewManager
     @Mock
-    private lateinit var uniqueObjectHostView: UniqueObjectHostView
-    @Mock
-    private lateinit var dreamOverlayStateController: DreamOverlayStateController
+    private lateinit var configurationController: ConfigurationController
     @Captor
     private lateinit var wakefullnessObserver: ArgumentCaptor<(WakefulnessLifecycle.Observer)>
     @Captor
@@ -96,12 +91,9 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
     val mockito = MockitoJUnit.rule()
     private lateinit var mediaHiearchyManager: MediaHierarchyManager
     private lateinit var mediaFrame: ViewGroup
-    private val configurationController = FakeConfigurationController()
 
     @Before
     fun setup() {
-        context.getOrCreateTestableResources().addOverride(
-                R.bool.config_use_split_notification_shade, false)
         mediaFrame = FrameLayout(context)
         `when`(mediaCarouselController.mediaFrame).thenReturn(mediaFrame)
         mediaHiearchyManager = MediaHierarchyManager(
@@ -113,13 +105,12 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
                 notificationLockscreenUserManager,
                 configurationController,
                 wakefulnessLifecycle,
-                keyguardViewController,
-                dreamOverlayStateController)
+                statusBarKeyguardViewManager)
         verify(wakefulnessLifecycle).addObserver(wakefullnessObserver.capture())
         verify(statusBarStateController).addCallback(statusBarCallback.capture())
-        setupHost(lockHost, MediaHierarchyManager.LOCATION_LOCKSCREEN, LOCKSCREEN_TOP)
-        setupHost(qsHost, MediaHierarchyManager.LOCATION_QS, QS_TOP)
-        setupHost(qqsHost, MediaHierarchyManager.LOCATION_QQS, QQS_TOP)
+        setupHost(lockHost, MediaHierarchyManager.LOCATION_LOCKSCREEN)
+        setupHost(qsHost, MediaHierarchyManager.LOCATION_QS)
+        setupHost(qqsHost, MediaHierarchyManager.LOCATION_QQS)
         `when`(statusBarStateController.state).thenReturn(StatusBarState.SHADE)
         `when`(mediaCarouselController.mediaCarouselScrollHandler)
                 .thenReturn(mediaCarouselScrollHandler)
@@ -130,10 +121,10 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
         clearInvocations(mediaCarouselController)
     }
 
-    private fun setupHost(host: MediaHost, location: Int, top: Int) {
+    private fun setupHost(host: MediaHost, location: Int) {
         `when`(host.location).thenReturn(location)
-        `when`(host.currentBounds).thenReturn(Rect(0, top, 0, top))
-        `when`(host.hostView).thenReturn(uniqueObjectHostView)
+        `when`(host.currentBounds).thenReturn(Rect())
+        `when`(host.hostView).thenReturn(UniqueObjectHostView(context))
         `when`(host.visible).thenReturn(true)
         mediaHiearchyManager.register(host)
     }
@@ -176,7 +167,12 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
 
     @Test
     fun testGoingToFullShade() {
-        goToLockscreen()
+        // Let's set it onto Lock screen
+        `when`(statusBarStateController.state).thenReturn(StatusBarState.KEYGUARD)
+        `when`(notificationLockscreenUserManager.shouldShowLockscreenNotifications()).thenReturn(
+            true)
+        statusBarCallback.value.onStatePreChange(StatusBarState.SHADE, StatusBarState.KEYGUARD)
+        clearInvocations(mediaCarouselController)
 
         // Let's transition all the way to full shade
         mediaHiearchyManager.setTransitionToFullShadeAmount(100000f)
@@ -199,60 +195,41 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
 
         // Let's make sure alpha is set
         mediaHiearchyManager.setTransitionToFullShadeAmount(2.0f)
-        assertThat(mediaFrame.alpha).isNotEqualTo(1.0f)
+        Assert.assertTrue("alpha should not be 1.0f when cross fading", mediaFrame.alpha != 1.0f)
     }
 
     @Test
     fun testTransformationOnLockScreenIsFading() {
-        goToLockscreen()
-        expandQS()
+        // Let's set it onto Lock screen
+        `when`(statusBarStateController.state).thenReturn(StatusBarState.KEYGUARD)
+        `when`(notificationLockscreenUserManager.shouldShowLockscreenNotifications()).thenReturn(
+            true)
+        statusBarCallback.value.onStatePreChange(StatusBarState.SHADE, StatusBarState.KEYGUARD)
+        clearInvocations(mediaCarouselController)
 
+        // Let's transition from lockscreen to qs
+        mediaHiearchyManager.qsExpansion = 1.0f
         val transformType = mediaHiearchyManager.calculateTransformationType()
-        assertThat(transformType).isEqualTo(MediaHierarchyManager.TRANSFORMATION_TYPE_FADE)
-    }
-
-    @Test
-    fun calculateTransformationType_onLockShade_inSplitShade_goingToFullShade_returnsTransition() {
-        enableSplitShade()
-        goToLockscreen()
-        expandQS()
-        mediaHiearchyManager.setTransitionToFullShadeAmount(10000f)
-
-        val transformType = mediaHiearchyManager.calculateTransformationType()
-        assertThat(transformType).isEqualTo(MediaHierarchyManager.TRANSFORMATION_TYPE_TRANSITION)
-    }
-
-    @Test
-    fun calculateTransformationType_onLockSplitShade_goingToFullShade_mediaInvisible_returnsFade() {
-        enableSplitShade()
-        goToLockscreen()
-        expandQS()
-        whenever(lockHost.visible).thenReturn(false)
-        mediaHiearchyManager.setTransitionToFullShadeAmount(10000f)
-
-        val transformType = mediaHiearchyManager.calculateTransformationType()
-        assertThat(transformType).isEqualTo(MediaHierarchyManager.TRANSFORMATION_TYPE_FADE)
-    }
-
-    @Test
-    fun calculateTransformationType_onLockShade_inSplitShade_notExpanding_returnsFade() {
-        enableSplitShade()
-        goToLockscreen()
-        goToLockedShade()
-        expandQS()
-        mediaHiearchyManager.setTransitionToFullShadeAmount(0f)
-
-        val transformType = mediaHiearchyManager.calculateTransformationType()
-        assertThat(transformType).isEqualTo(MediaHierarchyManager.TRANSFORMATION_TYPE_FADE)
+        Assert.assertTrue("media isn't transforming to qs with a fade",
+            transformType == MediaHierarchyManager.TRANSFORMATION_TYPE_FADE)
     }
 
     @Test
     fun testTransformationOnLockScreenToQQSisFading() {
-        goToLockscreen()
-        goToLockedShade()
+        // Let's set it onto Lock screen
+        `when`(statusBarStateController.state).thenReturn(StatusBarState.KEYGUARD)
+        `when`(notificationLockscreenUserManager.shouldShowLockscreenNotifications()).thenReturn(
+            true)
+        statusBarCallback.value.onStatePreChange(StatusBarState.SHADE, StatusBarState.KEYGUARD)
+        clearInvocations(mediaCarouselController)
 
+        // Let's transition from lockscreen to qs
+        `when`(statusBarStateController.state).thenReturn(StatusBarState.SHADE_LOCKED)
+        statusBarCallback.value.onStatePreChange(StatusBarState.KEYGUARD,
+            StatusBarState.SHADE_LOCKED)
         val transformType = mediaHiearchyManager.calculateTransformationType()
-        assertThat(transformType).isEqualTo(MediaHierarchyManager.TRANSFORMATION_TYPE_FADE)
+        Assert.assertTrue("media isn't transforming to qqswith a fade",
+            transformType == MediaHierarchyManager.TRANSFORMATION_TYPE_FADE)
     }
 
     @Test
@@ -267,59 +244,5 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
         statusBarCallback.value.onDozingChanged(true)
 
         verify(mediaCarouselController).closeGuts()
-    }
-
-    @Test
-    fun getGuidedTransformationTranslationY_notInGuidedTransformation_returnsNegativeNumber() {
-        assertThat(mediaHiearchyManager.getGuidedTransformationTranslationY()).isLessThan(0)
-    }
-
-    @Test
-    fun getGuidedTransformationTranslationY_inGuidedTransformation_returnsCurrentTranslation() {
-        enterGuidedTransformation()
-
-        val expectedTranslation = LOCKSCREEN_TOP - QS_TOP
-        assertThat(mediaHiearchyManager.getGuidedTransformationTranslationY())
-                .isEqualTo(expectedTranslation)
-    }
-
-    private fun enableSplitShade() {
-        context.getOrCreateTestableResources().addOverride(
-            R.bool.config_use_split_notification_shade, true
-        )
-        configurationController.notifyConfigurationChanged()
-    }
-
-    private fun goToLockscreen() {
-        whenever(statusBarStateController.state).thenReturn(StatusBarState.KEYGUARD)
-        whenever(notificationLockscreenUserManager.shouldShowLockscreenNotifications()).thenReturn(
-            true
-        )
-        statusBarCallback.value.onStatePreChange(StatusBarState.SHADE, StatusBarState.KEYGUARD)
-        clearInvocations(mediaCarouselController)
-    }
-
-    private fun goToLockedShade() {
-        whenever(statusBarStateController.state).thenReturn(StatusBarState.SHADE_LOCKED)
-        statusBarCallback.value.onStatePreChange(
-            StatusBarState.KEYGUARD,
-            StatusBarState.SHADE_LOCKED
-        )
-    }
-
-    private fun expandQS() {
-        mediaHiearchyManager.qsExpansion = 1.0f
-    }
-
-    private fun enterGuidedTransformation() {
-        mediaHiearchyManager.qsExpansion = 1.0f
-        goToLockscreen()
-        mediaHiearchyManager.setTransitionToFullShadeAmount(123f)
-    }
-
-    companion object {
-        private const val QQS_TOP = 123
-        private const val QS_TOP = 456
-        private const val LOCKSCREEN_TOP = 789
     }
 }

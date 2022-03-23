@@ -16,7 +16,6 @@
 
 package com.android.server.usage;
 
-import android.annotation.Nullable;
 import android.app.usage.TimeSparseArray;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageStats;
@@ -789,7 +788,7 @@ public class UsageStatsDatabase {
     public interface StatCombiner<T> {
 
         /**
-         * Implementations should extract interesting information from <code>stats</code> and add it
+         * Implementations should extract interesting from <code>stats</code> and add it
          * to the <code>accumulatedResult</code> list.
          *
          * If the <code>stats</code> object is mutable, <code>mutable</code> will be true,
@@ -799,32 +798,35 @@ public class UsageStatsDatabase {
          * @param stats             The {@link IntervalStats} object selected.
          * @param mutable           Whether or not the data inside the stats object is mutable.
          * @param accumulatedResult The list to which to add extracted data.
-         * @return Whether or not to continue providing new stats to this combiner. If {@code false}
-         * is returned, then combine will no longer be called.
          */
-        boolean combine(IntervalStats stats, boolean mutable, List<T> accumulatedResult);
+        void combine(IntervalStats stats, boolean mutable, List<T> accumulatedResult);
     }
 
     /**
      * Find all {@link IntervalStats} for the given range and interval type.
      */
-    @Nullable
     public <T> List<T> queryUsageStats(int intervalType, long beginTime, long endTime,
             StatCombiner<T> combiner) {
-        // mIntervalDirs is final. Accessing its size without holding the lock should be fine.
-        if (intervalType < 0 || intervalType >= mIntervalDirs.length) {
-            throw new IllegalArgumentException("Bad interval type " + intervalType);
-        }
-
-        if (endTime <= beginTime) {
-            if (DEBUG) {
-                Slog.d(TAG, "endTime(" + endTime + ") <= beginTime(" + beginTime + ")");
-            }
-            return null;
-        }
-
         synchronized (mLock) {
+            if (intervalType < 0 || intervalType >= mIntervalDirs.length) {
+                throw new IllegalArgumentException("Bad interval type " + intervalType);
+            }
+
             final TimeSparseArray<AtomicFile> intervalStats = mSortedStatFiles[intervalType];
+
+            if (endTime <= beginTime) {
+                if (DEBUG) {
+                    Slog.d(TAG, "endTime(" + endTime + ") <= beginTime(" + beginTime + ")");
+                }
+                return null;
+            }
+
+            int startIndex = intervalStats.closestIndexOnOrBefore(beginTime);
+            if (startIndex < 0) {
+                // All the stats available have timestamps after beginTime, which means they all
+                // match.
+                startIndex = 0;
+            }
 
             int endIndex = intervalStats.closestIndexOnOrBefore(endTime);
             if (endIndex < 0) {
@@ -847,13 +849,6 @@ public class UsageStatsDatabase {
                 }
             }
 
-            int startIndex = intervalStats.closestIndexOnOrBefore(beginTime);
-            if (startIndex < 0) {
-                // All the stats available have timestamps after beginTime, which means they all
-                // match.
-                startIndex = 0;
-            }
-
             final ArrayList<T> results = new ArrayList<>();
             for (int i = startIndex; i <= endIndex; i++) {
                 final AtomicFile f = intervalStats.valueAt(i);
@@ -865,9 +860,8 @@ public class UsageStatsDatabase {
 
                 try {
                     readLocked(f, stats);
-                    if (beginTime < stats.endTime
-                            && !combiner.combine(stats, false, results)) {
-                        break;
+                    if (beginTime < stats.endTime) {
+                        combiner.combine(stats, false, results);
                     }
                 } catch (Exception e) {
                     Slog.e(TAG, "Failed to read usage stats file", e);
@@ -990,6 +984,7 @@ public class UsageStatsDatabase {
             }
         }
     }
+
 
     private static long parseBeginTime(AtomicFile file) throws IOException {
         return parseBeginTime(file.getBaseFile());
@@ -1237,6 +1232,7 @@ public class UsageStatsDatabase {
             stats.lastTimeSaved = f.getLastModifiedTime();
         }
     }
+
 
     /* Backup/Restore Code */
     byte[] getBackupPayload(String key) {

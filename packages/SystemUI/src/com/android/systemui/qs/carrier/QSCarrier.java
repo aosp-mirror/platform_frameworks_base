@@ -25,7 +25,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.settingslib.Utils;
@@ -41,7 +40,6 @@ public class QSCarrier extends LinearLayout {
     private ImageView mMobileSignal;
     private ImageView mMobileRoaming;
     private View mSpacer;
-    @Nullable
     private CellSignalState mLastSignalState;
     private boolean mProviderModelInitialized = false;
     private boolean mIsSingleCarrier;
@@ -127,7 +125,7 @@ public class QSCarrier extends LinearLayout {
         return true;
     }
 
-    private boolean hasValidTypeContentDescription(@Nullable String typeContentDescription) {
+    private boolean hasValidTypeContentDescription(String typeContentDescription) {
         return TextUtils.equals(typeContentDescription,
                 mContext.getString(R.string.data_connection_no_internet))
                 || TextUtils.equals(typeContentDescription,

@@ -16,10 +16,6 @@
 
 package com.android.systemui.controls.ui
 
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
@@ -27,25 +23,18 @@ import android.view.WindowInsets
 import android.view.WindowInsets.Type
 
 import com.android.systemui.R
-import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.controls.management.ControlsAnimations
 import com.android.systemui.util.LifecycleActivity
 import javax.inject.Inject
 
 /**
- * Displays Device Controls inside an activity. This activity is available to be displayed over the
- * lockscreen if the user has allowed it via
- * [android.provider.Settings.Secure.LOCKSCREEN_SHOW_CONTROLS]. This activity will be
- * destroyed on SCREEN_OFF events, due to issues with occluded activities over lockscreen as well as
- * user expectations for the activity to not continue running.
+ * Displays Device Controls inside an activity
  */
 class ControlsActivity @Inject constructor(
-    private val uiController: ControlsUiController,
-    private val broadcastDispatcher: BroadcastDispatcher
+    private val uiController: ControlsUiController
 ) : LifecycleActivity() {
 
     private lateinit var parent: ViewGroup
-    private lateinit var broadcastReceiver: BroadcastReceiver
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -73,12 +62,10 @@ class ControlsActivity @Inject constructor(
                 WindowInsets.CONSUMED
             }
         }
-
-        initBroadcastReceiver()
     }
 
-    override fun onStart() {
-        super.onStart()
+    override fun onResume() {
+        super.onResume()
 
         parent = requireViewById<ViewGroup>(R.id.global_actions_controls)
         parent.alpha = 0f
@@ -91,30 +78,9 @@ class ControlsActivity @Inject constructor(
         finish()
     }
 
-    override fun onStop() {
-        super.onStop()
+    override fun onPause() {
+        super.onPause()
 
         uiController.hide()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-
-        broadcastDispatcher.unregisterReceiver(broadcastReceiver)
-    }
-
-    private fun initBroadcastReceiver() {
-        broadcastReceiver = object : BroadcastReceiver() {
-            override fun onReceive(context: Context, intent: Intent) {
-                val action = intent.getAction()
-                if (Intent.ACTION_SCREEN_OFF.equals(action)) {
-                    finish()
-                }
-            }
-        }
-
-        val filter = IntentFilter()
-        filter.addAction(Intent.ACTION_SCREEN_OFF)
-        broadcastDispatcher.registerReceiver(broadcastReceiver, filter)
     }
 }

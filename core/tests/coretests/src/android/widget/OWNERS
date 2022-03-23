@@ -1,5 +1,0 @@
-include /core/java/android/widget/OWNERS
-
-per-file *SuggestionsPopup* = file:/core/java/android/text/OWNERS
-
-per-file *FloatingToolbar*, *SelectionToolbar* = file:/core/java/android/view/textclassifier/OWNERS

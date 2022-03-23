@@ -36,45 +36,27 @@ import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams.WindowType;
 import android.view.WindowManagerImpl;
 
+// TODO(b/159767464): handle #onConfigurationChanged(Configuration)
 /**
  * A {@link Service} responsible for showing a non-activity window, such as software keyboards or
  * accessibility overlay windows. This {@link Service} has similar behavior to
  * {@link WindowContext}, but is represented as {@link Service}.
  *
  * @see android.inputmethodservice.InputMethodService
+ * @see android.accessibilityservice.AccessibilityService
  *
  * @hide
  */
 @TestApi
 @UiContext
-public abstract class WindowProviderService extends Service implements WindowProvider {
+public abstract class WindowProviderService extends Service {
 
-    private final Bundle mOptions;
     private final WindowTokenClient mWindowToken = new WindowTokenClient();
     private final WindowContextController mController = new WindowContextController(mWindowToken);
     private WindowManager mWindowManager;
-    private boolean mInitialized;
 
     /**
-     * Returns {@code true} if the {@code windowContextOptions} declares that it is a
-     * {@link WindowProviderService}.
-     *
-     * @hide
-     */
-    public static boolean isWindowProviderService(@Nullable Bundle windowContextOptions) {
-        if (windowContextOptions == null) {
-            return false;
-        }
-        return (windowContextOptions.getBoolean(KEY_IS_WINDOW_PROVIDER_SERVICE, false));
-    }
-
-    public WindowProviderService() {
-        mOptions = new Bundle();
-        mOptions.putBoolean(KEY_IS_WINDOW_PROVIDER_SERVICE, true);
-    }
-
-    /**
-     * Returns the window type of this {@link WindowProviderService}.
+     * Returns the type of this {@link WindowProviderService}.
      * Each inheriting class must implement this method to provide the type of the window. It is
      * used similar to {@code type} of {@link Context#createWindowContext(int, Bundle)}
      *
@@ -86,24 +68,15 @@ public abstract class WindowProviderService extends Service implements WindowPro
     @SuppressLint("OnNameExpected")
     // Suppress the lint because it is not a callback and users should provide window type
     // so we cannot make it final.
-    @WindowType
-    @Override
-    public abstract int getWindowType();
+    public abstract @WindowType int getWindowType();
 
     /**
      * Returns the option of this {@link WindowProviderService}.
-     * <p>
-     * The inheriting class can implement this method to provide the customization {@code option} of
-     * the window, but must be based on this method's returned value.
-     * It is used similar to {@code options} of {@link Context#createWindowContext(int, Bundle)}
-     * </p>
-     * <pre class="prettyprint">
-     * public Bundle getWindowContextOptions() {
-     *     final Bundle options = super.getWindowContextOptions();
-     *     options.put(KEY_ROOT_DISPLAY_AREA_ID, displayAreaInfo.rootDisplayAreaId);
-     *     return options;
-     * }
-     * </pre>
+     * Default is {@code null}. The inheriting class can implement this method to provide the
+     * customization {@code option} of the window. It is used similar to {@code options} of
+     * {@link Context#createWindowContext(int, Bundle)}
+     *
+     * @see Context#createWindowContext(int, Bundle)
      *
      * @hide
      */
@@ -112,24 +85,8 @@ public abstract class WindowProviderService extends Service implements WindowPro
     // Suppress the lint because it is not a callback and users may override this API to provide
     // launch option. Also, the return value of this API is null by default.
     @Nullable
-    @CallSuper
-    @Override
     public Bundle getWindowContextOptions() {
-        return mOptions;
-    }
-
-    /**
-     * Returns the display ID to launch this {@link WindowProviderService}.
-     *
-     * @hide
-     */
-    @TestApi
-    @SuppressLint({"OnNameExpected"})
-    // Suppress the lint because it is not a callback and users may override this API to provide
-    // display.
-    @NonNull
-    public int getInitialDisplayId() {
-        return DEFAULT_DISPLAY;
+        return null;
     }
 
     /**
@@ -147,22 +104,19 @@ public abstract class WindowProviderService extends Service implements WindowPro
     public final Context createServiceBaseContext(ActivityThread mainThread,
             LoadedApk packageInfo) {
         final Context context = super.createServiceBaseContext(mainThread, packageInfo);
-        final Display display = context.getSystemService(DisplayManager.class)
-                .getDisplay(getInitialDisplayId());
-        return context.createTokenContext(mWindowToken, display);
+        // Always associate with the default display at initialization.
+        final Display defaultDisplay = context.getSystemService(DisplayManager.class)
+                .getDisplay(DEFAULT_DISPLAY);
+        return context.createTokenContext(mWindowToken, defaultDisplay);
     }
 
-    /** @hide */
+    @CallSuper
     @Override
-    protected void attachBaseContext(Context newBase) {
-        super.attachBaseContext(newBase);
-        if (!mInitialized) {
-            mWindowToken.attachContext(this);
-            mController.attachToDisplayArea(getWindowType(), getDisplayId(),
-                    getWindowContextOptions());
-            mWindowManager = WindowManagerImpl.createWindowContextWindowManager(this);
-            mInitialized = true;
-        }
+    public void onCreate() {
+        super.onCreate();
+        mWindowToken.attachContext(this);
+        mController.attachToDisplayArea(getWindowType(), getDisplayId(), getWindowContextOptions());
+        mWindowManager = WindowManagerImpl.createWindowContextWindowManager(this);
     }
 
     @SuppressLint("OnNameExpected")

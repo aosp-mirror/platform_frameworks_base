@@ -53,7 +53,6 @@ import org.mockito.ArgumentMatchers
 import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito
-import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.inOrder
 import org.mockito.Mockito.mock
@@ -168,7 +167,7 @@ class ControlsControllerImplTest : SysuiTestCase() {
         controller.auxiliaryPersistenceWrapper = auxiliaryPersistenceWrapper
 
         verify(broadcastDispatcher).registerReceiver(
-                capture(broadcastReceiverCaptor), any(), any(), eq(UserHandle.ALL), anyInt())
+                capture(broadcastReceiverCaptor), any(), any(), eq(UserHandle.ALL))
 
         verify(listingController).addCallback(capture(listingCallbackCaptor))
     }

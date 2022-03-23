@@ -80,7 +80,8 @@ public final class InteractionJankMonitorWrapper {
     public static void begin(View v, @CujType int cujType, long timeout) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return;
         Configuration.Builder builder =
-                Configuration.Builder.withView(cujType, v)
+                new Configuration.Builder(cujType)
+                        .setView(v)
                         .setTimeout(timeout);
         InteractionJankMonitor.getInstance().begin(builder);
     }

@@ -20,7 +20,6 @@ import static android.app.ActivityManager.LOCK_TASK_MODE_LOCKED;
 import static android.app.ActivityManager.LOCK_TASK_MODE_NONE;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.window.DisplayAreaOrganizer.FEATURE_UNDEFINED;
-import static android.window.DisplayAreaOrganizer.KEY_ROOT_DISPLAY_AREA_ID;
 
 import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
@@ -149,11 +148,6 @@ public class ImmersiveModeConfirmation {
         }
     }
 
-    void release() {
-        mHandler.removeMessages(H.SHOW);
-        mHandler.removeMessages(H.HIDE);
-    }
-
     boolean onSettingChanged(int currentUserId) {
         final boolean changed = loadSetting(currentUserId, mContext);
         // Remove the window if the setting changes to be confirmed.
@@ -209,12 +203,7 @@ public class ImmersiveModeConfirmation {
         if (mClingWindow != null) {
             if (DEBUG) Slog.d(TAG, "Hiding immersive mode confirmation");
             // We don't care which root display area the window manager is specifying for removal.
-            try {
-                getWindowManager(FEATURE_UNDEFINED).removeView(mClingWindow);
-            } catch (WindowManager.InvalidDisplayException e) {
-                Slog.w(TAG, "Fail to hide the immersive confirmation window because of " + e);
-                return;
-            }
+            getWindowManager(FEATURE_UNDEFINED).removeView(mClingWindow);
             mClingWindow = null;
         }
     }
@@ -431,7 +420,7 @@ public class ImmersiveModeConfirmation {
         }
 
         final Bundle options = new Bundle();
-        options.putInt(KEY_ROOT_DISPLAY_AREA_ID, rootDisplayAreaId);
+        options.putInt(DisplayAreaPolicyBuilder.KEY_ROOT_DISPLAY_AREA_ID, rootDisplayAreaId);
         return options;
     }
 
@@ -442,11 +431,7 @@ public class ImmersiveModeConfirmation {
 
         // show the confirmation
         WindowManager.LayoutParams lp = getClingWindowLayoutParams();
-        try {
-            getWindowManager(rootDisplayAreaId).addView(mClingWindow, lp);
-        } catch (WindowManager.InvalidDisplayException e) {
-            Slog.w(TAG, "Fail to show the immersive confirmation window because of " + e);
-        }
+        getWindowManager(rootDisplayAreaId).addView(mClingWindow, lp);
     }
 
     private final Runnable mConfirm = new Runnable() {

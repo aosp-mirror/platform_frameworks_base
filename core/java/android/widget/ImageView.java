@@ -136,7 +136,6 @@ public class ImageView extends View {
 
     private int[] mState = null;
     private boolean mMergeState = false;
-    private boolean mHasLevelSet = false;
     private int mLevel = 0;
     @UnsupportedAppUsage
     private int mDrawableWidth;
@@ -799,7 +798,6 @@ public class ImageView extends View {
     @android.view.RemotableViewMethod
     public void setImageLevel(int level) {
         mLevel = level;
-        mHasLevelSet = true;
         if (mDrawable != null) {
             mDrawable.setLevel(level);
             resizeFromDrawable();
@@ -1071,9 +1069,7 @@ public class ImageView extends View {
                         : isAttachedToWindow() && getWindowVisibility() == VISIBLE && isShown();
                 d.setVisible(visible, true);
             }
-            if (mHasLevelSet) {
-                d.setLevel(mLevel);
-            }
+            d.setLevel(mLevel);
             mDrawableWidth = d.getIntrinsicWidth();
             mDrawableHeight = d.getIntrinsicHeight();
             applyImageTint();

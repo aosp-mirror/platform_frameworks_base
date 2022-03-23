@@ -21,12 +21,10 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.graphics.HardwareRenderer;
-import android.graphics.HardwareRenderer.SyncAndDrawResult;
 import android.graphics.RecordingCanvas;
 import android.graphics.Rect;
 import android.graphics.RenderNode;
 import android.os.CancellationSignal;
-import android.os.SystemClock;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -54,7 +52,7 @@ import java.util.function.Consumer;
 @UiThread
 public class ScrollCaptureViewSupport<V extends View> implements ScrollCaptureCallback {
 
-    private static final String TAG = "SCViewSupport";
+    private static final String TAG = "ScrollCaptureViewSupport";
 
     private static final String SETTING_CAPTURE_DELAY = "screenshot.scroll_capture_delay";
     private static final long SETTING_CAPTURE_DELAY_DEFAULT = 60L; // millis
@@ -249,38 +247,29 @@ public class ScrollCaptureViewSupport<V extends View> implements ScrollCaptureCa
         }
 
         // Ask the view to scroll as needed to bring this area into view.
-        mViewHelper.onScrollRequested(view, session.getScrollBounds(), requestRect, signal,
-                (result) -> onScrollResult(result, view, signal, onComplete));
-    }
-
-    private void onScrollResult(ScrollResult scrollResult, V view, CancellationSignal signal,
-            Consumer<Rect> onComplete) {
-
-        if (signal.isCanceled()) {
-            Log.w(TAG, "onScrollCaptureImageRequest: cancelled! skipping render.");
-            return;
-        }
+        ScrollResult scrollResult = mViewHelper.onScrollRequested(view, session.getScrollBounds(),
+                requestRect);
 
         if (scrollResult.availableArea.isEmpty()) {
             onComplete.accept(scrollResult.availableArea);
             return;
         }
 
-        // For image capture, shift back by scrollDelta to arrive at the location
-        // within the view where the requested content will be drawn
+        // For image capture, shift back by scrollDelta to arrive at the location within the view
+        // where the requested content will be drawn
         Rect viewCaptureArea = new Rect(scrollResult.availableArea);
         viewCaptureArea.offset(0, -scrollResult.scrollDelta);
 
-        int result = mRenderer.renderView(view, viewCaptureArea);
-        if (result == HardwareRenderer.SYNC_OK
-                || result == HardwareRenderer.SYNC_REDRAW_REQUESTED) {
-            /* Frame synced, buffer will be produced... notify client. */
-            onComplete.accept(new Rect(scrollResult.availableArea));
-        } else {
-            // No buffer will be produced.
-            Log.e(TAG, "syncAndDraw(): SyncAndDrawResult = " + result);
-            onComplete.accept(new Rect(/* empty */));
-        }
+        Runnable captureAction = () -> {
+            if (signal.isCanceled()) {
+                Log.w(TAG, "onScrollCaptureImageRequest: cancelled! skipping render.");
+            } else {
+                mRenderer.renderView(view, viewCaptureArea);
+                onComplete.accept(new Rect(scrollResult.availableArea));
+            }
+        };
+
+        view.postOnAnimationDelayed(captureAction, mPostScrollDelayMillis);
     }
 
     @Override
@@ -384,16 +373,37 @@ public class ScrollCaptureViewSupport<V extends View> implements ScrollCaptureCa
             mCaptureRenderNode.endRecording();
         }
 
-        @SyncAndDrawResult
-        public int renderView(View view, Rect sourceRect) {
-            HardwareRenderer.FrameRenderRequest request = mRenderer.createRenderRequest();
-            request.setVsyncTime(SystemClock.elapsedRealtimeNanos());
+        public void renderView(View view, Rect sourceRect) {
             if (updateForView(view)) {
                 setupLighting(view);
             }
             view.invalidate();
             updateRootNode(view, sourceRect);
-            return request.syncAndDraw();
+            HardwareRenderer.FrameRenderRequest request = mRenderer.createRenderRequest();
+            long timestamp = System.nanoTime();
+            request.setVsyncTime(timestamp);
+
+            // Would be nice to access nextFrameNumber from HwR without having to hold on to Surface
+            final long frameNumber = mSurface.getNextFrameNumber();
+
+            // Block until a frame is presented to the Surface
+            request.setWaitForPresent(true);
+
+            switch (request.syncAndDraw()) {
+                case HardwareRenderer.SYNC_OK:
+                case HardwareRenderer.SYNC_REDRAW_REQUESTED:
+                    return;
+
+                case HardwareRenderer.SYNC_FRAME_DROPPED:
+                    Log.e(TAG, "syncAndDraw(): SYNC_FRAME_DROPPED !");
+                    break;
+                case HardwareRenderer.SYNC_LOST_SURFACE_REWARD_IF_FOUND:
+                    Log.e(TAG, "syncAndDraw(): SYNC_LOST_SURFACE !");
+                    break;
+                case HardwareRenderer.SYNC_CONTEXT_IS_STOPPED:
+                    Log.e(TAG, "syncAndDraw(): SYNC_CONTEXT_IS_STOPPED !");
+                    break;
+            }
         }
 
         public void trimMemory() {

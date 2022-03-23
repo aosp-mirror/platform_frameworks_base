@@ -19,12 +19,9 @@ package com.android.internal.view;
 import android.annotation.NonNull;
 import android.graphics.Point;
 import android.graphics.Rect;
-import android.os.CancellationSignal;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
-
-import java.util.function.Consumer;
 
 /**
  * ScrollCapture for ScrollView and <i>ScrollView-like</i> ViewGroups.
@@ -46,11 +43,6 @@ public class ScrollViewCaptureHelper implements ScrollCaptureViewHelper<ViewGrou
     private boolean mScrollBarEnabled;
     private int mOverScrollMode;
 
-    public boolean onAcceptSession(@NonNull ViewGroup view) {
-        return view.isVisibleToUser()
-                && (view.canScrollVertically(UP) || view.canScrollVertically(DOWN));
-    }
-
     public void onPrepareForStart(@NonNull ViewGroup view, Rect scrollBounds) {
         mStartScrollY = view.getScrollY();
         mOverScrollMode = view.getOverScrollMode();
@@ -63,8 +55,8 @@ public class ScrollViewCaptureHelper implements ScrollCaptureViewHelper<ViewGrou
         }
     }
 
-    public void onScrollRequested(@NonNull ViewGroup view, Rect scrollBounds,
-            Rect requestRect, CancellationSignal signal, Consumer<ScrollResult> resultConsumer) {
+    public ScrollResult onScrollRequested(@NonNull ViewGroup view, Rect scrollBounds,
+            Rect requestRect) {
         /*
                +---------+ <----+ Content [25,25 - 275,1025] (w=250,h=1000)
                |         |
@@ -108,8 +100,7 @@ public class ScrollViewCaptureHelper implements ScrollCaptureViewHelper<ViewGrou
         final View contentView = view.getChildAt(0); // returns null, does not throw IOOBE
         if (contentView == null) {
             // No child view? Cannot continue.
-            resultConsumer.accept(result);
-            return;
+            return result;
         }
 
         //  1) Translate request rect to make it relative to container view
@@ -159,8 +150,7 @@ public class ScrollViewCaptureHelper implements ScrollCaptureViewHelper<ViewGrou
         if (!view.getChildVisibleRect(contentView, available, offset)) {
             available.setEmpty();
             result.availableArea = available;
-            resultConsumer.accept(result);
-            return;
+            return result;
         }
         // Transform back from global to content-view local
         available.offset(-offset.x, -offset.y);
@@ -179,7 +169,7 @@ public class ScrollViewCaptureHelper implements ScrollCaptureViewHelper<ViewGrou
         available.offset(0, scrollDelta);
 
         result.availableArea = new Rect(available);
-        resultConsumer.accept(result);
+        return result;
     }
 
     public void onPrepareForEnd(@NonNull ViewGroup view) {

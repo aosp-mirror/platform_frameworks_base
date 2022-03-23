@@ -23,8 +23,6 @@ import static com.android.server.pm.dex.PackageDexUsage.PackageUseInfo;
 
 import static java.util.function.Function.identity;
 
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
@@ -35,7 +33,6 @@ import android.os.BatteryManager;
 import android.os.FileUtils;
 import android.os.PowerManager;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.storage.StorageManager;
@@ -112,7 +109,7 @@ public class DexManager {
     // record class loaders or ISAs.)
     private final DynamicCodeLogger mDynamicCodeLogger;
 
-    private IPackageManager mPackageManager;
+    private final IPackageManager mPackageManager;
     private final PackageDexOptimizer mPackageDexOptimizer;
     private final Object mInstallLock;
     @GuardedBy("mInstallLock")
@@ -131,22 +128,16 @@ public class DexManager {
     private static int DEX_SEARCH_FOUND_SPLIT = 2;  // dex file is a split apk
     private static int DEX_SEARCH_FOUND_SECONDARY = 3;  // dex file is a secondary dex
 
-    public DexManager(Context context, PackageDexOptimizer pdo, Installer installer,
-            Object installLock) {
-        this(context, pdo, installer, installLock, null);
-    }
-
-    @VisibleForTesting
-    public DexManager(Context context, PackageDexOptimizer pdo, Installer installer,
-            Object installLock, @Nullable IPackageManager packageManager) {
+    public DexManager(Context context, IPackageManager pms, PackageDexOptimizer pdo,
+            Installer installer, Object installLock) {
         mContext = context;
         mPackageCodeLocationsCache = new HashMap<>();
         mPackageDexUsage = new PackageDexUsage();
+        mPackageManager = pms;
         mPackageDexOptimizer = pdo;
         mInstaller = installer;
         mInstallLock = installLock;
-        mDynamicCodeLogger = new DynamicCodeLogger(installer);
-        mPackageManager = packageManager;
+        mDynamicCodeLogger = new DynamicCodeLogger(pms, installer);
 
         // This is currently checked to handle tests that pass in a null context.
         // TODO(b/174783329): Modify the tests to pass in a mocked Context, PowerManager,
@@ -164,15 +155,6 @@ public class DexManager {
             // This value will never be used as the Battery Manager null check will fail first.
             mCriticalBatteryLevel = 0;
         }
-    }
-
-    @NonNull
-    private IPackageManager getPackageManager() {
-        if (mPackageManager == null) {
-            mPackageManager = IPackageManager.Stub.asInterface(
-                    ServiceManager.getService("package"));
-        }
-        return mPackageManager;
     }
 
     public DynamicCodeLogger getDynamicCodeLogger() {
@@ -547,7 +529,7 @@ public class DexManager {
 
             PackageInfo pkg;
             try {
-                pkg = getPackageManager().getPackageInfo(packageName, /*flags*/0,
+                pkg = mPackageManager.getPackageInfo(packageName, /*flags*/0,
                     dexUseInfo.getOwnerUserId());
             } catch (RemoteException e) {
                 throw new AssertionError(e);
@@ -691,7 +673,7 @@ public class DexManager {
                 // to get back the real app uid and its storage kind. These are only used
                 // to perform extra validation in installd.
                 // TODO(calin): maybe a bit overkill.
-                pkg = getPackageManager().getPackageInfo(packageName, /*flags*/0,
+                pkg = mPackageManager.getPackageInfo(packageName, /*flags*/0,
                     dexUseInfo.getOwnerUserId());
             } catch (RemoteException ignore) {
                 // Can't happen, DexManager is local.
@@ -1061,12 +1043,10 @@ public class DexManager {
     public long deleteOptimizedFiles(ArtPackageInfo packageInfo) {
         long freedBytes = 0;
         boolean hadErrors = false;
-        final String packageName = packageInfo.getPackageName();
         for (String codePath : packageInfo.getCodePaths()) {
             for (String isa : packageInfo.getInstructionSets()) {
                 try {
-                    freedBytes += mInstaller.deleteOdex(packageName, codePath, isa,
-                            packageInfo.getOatDir());
+                    freedBytes += mInstaller.deleteOdex(codePath, isa, packageInfo.getOatDir());
                 } catch (InstallerException e) {
                     Log.e(TAG, "Failed deleting oat files for " + codePath, e);
                     hadErrors = true;

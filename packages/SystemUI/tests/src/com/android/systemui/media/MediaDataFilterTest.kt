@@ -23,7 +23,6 @@ import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastDispatcher
-import com.android.systemui.broadcast.BroadcastSender
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
@@ -66,8 +65,6 @@ class MediaDataFilterTest : SysuiTestCase() {
     @Mock
     private lateinit var broadcastDispatcher: BroadcastDispatcher
     @Mock
-    private lateinit var broadcastSender: BroadcastSender
-    @Mock
     private lateinit var mediaResumeListener: MediaResumeListener
     @Mock
     private lateinit var mediaDataManager: MediaDataManager
@@ -89,8 +86,7 @@ class MediaDataFilterTest : SysuiTestCase() {
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
-        MediaPlayerData.clear()
-        mediaDataFilter = MediaDataFilter(context, broadcastDispatcher, broadcastSender,
+        mediaDataFilter = MediaDataFilter(broadcastDispatcher, mediaResumeListener,
                 lockscreenUserManager, executor, clock)
         mediaDataFilter.mediaDataManager = mediaDataManager
         mediaDataFilter.addListener(listener)
@@ -99,32 +95,17 @@ class MediaDataFilterTest : SysuiTestCase() {
         setUser(USER_MAIN)
 
         // Set up test media data
-        dataMain = MediaData(
-                userId = USER_MAIN,
-                initialized = true,
-                backgroundColor = BG_COLOR,
-                app = APP,
-                appIcon = null,
-                artist = ARTIST,
-                song = TITLE,
-                artwork = null,
-                actions = emptyList(),
-                actionsToShowInCompact = emptyList(),
-                packageName = PACKAGE,
-                token = null,
-                clickIntent = null,
-                device = device,
-                active = true,
-                resumeAction = null)
-        dataGuest = dataMain.copy(userId = USER_GUEST)
+        dataMain = MediaData(USER_MAIN, true, BG_COLOR, APP, null, ARTIST, TITLE, null, emptyList(),
+            emptyList(), PACKAGE, null, null, device, true, null)
+
+        dataGuest = MediaData(USER_GUEST, true, BG_COLOR, APP, null, ARTIST, TITLE, null,
+            emptyList(), emptyList(), PACKAGE, null, null, device, true, null)
 
         `when`(smartspaceData.targetId).thenReturn(SMARTSPACE_KEY)
         `when`(smartspaceData.isActive).thenReturn(true)
         `when`(smartspaceData.isValid).thenReturn(true)
         `when`(smartspaceData.packageName).thenReturn(PACKAGE)
         `when`(smartspaceData.recommendations).thenReturn(listOf(smartspaceMediaRecommendationItem))
-        `when`(smartspaceData.headphoneConnectionTimeMillis).thenReturn(
-                clock.currentTimeMillis() - 100)
     }
 
     private fun setUser(id: Int) {
@@ -140,7 +121,7 @@ class MediaDataFilterTest : SysuiTestCase() {
 
         // THEN we should tell the listener
         verify(listener).onMediaDataLoaded(eq(KEY), eq(null), eq(dataMain), eq(true),
-                eq(0))
+                eq(false))
     }
 
     @Test
@@ -149,7 +130,7 @@ class MediaDataFilterTest : SysuiTestCase() {
         mediaDataFilter.onMediaDataLoaded(KEY, null, dataGuest)
 
         // THEN we should NOT tell the listener
-        verify(listener, never()).onMediaDataLoaded(any(), any(), any(), anyBoolean(), anyInt())
+        verify(listener, never()).onMediaDataLoaded(any(), any(), any(), anyBoolean(), anyBoolean())
     }
 
     @Test
@@ -196,11 +177,11 @@ class MediaDataFilterTest : SysuiTestCase() {
 
         // THEN we should add back the guest user media
         verify(listener).onMediaDataLoaded(eq(KEY_ALT), eq(null), eq(dataGuest), eq(true),
-                eq(0))
+                eq(false))
 
         // but not the main user's
         verify(listener, never()).onMediaDataLoaded(eq(KEY), any(), eq(dataMain), anyBoolean(),
-                anyInt())
+                anyBoolean())
     }
 
     @Test
@@ -257,8 +238,7 @@ class MediaDataFilterTest : SysuiTestCase() {
         mediaDataFilter.onSmartspaceMediaDataLoaded(SMARTSPACE_KEY, smartspaceData)
 
         verify(listener)
-                .onSmartspaceMediaDataLoaded(eq(SMARTSPACE_KEY), eq(smartspaceData), eq(true),
-                        eq(false))
+                .onSmartspaceMediaDataLoaded(eq(SMARTSPACE_KEY), eq(smartspaceData), eq(true))
         assertThat(mediaDataFilter.hasActiveMedia()).isTrue()
     }
 
@@ -268,9 +248,8 @@ class MediaDataFilterTest : SysuiTestCase() {
 
         mediaDataFilter.onSmartspaceMediaDataLoaded(SMARTSPACE_KEY, smartspaceData)
 
-        verify(listener, never()).onMediaDataLoaded(any(), any(), any(), anyBoolean(), anyInt())
-        verify(listener, never()).onSmartspaceMediaDataLoaded(any(), any(), anyBoolean(),
-                anyBoolean())
+        verify(listener, never()).onMediaDataLoaded(any(), any(), any(), anyBoolean(), anyBoolean())
+        verify(listener, never()).onSmartspaceMediaDataLoaded(any(), any(), anyBoolean())
         assertThat(mediaDataFilter.hasActiveMedia()).isFalse()
     }
 
@@ -282,8 +261,7 @@ class MediaDataFilterTest : SysuiTestCase() {
         mediaDataFilter.onSmartspaceMediaDataLoaded(SMARTSPACE_KEY, smartspaceData)
 
         verify(listener)
-                .onSmartspaceMediaDataLoaded(eq(SMARTSPACE_KEY), eq(smartspaceData), eq(true),
-                        eq(true))
+                .onSmartspaceMediaDataLoaded(eq(SMARTSPACE_KEY), eq(smartspaceData), eq(true))
         assertThat(mediaDataFilter.hasActiveMedia()).isTrue()
     }
 
@@ -296,8 +274,7 @@ class MediaDataFilterTest : SysuiTestCase() {
         clock.advanceTime(SMARTSPACE_MAX_AGE + 100)
         mediaDataFilter.onSmartspaceMediaDataLoaded(SMARTSPACE_KEY, smartspaceData)
 
-        verify(listener, never()).onSmartspaceMediaDataLoaded(any(), any(), anyBoolean(),
-                anyBoolean())
+        verify(listener, never()).onSmartspaceMediaDataLoaded(any(), any(), anyBoolean())
         assertThat(mediaDataFilter.hasActiveMedia()).isFalse()
     }
 
@@ -309,16 +286,15 @@ class MediaDataFilterTest : SysuiTestCase() {
         val dataCurrent = dataMain.copy(active = false, lastActive = clock.elapsedRealtime())
         mediaDataFilter.onMediaDataLoaded(KEY, null, dataCurrent)
         verify(listener).onMediaDataLoaded(eq(KEY), eq(null), eq(dataCurrent), eq(true),
-                eq(0))
+                eq(false))
 
         // AND we get a smartspace signal
         mediaDataFilter.onSmartspaceMediaDataLoaded(SMARTSPACE_KEY, smartspaceData)
 
         // THEN we should tell listeners to treat the media as not active instead
         verify(listener, never()).onMediaDataLoaded(eq(KEY), eq(KEY), any(), anyBoolean(),
-                anyInt())
-        verify(listener, never()).onSmartspaceMediaDataLoaded(any(), any(), anyBoolean(),
                 anyBoolean())
+        verify(listener, never()).onSmartspaceMediaDataLoaded(any(), any(), anyBoolean())
         assertThat(mediaDataFilter.hasActiveMedia()).isFalse()
     }
 
@@ -330,7 +306,7 @@ class MediaDataFilterTest : SysuiTestCase() {
         val dataCurrent = dataMain.copy(active = false, lastActive = clock.elapsedRealtime())
         mediaDataFilter.onMediaDataLoaded(KEY, null, dataCurrent)
         verify(listener).onMediaDataLoaded(eq(KEY), eq(null), eq(dataCurrent), eq(true),
-                eq(0))
+                eq(false))
 
         // AND we get a smartspace signal
         mediaDataFilter.onSmartspaceMediaDataLoaded(SMARTSPACE_KEY, smartspaceData)
@@ -338,11 +314,10 @@ class MediaDataFilterTest : SysuiTestCase() {
         // THEN we should tell listeners to treat the media as active instead
         val dataCurrentAndActive = dataCurrent.copy(active = true)
         verify(listener).onMediaDataLoaded(eq(KEY), eq(KEY), eq(dataCurrentAndActive), eq(true),
-                eq(100))
+                eq(true))
         assertThat(mediaDataFilter.hasActiveMedia()).isTrue()
         // Smartspace update shouldn't be propagated for the empty rec list.
-        verify(listener, never()).onSmartspaceMediaDataLoaded(any(), any(), anyBoolean(),
-                anyBoolean())
+        verify(listener, never()).onSmartspaceMediaDataLoaded(any(), any(), anyBoolean())
     }
 
     @Test
@@ -351,7 +326,7 @@ class MediaDataFilterTest : SysuiTestCase() {
         val dataCurrent = dataMain.copy(active = false, lastActive = clock.elapsedRealtime())
         mediaDataFilter.onMediaDataLoaded(KEY, null, dataCurrent)
         verify(listener).onMediaDataLoaded(eq(KEY), eq(null), eq(dataCurrent), eq(true),
-                eq(0))
+                eq(false))
 
         // AND we get a smartspace signal
         mediaDataFilter.onSmartspaceMediaDataLoaded(SMARTSPACE_KEY, smartspaceData)
@@ -359,12 +334,11 @@ class MediaDataFilterTest : SysuiTestCase() {
         // THEN we should tell listeners to treat the media as active instead
         val dataCurrentAndActive = dataCurrent.copy(active = true)
         verify(listener).onMediaDataLoaded(eq(KEY), eq(KEY), eq(dataCurrentAndActive), eq(true),
-                eq(100))
+                eq(true))
         assertThat(mediaDataFilter.hasActiveMedia()).isTrue()
         // Smartspace update should also be propagated but not prioritized.
         verify(listener)
-                .onSmartspaceMediaDataLoaded(eq(SMARTSPACE_KEY), eq(smartspaceData), eq(false),
-                        eq(true))
+                .onSmartspaceMediaDataLoaded(eq(SMARTSPACE_KEY), eq(smartspaceData), eq(false))
     }
 
     @Test
@@ -381,13 +355,13 @@ class MediaDataFilterTest : SysuiTestCase() {
         val dataCurrent = dataMain.copy(active = false, lastActive = clock.elapsedRealtime())
         mediaDataFilter.onMediaDataLoaded(KEY, null, dataCurrent)
         verify(listener).onMediaDataLoaded(eq(KEY), eq(null), eq(dataCurrent), eq(true),
-                eq(0))
+                eq(false))
 
         mediaDataFilter.onSmartspaceMediaDataLoaded(SMARTSPACE_KEY, smartspaceData)
 
         val dataCurrentAndActive = dataCurrent.copy(active = true)
         verify(listener).onMediaDataLoaded(eq(KEY), eq(KEY), eq(dataCurrentAndActive), eq(true),
-                eq(100))
+                eq(true))
 
         mediaDataFilter.onSmartspaceMediaDataRemoved(SMARTSPACE_KEY)
 

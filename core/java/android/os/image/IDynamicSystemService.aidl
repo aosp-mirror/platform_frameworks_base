@@ -26,7 +26,6 @@ interface IDynamicSystemService
      * @param dsuSlot Name used to identify this installation
      * @return true if the call succeeds
      */
-    @EnforcePermission("MANAGE_DYNAMIC_SYSTEM")
     boolean startInstallation(@utf8InCpp String dsuSlot);
 
     /**
@@ -37,7 +36,6 @@ interface IDynamicSystemService
      * @param readOnly True if this partition is readOnly
      * @return true if the call succeeds
      */
-    @EnforcePermission("MANAGE_DYNAMIC_SYSTEM")
     boolean createPartition(@utf8InCpp String name, long size, boolean readOnly);
 
     /**
@@ -45,14 +43,12 @@ interface IDynamicSystemService
      *
      * @return true if the partition installation completes without error.
      */
-    @EnforcePermission("MANAGE_DYNAMIC_SYSTEM")
     boolean closePartition();
 
     /**
      * Finish a previously started installation. Installations without
      * a cooresponding finishInstallation() will be cleaned up during device boot.
      */
-    @EnforcePermission("MANAGE_DYNAMIC_SYSTEM")
     boolean finishInstallation();
 
     /**
@@ -61,7 +57,6 @@ interface IDynamicSystemService
      *
      * @return GsiProgress
      */
-    @EnforcePermission("MANAGE_DYNAMIC_SYSTEM")
     GsiProgress getInstallationProgress();
 
     /**
@@ -71,25 +66,21 @@ interface IDynamicSystemService
      *
      * @return true if the call succeeds
      */
-    @EnforcePermission("MANAGE_DYNAMIC_SYSTEM")
     boolean abort();
 
     /**
      * @return true if the device is running an DynamicAnroid image
      */
-    @RequiresNoPermission
     boolean isInUse();
 
     /**
      * @return true if the device has an DynamicSystem image installed
      */
-    @RequiresNoPermission
     boolean isInstalled();
 
     /**
      * @return true if the device has an DynamicSystem image enabled
      */
-    @EnforcePermission("MANAGE_DYNAMIC_SYSTEM")
     boolean isEnabled();
 
     /**
@@ -97,7 +88,6 @@ interface IDynamicSystemService
      *
      * @return true if the call succeeds
      */
-    @EnforcePermission("MANAGE_DYNAMIC_SYSTEM")
     boolean remove();
 
     /**
@@ -107,7 +97,6 @@ interface IDynamicSystemService
      *
      * @return true if the call succeeds
      */
-    @EnforcePermission("MANAGE_DYNAMIC_SYSTEM")
     boolean setEnable(boolean enable, boolean oneShot);
 
     /**
@@ -117,7 +106,6 @@ interface IDynamicSystemService
      * @param fd            fd that points to a ashmem
      * @param size          size of the ashmem file
      */
-    @EnforcePermission("MANAGE_DYNAMIC_SYSTEM")
     boolean setAshmem(in ParcelFileDescriptor fd, long size);
 
     /**
@@ -127,7 +115,6 @@ interface IDynamicSystemService
      * @param bytes         number of bytes that can be read from stream.
      * @return              true on success, false otherwise.
      */
-    @EnforcePermission("MANAGE_DYNAMIC_SYSTEM")
     boolean submitFromAshmem(long bytes);
 
     /**
@@ -137,12 +124,10 @@ interface IDynamicSystemService
      * @return              true on success, false if partition doesn't have a
      *                      valid VBMeta block to retrieve the AVB key from.
      */
-    @EnforcePermission("MANAGE_DYNAMIC_SYSTEM")
     boolean getAvbPublicKey(out AvbPublicKey dst);
 
     /**
      * Returns the suggested scratch partition size for overlayFS.
      */
-    @EnforcePermission("MANAGE_DYNAMIC_SYSTEM")
     long suggestScratchSize();
 }

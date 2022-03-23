@@ -204,8 +204,7 @@ public class LegacySplitScreenTransitions implements Transitions.TransitionHandl
 
     @Override
     public boolean startAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
-            @NonNull SurfaceControl.Transaction startTransaction,
-            @NonNull SurfaceControl.Transaction finishTransaction,
+            @NonNull SurfaceControl.Transaction t,
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
         if (transition != mPendingDismiss && transition != mPendingEnter) {
             // If we're not in split-mode, just abort
@@ -240,12 +239,12 @@ public class LegacySplitScreenTransitions implements Transitions.TransitionHandl
                 if (change.getParent() != null) {
                     // This is probably reparented, so we want the parent to be immediately visible
                     final TransitionInfo.Change parentChange = info.getChange(change.getParent());
-                    startTransaction.show(parentChange.getLeash());
-                    startTransaction.setAlpha(parentChange.getLeash(), 1.f);
+                    t.show(parentChange.getLeash());
+                    t.setAlpha(parentChange.getLeash(), 1.f);
                     // and then animate this layer outside the parent (since, for example, this is
                     // the home task animating from fullscreen to part-screen).
-                    startTransaction.reparent(leash, info.getRootLeash());
-                    startTransaction.setLayer(leash, info.getChanges().size() - i);
+                    t.reparent(leash, info.getRootLeash());
+                    t.setLayer(leash, info.getChanges().size() - i);
                     // build the finish reparent/reposition
                     mFinishTransaction.reparent(leash, parentChange.getLeash());
                     mFinishTransaction.setPosition(leash,
@@ -272,12 +271,12 @@ public class LegacySplitScreenTransitions implements Transitions.TransitionHandl
             if (transition == mPendingEnter
                     && mListener.mPrimary.token.equals(change.getContainer())
                     || mListener.mSecondary.token.equals(change.getContainer())) {
-                startTransaction.setWindowCrop(leash, change.getStartAbsBounds().width(),
+                t.setWindowCrop(leash, change.getStartAbsBounds().width(),
                         change.getStartAbsBounds().height());
                 if (mListener.mPrimary.token.equals(change.getContainer())) {
                     // Move layer to top since we want it above the oversized home task during
                     // animation even though home task is on top in hierarchy.
-                    startTransaction.setLayer(leash, info.getChanges().size() + 1);
+                    t.setLayer(leash, info.getChanges().size() + 1);
                 }
             }
             boolean isOpening = Transitions.isOpeningType(info.getType());
@@ -290,7 +289,7 @@ public class LegacySplitScreenTransitions implements Transitions.TransitionHandl
                     // Dismissing via snap-to-top/bottom means that the dismissed task is already
                     // not-visible (usually cropped to oblivion) so immediately set its alpha to 0
                     // and don't animate it so it doesn't pop-in when reparented.
-                    startTransaction.setAlpha(leash, 0.f);
+                    t.setAlpha(leash, 0.f);
                 } else {
                     startExampleAnimation(leash, false /* show */);
                 }
@@ -312,7 +311,7 @@ public class LegacySplitScreenTransitions implements Transitions.TransitionHandl
             }
             mSplitScreen.finishEnterSplitTransition(homeIsVisible);
         }
-        startTransaction.apply();
+        t.apply();
         onFinish();
         return true;
     }

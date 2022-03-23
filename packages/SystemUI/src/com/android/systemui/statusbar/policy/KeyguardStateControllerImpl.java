@@ -34,8 +34,7 @@ import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.dump.DumpManager;
-import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
+import com.android.systemui.shared.system.smartspace.SmartspaceTransitionController;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -43,8 +42,6 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 import javax.inject.Inject;
-
-import dagger.Lazy;
 
 /**
  */
@@ -60,7 +57,7 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
     private final LockPatternUtils mLockPatternUtils;
     private final KeyguardUpdateMonitorCallback mKeyguardUpdateMonitorCallback =
             new UpdateMonitorCallback();
-    private final Lazy<KeyguardUnlockAnimationController> mUnlockAnimationControllerLazy;
+    private final SmartspaceTransitionController mSmartspaceTransitionController;
 
     private boolean mCanDismissLockScreen;
     private boolean mShowing;
@@ -103,19 +100,14 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
     /**
      */
     @Inject
-    public KeyguardStateControllerImpl(
-            Context context,
-            KeyguardUpdateMonitor keyguardUpdateMonitor,
-            LockPatternUtils lockPatternUtils,
-            Lazy<KeyguardUnlockAnimationController> keyguardUnlockAnimationController,
-            DumpManager dumpManager) {
+    public KeyguardStateControllerImpl(Context context,
+            KeyguardUpdateMonitor keyguardUpdateMonitor, LockPatternUtils lockPatternUtils,
+            SmartspaceTransitionController smartspaceTransitionController) {
         mContext = context;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mLockPatternUtils = lockPatternUtils;
         mKeyguardUpdateMonitor.registerCallback(mKeyguardUpdateMonitorCallback);
-        mUnlockAnimationControllerLazy = keyguardUnlockAnimationController;
-
-        dumpManager.registerDumpable(getClass().getSimpleName(), this);
+        mSmartspaceTransitionController = smartspaceTransitionController;
 
         update(true /* updateAlways */);
         if (Build.IS_DEBUGGABLE && DEBUG_AUTH_WITH_ADB) {
@@ -130,7 +122,7 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
                         update(true /* updateAlways */);
                     }
                 }
-            }, filter, null, null, Context.RECEIVER_EXPORTED_UNAUDITED);
+            }, filter, null, null);
         }
     }
 
@@ -173,8 +165,6 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
         if (mShowing == showing && mOccluded == occluded) return;
         mShowing = showing;
         mOccluded = occluded;
-        Trace.instantForTrack(Trace.TRACE_TAG_APP, "UI Events",
-                "Keyguard showing: " + showing + " occluded: " + occluded);
         notifyKeyguardChanged();
 
         // Update the dismiss amount to the full 0f/1f if we explicitly show or hide the keyguard.
@@ -248,6 +238,12 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
     @Override
     public boolean canDismissLockScreen() {
         return mCanDismissLockScreen;
+    }
+
+    @Override
+    public boolean canPerformSmartSpaceTransition() {
+        return canDismissLockScreen()
+                && mSmartspaceTransitionController.isSmartspaceTransitionPossible();
     }
 
     @Override

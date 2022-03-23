@@ -22,10 +22,10 @@ import com.android.internal.backup.IBackupTransport;
 
 /**
  * Exception thrown when the {@link IBackupTransport} is not available. This happen when a {@link
- * TransportConnection} connection attempt fails. Check {@link
- * TransportConnection#connectAsync(TransportConnectionListener, String)} for when that happens.
+ * TransportClient} connection attempt fails. Check {@link
+ * TransportClient#connectAsync(TransportConnectionListener, String)} for when that happens.
  *
- * @see TransportConnection#connectAsync(TransportConnectionListener, String)
+ * @see TransportClient#connectAsync(TransportConnectionListener, String)
  */
 public class TransportNotAvailableException extends AndroidException {
     TransportNotAvailableException() {

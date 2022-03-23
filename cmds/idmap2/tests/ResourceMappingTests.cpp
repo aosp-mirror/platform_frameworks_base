@@ -29,6 +29,8 @@
 #include "idmap2/LogInfo.h"
 #include "idmap2/ResourceMapping.h"
 
+using android::Res_value;
+
 using PolicyFlags = android::ResTable_overlayable_policy_header::PolicyFlags;
 
 namespace android::idmap2 {

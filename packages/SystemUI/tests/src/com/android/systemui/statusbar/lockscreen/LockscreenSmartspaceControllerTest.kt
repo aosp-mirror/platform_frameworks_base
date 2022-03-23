@@ -41,12 +41,9 @@ import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener
 import com.android.systemui.settings.UserTracker
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
+import com.android.systemui.statusbar.FeatureFlags
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener
-import com.android.systemui.statusbar.policy.DeviceProvisionedController
-import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceProvisionedListener
 import com.android.systemui.util.concurrency.FakeExecution
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
@@ -54,6 +51,7 @@ import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.settings.SecureSettings
 import com.android.systemui.util.time.FakeSystemClock
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.mockito.ArgumentCaptor
@@ -92,8 +90,6 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
     @Mock
     private lateinit var statusBarStateController: StatusBarStateController
     @Mock
-    private lateinit var deviceProvisionedController: DeviceProvisionedController
-    @Mock
     private lateinit var handler: Handler
 
     @Mock
@@ -111,17 +107,12 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
     private lateinit var configChangeListenerCaptor: ArgumentCaptor<ConfigurationListener>
     @Captor
     private lateinit var statusBarStateListenerCaptor: ArgumentCaptor<StateListener>
-    @Captor
-    private lateinit var deviceProvisionedCaptor: ArgumentCaptor<DeviceProvisionedListener>
 
     private lateinit var sessionListener: OnTargetsAvailableListener
     private lateinit var userListener: UserTracker.Callback
     private lateinit var settingsObserver: ContentObserver
     private lateinit var configChangeListener: ConfigurationListener
     private lateinit var statusBarStateListener: StateListener
-    private lateinit var deviceProvisionedListener: DeviceProvisionedListener
-
-    private lateinit var smartspaceView: SmartspaceView
 
     private val clock = FakeSystemClock()
     private val executor = FakeExecutor(clock)
@@ -145,16 +136,14 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
-        `when`(featureFlags.isEnabled(Flags.SMARTSPACE)).thenReturn(true)
+        `when`(featureFlags.isSmartspaceEnabled).thenReturn(true)
 
         `when`(secureSettings.getUriFor(PRIVATE_LOCKSCREEN_SETTING))
                 .thenReturn(fakePrivateLockscreenSettingUri)
         `when`(smartspaceManager.createSmartspaceSession(any())).thenReturn(smartspaceSession)
-        `when`(plugin.getView(any())).thenReturn(createSmartspaceView(), createSmartspaceView())
+        `when`(plugin.getView(any())).thenReturn(fakeSmartspaceView)
         `when`(userTracker.userProfiles).thenReturn(userList)
         `when`(statusBarStateController.dozeAmount).thenReturn(0.5f)
-        `when`(deviceProvisionedController.isDeviceProvisioned()).thenReturn(true)
-        `when`(deviceProvisionedController.isCurrentUserSetup()).thenReturn(true)
 
         setActiveUser(userHandlePrimary)
         setAllowPrivateNotifications(userHandlePrimary, true)
@@ -172,50 +161,22 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
                 contentResolver,
                 configurationController,
                 statusBarStateController,
-                deviceProvisionedController,
                 execution,
                 executor,
                 handler,
                 Optional.of(plugin)
                 )
-
-        verify(deviceProvisionedController).addCallback(capture(deviceProvisionedCaptor))
-        deviceProvisionedListener = deviceProvisionedCaptor.value
     }
 
     @Test(expected = RuntimeException::class)
     fun testThrowsIfFlagIsDisabled() {
         // GIVEN the feature flag is disabled
-        `when`(featureFlags.isEnabled(Flags.SMARTSPACE)).thenReturn(false)
+        `when`(featureFlags.isSmartspaceEnabled).thenReturn(false)
 
         // WHEN we try to build the view
         controller.buildAndConnectView(fakeParent)
 
         // THEN an exception is thrown
-    }
-
-    @Test
-    fun connectOnlyAfterDeviceIsProvisioned() {
-        // GIVEN an unprovisioned device and an attempt to connect
-        `when`(deviceProvisionedController.isDeviceProvisioned()).thenReturn(false)
-        `when`(deviceProvisionedController.isCurrentUserSetup()).thenReturn(false)
-
-        // WHEN a connection attempt is made and view is attached
-        val view = controller.buildAndConnectView(fakeParent)
-        controller.stateChangeListener.onViewAttachedToWindow(view)
-
-        // THEN no session is created
-        verify(smartspaceManager, never()).createSmartspaceSession(any())
-
-        // WHEN it does become provisioned
-        `when`(deviceProvisionedController.isDeviceProvisioned()).thenReturn(true)
-        `when`(deviceProvisionedController.isCurrentUserSetup()).thenReturn(true)
-        deviceProvisionedListener.onUserSetupChanged()
-
-        // THEN the session is created
-        verify(smartspaceManager).createSmartspaceSession(any())
-        // THEN an event notifier is registered
-        verify(plugin).registerSmartspaceEventNotifier(any())
     }
 
     @Test
@@ -243,18 +204,16 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun testEmptyListIsEmittedAndNotifierRemovedAfterDisconnect() {
+    fun testEmptyListIsEmittedAfterDisconnect() {
         // GIVEN a registered listener on an active session
         connectSession()
         clearInvocations(plugin)
 
         // WHEN the session is closed
-        controller.stateChangeListener.onViewDetachedFromWindow(smartspaceView as View)
         controller.disconnect()
 
-        // THEN the listener receives an empty list of targets and unregisters the notifier
+        // THEN the listener receives an empty list of targets
         verify(plugin).onTargetsAvailable(emptyList())
-        verify(plugin).registerSmartspaceEventNotifier(null)
     }
 
     @Test
@@ -290,7 +249,7 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
         configChangeListener.onThemeChanged()
 
         // We update the new text color to match the wallpaper color
-        verify(smartspaceView).setPrimaryTextColor(anyInt())
+        verify(fakeSmartspaceView).setPrimaryTextColor(anyInt())
     }
 
     @Test
@@ -302,7 +261,7 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
         statusBarStateListener.onDozeAmountChanged(0.1f, 0.7f)
 
         // We pass that along to the view
-        verify(smartspaceView).setDozeAmount(0.7f)
+        verify(fakeSmartspaceView).setDozeAmount(0.7f)
     }
 
     @Test
@@ -422,7 +381,6 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
         connectSession()
 
         // WHEN we are told to cleanup
-        controller.stateChangeListener.onViewDetachedFromWindow(smartspaceView as View)
         controller.disconnect()
 
         // THEN we disconnect from the session and unregister any listeners
@@ -435,44 +393,40 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun testMultipleViewsUseSameSession() {
+    fun testBuildViewIsIdempotent() {
+        // GIVEN a connected session
+        connectSession()
+        clearInvocations(plugin)
+
+        // WHEN we disconnect and then reconnect
+        controller.disconnect()
+        controller.buildAndConnectView(fakeParent)
+
+        // THEN the view is not rebuilt
+        verify(plugin, never()).getView(any())
+        assertEquals(fakeSmartspaceView, controller.view)
+    }
+
+    @Test
+    fun testDoubleConnectIsIgnored() {
         // GIVEN a connected session
         connectSession()
         clearInvocations(smartspaceManager)
         clearInvocations(plugin)
 
-        // WHEN we're asked to connect a second time and add to a parent. If the same view
-        // was created the ViewGroup will throw an exception
+        // WHEN we're asked to connect a second time and add to a parent
         val view = controller.buildAndConnectView(fakeParent)
         fakeParent.addView(view)
-        val smartspaceView2 = view as SmartspaceView
 
-        // THEN the existing session is reused and views are registered
+        // THEN the existing view and session are reused
         verify(smartspaceManager, never()).createSmartspaceSession(any())
-        verify(smartspaceView2).registerDataProvider(plugin)
-    }
-
-    @Test
-    fun testConnectAttemptBeforeInitializationShouldNotCreateSession() {
-        // GIVEN an uninitalized smartspaceView
-        // WHEN the device is provisioned
-        `when`(deviceProvisionedController.isDeviceProvisioned()).thenReturn(true)
-        `when`(deviceProvisionedController.isCurrentUserSetup()).thenReturn(true)
-        deviceProvisionedListener.onDeviceProvisionedChanged()
-
-        // THEN no calls to createSmartspaceSession should occur
-        verify(smartspaceManager, never()).createSmartspaceSession(any())
-        // THEN no listeners should be registered
-        verify(configurationController, never()).addCallback(any())
+        verify(plugin, never()).getView(any())
+        assertEquals(fakeSmartspaceView, controller.view)
     }
 
     private fun connectSession() {
-        val view = controller.buildAndConnectView(fakeParent)
-        smartspaceView = view as SmartspaceView
+        controller.buildAndConnectView(fakeParent)
 
-        controller.stateChangeListener.onViewAttachedToWindow(view)
-
-        verify(smartspaceView).registerDataProvider(plugin)
         verify(smartspaceSession)
                 .addOnTargetsAvailableListener(any(), capture(sessionListenerCaptor))
         sessionListener = sessionListenerCaptor.value
@@ -496,11 +450,11 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
         verify(smartspaceSession).requestSmartspaceUpdate()
         clearInvocations(smartspaceSession)
 
-        verify(smartspaceView).setPrimaryTextColor(anyInt())
-        verify(smartspaceView).setDozeAmount(0.5f)
-        clearInvocations(view)
+        verify(fakeSmartspaceView).setPrimaryTextColor(anyInt())
+        verify(fakeSmartspaceView).setDozeAmount(0.5f)
+        clearInvocations(fakeSmartspaceView)
 
-        fakeParent.addView(view)
+        fakeParent.addView(fakeSmartspaceView)
     }
 
     private fun setActiveUser(userHandle: UserHandle) {
@@ -536,37 +490,31 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
         ).thenReturn(if (value) 1 else 0)
     }
 
-    private fun createSmartspaceView(): SmartspaceView {
-        return spy(object : View(context), SmartspaceView {
-            override fun registerDataProvider(plugin: BcSmartspaceDataPlugin?) {
-            }
+    private val fakeSmartspaceView = spy(object : View(context), SmartspaceView {
+        override fun registerDataProvider(plugin: BcSmartspaceDataPlugin?) {
+        }
 
-            override fun setPrimaryTextColor(color: Int) {
-            }
+        override fun setPrimaryTextColor(color: Int) {
+        }
 
-            override fun setDozeAmount(amount: Float) {
-            }
+        override fun setDozeAmount(amount: Float) {
+        }
 
-            override fun setIntentStarter(intentStarter: BcSmartspaceDataPlugin.IntentStarter?) {
-            }
+        override fun setIntentStarter(intentStarter: BcSmartspaceDataPlugin.IntentStarter?) {
+        }
 
-            override fun setFalsingManager(falsingManager: FalsingManager?) {
-            }
+        override fun setFalsingManager(falsingManager: FalsingManager?) {
+        }
 
-            override fun setDnd(image: Drawable?, description: String?) {
-            }
+        override fun setDnd(image: Drawable?, description: String?) {
+        }
 
-            override fun setNextAlarm(image: Drawable?, description: String?) {
-            }
+        override fun setNextAlarm(image: Drawable?, description: String?) {
+        }
 
-            override fun setMediaTarget(target: SmartspaceTarget?) {
-            }
-
-            override fun getSelectedPage(): Int {
-                return -1
-            }
-        })
-    }
+        override fun setMediaTarget(target: SmartspaceTarget?) {
+        }
+    })
 }
 
 private const val PRIVATE_LOCKSCREEN_SETTING =

@@ -409,10 +409,10 @@ public class NotificationTests extends AndroidTestCase {
         sleepIfYouCan(500);
 
         L("Parceling notifications...");
-        // we want to be able to use this test on older OSes that do not have getOpenAshmemSize
-        Method getOpenAshmemSize = null;
+        // we want to be able to use this test on older OSes that do not have getBlobAshmemSize
+        Method getBlobAshmemSize = null;
         try {
-            getOpenAshmemSize = Parcel.class.getMethod("getOpenAshmemSize");
+            getBlobAshmemSize = Parcel.class.getMethod("getBlobAshmemSize");
         } catch (NoSuchMethodException ex) {
         }
         for (int i=0; i<mNotifications.size(); i++) {
@@ -424,8 +424,8 @@ public class NotificationTests extends AndroidTestCase {
                 time = SystemClock.currentThreadTimeMillis() - time;
                 L("  %s: write parcel=%dms size=%d ashmem=%s",
                         summarize(n), time, p.dataPosition(),
-                        (getOpenAshmemSize != null)
-                            ? getOpenAshmemSize.invoke(p)
+                        (getBlobAshmemSize != null)
+                            ? getBlobAshmemSize.invoke(p)
                             : "???");
                 p.setDataPosition(0);
             }

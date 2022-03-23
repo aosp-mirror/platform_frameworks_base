@@ -31,8 +31,6 @@ import java.util.List;
 oneway interface ICapabilityExchangeEventListener {
     void onRequestPublishCapabilities(int publishTriggerType);
     void onUnpublish();
-    void onPublishUpdated(int reasonCode, String reasonPhrase, int reasonHeaderCause,
-            String reasonHeaderText);
     void onRemoteCapabilityRequest(in Uri contactUri,
             in List<String> remoteCapabilities, IOptionsRequestCallback cb);
 }

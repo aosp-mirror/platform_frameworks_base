@@ -19,7 +19,7 @@ package com.android.server;
 import android.annotation.NonNull;
 import android.os.Build;
 import android.os.Process;
-import android.util.Dumpable;
+import android.util.IndentingPrintWriter;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
@@ -28,7 +28,6 @@ import com.android.internal.util.Preconditions;
 import com.android.server.am.ActivityManagerService;
 import com.android.server.utils.TimingsTraceAndSlog;
 
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -193,16 +192,11 @@ public final class SystemServerInitThreadPool implements Dumpable {
         final ArrayList<Integer> pids = new ArrayList<>();
         pids.add(Process.myPid());
         ActivityManagerService.dumpStackTraces(pids, null, null,
-                Watchdog.getInterestingNativePids(), null, null, null);
+                Watchdog.getInterestingNativePids(), null, null);
     }
 
     @Override
-    public String getDumpableName() {
-        return SystemServerInitThreadPool.class.getSimpleName();
-    }
-
-    @Override
-    public void dump(PrintWriter pw, String[] args) {
+    public void dump(IndentingPrintWriter pw, String[] args) {
         synchronized (LOCK) {
             pw.printf("has instance: %b\n", (sInstance != null));
         }

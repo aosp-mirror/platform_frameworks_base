@@ -99,6 +99,9 @@ public class MediaOutputGroupAdapterTest extends SysuiTestCase {
         assertThat(mGroupViewHolder.mCheckBox.getVisibility()).isEqualTo(View.GONE);
         assertThat(mGroupViewHolder.mSubTitleText.getVisibility()).isEqualTo(View.GONE);
         assertThat(mGroupViewHolder.mProgressBar.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mGroupViewHolder.mDivider.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mGroupViewHolder.mAddIcon.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mGroupViewHolder.mBottomDivider.getVisibility()).isEqualTo(View.VISIBLE);
         assertThat(mGroupViewHolder.mSeekBar.getVisibility()).isEqualTo(View.VISIBLE);
         assertThat(mGroupViewHolder.mTwoLineTitleText.getVisibility()).isEqualTo(View.VISIBLE);
         assertThat(mGroupViewHolder.mTwoLineTitleText.getText()).isEqualTo(mContext.getText(
@@ -111,6 +114,9 @@ public class MediaOutputGroupAdapterTest extends SysuiTestCase {
 
         assertThat(mGroupViewHolder.mTitleText.getVisibility()).isEqualTo(View.GONE);
         assertThat(mGroupViewHolder.mProgressBar.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mGroupViewHolder.mDivider.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mGroupViewHolder.mAddIcon.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mGroupViewHolder.mBottomDivider.getVisibility()).isEqualTo(View.GONE);
         assertThat(mGroupViewHolder.mSubTitleText.getVisibility()).isEqualTo(View.GONE);
         assertThat(mGroupViewHolder.mSeekBar.getVisibility()).isEqualTo(View.VISIBLE);
         assertThat(mGroupViewHolder.mTwoLineTitleText.getVisibility()).isEqualTo(View.VISIBLE);
@@ -135,6 +141,9 @@ public class MediaOutputGroupAdapterTest extends SysuiTestCase {
 
         assertThat(mGroupViewHolder.mTitleText.getVisibility()).isEqualTo(View.GONE);
         assertThat(mGroupViewHolder.mProgressBar.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mGroupViewHolder.mDivider.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mGroupViewHolder.mAddIcon.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mGroupViewHolder.mBottomDivider.getVisibility()).isEqualTo(View.GONE);
         assertThat(mGroupViewHolder.mSubTitleText.getVisibility()).isEqualTo(View.GONE);
         assertThat(mGroupViewHolder.mSeekBar.getVisibility()).isEqualTo(View.VISIBLE);
         assertThat(mGroupViewHolder.mTwoLineTitleText.getVisibility()).isEqualTo(View.VISIBLE);
@@ -158,6 +167,9 @@ public class MediaOutputGroupAdapterTest extends SysuiTestCase {
 
         assertThat(mGroupViewHolder.mTitleText.getVisibility()).isEqualTo(View.GONE);
         assertThat(mGroupViewHolder.mProgressBar.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mGroupViewHolder.mDivider.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mGroupViewHolder.mAddIcon.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mGroupViewHolder.mBottomDivider.getVisibility()).isEqualTo(View.GONE);
         assertThat(mGroupViewHolder.mSubTitleText.getVisibility()).isEqualTo(View.GONE);
         assertThat(mGroupViewHolder.mSeekBar.getVisibility()).isEqualTo(View.VISIBLE);
         assertThat(mGroupViewHolder.mTwoLineTitleText.getVisibility()).isEqualTo(View.VISIBLE);
@@ -174,6 +186,9 @@ public class MediaOutputGroupAdapterTest extends SysuiTestCase {
 
         assertThat(mGroupViewHolder.mTitleText.getVisibility()).isEqualTo(View.GONE);
         assertThat(mGroupViewHolder.mProgressBar.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mGroupViewHolder.mDivider.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mGroupViewHolder.mAddIcon.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mGroupViewHolder.mBottomDivider.getVisibility()).isEqualTo(View.GONE);
         assertThat(mGroupViewHolder.mSubTitleText.getVisibility()).isEqualTo(View.GONE);
         assertThat(mGroupViewHolder.mSeekBar.getVisibility()).isEqualTo(View.VISIBLE);
         assertThat(mGroupViewHolder.mTwoLineTitleText.getVisibility()).isEqualTo(View.VISIBLE);

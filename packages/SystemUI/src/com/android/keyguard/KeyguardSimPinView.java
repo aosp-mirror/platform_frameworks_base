@@ -37,9 +37,8 @@ public class KeyguardSimPinView extends KeyguardPinBasedInputView {
         super(context, attrs);
     }
 
-    public void setEsimLocked(boolean locked, int subscriptionId) {
+    public void setEsimLocked(boolean locked) {
         KeyguardEsimArea esimButton = findViewById(R.id.keyguard_esim_area);
-        esimButton.setSubscriptionId(subscriptionId);
         esimButton.setVisibility(locked ? View.VISIBLE : View.GONE);
     }
 

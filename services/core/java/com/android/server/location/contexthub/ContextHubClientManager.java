@@ -19,6 +19,7 @@ package com.android.server.location.contexthub;
 import android.annotation.IntDef;
 import android.app.PendingIntent;
 import android.content.Context;
+import android.hardware.contexthub.V1_0.ContextHubMsg;
 import android.hardware.location.ContextHubInfo;
 import android.hardware.location.IContextHubClient;
 import android.hardware.location.IContextHubClientCallback;
@@ -226,37 +227,37 @@ import java.util.function.Consumer;
      * Handles a message sent from a nanoapp.
      *
      * @param contextHubId the ID of the hub where the nanoapp sent the message from
-     * @param hostEndpointId The host endpoint ID of the client that this message is for.
      * @param message the message send by a nanoapp
      * @param nanoappPermissions the set of permissions the nanoapp holds
      * @param messagePermissions the set of permissions that should be used for attributing
      * permissions when this message is consumed by a client
      */
     /* package */ void onMessageFromNanoApp(
-            int contextHubId, short hostEndpointId, NanoAppMessage message,
-            List<String> nanoappPermissions, List<String> messagePermissions) {
+            int contextHubId, ContextHubMsg message, List<String> nanoappPermissions,
+            List<String> messagePermissions) {
+        NanoAppMessage clientMessage = ContextHubServiceUtil.createNanoAppMessage(message);
+
         if (DEBUG_LOG_ENABLED) {
-            Log.v(TAG, "Received " + message);
+            Log.v(TAG, "Received " + clientMessage);
         }
 
-        if (message.isBroadcastMessage()) {
+        if (clientMessage.isBroadcastMessage()) {
             // Broadcast messages shouldn't be sent with any permissions tagged per CHRE API
             // requirements.
             if (!messagePermissions.isEmpty()) {
-                Log.wtf(TAG, "Received broadcast message with permissions from "
-                        + message.getNanoAppId());
+                Log.wtf(TAG, "Received broadcast message with permissions from " + message.appName);
             }
 
             broadcastMessage(
-                    contextHubId, message, nanoappPermissions, messagePermissions);
+                    contextHubId, clientMessage, nanoappPermissions, messagePermissions);
         } else {
-            ContextHubClientBroker proxy = mHostEndPointIdToClientMap.get(hostEndpointId);
+            ContextHubClientBroker proxy = mHostEndPointIdToClientMap.get(message.hostEndPoint);
             if (proxy != null) {
                 proxy.sendMessageToClient(
-                        message, nanoappPermissions, messagePermissions);
+                        clientMessage, nanoappPermissions, messagePermissions);
             } else {
                 Log.e(TAG, "Cannot send message to unregistered client (host endpoint ID = "
-                        + hostEndpointId + ")");
+                        + message.hostEndPoint + ")");
             }
         }
     }

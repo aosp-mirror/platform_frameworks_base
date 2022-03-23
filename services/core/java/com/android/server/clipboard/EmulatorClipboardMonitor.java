@@ -18,7 +18,6 @@ package com.android.server.clipboard;
 
 import android.annotation.Nullable;
 import android.content.ClipData;
-import android.os.SystemProperties;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
@@ -40,8 +39,6 @@ class EmulatorClipboardMonitor implements Consumer<ClipData> {
     private static final String PIPE_NAME = "pipe:clipboard";
     private static final int HOST_PORT = 5000;
     private final Thread mHostMonitorThread;
-    private static final boolean LOG_CLIBOARD_ACCESS =
-            SystemProperties.getBoolean("ro.boot.qemu.log_clipboard_access", false);
     private FileDescriptor mPipe = null;
 
     private static byte[] createOpenHandshake() {
@@ -54,8 +51,8 @@ class EmulatorClipboardMonitor implements Consumer<ClipData> {
         return bits;
     }
 
-    private synchronized FileDescriptor getPipeFD() {
-        return mPipe;
+    private boolean isPipeOpened() {
+        return mPipe != null;
     }
 
     private synchronized boolean openPipe() {
@@ -107,16 +104,14 @@ class EmulatorClipboardMonitor implements Consumer<ClipData> {
         return msg;
     }
 
-    private static void sendMessage(
-            final FileDescriptor fd,
-            final byte[] msg) throws ErrnoException, InterruptedIOException {
+    private void sendMessage(final byte[] msg) throws ErrnoException, InterruptedIOException {
         final byte[] lengthBits = new byte[4];
         final ByteBuffer bb = ByteBuffer.wrap(lengthBits);
         bb.order(ByteOrder.LITTLE_ENDIAN);
         bb.putInt(msg.length);
 
-        Os.write(fd, lengthBits, 0, lengthBits.length);
-        Os.write(fd, msg, 0, msg.length);
+        Os.write(mPipe, lengthBits, 0, lengthBits.length);
+        Os.write(mPipe, msg, 0, msg.length);
     }
 
     EmulatorClipboardMonitor(final Consumer<ClipData> setAndroidClipboard) {
@@ -137,9 +132,6 @@ class EmulatorClipboardMonitor implements Consumer<ClipData> {
                                                        new String[]{"text/plain"},
                                                        new ClipData.Item(str));
 
-                    if (LOG_CLIBOARD_ACCESS) {
-                        Slog.i(TAG, "Setting the guest clipboard to '" + str + "'");
-                    }
                     setAndroidClipboard.accept(clip);
                 } catch (ErrnoException | InterruptedIOException e) {
                     closePipe();
@@ -164,22 +156,13 @@ class EmulatorClipboardMonitor implements Consumer<ClipData> {
     }
 
     private void setHostClipboardImpl(final String value) {
-        final FileDescriptor pipeFD = getPipeFD();
-
-        if (pipeFD != null) {
-            Thread t = new Thread(() -> {
-                if (LOG_CLIBOARD_ACCESS) {
-                    Slog.i(TAG, "Setting the host clipboard to '" + value + "'");
-                }
-
-                try {
-                    sendMessage(pipeFD, value.getBytes());
-                } catch (ErrnoException | InterruptedIOException e) {
-                    Slog.e(TAG, "Failed to set host clipboard " + e.getMessage());
-                } catch (IllegalArgumentException e) {
-                }
-            });
-            t.start();
+        try {
+            if (isPipeOpened()) {
+                sendMessage(value.getBytes());
+            }
+        } catch (ErrnoException | InterruptedIOException e) {
+            Slog.e(TAG, "Failed to set host clipboard " + e.getMessage());
+        } catch (IllegalArgumentException e) {
         }
     }
 }

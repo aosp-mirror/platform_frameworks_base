@@ -17,11 +17,7 @@
 package android.media.tv.tuner;
 
 import android.annotation.Nullable;
-import android.hardware.tv.tuner.DemuxAlpFilterType;
-import android.hardware.tv.tuner.DemuxIpFilterType;
-import android.hardware.tv.tuner.DemuxMmtpFilterType;
-import android.hardware.tv.tuner.DemuxTlvFilterType;
-import android.hardware.tv.tuner.DemuxTsFilterType;
+import android.hardware.tv.tuner.V1_0.Constants;
 import android.media.tv.tuner.filter.Filter;
 
 /**
@@ -41,44 +37,44 @@ public final class TunerUtils {
         if (mainType == Filter.TYPE_TS) {
             switch (subtype) {
                 case Filter.SUBTYPE_UNDEFINED:
-                    return DemuxTsFilterType.UNDEFINED;
+                    return Constants.DemuxTsFilterType.UNDEFINED;
                 case Filter.SUBTYPE_SECTION:
-                    return DemuxTsFilterType.SECTION;
+                    return Constants.DemuxTsFilterType.SECTION;
                 case Filter.SUBTYPE_PES:
-                    return DemuxTsFilterType.PES;
+                    return Constants.DemuxTsFilterType.PES;
                 case Filter.SUBTYPE_TS:
-                    return DemuxTsFilterType.TS;
+                    return Constants.DemuxTsFilterType.TS;
                 case Filter.SUBTYPE_AUDIO:
-                    return DemuxTsFilterType.AUDIO;
+                    return Constants.DemuxTsFilterType.AUDIO;
                 case Filter.SUBTYPE_VIDEO:
-                    return DemuxTsFilterType.VIDEO;
+                    return Constants.DemuxTsFilterType.VIDEO;
                 case Filter.SUBTYPE_PCR:
-                    return DemuxTsFilterType.PCR;
+                    return Constants.DemuxTsFilterType.PCR;
                 case Filter.SUBTYPE_RECORD:
-                    return DemuxTsFilterType.RECORD;
+                    return Constants.DemuxTsFilterType.RECORD;
                 case Filter.SUBTYPE_TEMI:
-                    return DemuxTsFilterType.TEMI;
+                    return Constants.DemuxTsFilterType.TEMI;
                 default:
                     break;
             }
         } else if (mainType == Filter.TYPE_MMTP) {
             switch (subtype) {
                 case Filter.SUBTYPE_UNDEFINED:
-                    return DemuxMmtpFilterType.UNDEFINED;
+                    return Constants.DemuxMmtpFilterType.UNDEFINED;
                 case Filter.SUBTYPE_SECTION:
-                    return DemuxMmtpFilterType.SECTION;
+                    return Constants.DemuxMmtpFilterType.SECTION;
                 case Filter.SUBTYPE_PES:
-                    return DemuxMmtpFilterType.PES;
+                    return Constants.DemuxMmtpFilterType.PES;
                 case Filter.SUBTYPE_MMTP:
-                    return DemuxMmtpFilterType.MMTP;
+                    return Constants.DemuxMmtpFilterType.MMTP;
                 case Filter.SUBTYPE_AUDIO:
-                    return DemuxMmtpFilterType.AUDIO;
+                    return Constants.DemuxMmtpFilterType.AUDIO;
                 case Filter.SUBTYPE_VIDEO:
-                    return DemuxMmtpFilterType.VIDEO;
+                    return Constants.DemuxMmtpFilterType.VIDEO;
                 case Filter.SUBTYPE_RECORD:
-                    return DemuxMmtpFilterType.RECORD;
+                    return Constants.DemuxMmtpFilterType.RECORD;
                 case Filter.SUBTYPE_DOWNLOAD:
-                    return DemuxMmtpFilterType.DOWNLOAD;
+                    return Constants.DemuxMmtpFilterType.DOWNLOAD;
                 default:
                     break;
             }
@@ -86,43 +82,43 @@ public final class TunerUtils {
         } else if (mainType == Filter.TYPE_IP) {
             switch (subtype) {
                 case Filter.SUBTYPE_UNDEFINED:
-                    return DemuxIpFilterType.UNDEFINED;
+                    return Constants.DemuxIpFilterType.UNDEFINED;
                 case Filter.SUBTYPE_SECTION:
-                    return DemuxIpFilterType.SECTION;
+                    return Constants.DemuxIpFilterType.SECTION;
                 case Filter.SUBTYPE_NTP:
-                    return DemuxIpFilterType.NTP;
+                    return Constants.DemuxIpFilterType.NTP;
                 case Filter.SUBTYPE_IP_PAYLOAD:
-                    return DemuxIpFilterType.IP_PAYLOAD;
+                    return Constants.DemuxIpFilterType.IP_PAYLOAD;
                 case Filter.SUBTYPE_IP:
-                    return DemuxIpFilterType.IP;
+                    return Constants.DemuxIpFilterType.IP;
                 case Filter.SUBTYPE_PAYLOAD_THROUGH:
-                    return DemuxIpFilterType.PAYLOAD_THROUGH;
+                    return Constants.DemuxIpFilterType.PAYLOAD_THROUGH;
                 default:
                     break;
             }
         } else if (mainType == Filter.TYPE_TLV) {
             switch (subtype) {
                 case Filter.SUBTYPE_UNDEFINED:
-                    return DemuxTlvFilterType.UNDEFINED;
+                    return Constants.DemuxTlvFilterType.UNDEFINED;
                 case Filter.SUBTYPE_SECTION:
-                    return DemuxTlvFilterType.SECTION;
+                    return Constants.DemuxTlvFilterType.SECTION;
                 case Filter.SUBTYPE_TLV:
-                    return DemuxTlvFilterType.TLV;
+                    return Constants.DemuxTlvFilterType.TLV;
                 case Filter.SUBTYPE_PAYLOAD_THROUGH:
-                    return DemuxTlvFilterType.PAYLOAD_THROUGH;
+                    return Constants.DemuxTlvFilterType.PAYLOAD_THROUGH;
                 default:
                     break;
             }
         } else if (mainType == Filter.TYPE_ALP) {
             switch (subtype) {
                 case Filter.SUBTYPE_UNDEFINED:
-                    return DemuxAlpFilterType.UNDEFINED;
+                    return Constants.DemuxAlpFilterType.UNDEFINED;
                 case Filter.SUBTYPE_SECTION:
-                    return DemuxAlpFilterType.SECTION;
+                    return Constants.DemuxAlpFilterType.SECTION;
                 case Filter.SUBTYPE_PTP:
-                    return DemuxAlpFilterType.PTP;
+                    return Constants.DemuxAlpFilterType.PTP;
                 case Filter.SUBTYPE_PAYLOAD_THROUGH:
-                    return DemuxAlpFilterType.PAYLOAD_THROUGH;
+                    return Constants.DemuxAlpFilterType.PAYLOAD_THROUGH;
                 default:
                     break;
             }
@@ -169,17 +165,6 @@ public final class TunerUtils {
     public static void checkResourceState(String name, boolean closed) {
         if (closed) {
             throw new IllegalStateException(name + " has been closed");
-        }
-    }
-
-    /**
-     * Checks the accessibility of a resource instance.
-     *
-     * @throws IllegalStateException if the resource has already been inaccessible.
-     */
-    public static void checkResourceAccessible(String name, boolean accessible) {
-        if (!accessible) {
-            throw new IllegalStateException(name + " is inaccessible");
         }
     }
 

@@ -37,8 +37,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-import java.util.Collections;
-
 /** Tests for {@link com.android.server.hdmi.HdmiCecMessageValidator} class. */
 @SmallTest
 @Presubmit
@@ -51,9 +49,10 @@ public class HdmiCecMessageValidatorTest {
     @Before
     public void setUp() throws Exception {
         HdmiControlService mHdmiControlService = new HdmiControlService(
-                InstrumentationRegistry.getTargetContext(), Collections.emptyList());
+                InstrumentationRegistry.getTargetContext());
 
         mHdmiControlService.setIoLooper(mTestLooper.getLooper());
+        mHdmiCecMessageValidator = new HdmiCecMessageValidator(mHdmiControlService);
     }
 
     @Test
@@ -399,6 +398,16 @@ public class HdmiCecMessageValidatorTest {
     }
 
     @Test
+    public void isValid_reportFeatures() {
+        assertMessageValidity("0F:A6:05:80:00:00").isEqualTo(OK);
+
+        assertMessageValidity("04:A6:05:80:00:00").isEqualTo(ERROR_DESTINATION);
+        assertMessageValidity("FF:A6:05:80:00:00").isEqualTo(ERROR_SOURCE);
+
+        assertMessageValidity("0F:A6").isEqualTo(ERROR_PARAMETER_SHORT);
+    }
+
+    @Test
     public void isValid_deckControl() {
         assertMessageValidity("40:42:01:6E").isEqualTo(OK);
         assertMessageValidity("40:42:04").isEqualTo(OK);
@@ -638,6 +647,6 @@ public class HdmiCecMessageValidatorTest {
     }
 
     private IntegerSubject assertMessageValidity(String message) {
-        return assertThat(HdmiUtils.buildMessage(message).getValidationResult());
+        return assertThat(mHdmiCecMessageValidator.isValid(HdmiUtils.buildMessage(message)));
     }
 }

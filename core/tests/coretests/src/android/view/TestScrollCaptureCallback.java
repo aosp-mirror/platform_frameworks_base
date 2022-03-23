@@ -31,13 +31,10 @@ class TestScrollCaptureCallback implements ScrollCaptureCallback {
     private Consumer<Rect> mImageOnComplete;
     private Runnable mOnEndReady;
     private volatile int mModCount;
-    private boolean mOnScrollCaptureEndCalled;
-    private CancellationSignal mLastCancellationSignal;
 
     @Override
     public void onScrollCaptureSearch(@NonNull CancellationSignal signal,
             @NonNull Consumer<Rect> onReady) {
-        mLastCancellationSignal = signal;
         mSearchConsumer = onReady;
         mModCount++;
     }
@@ -45,7 +42,6 @@ class TestScrollCaptureCallback implements ScrollCaptureCallback {
     @Override
     public void onScrollCaptureStart(@NonNull ScrollCaptureSession session,
             @NonNull CancellationSignal signal, @NonNull Runnable onReady) {
-        mLastCancellationSignal = signal;
         mStartOnReady = onReady;
         mModCount++;
     }
@@ -54,7 +50,6 @@ class TestScrollCaptureCallback implements ScrollCaptureCallback {
     public void onScrollCaptureImageRequest(@NonNull ScrollCaptureSession session,
             @NonNull CancellationSignal signal, @NonNull Rect captureArea,
             @NonNull Consumer<Rect> onComplete) {
-        mLastCancellationSignal = signal;
         mImageOnComplete = onComplete;
         mModCount++;
     }
@@ -62,12 +57,8 @@ class TestScrollCaptureCallback implements ScrollCaptureCallback {
     @Override
     public void onScrollCaptureEnd(@NonNull Runnable onReady) {
         mOnEndReady = onReady;
-        mOnScrollCaptureEndCalled = true;
     }
 
-    public boolean onScrollCaptureEndCalled() {
-        return mOnScrollCaptureEndCalled;
-    }
     void completeSearchRequest(Rect scrollBounds) {
         assertNotNull("Did not receive search request", mSearchConsumer);
         mSearchConsumer.accept(scrollBounds);
@@ -80,26 +71,16 @@ class TestScrollCaptureCallback implements ScrollCaptureCallback {
 
     void completeStartRequest() {
         assertNotNull("Did not receive start request", mStartOnReady);
-        if (mLastCancellationSignal != null && !mLastCancellationSignal.isCanceled()) {
-            mStartOnReady.run();
-        }
+        mStartOnReady.run();
     }
 
     void completeImageRequest(Rect captured) {
         assertNotNull("Did not receive image request", mImageOnComplete);
-        if (mLastCancellationSignal != null && !mLastCancellationSignal.isCanceled()) {
-            mImageOnComplete.accept(captured);
-        }
+        mImageOnComplete.accept(captured);
     }
 
     void completeEndRequest() {
         assertNotNull("Did not receive end request", mOnEndReady);
-        if (mLastCancellationSignal != null && !mLastCancellationSignal.isCanceled()) {
-            mOnEndReady.run();
-        }
-    }
-
-    public CancellationSignal getLastCancellationSignal() {
-        return mLastCancellationSignal;
+        mOnEndReady.run();
     }
 }
