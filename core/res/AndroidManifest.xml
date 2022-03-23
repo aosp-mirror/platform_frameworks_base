@@ -654,6 +654,8 @@
 
     <protected-broadcast android:name="android.intent.action.DEVICE_LOCKED_CHANGED" />
 
+    <protected-broadcast android:name="com.android.content.pm.action.CAN_INTERACT_ACROSS_PROFILES_CHANGED"/>
+
     <!-- Added in O -->
     <protected-broadcast android:name="android.app.action.APPLICATION_DELEGATION_SCOPES_CHANGED" />
     <protected-broadcast android:name="com.android.server.wm.ACTION_REVOKE_SYSTEM_ALERT_WINDOW_PERMISSION" />
