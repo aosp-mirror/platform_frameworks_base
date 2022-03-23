@@ -98,6 +98,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 /**
@@ -541,12 +542,13 @@ public class AppTransitionController {
     }
 
     /**
-     * Finds the common {@link android.window.TaskFragmentOrganizer} that organizes all app windows
-     * in the current transition.
-     * @return {@code null} if there is no such organizer, or if there are more than one.
+     * Finds the common parent {@link Task} that is parent of all embedded app windows in the
+     * current transition.
+     * @return {@code null} if app windows in the transition are not children of the same Task, or
+     *         if none of the app windows is embedded.
      */
     @Nullable
-    private ITaskFragmentOrganizer findTaskFragmentOrganizerForAllWindows() {
+    private Task findParentTaskForAllEmbeddedWindows() {
         mTempTransitionWindows.clear();
         mTempTransitionWindows.addAll(mDisplayContent.mClosingApps);
         mTempTransitionWindows.addAll(mDisplayContent.mOpeningApps);
@@ -600,13 +602,22 @@ public class AppTransitionController {
             leafTask = task;
         }
         mTempTransitionWindows.clear();
-        if (leafTask == null) {
+        return leafTask;
+    }
+
+    /**
+     * Finds the common {@link android.window.TaskFragmentOrganizer} that organizes all embedded
+     * {@link TaskFragment} belong to the given {@link Task}.
+     * @return {@code null} if there is no such organizer, or if there are more than one.
+     */
+    @Nullable
+    private ITaskFragmentOrganizer findTaskFragmentOrganizer(@Nullable Task task) {
+        if (task == null) {
             return null;
         }
-
         // We don't support remote animation for Task with multiple TaskFragmentOrganizers.
         final ITaskFragmentOrganizer[] organizer = new ITaskFragmentOrganizer[1];
-        final boolean hasMultipleOrganizers = leafTask.forAllLeafTaskFragments(taskFragment -> {
+        final boolean hasMultipleOrganizers = task.forAllLeafTaskFragments(taskFragment -> {
             final ITaskFragmentOrganizer tfOrganizer = taskFragment.getTaskFragmentOrganizer();
             if (tfOrganizer == null) {
                 return false;
@@ -638,7 +649,8 @@ public class AppTransitionController {
             return false;
         }
 
-        final ITaskFragmentOrganizer organizer = findTaskFragmentOrganizerForAllWindows();
+        final Task task = findParentTaskForAllEmbeddedWindows();
+        final ITaskFragmentOrganizer organizer = findTaskFragmentOrganizer(task);
         final RemoteAnimationDefinition definition = organizer != null
                 ? mDisplayContent.mAtmService.mTaskFragmentOrganizerController
                     .getRemoteAnimationDefinition(organizer)
@@ -653,6 +665,24 @@ public class AppTransitionController {
         ProtoLog.v(WM_DEBUG_APP_TRANSITIONS,
                 "Override with TaskFragment remote animation for transit=%s",
                 AppTransition.appTransitionOldToString(transit));
+
+        final boolean hasUntrustedEmbedding = task.forAllLeafTasks(
+                taskFragment -> !taskFragment.isAllowedToBeEmbeddedInTrustedMode());
+        final RemoteAnimationController remoteAnimationController =
+                mDisplayContent.mAppTransition.getRemoteAnimationController();
+        if (hasUntrustedEmbedding && remoteAnimationController != null) {
+            // We are going to use client-driven animation, but the Task is in untrusted embedded
+            // mode. We need to disable all input on activity windows during the animation to
+            // ensure it is safe. This is needed for all activity windows in the animation Task.
+            remoteAnimationController.setOnRemoteAnimationReady(() -> {
+                final Consumer<ActivityRecord> updateActivities =
+                        activity -> activity.setDropInputForAnimation(true);
+                task.forAllActivities(updateActivities);
+            });
+            ProtoLog.d(WM_DEBUG_APP_TRANSITIONS, "Task=%d contains embedded TaskFragment in"
+                    + " untrusted mode. Disabled all input during TaskFragment remote animation.",
+                    task.mTaskId);
+        }
         return true;
     }
 
