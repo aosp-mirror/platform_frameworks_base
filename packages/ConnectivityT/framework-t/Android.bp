@@ -131,8 +131,8 @@ filegroup {
         "src/android/net/EthernetNetworkUpdateRequest.java",
         "src/android/net/EthernetNetworkUpdateRequest.aidl",
         "src/android/net/IEthernetManager.aidl",
-        "src/android/net/IEthernetNetworkManagementListener.aidl",
         "src/android/net/IEthernetServiceListener.aidl",
+        "src/android/net/INetworkInterfaceOutcomeReceiver.aidl",
         "src/android/net/ITetheredInterfaceCallback.aidl",
     ],
     path: "src",
@@ -154,17 +154,17 @@ filegroup {
     ],
 }
 
+// TODO: remove this empty filegroup.
 filegroup {
     name: "framework-connectivity-tiramisu-sources",
-    srcs: [
-        ":framework-connectivity-ethernet-sources",
-    ],
+    srcs: [],
     visibility: ["//frameworks/base"],
 }
 
 filegroup {
     name: "framework-connectivity-tiramisu-updatable-sources",
     srcs: [
+        ":framework-connectivity-ethernet-sources",
         ":framework-connectivity-ipsec-sources",
         ":framework-connectivity-netstats-sources",
         ":framework-connectivity-nsd-sources",

@@ -33,17 +33,20 @@ import java.util.Objects;
  */
 @SystemApi
 public final class EthernetNetworkUpdateRequest implements Parcelable {
-    @NonNull
+    @Nullable
     private final IpConfiguration mIpConfig;
     @Nullable
     private final NetworkCapabilities mNetworkCapabilities;
 
     /**
-     * @return the new {@link IpConfiguration}.
+     * Setting the {@link IpConfiguration} is optional in {@link EthernetNetworkUpdateRequest}.
+     * When set to null, the existing IpConfiguration is not updated.
+     *
+     * @return the new {@link IpConfiguration} or null.
      */
-    @NonNull
+    @Nullable
     public IpConfiguration getIpConfiguration() {
-        return new IpConfiguration(mIpConfig);
+        return mIpConfig == null ? null : new IpConfiguration(mIpConfig);
     }
 
     /**
@@ -57,9 +60,8 @@ public final class EthernetNetworkUpdateRequest implements Parcelable {
         return mNetworkCapabilities == null ? null : new NetworkCapabilities(mNetworkCapabilities);
     }
 
-    private EthernetNetworkUpdateRequest(@NonNull final IpConfiguration ipConfig,
+    private EthernetNetworkUpdateRequest(@Nullable final IpConfiguration ipConfig,
             @Nullable final NetworkCapabilities networkCapabilities) {
-        Objects.requireNonNull(ipConfig);
         mIpConfig = ipConfig;
         mNetworkCapabilities = networkCapabilities;
     }
@@ -90,7 +92,8 @@ public final class EthernetNetworkUpdateRequest implements Parcelable {
          */
         public Builder(@NonNull final EthernetNetworkUpdateRequest request) {
             Objects.requireNonNull(request);
-            mBuilderIpConfig = new IpConfiguration(request.mIpConfig);
+            mBuilderIpConfig = null == request.mIpConfig
+                    ? null : new IpConfiguration(request.mIpConfig);
             mBuilderNetworkCapabilities = null == request.mNetworkCapabilities
                     ? null : new NetworkCapabilities(request.mNetworkCapabilities);
         }
@@ -101,8 +104,8 @@ public final class EthernetNetworkUpdateRequest implements Parcelable {
          * @return The builder to facilitate chaining.
          */
         @NonNull
-        public Builder setIpConfiguration(@NonNull final IpConfiguration ipConfig) {
-            mBuilderIpConfig = new IpConfiguration(ipConfig);
+        public Builder setIpConfiguration(@Nullable final IpConfiguration ipConfig) {
+            mBuilderIpConfig = ipConfig == null ? null : new IpConfiguration(ipConfig);
             return this;
         }
 
@@ -119,9 +122,16 @@ public final class EthernetNetworkUpdateRequest implements Parcelable {
 
         /**
          * Build {@link EthernetNetworkUpdateRequest} return the current update request.
+         *
+         * @throws IllegalStateException when both mBuilderNetworkCapabilities and mBuilderIpConfig
+         *                               are null.
          */
         @NonNull
         public EthernetNetworkUpdateRequest build() {
+            if (mBuilderIpConfig == null && mBuilderNetworkCapabilities == null) {
+                throw new IllegalStateException(
+                        "Cannot construct an empty EthernetNetworkUpdateRequest");
+            }
             return new EthernetNetworkUpdateRequest(mBuilderIpConfig, mBuilderNetworkCapabilities);
         }
     }

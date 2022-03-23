@@ -196,13 +196,15 @@ public class NetworkTimeUpdateService extends Binder {
      * Overrides the NTP server config for tests. Passing {@code null} to a parameter clears the
      * test value, i.e. so the normal value will be used next time.
      */
-    void setServerConfigForTests(@Nullable String hostname, @Nullable Duration timeout) {
+    void setServerConfigForTests(
+            @Nullable String hostname, @Nullable Integer port, @Nullable Duration timeout) {
         mContext.enforceCallingPermission(
                 android.Manifest.permission.SET_TIME, "set NTP server config for tests");
 
         mLocalLog.log("Setting server config for tests: hostname=" + hostname
+                + ", port=" + port
                 + ", timeout=" + timeout);
-        mTime.setServerConfigForTests(hostname, timeout);
+        mTime.setServerConfigForTests(hostname, port, timeout);
     }
 
     private void onPollNetworkTime(int event) {

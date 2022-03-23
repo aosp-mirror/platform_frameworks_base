@@ -2938,19 +2938,6 @@ public class CarrierConfigManager {
             "signal_strength_nr_nsa_use_lte_as_primary_bool";
 
     /**
-     * String array of TCP buffer sizes per network type.
-     * The entries should be of the following form, with values in bytes:
-     * "network_name:read_min,read_default,read_max,write_min,write_default,write_max".
-     * For NR (5G), the following network names should be used:
-     * - NR_NSA: NR NSA, sub-6 frequencies
-     * - NR_NSA_MMWAVE: NR NSA, mmwave frequencies
-     * - NR_SA: NR SA, sub-6 frequencies
-     * - NR_SA_MMWAVE: NR SA, mmwave frequencies
-     * @hide
-     */
-    public static final String KEY_TCP_BUFFERS_STRING_ARRAY = "tcp_buffers_string_array";
-
-    /**
      * String array of default bandwidth values per network type.
      * The entries should be of form: "network_name:downlink,uplink", with values in Kbps.
      * For NR (5G), the following network names should be used:
@@ -5654,6 +5641,13 @@ public class CarrierConfigManager {
             "telephony_data_handover_retry_rules_string_array";
 
     /**
+     * Indicates whether delay tearing down IMS data network until voice call ends.
+     * @hide
+     */
+    public static final String KEY_DELAY_IMS_TEAR_DOWN_UNTIL_CALL_END_BOOL =
+            "delay_ims_tear_down_until_call_end_bool";
+
+    /**
      * The patterns of missed incoming call sms. This is the regular expression used for
      * matching the missed incoming call's date, time, and caller id. The pattern should match
      * fields for at least month, day, hour, and minute. Year is optional although it is encouraged.
@@ -6322,28 +6316,6 @@ public class CarrierConfigManager {
                 "iDEN:14,14", "LTE:30000,15000", "HSPA+:13000,3400", "GSM:24,24",
                 "TD_SCDMA:115,115", "LTE_CA:30000,15000", "NR_NSA:47000,18000",
                 "NR_NSA_MMWAVE:145000,60000", "NR_SA:145000,60000", "NR_SA_MMWAVE:145000,60000"});
-        sDefaults.putStringArray(KEY_TCP_BUFFERS_STRING_ARRAY, new String[]{
-                "GPRS:4092,8760,48000,4096,8760,48000", "EDGE:4093,26280,70800,4096,16384,70800",
-                "UMTS:58254,349525,1048576,58254,349525,1048576",
-                "CDMA:4094,87380,262144,4096,16384,262144",
-                "1xRTT:16384,32768,131072,4096,16384,102400",
-                "EvDo_0:4094,87380,262144,4096,16384,262144",
-                "EvDo_A:4094,87380,262144,4096,16384,262144",
-                "HSDPA:61167,367002,1101005,8738,52429,262114",
-                "HSUPA:40778,244668,734003,16777,100663,301990",
-                "HSPA:40778,244668,734003,16777,100663,301990",
-                "EvDo_B:4094,87380,262144,4096,16384,262144",
-                "eHRPD:131072,262144,1048576,4096,16384,524288",
-                "iDEN:4094,87380,262144,4096,16384,262144",
-                "LTE:524288,1048576,2097152,262144,524288,1048576",
-                "HSPA+:122334,734003,2202010,32040,192239,576717",
-                "GSM:4092,8760,48000,4096,8760,48000",
-                "TD_SCDMA:58254,349525,1048576,58254,349525,1048576",
-                "LTE_CA:4096,6291456,12582912,4096,1048576,2097152",
-                "NR_NSA:2097152,6291456,16777216,512000,2097152,8388608",
-                "NR_NSA_MMWAVE:2097152,6291456,16777216,512000,2097152,8388608",
-                "NR_SA:2097152,6291456,16777216,512000,2097152,8388608",
-                "NR_SA_MMWAVE:2097152,6291456,16777216,512000,2097152,8388608"});
         sDefaults.putBoolean(KEY_BANDWIDTH_NR_NSA_USE_LTE_VALUE_FOR_UPLINK_BOOL, false);
         sDefaults.putString(KEY_WCDMA_DEFAULT_SIGNAL_STRENGTH_MEASUREMENT_STRING, "rssi");
         sDefaults.putBoolean(KEY_CONFIG_SHOW_ORIG_DIAL_STRING_FOR_CDMA_BOOL, false);
@@ -6493,6 +6465,7 @@ public class CarrierConfigManager {
                 KEY_TELEPHONY_DATA_HANDOVER_RETRY_RULES_STRING_ARRAY, new String[] {
                         "retry_interval=1000|2000|4000|8000|16000, maximum_retries=5"
                 });
+        sDefaults.putBoolean(KEY_DELAY_IMS_TEAR_DOWN_UNTIL_CALL_END_BOOL, false);
         sDefaults.putStringArray(KEY_MISSED_INCOMING_CALL_SMS_PATTERN_STRING_ARRAY, new String[0]);
         sDefaults.putBoolean(KEY_DISABLE_DUN_APN_WHILE_ROAMING_WITH_PRESET_APN_BOOL, false);
         sDefaults.putString(KEY_DEFAULT_PREFERRED_APN_NAME_STRING, "");
@@ -6504,7 +6477,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_STORE_SIM_PIN_FOR_UNATTENDED_REBOOT_BOOL, true);
         sDefaults.putBoolean(KEY_HIDE_ENABLE_2G, false);
         sDefaults.putStringArray(KEY_ALLOWED_INITIAL_ATTACH_APN_TYPES_STRING_ARRAY,
-                new String[]{"ia", "default", "mms", "dun"});
+                new String[]{"ia", "default"});
         sDefaults.putBoolean(KEY_CARRIER_PROVISIONS_WIFI_MERGED_NETWORKS_BOOL, false);
         sDefaults.putBoolean(KEY_USE_IP_FOR_CALLING_INDICATOR_BOOL, false);
         sDefaults.putBoolean(KEY_DISPLAY_CALL_STRENGTH_INDICATOR_BOOL, true);
