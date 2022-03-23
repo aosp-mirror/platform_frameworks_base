@@ -2096,6 +2096,13 @@ public class AppStandbyController
                 .sendToTarget();
     }
 
+    @VisibleForTesting
+    AppIdleHistory getAppIdleHistoryForTest() {
+        synchronized (mAppIdleLock) {
+            return mAppIdleHistory;
+        }
+    }
+
     @Override
     public void dumpUsers(IndentingPrintWriter idpw, int[] userIds, List<String> pkgs) {
         synchronized (mAppIdleLock) {
