@@ -465,6 +465,7 @@ public class InfoMediaManager extends MediaManager {
         RoutingSessionInfo routingSessionInfo = getRoutingSessionInfo(packageName);
         if (routingSessionInfo != null) {
             infos.addAll(mRouterManager.getSelectedRoutes(routingSessionInfo));
+            infos.addAll(mRouterManager.getSelectableRoutes(routingSessionInfo));
         }
         final List<MediaRoute2Info> transferableRoutes =
                 mRouterManager.getTransferableRoutes(packageName);
