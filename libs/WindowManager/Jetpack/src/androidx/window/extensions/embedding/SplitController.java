@@ -37,6 +37,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.util.SparseArray;
 import android.window.TaskFragmentInfo;
 import android.window.WindowContainerTransaction;
 
@@ -58,14 +59,20 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
 
     // Currently applied split configuration.
     private final List<EmbeddingRule> mSplitRules = new ArrayList<>();
-    private final List<TaskFragmentContainer> mContainers = new ArrayList<>();
-    private final List<SplitContainer> mSplitContainers = new ArrayList<>();
+    /**
+     * Map from Task id to {@link TaskContainer} which contains all TaskFragment and split pair info
+     * below it.
+     * When the app is host of multiple Tasks, there can be multiple splits controlled by the same
+     * organizer.
+     */
+    private final SparseArray<TaskContainer> mTaskContainers = new SparseArray<>();
 
     // Callback to Jetpack to notify about changes to split states.
     private @NonNull Consumer<List<SplitInfo>> mEmbeddingCallback;
     private final List<SplitInfo> mLastReportedSplitStates = new ArrayList<>();
 
     // We currently only support split activity embedding within the one root Task.
+    // TODO(b/207720388): move to TaskContainer
     private final Rect mParentBounds = new Rect();
 
     public SplitController() {
@@ -244,7 +251,8 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
                 mPresenter.expandTaskFragment(currentContainer.getTaskFragmentToken());
             } else {
                 // Put activity into a new expanded container
-                final TaskFragmentContainer newContainer = newContainer(launchedActivity);
+                final TaskFragmentContainer newContainer = newContainer(launchedActivity,
+                        launchedActivity.getTaskId());
                 mPresenter.expandActivity(newContainer.getTaskFragmentToken(),
                         launchedActivity);
             }
@@ -327,12 +335,14 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
      */
     @Nullable
     TaskFragmentContainer getContainerWithActivity(@NonNull IBinder activityToken) {
-        for (TaskFragmentContainer container : mContainers) {
-            if (container.hasActivity(activityToken)) {
-                return container;
+        for (int i = mTaskContainers.size() - 1; i >= 0; i--) {
+            final List<TaskFragmentContainer> containers = mTaskContainers.valueAt(i).mContainers;
+            for (TaskFragmentContainer container : containers) {
+                if (container.hasActivity(activityToken)) {
+                    return container;
+                }
             }
         }
-
         return null;
     }
 
@@ -340,9 +350,12 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
      * Creates and registers a new organized container with an optional activity that will be
      * re-parented to it in a WCT.
      */
-    TaskFragmentContainer newContainer(@Nullable Activity activity) {
-        TaskFragmentContainer container = new TaskFragmentContainer(activity);
-        mContainers.add(container);
+    TaskFragmentContainer newContainer(@Nullable Activity activity, int taskId) {
+        final TaskFragmentContainer container = new TaskFragmentContainer(activity, taskId);
+        if (!mTaskContainers.contains(taskId)) {
+            mTaskContainers.put(taskId, new TaskContainer());
+        }
+        mTaskContainers.get(taskId).mContainers.add(container);
         return container;
     }
 
@@ -354,13 +367,13 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             @NonNull TaskFragmentContainer primaryContainer, @NonNull Activity primaryActivity,
             @NonNull TaskFragmentContainer secondaryContainer,
             @NonNull SplitRule splitRule) {
-        SplitContainer splitContainer = new SplitContainer(primaryContainer, primaryActivity,
+        final SplitContainer splitContainer = new SplitContainer(primaryContainer, primaryActivity,
                 secondaryContainer, splitRule);
         // Remove container later to prevent pinning escaping toast showing in lock task mode.
         if (splitRule instanceof SplitPairRule && ((SplitPairRule) splitRule).shouldClearTop()) {
             removeExistingSecondaryContainers(wct, primaryContainer);
         }
-        mSplitContainers.add(splitContainer);
+        mTaskContainers.get(primaryContainer.getTaskId()).mSplitContainers.add(splitContainer);
     }
 
     /**
@@ -368,15 +381,26 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
      */
     void removeContainer(@NonNull TaskFragmentContainer container) {
         // Remove all split containers that included this one
-        mContainers.remove(container);
-        List<SplitContainer> containersToRemove = new ArrayList<>();
-        for (SplitContainer splitContainer : mSplitContainers) {
+        final int taskId = container.getTaskId();
+        final TaskContainer taskContainer = mTaskContainers.get(taskId);
+        if (taskContainer == null) {
+            return;
+        }
+        taskContainer.mContainers.remove(container);
+        if (taskContainer.mContainers.isEmpty()) {
+            mTaskContainers.remove(taskId);
+            // No more TaskFragment in this Task, so no need to check split container.
+            return;
+        }
+
+        final List<SplitContainer> containersToRemove = new ArrayList<>();
+        for (SplitContainer splitContainer : taskContainer.mSplitContainers) {
             if (container.equals(splitContainer.getSecondaryContainer())
                     || container.equals(splitContainer.getPrimaryContainer())) {
                 containersToRemove.add(splitContainer);
             }
         }
-        mSplitContainers.removeAll(containersToRemove);
+        taskContainer.mSplitContainers.removeAll(containersToRemove);
     }
 
     /**
@@ -399,12 +423,16 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     }
 
     /**
-     * Returns the topmost not finished container.
+     * Returns the topmost not finished container in Task of given task id.
      */
     @Nullable
-    TaskFragmentContainer getTopActiveContainer() {
-        for (int i = mContainers.size() - 1; i >= 0; i--) {
-            TaskFragmentContainer container = mContainers.get(i);
+    TaskFragmentContainer getTopActiveContainer(int taskId) {
+        final TaskContainer taskContainer = mTaskContainers.get(taskId);
+        if (taskContainer == null) {
+            return null;
+        }
+        for (int i = taskContainer.mContainers.size() - 1; i >= 0; i--) {
+            final TaskFragmentContainer container = taskContainer.mContainers.get(i);
             if (!container.isFinished() && container.getRunningActivityCount() > 0) {
                 return container;
             }
@@ -434,7 +462,10 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         if (splitContainer == null) {
             return;
         }
-        if (splitContainer != mSplitContainers.get(mSplitContainers.size() - 1)) {
+        final List<SplitContainer> splitContainers = mTaskContainers.get(container.getTaskId())
+                .mSplitContainers;
+        if (splitContainers == null
+                || splitContainer != splitContainers.get(splitContainers.size() - 1)) {
             // Skip position update - it isn't the topmost split.
             return;
         }
@@ -455,8 +486,13 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
      */
     @Nullable
     private SplitContainer getActiveSplitForContainer(@NonNull TaskFragmentContainer container) {
-        for (int i = mSplitContainers.size() - 1; i >= 0; i--) {
-            SplitContainer splitContainer = mSplitContainers.get(i);
+        final List<SplitContainer> splitContainers = mTaskContainers.get(container.getTaskId())
+                .mSplitContainers;
+        if (splitContainers == null) {
+            return null;
+        }
+        for (int i = splitContainers.size() - 1; i >= 0; i--) {
+            final SplitContainer splitContainer = splitContainers.get(i);
             if (container.equals(splitContainer.getSecondaryContainer())
                     || container.equals(splitContainer.getPrimaryContainer())) {
                 return splitContainer;
@@ -473,8 +509,13 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     private SplitContainer getActiveSplitForContainers(
             @NonNull TaskFragmentContainer firstContainer,
             @NonNull TaskFragmentContainer secondContainer) {
-        for (int i = mSplitContainers.size() - 1; i >= 0; i--) {
-            SplitContainer splitContainer = mSplitContainers.get(i);
+        final List<SplitContainer> splitContainers = mTaskContainers.get(firstContainer.getTaskId())
+                .mSplitContainers;
+        if (splitContainers == null) {
+            return null;
+        }
+        for (int i = splitContainers.size() - 1; i >= 0; i--) {
+            final SplitContainer splitContainer = splitContainers.get(i);
             final TaskFragmentContainer primary = splitContainer.getPrimaryContainer();
             final TaskFragmentContainer secondary = splitContainer.getSecondaryContainer();
             if ((firstContainer == secondary && secondContainer == primary)
@@ -501,7 +542,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         final  TaskFragmentContainer container = getContainerWithActivity(
                 activity.getActivityToken());
         // Don't launch placeholder if the container is occluded.
-        if (container != null && container != getTopActiveContainer()) {
+        if (container != null && container != getTopActiveContainer(container.getTaskId())) {
             return false;
         }
 
@@ -588,24 +629,30 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     @Nullable
     private List<SplitInfo> getActiveSplitStates() {
         List<SplitInfo> splitStates = new ArrayList<>();
-        for (SplitContainer container : mSplitContainers) {
-            if (container.getPrimaryContainer().isEmpty()
-                    || container.getSecondaryContainer().isEmpty()) {
-                // We are in an intermediate state because either the split container is about to be
-                // removed or the primary or secondary container are about to receive an activity.
-                return null;
+        for (int i = mTaskContainers.size() - 1; i >= 0; i--) {
+            final List<SplitContainer> splitContainers = mTaskContainers.valueAt(i)
+                    .mSplitContainers;
+            for (SplitContainer container : splitContainers) {
+                if (container.getPrimaryContainer().isEmpty()
+                        || container.getSecondaryContainer().isEmpty()) {
+                    // We are in an intermediate state because either the split container is about
+                    // to be removed or the primary or secondary container are about to receive an
+                    // activity.
+                    return null;
+                }
+                final ActivityStack primaryContainer = container.getPrimaryContainer()
+                        .toActivityStack();
+                final ActivityStack secondaryContainer = container.getSecondaryContainer()
+                        .toActivityStack();
+                final SplitInfo splitState = new SplitInfo(primaryContainer, secondaryContainer,
+                        // Splits that are not showing side-by-side are reported as having 0 split
+                        // ratio, since by definition in the API the primary container occupies no
+                        // width of the split when covered by the secondary.
+                        mPresenter.shouldShowSideBySide(container)
+                                ? container.getSplitRule().getSplitRatio()
+                                : 0.0f);
+                splitStates.add(splitState);
             }
-            ActivityStack primaryContainer = container.getPrimaryContainer().toActivityStack();
-            ActivityStack secondaryContainer = container.getSecondaryContainer().toActivityStack();
-            SplitInfo splitState = new SplitInfo(primaryContainer,
-                    secondaryContainer,
-                    // Splits that are not showing side-by-side are reported as having 0 split
-                    // ratio, since by definition in the API the primary container occupies no
-                    // width of the split when covered by the secondary.
-                    mPresenter.shouldShowSideBySide(container)
-                            ? container.getSplitRule().getSplitRatio()
-                            : 0.0f);
-            splitStates.add(splitState);
         }
         return splitStates;
     }
@@ -615,11 +662,14 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
      * the client.
      */
     private boolean allActivitiesCreated() {
-        for (TaskFragmentContainer container : mContainers) {
-            if (container.getInfo() == null
-                    || container.getInfo().getActivities().size()
-                    != container.collectActivities().size()) {
-                return false;
+        for (int i = mTaskContainers.size() - 1; i >= 0; i--) {
+            final List<TaskFragmentContainer> containers = mTaskContainers.valueAt(i).mContainers;
+            for (TaskFragmentContainer container : containers) {
+                if (container.getInfo() == null
+                        || container.getInfo().getActivities().size()
+                        != container.collectActivities().size()) {
+                    return false;
+                }
             }
         }
         return true;
@@ -633,7 +683,12 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         if (container == null) {
             return false;
         }
-        for (SplitContainer splitContainer : mSplitContainers) {
+        final List<SplitContainer> splitContainers = mTaskContainers.get(container.getTaskId())
+                .mSplitContainers;
+        if (splitContainers == null) {
+            return true;
+        }
+        for (SplitContainer splitContainer : splitContainers) {
             if (container.equals(splitContainer.getPrimaryContainer())
                     || container.equals(splitContainer.getSecondaryContainer())) {
                 return false;
@@ -684,9 +739,12 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
 
     @Nullable
     TaskFragmentContainer getContainer(@NonNull IBinder fragmentToken) {
-        for (TaskFragmentContainer container : mContainers) {
-            if (container.getTaskFragmentToken().equals(fragmentToken)) {
-                return container;
+        for (int i = mTaskContainers.size() - 1; i >= 0; i--) {
+            final List<TaskFragmentContainer> containers = mTaskContainers.valueAt(i).mContainers;
+            for (TaskFragmentContainer container : containers) {
+                if (container.getTaskFragmentToken().equals(fragmentToken)) {
+                    return container;
+                }
             }
         }
         return null;
@@ -968,5 +1026,11 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
 
         // Not reuse if it needs to destroy the existing.
         return !pairRule.shouldClearTop();
+    }
+
+    /** Represents TaskFragments and split pairs below a Task. */
+    private static class TaskContainer {
+        final List<TaskFragmentContainer> mContainers = new ArrayList<>();
+        final List<SplitContainer> mSplitContainers = new ArrayList<>();
     }
 }

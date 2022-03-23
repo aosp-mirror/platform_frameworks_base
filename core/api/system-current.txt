@@ -439,6 +439,7 @@ package android {
     field public static final int config_systemContacts = 17039403; // 0x104002b
     field public static final int config_systemGallery = 17039399; // 0x1040027
     field public static final int config_systemNotificationIntelligence = 17039413; // 0x1040035
+    field public static final int config_systemSettingsIntelligence;
     field public static final int config_systemShell = 17039402; // 0x104002a
     field public static final int config_systemSpeechRecognizer = 17039406; // 0x104002e
     field public static final int config_systemSupervision;
@@ -9804,8 +9805,8 @@ package android.os {
     method public boolean isRestrictedProfile();
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}, conditional=true) public boolean isRestrictedProfile(@NonNull android.os.UserHandle);
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.QUERY_USERS}) public boolean isSameProfileGroup(@NonNull android.os.UserHandle, @NonNull android.os.UserHandle);
-    method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.GET_ACCOUNTS_PRIVILEGED}) public boolean isUserNameSet();
-    method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public boolean isUserOfType(@NonNull String);
+    method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS, android.Manifest.permission.QUERY_USERS, android.Manifest.permission.GET_ACCOUNTS_PRIVILEGED}) public boolean isUserNameSet();
+    method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS, android.Manifest.permission.QUERY_USERS}) public boolean isUserOfType(@NonNull String);
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS}, conditional=true) public boolean isUserUnlockingOrUnlocked(@NonNull android.os.UserHandle);
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}) public boolean removeUser(@NonNull android.os.UserHandle);
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}) public int removeUserWhenPossible(@NonNull android.os.UserHandle, boolean);
@@ -10084,10 +10085,10 @@ package android.permission {
 
   public final class PermissionManager {
     method public int checkDeviceIdentifierAccess(@Nullable String, @Nullable String, @Nullable String, int, int);
-    method public int checkPermissionForDataDelivery(@NonNull String, @NonNull android.content.AttributionSource, @Nullable String);
-    method public int checkPermissionForDataDeliveryFromDataSource(@NonNull String, @NonNull android.content.AttributionSource, @Nullable String);
+    method @RequiresPermission(value=android.Manifest.permission.UPDATE_APP_OPS_STATS, conditional=true) public int checkPermissionForDataDelivery(@NonNull String, @NonNull android.content.AttributionSource, @Nullable String);
+    method @RequiresPermission(value=android.Manifest.permission.UPDATE_APP_OPS_STATS, conditional=true) public int checkPermissionForDataDeliveryFromDataSource(@NonNull String, @NonNull android.content.AttributionSource, @Nullable String);
     method public int checkPermissionForPreflight(@NonNull String, @NonNull android.content.AttributionSource);
-    method public int checkPermissionForStartDataDelivery(@NonNull String, @NonNull android.content.AttributionSource, @Nullable String);
+    method @RequiresPermission(value=android.Manifest.permission.UPDATE_APP_OPS_STATS, conditional=true) public int checkPermissionForStartDataDelivery(@NonNull String, @NonNull android.content.AttributionSource, @Nullable String);
     method public void finishDataDelivery(@NonNull String, @NonNull android.content.AttributionSource);
     method @NonNull @RequiresPermission(android.Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY) public java.util.Set<java.lang.String> getAutoRevokeExemptionGrantedPackages();
     method @NonNull @RequiresPermission(android.Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY) public java.util.Set<java.lang.String> getAutoRevokeExemptionRequestedPackages();

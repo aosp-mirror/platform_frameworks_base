@@ -575,13 +575,7 @@ public class KeyguardIndicationController {
                                     return;
                                 }
                                 int currentUserId = KeyguardUpdateMonitor.getCurrentUser();
-                                try {
-                                    mIActivityManager.switchUser(UserHandle.USER_SYSTEM);
-                                    mIActivityManager.stopUser(currentUserId, true /* force */,
-                                            null);
-                                } catch (RemoteException re) {
-                                    Log.e(TAG, "Failed to logout user", re);
-                                }
+                                mDevicePolicyManager.logoutUser();
                             })
                             .build(),
                     false);

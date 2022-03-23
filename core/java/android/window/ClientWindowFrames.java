@@ -40,9 +40,6 @@ public class ClientWindowFrames implements Parcelable {
      */
     public final @NonNull Rect parentFrame = new Rect();
 
-    /** The background area while the window is resizing. */
-    public final @NonNull Rect backdropFrame = new Rect();
-
     public boolean isParentFrameClippedByDisplayCutout;
 
     public ClientWindowFrames() {
@@ -52,7 +49,6 @@ public class ClientWindowFrames implements Parcelable {
         frame.set(other.frame);
         displayFrame.set(other.displayFrame);
         parentFrame.set(other.parentFrame);
-        backdropFrame.set(other.backdropFrame);
         isParentFrameClippedByDisplayCutout = other.isParentFrameClippedByDisplayCutout;
     }
 
@@ -65,7 +61,6 @@ public class ClientWindowFrames implements Parcelable {
         frame.readFromParcel(in);
         displayFrame.readFromParcel(in);
         parentFrame.readFromParcel(in);
-        backdropFrame.readFromParcel(in);
         isParentFrameClippedByDisplayCutout = in.readBoolean();
     }
 
@@ -74,7 +69,6 @@ public class ClientWindowFrames implements Parcelable {
         frame.writeToParcel(dest, flags);
         displayFrame.writeToParcel(dest, flags);
         parentFrame.writeToParcel(dest, flags);
-        backdropFrame.writeToParcel(dest, flags);
         dest.writeBoolean(isParentFrameClippedByDisplayCutout);
     }
 
@@ -84,7 +78,6 @@ public class ClientWindowFrames implements Parcelable {
         return "ClientWindowFrames{frame=" + frame.toShortString(sb)
                 + " display=" + displayFrame.toShortString(sb)
                 + " parentFrame=" + parentFrame.toShortString(sb)
-                + " backdrop=" + backdropFrame.toShortString(sb)
                 + " parentClippedByDisplayCutout=" + isParentFrameClippedByDisplayCutout + "}";
     }
 

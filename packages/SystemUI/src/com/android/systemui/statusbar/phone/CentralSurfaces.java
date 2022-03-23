@@ -1877,13 +1877,7 @@ public class CentralSurfaces extends CoreStartable implements
         if (!mPresenter.isCollapsing()) {
             onClosingFinished();
         }
-
-        // Collapse the panel if we're launching in fullscreen, over the lockscreen. Do not do this
-        // if the device has gone back to sleep - through a horrific chain of 15 or so function
-        // calls, instantCollapseNotificationPanel will eventually call through to
-        // StatusBar#wakeUpIfDozing, which will wake the device up even if it was put to sleep
-        // during the launch animation.
-        if (launchIsFullScreen && mPowerManager.isInteractive()) {
+        if (launchIsFullScreen) {
             instantCollapseNotificationPanel();
         }
     }
@@ -3136,6 +3130,10 @@ public class CentralSurfaces extends CoreStartable implements
     public void finishKeyguardFadingAway() {
         mKeyguardStateController.notifyKeyguardDoneFading();
         mScrimController.setExpansionAffectsAlpha(true);
+
+        // If the device was re-locked while unlocking, we might have a pending lock that was
+        // delayed because the keyguard was in the middle of going away.
+        mKeyguardViewMediator.maybeHandlePendingLock();
     }
 
     /**

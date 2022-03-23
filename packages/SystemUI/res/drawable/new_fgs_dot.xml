@@ -15,8 +15,9 @@
 ** limitations under the License.
 -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
     android:shape="oval"
     android:width="12dp"
     android:height="12dp">
-    <solid android:color="@*android:color/red" />
+    <solid android:color="?androidprv:attr/colorAccentTertiary" />
 </shape>

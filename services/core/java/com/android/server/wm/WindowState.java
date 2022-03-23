@@ -106,6 +106,7 @@ import static android.view.WindowManagerPolicyConstants.TYPE_LAYER_MULTIPLIER;
 import static android.view.WindowManagerPolicyConstants.TYPE_LAYER_OFFSET;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ADD_REMOVE;
+import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ANIM;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_APP_TRANSITIONS;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_BACK_PREVIEW;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_FOCUS;
@@ -140,7 +141,6 @@ import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
 import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
 import static com.android.server.wm.WindowContainerChildProto.WINDOW;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_CONFIGURATION;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_INPUT_METHOD;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_POWER;
@@ -252,6 +252,7 @@ import android.window.IOnBackInvokedCallback;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.KeyInterceptionInfo;
+import com.android.internal.protolog.ProtoLogImpl;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.ToBooleanFunction;
@@ -262,6 +263,7 @@ import com.android.server.wm.SurfaceAnimator.AnimationType;
 import dalvik.annotation.optimization.NeverCompile;
 
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -2241,6 +2243,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // Mark all relevant flags for that onExitAnimationDone will proceed all the way
             // to actually remove it.
             if (!visible && isVisibleNow && mActivityRecord.isAnimating(PARENTS | TRANSITION)) {
+                ProtoLog.d(WM_DEBUG_ANIM,
+                        "Set animatingExit: reason=onAppVisibilityChanged win=%s", this);
                 mAnimatingExit = true;
                 mRemoveOnExit = true;
                 mWindowRemovalAllowed = true;
@@ -2580,6 +2584,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     // been removed. We probably need another flag to indicate that window removal
                     // should be deffered vs. overloading the flag that says we are playing an exit
                     // animation.
+                    ProtoLog.v(WM_DEBUG_ANIM,
+                            "Set animatingExit: reason=remove/replaceWindow win=%s", this);
                     mAnimatingExit = true;
                     mReplacingRemoveRequested = true;
                     return;
@@ -2608,6 +2614,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
                     // Try starting an animation.
                     if (mWinAnimator.applyAnimationLocked(transit, false)) {
+                        ProtoLog.v(WM_DEBUG_ANIM,
+                                "Set animatingExit: reason=remove/applyAnimation win=%s", this);
                         mAnimatingExit = true;
 
                         // mAnimatingExit affects canAffectSystemUiFlags(). Run layout such that
@@ -2634,6 +2642,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     // The exit animation is running or should run... wait for it!
                     ProtoLog.v(WM_DEBUG_ADD_REMOVE,
                             "Not removing %s due to exit animation", this);
+                    ProtoLog.v(WM_DEBUG_ANIM, "Set animatingExit: reason=remove/isAnimating win=%s",
+                            this);
                     setupWindowForRemoveOnExit();
                     if (mActivityRecord != null) {
                         mActivityRecord.updateReportedVisibilityLocked();
@@ -3593,6 +3603,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // Clear animating flags now, since the surface is now gone. (Note this is true even
         // if the surface is saved, to outside world the surface is still NO_SURFACE.)
         mAnimatingExit = false;
+        ProtoLog.d(WM_DEBUG_ANIM, "Clear animatingExit: reason=destroySurface win=%s", this);
 
         if (useBLASTSync()) {
             immediatelyNotifyBlastSync();
@@ -3867,25 +3878,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         outFrames.displayFrame.set(mWindowFrames.mDisplayFrame);
         if (mInvGlobalScale != 1.0f && hasCompatScale()) {
             outFrames.displayFrame.scale(mInvGlobalScale);
-        }
-
-        final Rect backdropFrame = outFrames.backdropFrame;
-        // When the task is docked, we send fullscreen sized backdropFrame as soon as resizing
-        // start even if we haven't received the relayout window, so that the client requests
-        // the relayout sooner. When dragging stops, backdropFrame needs to stay fullscreen
-        // until the window to small size, otherwise the multithread renderer will shift last
-        // one or more frame to wrong offset. So here we send fullscreen backdrop if either
-        // isDragResizing() or isDragResizeChanged() is true.
-        final boolean resizing = isDragResizing() || isDragResizeChanged();
-        if (!resizing || getWindowConfiguration().useWindowFrameForBackdrop()) {
-            // Surface position is now inherited from parent, and BackdropFrameRenderer uses
-            // backdrop frame to position content. Thus we just keep the size of backdrop frame,
-            // and remove the offset to avoid double offset from display origin.
-            backdropFrame.set(outFrames.frame);
-            backdropFrame.offsetTo(0, 0);
-        } else {
-            final DisplayInfo displayInfo = getDisplayInfo();
-            backdropFrame.set(0, 0, displayInfo.logicalWidth, displayInfo.logicalHeight);
         }
 
         // Note: in the cases where the window is tied to an activity, we should not send a
@@ -4682,8 +4674,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         // Force the show in the next prepareSurfaceLocked() call.
         mWinAnimator.mLastAlpha = -1;
-        if (DEBUG_ANIM) Slog.v(TAG,
-                "performShowLocked: mDrawState=HAS_DRAWN in " + this);
+        ProtoLog.v(WM_DEBUG_ANIM, "performShowLocked: mDrawState=HAS_DRAWN in %s", this);
         mWinAnimator.mDrawState = HAS_DRAWN;
         mWmService.scheduleAnimationLocked();
 
@@ -5003,12 +4994,24 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     boolean isExitAnimationRunningSelfOrParent() {
-        return inAppOrRecentsTransition()
+        return inTransitionSelfOrParent()
                 || isAnimating(0 /* flags */, ANIMATION_TYPE_WINDOW_ANIMATION);
     }
 
     boolean isExitAnimationRunningSelfOrChild() {
         return isAnimating(CHILDREN, ANIMATION_TYPE_WINDOW_ANIMATION);
+    }
+
+    /**
+     * @return {@code true} if self or the parent container of the window is in transition.
+     * (e.g. The app or recents transition)
+     */
+    boolean inTransitionSelfOrParent() {
+        if (!mTransitionController.isShellTransitionsEnabled()) {
+            return isAnimating(PARENTS | TRANSITION,
+                    ANIMATION_TYPE_APP_TRANSITION | ANIMATION_TYPE_RECENTS);
+        }
+        return mTransitionController.inTransition(this);
     }
 
     private boolean shouldFinishAnimatingExit() {
@@ -5054,9 +5057,17 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     void onExitAnimationDone() {
-        if (DEBUG_ANIM) Slog.v(TAG, "onExitAnimationDone in " + this
-                + ": exiting=" + mAnimatingExit + " remove=" + mRemoveOnExit
-                + " selfAnimating=" + isAnimating());
+        if (ProtoLogImpl.isEnabled(WM_DEBUG_ANIM)) {
+            final AnimationAdapter animationAdapter = mSurfaceAnimator.getAnimation();
+            StringWriter sw = new StringWriter();
+            if (animationAdapter != null) {
+                PrintWriter pw = new PrintWriter(sw);
+                animationAdapter.dump(pw, "");
+            }
+            ProtoLog.v(WM_DEBUG_ANIM, "onExitAnimationDone in %s"
+                            + ": exiting=%b remove=%b selfAnimating=%b anim=%s",
+                    this, mAnimatingExit, mRemoveOnExit, isAnimating(), sw);
+        }
 
         if (!mChildren.isEmpty()) {
             // Copying to a different list as multiple children can be removed.
@@ -5110,6 +5121,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             }
         }
         mAnimatingExit = false;
+        ProtoLog.d(WM_DEBUG_ANIM, "Clear animatingExit: reason=exitAnimationDone win=%s", this);
         getDisplayContent().mWallpaperController.hideWallpapers(this);
     }
 
@@ -5141,6 +5153,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // show up with wrong position or scale.
             if (mAnimatingExit) {
                 mAnimatingExit = false;
+                ProtoLog.d(WM_DEBUG_ANIM, "Clear animatingExit: reason=clearAnimatingFlags win=%s",
+                        this);
                 didSomething = true;
             }
             if (mDestroying) {
@@ -5215,6 +5229,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 cancelAnimation();
             }
             mAnimatingExit = false;
+            ProtoLog.d(WM_DEBUG_ANIM, "Clear animatingExit: reason=relayoutVisibleWindow win=%s",
+                    this);
         }
         if (mDestroying) {
             mDestroying = false;
@@ -5299,7 +5315,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return;
         }
 
-        if (DEBUG_ANIM) Slog.v(TAG, "Setting move animation on " + this);
+        ProtoLog.v(WM_DEBUG_ANIM, "Setting move animation on %s", this);
         final Point oldPosition = new Point();
         final Point newPosition = new Point();
         transformFrameToSurfacePosition(mWindowFrames.mLastFrame.left, mWindowFrames.mLastFrame.top,

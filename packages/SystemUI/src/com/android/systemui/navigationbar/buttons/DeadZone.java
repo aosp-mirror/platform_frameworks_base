@@ -30,6 +30,8 @@ import com.android.systemui.R;
 import com.android.systemui.navigationbar.NavigationBarController;
 import com.android.systemui.navigationbar.NavigationBarView;
 
+import javax.inject.Inject;
+
 /**
  * The "dead zone" consumes unintentional taps along the top edge of the navigation bar.
  * When users are typing quickly on an IME they may attempt to hit the space bar, overshoot, and
@@ -82,6 +84,7 @@ public class DeadZone {
         }
     };
 
+    @Inject
     public DeadZone(NavigationBarView view) {
         mNavigationBarView = view;
         mNavBarController = Dependency.get(NavigationBarController.class);

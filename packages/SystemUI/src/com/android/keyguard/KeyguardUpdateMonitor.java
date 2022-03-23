@@ -1501,17 +1501,23 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
 
                 @Override
                 public void onAuthenticationHelp(int helpMsgId, CharSequence helpString) {
+                    Trace.beginSection("KeyguardUpdateMonitor#onAuthenticationHelp");
                     handleFingerprintHelp(helpMsgId, helpString.toString());
+                    Trace.endSection();
                 }
 
                 @Override
                 public void onAuthenticationError(int errMsgId, CharSequence errString) {
+                    Trace.beginSection("KeyguardUpdateMonitor#onAuthenticationError");
                     handleFingerprintError(errMsgId, errString.toString());
+                    Trace.endSection();
                 }
 
                 @Override
                 public void onAuthenticationAcquired(int acquireInfo) {
+                    Trace.beginSection("KeyguardUpdateMonitor#onAuthenticationAcquired");
                     handleFingerprintAcquired(acquireInfo);
+                    Trace.endSection();
                 }
 
                 @Override

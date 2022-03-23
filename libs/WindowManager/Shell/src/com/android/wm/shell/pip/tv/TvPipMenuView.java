@@ -177,29 +177,43 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
                 expanded ? R.string.pip_collapse : R.string.pip_expand);
     }
 
-    void show(boolean inMoveMode, int gravity) {
+    /**
+     * @param gravity for the arrow hints
+     */
+    void showMoveMenu(int gravity) {
         if (DEBUG) {
-            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                    "%s: show(), inMoveMode: %b", TAG, inMoveMode);
+            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE, "%s: showMoveMenu()", TAG);
         }
-        if (inMoveMode) {
-            showMovementHints(gravity);
-        } else {
-            animateAlphaTo(1, mActionButtonsContainer);
-        }
-        animateAlphaTo(1, mMenuFrameView);
+        showMenuButtons(false);
+        showMovementHints(gravity);
+        showMenuFrame(true);
     }
 
-    void hide() {
+    void showButtonMenu() {
         if (DEBUG) {
-            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE, "%s: hide()", TAG);
+            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE, "%s: showButtonMenu()", TAG);
         }
-        animateAlphaTo(0, mActionButtonsContainer);
-        animateAlphaTo(0, mMenuFrameView);
+        showMenuButtons(true);
         hideMovementHints();
+        showMenuFrame(true);
+    }
+
+    /**
+     * Hides all menu views, including the menu frame.
+     */
+    void hideAll() {
+        if (DEBUG) {
+            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE, "%s: hideAll()", TAG);
+        }
+        showMenuButtons(false);
+        hideMovementHints();
+        showMenuFrame(false);
     }
 
     private void animateAlphaTo(float alpha, View view) {
+        if (view.getAlpha() == alpha) {
+            return;
+        }
         view.animate()
                 .alpha(alpha)
                 .setInterpolator(alpha == 0f ? TvPipInterpolators.EXIT : TvPipInterpolators.ENTER)
@@ -419,6 +433,10 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
         animateAlphaTo(show ? 1 : 0, mActionButtonsContainer);
     }
 
+    private void showMenuFrame(boolean show) {
+        animateAlphaTo(show ? 1 : 0, mMenuFrameView);
+    }
+
     interface Listener {
 
         void onBackPress();
@@ -426,7 +444,10 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
         void onEnterMoveMode();
 
         /**
-         * @return whether move mode was exited
+         * Called when a button for exiting move mode was pressed.
+         *
+         * @return true if the event was handled or false if the key event should be handled by the
+         * next receiver.
          */
         boolean onExitMoveMode();
 

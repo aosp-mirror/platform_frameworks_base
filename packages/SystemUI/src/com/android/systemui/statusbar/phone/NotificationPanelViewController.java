@@ -1098,6 +1098,8 @@ public class NotificationPanelViewController extends PanelViewController {
 
         if (splitNotificationShadeChanged) {
             updateClockAppearance();
+            updateQsState();
+            mNotificationStackScrollLayoutController.updateFooter();
         }
     }
 
@@ -2348,7 +2350,7 @@ public class NotificationPanelViewController extends PanelViewController {
     private int calculateBottomQsClippingBound(int top) {
         if (mShouldUseSplitNotificationShade) {
             return top + mNotificationStackScrollLayoutController.getHeight()
-                    - mSplitShadeNotificationsScrimMarginBottom;
+                    + mSplitShadeNotificationsScrimMarginBottom;
         } else {
             return getView().getBottom();
         }
@@ -2466,7 +2468,12 @@ public class NotificationPanelViewController extends PanelViewController {
             // be visible, otherwise you can see the bounds once swiping up to see bouncer
             mScrimController.setNotificationsBounds(0, 0, 0, 0);
         } else {
-            mScrimController.setNotificationsBounds(left, top, right, bottom);
+            // Increase the height of the notifications scrim when not in split shade
+            // (e.g. portrait tablet) so the rounded corners are not visible at the bottom,
+            // in this case they are rendered off-screen
+            final int notificationsScrimBottom =
+                    mShouldUseSplitNotificationShade ? bottom : bottom + radius;
+            mScrimController.setNotificationsBounds(left, top, right, notificationsScrimBottom);
         }
 
         if (mShouldUseSplitNotificationShade) {
@@ -2476,10 +2483,13 @@ public class NotificationPanelViewController extends PanelViewController {
         }
 
         mScrimController.setScrimCornerRadius(radius);
+
+        // Convert global clipping coordinates to local ones,
+        // relative to NotificationStackScrollLayout
         int nsslLeft = left - mNotificationStackScrollLayoutController.getLeft();
         int nsslRight = right - mNotificationStackScrollLayoutController.getLeft();
         int nsslTop = top - mNotificationStackScrollLayoutController.getTop();
-        int nsslBottom = bottom;
+        int nsslBottom = bottom - mNotificationStackScrollLayoutController.getTop();
         int bottomRadius = mShouldUseSplitNotificationShade ? radius : 0;
         mNotificationStackScrollLayoutController.setRoundedClippingBounds(
                 nsslLeft, nsslTop, nsslRight, nsslBottom, radius, bottomRadius);

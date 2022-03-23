@@ -2931,8 +2931,8 @@
     <!-- Apps that are authorized to access shared accounts, overridden by product overlays -->
     <string name="config_appsAuthorizedForSharedAccounts" translatable="false">;com.android.settings;</string>
 
-    <!-- Settings intelligence package name -->
-    <string name="config_settingsIntelligencePackageName" translatable="false">
+    <!-- System settings intelligence package name -->
+    <string name="config_systemSettingsIntelligence" translatable="false">
         com.android.settings.intelligence
     </string>
 

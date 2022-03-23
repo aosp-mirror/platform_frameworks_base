@@ -401,7 +401,7 @@ public class SurfaceControlViewHost {
     public void relayout(WindowManager.LayoutParams attrs,
             WindowlessWindowManager.ResizeCompleteCallback callback) {
         mViewRoot.setLayoutParams(attrs, false);
-        mViewRoot.setReportNextDraw(true /* syncBuffer */);
+        mViewRoot.setReportNextDraw();
         mWm.setCompletionCallback(mViewRoot.mWindow.asBinder(), callback);
     }
 

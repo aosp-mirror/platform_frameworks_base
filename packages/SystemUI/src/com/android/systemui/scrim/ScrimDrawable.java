@@ -199,7 +199,7 @@ public class ScrimDrawable extends Drawable {
             drawConcave(canvas);
         } else if (mCornerRadiusEnabled && mCornerRadius > 0) {
             canvas.drawRoundRect(getBounds().left, getBounds().top, getBounds().right,
-                    getBounds().bottom + mCornerRadius,
+                    getBounds().bottom,
                     /* x radius*/ mCornerRadius, /* y radius*/ mCornerRadius, mPaint);
         } else {
             canvas.drawRect(getBounds().left, getBounds().top, getBounds().right,

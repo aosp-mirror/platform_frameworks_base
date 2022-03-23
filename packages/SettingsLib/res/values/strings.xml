@@ -229,11 +229,11 @@
     <string name="bluetooth_active_no_battery_level">Active</string>
 
     <!-- Connected device settings. Message when the left-side hearing aid device is active. [CHAR LIMIT=NONE] -->
-    <string name="bluetooth_hearing_aid_left_active">Active, left ear</string>
+    <string name="bluetooth_hearing_aid_left_active">Active, left only</string>
     <!-- Connected device settings. Message when the right-side hearing aid device is active. [CHAR LIMIT=NONE] -->
-    <string name="bluetooth_hearing_aid_right_active">Active, right ear</string>
+    <string name="bluetooth_hearing_aid_right_active">Active, right only</string>
     <!-- Connected device settings. Message when the left-side and right-side hearing aids device are active. [CHAR LIMIT=NONE] -->
-    <string name="bluetooth_hearing_aid_left_and_right_active">Active, left and right ears</string>
+    <string name="bluetooth_hearing_aid_left_and_right_active">Active, left and right</string>
 
     <!-- Bluetooth settings.  The user-visible string that is used whenever referring to the A2DP profile. -->
     <string name="bluetooth_profile_a2dp">Media audio</string>
@@ -397,9 +397,6 @@
 
     <!-- Title for a work profile. [CHAR LIMIT=25] -->
     <string name="managed_user_title">All work apps</string>
-
-    <!-- Title for Guest user [CHAR LIMIT=35] -->
-    <string name="user_guest">Guest</string>
 
     <!-- Manage apps, individual app screen, substituted for the application's label when the app's label CAN NOT be determined.-->
     <string name="unknown">Unknown</string>
@@ -1421,16 +1418,18 @@
     <!-- Title for the preference to enter the nickname of the user to display in the user switcher [CHAR LIMIT=25]-->
     <string name="user_nickname">Nickname</string>
 
+    <!-- Label for adding a new user in the user switcher [CHAR LIMIT=35] -->
+    <string name="user_add_user">Add user</string>
     <!-- Label for adding a new guest in the user switcher [CHAR LIMIT=35] -->
     <string name="guest_new_guest">Add guest</string>
     <!-- Label for exiting and removing the guest session in the user switcher [CHAR LIMIT=35] -->
     <string name="guest_exit_guest">Remove guest</string>
     <!-- Label for resetting guest session in the user switcher, which will remove all data from the current guest session [CHAR LIMIT=35] -->
     <string name="guest_reset_guest">Reset guest</string>
-    <!-- Name for the guest user [CHAR LIMIT=35] -->
-    <string name="guest_nickname">Guest</string>
     <!-- Title of the confirmation dialog to confirm resetting guest. [CHAR LIMIT=NONE] -->
     <string name="guest_reset_guest_dialog_title">Reset guest?</string>
+    <!-- Title of the confirmation dialog to confirm removing guest. [CHAR LIMIT=NONE] -->
+    <string name="guest_remove_guest_dialog_title">Remove guest?</string>
     <!-- Label for button in confirmation dialog when resetting guest user [CHAR LIMIT=35] -->
     <string name="guest_reset_guest_confirm_button">Reset</string>
     <!-- Status message indicating the device is in the process of resetting the guest user. [CHAR_LIMIT=NONE] -->
@@ -1441,6 +1440,15 @@
     <string name="user_image_choose_photo">Choose an image</string>
     <!-- Accessibility message for the photo selector which is a button/popup with the current photo [CHAR LIMIT=50] -->
     <string name="user_image_photo_selector">Select photo</string>
+
+    <!-- Content of the dialog shown when the user has failed to provide the device lock too many times and the device is wiped. [CHAR LIMIT=NONE] -->
+    <string name="failed_attempts_now_wiping_device">Too many incorrect attempts. This device\'s data will be deleted.</string>
+    <!-- Content of the dialog shown when the user has failed to provide the user lock too many times and the user is removed. [CHAR LIMIT=NONE] -->
+    <string name="failed_attempts_now_wiping_user">Too many incorrect attempts. This user will be deleted.</string>
+    <!-- Content of the dialog shown when the user has failed to provide the work lock too many times and the work profile is removed. [CHAR LIMIT=NONE] -->
+    <string name="failed_attempts_now_wiping_profile">Too many incorrect attempts. This work profile and its data will be deleted.</string>
+    <!-- Button label to dismiss the dialog telling the user the work profile has been wiped. [CHAR LIMIT=40] -->
+    <string name="failed_attempts_now_wiping_dialog_dismiss">Dismiss</string>
 
     <!-- List entry in developer settings to choose default device/system behavior for the app freezer [CHAR LIMIT=30]-->
     <string name="cached_apps_freezer_device_default">Device default</string>

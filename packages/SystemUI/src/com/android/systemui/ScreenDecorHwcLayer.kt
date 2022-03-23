@@ -114,6 +114,10 @@ class ScreenDecorHwcLayer(context: Context, displayDecorationSupport: DisplayDec
         }
     }
 
+    override fun onUpdate() {
+        parent.requestTransparentRegion(this)
+    }
+
     override fun onDraw(canvas: Canvas) {
         // If updating onDraw, also update gatherTransparentRegion
         if (useInvertedAlphaColor) {
@@ -365,10 +369,15 @@ class ScreenDecorHwcLayer(context: Context, displayDecorationSupport: DisplayDec
      * Update the rounded corner size.
      */
     fun updateRoundedCornerSize(top: Int, bottom: Int) {
+        if (roundedCornerTopSize == top && roundedCornerBottomSize == bottom) {
+            return
+        }
         roundedCornerTopSize = top
         roundedCornerBottomSize = bottom
         updateRoundedCornerDrawableBounds()
-        invalidate()
+
+        // Use requestLayout() to trigger transparent region recalculated
+        requestLayout()
     }
 
     private fun updateRoundedCornerDrawableBounds() {
