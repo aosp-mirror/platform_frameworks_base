@@ -17,6 +17,8 @@
 package android.speech;
 
 import android.annotation.NonNull;
+import android.content.Context;
+import android.content.Intent;
 import android.os.Parcelable;
 
 import com.android.internal.util.DataClass;
@@ -34,19 +36,63 @@ import java.util.List;
 )
 public final class RecognitionSupport implements Parcelable {
 
+    /**
+     * Support for this request is ready for use on this device for the returned languages.
+     *
+     * @deprecated See {@link #getInstalledOnDeviceLanguages()}.
+     */
+    @NonNull
+    @Deprecated
+    @DataClass.PluralOf("installedLanguage")
+    private List<String> mInstalledLanguages = List.of();
+
+    /**
+     * Support for this request is scheduled for download for the returned languages.
+     *
+     * @deprecated See {@link #getPendingOnDeviceLanguages()}.
+     */
+    @NonNull
+    @Deprecated
+    @DataClass.PluralOf("pendingLanguage")
+    private List<String> mPendingLanguages = List.of();
+
+    /**
+     * These languages are supported but need to be downloaded before use. See {@link
+     * SpeechRecognizer#triggerModelDownload(Intent)}.
+     *
+     * @deprecated See {@link #getSupportedOnDeviceLanguages()}.
+     */
+    @NonNull
+    @Deprecated
+    @DataClass.PluralOf("supportedLanguage")
+    private List<String> mSupportedLanguages = List.of();
+
     /** Support for this request is ready for use on this device for the returned languages. */
     @NonNull
-    @DataClass.PluralOf("installedLanguage")
-    private List<String> mInstalledLanguages = null;
+    @DataClass.PluralOf("installedOnDeviceLanguage")
+    private List<String> mInstalledOnDeviceLanguages = List.of();
 
     /** Support for this request is scheduled for download for the returned languages. */
-    @DataClass.PluralOf("pendingLanguage")
-    @NonNull private List<String> mPendingLanguages = null;
-
-    /** These languages are supported but need to be downloaded before use. */
     @NonNull
-    @DataClass.PluralOf("supportedLanguage")
-    private List<String> mSupportedLanguages = null;
+    @DataClass.PluralOf("pendingOnDeviceLanguage")
+    private List<String> mPendingOnDeviceLanguages = List.of();
+
+    /**
+     * These languages are supported but need to be downloaded before use. See {@link
+     * SpeechRecognizer#triggerModelDownload(Intent)}.
+     */
+    @NonNull
+    @DataClass.PluralOf("supportedOnDeviceLanguage")
+    private List<String> mSupportedOnDeviceLanguages = List.of();
+
+    /**
+     * Support for this request is available via a remote implementation. {@link SpeechRecognizer}
+     * created via {@link SpeechRecognizer#createOnDeviceSpeechRecognizer(Context)} are expected to
+     * return an empty list.
+     */
+    @NonNull
+    @DataClass.PluralOf("onlineLanguage")
+    private List<String> mOnlineLanguages = List.of();
 
 
 
@@ -65,44 +111,108 @@ public final class RecognitionSupport implements Parcelable {
 
     @DataClass.Generated.Member
     /* package-private */ RecognitionSupport(
-            @NonNull List<String> installedLanguages,
-            @NonNull List<String> pendingLanguages,
-            @NonNull List<String> supportedLanguages) {
+            @NonNull @Deprecated List<String> installedLanguages,
+            @NonNull @Deprecated List<String> pendingLanguages,
+            @NonNull @Deprecated List<String> supportedLanguages,
+            @NonNull List<String> installedOnDeviceLanguages,
+            @NonNull List<String> pendingOnDeviceLanguages,
+            @NonNull List<String> supportedOnDeviceLanguages,
+            @NonNull List<String> onlineLanguages) {
         this.mInstalledLanguages = installedLanguages;
         com.android.internal.util.AnnotationValidations.validate(
                 NonNull.class, null, mInstalledLanguages);
+        com.android.internal.util.AnnotationValidations.validate(
+                Deprecated.class, null, mInstalledLanguages);
         this.mPendingLanguages = pendingLanguages;
         com.android.internal.util.AnnotationValidations.validate(
                 NonNull.class, null, mPendingLanguages);
+        com.android.internal.util.AnnotationValidations.validate(
+                Deprecated.class, null, mPendingLanguages);
         this.mSupportedLanguages = supportedLanguages;
         com.android.internal.util.AnnotationValidations.validate(
                 NonNull.class, null, mSupportedLanguages);
+        com.android.internal.util.AnnotationValidations.validate(
+                Deprecated.class, null, mSupportedLanguages);
+        this.mInstalledOnDeviceLanguages = installedOnDeviceLanguages;
+        com.android.internal.util.AnnotationValidations.validate(
+                NonNull.class, null, mInstalledOnDeviceLanguages);
+        this.mPendingOnDeviceLanguages = pendingOnDeviceLanguages;
+        com.android.internal.util.AnnotationValidations.validate(
+                NonNull.class, null, mPendingOnDeviceLanguages);
+        this.mSupportedOnDeviceLanguages = supportedOnDeviceLanguages;
+        com.android.internal.util.AnnotationValidations.validate(
+                NonNull.class, null, mSupportedOnDeviceLanguages);
+        this.mOnlineLanguages = onlineLanguages;
+        com.android.internal.util.AnnotationValidations.validate(
+                NonNull.class, null, mOnlineLanguages);
 
         // onConstructed(); // You can define this method to get a callback
     }
 
     /**
      * Support for this request is ready for use on this device for the returned languages.
+     *
+     * @deprecated See {@link #getInstalledOnDeviceLanguages()}.
      */
     @DataClass.Generated.Member
-    public @NonNull List<String> getInstalledLanguages() {
+    @NonNull @Deprecated public List<String> getInstalledLanguages() {
         return mInstalledLanguages;
+    }
+
+    /**
+     * Support for this request is scheduled for download for the returned languages.
+     *
+     * @deprecated See {@link #getPendingOnDeviceLanguages()}.
+     */
+    @DataClass.Generated.Member
+    @NonNull @Deprecated public List<String> getPendingLanguages() {
+        return mPendingLanguages;
+    }
+
+    /**
+     * These languages are supported but need to be downloaded before use. See {@link
+     * SpeechRecognizer#triggerModelDownload(Intent)}.
+     *
+     * @deprecated See {@link #getSupportedOnDeviceLanguages()}.
+     */
+    @DataClass.Generated.Member
+    @NonNull @Deprecated public List<String> getSupportedLanguages() {
+        return mSupportedLanguages;
+    }
+
+    /**
+     * Support for this request is ready for use on this device for the returned languages.
+     */
+    @DataClass.Generated.Member
+    public @NonNull List<String> getInstalledOnDeviceLanguages() {
+        return mInstalledOnDeviceLanguages;
     }
 
     /**
      * Support for this request is scheduled for download for the returned languages.
      */
     @DataClass.Generated.Member
-    public @NonNull List<String> getPendingLanguages() {
-        return mPendingLanguages;
+    public @NonNull List<String> getPendingOnDeviceLanguages() {
+        return mPendingOnDeviceLanguages;
     }
 
     /**
-     * These languages are supported but need to be downloaded before use.
+     * These languages are supported but need to be downloaded before use. See {@link
+     * SpeechRecognizer#triggerModelDownload(Intent)}.
      */
     @DataClass.Generated.Member
-    public @NonNull List<String> getSupportedLanguages() {
-        return mSupportedLanguages;
+    public @NonNull List<String> getSupportedOnDeviceLanguages() {
+        return mSupportedOnDeviceLanguages;
+    }
+
+    /**
+     * Support for this request is available via a remote implementation. {@link SpeechRecognizer}
+     * created via {@link SpeechRecognizer#createOnDeviceSpeechRecognizer(Context)} are expected to
+     * return an empty list.
+     */
+    @DataClass.Generated.Member
+    public @NonNull List<String> getOnlineLanguages() {
+        return mOnlineLanguages;
     }
 
     @Override
@@ -114,7 +224,11 @@ public final class RecognitionSupport implements Parcelable {
         return "RecognitionSupport { " +
                 "installedLanguages = " + mInstalledLanguages + ", " +
                 "pendingLanguages = " + mPendingLanguages + ", " +
-                "supportedLanguages = " + mSupportedLanguages +
+                "supportedLanguages = " + mSupportedLanguages + ", " +
+                "installedOnDeviceLanguages = " + mInstalledOnDeviceLanguages + ", " +
+                "pendingOnDeviceLanguages = " + mPendingOnDeviceLanguages + ", " +
+                "supportedOnDeviceLanguages = " + mSupportedOnDeviceLanguages + ", " +
+                "onlineLanguages = " + mOnlineLanguages +
         " }";
     }
 
@@ -133,7 +247,11 @@ public final class RecognitionSupport implements Parcelable {
         return true
                 && java.util.Objects.equals(mInstalledLanguages, that.mInstalledLanguages)
                 && java.util.Objects.equals(mPendingLanguages, that.mPendingLanguages)
-                && java.util.Objects.equals(mSupportedLanguages, that.mSupportedLanguages);
+                && java.util.Objects.equals(mSupportedLanguages, that.mSupportedLanguages)
+                && java.util.Objects.equals(mInstalledOnDeviceLanguages, that.mInstalledOnDeviceLanguages)
+                && java.util.Objects.equals(mPendingOnDeviceLanguages, that.mPendingOnDeviceLanguages)
+                && java.util.Objects.equals(mSupportedOnDeviceLanguages, that.mSupportedOnDeviceLanguages)
+                && java.util.Objects.equals(mOnlineLanguages, that.mOnlineLanguages);
     }
 
     @Override
@@ -146,6 +264,10 @@ public final class RecognitionSupport implements Parcelable {
         _hash = 31 * _hash + java.util.Objects.hashCode(mInstalledLanguages);
         _hash = 31 * _hash + java.util.Objects.hashCode(mPendingLanguages);
         _hash = 31 * _hash + java.util.Objects.hashCode(mSupportedLanguages);
+        _hash = 31 * _hash + java.util.Objects.hashCode(mInstalledOnDeviceLanguages);
+        _hash = 31 * _hash + java.util.Objects.hashCode(mPendingOnDeviceLanguages);
+        _hash = 31 * _hash + java.util.Objects.hashCode(mSupportedOnDeviceLanguages);
+        _hash = 31 * _hash + java.util.Objects.hashCode(mOnlineLanguages);
         return _hash;
     }
 
@@ -158,6 +280,10 @@ public final class RecognitionSupport implements Parcelable {
         dest.writeStringList(mInstalledLanguages);
         dest.writeStringList(mPendingLanguages);
         dest.writeStringList(mSupportedLanguages);
+        dest.writeStringList(mInstalledOnDeviceLanguages);
+        dest.writeStringList(mPendingOnDeviceLanguages);
+        dest.writeStringList(mSupportedOnDeviceLanguages);
+        dest.writeStringList(mOnlineLanguages);
     }
 
     @Override
@@ -177,16 +303,42 @@ public final class RecognitionSupport implements Parcelable {
         in.readStringList(pendingLanguages);
         List<String> supportedLanguages = new java.util.ArrayList<>();
         in.readStringList(supportedLanguages);
+        List<String> installedOnDeviceLanguages = new java.util.ArrayList<>();
+        in.readStringList(installedOnDeviceLanguages);
+        List<String> pendingOnDeviceLanguages = new java.util.ArrayList<>();
+        in.readStringList(pendingOnDeviceLanguages);
+        List<String> supportedOnDeviceLanguages = new java.util.ArrayList<>();
+        in.readStringList(supportedOnDeviceLanguages);
+        List<String> onlineLanguages = new java.util.ArrayList<>();
+        in.readStringList(onlineLanguages);
 
         this.mInstalledLanguages = installedLanguages;
         com.android.internal.util.AnnotationValidations.validate(
                 NonNull.class, null, mInstalledLanguages);
+        com.android.internal.util.AnnotationValidations.validate(
+                Deprecated.class, null, mInstalledLanguages);
         this.mPendingLanguages = pendingLanguages;
         com.android.internal.util.AnnotationValidations.validate(
                 NonNull.class, null, mPendingLanguages);
+        com.android.internal.util.AnnotationValidations.validate(
+                Deprecated.class, null, mPendingLanguages);
         this.mSupportedLanguages = supportedLanguages;
         com.android.internal.util.AnnotationValidations.validate(
                 NonNull.class, null, mSupportedLanguages);
+        com.android.internal.util.AnnotationValidations.validate(
+                Deprecated.class, null, mSupportedLanguages);
+        this.mInstalledOnDeviceLanguages = installedOnDeviceLanguages;
+        com.android.internal.util.AnnotationValidations.validate(
+                NonNull.class, null, mInstalledOnDeviceLanguages);
+        this.mPendingOnDeviceLanguages = pendingOnDeviceLanguages;
+        com.android.internal.util.AnnotationValidations.validate(
+                NonNull.class, null, mPendingOnDeviceLanguages);
+        this.mSupportedOnDeviceLanguages = supportedOnDeviceLanguages;
+        com.android.internal.util.AnnotationValidations.validate(
+                NonNull.class, null, mSupportedOnDeviceLanguages);
+        this.mOnlineLanguages = onlineLanguages;
+        com.android.internal.util.AnnotationValidations.validate(
+                NonNull.class, null, mOnlineLanguages);
 
         // onConstructed(); // You can define this method to get a callback
     }
@@ -212,9 +364,13 @@ public final class RecognitionSupport implements Parcelable {
     @DataClass.Generated.Member
     public static final class Builder {
 
-        private @NonNull List<String> mInstalledLanguages;
-        private @NonNull List<String> mPendingLanguages;
-        private @NonNull List<String> mSupportedLanguages;
+        private @NonNull @Deprecated List<String> mInstalledLanguages;
+        private @NonNull @Deprecated List<String> mPendingLanguages;
+        private @NonNull @Deprecated List<String> mSupportedLanguages;
+        private @NonNull List<String> mInstalledOnDeviceLanguages;
+        private @NonNull List<String> mPendingOnDeviceLanguages;
+        private @NonNull List<String> mSupportedOnDeviceLanguages;
+        private @NonNull List<String> mOnlineLanguages;
 
         private long mBuilderFieldsSet = 0L;
 
@@ -223,9 +379,12 @@ public final class RecognitionSupport implements Parcelable {
 
         /**
          * Support for this request is ready for use on this device for the returned languages.
+         *
+         * @deprecated See {@link #getInstalledOnDeviceLanguages()}.
          */
         @DataClass.Generated.Member
-        public @NonNull Builder setInstalledLanguages(@NonNull List<String> value) {
+        @Deprecated @NonNull
+        public Builder setInstalledLanguages(@NonNull @Deprecated List<String> value) {
             checkNotUsed();
             mBuilderFieldsSet |= 0x1;
             mInstalledLanguages = value;
@@ -234,7 +393,8 @@ public final class RecognitionSupport implements Parcelable {
 
         /** @see #setInstalledLanguages */
         @DataClass.Generated.Member
-        public @NonNull Builder addInstalledLanguage(@NonNull String value) {
+        @Deprecated @NonNull
+        public Builder addInstalledLanguage(@NonNull String value) {
             if (mInstalledLanguages == null) setInstalledLanguages(new java.util.ArrayList<>());
             mInstalledLanguages.add(value);
             return this;
@@ -242,9 +402,12 @@ public final class RecognitionSupport implements Parcelable {
 
         /**
          * Support for this request is scheduled for download for the returned languages.
+         *
+         * @deprecated See {@link #getPendingOnDeviceLanguages()}.
          */
         @DataClass.Generated.Member
-        public @NonNull Builder setPendingLanguages(@NonNull List<String> value) {
+        @Deprecated @NonNull
+        public Builder setPendingLanguages(@NonNull @Deprecated List<String> value) {
             checkNotUsed();
             mBuilderFieldsSet |= 0x2;
             mPendingLanguages = value;
@@ -253,17 +416,22 @@ public final class RecognitionSupport implements Parcelable {
 
         /** @see #setPendingLanguages */
         @DataClass.Generated.Member
-        public @NonNull Builder addPendingLanguage(@NonNull String value) {
+        @Deprecated @NonNull
+        public Builder addPendingLanguage(@NonNull String value) {
             if (mPendingLanguages == null) setPendingLanguages(new java.util.ArrayList<>());
             mPendingLanguages.add(value);
             return this;
         }
 
         /**
-         * These languages are supported but need to be downloaded before use.
+         * These languages are supported but need to be downloaded before use. See {@link
+         * SpeechRecognizer#triggerModelDownload(Intent)}.
+         *
+         * @deprecated See {@link #getSupportedOnDeviceLanguages()}.
          */
         @DataClass.Generated.Member
-        public @NonNull Builder setSupportedLanguages(@NonNull List<String> value) {
+        @Deprecated @NonNull
+        public Builder setSupportedLanguages(@NonNull @Deprecated List<String> value) {
             checkNotUsed();
             mBuilderFieldsSet |= 0x4;
             mSupportedLanguages = value;
@@ -272,35 +440,131 @@ public final class RecognitionSupport implements Parcelable {
 
         /** @see #setSupportedLanguages */
         @DataClass.Generated.Member
-        public @NonNull Builder addSupportedLanguage(@NonNull String value) {
+        @Deprecated @NonNull
+        public Builder addSupportedLanguage(@NonNull String value) {
             if (mSupportedLanguages == null) setSupportedLanguages(new java.util.ArrayList<>());
             mSupportedLanguages.add(value);
+            return this;
+        }
+
+        /**
+         * Support for this request is ready for use on this device for the returned languages.
+         */
+        @DataClass.Generated.Member
+        public @NonNull Builder setInstalledOnDeviceLanguages(@NonNull List<String> value) {
+            checkNotUsed();
+            mBuilderFieldsSet |= 0x8;
+            mInstalledOnDeviceLanguages = value;
+            return this;
+        }
+
+        /** @see #setInstalledOnDeviceLanguages */
+        @DataClass.Generated.Member
+        public @NonNull Builder addInstalledOnDeviceLanguage(@NonNull String value) {
+            if (mInstalledOnDeviceLanguages == null) setInstalledOnDeviceLanguages(new java.util.ArrayList<>());
+            mInstalledOnDeviceLanguages.add(value);
+            return this;
+        }
+
+        /**
+         * Support for this request is scheduled for download for the returned languages.
+         */
+        @DataClass.Generated.Member
+        public @NonNull Builder setPendingOnDeviceLanguages(@NonNull List<String> value) {
+            checkNotUsed();
+            mBuilderFieldsSet |= 0x10;
+            mPendingOnDeviceLanguages = value;
+            return this;
+        }
+
+        /** @see #setPendingOnDeviceLanguages */
+        @DataClass.Generated.Member
+        public @NonNull Builder addPendingOnDeviceLanguage(@NonNull String value) {
+            if (mPendingOnDeviceLanguages == null) setPendingOnDeviceLanguages(new java.util.ArrayList<>());
+            mPendingOnDeviceLanguages.add(value);
+            return this;
+        }
+
+        /**
+         * These languages are supported but need to be downloaded before use. See {@link
+         * SpeechRecognizer#triggerModelDownload(Intent)}.
+         */
+        @DataClass.Generated.Member
+        public @NonNull Builder setSupportedOnDeviceLanguages(@NonNull List<String> value) {
+            checkNotUsed();
+            mBuilderFieldsSet |= 0x20;
+            mSupportedOnDeviceLanguages = value;
+            return this;
+        }
+
+        /** @see #setSupportedOnDeviceLanguages */
+        @DataClass.Generated.Member
+        public @NonNull Builder addSupportedOnDeviceLanguage(@NonNull String value) {
+            if (mSupportedOnDeviceLanguages == null) setSupportedOnDeviceLanguages(new java.util.ArrayList<>());
+            mSupportedOnDeviceLanguages.add(value);
+            return this;
+        }
+
+        /**
+         * Support for this request is available via a remote implementation. {@link SpeechRecognizer}
+         * created via {@link SpeechRecognizer#createOnDeviceSpeechRecognizer(Context)} are expected to
+         * return an empty list.
+         */
+        @DataClass.Generated.Member
+        public @NonNull Builder setOnlineLanguages(@NonNull List<String> value) {
+            checkNotUsed();
+            mBuilderFieldsSet |= 0x40;
+            mOnlineLanguages = value;
+            return this;
+        }
+
+        /** @see #setOnlineLanguages */
+        @DataClass.Generated.Member
+        public @NonNull Builder addOnlineLanguage(@NonNull String value) {
+            if (mOnlineLanguages == null) setOnlineLanguages(new java.util.ArrayList<>());
+            mOnlineLanguages.add(value);
             return this;
         }
 
         /** Builds the instance. This builder should not be touched after calling this! */
         public @NonNull RecognitionSupport build() {
             checkNotUsed();
-            mBuilderFieldsSet |= 0x8; // Mark builder used
+            mBuilderFieldsSet |= 0x80; // Mark builder used
 
             if ((mBuilderFieldsSet & 0x1) == 0) {
-                mInstalledLanguages = null;
+                mInstalledLanguages = List.of();
             }
             if ((mBuilderFieldsSet & 0x2) == 0) {
-                mPendingLanguages = null;
+                mPendingLanguages = List.of();
             }
             if ((mBuilderFieldsSet & 0x4) == 0) {
-                mSupportedLanguages = null;
+                mSupportedLanguages = List.of();
+            }
+            if ((mBuilderFieldsSet & 0x8) == 0) {
+                mInstalledOnDeviceLanguages = List.of();
+            }
+            if ((mBuilderFieldsSet & 0x10) == 0) {
+                mPendingOnDeviceLanguages = List.of();
+            }
+            if ((mBuilderFieldsSet & 0x20) == 0) {
+                mSupportedOnDeviceLanguages = List.of();
+            }
+            if ((mBuilderFieldsSet & 0x40) == 0) {
+                mOnlineLanguages = List.of();
             }
             RecognitionSupport o = new RecognitionSupport(
                     mInstalledLanguages,
                     mPendingLanguages,
-                    mSupportedLanguages);
+                    mSupportedLanguages,
+                    mInstalledOnDeviceLanguages,
+                    mPendingOnDeviceLanguages,
+                    mSupportedOnDeviceLanguages,
+                    mOnlineLanguages);
             return o;
         }
 
         private void checkNotUsed() {
-            if ((mBuilderFieldsSet & 0x8) != 0) {
+            if ((mBuilderFieldsSet & 0x80) != 0) {
                 throw new IllegalStateException(
                         "This Builder should not be reused. Use a new Builder instance instead");
             }
@@ -308,10 +572,10 @@ public final class RecognitionSupport implements Parcelable {
     }
 
     @DataClass.Generated(
-            time = 1644582623366L,
+            time = 1647890081869L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/android/speech/RecognitionSupport.java",
-            inputSignatures = "private @android.annotation.NonNull @com.android.internal.util.DataClass.PluralOf(\"installedLanguage\") java.util.List<java.lang.String> mInstalledLanguages\nprivate @com.android.internal.util.DataClass.PluralOf(\"pendingLanguage\") @android.annotation.NonNull java.util.List<java.lang.String> mPendingLanguages\nprivate @android.annotation.NonNull @com.android.internal.util.DataClass.PluralOf(\"supportedLanguage\") java.util.List<java.lang.String> mSupportedLanguages\nclass RecognitionSupport extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genConstructor=false, genBuilder=true, genEqualsHashCode=true, genHiddenConstDefs=true, genParcelable=true, genToString=true)")
+            inputSignatures = "private @android.annotation.NonNull @java.lang.Deprecated @com.android.internal.util.DataClass.PluralOf(\"installedLanguage\") java.util.List<java.lang.String> mInstalledLanguages\nprivate @android.annotation.NonNull @java.lang.Deprecated @com.android.internal.util.DataClass.PluralOf(\"pendingLanguage\") java.util.List<java.lang.String> mPendingLanguages\nprivate @android.annotation.NonNull @java.lang.Deprecated @com.android.internal.util.DataClass.PluralOf(\"supportedLanguage\") java.util.List<java.lang.String> mSupportedLanguages\nprivate @android.annotation.NonNull @com.android.internal.util.DataClass.PluralOf(\"installedOnDeviceLanguage\") java.util.List<java.lang.String> mInstalledOnDeviceLanguages\nprivate @android.annotation.NonNull @com.android.internal.util.DataClass.PluralOf(\"pendingOnDeviceLanguage\") java.util.List<java.lang.String> mPendingOnDeviceLanguages\nprivate @android.annotation.NonNull @com.android.internal.util.DataClass.PluralOf(\"supportedOnDeviceLanguage\") java.util.List<java.lang.String> mSupportedOnDeviceLanguages\nprivate @android.annotation.NonNull @com.android.internal.util.DataClass.PluralOf(\"onlineLanguage\") java.util.List<java.lang.String> mOnlineLanguages\nclass RecognitionSupport extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genConstructor=false, genBuilder=true, genEqualsHashCode=true, genHiddenConstDefs=true, genParcelable=true, genToString=true)")
     @Deprecated
     private void __metadata() {}
 
