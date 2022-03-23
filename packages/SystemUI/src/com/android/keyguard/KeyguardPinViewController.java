@@ -23,10 +23,14 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 import com.android.systemui.R;
 import com.android.systemui.classifier.FalsingCollector;
+import com.android.systemui.statusbar.policy.DevicePostureController;
 
 public class KeyguardPinViewController
         extends KeyguardPinBasedInputViewController<KeyguardPINView> {
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
+    private final DevicePostureController mPostureController;
+    private final DevicePostureController.Callback mPostureCallback = posture ->
+            mView.onDevicePostureChanged(posture);
 
     protected KeyguardPinViewController(KeyguardPINView view,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
@@ -35,11 +39,13 @@ public class KeyguardPinViewController
             KeyguardMessageAreaController.Factory messageAreaControllerFactory,
             LatencyTracker latencyTracker, LiftToActivateListener liftToActivateListener,
             EmergencyButtonController emergencyButtonController,
-            FalsingCollector falsingCollector) {
+            FalsingCollector falsingCollector,
+            DevicePostureController postureController) {
         super(view, keyguardUpdateMonitor, securityMode, lockPatternUtils, keyguardSecurityCallback,
                 messageAreaControllerFactory, latencyTracker, liftToActivateListener,
                 emergencyButtonController, falsingCollector);
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
+        mPostureController = postureController;
     }
 
     @Override
@@ -53,6 +59,14 @@ public class KeyguardPinViewController
                 getKeyguardSecurityCallback().onCancelClicked();
             });
         }
+
+        mPostureController.addCallback(mPostureCallback);
+    }
+
+    @Override
+    protected void onViewDetached() {
+        super.onViewDetached();
+        mPostureController.removeCallback(mPostureCallback);
     }
 
     @Override

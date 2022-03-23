@@ -27,7 +27,6 @@ import android.util.AttributeSet;
 import android.widget.TextView;
 
 import com.android.systemui.R;
-import com.android.systemui.statusbar.phone.KeyguardBypassController;
 
 import java.util.Calendar;
 import java.util.Locale;
@@ -111,6 +110,28 @@ public class AnimatableClockView extends TextView {
         super.onDetachedFromWindow();
     }
 
+    int getDozingWeight() {
+        if (useBoldedVersion()) {
+            return mDozingWeight + 100;
+        }
+        return mDozingWeight;
+    }
+
+    int getLockScreenWeight() {
+        if (useBoldedVersion()) {
+            return mLockScreenWeight + 100;
+        }
+        return mLockScreenWeight;
+    }
+
+    /**
+     * Whether to use a bolded version based on the user specified fontWeightAdjustment.
+     */
+    boolean useBoldedVersion() {
+        // "Bold text" fontWeightAdjustment is 300.
+        return getResources().getConfiguration().fontWeightAdjustment > 100;
+    }
+
     void refreshTime() {
         mTime.setTimeInMillis(System.currentTimeMillis());
         setText(DateFormat.format(mFormat, mTime));
@@ -162,7 +183,7 @@ public class AnimatableClockView extends TextView {
         }
 
         setTextStyle(
-                mDozingWeight,
+                getDozingWeight(),
                 -1 /* text size, no update */,
                 mLockScreenColor,
                 false /* animate */,
@@ -171,26 +192,11 @@ public class AnimatableClockView extends TextView {
                 null /* onAnimationEnd */);
 
         setTextStyle(
-                mLockScreenWeight,
+                getLockScreenWeight(),
                 -1 /* text size, no update */,
                 mLockScreenColor,
                 true, /* animate */
                 APPEAR_ANIM_DURATION,
-                0 /* delay */,
-                null /* onAnimationEnd */);
-    }
-
-    void animateDisappear() {
-        if (mTextAnimator == null) {
-            return;
-        }
-
-        setTextStyle(
-                0 /* weight */,
-                -1 /* text size, no update */,
-                null /* color, no update */,
-                true /* animate */,
-                KeyguardBypassController.BYPASS_FADE_DURATION /* duration */,
                 0 /* delay */,
                 null /* onAnimationEnd */);
     }
@@ -201,14 +207,16 @@ public class AnimatableClockView extends TextView {
             return;
         }
         Runnable startAnimPhase2 = () -> setTextStyle(
-                dozeStateGetter.isDozing() ? mDozingWeight : mLockScreenWeight/* weight */,
+                dozeStateGetter.isDozing() ? getDozingWeight() : getLockScreenWeight() /* weight */,
                 -1,
                 null,
                 true /* animate */,
                 CHARGE_ANIM_DURATION_PHASE_1,
                 0 /* delay */,
                 null /* onAnimationEnd */);
-        setTextStyle(dozeStateGetter.isDozing() ? mLockScreenWeight : mDozingWeight/* weight */,
+        setTextStyle(dozeStateGetter.isDozing()
+                        ? getLockScreenWeight()
+                        : getDozingWeight()/* weight */,
                 -1,
                 null,
                 true /* animate */,
@@ -218,7 +226,7 @@ public class AnimatableClockView extends TextView {
     }
 
     void animateDoze(boolean isDozing, boolean animate) {
-        setTextStyle(isDozing ? mDozingWeight : mLockScreenWeight /* weight */,
+        setTextStyle(isDozing ? getDozingWeight() : getLockScreenWeight() /* weight */,
                 -1,
                 isDozing ? mDozingColor : mLockScreenColor,
                 animate,

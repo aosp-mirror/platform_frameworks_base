@@ -86,7 +86,7 @@ public class DropOutlineDrawable extends Drawable {
     public DropOutlineDrawable(Context context) {
         super();
         // TODO(b/169894807): Use corner specific radii and maybe lower radius for non-edge corners
-        mCornerRadius = ScreenDecorationsUtils.getWindowCornerRadius(context.getResources());
+        mCornerRadius = ScreenDecorationsUtils.getWindowCornerRadius(context);
         mColor = context.getColor(R.color.drop_outline_background);
         mMaxAlpha = Color.alpha(mColor);
         // Initialize as hidden

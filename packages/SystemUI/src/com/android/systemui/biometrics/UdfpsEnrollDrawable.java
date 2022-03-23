@@ -20,9 +20,7 @@ import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ValueAnimator;
 import android.content.Context;
-import android.content.res.TypedArray;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PointF;
 import android.graphics.Rect;
@@ -30,7 +28,6 @@ import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.TypedValue;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.LinearInterpolator;
 
@@ -38,7 +35,6 @@ import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.android.internal.graphics.ColorUtils;
 import com.android.systemui.R;
 
 /**
@@ -106,22 +102,22 @@ public class UdfpsEnrollDrawable extends UdfpsDrawable {
 
         mSensorOutlinePaint = new Paint(0 /* flags */);
         mSensorOutlinePaint.setAntiAlias(true);
-        mSensorOutlinePaint.setColor(mContext.getColor(R.color.udfps_enroll_icon));
-        mSensorOutlinePaint.setStyle(Paint.Style.STROKE);
-        mSensorOutlinePaint.setStrokeWidth(2.f);
+        mSensorOutlinePaint.setColor(mContext.getColor(R.color.udfps_moving_target_fill));
+        mSensorOutlinePaint.setStyle(Paint.Style.FILL);
 
         mBlueFill = new Paint(0 /* flags */);
         mBlueFill.setAntiAlias(true);
         mBlueFill.setColor(context.getColor(R.color.udfps_moving_target_fill));
         mBlueFill.setStyle(Paint.Style.FILL);
 
-        mMovingTargetFpIcon = context.getResources().getDrawable(R.drawable.ic_fingerprint, null);
-        mMovingTargetFpIcon.setTint(Color.WHITE);
+        mMovingTargetFpIcon = context.getResources()
+                .getDrawable(R.drawable.ic_kg_fingerprint, null);
+        mMovingTargetFpIcon.setTint(mContext.getColor(R.color.udfps_enroll_icon));
         mMovingTargetFpIcon.mutate();
 
         mFingerprintDrawable.setTint(mContext.getColor(R.color.udfps_enroll_icon));
 
-        mHintColorFaded = getHintColorFaded(context);
+        mHintColorFaded = context.getColor(R.color.udfps_moving_target_fill);
         mHintColorHighlight = context.getColor(R.color.udfps_enroll_progress);
         mHintMaxWidthPx = Utils.dpToPixels(context, HINT_MAX_WIDTH_DP);
         mHintPaddingPx = Utils.dpToPixels(context, HINT_PADDING_DP);
@@ -215,22 +211,6 @@ public class UdfpsEnrollDrawable extends UdfpsDrawable {
             @Override
             public void onAnimationRepeat(Animator animation) {}
         };
-    }
-
-    @ColorInt
-    private static int getHintColorFaded(@NonNull Context context) {
-        final TypedValue tv = new TypedValue();
-        context.getTheme().resolveAttribute(android.R.attr.disabledAlpha, tv, true);
-        final int alpha = (int) (tv.getFloat() * 255f);
-
-        final int[] attrs = new int[] {android.R.attr.colorControlNormal};
-        final TypedArray ta = context.obtainStyledAttributes(attrs);
-        try {
-            @ColorInt final int color = ta.getColor(0, context.getColor(R.color.white_disabled));
-            return ColorUtils.setAlphaComponent(color, alpha);
-        } finally {
-            ta.recycle();
-        }
     }
 
     void setEnrollHelper(@NonNull UdfpsEnrollHelper helper) {

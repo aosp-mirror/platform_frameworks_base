@@ -18,6 +18,7 @@ package android.media;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.TestApi;
 import android.bluetooth.BluetoothCodecConfig;
@@ -982,6 +983,8 @@ public class AudioSystem
     public static final int DEVICE_OUT_BLE_HEADSET = 0x20000000;
     /** @hide */
     public static final int DEVICE_OUT_BLE_SPEAKER = 0x20000001;
+    /** @hide */
+    public static final int DEVICE_OUT_BLE_BROADCAST = 0x20000002;
 
     /** @hide */
     public static final int DEVICE_OUT_DEFAULT = DEVICE_BIT_DEFAULT;
@@ -1042,6 +1045,7 @@ public class AudioSystem
         DEVICE_OUT_ALL_SET.add(DEVICE_OUT_ECHO_CANCELLER);
         DEVICE_OUT_ALL_SET.add(DEVICE_OUT_BLE_HEADSET);
         DEVICE_OUT_ALL_SET.add(DEVICE_OUT_BLE_SPEAKER);
+        DEVICE_OUT_ALL_SET.add(DEVICE_OUT_BLE_BROADCAST);
         DEVICE_OUT_ALL_SET.add(DEVICE_OUT_DEFAULT);
 
         DEVICE_OUT_ALL_A2DP_SET = new HashSet<>();
@@ -1072,6 +1076,7 @@ public class AudioSystem
         DEVICE_OUT_ALL_BLE_SET = new HashSet<>();
         DEVICE_OUT_ALL_BLE_SET.add(DEVICE_OUT_BLE_HEADSET);
         DEVICE_OUT_ALL_BLE_SET.add(DEVICE_OUT_BLE_SPEAKER);
+        DEVICE_OUT_ALL_BLE_SET.add(DEVICE_OUT_BLE_BROADCAST);
     }
 
     // input devices
@@ -1255,6 +1260,7 @@ public class AudioSystem
     /** @hide */ public static final String DEVICE_OUT_ECHO_CANCELLER_NAME = "echo_canceller";
     /** @hide */ public static final String DEVICE_OUT_BLE_HEADSET_NAME = "ble_headset";
     /** @hide */ public static final String DEVICE_OUT_BLE_SPEAKER_NAME = "ble_speaker";
+    /** @hide */ public static final String DEVICE_OUT_BLE_BROADCAST_NAME = "ble_broadcast";
 
     /** @hide */ public static final String DEVICE_IN_COMMUNICATION_NAME = "communication";
     /** @hide */ public static final String DEVICE_IN_AMBIENT_NAME = "ambient";
@@ -1354,9 +1360,11 @@ public class AudioSystem
             return DEVICE_OUT_BLE_HEADSET_NAME;
         case DEVICE_OUT_BLE_SPEAKER:
             return DEVICE_OUT_BLE_SPEAKER_NAME;
+        case DEVICE_OUT_BLE_BROADCAST:
+            return DEVICE_OUT_BLE_BROADCAST_NAME;
         case DEVICE_OUT_DEFAULT:
         default:
-            return Integer.toString(device);
+            return "0x" + Integer.toHexString(device);
         }
     }
 
@@ -2039,6 +2047,46 @@ public class AudioSystem
      * @return command completion status
      */
     public static native int setVibratorInfos(@NonNull List<Vibrator> vibrators);
+
+    /**
+     * @hide
+     * If a spatializer effect is present on the platform, this will return an
+     * ISpatializer interface to control this feature.
+     * If no spatializer is present, a null interface is returned.
+     * The INativeSpatializerCallback passed must not be null.
+     * Only one ISpatializer interface can exist at a given time. The native audio policy
+     * service will reject the request if an interface was already acquired and previous owner
+     * did not die or call ISpatializer.release().
+     * @param callback the callback to receive state updates if the ISpatializer
+     *        interface is acquired.
+     * @return the ISpatializer interface made available to control the
+     *        platform spatializer
+     */
+    @Nullable
+    public static ISpatializer getSpatializer(INativeSpatializerCallback callback) {
+        return ISpatializer.Stub.asInterface(nativeGetSpatializer(callback));
+    }
+    private static native IBinder nativeGetSpatializer(INativeSpatializerCallback callback);
+
+    /**
+     * @hide
+     * Queries if some kind of spatialization will be performed if the audio playback context
+     * described by the provided arguments is present.
+     * The context is made of:
+     * - The audio attributes describing the playback use case.
+     * - The audio configuration describing the audio format, channels, sampling rate ...
+     * - The devices describing the sink audio device selected for playback.
+     * All arguments are optional and only the specified arguments are used to match against
+     * supported criteria. For instance, supplying no argument will tell if spatialization is
+     * supported or not in general.
+     * @param attributes audio attributes describing the playback use case
+     * @param format audio configuration describing the audio format, channels, sampling rate...
+     * @param devices the sink audio device selected for playback
+     * @return true if spatialization is enabled for this context, false otherwise.
+     */
+    public static native boolean canBeSpatialized(AudioAttributes attributes,
+                                              AudioFormat format,
+                                              AudioDeviceAttributes[] devices);
 
     // Items shared with audio service
 

@@ -55,6 +55,7 @@ import android.telephony.VisualVoicemailSmsFilterSettings;
 import android.telephony.emergency.EmergencyNumber;
 import android.telephony.ims.RcsClientConfiguration;
 import android.telephony.ims.RcsContactUceCapability;
+import android.telephony.ims.aidl.IFeatureProvisioningCallback;
 import android.telephony.ims.aidl.IImsCapabilityCallback;
 import android.telephony.ims.aidl.IImsConfig;
 import android.telephony.ims.aidl.IImsConfigCallback;
@@ -67,6 +68,7 @@ import com.android.ims.internal.IImsServiceFeatureCallback;
 import com.android.internal.telephony.CellNetworkScanResult;
 import com.android.internal.telephony.IBooleanConsumer;
 import com.android.internal.telephony.ICallForwardingInfoCallback;
+import com.android.internal.telephony.IccLogicalChannelRequest;
 import com.android.internal.telephony.IImsStateCallback;
 import com.android.internal.telephony.IIntegerConsumer;
 import com.android.internal.telephony.INumberVerificationCallback;
@@ -584,64 +586,32 @@ interface ITelephony {
     void setCellInfoListRate(int rateInMillis);
 
     /**
-     * Opens a logical channel to the ICC card using the physical slot index.
-     *
-     * Input parameters equivalent to TS 27.007 AT+CCHO command.
-     *
-     * @param slotIndex The physical slot index of the target ICC card
-     * @param callingPackage the name of the package making the call.
-     * @param AID Application id. See ETSI 102.221 and 101.220.
-     * @param p2 P2 parameter (described in ISO 7816-4).
-     * @return an IccOpenLogicalChannelResponse object.
-     */
-    IccOpenLogicalChannelResponse iccOpenLogicalChannelBySlot(
-            int slotIndex, String callingPackage, String AID, int p2);
-
-    /**
      * Opens a logical channel to the ICC card.
      *
      * Input parameters equivalent to TS 27.007 AT+CCHO command.
      *
-     * @param subId The subscription to use.
-     * @param callingPackage the name of the package making the call.
-     * @param AID Application id. See ETSI 102.221 and 101.220.
-     * @param p2 P2 parameter (described in ISO 7816-4).
+     * @param request the parcelable used to indicate how to open the logical channel.
      * @return an IccOpenLogicalChannelResponse object.
      */
-    IccOpenLogicalChannelResponse iccOpenLogicalChannel(
-            int subId, String callingPackage, String AID, int p2);
-
-    /**
-     * Closes a previously opened logical channel to the ICC card using the physical slot index.
-     *
-     * Input parameters equivalent to TS 27.007 AT+CCHC command.
-     *
-     * @param slotIndex The physical slot index of the target ICC card
-     * @param channel is the channel id to be closed as returned by a
-     *            successful iccOpenLogicalChannel.
-     * @return true if the channel was closed successfully.
-     */
-    boolean iccCloseLogicalChannelBySlot(int slotIndex, int channel);
+    IccOpenLogicalChannelResponse iccOpenLogicalChannel(in IccLogicalChannelRequest request);
 
     /**
      * Closes a previously opened logical channel to the ICC card.
      *
      * Input parameters equivalent to TS 27.007 AT+CCHC command.
      *
-     * @param subId The subscription to use.
-     * @param channel is the channel id to be closed as returned by a
-     *            successful iccOpenLogicalChannel.
+     * @param request the parcelable used to indicate how to close the logical channel.
      * @return true if the channel was closed successfully.
      */
-    @UnsupportedAppUsage(trackingBug = 171933273)
-    boolean iccCloseLogicalChannel(int subId, int channel);
+    boolean iccCloseLogicalChannel(in IccLogicalChannelRequest request);
 
     /**
-     * Transmit an APDU to the ICC card over a logical channel using the physical slot index.
+     * Transmit an APDU to the ICC card over a logical channel using the physical slot index and port index.
      *
      * Input parameters equivalent to TS 27.007 AT+CGLA command.
      *
      * @param slotIndex The physical slot index of the target ICC card
+     * @param portIndex The unique index referring to a port belonging to the SIM slot
      * @param channel is the channel id to be closed as returned by a
      *            successful iccOpenLogicalChannel.
      * @param cla Class of the APDU command.
@@ -654,7 +624,7 @@ interface ITelephony {
      * @return The APDU response from the ICC card with the status appended at
      *            the end.
      */
-    String iccTransmitApduLogicalChannelBySlot(int slotIndex, int channel, int cla, int instruction,
+    String iccTransmitApduLogicalChannelByPort(int slotIndex, int portIndex, int channel, int cla, int instruction,
             int p1, int p2, int p3, String data);
 
     /**
@@ -680,11 +650,12 @@ interface ITelephony {
             int p1, int p2, int p3, String data);
 
     /**
-     * Transmit an APDU to the ICC card over the basic channel using the physical slot index.
+     * Transmit an APDU to the ICC card over the basic channel using the physical slot index and port index.
      *
      * Input parameters equivalent to TS 27.007 AT+CSIM command.
      *
      * @param slotIndex The physical slot index of the target ICC card
+     * @param portIndex The unique index referring to a port belonging to the SIM slot
      * @param callingPackage the name of the package making the call.
      * @param cla Class of the APDU command.
      * @param instruction Instruction of the APDU command.
@@ -696,7 +667,7 @@ interface ITelephony {
      * @return The APDU response from the ICC card with the status appended at
      *            the end.
      */
-    String iccTransmitApduBasicChannelBySlot(int slotIndex, String callingPackage, int cla,
+    String iccTransmitApduBasicChannelByPort(int slotIndex, int portIndex, String callingPackage, int cla,
             int instruction, int p1, int p2, int p3, String data);
 
     /**
@@ -2027,6 +1998,18 @@ interface ITelephony {
     void unregisterImsProvisioningChangedCallback(int subId, IImsConfigCallback callback);
 
     /**
+     * Register an IMS provisioning change callback with Telephony.
+     */
+    void registerFeatureProvisioningChangedCallback(int subId,
+            IFeatureProvisioningCallback callback);
+
+    /**
+     * unregister an existing IMS provisioning change callback.
+     */
+    void unregisterFeatureProvisioningChangedCallback(int subId,
+            IFeatureProvisioningCallback callback);
+
+    /**
      * Set the provisioning status for the IMS MmTel capability using the specified subscription.
      */
     void setImsProvisioningStatusForCapability(int subId, int capability, int tech,
@@ -2040,19 +2023,12 @@ interface ITelephony {
     /**
      * Get the provisioning status for the IMS Rcs capability specified.
      */
-    boolean getRcsProvisioningStatusForCapability(int subId, int capability);
+    boolean getRcsProvisioningStatusForCapability(int subId, int capability, int tech);
 
     /**
      * Set the provisioning status for the IMS Rcs capability using the specified subscription.
      */
-    void setRcsProvisioningStatusForCapability(int subId, int capability,
-            boolean isProvisioned);
-
-    /** Is the capability and tech flagged as provisioned in the cache */
-    boolean isMmTelCapabilityProvisionedInCache(int subId, int capability, int tech);
-
-    /** Set the provisioning for the capability and tech in the cache */
-    void cacheMmTelCapabilityProvisioning(int subId, int capability, int tech,
+    void setRcsProvisioningStatusForCapability(int subId, int capability, int tech,
             boolean isProvisioned);
 
     /**
@@ -2147,9 +2123,9 @@ interface ITelephony {
              String callingFeatureId);
 
     /**
-     * Get the mapping from logical slots to physical slots.
+     * Get the mapping from logical slots to port index.
      */
-    int[] getSlotsMapping(String callingPackage);
+    List<UiccSlotMapping> getSlotsMapping(String callingPackage);
 
     /**
      * Get the IRadio HAL Version encoded as 100 * MAJOR_VERSION + MINOR_VERSION or -1 if unknown
@@ -2555,4 +2531,18 @@ interface ITelephony {
      * @return the service name of the modem service which bind to.
      */
     String getModemService();
+
+    /**
+     * Is Provisioning required for capability
+     * @return true if provisioning is required for the MMTEL capability and IMS
+     * registration technology specified, false if it is not required.
+     */
+    boolean isProvisioningRequiredForCapability(int subId, int capability, int tech);
+
+    /**
+     * Is RCS Provisioning required for capability
+     * @return true if provisioning is required for the RCS capability and IMS
+     * registration technology specified, false if it is not required.
+     */
+    boolean isRcsProvisioningRequiredForCapability(int subId, int capability, int tech);
 }

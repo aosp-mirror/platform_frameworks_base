@@ -115,6 +115,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
     private boolean mIsHeadsetProfileConnectedFail = false;
     private boolean mIsHearingAidProfileConnectedFail = false;
     private boolean mIsLeAudioProfileConnectedFail = false;
+    private boolean mUnpairing = false;
     // Group second device for Hearing Aid
     private CachedBluetoothDevice mSubDevice;
     // Group member devices for the coordinated set
@@ -282,6 +283,12 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
 
     public void disconnect() {
         synchronized (mProfileLock) {
+            if (getGroupId() != BluetoothCsipSetCoordinator.GROUP_ID_INVALID) {
+                for (CachedBluetoothDevice member : getMemberDevice()) {
+                    Log.d(TAG, "Disconnect the member(" + member.getAddress() + ")");
+                    member.disconnect();
+                }
+            }
             mDevice.disconnect();
         }
         // Disconnect  PBAP server in case its connected
@@ -396,6 +403,12 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
             }
 
             mDevice.connect();
+            if (getGroupId() != BluetoothCsipSetCoordinator.GROUP_ID_INVALID) {
+                for (CachedBluetoothDevice member : getMemberDevice()) {
+                    Log.d(TAG, "connect the member(" + member.getAddress() + ")");
+                    member.connect();
+                }
+            }
         }
     }
 
@@ -456,6 +469,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         if (state != BluetoothDevice.BOND_NONE) {
             final BluetoothDevice dev = mDevice;
             if (dev != null) {
+                mUnpairing = true;
                 final boolean successful = dev.removeBond();
                 if (successful) {
                     releaseLruCache();
@@ -497,6 +511,17 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
      */
     public String getAddress() {
         return mDevice.getAddress();
+    }
+
+    /**
+     * Get identity address from remote device
+     * @return {@link BluetoothDevice#getIdentityAddress()} if
+     * {@link BluetoothDevice#getIdentityAddress()} is not null otherwise return
+     * {@link BluetoothDevice#getAddress()}
+     */
+    public String getIdentityAddress() {
+        final String identityAddress = mDevice.getIdentityAddress();
+        return TextUtils.isEmpty(identityAddress) ? getAddress() : identityAddress;
     }
 
     /**
@@ -726,7 +751,10 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         ParcelUuid[] uuids = mDevice.getUuids();
         if (uuids == null) return false;
 
-        ParcelUuid[] localUuids = mLocalAdapter.getUuids();
+        List<ParcelUuid> uuidsList = mLocalAdapter.getUuidsList();
+        ParcelUuid[] localUuids = new ParcelUuid[uuidsList.size()];
+        uuidsList.toArray(localUuids);
+
         if (localUuids == null) return false;
 
         /*
@@ -1090,7 +1118,8 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
                 final boolean isOnCall = Utils.isAudioModeOngoingCall(mContext);
                 if ((mIsActiveDeviceHearingAid)
                         || (mIsActiveDeviceHeadset && isOnCall)
-                        || (mIsActiveDeviceA2dp && !isOnCall)) {
+                        || (mIsActiveDeviceA2dp && !isOnCall)
+                        || mIsActiveDeviceLeAudio) {
                     if (isTwsBatteryAvailable(leftBattery, rightBattery) && !shortSummary) {
                         stringRes = R.string.bluetooth_active_battery_level_untethered;
                     } else if (batteryLevelPercentageString != null && !shortSummary) {
@@ -1385,5 +1414,9 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
 
     void releaseLruCache() {
         mDrawableCache.evictAll();
+    }
+
+    boolean getUnpairing() {
+        return mUnpairing;
     }
 }

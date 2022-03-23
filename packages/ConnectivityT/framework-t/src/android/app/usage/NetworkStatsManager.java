@@ -27,7 +27,6 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
-import android.annotation.TestApi;
 import android.annotation.WorkerThread;
 import android.app.usage.NetworkStats.Bucket;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -41,6 +40,7 @@ import android.net.NetworkStateSnapshot;
 import android.net.NetworkTemplate;
 import android.net.UnderlyingNetworkInfo;
 import android.net.netstats.IUsageCallback;
+import android.net.netstats.NetworkStatsDataMigrationUtils;
 import android.net.netstats.provider.INetworkStatsProviderCallback;
 import android.net.netstats.provider.NetworkStatsProvider;
 import android.os.Build;
@@ -126,17 +126,12 @@ public class NetworkStatsManager {
     private final INetworkStatsService mService;
 
     /**
-     * Type constants for reading different types of Data Usage.
+     * @deprecated Use {@link NetworkStatsDataMigrationUtils#PREFIX_XT}
+     * instead.
      * @hide
      */
-    // @SystemApi(client = MODULE_LIBRARIES)
+    @Deprecated
     public static final String PREFIX_DEV = "dev";
-    /** @hide */
-    public static final String PREFIX_XT = "xt";
-    /** @hide */
-    public static final String PREFIX_UID = "uid";
-    /** @hide */
-    public static final String PREFIX_UID_TAG = "uid_tag";
 
     /** @hide */
     public static final int FLAG_POLL_ON_OPEN = 1 << 0;
@@ -144,6 +139,18 @@ public class NetworkStatsManager {
     public static final int FLAG_POLL_FORCE = 1 << 1;
     /** @hide */
     public static final int FLAG_AUGMENT_WITH_SUBSCRIPTION_PLAN = 1 << 2;
+
+    /**
+     * Virtual RAT type to represent 5G NSA (Non Stand Alone) mode, where the primary cell is
+     * still LTE and network allocates a secondary 5G cell so telephony reports RAT = LTE along
+     * with NR state as connected. This is a concept added by NetworkStats on top of the telephony
+     * constants for backward compatibility of metrics so this should not be overlapped with any of
+     * the {@code TelephonyManager.NETWORK_TYPE_*} constants.
+     *
+     * @hide
+     */
+    @SystemApi(client = MODULE_LIBRARIES)
+    public static final int NETWORK_TYPE_5G_NSA = -2;
 
     private int mFlags;
 
@@ -184,9 +191,13 @@ public class NetworkStatsManager {
         }
     }
 
-    /** @hide */
+    /**
+     * Set poll force flag to indicate that calling any subsequent query method will force a stats
+     * poll.
+     * @hide
+     */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    @TestApi
+    @SystemApi(client = MODULE_LIBRARIES)
     public void setPollForce(boolean pollForce) {
         if (pollForce) {
             mFlags |= FLAG_POLL_FORCE;
@@ -688,7 +699,9 @@ public class NetworkStatsManager {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK)
+    @RequiresPermission(anyOf = {
+            NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
+            android.Manifest.permission.NETWORK_STACK})
     @NonNull public android.net.NetworkStats getMobileUidStats() {
         try {
             return mService.getUidStatsForTransport(TRANSPORT_CELLULAR);
@@ -712,7 +725,9 @@ public class NetworkStatsManager {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK)
+    @RequiresPermission(anyOf = {
+            NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
+            android.Manifest.permission.NETWORK_STACK})
     @NonNull public android.net.NetworkStats getWifiUidStats() {
         try {
             return mService.getUidStatsForTransport(TRANSPORT_WIFI);
@@ -729,8 +744,9 @@ public class NetworkStatsManager {
      * {@link #unregisterUsageCallback} is called.
      *
      * @param template Template used to match networks. See {@link NetworkTemplate}.
-     * @param thresholdBytes Threshold in bytes to be notified on. The provided value that lower
-     *                       than 2MiB will be clamped for non-privileged callers.
+     * @param thresholdBytes Threshold in bytes to be notified on. Provided values lower than 2MiB
+     *                       will be clamped for callers except callers with the NETWORK_STACK
+     *                       permission.
      * @param executor The executor on which callback will be invoked. The provided {@link Executor}
      *                 must run callback sequentially, otherwise the order of callbacks cannot be
      *                 guaranteed.
@@ -739,6 +755,9 @@ public class NetworkStatsManager {
      * @hide
      */
     @SystemApi(client = MODULE_LIBRARIES)
+    @RequiresPermission(anyOf = {
+            NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
+            android.Manifest.permission.NETWORK_STACK}, conditional = true)
     public void registerUsageCallback(@NonNull NetworkTemplate template, long thresholdBytes,
             @NonNull @CallbackExecutor Executor executor, @NonNull UsageCallback callback) {
         Objects.requireNonNull(template, "NetworkTemplate cannot be null");
@@ -1042,9 +1061,9 @@ public class NetworkStatsManager {
     @RequiresPermission(anyOf = {
             NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
             android.Manifest.permission.NETWORK_STACK})
-    public void setUidForeground(int uid, boolean uidForeground) {
+    public void noteUidForeground(int uid, boolean uidForeground) {
         try {
-            mService.setUidForeground(uid, uidForeground);
+            mService.noteUidForeground(uid, uidForeground);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1109,6 +1128,54 @@ public class NetworkStatsManager {
             mService.setStatsProviderWarningAndLimitAsync(iface, warning, limit);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Get a RAT type representative of a group of RAT types for network statistics.
+     *
+     * Collapse the given Radio Access Technology (RAT) type into a bucket that
+     * is representative of the original RAT type for network statistics. The
+     * mapping mostly corresponds to {@code TelephonyManager#NETWORK_CLASS_BIT_MASK_*}
+     * but with adaptations specific to the virtual types introduced by
+     * networks stats.
+     *
+     * @param ratType An integer defined in {@code TelephonyManager#NETWORK_TYPE_*}.
+     *
+     * @hide
+     */
+    @SystemApi(client = MODULE_LIBRARIES)
+    public static int getCollapsedRatType(int ratType) {
+        switch (ratType) {
+            case TelephonyManager.NETWORK_TYPE_GPRS:
+            case TelephonyManager.NETWORK_TYPE_GSM:
+            case TelephonyManager.NETWORK_TYPE_EDGE:
+            case TelephonyManager.NETWORK_TYPE_IDEN:
+            case TelephonyManager.NETWORK_TYPE_CDMA:
+            case TelephonyManager.NETWORK_TYPE_1xRTT:
+                return TelephonyManager.NETWORK_TYPE_GSM;
+            case TelephonyManager.NETWORK_TYPE_EVDO_0:
+            case TelephonyManager.NETWORK_TYPE_EVDO_A:
+            case TelephonyManager.NETWORK_TYPE_EVDO_B:
+            case TelephonyManager.NETWORK_TYPE_EHRPD:
+            case TelephonyManager.NETWORK_TYPE_UMTS:
+            case TelephonyManager.NETWORK_TYPE_HSDPA:
+            case TelephonyManager.NETWORK_TYPE_HSUPA:
+            case TelephonyManager.NETWORK_TYPE_HSPA:
+            case TelephonyManager.NETWORK_TYPE_HSPAP:
+            case TelephonyManager.NETWORK_TYPE_TD_SCDMA:
+                return TelephonyManager.NETWORK_TYPE_UMTS;
+            case TelephonyManager.NETWORK_TYPE_LTE:
+            case TelephonyManager.NETWORK_TYPE_IWLAN:
+                return TelephonyManager.NETWORK_TYPE_LTE;
+            case TelephonyManager.NETWORK_TYPE_NR:
+                return TelephonyManager.NETWORK_TYPE_NR;
+            // Virtual RAT type for 5G NSA mode, see
+            // {@link NetworkStatsManager#NETWORK_TYPE_5G_NSA}.
+            case NetworkStatsManager.NETWORK_TYPE_5G_NSA:
+                return NetworkStatsManager.NETWORK_TYPE_5G_NSA;
+            default:
+                return TelephonyManager.NETWORK_TYPE_UNKNOWN;
         }
     }
 }

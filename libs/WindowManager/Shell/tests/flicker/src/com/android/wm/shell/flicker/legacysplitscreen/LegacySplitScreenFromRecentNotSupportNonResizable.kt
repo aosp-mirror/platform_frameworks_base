@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.flicker.legacysplitscreen
 
+import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.RequiresDevice
@@ -23,16 +24,12 @@ import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group2
-import com.android.server.wm.flicker.appWindowBecomesInVisible
-import com.android.server.wm.flicker.appWindowBecomesVisible
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.launchSplitScreen
 import com.android.server.wm.flicker.helpers.reopenAppFromOverview
-import com.android.server.wm.flicker.layerBecomesInvisible
-import com.android.server.wm.flicker.layerBecomesVisible
-import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
-import com.android.wm.shell.flicker.DOCKED_STACK_DIVIDER
-import com.android.wm.shell.flicker.dockedStackDividerIsInvisible
+import com.android.server.wm.traces.common.FlickerComponentName
+import com.android.wm.shell.flicker.DOCKED_STACK_DIVIDER_COMPONENT
+import com.android.wm.shell.flicker.dockedStackDividerNotExistsAtEnd
 import com.android.wm.shell.flicker.helpers.MultiWindowHelper.Companion.resetMultiWindowConfig
 import com.android.wm.shell.flicker.helpers.MultiWindowHelper.Companion.setSupportsNonResizableMultiWindow
 import com.android.wm.shell.flicker.helpers.SplitScreenHelper
@@ -73,11 +70,11 @@ class LegacySplitScreenFromRecentNotSupportNonResizable(
             }
         }
 
-    override val ignoredWindows: List<String>
-        get() = listOf(DOCKED_STACK_DIVIDER, LAUNCHER_PACKAGE_NAME, LETTERBOX_NAME, TOAST_NAME,
-                splitScreenApp.defaultWindowName, nonResizeableApp.defaultWindowName,
-                WindowManagerStateHelper.SPLASH_SCREEN_NAME,
-                WindowManagerStateHelper.SNAPSHOT_WINDOW_NAME)
+    override val ignoredWindows: List<FlickerComponentName>
+        get() = listOf(DOCKED_STACK_DIVIDER_COMPONENT, LAUNCHER_COMPONENT, LETTERBOX_COMPONENT,
+            TOAST_COMPONENT, splitScreenApp.component, nonResizeableApp.component,
+            FlickerComponentName.SPLASH_SCREEN,
+            FlickerComponentName.SNAPSHOT)
 
     @Before
     override fun setup() {
@@ -93,36 +90,72 @@ class LegacySplitScreenFromRecentNotSupportNonResizable(
 
     @Presubmit
     @Test
-    fun resizableAppLayerBecomesInvisible() =
-            testSpec.layerBecomesInvisible(splitScreenApp.defaultWindowName)
+    fun resizableAppLayerBecomesInvisible() {
+        testSpec.assertLayers {
+            this.isVisible(splitScreenApp.component)
+                    .then()
+                    .isInvisible(splitScreenApp.component)
+        }
+    }
 
     @Presubmit
     @Test
-    fun nonResizableAppLayerBecomesVisible() =
-            testSpec.layerBecomesVisible(nonResizeableApp.defaultWindowName)
+    fun nonResizableAppLayerBecomesVisible() {
+        testSpec.assertLayers {
+            this.isInvisible(nonResizeableApp.component)
+                    .then()
+                    .isVisible(nonResizeableApp.component)
+        }
+    }
 
     @Presubmit
     @Test
-    fun resizableAppWindowBecomesInvisible() =
-        testSpec.appWindowBecomesInVisible(splitScreenApp.defaultWindowName)
+    fun resizableAppWindowBecomesInvisible() {
+        testSpec.assertWm {
+            // when the activity gets PAUSED the window may still be marked as visible
+            // it will be updated in the next log entry. This occurs because we record 1x
+            // per frame, thus ignore activity check here
+            this.isAppWindowVisible(splitScreenApp.component)
+                    .then()
+                    // immediately after the window (after onResume and before perform relayout)
+                    // the activity is invisible. This may or not be logged, since we record 1x
+                    // per frame, thus ignore activity check here
+                    .isAppWindowInvisible(splitScreenApp.component)
+        }
+    }
+
+    @Postsubmit
+    @Test
+    fun nonResizableAppWindowBecomesVisible() {
+        testSpec.assertWm {
+            this.isAppWindowInvisible(nonResizeableApp.component)
+                    .then()
+                    .isAppWindowVisible(nonResizeableApp.component)
+        }
+    }
 
     @Presubmit
     @Test
-    fun nonResizableAppWindowBecomesVisible() =
-        testSpec.appWindowBecomesVisible(nonResizeableApp.defaultWindowName)
-
-    @Presubmit
-    @Test
-    fun dockedStackDividerIsInvisibleAtEnd() = testSpec.dockedStackDividerIsInvisible()
+    fun dockedStackDividerNotExistsAtEnd() = testSpec.dockedStackDividerNotExistsAtEnd()
 
     @Presubmit
     @Test
     fun onlyNonResizableAppWindowIsVisibleAtEnd() {
         testSpec.assertWmEnd {
-            isInvisible(splitScreenApp.defaultWindowName)
-            isVisible(nonResizeableApp.defaultWindowName)
+            isAppWindowInvisible(splitScreenApp.component)
+            isAppWindowVisible(nonResizeableApp.component)
         }
     }
+
+    @Presubmit
+    @Test
+    override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
+            super.visibleLayersShownMoreThanOneConsecutiveEntry()
+
+    @Presubmit
+    @Test
+    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
+            super.visibleWindowsShownMoreThanOneConsecutiveEntry()
 
     companion object {
         @Parameterized.Parameters(name = "{0}")

@@ -33,6 +33,7 @@ import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import static java.util.Collections.singletonList;
@@ -42,6 +43,7 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.util.ArrayMap;
 
+import androidx.annotation.Nullable;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
@@ -54,6 +56,7 @@ import com.android.systemui.statusbar.notification.collection.listbuilder.OnBefo
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeSortListener;
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeTransformGroupsListener;
 import com.android.systemui.statusbar.notification.collection.listbuilder.ShadeListBuilderLogger;
+import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.Invalidator;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifComparator;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifPromoter;
@@ -78,6 +81,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 @SmallTest
@@ -608,6 +612,30 @@ public class ShadeListBuilderTest extends SysuiTestCase {
     }
 
     @Test
+    public void testNotifSectionsChildrenUpdated() {
+        AtomicBoolean validChildren = new AtomicBoolean(false);
+        final NotifSectioner pkg1Sectioner = spy(new PackageSectioner(PACKAGE_1) {
+            @Nullable
+            @Override
+            public void onEntriesUpdated(List<ListEntry> entries) {
+                super.onEntriesUpdated(entries);
+                validChildren.set(entries.size() == 2);
+            }
+        });
+        mListBuilder.setSectioners(Arrays.asList(pkg1Sectioner));
+
+        addNotif(0, PACKAGE_4);
+        addNotif(1, PACKAGE_1);
+        addNotif(2, PACKAGE_1);
+        addNotif(3, PACKAGE_3);
+
+        dispatchBuild();
+
+        verify(pkg1Sectioner, times(1)).onEntriesUpdated(any());
+        assertTrue(validChildren.get());
+    }
+
+    @Test
     public void testNotifSections() {
         // GIVEN a filter that removes all PACKAGE_4 notifs and sections that divide
         // notifs based on package name
@@ -802,13 +830,13 @@ public class ShadeListBuilderTest extends SysuiTestCase {
                 .onBeforeTransformGroups(anyList());
         inOrder.verify(promoter, atLeastOnce())
                 .shouldPromoteToTopLevel(any(NotificationEntry.class));
+        inOrder.verify(mOnBeforeFinalizeFilterListener).onBeforeFinalizeFilter(anyList());
+        inOrder.verify(preRenderFilter, atLeastOnce())
+                .shouldFilterOut(any(NotificationEntry.class), anyLong());
         inOrder.verify(mOnBeforeSortListener).onBeforeSort(anyList());
         inOrder.verify(section, atLeastOnce()).isInSection(any(ListEntry.class));
         inOrder.verify(comparator, atLeastOnce())
                 .compare(any(ListEntry.class), any(ListEntry.class));
-        inOrder.verify(mOnBeforeFinalizeFilterListener).onBeforeFinalizeFilter(anyList());
-        inOrder.verify(preRenderFilter, atLeastOnce())
-                .shouldFilterOut(any(NotificationEntry.class), anyLong());
         inOrder.verify(mOnBeforeRenderListListener).onBeforeRenderList(anyList());
         inOrder.verify(mOnRenderListListener).onRenderList(anyList());
     }
@@ -820,11 +848,13 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         NotifPromoter idPromoter = new IdPromoter(4);
         NotifSectioner section = new PackageSectioner(PACKAGE_1);
         NotifComparator hypeComparator = new HypeComparator(PACKAGE_2);
+        Invalidator preRenderInvalidator = new Invalidator("PreRenderInvalidator") {};
 
         mListBuilder.addPreGroupFilter(packageFilter);
         mListBuilder.addPromoter(idPromoter);
         mListBuilder.setSectioners(singletonList(section));
         mListBuilder.setComparators(singletonList(hypeComparator));
+        mListBuilder.addPreRenderInvalidator(preRenderInvalidator);
 
         // GIVEN a set of random notifs
         addNotif(0, PACKAGE_1);
@@ -848,6 +878,10 @@ public class ShadeListBuilderTest extends SysuiTestCase {
 
         clearInvocations(mOnRenderListListener);
         hypeComparator.invalidateList();
+        verify(mOnRenderListListener).onRenderList(anyList());
+
+        clearInvocations(mOnRenderListListener);
+        preRenderInvalidator.invalidateList();
         verify(mOnRenderListListener).onRenderList(anyList());
     }
 
@@ -1045,12 +1079,32 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         // because group changes aren't allowed by the stability manager
         verifyBuiltList(
                 notif(0),
+                notif(2),
                 group(
                         summary(3),
                         child(4),
                         child(5)
-                ),
-                notif(2)
+                )
+        );
+    }
+
+    @Test
+    public void testBrokenGroupNotificationOrdering() {
+        // GIVEN two group children with different sections & without a summary yet
+
+        addGroupChild(0, PACKAGE_2, GROUP_1);
+        addNotif(1, PACKAGE_1);
+        addGroupChild(2, PACKAGE_2, GROUP_1);
+        addGroupChild(3, PACKAGE_2, GROUP_1);
+
+        dispatchBuild();
+
+        // THEN all notifications are not grouped and posted in order by index
+        verifyBuiltList(
+                notif(0),
+                notif(1),
+                notif(2),
+                notif(3)
         );
     }
 
@@ -1613,7 +1667,7 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         private final String mPackage;
 
         PackageSectioner(String pkg) {
-            super("PackageSection_" + pkg);
+            super("PackageSection_" + pkg, 0);
             mPackage = pkg;
         }
 

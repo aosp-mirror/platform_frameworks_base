@@ -23,6 +23,7 @@ import static java.lang.Integer.max;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -36,10 +37,11 @@ import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
-import android.view.ViewPropertyAnimator;
 import android.view.WindowInsets;
 import android.view.WindowInsetsAnimation;
 import android.view.WindowManager;
+import android.view.animation.AnimationUtils;
+import android.view.animation.Interpolator;
 import android.widget.FrameLayout;
 
 import androidx.annotation.Nullable;
@@ -55,7 +57,7 @@ import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 import com.android.systemui.Gefingerpoken;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
-import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
+import com.android.systemui.shared.system.SysUiStatsLog;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -85,6 +87,13 @@ public class KeyguardSecurityContainer extends FrameLayout {
 
     private static final long IME_DISAPPEAR_DURATION_MS = 125;
 
+    // The duration of the animation to switch bouncer sides.
+    private static final long BOUNCER_HANDEDNESS_ANIMATION_DURATION_MS = 500;
+
+    // How much of the switch sides animation should be dedicated to fading the bouncer out. The
+    // remainder will fade it back in again.
+    private static final float BOUNCER_HANDEDNESS_ANIMATION_FADE_OUT_PROPORTION = 0.2f;
+
     @VisibleForTesting
     KeyguardSecurityViewFlipper mSecurityViewFlipper;
     private AlertDialog mAlertDialog;
@@ -104,8 +113,7 @@ public class KeyguardSecurityContainer extends FrameLayout {
 
     private boolean mIsSecurityViewLeftAligned = true;
     private boolean mOneHandedMode = false;
-    private SecurityMode mSecurityMode = SecurityMode.Invalid;
-    private ViewPropertyAnimator mRunningOneHandedAnimator;
+    @Nullable private ValueAnimator mRunningOneHandedAnimator;
 
     private final WindowInsetsAnimation.Callback mWindowInsetsAnimationCallback =
             new WindowInsetsAnimation.Callback(DISPATCH_MODE_STOP) {
@@ -248,66 +256,47 @@ public class KeyguardSecurityContainer extends FrameLayout {
     }
 
     void onResume(SecurityMode securityMode, boolean faceAuthEnabled) {
-        mSecurityMode = securityMode;
         mSecurityViewFlipper.setWindowInsetsAnimationCallback(mWindowInsetsAnimationCallback);
         updateBiometricRetry(securityMode, faceAuthEnabled);
-
-        updateLayoutForSecurityMode(securityMode);
     }
 
-    void updateLayoutForSecurityMode(SecurityMode securityMode) {
-        mSecurityMode = securityMode;
-        mOneHandedMode = canUseOneHandedBouncer();
-
-        if (mOneHandedMode) {
-            mIsSecurityViewLeftAligned = isOneHandedKeyguardLeftAligned(mContext);
-        }
-
+    /**
+     * Sets whether this security container is in one handed mode. If so, it will measure its
+     * child SecurityViewFlipper in one half of the screen, and move it when tapping on the opposite
+     * side of the screen.
+     */
+    public void setOneHandedMode(boolean oneHandedMode) {
+        mOneHandedMode = oneHandedMode;
         updateSecurityViewGravity();
         updateSecurityViewLocation(false);
     }
 
-    /** Update keyguard position based on a tapped X coordinate. */
-    public void updateKeyguardPosition(float x) {
-        if (mOneHandedMode) {
-            moveBouncerForXCoordinate(x, /* animate= */false);
-        }
+    /** Returns whether this security container is in one-handed mode. */
+    public boolean isOneHandedMode() {
+        return mOneHandedMode;
     }
 
-    /** Return whether the one-handed keyguard should be enabled. */
-    private boolean canUseOneHandedBouncer() {
-        // Is it enabled?
-        if (!getResources().getBoolean(
-                com.android.internal.R.bool.config_enableDynamicKeyguardPositioning)) {
-            return false;
-        }
-
-        if (!KeyguardSecurityModel.isSecurityViewOneHanded(mSecurityMode)) {
-            return false;
-        }
-
-        return getResources().getBoolean(R.bool.can_use_one_handed_bouncer);
+    /**
+     * When in one-handed mode, sets if the inner SecurityViewFlipper should be aligned to the
+     * left-hand side of the screen or not, and whether to animate when moving between the two.
+     */
+    public void setOneHandedModeLeftAligned(boolean leftAligned, boolean animate) {
+        mIsSecurityViewLeftAligned = leftAligned;
+        updateSecurityViewLocation(animate);
     }
 
-    /** Read whether the one-handed keyguard should be on the left/right from settings. */
-    private boolean isOneHandedKeyguardLeftAligned(Context context) {
-        try {
-            return Settings.Global.getInt(context.getContentResolver(),
-                    Settings.Global.ONE_HANDED_KEYGUARD_SIDE)
-                    == Settings.Global.ONE_HANDED_KEYGUARD_SIDE_LEFT;
-        } catch (Settings.SettingNotFoundException ex) {
-            return true;
-        }
+    /** Returns whether the inner SecurityViewFlipper is left-aligned when in one-handed mode. */
+    public boolean isOneHandedModeLeftAligned() {
+        return mIsSecurityViewLeftAligned;
     }
 
     private void updateSecurityViewGravity() {
-        View securityView = findKeyguardSecurityView();
-
-        if (securityView == null) {
+        if (mSecurityViewFlipper == null) {
             return;
         }
 
-        FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) securityView.getLayoutParams();
+        FrameLayout.LayoutParams lp =
+                (FrameLayout.LayoutParams) mSecurityViewFlipper.getLayoutParams();
 
         if (mOneHandedMode) {
             lp.gravity = Gravity.LEFT | Gravity.BOTTOM;
@@ -315,7 +304,7 @@ public class KeyguardSecurityContainer extends FrameLayout {
             lp.gravity = Gravity.CENTER_HORIZONTAL;
         }
 
-        securityView.setLayoutParams(lp);
+        mSecurityViewFlipper.setLayoutParams(lp);
     }
 
     /**
@@ -324,14 +313,12 @@ public class KeyguardSecurityContainer extends FrameLayout {
      * by the security view .
      */
     private void updateSecurityViewLocation(boolean animate) {
-        View securityView = findKeyguardSecurityView();
-
-        if (securityView == null) {
+        if (mSecurityViewFlipper == null) {
             return;
         }
 
         if (!mOneHandedMode) {
-            securityView.setTranslationX(0);
+            mSecurityViewFlipper.setTranslationX(0);
             return;
         }
 
@@ -340,40 +327,105 @@ public class KeyguardSecurityContainer extends FrameLayout {
             mRunningOneHandedAnimator = null;
         }
 
-        int targetTranslation = mIsSecurityViewLeftAligned ? 0 : (int) (getMeasuredWidth() / 2f);
+        int targetTranslation = mIsSecurityViewLeftAligned
+                ? 0 : (int) (getMeasuredWidth() - mSecurityViewFlipper.getWidth());
 
         if (animate) {
-            mRunningOneHandedAnimator = securityView.animate().translationX(targetTranslation);
-            mRunningOneHandedAnimator.setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
-            mRunningOneHandedAnimator.setListener(new AnimatorListenerAdapter() {
+            // This animation is a bit fun to implement. The bouncer needs to move, and fade in/out
+            // at the same time. The issue is, the bouncer should only move a short amount (120dp or
+            // so), but obviously needs to go from one side of the screen to the other. This needs a
+            // pretty custom animation.
+            //
+            // This works as follows. It uses a ValueAnimation to simply drive the animation
+            // progress. This animator is responsible for both the translation of the bouncer, and
+            // the current fade. It will fade the bouncer out while also moving it along the 120dp
+            // path. Once the bouncer is fully faded out though, it will "snap" the bouncer closer
+            // to its destination, then fade it back in again. The effect is that the bouncer will
+            // move from 0 -> X while fading out, then (destination - X) -> destination while fading
+            // back in again.
+            // TODO(b/195012405): Make this animation properly abortable.
+            Interpolator positionInterpolator = AnimationUtils.loadInterpolator(
+                    mContext, android.R.interpolator.fast_out_extra_slow_in);
+            Interpolator fadeOutInterpolator = Interpolators.FAST_OUT_LINEAR_IN;
+            Interpolator fadeInInterpolator = Interpolators.LINEAR_OUT_SLOW_IN;
+
+            mRunningOneHandedAnimator = ValueAnimator.ofFloat(0.0f, 1.0f);
+            mRunningOneHandedAnimator.setDuration(BOUNCER_HANDEDNESS_ANIMATION_DURATION_MS);
+            mRunningOneHandedAnimator.setInterpolator(Interpolators.LINEAR);
+
+            int initialTranslation = (int) mSecurityViewFlipper.getTranslationX();
+            int totalTranslation = (int) getResources().getDimension(
+                    R.dimen.one_handed_bouncer_move_animation_translation);
+
+            final boolean shouldRestoreLayerType = mSecurityViewFlipper.hasOverlappingRendering()
+                    && mSecurityViewFlipper.getLayerType() != View.LAYER_TYPE_HARDWARE;
+            if (shouldRestoreLayerType) {
+                mSecurityViewFlipper.setLayerType(View.LAYER_TYPE_HARDWARE, /* paint= */null);
+            }
+
+            float initialAlpha = mSecurityViewFlipper.getAlpha();
+
+            mRunningOneHandedAnimator.addListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator animation) {
                     mRunningOneHandedAnimator = null;
                 }
             });
+            mRunningOneHandedAnimator.addUpdateListener(animation -> {
+                float switchPoint = BOUNCER_HANDEDNESS_ANIMATION_FADE_OUT_PROPORTION;
+                boolean isFadingOut = animation.getAnimatedFraction() < switchPoint;
 
-            mRunningOneHandedAnimator.setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD);
+                int currentTranslation = (int) (positionInterpolator.getInterpolation(
+                        animation.getAnimatedFraction()) * totalTranslation);
+                int translationRemaining = totalTranslation - currentTranslation;
+
+                // Flip the sign if we're going from right to left.
+                if (mIsSecurityViewLeftAligned) {
+                    currentTranslation = -currentTranslation;
+                    translationRemaining = -translationRemaining;
+                }
+
+                if (isFadingOut) {
+                    // The bouncer fades out over the first X%.
+                    float fadeOutFraction = MathUtils.constrainedMap(
+                            /* rangeMin= */1.0f,
+                            /* rangeMax= */0.0f,
+                            /* valueMin= */0.0f,
+                            /* valueMax= */switchPoint,
+                            animation.getAnimatedFraction());
+                    float opacity = fadeOutInterpolator.getInterpolation(fadeOutFraction);
+
+                    // When fading out, the alpha needs to start from the initial opacity of the
+                    // view flipper, otherwise we get a weird bit of jank as it ramps back to 100%.
+                    mSecurityViewFlipper.setAlpha(opacity * initialAlpha);
+
+                    // Animate away from the source.
+                    mSecurityViewFlipper.setTranslationX(initialTranslation + currentTranslation);
+                } else {
+                    // And in again over the remaining (100-X)%.
+                    float fadeInFraction = MathUtils.constrainedMap(
+                            /* rangeMin= */0.0f,
+                            /* rangeMax= */1.0f,
+                            /* valueMin= */switchPoint,
+                            /* valueMax= */1.0f,
+                            animation.getAnimatedFraction());
+
+                    float opacity = fadeInInterpolator.getInterpolation(fadeInFraction);
+                    mSecurityViewFlipper.setAlpha(opacity);
+
+                    // Fading back in, animate towards the destination.
+                    mSecurityViewFlipper.setTranslationX(targetTranslation - translationRemaining);
+                }
+
+                if (animation.getAnimatedFraction() == 1.0f && shouldRestoreLayerType) {
+                    mSecurityViewFlipper.setLayerType(View.LAYER_TYPE_NONE, /* paint= */null);
+                }
+            });
+
             mRunningOneHandedAnimator.start();
         } else {
-            securityView.setTranslationX(targetTranslation);
+            mSecurityViewFlipper.setTranslationX(targetTranslation);
         }
-    }
-
-    @Nullable
-    private KeyguardSecurityViewFlipper findKeyguardSecurityView() {
-        for (int i = 0; i < getChildCount(); i++) {
-            View child = getChildAt(i);
-
-            if (isKeyguardSecurityView(child)) {
-                return (KeyguardSecurityViewFlipper) child;
-            }
-        }
-
-        return null;
-    }
-
-    private boolean isKeyguardSecurityView(View view) {
-        return view instanceof KeyguardSecurityViewFlipper;
     }
 
     public void onPause() {
@@ -510,6 +562,11 @@ public class KeyguardSecurityContainer extends FrameLayout {
                     mIsSecurityViewLeftAligned ? Settings.Global.ONE_HANDED_KEYGUARD_SIDE_LEFT
                             : Settings.Global.ONE_HANDED_KEYGUARD_SIDE_RIGHT);
 
+            int keyguardState = mIsSecurityViewLeftAligned
+                    ? SysUiStatsLog.KEYGUARD_BOUNCER_STATE_CHANGED__STATE__SWITCH_LEFT
+                    : SysUiStatsLog.KEYGUARD_BOUNCER_STATE_CHANGED__STATE__SWITCH_RIGHT;
+            SysUiStatsLog.write(SysUiStatsLog.KEYGUARD_BOUNCER_STATE_CHANGED, keyguardState);
+
             updateSecurityViewLocation(animate);
         }
     }
@@ -635,7 +692,7 @@ public class KeyguardSecurityContainer extends FrameLayout {
         for (int i = 0; i < getChildCount(); i++) {
             final View view = getChildAt(i);
             if (view.getVisibility() != GONE) {
-                if (mOneHandedMode && isKeyguardSecurityView(view)) {
+                if (mOneHandedMode && view == mSecurityViewFlipper) {
                     measureChildWithMargins(view, halfWidthMeasureSpec, 0,
                             heightMeasureSpec, 0);
                 } else {

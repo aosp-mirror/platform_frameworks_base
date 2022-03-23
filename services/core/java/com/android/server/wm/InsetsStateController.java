@@ -254,7 +254,7 @@ class InsetsStateController {
             if (p == null) continue;
             final WindowContainer wc = p.mWin;
             if (wc == null) continue;
-            mDisplayContent.mAtmService.getTransitionController().collect(wc);
+            mDisplayContent.mTransitionController.collect(wc);
         }
     }
 
@@ -385,7 +385,7 @@ class InsetsStateController {
         if (changed) {
             notifyInsetsChanged();
             mDisplayContent.updateSystemGestureExclusion();
-            mDisplayContent.getDisplayPolicy().updateSystemUiVisibilityLw();
+            mDisplayContent.getDisplayPolicy().updateSystemBarAttributes();
         }
     }
 

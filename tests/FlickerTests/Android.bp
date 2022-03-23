@@ -25,11 +25,17 @@ package {
 
 android_test {
     name: "FlickerTests",
-    srcs: ["src/**/*.java", "src/**/*.kt"],
+    srcs: [
+        "src/**/*.java",
+        "src/**/*.kt",
+    ],
     manifest: "AndroidManifest.xml",
     test_config: "AndroidTest.xml",
     platform_apis: true,
     certificate: "platform",
+    optimize: {
+        enabled: false,
+    },
     test_suites: ["device-tests"],
     libs: ["android.test.runner"],
     static_libs: [
@@ -46,6 +52,9 @@ android_test {
 java_library {
     name: "wm-flicker-common-assertions",
     platform_apis: true,
+    optimize: {
+        enabled: false,
+    },
     srcs: [
         "src/**/*Assertions.java",
         "src/**/*Assertions.kt",
@@ -56,20 +65,23 @@ java_library {
     static_libs: [
         "flickerlib",
         "truth-prebuilt",
-        "app-helpers-core"
+        "app-helpers-core",
     ],
 }
 
 java_library {
     name: "wm-flicker-common-app-helpers",
     platform_apis: true,
+    optimize: {
+        enabled: false,
+    },
     srcs: [
-        "**/helpers/*"
+        "**/helpers/*",
     ],
     static_libs: [
         "flickerlib",
         "flickertestapplib",
         "truth-prebuilt",
-        "app-helpers-core"
+        "app-helpers-core",
     ],
 }

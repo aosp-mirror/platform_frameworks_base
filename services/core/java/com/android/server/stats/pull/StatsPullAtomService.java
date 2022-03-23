@@ -29,7 +29,6 @@ import static android.net.NetworkTemplate.MATCH_WIFI;
 import static android.net.NetworkTemplate.OEM_MANAGED_ALL;
 import static android.net.NetworkTemplate.OEM_MANAGED_PAID;
 import static android.net.NetworkTemplate.OEM_MANAGED_PRIVATE;
-import static android.net.NetworkTemplate.getAllCollapsedRatTypes;
 import static android.os.Debug.getIonHeapsSizeKb;
 import static android.os.Process.LAST_SHARED_APPLICATION_GID;
 import static android.os.Process.getUidForPid;
@@ -40,6 +39,10 @@ import static android.telephony.TelephonyManager.UNKNOWN_CARRIER_ID;
 import static android.util.MathUtils.constrain;
 
 import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
+import static com.android.internal.util.FrameworkStatsLog.ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__A11Y_BUTTON;
+import static com.android.internal.util.FrameworkStatsLog.ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__A11Y_FLOATING_MENU;
+import static com.android.internal.util.FrameworkStatsLog.ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__A11Y_GESTURE;
+import static com.android.internal.util.FrameworkStatsLog.ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__UNKNOWN_TYPE;
 import static com.android.internal.util.FrameworkStatsLog.DATA_USAGE_BYTES_TRANSFER__OPPORTUNISTIC_DATA_SUB__NOT_OPPORTUNISTIC;
 import static com.android.internal.util.FrameworkStatsLog.DATA_USAGE_BYTES_TRANSFER__OPPORTUNISTIC_DATA_SUB__OPPORTUNISTIC;
 import static com.android.internal.util.FrameworkStatsLog.TIME_ZONE_DETECTOR_STATE__DETECTION_MODE__GEO;
@@ -58,6 +61,7 @@ import static java.util.concurrent.TimeUnit.MICROSECONDS;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.app.ActivityManagerInternal;
 import android.app.AppOpsManager;
 import android.app.AppOpsManager.HistoricalOp;
@@ -74,6 +78,7 @@ import android.app.usage.NetworkStatsManager;
 import android.bluetooth.BluetoothActivityEnergyInfo;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.UidTraffic;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
@@ -726,6 +731,10 @@ public class StatsPullAtomService extends SystemService {
                     case FrameworkStatsLog.RKP_ERROR_STATS:
                     case FrameworkStatsLog.KEYSTORE2_CRASH_STATS:
                         return pullKeystoreAtoms(atomTag, data);
+                    case FrameworkStatsLog.ACCESSIBILITY_SHORTCUT_STATS:
+                        return pullAccessibilityShortcutStatsLocked(atomTag, data);
+                    case FrameworkStatsLog.ACCESSIBILITY_FLOATING_MENU_STATS:
+                        return pullAccessibilityFloatingMenuStatsLocked(atomTag, data);
                     default:
                         throw new UnsupportedOperationException("Unknown tagId=" + atomTag);
                 }
@@ -921,6 +930,8 @@ public class StatsPullAtomService extends SystemService {
         registerKeystoreKeyOperationWithGeneralInfo();
         registerRkpErrorStats();
         registerKeystoreCrashStats();
+        registerAccessibilityShortcutStats();
+        registerAccessibilityFloatingMenuStats();
     }
 
     private void initAndRegisterNetworkStatsPullers() {
@@ -1168,13 +1179,14 @@ public class StatsPullAtomService extends SystemService {
                 Slog.e(TAG, "baseline is null for " + atomTag + ", return.");
                 return StatsManager.PULL_SKIP;
             }
+
             final NetworkStatsExt diff = new NetworkStatsExt(
-                    item.stats.subtract(baseline.stats).removeEmptyEntries(), item.transports,
+                    removeEmptyEntries(item.stats.subtract(baseline.stats)), item.transports,
                     item.slicedByFgbg, item.slicedByTag, item.slicedByMetered, item.ratType,
                     item.subInfo, item.oemManaged);
 
             // If no diff, skip.
-            if (diff.stats.size() == 0) continue;
+            if (!diff.stats.iterator().hasNext()) continue;
 
             switch (atomTag) {
                 case FrameworkStatsLog.BYTES_TRANSFER_BY_TAG_AND_METERED:
@@ -1191,6 +1203,17 @@ public class StatsPullAtomService extends SystemService {
             }
         }
         return StatsManager.PULL_SUCCESS;
+    }
+
+    @NonNull private static NetworkStats removeEmptyEntries(NetworkStats stats) {
+        NetworkStats ret = new NetworkStats(0, 1);
+        for (NetworkStats.Entry e : stats) {
+            if (e.getRxBytes() != 0 || e.getRxPackets() != 0 || e.getTxBytes() != 0
+                    || e.getTxPackets() != 0 || e.getOperations() != 0) {
+                ret = ret.addEntry(e);
+            }
+        }
+        return ret;
     }
 
     private void addNetworkStats(int atomTag, @NonNull List<StatsEvent> ret,
@@ -1227,11 +1250,11 @@ public class StatsPullAtomService extends SystemService {
     private void addDataUsageBytesTransferAtoms(@NonNull NetworkStatsExt statsExt,
             @NonNull List<StatsEvent> pulledData) {
 
-        // Workaround for 5G NSA mode, see {@link NetworkTemplate#NETWORK_TYPE_5G_NSA}.
+        // Workaround for 5G NSA mode, see {@link NetworkStatsManager#NETWORK_TYPE_5G_NSA}.
         // 5G NSA mode means the primary cell is LTE with a secondary connection to an
         // NR cell. To mitigate risk, NetworkStats is currently storing this state as
         // a fake RAT type rather than storing the boolean separately.
-        final boolean is5GNsa = statsExt.ratType == NetworkTemplate.NETWORK_TYPE_5G_NSA;
+        final boolean is5GNsa = statsExt.ratType == NetworkStatsManager.NETWORK_TYPE_5G_NSA;
         // Report NR connected in 5G non-standalone mode, or if the RAT type is NR to begin with.
         final boolean isNR = is5GNsa || statsExt.ratType == TelephonyManager.NETWORK_TYPE_NR;
 
@@ -1371,6 +1394,27 @@ public class StatsPullAtomService extends SystemService {
         return ret;
     }
 
+    /**
+     * Return all supported collapsed RAT types that could be returned by
+     * {@link android.app.usage.NetworkStatsManager#getCollapsedRatType(int)}.
+     */
+    @NonNull
+    private static int[] getAllCollapsedRatTypes() {
+        final int[] ratTypes = TelephonyManager.getAllNetworkTypes();
+        final HashSet<Integer> collapsedRatTypes = new HashSet<>();
+        for (final int ratType : ratTypes) {
+            collapsedRatTypes.add(NetworkStatsManager.getCollapsedRatType(ratType));
+        }
+        // Add NETWORK_TYPE_5G_NSA to the returned list since 5G NSA is a virtual RAT type and
+        // it is not in TelephonyManager#NETWORK_TYPE_* constants.
+        // See {@link NetworkStatsManager#NETWORK_TYPE_5G_NSA}.
+        collapsedRatTypes.add(
+                NetworkStatsManager.getCollapsedRatType(NetworkStatsManager.NETWORK_TYPE_5G_NSA));
+        // Ensure that unknown type is returned.
+        collapsedRatTypes.add(TelephonyManager.NETWORK_TYPE_UNKNOWN);
+        return com.android.net.module.util.CollectionUtils.toIntArray(collapsedRatTypes);
+    }
+
     @NonNull private NetworkStats sliceNetworkStatsByUid(@NonNull NetworkStats stats) {
         return sliceNetworkStats(stats,
                 (entry) -> {
@@ -1444,12 +1488,8 @@ public class StatsPullAtomService extends SystemService {
     @NonNull private NetworkStats sliceNetworkStats(@NonNull NetworkStats stats,
             @NonNull Function<NetworkStats.Entry, NetworkStats.Entry> slicer) {
         NetworkStats ret = new NetworkStats(0, 1);
-        NetworkStats.Entry entry = new NetworkStats.Entry();
         for (NetworkStats.Entry e : stats) {
-            if (slicer != null) {
-                entry = slicer.apply(e);
-            }
-            ret = ret.addEntry(entry);
+            ret = ret.addEntry(slicer.apply(e));
         }
         return ret;
     }
@@ -2581,6 +2621,7 @@ public class StatsPullAtomService extends SystemService {
         StatFs statFsData = new StatFs(Environment.getDataDirectory().getAbsolutePath());
         StatFs statFsSystem = new StatFs(Environment.getRootDirectory().getAbsolutePath());
         StatFs statFsCache = new StatFs(Environment.getDownloadCacheDirectory().getAbsolutePath());
+        StatFs metadataFsSystem = new StatFs(Environment.getMetadataDirectory().getAbsolutePath());
 
         pulledData.add(FrameworkStatsLog.buildStatsEvent(atomTag,
                 FrameworkStatsLog.DIRECTORY_USAGE__DIRECTORY__DATA, statFsData.getAvailableBytes(),
@@ -2593,6 +2634,10 @@ public class StatsPullAtomService extends SystemService {
         pulledData.add(FrameworkStatsLog.buildStatsEvent(atomTag,
                 FrameworkStatsLog.DIRECTORY_USAGE__DIRECTORY__SYSTEM,
                 statFsSystem.getAvailableBytes(), statFsSystem.getTotalBytes()));
+
+        pulledData.add(FrameworkStatsLog.buildStatsEvent(atomTag,
+                FrameworkStatsLog.DIRECTORY_USAGE__DIRECTORY__METADATA,
+                metadataFsSystem.getAvailableBytes(), metadataFsSystem.getTotalBytes()));
         return StatsManager.PULL_SUCCESS;
     }
 
@@ -4139,6 +4184,26 @@ public class StatsPullAtomService extends SystemService {
                 mStatsCallbackImpl);
     }
 
+    private void registerAccessibilityShortcutStats() {
+        int tagId = FrameworkStatsLog.ACCESSIBILITY_SHORTCUT_STATS;
+        mStatsManager.setPullAtomCallback(
+                tagId,
+                null, // use default PullAtomMetadata values
+                DIRECT_EXECUTOR,
+                mStatsCallbackImpl
+        );
+    }
+
+    private void registerAccessibilityFloatingMenuStats() {
+        int tagId = FrameworkStatsLog.ACCESSIBILITY_FLOATING_MENU_STATS;
+        mStatsManager.setPullAtomCallback(
+                tagId,
+                null, // use default PullAtomMetadata values
+                DIRECT_EXECUTOR,
+                mStatsCallbackImpl
+        );
+    }
+
     int parseKeystoreStorageStats(KeystoreAtom[] atoms, List<StatsEvent> pulledData) {
         for (KeystoreAtom atomWrapper : atoms) {
             if (atomWrapper.payload.getTag() != KeystoreAtomPayload.storageStats) {
@@ -4327,6 +4392,158 @@ public class StatsPullAtomService extends SystemService {
             return StatsManager.PULL_SKIP;
         } finally {
             Binder.restoreCallingIdentity(callingToken);
+        }
+    }
+
+    int pullAccessibilityShortcutStatsLocked(int atomTag, List<StatsEvent> pulledData) {
+        UserManager userManager = mContext.getSystemService(UserManager.class);
+        if (userManager == null) {
+            return StatsManager.PULL_SKIP;
+        }
+        final long token = Binder.clearCallingIdentity();
+        try {
+            final ContentResolver resolver = mContext.getContentResolver();
+            final int hardware_shortcut_type =
+                    FrameworkStatsLog.ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__VOLUME_KEY;
+            final int triple_tap_shortcut =
+                    FrameworkStatsLog.ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__TRIPLE_TAP;
+            for (UserInfo userInfo : userManager.getUsers()) {
+                final int userId = userInfo.getUserHandle().getIdentifier();
+
+                if (isAccessibilityShortcutUser(mContext, userId)) {
+                    final int software_shortcut_type = convertToAccessibilityShortcutType(
+                            Settings.Secure.getIntForUser(resolver,
+                                    Settings.Secure.ACCESSIBILITY_BUTTON_MODE, 0, userId));
+                    final String software_shortcut_list = Settings.Secure.getStringForUser(resolver,
+                            Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS, userId);
+                    final int software_shortcut_service_num = countAccessibilityServices(
+                            software_shortcut_list);
+
+                    final String hardware_shortcut_list = Settings.Secure.getStringForUser(resolver,
+                            Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE, userId);
+                    final int hardware_shortcut_service_num = countAccessibilityServices(
+                            hardware_shortcut_list);
+
+                    // only allow magnification to use it for now
+                    final int triple_tap_service_num = Settings.Secure.getIntForUser(resolver,
+                            Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_ENABLED, 0, userId);
+
+                    pulledData.add(
+                            FrameworkStatsLog.buildStatsEvent(atomTag,
+                                    software_shortcut_type, software_shortcut_service_num,
+                                    hardware_shortcut_type, hardware_shortcut_service_num,
+                                    triple_tap_shortcut, triple_tap_service_num));
+                }
+            }
+        } catch (RuntimeException e) {
+            Slog.e(TAG, "pulling accessibility shortcuts stats failed at getUsers", e);
+            return StatsManager.PULL_SKIP;
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+        return StatsManager.PULL_SUCCESS;
+    }
+
+    int pullAccessibilityFloatingMenuStatsLocked(int atomTag, List<StatsEvent> pulledData) {
+        UserManager userManager = mContext.getSystemService(UserManager.class);
+        if (userManager == null) {
+            return StatsManager.PULL_SKIP;
+        }
+        final long token = Binder.clearCallingIdentity();
+        try {
+            final ContentResolver resolver = mContext.getContentResolver();
+            final int defaultSize = 0;
+            final int defaultIconType = 0;
+            final int defaultFadeEnabled = 1;
+            final float defaultOpacity = 0.55f;
+
+            for (UserInfo userInfo : userManager.getUsers()) {
+                final int userId = userInfo.getUserHandle().getIdentifier();
+
+                if (isAccessibilityFloatingMenuUser(mContext, userId)) {
+                    final int size = Settings.Secure.getIntForUser(resolver,
+                            Settings.Secure.ACCESSIBILITY_FLOATING_MENU_SIZE, defaultSize, userId);
+                    final int type = Settings.Secure.getIntForUser(resolver,
+                            Settings.Secure.ACCESSIBILITY_FLOATING_MENU_ICON_TYPE,
+                            defaultIconType, userId);
+                    final boolean fadeEnabled = (Settings.Secure.getIntForUser(resolver,
+                            Settings.Secure.ACCESSIBILITY_FLOATING_MENU_FADE_ENABLED,
+                            defaultFadeEnabled, userId)) == 1;
+                    final float opacity = Settings.Secure.getFloatForUser(resolver,
+                            Settings.Secure.ACCESSIBILITY_FLOATING_MENU_OPACITY,
+                            defaultOpacity, userId);
+
+                    pulledData.add(
+                            FrameworkStatsLog.buildStatsEvent(atomTag, size, type, fadeEnabled,
+                                    opacity));
+                }
+            }
+        }  catch (RuntimeException e) {
+            Slog.e(TAG, "pulling accessibility floating menu stats failed at getUsers", e);
+            return StatsManager.PULL_SKIP;
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+        return StatsManager.PULL_SUCCESS;
+    }
+
+    /**
+     * Counts how many accessibility services (including features) there are in the colon-separated
+     * string list.
+     *
+     * @param semicolonList colon-separated string, it should be
+     *                        {@link Settings.Secure#ACCESSIBILITY_BUTTON_TARGETS} or
+     *                        {@link Settings.Secure#ACCESSIBILITY_SHORTCUT_TARGET_SERVICE}.
+     * @return The number of accessibility services
+     */
+    private int countAccessibilityServices(String semicolonList) {
+        if (TextUtils.isEmpty(semicolonList)) {
+            return 0;
+        }
+        final int semiColonNums = (int) semicolonList.chars().filter(ch -> ch == ':').count();
+        return TextUtils.isEmpty(semicolonList) ? 0 : semiColonNums + 1;
+    }
+
+    private boolean isAccessibilityShortcutUser(Context context, @UserIdInt int userId) {
+        final ContentResolver resolver = context.getContentResolver();
+
+        final String software_shortcut_list = Settings.Secure.getStringForUser(resolver,
+                Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS, userId);
+        final String hardware_shortcut_list = Settings.Secure.getStringForUser(resolver,
+                Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE, userId);
+        final boolean hardware_shortcut_dialog_shown = Settings.Secure.getIntForUser(resolver,
+                Settings.Secure.ACCESSIBILITY_SHORTCUT_DIALOG_SHOWN, 0, userId) == 1;
+        final boolean software_shortcut_enabled = !TextUtils.isEmpty(software_shortcut_list);
+        final boolean hardware_shortcut_enabled =
+                hardware_shortcut_dialog_shown && !TextUtils.isEmpty(hardware_shortcut_list);
+        final boolean triple_tap_shortcut_enabled = Settings.Secure.getIntForUser(resolver,
+                Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_ENABLED, 0, userId) == 1;
+
+        return software_shortcut_enabled || hardware_shortcut_enabled
+                || triple_tap_shortcut_enabled;
+    }
+
+    private boolean isAccessibilityFloatingMenuUser(Context context, @UserIdInt int userId) {
+        final ContentResolver resolver = context.getContentResolver();
+        final int mode = Settings.Secure.getIntForUser(resolver,
+                Settings.Secure.ACCESSIBILITY_BUTTON_MODE, 0, userId);
+        final String software_string = Settings.Secure.getStringForUser(resolver,
+                Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS, userId);
+
+        return (mode == Settings.Secure.ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU)
+                && !TextUtils.isEmpty(software_string);
+    }
+
+    private int convertToAccessibilityShortcutType(int shortcutType) {
+        switch (shortcutType) {
+            case Settings.Secure.ACCESSIBILITY_BUTTON_MODE_NAVIGATION_BAR:
+                return ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__A11Y_BUTTON;
+            case Settings.Secure.ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU:
+                return ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__A11Y_FLOATING_MENU;
+            case Settings.Secure.ACCESSIBILITY_BUTTON_MODE_GESTURE:
+                return ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__A11Y_GESTURE;
+            default:
+                return ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__UNKNOWN_TYPE;
         }
     }
 

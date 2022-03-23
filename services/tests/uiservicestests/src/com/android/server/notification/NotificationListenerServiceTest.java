@@ -118,7 +118,7 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
             assertActionsEqual(getSmartActions(key, i), ranking.getSmartActions());
             assertEquals(getSmartReplies(key, i), ranking.getSmartReplies());
             assertEquals(canBubble(i), ranking.canBubble());
-            assertEquals(visuallyInterruptive(i), ranking.visuallyInterruptive());
+            assertEquals(isTextChanged(i), ranking.isTextChanged());
             assertEquals(isConversation(i), ranking.isConversation());
             assertEquals(getShortcutInfo(i).getId(), ranking.getConversationShortcutInfo().getId());
             assertEquals(getRankingAdjustment(i), ranking.getRankingAdjustment());
@@ -189,7 +189,7 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
                 (ArrayList) tweak.getSmartActions(),
                 (ArrayList) tweak.getSmartReplies(),
                 tweak.canBubble(),
-                tweak.visuallyInterruptive(),
+                tweak.isTextChanged(),
                 tweak.isConversation(),
                 tweak.getConversationShortcutInfo(),
                 tweak.getRankingAdjustment(),
@@ -270,7 +270,7 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
                     getSmartActions(key, i),
                     getSmartReplies(key, i),
                     canBubble(i),
-                    visuallyInterruptive(i),
+                    isTextChanged(i),
                     isConversation(i),
                     getShortcutInfo(i),
                     getRankingAdjustment(i),
@@ -379,7 +379,7 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
         return index % 4 == 0;
     }
 
-    private boolean visuallyInterruptive(int index) {
+    private boolean isTextChanged(int index) {
         return index % 4 == 0;
     }
 

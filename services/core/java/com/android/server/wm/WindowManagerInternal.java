@@ -40,6 +40,7 @@ import com.android.server.input.InputManagerService;
 import com.android.server.policy.WindowManagerPolicy;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * Window manager local system service interface.
@@ -54,17 +55,18 @@ public abstract class WindowManagerInternal {
      */
     public interface AccessibilityControllerInternal {
         /**
-         * Enable the accessibility trace logging.
+         * Start tracing for the given logging types.
+         * @param loggingTypeFlags flags of the logging types enabled.
          */
-        void startTrace();
+        void startTrace(long loggingTypeFlags);
 
         /**
-         * Disable the accessibility trace logging.
+         * Disable accessibility tracing for all logging types.
          */
         void stopTrace();
 
         /**
-         * Is trace enabled or not.
+         * Is tracing enabled for any logging type.
          */
         boolean isAccessibilityTracingEnabled();
 
@@ -73,20 +75,23 @@ public abstract class WindowManagerInternal {
          *
          * @param where A string to identify this log entry, which can be used to filter/search
          *        through the tracing file.
+         * @param loggingTypeFlags The flags for the logging types this log entry belongs to.
          * @param callingParams The parameters for the method to be logged.
          * @param a11yDump The proto byte array for a11y state when the entry is generated.
          * @param callingUid The calling uid.
          * @param stackTrace The stack trace, null if not needed.
+         * @param ignoreStackEntries The stack entries can be removed
          */
         void logTrace(
-                String where, String callingParams, byte[] a11yDump, int callingUid,
-                StackTraceElement[] stackTrace);
+                String where, long loggingTypeFlags, String callingParams, byte[] a11yDump,
+                int callingUid, StackTraceElement[] stackTrace, Set<String> ignoreStackEntries);
 
         /**
          * Add an accessibility trace entry.
          *
          * @param where A string to identify this log entry, which can be used to filter/search
          *        through the tracing file.
+         * @param loggingTypeFlags The flags for the logging types this log entry belongs to.
          * @param callingParams The parameters for the method to be logged.
          * @param a11yDump The proto byte array for a11y state when the entry is generated.
          * @param callingUid The calling uid.
@@ -94,9 +99,11 @@ public abstract class WindowManagerInternal {
          * @param timeStamp The time when the method to be logged is called.
          * @param processId The calling process Id.
          * @param threadId The calling thread Id.
+         * @param ignoreStackEntries The stack entries can be removed
          */
-        void logTrace(String where, String callingParams, byte[] a11yDump, int callingUid,
-                StackTraceElement[] callStack, long timeStamp, int processId, long threadId);
+        void logTrace(String where, long loggingTypeFlags, String callingParams,
+                byte[] a11yDump, int callingUid, StackTraceElement[] callStack, long timeStamp,
+                int processId, long threadId, Set<String> ignoreStackEntries);
     }
 
     /**
@@ -115,6 +122,16 @@ public abstract class WindowManagerInternal {
          */
         void onWindowsForAccessibilityChanged(boolean forceSend, int topFocusedDisplayId,
                 IBinder topFocusedWindowToken, @NonNull List<WindowInfo> windows);
+
+        /**
+         * Called when the display is reparented and becomes an embedded
+         * display. The {@link WindowsForAccessibilityCallback} with the given embedded
+         * display will be replaced by the {@link WindowsForAccessibilityCallback}
+         * associated with its parent display at the same time.
+         *
+         * @param embeddedDisplayId The embedded display Id.
+         */
+        void onDisplayReparented(int embeddedDisplayId);
     }
 
     /**
@@ -143,11 +160,11 @@ public abstract class WindowManagerInternal {
         void onRectangleOnScreenRequested(int left, int top, int right, int bottom);
 
         /**
-         * Notifies that the rotation changed.
+         * Notifies that the display size is changed when rotation or the
+         * logical display is changed.
          *
-         * @param rotation The current rotation.
          */
-        void onRotationChanged(int rotation);
+        void onDisplaySizeChanged();
 
         /**
          * Notifies that the context of the user changed. For example, an application
@@ -177,7 +194,7 @@ public abstract class WindowManagerInternal {
         /**
          * Called when a pending app transition gets cancelled.
          *
-         * @param keyguardGoingAway true if keyguard going away transition transition got cancelled.
+         * @param keyguardGoingAway true if keyguard going away transition got cancelled.
          */
         public void onAppTransitionCancelledLocked(boolean keyguardGoingAway) {}
 
@@ -190,6 +207,7 @@ public abstract class WindowManagerInternal {
          * Called when an app transition gets started
          *
          * @param keyguardGoingAway true if keyguard going away transition is started.
+         * @param keyguardOccluding true if keyguard (un)occlude transition is started.
          * @param duration the total duration of the transition
          * @param statusBarAnimationStartTime the desired start time for all visual animations in
          *        the status bar caused by this app transition in uptime millis
@@ -201,8 +219,9 @@ public abstract class WindowManagerInternal {
          * {@link WindowManagerPolicy#FINISH_LAYOUT_REDO_WALLPAPER},
          * or {@link WindowManagerPolicy#FINISH_LAYOUT_REDO_ANIM}.
          */
-        public int onAppTransitionStartingLocked(boolean keyguardGoingAway, long duration,
-                long statusBarAnimationStartTime, long statusBarAnimationDuration) {
+        public int onAppTransitionStartingLocked(boolean keyguardGoingAway,
+                boolean keyguardOccluding, long duration, long statusBarAnimationStartTime,
+                long statusBarAnimationDuration) {
             return 0;
         }
 
@@ -672,24 +691,43 @@ public abstract class WindowManagerInternal {
     public abstract String getWindowName(@NonNull IBinder binder);
 
     /**
-     * Return the window name of IME Insets control target.
+     * The callback after the request of show/hide input method is sent.
      *
+     * @param show Whether to show or hide input method.
+     * @param focusedToken The token of focused window.
+     * @param requestToken The token of window who requests the change.
      * @param displayId The ID of the display which input method is currently focused.
-     * @return The corresponding {@link WindowState#getName()}
+     * @return The information of the input method target.
      */
-    public abstract @Nullable String getImeControlTargetNameForLogging(int displayId);
+    public abstract ImeTargetInfo onToggleImeRequested(boolean show,
+            @NonNull IBinder focusedToken, @NonNull IBinder requestToken, int displayId);
 
-    /**
-     * Return the current window name of the input method is on top of.
-     *
-     * Note that the concept of this window is only reparent the target window behind the input
-     * method window, it may different with the window which reported by
-     * {@code InputMethodManagerService#reportStartInput} which has input connection.
-     *
-     * @param displayId The ID of the display which input method is currently focused.
-     * @return The corresponding {@link WindowState#getName()}
-     */
-    public abstract @Nullable String getImeTargetNameForLogging(int displayId);
+    /** The information of input method target when IME is requested to show or hide. */
+    public static class ImeTargetInfo {
+        public final String focusedWindowName;
+        public final String requestWindowName;
+
+        /** The window name of IME Insets control target. */
+        public final String imeControlTargetName;
+
+        /**
+         * The current window name of the input method is on top of.
+         * <p>
+         * Note that the concept of this window is only used to reparent the target window behind
+         * the input method window, it may be different from the window reported by
+         * {@link com.android.server.inputmethod.InputMethodManagerService#reportStartInput} which
+         * has input connection.
+         */
+        public final String imeLayerTargetName;
+
+        public ImeTargetInfo(String focusedWindowName, String requestWindowName,
+                String imeControlTargetName, String imeLayerTargetName) {
+            this.focusedWindowName = focusedWindowName;
+            this.requestWindowName = requestWindowName;
+            this.imeControlTargetName = imeControlTargetName;
+            this.imeLayerTargetName = imeLayerTargetName;
+        }
+    }
 
     /**
      * Moves the {@link WindowToken} {@code binder} to the display specified by {@code displayId}.

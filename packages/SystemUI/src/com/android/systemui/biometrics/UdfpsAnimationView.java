@@ -111,7 +111,7 @@ abstract class UdfpsAnimationView extends FrameLayout {
         return (int) ((1 - percent) * 255);
     }
 
-    public void onExpansionChanged(float expansion, boolean expanded) {
+    public void onExpansionChanged(float expansion) {
         mAlpha = expansionToAlpha(expansion);
         updateAlpha();
     }

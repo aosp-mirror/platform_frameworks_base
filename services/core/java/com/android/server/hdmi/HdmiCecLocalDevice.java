@@ -75,6 +75,8 @@ abstract class HdmiCecLocalDevice {
     protected int mLastKeycode = HdmiCecKeycode.UNSUPPORTED_KEYCODE;
     protected int mLastKeyRepeatCount = 0;
 
+    HdmiCecStandbyModeHandler mStandbyHandler;
+
     // Stores recent changes to the active source in the CEC network.
     private final ArrayBlockingQueue<HdmiCecController.Dumpable> mActiveSourceHistory =
             new ArrayBlockingQueue<>(MAX_HDMI_ACTIVE_SOURCE_HISTORY);
@@ -262,6 +264,11 @@ abstract class HdmiCecLocalDevice {
         int dest = message.getDestination();
         if (dest != mAddress && dest != Constants.ADDR_BROADCAST) {
             return Constants.NOT_HANDLED;
+        }
+        if (mService.isPowerStandby()
+                && !mService.isWakeUpMessageReceived()
+                && mStandbyHandler.handleCommand(message)) {
+            return Constants.HANDLED;
         }
         // Cache incoming message if it is included in the list of cacheable opcodes.
         mCecMessageCache.cacheMessage(message);
@@ -829,17 +836,12 @@ abstract class HdmiCecLocalDevice {
     protected int handleVendorCommandWithId(HdmiCecMessage message) {
         byte[] params = message.getParams();
         int vendorId = HdmiUtils.threeBytesToInt(params);
-        if (vendorId == mService.getVendorId()) {
-            if (!mService.invokeVendorCommandListenersOnReceived(
-                    mDeviceType, message.getSource(), message.getDestination(), params, true)) {
-                return Constants.ABORT_REFUSED;
-            }
-        } else if (message.getDestination() != Constants.ADDR_BROADCAST
-                && message.getSource() != Constants.ADDR_UNREGISTERED) {
-            Slog.v(TAG, "Wrong direct vendor command. Replying with <Feature Abort>");
-            return Constants.ABORT_UNRECOGNIZED_OPCODE;
-        } else {
+        if (message.getDestination() == Constants.ADDR_BROADCAST
+                || message.getSource() == Constants.ADDR_UNREGISTERED) {
             Slog.v(TAG, "Wrong broadcast vendor command. Ignoring");
+        } else if (!mService.invokeVendorCommandListenersOnReceived(
+                mDeviceType, message.getSource(), message.getDestination(), params, true)) {
+            return Constants.ABORT_REFUSED;
         }
         return Constants.HANDLED;
     }

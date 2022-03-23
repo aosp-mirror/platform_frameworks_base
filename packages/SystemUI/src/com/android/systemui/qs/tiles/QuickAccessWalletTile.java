@@ -131,22 +131,16 @@ public class QuickAccessWalletTile extends QSTileImpl<QSTile.State> {
                 Intent intent = new Intent(mContext, WalletActivity.class)
                         .setAction(Intent.ACTION_VIEW)
                         .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                if (mKeyguardStateController.isUnlocked()) {
-                    mActivityStarter.startActivity(intent, true /* dismissShade */,
-                            animationController);
-                } else {
-                    mHost.collapsePanels();
-                    // Do not use ActivityStarter here because the WalletActivity is required to be
-                    // started without prompting keyguard when the device is locked.
-                    mContext.startActivity(intent);
-                }
+                mActivityStarter.startActivity(intent, true /* dismissShade */,
+                        animationController, true /* showOverLockscreenWhenLocked */);
             } else {
-                if (mController.getWalletClient().createWalletIntent() == null) {
+                Intent intent = mController.getWalletClient().createWalletIntent();
+                if (intent == null) {
                     Log.w(TAG, "Could not get intent of the wallet app.");
                     return;
                 }
                 mActivityStarter.postStartActivityDismissingKeyguard(
-                        mController.getWalletClient().createWalletIntent(),
+                        intent,
                         /* delay= */ 0,
                         animationController);
             }

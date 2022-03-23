@@ -22,16 +22,22 @@ import android.content.pm.PackageManager;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.shared.plugins.PluginEnabler;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+/** */
+@Singleton
 public class PluginEnablerImpl implements PluginEnabler {
     private static final String CRASH_DISABLED_PLUGINS_PREF_FILE = "auto_disabled_plugins_prefs";
 
-    private PackageManager mPm;
+    private final PackageManager mPm;
     private final SharedPreferences mAutoDisabledPrefs;
 
     public PluginEnablerImpl(Context context) {
         this(context, context.getPackageManager());
     }
 
+    @Inject
     @VisibleForTesting public PluginEnablerImpl(Context context, PackageManager pm) {
         mAutoDisabledPrefs = context.getSharedPreferences(
                 CRASH_DISABLED_PLUGINS_PREF_FILE, Context.MODE_PRIVATE);

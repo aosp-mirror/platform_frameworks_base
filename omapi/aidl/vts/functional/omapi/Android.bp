@@ -39,6 +39,11 @@ cc_test {
     static_libs: [
         "VtsHalHidlTargetTestBase",
         "android.se.omapi-V1-ndk",
+        "android.hardware.audio.common.test.utility",
+        "libxml2",
+    ],
+    data: [
+        ":omapi_uuid_map_config",
     ],
     cflags: [
         "-O0",
@@ -51,4 +56,5 @@ cc_test {
         "general-tests",
         "vts",
     ],
+    test_config: "VtsHalOmapiSeServiceV1_TargetTest.xml",
 }

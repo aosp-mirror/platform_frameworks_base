@@ -63,7 +63,7 @@ class MediaTimeoutListener @Inject constructor(
         oldKey: String?,
         data: MediaData,
         immediately: Boolean,
-        isSsReactivated: Boolean
+        receivedSmartspaceCardLatency: Int
     ) {
         var reusedListener: PlaybackStateListener? = null
 

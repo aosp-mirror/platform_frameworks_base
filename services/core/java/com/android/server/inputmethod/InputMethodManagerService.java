@@ -542,9 +542,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
      */
     private InputMethodSubtype mCurrentSubtype;
 
-    // Was the keyguard locked when this client became current?
-    private boolean mCurClientInKeyguard;
-
     /**
      * {@code true} if the IME has not been mostly hidden via {@link android.view.InsetsController}
      */
@@ -2356,19 +2353,16 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
         if (displayIdToShowIme == INVALID_DISPLAY) {
             mImeHiddenByDisplayPolicy = true;
+            hideCurrentInputLocked(mCurFocusedWindow, 0, null,
+                    SoftInputShowHideReason.HIDE_DISPLAY_IME_POLICY_HIDE);
             return InputBindResult.NO_IME;
         }
         mImeHiddenByDisplayPolicy = false;
 
         if (mCurClient != cs) {
-            // Was the keyguard locked when switching over to the new client?
-            mCurClientInKeyguard = isKeyguardLocked();
             // If the client is changing, we need to switch over to the new
             // one.
             unbindCurrentClientLocked(UnbindReason.SWITCH_CLIENT);
-            if (DEBUG) Slog.v(TAG, "switching to client: client="
-                    + cs.client.asBinder() + " keyguard=" + mCurClientInKeyguard);
-
             // If the screen is on, inform the new client it is active
             if (mIsInteractive) {
                 scheduleSetActiveToClient(cs, true /* active */, false /* fullscreen */,
@@ -2528,9 +2522,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 }
                 if (DEBUG) Slog.v(TAG, "Initiating attach with token: " + mCurToken);
                 // Dispatch display id for InputMethodService to update context display.
-                executeOrSendMessage(mCurMethod, mCaller.obtainMessageIOOO(
-                        MSG_INITIALIZE_IME, mCurTokenDisplayId, mCurMethod, mCurToken,
-                        mMethodMap.get(mCurMethodId).getConfigChanges()));
+                executeOrSendMessage(mCurMethod, mCaller.obtainMessageIOO(MSG_INITIALIZE_IME,
+                        mMethodMap.get(mCurMethodId).getConfigChanges(), mCurMethod, mCurToken));
                 scheduleNotifyImeUidToAudioService(mCurMethodUid);
                 if (mCurClient != null) {
                     clearClientSessionLocked(mCurClient);
@@ -2837,7 +2830,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 return;
             }
             final IBinder targetWindow = mImeTargetWindowMap.get(startInputToken);
-            if (targetWindow != null && mLastImeTargetWindow != targetWindow) {
+            if (targetWindow != null) {
                 mWindowManagerInternal.updateInputMethodTargetWindow(token, targetWindow);
             }
             mLastImeTargetWindow = targetWindow;
@@ -2874,12 +2867,13 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         // all updateSystemUi happens on system previlege.
         final long ident = Binder.clearCallingIdentity();
         try {
-            // apply policy for binder calls
-            if (vis != 0 && isKeyguardLocked() && !mCurClientInKeyguard) {
-                vis = 0;
-            }
             if (!mCurPerceptible) {
-                vis &= ~InputMethodService.IME_VISIBLE;
+                if ((vis & InputMethodService.IME_VISIBLE) != 0) {
+                    vis &= ~InputMethodService.IME_VISIBLE;
+                    vis |= InputMethodService.IME_VISIBLE_IMPERCEPTIBLE;
+                }
+            } else {
+                vis &= ~InputMethodService.IME_VISIBLE_IMPERCEPTIBLE;
             }
             // mImeWindowVis should be updated before calling shouldShowImeSwitcherLocked().
             final boolean needsToShowImeSwitcher = shouldShowImeSwitcherLocked(vis);
@@ -4121,6 +4115,18 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
+    /** Called right after {@link IInputMethod#showSoftInput}. */
+    private void onShowHideSoftInputRequested(boolean show, IBinder requestToken,
+            @SoftInputShowHideReason int reason) {
+        final WindowManagerInternal.ImeTargetInfo info =
+                mWindowManagerInternal.onToggleImeRequested(
+                        show, mCurFocusedWindow, requestToken, mCurTokenDisplayId);
+        mSoftInputShowHideHistory.addEntry(new SoftInputShowHideHistory.Entry(
+                mCurFocusedWindowClient, mCurAttribute, info.focusedWindowName,
+                mCurFocusedWindowSoftInputMode, reason, mInFullscreenMode,
+                info.requestWindowName, info.imeControlTargetName, info.imeLayerTargetName));
+    }
+
     @BinderThread
     private void hideMySoftInput(@NonNull IBinder token, int flags) {
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMMS.hideMySoftInput");
@@ -4239,18 +4245,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     if (DEBUG) Slog.v(TAG, "Calling " + args.arg1 + ".showSoftInput("
                             + args.arg3 + ", " + msg.arg1 + ", " + args.arg2 + ") for reason: "
                             + InputMethodDebug.softInputDisplayReasonToString(reason));
+                    final IBinder token = (IBinder) args.arg3;
                     ((IInputMethod) args.arg1).showSoftInput(
-                            (IBinder) args.arg3, msg.arg1, (ResultReceiver) args.arg2);
-                    mSoftInputShowHideHistory.addEntry(new SoftInputShowHideHistory.Entry(
-                            mCurFocusedWindowClient, mCurAttribute,
-                            mWindowManagerInternal.getWindowName(mCurFocusedWindow),
-                            mCurFocusedWindowSoftInputMode, reason, mInFullscreenMode,
-                            mWindowManagerInternal.getWindowName(
-                                    mShowRequestWindowMap.get(args.arg3)),
-                            mWindowManagerInternal.getImeControlTargetNameForLogging(
-                                    mCurTokenDisplayId),
-                            mWindowManagerInternal.getImeTargetNameForLogging(
-                                    mCurTokenDisplayId)));
+                            token, msg.arg1 /* flags */, (ResultReceiver) args.arg2);
+                    final IBinder requestToken = mShowRequestWindowMap.get(token);
+                    onShowHideSoftInputRequested(true /* show */, requestToken, reason);
                 } catch (RemoteException e) {
                 }
                 args.recycle();
@@ -4262,18 +4261,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     if (DEBUG) Slog.v(TAG, "Calling " + args.arg1 + ".hideSoftInput(0, "
                             + args.arg3 + ", " + args.arg2 + ") for reason: "
                             + InputMethodDebug.softInputDisplayReasonToString(reason));
+                    final IBinder token = (IBinder) args.arg3;
                     ((IInputMethod)args.arg1).hideSoftInput(
-                            (IBinder) args.arg3, 0, (ResultReceiver)args.arg2);
-                    mSoftInputShowHideHistory.addEntry(new SoftInputShowHideHistory.Entry(
-                            mCurFocusedWindowClient, mCurAttribute,
-                            mWindowManagerInternal.getWindowName(mCurFocusedWindow),
-                            mCurFocusedWindowSoftInputMode, reason, mInFullscreenMode,
-                            mWindowManagerInternal.getWindowName(
-                                    mHideRequestWindowMap.get(args.arg3)),
-                            mWindowManagerInternal.getImeControlTargetNameForLogging(
-                                    mCurTokenDisplayId),
-                            mWindowManagerInternal.getImeTargetNameForLogging(
-                                    mCurTokenDisplayId)));
+                            token, 0 /* flags */, (ResultReceiver) args.arg2);
+                    final IBinder requestToken = mHideRequestWindowMap.get(token);
+                    onShowHideSoftInputRequested(false /* show */, requestToken, reason);
                 } catch (RemoteException e) {
                 }
                 args.recycle();
@@ -4290,12 +4282,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 try {
                     if (DEBUG) {
                         Slog.v(TAG, "Sending attach of token: " + args.arg2 + " for display: "
-                                + msg.arg1);
+                                + mCurTokenDisplayId);
                     }
                     final IBinder token = (IBinder) args.arg2;
-                    ((IInputMethod) args.arg1).initializeInternal(token, msg.arg1,
-                            new InputMethodPrivilegedOperationsImpl(this, token),
-                            (int) args.arg3);
+                    ((IInputMethod) args.arg1).initializeInternal(token,
+                            new InputMethodPrivilegedOperationsImpl(this, token), msg.arg1);
                 } catch (RemoteException e) {
                 }
                 args.recycle();

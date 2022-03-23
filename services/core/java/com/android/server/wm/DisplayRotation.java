@@ -22,7 +22,6 @@ import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_CROSSFA
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_JUMPCUT;
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_ROTATE;
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_SEAMLESS;
-import static android.view.WindowManager.TRANSIT_CHANGE;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ORIENTATION;
 import static com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs.LID_OPEN;
@@ -414,7 +413,7 @@ public class DisplayRotation {
      */
     boolean updateRotationUnchecked(boolean forceUpdate) {
         final boolean useShellTransitions =
-                mService.mAtmService.getTransitionController().getTransitionPlayer() != null;
+                mDisplayContent.mTransitionController.isShellTransitionsEnabled();
 
         final int displayId = mDisplayContent.getDisplayId();
         if (!forceUpdate && !useShellTransitions) {
@@ -443,7 +442,9 @@ public class DisplayRotation {
                 return false;
             }
 
-            if (mDisplayContent.mFixedRotationTransitionListener
+            final RecentsAnimationController recentsAnimController =
+                    mService.getRecentsAnimationController();
+            if (recentsAnimController != null && mDisplayContent.mFixedRotationTransitionListener
                     .isTopFixedOrientationRecentsAnimating()
                     // If screen is off or the device is going to sleep, then still allow to update.
                     && mService.mPolicy.okToAnimate(false /* ignoreScreenOn */)) {
@@ -451,6 +452,7 @@ public class DisplayRotation {
                 // In order to ignore its requested orientation to avoid a sensor led rotation (e.g
                 // user rotating the device while the recents animation is running), we ignore
                 // rotation update while the animation is running.
+                recentsAnimController.setCheckRotationAfterCleanup();
                 return false;
             }
         }
@@ -492,12 +494,6 @@ public class DisplayRotation {
             recentsAnimationController.cancelAnimationForDisplayChange();
         }
 
-        final Transition t = (useShellTransitions
-                && !mService.mAtmService.getTransitionController().isCollecting())
-                ? mService.mAtmService.getTransitionController().createTransition(TRANSIT_CHANGE)
-                : null;
-        mService.mAtmService.getTransitionController().collect(mDisplayContent);
-
         ProtoLog.v(WM_DEBUG_ORIENTATION,
                 "Display id=%d rotation changed to %d from %d, lastOrientation=%d",
                         displayId, rotation, oldRotation, lastOrientation);
@@ -511,11 +507,10 @@ public class DisplayRotation {
         mDisplayContent.setLayoutNeeded();
 
         if (useShellTransitions) {
-            if (t != null) {
-                // This created its own transition, so send a start request.
-                mService.mAtmService.getTransitionController().requestStartTransition(
-                        t, null /* trigger */, null /* remote */);
-            } else {
+            final boolean wasInTransition = mDisplayContent.inTransition();
+            mDisplayContent.requestChangeTransitionIfNeeded(
+                    ActivityInfo.CONFIG_WINDOW_CONFIGURATION);
+            if (wasInTransition) {
                 // Use remote-rotation infra since the transition has already been requested
                 // TODO(shell-transitions): Remove this once lifecycle management can cover all
                 //                          rotation cases.
@@ -591,17 +586,17 @@ public class DisplayRotation {
             mService.mH.removeCallbacks(mDisplayRotationHandlerTimeout);
             mIsWaitingForRemoteRotation = false;
 
-            if (mService.mAtmService.getTransitionController().getTransitionPlayer() != null) {
-                if (!mService.mAtmService.getTransitionController().isCollecting()) {
+            if (mDisplayContent.mTransitionController.isShellTransitionsEnabled()) {
+                if (!mDisplayContent.mTransitionController.isCollecting()) {
                     throw new IllegalStateException("Trying to rotate outside a transition");
                 }
-                mService.mAtmService.getTransitionController().collect(mDisplayContent);
+                mDisplayContent.mTransitionController.collect(mDisplayContent);
                 // Go through all tasks and collect them before the rotation
                 // TODO(shell-transitions): move collect() to onConfigurationChange once wallpaper
                 //       handling is synchronized.
                 mDisplayContent.forAllTasks(task -> {
                     if (task.isVisible()) {
-                        mService.mAtmService.getTransitionController().collect(task);
+                        mDisplayContent.mTransitionController.collect(task);
                     }
                 });
                 mDisplayContent.getInsetsStateController().addProvidersToTransition();
@@ -1335,7 +1330,7 @@ public class DisplayRotation {
             case ActivityInfo.SCREEN_ORIENTATION_USER:
             case ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED:
                 // Works with any rotation except upside down.
-                return (preferredRotation >= 0) && (preferredRotation != mUpsideDownRotation);
+                return (preferredRotation >= 0) && (preferredRotation != Surface.ROTATION_180);
         }
 
         return false;

@@ -23,7 +23,7 @@ import android.view.MotionEvent;
 import android.widget.FrameLayout;
 
 public abstract class PanelView extends FrameLayout {
-    public static final boolean DEBUG = PanelBar.DEBUG;
+    public static final boolean DEBUG = false;
     public static final String TAG = PanelView.class.getSimpleName();
     private PanelViewController.TouchHandler mTouchHandler;
 

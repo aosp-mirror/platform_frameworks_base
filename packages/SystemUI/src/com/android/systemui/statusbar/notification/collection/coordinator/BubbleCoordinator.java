@@ -16,10 +16,10 @@
 
 package com.android.systemui.statusbar.notification.collection.coordinator;
 
-import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.collection.coordinator.dagger.CoordinatorScope;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
 import com.android.systemui.statusbar.notification.collection.notifcollection.DismissedByUserStats;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifDismissInterceptor;
@@ -53,7 +53,7 @@ import javax.inject.Inject;
  * respond to app-cancellations (ie: remove the bubble if the app cancels the notification).
  *
  */
-@SysUISingleton
+@CoordinatorScope
 public class BubbleCoordinator implements Coordinator {
     private static final String TAG = "BubbleCoordinator";
 

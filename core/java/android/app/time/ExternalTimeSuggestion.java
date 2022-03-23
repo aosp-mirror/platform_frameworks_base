@@ -50,16 +50,17 @@ import java.util.Objects;
  * <p>The creator of an external suggestion is expected to be separate Android process, e.g. a
  * process integrating with the external time source via a HAL or local network. The creator must
  * capture the elapsed realtime reference clock, e.g. via {@link SystemClock#elapsedRealtime()},
- * when the UTC time is first obtained (usually under a wakelock). This enables Android to adjust
- * for latency introduced between suggestion creation and eventual use. Adjustments for other
+ * when the Unix epoch time is first obtained (usually under a wakelock). This enables Android to
+ * adjust for latency introduced between suggestion creation and eventual use. Adjustments for other
  * sources of latency, i.e. those before the external time suggestion is created, must be handled by
  * the creator.
  *
  * <p>{@code elapsedRealtimeMillis} and {@code suggestionMillis} represent the suggested time.
- * {@code suggestionMillis} is the number of milliseconds elapsed since 1/1/1970 00:00:00 UTC.
- * {@code elapsedRealtimeMillis} is the value of the elapsed realtime clock when {@code
- * suggestionMillis} was established. Note that the elapsed realtime clock is considered accurate
- * but it is volatile, so time suggestions cannot be persisted across device resets.
+ * {@code suggestionMillis} is the number of milliseconds elapsed since 1/1/1970 00:00:00 UTC
+ * according to the Unix time scale. {@code elapsedRealtimeMillis} is the value of the elapsed
+ * realtime clock when {@code suggestionMillis} was established. Note that the elapsed realtime
+ * clock is considered accurate but it is volatile, so time suggestions cannot be persisted across
+ * device resets.
  *
  * <p>{@code debugInfo} contains debugging metadata associated with the suggestion. This is used to
  * record why the suggestion exists and how it was entered. This information exists only to aid in
@@ -83,7 +84,7 @@ public final class ExternalTimeSuggestion implements Parcelable {
             };
 
     @NonNull
-    private final TimestampedValue<Long> mUtcTime;
+    private final TimestampedValue<Long> mUnixEpochTime;
     @Nullable
     private ArrayList<String> mDebugInfo;
 
@@ -92,12 +93,12 @@ public final class ExternalTimeSuggestion implements Parcelable {
      * ExternalTimeSuggestion} for more details.
      *
      * @param elapsedRealtimeMillis the elapsed realtime clock reference for the suggestion
-     * @param suggestionMillis      the suggested UTC time in milliseconds since the start of the
+     * @param suggestionMillis      the suggested time in milliseconds since the start of the
      *                              Unix epoch
      */
     public ExternalTimeSuggestion(@ElapsedRealtimeLong long elapsedRealtimeMillis,
             @CurrentTimeMillisLong long suggestionMillis) {
-        mUtcTime = new TimestampedValue(elapsedRealtimeMillis, suggestionMillis);
+        mUnixEpochTime = new TimestampedValue(elapsedRealtimeMillis, suggestionMillis);
     }
 
     private static ExternalTimeSuggestion createFromParcel(Parcel in) {
@@ -117,7 +118,7 @@ public final class ExternalTimeSuggestion implements Parcelable {
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
-        dest.writeParcelable(mUtcTime, 0);
+        dest.writeParcelable(mUnixEpochTime, 0);
         dest.writeList(mDebugInfo);
     }
 
@@ -125,8 +126,8 @@ public final class ExternalTimeSuggestion implements Parcelable {
      * {@hide}
      */
     @NonNull
-    public TimestampedValue<Long> getUtcTime() {
-        return mUtcTime;
+    public TimestampedValue<Long> getUnixEpochTime() {
+        return mUnixEpochTime;
     }
 
     /**
@@ -160,17 +161,18 @@ public final class ExternalTimeSuggestion implements Parcelable {
             return false;
         }
         ExternalTimeSuggestion that = (ExternalTimeSuggestion) o;
-        return Objects.equals(mUtcTime, that.mUtcTime);
+        return Objects.equals(mUnixEpochTime, that.mUnixEpochTime);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mUtcTime);
+        return Objects.hash(mUnixEpochTime);
     }
 
     @Override
     public String toString() {
-        return "ExternalTimeSuggestion{" + "mUtcTime=" + mUtcTime + ", mDebugInfo=" + mDebugInfo
+        return "ExternalTimeSuggestion{" + "mUnixEpochTime=" + mUnixEpochTime
+                + ", mDebugInfo=" + mDebugInfo
                 + '}';
     }
 }

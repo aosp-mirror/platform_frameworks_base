@@ -414,6 +414,44 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
         return mInfo.getSupportsLocalInteraction();
     }
 
+    public void startListeningVisibleActivityChangedLocked(@NonNull IBinder token) {
+        if (DEBUG) {
+            Slog.d(TAG, "startListeningVisibleActivityChangedLocked: token=" + token);
+        }
+        if (mActiveSession == null || token != mActiveSession.mToken) {
+            Slog.w(TAG, "startListeningVisibleActivityChangedLocked does not match"
+                    + " active session");
+            return;
+        }
+        mActiveSession.startListeningVisibleActivityChangedLocked();
+    }
+
+    public void stopListeningVisibleActivityChangedLocked(@NonNull IBinder token) {
+        if (DEBUG) {
+            Slog.d(TAG, "stopListeningVisibleActivityChangedLocked: token=" + token);
+        }
+        if (mActiveSession == null || token != mActiveSession.mToken) {
+            Slog.w(TAG, "stopListeningVisibleActivityChangedLocked does not match"
+                    + " active session");
+            return;
+        }
+        mActiveSession.stopListeningVisibleActivityChangedLocked();
+    }
+
+    public void notifyActivityEventChangedLocked() {
+        if (DEBUG) {
+            Slog.d(TAG, "notifyActivityEventChangedLocked");
+        }
+        if (mActiveSession == null || !mActiveSession.mShown) {
+            if (DEBUG) {
+                Slog.d(TAG, "notifyActivityEventChangedLocked not allowed on no session or"
+                        + " hidden session");
+            }
+            return;
+        }
+        mActiveSession.notifyActivityEventChangedLocked();
+    }
+
     public void updateStateLocked(
             @NonNull Identity voiceInteractorIdentity,
             @Nullable PersistableBundle options,

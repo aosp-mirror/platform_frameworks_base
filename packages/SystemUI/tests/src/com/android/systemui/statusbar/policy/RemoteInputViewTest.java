@@ -205,7 +205,7 @@ public class RemoteInputViewTest extends SysuiTestCase {
         ExpandableNotificationRow row = helper.createRow();
         RemoteInputView view = RemoteInputView.inflate(mContext, null, row.getEntry(), mController);
 
-        view.setOnVisibilityChangedListener(null);
+        view.addOnVisibilityChangedListener(null);
         view.setVisibility(View.INVISIBLE);
         view.setVisibility(View.VISIBLE);
     }

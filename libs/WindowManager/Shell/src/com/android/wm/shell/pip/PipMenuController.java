@@ -90,6 +90,11 @@ public interface PipMenuController {
     default void updateMenuBounds(Rect destinationBounds) {}
 
     /**
+     * Update when the current focused task changes.
+     */
+    default void onFocusTaskChanged(RunningTaskInfo taskInfo) {}
+
+    /**
      * Returns a default LayoutParams for the PIP Menu.
      * @param width the PIP stack width.
      * @param height the PIP stack height.

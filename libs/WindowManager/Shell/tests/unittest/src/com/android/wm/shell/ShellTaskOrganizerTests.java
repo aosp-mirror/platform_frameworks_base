@@ -56,7 +56,7 @@ import androidx.test.filters.SmallTest;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TransactionPool;
-import com.android.wm.shell.sizecompatui.SizeCompatUIController;
+import com.android.wm.shell.compatui.CompatUIController;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -65,6 +65,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
+import java.util.Optional;
 
 /**
  * Tests for the shell task organizer.
@@ -81,7 +82,7 @@ public class ShellTaskOrganizerTests {
     @Mock
     private Context mContext;
     @Mock
-    private SizeCompatUIController mSizeCompatUI;
+    private CompatUIController mCompatUI;
 
     ShellTaskOrganizer mOrganizer;
     private final SyncTransactionQueue mSyncTransactionQueue = mock(SyncTransactionQueue.class);
@@ -131,7 +132,7 @@ public class ShellTaskOrganizerTests {
                     .when(mTaskOrganizerController).registerTaskOrganizer(any());
         } catch (RemoteException e) {}
         mOrganizer = spy(new ShellTaskOrganizer(mTaskOrganizerController, mTestExecutor, mContext,
-                mSizeCompatUI));
+                mCompatUI, Optional.empty()));
     }
 
     @Test
@@ -194,6 +195,43 @@ public class ShellTaskOrganizerTests {
         TrackingTaskListener listener = new TrackingTaskListener();
         mOrganizer.addListenerForType(listener, TASK_LISTENER_TYPE_MULTI_WINDOW);
         assertTrue(listener.appeared.contains(taskInfo));
+    }
+
+    @Test
+    public void testAddListenerForMultipleTypes() {
+        RunningTaskInfo taskInfo1 = createTaskInfo(1, WINDOWING_MODE_FULLSCREEN);
+        mOrganizer.onTaskAppeared(taskInfo1, null);
+        RunningTaskInfo taskInfo2 = createTaskInfo(2, WINDOWING_MODE_MULTI_WINDOW);
+        mOrganizer.onTaskAppeared(taskInfo2, null);
+
+        TrackingTaskListener listener = new TrackingTaskListener();
+        mOrganizer.addListenerForType(listener,
+                TASK_LISTENER_TYPE_MULTI_WINDOW, TASK_LISTENER_TYPE_FULLSCREEN);
+
+        // onTaskAppeared event should be delivered once for each taskInfo.
+        assertTrue(listener.appeared.contains(taskInfo1));
+        assertTrue(listener.appeared.contains(taskInfo2));
+        assertEquals(2, listener.appeared.size());
+    }
+
+    @Test
+    public void testRemoveListenerForMultipleTypes() {
+        RunningTaskInfo taskInfo1 = createTaskInfo(1, WINDOWING_MODE_FULLSCREEN);
+        mOrganizer.onTaskAppeared(taskInfo1, null);
+        RunningTaskInfo taskInfo2 = createTaskInfo(2, WINDOWING_MODE_MULTI_WINDOW);
+        mOrganizer.onTaskAppeared(taskInfo2, null);
+
+        TrackingTaskListener listener = new TrackingTaskListener();
+        mOrganizer.addListenerForType(listener,
+                TASK_LISTENER_TYPE_MULTI_WINDOW, TASK_LISTENER_TYPE_FULLSCREEN);
+
+        mOrganizer.removeListener(listener);
+
+        // If listener is removed properly, onTaskInfoChanged event shouldn't be delivered.
+        mOrganizer.onTaskInfoChanged(taskInfo1);
+        assertTrue(listener.infoChanged.isEmpty());
+        mOrganizer.onTaskInfoChanged(taskInfo2);
+        assertTrue(listener.infoChanged.isEmpty());
     }
 
     @Test
@@ -296,34 +334,34 @@ public class ShellTaskOrganizerTests {
         mOrganizer.onTaskAppeared(taskInfo1, null);
 
         // sizeCompatActivity is null if top activity is not in size compat.
-        verify(mSizeCompatUI).onSizeCompatInfoChanged(taskInfo1.displayId, taskInfo1.taskId,
+        verify(mCompatUI).onCompatInfoChanged(taskInfo1.displayId, taskInfo1.taskId,
                 null /* taskConfig */, null /* taskListener */);
 
         // sizeCompatActivity is non-null if top activity is in size compat.
-        clearInvocations(mSizeCompatUI);
+        clearInvocations(mCompatUI);
         final RunningTaskInfo taskInfo2 =
                 createTaskInfo(taskInfo1.taskId, taskInfo1.getWindowingMode());
         taskInfo2.displayId = taskInfo1.displayId;
         taskInfo2.topActivityInSizeCompat = true;
         taskInfo2.isVisible = true;
         mOrganizer.onTaskInfoChanged(taskInfo2);
-        verify(mSizeCompatUI).onSizeCompatInfoChanged(taskInfo1.displayId, taskInfo1.taskId,
+        verify(mCompatUI).onCompatInfoChanged(taskInfo1.displayId, taskInfo1.taskId,
                 taskInfo1.configuration, taskListener);
 
         // Not show size compat UI if task is not visible.
-        clearInvocations(mSizeCompatUI);
+        clearInvocations(mCompatUI);
         final RunningTaskInfo taskInfo3 =
                 createTaskInfo(taskInfo1.taskId, taskInfo1.getWindowingMode());
         taskInfo3.displayId = taskInfo1.displayId;
         taskInfo3.topActivityInSizeCompat = true;
         taskInfo3.isVisible = false;
         mOrganizer.onTaskInfoChanged(taskInfo3);
-        verify(mSizeCompatUI).onSizeCompatInfoChanged(taskInfo1.displayId, taskInfo1.taskId,
+        verify(mCompatUI).onCompatInfoChanged(taskInfo1.displayId, taskInfo1.taskId,
                 null /* taskConfig */, null /* taskListener */);
 
-        clearInvocations(mSizeCompatUI);
+        clearInvocations(mCompatUI);
         mOrganizer.onTaskVanished(taskInfo1);
-        verify(mSizeCompatUI).onSizeCompatInfoChanged(taskInfo1.displayId, taskInfo1.taskId,
+        verify(mCompatUI).onCompatInfoChanged(taskInfo1.displayId, taskInfo1.taskId,
                 null /* taskConfig */, null /* taskListener */);
     }
 

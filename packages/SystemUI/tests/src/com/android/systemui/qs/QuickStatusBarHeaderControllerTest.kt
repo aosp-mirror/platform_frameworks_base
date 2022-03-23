@@ -20,19 +20,15 @@ import android.content.Context
 import android.testing.AndroidTestingRunner
 import android.view.View
 import androidx.test.filters.SmallTest
-import com.android.internal.logging.UiEventLogger
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.battery.BatteryMeterViewController
 import com.android.systemui.colorextraction.SysuiColorExtractor
 import com.android.systemui.demomode.DemoModeController
-import com.android.systemui.plugins.ActivityStarter
-import com.android.systemui.privacy.OngoingPrivacyChip
-import com.android.systemui.privacy.PrivacyDialogController
-import com.android.systemui.privacy.PrivacyItemController
-import com.android.systemui.privacy.logging.PrivacyLogger
+import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.qs.carrier.QSCarrierGroup
 import com.android.systemui.qs.carrier.QSCarrierGroupController
-import com.android.systemui.statusbar.FeatureFlags
+import com.android.systemui.statusbar.phone.StatusBarContentInsetsProvider
 import com.android.systemui.statusbar.phone.StatusBarIconController
 import com.android.systemui.statusbar.phone.StatusIconContainer
 import com.android.systemui.statusbar.policy.Clock
@@ -50,6 +46,7 @@ import org.mockito.Answers
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
+import org.mockito.Mockito.anyBoolean
 import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
@@ -61,11 +58,7 @@ class QuickStatusBarHeaderControllerTest : SysuiTestCase() {
     @Mock
     private lateinit var view: QuickStatusBarHeader
     @Mock
-    private lateinit var privacyItemController: PrivacyItemController
-    @Mock
-    private lateinit var activityStarter: ActivityStarter
-    @Mock
-    private lateinit var uiEventLogger: UiEventLogger
+    private lateinit var privacyIconsController: HeaderPrivacyIconsController
     @Mock
     private lateinit var statusBarIconController: StatusBarIconController
     @Mock
@@ -77,21 +70,17 @@ class QuickStatusBarHeaderControllerTest : SysuiTestCase() {
     @Mock
     private lateinit var qsCarrierGroupController: QSCarrierGroupController
     @Mock
-    private lateinit var privacyLogger: PrivacyLogger
-    @Mock
     private lateinit var colorExtractor: SysuiColorExtractor
     @Mock
     private lateinit var iconContainer: StatusIconContainer
     @Mock
     private lateinit var qsCarrierGroup: QSCarrierGroup
     @Mock
-    private lateinit var privacyChip: OngoingPrivacyChip
-    @Mock
-    private lateinit var privacyDialogController: PrivacyDialogController
-    @Mock
     private lateinit var variableDateViewControllerFactory: VariableDateViewController.Factory
     @Mock
     private lateinit var variableDateViewController: VariableDateViewController
+    @Mock
+    private lateinit var batteryMeterViewController: BatteryMeterViewController
     @Mock
     private lateinit var clock: Clock
     @Mock
@@ -102,14 +91,12 @@ class QuickStatusBarHeaderControllerTest : SysuiTestCase() {
     private lateinit var context: Context
     @Mock
     private lateinit var featureFlags: FeatureFlags
+    @Mock
+    private lateinit var insetsProvider: StatusBarContentInsetsProvider
 
     private val qsExpansionPathInterpolator = QSExpansionPathInterpolator()
 
     private lateinit var controller: QuickStatusBarHeaderController
-
-    private lateinit var cameraSlotName: String
-    private lateinit var microphoneSlotName: String
-    private lateinit var locationSlotName: String
 
     @Before
     fun setUp() {
@@ -123,28 +110,19 @@ class QuickStatusBarHeaderControllerTest : SysuiTestCase() {
         `when`(view.isAttachedToWindow).thenReturn(true)
         `when`(view.context).thenReturn(context)
 
-        cameraSlotName = mContext.resources.getString(
-            com.android.internal.R.string.status_bar_camera)
-        microphoneSlotName = mContext.resources.getString(
-            com.android.internal.R.string.status_bar_microphone)
-        locationSlotName = mContext.resources.getString(
-            com.android.internal.R.string.status_bar_location)
-
         controller = QuickStatusBarHeaderController(
                 view,
-                privacyItemController,
-                activityStarter,
-                uiEventLogger,
+                privacyIconsController,
                 statusBarIconController,
                 demoModeController,
                 quickQSPanelController,
                 qsCarrierGroupControllerBuilder,
-                privacyLogger,
                 colorExtractor,
-                privacyDialogController,
                 qsExpansionPathInterpolator,
+                batteryMeterViewController,
                 featureFlags,
-                variableDateViewControllerFactory
+                variableDateViewControllerFactory,
+                insetsProvider
         )
     }
 
@@ -156,62 +134,6 @@ class QuickStatusBarHeaderControllerTest : SysuiTestCase() {
     @Test
     fun testClockNotClickable() {
         assertThat(clock.isClickable).isFalse()
-    }
-
-    @Test
-    fun testIgnoredSlotsOnAttached_noIndicators() {
-        setPrivacyController(micCamera = false, location = false)
-
-        controller.init()
-
-        verify(iconContainer).removeIgnoredSlot(cameraSlotName)
-        verify(iconContainer).removeIgnoredSlot(microphoneSlotName)
-        verify(iconContainer).removeIgnoredSlot(locationSlotName)
-    }
-
-    @Test
-    fun testIgnoredSlotsOnAttached_onlyMicCamera() {
-        setPrivacyController(micCamera = true, location = false)
-
-        controller.init()
-
-        verify(iconContainer).addIgnoredSlot(cameraSlotName)
-        verify(iconContainer).addIgnoredSlot(microphoneSlotName)
-        verify(iconContainer).removeIgnoredSlot(locationSlotName)
-    }
-
-    @Test
-    fun testIgnoredSlotsOnAttached_onlyLocation() {
-        setPrivacyController(micCamera = false, location = true)
-
-        controller.init()
-
-        verify(iconContainer).removeIgnoredSlot(cameraSlotName)
-        verify(iconContainer).removeIgnoredSlot(microphoneSlotName)
-        verify(iconContainer).addIgnoredSlot(locationSlotName)
-    }
-
-    @Test
-    fun testIgnoredSlotsOnAttached_locationMicCamera() {
-        setPrivacyController(micCamera = true, location = true)
-
-        controller.init()
-
-        verify(iconContainer).addIgnoredSlot(cameraSlotName)
-        verify(iconContainer).addIgnoredSlot(microphoneSlotName)
-        verify(iconContainer).addIgnoredSlot(locationSlotName)
-    }
-
-    @Test
-    fun testPrivacyChipClicked() {
-        controller.init()
-
-        val captor = argumentCaptor<View.OnClickListener>()
-        verify(privacyChip).setOnClickListener(capture(captor))
-
-        captor.value.onClick(privacyChip)
-
-        verify(privacyDialogController).showDialog(any(Context::class.java))
     }
 
     @Test
@@ -243,7 +165,7 @@ class QuickStatusBarHeaderControllerTest : SysuiTestCase() {
         controller.init()
 
         val captor = argumentCaptor<List<String>>()
-        verify(view).onAttach(any(), any(), capture(captor))
+        verify(view).onAttach(any(), any(), capture(captor), anyBoolean(), any())
 
         assertThat(captor.value).containsExactly(
             mContext.getString(com.android.internal.R.string.status_bar_mobile)
@@ -256,7 +178,7 @@ class QuickStatusBarHeaderControllerTest : SysuiTestCase() {
         controller.init()
 
         val captor = argumentCaptor<List<String>>()
-        verify(view).onAttach(any(), any(), capture(captor))
+        verify(view).onAttach(any(), any(), capture(captor), anyBoolean(), any())
 
         assertThat(captor.value).containsExactly(
             mContext.getString(com.android.internal.R.string.status_bar_no_calling),
@@ -283,14 +205,8 @@ class QuickStatusBarHeaderControllerTest : SysuiTestCase() {
         `when`(view.findViewById<View>(anyInt())).thenReturn(mockView)
         `when`(view.findViewById<QSCarrierGroup>(R.id.carrier_group)).thenReturn(qsCarrierGroup)
         `when`(view.findViewById<StatusIconContainer>(R.id.statusIcons)).thenReturn(iconContainer)
-        `when`(view.findViewById<OngoingPrivacyChip>(R.id.privacy_chip)).thenReturn(privacyChip)
         `when`(view.findViewById<Clock>(R.id.clock)).thenReturn(clock)
         `when`(view.requireViewById<VariableDateView>(R.id.date)).thenReturn(variableDateView)
         `when`(view.requireViewById<VariableDateView>(R.id.date_clock)).thenReturn(variableDateView)
-    }
-
-    private fun setPrivacyController(micCamera: Boolean, location: Boolean) {
-        `when`(privacyItemController.micCameraAvailable).thenReturn(micCamera)
-        `when`(privacyItemController.locationAvailable).thenReturn(location)
     }
 }

@@ -66,6 +66,7 @@ import java.security.SecureRandom;
 import java.security.UnrecoverableKeyException;
 import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.ECGenParameterSpec;
+import java.security.spec.NamedParameterSpec;
 import java.security.spec.RSAKeyGenParameterSpec;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -107,6 +108,16 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
         }
     }
 
+    /**
+     * XDH represents Curve 25519 providers.
+     */
+    public static class XDH extends AndroidKeyStoreKeyPairGeneratorSpi {
+        // XDH is treated as EC.
+        public XDH() {
+            super(KeymasterDefs.KM_ALGORITHM_EC);
+        }
+    }
+
     /*
      * These must be kept in sync with system/security/keystore/defaults.h
      */
@@ -119,36 +130,42 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
     private static final int RSA_MIN_KEY_SIZE = 512;
     private static final int RSA_MAX_KEY_SIZE = 8192;
 
-    private static final Map<String, Integer> SUPPORTED_EC_NIST_CURVE_NAME_TO_SIZE =
+    private static final Map<String, Integer> SUPPORTED_EC_CURVE_NAME_TO_SIZE =
             new HashMap<String, Integer>();
-    private static final List<String> SUPPORTED_EC_NIST_CURVE_NAMES = new ArrayList<String>();
-    private static final List<Integer> SUPPORTED_EC_NIST_CURVE_SIZES = new ArrayList<Integer>();
+    private static final List<String> SUPPORTED_EC_CURVE_NAMES = new ArrayList<String>();
+    private static final List<Integer> SUPPORTED_EC_CURVE_SIZES = new ArrayList<Integer>();
+    private static final String CURVE_X_25519 = NamedParameterSpec.X25519.getName();
+    private static final String CURVE_ED_25519 = NamedParameterSpec.ED25519.getName();
+
 
     static {
         // Aliases for NIST P-224
-        SUPPORTED_EC_NIST_CURVE_NAME_TO_SIZE.put("p-224", 224);
-        SUPPORTED_EC_NIST_CURVE_NAME_TO_SIZE.put("secp224r1", 224);
+        SUPPORTED_EC_CURVE_NAME_TO_SIZE.put("p-224", 224);
+        SUPPORTED_EC_CURVE_NAME_TO_SIZE.put("secp224r1", 224);
 
 
         // Aliases for NIST P-256
-        SUPPORTED_EC_NIST_CURVE_NAME_TO_SIZE.put("p-256", 256);
-        SUPPORTED_EC_NIST_CURVE_NAME_TO_SIZE.put("secp256r1", 256);
-        SUPPORTED_EC_NIST_CURVE_NAME_TO_SIZE.put("prime256v1", 256);
+        SUPPORTED_EC_CURVE_NAME_TO_SIZE.put("p-256", 256);
+        SUPPORTED_EC_CURVE_NAME_TO_SIZE.put("secp256r1", 256);
+        SUPPORTED_EC_CURVE_NAME_TO_SIZE.put("prime256v1", 256);
+        // Aliases for Curve 25519
+        SUPPORTED_EC_CURVE_NAME_TO_SIZE.put(CURVE_X_25519.toLowerCase(Locale.US), 256);
+        SUPPORTED_EC_CURVE_NAME_TO_SIZE.put(CURVE_ED_25519.toLowerCase(Locale.US), 256);
 
         // Aliases for NIST P-384
-        SUPPORTED_EC_NIST_CURVE_NAME_TO_SIZE.put("p-384", 384);
-        SUPPORTED_EC_NIST_CURVE_NAME_TO_SIZE.put("secp384r1", 384);
+        SUPPORTED_EC_CURVE_NAME_TO_SIZE.put("p-384", 384);
+        SUPPORTED_EC_CURVE_NAME_TO_SIZE.put("secp384r1", 384);
 
         // Aliases for NIST P-521
-        SUPPORTED_EC_NIST_CURVE_NAME_TO_SIZE.put("p-521", 521);
-        SUPPORTED_EC_NIST_CURVE_NAME_TO_SIZE.put("secp521r1", 521);
+        SUPPORTED_EC_CURVE_NAME_TO_SIZE.put("p-521", 521);
+        SUPPORTED_EC_CURVE_NAME_TO_SIZE.put("secp521r1", 521);
 
-        SUPPORTED_EC_NIST_CURVE_NAMES.addAll(SUPPORTED_EC_NIST_CURVE_NAME_TO_SIZE.keySet());
-        Collections.sort(SUPPORTED_EC_NIST_CURVE_NAMES);
+        SUPPORTED_EC_CURVE_NAMES.addAll(SUPPORTED_EC_CURVE_NAME_TO_SIZE.keySet());
+        Collections.sort(SUPPORTED_EC_CURVE_NAMES);
 
-        SUPPORTED_EC_NIST_CURVE_SIZES.addAll(
-                new HashSet<Integer>(SUPPORTED_EC_NIST_CURVE_NAME_TO_SIZE.values()));
-        Collections.sort(SUPPORTED_EC_NIST_CURVE_SIZES);
+        SUPPORTED_EC_CURVE_SIZES.addAll(
+                new HashSet<Integer>(SUPPORTED_EC_CURVE_NAME_TO_SIZE.values()));
+        Collections.sort(SUPPORTED_EC_CURVE_SIZES);
     }
 
     private final int mOriginalKeymasterAlgorithm;
@@ -164,6 +181,7 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
     private int mKeySizeBits;
     private SecureRandom mRng;
     private KeyDescriptor mAttestKeyDescriptor;
+    private String mEcCurveName;
 
     private int[] mKeymasterPurposes;
     private int[] mKeymasterBlockModes;
@@ -177,12 +195,15 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
         mOriginalKeymasterAlgorithm = keymasterAlgorithm;
     }
 
-    private @EcCurve int keySize2EcCurve(int keySizeBits)
+    private static @EcCurve int keySizeAndNameToEcCurve(int keySizeBits, String ecCurveName)
             throws InvalidAlgorithmParameterException {
         switch (keySizeBits) {
             case 224:
                 return EcCurve.P_224;
             case 256:
+                if (isCurve25519(ecCurveName)) {
+                    return EcCurve.CURVE_25519;
+                }
                 return EcCurve.P_256;
             case 384:
                 return EcCurve.P_384;
@@ -231,6 +252,23 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
                 } catch (NullPointerException | IllegalArgumentException e) {
                     throw new InvalidAlgorithmParameterException(e);
                 }
+            } else if (params instanceof NamedParameterSpec) {
+                NamedParameterSpec namedSpec = (NamedParameterSpec) params;
+                // Android Keystore cannot support initialization from a NamedParameterSpec
+                // because an alias for the key is needed (a KeyGenParameterSpec cannot be
+                // constructed).
+                if (namedSpec.getName().equalsIgnoreCase(NamedParameterSpec.X25519.getName())
+                        || namedSpec.getName().equalsIgnoreCase(
+                        NamedParameterSpec.ED25519.getName())) {
+                    throw new IllegalArgumentException(
+                            "This KeyPairGenerator cannot be initialized using NamedParameterSpec."
+                                    + " use " + KeyGenParameterSpec.class.getName() + " or "
+                                    + KeyPairGeneratorSpec.class.getName());
+                } else {
+                    throw new InvalidAlgorithmParameterException(
+                            "Unsupported algorithm specified via NamedParameterSpec: "
+                            + namedSpec.getName());
+                }
             } else {
                 throw new InvalidAlgorithmParameterException(
                         "Unsupported params class: " + params.getClass().getName()
@@ -247,7 +285,8 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
             if (mKeySizeBits == -1) {
                 mKeySizeBits = getDefaultKeySize(keymasterAlgorithm);
             }
-            checkValidKeySize(keymasterAlgorithm, mKeySizeBits, mSpec.isStrongBoxBacked());
+            checkValidKeySize(keymasterAlgorithm, mKeySizeBits, mSpec.isStrongBoxBacked(),
+                    mEcCurveName);
 
             if (spec.getKeystoreAlias() == null) {
                 throw new InvalidAlgorithmParameterException("KeyStore entry alias not provided");
@@ -299,6 +338,7 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
 
             mAttestKeyDescriptor = buildAndCheckAttestKeyDescriptor(spec);
             checkAttestKeyPurpose(spec);
+            checkCorrectKeyPurposeForCurve(spec);
 
             success = true;
         } finally {
@@ -315,6 +355,42 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
             throw new InvalidAlgorithmParameterException(
                     "PURPOSE_ATTEST_KEY may not be specified with any other purposes");
         }
+    }
+
+    private void checkCorrectKeyPurposeForCurve(KeyGenParameterSpec spec)
+            throws InvalidAlgorithmParameterException {
+        // Validate the key usage purposes against the curve. x25519 should be
+        // key exchange only, ed25519 signing and attesting.
+
+        if (!isCurve25519(mEcCurveName)) {
+            return;
+        }
+
+        if (mEcCurveName.equalsIgnoreCase(CURVE_X_25519)
+                && spec.getPurposes() != KeyProperties.PURPOSE_AGREE_KEY) {
+            throw new InvalidAlgorithmParameterException(
+                    "x25519 may only be used for key agreement.");
+        } else if (mEcCurveName.equalsIgnoreCase(CURVE_ED_25519)
+                && !hasOnlyAllowedPurposeForEd25519(spec.getPurposes())) {
+            throw new InvalidAlgorithmParameterException(
+                    "ed25519 may not be used for key agreement.");
+        }
+    }
+
+    private static boolean isCurve25519(String ecCurveName) {
+        if (ecCurveName == null) {
+            return false;
+        }
+        return ecCurveName.equalsIgnoreCase(CURVE_X_25519)
+                || ecCurveName.equalsIgnoreCase(CURVE_ED_25519);
+    }
+
+    private static boolean hasOnlyAllowedPurposeForEd25519(@KeyProperties.PurposeEnum int purpose) {
+        final int allowedPurposes = KeyProperties.PURPOSE_SIGN | KeyProperties.PURPOSE_VERIFY
+                | KeyProperties.PURPOSE_ATTEST_KEY;
+        boolean hasAllowedPurpose = (purpose & allowedPurposes) != 0;
+        boolean hasDisallowedPurpose = (purpose & ~allowedPurposes) != 0;
+        return hasAllowedPurpose && !hasDisallowedPurpose;
     }
 
     private KeyDescriptor buildAndCheckAttestKeyDescriptor(KeyGenParameterSpec spec)
@@ -473,6 +549,7 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
         mRSAPublicExponent = null;
         mRng = null;
         mKeyStore = null;
+        mEcCurveName = null;
     }
 
     private void initAlgorithmSpecificParameters() throws InvalidAlgorithmParameterException {
@@ -514,13 +591,13 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
             case KeymasterDefs.KM_ALGORITHM_EC:
                 if (algSpecificSpec instanceof ECGenParameterSpec) {
                     ECGenParameterSpec ecSpec = (ECGenParameterSpec) algSpecificSpec;
-                    String curveName = ecSpec.getName();
-                    Integer ecSpecKeySizeBits = SUPPORTED_EC_NIST_CURVE_NAME_TO_SIZE.get(
-                            curveName.toLowerCase(Locale.US));
+                    mEcCurveName = ecSpec.getName();
+                    final Integer ecSpecKeySizeBits = SUPPORTED_EC_CURVE_NAME_TO_SIZE.get(
+                            mEcCurveName.toLowerCase(Locale.US));
                     if (ecSpecKeySizeBits == null) {
                         throw new InvalidAlgorithmParameterException(
-                                "Unsupported EC curve name: " + curveName
-                                        + ". Supported: " + SUPPORTED_EC_NIST_CURVE_NAMES);
+                                "Unsupported EC curve name: " + mEcCurveName
+                                        + ". Supported: " + SUPPORTED_EC_CURVE_NAMES);
                     }
                     if (mKeySizeBits == -1) {
                         mKeySizeBits = ecSpecKeySizeBits;
@@ -744,7 +821,7 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
 
         if (mKeymasterAlgorithm == KeymasterDefs.KM_ALGORITHM_EC) {
             params.add(KeyStore2ParameterUtils.makeEnum(
-                    Tag.EC_CURVE, keySize2EcCurve(mKeySizeBits)
+                    Tag.EC_CURVE, keySizeAndNameToEcCurve(mKeySizeBits, mEcCurveName)
             ));
         }
 
@@ -864,7 +941,8 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
     private static void checkValidKeySize(
             int keymasterAlgorithm,
             int keySize,
-            boolean isStrongBoxBacked)
+            boolean isStrongBoxBacked,
+            String mEcCurveName)
             throws InvalidAlgorithmParameterException {
         switch (keymasterAlgorithm) {
             case KeymasterDefs.KM_ALGORITHM_EC:
@@ -873,9 +951,13 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
                             "Unsupported StrongBox EC key size: "
                                     + keySize + " bits. Supported: 256");
                 }
-                if (!SUPPORTED_EC_NIST_CURVE_SIZES.contains(keySize)) {
+                if (isStrongBoxBacked && isCurve25519(mEcCurveName)) {
+                    throw new InvalidAlgorithmParameterException(
+                            "Unsupported StrongBox EC: " + mEcCurveName);
+                }
+                if (!SUPPORTED_EC_CURVE_SIZES.contains(keySize)) {
                     throw new InvalidAlgorithmParameterException("Unsupported EC key size: "
-                            + keySize + " bits. Supported: " + SUPPORTED_EC_NIST_CURVE_SIZES);
+                            + keySize + " bits. Supported: " + SUPPORTED_EC_CURVE_SIZES);
                 }
                 break;
             case KeymasterDefs.KM_ALGORITHM_RSA:

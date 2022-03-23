@@ -117,7 +117,7 @@ public final class DeviceStateManagerGlobal {
      * @see DeviceStateRequest
      */
     public void requestState(@NonNull DeviceStateRequest request,
-            @Nullable DeviceStateRequest.Callback callback, @Nullable Executor executor) {
+            @Nullable Executor executor, @Nullable DeviceStateRequest.Callback callback) {
         if (callback == null && executor != null) {
             throw new IllegalArgumentException("Callback must be supplied with executor.");
         } else if (executor == null && callback != null) {
@@ -149,7 +149,7 @@ public final class DeviceStateManagerGlobal {
 
     /**
      * Cancels a {@link DeviceStateRequest request} previously submitted with a call to
-     * {@link #requestState(DeviceStateRequest, DeviceStateRequest.Callback, Executor)}.
+     * {@link #requestState(DeviceStateRequest, Executor, DeviceStateRequest.Callback)}.
      *
      * @see DeviceStateManager#cancelRequest(DeviceStateRequest)
      */
@@ -408,7 +408,7 @@ public final class DeviceStateManagerGlobal {
                 return;
             }
 
-            mExecutor.execute(() -> mCallback.onRequestSuspended(mRequest));
+            mExecutor.execute(() -> mCallback.onRequestCanceled(mRequest));
         }
     }
 }

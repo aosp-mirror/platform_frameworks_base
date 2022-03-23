@@ -39,11 +39,9 @@
 #include "idmap2/Result.h"
 #include "idmap2/SysTrace.h"
 
-using android::IPCThreadState;
 using android::base::StringPrintf;
 using android::binder::Status;
 using android::idmap2::BinaryStreamVisitor;
-using android::idmap2::FabricatedOverlay;
 using android::idmap2::FabricatedOverlayContainer;
 using android::idmap2::Idmap;
 using android::idmap2::IdmapHeader;

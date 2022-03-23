@@ -16,8 +16,11 @@
 
 package android.net;
 
+import android.net.IpConfiguration;
+
 /** @hide */
 oneway interface IEthernetServiceListener
 {
-    void onAvailabilityChanged(String iface, boolean isAvailable);
+    void onInterfaceStateChanged(String iface, int state, int role,
+            in IpConfiguration configuration);
 }

@@ -63,8 +63,12 @@ public interface ServiceConnection {
      * happen, for example, if the application hosting the service it is bound to
      * has been updated.
      *
-     * @param name The concrete component name of the service whose
-     * connection is dead.
+     * <p class="note"><b>Note:</b> The app that requested the binding must call
+     * {@link Context#unbindService(ServiceConnection)} to release the tracking
+     * resources associated with this ServiceConnection even if this callback was
+     * invoked following {@link Context#bindService Context.bindService() bindService()}.
+     *
+     * @param name The concrete component name of the service whose connection is dead.
      */
     default void onBindingDied(ComponentName name) {
     }
@@ -72,10 +76,10 @@ public interface ServiceConnection {
     /**
      * Called when the service being bound has returned {@code null} from its
      * {@link android.app.Service#onBind(Intent) onBind()} method.  This indicates
-     * that the attempting service binding represented by this ServiceConnection
+     * that the attempted service binding represented by this ServiceConnection
      * will never become usable.
      *
-     * <p class="note">The app which requested the binding must still call
+     * <p class="note"><b>Note:</b> The app that requested the binding must still call
      * {@link Context#unbindService(ServiceConnection)} to release the tracking
      * resources associated with this ServiceConnection even if this callback was
      * invoked following {@link Context#bindService Context.bindService() bindService()}.

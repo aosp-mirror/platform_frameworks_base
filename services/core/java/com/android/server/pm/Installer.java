@@ -40,7 +40,6 @@ import com.android.server.SystemService;
 import dalvik.system.BlockGuard;
 import dalvik.system.VMRuntime;
 
-import java.io.FileDescriptor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -252,6 +251,17 @@ public class Installer extends SystemService {
         try {
             return mInstalld.createAppDataBatched(args);
         } catch (Exception e) {
+            throw InstallerException.from(e);
+        }
+    }
+
+    /**
+     * Sets in Installd that it is first boot after data wipe
+     */
+    public void setFirstBoot() throws InstallerException {
+        try {
+            mInstalld.setFirstBoot();
+        } catch (RemoteException e) {
             throw InstallerException.from(e);
         }
     }
@@ -676,28 +686,6 @@ public class Installer extends SystemService {
         BlockGuard.getVmPolicy().onPathAccess(outputPath);
         try {
             return mInstalld.deleteOdex(apkPath, instructionSet, outputPath);
-        } catch (Exception e) {
-            throw InstallerException.from(e);
-        }
-    }
-
-    public void installApkVerity(String filePath, FileDescriptor verityInput, int contentSize)
-            throws InstallerException {
-        if (!checkBeforeRemote()) return;
-        BlockGuard.getVmPolicy().onPathAccess(filePath);
-        try {
-            mInstalld.installApkVerity(filePath, verityInput, contentSize);
-        } catch (Exception e) {
-            throw InstallerException.from(e);
-        }
-    }
-
-    public void assertFsverityRootHashMatches(String filePath, @NonNull byte[] expectedHash)
-            throws InstallerException {
-        if (!checkBeforeRemote()) return;
-        BlockGuard.getVmPolicy().onPathAccess(filePath);
-        try {
-            mInstalld.assertFsverityRootHashMatches(filePath, expectedHash);
         } catch (Exception e) {
             throw InstallerException.from(e);
         }

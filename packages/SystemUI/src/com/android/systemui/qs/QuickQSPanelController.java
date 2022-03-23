@@ -17,6 +17,7 @@
 package com.android.systemui.qs;
 
 import static com.android.systemui.media.dagger.MediaModule.QUICK_QS_PANEL;
+import static com.android.systemui.qs.dagger.QSFragmentModule.QQS_FOOTER;
 import static com.android.systemui.qs.dagger.QSFragmentModule.QS_USING_MEDIA_PLAYER;
 
 import com.android.internal.logging.MetricsLogger;
@@ -29,7 +30,8 @@ import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.qs.customize.QSCustomizerController;
 import com.android.systemui.qs.dagger.QSScope;
 import com.android.systemui.qs.logging.QSLogger;
-import com.android.systemui.statusbar.FeatureFlags;
+import com.android.systemui.settings.brightness.BrightnessMirrorHandler;
+import com.android.systemui.statusbar.policy.BrightnessMirrorController;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,11 +45,16 @@ public class QuickQSPanelController extends QSPanelControllerBase<QuickQSPanel> 
 
     private final QSPanel.OnConfigurationChangedListener mOnConfigurationChangedListener =
             newConfig -> {
-                int newMaxTiles = getResources().getInteger(R.integer.quick_qs_panel_max_columns);
+                int newMaxTiles = getResources().getInteger(R.integer.quick_qs_panel_max_tiles);
                 if (newMaxTiles != mView.getNumQuickTiles()) {
                     setMaxTiles(newMaxTiles);
                 }
             };
+
+    // brightness is visible only in split shade
+    private final QuickQSBrightnessController mBrightnessController;
+    private final BrightnessMirrorHandler mBrightnessMirrorHandler;
+    private final FooterActionsController mFooterActionsController;
 
     @Inject
     QuickQSPanelController(QuickQSPanel view, QSTileHost qsTileHost,
@@ -55,10 +62,15 @@ public class QuickQSPanelController extends QSPanelControllerBase<QuickQSPanel> 
             @Named(QS_USING_MEDIA_PLAYER) boolean usingMediaPlayer,
             @Named(QUICK_QS_PANEL) MediaHost mediaHost,
             MetricsLogger metricsLogger, UiEventLogger uiEventLogger, QSLogger qsLogger,
-            DumpManager dumpManager, FeatureFlags featureFlags
+            DumpManager dumpManager,
+            QuickQSBrightnessController quickQSBrightnessController,
+            @Named(QQS_FOOTER) FooterActionsController footerActionsController
     ) {
         super(view, qsTileHost, qsCustomizerController, usingMediaPlayer, mediaHost, metricsLogger,
-                uiEventLogger, qsLogger, dumpManager, featureFlags);
+                uiEventLogger, qsLogger, dumpManager);
+        mBrightnessController = quickQSBrightnessController;
+        mBrightnessMirrorHandler = new BrightnessMirrorHandler(mBrightnessController);
+        mFooterActionsController = footerActionsController;
     }
 
     @Override
@@ -67,18 +79,30 @@ public class QuickQSPanelController extends QSPanelControllerBase<QuickQSPanel> 
         mMediaHost.setExpansion(0.0f);
         mMediaHost.setShowsOnlyActiveMedia(true);
         mMediaHost.init(MediaHierarchyManager.LOCATION_QQS);
+        mBrightnessController.init(mShouldUseSplitNotificationShade);
+        mFooterActionsController.init();
+        mFooterActionsController.refreshVisibility(mShouldUseSplitNotificationShade);
     }
 
     @Override
     protected void onViewAttached() {
         super.onViewAttached();
         mView.addOnConfigurationChangedListener(mOnConfigurationChangedListener);
+        mBrightnessMirrorHandler.onQsPanelAttached();
     }
 
     @Override
     protected void onViewDetached() {
         super.onViewDetached();
         mView.removeOnConfigurationChangedListener(mOnConfigurationChangedListener);
+        mBrightnessMirrorHandler.onQsPanelDettached();
+    }
+
+    @Override
+    void setListening(boolean listening) {
+        super.setListening(listening);
+        mBrightnessController.setListening(listening);
+        mFooterActionsController.setListening(listening);
     }
 
     public boolean isListening() {
@@ -88,6 +112,18 @@ public class QuickQSPanelController extends QSPanelControllerBase<QuickQSPanel> 
     private void setMaxTiles(int parseNumTiles) {
         mView.setMaxTiles(parseNumTiles);
         setTiles();
+    }
+
+    @Override
+    public void refreshAllTiles() {
+        mBrightnessController.checkRestrictionAndSetEnabled();
+        super.refreshAllTiles();
+    }
+
+    @Override
+    protected void onConfigurationChanged() {
+        mBrightnessController.refreshVisibility(mShouldUseSplitNotificationShade);
+        mFooterActionsController.refreshVisibility(mShouldUseSplitNotificationShade);
     }
 
     @Override
@@ -109,5 +145,9 @@ public class QuickQSPanelController extends QSPanelControllerBase<QuickQSPanel> 
 
     public int getNumQuickTiles() {
         return mView.getNumQuickTiles();
+    }
+
+    public void setBrightnessMirror(BrightnessMirrorController brightnessMirrorController) {
+        mBrightnessMirrorHandler.setController(brightnessMirrorController);
     }
 }

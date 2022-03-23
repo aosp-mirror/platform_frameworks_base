@@ -47,6 +47,8 @@ import android.window.WindowContainerToken;
 import androidx.test.filters.SmallTest;
 
 import com.android.wm.shell.common.HandlerExecutor;
+import com.android.wm.shell.common.SyncTransactionQueue;
+import com.android.wm.shell.common.SyncTransactionQueue.TransactionRunnable;
 
 import org.junit.After;
 import org.junit.Before;
@@ -71,6 +73,8 @@ public class TaskViewTest extends ShellTestCase {
     ShellTaskOrganizer mOrganizer;
     @Mock
     HandlerExecutor mExecutor;
+    @Mock
+    SyncTransactionQueue mSyncQueue;
 
     SurfaceSession mSession;
     SurfaceControl mLeash;
@@ -99,7 +103,14 @@ public class TaskViewTest extends ShellTestCase {
         }).when(mExecutor).execute(any());
 
         when(mOrganizer.getExecutor()).thenReturn(mExecutor);
-        mTaskView = new TaskView(mContext, mOrganizer);
+
+        doAnswer((InvocationOnMock invocationOnMock) -> {
+            final TransactionRunnable r = invocationOnMock.getArgument(0);
+            r.runWithTransaction(new SurfaceControl.Transaction());
+            return null;
+        }).when(mSyncQueue).runInSync(any());
+
+        mTaskView = new TaskView(mContext, mOrganizer, mSyncQueue);
         mTaskView.setListener(mExecutor, mViewListener);
     }
 
@@ -112,7 +123,7 @@ public class TaskViewTest extends ShellTestCase {
 
     @Test
     public void testSetPendingListener_throwsException() {
-        TaskView taskView = new TaskView(mContext, mOrganizer);
+        TaskView taskView = new TaskView(mContext, mOrganizer, mSyncQueue);
         taskView.setListener(mExecutor, mViewListener);
         try {
             taskView.setListener(mExecutor, mViewListener);

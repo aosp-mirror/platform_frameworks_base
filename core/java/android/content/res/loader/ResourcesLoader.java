@@ -257,7 +257,7 @@ public class ResourcesLoader {
 
         for (int i = mChangeCallbacks.size() - 1; i >= 0; i--) {
             final WeakReference<Object> key = mChangeCallbacks.keyAt(i);
-            if (key.get() == null) {
+            if (key.refersTo(null)) {
                 mChangeCallbacks.removeAt(i);
             } else {
                 uniqueCallbacks.add(mChangeCallbacks.valueAt(i));

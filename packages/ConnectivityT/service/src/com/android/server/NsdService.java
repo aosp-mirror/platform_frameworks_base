@@ -19,6 +19,9 @@ package com.android.server;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.ConnectivityManager;
+import android.net.LinkProperties;
+import android.net.Network;
 import android.net.nsd.INsdManager;
 import android.net.nsd.INsdManagerCallback;
 import android.net.nsd.INsdServiceConnector;
@@ -44,6 +47,9 @@ import com.android.net.module.util.DnsSdTxtRecord;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.concurrent.CountDownLatch;
@@ -60,6 +66,7 @@ public class NsdService extends INsdManager.Stub {
 
     private static final boolean DBG = true;
     private static final long CLEANUP_DELAY_MS = 10000;
+    private static final int IFACE_IDX_ANY = 0;
 
     private final Context mContext;
     private final NsdStateMachine mNsdStateMachine;
@@ -297,7 +304,7 @@ public class NsdService extends INsdManager.Stub {
 
                         maybeStartDaemon();
                         id = getUniqueId();
-                        if (discoverServices(id, args.serviceInfo.getServiceType())) {
+                        if (discoverServices(id, args.serviceInfo)) {
                             if (DBG) {
                                 Log.d(TAG, "Discover " + msg.arg2 + " " + id
                                         + args.serviceInfo.getServiceType());
@@ -430,13 +437,38 @@ public class NsdService extends INsdManager.Stub {
                 }
                 switch (code) {
                     case NativeResponseCode.SERVICE_FOUND:
-                        /* NNN uniqueId serviceName regType domain */
+                        /* NNN uniqueId serviceName regType domain interfaceIdx netId */
                         servInfo = new NsdServiceInfo(cooked[2], cooked[3]);
+                        final int foundNetId;
+                        try {
+                            foundNetId = Integer.parseInt(cooked[6]);
+                        } catch (NumberFormatException e) {
+                            Log.wtf(TAG, "Invalid network received from mdnsd: " + cooked[6]);
+                            break;
+                        }
+                        if (foundNetId == 0L) {
+                            // Ignore services that do not have a Network: they are not usable
+                            // by apps, as they would need privileged permissions to use
+                            // interfaces that do not have an associated Network.
+                            break;
+                        }
+                        servInfo.setNetwork(new Network(foundNetId));
                         clientInfo.onServiceFound(clientId, servInfo);
                         break;
                     case NativeResponseCode.SERVICE_LOST:
-                        /* NNN uniqueId serviceName regType domain */
+                        /* NNN uniqueId serviceName regType domain interfaceIdx netId */
+                        final int lostNetId;
+                        try {
+                            lostNetId = Integer.parseInt(cooked[6]);
+                        } catch (NumberFormatException e) {
+                            Log.wtf(TAG, "Invalid network received from mdnsd: " + cooked[6]);
+                            break;
+                        }
                         servInfo = new NsdServiceInfo(cooked[2], cooked[3]);
+                        // The network could be null if it was torn down when the service is lost
+                        // TODO: avoid returning null in that case, possibly by remembering found
+                        // services on the same interface index and their network at the time
+                        servInfo.setNetwork(lostNetId == 0 ? null : new Network(lostNetId));
                         clientInfo.onServiceLost(clientId, servInfo);
                         break;
                     case NativeResponseCode.SERVICE_DISCOVERY_FAILED:
@@ -461,7 +493,7 @@ public class NsdService extends INsdManager.Stub {
                         /* NNN regId errorCode */
                         break;
                     case NativeResponseCode.SERVICE_RESOLVED:
-                        /* NNN resolveId fullName hostName port txtlen txtdata */
+                        /* NNN resolveId fullName hostName port txtlen txtdata interfaceIdx */
                         int index = 0;
                         while (index < cooked[2].length() && cooked[2].charAt(index) != '.') {
                             if (cooked[2].charAt(index) == '\\') {
@@ -473,6 +505,7 @@ public class NsdService extends INsdManager.Stub {
                             Log.e(TAG, "Invalid service found " + raw);
                             break;
                         }
+
                         String name = cooked[2].substring(0, index);
                         String rest = cooked[2].substring(index);
                         String type = rest.replace(".local.", "");
@@ -483,12 +516,13 @@ public class NsdService extends INsdManager.Stub {
                         clientInfo.mResolvedService.setServiceType(type);
                         clientInfo.mResolvedService.setPort(Integer.parseInt(cooked[4]));
                         clientInfo.mResolvedService.setTxtRecords(cooked[6]);
+                        // Network will be added after SERVICE_GET_ADDR_SUCCESS
 
                         stopResolveService(id);
                         removeRequestMap(clientId, id, clientInfo);
 
                         int id2 = getUniqueId();
-                        if (getAddrInfo(id2, cooked[3])) {
+                        if (getAddrInfo(id2, cooked[3], cooked[7] /* interfaceIdx */)) {
                             storeRequestMap(clientId, id2, clientInfo, NsdManager.RESOLVE_SERVICE);
                         } else {
                             clientInfo.onResolveServiceFailed(
@@ -513,12 +547,31 @@ public class NsdService extends INsdManager.Stub {
                                 clientId, NsdManager.FAILURE_INTERNAL_ERROR);
                         break;
                     case NativeResponseCode.SERVICE_GET_ADDR_SUCCESS:
-                        /* NNN resolveId hostname ttl addr */
+                        /* NNN resolveId hostname ttl addr interfaceIdx netId */
+                        Network network = null;
                         try {
-                            clientInfo.mResolvedService.setHost(InetAddress.getByName(cooked[4]));
+                            final int netId = Integer.parseInt(cooked[6]);
+                            network = netId == 0L ? null : new Network(netId);
+                        } catch (NumberFormatException e) {
+                            Log.wtf(TAG, "Invalid network in GET_ADDR_SUCCESS: " + cooked[6], e);
+                        }
+
+                        InetAddress serviceHost = null;
+                        try {
+                            serviceHost = InetAddress.getByName(cooked[4]);
+                        } catch (UnknownHostException e) {
+                            Log.wtf(TAG, "Invalid host in GET_ADDR_SUCCESS", e);
+                        }
+
+                        // If the resolved service is on an interface without a network, consider it
+                        // as a failure: it would not be usable by apps as they would need
+                        // privileged permissions.
+                        if (network != null && serviceHost != null) {
+                            clientInfo.mResolvedService.setHost(serviceHost);
+                            clientInfo.mResolvedService.setNetwork(network);
                             clientInfo.onResolveServiceSucceeded(
                                     clientId, clientInfo.mResolvedService);
-                        } catch (java.net.UnknownHostException e) {
+                        } else {
                             clientInfo.onResolveServiceFailed(
                                     clientId, NsdManager.FAILURE_INTERNAL_ERROR);
                         }
@@ -815,8 +868,15 @@ public class NsdService extends INsdManager.Stub {
         return mDaemon.execute("update", regId, t.size(), t.getRawData());
     }
 
-    private boolean discoverServices(int discoveryId, String serviceType) {
-        return mDaemon.execute("discover", discoveryId, serviceType);
+    private boolean discoverServices(int discoveryId, NsdServiceInfo serviceInfo) {
+        final Network network = serviceInfo.getNetwork();
+        final int discoverInterface = getNetworkInterfaceIndex(network);
+        if (network != null && discoverInterface == IFACE_IDX_ANY) {
+            Log.e(TAG, "Interface to discover service on not found");
+            return false;
+        }
+        return mDaemon.execute("discover", discoveryId, serviceInfo.getServiceType(),
+                discoverInterface);
     }
 
     private boolean stopServiceDiscovery(int discoveryId) {
@@ -824,17 +884,61 @@ public class NsdService extends INsdManager.Stub {
     }
 
     private boolean resolveService(int resolveId, NsdServiceInfo service) {
-        String name = service.getServiceName();
-        String type = service.getServiceType();
-        return mDaemon.execute("resolve", resolveId, name, type, "local.");
+        final String name = service.getServiceName();
+        final String type = service.getServiceType();
+        final Network network = service.getNetwork();
+        final int resolveInterface = getNetworkInterfaceIndex(network);
+        if (network != null && resolveInterface == IFACE_IDX_ANY) {
+            Log.e(TAG, "Interface to resolve service on not found");
+            return false;
+        }
+        return mDaemon.execute("resolve", resolveId, name, type, "local.", resolveInterface);
+    }
+
+    /**
+     * Guess the interface to use to resolve or discover a service on a specific network.
+     *
+     * This is an imperfect guess, as for example the network may be gone or not yet fully
+     * registered. This is fine as failing is correct if the network is gone, and a client
+     * attempting to resolve/discover on a network not yet setup would have a bad time anyway; also
+     * this is to support the legacy mdnsresponder implementation, which historically resolved
+     * services on an unspecified network.
+     */
+    private int getNetworkInterfaceIndex(Network network) {
+        if (network == null) return IFACE_IDX_ANY;
+
+        final ConnectivityManager cm = mContext.getSystemService(ConnectivityManager.class);
+        if (cm == null) {
+            Log.wtf(TAG, "No ConnectivityManager for resolveService");
+            return IFACE_IDX_ANY;
+        }
+        final LinkProperties lp = cm.getLinkProperties(network);
+        if (lp == null) return IFACE_IDX_ANY;
+
+        // Only resolve on non-stacked interfaces
+        final NetworkInterface iface;
+        try {
+            iface = NetworkInterface.getByName(lp.getInterfaceName());
+        } catch (SocketException e) {
+            Log.e(TAG, "Error querying interface", e);
+            return IFACE_IDX_ANY;
+        }
+
+        if (iface == null) {
+            Log.e(TAG, "Interface not found: " + lp.getInterfaceName());
+            return IFACE_IDX_ANY;
+        }
+
+        return iface.getIndex();
     }
 
     private boolean stopResolveService(int resolveId) {
         return mDaemon.execute("stop-resolve", resolveId);
     }
 
-    private boolean getAddrInfo(int resolveId, String hostname) {
-        return mDaemon.execute("getaddrinfo", resolveId, hostname);
+    private boolean getAddrInfo(int resolveId, String hostname, String interfaceIdx) {
+        // interfaceIdx is always obtained (as string) from the service resolved callback
+        return mDaemon.execute("getaddrinfo", resolveId, hostname, interfaceIdx);
     }
 
     private boolean stopGetAddrInfo(int resolveId) {

@@ -548,6 +548,7 @@ public final class PowerManager {
             WAKE_REASON_HDMI,
             WAKE_REASON_DISPLAY_GROUP_ADDED,
             WAKE_REASON_DISPLAY_GROUP_TURNED_ON,
+            WAKE_REASON_UNFOLD_DEVICE
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface WakeReason{}
@@ -647,6 +648,12 @@ public final class PowerManager {
     public static final int WAKE_REASON_DISPLAY_GROUP_TURNED_ON = 11;
 
     /**
+     * Wake up reason code: Waking the device due to unfolding of a foldable device.
+     * @hide
+     */
+    public static final int WAKE_REASON_UNFOLD_DEVICE = 12;
+
+    /**
      * Convert the wake reason to a string for debugging purposes.
      * @hide
      */
@@ -664,6 +671,7 @@ public final class PowerManager {
             case WAKE_REASON_LID: return "WAKE_REASON_LID";
             case WAKE_REASON_DISPLAY_GROUP_ADDED: return "WAKE_REASON_DISPLAY_GROUP_ADDED";
             case WAKE_REASON_DISPLAY_GROUP_TURNED_ON: return "WAKE_REASON_DISPLAY_GROUP_TURNED_ON";
+            case WAKE_REASON_UNFOLD_DEVICE: return "WAKE_REASON_UNFOLD_DEVICE";
             default: return Integer.toString(wakeReason);
         }
     }

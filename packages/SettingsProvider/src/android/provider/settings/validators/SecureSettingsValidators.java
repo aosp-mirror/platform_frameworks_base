@@ -34,7 +34,9 @@ import static android.provider.settings.validators.SettingsValidators.TILE_LIST_
 import static android.provider.settings.validators.SettingsValidators.TTS_LIST_VALIDATOR;
 
 import android.provider.Settings.Secure;
+import android.text.TextUtils;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 
 import java.util.Map;
 
@@ -148,6 +150,7 @@ public class SecureSettingsValidators {
         VALIDATORS.put(Secure.POWER_MENU_LOCKED_SHOW_CONTENT, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Secure.LOCKSCREEN_SHOW_CONTROLS, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Secure.LOCKSCREEN_SHOW_WALLET, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Secure.LOCKSCREEN_USE_DOUBLE_LINE_CLOCK, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Secure.DOZE_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Secure.DOZE_ALWAYS_ON, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Secure.DOZE_PICK_UP_GESTURE, BOOLEAN_VALIDATOR);
@@ -276,7 +279,7 @@ public class SecureSettingsValidators {
         VALIDATORS.put(Secure.ACCESSIBILITY_BUTTON_MODE,
                 new InclusiveIntegerRangeValidator(
                         Secure.ACCESSIBILITY_BUTTON_MODE_NAVIGATION_BAR,
-                        Secure.ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU));
+                        Secure.ACCESSIBILITY_BUTTON_MODE_GESTURE));
         VALIDATORS.put(Secure.ACCESSIBILITY_FLOATING_MENU_SIZE,
                 new DiscreteValueValidator(new String[] {"0", "1"}));
         VALIDATORS.put(Secure.ACCESSIBILITY_FLOATING_MENU_ICON_TYPE,
@@ -287,5 +290,32 @@ public class SecureSettingsValidators {
         VALIDATORS.put(Secure.CLIPBOARD_SHOW_ACCESS_NOTIFICATIONS, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Secure.NOTIFICATION_BUBBLES, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Secure.LOCATION_TIME_ZONE_DETECTION_ENABLED, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Secure.DEVICE_STATE_ROTATION_LOCK, value -> {
+            if (TextUtils.isEmpty(value)) {
+                return true;
+            }
+            String[] intValues = value.split(":");
+            if (intValues.length % 2 != 0) {
+                return false;
+            }
+            InclusiveIntegerRangeValidator enumValidator =
+                    new InclusiveIntegerRangeValidator(
+                            Secure.DEVICE_STATE_ROTATION_LOCK_IGNORED,
+                            Secure.DEVICE_STATE_ROTATION_LOCK_UNLOCKED);
+            ArraySet<String> keys = new ArraySet<>();
+            for (int i = 0; i < intValues.length - 1; ) {
+                String entryKey = intValues[i++];
+                String entryValue = intValues[i++];
+                if (!NON_NEGATIVE_INTEGER_VALIDATOR.validate(entryKey)
+                        || !enumValidator.validate(entryValue)) {
+                    return false;
+                }
+                // If the same device state key was specified more than once, this is invalid
+                if (!keys.add(entryKey)) {
+                    return false;
+                }
+            }
+            return true;
+        });
     }
 }

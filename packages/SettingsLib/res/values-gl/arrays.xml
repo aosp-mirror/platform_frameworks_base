@@ -59,7 +59,7 @@
     <item msgid="6421717003037072581">"Utilizar sempre a comprobación HDCP"</item>
   </string-array>
   <string-array name="bt_hci_snoop_log_entries">
-    <item msgid="695678520785580527">"Desactivado"</item>
+    <item msgid="695678520785580527">"Desactivada"</item>
     <item msgid="6336372935919715515">"Está activado o filtrado"</item>
     <item msgid="2779123106632690576">"Activada"</item>
   </string-array>

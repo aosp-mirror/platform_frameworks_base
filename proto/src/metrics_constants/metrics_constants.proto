@@ -2260,10 +2260,12 @@ message MetricsEvent {
     ACCOUNTS_WORK_PROFILE_SETTINGS = 401;
 
     // Settings -> Dev options -> Convert to file encryption
-    CONVERT_FBE = 402;
+    // DEPRECATED: this setting was removed in Android T.
+    CONVERT_FBE = 402 [deprecated=true];
 
     // Settings -> Dev options -> Convert to file encryption -> WIPE AND CONVERT...
-    CONVERT_FBE_CONFIRM = 403;
+    // DEPRECATED: this setting was removed in Android T.
+    CONVERT_FBE_CONFIRM = 403 [deprecated=true];
 
     // Settings -> Dev options -> Running services
     RUNNING_SERVICES = 404;

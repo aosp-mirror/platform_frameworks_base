@@ -20,16 +20,17 @@ import static android.annotation.SystemApi.Client.MODULE_LIBRARIES;
 import static android.net.ConnectivityManager.TYPE_MOBILE;
 import static android.net.ConnectivityManager.TYPE_WIFI;
 import static android.net.NetworkTemplate.NETWORK_TYPE_ALL;
+import static android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
+import android.app.usage.NetworkStatsManager;
 import android.content.Context;
 import android.net.wifi.WifiInfo;
 import android.service.NetworkIdentityProto;
-import android.telephony.Annotation;
 import android.telephony.TelephonyManager;
 import android.util.proto.ProtoOutputStream;
 
@@ -86,6 +87,7 @@ public class NetworkIdentity {
 
     final int mType;
     final int mRatType;
+    final int mSubId;
     final String mSubscriberId;
     final String mWifiNetworkKey;
     final boolean mRoaming;
@@ -96,7 +98,7 @@ public class NetworkIdentity {
     /** @hide */
     public NetworkIdentity(
             int type, int ratType, @Nullable String subscriberId, @Nullable String wifiNetworkKey,
-            boolean roaming, boolean metered, boolean defaultNetwork, int oemManaged) {
+            boolean roaming, boolean metered, boolean defaultNetwork, int oemManaged, int subId) {
         mType = type;
         mRatType = ratType;
         mSubscriberId = subscriberId;
@@ -105,12 +107,13 @@ public class NetworkIdentity {
         mMetered = metered;
         mDefaultNetwork = defaultNetwork;
         mOemManaged = oemManaged;
+        mSubId = subId;
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(mType, mRatType, mSubscriberId, mWifiNetworkKey, mRoaming, mMetered,
-                mDefaultNetwork, mOemManaged);
+                mDefaultNetwork, mOemManaged, mSubId);
     }
 
     @Override
@@ -122,7 +125,8 @@ public class NetworkIdentity {
                     && Objects.equals(mWifiNetworkKey, ident.mWifiNetworkKey)
                     && mMetered == ident.mMetered
                     && mDefaultNetwork == ident.mDefaultNetwork
-                    && mOemManaged == ident.mOemManaged;
+                    && mOemManaged == ident.mOemManaged
+                    && mSubId == ident.mSubId;
         }
         return false;
     }
@@ -150,6 +154,7 @@ public class NetworkIdentity {
         builder.append(", metered=").append(mMetered);
         builder.append(", defaultNetwork=").append(mDefaultNetwork);
         builder.append(", oemManaged=").append(getOemManagedNames(mOemManaged));
+        builder.append(", subId=").append(mSubId);
         return builder.append("}").toString();
     }
 
@@ -256,6 +261,11 @@ public class NetworkIdentity {
         return mOemManaged;
     }
 
+    /** Get the SubId of this instance. */
+    public int getSubId() {
+        return mSubId;
+    }
+
     /**
      * Assemble a {@link NetworkIdentity} from the passed arguments.
      *
@@ -274,10 +284,10 @@ public class NetworkIdentity {
     @Deprecated
     @NonNull
     public static NetworkIdentity buildNetworkIdentity(Context context,
-            @NonNull NetworkStateSnapshot snapshot,
-            boolean defaultNetwork, @Annotation.NetworkType int ratType) {
+            @NonNull NetworkStateSnapshot snapshot, boolean defaultNetwork, int ratType) {
         final NetworkIdentity.Builder builder = new NetworkIdentity.Builder()
-                .setNetworkStateSnapshot(snapshot).setDefaultNetwork(defaultNetwork);
+                .setNetworkStateSnapshot(snapshot).setDefaultNetwork(defaultNetwork)
+                .setSubId(snapshot.getSubId());
         if (snapshot.getLegacyType() == TYPE_MOBILE && ratType != NETWORK_TYPE_ALL) {
             builder.setRatType(ratType);
         }
@@ -326,6 +336,9 @@ public class NetworkIdentity {
         if (res == 0) {
             res = Integer.compare(left.mOemManaged, right.mOemManaged);
         }
+        if (res == 0) {
+            res = Integer.compare(left.mSubId, right.mSubId);
+        }
         return res;
     }
 
@@ -346,6 +359,7 @@ public class NetworkIdentity {
         private boolean mMetered;
         private boolean mDefaultNetwork;
         private int mOemManaged;
+        private int mSubId;
 
         /**
          * Creates a new Builder.
@@ -360,6 +374,7 @@ public class NetworkIdentity {
             mMetered = false;
             mDefaultNetwork = false;
             mOemManaged = NetworkTemplate.OEM_MANAGED_NO;
+            mSubId = INVALID_SUBSCRIPTION_ID;
         }
 
         /**
@@ -432,10 +447,10 @@ public class NetworkIdentity {
          * @return this builder.
          */
         @NonNull
-        public Builder setRatType(@Annotation.NetworkType int ratType) {
+        public Builder setRatType(int ratType) {
             if (!CollectionUtils.contains(TelephonyManager.getAllNetworkTypes(), ratType)
                     && ratType != TelephonyManager.NETWORK_TYPE_UNKNOWN
-                    && ratType != NetworkTemplate.NETWORK_TYPE_5G_NSA) {
+                    && ratType != NetworkStatsManager.NETWORK_TYPE_5G_NSA) {
                 throw new IllegalArgumentException("Invalid ratType " + ratType);
             }
             mRatType = ratType;
@@ -538,6 +553,19 @@ public class NetworkIdentity {
             return this;
         }
 
+        /**
+         * Set the Subscription Id.
+         *
+         * @param subId the Subscription Id of the network. Or INVALID_SUBSCRIPTION_ID if not
+         *              applicable.
+         * @return this builder.
+         */
+        @NonNull
+        public Builder setSubId(int subId) {
+            mSubId = subId;
+            return this;
+        }
+
         private void ensureValidParameters() {
             // Assert non-mobile network cannot have a ratType.
             if (mType != TYPE_MOBILE && mRatType != NetworkTemplate.NETWORK_TYPE_ALL) {
@@ -560,7 +588,7 @@ public class NetworkIdentity {
         public NetworkIdentity build() {
             ensureValidParameters();
             return new NetworkIdentity(mType, mRatType, mSubscriberId, mWifiNetworkKey,
-                    mRoaming, mMetered, mDefaultNetwork, mOemManaged);
+                    mRoaming, mMetered, mDefaultNetwork, mOemManaged, mSubId);
         }
     }
 }

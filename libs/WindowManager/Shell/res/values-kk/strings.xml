@@ -28,8 +28,6 @@
     <string name="pip_skip_to_next" msgid="8403429188794867653">"Келесіге өту"</string>
     <string name="pip_skip_to_prev" msgid="7172158111196394092">"Алдыңғысына оралу"</string>
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"Өлшемін өзгерту"</string>
-    <string name="accessibility_action_pip_stash" msgid="4060775037619702641">"Жасыру"</string>
-    <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Көрсету"</string>
     <string name="dock_forced_resizable" msgid="1749750436092293116">"Қолданба экранды бөлу режимінде жұмыс істемеуі мүмкін."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"Қодланба бөлінген экранды қолдамайды."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Қолданба қосымша дисплейде жұмыс істемеуі мүмкін."</string>
@@ -70,7 +68,7 @@
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"Соңғы және жабылған қалқыма хабарлар осы жерде көрсетіледі."</string>
     <string name="notification_bubble_title" msgid="6082910224488253378">"Көпіршік"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Басқару"</string>
-    <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Қалқыма хабар жабылды."</string>
+    <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Қалқымалы анықтама өшірілді."</string>
     <string name="restart_button_description" msgid="5887656107651190519">"Бұл қолданбаны қайта қосып, толық экранға өту үшін түртіңіз."</string>
     <string name="got_it" msgid="4428750913636945527">"Түсінікті"</string>
 </resources>

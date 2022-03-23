@@ -162,8 +162,11 @@ public class HeadsUpAppearanceControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testHeaderReadFromOldController() {
-        mHeadsUpAppearanceController.setAppearFraction(1.0f, 1.0f);
+    public void constructor_animationValuesUpdated() {
+        float appearFraction = .75f;
+        float expandedHeight = 400f;
+        when(mStackScrollerController.getAppearFraction()).thenReturn(appearFraction);
+        when(mStackScrollerController.getExpandedHeight()).thenReturn(expandedHeight);
 
         HeadsUpAppearanceController newController = new HeadsUpAppearanceController(
                 mock(NotificationIconAreaController.class),
@@ -179,14 +182,9 @@ public class HeadsUpAppearanceControllerTest extends SysuiTestCase {
                 new View(mContext),
                 new View(mContext),
                 new View(mContext));
-        newController.readFrom(mHeadsUpAppearanceController);
 
-        Assert.assertEquals(mHeadsUpAppearanceController.mExpandedHeight,
-                newController.mExpandedHeight, 0.0f);
-        Assert.assertEquals(mHeadsUpAppearanceController.mAppearFraction,
-                newController.mAppearFraction, 0.0f);
-        Assert.assertEquals(mHeadsUpAppearanceController.mIsExpanded,
-                newController.mIsExpanded);
+        Assert.assertEquals(expandedHeight, newController.mExpandedHeight, 0.0f);
+        Assert.assertEquals(appearFraction, newController.mAppearFraction, 0.0f);
     }
 
     @Test
@@ -195,10 +193,11 @@ public class HeadsUpAppearanceControllerTest extends SysuiTestCase {
         reset(mDarkIconDispatcher);
         reset(mPanelView);
         reset(mStackScrollerController);
-        mHeadsUpAppearanceController.destroy();
+
+        mHeadsUpAppearanceController.onViewDetached();
+
         verify(mHeadsUpManager).removeListener(any());
         verify(mDarkIconDispatcher).removeDarkReceiver((DarkIconDispatcher.DarkReceiver) any());
-        verify(mPanelView).setVerticalTranslationListener(isNull());
         verify(mPanelView).removeTrackingHeadsUpListener(any());
         verify(mPanelView).setHeadsUpAppearanceController(isNull());
         verify(mStackScrollerController).removeOnExpandedHeightChangedListener(any());

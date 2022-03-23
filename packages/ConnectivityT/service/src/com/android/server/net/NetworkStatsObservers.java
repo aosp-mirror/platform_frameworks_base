@@ -19,8 +19,11 @@ package com.android.server.net;
 import static android.app.usage.NetworkStatsManager.MIN_THRESHOLD_BYTES;
 
 import android.app.usage.NetworkStatsManager;
+import android.content.Context;
+import android.content.pm.PackageManager;
 import android.net.DataUsageRequest;
 import android.net.NetworkIdentitySet;
+import android.net.NetworkStack;
 import android.net.NetworkStats;
 import android.net.NetworkStatsAccess;
 import android.net.NetworkStatsCollection;
@@ -74,9 +77,9 @@ class NetworkStatsObservers {
      *
      * @return the normalized request wrapped within {@link RequestInfo}.
      */
-    public DataUsageRequest register(DataUsageRequest inputRequest, IUsageCallback callback,
-            int callingUid, @NetworkStatsAccess.Level int accessLevel) {
-        DataUsageRequest request = buildRequest(inputRequest, callingUid);
+    public DataUsageRequest register(Context context, DataUsageRequest inputRequest,
+            IUsageCallback callback, int callingUid, @NetworkStatsAccess.Level int accessLevel) {
+        DataUsageRequest request = buildRequest(context, inputRequest, callingUid);
         RequestInfo requestInfo = buildRequestInfo(request, callback, callingUid,
                 accessLevel);
 
@@ -194,10 +197,13 @@ class NetworkStatsObservers {
         }
     }
 
-    private DataUsageRequest buildRequest(DataUsageRequest request, int callingUid) {
-        // For non-system uid, cap the minimum threshold to a safe default to avoid too
-        // many callbacks.
-        long thresholdInBytes = (callingUid == Process.SYSTEM_UID ? request.thresholdInBytes
+    private DataUsageRequest buildRequest(Context context, DataUsageRequest request,
+                int callingUid) {
+        // For non-NETWORK_STACK permission uid, cap the minimum threshold to a safe default to
+        // avoid too many callbacks.
+        final long thresholdInBytes = (context.checkPermission(
+                NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, Process.myPid(), callingUid)
+                == PackageManager.PERMISSION_GRANTED ? request.thresholdInBytes
                 : Math.max(MIN_THRESHOLD_BYTES, request.thresholdInBytes));
         if (thresholdInBytes > request.thresholdInBytes) {
             Log.w(TAG, "Threshold was too low for " + request

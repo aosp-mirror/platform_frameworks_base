@@ -31,11 +31,12 @@ import java.util.Objects;
 /**
  * A time signal from a network time source like NTP.
  *
- * <p>{@code utcTime} contains the suggested time. The {@code utcTime.value} is the number of
- * milliseconds elapsed since 1/1/1970 00:00:00 UTC. The {@code utcTime.referenceTimeMillis} is the
- * value of the elapsed realtime clock when the {@code utcTime.value} was established.
- * Note that the elapsed realtime clock is considered accurate but it is volatile, so time
- * suggestions cannot be persisted across device resets.
+ * <p>{@code unixEpochTime} contains the suggested time. The {@code unixEpochTime.value} is the
+ * number of milliseconds elapsed since 1/1/1970 00:00:00 UTC according to the Unix time system.
+ * The {@code unixEpochTime.referenceTimeMillis} is the value of the elapsed realtime clock when
+ * the {@code unixEpochTime.value} was established. Note that the elapsed realtime clock is
+ * considered accurate but it is volatile, so time suggestions cannot be persisted across device
+ * resets.
  *
  * <p>{@code debugInfo} contains debugging metadata associated with the suggestion. This is used to
  * record why the suggestion exists and how it was determined. This information exists only to aid
@@ -57,17 +58,17 @@ public final class NetworkTimeSuggestion implements Parcelable {
                 }
             };
 
-    @NonNull private final TimestampedValue<Long> mUtcTime;
+    @NonNull private final TimestampedValue<Long> mUnixEpochTime;
     @Nullable private ArrayList<String> mDebugInfo;
 
-    public NetworkTimeSuggestion(@NonNull TimestampedValue<Long> utcTime) {
-        mUtcTime = Objects.requireNonNull(utcTime);
-        Objects.requireNonNull(utcTime.getValue());
+    public NetworkTimeSuggestion(@NonNull TimestampedValue<Long> unixEpochTime) {
+        mUnixEpochTime = Objects.requireNonNull(unixEpochTime);
+        Objects.requireNonNull(unixEpochTime.getValue());
     }
 
     private static NetworkTimeSuggestion createFromParcel(Parcel in) {
-        TimestampedValue<Long> utcTime = in.readParcelable(null /* classLoader */);
-        NetworkTimeSuggestion suggestion = new NetworkTimeSuggestion(utcTime);
+        TimestampedValue<Long> unixEpochTime = in.readParcelable(null /* classLoader */);
+        NetworkTimeSuggestion suggestion = new NetworkTimeSuggestion(unixEpochTime);
         @SuppressWarnings("unchecked")
         ArrayList<String> debugInfo = (ArrayList<String>) in.readArrayList(null /* classLoader */);
         suggestion.mDebugInfo = debugInfo;
@@ -81,13 +82,13 @@ public final class NetworkTimeSuggestion implements Parcelable {
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
-        dest.writeParcelable(mUtcTime, 0);
+        dest.writeParcelable(mUnixEpochTime, 0);
         dest.writeList(mDebugInfo);
     }
 
     @NonNull
-    public TimestampedValue<Long> getUtcTime() {
-        return mUtcTime;
+    public TimestampedValue<Long> getUnixEpochTime() {
+        return mUnixEpochTime;
     }
 
     @NonNull
@@ -117,18 +118,18 @@ public final class NetworkTimeSuggestion implements Parcelable {
             return false;
         }
         NetworkTimeSuggestion that = (NetworkTimeSuggestion) o;
-        return Objects.equals(mUtcTime, that.mUtcTime);
+        return Objects.equals(mUnixEpochTime, that.mUnixEpochTime);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mUtcTime);
+        return Objects.hash(mUnixEpochTime);
     }
 
     @Override
     public String toString() {
         return "NetworkTimeSuggestion{"
-                + "mUtcTime=" + mUtcTime
+                + "mUnixEpochTime=" + mUnixEpochTime
                 + ", mDebugInfo=" + mDebugInfo
                 + '}';
     }

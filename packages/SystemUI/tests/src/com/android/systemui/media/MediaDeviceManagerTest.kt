@@ -56,6 +56,7 @@ private const val PACKAGE = "PKG"
 private const val SESSION_KEY = "SESSION_KEY"
 private const val SESSION_TITLE = "SESSION_TITLE"
 private const val DEVICE_NAME = "DEVICE_NAME"
+private const val REMOTE_DEVICE_NAME = "REMOTE_DEVICE_NAME"
 private const val USER_ID = 0
 
 private fun <T> eq(value: T): T = Mockito.eq(value) ?: value
@@ -195,8 +196,6 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
         // THEN the device should be disabled
         val data = captureDeviceData(KEY)
         assertThat(data.enabled).isFalse()
-        assertThat(data.name).isNull()
-        assertThat(data.icon).isNull()
     }
 
     @Test
@@ -263,6 +262,20 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
     }
 
     @Test
+    fun deviceNameFromMR2RouteInfo() {
+        // GIVEN that MR2Manager returns a valid routing session
+        whenever(route.name).thenReturn(REMOTE_DEVICE_NAME)
+        // WHEN a notification is added
+        manager.onMediaDataLoaded(KEY, null, mediaData)
+        fakeBgExecutor.runAllReady()
+        fakeFgExecutor.runAllReady()
+        // THEN it uses the route name (instead of device name)
+        val data = captureDeviceData(KEY)
+        assertThat(data.enabled).isTrue()
+        assertThat(data.name).isEqualTo(REMOTE_DEVICE_NAME)
+    }
+
+    @Test
     fun deviceDisabledWhenMR2ReturnsNullRouteInfo() {
         // GIVEN that MR2Manager returns null for routing session
         whenever(mr2.getRoutingSessionForMediaController(any())).thenReturn(null)
@@ -273,8 +286,6 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
         // THEN the device is disabled
         val data = captureDeviceData(KEY)
         assertThat(data.enabled).isFalse()
-        assertThat(data.name).isNull()
-        assertThat(data.icon).isNull()
     }
 
     @Test
@@ -294,8 +305,6 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
         // THEN the device is disabled
         val data = captureDeviceData(KEY)
         assertThat(data.enabled).isFalse()
-        assertThat(data.name).isNull()
-        assertThat(data.icon).isNull()
     }
 
     @Test
@@ -315,8 +324,6 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
         // THEN the device is disabled
         val data = captureDeviceData(KEY)
         assertThat(data.enabled).isFalse()
-        assertThat(data.name).isNull()
-        assertThat(data.icon).isNull()
     }
 
     @Test

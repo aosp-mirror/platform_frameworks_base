@@ -31,11 +31,8 @@ import android.media.MediaPlayer;
 import android.os.Binder;
 import android.os.Build;
 import android.os.RemoteException;
+import android.os.StrictMode;
 import android.util.Log;
-
-import com.android.server.NetworkManagementSocketTagger;
-
-import dalvik.system.SocketTagger;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
@@ -56,6 +53,10 @@ import java.net.SocketException;
  * use {@link NetworkStatsManager} instead.
  */
 public class TrafficStats {
+    static {
+        System.loadLibrary("framework-connectivity-tiramisu-jni");
+    }
+
     private static final String TAG = TrafficStats.class.getSimpleName();
     /**
      * The return value to indicate that the device does not support the statistic.
@@ -232,8 +233,67 @@ public class TrafficStats {
      */
     @SystemApi(client = MODULE_LIBRARIES)
     public static void attachSocketTagger() {
-        NetworkManagementSocketTagger.install();
+        dalvik.system.SocketTagger.set(new SocketTagger());
     }
+
+    private static class SocketTagger extends dalvik.system.SocketTagger {
+
+        // TODO: set to false
+        private static final boolean LOGD = true;
+
+        SocketTagger() {
+        }
+
+        @Override
+        public void tag(FileDescriptor fd) throws SocketException {
+            final UidTag tagInfo = sThreadUidTag.get();
+            if (LOGD) {
+                Log.d(TAG, "tagSocket(" + fd.getInt$() + ") with statsTag=0x"
+                        + Integer.toHexString(tagInfo.tag) + ", statsUid=" + tagInfo.uid);
+            }
+            if (tagInfo.tag == -1) {
+                StrictMode.noteUntaggedSocket();
+            }
+
+            if (tagInfo.tag == -1 && tagInfo.uid == -1) return;
+            final int errno = native_tagSocketFd(fd, tagInfo.tag, tagInfo.uid);
+            if (errno < 0) {
+                Log.i(TAG, "tagSocketFd(" + fd.getInt$() + ", "
+                        + tagInfo.tag + ", "
+                        + tagInfo.uid + ") failed with errno" + errno);
+            }
+        }
+
+        @Override
+        public void untag(FileDescriptor fd) throws SocketException {
+            if (LOGD) {
+                Log.i(TAG, "untagSocket(" + fd.getInt$() + ")");
+            }
+
+            final UidTag tagInfo = sThreadUidTag.get();
+            if (tagInfo.tag == -1 && tagInfo.uid == -1) return;
+
+            final int errno = native_untagSocketFd(fd);
+            if (errno < 0) {
+                Log.w(TAG, "untagSocket(" + fd.getInt$() + ") failed with errno " + errno);
+            }
+        }
+    }
+
+    private static native int native_tagSocketFd(FileDescriptor fd, int tag, int uid);
+    private static native int native_untagSocketFd(FileDescriptor fd);
+
+    private static class UidTag {
+        public int tag = -1;
+        public int uid = -1;
+    }
+
+    private static ThreadLocal<UidTag> sThreadUidTag = new ThreadLocal<UidTag>() {
+        @Override
+        protected UidTag initialValue() {
+            return new UidTag();
+        }
+    };
 
     /**
      * Set active tag to use when accounting {@link Socket} traffic originating
@@ -249,7 +309,7 @@ public class TrafficStats {
      * @see #clearThreadStatsTag()
      */
     public static void setThreadStatsTag(int tag) {
-        NetworkManagementSocketTagger.setThreadSocketStatsTag(tag);
+        getAndSetThreadStatsTag(tag);
     }
 
     /**
@@ -267,7 +327,9 @@ public class TrafficStats {
      *         restore any existing values after a nested operation is finished
      */
     public static int getAndSetThreadStatsTag(int tag) {
-        return NetworkManagementSocketTagger.setThreadSocketStatsTag(tag);
+        final int old = sThreadUidTag.get().tag;
+        sThreadUidTag.get().tag = tag;
+        return old;
     }
 
     /**
@@ -327,7 +389,7 @@ public class TrafficStats {
      * @see #setThreadStatsTag(int)
      */
     public static int getThreadStatsTag() {
-        return NetworkManagementSocketTagger.getThreadSocketStatsTag();
+        return sThreadUidTag.get().tag;
     }
 
     /**
@@ -337,7 +399,7 @@ public class TrafficStats {
      * @see #setThreadStatsTag(int)
      */
     public static void clearThreadStatsTag() {
-        NetworkManagementSocketTagger.setThreadSocketStatsTag(-1);
+        sThreadUidTag.get().tag = -1;
     }
 
     /**
@@ -357,7 +419,7 @@ public class TrafficStats {
      */
     @SuppressLint("RequiresPermission")
     public static void setThreadStatsUid(int uid) {
-        NetworkManagementSocketTagger.setThreadSocketStatsUid(uid);
+        sThreadUidTag.get().uid = uid;
     }
 
     /**
@@ -368,7 +430,7 @@ public class TrafficStats {
      * @see #setThreadStatsUid(int)
      */
     public static int getThreadStatsUid() {
-        return NetworkManagementSocketTagger.getThreadSocketStatsUid();
+        return sThreadUidTag.get().uid;
     }
 
     /**
@@ -395,7 +457,7 @@ public class TrafficStats {
      */
     @SuppressLint("RequiresPermission")
     public static void clearThreadStatsUid() {
-        NetworkManagementSocketTagger.setThreadSocketStatsUid(-1);
+        setThreadStatsUid(-1);
     }
 
     /**

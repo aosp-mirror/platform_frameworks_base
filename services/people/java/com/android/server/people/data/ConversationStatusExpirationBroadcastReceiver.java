@@ -31,6 +31,7 @@ import android.os.CancellationSignal;
 
 import com.android.server.LocalServices;
 import com.android.server.people.PeopleServiceInternal;
+import com.android.server.pm.PackageManagerService;
 
 /**
  * If a {@link ConversationStatus} is added to the system with an expiration time, remove that
@@ -50,6 +51,7 @@ public class ConversationStatusExpirationBroadcastReceiver extends BroadcastRece
             final PendingIntent pi = PendingIntent.getBroadcast(context,
                     REQUEST_CODE,
                     new Intent(ACTION)
+                            .setPackage(PackageManagerService.PLATFORM_PACKAGE_NAME)
                             .setData(new Uri.Builder().scheme(SCHEME)
                                     .appendPath(getKey(userId, pkg, conversationId, status))
                                     .build())

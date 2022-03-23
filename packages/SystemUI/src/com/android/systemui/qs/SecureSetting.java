@@ -54,11 +54,15 @@ public abstract class SecureSetting extends ContentObserver implements Listenabl
     }
 
     public int getValue() {
-        return mSecureSettings.getIntForUser(mSettingName, mDefaultValue, mUserId);
+        return mListening ? mObservedValue : getValueFromProvider();
     }
 
     public void setValue(int value) {
         mSecureSettings.putIntForUser(mSettingName, value, mUserId);
+    }
+
+    private int getValueFromProvider() {
+        return mSecureSettings.getIntForUser(mSettingName, mDefaultValue, mUserId);
     }
 
     @Override
@@ -66,7 +70,7 @@ public abstract class SecureSetting extends ContentObserver implements Listenabl
         if (listening == mListening) return;
         mListening = listening;
         if (listening) {
-            mObservedValue = getValue();
+            mObservedValue = getValueFromProvider();
             mSecureSettings.registerContentObserverForUser(
                     mSecureSettings.getUriFor(mSettingName), false, this, mUserId);
         } else {
@@ -77,9 +81,10 @@ public abstract class SecureSetting extends ContentObserver implements Listenabl
 
     @Override
     public void onChange(boolean selfChange) {
-        final int value = getValue();
-        handleValueChanged(value, value != mObservedValue);
+        final int value = getValueFromProvider();
+        final boolean changed = value != mObservedValue;
         mObservedValue = value;
+        handleValueChanged(value, changed);
     }
 
     public void setUserId(int userId) {

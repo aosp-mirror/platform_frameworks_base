@@ -54,7 +54,6 @@ import android.hardware.display.DisplayManagerInternal;
 import android.net.ConnectivityManager;
 import android.net.ConnectivityModuleConnector;
 import android.net.NetworkStackClient;
-import android.net.TrafficStats;
 import android.os.BaseBundle;
 import android.os.Binder;
 import android.os.Build;
@@ -141,7 +140,6 @@ import com.android.server.media.MediaRouterService;
 import com.android.server.media.metrics.MediaMetricsManagerService;
 import com.android.server.media.projection.MediaProjectionManagerService;
 import com.android.server.net.NetworkPolicyManagerService;
-import com.android.server.net.NetworkStatsService;
 import com.android.server.net.watchlist.NetworkWatchlistService;
 import com.android.server.notification.NotificationManagerService;
 import com.android.server.oemlock.OemLockService;
@@ -207,8 +205,6 @@ import com.android.server.wm.WindowManagerGlobalLock;
 import com.android.server.wm.WindowManagerService;
 
 import dalvik.system.VMRuntime;
-
-import com.google.android.startop.iorap.IorapForwardingService;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -285,8 +281,6 @@ public final class SystemServer implements Dumpable {
             "com.android.server.wifi.p2p.WifiP2pService";
     private static final String LOWPAN_SERVICE_CLASS =
             "com.android.server.lowpan.LowpanService";
-    private static final String ETHERNET_SERVICE_CLASS =
-            "com.android.server.ethernet.EthernetService";
     private static final String JOB_SCHEDULER_SERVICE_CLASS =
             "com.android.server.job.JobSchedulerService";
     private static final String LOCK_SETTINGS_SERVICE_CLASS =
@@ -379,10 +373,14 @@ public final class SystemServer implements Dumpable {
             "com.android.server.media.MediaResourceMonitorService";
     private static final String CONNECTIVITY_SERVICE_INITIALIZER_CLASS =
             "com.android.server.ConnectivityServiceInitializer";
+    private static final String NETWORK_STATS_SERVICE_INITIALIZER_CLASS =
+            "com.android.server.NetworkStatsServiceInitializer";
     private static final String IP_CONNECTIVITY_METRICS_CLASS =
             "com.android.server.connectivity.IpConnectivityMetrics";
     private static final String MEDIA_COMMUNICATION_SERVICE_CLASS =
             "com.android.server.media.MediaCommunicationService";
+    private static final String APP_COMPAT_OVERRIDES_SERVICE_CLASS =
+            "com.android.server.compat.overrides.AppCompatOverridesService$Lifecycle";
 
     private static final String ROLE_SERVICE_CLASS = "com.android.role.RoleService";
     private static final String GAME_MANAGER_SERVICE_CLASS =
@@ -1334,10 +1332,8 @@ public final class SystemServer implements Dumpable {
         DynamicSystemService dynamicSystem = null;
         IStorageManager storageManager = null;
         NetworkManagementService networkManagement = null;
-        IpSecService ipSecService = null;
         VpnManagerService vpnManager = null;
         VcnManagementService vcnManagement = null;
-        NetworkStatsService networkStats = null;
         NetworkPolicyManagerService networkPolicy = null;
         WindowManagerService wm = null;
         SerialService serial = null;
@@ -1554,10 +1550,6 @@ public final class SystemServer implements Dumpable {
             mSystemServiceManager.startService(PinnerService.class);
             t.traceEnd();
 
-            t.traceBegin("IorapForwardingService");
-            mSystemServiceManager.startService(IorapForwardingService.class);
-            t.traceEnd();
-
             if (Build.IS_DEBUGGABLE && ProfcollectForwardingService.enabled()) {
                 t.traceBegin("ProfcollectForwardingService");
                 mSystemServiceManager.startService(ProfcollectForwardingService.class);
@@ -1588,6 +1580,9 @@ public final class SystemServer implements Dumpable {
             // all listeners have the chance to react with special handling.
             Settings.Global.putInt(context.getContentResolver(),
                     Settings.Global.AIRPLANE_MODE_ON, 1);
+        } else if (context.getResources().getBoolean(R.bool.config_autoResetAirplaneMode)) {
+            Settings.Global.putInt(context.getContentResolver(),
+                    Settings.Global.AIRPLANE_MODE_ON, 0);
         }
 
         StatusBarManagerService statusBar = null;
@@ -1806,16 +1801,6 @@ public final class SystemServer implements Dumpable {
             }
             t.traceEnd();
 
-
-            t.traceBegin("StartIpSecService");
-            try {
-                ipSecService = IpSecService.create(context);
-                ServiceManager.addService(Context.IPSEC_SERVICE, ipSecService);
-            } catch (Throwable e) {
-                reportWtf("starting IpSec Service", e);
-            }
-            t.traceEnd();
-
             t.traceBegin("StartFontManagerService");
             mSystemServiceManager.startService(new FontManagerService.Lifecycle(context, safeMode));
             t.traceEnd();
@@ -1836,13 +1821,10 @@ public final class SystemServer implements Dumpable {
             t.traceEnd();
 
             t.traceBegin("StartNetworkStatsService");
-            try {
-                networkStats = NetworkStatsService.create(context);
-                ServiceManager.addService(Context.NETWORK_STATS_SERVICE, networkStats);
-                TrafficStats.init(context);
-            } catch (Throwable e) {
-                reportWtf("starting NetworkStats Service", e);
-            }
+            // This has to be called before NetworkPolicyManager because NetworkPolicyManager
+            // needs to take NetworkStatsService to initialize.
+            mSystemServiceManager.startServiceFromJar(NETWORK_STATS_SERVICE_INITIALIZER_CLASS,
+                    CONNECTIVITY_SERVICE_APEX_PATH);
             t.traceEnd();
 
             t.traceBegin("StartNetworkPolicyManagerService");
@@ -1896,13 +1878,6 @@ public final class SystemServer implements Dumpable {
                     PackageManager.FEATURE_LOWPAN)) {
                 t.traceBegin("StartLowpan");
                 mSystemServiceManager.startService(LOWPAN_SERVICE_CLASS);
-                t.traceEnd();
-            }
-
-            if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_ETHERNET) ||
-                    mPackageManager.hasSystemFeature(PackageManager.FEATURE_USB_HOST)) {
-                t.traceBegin("StartEthernet");
-                mSystemServiceManager.startService(ETHERNET_SERVICE_CLASS);
                 t.traceEnd();
             }
 
@@ -2657,9 +2632,12 @@ public final class SystemServer implements Dumpable {
         mSystemServiceManager.startService(MEDIA_COMMUNICATION_SERVICE_CLASS);
         t.traceEnd();
 
+        t.traceBegin("AppCompatOverridesService");
+        mSystemServiceManager.startService(APP_COMPAT_OVERRIDES_SERVICE_CLASS);
+        t.traceEnd();
+
         // These are needed to propagate to the runnable below.
         final NetworkManagementService networkManagementF = networkManagement;
-        final NetworkStatsService networkStatsF = networkStats;
         final NetworkPolicyManagerService networkPolicyF = networkPolicy;
         final CountryDetectorService countryDetectorF = countryDetector;
         final NetworkTimeUpdateService networkTimeUpdaterF = networkTimeUpdater;
@@ -2667,7 +2645,6 @@ public final class SystemServer implements Dumpable {
         final TelephonyRegistry telephonyRegistryF = telephonyRegistry;
         final MediaRouterService mediaRouterF = mediaRouter;
         final MmsServiceBroker mmsServiceF = mmsService;
-        final IpSecService ipSecServiceF = ipSecService;
         final VpnManagerService vpnManagerF = vpnManager;
         final VcnManagementService vcnManagementF = vcnManagement;
         final WindowManagerService windowManagerF = wm;
@@ -2755,24 +2732,6 @@ public final class SystemServer implements Dumpable {
             if (networkPolicyF != null) {
                 networkPolicyInitReadySignal = networkPolicyF
                         .networkScoreAndNetworkManagementServiceReady();
-            }
-            t.traceEnd();
-            t.traceBegin("MakeIpSecServiceReady");
-            try {
-                if (ipSecServiceF != null) {
-                    ipSecServiceF.systemReady();
-                }
-            } catch (Throwable e) {
-                reportWtf("making IpSec Service ready", e);
-            }
-            t.traceEnd();
-            t.traceBegin("MakeNetworkStatsServiceReady");
-            try {
-                if (networkStatsF != null) {
-                    networkStatsF.systemReady();
-                }
-            } catch (Throwable e) {
-                reportWtf("making Network Stats Service ready", e);
             }
             t.traceEnd();
             t.traceBegin("MakeConnectivityServiceReady");
