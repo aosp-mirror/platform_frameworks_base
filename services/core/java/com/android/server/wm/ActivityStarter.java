@@ -2951,7 +2951,8 @@ class ActivityStarter {
 
         final boolean onTop =
                 (aOptions == null || !aOptions.getAvoidMoveToFront()) && !mLaunchTaskBehind;
-        return mRootWindowContainer.getOrCreateRootTask(r, aOptions, task, mSourceRootTask, onTop,
+        final Task sourceTask = mSourceRecord != null ? mSourceRecord.getTask() : null;
+        return mRootWindowContainer.getOrCreateRootTask(r, aOptions, task, sourceTask, onTop,
                 mLaunchParams, launchFlags);
     }
 
