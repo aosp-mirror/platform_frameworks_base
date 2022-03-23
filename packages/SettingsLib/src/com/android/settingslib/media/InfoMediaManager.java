@@ -32,6 +32,8 @@ import static android.media.MediaRoute2Info.TYPE_WIRED_HEADPHONES;
 import static android.media.MediaRoute2Info.TYPE_WIRED_HEADSET;
 import static android.media.MediaRoute2ProviderService.REASON_UNKNOWN_ERROR;
 
+import static com.android.settingslib.media.LocalMediaManager.MediaDeviceState.STATE_SELECTED;
+
 import android.annotation.TargetApi;
 import android.app.Notification;
 import android.bluetooth.BluetoothAdapter;
@@ -497,9 +499,11 @@ public class InfoMediaManager extends MediaManager {
                 mediaDevice = new InfoMediaDevice(mContext, mRouterManager, route,
                         mPackageName);
                 if (!TextUtils.isEmpty(mPackageName)
-                        && getRoutingSessionInfo().getSelectedRoutes().contains(route.getId())
-                        && mCurrentConnectedDevice == null) {
-                    mCurrentConnectedDevice = mediaDevice;
+                        && getRoutingSessionInfo().getSelectedRoutes().contains(route.getId())) {
+                    mediaDevice.setState(STATE_SELECTED);
+                    if (mCurrentConnectedDevice == null) {
+                        mCurrentConnectedDevice = mediaDevice;
+                    }
                 }
                 break;
             case TYPE_BUILTIN_SPEAKER:
