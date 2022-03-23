@@ -270,8 +270,8 @@ public class NotificationBackgroundView extends View {
 
     /** Set the current expand animation size. */
     public void setExpandAnimationSize(int width, int height) {
-        mExpandAnimationHeight = width;
-        mExpandAnimationWidth = height;
+        mExpandAnimationHeight = height;
+        mExpandAnimationWidth = width;
         invalidate();
     }
 
