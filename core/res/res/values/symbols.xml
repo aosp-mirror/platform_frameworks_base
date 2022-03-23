@@ -97,10 +97,12 @@
   <java-symbol type="id" name="icon" />
   <java-symbol type="id" name="image" />
   <java-symbol type="id" name="increment" />
+  <java-symbol type="id" name="indicator" />
   <java-symbol type="id" name="internalEmpty" />
   <java-symbol type="id" name="inputExtractAccessories" />
   <java-symbol type="id" name="inputExtractAction" />
   <java-symbol type="id" name="issued_on" />
+  <java-symbol type="id" name="language_item" />
   <java-symbol type="id" name="left_icon" />
   <java-symbol type="id" name="leftSpacer" />
   <java-symbol type="id" name="line1" />
@@ -3122,6 +3124,12 @@
   <java-symbol type="id" name="locale_search_menu" />
   <java-symbol type="layout" name="language_picker_item" />
   <java-symbol type="layout" name="language_picker_bilingual_item" />
+  <java-symbol type="color" name="language_picker_item_text_color" />
+  <java-symbol type="color" name="language_picker_item_text_color_selected" />
+  <java-symbol type="color" name="language_picker_item_text_color_secondary_selected" />
+  <java-symbol type="drawable" name="language_picker_item_text_color_selector" />
+  <java-symbol type="drawable" name="language_picker_item_text_color2_selector" />
+  <java-symbol type="drawable" name="language_picker_item_bg_selected" />
   <java-symbol type="layout" name="language_picker_section_header" />
   <java-symbol type="layout" name="language_picker_bilingual_section_header" />
   <java-symbol type="menu" name="language_selection_list" />
