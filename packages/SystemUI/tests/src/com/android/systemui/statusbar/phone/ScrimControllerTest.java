@@ -1228,8 +1228,8 @@ public class ScrimControllerTest extends SysuiTestCase {
     public void testNotificationTransparency_followsPanelExpansionInShadeLockedState() {
         mScrimController.transitionTo(ScrimState.SHADE_LOCKED);
 
-        assertAlphaAfterExpansion(mNotificationsScrim, /* alpha */ 0.8f, /* expansion */ 0.8f);
-        assertAlphaAfterExpansion(mNotificationsScrim, /* alpha */ 0.47f, /* expansion */ 0.2f);
+        assertAlphaAfterExpansion(mNotificationsScrim, /* alpha */ 0f, /* expansion */ 0.8f);
+        assertAlphaAfterExpansion(mNotificationsScrim, /* alpha */ 0f, /* expansion */ 0.2f);
     }
 
     @Test
@@ -1242,15 +1242,16 @@ public class ScrimControllerTest extends SysuiTestCase {
 
         // Verify normal behavior after
         mScrimController.setUnocclusionAnimationRunning(false);
-        assertAlphaAfterExpansion(mNotificationsScrim, /* alpha */ 0.2f, /* expansion */ 0.4f);
+        assertAlphaAfterExpansion(mNotificationsScrim, /* alpha */ 1f, /* expansion */ 0.4f);
     }
 
     @Test
     public void testNotificationTransparency_inKeyguardState() {
         mScrimController.transitionTo(ScrimState.KEYGUARD);
 
-        assertAlphaAfterExpansion(mNotificationsScrim, /* alpha */ 0.2f, /* expansion */ 0.4f);
-        assertAlphaAfterExpansion(mNotificationsScrim, /* alpha */ 0.52f, /* expansion */ 0.2f);
+        assertAlphaAfterExpansion(mNotificationsScrim, /* alpha */ 1f, /* expansion */ 0.8f);
+        assertAlphaAfterExpansion(mNotificationsScrim, /* alpha */ 1f, /* expansion */ 0.4f);
+        assertAlphaAfterExpansion(mNotificationsScrim, /* alpha */ 1f, /* expansion */ 0.2f);
     }
 
     @Test

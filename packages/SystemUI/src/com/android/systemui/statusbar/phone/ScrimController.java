@@ -836,14 +836,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
     private Pair<Integer, Float> calculateBackStateForState(ScrimState state) {
         // Either darken of make the scrim transparent when you
         // pull down the shade
-        float interpolatedFract;
-
-        if (state == ScrimState.KEYGUARD)  {
-            interpolatedFract = BouncerPanelExpansionCalculator
-                    .getBackScrimScaledExpansion(mPanelExpansionFraction);
-        } else {
-            interpolatedFract = getInterpolatedFraction();
-        }
+        float interpolatedFract = getInterpolatedFraction();
 
         float stateBehind = mClipsQsScrim ? state.getNotifAlpha() : state.getBehindAlpha();
         float behindAlpha;
@@ -1025,6 +1018,10 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
     }
 
     private float getInterpolatedFraction() {
+        if (mState == ScrimState.KEYGUARD || mState == ScrimState.SHADE_LOCKED) {
+            return BouncerPanelExpansionCalculator
+                    .getBackScrimScaledExpansion(mPanelExpansionFraction);
+        }
         return ShadeInterpolation.getNotificationScrimAlpha(mPanelExpansionFraction);
     }
 

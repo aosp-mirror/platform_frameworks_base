@@ -48,6 +48,7 @@ import android.view.animation.Interpolator;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.LatencyTracker;
+import com.android.keyguard.BouncerPanelExpansionCalculator;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
@@ -796,7 +797,10 @@ public abstract class PanelViewController {
             }
             mExpandedFraction = Math.min(1f,
                     maxPanelHeight == 0 ? 0 : mExpandedHeight / maxPanelHeight);
-            mAmbientState.setExpansionFraction(mExpandedFraction);
+            mAmbientState.setExpansionFraction(mKeyguardStateController.isUnlocked()
+                    ? mExpandedFraction
+                    : BouncerPanelExpansionCalculator
+                            .getBackScrimScaledExpansion(mExpandedFraction));
             onHeightUpdated(mExpandedHeight);
             updatePanelExpansionAndVisibility();
         });
