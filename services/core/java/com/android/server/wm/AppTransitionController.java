@@ -96,8 +96,8 @@ import com.android.internal.protolog.common.ProtoLog;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.function.Predicate;
 
 /**
@@ -827,7 +827,7 @@ public class AppTransitionController {
             boolean visible) {
 
         // The candidates of animation targets, which might be able to promote to higher level.
-        final LinkedList<WindowContainer> candidates = new LinkedList<>();
+        final ArrayDeque<WindowContainer> candidates = new ArrayDeque<>();
         final ArraySet<ActivityRecord> apps = visible ? openingApps : closingApps;
         for (int i = 0; i < apps.size(); ++i) {
             final ActivityRecord app = apps.valueAt(i);

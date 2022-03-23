@@ -52,10 +52,10 @@ import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.ArrayUtils;
 
 import java.io.PrintWriter;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.WeakHashMap;
 import java.util.function.Consumer;
@@ -311,13 +311,13 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
     private final WindowManagerGlobalLock mGlobalLock;
 
     // List of task organizers by priority
-    private final LinkedList<ITaskOrganizer> mTaskOrganizers = new LinkedList<>();
+    private final ArrayDeque<ITaskOrganizer> mTaskOrganizers = new ArrayDeque<>();
     private final HashMap<IBinder, TaskOrganizerState> mTaskOrganizerStates = new HashMap<>();
     private final WeakHashMap<Task, RunningTaskInfo> mLastSentTaskInfos = new WeakHashMap<>();
     // Pending task events due to layout deferred.
     private final ArrayList<PendingTaskEvent> mPendingTaskEvents = new ArrayList<>();
     // Set of organized tasks (by taskId) that dispatch back pressed to their organizers
-    private final HashSet<Integer> mInterceptBackPressedOnRootTasks = new HashSet();
+    private final HashSet<Integer> mInterceptBackPressedOnRootTasks = new HashSet<>();
 
     private RunningTaskInfo mTmpTaskInfo;
     private Consumer<Runnable> mDeferTaskOrgCallbacksConsumer;
