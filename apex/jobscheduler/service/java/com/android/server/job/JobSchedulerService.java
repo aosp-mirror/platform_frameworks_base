@@ -21,7 +21,6 @@ import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED
 import static android.text.format.DateUtils.HOUR_IN_MILLIS;
 import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 
-import android.annotation.ElapsedRealtimeLong;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
@@ -81,7 +80,6 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
-import android.util.SparseLongArray;
 import android.util.SparseSetArray;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
@@ -288,7 +286,7 @@ public class JobSchedulerService extends com.android.server.SystemService
      * Queue of pending jobs. The JobServiceContext class will receive jobs from this list
      * when ready to execute them.
      */
-    final ArrayList<JobStatus> mPendingJobs = new ArrayList<>();
+    final PendingJobQueue mPendingJobQueue = new PendingJobQueue();
 
     int[] mStartedUsers = EmptyArray.INT;
 
@@ -828,189 +826,6 @@ public class JobSchedulerService extends com.android.server.SystemService
     final Constants mConstants;
     final ConstantsObserver mConstantsObserver;
 
-    @VisibleForTesting
-    class PendingJobComparator implements Comparator<JobStatus> {
-        private static final int EJ_PRIORITY_MODIFIER = 10;
-
-        /** Cache of the earliest non-PRIORITY_MAX enqueue time found per UID. */
-        private final SparseLongArray mEarliestNonMaxEnqueueTimeCache = new SparseLongArray();
-        /**
-         * Cache of the last enqueue time of each priority for each UID. The SparseArray is keyed
-         * by UID and the SparseLongArray is keyed by the priority.
-         */
-        private final SparseArray<SparseLongArray> mLastPriorityEnqueueTimeCache =
-                new SparseArray<>();
-        /**
-         * The earliest enqueue time each UID's priority's jobs should use. The SparseArray is keyed
-         * by UID and the SparseLongArray is keyed by the value returned from
-         * {@link #getPriorityIndex(int, boolean)}.
-         */
-        private final SparseArray<SparseLongArray> mEarliestAllowedEnqueueTimes =
-                new SparseArray<>();
-
-        private int getPriorityIndex(int priority, boolean isEJ) {
-            // We need to separate HIGH priority EJs from HIGH priority regular jobs.
-            if (isEJ) {
-                return priority * EJ_PRIORITY_MODIFIER;
-            }
-            return priority;
-        }
-
-        /**
-         * Refresh sorting determinants based on the current state of {@link #mPendingJobs}.
-         */
-        @GuardedBy("mLock")
-        @VisibleForTesting
-        void refreshLocked() {
-            mEarliestNonMaxEnqueueTimeCache.clear();
-            for (int i = 0; i < mPendingJobs.size(); ++i) {
-                final JobStatus job = mPendingJobs.get(i);
-                final int uid = job.getSourceUid();
-                if (job.getEffectivePriority() < JobInfo.PRIORITY_MAX) {
-                    final long earliestEnqueueTime =
-                            mEarliestNonMaxEnqueueTimeCache.get(uid, Long.MAX_VALUE);
-                    mEarliestNonMaxEnqueueTimeCache.put(uid,
-                            Math.min(earliestEnqueueTime, job.enqueueTime));
-                }
-
-                final int pIdx =
-                        getPriorityIndex(job.getEffectivePriority(), job.isRequestedExpeditedJob());
-                SparseLongArray lastPriorityEnqueueTime = mLastPriorityEnqueueTimeCache.get(uid);
-                if (lastPriorityEnqueueTime == null) {
-                    lastPriorityEnqueueTime = new SparseLongArray();
-                    mLastPriorityEnqueueTimeCache.put(uid, lastPriorityEnqueueTime);
-                }
-                lastPriorityEnqueueTime.put(pIdx,
-                        Math.max(job.enqueueTime, lastPriorityEnqueueTime.get(pIdx, 0)));
-            }
-
-            // Move lower priority jobs behind higher priority jobs (instead of moving higher
-            // priority jobs ahead of lower priority jobs), except for EJs.
-            for (int i = 0; i < mLastPriorityEnqueueTimeCache.size(); ++i) {
-                final int uid = mLastPriorityEnqueueTimeCache.keyAt(i);
-                SparseLongArray lastEnqueueTimes = mLastPriorityEnqueueTimeCache.valueAt(i);
-                SparseLongArray earliestAllowedEnqueueTimes = new SparseLongArray();
-                mEarliestAllowedEnqueueTimes.put(uid, earliestAllowedEnqueueTimes);
-                long earliestAllowedEnqueueTime = mEarliestNonMaxEnqueueTimeCache.get(uid,
-                        lastEnqueueTimes.get(getPriorityIndex(JobInfo.PRIORITY_MAX, true), -1));
-                earliestAllowedEnqueueTimes.put(getPriorityIndex(JobInfo.PRIORITY_MAX, true),
-                        earliestAllowedEnqueueTime);
-                earliestAllowedEnqueueTime = 1
-                        + Math.max(earliestAllowedEnqueueTime,
-                        lastEnqueueTimes.get(getPriorityIndex(JobInfo.PRIORITY_HIGH, true), -1));
-                earliestAllowedEnqueueTimes.put(getPriorityIndex(JobInfo.PRIORITY_HIGH, true),
-                        earliestAllowedEnqueueTime);
-                earliestAllowedEnqueueTime++;
-                for (int p = JobInfo.PRIORITY_HIGH; p >= JobInfo.PRIORITY_MIN; --p) {
-                    final int pIdx = getPriorityIndex(p, false);
-                    earliestAllowedEnqueueTimes.put(pIdx, earliestAllowedEnqueueTime);
-                    final long lastEnqueueTime = lastEnqueueTimes.get(pIdx, -1);
-                    if (lastEnqueueTime != -1) {
-                        // Add additional millisecond for the next priority to ensure sorting is
-                        // stable/accurate when comparing to other apps.
-                        earliestAllowedEnqueueTime = 1
-                                + Math.max(earliestAllowedEnqueueTime, lastEnqueueTime);
-                    }
-                }
-            }
-
-            // Clear intermediate state that we don't need to reduce steady state memory usage.
-            mLastPriorityEnqueueTimeCache.clear();
-        }
-
-        @ElapsedRealtimeLong
-        private long getEffectiveEnqueueTime(@NonNull JobStatus job) {
-            // Move lower priority jobs behind higher priority jobs (instead of moving higher
-            // priority jobs ahead of lower priority jobs), except for MAX EJs.
-            final int uid = job.getSourceUid();
-            if (job.isRequestedExpeditedJob()
-                    && job.getEffectivePriority() == JobInfo.PRIORITY_MAX) {
-                return Math.min(job.enqueueTime,
-                        mEarliestNonMaxEnqueueTimeCache.get(uid, Long.MAX_VALUE));
-            }
-            final int priorityIdx =
-                    getPriorityIndex(job.getEffectivePriority(), job.isRequestedExpeditedJob());
-            final SparseLongArray earliestAllowedEnqueueTimes =
-                    mEarliestAllowedEnqueueTimes.get(uid);
-            if (earliestAllowedEnqueueTimes == null) {
-                // We're probably trying to insert directly without refreshing the internal arrays.
-                // Since we haven't seen this UID before, we can just use the job's enqueue time.
-                return job.enqueueTime;
-            }
-            return Math.max(job.enqueueTime, earliestAllowedEnqueueTimes.get(priorityIdx));
-        }
-
-        @Override
-        public int compare(JobStatus o1, JobStatus o2) {
-            if (o1 == o2) {
-                return 0;
-            }
-            // Jobs with an override state set (via adb) should be put first as tests/developers
-            // expect the jobs to run immediately.
-            if (o1.overrideState != o2.overrideState) {
-                // Higher override state (OVERRIDE_FULL) should be before lower state
-                // (OVERRIDE_SOFT)
-                return o2.overrideState - o1.overrideState;
-            }
-            final boolean o1EJ = o1.isRequestedExpeditedJob();
-            final boolean o2EJ = o2.isRequestedExpeditedJob();
-            if (o1.getSourceUid() == o2.getSourceUid()) {
-                if (o1EJ != o2EJ) {
-                    // Attempt to run requested expedited jobs ahead of regular jobs, regardless of
-                    // expedited job quota.
-                    return o1EJ ? -1 : 1;
-                }
-                if (o1.getEffectivePriority() != o2.getEffectivePriority()) {
-                    // Use the priority set by an app for intra-app job ordering. Higher
-                    // priority should be before lower priority.
-                    return o2.getEffectivePriority() - o1.getEffectivePriority();
-                }
-            } else {
-                // TODO: see if we can simplify this using explicit topological sorting
-                // Since we order jobs within a UID by the job's priority, in order to satisfy the
-                // transitivity constraint of the comparator, we must ensure consistent/appropriate
-                // ordering between apps as well. That is, if a job is ordered before or behind
-                // another job because of its priority, that ordering must translate to the
-                // relative ordering against other jobs.
-                // The effective ordering implementation here is to use HIGH priority EJs as a
-                // pivot point. MAX priority EJs are moved *ahead* of HIGH priority EJs. All
-                // regular jobs are moved *behind* HIGH priority EJs. The intention for moving jobs
-                // "behind" the EJs instead of moving all high priority jobs before lower priority
-                // jobs is to reduce any potential abuse (or just unfortunate execution) cases where
-                // there are early low priority jobs that don't get to run because so many of the
-                // app's high priority jobs are pushed before low priority job. This may still
-                // happen because of the job ordering mechanism, but moving jobs back prevents
-                // one app's jobs from always being at the front (due to the early scheduled low
-                // priority job and our base case of sorting by enqueue time).
-
-                final long o1EffectiveEnqueueTime = getEffectiveEnqueueTime(o1);
-                final long o2EffectiveEnqueueTime = getEffectiveEnqueueTime(o2);
-
-                if (o1EffectiveEnqueueTime < o2EffectiveEnqueueTime) {
-                    return -1;
-                } else if (o1EffectiveEnqueueTime > o2EffectiveEnqueueTime) {
-                    return 1;
-                }
-            }
-
-            if (o1.enqueueTime < o2.enqueueTime) {
-                return -1;
-            }
-            return o1.enqueueTime > o2.enqueueTime ? 1 : 0;
-        }
-    }
-
-    @VisibleForTesting
-    final PendingJobComparator mPendingJobComparator = new PendingJobComparator();
-
-    static <T> void addOrderedItem(ArrayList<T> array, T newItem, Comparator<T> comparator) {
-        int where = Collections.binarySearch(array, newItem, comparator);
-        if (where < 0) {
-            where = ~where;
-        }
-        array.add(where, newItem);
-    }
-
     /**
      * Cleans up outstanding jobs when a package is removed. Even if it's being replaced later we
      * still clean up. On reinstall the package will have a new uid.
@@ -1434,7 +1249,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                 // This is a new job, we can just immediately put it on the pending
                 // list and try to run it.
                 mJobPackageTracker.notePending(jobStatus);
-                addOrderedItem(mPendingJobs, jobStatus, mPendingJobComparator);
+                mPendingJobQueue.add(jobStatus);
                 maybeRunPendingJobsLocked();
             } else {
                 evaluateControllerStatesLocked(jobStatus);
@@ -1563,7 +1378,7 @@ public class JobSchedulerService extends com.android.server.SystemService
         cancelled.unprepareLocked();
         stopTrackingJobLocked(cancelled, incomingJob, true /* writeBack */);
         // Remove from pending queue.
-        if (mPendingJobs.remove(cancelled)) {
+        if (mPendingJobQueue.remove(cancelled)) {
             mJobPackageTracker.noteNonpending(cancelled);
         }
         // Cancel if running.
@@ -1658,8 +1473,8 @@ public class JobSchedulerService extends com.android.server.SystemService
 
     void reportActiveLocked() {
         // active is true if pending queue contains jobs OR some job is running.
-        boolean active = mPendingJobs.size() > 0;
-        if (mPendingJobs.size() <= 0) {
+        boolean active = mPendingJobQueue.size() > 0;
+        if (!active) {
             final ArraySet<JobStatus> runningJobs = mConcurrencyManager.getRunningJobsLocked();
             for (int i = runningJobs.size() - 1; i >= 0; --i) {
                 final JobStatus job = runningJobs.valueAt(i);
@@ -1952,10 +1767,13 @@ public class JobSchedulerService extends com.android.server.SystemService
         mJobPackageTracker.noteNonpending(job);
     }
 
-    void noteJobsNonpending(List<JobStatus> jobs) {
-        for (int i = jobs.size() - 1; i >= 0; i--) {
-            noteJobNonPending(jobs.get(i));
+    private void clearPendingJobQueue() {
+        JobStatus job;
+        mPendingJobQueue.resetIterator();
+        while ((job = mPendingJobQueue.next()) != null) {
+            noteJobNonPending(job);
         }
+        mPendingJobQueue.clear();
     }
 
     /**
@@ -2236,7 +2054,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                         if (js != null) {
                             if (isReadyToBeExecutedLocked(js)) {
                                 mJobPackageTracker.notePending(js);
-                                addOrderedItem(mPendingJobs, js, mPendingJobComparator);
+                                mPendingJobQueue.add(js);
                             }
                             mChangedJobList.remove(js);
                         } else {
@@ -2382,14 +2200,13 @@ public class JobSchedulerService extends com.android.server.SystemService
         if (DEBUG) {
             Slog.d(TAG, "queuing all ready jobs for execution:");
         }
-        noteJobsNonpending(mPendingJobs);
-        mPendingJobs.clear();
+        clearPendingJobQueue();
         stopNonReadyActiveJobsLocked();
         mJobs.forEachJob(mReadyQueueFunctor);
         mReadyQueueFunctor.postProcessLocked();
 
         if (DEBUG) {
-            final int queuedJobs = mPendingJobs.size();
+            final int queuedJobs = mPendingJobQueue.size();
             if (queuedJobs == 0) {
                 Slog.d(TAG, "No jobs pending.");
             } else {
@@ -2416,11 +2233,7 @@ public class JobSchedulerService extends com.android.server.SystemService
         @GuardedBy("mLock")
         private void postProcessLocked() {
             noteJobsPending(newReadyJobs);
-            mPendingJobs.addAll(newReadyJobs);
-            mPendingJobComparator.refreshLocked();
-            if (mPendingJobs.size() > 1) {
-                mPendingJobs.sort(mPendingJobComparator);
-            }
+            mPendingJobQueue.addAll(newReadyJobs);
 
             newReadyJobs.clear();
         }
@@ -2453,7 +2266,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                         mHandler.obtainMessage(MSG_STOP_JOB,
                                 JobParameters.STOP_REASON_BACKGROUND_RESTRICTION, 0, job)
                                 .sendToTarget();
-                    } else if (mPendingJobs.remove(job)) {
+                    } else if (mPendingJobQueue.remove(job)) {
                         noteJobNonPending(job);
                     }
                     return;
@@ -2530,7 +2343,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                     }
                     mConcurrencyManager.stopJobOnServiceContextLocked(job, job.getStopReason(),
                             internalStopReason, debugReason);
-                } else if (mPendingJobs.remove(job)) {
+                } else if (mPendingJobQueue.remove(job)) {
                     noteJobNonPending(job);
                 }
                 evaluateControllerStatesLocked(job);
@@ -2546,11 +2359,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                     Slog.d(TAG, "maybeQueueReadyJobsForExecutionLocked: Running jobs.");
                 }
                 noteJobsPending(runnableJobs);
-                mPendingJobs.addAll(runnableJobs);
-                mPendingJobComparator.refreshLocked();
-                if (mPendingJobs.size() > 1) {
-                    mPendingJobs.sort(mPendingJobComparator);
-                }
+                mPendingJobQueue.addAll(runnableJobs);
             } else {
                 if (DEBUG) {
                     Slog.d(TAG, "maybeQueueReadyJobsForExecutionLocked: Not running anything.");
@@ -2574,14 +2383,13 @@ public class JobSchedulerService extends com.android.server.SystemService
     @GuardedBy("mLock")
     private void maybeQueueReadyJobsForExecutionLocked() {
         mHandler.removeMessages(MSG_CHECK_JOB);
-        // This method will evaluate all jobs, so we don't need to keep any messages for a suubset
+        // This method will evaluate all jobs, so we don't need to keep any messages for a subset
         // of jobs in the queue.
         mHandler.removeMessages(MSG_CHECK_CHANGED_JOB_LIST);
         mChangedJobList.clear();
         if (DEBUG) Slog.d(TAG, "Maybe queuing ready jobs...");
 
-        noteJobsNonpending(mPendingJobs);
-        mPendingJobs.clear();
+        clearPendingJobQueue();
         stopNonReadyActiveJobsLocked();
         mJobs.forEachJob(mMaybeQueueFunctor);
         mMaybeQueueFunctor.postProcessLocked();
@@ -2682,7 +2490,7 @@ public class JobSchedulerService extends com.android.server.SystemService
             return false;
         }
 
-        final boolean jobPending = mPendingJobs.contains(job);
+        final boolean jobPending = mPendingJobQueue.contains(job);
         final boolean jobActive = rejectActive && mConcurrencyManager.isJobRunningLocked(job);
 
         if (DEBUG) {
@@ -2802,7 +2610,7 @@ public class JobSchedulerService extends com.android.server.SystemService
      */
     void maybeRunPendingJobsLocked() {
         if (DEBUG) {
-            Slog.d(TAG, "pending queue: " + mPendingJobs.size() + " jobs.");
+            Slog.d(TAG, "pending queue: " + mPendingJobQueue.size() + " jobs.");
         }
         mConcurrencyManager.assignJobsToContextsLocked();
         reportActiveLocked();
@@ -3634,7 +3442,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                 }
 
                 boolean printed = false;
-                if (mPendingJobs.contains(js)) {
+                if (mPendingJobQueue.contains(js)) {
                     pw.print("pending");
                     printed = true;
                 }
@@ -3836,7 +3644,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                     pw.print(" !restricted=");
                     pw.print(!isRestricted);
                     pw.print(" !pending=");
-                    pw.print(!mPendingJobs.contains(job));
+                    pw.print(!mPendingJobQueue.contains(job));
                     pw.print(" !active=");
                     pw.print(!mConcurrencyManager.isJobRunningLocked(job));
                     pw.print(" !backingup=");
@@ -3929,8 +3737,11 @@ public class JobSchedulerService extends com.android.server.SystemService
             boolean pendingPrinted = false;
             pw.println("Pending queue:");
             pw.increaseIndent();
-            for (int i = 0; i < mPendingJobs.size(); i++) {
-                JobStatus job = mPendingJobs.get(i);
+            JobStatus job;
+            int pendingIdx = 0;
+            mPendingJobQueue.resetIterator();
+            while ((job = mPendingJobQueue.next()) != null) {
+                pendingIdx++;
                 if (!predicate.test(job)) {
                     continue;
                 }
@@ -3938,7 +3749,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                     pendingPrinted = true;
                 }
 
-                pw.print("Pending #"); pw.print(i); pw.print(": ");
+                pw.print("Pending #"); pw.print(pendingIdx); pw.print(": ");
                 pw.println(job.toShortString());
 
                 pw.increaseIndent();
@@ -3969,7 +3780,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                 // Print most recent first
                 final int idx = (mLastCompletedJobIndex + NUM_COMPLETED_JOB_HISTORY - r)
                         % NUM_COMPLETED_JOB_HISTORY;
-                final JobStatus job = mLastCompletedJobs[idx];
+                job = mLastCompletedJobs[idx];
                 if (job != null) {
                     if (!predicate.test(job)) {
                         continue;
@@ -4062,7 +3873,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                             JobSchedulerServiceDumpProto.RegisteredJob.IS_JOB_RESTRICTED,
                             checkIfRestricted(job) != null);
                     proto.write(JobSchedulerServiceDumpProto.RegisteredJob.IS_JOB_PENDING,
-                            mPendingJobs.contains(job));
+                            mPendingJobQueue.contains(job));
                     proto.write(JobSchedulerServiceDumpProto.RegisteredJob.IS_JOB_CURRENTLY_ACTIVE,
                             mConcurrencyManager.isJobRunningLocked(job));
                     proto.write(JobSchedulerServiceDumpProto.RegisteredJob.IS_UID_BACKING_UP,
@@ -4109,7 +3920,9 @@ public class JobSchedulerService extends com.android.server.SystemService
             mJobPackageTracker.dumpHistory(proto, JobSchedulerServiceDumpProto.HISTORY,
                     filterAppId);
 
-            for (JobStatus job : mPendingJobs) {
+            JobStatus job;
+            mPendingJobQueue.resetIterator();
+            while ((job = mPendingJobQueue.next()) != null) {
                 final long pjToken = proto.start(JobSchedulerServiceDumpProto.PENDING_JOBS);
 
                 job.writeToShortProto(proto, PendingJob.INFO);
