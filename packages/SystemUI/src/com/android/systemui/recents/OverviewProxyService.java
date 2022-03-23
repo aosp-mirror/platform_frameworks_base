@@ -507,6 +507,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
                     backAnimation.createExternalInterface().asBinder()));
 
             try {
+                Log.d(TAG_OPS, "OverviewProxyService connected, initializing overview proxy");
                 mOverviewProxy.onInitialize(params);
             } catch (RemoteException e) {
                 mCurrentBoundedUserId = -1;
