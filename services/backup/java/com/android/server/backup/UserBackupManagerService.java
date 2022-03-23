@@ -3985,7 +3985,7 @@ public class UserBackupManagerService {
             String callerLogString = "BMS.filterAppsEligibleForBackup";
             TransportConnection transportConnection =
                     mTransportManager.getCurrentTransportClient(callerLogString);
-            List<String> eligibleApps = new LinkedList<>();
+            List<String> eligibleApps = new ArrayList<>();
             for (String packageName : packages) {
                 if (mScheduledBackupEligibility.appIsRunningAndEligibleForBackupWithTransport(
                         transportConnection, packageName)) {
@@ -3995,7 +3995,7 @@ public class UserBackupManagerService {
             if (transportConnection != null) {
                 mTransportManager.disposeOfTransportClient(transportConnection, callerLogString);
             }
-            return eligibleApps.toArray(new String[eligibleApps.size()]);
+            return eligibleApps.toArray(new String[0]);
         } finally {
             Binder.restoreCallingIdentity(oldToken);
         }
