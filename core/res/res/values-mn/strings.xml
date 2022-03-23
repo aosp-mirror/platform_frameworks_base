@@ -85,8 +85,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"<xliff:g id="SIMNUMBER">%d</xliff:g> SIM-н оператор компаниас түр унтраасан"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Мобайл сүлжээнд холбогдох боломжгүй байна"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Сонгосон сүлжээг өөрчлөхөөр оролдоно уу. Өөрчлөхийн тулд товшино уу."</string>
-    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Яаралтай дуудлага хийх боломжгүй"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Wi‑Fi-р яаралтай дуудлага хийх боломжгүй байна"</string>
+    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"Яаралтай дуудлага боломжгүй байж магадгүй"</string>
+    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi-р яаралтай дуудлага хийхийг дэмждэггүй. Дэлгэрэнгүйг харахын тулд товшино уу."</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Сануулга"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Дуудлага шилжүүлэх"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Яаралтай дуудлага хийх горим"</string>
@@ -425,10 +425,10 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"Апп нь таны таблетын ирсэн гарсан дуудлага зэргийг агуулсан дуудлагын логыг унших боломжтой. Хортой апп нь энийг ашиглан таны дуудлагын логыг өөрчлөх болон арилгах боломжтой."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Аппад таны Android TV төхөөрөмжийн ирсэн болон залгасан дуудлага зэрэг өгөгдөл бүхий дуудлагын жагсаалтыг өөрчлөхийг зөвшөөрнө. Хортой аппууд үүнийг ашиглан таны дуудлагын жагсаалтыг устгаж эсвэл өөрчилж болзошгүй."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Апп нь таны утасны ирсэн гарсан дуудлага зэргийг агуулсан дуудлагын логыг өөрчлөх боломжтой. Хортой апп нь энийг ашиглан таны дуудлагын логыг өөрчлөх болон арилгах боломжтой."</string>
-    <string name="permlab_bodySensors" msgid="3411035315357380862">"биеийн мэдрэгчид хандах (зүрхний хэмнэл шалгагч г.м)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="3208940894182188063">"Зүрхний хэм, температур, цусны хүчилтөрөгчийн хувь гэх мэт биеийн мэдрэгчийн өгөгдөлд хандана уу"</string>
-    <string name="permlab_bodySensors_background" msgid="4352831883331744370">"арын дэвсгэрт ажиллах үед биеийн мэдрэгчид (зүрхний хэм хянагч гэх мэт) хандах"</string>
-    <string name="permdesc_bodySensors_background" product="default" msgid="8512392249166660872">"Арын дэвсгэрт ажиллах үед зүрхний хэм, температур, цусны хүчилтөрөгчийн хувь гэх мэт биеийн мэдрэгчийн өгөгдөлд хандана уу."</string>
+    <string name="permlab_bodySensors" msgid="662918578601619569">"Ашиглаж байх үедээ зүрхний хэм зэрэг биеийн мэдрэгчийн өгөгдөлд хандаарай"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Аппыг ашиглаж байх үедээ зүрхний хэм, температур болон цусны хүчилтөрөгчийн хувь зэрэг биеийн мэдрэгчийн өгөгдөлд хандах боломжтой."</string>
+    <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Ард нь байх үед зүрхний хэм зэрэг биеийн мэдрэгчийн өгөгдөлд хандаарай"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Апп ард нь байх үед зүрхний хэм, температур, цусны хүчилтөрөгчийн хувь зэрэг биеийн мэдрэгчийн өгөгдөлд хандах боломжтой."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Календарийн арга хэмжээ, дэлгэрэнгүйг унших"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Энэ апп таны таблетад хадгалсан календарийн бүх арга хэмжээг унших, календарийн өгөгдлийг хуваалцах, хадгалах боломжтой."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Энэ апп таны Android TV төхөөрөмжид хадгалсан календарийн бүх арга хэмжээг унших болон таны календарийн өгөгдлийг хуваалцах эсвэл хадгалах боломжтой."</string>
@@ -689,8 +689,8 @@
     <string name="permdesc_readMediaAudio" msgid="5299772574434619399">"Аппад таны дундын хадгалах сангаас аудио файлыг унших боломжийг олгодог."</string>
     <string name="permlab_readMediaVideo" msgid="7768003311260655007">"дундын хадгалах сангаас видео файл унших"</string>
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"Аппад таны дундын хадгалах сангаас видео файлыг унших боломжийг олгодог."</string>
-    <string name="permlab_readMediaImage" msgid="1507059005825769856">"дундын хадгалах сангаас зургийн файл унших"</string>
-    <string name="permdesc_readMediaImage" msgid="8328052622292457588">"Аппад таны дундын хадгалах сангаас зургийн файлыг унших боломжийг олгодог."</string>
+    <string name="permlab_readMediaImages" msgid="4057590631020986789">"дундын хадгалах сангаас зургийн файл унших"</string>
+    <string name="permdesc_readMediaImages" msgid="5836219373138469259">"Аппад таны дундын хадгалах сангаас зургийн файлыг унших зөвшөөрөл олгодог."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"дундын хадгалах сангийнхаа контентыг өөрчлөх эсвэл устгах"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Аппад таны дундын хадгалах сангийн контентыг бичихийг зөвшөөрдөг."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"SIP дуудлага хийх/хүлээн авах"</string>
@@ -912,7 +912,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"Яаралтай дуудлага хийх буюу эсвэл түгжээг тайлах бол цэсийг дарна уу."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"Тайлах бол цэсийг дарна уу."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"Тайлах хээгээ зурна уу"</string>
-    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"Яаралтай дуудлага"</string>
+    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"Яаралтай тусламж"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"Дуудлагаруу буцах"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"Зөв!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Дахин оролдох"</string>
@@ -1051,7 +1051,6 @@
     <string name="save_password_never" msgid="6776808375903410659">"Хэзээ ч үгүй"</string>
     <string name="open_permission_deny" msgid="5136793905306987251">"Танд энэ хуудсыг нээх зөвшөөрөл байхгүй."</string>
     <string name="text_copied" msgid="2531420577879738860">"Текст хуулагдав."</string>
-    <string name="copied" msgid="4675902854553014676">"Хуулсан"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g>-с буулгасан <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>"</string>
     <string name="pasted_from_clipboard" msgid="7355790625710831847">"Таны түр санах ойгоос <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>-г буулгасан"</string>
     <string name="pasted_text" msgid="4298871641549173733">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> таны хуулсан текстийг буулгасан"</string>
@@ -1452,8 +1451,12 @@
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"Тухайн аппaaс батерейны оновчлол алгасах зөвшөөрөл асуухыг зөвшөөрдөг."</string>
     <string name="permlab_queryAllPackages" msgid="2928450604653281650">"бүх багцыг лавлах"</string>
     <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"Аппап бүх суулгасан багцыг харахыг зөвшөөрнө."</string>
-    <string name="permlab_accessSupplementalApi" msgid="3544659160536960275">"SupplementalApis-д хандах"</string>
-    <string name="permdesc_accessSupplementalApi" msgid="8974758769370951074">"Аппликэйшнд SupplementalApis-д хандах зөвшөөрлийг олгодог."</string>
+    <string name="permlab_accessAdServicesTopics" msgid="6687112022940098945">"AdServices Topics API-д хандах"</string>
+    <string name="permdesc_accessAdServicesTopics" msgid="6011532458156465929">"Аппликэйшнд AdServices Topics API-д хандах зөвшөөрөл олгодог."</string>
+    <string name="permlab_accessAdServicesAttribution" msgid="3268942271128309354">"AdServices Attribution API-д хандах"</string>
+    <string name="permdesc_accessAdServicesAttribution" msgid="577482544832578288">"Аппликэйшнд AdServices Attribution API-д хандах зөвшөөрөл олгодог."</string>
+    <string name="permlab_accessAdServicesCustomAudiences" msgid="7249286630514600684">"AdServices Custom Audiences API-д хандах"</string>
+    <string name="permdesc_accessAdServicesCustomAudiences" msgid="645526926477180315">"Аппликэйшнд AdServices Custom Audiences API-д хандах зөвшөөрөл олгодог."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"Өсгөх контрол дээр хоёр удаа товшино уу"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"Виджет нэмж чадсангүй."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"Очих"</string>
@@ -1716,6 +1719,7 @@
     <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g> руу сэлгэж байна…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"<xliff:g id="NAME">%1$s</xliff:g>-с гарч байна…"</string>
     <string name="owner_name" msgid="8713560351570795743">"Эзэмшигч"</string>
+    <string name="guest_name" msgid="8502103277839834324">"Зочин"</string>
     <string name="error_message_title" msgid="4082495589294631966">"Алдаа"</string>
     <string name="error_message_change_not_allowed" msgid="843159705042381454">"Энэ өөрчлөлтийг админ зөвшөөрөөгүй байна"</string>
     <string name="app_not_found" msgid="3429506115332341800">"Энэ ажиллагааг зохицуулах аппликейшн олдсонгүй."</string>
@@ -2027,10 +2031,10 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"УСТГАХ"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"ЯМАР Ч ТОХИОЛДОЛД НЭЭХ"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"Аюултай апп олдсон"</string>
-    <string name="log_access_confirmation_title" msgid="3143035474800851565">"Системийн логийн хандалтын хүсэлт"</string>
+    <string name="log_access_confirmation_title" msgid="2343578467290592708">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g>-д төхөөрөмжийн бүх логт хандахыг зөвшөөрөх үү?"</string>
     <string name="log_access_confirmation_allow" msgid="143157286283302512">"Зөвхөн энэ удаа"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Бүү зөвшөөр"</string>
-    <string name="log_access_confirmation_body" msgid="7599059550906238538">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> функциональ дибаг хийх системийн логийг хүсдэг. Эдгээр лог нь таны төхөөрөмж дээрх апп болон үйлчилгээнүүдийн бичсэн мэдээллийг агуулж болно."</string>
+    <string name="log_access_confirmation_body" msgid="4483075525611652922">"Төхөөрөмжийн лог нь таны төхөөрөмж дээр юу болж байгааг бичдэг. Аппууд эдгээр логийг асуудлыг олох болон засахад ашиглах боломжтой.\n\nЗарим лог эмзэг мэдээлэл агуулж байж магадгүй тул та зөвхөн итгэдэг аппууддаа төхөөрөмжийн бүх логт хандахыг зөвшөөрнө үү. \n\nХэрэв та энэ аппад төхөөрөмжийн бүх логт хандахыг зөвшөөрөхгүй бол энэ нь өөрийн логт хандах боломжтой хэвээр байх бөгөөд таны төхөөрөмж үйлдвэрлэгч таны төхөөрөмж дээрх зарим лог эсвэл мэдээлэлд хандах боломжтой хэвээр байж магадгүй. Нэмэлт мэдээлэл авах"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Дахиж бүү харуул"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> <xliff:g id="APP_2">%2$s</xliff:g>-н хэсгүүдийг (slices) харуулах хүсэлтэй байна"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Засах"</string>
@@ -2265,4 +2269,6 @@
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> дэвсгэрт удаан хугацааны турш ажиллаж байна. Хянахын тулд товшино уу."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Идэвхтэй аппуудыг шалгах"</string>
     <string name="vdm_camera_access_denied" msgid="6345652513729130490">"Энэ төхөөрөмжөөс камер луу нэвтрэх боломжгүй байна"</string>
+    <!-- no translation found for system_locale_title (3978041860457277638) -->
+    <skip />
 </resources>

@@ -85,8 +85,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"이동통신사에서 SIM <xliff:g id="SIMNUMBER">%d</xliff:g>의 서비스를 일시적으로 사용 중지했습니다."</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"모바일 네트워크에 연결할 수 없습니다."</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"기본 네트워크를 변경해 보세요. 탭하여 변경할 수 있습니다."</string>
-    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"긴급 전화를 사용할 수 없습니다."</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Wi‑Fi로는 긴급 전화를 걸 수 없습니다."</string>
+    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"긴급 전화를 사용할 수 없음"</string>
+    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"<xliff:g id="SPN">%s</xliff:g>에서는 Wi-Fi를 통한 긴급 전화를 지원하지 않습니다. 탭하여 세부정보를 확인하세요."</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"알림"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"착신전환"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"긴급 콜백 모드"</string>
@@ -425,10 +425,10 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"앱에서 수신 및 발신 통화 데이터를 포함하여 태블릿의 통화 기록을 수정할 수 있도록 허용합니다. 이 경우 악성 앱이 통화 기록을 지우거나 수정할 수 있습니다."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"앱이 수신 및 발신 통화에 관한 데이터를 비롯하여 Android TV 기기의 통화 기록을 수정하도록 허용합니다. 이렇게 하면 악성 앱이 통화 기록을 삭제하거나 수정할 수도 있습니다."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"앱에서 수신 및 발신 통화 데이터를 포함하여 휴대전화의 통화 기록을 수정할 수 있도록 허용합니다. 이 경우 악성 앱이 통화 기록을 지우거나 수정할 수 있습니다."</string>
-    <string name="permlab_bodySensors" msgid="3411035315357380862">"인체 감지 센서(예: 심박수 모니터)에 액세스"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="3208940894182188063">"심박수, 체온, 혈중 산소 농도와 같은 생체 신호 센서의 데이터에 액세스합니다."</string>
-    <string name="permlab_bodySensors_background" msgid="4352831883331744370">"백그라운드에서 생체 신호 센서(심박수 모니터 등)에 액세스"</string>
-    <string name="permdesc_bodySensors_background" product="default" msgid="8512392249166660872">"백그라운드에서 심박수, 체온, 혈중 산소 농도 등 생체 신호 센서의 데이터에 액세스합니다."</string>
+    <string name="permlab_bodySensors" msgid="662918578601619569">"사용 중에 심박수와 같은 생체 신호 센서 데이터에 액세스"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"앱이 사용 중에 심박수, 체온, 혈중 산소 농도와 같은 생체 신호 센서 데이터에 액세스하도록 허용합니다."</string>
+    <string name="permlab_bodySensors_background" msgid="4912560779957760446">"백그라운드에서 심박수와 같은 생체 신호 센서 데이터에 액세스"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"앱이 백그라운드에서 심박수, 체온, 혈중 산소 농도와 같은 생체 신호 센서 데이터에 액세스하도록 허용합니다."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"캘린더 일정 및 세부정보 읽기"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"이 앱은 태블릿에 저장된 모든 캘린더 일정을 읽고 캘린더 데이터를 공유하거나 저장할 수 있습니다."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"앱이 Android TV 기기에 저장된 모든 캘린더 일정을 읽고 캘린더 데이터를 공유하거나 저장할 수 있습니다."</string>
@@ -689,8 +689,8 @@
     <string name="permdesc_readMediaAudio" msgid="5299772574434619399">"앱이 공유 저장소에서 오디오 파일을 읽도록 허용합니다."</string>
     <string name="permlab_readMediaVideo" msgid="7768003311260655007">"공유 저장소에서 동영상 파일 읽기"</string>
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"앱이 공유 저장소에서 동영상 파일을 읽도록 허용합니다."</string>
-    <string name="permlab_readMediaImage" msgid="1507059005825769856">"공유 저장소에서 이미지 파일 읽기"</string>
-    <string name="permdesc_readMediaImage" msgid="8328052622292457588">"앱이 공유 저장소에서 이미지 파일을 읽도록 허용합니다."</string>
+    <string name="permlab_readMediaImages" msgid="4057590631020986789">"공유 저장소에서 이미지 파일 읽기"</string>
+    <string name="permdesc_readMediaImages" msgid="5836219373138469259">"앱이 공유 저장소에서 이미지 파일을 읽도록 허용합니다."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"공유 저장공간의 콘텐츠 수정 또는 삭제"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"앱이 공유 저장공간의 콘텐츠에 쓰도록 허용합니다."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"SIP 통화 발신/수신"</string>
@@ -912,7 +912,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"비상 전화를 걸거나 잠금해제하려면 메뉴를 누르세요."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"잠금해제하려면 메뉴를 누르세요."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"잠금해제를 위해 패턴 그리기"</string>
-    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"긴급 전화"</string>
+    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"긴급 전화"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"통화로 돌아가기"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"맞습니다."</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"다시 시도"</string>
@@ -1051,7 +1051,6 @@
     <string name="save_password_never" msgid="6776808375903410659">"안함"</string>
     <string name="open_permission_deny" msgid="5136793905306987251">"페이지를 열 수 있는 권한이 없습니다."</string>
     <string name="text_copied" msgid="2531420577879738860">"텍스트가 클립보드에 복사되었습니다."</string>
-    <string name="copied" msgid="4675902854553014676">"복사 완료"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> 앱이 <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g> 앱에서 복사하여 붙여넣음"</string>
     <string name="pasted_from_clipboard" msgid="7355790625710831847">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>에서 클립보드 데이터를 붙여넣음"</string>
     <string name="pasted_text" msgid="4298871641549173733">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>에서 복사한 텍스트를 붙여넣음"</string>
@@ -1452,8 +1451,12 @@
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"앱에서 배터리 최적화를 무시할 수 있는 권한을 요청할 수 있도록 허용합니다."</string>
     <string name="permlab_queryAllPackages" msgid="2928450604653281650">"모든 패키지 쿼리"</string>
     <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"앱이 설치된 패키지를 모두 볼 수 있도록 허용합니다."</string>
-    <string name="permlab_accessSupplementalApi" msgid="3544659160536960275">"SupplementalApis 액세스"</string>
-    <string name="permdesc_accessSupplementalApi" msgid="8974758769370951074">"애플리케이션에서 SupplementalApis에 액세스하도록 허용합니다."</string>
+    <string name="permlab_accessAdServicesTopics" msgid="6687112022940098945">"AdServices Topics API 액세스"</string>
+    <string name="permdesc_accessAdServicesTopics" msgid="6011532458156465929">"애플리케이션이 AdServices Topics API에 액세스하도록 허용합니다."</string>
+    <string name="permlab_accessAdServicesAttribution" msgid="3268942271128309354">"AdServices Attribution API 액세스"</string>
+    <string name="permdesc_accessAdServicesAttribution" msgid="577482544832578288">"애플리케이션이 AdServices Attribution API에 액세스하도록 허용합니다."</string>
+    <string name="permlab_accessAdServicesCustomAudiences" msgid="7249286630514600684">"AdServices Custom Audiences API 액세스"</string>
+    <string name="permdesc_accessAdServicesCustomAudiences" msgid="645526926477180315">"애플리케이션이 AdServices Custom Audiences API에 액세스하도록 허용합니다."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"확대/축소하려면 두 번 탭하세요."</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"위젯을 추가할 수 없습니다."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"이동"</string>
@@ -1716,6 +1719,7 @@
     <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g>로 전환하는 중…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"<xliff:g id="NAME">%1$s</xliff:g>님을 로그아웃하는 중…"</string>
     <string name="owner_name" msgid="8713560351570795743">"소유자"</string>
+    <string name="guest_name" msgid="8502103277839834324">"게스트"</string>
     <string name="error_message_title" msgid="4082495589294631966">"오류"</string>
     <string name="error_message_change_not_allowed" msgid="843159705042381454">"관리자가 이 변경을 허용하지 않습니다."</string>
     <string name="app_not_found" msgid="3429506115332341800">"이 작업을 처리하는 애플리케이션을 찾을 수 없습니다."</string>
@@ -2027,10 +2031,10 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"제거"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"열기"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"유해한 앱 감지됨"</string>
-    <string name="log_access_confirmation_title" msgid="3143035474800851565">"시스템 로그 액세스 요청"</string>
+    <string name="log_access_confirmation_title" msgid="2343578467290592708">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g>에서 모든 기기에 액세스하도록 허용하시겠습니까?"</string>
     <string name="log_access_confirmation_allow" msgid="143157286283302512">"이번만 허용"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"허용 안함"</string>
-    <string name="log_access_confirmation_body" msgid="7599059550906238538">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> 앱에서 기능 디버깅을 위해 시스템 로그를 요청합니다. 이 로그에는 기기의 앱과 서비스가 작성한 정보가 포함될 수 있습니다."</string>
+    <string name="log_access_confirmation_body" msgid="4483075525611652922">"기기 로그에 기기에서 발생한 상황이 기록됩니다. 앱은 문제를 찾고 해결하는 데 이 로그를 사용할 수 있습니다.\n\n일부 로그에는 민감한 정보가 포함될 수 있으므로 신뢰할 수 있는 앱만 전체 기기 로그에 액세스하도록 허용하세요. \n\n앱에 전체 기기 로그에 대한 액세스 권한을 부여하지 않아도 앱이 자체 로그에는 액세스할 수 있으며, 기기 제조업체에서 일부 로그 또는 기기 내 정보에 액세스할 수 있습니다. 자세히 알아보기"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"다시 표시 안함"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g>에서 <xliff:g id="APP_2">%2$s</xliff:g>의 슬라이스를 표시하려고 합니다"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"수정"</string>
@@ -2265,4 +2269,6 @@
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> 앱이 백그라운드에서 오랫동안 실행 중입니다. 확인하려면 탭하세요."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"활성 상태의 앱 확인"</string>
     <string name="vdm_camera_access_denied" msgid="6345652513729130490">"이 기기에서 카메라에 액세스할 수 없습니다."</string>
+    <!-- no translation found for system_locale_title (3978041860457277638) -->
+    <skip />
 </resources>
