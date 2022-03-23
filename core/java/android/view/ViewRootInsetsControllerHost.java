@@ -171,8 +171,9 @@ public class ViewRootInsetsControllerHost implements InsetsController.Host {
     public void setSystemBarsAppearance(int appearance, int mask) {
         mViewRoot.mWindowAttributes.privateFlags |= PRIVATE_FLAG_APPEARANCE_CONTROLLED;
         final InsetsFlags insetsFlags = mViewRoot.mWindowAttributes.insetsFlags;
-        if (insetsFlags.appearance != appearance) {
-            insetsFlags.appearance = (insetsFlags.appearance & ~mask) | (appearance & mask);
+        final int newAppearance = (insetsFlags.appearance & ~mask) | (appearance & mask);
+        if (insetsFlags.appearance != newAppearance) {
+            insetsFlags.appearance = newAppearance;
             mViewRoot.mWindowAttributesChanged = true;
             mViewRoot.scheduleTraversals();
         }
