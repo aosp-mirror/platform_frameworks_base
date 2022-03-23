@@ -124,7 +124,7 @@ public class Picture {
     public void endRecording() {
         verifyValid();
         if (mRecordingCanvas != null) {
-            mRequiresHwAcceleration = mRecordingCanvas.mUsesHwFeature;
+            mRequiresHwAcceleration = mRecordingCanvas.mHoldsHwBitmap;
             mRecordingCanvas = null;
             nativeEndRecording(mNativePicture);
         }
@@ -182,10 +182,8 @@ public class Picture {
         if (mRecordingCanvas != null) {
             endRecording();
         }
-        if (mRequiresHwAcceleration && !canvas.isHardwareAccelerated()
-                && canvas.onHwFeatureInSwMode()) {
-            throw new IllegalArgumentException("Software rendering not supported for Pictures that"
-                    + " require hardware acceleration");
+        if (mRequiresHwAcceleration && !canvas.isHardwareAccelerated()) {
+            canvas.onHwBitmapInSwMode();
         }
         nativeDraw(canvas.getNativeCanvasWrapper(), mNativePicture);
     }
@@ -244,7 +242,7 @@ public class Picture {
 
     private static class PictureCanvas extends Canvas {
         private final Picture mPicture;
-        boolean mUsesHwFeature;
+        boolean mHoldsHwBitmap;
 
         public PictureCanvas(Picture pict, long nativeCanvas) {
             super(nativeCanvas);
@@ -267,9 +265,8 @@ public class Picture {
         }
 
         @Override
-        protected boolean onHwFeatureInSwMode() {
-            mUsesHwFeature = true;
-            return false;
+        protected void onHwBitmapInSwMode() {
+            mHoldsHwBitmap = true;
         }
     }
 }

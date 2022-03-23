@@ -41,7 +41,6 @@ import androidx.annotation.NonNull;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.Prefs;
-import com.android.systemui.shared.system.SysUiStatsLog;
 
 /**
  * Contains logic for an accessibility floating menu view.
@@ -178,9 +177,6 @@ public class AccessibilityFloatingMenu implements IAccessibilityFloatingMenu {
     }
 
     private void onDragEnd(Position position) {
-        SysUiStatsLog.write(SysUiStatsLog.ACCESSIBILITY_FLOATING_MENU_UI_CHANGED,
-                position.getPercentageX(), position.getPercentageY(),
-                mContext.getResources().getConfiguration().orientation);
         savePosition(mContext, position);
         showDockTooltipIfNecessary(mContext);
     }

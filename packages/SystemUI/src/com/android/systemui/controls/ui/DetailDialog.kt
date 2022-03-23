@@ -33,7 +33,6 @@ import android.view.WindowManager
 import android.widget.ImageView
 import com.android.internal.policy.ScreenDecorationsUtils
 import com.android.systemui.R
-import com.android.systemui.broadcast.BroadcastSender
 import com.android.wm.shell.TaskView
 
 /**
@@ -42,13 +41,12 @@ import com.android.wm.shell.TaskView
  * The activity being launched is specified by {@link android.service.controls.Control#getAppIntent}.
  */
 class DetailDialog(
-    val activityContext: Context,
-    val broadcastSender: BroadcastSender,
+    val activityContext: Context?,
     val taskView: TaskView,
     val pendingIntent: PendingIntent,
     val cvh: ControlViewHolder
 ) : Dialog(
-    activityContext,
+    activityContext ?: cvh.context,
     R.style.Theme_SystemUI_Dialog_Control_DetailPanel
 ) {
     companion object {
@@ -60,10 +58,6 @@ class DetailDialog(
     }
 
     var detailTaskId = INVALID_TASK_ID
-    private lateinit var taskViewContainer: View
-    private val taskWidthPercentWidth = activityContext.resources.getFloat(
-        R.dimen.controls_task_view_width_percentage
-    )
 
     private val fillInIntent = Intent().apply {
         putExtra(EXTRA_USE_PANEL, true)
@@ -81,18 +75,13 @@ class DetailDialog(
 
     val stateCallback = object : TaskView.Listener {
         override fun onInitialized() {
-            taskViewContainer.apply {
-                // For some devices, limit the overall width of the taskView
-                val lp = getLayoutParams()
-                lp.width = (getWidth() * taskWidthPercentWidth).toInt()
-                setLayoutParams(lp)
-            }
-
-            val options = ActivityOptions.makeCustomAnimation(
-                activityContext,
-                0 /* enterResId */,
-                0 /* exitResId */
-            )
+            val options = activityContext?.let {
+                ActivityOptions.makeCustomAnimation(
+                    it,
+                    0 /* enterResId */,
+                    0 /* exitResId */
+                )
+            } ?: ActivityOptions.makeBasic()
             taskView.startActivity(
                 pendingIntent,
                 fillInIntent,
@@ -123,13 +112,15 @@ class DetailDialog(
     }
 
     init {
+        if (activityContext == null) {
+            window.setType(WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY)
+        }
+
         // To pass touches to the task inside TaskView.
         window.addFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL)
         window.addPrivateFlags(WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY)
 
         setContentView(R.layout.controls_detail_dialog)
-
-        taskViewContainer = requireViewById<ViewGroup>(R.id.control_task_view_container)
 
         requireViewById<ViewGroup>(R.id.controls_activity_view).apply {
             addView(taskView)
@@ -139,9 +130,6 @@ class DetailDialog(
         requireViewById<ImageView>(R.id.control_detail_close).apply {
             setOnClickListener { _: View -> dismiss() }
         }
-        requireViewById<View>(R.id.control_detail_root).apply {
-            setOnClickListener { _: View -> dismiss() }
-        }
 
         requireViewById<ImageView>(R.id.control_detail_open_in_app).apply {
             setOnClickListener { v: View ->
@@ -149,7 +137,7 @@ class DetailDialog(
                 // startActivity() below is called.
                 removeDetailTask()
                 dismiss()
-                broadcastSender.closeSystemDialogs()
+                context.sendBroadcast(Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS))
                 pendingIntent.send()
             }
         }
@@ -157,10 +145,17 @@ class DetailDialog(
         // consume all insets to achieve slide under effect
         window.getDecorView().setOnApplyWindowInsetsListener {
             v: View, insets: WindowInsets ->
+                taskView.apply {
+                    val l = getPaddingLeft()
+                    val t = getPaddingTop()
+                    val r = getPaddingRight()
+                    setPadding(l, t, r, insets.getInsets(Type.systemBars()).bottom)
+                }
+
                 val l = v.getPaddingLeft()
+                val b = v.getPaddingBottom()
                 val r = v.getPaddingRight()
-                val insets = insets.getInsets(Type.systemBars())
-                v.setPadding(l, insets.top, r, insets.bottom)
+                v.setPadding(l, insets.getInsets(Type.systemBars()).top, r, b)
 
                 WindowInsets.CONSUMED
         }

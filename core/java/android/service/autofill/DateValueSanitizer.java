@@ -27,8 +27,9 @@ import android.os.Parcelable;
 import android.util.Log;
 import android.view.autofill.AutofillValue;
 
+import com.android.internal.util.Preconditions;
+
 import java.util.Date;
-import java.util.Objects;
 
 /**
  * Sanitizes a date {@link AutofillValue} using a {@link DateFormat}.
@@ -51,7 +52,7 @@ public final class DateValueSanitizer extends InternalSanitizer implements Sanit
      * @param dateFormat date format applied to the actual date value of an input field.
       */
     public DateValueSanitizer(@NonNull DateFormat dateFormat) {
-        mDateFormat = Objects.requireNonNull(dateFormat);
+        mDateFormat = Preconditions.checkNotNull(dateFormat);
     }
 
     /** @hide */
@@ -111,7 +112,7 @@ public final class DateValueSanitizer extends InternalSanitizer implements Sanit
             new Parcelable.Creator<DateValueSanitizer>() {
         @Override
         public DateValueSanitizer createFromParcel(Parcel parcel) {
-            return new DateValueSanitizer((DateFormat) parcel.readSerializable(android.icu.text.DateFormat.class.getClassLoader(), android.icu.text.DateFormat.class));
+            return new DateValueSanitizer((DateFormat) parcel.readSerializable());
         }
 
         @Override

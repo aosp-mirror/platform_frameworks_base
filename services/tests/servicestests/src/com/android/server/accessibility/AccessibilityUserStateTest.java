@@ -48,7 +48,6 @@ import android.provider.Settings;
 import android.test.mock.MockContentResolver;
 import android.testing.DexmakerShareClassLoaderRule;
 import android.util.ArraySet;
-import android.view.Display;
 
 import androidx.test.InstrumentationRegistry;
 
@@ -79,8 +78,6 @@ public class AccessibilityUserStateTest {
     private static final int STATE_SHOW_IME = 1;
 
     private static final int USER_ID = 42;
-
-    private static final int TEST_DISPLAY = Display.DEFAULT_DISPLAY;
 
     // Mock package-private class AccessibilityServiceConnection
     @Rule public final DexmakerShareClassLoaderRule mDexmakerShareClassLoaderRule =
@@ -146,8 +143,7 @@ public class AccessibilityUserStateTest {
         mUserState.setAutoclickEnabledLocked(true);
         mUserState.setUserNonInteractiveUiTimeoutLocked(30);
         mUserState.setUserInteractiveUiTimeoutLocked(30);
-        mUserState.setMagnificationModeLocked(TEST_DISPLAY,
-                ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
+        mUserState.setMagnificationModeLocked(ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
         mUserState.setFocusAppearanceLocked(20, Color.BLUE);
 
         mUserState.onSwitchToAnotherUserLocked();
@@ -169,10 +165,9 @@ public class AccessibilityUserStateTest {
         assertEquals(0, mUserState.getUserNonInteractiveUiTimeoutLocked());
         assertEquals(0, mUserState.getUserInteractiveUiTimeoutLocked());
         assertEquals(ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN,
-                mUserState.getMagnificationModeLocked(TEST_DISPLAY));
+                mUserState.getMagnificationModeLocked());
         assertEquals(mFocusStrokeWidthDefaultValue, mUserState.getFocusStrokeWidthLocked());
         assertEquals(mFocusColorDefaultValue, mUserState.getFocusColorLocked());
-        assertTrue(mUserState.isMagnificationFollowTypingEnabled());
     }
 
     @Test
@@ -365,22 +360,12 @@ public class AccessibilityUserStateTest {
     @Test
     public void setWindowMagnificationMode_returnExpectedMagnificationMode() {
         assertEquals(ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN,
-                mUserState.getMagnificationModeLocked(TEST_DISPLAY));
+                mUserState.getMagnificationModeLocked());
 
-        mUserState.setMagnificationModeLocked(TEST_DISPLAY,
-                ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
+        mUserState.setMagnificationModeLocked(ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
 
         assertEquals(ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW,
-                mUserState.getMagnificationModeLocked(TEST_DISPLAY));
-    }
-
-    @Test
-    public void setMagnificationFollowTypingEnabled_defaultTrueAndThenDisable_returnFalse() {
-        assertTrue(mUserState.isMagnificationFollowTypingEnabled());
-
-        mUserState.setMagnificationFollowTypingEnabled(false);
-
-        assertFalse(mUserState.isMagnificationFollowTypingEnabled());
+                mUserState.getMagnificationModeLocked());
     }
 
     @Test

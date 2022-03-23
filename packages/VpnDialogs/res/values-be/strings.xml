@@ -18,7 +18,6 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="prompt" msgid="3183836924226407828">"Запыт на падлучэнне"</string>
     <string name="warning" msgid="809658604548412033">"<xliff:g id="APP">%s</xliff:g> спрабуе наладзіць падлучэнне VPN, якое дазваляе сачыць за сеткавым трафікам. Прымайце толькі тады, калі вы давяраеце гэтай крыніцы. Калі VPN актыўны, у верхняй частцы экрана адлюстроўваецца &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt;."</string>
-    <string name="warning" product="tv" msgid="5188957997628124947">"Праграма \"<xliff:g id="APP">%s</xliff:g>\" запытвае дазвол на падключэнне да сеткі VPN, каб адсочваць сеткавы трафік. Дайце дазвол, толькі калі вы давяраеце крыніцы. Калі адбудзецца падключэнне да VPN, на экране з\'явіцца значок &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt;."</string>
     <string name="legacy_title" msgid="192936250066580964">"VPN падключаны"</string>
     <string name="session" msgid="6470628549473641030">"Сессія"</string>
     <string name="duration" msgid="3584782459928719435">"Працягласць:"</string>

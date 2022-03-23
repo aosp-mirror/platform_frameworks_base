@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar.notification.collection.render;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 
 import android.content.Context;
 import android.testing.AndroidTestingRunner;
@@ -139,7 +138,7 @@ public class ShadeViewDifferTest extends SysuiTestCase {
     }
 
     @Test
-    public void testRemovedGroupsAreBrokenApart() {
+    public void testRemovedGroupsAreKeptTogether() {
         // GIVEN a preexisting tree with a group
         applySpecAndCheck(
                 node(mController1),
@@ -155,10 +154,10 @@ public class ShadeViewDifferTest extends SysuiTestCase {
                 node(mController1)
         );
 
-        // THEN the group children are no longer attached to their parent
-        assertNull(mController3.getView().getParent());
-        assertNull(mController4.getView().getParent());
-        assertNull(mController5.getView().getParent());
+        // THEN the group children are still attached to their parent
+        assertEquals(mController2.getView(), mController3.getView().getParent());
+        assertEquals(mController2.getView(), mController4.getView().getParent());
+        assertEquals(mController2.getView(), mController5.getView().getParent());
     }
 
     @Test
@@ -274,18 +273,6 @@ public class ShadeViewDifferTest extends SysuiTestCase {
         @Override
         public void removeChild(@NonNull NodeController child, boolean isTransfer) {
             view.removeView(child.getView());
-        }
-
-        @Override
-        public void onViewAdded() {
-        }
-
-        @Override
-        public void onViewMoved() {
-        }
-
-        @Override
-        public void onViewRemoved() {
         }
     }
 

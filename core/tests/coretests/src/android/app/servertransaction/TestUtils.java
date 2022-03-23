@@ -29,6 +29,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.PersistableBundle;
 import android.util.MergedConfiguration;
+import android.view.DisplayAdjustments.FixedRotationAdjustments;
 
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.content.ReferrerIntent;
@@ -109,6 +110,7 @@ class TestUtils {
         private ProfilerInfo mProfilerInfo;
         private IBinder mAssistToken;
         private IBinder mShareableActivityToken;
+        private FixedRotationAdjustments mFixedRotationAdjustments;
         private boolean mLaunchedFromBubble;
 
         LaunchActivityItemBuilder setIntent(Intent intent) {
@@ -201,6 +203,11 @@ class TestUtils {
             return this;
         }
 
+        LaunchActivityItemBuilder setFixedRotationAdjustments(FixedRotationAdjustments fra) {
+            mFixedRotationAdjustments = fra;
+            return this;
+        }
+
         LaunchActivityItemBuilder setLaunchedFromBubble(boolean launchedFromBubble) {
             mLaunchedFromBubble = launchedFromBubble;
             return this;
@@ -211,8 +218,8 @@ class TestUtils {
                     mCurConfig, mOverrideConfig, mCompatInfo, mReferrer, mVoiceInteractor,
                     mProcState, mState, mPersistentState, mPendingResults, mPendingNewIntents,
                     mActivityOptions, mIsForward, mProfilerInfo, mAssistToken,
-                    null /* activityClientController */, mShareableActivityToken,
-                    mLaunchedFromBubble);
+                    null /* activityClientController */, mFixedRotationAdjustments,
+                    mShareableActivityToken, mLaunchedFromBubble);
         }
     }
 }

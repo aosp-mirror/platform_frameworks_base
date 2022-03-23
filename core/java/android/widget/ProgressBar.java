@@ -245,6 +245,8 @@ public class ProgressBar extends View {
 
     private boolean mAggregatedIsVisible;
 
+    private CharSequence mCustomStateDescription = null;
+
     private final ArrayList<RefreshData> mRefreshData = new ArrayList<RefreshData>();
 
     private ObjectAnimator mLastProgressAnimator;
@@ -683,9 +685,6 @@ public class ProgressBar extends View {
                 swapCurrentDrawable(mProgressDrawable);
                 stopAnimation();
             }
-
-            notifyViewAccessibilityStateChangedIfNeeded(
-                    AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED);
         }
     }
 
@@ -1623,21 +1622,18 @@ public class ProgressBar extends View {
     @Override
     @RemotableViewMethod
     public void setStateDescription(@Nullable CharSequence stateDescription) {
-        // Assume the previous custom state description is different from default state description.
-        // Otherwise when the argument is null to restore the default state description, we will
-        // send out a state description changed event even though the state description presented to
-        // the user doesn't change. Since mStateDescription in View is private, we can't prevent
-        // this event from sending out.
-        super.setStateDescription(stateDescription);
+        mCustomStateDescription = stateDescription;
+        if (stateDescription == null) {
+            super.setStateDescription(formatStateDescription(mProgress));
+        } else {
+            super.setStateDescription(stateDescription);
+        }
     }
 
     void onProgressRefresh(float scale, boolean fromUser, int progress) {
         if (AccessibilityManager.getInstance(mContext).isEnabled()
-                && getStateDescription() == null && !isIndeterminate()) {
-            AccessibilityEvent event = AccessibilityEvent.obtain();
-            event.setEventType(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
-            event.setContentChangeTypes(AccessibilityEvent.CONTENT_CHANGE_TYPE_STATE_DESCRIPTION);
-            sendAccessibilityEventUnchecked(event);
+                && mCustomStateDescription == null) {
+            super.setStateDescription(formatStateDescription(mProgress));
         }
     }
 
@@ -2360,15 +2356,7 @@ public class ProgressBar extends View {
                     AccessibilityNodeInfo.RangeInfo.RANGE_TYPE_INT, getMin(), getMax(),
                     getProgress());
             info.setRangeInfo(rangeInfo);
-        }
-
-        // Only set the default state description when custom state descripton is null.
-        if (getStateDescription() == null) {
-            if (isIndeterminate()) {
-                info.setStateDescription(getResources().getString(R.string.in_progress));
-            } else {
-                info.setStateDescription(formatStateDescription(mProgress));
-            }
+            info.setStateDescription(formatStateDescription(mProgress));
         }
     }
 

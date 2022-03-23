@@ -27,9 +27,7 @@ import android.os.Binder;
 import android.os.ShellCommand;
 
 import java.io.PrintWriter;
-import java.util.Arrays;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * ShellCommands for {@link DeviceStateManagerService}.
@@ -58,18 +56,14 @@ public class DeviceStateManagerShellCommand extends ShellCommand {
         switch (cmd) {
             case "state":
                 return runState(pw);
-            case "print-state":
-                return runPrintState(pw);
             case "print-states":
                 return runPrintStates(pw);
-            case "print-states-simple":
-                return runPrintStatesSimple(pw);
             default:
                 return handleDefaultCommands(cmd);
         }
     }
 
-    private void printAllStates(PrintWriter pw) {
+    private void printState(PrintWriter pw) {
         Optional<DeviceState> committedState = mService.getCommittedState();
         Optional<DeviceState> baseState = mService.getBaseState();
         Optional<DeviceState> overrideState = mService.getOverrideState();
@@ -85,8 +79,7 @@ public class DeviceStateManagerShellCommand extends ShellCommand {
     private int runState(PrintWriter pw) {
         final String nextArg = getNextArg();
         if (nextArg == null) {
-            printAllStates(pw);
-            return 0;
+            printState(pw);
         }
 
         final Context context = mService.getContext();
@@ -97,7 +90,7 @@ public class DeviceStateManagerShellCommand extends ShellCommand {
         try {
             if ("reset".equals(nextArg)) {
                 if (sLastRequest != null) {
-                    mClient.cancelStateRequest();
+                    mClient.cancelRequest(sLastRequest);
                     sLastRequest = null;
                 }
             } else {
@@ -105,6 +98,9 @@ public class DeviceStateManagerShellCommand extends ShellCommand {
                 DeviceStateRequest request = DeviceStateRequest.newBuilder(requestedState).build();
 
                 mClient.requestState(request, null /* executor */, null /* callback */);
+                if (sLastRequest != null) {
+                    mClient.cancelRequest(sLastRequest);
+                }
 
                 sLastRequest = request;
             }
@@ -127,16 +123,6 @@ public class DeviceStateManagerShellCommand extends ShellCommand {
         return 0;
     }
 
-    private int runPrintState(PrintWriter pw) {
-        Optional<DeviceState> deviceState = mService.getCommittedState();
-        if (deviceState.isPresent()) {
-            pw.println(deviceState.get().getIdentifier());
-            return 0;
-        }
-        getErrPrintWriter().println("Error: device state not available.");
-        return 1;
-    }
-
     private int runPrintStates(PrintWriter pw) {
         DeviceState[] states = mService.getSupportedStates();
         pw.print("Supported states: [\n");
@@ -144,14 +130,6 @@ public class DeviceStateManagerShellCommand extends ShellCommand {
             pw.print("  " + states[i] + ",\n");
         }
         pw.println("]");
-        return 0;
-    }
-
-    private int runPrintStatesSimple(PrintWriter pw) {
-        pw.print(Arrays.stream(mService.getSupportedStates())
-                .map(DeviceState::getIdentifier)
-                .map(Object::toString)
-                .collect(Collectors.joining(",")));
         return 0;
     }
 
@@ -163,12 +141,8 @@ public class DeviceStateManagerShellCommand extends ShellCommand {
         pw.println("    Print this help text.");
         pw.println("  state [reset|OVERRIDE_DEVICE_STATE]");
         pw.println("    Return or override device state.");
-        pw.println("  print-state");
-        pw.println("    Return the current device state.");
         pw.println("  print-states");
         pw.println("    Return list of currently supported device states.");
-        pw.println("  print-states-simple");
-        pw.println("    Return the currently supported device states in comma separated format.");
     }
 
     private static String toString(@NonNull Optional<DeviceState> state) {

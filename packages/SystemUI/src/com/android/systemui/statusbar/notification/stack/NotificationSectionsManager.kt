@@ -16,15 +16,17 @@
 package com.android.systemui.statusbar.notification.stack
 
 import android.annotation.ColorInt
+import android.annotation.IntDef
+import android.annotation.LayoutRes
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
 import com.android.internal.annotations.VisibleForTesting
+import com.android.systemui.R
 import com.android.systemui.media.KeyguardMediaController
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.StatusBarState
-import com.android.systemui.statusbar.notification.NotifPipelineFlags
 import com.android.systemui.statusbar.notification.NotificationSectionsFeatureManager
-import com.android.systemui.statusbar.notification.collection.render.MediaContainerController
 import com.android.systemui.statusbar.notification.collection.render.SectionHeaderController
 import com.android.systemui.statusbar.notification.collection.render.ShadeViewManager
 import com.android.systemui.statusbar.notification.dagger.AlertingHeader
@@ -39,7 +41,6 @@ import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.children
 import com.android.systemui.util.foldToSparseArray
 import com.android.systemui.util.takeUntil
-import com.android.systemui.util.traceSection
 import javax.inject.Inject
 
 /**
@@ -58,8 +59,6 @@ class NotificationSectionsManager @Inject internal constructor(
     private val keyguardMediaController: KeyguardMediaController,
     private val sectionsFeatureManager: NotificationSectionsFeatureManager,
     private val logger: NotificationSectionsLogger,
-    private val notifPipelineFlags: NotifPipelineFlags,
-    private val mediaContainerController: MediaContainerController,
     @IncomingHeader private val incomingHeaderController: SectionHeaderController,
     @PeopleHeader private val peopleHeaderController: SectionHeaderController,
     @AlertingHeader private val alertingHeaderController: SectionHeaderController,
@@ -68,7 +67,7 @@ class NotificationSectionsManager @Inject internal constructor(
 
     private val configurationListener = object : ConfigurationController.ConfigurationListener {
         override fun onLocaleListChanged() {
-            reinflateViews()
+            reinflateViews(LayoutInflater.from(parent.context))
         }
     }
 
@@ -91,17 +90,37 @@ class NotificationSectionsManager @Inject internal constructor(
     val peopleHeaderView: SectionHeaderView?
         get() = peopleHeaderController.headerView
 
-    @VisibleForTesting
-    val mediaControlsView: MediaContainerView?
-        get() = mediaContainerController.mediaContainerView
+    @get:VisibleForTesting
+    var mediaControlsView: MediaHeaderView? = null
+        private set
 
     /** Must be called before use.  */
-    fun initialize(parent: NotificationStackScrollLayout) {
+    fun initialize(parent: NotificationStackScrollLayout, layoutInflater: LayoutInflater) {
         check(!initialized) { "NotificationSectionsManager already initialized" }
         initialized = true
         this.parent = parent
-        reinflateViews()
+        reinflateViews(layoutInflater)
         configurationController.addCallback(configurationListener)
+    }
+
+    private fun <T : ExpandableView> reinflateView(
+        view: T?,
+        layoutInflater: LayoutInflater,
+        @LayoutRes layoutResId: Int
+    ): T {
+        var oldPos = -1
+        view?.let {
+            view.transientContainer?.removeView(view)
+            if (view.parent === parent) {
+                oldPos = parent.indexOfChild(view)
+                parent.removeView(view)
+            }
+        }
+        val inflated = layoutInflater.inflate(layoutResId, parent, false) as T
+        if (oldPos != -1) {
+            parent.addView(inflated, oldPos)
+        }
+        return inflated
     }
 
     fun createSectionsForBuckets(): Array<NotificationSection> =
@@ -112,12 +131,13 @@ class NotificationSectionsManager @Inject internal constructor(
     /**
      * Reinflates the entire notification header, including all decoration views.
      */
-    fun reinflateViews() {
+    fun reinflateViews(layoutInflater: LayoutInflater) {
         silentHeaderController.reinflateView(parent)
         alertingHeaderController.reinflateView(parent)
         peopleHeaderController.reinflateView(parent)
         incomingHeaderController.reinflateView(parent)
-        mediaContainerController.reinflateView(parent)
+        mediaControlsView =
+                reinflateView(mediaControlsView, layoutInflater, R.layout.keyguard_media_header)
         keyguardMediaController.attachSinglePaneContainer(mediaControlsView)
     }
 
@@ -158,9 +178,7 @@ class NotificationSectionsManager @Inject internal constructor(
             }
         }
     }
-    private fun logShadeContents() = traceSection("NotifSectionsManager.logShadeContents") {
-        parent.children.forEachIndexed(::logShadeChild)
-    }
+    private fun logShadeContents() = parent.children.forEachIndexed(::logShadeChild)
 
     private val isUsingMultipleSections: Boolean
         get() = sectionsFeatureManager.getNumberOfBuckets() > 1
@@ -182,7 +200,6 @@ class NotificationSectionsManager @Inject internal constructor(
                 override var targetPosition: Int? = null
 
                 override fun adjustViewPosition() {
-                    notifPipelineFlags.checkLegacyPipelineEnabled()
                     val target = targetPosition
                     val current = currentPosition
                     if (target == null) {
@@ -196,7 +213,8 @@ class NotificationSectionsManager @Inject internal constructor(
                             // TODO: We should really cancel the active animations here. This will
                             //  happen automatically when the view's intro animation starts, but
                             //  it's a fragile link.
-                            header.removeFromTransientContainer()
+                            header.transientContainer?.removeTransientView(header)
+                            header.transientContainer = null
                             parent.addView(header, target)
                         } else {
                             parent.changeViewPosition(header, target)
@@ -208,7 +226,6 @@ class NotificationSectionsManager @Inject internal constructor(
     private fun <T : StackScrollerDecorView> decorViewHeaderState(
         header: T
     ): SectionUpdateState<T> {
-        notifPipelineFlags.checkLegacyPipelineEnabled()
         val inner = expandableViewHeaderState(header)
         return object : SectionUpdateState<T> by inner {
             override fun adjustViewPosition() {
@@ -224,10 +241,9 @@ class NotificationSectionsManager @Inject internal constructor(
      * Should be called whenever notifs are added, removed, or updated. Updates section boundary
      * bookkeeping and adds/moves/removes section headers if appropriate.
      */
-    fun updateSectionBoundaries(reason: String) = traceSection("NotifSectionsManager.update") {
-        notifPipelineFlags.checkLegacyPipelineEnabled()
+    fun updateSectionBoundaries(reason: String) {
         if (!isUsingMultipleSections) {
-            return@traceSection
+            return
         }
         logger.logStartSectionUpdate(reason)
 
@@ -334,7 +350,7 @@ class NotificationSectionsManager @Inject internal constructor(
         silentHeaderView?.run {
             val hasActiveClearableNotifications = this@NotificationSectionsManager.parent
                     .hasActiveClearableNotifications(NotificationStackScrollLayout.ROWS_GENTLE)
-            setClearSectionButtonEnabled(hasActiveClearableNotifications)
+            setAreThereDismissableGentleNotifs(hasActiveClearableNotifications)
         }
     }
 
@@ -432,3 +448,25 @@ class NotificationSectionsManager @Inject internal constructor(
         private const val DEBUG = false
     }
 }
+
+/**
+ * For now, declare the available notification buckets (sections) here so that other
+ * presentation code can decide what to do based on an entry's buckets
+ */
+@Retention(AnnotationRetention.SOURCE)
+@IntDef(
+        prefix = ["BUCKET_"],
+        value = [
+            BUCKET_UNKNOWN, BUCKET_MEDIA_CONTROLS, BUCKET_HEADS_UP, BUCKET_FOREGROUND_SERVICE,
+            BUCKET_PEOPLE, BUCKET_ALERTING, BUCKET_SILENT
+        ]
+)
+annotation class PriorityBucket
+
+const val BUCKET_UNKNOWN = 0
+const val BUCKET_MEDIA_CONTROLS = 1
+const val BUCKET_HEADS_UP = 2
+const val BUCKET_FOREGROUND_SERVICE = 3
+const val BUCKET_PEOPLE = 4
+const val BUCKET_ALERTING = 5
+const val BUCKET_SILENT = 6

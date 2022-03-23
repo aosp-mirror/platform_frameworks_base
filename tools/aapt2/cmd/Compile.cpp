@@ -47,6 +47,7 @@
 #include "io/ZipArchive.h"
 #include "trace/TraceBuffer.h"
 #include "util/Files.h"
+#include "util/Maybe.h"
 #include "util/Util.h"
 #include "xml/XmlDom.h"
 #include "xml/XmlPullParser.h"
@@ -74,10 +75,10 @@ struct ResourcePathData {
 };
 
 // Resource file paths are expected to look like: [--/res/]type[-config]/name
-static std::optional<ResourcePathData> ExtractResourcePathData(const std::string& path,
-                                                               const char dir_sep,
-                                                               std::string* out_error,
-                                                               const CompileOptions& options) {
+static Maybe<ResourcePathData> ExtractResourcePathData(const std::string& path,
+                                                       const char dir_sep,
+                                                       std::string* out_error,
+                                                       const CompileOptions& options) {
   std::vector<std::string> parts = util::Split(path, dir_sep);
   if (parts.size() < 2) {
     if (out_error) *out_error = "bad resource path";
@@ -336,7 +337,7 @@ static bool IsValidFile(IAaptContext* context, const std::string& input_path) {
     if (file_type == file::FileType::kDirectory) {
       context->GetDiagnostics()->Error(DiagMessage(input_path)
                                        << "resource file cannot be a directory");
-    } else if (file_type == file::FileType::kNonExistant) {
+    } else if (file_type == file::FileType::kNonexistant) {
       context->GetDiagnostics()->Error(DiagMessage(input_path) << "file not found");
     } else {
       context->GetDiagnostics()->Error(DiagMessage(input_path)

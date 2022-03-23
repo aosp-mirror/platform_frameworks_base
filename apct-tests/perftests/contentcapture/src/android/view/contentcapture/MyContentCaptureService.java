@@ -84,18 +84,18 @@ public class MyContentCaptureService extends ContentCaptureService {
 
     @Override
     public void onDisconnected() {
-        final ServiceWatcher sw = sServiceWatcher;
-        Log.i(TAG, "onDisconnected: sServiceWatcher=" + sw);
-        if (sw == null) {
+        Log.i(TAG, "onDisconnected: sServiceWatcher=" + sServiceWatcher);
+
+        if (sServiceWatcher == null) {
             Log.e(TAG, "onDisconnected() without a watcher");
             return;
         }
-        if (sw.mService == null) {
-            Log.e(TAG, "onDisconnected(): no service on " + sw);
+        if (sServiceWatcher.mService == null) {
+            Log.e(TAG, "onDisconnected(): no service on " + sServiceWatcher);
             return;
         }
 
-        sw.mDestroyed.countDown();
+        sServiceWatcher.mDestroyed.countDown();
         clearServiceWatcher();
     }
 

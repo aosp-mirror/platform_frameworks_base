@@ -110,7 +110,7 @@ public:
         const float rotation3 = turbulencePhase * PI_ROTATE_RIGHT + 2.75 * PI;
         setUniform2f(effectBuilder, "in_tRotation3", cos(rotation3), sin(rotation3));
 
-        params.paint->value.setShader(effectBuilder.makeShader());
+        params.paint->value.setShader(effectBuilder.makeShader(nullptr, false));
         canvas->drawCircle(params.x->value, params.y->value, params.radius->value,
                            params.paint->value);
     }

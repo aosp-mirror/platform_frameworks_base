@@ -66,7 +66,7 @@ public interface PipMenuController {
     /**
      * Given a set of actions, update the menu.
      */
-    void setAppActions(ParceledListSlice<RemoteAction> appActions, RemoteAction closeAction);
+    void setAppActions(ParceledListSlice<RemoteAction> appActions);
 
     /**
      * Resize the PiP menu with the given bounds. The PiP SurfaceControl is given if there is a
@@ -88,11 +88,6 @@ public interface PipMenuController {
      * Update the PiP menu with the given bounds for re-layout purposes.
      */
     default void updateMenuBounds(Rect destinationBounds) {}
-
-    /**
-     * Update when the current focused task changes.
-     */
-    default void onFocusTaskChanged(RunningTaskInfo taskInfo) {}
 
     /**
      * Returns a default LayoutParams for the PIP Menu.

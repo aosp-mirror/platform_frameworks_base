@@ -20,13 +20,11 @@ import static com.android.wm.shell.bubbles.BubbleDebugConfig.DEBUG_OVERFLOW;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_BUBBLES;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_WITH_CLASS_NAME;
 
-import android.annotation.NonNull;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Color;
-import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.TypedValue;
@@ -60,8 +58,6 @@ public class BubbleOverflowContainerView extends LinearLayout {
     private TextView mEmptyStateTitle;
     private TextView mEmptyStateSubtitle;
     private ImageView mEmptyStateImage;
-    private int mHorizontalMargin;
-    private int mVerticalMargin;
     private BubbleController mController;
     private BubbleOverflowAdapter mAdapter;
     private RecyclerView mRecyclerView;
@@ -81,6 +77,12 @@ public class BubbleOverflowContainerView extends LinearLayout {
             super(context, columns);
         }
 
+//        @Override
+//        public boolean canScrollVertically() {
+//            // TODO (b/162006693): this should be based on items in the list & available height
+//            return true;
+//        }
+
         @Override
         public int getColumnCountForAccessibility(RecyclerView.Recycler recycler,
                 RecyclerView.State state) {
@@ -93,17 +95,6 @@ public class BubbleOverflowContainerView extends LinearLayout {
                 return bubbleCount;
             }
             return columnCount;
-        }
-    }
-
-    private class OverflowItemDecoration extends RecyclerView.ItemDecoration {
-        @Override
-        public void getItemOffsets(@NonNull Rect outRect, @NonNull View view,
-                @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
-            outRect.left = mHorizontalMargin;
-            outRect.top = mVerticalMargin;
-            outRect.right = mHorizontalMargin;
-            outRect.bottom = mVerticalMargin;
         }
     }
 
@@ -151,7 +142,7 @@ public class BubbleOverflowContainerView extends LinearLayout {
         super.onAttachedToWindow();
         if (mController != null) {
             // For the overflow to get key events (e.g. back press) we need to adjust the flags
-            mController.updateWindowFlagsForBackpress(true);
+            mController.updateWindowFlagsForOverflow(true);
         }
         setOnKeyListener(mKeyListener);
     }
@@ -160,7 +151,7 @@ public class BubbleOverflowContainerView extends LinearLayout {
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         if (mController != null) {
-            mController.updateWindowFlagsForBackpress(false);
+            mController.updateWindowFlagsForOverflow(false);
         }
         setOnKeyListener(null);
     }
@@ -170,9 +161,6 @@ public class BubbleOverflowContainerView extends LinearLayout {
         final int columns = res.getInteger(R.integer.bubbles_overflow_columns);
         mRecyclerView.setLayoutManager(
                 new OverflowGridLayoutManager(getContext(), columns));
-        if (mRecyclerView.getItemDecorationCount() == 0) {
-            mRecyclerView.addItemDecoration(new OverflowItemDecoration());
-        }
         mAdapter = new BubbleOverflowAdapter(getContext(), mOverflowBubbles,
                 mController::promoteBubbleFromOverflow,
                 mController.getPositioner());
@@ -199,13 +187,6 @@ public class BubbleOverflowContainerView extends LinearLayout {
         Resources res = getResources();
         final int mode = res.getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
         final boolean isNightMode = (mode == Configuration.UI_MODE_NIGHT_YES);
-
-        mHorizontalMargin = res.getDimensionPixelSize(
-                R.dimen.bubble_overflow_item_padding_horizontal);
-        mVerticalMargin = res.getDimensionPixelSize(R.dimen.bubble_overflow_item_padding_vertical);
-        if (mRecyclerView != null) {
-            mRecyclerView.invalidateItemDecorations();
-        }
 
         mEmptyStateImage.setImageDrawable(isNightMode
                 ? res.getDrawable(R.drawable.bubble_ic_empty_overflow_dark)
@@ -296,7 +277,8 @@ class BubbleOverflowAdapter extends RecyclerView.Adapter<BubbleOverflowAdapter.V
     }
 
     @Override
-    public BubbleOverflowAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public BubbleOverflowAdapter.ViewHolder onCreateViewHolder(ViewGroup parent,
+            int viewType) {
 
         // Set layout for overflow bubble view.
         LinearLayout overflowView = (LinearLayout) LayoutInflater.from(parent.getContext())

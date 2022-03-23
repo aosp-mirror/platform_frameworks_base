@@ -22,7 +22,7 @@ import com.android.systemui.shared.plugins.PluginManager;
 
 public class FakePluginManager implements PluginManager {
 
-    private final BaseLeakChecker<PluginListener<?>> mLeakChecker;
+    private final BaseLeakChecker<PluginListener> mLeakChecker;
 
     public FakePluginManager(LeakCheck test) {
         mLeakChecker = new BaseLeakChecker<>(test, "Plugin");
@@ -30,24 +30,24 @@ public class FakePluginManager implements PluginManager {
 
     @Override
     public <T extends Plugin> void addPluginListener(String action, PluginListener<T> listener,
-            Class<T> cls, boolean allowMultiple) {
+            Class cls, boolean allowMultiple) {
         mLeakChecker.addCallback(listener);
     }
 
     @Override
-    public <T extends Plugin> void addPluginListener(PluginListener<T> listener, Class<T> cls) {
+    public <T extends Plugin> void addPluginListener(PluginListener<T> listener, Class<?> cls) {
         mLeakChecker.addCallback(listener);
     }
 
     @Override
-    public <T extends Plugin> void addPluginListener(PluginListener<T> listener, Class<T> cls,
+    public <T extends Plugin> void addPluginListener(PluginListener<T> listener, Class<?> cls,
             boolean allowMultiple) {
         mLeakChecker.addCallback(listener);
     }
 
     @Override
     public <T extends Plugin> void addPluginListener(String action, PluginListener<T> listener,
-            Class<T> cls) {
+            Class<?> cls) {
         mLeakChecker.addCallback(listener);
     }
 
@@ -62,7 +62,17 @@ public class FakePluginManager implements PluginManager {
     }
 
     @Override
-    public String[] getPrivilegedPlugins() {
+    public String[] getWhitelistedPlugins() {
         return new String[0];
+    }
+
+    @Override
+    public <T extends Plugin> T getOneShotPlugin(Class<T> cls) {
+        return null;
+    }
+
+    @Override
+    public <T extends Plugin> T getOneShotPlugin(String action, Class<?> cls) {
+        return null;
     }
 }

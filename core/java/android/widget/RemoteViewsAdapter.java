@@ -408,7 +408,7 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
         }
 
         @Override
-        protected Context getRemoteContextEnsuringCorrectCachedApkPath() {
+        protected Context getRemoteContext() {
             return null;
         }
 

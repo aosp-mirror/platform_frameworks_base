@@ -30,7 +30,7 @@ import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.os.IBinder;
 import android.util.proto.ProtoOutputStream;
 
-import com.android.server.biometrics.sensors.ClientMonitorCallback;
+import com.android.server.biometrics.sensors.BaseClientMonitor;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.LockoutTracker;
 
@@ -88,29 +88,27 @@ public interface ServiceProvider {
     /**
      * Schedules fingerprint enrollment.
      */
-    long scheduleEnroll(int sensorId, @NonNull IBinder token, @NonNull byte[] hardwareAuthToken,
+    void scheduleEnroll(int sensorId, @NonNull IBinder token, @NonNull byte[] hardwareAuthToken,
             int userId, @NonNull IFingerprintServiceReceiver receiver,
-            @NonNull String opPackageName, @FingerprintManager.EnrollReason int enrollReason);
+            @NonNull String opPackageName, @FingerprintManager.EnrollReason int enrollReason,
+            @NonNull FingerprintStateCallback fingerprintStateCallback);
 
-    void cancelEnrollment(int sensorId, @NonNull IBinder token, long requestId);
+    void cancelEnrollment(int sensorId, @NonNull IBinder token);
 
-    long scheduleFingerDetect(int sensorId, @NonNull IBinder token, int userId,
+    void scheduleFingerDetect(int sensorId, @NonNull IBinder token, int userId,
             @NonNull ClientMonitorCallbackConverter callback, @NonNull String opPackageName,
-            int statsClient);
+            int statsClient,
+            @NonNull FingerprintStateCallback fingerprintStateCallback);
 
     void scheduleAuthenticate(int sensorId, @NonNull IBinder token, long operationId, int userId,
             int cookie, @NonNull ClientMonitorCallbackConverter callback,
-            @NonNull String opPackageName, long requestId, boolean restricted, int statsClient,
-            boolean allowBackgroundAuthentication);
-
-    long scheduleAuthenticate(int sensorId, @NonNull IBinder token, long operationId, int userId,
-            int cookie, @NonNull ClientMonitorCallbackConverter callback,
             @NonNull String opPackageName, boolean restricted, int statsClient,
-            boolean allowBackgroundAuthentication);
+            boolean allowBackgroundAuthentication,
+            @NonNull FingerprintStateCallback fingerprintStateCallback);
 
     void startPreparedClient(int sensorId, int cookie);
 
-    void cancelAuthentication(int sensorId, @NonNull IBinder token, long requestId);
+    void cancelAuthentication(int sensorId, @NonNull IBinder token);
 
     void scheduleRemove(int sensorId, @NonNull IBinder token,
             @NonNull IFingerprintServiceReceiver receiver, int fingerId, int userId,
@@ -121,7 +119,7 @@ public interface ServiceProvider {
             @NonNull String opPackageName);
 
     void scheduleInternalCleanup(int sensorId, int userId,
-            @Nullable ClientMonitorCallback callback);
+            @Nullable BaseClientMonitor.Callback callback);
 
     boolean isHardwareDetected(int sensorId);
 
@@ -142,11 +140,11 @@ public interface ServiceProvider {
 
     long getAuthenticatorId(int sensorId, int userId);
 
-    void onPointerDown(long requestId, int sensorId, int x, int y, float minor, float major);
+    void onPointerDown(int sensorId, int x, int y, float minor, float major);
 
-    void onPointerUp(long requestId, int sensorId);
+    void onPointerUp(int sensorId);
 
-    void onUiReady(long requestId, int sensorId);
+    void onUiReady(int sensorId);
 
     void setUdfpsOverlayController(@NonNull IUdfpsOverlayController controller);
 
@@ -165,5 +163,6 @@ public interface ServiceProvider {
 
     @NonNull
     ITestSession createTestSession(int sensorId, @NonNull ITestSessionCallback callback,
+            @NonNull FingerprintStateCallback fingerprintStateCallback,
             @NonNull String opPackageName);
 }

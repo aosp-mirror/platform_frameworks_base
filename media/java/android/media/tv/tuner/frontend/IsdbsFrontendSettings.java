@@ -20,10 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
-import android.hardware.tv.tuner.FrontendIsdbsCoderate;
-import android.hardware.tv.tuner.FrontendIsdbsModulation;
-import android.hardware.tv.tuner.FrontendIsdbsRolloff;
-import android.hardware.tv.tuner.FrontendIsdbsStreamIdType;
+import android.hardware.tv.tuner.V1_0.Constants;
 import android.media.tv.tuner.Tuner;
 
 import java.lang.annotation.Retention;
@@ -45,16 +42,17 @@ public class IsdbsFrontendSettings extends FrontendSettings {
     /**
      * Uses stream ID.
      */
-    public static final int STREAM_ID_TYPE_ID = FrontendIsdbsStreamIdType.STREAM_ID;
+    public static final int STREAM_ID_TYPE_ID = Constants.FrontendIsdbsStreamIdType.STREAM_ID;
     /**
      * Uses relative number.
      */
     public static final int STREAM_ID_TYPE_RELATIVE_NUMBER =
-            FrontendIsdbsStreamIdType.RELATIVE_STREAM_NUMBER;
+            Constants.FrontendIsdbsStreamIdType.RELATIVE_STREAM_NUMBER;
 
 
     /** @hide */
-    @IntDef(prefix = "MODULATION_",
+    @IntDef(flag = true,
+            prefix = "MODULATION_",
             value = {MODULATION_UNDEFINED, MODULATION_AUTO, MODULATION_MOD_BPSK,
                     MODULATION_MOD_QPSK, MODULATION_MOD_TC8PSK})
     @Retention(RetentionPolicy.SOURCE)
@@ -63,27 +61,28 @@ public class IsdbsFrontendSettings extends FrontendSettings {
     /**
      * Modulation undefined.
      */
-    public static final int MODULATION_UNDEFINED = FrontendIsdbsModulation.UNDEFINED;
+    public static final int MODULATION_UNDEFINED = Constants.FrontendIsdbsModulation.UNDEFINED;
     /**
      * Hardware is able to detect and set modulation automatically
      */
-    public static final int MODULATION_AUTO = FrontendIsdbsModulation.AUTO;
+    public static final int MODULATION_AUTO = Constants.FrontendIsdbsModulation.AUTO;
     /**
      * BPSK Modulation.
      */
-    public static final int MODULATION_MOD_BPSK = FrontendIsdbsModulation.MOD_BPSK;
+    public static final int MODULATION_MOD_BPSK = Constants.FrontendIsdbsModulation.MOD_BPSK;
     /**
      * QPSK Modulation.
      */
-    public static final int MODULATION_MOD_QPSK = FrontendIsdbsModulation.MOD_QPSK;
+    public static final int MODULATION_MOD_QPSK = Constants.FrontendIsdbsModulation.MOD_QPSK;
     /**
      * TC8PSK Modulation.
      */
-    public static final int MODULATION_MOD_TC8PSK = FrontendIsdbsModulation.MOD_TC8PSK;
+    public static final int MODULATION_MOD_TC8PSK = Constants.FrontendIsdbsModulation.MOD_TC8PSK;
 
 
     /** @hide */
-    @IntDef(prefix = "CODERATE_",
+    @IntDef(flag = true,
+            prefix = "CODERATE_",
             value = {CODERATE_UNDEFINED, CODERATE_AUTO, CODERATE_1_2, CODERATE_2_3, CODERATE_3_4,
                     CODERATE_5_6, CODERATE_7_8})
     @Retention(RetentionPolicy.SOURCE)
@@ -92,31 +91,31 @@ public class IsdbsFrontendSettings extends FrontendSettings {
     /**
      * Code rate undefined.
      */
-    public static final int CODERATE_UNDEFINED = FrontendIsdbsCoderate.UNDEFINED;
+    public static final int CODERATE_UNDEFINED = Constants.FrontendIsdbsCoderate.UNDEFINED;
     /**
      * Hardware is able to detect and set code rate automatically.
      */
-    public static final int CODERATE_AUTO = FrontendIsdbsCoderate.AUTO;
+    public static final int CODERATE_AUTO = Constants.FrontendIsdbsCoderate.AUTO;
     /**
      * 1/2 code rate.
      */
-    public static final int CODERATE_1_2 = FrontendIsdbsCoderate.CODERATE_1_2;
+    public static final int CODERATE_1_2 = Constants.FrontendIsdbsCoderate.CODERATE_1_2;
     /**
      * 2/3 code rate.
      */
-    public static final int CODERATE_2_3 = FrontendIsdbsCoderate.CODERATE_2_3;
+    public static final int CODERATE_2_3 = Constants.FrontendIsdbsCoderate.CODERATE_2_3;
     /**
      * 3/4 code rate.
      */
-    public static final int CODERATE_3_4 = FrontendIsdbsCoderate.CODERATE_3_4;
+    public static final int CODERATE_3_4 = Constants.FrontendIsdbsCoderate.CODERATE_3_4;
     /**
      * 5/6 code rate.
      */
-    public static final int CODERATE_5_6 = FrontendIsdbsCoderate.CODERATE_5_6;
+    public static final int CODERATE_5_6 = Constants.FrontendIsdbsCoderate.CODERATE_5_6;
     /**
      * 7/8 code rate.
      */
-    public static final int CODERATE_7_8 = FrontendIsdbsCoderate.CODERATE_7_8;
+    public static final int CODERATE_7_8 = Constants.FrontendIsdbsCoderate.CODERATE_7_8;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
@@ -127,11 +126,11 @@ public class IsdbsFrontendSettings extends FrontendSettings {
     /**
      * Rolloff type undefined.
      */
-    public static final int ROLLOFF_UNDEFINED = FrontendIsdbsRolloff.UNDEFINED;
+    public static final int ROLLOFF_UNDEFINED = Constants.FrontendIsdbsRolloff.UNDEFINED;
     /**
      * 0,35 rolloff.
      */
-    public static final int ROLLOFF_0_35 = FrontendIsdbsRolloff.ROLLOFF_0_35;
+    public static final int ROLLOFF_0_35 = Constants.FrontendIsdbsRolloff.ROLLOFF_0_35;
 
 
     private final int mStreamId;
@@ -141,7 +140,7 @@ public class IsdbsFrontendSettings extends FrontendSettings {
     private final int mSymbolRate;
     private final int mRolloff;
 
-    private IsdbsFrontendSettings(long frequency, int streamId, int streamIdType, int modulation,
+    private IsdbsFrontendSettings(int frequency, int streamId, int streamIdType, int modulation,
             int codeRate, int symbolRate, int rolloff) {
         super(frequency);
         mStreamId = streamId;
@@ -205,7 +204,7 @@ public class IsdbsFrontendSettings extends FrontendSettings {
      * Builder for {@link IsdbsFrontendSettings}.
      */
     public static class Builder {
-        private long mFrequency = 0;
+        private int mFrequency = 0;
         private int mStreamId = Tuner.INVALID_STREAM_ID;
         private int mStreamIdType = STREAM_ID_TYPE_ID;
         private int mModulation = MODULATION_UNDEFINED;
@@ -220,23 +219,10 @@ public class IsdbsFrontendSettings extends FrontendSettings {
          * Sets frequency in Hz.
          *
          * <p>Default value is 0.
-         * @deprecated Use {@link #setFrequencyLong(long)}
          */
         @NonNull
         @IntRange(from = 1)
-        @Deprecated
         public Builder setFrequency(int frequency) {
-            return setFrequencyLong((long) frequency);
-        }
-
-        /**
-         * Sets frequency in Hz.
-         *
-         * <p>Default value is 0.
-         */
-        @NonNull
-        @IntRange(from = 1)
-        public Builder setFrequencyLong(long frequency) {
             mFrequency = frequency;
             return this;
         }

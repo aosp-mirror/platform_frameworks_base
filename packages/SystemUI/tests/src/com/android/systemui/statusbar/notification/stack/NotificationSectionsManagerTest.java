@@ -18,11 +18,11 @@ package com.android.systemui.statusbar.notification.stack;
 
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
-import static com.android.systemui.statusbar.notification.stack.NotificationPriorityBucketKt.BUCKET_ALERTING;
-import static com.android.systemui.statusbar.notification.stack.NotificationPriorityBucketKt.BUCKET_FOREGROUND_SERVICE;
-import static com.android.systemui.statusbar.notification.stack.NotificationPriorityBucketKt.BUCKET_HEADS_UP;
-import static com.android.systemui.statusbar.notification.stack.NotificationPriorityBucketKt.BUCKET_PEOPLE;
-import static com.android.systemui.statusbar.notification.stack.NotificationPriorityBucketKt.BUCKET_SILENT;
+import static com.android.systemui.statusbar.notification.stack.NotificationSectionsManagerKt.BUCKET_ALERTING;
+import static com.android.systemui.statusbar.notification.stack.NotificationSectionsManagerKt.BUCKET_FOREGROUND_SERVICE;
+import static com.android.systemui.statusbar.notification.stack.NotificationSectionsManagerKt.BUCKET_HEADS_UP;
+import static com.android.systemui.statusbar.notification.stack.NotificationSectionsManagerKt.BUCKET_PEOPLE;
+import static com.android.systemui.statusbar.notification.stack.NotificationSectionsManagerKt.BUCKET_SILENT;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -32,7 +32,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -41,20 +40,21 @@ import static org.mockito.Mockito.when;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.util.AttributeSet;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.systemui.ActivityStarterDelegate;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.media.KeyguardMediaController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.StatusBarState;
-import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.NotificationSectionsFeatureManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
-import com.android.systemui.statusbar.notification.collection.render.MediaContainerController;
 import com.android.systemui.statusbar.notification.collection.render.SectionHeaderController;
+import com.android.systemui.statusbar.notification.people.PeopleHubViewAdapter;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationViewController;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.dagger.NotificationRowComponent;
@@ -64,7 +64,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InOrder;
+import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
@@ -80,19 +80,19 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
     @Rule public final MockitoRule mockitoRule = MockitoJUnit.rule();
 
     @Mock private NotificationStackScrollLayout mNssl;
+    @Mock private ActivityStarterDelegate mActivityStarterDelegate;
     @Mock private StatusBarStateController mStatusBarStateController;
     @Mock private ConfigurationController mConfigurationController;
+    @Mock private PeopleHubViewAdapter mPeopleHubAdapter;
     @Mock private KeyguardMediaController mKeyguardMediaController;
     @Mock private NotificationSectionsFeatureManager mSectionsFeatureManager;
     @Mock private NotificationRowComponent mNotificationRowComponent;
     @Mock private ActivatableNotificationViewController mActivatableNotificationViewController;
     @Mock private NotificationSectionsLogger mLogger;
-    @Mock private MediaContainerController mMediaContainerController;
     @Mock private SectionHeaderController mIncomingHeaderController;
     @Mock private SectionHeaderController mPeopleHeaderController;
     @Mock private SectionHeaderController mAlertingHeaderController;
     @Mock private SectionHeaderController mSilentHeaderController;
-    @Mock private NotifPipelineFlags mNotifPipelineFlags;
 
     private NotificationSectionsManager mSectionsManager;
 
@@ -115,8 +115,6 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
                 });
         when(mNotificationRowComponent.getActivatableNotificationViewController())
                 .thenReturn(mActivatableNotificationViewController);
-        when(mMediaContainerController.getMediaContainerView())
-                .thenReturn(mock(MediaContainerView.class));
         when(mIncomingHeaderController.getHeaderView()).thenReturn(mock(SectionHeaderView.class));
         when(mPeopleHeaderController.getHeaderView()).thenReturn(mock(SectionHeaderView.class));
         when(mAlertingHeaderController.getHeaderView()).thenReturn(mock(SectionHeaderView.class));
@@ -128,8 +126,6 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
                         mKeyguardMediaController,
                         mSectionsFeatureManager,
                         mLogger,
-                        mNotifPipelineFlags,
-                        mMediaContainerController,
                         mIncomingHeaderController,
                         mPeopleHeaderController,
                         mAlertingHeaderController,
@@ -138,7 +134,7 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
         // Required in order for the header inflation to work properly
         when(mNssl.generateLayoutParams(any(AttributeSet.class)))
                 .thenReturn(new ViewGroup.LayoutParams(WRAP_CONTENT, WRAP_CONTENT));
-        mSectionsManager.initialize(mNssl);
+        mSectionsManager.initialize(mNssl, LayoutInflater.from(mContext));
         when(mNssl.indexOfChild(any(View.class))).thenReturn(-1);
         when(mStatusBarStateController.getState()).thenReturn(StatusBarState.SHADE);
 
@@ -146,7 +142,7 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
 
     @Test(expected =  IllegalStateException.class)
     public void testDuplicateInitializeThrows() {
-        mSectionsManager.initialize(mNssl);
+        mSectionsManager.initialize(mNssl, LayoutInflater.from(mContext));
     }
 
     @Test
@@ -269,9 +265,8 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
 
         // THEN the header is first removed from the transient parent before being added to the
         // NSSL.
-        final InOrder inOrder = inOrder(silentHeaderView, mNssl);
-        inOrder.verify(silentHeaderView).removeFromTransientContainer();
-        inOrder.verify(mNssl).addView(eq(silentHeaderView), eq(1));
+        verify(transientParent).removeTransientView(silentHeaderView);
+        verify(mNssl).addView(silentHeaderView, 1);
     }
 
     @Test
@@ -613,7 +608,7 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
         }
     }
 
-    private View mockNotification(@PriorityBucket int bucket, boolean isGone) {
+    private View mockNotification(int bucket, boolean isGone) {
         ExpandableNotificationRow notifRow =
                 mock(ExpandableNotificationRow.class, RETURNS_DEEP_STUBS);
         when(notifRow.getVisibility()).thenReturn(View.VISIBLE);

@@ -16,11 +16,13 @@
 
 package android.service.timezone;
 
-import android.service.timezone.TimeZoneProviderEvent;
+import android.service.timezone.TimeZoneProviderSuggestion;
 
 /**
  * @hide
  */
 oneway interface ITimeZoneProviderManager {
-    void onTimeZoneProviderEvent(in TimeZoneProviderEvent timeZoneProviderEvent);
+    void onTimeZoneProviderSuggestion(in TimeZoneProviderSuggestion timeZoneProviderSuggestion);
+    void onTimeZoneProviderUncertain();
+    void onTimeZoneProviderPermanentFailure(in String failureReason);
 }

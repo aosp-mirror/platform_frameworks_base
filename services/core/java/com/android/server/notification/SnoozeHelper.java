@@ -116,8 +116,7 @@ public class SnoozeHelper {
         mContext = context;
         IntentFilter filter = new IntentFilter(REPOST_ACTION);
         filter.addDataScheme(REPOST_SCHEME);
-        mContext.registerReceiver(mBroadcastReceiver, filter,
-                Context.RECEIVER_EXPORTED_UNAUDITED);
+        mContext.registerReceiver(mBroadcastReceiver, filter);
         mAm = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
         mCallback = callback;
         mUserProfiles = userProfiles;

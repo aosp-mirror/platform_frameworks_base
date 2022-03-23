@@ -210,8 +210,6 @@ public class AlarmManager {
      * on how frequently it can be scheduled.  Only available (and automatically applied) to
      * system alarms.
      *
-     * <p>Note that alarms set with a {@link WorkSource} <b>do not</b> get this flag.
-     *
      * @hide
      */
     @UnsupportedAppUsage
@@ -1410,7 +1408,6 @@ public class AlarmManager {
          * Use the {@link #CREATOR}
          * @hide
          */
-        @SuppressWarnings("UnsafeParcelApi")
         AlarmClockInfo(Parcel in) {
             mTriggerTime = in.readLong();
             mShowIntent = in.readParcelable(PendingIntent.class.getClassLoader());

@@ -21,6 +21,7 @@ import static com.android.server.wm.WindowAnimationSpecProto.ANIMATION;
 
 import android.annotation.NonNull;
 import android.content.Context;
+import android.util.ArrayMap;
 import android.util.proto.ProtoOutputStream;
 import android.view.SurfaceControl;
 import android.view.animation.Animation;
@@ -35,11 +36,10 @@ import java.io.PrintWriter;
  * An animation controller to fade-in/out for a window token.
  */
 public class FadeAnimationController {
-    protected final DisplayContent mDisplayContent;
     protected final Context mContext;
+    protected final ArrayMap<WindowToken, Runnable> mDeferredFinishCallbacks = new ArrayMap<>();
 
     public FadeAnimationController(DisplayContent displayContent) {
-        mDisplayContent = displayContent;
         mContext = displayContent.mWmService.mContext;
     }
 
@@ -69,21 +69,34 @@ public class FadeAnimationController {
             return;
         }
 
-        final Animation animation = show ? getFadeInAnimation() : getFadeOutAnimation();
-        final FadeAnimationAdapter animationAdapter = animation != null
-                ? createAdapter(createAnimationSpec(animation), show, windowToken) : null;
+        final FadeAnimationAdapter animationAdapter = createAdapter(show, windowToken);
         if (animationAdapter == null) {
             return;
         }
 
+        // We deferred the end of the animation when hiding the token, so we need to end it now that
+        // it's shown again.
+        final SurfaceAnimator.OnAnimationFinishedCallback finishedCallback = show ? (t, r) -> {
+            final Runnable runnable = mDeferredFinishCallbacks.remove(windowToken);
+            if (runnable != null) {
+                runnable.run();
+            }
+        } : null;
         windowToken.startAnimation(windowToken.getPendingTransaction(), animationAdapter,
-                show /* hidden */, animationType, null /* finishedCallback */);
+                show /* hidden */, animationType, finishedCallback);
     }
 
-    protected FadeAnimationAdapter createAdapter(LocalAnimationAdapter.AnimationSpec animationSpec,
-            boolean show, WindowToken windowToken) {
-        return new FadeAnimationAdapter(animationSpec, windowToken.getSurfaceAnimationRunner(),
-                show, windowToken);
+    protected FadeAnimationAdapter createAdapter(boolean show, WindowToken windowToken) {
+        final Animation animation = show ? getFadeInAnimation() : getFadeOutAnimation();
+        if (animation == null) {
+            return null;
+        }
+
+        final LocalAnimationAdapter.AnimationSpec windowAnimationSpec =
+                createAnimationSpec(animation);
+
+        return new FadeAnimationAdapter(
+                windowAnimationSpec, windowToken.getSurfaceAnimationRunner(), show, windowToken);
     }
 
     protected LocalAnimationAdapter.AnimationSpec createAnimationSpec(
@@ -125,9 +138,9 @@ public class FadeAnimationController {
         };
     }
 
-    protected static class FadeAnimationAdapter extends LocalAnimationAdapter {
+    protected class FadeAnimationAdapter extends LocalAnimationAdapter {
         protected final boolean mShow;
-        protected final WindowToken mToken;
+        private final WindowToken mToken;
 
         FadeAnimationAdapter(AnimationSpec windowAnimationSpec,
                 SurfaceAnimationRunner surfaceAnimationRunner, boolean show,
@@ -139,10 +152,13 @@ public class FadeAnimationController {
 
         @Override
         public boolean shouldDeferAnimationFinish(Runnable endDeferFinishCallback) {
-            // Defer the finish callback (restore leash) of the hide animation to ensure the token
-            // stay hidden until it needs to show again. Besides, when starting the show animation,
-            // the previous hide animation will be cancelled, so the callback can be ignored.
-            return !mShow;
+            // We defer the end of the hide animation to ensure the tokens stay hidden until
+            // we show them again.
+            if (!mShow) {
+                mDeferredFinishCallbacks.put(mToken, endDeferFinishCallback);
+                return true;
+            }
+            return false;
         }
     }
 }

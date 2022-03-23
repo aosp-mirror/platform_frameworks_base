@@ -97,11 +97,7 @@ class ControlsProviderLifecycleManager(
                     }
                     bindTryCount++
                     try {
-                        val bound = context
-                            .bindServiceAsUser(intent, serviceConnection, BIND_FLAGS, user)
-                        if (!bound) {
-                            context.unbindService(serviceConnection)
-                        }
+                        context.bindServiceAsUser(intent, serviceConnection, BIND_FLAGS, user)
                     } catch (e: SecurityException) {
                         Log.e(TAG, "Failed to bind to service", e)
                     }

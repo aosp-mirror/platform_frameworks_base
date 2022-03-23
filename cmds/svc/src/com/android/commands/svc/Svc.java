@@ -96,7 +96,7 @@ public class Svc {
             // `svc wifi` has been migrated to WifiShellCommand
             new UsbCommand(),
             new NfcCommand(),
-            // `svc bluetooth` has been migrated to BluetoothShellCommand
+            new BluetoothCommand(),
             new SystemServerCommand(),
     };
 }

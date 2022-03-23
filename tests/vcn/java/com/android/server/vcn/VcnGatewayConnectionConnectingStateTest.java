@@ -64,7 +64,7 @@ public class VcnGatewayConnectionConnectingStateTest extends VcnGatewayConnectio
     @Test
     public void testNullNetworkTriggersDisconnect() throws Exception {
         mGatewayConnection
-                .getUnderlyingNetworkControllerCallback()
+                .getUnderlyingNetworkTrackerCallback()
                 .onSelectedUnderlyingNetworkChanged(null);
         mTestLooper.dispatchAll();
 
@@ -76,7 +76,7 @@ public class VcnGatewayConnectionConnectingStateTest extends VcnGatewayConnectio
     @Test
     public void testNewNetworkTriggersReconnect() throws Exception {
         mGatewayConnection
-                .getUnderlyingNetworkControllerCallback()
+                .getUnderlyingNetworkTrackerCallback()
                 .onSelectedUnderlyingNetworkChanged(TEST_UNDERLYING_NETWORK_RECORD_2);
         mTestLooper.dispatchAll();
 
@@ -89,7 +89,7 @@ public class VcnGatewayConnectionConnectingStateTest extends VcnGatewayConnectio
     @Test
     public void testSameNetworkDoesNotTriggerReconnect() throws Exception {
         mGatewayConnection
-                .getUnderlyingNetworkControllerCallback()
+                .getUnderlyingNetworkTrackerCallback()
                 .onSelectedUnderlyingNetworkChanged(TEST_UNDERLYING_NETWORK_RECORD_1);
         mTestLooper.dispatchAll();
 

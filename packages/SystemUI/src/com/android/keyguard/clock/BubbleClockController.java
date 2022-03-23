@@ -91,7 +91,7 @@ public class BubbleClockController implements ClockPlugin {
         mResources = res;
         mLayoutInflater = inflater;
         mColorExtractor = colorExtractor;
-        mClockPosition = new SmallClockPosition(inflater.getContext());
+        mClockPosition = new SmallClockPosition(res);
     }
 
     private void createViews() {

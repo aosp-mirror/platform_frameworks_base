@@ -16,7 +16,6 @@
 
 package com.android.server.notification;
 
-import static android.service.notification.NotificationListenerService.REASON_ASSISTANT_CANCEL;
 import static android.service.notification.NotificationListenerService.REASON_CANCEL;
 import static android.service.notification.NotificationListenerService.REASON_CLICK;
 import static android.service.notification.NotificationListenerService.REASON_TIMEOUT;
@@ -60,20 +59,6 @@ public interface NotificationRecordLogger {
             InstanceId groupId);
 
     /**
-     * Logs a NotificationReported atom reflecting an adjustment to a notification.
-     * Unlike maybeLogNotificationPosted, this method is guaranteed to log a notification update,
-     * so the caller must take responsibility for checking that that logging update is necessary,
-     * and that the notification is meaningfully changed.
-     * @param r The NotificationRecord. If null, no action is taken.
-     * @param position The position at which this notification is ranked.
-     * @param buzzBeepBlink Logging code reflecting whether this notification alerted the user.
-     * @param groupId The instance Id of the group summary notification, or null.
-     */
-    void logNotificationAdjusted(@Nullable NotificationRecord r,
-            int position, int buzzBeepBlink,
-            InstanceId groupId);
-
-    /**
      * Logs a notification cancel / dismiss event using UiEventReported (event ids from the
      * NotificationCancelledEvents enum).
      * @param r The NotificationRecord. If null, no action is taken.
@@ -111,9 +96,7 @@ public interface NotificationRecordLogger {
         @UiEvent(doc = "New notification enqueued to post")
         NOTIFICATION_POSTED(162),
         @UiEvent(doc = "Notification substantially updated, or alerted again.")
-        NOTIFICATION_UPDATED(163),
-        @UiEvent(doc = "Notification adjusted by assistant.")
-        NOTIFICATION_ADJUSTED(908);
+        NOTIFICATION_UPDATED(163);
 
         private final int mId;
         NotificationReportedEvent(int id) {
@@ -181,9 +164,7 @@ public interface NotificationRecordLogger {
                 + " shade.")
         NOTIFICATION_CANCEL_USER_SHADE(192),
         @UiEvent(doc = "Notification was canceled due to user dismissal from the lockscreen")
-        NOTIFICATION_CANCEL_USER_LOCKSCREEN(193),
-        @UiEvent(doc = "Notification was canceled due to an assistant adjustment update.")
-        NOTIFICATION_CANCEL_ASSISTANT(906);
+        NOTIFICATION_CANCEL_USER_LOCKSCREEN(193);
 
         private final int mId;
         NotificationCancelledEvent(int id) {
@@ -208,9 +189,6 @@ public interface NotificationRecordLogger {
             if (surface == NotificationStats.DISMISSAL_OTHER) {
                 if ((REASON_CLICK <= reason) && (reason <= REASON_TIMEOUT)) {
                     return NotificationCancelledEvent.values()[reason];
-                }
-                if (reason == REASON_ASSISTANT_CANCEL) {
-                    return NotificationCancelledEvent.NOTIFICATION_CANCEL_ASSISTANT;
                 }
                 if (NotificationManagerService.DBG) {
                     throw new IllegalArgumentException("Unexpected cancel reason " + reason);
@@ -371,8 +349,7 @@ public interface NotificationRecordLogger {
                     && Objects.equals(r.getSbn().getNotification().category,
                         old.getSbn().getNotification().category)
                     && (r.getImportance() == old.getImportance())
-                    && (getLoggingImportance(r) == getLoggingImportance(old))
-                    && r.rankingScoreMatches(old.getRankingScore()));
+                    && (getLoggingImportance(r) == getLoggingImportance(old)));
         }
 
         /**
@@ -452,14 +429,4 @@ public interface NotificationRecordLogger {
         return NotificationChannelLogger.getLoggingImportance(channel, importance);
     }
 
-    /**
-     * @param r NotificationRecord
-     * @return Whether the notification is a foreground service notification.
-     */
-    static boolean isForegroundService(@NonNull NotificationRecord r) {
-        if (r.getSbn() == null || r.getSbn().getNotification() == null) {
-            return false;
-        }
-        return (r.getSbn().getNotification().flags & Notification.FLAG_FOREGROUND_SERVICE) != 0;
-    }
 }

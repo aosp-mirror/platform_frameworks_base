@@ -1376,11 +1376,6 @@ public class BlobStoreManagerService extends SystemService {
         }
     }
 
-    private boolean isAllowedBlobAccess(int uid, String packageName) {
-        return (!Process.isSdkSandboxUid(uid) && !Process.isIsolated(uid)
-                && !mPackageManagerInternal.isInstantApp(packageName, UserHandle.getUserId(uid)));
-    }
-
     private class PackageChangedReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -1442,7 +1437,8 @@ public class BlobStoreManagerService extends SystemService {
             final int callingUid = Binder.getCallingUid();
             verifyCallingPackage(callingUid, packageName);
 
-            if (!isAllowedBlobAccess(callingUid, packageName)) {
+            if (Process.isIsolated(callingUid) || mPackageManagerInternal.isInstantApp(
+                    packageName, UserHandle.getUserId(callingUid))) {
                 throw new SecurityException("Caller not allowed to create session; "
                         + "callingUid=" + callingUid + ", callingPackage=" + packageName);
             }
@@ -1491,7 +1487,8 @@ public class BlobStoreManagerService extends SystemService {
             final int callingUid = Binder.getCallingUid();
             verifyCallingPackage(callingUid, packageName);
 
-            if (!isAllowedBlobAccess(callingUid, packageName)) {
+            if (Process.isIsolated(callingUid) || mPackageManagerInternal.isInstantApp(
+                    packageName, UserHandle.getUserId(callingUid))) {
                 throw new SecurityException("Caller not allowed to open blob; "
                         + "callingUid=" + callingUid + ", callingPackage=" + packageName);
             }
@@ -1522,7 +1519,8 @@ public class BlobStoreManagerService extends SystemService {
             final int callingUid = Binder.getCallingUid();
             verifyCallingPackage(callingUid, packageName);
 
-            if (!isAllowedBlobAccess(callingUid, packageName)) {
+            if (Process.isIsolated(callingUid) || mPackageManagerInternal.isInstantApp(
+                    packageName, UserHandle.getUserId(callingUid))) {
                 throw new SecurityException("Caller not allowed to open blob; "
                         + "callingUid=" + callingUid + ", callingPackage=" + packageName);
             }
@@ -1546,7 +1544,8 @@ public class BlobStoreManagerService extends SystemService {
             final int callingUid = Binder.getCallingUid();
             verifyCallingPackage(callingUid, packageName);
 
-            if (!isAllowedBlobAccess(callingUid, packageName)) {
+            if (Process.isIsolated(callingUid) || mPackageManagerInternal.isInstantApp(
+                    packageName, UserHandle.getUserId(callingUid))) {
                 throw new SecurityException("Caller not allowed to open blob; "
                         + "callingUid=" + callingUid + ", callingPackage=" + packageName);
             }
@@ -1629,7 +1628,8 @@ public class BlobStoreManagerService extends SystemService {
             final int callingUid = Binder.getCallingUid();
             verifyCallingPackage(callingUid, packageName);
 
-            if (!isAllowedBlobAccess(callingUid, packageName)) {
+            if (Process.isIsolated(callingUid) || mPackageManagerInternal.isInstantApp(
+                    packageName, UserHandle.getUserId(callingUid))) {
                 throw new SecurityException("Caller not allowed to open blob; "
                         + "callingUid=" + callingUid + ", callingPackage=" + packageName);
             }

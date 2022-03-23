@@ -179,11 +179,7 @@ public final class ParcelableHolder implements Parcelable {
      * Read ParcelableHolder from a parcel.
      */
     public void readFromParcel(@NonNull Parcel parcel) {
-        int wireStability = parcel.readInt();
-        if (this.mStability != wireStability) {
-            throw new IllegalArgumentException("Expected stability " + this.mStability
-                                               + " but got " + wireStability);
-        }
+        this.mStability = parcel.readInt();
 
         mParcelable = null;
 

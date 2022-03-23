@@ -32,12 +32,7 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * Provides QOS attributes of an EPS bearer.
- *
- * <p> The dedicated EPS bearer along with QOS is allocated by the LTE network and notified to the
- * device. The Telephony framework creates the {@link EpsBearerQosSessionAttributes} object which
- * represents the QOS of the dedicated bearer and notifies the same to applications via
- * {@link QosCallback}.
+ * Provides Qos attributes of an EPS bearer.
  *
  * {@hide}
  */

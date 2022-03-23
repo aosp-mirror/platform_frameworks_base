@@ -81,8 +81,7 @@ public class DozeTestDream extends DreamService {
         intent.setPackage(getPackageName());
         IntentFilter filter = new IntentFilter();
         filter.addAction(intent.getAction());
-        registerReceiver(mAlarmReceiver, filter,
-                Context.RECEIVER_EXPORTED_UNAUDITED);
+        registerReceiver(mAlarmReceiver, filter);
         mAlarmIntent = PendingIntent.getBroadcast(this, 0, intent,
                 PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_MUTABLE_UNAUDITED);
 

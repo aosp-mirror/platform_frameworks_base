@@ -122,7 +122,7 @@ public final class PhantomProcessRecord {
                     // We'll notify the listener when we're notified it's dead.
                     // Meanwhile, we'd also need handle the case of zombie processes.
                     mKillHandler.postDelayed(mProcKillTimer, this,
-                            mService.mConstants.mProcessKillTimeoutMs);
+                            ProcessList.PROC_KILL_TIMEOUT);
                 }
                 Process.killProcessQuiet(mPid);
                 ProcessList.killProcessGroup(mUid, mPid);
@@ -138,7 +138,7 @@ public final class PhantomProcessRecord {
             synchronized (mLock) {
                 // The process is maybe in either D or Z state.
                 Slog.w(TAG, "Process " + toString() + " is still alive after "
-                        + mService.mConstants.mProcessKillTimeoutMs + "ms");
+                        + ProcessList.PROC_KILL_TIMEOUT + "ms");
                 // Force a cleanup as we can't keep the fd open forever
                 mZombie = true;
                 onProcDied(false);

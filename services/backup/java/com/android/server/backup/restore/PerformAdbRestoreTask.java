@@ -32,7 +32,6 @@ import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.LocalServices;
-import com.android.server.backup.OperationStorage;
 import com.android.server.backup.UserBackupManagerService;
 import com.android.server.backup.fullbackup.FullBackupObbConnection;
 import com.android.server.backup.utils.BackupEligibilityRules;
@@ -61,7 +60,6 @@ import javax.crypto.spec.SecretKeySpec;
 public class PerformAdbRestoreTask implements Runnable {
 
     private final UserBackupManagerService mBackupManagerService;
-    private final OperationStorage mOperationStorage;
     private final ParcelFileDescriptor mInputFile;
     private final String mCurrentPassword;
     private final String mDecryptPassword;
@@ -70,12 +68,10 @@ public class PerformAdbRestoreTask implements Runnable {
 
     private IFullBackupRestoreObserver mObserver;
 
-    public PerformAdbRestoreTask(
-            UserBackupManagerService backupManagerService, OperationStorage operationStorage,
+    public PerformAdbRestoreTask(UserBackupManagerService backupManagerService,
             ParcelFileDescriptor fd, String curPassword, String decryptPassword,
             IFullBackupRestoreObserver observer, AtomicBoolean latch) {
         this.mBackupManagerService = backupManagerService;
-        mOperationStorage = operationStorage;
         mInputFile = fd;
         mCurrentPassword = curPassword;
         mDecryptPassword = decryptPassword;
@@ -113,9 +109,9 @@ public class PerformAdbRestoreTask implements Runnable {
                     mBackupManagerService.getPackageManager(),
                     LocalServices.getService(PackageManagerInternal.class),
                     mBackupManagerService.getUserId(), BackupManager.OperationType.ADB_BACKUP);
-            FullRestoreEngine mEngine = new FullRestoreEngine(mBackupManagerService,
-                    mOperationStorage, null, mObserver, null, null,
-                    true, 0 /*unused*/, true, eligibilityRules);
+            FullRestoreEngine mEngine = new FullRestoreEngine(mBackupManagerService, null,
+                    mObserver, null, null, true, 0 /*unused*/, true,
+                    eligibilityRules);
             FullRestoreEngineThread mEngineThread = new FullRestoreEngineThread(mEngine,
                     tarInputStream);
             mEngineThread.run();

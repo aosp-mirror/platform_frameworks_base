@@ -80,23 +80,22 @@ open class BlurUtils @Inject constructor(
      * @param opaque if surface is opaque, regardless or having blurs or no.
      */
     fun applyBlur(viewRootImpl: ViewRootImpl?, radius: Int, opaque: Boolean) {
-        if (viewRootImpl == null || !viewRootImpl.surfaceControl.isValid) {
+        if (viewRootImpl == null || !viewRootImpl.surfaceControl.isValid ||
+                !supportsBlursOnWindows()) {
             return
         }
         createTransaction().use {
-            if (supportsBlursOnWindows()) {
-                it.setBackgroundBlurRadius(viewRootImpl.surfaceControl, radius)
-                if (lastAppliedBlur == 0 && radius != 0) {
-                    it.setEarlyWakeupStart()
-                }
-                if (lastAppliedBlur != 0 && radius == 0) {
-                    it.setEarlyWakeupEnd()
-                }
-                lastAppliedBlur = radius
-            }
+            it.setBackgroundBlurRadius(viewRootImpl.surfaceControl, radius)
             it.setOpaque(viewRootImpl.surfaceControl, opaque)
+            if (lastAppliedBlur == 0 && radius != 0) {
+                it.setEarlyWakeupStart()
+            }
+            if (lastAppliedBlur != 0 && radius == 0) {
+                it.setEarlyWakeupEnd()
+            }
             it.apply()
         }
+        lastAppliedBlur = radius
     }
 
     @VisibleForTesting

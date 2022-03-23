@@ -27,7 +27,6 @@ cc_library_shared {
     name: "libservices",
     srcs: [
         ":IDropBoxManagerService.aidl",
-        ":ILogcatManagerService_aidl",
         "src/content/ComponentName.cpp",
         "src/os/DropBoxManager.cpp",
     ],

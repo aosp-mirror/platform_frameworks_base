@@ -20,14 +20,16 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.Spinner;
 
 import androidx.preference.Preference;
 import androidx.preference.Preference.OnPreferenceClickListener;
 import androidx.preference.PreferenceViewHolder;
 
+import com.android.settingslib.widget.settingsspinner.SettingsSpinner;
+import com.android.settingslib.widget.settingsspinner.SettingsSpinnerAdapter;
+
 /**
- * This preference uses Spinner & SettingsSpinnerAdapter which provide default layouts for
+ * This preference uses SettingsSpinner & SettingsSpinnerAdapter which provide default layouts for
  * both view and drop down view of the Spinner.
  */
 public class SettingsSpinnerPreference extends Preference implements OnPreferenceClickListener {
@@ -111,7 +113,7 @@ public class SettingsSpinnerPreference extends Preference implements OnPreferenc
     @Override
     public void onBindViewHolder(PreferenceViewHolder holder) {
         super.onBindViewHolder(holder);
-        final Spinner spinner = (Spinner) holder.findViewById(R.id.spinner);
+        final SettingsSpinner spinner = (SettingsSpinner) holder.findViewById(R.id.spinner);
         spinner.setAdapter(mAdapter);
         spinner.setSelection(mPosition);
         spinner.setOnItemSelectedListener(mOnSelectedListener);

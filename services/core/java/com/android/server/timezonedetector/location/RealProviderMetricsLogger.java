@@ -41,12 +41,12 @@ import com.android.server.timezonedetector.location.LocationTimeZoneProvider.Pro
  * The real implementation of {@link ProviderMetricsLogger} which logs using
  * {@link FrameworkStatsLog}.
  */
-final class RealProviderMetricsLogger implements ProviderMetricsLogger {
+public class RealProviderMetricsLogger implements ProviderMetricsLogger {
 
     @IntRange(from = 0, to = 1)
     private final int mProviderIndex;
 
-    RealProviderMetricsLogger(@IntRange(from = 0, to = 1) int providerIndex) {
+    public RealProviderMetricsLogger(@IntRange(from = 0, to = 1) int providerIndex) {
         mProviderIndex = providerIndex;
     }
 

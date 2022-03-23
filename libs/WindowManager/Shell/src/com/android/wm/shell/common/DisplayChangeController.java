@@ -17,7 +17,6 @@
 package com.android.wm.shell.common;
 
 import android.os.RemoteException;
-import android.util.Slog;
 import android.view.IDisplayWindowRotationCallback;
 import android.view.IDisplayWindowRotationController;
 import android.view.IWindowManager;
@@ -27,7 +26,7 @@ import androidx.annotation.BinderThread;
 
 import com.android.wm.shell.common.annotations.ShellMainThread;
 
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.ArrayList;
 
 /**
  * This module deals with display rotations coming from WM. When WM starts a rotation: after it has
@@ -36,14 +35,14 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * rotation.
  */
 public class DisplayChangeController {
-    private static final String TAG = DisplayChangeController.class.getSimpleName();
 
     private final ShellExecutor mMainExecutor;
     private final IWindowManager mWmService;
     private final IDisplayWindowRotationController mControllerImpl;
 
-    private final CopyOnWriteArrayList<OnDisplayChangingListener> mRotationListener =
-            new CopyOnWriteArrayList<>();
+    private final ArrayList<OnDisplayChangingListener> mRotationListener =
+            new ArrayList<>();
+    private final ArrayList<OnDisplayChangingListener> mTmpListeners = new ArrayList<>();
 
     public DisplayChangeController(IWindowManager wmService, ShellExecutor mainExecutor) {
         mMainExecutor = mainExecutor;
@@ -60,32 +59,34 @@ public class DisplayChangeController {
      * Adds a display rotation controller.
      */
     public void addRotationListener(OnDisplayChangingListener listener) {
-        mRotationListener.add(listener);
+        synchronized (mRotationListener) {
+            mRotationListener.add(listener);
+        }
     }
 
     /**
      * Removes a display rotation controller.
      */
     public void removeRotationListener(OnDisplayChangingListener listener) {
-        mRotationListener.remove(listener);
-    }
-
-    /** Query all listeners for changes that should happen on rotation. */
-    public void dispatchOnRotateDisplay(WindowContainerTransaction outWct, int displayId,
-            final int fromRotation, final int toRotation) {
-        for (OnDisplayChangingListener c : mRotationListener) {
-            c.onRotateDisplay(displayId, fromRotation, toRotation, outWct);
+        synchronized (mRotationListener) {
+            mRotationListener.remove(listener);
         }
     }
 
     private void onRotateDisplay(int displayId, final int fromRotation, final int toRotation,
             IDisplayWindowRotationCallback callback) {
         WindowContainerTransaction t = new WindowContainerTransaction();
-        dispatchOnRotateDisplay(t, displayId, fromRotation, toRotation);
+        synchronized (mRotationListener) {
+            mTmpListeners.clear();
+            // Make a local copy in case the handlers add/remove themselves.
+            mTmpListeners.addAll(mRotationListener);
+        }
+        for (OnDisplayChangingListener c : mTmpListeners) {
+            c.onRotateDisplay(displayId, fromRotation, toRotation, t);
+        }
         try {
             callback.continueRotateDisplay(toRotation, t);
         } catch (RemoteException e) {
-            Slog.e(TAG, "Failed to continue rotation", e);
         }
     }
 

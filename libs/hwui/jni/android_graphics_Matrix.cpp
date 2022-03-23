@@ -378,17 +378,13 @@ static const JNINativeMethod methods[] = {
     {"nEquals", "(JJ)Z", (void*) SkMatrixGlue::equals}
 };
 
-static jclass sClazz;
 static jfieldID sNativeInstanceField;
-static jmethodID sCtor;
 
 int register_android_graphics_Matrix(JNIEnv* env) {
     int result = RegisterMethodsOrDie(env, "android/graphics/Matrix", methods, NELEM(methods));
 
     jclass clazz = FindClassOrDie(env, "android/graphics/Matrix");
-    sClazz = MakeGlobalRefOrDie(env, clazz);
     sNativeInstanceField = GetFieldIDOrDie(env, clazz, "native_instance", "J");
-    sCtor = GetMethodIDOrDie(env, clazz, "<init>", "()V");
 
     return result;
 }
@@ -397,7 +393,4 @@ SkMatrix* android_graphics_Matrix_getSkMatrix(JNIEnv* env, jobject matrixObj) {
     return reinterpret_cast<SkMatrix*>(env->GetLongField(matrixObj, sNativeInstanceField));
 }
 
-jobject android_graphics_Matrix_newInstance(JNIEnv* env) {
-    return env->NewObject(sClazz, sCtor);
-}
 }

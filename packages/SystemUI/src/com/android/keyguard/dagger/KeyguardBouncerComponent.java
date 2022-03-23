@@ -16,13 +16,10 @@
 
 package com.android.keyguard.dagger;
 
-import android.view.ViewGroup;
-
 import com.android.keyguard.KeyguardHostViewController;
-import com.android.systemui.dagger.qualifiers.RootView;
+import com.android.keyguard.KeyguardRootViewController;
 import com.android.systemui.statusbar.phone.KeyguardBouncer;
 
-import dagger.BindsInstance;
 import dagger.Subcomponent;
 
 /**
@@ -34,8 +31,11 @@ public interface KeyguardBouncerComponent {
     /** Simple factory for {@link KeyguardBouncerComponent}. */
     @Subcomponent.Factory
     interface Factory {
-        KeyguardBouncerComponent create(@BindsInstance @RootView ViewGroup bouncerContainer);
+        KeyguardBouncerComponent create();
     }
+
+    /** Returns a {@link KeyguardRootViewController}. */
+    KeyguardRootViewController getKeyguardRootViewController();
 
     /** Returns a {@link KeyguardHostViewController}. */
     KeyguardHostViewController getKeyguardHostViewController();

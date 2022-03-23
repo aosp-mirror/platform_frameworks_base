@@ -15,7 +15,7 @@
 -->
 <inset xmlns:android="http://schemas.android.com/apk/res/android">
     <shape>
-        <solid android:color="@android:color/transparent"/>
+        <solid android:color="@color/qs_detail_transition"/>
         <corners android:radius="?android:attr/dialogCornerRadius" />
     </shape>
 </inset>

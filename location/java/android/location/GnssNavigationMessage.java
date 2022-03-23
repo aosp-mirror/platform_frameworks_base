@@ -358,7 +358,7 @@ public final class GnssNavigationMessage implements Parcelable {
     }
 
     /**
-     * Gets the data of the reported GNSS message.
+     * Gets the data of the reported GPS message.
      *
      * <p>The bytes (or words) specified using big endian format (MSB first).
      *

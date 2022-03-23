@@ -39,14 +39,12 @@ public class RecentsAnimationControllerCompat {
 
     public ThumbnailData screenshotTask(int taskId) {
         try {
-            final TaskSnapshot snapshot = mAnimationController.screenshotTask(taskId);
-            if (snapshot != null) {
-                return new ThumbnailData(snapshot);
-            }
+            TaskSnapshot snapshot = mAnimationController.screenshotTask(taskId);
+            return snapshot != null ? new ThumbnailData(snapshot) : new ThumbnailData();
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to screenshot task", e);
+            return new ThumbnailData();
         }
-        return new ThumbnailData();
     }
 
     public void setInputConsumerEnabled(boolean enabled) {

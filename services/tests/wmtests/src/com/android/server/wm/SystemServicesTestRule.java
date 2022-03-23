@@ -18,7 +18,6 @@ package com.android.server.wm;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
-import static android.provider.DeviceConfig.NAMESPACE_CONSTRAIN_DISPLAY_APIS;
 import static android.testing.DexmakerShareClassLoaderRule.runWithDexmakerShareClassLoader;
 import static android.view.Display.DEFAULT_DISPLAY;
 
@@ -28,7 +27,6 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyBoolean;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyInt;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyString;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.eq;
@@ -37,9 +35,6 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSess
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.nullable;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
-
-import static org.mockito.Mockito.CALLS_REAL_METHODS;
-import static org.mockito.Mockito.withSettings;
 
 import android.app.ActivityManagerInternal;
 import android.app.AppOpsManager;
@@ -62,7 +57,6 @@ import android.os.PowerManagerInternal;
 import android.os.PowerSaveState;
 import android.os.StrictMode;
 import android.os.UserHandle;
-import android.provider.DeviceConfig;
 import android.util.Log;
 import android.view.InputChannel;
 import android.view.Surface;
@@ -89,12 +83,10 @@ import com.android.server.uri.UriGrantsManagerInternal;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
-import org.mockito.MockSettings;
 import org.mockito.Mockito;
 import org.mockito.quality.Strictness;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
@@ -107,19 +99,9 @@ public class SystemServicesTestRule implements TestRule {
     private static final String TAG = SystemServicesTestRule.class.getSimpleName();
 
     static int sNextDisplayId = DEFAULT_DISPLAY + 100;
+    static int sNextTaskId = 100;
 
     private static final int[] TEST_USER_PROFILE_IDS = {};
-    /** Use a real static object so there won't be NPE in finalize() after clearInlineMocks(). */
-    private static final PowerManager.WakeLock sWakeLock = getInstrumentation().getContext()
-            .getSystemService(PowerManager.class).newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
-    private PowerManager.WakeLock mStubbedWakeLock;
-
-    /**
-     * The captured listeners will be unregistered in {@link #tearDown()} to avoid keeping static
-     * references of test instances from DeviceConfig.
-     */
-    private final ArrayList<DeviceConfig.OnPropertiesChangedListener> mDeviceConfigListeners =
-            new ArrayList<>();
 
     private Description mDescription;
     private Context mContext;
@@ -127,6 +109,8 @@ public class SystemServicesTestRule implements TestRule {
     private ActivityManagerService mAmService;
     private ActivityTaskManagerService mAtmService;
     private WindowManagerService mWmService;
+    private TestWindowManagerPolicy mWMPolicy;
+    private TestDisplayWindowSettingsProvider mTestDisplayWindowSettingsProvider;
     private WindowState.PowerManagerWrapper mPowerManagerWrapper;
     private InputManagerService mImService;
     private InputChannel mInputChannel;
@@ -156,29 +140,19 @@ public class SystemServicesTestRule implements TestRule {
                             Log.e("SystemServicesTestRule", "Suppressed: ", throwable);
                             t.addSuppressed(throwable);
                         }
-                        throwable = t;
+                        throw t;
                     }
+                    if (throwable != null) throw throwable;
                 }
-                if (throwable != null) throw throwable;
             }
         };
     }
 
     private void setUp() {
-        // Use stubOnly() to reduce memory usage if it doesn't need verification.
-        final MockSettings spyStubOnly = withSettings().stubOnly()
-                .defaultAnswer(CALLS_REAL_METHODS);
-        final MockSettings mockStubOnly = withSettings().stubOnly();
-        // Return mocked services: LocalServices.getService
-        // Avoid real operation: SurfaceControl.mirrorSurface
-        // Avoid leakage: DeviceConfig.addOnPropertiesChangedListener, LockGuard.installLock
-        //                Watchdog.getInstance/addMonitor
         mMockitoSession = mockitoSession()
-                .mockStatic(LocalServices.class, spyStubOnly)
-                .mockStatic(DeviceConfig.class, spyStubOnly)
-                .mockStatic(SurfaceControl.class, mockStubOnly)
-                .mockStatic(LockGuard.class, mockStubOnly)
-                .mockStatic(Watchdog.class, mockStubOnly)
+                .spyStatic(LocalServices.class)
+                .mockStatic(LockGuard.class)
+                .mockStatic(Watchdog.class)
                 .strictness(Strictness.LENIENT)
                 .startMocking();
 
@@ -190,16 +164,6 @@ public class SystemServicesTestRule implements TestRule {
 
     private void setUpSystemCore() {
         doReturn(mock(Watchdog.class)).when(Watchdog::getInstance);
-        doAnswer(invocation -> {
-            // Exclude CONSTRAIN_DISPLAY_APIS because ActivityRecord#sConstrainDisplayApisConfig
-            // only registers once and it doesn't reference to outside.
-            if (!NAMESPACE_CONSTRAIN_DISPLAY_APIS.equals(invocation.getArgument(0))) {
-                mDeviceConfigListeners.add(invocation.getArgument(2));
-            }
-            // SizeCompatTests uses setNeverConstrainDisplayApisFlag, and ActivityRecordTests
-            // uses splash_screen_exception_list. So still execute real registration.
-            return invocation.callRealMethod();
-        }).when(() -> DeviceConfig.addOnPropertiesChangedListener(anyString(), any(), any()));
 
         mContext = getInstrumentation().getTargetContext();
         spyOn(mContext);
@@ -232,8 +196,7 @@ public class SystemServicesTestRule implements TestRule {
         // Prevent "WakeLock finalized while still held: SCREEN_FROZEN".
         final PowerManager pm = mock(PowerManager.class);
         doReturn(pm).when(mContext).getSystemService(eq(Context.POWER_SERVICE));
-        mStubbedWakeLock = createStubbedWakeLock(false /* needVerification */);
-        doReturn(mStubbedWakeLock).when(pm).newWakeLock(anyInt(), anyString());
+        doReturn(mock(PowerManager.WakeLock.class)).when(pm).newWakeLock(anyInt(), anyString());
 
         // DisplayManagerInternal
         final DisplayManagerInternal dmi = mock(DisplayManagerInternal.class);
@@ -306,9 +269,9 @@ public class SystemServicesTestRule implements TestRule {
         doNothing().when(amInternal).updateOomLevelsForDisplay(anyInt());
         doNothing().when(amInternal).broadcastGlobalConfigurationChanged(anyInt(), anyBoolean());
         doNothing().when(amInternal).cleanUpServices(anyInt(), any(), any());
-        doNothing().when(amInternal).reportCurKeyguardUsageEvent(anyBoolean());
         doReturn(UserHandle.USER_SYSTEM).when(amInternal).getCurrentUserId();
         doReturn(TEST_USER_PROFILE_IDS).when(amInternal).getCurrentProfileIds();
+        doReturn(true).when(amInternal).isCurrentProfile(anyInt());
         doReturn(true).when(amInternal).isUserRunning(anyInt(), anyInt());
         doReturn(true).when(amInternal).hasStartedUserState(anyInt());
         doReturn(false).when(amInternal).shouldConfirmCredentials(anyInt());
@@ -321,14 +284,14 @@ public class SystemServicesTestRule implements TestRule {
 
     private void setUpWindowManagerService() {
         mPowerManagerWrapper = mock(WindowState.PowerManagerWrapper.class);
-        TestWindowManagerPolicy wmPolicy = new TestWindowManagerPolicy();
-        TestDisplayWindowSettingsProvider testDisplayWindowSettingsProvider =
-                new TestDisplayWindowSettingsProvider();
+        mWMPolicy = new TestWindowManagerPolicy(this::getWindowManagerService,
+                mPowerManagerWrapper);
+        mTestDisplayWindowSettingsProvider = new TestDisplayWindowSettingsProvider();
         // Suppress StrictMode violation (DisplayWindowSettings) to avoid log flood.
         DisplayThread.getHandler().post(StrictMode::allowThreadDiskWritesMask);
         mWmService = WindowManagerService.main(
-                mContext, mImService, false, false, wmPolicy, mAtmService,
-                testDisplayWindowSettingsProvider, StubTransaction::new,
+                mContext, mImService, false, false, mWMPolicy, mAtmService,
+                mTestDisplayWindowSettingsProvider, StubTransaction::new,
                 () -> mSurfaceFactory.get(), (unused) -> new MockSurfaceControlBuilder());
         spyOn(mWmService);
         spyOn(mWmService.mRoot);
@@ -379,10 +342,11 @@ public class SystemServicesTestRule implements TestRule {
         // Unregister display listener from root to avoid issues with subsequent tests.
         mContext.getSystemService(DisplayManager.class)
                 .unregisterDisplayListener(mAtmService.mRootWindowContainer);
-
-        for (int i = mDeviceConfigListeners.size() - 1; i >= 0; i--) {
-            DeviceConfig.removeOnPropertiesChangedListener(mDeviceConfigListeners.get(i));
-        }
+        // The constructor of WindowManagerService registers WindowManagerConstants and
+        // HighRefreshRateBlacklist with DeviceConfig. We need to undo that here to avoid
+        // leaking mWmService.
+        mWmService.mConstants.dispose();
+        mWmService.mHighRefreshRateDenylist.dispose();
 
         // This makes sure the posted messages without delay are processed, e.g.
         // DisplayPolicy#release, WindowManagerService#setAnimationScale.
@@ -437,16 +401,6 @@ public class SystemServicesTestRule implements TestRule {
 
     WindowState.PowerManagerWrapper getPowerManagerWrapper() {
         return mPowerManagerWrapper;
-    }
-
-    /** Creates a no-op wakelock object. */
-    PowerManager.WakeLock createStubbedWakeLock(boolean needVerification) {
-        if (needVerification) {
-            return mock(PowerManager.WakeLock.class, Mockito.withSettings()
-                    .spiedInstance(sWakeLock).defaultAnswer(Mockito.RETURNS_DEFAULTS));
-        }
-        return mock(PowerManager.WakeLock.class, Mockito.withSettings()
-                .spiedInstance(sWakeLock).stubOnly());
     }
 
     void setSurfaceFactory(Supplier<Surface> factory) {
@@ -604,7 +558,7 @@ public class SystemServicesTestRule implements TestRule {
             // unit test version does not handle launch wake lock
             doNothing().when(this).acquireLaunchWakelock();
 
-            mLaunchingActivityWakeLock = mStubbedWakeLock;
+            mLaunchingActivityWakeLock = mock(PowerManager.WakeLock.class);
 
             initialize();
 

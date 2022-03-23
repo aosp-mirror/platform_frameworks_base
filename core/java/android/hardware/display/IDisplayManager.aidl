@@ -16,20 +16,17 @@
 
 package android.hardware.display;
 
-import android.companion.virtual.IVirtualDevice;
 import android.content.pm.ParceledListSlice;
 import android.graphics.Point;
 import android.hardware.display.BrightnessConfiguration;
 import android.hardware.display.BrightnessInfo;
 import android.hardware.display.Curve;
-import android.hardware.graphics.common.DisplayDecorationSupport;
 import android.hardware.display.IDisplayManagerCallback;
 import android.hardware.display.IVirtualDisplayCallback;
 import android.hardware.display.VirtualDisplayConfig;
 import android.hardware.display.WifiDisplay;
 import android.hardware.display.WifiDisplayStatus;
 import android.media.projection.IMediaProjection;
-import android.view.Display.Mode;
 import android.view.DisplayInfo;
 import android.view.Surface;
 
@@ -88,10 +85,10 @@ interface IDisplayManager {
     void requestColorMode(int displayId, int colorMode);
 
     // Requires CAPTURE_VIDEO_OUTPUT, CAPTURE_SECURE_VIDEO_OUTPUT, or an appropriate
-    // MediaProjection token or VirtualDevice for certain combinations of flags.
+    // MediaProjection token for certain combinations of flags.
     int createVirtualDisplay(in VirtualDisplayConfig virtualDisplayConfig,
             in IVirtualDisplayCallback callback, in IMediaProjection projectionToken,
-            in IVirtualDevice virtualDevice, String packageName);
+            String packageName);
 
     // No permissions required, but must be same Uid as the creator.
     void resizeVirtualDisplay(in IVirtualDisplayCallback token,
@@ -120,16 +117,6 @@ interface IDisplayManager {
     // the same as the calling user.
     void setBrightnessConfigurationForUser(in BrightnessConfiguration c, int userId,
             String packageName);
-
-    // Sets the global brightness configuration for a given display. Requires
-    // CONFIGURE_DISPLAY_BRIGHTNESS.
-    void setBrightnessConfigurationForDisplay(in BrightnessConfiguration c, String uniqueDisplayId,
-            int userId, String packageName);
-
-    // Gets the brightness configuration for a given display. Requires
-    // CONFIGURE_DISPLAY_BRIGHTNESS.
-    BrightnessConfiguration getBrightnessConfigurationForDisplay(String uniqueDisplayId,
-            int userId);
 
     // Gets the global brightness configuration for a given user. Requires
     // CONFIGURE_DISPLAY_BRIGHTNESS, and INTERACT_ACROSS_USER if the user is not
@@ -165,12 +152,6 @@ interface IDisplayManager {
     // based on hardware capability.
     int getPreferredWideGamutColorSpaceId();
 
-    // Sets the user preferred display mode.
-    // Requires MODIFY_USER_PREFERRED_DISPLAY_MODE permission.
-    void setUserPreferredDisplayMode(int displayId, in Mode mode);
-    Mode getUserPreferredDisplayMode(int displayId);
-    Mode getSystemPreferredDisplayMode(int displayId);
-
     // When enabled the app requested display resolution and refresh rate is always selected
     // in DisplayModeDirector regardless of user settings and policies for low brightness, low
     // battery etc.
@@ -182,7 +163,4 @@ interface IDisplayManager {
 
     // Returns the refresh rate switching type.
     int getRefreshRateSwitchingType();
-
-    // Query for DISPLAY_DECORATION support.
-    DisplayDecorationSupport getDisplayDecorationSupport(int displayId);
 }

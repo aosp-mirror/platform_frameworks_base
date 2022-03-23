@@ -44,7 +44,7 @@ public class PrivateDnsConnectivityChecker {
      */
     public static boolean canConnectToPrivateDnsServer(@NonNull String hostname) {
         final SocketFactory factory = SSLSocketFactory.getDefault();
-        TrafficStats.setThreadStatsTagApp();
+        TrafficStats.setThreadStatsTag(TrafficStats.TAG_SYSTEM_APP);
 
         try (SSLSocket socket = (SSLSocket) factory.createSocket()) {
             socket.setSoTimeout(CONNECTION_TIMEOUT_MS);

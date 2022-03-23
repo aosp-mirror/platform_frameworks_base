@@ -93,7 +93,7 @@ public class OwnersTest extends DpmTestBase {
             assertThat(owners.getProfileOwnerUserRestrictionsNeedsMigration(21)).isFalse();
 
             owners.setDeviceOwnerType(owners.getDeviceOwnerPackageName(),
-                    DEVICE_OWNER_TYPE_FINANCED, /* isAdminTestOnly= */ false);
+                    DEVICE_OWNER_TYPE_FINANCED);
             // There is no device owner, so the default owner type should be returned.
             assertThat(owners.getDeviceOwnerType(owners.getDeviceOwnerPackageName())).isEqualTo(
                     DEVICE_OWNER_TYPE_DEFAULT);
@@ -367,7 +367,7 @@ public class OwnersTest extends DpmTestBase {
             owners.setDeviceOwnerUserRestrictionsMigrated();
 
             owners.setDeviceOwnerType(owners.getDeviceOwnerPackageName(),
-                    DEVICE_OWNER_TYPE_FINANCED, /* isAdminTestOnly= */ false);
+                    DEVICE_OWNER_TYPE_FINANCED);
             assertThat(owners.getDeviceOwnerType(owners.getDeviceOwnerPackageName())).isEqualTo(
                     DEVICE_OWNER_TYPE_FINANCED);
 
@@ -399,7 +399,7 @@ public class OwnersTest extends DpmTestBase {
             owners.setProfileOwnerUserRestrictionsMigrated(11);
 
             owners.setDeviceOwnerType(owners.getDeviceOwnerPackageName(),
-                    DEVICE_OWNER_TYPE_DEFAULT, /* isAdminTestOnly= */ false);
+                    DEVICE_OWNER_TYPE_DEFAULT);
             // The previous device owner type should persist.
             assertThat(owners.getDeviceOwnerType(owners.getDeviceOwnerPackageName())).isEqualTo(
                     DEVICE_OWNER_TYPE_FINANCED);
@@ -585,8 +585,7 @@ public class OwnersTest extends DpmTestBase {
         assertThat(owners.getProfileOwnerFile(11).exists()).isTrue();
 
         String previousDeviceOwnerPackageName = owners.getDeviceOwnerPackageName();
-        owners.setDeviceOwnerType(previousDeviceOwnerPackageName, DEVICE_OWNER_TYPE_FINANCED,
-                /* isAdminTestOnly= */ false);
+        owners.setDeviceOwnerType(previousDeviceOwnerPackageName, DEVICE_OWNER_TYPE_FINANCED);
         assertThat(owners.getDeviceOwnerType(previousDeviceOwnerPackageName)).isEqualTo(
                 DEVICE_OWNER_TYPE_FINANCED);
         owners.setDeviceOwnerProtectedPackages(

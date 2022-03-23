@@ -56,7 +56,6 @@ import com.android.systemui.qs.tileimpl.QSTileViewImpl;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import javax.inject.Inject;
 
@@ -96,20 +95,15 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
     private int mFocusIndex;
 
     private boolean mNeedsFocus;
-    @Nullable
     private List<String> mCurrentSpecs;
-    @Nullable
     private List<TileInfo> mOtherTiles;
-    @Nullable
     private List<TileInfo> mAllTiles;
 
-    @Nullable
     private Holder mCurrentDrag;
     private int mAccessibilityAction = ACTION_NONE;
     private int mAccessibilityFromIndex;
     private final UiEventLogger mUiEventLogger;
     private final AccessibilityDelegateCompat mAccessibilityDelegate;
-    @Nullable
     private RecyclerView mRecyclerView;
     private int mNumColumns;
 
@@ -186,7 +180,6 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
     }
 
     private void clearAccessibilityState() {
-        mNeedsFocus = false;
         if (mAccessibilityAction == ACTION_ADD) {
             // Remove blank tile from last spot
             mTiles.remove(--mEditIndex);
@@ -245,7 +238,6 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         notifyDataSetChanged();
     }
 
-    @Nullable
     private TileInfo getAndRemoveOther(String s) {
         for (int i = 0; i < mOtherTiles.size(); i++) {
             if (mOtherTiles.get(i).spec.equals(s)) {
@@ -372,13 +364,11 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         }
         info.state.expandedAccessibilityClassName = "";
 
-        CustomizeTileView tileView =
-                Objects.requireNonNull(
-                        holder.getTileAsCustomizeView(), "The holder must have a tileView");
-        tileView.changeState(info.state);
-        tileView.setShowAppLabel(position > mEditIndex && !info.isSystem);
+        // The holder has a tileView, therefore this call is not null
+        holder.getTileAsCustomizeView().changeState(info.state);
+        holder.getTileAsCustomizeView().setShowAppLabel(position > mEditIndex && !info.isSystem);
         // Don't show the side view for third party tiles, as we don't have the actual state.
-        tileView.setShowSideView(position < mEditIndex || info.isSystem);
+        holder.getTileAsCustomizeView().setShowSideView(position < mEditIndex || info.isSystem);
         holder.mTileView.setSelected(true);
         holder.mTileView.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
         holder.mTileView.setClickable(true);
@@ -421,7 +411,10 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
                 public void onLayoutChange(View v, int left, int top, int right, int bottom,
                         int oldLeft, int oldTop, int oldRight, int oldBottom) {
                     holder.mTileView.removeOnLayoutChangeListener(this);
-                    holder.mTileView.requestAccessibilityFocus();
+                    holder.mTileView.requestFocus();
+                    if (mAccessibilityAction == ACTION_NONE) {
+                        holder.mTileView.clearFocus();
+                    }
                 }
             });
             mNeedsFocus = false;
@@ -453,15 +446,9 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         // Update the tile divider position
         mTileDividerIndex++;
         mFocusIndex = mEditIndex - 1;
-        final int focus = mFocusIndex;
         mNeedsFocus = true;
         if (mRecyclerView != null) {
-            mRecyclerView.post(() -> {
-                final RecyclerView recyclerView = mRecyclerView;
-                if (recyclerView != null) {
-                    recyclerView.smoothScrollToPosition(focus);
-                }
-            });
+            mRecyclerView.post(() -> mRecyclerView.smoothScrollToPosition(mFocusIndex));
         }
         notifyDataSetChanged();
     }
@@ -561,7 +548,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
     }
 
     public class Holder extends ViewHolder {
-        @Nullable private QSTileViewImpl mTileView;
+        private QSTileViewImpl mTileView;
 
         public Holder(View itemView) {
             super(itemView);

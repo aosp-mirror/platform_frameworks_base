@@ -22,12 +22,18 @@ import java.util.Map;
 
 /**
  * This class is used to manage the JavaScript storage APIs provided by the
- * {@link WebView}. It manages the Web SQL Database API and the HTML5 Web
- * Storage API.
+ * {@link WebView}. It manages the Application Cache API, the Web SQL Database
+ * API and the HTML5 Web Storage API.
+ *
+ * The Application Cache API provides a mechanism to create and maintain an
+ * application cache to power offline Web applications. Use of the Application
+ * Cache API can be attributed to an origin {@link WebStorage.Origin}, however
+ * it is not possible to set per-origin quotas. Note that there can be only
+ * one application cache per application.
  *
  * The Web SQL Database API provides storage which is private to a given origin.
- * Use of the Web SQL Database can be attributed to an origin. It is also
- * possible to set per-origin quotas.
+ * Similar to the Application Cache, use of the Web SQL Database can be attributed
+ * to an origin. It is also possible to set per-origin quotas.
  */
 public class WebStorage {
 
@@ -35,7 +41,8 @@ public class WebStorage {
      * Encapsulates a callback function which is used to provide a new quota
      * for a JavaScript storage API.
      * See
-     * {@link WebChromeClient#onExceededDatabaseQuota}.
+     * {@link WebChromeClient#onExceededDatabaseQuota} and
+     * {@link WebChromeClient#onReachedMaxAppCacheSize}.
      * @deprecated This class is obsolete and no longer used.
      */
     @Deprecated
@@ -116,9 +123,9 @@ public class WebStorage {
      */
 
     /**
-     * Gets the origins currently using the Web SQL Database APIs. This method
-     * operates asynchronously, with the result being provided via a
-     * {@link ValueCallback}. The origins are provided as
+     * Gets the origins currently using either the Application Cache or Web SQL
+     * Database APIs. This method operates asynchronously, with the result
+     * being provided via a {@link ValueCallback}. The origins are provided as
      * a map, of type {@code Map<String, WebStorage.Origin>}, from the string
      * representation of the origin to a {@link WebStorage.Origin} object.
      */
@@ -127,9 +134,9 @@ public class WebStorage {
     }
 
     /**
-     * Gets the amount of storage currently being used by the Web SQL Database
-     * APIs by the given origin. The amount is given in bytes and the origin
-     * is specified using its string representation.
+     * Gets the amount of storage currently being used by both the Application
+     * Cache and Web SQL Database APIs by the given origin. The amount is given
+     * in bytes and the origin is specified using its string representation.
      * This method operates asynchronously, with the result being provided via
      * a {@link ValueCallback}.
      */
@@ -141,7 +148,8 @@ public class WebStorage {
      * Gets the storage quota for the Web SQL Database API for the given origin.
      * The quota is given in bytes and the origin is specified using its string
      * representation. This method operates asynchronously, with the result
-     * being provided via a {@link ValueCallback}.
+     * being provided via a {@link ValueCallback}. Note that a quota is not
+     * enforced on a per-origin basis for the Application Cache API.
      */
     public void getQuotaForOrigin(String origin, ValueCallback<Long> callback) {
         // Must be a no-op for backward compatibility: see the hidden constructor for reason.
@@ -150,7 +158,8 @@ public class WebStorage {
     /**
      * Sets the storage quota for the Web SQL Database API for the given origin.
      * The quota is specified in bytes and the origin is specified using its string
-     * representation.
+     * representation. Note that a quota is not enforced on a per-origin basis
+     * for the Application Cache API.
      * @deprecated Controlling quota per-origin will not be supported in future.
      */
     @Deprecated
@@ -159,8 +168,9 @@ public class WebStorage {
     }
 
     /**
-     * Clears the storage currently being used by the Web SQL Database APIs by
-     * the given origin. The origin is specified using its string representation.
+     * Clears the storage currently being used by both the Application Cache and
+     * Web SQL Database APIs by the given origin. The origin is specified using
+     * its string representation.
      */
     public void deleteOrigin(String origin) {
         // Must be a no-op for backward compatibility: see the hidden constructor for reason.
@@ -168,7 +178,8 @@ public class WebStorage {
 
     /**
      * Clears all storage currently being used by the JavaScript storage APIs.
-     * This includes Web SQL Database and the HTML5 Web Storage APIs.
+     * This includes the Application Cache, Web SQL Database and the HTML5 Web
+     * Storage APIs.
      */
     public void deleteAllData() {
         // Must be a no-op for backward compatibility: see the hidden constructor for reason.

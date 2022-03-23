@@ -20,22 +20,33 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_TASK_POSITION
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.annotation.Nullable;
+import android.app.IActivityTaskManager;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.RemoteException;
 import android.util.Slog;
 import android.view.Display;
 import android.view.IWindow;
 import android.view.InputWindowHandle;
 import android.view.SurfaceControl;
 
+import com.android.internal.annotations.GuardedBy;
+import com.android.server.input.InputManagerService;
+
 /**
  * Controller for task positioning by drag.
  */
 class TaskPositioningController {
     private final WindowManagerService mService;
+    private final InputManagerService mInputManager;
+    private final IActivityTaskManager mActivityManager;
+    private final Handler mHandler;
     private SurfaceControl mInputSurface;
     private DisplayContent mPositioningDisplay;
 
+    @GuardedBy("WindowManagerSerivce.mWindowMap")
     private @Nullable TaskPositioner mTaskPositioner;
 
     private final Rect mTmpClipRect = new Rect();
@@ -50,8 +61,12 @@ class TaskPositioningController {
         return mTaskPositioner != null ? mTaskPositioner.mDragWindowHandle : null;
     }
 
-    TaskPositioningController(WindowManagerService service) {
+    TaskPositioningController(WindowManagerService service, InputManagerService inputManager,
+            IActivityTaskManager activityManager, Looper looper) {
         mService = service;
+        mInputManager = inputManager;
+        mActivityManager = activityManager;
+        mHandler = new Handler(looper);
         mTransaction = service.mTransactionFactory.get();
     }
 
@@ -83,18 +98,17 @@ class TaskPositioningController {
             return;
         }
 
+        mTransaction.show(mInputSurface);
+        mTransaction.setInputWindowInfo(mInputSurface, h);
+        mTransaction.setLayer(mInputSurface, Integer.MAX_VALUE);
+
         final Display display = dc.getDisplay();
         final Point p = new Point();
         display.getRealSize(p);
-        mTmpClipRect.set(0, 0, p.x, p.y);
 
-        mTransaction.show(mInputSurface)
-                .setInputWindowInfo(mInputSurface, h)
-                .setLayer(mInputSurface, Integer.MAX_VALUE)
-                .setPosition(mInputSurface, 0, 0)
-                .setCrop(mInputSurface, mTmpClipRect)
-                .syncInputWindows()
-                .apply();
+        mTmpClipRect.set(0, 0, p.x, p.y);
+        mTransaction.setWindowCrop(mInputSurface, mTmpClipRect);
+        mTransaction.syncInputWindows().apply();
     }
 
     boolean startMovingTask(IWindow window, float startX, float startY) {
@@ -107,13 +121,15 @@ class TaskPositioningController {
                     win, false /*resize*/, false /*preserveOrientation*/, startX, startY)) {
                 return false;
             }
-            mService.mAtmService.setFocusedTask(win.getTask().mTaskId);
         }
+        try {
+            mActivityManager.setFocusedTask(win.getTask().mTaskId);
+        } catch(RemoteException e) {}
         return true;
     }
 
     void handleTapOutsideTask(DisplayContent displayContent, int x, int y) {
-        mService.mH.post(() -> {
+        mHandler.post(() -> {
             synchronized (mService.mGlobalLock) {
                 final Task task = displayContent.findTaskForResizePoint(x, y);
                 if (task != null) {
@@ -126,7 +142,10 @@ class TaskPositioningController {
                             task.preserveOrientationOnResize(), x, y)) {
                         return;
                     }
-                    mService.mAtmService.setFocusedTask(task.mTaskId);
+                    try {
+                        mActivityManager.setFocusedTask(task.mTaskId);
+                    } catch (RemoteException e) {
+                    }
                 }
             }
         });
@@ -139,7 +158,7 @@ class TaskPositioningController {
                     + "win=" + win + ", resize=" + resize + ", preserveOrientation="
                     + preserveOrientation + ", {" + startX + ", " + startY + "}");
 
-        if (win == null || win.mActivityRecord == null) {
+        if (win == null || win.getAppToken() == null) {
             Slog.w(TAG_WM, "startPositioningLocked: Bad window " + win);
             return false;
         }
@@ -168,7 +187,7 @@ class TaskPositioningController {
                 && displayContent.mCurrentFocus.mActivityRecord == win.mActivityRecord) {
             transferFocusFromWin = displayContent.mCurrentFocus;
         }
-        if (!mService.mInputManager.transferTouchFocus(
+        if (!mInputManager.transferTouchFocus(
                 transferFocusFromWin.mInputChannel, mTaskPositioner.mClientChannel,
                 false /* isDragDrop */)) {
             Slog.e(TAG_WM, "startPositioningLocked: Unable to transfer touch focus");

@@ -29,7 +29,6 @@ import android.util.Slog;
 import android.view.Display;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.os.LongMultiStateCounter;
 
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
@@ -76,148 +75,6 @@ public class MeasuredEnergyStats {
     public @interface StandardPowerBucket {
     }
 
-    private static final int INVALID_STATE = -1;
-
-    /**
-     * Configuration of measured energy stats: which power rails (buckets)  are supported on
-     * this device, what custom power drains are supported etc.
-     */
-    public static class Config {
-        private final boolean[] mSupportedStandardBuckets;
-        @NonNull
-        private final String[] mCustomBucketNames;
-        private final boolean[] mSupportedMultiStateBuckets;
-        @NonNull
-        private final String[] mStateNames;
-
-        public Config(@NonNull boolean[] supportedStandardBuckets,
-                @Nullable String[] customBucketNames,
-                @NonNull int[] supportedMultiStateBuckets,
-                @Nullable String[] stateNames) {
-            mSupportedStandardBuckets = supportedStandardBuckets;
-            mCustomBucketNames = customBucketNames != null ? customBucketNames : new String[0];
-            mSupportedMultiStateBuckets =
-                    new boolean[supportedStandardBuckets.length + mCustomBucketNames.length];
-            for (int bucket : supportedMultiStateBuckets) {
-                if (mSupportedStandardBuckets[bucket]) {
-                    mSupportedMultiStateBuckets[bucket] = true;
-                }
-            }
-            mStateNames = stateNames != null ? stateNames : new String[] {""};
-        }
-
-        /**
-         * Returns true if the supplied Config is compatible with this one and therefore
-         * data collected with one of them will work with the other.
-         */
-        public boolean isCompatible(Config other) {
-            return Arrays.equals(mSupportedStandardBuckets, other.mSupportedStandardBuckets)
-                    && Arrays.equals(mCustomBucketNames, other.mCustomBucketNames)
-                    && Arrays.equals(mSupportedMultiStateBuckets,
-                    other.mSupportedMultiStateBuckets)
-                    && Arrays.equals(mStateNames, other.mStateNames);
-        }
-
-        /**
-         * Writes the Config object into the supplied Parcel.
-         */
-        public static void writeToParcel(@Nullable Config config, Parcel out) {
-            if (config == null) {
-                out.writeBoolean(false);
-                return;
-            }
-
-            out.writeBoolean(true);
-            out.writeInt(config.mSupportedStandardBuckets.length);
-            out.writeBooleanArray(config.mSupportedStandardBuckets);
-            out.writeStringArray(config.mCustomBucketNames);
-            int multiStateBucketCount = 0;
-            for (boolean supported : config.mSupportedMultiStateBuckets) {
-                if (supported) {
-                    multiStateBucketCount++;
-                }
-            }
-            final int[] supportedMultiStateBuckets = new int[multiStateBucketCount];
-            int index = 0;
-            for (int bucket = 0; bucket < config.mSupportedMultiStateBuckets.length; bucket++) {
-                if (config.mSupportedMultiStateBuckets[bucket]) {
-                    supportedMultiStateBuckets[index++] = bucket;
-                }
-            }
-            out.writeInt(multiStateBucketCount);
-            out.writeIntArray(supportedMultiStateBuckets);
-            out.writeStringArray(config.mStateNames);
-        }
-
-        /**
-         * Reads a Config object from the supplied Parcel.
-         */
-        @Nullable
-        public static Config createFromParcel(Parcel in) {
-            if (!in.readBoolean()) {
-                return null;
-            }
-
-            final int supportedStandardBucketCount = in.readInt();
-            final boolean[] supportedStandardBuckets = new boolean[supportedStandardBucketCount];
-            in.readBooleanArray(supportedStandardBuckets);
-            final String[] customBucketNames = in.readStringArray();
-            final int supportedMultiStateBucketCount = in.readInt();
-            final int[] supportedMultiStateBuckets = new int[supportedMultiStateBucketCount];
-            in.readIntArray(supportedMultiStateBuckets);
-            final String[] stateNames = in.readStringArray();
-            return new Config(supportedStandardBuckets, customBucketNames,
-                    supportedMultiStateBuckets, stateNames);
-        }
-
-        /** Get number of possible buckets, including both standard and custom ones. */
-        private int getNumberOfBuckets() {
-            return mSupportedStandardBuckets.length + mCustomBucketNames.length;
-        }
-
-        /**
-         * Returns true if the specified charge bucket is tracked.
-         */
-        public boolean isSupportedBucket(int index) {
-            return mSupportedStandardBuckets[index];
-        }
-
-        @NonNull
-        public String[] getCustomBucketNames() {
-            return mCustomBucketNames;
-        }
-
-        /**
-         * Returns true if the specified charge bucket is tracked on a per-state basis.
-         */
-        public boolean isSupportedMultiStateBucket(int index) {
-            return mSupportedMultiStateBuckets[index];
-        }
-
-        @NonNull
-        public String[] getStateNames() {
-            return mStateNames;
-        }
-
-        /**
-         * If the index is a standard bucket, returns its name; otherwise returns its prefixed
-         * custom bucket number.
-         */
-        private String getBucketName(int index) {
-            if (isValidStandardBucket(index)) {
-                return DebugUtils.valueToString(MeasuredEnergyStats.class, "POWER_BUCKET_", index);
-            }
-            final int customBucket = indexToCustomBucket(index);
-            StringBuilder name = new StringBuilder().append("CUSTOM_").append(customBucket);
-            if (!TextUtils.isEmpty(mCustomBucketNames[customBucket])) {
-                name.append('(').append(mCustomBucketNames[customBucket]).append(')');
-            }
-            return name.toString();
-        }
-    }
-
-    private final Config mConfig;
-
     /**
      * Total charge (in microcoulombs) that a power bucket (including both
      * {@link StandardPowerBucket} and custom buckets) has accumulated since the last reset.
@@ -233,76 +90,74 @@ public class MeasuredEnergyStats {
      */
     private final long[] mAccumulatedChargeMicroCoulomb;
 
-    private LongMultiStateCounter[] mAccumulatedMultiStateChargeMicroCoulomb;
-    private int mState = INVALID_STATE;
-    private long mStateChangeTimestampMs;
+    private final String[] mCustomBucketNames;
 
     /**
      * Creates a MeasuredEnergyStats set to support the provided power buckets.
      * supportedStandardBuckets must be of size {@link #NUMBER_STANDARD_POWER_BUCKETS}.
      * numCustomBuckets >= 0 is the number of (non-standard) custom power buckets on the device.
      */
-    public MeasuredEnergyStats(MeasuredEnergyStats.Config config) {
-        mConfig = config;
-        final int numTotalBuckets = config.getNumberOfBuckets();
+    public MeasuredEnergyStats(@NonNull boolean[] supportedStandardBuckets,
+            @Nullable String[] customBucketNames) {
+        mCustomBucketNames = customBucketNames == null ? new String[0] : customBucketNames;
+        final int numTotalBuckets = NUMBER_STANDARD_POWER_BUCKETS + mCustomBucketNames.length;
         mAccumulatedChargeMicroCoulomb = new long[numTotalBuckets];
         // Initialize to all zeros where supported, otherwise POWER_DATA_UNAVAILABLE.
         // All custom buckets are, by definition, supported, so their values stay at 0.
         for (int stdBucket = 0; stdBucket < NUMBER_STANDARD_POWER_BUCKETS; stdBucket++) {
-            if (!mConfig.mSupportedStandardBuckets[stdBucket]) {
+            if (!supportedStandardBuckets[stdBucket]) {
                 mAccumulatedChargeMicroCoulomb[stdBucket] = POWER_DATA_UNAVAILABLE;
             }
         }
     }
 
     /**
-     * Reads a MeasuredEnergyStats from the supplied Parcel.
+     * Creates a new zero'd MeasuredEnergyStats, using the template to determine which buckets are
+     * supported. This certainly does NOT produce an exact clone of the template.
      */
-    @Nullable
-    public static MeasuredEnergyStats createFromParcel(Config config, Parcel in) {
-        if (!in.readBoolean()) {
-            return null;
+    private MeasuredEnergyStats(MeasuredEnergyStats template) {
+        final int numIndices = template.getNumberOfIndices();
+        mAccumulatedChargeMicroCoulomb = new long[numIndices];
+        // Initialize to all zeros where supported, otherwise POWER_DATA_UNAVAILABLE.
+        // All custom buckets are, by definition, supported, so their values stay at 0.
+        for (int stdBucket = 0; stdBucket < NUMBER_STANDARD_POWER_BUCKETS; stdBucket++) {
+            if (!template.isIndexSupported(stdBucket)) {
+                mAccumulatedChargeMicroCoulomb[stdBucket] = POWER_DATA_UNAVAILABLE;
+            }
         }
-        return new MeasuredEnergyStats(config, in);
+        mCustomBucketNames = template.getCustomBucketNames();
+    }
+
+    /**
+     * Creates a new zero'd MeasuredEnergyStats, using the template to determine which buckets are
+     * supported.
+     */
+    public static MeasuredEnergyStats createFromTemplate(MeasuredEnergyStats template) {
+        return new MeasuredEnergyStats(template);
+    }
+
+    /**
+     * Constructor for creating a temp MeasuredEnergyStats.
+     * See {@link #createAndReadSummaryFromParcel(Parcel, MeasuredEnergyStats)}.
+     */
+    private MeasuredEnergyStats(int numIndices) {
+        mAccumulatedChargeMicroCoulomb = new long[numIndices];
+        mCustomBucketNames = new String[numIndices - NUMBER_STANDARD_POWER_BUCKETS];
     }
 
     /** Construct from parcel. */
-    public MeasuredEnergyStats(MeasuredEnergyStats.Config config, Parcel in) {
-        mConfig = config;
-
+    public MeasuredEnergyStats(Parcel in) {
         final int size = in.readInt();
         mAccumulatedChargeMicroCoulomb = new long[size];
         in.readLongArray(mAccumulatedChargeMicroCoulomb);
-        if (in.readBoolean()) {
-            mAccumulatedMultiStateChargeMicroCoulomb = new LongMultiStateCounter[size];
-            for (int i = 0; i < size; i++) {
-                if (in.readBoolean()) {
-                    mAccumulatedMultiStateChargeMicroCoulomb[i] =
-                            LongMultiStateCounter.CREATOR.createFromParcel(in);
-                }
-            }
-        } else {
-            mAccumulatedMultiStateChargeMicroCoulomb = null;
-        }
+        mCustomBucketNames = in.readStringArray();
     }
 
     /** Write to parcel */
     public void writeToParcel(Parcel out) {
         out.writeInt(mAccumulatedChargeMicroCoulomb.length);
         out.writeLongArray(mAccumulatedChargeMicroCoulomb);
-        if (mAccumulatedMultiStateChargeMicroCoulomb != null) {
-            out.writeBoolean(true);
-            for (LongMultiStateCounter counter : mAccumulatedMultiStateChargeMicroCoulomb) {
-                if (counter != null) {
-                    out.writeBoolean(true);
-                    counter.writeToParcel(out, 0);
-                } else {
-                    out.writeBoolean(false);
-                }
-            }
-        } else {
-            out.writeBoolean(false);
-        }
+        out.writeStringArray(mCustomBucketNames);
     }
 
     /**
@@ -312,31 +167,17 @@ public class MeasuredEnergyStats {
      * Note: {@link com.android.internal.os.BatteryStatsImpl#VERSION} must be updated if summary
      *       parceling changes.
      *
-     * Corresponding write performed by {@link #writeSummaryToParcel(Parcel)}.
+     * Corresponding write performed by {@link #writeSummaryToParcel(Parcel, boolean)}.
      */
-    private void readSummaryFromParcel(Parcel in) {
+    private void readSummaryFromParcel(Parcel in, boolean overwriteAvailability) {
         final int numWrittenEntries = in.readInt();
         for (int entry = 0; entry < numWrittenEntries; entry++) {
             final int index = in.readInt();
             final long chargeUC = in.readLong();
-            LongMultiStateCounter multiStateCounter = null;
-            if (in.readBoolean()) {
-                multiStateCounter = LongMultiStateCounter.CREATOR.createFromParcel(in);
-                if (mConfig == null
-                        || multiStateCounter.getStateCount() != mConfig.getStateNames().length) {
-                    multiStateCounter = null;
-                }
-            }
-
-            if (index < mAccumulatedChargeMicroCoulomb.length) {
+            if (overwriteAvailability) {
+                mAccumulatedChargeMicroCoulomb[index] = chargeUC;
+            } else {
                 setValueIfSupported(index, chargeUC);
-                if (multiStateCounter != null) {
-                    if (mAccumulatedMultiStateChargeMicroCoulomb == null) {
-                        mAccumulatedMultiStateChargeMicroCoulomb =
-                                new LongMultiStateCounter[mAccumulatedChargeMicroCoulomb.length];
-                    }
-                    mAccumulatedMultiStateChargeMicroCoulomb[index] = multiStateCounter;
-                }
             }
         }
     }
@@ -345,26 +186,20 @@ public class MeasuredEnergyStats {
      * Write to summary parcel.
      * Note: Measured subsystem availability may be different when the summary parcel is read.
      *
-     * Corresponding read performed by {@link #readSummaryFromParcel(Parcel)}.
+     * Corresponding read performed by {@link #readSummaryFromParcel(Parcel, boolean)}.
      */
-    private void writeSummaryToParcel(Parcel out) {
+    private void writeSummaryToParcel(Parcel out, boolean skipZero) {
         final int posOfNumWrittenEntries = out.dataPosition();
         out.writeInt(0);
         int numWrittenEntries = 0;
         // Write only the supported buckets (with non-zero charge, if applicable).
         for (int index = 0; index < mAccumulatedChargeMicroCoulomb.length; index++) {
             final long charge = mAccumulatedChargeMicroCoulomb[index];
-            if (charge <= 0) continue;
+            if (charge < 0) continue;
+            if (charge == 0 && skipZero) continue;
 
             out.writeInt(index);
             out.writeLong(charge);
-            if (mAccumulatedMultiStateChargeMicroCoulomb != null
-                    && mAccumulatedMultiStateChargeMicroCoulomb[index] != null) {
-                out.writeBoolean(true);
-                mAccumulatedMultiStateChargeMicroCoulomb[index].writeToParcel(out, 0);
-            } else {
-                out.writeBoolean(false);
-            }
             numWrittenEntries++;
         }
         final int currPos = out.dataPosition();
@@ -373,89 +208,36 @@ public class MeasuredEnergyStats {
         out.setDataPosition(currPos);
     }
 
-    /** Updates the given standard power bucket with the given charge if accumulate is true. */
-    public void updateStandardBucket(@StandardPowerBucket int bucket, long chargeDeltaUC) {
-        updateStandardBucket(bucket, chargeDeltaUC, 0);
+    /** Get number of possible buckets, including both standard and custom ones. */
+    private int getNumberOfIndices() {
+        return mAccumulatedChargeMicroCoulomb.length;
     }
 
-    /**
-     * Updates the given standard power bucket with the given charge if supported.
-     * @param timestampMs elapsed realtime in milliseconds
-     */
-    public void updateStandardBucket(@StandardPowerBucket int bucket, long chargeDeltaUC,
-            long timestampMs) {
+
+    /** Updates the given standard power bucket with the given charge if accumulate is true. */
+    public void updateStandardBucket(@StandardPowerBucket int bucket, long chargeDeltaUC) {
         checkValidStandardBucket(bucket);
-        updateEntry(bucket, chargeDeltaUC, timestampMs);
+        updateEntry(bucket, chargeDeltaUC);
     }
 
     /** Updates the given custom power bucket with the given charge if accumulate is true. */
     public void updateCustomBucket(int customBucket, long chargeDeltaUC) {
-        updateCustomBucket(customBucket, chargeDeltaUC, 0);
-    }
-
-    /**
-     * Updates the given custom power bucket with the given charge if supported.
-     * @param timestampMs elapsed realtime in milliseconds
-     */
-    public void updateCustomBucket(int customBucket, long chargeDeltaUC, long timestampMs) {
         if (!isValidCustomBucket(customBucket)) {
             Slog.e(TAG, "Attempted to update invalid custom bucket " + customBucket);
             return;
         }
         final int index = customBucketToIndex(customBucket);
-        updateEntry(index, chargeDeltaUC, timestampMs);
+        updateEntry(index, chargeDeltaUC);
     }
 
-    /** Updates the given bucket with the given charge delta. */
-    private void updateEntry(int index, long chargeDeltaUC, long timestampMs) {
+    /** Updates the given index with the given charge if accumulate is true. */
+    private void updateEntry(int index, long chargeDeltaUC) {
         if (mAccumulatedChargeMicroCoulomb[index] >= 0L) {
             mAccumulatedChargeMicroCoulomb[index] += chargeDeltaUC;
-            if (mState != INVALID_STATE && mConfig.isSupportedMultiStateBucket(index)) {
-                if (mAccumulatedMultiStateChargeMicroCoulomb == null) {
-                    mAccumulatedMultiStateChargeMicroCoulomb =
-                            new LongMultiStateCounter[mAccumulatedChargeMicroCoulomb.length];
-                }
-                LongMultiStateCounter counter =
-                        mAccumulatedMultiStateChargeMicroCoulomb[index];
-                if (counter == null) {
-                    counter = new LongMultiStateCounter(mConfig.mStateNames.length);
-                    mAccumulatedMultiStateChargeMicroCoulomb[index] = counter;
-                    counter.setState(mState, mStateChangeTimestampMs);
-                    counter.updateValue(0, mStateChangeTimestampMs);
-                }
-                counter.updateValue(mAccumulatedChargeMicroCoulomb[index], timestampMs);
-            }
         } else {
             Slog.wtf(TAG, "Attempting to add " + chargeDeltaUC + " to unavailable bucket "
-                    + mConfig.getBucketName(index) + " whose value was "
+                    + getBucketName(index) + " whose value was "
                     + mAccumulatedChargeMicroCoulomb[index]);
-        }
-    }
-
-    /**
-     * Updates the "state" on all multi-state counters used by this MeasuredEnergyStats. Further
-     * accumulated charge updates will assign the deltas to this state, until the state changes.
-     *
-     * If setState is never called on a MeasuredEnergyStats object, then it does not track
-     * per-state usage.
-     */
-    public void setState(int state, long timestampMs) {
-        mState = state;
-        mStateChangeTimestampMs = timestampMs;
-        if (mAccumulatedMultiStateChargeMicroCoulomb == null) {
-            mAccumulatedMultiStateChargeMicroCoulomb =
-                    new LongMultiStateCounter[mAccumulatedChargeMicroCoulomb.length];
-        }
-        for (int i = 0; i < mAccumulatedMultiStateChargeMicroCoulomb.length; i++) {
-            LongMultiStateCounter counter = mAccumulatedMultiStateChargeMicroCoulomb[i];
-            if (counter == null && mConfig.isSupportedMultiStateBucket(i)) {
-                counter = new LongMultiStateCounter(mConfig.mStateNames.length);
-                counter.updateValue(0, timestampMs);
-                mAccumulatedMultiStateChargeMicroCoulomb[i] = counter;
-            }
-            if (counter != null) {
-                counter.setState(state, timestampMs);
-            }
         }
     }
 
@@ -467,26 +249,6 @@ public class MeasuredEnergyStats {
     public long getAccumulatedStandardBucketCharge(@StandardPowerBucket int bucket) {
         checkValidStandardBucket(bucket);
         return mAccumulatedChargeMicroCoulomb[bucket];
-    }
-
-    /**
-     * Returns the accumulated charge (in microcouloumb) for the standard power bucket and
-     * the specified state since last reset.
-     *
-     * Returns {@link android.os.BatteryStats#POWER_DATA_UNAVAILABLE} if this data is unavailable.
-     */
-    public long getAccumulatedStandardBucketCharge(@StandardPowerBucket int bucket, int state) {
-        if (!mConfig.isSupportedMultiStateBucket(bucket)) {
-            return POWER_DATA_UNAVAILABLE;
-        }
-        if (mAccumulatedMultiStateChargeMicroCoulomb == null) {
-            return 0;
-        }
-        final LongMultiStateCounter counter = mAccumulatedMultiStateChargeMicroCoulomb[bucket];
-        if (counter == null) {
-            return 0;
-        }
-        return counter.getCount(state);
     }
 
     /**
@@ -527,6 +289,32 @@ public class MeasuredEnergyStats {
     }
 
     /**
+     * Create a MeasuredEnergyStats object from a summary parcel.
+     *
+     * Corresponding write performed by
+     * {@link #writeSummaryToParcel(MeasuredEnergyStats, Parcel, boolean, boolean)}.
+     *
+     * @return a new MeasuredEnergyStats object as described.
+     *         Returns null if the parcel indicates there is no data to populate.
+     */
+    public static @Nullable MeasuredEnergyStats createAndReadSummaryFromParcel(Parcel in) {
+        final int arraySize = in.readInt();
+        // Check if any MeasuredEnergyStats exists on the parcel
+        if (arraySize == 0) return null;
+
+        final String[] customBucketNames;
+        if (in.readBoolean()) {
+            customBucketNames = in.readStringArray();
+        } else {
+            customBucketNames = new String[0];
+        }
+        final MeasuredEnergyStats stats = new MeasuredEnergyStats(
+                new boolean[NUMBER_STANDARD_POWER_BUCKETS], customBucketNames);
+        stats.readSummaryFromParcel(in, true);
+        return stats;
+    }
+
+    /**
      * Create a MeasuredEnergyStats using the template to determine which buckets are supported,
      * and populate this new object from the given parcel.
      *
@@ -534,37 +322,44 @@ public class MeasuredEnergyStats {
      * possible (not necessarily supported) standard and custom buckets.
      *
      * Corresponding write performed by
-     * {@link #writeSummaryToParcel(MeasuredEnergyStats, Parcel)}.
+     * {@link #writeSummaryToParcel(MeasuredEnergyStats, Parcel, boolean, boolean)}.
      *
      * @return a new MeasuredEnergyStats object as described.
      *         Returns null if the stats contain no non-0 information (such as if template is null
      *         or if the parcel indicates there is no data to populate).
+     *
+     * @see #createFromTemplate
      */
-    public static @Nullable MeasuredEnergyStats createAndReadSummaryFromParcel(
-            @Nullable Config config, Parcel in) {
+    public static @Nullable MeasuredEnergyStats createAndReadSummaryFromParcel(Parcel in,
+            @Nullable MeasuredEnergyStats template) {
         final int arraySize = in.readInt();
         // Check if any MeasuredEnergyStats exists on the parcel
         if (arraySize == 0) return null;
 
-        if (config == null) {
+        boolean includesCustomBucketNames = in.readBoolean();
+        if (includesCustomBucketNames) {
+            // Consume the array of custom bucket names. They are already included in the
+            // template.
+            in.readStringArray();
+        }
+        if (template == null) {
             // Nothing supported anymore. Create placeholder object just to consume the parcel data.
-            final MeasuredEnergyStats mes = new MeasuredEnergyStats(
-                    new Config(new boolean[arraySize], null, new int[0], new String[]{""}));
-            mes.readSummaryFromParcel(in);
+            final MeasuredEnergyStats mes = new MeasuredEnergyStats(arraySize);
+            mes.readSummaryFromParcel(in, false);
             return null;
         }
 
-        if (arraySize != config.getNumberOfBuckets()) {
+        if (arraySize != template.getNumberOfIndices()) {
             Slog.wtf(TAG, "Size of MeasuredEnergyStats parcel (" + arraySize
-                    + ") does not match config (" + config.getNumberOfBuckets() + ").");
+                    + ") does not match template (" + template.getNumberOfIndices() + ").");
             // Something is horribly wrong. Just consume the parcel and return null.
-            final MeasuredEnergyStats mes = new MeasuredEnergyStats(config);
-            mes.readSummaryFromParcel(in);
+            final MeasuredEnergyStats mes = new MeasuredEnergyStats(arraySize);
+            mes.readSummaryFromParcel(in, false);
             return null;
         }
 
-        final MeasuredEnergyStats stats = new MeasuredEnergyStats(config);
-        stats.readSummaryFromParcel(in);
+        final MeasuredEnergyStats stats = createFromTemplate(template);
+        stats.readSummaryFromParcel(in, false);
         if (stats.containsInterestingData()) {
             return stats;
         } else {
@@ -584,26 +379,30 @@ public class MeasuredEnergyStats {
     /**
      * Write a MeasuredEnergyStats to a parcel. If the stats is null, just write a 0.
      *
-     * Corresponding read performed by {@link #createAndReadSummaryFromParcel}.
+     * Corresponding read performed by {@link #createAndReadSummaryFromParcel(Parcel)}
+     * and {@link #createAndReadSummaryFromParcel(Parcel, MeasuredEnergyStats)}.
      */
-    public static void writeSummaryToParcel(@Nullable MeasuredEnergyStats stats, Parcel dest) {
+    public static void writeSummaryToParcel(@Nullable MeasuredEnergyStats stats,
+            Parcel dest, boolean skipZero, boolean skipCustomBucketNames) {
         if (stats == null) {
             dest.writeInt(0);
             return;
         }
-        dest.writeInt(stats.mConfig.getNumberOfBuckets());
-        stats.writeSummaryToParcel(dest);
+        dest.writeInt(stats.getNumberOfIndices());
+        if (!skipCustomBucketNames) {
+            dest.writeBoolean(true);
+            dest.writeStringArray(stats.getCustomBucketNames());
+        } else {
+            dest.writeBoolean(false);
+        }
+        stats.writeSummaryToParcel(dest, skipZero);
     }
 
     /** Reset accumulated charges. */
     private void reset() {
-        final int numIndices = mConfig.getNumberOfBuckets();
+        final int numIndices = getNumberOfIndices();
         for (int index = 0; index < numIndices; index++) {
             setValueIfSupported(index, 0L);
-            if (mAccumulatedMultiStateChargeMicroCoulomb != null
-                    && mAccumulatedMultiStateChargeMicroCoulomb[index] != null) {
-                mAccumulatedMultiStateChargeMicroCoulomb[index].reset();
-            }
         }
     }
 
@@ -632,37 +431,67 @@ public class MeasuredEnergyStats {
         return mAccumulatedChargeMicroCoulomb[index] != POWER_DATA_UNAVAILABLE;
     }
 
+    /** Check if the supported power buckets are precisely those given. */
+    public boolean isSupportEqualTo(
+            @NonNull boolean[] queriedStandardBuckets, @Nullable String[] customBucketNames) {
+        if (customBucketNames == null) {
+            //In practice customBucketNames should never be null, but sanitize it just to be sure.
+            customBucketNames = new String[0];
+        }
+
+        final int numBuckets = getNumberOfIndices();
+        final int numCustomBuckets = customBucketNames == null ? 0 : customBucketNames.length;
+        if (numBuckets != NUMBER_STANDARD_POWER_BUCKETS + numCustomBuckets) {
+            return false;
+        }
+
+        if (!Arrays.equals(mCustomBucketNames, customBucketNames)) {
+            return false;
+        }
+
+        for (int stdBucket = 0; stdBucket < NUMBER_STANDARD_POWER_BUCKETS; stdBucket++) {
+            if (isStandardBucketSupported(stdBucket) != queriedStandardBuckets[stdBucket]) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public String[] getCustomBucketNames() {
+        return mCustomBucketNames;
+    }
+
     /** Dump debug data. */
     public void dump(PrintWriter pw) {
         pw.print("   ");
         for (int index = 0; index < mAccumulatedChargeMicroCoulomb.length; index++) {
-            pw.print(mConfig.getBucketName(index));
+            pw.print(getBucketName(index));
             pw.print(" : ");
             pw.print(mAccumulatedChargeMicroCoulomb[index]);
             if (!isIndexSupported(index)) {
                 pw.print(" (unsupported)");
-            }
-            if (mAccumulatedMultiStateChargeMicroCoulomb != null) {
-                final LongMultiStateCounter counter =
-                        mAccumulatedMultiStateChargeMicroCoulomb[index];
-                if (counter != null) {
-                    pw.print(" [");
-                    for (int i = 0; i < mConfig.mStateNames.length; i++) {
-                        if (i != 0) {
-                            pw.print(" ");
-                        }
-                        pw.print(mConfig.mStateNames[i]);
-                        pw.print(": ");
-                        pw.print(counter.getCount(i));
-                    }
-                    pw.print("]");
-                }
             }
             if (index != mAccumulatedChargeMicroCoulomb.length - 1) {
                 pw.print(", ");
             }
         }
         pw.println();
+    }
+
+    /**
+     * If the index is a standard bucket, returns its name; otherwise returns its prefixed custom
+     * bucket number.
+     */
+    private String getBucketName(int index) {
+        if (isValidStandardBucket(index)) {
+            return DebugUtils.valueToString(MeasuredEnergyStats.class, "POWER_BUCKET_", index);
+        }
+        final int customBucket = indexToCustomBucket(index);
+        StringBuilder name = new StringBuilder().append("CUSTOM_").append(customBucket);
+        if (mCustomBucketNames != null && !TextUtils.isEmpty(mCustomBucketNames[customBucket])) {
+            name.append('(').append(mCustomBucketNames[customBucket]).append(')');
+        }
+        return name.toString();
     }
 
     /** Get the number of custom power buckets on this device. */

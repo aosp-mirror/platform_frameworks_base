@@ -48,7 +48,6 @@
 #define ANDROID_MEDIA_IMAGEREADER_CTX_JNI_ID       "mNativeContext"
 #define ANDROID_MEDIA_SURFACEIMAGE_BUFFER_JNI_ID   "mNativeBuffer"
 #define ANDROID_MEDIA_SURFACEIMAGE_TS_JNI_ID       "mTimestamp"
-#define ANDROID_MEDIA_SURFACEIMAGE_DS_JNI_ID       "mDataSpace"
 #define ANDROID_MEDIA_SURFACEIMAGE_TF_JNI_ID       "mTransform"
 #define ANDROID_MEDIA_SURFACEIMAGE_SM_JNI_ID       "mScalingMode"
 
@@ -72,7 +71,6 @@ static struct {
 static struct {
     jfieldID mNativeBuffer;
     jfieldID mTimestamp;
-    jfieldID mDataSpace;
     jfieldID mTransform;
     jfieldID mScalingMode;
     jfieldID mPlanes;
@@ -321,12 +319,6 @@ static void ImageReader_classInit(JNIEnv* env, jclass clazz)
                         "can't find android/graphics/ImageReader.%s",
                         ANDROID_MEDIA_SURFACEIMAGE_TS_JNI_ID);
 
-    gSurfaceImageClassInfo.mDataSpace = env->GetFieldID(
-            imageClazz, ANDROID_MEDIA_SURFACEIMAGE_DS_JNI_ID, "I");
-    LOG_ALWAYS_FATAL_IF(gSurfaceImageClassInfo.mDataSpace == NULL,
-                        "can't find android/graphics/ImageReader.%s",
-                        ANDROID_MEDIA_SURFACEIMAGE_DS_JNI_ID);
-
     gSurfaceImageClassInfo.mTransform = env->GetFieldID(
             imageClazz, ANDROID_MEDIA_SURFACEIMAGE_TF_JNI_ID, "I");
     LOG_ALWAYS_FATAL_IF(gSurfaceImageClassInfo.mTransform == NULL,
@@ -375,13 +367,18 @@ static void ImageReader_classInit(JNIEnv* env, jclass clazz)
 }
 
 static void ImageReader_init(JNIEnv* env, jobject thiz, jobject weakThiz, jint width, jint height,
-                             jint maxImages, jlong ndkUsage, jint nativeFormat, jint dataSpace) {
+                             jint format, jint maxImages, jlong ndkUsage)
+{
     status_t res;
+    int nativeFormat;
+    android_dataspace nativeDataspace;
 
-    ALOGV("%s: width:%d, height: %d, nativeFormat: %d, maxImages:%d",
-          __FUNCTION__, width, height, nativeFormat, maxImages);
+    ALOGV("%s: width:%d, height: %d, format: 0x%x, maxImages:%d",
+          __FUNCTION__, width, height, format, maxImages);
 
-    android_dataspace nativeDataspace = static_cast<android_dataspace>(dataSpace);
+    PublicFormat publicFormat = static_cast<PublicFormat>(format);
+    nativeFormat = mapPublicFormatToHalFormat(publicFormat);
+    nativeDataspace = mapPublicFormatToHalDataspace(publicFormat);
 
     jclass clazz = env->GetObjectClass(thiz);
     if (clazz == NULL) {
@@ -395,7 +392,7 @@ static void ImageReader_init(JNIEnv* env, jobject thiz, jobject weakThiz, jint w
     BufferQueue::createBufferQueue(&gbProducer, &gbConsumer);
     sp<BufferItemConsumer> bufferConsumer;
     String8 consumerName = String8::format("ImageReader-%dx%df%xm%d-%d-%d",
-            width, height, nativeFormat, maxImages, getpid(),
+            width, height, format, maxImages, getpid(),
             createProcessUniqueId());
     uint64_t consumerUsage =
             android_hardware_HardwareBuffer_convertToGrallocUsageBits(ndkUsage);
@@ -522,8 +519,7 @@ static void ImageReader_imageRelease(JNIEnv* env, jobject thiz, jobject image)
     ALOGV("%s: Image (format: 0x%x) has been released", __FUNCTION__, ctx->getBufferFormat());
 }
 
-static jint ImageReader_imageSetup(JNIEnv* env, jobject thiz, jobject image,
-                                   jboolean legacyValidateImageFormat) {
+static jint ImageReader_imageSetup(JNIEnv* env, jobject thiz, jobject image) {
     ALOGV("%s:", __FUNCTION__);
     JNIImageReaderContext* ctx = ImageReader_getContext(env, thiz);
     if (ctx == NULL) {
@@ -586,7 +582,7 @@ static jint ImageReader_imageSetup(JNIEnv* env, jobject thiz, jobject image,
             ALOGV("%s: Producer buffer size: %dx%d, doesn't match ImageReader configured size: %dx%d",
                     __FUNCTION__, outputWidth, outputHeight, imageReaderWidth, imageReaderHeight);
         }
-        if (legacyValidateImageFormat && imgReaderFmt != bufferFormat) {
+        if (imgReaderFmt != bufferFormat) {
             if (imgReaderFmt == HAL_PIXEL_FORMAT_YCbCr_420_888 &&
                     isPossiblyYUV(bufferFormat)) {
                 // Treat formats that are compatible with flexible YUV
@@ -623,8 +619,6 @@ static jint ImageReader_imageSetup(JNIEnv* env, jobject thiz, jobject image,
     Image_setBufferItem(env, image, buffer);
     env->SetLongField(image, gSurfaceImageClassInfo.mTimestamp,
             static_cast<jlong>(buffer->mTimestamp));
-    env->SetIntField(image, gSurfaceImageClassInfo.mDataSpace,
-            static_cast<jint>(buffer->mDataSpace));
     auto transform = buffer->mTransform;
     if (buffer->mTransformToDisplayInverse) {
         transform |= NATIVE_WINDOW_TRANSFORM_INVERSE_DISPLAY;
@@ -954,10 +948,10 @@ static jobject Image_getHardwareBuffer(JNIEnv* env, jobject thiz) {
 
 static const JNINativeMethod gImageReaderMethods[] = {
     {"nativeClassInit",        "()V",                        (void*)ImageReader_classInit },
-    {"nativeInit",             "(Ljava/lang/Object;IIIJII)V",   (void*)ImageReader_init },
+    {"nativeInit",             "(Ljava/lang/Object;IIIIJ)V",  (void*)ImageReader_init },
     {"nativeClose",            "()V",                        (void*)ImageReader_close },
     {"nativeReleaseImage",     "(Landroid/media/Image;)V",   (void*)ImageReader_imageRelease },
-    {"nativeImageSetup",       "(Landroid/media/Image;Z)I",   (void*)ImageReader_imageSetup },
+    {"nativeImageSetup",       "(Landroid/media/Image;)I",   (void*)ImageReader_imageSetup },
     {"nativeGetSurface",       "()Landroid/view/Surface;",   (void*)ImageReader_getSurface },
     {"nativeDetachImage",      "(Landroid/media/Image;)I",   (void*)ImageReader_detachImage },
     {"nativeCreateImagePlanes",

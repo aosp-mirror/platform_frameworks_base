@@ -63,15 +63,29 @@ public class OomAdjusterTests {
 
     static class MyOomAdjuster extends OomAdjuster {
 
+        private final PlatformCompatCache mPlatformCompatCache;
+
         MyOomAdjuster(ActivityManagerService service, ProcessList processList,
                 ActiveUids activeUids) {
             super(service, processList, activeUids);
+            mPlatformCompatCache = new MyPlatformCompatCache(new long[]{});
+        }
+
+        static class MyPlatformCompatCache extends PlatformCompatCache {
+
+            MyPlatformCompatCache(long[] compatChanges) {
+                super(compatChanges);
+            }
+
+            @Override
+            boolean isChangeEnabled(long changeId, ApplicationInfo app, boolean defaultValue) {
+                return true;
+            }
         }
 
         @Override
-        protected boolean isChangeEnabled(int changeId, ApplicationInfo app,
-                boolean defaultValue) {
-            return true;
+        protected OomAdjuster.PlatformCompatCache getPlatformCompatCache() {
+            return mPlatformCompatCache;
         }
     }
 

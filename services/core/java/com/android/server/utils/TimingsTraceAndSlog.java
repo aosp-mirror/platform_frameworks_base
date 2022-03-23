@@ -78,17 +78,9 @@ public final class TimingsTraceAndSlog extends TimingsTraceLog {
         mTag = tag;
     }
 
-    /**
-     * @see TimingsTraceLog#TimingsTraceLog(TimingsTraceLog)
-     */
-    public TimingsTraceAndSlog(@NonNull TimingsTraceAndSlog other) {
-        super(other);
-        this.mTag = other.mTag;
-    }
-
     @Override
     public void traceBegin(@NonNull String name) {
-        Slog.d(mTag, name);
+        Slog.i(mTag, name);
         super.traceBegin(name);
     }
 

@@ -16,15 +16,14 @@
 
 package com.android.wm.shell.onehanded;
 
-import static com.android.internal.jank.InteractionJankMonitor.CUJ_ONE_HANDED_ENTER_TRANSITION;
-import static com.android.internal.jank.InteractionJankMonitor.CUJ_ONE_HANDED_EXIT_TRANSITION;
+import static android.os.UserHandle.myUserId;
+
 import static com.android.wm.shell.onehanded.OneHandedAnimationController.TRANSITION_DIRECTION_EXIT;
 import static com.android.wm.shell.onehanded.OneHandedAnimationController.TRANSITION_DIRECTION_TRIGGER;
 
 import android.content.Context;
 import android.graphics.Rect;
 import android.os.SystemProperties;
-import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.view.SurfaceControl;
 import android.window.DisplayAreaAppearedInfo;
@@ -37,7 +36,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
-import com.android.internal.jank.InteractionJankMonitor;
 import com.android.wm.shell.R;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.ShellExecutor;
@@ -45,7 +43,6 @@ import com.android.wm.shell.common.ShellExecutor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Manages OneHanded display areas such as offset.
@@ -67,8 +64,6 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
     private final Rect mLastVisualDisplayBounds = new Rect();
     private final Rect mDefaultDisplayBounds = new Rect();
     private final OneHandedSettingsUtil mOneHandedSettingsUtil;
-    private final InteractionJankMonitor mJankMonitor;
-    private final Context mContext;
 
     private boolean mIsReady;
     private float mLastVisualOffset = 0;
@@ -80,6 +75,7 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
             mSurfaceControlTransactionFactory;
     private OneHandedTutorialHandler mTutorialHandler;
     private List<OneHandedTransitionCallback> mTransitionCallbacks = new ArrayList<>();
+    private OneHandedBackgroundPanelOrganizer mBackgroundPanelOrganizer;
 
     @VisibleForTesting
     OneHandedAnimationCallback mOneHandedAnimationCallback =
@@ -101,11 +97,7 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
                 public void onOneHandedAnimationEnd(SurfaceControl.Transaction tx,
                         OneHandedAnimationController.OneHandedTransitionAnimator animator) {
                     mAnimationController.removeAnimator(animator.getToken());
-                    final boolean isEntering = animator.getTransitionDirection()
-                            == TRANSITION_DIRECTION_TRIGGER;
                     if (mAnimationController.isAnimatorsConsumed()) {
-                        endCUJTracing(isEntering ? CUJ_ONE_HANDED_ENTER_TRANSITION
-                                : CUJ_ONE_HANDED_EXIT_TRANSITION);
                         finishOffset((int) animator.getDestinationOffset(),
                                 animator.getTransitionDirection());
                     }
@@ -115,11 +107,7 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
                 public void onOneHandedAnimationCancel(
                         OneHandedAnimationController.OneHandedTransitionAnimator animator) {
                     mAnimationController.removeAnimator(animator.getToken());
-                    final boolean isEntering = animator.getTransitionDirection()
-                            == TRANSITION_DIRECTION_TRIGGER;
                     if (mAnimationController.isAnimatorsConsumed()) {
-                        cancelCUJTracing(isEntering ? CUJ_ONE_HANDED_ENTER_TRANSITION
-                                : CUJ_ONE_HANDED_EXIT_TRANSITION);
                         finishOffset((int) animator.getDestinationOffset(),
                                 animator.getTransitionDirection());
                     }
@@ -134,20 +122,20 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
             OneHandedSettingsUtil oneHandedSettingsUtil,
             OneHandedAnimationController animationController,
             OneHandedTutorialHandler tutorialHandler,
-            InteractionJankMonitor jankMonitor,
+            OneHandedBackgroundPanelOrganizer oneHandedBackgroundGradientOrganizer,
             ShellExecutor mainExecutor) {
         super(mainExecutor);
-        mContext = context;
-        setDisplayLayout(displayLayout);
+        mDisplayLayout.set(displayLayout);
         mOneHandedSettingsUtil = oneHandedSettingsUtil;
+        updateDisplayBounds();
         mAnimationController = animationController;
-        mJankMonitor = jankMonitor;
         final int animationDurationConfig = context.getResources().getInteger(
                 R.integer.config_one_handed_translate_animation_duration);
         mEnterExitAnimationDurationMs =
                 SystemProperties.getInt(ONE_HANDED_MODE_TRANSLATE_ANIMATION_DURATION,
                         animationDurationConfig);
         mSurfaceControlTransactionFactory = SurfaceControl.Transaction::new;
+        mBackgroundPanelOrganizer = oneHandedBackgroundGradientOrganizer;
         mTutorialHandler = tutorialHandler;
     }
 
@@ -198,8 +186,20 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
         if (mDisplayLayout.rotation() == toRotation) {
             return;
         }
+
+        if (!mOneHandedSettingsUtil.getSettingsOneHandedModeEnabled(context.getContentResolver(),
+                myUserId())) {
+            return;
+        }
+
         mDisplayLayout.rotateTo(context.getResources(), toRotation);
         updateDisplayBounds();
+
+        if (mOneHandedSettingsUtil.getSettingsSwipeToNotificationEnabled(
+                context.getContentResolver(), myUserId())) {
+            // If current settings is swipe notification, skip finishOffset.
+            return;
+        }
         finishOffset(0, TRANSITION_DIRECTION_EXIT);
     }
 
@@ -212,11 +212,6 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
         final int direction = yOffset > 0
                 ? TRANSITION_DIRECTION_TRIGGER
                 : TRANSITION_DIRECTION_EXIT;
-        if (direction == TRANSITION_DIRECTION_TRIGGER) {
-            beginCUJTracing(CUJ_ONE_HANDED_ENTER_TRANSITION, "enterOneHanded");
-        } else {
-            beginCUJTracing(CUJ_ONE_HANDED_EXIT_TRANSITION, "stopOneHanded");
-        }
         mDisplayAreaTokenMap.forEach(
                 (token, leash) -> {
                     animateWindows(token, leash, fromPos, yOffset, direction,
@@ -255,6 +250,7 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
             animator.setTransitionDirection(direction)
                     .addOneHandedAnimationCallback(mOneHandedAnimationCallback)
                     .addOneHandedAnimationCallback(mTutorialHandler)
+                    .addOneHandedAnimationCallback(mBackgroundPanelOrganizer)
                     .setDuration(durationMs)
                     .start();
         }
@@ -300,7 +296,6 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
     @VisibleForTesting
     void setDisplayLayout(@NonNull DisplayLayout displayLayout) {
         mDisplayLayout.set(displayLayout);
-        updateDisplayBounds();
     }
 
     @VisibleForTesting
@@ -308,7 +303,6 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
         return mDisplayAreaTokenMap;
     }
 
-    @VisibleForTesting
     void updateDisplayBounds() {
         mDefaultDisplayBounds.set(0, 0, mDisplayLayout.width(), mDisplayLayout.height());
         mLastVisualDisplayBounds.set(mDefaultDisplayBounds);
@@ -319,26 +313,6 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
      */
     public void registerTransitionCallback(OneHandedTransitionCallback callback) {
         mTransitionCallbacks.add(callback);
-    }
-
-    void beginCUJTracing(@InteractionJankMonitor.CujType int cujType, @Nullable String tag) {
-        final Map.Entry<WindowContainerToken, SurfaceControl> firstEntry =
-                getDisplayAreaTokenMap().entrySet().iterator().next();
-        final InteractionJankMonitor.Configuration.Builder builder =
-                InteractionJankMonitor.Configuration.Builder.withSurface(
-                        cujType, mContext, firstEntry.getValue());
-        if (!TextUtils.isEmpty(tag)) {
-            builder.setTag(tag);
-        }
-        mJankMonitor.begin(builder);
-    }
-
-    void endCUJTracing(@InteractionJankMonitor.CujType int cujType) {
-        mJankMonitor.end(cujType);
-    }
-
-    void cancelCUJTracing(@InteractionJankMonitor.CujType int cujType) {
-        mJankMonitor.cancel(cujType);
     }
 
     void dump(@NonNull PrintWriter pw) {

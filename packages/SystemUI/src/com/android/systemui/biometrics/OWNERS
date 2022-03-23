@@ -1,4 +1,3 @@
 set noparent
 
 include /services/core/java/com/android/server/biometrics/OWNERS
-beverlyt@google.com

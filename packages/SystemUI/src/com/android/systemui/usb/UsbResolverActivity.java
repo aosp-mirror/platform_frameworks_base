@@ -19,7 +19,6 @@ package com.android.systemui.usb;
 import static com.android.internal.app.IntentForwarderActivity.FORWARD_INTENT_TO_MANAGED_PROFILE;
 
 import android.content.ActivityNotFoundException;
-import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
 import android.hardware.usb.IUsbManager;
@@ -33,7 +32,6 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.util.Log;
-import android.view.WindowManager;
 import android.widget.CheckBox;
 
 import com.android.internal.app.ResolverActivity;
@@ -61,12 +59,9 @@ public class UsbResolverActivity extends ResolverActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        getWindow().addSystemFlags(
-                WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS);
         Intent intent = getIntent();
         Parcelable targetParcelable = intent.getParcelableExtra(Intent.EXTRA_INTENT);
         if (!(targetParcelable instanceof Intent)) {
-            super_onCreate(savedInstanceState);
             Log.w("UsbResolverActivity", "Target is not an intent: " + targetParcelable);
             finish();
             return;
@@ -99,7 +94,6 @@ public class UsbResolverActivity extends ResolverActivity {
         } else {
             mAccessory = (UsbAccessory)target.getParcelableExtra(UsbManager.EXTRA_ACCESSORY);
             if (mAccessory == null) {
-                super_onCreate(savedInstanceState);
                 Log.e(TAG, "no device or accessory");
                 finish();
                 return;
@@ -115,10 +109,7 @@ public class UsbResolverActivity extends ResolverActivity {
                 mOtherProfileIntent.putParcelableArrayListExtra(EXTRA_RESOLVE_INFOS,
                         rListOtherProfile);
             } else {
-                mOtherProfileIntent = new Intent();
-                mOtherProfileIntent.setComponent(ComponentName.unflattenFromString(
-                        this.getResources().getString(
-                                com.android.internal.R.string.config_usbConfirmActivity)));
+                mOtherProfileIntent = new Intent(this, UsbConfirmActivity.class);
                 mOtherProfileIntent.putExtra(EXTRA_RESOLVE_INFO, rListOtherProfile.get(0));
 
                 if (mDevice != null) {

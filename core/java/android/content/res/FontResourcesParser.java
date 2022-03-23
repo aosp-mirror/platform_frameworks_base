@@ -199,7 +199,6 @@ public class FontResourcesParser {
                         certs.add(certsList);
                     }
                 }
-                typedArray.recycle();
             }
             return new ProviderResourceEntry(
                     authority,

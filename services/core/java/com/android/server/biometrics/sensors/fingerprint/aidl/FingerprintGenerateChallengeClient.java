@@ -19,37 +19,32 @@ package com.android.server.biometrics.sensors.fingerprint.aidl;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.hardware.biometrics.fingerprint.IFingerprint;
+import android.hardware.biometrics.fingerprint.ISession;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
 
-import com.android.server.biometrics.log.BiometricContext;
-import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.GenerateChallengeClient;
-
-import java.util.function.Supplier;
 
 /**
  * Fingerprint-specific generateChallenge client for the {@link IFingerprint} AIDL HAL interface.
  */
-class FingerprintGenerateChallengeClient extends GenerateChallengeClient<AidlSession> {
+class FingerprintGenerateChallengeClient extends GenerateChallengeClient<ISession> {
     private static final String TAG = "FingerprintGenerateChallengeClient";
 
     FingerprintGenerateChallengeClient(@NonNull Context context,
-            @NonNull Supplier<AidlSession> lazyDaemon,
+            @NonNull LazyDaemon<ISession> lazyDaemon,
             @NonNull IBinder token,
             @NonNull ClientMonitorCallbackConverter listener,
-            int userId, @NonNull String owner, int sensorId,
-            @NonNull BiometricLogger biometricLogger, @NonNull BiometricContext biometricContext) {
-        super(context, lazyDaemon, token, listener, userId, owner, sensorId,
-                biometricLogger, biometricContext);
+            int userId, @NonNull String owner, int sensorId) {
+        super(context, lazyDaemon, token, listener, userId, owner, sensorId);
     }
 
     @Override
     protected void startHalOperation() {
         try {
-            getFreshDaemon().getSession().generateChallenge();
+            getFreshDaemon().generateChallenge();
         } catch (RemoteException e) {
             Slog.e(TAG, "Unable to generateChallenge", e);
             mCallback.onClientFinished(this, false /* success */);

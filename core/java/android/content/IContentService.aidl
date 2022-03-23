@@ -150,7 +150,6 @@ interface IContentService {
     SyncAdapterType[] getSyncAdapterTypesAsUser(int userId);
 
     String[] getSyncAdapterPackagesForAuthorityAsUser(String authority, int userId);
-    String getSyncAdapterPackageAsUser(String accountType, String authority, int userId);
 
     /**
      * Returns true if there is currently a operation for the given account/authority or service

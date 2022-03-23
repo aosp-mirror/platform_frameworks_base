@@ -56,8 +56,7 @@ public class ExtensionControllerImpl implements ExtensionController {
     /**
      */
     @Inject
-    public ExtensionControllerImpl(
-            Context context,
+    public ExtensionControllerImpl(Context context,
             LeakDetector leakDetector,
             PluginManager pluginManager,
             TunerService tunerService,

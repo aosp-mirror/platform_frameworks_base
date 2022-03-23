@@ -73,9 +73,9 @@ public final class FaceEnrollFrame implements Parcelable {
     }
 
     private FaceEnrollFrame(@NonNull Parcel source) {
-        mCell = source.readParcelable(FaceEnrollCell.class.getClassLoader(), android.hardware.face.FaceEnrollCell.class);
+        mCell = source.readParcelable(FaceEnrollCell.class.getClassLoader());
         mStage = source.readInt();
-        mData = source.readParcelable(FaceDataFrame.class.getClassLoader(), android.hardware.face.FaceDataFrame.class);
+        mData = source.readParcelable(FaceDataFrame.class.getClassLoader());
     }
 
     @Override

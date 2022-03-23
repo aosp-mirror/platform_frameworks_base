@@ -30,6 +30,7 @@ import android.hardware.display.DisplayManager.DisplayListener;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.RemoteException;
@@ -46,15 +47,16 @@ import com.android.internal.display.BrightnessSynchronizer;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.settingslib.RestrictedLockUtilsInternal;
+import com.android.systemui.Dependency;
 import com.android.systemui.broadcast.BroadcastDispatcher;
-import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.settings.CurrentUserTracker;
-import com.android.systemui.statusbar.policy.BrightnessMirrorController;
+
+import java.util.ArrayList;
 
 import javax.inject.Inject;
 
-public class BrightnessController implements ToggleSlider.Listener, MirroredBrightnessController {
-    private static final String TAG = "CentralSurfaces.BrightnessController";
+public class BrightnessController implements ToggleSlider.Listener {
+    private static final String TAG = "StatusBar.BrightnessController";
     private static final int SLIDER_ANIMATION_DURATION = 3000;
 
     private static final int MSG_UPDATE_SLIDER = 1;
@@ -90,8 +92,12 @@ public class BrightnessController implements ToggleSlider.Listener, MirroredBrig
         @Override
         public void onDisplayChanged(int displayId) {
             mBackgroundHandler.post(mUpdateSliderRunnable);
+            notifyCallbacks();
         }
     };
+
+    private ArrayList<BrightnessStateChangeCallback> mChangeCallbacks =
+            new ArrayList<BrightnessStateChangeCallback>();
 
     private volatile boolean mAutomatic;  // Brightness adjusted automatically using ambient light.
     private volatile boolean mIsVrModeEnabled;
@@ -103,9 +109,9 @@ public class BrightnessController implements ToggleSlider.Listener, MirroredBrig
 
     private ValueAnimator mSliderAnimator;
 
-    @Override
-    public void setMirror(BrightnessMirrorController controller) {
-        mControl.setMirrorControllerAndMirror(controller);
+    public interface BrightnessStateChangeCallback {
+        /** Indicates that some of the brightness settings have changed */
+        void onBrightnessLevelChanged();
     }
 
     /** ContentObserver to watch brightness */
@@ -128,6 +134,7 @@ public class BrightnessController implements ToggleSlider.Listener, MirroredBrig
                 mBackgroundHandler.post(mUpdateModeRunnable);
                 mBackgroundHandler.post(mUpdateSliderRunnable);
             }
+            notifyCallbacks();
         }
 
         public void startObserving() {
@@ -275,15 +282,12 @@ public class BrightnessController implements ToggleSlider.Listener, MirroredBrig
         }
     };
 
-    public BrightnessController(
-            Context context,
-            ToggleSlider control,
-            BroadcastDispatcher broadcastDispatcher,
-            @Background Handler bgHandler) {
+    public BrightnessController(Context context, ToggleSlider control,
+            BroadcastDispatcher broadcastDispatcher) {
         mContext = context;
         mControl = control;
         mControl.setMax(GAMMA_SPACE_MAX);
-        mBackgroundHandler = bgHandler;
+        mBackgroundHandler = new Handler((Looper) Dependency.get(Dependency.BG_LOOPER));
         mUserTracker = new CurrentUserTracker(broadcastDispatcher) {
             @Override
             public void onUserSwitched(int newUserId) {
@@ -303,6 +307,14 @@ public class BrightnessController implements ToggleSlider.Listener, MirroredBrig
         mDisplayManager = context.getSystemService(DisplayManager.class);
         mVrManager = IVrManager.Stub.asInterface(ServiceManager.getService(
                 Context.VR_SERVICE));
+    }
+
+    public void addStateChangedCallback(BrightnessStateChangeCallback cb) {
+        mChangeCallbacks.add(cb);
+    }
+
+    public boolean removeStateChangedCallback(BrightnessStateChangeCallback cb) {
+        return mChangeCallbacks.remove(cb);
     }
 
     public void registerCallbacks() {
@@ -355,6 +367,10 @@ public class BrightnessController implements ToggleSlider.Listener, MirroredBrig
                     }
                 });
         }
+
+        for (BrightnessStateChangeCallback cb : mChangeCallbacks) {
+            cb.onBrightnessLevelChanged();
+        }
     }
 
     public void checkRestrictionAndSetEnabled() {
@@ -367,14 +383,6 @@ public class BrightnessController implements ToggleSlider.Listener, MirroredBrig
                                 mUserTracker.getCurrentUserId()));
             }
         });
-    }
-
-    public void hideSlider() {
-        mControl.hideView();
-    }
-
-    public void showSlider() {
-        mControl.showView();
     }
 
     private void setBrightness(float brightness) {
@@ -398,11 +406,6 @@ public class BrightnessController implements ToggleSlider.Listener, MirroredBrig
             min = mBrightnessMin;
             max = mBrightnessMax;
         }
-
-        // Ensure the slider is in a fixed position first, then check if we should animate.
-        if (mSliderAnimator != null && mSliderAnimator.isStarted()) {
-            mSliderAnimator.cancel();
-        }
         // convertGammaToLinearFloat returns 0-1
         if (BrightnessSynchronizer.floatEquals(brightnessValue,
                 convertGammaToLinearFloat(mControl.getValue(), min, max))) {
@@ -416,14 +419,13 @@ public class BrightnessController implements ToggleSlider.Listener, MirroredBrig
     }
 
     private void animateSliderTo(int target) {
-        if (!mControlValueInitialized || !mControl.isVisible()) {
+        if (!mControlValueInitialized) {
             // Don't animate the first value since its default state isn't meaningful to users.
-            // We also don't want to animate slider if it's not visible - especially important when
-            // two sliders are active at the same time in split shade (one in QS and one in QQS),
-            // as this negatively affects transition between them and they share mirror slider -
-            // animating it from two different sources causes janky motion
             mControl.setValue(target);
             mControlValueInitialized = true;
+        }
+        if (mSliderAnimator != null && mSliderAnimator.isStarted()) {
+            mSliderAnimator.cancel();
         }
         mSliderAnimator = ValueAnimator.ofInt(mControl.getValue(), target);
         mSliderAnimator.addUpdateListener((ValueAnimator animation) -> {
@@ -437,29 +439,27 @@ public class BrightnessController implements ToggleSlider.Listener, MirroredBrig
         mSliderAnimator.start();
     }
 
+    private void notifyCallbacks() {
+        final int size = mChangeCallbacks.size();
+        for (int i = 0; i < size; i++) {
+            mChangeCallbacks.get(i).onBrightnessLevelChanged();
+        }
+    }
+
     /** Factory for creating a {@link BrightnessController}. */
     public static class Factory {
         private final Context mContext;
         private final BroadcastDispatcher mBroadcastDispatcher;
-        private final Handler mBackgroundHandler;
 
         @Inject
-        public Factory(
-                Context context,
-                BroadcastDispatcher broadcastDispatcher,
-                @Background Handler bgHandler) {
+        public Factory(Context context, BroadcastDispatcher broadcastDispatcher) {
             mContext = context;
             mBroadcastDispatcher = broadcastDispatcher;
-            mBackgroundHandler = bgHandler;
         }
 
         /** Create a {@link BrightnessController} */
         public BrightnessController create(ToggleSlider toggleSlider) {
-            return new BrightnessController(
-                    mContext,
-                    toggleSlider,
-                    mBroadcastDispatcher,
-                    mBackgroundHandler);
+            return new BrightnessController(mContext, toggleSlider, mBroadcastDispatcher);
         }
     }
 

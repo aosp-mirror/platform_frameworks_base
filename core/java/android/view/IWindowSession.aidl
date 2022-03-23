@@ -32,12 +32,10 @@ import android.view.MotionEvent;
 import android.view.WindowManager;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
-import android.view.InsetsVisibilities;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 import android.window.ClientWindowFrames;
-import android.window.IOnBackInvokedCallback;
 
 import java.util.List;
 
@@ -48,12 +46,12 @@ import java.util.List;
  */
 interface IWindowSession {
     int addToDisplay(IWindow window, in WindowManager.LayoutParams attrs,
-            in int viewVisibility, in int layerStackId, in InsetsVisibilities requestedVisibilities,
+            in int viewVisibility, in int layerStackId, in InsetsState requestedVisibility,
             out InputChannel outInputChannel, out InsetsState insetsState,
             out InsetsSourceControl[] activeControls);
     int addToDisplayAsUser(IWindow window, in WindowManager.LayoutParams attrs,
             in int viewVisibility, in int layerStackId, in int userId,
-            in InsetsVisibilities requestedVisibilities, out InputChannel outInputChannel,
+            in InsetsState requestedVisibility, out InputChannel outInputChannel,
             out InsetsState insetsState, out InsetsSourceControl[] activeControls);
     int addToDisplayWithoutInputChannel(IWindow window, in WindowManager.LayoutParams attrs,
             in int viewVisibility, in int layerStackId, out InsetsState insetsState);
@@ -74,6 +72,7 @@ interface IWindowSession {
      * @param viewVisibility Window root view's visibility.
      * @param flags Request flags: {@link WindowManagerGlobal#RELAYOUT_INSETS_PENDING},
      * {@link WindowManagerGlobal#RELAYOUT_DEFER_SURFACE_DESTROY}.
+     * @param frameNumber A frame number in which changes requested in this layout will be rendered.
      * @param outFrame Rect in which is placed the new position/size on
      * screen.
      * @param outContentInsets Rect in which is placed the offsets from
@@ -96,16 +95,17 @@ interface IWindowSession {
      * since it was last displayed.
      * @param outSurface Object in which is placed the new display surface.
      * @param insetsState The current insets state in the system.
+     * @param outSurfaceSize The width and height of the surface control
      *
      * @return int Result flags: {@link WindowManagerGlobal#RELAYOUT_SHOW_FOCUS},
      * {@link WindowManagerGlobal#RELAYOUT_FIRST_TIME}.
      */
     int relayout(IWindow window, in WindowManager.LayoutParams attrs,
             int requestedWidth, int requestedHeight, int viewVisibility,
-            int flags, out ClientWindowFrames outFrames,
+            int flags, long frameNumber, out ClientWindowFrames outFrames,
             out MergedConfiguration outMergedConfiguration, out SurfaceControl outSurfaceControl,
             out InsetsState insetsState, out InsetsSourceControl[] activeControls,
-            out Bundle bundle);
+            out Point outSurfaceSize);
 
     /*
      * Notify the window manager that an application is relaunching and
@@ -143,8 +143,7 @@ interface IWindowSession {
      * is null if there is no sync required.
      */
     @UnsupportedAppUsage
-    oneway void finishDrawing(IWindow window, in SurfaceControl.Transaction postDrawTransaction,
-            int seqId);
+    oneway void finishDrawing(IWindow window, in SurfaceControl.Transaction postDrawTransaction);
 
     @UnsupportedAppUsage
     oneway void setInTouchMode(boolean showFocus);
@@ -173,11 +172,6 @@ interface IWindowSession {
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     IBinder performDrag(IWindow window, int flags, in SurfaceControl surface, int touchSource,
             float touchX, float touchY, float thumbCenterX, float thumbCenterY, in ClipData data);
-
-    /**
-     * Drops the content of the current drag operation for accessibility
-     */
-    boolean dropForAccessibility(IWindow window, int x, int y);
 
     /**
      * Report the result of a drop action targeted to the given window.
@@ -273,6 +267,17 @@ interface IWindowSession {
     oneway void updatePointerIcon(IWindow window);
 
     /**
+     * Update the location of a child display in its parent window. This enables windows in the
+     * child display to compute the global transformation matrix.
+     *
+     * @param window The parent window of the display.
+     * @param x The x coordinate in the parent window.
+     * @param y The y coordinate in the parent window.
+     * @param displayId The id of the display to be notified.
+     */
+    oneway void updateDisplayContentLocation(IWindow window, int x, int y, int displayId);
+
+    /**
      * Update a tap exclude region identified by provided id in the window. Touches on this region
      * will neither be dispatched to this window nor change the focus to this window. Passing an
      * invalid region will remove the area from the exclude region of this window.
@@ -280,9 +285,10 @@ interface IWindowSession {
     oneway void updateTapExcludeRegion(IWindow window, in Region region);
 
     /**
-     * Updates the requested visibilities of insets.
+     * Called when the client has changed the local insets state, and now the server should reflect
+     * that new state.
      */
-    oneway void updateRequestedVisibilities(IWindow window, in InsetsVisibilities visibilities);
+    oneway void insetsModified(IWindow window, in InsetsState state);
 
     /**
      * Called when the system gesture exclusion has changed.
@@ -290,18 +296,12 @@ interface IWindowSession {
     oneway void reportSystemGestureExclusionChanged(IWindow window, in List<Rect> exclusionRects);
 
     /**
-     * Called when the keep-clear areas for this window have changed.
-     */
-    oneway void reportKeepClearAreasChanged(IWindow window, in List<Rect> restricted,
-           in List<Rect> unrestricted);
-
-    /**
     * Request the server to call setInputWindowInfo on a given Surface, and return
     * an input channel where the client can receive input.
     */
     void grantInputChannel(int displayId, in SurfaceControl surface, in IWindow window,
             in IBinder hostInputToken, int flags, int privateFlags, int type,
-            in IBinder focusGrantToken, String inputHandleName, out InputChannel outInputChannel);
+            out InputChannel outInputChannel);
 
     /**
      * Update the flags on an input channel associated with a particular surface.
@@ -334,19 +334,4 @@ interface IWindowSession {
      */
     oneway void generateDisplayHash(IWindow window, in Rect boundsInWindow,
             in String hashAlgorithm, in RemoteCallback callback);
-
-    /**
-     * Sets the {@link IOnBackInvokedCallback} to be invoked for a window when back is triggered.
-     *
-     * @param window The token for the window to set the callback to.
-     * @param callback The {@link IOnBackInvokedCallback} to set.
-     * @param priority The priority of the callback.
-     */
-    oneway void setOnBackInvokedCallback(
-            IWindow window, IOnBackInvokedCallback callback, int priority);
-
-    /**
-     * Clears a touchable region set by {@link #setInsets}.
-     */
-    void clearTouchableRegion(IWindow window);
 }
