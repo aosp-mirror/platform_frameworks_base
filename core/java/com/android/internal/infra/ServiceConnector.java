@@ -507,10 +507,21 @@ public interface ServiceConnector<I extends IInterface> {
         void unbindJobThread() {
             cancelTimeout();
             I service = mService;
+            // TODO(b/224695239): This is actually checking wasConnected. Rename and/or fix
+            // implementation based on what this should actually be checking. At least the first
+            // check for calling unbind is the correct behavior, though.
             boolean wasBound = service != null;
+            if (wasBound || mBinding) {
+                try {
+                    mContext.unbindService(mServiceConnection);
+                } catch (IllegalArgumentException e) {  // TODO(b/224697137): Fix the race condition
+                                                        // that requires catching this (crashes if
+                                                        // service isn't currently bound).
+                    Log.e(LOG_TAG, "Failed to unbind: " + e);
+                }
+            }
             if (wasBound) {
                 onServiceConnectionStatusChanged(service, false);
-                mContext.unbindService(mServiceConnection);
                 service.asBinder().unlinkToDeath(this, 0);
                 mService = null;
             }
