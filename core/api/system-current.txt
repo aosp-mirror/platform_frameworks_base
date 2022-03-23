@@ -11903,20 +11903,20 @@ package android.service.trust {
 package android.service.voice {
 
   public class AlwaysOnHotwordDetector implements android.service.voice.HotwordDetector {
-    method @Nullable public android.content.Intent createEnrollIntent();
-    method @Nullable public android.content.Intent createReEnrollIntent();
-    method @Nullable public android.content.Intent createUnEnrollIntent();
-    method @RequiresPermission(allOf={android.Manifest.permission.RECORD_AUDIO, android.Manifest.permission.CAPTURE_AUDIO_HOTWORD}) public int getParameter(int);
+    method @Nullable public android.content.Intent createEnrollIntent() throws android.service.voice.HotwordDetector.IllegalDetectorStateException;
+    method @Nullable public android.content.Intent createReEnrollIntent() throws android.service.voice.HotwordDetector.IllegalDetectorStateException;
+    method @Nullable public android.content.Intent createUnEnrollIntent() throws android.service.voice.HotwordDetector.IllegalDetectorStateException;
+    method @RequiresPermission(allOf={android.Manifest.permission.RECORD_AUDIO, android.Manifest.permission.CAPTURE_AUDIO_HOTWORD}) public int getParameter(int) throws android.service.voice.HotwordDetector.IllegalDetectorStateException;
     method public int getSupportedAudioCapabilities();
-    method public int getSupportedRecognitionModes();
-    method @Nullable @RequiresPermission(allOf={android.Manifest.permission.RECORD_AUDIO, android.Manifest.permission.CAPTURE_AUDIO_HOTWORD}) public android.service.voice.AlwaysOnHotwordDetector.ModelParamRange queryParameter(int);
-    method @RequiresPermission(allOf={android.Manifest.permission.RECORD_AUDIO, android.Manifest.permission.CAPTURE_AUDIO_HOTWORD}) public int setParameter(int, int);
-    method @RequiresPermission(allOf={android.Manifest.permission.RECORD_AUDIO, android.Manifest.permission.CAPTURE_AUDIO_HOTWORD}) public boolean startRecognition(int, @NonNull byte[]);
-    method @RequiresPermission(allOf={android.Manifest.permission.RECORD_AUDIO, android.Manifest.permission.CAPTURE_AUDIO_HOTWORD}) public boolean startRecognition(int);
-    method @RequiresPermission(allOf={android.Manifest.permission.RECORD_AUDIO, android.Manifest.permission.CAPTURE_AUDIO_HOTWORD}) public boolean startRecognition();
-    method public boolean startRecognition(@NonNull android.os.ParcelFileDescriptor, @NonNull android.media.AudioFormat, @Nullable android.os.PersistableBundle);
-    method @RequiresPermission(allOf={android.Manifest.permission.RECORD_AUDIO, android.Manifest.permission.CAPTURE_AUDIO_HOTWORD}) public boolean stopRecognition();
-    method public final void updateState(@Nullable android.os.PersistableBundle, @Nullable android.os.SharedMemory);
+    method public int getSupportedRecognitionModes() throws android.service.voice.HotwordDetector.IllegalDetectorStateException;
+    method @Nullable @RequiresPermission(allOf={android.Manifest.permission.RECORD_AUDIO, android.Manifest.permission.CAPTURE_AUDIO_HOTWORD}) public android.service.voice.AlwaysOnHotwordDetector.ModelParamRange queryParameter(int) throws android.service.voice.HotwordDetector.IllegalDetectorStateException;
+    method @RequiresPermission(allOf={android.Manifest.permission.RECORD_AUDIO, android.Manifest.permission.CAPTURE_AUDIO_HOTWORD}) public int setParameter(int, int) throws android.service.voice.HotwordDetector.IllegalDetectorStateException;
+    method @RequiresPermission(allOf={android.Manifest.permission.RECORD_AUDIO, android.Manifest.permission.CAPTURE_AUDIO_HOTWORD}) public boolean startRecognition(int, @NonNull byte[]) throws android.service.voice.HotwordDetector.IllegalDetectorStateException;
+    method @RequiresPermission(allOf={android.Manifest.permission.RECORD_AUDIO, android.Manifest.permission.CAPTURE_AUDIO_HOTWORD}) public boolean startRecognition(int) throws android.service.voice.HotwordDetector.IllegalDetectorStateException;
+    method @RequiresPermission(allOf={android.Manifest.permission.RECORD_AUDIO, android.Manifest.permission.CAPTURE_AUDIO_HOTWORD}) public boolean startRecognition() throws android.service.voice.HotwordDetector.IllegalDetectorStateException;
+    method public boolean startRecognition(@NonNull android.os.ParcelFileDescriptor, @NonNull android.media.AudioFormat, @Nullable android.os.PersistableBundle) throws android.service.voice.HotwordDetector.IllegalDetectorStateException;
+    method @RequiresPermission(allOf={android.Manifest.permission.RECORD_AUDIO, android.Manifest.permission.CAPTURE_AUDIO_HOTWORD}) public boolean stopRecognition() throws android.service.voice.HotwordDetector.IllegalDetectorStateException;
+    method public final void updateState(@Nullable android.os.PersistableBundle, @Nullable android.os.SharedMemory) throws android.service.voice.HotwordDetector.IllegalDetectorStateException;
     field public static final int AUDIO_CAPABILITY_ECHO_CANCELLATION = 1; // 0x1
     field public static final int AUDIO_CAPABILITY_NOISE_SUPPRESSION = 2; // 0x2
     field public static final int MODEL_PARAM_THRESHOLD_FACTOR = 0; // 0x0
@@ -12023,10 +12023,10 @@ package android.service.voice {
 
   public interface HotwordDetector {
     method public default void destroy();
-    method @RequiresPermission(allOf={android.Manifest.permission.RECORD_AUDIO, android.Manifest.permission.CAPTURE_AUDIO_HOTWORD}) public boolean startRecognition();
-    method public boolean startRecognition(@NonNull android.os.ParcelFileDescriptor, @NonNull android.media.AudioFormat, @Nullable android.os.PersistableBundle);
-    method public boolean stopRecognition();
-    method public void updateState(@Nullable android.os.PersistableBundle, @Nullable android.os.SharedMemory);
+    method @RequiresPermission(allOf={android.Manifest.permission.RECORD_AUDIO, android.Manifest.permission.CAPTURE_AUDIO_HOTWORD}) public boolean startRecognition() throws android.service.voice.HotwordDetector.IllegalDetectorStateException;
+    method public boolean startRecognition(@NonNull android.os.ParcelFileDescriptor, @NonNull android.media.AudioFormat, @Nullable android.os.PersistableBundle) throws android.service.voice.HotwordDetector.IllegalDetectorStateException;
+    method public boolean stopRecognition() throws android.service.voice.HotwordDetector.IllegalDetectorStateException;
+    method public void updateState(@Nullable android.os.PersistableBundle, @Nullable android.os.SharedMemory) throws android.service.voice.HotwordDetector.IllegalDetectorStateException;
   }
 
   public static interface HotwordDetector.Callback {
@@ -12037,6 +12037,9 @@ package android.service.voice {
     method public void onRecognitionPaused();
     method public void onRecognitionResumed();
     method public void onRejected(@NonNull android.service.voice.HotwordRejectedResult);
+  }
+
+  public static class HotwordDetector.IllegalDetectorStateException extends android.util.AndroidException {
   }
 
   public final class HotwordRejectedResult implements android.os.Parcelable {
