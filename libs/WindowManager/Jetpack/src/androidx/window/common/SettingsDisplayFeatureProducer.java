@@ -16,6 +16,8 @@
 
 package androidx.window.common;
 
+import static androidx.window.common.CommonFoldingFeature.COMMON_STATE_FLAT;
+import static androidx.window.common.CommonFoldingFeature.COMMON_STATE_HALF_OPENED;
 import static androidx.window.common.CommonFoldingFeature.COMMON_STATE_UNKNOWN;
 import static androidx.window.common.CommonFoldingFeature.parseListFromString;
 
@@ -42,7 +44,10 @@ import java.util.Optional;
 public final class SettingsDisplayFeatureProducer
         extends BaseDataProducer<List<CommonFoldingFeature>> {
     private static final String DISPLAY_FEATURES = "display_features";
+    private static final String DEVICE_POSTURE = "device_posture";
 
+    private final Uri mDevicePostureUri =
+            Settings.Global.getUriFor(DEVICE_POSTURE);
     private final Uri mDisplayFeaturesUri =
             Settings.Global.getUriFor(DISPLAY_FEATURES);
 
@@ -53,6 +58,15 @@ public final class SettingsDisplayFeatureProducer
     public SettingsDisplayFeatureProducer(@NonNull Context context) {
         mResolver = context.getContentResolver();
         mObserver = new SettingsObserver();
+    }
+
+    private int getPosture() {
+        int posture = Settings.Global.getInt(mResolver, DEVICE_POSTURE, COMMON_STATE_UNKNOWN);
+        if (posture == COMMON_STATE_HALF_OPENED || posture == COMMON_STATE_FLAT) {
+            return posture;
+        } else {
+            return COMMON_STATE_UNKNOWN;
+        }
     }
 
     @Override
@@ -66,7 +80,7 @@ public final class SettingsDisplayFeatureProducer
         if (TextUtils.isEmpty(displayFeaturesString)) {
             return Optional.of(Collections.emptyList());
         }
-        return Optional.of(parseListFromString(displayFeaturesString, COMMON_STATE_UNKNOWN));
+        return Optional.of(parseListFromString(displayFeaturesString, getPosture()));
     }
 
     /**
@@ -80,6 +94,7 @@ public final class SettingsDisplayFeatureProducer
         mRegisteredObservers = true;
         mResolver.registerContentObserver(mDisplayFeaturesUri, false /* notifyForDescendants */,
                 mObserver /* ContentObserver */);
+        mResolver.registerContentObserver(mDevicePostureUri, false, mObserver);
     }
 
     /**
@@ -101,7 +116,7 @@ public final class SettingsDisplayFeatureProducer
 
         @Override
         public void onChange(boolean selfChange, Uri uri) {
-            if (mDisplayFeaturesUri.equals(uri)) {
+            if (mDisplayFeaturesUri.equals(uri) || mDevicePostureUri.equals(uri)) {
                 notifyDataChanged();
             }
         }
