@@ -250,14 +250,25 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun testDragDownAmount_depthDistanceIsZero_doesNotSetProgress() {
+    fun testDragDownAmount_depthDistanceIsZero_setsProgressToZero() {
         context.getOrCreateTestableResources()
             .addOverride(R.dimen.lockscreen_shade_depth_controller_transition_distance, 0)
         configurationController.notifyConfigurationChanged()
 
         transitionController.dragDownAmount = 10f
 
-        verify(depthController, never()).transitionToFullShadeProgress
+        verify(depthController).transitionToFullShadeProgress = 0f
+    }
+
+    @Test
+    fun testDragDownAmount_depthDistanceNonZero_setsProgressBasedOnDistance() {
+        context.getOrCreateTestableResources()
+            .addOverride(R.dimen.lockscreen_shade_depth_controller_transition_distance, 100)
+        configurationController.notifyConfigurationChanged()
+
+        transitionController.dragDownAmount = 10f
+
+        verify(depthController).transitionToFullShadeProgress = 0.1f
     }
 
     @Test
