@@ -151,10 +151,6 @@
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"Если вы неправильно введете графический ключ ещё раз, ваш рабочий профиль и его данные будут удалены."</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"Если вы неправильно введете PIN-код ещё раз, ваш рабочий профиль и его данные будут удалены."</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"Если вы неправильно введете пароль ещё раз, ваш рабочий профиль и его данные будут удалены."</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"Слишком много неудачных попыток. С устройства будут удалены все данные."</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"Слишком много неудачных попыток. Этот пользователь будет удален."</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"Слишком много неудачных попыток. Этот рабочий профиль и его данные будут удалены."</string>
-    <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"Закрыть"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Прикоснитесь к сканеру отпечатков пальцев."</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"Значок отпечатка пальца"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Не удалось распознать лицо. Используйте отпечаток."</string>
@@ -327,17 +323,12 @@
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Медленная зарядка • Осталось <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Зарядка от док-станции • Ещё <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Сменить пользователя."</string>
-    <string name="user_add_user" msgid="4336657383006913022">"Добавить пользователя"</string>
-    <string name="user_new_user_name" msgid="2019166282704195789">"Новый пользователь"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Удалить аккаунт гостя?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Все приложения и данные этого профиля будут удалены."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Удалить"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Рады видеть вас снова!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Продолжить сеанс?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Начать заново"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Да, продолжить"</string>
-    <string name="user_add_user_title" msgid="4172327541504825032">"Добавить пользователя?"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"Когда вы добавите пользователя, ему потребуется настроить профиль.\n\nЛюбой пользователь устройства может обновлять приложения для всех аккаунтов."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Достигнут лимит"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="one">Можно добавить не более <xliff:g id="COUNT">%d</xliff:g> пользователя.</item>
@@ -797,9 +788,10 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Проведите по экрану, чтобы увидеть больше"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Загрузка рекомендаций…"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Медиа"</string>
-    <string name="controls_media_close_session" msgid="1193000643003066508">"Скрыть этот мультимедийный сеанс?"</string>
+    <!-- no translation found for controls_media_close_session (4780485355795635052) -->
+    <skip />
     <string name="controls_media_active_session" msgid="3146882316024153337">"Этот мультимедийный сеанс невозможно скрыть."</string>
-    <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Скрыть"</string>
+    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Скрыть"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Возобновить"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Настройки"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"Воспроизводится медиафайл \"<xliff:g id="SONG_NAME">%1$s</xliff:g>\" (исполнитель: <xliff:g id="ARTIST_NAME">%2$s</xliff:g>) из приложения \"<xliff:g id="APP_LABEL">%3$s</xliff:g>\"."</string>
@@ -817,7 +809,8 @@
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Для воспроизведения на этом устройстве подойдите ближе к другому (<xliff:g id="DEVICENAME">%1$s</xliff:g>)."</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Воспроизводится на устройстве \"<xliff:g id="DEVICENAME">%1$s</xliff:g>\"."</string>
     <string name="media_transfer_playing_this_device" msgid="1856890686844499172">"Воспроизводится на этом телефоне."</string>
-    <string name="media_transfer_failed" msgid="2640354446629980227">"Произошла ошибка."</string>
+    <!-- no translation found for media_transfer_failed (7955354964610603723) -->
+    <skip />
     <string name="controls_error_timeout" msgid="794197289772728958">"Нет ответа. Проверьте приложение."</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Не найдено."</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Управление недоступно"</string>

@@ -151,10 +151,6 @@
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"Se você informar um padrão incorreto na próxima tentativa, seu perfil de trabalho e os dados dele serão excluídos."</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"Se você informar um PIN incorreto na próxima tentativa, seu perfil de trabalho e os dados dele serão excluídos."</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"Se você informar uma senha incorreta na próxima tentativa, seu perfil de trabalho e os dados dele serão excluídos."</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"Excesso de tentativas incorretas. Os dados deste dispositivo serão excluídos."</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"Excesso de tentativas incorretas. O usuário será excluído."</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"Excesso de tentativas incorretas. Este perfil de trabalho e os dados dele serão excluídos."</string>
-    <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"Dispensar"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Toque no sensor de impressão digital"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"Ícone de impressão digital"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Não foi possível reconhecer o rosto Use a impressão digital."</string>
@@ -323,17 +319,12 @@
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Carga lenta • Conclusão em <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Carregando na base • Carga completa em <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Trocar usuário"</string>
-    <string name="user_add_user" msgid="4336657383006913022">"Adicionar usuário"</string>
-    <string name="user_new_user_name" msgid="2019166282704195789">"Novo usuário"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Remover visitante?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Todos os apps e dados nesta sessão serão excluídos."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Remover"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Você voltou, visitante!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Quer continuar a sessão?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Recomeçar"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Sim, continuar"</string>
-    <string name="user_add_user_title" msgid="4172327541504825032">"Adicionar novo usuário?"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"Quando você adiciona um novo usuário, essa pessoa precisa configurar o próprio espaço.\n\nQualquer usuário pode atualizar apps para os demais usuários."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Limite de usuários atingido"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="one">É possível adicionar até <xliff:g id="COUNT">%d</xliff:g> usuário.</item>
@@ -784,9 +775,10 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Deslize para ver mais"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Carregando recomendações"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Mídia"</string>
-    <string name="controls_media_close_session" msgid="1193000643003066508">"Ocultar a sessão de mídia?"</string>
+    <!-- no translation found for controls_media_close_session (4780485355795635052) -->
+    <skip />
     <string name="controls_media_active_session" msgid="3146882316024153337">"Não é possível ocultar a sessão de mídia atual."</string>
-    <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Dispensar"</string>
+    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Ocultar"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Retomar"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Configurações"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"Tocando <xliff:g id="SONG_NAME">%1$s</xliff:g> de <xliff:g id="ARTIST_NAME">%2$s</xliff:g> no app <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
@@ -804,7 +796,7 @@
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Aproxime-se do dispositivo <xliff:g id="DEVICENAME">%1$s</xliff:g> para abrir a mídia aqui"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Mídia aberta no dispositivo <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_transfer_playing_this_device" msgid="1856890686844499172">"Mídia aberta neste smartphone"</string>
-    <string name="media_transfer_failed" msgid="2640354446629980227">"Algo deu errado"</string>
+    <string name="media_transfer_failed" msgid="7955354964610603723">"Algo deu errado. Tente novamente."</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Inativo, verifique o app"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Não encontrado"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"O controle está indisponível"</string>
