@@ -274,7 +274,6 @@ import android.net.Uri;
 import android.net.VpnManager;
 import android.net.metrics.IpConnectivityLog;
 import android.net.wifi.WifiManager;
-import android.net.wifi.WifiSsid;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
@@ -395,7 +394,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Constructor;
-import java.nio.charset.StandardCharsets;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
@@ -18572,13 +18570,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                         .notifyMinimumRequiredWifiSecurityLevelChanged(level));
     }
 
-    private void notifyWifiSsidPolicyChanged(int policyType, List<String> ssids) {
-        List<WifiSsid> wifiSsidList = new ArrayList<>();
-        for (String ssid : ssids) {
-            wifiSsidList.add(
-                    WifiSsid.fromBytes(ssid.getBytes(StandardCharsets.UTF_8)));
+    private void notifyWifiSsidPolicyChanged(WifiSsidPolicy policy) {
+        if (policy == null) {
+            // If policy doesn't limit SSIDs, no need to disconnect anything.
+            return;
         }
-        WifiSsidPolicy policy = new WifiSsidPolicy(policyType, new ArraySet<>(wifiSsidList));
         mInjector.binderWithCleanCallingIdentity(
                 () -> mInjector.getWifiManager().notifyWifiSsidPolicyChanged(policy));
     }
@@ -18614,84 +18610,40 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
-    public void setSsidAllowlist(List<String> ssids) {
-        final CallerIdentity caller = getCallerIdentity();
-        Preconditions.checkCallAuthorization(
-                isDefaultDeviceOwner(caller) || isProfileOwnerOfOrganizationOwnedDevice(caller),
-                "SSID allowlist can only be controlled by a device owner or "
-                        + "a profile owner on an organization-owned device.");
-
-        Collections.sort(ssids);
-        boolean changed = false;
-        synchronized (getLockObject()) {
-            final ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(caller);
-            if (!ssids.equals(admin.mSsidAllowlist)) {
-                admin.mSsidAllowlist = ssids;
-                admin.mSsidDenylist = null;
-                changed = true;
-            }
-            if (changed) saveSettingsLocked(caller.getUserId());
-        }
-        if (changed && !ssids.isEmpty()) {
-            notifyWifiSsidPolicyChanged(WifiSsidPolicy.WIFI_SSID_POLICY_TYPE_ALLOWLIST, ssids);
-        }
-    }
-
-    @Override
-    public List<String> getSsidAllowlist() {
+    public WifiSsidPolicy getWifiSsidPolicy() {
         final CallerIdentity caller = getCallerIdentity();
         Preconditions.checkCallAuthorization(
                 isDefaultDeviceOwner(caller) || isProfileOwnerOfOrganizationOwnedDevice(caller)
                         || canQueryAdminPolicy(caller),
-                "SSID allowlist can only be retrieved by a device owner or "
+                "SSID policy can only be retrieved by a device owner or "
                         + "a profile owner on an organization-owned device or "
                         + "an app with the QUERY_ADMIN_POLICY permission.");
         synchronized (getLockObject()) {
             final ActiveAdmin admin = getDeviceOwnerOrProfileOwnerOfOrganizationOwnedDeviceLocked(
                     UserHandle.USER_SYSTEM);
-            return (admin == null || admin.mSsidAllowlist == null) ? new ArrayList<>()
-                    : admin.mSsidAllowlist;
+            return admin != null ? admin.mWifiSsidPolicy : null;
         }
     }
 
     @Override
-    public void setSsidDenylist(List<String> ssids) {
+    public void setWifiSsidPolicy(WifiSsidPolicy policy) {
         final CallerIdentity caller = getCallerIdentity();
         Preconditions.checkCallAuthorization(
                 isDefaultDeviceOwner(caller) || isProfileOwnerOfOrganizationOwnedDevice(caller),
                 "SSID denylist can only be controlled by a device owner or "
                         + "a profile owner on an organization-owned device.");
 
-        Collections.sort(ssids);
         boolean changed = false;
         synchronized (getLockObject()) {
             final ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(caller);
-            if (!ssids.equals(admin.mSsidDenylist)) {
-                admin.mSsidDenylist = ssids;
-                admin.mSsidAllowlist = null;
+            if (!Objects.equals(policy, admin.mWifiSsidPolicy)) {
+                admin.mWifiSsidPolicy = policy;
                 changed = true;
             }
             if (changed) saveSettingsLocked(caller.getUserId());
         }
         if (changed) {
-            notifyWifiSsidPolicyChanged(WifiSsidPolicy.WIFI_SSID_POLICY_TYPE_DENYLIST, ssids);
-        }
-    }
-
-    @Override
-    public List<String> getSsidDenylist() {
-        final CallerIdentity caller = getCallerIdentity();
-        Preconditions.checkCallAuthorization(
-                isDefaultDeviceOwner(caller) || isProfileOwnerOfOrganizationOwnedDevice(caller)
-                        || canQueryAdminPolicy(caller),
-                "SSID denylist can only be retrieved by a device owner or "
-                        + "a profile owner on an organization-owned device or "
-                        + "an app with the QUERY_ADMIN_POLICY permission.");
-        synchronized (getLockObject()) {
-            final ActiveAdmin admin = getDeviceOwnerOrProfileOwnerOfOrganizationOwnedDeviceLocked(
-                    UserHandle.USER_SYSTEM);
-            return (admin == null || admin.mSsidDenylist == null) ? new ArrayList<>()
-                    : admin.mSsidDenylist;
+            notifyWifiSsidPolicyChanged(policy);
         }
     }
 

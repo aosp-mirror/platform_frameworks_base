@@ -60,7 +60,6 @@ import android.graphics.drawable.Drawable;
 import android.net.PrivateDnsConnectivityChecker;
 import android.net.ProxyInfo;
 import android.net.Uri;
-import android.net.wifi.WifiSsid;
 import android.nfc.NfcAdapter;
 import android.os.Binder;
 import android.os.Build;
@@ -112,7 +111,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
-import java.nio.charset.StandardCharsets;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
@@ -15237,26 +15235,15 @@ public class DevicePolicyManager {
      */
     public void setWifiSsidPolicy(@Nullable WifiSsidPolicy policy) {
         throwIfParentInstance("setWifiSsidPolicy");
-        if (mService != null) {
-            try {
-                if (policy == null) {
-                    mService.setSsidAllowlist(new ArrayList<>());
-                } else {
-                    int policyType = policy.getPolicyType();
-                    List<String> ssidList = new ArrayList<>();
-                    for (WifiSsid ssid : policy.getSsids()) {
-                        ssidList.add(new String(ssid.getBytes(), StandardCharsets.UTF_8));
-                    }
-                    if (policyType == WifiSsidPolicy.WIFI_SSID_POLICY_TYPE_ALLOWLIST) {
-                        mService.setSsidAllowlist(ssidList);
-                    } else {
-                        mService.setSsidDenylist(ssidList);
-                    }
-                }
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
+        if (mService == null) {
+            return;
         }
+        try {
+            mService.setWifiSsidPolicy(policy);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+
     }
 
     /**
@@ -15274,30 +15261,10 @@ public class DevicePolicyManager {
             return null;
         }
         try {
-            List<String> allowlist = mService.getSsidAllowlist();
-            if (!allowlist.isEmpty()) {
-                List<WifiSsid> wifiSsidAllowlist = new ArrayList<>();
-                for (String ssid : allowlist) {
-                    wifiSsidAllowlist.add(
-                            WifiSsid.fromBytes(ssid.getBytes(StandardCharsets.UTF_8)));
-                }
-                return new WifiSsidPolicy(WifiSsidPolicy.WIFI_SSID_POLICY_TYPE_ALLOWLIST,
-                        new ArraySet<>(wifiSsidAllowlist));
-            }
-            List<String> denylist = mService.getSsidDenylist();
-            if (!denylist.isEmpty()) {
-                List<WifiSsid> wifiSsidDenylist = new ArrayList<>();
-                for (String ssid : denylist) {
-                    wifiSsidDenylist.add(
-                            WifiSsid.fromBytes(ssid.getBytes(StandardCharsets.UTF_8)));
-                }
-                return new WifiSsidPolicy(WifiSsidPolicy.WIFI_SSID_POLICY_TYPE_DENYLIST,
-                        new ArraySet<>(wifiSsidDenylist));
-            }
+            return mService.getWifiSsidPolicy();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
-        return null;
     }
 
     /**
