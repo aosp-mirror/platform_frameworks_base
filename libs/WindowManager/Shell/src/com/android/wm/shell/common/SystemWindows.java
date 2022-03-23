@@ -343,15 +343,13 @@ public class SystemWindows {
 
         @Override
         public void resized(ClientWindowFrames frames, boolean reportDraw,
-                MergedConfiguration newMergedConfiguration, boolean forceLayout,
-                boolean alwaysConsumeSystemBars, int displayId, int syncSeqId, int resizeMode) {}
-
-        @Override
-        public void insetsChanged(InsetsState insetsState, boolean willMove, boolean willResize) {}
+                MergedConfiguration newMergedConfiguration, InsetsState insetsState,
+                boolean forceLayout, boolean alwaysConsumeSystemBars, int displayId, int syncSeqId,
+                int resizeMode) {}
 
         @Override
         public void insetsControlChanged(InsetsState insetsState,
-                InsetsSourceControl[] activeControls, boolean willMove, boolean willResize) {}
+                InsetsSourceControl[] activeControls) {}
 
         @Override
         public void showInsets(int types, boolean fromIme) {}
