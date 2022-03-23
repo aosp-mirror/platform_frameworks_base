@@ -127,6 +127,7 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
         // We'll not invalidate the active source on the hotplug event to pass CETC 11.2.2-2 ~ 3.
         if (!connected) {
             getWakeLock().release();
+            mService.getHdmiCecNetwork().removeDevicesConnectedToPort(portId);
         }
     }
 
