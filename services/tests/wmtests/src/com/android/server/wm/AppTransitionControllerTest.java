@@ -1064,6 +1064,47 @@ public class AppTransitionControllerTest extends WindowTestsBase {
         verify(activity2).setDropInputMode(DropInputMode.NONE);
     }
 
+    /**
+     * Since we don't have any use case to rely on handling input during animation, disable it even
+     * if it is trusted embedding so that it could cover some edge-cases when a previously trusted
+     * host starts doing something bad.
+     */
+    @Test
+    public void testOverrideTaskFragmentAdapter_inputProtectedForTrustedAnimation() {
+        final TaskFragmentOrganizer organizer = new TaskFragmentOrganizer(Runnable::run);
+        final TestRemoteAnimationRunner remoteAnimationRunner = new TestRemoteAnimationRunner();
+        setupTaskFragmentRemoteAnimation(organizer, remoteAnimationRunner);
+
+        // Create a TaskFragment with only trusted embedded activity
+        final Task task = createTask(mDisplayContent);
+        final TaskFragment taskFragment = new TaskFragmentBuilder(mAtm)
+                .setParentTask(task)
+                .createActivityCount(1)
+                .setOrganizer(organizer)
+                .build();
+        final ActivityRecord activity = taskFragment.getChildAt(0).asActivityRecord();
+        prepareActivityForAppTransition(activity);
+        doReturn(true).when(taskFragment).isAllowedToEmbedActivityInTrustedMode(activity);
+        spyOn(mDisplayContent.mAppTransition);
+
+        // Prepare and start transition.
+        prepareAndTriggerAppTransition(activity, null /* closingActivity */, taskFragment);
+        mWm.mAnimator.executeAfterPrepareSurfacesRunnables();
+
+        // The animation will be animated remotely by client and all activities are input disabled
+        // for untrusted animation.
+        assertTrue(remoteAnimationRunner.isAnimationStarted());
+        verify(activity).setDropInputForAnimation(true);
+        verify(activity).setDropInputMode(DropInputMode.ALL);
+
+        // Reset input after animation is finished.
+        clearInvocations(activity);
+        remoteAnimationRunner.finishAnimation();
+
+        verify(activity).setDropInputForAnimation(false);
+        verify(activity).setDropInputMode(DropInputMode.NONE);
+    }
+
     @Test
     public void testTransitionGoodToGoForTaskFragments() {
         final TaskFragmentOrganizer organizer = new TaskFragmentOrganizer(Runnable::run);
