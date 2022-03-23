@@ -33,6 +33,7 @@ import android.view.ViewTreeObserver;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.keyguard.BouncerPanelExpansionCalculator;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dreams.complication.ComplicationHostViewController;
 import com.android.systemui.statusbar.BlurUtils;
@@ -173,10 +174,14 @@ public class DreamOverlayContainerViewControllerTest extends SysuiTestCase {
         when(mBlurUtils.blurRadiusOfRatio(anyFloat())).thenReturn(blurRadius);
 
         bouncerExpansionCaptor.getValue().onStartingToShow();
-        final float bouncerHideAmount = 0.1f;
+
+        final float bouncerHideAmount = 0.05f;
+        final float scaledFraction =
+                BouncerPanelExpansionCalculator.getBackScrimScaledExpansion(bouncerHideAmount);
+
         bouncerExpansionCaptor.getValue().onExpansionChanged(bouncerHideAmount);
-        verify(mBlurUtils).blurRadiusOfRatio(1 - bouncerHideAmount);
+        verify(mBlurUtils).blurRadiusOfRatio(1 - scaledFraction);
         verify(mBlurUtils).applyBlur(mViewRoot, (int) blurRadius, false);
-        verify(mDreamOverlayContainerView).setAlpha(bouncerHideAmount);
+        verify(mDreamOverlayContainerView).setAlpha(scaledFraction);
     }
 }

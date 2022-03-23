@@ -23,6 +23,7 @@ import android.util.MathUtils;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.android.keyguard.BouncerPanelExpansionCalculator;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dreams.complication.ComplicationHostViewController;
 import com.android.systemui.dreams.dagger.DreamOverlayComponent;
@@ -93,9 +94,12 @@ public class DreamOverlayContainerViewController extends ViewController<DreamOve
                 @Override
                 public void onExpansionChanged(float bouncerHideAmount) {
                     if (!mBouncerAnimating) return;
+                    final float scaledFraction =
+                            BouncerPanelExpansionCalculator.getBackScrimScaledExpansion(
+                                    bouncerHideAmount);
                     final int blurRadius =
-                            (int) mBlurUtils.blurRadiusOfRatio(1 - bouncerHideAmount);
-                    updateTransitionState(blurRadius, bouncerHideAmount);
+                            (int) mBlurUtils.blurRadiusOfRatio(1 - scaledFraction);
+                    updateTransitionState(blurRadius, scaledFraction);
                 }
 
                 @Override
