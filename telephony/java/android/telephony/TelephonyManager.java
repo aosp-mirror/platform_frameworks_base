@@ -16252,6 +16252,7 @@ public class TelephonyManager {
      * @deprecated Use {@link CarrierPrivilegesCallback} instead. This API will be removed soon
      * prior to API finalization.
      */
+    @Deprecated
     @SystemApi
     public interface CarrierPrivilegesListener {
         /**
@@ -16389,8 +16390,17 @@ public class TelephonyManager {
             int logicalSlotIndex,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull CarrierPrivilegesCallback callback) {
-        // TODO(b/216549778): cherry-pick implementation once merge conflict is resolved
-        throw new UnsupportedOperationException("Not implemented, yet");
+        if (mContext == null) {
+            throw new IllegalStateException("Telephony service is null");
+        } else if (executor == null || callback == null) {
+            throw new IllegalArgumentException(
+                    "CarrierPrivilegesCallback and executor must be non-null");
+        }
+        mTelephonyRegistryMgr = mContext.getSystemService(TelephonyRegistryManager.class);
+        if (mTelephonyRegistryMgr == null) {
+            throw new IllegalStateException("Telephony registry service is null");
+        }
+        mTelephonyRegistryMgr.addCarrierPrivilegesCallback(logicalSlotIndex, executor, callback);
     }
 
     /**
@@ -16401,7 +16411,15 @@ public class TelephonyManager {
     @SystemApi
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public void unregisterCarrierPrivilegesCallback(@NonNull CarrierPrivilegesCallback callback) {
-        // TODO(b/216549778): cherry-pick implementation once merge conflict is resolved
-        throw new UnsupportedOperationException("Not implemented, yet");
+        if (mContext == null) {
+            throw new IllegalStateException("Telephony service is null");
+        } else if (callback == null) {
+            throw new IllegalArgumentException("CarrierPrivilegesCallback must be non-null");
+        }
+        mTelephonyRegistryMgr = mContext.getSystemService(TelephonyRegistryManager.class);
+        if (mTelephonyRegistryMgr == null) {
+            throw new IllegalStateException("Telephony registry service is null");
+        }
+        mTelephonyRegistryMgr.removeCarrierPrivilegesCallback(callback);
     }
 }
