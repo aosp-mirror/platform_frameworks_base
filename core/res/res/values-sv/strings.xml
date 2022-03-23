@@ -85,8 +85,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"Tillfälligt avstängt av operatören för SIM <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Det går inte att nå mobilnätverket"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Testa att byta föredraget nätverk. Tryck om du vill ändra."</string>
-    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Det går inte att ringa nödsamtal"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Det går inte att ringa nödsamtal via Wi‑Fi"</string>
+    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"Nödsamtal kan vara otillgängligt"</string>
+    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"<xliff:g id="SPN">%s</xliff:g> har inte stöd för nödsamtal via wifi. Tryck här för mer information."</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Aviseringar"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Vidarekoppla samtal"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Läget Återuppringning vid nödsamtal"</string>
@@ -425,10 +425,10 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"Tillåter att appen gör ändringar i pekdatorns samtalslista, inklusive i uppgifter om inkommande och utgående samtal. Skadliga program kan använda detta för att radera eller ändra din samtalslista."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Tillåter att appen gör ändringar i Android TV-enhetens samtalshistorik, inklusive i uppgifter om inkommande och utgående samtal. Skadliga appar kan använda detta för att radera eller ändra samtalshistoriken."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Tillåter att appen gör ändringar i mobilens samtalslista, inklusive i uppgifter om inkommande och utgående samtal. Skadliga program kan använda detta för att radera eller ändra din samtalslista."</string>
-    <string name="permlab_bodySensors" msgid="3411035315357380862">"få åtkomst till kroppssensorer (till exempel pulsmätare)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="3208940894182188063">"Åtkomst till data från kroppssensorer, t.ex. puls, kroppstemperatur, procentandel syre i blodet med mera."</string>
-    <string name="permlab_bodySensors_background" msgid="4352831883331744370">"åtkomst till kroppssensorer (t.ex. pulsmätare) i bakgrunden"</string>
-    <string name="permdesc_bodySensors_background" product="default" msgid="8512392249166660872">"Åtkomst till data från kroppssensorer, t.ex. puls, kroppstemperatur, procentandel syre i blodet med mera, i bakgrunden."</string>
+    <string name="permlab_bodySensors" msgid="662918578601619569">"Åtkomst till data från kroppssensorer, t.ex. puls, medan appen används"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Tillåter att appen får åtkomst till data från kroppssensorer, t.ex. puls, kroppstemperatur och blodets syrehalt, medan appen används."</string>
+    <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Åtkomst till data från kroppssensorer, t.ex. puls, i bakgrunden"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Tillåter att appen får åtkomst till data från kroppssensorer, t.ex. puls, kroppstemperatur och blodets syrehalt, medan appen är i bakgrunden."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Läsa kalenderhändelser och kalenderuppgifter"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Appen kan läsa alla kalenderhändelser som sparats på surfplattan och dela eller spara uppgifter i din kalender."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Appen kan läsa alla kalenderhändelser som sparats på Android TV-enheten och dela eller spara uppgifter i din kalender."</string>
@@ -689,8 +689,8 @@
     <string name="permdesc_readMediaAudio" msgid="5299772574434619399">"Tillåter att appen läser ljudfiler från delad lagring."</string>
     <string name="permlab_readMediaVideo" msgid="7768003311260655007">"läsa videofiler från delad lagring"</string>
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"Tillåter att appen läser videofiler från delad lagring."</string>
-    <string name="permlab_readMediaImage" msgid="1507059005825769856">"läsa bildfiler från delad lagring"</string>
-    <string name="permdesc_readMediaImage" msgid="8328052622292457588">"Tillåter att appen läser bildfiler från delad lagring."</string>
+    <string name="permlab_readMediaImages" msgid="4057590631020986789">"läsa bildfiler från delad lagring"</string>
+    <string name="permdesc_readMediaImages" msgid="5836219373138469259">"Tillåter att appen läser bildfiler från delad lagring."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"ändra eller ta bort innehåll på delat lagringsutrymme"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Tillåter att appen skriver innehåll på ditt delade lagringsutrymme."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"gör/ta emot SIP-anrop"</string>
@@ -912,7 +912,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"Tryck på Menu för att låsa upp eller ringa nödsamtal."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"Tryck på Menu för att låsa upp."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"Rita mönster för att låsa upp"</string>
-    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"Nödsamtal"</string>
+    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"Nödsamtal"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"Tillbaka till samtal"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"Korrekt!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Försök igen"</string>
@@ -1051,7 +1051,6 @@
     <string name="save_password_never" msgid="6776808375903410659">"Aldrig"</string>
     <string name="open_permission_deny" msgid="5136793905306987251">"Du har inte behörighet att öppna den här sidan."</string>
     <string name="text_copied" msgid="2531420577879738860">"Text har kopierats till urklipp."</string>
-    <string name="copied" msgid="4675902854553014676">"Kopierat"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> klistrade in från <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g>"</string>
     <string name="pasted_from_clipboard" msgid="7355790625710831847">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> klistrade in från urklipp"</string>
     <string name="pasted_text" msgid="4298871641549173733">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> klistrade in text som du kopierade"</string>
@@ -1452,8 +1451,12 @@
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"Appen får be om tillstånd att ignorera batterioptimering."</string>
     <string name="permlab_queryAllPackages" msgid="2928450604653281650">"fråga alla paket"</string>
     <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"Tillåter att en app ser alla installerade paket."</string>
-    <string name="permlab_accessSupplementalApi" msgid="3544659160536960275">"åtkomst till SupplementalApis"</string>
-    <string name="permdesc_accessSupplementalApi" msgid="8974758769370951074">"Tillåter att en app får åtkomst till SupplementalApis."</string>
+    <string name="permlab_accessAdServicesTopics" msgid="6687112022940098945">"få åtkomst till AdServices Topics API"</string>
+    <string name="permdesc_accessAdServicesTopics" msgid="6011532458156465929">"Tillåter att en app får åtkomst till AdServices Topics API."</string>
+    <string name="permlab_accessAdServicesAttribution" msgid="3268942271128309354">"få åtkomst till AdServices Attribution API:er"</string>
+    <string name="permdesc_accessAdServicesAttribution" msgid="577482544832578288">"Tillåter att en app får åtkomst till AdServices Attribution API:er."</string>
+    <string name="permlab_accessAdServicesCustomAudiences" msgid="7249286630514600684">"få åtkomst till AdServices Custom Audiences API"</string>
+    <string name="permdesc_accessAdServicesCustomAudiences" msgid="645526926477180315">"Tillåter att en app får åtkomst till AdServices Custom Audiences API."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"Peka två gånger för zoomkontroll"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"Det gick inte att lägga till widgeten."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"Kör"</string>
@@ -1716,6 +1719,7 @@
     <string name="user_switching_message" msgid="1912993630661332336">"Byter till <xliff:g id="NAME">%1$s</xliff:g> …"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"Loggar ut <xliff:g id="NAME">%1$s</xliff:g> …"</string>
     <string name="owner_name" msgid="8713560351570795743">"Ägare"</string>
+    <string name="guest_name" msgid="8502103277839834324">"Gäst"</string>
     <string name="error_message_title" msgid="4082495589294631966">"Fel"</string>
     <string name="error_message_change_not_allowed" msgid="843159705042381454">"Administratören tillåter inte denna ändring"</string>
     <string name="app_not_found" msgid="3429506115332341800">"Ingen app som kan hantera åtgärden hittades"</string>
@@ -2027,10 +2031,10 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"AVINSTALLERA"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"ÖPPNA ÄNDÅ"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"En skadlig app har upptäckts"</string>
-    <string name="log_access_confirmation_title" msgid="3143035474800851565">"Begäran om åtkomst till systemloggar"</string>
+    <string name="log_access_confirmation_title" msgid="2343578467290592708">"Vill du tillåta att <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> får åtkomst till alla enhetsloggar?"</string>
     <string name="log_access_confirmation_allow" msgid="143157286283302512">"Bara den här gången"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Tillåt inte"</string>
-    <string name="log_access_confirmation_body" msgid="7599059550906238538">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> begär systemloggar i syfte att felsöka funktioner. Dessa loggar kan innehålla information som har skrivits på enheten av appar och tjänster."</string>
+    <string name="log_access_confirmation_body" msgid="4483075525611652922">"Enhetsloggar registrerar vad som händer på enheten. Appar kan använda dessa loggar för att hitta och åtgärda problem.\n\nVissa loggar kan innehålla känsliga uppgifter, så du ska bara tillåta att appar du litar på får åtkomst till alla enhetsloggar. \n\nOm du inte ger appen åtkomst till alla enhetsloggar har den ändå åtkomst till sina egna loggar, och enhetstillverkare kan fortfarande få åtkomst till vissa loggar eller viss information på enheten. Läs mer"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Visa inte igen"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> vill kunna visa bitar av <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Redigera"</string>
@@ -2265,4 +2269,6 @@
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> har körts i bakgrunden under lång tid. Tryck för att granska."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Kontrollera aktiva appar"</string>
     <string name="vdm_camera_access_denied" msgid="6345652513729130490">"Det går inte att komma åt kameran från den här enheten"</string>
+    <!-- no translation found for system_locale_title (3978041860457277638) -->
+    <skip />
 </resources>

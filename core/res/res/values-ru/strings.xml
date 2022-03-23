@@ -87,8 +87,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"Временно отключено оператором связи для SIM-карты <xliff:g id="SIMNUMBER">%d</xliff:g>."</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Мобильная сеть недоступна"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Нажмите, чтобы выбрать другую сеть."</string>
-    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Экстренные вызовы недоступны"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Экстренные вызовы по Wi‑Fi недоступны."</string>
+    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"Экстренные вызовы могут быть недоступны"</string>
+    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"<xliff:g id="SPN">%s</xliff:g> не поддерживает экстренные вызовы по Wi-Fi. Нажмите, чтобы узнать больше."</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Оповещения"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Переадресация вызовов"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Режим экстренных обратных вызовов"</string>
@@ -427,10 +427,14 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"Приложение сможет вносить изменения в список вызовов планшетного ПК и данные о входящих и исходящих звонках. Вредоносные приложения смогут воспользоваться этим для удаления или изменения информации о звонках."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Приложение сможет изменять список вызовов и данные о входящих и исходящих звонках на устройстве Android TV. Вредоносные программы смогут воспользоваться этим для удаления или изменения информации о звонках."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Приложение сможет вносить изменения в список вызовов телефона и данные о входящих и исходящих звонках. Вредоносные приложения смогут воспользоваться этим для удаления или изменения информации о звонках."</string>
-    <string name="permlab_bodySensors" msgid="3411035315357380862">"Датчики (например, пульсометр)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="3208940894182188063">"Доступ к данным датчиков на теле (например, пульсу, температуре, уровню кислорода в крови)."</string>
-    <string name="permlab_bodySensors_background" msgid="4352831883331744370">"Доступ к датчикам на теле (например, пульсометру) в фоновом режиме"</string>
-    <string name="permdesc_bodySensors_background" product="default" msgid="8512392249166660872">"Доступ к данным датчиков на теле (например, пульсу, температуре, уровню кислорода в крови) в фоновом режиме."</string>
+    <!-- no translation found for permlab_bodySensors (662918578601619569) -->
+    <skip />
+    <!-- no translation found for permdesc_bodySensors (7652650410295512140) -->
+    <skip />
+    <!-- no translation found for permlab_bodySensors_background (4912560779957760446) -->
+    <skip />
+    <!-- no translation found for permdesc_bodySensors_background (8870726027557749417) -->
+    <skip />
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Чтение мероприятий и данных"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Приложение может считывать, отправлять и сохранять информацию о мероприятиях в календаре планшета."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Приложение может считывать, отправлять и сохранять информацию о мероприятиях в календаре устройства Android TV."</string>
@@ -691,8 +695,10 @@
     <string name="permdesc_readMediaAudio" msgid="5299772574434619399">"Приложение сможет считывать аудиофайлы из общего хранилища."</string>
     <string name="permlab_readMediaVideo" msgid="7768003311260655007">"считывание видеофайлов из общего хранилища"</string>
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"Приложение сможет считывать видеофайлы из общего хранилища."</string>
-    <string name="permlab_readMediaImage" msgid="1507059005825769856">"считывание изображений из общего хранилища"</string>
-    <string name="permdesc_readMediaImage" msgid="8328052622292457588">"Приложение сможет считывать изображения из общего хранилища."</string>
+    <!-- no translation found for permlab_readMediaImages (4057590631020986789) -->
+    <skip />
+    <!-- no translation found for permdesc_readMediaImages (5836219373138469259) -->
+    <skip />
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"Изменение или удаление данных на общем накопителе"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Приложение сможет записывать данные на общий накопитель."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"Входящие и исходящие вызовы SIP"</string>
@@ -914,7 +920,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"Нажмите \"Меню\", чтобы разблокировать экран или вызвать службу экстренной помощи."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"Для разблокировки нажмите \"Меню\"."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"Введите графический ключ"</string>
-    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"Экстренный вызов"</string>
+    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"Экстренный вызов"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"Вернуться к вызову"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"Правильно!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Повторите попытку"</string>
@@ -1053,7 +1059,6 @@
     <string name="save_password_never" msgid="6776808375903410659">"Никогда"</string>
     <string name="open_permission_deny" msgid="5136793905306987251">"У вас нет доступа к этой странице."</string>
     <string name="text_copied" msgid="2531420577879738860">"Текст скопирован в буфер обмена."</string>
-    <string name="copied" msgid="4675902854553014676">"Скопировано"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"Данные из приложения \"<xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g>\" вставлены в приложение \"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>\"."</string>
     <string name="pasted_from_clipboard" msgid="7355790625710831847">"Приложение \"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>\" вставило данные из буфера обмена."</string>
     <string name="pasted_text" msgid="4298871641549173733">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>: скопированный текст вставлен"</string>
@@ -1454,8 +1459,12 @@
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"Разрешает приложению игнорировать ограничение на расход заряда батареи."</string>
     <string name="permlab_queryAllPackages" msgid="2928450604653281650">"Запрос информации обо всех пакетах"</string>
     <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"Приложение сможет просматривать все установленные пакеты."</string>
-    <string name="permlab_accessSupplementalApi" msgid="3544659160536960275">"Доступ к SupplementalApis"</string>
-    <string name="permdesc_accessSupplementalApi" msgid="8974758769370951074">"Приложение сможет получать доступ к SupplementalApis."</string>
+    <string name="permlab_accessAdServicesTopics" msgid="6687112022940098945">"доступ к AdServices Topics API"</string>
+    <string name="permdesc_accessAdServicesTopics" msgid="6011532458156465929">"Приложение сможет получать доступ к AdServices Topics API."</string>
+    <string name="permlab_accessAdServicesAttribution" msgid="3268942271128309354">"доступ к AdServices Attribution API"</string>
+    <string name="permdesc_accessAdServicesAttribution" msgid="577482544832578288">"Приложение сможет получать доступ к AdServices Attribution API."</string>
+    <string name="permlab_accessAdServicesCustomAudiences" msgid="7249286630514600684">"доступ к AdServices Custom Audiences API"</string>
+    <string name="permdesc_accessAdServicesCustomAudiences" msgid="645526926477180315">"Приложение сможет получать доступ к AdServices Custom Audiences API."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"Нажмите дважды для изменения масштаба"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"Не удалось добавить виджет."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"Выбрать"</string>
@@ -1718,6 +1727,7 @@
     <string name="user_switching_message" msgid="1912993630661332336">"Смена профиля на \"<xliff:g id="NAME">%1$s</xliff:g>\"…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"Выход из аккаунта <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="owner_name" msgid="8713560351570795743">"Владелец"</string>
+    <string name="guest_name" msgid="8502103277839834324">"Гость"</string>
     <string name="error_message_title" msgid="4082495589294631966">"Ошибка"</string>
     <string name="error_message_change_not_allowed" msgid="843159705042381454">"Это действие запрещено администратором"</string>
     <string name="app_not_found" msgid="3429506115332341800">"Невозможно обработать это действие"</string>
@@ -2029,10 +2039,11 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"УДАЛИТЬ"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"ОТКРЫТЬ"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"Обнаружено вредоносное приложение"</string>
-    <string name="log_access_confirmation_title" msgid="3143035474800851565">"Запрос на доступ к системным журналам"</string>
+    <string name="log_access_confirmation_title" msgid="2343578467290592708">"Разрешить приложению \"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g>\" доступ ко всем журналам устройства?"</string>
     <string name="log_access_confirmation_allow" msgid="143157286283302512">"Только в этот раз"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Запретить"</string>
-    <string name="log_access_confirmation_body" msgid="7599059550906238538">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> запрашивает доступ к системным журналам для отладки функций. В этих журналах может содержаться информация, записанная приложениями и сервисами на вашем устройстве."</string>
+    <!-- no translation found for log_access_confirmation_body (4483075525611652922) -->
+    <skip />
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Больше не показывать"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"Приложение \"<xliff:g id="APP_0">%1$s</xliff:g>\" запрашивает разрешение на показ фрагментов приложения \"<xliff:g id="APP_2">%2$s</xliff:g>\"."</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Изменить"</string>
@@ -2267,4 +2278,6 @@
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"Приложение \"<xliff:g id="APP">%1$s</xliff:g>\" работает в фоновом режиме уже длительное время. Нажмите, чтобы узнать подробности."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Проверить активные приложения"</string>
     <string name="vdm_camera_access_denied" msgid="6345652513729130490">"Камера на этом устройстве недоступна."</string>
+    <!-- no translation found for system_locale_title (3978041860457277638) -->
+    <skip />
 </resources>

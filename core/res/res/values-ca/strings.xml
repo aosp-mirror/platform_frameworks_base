@@ -85,8 +85,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"L\'operador de telefonia mòbil ho ha desactivat temporalment per a la SIM <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"No es pot accedir a la xarxa mòbil"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Prova de canviar de xarxa preferent. Toca per canviar-la."</string>
-    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Les trucades d\'emergència no estan disponibles"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"No es poden fer trucades d\'emergència per Wi-Fi"</string>
+    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"És possible que les trucades d\'emergència no estiguin disponibles"</string>
+    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"<xliff:g id="SPN">%s</xliff:g> no admet les trucades d\'emergència per Wi‑Fi. Toca per obtenir informació."</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Alertes"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Desviació de trucades"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Mode de devolució de trucada d\'emergència"</string>
@@ -425,10 +425,10 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"Permet que l\'aplicació modifiqui el registre de trucades de la teva tauleta, incloses les dades de les trucades entrants i sortints. És possible que les aplicacions malicioses ho utilitzin per eliminar o per modificar el teu registre de trucades."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Permet que l\'aplicació modifiqui el registre de trucades del dispositiu Android TV, incloses les dades de les trucades entrants i sortints. És possible que les aplicacions malicioses ho utilitzin per suprimir o per modificar el teu registre de trucades."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Permet que l\'aplicació modifiqui el registre de trucades del teu telèfon, incloses les dades de les trucades entrants i sortints. És possible que les aplicacions malicioses ho utilitzin per eliminar o per modificar el teu registre de trucades."</string>
-    <string name="permlab_bodySensors" msgid="3411035315357380862">"accedir a sensors corporals (p. ex., monitors de freqüència cardíaca)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="3208940894182188063">"Accés a les dades dels sensors corporals com la freqüència cardíaca, la temperatura, el percentatge d\'oxigen a la sang, etc."</string>
-    <string name="permlab_bodySensors_background" msgid="4352831883331744370">"accedir a sensors corporals (com els monitors de freqüència cardíaca) en segon pla"</string>
-    <string name="permdesc_bodySensors_background" product="default" msgid="8512392249166660872">"Accés a les dades dels sensors corporals, com ara la freqüència cardíaca, la temperatura o el percentatge d\'oxigen a la sang, en segon pla."</string>
+    <string name="permlab_bodySensors" msgid="662918578601619569">"Accedir a dades del sensor corporal, com la freqüència cardíaca, en utilitzar-se"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Permet que l\'aplicació accedeixi a les dades del sensor corporal, com ara la freqüència cardíaca, la temperatura i el percentatge d\'oxigen a la sang, mentre s\'utilitza."</string>
+    <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Accedir a dades del sensor corporal, com la freqüència cardíaca, en segon pla"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Permet que l\'aplicació accedeixi a les dades del sensor corporal, com ara la freqüència cardíaca, la temperatura i el percentatge d\'oxigen a la sang, mentre es troba en segon pla."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Aquesta aplicació pot llegir els esdeveniments i la informació del calendari"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Aquesta aplicació pot llegir tots els esdeveniments del calendari emmagatzemats a la tauleta i compartir o desar les dades del teu calendari."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Aquesta aplicació pot llegir tots els esdeveniments del calendari emmagatzemats al dispositiu Android TV i compartir o desar les dades del calendari."</string>
@@ -689,8 +689,8 @@
     <string name="permdesc_readMediaAudio" msgid="5299772574434619399">"Permet que l\'aplicació llegeixi fitxers d\'àudio de l\'emmagatzematge compartit."</string>
     <string name="permlab_readMediaVideo" msgid="7768003311260655007">"llegir fitxers de vídeo de l\'emmagatzematge compartit"</string>
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"Permet que l\'aplicació llegeixi fitxers de vídeo de l\'emmagatzematge compartit."</string>
-    <string name="permlab_readMediaImage" msgid="1507059005825769856">"llegir fitxers d\'imatge de l\'emmagatzematge compartit"</string>
-    <string name="permdesc_readMediaImage" msgid="8328052622292457588">"Permet que l\'aplicació llegeixi fitxers d\'imatge de l\'emmagatzematge compartit."</string>
+    <string name="permlab_readMediaImages" msgid="4057590631020986789">"llegir fitxers d\'imatge de l\'emmagatzematge compartit"</string>
+    <string name="permdesc_readMediaImages" msgid="5836219373138469259">"Permet que l\'aplicació llegeixi fitxers d\'imatge de l\'emmagatzematge compartit."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"editar o suprimir cont. d\'emmagatzematge compartit"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"L\'app pot editar contingut de l\'emmagatzematge compartit."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"Fer i rebre trucades de SIP"</string>
@@ -912,7 +912,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"Premeu Menú per desbloquejar-lo o per fer una trucada d\'emergència."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"Premeu Menú per desbloquejar."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"Dibuixeu el patró de desbloqueig"</string>
-    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"Trucada d\'emergència"</string>
+    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"Emergència"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"Torna a la trucada"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"Correcte!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Torna-ho a provar"</string>
@@ -1051,7 +1051,6 @@
     <string name="save_password_never" msgid="6776808375903410659">"Mai"</string>
     <string name="open_permission_deny" msgid="5136793905306987251">"No tens permís per obrir aquesta pàgina."</string>
     <string name="text_copied" msgid="2531420577879738860">"Text copiat al Porta-retalls."</string>
-    <string name="copied" msgid="4675902854553014676">"S\'ha copiat"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ha enganxat dades de: <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g>"</string>
     <string name="pasted_from_clipboard" msgid="7355790625710831847">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ha enganxat dades del porta-retalls"</string>
     <string name="pasted_text" msgid="4298871641549173733">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ha enganxat text que has copiat"</string>
@@ -1452,8 +1451,12 @@
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"Permet que una aplicació demani permís per ignorar les optimitzacions de bateria per a l\'aplicació."</string>
     <string name="permlab_queryAllPackages" msgid="2928450604653281650">"consultar tots els paquets"</string>
     <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"Permet que una aplicació vegi els paquets instal·lats."</string>
-    <string name="permlab_accessSupplementalApi" msgid="3544659160536960275">"accedir a SupplementalApis"</string>
-    <string name="permdesc_accessSupplementalApi" msgid="8974758769370951074">"Permet que una aplicació accedeixi a SupplementalApis."</string>
+    <string name="permlab_accessAdServicesTopics" msgid="6687112022940098945">"accedir a l\'API AdServices Topics"</string>
+    <string name="permdesc_accessAdServicesTopics" msgid="6011532458156465929">"Permet que una aplicació accedeixi a l\'API AdServices Topics."</string>
+    <string name="permlab_accessAdServicesAttribution" msgid="3268942271128309354">"accedir a les API AdServices Attribution"</string>
+    <string name="permdesc_accessAdServicesAttribution" msgid="577482544832578288">"Permet que una aplicació accedeixi a les API AdServices Attribution."</string>
+    <string name="permlab_accessAdServicesCustomAudiences" msgid="7249286630514600684">"accedir a l\'API AdServices Custom Audiences"</string>
+    <string name="permdesc_accessAdServicesCustomAudiences" msgid="645526926477180315">"Permet que una aplicació accedeixi a l\'API AdServices Custom Audiences."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"Piqueu dos cops per controlar el zoom"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"No s\'ha pogut afegir el widget."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"Ves"</string>
@@ -1716,6 +1719,7 @@
     <string name="user_switching_message" msgid="1912993630661332336">"S\'està canviant a <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"S\'està tancant la sessió de l\'usuari <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="owner_name" msgid="8713560351570795743">"Propietari"</string>
+    <string name="guest_name" msgid="8502103277839834324">"Convidat"</string>
     <string name="error_message_title" msgid="4082495589294631966">"Error"</string>
     <string name="error_message_change_not_allowed" msgid="843159705042381454">"L\'administrador no permet aquest canvi"</string>
     <string name="app_not_found" msgid="3429506115332341800">"No s\'ha trobat cap aplicació per processar aquesta acció"</string>
@@ -2027,10 +2031,10 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"DESINSTAL·LA"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"OBRE IGUALMENT"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"S\'ha detectat una aplicació perjudicial"</string>
-    <string name="log_access_confirmation_title" msgid="3143035474800851565">"Sol·licitud d\'accés a registre del sistema"</string>
+    <string name="log_access_confirmation_title" msgid="2343578467290592708">"Vols permetre que <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> accedeixi a tots els registres del dispositiu?"</string>
     <string name="log_access_confirmation_allow" msgid="143157286283302512">"Només aquesta vegada"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"No permetis"</string>
-    <string name="log_access_confirmation_body" msgid="7599059550906238538">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> sol·licita registres del sistema per dur a terme una depuració funcional. Aquests registres poden contenir informació escrita per les aplicacions i els serveis del teu dispositiu."</string>
+    <string name="log_access_confirmation_body" msgid="4483075525611652922">"Els registres del dispositiu inclouen informació sobre tot allò que passa al teu dispositiu. Les aplicacions poden utilitzar aquests registres per detectar i corregir problemes.\n\nÉs possible que alguns registres continguin informació sensible; per això només has de donar-hi accés a les aplicacions de confiança. \n\nEncara que no permetis que aquesta aplicació pugui accedir a tots els registres del dispositiu, podrà accedir als seus propis registres. A més, és possible que el fabricant del dispositiu també tingui accés a alguns registres o a informació del teu dispositiu. Més informació"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"No tornis a mostrar"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> vol mostrar porcions de l\'aplicació <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Edita"</string>
@@ -2265,4 +2269,6 @@
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"Fa molta estona que <xliff:g id="APP">%1$s</xliff:g> s\'està executant en segon pla. Toca per revisar-ho."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Consulta les aplicacions actives"</string>
     <string name="vdm_camera_access_denied" msgid="6345652513729130490">"No es pot accedir a la càmera des d\'aquest dispositiu"</string>
+    <!-- no translation found for system_locale_title (3978041860457277638) -->
+    <skip />
 </resources>

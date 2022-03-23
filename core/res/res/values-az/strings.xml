@@ -85,8 +85,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"SIM <xliff:g id="SIMNUMBER">%d</xliff:g> üçün operator tərəfindən müvəqqəti olaraq deaktiv edildi"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Mobil şəbəkəyə daxil olmaq mümkün deyil"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Tərcih edilən şəbəkəni dəyişin. Dəyişmək üçün klikləyin."</string>
-    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Təcili zəng əlçatan deyil"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Wi‑Fi vasitəsilə təcili zənglər etmək mümkün deyil"</string>
+    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"Təcili zənglər əlçatan olmaya bilər"</string>
+    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi üzərindən təcili zəngləri dəstəkləmir. Detallar üçün toxunun."</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Siqnallar"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Zəng yönləndirmə"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Təcili geriyə zəng rejimi"</string>
@@ -425,10 +425,10 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"Tətbiqə planşetinizdəki zəng jurnalını, həmçinin gedən və gələn zənglərin siyahısını dəyişməyə imkan verir. Zərərli tətbiqlər bundan istifadə edərək, zəng jurnalınıza dəyişiklik edə bilər."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Gələn və gedən zənglərlə bağlı məlumatlar daxil olmaqla tətbiqə Android TV cihazının zəng siyahısını dəyişdirmək icazəsi verir. Zərərli proqramlar zəng siyahısını silmək və ya dəyişdirmək üçün bundan istifadə edə bilər."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Tətbiqə sizin daxil olan və gedən zənglər daxil olmaqla telefon zəngi loqlarınızı redaktə etmək icazəsi verir. Zərərli tətbiqlər bundan telefon loqlarınızı silmək və ya redaktə etmək üçün istifadə edə bilər."</string>
-    <string name="permlab_bodySensors" msgid="3411035315357380862">"bədən sensorlarına (ürək döyüntüsü monitorları kimi) giriş"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="3208940894182188063">"Ürək döyüntüsü, temperatur, qanda oksigen faizi kimi bədən sensorlarından əldə edilən məlumatlara giriş."</string>
-    <string name="permlab_bodySensors_background" msgid="4352831883331744370">"arxa fonda işləyərkən bədən sensorlarına (ürək döyüntüsü nəzarətləri kimi) giriş"</string>
-    <string name="permdesc_bodySensors_background" product="default" msgid="8512392249166660872">"Arxa fonda işləyərkən ürək döyüntüsü, temperatur, qanda oksigen faizi kimi bədən sensorlarından əldə edilən məlumatlara giriş."</string>
+    <string name="permlab_bodySensors" msgid="662918578601619569">"İstifadə zamanı ürək döyüntüsü kimi bədən sensoru datasına giriş"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Tətbiqə istifadə zamanı ürək döyüntüsü, temperatur və qanda oksigen faizi kimi bədən sensoru datasına giriş icazəsi verir."</string>
+    <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Arxa fonda olarkən ürək döyüntüsü kimi bədən sensoru datasına giriş"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Tətbiqə arxa fonda olarkən ürək döyüntüsü, temperatur və qanda oksigen faizi kimi bədən sensoru datasına giriş icazəsi verir."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Təqvim təqdirləri və detallarını oxuyun"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Bu tətbiq planşetdə yerləşdirilmiş və təqvim datasında yadda saxlanmış bütün təqvim tədbirlərini oxuya bilər."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Bu tətbiq Android TV cihazında saxlanılan bütün təqvim tədbirlərini oxuya, həmçinin təqvim datasını paylaşa və ya yadda saxlaya bilər."</string>
@@ -689,8 +689,8 @@
     <string name="permdesc_readMediaAudio" msgid="5299772574434619399">"Tətbiqə paylaşılan yaddaşdakı audio faylları oxumaq imkanı verir."</string>
     <string name="permlab_readMediaVideo" msgid="7768003311260655007">"paylaşılan yaddaşdakı video fayllarını oxumaq"</string>
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"Tətbiqə paylaşılan yaddaşdakı video fayllarını oxumaq imkanı verir."</string>
-    <string name="permlab_readMediaImage" msgid="1507059005825769856">"paylaşılan yaddaşdakı şəkil fayllarını oxumaq"</string>
-    <string name="permdesc_readMediaImage" msgid="8328052622292457588">"Tətbiqə paylaşılan yaddaşdakı şəkil fayllarını oxumaq imkanı verir."</string>
+    <string name="permlab_readMediaImages" msgid="4057590631020986789">"paylaşılan yaddaşdakı şəkil fayllarını oxumaq"</string>
+    <string name="permdesc_readMediaImages" msgid="5836219373138469259">"Tətbiqə paylaşılan yaddaşdakı şəkil fayllarını oxumaq imkanı verir."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"paylaşılan yaddaşdakı kontenti dəyişmək və ya silmək"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Tətbiqə paylaşılan yaddaşdakı kontenti yazmaq imkanı verir."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"SIP çağrıları göndərin/qəbul edin"</string>
@@ -912,7 +912,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"Təcili zəng kilidini açmaq və ya yerləşdirmək üçün Menyu düyməsinə basın."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"Kilidi açmaq üçün Menyu düyməsinə basın."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"Kilidi açmaq üçün model çəkin"</string>
-    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"Təcili zəng"</string>
+    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"Təcili"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"Zəngə qayıt"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"Düzdür!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Bir də cəhd edin"</string>
@@ -1051,7 +1051,6 @@
     <string name="save_password_never" msgid="6776808375903410659">"Heç vaxt"</string>
     <string name="open_permission_deny" msgid="5136793905306987251">"Bu səhifəni açmaq üçün icazəniz yoxdur."</string>
     <string name="text_copied" msgid="2531420577879738860">"Mətn panoya kopyalandı."</string>
-    <string name="copied" msgid="4675902854553014676">"Kopyalandı"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g> tətbiqindən əlavə edilib"</string>
     <string name="pasted_from_clipboard" msgid="7355790625710831847">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> datanı panodan əlavə edib"</string>
     <string name="pasted_text" msgid="4298871641549173733">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> kopyaladığınız mətni əlavə etdi"</string>
@@ -1452,8 +1451,12 @@
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"Tatareya optimallaşdırılmasını o tətbiq üçün iqnor edilməsinə icazə vermək məqsədilə soruşmağa tətbiqə icazə verilir."</string>
     <string name="permlab_queryAllPackages" msgid="2928450604653281650">"bütün paketlər üçün sorğu göndərin"</string>
     <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"Tətbiqə bütün quraşdırılmış paketləri görmək icazəsi verir."</string>
-    <string name="permlab_accessSupplementalApi" msgid="3544659160536960275">"SupplementalApis\'ə giriş"</string>
-    <string name="permdesc_accessSupplementalApi" msgid="8974758769370951074">"Tətbiqə SupplementalApis\'ə giriş icazəsi verir."</string>
+    <string name="permlab_accessAdServicesTopics" msgid="6687112022940098945">"AdServices Topics API\'ə giriş"</string>
+    <string name="permdesc_accessAdServicesTopics" msgid="6011532458156465929">"Tətbiqə AdServices Topics API\'ə giriş icazəsi verir."</string>
+    <string name="permlab_accessAdServicesAttribution" msgid="3268942271128309354">"AdServices Attribution API\'ə giriş"</string>
+    <string name="permdesc_accessAdServicesAttribution" msgid="577482544832578288">"Tətbiqə AdServices Attribution API\'ə giriş icazəsi verir."</string>
+    <string name="permlab_accessAdServicesCustomAudiences" msgid="7249286630514600684">"AdServices Custom Audiences API\'ə giriş"</string>
+    <string name="permdesc_accessAdServicesCustomAudiences" msgid="645526926477180315">"Tətbiqə AdServices Custom Audiences API\'ə giriş icazəsi verir."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"Zoom kontrolu üçün iki dəfə toxunun"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"Widget əlavə edilə bilmədi."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"Get"</string>
@@ -1716,6 +1719,7 @@
     <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g> adına keçirilir…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"<xliff:g id="NAME">%1$s</xliff:g> çıxır..."</string>
     <string name="owner_name" msgid="8713560351570795743">"Sahib"</string>
+    <string name="guest_name" msgid="8502103277839834324">"Qonaq"</string>
     <string name="error_message_title" msgid="4082495589294631966">"Xəta"</string>
     <string name="error_message_change_not_allowed" msgid="843159705042381454">"Bu dəyişikliyə admin tərəfindən icazə verilmir"</string>
     <string name="app_not_found" msgid="3429506115332341800">"Bu əməliyyatı idarə etmək üçün heç bir tətbiq tapılmadı."</string>
@@ -2027,10 +2031,10 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"SİSTEMDƏN SİLİN"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"İSTƏNİLƏN HALDA AÇIN"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"Zərərli tətbiq aşkarlandı"</string>
-    <string name="log_access_confirmation_title" msgid="3143035474800851565">"Sistem qeydinə giriş sorğusu"</string>
+    <string name="log_access_confirmation_title" msgid="2343578467290592708">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> tətbiqinin bütün cihaz qeydlərinə girişinə icazə verilsin?"</string>
     <string name="log_access_confirmation_allow" msgid="143157286283302512">"Yalnız bu dəfə"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"İcazə verməyin"</string>
-    <string name="log_access_confirmation_body" msgid="7599059550906238538">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> funksional sazlama üçün sistem qeydlərini tələb edir. Bu qeydlərə cihazınızda tətbiqlər və xidmətlərin yazdığı məlumatlar daxil ola bilər."</string>
+    <string name="log_access_confirmation_body" msgid="4483075525611652922">"Cihaz qeydləri cihazınızda baş verənləri qeyd edir. Tətbiqlər problemləri tapmaq və həll etmək üçün bu qeydlərdən istifadə edə bilər.\n\nBəzi qeydlərdə həssas məlumatlar ola bilər, ona görə də yalnız etibar etdiyiniz tətbiqlərin bütün cihaz qeydlərinə giriş etməsinə icazə verin. \n\nBu tətbiqin bütün cihaz qeydlərinə girişinə icazə verməsəniz, o, hələ də öz qeydlərinə giriş edə bilər və cihaz istehsalçınız hələ də cihazınızda bəzi qeydlərə və ya məlumatlara giriş edə bilər. Ətraflı məlumat"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Daha göstərməyin"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> <xliff:g id="APP_2">%2$s</xliff:g> tətbiqindən bölmələr göstərmək istəyir"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Redaktə edin"</string>
@@ -2265,4 +2269,6 @@
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> uzun müddət arxa fonda işləyir. Nəzərdən keçirmək üçün toxunun."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Aktiv tətbiqləri yoxlayın"</string>
     <string name="vdm_camera_access_denied" msgid="6345652513729130490">"Bu cihazdan kameraya giriş mümkün deyil"</string>
+    <!-- no translation found for system_locale_title (3978041860457277638) -->
+    <skip />
 </resources>

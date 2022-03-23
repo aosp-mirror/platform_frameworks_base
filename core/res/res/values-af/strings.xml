@@ -85,8 +85,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"Tydelik deur jou diensverskaffer afgeskakel vir SIM <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Kan nie selnetwerk bereik nie"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Probeer die voorkeurnetwerk verander. Tik om te verander."</string>
-    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Noodoproepe is onbeskikbaar"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Kan nie noodoproepe oor Wi-Fi maak nie"</string>
+    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"Noodoproepe is dalk nie beskikbaar nie"</string>
+    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"<xliff:g id="SPN">%s</xliff:g> steun nie noodoproepe oor wi-fi nie. Tik vir besonderhede."</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Opletberigte"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Oproepaanstuur"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Noodterugbel-modus"</string>
@@ -425,10 +425,10 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"Laat die program toe om jou tablet se oproeprekord, insluitende data oor inkomende en uitgaande oproepe, te verander. Kwaadwillige programme kan dit gebruik om jou oproeprekord uit te vee of te verander."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Laat die program toe om jou Android TV-toestel se oproeprekord te wysig, insluitend data oor inkomende en uitgaande oproepe. Kwaadwillige programme kan dit gebruik om jou oproeprekord uit te vee of te wysig."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Laat die program toe om jou foon se oproeprekord, insluitende data oor inkomende en uitgaande oproepe, te verander. Kwaadwillige programme kan dit gebruik om jou oproeprekord uit te vee of te verander."</string>
-    <string name="permlab_bodySensors" msgid="3411035315357380862">"verkry toegang tot liggaamsensors (soos hartklopmonitors)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="3208940894182188063">"Toegang tot data vanaf liggaamsensors, soos polsslag, temperatuur, bloedsuurstofpersentasie, ens."</string>
-    <string name="permlab_bodySensors_background" msgid="4352831883331744370">"gaan by liggaamsensors in (soos polsslagmonitors) terwyl dit op die agtergrond is"</string>
-    <string name="permdesc_bodySensors_background" product="default" msgid="8512392249166660872">"Toegang tot data vanaf liggaamsensors, soos polsslag, temperatuur, bloedsuurstofpersentasie, ens. terwyl dit op die agtergrond is."</string>
+    <string name="permlab_bodySensors" msgid="662918578601619569">"Kry toegang tot liggaamsensordata, soos polsslag, terwyl program gebruik word"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Gee die program toegang tot liggaamsensordata, soos polsslag, temperatuur en bloedsuurstofpersentasie, terwyl dit program gebruik word."</string>
+    <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Kry toegang tot liggaamsensordata, soos polsslag, terwyl program op agtergrond is"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Gee die program toegang tot liggaamsensordata, soos polsslag, temperatuur en bloedsuurstofpersentasie, terwyl dit op die agtergrond is."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Lees kalendergebeurtenisse en -besonderhede"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Hierdie program kan alle kalendergebeurtenisse lees wat op jou tablet geberg is of jou kalenderdata stoor."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Hierdie program kan alle kalendergeleenthede wat op jou Android TV-toestel geberg is, lees of jou kalenderdata stoor."</string>
@@ -689,8 +689,8 @@
     <string name="permdesc_readMediaAudio" msgid="5299772574434619399">"Laat die program toe om oudiolêers in jou gedeelde berging te lees."</string>
     <string name="permlab_readMediaVideo" msgid="7768003311260655007">"lees videolêers in gedeelde berging"</string>
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"Laat die program toe om videolêers in jou gedeelde berging te lees."</string>
-    <string name="permlab_readMediaImage" msgid="1507059005825769856">"lees prentlêers in gedeelde berging"</string>
-    <string name="permdesc_readMediaImage" msgid="8328052622292457588">"Laat die program toe om prentlêers in jou gedeelde berging te lees."</string>
+    <string name="permlab_readMediaImages" msgid="4057590631020986789">"lees prentlêers in gedeelde berging"</string>
+    <string name="permdesc_readMediaImages" msgid="5836219373138469259">"Laat die program toe om prentlêers in jou gedeelde berging te lees."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"verander of vee jou gedeelde berging se inhoud uit"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Laat die program toe om jou gedeelde berging se inhoud te skryf."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"maak en/of ontvang SIP-oproepe"</string>
@@ -912,7 +912,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"Druk kieslys om oop te sluit of maak noodoproep."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"Druk kieslys om oop te maak."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"Teken patroon om te ontsluit"</string>
-    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"Noodoproep"</string>
+    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"Noodgeval"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"Keer terug na oproep"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"Reg!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Probeer weer"</string>
@@ -1051,7 +1051,6 @@
     <string name="save_password_never" msgid="6776808375903410659">"Nooit"</string>
     <string name="open_permission_deny" msgid="5136793905306987251">"Jy hoef nie toestemming te hê om hierdie bladsy oop te maak nie."</string>
     <string name="text_copied" msgid="2531420577879738860">"Teks na knipbord gekopieër."</string>
-    <string name="copied" msgid="4675902854553014676">"Gekopieer"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> het uit <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g> geplak"</string>
     <string name="pasted_from_clipboard" msgid="7355790625710831847">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> het van jou knipbord af geplak"</string>
     <string name="pasted_text" msgid="4298871641549173733">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> het teks geplak wat jy gekopieer het"</string>
@@ -1452,8 +1451,12 @@
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"Laat \'n program toe om toestemming te vra om batteryoptimerings vir daardie program ignoreer."</string>
     <string name="permlab_queryAllPackages" msgid="2928450604653281650">"navraag oor alle pakkette"</string>
     <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"Laat \'n program toe om alle geïnstalleerde pakette te sien."</string>
-    <string name="permlab_accessSupplementalApi" msgid="3544659160536960275">"verkry toegang tot SupplementalApis"</string>
-    <string name="permdesc_accessSupplementalApi" msgid="8974758769370951074">"Gee \'n program toegang tot SupplementalApis."</string>
+    <string name="permlab_accessAdServicesTopics" msgid="6687112022940098945">"kry toegang tot AdServices Topics API"</string>
+    <string name="permdesc_accessAdServicesTopics" msgid="6011532458156465929">"Gee ’n program toegang tot AdServices Topics API."</string>
+    <string name="permlab_accessAdServicesAttribution" msgid="3268942271128309354">"kry toegang tot AdServices Attribution API\'s"</string>
+    <string name="permdesc_accessAdServicesAttribution" msgid="577482544832578288">"Gee ’n program toegang tot AdServices Attribution API\'s."</string>
+    <string name="permlab_accessAdServicesCustomAudiences" msgid="7249286630514600684">"kry toegang tot AdServices Custom Audiences API"</string>
+    <string name="permdesc_accessAdServicesCustomAudiences" msgid="645526926477180315">"Gee ’n program toegang tot AdServices Custom Audiences API."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"Klop twee keer vir zoembeheer"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"Kon nie legstuk byvoeg nie."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"Gaan"</string>
@@ -1716,6 +1719,7 @@
     <string name="user_switching_message" msgid="1912993630661332336">"Skakel tans oor na <xliff:g id="NAME">%1$s</xliff:g> …"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"Meld <xliff:g id="NAME">%1$s</xliff:g> tans af …"</string>
     <string name="owner_name" msgid="8713560351570795743">"Eienaar"</string>
+    <string name="guest_name" msgid="8502103277839834324">"Gas"</string>
     <string name="error_message_title" msgid="4082495589294631966">"Fout"</string>
     <string name="error_message_change_not_allowed" msgid="843159705042381454">"Jou administrateur laat nie hierdie verandering toe nie"</string>
     <string name="app_not_found" msgid="3429506115332341800">"Geen program gevind om hierdie handeling te hanteer nie"</string>
@@ -2027,10 +2031,10 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"DEΪNSTALLEER"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"MAAK TOG OOP"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"Skadelike program is bespeur"</string>
-    <string name="log_access_confirmation_title" msgid="3143035474800851565">"Stelselloglêertoegangsversoek"</string>
+    <string name="log_access_confirmation_title" msgid="2343578467290592708">"Gee <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> toegang tot alle toestelloglêers?"</string>
     <string name="log_access_confirmation_allow" msgid="143157286283302512">"Net hierdie keer"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Moenie toelaat nie"</string>
-    <string name="log_access_confirmation_body" msgid="7599059550906238538">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> versoek stelselloglêers vir funksionele ontfouting. Hierdie loglêers bevat dalk inligting wat programme en dienste op jou toestel geskryf het."</string>
+    <string name="log_access_confirmation_body" msgid="4483075525611652922">"Toestelloglêers teken aan wat op jou toestel gebeur. Programme kan hierdie loglêers gebruik om kwessies op te spoor en reg te stel.\n\nSommige loglêers bevat dalk sensitiewe inligting en daarom moet jy toegang tot alle toestelloglêers net gee aan programme wat jy vertrou. \n\nAs jy nie vir hierdie program toegang tot alle toestelloglêers gee nie, het dit steeds toegang tot sy eie loglêers, en jou toestelvervaardiger het dalk steeds toegang tot sommige loglêers of inligting op jou toestel. Kom meer te wete"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Moenie weer wys nie"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> wil <xliff:g id="APP_2">%2$s</xliff:g>-skyfies wys"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Wysig"</string>
@@ -2265,4 +2269,6 @@
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> werk al vir \'n lang tyd op die agtergrond. Tik om na te gaan."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Gaan aktiewe programme na"</string>
     <string name="vdm_camera_access_denied" msgid="6345652513729130490">"Kan nie toegang tot kamera van hierdie toestel af kry nie"</string>
+    <!-- no translation found for system_locale_title (3978041860457277638) -->
+    <skip />
 </resources>

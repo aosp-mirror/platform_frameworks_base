@@ -85,8 +85,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"ဆင်းမ် <xliff:g id="SIMNUMBER">%d</xliff:g> အတွက် သင်၏ ဝန်ဆောင်မှုပေးသူက ယာယီပိတ်ထားပါသည်"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"မိုဘိုင်းကွန်ရက် လိုင်းမရပါ"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"ဦးစားပေးကွန်ရက်သို့ ပြောင်းကြည့်ပါ။ ပြောင်းရန် တို့ပါ။"</string>
-    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"အရေးပေါ်ခေါ်ဆိုမှု မရနိုင်ပါ"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Wi‑Fi ဖြင့် အရေးပေါ်ခေါ်ဆိုမှုများ ပြုလုပ်၍မရပါ"</string>
+    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"အရေးပေါ်ဖုန်းခေါ်ခြင်းများ မရနိုင်ပါ"</string>
+    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"Wi-Fi ဖြင့် အရေးပေါ်ဖုန်းခေါ်ခြင်းကို <xliff:g id="SPN">%s</xliff:g> က ပံ့ပိုးမထားပါ။ အသေးစိတ်အချက်အလက်များအတွက် တို့ပါ။"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"သတိပေးချက်များ"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"အဝင်ခေါ်ဆိုမှုအား ထပ်ဆင့်ပို့ခြင်း"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"အရေးပေါ် ပြန်လည်ခေါ်ဆိုနိုင်သောမုဒ်"</string>
@@ -425,10 +425,10 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"အပလီကေးရှင်းအား သင့်တက်ဘလက်၏ ဖုန်းခေါ်ဆိုမှု မှတ်တမ်း (အဝင်အထွက်ခေါ်ဆိုမှု အချက်အလက်များ) ကို ပြင်ဆင်ခွင့် ပေးခြင်း။ အန္တရာယ်ရှိ အပလီကေးရှင်းများမှ ဤအချက်ကို အသုံးပြု၍ သင့် ဖုန်းခေါ်ဆိုမှု မှတ်တမ်းကို ဖျက်ပစ်ခြင်း၊ ပြင်ဆင်ခြင်းများ ပြုလုပ်နိုင်ပါသည်"</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"အဝင်နှင့် အထွက်ခေါ်ဆိုမှု အချက်အလက်များ အပါအဝင် သင့် Android TV စက်ပစ္စည်းပေါ်ရှိ ခေါ်ဆိုထားသော မှတ်တမ်းကို အက်ပ်အား မွမ်းမံခွင့်ပြုသည်။ သံသယဖြစ်နိုင်ဖွယ်ရှိသည့် အက်ပ်များသည် ၎င်းကို အသုံးပြုပြီး သင်၏ ခေါ်ဆိုထားသော မှတ်တမ်းကို ဖျက်နိုင်သည်။"</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"အပလီကေးရှင်းအား သင့်ဖုန်း၏ ဖုန်းခေါ်ဆိုမှု မှတ်တမ်း (အဝင်အထွက်ခေါ်ဆိုမှု အချက်အလက်များ) ကို ပြင်ဆင်ခွင့် ပေးခြင်း။ အန္တရာယ်ရှိ အပလီကေးရှင်းများမှ ဤအချက်ကို အသုံးပြု၍ သင့် ဖုန်းခေါ်ဆိုမှု မှတ်တမ်းကို ဖျက်ပစ်ခြင်း၊ ပြင်ဆင်ခြင်းများ ပြုလုပ်နိုင်ပါသည်"</string>
-    <string name="permlab_bodySensors" msgid="3411035315357380862">"ခန္ဓာကိုယ် အာရုံကိရိယာများကို (နှလုံးခုန်နှုန်း မော်နီတာလို)ကို ရယူသုံးရန်"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="3208940894182188063">"နှလုံးခုန်နှုန်း၊ အပူချိန်၊ သွေးတွင်း အောက်ဆီဂျင် ရာခိုင်နှုန်း စသည့် ခန္ဓာကိုယ် အာရုံခံကိရိယာများမှ ဒေတာသုံးခွင့်။"</string>
-    <string name="permlab_bodySensors_background" msgid="4352831883331744370">"(နှလုံးခုန်နှုန်း စောင့်ကြည့်ခြင်းကဲ့သို့) ခန္ဓာကိုယ် အာရုံခံကိရိယာများကို နောက်ခံ၌သုံးခွင့်"</string>
-    <string name="permdesc_bodySensors_background" product="default" msgid="8512392249166660872">"နှလုံးခုန်နှုန်း၊ အပူချိန်၊ သွေးတွင်း အောက်ဆီဂျင် ရာခိုင်နှုန်း စသည့် ခန္ဓာကိုယ် အာရုံခံကိရိယာများမှ ဒေတာကို နောက်ခံ၌သုံးခွင့်။"</string>
+    <string name="permlab_bodySensors" msgid="662918578601619569">"သုံးနေစဉ် နှလုံးခုန်နှုန်းကဲ့သို့ ခန္ဓာကိုယ်အာရုံခံစနစ် ဒေတာ သုံးခြင်း"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"အက်ပ်သုံးစဉ် နှလုံးခုန်နှုန်း၊ အပူချိန်၊ သွေးတွင်း အောက်ဆီဂျင်ရာခိုင်နှုန်းကဲ့သို့ ခန္ဓာကိုယ်အာရုံခံစနစ် ဒေတာများသုံးရန် အက်ပ်ကိုခွင့်ပြုသည်။"</string>
+    <string name="permlab_bodySensors_background" msgid="4912560779957760446">"နောက်ခံတွင်ဖွင့်စဉ် နှလုံးခုန်နှုန်းကဲ့သို့ ခန္ဓာကိုယ်အာရုံခံစနစ် ဒေတာ သုံးခြင်း"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"နောက်ခံတွင်အက်ပ်ဖွင့်စဉ် နှလုံးခုန်နှုန်း၊ အပူချိန်၊ သွေးတွင်း အောက်ဆီဂျင်ရာခိုင်နှုန်းကဲ့သို့ ခန္ဓာကိုယ်အာရုံခံစနစ် ဒေတာများသုံးရန် အက်ပ်ကိုခွင့်ပြုသည်။"</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"ပြက္ခဒိန်ဖြစ်ရပ်များနှင့် အသေးစိတ်အချက်အလက်များကို ဖတ်ခြင်း"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"ဤအက်ပ်သည် သင့်တက်ဘလက်တွင် သိမ်းဆည်းထားသည့် ပြက္ခဒိန်ဖြစ်ရပ်များကို ကြည့်ရှုနိုင်ပြီး သင့်ပြက္ခဒိန်ဒေတာများကို မျှဝေခြင်းနှင့် သိမ်းဆည်းခြင်းတို့ ပြုလုပ်နိုင်ပါသည်။"</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"ဤအက်ပ်သည် သင့် Android TV စက်ပစ္စည်းတွင် သိမ်းဆည်းထားသည့် ပြက္ခဒိန်ဖြစ်ရပ်များအားလုံးကို ဖတ်နိုင်ပြီး သင်၏ ပြက္ခဒိန်ဒေတာများကို မျှဝေခြင်း သို့မဟုတ် သိမ်းဆည်းခြင်းတို့ ပြုလုပ်နိုင်သည်။"</string>
@@ -689,8 +689,8 @@
     <string name="permdesc_readMediaAudio" msgid="5299772574434619399">"သင်၏မျှဝေထားသော သိုလှောင်ခန်းမှ အသံဖိုင်များဖတ်ရန် အက်ပ်ကိုခွင့်ပြုသည်။"</string>
     <string name="permlab_readMediaVideo" msgid="7768003311260655007">"မျှဝေထားသော သိုလှောင်ခန်းမှ ဗီဒီယိုဖိုင်များဖတ်ရန်"</string>
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"သင်၏မျှဝေထားသော သိုလှောင်ခန်းမှ ဗီဒီယိုဖိုင်များဖတ်ရန် အက်ပ်ကိုခွင့်ပြုသည်။"</string>
-    <string name="permlab_readMediaImage" msgid="1507059005825769856">"မျှဝေထားသော သိုလှောင်ခန်းမှ ပုံပါဝင်သောဖိုင်များဖတ်ရန်"</string>
-    <string name="permdesc_readMediaImage" msgid="8328052622292457588">"သင်၏မျှဝေထားသော သိုလှောင်ခန်းမှ ပုံပါဝင်သောဖိုင်များဖတ်ရန် အက်ပ်ကိုခွင့်ပြုသည်။"</string>
+    <string name="permlab_readMediaImages" msgid="4057590631020986789">"မျှဝေထားသည့် သိုလှောင်ခန်းမှ ပုံပါဝင်သောဖိုင်များဖတ်ရန်"</string>
+    <string name="permdesc_readMediaImages" msgid="5836219373138469259">"သင်၏မျှဝေထားသည့် သိုလှောင်ခန်းမှ ပုံပါဝင်သောဖိုင်များဖတ်ရန် အက်ပ်ကို ခွင့်ပြုသည်။"</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"မျှဝေသိုလှောင်ခန်းမှ အရာများ ပြုပြင်/ဖျက်ခြင်း"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"မျှဝေသိုလှောင်ခန်းမှ အရာများ ရေးခွင့်ပြုသည်။"</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"SIP ခေါ်ဆိုမှုများ ခေါ်ရန်/လက်ခံရန်"</string>
@@ -912,7 +912,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"ဖွင့်ရန်သို့မဟုတ်အရေးပေါ်ခေါ်ဆိုခြင်းပြုလုပ်ရန် မီနူးကိုနှိပ်ပါ"</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"မီးနူးကို နှိပ်ခြင်းဖြင့် သော့ဖွင့်ပါ"</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"ဖွင့်ရန်ပုံစံဆွဲပါ"</string>
-    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"အရေးပေါ် ခေါ်ဆိုမှု"</string>
+    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"အရေးပေါ်"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"ခေါ်ဆိုမှုထံပြန်သွားရန်"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"မှန်ပါသည်"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"ထပ် စမ်းပါ"</string>
@@ -1051,7 +1051,6 @@
     <string name="save_password_never" msgid="6776808375903410659">"လုံးဝ မလုပ်ပါ"</string>
     <string name="open_permission_deny" msgid="5136793905306987251">"သင့်ဆီမှာ ဒီစာမျက်နှာကို ဖွင့်ရန် ခွင့်ပြုချက် မရှိပါ။"</string>
     <string name="text_copied" msgid="2531420577879738860">"clipboardထံ စာသားအားကူးယူမည်"</string>
-    <string name="copied" msgid="4675902854553014676">"မိတ္တူကူးပြီးပါပြီ"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g> မှ <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> သို့ ကူးထည့်ထားသည်"</string>
     <string name="pasted_from_clipboard" msgid="7355790625710831847">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> က သင့်ကလစ်ဘုတ်မှ ကူးထည့်ထားသည်"</string>
     <string name="pasted_text" msgid="4298871641549173733">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> က သင်မိတ္တူကူးထားသော စာသားကို ထည့်လိုက်သည်"</string>
@@ -1452,8 +1451,12 @@
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"ဘက်ထရီ ပိုမိုကောင်းမွန်အောင် ပြုလုပ်ခြင်းကို လျစ်လျူရှုရန်အတွက် ခွင့်ပြုချက်တောင်းရန် အက်ပ်ကို ခွင့်ပြုပါ။"</string>
     <string name="permlab_queryAllPackages" msgid="2928450604653281650">"ပက်ကေ့ဂျ်အားလုံးကို မေးမြန်းခြင်း"</string>
     <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"ထည့်သွင်းထားသော ပက်ကေ့ဂျ်အားလုံး ကြည့်ရန် အက်ပ်ကို ခွင့်ပြုပါ။"</string>
-    <string name="permlab_accessSupplementalApi" msgid="3544659160536960275">"SupplementalApis သုံးခွင့်"</string>
-    <string name="permdesc_accessSupplementalApi" msgid="8974758769370951074">"အပလီကေးရှင်းအား SupplementalApis သုံးခွင့်ပေးနိုင်သည်။"</string>
+    <string name="permlab_accessAdServicesTopics" msgid="6687112022940098945">"AdServices Topics API သုံးခွင့်"</string>
+    <string name="permdesc_accessAdServicesTopics" msgid="6011532458156465929">"AdServices Topics API ကို အပလီကေးရှင်းတစ်ခုအား သုံးခွင့်ပေးနိုင်သည်။"</string>
+    <string name="permlab_accessAdServicesAttribution" msgid="3268942271128309354">"AdServices Attribution API များ သုံးခွင့်"</string>
+    <string name="permdesc_accessAdServicesAttribution" msgid="577482544832578288">"AdServices Attribution API များကို အပလီကေးရှင်းတစ်ခုအား သုံးခွင့်ပေးနိုင်သည်။"</string>
+    <string name="permlab_accessAdServicesCustomAudiences" msgid="7249286630514600684">"AdServices Custom Audiences API သုံးခွင့်"</string>
+    <string name="permdesc_accessAdServicesCustomAudiences" msgid="645526926477180315">"AdServices Custom Audiences API ကို အပလီကေးရှင်းတစ်ခုအား သုံးခွင့်ပေးနိုင်သည်။"</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"ဇူးမ်အသုံးပြုရန် နှစ်ချက်တို့ပါ"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"ဝဒ်ဂျက်ထည့်လို့ မရပါ"</string>
     <string name="ime_action_go" msgid="5536744546326495436">"သွားပါ"</string>
@@ -1716,6 +1719,7 @@
     <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g>သို့ ပြောင်းနေ…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"<xliff:g id="NAME">%1$s</xliff:g>ကို ထွက်ပစ်ပါတော့မည်..."</string>
     <string name="owner_name" msgid="8713560351570795743">"ပိုင်ရှင်"</string>
+    <string name="guest_name" msgid="8502103277839834324">"ဧည့်သည်"</string>
     <string name="error_message_title" msgid="4082495589294631966">"အမှား"</string>
     <string name="error_message_change_not_allowed" msgid="843159705042381454">"ဤပြောင်းလဲမှုကို သင်၏ စီမံခန့်ခွဲသူက ခွင့်မပြုပါ"</string>
     <string name="app_not_found" msgid="3429506115332341800">"ဤလုပ်ဆောင်ချက်ကို ပြုလုပ်ပေးမည့် အပလီကေးရှင်းမရှိပါ။"</string>
@@ -2027,10 +2031,10 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"ဖြုတ်ရန်"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"ဘာဖြစ်ဖြစ် ဖွင့်ရန်"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"အန္တရာယ်ရှိသော အက်ပ်ကို တွေ့ရှိထားသည်"</string>
-    <string name="log_access_confirmation_title" msgid="3143035474800851565">"စနစ်မှတ်တမ်းသုံးခွင့် တောင်းဆိုခြင်း"</string>
+    <string name="log_access_confirmation_title" msgid="2343578467290592708">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> ကို စက်မှတ်တမ်းအားလုံး သုံးခွင့်ပြုမလား။"</string>
     <string name="log_access_confirmation_allow" msgid="143157286283302512">"ဤတစ်ကြိမ်သာ"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"ခွင့်မပြုပါ"</string>
-    <string name="log_access_confirmation_body" msgid="7599059550906238538">"အမှားရှာပြင်မှု လုပ်ဆောင်နိုင်ရန်အတွက် စနစ်မှတ်တမ်းများကို <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> က တောင်းဆိုသည်။ ဤမှတ်တမ်းများတွင် သင်၏စက်ပေါ်ရှိအက်ပ်နှင့် ဝန်ဆောင်မှုများ ရေးထားသော အချက်အလက်များ ပါဝင်နိုင်သည်။"</string>
+    <string name="log_access_confirmation_body" msgid="4483075525611652922">"သင့်စက်ရှိ အဖြစ်အပျက်များကို စက်မှတ်တမ်းများက မှတ်တမ်းတင်သည်။ အက်ပ်များက ပြဿနာများ ရှာဖွေပြီးဖြေရှင်းရန် ဤမှတ်တမ်းများကို သုံးနိုင်သည်။\n\nအချို့မှတ်တမ်းများတွင် သတိထားရမည့်အချက်အလက်များ ပါဝင်နိုင်သဖြင့် စက်မှတ်တမ်းအားလုံးကို ယုံကြည်ရသည့် အက်ပ်များကိုသာ သုံးခွင့်ပြုပါ။ \n\nဤအက်ပ်ကို စက်မှတ်တမ်းအားလုံး သုံးခွင့်မပြုသော်လည်း ၎င်းက ကိုယ်ပိုင်မှတ်တမ်းကို သုံးနိုင်ဆဲဖြစ်ပြီး သင့်စက်ရှိ အချို့မှတ်တမ်းများ (သို့) အချက်အလက်များကို သင့်စက်ထုတ်လုပ်သူက သုံးနိုင်ပါသေးသည်။ ပိုမိုလေ့လာရန်"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"နောက်ထပ်မပြပါနှင့်"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> သည် <xliff:g id="APP_2">%2$s</xliff:g> ၏အချပ်များကို ပြသလိုသည်"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"တည်းဖြတ်ရန်"</string>
@@ -2265,4 +2269,6 @@
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> သည် နောက်ခံတွင် အချိန်အတော်ကြာပွင့်နေသည်။ ပြန်ကြည့်ရန် တို့ပါ။"</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"ပွင့်နေသည့်အက်ပ်များ စစ်ဆေးရန်"</string>
     <string name="vdm_camera_access_denied" msgid="6345652513729130490">"ကင်မရာကို ဤစက်မှ အသုံးမပြုနိုင်ပါ"</string>
+    <!-- no translation found for system_locale_title (3978041860457277638) -->
+    <skip />
 </resources>

@@ -85,8 +85,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"ለሲም <xliff:g id="SIMNUMBER">%d</xliff:g> ለጊዜው በእርስዎ አገልግሎት አቅራቢ ጠፍቷል"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"የሞባይል አውታረ መረብን መድረስ አልተቻለም"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"ተመራጭ አውታረ መረብን ለመለወጥ ይሞክሩ። ለመለወጥ መታ ያድርጉ።"</string>
-    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"የአደጋ ጊዜ ጥሪ አይገኝም"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"በWi‑Fi በኩል የአደጋ ጊዜ ጥሪዎችን ማድረግ አይችልም"</string>
+    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"የአደጋ ጊዜ ጥሪዎች ላይገኙ ይችላሉ"</string>
+    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"<xliff:g id="SPN">%s</xliff:g> በWi-Fi ላይ የአደጋ ጊዜ ጥሪዎችን አይደግፍም። ዝርዝሮችን ለማግኘት መታ ያድርጉ።"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"ማንቂያዎች"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"ጥሪ ማስተላለፍ"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"የአደጋ ጊዜ ጥሪ ሁነታ"</string>
@@ -425,10 +425,10 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"ስለ ገቢ እና ወጪ ጥሪዎችን ውሂብ ጨምሮ፣ የጡባዊተኮህን ምዝግብ ማስታወሻ ለመቀየር ለመተግበሪያው ይፈቅዳል። ይሄንን ተንኮል አዘል መተግበሪያዎች የስልክህን ምዝግብ ማስታወሻ ለመሰረዝ ወይም ለመለወጥ ሊጠቀሙበት ይችላሉ።"</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"መተግበሪያው ስለገቢ እና ወጪ ጥሪዎች ያለ ውሂብም ጨምሮ የእርስዎ Android TV መሣሪያ ምዝግብ ማስታወሻ እንዲቀይር ያስችለዋል። ተንኮል-አዘል መተግበሪያዎች ይህን ተጠቅመው የስልክዎን ምዝግብ ማስታወሻ ሊደመስሱ ወይም ሊቀይሩ ይችላሉ።"</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"ስለ ገቢ እና ወጪ ጥሪዎችን ውሂብ ጨምሮ፣ የስልክህን ምዝግብ ማስታወሻ ለመቀየር ለመተግበሪያው ይፈቅዳል። ይሄንን ተንኮል አዘል መተግበሪያዎች የስልክህን ምዝግብ ማስታወሻ ለመሰረዝ ወይም ለመለወጥ ሊጠቀሙበት ይችላሉ።"</string>
-    <string name="permlab_bodySensors" msgid="3411035315357380862">"የሰውነት ዳሳሾችን መድረስ (እንደ የልብ ምት መከታተያዎች ያሉ)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="3208940894182188063">"እንደ የልብ ምት፣ የሙቀት መጠን፣ የደም ኦክሲጅን መቶኛ፣ ወዘተ ያሉ የሰውነት ዳሳሾች ውሂብን መድረስ።"</string>
-    <string name="permlab_bodySensors_background" msgid="4352831883331744370">"ከበስተጀርባ እያለ የሰውነት ዳሳሾችን (እንደ የልብ ምት መቆጣጠሪያዎች) መድረስ"</string>
-    <string name="permdesc_bodySensors_background" product="default" msgid="8512392249166660872">"ከበስተጀርባ እያለ እንደ የልብ ምት፣ የሙቀት መጠን፣ የደም ኦክሲጅን መቶኛ፣ ወዘተ ያሉ የሰውነት ዳሳሾች ውሂብን መድረስ።"</string>
+    <string name="permlab_bodySensors" msgid="662918578601619569">"ስራ ላይ በሚውልበት ጊዜ እንደ የልብ ምት ያለ የሰውነት ዳሳሽ ውሂብን መድረስ"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"መተግበሪያው ስራ ላይ በሚውልበት ጊዜ እንደ የልብ ምት፣ የሙቀት መጠን እና የደም ኦክሲጅን መቶኛ ያለ የሰውነት ዳሳሽ ውሂብን እንዲደርስ ያስችለዋል።"</string>
+    <string name="permlab_bodySensors_background" msgid="4912560779957760446">"ከበስተጀርባ እያለ እንደ የልብ ምት ያለ የሰውነት ዳሳሽ ውሂብን መድረስ"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"መተግበሪያው ከበስተጀርባ እያለ እንደ የልብ ምት፣ የሙቀት መጠን እና የደም ኦክሲጅን መቶኛ ያለ የሰውነት ዳሳሽ ውሂብን እንዲደርስ ያስችለዋል።"</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"የቀን መቁጠሪያ ክስተቶችን እና ዝርዝሮችን አንብብ"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"ይህ መተግበሪያ ሁሉንም በእርስዎ ጡባዊ ላይ የተከማቹ የቀን መቁጠሪያ ክስተቶችን ማንበብ ወይም የእርስዎን የቀን መቁጠሪያ ውሂብ ማስቀመጥ ይችላል።"</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"ይህ መተግበሪያ ሁሉንም በእርስዎ Android TV መሣሪያ ላይ የተከማቹ የቀን መቁጠሪያ ክስተቶችን ማንበብ ወይም የእርስዎን የቀን መቁጠሪያ ውሂብ ማስቀመጥ ይችላል።"</string>
@@ -689,8 +689,8 @@
     <string name="permdesc_readMediaAudio" msgid="5299772574434619399">"መተግበሪያው ከእርስዎ የተጋራ ማከማቻ የድምጽ ፋይሎችን እንዲያነብ ይፈቅድለታል።"</string>
     <string name="permlab_readMediaVideo" msgid="7768003311260655007">"የቪዲዮ ፋይሎችን ከተጋራ ማከማቻ አንብብ"</string>
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"መተግበሪያው ከእርስዎ የተጋራ ማከማቻ የቪዲዮ ፋይሎችን እንዲያነብ ይፈቅድለታል።"</string>
-    <string name="permlab_readMediaImage" msgid="1507059005825769856">"ከጋራ ማከማቻ የምስል ፋይሎችን አንብብ"</string>
-    <string name="permdesc_readMediaImage" msgid="8328052622292457588">"መተግበሪያው ከእርስዎ የተጋራ ማከማቻ የምስል ፋይሎችን እንዲያነብ ይፈቅድለታል።"</string>
+    <string name="permlab_readMediaImages" msgid="4057590631020986789">"ከጋራ ማከማቻ የምስል ፋይሎችን አንብብ"</string>
+    <string name="permdesc_readMediaImages" msgid="5836219373138469259">"መተግበሪያው ከእርስዎ የተጋራ ማከማቻ የምስል ፋይሎችን እንዲያነብ ይፈቅድለታል።"</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"የተጋራ ማከማቻዎን ይዘቶች ይቀይሩ ወይም ይሰርዙ"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"መተግበሪያው የእርስዎን የተጋራ ማከማቻ ይዘቶችን እንዲጽፍ ያስችለዋል።"</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"የSIP ጥሪዎችን ያድርጉ/ይቀበሉ"</string>
@@ -912,7 +912,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"ለመክፈት ምናሌ ተጫንወይም የአደጋ ጊዜ ጥሪ አድርግ።"</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"ለመክፈት ምናሌ ተጫን"</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"ለመክፈት ስርዓተ ጥለት ሳል"</string>
-    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"የአደጋ ጊዜ ጥሪ"</string>
+    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"ድንገተኛ አደጋ"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"ወደ ጥሪ ተመለስ"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"ትክክል!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"እንደገና ሞክር"</string>
@@ -1051,7 +1051,6 @@
     <string name="save_password_never" msgid="6776808375903410659">"በፍፁም"</string>
     <string name="open_permission_deny" msgid="5136793905306987251">"ይህን ገጽ  ለመክፈት ፈቃድ የለህም።"</string>
     <string name="text_copied" msgid="2531420577879738860">"ፅሁፍ ወደ ቅንጥብ ሰሌዳ ተገልብጧል።"</string>
-    <string name="copied" msgid="4675902854553014676">"ተቀድቷል"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ከ <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g> ተለጥፏል"</string>
     <string name="pasted_from_clipboard" msgid="7355790625710831847">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ከእርስዎ ቅንጥብ ሰሌዳ ተለጥፏል"</string>
     <string name="pasted_text" msgid="4298871641549173733">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> እርስዎ የቀዱትን ጽሑፍ ለጥፏል"</string>
@@ -1452,8 +1451,12 @@
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"አንድ መተግበሪያ ለዚያ መተግበሪያ የባትሪ ማትባቶችን ችላ ለማለት እንዲጠይቅ ይፈቅድለታል።"</string>
     <string name="permlab_queryAllPackages" msgid="2928450604653281650">"ሁሉንም ጥቅሎች ይጠይቁ"</string>
     <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"አንድ መተግበሪያ ሁሉንም የተጫኑ ጥቅሎችን እንዲያይ ይፈቅድለታል።"</string>
-    <string name="permlab_accessSupplementalApi" msgid="3544659160536960275">"SupplementalApisን ይድረሱ"</string>
-    <string name="permdesc_accessSupplementalApi" msgid="8974758769370951074">"መተግበሪያ SupplementalApisን እንዲደርስ ይፈቅዳል።"</string>
+    <string name="permlab_accessAdServicesTopics" msgid="6687112022940098945">"የAdServices ርዕሶች ኤፒአይን ይድረሱ"</string>
+    <string name="permdesc_accessAdServicesTopics" msgid="6011532458156465929">"መተግበሪያ የAdServices ርዕሶች ኤፒአይን እንዲደርስ ይፈቅዳል።"</string>
+    <string name="permlab_accessAdServicesAttribution" msgid="3268942271128309354">"የAdServices Attribution ኤፒአይን ይድረሱ"</string>
+    <string name="permdesc_accessAdServicesAttribution" msgid="577482544832578288">"መተግበሪያ የAdServices ባለቤትነት ኤፒአይዎችን ለመድረስ ይፈቅዳል።"</string>
+    <string name="permlab_accessAdServicesCustomAudiences" msgid="7249286630514600684">"የAdServices ብጁ ታዳሚዎች ኤፒአይን ይድረሱ"</string>
+    <string name="permdesc_accessAdServicesCustomAudiences" msgid="645526926477180315">"መተግበሪያ የAdServices ብጁ ታዳሚዎች ኤፒአይን ለመድረስ ይፈቅዳል።"</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"ለአጉላ መቆጣጠሪያ ሁለት ጊዜ ነካ አድርግ"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"ምግብር ማከል አልተቻለም።"</string>
     <string name="ime_action_go" msgid="5536744546326495436">"ሂድ"</string>
@@ -1716,6 +1719,7 @@
     <string name="user_switching_message" msgid="1912993630661332336">"ወደ <xliff:g id="NAME">%1$s</xliff:g> በመቀየር ላይ…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"<xliff:g id="NAME">%1$s</xliff:g> በማውጣት ላይ…"</string>
     <string name="owner_name" msgid="8713560351570795743">"ባለቤት"</string>
+    <string name="guest_name" msgid="8502103277839834324">"እንግዳ"</string>
     <string name="error_message_title" msgid="4082495589294631966">"ስህተት"</string>
     <string name="error_message_change_not_allowed" msgid="843159705042381454">"ይህ ለውጥ በአስተዳዳሪዎ አይፈቀድም"</string>
     <string name="app_not_found" msgid="3429506115332341800">"ይህን እርምጃ የሚያከናውን ምንም መተግበሪያ አልተገኘም"</string>
@@ -2027,10 +2031,10 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"አራግፍ"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"ለማንኛውም ክፈት"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"ጎጂ መተግበሪያ ተገኝቷል"</string>
-    <string name="log_access_confirmation_title" msgid="3143035474800851565">"የስርዓት ምዝግብ ማስታወሻ መዳረሻ ጥያቄ"</string>
+    <string name="log_access_confirmation_title" msgid="2343578467290592708">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> ሁሉንም የመሣሪያ ምዝግብ ማስታወሻዎች እንዲደርስ ይፈቀድለት?"</string>
     <string name="log_access_confirmation_allow" msgid="143157286283302512">"አሁን ብቻ"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"አትፍቀድ"</string>
-    <string name="log_access_confirmation_body" msgid="7599059550906238538">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> ለተግባራዊ ስህተት ማረሚያ የስርዓት ምዝግብ ማስታወሻዎችን ይጠይቃል። እነዚህ ምዝግብ ማስታወሻዎች በመሣሪያዎ ላይ ያሉ መተግበሪያዎች እና አገልግሎቶች የጻፉትን መረጃ ሊይዙ ይችላሉ።"</string>
+    <string name="log_access_confirmation_body" msgid="4483075525611652922">"የመሣሪያ ምዝግብ ማስታወሻዎች በመሣሪያዎ ላይ ምን እንደሚከሰት ይመዘግባሉ። መተግበሪያዎች ችግሮችን ለማግኘት እና ለማስተካከል እነዚህን ምዝግብ ማስታወሻዎች መጠቀም ይችላሉ።\n\nአንዳንድ ምዝግብ ማስታወሻዎች ሚስጥራዊነት ያለው መረጃ ሊይዙ ይችላሉ፣ ስለዚህ የሚያምኗቸውን መተግበሪያዎች ብቻ ሁሉንም የመሣሪያ ምዝግብ ማስታወሻዎች እንዲደርሱ ይፍቀዱላቸው። \n\nይህ መተግበሪያ ሁሉንም የመሣሪያ ምዝግብ ማስታወሻዎች እንዲደርስ ካልፈቀዱለት አሁንም የራሱን ምዝግብ ማስታወሻዎች መድረስ ይችላል፣ እንዲሁም የእርስዎ መሣሪያ አምራች አሁንም አንዳንድ ምዝግብ ማስታወሻዎችን ወይም መረጃዎችን በመሣሪያዎ ላይ ሊደርስ ይችላል። የበለጠ መረዳት"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"ዳግም አታሳይ"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> የ<xliff:g id="APP_2">%2$s</xliff:g> ቁራጮችን ማሳየት ይፈልጋል"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"አርትዕ"</string>
@@ -2265,4 +2269,6 @@
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> ከበስተጀርባ ለረጅም ጊዜ በማሄድ ላይ ነው። ለመገምገም መታ ያድርጉ።"</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"ንቁ መተግበሪያዎችን ይፈትሹ"</string>
     <string name="vdm_camera_access_denied" msgid="6345652513729130490">"ከዚህ መሣሪያ ሆኖ ካሜራን መድረስ አይቻልም"</string>
+    <!-- no translation found for system_locale_title (3978041860457277638) -->
+    <skip />
 </resources>

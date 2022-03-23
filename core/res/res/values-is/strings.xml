@@ -85,8 +85,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"Símafyrirtækið slökkti tímabundið á þessu fyrir SIM-kort <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Ekki næst samband við farsímakerfi"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Prófaðu að velja annað símkerfi. Ýttu til að breyta."</string>
-    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Neyðarsímtöl eru ekki í boði"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Ekki er hægt að hringja neyðarsímtöl með Wi-Fi"</string>
+    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"Neyðarsímtöl eru hugsanlega ekki tiltæk"</string>
+    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"<xliff:g id="SPN">%s</xliff:g> styður ekki neyðarsímtöl um Wi-Fi. Ýttu til að fá frekari upplýsingar."</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Tilkynningar"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Símtalsflutningur"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Stilling fyrir svarhringingu neyðarsímtala"</string>
@@ -425,10 +425,10 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"Leyfir forriti að breyta símtalaskrá spjaldtölvunnar, þ. á m. gögnum um hringd og móttekin símtöl. Spilliforrit geta notað þetta til að eyða eða breyta símtalaskránni."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Leyfir forritinu að breyta símtalaskrá Android TV tækisins, þ. á m. gögnum um hringd og móttekin símtöl. Spilliforrit geta notað þetta til að eyða eða breyta símtalaskránni."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Leyfir forriti að breyta símtalaskrá símans, þ. á m. gögnum um hringd og móttekin símtöl. Spilliforrit geta notað þetta til að eyða eða breyta símtalaskránni."</string>
-    <string name="permlab_bodySensors" msgid="3411035315357380862">"fá aðgang að líkamsskynjurum (s.s. hjartsláttarmælum)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="3208940894182188063">"Aðgangur að gögnum frá líkamsskynjurum, svo sem um hjartslátt, hitastig, súrefnismettun í blóði o.s.frv."</string>
-    <string name="permlab_bodySensors_background" msgid="4352831883331744370">"aðgangur að líkamsskynjurum (svo sem púlsmælum) í bakgrunni"</string>
-    <string name="permdesc_bodySensors_background" product="default" msgid="8512392249166660872">"Aðgangur að gögnum frá líkamsskynjurum, svo sem um hjartslátt, hitastig, súrefnismettun í blóði o.s.frv. í bakgrunni."</string>
+    <string name="permlab_bodySensors" msgid="662918578601619569">"Aðgangur að gögnum líkamsskynjara, svo sem um hjartslátt, meðan það er í notkun"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Veitir forritinu aðgang að gögnum frá líkamsskynjurum, svo sem um hjartslátt, hitastig og súrefnismettun í blóði á meðan forritið er í notkun."</string>
+    <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Aðgangur að gögnum líkamsskynjara, t.d. um hjartslátt, meðan það er í bakgrunni"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Veitir forritinu aðgang að gögnum frá líkamsskynjurum, svo sem um hjartslátt, hitastig og súrefnismettun í blóði á meðan forritið keyrir í bakgrunni."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Lesa dagatalsviðburði og upplýsingar"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Þetta forrit getur lesið alla dagatalsviðburði sem eru vistaðir í spjaldtölvunni og deilt eða vistað dagatalsgögnin þín."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Þetta forrit getur lesið alla dagatalsviðburði sem eru vistaðir í Android TV og deilt eða vistað dagatalsgögnin þín."</string>
@@ -689,8 +689,8 @@
     <string name="permdesc_readMediaAudio" msgid="5299772574434619399">"Leyfir forritinu að lesa hljóðskrár úr samnýtta geymslurýminu þínu."</string>
     <string name="permlab_readMediaVideo" msgid="7768003311260655007">"lesa myndskeiðaskrár úr samnýttu geymslurými"</string>
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"Leyfir forritinu að lesa myndskeiðaskrár úr samnýtta geymslurýminu þínu."</string>
-    <string name="permlab_readMediaImage" msgid="1507059005825769856">"lesa myndskrár úr samnýttu geymslurými"</string>
-    <string name="permdesc_readMediaImage" msgid="8328052622292457588">"Leyfir forritinu að lesa myndskrár úr samnýtta geymslurýminu þínu."</string>
+    <string name="permlab_readMediaImages" msgid="4057590631020986789">"lesa myndskrár úr samnýttu geymslurými"</string>
+    <string name="permdesc_readMediaImages" msgid="5836219373138469259">"Leyfir forritinu að lesa myndskrár úr samnýtta geymslurýminu þínu."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"breyta eða eyða innihaldi samnýtta geymslurýmisins"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Leyfir forriti að skrifa í innihald samnýtta geymslurýmisins."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"hringja/svara SIP-símtölum"</string>
@@ -912,7 +912,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"Ýttu á valmyndartakkann til að taka úr lás eða hringja neyðarsímtal."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"Ýttu á valmyndartakkann til að taka úr lás."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"Teiknaðu mynstur til að taka úr lás"</string>
-    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"Neyðarsímtal"</string>
+    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"Neyðarsímtal"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"Aftur í símtal"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"Rétt!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Reyndu aftur"</string>
@@ -1051,7 +1051,6 @@
     <string name="save_password_never" msgid="6776808375903410659">"Aldrei"</string>
     <string name="open_permission_deny" msgid="5136793905306987251">"Þú hefur ekki heimild til að opna þessa síðu."</string>
     <string name="text_copied" msgid="2531420577879738860">"Texti afritaður á klippiborð."</string>
-    <string name="copied" msgid="4675902854553014676">"Afritað"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> límt úr <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g>"</string>
     <string name="pasted_from_clipboard" msgid="7355790625710831847">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> límdi af klippiborðinu"</string>
     <string name="pasted_text" msgid="4298871641549173733">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> límdi texta sem þú afritaðir"</string>
@@ -1452,8 +1451,12 @@
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"Gerir forriti kleift að biðja um heimild til að hunsa rafhlöðusparnað fyrir forritið."</string>
     <string name="permlab_queryAllPackages" msgid="2928450604653281650">"spyrja fyrir alla pakka"</string>
     <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"Leyfir forriti að sjá alla uppsetta pakka."</string>
-    <string name="permlab_accessSupplementalApi" msgid="3544659160536960275">"aðgangur að SupplementalApis"</string>
-    <string name="permdesc_accessSupplementalApi" msgid="8974758769370951074">"Veitir forriti aðgang að SupplementalApis."</string>
+    <string name="permlab_accessAdServicesTopics" msgid="6687112022940098945">"opna forritaskil umfjöllunarefna AdServices"</string>
+    <string name="permdesc_accessAdServicesTopics" msgid="6011532458156465929">"Veitir forritum aðgang að forritaskilum umfjöllunarefna AdServices."</string>
+    <string name="permlab_accessAdServicesAttribution" msgid="3268942271128309354">"opna forritaskil eigindar AdServices"</string>
+    <string name="permdesc_accessAdServicesAttribution" msgid="577482544832578288">"Veitir forriti aðgang að forritaskilum eigindar AdServices."</string>
+    <string name="permlab_accessAdServicesCustomAudiences" msgid="7249286630514600684">"opna forritaskil sérsniðinna áhorfenda AdServices"</string>
+    <string name="permdesc_accessAdServicesCustomAudiences" msgid="645526926477180315">"Veitir forritum aðgang að forritaskilum sérsniðinna áhorfenda AdServices."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"Ýttu tvisvar til að opna aðdráttarstýringar"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"Ekki tókst að bæta græju við."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"Áfram"</string>
@@ -1716,6 +1719,7 @@
     <string name="user_switching_message" msgid="1912993630661332336">"Skiptir yfir á <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"Skráir <xliff:g id="NAME">%1$s</xliff:g> út…"</string>
     <string name="owner_name" msgid="8713560351570795743">"Eigandi"</string>
+    <string name="guest_name" msgid="8502103277839834324">"Gestur"</string>
     <string name="error_message_title" msgid="4082495589294631966">"Villa"</string>
     <string name="error_message_change_not_allowed" msgid="843159705042381454">"Kerfisstjórinn þinn leyfir ekki þessa breytingu"</string>
     <string name="app_not_found" msgid="3429506115332341800">"Ekkert forrit fannst til að meðhöndla þessa aðgerð"</string>
@@ -2027,10 +2031,10 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"FJARLÆGJA"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"OPNA SAMT"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"Skaðlegt forrit fannst"</string>
-    <string name="log_access_confirmation_title" msgid="3143035474800851565">"Beiðni um aðgang að kerfisannálum"</string>
+    <string name="log_access_confirmation_title" msgid="2343578467290592708">"Veita <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> aðgang að öllum annálum í tækinu?"</string>
     <string name="log_access_confirmation_allow" msgid="143157286283302512">"Aðeins í þetta skipti"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Ekki leyfa"</string>
-    <string name="log_access_confirmation_body" msgid="7599059550906238538">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> biður um kerfisannála fyrir virka villuleit. Annálarnir kunna að innihalda upplýsingar sem forrit og þjónustur í tækinu þínu hafa skrifað."</string>
+    <string name="log_access_confirmation_body" msgid="4483075525611652922">"Annálar tækisins skrá niður það sem gerist í tækinu. Forrit geta notað þessa annála til að finna og lagfæra vandamál.\n\nTilteknir annálar innihalda viðkvæmar upplýsingar og því skaltu einungis veita forritum sem þú treystir aðgang að öllum annálum tækisins. \n\nEf þú veitir þessu forriti ekki aðgang að öllum annálum tækisins hefur það áfram aðgang að eigin annálum og framleiðandi tækisins getur hugsanlega opnað tiltekna annála eða upplýsingar í tækinu. Nánar"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Ekki sýna aftur"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> vill sýna sneiðar úr <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Breyta"</string>
@@ -2265,4 +2269,6 @@
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> hefur keyrt lengi í bakgrunni. Ýttu til að skoða."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Skoða virk forrit"</string>
     <string name="vdm_camera_access_denied" msgid="6345652513729130490">"Aðgangur að myndavél er ekki tiltækur í þessu tæki"</string>
+    <!-- no translation found for system_locale_title (3978041860457277638) -->
+    <skip />
 </resources>

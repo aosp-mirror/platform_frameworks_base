@@ -85,8 +85,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"Kuvalwe okwesikhashana inkampani yakho yenethiwekhi ku-SIM <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Ayikwazi ukufinyelela kunethiwekhi yeselula"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Zama ukushintsha inethiwekhi encanyelwayo. Thepha ukuze ushintshe."</string>
-    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Ukushaya okuphuthumayo akutholakali"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Ayikwazi ukwenza amakholi aphuthumayo nge-Wi-Fi"</string>
+    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"Amakholi aphuthumayo angase angatholakali"</string>
+    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"I-<xliff:g id="SPN">%s</xliff:g> ayisekeli amakholi aphuthumayo nge-Wi-Fi. Thepha ukuze uthole imininingwane"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Izexwayiso"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Ukudlulisa ikholi"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Imodi yokushayela yesimo esiphuthumayo"</string>
@@ -425,10 +425,10 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"Ivumela uhlelo lokusebenza ukushintsha ilogi yekholi yethebulethi yakho, kufaka phakathi idatha mayelana namakholi angenayo naphumayo. Izinhlelo zikusebenza ezingalungile zingasebenzisa lokhu ukusula noma ukushintsha irekhodi lwamakholi wakho."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Ivumela uhlelo lokusebenza ukuthi liguqule ilogi yekholi yedivayisi yakho ye-Android TV, okufaka idatha emayelana namakholi angenayo naphumayo. Izinhlelo zokusebenza ezinobungozi zingasebenzisa lokhu ukususa noma ukuguqula ilogi yakho yekholi."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Ivumela uhlelo lokusebenza ukushintsha irekhodi lamakholi efoni yakho, kufaka phakathi idatha emayelana namakholi angenayo naphumayo. Izinhlelo zikusebenza ezingalungile zingasebenzisa lokhu ukusula noma ukushintsha irekhodi lwamakholi wakho."</string>
-    <string name="permlab_bodySensors" msgid="3411035315357380862">"finyelela kuzinzwa zomzimba (ezifana neziqaphi zokulinganisela inhliziyo)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="3208940894182188063">"Ukufinyelela kudatha kusuka kuzinzwa zomzimba ezifana nokushaya kwenhliziyo, izinga lokushisa, amaphesenti womoyampilo wegazi, njll."</string>
-    <string name="permlab_bodySensors_background" msgid="4352831883331744370">"finyelela izinzwa zomzimba (njengeziqapha ukushaya kwenhliziyo) kuyilapho ingemuva"</string>
-    <string name="permdesc_bodySensors_background" product="default" msgid="8512392249166660872">"Ukufinyelela kudatha evela kuzinzwa zomzimba ezinjengokushaya kwenhliziyo, izinga lokushisa, amaphesenti omoyampilo wegazi, njll. kuyilapho ingemuva."</string>
+    <string name="permlab_bodySensors" msgid="662918578601619569">"Finyelela kudatha yenzwa yomzimba, njengokushaya kwenhliziyo, ngenkathi isetshenziswa"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Ivumela i-app ukuthi ifinyelele idatha yenzwa yomzimba, efana nokushaya kwenhliziyo, izinga lokushisa, namaphesenti komoyampilo wegazi, kuyilapho i-app isetshenziswa."</string>
+    <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Finyelela kudatha yenzwa yomzimba, njengokushaya kwenhliziyo, ngenkathi ungemuva"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Ivumela i-app ukuthi ifinyelele idatha yenzwa yomzimba, efana nokushaya kwenhliziyo, izinga lokushisa, namaphesenti komoyampilo wegazi, kuyilapho i-app ingemuva."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Funda imicimbi yekhalenda nemininingwane"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Lolu hlelo lokusebenza lungafunda yonke imicimbi yekhalenda elondolozwe kuthebhulethi yakho nokwabelana noma ukulondoloza idatha yakho yekhalenda."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Lolu hlelo lokusebenza lungafunda yonke imicimbi yekhalenda elondolozwe kudivayisi yakho ye-Android TV nokwabelana noma ukulondoloza idatha yakho yekhalenda."</string>
@@ -689,8 +689,8 @@
     <string name="permdesc_readMediaAudio" msgid="5299772574434619399">"Ivumela i-app ukuthi ifunde amafayela okulalelwayo kwisitoreji sakho owabelane ngaso."</string>
     <string name="permlab_readMediaVideo" msgid="7768003311260655007">"funda amafayela amavidiyo esitoreji okwabelenwe ngaso"</string>
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"Ivumela i-app ukuthi ifunde amafayela amavidiyo kwisitoreji sakho owabelane ngaso."</string>
-    <string name="permlab_readMediaImage" msgid="1507059005825769856">"funda amafayela ezithombe esitoreji okwabelenwe ngaso"</string>
-    <string name="permdesc_readMediaImage" msgid="8328052622292457588">"Ivumela i-app ukuthi ifunde amafayela ezithombe kwisitoreji sakho owabelane ngaso."</string>
+    <string name="permlab_readMediaImages" msgid="4057590631020986789">"funda amafayela womfanekiso wesitoreji okwabelenwe ngaso"</string>
+    <string name="permdesc_readMediaImages" msgid="5836219373138469259">"Ivumela i-app ukuthi ifunde amafayela ezithombe kwisitoreji sakho owabelane ngaso."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"guqula noma susa okuqukethwe kwesitoreji sakho esabiwe"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Ivumela uhlelo lokusebenza ukuthi lubhale okuqukethwe kwesitoreji sakho esabiwe."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"yenza/thola amakholi we-SIP"</string>
@@ -912,7 +912,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"Chofoza Menyu ukuvula noma ukwenza ikholi ephuthumayo."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"Chofoza Menyu ukuvula."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"Dweba iphathini ukuvula"</string>
-    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"Ikholi ephuthumayo"</string>
+    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"Isimo esiphuthumayo"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"Buyela ekholini"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"Lungile!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Zama futhi"</string>
@@ -1051,7 +1051,6 @@
     <string name="save_password_never" msgid="6776808375903410659">"Akusoze"</string>
     <string name="open_permission_deny" msgid="5136793905306987251">"Awunayo imvume yokuvula leli khasi."</string>
     <string name="text_copied" msgid="2531420577879738860">"Umbhalo ukopishwe ebhodini lokunamathisela."</string>
-    <string name="copied" msgid="4675902854553014676">"Kukopishiwe"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"I-<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> inamathiselwe kusuka ku-<xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g>"</string>
     <string name="pasted_from_clipboard" msgid="7355790625710831847">"I-<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> inamathiselwe ebhodini lakho lokunamathisela"</string>
     <string name="pasted_text" msgid="4298871641549173733">"U-<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> unamathisele umbhalo owukopishile"</string>
@@ -1452,8 +1451,12 @@
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"Ivumela uhlelo lokusebenza ukuthi licele imvume yokuziba ukulungiselela ibhethri yalolo hlelo lokusebenza."</string>
     <string name="permlab_queryAllPackages" msgid="2928450604653281650">"buza wonke amaphakheji"</string>
     <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"Ivumela i-app ibone wonke amaphakheji afakiwe."</string>
-    <string name="permlab_accessSupplementalApi" msgid="3544659160536960275">"finyelela i-SupplementalApis"</string>
-    <string name="permdesc_accessSupplementalApi" msgid="8974758769370951074">"Ivumela i-application ukuba ifinyelele i-SupplementalApis."</string>
+    <string name="permlab_accessAdServicesTopics" msgid="6687112022940098945">"finyelela i-AdServices Topics API"</string>
+    <string name="permdesc_accessAdServicesTopics" msgid="6011532458156465929">"Ivumela i-app ukufinyelela i-AdServices Topics API."</string>
+    <string name="permlab_accessAdServicesAttribution" msgid="3268942271128309354">"finyelela ama-AdServices Attribution API"</string>
+    <string name="permdesc_accessAdServicesAttribution" msgid="577482544832578288">"Ivumela i-app ukufinyelela kuma-AdServices Attribution API."</string>
+    <string name="permlab_accessAdServicesCustomAudiences" msgid="7249286630514600684">"finyelela i-AdServices Custom Audiences API"</string>
+    <string name="permdesc_accessAdServicesCustomAudiences" msgid="645526926477180315">"Ivumela i-app ukufinyelela i-AdServices Custom Audiences API."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"Thepha kabili ukuthola ukulawula ukusondeza"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"Yehlulekile ukwengeza i-widget."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"Iya"</string>
@@ -1716,6 +1719,7 @@
     <string name="user_switching_message" msgid="1912993630661332336">"Ishintshela ku-<xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"Iyaphuma <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="owner_name" msgid="8713560351570795743">"Umnikazi"</string>
+    <string name="guest_name" msgid="8502103277839834324">"Isivakashi"</string>
     <string name="error_message_title" msgid="4082495589294631966">"Iphutha"</string>
     <string name="error_message_change_not_allowed" msgid="843159705042381454">"Lolu shintsho aluvunyelwe umlawuli wakho"</string>
     <string name="app_not_found" msgid="3429506115332341800">"Alukho uhlelo lokusebenza olutholakele lokuphatha lesi senzo"</string>
@@ -2027,10 +2031,10 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"KHIPHA"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"VULA NOMA KUNJALO"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"Uhlelo lokusebenza oluyingozi lutholakele"</string>
-    <string name="log_access_confirmation_title" msgid="3143035474800851565">"Isicelo sokufinyelela ilogu yesistimu"</string>
+    <string name="log_access_confirmation_title" msgid="2343578467290592708">"Vumela i-<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> ukuba ifinyelele wonke amalogu edivayisi?"</string>
     <string name="log_access_confirmation_allow" msgid="143157286283302512">"Kulokhu kuphela"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Ungavumeli"</string>
-    <string name="log_access_confirmation_body" msgid="7599059550906238538">"I-<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> icela amalogu wesistimu ukuze alungise iphutha. Lawa malogu angase aqukathe ulwazi olubhalwe ama-app namasevisi kudivayisi yakho."</string>
+    <string name="log_access_confirmation_body" msgid="4483075525611652922">"Amalogu edivayisi arekhoda okwenzekayo kudivayisi yakho. Ama-app angasebenzisa lawa malogu ukuze athole futhi alungise izinkinga.\n\nAmanye amalogu angase aqukathe ulwazi olubucayi, ngakho vumela ama-app owathembayo kuphela ukuthi afinyelele wonke amalogu edivayisi. \n\nUma ungayivumeli le-app ukuthi ifinyelele wonke amalogu edivayisi, isengakwazi ukufinyelela amalogu ayo futhi umkhiqizi wedivayisi yakho usengakwazi ukufinyelela amanye amalogu noma ulwazi kudivayisi yakho. Funda kabanzi"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Ungabonisi futhi"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"I-<xliff:g id="APP_0">%1$s</xliff:g> ifuna ukubonisa izingcezu ze-<xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Hlela"</string>
@@ -2265,4 +2269,6 @@
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"I-<xliff:g id="APP">%1$s</xliff:g> isebenza ngemuva isikhathi eside. Thepha ukuze ubuyekeze."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Hlola ama-app asebenzayo"</string>
     <string name="vdm_camera_access_denied" msgid="6345652513729130490">"Ayikwazi ukufinyelela ikhamera kule divayisi"</string>
+    <!-- no translation found for system_locale_title (3978041860457277638) -->
+    <skip />
 </resources>

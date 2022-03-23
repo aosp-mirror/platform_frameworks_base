@@ -87,8 +87,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"Оператор тимчасово вимкнув службу для SIM-карти <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Не вдається під’єднатися до мобільної мережі"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Спробуйте змінити вибрану мережу. Торкніться, щоб це зробити."</string>
-    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Екстрені виклики недоступні"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Не можна здійснювати екстрені виклики через Wi-Fi"</string>
+    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"Екстрені виклики можуть бути недоступні"</string>
+    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"<xliff:g id="SPN">%s</xliff:g> не підтримує екстрені виклики через Wi-Fi. Натисніть, щоб дізнатися більше."</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Сповіщення"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Переадресація виклику"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Режим екстреного зворотного виклику"</string>
@@ -427,10 +427,10 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"Дозволяє програмі змінювати журнал викликів вашого планшетного ПК, включно з даними про вхідні та вихідні дзвінки. Шкідливі програми можуть використовувати це для стирання або зміни вашого журналу викликів."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Дозволяє додатку змінювати журнал викликів пристрою, зокрема дані про вхідні та вихідні дзвінки. Шкідливі додатки можуть стирати або змінювати журнал викликів."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Дозволяє програмі змінювати журнал викликів вашого телефону, включно з даними про вхідні та вихідні дзвінки. Шкідливі програми можуть використовувати це для стирання або зміни вашого журналу викликів."</string>
-    <string name="permlab_bodySensors" msgid="3411035315357380862">"отримувати дані з датчиків на тілі (наприклад, з пульсометра)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="3208940894182188063">"Доступ до даних із датчиків на тілі, наприклад про пульс, температуру, вміст кисню в крові тощо."</string>
-    <string name="permlab_bodySensors_background" msgid="4352831883331744370">"отримувати дані з датчиків на тілі (наприклад, з пульсометра) у фоновому режимі"</string>
-    <string name="permdesc_bodySensors_background" product="default" msgid="8512392249166660872">"Доступ до даних із датчиків на тілі, наприклад про пульс, температуру, вміст кисню в крові тощо (у фоновому режимі)."</string>
+    <string name="permlab_bodySensors" msgid="662918578601619569">"Доступ до показників датчиків на тілі, наприклад пульсу, під час використання"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Під час використання додатка він матиме доступ до даних датчиків на тілі, наприклад пульсу, температури та відсотка кисню в крові."</string>
+    <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Доступ до показників датчиків на тілі, наприклад пульсу, у фоновому режимі"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Коли додаток працюватиме у фоновому режимі, він матиме доступ до показників датчиків на тілі, наприклад пульсу, температури та відсотка кисню в крові."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Переглядати події календаря й додаткову інформацію"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Цей додаток може переглядати всі події календаря, збережені на вашому планшеті, а також надсилати та зберігати дані календаря."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Додаток може переглядати всі події календаря, збережені на вашому пристрої Android TV, а також надсилати та зберігати дані календаря."</string>
@@ -691,8 +691,8 @@
     <string name="permdesc_readMediaAudio" msgid="5299772574434619399">"Дозволяє додатку зчитувати аудіофайли з вашого спільного сховища."</string>
     <string name="permlab_readMediaVideo" msgid="7768003311260655007">"зчитувати відеофайли зі спільного сховища"</string>
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"Дозволяє додатку зчитувати відеофайли з вашого спільного сховища."</string>
-    <string name="permlab_readMediaImage" msgid="1507059005825769856">"зчитувати файли зображень зі спільного сховища"</string>
-    <string name="permdesc_readMediaImage" msgid="8328052622292457588">"Дозволяє додатку зчитувати файли зображень із вашого спільного сховища."</string>
+    <string name="permlab_readMediaImages" msgid="4057590631020986789">"зчитувати файли зображень зі спільного сховища"</string>
+    <string name="permdesc_readMediaImages" msgid="5836219373138469259">"Дозволяє додатку зчитувати файли зображень із вашого спільного сховища."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"змінювати чи видаляти вміст у спільній пам’яті"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Додаток може писати вміст у спільній пам’яті."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"здійснювати й отримувати дзвінки через протокол SIP"</string>
@@ -914,7 +914,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"Натис. меню, щоб розбл. чи зробити авар. виклик."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"Натисн. меню, щоб розбл."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"Намал. ключ, щоб розбл."</string>
-    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"Екстрений виклик"</string>
+    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"Екстрений виклик"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"Поверн. до дзвін."</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"Правильно!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Повторіть спробу"</string>
@@ -1053,7 +1053,6 @@
     <string name="save_password_never" msgid="6776808375903410659">"Ніколи"</string>
     <string name="open_permission_deny" msgid="5136793905306987251">"У вас немає дозволу на відкривання цієї сторінки."</string>
     <string name="text_copied" msgid="2531420577879738860">"Текст скопійов. в буф. обм."</string>
-    <string name="copied" msgid="4675902854553014676">"Скопійовано"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"Дані з додатка <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g> вставлено в <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>"</string>
     <string name="pasted_from_clipboard" msgid="7355790625710831847">"Дані з буфера обміну вставлено в додатку <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>"</string>
     <string name="pasted_text" msgid="4298871641549173733">"Скопійований текст вставлено в додатку <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>"</string>
@@ -1454,8 +1453,12 @@
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"Додаток зможе запитувати дозвіл ігнорувати оптимізацію використання заряду акумулятора."</string>
     <string name="permlab_queryAllPackages" msgid="2928450604653281650">"подавати запити на всі пакети"</string>
     <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"Дозволяє додатку переглядати всі встановлені пакети."</string>
-    <string name="permlab_accessSupplementalApi" msgid="3544659160536960275">"Доступ до SupplementalApis"</string>
-    <string name="permdesc_accessSupplementalApi" msgid="8974758769370951074">"Надає додатку доступ до SupplementalApis."</string>
+    <string name="permlab_accessAdServicesTopics" msgid="6687112022940098945">"надавати доступ до AdServices Topics API"</string>
+    <string name="permdesc_accessAdServicesTopics" msgid="6011532458156465929">"Надає додатку доступ до AdServices Topics API."</string>
+    <string name="permlab_accessAdServicesAttribution" msgid="3268942271128309354">"надавати доступ до інтерфейсів API AdServices Attribution"</string>
+    <string name="permdesc_accessAdServicesAttribution" msgid="577482544832578288">"Надає додатку доступ до інтерфейсів API AdServices Attribution."</string>
+    <string name="permlab_accessAdServicesCustomAudiences" msgid="7249286630514600684">"надавати доступ до AdServices Custom Audiences API"</string>
+    <string name="permdesc_accessAdServicesCustomAudiences" msgid="645526926477180315">"Надає додатку доступ до AdServices Custom Audiences API."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"Двічі натис. для кер. масшт."</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"Не вдалося додати віджет."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"Йти"</string>
@@ -1718,6 +1721,7 @@
     <string name="user_switching_message" msgid="1912993630661332336">"Перехід у режим \"<xliff:g id="NAME">%1$s</xliff:g>\"…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"Вихід з облікового запису користувача <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="owner_name" msgid="8713560351570795743">"Власник"</string>
+    <string name="guest_name" msgid="8502103277839834324">"Гість"</string>
     <string name="error_message_title" msgid="4082495589294631966">"Помилка"</string>
     <string name="error_message_change_not_allowed" msgid="843159705042381454">"Ця дія заборонена адміністратором"</string>
     <string name="app_not_found" msgid="3429506115332341800">"Не знайдено програму для обробки цієї дії"</string>
@@ -2029,10 +2033,10 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"ВИДАЛИТИ"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"УСЕ ОДНО ВІДКРИТИ"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"Виявлено шкідливий додаток"</string>
-    <string name="log_access_confirmation_title" msgid="3143035474800851565">"Запит на доступ до системних журналів"</string>
+    <string name="log_access_confirmation_title" msgid="2343578467290592708">"Надати додатку <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> доступ до всіх журналів пристрою?"</string>
     <string name="log_access_confirmation_allow" msgid="143157286283302512">"Лише цього разу"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Не дозволяти"</string>
-    <string name="log_access_confirmation_body" msgid="7599059550906238538">"Для функціонального налагодження додатку <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> потрібен доступ до системних журналів. Вони можуть містити інформацію, записану додатками й сервісами на вашому пристрої."</string>
+    <string name="log_access_confirmation_body" msgid="4483075525611652922">"У журналах пристрою реєструється все, що відбувається на ньому. За допомогою цих журналів додатки можуть виявляти й усувати проблеми.\n\nДеякі журнали можуть містити конфіденційні дані, тому надавати доступ до всіх журналів пристрою слід лише надійним додаткам. \n\nЯкщо додаток не має доступу до всіх журналів пристрою, він усе одно може використовувати власні журнали, а виробник вашого пристрою – деякі журнали чи інформацію на ньому. Докладніше"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Більше не показувати"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> хоче показати фрагменти додатка <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Редагувати"</string>
@@ -2267,4 +2271,6 @@
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"Додаток <xliff:g id="APP">%1$s</xliff:g> довго працює у фоновому режимі. Натисніть, щоб переглянути."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Перевірте активні додатки"</string>
     <string name="vdm_camera_access_denied" msgid="6345652513729130490">"Не вдається отримати доступ до камери через цей пристрій"</string>
+    <!-- no translation found for system_locale_title (3978041860457277638) -->
+    <skip />
 </resources>

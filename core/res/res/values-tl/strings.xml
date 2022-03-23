@@ -85,8 +85,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"Pansamantalang na-off ng iyong carrier para sa SIM <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Hindi makakonekta sa mobile network"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Subukang baguhin ang gustong network. I-tap para baguhin."</string>
-    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Hindi available ang pang-emergency na pagtawag"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Hindi makapagsagawa ng mga emergency na tawag sa pamamagitan ng Wi‑Fi"</string>
+    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"Posibleng hindi available ang mga emergency na tawag"</string>
+    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"Hindi sinusuportahan ng <xliff:g id="SPN">%s</xliff:g> ang mga emergency na tawag sa pamamagitan ng Wi-Fi. I-tap para sa mga detalye."</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Mga Alerto"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Pagpasa ng tawag"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Emergency callback mode"</string>
@@ -425,10 +425,10 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"Binibigyan-daan ang app na baguhin ang log ng tawag ng iyong tablet, kabilang ang data tungkol sa mga paparating at papalabas na tawag. Maaari itong gamitin ng nakakahamak na apps upang burahin o baguhin ang iyong log ng tawag."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Nagbibigay-daan sa app na baguhin ang log ng tawag ng iyong Android TV device, kasama ang data tungkol sa mga papasok at papalabas na tawag. Puwede itong gamitin ng mga mapaminsalang app para burahin o baguhin ang iyong log ng tawag."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Binibigyan-daan ang app na baguhin ang log ng tawag ng iyong telepono, kabilang ang data tungkol sa mga paparating at papalabas na tawag. Maaari itong gamitin ng nakakahamak na apps upang burahin o baguhin ang iyong log ng tawag."</string>
-    <string name="permlab_bodySensors" msgid="3411035315357380862">"i-access ang mga sensor sa katawan (tulad ng mga monitor ng bilis ng tibok ng puso)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="3208940894182188063">"Access sa data mula sa mga sensor ng katawan gaya ng bilis ng tibok ng puso, temperatura, porsyento ng oxygen sa dugo, atbp."</string>
-    <string name="permlab_bodySensors_background" msgid="4352831883331744370">"i-access ang body sensors (tulad ng heart rate monitors) habang nasa background"</string>
-    <string name="permdesc_bodySensors_background" product="default" msgid="8512392249166660872">"Access sa data mula sa mga sensor ng katawan gaya ng bilis ng tibok ng puso, temperatura, porsyento ng oxygen sa dugo, atbp. habang nasa background."</string>
+    <string name="permlab_bodySensors" msgid="662918578601619569">"I-access ang data ng sensor ng katawan, gaya ng heart rate, habang ginagamit"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Nagpapahintulot sa app na i-access ang data ng sensor ng katawan, gaya ng bilis ng tibok ng puso, temperatura, at porsyento ng oxygen sa dugo, habang ginagamit ang app."</string>
+    <string name="permlab_bodySensors_background" msgid="4912560779957760446">"I-access ang data ng sensor ng katawan gaya ng heart rate habang nasa background"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Nagpapahintulot sa app na i-access ang data ng sensor ng katawan, gaya ng bilis ng tibok ng puso, temperatura, at porsyento ng oxygen sa dugo, habang nasa background ang app."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Magbasa ng mga event sa kalendaryo at detalye"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Mababasa ng app na ito ang lahat ng event sa kalendaryo na naka-store sa iyong tablet at maibabahagi o mase-save nito ang data ng iyong kalendaryo."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Mababasa ng app na ito ang lahat ng event sa kalendaryo na naka-store sa iyong Android TV device at maibabahagi o mase-save nito ang data ng kalendaryo mo."</string>
@@ -689,8 +689,8 @@
     <string name="permdesc_readMediaAudio" msgid="5299772574434619399">"Nagbibigay-daan sa app na magbasa ng mga audio file mula sa iyong nakabahaging storage."</string>
     <string name="permlab_readMediaVideo" msgid="7768003311260655007">"magbasa ng mga video file mula sa nakabahaging storage"</string>
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"Nagbibigay-daan sa app na magbasa ng mga video file mula sa iyong nakabahaging storage."</string>
-    <string name="permlab_readMediaImage" msgid="1507059005825769856">"magbasa ng mga image file mula sa nakabahaging storage"</string>
-    <string name="permdesc_readMediaImage" msgid="8328052622292457588">"Nagbibigay-daan sa app na magbasa ng mga image file mula sa iyong nakabahaging storage."</string>
+    <string name="permlab_readMediaImages" msgid="4057590631020986789">"magbasa ng mga image file mula sa nakabahaging storage"</string>
+    <string name="permdesc_readMediaImages" msgid="5836219373138469259">"Nagbibigay-daan sa app na magbasa ng mga image file mula sa iyong nakabahaging storage."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"baguhin o i-delete ang content ng nakabahagi mong storage"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Pinapayagan ang app na mag-write sa content ng nakabahagi mong storage."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"magsagawa/tumanggap ng mga tawag sa SIP"</string>
@@ -912,7 +912,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"Pindutin ang Menu upang i-unlock o magsagawa ng pang-emergency na tawag."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"Pindutin ang Menu upang i-unlock."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"Iguhit ang pattern upang i-unlock"</string>
-    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"Emergency na tawag"</string>
+    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"Emergency"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"Bumalik sa tawag"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"Tama!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Subukang muli"</string>
@@ -1051,7 +1051,6 @@
     <string name="save_password_never" msgid="6776808375903410659">"Hindi Kailanman"</string>
     <string name="open_permission_deny" msgid="5136793905306987251">"Wala kang pahintulot na buksan ang pahinang ito."</string>
     <string name="text_copied" msgid="2531420577879738860">"Nakopya ang teksto sa clipboard."</string>
-    <string name="copied" msgid="4675902854553014676">"Nakopya"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"Na-paste ang <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> mula sa <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g>"</string>
     <string name="pasted_from_clipboard" msgid="7355790625710831847">"Na-paste ang <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> mula sa iyong clipboard"</string>
     <string name="pasted_text" msgid="4298871641549173733">"Nag-paste ang <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ng text na nakopya mo"</string>
@@ -1452,8 +1451,12 @@
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"Pinapayagang humingi ng pahintulot ang isang app na balewalain ang mga pag-optimize ng baterya para sa app na iyon."</string>
     <string name="permlab_queryAllPackages" msgid="2928450604653281650">"i-query ang lahat ng package"</string>
     <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"Nagbibigay-daan sa isang app na makita ang lahat ng naka-install na package."</string>
-    <string name="permlab_accessSupplementalApi" msgid="3544659160536960275">"access sa SupplementalApis"</string>
-    <string name="permdesc_accessSupplementalApi" msgid="8974758769370951074">"Nagbibigay-daan sa isang application na i-access ang SupplementalApis."</string>
+    <string name="permlab_accessAdServicesTopics" msgid="6687112022940098945">"i-access ang AdServices Topics API"</string>
+    <string name="permdesc_accessAdServicesTopics" msgid="6011532458156465929">"Nagbibigay-daan sa isang application na i-access ang AdServices Topics API."</string>
+    <string name="permlab_accessAdServicesAttribution" msgid="3268942271128309354">"i-access ang mga AdServices Attribution API"</string>
+    <string name="permdesc_accessAdServicesAttribution" msgid="577482544832578288">"Nagbibigay-daan sa isang application na i-access ang mga AdServices Attribution API."</string>
+    <string name="permlab_accessAdServicesCustomAudiences" msgid="7249286630514600684">"i-access ang AdServices Custom Audiences API"</string>
+    <string name="permdesc_accessAdServicesCustomAudiences" msgid="645526926477180315">"Nagbibigay-daan sa isang application na i-access ang AdServices Custom Audiences API."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"Tapikin ng dalawang beses para sa pagkontrol ng zoom"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"Hindi maidagdag ang widget."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"Pumunta"</string>
@@ -1716,6 +1719,7 @@
     <string name="user_switching_message" msgid="1912993630661332336">"Lumilipat kay <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"Nila-log out si <xliff:g id="NAME">%1$s</xliff:g>..."</string>
     <string name="owner_name" msgid="8713560351570795743">"May-ari"</string>
+    <string name="guest_name" msgid="8502103277839834324">"Bisita"</string>
     <string name="error_message_title" msgid="4082495589294631966">"Error"</string>
     <string name="error_message_change_not_allowed" msgid="843159705042381454">"Hindi pinapayagan ng iyong admin ang pagbabagong ito"</string>
     <string name="app_not_found" msgid="3429506115332341800">"Walang nakitang application na mangangasiwa sa pagkilos na ito"</string>
@@ -2027,10 +2031,10 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"I-UNINSTALL"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"BUKSAN PA RIN"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"May na-detect na mapaminsalang app"</string>
-    <string name="log_access_confirmation_title" msgid="3143035474800851565">"Kahilingan sa access sa log ng system"</string>
+    <string name="log_access_confirmation_title" msgid="2343578467290592708">"Payagan ang <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> na i-access ang lahat ng log ng device?"</string>
     <string name="log_access_confirmation_allow" msgid="143157286283302512">"Ngayon lang"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Huwag payagan"</string>
-    <string name="log_access_confirmation_body" msgid="7599059550906238538">"Humihiling ang <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> ng mga log ng system para sa functional na pag-debug. Posibleng maglaman ang mga log na ito ng impormasyong isinulat ng mga app at serbisyo sa iyong device."</string>
+    <string name="log_access_confirmation_body" msgid="4483075525611652922">"Nire-record ng mga log ng device kung ano ang nangyayari sa iyong device. Magagamit ng mga app ang mga log na ito para maghanap at mag-ayos ng mga isyu.\n\nPosibleng maglaman ang ilang log ng sensitibong impormasyon, kaya ang mga app lang na pinagkakatiwalaan mo ang payagang maka-access sa lahat ng log ng device. \n\nKung hindi mo papayagan ang app na ito na i-access ang lahat ng log ng device, maa-access pa rin nito ang mga sarili nitong log, at posible pa ring ma-access ng manufacturer ng iyong device ang ilang log o impormasyon sa device mo. Matuto pa"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Huwag ipakita ulit"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"Gustong ipakita ng <xliff:g id="APP_0">%1$s</xliff:g> ang mga slice ng <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"I-edit"</string>
@@ -2265,4 +2269,6 @@
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"Napakatagal nang gumagana ang <xliff:g id="APP">%1$s</xliff:g> sa background. I-tap para suriin."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Tingnan ang mga aktibong app"</string>
     <string name="vdm_camera_access_denied" msgid="6345652513729130490">"Hindi ma-access ang camera mula sa device na ito"</string>
+    <!-- no translation found for system_locale_title (3978041860457277638) -->
+    <skip />
 </resources>
