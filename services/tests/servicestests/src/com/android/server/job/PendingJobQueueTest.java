@@ -28,7 +28,6 @@ import android.platform.test.annotations.LargeTest;
 import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
-import android.util.SparseIntArray;
 import android.util.SparseLongArray;
 
 import com.android.server.job.controllers.JobStatus;
@@ -371,38 +370,34 @@ public class PendingJobQueueTest {
 
     private void checkPendingJobInvariants(PendingJobQueue jobQueue) {
         final SparseBooleanArray regJobSeen = new SparseBooleanArray();
-        final SparseIntArray lastOverrideStateSeen = new SparseIntArray();
         // Latest priority enqueue times seen for each priority for each app.
         final SparseArray<SparseLongArray> latestPriorityRegEnqueueTimesPerUid =
                 new SparseArray<>();
         final SparseArray<SparseLongArray> latestPriorityEjEnqueueTimesPerUid = new SparseArray<>();
         final int noEntry = -1;
+        int prevOverrideState = noEntry;
 
         JobStatus job;
         jobQueue.resetIterator();
         while ((job = jobQueue.next()) != null) {
             final int uid = job.getSourceUid();
 
-            // Invariant #1: All jobs (for a UID) are sorted by override state
+            // Invariant #1: All jobs are sorted by override state
             // Invariant #2: All jobs (for a UID) are sorted by priority order
             // Invariant #3: Jobs (for a UID) with the same priority are sorted by enqueue time.
             // Invariant #4: EJs (for a UID) should be before regular jobs
 
-            final int prevOverrideState = lastOverrideStateSeen.get(uid, noEntry);
-            lastOverrideStateSeen.put(uid, job.overrideState);
-            if (prevOverrideState == noEntry) {
-                // First job for UID
-                continue;
-            }
-
             // Invariant 1
             if (prevOverrideState != job.overrideState) {
-                assertTrue(prevOverrideState > job.overrideState);
-                // Override state can make ordering weird. Clear the other cached states for this
-                // UID to avoid confusion in the other checks.
-                latestPriorityEjEnqueueTimesPerUid.remove(uid);
-                latestPriorityRegEnqueueTimesPerUid.remove(uid);
-                regJobSeen.delete(uid);
+                if (prevOverrideState != noEntry) {
+                    assertTrue(prevOverrideState > job.overrideState);
+                }
+                // Override state can make ordering weird. Clear the other cached states
+                // to avoid confusion in the other checks.
+                latestPriorityEjEnqueueTimesPerUid.clear();
+                latestPriorityRegEnqueueTimesPerUid.clear();
+                regJobSeen.clear();
+                prevOverrideState = job.overrideState;
             }
 
             final int priority = job.getEffectivePriority();
@@ -423,8 +418,9 @@ public class PendingJobQueueTest {
                 final long lastSeenPriorityEnqueueTime =
                         latestPriorityEnqueueTimes.get(priority, noEntry);
                 if (lastSeenPriorityEnqueueTime != noEntry) {
-                    assertTrue("Jobs with same priority not sorted by enqueue time: "
-                                    + lastSeenPriorityEnqueueTime + " vs " + job.enqueueTime,
+                    assertTrue("Jobs with same priority for uid " + uid
+                                    + " not sorted by enqueue time: "
+                                    + lastSeenPriorityEnqueueTime + " before " + job.enqueueTime,
                             lastSeenPriorityEnqueueTime <= job.enqueueTime);
                 }
             } else {
