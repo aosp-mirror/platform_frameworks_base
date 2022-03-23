@@ -96,10 +96,10 @@
     <string name="notification_channel_wfc" msgid="9048240466765169038">"Wi-Fi కాలింగ్"</string>
     <string name="notification_channel_sim" msgid="5098802350325677490">"SIM స్టేటస్"</string>
     <string name="notification_channel_sim_high_prio" msgid="642361929452850928">"అధిక ప్రాధాన్యత గల SIM స్టేటస్‌"</string>
-    <string name="peerTtyModeFull" msgid="337553730440832160">"అవతలి వారు FULL TTY మోడ్‌ని అభ్యర్థించారు"</string>
-    <string name="peerTtyModeHco" msgid="5626377160840915617">"అవతలి వారు HCO TTY మోడ్‌ని అభ్యర్థించారు"</string>
-    <string name="peerTtyModeVco" msgid="572208600818270944">"అవతలి వారు VCO TTY మోడ్‌ని అభ్యర్థించారు"</string>
-    <string name="peerTtyModeOff" msgid="2420380956369226583">"అవతలి వారు OFF TTY మోడ్‌ని అభ్యర్థించారు"</string>
+    <string name="peerTtyModeFull" msgid="337553730440832160">"అవతలి వారు FULL TTY మోడ్‌ని రిక్వెస్ట్ చేశారు"</string>
+    <string name="peerTtyModeHco" msgid="5626377160840915617">"అవతలి వారు HCO TTY మోడ్‌ని రిక్వెస్ట్ చేశారు"</string>
+    <string name="peerTtyModeVco" msgid="572208600818270944">"అవతలి వారు VCO TTY మోడ్‌ని రిక్వెస్ట్ చేశారు"</string>
+    <string name="peerTtyModeOff" msgid="2420380956369226583">"అవతలి వారు OFF TTY మోడ్‌ని రిక్వెస్ట్ చేశారు"</string>
     <string name="serviceClassVoice" msgid="2065556932043454987">"వాయిస్"</string>
     <string name="serviceClassData" msgid="4148080018967300248">"డేటా"</string>
     <string name="serviceClassFAX" msgid="2561653371698904118">"ఫ్యాక్స్"</string>
@@ -170,7 +170,7 @@
     <string name="httpErrorFailedSslHandshake" msgid="546319061228876290">"సురక్షిత కనెక్షన్‌ను వ్యవస్థాపించడం సాధ్యపడలేదు."</string>
     <string name="httpErrorBadUrl" msgid="754447723314832538">"URL చెల్లనిది అయినందువలన పేజీని తెరవడం సాధ్యపడలేదు."</string>
     <string name="httpErrorFile" msgid="3400658466057744084">"ఫైల్‌ను యాక్సెస్ చేయడం సాధ్యపడలేదు."</string>
-    <string name="httpErrorFileNotFound" msgid="5191433324871147386">"అభ్యర్థించిన ఫైల్‌ను కనుగొనడం సాధ్యపడలేదు."</string>
+    <string name="httpErrorFileNotFound" msgid="5191433324871147386">"రిక్వెస్ట్ చేసిన ఫైల్‌ను కనుగొనడం సాధ్యపడలేదు."</string>
     <string name="httpErrorTooManyRequests" msgid="2149677715552037198">"చాలా ఎక్కువ రిక్వెస్ట్‌లు ప్రాసెస్ చేయబడుతున్నాయి. తర్వాత మళ్లీ ప్రయత్నించండి."</string>
     <string name="notification_title" msgid="5783748077084481121">"<xliff:g id="ACCOUNT">%1$s</xliff:g>కు సైన్‌ఇన్ ఎర్రర్"</string>
     <string name="contentServiceSync" msgid="2341041749565687871">"సింక్‌"</string>
@@ -251,7 +251,7 @@
     <string name="global_action_logout" msgid="6093581310002476511">"సెషన్‌ను ముగించు"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"స్క్రీన్‌షాట్"</string>
     <string name="bugreport_title" msgid="8549990811777373050">"బగ్ రిపోర్ట్‌"</string>
-    <string name="bugreport_message" msgid="5212529146119624326">"ఇది ఇ-మెయిల్ మెసేజ్‌ రూపంలో పంపడానికి మీ ప్రస్తుత పరికర స్థితి గురించి సమాచారాన్ని సేకరిస్తుంది. బగ్ రిపోర్ట్‌ను ప్రారంభించడం మొదలుకొని పంపడానికి సిద్ధం చేసే వరకు ఇందుకు కొంత సమయం పడుతుంది; దయచేసి ఓపిక పట్టండి."</string>
+    <string name="bugreport_message" msgid="5212529146119624326">"ఇది ఈమెయిల్‌ మెసేజ్‌ రూపంలో పంపడానికి మీ ప్రస్తుత పరికర స్థితి గురించి సమాచారాన్ని సేకరిస్తుంది. బగ్ రిపోర్ట్‌ను ప్రారంభించడం మొదలుకొని పంపడానికి సిద్ధం చేసే వరకు ఇందుకు కొంత సమయం పడుతుంది; దయచేసి ఓపిక పట్టండి."</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"ప్రభావశీల రిపోర్ట్‌"</string>
     <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"చాలా సందర్భాల్లో దీన్ని ఉపయోగించండి. ఇది రిపోర్ట్‌ ప్రోగ్రెస్‌ను ట్రాక్ చేయడానికి, సమస్య గురించి మరిన్ని వివరాలను నమోదు చేయడానికి మరియు స్క్రీన్‌షాట్‌లు తీయడానికి మిమ్మల్ని అనుమతిస్తుంది. ఇది నివేదించడానికి ఎక్కువ సమయం పట్టే తక్కువ వినియోగ విభాగాలను విడిచిపెట్టవచ్చు."</string>
     <string name="bugreport_option_full_title" msgid="7681035745950045690">"పూర్తి రిపోర్ట్‌"</string>
@@ -411,9 +411,9 @@
     <string name="permdesc_broadcastSticky" product="tv" msgid="2338185920171000650">"ప్రసారం ముగిసిన తర్వాత భద్రపరచబడే ప్రసారాలను పంపడానికి యాప్‌ని అనుమతిస్తుంది. ఎక్కువగా వినియోగిస్తే అధిక పరిమాణంలో మెమరీని ఉపయోగించడం వలన టీవీ నెమ్మదిగా పని చేయవచ్చు లేదా అస్థిరంగా మారవచ్చు."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="134529339678913453">"ప్రసారం ముగిసిన తర్వాత భద్రపరచబడే ప్రసారాలను పంపడానికి యాప్‌ను అనుమతిస్తుంది. అత్యధిక వినియోగం వలన ఫోన్ నెమ్మదిగా పని చేయవచ్చు లేదా అధిక పరిమాణంలో మెమరీని ఉపయోగించడం వలన అస్థిరంగా మారవచ్చు."</string>
     <string name="permlab_readContacts" msgid="8776395111787429099">"మీ కాంటాక్ట్‌లను చదవడం"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="6430093481659992692">"టాబ్లెట్‌లో నిల్వ చేసిన మీ కాంటాక్ట్‌లకు సంబంధించిన డేటాను చదవడానికి యాప్‌ను అనుమతిస్తుంది. కాంటాక్ట్‌లను సృష్టించిన మీ టాబ్లెట్‌లోని ఖాతాలకు కూడా యాప్‌లకు యాక్సెస్ ఉంటుంది. ఇందులో మీరు ఇన్‌స్టాల్ చేసిన యాప్‌ల ద్వారా సృష్టించబడిన ఖాతాలు ఉండవచ్చు. ఈ అనుమతి, మీ కాంటాక్ట్ డేటాను సేవ్ చేయడానికి యాప్‌లను అనుమతిస్తుంది, హానికరమైన యాప్‌లు మీకు తెలియకుండానే కాంటాక్ట్ డేటాను షేర్ చేయవచ్చు."</string>
-    <string name="permdesc_readContacts" product="tv" msgid="8400138591135554789">"మీ Android TV పరికరంలో నిల్వ చేసిన కాంటాక్ట్‌లకు సంబంధించిన డేటాను చదవడానికి యాప్‌ను అనుమతిస్తుంది. కాంటాక్ట్‌లను సృష్టించిన మీ Android TV పరికరంలోని ఖాతాలకు కూడా యాప్‌లకు యాక్సెస్ ఉంటుంది. ఇందులో మీరు ఇన్‌స్టాల్ చేసిన యాప్‌ల ద్వారా సృష్టించబడిన ఖాతాలు ఉండవచ్చు. ఈ అనుమతి, మీ కాంటాక్ట్ డేటాను సేవ్ చేయడానికి యాప్‌లను అనుమతిస్తుంది, హానికరమైన యాప్‌లు మీకు తెలియకుండానే కాంటాక్ట్ డేటాను షేర్ చేయవచ్చు."</string>
-    <string name="permdesc_readContacts" product="default" msgid="4911989776203207644">"ఫోన్‌లో నిల్వ చేసిన మీ కాంటాక్ట్‌లకు సంబంధించిన డేటాను చదవడానికి యాప్‌ను అనుమతిస్తుంది. కాంటాక్ట్‌లను సృష్టించిన మీ ఫోన్‌లోని ఖాతాలను కూడా యాప్‌లు యాక్సెస్ చేయగలవు. ఇందులో మీరు ఇన్‌స్టాల్ చేసిన యాప్‌ల ద్వారా సృష్టించబడిన ఖాతాలు ఉండవచ్చు. ఈ అనుమతి, మీ కాంటాక్ట్ డేటాను సేవ్ చేయడానికి యాప్‌లను అనుమతిస్తుంది, హానికరమైన యాప్‌లు మీకు తెలియకుండానే కాంటాక్ట్ డేటాను షేర్ చేయవచ్చు."</string>
+    <string name="permdesc_readContacts" product="tablet" msgid="6430093481659992692">"టాబ్లెట్‌లో నిల్వ చేసిన మీ కాంటాక్ట్‌లకు సంబంధించిన డేటాను చదవడానికి యాప్‌ను అనుమతిస్తుంది. కాంటాక్ట్‌లను క్రియేట్ చేసిన మీ టాబ్లెట్‌లోని ఖాతాలకు కూడా యాప్‌లకు యాక్సెస్ ఉంటుంది. ఇందులో మీరు ఇన్‌స్టాల్ చేసిన యాప్‌ల ద్వారా క్రియేట్ చేయబడిన ఖాతాలు ఉండవచ్చు. ఈ అనుమతి, మీ కాంటాక్ట్ డేటాను సేవ్ చేయడానికి యాప్‌లను అనుమతిస్తుంది, హానికరమైన యాప్‌లు మీకు తెలియకుండానే కాంటాక్ట్ డేటాను షేర్ చేయవచ్చు."</string>
+    <string name="permdesc_readContacts" product="tv" msgid="8400138591135554789">"మీ Android TV పరికరంలో నిల్వ చేసిన కాంటాక్ట్‌లకు సంబంధించిన డేటాను చదవడానికి యాప్‌ను అనుమతిస్తుంది. కాంటాక్ట్‌లను క్రియేట్ చేసిన మీ Android TV పరికరంలోని ఖాతాలకు కూడా యాప్‌లకు యాక్సెస్ ఉంటుంది. ఇందులో మీరు ఇన్‌స్టాల్ చేసిన యాప్‌ల ద్వారా క్రియేట్ చేయబడిన ఖాతాలు ఉండవచ్చు. ఈ అనుమతి, మీ కాంటాక్ట్ డేటాను సేవ్ చేయడానికి యాప్‌లను అనుమతిస్తుంది, హానికరమైన యాప్‌లు మీకు తెలియకుండానే కాంటాక్ట్ డేటాను షేర్ చేయవచ్చు."</string>
+    <string name="permdesc_readContacts" product="default" msgid="4911989776203207644">"ఫోన్‌లో నిల్వ చేసిన మీ కాంటాక్ట్‌లకు సంబంధించిన డేటాను చదవడానికి యాప్‌ను అనుమతిస్తుంది. కాంటాక్ట్‌లను క్రియేట్ చేసిన మీ ఫోన్‌లోని ఖాతాలను కూడా యాప్‌లు యాక్సెస్ చేయగలవు. ఇందులో మీరు ఇన్‌స్టాల్ చేసిన యాప్‌ల ద్వారా క్రియేట్ చేయబడిన ఖాతాలు ఉండవచ్చు. ఈ అనుమతి, మీ కాంటాక్ట్ డేటాను సేవ్ చేయడానికి యాప్‌లను అనుమతిస్తుంది, హానికరమైన యాప్‌లు మీకు తెలియకుండానే కాంటాక్ట్ డేటాను షేర్ చేయవచ్చు."</string>
     <string name="permlab_writeContacts" msgid="8919430536404830430">"మీ కాంటాక్ట్‌లను సవరించడం"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="6422419281427826181">"మీ టాబ్లెట్‌లో నిల్వ చేసి ఉన్న కాంటాక్ట్‌లకు సంబంధించిన డేటాను ఎడిట్ చేయడానికి యాప్‌ను అనుమతిస్తుంది. ఈ అనుమతి, కాంటాక్ట్ డేటాను తొలగించడానికి యాప్‌లను అనుమతిస్తుంది."</string>
     <string name="permdesc_writeContacts" product="tv" msgid="6488872735379978935">"మీ Android TV పరికరంలో నిల్వ చేసి ఉన్న కాంటాక్ట్‌లకు సంబంధించిన డేటాను ఎడిట్ చేయడానికి యాప్‌ను అనుమతిస్తుంది. ఈ అనుమతి, కాంటాక్ట్ డేటాను తొలగించడానికి యాప్‌లను అనుమతిస్తుంది."</string>
@@ -500,13 +500,13 @@
     <string name="permdesc_setTimeZone" product="tv" msgid="9069045914174455938">"మీ Android TV పరికరం సమయ మండలిని మార్చడానికి యాప్‌ని అనుమతిస్తుంది."</string>
     <string name="permdesc_setTimeZone" product="default" msgid="4611828585759488256">"ఫోన్ యొక్క సమయ మండలిని మార్చడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_getAccounts" msgid="5304317160463582791">"పరికరంలో ఖాతాలను కనుగొనడం"</string>
-    <string name="permdesc_getAccounts" product="tablet" msgid="1784452755887604512">"టాబ్లెట్‌కు తెలిసిన ఖాతాల లిస్ట్‌ను పొందడానికి యాప్‌ను అనుమతిస్తుంది. దీనిలో మీరు ఇన్‌స్టాల్ చేసిన యాప్‌ల ద్వారా సృష్టించబడిన ఖాతాలు ఏవైనా ఉండవచ్చు."</string>
-    <string name="permdesc_getAccounts" product="tv" msgid="437604680436540822">"మీ Android TV పరికరానికి తెలిసిన ఖాతాల లిస్ట్‌ను పొందడానికి యాప్‌ను అనుమతిస్తుంది. దీనిలో మీరు ఇన్‌స్టాల్ చేసిన యాప్‌ల ద్వారా సృష్టించబడిన ఖాతాలు ఏవైనా ఉండవచ్చు."</string>
-    <string name="permdesc_getAccounts" product="default" msgid="2491273043569751867">"ఫోన్‌కు తెలిసిన ఖాతాల లిస్ట్‌ను పొందడానికి యాప్‌ను అనుమతిస్తుంది. దీనిలో మీరు ఇన్‌స్టాల్ చేసిన యాప్‌ల ద్వారా సృష్టించబడిన ఖాతాలు ఏవైనా ఉండవచ్చు."</string>
+    <string name="permdesc_getAccounts" product="tablet" msgid="1784452755887604512">"టాబ్లెట్‌కు తెలిసిన ఖాతాల లిస్ట్‌ను పొందడానికి యాప్‌ను అనుమతిస్తుంది. దీనిలో మీరు ఇన్‌స్టాల్ చేసిన యాప్‌ల ద్వారా క్రియేట్ చేయబడిన ఖాతాలు ఏవైనా ఉండవచ్చు."</string>
+    <string name="permdesc_getAccounts" product="tv" msgid="437604680436540822">"మీ Android TV పరికరానికి తెలిసిన ఖాతాల లిస్ట్‌ను పొందడానికి యాప్‌ను అనుమతిస్తుంది. దీనిలో మీరు ఇన్‌స్టాల్ చేసిన యాప్‌ల ద్వారా క్రియేట్ చేయబడిన ఖాతాలు ఏవైనా ఉండవచ్చు."</string>
+    <string name="permdesc_getAccounts" product="default" msgid="2491273043569751867">"ఫోన్‌కు తెలిసిన ఖాతాల లిస్ట్‌ను పొందడానికి యాప్‌ను అనుమతిస్తుంది. దీనిలో మీరు ఇన్‌స్టాల్ చేసిన యాప్‌ల ద్వారా క్రియేట్ చేయబడిన ఖాతాలు ఏవైనా ఉండవచ్చు."</string>
     <string name="permlab_accessNetworkState" msgid="2349126720783633918">"నెట్‌వర్క్ కనెక్షన్‌లను వీక్షించడం"</string>
     <string name="permdesc_accessNetworkState" msgid="4394564702881662849">"ఏ నెట్‌వర్క్‌లు ఉన్నాయి మరియు కనెక్ట్ చేయబడ్డాయి వంటి నెట్‌వర్క్ కనెక్షన్‌ల గురించి సమాచారాన్ని వీక్షించడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_createNetworkSockets" msgid="3224420491603590541">"నెట్‌వర్క్‌ను పూర్తిగా యాక్సెస్ చేయగలగడం"</string>
-    <string name="permdesc_createNetworkSockets" msgid="7722020828749535988">"నెట్‌వర్క్ సాకెట్‌లను సృష్టించడానికి మరియు అనుకూల నెట్‌వర్క్ ప్రోటోకాల్‌లను ఉపయోగించడానికి యాప్‌ను అనుమతిస్తుంది. బ్రౌజర్ మరియు ఇతర యాప్‌లు ఇంటర్నెట్‌కు డేటా పంపడానికి మార్గాలను అందిస్తాయి, కనుక ఇంటర్నెట్‌కు డేటా పంపడానికి ఈ అనుమతి అవసరం లేదు."</string>
+    <string name="permdesc_createNetworkSockets" msgid="7722020828749535988">"నెట్‌వర్క్ సాకెట్‌లను క్రియేట్ చేయడానికి మరియు అనుకూల నెట్‌వర్క్ ప్రోటోకాల్‌లను ఉపయోగించడానికి యాప్‌ను అనుమతిస్తుంది. బ్రౌజర్ మరియు ఇతర యాప్‌లు ఇంటర్నెట్‌కు డేటా పంపడానికి మార్గాలను అందిస్తాయి, కనుక ఇంటర్నెట్‌కు డేటా పంపడానికి ఈ అనుమతి అవసరం లేదు."</string>
     <string name="permlab_changeNetworkState" msgid="8945711637530425586">"నెట్‌వర్క్ కనెక్టివిటీని మార్చడం"</string>
     <string name="permdesc_changeNetworkState" msgid="649341947816898736">"నెట్‌వర్క్ కనెక్టివిటీ యొక్క స్థితిని మార్చడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_changeTetherState" msgid="9079611809931863861">"టీథర్ చేయబడిన కనెక్టివిటీని మార్చడం"</string>
@@ -703,8 +703,8 @@
     <string name="permdesc_bindConditionProviderService" msgid="6106018791256120258">"షరతు ప్రదాత సేవ యొక్క అగ్ర-స్థాయి ఇంటర్‌ఫేస్‌కు అనుబంధించడానికి హోల్డర్‌ను అనుమతిస్తుంది. సాధారణ యాప్‌లకు ఎప్పటికీ అవసరం ఉండదు."</string>
     <string name="permlab_bindDreamService" msgid="4776175992848982706">"డ్రీమ్ సేవ‌కి అనుబంధించడం"</string>
     <string name="permdesc_bindDreamService" msgid="9129615743300572973">"డ్రీమ్ సేవ యొక్క అగ్ర-స్థాయి ఇంటర్‌ఫేస్‌కు అనుబంధించడానికి హోల్డర్‌ను అనుమతిస్తుంది. సాధారణ యాప్‌లకు ఎప్పటికీ అవసరం ఉండదు."</string>
-    <string name="permlab_invokeCarrierSetup" msgid="5098810760209818140">"క్యారియర్ అందించిన కాన్ఫిగరేషన్ యాప్‌ను అభ్యర్థించడం"</string>
-    <string name="permdesc_invokeCarrierSetup" msgid="4790845896063237887">"క్యారియర్ అందించిన కాన్ఫిగరేషన్ యాప్‌ను అభ్యర్థించడానికి హోల్డర్‌ను అనుమతిస్తుంది. సాధారణ యాప్‌ల కోసం ఎప్పటికీ అవసరం ఉండకూడదు."</string>
+    <string name="permlab_invokeCarrierSetup" msgid="5098810760209818140">"క్యారియర్ అందించిన కాన్ఫిగరేషన్ యాప్‌ను రిక్వెస్ట్ చేయడం"</string>
+    <string name="permdesc_invokeCarrierSetup" msgid="4790845896063237887">"క్యారియర్ అందించిన కాన్ఫిగరేషన్ యాప్‌ను రిక్వెస్ట్ చేయడానికి హోల్డర్‌ను అనుమతిస్తుంది. సాధారణ యాప్‌ల కోసం ఎప్పటికీ అవసరం ఉండకూడదు."</string>
     <string name="permlab_accessNetworkConditions" msgid="1270732533356286514">"నెట్‌వర్క్ పరిస్థితులపై పరిశీలనల గురించి తెలుసుకోవడం"</string>
     <string name="permdesc_accessNetworkConditions" msgid="2959269186741956109">"నెట్‌వర్క్ పరిస్థితులపై పరిశీలనల గురించి తెలుసుకోవడానికి యాప్‌ను అనుమతిస్తుంది. సాధారణ యాప్‌లకు ఎప్పటికీ అవసరం ఉండకూడదు."</string>
     <string name="permlab_setInputCalibration" msgid="932069700285223434">"ఇన్‌పుట్ పరికరం క్రమాంకనాన్ని మార్చండి"</string>
@@ -755,7 +755,7 @@
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"విధానాన్ని ప్రారంభించినప్పుడు ఉపయోగించడానికి పరికర గ్లోబల్ ప్రాక్సీని సెట్ చేస్తుంది. పరికర యజమాని మాత్రమే గ్లోబల్ ప్రాక్సీని సెట్ చేయగలరు."</string>
     <string name="policylab_expirePassword" msgid="6015404400532459169">"స్క్రీన్ లాక్ పాస్‌వర్డ్ గడువు ముగింపుని సెట్ చేయండి"</string>
     <string name="policydesc_expirePassword" msgid="9136524319325960675">"స్క్రీన్ లాక్ పాస్‌వర్డ్, పిన్ లేదా నమూనాని తప్పనిసరిగా ఎంత తరచుగా మార్చాలనే దాన్ని మారుస్తుంది."</string>
-    <string name="policylab_encryptedStorage" msgid="9012936958126670110">"నిల్వ గుప్తీకరణను సెట్ చేయండి"</string>
+    <string name="policylab_encryptedStorage" msgid="9012936958126670110">"నిల్వ ఎన్‌క్రిప్షన్‌ను సెట్ చేయండి"</string>
     <string name="policydesc_encryptedStorage" msgid="1102516950740375617">"నిల్వ చేయబడిన యాప్ డేటా గుప్తీకరించబడి ఉండటం అవసరం."</string>
     <string name="policylab_disableCamera" msgid="5749486347810162018">"కెమెరాలను నిలిపివేయండి"</string>
     <string name="policydesc_disableCamera" msgid="3204405908799676104">"అన్ని పరికర కెమెరాల వినియోగాన్ని నిరోధించండి."</string>
@@ -1464,10 +1464,10 @@
     <string name="permdesc_route_media_output" msgid="1759683269387729675">"మీడియా అవుట్‌పుట్‌ను ఇతర బాహ్య పరికరాలకు మళ్లించడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_readInstallSessions" msgid="7279049337895583621">"ఇన్‌స్టాల్ సెషన్‌లను చదవడం"</string>
     <string name="permdesc_readInstallSessions" msgid="4012608316610763473">"ఇన్‌స్టాల్ సెషన్‌లను చదవడానికి యాప్‌ను అనుమతిస్తుంది. ఇది సక్రియ ప్యాకేజీ ఇన్‌స్టాలేషన్‌ల గురించి వివరాలను చూడటానికి యాప్‌ను అనుమతిస్తుంది."</string>
-    <string name="permlab_requestInstallPackages" msgid="7600020863445351154">"ఇన్‌స్టాల్ ప్యాకేజీలను అభ్యర్థించడం"</string>
-    <string name="permdesc_requestInstallPackages" msgid="3969369278325313067">"ప్యాకేజీల ఇన్‌స్టాలేషన్ అభ్యర్థించడానికి యాప్‌ను అనుమతిస్తుంది."</string>
+    <string name="permlab_requestInstallPackages" msgid="7600020863445351154">"ఇన్‌స్టాల్ ప్యాకేజీలను రిక్వెస్ట్ చేయడం"</string>
+    <string name="permdesc_requestInstallPackages" msgid="3969369278325313067">"ప్యాకేజీల ఇన్‌స్టాలేషన్ రిక్వెస్ట్ చేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_requestDeletePackages" msgid="2541172829260106795">"ప్యాకేజీలను తొలగించడానికి అభ్యర్థించు"</string>
-    <string name="permdesc_requestDeletePackages" msgid="6133633516423860381">"ప్యాకేజీల తొలగింపును అభ్యర్థించడానికి యాప్‌ను అనుమతిస్తుంది."</string>
+    <string name="permdesc_requestDeletePackages" msgid="6133633516423860381">"ప్యాకేజీల తొలగింపును రిక్వెస్ట్ చేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="7646611326036631439">"బ్యాటరీ అనుకూలీకరణలను విస్మరించడానికి అడగాలి"</string>
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"ఆ యాప్ కోసం బ్యాటరీ అనుకూలీకరణలు విస్మరించేలా అనుమతి కోరడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_queryAllPackages" msgid="2928450604653281650">"అన్ని ప్యాకేజీలను క్వెరీ చేయండి"</string>
@@ -1483,13 +1483,13 @@
     <string name="ime_action_default" msgid="8265027027659800121">"అమలు చేయి"</string>
     <string name="dial_number_using" msgid="6060769078933953531">"<xliff:g id="NUMBER">%s</xliff:g>ని ఉపయోగించి\nనంబర్ డయల్ చేయండి"</string>
     <string name="create_contact_using" msgid="6200708808003692594">"<xliff:g id="NUMBER">%s</xliff:g>ని ఉపయోగించి\nకాంటాక్ట్‌ను క్రియేట్ చేయండి"</string>
-    <string name="grant_credentials_permission_message_header" msgid="5365733888842570481">"కింది ఒకటి లేదా అంతకంటే ఎక్కువ యాప్‌లు మీ ఖాతాను యాక్సెస్ చేయడానికి ఇప్పుడు మరియు భవిష్యత్తులో అనుమతిని అభ్యర్థించవచ్చు."</string>
+    <string name="grant_credentials_permission_message_header" msgid="5365733888842570481">"కింది ఒకటి లేదా అంతకంటే ఎక్కువ యాప్‌లు మీ ఖాతాను యాక్సెస్ చేయడానికి ఇప్పుడు మరియు భవిష్యత్తులో అనుమతిని రిక్వెస్ట్ చేయవచ్చు."</string>
     <string name="grant_credentials_permission_message_footer" msgid="1886710210516246461">"మీరు ఈ రిక్వెస్ట్‌ను అనుమతించాలనుకుంటున్నారా?"</string>
     <string name="grant_permissions_header_text" msgid="3420736827804657201">"యాక్సెస్ రిక్వెస్ట్‌"</string>
     <string name="allow" msgid="6195617008611933762">"అనుమతించండి"</string>
     <string name="deny" msgid="6632259981847676572">"తిరస్కరించండి"</string>
-    <string name="permission_request_notification_title" msgid="1810025922441048273">"అనుమతి అభ్యర్థించబడింది"</string>
-    <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"ఖాతా <xliff:g id="ACCOUNT">%s</xliff:g> కోసం\nఅనుమతి అభ్యర్థించబడింది."</string>
+    <string name="permission_request_notification_title" msgid="1810025922441048273">"అనుమతి రిక్వెస్ట్ చేయబడింది"</string>
+    <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"ఖాతా <xliff:g id="ACCOUNT">%s</xliff:g> కోసం\nఅనుమతి రిక్వెస్ట్ చేయబడింది."</string>
     <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"<xliff:g id="APP">%1$s</xliff:g> ద్వారా అనుమతి రిక్వెస్ట్ చేయబడింది\nఖాతా <xliff:g id="ACCOUNT">%2$s</xliff:g> కోసం."</string>
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"మీరు మీ కార్యాలయ ప్రొఫైల్‌కు వెలుపల ఈ యాప్‌ను ఉపయోగిస్తున్నారు"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"మీరు మీ కార్యాలయ ప్రొఫైల్‌లో ఈ యాప్‌ను ఉపయోగిస్తున్నారు"</string>
@@ -1535,7 +1535,7 @@
     <string name="find_previous" msgid="4405898398141275532">"మునుపటిదాన్ని కనుగొను"</string>
     <string name="gpsNotifTicker" msgid="3207361857637620780">"<xliff:g id="NAME">%s</xliff:g> నుండి లొకేషన్ రిక్వెస్ట్‌"</string>
     <string name="gpsNotifTitle" msgid="1590033371665669570">"లొకేషన్ రిక్వెస్ట్‌"</string>
-    <string name="gpsNotifMessage" msgid="7346649122793758032">"<xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>) ద్వారా అభ్యర్థించబడింది"</string>
+    <string name="gpsNotifMessage" msgid="7346649122793758032">"<xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>) ద్వారా రిక్వెస్ట్ చేయబడింది"</string>
     <string name="gpsVerifYes" msgid="3719843080744112940">"అవును"</string>
     <string name="gpsVerifNo" msgid="1671201856091564741">"కాదు"</string>
     <string name="sync_too_many_deletes" msgid="6999440774578705300">"తొలగింపు పరిమితి మించిపోయింది"</string>
@@ -1972,8 +1972,8 @@
     <string name="importance_from_user" msgid="2782756722448800447">"మీరు ఈ నోటిఫికేషన్‌ల ప్రాముఖ్యతను సెట్ చేశారు."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"ఇందులో పేర్కొనబడిన వ్యక్తులను బట్టి ఇది చాలా ముఖ్యమైనది."</string>
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"అనుకూల యాప్ నోటిఫికేషన్"</string>
-    <string name="user_creation_account_exists" msgid="2239146360099708035">"<xliff:g id="ACCOUNT">%2$s</xliff:g>తో కొత్త వినియోగదారుని సృష్టించడానికి <xliff:g id="APP">%1$s</xliff:g>ను అనుమతించాలా (ఈ ఖాతాతో ఇప్పటికే ఒక వినియోగదారు ఉన్నారు) ?"</string>
-    <string name="user_creation_adding" msgid="7305185499667958364">"<xliff:g id="ACCOUNT">%2$s</xliff:g>తో కొత్త వినియోగదారుని సృష్టించడానికి <xliff:g id="APP">%1$s</xliff:g>ను అనుమతించాలా?"</string>
+    <string name="user_creation_account_exists" msgid="2239146360099708035">"<xliff:g id="ACCOUNT">%2$s</xliff:g>తో కొత్త వినియోగదారుని క్రియేట్ చేయడానికి <xliff:g id="APP">%1$s</xliff:g>ను అనుమతించాలా (ఈ ఖాతాతో ఇప్పటికే ఒక వినియోగదారు ఉన్నారు) ?"</string>
+    <string name="user_creation_adding" msgid="7305185499667958364">"<xliff:g id="ACCOUNT">%2$s</xliff:g>తో కొత్త వినియోగదారుని క్రియేట్ చేయడానికి <xliff:g id="APP">%1$s</xliff:g>ను అనుమతించాలా?"</string>
     <string name="language_selection_title" msgid="52674936078683285">"భాషను జోడించండి"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"ప్రాంతం ప్రాధాన్యత"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"భాష పేరును టైప్ చేయండి"</string>

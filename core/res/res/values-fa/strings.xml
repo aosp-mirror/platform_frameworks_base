@@ -909,7 +909,7 @@
     <string name="lockscreen_transport_next_description" msgid="2931509904881099919">"آهنگ بعدی"</string>
     <string name="lockscreen_transport_pause_description" msgid="6705284702135372494">"مکث"</string>
     <string name="lockscreen_transport_play_description" msgid="106868788691652733">"پخش"</string>
-    <string name="lockscreen_transport_stop_description" msgid="1449552232598355348">"توقف"</string>
+    <string name="lockscreen_transport_stop_description" msgid="1449552232598355348">"متوقف کردن"</string>
     <string name="lockscreen_transport_rew_description" msgid="7680106856221622779">"عقب بردن"</string>
     <string name="lockscreen_transport_ffw_description" msgid="4763794746640196772">"جلو بردن سریع"</string>
     <string name="emergency_calls_only" msgid="3057351206678279851">"فقط تماس‌های اضطراری"</string>
@@ -1881,8 +1881,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"توسط سرپرست سیستم به‌روزرسانی شد"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"توسط سرپرست سیستم حذف شد"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"تأیید"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"«بهینه‌سازی باتری» «طرح زمینه تیره» را روشن می‌کند و فعالیت پس‌زمینه، برخی از جلوه‌های بصری، ویژگی‌هایی خاص، و برخی از اتصال‌های شبکه را محدود یا خاموش می‌کند."</string>
-    <string name="battery_saver_description" msgid="8518809702138617167">"«بهینه‌سازی باتری» «طرح زمینه تیره» را روشن می‌کند و فعالیت پس‌زمینه، برخی از جلوه‌های بصری، ویژگی‌هایی خاص، و برخی از اتصال‌های شبکه را محدود یا خاموش می‌کند."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"«بهینه‌سازی باتری» «زمینه تیره» را روشن می‌کند و فعالیت پس‌زمینه، برخی از جلوه‌های بصری، ویژگی‌هایی خاص، و برخی از اتصال‌های شبکه را محدود یا خاموش می‌کند."</string>
+    <string name="battery_saver_description" msgid="8518809702138617167">"«بهینه‌سازی باتری» «زمینه تیره» را روشن می‌کند و فعالیت پس‌زمینه، برخی از جلوه‌های بصری، ویژگی‌هایی خاص، و برخی از اتصال‌های شبکه را محدود یا خاموش می‌کند."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"برای کمک به کاهش مصرف داده، «صرفه‌جویی داده» از ارسال و دریافت داده در پس‌زمینه در بعضی برنامه‌ها جلوگیری می‌کند. برنامه‌ای که درحال‌حاضر استفاده می‌کنید می‌تواند به داده‌ها دسترسی داشته باشد اما دفعات دسترسی آن محدود است. این می‌تواند به این معنی باشد که، برای مثال، تصاویر تازمانی‌که روی آن‌ها ضربه نزنید نشان داده نمی‌شوند."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"«صرفه‌جویی داده» روشن شود؟"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"روشن کردن"</string>
