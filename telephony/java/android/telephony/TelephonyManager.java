@@ -9417,15 +9417,7 @@ public class TelephonyManager {
     @SystemApi
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public @Nullable String getCarrierServicePackageName() {
-        // TODO(b/205736323) plumb this through to CarrierPrivilegesTracker, which will cache the
-        // value instead of re-querying every time.
-        List<String> carrierServicePackages =
-                getCarrierPackageNamesForIntent(
-                        new Intent(CarrierService.CARRIER_SERVICE_INTERFACE));
-        if (carrierServicePackages != null && !carrierServicePackages.isEmpty()) {
-            return carrierServicePackages.get(0);
-        }
-        return null;
+        return getCarrierServicePackageNameForLogicalSlot(getPhoneId());
     }
 
     /**
@@ -9442,13 +9434,15 @@ public class TelephonyManager {
     @SystemApi
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public @Nullable String getCarrierServicePackageNameForLogicalSlot(int logicalSlotIndex) {
-        // TODO(b/205736323) plumb this through to CarrierPrivilegesTracker, which will cache the
-        // value instead of re-querying every time.
-        List<String> carrierServicePackages =
-                getCarrierPackageNamesForIntentAndPhone(
-                        new Intent(CarrierService.CARRIER_SERVICE_INTERFACE), logicalSlotIndex);
-        if (carrierServicePackages != null && !carrierServicePackages.isEmpty()) {
-            return carrierServicePackages.get(0);
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.getCarrierServicePackageNameForLogicalSlot(logicalSlotIndex);
+            }
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "getCarrierServicePackageNameForLogicalSlot RemoteException", ex);
+        } catch (NullPointerException ex) {
+            Rlog.e(TAG, "getCarrierServicePackageNameForLogicalSlot NPE", ex);
         }
         return null;
     }
