@@ -6776,10 +6776,12 @@ public class TelephonyManager {
      * @param p2 P2 parameter (described in ISO 7816-4).
      * @return an IccOpenLogicalChannelResponse object.
      * @hide
+     * @deprecated instead use {@link #iccOpenLogicalChannelByPort(int, int, String, int)}
      */
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     @SystemApi
     @Nullable
+    @Deprecated
     public IccOpenLogicalChannelResponse iccOpenLogicalChannelBySlot(int slotIndex,
             @Nullable String aid, int p2) {
         try {
@@ -6797,6 +6799,58 @@ public class TelephonyManager {
         } catch (NullPointerException ex) {
         }
         return null;
+    }
+
+    /**
+     * Opens a logical channel to the ICC card using the physical slot index and port index.
+     *
+     * Use this method when no subscriptions are available on the SIM and the operation must be
+     * performed using the physical slot index and port index.
+     *
+     * This operation wraps two APDU instructions:
+     * <ul>
+     *     <li>MANAGE CHANNEL to open a logical channel</li>
+     *     <li>SELECT the given {@code AID} using the given {@code p2}</li>
+     * </ul>
+     *
+     * Per Open Mobile API Specification v3.2 section 6.2.7.h, only p2 values of 0x00, 0x04, 0x08,
+     * and 0x0C are guaranteed to be supported.
+     *
+     * If the SELECT command's status word is not '9000', '62xx', or '63xx', the status word will be
+     * considered an error and the channel shall not be opened.
+     *
+     * Input parameters equivalent to TS 27.007 AT+CCHO command.
+     *
+     * @param slotIndex the physical slot index of the ICC card
+     * @param portIndex The port index is an enumeration of the ports available on the UICC.
+     *                  Use {@link UiccPortInfo#getPortIndex()} to get portIndex.
+     * @param aid Application id. See ETSI 102.221 and 101.220.
+     * @param p2 P2 parameter (described in ISO 7816-4).
+     * @return an IccOpenLogicalChannelResponse object.
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
+    @SystemApi
+    @NonNull
+    public IccOpenLogicalChannelResponse iccOpenLogicalChannelByPort(int slotIndex,
+            int portIndex, @Nullable String aid, int p2) {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                IccLogicalChannelRequest request = new IccLogicalChannelRequest();
+                request.slotIndex = slotIndex;
+                request.portIndex = portIndex;
+                request.aid = aid;
+                request.p2 = p2;
+                request.callingPackage = getOpPackageName();
+                request.binder = new Binder();
+                return telephony.iccOpenLogicalChannel(request);
+            } else {
+                throw new IllegalStateException("telephony service is null.");
+            }
+        } catch (RemoteException ex) {
+            throw ex.rethrowAsRuntimeException();
+        }
     }
 
     /**
@@ -6889,9 +6943,11 @@ public class TelephonyManager {
      *            iccOpenLogicalChannel.
      * @return true if the channel was closed successfully.
      * @hide
+     * @deprecated instead use {@link #iccCloseLogicalChannelByPort(int, int, int)}
      */
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     @SystemApi
+    @Deprecated
     public boolean iccCloseLogicalChannelBySlot(int slotIndex, int channel) {
         try {
             ITelephony telephony = getITelephony();
@@ -6905,6 +6961,45 @@ public class TelephonyManager {
         } catch (NullPointerException ex) {
         }
         return false;
+    }
+
+    /**
+     * Closes a previously opened logical channel to the ICC card using the physical slot index and
+     * port index.
+     *
+     * Use this method when no subscriptions are available on the SIM and the operation must be
+     * performed using the physical slot index and port index.
+     *
+     * Input parameters equivalent to TS 27.007 AT+CCHC command.
+     *
+     * @param slotIndex the physical slot index of the ICC card
+     * @param portIndex The port index is an enumeration of the ports available on the UICC.
+     *                  Use {@link UiccPortInfo#getPortIndex()} to get portIndex.
+     * @param channel is the channel id to be closed as returned by a successful
+     *            iccOpenLogicalChannel.
+     *
+     * @throws IllegalStateException if the Telephony process is not currently available or modem
+     *                               currently can't process this command.
+     * @throws IllegalArgumentException if invalid arguments are passed.
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
+    @SystemApi
+    public void iccCloseLogicalChannelByPort(int slotIndex, int portIndex, int channel) {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                IccLogicalChannelRequest request = new IccLogicalChannelRequest();
+                request.slotIndex = slotIndex;
+                request.portIndex = portIndex;
+                request.channel = channel;
+                telephony.iccCloseLogicalChannel(request);
+            } else {
+                throw new IllegalStateException("telephony service is null.");
+            }
+        } catch (RemoteException ex) {
+            throw ex.rethrowAsRuntimeException();
+        }
     }
 
     /**
@@ -6978,10 +7073,13 @@ public class TelephonyManager {
      * @return The APDU response from the ICC card with the status appended at the end, or null if
      * there is an issue connecting to the Telephony service.
      * @hide
+     * @deprecated instead use
+     * {@link #iccTransmitApduLogicalChannelByPort(int, int, int, int, int, int, int, int, String)}
      */
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     @SystemApi
     @Nullable
+    @Deprecated
     public String iccTransmitApduLogicalChannelBySlot(int slotIndex, int channel, int cla,
             int instruction, int p1, int p2, int p3, @Nullable String data) {
         try {
@@ -6994,6 +7092,50 @@ public class TelephonyManager {
         } catch (NullPointerException ex) {
         }
         return null;
+    }
+
+    /**
+     * Transmit an APDU to the ICC card over a logical channel using the physical slot index.
+     *
+     * Use this method when no subscriptions are available on the SIM and the operation must be
+     * performed using the physical slot index.
+     *
+     * Input parameters equivalent to TS 27.007 AT+CGLA command.
+     *
+     * @param slotIndex the physical slot index of the ICC card
+     * @param portIndex The port index is an enumeration of the ports available on the UICC.
+     *                  Use {@link UiccPortInfo#getPortIndex()} to get portIndex.
+     * @param channel is the channel id to be closed as returned by a successful
+     *            iccOpenLogicalChannel.
+     * @param cla Class of the APDU command.
+     * @param instruction Instruction of the APDU command.
+     * @param p1 P1 value of the APDU command.
+     * @param p2 P2 value of the APDU command.
+     * @param p3 P3 value of the APDU command. If p3 is negative a 4 byte APDU
+     *            is sent to the SIM.
+     * @param data Data to be sent with the APDU.
+     * @return The APDU response from the ICC card with the status appended at the end, or null if
+     * there is an issue connecting to the Telephony service.
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
+    @SystemApi
+    @NonNull
+    public String iccTransmitApduLogicalChannelByPort(int slotIndex, int portIndex, int channel,
+            int cla, int instruction, int p1, int p2, int p3, @Nullable String data) {
+        String response;
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                response = telephony.iccTransmitApduLogicalChannelByPort(slotIndex, portIndex,
+                        channel, cla, instruction, p1, p2, p3, data);
+            } else {
+                throw new IllegalStateException("telephony service is null.");
+            }
+        } catch (RemoteException ex) {
+            throw ex.rethrowAsRuntimeException();
+        }
+        return response;
     }
 
     /**
@@ -7081,10 +7223,13 @@ public class TelephonyManager {
      * @return The APDU response from the ICC card with the status appended at
      *            the end.
      * @hide
+     * @deprecated instead use
+     * {@link #iccTransmitApduBasicChannelByPort(int, int, int, int, int, int, int, String)}
      */
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     @SystemApi
     @NonNull
+    @Deprecated
     public String iccTransmitApduBasicChannelBySlot(int slotIndex, int cla, int instruction, int p1,
             int p2, int p3, @Nullable String data) {
         try {
@@ -7099,6 +7244,47 @@ public class TelephonyManager {
         return null;
     }
 
+    /**
+     * Transmit an APDU to the ICC card over the basic channel using the physical slot index.
+     *
+     * Use this method when no subscriptions are available on the SIM and the operation must be
+     * performed using the physical slot index.
+     *
+     * Input parameters equivalent to TS 27.007 AT+CSIM command.
+     *
+     * @param slotIndex the physical slot index of the ICC card to target
+     * @param portIndex The port index is an enumeration of the ports available on the UICC.
+     *                  Use {@link UiccPortInfo#getPortIndex()} to get portIndex.
+     * @param cla Class of the APDU command.
+     * @param instruction Instruction of the APDU command.
+     * @param p1 P1 value of the APDU command.
+     * @param p2 P2 value of the APDU command.
+     * @param p3 P3 value of the APDU command. If p3 is negative a 4 byte APDU
+     *            is sent to the SIM.
+     * @param data Data to be sent with the APDU.
+     * @return The APDU response from the ICC card with the status appended at
+     *            the end.
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
+    @SystemApi
+    @NonNull
+    public String iccTransmitApduBasicChannelByPort(int slotIndex, int portIndex, int cla,
+            int instruction, int p1, int p2, int p3, @Nullable String data) {
+        String response;
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                response = telephony.iccTransmitApduBasicChannelByPort(slotIndex, portIndex,
+                        getOpPackageName(), cla, instruction, p1, p2, p3, data);
+            } else {
+                throw new IllegalStateException("telephony service is null.");
+            }
+        } catch (RemoteException ex) {
+            throw ex.rethrowAsRuntimeException();
+        }
+        return response;
+    }
     /**
      * Transmit an APDU to the ICC card over the basic channel.
      *
