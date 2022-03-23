@@ -345,6 +345,26 @@ public class DreamOverlayTouchMonitorTest extends SysuiTestCase {
     }
 
     @Test
+    public void testPop() {
+        final DreamTouchHandler touchHandler = Mockito.mock(DreamTouchHandler.class);
+        final DreamTouchHandler.TouchSession.Callback callback =
+                Mockito.mock(DreamTouchHandler.TouchSession.Callback.class);
+
+        final Environment environment = new Environment(Stream.of(touchHandler)
+                .collect(Collectors.toCollection(HashSet::new)));
+
+        final InputEvent initialEvent = Mockito.mock(InputEvent.class);
+        environment.publishInputEvent(initialEvent);
+
+        final DreamTouchHandler.TouchSession session = captureSession(touchHandler);
+        session.registerCallback(callback);
+        session.pop();
+        environment.executeAll();
+
+        verify(callback).onRemoved();
+    }
+
+    @Test
     public void testPause() {
         final DreamTouchHandler touchHandler = Mockito.mock(DreamTouchHandler.class);
 
