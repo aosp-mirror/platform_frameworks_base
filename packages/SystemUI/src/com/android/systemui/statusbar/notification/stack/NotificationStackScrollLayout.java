@@ -689,7 +689,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         boolean showFooterView = (showDismissView || mController.getVisibleNotificationCount() > 0)
                 && mIsCurrentUserSetup  // see: b/193149550
                 && mStatusBarState != StatusBarState.KEYGUARD
-                && mQsExpansionFraction != 1
+                // quick settings don't affect notifications when not in full screen
+                && (mQsExpansionFraction != 1 || !mQsFullScreen)
                 && !mScreenOffAnimationController.shouldHideNotificationsFooter()
                 && !mIsRemoteInputActive;
         boolean showHistory = mController.isHistoryEnabled();
@@ -799,6 +800,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         y = (int) (mAmbientState.getStackY() + mKeyguardNotificationAvailableSpace);
         drawDebugInfo(canvas, y, Color.RED, /* label= */
                 "mAmbientState.getStackY() + mKeyguardNotificationAvailableSpace = " + y);
+
+        drawDebugInfo(canvas, mRoundedRectClippingBottom, Color.DKGRAY,
+                /* label= */ "mRoundedRectClippingBottom) = " + y);
     }
 
     private void drawDebugInfo(Canvas canvas, int y, int color, String label) {
@@ -1311,7 +1315,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         if (mOnStackYChanged != null) {
             mOnStackYChanged.accept(listenerNeedsAnimation);
         }
-        if (mQsExpansionFraction <= 0 && !shouldSkipHeightUpdate()) {
+        if ((mQsExpansionFraction <= 0 || !mQsFullScreen) && !shouldSkipHeightUpdate()) {
             final float endHeight = updateStackEndHeight();
             updateStackHeight(endHeight, fraction);
         }

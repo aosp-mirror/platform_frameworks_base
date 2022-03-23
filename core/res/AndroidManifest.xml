@@ -471,11 +471,9 @@
         android:name="com.android.server.connectivityservice.CONNECTED_TO_PROVISIONING_NETWORK_ACTION" />
 
     <!-- Defined in RestrictionsManager -->
-    <protected-broadcast
-        android:name="android.intent.action.PERMISSION_RESPONSE_RECEIVED" />
-    <!-- Defined in RestrictionsManager -->
+    <protected-broadcast android:name="android.content.action.PERMISSION_RESPONSE_RECEIVED" />
+    <protected-broadcast android:name="android.content.action.REQUEST_PERMISSION" />
 
-    <protected-broadcast android:name="android.intent.action.REQUEST_PERMISSION" />
     <protected-broadcast android:name="android.nfc.handover.intent.action.HANDOVER_STARTED" />
     <protected-broadcast android:name="android.nfc.handover.intent.action.TRANSFER_DONE" />
     <protected-broadcast android:name="android.nfc.handover.intent.action.TRANSFER_PROGRESS" />

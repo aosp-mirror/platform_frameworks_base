@@ -270,7 +270,7 @@ public class PolicyWarningUIController {
                 final AccessibilityServiceInfo a11yServiceInfo = enabledServiceInfos.get(i);
                 if (componentName.flattenToShortString().equals(
                         a11yServiceInfo.getComponentName().flattenToShortString())) {
-                    if (!mAccessibilitySecurityPolicy.isA11yCategoryService(a11yServiceInfo)
+                    if (!a11yServiceInfo.isAccessibilityTool()
                             && !mNotifiedA11yServices.contains(componentName)) {
                         final CharSequence displayName =
                                 a11yServiceInfo.getResolveInfo().serviceInfo.loadLabel(

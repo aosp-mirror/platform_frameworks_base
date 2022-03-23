@@ -18,6 +18,7 @@ package com.android.server.midi;
 
 import android.annotation.NonNull;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothUuid;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -150,6 +151,8 @@ public class MidiService extends IMidiManager.Stub {
 
     private static final UUID MIDI_SERVICE = UUID.fromString(
             "03B80E5A-EDE8-4B33-A751-6CE34EC4C700");
+
+    private final HashSet<ParcelUuid> mNonMidiUUIDs = new HashSet<ParcelUuid>();
 
     // PackageMonitor for listening to package changes
     private final PackageMonitor mPackageMonitor = new PackageMonitor() {
@@ -643,6 +646,55 @@ public class MidiService extends IMidiManager.Stub {
         return false;
     }
 
+    private static void dumpIntentExtras(Intent intent) {
+        String action = intent.getAction();
+        Log.d(TAG, "Intent: " + action);
+        Bundle bundle = intent.getExtras();
+        if (bundle != null) {
+            for (String key : bundle.keySet()) {
+                Log.d(TAG, "  " + key + " : "
+                        + (bundle.get(key) != null ? bundle.get(key) : "NULL"));
+            }
+        }
+    }
+
+    private static boolean isBleTransport(Intent intent) {
+        Bundle bundle = intent.getExtras();
+        boolean isBle = false;
+        if (bundle != null) {
+            isBle = bundle.getInt(BluetoothDevice.EXTRA_TRANSPORT, BluetoothDevice.TRANSPORT_AUTO)
+                    == BluetoothDevice.TRANSPORT_LE;
+        }
+        return isBle;
+    }
+
+    private void dumpUuids(BluetoothDevice btDevice) {
+        Log.d(TAG, "UUIDs for " + btDevice);
+
+        ParcelUuid[] uuidParcels = btDevice.getUuids();
+        if (uuidParcels == null) {
+            Log.d(TAG, "No UUID Parcels");
+            return;
+        }
+
+        for (ParcelUuid parcel : uuidParcels) {
+            UUID uuid = parcel.getUuid();
+            Log.d(TAG, " uuid:" + uuid);
+        }
+    }
+
+    private boolean hasNonMidiUuids(BluetoothDevice btDevice) {
+        ParcelUuid[] uuidParcels = btDevice.getUuids();
+        // The assumption is that these services are indicative of devices that
+        // ARE NOT MIDI devices.
+        for (ParcelUuid parcel : uuidParcels) {
+            if (mNonMidiUUIDs.contains(parcel)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private final BroadcastReceiver mBleMidiReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -655,10 +707,27 @@ public class MidiService extends IMidiManager.Stub {
             switch (action) {
                 case BluetoothDevice.ACTION_ACL_CONNECTED: {
                     Log.d(TAG, "ACTION_ACL_CONNECTED");
+                    dumpIntentExtras(intent);
+                    // BLE-MIDI controllers are by definition BLE, so if this device
+                    // isn't, it CAN'T be a midi device
+                    if (!isBleTransport(intent)) {
+                        Log.i(TAG, "No BLE transport - NOT MIDI");
+                        break;
+                    }
+
+                    Log.d(TAG, "BLE Device");
                     BluetoothDevice btDevice =
                             intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                    // We can't determine here if this is a BLD-MIDI device, so go ahead and try
-                    // to open as a MIDI device, further down it will get figured out.
+                    dumpUuids(btDevice);
+
+                    // See if there are any service UUIDs and if so do any of them indicate a
+                    // Non-MIDI device (headset, headphones, QWERTY keyboard....)
+                    if (hasNonMidiUuids(btDevice)) {
+                        Log.d(TAG, "Non-MIDI service UUIDs found. NOT MIDI");
+                        break;
+                    }
+
+                    Log.d(TAG, "Potential MIDI Device.");
                     openBluetoothDevice(btDevice);
                 }
                 break;
@@ -689,6 +758,17 @@ public class MidiService extends IMidiManager.Stub {
         context.registerReceiver(mBleMidiReceiver, filter);
 
         mBluetoothServiceUid = -1;
+
+        mNonMidiUUIDs.add(BluetoothUuid.A2DP_SINK);     // Headphones?
+        mNonMidiUUIDs.add(BluetoothUuid.A2DP_SOURCE);   // Headset?
+        mNonMidiUUIDs.add(BluetoothUuid.ADV_AUDIO_DIST);
+        mNonMidiUUIDs.add(BluetoothUuid.AVRCP_CONTROLLER);
+        mNonMidiUUIDs.add(BluetoothUuid.HFP);
+        mNonMidiUUIDs.add(BluetoothUuid.HSP);
+        mNonMidiUUIDs.add(BluetoothUuid.HID);
+        mNonMidiUUIDs.add(BluetoothUuid.LE_AUDIO);
+        mNonMidiUUIDs.add(BluetoothUuid.HOGP);
+        mNonMidiUUIDs.add(BluetoothUuid.HEARING_AID);
     }
 
     private void onUnlockUser() {

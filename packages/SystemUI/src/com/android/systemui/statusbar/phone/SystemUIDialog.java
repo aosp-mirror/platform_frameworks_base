@@ -63,6 +63,8 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
     // TODO(b/203389579): Remove this once the dialog width on large screens has been agreed on.
     private static final String FLAG_TABLET_DIALOG_WIDTH =
             "persist.systemui.flag_tablet_dialog_width";
+    private static final int DEFAULT_THEME = R.style.Theme_SystemUI_Dialog;
+    private static final boolean DEFAULT_DISMISS_ON_DEVICE_LOCK = true;
 
     private final Context mContext;
     @Nullable private final DismissReceiver mDismissReceiver;
@@ -78,11 +80,15 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
     private List<Runnable> mOnCreateRunnables = new ArrayList<>();
 
     public SystemUIDialog(Context context) {
-        this(context, R.style.Theme_SystemUI_Dialog);
+        this(context, DEFAULT_THEME, DEFAULT_DISMISS_ON_DEVICE_LOCK);
     }
 
     public SystemUIDialog(Context context, int theme) {
-        this(context, theme, true /* dismissOnDeviceLock */);
+        this(context, theme, DEFAULT_DISMISS_ON_DEVICE_LOCK);
+    }
+
+    public SystemUIDialog(Context context, boolean dismissOnDeviceLock) {
+        this(context, DEFAULT_THEME, dismissOnDeviceLock);
     }
 
     public SystemUIDialog(Context context, int theme, boolean dismissOnDeviceLock) {

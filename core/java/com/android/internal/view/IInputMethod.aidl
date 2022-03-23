@@ -67,4 +67,6 @@ oneway interface IInputMethod {
             in List<MotionEvent> events);
 
     void initInkWindow();
+
+    void finishStylusHandwriting();
 }

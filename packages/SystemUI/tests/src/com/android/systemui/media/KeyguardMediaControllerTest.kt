@@ -52,8 +52,6 @@ class KeyguardMediaControllerTest : SysuiTestCase() {
     private lateinit var statusBarStateController: SysuiStatusBarStateController
     @Mock
     private lateinit var configurationController: ConfigurationController
-    @Mock
-    private lateinit var mediaFlags: MediaFlags
 
     @Mock
     private lateinit var notificationLockscreenUserManager: NotificationLockscreenUserManager
@@ -73,15 +71,13 @@ class KeyguardMediaControllerTest : SysuiTestCase() {
                 .thenReturn(true)
         whenever(mediaHost.hostView).thenReturn(hostView)
         hostView.layoutParams = FrameLayout.LayoutParams(100, 100)
-        whenever(mediaFlags.useMediaSessionLayout()).thenReturn(false)
         keyguardMediaController = KeyguardMediaController(
             mediaHost,
             bypassController,
             statusBarStateController,
             notificationLockscreenUserManager,
             context,
-            configurationController,
-            mediaFlags
+            configurationController
         )
         keyguardMediaController.attachSinglePaneContainer(mediaContainerView)
         keyguardMediaController.useSplitShade = false
@@ -157,22 +153,7 @@ class KeyguardMediaControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun testNotificationLayout_collapsedPlayer() {
-        verify(mediaHost).expansion = MediaHostState.COLLAPSED
-    }
-
-    @Test
-    fun testSessionLayout_expandedPlayer() {
-        whenever(mediaFlags.useMediaSessionLayout()).thenReturn(true)
-        keyguardMediaController = KeyguardMediaController(
-            mediaHost,
-            bypassController,
-            statusBarStateController,
-            notificationLockscreenUserManager,
-            context,
-            configurationController,
-            mediaFlags
-        )
+    fun testMediaHost_expandedPlayer() {
         verify(mediaHost).expansion = MediaHostState.EXPANDED
     }
 }

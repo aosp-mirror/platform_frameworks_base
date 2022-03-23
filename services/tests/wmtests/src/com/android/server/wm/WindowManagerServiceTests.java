@@ -70,7 +70,7 @@ import org.junit.runner.RunWith;
 
 /**
  * Build/Install/Run:
- *  atest WmTests:WindowManagerServiceTests
+ * atest WmTests:WindowManagerServiceTests
  */
 @SmallTest
 @Presubmit
@@ -266,7 +266,8 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         final WindowToken windowToken = createTestWindowToken(TYPE_INPUT_METHOD, mDefaultDisplay);
         final Session session = new Session(mWm, new IWindowSessionCallback.Stub() {
             @Override
-            public void onAnimatorScaleChanged(float v) throws RemoteException {}
+            public void onAnimatorScaleChanged(float v) throws RemoteException {
+            }
         });
         final WindowManager.LayoutParams params = new WindowManager.LayoutParams(
                 TYPE_APPLICATION_ATTACHED_DIALOG);
@@ -292,7 +293,8 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         int callingPid = Binder.getCallingPid();
         int callingUid = Binder.getCallingUid();
         doReturn(false).when(mWm).checkCallingPermission(anyString(), anyString());
-        when(mWm.mAtmService.isInstrumenting(callingPid)).thenReturn(true);
+        when(mWm.mAtmService.instrumentationSourceHasPermission(callingPid,
+                android.Manifest.permission.MODIFY_TOUCH_MODE_STATE)).thenReturn(true);
 
         mWm.setInTouchMode(!currentTouchMode);
 
@@ -306,7 +308,8 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         int callingPid = Binder.getCallingPid();
         int callingUid = Binder.getCallingUid();
         doReturn(false).when(mWm).checkCallingPermission(anyString(), anyString());
-        when(mWm.mAtmService.isInstrumenting(callingPid)).thenReturn(false);
+        when(mWm.mAtmService.instrumentationSourceHasPermission(callingPid,
+                android.Manifest.permission.MODIFY_TOUCH_MODE_STATE)).thenReturn(false);
 
         mWm.setInTouchMode(!currentTouchMode);
 

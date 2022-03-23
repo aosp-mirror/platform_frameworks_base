@@ -110,7 +110,7 @@ class RemoteAnimationController implements DeathRecipient {
             ProtoLog.d(WM_DEBUG_REMOTE_ANIMATIONS,
                     "goodToGo(): Animation canceled already");
             onAnimationFinished();
-            invokeAnimationCancelled();
+            invokeAnimationCancelled("already_cancelled");
             return;
         }
 
@@ -129,7 +129,7 @@ class RemoteAnimationController implements DeathRecipient {
                     "goodToGo(): No apps to animate, mPendingAnimations=%d",
                     mPendingAnimations.size());
             onAnimationFinished();
-            invokeAnimationCancelled();
+            invokeAnimationCancelled("no_app_targets");
             return;
         }
 
@@ -169,7 +169,7 @@ class RemoteAnimationController implements DeathRecipient {
             mCanceled = true;
         }
         onAnimationFinished();
-        invokeAnimationCancelled();
+        invokeAnimationCancelled(reason);
     }
 
     private void writeStartDebugStatement() {
@@ -296,7 +296,8 @@ class RemoteAnimationController implements DeathRecipient {
         ProtoLog.i(WM_DEBUG_REMOTE_ANIMATIONS, "Finishing remote animation");
     }
 
-    private void invokeAnimationCancelled() {
+    private void invokeAnimationCancelled(String reason) {
+        ProtoLog.d(WM_DEBUG_REMOTE_ANIMATIONS, "cancelAnimation(): reason=%s", reason);
         try {
             mRemoteAnimationAdapter.getRunner().onAnimationCancelled();
         } catch (RemoteException e) {

@@ -16,15 +16,12 @@
 
 package com.android.server.devicepolicy;
 
-import static android.app.admin.DevicePolicyResources.Drawables.Style;
-
 import static java.util.Objects.requireNonNull;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.admin.DevicePolicyDrawableResource;
 import android.app.admin.DevicePolicyResources;
-import android.app.admin.DevicePolicyResources.Drawables;
 import android.app.admin.DevicePolicyStringResource;
 import android.app.admin.ParcelableResource;
 import android.os.Environment;
@@ -180,16 +177,18 @@ class DeviceManagementResourcesProvider {
     @Nullable
     ParcelableResource getDrawable(
             String drawableId, String drawableStyle, String drawableSource) {
-        if (mUpdatedDrawablesForSource.containsKey(drawableId)
-                && mUpdatedDrawablesForSource.get(drawableId).containsKey(drawableSource)) {
-            return mUpdatedDrawablesForSource.get(drawableId).get(drawableSource);
-        }
-        if (!mUpdatedDrawablesForStyle.containsKey(drawableId)) {
-            Log.d(TAG, "No updated drawable found for drawable id " + drawableId);
-            return null;
-        }
-        if (mUpdatedDrawablesForStyle.get(drawableId).containsKey(drawableStyle)) {
-            return mUpdatedDrawablesForStyle.get(drawableId).get(drawableStyle);
+        synchronized (mLock) {
+            if (mUpdatedDrawablesForSource.containsKey(drawableId)
+                    && mUpdatedDrawablesForSource.get(drawableId).containsKey(drawableSource)) {
+                return mUpdatedDrawablesForSource.get(drawableId).get(drawableSource);
+            }
+            if (!mUpdatedDrawablesForStyle.containsKey(drawableId)) {
+                Log.d(TAG, "No updated drawable found for drawable id " + drawableId);
+                return null;
+            }
+            if (mUpdatedDrawablesForStyle.get(drawableId).containsKey(drawableStyle)) {
+                return mUpdatedDrawablesForStyle.get(drawableId).get(drawableStyle);
+            }
         }
         Log.d(TAG, "No updated drawable found for drawable id " + drawableId);
         return null;
@@ -249,10 +248,11 @@ class DeviceManagementResourcesProvider {
 
     @Nullable
     ParcelableResource getString(String stringId) {
-        if (mUpdatedStrings.containsKey(stringId)) {
-            return mUpdatedStrings.get(stringId);
+        synchronized (mLock) {
+            if (mUpdatedStrings.containsKey(stringId)) {
+                return mUpdatedStrings.get(stringId);
+            }
         }
-
         Log.d(TAG, "No updated string found for string id " + stringId);
         return null;
     }

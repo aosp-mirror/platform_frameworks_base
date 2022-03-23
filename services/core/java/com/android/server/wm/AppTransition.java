@@ -81,11 +81,11 @@ import static com.android.internal.R.styleable.WindowAnimation_wallpaperIntraOpe
 import static com.android.internal.R.styleable.WindowAnimation_wallpaperIntraOpenExitAnimation;
 import static com.android.internal.R.styleable.WindowAnimation_wallpaperOpenEnterAnimation;
 import static com.android.internal.R.styleable.WindowAnimation_wallpaperOpenExitAnimation;
+import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ANIM;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_APP_TRANSITIONS;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_APP_TRANSITIONS_ANIM;
 import static com.android.server.wm.AppTransitionProto.APP_TRANSITION_STATE;
 import static com.android.server.wm.AppTransitionProto.LAST_USED_APP_TRANSITION;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerInternal.AppTransitionListener;
@@ -130,6 +130,7 @@ import android.view.animation.TranslateAnimation;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.TransitionAnimation;
+import com.android.internal.protolog.ProtoLogImpl;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.DumpUtils.Dump;
 import com.android.internal.util.function.pooled.PooledLambda;
@@ -237,7 +238,8 @@ public class AppTransition implements Dump {
         mService = service;
         mHandler = new Handler(service.mH.getLooper());
         mDisplayContent = displayContent;
-        mTransitionAnimation = new TransitionAnimation(context, DEBUG_ANIM, TAG);
+        mTransitionAnimation = new TransitionAnimation(
+                context, ProtoLogImpl.isEnabled(WM_DEBUG_ANIM), TAG);
 
         mGridLayoutRecentsEnabled = SystemProperties.getBoolean("ro.recents.grid", false);
 
@@ -1305,6 +1307,8 @@ public class AppTransition implements Dump {
             pw.print(Integer.toHexString(mNextAppTransitionEnter));
             pw.print(" mNextAppTransitionExit=0x");
             pw.println(Integer.toHexString(mNextAppTransitionExit));
+            pw.print(" mNextAppTransitionBackgroundColor=0x");
+            pw.println(Integer.toHexString(mNextAppTransitionBackgroundColor));
         }
         switch (mNextAppTransitionType) {
             case NEXT_TRANSIT_TYPE_CUSTOM_IN_PLACE:

@@ -24,7 +24,7 @@
 
     <style name="TextAppearance.PreferenceSummary.SettingsLib"
            parent="@android:style/TextAppearance.DeviceDefault.Small">
-        <item name="android:textColor">@color/settingslib_text_color_secondary_device_default</item>
+        <item name="android:textColor">@color/settingslib_text_color_secondary</item>
     </style>
 
     <style name="TextAppearance.CategoryTitle.SettingsLib"

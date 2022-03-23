@@ -599,6 +599,9 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
                     mQSPanelScrollView.getHeight());
         }
         mQSPanelScrollView.setClipBounds(mQsBounds);
+
+        mQsMediaHost.getCurrentClipping().set(0, 0, getView().getMeasuredWidth(),
+                mQSPanelScrollView.getMeasuredHeight() - mQSPanelScrollView.getPaddingBottom());
     }
 
     private void updateMediaPositions() {

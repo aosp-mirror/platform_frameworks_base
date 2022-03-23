@@ -20,6 +20,7 @@ import android.app.PendingIntent
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.Icon
 import android.media.session.MediaSession
+import com.android.systemui.R
 
 /** State of a media view. */
 data class MediaData(
@@ -154,7 +155,18 @@ data class MediaButton(
      * Second custom action space
      */
     var custom1: MediaAction? = null
-)
+) {
+    fun getActionById(id: Int): MediaAction? {
+        return when (id) {
+            R.id.actionPlayPause -> playOrPause
+            R.id.actionNext -> nextOrCustom
+            R.id.actionPrev -> prevOrCustom
+            R.id.action0 -> custom0
+            R.id.action1 -> custom1
+            else -> null
+        }
+    }
+}
 
 /** State of a media action. */
 data class MediaAction(

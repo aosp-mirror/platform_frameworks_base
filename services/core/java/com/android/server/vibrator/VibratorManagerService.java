@@ -162,10 +162,11 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                     // When the system is entering a non-interactive state, we want to cancel
                     // vibrations in case a misbehaving app has abandoned them.
                     if (shouldCancelOnScreenOffLocked(mNextVibration)) {
-                        clearNextVibrationLocked(Vibration.Status.CANCELLED);
+                        clearNextVibrationLocked(Vibration.Status.CANCELLED_BY_SCREEN_OFF);
                     }
                     if (shouldCancelOnScreenOffLocked(mCurrentVibration)) {
-                        mCurrentVibration.notifyCancelled(/* immediate= */ false);
+                        mCurrentVibration.notifyCancelled(Vibration.Status.CANCELLED_BY_SCREEN_OFF,
+                                /* immediate= */ false);
                     }
                 }
             }
@@ -401,6 +402,12 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                     uid, opPkg, reason);
             fillVibrationFallbacks(vib, effect);
 
+            if (attrs.isFlagSet(VibrationAttributes.FLAG_INVALIDATE_SETTINGS_CACHE)) {
+                // Force update of user settings before checking if this vibration effect should
+                // be ignored or scaled.
+                mVibrationSettings.update();
+            }
+
             synchronized (mLock) {
                 if (DEBUG) {
                     Slog.d(TAG, "Starting vibrate for vibration  " + vib.id);
@@ -420,7 +427,8 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                 final long ident = Binder.clearCallingIdentity();
                 try {
                     if (mCurrentVibration != null) {
-                        mCurrentVibration.notifyCancelled(/* immediate= */ false);
+                        mCurrentVibration.notifyCancelled(Vibration.Status.CANCELLED_SUPERSEDED,
+                                /* immediate= */ false);
                     }
                     Vibration.Status status = startVibrationLocked(vib);
                     if (status != Vibration.Status.RUNNING) {
@@ -453,19 +461,20 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                     if (mNextVibration != null
                             && shouldCancelVibration(mNextVibration.getVibration(),
                             usageFilter, token)) {
-                        clearNextVibrationLocked(Vibration.Status.CANCELLED);
+                        clearNextVibrationLocked(Vibration.Status.CANCELLED_BY_USER);
                     }
                     if (mCurrentVibration != null
                             && shouldCancelVibration(mCurrentVibration.getVibration(),
                             usageFilter, token)) {
-                        mCurrentVibration.notifyCancelled(/* immediate= */false);
+                        mCurrentVibration.notifyCancelled(Vibration.Status.CANCELLED_BY_USER,
+                                /* immediate= */false);
                     }
                     if (mCurrentExternalVibration != null
                             && shouldCancelVibration(
                             mCurrentExternalVibration.externalVibration.getVibrationAttributes(),
                             usageFilter)) {
                         mCurrentExternalVibration.externalVibration.mute();
-                        endExternalVibrateLocked(Vibration.Status.CANCELLED,
+                        endExternalVibrateLocked(Vibration.Status.CANCELLED_BY_USER,
                                 /* continueExternalControl= */ false);
                     }
                 } finally {
@@ -594,7 +603,8 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                     Slog.d(TAG, "Canceling vibration because settings changed: "
                             + (inputDevicesChanged ? "input devices changed" : ignoreStatus));
                 }
-                mCurrentVibration.notifyCancelled(/* immediate= */ false);
+                mCurrentVibration.notifyCancelled(Vibration.Status.CANCELLED_BY_SETTINGS_UPDATE,
+                        /* immediate= */ false);
             }
         }
     }
@@ -1313,7 +1323,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                     if (DEBUG) {
                         Slog.d(TAG, "External vibration finished because binder died");
                     }
-                    endExternalVibrateLocked(Vibration.Status.CANCELLED,
+                    endExternalVibrateLocked(Vibration.Status.CANCELLED_BINDER_DIED,
                             /* continueExternalControl= */ false);
                 }
             }
@@ -1506,12 +1516,20 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                 return IExternalVibratorService.SCALE_MUTE;
             }
 
+            VibrationAttributes attrs = fixupVibrationAttributes(vib.getVibrationAttributes(),
+                    /* effect= */ null);
+            if (attrs.isFlagSet(VibrationAttributes.FLAG_INVALIDATE_SETTINGS_CACHE)) {
+                // Force update of user settings before checking if this vibration effect should
+                // be ignored or scaled.
+                mVibrationSettings.update();
+            }
+
             boolean alreadyUnderExternalControl = false;
             boolean waitForCompletion = false;
             int scale;
             synchronized (mLock) {
                 Vibration.Status ignoreStatus = shouldIgnoreVibrationLocked(
-                        vib.getUid(), vib.getPackage(), vib.getVibrationAttributes());
+                        vib.getUid(), vib.getPackage(), attrs);
                 if (ignoreStatus != null) {
                     ExternalVibrationHolder vibHolder = new ExternalVibrationHolder(vib);
                     vibHolder.scale = IExternalVibratorService.SCALE_MUTE;
@@ -1529,7 +1547,8 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                     // vibration that may be playing and ready the vibrator for external control.
                     if (mCurrentVibration != null) {
                         clearNextVibrationLocked(Vibration.Status.IGNORED_FOR_EXTERNAL);
-                        mCurrentVibration.notifyCancelled(/* immediate= */ true);
+                        mCurrentVibration.notifyCancelled(Vibration.Status.CANCELLED_SUPERSEDED,
+                                /* immediate= */ true);
                         waitForCompletion = true;
                     }
                 } else {
@@ -1543,13 +1562,13 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                     // would need to mute the old one still if it came from a different controller.
                     alreadyUnderExternalControl = true;
                     mCurrentExternalVibration.externalVibration.mute();
-                    endExternalVibrateLocked(Vibration.Status.CANCELLED,
+                    endExternalVibrateLocked(Vibration.Status.CANCELLED_SUPERSEDED,
                             /* continueExternalControl= */ true);
                 }
                 mCurrentExternalVibration = new ExternalVibrationHolder(vib);
                 vib.linkToDeath(mCurrentExternalVibration);
                 mCurrentExternalVibration.scale = mVibrationScaler.getExternalVibrationScale(
-                        vib.getVibrationAttributes().getUsage());
+                        attrs.getUsage());
                 scale = mCurrentExternalVibration.scale;
             }
 
@@ -1908,7 +1927,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
             final int flags =
                     commonOptions.force ? VibrationAttributes.FLAG_BYPASS_INTERRUPTION_POLICY : 0;
             return new VibrationAttributes.Builder()
-                    .setFlags(flags, VibrationAttributes.FLAG_ALL_SUPPORTED)
+                    .setFlags(flags)
                     // Used to apply Settings.System.HAPTIC_FEEDBACK_INTENSITY to scale effects.
                     .setUsage(VibrationAttributes.USAGE_TOUCH)
                     .build();

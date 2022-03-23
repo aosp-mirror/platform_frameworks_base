@@ -2322,7 +2322,9 @@
         <attr name="windowSplashScreenAnimatedIcon" format="reference"/>
         <!-- The duration, in milliseconds, of the window splash screen icon animation duration
              when playing the splash screen starting window. The maximum animation duration should
-             be limited below 1000ms. -->
+             be limited below 1000ms.
+              @deprecated Not used by framework starting from API level 33. The system estimates the
+               duration of the vector animation automatically. -->
         <attr name="windowSplashScreenAnimationDuration" format="integer"/>
 
         <!-- Place an drawable image in the bottom of the starting window, it can be used to
@@ -9806,5 +9808,13 @@
         <!-- The <a href="https://www.rfc-editor.org/rfc/bcp/bcp47.txt">IETF BCP47 language tag</a>
         of the supported locale. {@link android.app.LocaleConfig} -->
         <attr name="name" />
+    </declare-styleable>
+
+    <!-- @hide -->
+    <declare-styleable name="CachingIconView">
+        <!-- Maximum width of displayed drawable. Drawables exceeding this size will be downsampled. -->
+        <attr name="maxDrawableWidth" format="dimension"/>
+        <!-- Maximum width of height drawable. Drawables exceeding this size will be downsampled. -->
+        <attr name="maxDrawableHeight" format="dimension"/>
     </declare-styleable>
     </resources>

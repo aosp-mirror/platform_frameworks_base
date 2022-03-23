@@ -107,9 +107,6 @@ public final class Trace {
     public static final long TRACE_TAG_RRO = 1L << 26;
     /** @hide */
     public static final long TRACE_TAG_THERMAL = 1L << 27;
-    /** @hide */
-
-    public static final long TRACE_TAG_APEX_MANAGER = 1L << 18;
 
     private static final long TRACE_TAG_NOT_READY = 1L << 63;
     private static final int MAX_SECTION_NAME_LEN = 127;

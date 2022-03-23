@@ -63,8 +63,7 @@ public class CollapsingToolbarBaseActivity extends FragmentActivity {
             return;
         }
 
-        mToolbardelegate = new CollapsingToolbarDelegate(new DelegateCallback());
-        View view = mToolbardelegate.onCreateView(getLayoutInflater(), null);
+        View view = getToolbarDelegate().onCreateView(getLayoutInflater(), null);
         super.setContentView(view);
     }
 
@@ -107,7 +106,7 @@ public class CollapsingToolbarBaseActivity extends FragmentActivity {
 
     @Override
     public void setTitle(CharSequence title) {
-        mToolbardelegate.setTitle(title);
+        getToolbarDelegate().setTitle(title);
     }
 
     @Override
@@ -128,7 +127,7 @@ public class CollapsingToolbarBaseActivity extends FragmentActivity {
      */
     @Nullable
     public CollapsingToolbarLayout getCollapsingToolbarLayout() {
-        return mToolbardelegate.getCollapsingToolbarLayout();
+        return getToolbarDelegate().getCollapsingToolbarLayout();
     }
 
     /**
@@ -136,6 +135,13 @@ public class CollapsingToolbarBaseActivity extends FragmentActivity {
      */
     @Nullable
     public AppBarLayout getAppBarLayout() {
-        return mToolbardelegate.getAppBarLayout();
+        return getToolbarDelegate().getAppBarLayout();
+    }
+
+    private CollapsingToolbarDelegate getToolbarDelegate() {
+        if (mToolbardelegate == null) {
+            mToolbardelegate = new CollapsingToolbarDelegate(new DelegateCallback());
+        }
+        return mToolbardelegate;
     }
 }

@@ -45,6 +45,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.Objects;
+import java.util.concurrent.Executor;
 
 /**
  * The Network Service Discovery Manager class provides the API to discover services
@@ -285,8 +286,12 @@ public final class NsdManager {
     private final Context mContext;
 
     private int mListenerKey = FIRST_LISTENER_KEY;
+    @GuardedBy("mMapLock")
     private final SparseArray mListenerMap = new SparseArray();
+    @GuardedBy("mMapLock")
     private final SparseArray<NsdServiceInfo> mServiceMap = new SparseArray<>();
+    @GuardedBy("mMapLock")
+    private final SparseArray<Executor> mExecutorMap = new SparseArray<>();
     private final Object mMapLock = new Object();
     // Map of listener key sent by client -> per-network discovery tracker
     @GuardedBy("mPerNetworkDiscoveryMap")
@@ -299,6 +304,7 @@ public final class NsdManager {
         final String mServiceType;
         final int mProtocolType;
         final DiscoveryListener mBaseListener;
+        final Executor mBaseExecutor;
         final ArrayMap<Network, DelegatingDiscoveryListener> mPerNetworkListeners =
                 new ArrayMap<>();
 
@@ -308,7 +314,8 @@ public final class NsdManager {
                 final DelegatingDiscoveryListener wrappedListener = new DelegatingDiscoveryListener(
                         network, mBaseListener);
                 mPerNetworkListeners.put(network, wrappedListener);
-                discoverServices(mServiceType, mProtocolType, network, wrappedListener);
+                discoverServices(mServiceType, mProtocolType, network, mBaseExecutor,
+                        wrappedListener);
             }
 
             @Override
@@ -355,9 +362,10 @@ public final class NsdManager {
         }
 
         private PerNetworkDiscoveryTracker(String serviceType, int protocolType,
-                DiscoveryListener baseListener) {
+                Executor baseExecutor, DiscoveryListener baseListener) {
             mServiceType = serviceType;
             mProtocolType = protocolType;
+            mBaseExecutor = baseExecutor;
             mBaseListener = baseListener;
         }
 
@@ -644,9 +652,11 @@ public final class NsdManager {
             final int key = message.arg2;
             final Object listener;
             final NsdServiceInfo ns;
+            final Executor executor;
             synchronized (mMapLock) {
                 listener = mListenerMap.get(key);
                 ns = mServiceMap.get(key);
+                executor = mExecutorMap.get(key);
             }
             if (listener == null) {
                 Log.d(TAG, "Stale key " + message.arg2);
@@ -657,56 +667,64 @@ public final class NsdManager {
             }
             switch (what) {
                 case DISCOVER_SERVICES_STARTED:
-                    String s = getNsdServiceInfoType((NsdServiceInfo) message.obj);
-                    ((DiscoveryListener) listener).onDiscoveryStarted(s);
+                    final String s = getNsdServiceInfoType((NsdServiceInfo) message.obj);
+                    executor.execute(() -> ((DiscoveryListener) listener).onDiscoveryStarted(s));
                     break;
                 case DISCOVER_SERVICES_FAILED:
                     removeListener(key);
-                    ((DiscoveryListener) listener).onStartDiscoveryFailed(getNsdServiceInfoType(ns),
-                            message.arg1);
+                    executor.execute(() -> ((DiscoveryListener) listener).onStartDiscoveryFailed(
+                            getNsdServiceInfoType(ns), message.arg1));
                     break;
                 case SERVICE_FOUND:
-                    ((DiscoveryListener) listener).onServiceFound((NsdServiceInfo) message.obj);
+                    executor.execute(() -> ((DiscoveryListener) listener).onServiceFound(
+                            (NsdServiceInfo) message.obj));
                     break;
                 case SERVICE_LOST:
-                    ((DiscoveryListener) listener).onServiceLost((NsdServiceInfo) message.obj);
+                    executor.execute(() -> ((DiscoveryListener) listener).onServiceLost(
+                            (NsdServiceInfo) message.obj));
                     break;
                 case STOP_DISCOVERY_FAILED:
                     // TODO: failure to stop discovery should be internal and retried internally, as
                     // the effect for the client is indistinguishable from STOP_DISCOVERY_SUCCEEDED
                     removeListener(key);
-                    ((DiscoveryListener) listener).onStopDiscoveryFailed(getNsdServiceInfoType(ns),
-                            message.arg1);
+                    executor.execute(() -> ((DiscoveryListener) listener).onStopDiscoveryFailed(
+                            getNsdServiceInfoType(ns), message.arg1));
                     break;
                 case STOP_DISCOVERY_SUCCEEDED:
                     removeListener(key);
-                    ((DiscoveryListener) listener).onDiscoveryStopped(getNsdServiceInfoType(ns));
+                    executor.execute(() -> ((DiscoveryListener) listener).onDiscoveryStopped(
+                            getNsdServiceInfoType(ns)));
                     break;
                 case REGISTER_SERVICE_FAILED:
                     removeListener(key);
-                    ((RegistrationListener) listener).onRegistrationFailed(ns, message.arg1);
+                    executor.execute(() -> ((RegistrationListener) listener).onRegistrationFailed(
+                            ns, message.arg1));
                     break;
                 case REGISTER_SERVICE_SUCCEEDED:
-                    ((RegistrationListener) listener).onServiceRegistered(
-                            (NsdServiceInfo) message.obj);
+                    executor.execute(() -> ((RegistrationListener) listener).onServiceRegistered(
+                            (NsdServiceInfo) message.obj));
                     break;
                 case UNREGISTER_SERVICE_FAILED:
                     removeListener(key);
-                    ((RegistrationListener) listener).onUnregistrationFailed(ns, message.arg1);
+                    executor.execute(() -> ((RegistrationListener) listener).onUnregistrationFailed(
+                            ns, message.arg1));
                     break;
                 case UNREGISTER_SERVICE_SUCCEEDED:
                     // TODO: do not unregister listener until service is unregistered, or provide
                     // alternative way for unregistering ?
                     removeListener(message.arg2);
-                    ((RegistrationListener) listener).onServiceUnregistered(ns);
+                    executor.execute(() -> ((RegistrationListener) listener).onServiceUnregistered(
+                            ns));
                     break;
                 case RESOLVE_SERVICE_FAILED:
                     removeListener(key);
-                    ((ResolveListener) listener).onResolveFailed(ns, message.arg1);
+                    executor.execute(() -> ((ResolveListener) listener).onResolveFailed(
+                            ns, message.arg1));
                     break;
                 case RESOLVE_SERVICE_SUCCEEDED:
                     removeListener(key);
-                    ((ResolveListener) listener).onServiceResolved((NsdServiceInfo) message.obj);
+                    executor.execute(() -> ((ResolveListener) listener).onServiceResolved(
+                            (NsdServiceInfo) message.obj));
                     break;
                 default:
                     Log.d(TAG, "Ignored " + message);
@@ -722,7 +740,7 @@ public final class NsdManager {
     }
 
     // Assert that the listener is not in the map, then add it and returns its key
-    private int putListener(Object listener, NsdServiceInfo s) {
+    private int putListener(Object listener, Executor e, NsdServiceInfo s) {
         checkListener(listener);
         final int key;
         synchronized (mMapLock) {
@@ -733,6 +751,7 @@ public final class NsdManager {
             key = nextListenerKey();
             mListenerMap.put(key, listener);
             mServiceMap.put(key, s);
+            mExecutorMap.put(key, e);
         }
         return key;
     }
@@ -741,6 +760,7 @@ public final class NsdManager {
         synchronized (mMapLock) {
             mListenerMap.remove(key);
             mServiceMap.remove(key);
+            mExecutorMap.remove(key);
         }
     }
 
@@ -779,12 +799,33 @@ public final class NsdManager {
      */
     public void registerService(NsdServiceInfo serviceInfo, int protocolType,
             RegistrationListener listener) {
+        registerService(serviceInfo, protocolType, Runnable::run, listener);
+    }
+
+    /**
+     * Register a service to be discovered by other services.
+     *
+     * <p> The function call immediately returns after sending a request to register service
+     * to the framework. The application is notified of a successful registration
+     * through the callback {@link RegistrationListener#onServiceRegistered} or a failure
+     * through {@link RegistrationListener#onRegistrationFailed}.
+     *
+     * <p> The application should call {@link #unregisterService} when the service
+     * registration is no longer required, and/or whenever the application is stopped.
+     * @param serviceInfo The service being registered
+     * @param protocolType The service discovery protocol
+     * @param executor Executor to run listener callbacks with
+     * @param listener The listener notifies of a successful registration and is used to
+     * unregister this service through a call on {@link #unregisterService}. Cannot be null.
+     */
+    public void registerService(@NonNull NsdServiceInfo serviceInfo, int protocolType,
+            @NonNull Executor executor, @NonNull RegistrationListener listener) {
         if (serviceInfo.getPort() <= 0) {
             throw new IllegalArgumentException("Invalid port number");
         }
         checkServiceInfo(serviceInfo);
         checkProtocol(protocolType);
-        int key = putListener(listener, serviceInfo);
+        int key = putListener(listener, executor, serviceInfo);
         try {
             mService.registerService(key, serviceInfo);
         } catch (RemoteException e) {
@@ -815,14 +856,6 @@ public final class NsdManager {
     }
 
     /**
-     * Same as {@link #discoverServices(String, int, Network, DiscoveryListener)} with a null
-     * {@link Network}.
-     */
-    public void discoverServices(String serviceType, int protocolType, DiscoveryListener listener) {
-        discoverServices(serviceType, protocolType, (Network) null, listener);
-    }
-
-    /**
      * Initiate service discovery to browse for instances of a service type. Service discovery
      * consumes network bandwidth and will continue until the application calls
      * {@link #stopServiceDiscovery}.
@@ -846,13 +879,45 @@ public final class NsdManager {
      * @param serviceType The service type being discovered. Examples include "_http._tcp" for
      * http services or "_ipp._tcp" for printers
      * @param protocolType The service discovery protocol
-     * @param network Network to discover services on, or null to discover on all available networks
      * @param listener  The listener notifies of a successful discovery and is used
      * to stop discovery on this serviceType through a call on {@link #stopServiceDiscovery}.
      * Cannot be null. Cannot be in use for an active service discovery.
      */
+    public void discoverServices(String serviceType, int protocolType, DiscoveryListener listener) {
+        discoverServices(serviceType, protocolType, (Network) null, Runnable::run, listener);
+    }
+
+    /**
+     * Initiate service discovery to browse for instances of a service type. Service discovery
+     * consumes network bandwidth and will continue until the application calls
+     * {@link #stopServiceDiscovery}.
+     *
+     * <p> The function call immediately returns after sending a request to start service
+     * discovery to the framework. The application is notified of a success to initiate
+     * discovery through the callback {@link DiscoveryListener#onDiscoveryStarted} or a failure
+     * through {@link DiscoveryListener#onStartDiscoveryFailed}.
+     *
+     * <p> Upon successful start, application is notified when a service is found with
+     * {@link DiscoveryListener#onServiceFound} or when a service is lost with
+     * {@link DiscoveryListener#onServiceLost}.
+     *
+     * <p> Upon failure to start, service discovery is not active and application does
+     * not need to invoke {@link #stopServiceDiscovery}
+     *
+     * <p> The application should call {@link #stopServiceDiscovery} when discovery of this
+     * service type is no longer required, and/or whenever the application is paused or
+     * stopped.
+     * @param serviceType The service type being discovered. Examples include "_http._tcp" for
+     * http services or "_ipp._tcp" for printers
+     * @param protocolType The service discovery protocol
+     * @param network Network to discover services on, or null to discover on all available networks
+     * @param executor Executor to run listener callbacks with
+     * @param listener  The listener notifies of a successful discovery and is used
+     * to stop discovery on this serviceType through a call on {@link #stopServiceDiscovery}.
+     */
     public void discoverServices(@NonNull String serviceType, int protocolType,
-            @Nullable Network network, @NonNull DiscoveryListener listener) {
+            @Nullable Network network, @NonNull Executor executor,
+            @NonNull DiscoveryListener listener) {
         if (TextUtils.isEmpty(serviceType)) {
             throw new IllegalArgumentException("Service type cannot be empty");
         }
@@ -862,7 +927,7 @@ public final class NsdManager {
         s.setServiceType(serviceType);
         s.setNetwork(network);
 
-        int key = putListener(listener, s);
+        int key = putListener(listener, executor, s);
         try {
             mService.discoverServices(key, s);
         } catch (RemoteException e) {
@@ -899,18 +964,18 @@ public final class NsdManager {
      * themselves are encouraged to use this method instead of other overloads of
      * {@code discoverServices}, as they will receive proper notifications when a service becomes
      * available or unavailable due to network changes.
-     *
      * @param serviceType The service type being discovered. Examples include "_http._tcp" for
      * http services or "_ipp._tcp" for printers
      * @param protocolType The service discovery protocol
      * @param networkRequest Request specifying networks that should be considered when discovering
+     * @param executor Executor to run listener callbacks with
      * @param listener  The listener notifies of a successful discovery and is used
      * to stop discovery on this serviceType through a call on {@link #stopServiceDiscovery}.
-     * Cannot be null. Cannot be in use for an active service discovery.
      */
     @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)
     public void discoverServices(@NonNull String serviceType, int protocolType,
-            @NonNull NetworkRequest networkRequest, @NonNull DiscoveryListener listener) {
+            @NonNull NetworkRequest networkRequest, @NonNull Executor executor,
+            @NonNull DiscoveryListener listener) {
         if (TextUtils.isEmpty(serviceType)) {
             throw new IllegalArgumentException("Service type cannot be empty");
         }
@@ -920,10 +985,10 @@ public final class NsdManager {
         NsdServiceInfo s = new NsdServiceInfo();
         s.setServiceType(serviceType);
 
-        final int baseListenerKey = putListener(listener, s);
+        final int baseListenerKey = putListener(listener, executor, s);
 
         final PerNetworkDiscoveryTracker discoveryInfo = new PerNetworkDiscoveryTracker(
-                serviceType, protocolType, listener);
+                serviceType, protocolType, executor, listener);
 
         synchronized (mPerNetworkDiscoveryMap) {
             mPerNetworkDiscoveryMap.put(baseListenerKey, discoveryInfo);
@@ -974,8 +1039,21 @@ public final class NsdManager {
      * Cannot be in use for an active service resolution.
      */
     public void resolveService(NsdServiceInfo serviceInfo, ResolveListener listener) {
+        resolveService(serviceInfo, Runnable::run, listener);
+    }
+
+    /**
+     * Resolve a discovered service. An application can resolve a service right before
+     * establishing a connection to fetch the IP and port details on which to setup
+     * the connection.
+     * @param serviceInfo service to be resolved
+     * @param executor Executor to run listener callbacks with
+     * @param listener to receive callback upon success or failure.
+     */
+    public void resolveService(@NonNull NsdServiceInfo serviceInfo,
+            @NonNull Executor executor, @NonNull ResolveListener listener) {
         checkServiceInfo(serviceInfo);
-        int key = putListener(listener, serviceInfo);
+        int key = putListener(listener, executor, serviceInfo);
         try {
             mService.resolveService(key, serviceInfo);
         } catch (RemoteException e) {

@@ -8,7 +8,6 @@ import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.media.MediaFlags
 import com.android.systemui.media.MediaHost
 import com.android.systemui.media.MediaHostState
 import com.android.systemui.plugins.FalsingManager
@@ -49,7 +48,6 @@ class QSPanelControllerTest : SysuiTestCase() {
     @Mock private lateinit var brightnessSliderFactory: BrightnessSliderController.Factory
     @Mock private lateinit var falsingManager: FalsingManager
     @Mock private lateinit var featureFlags: FeatureFlags
-    @Mock private lateinit var mediaFlags: MediaFlags
     @Mock private lateinit var mediaHost: MediaHost
 
     private lateinit var controller: QSPanelController
@@ -79,8 +77,7 @@ class QSPanelControllerTest : SysuiTestCase() {
             brightnessControllerFactory,
             brightnessSliderFactory,
             falsingManager,
-            featureFlags,
-            mediaFlags
+            featureFlags
         )
     }
 
@@ -90,43 +87,10 @@ class QSPanelControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun onInit_notSplitShade_newMediaLayoutAvailable_setsMediaAsExpanded() {
-        setSplitShadeEnabled(false)
-        whenever(mediaFlags.useMediaSessionLayout()).thenReturn(true)
-
+    fun onInit_setsMediaAsExpanded() {
         controller.onInit()
 
         verify(mediaHost).expansion = MediaHostState.EXPANDED
-    }
-
-    @Test
-    fun onInit_notSplitShade_newMediaLayoutNotAvailable_setsMediaAsExpanded() {
-        setSplitShadeEnabled(false)
-        whenever(mediaFlags.useMediaSessionLayout()).thenReturn(false)
-
-        controller.onInit()
-
-        verify(mediaHost).expansion = MediaHostState.EXPANDED
-    }
-
-    @Test
-    fun onInit_inSplitShade_newMediaLayoutAvailable_setsMediaAsExpanded() {
-        setSplitShadeEnabled(true)
-        whenever(mediaFlags.useMediaSessionLayout()).thenReturn(true)
-
-        controller.onInit()
-
-        verify(mediaHost).expansion = MediaHostState.EXPANDED
-    }
-
-    @Test
-    fun onInit_inSplitShade_newMediaLayoutNotAvailable_setsMediaAsCollapsed() {
-        setSplitShadeEnabled(true)
-        whenever(mediaFlags.useMediaSessionLayout()).thenReturn(false)
-
-        controller.onInit()
-
-        verify(mediaHost).expansion = MediaHostState.COLLAPSED
     }
 
     private fun setSplitShadeEnabled(enabled: Boolean) {

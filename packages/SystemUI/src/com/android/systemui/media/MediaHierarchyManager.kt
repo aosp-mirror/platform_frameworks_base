@@ -98,6 +98,10 @@ class MediaHierarchyManager @Inject constructor(
     private var currentBounds = Rect()
     private var animationStartBounds: Rect = Rect()
 
+    private var animationStartClipping = Rect()
+    private var currentClipping = Rect()
+    private var targetClipping = Rect()
+
     /**
      * The cross fade progress at the start of the animation. 0.5f means it's just switching between
      * the start and the end location and the content is fully faded, while 0.75f means that we're
@@ -144,7 +148,8 @@ class MediaHierarchyManager @Inject constructor(
             }
             interpolateBounds(animationStartBounds, targetBounds, boundsProgress,
                     result = currentBounds)
-            applyState(currentBounds, currentAlpha)
+            resolveClipping(currentClipping)
+            applyState(currentBounds, currentAlpha, clipBounds = currentClipping)
         }
         addListener(object : AnimatorListenerAdapter() {
             private var cancelled: Boolean = false
@@ -167,6 +172,12 @@ class MediaHierarchyManager @Inject constructor(
                 animationPending = false
             }
         })
+    }
+
+    private fun resolveClipping(result: Rect) {
+        if (animationStartClipping.isEmpty) result.set(targetClipping)
+        else if (targetClipping.isEmpty) result.set(animationStartClipping)
+        else result.setIntersect(animationStartClipping, targetClipping)
     }
 
     private val mediaHosts = arrayOfNulls<MediaHost>(LOCATION_DREAM_OVERLAY + 1)
@@ -629,10 +640,12 @@ class MediaHierarchyManager @Inject constructor(
                 // We also go in here in case the view was detached, since the bounds wouldn't
                 // be correct anymore
                 animationStartBounds.set(currentBounds)
+                animationStartClipping.set(currentClipping)
             } else {
                 // otherwise, let's take the freshest state, since the current one could
                 // be outdated
                 animationStartBounds.set(previousHost.currentBounds)
+                animationStartClipping.set(previousHost.currentClipping)
             }
             val transformationType = calculateTransformationType()
             var needsCrossFade = transformationType == TRANSFORMATION_TYPE_FADE
@@ -745,7 +758,7 @@ class MediaHierarchyManager @Inject constructor(
             // Let's immediately apply the target state (which is interpolated) if there is
             // no animation running. Otherwise the animation update will already update
             // the location
-            applyState(targetBounds, carouselAlpha)
+            applyState(targetBounds, carouselAlpha, clipBounds = targetClipping)
         }
     }
 
@@ -769,9 +782,11 @@ class MediaHierarchyManager @Inject constructor(
             val newBounds = endHost.currentBounds
             val previousBounds = starthost.currentBounds
             targetBounds = interpolateBounds(previousBounds, newBounds, progress)
+            targetClipping = endHost.currentClipping
         } else if (endHost != null) {
             val bounds = endHost.currentBounds
             targetBounds.set(bounds)
+            targetClipping = endHost.currentClipping
         }
     }
 
@@ -879,8 +894,14 @@ class MediaHierarchyManager @Inject constructor(
     /**
      * Apply the current state to the view, updating it's bounds and desired state
      */
-    private fun applyState(bounds: Rect, alpha: Float, immediately: Boolean = false) {
+    private fun applyState(
+        bounds: Rect,
+        alpha: Float,
+        immediately: Boolean = false,
+        clipBounds: Rect = EMPTY_RECT
+    ) {
         currentBounds.set(bounds)
+        currentClipping = clipBounds
         carouselAlpha = if (isCurrentlyFading()) alpha else 1.0f
         val onlyUseEndState = !isCurrentlyInGuidedTransformation() || isCurrentlyFading()
         val startLocation = if (onlyUseEndState) -1 else previousLocation
@@ -889,6 +910,10 @@ class MediaHierarchyManager @Inject constructor(
         mediaCarouselController.setCurrentState(startLocation, endLocation, progress, immediately)
         updateHostAttachment()
         if (currentAttachmentLocation == IN_OVERLAY) {
+            // Setting the clipping on the hierarchy of `mediaFrame` does not work
+            if (!currentClipping.isEmpty) {
+                currentBounds.intersect(currentClipping)
+            }
             mediaFrame.setLeftTopRightBottom(
                     currentBounds.left,
                     currentBounds.top,
@@ -1113,6 +1138,7 @@ class MediaHierarchyManager @Inject constructor(
         const val TRANSFORMATION_TYPE_FADE = 1
     }
 }
+private val EMPTY_RECT = Rect()
 
 @IntDef(prefix = ["TRANSFORMATION_TYPE_"], value = [
     MediaHierarchyManager.TRANSFORMATION_TYPE_TRANSITION,

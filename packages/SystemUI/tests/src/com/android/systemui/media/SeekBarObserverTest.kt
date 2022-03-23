@@ -43,7 +43,7 @@ class SeekBarObserverTest : SysuiTestCase() {
     private val enabledHeight = 2
 
     private lateinit var observer: SeekBarObserver
-    @Mock private lateinit var mockHolder: PlayerViewHolder
+    @Mock private lateinit var mockHolder: MediaViewHolder
     @Mock private lateinit var mockSquigglyProgress: SquigglyProgress
     private lateinit var seekBarView: SeekBar
     private lateinit var elapsedTimeView: TextView
@@ -64,10 +64,8 @@ class SeekBarObserverTest : SysuiTestCase() {
         elapsedTimeView = TextView(context)
         totalTimeView = TextView(context)
         whenever(mockHolder.seekBar).thenReturn(seekBarView)
-        whenever(mockHolder.elapsedTimeView).thenReturn(elapsedTimeView)
-        whenever(mockHolder.totalTimeView).thenReturn(totalTimeView)
 
-        observer = SeekBarObserver(mockHolder, false /* useSessionLayout */)
+        observer = SeekBarObserver(mockHolder)
     }
 
     @Test
@@ -79,8 +77,6 @@ class SeekBarObserverTest : SysuiTestCase() {
         // THEN seek bar shows just a thin line with no text
         assertThat(seekBarView.isEnabled()).isFalse()
         assertThat(seekBarView.getThumb().getAlpha()).isEqualTo(0)
-        assertThat(elapsedTimeView.getText()).isEqualTo("")
-        assertThat(totalTimeView.getText()).isEqualTo("")
         assertThat(seekBarView.contentDescription).isEqualTo("")
         assertThat(seekBarView.maxHeight).isEqualTo(disabledHeight)
     }
@@ -93,8 +89,6 @@ class SeekBarObserverTest : SysuiTestCase() {
         observer.onChanged(data)
         // THEN seek bar is visible and thick
         assertThat(seekBarView.getVisibility()).isEqualTo(View.VISIBLE)
-        assertThat(elapsedTimeView.getVisibility()).isEqualTo(View.VISIBLE)
-        assertThat(totalTimeView.getVisibility()).isEqualTo(View.VISIBLE)
         assertThat(seekBarView.maxHeight).isEqualTo(enabledHeight)
     }
 
@@ -106,8 +100,6 @@ class SeekBarObserverTest : SysuiTestCase() {
         // THEN seek bar shows the progress
         assertThat(seekBarView.progress).isEqualTo(3000)
         assertThat(seekBarView.max).isEqualTo(120000)
-        assertThat(elapsedTimeView.getText()).isEqualTo("00:03")
-        assertThat(totalTimeView.getText()).isEqualTo("02:00")
 
         val desc = context.getString(R.string.controls_media_seekbar_description, "00:03", "02:00")
         assertThat(seekBarView.contentDescription).isEqualTo(desc)
