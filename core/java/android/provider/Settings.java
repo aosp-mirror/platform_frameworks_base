@@ -78,6 +78,7 @@ import android.os.ResultReceiver;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.speech.tts.TextToSpeech;
+import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.AndroidException;
 import android.util.ArrayMap;
@@ -11303,8 +11304,9 @@ public final class Settings {
 
         /**
          * Whether or not data roaming is enabled. (0 = false, 1 = true)
+         * Use {@link TelephonyManager#isDataRoamingEnabled} instead of calling via settings.
          */
-        @Readable
+        @Readable(maxTargetSdk = Build.VERSION_CODES.S)
         public static final String DATA_ROAMING = "data_roaming";
 
         /**
