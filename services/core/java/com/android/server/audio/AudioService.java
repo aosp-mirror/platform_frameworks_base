@@ -96,6 +96,7 @@ import android.media.IAudioServerStateDispatcher;
 import android.media.IAudioService;
 import android.media.ICapturePresetDevicesRoleDispatcher;
 import android.media.ICommunicationDeviceDispatcher;
+import android.media.IDeviceVolumeBehaviorDispatcher;
 import android.media.IMuteAwaitConnectionCallback;
 import android.media.IPlaybackConfigDispatcher;
 import android.media.IRecordingConfigDispatcher;
@@ -341,6 +342,7 @@ public class AudioService extends IAudioService.Stub
     private static final int MSG_ADD_ASSISTANT_SERVICE_UID = 44;
     private static final int MSG_REMOVE_ASSISTANT_SERVICE_UID = 45;
     private static final int MSG_UPDATE_ACTIVE_ASSISTANT_SERVICE_UID = 46;
+    private static final int MSG_DISPATCH_DEVICE_VOLUME_BEHAVIOR = 47;
 
     // start of messages handled under wakelock
     //   these messages can only be queued, i.e. sent with queueMsgUnderWakeLock(),
@@ -876,13 +878,23 @@ public class AudioService extends IAudioService.Stub
 
     /** @hide */
     public AudioService(Context context) {
-        this(context, AudioSystemAdapter.getDefaultAdapter(),
+        this(context,
+                AudioSystemAdapter.getDefaultAdapter(),
                 SystemServerAdapter.getDefaultAdapter(context),
-                SettingsAdapter.getDefaultAdapter());
+                SettingsAdapter.getDefaultAdapter(),
+                null);
     }
 
+    /**
+     * @param context
+     * @param audioSystem Adapter for {@link AudioSystem}
+     * @param systemServer Adapter for privilieged functionality for system server components
+     * @param settings Adapter for {@link Settings}
+     * @param looper Looper to use for the service's message handler. If this is null, an
+     *               {@link AudioSystemThread} is created as the messaging thread instead.
+     */
     public AudioService(Context context, AudioSystemAdapter audioSystem,
-            SystemServerAdapter systemServer, SettingsAdapter settings) {
+            SystemServerAdapter systemServer, SettingsAdapter settings, @Nullable Looper looper) {
         sLifecycleLogger.log(new AudioEventLogger.StringEvent("AudioService()"));
         mContext = context;
         mContentResolver = context.getContentResolver();
@@ -1010,7 +1022,11 @@ public class AudioService extends IAudioService.Stub
                         MAX_STREAM_VOLUME[AudioSystem.STREAM_SYSTEM];
         }
 
-        createAudioSystemThread();
+        if (looper == null) {
+            createAudioSystemThread();
+        } else {
+            mAudioHandler = new AudioHandler(looper);
+        }
 
         AudioSystem.setErrorCallback(mAudioSystemCallback);
 
@@ -6457,32 +6473,39 @@ public class AudioService extends IAudioService.Stub
             return;
         }
 
-        int audioSystemDeviceOut = AudioDeviceInfo.convertDeviceTypeToInternalDevice(
-                device.getType());
-        setDeviceVolumeBehaviorInternal(audioSystemDeviceOut, deviceVolumeBehavior, pkgName);
-
-        persistDeviceVolumeBehavior(audioSystemDeviceOut, deviceVolumeBehavior);
+        setDeviceVolumeBehaviorInternal(device, deviceVolumeBehavior, pkgName);
+        persistDeviceVolumeBehavior(device.getInternalType(), deviceVolumeBehavior);
     }
 
-    private void setDeviceVolumeBehaviorInternal(int audioSystemDeviceOut,
+    private void setDeviceVolumeBehaviorInternal(@NonNull AudioDeviceAttributes device,
             @AudioManager.DeviceVolumeBehavior int deviceVolumeBehavior, @NonNull String caller) {
+        int audioSystemDeviceOut = device.getInternalType();
+        boolean volumeBehaviorChanged = false;
         // update device masks based on volume behavior
         switch (deviceVolumeBehavior) {
             case AudioManager.DEVICE_VOLUME_BEHAVIOR_VARIABLE:
-                removeAudioSystemDeviceOutFromFullVolumeDevices(audioSystemDeviceOut);
-                removeAudioSystemDeviceOutFromFixedVolumeDevices(audioSystemDeviceOut);
+                volumeBehaviorChanged |=
+                        removeAudioSystemDeviceOutFromFullVolumeDevices(audioSystemDeviceOut)
+                        | removeAudioSystemDeviceOutFromFixedVolumeDevices(audioSystemDeviceOut);
                 break;
             case AudioManager.DEVICE_VOLUME_BEHAVIOR_FIXED:
-                removeAudioSystemDeviceOutFromFullVolumeDevices(audioSystemDeviceOut);
-                addAudioSystemDeviceOutToFixedVolumeDevices(audioSystemDeviceOut);
+                volumeBehaviorChanged |=
+                        removeAudioSystemDeviceOutFromFullVolumeDevices(audioSystemDeviceOut)
+                        | addAudioSystemDeviceOutToFixedVolumeDevices(audioSystemDeviceOut);
                 break;
             case AudioManager.DEVICE_VOLUME_BEHAVIOR_FULL:
-                addAudioSystemDeviceOutToFullVolumeDevices(audioSystemDeviceOut);
-                removeAudioSystemDeviceOutFromFixedVolumeDevices(audioSystemDeviceOut);
+                volumeBehaviorChanged |=
+                        addAudioSystemDeviceOutToFullVolumeDevices(audioSystemDeviceOut)
+                        | removeAudioSystemDeviceOutFromFixedVolumeDevices(audioSystemDeviceOut);
                 break;
             case AudioManager.DEVICE_VOLUME_BEHAVIOR_ABSOLUTE:
             case AudioManager.DEVICE_VOLUME_BEHAVIOR_ABSOLUTE_MULTI_MODE:
                 throw new IllegalArgumentException("Absolute volume unsupported for now");
+        }
+
+        if (volumeBehaviorChanged) {
+            sendMsg(mAudioHandler, MSG_DISPATCH_DEVICE_VOLUME_BEHAVIOR, SENDMSG_QUEUE,
+                    deviceVolumeBehavior, 0, device, /*delay*/ 0);
         }
 
         // log event and caller
@@ -7761,6 +7784,14 @@ public class AudioService extends IAudioService.Stub
     /** Handles internal volume messages in separate volume thread. */
     private class AudioHandler extends Handler {
 
+        AudioHandler() {
+            super();
+        }
+
+        AudioHandler(Looper looper) {
+            super(looper);
+        }
+
         private void setAllVolumes(VolumeStreamState streamState) {
 
             // Apply volume
@@ -8062,6 +8093,10 @@ public class AudioService extends IAudioService.Stub
                     break;
                 case MSG_UPDATE_ACTIVE_ASSISTANT_SERVICE_UID:
                     updateActiveAssistantServiceUids();
+                    break;
+
+                case MSG_DISPATCH_DEVICE_VOLUME_BEHAVIOR:
+                    dispatchDeviceVolumeBehavior((AudioDeviceAttributes) msg.obj, msg.arg1);
                     break;
             }
         }
@@ -9080,6 +9115,35 @@ public class AudioService extends IAudioService.Stub
         mMuteAwaitConnectionDispatchers.finishBroadcast();
     }
 
+    final RemoteCallbackList<IDeviceVolumeBehaviorDispatcher> mDeviceVolumeBehaviorDispatchers =
+            new RemoteCallbackList<IDeviceVolumeBehaviorDispatcher>();
+
+    /**
+     *  @see AudioDeviceVolumeManager#addOnDeviceVolumeBehaviorChangedListener and
+     *  AudioDeviceVolumeManager#removeOnDeviceVolumeBehaviorChangedListener
+     */
+    public void registerDeviceVolumeBehaviorDispatcher(boolean register,
+            @NonNull IDeviceVolumeBehaviorDispatcher dispatcher) {
+        enforceQueryStateOrModifyRoutingPermission();
+        Objects.requireNonNull(dispatcher);
+        if (register) {
+            mDeviceVolumeBehaviorDispatchers.register(dispatcher);
+        } else {
+            mDeviceVolumeBehaviorDispatchers.unregister(dispatcher);
+        }
+    }
+
+    private void dispatchDeviceVolumeBehavior(AudioDeviceAttributes device, int volumeBehavior) {
+        final int dispatchers = mDeviceVolumeBehaviorDispatchers.beginBroadcast();
+        for (int i = 0; i < dispatchers; i++) {
+            try {
+                mDeviceVolumeBehaviorDispatchers.getBroadcastItem(i)
+                        .dispatchDeviceVolumeBehaviorChanged(device, volumeBehavior);
+            } catch (RemoteException e) {
+            }
+        }
+        mDeviceVolumeBehaviorDispatchers.finishBroadcast();
+    }
 
     //==========================================================================================
     // Device orientation
@@ -9310,14 +9374,20 @@ public class AudioService extends IAudioService.Stub
                 if (DEBUG_VOL) {
                     Log.d(TAG, "CEC sink: setting HDMI as full vol device");
                 }
-                addAudioSystemDeviceOutToFullVolumeDevices(AudioSystem.DEVICE_OUT_HDMI);
+                setDeviceVolumeBehaviorInternal(
+                        new AudioDeviceAttributes(AudioSystem.DEVICE_OUT_HDMI, ""),
+                        AudioManager.DEVICE_VOLUME_BEHAVIOR_FULL,
+                        "AudioService.updateHdmiCecSinkLocked()");
             } else {
                 if (DEBUG_VOL) {
                     Log.d(TAG, "TV, no CEC: setting HDMI as regular vol device");
                 }
                 // Android TV devices without CEC service apply software volume on
                 // HDMI output
-                removeAudioSystemDeviceOutFromFullVolumeDevices(AudioSystem.DEVICE_OUT_HDMI);
+                setDeviceVolumeBehaviorInternal(
+                        new AudioDeviceAttributes(AudioSystem.DEVICE_OUT_HDMI, ""),
+                        AudioManager.DEVICE_VOLUME_BEHAVIOR_VARIABLE,
+                        "AudioService.updateHdmiCecSinkLocked()");
             }
             postUpdateVolumeStatesForAudioDevice(AudioSystem.DEVICE_OUT_HDMI,
                     "HdmiPlaybackClient.DisplayStatusCallback");
@@ -11463,8 +11533,8 @@ public class AudioService extends IAudioService.Stub
                 continue;
             }
 
-            setDeviceVolumeBehaviorInternal(deviceType, deviceVolumeBehavior,
-                    "AudioService.restoreDeviceVolumeBehavior()");
+            setDeviceVolumeBehaviorInternal(new AudioDeviceAttributes(deviceType, ""),
+                    deviceVolumeBehavior, "AudioService.restoreDeviceVolumeBehavior()");
         }
     }
 
@@ -11479,36 +11549,36 @@ public class AudioService extends IAudioService.Stub
                 != AudioManager.DEVICE_VOLUME_BEHAVIOR_UNSET;
     }
 
-    private void addAudioSystemDeviceOutToFixedVolumeDevices(int audioSystemDeviceOut) {
+    private boolean addAudioSystemDeviceOutToFixedVolumeDevices(int audioSystemDeviceOut) {
         if (DEBUG_VOL) {
             Log.d(TAG, "Adding DeviceType: 0x" + Integer.toHexString(audioSystemDeviceOut)
                     + " to mFixedVolumeDevices");
         }
-        mFixedVolumeDevices.add(audioSystemDeviceOut);
+        return mFixedVolumeDevices.add(audioSystemDeviceOut);
     }
 
-    private void removeAudioSystemDeviceOutFromFixedVolumeDevices(int audioSystemDeviceOut) {
+    private boolean removeAudioSystemDeviceOutFromFixedVolumeDevices(int audioSystemDeviceOut) {
         if (DEBUG_VOL) {
             Log.d(TAG, "Removing DeviceType: 0x" + Integer.toHexString(audioSystemDeviceOut)
                     + " from mFixedVolumeDevices");
         }
-        mFixedVolumeDevices.remove(audioSystemDeviceOut);
+        return mFixedVolumeDevices.remove(audioSystemDeviceOut);
     }
 
-    private void addAudioSystemDeviceOutToFullVolumeDevices(int audioSystemDeviceOut) {
+    private boolean addAudioSystemDeviceOutToFullVolumeDevices(int audioSystemDeviceOut) {
         if (DEBUG_VOL) {
             Log.d(TAG, "Adding DeviceType: 0x" + Integer.toHexString(audioSystemDeviceOut)
                     + " to mFullVolumeDevices");
         }
-        mFullVolumeDevices.add(audioSystemDeviceOut);
+        return mFullVolumeDevices.add(audioSystemDeviceOut);
     }
 
-    private void removeAudioSystemDeviceOutFromFullVolumeDevices(int audioSystemDeviceOut) {
+    private boolean removeAudioSystemDeviceOutFromFullVolumeDevices(int audioSystemDeviceOut) {
         if (DEBUG_VOL) {
             Log.d(TAG, "Removing DeviceType: 0x" + Integer.toHexString(audioSystemDeviceOut)
                     + " from mFullVolumeDevices");
         }
-        mFullVolumeDevices.remove(audioSystemDeviceOut);
+        return mFullVolumeDevices.remove(audioSystemDeviceOut);
     }
 
     //====================
