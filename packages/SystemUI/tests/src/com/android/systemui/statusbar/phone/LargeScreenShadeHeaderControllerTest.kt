@@ -27,7 +27,7 @@ import org.mockito.Mockito.`when` as whenever
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
-class SplitShadeHeaderControllerTest : SysuiTestCase() {
+class LargeScreenShadeHeaderControllerTest : SysuiTestCase() {
 
     @Mock private lateinit var view: View
     @Mock private lateinit var statusIcons: StatusIconContainer
@@ -43,7 +43,7 @@ class SplitShadeHeaderControllerTest : SysuiTestCase() {
     @JvmField @Rule val mockitoRule = MockitoJUnit.rule()
     var viewVisibility = View.GONE
 
-    private lateinit var splitShadeHeaderController: SplitShadeHeaderController
+    private lateinit var mLargeScreenShadeHeaderController: LargeScreenShadeHeaderController
     private lateinit var carrierIconSlots: List<String>
 
     @Before
@@ -62,7 +62,7 @@ class SplitShadeHeaderControllerTest : SysuiTestCase() {
         }
         whenever(view.visibility).thenAnswer { _ -> viewVisibility }
         whenever(featureFlags.isEnabled(Flags.COMBINED_QS_HEADERS)).thenReturn(false)
-        splitShadeHeaderController = SplitShadeHeaderController(
+        mLargeScreenShadeHeaderController = LargeScreenShadeHeaderController(
                 view,
                 statusBarIconController,
                 privacyIconsController,
@@ -76,11 +76,11 @@ class SplitShadeHeaderControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun setVisible_onlyInSplitShade() {
+    fun setVisible_onlyWhenActive() {
         makeShadeVisible()
         assertThat(viewVisibility).isEqualTo(View.VISIBLE)
 
-        splitShadeHeaderController.splitShadeMode = false
+        mLargeScreenShadeHeaderController.active = false
         assertThat(viewVisibility).isEqualTo(View.GONE)
     }
 
@@ -94,7 +94,7 @@ class SplitShadeHeaderControllerTest : SysuiTestCase() {
     @Test
     fun shadeExpandedFraction_updatesAlpha() {
         makeShadeVisible()
-        splitShadeHeaderController.shadeExpandedFraction = 0.5f
+        mLargeScreenShadeHeaderController.shadeExpandedFraction = 0.5f
         verify(view).setAlpha(ShadeInterpolation.getContentAlpha(0.5f))
     }
 
@@ -117,7 +117,7 @@ class SplitShadeHeaderControllerTest : SysuiTestCase() {
     }
 
     private fun makeShadeVisible() {
-        splitShadeHeaderController.splitShadeMode = true
-        splitShadeHeaderController.shadeExpanded = true
+        mLargeScreenShadeHeaderController.active = true
+        mLargeScreenShadeHeaderController.shadeExpanded = true
     }
 }

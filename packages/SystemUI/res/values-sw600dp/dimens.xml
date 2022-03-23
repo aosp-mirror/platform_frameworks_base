@@ -67,4 +67,6 @@
 
     <!-- The width of large/content heavy dialogs (e.g. Internet, Media output, etc) -->
     <dimen name="large_dialog_width">472dp</dimen>
+
+    <dimen name="large_screen_shade_header_height">42dp</dimen>
 </resources>
