@@ -115,6 +115,7 @@ final class HotwordDetectionConnection {
     private static final Duration MAX_UPDATE_TIMEOUT_DURATION =
             Duration.ofMillis(MAX_UPDATE_TIMEOUT_MILLIS);
     private static final long RESET_DEBUG_HOTWORD_LOGGING_TIMEOUT_MILLIS = 60 * 60 * 1000; // 1 hour
+    private static final int MAX_ISOLATED_PROCESS_NUMBER = 10;
 
     // Hotword metrics
     private static final int METRICS_INIT_UNKNOWN_TIMEOUT =
@@ -873,7 +874,8 @@ final class HotwordDetectionConnection {
         ServiceConnection createLocked() {
             ServiceConnection connection =
                     new ServiceConnection(mContext, mIntent, mBindingFlags, mUser,
-                            IHotwordDetectionService.Stub::asInterface, ++mRestartCount);
+                            IHotwordDetectionService.Stub::asInterface,
+                            mRestartCount++ % MAX_ISOLATED_PROCESS_NUMBER);
             connection.connect();
 
             updateAudioFlinger(connection, mAudioFlinger);
