@@ -111,7 +111,7 @@
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"درحال ضبط صفحه‌نمایش و صدا"</string>
     <string name="screenrecord_taps_label" msgid="1595690528298857649">"نمایش قسمت‌های لمس‌شده روی صفحه‌نمایش"</string>
     <string name="screenrecord_stop_text" msgid="6549288689506057686">"ضربه برای توقف"</string>
-    <string name="screenrecord_stop_label" msgid="72699670052087989">"توقف"</string>
+    <string name="screenrecord_stop_label" msgid="72699670052087989">"متوقف کردن"</string>
     <string name="screenrecord_pause_label" msgid="6004054907104549857">"مکث"</string>
     <string name="screenrecord_resume_label" msgid="4972223043729555575">"ازسرگیری"</string>
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"لغو"</string>
@@ -427,7 +427,7 @@
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"‏NFC فعال است"</string>
     <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"ضبط صفحه‌نمایش"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"شروع"</string>
-    <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"توقف"</string>
+    <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"متوقف کردن"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"میکروفون دستگاه لغو انسداد شود؟"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"دوربین دستگاه لغو انسداد شود؟"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"دوربین و میکروفون دستگاه لغو انسداد شود؟"</string>
@@ -818,7 +818,7 @@
     <string name="keyboard_key_enter" msgid="8633362970109751646">"ورود"</string>
     <string name="keyboard_key_backspace" msgid="4095278312039628074">"پس‌بر"</string>
     <string name="keyboard_key_media_play_pause" msgid="8389984232732277478">"پخش/مکث"</string>
-    <string name="keyboard_key_media_stop" msgid="1509943745250377699">"توقف"</string>
+    <string name="keyboard_key_media_stop" msgid="1509943745250377699">"متوقف کردن"</string>
     <string name="keyboard_key_media_next" msgid="8502476691227914952">"بعدی"</string>
     <string name="keyboard_key_media_previous" msgid="5637875709190955351">"قبلی"</string>
     <string name="keyboard_key_media_rewind" msgid="3450387734224327577">"عقب بردن"</string>
