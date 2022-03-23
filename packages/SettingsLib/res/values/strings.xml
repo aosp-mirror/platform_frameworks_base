@@ -1434,6 +1434,8 @@
     <string name="guest_remove_guest_dialog_title">Remove guest?</string>
     <!-- Label for button in confirmation dialog when resetting guest user [CHAR LIMIT=35] -->
     <string name="guest_reset_guest_confirm_button">Reset</string>
+    <!-- Label for button in confirmation dialog when removing guest session [CHAR LIMIT=35] -->
+    <string name="guest_remove_guest_confirm_button">Remove</string>
     <!-- Status message indicating the device is in the process of resetting the guest user. [CHAR_LIMIT=NONE] -->
     <string name="guest_resetting">Resetting guest\u2026</string>
     <!-- An option in a photo selection dialog to take a new photo [CHAR LIMIT=50] -->
