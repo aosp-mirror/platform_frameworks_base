@@ -67,6 +67,7 @@ public class QuickAccessWalletClientImpl implements QuickAccessWalletClient, Ser
     private final Context mContext;
     private final Queue<ApiCaller> mRequestQueue;
     private final Map<WalletServiceEventListener, String> mEventListeners;
+    private final Executor mLifecycleExecutor;
     private boolean mIsConnected;
     /** Timeout for active service connections (1 minute) */
     private static final long SERVICE_CONNECTION_TIMEOUT_MS = 60 * 1000;
@@ -79,10 +80,11 @@ public class QuickAccessWalletClientImpl implements QuickAccessWalletClient, Ser
 
     private static final int MSG_TIMEOUT_SERVICE = 5;
 
-    QuickAccessWalletClientImpl(@NonNull Context context) {
+    QuickAccessWalletClientImpl(@NonNull Context context, @Nullable Executor bgExecutor) {
         mContext = context.getApplicationContext();
         mServiceInfo = QuickAccessWalletServiceInfo.tryCreate(context);
         mHandler = new Handler(Looper.getMainLooper());
+        mLifecycleExecutor = (bgExecutor == null) ? Runnable::run : bgExecutor;
         mRequestQueue = new LinkedList<>();
         mEventListeners = new HashMap<>(1);
     }
@@ -369,7 +371,7 @@ public class QuickAccessWalletClientImpl implements QuickAccessWalletClient, Ser
         Intent intent = new Intent(SERVICE_INTERFACE);
         intent.setComponent(mServiceInfo.getComponentName());
         int flags = Context.BIND_AUTO_CREATE | Context.BIND_WAIVE_PRIORITY;
-        mContext.bindService(intent, this, flags);
+        mLifecycleExecutor.execute(() -> mContext.bindService(intent, this, flags));
         resetServiceConnectionTimeout();
     }
 
@@ -411,7 +413,7 @@ public class QuickAccessWalletClientImpl implements QuickAccessWalletClient, Ser
             return;
         }
         mIsConnected = false;
-        mContext.unbindService(/*conn=*/ this);
+        mLifecycleExecutor.execute(() -> mContext.unbindService(/*conn=*/ this));
         mService = null;
         mEventListeners.clear();
         mRequestQueue.clear();
