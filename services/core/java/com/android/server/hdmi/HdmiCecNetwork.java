@@ -269,7 +269,10 @@ public class HdmiCecNetwork {
             // The addition of a local device should not notify listeners
             return;
         }
-        if (old == null) {
+        if (info.getPhysicalAddress() == HdmiDeviceInfo.PATH_INVALID) {
+            // Don't notify listeners of devices that haven't reported their physical address yet
+            return;
+        } else if (old == null  || old.getPhysicalAddress() == HdmiDeviceInfo.PATH_INVALID) {
             invokeDeviceEventListener(info,
                     HdmiControlManager.DEVICE_EVENT_ADD_DEVICE);
         } else if (!old.equals(info)) {
@@ -296,7 +299,10 @@ public class HdmiCecNetwork {
         assertRunOnServiceThread();
         HdmiDeviceInfo old = addDeviceInfo(info);
 
-        if (old == null) {
+        if (info.getPhysicalAddress() == HdmiDeviceInfo.PATH_INVALID) {
+            // Don't notify listeners of devices that haven't reported their physical address yet
+            return;
+        } else if (old == null  || old.getPhysicalAddress() == HdmiDeviceInfo.PATH_INVALID) {
             invokeDeviceEventListener(info,
                     HdmiControlManager.DEVICE_EVENT_ADD_DEVICE);
         } else if (!old.equals(info)) {
@@ -389,6 +395,10 @@ public class HdmiCecNetwork {
         HdmiDeviceInfo info = removeDeviceInfo(HdmiDeviceInfo.idForCecDevice(address));
 
         localDevice.mCecMessageCache.flushMessagesFrom(address);
+        if (info.getPhysicalAddress() == HdmiDeviceInfo.PATH_INVALID) {
+            // Don't notify listeners of devices that haven't reported their physical address yet
+            return;
+        }
         invokeDeviceEventListener(info,
                 HdmiControlManager.DEVICE_EVENT_REMOVE_DEVICE);
     }
@@ -823,7 +833,10 @@ public class HdmiCecNetwork {
     public void clearDeviceList() {
         assertRunOnServiceThread();
         for (HdmiDeviceInfo info : HdmiUtils.sparseArrayToList(mDeviceInfos)) {
-            if (info.getPhysicalAddress() == getPhysicalAddress()) {
+            if (info.getPhysicalAddress() == getPhysicalAddress()
+                    || info.getPhysicalAddress() == HdmiDeviceInfo.PATH_INVALID) {
+                // Don't notify listeners of local devices or devices that haven't reported their
+                // physical address yet
                 continue;
             }
             invokeDeviceEventListener(info,
