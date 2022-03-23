@@ -181,6 +181,80 @@ public class AudioDeviceVolumeManager {
         }
     }
 
+    /**
+     * Manages the OnDeviceVolumeBehaviorChangedListener listeners and
+     * DeviceVolumeBehaviorDispatcherStub
+     */
+    private final CallbackUtil.LazyListenerManager<OnDeviceVolumeBehaviorChangedListener>
+            mDeviceVolumeBehaviorChangedListenerMgr = new CallbackUtil.LazyListenerManager();
+
+    /**
+     * @hide
+     * Interface definition of a callback to be invoked when the volume behavior of an audio device
+     * is updated.
+     */
+    public interface OnDeviceVolumeBehaviorChangedListener {
+        /**
+         * Called on the listener to indicate that the volume behavior of a device has changed.
+         * @param device the audio device whose volume behavior changed
+         * @param volumeBehavior the new volume behavior of the audio device
+         */
+        void onDeviceVolumeBehaviorChanged(
+                @NonNull AudioDeviceAttributes device,
+                @AudioManager.DeviceVolumeBehavior int volumeBehavior);
+    }
+
+    /**
+     * @hide
+     * Adds a listener for being notified of changes to any device's volume behavior.
+     * @throws SecurityException if the caller doesn't hold the required permission
+     */
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.MODIFY_AUDIO_ROUTING,
+            android.Manifest.permission.QUERY_AUDIO_STATE
+    })
+    public void addOnDeviceVolumeBehaviorChangedListener(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull OnDeviceVolumeBehaviorChangedListener listener)
+            throws SecurityException {
+        mDeviceVolumeBehaviorChangedListenerMgr.addListener(executor, listener,
+                "addOnDeviceVolumeBehaviorChangedListener",
+                () -> new DeviceVolumeBehaviorDispatcherStub());
+    }
+
+    /**
+     * @hide
+     * Removes a previously added listener of changes to device volume behavior.
+     */
+
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.MODIFY_AUDIO_ROUTING,
+            android.Manifest.permission.QUERY_AUDIO_STATE
+    })
+    public void removeOnDeviceVolumeBehaviorChangedListener(
+            @NonNull OnDeviceVolumeBehaviorChangedListener listener) {
+        mDeviceVolumeBehaviorChangedListenerMgr.removeListener(listener,
+                "removeOnDeviceVolumeBehaviorChangedListener");
+    }
+
+    private final class DeviceVolumeBehaviorDispatcherStub
+            extends IDeviceVolumeBehaviorDispatcher.Stub implements CallbackUtil.DispatcherStub {
+        public void register(boolean register) {
+            try {
+                getService().registerDeviceVolumeBehaviorDispatcher(register, this);
+            } catch (RemoteException e) {
+                e.rethrowFromSystemServer();
+            }
+        }
+
+        @Override
+        public void dispatchDeviceVolumeBehaviorChanged(@NonNull AudioDeviceAttributes device,
+                @AudioManager.DeviceVolumeBehavior int volumeBehavior) {
+            mDeviceVolumeBehaviorChangedListenerMgr.callListeners((listener) ->
+                    listener.onDeviceVolumeBehaviorChanged(device, volumeBehavior));
+        }
+    }
+
     private static IAudioService getService() {
         if (sService != null) {
             return sService;
