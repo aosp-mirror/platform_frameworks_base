@@ -54,6 +54,13 @@ class PendingJobQueue {
                 } else if (t2 == AppJobQueue.NO_NEXT_TIMESTAMP) {
                     return -1;
                 }
+                final int o1 = ajq1.peekNextOverrideState();
+                final int o2 = ajq2.peekNextOverrideState();
+                if (o1 != o2) {
+                    // Higher override state (OVERRIDE_FULL) should be before lower state
+                    // (OVERRIDE_SOFT)
+                    return Integer.compare(o2, o1);
+                }
                 return Long.compare(t1, t2);
             });
 
@@ -185,6 +192,7 @@ class PendingJobQueue {
 
     private static final class AppJobQueue {
         static final long NO_NEXT_TIMESTAMP = -1L;
+        static final int NO_NEXT_OVERRIDE_STATE = -1;
 
         private static class AdjustedJobStatus {
             public long adjustedEnqueueTime;
@@ -207,7 +215,7 @@ class PendingJobQueue {
             if (job1.overrideState != job2.overrideState) {
                 // Higher override state (OVERRIDE_FULL) should be before lower state
                 // (OVERRIDE_SOFT)
-                return job2.overrideState - job1.overrideState;
+                return Integer.compare(job2.overrideState, job1.overrideState);
             }
 
             final boolean job1EJ = job1.isRequestedExpeditedJob();
@@ -223,18 +231,15 @@ class PendingJobQueue {
             if (job1Priority != job2Priority) {
                 // Use the priority set by an app for intra-app job ordering. Higher
                 // priority should be before lower priority.
-                return job2Priority - job1Priority;
+                return Integer.compare(job2Priority, job1Priority);
             }
 
             if (job1.lastEvaluatedBias != job2.lastEvaluatedBias) {
                 // Higher bias should go first.
-                return job2.lastEvaluatedBias - job1.lastEvaluatedBias;
+                return Integer.compare(job2.lastEvaluatedBias, job1.lastEvaluatedBias);
             }
 
-            if (job1.enqueueTime < job2.enqueueTime) {
-                return -1;
-            }
-            return job1.enqueueTime > job2.enqueueTime ? 1 : 0;
+            return Long.compare(job1.enqueueTime, job2.enqueueTime);
         };
 
         private static final Pools.Pool<AdjustedJobStatus> mAdjustedJobStatusPool =
@@ -344,9 +349,14 @@ class PendingJobQueue {
             if (mCurIndex >= mJobs.size()) {
                 return null;
             }
-            JobStatus next = mJobs.get(mCurIndex).job;
-            mCurIndex++;
-            return next;
+            return mJobs.get(mCurIndex++).job;
+        }
+
+        int peekNextOverrideState() {
+            if (mCurIndex >= mJobs.size()) {
+                return NO_NEXT_OVERRIDE_STATE;
+            }
+            return mJobs.get(mCurIndex).job.overrideState;
         }
 
         long peekNextTimestamp() {
