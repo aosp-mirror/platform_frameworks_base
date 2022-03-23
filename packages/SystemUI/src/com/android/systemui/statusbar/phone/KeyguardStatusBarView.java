@@ -48,7 +48,6 @@ import com.android.systemui.animation.Interpolators;
 import com.android.systemui.battery.BatteryMeterView;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
@@ -500,13 +499,13 @@ public class KeyguardStatusBarView extends RelativeLayout {
     }
 
     /** Should only be called from {@link KeyguardStatusBarViewController}. */
-    void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    void dump(PrintWriter pw, String[] args) {
         pw.println("KeyguardStatusBarView:");
         pw.println("  mBatteryCharging: " + mBatteryCharging);
         pw.println("  mLayoutState: " + mLayoutState);
         pw.println("  mKeyguardUserSwitcherEnabled: " + mKeyguardUserSwitcherEnabled);
         if (mBatteryView != null) {
-            mBatteryView.dump(fd, pw, args);
+            mBatteryView.dump(pw, args);
         }
     }
 

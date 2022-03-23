@@ -23,7 +23,6 @@ import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
 import com.android.systemui.plugins.ClockPlugin;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -360,7 +359,7 @@ public class KeyguardClockSwitch extends RelativeLayout {
         }
     }
 
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         pw.println("KeyguardClockSwitch:");
         pw.println("  mClockPlugin: " + mClockPlugin);
         pw.println("  mClockFrame: " + mClockFrame);

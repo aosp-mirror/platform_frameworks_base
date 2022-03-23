@@ -90,7 +90,6 @@ import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.wakelock.SettableWakeLock;
 import com.android.systemui.util.wakelock.WakeLock;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.text.NumberFormat;
 
@@ -919,7 +918,7 @@ public class KeyguardIndicationController {
         }
     }
 
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         pw.println("KeyguardIndicationController:");
         pw.println("  mInitialTextColorState: " + mInitialTextColorState);
         pw.println("  mPowerPluggedInWired: " + mPowerPluggedInWired);
@@ -937,7 +936,7 @@ public class KeyguardIndicationController {
                 mTopIndicationView == null ? null : mTopIndicationView.getText()));
         pw.println("  computePowerIndication(): " + computePowerIndication());
         pw.println("  trustGrantedIndication: " + getTrustGrantedIndication());
-        mRotateTextViewController.dump(fd, pw, args);
+        mRotateTextViewController.dump(pw, args);
     }
 
     protected class BaseKeyguardCallback extends KeyguardUpdateMonitorCallback {

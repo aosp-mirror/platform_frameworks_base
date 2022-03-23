@@ -23,7 +23,6 @@ import com.android.internal.util.IndentingPrintWriter;
 import com.android.systemui.Dumpable;
 import com.android.systemui.dump.DumpManager;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.Collection;
 
@@ -105,7 +104,7 @@ public class LeakDetector implements Dumpable {
     }
 
     @Override
-    public void dump(FileDescriptor df, PrintWriter w, String[] args) {
+    public void dump(PrintWriter w, String[] args) {
         IndentingPrintWriter pw = new IndentingPrintWriter(w, "  ");
 
         pw.println("SYSUI LEAK DETECTOR");

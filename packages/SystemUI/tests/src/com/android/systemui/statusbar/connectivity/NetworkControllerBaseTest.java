@@ -148,7 +148,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
             // Print out mNetworkController state if the test fails.
             StringWriter sw = new StringWriter();
             PrintWriter pw = new PrintWriter(sw);
-            mNetworkController.dump(null, pw, null);
+            mNetworkController.dump(pw, null);
             pw.flush();
             Log.d(TAG, sw.toString());
         }

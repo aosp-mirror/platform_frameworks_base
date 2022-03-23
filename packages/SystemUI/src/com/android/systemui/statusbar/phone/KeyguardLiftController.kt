@@ -30,7 +30,6 @@ import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.util.Assert
 import com.android.systemui.util.sensors.AsyncSensorManager
-import java.io.FileDescriptor
 import java.io.PrintWriter
 import javax.inject.Inject
 
@@ -93,7 +92,7 @@ class KeyguardLiftController @Inject constructor(
         }
     }
 
-    override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {
+    override fun dump(pw: PrintWriter, args: Array<out String>) {
         pw.println("KeyguardLiftController:")
         pw.println("  pickupSensor: $pickupSensor")
         pw.println("  isListening: $isListening")

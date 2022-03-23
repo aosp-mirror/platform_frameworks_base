@@ -43,7 +43,6 @@ import com.android.systemui.statusbar.phone.ScrimController
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionListener
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.WallpaperController
-import java.io.FileDescriptor
 import java.io.PrintWriter
 import javax.inject.Inject
 import kotlin.math.max
@@ -435,7 +434,7 @@ class NotificationShadeDepthController @Inject constructor(
                 !keyguardStateController.isKeyguardFadingAway
     }
 
-    override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {
+    override fun dump(pw: PrintWriter, args: Array<out String>) {
         IndentingPrintWriter(pw, "  ").let {
             it.println("StatusBarWindowBlurController:")
             it.increaseIndent()

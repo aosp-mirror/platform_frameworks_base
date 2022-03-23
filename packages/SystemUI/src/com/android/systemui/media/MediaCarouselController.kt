@@ -32,7 +32,6 @@ import com.android.systemui.util.animation.UniqueObjectHostView
 import com.android.systemui.util.animation.requiresRemeasuring
 import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.systemui.util.time.SystemClock
-import java.io.FileDescriptor
 import java.io.PrintWriter
 import java.util.TreeMap
 import javax.inject.Inject
@@ -872,7 +871,7 @@ class MediaCarouselController @Inject constructor(
         mediaManager.onSwipeToDismiss()
     }
 
-    override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {
+    override fun dump(pw: PrintWriter, args: Array<out String>) {
         pw.apply {
             println("keysNeedRemoval: $keysNeedRemoval")
             println("playerKeys: ${MediaPlayerData.playerKeys()}")

@@ -44,7 +44,6 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.time.SystemClock;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
 /**
@@ -181,8 +180,8 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
     }
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        super.dump(fd, pw, args);
+    public void dump(PrintWriter pw, String[] args) {
+        super.dump(pw, args);
         pw.println("mShowingUdfpsBouncer=" + mShowingUdfpsBouncer);
         pw.println("mFaceDetectRunning=" + mFaceDetectRunning);
         pw.println("mStatusBarState=" + StatusBarState.toString(mStatusBarState));

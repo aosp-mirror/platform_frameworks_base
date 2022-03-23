@@ -33,7 +33,6 @@ import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.CommandQueue.Callbacks;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
 /**
@@ -202,7 +201,7 @@ public class LightBarTransitionsController implements Dumpable, Callbacks,
     }
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         pw.print("  mTransitionDeferring="); pw.print(mTransitionDeferring);
         if (mTransitionDeferring) {
             pw.println();

@@ -33,7 +33,6 @@ import com.android.systemui.Dumpable
 import com.android.systemui.broadcast.logging.BroadcastDispatcherLogger
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.settings.UserTracker
-import java.io.FileDescriptor
 import java.io.PrintWriter
 import java.util.concurrent.Executor
 
@@ -134,7 +133,7 @@ open class BroadcastDispatcher constructor (
         executor: Executor? = null,
         user: UserHandle? = null,
         @Context.RegisterReceiverFlags flags: Int = Context.RECEIVER_EXPORTED,
-        permission: String? = null,
+        permission: String? = null
     ) {
         checkFilter(filter)
         val data = ReceiverData(
@@ -186,13 +185,13 @@ open class BroadcastDispatcher constructor (
     protected open fun createUBRForUser(userId: Int) =
             UserBroadcastDispatcher(context, userId, bgLooper, bgExecutor, logger)
 
-    override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {
+    override fun dump(pw: PrintWriter, args: Array<out String>) {
         pw.println("Broadcast dispatcher:")
         val ipw = IndentingPrintWriter(pw, "  ")
         ipw.increaseIndent()
         for (index in 0 until receiversByUser.size()) {
             ipw.println("User ${receiversByUser.keyAt(index)}")
-            receiversByUser.valueAt(index).dump(fd, ipw, args)
+            receiversByUser.valueAt(index).dump(ipw, args)
         }
         ipw.decreaseIndent()
     }

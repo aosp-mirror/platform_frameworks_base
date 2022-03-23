@@ -92,7 +92,6 @@ import com.android.systemui.statusbar.notification.collection.notifcollection.Ra
 import com.android.systemui.util.Assert;
 import com.android.systemui.util.time.SystemClock;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -811,7 +810,7 @@ public class NotifCollection implements Dumpable {
     }
 
     @Override
-    public void dump(@NonNull FileDescriptor fd, PrintWriter pw, @NonNull String[] args) {
+    public void dump(PrintWriter pw, @NonNull String[] args) {
         final List<NotificationEntry> entries = new ArrayList<>(getAllNotifs());
 
         pw.println("\t" + TAG + " unsorted/unfiltered notifications:");

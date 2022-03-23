@@ -33,6 +33,7 @@ import android.service.controls.actions.ControlAction
 import android.util.ArrayMap
 import android.util.Log
 import com.android.internal.annotations.VisibleForTesting
+import com.android.internal.notification.NotificationAccessConfirmationActivityContract.EXTRA_USER_ID
 import com.android.systemui.Dumpable
 import com.android.systemui.backup.BackupHelper
 import com.android.systemui.broadcast.BroadcastDispatcher
@@ -43,11 +44,11 @@ import com.android.systemui.controls.ui.ControlsUiController
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.people.widget.PeopleSpaceWidgetProvider.EXTRA_USER_HANDLE
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.policy.DeviceControlsControllerImpl.Companion.PREFS_CONTROLS_FILE
 import com.android.systemui.statusbar.policy.DeviceControlsControllerImpl.Companion.PREFS_CONTROLS_SEEDING_COMPLETED
 import com.android.systemui.util.concurrency.DelayableExecutor
-import java.io.FileDescriptor
 import java.io.PrintWriter
 import java.util.Optional
 import java.util.concurrent.TimeUnit
@@ -561,7 +562,7 @@ class ControlsControllerImpl @Inject constructor (
         return uiController.getPreferredStructure(getFavorites())
     }
 
-    override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {
+    override fun dump(pw: PrintWriter, args: Array<out String>) {
         pw.println("ControlsController state:")
         pw.println("  Changing users: $userChanging")
         pw.println("  Current user: ${currentUser.identifier}")
