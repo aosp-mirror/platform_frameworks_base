@@ -304,18 +304,7 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
         synchronized (mGlobalLock) {
             final TaskFragmentOrganizerState organizerState =
                     mTaskFragmentOrganizerState.get(organizer.asBinder());
-            if (organizerState == null) {
-                return null;
-            }
-            for (TaskFragment tf : organizerState.mOrganizedTaskFragments) {
-                if (!tf.isAllowedToBeEmbeddedInTrustedMode()) {
-                    // Disable client-driven animations for organizer if at least one of the
-                    // embedded task fragments is not embedding in trusted mode.
-                    // TODO(b/197364677): replace with a stub or Shell-driven one instead of skip?
-                    return null;
-                }
-            }
-            return organizerState.mRemoteAnimationDefinition;
+            return organizerState != null ? organizerState.mRemoteAnimationDefinition : null;
         }
     }
 
