@@ -135,6 +135,7 @@ import com.android.server.wm.LaunchParamsController.LaunchParams;
 
 import java.io.PrintWriter;
 import java.text.DateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 
 /**
@@ -2008,6 +2009,27 @@ class ActivityStarter {
             Slog.e(TAG, "Permission denied: Cannot embed " + r + " to " + mInTaskFragment.getTask()
                     + " targetTask= " + targetTask);
             return START_PERMISSION_DENIED;
+        }
+
+        // Do not start the activity if target display's DWPC does not allow it.
+        // We can't return fatal error code here because it will crash the caller of
+        // startActivity() if they don't catch the exception. We don't expect 3P apps to make
+        // changes.
+        if (mPreferredTaskDisplayArea != null) {
+            final DisplayContent displayContent = mRootWindowContainer.getDisplayContentOrCreate(
+                    mPreferredTaskDisplayArea.getDisplayId());
+            if (displayContent != null && displayContent.mDwpcHelper.hasController()) {
+                final ArrayList<ActivityInfo> activities = new ArrayList<>();
+                activities.add(r.info);
+                final int targetWindowingMode = (targetTask != null)
+                        ? targetTask.getWindowingMode() : displayContent.getWindowingMode();
+                if (!displayContent.mDwpcHelper
+                        .canContainActivities(activities, targetWindowingMode)) {
+                    Slog.w(TAG, "Abort to launch " + r.info.getComponentName()
+                            + " on display area " + mPreferredTaskDisplayArea);
+                    return START_ABORTED;
+                }
+            }
         }
 
         return START_SUCCESS;
