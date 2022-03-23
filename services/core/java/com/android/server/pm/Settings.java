@@ -799,7 +799,6 @@ public final class Settings implements Watchable, Snappable {
         // always make sure the system package code and resource paths dont change
         if (dp == null && p.getPkg() != null && p.getPkg().isSystem()
                 && !p.getPkgState().isUpdatedSystemApp()) {
-            p.getPkgState().setUpdatedSystemApp(true);
             final PackageSetting disabled;
             if (replaced) {
                 // a little trick...  when we install the new package, we don't
@@ -810,6 +809,7 @@ public final class Settings implements Watchable, Snappable {
             } else {
                 disabled = p;
             }
+            p.getPkgState().setUpdatedSystemApp(true);
             mDisabledSysPackages.put(name, disabled);
             SharedUserSetting sharedUserSetting = getSharedUserSettingLPr(disabled);
             if (sharedUserSetting != null) {

@@ -368,15 +368,6 @@
     <!-- Content of a dialog shown when the user only has one attempt left to provide the correct password before the work profile is removed. [CHAR LIMIT=NONE] -->
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile">If you enter an incorrect password on the next attempt, your work profile and its data will be deleted.</string>
 
-    <!-- Content of a dialog shown when the user has failed to provide the device lock too many times and the device is wiped. [CHAR LIMIT=NONE] -->
-    <string name="biometric_dialog_failed_attempts_now_wiping_device">Too many incorrect attempts. This device\u2019s data will be deleted.</string>
-    <!-- Content of a dialog shown when the user has failed to provide the user lock too many times and the user is removed. [CHAR LIMIT=NONE] -->
-    <string name="biometric_dialog_failed_attempts_now_wiping_user">Too many incorrect attempts. This user will be deleted.</string>
-    <!-- Content of a dialog shown when the user has failed to provide the work lock too many times and the work profile is removed. [CHAR LIMIT=NONE] -->
-    <string name="biometric_dialog_failed_attempts_now_wiping_profile">Too many incorrect attempts. This work profile and its data will be deleted.</string>
-    <!-- Button label to dismiss the dialog telling the user the device, user, or work profile has been wiped. [CHAR LIMIT=40] -->
-    <string name="biometric_dialog_now_wiping_dialog_dismiss">Dismiss</string>
-
     <!-- Message shown when the system-provided fingerprint dialog is shown, asking for authentication -->
     <string name="fingerprint_dialog_touch_sensor">Touch the fingerprint sensor</string>
     <!-- Content description of the fingerprint icon when the system-provided fingerprint dialog is showing, for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
@@ -831,15 +822,6 @@
 
     <!-- Accessibility label for the button that opens the quick contact of the user. -->
 
-    <!-- Label for the adding a new user in the user switcher [CHAR LIMIT=35] -->
-    <string name="user_add_user">Add user</string>
-
-    <!-- Name for a freshly added user [CHAR LIMIT=30] -->
-    <string name="user_new_user_name">New user</string>
-
-    <!-- Title of the confirmation dialog when exiting guest session [CHAR LIMIT=NONE] -->
-    <string name="guest_exit_guest_dialog_title">Remove guest?</string>
-
     <!-- Message of the confirmation dialog when exiting guest session [CHAR LIMIT=NONE] -->
     <string name="guest_exit_guest_dialog_message">All apps and data in this session will be deleted.</string>
 
@@ -857,12 +839,6 @@
 
     <!-- Notification when resuming an existing guest session: Action that continues with the current session [CHAR LIMIT=35] -->
     <string name="guest_wipe_session_dontwipe">Yes, continue</string>
-
-    <!-- Title for add user confirmation dialog [CHAR LIMIT=30] -->
-    <string name="user_add_user_title" msgid="2108112641783146007">Add new user?</string>
-
-    <!-- Message for add user confirmation dialog - short version. [CHAR LIMIT=none] -->
-    <string name="user_add_user_message_short" msgid="1511354412249044381">When you add a new user, that person needs to set up their space.\n\nAny user can update apps for all other users. </string>
 
     <!-- Title for the dialog that lets users know that the maximum allowed number of users on the device has been reached. [CHAR LIMIT=35]-->
     <string name="user_limit_reached_title">User limit reached</string>
@@ -2140,11 +2116,11 @@
     <!-- Title for media controls [CHAR_LIMIT=50] -->
     <string name="controls_media_title">Media</string>
     <!-- Explanation for closing controls associated with a specific media session [CHAR_LIMIT=50] -->
-    <string name="controls_media_close_session">Hide this media session?</string>
+    <string name="controls_media_close_session">Hide this media control for <xliff:g id="app_name" example="YouTube Music">%1$s</xliff:g>?</string>
     <!-- Explanation that controls associated with a specific media session are active [CHAR_LIMIT=50] -->
     <string name="controls_media_active_session">The current media session cannot be hidden.</string>
     <!-- Label for a button that will hide media controls [CHAR_LIMIT=30] -->
-    <string name="controls_media_dismiss_button">Dismiss</string>
+    <string name="controls_media_dismiss_button">Hide</string>
     <!-- Label for button to resume media playback [CHAR_LIMIT=NONE] -->
     <string name="controls_media_resume">Resume</string>
     <!-- Label for button to go to media control settings screen [CHAR_LIMIT=30] -->

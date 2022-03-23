@@ -1713,10 +1713,6 @@
   <java-symbol type="anim" name="activity_open_exit" />
   <java-symbol type="anim" name="activity_close_enter" />
   <java-symbol type="anim" name="activity_close_exit" />
-  <java-symbol type="anim" name="activity_open_enter_legacy" />
-  <java-symbol type="anim" name="activity_open_exit_legacy" />
-  <java-symbol type="anim" name="activity_close_enter_legacy" />
-  <java-symbol type="anim" name="activity_close_exit_legacy" />
   <java-symbol type="anim" name="task_fragment_close_enter" />
   <java-symbol type="anim" name="task_fragment_close_exit" />
   <java-symbol type="anim" name="task_fragment_open_enter" />
@@ -4650,8 +4646,6 @@
   <java-symbol type="drawable" name="ic_accessibility_24dp" />
   <java-symbol type="string" name="view_and_control_notification_title" />
   <java-symbol type="string" name="view_and_control_notification_content" />
-  <java-symbol type="array" name="config_accessibility_allowed_install_source" />
-
   <!-- Translation -->
   <java-symbol type="string" name="ui_translation_accessibility_translated_text" />
   <java-symbol type="string" name="ui_translation_accessibility_translation_finished" />
@@ -4773,4 +4767,7 @@
   <java-symbol type="drawable" name="ic_swap_horiz" />
   <java-symbol type="bool" name="config_notificationForceUserSetOnUpgrade" />
 
+  <java-symbol type="string" name="system_locale_title" />
+  <java-symbol type="layout" name="app_language_picker_system_default" />
+  <java-symbol type="id" name="system_locale_subtitle" />
 </resources>

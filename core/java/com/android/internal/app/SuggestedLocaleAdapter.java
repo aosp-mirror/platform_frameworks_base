@@ -53,6 +53,7 @@ public class SuggestedLocaleAdapter extends BaseAdapter implements Filterable {
     private static final int TYPE_HEADER_SUGGESTED = 0;
     private static final int TYPE_HEADER_ALL_OTHERS = 1;
     private static final int TYPE_LOCALE = 2;
+    private static final int TYPE_SYSTEM_LANGUAGE_FOR_APP_LANGUAGE_PICKER = 3;
     private static final int MIN_REGIONS_FOR_SUGGESTIONS = 6;
 
     private ArrayList<LocaleStore.LocaleInfo> mLocaleOptions;
@@ -64,10 +65,18 @@ public class SuggestedLocaleAdapter extends BaseAdapter implements Filterable {
     private Locale mDisplayLocale = null;
     // used to potentially cache a modified Context that uses mDisplayLocale
     private Context mContextOverride = null;
+    private String mAppPackageName;
 
     public SuggestedLocaleAdapter(Set<LocaleStore.LocaleInfo> localeOptions, boolean countryMode) {
+        this(localeOptions, countryMode, null);
+    }
+
+    public SuggestedLocaleAdapter(Set<LocaleStore.LocaleInfo> localeOptions, boolean countryMode,
+            String appPackageName) {
         mCountryMode = countryMode;
         mLocaleOptions = new ArrayList<>(localeOptions.size());
+        mAppPackageName = appPackageName;
+
         for (LocaleStore.LocaleInfo li : localeOptions) {
             if (li.isSuggested()) {
                 mSuggestionCount++;
@@ -83,7 +92,8 @@ public class SuggestedLocaleAdapter extends BaseAdapter implements Filterable {
 
     @Override
     public boolean isEnabled(int position) {
-        return getItemViewType(position) == TYPE_LOCALE;
+        return getItemViewType(position) == TYPE_LOCALE
+                || getItemViewType(position) == TYPE_SYSTEM_LANGUAGE_FOR_APP_LANGUAGE_PICKER;
     }
 
     @Override
@@ -97,13 +107,20 @@ public class SuggestedLocaleAdapter extends BaseAdapter implements Filterable {
             if (position == mSuggestionCount + 1) {
                 return TYPE_HEADER_ALL_OTHERS;
             }
+
+            LocaleStore.LocaleInfo item = (LocaleStore.LocaleInfo) getItem(position);
+            if (item.isSystemLocale()) {
+                return TYPE_SYSTEM_LANGUAGE_FOR_APP_LANGUAGE_PICKER;
+            }
             return TYPE_LOCALE;
         }
     }
 
     @Override
     public int getViewTypeCount() {
-        if (showHeaders()) {
+        if (!TextUtils.isEmpty(mAppPackageName) && showHeaders()) {
+            return 4; // Two headers and 1 for "System language"
+        } else if (showHeaders()) {
             return 3; // Two headers in addition to the locales
         } else {
             return 1; // Locales items only
@@ -186,6 +203,21 @@ public class SuggestedLocaleAdapter extends BaseAdapter implements Filterable {
                 }
                 textView.setTextLocale(
                         mDisplayLocale != null ? mDisplayLocale : Locale.getDefault());
+                break;
+
+            case TYPE_SYSTEM_LANGUAGE_FOR_APP_LANGUAGE_PICKER:
+                if (!(convertView instanceof ViewGroup)) {
+                    convertView = mInflater.inflate(
+                            R.layout.app_language_picker_system_default, parent, false);
+                }
+
+                Locale defaultLocale = Locale.getDefault();
+                TextView title = convertView.findViewById(R.id.locale);
+                title.setText(R.string.system_locale_title);
+                title.setTextLocale(defaultLocale);
+                TextView subtitle = convertView.findViewById(R.id.system_locale_subtitle);
+                subtitle.setText(defaultLocale.getDisplayName());
+                subtitle.setTextLocale(defaultLocale);
                 break;
             default:
                 // Covers both null, and "reusing" a wrong kind of view
@@ -315,5 +347,9 @@ public class SuggestedLocaleAdapter extends BaseAdapter implements Filterable {
     @Override
     public Filter getFilter() {
         return new FilterByNativeAndUiNames();
+    }
+
+    public String getAppPackageName() {
+        return mAppPackageName;
     }
 }

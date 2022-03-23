@@ -146,6 +146,7 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
         mEllipsizedWidth = outerwidth;
         mEllipsizedStart = 0;
         mEllipsizedCount = 0;
+        mUseFallbackLineSpacing = false;
 
         init(source, paint, align, metrics, includePad, true, false /* useFallbackLineSpacing */);
         return this;
@@ -200,6 +201,8 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
             trust = false;
         }
 
+        mUseFallbackLineSpacing = useFallbackLineSpacing;
+
         init(getText(), paint, align, metrics, includePad, trust,
                 useFallbackLineSpacing);
         return this;
@@ -252,6 +255,7 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
         mEllipsizedWidth = outerwidth;
         mEllipsizedStart = 0;
         mEllipsizedCount = 0;
+        mUseFallbackLineSpacing = false;
 
         init(source, paint, align, metrics, includePad, true, false /* useFallbackLineSpacing */);
     }
@@ -331,6 +335,7 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
             trust = false;
         }
 
+        mUseFallbackLineSpacing = useFallbackLineSpacing;
         init(getText(), paint, align, metrics, includePad, trust, useFallbackLineSpacing);
     }
 

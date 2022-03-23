@@ -2849,7 +2849,8 @@ public final class InputMethodManager {
      */
     @Deprecated
     public void hideSoftInputFromInputMethod(IBinder token, int flags) {
-        InputMethodPrivilegedOperationsRegistry.get(token).hideMySoftInput(flags);
+        InputMethodPrivilegedOperationsRegistry.get(token).hideMySoftInput(
+                flags, SoftInputShowHideReason.HIDE_SOFT_INPUT_IMM_DEPRECATION);
     }
 
     /**

@@ -14945,7 +14945,7 @@ public class TelephonyManager {
             }
             ITelephony service = getITelephony();
             if (service != null) {
-                return service.isMvnoMatched(getSubId(), mvnoType, mvnoMatchData);
+                return service.isMvnoMatched(getSlotIndex(), mvnoType, mvnoMatchData);
             }
         } catch (RemoteException ex) {
             Rlog.e(TAG, "Telephony#matchesCurrentSimOperator RemoteException" + ex);
@@ -16914,7 +16914,7 @@ public class TelephonyManager {
      * @param executor The executor where {@code listener} will be invoked
      * @param listener The callback to register
      * @hide
-     * @deprecated Use {@link #unregisterCarrierPrivilegesCallback} instead. This API will be
+     * @deprecated Use {@link #registerCarrierPrivilegesCallback} instead. This API will be
      * removed prior to API finalization.
      */
     @Deprecated

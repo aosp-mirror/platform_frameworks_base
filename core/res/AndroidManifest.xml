@@ -471,11 +471,9 @@
         android:name="com.android.server.connectivityservice.CONNECTED_TO_PROVISIONING_NETWORK_ACTION" />
 
     <!-- Defined in RestrictionsManager -->
-    <protected-broadcast
-        android:name="android.intent.action.PERMISSION_RESPONSE_RECEIVED" />
-    <!-- Defined in RestrictionsManager -->
+    <protected-broadcast android:name="android.content.action.PERMISSION_RESPONSE_RECEIVED" />
+    <protected-broadcast android:name="android.content.action.REQUEST_PERMISSION" />
 
-    <protected-broadcast android:name="android.intent.action.REQUEST_PERMISSION" />
     <protected-broadcast android:name="android.nfc.handover.intent.action.HANDOVER_STARTED" />
     <protected-broadcast android:name="android.nfc.handover.intent.action.TRANSFER_DONE" />
     <protected-broadcast android:name="android.nfc.handover.intent.action.TRANSFER_PROGRESS" />
@@ -718,6 +716,92 @@
     <protected-broadcast android:name="android.app.action.DEVICE_POLICY_CONSTANTS_CHANGED" />
     <protected-broadcast android:name="android.app.action.SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED" />
     <protected-broadcast android:name="android.app.action.SHOW_NEW_USER_DISCLAIMER" />
+
+    <!-- Moved from packages/services/Telephony in T -->
+    <protected-broadcast android:name="android.telecom.action.CURRENT_TTY_MODE_CHANGED" />
+    <protected-broadcast android:name="android.intent.action.SERVICE_STATE" />
+    <protected-broadcast android:name="android.intent.action.RADIO_TECHNOLOGY" />
+    <protected-broadcast android:name="android.intent.action.EMERGENCY_CALLBACK_MODE_CHANGED" />
+    <protected-broadcast android:name="android.intent.action.EMERGENCY_CALL_STATE_CHANGED" />
+    <protected-broadcast android:name="android.intent.action.SIG_STR" />
+    <protected-broadcast android:name="android.intent.action.ANY_DATA_STATE" />
+    <protected-broadcast android:name="android.intent.action.DATA_STALL_DETECTED" />
+    <protected-broadcast android:name="android.intent.action.SIM_STATE_CHANGED" />
+    <protected-broadcast android:name="android.intent.action.USER_ACTIVITY_NOTIFICATION" />
+    <protected-broadcast android:name="android.telephony.action.SHOW_NOTICE_ECM_BLOCK_OTHERS" />
+    <protected-broadcast android:name="android.intent.action.ACTION_MDN_STATE_CHANGED" />
+    <protected-broadcast android:name="android.telephony.action.SERVICE_PROVIDERS_UPDATED" />
+    <protected-broadcast android:name="android.provider.Telephony.SIM_FULL" />
+    <protected-broadcast android:name="com.android.internal.telephony.carrier_key_download_alarm" />
+    <protected-broadcast android:name="com.android.internal.telephony.data-restart-trysetup" />
+    <protected-broadcast android:name="com.android.internal.telephony.data-stall" />
+    <protected-broadcast android:name="com.android.internal.telephony.provisioning_apn_alarm" />
+    <protected-broadcast android:name="android.intent.action.DATA_SMS_RECEIVED" />
+    <protected-broadcast android:name="android.provider.Telephony.SMS_RECEIVED" />
+    <protected-broadcast android:name="android.provider.Telephony.SMS_DELIVER" />
+    <protected-broadcast android:name="android.provider.Telephony.SMS_REJECTED" />
+    <protected-broadcast android:name="android.provider.Telephony.WAP_PUSH_DELIVER" />
+    <protected-broadcast android:name="android.provider.Telephony.WAP_PUSH_RECEIVED" />
+    <protected-broadcast android:name="android.provider.Telephony.SMS_CB_RECEIVED" />
+    <protected-broadcast android:name="android.provider.action.SMS_EMERGENCY_CB_RECEIVED" />
+    <protected-broadcast android:name="android.provider.Telephony.SMS_SERVICE_CATEGORY_PROGRAM_DATA_RECEIVED" />
+    <protected-broadcast android:name="android.provider.Telephony.SECRET_CODE" />
+    <protected-broadcast android:name="com.android.internal.stk.command" />
+    <protected-broadcast android:name="com.android.internal.stk.session_end" />
+    <protected-broadcast android:name="com.android.internal.stk.icc_status_change" />
+    <protected-broadcast android:name="com.android.internal.stk.alpha_notify" />
+    <protected-broadcast android:name="com.android.internal.telephony.CARRIER_SIGNAL_REDIRECTED" />
+    <protected-broadcast android:name="com.android.internal.telephony.CARRIER_SIGNAL_REQUEST_NETWORK_FAILED" />
+    <protected-broadcast android:name="com.android.internal.telephony.CARRIER_SIGNAL_PCO_VALUE" />
+    <protected-broadcast android:name="com.android.internal.telephony.CARRIER_SIGNAL_RESET" />
+    <protected-broadcast android:name="com.android.internal.telephony.CARRIER_SIGNAL_DEFAULT_NETWORK_AVAILABLE" />
+    <protected-broadcast android:name="com.android.internal.telephony.PROVISION" />
+    <protected-broadcast android:name="com.android.internal.telephony.ACTION_LINE1_NUMBER_ERROR_DETECTED" />
+    <protected-broadcast android:name="com.android.internal.provider.action.VOICEMAIL_SMS_RECEIVED" />
+    <protected-broadcast android:name="com.android.intent.isim_refresh" />
+    <protected-broadcast android:name="com.android.ims.ACTION_RCS_SERVICE_AVAILABLE" />
+    <protected-broadcast android:name="com.android.ims.ACTION_RCS_SERVICE_UNAVAILABLE" />
+    <protected-broadcast android:name="com.android.ims.ACTION_RCS_SERVICE_DIED" />
+    <protected-broadcast android:name="com.android.ims.ACTION_PRESENCE_CHANGED" />
+    <protected-broadcast android:name="com.android.ims.ACTION_PUBLISH_STATUS_CHANGED" />
+    <protected-broadcast android:name="com.android.ims.IMS_SERVICE_UP" />
+    <protected-broadcast android:name="com.android.ims.IMS_SERVICE_DOWN" />
+    <protected-broadcast android:name="com.android.ims.IMS_INCOMING_CALL" />
+    <protected-broadcast android:name="com.android.ims.internal.uce.UCE_SERVICE_UP" />
+    <protected-broadcast android:name="com.android.ims.internal.uce.UCE_SERVICE_DOWN" />
+    <protected-broadcast android:name="com.android.imsconnection.DISCONNECTED" />
+    <protected-broadcast android:name="com.android.intent.action.IMS_FEATURE_CHANGED" />
+    <protected-broadcast android:name="com.android.intent.action.IMS_CONFIG_CHANGED" />
+    <protected-broadcast android:name="android.telephony.ims.action.WFC_IMS_REGISTRATION_ERROR" />
+    <protected-broadcast android:name="com.android.phone.vvm.omtp.sms.REQUEST_SENT" />
+    <protected-broadcast android:name="com.android.phone.vvm.ACTION_VISUAL_VOICEMAIL_SERVICE_EVENT" />
+    <protected-broadcast android:name="com.android.internal.telephony.CARRIER_VVM_PACKAGE_INSTALLED" />
+    <protected-broadcast android:name="com.android.cellbroadcastreceiver.GET_LATEST_CB_AREA_INFO" />
+    <protected-broadcast android:name="com.android.internal.telephony.ACTION_CARRIER_CERTIFICATE_DOWNLOAD" />
+    <protected-broadcast android:name="com.android.internal.telephony.action.COUNTRY_OVERRIDE" />
+    <protected-broadcast android:name="com.android.internal.telephony.OPEN_DEFAULT_SMS_APP" />
+    <protected-broadcast android:name="com.android.internal.telephony.ACTION_TEST_OVERRIDE_CARRIER_ID" />
+    <protected-broadcast android:name="android.telephony.action.SIM_CARD_STATE_CHANGED" />
+    <protected-broadcast android:name="android.telephony.action.SIM_APPLICATION_STATE_CHANGED" />
+    <protected-broadcast android:name="android.telephony.action.SIM_SLOT_STATUS_CHANGED" />
+    <protected-broadcast android:name="android.telephony.action.SUBSCRIPTION_CARRIER_IDENTITY_CHANGED" />
+    <protected-broadcast android:name="android.telephony.action.SUBSCRIPTION_SPECIFIC_CARRIER_IDENTITY_CHANGED" />
+    <protected-broadcast android:name="android.telephony.action.TOGGLE_PROVISION" />
+    <protected-broadcast android:name="android.telephony.action.NETWORK_COUNTRY_CHANGED" />
+    <protected-broadcast android:name="android.telephony.action.PRIMARY_SUBSCRIPTION_LIST_CHANGED" />
+    <protected-broadcast android:name="android.telephony.action.MULTI_SIM_CONFIG_CHANGED" />
+    <protected-broadcast android:name="android.telephony.action.CARRIER_SIGNAL_RESET" />
+    <protected-broadcast android:name="android.telephony.action.CARRIER_SIGNAL_PCO_VALUE" />
+    <protected-broadcast android:name="android.telephony.action.CARRIER_SIGNAL_DEFAULT_NETWORK_AVAILABLE" />
+    <protected-broadcast android:name="android.telephony.action.CARRIER_SIGNAL_REDIRECTED" />
+    <protected-broadcast android:name="android.telephony.action.CARRIER_SIGNAL_REQUEST_NETWORK_FAILED" />
+    <protected-broadcast android:name="com.android.phone.settings.CARRIER_PROVISIONING" />
+    <protected-broadcast android:name="com.android.phone.settings.TRIGGER_CARRIER_PROVISIONING" />
+    <protected-broadcast android:name="com.android.internal.telephony.ACTION_VOWIFI_ENABLED" />
+    <protected-broadcast android:name="android.telephony.action.ANOMALY_REPORTED" />
+    <protected-broadcast android:name="android.intent.action.SUBSCRIPTION_INFO_RECORD_ADDED" />
+    <protected-broadcast android:name="android.intent.action.ACTION_MANAGED_ROAMING_IND" />
+    <protected-broadcast android:name="android.telephony.ims.action.RCS_SINGLE_REGISTRATION_CAPABILITY_UPDATE" />
 
     <!-- Added in T -->
     <protected-broadcast android:name="android.safetycenter.action.REFRESH_SAFETY_SOURCES" />

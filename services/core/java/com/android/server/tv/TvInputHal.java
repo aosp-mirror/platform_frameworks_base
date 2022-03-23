@@ -155,8 +155,6 @@ final class TvInputHal implements Handler.Callback {
 
     // Handler.Callback implementation
 
-    private final Queue<Message> mPendingMessageQueue = new LinkedList<>();
-
     @Override
     public boolean handleMessage(Message msg) {
         switch (msg.what) {

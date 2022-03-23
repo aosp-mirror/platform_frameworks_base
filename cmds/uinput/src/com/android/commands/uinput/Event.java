@@ -64,6 +64,7 @@ public class Event {
     private SparseArray<int[]> mConfiguration;
     private int mDuration;
     private int mFfEffectsMax = 0;
+    private String mInputport;
     private SparseArray<InputAbsInfo> mAbsInfo;
 
     public int getId() {
@@ -110,6 +111,10 @@ public class Event {
         return mAbsInfo;
     }
 
+    public String getPort() {
+        return mInputport;
+    }
+
     /**
      * Convert an event to String.
      */
@@ -124,6 +129,7 @@ public class Event {
             + ", configuration=" + mConfiguration
             + ", duration=" + mDuration
             + ", ff_effects_max=" + mFfEffectsMax
+            + ", port=" + mInputport
             + "}";
     }
 
@@ -176,6 +182,10 @@ public class Event {
 
         public void setAbsInfo(SparseArray<InputAbsInfo> absInfo) {
             mEvent.mAbsInfo = absInfo;
+        }
+
+        public void setInputport(String port) {
+            mEvent.mInputport = port;
         }
 
         public Event build() {
@@ -261,6 +271,9 @@ public class Event {
                                 break;
                             case "duration":
                                 eb.setDuration(readInt());
+                                break;
+                            case "port":
+                                eb.setInputport(mReader.nextString());
                                 break;
                             default:
                                 mReader.skipValue();

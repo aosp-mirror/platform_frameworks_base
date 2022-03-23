@@ -447,14 +447,6 @@ public class UserSwitcherController implements Dumpable {
         mResumeUserOnGuestLogout = resume;
     }
 
-    public void logoutCurrentUser() {
-        int currentUser = mUserTracker.getUserId();
-        if (currentUser != UserHandle.USER_SYSTEM) {
-            pauseRefreshUsers();
-            ActivityManager.logoutCurrentUser();
-        }
-    }
-
     /**
      * Returns whether the current user is a system user.
      */
@@ -711,8 +703,7 @@ public class UserSwitcherController implements Dumpable {
         if (mUsers.isEmpty()) return null;
         UserRecord item = mUsers.stream().filter(x -> x.isCurrent).findFirst().orElse(null);
         if (item == null || item.info == null) return null;
-        if (item.isGuest) return mContext.getString(
-                com.android.settingslib.R.string.guest_nickname);
+        if (item.isGuest) return mContext.getString(com.android.internal.R.string.guest_name);
         return item.info.name;
     }
 
@@ -949,7 +940,7 @@ public class UserSwitcherController implements Dumpable {
                             : com.android.settingslib.R.string.guest_exit_guest);
                 } else {
                     if (item.info != null) {
-                        return context.getString(com.android.settingslib.R.string.guest_nickname);
+                        return context.getString(com.android.internal.R.string.guest_name);
                     } else {
                         if (mController.mGuestUserAutoCreated) {
                             // If mGuestIsResetting=true, we expect the guest user to be created
@@ -961,7 +952,7 @@ public class UserSwitcherController implements Dumpable {
                             return context.getString(
                                     mController.mGuestIsResetting.get()
                                             ? com.android.settingslib.R.string.guest_resetting
-                                            : com.android.settingslib.R.string.guest_nickname);
+                                            : com.android.internal.R.string.guest_name);
                         } else {
                             return context.getString(
                                     com.android.settingslib.R.string.guest_new_guest);
@@ -969,7 +960,7 @@ public class UserSwitcherController implements Dumpable {
                     }
                 }
             } else if (item.isAddUser) {
-                return context.getString(R.string.user_add_user);
+                return context.getString(com.android.settingslib.R.string.user_add_user);
             } else if (item.isAddSupervisedUser) {
                 return context.getString(R.string.add_user_supervised);
             } else {
@@ -1136,7 +1127,7 @@ public class UserSwitcherController implements Dumpable {
             super(context);
             setTitle(mGuestUserAutoCreated
                     ? com.android.settingslib.R.string.guest_reset_guest_dialog_title
-                    : R.string.guest_exit_guest_dialog_title);
+                    : com.android.settingslib.R.string.guest_remove_guest_dialog_title);
             setMessage(context.getString(R.string.guest_exit_guest_dialog_message));
             setButton(DialogInterface.BUTTON_NEUTRAL,
                     context.getString(android.R.string.cancel), this);
@@ -1173,8 +1164,8 @@ public class UserSwitcherController implements Dumpable {
 
         public AddUserDialog(Context context) {
             super(context);
-            setTitle(R.string.user_add_user_title);
-            setMessage(context.getString(R.string.user_add_user_message_short));
+            setTitle(com.android.settingslib.R.string.user_add_user_title);
+            setMessage(com.android.settingslib.R.string.user_add_user_message_short);
             setButton(DialogInterface.BUTTON_NEUTRAL,
                     context.getString(android.R.string.cancel), this);
             setButton(DialogInterface.BUTTON_POSITIVE,

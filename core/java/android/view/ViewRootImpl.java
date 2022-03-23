@@ -23,8 +23,6 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.InputDevice.SOURCE_CLASS_NONE;
 import static android.view.InsetsState.ITYPE_IME;
-import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
-import static android.view.InsetsState.ITYPE_STATUS_BAR;
 import static android.view.InsetsState.SIZE;
 import static android.view.View.PFLAG_DRAW_ANIMATION;
 import static android.view.View.SYSTEM_UI_FLAG_FULLSCREEN;
@@ -401,10 +399,8 @@ public final class ViewRootImpl implements ViewParent,
     private static boolean sAlwaysAssignFocus;
 
     /**
-     * This list must only be modified by the main thread, so a lock is only needed when changing
-     * the list or when accessing the list from a non-main thread.
+     * This list must only be modified by the main thread.
      */
-    @GuardedBy("mWindowCallbacks")
     final ArrayList<WindowCallbacks> mWindowCallbacks = new ArrayList<>();
     @UnsupportedAppUsage
     @UiContext
@@ -973,15 +969,11 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     public void addWindowCallbacks(WindowCallbacks callback) {
-        synchronized (mWindowCallbacks) {
-            mWindowCallbacks.add(callback);
-        }
+        mWindowCallbacks.add(callback);
     }
 
     public void removeWindowCallbacks(WindowCallbacks callback) {
-        synchronized (mWindowCallbacks) {
-            mWindowCallbacks.remove(callback);
-        }
+        mWindowCallbacks.remove(callback);
     }
 
     public void reportDrawFinish() {
@@ -1703,15 +1695,19 @@ public final class ViewRootImpl implements ViewParent,
         final boolean forceNextWindowRelayout = args.argi1 != 0;
         final int displayId = args.argi3;
         final int resizeMode = args.argi5;
-        final Rect backdropFrame = frames.backdropFrame;
 
-        final boolean frameChanged = !mWinFrame.equals(frames.frame);
-        final boolean backdropFrameChanged = !mPendingBackDropFrame.equals(backdropFrame);
+        final Rect frame = frames.frame;
+        final Rect displayFrame = frames.displayFrame;
+        if (mTranslator != null) {
+            mTranslator.translateRectInScreenToAppWindow(frame);
+            mTranslator.translateRectInScreenToAppWindow(displayFrame);
+        }
+        final boolean frameChanged = !mWinFrame.equals(frame);
         final boolean configChanged = !mLastReportedMergedConfiguration.equals(mergedConfiguration);
         final boolean displayChanged = mDisplay.getDisplayId() != displayId;
         final boolean resizeModeChanged = mResizeMode != resizeMode;
-        if (msg == MSG_RESIZED && !frameChanged && !backdropFrameChanged && !configChanged
-                && !displayChanged && !resizeModeChanged && !forceNextWindowRelayout) {
+        if (msg == MSG_RESIZED && !frameChanged && !configChanged && !displayChanged
+                && !resizeModeChanged && !forceNextWindowRelayout) {
             return;
         }
 
@@ -1727,9 +1723,17 @@ public final class ViewRootImpl implements ViewParent,
             onMovedToDisplay(displayId, mLastConfigurationFromResources);
         }
 
-        setFrame(frames.frame);
-        mTmpFrames.displayFrame.set(frames.displayFrame);
-        mPendingBackDropFrame.set(backdropFrame);
+        setFrame(frame);
+        mTmpFrames.displayFrame.set(displayFrame);
+
+        if (mDragResizing && mUseMTRenderer) {
+            boolean fullscreen = frame.equals(mPendingBackDropFrame);
+            for (int i = mWindowCallbacks.size() - 1; i >= 0; i--) {
+                mWindowCallbacks.get(i).onWindowSizeIsChanging(mPendingBackDropFrame, fullscreen,
+                        mAttachInfo.mVisibleInsets, mAttachInfo.mStableInsets);
+            }
+        }
+
         mForceNextWindowRelayout = forceNextWindowRelayout;
         mPendingAlwaysConsumeSystemBars = args.argi2 != 0;
         mSyncSeqId = args.argi4;
@@ -2310,11 +2314,12 @@ public final class ViewRootImpl implements ViewParent,
      */
     void updateCompatSysUiVisibility(@InternalInsetsType int type, boolean visible,
             boolean hasControl) {
-        if (type != ITYPE_STATUS_BAR && type != ITYPE_NAVIGATION_BAR) {
+        @InsetsType final int publicType = InsetsState.toPublicType(type);
+        if (publicType != Type.statusBars() && publicType != Type.navigationBars()) {
             return;
         }
         final SystemUiVisibilityInfo info = mCompatibleVisibilityInfo;
-        final int systemUiFlag = type == ITYPE_STATUS_BAR
+        final int systemUiFlag = publicType == Type.statusBars()
                 ? View.SYSTEM_UI_FLAG_FULLSCREEN
                 : View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
         final boolean wasVisible = (info.globalVisibility & systemUiFlag) == 0;
@@ -5619,8 +5624,6 @@ public final class ViewRootImpl implements ViewParent,
                         mTmpFrames.frame.top = t;
                         mTmpFrames.frame.bottom = t + h;
                         setFrame(mTmpFrames.frame);
-
-                        mPendingBackDropFrame.set(mWinFrame);
                         maybeHandleWindowMove(mWinFrame);
                     }
                     break;
@@ -8118,7 +8121,6 @@ public final class ViewRootImpl implements ViewParent,
                     getConfiguration().windowConfiguration.getBounds());
         }
 
-        mPendingBackDropFrame.set(mTmpFrames.backdropFrame);
         if (mSurfaceControl.isValid()) {
             if (!useBLAST()) {
                 mSurface.copyFrom(mSurfaceControl);
@@ -8149,6 +8151,7 @@ public final class ViewRootImpl implements ViewParent,
 
         if (mTranslator != null) {
             mTranslator.translateRectInScreenToAppWindow(mTmpFrames.frame);
+            mTranslator.translateRectInScreenToAppWindow(mTmpFrames.displayFrame);
             mTranslator.translateInsetsStateInScreenToAppWindow(mTempInsets);
             mTranslator.translateSourceControlsInScreenToAppWindow(mTempControls);
         }
@@ -8193,6 +8196,13 @@ public final class ViewRootImpl implements ViewParent,
 
     private void setFrame(Rect frame) {
         mWinFrame.set(frame);
+
+        // Surface position is now inherited from parent, and BackdropFrameRenderer uses backdrop
+        // frame to position content. Thus, we just keep the size of backdrop frame, and remove the
+        // offset to avoid double offset from display origin.
+        mPendingBackDropFrame.set(frame);
+        mPendingBackDropFrame.offsetTo(0, 0);
+
         mInsetsController.onFrameChanged(mOverrideInsetsFrame != null ?
             mOverrideInsetsFrame : frame);
     }
@@ -8584,28 +8594,7 @@ public final class ViewRootImpl implements ViewParent,
     private void dispatchResized(ClientWindowFrames frames, boolean reportDraw,
             MergedConfiguration mergedConfiguration, boolean forceLayout,
             boolean alwaysConsumeSystemBars, int displayId, int seqId, int resizeMode) {
-        final Rect frame = frames.frame;
-        final Rect backDropFrame = frames.backdropFrame;
-        if (DEBUG_LAYOUT) Log.v(mTag, "Resizing " + this + ": frame=" + frame.toShortString()
-                + " reportDraw=" + reportDraw
-                + " backDropFrame=" + backDropFrame);
-
-        // Tell all listeners that we are resizing the window so that the chrome can get
-        // updated as fast as possible on a separate thread,
-        if (mDragResizing && mUseMTRenderer) {
-            boolean fullscreen = frame.equals(backDropFrame);
-            synchronized (mWindowCallbacks) {
-                for (int i = mWindowCallbacks.size() - 1; i >= 0; i--) {
-                    mWindowCallbacks.get(i).onWindowSizeIsChanging(backDropFrame, fullscreen,
-                            mAttachInfo.mVisibleInsets, mAttachInfo.mStableInsets);
-                }
-            }
-        }
-
         Message msg = mHandler.obtainMessage(reportDraw ? MSG_RESIZED_REPORT : MSG_RESIZED);
-        if (mTranslator != null) {
-            mTranslator.translateRectInScreenToAppWindow(frame);
-        }
         SomeArgs args = SomeArgs.obtain();
         final boolean sameProcessCall = (Binder.getCallingPid() == android.os.Process.myPid());
         args.arg1 = sameProcessCall ? new ClientWindowFrames(frames) : frames;

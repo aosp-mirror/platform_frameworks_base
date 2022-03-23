@@ -1246,10 +1246,12 @@ package android.hardware.input {
   }
 
   public final class InputManager {
+    method public void addUniqueIdAssociation(@NonNull String, @NonNull String);
     method public int getBlockUntrustedTouchesMode(@NonNull android.content.Context);
     method @Nullable public String getCurrentKeyboardLayoutForInputDevice(@NonNull android.hardware.input.InputDeviceIdentifier);
     method @NonNull public java.util.List<java.lang.String> getKeyboardLayoutDescriptorsForInputDevice(@NonNull android.view.InputDevice);
     method @RequiresPermission(android.Manifest.permission.SET_KEYBOARD_LAYOUT) public void removeKeyboardLayoutForInputDevice(@NonNull android.hardware.input.InputDeviceIdentifier, @NonNull String);
+    method public void removeUniqueIdAssociation(@NonNull String);
     method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void setBlockUntrustedTouchesMode(@NonNull android.content.Context, int);
     method @RequiresPermission(android.Manifest.permission.SET_KEYBOARD_LAYOUT) public void setCurrentKeyboardLayoutForInputDevice(@NonNull android.hardware.input.InputDeviceIdentifier, @NonNull String);
     method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void setMaximumObscuringOpacityForTouch(@FloatRange(from=0, to=1) float);
@@ -2429,6 +2431,8 @@ package android.service.quicksettings {
 package android.service.voice {
 
   public class AlwaysOnHotwordDetector implements android.service.voice.HotwordDetector {
+    method public void overrideAvailability(int);
+    method public void resetAvailability();
     method @RequiresPermission(allOf={android.Manifest.permission.RECORD_AUDIO, android.Manifest.permission.CAPTURE_AUDIO_HOTWORD}) public void triggerHardwareRecognitionEventForTest(int, int, boolean, int, int, int, boolean, @NonNull android.media.AudioFormat, @Nullable byte[], @NonNull java.util.List<android.hardware.soundtrigger.SoundTrigger.KeyphraseRecognitionExtra>);
   }
 
@@ -2788,6 +2792,7 @@ package android.view {
     method @NonNull public android.graphics.ColorSpace[] getSupportedWideColorGamut();
     method @Nullable public android.view.Display.Mode getSystemPreferredDisplayMode();
     method public int getType();
+    method @Nullable public String getUniqueId();
     method @Nullable public android.view.Display.Mode getUserPreferredDisplayMode();
     method public boolean hasAccess(int);
     method @RequiresPermission(android.Manifest.permission.MODIFY_USER_PREFERRED_DISPLAY_MODE) public void setUserPreferredDisplayMode(@NonNull android.view.Display.Mode);

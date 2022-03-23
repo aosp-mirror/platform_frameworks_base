@@ -811,8 +811,8 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
                 RectF windowFrame = TEMP_RECTF;
                 windowFrame.set(rect);
 
-                inverseMatrix.mapRect(windowFrame);
                 displayMatrix.mapRect(windowFrame);
+                inverseMatrix.mapRect(windowFrame);
                 // Union all rects.
                 outRegion.union(new Rect((int) windowFrame.left, (int) windowFrame.top,
                         (int) windowFrame.right, (int) windowFrame.bottom));

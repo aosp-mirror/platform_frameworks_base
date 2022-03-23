@@ -50,6 +50,7 @@
 #include <nativehelper/ScopedLocalRef.h>
 #include <nativehelper/ScopedPrimitiveArray.h>
 #include <nativehelper/ScopedUtfChars.h>
+#include <server_configurable_flags/get_flags.h>
 #include <ui/Region.h>
 #include <utils/Log.h>
 #include <utils/Looper.h>
@@ -86,6 +87,13 @@ namespace android {
 // The scaling factor is calculated as 2 ^ (speed * exponent),
 // where the speed ranges from -7 to + 7 and is supplied by the user.
 static const float POINTER_SPEED_EXPONENT = 1.0f / 4;
+
+// Category (=namespace) name for the input settings that are applied at boot time
+static const char* INPUT_NATIVE_BOOT = "input_native_boot";
+/**
+ * Feature flag name. This flag determines which VelocityTracker strategy is used by default.
+ */
+static const char* VELOCITYTRACKER_STRATEGY = "velocitytracker_strategy";
 
 static struct {
     jclass clazz;
@@ -2125,8 +2133,10 @@ static void nativeReloadDeviceAliases(JNIEnv* /* env */,
 static std::string dumpInputProperties() {
     std::string out = "Input properties:\n";
     const std::string strategy =
-            sysprop::InputProperties::velocitytracker_strategy().value_or("default");
-    out += "  persist.input.velocitytracker.strategy = " + strategy + "\n";
+            server_configurable_flags::GetServerConfigurableFlag(INPUT_NATIVE_BOOT,
+                                                                 VELOCITYTRACKER_STRATEGY,
+                                                                 "default");
+    out += "  velocitytracker_strategy (flag value) = " + strategy + "\n";
     out += "\n";
     return out;
 }

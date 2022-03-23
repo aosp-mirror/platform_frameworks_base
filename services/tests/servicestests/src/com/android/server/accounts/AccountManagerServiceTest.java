@@ -36,6 +36,7 @@ import android.accounts.CantAddAccountActivity;
 import android.accounts.IAccountManagerResponse;
 import android.app.AppOpsManager;
 import android.app.INotificationManager;
+import android.app.PropertyInvalidatedCache;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.content.BroadcastReceiver;
@@ -131,6 +132,8 @@ public class AccountManagerServiceTest extends AndroidTestCase {
     @Override
     protected void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
+
+        PropertyInvalidatedCache.disableForTestMode();
 
         when(mMockPackageManager.checkSignatures(anyInt(), anyInt()))
                     .thenReturn(PackageManager.SIGNATURE_MATCH);
@@ -255,19 +258,17 @@ public class AccountManagerServiceTest extends AndroidTestCase {
                 + "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
                 + "aaaaa";
         Account a11 = new Account(longString, AccountManagerServiceTestFixtures.ACCOUNT_TYPE_1);
-        Account a21 = new Account("account2", longString);
 
         mAms.addAccountExplicitly(
                 a11, /* password= */ "p11", /* extras= */ null, /* callerPackage= */ null);
-        mAms.addAccountExplicitly(
-                a21, /* password= */ "p12", /* extras= */ null, /* callerPackage= */ null);
 
         String[] list = new String[]{AccountManagerServiceTestFixtures.CALLER_PACKAGE};
         when(mMockPackageManager.getPackagesForUid(anyInt())).thenReturn(list);
         Account[] accounts = mAms.getAccountsAsUser(null,
                 UserHandle.getCallingUserId(), mContext.getOpPackageName());
-        assertEquals(0, accounts);
+        assertEquals(0, accounts.length);
     }
+
 
     @SmallTest
     public void testPasswords() throws Exception {

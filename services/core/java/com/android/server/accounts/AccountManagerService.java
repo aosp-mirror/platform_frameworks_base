@@ -2073,6 +2073,10 @@ public class AccountManagerService
                 + ", pid " + Binder.getCallingPid());
         }
         if (accountToRename == null) throw new IllegalArgumentException("account is null");
+        if (newName != null && newName.length() > 200) {
+            Log.e(TAG, "renameAccount failed - account name longer than 200");
+            throw new IllegalArgumentException("account name longer than 200");
+        }
         int userId = UserHandle.getCallingUserId();
         if (!isAccountManagedByCaller(accountToRename.type, callingUid, userId)) {
             String msg = String.format(
@@ -2103,10 +2107,6 @@ public class AccountManagerService
     private Account renameAccountInternal(
             UserAccounts accounts, Account accountToRename, String newName) {
         Account resultAccount = null;
-        if (newName != null && newName.length() > 200) {
-            Log.e(TAG, "renameAccount failed - account name longer than 200");
-            return null;
-        }
         /*
          * Cancel existing notifications. Let authenticators
          * re-post notifications as required. But we don't know if

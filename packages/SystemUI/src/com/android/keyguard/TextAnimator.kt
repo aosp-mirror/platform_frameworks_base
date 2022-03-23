@@ -22,12 +22,14 @@ import android.animation.TimeInterpolator
 import android.animation.ValueAnimator
 import android.graphics.Canvas
 import android.graphics.Typeface
+import android.graphics.fonts.Font
 import android.text.Layout
 import android.util.SparseArray
 
 private const val TAG_WGHT = "wght"
 private const val DEFAULT_ANIMATION_DURATION: Long = 300
 
+typealias GlyphCallback = (TextAnimator.PositionedGlyph, Float) -> Unit
 /**
  * This class provides text animation between two styles.
  *
@@ -74,6 +76,59 @@ class TextAnimator(
         })
     }
 
+    sealed class PositionedGlyph {
+
+        /**
+         * Mutable X coordinate of the glyph position relative from drawing offset.
+         */
+        var x: Float = 0f
+
+        /**
+         * Mutable Y coordinate of the glyph position relative from the baseline.
+         */
+        var y: Float = 0f
+
+        /**
+         * Mutable text size of the glyph in pixels.
+         */
+        var textSize: Float = 0f
+
+        /**
+         * Mutable color of the glyph.
+         */
+        var color: Int = 0
+
+        /**
+         * Immutable character offset in the text that the current font run start.
+         */
+        abstract var runStart: Int
+            protected set
+
+        /**
+         * Immutable run length of the font run.
+         */
+        abstract var runLength: Int
+            protected set
+
+        /**
+         * Immutable glyph index of the font run.
+         */
+        abstract var glyphIndex: Int
+            protected set
+
+        /**
+         * Immutable font instance for this font run.
+         */
+        abstract var font: Font
+            protected set
+
+        /**
+         * Immutable glyph ID for this glyph.
+         */
+        abstract var glyphId: Int
+            protected set
+    }
+
     private val typefaceCache = SparseArray<Typeface?>()
 
     fun updateLayout(layout: Layout) {
@@ -83,6 +138,57 @@ class TextAnimator(
     fun isRunning(): Boolean {
         return animator.isRunning
     }
+
+    /**
+     * GlyphFilter applied just before drawing to canvas for tweaking positions and text size.
+     *
+     * This callback is called for each glyphs just before drawing the glyphs. This function will
+     * be called with the intrinsic position, size, color, glyph ID and font instance. You can
+     * mutate the position, size and color for tweaking animations.
+     * Do not keep the reference of passed glyph object. The interpolator reuses that object for
+     * avoiding object allocations.
+     *
+     * Details:
+     * The text is drawn with font run units. The font run is a text segment that draws with the
+     * same font. The {@code runStart} and {@code runLimit} is a range of the font run in the text
+     * that current glyph is in. Once the font run is determined, the system will convert characters
+     * into glyph IDs. The {@code glyphId} is the glyph identifier in the font and
+     * {@code glyphIndex} is the offset of the converted glyph array. Please note that the
+     * {@code glyphIndex} is not a character index, because the character will not be converted to
+     * glyph one-by-one. If there are ligatures including emoji sequence, etc, the glyph ID may be
+     * composed from multiple characters.
+     *
+     * Here is an example of font runs: "fin. 終わり"
+     *
+     * Characters :    f      i      n      .      _      終     わ     り
+     * Code Points: \u0066 \u0069 \u006E \u002E \u0020 \u7D42 \u308F \u308A
+     * Font Runs  : <-- Roboto-Regular.ttf          --><-- NotoSans-CJK.otf -->
+     *                  runStart = 0, runLength = 5        runStart = 5, runLength = 3
+     * Glyph IDs  :      194        48     7      8     4367   1039   1002
+     * Glyph Index:       0          1     2      3       0      1      2
+     *
+     * In this example, the "fi" is converted into ligature form, thus the single glyph ID is
+     * assigned for two characters, f and i.
+     *
+     * Example:
+     * ```
+     * private val glyphFilter: GlyphCallback = {　glyph, progress ->
+     *     val index = glyph.runStart
+     *     val i = glyph.glyphIndex
+     *     val moveAmount = 1.3f
+     *     val sign = (-1 + 2 * ((i + index) % 2))
+     *     val turnProgress = if (progress < .5f) progress / 0.5f else (1.0f - progress) / 0.5f
+     *
+     *     // You can modify (x, y) coordinates, textSize and color during animation.
+     *     glyph.textSize += glyph.textSize * sign * moveAmount * turnProgress
+     *     glyph.y += glyph.y * sign * moveAmount * turnProgress
+     *     glyph.x += glyph.x * sign * moveAmount * turnProgress
+     * }
+     * ```
+     */
+    var glyphFilter: GlyphCallback?
+        get() = textInterpolator.glyphFilter
+        set(value) { textInterpolator.glyphFilter = value }
 
     fun draw(c: Canvas) = textInterpolator.draw(c)
 

@@ -44,7 +44,6 @@ import android.util.PathParser;
 import android.window.SplashScreenView;
 
 import com.android.internal.R;
-import com.android.wm.shell.common.ShellExecutor;
 
 import java.util.function.LongConsumer;
 
@@ -63,15 +62,14 @@ public class SplashscreenIconDrawableFactory {
      */
     static Drawable[] makeIconDrawable(@ColorInt int backgroundColor, @ColorInt int themeColor,
             @NonNull Drawable foregroundDrawable, int srcIconSize, int iconSize,
-            Handler splashscreenWorkerHandler, ShellExecutor splashScreenExecutor) {
+            Handler splashscreenWorkerHandler) {
         Drawable foreground;
         Drawable background = null;
         boolean drawBackground =
                 backgroundColor != Color.TRANSPARENT && backgroundColor != themeColor;
 
         if (foregroundDrawable instanceof Animatable) {
-            foreground = new AnimatableIconAnimateListener(foregroundDrawable,
-                    splashScreenExecutor);
+            foreground = new AnimatableIconAnimateListener(foregroundDrawable);
         } else if (foregroundDrawable instanceof AdaptiveIconDrawable) {
             // If the icon is Adaptive, we already use the icon background.
             drawBackground = false;
@@ -274,12 +272,9 @@ public class SplashscreenIconDrawableFactory {
         private boolean mAnimationTriggered;
         private AnimatorListenerAdapter mJankMonitoringListener;
         private boolean mRunning;
-        private long mDuration;
         private LongConsumer mStartListener;
-        private final ShellExecutor mSplashScreenExecutor;
 
-        AnimatableIconAnimateListener(@NonNull Drawable foregroundDrawable,
-                ShellExecutor splashScreenExecutor) {
+        AnimatableIconAnimateListener(@NonNull Drawable foregroundDrawable) {
             super(foregroundDrawable);
             Callback callback = new Callback() {
                 @Override
@@ -299,7 +294,6 @@ public class SplashscreenIconDrawableFactory {
                 }
             };
             mForegroundDrawable.setCallback(callback);
-            mSplashScreenExecutor = splashScreenExecutor;
             mAnimatableIcon = (Animatable) mForegroundDrawable;
         }
 
@@ -309,9 +303,8 @@ public class SplashscreenIconDrawableFactory {
         }
 
         @Override
-        public void prepareAnimate(long duration, LongConsumer startListener) {
+        public void prepareAnimate(LongConsumer startListener) {
             stopAnimation();
-            mDuration = duration;
             mStartListener = startListener;
         }
 
@@ -328,11 +321,11 @@ public class SplashscreenIconDrawableFactory {
                     mJankMonitoringListener.onAnimationCancel(null);
                 }
                 if (mStartListener != null) {
-                    mStartListener.accept(mDuration);
+                    mStartListener.accept(0);
                 }
                 return;
             }
-            long animDuration = mDuration;
+            long animDuration = 0;
             if (mAnimatableIcon instanceof AnimatedVectorDrawable
                     && ((AnimatedVectorDrawable) mAnimatableIcon).getTotalDuration() > 0) {
                 animDuration = ((AnimatedVectorDrawable) mAnimatableIcon).getTotalDuration();
@@ -341,9 +334,8 @@ public class SplashscreenIconDrawableFactory {
                 animDuration = ((AnimationDrawable) mAnimatableIcon).getTotalDuration();
             }
             mRunning = true;
-            mSplashScreenExecutor.executeDelayed(this::stopAnimation, animDuration);
             if (mStartListener != null) {
-                mStartListener.accept(Math.max(animDuration, 0));
+                mStartListener.accept(animDuration);
             }
         }
 
@@ -359,7 +351,6 @@ public class SplashscreenIconDrawableFactory {
         @Override
         public void stopAnimation() {
             if (mRunning) {
-                mSplashScreenExecutor.removeCallbacks(this::stopAnimation);
                 onAnimationEnd();
                 mJankMonitoringListener = null;
             }

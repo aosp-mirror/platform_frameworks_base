@@ -293,8 +293,7 @@ public class ZOrderingTests extends WindowTestsBase {
     public void testAssignWindowLayers_ForImeWithAppTargetAndAppAbove() {
         final WindowState appBelowImeTarget = createWindow("appBelowImeTarget");
         final WindowState imeAppTarget = createWindow("imeAppTarget");
-        final WindowState appAboveImeTarget = createWindow(imeAppTarget, TYPE_APPLICATION,
-                "appAboveImeTarget");
+        final WindowState appAboveImeTarget = createWindow("appAboveImeTarget");
 
         mDisplayContent.setImeLayeringTarget(imeAppTarget);
         mDisplayContent.setImeControlTarget(imeAppTarget);

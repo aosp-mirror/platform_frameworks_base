@@ -2407,7 +2407,7 @@ public class InputManagerService extends IInputManager.Stub
     public void removePortAssociation(@NonNull String inputPort) {
         if (!checkCallingPermission(
                 android.Manifest.permission.ASSOCIATE_INPUT_DEVICE_TO_DISPLAY,
-                "clearPortAssociations()")) {
+                "removePortAssociation()")) {
             throw new SecurityException(
                     "Requires ASSOCIATE_INPUT_DEVICE_TO_DISPLAY permission");
         }
@@ -2423,7 +2423,7 @@ public class InputManagerService extends IInputManager.Stub
     public void addUniqueIdAssociation(@NonNull String inputPort, @NonNull String displayUniqueId) {
         if (!checkCallingPermission(
                 android.Manifest.permission.ASSOCIATE_INPUT_DEVICE_TO_DISPLAY,
-                "addNameAssociation()")) {
+                "addUniqueIdAssociation()")) {
             throw new SecurityException(
                     "Requires ASSOCIATE_INPUT_DEVICE_TO_DISPLAY permission");
         }

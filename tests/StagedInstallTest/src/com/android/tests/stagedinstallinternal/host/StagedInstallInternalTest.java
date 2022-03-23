@@ -95,6 +95,7 @@ public class StagedInstallInternalTest extends BaseHostJUnit4Test {
                 "/data/apex/active/" + SHIM_APEX_PACKAGE_NAME + "*.apex",
                 "/system/apex/test.rebootless_apex_v*.apex",
                 "/data/apex/active/test.apex.rebootless*.apex",
+                "/system/app/TestApp/TestAppAv1.apk",
                 TEST_VENDOR_APEX_ALLOW_LIST);
     }
 
@@ -160,6 +161,25 @@ public class StagedInstallInternalTest extends BaseHostJUnit4Test {
             writer.write(String.format(fmt, installerPackageName));
         }
         getDevice().pushFile(file, TEST_VENDOR_APEX_ALLOW_LIST);
+    }
+
+    /**
+     * Tests app info flags are set correctly when updating a system app.
+     */
+    @Test
+    public void testUpdateSystemApp() throws Exception {
+        // Push TestAppAv1.apk to /system
+        final File apkFile = mHostUtils.getTestFile(APK_A);
+        if (!getDevice().isAdbRoot()) {
+            getDevice().enableAdbRoot();
+        }
+        getDevice().remountSystemWritable();
+        assertTrue(getDevice().pushFile(apkFile, "/system/app/TestApp/" + apkFile.getName()));
+        getDevice().reboot();
+
+        runPhase("testUpdateSystemApp_InstallV2");
+        getDevice().reboot();
+        runPhase("testUpdateSystemApp_PostInstallV2");
     }
 
     /**
