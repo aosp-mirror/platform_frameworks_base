@@ -480,10 +480,15 @@ class TaskSnapshotController {
         }
         final HardwareBuffer buffer = screenshotBuffer == null ? null
                 : screenshotBuffer.getHardwareBuffer();
-        if (buffer == null || buffer.getWidth() <= 1 || buffer.getHeight() <= 1) {
+        if (isInvalidHardwareBuffer(buffer)) {
             return null;
         }
         return screenshotBuffer;
+    }
+
+    static boolean isInvalidHardwareBuffer(HardwareBuffer buffer) {
+        return buffer == null || buffer.isClosed() // This must be checked before getting size.
+                || buffer.getWidth() <= 1 || buffer.getHeight() <= 1;
     }
 
     @Nullable
