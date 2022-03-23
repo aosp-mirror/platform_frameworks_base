@@ -1681,7 +1681,7 @@ public class DevicePolicyManager {
     public @interface ProvisioningConfiguration {}
 
     /**
-     * A String extra holding the provisioning trigger. It could be one of
+     * An int extra holding the provisioning trigger. It could be one of
      * {@link #PROVISIONING_TRIGGER_CLOUD_ENROLLMENT}, {@link #PROVISIONING_TRIGGER_QR_CODE},
      * {@link #PROVISIONING_TRIGGER_MANAGED_ACCOUNT} or {@link
      * #PROVISIONING_TRIGGER_UNSPECIFIED}.
@@ -3297,9 +3297,9 @@ public class DevicePolicyManager {
      * Activity action: Starts the device policy management role holder updater.
      *
      * <p>The activity must handle the device policy management role holder update and set the
-     * intent result to either {@link Activity#RESULT_OK} if the update was successful, {@link
-     * #RESULT_UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER_RECOVERABLE_ERROR} if it encounters a
-     * problem that may be solved by relaunching it again, {@link
+     * intent result to either {@link Activity#RESULT_OK} if the update was successful or not
+     * necessary, {@link #RESULT_UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER_RECOVERABLE_ERROR} if
+     * it encounters a problem that may be solved by relaunching it again, {@link
      * #RESULT_UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER_PROVISIONING_DISABLED} if role holder
      * provisioning is disabled, or {@link
      * #RESULT_UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER_UNRECOVERABLE_ERROR} if it encounters
