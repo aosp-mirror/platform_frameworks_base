@@ -29,7 +29,7 @@
     <string name="keyguard_password_enter_password_code" msgid="7393393239623946777">"Lås upp med lösenordet"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="3692259677395250509">"Lås upp med pinkoden"</string>
     <string name="keyguard_enter_your_pin" msgid="5429932527814874032">"Ange pinkoden"</string>
-    <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"Ange det grafiska lösenordet"</string>
+    <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"Ange mönstret"</string>
     <string name="keyguard_enter_your_password" msgid="7225626204122735501">"Ange ditt lösenord"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="3514267777289393046">"Fel pinkod."</string>
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"Ogiltigt kort."</string>
@@ -114,8 +114,8 @@
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Administratören har låst enheten"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Enheten har låsts manuellt"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="1337428979661197957">
-      <item quantity="other">Enheten har inte låsts upp på <xliff:g id="NUMBER_1">%d</xliff:g> timmar. Bekräfta det grafiska lösenordet.</item>
-      <item quantity="one">Enheten har inte låsts upp på <xliff:g id="NUMBER_0">%d</xliff:g> timme. Bekräfta det grafiska lösenordet.</item>
+      <item quantity="other">Enheten har inte låsts upp på <xliff:g id="NUMBER_1">%d</xliff:g> timmar. Bekräfta mönstret.</item>
+      <item quantity="one">Enheten har inte låsts upp på <xliff:g id="NUMBER_0">%d</xliff:g> timme. Bekräfta mönstret.</item>
     </plurals>
     <plurals name="kg_prompt_reason_time_pin" formatted="false" msgid="6444519502336330270">
       <item quantity="other">Enheten har inte låsts upp på <xliff:g id="NUMBER_1">%d</xliff:g> timmar. Bekräfta pinkoden.</item>
