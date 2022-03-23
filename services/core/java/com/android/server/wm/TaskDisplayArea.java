@@ -1125,9 +1125,9 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
         if ((launchFlags & FLAG_ACTIVITY_LAUNCH_ADJACENT) != 0
                 && mLaunchAdjacentFlagRootTask != null) {
             // If the adjacent launch is coming from the same root, launch to adjacent root instead.
-            if (sourceTask != null
-                    && sourceTask.getRootTask().mTaskId == mLaunchAdjacentFlagRootTask.mTaskId
-                    && mLaunchAdjacentFlagRootTask.getAdjacentTaskFragment() != null) {
+            if (sourceTask != null && mLaunchAdjacentFlagRootTask.getAdjacentTaskFragment() != null
+                    && (sourceTask == mLaunchAdjacentFlagRootTask
+                    || sourceTask.isDescendantOf(mLaunchAdjacentFlagRootTask))) {
                 return mLaunchAdjacentFlagRootTask.getAdjacentTaskFragment().asTask();
             } else {
                 return mLaunchAdjacentFlagRootTask;
@@ -1141,18 +1141,22 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
                         ? launchRootTask.getAdjacentTaskFragment() : null;
                 final Task adjacentRootTask =
                         adjacentTaskFragment != null ? adjacentTaskFragment.asTask() : null;
-                if (sourceTask != null && sourceTask.getRootTask() == adjacentRootTask) {
+                if (sourceTask != null && adjacentRootTask != null
+                        && (sourceTask == adjacentRootTask
+                        || sourceTask.isDescendantOf(adjacentRootTask))) {
                     return adjacentRootTask;
                 } else {
                     return launchRootTask;
                 }
             }
         }
-        // For better split UX, If task launch by the source task which root task is created by
-        // organizer, it should also launch in that root too.
-        if (sourceTask != null && sourceTask.getRootTask().mCreatedByOrganizer) {
-            return sourceTask.getRootTask();
+
+        // For a better split UX, If a task is launching from a created-by-organizer task, it should
+        // be launched into the same created-by-organizer task as well.
+        if (sourceTask != null) {
+            return sourceTask.getCreatedByOrganizerTask();
         }
+
         return null;
     }
 
