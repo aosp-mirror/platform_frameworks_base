@@ -16,18 +16,15 @@
 
 package com.android.server.wm.flicker.launch
 
-import android.platform.test.annotations.Presubmit
-import android.platform.test.annotations.RequiresDevice
 import androidx.test.filters.FlakyTest
+import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group1
-import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.server.wm.flicker.helpers.setRotation
-import org.junit.Assume
-import org.junit.Before
+import com.android.server.wm.flicker.startRotation
+import com.android.server.wm.flicker.dsl.FlickerBuilder
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -35,41 +32,18 @@ import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
 
 /**
- * Test warm launching an app from launcher
- *
+ * Test warm launch app.
  * To run this test: `atest FlickerTests:OpenAppWarmTest`
- *
- * Actions:
- *     Launch [testApp]
- *     Press home
- *     Relaunch an app [testApp] and wait animation to complete (only this action is traced)
- *
- * Notes:
- *     1. Some default assertions (e.g., nav bar, status bar and screen covered)
- *        are inherited [OpenAppTransition]
- *     2. Part of the test setup occurs automatically via
- *        [com.android.server.wm.flicker.TransitionRunnerWithRules],
- *        including configuring navigation mode, initial orientation and ensuring no
- *        apps are running before setup
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group1
-open class OpenAppWarmTest(testSpec: FlickerTestParameter)
-    : OpenAppFromLauncherTransition(testSpec) {
-    @Before
-    open fun before() {
-        Assume.assumeFalse(isShellTransitionsEnabled)
-    }
-
-    /**
-     * Defines the transition used to run the test
-     */
-    override val transition: FlickerBuilder.() -> Unit
+class OpenAppWarmTest(testSpec: FlickerTestParameter) : OpenAppTransition(testSpec) {
+    override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
         get() = {
-            super.transition(this)
+            super.transition(this, it)
             setup {
                 test {
                     testApp.launchViaIntent(wmHelper)
@@ -77,7 +51,7 @@ open class OpenAppWarmTest(testSpec: FlickerTestParameter)
                 eachRun {
                     device.pressHome()
                     wmHelper.waitForHomeActivityVisible()
-                    this.setRotation(testSpec.startRotation)
+                    this.setRotation(testSpec.config.startRotation)
                 }
             }
             teardown {
@@ -91,60 +65,19 @@ open class OpenAppWarmTest(testSpec: FlickerTestParameter)
             }
         }
 
-    /** {@inheritDoc} */
-    @FlakyTest(bugId = 206753786)
-    @Test
-    override fun statusBarLayerRotatesScales() = super.statusBarLayerRotatesScales()
-
-    /** {@inheritDoc} */
-    @Presubmit
-    @Test
-    override fun appWindowReplacesLauncherAsTopWindow() =
-            super.appWindowReplacesLauncherAsTopWindow()
-
-    /** {@inheritDoc} */
-    @Presubmit
-    @Test
-    override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
-            super.visibleLayersShownMoreThanOneConsecutiveEntry()
-
-    /** {@inheritDoc} */
     @FlakyTest
     @Test
-    override fun navBarLayerRotatesAndScales() = super.navBarLayerRotatesAndScales()
+    override fun navBarLayerIsAlwaysVisible() {
+        super.navBarLayerIsAlwaysVisible()
+    }
 
-    /** {@inheritDoc} */
-    @Presubmit
+    @FlakyTest
     @Test
-    override fun appLayerReplacesLauncher() = super.appLayerReplacesLauncher()
-
-    /** {@inheritDoc} */
-    @Presubmit
-    @Test
-    override fun navBarLayerIsVisible() = super.navBarLayerIsVisible()
-
-    /** {@inheritDoc} */
-    @Presubmit
-    @Test
-    override fun navBarWindowIsVisible() = super.navBarWindowIsVisible()
-
-    /** {@inheritDoc} */
-    @Presubmit
-    @Test
-    override fun appLayerBecomesVisible() = super.appLayerBecomesVisible_warmStart()
-
-    /** {@inheritDoc} */
-    @Presubmit
-    @Test
-    override fun appWindowBecomesVisible() = super.appWindowBecomesVisible_warmStart()
+    override fun navBarLayerRotatesAndScales() {
+        super.navBarLayerRotatesAndScales()
+    }
 
     companion object {
-        /**
-         * Creates the test configurations.
-         *
-         * See [FlickerTestParameterFactory.getConfigNonRotationTests] for configuring
-         * repetitions, screen orientation and navigation modes.
-         */
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
         fun getParams(): Collection<FlickerTestParameter> {

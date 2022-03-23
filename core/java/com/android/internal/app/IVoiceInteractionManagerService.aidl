@@ -242,14 +242,12 @@ interface IVoiceInteractionManagerService {
      * {@link HotwordDetectionService}. Use this to provide the hotword models data or other
      * such data to the trusted process.
      * @param callback Use this to report {@link HotwordDetectionService} status.
-     * @param detectorType Indicate which detector is used.
      */
     void updateState(
             in Identity originatorIdentity,
             in PersistableBundle options,
             in SharedMemory sharedMemory,
-            in IHotwordRecognitionStatusCallback callback,
-            int detectorType);
+            in IHotwordRecognitionStatusCallback callback);
 
     /**
      * Requests to shutdown hotword detection service.
@@ -274,14 +272,4 @@ interface IVoiceInteractionManagerService {
     void triggerHardwareRecognitionEventForTest(
             in SoundTrigger.KeyphraseRecognitionEvent event,
             in IHotwordRecognitionStatusCallback callback);
-
-    /**
-     * Starts to listen the status of visible activity.
-     */
-    void startListeningVisibleActivityChanged(in IBinder token);
-
-    /**
-     * Stops to listen the status of visible activity.
-     */
-    void stopListeningVisibleActivityChanged(in IBinder token);
 }

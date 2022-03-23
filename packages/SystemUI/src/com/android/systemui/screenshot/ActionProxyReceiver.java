@@ -24,7 +24,7 @@ import static com.android.systemui.screenshot.ScreenshotController.EXTRA_ACTION_
 import static com.android.systemui.screenshot.ScreenshotController.EXTRA_DISALLOW_ENTER_PIP;
 import static com.android.systemui.screenshot.ScreenshotController.EXTRA_ID;
 import static com.android.systemui.screenshot.ScreenshotController.EXTRA_SMART_ACTIONS_ENABLED;
-import static com.android.systemui.statusbar.phone.CentralSurfaces.SYSTEM_DIALOG_REASON_SCREENSHOT;
+import static com.android.systemui.statusbar.phone.StatusBar.SYSTEM_DIALOG_REASON_SCREENSHOT;
 
 import android.app.ActivityOptions;
 import android.app.PendingIntent;
@@ -36,7 +36,7 @@ import android.view.RemoteAnimationAdapter;
 import android.view.WindowManagerGlobal;
 
 import com.android.systemui.shared.system.ActivityManagerWrapper;
-import com.android.systemui.statusbar.phone.CentralSurfaces;
+import com.android.systemui.statusbar.phone.StatusBar;
 
 import java.util.Optional;
 
@@ -49,15 +49,15 @@ import javax.inject.Inject;
 public class ActionProxyReceiver extends BroadcastReceiver {
     private static final String TAG = "ActionProxyReceiver";
 
-    private final CentralSurfaces mCentralSurfaces;
+    private final StatusBar mStatusBar;
     private final ActivityManagerWrapper mActivityManagerWrapper;
     private final ScreenshotSmartActions mScreenshotSmartActions;
 
     @Inject
-    public ActionProxyReceiver(Optional<CentralSurfaces> centralSurfacesOptional,
+    public ActionProxyReceiver(Optional<StatusBar> statusBar,
             ActivityManagerWrapper activityManagerWrapper,
             ScreenshotSmartActions screenshotSmartActions) {
-        mCentralSurfaces = centralSurfacesOptional.orElse(null);
+        mStatusBar = statusBar.orElse(null);
         mActivityManagerWrapper = activityManagerWrapper;
         mScreenshotSmartActions = screenshotSmartActions;
     }
@@ -89,8 +89,8 @@ public class ActionProxyReceiver extends BroadcastReceiver {
 
         };
 
-        if (mCentralSurfaces != null) {
-            mCentralSurfaces.executeRunnableDismissingKeyguard(startActivityRunnable, null,
+        if (mStatusBar != null) {
+            mStatusBar.executeRunnableDismissingKeyguard(startActivityRunnable, null,
                     true /* dismissShade */, true /* afterKeyguardGone */,
                     true /* deferred */);
         } else {

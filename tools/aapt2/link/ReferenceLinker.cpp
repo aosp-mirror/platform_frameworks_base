@@ -190,8 +190,7 @@ class EmptyDeclStack : public xml::IPackageDeclStack {
  public:
   EmptyDeclStack() = default;
 
-  std::optional<xml::ExtractedPackage> TransformPackageAlias(
-      const StringPiece& alias) const override {
+  Maybe<xml::ExtractedPackage> TransformPackageAlias(const StringPiece& alias) const override {
     if (alias.empty()) {
       return xml::ExtractedPackage{{}, true /*private*/};
     }
@@ -207,8 +206,7 @@ struct MacroDeclStack : public xml::IPackageDeclStack {
       : alias_namespaces_(std::move(namespaces)) {
   }
 
-  std::optional<xml::ExtractedPackage> TransformPackageAlias(
-      const StringPiece& alias) const override {
+  Maybe<xml::ExtractedPackage> TransformPackageAlias(const StringPiece& alias) const override {
     if (alias.empty()) {
       return xml::ExtractedPackage{{}, true /*private*/};
     }
@@ -324,11 +322,11 @@ const SymbolTable::Symbol* ReferenceLinker::ResolveAttributeCheckVisibility(
   return symbol;
 }
 
-std::optional<xml::AaptAttribute> ReferenceLinker::CompileXmlAttribute(const Reference& reference,
-                                                                       const CallSite& callsite,
-                                                                       IAaptContext* context,
-                                                                       SymbolTable* symbols,
-                                                                       std::string* out_error) {
+Maybe<xml::AaptAttribute> ReferenceLinker::CompileXmlAttribute(const Reference& reference,
+                                                               const CallSite& callsite,
+                                                               IAaptContext* context,
+                                                               SymbolTable* symbols,
+                                                               std::string* out_error) {
   const SymbolTable::Symbol* symbol =
       ResolveAttributeCheckVisibility(reference, callsite, context, symbols, out_error);
   if (!symbol) {
@@ -352,7 +350,7 @@ void ReferenceLinker::WriteAttributeName(const Reference& ref, const CallSite& c
   }
 
   const ResourceName& ref_name = ref.name.value();
-  CHECK_EQ(ref_name.type.type, ResourceType::kAttr);
+  CHECK_EQ(ref_name.type, ResourceType::kAttr);
 
   if (!ref_name.package.empty()) {
     *out_msg << ref_name.package << ":";
@@ -385,7 +383,7 @@ std::unique_ptr<Item> ReferenceLinker::LinkReference(const CallSite& callsite,
   Reference transformed_reference = reference;
   xml::ResolvePackage(decls, &transformed_reference);
 
-  if (transformed_reference.name.value().type.type == ResourceType::kMacro) {
+  if (transformed_reference.name.value().type == ResourceType::kMacro) {
     if (transformed_reference.name.value().package.empty()) {
       transformed_reference.name.value().package = callsite.package;
     }

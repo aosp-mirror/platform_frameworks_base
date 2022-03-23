@@ -17,21 +17,15 @@
 package com.android.server.wm.flicker.launch
 
 import androidx.test.filters.FlakyTest
-import android.platform.test.annotations.Presubmit
-import android.platform.test.annotations.RequiresDevice
-import android.view.Display
+import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
-import com.android.server.wm.flicker.LAUNCHER_COMPONENT
 import com.android.server.wm.flicker.annotation.Group1
-import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.server.wm.flicker.helpers.reopenAppFromOverview
 import com.android.server.wm.flicker.helpers.setRotation
-import com.android.server.wm.traces.common.WindowManagerConditionsFactory
-import org.junit.Assume.assumeFalse
-import org.junit.Before
+import com.android.server.wm.flicker.startRotation
+import com.android.server.wm.flicker.dsl.FlickerBuilder
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -39,42 +33,18 @@ import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
 
 /**
- * Test launching an app from the recents app view (the overview)
- *
+ * Launch an app from the recents app view (the overview)
  * To run this test: `atest FlickerTests:OpenAppFromOverviewTest`
- *
- * Actions:
- *     Launch [testApp]
- *     Press recents
- *     Relaunch an app [testApp] by selecting it in the overview screen, and wait animation to
- *     complete (only this action is traced)
- *
- * Notes:
- *     1. Some default assertions (e.g., nav bar, status bar and screen covered)
- *        are inherited [OpenAppTransition]
- *     2. Part of the test setup occurs automatically via
- *        [com.android.server.wm.flicker.TransitionRunnerWithRules],
- *        including configuring navigation mode, initial orientation and ensuring no
- *        apps are running before setup
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group1
-open class OpenAppFromOverviewTest(testSpec: FlickerTestParameter)
-    : OpenAppFromLauncherTransition(testSpec) {
-    @Before
-    open fun before() {
-        assumeFalse(isShellTransitionsEnabled)
-    }
-
-    /**
-     * Defines the transition used to run the test
-     */
-    override val transition: FlickerBuilder.() -> Unit
+class OpenAppFromOverviewTest(testSpec: FlickerTestParameter) : OpenAppTransition(testSpec) {
+    override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
         get() = {
-            super.transition(this)
+            super.transition(this, it)
             setup {
                 test {
                     testApp.launchViaIntent(wmHelper)
@@ -83,74 +53,52 @@ open class OpenAppFromOverviewTest(testSpec: FlickerTestParameter)
                     device.pressHome()
                     wmHelper.waitForAppTransitionIdle()
                     device.pressRecentApps()
-                    wmHelper.waitFor(
-                        WindowManagerConditionsFactory
-                            .isAppTransitionIdle(Display.DEFAULT_DISPLAY),
-                        WindowManagerConditionsFactory.isActivityVisible(LAUNCHER_COMPONENT),
-                        WindowManagerConditionsFactory.hasLayersAnimating().negate()
-                    )
-                    this.setRotation(testSpec.startRotation)
+                    wmHelper.waitForAppTransitionIdle()
+                    this.setRotation(testSpec.config.startRotation)
                 }
             }
             transitions {
                 device.reopenAppFromOverview(wmHelper)
-                wmHelper.waitFor(
-                    WindowManagerConditionsFactory.hasLayersAnimating().negate(),
-                    WindowManagerConditionsFactory.isWMStateComplete(),
-                    WindowManagerConditionsFactory.isLayerVisible(LAUNCHER_COMPONENT).negate(),
-                    WindowManagerConditionsFactory.isActivityVisible(LAUNCHER_COMPONENT).negate()
-                )
                 wmHelper.waitForFullScreenApp(testApp.component)
             }
         }
 
-    /** {@inheritDoc} */
-    @FlakyTest(bugId = 206753786)
-    @Test
-    override fun statusBarLayerRotatesScales() = super.statusBarLayerRotatesScales()
-
-    /** {@inheritDoc} */
-    @Presubmit
-    @Test
-    override fun appLayerReplacesLauncher() = super.appLayerReplacesLauncher()
-
-    /** {@inheritDoc} */
     @FlakyTest
     @Test
-    override fun navBarLayerRotatesAndScales() = super.navBarLayerRotatesAndScales()
+    override fun navBarLayerIsAlwaysVisible() {
+        super.navBarLayerIsAlwaysVisible()
+    }
 
-    /** {@inheritDoc} */
-    @Presubmit
+    @FlakyTest
     @Test
-    override fun navBarLayerIsVisible() = super.navBarLayerIsVisible()
+    override fun statusBarLayerIsAlwaysVisible() {
+        super.statusBarLayerIsAlwaysVisible()
+    }
 
-    /** {@inheritDoc} */
-    @Presubmit
+    @FlakyTest
     @Test
-    override fun navBarWindowIsVisible() = super.navBarWindowIsVisible()
+    override fun navBarLayerRotatesAndScales() {
+        super.navBarLayerRotatesAndScales()
+    }
 
-    /** {@inheritDoc} */
-    @Presubmit
+    @FlakyTest
     @Test
-    override fun appLayerBecomesVisible() = super.appLayerBecomesVisible_warmStart()
+    override fun statusBarLayerRotatesScales() {
+        super.statusBarLayerRotatesScales()
+    }
 
-    /** {@inheritDoc} */
-    @FlakyTest(bugId = 218624176)
+    @FlakyTest
     @Test
-    override fun appWindowBecomesVisible() = super.appWindowBecomesVisible_warmStart()
+    override fun visibleLayersShownMoreThanOneConsecutiveEntry() {
+        super.visibleLayersShownMoreThanOneConsecutiveEntry()
+    }
 
     companion object {
-        /**
-         * Creates the test configurations.
-         *
-         * See [FlickerTestParameterFactory.getConfigNonRotationTests] for configuring
-         * repetitions, screen orientation and navigation modes.
-         */
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
         fun getParams(): Collection<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance()
-                .getConfigNonRotationTests(repetitions = 3)
+                .getConfigNonRotationTests(repetitions = 5)
         }
     }
 }

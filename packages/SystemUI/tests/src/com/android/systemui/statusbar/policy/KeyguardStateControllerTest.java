@@ -32,16 +32,13 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.dump.DumpManager;
-import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
+import com.android.systemui.shared.system.smartspace.SmartspaceTransitionController;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
-import dagger.Lazy;
 
 @SmallTest
 @TestableLooper.RunWithLooper
@@ -54,19 +51,13 @@ public class KeyguardStateControllerTest extends SysuiTestCase {
     private LockPatternUtils mLockPatternUtils;
     private KeyguardStateController mKeyguardStateController;
     @Mock
-    private DumpManager mDumpManager;
-    @Mock
-    private Lazy<KeyguardUnlockAnimationController> mKeyguardUnlockAnimationControllerLazy;
+    private SmartspaceTransitionController mSmartSpaceTransitionController;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        mKeyguardStateController = new KeyguardStateControllerImpl(
-                mContext,
-                mKeyguardUpdateMonitor,
-                mLockPatternUtils,
-                mKeyguardUnlockAnimationControllerLazy,
-                mDumpManager);
+        mKeyguardStateController = new KeyguardStateControllerImpl(mContext,
+                mKeyguardUpdateMonitor, mLockPatternUtils, mSmartSpaceTransitionController);
     }
 
     @Test

@@ -424,17 +424,6 @@ public class AnimationDrawable extends DrawableContainer implements Runnable, An
             System.arraycopy(mDurations, 0, newDurations, 0, oldSize);
             mDurations = newDurations;
         }
-
-        public long getTotalDuration() {
-            if (mDurations != null) {
-                int total = 0;
-                for (int dur : mDurations) {
-                    total += dur;
-                }
-                return total;
-            }
-            return 0;
-        }
     }
 
     @Override
@@ -444,14 +433,6 @@ public class AnimationDrawable extends DrawableContainer implements Runnable, An
         if (state instanceof AnimationState) {
             mAnimationState = (AnimationState) state;
         }
-    }
-
-    /**
-     * Gets the total duration of the animation
-     * @hide
-     */
-    public long getTotalDuration() {
-        return mAnimationState.getTotalDuration();
     }
 
     private AnimationDrawable(AnimationState state, Resources res) {

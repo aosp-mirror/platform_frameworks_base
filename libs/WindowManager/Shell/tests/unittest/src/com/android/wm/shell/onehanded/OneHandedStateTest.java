@@ -40,7 +40,6 @@ import android.view.SurfaceControl;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.internal.jank.InteractionJankMonitor;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.ShellExecutor;
@@ -67,6 +66,8 @@ public class OneHandedStateTest extends OneHandedTestCase {
     @Mock
     DisplayController mMockDisplayController;
     @Mock
+    OneHandedBackgroundPanelOrganizer mMockBackgroundOrganizer;
+    @Mock
     OneHandedDisplayAreaOrganizer mMockDisplayAreaOrganizer;
     @Mock
     OneHandedTouchHandler mMockTouchHandler;
@@ -76,8 +77,6 @@ public class OneHandedStateTest extends OneHandedTestCase {
     OneHandedSettingsUtil mMockSettingsUitl;
     @Mock
     OneHandedUiEventLogger mMockUiEventLogger;
-    @Mock
-    InteractionJankMonitor mMockJankMonitor;
     @Mock
     IOverlayManager mMockOverlayManager;
     @Mock
@@ -103,6 +102,7 @@ public class OneHandedStateTest extends OneHandedTestCase {
 
         when(mMockDisplayController.getDisplay(anyInt())).thenReturn(mDisplay);
         when(mMockDisplayAreaOrganizer.getDisplayAreaTokenMap()).thenReturn(new ArrayMap<>());
+        when(mMockBackgroundOrganizer.isRegistered()).thenReturn(true);
         when(mMockSettingsUitl.getSettingsOneHandedModeEnabled(any(), anyInt())).thenReturn(
                 mDefaultEnabled);
         when(mMockSettingsUitl.getSettingsOneHandedModeTimeout(any(), anyInt())).thenReturn(
@@ -120,6 +120,7 @@ public class OneHandedStateTest extends OneHandedTestCase {
         mSpiedOneHandedController = spy(new OneHandedController(
                 mContext,
                 mMockDisplayController,
+                mMockBackgroundOrganizer,
                 mMockDisplayAreaOrganizer,
                 mMockTouchHandler,
                 mMockTutorialHandler,
@@ -127,7 +128,6 @@ public class OneHandedStateTest extends OneHandedTestCase {
                 mOneHandedAccessibilityUtil,
                 mSpiedTimeoutHandler,
                 mSpiedState,
-                mMockJankMonitor,
                 mMockUiEventLogger,
                 mMockOverlayManager,
                 mMockTaskStackListener,

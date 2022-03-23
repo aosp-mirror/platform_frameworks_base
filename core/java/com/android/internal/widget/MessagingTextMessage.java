@@ -24,6 +24,7 @@ import android.app.Notification;
 import android.content.Context;
 import android.text.Layout;
 import android.util.AttributeSet;
+import android.util.Pools;
 import android.view.LayoutInflater;
 import android.widget.RemoteViews;
 
@@ -35,8 +36,8 @@ import com.android.internal.R;
 @RemoteViews.RemoteView
 public class MessagingTextMessage extends ImageFloatingTextView implements MessagingMessage {
 
-    private static final MessagingPool<MessagingTextMessage> sInstancePool =
-            new MessagingPool<>(20);
+    private static Pools.SimplePool<MessagingTextMessage> sInstancePool
+            = new Pools.SynchronizedPool<>(20);
     private final MessagingMessageState mState = new MessagingMessageState(this);
 
     public MessagingTextMessage(@NonNull Context context) {
@@ -91,7 +92,7 @@ public class MessagingTextMessage extends ImageFloatingTextView implements Messa
     }
 
     public static void dropCache() {
-        sInstancePool.clear();
+        sInstancePool = new Pools.SynchronizedPool<>(10);
     }
 
     @Override

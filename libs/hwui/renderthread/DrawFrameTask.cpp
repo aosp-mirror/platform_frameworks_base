@@ -133,7 +133,6 @@ int DrawFrameTask::drawFrame() {
 }
 
 void DrawFrameTask::postAndWait() {
-    ATRACE_CALL();
     AutoMutex _lock(mLock);
     mRenderThread->queue().post([this]() { run(); });
     mSignal.wait(mLock);
@@ -151,19 +150,16 @@ void DrawFrameTask::run() {
         canUnblockUiThread = syncFrameState(info);
         canDrawThisFrame = info.out.canDrawThisFrame;
 
-        if (mFrameCommitCallback) {
-            mContext->addFrameCommitListener(std::move(mFrameCommitCallback));
-            mFrameCommitCallback = nullptr;
+        if (mFrameCompleteCallback) {
+            mContext->addFrameCompleteListener(std::move(mFrameCompleteCallback));
+            mFrameCompleteCallback = nullptr;
         }
     }
 
     // Grab a copy of everything we need
     CanvasContext* context = mContext;
-    std::function<std::function<void(bool)>(int32_t, int64_t)> frameCallback =
-            std::move(mFrameCallback);
-    std::function<void()> frameCompleteCallback = std::move(mFrameCompleteCallback);
+    std::function<void(int64_t)> callback = std::move(mFrameCallback);
     mFrameCallback = nullptr;
-    mFrameCompleteCallback = nullptr;
     int64_t intendedVsync = mFrameInfo[static_cast<int>(FrameInfoIndex::IntendedVsync)];
     int64_t frameDeadline = mFrameInfo[static_cast<int>(FrameInfoIndex::FrameDeadline)];
     int64_t frameStartTime = mFrameInfo[static_cast<int>(FrameInfoIndex::FrameStartTime)];
@@ -174,14 +170,9 @@ void DrawFrameTask::run() {
     }
 
     // Even if we aren't drawing this vsync pulse the next frame number will still be accurate
-    if (CC_UNLIKELY(frameCallback)) {
-        context->enqueueFrameWork([frameCallback, context, syncResult = mSyncResult,
-                                   frameNr = context->getFrameNumber()]() {
-            auto frameCommitCallback = std::move(frameCallback(syncResult, frameNr));
-            if (frameCommitCallback) {
-                context->addFrameCommitListener(std::move(frameCommitCallback));
-            }
-        });
+    if (CC_UNLIKELY(callback)) {
+        context->enqueueFrameWork(
+                [callback, frameNr = context->getFrameNumber()]() { callback(frameNr); });
     }
 
     nsecs_t dequeueBufferDuration = 0;
@@ -196,10 +187,6 @@ void DrawFrameTask::run() {
         }
         // wait on fences so tasks don't overlap next frame
         context->waitOnFences();
-    }
-
-    if (CC_UNLIKELY(frameCompleteCallback)) {
-        std::invoke(frameCompleteCallback);
     }
 
     if (!canUnblockUiThread) {

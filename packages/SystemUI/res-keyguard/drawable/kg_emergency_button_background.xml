@@ -15,11 +15,10 @@
   ~ limitations under the License.
   -->
 <ripple xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
     android:color="?attr/wallpaperTextColorSecondary">
     <item android:id="@android:id/background">
         <shape android:shape="rectangle">
-            <solid android:color="?androidprv:attr/colorAccentTertiary"/>
+            <solid android:color="?android:attr/colorAccent"/>
             <corners android:radius="24dp"/>
         </shape>
     </item>

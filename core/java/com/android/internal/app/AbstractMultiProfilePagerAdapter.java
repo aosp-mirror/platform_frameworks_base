@@ -467,20 +467,7 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
     }
 
     protected void showEmptyState(ResolverListAdapter activeListAdapter,
-            @DrawableRes int iconRes, String title, String subtitle) {
-        showEmptyState(activeListAdapter, iconRes, title, subtitle, /* buttonOnClick */ null);
-    }
-
-    protected void showEmptyState(ResolverListAdapter activeListAdapter,
             @DrawableRes int iconRes, @StringRes int titleRes, @StringRes int subtitleRes,
-            View.OnClickListener buttonOnClick) {
-        String title = titleRes == 0 ? null : mContext.getString(titleRes);
-        String subtitle = subtitleRes == 0 ? null : mContext.getString(subtitleRes);
-        showEmptyState(activeListAdapter, iconRes, title, subtitle, buttonOnClick);
-    }
-
-    protected void showEmptyState(ResolverListAdapter activeListAdapter,
-            @DrawableRes int iconRes, String title, String subtitle,
             View.OnClickListener buttonOnClick) {
         ProfileDescriptor descriptor = getItem(
                 userHandleToPageIndex(activeListAdapter.getUserHandle()));
@@ -492,15 +479,15 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
         View container = emptyStateView.findViewById(R.id.resolver_empty_state_container);
         setupContainerPadding(container);
 
-        TextView titleView = emptyStateView.findViewById(R.id.resolver_empty_state_title);
-        titleView.setText(title);
+        TextView title = emptyStateView.findViewById(R.id.resolver_empty_state_title);
+        title.setText(titleRes);
 
-        TextView subtitleView = emptyStateView.findViewById(R.id.resolver_empty_state_subtitle);
-        if (subtitle != null) {
-            subtitleView.setVisibility(View.VISIBLE);
-            subtitleView.setText(subtitle);
+        TextView subtitle = emptyStateView.findViewById(R.id.resolver_empty_state_subtitle);
+        if (subtitleRes != 0) {
+            subtitle.setVisibility(View.VISIBLE);
+            subtitle.setText(subtitleRes);
         } else {
-            subtitleView.setVisibility(View.GONE);
+            subtitle.setVisibility(View.GONE);
         }
 
         Button button = emptyStateView.findViewById(R.id.resolver_empty_state_button);

@@ -29,6 +29,7 @@ import androidx.annotation.Nullable;
 
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.pip.PipAnimationController;
+import com.android.wm.shell.pip.PipBoundsAlgorithm;
 import com.android.wm.shell.pip.PipBoundsState;
 import com.android.wm.shell.pip.PipMenuController;
 import com.android.wm.shell.pip.PipTransitionController;
@@ -41,11 +42,11 @@ import com.android.wm.shell.transition.Transitions;
 public class TvPipTransition extends PipTransitionController {
     public TvPipTransition(PipBoundsState pipBoundsState,
             PipMenuController pipMenuController,
-            TvPipBoundsAlgorithm tvPipBoundsAlgorithm,
+            PipBoundsAlgorithm pipBoundsAlgorithm,
             PipAnimationController pipAnimationController,
             Transitions transitions,
             @NonNull ShellTaskOrganizer shellTaskOrganizer) {
-        super(pipBoundsState, pipMenuController, tvPipBoundsAlgorithm, pipAnimationController,
+        super(pipBoundsState, pipMenuController, pipBoundsAlgorithm, pipAnimationController,
                 transitions, shellTaskOrganizer);
     }
 
@@ -57,8 +58,7 @@ public class TvPipTransition extends PipTransitionController {
 
     @Override
     public boolean startAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
-            @NonNull SurfaceControl.Transaction startTransaction,
-            @android.annotation.NonNull SurfaceControl.Transaction finishTransaction,
+            @NonNull SurfaceControl.Transaction t,
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
         return false;
     }

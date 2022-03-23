@@ -20,12 +20,9 @@ import android.app.PendingIntent;
 import android.app.smartspace.SmartspaceAction;
 import android.app.smartspace.SmartspaceTarget;
 import android.app.smartspace.SmartspaceTargetEvent;
-import android.app.smartspace.uitemplatedata.TapAction;
-import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Parcelable;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -42,7 +39,6 @@ import java.util.List;
 public interface BcSmartspaceDataPlugin extends Plugin {
     String ACTION = "com.android.systemui.action.PLUGIN_BC_SMARTSPACE_DATA";
     int VERSION = 1;
-    String TAG = "BcSmartspaceDataPlugin";
 
     /** Register a listener to get Smartspace data. */
     void registerListener(SmartspaceTargetListener listener);
@@ -123,43 +119,22 @@ public interface BcSmartspaceDataPlugin extends Plugin {
          * Set or clear device media playing
          */
         void setMediaTarget(@Nullable SmartspaceTarget target);
-
-        /**
-         * Get the index of the currently selected page.
-         */
-        int getSelectedPage();
     }
 
     /** Interface for launching Intents, which can differ on the lockscreen */
     interface IntentStarter {
-        default void startFromAction(SmartspaceAction action, View v, boolean showOnLockscreen) {
-            try {
-                if (action.getIntent() != null) {
-                    startIntent(v, action.getIntent(), showOnLockscreen);
-                } else if (action.getPendingIntent() != null) {
-                    startPendingIntent(action.getPendingIntent(), showOnLockscreen);
-                }
-            } catch (ActivityNotFoundException e) {
-                Log.w(TAG, "Could not launch intent for action: " + action, e);
-            }
-        }
-
-        default void startFromAction(TapAction action, View v, boolean showOnLockscreen) {
-            try {
-                if (action.getIntent() != null) {
-                    startIntent(v, action.getIntent(), showOnLockscreen);
-                } else if (action.getPendingIntent() != null) {
-                    startPendingIntent(action.getPendingIntent(), showOnLockscreen);
-                }
-            } catch (ActivityNotFoundException e) {
-                Log.w(TAG, "Could not launch intent for action: " + action, e);
+        default void startFromAction(SmartspaceAction action, View v) {
+            if (action.getIntent() != null) {
+                startIntent(v, action.getIntent());
+            } else if (action.getPendingIntent() != null) {
+                startPendingIntent(action.getPendingIntent());
             }
         }
 
         /** Start the intent */
-        void startIntent(View v, Intent i, boolean showOnLockscreen);
+        void startIntent(View v, Intent i);
 
         /** Start the PendingIntent */
-        void startPendingIntent(PendingIntent pi, boolean showOnLockscreen);
+        void startPendingIntent(PendingIntent pi);
     }
 }

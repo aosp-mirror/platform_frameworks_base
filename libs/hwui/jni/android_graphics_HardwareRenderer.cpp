@@ -73,10 +73,6 @@ struct {
 } gFrameDrawingCallback;
 
 struct {
-    jmethodID onFrameCommit;
-} gFrameCommitCallback;
-
-struct {
     jmethodID onFrameComplete;
 } gFrameCompleteCallback;
 
@@ -105,21 +101,22 @@ private:
     JavaVM* mVm;
 };
 
-class FrameCommitWrapper : public LightRefBase<FrameCommitWrapper> {
+class FrameCompleteWrapper : public LightRefBase<FrameCompleteWrapper> {
 public:
-    explicit FrameCommitWrapper(JNIEnv* env, jobject jobject) {
+    explicit FrameCompleteWrapper(JNIEnv* env, jobject jobject) {
         env->GetJavaVM(&mVm);
         mObject = env->NewGlobalRef(jobject);
         LOG_ALWAYS_FATAL_IF(!mObject, "Failed to make global ref");
     }
 
-    ~FrameCommitWrapper() { releaseObject(); }
+    ~FrameCompleteWrapper() {
+        releaseObject();
+    }
 
-    void onFrameCommit(bool didProduceBuffer) {
+    void onFrameComplete(int64_t frameNr) {
         if (mObject) {
-            ATRACE_FORMAT("frameCommit success=%d", didProduceBuffer);
-            getenv(mVm)->CallVoidMethod(mObject, gFrameCommitCallback.onFrameCommit,
-                                        didProduceBuffer);
+            ATRACE_FORMAT("frameComplete %" PRId64, frameNr);
+            getenv(mVm)->CallVoidMethod(mObject, gFrameCompleteCallback.onFrameComplete, frameNr);
             releaseObject();
         }
     }
@@ -379,13 +376,6 @@ static void android_view_ThreadedRenderer_dumpProfileInfo(JNIEnv* env, jobject c
     proxy->dumpProfileInfo(fd, dumpFlags);
 }
 
-static void android_view_ThreadedRenderer_dumpGlobalProfileInfo(JNIEnv* env, jobject clazz,
-                                                                jobject javaFileDescriptor,
-                                                                jint dumpFlags) {
-    int fd = jniGetFDFromFileDescriptor(env, javaFileDescriptor);
-    RenderProxy::dumpGraphicsMemory(fd, true, dumpFlags & DumpFlags::Reset);
-}
-
 static void android_view_ThreadedRenderer_addRenderNode(JNIEnv* env, jobject clazz,
         jlong proxyPtr, jlong renderNodePtr, jboolean placeFront) {
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
@@ -431,6 +421,28 @@ private:
 
     JavaVM* mVm;
     jobject mObject;
+};
+
+class JWeakGlobalRefHolder {
+public:
+    JWeakGlobalRefHolder(JavaVM* vm, jobject object) : mVm(vm) {
+        mWeakRef = getenv(vm)->NewWeakGlobalRef(object);
+    }
+
+    virtual ~JWeakGlobalRefHolder() {
+        if (mWeakRef != nullptr) getenv(mVm)->DeleteWeakGlobalRef(mWeakRef);
+        mWeakRef = nullptr;
+    }
+
+    jobject ref() { return mWeakRef; }
+    JavaVM* vm() { return mVm; }
+
+private:
+    JWeakGlobalRefHolder(const JWeakGlobalRefHolder&) = delete;
+    void operator=(const JWeakGlobalRefHolder&) = delete;
+
+    JavaVM* mVm;
+    jobject mWeakRef;
 };
 
 using TextureMap = std::unordered_map<uint32_t, sk_sp<SkImage>>;
@@ -566,16 +578,20 @@ static void android_view_ThreadedRenderer_setASurfaceTransactionCallback(
     } else {
         JavaVM* vm = nullptr;
         LOG_ALWAYS_FATAL_IF(env->GetJavaVM(&vm) != JNI_OK, "Unable to get Java VM");
-        auto globalCallbackRef = std::make_shared<JGlobalRefHolder>(
-                vm, env->NewGlobalRef(aSurfaceTransactionCallback));
+        auto globalCallbackRef =
+                std::make_shared<JWeakGlobalRefHolder>(vm, aSurfaceTransactionCallback);
         proxy->setASurfaceTransactionCallback(
                 [globalCallbackRef](int64_t transObj, int64_t scObj, int64_t frameNr) -> bool {
                     JNIEnv* env = getenv(globalCallbackRef->vm());
+                    jobject localref = env->NewLocalRef(globalCallbackRef->ref());
+                    if (CC_UNLIKELY(!localref)) {
+                        return false;
+                    }
                     jboolean ret = env->CallBooleanMethod(
-                            globalCallbackRef->object(),
-                            gASurfaceTransactionCallback.onMergeTransaction,
+                            localref, gASurfaceTransactionCallback.onMergeTransaction,
                             static_cast<jlong>(transObj), static_cast<jlong>(scObj),
                             static_cast<jlong>(frameNr));
+                    env->DeleteLocalRef(localref);
                     return ret;
                 });
     }
@@ -590,11 +606,15 @@ static void android_view_ThreadedRenderer_setPrepareSurfaceControlForWebviewCall
         JavaVM* vm = nullptr;
         LOG_ALWAYS_FATAL_IF(env->GetJavaVM(&vm) != JNI_OK, "Unable to get Java VM");
         auto globalCallbackRef =
-                std::make_shared<JGlobalRefHolder>(vm, env->NewGlobalRef(callback));
+                std::make_shared<JWeakGlobalRefHolder>(vm, callback);
         proxy->setPrepareSurfaceControlForWebviewCallback([globalCallbackRef]() {
             JNIEnv* env = getenv(globalCallbackRef->vm());
-            env->CallVoidMethod(globalCallbackRef->object(),
-                                gPrepareSurfaceControlForWebviewCallback.prepare);
+            jobject localref = env->NewLocalRef(globalCallbackRef->ref());
+            if (CC_UNLIKELY(!localref)) {
+                return;
+            }
+            env->CallVoidMethod(localref, gPrepareSurfaceControlForWebviewCallback.prepare);
+            env->DeleteLocalRef(localref);
         });
     }
 }
@@ -609,32 +629,11 @@ static void android_view_ThreadedRenderer_setFrameCallback(JNIEnv* env,
         LOG_ALWAYS_FATAL_IF(env->GetJavaVM(&vm) != JNI_OK, "Unable to get Java VM");
         auto globalCallbackRef = std::make_shared<JGlobalRefHolder>(vm,
                 env->NewGlobalRef(frameCallback));
-        proxy->setFrameCallback([globalCallbackRef](int32_t syncResult,
-                                                    int64_t frameNr) -> std::function<void(bool)> {
+        proxy->setFrameCallback([globalCallbackRef](int64_t frameNr) {
             JNIEnv* env = getenv(globalCallbackRef->vm());
-            ScopedLocalRef<jobject> frameCommitCallback(
-                    env, env->CallObjectMethod(
-                                 globalCallbackRef->object(), gFrameDrawingCallback.onFrameDraw,
-                                 static_cast<jint>(syncResult), static_cast<jlong>(frameNr)));
-            if (frameCommitCallback == nullptr) {
-                return nullptr;
-            }
-            sp<FrameCommitWrapper> wrapper =
-                    sp<FrameCommitWrapper>::make(env, frameCommitCallback.get());
-            return [wrapper](bool didProduceBuffer) { wrapper->onFrameCommit(didProduceBuffer); };
+            env->CallVoidMethod(globalCallbackRef->object(), gFrameDrawingCallback.onFrameDraw,
+                    static_cast<jlong>(frameNr));
         });
-    }
-}
-
-static void android_view_ThreadedRenderer_setFrameCommitCallback(JNIEnv* env, jobject clazz,
-                                                                 jlong proxyPtr, jobject callback) {
-    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
-    if (!callback) {
-        proxy->setFrameCommitCallback(nullptr);
-    } else {
-        sp<FrameCommitWrapper> wrapper = sp<FrameCommitWrapper>::make(env, callback);
-        proxy->setFrameCommitCallback(
-                [wrapper](bool didProduceBuffer) { wrapper->onFrameCommit(didProduceBuffer); });
     }
 }
 
@@ -644,15 +643,9 @@ static void android_view_ThreadedRenderer_setFrameCompleteCallback(JNIEnv* env,
     if (!callback) {
         proxy->setFrameCompleteCallback(nullptr);
     } else {
-        RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
-        JavaVM* vm = nullptr;
-        LOG_ALWAYS_FATAL_IF(env->GetJavaVM(&vm) != JNI_OK, "Unable to get Java VM");
-        auto globalCallbackRef =
-                std::make_shared<JGlobalRefHolder>(vm, env->NewGlobalRef(callback));
-        proxy->setFrameCompleteCallback([globalCallbackRef]() {
-            JNIEnv* env = getenv(globalCallbackRef->vm());
-            env->CallVoidMethod(globalCallbackRef->object(),
-                                gFrameCompleteCallback.onFrameComplete);
+        sp<FrameCompleteWrapper> wrapper = new FrameCompleteWrapper{env, callback};
+        proxy->setFrameCompleteCallback([wrapper](int64_t frameNr) {
+            wrapper->onFrameComplete(frameNr);
         });
     }
 }
@@ -824,14 +817,6 @@ static void android_view_ThreadedRenderer_initDisplayInfo(JNIEnv*, jclass, jint 
     DeviceInfo::setPresentationDeadlineNanos(presentationDeadlineNanos);
 }
 
-static void android_view_ThreadedRenderer_setDrawingEnabled(JNIEnv*, jclass, jboolean enabled) {
-    Properties::setDrawingEnabled(enabled);
-}
-
-static jboolean android_view_ThreadedRenderer_isDrawingEnabled(JNIEnv*, jclass) {
-    return Properties::isDrawingEnabled();
-}
-
 // ----------------------------------------------------------------------------
 // HardwareRendererObserver
 // ----------------------------------------------------------------------------
@@ -926,8 +911,6 @@ static const JNINativeMethod gMethods[] = {
         {"nNotifyFramePending", "(J)V", (void*)android_view_ThreadedRenderer_notifyFramePending},
         {"nDumpProfileInfo", "(JLjava/io/FileDescriptor;I)V",
          (void*)android_view_ThreadedRenderer_dumpProfileInfo},
-        {"nDumpGlobalProfileInfo", "(Ljava/io/FileDescriptor;I)V",
-         (void*)android_view_ThreadedRenderer_dumpGlobalProfileInfo},
         {"setupShadersDiskCache", "(Ljava/lang/String;Ljava/lang/String;)V",
          (void*)android_view_ThreadedRenderer_setupShadersDiskCache},
         {"nAddRenderNode", "(JJZ)V", (void*)android_view_ThreadedRenderer_addRenderNode},
@@ -946,8 +929,6 @@ static const JNINativeMethod gMethods[] = {
          (void*)android_view_ThreadedRenderer_setPrepareSurfaceControlForWebviewCallback},
         {"nSetFrameCallback", "(JLandroid/graphics/HardwareRenderer$FrameDrawingCallback;)V",
          (void*)android_view_ThreadedRenderer_setFrameCallback},
-        {"nSetFrameCommitCallback", "(JLandroid/graphics/HardwareRenderer$FrameCommitCallback;)V",
-         (void*)android_view_ThreadedRenderer_setFrameCommitCallback},
         {"nSetFrameCompleteCallback",
          "(JLandroid/graphics/HardwareRenderer$FrameCompleteCallback;)V",
          (void*)android_view_ThreadedRenderer_setFrameCompleteCallback},
@@ -972,8 +953,6 @@ static const JNINativeMethod gMethods[] = {
         {"preload", "()V", (void*)android_view_ThreadedRenderer_preload},
         {"isWebViewOverlaysEnabled", "()Z",
          (void*)android_view_ThreadedRenderer_isWebViewOverlaysEnabled},
-        {"nSetDrawingEnabled", "(Z)V", (void*)android_view_ThreadedRenderer_setDrawingEnabled},
-        {"nIsDrawingEnabled", "()Z", (void*)android_view_ThreadedRenderer_isDrawingEnabled},
 };
 
 static JavaVM* mJvm = nullptr;
@@ -1012,19 +991,13 @@ int register_android_view_ThreadedRenderer(JNIEnv* env) {
 
     jclass frameCallbackClass = FindClassOrDie(env,
             "android/graphics/HardwareRenderer$FrameDrawingCallback");
-    gFrameDrawingCallback.onFrameDraw =
-            GetMethodIDOrDie(env, frameCallbackClass, "onFrameDraw",
-                             "(IJ)Landroid/graphics/HardwareRenderer$FrameCommitCallback;");
-
-    jclass frameCommitClass =
-            FindClassOrDie(env, "android/graphics/HardwareRenderer$FrameCommitCallback");
-    gFrameCommitCallback.onFrameCommit =
-            GetMethodIDOrDie(env, frameCommitClass, "onFrameCommit", "(Z)V");
+    gFrameDrawingCallback.onFrameDraw = GetMethodIDOrDie(env, frameCallbackClass,
+            "onFrameDraw", "(J)V");
 
     jclass frameCompleteClass = FindClassOrDie(env,
             "android/graphics/HardwareRenderer$FrameCompleteCallback");
-    gFrameCompleteCallback.onFrameComplete =
-            GetMethodIDOrDie(env, frameCompleteClass, "onFrameComplete", "()V");
+    gFrameCompleteCallback.onFrameComplete = GetMethodIDOrDie(env, frameCompleteClass,
+            "onFrameComplete", "(J)V");
 
     void* handle_ = dlopen("libandroid.so", RTLD_NOW | RTLD_NODELETE);
     fromSurface = (ANW_fromSurface)dlsym(handle_, "ANativeWindow_fromSurface");

@@ -50,7 +50,8 @@ void setGpuStats_native(JNIEnv* env, jobject clazz, jstring driverPackageName,
 }
 
 void setAngleInfo_native(JNIEnv* env, jobject clazz, jstring path, jstring appName,
-                         jstring devOptIn, jobjectArray featuresObj) {
+                         jstring devOptIn, jobjectArray featuresObj, jobject rulesFd,
+                         jlong rulesOffset, jlong rulesLength) {
     ScopedUtfChars pathChars(env, path);
     ScopedUtfChars appNameChars(env, appName);
     ScopedUtfChars devOptInChars(env, devOptIn);
@@ -73,8 +74,11 @@ void setAngleInfo_native(JNIEnv* env, jobject clazz, jstring path, jstring appNa
         }
     }
 
+    int rulesFd_native = jniGetFDFromFileDescriptor(env, rulesFd);
+
     android::GraphicsEnv::getInstance().setAngleInfo(pathChars.c_str(), appNameChars.c_str(),
-                                                     devOptInChars.c_str(), features);
+                                                     devOptInChars.c_str(), features,
+                                                     rulesFd_native, rulesOffset, rulesLength);
 }
 
 bool shouldUseAngle_native(JNIEnv* env, jobject clazz, jstring appName) {
@@ -120,7 +124,8 @@ const JNINativeMethod g_methods[] = {
         {"setInjectLayersPrSetDumpable", "()Z",
          reinterpret_cast<void*>(setInjectLayersPrSetDumpable_native)},
         {"setAngleInfo",
-         "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;)V",
+         "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;Ljava/io/"
+         "FileDescriptor;JJ)V",
          reinterpret_cast<void*>(setAngleInfo_native)},
         {"getShouldUseAngle", "(Ljava/lang/String;)Z",
          reinterpret_cast<void*>(shouldUseAngle_native)},

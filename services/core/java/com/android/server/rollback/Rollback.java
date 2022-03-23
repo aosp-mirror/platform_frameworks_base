@@ -116,10 +116,10 @@ class Rollback {
     static final int ROLLBACK_STATE_DELETED = 4;
 
     /**
-     * The session ID associate with this rollback. This is the parent session ID in the case of
-     * a multi-package session.
+     * The session ID for the staged session if this rollback data represents a staged session,
+     * {@code -1} otherwise.
      */
-    private final int mOriginalSessionId;
+    private final int mStagedSessionId;
 
     /**
      * The rollback info for this rollback.
@@ -181,6 +181,13 @@ class Rollback {
     private final int[] mPackageSessionIds;
 
     /**
+     * The number of sessions in the install which are notified with success by
+     * {@link PackageInstaller.SessionCallback#onFinished(int, boolean)}.
+     * This rollback will be enabled only after all child sessions finished with success.
+     */
+    private int mNumPackageSessionsWithSuccess;
+
+    /**
      * The extension versions supported at the time of rollback creation.
      */
     @NonNull private final SparseIntArray mExtensionVersions;
@@ -196,25 +203,24 @@ class Rollback {
      *
      * @param rollbackId the id of the rollback.
      * @param backupDir the directory where the rollback data is stored.
-     * @param originalSessionId the session id associated with this rollback.
-     * @param isStaged true if this is a staged rollback.
+     * @param stagedSessionId the session id if this is a staged rollback, -1 otherwise.
      * @param userId the user that performed the install with rollback enabled.
      * @param installerPackageName the installer package name from the original install session.
      * @param packageSessionIds the session ids for all packages in the install.
      * @param extensionVersions the extension versions supported at the time of rollback creation
      */
-    Rollback(int rollbackId, File backupDir, int originalSessionId, boolean isStaged, int userId,
+    Rollback(int rollbackId, File backupDir, int stagedSessionId, int userId,
             String installerPackageName, int[] packageSessionIds,
             SparseIntArray extensionVersions) {
         this.info = new RollbackInfo(rollbackId,
                 /* packages */ new ArrayList<>(),
-                /* isStaged */ isStaged,
+                /* isStaged */ stagedSessionId != -1,
                 /* causePackages */ new ArrayList<>(),
                 /* committedSessionId */ -1);
         mUserId = userId;
         mInstallerPackageName = installerPackageName;
         mBackupDir = backupDir;
-        mOriginalSessionId = originalSessionId;
+        mStagedSessionId = stagedSessionId;
         mState = ROLLBACK_STATE_ENABLING;
         mTimestamp = Instant.now();
         mPackageSessionIds = packageSessionIds != null ? packageSessionIds : new int[0];
@@ -222,10 +228,16 @@ class Rollback {
         mHandler = Looper.myLooper() != null ? new Handler(Looper.myLooper()) : null;
     }
 
+    Rollback(int rollbackId, File backupDir, int stagedSessionId, int userId,
+             String installerPackageName) {
+        this(rollbackId, backupDir, stagedSessionId, userId, installerPackageName, null,
+                new SparseIntArray(0));
+    }
+
     /**
      * Constructs a pre-populated Rollback instance.
      */
-    Rollback(RollbackInfo info, File backupDir, Instant timestamp, int originalSessionId,
+    Rollback(RollbackInfo info, File backupDir, Instant timestamp, int stagedSessionId,
             @RollbackState int state, String stateDescription, boolean restoreUserDataInProgress,
             int userId, String installerPackageName, SparseIntArray extensionVersions) {
         this.info = info;
@@ -233,7 +245,7 @@ class Rollback {
         mInstallerPackageName = installerPackageName;
         mBackupDir = backupDir;
         mTimestamp = timestamp;
-        mOriginalSessionId = originalSessionId;
+        mStagedSessionId = stagedSessionId;
         mState = state;
         mStateDescription = stateDescription;
         mRestoreUserDataInProgress = restoreUserDataInProgress;
@@ -286,11 +298,12 @@ class Rollback {
     }
 
     /**
-     * Returns the session ID associated with this rollback, or {@code -1} if unknown.
+     * Returns the session ID for the staged session if this rollback data represents a staged
+     * session, or {@code -1} otherwise.
      */
     @AnyThread
-    int getOriginalSessionId() {
-        return mOriginalSessionId;
+    int getStagedSessionId() {
+        return mStagedSessionId;
     }
 
     /**
@@ -438,7 +451,7 @@ class Rollback {
         for (PackageRollbackInfo pkgRollbackInfo : info.getPackages()) {
             if (pkgRollbackInfo.getPackageName().equals(packageName)) {
                 if (pkgRollbackInfo.getRollbackDataPolicy()
-                        == PackageManager.ROLLBACK_DATA_POLICY_RESTORE) {
+                        == PackageManager.RollbackDataPolicy.RESTORE) {
                     dataHelper.snapshotAppData(info.getRollbackId(), pkgRollbackInfo, userIds);
                     addAll(pkgRollbackInfo.getSnapshottedUsers(), userIds);
                     RollbackStore.saveRollback(this);
@@ -825,6 +838,17 @@ class Rollback {
     }
 
     /**
+     * Called when a child session finished with success.
+     * Returns true when all child sessions are notified with success. This rollback will be
+     * enabled only after all child sessions finished with success.
+     */
+    @WorkerThread
+    boolean notifySessionWithSuccess() {
+        assertInWorkerThread();
+        return ++mNumPackageSessionsWithSuccess == mPackageSessionIds.length;
+    }
+
+    /**
      * Returns true if all packages in this rollback are enabled. We won't enable this rollback
      * until all packages are enabled. Note we don't count apk-in-apex here since they are enabled
      * automatically when the embedding apex is enabled.
@@ -930,8 +954,9 @@ class Rollback {
         ipw.println("-state: " + getStateAsString());
         ipw.println("-stateDescription: " + mStateDescription);
         ipw.println("-timestamp: " + getTimestamp());
-        ipw.println("-isStaged: " + isStaged());
-        ipw.println("-originalSessionId: " + getOriginalSessionId());
+        if (getStagedSessionId() != -1) {
+            ipw.println("-stagedSessionId: " + getStagedSessionId());
+        }
         ipw.println("-packages:");
         ipw.increaseIndent();
         for (PackageRollbackInfo pkg : info.getPackages()) {

@@ -22,11 +22,9 @@ import static com.android.server.devicepolicy.DpmTestUtils.newRestrictions;
 import android.os.Bundle;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.platform.test.annotations.Presubmit;
 import android.test.AndroidTestCase;
+import android.test.suitebuilder.annotation.SmallTest;
 import android.util.SparseArray;
-
-import androidx.test.filters.SmallTest;
 
 /**
  * Tests for {@link com.android.server.pm.UserRestrictionsUtils}.
@@ -39,7 +37,6 @@ import androidx.test.filters.SmallTest;
      -w com.android.frameworks.servicestests/androidx.test.runner.AndroidJUnitRunner
  * </pre>
  */
-@Presubmit
 @SmallTest
 public class UserRestrictionsUtilsTest extends AndroidTestCase {
     public void testNonNull() {

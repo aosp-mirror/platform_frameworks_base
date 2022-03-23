@@ -70,8 +70,7 @@ public final class SQLiteDebug {
         /**
          * True to enable database performance testing instrumentation.
          */
-        public static final boolean DEBUG_LOG_SLOW_QUERIES =
-                Log.isLoggable("SQLiteSlowQueries", Log.VERBOSE);
+        public static final boolean DEBUG_LOG_SLOW_QUERIES = Build.IS_DEBUGGABLE;
 
         private static final String SLOW_QUERY_THRESHOLD_PROP = "db.log.slow_query_threshold";
 

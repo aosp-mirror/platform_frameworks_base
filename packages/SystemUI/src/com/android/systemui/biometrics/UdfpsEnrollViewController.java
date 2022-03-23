@@ -22,8 +22,7 @@ import android.graphics.PointF;
 import com.android.systemui.R;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.statusbar.phone.SystemUIDialogManager;
-import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
+import com.android.systemui.statusbar.phone.StatusBar;
 
 /**
  * Class that coordinates non-HBM animations during enrollment.
@@ -54,11 +53,9 @@ public class UdfpsEnrollViewController extends UdfpsAnimationViewController<Udfp
             @NonNull UdfpsEnrollView view,
             @NonNull UdfpsEnrollHelper enrollHelper,
             @NonNull StatusBarStateController statusBarStateController,
-            @NonNull PanelExpansionStateManager panelExpansionStateManager,
-            @NonNull SystemUIDialogManager systemUIDialogManager,
+            @NonNull StatusBar statusBar,
             @NonNull DumpManager dumpManager) {
-        super(view, statusBarStateController, panelExpansionStateManager, systemUIDialogManager,
-                dumpManager);
+        super(view, statusBarStateController, statusBar, dumpManager);
         mEnrollProgressBarRadius = getContext().getResources()
                 .getInteger(R.integer.config_udfpsEnrollProgressBar);
         mEnrollHelper = enrollHelper;
@@ -66,7 +63,7 @@ public class UdfpsEnrollViewController extends UdfpsAnimationViewController<Udfp
     }
 
     @Override
-    @NonNull protected String getTag() {
+    @NonNull String getTag() {
         return "UdfpsEnrollViewController";
     }
 

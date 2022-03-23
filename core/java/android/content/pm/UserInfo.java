@@ -343,7 +343,7 @@ public class UserInfo implements Parcelable {
     }
 
     public boolean isDemo() {
-        return UserManager.isUserTypeDemo(userType) || (flags & FLAG_DEMO) != 0;
+        return UserManager.isUserTypeDemo(userType);
     }
 
     public boolean isFull() {

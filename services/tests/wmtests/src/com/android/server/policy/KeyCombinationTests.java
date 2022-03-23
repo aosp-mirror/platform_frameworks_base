@@ -36,9 +36,6 @@ import androidx.test.filters.SmallTest;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-
 /**
  * Test class for {@link KeyCombinationManager}.
  *
@@ -50,18 +47,16 @@ import java.util.concurrent.TimeUnit;
 public class KeyCombinationTests {
     private KeyCombinationManager mKeyCombinationManager;
 
-    private final CountDownLatch mAction1Triggered = new CountDownLatch(1);
-    private final CountDownLatch mAction2Triggered = new CountDownLatch(1);
-    private final CountDownLatch mAction3Triggered = new CountDownLatch(1);
+    private boolean mAction1Triggered = false;
+    private boolean mAction2Triggered = false;
+    private boolean mAction3Triggered = false;
 
     private boolean mPreCondition = true;
     private static final long SCHEDULE_TIME = 300;
-    private Handler mHandler;
 
     @Before
     public void setUp() {
-        mHandler = new Handler(Looper.getMainLooper());
-        mKeyCombinationManager = new KeyCombinationManager(mHandler);
+        mKeyCombinationManager = new KeyCombinationManager();
         initKeyCombinationRules();
     }
 
@@ -72,7 +67,7 @@ public class KeyCombinationTests {
                         KEYCODE_POWER) {
                     @Override
                     void execute() {
-                        mAction1Triggered.countDown();
+                        mAction1Triggered = true;
                     }
 
                     @Override
@@ -91,16 +86,11 @@ public class KeyCombinationTests {
 
                     @Override
                     void execute() {
-                        mAction2Triggered.countDown();
+                        mAction2Triggered = true;
                     }
 
                     @Override
                     void cancel() {
-                    }
-
-                    @Override
-                    long getKeyInterceptDelayMs() {
-                        return 0;
                     }
                 });
 
@@ -110,9 +100,10 @@ public class KeyCombinationTests {
                     final Runnable mAction = new Runnable() {
                         @Override
                         public void run() {
-                            mAction3Triggered.countDown();
+                            mAction3Triggered = true;
                         }
                     };
+                    final Handler mHandler = new Handler(Looper.getMainLooper());
 
                     @Override
                     void execute() {
@@ -158,74 +149,60 @@ public class KeyCombinationTests {
     }
 
     @Test
-    public void testTriggerRule() throws InterruptedException {
+    public void testTriggerRule() {
         final long eventTime = SystemClock.uptimeMillis();
         pressKeys(eventTime, KEYCODE_POWER, eventTime, KEYCODE_VOLUME_DOWN);
-        assertTrue(mAction1Triggered.await(SCHEDULE_TIME, TimeUnit.MILLISECONDS));
+        assertTrue(mAction1Triggered);
 
         pressKeys(eventTime, KEYCODE_VOLUME_UP, eventTime, KEYCODE_VOLUME_DOWN);
-        assertTrue(mAction2Triggered.await(SCHEDULE_TIME, TimeUnit.MILLISECONDS));
+        assertTrue(mAction2Triggered);
 
         pressKeys(eventTime, KEYCODE_POWER, eventTime, KEYCODE_VOLUME_UP, SCHEDULE_TIME + 50);
-        assertTrue(mAction3Triggered.await(SCHEDULE_TIME, TimeUnit.MILLISECONDS));
+        assertTrue(mAction3Triggered);
     }
 
     /**
      *  Nothing should happen if there is no definition.
      */
     @Test
-    public void testNotTrigger_NoRule() throws InterruptedException {
+    public void testNotTrigger_NoRule() {
         final long eventTime = SystemClock.uptimeMillis();
         pressKeys(eventTime, KEYCODE_BACK, eventTime, KEYCODE_VOLUME_DOWN);
-        assertFalse(mAction1Triggered.await(SCHEDULE_TIME, TimeUnit.MILLISECONDS));
-        assertFalse(mAction2Triggered.await(SCHEDULE_TIME, TimeUnit.MILLISECONDS));
-        assertFalse(mAction3Triggered.await(SCHEDULE_TIME, TimeUnit.MILLISECONDS));
+        assertFalse(mAction1Triggered);
+        assertFalse(mAction2Triggered);
+        assertFalse(mAction3Triggered);
     }
 
     /**
      *  Nothing should happen if the interval of press time is too long.
      */
     @Test
-    public void testNotTrigger_Interval() throws InterruptedException {
+    public void testNotTrigger_Interval() {
         final long eventTime = SystemClock.uptimeMillis();
         final long earlyEventTime = eventTime - 200; // COMBINE_KEY_DELAY_MILLIS = 150;
         pressKeys(earlyEventTime, KEYCODE_POWER, eventTime, KEYCODE_VOLUME_DOWN);
-        assertFalse(mAction1Triggered.await(SCHEDULE_TIME, TimeUnit.MILLISECONDS));
+        assertFalse(mAction1Triggered);
     }
 
     /**
      *  Nothing should happen if the condition is false.
      */
     @Test
-    public void testNotTrigger_Condition() throws InterruptedException {
+    public void testNotTrigger_Condition() {
         final long eventTime = SystemClock.uptimeMillis();
         // we won't trigger action 2 because the condition is false.
         mPreCondition = false;
         pressKeys(eventTime, KEYCODE_VOLUME_UP, eventTime, KEYCODE_VOLUME_DOWN);
-        assertFalse(mAction2Triggered.await(SCHEDULE_TIME, TimeUnit.MILLISECONDS));
+        assertFalse(mAction2Triggered);
     }
 
     /**
      *  Nothing should happen if the keys released too early.
      */
     @Test
-    public void testNotTrigger_EarlyRelease() throws InterruptedException {
+    public void testNotTrigger_EarlyRelease() {
         final long eventTime = SystemClock.uptimeMillis();
         pressKeys(eventTime, KEYCODE_POWER, eventTime, KEYCODE_VOLUME_UP);
-        assertFalse(mAction3Triggered.await(SCHEDULE_TIME, TimeUnit.MILLISECONDS));
-    }
-
-    /**
-     *  The KeyInterceptTimeout should return the max timeout value.
-     */
-    @Test
-    public void testKeyInterceptTimeout() {
-        final long eventTime = SystemClock.uptimeMillis();
-        final KeyEvent firstKeyDown = new KeyEvent(eventTime, eventTime, ACTION_DOWN,
-                KEYCODE_VOLUME_UP, 0 /* repeat */, 0 /* metaState */);
-        // Press KEYCODE_VOLUME_UP would activate rule2 and rule3,
-        // and rule2's intercept delay is 0.
-        mKeyCombinationManager.interceptKey(firstKeyDown, true);
-        assertTrue(mKeyCombinationManager.getKeyInterceptTimeout(KEYCODE_VOLUME_UP) > eventTime);
+        assertFalse(mAction3Triggered);
     }
 }

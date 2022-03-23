@@ -39,7 +39,6 @@ import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.os.Bundle;
 import android.os.UserManager;
-import android.platform.test.annotations.Presubmit;
 import android.util.ArrayMap;
 
 import androidx.test.InstrumentationRegistry;
@@ -59,7 +58,6 @@ import java.util.List;
  *
  * <p>Run with: atest UserManagerServiceUserTypeTest
  */
-@Presubmit
 @RunWith(AndroidJUnit4.class)
 @MediumTest
 public class UserManagerServiceUserTypeTest {
@@ -83,7 +81,7 @@ public class UserManagerServiceUserTypeTest {
                 /* letsPersonalDataIntoProfile= */false).build());
         final UserTypeDetails type = new UserTypeDetails.Builder()
                 .setName("a.name")
-                .setEnabled(1)
+                .setEnabled(true)
                 .setMaxAllowed(21)
                 .setBaseType(FLAG_PROFILE)
                 .setDefaultUserInfoPropertyFlags(FLAG_EPHEMERAL)
@@ -318,7 +316,6 @@ public class UserManagerServiceUserTypeTest {
         builders.put(userTypeFull, new UserTypeDetails.Builder()
                 .setName(userTypeFull)
                 .setBaseType(FLAG_FULL)
-                .setEnabled(0)
                 .setDefaultRestrictions(restrictions));
 
         final XmlResourceParser parser = mResources.getXml(R.xml.usertypes_test_full);
@@ -326,7 +323,6 @@ public class UserManagerServiceUserTypeTest {
 
         UserTypeDetails details = builders.get(userTypeFull).createUserTypeDetails();
         assertEquals(UNLIMITED_NUMBER_OF_USERS, details.getMaxAllowedPerParent());
-        assertFalse(details.isEnabled());
         assertTrue(UserRestrictionsUtils.areEqual(
                 makeRestrictionsBundle("no_remove_user", "no_bluetooth"),
                 details.getDefaultRestrictions()));

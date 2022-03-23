@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.flicker.apppairs
 
+import android.os.SystemClock
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.FlakyTest
@@ -25,11 +26,14 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group1
 import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.endRotation
 import com.android.server.wm.flicker.helpers.setRotation
-import com.android.wm.shell.flicker.appPairsDividerIsVisibleAtEnd
-import com.android.wm.shell.flicker.appPairsPrimaryBoundsIsVisibleAtEnd
-import com.android.wm.shell.flicker.appPairsSecondaryBoundsIsVisibleAtEnd
-import com.android.wm.shell.flicker.helpers.AppPairsHelper.Companion.waitAppsShown
+import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
+import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
+import com.android.wm.shell.flicker.appPairsDividerIsVisible
+import com.android.wm.shell.flicker.appPairsPrimaryBoundsIsVisible
+import com.android.wm.shell.flicker.appPairsSecondaryBoundsIsVisible
+import com.android.wm.shell.flicker.helpers.AppPairsHelper
 import com.android.wm.shell.flicker.helpers.SplitScreenHelper
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -49,61 +53,55 @@ import org.junit.runners.Parameterized
 class RotateTwoLaunchedAppsRotateAndEnterAppPairsMode(
     testSpec: FlickerTestParameter
 ) : RotateTwoLaunchedAppsTransition(testSpec) {
-    override val transition: FlickerBuilder.() -> Unit
+    override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
         get() = {
-            super.transition(this)
+            super.transition(this, it)
             transitions {
-                this.setRotation(testSpec.endRotation)
+                this.setRotation(testSpec.config.endRotation)
                 executeShellCommand(
                     composePairsCommand(primaryTaskId, secondaryTaskId, pair = true))
-                waitAppsShown(primaryApp, secondaryApp)
+                SystemClock.sleep(AppPairsHelper.TIMEOUT_MS)
             }
         }
 
     @Presubmit
     @Test
-    fun appPairsDividerIsVisibleAtEnd() = testSpec.appPairsDividerIsVisibleAtEnd()
+    fun appPairsDividerIsVisible() = testSpec.appPairsDividerIsVisible()
 
     @Presubmit
     @Test
-    override fun navBarWindowIsVisible() = super.navBarWindowIsVisible()
+    override fun navBarWindowIsAlwaysVisible() = testSpec.navBarWindowIsAlwaysVisible()
 
     @Presubmit
     @Test
-    override fun navBarLayerIsVisible() = super.navBarLayerIsVisible()
+    override fun statusBarWindowIsAlwaysVisible() = testSpec.statusBarWindowIsAlwaysVisible()
 
-    @Presubmit
+    @FlakyTest
     @Test
-    override fun statusBarWindowIsVisible() = super.statusBarWindowIsVisible()
-
-    @Presubmit
-    @Test
-    override fun statusBarLayerIsVisible() = super.statusBarLayerIsVisible()
-
-    @FlakyTest(bugId = 206753786)
-    @Test
-    override fun statusBarLayerRotatesScales() = super.statusBarLayerRotatesScales()
+    override fun statusBarLayerIsAlwaysVisible() {
+        super.statusBarLayerIsAlwaysVisible()
+    }
 
     @Presubmit
     @Test
     fun bothAppWindowsVisible() {
         testSpec.assertWmEnd {
-            isAppWindowVisible(primaryApp.component)
-            isAppWindowVisible(secondaryApp.component)
+            isVisible(primaryApp.defaultWindowName)
+            isVisible(secondaryApp.defaultWindowName)
         }
     }
 
-    @Presubmit
+    @FlakyTest(bugId = 172776659)
     @Test
-    fun appPairsPrimaryBoundsIsVisibleAtEnd() =
-        testSpec.appPairsPrimaryBoundsIsVisibleAtEnd(testSpec.endRotation,
-            primaryApp.component)
+    fun appPairsPrimaryBoundsIsVisible() =
+        testSpec.appPairsPrimaryBoundsIsVisible(testSpec.config.endRotation,
+            primaryApp.defaultWindowName)
 
-    @Presubmit
+    @FlakyTest(bugId = 172776659)
     @Test
-    fun appPairsSecondaryBoundsIsVisibleAtEnd() =
-        testSpec.appPairsSecondaryBoundsIsVisibleAtEnd(testSpec.endRotation,
-            secondaryApp.component)
+    fun appPairsSecondaryBoundsIsVisible() =
+        testSpec.appPairsSecondaryBoundsIsVisible(testSpec.config.endRotation,
+            secondaryApp.defaultWindowName)
 
     companion object {
         @Parameterized.Parameters(name = "{0}")

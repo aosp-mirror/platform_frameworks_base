@@ -19,25 +19,20 @@ package com.android.systemui.statusbar.notification.collection.coordinator;
 import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_AWAKE;
 import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_WAKING;
 
-import androidx.annotation.NonNull;
+import android.annotation.NonNull;
+
 import androidx.annotation.VisibleForTesting;
 
-import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.statusbar.notification.collection.ListEntry;
+import com.android.systemui.statusbar.NotificationViewHierarchyManager;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifStabilityManager;
-import com.android.systemui.statusbar.notification.collection.provider.VisualStabilityProvider;
-import com.android.systemui.statusbar.phone.NotifPanelEvents;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 
-import java.io.FileDescriptor;
-import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -49,30 +44,26 @@ import javax.inject.Inject;
  * Ensures that notifications are visually stable if the user is looking at the notifications.
  * Group and section changes are re-allowed when the notification entries are no longer being
  * viewed.
+ *
+ * Previously this was implemented in the view-layer {@link NotificationViewHierarchyManager} by
+ * {@link com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager}.
+ * This is now integrated in the data-layer via
+ * {@link com.android.systemui.statusbar.notification.collection.ShadeListBuilder}.
  */
-// TODO(b/204468557): Move to @CoordinatorScope
 @SysUISingleton
-public class VisualStabilityCoordinator implements Coordinator, Dumpable,
-        NotifPanelEvents.Listener {
+public class VisualStabilityCoordinator implements Coordinator {
     private final DelayableExecutor mDelayableExecutor;
-    private final HeadsUpManager mHeadsUpManager;
-    private final NotifPanelEvents mNotifPanelEvents;
-    private final StatusBarStateController mStatusBarStateController;
-    private final VisualStabilityProvider mVisualStabilityProvider;
     private final WakefulnessLifecycle mWakefulnessLifecycle;
+    private final StatusBarStateController mStatusBarStateController;
+    private final HeadsUpManager mHeadsUpManager;
 
     private boolean mScreenOn;
     private boolean mPanelExpanded;
     private boolean mPulsing;
-    private boolean mNotifPanelCollapsing;
-    private boolean mNotifPanelLaunchingActivity;
 
-    private boolean mPipelineRunAllowed;
     private boolean mReorderingAllowed;
-    private boolean mIsSuppressingPipelineRun = false;
     private boolean mIsSuppressingGroupChange = false;
     private final Set<String> mEntriesWithSuppressedSectionChange = new HashSet<>();
-    private boolean mIsSuppressingEntryReorder = false;
 
     // key: notification key that can temporarily change its section
     // value: runnable that when run removes its associated RemoveOverrideSuppressionRunnable
@@ -84,21 +75,15 @@ public class VisualStabilityCoordinator implements Coordinator, Dumpable,
 
     @Inject
     public VisualStabilityCoordinator(
-            DelayableExecutor delayableExecutor,
-            DumpManager dumpManager,
             HeadsUpManager headsUpManager,
-            NotifPanelEvents notifPanelEvents,
+            WakefulnessLifecycle wakefulnessLifecycle,
             StatusBarStateController statusBarStateController,
-            VisualStabilityProvider visualStabilityProvider,
-            WakefulnessLifecycle wakefulnessLifecycle) {
+            DelayableExecutor delayableExecutor
+    ) {
         mHeadsUpManager = headsUpManager;
-        mVisualStabilityProvider = visualStabilityProvider;
         mWakefulnessLifecycle = wakefulnessLifecycle;
         mStatusBarStateController = statusBarStateController;
         mDelayableExecutor = delayableExecutor;
-        mNotifPanelEvents = notifPanelEvents;
-
-        dumpManager.registerDumpable(this);
     }
 
     @Override
@@ -109,30 +94,20 @@ public class VisualStabilityCoordinator implements Coordinator, Dumpable,
 
         mStatusBarStateController.addCallback(mStatusBarStateControllerListener);
         mPulsing = mStatusBarStateController.isPulsing();
-        mNotifPanelEvents.registerListener(this);
 
         pipeline.setVisualStabilityManager(mNotifStabilityManager);
     }
-    // TODO(b/203826051): Ensure stability manager can allow reordering off-screen
-    //  HUNs to the top of the shade
+
     private final NotifStabilityManager mNotifStabilityManager =
             new NotifStabilityManager("VisualStabilityCoordinator") {
                 @Override
                 public void onBeginRun() {
-                    mIsSuppressingPipelineRun = false;
                     mIsSuppressingGroupChange = false;
                     mEntriesWithSuppressedSectionChange.clear();
-                    mIsSuppressingEntryReorder = false;
                 }
 
                 @Override
-                public boolean isPipelineRunAllowed() {
-                    mIsSuppressingPipelineRun |= !mPipelineRunAllowed;
-                    return mPipelineRunAllowed;
-                }
-
-                @Override
-                public boolean isGroupChangeAllowed(@NonNull NotificationEntry entry) {
+                public boolean isGroupChangeAllowed(NotificationEntry entry) {
                     final boolean isGroupChangeAllowedForEntry =
                             mReorderingAllowed || mHeadsUpManager.isAlerting(entry.getKey());
                     mIsSuppressingGroupChange |= !isGroupChangeAllowedForEntry;
@@ -140,51 +115,27 @@ public class VisualStabilityCoordinator implements Coordinator, Dumpable,
                 }
 
                 @Override
-                public boolean isSectionChangeAllowed(@NonNull NotificationEntry entry) {
+                public boolean isSectionChangeAllowed(NotificationEntry entry) {
                     final boolean isSectionChangeAllowedForEntry =
                             mReorderingAllowed
                                     || mHeadsUpManager.isAlerting(entry.getKey())
                                     || mEntriesThatCanChangeSection.containsKey(entry.getKey());
-                    if (!isSectionChangeAllowedForEntry) {
+                    if (isSectionChangeAllowedForEntry) {
                         mEntriesWithSuppressedSectionChange.add(entry.getKey());
                     }
                     return isSectionChangeAllowedForEntry;
                 }
-
-                @Override
-                public boolean isEntryReorderingAllowed(@NonNull ListEntry section) {
-                    return mReorderingAllowed;
-                }
-
-                @Override
-                public boolean isEveryChangeAllowed() {
-                    return mReorderingAllowed;
-                }
-
-                @Override
-                public void onEntryReorderSuppressed() {
-                    mIsSuppressingEntryReorder = true;
-                }
             };
 
     private void updateAllowedStates() {
-        mPipelineRunAllowed = !isPanelCollapsingOrLaunchingActivity();
         mReorderingAllowed = isReorderingAllowed();
-        if ((mPipelineRunAllowed && mIsSuppressingPipelineRun)
-                || (mReorderingAllowed && (mIsSuppressingGroupChange
-                        || isSuppressingSectionChange()
-                        || mIsSuppressingEntryReorder))) {
+        if (mReorderingAllowed && (mIsSuppressingGroupChange || isSuppressingSectionChange())) {
             mNotifStabilityManager.invalidateList();
         }
-        mVisualStabilityProvider.setReorderingAllowed(mReorderingAllowed);
     }
 
     private boolean isSuppressingSectionChange() {
         return !mEntriesWithSuppressedSectionChange.isEmpty();
-    }
-
-    private boolean isPanelCollapsingOrLaunchingActivity() {
-        return mNotifPanelCollapsing || mNotifPanelLaunchingActivity;
     }
 
     private boolean isReorderingAllowed() {
@@ -251,39 +202,4 @@ public class VisualStabilityCoordinator implements Coordinator, Dumpable,
             updateAllowedStates();
         }
     };
-
-    @Override
-    public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
-        pw.println("pipelineRunAllowed: " + mPipelineRunAllowed);
-        pw.println("  notifPanelCollapsing: " + mNotifPanelCollapsing);
-        pw.println("  launchingNotifActivity: " + mNotifPanelLaunchingActivity);
-        pw.println("reorderingAllowed: " + mReorderingAllowed);
-        pw.println("  screenOn: " + mScreenOn);
-        pw.println("  panelExpanded: " + mPanelExpanded);
-        pw.println("  pulsing: " + mPulsing);
-        pw.println("isSuppressingPipelineRun: " + mIsSuppressingPipelineRun);
-        pw.println("isSuppressingGroupChange: " + mIsSuppressingGroupChange);
-        pw.println("isSuppressingEntryReorder: " + mIsSuppressingEntryReorder);
-        pw.println("entriesWithSuppressedSectionChange: "
-                + mEntriesWithSuppressedSectionChange.size());
-        for (String key : mEntriesWithSuppressedSectionChange) {
-            pw.println("  " + key);
-        }
-        pw.println("entriesThatCanChangeSection: " + mEntriesThatCanChangeSection.size());
-        for (String key : mEntriesThatCanChangeSection.keySet()) {
-            pw.println("  " + key);
-        }
-    }
-
-    @Override
-    public void onPanelCollapsingChanged(boolean isCollapsing) {
-        mNotifPanelCollapsing = isCollapsing;
-        updateAllowedStates();
-    }
-
-    @Override
-    public void onLaunchingActivityChanged(boolean isLaunchingActivity) {
-        mNotifPanelLaunchingActivity = isLaunchingActivity;
-        updateAllowedStates();
-    }
 }

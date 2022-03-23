@@ -68,7 +68,6 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.testing.UiEventLoggerFake;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.dump.DumpManager;
 import com.android.systemui.people.widget.PeopleSpaceWidgetManager;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.settings.UserContextProvider;
@@ -82,8 +81,8 @@ import com.android.systemui.statusbar.notification.collection.provider.HighPrior
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager.OnSettingsClickListener;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
-import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.ShadeController;
+import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.wmshell.BubblesManager;
 
@@ -92,12 +91,15 @@ import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
 import java.util.Optional;
+
+import javax.inject.Provider;
 
 /**
  * Tests for {@link NotificationGutsManager}.
@@ -124,7 +126,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
     @Mock private NotificationInfo.CheckSaveListener mCheckSaveListener;
     @Mock private OnSettingsClickListener mOnSettingsClickListener;
     @Mock private DeviceProvisionedController mDeviceProvisionedController;
-    @Mock private CentralSurfaces mCentralSurfaces;
+    @Mock private StatusBar mStatusBar;
     @Mock private AccessibilityManager mAccessibilityManager;
     @Mock private HighPriorityProvider mHighPriorityProvider;
     @Mock private INotificationManager mINotificationManager;
@@ -155,12 +157,11 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
         when(mAccessibilityManager.isTouchExplorationEnabled()).thenReturn(false);
 
         mGutsManager = new NotificationGutsManager(mContext,
-                () -> Optional.of(mCentralSurfaces), mHandler, mHandler, mAccessibilityManager,
-                mHighPriorityProvider, mINotificationManager, mNotificationEntryManager,
-                mPeopleSpaceWidgetManager, mLauncherApps, mShortcutManager,
-                mChannelEditorDialogController, mContextTracker, mAssistantFeedbackController,
-                Optional.of(mBubblesManager), new UiEventLoggerFake(), mOnUserInteractionCallback,
-                mShadeController, mock(DumpManager.class));
+                () -> mStatusBar, mHandler, mHandler, mAccessibilityManager, mHighPriorityProvider,
+                mINotificationManager, mNotificationEntryManager, mPeopleSpaceWidgetManager,
+                mLauncherApps, mShortcutManager, mChannelEditorDialogController, mContextTracker,
+                mAssistantFeedbackController, Optional.of(mBubblesManager),
+                new UiEventLoggerFake(), mOnUserInteractionCallback, mShadeController);
         mGutsManager.setUpWithPresenter(mPresenter, mNotificationListContainer,
                 mCheckSaveListener, mOnSettingsClickListener);
         mGutsManager.setNotificationActivityStarter(mNotificationActivityStarter);

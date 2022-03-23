@@ -18,7 +18,6 @@ package android.media.tv.tuner.filter;
 
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
-import android.hardware.tv.tuner.Constant;
 
 /**
  * Table information for Section Filter.
@@ -27,18 +26,12 @@ import android.hardware.tv.tuner.Constant;
  */
 @SystemApi
 public class SectionSettingsWithTableInfo extends SectionSettings {
-    /**
-     * The invalid version number of {@link SectionSettingsWithTableInfo}. Tuner HAL will ignore the
-     * {@link SectionSettingsWithTableInfo} version number if this invalid version is set.
-     */
-    public static final int INVALID_TABLE_INFO_VERSION = Constant.INVALID_TABINFO_VERSION;
-
     private final int mTableId;
     private final int mVersion;
 
     private SectionSettingsWithTableInfo(int mainType, boolean isCheckCrc, boolean isRepeat,
-            boolean isRaw, int bitWidthOfLengthField, int tableId, int version) {
-        super(mainType, isCheckCrc, isRepeat, isRaw, bitWidthOfLengthField);
+            boolean isRaw, int tableId, int version) {
+        super(mainType, isCheckCrc, isRepeat, isRaw);
         mTableId = tableId;
         mVersion = version;
     }
@@ -71,7 +64,7 @@ public class SectionSettingsWithTableInfo extends SectionSettings {
      */
     public static class Builder extends SectionSettings.Builder<Builder> {
         private int mTableId;
-        private int mVersion = INVALID_TABLE_INFO_VERSION;
+        private int mVersion;
 
         private Builder(int mainType) {
             super(mainType);
@@ -99,8 +92,8 @@ public class SectionSettingsWithTableInfo extends SectionSettings {
          */
         @NonNull
         public SectionSettingsWithTableInfo build() {
-            return new SectionSettingsWithTableInfo(mMainType, mCrcEnabled, mIsRepeat, mIsRaw,
-                    mBitWidthOfLengthField, mTableId, mVersion);
+            return new SectionSettingsWithTableInfo(
+                    mMainType, mCrcEnabled, mIsRepeat, mIsRaw, mTableId, mVersion);
         }
 
         @Override

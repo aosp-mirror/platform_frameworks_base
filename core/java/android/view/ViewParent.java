@@ -17,7 +17,6 @@
 package android.view;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.Bundle;
@@ -299,7 +298,7 @@ public interface ViewParent {
      *
      * @param child The child whose drawable state has changed.
      */
-    public void childDrawableStateChanged(@NonNull View child);
+    public void childDrawableStateChanged(View child);
 
     /**
      * Called when a child does not want this parent and its ancestors to
@@ -338,7 +337,7 @@ public interface ViewParent {
      *        false otherwise
      * @return Whether the group scrolled to handle the operation
      */
-    public boolean requestChildRectangleOnScreen(@NonNull View child, Rect rectangle,
+    public boolean requestChildRectangleOnScreen(View child, Rect rectangle,
             boolean immediate);
 
     /**
@@ -357,7 +356,7 @@ public interface ViewParent {
      * @param event The event to be sent.
      * @return True if the event was sent.
      */
-    public boolean requestSendAccessibilityEvent(@NonNull View child, AccessibilityEvent event);
+    public boolean requestSendAccessibilityEvent(View child, AccessibilityEvent event);
 
     /**
      * Called when a child view now has or no longer is tracking transient state.
@@ -382,7 +381,7 @@ public interface ViewParent {
      * @param child Child view whose state has changed
      * @param hasTransientState true if this child has transient state
      */
-    public void childHasTransientStateChanged(@NonNull View child, boolean hasTransientState);
+    public void childHasTransientStateChanged(View child, boolean hasTransientState);
 
     /**
      * Ask that a new dispatch of {@link View#fitSystemWindows(Rect)
@@ -413,13 +412,10 @@ public interface ViewParent {
      *            <li>{@link AccessibilityEvent#CONTENT_CHANGE_TYPE_SUBTREE}
      *            <li>{@link AccessibilityEvent#CONTENT_CHANGE_TYPE_TEXT}
      *            <li>{@link AccessibilityEvent#CONTENT_CHANGE_TYPE_UNDEFINED}
-     *            <li>{@link AccessibilityEvent#CONTENT_CHANGE_TYPE_DRAG_STARTED}
-     *            <li>{@link AccessibilityEvent#CONTENT_CHANGE_TYPE_DRAG_CANCELLED}
-     *            <li>{@link AccessibilityEvent#CONTENT_CHANGE_TYPE_DRAG_DROPPED}
      *            </ul>
      */
     public void notifySubtreeAccessibilityStateChanged(
-            @NonNull View child, @NonNull View source, int changeType);
+            View child, @NonNull View source, int changeType);
 
     /**
      * Tells if this view parent can resolve the layout direction.
@@ -526,8 +522,7 @@ public interface ViewParent {
      *                         {@link View#SCROLL_AXIS_VERTICAL} or both
      * @return true if this ViewParent accepts the nested scroll operation
      */
-    public boolean onStartNestedScroll(@NonNull View child, @NonNull View target,
-            int nestedScrollAxes);
+    public boolean onStartNestedScroll(View child, View target, int nestedScrollAxes);
 
     /**
      * React to the successful claiming of a nested scroll operation.
@@ -545,8 +540,7 @@ public interface ViewParent {
      * @see #onStartNestedScroll(View, View, int)
      * @see #onStopNestedScroll(View)
      */
-    public void onNestedScrollAccepted(@NonNull View child, @NonNull View target,
-            int nestedScrollAxes);
+    public void onNestedScrollAccepted(View child, View target, int nestedScrollAxes);
 
     /**
      * React to a nested scroll operation ending.
@@ -559,7 +553,7 @@ public interface ViewParent {
      *
      * @param target View that initiated the nested scroll
      */
-    public void onStopNestedScroll(@NonNull View target);
+    public void onStopNestedScroll(View target);
 
     /**
      * React to a nested scroll in progress.
@@ -582,7 +576,7 @@ public interface ViewParent {
      * @param dxUnconsumed Horizontal scroll distance in pixels not consumed by target
      * @param dyUnconsumed Vertical scroll distance in pixels not consumed by target
      */
-    public void onNestedScroll(@NonNull View target, int dxConsumed, int dyConsumed,
+    public void onNestedScroll(View target, int dxConsumed, int dyConsumed,
             int dxUnconsumed, int dyUnconsumed);
 
     /**
@@ -605,7 +599,7 @@ public interface ViewParent {
      * @param dy Vertical scroll distance in pixels
      * @param consumed Output. The horizontal and vertical scroll distance consumed by this parent
      */
-    public void onNestedPreScroll(@NonNull View target, int dx, int dy, @NonNull int[] consumed);
+    public void onNestedPreScroll(View target, int dx, int dy, int[] consumed);
 
     /**
      * Request a fling from a nested scroll.
@@ -626,8 +620,7 @@ public interface ViewParent {
      * @param consumed true if the child consumed the fling, false otherwise
      * @return true if this parent consumed or otherwise reacted to the fling
      */
-    public boolean onNestedFling(@NonNull View target, float velocityX, float velocityY,
-            boolean consumed);
+    public boolean onNestedFling(View target, float velocityX, float velocityY, boolean consumed);
 
     /**
      * React to a nested fling before the target view consumes it.
@@ -649,7 +642,7 @@ public interface ViewParent {
      * @param velocityY Vertical velocity in pixels per second
      * @return true if this parent consumed the fling ahead of the target view
      */
-    public boolean onNestedPreFling(@NonNull View target, float velocityX, float velocityY);
+    public boolean onNestedPreFling(View target, float velocityX, float velocityY);
 
     /**
      * React to an accessibility action delegated by a target descendant view before the target
@@ -668,8 +661,7 @@ public interface ViewParent {
      * @param arguments Optional action arguments
      * @return true if the action was consumed by this ViewParent
      */
-    public boolean onNestedPrePerformAccessibilityAction(@NonNull View target, int action,
-            @Nullable Bundle arguments);
+    public boolean onNestedPrePerformAccessibilityAction(View target, int action, Bundle arguments);
 
     /**
      * Given a touchable region of a child, this method reduces region by the bounds of all views on

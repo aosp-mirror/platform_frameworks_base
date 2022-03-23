@@ -17,17 +17,15 @@
 package com.android.server.wm.flicker.helpers
 
 import android.app.Instrumentation
+import android.content.ComponentName
 import android.support.test.launcherhelper.ILauncherStrategy
 import android.support.test.launcherhelper.LauncherStrategyFactory
 import com.android.server.wm.flicker.testapp.ActivityOptions
-import com.android.server.wm.traces.common.FlickerComponentName
-import com.android.server.wm.traces.parser.toFlickerComponent
 
 class SeamlessRotationAppHelper @JvmOverloads constructor(
     instr: Instrumentation,
     launcherName: String = ActivityOptions.SEAMLESS_ACTIVITY_LAUNCHER_NAME,
-    component: FlickerComponentName =
-        ActivityOptions.SEAMLESS_ACTIVITY_COMPONENT_NAME.toFlickerComponent(),
+    component: ComponentName = ActivityOptions.SEAMLESS_ACTIVITY_COMPONENT_NAME,
     launcherStrategy: ILauncherStrategy = LauncherStrategyFactory
         .getInstance(instr)
         .launcherStrategy

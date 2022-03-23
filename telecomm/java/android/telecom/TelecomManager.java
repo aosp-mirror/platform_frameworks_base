@@ -20,7 +20,6 @@ import android.Manifest;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.RequiresFeature;
 import android.annotation.RequiresPermission;
 import android.annotation.SuppressAutoDoc;
 import android.annotation.SuppressLint;
@@ -32,7 +31,6 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -72,7 +70,6 @@ import java.util.concurrent.Executor;
  */
 @SuppressAutoDoc
 @SystemService(Context.TELECOM_SERVICE)
-@RequiresFeature(PackageManager.FEATURE_TELECOM)
 public class TelecomManager {
 
     /**
@@ -354,17 +351,13 @@ public class TelecomManager {
             "android.telecom.extra.INCOMING_CALL_EXTRAS";
 
     /**
-     * Optional extra for {@link #addNewIncomingCall(PhoneAccountHandle, Bundle)} used to indicate
-     * that a call has an in-band ringtone associated with it.  This is used when the device is
-     * acting as an HFP headset and the Bluetooth stack has received an in-band ringtone from the
-     * the HFP host which must be played instead of any local ringtone the device would otherwise
-     * have generated.
-     *
+     * Optional extra for {@link #ACTION_INCOMING_CALL} containing a boolean to indicate that the
+     * call has an externally generated ringer. Used by the HfpClientConnectionService when In Band
+     * Ringtone is enabled to prevent two ringers from being generated.
      * @hide
      */
-    @SystemApi
-    public static final String EXTRA_CALL_HAS_IN_BAND_RINGTONE =
-            "android.telecom.extra.CALL_HAS_IN_BAND_RINGTONE";
+    public static final String EXTRA_CALL_EXTERNAL_RINGER =
+            "android.telecom.extra.CALL_EXTERNAL_RINGER";
 
     /**
      * Optional extra for {@link android.content.Intent#ACTION_CALL} and
@@ -994,11 +987,6 @@ public class TelecomManager {
      */
     public static final int PRESENTATION_PAYPHONE = 4;
 
-    /**
-     * Indicates that the address or number of a call is unavailable.
-     */
-    public static final int PRESENTATION_UNAVAILABLE = 5;
-
 
     /*
      * Values for the adb property "persist.radio.videocall.audio.output"
@@ -1015,7 +1003,7 @@ public class TelecomManager {
     @IntDef(
             prefix = { "PRESENTATION_" },
             value = {PRESENTATION_ALLOWED, PRESENTATION_RESTRICTED, PRESENTATION_UNKNOWN,
-            PRESENTATION_PAYPHONE, PRESENTATION_UNAVAILABLE})
+            PRESENTATION_PAYPHONE})
     public @interface Presentation {}
 
 
@@ -1292,8 +1280,7 @@ public class TelecomManager {
     }
 
     /**
-     * Returns a list of {@link PhoneAccountHandle}s for all self-managed
-     * {@link ConnectionService}s owned by the calling {@link UserHandle}.
+     * Returns a list of {@link PhoneAccountHandle}s for self-managed {@link ConnectionService}s.
      * <p>
      * Self-Managed {@link ConnectionService}s have a {@link PhoneAccount} with
      * {@link PhoneAccount#CAPABILITY_SELF_MANAGED}.
@@ -1307,7 +1294,7 @@ public class TelecomManager {
      * @return A list of {@code PhoneAccountHandle} objects.
      */
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
-    public @NonNull List<PhoneAccountHandle> getSelfManagedPhoneAccounts() {
+    public List<PhoneAccountHandle> getSelfManagedPhoneAccounts() {
         ITelecomService service = getTelecomService();
         if (service != null) {
             try {
@@ -1318,34 +1305,6 @@ public class TelecomManager {
             }
         }
         return new ArrayList<>();
-    }
-
-    /**
-     * Returns a list of {@link PhoneAccountHandle}s owned by the calling self-managed
-     * {@link ConnectionService}.
-     * <p>
-     * Self-Managed {@link ConnectionService}s have a {@link PhoneAccount} with
-     * {@link PhoneAccount#CAPABILITY_SELF_MANAGED}.
-     * <p>
-     * Requires permission {@link android.Manifest.permission#MANAGE_OWN_CALLS}
-     * <p>
-     * A {@link SecurityException} will be thrown if a caller lacks the
-     * {@link android.Manifest.permission#MANAGE_OWN_CALLS} permission.
-     *
-     * @return A list of {@code PhoneAccountHandle} objects.
-     */
-    @RequiresPermission(Manifest.permission.MANAGE_OWN_CALLS)
-    public @NonNull List<PhoneAccountHandle> getOwnSelfManagedPhoneAccounts() {
-        ITelecomService service = getTelecomService();
-        if (service != null) {
-            try {
-                return service.getOwnSelfManagedPhoneAccounts(mContext.getOpPackageName(),
-                        mContext.getAttributionTag());
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-        }
-        throw new IllegalStateException("Telecom is not available");
     }
 
     /**
@@ -1485,14 +1444,9 @@ public class TelecomManager {
      * when placing calls. The user may still need to enable the {@link PhoneAccount} within
      * the phone app settings before the account is usable.
      * <p>
-     * Note: Each package is limited to 10 {@link PhoneAccount} registrations.
-     * <p>
      * A {@link SecurityException} will be thrown if an app tries to register a
      * {@link PhoneAccountHandle} where the package name specified within
      * {@link PhoneAccountHandle#getComponentName()} does not match the package name of the app.
-     * <p>
-     * A {@link IllegalArgumentException} will be thrown if an app tries to register a
-     * {@link PhoneAccount} when the upper bound limit, 10, has already been reached.
      *
      * @param account The complete {@link PhoneAccount}.
      */
@@ -1733,11 +1687,7 @@ public class TelecomManager {
      *
      * @param accountHandle The handle for the account retrieve a number for.
      * @return A string representation of the line 1 phone number.
-     * @deprecated use {@link SubscriptionManager#getPhoneNumber(int)} instead, which takes a
-     *             Telephony Subscription ID that can be retrieved with the {@code accountHandle}
-     *             from {@link TelephonyManager#getSubscriptionId(PhoneAccountHandle)}.
      */
-    @Deprecated
     @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges or default SMS app
     @RequiresPermission(anyOf = {
             android.Manifest.permission.READ_PHONE_STATE,
@@ -2480,8 +2430,7 @@ public class TelecomManager {
         ITelecomService service = getTelecomService();
         if (service != null) {
             try {
-                return service.isIncomingCallPermitted(phoneAccountHandle,
-                        mContext.getOpPackageName());
+                return service.isIncomingCallPermitted(phoneAccountHandle);
             } catch (RemoteException e) {
                 Log.e(TAG, "Error isIncomingCallPermitted", e);
             }
@@ -2514,8 +2463,7 @@ public class TelecomManager {
         ITelecomService service = getTelecomService();
         if (service != null) {
             try {
-                return service.isOutgoingCallPermitted(phoneAccountHandle,
-                        mContext.getOpPackageName());
+                return service.isOutgoingCallPermitted(phoneAccountHandle);
             } catch (RemoteException e) {
                 Log.e(TAG, "Error isOutgoingCallPermitted", e);
             }

@@ -72,10 +72,9 @@ public class PinnedStackListenerForwarder {
         }
     }
 
-    private void onActionsChanged(ParceledListSlice<RemoteAction> actions,
-            RemoteAction closeAction) {
+    private void onActionsChanged(ParceledListSlice<RemoteAction> actions) {
         for (PinnedTaskListener listener : mListeners) {
-            listener.onActionsChanged(actions, closeAction);
+            listener.onActionsChanged(actions);
         }
     }
 
@@ -88,12 +87,6 @@ public class PinnedStackListenerForwarder {
     private void onAspectRatioChanged(float aspectRatio) {
         for (PinnedTaskListener listener : mListeners) {
             listener.onAspectRatioChanged(aspectRatio);
-        }
-    }
-
-    private void onExpandedAspectRatioChanged(float aspectRatio) {
-        for (PinnedTaskListener listener : mListeners) {
-            listener.onExpandedAspectRatioChanged(aspectRatio);
         }
     }
 
@@ -114,10 +107,9 @@ public class PinnedStackListenerForwarder {
         }
 
         @Override
-        public void onActionsChanged(ParceledListSlice<RemoteAction> actions,
-                RemoteAction closeAction) {
+        public void onActionsChanged(ParceledListSlice<RemoteAction> actions) {
             mMainExecutor.execute(() -> {
-                PinnedStackListenerForwarder.this.onActionsChanged(actions, closeAction);
+                PinnedStackListenerForwarder.this.onActionsChanged(actions);
             });
         }
 
@@ -134,15 +126,6 @@ public class PinnedStackListenerForwarder {
                 PinnedStackListenerForwarder.this.onAspectRatioChanged(aspectRatio);
             });
         }
-
-        @Override
-        public void onExpandedAspectRatioChanged(float aspectRatio) {
-            mMainExecutor.execute(() -> {
-                PinnedStackListenerForwarder.this.onExpandedAspectRatioChanged(aspectRatio);
-            });
-        }
-
-
     }
 
     /**
@@ -154,13 +137,10 @@ public class PinnedStackListenerForwarder {
 
         public void onImeVisibilityChanged(boolean imeVisible, int imeHeight) {}
 
-        public void onActionsChanged(ParceledListSlice<RemoteAction> actions,
-                RemoteAction closeAction) {}
+        public void onActionsChanged(ParceledListSlice<RemoteAction> actions) {}
 
         public void onActivityHidden(ComponentName componentName) {}
 
         public void onAspectRatioChanged(float aspectRatio) {}
-
-        public void onExpandedAspectRatioChanged(float aspectRatio) {}
     }
 }

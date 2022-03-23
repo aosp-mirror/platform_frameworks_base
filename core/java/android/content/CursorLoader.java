@@ -42,7 +42,7 @@ import java.util.Arrays;
  * and {@link #setProjection(String[])}.
  *
  * @deprecated Use the <a href="{@docRoot}tools/extras/support-library.html">Support Library</a>
- *      {@link androidx.loader.content.CursorLoader}
+ *      {@link android.support.v4.content.CursorLoader}
  */
 @Deprecated
 public class CursorLoader extends AsyncTaskLoader<Cursor> {

@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
@@ -92,9 +93,7 @@ class PinnedTaskController {
 
     // The set of actions and aspect-ratio for the that are currently allowed on the PiP activity
     private ArrayList<RemoteAction> mActions = new ArrayList<>();
-    private RemoteAction mCloseAction;
     private float mAspectRatio = -1f;
-    private float mExpandedAspectRatio = 0f;
 
     // The aspect ratio bounds of the PIP.
     private float mMinAspectRatio;
@@ -155,14 +154,14 @@ class PinnedTaskController {
             mPinnedTaskListener = listener;
             notifyImeVisibilityChanged(mIsImeShowing, mImeHeight);
             notifyMovementBoundsChanged(false /* fromImeAdjustment */);
-            notifyActionsChanged(mActions, mCloseAction);
+            notifyActionsChanged(mActions);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to register pinned task listener", e);
         }
     }
 
     /**
-     * @return whether the given {@param aspectRatio} is valid, i.e. min <= ratio <= max.
+     * @return whether the given {@param aspectRatio} is valid.
      */
     public boolean isValidPictureInPictureAspectRatio(float aspectRatio) {
         return Float.compare(mMinAspectRatio, aspectRatio) <= 0
@@ -170,20 +169,14 @@ class PinnedTaskController {
     }
 
     /**
-     * @return whether the given {@param aspectRatio} is valid, i.e. ratio < min or ratio > max.
-     */
-    public boolean isValidExpandedPictureInPictureAspectRatio(float aspectRatio) {
-        return Float.compare(mMinAspectRatio, aspectRatio) > 0
-                || Float.compare(aspectRatio, mMaxAspectRatio) > 0;
-    }
-
-    /**
      * Called when a fullscreen task is entering PiP with display orientation change. This is used
      * to avoid flickering when running PiP animation across different orientations.
      */
     void deferOrientationChangeForEnteringPipFromFullScreenIfNeeded() {
-        final ActivityRecord topFullscreen = mDisplayContent.getActivity(
-                a -> a.fillsParent() && !a.getTask().inMultiWindowMode());
+        final Task topFullscreenTask = mDisplayContent.getDefaultTaskDisplayArea()
+                .getTopRootTaskInWindowingMode(WINDOWING_MODE_FULLSCREEN);
+        final ActivityRecord topFullscreen = topFullscreenTask != null
+                ? topFullscreenTask.topRunningActivity() : null;
         if (topFullscreen == null || topFullscreen.hasFixedRotationTransform()) {
             return;
         }
@@ -218,9 +211,7 @@ class PinnedTaskController {
         }
         mFreezingTaskConfig = true;
         mDestRotatedBounds = new Rect(bounds);
-        if (!mDisplayContent.mTransitionController.isShellTransitionsEnabled()) {
-            continueOrientationChange();
-        }
+        continueOrientationChange();
     }
 
     /**
@@ -253,8 +244,7 @@ class PinnedTaskController {
             int oldRotation, int newRotation) {
         final Rect bounds = mDestRotatedBounds;
         final PictureInPictureSurfaceTransaction pipTx = mPipTransaction;
-        final boolean emptyPipPositionTx = pipTx == null || pipTx.mPosition == null;
-        if (bounds == null && emptyPipPositionTx) {
+        if (bounds == null && pipTx == null) {
             return;
         }
         final TaskDisplayArea taskArea = mDisplayContent.getDefaultTaskDisplayArea();
@@ -266,27 +256,25 @@ class PinnedTaskController {
         mDestRotatedBounds = null;
         mPipTransaction = null;
         final Rect areaBounds = taskArea.getBounds();
-        if (!emptyPipPositionTx) {
+        if (pipTx != null) {
             // The transaction from recents animation is in old rotation. So the position needs to
             // be rotated.
-            float dx = pipTx.mPosition.x;
-            float dy = pipTx.mPosition.y;
+            float dx = pipTx.mPositionX;
+            float dy = pipTx.mPositionY;
             final Matrix matrix = pipTx.getMatrix();
             if (pipTx.mRotation == 90) {
-                dx = pipTx.mPosition.y;
-                dy = areaBounds.right - pipTx.mPosition.x;
+                dx = pipTx.mPositionY;
+                dy = areaBounds.right - pipTx.mPositionX;
                 matrix.postRotate(-90);
             } else if (pipTx.mRotation == -90) {
-                dx = areaBounds.bottom - pipTx.mPosition.y;
-                dy = pipTx.mPosition.x;
+                dx = areaBounds.bottom - pipTx.mPositionY;
+                dy = pipTx.mPositionX;
                 matrix.postRotate(90);
             }
             matrix.postTranslate(dx, dy);
             final SurfaceControl leash = pinnedTask.getSurfaceControl();
-            t.setMatrix(leash, matrix, new float[9]);
-            if (pipTx.hasCornerRadiusSet()) {
-                t.setCornerRadius(leash, pipTx.mCornerRadius);
-            }
+            t.setMatrix(leash, matrix, new float[9])
+                    .setCornerRadius(leash, pipTx.mCornerRadius);
             Slog.i(TAG, "Seamless rotation PiP tx=" + pipTx + " pos=" + dx + "," + dy);
             return;
         }
@@ -329,11 +317,15 @@ class PinnedTaskController {
     }
 
     /** Resets the states which were used to perform fixed rotation with PiP task. */
-    void onCancelFixedRotationTransform() {
+    void onCancelFixedRotationTransform(Task task) {
         mFreezingTaskConfig = false;
         mDeferOrientationChanging = false;
         mDestRotatedBounds = null;
         mPipTransaction = null;
+        if (!task.isOrganized()) {
+            // Force clearing Task#mForceNotOrganized because the display didn't rotate.
+            task.onConfigurationChanged(task.getParent().getConfiguration());
+        }
     }
 
     /**
@@ -388,34 +380,14 @@ class PinnedTaskController {
     }
 
     /**
-     * Sets the current aspect ratio.
-     */
-    void setExpandedAspectRatio(float aspectRatio) {
-        if (Float.compare(mExpandedAspectRatio, aspectRatio) != 0) {
-            mExpandedAspectRatio = aspectRatio;
-            notifyExpandedAspectRatioChanged(aspectRatio);
-            notifyMovementBoundsChanged(false /* fromImeAdjustment */);
-        }
-    }
-
-    /**
-     * @return the current aspect ratio.
-     */
-    float getExpandedAspectRatio() {
-        return mExpandedAspectRatio;
-    }
-
-
-    /**
      * Sets the current set of actions.
      */
-    void setActions(List<RemoteAction> actions, RemoteAction closeAction) {
+    void setActions(List<RemoteAction> actions) {
         mActions.clear();
         if (actions != null) {
             mActions.addAll(actions);
         }
-        mCloseAction = closeAction;
-        notifyActionsChanged(mActions, closeAction);
+        notifyActionsChanged(mActions);
     }
 
     /**
@@ -440,22 +412,13 @@ class PinnedTaskController {
         }
     }
 
-    private void notifyExpandedAspectRatioChanged(float aspectRatio) {
-        if (mPinnedTaskListener == null) return;
-        try {
-            mPinnedTaskListener.onExpandedAspectRatioChanged(aspectRatio);
-        } catch (RemoteException e) {
-            Slog.e(TAG_WM, "Error delivering aspect ratio changed event.", e);
-        }
-    }
-
     /**
      * Notifies listeners that the PIP actions have changed.
      */
-    private void notifyActionsChanged(List<RemoteAction> actions, RemoteAction closeAction) {
+    private void notifyActionsChanged(List<RemoteAction> actions) {
         if (mPinnedTaskListener != null) {
             try {
-                mPinnedTaskListener.onActionsChanged(new ParceledListSlice(actions), closeAction);
+                mPinnedTaskListener.onActionsChanged(new ParceledListSlice(actions));
             } catch (RemoteException e) {
                 Slog.e(TAG_WM, "Error delivering actions changed event.", e);
             }

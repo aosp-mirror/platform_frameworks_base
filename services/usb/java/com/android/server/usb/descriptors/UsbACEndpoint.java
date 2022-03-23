@@ -25,17 +25,13 @@ import android.util.Log;
 abstract class UsbACEndpoint extends UsbDescriptor {
     private static final String TAG = "UsbACEndpoint";
 
-    public static final byte MS_GENERAL = 1;
-    public static final byte MS_GENERAL_2_0 = 2;
-
     protected final int mSubclass; // from the mSubclass member of the "enclosing"
                                    // Interface Descriptor, not the stream.
-    protected final byte mSubtype;       // 2:1 HEADER descriptor subtype
+    protected byte mSubtype;       // 2:1 HEADER descriptor subtype
 
-    UsbACEndpoint(int length, byte type, int subclass, byte subtype) {
+    UsbACEndpoint(int length, byte type, int subclass) {
         super(length, type);
         mSubclass = subclass;
-        mSubtype = subtype;
     }
 
     public int getSubclass() {
@@ -48,39 +44,33 @@ abstract class UsbACEndpoint extends UsbDescriptor {
 
     @Override
     public int parseRawDescriptors(ByteStream stream) {
+        mSubtype = stream.getByte();
         return mLength;
     }
 
     public static UsbDescriptor allocDescriptor(UsbDescriptorParser parser,
-                                                int length, byte type, byte subType) {
+                                                int length, byte type) {
         UsbInterfaceDescriptor interfaceDesc = parser.getCurInterface();
         int subClass = interfaceDesc.getUsbSubclass();
+        // TODO shouldn't this switch on subtype?
         switch (subClass) {
             case AUDIO_AUDIOCONTROL:
                 if (UsbDescriptorParser.DEBUG) {
                     Log.d(TAG, "---> AUDIO_AUDIOCONTROL");
                 }
-                return new UsbACAudioControlEndpoint(length, type, subClass, subType);
+                return new UsbACAudioControlEndpoint(length, type, subClass);
 
             case AUDIO_AUDIOSTREAMING:
                 if (UsbDescriptorParser.DEBUG) {
                     Log.d(TAG, "---> AUDIO_AUDIOSTREAMING");
                 }
-                return new UsbACAudioStreamEndpoint(length, type, subClass, subType);
+                return new UsbACAudioStreamEndpoint(length, type, subClass);
 
             case AUDIO_MIDISTREAMING:
                 if (UsbDescriptorParser.DEBUG) {
                     Log.d(TAG, "---> AUDIO_MIDISTREAMING");
                 }
-                switch (subType) {
-                    case MS_GENERAL:
-                        return new UsbACMidi10Endpoint(length, type, subClass, subType);
-                    case MS_GENERAL_2_0:
-                        return new UsbACMidi20Endpoint(length, type, subClass, subType);
-                    default:
-                        Log.w(TAG, "Unknown Midi Endpoint id:0x" + Integer.toHexString(subType));
-                        return null;
-                }
+                return new UsbACMidiEndpoint(length, type, subClass);
 
             default:
                 Log.w(TAG, "Unknown Audio Class Endpoint id:0x" + Integer.toHexString(subClass));

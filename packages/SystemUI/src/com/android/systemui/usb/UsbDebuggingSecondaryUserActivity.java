@@ -30,7 +30,6 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.util.Log;
-import android.view.WindowManager;
 
 import com.android.internal.app.AlertActivity;
 import com.android.internal.app.AlertController;
@@ -52,8 +51,6 @@ public class UsbDebuggingSecondaryUserActivity extends AlertActivity
 
     @Override
     public void onCreate(Bundle icicle) {
-        getWindow().addSystemFlags(
-                WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS);
         super.onCreate(icicle);
 
         if (SystemProperties.getInt("service.adb.tcp.port", 0) == 0) {

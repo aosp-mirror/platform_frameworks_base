@@ -25,25 +25,19 @@ public interface AppStateTracker {
     String TAG = "AppStateTracker";
 
     /**
-     * Register a {@link BackgroundRestrictedAppListener} to listen for background restricted mode
-     * changes that should affect services etc.
+     * Register a {@link ServiceStateListener} to listen for forced-app-standby changes that should
+     * affect services.
      */
-    void addBackgroundRestrictedAppListener(@NonNull BackgroundRestrictedAppListener listener);
+    void addServiceStateListener(@NonNull ServiceStateListener listener);
 
     /**
-     * @return {code true} if the given UID/package has been in background restricted mode,
-     * it does NOT include the case where the "force app background restricted" is enabled.
+     * A listener to listen to forced-app-standby changes that should affect services.
      */
-    boolean isAppBackgroundRestricted(int uid, @NonNull String packageName);
-
-    /**
-     * A listener to listen to background restricted mode changes that should affect services etc.
-     */
-    interface BackgroundRestrictedAppListener {
+    interface ServiceStateListener {
         /**
-         * Called when an app goes in/out of background restricted mode.
+         * Called when an app goes into forced app standby and its foreground
+         * services need to be removed from that state.
          */
-        void updateBackgroundRestrictedForUidPackage(int uid, String packageName,
-                boolean restricted);
+        void stopForegroundServicesForUidPackage(int uid, String packageName);
     }
 }

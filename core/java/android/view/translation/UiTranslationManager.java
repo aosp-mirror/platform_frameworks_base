@@ -101,32 +101,33 @@ public final class UiTranslationManager {
     public static final String LOG_TAG = "UiTranslation";
 
     /**
-     * The state the caller requests to enable UI translation.
+     * The state caller request to disable utranslation,, it is no longer need to ui translation.
      *
      * @hide
      */
     public static final int STATE_UI_TRANSLATION_STARTED = 0;
     /**
-     * The state caller requests to pause UI translation. It will switch back to the original text.
+     * The state caller request to pause ui translation, it will switch back to the original text.
      *
      * @hide
      */
     public static final int STATE_UI_TRANSLATION_PAUSED = 1;
     /**
-     * The state caller requests to resume the paused UI translation. It will show the translated
+     * The state caller request to resume the paused ui translation, it will show the translated
      * text again if the text had been translated.
      *
      * @hide
      */
     public static final int STATE_UI_TRANSLATION_RESUMED = 2;
     /**
-     * The state caller requests to disable UI translation when it no longer needs translation.
+     * The state the caller request to enable ui translation.
      *
      * @hide
      */
     public static final int STATE_UI_TRANSLATION_FINISHED = 3;
-
-    /** @hide */
+    /**
+     * @hide
+     */
     @IntDef(prefix = {"STATE__TRANSLATION"}, value = {
             STATE_UI_TRANSLATION_STARTED,
             STATE_UI_TRANSLATION_PAUSED,
@@ -144,8 +145,6 @@ public final class UiTranslationManager {
     public static final String EXTRA_SOURCE_LOCALE = "source_locale";
     /** @hide */
     public static final String EXTRA_TARGET_LOCALE = "target_locale";
-    /** @hide */
-    public static final String EXTRA_PACKAGE_NAME = "package_name";
 
     @NonNull
     private final Context mContext;
@@ -216,7 +215,7 @@ public final class UiTranslationManager {
 
     /**
      * Request to disable the ui translation. It will destroy all the {@link Translator}s and no
-     * longer to show the translated text.
+     * longer to show to show the translated text.
      *
      * @param activityId the identifier for the Activity which needs ui translation
      * @throws NullPointerException the activityId or
@@ -363,8 +362,8 @@ public final class UiTranslationManager {
     public void onTranslationFinished(boolean activityDestroyed, ActivityId activityId,
             ComponentName componentName) {
         try {
-            mService.onTranslationFinished(activityDestroyed, activityId.getToken(), componentName,
-                    mContext.getUserId());
+            mService.onTranslationFinished(activityDestroyed,
+                    activityId.getToken(), componentName, mContext.getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -393,21 +392,20 @@ public final class UiTranslationManager {
 
         private void onStateChange(Bundle bundle) {
             int state = bundle.getInt(EXTRA_STATE);
-            String packageName = bundle.getString(EXTRA_PACKAGE_NAME);
             switch (state) {
                 case STATE_UI_TRANSLATION_STARTED:
-                    mSourceLocale = bundle.getSerializable(EXTRA_SOURCE_LOCALE, ULocale.class);
-                    mTargetLocale = bundle.getSerializable(EXTRA_TARGET_LOCALE, ULocale.class);
-                    mCallback.onStarted(mSourceLocale, mTargetLocale, packageName);
+                    mSourceLocale = (ULocale) bundle.getSerializable(EXTRA_SOURCE_LOCALE);
+                    mTargetLocale = (ULocale) bundle.getSerializable(EXTRA_TARGET_LOCALE);
+                    mCallback.onStarted(mSourceLocale, mTargetLocale);
                     break;
                 case STATE_UI_TRANSLATION_RESUMED:
-                    mCallback.onResumed(mSourceLocale, mTargetLocale, packageName);
+                    mCallback.onResumed(mSourceLocale, mTargetLocale);
                     break;
                 case STATE_UI_TRANSLATION_PAUSED:
-                    mCallback.onPaused(packageName);
+                    mCallback.onPaused();
                     break;
                 case STATE_UI_TRANSLATION_FINISHED:
-                    mCallback.onFinished(packageName);
+                    mCallback.onFinished();
                     break;
                 default:
                     Log.wtf(TAG, "Unexpected translation state:" + state);

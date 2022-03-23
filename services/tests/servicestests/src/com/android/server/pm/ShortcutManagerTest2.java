@@ -36,8 +36,6 @@ import android.app.Person;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.LocusId;
-import android.content.pm.Capability;
-import android.content.pm.CapabilityParams;
 import android.content.pm.ShortcutInfo;
 import android.content.res.Resources;
 import android.graphics.BitmapFactory;
@@ -45,10 +43,8 @@ import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.PersistableBundle;
 import android.os.UserHandle;
-import android.platform.test.annotations.Presubmit;
 import android.test.MoreAsserts;
-
-import androidx.test.filters.SmallTest;
+import android.test.suitebuilder.annotation.SmallTest;
 
 import com.android.frameworks.servicestests.R;
 import com.android.server.pm.ShortcutUser.PackageWithUser;
@@ -68,7 +64,6 @@ import java.util.Locale;
  adb shell am instrument -e class com.android.server.pm.ShortcutManagerTest2 \
  -w com.android.frameworks.servicestests/androidx.test.runner.AndroidJUnitRunner
  */
-@Presubmit
 @SmallTest
 public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
     // ShortcutInfo tests
@@ -259,15 +254,6 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
                 .setLongLived(true)
                 .setExtras(pb)
                 .setStartingTheme(android.R.style.Theme_Black_NoTitleBar_Fullscreen)
-                .addCapabilityBinding(
-                        new Capability.Builder("action.intent.START_EXERCISE").build(),
-                        new CapabilityParams.Builder("exercise.type", "running")
-                                .addAlias("jogging")
-                                .build())
-                .addCapabilityBinding(
-                        new Capability.Builder("action.intent.START_EXERCISE").build(),
-                        new CapabilityParams.Builder("exercise.duration", "10m")
-                                .build())
                 .build();
         si.addFlags(ShortcutInfo.FLAG_PINNED);
         si.setBitmapPath("abc");
@@ -305,14 +291,6 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         assertEquals(null, si.getDisabledMessageResName());
         assertEquals("android:style/Theme.Black.NoTitleBar.Fullscreen",
                 si.getStartingThemeResName());
-        assertEquals(list(new Capability.Builder("action.intent.START_EXERCISE").build()),
-                si.getCapabilities());
-        assertEquals(list(
-                        new CapabilityParams.Builder("exercise.type", "running")
-                                .addAlias("jogging").build(),
-                        new CapabilityParams.Builder("exercise.duration", "10m").build()),
-                si.getCapabilityParams(
-                        new Capability.Builder("action.intent.START_EXERCISE").build()));
     }
 
     public void testShortcutInfoParcel_resId() {
@@ -966,15 +944,6 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
                 .setRank(123)
                 .setExtras(pb)
                 .setLocusId(new LocusId("1.2.3.4.5"))
-                .addCapabilityBinding(
-                        new Capability.Builder("action.intent.START_EXERCISE").build(),
-                        new CapabilityParams.Builder("exercise.type", "running")
-                                .addAlias("jogging")
-                                .build())
-                .addCapabilityBinding(
-                        new Capability.Builder("action.intent.START_EXERCISE").build(),
-                        new CapabilityParams.Builder("exercise.duration", "10m")
-                                .build())
                 .build();
         sorig.setTimestamp(mInjectedCurrentTimeMillis);
 
@@ -1035,15 +1004,6 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         assertEquals(0, si.getIconResourceId());
         assertNull(si.getIconUri());
         assertTrue(si.getLastChangedTimestamp() < now);
-
-        assertEquals(list(new Capability.Builder("action.intent.START_EXERCISE").build()),
-                si.getCapabilities());
-        assertEquals(list(
-                        new CapabilityParams.Builder("exercise.type", "running")
-                                .addAlias("jogging").build(),
-                        new CapabilityParams.Builder("exercise.duration", "10m").build()),
-                si.getCapabilityParams(
-                        new Capability.Builder("action.intent.START_EXERCISE").build()));
 
         // Make sure ranks are saved too.  Because of the auto-adjusting, we need two shortcuts
         // to test it.

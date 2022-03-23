@@ -21,7 +21,6 @@ import android.app.ActivityManager;
 import android.content.pm.PackageManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
-import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
@@ -281,17 +280,6 @@ public final class UidRecord {
         for (int i = mProcRecords.size() - 1; i >= 0; i--) {
             callback.accept(mProcRecords.valueAt(i));
         }
-    }
-
-    @GuardedBy(anyOf = {"mService", "mProcLock"})
-    ProcessRecord getProcessInPackage(String packageName) {
-        for (int i = mProcRecords.size() - 1; i >= 0; i--) {
-            final ProcessRecord app = mProcRecords.valueAt(i);
-            if (app != null && TextUtils.equals(app.info.packageName, packageName)) {
-                return app;
-            }
-        }
-        return null;
     }
 
     @GuardedBy({"mService", "mProcLock"})

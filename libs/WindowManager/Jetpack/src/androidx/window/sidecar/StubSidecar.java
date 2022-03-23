@@ -30,7 +30,7 @@ import java.util.Set;
 abstract class StubSidecar implements SidecarInterface {
 
     private SidecarCallback mSidecarCallback;
-    final Set<IBinder> mWindowLayoutChangeListenerTokens = new HashSet<>();
+    private final Set<IBinder> mWindowLayoutChangeListenerTokens = new HashSet<>();
     private boolean mDeviceStateChangeListenerRegistered;
 
     StubSidecar() {

@@ -16,9 +16,8 @@
 
 package android.text.style;
 
-import android.annotation.NonNull;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
-import android.os.Parcelable;
 import android.text.ParcelableSpan;
 import android.text.TextPaint;
 import android.text.TextUtils;
@@ -26,32 +25,22 @@ import android.text.TextUtils;
 /**
  * A SuggestionRangeSpan is used to show which part of an EditText is affected by a suggestion
  * popup window.
+ *
+ * @hide
  */
-public final class SuggestionRangeSpan extends CharacterStyle implements ParcelableSpan {
+public class SuggestionRangeSpan extends CharacterStyle implements ParcelableSpan {
     private int mBackgroundColor;
 
+    @UnsupportedAppUsage
     public SuggestionRangeSpan() {
         // 0 is a fully transparent black. Has to be set using #setBackgroundColor
         mBackgroundColor = 0;
     }
 
-    /** @hide */
-    public SuggestionRangeSpan(@NonNull Parcel src) {
+    @UnsupportedAppUsage
+    public SuggestionRangeSpan(Parcel src) {
         mBackgroundColor = src.readInt();
     }
-
-    public static final @NonNull Parcelable.Creator<SuggestionRangeSpan>
-            CREATOR = new Parcelable.Creator<SuggestionRangeSpan>() {
-                @Override
-                public SuggestionRangeSpan createFromParcel(Parcel source) {
-                    return new SuggestionRangeSpan(source);
-                }
-
-                @Override
-                public SuggestionRangeSpan[] newArray(int size) {
-                    return new SuggestionRangeSpan[size];
-                }
-            };
 
     @Override
     public int describeContents() {
@@ -59,7 +48,7 @@ public final class SuggestionRangeSpan extends CharacterStyle implements Parcela
     }
 
     @Override
-    public void writeToParcel(@NonNull Parcel dest, int flags) {
+    public void writeToParcel(Parcel dest, int flags) {
         writeToParcelInternal(dest, flags);
     }
 
@@ -78,16 +67,13 @@ public final class SuggestionRangeSpan extends CharacterStyle implements Parcela
         return TextUtils.SUGGESTION_RANGE_SPAN;
     }
 
+    @UnsupportedAppUsage
     public void setBackgroundColor(int backgroundColor) {
         mBackgroundColor = backgroundColor;
     }
 
-    public int getBackgroundColor() {
-        return mBackgroundColor;
-    }
-
     @Override
-    public void updateDrawState(@NonNull TextPaint tp) {
+    public void updateDrawState(TextPaint tp) {
         tp.bgColor = mBackgroundColor;
     }
 }

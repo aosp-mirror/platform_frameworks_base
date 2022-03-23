@@ -37,7 +37,6 @@ import android.content.res.CompatibilityInfo;
 import android.content.res.Resources;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.FileUtils;
 import android.os.GraphicsEnvironment;
 import android.os.Handler;
@@ -55,12 +54,10 @@ import android.text.TextUtils;
 import android.util.AndroidRuntimeException;
 import android.util.ArrayMap;
 import android.util.Log;
-import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.DisplayAdjustments;
 
-import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.ArrayUtils;
 
@@ -79,7 +76,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
@@ -161,13 +157,6 @@ public final class LoadedApk {
     private final ArrayMap<Context, ArrayMap<ServiceConnection, LoadedApk.ServiceDispatcher>> mUnboundServices
         = new ArrayMap<>();
     private AppComponentFactory mAppComponentFactory;
-
-    /**
-     * We cache the instantiated application object for each package on this process here.
-     */
-    @GuardedBy("sApplications")
-    private static final ArrayMap<String, Application> sApplications = new ArrayMap<>(4);
-
     private final Object mLock = new Object();
 
     Application getApplication() {
@@ -410,26 +399,6 @@ public final class LoadedApk {
         if (aInfo.requestsIsolatedSplitLoading() && !ArrayUtils.isEmpty(mSplitNames)) {
             mSplitLoader = new SplitDependencyLoaderImpl(aInfo.splitDependencies);
         }
-    }
-
-    /** @hide */
-    void setSdkSandboxStorage(String sdkSandboxClientAppPackage) {
-        int userId = UserHandle.myUserId();
-        mDeviceProtectedDataDirFile = Environment
-                .getDataMiscDeSharedSdkSandboxDirectory(userId, sdkSandboxClientAppPackage)
-                .getAbsoluteFile();
-        mCredentialProtectedDataDirFile = Environment
-                .getDataMiscCeSharedSdkSandboxDirectory(userId, sdkSandboxClientAppPackage)
-                .getAbsoluteFile();
-
-        if ((mApplicationInfo.privateFlags
-                & ApplicationInfo.PRIVATE_FLAG_DEFAULT_TO_DEVICE_PROTECTED_STORAGE) != 0
-                && PackageManager.APPLY_DEFAULT_TO_DEVICE_PROTECTED_STORAGE) {
-            mDataDirFile = mDeviceProtectedDataDirFile;
-        } else {
-            mDataDirFile = mCredentialProtectedDataDirFile;
-        }
-        mDataDir = mDataDirFile.getAbsolutePath();
     }
 
     public static void makePaths(ActivityThread activityThread,
@@ -731,7 +700,7 @@ public final class LoadedApk {
     ClassLoader createSharedLibraryLoader(SharedLibraryInfo sharedLibrary,
             boolean isBundledApp, String librarySearchPath, String libraryPermittedPath) {
         List<String> paths = sharedLibrary.getAllCodePaths();
-        Pair<List<ClassLoader>, List<ClassLoader>> sharedLibraries = createSharedLibrariesLoaders(
+        List<ClassLoader> sharedLibraries = createSharedLibrariesLoaders(
                 sharedLibrary.getDependencies(), isBundledApp, librarySearchPath,
                 libraryPermittedPath);
         final String jars = (paths.size() == 1) ? paths.get(0) :
@@ -742,31 +711,15 @@ public final class LoadedApk {
         return ApplicationLoaders.getDefault().getSharedLibraryClassLoaderWithSharedLibraries(jars,
                     mApplicationInfo.targetSdkVersion, isBundledApp, librarySearchPath,
                     libraryPermittedPath, /* parent */ null,
-                    /* classLoaderName */ null, sharedLibraries.first, sharedLibraries.second);
+                    /* classLoaderName */ null, sharedLibraries);
     }
 
-    /**
-     *
-     * @return a {@link Pair} of List<ClassLoader> where the first is for standard shared libraries
-     *         and the second is list for shared libraries that code should be loaded after the dex
-     */
-    private Pair<List<ClassLoader>, List<ClassLoader>> createSharedLibrariesLoaders(
-            List<SharedLibraryInfo> sharedLibraries,
+    private List<ClassLoader> createSharedLibrariesLoaders(List<SharedLibraryInfo> sharedLibraries,
             boolean isBundledApp, String librarySearchPath, String libraryPermittedPath) {
-        if (sharedLibraries == null || sharedLibraries.isEmpty()) {
-            return new Pair<>(null, null);
+        if (sharedLibraries == null) {
+            return null;
         }
-
-        // if configured to do so, shared libs are split into 2 collections: those that are
-        // on the class path before the applications code, which is standard, and those
-        // specified to be loaded after the applications code.
-        HashSet<String> libsToLoadAfter = new HashSet<>();
-        Resources systemR = Resources.getSystem();
-        Collections.addAll(libsToLoadAfter, systemR.getStringArray(
-                R.array.config_sharedLibrariesLoadedAfterApp));
-
         List<ClassLoader> loaders = new ArrayList<>();
-        List<ClassLoader> after = new ArrayList<>();
         for (SharedLibraryInfo info : sharedLibraries) {
             if (info.isNative()) {
                 // Native shared lib doesn't contribute to the native lib search path. Its name is
@@ -774,23 +727,10 @@ public final class LoadedApk {
                 // default linker namespace.
                 continue;
             }
-            if (info.isSdk()) {
-                // SDKs are not loaded automatically.
-                continue;
-            }
-            if (libsToLoadAfter.contains(info.getName())) {
-                if (DEBUG) {
-                    Slog.v(ActivityThread.TAG,
-                            info.getName() + " will be loaded after application code");
-                }
-                after.add(createSharedLibraryLoader(
-                        info, isBundledApp, librarySearchPath, libraryPermittedPath));
-            } else {
-                loaders.add(createSharedLibraryLoader(
-                        info, isBundledApp, librarySearchPath, libraryPermittedPath));
-            }
+            loaders.add(createSharedLibraryLoader(
+                    info, isBundledApp, librarySearchPath, libraryPermittedPath));
         }
-        return new Pair<>(loaders, after);
+        return loaders;
     }
 
     private StrictMode.ThreadPolicy allowThreadDiskReads() {
@@ -1015,9 +955,9 @@ public final class LoadedApk {
             // as this is early and necessary.
             StrictMode.ThreadPolicy oldPolicy = allowThreadDiskReads();
 
-            Pair<List<ClassLoader>, List<ClassLoader>> sharedLibraries =
-                    createSharedLibrariesLoaders(mApplicationInfo.sharedLibraryInfos, isBundledApp,
-                            librarySearchPath, libraryPermittedPath);
+            List<ClassLoader> sharedLibraries = createSharedLibrariesLoaders(
+                    mApplicationInfo.sharedLibraryInfos, isBundledApp, librarySearchPath,
+                    libraryPermittedPath);
 
             List<String> nativeSharedLibraries = new ArrayList<>();
             if (mApplicationInfo.sharedLibraryInfos != null) {
@@ -1031,8 +971,7 @@ public final class LoadedApk {
             mDefaultClassLoader = ApplicationLoaders.getDefault().getClassLoaderWithSharedLibraries(
                     zip, mApplicationInfo.targetSdkVersion, isBundledApp, librarySearchPath,
                     libraryPermittedPath, mBaseClassLoader,
-                    mApplicationInfo.classLoaderName, sharedLibraries.first, nativeSharedLibraries,
-                    sharedLibraries.second);
+                    mApplicationInfo.classLoaderName, sharedLibraries, nativeSharedLibraries);
             mAppComponentFactory = createAppFactory(mApplicationInfo, mDefaultClassLoader);
 
             setThreadPolicy(oldPolicy);
@@ -1373,56 +1312,18 @@ public final class LoadedApk {
         return mResources;
     }
 
-    /**
-     * This is for 3p apps accessing this hidden API directly... in which case, we don't return
-     * the cached Application instance.
-     */
     @UnsupportedAppUsage
     public Application makeApplication(boolean forceDefaultAppClass,
             Instrumentation instrumentation) {
-        return makeApplicationInner(forceDefaultAppClass, instrumentation,
-                /* allowDuplicateInstances= */ true);
-    }
-
-    /**
-     * This is for all the (internal) callers, for which we do return the cached instance.
-     */
-    public Application makeApplicationInner(boolean forceDefaultAppClass,
-            Instrumentation instrumentation) {
-        return makeApplicationInner(forceDefaultAppClass, instrumentation,
-                /* allowDuplicateInstances= */ false);
-    }
-
-    private Application makeApplicationInner(boolean forceDefaultAppClass,
-            Instrumentation instrumentation, boolean allowDuplicateInstances) {
         if (mApplication != null) {
             return mApplication;
         }
-        Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "makeApplication");
 
-        synchronized (sApplications) {
-            final Application cached = sApplications.get(mPackageName);
-            if (cached != null) {
-                // Looks like this is always happening for the system server, because
-                // the LoadedApk created in systemMain() -> attach() isn't cached properly?
-                if (!"android".equals(mPackageName)) {
-                    Slog.wtfStack(TAG, "App instance already created for package=" + mPackageName
-                            + " instance=" + cached);
-                }
-                if (!allowDuplicateInstances) {
-                    mApplication = cached;
-                    return cached;
-                }
-                // Some apps intentionally call makeApplication() to create a new Application
-                // instance... Sigh...
-            }
-        }
+        Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "makeApplication");
 
         Application app = null;
 
-        final String myProcessName = Process.myProcessName();
-        String appClass = mApplicationInfo.getCustomApplicationClassNameForProcess(
-                myProcessName);
+        String appClass = mApplicationInfo.className;
         if (forceDefaultAppClass || (appClass == null)) {
             appClass = "android.app.Application";
         }
@@ -1465,11 +1366,6 @@ public final class LoadedApk {
         }
         mActivityThread.mAllApplications.add(app);
         mApplication = app;
-        if (!allowDuplicateInstances) {
-            synchronized (sApplications) {
-                sApplications.put(mPackageName, app);
-            }
-        }
 
         if (instrumentation != null) {
             try {
@@ -1770,11 +1666,7 @@ public final class LoadedApk {
                         return;
                     }
 
-                    if (Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER)) {
-                        Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
-                                "broadcastReceiveReg: " + intent.getAction());
-                    }
-
+                    Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "broadcastReceiveReg");
                     try {
                         ClassLoader cl = mReceiver.getClass().getClassLoader();
                         intent.setExtrasClassLoader(cl);
@@ -2242,38 +2134,4 @@ public final class LoadedApk {
             final IBinder mService;
         }
     }
-
-    /**
-     * Check if the Apk paths in the cache are correct, and update them if they are not.
-     * @hide
-     */
-    public static void checkAndUpdateApkPaths(ApplicationInfo expectedAppInfo) {
-        // Get the LoadedApk from the cache
-        ActivityThread activityThread = ActivityThread.currentActivityThread();
-        if (activityThread == null) {
-            Log.e(TAG, "Cannot find activity thread");
-            return;
-        }
-        checkAndUpdateApkPaths(activityThread, expectedAppInfo, /* cacheWithCode */ true);
-        checkAndUpdateApkPaths(activityThread, expectedAppInfo, /* cacheWithCode */ false);
-    }
-
-    private static void checkAndUpdateApkPaths(ActivityThread activityThread,
-            ApplicationInfo expectedAppInfo, boolean cacheWithCode) {
-        String expectedCodePath = expectedAppInfo.getCodePath();
-        LoadedApk loadedApk = activityThread.peekPackageInfo(
-                expectedAppInfo.packageName, /* includeCode= */ cacheWithCode);
-        // If there is load apk cached, or if the cache is valid, don't do anything.
-        if (loadedApk == null || loadedApk.getApplicationInfo() == null
-                || loadedApk.getApplicationInfo().getCodePath().equals(expectedCodePath)) {
-            return;
-        }
-        // Duplicate framework logic
-        List<String> oldPaths = new ArrayList<>();
-        LoadedApk.makePaths(activityThread, expectedAppInfo, oldPaths);
-
-        // Force update the LoadedApk instance, which should update the reference in the cache
-        loadedApk.updateApplicationInfo(expectedAppInfo, oldPaths);
-    }
-
 }

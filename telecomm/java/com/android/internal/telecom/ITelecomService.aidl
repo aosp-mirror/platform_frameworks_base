@@ -66,12 +66,6 @@ interface ITelecomService {
             String callingFeatureId);
 
     /**
-     * @see TelecomServiceImpl#getOwnSelfManagedPhoneAccounts
-     */
-    List<PhoneAccountHandle> getOwnSelfManagedPhoneAccounts(String callingPackage,
-            String callingFeatureId);
-
-    /**
      * @see TelecomManager#getPhoneAccountsSupportingScheme
      */
     List<PhoneAccountHandle> getPhoneAccountsSupportingScheme(in String uriScheme,
@@ -312,14 +306,12 @@ interface ITelecomService {
     /**
      * @see TelecomServiceImpl#isIncomingCallPermitted
      */
-    boolean isIncomingCallPermitted(in PhoneAccountHandle phoneAccountHandle,
-            String callingPackage);
+    boolean isIncomingCallPermitted(in PhoneAccountHandle phoneAccountHandle);
 
     /**
      * @see TelecomServiceImpl#isOutgoingCallPermitted
      */
-    boolean isOutgoingCallPermitted(in PhoneAccountHandle phoneAccountHandle,
-            String callingPackage);
+    boolean isOutgoingCallPermitted(in PhoneAccountHandle phoneAccountHandle);
 
     /**
      * @see TelecomServiceImpl#waitOnHandler
@@ -347,8 +339,6 @@ interface ITelecomService {
     void handleCallIntent(in Intent intent, in String callingPackageProxy);
 
     void cleanupStuckCalls();
-
-    int cleanupOrphanPhoneAccounts();
 
     void resetCarMode();
 

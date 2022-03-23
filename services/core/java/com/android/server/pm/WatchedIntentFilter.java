@@ -84,7 +84,7 @@ public class WatchedIntentFilter
     }
 
     // Convert an {@link IntentFilter} to a {@link WatchedIntentFilter}
-    public WatchedIntentFilter(IntentFilter f) {
+    protected WatchedIntentFilter(IntentFilter f) {
         mFilter = new IntentFilter(f);
     }
 

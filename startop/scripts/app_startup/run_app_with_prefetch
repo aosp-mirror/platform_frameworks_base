@@ -1,0 +1,487 @@
+#!/bin/bash
+#
+# Copyright 2018, The Android Open Source Project
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+usage() {
+    cat <<EOF
+Usage: run_app_with_prefetch --package <name> [OPTIONS]...
+
+    -p, --package <name>        package of the app to test
+    -a, --activity <name>       activity to use
+    -h, --help                  usage information (this)
+    -v, --verbose               enable extra verbose printing
+    -i, --input <file>          trace file protobuf (default 'TraceFile.pb')
+    -r, --readahead <mode>      cold, warm, fadvise, mlock (default 'warm')
+    -w, --when <when>           aot or jit (default 'jit')
+    -c, --count <count>         how many times to run (default 1)
+    -s, --sleep <sec>           how long to sleep after readahead
+    -t, --timeout <sec>         how many seconds to timeout in between each app run (default 10)
+    -o, --output <file.csv>     what file to write the performance results into as csv (default stdout)
+EOF
+}
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source "$DIR/../iorap/common"
+
+report_fully_drawn="n"
+needs_trace_file="n"
+input_file=""
+package=""
+mode='warm'
+count=2
+sleep_time=2
+timeout=10
+output="" # stdout by default
+when="jit"
+parse_arguments() {
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      -h|--help)
+        usage
+        exit 0
+        ;;
+      -p|--package)
+        package="$2"
+        shift
+        ;;
+      -a|--activity)
+        activity="$2"
+        shift
+        ;;
+      -i|--input)
+        input_file="$2"
+        shift
+        ;;
+      -v|--verbose)
+        export verbose="y"
+        ;;
+      -r|--readahead)
+        mode="$2"
+        shift
+        ;;
+      -rfd|--reportfullydrawn)
+        report_fully_drawn="y"
+        shift
+        ;;
+      -c|--count)
+        count="$2"
+        ((count+=1))
+        shift
+        ;;
+      -s|--sleep)
+        sleep_time="$2"
+        shift
+        ;;
+      -t|--timeout)
+        timeout="$2"
+        shift
+        ;;
+      -o|--output)
+        output="$2"
+        shift
+        ;;
+      -w|--when)
+        when="$2"
+        shift
+        ;;
+      --compiler-filter)
+        compiler_filter="$2"
+        shift
+        ;;
+      *)
+        echo "Invalid argument: $1" >&2
+        exit 1
+    esac
+    shift
+  done
+
+  if [[ $when == "aot" ]]; then
+    # TODO: re-implement aot later for experimenting.
+    echo "Error: --when $when is unsupported" >&2
+    exit 1
+  elif [[ $when != "jit" ]]; then
+    echo "Error: --when must be one of (aot jit)." >&2
+    exit 1
+  fi
+}
+
+echo_to_output_file() {
+  if [[ "x$output" != x ]]; then
+    echo "$@" >> $output
+  fi
+  # Always echo to stdout as well.
+  echo "$@"
+}
+
+find_package_path() {
+  local pkg="$1"
+
+  res="$(adb shell find "/data/app/$pkg"-'*' -maxdepth 0 2> /dev/null)"
+  if [[ -z $res ]]; then
+    res="$(adb shell find "/system/app/$pkg"-'*' -maxdepth 0 2> /dev/null)"
+  fi
+  echo "$res"
+}
+
+# Main entry point
+if [[ $# -eq 0 ]]; then
+  usage
+  exit 1
+else
+  parse_arguments "$@"
+
+  # if we do not have have package exit early with an error
+  [[ "$package" == "" ]] && echo "--package not specified" 1>&2 && exit 1
+
+  if [[ $mode != "cold" && $mode != "warm" ]]; then
+    needs_trace_file="y"
+    if [[ -z "$input_file" ]] || ! [[ -f $input_file ]]; then
+      echo "--input not specified" 1>&2
+      exit 1
+    fi
+  fi
+
+  if [[ "$activity" == "" ]]; then
+    activity="$(get_activity_name "$package")"
+    if [[ "$activity" == "" ]]; then
+      echo "Activity name could not be found, invalid package name?" 1>&2
+      exit 1
+    else
+      verbose_print "Activity name inferred: " "$activity"
+    fi
+  fi
+fi
+
+adb root > /dev/null
+
+if [[ ($when == jit) || ($when == aot) ]] && [[ "$(adb shell getenforce)" != "Permissive" ]]; then
+  echo "Disable selinux permissions and restart framework."
+  adb shell setenforce 0
+  adb shell stop
+  adb shell start
+  adb wait-for-device
+fi
+
+# TODO: set performance governor etc, preferrably only once
+# before every single app run.
+
+# Kill everything before running.
+remote_pkill "$package"
+sleep 1
+
+timings_array=()
+
+package_path="$(find_package_path "$package")"
+if [[ $? -ne 0 ]]; then
+  echo "Failed to detect package path for '$package'" >&2
+  exit 1
+fi
+verbose_print "Package was in path '$package_path'"
+
+application_trace_file_path="$package_path/TraceFile.pb"
+trace_file_directory="$package_path"
+if [[ $needs_trace_file == y ]]; then
+  # system server always passes down the package path in a hardcoded spot.
+  if [[ $when == "jit" ]]; then
+    if ! iorapd_compiler_install_trace_file "$package" "$activity" "$input_file"; then
+      echo "Error: Failed to install compiled TraceFile.pb for '$package/$activity'" >&2
+      exit 1
+    fi
+    keep_application_trace_file="y"
+  else
+    echo "TODO: --readahead=aot is non-functional and needs to be fixed." >&2
+    exit 1
+    # otherwise use a temporary directory to get normal non-jit behavior.
+    trace_file_directory="/data/local/tmp/prefetch/$package"
+    adb shell mkdir -p "$trace_file_directory"
+    verbose_print  adb push "$input_file" "$trace_file_directory/TraceFile.pb"
+    adb push "$input_file" "$trace_file_directory/TraceFile.pb"
+  fi
+fi
+
+# Everything other than JIT: remove the trace file,
+# otherwise system server activity hints will kick in
+# and the new just-in-time app pre-warmup will happen.
+if [[ $keep_application_trace_file == "n" ]]; then
+  iorapd_compiler_purge_trace_file "$package" "$activity"
+fi
+
+# Perform AOT readahead/pinning/etc when an application is about to be launched.
+# For JIT readahead, we allow the system to handle it itself (this is a no-op).
+#
+# For warm, cold, etc modes which don't need readahead this is always a no-op.
+perform_aot() {
+  local the_when="$1" # user: aot, jit
+  local the_mode="$2" # warm, cold, fadvise, mlock, etc.
+
+  # iorapd readahead for jit+(mlock/fadvise)
+  if [[ $the_when == "jit" && $the_mode != 'warm' && $the_mode != 'cold' ]]; then
+    iorapd_readahead_enable
+    return 0
+  fi
+
+  if [[ $the_when != "aot" ]]; then
+    # TODO: just in time implementation.. should probably use system server.
+    return 0
+  fi
+
+  # any non-warm/non-cold modes should use the iorap-activity-hint wrapper script.
+  if [[ $the_mode != 'warm' && $the_mode != 'cold' ]]; then
+
+    # TODO: add activity_hint_sender.exp
+    verbose_print "starting with package=$package package_path=$trace_file_directory"
+    coproc hint_sender_fd { $ANDROID_BUILD_TOP/system/iorap/src/sh/activity_hint_sender.exp "$package" "$trace_file_directory" "$the_mode"; }
+    hint_sender_pid=$!
+    verbose_print "Activity hint sender began"
+
+    notification_success="n"
+    while read -r -u "${hint_sender_fd[0]}" hint_sender_output; do
+      verbose_print "$hint_sender_output"
+      if [[ "$hint_sender_output" == "Press any key to send completed event..."* ]]; then
+        verbose_print "WE DID SEE NOTIFICATION SUCCESS."
+        notification_success='y'
+        # Give it some time to actually perform the readaheads.
+        sleep $sleep_time
+        break
+      fi
+    done
+
+    if [[ $notification_success == 'n' ]]; then
+      echo "[FATAL] Activity hint notification failed." 1>&2
+      exit 1
+    fi
+  fi
+}
+
+# Perform cleanup at the end of each loop iteration.
+perform_post_launch_cleanup() {
+  local the_when="$1" # user: aot, jit
+  local the_mode="$2" # warm, cold, fadvise, mlock, etc.
+  local logcat_timestamp="$3"  # timestamp from before am start.
+  local res
+
+  if [[ $the_when != "aot" ]]; then
+    if [[ $the_mode != 'warm' && $the_mode != 'cold' ]]; then
+      # Validate that readahead completes.
+      # If this fails for some reason, then this will also discard the timing of the run.
+      iorapd_readahead_wait_until_finished "$package" "$activity" "$logcat_timestamp" "$timeout"
+      res=$?
+
+      iorapd_readahead_disable
+
+      return $res
+    fi
+    # Don't need to do anything for warm or cold.
+    return 0
+  fi
+
+  # any non-warm/non-cold modes should use the iorap-activity-hint wrapper script.
+  if [[ $the_mode != 'warm' && $the_mode != 'cold' ]]; then
+    # Clean up the hint sender by telling it that the launch was completed,
+    # and to shutdown the watcher.
+    echo "Done\n" >&"${hint_sender_fd[1]}"
+
+    while read -r -u "${hint_sender_fd[0]}" hint_sender_output; do
+      verbose_print "$hint_sender_output"
+    done
+
+    wait $hint_sender_pid
+  fi
+}
+
+configure_compiler_filter() {
+  local the_compiler_filter="$1"
+  local the_package="$2"
+  local the_activity="$3"
+
+  if [[ -z $the_compiler_filter ]]; then
+    verbose_print "No --compiler-filter specified, don't need to force it."
+    return 0
+  fi
+
+  local current_compiler_filter_info="$("$DIR"/query_compiler_filter.py --package "$the_package")"
+  local res=$?
+  if [[ $res -ne 0 ]]; then
+    return $res
+  fi
+
+  local current_compiler_filter
+  local current_reason
+  local current_isa
+  read current_compiler_filter current_reason current_isa <<< "$current_compiler_filter_info"
+
+  verbose_print "Compiler Filter="$current_compiler_filter "Reason="$current_reason "Isa="$current_isa
+
+  # Don't trust reasons that aren't 'unknown' because that means we didn't manually force the compilation filter.
+  # (e.g. if any automatic system-triggered compilations are not unknown).
+  if [[ $current_reason != "unknown" ]] || [[ $current_compiler_filter != $the_compiler_filter ]]; then
+    verbose_print "$DIR"/force_compiler_filter --compiler-filter "$the_compiler_filter" --package "$the_package" --activity "$the_activity"
+    "$DIR"/force_compiler_filter --compiler-filter "$the_compiler_filter" --package "$the_package" --activity "$the_activity"
+    res=$?
+  else
+    verbose_print "Queried compiler-filter matched requested compiler-filter, skip forcing."
+    res=0
+  fi
+
+  return $res
+}
+
+# Ensure the APK is currently compiled with whatever we passed in via --compiler-filter.
+# No-op if this option was not passed in.
+configure_compiler_filter "$compiler_filter" "$package" "$activity" || exit 1
+
+# convert 'a=b\nc=d\ne=f\n...' into 'b,d,f,...'
+parse_metrics_output_string() {
+  # single string with newlines in it.
+  local input="$1"
+
+  local metric_name
+  local metric_value
+  local rest
+
+  local all_metrics=()
+
+  # (n1=v1 n2=v2 n3=v3 ...)
+  readarray -t all_metrics <<< "$input"
+
+  local kv_pair=()
+  local i
+
+  for i in "${all_metrics[@]}"
+  do
+    verbose_print "parse_metrics_output: element '$i'"
+    # name=value
+
+    IFS='=' read -r metric_name metric_value rest <<< "$i"
+
+    verbose_print "parse_metrics_output: metric_value '$metric_value'"
+
+    # (value1 value2 value3 ...)
+    all_metrics+=(${metric_value})
+  done
+
+  # "value1,value2,value3,..."
+  join_by ',' "${all_metrics[@]}"
+}
+
+# convert 'a=b\nc=d\ne=f\n... into b,d,f,...'
+parse_metrics_output() {
+  local metric_name
+  local metric_value
+  local rest
+
+  local all_metrics=()
+
+  while IFS='=' read -r metric_name metric_value rest; do
+    verbose_print "metric: $metric_name, value: $metric_value; rest: $rest"
+    all_metrics+=($metric_value)
+  done
+
+  join_by ',' "${all_metrics[@]}"
+}
+
+# convert 'a=b\nc=d\ne=f\n... into b,d,f,...'
+parse_metrics_header() {
+  local metric_name
+  local metric_value
+  local rest
+
+  local all_metrics=()
+
+  while IFS='=' read -r metric_name metric_value rest; do
+    verbose_print "metric: $metric_name, value: $metric_value; rest: $rest"
+    all_metrics+=($metric_name)
+  done
+
+  join_by ',' "${all_metrics[@]}"
+}
+
+if [[ $report_fully_drawn == y ]]; then
+  metrics_header="$("$DIR/parse_metrics" --package "$package" --activity "$activity" --simulate --reportfullydrawn | parse_metrics_header)"
+else
+  metrics_header="$("$DIR/parse_metrics" --package "$package" --activity "$activity" --simulate | parse_metrics_header)"
+fi
+
+# TODO: This loop logic could probably be moved into app_startup_runner.py
+for ((i=0;i<count;++i)) do
+  verbose_print "=========================================="
+  verbose_print "====         ITERATION $i             ===="
+  verbose_print "=========================================="
+  if [[ $mode != "warm" ]]; then
+    # The package must be killed **before** we drop caches, otherwise pages will stay resident.
+    verbose_print "Kill package for non-warm start."
+    remote_pkill "$package"
+    verbose_print "Drop caches for non-warm start."
+    # Drop all caches to get cold starts.
+    adb shell "echo 3 > /proc/sys/vm/drop_caches"
+  fi
+
+  perform_aot "$when" "$mode"
+
+  verbose_print "Running with timeout $timeout"
+
+  pre_launch_timestamp="$(logcat_save_timestamp)"
+
+  # TODO: multiple metrics output.
+
+if [[ $report_fully_drawn == y ]]; then
+  total_time="$(timeout $timeout "$DIR/launch_application" "$package" "$activity" | "$DIR/parse_metrics" --package "$package" --activity "$activity" --timestamp "$pre_launch_timestamp" --reportfullydrawn | parse_metrics_output)"
+else
+  total_time="$(timeout $timeout "$DIR/launch_application" "$package" "$activity" | "$DIR/parse_metrics" --package "$package" --activity "$activity" --timestamp "$pre_launch_timestamp" | parse_metrics_output)"
+fi
+
+  if [[ $? -ne 0 ]]; then
+    echo "WARNING: Skip bad result, try iteration again." >&2
+    ((i=i-1))
+    continue
+  fi
+
+  perform_post_launch_cleanup "$when" "$mode" "$pre_launch_timestamp"
+
+  if [[ $? -ne 0 ]]; then
+    echo "WARNING: Skip bad cleanup, try iteration again." >&2
+    ((i=i-1))
+    continue
+  fi
+
+  echo "Iteration $i. Total time was: $total_time"
+
+  timings_array+=("$total_time")
+done
+
+# drop the first result which is usually garbage.
+timings_array=("${timings_array[@]:1}")
+
+# Print the CSV header first.
+echo_to_output_file "$metrics_header"
+
+# Print out interactive/debugging timings and averages.
+# Other scripts should use the --output flag and parse the CSV.
+for tim in "${timings_array[@]}"; do
+  echo_to_output_file "$tim"
+done
+
+if [[ x$output != x ]]; then
+  echo " Saved results to '$output'"
+fi
+
+if [[ $needs_trace_file == y ]] ; then
+  iorapd_compiler_purge_trace_file "$package" "$activity"
+fi
+
+# Kill the process to ensure AM isn't keeping it around.
+remote_pkill "$package"
+
+exit 0

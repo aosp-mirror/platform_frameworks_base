@@ -16,7 +16,6 @@
 
 package com.android.settingslib.net;
 
-import static android.app.usage.NetworkStats.Bucket.STATE_ALL;
 import static android.app.usage.NetworkStats.Bucket.STATE_FOREGROUND;
 import static android.net.NetworkStats.TAG_NONE;
 
@@ -31,7 +30,6 @@ import android.app.usage.NetworkStatsManager;
 import android.content.Context;
 import android.net.NetworkPolicy;
 import android.net.NetworkPolicyManager;
-import android.net.NetworkStats;
 import android.net.NetworkTemplate;
 import android.text.format.DateUtils;
 
@@ -41,8 +39,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
-
-import java.util.Set;
 
 @RunWith(RobolectricTestRunner.class)
 public class NetworkCycleDataForUidLoaderTest {
@@ -66,9 +62,7 @@ public class NetworkCycleDataForUidLoaderTest {
         when(mContext.getSystemService(Context.NETWORK_POLICY_SERVICE))
                 .thenReturn(mNetworkPolicyManager);
         when(mNetworkPolicyManager.getNetworkPolicies()).thenReturn(new NetworkPolicy[0]);
-        mNetworkTemplate = new NetworkTemplate.Builder(NetworkTemplate.MATCH_CARRIER)
-                .setMeteredness(NetworkStats.METERED_YES)
-                .setSubscriberIds(Set.of(SUB_ID)).build();
+        mNetworkTemplate = NetworkTemplate.buildTemplateCarrierMetered(SUB_ID);
     }
 
     @Test
@@ -84,6 +78,7 @@ public class NetworkCycleDataForUidLoaderTest {
 
         mLoader.recordUsage(start, end);
 
+        verify(mNetworkStatsManager).queryDetailsForUid(mNetworkTemplate, start, end, uid);
         verify(mNetworkStatsManager).queryDetailsForUidTagState(
                 mNetworkTemplate, start, end, uid, TAG_NONE, STATE_FOREGROUND);
     }
@@ -116,12 +111,9 @@ public class NetworkCycleDataForUidLoaderTest {
 
         mLoader.recordUsage(start, end);
 
-        verify(mNetworkStatsManager).queryDetailsForUidTagState(mNetworkTemplate, start, end, 1,
-                TAG_NONE, STATE_ALL);
-        verify(mNetworkStatsManager).queryDetailsForUidTagState(mNetworkTemplate, start, end, 2,
-                TAG_NONE, STATE_ALL);
-        verify(mNetworkStatsManager).queryDetailsForUidTagState(mNetworkTemplate, start, end, 3,
-                TAG_NONE, STATE_ALL);
+        verify(mNetworkStatsManager).queryDetailsForUid(mNetworkTemplate, start, end, 1);
+        verify(mNetworkStatsManager).queryDetailsForUid(mNetworkTemplate, start, end, 2);
+        verify(mNetworkStatsManager).queryDetailsForUid(mNetworkTemplate, start, end, 3);
     }
 
 }

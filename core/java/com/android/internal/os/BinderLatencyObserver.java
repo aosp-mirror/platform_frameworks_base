@@ -19,6 +19,7 @@ package com.android.internal.os;
 import android.annotation.Nullable;
 import android.os.Binder;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.SystemClock;
 import android.util.ArrayMap;
 import android.util.Slog;
@@ -180,7 +181,7 @@ public class BinderLatencyObserver {
         }
 
         public Handler getHandler() {
-            return BackgroundThread.getHandler();
+            return new Handler(Looper.getMainLooper());
         }
     }
 

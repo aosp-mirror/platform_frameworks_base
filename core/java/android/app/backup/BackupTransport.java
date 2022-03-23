@@ -25,11 +25,6 @@ import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 
 import com.android.internal.backup.IBackupTransport;
-import com.android.internal.backup.ITransportStatusCallback;
-import com.android.internal.infra.AndroidFuture;
-
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * Concrete class that provides a stable-API bridge between IBackupTransport
@@ -664,185 +659,141 @@ public class BackupTransport {
     class TransportImpl extends IBackupTransport.Stub {
 
         @Override
-        public void name(AndroidFuture<String> resultFuture) throws RemoteException {
-            String result = BackupTransport.this.name();
-            resultFuture.complete(result);
+        public String name() throws RemoteException {
+            return BackupTransport.this.name();
         }
 
         @Override
-        public void configurationIntent(AndroidFuture<Intent> resultFuture)
+        public Intent configurationIntent() throws RemoteException {
+            return BackupTransport.this.configurationIntent();
+        }
+
+        @Override
+        public String currentDestinationString() throws RemoteException {
+            return BackupTransport.this.currentDestinationString();
+        }
+
+        @Override
+        public Intent dataManagementIntent() {
+            return BackupTransport.this.dataManagementIntent();
+        }
+
+        @Override
+        public CharSequence dataManagementIntentLabel() {
+            return BackupTransport.this.dataManagementIntentLabel();
+        }
+
+        @Override
+        public String transportDirName() throws RemoteException {
+            return BackupTransport.this.transportDirName();
+        }
+
+        @Override
+        public long requestBackupTime() throws RemoteException {
+            return BackupTransport.this.requestBackupTime();
+        }
+
+        @Override
+        public int initializeDevice() throws RemoteException {
+            return BackupTransport.this.initializeDevice();
+        }
+
+        @Override
+        public int performBackup(PackageInfo packageInfo, ParcelFileDescriptor inFd, int flags)
                 throws RemoteException {
-            Intent result = BackupTransport.this.configurationIntent();
-            resultFuture.complete(result);
+            return BackupTransport.this.performBackup(packageInfo, inFd, flags);
         }
 
         @Override
-        public void currentDestinationString(AndroidFuture<String> resultFuture)
-                throws RemoteException {
-            String result = BackupTransport.this.currentDestinationString();
-            resultFuture.complete(result);
+        public int clearBackupData(PackageInfo packageInfo) throws RemoteException {
+            return BackupTransport.this.clearBackupData(packageInfo);
         }
 
         @Override
-        public void dataManagementIntent(AndroidFuture<Intent> resultFuture)
-                throws RemoteException {
-            Intent result = BackupTransport.this.dataManagementIntent();
-            resultFuture.complete(result);
+        public int finishBackup() throws RemoteException {
+            return BackupTransport.this.finishBackup();
         }
 
         @Override
-        public void dataManagementIntentLabel(AndroidFuture<CharSequence> resultFuture)
-                throws RemoteException {
-            CharSequence result = BackupTransport.this.dataManagementIntentLabel();
-            resultFuture.complete(result);
+        public RestoreSet[] getAvailableRestoreSets() throws RemoteException {
+            return BackupTransport.this.getAvailableRestoreSets();
         }
 
         @Override
-        public void transportDirName(AndroidFuture<String> resultFuture) throws RemoteException {
-            String result = BackupTransport.this.transportDirName();
-            resultFuture.complete(result);
+        public long getCurrentRestoreSet() throws RemoteException {
+            return BackupTransport.this.getCurrentRestoreSet();
         }
 
         @Override
-        public void requestBackupTime(AndroidFuture<Long> resultFuture) throws RemoteException {
-            long result = BackupTransport.this.requestBackupTime();
-            resultFuture.complete(result);
+        public int startRestore(long token, PackageInfo[] packages) throws RemoteException {
+            return BackupTransport.this.startRestore(token, packages);
         }
 
         @Override
-        public void initializeDevice(ITransportStatusCallback callback) throws RemoteException {
-            int result = BackupTransport.this.initializeDevice();
-            callback.onOperationCompleteWithStatus(result);
+        public RestoreDescription nextRestorePackage() throws RemoteException {
+            return BackupTransport.this.nextRestorePackage();
         }
 
         @Override
-        public void performBackup(PackageInfo packageInfo, ParcelFileDescriptor inFd, int flags,
-                ITransportStatusCallback callback) throws RemoteException {
-            int result = BackupTransport.this.performBackup(packageInfo, inFd, flags);
-            callback.onOperationCompleteWithStatus(result);
+        public int getRestoreData(ParcelFileDescriptor outFd) throws RemoteException {
+            return BackupTransport.this.getRestoreData(outFd);
         }
 
         @Override
-        public void clearBackupData(PackageInfo packageInfo, ITransportStatusCallback callback)
-                throws RemoteException {
-            int result = BackupTransport.this.clearBackupData(packageInfo);
-            callback.onOperationCompleteWithStatus(result);
-        }
-
-        @Override
-        public void finishBackup(ITransportStatusCallback callback) throws RemoteException {
-            int result = BackupTransport.this.finishBackup();
-            callback.onOperationCompleteWithStatus(result);
-        }
-
-        @Override
-        public void getAvailableRestoreSets(AndroidFuture<List<RestoreSet>> resultFuture)
-                throws RemoteException {
-            RestoreSet[] result = BackupTransport.this.getAvailableRestoreSets();
-            resultFuture.complete(Arrays.asList(result));
-        }
-
-        @Override
-        public void getCurrentRestoreSet(AndroidFuture<Long> resultFuture)
-                throws RemoteException {
-            long result = BackupTransport.this.getCurrentRestoreSet();
-            resultFuture.complete(result);
-        }
-
-        @Override
-        public void startRestore(long token, PackageInfo[] packages,
-                ITransportStatusCallback callback)  throws RemoteException {
-            int result = BackupTransport.this.startRestore(token, packages);
-            callback.onOperationCompleteWithStatus(result);
-        }
-
-        @Override
-        public void nextRestorePackage(AndroidFuture<RestoreDescription> resultFuture)
-                throws RemoteException {
-            RestoreDescription result = BackupTransport.this.nextRestorePackage();
-            resultFuture.complete(result);
-        }
-
-        @Override
-        public void getRestoreData(ParcelFileDescriptor outFd,
-                ITransportStatusCallback callback) throws RemoteException {
-            int result = BackupTransport.this.getRestoreData(outFd);
-            callback.onOperationCompleteWithStatus(result);
-        }
-
-        @Override
-        public void finishRestore(ITransportStatusCallback callback)
-                throws RemoteException {
+        public void finishRestore() throws RemoteException {
             BackupTransport.this.finishRestore();
-            callback.onOperationComplete();
         }
 
         @Override
-        public void requestFullBackupTime(AndroidFuture<Long> resultFuture)
-                throws RemoteException {
-            long result = BackupTransport.this.requestFullBackupTime();
-            resultFuture.complete(result);
+        public long requestFullBackupTime() throws RemoteException {
+            return BackupTransport.this.requestFullBackupTime();
         }
 
         @Override
-        public void performFullBackup(PackageInfo targetPackage, ParcelFileDescriptor socket,
-                int flags, ITransportStatusCallback callback) throws RemoteException {
-            int result = BackupTransport.this.performFullBackup(targetPackage, socket, flags);
-            callback.onOperationCompleteWithStatus(result);
+        public int performFullBackup(PackageInfo targetPackage, ParcelFileDescriptor socket,
+                int flags) throws RemoteException {
+            return BackupTransport.this.performFullBackup(targetPackage, socket, flags);
         }
 
         @Override
-        public void checkFullBackupSize(long size, ITransportStatusCallback callback)
-                throws RemoteException {
-            int result = BackupTransport.this.checkFullBackupSize(size);
-            callback.onOperationCompleteWithStatus(result);
+        public int checkFullBackupSize(long size) {
+            return BackupTransport.this.checkFullBackupSize(size);
         }
 
         @Override
-        public void sendBackupData(int numBytes, ITransportStatusCallback callback)
-                throws RemoteException {
-            int result = BackupTransport.this.sendBackupData(numBytes);
-            callback.onOperationCompleteWithStatus(result);
+        public int sendBackupData(int numBytes) throws RemoteException {
+            return BackupTransport.this.sendBackupData(numBytes);
         }
 
         @Override
-        public void cancelFullBackup(ITransportStatusCallback callback) throws RemoteException {
+        public void cancelFullBackup() throws RemoteException {
             BackupTransport.this.cancelFullBackup();
-            callback.onOperationComplete();
         }
 
         @Override
-        public void isAppEligibleForBackup(PackageInfo targetPackage, boolean isFullBackup,
-                AndroidFuture<Boolean> resultFuture) throws RemoteException {
-            boolean result = BackupTransport.this.isAppEligibleForBackup(targetPackage,
-                    isFullBackup);
-            resultFuture.complete(result);
+        public boolean isAppEligibleForBackup(PackageInfo targetPackage, boolean isFullBackup)
+                throws RemoteException {
+            return BackupTransport.this.isAppEligibleForBackup(targetPackage, isFullBackup);
         }
 
         @Override
-        public void getBackupQuota(String packageName, boolean isFullBackup,
-                AndroidFuture<Long> resultFuture) throws RemoteException {
-            long result = BackupTransport.this.getBackupQuota(packageName, isFullBackup);
-            resultFuture.complete(result);
+        public long getBackupQuota(String packageName, boolean isFullBackup) {
+            return BackupTransport.this.getBackupQuota(packageName, isFullBackup);
         }
 
         @Override
-        public void getTransportFlags(AndroidFuture<Integer> resultFuture) throws RemoteException {
-            int result = BackupTransport.this.getTransportFlags();
-            resultFuture.complete(result);
+        public int getTransportFlags() {
+            return BackupTransport.this.getTransportFlags();
         }
 
         @Override
-        public void getNextFullRestoreDataChunk(ParcelFileDescriptor socket,
-                ITransportStatusCallback callback) throws RemoteException {
-            int result = BackupTransport.this.getNextFullRestoreDataChunk(socket);
-            callback.onOperationCompleteWithStatus(result);
+        public int getNextFullRestoreDataChunk(ParcelFileDescriptor socket) {
+            return BackupTransport.this.getNextFullRestoreDataChunk(socket);
         }
 
         @Override
-        public void abortFullRestore(ITransportStatusCallback callback) throws RemoteException {
-            int result = BackupTransport.this.abortFullRestore();
-            callback.onOperationCompleteWithStatus(result);
+        public int abortFullRestore() {
+            return BackupTransport.this.abortFullRestore();
         }
     }
 }

@@ -34,7 +34,6 @@ import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.app.admin.DeviceAdminReceiver;
 import android.app.admin.DevicePolicyManager;
-import android.app.role.RoleManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -42,7 +41,6 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.os.Binder;
 import android.util.ArraySet;
 import android.util.IndentingPrintWriter;
 import android.view.inputmethod.InputMethodInfo;
@@ -93,8 +91,6 @@ public class OverlayPackagesProvider {
         List<InputMethodInfo> getInputMethodListAsUser(@UserIdInt int userId);
 
         String getActiveApexPackageNameContainingPackage(String packageName);
-
-        String getDevicePolicyManagementRoleHolderPackageName(Context context);
     }
 
     private static final class DefaultInjector implements Injector {
@@ -107,19 +103,6 @@ public class OverlayPackagesProvider {
         @Override
         public String getActiveApexPackageNameContainingPackage(String packageName) {
             return ApexManager.getInstance().getActiveApexPackageNameContainingPackage(packageName);
-        }
-
-        @Override
-        public String getDevicePolicyManagementRoleHolderPackageName(Context context) {
-            return Binder.withCleanCallingIdentity(() -> {
-                RoleManager roleManager = context.getSystemService(RoleManager.class);
-                List<String> roleHolders =
-                        roleManager.getRoleHolders(RoleManager.ROLE_DEVICE_POLICY_MANAGEMENT);
-                if (roleHolders.isEmpty()) {
-                    return null;
-                }
-                return roleHolders.get(0);
-            });
         }
     }
 
@@ -159,18 +142,7 @@ public class OverlayPackagesProvider {
         nonRequiredApps.addAll(getDisallowedApps(provisioningAction));
         nonRequiredApps.removeAll(
                 getRequiredAppsMainlineModules(nonRequiredApps, provisioningAction));
-        nonRequiredApps.removeAll(getDeviceManagerRoleHolders());
         return nonRequiredApps;
-    }
-
-    private Set<String> getDeviceManagerRoleHolders() {
-        HashSet<String> result = new HashSet<>();
-        String deviceManagerRoleHolderPackageName =
-                mInjector.getDevicePolicyManagementRoleHolderPackageName(mContext);
-        if (deviceManagerRoleHolderPackageName != null) {
-            result.add(deviceManagerRoleHolderPackageName);
-        }
-        return result;
     }
 
     /**

@@ -18,7 +18,6 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="prompt" msgid="3183836924226407828">"Ombi la muunganisho"</string>
     <string name="warning" msgid="809658604548412033">"<xliff:g id="APP">%s</xliff:g> inataka kusanidi muunganisho wa VPN utakaoiruhusu kufuatilia shughuli kwenye mtandao. Kubali ikiwa tu unakiamini chanzo. &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; huonekana sehemu ya juu ya skrini yako VPN inapofanya kazi."</string>
-    <string name="warning" product="tv" msgid="5188957997628124947">"<xliff:g id="APP">%s</xliff:g> inagependa kuweka mipangilio ya muunganisho wa VPN inayoiruhusu kufuatilia trafiki ya mtandao. Kubali tu iwapo unaamini chanzo. &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; huonekana kwenye skrini yako VPN inapotumika."</string>
     <string name="legacy_title" msgid="192936250066580964">"VPN imeunganishwa"</string>
     <string name="session" msgid="6470628549473641030">"Kipindi:"</string>
     <string name="duration" msgid="3584782459928719435">"Muda:"</string>

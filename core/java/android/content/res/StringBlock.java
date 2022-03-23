@@ -16,9 +16,8 @@
 
 package android.content.res;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.ActivityThread;
-import android.app.Application;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -239,10 +238,7 @@ public final class StringBlock implements Closeable {
 
 
             if (type == ids.boldId) {
-                Application application = ActivityThread.currentApplication();
-                int fontWeightAdjustment =
-                        application.getResources().getConfiguration().fontWeightAdjustment;
-                buffer.setSpan(new StyleSpan(Typeface.BOLD, fontWeightAdjustment),
+                buffer.setSpan(new StyleSpan(Typeface.BOLD),
                                style[i+1], style[i+2]+1,
                                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             } else if (type == ids.italicId) {

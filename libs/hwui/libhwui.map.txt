@@ -1,4 +1,4 @@
-LIBHWUI { # platform-only /* HWUI isn't current a module, so all of these are still platform-only */
+LIBHWUI {
   global:
     /* listing of all C APIs to be exposed by libhwui to consumers outside of the module */
     ABitmap_getInfoFromJava;
@@ -28,7 +28,6 @@ LIBHWUI { # platform-only /* HWUI isn't current a module, so all of these are st
     register_android_graphics_GraphicsStatsService;
     zygote_preload_graphics;
     AMatrix_getContents;
-    AMatrix_newInstance;
     APaint_createPaint;
     APaint_destroyPaint;
     APaint_setBlendMode;
@@ -39,6 +38,7 @@ LIBHWUI { # platform-only /* HWUI isn't current a module, so all of these are st
     ARegionIterator_next;
     ARegionIterator_getRect;
     ARegionIterator_getTotalBounds;
+    ARenderThread_dumpGraphicsMemory;
   local:
     *;
 };

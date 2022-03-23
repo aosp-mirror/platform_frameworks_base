@@ -20,7 +20,6 @@ import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemService;
-import android.annotation.UserHandleAware;
 import android.annotation.UserIdInt;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
@@ -115,7 +114,6 @@ public final class TextServicesManager {
      * @throws ServiceNotFoundException When {@link TextServicesManager} is not available.
      * @hide
      */
-    @UserHandleAware
     @NonNull
     public static TextServicesManager createInstance(@NonNull Context context)
             throws ServiceNotFoundException {
@@ -180,7 +178,6 @@ public final class TextServicesManager {
      * languages in settings will be returned.
      * @return a spell checker session of the spell checker
      */
-    @UserHandleAware
     @Nullable
     public SpellCheckerSession newSpellCheckerSession(@Nullable Bundle bundle,
             @Nullable Locale locale,
@@ -211,7 +208,6 @@ public final class TextServicesManager {
      * @param listener a spell checker session lister for getting results from the spell checker.
      * @return The spell checker session of the spell checker.
      */
-    @UserHandleAware
     @Nullable
     public SpellCheckerSession newSpellCheckerSession(
             @NonNull SpellCheckerSessionParams params,
@@ -287,7 +283,6 @@ public final class TextServicesManager {
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553,
             publicAlternatives = "Use {@link #getEnabledSpellCheckerInfos()} instead.")
-    @UserHandleAware
     public SpellCheckerInfo[] getEnabledSpellCheckers() {
         try {
             final SpellCheckerInfo[] retval = mService.getEnabledSpellCheckers(mUserId);
@@ -305,7 +300,6 @@ public final class TextServicesManager {
      *
      * @return The list of currently enabled spell checkers.
      */
-    @UserHandleAware
     @NonNull
     public List<SpellCheckerInfo> getEnabledSpellCheckerInfos() {
         final SpellCheckerInfo[] enabledSpellCheckers = getEnabledSpellCheckers();
@@ -318,7 +312,6 @@ public final class TextServicesManager {
      *
      * @return The current active spell checker info.
      */
-    @UserHandleAware
     @Nullable
     public SpellCheckerInfo getCurrentSpellCheckerInfo() {
         try {
@@ -335,7 +328,6 @@ public final class TextServicesManager {
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R,
             publicAlternatives = "Use {@link #getCurrentSpellCheckerInfo()} instead.")
-    @UserHandleAware
     @Nullable
     public SpellCheckerInfo getCurrentSpellChecker() {
         return getCurrentSpellCheckerInfo();
@@ -351,7 +343,6 @@ public final class TextServicesManager {
      * @hide
      */
     @UnsupportedAppUsage
-    @UserHandleAware
     @Nullable
     public SpellCheckerSubtype getCurrentSpellCheckerSubtype(
             boolean allowImplicitlySelectedSubtype) {
@@ -367,7 +358,6 @@ public final class TextServicesManager {
      *
      * @return {@code true} if spell checker is enabled, {@code false} otherwise.
      */
-    @UserHandleAware
     public boolean isSpellCheckerEnabled() {
         try {
             return mService.isSpellCheckerEnabled(mUserId);
@@ -376,7 +366,6 @@ public final class TextServicesManager {
         }
     }
 
-    @UserHandleAware
     void finishSpellCheckerService(ISpellCheckerSessionListener listener) {
         try {
             mService.finishSpellCheckerService(mUserId, listener);

@@ -293,10 +293,7 @@ public interface IBinder {
      *
      * @return Returns the result from {@link Binder#onTransact}.  A successful call
      * generally returns true; false generally means the transaction code was not
-     * understood.  For a oneway call to a different process false should never be
-     * returned.  If a oneway call is made to code in the same process (usually to
-     * a C++ or Rust implementation), then there are no oneway semantics, and
-     * false can still be returned.
+     * understood.
      */
     public boolean transact(int code, @NonNull Parcel data, @Nullable Parcel reply, int flags)
         throws RemoteException;

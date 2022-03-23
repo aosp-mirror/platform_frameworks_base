@@ -16,14 +16,12 @@ package com.android.systemui.qs.tileimpl;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.animation.ArgbEvaluator;
-import android.animation.PropertyValuesHolder;
 import android.animation.ValueAnimator;
-import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.graphics.drawable.Animatable2;
 import android.graphics.drawable.Animatable2.AnimationCallback;
 import android.graphics.drawable.Drawable;
@@ -51,10 +49,7 @@ public class QSIconViewImpl extends QSIconView {
     private boolean mAnimationEnabled = true;
     private int mState = -1;
     private int mTint;
-    @Nullable
     private QSTile.Icon mLastIcon;
-
-    private ValueAnimator mColorAnimator = new ValueAnimator();
 
     public QSIconViewImpl(Context context) {
         super(context);
@@ -64,7 +59,6 @@ public class QSIconViewImpl extends QSIconView {
 
         mIcon = createIcon();
         addView(mIcon);
-        mColorAnimator.setDuration(QS_ANIM_LENGTH);
     }
 
     @Override
@@ -122,9 +116,6 @@ public class QSIconViewImpl extends QSIconView {
                     : icon.getInvisibleDrawable(mContext) : null;
             int padding = icon != null ? icon.getPadding() : 0;
             if (d != null) {
-                if (d.getConstantState() != null) {
-                    d = d.getConstantState().newDrawable();
-                }
                 d.setAutoMirrored(false);
                 d.setLayoutDirection(getLayoutDirection());
             }
@@ -169,6 +160,7 @@ public class QSIconViewImpl extends QSIconView {
             mState = state.state;
             if (mTint != 0 && allowAnimations && shouldAnimate(iv)) {
                 animateGrayScale(mTint, color, iv, () -> updateIcon(iv, state, allowAnimations));
+                mTint = color;
             } else {
                 if (iv instanceof AlphaControlledSlashImageView) {
                     ((AlphaControlledSlashImageView)iv)
@@ -176,6 +168,7 @@ public class QSIconViewImpl extends QSIconView {
                 } else {
                     setTint(iv, color);
                 }
+                mTint = color;
                 updateIcon(iv, state, allowAnimations);
             }
         } else {
@@ -193,29 +186,38 @@ public class QSIconViewImpl extends QSIconView {
             ((AlphaControlledSlashImageView)iv)
                     .setFinalImageTintList(ColorStateList.valueOf(toColor));
         }
-        mColorAnimator.cancel();
         if (mAnimationEnabled && ValueAnimator.areAnimatorsEnabled()) {
-            PropertyValuesHolder values = PropertyValuesHolder.ofInt("color", fromColor, toColor);
-            values.setEvaluator(ArgbEvaluator.getInstance());
-            mColorAnimator.setValues(values);
-            mColorAnimator.removeAllListeners();
-            mColorAnimator.addUpdateListener(animation -> {
-                setTint(iv, (int) animation.getAnimatedValue());
+            final float fromAlpha = Color.alpha(fromColor);
+            final float toAlpha = Color.alpha(toColor);
+            final float fromChannel = Color.red(fromColor);
+            final float toChannel = Color.red(toColor);
+
+            ValueAnimator anim = ValueAnimator.ofFloat(0, 1);
+            anim.setDuration(QS_ANIM_LENGTH);
+            anim.addUpdateListener(animation -> {
+                float fraction = animation.getAnimatedFraction();
+                int alpha = (int) (fromAlpha + (toAlpha - fromAlpha) * fraction);
+                int channel = (int) (fromChannel + (toChannel - fromChannel) * fraction);
+
+                setTint(iv, Color.argb(alpha, channel, channel, channel));
             });
-            mColorAnimator.addListener(new EndRunnableAnimatorListener(endRunnable));
-
-            mColorAnimator.start();
+            anim.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    endRunnable.run();
+                }
+            });
+            anim.start();
         } else {
-
             setTint(iv, toColor);
             endRunnable.run();
         }
     }
 
-    public void setTint(ImageView iv, int color) {
+    public static void setTint(ImageView iv, int color) {
         iv.setImageTintList(ColorStateList.valueOf(color));
-        mTint = color;
     }
+
 
     protected int getIconMeasureMode() {
         return MeasureSpec.EXACTLY;
@@ -248,31 +250,10 @@ public class QSIconViewImpl extends QSIconView {
                 return Utils.getColorAttrDefaultColor(context, android.R.attr.textColorPrimary);
             case Tile.STATE_ACTIVE:
                 return Utils.getColorAttrDefaultColor(context,
-                        com.android.internal.R.attr.textColorOnAccent);
+                        android.R.attr.textColorPrimaryInverse);
             default:
                 Log.e("QSIconView", "Invalid state " + state);
                 return 0;
-        }
-    }
-
-    private static class EndRunnableAnimatorListener extends AnimatorListenerAdapter {
-        private Runnable mRunnable;
-
-        EndRunnableAnimatorListener(Runnable endRunnable) {
-            super();
-            mRunnable = endRunnable;
-        }
-
-        @Override
-        public void onAnimationCancel(Animator animation) {
-            super.onAnimationCancel(animation);
-            mRunnable.run();
-        }
-
-        @Override
-        public void onAnimationEnd(Animator animation) {
-            super.onAnimationEnd(animation);
-            mRunnable.run();
         }
     }
 }

@@ -34,6 +34,7 @@ import android.net.ProxyInfo;
 import android.net.TrafficStats;
 import android.net.Uri;
 import android.os.Handler;
+import android.os.HandlerExecutor;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.RemoteCallbackList;
@@ -41,7 +42,6 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
-import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Log;
 
@@ -192,7 +192,7 @@ public class PacProxyService extends IPacProxyManager.Stub {
     }
 
     /**
-     * Updates the PAC Proxy Service with current Proxy information. This is called by
+     * Updates the PAC Proxy Installer with current Proxy information. This is called by
      * the ProxyTracker through PacProxyManager before a broadcast takes place to allow
      * the PacProxyService to indicate that the broadcast should not be sent and the
      * PacProxyService will trigger a new broadcast when it is ready.
@@ -357,9 +357,8 @@ public class PacProxyService extends IPacProxyManager.Stub {
                 }
             }
         };
-        mContext.bindServiceAsUser(intent, mConnection,
-                Context.BIND_AUTO_CREATE | Context.BIND_NOT_FOREGROUND | Context.BIND_NOT_VISIBLE,
-                UserHandle.SYSTEM);
+        mContext.bindService(intent, mConnection,
+                Context.BIND_AUTO_CREATE | Context.BIND_NOT_FOREGROUND | Context.BIND_NOT_VISIBLE);
 
         intent = new Intent();
         intent.setClassName(PROXY_PACKAGE, PROXY_SERVICE);
@@ -399,9 +398,9 @@ public class PacProxyService extends IPacProxyManager.Stub {
                 }
             }
         };
-        mContext.bindServiceAsUser(intent, mProxyConnection,
+        mContext.bindService(intent,
                 Context.BIND_AUTO_CREATE | Context.BIND_NOT_FOREGROUND | Context.BIND_NOT_VISIBLE,
-                mNetThreadHandler, UserHandle.SYSTEM);
+                new HandlerExecutor(mNetThreadHandler), mProxyConnection);
     }
 
     private void unbind() {

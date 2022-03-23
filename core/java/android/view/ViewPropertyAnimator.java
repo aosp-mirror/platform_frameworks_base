@@ -20,8 +20,6 @@ import android.animation.Animator;
 import android.animation.TimeInterpolator;
 import android.animation.ValueAnimator;
 import android.annotation.FloatRange;
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.graphics.RenderNode;
 
 import java.util.ArrayList;
@@ -248,7 +246,7 @@ public class ViewPropertyAnimator {
      *
      * @param view The View associated with this ViewPropertyAnimator
      */
-    ViewPropertyAnimator(@NonNull View view) {
+    ViewPropertyAnimator(View view) {
         mView = view;
         view.ensureTransformationInfo();
     }
@@ -261,7 +259,7 @@ public class ViewPropertyAnimator {
      * cannot be negative.
      * @return This object, allowing calls to methods in this class to be chained.
      */
-    public @NonNull ViewPropertyAnimator setDuration(long duration) {
+    public ViewPropertyAnimator setDuration(long duration) {
         if (duration < 0) {
             throw new IllegalArgumentException("Animators cannot have negative duration: " +
                     duration);
@@ -318,7 +316,7 @@ public class ViewPropertyAnimator {
      * cannot be negative.
      * @return This object, allowing calls to methods in this class to be chained.
      */
-    public @NonNull ViewPropertyAnimator setStartDelay(long startDelay) {
+    public ViewPropertyAnimator setStartDelay(long startDelay) {
         if (startDelay < 0) {
             throw new IllegalArgumentException("Animators cannot have negative start " +
                 "delay: " + startDelay);
@@ -337,7 +335,7 @@ public class ViewPropertyAnimator {
      * of <code>null</code> will result in linear interpolation.
      * @return This object, allowing calls to methods in this class to be chained.
      */
-    public @NonNull ViewPropertyAnimator setInterpolator(TimeInterpolator interpolator) {
+    public ViewPropertyAnimator setInterpolator(TimeInterpolator interpolator) {
         mInterpolatorSet = true;
         mInterpolator = interpolator;
         return this;
@@ -348,7 +346,7 @@ public class ViewPropertyAnimator {
      *
      * @return The timing interpolator for this animation.
      */
-    public @Nullable TimeInterpolator getInterpolator() {
+    public TimeInterpolator getInterpolator() {
         if (mInterpolatorSet) {
             return mInterpolator;
         } else {
@@ -371,12 +369,12 @@ public class ViewPropertyAnimator {
      * <code>null</code> removes any existing listener.
      * @return This object, allowing calls to methods in this class to be chained.
      */
-    public @NonNull ViewPropertyAnimator setListener(@Nullable Animator.AnimatorListener listener) {
+    public ViewPropertyAnimator setListener(Animator.AnimatorListener listener) {
         mListener = listener;
         return this;
     }
 
-    @Nullable Animator.AnimatorListener getListener() {
+    Animator.AnimatorListener getListener() {
         return mListener;
     }
 
@@ -394,13 +392,12 @@ public class ViewPropertyAnimator {
      * <code>null</code> removes any existing listener.
      * @return This object, allowing calls to methods in this class to be chained.
      */
-    public @NonNull ViewPropertyAnimator setUpdateListener(
-            @Nullable ValueAnimator.AnimatorUpdateListener listener) {
+    public ViewPropertyAnimator setUpdateListener(ValueAnimator.AnimatorUpdateListener listener) {
         mUpdateListener = listener;
         return this;
     }
 
-    @Nullable ValueAnimator.AnimatorUpdateListener getUpdateListener() {
+    ValueAnimator.AnimatorUpdateListener getUpdateListener() {
         return mUpdateListener;
     }
 
@@ -444,7 +441,7 @@ public class ViewPropertyAnimator {
      * @see View#setX(float)
      * @return This object, allowing calls to methods in this class to be chained.
      */
-    public @NonNull ViewPropertyAnimator x(float value) {
+    public ViewPropertyAnimator x(float value) {
         animateProperty(X, value);
         return this;
     }
@@ -457,7 +454,7 @@ public class ViewPropertyAnimator {
      * @see View#setX(float)
      * @return This object, allowing calls to methods in this class to be chained.
      */
-    public @NonNull ViewPropertyAnimator xBy(float value) {
+    public ViewPropertyAnimator xBy(float value) {
         animatePropertyBy(X, value);
         return this;
     }
@@ -470,7 +467,7 @@ public class ViewPropertyAnimator {
      * @see View#setY(float)
      * @return This object, allowing calls to methods in this class to be chained.
      */
-    public @NonNull ViewPropertyAnimator y(float value) {
+    public ViewPropertyAnimator y(float value) {
         animateProperty(Y, value);
         return this;
     }
@@ -483,7 +480,7 @@ public class ViewPropertyAnimator {
      * @see View#setY(float)
      * @return This object, allowing calls to methods in this class to be chained.
      */
-    public @NonNull ViewPropertyAnimator yBy(float value) {
+    public ViewPropertyAnimator yBy(float value) {
         animatePropertyBy(Y, value);
         return this;
     }
@@ -496,7 +493,7 @@ public class ViewPropertyAnimator {
      * @see View#setZ(float)
      * @return This object, allowing calls to methods in this class to be chained.
      */
-    public @NonNull ViewPropertyAnimator z(float value) {
+    public ViewPropertyAnimator z(float value) {
         animateProperty(Z, value);
         return this;
     }
@@ -509,7 +506,7 @@ public class ViewPropertyAnimator {
      * @see View#setZ(float)
      * @return This object, allowing calls to methods in this class to be chained.
      */
-    public @NonNull ViewPropertyAnimator zBy(float value) {
+    public ViewPropertyAnimator zBy(float value) {
         animatePropertyBy(Z, value);
         return this;
     }
@@ -522,7 +519,7 @@ public class ViewPropertyAnimator {
      * @see View#setRotation(float)
      * @return This object, allowing calls to methods in this class to be chained.
      */
-    public @NonNull ViewPropertyAnimator rotation(float value) {
+    public ViewPropertyAnimator rotation(float value) {
         animateProperty(ROTATION, value);
         return this;
     }
@@ -535,7 +532,7 @@ public class ViewPropertyAnimator {
      * @see View#setRotation(float)
      * @return This object, allowing calls to methods in this class to be chained.
      */
-    public @NonNull ViewPropertyAnimator rotationBy(float value) {
+    public ViewPropertyAnimator rotationBy(float value) {
         animatePropertyBy(ROTATION, value);
         return this;
     }
@@ -548,7 +545,7 @@ public class ViewPropertyAnimator {
      * @see View#setRotationX(float)
      * @return This object, allowing calls to methods in this class to be chained.
      */
-    public @NonNull ViewPropertyAnimator rotationX(float value) {
+    public ViewPropertyAnimator rotationX(float value) {
         animateProperty(ROTATION_X, value);
         return this;
     }
@@ -561,7 +558,7 @@ public class ViewPropertyAnimator {
      * @see View#setRotationX(float)
      * @return This object, allowing calls to methods in this class to be chained.
      */
-    public @NonNull ViewPropertyAnimator rotationXBy(float value) {
+    public ViewPropertyAnimator rotationXBy(float value) {
         animatePropertyBy(ROTATION_X, value);
         return this;
     }
@@ -574,7 +571,7 @@ public class ViewPropertyAnimator {
      * @see View#setRotationY(float)
      * @return This object, allowing calls to methods in this class to be chained.
      */
-    public @NonNull ViewPropertyAnimator rotationY(float value) {
+    public ViewPropertyAnimator rotationY(float value) {
         animateProperty(ROTATION_Y, value);
         return this;
     }
@@ -587,7 +584,7 @@ public class ViewPropertyAnimator {
      * @see View#setRotationY(float)
      * @return This object, allowing calls to methods in this class to be chained.
      */
-    public @NonNull ViewPropertyAnimator rotationYBy(float value) {
+    public ViewPropertyAnimator rotationYBy(float value) {
         animatePropertyBy(ROTATION_Y, value);
         return this;
     }
@@ -600,7 +597,7 @@ public class ViewPropertyAnimator {
      * @see View#setTranslationX(float)
      * @return This object, allowing calls to methods in this class to be chained.
      */
-    public @NonNull ViewPropertyAnimator translationX(float value) {
+    public ViewPropertyAnimator translationX(float value) {
         animateProperty(TRANSLATION_X, value);
         return this;
     }
@@ -613,7 +610,7 @@ public class ViewPropertyAnimator {
      * @see View#setTranslationX(float)
      * @return This object, allowing calls to methods in this class to be chained.
      */
-    public @NonNull ViewPropertyAnimator translationXBy(float value) {
+    public ViewPropertyAnimator translationXBy(float value) {
         animatePropertyBy(TRANSLATION_X, value);
         return this;
     }
@@ -626,7 +623,7 @@ public class ViewPropertyAnimator {
      * @see View#setTranslationY(float)
      * @return This object, allowing calls to methods in this class to be chained.
      */
-    public @NonNull ViewPropertyAnimator translationY(float value) {
+    public ViewPropertyAnimator translationY(float value) {
         animateProperty(TRANSLATION_Y, value);
         return this;
     }
@@ -639,7 +636,7 @@ public class ViewPropertyAnimator {
      * @see View#setTranslationY(float)
      * @return This object, allowing calls to methods in this class to be chained.
      */
-    public @NonNull ViewPropertyAnimator translationYBy(float value) {
+    public ViewPropertyAnimator translationYBy(float value) {
         animatePropertyBy(TRANSLATION_Y, value);
         return this;
     }
@@ -652,7 +649,7 @@ public class ViewPropertyAnimator {
      * @see View#setTranslationZ(float)
      * @return This object, allowing calls to methods in this class to be chained.
      */
-    public @NonNull ViewPropertyAnimator translationZ(float value) {
+    public ViewPropertyAnimator translationZ(float value) {
         animateProperty(TRANSLATION_Z, value);
         return this;
     }
@@ -665,7 +662,7 @@ public class ViewPropertyAnimator {
      * @see View#setTranslationZ(float)
      * @return This object, allowing calls to methods in this class to be chained.
      */
-    public @NonNull ViewPropertyAnimator translationZBy(float value) {
+    public ViewPropertyAnimator translationZBy(float value) {
         animatePropertyBy(TRANSLATION_Z, value);
         return this;
     }
@@ -677,7 +674,7 @@ public class ViewPropertyAnimator {
      * @see View#setScaleX(float)
      * @return This object, allowing calls to methods in this class to be chained.
      */
-    public @NonNull ViewPropertyAnimator scaleX(float value) {
+    public ViewPropertyAnimator scaleX(float value) {
         animateProperty(SCALE_X, value);
         return this;
     }
@@ -690,7 +687,7 @@ public class ViewPropertyAnimator {
      * @see View#setScaleX(float)
      * @return This object, allowing calls to methods in this class to be chained.
      */
-    public @NonNull ViewPropertyAnimator scaleXBy(float value) {
+    public ViewPropertyAnimator scaleXBy(float value) {
         animatePropertyBy(SCALE_X, value);
         return this;
     }
@@ -703,7 +700,7 @@ public class ViewPropertyAnimator {
      * @see View#setScaleY(float)
      * @return This object, allowing calls to methods in this class to be chained.
      */
-    public @NonNull ViewPropertyAnimator scaleY(float value) {
+    public ViewPropertyAnimator scaleY(float value) {
         animateProperty(SCALE_Y, value);
         return this;
     }
@@ -716,7 +713,7 @@ public class ViewPropertyAnimator {
      * @see View#setScaleY(float)
      * @return This object, allowing calls to methods in this class to be chained.
      */
-    public @NonNull ViewPropertyAnimator scaleYBy(float value) {
+    public ViewPropertyAnimator scaleYBy(float value) {
         animatePropertyBy(SCALE_Y, value);
         return this;
     }
@@ -729,7 +726,7 @@ public class ViewPropertyAnimator {
      * @see View#setAlpha(float)
      * @return This object, allowing calls to methods in this class to be chained.
      */
-    public @NonNull ViewPropertyAnimator alpha(@FloatRange(from = 0.0f, to = 1.0f) float value) {
+    public ViewPropertyAnimator alpha(@FloatRange(from = 0.0f, to = 1.0f) float value) {
         animateProperty(ALPHA, value);
         return this;
     }
@@ -742,7 +739,7 @@ public class ViewPropertyAnimator {
      * @see View#setAlpha(float)
      * @return This object, allowing calls to methods in this class to be chained.
      */
-    public @NonNull ViewPropertyAnimator alphaBy(float value) {
+    public ViewPropertyAnimator alphaBy(float value) {
         animatePropertyBy(ALPHA, value);
         return this;
     }
@@ -768,7 +765,7 @@ public class ViewPropertyAnimator {
      * @see View#setLayerType(int, android.graphics.Paint)
      * @return This object, allowing calls to methods in this class to be chained.
      */
-    public @NonNull ViewPropertyAnimator withLayer() {
+    public ViewPropertyAnimator withLayer() {
          mPendingSetupAction= new Runnable() {
             @Override
             public void run() {
@@ -806,7 +803,7 @@ public class ViewPropertyAnimator {
      * @param runnable The action to run when the next animation starts.
      * @return This object, allowing calls to methods in this class to be chained.
      */
-    public @NonNull ViewPropertyAnimator withStartAction(Runnable runnable) {
+    public ViewPropertyAnimator withStartAction(Runnable runnable) {
         mPendingOnStartAction = runnable;
         if (runnable != null && mAnimatorOnStartMap == null) {
             mAnimatorOnStartMap = new HashMap<Animator, Runnable>();
@@ -835,7 +832,7 @@ public class ViewPropertyAnimator {
      * @param runnable The action to run when the next animation ends.
      * @return This object, allowing calls to methods in this class to be chained.
      */
-    public @NonNull ViewPropertyAnimator withEndAction(Runnable runnable) {
+    public ViewPropertyAnimator withEndAction(Runnable runnable) {
         mPendingOnEndAction = runnable;
         if (runnable != null && mAnimatorOnEndMap == null) {
             mAnimatorOnEndMap = new HashMap<Animator, Runnable>();
@@ -1064,7 +1061,7 @@ public class ViewPropertyAnimator {
     private class AnimatorEventListener
             implements Animator.AnimatorListener, ValueAnimator.AnimatorUpdateListener {
         @Override
-        public void onAnimationStart(@NonNull Animator animation) {
+        public void onAnimationStart(Animator animation) {
             if (mAnimatorSetupMap != null) {
                 Runnable r = mAnimatorSetupMap.get(animation);
                 if (r != null) {
@@ -1085,7 +1082,7 @@ public class ViewPropertyAnimator {
         }
 
         @Override
-        public void onAnimationCancel(@NonNull Animator animation) {
+        public void onAnimationCancel(Animator animation) {
             if (mListener != null) {
                 mListener.onAnimationCancel(animation);
             }
@@ -1095,14 +1092,14 @@ public class ViewPropertyAnimator {
         }
 
         @Override
-        public void onAnimationRepeat(@NonNull Animator animation) {
+        public void onAnimationRepeat(Animator animation) {
             if (mListener != null) {
                 mListener.onAnimationRepeat(animation);
             }
         }
 
         @Override
-        public void onAnimationEnd(@NonNull Animator animation) {
+        public void onAnimationEnd(Animator animation) {
             mView.setHasTransientState(false);
             if (mAnimatorCleanupMap != null) {
                 Runnable r = mAnimatorCleanupMap.get(animation);
@@ -1133,7 +1130,7 @@ public class ViewPropertyAnimator {
          * the current value of each property.
          */
         @Override
-        public void onAnimationUpdate(@NonNull ValueAnimator animation) {
+        public void onAnimationUpdate(ValueAnimator animation) {
             PropertyBundle propertyBundle = mAnimatorMap.get(animation);
             if (propertyBundle == null) {
                 // Shouldn't happen, but just to play it safe

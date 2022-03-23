@@ -64,8 +64,7 @@ class SplashScreenExceptionList {
                 mOnPropertiesChangedListener);
     }
 
-    @VisibleForTesting
-    void updateDeviceConfig(String values) {
+    private void updateDeviceConfig(String values) {
         parseDeviceConfigPackageList(values);
     }
 

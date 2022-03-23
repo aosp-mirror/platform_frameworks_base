@@ -20,8 +20,6 @@ import android.graphics.Rect;
 
 import com.android.systemui.shared.recents.model.ThumbnailData;
 
-import java.util.HashMap;
-
 public interface RecentsAnimationListener {
     /**
      * Called when the animation into Recents can start. This call is made on the binder thread.
@@ -33,11 +31,11 @@ public interface RecentsAnimationListener {
     /**
      * Called when the animation into Recents was canceled. This call is made on the binder thread.
      */
-    void onAnimationCanceled(HashMap<Integer, ThumbnailData> thumbnailDatas);
+    void onAnimationCanceled(ThumbnailData thumbnailData);
 
     /**
      * Called when the task of an activity that has been started while the recents animation
      * was running becomes ready for control.
      */
-    void onTasksAppeared(RemoteAnimationTargetCompat[] app);
+    void onTaskAppeared(RemoteAnimationTargetCompat app);
 }

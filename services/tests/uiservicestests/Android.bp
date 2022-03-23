@@ -58,6 +58,7 @@ android_test {
     jni_libs: [
         "libdexmakerjvmtiagent",
         "libmultiplejvmtiagentsinterferenceagent",
+        "libbacktrace",
         "libbase",
         "libbinder",
         "libc++",

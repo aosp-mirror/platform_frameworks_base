@@ -1,0 +1,41 @@
+<!--
+Copyright (C) 2019 The Android Open Source Project
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+         http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/back">
+        <shape android:shape="oval">
+            <solid
+                android:color="@color/notification_alert_color" />
+            <size
+                android:height="24dp"
+                android:width="24dp"/>
+        </shape>
+    </item>
+    <item
+        android:id="@+id/fore"
+        android:gravity="center">
+        <vector
+                android:width="13dp"
+                android:height="13dp"
+                android:viewportWidth="24"
+                android:viewportHeight="24">
+            <path
+                android:fillColor="#FFFFFFFF"
+                android:pathData="M8.98,16.65c-0.47,0 -0.91,-0.27 -1.12,-0.69l-1.93,-4.61L5.46,12.3c-0.21,0.43 -0.64,0.69 -1.12,0.69H2v-2h1.88l1,-2C5.1,8.56 5.52,8.3 6,8.3s0.9,0.26 1.12,0.69l1.73,4.14l2,-7c0.2,-0.46 0.65,-0.76 1.15,-0.76s0.95,0.3 1.15,0.76l0.04,0.12l1.96,6.88l1.7,-4.08c0.49,-0.98 1.84,-0.91 2.26,-0.06l1,2H22v2h-2.35c-0.47,0 -0.91,-0.27 -1.12,-0.7l-0.47,-0.95l-1.9,4.55c-0.25,0.5 -0.69,0.77 -1.18,0.75c-0.48,-0.01 -0.92,-0.31 -1.11,-0.76l-0.04,-0.12L12,9.37l-1.87,6.52c-0.19,0.45 -0.63,0.74 -1.11,0.76C9.01,16.65 9,16.65 8.98,16.65zM20.32,11.4L20.32,11.4C20.32,11.4 20.32,11.4 20.32,11.4z" />
+        </vector>
+    </item>
+</layer-list>
