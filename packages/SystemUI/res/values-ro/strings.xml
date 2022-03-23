@@ -20,14 +20,17 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4811759950673118541">"UI sistem"</string>
-    <string name="battery_low_title" msgid="6891106956328275225">"Este posibil ca bateria să se descarce în curând"</string>
+    <string name="battery_low_title" msgid="5319680173344341779">"Activați Economisirea bateriei?"</string>
+    <string name="battery_low_description" msgid="3282977755476423966">"Mai aveți <xliff:g id="PERCENTAGE">%s</xliff:g> din baterie. Economisirea bateriei activează Tema întunecată, restricționează activitatea în fundal și amână notificările."</string>
+    <string name="battery_low_intro" msgid="5148725009653088790">"Economisirea bateriei activează Tema întunecată, restricționează activitatea în fundal și amână notificările."</string>
     <string name="battery_low_percent_format" msgid="4276661262843170964">"Procent rămas din baterie: <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="invalid_charger_title" msgid="938685362320735167">"Nu se poate realiza încărcarea prin USB"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"Folosiți încărcătorul livrat împreună cu dispozitivul"</string>
     <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Activați economisirea bateriei?"</string>
     <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"Despre Economisirea bateriei"</string>
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"Activați"</string>
-    <string name="battery_saver_start_action" msgid="4553256017945469937">"Activați economisirea bateriei"</string>
+    <string name="battery_saver_start_action" msgid="8353766979886287140">"Activați"</string>
+    <string name="battery_saver_dismiss_action" msgid="7199342621040014738">"Nu, mulțumesc"</string>
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Rotire automată a ecranului"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"Permiteți <xliff:g id="APPLICATION">%1$s</xliff:g> să acceseze <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"Permiteți accesul aplicației <xliff:g id="APPLICATION">%1$s</xliff:g> la <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nPermisiunea de înregistrare nu a fost acordată aplicației, dar aceasta poate să înregistreze conținut audio prin intermediul acestui dispozitiv USB."</string>
@@ -128,6 +131,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Chip autentificat"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Confirmat"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Atingeți Confirmați pentru a finaliza"</string>
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="1597899891472340950">"S-a deblocat cu ajutorul feței. Apăsați pentru a continua."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Autentificat"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Folosiți PIN-ul"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Folosiți modelul"</string>
@@ -147,10 +151,6 @@
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"Dacă la următoarea încercare introduceți un model incorect, profilul de serviciu și datele sale vor fi șterse."</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"Dacă la următoarea încercare introduceți un cod PIN incorect, profilul de serviciu și datele sale vor fi șterse."</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"Dacă la următoarea încercare introduceți o parolă incorectă, profilul de serviciu și datele sale vor fi șterse."</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"Prea multe încercări incorecte. Datele de pe acest dispozitiv vor fi șterse."</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"Prea multe încercări incorecte. Acest utilizator va fi șters."</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"Prea multe încercări incorecte. Acest profil de serviciu și datele sale vor fi șterse."</string>
-    <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"Închideți"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Atingeți senzorul de amprente"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"Pictograma amprentă"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Chipul nu a fost recunoscut. Folosiți amprenta."</string>
@@ -181,6 +181,7 @@
     <string name="accessibility_desc_close" msgid="8293708213442107755">"Închideți"</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"niciun sunet"</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3375848309132140014">"numai alarme"</string>
+    <string name="accessibility_quick_settings_dnd" msgid="2415967452264206047">"Nu deranja."</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="8250942386687551283">"Bluetooth."</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="3819082137684078013">"Conexiunea prin Bluetooth este activată."</string>
     <string name="accessibility_quick_settings_alarm" msgid="558094529584082090">"Alarmă setată pentru <xliff:g id="TIME">%s</xliff:g>."</string>
@@ -206,6 +207,7 @@
     <string name="dessert_case" msgid="9104973640704357717">"Vitrina cu dulciuri"</string>
     <string name="start_dreams" msgid="9131802557946276718">"Economizor de ecran"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"Ethernet"</string>
+    <string name="quick_settings_dnd_label" msgid="7728690179108024338">"Nu deranja"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"Niciun dispozitiv conectat disponibil"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"Nivelul bateriei: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
@@ -319,17 +321,12 @@
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Se încarcă lent • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> până la încărcarea completă"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Suport de încărcare • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> până la încărcarea completă"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Comutați între utilizatori"</string>
-    <string name="user_add_user" msgid="4336657383006913022">"Adăugați un utilizator"</string>
-    <string name="user_new_user_name" msgid="2019166282704195789">"Utilizator nou"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Ștergeți invitatul?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Toate aplicațiile și datele din această sesiune vor fi șterse."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Ștergeți"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Bine ați revenit în sesiunea pentru invitați!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Vreți să continuați sesiunea?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Începeți din nou"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Da, continuați"</string>
-    <string name="user_add_user_title" msgid="4172327541504825032">"Adăugați un utilizator nou?"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"Când adăugați un utilizator nou, acesta trebuie să-și configureze spațiul.\n\nOrice utilizator poate actualiza aplicațiile pentru toți ceilalți utilizatori."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Ați atins limita de utilizatori"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="few">Puteți adăuga maximum <xliff:g id="COUNT">%d</xliff:g> utilizatori.</item>
@@ -351,6 +348,7 @@
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Notificări"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Conversații"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Ștergeți toate notificările silențioase"</string>
+    <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Notificări întrerupte prin „Nu deranja”"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Începeți acum"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Nicio notificare"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Dispozitivul este gestionat de unul dintre părinți"</string>
@@ -455,8 +453,7 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Deblocați pentru a folosi"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"A apărut o problemă la preluarea cardurilor. Încercați din nou mai târziu"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Setările ecranului de blocare"</string>
-    <string name="qr_code_scanner_title" msgid="5660820608548306581">"Cod QR"</string>
-    <string name="qr_code_scanner_description" msgid="7937603775306661863">"Atingeți pentru a scana"</string>
+    <string name="qr_code_scanner_title" msgid="5290201053875420785">"Scanați codul QR"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Profil de serviciu"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Mod Avion"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"Nu veți auzi următoarea alarmă <xliff:g id="WHEN">%1$s</xliff:g>"</string>
@@ -494,6 +491,8 @@
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Stare:&lt;/b&gt; clasificată mai jos"</string>
     <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"Se afișează în partea de sus a notificărilor pentru conversații și ca fotografie de profil pe ecranul de blocare"</string>
     <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"Se afișează în partea de sus a notificărilor pentru conversații și ca fotografie de profil pe ecranul de blocare, apare ca un balon"</string>
+    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Se afișează în partea de sus a notificărilor pentru conversații și ca fotografie de profil pe ecranul de blocare, întrerupe funcția Nu deranja"</string>
+    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Se afișează în partea de sus a notificărilor pentru conversații și ca fotografie de profil pe ecranul de blocare, apare ca un balon, întrerupe funcția Nu deranja"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritate"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> nu acceptă funcții pentru conversații"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Aceste notificări nu pot fi modificate."</string>
@@ -571,6 +570,7 @@
     <string name="keyboard_shortcut_group_applications_sms" msgid="6912633831752843566">"SMS"</string>
     <string name="keyboard_shortcut_group_applications_music" msgid="9032078456666204025">"Muzică"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Calendar"</string>
+    <string name="volume_and_do_not_disturb" msgid="502044092739382832">"Nu deranja"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"Comandă rapidă din butoanele de volum"</string>
     <string name="battery" msgid="769686279459897127">"Baterie"</string>
     <string name="headset" msgid="4485892374984466437">"Set căști-microfon"</string>
@@ -689,6 +689,10 @@
     <string name="mobile_carrier_text_format" msgid="8912204177152950766">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>, <xliff:g id="MOBILE_DATA_TYPE">%2$s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="5389597396308001471">"Conexiunea Wi-Fi este dezactivată"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"Funcția Bluetooth este dezactivată"</string>
+    <string name="dnd_is_off" msgid="3185706903793094463">"Funcția Nu deranja este dezactivată"</string>
+    <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"Funcția Nu deranja a fost activată de o regulă automată (<xliff:g id="ID_1">%s</xliff:g>)."</string>
+    <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"Funcția Nu deranja a fost activată de o aplicație (<xliff:g id="ID_1">%s</xliff:g>)."</string>
+    <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"Funcția Nu deranja a fost activată de o regulă automată sau de o aplicație."</string>
     <string name="running_foreground_services_title" msgid="5137313173431186685">"Aplicațiile rulează în fundal"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"Atingeți pentru mai multe detalii privind bateria și utilizarea datelor"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"Dezactivați datele mobile?"</string>
@@ -713,6 +717,8 @@
     <string name="ongoing_privacy_dialog_enterprise" msgid="3003314125311966061">"(serviciu)"</string>
     <string name="ongoing_privacy_dialog_phonecall" msgid="4487370562589839298">"Apel telefonic"</string>
     <string name="ongoing_privacy_dialog_attribution_text" msgid="4738795925380373994">"(prin <xliff:g id="APPLICATION_NAME_S_">%s</xliff:g>)"</string>
+    <string name="ongoing_privacy_dialog_attribution_label" msgid="3385241594101496292">"(<xliff:g id="ATTRIBUTION_LABEL">%s</xliff:g>)"</string>
+    <string name="ongoing_privacy_dialog_attribution_proxy_label" msgid="1111829599659403249">"(<xliff:g id="ATTRIBUTION_LABEL">%1$s</xliff:g> • <xliff:g id="PROXY_LABEL">%2$s</xliff:g>)"</string>
     <string name="privacy_type_camera" msgid="7974051382167078332">"cameră foto"</string>
     <string name="privacy_type_location" msgid="7991481648444066703">"locație"</string>
     <string name="privacy_type_microphone" msgid="9136763906797732428">"microfon"</string>
@@ -775,9 +781,10 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Glisați pentru a vedea mai multe"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Se încarcă recomandările"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Media"</string>
-    <string name="controls_media_close_session" msgid="1193000643003066508">"Ascundeți sesiunea media?"</string>
+    <!-- no translation found for controls_media_close_session (4780485355795635052) -->
+    <skip />
     <string name="controls_media_active_session" msgid="3146882316024153337">"Sesiunea media actuală nu se poate ascunde."</string>
-    <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Închideți"</string>
+    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Ascunde"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Reia"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Setări"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"<xliff:g id="SONG_NAME">%1$s</xliff:g> de la <xliff:g id="ARTIST_NAME">%2$s</xliff:g> se redă în <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
@@ -795,7 +802,8 @@
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Mergeți mai aproape de <xliff:g id="DEVICENAME">%1$s</xliff:g> ca să redați acolo"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Se redă pe <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_transfer_playing_this_device" msgid="1856890686844499172">"Se redă pe acest telefon"</string>
-    <string name="media_transfer_failed" msgid="2640354446629980227">"A apărut o eroare"</string>
+    <!-- no translation found for media_transfer_failed (7955354964610603723) -->
+    <skip />
     <string name="controls_error_timeout" msgid="794197289772728958">"Inactiv, verificați aplicația"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Nu s-a găsit"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Comanda este indisponibilă"</string>
@@ -812,6 +820,9 @@
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(deconectat)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"Nu se poate comuta. Atingeți pentru a încerca din nou."</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Asociați un nou dispozitiv"</string>
+    <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Pentru a proiecta această sesiune, deschideți aplicația."</string>
+    <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Aplicație necunoscută"</string>
+    <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Nu mai proiectați"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Numărul versiunii"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Numărul versiunii s-a copiat în clipboard."</string>
     <string name="basic_status" msgid="2315371112182658176">"Deschideți conversația"</string>
@@ -845,6 +856,7 @@
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"Vedeți mesaje recente, apeluri pierdute și actualizări de stare"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"Conversație"</string>
+    <string name="paused_by_dnd" msgid="7856941866433556428">"Întrerupt de Nu deranja"</string>
     <string name="new_notification_text_content_description" msgid="2915029960094389291">"<xliff:g id="NAME">%1$s</xliff:g> a trimis un mesaj: <xliff:g id="NOTIFICATION">%2$s</xliff:g>"</string>
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g> a trimis o imagine"</string>
     <string name="new_status_content_description" msgid="6046637888641308327">"<xliff:g id="NAME">%1$s</xliff:g> are o nouă stare: <xliff:g id="STATUS">%2$s</xliff:g>"</string>
@@ -884,8 +896,7 @@
       <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> de aplicații active</item>
       <item quantity="one"><xliff:g id="COUNT_0">%s</xliff:g> aplicație activă</item>
     </plurals>
-    <!-- no translation found for fgs_dot_content_description (2865071539464777240) -->
-    <skip />
+    <string name="fgs_dot_content_description" msgid="2865071539464777240">"Informații noi"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Aplicații active"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Opriți"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Oprită"</string>
@@ -896,8 +907,12 @@
     <string name="clipboard_edit_text_description" msgid="805254383912962103">"Editați textul copiat"</string>
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"Editați imaginea copiată"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"Trimiteți către un dispozitiv din apropiere"</string>
-    <!-- no translation found for add (81036585205287996) -->
-    <skip />
-    <!-- no translation found for manage_users (1823875311934643849) -->
-    <skip />
+    <string name="add" msgid="81036585205287996">"Adăugați"</string>
+    <string name="manage_users" msgid="1823875311934643849">"Gestionați utilizatorii"</string>
+    <string name="drag_split_not_supported" msgid="4326847447699729722">"Notificarea nu acceptă tragerea pe ecranul împărțit."</string>
+    <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"Wi‑Fi indisponibil"</string>
+    <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"Modul Prioritate"</string>
+    <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"Alarmă setată"</string>
+    <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"Camera și microfonul sunt dezactivate"</string>
+    <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# notificare}few{# notificări}other{# de notificări}}"</string>
 </resources>
