@@ -336,6 +336,21 @@ public class WindowlessWindowManager implements IWindowSession {
     }
 
     @Override
+    public int updateVisibility(IWindow window, WindowManager.LayoutParams inAttrs,
+            int viewVisibility, MergedConfiguration outMergedConfiguration,
+            SurfaceControl outSurfaceControl, InsetsState outInsetsState,
+            InsetsSourceControl[] outActiveControls) {
+        // TODO(b/161810301): Finish the implementation.
+        return 0;
+    }
+
+    @Override
+    public void updateLayout(IWindow window, WindowManager.LayoutParams inAttrs, int flags,
+            ClientWindowFrames clientWindowFrames, int requestedWidth, int requestedHeight) {
+        // TODO(b/161810301): Finish the implementation.
+    }
+
+    @Override
     public void prepareToReplaceWindows(android.os.IBinder appToken, boolean childrenOnly) {
     }
 
