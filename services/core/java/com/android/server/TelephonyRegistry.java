@@ -91,7 +91,7 @@ import android.util.Pair;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IBatteryStats;
-import com.android.internal.telephony.ICarrierPrivilegesListener;
+import com.android.internal.telephony.ICarrierPrivilegesCallback;
 import com.android.internal.telephony.IOnSubscriptionsChangedListener;
 import com.android.internal.telephony.IPhoneStateListener;
 import com.android.internal.telephony.ITelephonyRegistry;
@@ -151,7 +151,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         IPhoneStateListener callback;
         IOnSubscriptionsChangedListener onSubscriptionsChangedListenerCallback;
         IOnSubscriptionsChangedListener onOpportunisticSubscriptionsChangedListenerCallback;
-        ICarrierPrivilegesListener carrierPrivilegesListener;
+        ICarrierPrivilegesCallback carrierPrivilegesCallback;
 
         int callerUid;
         int callerPid;
@@ -176,8 +176,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             return (onOpportunisticSubscriptionsChangedListenerCallback != null);
         }
 
-        boolean matchCarrierPrivilegesListener() {
-            return carrierPrivilegesListener != null;
+        boolean matchCarrierPrivilegesCallback() {
+            return carrierPrivilegesCallback != null;
         }
 
         boolean canReadCallLog() {
@@ -197,7 +197,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     + onSubscriptionsChangedListenerCallback
                     + " onOpportunisticSubscriptionsChangedListenererCallback="
                     + onOpportunisticSubscriptionsChangedListenerCallback
-                    + " carrierPrivilegesListener=" + carrierPrivilegesListener
+                    + " carrierPrivilegesCallback=" + carrierPrivilegesCallback
                     + " subId=" + subId + " phoneId=" + phoneId + " events=" + eventList + "}";
         }
     }
@@ -412,7 +412,9 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             mPreciseDataConnectionStates;
 
     /** Per-phoneId snapshot of privileged packages (names + UIDs). */
-    private List<Pair<List<String>, int[]>> mCarrierPrivilegeStates;
+    @NonNull private List<Pair<List<String>, int[]>> mCarrierPrivilegeStates;
+    /** Per-phoneId of CarrierService (PackageName, UID) pair. */
+    @NonNull private List<Pair<String, Integer>> mCarrierServiceStates;
 
     /**
      * Support backward compatibility for {@link android.telephony.TelephonyDisplayInfo}.
@@ -702,22 +704,23 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             cutListToSize(mPhysicalChannelConfigs, mNumPhones);
             cutListToSize(mLinkCapacityEstimateLists, mNumPhones);
             cutListToSize(mCarrierPrivilegeStates, mNumPhones);
+            cutListToSize(mCarrierServiceStates, mNumPhones);
             return;
         }
 
         // mNumPhones > oldNumPhones: ss -> ds switch
         for (int i = oldNumPhones; i < mNumPhones; i++) {
-            mCallState[i] =  TelephonyManager.CALL_STATE_IDLE;
+            mCallState[i] = TelephonyManager.CALL_STATE_IDLE;
             mDataActivity[i] = TelephonyManager.DATA_ACTIVITY_NONE;
             mDataConnectionState[i] = TelephonyManager.DATA_UNKNOWN;
             mVoiceActivationState[i] = TelephonyManager.SIM_ACTIVATION_STATE_UNKNOWN;
             mDataActivationState[i] = TelephonyManager.SIM_ACTIVATION_STATE_UNKNOWN;
-            mCallIncomingNumber[i] =  "";
-            mServiceState[i] =  new ServiceState();
-            mSignalStrength[i] =  null;
+            mCallIncomingNumber[i] = "";
+            mServiceState[i] = new ServiceState();
+            mSignalStrength[i] = null;
             mUserMobileDataState[i] = false;
-            mMessageWaiting[i] =  false;
-            mCallForwarding[i] =  false;
+            mMessageWaiting[i] = false;
+            mCallForwarding[i] = false;
             mCellIdentity[i] = null;
             mCellInfo.add(i, null);
             mImsReasonInfo.add(i, null);
@@ -743,6 +746,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             mAllowedNetworkTypeValue[i] = -1;
             mLinkCapacityEstimateLists.add(i, INVALID_LCE_LIST);
             mCarrierPrivilegeStates.add(i, new Pair<>(Collections.emptyList(), new int[0]));
+            mCarrierServiceStates.add(i, new Pair<>(null, Process.INVALID_UID));
         }
     }
 
@@ -809,6 +813,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         mDataEnabledReason = new int[numPhones];
         mLinkCapacityEstimateLists = new ArrayList<>();
         mCarrierPrivilegeStates = new ArrayList<>();
+        mCarrierServiceStates = new ArrayList<>();
 
         for (int i = 0; i < numPhones; i++) {
             mCallState[i] =  TelephonyManager.CALL_STATE_IDLE;
@@ -847,6 +852,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             mAllowedNetworkTypeValue[i] = -1;
             mLinkCapacityEstimateLists.add(i, INVALID_LCE_LIST);
             mCarrierPrivilegeStates.add(i, new Pair<>(Collections.emptyList(), new int[0]));
+            mCarrierServiceStates.add(i, new Pair<>(null, Process.INVALID_UID));
         }
 
         mAppOps = mContext.getSystemService(AppOpsManager.class);
@@ -2780,16 +2786,16 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
     }
 
     @Override
-    public void addCarrierPrivilegesListener(
+    public void addCarrierPrivilegesCallback(
             int phoneId,
-            ICarrierPrivilegesListener callback,
-            String callingPackage,
-            String callingFeatureId) {
+            @NonNull ICarrierPrivilegesCallback callback,
+            @NonNull String callingPackage,
+            @NonNull String callingFeatureId) {
         int callerUserId = UserHandle.getCallingUserId();
         mAppOps.checkPackage(Binder.getCallingUid(), callingPackage);
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
-                "addCarrierPrivilegesListener");
+                "addCarrierPrivilegesCallback");
         if (VDBG) {
             log(
                     "listen carrier privs: E pkg=" + pii(callingPackage) + " phoneId=" + phoneId
@@ -2809,7 +2815,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             if (r == null) return;
 
             r.context = mContext;
-            r.carrierPrivilegesListener = callback;
+            r.carrierPrivilegesCallback = callback;
             r.callingPackage = callingPackage;
             r.callingFeatureId = callingFeatureId;
             r.callerUid = Binder.getCallingUid();
@@ -2821,10 +2827,18 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             }
 
             Pair<List<String>, int[]> state = mCarrierPrivilegeStates.get(phoneId);
+            Pair<String, Integer> carrierServiceState = mCarrierServiceStates.get(phoneId);
             try {
-                r.carrierPrivilegesListener.onCarrierPrivilegesChanged(
-                        Collections.unmodifiableList(state.first),
-                        Arrays.copyOf(state.second, state.second.length));
+                if (r.matchCarrierPrivilegesCallback()) {
+                    // Here, two callbacks are triggered in quick succession on the same binder.
+                    // In typical case, we expect the callers to care about only one or the other.
+                    r.carrierPrivilegesCallback.onCarrierPrivilegesChanged(
+                            Collections.unmodifiableList(state.first),
+                            Arrays.copyOf(state.second, state.second.length));
+
+                    r.carrierPrivilegesCallback.onCarrierServiceChanged(carrierServiceState.first,
+                            carrierServiceState.second);
+                }
             } catch (RemoteException ex) {
                 remove(r.binder);
             }
@@ -2832,12 +2846,12 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
     }
 
     @Override
-    public void removeCarrierPrivilegesListener(
-            ICarrierPrivilegesListener callback, String callingPackage) {
+    public void removeCarrierPrivilegesCallback(
+            @NonNull ICarrierPrivilegesCallback callback, @NonNull String callingPackage) {
         mAppOps.checkPackage(Binder.getCallingUid(), callingPackage);
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
-                "removeCarrierPrivilegesListener");
+                "removeCarrierPrivilegesCallback");
         remove(callback.asBinder());
     }
 
@@ -2860,15 +2874,43 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             for (Record r : mRecords) {
                 // Listeners are per-slot, not per-subscription. This is to provide a stable
                 // view across SIM profile switches.
-                if (!r.matchCarrierPrivilegesListener()
+                if (!r.matchCarrierPrivilegesCallback()
                         || !idMatch(r, SubscriptionManager.INVALID_SUBSCRIPTION_ID, phoneId)) {
                     continue;
                 }
                 try {
                     // Make sure even in-process listeners can't modify the values.
-                    r.carrierPrivilegesListener.onCarrierPrivilegesChanged(
+                    r.carrierPrivilegesCallback.onCarrierPrivilegesChanged(
                             Collections.unmodifiableList(privilegedPackageNames),
                             Arrays.copyOf(privilegedUids, privilegedUids.length));
+                } catch (RemoteException ex) {
+                    mRemoveList.add(r.binder);
+                }
+            }
+            handleRemoveListLocked();
+        }
+    }
+
+    @Override
+    public void notifyCarrierServiceChanged(int phoneId, @Nullable String packageName, int uid) {
+        if (!checkNotifyPermission("notifyCarrierServiceChanged")) return;
+        if (!validatePhoneId(phoneId)) return;
+        if (VDBG) {
+            log("notifyCarrierServiceChanged: phoneId=" + phoneId
+                    + ", package=" + pii(packageName) + ", uid=" + uid);
+        }
+
+        synchronized (mRecords) {
+            mCarrierServiceStates.set(
+                    phoneId, new Pair<>(packageName, uid));
+            for (Record r : mRecords) {
+                // Listeners are per-slot, not per-subscription.
+                if (!r.matchCarrierPrivilegesCallback()
+                        || !idMatch(r, SubscriptionManager.INVALID_SUBSCRIPTION_ID, phoneId)) {
+                    continue;
+                }
+                try {
+                    r.carrierPrivilegesCallback.onCarrierServiceChanged(packageName, uid);
                 } catch (RemoteException ex) {
                     mRemoveList.add(r.binder);
                 }
@@ -2931,6 +2973,9 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 pw.println(
                         "mCarrierPrivilegeState=<packages=" + pii(carrierPrivilegeState.first)
                                 + ", uids=" + Arrays.toString(carrierPrivilegeState.second) + ">");
+                Pair<String, Integer> carrierServiceState = mCarrierServiceStates.get(i);
+                pw.println("mCarrierServiceState=<package=" + pii(carrierServiceState.first)
+                        + ", uid=" + carrierServiceState.second + ">");
                 pw.decreaseIndent();
             }
 
