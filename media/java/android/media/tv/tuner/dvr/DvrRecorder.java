@@ -82,13 +82,7 @@ public class DvrRecorder implements AutoCloseable {
         }
         synchronized (mListenerLock) {
             if (mExecutor != null && mListener != null) {
-                mExecutor.execute(() -> {
-                    synchronized (mListenerLock) {
-                        if (mListener != null) {
-                            mListener.onRecordStatusChanged(status);
-                        }
-                    }
-                });
+                mExecutor.execute(() -> mListener.onRecordStatusChanged(status));
             }
         }
     }
@@ -216,6 +210,7 @@ public class DvrRecorder implements AutoCloseable {
      *
      * @param fd the file descriptor to write data.
      * @see #write(long)
+     * @see #write(byte[], long, long)
      */
     public void setFileDescriptor(@NonNull ParcelFileDescriptor fd) {
         nativeSetFileDescriptor(fd.getFd());
@@ -235,17 +230,17 @@ public class DvrRecorder implements AutoCloseable {
     /**
      * Writes recording data to buffer.
      *
-     * @param buffer the byte array stores the data from DVR.
-     * @param offset the index of the first byte in {@code buffer} to write the data from DVR.
+     * @param bytes the byte array stores the data to be written to DVR.
+     * @param offset the index of the first byte in {@code bytes} to be written to DVR.
      * @param size the maximum number of bytes to write.
      * @return the number of bytes written.
      */
     @BytesLong
-    public long write(@NonNull byte[] buffer, @BytesLong long offset, @BytesLong long size) {
-        if (size + offset > buffer.length) {
+    public long write(@NonNull byte[] bytes, @BytesLong long offset, @BytesLong long size) {
+        if (size + offset > bytes.length) {
             throw new ArrayIndexOutOfBoundsException(
-                    "Array length=" + buffer.length + ", offset=" + offset + ", size=" + size);
+                    "Array length=" + bytes.length + ", offset=" + offset + ", size=" + size);
         }
-        return nativeWrite(buffer, offset, size);
+        return nativeWrite(bytes, offset, size);
     }
 }

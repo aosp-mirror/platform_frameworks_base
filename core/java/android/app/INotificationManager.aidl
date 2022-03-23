@@ -63,7 +63,6 @@ interface INotificationManager
     boolean isInInvalidMsgState(String pkg, int uid);
     boolean hasUserDemotedInvalidMsgApp(String pkg, int uid);
     void setInvalidMsgAppDemoted(String pkg, int uid, boolean isDemoted);
-    boolean hasSentValidBubble(String pkg, int uid);
     void setNotificationsEnabledForPackage(String pkg, int uid, boolean enabled);
     /**
      * Updates the notification's enabled state. Additionally locks importance for all of the
@@ -115,11 +114,12 @@ interface INotificationManager
     NotificationChannelGroup getNotificationChannelGroup(String pkg, String channelGroupId);
     ParceledListSlice getNotificationChannelGroups(String pkg);
     boolean onlyHasDefaultChannel(String pkg, int uid);
+    int getBlockedAppCount(int userId);
     boolean areChannelsBypassingDnd();
-    ParceledListSlice getNotificationChannelsBypassingDnd(String pkg, int uid);
+    int getAppsBypassingDndCount(int uid);
+    ParceledListSlice getNotificationChannelsBypassingDnd(String pkg, int userId);
     boolean isPackagePaused(String pkg);
     void deleteNotificationHistoryItem(String pkg, int uid, long postedTime);
-    boolean isPermissionFixed(String pkg, int userId);
 
     void silenceNotificationSound();
 
@@ -175,7 +175,6 @@ interface INotificationManager
 
     ComponentName getEffectsSuppressor();
     boolean matchesCallFilter(in Bundle extras);
-    void cleanUpCallersAfter(long timeThreshold);
     boolean isSystemConditionProviderEnabled(String path);
 
     boolean isNotificationListenerAccessGranted(in ComponentName listener);

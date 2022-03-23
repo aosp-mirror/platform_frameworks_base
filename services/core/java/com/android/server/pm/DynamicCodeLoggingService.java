@@ -22,12 +22,11 @@ import android.app.job.JobScheduler;
 import android.app.job.JobService;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.pm.PackageManagerInternal;
 import android.os.Process;
+import android.os.ServiceManager;
 import android.util.EventLog;
 import android.util.Log;
 
-import com.android.server.LocalServices;
 import com.android.server.pm.dex.DynamicCodeLogger;
 
 import libcore.util.HexEncoding;
@@ -134,7 +133,8 @@ public class DynamicCodeLoggingService extends JobService {
     }
 
     private static DynamicCodeLogger getDynamicCodeLogger() {
-        return LocalServices.getService(PackageManagerInternal.class).getDynamicCodeLogger();
+        PackageManagerService pm = (PackageManagerService) ServiceManager.getService("package");
+        return pm.getDexManager().getDynamicCodeLogger();
     }
 
     private class IdleLoggingThread extends Thread {

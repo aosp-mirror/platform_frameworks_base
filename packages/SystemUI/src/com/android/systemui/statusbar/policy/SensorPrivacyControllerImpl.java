@@ -29,8 +29,7 @@ import java.util.List;
  * Controls sensor privacy state and notification.
  */
 @SysUISingleton
-public class SensorPrivacyControllerImpl implements
-        SensorPrivacyController,
+public class SensorPrivacyControllerImpl implements SensorPrivacyController,
         SensorPrivacyManager.OnAllSensorPrivacyChangedListener {
     private SensorPrivacyManager mSensorPrivacyManager;
     private final List<OnSensorPrivacyChangedListener> mListeners = new ArrayList<>(1);

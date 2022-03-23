@@ -16,8 +16,8 @@
 
 package com.android.wm.shell.flicker.apppairs
 
+import android.os.SystemClock
 import android.platform.test.annotations.Presubmit
-import android.view.Display
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
@@ -25,8 +25,7 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group1
 import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.server.wm.traces.common.WindowManagerConditionsFactory
-import com.android.wm.shell.flicker.appPairsDividerIsVisibleAtEnd
+import com.android.wm.shell.flicker.appPairsDividerIsVisible
 import com.android.wm.shell.flicker.helpers.AppPairsHelper
 import com.android.wm.shell.flicker.helpers.MultiWindowHelper.Companion.resetMultiWindowConfig
 import com.android.wm.shell.flicker.helpers.MultiWindowHelper.Companion.setSupportsNonResizableMultiWindow
@@ -54,26 +53,15 @@ class AppPairsTestSupportPairNonResizeableApps(
     testSpec: FlickerTestParameter
 ) : AppPairsTransition(testSpec) {
 
-    override val transition: FlickerBuilder.() -> Unit
+    override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
         get() = {
-            super.transition(this)
+            super.transition(this, it)
             transitions {
                 nonResizeableApp?.launchViaIntent(wmHelper)
                 // TODO pair apps through normal UX flow
                 executeShellCommand(
                         composePairsCommand(primaryTaskId, nonResizeableTaskId, pair = true))
-                val waitConditions = mutableListOf(
-                    WindowManagerConditionsFactory.isWindowVisible(primaryApp.component),
-                    WindowManagerConditionsFactory.isLayerVisible(primaryApp.component),
-                    WindowManagerConditionsFactory.isAppTransitionIdle(Display.DEFAULT_DISPLAY))
-
-                nonResizeableApp?.let {
-                    waitConditions.add(
-                        WindowManagerConditionsFactory.isWindowVisible(nonResizeableApp.component))
-                    waitConditions.add(
-                        WindowManagerConditionsFactory.isLayerVisible(nonResizeableApp.component))
-                }
-                wmHelper.waitFor(*waitConditions.toTypedArray())
+                SystemClock.sleep(AppPairsHelper.TIMEOUT_MS)
             }
         }
 
@@ -89,21 +77,17 @@ class AppPairsTestSupportPairNonResizeableApps(
         resetMultiWindowConfig(instrumentation)
     }
 
-    @Presubmit
-    @Test
-    override fun navBarLayerIsVisible() = super.navBarLayerIsVisible()
-
     @FlakyTest
     @Test
     override fun navBarLayerRotatesAndScales() = super.navBarLayerRotatesAndScales()
 
-    @FlakyTest(bugId = 206753786)
+    @FlakyTest
     @Test
     override fun statusBarLayerRotatesScales() = super.statusBarLayerRotatesScales()
 
     @Presubmit
     @Test
-    fun appPairsDividerIsVisibleAtEnd() = testSpec.appPairsDividerIsVisibleAtEnd()
+    fun appPairsDividerIsVisible() = testSpec.appPairsDividerIsVisible()
 
     @Presubmit
     @Test
@@ -113,8 +97,8 @@ class AppPairsTestSupportPairNonResizeableApps(
             "Non resizeable app not initialized"
         }
         testSpec.assertWmEnd {
-            isAppWindowVisible(nonResizeableApp.component)
-            isAppWindowVisible(primaryApp.component)
+            isVisible(nonResizeableApp.defaultWindowName)
+            isVisible(primaryApp.defaultWindowName)
         }
     }
 

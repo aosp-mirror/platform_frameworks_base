@@ -1,5 +1,4 @@
 .idea
-.project
 *.iml
 *.sw*
 gen/

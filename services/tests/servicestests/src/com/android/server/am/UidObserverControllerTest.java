@@ -42,7 +42,6 @@ import android.app.IUidObserver;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.platform.test.annotations.Presubmit;
 import android.util.DebugUtils;
 import android.util.Pair;
 import android.util.SparseArray;
@@ -58,7 +57,6 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 
-@Presubmit
 @SmallTest
 public class UidObserverControllerTest {
     private static final int TEST_UID1 = 1111;

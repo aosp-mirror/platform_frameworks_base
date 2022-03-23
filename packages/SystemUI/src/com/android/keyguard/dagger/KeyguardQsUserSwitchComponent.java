@@ -16,8 +16,7 @@
 
 package com.android.keyguard.dagger;
 
-import android.widget.FrameLayout;
-
+import com.android.systemui.statusbar.phone.UserAvatarView;
 import com.android.systemui.statusbar.policy.KeyguardQsUserSwitchController;
 
 import dagger.BindsInstance;
@@ -32,7 +31,8 @@ public interface KeyguardQsUserSwitchComponent {
     /** Simple factory for {@link KeyguardUserSwitcherComponent}. */
     @Subcomponent.Factory
     interface Factory {
-        KeyguardQsUserSwitchComponent build(@BindsInstance FrameLayout userAvatarContainer);
+        KeyguardQsUserSwitchComponent build(
+                @BindsInstance UserAvatarView userAvatarView);
     }
 
     /** Builds a {@link KeyguardQsUserSwitchController}. */

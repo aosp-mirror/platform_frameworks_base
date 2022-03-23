@@ -19,6 +19,7 @@ package com.android.server.locksettings;
 import android.os.IProgressListener;
 import android.os.RemoteException;
 import android.util.ArrayMap;
+import android.util.Pair;
 
 
 import junit.framework.AssertionFailedError;
@@ -28,56 +29,56 @@ import java.util.Arrays;
 
 public class FakeStorageManager {
 
-    private ArrayMap<Integer, ArrayList<byte[]>> mAuth = new ArrayMap<>();
+    private ArrayMap<Integer, ArrayList<Pair<byte[], byte[]>>> mAuth = new ArrayMap<>();
     private boolean mIgnoreBadUnlock;
 
-    public void addUserKeyAuth(int userId, int serialNumber, byte[] secret) {
-        getUserAuth(userId).add(secret);
+    public void addUserKeyAuth(int userId, int serialNumber, byte[] token, byte[] secret) {
+        getUserAuth(userId).add(new Pair<>(token, secret));
     }
 
-    public void clearUserKeyAuth(int userId, int serialNumber, byte[] secret) {
-        ArrayList<byte[]> auths = getUserAuth(userId);
-        if (secret == null) {
+    public void clearUserKeyAuth(int userId, int serialNumber, byte[] token, byte[] secret) {
+        ArrayList<Pair<byte[], byte[]>> auths = getUserAuth(userId);
+        if (token == null && secret == null) {
             return;
         }
-        auths.remove(secret);
-        auths.add(null);
+        auths.remove(new Pair<>(token, secret));
+        auths.add(new Pair<>(null, null));
     }
 
     public void fixateNewestUserKeyAuth(int userId) {
-        ArrayList<byte[]> auths = mAuth.get(userId);
-        byte[] latest = auths.get(auths.size() - 1);
+        ArrayList<Pair<byte[], byte[]>> auths = mAuth.get(userId);
+        Pair<byte[], byte[]> latest = auths.get(auths.size() - 1);
         auths.clear();
         auths.add(latest);
     }
 
-    private ArrayList<byte[]> getUserAuth(int userId) {
+    private ArrayList<Pair<byte[], byte[]>> getUserAuth(int userId) {
         if (!mAuth.containsKey(userId)) {
-            ArrayList<byte[]> auths = new ArrayList<>();
-            auths.add(null);
-            mAuth.put(userId, auths);
+            ArrayList<Pair<byte[], byte[]>> auths = new ArrayList<Pair<byte[], byte[]>>();
+            auths.add(new Pair(null, null));
+            mAuth.put(userId,  auths);
         }
         return mAuth.get(userId);
     }
 
     public byte[] getUserUnlockToken(int userId) {
-        ArrayList<byte[]> auths = getUserAuth(userId);
+        ArrayList<Pair<byte[], byte[]>> auths = getUserAuth(userId);
         if (auths.size() != 1) {
             throw new AssertionFailedError("More than one secret exists");
         }
-        return auths.get(0);
+        return auths.get(0).second;
     }
 
     public void unlockUser(int userId, byte[] secret, IProgressListener listener)
             throws RemoteException {
         listener.onStarted(userId, null);
         listener.onFinished(userId, null);
-        ArrayList<byte[]> auths = getUserAuth(userId);
+        ArrayList<Pair<byte[], byte[]>> auths = getUserAuth(userId);
         if (auths.size() > 1) {
             throw new AssertionFailedError("More than one secret exists");
         }
-        byte[] auth = auths.get(0);
-        if (!Arrays.equals(secret, auth)) {
+        Pair<byte[], byte[]> auth = auths.get(0);
+        if (!Arrays.equals(secret, auth.second)) {
             if (!mIgnoreBadUnlock) {
                 throw new AssertionFailedError("Invalid secret to unlock user " + userId);
             }

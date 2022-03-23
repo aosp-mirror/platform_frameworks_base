@@ -1,0 +1,164 @@
+// Copyright (C) 2020 The Android Open Source Project
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package {
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_base_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
+java_library {
+    name: "updatable-media",
+
+    srcs: [
+        ":updatable-media-srcs",
+    ],
+
+    permitted_packages: [
+        "android.media",
+    ],
+
+    optimize: {
+        enabled: true,
+        shrink: true,
+        proguard_flags_files: ["updatable-media-proguard.flags"],
+    },
+
+    installable: true,
+
+    sdk_version: "module_current",
+    libs: [
+        "androidx.annotation_annotation",
+        "framework-annotations-lib",
+    ],
+    static_libs: [
+        "exoplayer2-extractor",
+        "mediatranscoding_aidl_interface-java",
+        "modules-annotation-minsdk",
+        "modules-utils-build",
+    ],
+    jarjar_rules: "jarjar_rules.txt",
+
+    plugins: ["java_api_finder"],
+
+    hostdex: true, // for hiddenapi check
+    apex_available: [
+        "com.android.media",
+        "test_com.android.media",
+    ],
+    min_sdk_version: "29",
+    visibility: [
+        "//frameworks/av/apex:__subpackages__",
+        "//frameworks/base", // For framework-all
+        "//frameworks/base/apex/media/service",
+    ],
+}
+
+filegroup {
+    name: "updatable-media-srcs",
+    srcs: [
+        "java/android/media/MediaFrameworkInitializer.java",
+        ":media-aidl-srcs",
+        ":mediaparceledlistslice-java-srcs",
+        ":mediaparser-srcs",
+        ":mediasession2-java-srcs",
+        ":mediatranscoding-srcs",
+    ],
+    visibility: ["//frameworks/base"],
+}
+
+filegroup {
+    name: "mediasession2-java-srcs",
+    srcs: [
+        "java/android/media/Controller2Link.java",
+        "java/android/media/MediaConstants.java",
+        "java/android/media/MediaController2.java",
+        "java/android/media/MediaSession2.java",
+        "java/android/media/MediaSession2Service.java",
+        "java/android/media/Session2Command.java",
+        "java/android/media/Session2CommandGroup.java",
+        "java/android/media/Session2Link.java",
+        "java/android/media/Session2Token.java",
+        "java/android/media/MediaCommunicationManager.java",
+    ],
+    path: "java",
+}
+
+filegroup {
+    name: "mediaparceledlistslice-java-srcs",
+    srcs: [
+        "java/android/media/MediaParceledListSlice.java",
+        "java/android/media/BaseMediaParceledListSlice.java",
+    ],
+    path: "java",
+}
+
+filegroup {
+    name: "mediaparser-srcs",
+    srcs: [
+        "java/android/media/MediaParser.java",
+    ],
+    path: "java",
+}
+
+filegroup {
+    name: "mediatranscoding-srcs",
+    srcs: [
+        "java/android/media/ApplicationMediaCapabilities.java",
+        "java/android/media/MediaFeature.java",
+        "java/android/media/MediaTranscodingManager.java",
+    ],
+    path: "java",
+}
+
+java_sdk_library {
+    name: "framework-media",
+    defaults: ["framework-module-defaults"],
+
+    // This is only used to define the APIs for updatable-media.
+    api_only: true,
+
+    srcs: [
+        ":updatable-media-srcs",
+    ],
+
+    impl_library_visibility: ["//frameworks/av/apex:__subpackages__"],
+}
+
+cc_library_shared {
+    name: "libmediaparser-jni",
+    srcs: [
+        "jni/android_media_MediaParserJNI.cpp",
+    ],
+    header_libs: ["jni_headers"],
+    shared_libs: [
+        "libandroid",
+        "liblog",
+        "libmediametrics",
+    ],
+    cflags: [
+        "-Wall",
+        "-Werror",
+        "-Wno-unused-parameter",
+        "-Wunreachable-code",
+        "-Wunused",
+    ],
+    apex_available: [
+        "com.android.media",
+    ],
+    min_sdk_version: "29",
+}

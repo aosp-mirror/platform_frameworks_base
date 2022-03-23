@@ -17,8 +17,6 @@
 package com.android.server;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
-import android.annotation.UserIdInt;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
@@ -34,9 +32,6 @@ import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.util.FastPrintWriter;
-import com.android.server.pm.Computer;
-import com.android.server.pm.pkg.PackageStateInternal;
-import com.android.server.pm.snapshot.PackageDataSnapshot;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -56,7 +51,7 @@ public abstract class IntentResolver<F, R extends Object> {
     final private static boolean localLOGV = DEBUG || false;
     final private static boolean localVerificationLOGV = DEBUG || false;
 
-    public void addFilter(@Nullable PackageDataSnapshot snapshot, F f) {
+    public void addFilter(F f) {
         IntentFilter intentFilter = getIntentFilter(f);
         if (localLOGV) {
             Slog.v(TAG, "Adding filter: " + f);
@@ -150,47 +145,6 @@ public abstract class IntentResolver<F, R extends Object> {
             }
         }
         return true;
-    }
-
-    /**
-     * Returns whether an intent matches the IntentFilter with a pre-resolved type.
-     */
-    public static boolean intentMatchesFilter(
-            IntentFilter filter, Intent intent, String resolvedType) {
-        final boolean debug = localLOGV
-                || ((intent.getFlags() & Intent.FLAG_DEBUG_LOG_RESOLUTION) != 0);
-
-        final Printer logPrinter = debug
-                ? new LogPrinter(Log.VERBOSE, TAG, Log.LOG_ID_SYSTEM) : null;
-
-        if (debug) {
-            Slog.v(TAG, "Intent: " + intent);
-            Slog.v(TAG, "Matching against filter: " + filter);
-            filter.dump(logPrinter, "  ");
-        }
-
-        final int match = filter.match(intent.getAction(), resolvedType, intent.getScheme(),
-                intent.getData(), intent.getCategories(), TAG);
-
-        if (match >= 0) {
-            if (debug) {
-                Slog.v(TAG, "Filter matched!  match=0x" + Integer.toHexString(match));
-            }
-            return true;
-        } else {
-            if (debug) {
-                final String reason;
-                switch (match) {
-                    case IntentFilter.NO_MATCH_ACTION: reason = "action"; break;
-                    case IntentFilter.NO_MATCH_CATEGORY: reason = "category"; break;
-                    case IntentFilter.NO_MATCH_DATA: reason = "data"; break;
-                    case IntentFilter.NO_MATCH_TYPE: reason = "type"; break;
-                    default: reason = "unknown reason"; break;
-                }
-                Slog.v(TAG, "Filter did not match: " + reason);
-            }
-            return false;
-        }
     }
 
     private ArrayList<F> collectFilters(F[] array, IntentFilter matching) {
@@ -425,9 +379,8 @@ public abstract class IntentResolver<F, R extends Object> {
         return Collections.unmodifiableSet(mFilters);
     }
 
-    public List<R> queryIntentFromList(@NonNull Computer computer, Intent intent,
-            String resolvedType, boolean defaultOnly, ArrayList<F[]> listCut, int userId,
-            long customFlags) {
+    public List<R> queryIntentFromList(Intent intent, String resolvedType, boolean defaultOnly,
+            ArrayList<F[]> listCut, int userId) {
         ArrayList<R> resultList = new ArrayList<R>();
 
         final boolean debug = localLOGV ||
@@ -437,21 +390,16 @@ public abstract class IntentResolver<F, R extends Object> {
         final String scheme = intent.getScheme();
         int N = listCut.size();
         for (int i = 0; i < N; ++i) {
-            buildResolveList(computer, intent, categories, debug, defaultOnly, resolvedType, scheme,
-                    listCut.get(i), resultList, userId, customFlags);
+            buildResolveList(intent, categories, debug, defaultOnly, resolvedType, scheme,
+                    listCut.get(i), resultList, userId);
         }
         filterResults(resultList);
         sortResults(resultList);
         return resultList;
     }
 
-    public List<R> queryIntent(@NonNull PackageDataSnapshot snapshot, Intent intent,
-            String resolvedType, boolean defaultOnly, @UserIdInt int userId) {
-        return queryIntent(snapshot, intent, resolvedType, defaultOnly, userId, 0);
-    }
-
-    protected final List<R> queryIntent(@NonNull PackageDataSnapshot snapshot, Intent intent,
-            String resolvedType, boolean defaultOnly, @UserIdInt int userId, long customFlags) {
+    public List<R> queryIntent(Intent intent, String resolvedType, boolean defaultOnly,
+            int userId) {
         String scheme = intent.getScheme();
 
         ArrayList<R> finalList = new ArrayList<R>();
@@ -523,22 +471,21 @@ public abstract class IntentResolver<F, R extends Object> {
         }
 
         FastImmutableArraySet<String> categories = getFastIntentCategories(intent);
-        Computer computer = (Computer) snapshot;
         if (firstTypeCut != null) {
-            buildResolveList(computer, intent, categories, debug, defaultOnly, resolvedType,
-                    scheme, firstTypeCut, finalList, userId, customFlags);
+            buildResolveList(intent, categories, debug, defaultOnly, resolvedType,
+                    scheme, firstTypeCut, finalList, userId);
         }
         if (secondTypeCut != null) {
-            buildResolveList(computer, intent, categories, debug, defaultOnly, resolvedType,
-                    scheme, secondTypeCut, finalList, userId, customFlags);
+            buildResolveList(intent, categories, debug, defaultOnly, resolvedType,
+                    scheme, secondTypeCut, finalList, userId);
         }
         if (thirdTypeCut != null) {
-            buildResolveList(computer, intent, categories, debug, defaultOnly, resolvedType,
-                    scheme, thirdTypeCut, finalList, userId, customFlags);
+            buildResolveList(intent, categories, debug, defaultOnly, resolvedType,
+                    scheme, thirdTypeCut, finalList, userId);
         }
         if (schemeCut != null) {
-            buildResolveList(computer, intent, categories, debug, defaultOnly, resolvedType,
-                    scheme, schemeCut, finalList, userId, customFlags);
+            buildResolveList(intent, categories, debug, defaultOnly, resolvedType,
+                    scheme, schemeCut, finalList, userId);
         }
         filterResults(finalList);
         sortResults(finalList);
@@ -566,7 +513,7 @@ public abstract class IntentResolver<F, R extends Object> {
      * "stopped", that is whether it should not be included in the result
      * if the intent requests to excluded stopped objects.
      */
-    protected boolean isFilterStopped(PackageStateInternal packageState, @UserIdInt int userId) {
+    protected boolean isFilterStopped(F filter, int userId) {
         return false;
     }
 
@@ -596,8 +543,7 @@ public abstract class IntentResolver<F, R extends Object> {
     protected abstract F[] newArray(int size);
 
     @SuppressWarnings("unchecked")
-    protected R newResult(@NonNull Computer computer, F filter, int match, int userId,
-            long customFlags) {
+    protected R newResult(F filter, int match, int userId) {
         return (R)filter;
     }
 
@@ -777,10 +723,9 @@ public abstract class IntentResolver<F, R extends Object> {
         return new FastImmutableArraySet<String>(categories.toArray(new String[categories.size()]));
     }
 
-    private void buildResolveList(@NonNull Computer computer, Intent intent,
-            FastImmutableArraySet<String> categories, boolean debug, boolean defaultOnly,
-            String resolvedType, String scheme, F[] src, List<R> dest, int userId,
-            long customFlags) {
+    private void buildResolveList(Intent intent, FastImmutableArraySet<String> categories,
+            boolean debug, boolean defaultOnly, String resolvedType, String scheme,
+            F[] src, List<R> dest, int userId) {
         final String action = intent.getAction();
         final Uri data = intent.getData();
         final String packageName = intent.getPackage();
@@ -805,8 +750,7 @@ public abstract class IntentResolver<F, R extends Object> {
             int match;
             if (debug) Slog.v(TAG, "Matching against filter " + filter);
 
-            if (excludingStopped && isFilterStopped(computer.getPackageStateInternal(packageName),
-                    userId)) {
+            if (excludingStopped && isFilterStopped(filter, userId)) {
                 if (debug) {
                     Slog.v(TAG, "  Filter's target is stopped; skipping");
                 }
@@ -848,7 +792,7 @@ public abstract class IntentResolver<F, R extends Object> {
                         Integer.toHexString(match) + " hasDefault="
                         + intentFilter.hasCategory(Intent.CATEGORY_DEFAULT));
                 if (!defaultOnly || intentFilter.hasCategory(Intent.CATEGORY_DEFAULT)) {
-                    final R oneResult = newResult(computer, filter, match, userId, customFlags);
+                    final R oneResult = newResult(filter, match, userId);
                     if (debug) Slog.v(TAG, "    Created result: " + oneResult);
                     if (oneResult != null) {
                         dest.add(oneResult);

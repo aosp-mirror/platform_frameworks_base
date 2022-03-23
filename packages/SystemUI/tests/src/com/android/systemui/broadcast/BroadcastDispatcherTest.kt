@@ -31,7 +31,6 @@ import com.android.systemui.broadcast.logging.BroadcastDispatcherLogger
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.util.concurrency.FakeExecutor
-import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.time.FakeSystemClock
 import junit.framework.Assert.assertSame
 import org.junit.Before
@@ -55,7 +54,6 @@ class BroadcastDispatcherTest : SysuiTestCase() {
     companion object {
         val user0 = UserHandle.of(0)
         val user1 = UserHandle.of(1)
-        const val DEFAULT_FLAG = Context.RECEIVER_EXPORTED
 
         fun <T> capture(argumentCaptor: ArgumentCaptor<T>): T = argumentCaptor.capture()
         const val TEST_ACTION = "TEST_ACTION"
@@ -98,7 +96,6 @@ class BroadcastDispatcherTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
         testableLooper = TestableLooper.get(this)
         executor = FakeExecutor(FakeSystemClock())
-        `when`(mockContext.mainExecutor).thenReturn(executor)
 
         broadcastDispatcher = TestBroadcastDispatcher(
                 mockContext,
@@ -124,12 +121,12 @@ class BroadcastDispatcherTest : SysuiTestCase() {
 
         testableLooper.processAllMessages()
 
-        verify(mockUBRUser0).registerReceiver(capture(argumentCaptor), eq(DEFAULT_FLAG))
+        verify(mockUBRUser0).registerReceiver(capture(argumentCaptor))
 
         assertSame(broadcastReceiver, argumentCaptor.value.receiver)
         assertSame(intentFilter, argumentCaptor.value.filter)
 
-        verify(mockUBRUser1).registerReceiver(capture(argumentCaptor), eq(DEFAULT_FLAG))
+        verify(mockUBRUser1).registerReceiver(capture(argumentCaptor))
         assertSame(broadcastReceiverOther, argumentCaptor.value.receiver)
         assertSame(intentFilterOther, argumentCaptor.value.filter)
     }
@@ -142,64 +139,14 @@ class BroadcastDispatcherTest : SysuiTestCase() {
 
         testableLooper.processAllMessages()
 
-        verify(mockUBRUser0).registerReceiver(capture(argumentCaptor), eq(DEFAULT_FLAG))
+        verify(mockUBRUser0).registerReceiver(capture(argumentCaptor))
 
         assertSame(broadcastReceiver, argumentCaptor.value.receiver)
         assertSame(intentFilter, argumentCaptor.value.filter)
 
-        verify(mockUBRUser1).registerReceiver(capture(argumentCaptor), eq(DEFAULT_FLAG))
+        verify(mockUBRUser1).registerReceiver(capture(argumentCaptor))
         assertSame(broadcastReceiverOther, argumentCaptor.value.receiver)
         assertSame(intentFilterOther, argumentCaptor.value.filter)
-    }
-
-    @Test
-    fun testAddReceiverDefaultFlag_handler() {
-        broadcastDispatcher.registerReceiverWithHandler(
-                broadcastReceiver, intentFilter, mockHandler)
-        testableLooper.processAllMessages()
-
-        verify(mockUBRUser0).registerReceiver(capture(argumentCaptor), eq(DEFAULT_FLAG))
-
-        assertSame(broadcastReceiver, argumentCaptor.value.receiver)
-        assertSame(intentFilter, argumentCaptor.value.filter)
-    }
-
-    @Test
-    fun testAddReceiverCorrectFlag_handler() {
-        val flag = 3
-
-        broadcastDispatcher.registerReceiverWithHandler(
-                broadcastReceiver, intentFilter, mockHandler, flags = flag)
-        testableLooper.processAllMessages()
-
-        verify(mockUBRUser0).registerReceiver(capture(argumentCaptor), eq(flag))
-
-        assertSame(broadcastReceiver, argumentCaptor.value.receiver)
-        assertSame(intentFilter, argumentCaptor.value.filter)
-    }
-
-    @Test
-    fun testAddReceiverDefaultFlag_executor() {
-        broadcastDispatcher.registerReceiver(broadcastReceiver, intentFilter)
-        testableLooper.processAllMessages()
-
-        verify(mockUBRUser0).registerReceiver(capture(argumentCaptor), eq(DEFAULT_FLAG))
-
-        assertSame(broadcastReceiver, argumentCaptor.value.receiver)
-        assertSame(intentFilter, argumentCaptor.value.filter)
-    }
-
-    @Test
-    fun testAddReceiverCorrectFlag_executor() {
-        val flag = 3
-
-        broadcastDispatcher.registerReceiver(broadcastReceiver, intentFilter, flags = flag)
-        testableLooper.processAllMessages()
-
-        verify(mockUBRUser0).registerReceiver(capture(argumentCaptor), eq(flag))
-
-        assertSame(broadcastReceiver, argumentCaptor.value.receiver)
-        assertSame(intentFilter, argumentCaptor.value.filter)
     }
 
     @Test
@@ -241,8 +188,7 @@ class BroadcastDispatcherTest : SysuiTestCase() {
 
         testableLooper.processAllMessages()
 
-        verify(mockUBRUser1).registerReceiver(
-                capture(argumentCaptor), eq(Context.RECEIVER_EXPORTED))
+        verify(mockUBRUser1).registerReceiver(capture(argumentCaptor))
         assertSame(broadcastReceiver, argumentCaptor.value.receiver)
     }
 

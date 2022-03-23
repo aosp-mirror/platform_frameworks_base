@@ -29,7 +29,6 @@ import android.view.ViewTreeObserver;
 import android.view.ViewTreeObserver.OnComputeInternalInsetsListener;
 import android.view.WindowInsets;
 
-import com.android.internal.policy.SystemBarUtils;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.ScreenDecorations;
@@ -59,7 +58,7 @@ public final class StatusBarTouchableRegionManager implements Dumpable {
 
     private boolean mIsStatusBarExpanded = false;
     private boolean mShouldAdjustInsets = false;
-    private CentralSurfaces mCentralSurfaces;
+    private StatusBar mStatusBar;
     private View mNotificationShadeWindowView;
     private View mNotificationPanelView;
     private boolean mForceCollapsedUntilLayout = false;
@@ -84,7 +83,7 @@ public final class StatusBarTouchableRegionManager implements Dumpable {
             }
 
             @Override
-            public void onThemeChanged() {
+            public void onOverlayChanged() {
                 initResources();
             }
         });
@@ -119,9 +118,9 @@ public final class StatusBarTouchableRegionManager implements Dumpable {
     }
 
     protected void setup(
-            @NonNull CentralSurfaces centralSurfaces,
+            @NonNull StatusBar statusBar,
             @NonNull View notificationShadeWindowView) {
-        mCentralSurfaces = centralSurfaces;
+        mStatusBar = statusBar;
         mNotificationShadeWindowView = notificationShadeWindowView;
         mNotificationPanelView = mNotificationShadeWindowView.findViewById(R.id.notification_panel);
     }
@@ -173,7 +172,8 @@ public final class StatusBarTouchableRegionManager implements Dumpable {
         Resources resources = mContext.getResources();
         mDisplayCutoutTouchableRegionSize = resources.getDimensionPixelSize(
                 com.android.internal.R.dimen.display_cutout_touchable_region_size);
-        mStatusBarHeight = SystemBarUtils.getStatusBarHeight(mContext);
+        mStatusBarHeight =
+                resources.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_height);
     }
 
     /**
@@ -246,7 +246,7 @@ public final class StatusBarTouchableRegionManager implements Dumpable {
             new OnComputeInternalInsetsListener() {
         @Override
         public void onComputeInternalInsets(ViewTreeObserver.InternalInsetsInfo info) {
-            if (mIsStatusBarExpanded || mCentralSurfaces.isBouncerShowing()) {
+            if (mIsStatusBarExpanded || mStatusBar.isBouncerShowing()) {
                 // The touchable region is always the full area when expanded
                 return;
             }

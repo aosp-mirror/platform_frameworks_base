@@ -428,7 +428,7 @@ public class ImageFormat {
 
     /**
      * <p>Private raw camera sensor image format, a single channel image with
-     * implementation dependent pixel layout.</p>
+     * implementation depedent pixel layout.</p>
      *
      * <p>RAW_PRIVATE is a format for unprocessed raw image buffers coming from an
      * image sensor. The actual structure of buffers of this format is
@@ -827,7 +827,7 @@ public class ImageFormat {
             case RAW_SENSOR:
                 return 16;
             case YCBCR_P010:
-                return 24;
+                return 20;
             case RAW_DEPTH10:
             case RAW10:
                 return 10;

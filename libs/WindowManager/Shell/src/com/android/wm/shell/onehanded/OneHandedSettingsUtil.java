@@ -171,22 +171,9 @@ public final class OneHandedSettingsUtil {
      * @return true if user enabled one-handed shortcut in settings, false otherwise.
      */
     public boolean getShortcutEnabled(ContentResolver resolver, int userId) {
-        // Checks SOFTWARE_SHORTCUT_KEY
-        final String targetsSwKey = Settings.Secure.getStringForUser(resolver,
+        final String targets = Settings.Secure.getStringForUser(resolver,
                 Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS, userId);
-        if (!TextUtils.isEmpty(targetsSwKey) && targetsSwKey.contains(
-                ONE_HANDED_MODE_TARGET_NAME)) {
-            return true;
-        }
-
-        // Checks HARDWARE_SHORTCUT_KEY
-        final String targetsHwKey = Settings.Secure.getStringForUser(resolver,
-                Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE, userId);
-        if (!TextUtils.isEmpty(targetsHwKey) && targetsHwKey.contains(
-                ONE_HANDED_MODE_TARGET_NAME)) {
-            return true;
-        }
-        return false;
+        return TextUtils.isEmpty(targets) ? false : targets.contains(ONE_HANDED_MODE_TARGET_NAME);
     }
 
     /**
@@ -244,8 +231,6 @@ public final class OneHandedSettingsUtil {
         pw.println(TAG);
         pw.print(innerPrefix + "isOneHandedModeEnable=");
         pw.println(getSettingsOneHandedModeEnabled(resolver, userId));
-        pw.print(innerPrefix + "isSwipeToNotificationEnabled=");
-        pw.println(getSettingsSwipeToNotificationEnabled(resolver, userId));
         pw.print(innerPrefix + "oneHandedTimeOut=");
         pw.println(getSettingsOneHandedModeTimeout(resolver, userId));
         pw.print(innerPrefix + "tapsAppToExit=");

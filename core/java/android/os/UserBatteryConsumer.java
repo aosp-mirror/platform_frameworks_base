@@ -35,35 +35,60 @@ import java.util.List;
  *
  * {@hide}
  */
-public class UserBatteryConsumer extends BatteryConsumer {
-    static final int CONSUMER_TYPE_USER = 2;
+public class UserBatteryConsumer extends BatteryConsumer implements Parcelable {
+    private final int mUserId;
 
-    private static final int COLUMN_INDEX_USER_ID = BatteryConsumer.COLUMN_COUNT;
-
-    static final int COLUMN_COUNT = BatteryConsumer.COLUMN_COUNT + 1;
-
-    UserBatteryConsumer(BatteryConsumerData data) {
-        super(data);
+    public int getUserId() {
+        return mUserId;
     }
 
     private UserBatteryConsumer(@NonNull UserBatteryConsumer.Builder builder) {
-        super(builder.mData, builder.mPowerComponentsBuilder.build());
+        super(builder.mPowerComponentsBuilder.build());
+        mUserId = builder.mUserId;
     }
 
-    public int getUserId() {
-        return mData.getInt(COLUMN_INDEX_USER_ID);
+    private UserBatteryConsumer(Parcel in) {
+        super(new PowerComponents(in));
+        mUserId = in.readInt();
+    }
+
+    /**
+     * Writes the contents into a Parcel.
+     */
+    @Override
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
+        super.writeToParcel(dest, flags);
+        dest.writeInt(mUserId);
     }
 
     @Override
     public void dump(PrintWriter pw, boolean skipEmptyComponents) {
         final double consumedPower = getConsumedPower();
         pw.print("User ");
-        pw.print(getUserId());
+        pw.print(mUserId);
         pw.print(": ");
         PowerCalculator.printPowerMah(pw, consumedPower);
         pw.print(" ( ");
         mPowerComponents.dump(pw, skipEmptyComponents  /* skipTotalPowerComponent */);
         pw.print(" ) ");
+    }
+
+    public static final Creator<UserBatteryConsumer> CREATOR =
+            new Creator<UserBatteryConsumer>() {
+                @Override
+                public UserBatteryConsumer createFromParcel(Parcel in) {
+                    return new UserBatteryConsumer(in);
+                }
+
+                @Override
+                public UserBatteryConsumer[] newArray(int size) {
+                    return new UserBatteryConsumer[size];
+                }
+            };
+
+    @Override
+    public int describeContents() {
+        return 0;
     }
 
     /** Serializes this object to XML */
@@ -106,11 +131,13 @@ public class UserBatteryConsumer extends BatteryConsumer {
      * Builder for UserBatteryConsumer.
      */
     public static final class Builder extends BaseBuilder<Builder> {
+        private final int mUserId;
         private List<UidBatteryConsumer.Builder> mUidBatteryConsumers;
 
-        Builder(BatteryConsumerData data, int userId) {
-            super(data, CONSUMER_TYPE_USER);
-            data.putLong(COLUMN_INDEX_USER_ID, userId);
+        Builder(@NonNull String[] customPowerComponentNames, boolean includePowerModels,
+                int userId) {
+            super(customPowerComponentNames, includePowerModels);
+            mUserId = userId;
         }
 
         /**

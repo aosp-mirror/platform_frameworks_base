@@ -18,7 +18,6 @@ package android.view.autofill;
 
 import static android.service.autofill.FillRequest.FLAG_MANUAL_REQUEST;
 import static android.service.autofill.FillRequest.FLAG_PASSWORD_INPUT_TYPE;
-import static android.service.autofill.FillRequest.FLAG_SUPPORTS_FILL_DIALOG;
 import static android.service.autofill.FillRequest.FLAG_VIEW_NOT_FOCUSED;
 import static android.view.ContentInfo.SOURCE_AUTOFILL;
 import static android.view.autofill.Helper.sDebug;
@@ -26,7 +25,6 @@ import static android.view.autofill.Helper.sVerbose;
 import static android.view.autofill.Helper.toList;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
-import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -47,22 +45,16 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.Rect;
 import android.metrics.LogMaker;
-import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.CancellationSignal;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.ICancellationSignal;
 import android.os.Looper;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.SystemClock;
-import android.provider.DeviceConfig;
 import android.service.autofill.AutofillService;
-import android.service.autofill.FillCallback;
 import android.service.autofill.FillEventHistory;
-import android.service.autofill.IFillCallback;
 import android.service.autofill.UserData;
 import android.text.TextUtils;
 import android.util.ArrayMap;
@@ -82,7 +74,6 @@ import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeProvider;
 import android.view.accessibility.AccessibilityWindowInfo;
-import android.view.inputmethod.InlineSuggestionsRequest;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -92,6 +83,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.Preconditions;
 import com.android.internal.util.SyncResultReceiver;
 
 import org.xmlpull.v1.XmlPullParserException;
@@ -107,7 +99,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.Executor;
 
 import sun.misc.Cleaner;
 
@@ -175,12 +166,6 @@ import sun.misc.Cleaner;
  * <p>Finally, after the autofill context is commited (i.e., not cancelled), the Android System
  * shows an autofill save UI if the value of savable views have changed. If the user selects the
  * option to Save, the current value of the views is then sent to the autofill service.
- *
- * <p>There is another choice for the application to provide it's datasets to the Autofill framework
- * by setting an {@link AutofillRequestCallback} through
- * {@link #setAutofillRequestCallback(Executor, AutofillRequestCallback)}. The application can use
- * its callback instead of the default {@link AutofillService}. See
- * {@link AutofillRequestCallback} for more details.
  *
  * <h3 id="additional-notes">Additional notes</h3>
  *
@@ -307,7 +292,6 @@ public final class AutofillManager {
     /** @hide */ public static final int FLAG_ADD_CLIENT_DEBUG = 0x2;
     /** @hide */ public static final int FLAG_ADD_CLIENT_VERBOSE = 0x4;
     /** @hide */ public static final int FLAG_ADD_CLIENT_ENABLED_FOR_AUGMENTED_AUTOFILL_ONLY = 0x8;
-    /** @hide */ public static final int FLAG_ENABLED_CLIENT_SUGGESTIONS = 0x20;
 
     // NOTE: flag below is used by the session start receiver only, hence it can have values above
     /** @hide */ public static final int RECEIVER_FLAG_SESSION_FOR_AUGMENTED_AUTOFILL_ONLY = 0x1;
@@ -474,33 +458,6 @@ public final class AutofillManager {
     public static final String DEVICE_CONFIG_AUGMENTED_SERVICE_REQUEST_TIMEOUT =
             "augmented_service_request_timeout";
 
-    /**
-     * Sets allowed list for the autofill compatibility mode.
-     *
-     * The list of packages is {@code ":"} colon delimited, and each entry has the name of the
-     * package and an optional list of url bar resource ids (the list is delimited by
-     * brackets&mdash{@code [} and {@code ]}&mdash and is also comma delimited).
-     *
-     * <p>For example, a list with 3 packages {@code p1}, {@code p2}, and {@code p3}, where
-     * package {@code p1} have one id ({@code url_bar}, {@code p2} has none, and {@code p3 }
-     * have 2 ids {@code url_foo} and {@code url_bas}) would be
-     * {@code p1[url_bar]:p2:p3[url_foo,url_bas]}
-     *
-     * @hide
-     */
-    @TestApi
-    public static final String DEVICE_CONFIG_AUTOFILL_COMPAT_MODE_ALLOWED_PACKAGES =
-            "compat_mode_allowed_packages";
-
-    /**
-     * Sets the fill dialog feature enabled or not.
-     *
-     * @hide
-     */
-    @TestApi
-    public static final String DEVICE_CONFIG_AUTOFILL_DIALOG_ENABLED =
-            "autofill_dialog_enabled";
-
     /** @hide */
     public static final int RESULT_OK = 0;
     /** @hide */
@@ -548,8 +505,6 @@ public final class AutofillManager {
      * {@hide}
      */
     public static final int NO_SESSION = Integer.MAX_VALUE;
-
-    private static final boolean HAS_FILL_DIALOG_UI_FEATURE_DEFAULT = false;
 
     private final IAutoFillManager mService;
 
@@ -636,36 +591,6 @@ public final class AutofillManager {
      */
     @GuardedBy("mLock")
     private boolean mEnabledForAugmentedAutofillOnly;
-
-    @GuardedBy("mLock")
-    @Nullable private AutofillRequestCallback mAutofillRequestCallback;
-    @GuardedBy("mLock")
-    @Nullable private Executor mRequestCallbackExecutor;
-
-    /**
-     * Indicates whether there are any fields that need to do a fill request
-     * after the activity starts.
-     *
-     * Note: This field will be set to true multiple times if there are many
-     * autofillable views. So needs to check mIsFillRequested at the same time to
-     * avoid re-trigger autofill.
-     */
-    private boolean mRequireAutofill;
-
-    /**
-     * Indicates whether there is already a field to do a fill request after
-     * the activity started.
-     *
-     * Autofill will automatically trigger a fill request after activity
-     * start if there is any field is autofillable. But if there is a field that
-     * triggered autofill, it is unnecessary to trigger again through
-     * AutofillManager#notifyViewEnteredForActivityStarted.
-     */
-    private boolean mIsFillRequested;
-
-    @Nullable private List<AutofillId> mFillDialogTriggerIds;
-
-    private final boolean mIsFillDialogEnabled;
 
     /** @hide */
     public interface AutofillClient {
@@ -801,19 +726,9 @@ public final class AutofillManager {
      * @hide
      */
     public AutofillManager(Context context, IAutoFillManager service) {
-        mContext = Objects.requireNonNull(context, "context cannot be null");
+        mContext = Preconditions.checkNotNull(context, "context cannot be null");
         mService = service;
         mOptions = context.getAutofillOptions();
-        mIsFillRequested = false;
-        mRequireAutofill = false;
-
-        mIsFillDialogEnabled = DeviceConfig.getBoolean(
-                DeviceConfig.NAMESPACE_AUTOFILL,
-                DEVICE_CONFIG_AUTOFILL_DIALOG_ENABLED,
-                HAS_FILL_DIALOG_UI_FEATURE_DEFAULT);
-        if (sDebug) {
-            Log.d(TAG, "Fill dialog is enabled:" + mIsFillDialogEnabled);
-        }
 
         if (mOptions != null) {
             sDebug = (mOptions.loggingLevel & FLAG_ADD_CLIENT_DEBUG) != 0;
@@ -1090,39 +1005,6 @@ public final class AutofillManager {
         notifyViewEntered(view, 0);
     }
 
-    /**
-     * The view is autofillable, marked to perform a fill request after layout if
-     * the field does not trigger a fill request.
-     *
-     * @hide
-     */
-    public void enableFillRequestActivityStarted() {
-        mRequireAutofill = true;
-    }
-
-    private boolean hasFillDialogUiFeature() {
-        return mIsFillDialogEnabled;
-    }
-
-    /**
-     * Notify autofill to do a fill request while the activity started.
-     *
-     * @hide
-     */
-    public void notifyViewEnteredForActivityStarted(@NonNull View view) {
-        if (!hasAutofillFeature() || !hasFillDialogUiFeature()) {
-            return;
-        }
-
-        if (!mRequireAutofill || mIsFillRequested) {
-            return;
-        }
-
-        int flags = FLAG_SUPPORTS_FILL_DIALOG;
-        flags |= FLAG_VIEW_NOT_FOCUSED;
-        notifyViewEntered(view, flags);
-    }
-
     @GuardedBy("mLock")
     private boolean shouldIgnoreViewEnteredLocked(@NonNull AutofillId id, int flags) {
         if (isDisabledByServiceLocked()) {
@@ -1163,7 +1045,6 @@ public final class AutofillManager {
         }
         AutofillCallback callback;
         synchronized (mLock) {
-            mIsFillRequested = true;
             callback = notifyViewEnteredLocked(view, flags);
         }
 
@@ -1955,32 +1836,6 @@ public final class AutofillManager {
         return new AutofillId(parent.getAutofillViewId(), virtualId);
     }
 
-    /**
-     * Sets the client's suggestions callback for autofill.
-     *
-     * @see AutofillRequestCallback
-     *
-     * @param executor specifies the thread upon which the callbacks will be invoked.
-     * @param callback which handles autofill request to provide client's suggestions.
-     */
-    public void setAutofillRequestCallback(@NonNull @CallbackExecutor Executor executor,
-            @NonNull AutofillRequestCallback callback) {
-        synchronized (mLock) {
-            mRequestCallbackExecutor = executor;
-            mAutofillRequestCallback = callback;
-        }
-    }
-
-    /**
-     * clears the client's suggestions callback for autofill.
-     */
-    public void clearAutofillRequestCallback() {
-        synchronized (mLock) {
-            mRequestCallbackExecutor = null;
-            mAutofillRequestCallback = null;
-        }
-    }
-
     @GuardedBy("mLock")
     private void startSessionLocked(@NonNull AutofillId id, @NonNull Rect bounds,
             @NonNull AutofillValue value, int flags) {
@@ -2039,13 +1894,6 @@ public final class AutofillManager {
                     client.autofillClientResetableStateAvailable();
                     return;
                 }
-            }
-
-            if (mAutofillRequestCallback != null) {
-                if (sDebug) {
-                    Log.d(TAG, "startSession with the client suggestions provider");
-                }
-                flags |= FLAG_ENABLED_CLIENT_SUGGESTIONS;
             }
 
             mService.startSession(client.autofillClientGetActivityToken(),
@@ -2108,8 +1956,6 @@ public final class AutofillManager {
         mFillableIds = null;
         mSaveTriggerId = null;
         mIdShownFillUi = null;
-        mIsFillRequested = false;
-        mRequireAutofill = false;
         if (resetEnteredIds) {
             mEnteredIds = null;
         }
@@ -2396,28 +2242,6 @@ public final class AutofillManager {
                     client.autofillClientDispatchUnhandledKey(anchor, keyEvent);
                 }
             }
-        }
-    }
-
-    private void onFillRequest(InlineSuggestionsRequest request,
-            CancellationSignal cancellationSignal, FillCallback callback) {
-        final AutofillRequestCallback autofillRequestCallback;
-        final Executor executor;
-        synchronized (mLock) {
-            autofillRequestCallback = mAutofillRequestCallback;
-            executor = mRequestCallbackExecutor;
-        }
-        if (autofillRequestCallback != null && executor != null) {
-            final long ident = Binder.clearCallingIdentity();
-            try {
-                executor.execute(() ->
-                        autofillRequestCallback.onFillRequest(
-                                request, cancellationSignal, callback));
-            } finally {
-                Binder.restoreCallingIdentity(ident);
-            }
-        } else {
-            callback.onSuccess(null);
         }
     }
 
@@ -3032,7 +2856,6 @@ public final class AutofillManager {
         }
         pw.print(pfx); pw.print("compat mode enabled: ");
         synchronized (mLock) {
-            pw.print(pfx); pw.print("fill dialog enabled: "); pw.println(mIsFillDialogEnabled);
             if (mCompatibilityBridge != null) {
                 final String pfx2 = pfx + "  ";
                 pw.println("true");
@@ -3114,71 +2937,6 @@ public final class AutofillManager {
             return;
         }
         client.autofillClientRunOnUiThread(runnable);
-    }
-
-    private void setFillDialogTriggerIds(@Nullable List<AutofillId> ids) {
-        mFillDialogTriggerIds = ids;
-    }
-
-    /**
-     * If autofill suggestions for a
-     * <a href="{@docRoot}reference/android/service/autofill/Dataset.html#FillDialogUI">
-     * dialog-style UI</a> are available for {@code view}, shows a dialog allowing the user to
-     * select a suggestion and returns {@code true}.
-     * <p>
-     * The dialog may not be available if the autofill service does not support it, or if the
-     * autofill request has not returned a response yet.
-     * <p>
-     * It is recommended apps to call this method the first time a user focuses on
-     * an autofill-able form, and to avoid showing the input method if the dialog is shown. If
-     * this method returns {@code false}, you should then instead show the input method (assuming
-     * that is how the view normally handles the focus event). If the user re-focuses on the view,
-     * you should not call this method again so as to not disrupt usage of the input method.
-     *
-     * @param view the view for which to show autofill suggestions. This is typically a view
-     *             receiving a focus event. The autofill suggestions shown will include content for
-     *             related views as well.
-     * @return {@code true} if the autofill dialog is being shown
-     */
-    // TODO(b/210926084): Consider whether to include the one-time show logic within this method.
-    public boolean showAutofillDialog(@NonNull View view) {
-        Objects.requireNonNull(view);
-        if (shouldShowAutofillDialog(view.getAutofillId())) {
-            // If the id matches a trigger id, this will trigger the fill dialog.
-            notifyViewEntered(view);
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * Like {@link #showAutofillDialog(View)} but for virtual views.
-     *
-     * @param virtualId id identifying the virtual child inside the parent view.
-     */
-    // TODO(b/210926084): Consider whether to include the one-time show logic within this method.
-    public boolean showAutofillDialog(@NonNull View view, int virtualId) {
-        Objects.requireNonNull(view);
-        if (shouldShowAutofillDialog(getAutofillId(view, virtualId))) {
-            // If the id matches a trigger id, this will trigger the fill dialog.
-            notifyViewEntered(view, virtualId, /* bounds= */ null, /* flags= */ 0);
-            return true;
-        }
-        return false;
-    }
-
-    private boolean shouldShowAutofillDialog(AutofillId id) {
-        if (!hasFillDialogUiFeature() || mFillDialogTriggerIds == null) {
-            return false;
-        }
-        final int size = mFillDialogTriggerIds.size();
-        for (int i = 0; i < size; i++) {
-            AutofillId fillId = mFillDialogTriggerIds.get(i);
-            if (fillId.equalsIgnoreSession(id)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     /**
@@ -3867,30 +3625,6 @@ public final class AutofillManager {
             final AutofillManager afm = mAfm.get();
             if (afm != null) {
                 afm.post(() -> afm.requestShowSoftInput(id));
-            }
-        }
-
-        @Override
-        public void requestFillFromClient(int id, InlineSuggestionsRequest request,
-                IFillCallback callback) {
-            final AutofillManager afm = mAfm.get();
-            if (afm != null) {
-                ICancellationSignal transport = CancellationSignal.createTransport();
-                try {
-                    callback.onCancellable(transport);
-                } catch (RemoteException e) {
-                    Slog.w(TAG, "Error requesting a cancellation", e);
-                }
-
-                afm.onFillRequest(request, CancellationSignal.fromTransport(transport),
-                        new FillCallback(callback, id));
-            }
-        }
-
-        public void notifyFillDialogTriggerIds(List<AutofillId> ids) {
-            final AutofillManager afm = mAfm.get();
-            if (afm != null) {
-                afm.post(() -> afm.setFillDialogTriggerIds(ids));
             }
         }
     }

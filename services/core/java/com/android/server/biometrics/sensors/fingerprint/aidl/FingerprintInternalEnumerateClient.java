@@ -18,39 +18,37 @@ package com.android.server.biometrics.sensors.fingerprint.aidl;
 
 import android.annotation.NonNull;
 import android.content.Context;
+import android.hardware.biometrics.BiometricsProtoEnums;
+import android.hardware.biometrics.fingerprint.ISession;
 import android.hardware.fingerprint.Fingerprint;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
 
-import com.android.server.biometrics.log.BiometricContext;
-import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.sensors.BiometricUtils;
 import com.android.server.biometrics.sensors.InternalEnumerateClient;
 
 import java.util.List;
-import java.util.function.Supplier;
 
 /**
  * Fingerprint-specific internal client supporting the
  * {@link android.hardware.biometrics.fingerprint.IFingerprint} AIDL interface.
  */
-class FingerprintInternalEnumerateClient extends InternalEnumerateClient<AidlSession> {
+class FingerprintInternalEnumerateClient extends InternalEnumerateClient<ISession> {
     private static final String TAG = "FingerprintInternalEnumerateClient";
 
     protected FingerprintInternalEnumerateClient(@NonNull Context context,
-            @NonNull Supplier<AidlSession> lazyDaemon, @NonNull IBinder token, int userId,
+            @NonNull LazyDaemon<ISession> lazyDaemon, @NonNull IBinder token, int userId,
             @NonNull String owner, @NonNull List<Fingerprint> enrolledList,
-            @NonNull BiometricUtils<Fingerprint> utils, int sensorId,
-            @NonNull BiometricLogger logger, @NonNull BiometricContext biometricContext) {
+            @NonNull BiometricUtils<Fingerprint> utils, int sensorId) {
         super(context, lazyDaemon, token, userId, owner, enrolledList, utils, sensorId,
-                logger, biometricContext);
+                BiometricsProtoEnums.MODALITY_FINGERPRINT);
     }
 
     @Override
     protected void startHalOperation() {
         try {
-            getFreshDaemon().getSession().enumerateEnrollments();
+            getFreshDaemon().enumerateEnrollments();
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception when requesting enumerate", e);
             mCallback.onClientFinished(this, false /* success */);

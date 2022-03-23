@@ -22,7 +22,7 @@
     android:layout_marginStart="16dp"
     android:layout_marginEnd="16dp">
 
-    <Spinner
+    <com.android.settingslib.widget.settingsspinner.SettingsSpinner
         android:id="@+id/spinner"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

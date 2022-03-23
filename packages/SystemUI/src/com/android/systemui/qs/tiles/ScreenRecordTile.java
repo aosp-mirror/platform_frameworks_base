@@ -29,7 +29,6 @@ import androidx.annotation.Nullable;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.R;
-import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
@@ -40,9 +39,7 @@ import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.screenrecord.RecordingController;
-import com.android.systemui.screenrecord.ScreenRecordDialog;
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil;
-import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import javax.inject.Inject;
 
@@ -52,13 +49,10 @@ import javax.inject.Inject;
 public class ScreenRecordTile extends QSTileImpl<QSTile.BooleanState>
         implements RecordingController.RecordingStateChangeCallback {
     private static final String TAG = "ScreenRecordTile";
-    private final RecordingController mController;
-    private final KeyguardDismissUtil mKeyguardDismissUtil;
-    private final KeyguardStateController mKeyguardStateController;
-    private final Callback mCallback = new Callback();
-    private final DialogLaunchAnimator mDialogLaunchAnimator;
-
+    private RecordingController mController;
+    private KeyguardDismissUtil mKeyguardDismissUtil;
     private long mMillisUntilFinished = 0;
+    private Callback mCallback = new Callback();
 
     @Inject
     public ScreenRecordTile(
@@ -71,17 +65,13 @@ public class ScreenRecordTile extends QSTileImpl<QSTile.BooleanState>
             ActivityStarter activityStarter,
             QSLogger qsLogger,
             RecordingController controller,
-            KeyguardDismissUtil keyguardDismissUtil,
-            KeyguardStateController keyguardStateController,
-            DialogLaunchAnimator dialogLaunchAnimator
+            KeyguardDismissUtil keyguardDismissUtil
     ) {
         super(host, backgroundLooper, mainHandler, falsingManager, metricsLogger,
                 statusBarStateController, activityStarter, qsLogger);
         mController = controller;
         mController.observe(this, mCallback);
         mKeyguardDismissUtil = keyguardDismissUtil;
-        mKeyguardStateController = keyguardStateController;
-        mDialogLaunchAnimator = dialogLaunchAnimator;
     }
 
     @Override
@@ -99,7 +89,7 @@ public class ScreenRecordTile extends QSTileImpl<QSTile.BooleanState>
         } else if (mController.isRecording()) {
             stopRecording();
         } else {
-            mUiHandler.post(() -> showPrompt(view));
+            mUiHandler.post(() -> showPrompt());
         }
         refreshState();
     }
@@ -136,7 +126,6 @@ public class ScreenRecordTile extends QSTileImpl<QSTile.BooleanState>
         return 0;
     }
 
-    @Nullable
     @Override
     public Intent getLongClickIntent() {
         return null;
@@ -147,33 +136,15 @@ public class ScreenRecordTile extends QSTileImpl<QSTile.BooleanState>
         return mContext.getString(R.string.quick_settings_screen_record_label);
     }
 
-    private void showPrompt(@Nullable View view) {
-        // We animate from the touched view only if we are not on the keyguard, given that if we
-        // are we will dismiss it which will also collapse the shade.
-        boolean shouldAnimateFromView = view != null && !mKeyguardStateController.isShowing();
-
-        // Create the recording dialog that will collapse the shade only if we start the recording.
-        Runnable onStartRecordingClicked = () -> {
-            // We dismiss the shade. Since starting the recording will also dismiss the dialog, we
-            // disable the exit animation which looks weird when it happens at the same time as the
-            // shade collapsing.
-            mDialogLaunchAnimator.disableAllCurrentDialogsExitAnimations();
-            getHost().collapsePanels();
-        };
-        ScreenRecordDialog dialog = mController.createScreenRecordDialog(mContext,
-                onStartRecordingClicked);
-
+    private void showPrompt() {
+        // Close QS, otherwise the dialog appears beneath it
+        getHost().collapsePanels();
+        Intent intent = mController.getPromptIntent();
         ActivityStarter.OnDismissAction dismissAction = () -> {
-            if (shouldAnimateFromView) {
-                mDialogLaunchAnimator.showFromView(dialog, view);
-            } else {
-                dialog.show();
-            }
+            mHost.getUserContext().startActivity(intent);
             return false;
         };
-
-        mKeyguardDismissUtil.executeWhenUnlocked(dismissAction, false /* requiresShadeOpen */,
-                true /* afterKeyguardDone */);
+        mKeyguardDismissUtil.executeWhenUnlocked(dismissAction, false, false);
     }
 
     private void cancelCountdown() {

@@ -133,7 +133,7 @@ class MagnificationGesturesObserver implements GesturesObserver.Listener {
         mDelayedEventQueue = null;
         mCallback.onGestureCompleted(gestureId, mLastDownEventTime, delayEventQueue,
                 event);
-        clear();
+        recycleLastEvent();
     }
 
     @Override
@@ -149,18 +149,19 @@ class MagnificationGesturesObserver implements GesturesObserver.Listener {
         mDelayedEventQueue = null;
         mCallback.onGestureCancelled(mLastDownEventTime, delayEventQueue,
                 mLastEvent);
-        clear();
+        recycleLastEvent();
     }
 
     /**
      * Resets all state to default.
      */
-    private void clear() {
+    void clear() {
         if (DBG) {
             Slog.d(LOG_TAG, "clear:" + mDelayedEventQueue);
         }
         recycleLastEvent();
         mLastDownEventTime = 0;
+        mGesturesObserver.clear();
         if (mDelayedEventQueue != null) {
             for (MotionEventInfo eventInfo2: mDelayedEventQueue) {
                 eventInfo2.recycle();

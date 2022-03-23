@@ -30,6 +30,7 @@ import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -119,7 +120,6 @@ public class AccessibilityWindowManagerTest {
     @Mock private AccessibilityWindowManager.AccessibilityEventSender mMockA11yEventSender;
     @Mock private AccessibilitySecurityPolicy mMockA11ySecurityPolicy;
     @Mock private AccessibilitySecurityPolicy.AccessibilityUserManager mMockA11yUserManager;
-    @Mock private AccessibilityTraceManager mMockA11yTraceManager;
 
     @Mock private IBinder mMockHostToken;
     @Mock private IBinder mMockEmbeddedToken;
@@ -140,8 +140,7 @@ public class AccessibilityWindowManagerTest {
                 mMockWindowManagerInternal,
                 mMockA11yEventSender,
                 mMockA11ySecurityPolicy,
-                mMockA11yUserManager,
-                mMockA11yTraceManager);
+                mMockA11yUserManager);
         // Starts tracking window of default display and sets the default display
         // as top focused display before each testing starts.
         startTrackingPerDisplay(Display.DEFAULT_DISPLAY);
@@ -864,6 +863,8 @@ public class AccessibilityWindowManagerTest {
             windowInfosForDisplay.get(DEFAULT_FOCUSED_INDEX).focused = true;
         }
         // Turns on windows tracking, and update window info.
+        when(mMockWindowManagerInternal.setWindowsForAccessibilityCallback(eq(displayId), any()))
+                .thenReturn(true);
         mA11yWindowManager.startTrackingWindows(displayId);
         // Puts window lists into array.
         mWindowInfos.put(displayId, windowInfosForDisplay);

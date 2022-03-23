@@ -26,7 +26,6 @@ import android.hardware.display.DisplayManager;
 import android.media.MediaRouter;
 import android.media.MediaRouter.RouteInfo;
 import android.os.Bundle;
-import android.os.Trace;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.Display;
@@ -50,7 +49,7 @@ import dagger.Lazy;
 
 public class KeyguardDisplayManager {
     protected static final String TAG = "KeyguardDisplayManager";
-    private static final boolean DEBUG = KeyguardConstants.DEBUG;
+    private static boolean DEBUG = KeyguardConstants.DEBUG;
 
     private MediaRouter mMediaRouter = null;
     private final DisplayManager mDisplayService;
@@ -68,14 +67,11 @@ public class KeyguardDisplayManager {
 
         @Override
         public void onDisplayAdded(int displayId) {
-            Trace.beginSection(
-                    "KeyguardDisplayManager#onDisplayAdded(displayId=" + displayId + ")");
             final Display display = mDisplayService.getDisplay(displayId);
             if (mShowing) {
                 updateNavigationBarVisibility(displayId, false /* navBarVisible */);
                 showPresentation(display);
             }
-            Trace.endSection();
         }
 
         @Override
@@ -85,10 +81,7 @@ public class KeyguardDisplayManager {
 
         @Override
         public void onDisplayRemoved(int displayId) {
-            Trace.beginSection(
-                    "KeyguardDisplayManager#onDisplayRemoved(displayId=" + displayId + ")");
             hidePresentation(displayId);
-            Trace.endSection();
         }
     };
 
@@ -269,6 +262,7 @@ public class KeyguardDisplayManager {
         private static final int VIDEO_SAFE_REGION = 80; // Percentage of display width & height
         private static final int MOVE_CLOCK_TIMEOUT = 10000; // 10s
         private final KeyguardStatusViewComponent.Factory mKeyguardStatusViewComponentFactory;
+        private final Context mContext;
         private KeyguardClockSwitchController mKeyguardClockSwitchController;
         private View mClock;
         private int mUsableWidth;
@@ -292,6 +286,7 @@ public class KeyguardDisplayManager {
                     WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
             mKeyguardStatusViewComponentFactory = keyguardStatusViewComponentFactory;
             setCancelable(false);
+            mContext = context;
         }
 
         @Override
@@ -316,7 +311,7 @@ public class KeyguardDisplayManager {
 
             updateBounds();
 
-            setContentView(LayoutInflater.from(getContext())
+            setContentView(LayoutInflater.from(mContext)
                     .inflate(R.layout.keyguard_presentation, null));
 
             // Logic to make the lock screen fullscreen

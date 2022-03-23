@@ -34,6 +34,11 @@ public class CellConfigLte implements Parcelable {
     }
 
     /** @hide */
+    public CellConfigLte(android.hardware.radio.V1_4.CellConfigLte cellConfig) {
+        mIsEndcAvailable = cellConfig.isEndcAvailable;
+    }
+
+    /** @hide */
     public CellConfigLte(boolean isEndcAvailable) {
         mIsEndcAvailable = isEndcAvailable;
     }

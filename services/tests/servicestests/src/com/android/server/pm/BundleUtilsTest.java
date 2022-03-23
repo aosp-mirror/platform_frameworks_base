@@ -22,9 +22,8 @@ import static com.android.server.devicepolicy.DpmTestUtils.newRestrictions;
 import static com.google.common.truth.Truth.assertThat;
 
 import android.os.Bundle;
-import android.platform.test.annotations.Presubmit;
+import android.test.suitebuilder.annotation.SmallTest;
 
-import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.BundleUtils;
@@ -36,7 +35,6 @@ import org.junit.runner.RunWith;
  * Build/Install/Run:
  * atest com.android.server.pm.BundleUtilsTest
  */
-@Presubmit
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class BundleUtilsTest {

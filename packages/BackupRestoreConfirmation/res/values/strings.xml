@@ -44,6 +44,8 @@
     <string name="backup_enc_password_text">Please enter a password to use for encrypting the full backup data. If this is left blank, your current backup password will be used:</string>
     <!-- Text for message to user that they may optionally supply an encryption password to use for a full backup operation. -->
     <string name="backup_enc_password_optional">If you wish to encrypt the full backup data, enter a password below:</string>
+    <!-- Text for message to user that they must supply an encryption password to use for a full backup operation because their phone is locked. -->
+    <string name="backup_enc_password_required">Since your device is encrypted, you are required to encrypt your backup. Please enter a password below:</string>
 
     <!-- Text for message to user when performing a full restore operation, explaining that they must enter the password originally used to encrypt the full backup data. -->
     <string name="restore_enc_password_text">If the restore data is encrypted, please enter the password below:</string>

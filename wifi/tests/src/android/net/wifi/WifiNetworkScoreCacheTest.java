@@ -76,7 +76,7 @@ public class WifiNetworkScoreCacheTest {
 
     private static ScanResult buildScanResult(String ssid, String bssid) {
         return new ScanResult(
-                WifiSsid.fromUtf8Text(ssid),
+                WifiSsid.createFromAsciiEncoded(ssid),
                 bssid,
                 "" /* caps */,
                 0 /* level */,

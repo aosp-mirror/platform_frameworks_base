@@ -28,7 +28,6 @@ import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 import com.android.systemui.R;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.statusbar.policy.DevicePostureController;
 import com.android.systemui.util.ViewController;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 
@@ -167,7 +166,6 @@ public abstract class KeyguardInputViewController<T extends KeyguardInputView>
         private final TelephonyManager mTelephonyManager;
         private final EmergencyButtonController.Factory mEmergencyButtonControllerFactory;
         private final FalsingCollector mFalsingCollector;
-        private final DevicePostureController mDevicePostureController;
 
         @Inject
         public Factory(KeyguardUpdateMonitor keyguardUpdateMonitor,
@@ -177,8 +175,7 @@ public abstract class KeyguardInputViewController<T extends KeyguardInputView>
                 InputMethodManager inputMethodManager, @Main DelayableExecutor mainExecutor,
                 @Main Resources resources, LiftToActivateListener liftToActivateListener,
                 TelephonyManager telephonyManager, FalsingCollector falsingCollector,
-                EmergencyButtonController.Factory emergencyButtonControllerFactory,
-                DevicePostureController devicePostureController) {
+                EmergencyButtonController.Factory emergencyButtonControllerFactory) {
             mKeyguardUpdateMonitor = keyguardUpdateMonitor;
             mLockPatternUtils = lockPatternUtils;
             mLatencyTracker = latencyTracker;
@@ -190,7 +187,6 @@ public abstract class KeyguardInputViewController<T extends KeyguardInputView>
             mTelephonyManager = telephonyManager;
             mEmergencyButtonControllerFactory = emergencyButtonControllerFactory;
             mFalsingCollector = falsingCollector;
-            mDevicePostureController = devicePostureController;
         }
 
         /** Create a new {@link KeyguardInputViewController}. */
@@ -204,8 +200,7 @@ public abstract class KeyguardInputViewController<T extends KeyguardInputView>
                 return new KeyguardPatternViewController((KeyguardPatternView) keyguardInputView,
                         mKeyguardUpdateMonitor, securityMode, mLockPatternUtils,
                         keyguardSecurityCallback, mLatencyTracker, mFalsingCollector,
-                        emergencyButtonController, mMessageAreaControllerFactory,
-                        mDevicePostureController);
+                        emergencyButtonController, mMessageAreaControllerFactory);
             } else if (keyguardInputView instanceof KeyguardPasswordView) {
                 return new KeyguardPasswordViewController((KeyguardPasswordView) keyguardInputView,
                         mKeyguardUpdateMonitor, securityMode, mLockPatternUtils,
@@ -217,8 +212,7 @@ public abstract class KeyguardInputViewController<T extends KeyguardInputView>
                 return new KeyguardPinViewController((KeyguardPINView) keyguardInputView,
                         mKeyguardUpdateMonitor, securityMode, mLockPatternUtils,
                         keyguardSecurityCallback, mMessageAreaControllerFactory, mLatencyTracker,
-                        mLiftToActivateListener, emergencyButtonController, mFalsingCollector,
-                        mDevicePostureController);
+                        mLiftToActivateListener, emergencyButtonController, mFalsingCollector);
             } else if (keyguardInputView instanceof KeyguardSimPinView) {
                 return new KeyguardSimPinViewController((KeyguardSimPinView) keyguardInputView,
                         mKeyguardUpdateMonitor, securityMode, mLockPatternUtils,

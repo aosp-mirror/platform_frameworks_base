@@ -17,7 +17,6 @@
 package android.service.attention;
 
 import android.service.attention.IAttentionCallback;
-import android.service.attention.IProximityUpdateCallback;
 
 /**
  * Interface for a concrete implementation to provide to the AttentionManagerService.
@@ -27,6 +26,4 @@ import android.service.attention.IProximityUpdateCallback;
 oneway interface IAttentionService {
     void checkAttention(IAttentionCallback callback);
     void cancelAttentionCheck(IAttentionCallback callback);
-    void onStartProximityUpdates(IProximityUpdateCallback callback);
-    void onStopProximityUpdates();
 }

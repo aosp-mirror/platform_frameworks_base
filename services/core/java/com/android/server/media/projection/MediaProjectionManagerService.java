@@ -45,7 +45,6 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.Slog;
-import android.window.WindowContainerToken;
 
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
@@ -411,7 +410,6 @@ public final class MediaProjectionManagerService extends SystemService
         private IBinder mToken;
         private IBinder.DeathRecipient mDeathEater;
         private boolean mRestoreSystemAlertWindow;
-        private WindowContainerToken mTaskRecordingWindowContainerToken = null;
 
         MediaProjection(int type, int uid, String packageName, int targetSdkVersion,
                 boolean isPrivileged) {
@@ -570,7 +568,7 @@ public final class MediaProjectionManagerService extends SystemService
             }
         }
 
-        @Override // Binder call
+        @Override
         public void registerCallback(IMediaProjectionCallback callback) {
             if (callback == null) {
                 throw new IllegalArgumentException("callback must not be null");
@@ -578,23 +576,12 @@ public final class MediaProjectionManagerService extends SystemService
             mCallbackDelegate.add(callback);
         }
 
-        @Override // Binder call
+        @Override
         public void unregisterCallback(IMediaProjectionCallback callback) {
             if (callback == null) {
                 throw new IllegalArgumentException("callback must not be null");
             }
             mCallbackDelegate.remove(callback);
-        }
-
-        @Override // Binder call
-        public void setTaskRecordingWindowContainerToken(WindowContainerToken token) {
-            // TODO(b/221417940) set the task id to record from sysui, for the package chosen.
-            mTaskRecordingWindowContainerToken = token;
-        }
-
-        @Override // Binder call
-        public WindowContainerToken getTaskRecordingWindowContainerToken() {
-            return mTaskRecordingWindowContainerToken;
         }
 
         public MediaProjectionInfo getProjectionInfo() {

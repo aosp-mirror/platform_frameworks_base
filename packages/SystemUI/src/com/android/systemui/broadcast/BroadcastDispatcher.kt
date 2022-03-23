@@ -87,11 +87,8 @@ open class BroadcastDispatcher constructor (
      * @param handler A handler to dispatch [BroadcastReceiver.onReceive].
      * @param user A user handle to determine which broadcast should be dispatched to this receiver.
      *             By default, it is the user of the context (system user in SystemUI).
-     * @param flags Flags to use when registering the receiver. [Context.RECEIVER_EXPORTED] by
-     *              default.
      * @throws IllegalArgumentException if the filter has other constraints that are not actions or
      *                                  categories or the filter has no actions.
-     *
      */
     @Deprecated(message = "Replacing Handler for Executor in SystemUI",
             replaceWith = ReplaceWith("registerReceiver(receiver, filter, executor, user)"))
@@ -100,10 +97,9 @@ open class BroadcastDispatcher constructor (
         receiver: BroadcastReceiver,
         filter: IntentFilter,
         handler: Handler,
-        user: UserHandle = context.user,
-        @Context.RegisterReceiverFlags flags: Int = Context.RECEIVER_EXPORTED
+        user: UserHandle = context.user
     ) {
-        registerReceiver(receiver, filter, HandlerExecutor(handler), user, flags)
+        registerReceiver(receiver, filter, HandlerExecutor(handler), user)
     }
 
     /**
@@ -117,8 +113,6 @@ open class BroadcastDispatcher constructor (
      *                 executor in the main thread (default).
      * @param user A user handle to determine which broadcast should be dispatched to this receiver.
      *             Pass `null` to use the user of the context (system user in SystemUI).
-     * @param flags Flags to use when registering the receiver. [Context.RECEIVER_EXPORTED] by
-     *              default.
      * @throws IllegalArgumentException if the filter has other constraints that are not actions or
      *                                  categories or the filter has no actions.
      */
@@ -127,18 +121,16 @@ open class BroadcastDispatcher constructor (
         receiver: BroadcastReceiver,
         filter: IntentFilter,
         executor: Executor? = null,
-        user: UserHandle? = null,
-        @Context.RegisterReceiverFlags flags: Int = Context.RECEIVER_EXPORTED
+        user: UserHandle? = null
     ) {
         checkFilter(filter)
-        val data = ReceiverData(
-                receiver,
-                filter,
-                executor ?: context.mainExecutor,
-                user ?: context.user
-        )
         this.handler
-                .obtainMessage(MSG_ADD_RECEIVER, flags, 0, data)
+                .obtainMessage(MSG_ADD_RECEIVER, ReceiverData(
+                        receiver,
+                        filter,
+                        executor ?: context.mainExecutor,
+                        user ?: context.user
+                ))
                 .sendToTarget()
     }
 
@@ -196,7 +188,6 @@ open class BroadcastDispatcher constructor (
             when (msg.what) {
                 MSG_ADD_RECEIVER -> {
                     val data = msg.obj as ReceiverData
-                    val flags = msg.arg1
                     // If the receiver asked to be registered under the current user, we register
                     // under the actual current user.
                     val userId = if (data.user.identifier == UserHandle.USER_CURRENT) {
@@ -210,7 +201,7 @@ open class BroadcastDispatcher constructor (
                     }
                     val uBR = receiversByUser.get(userId, createUBRForUser(userId))
                     receiversByUser.put(userId, uBR)
-                    uBR.registerReceiver(data, flags)
+                    uBR.registerReceiver(data)
                 }
 
                 MSG_REMOVE_RECEIVER -> {

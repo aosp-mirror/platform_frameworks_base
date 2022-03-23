@@ -255,9 +255,9 @@ public final class TranslationRequest implements Parcelable {
 
         int flags = in.readInt();
         List<TranslationRequestValue> translationRequestValues = new ArrayList<>();
-        in.readParcelableList(translationRequestValues, TranslationRequestValue.class.getClassLoader(), android.view.translation.TranslationRequestValue.class);
+        in.readParcelableList(translationRequestValues, TranslationRequestValue.class.getClassLoader());
         List<ViewTranslationRequest> viewTranslationRequests = new ArrayList<>();
-        in.readParcelableList(viewTranslationRequests, ViewTranslationRequest.class.getClassLoader(), android.view.translation.ViewTranslationRequest.class);
+        in.readParcelableList(viewTranslationRequests, ViewTranslationRequest.class.getClassLoader());
 
         this.mFlags = flags;
 

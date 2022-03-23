@@ -25,7 +25,7 @@ import java.util.concurrent.Executor
 class KeyguardBottomAreaTest : SysuiTestCase() {
 
     @Mock
-    private lateinit var mCentralSurfaces: CentralSurfaces
+    private lateinit var mStatusBar: StatusBar
     private lateinit var mKeyguardBottomArea: KeyguardBottomAreaView
 
     @Before
@@ -42,13 +42,13 @@ class KeyguardBottomAreaTest : SysuiTestCase() {
 
         mKeyguardBottomArea = LayoutInflater.from(mContext).inflate(
                 R.layout.keyguard_bottom_area, null, false) as KeyguardBottomAreaView
-        mKeyguardBottomArea.setCentralSurfaces(mCentralSurfaces)
+        mKeyguardBottomArea.setStatusBar(mStatusBar)
     }
 
     @Test
     fun initFrom_doesntCrash() {
-        val other = LayoutInflater.from(mContext).inflate(R.layout.keyguard_bottom_area,
-                null, false) as KeyguardBottomAreaView
+        val other = LayoutInflater.from(mContext).inflate(
+                R.layout.keyguard_bottom_area, null, false) as KeyguardBottomAreaView
 
         other.initFrom(mKeyguardBottomArea)
         other.launchVoiceAssist()

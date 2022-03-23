@@ -24,11 +24,10 @@ import android.os.Looper;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings.Secure;
+import android.service.quicksettings.Tile;
 import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Log;
-
-import androidx.annotation.Nullable;
 
 import com.android.internal.logging.InstanceId;
 import com.android.internal.logging.InstanceIdSequence;
@@ -48,12 +47,13 @@ import com.android.systemui.qs.external.CustomTile;
 import com.android.systemui.qs.external.CustomTileStatePersister;
 import com.android.systemui.qs.external.TileLifecycleManager;
 import com.android.systemui.qs.external.TileServiceKey;
-import com.android.systemui.qs.external.TileServiceRequestController;
+import com.android.systemui.qs.external.TileServices;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shared.plugins.PluginManager;
+import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.phone.AutoTileManager;
-import com.android.systemui.statusbar.phone.CentralSurfaces;
+import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
@@ -87,6 +87,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
     private final Context mContext;
     private final LinkedHashMap<String, QSTile> mTiles = new LinkedHashMap<>();
     protected final ArrayList<String> mTileSpecs = new ArrayList<>();
+    private final TileServices mServices;
     private final TunerService mTunerService;
     private final PluginManager mPluginManager;
     private final DumpManager mDumpManager;
@@ -95,20 +96,17 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
     private final UiEventLogger mUiEventLogger;
     private final InstanceIdSequence mInstanceIdSequence;
     private final CustomTileStatePersister mCustomTileStatePersister;
+    private final FeatureFlags mFeatureFlags;
 
     private final List<Callback> mCallbacks = new ArrayList<>();
-    @Nullable
     private AutoTileManager mAutoTiles;
     private final StatusBarIconController mIconController;
     private final ArrayList<QSFactory> mQsFactories = new ArrayList<>();
     private int mCurrentUser;
-    private final Optional<CentralSurfaces> mCentralSurfacesOptional;
+    private final Optional<StatusBar> mStatusBarOptional;
     private Context mUserContext;
     private UserTracker mUserTracker;
     private SecureSettings mSecureSettings;
-
-    private final TileServiceRequestController mTileServiceRequestController;
-    private TileLifecycleManager.Factory mTileLifeCycleManagerFactory;
 
     @Inject
     public QSTileHost(Context context,
@@ -121,14 +119,13 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
             Provider<AutoTileManager> autoTiles,
             DumpManager dumpManager,
             BroadcastDispatcher broadcastDispatcher,
-            Optional<CentralSurfaces> centralSurfacesOptional,
+            Optional<StatusBar> statusBarOptional,
             QSLogger qsLogger,
             UiEventLogger uiEventLogger,
             UserTracker userTracker,
             SecureSettings secureSettings,
             CustomTileStatePersister customTileStatePersister,
-            TileServiceRequestController.Builder tileServiceRequestControllerBuilder,
-            TileLifecycleManager.Factory tileLifecycleManagerFactory
+            FeatureFlags featureFlags
     ) {
         mIconController = iconController;
         mContext = context;
@@ -139,11 +136,10 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
         mQSLogger = qsLogger;
         mUiEventLogger = uiEventLogger;
         mBroadcastDispatcher = broadcastDispatcher;
-        mTileServiceRequestController = tileServiceRequestControllerBuilder.create(this);
-        mTileLifeCycleManagerFactory = tileLifecycleManagerFactory;
 
         mInstanceIdSequence = new InstanceIdSequence(MAX_QS_INSTANCE_ID);
-        mCentralSurfacesOptional = centralSurfacesOptional;
+        mServices = new TileServices(this, bgLooper, mBroadcastDispatcher, userTracker);
+        mStatusBarOptional = statusBarOptional;
 
         mQsFactories.add(defaultFactory);
         pluginManager.addPluginListener(this, QSFactory.class, true);
@@ -151,6 +147,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
         mUserTracker = userTracker;
         mSecureSettings = secureSettings;
         mCustomTileStatePersister = customTileStatePersister;
+        mFeatureFlags = featureFlags;
 
         mainHandler.post(() -> {
             // This is technically a hack to avoid circular dependency of
@@ -159,7 +156,6 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
             tunerService.addTunable(this, TILES_SETTING);
             // AutoTileManager can modify mTiles so make sure mTiles has already been initialized.
             mAutoTiles = autoTiles.get();
-            mTileServiceRequestController.init();
         });
     }
 
@@ -176,9 +172,9 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
         mTiles.values().forEach(tile -> tile.destroy());
         mAutoTiles.destroy();
         mTunerService.removeTunable(this);
+        mServices.destroy();
         mPluginManager.removePluginListener(this);
         mDumpManager.unregisterDumpable(TAG);
-        mTileServiceRequestController.destroy();
     }
 
     @Override
@@ -227,17 +223,17 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
 
     @Override
     public void collapsePanels() {
-        mCentralSurfacesOptional.ifPresent(CentralSurfaces::postAnimateCollapsePanels);
+        mStatusBarOptional.ifPresent(StatusBar::postAnimateCollapsePanels);
     }
 
     @Override
     public void forceCollapsePanels() {
-        mCentralSurfacesOptional.ifPresent(CentralSurfaces::postAnimateForceCollapsePanels);
+        mStatusBarOptional.ifPresent(StatusBar::postAnimateForceCollapsePanels);
     }
 
     @Override
     public void openPanels() {
-        mCentralSurfacesOptional.ifPresent(CentralSurfaces::postAnimateOpenPanels);
+        mStatusBarOptional.ifPresent(StatusBar::postAnimateOpenPanels);
     }
 
     @Override
@@ -255,6 +251,11 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
         return mCurrentUser;
     }
 
+    @Override
+    public TileServices getTileServices() {
+        return mServices;
+    }
+
     public int indexOf(String spec) {
         return mTileSpecs.indexOf(spec);
     }
@@ -268,7 +269,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
         if (newValue == null && UserManager.isDeviceInDemoMode(mContext)) {
             newValue = mContext.getResources().getString(R.string.quick_settings_tiles_retail_mode);
         }
-        final List<String> tileSpecs = loadTileSpecs(mContext, newValue);
+        final List<String> tileSpecs = loadTileSpecs(mContext, newValue, mFeatureFlags);
         int currentUser = mUserTracker.getUserId();
         if (currentUser != mCurrentUser) {
             mUserContext = mUserTracker.getUserContext();
@@ -337,7 +338,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
         if (newTiles.isEmpty() && !tileSpecs.isEmpty()) {
             // If we didn't manage to create any tiles, set it to empty (default)
             Log.d(TAG, "No valid tiles on tuning changed. Setting to default.");
-            changeTiles(currentSpecs, loadTileSpecs(mContext, ""));
+            changeTiles(currentSpecs, loadTileSpecs(mContext, "", mFeatureFlags));
         } else {
             for (int i = 0; i < mCallbacks.size(); i++) {
                 mCallbacks.get(i).onTilesChanged();
@@ -348,17 +349,6 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
     @Override
     public void removeTile(String spec) {
         changeTileSpecs(tileSpecs-> tileSpecs.remove(spec));
-    }
-
-    /**
-     * Remove many tiles at once.
-     *
-     * It will only save to settings once (as opposed to {@link QSTileHost#removeTile} called
-     * multiple times).
-     */
-    @Override
-    public void removeTiles(Collection<String> specs) {
-        changeTileSpecs(tileSpecs -> tileSpecs.removeAll(specs));
     }
 
     @Override
@@ -382,7 +372,6 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
      * @param requestPosition -1 for end, 0 for beginning, or X for insertion at position X
      */
     public void addTile(String spec, int requestPosition) {
-        if (spec.equals("work")) Log.wtfStack(TAG, "Adding work tile");
         changeTileSpecs(tileSpecs -> {
             if (tileSpecs.contains(spec)) return false;
 
@@ -397,7 +386,6 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
     }
 
     void saveTilesToSettings(List<String> tileSpecs) {
-        if (tileSpecs.contains("work")) Log.wtfStack(TAG, "Saving work tile");
         mSecureSettings.putStringForUser(TILES_SETTING, TextUtils.join(",", tileSpecs),
                 null /* tag */, false /* default */, mCurrentUser,
                 true /* overrideable by restore */);
@@ -405,7 +393,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
 
     private void changeTileSpecs(Predicate<List<String>> changeFunction) {
         final String setting = mSecureSettings.getStringForUser(TILES_SETTING, mCurrentUser);
-        final List<String> tileSpecs = loadTileSpecs(mContext, setting);
+        final List<String> tileSpecs = loadTileSpecs(mContext, setting, mFeatureFlags);
         if (changeFunction.test(tileSpecs)) {
             saveTilesToSettings(tileSpecs);
         }
@@ -453,8 +441,10 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
             if (!newTiles.contains(tileSpec)) {
                 ComponentName component = CustomTile.getComponentFromSpec(tileSpec);
                 Intent intent = new Intent().setComponent(component);
-                TileLifecycleManager lifecycleManager = mTileLifeCycleManagerFactory.create(
-                        intent, new UserHandle(mCurrentUser));
+                TileLifecycleManager lifecycleManager = new TileLifecycleManager(new Handler(),
+                        mContext, mServices, new Tile(), intent,
+                        new UserHandle(mCurrentUser),
+                        mBroadcastDispatcher);
                 lifecycleManager.onStopListening();
                 lifecycleManager.onTileRemoved();
                 mCustomTileStatePersister.removeState(new TileServiceKey(component, mCurrentUser));
@@ -466,8 +456,6 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
         saveTilesToSettings(newTiles);
     }
 
-    /** Create a {@link QSTile} of a {@code tileSpec} type. */
-    @Nullable
     public QSTile createTile(String tileSpec) {
         for (int i = 0; i < mQsFactories.size(); i++) {
             QSTile t = mQsFactories.get(i).createTile(tileSpec);
@@ -494,7 +482,8 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
         throw new RuntimeException("Default factory didn't create view for " + tile.getTileSpec());
     }
 
-    protected static List<String> loadTileSpecs(Context context, String tileList) {
+    protected static List<String> loadTileSpecs(
+            Context context, String tileList, FeatureFlags featureFlags) {
         final Resources res = context.getResources();
 
         if (TextUtils.isEmpty(tileList)) {
@@ -527,19 +516,20 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
                 }
             }
         }
-
-        if (!tiles.contains("internet")) {
-            if (tiles.contains("wifi")) {
-                // Replace the WiFi with Internet, and remove the Cell
-                tiles.set(tiles.indexOf("wifi"), "internet");
+        if (featureFlags.isProviderModelSettingEnabled()) {
+            if (!tiles.contains("internet")) {
+                if (tiles.contains("wifi")) {
+                    // Replace the WiFi with Internet, and remove the Cell
+                    tiles.set(tiles.indexOf("wifi"), "internet");
+                    tiles.remove("cell");
+                } else if (tiles.contains("cell")) {
+                    // Replace the Cell with Internet
+                    tiles.set(tiles.indexOf("cell"), "internet");
+                }
+            } else {
+                tiles.remove("wifi");
                 tiles.remove("cell");
-            } else if (tiles.contains("cell")) {
-                // Replace the Cell with Internet
-                tiles.set(tiles.indexOf("cell"), "internet");
             }
-        } else {
-            tiles.remove("wifi");
-            tiles.remove("cell");
         }
         return tiles;
     }

@@ -18,11 +18,8 @@ package com.android.settingslib;
 
 import static com.android.settingslib.RestrictedLockUtils.EnforcedAdmin;
 
-import android.annotation.NonNull;
-import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.os.Process;
 import android.os.UserHandle;
 import android.util.AttributeSet;
 import android.util.TypedValue;
@@ -31,7 +28,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import androidx.annotation.VisibleForTesting;
 import androidx.core.content.res.TypedArrayUtils;
 import androidx.preference.PreferenceManager;
 import androidx.preference.PreferenceViewHolder;
@@ -43,7 +39,6 @@ import androidx.preference.SwitchPreference;
  */
 public class RestrictedSwitchPreference extends SwitchPreference {
     RestrictedPreferenceHelper mHelper;
-    AppOpsManager mAppOpsManager;
     boolean mUseAdditionalSummary = false;
     CharSequence mRestrictedSwitchSummary;
     private int mIconSize;
@@ -51,6 +46,7 @@ public class RestrictedSwitchPreference extends SwitchPreference {
     public RestrictedSwitchPreference(Context context, AttributeSet attrs,
             int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
+        setWidgetLayoutResource(R.layout.restricted_switch_widget);
         mHelper = new RestrictedPreferenceHelper(context, this, attrs);
         if (attrs != null) {
             final TypedArray attributes = context.obtainStyledAttributes(attrs,
@@ -65,7 +61,6 @@ public class RestrictedSwitchPreference extends SwitchPreference {
 
             final TypedValue restrictedSwitchSummary = attributes.peekValue(
                     R.styleable.RestrictedSwitchPreference_restrictedSwitchSummary);
-            attributes.recycle();
             if (restrictedSwitchSummary != null
                     && restrictedSwitchSummary.type == TypedValue.TYPE_STRING) {
                 if (restrictedSwitchSummary.resourceId != 0) {
@@ -95,11 +90,6 @@ public class RestrictedSwitchPreference extends SwitchPreference {
         this(context, null);
     }
 
-    @VisibleForTesting
-    public void setAppOps(AppOpsManager appOps) {
-        mAppOpsManager = appOps;
-    }
-
     public void setIconSize(int iconSize) {
         mIconSize = iconSize;
     }
@@ -107,12 +97,6 @@ public class RestrictedSwitchPreference extends SwitchPreference {
     @Override
     public void onBindViewHolder(PreferenceViewHolder holder) {
         super.onBindViewHolder(holder);
-        final View switchView = holder.findViewById(android.R.id.switch_widget);
-        if (switchView != null) {
-            final View rootView = switchView.getRootView();
-            rootView.setFilterTouchesWhenObscured(true);
-        }
-
         mHelper.onBindViewHolder(holder);
 
         CharSequence switchSummary;
@@ -121,6 +105,15 @@ public class RestrictedSwitchPreference extends SwitchPreference {
                     ? R.string.enabled_by_admin : R.string.disabled_by_admin);
         } else {
             switchSummary = mRestrictedSwitchSummary;
+        }
+
+        final View restrictedIcon = holder.findViewById(R.id.restricted_icon);
+        final View switchWidget = holder.findViewById(android.R.id.switch_widget);
+        if (restrictedIcon != null) {
+            restrictedIcon.setVisibility(isDisabledByAdmin() ? View.VISIBLE : View.GONE);
+        }
+        if (switchWidget != null) {
+            switchWidget.setVisibility(isDisabledByAdmin() ? View.GONE : View.VISIBLE);
         }
 
         final ImageView icon = holder.itemView.findViewById(android.R.id.icon);
@@ -180,18 +173,11 @@ public class RestrictedSwitchPreference extends SwitchPreference {
 
     @Override
     public void setEnabled(boolean enabled) {
-        boolean changed = false;
         if (enabled && isDisabledByAdmin()) {
             mHelper.setDisabledByAdmin(null);
-            changed = true;
+            return;
         }
-        if (enabled && isDisabledByAppOps()) {
-            mHelper.setDisabledByAppOps(false);
-            changed = true;
-        }
-        if (!changed) {
-            super.setEnabled(enabled);
-        }
+        super.setEnabled(enabled);
     }
 
     public void setDisabledByAdmin(EnforcedAdmin admin) {
@@ -202,39 +188,5 @@ public class RestrictedSwitchPreference extends SwitchPreference {
 
     public boolean isDisabledByAdmin() {
         return mHelper.isDisabledByAdmin();
-    }
-
-    private void setDisabledByAppOps(boolean disabled) {
-        if (mHelper.setDisabledByAppOps(disabled)) {
-            notifyChanged();
-        }
-    }
-
-    public boolean isDisabledByAppOps() {
-        return mHelper.isDisabledByAppOps();
-    }
-
-    public int getUid() {
-        return mHelper != null ? mHelper.uid : Process.INVALID_UID;
-    }
-
-    public String getPackageName() {
-        return mHelper != null ? mHelper.packageName : null;
-    }
-
-    public void updateState(@NonNull String packageName, int uid, boolean isEnabled) {
-        mHelper.updatePackageDetails(packageName, uid);
-        if (mAppOpsManager == null) {
-            mAppOpsManager = getContext().getSystemService(AppOpsManager.class);
-        }
-        final int mode = mAppOpsManager.noteOpNoThrow(
-                AppOpsManager.OP_ACCESS_RESTRICTED_SETTINGS,
-                uid, packageName);
-        final boolean appOpsAllowed = mode == AppOpsManager.MODE_ALLOWED;
-        if (appOpsAllowed || isEnabled) {
-            setEnabled(true);
-        } else {
-            setDisabledByAppOps(true);
-        }
     }
 }

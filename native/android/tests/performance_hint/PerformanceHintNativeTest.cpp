@@ -18,12 +18,10 @@
 
 #include <android/os/IHintManager.h>
 #include <android/os/IHintSession.h>
-#include <android/performance_hint.h>
 #include <binder/IBinder.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <performance_hint_private.h>
-
 #include <memory>
 #include <vector>
 

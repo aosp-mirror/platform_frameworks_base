@@ -22,12 +22,13 @@
 #include <vector>
 
 #include "android-base/stringprintf.h"
-#include "android-base/strings.h"
 #include "androidfw/StringPiece.h"
 #include "build/version.h"
+
 #include "text/Unicode.h"
 #include "text/Utf8Iterator.h"
 #include "util/BigBuffer.h"
+#include "util/Maybe.h"
 #include "utils/Unicode.h"
 
 using ::aapt::text::Utf8Iterator;
@@ -192,8 +193,8 @@ bool IsAndroidSplitName(const StringPiece& str) {
   return IsAndroidNameImpl(str) > 0;
 }
 
-std::optional<std::string> GetFullyQualifiedClassName(const StringPiece& package,
-                                                      const StringPiece& classname) {
+Maybe<std::string> GetFullyQualifiedClassName(const StringPiece& package,
+                                              const StringPiece& classname) {
   if (classname.empty()) {
     return {};
   }
@@ -231,14 +232,7 @@ std::string GetToolFingerprint() {
   static const char* const sMinorVersion = "19";
 
   // The build id of aapt2 binary.
-  static std::string sBuildId = android::build::GetBuildNumber();
-
-  if (android::base::StartsWith(sBuildId, "eng.")) {
-    time_t now = time(0);
-    tm* ltm = localtime(&now);
-
-    sBuildId = android::base::StringPrintf("eng.%d%d", 1900 + ltm->tm_year, 1 + ltm->tm_mon);
-  }
+  static const std::string sBuildId = android::build::GetBuildNumber();
 
   return android::base::StringPrintf("%s.%s-%s", sMajorVersion, sMinorVersion, sBuildId.c_str());
 }

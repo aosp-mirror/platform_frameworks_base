@@ -72,7 +72,6 @@ import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
-import android.platform.test.annotations.Presubmit;
 import android.util.IntArray;
 
 import androidx.test.filters.MediumTest;
@@ -99,7 +98,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
@@ -110,7 +108,6 @@ import java.util.function.Function;
  * Build/Install/Run:
  *  atest FrameworksServicesTests:ActivityManagerServiceTest
  */
-@Presubmit
 @SmallTest
 public class ActivityManagerServiceTest {
     private static final String TAG = ActivityManagerServiceTest.class.getSimpleName();
@@ -167,8 +164,6 @@ public class ActivityManagerServiceTest {
         mAms.mWaitForNetworkTimeoutMs = 2000;
         mAms.mActivityTaskManager = new ActivityTaskManagerService(mContext);
         mAms.mActivityTaskManager.initialize(null, null, mHandler.getLooper());
-        mHandler.setRunnablesToIgnore(
-                List.of(mAms.mUidObserverController.getDispatchRunnableForTest()));
     }
 
     private void mockNoteOperation() {
@@ -988,19 +983,10 @@ public class ActivityManagerServiceTest {
         private static final long WAIT_FOR_MSG_TIMEOUT_MS = 4000; // 4 sec
         private static final long WAIT_FOR_MSG_INTERVAL_MS = 400; // 0.4 sec
 
-        private final Set<Integer> mMsgsHandled = new HashSet<>();
-        private final List<Runnable> mRunnablesToIgnore = new ArrayList<>();
+        private Set<Integer> mMsgsHandled = new HashSet<>();
 
         TestHandler(Looper looper) {
             super(looper);
-        }
-
-        @Override
-        public void dispatchMessage(Message msg) {
-            if (msg.getCallback() != null && mRunnablesToIgnore.contains(msg.getCallback())) {
-                return;
-            }
-            super.dispatchMessage(msg);
         }
 
         @Override
@@ -1016,11 +1002,6 @@ public class ActivityManagerServiceTest {
             if (!mMsgsHandled.contains(msg)) {
                 fail("Timed out waiting for the message to be handled, msg: " + msg);
             }
-        }
-
-        public void setRunnablesToIgnore(List<Runnable> runnables) {
-            mRunnablesToIgnore.clear();
-            mRunnablesToIgnore.addAll(runnables);
         }
 
         public void reset() {

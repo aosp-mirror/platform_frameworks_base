@@ -249,7 +249,7 @@ public class TextAppearanceSpan extends MetricAffectingSpan implements Parcelabl
         mTypeface = LeakyTypefaceStorage.readTypefaceFromParcel(src);
 
         mTextFontWeight = src.readInt();
-        mTextLocales = src.readParcelable(LocaleList.class.getClassLoader(), android.os.LocaleList.class);
+        mTextLocales = src.readParcelable(LocaleList.class.getClassLoader());
 
         mShadowRadius = src.readFloat();
         mShadowDx = src.readFloat();

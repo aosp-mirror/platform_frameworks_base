@@ -48,6 +48,7 @@ import "frameworks/base/core/proto/android/service/batterystats.proto";
 import "frameworks/base/core/proto/android/service/diskstats.proto";
 import "frameworks/base/core/proto/android/service/dropbox.proto";
 import "frameworks/base/core/proto/android/service/graphicsstats.proto";
+import "frameworks/base/core/proto/android/service/netstats.proto";
 import "frameworks/base/core/proto/android/service/notification.proto";
 import "frameworks/base/core/proto/android/service/package.proto";
 import "frameworks/base/core/proto/android/service/print.proto";
@@ -61,8 +62,7 @@ import "frameworks/base/core/proto/android/util/textdump.proto";
 import "frameworks/base/core/proto/android/privacy.proto";
 import "frameworks/base/core/proto/android/section.proto";
 import "frameworks/base/proto/src/ipconnectivity.proto";
-import "packages/modules/Connectivity/framework/proto/netstats.proto";
-import "packages/modules/Permission/service/proto/role_service.proto";
+import "packages/modules/Permission/service/proto/com/android/role/roleservice.proto";
 
 package android.os;
 
@@ -249,8 +249,7 @@ message IncidentProto {
 
     optional android.service.NetworkStatsServiceDumpProto netstats = 3001 [
         (section).type = SECTION_DUMPSYS,
-        (section).args = "netstats --proto",
-        (section).userdebug_and_eng_only = true
+        (section).args = "netstats --proto"
     ];
 
     optional android.providers.settings.SettingsServiceDumpProto settings = 3002 [

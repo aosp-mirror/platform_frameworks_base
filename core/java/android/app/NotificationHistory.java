@@ -497,11 +497,7 @@ public final class NotificationHistory implements Parcelable {
         p.writeLong(notification.getPostedTimeMs());
         p.writeString(notification.getTitle());
         p.writeString(notification.getText());
-        p.writeBoolean(false);
-        // The current design does not display icons, so don't bother adding them to the parcel
-        //if (notification.getIcon() != null) {
-        //    notification.getIcon().writeToParcel(p, flags);
-        //}
+        notification.getIcon().writeToParcel(p, flags);
     }
 
     /**
@@ -543,9 +539,7 @@ public final class NotificationHistory implements Parcelable {
         notificationOut.setPostedTimeMs(p.readLong());
         notificationOut.setTitle(p.readString());
         notificationOut.setText(p.readString());
-        if (p.readBoolean()) {
-            notificationOut.setIcon(Icon.CREATOR.createFromParcel(p));
-        }
+        notificationOut.setIcon(Icon.CREATOR.createFromParcel(p));
 
         return notificationOut.build();
     }
@@ -610,7 +604,6 @@ public final class NotificationHistory implements Parcelable {
         // Data can be too large for a transact. Write the data as a Blob, which will be written to
         // ashmem if too large.
         dest.writeBlob(data.marshall());
-        data.recycle();
     }
 
     public static final @NonNull Creator<NotificationHistory> CREATOR

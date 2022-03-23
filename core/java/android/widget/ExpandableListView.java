@@ -1309,7 +1309,7 @@ public class ExpandableListView extends ListView {
         private SavedState(Parcel in) {
             super(in);
             expandedGroupMetadataList = new ArrayList<ExpandableListConnector.GroupMetadata>();
-            in.readList(expandedGroupMetadataList, ExpandableListConnector.class.getClassLoader(), android.widget.ExpandableListConnector.GroupMetadata.class);
+            in.readList(expandedGroupMetadataList, ExpandableListConnector.class.getClassLoader());
         }
 
         @Override

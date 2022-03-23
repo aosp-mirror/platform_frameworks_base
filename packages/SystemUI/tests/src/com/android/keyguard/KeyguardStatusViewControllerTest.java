@@ -23,8 +23,9 @@ import android.testing.AndroidTestingRunner;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
+import com.android.systemui.shared.system.smartspace.SmartspaceTransitionController;
 import com.android.systemui.statusbar.phone.DozeParameters;
-import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
+import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
@@ -57,7 +58,9 @@ public class KeyguardStatusViewControllerTest extends SysuiTestCase {
     @Mock
     KeyguardUnlockAnimationController mKeyguardUnlockAnimationController;
     @Mock
-    ScreenOffAnimationController mScreenOffAnimationController;
+    SmartspaceTransitionController mSmartSpaceTransitionController;
+    @Mock
+    UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
     @Captor
     private ArgumentCaptor<KeyguardUpdateMonitorCallback> mKeyguardUpdateMonitorCallbackCaptor;
 
@@ -76,7 +79,8 @@ public class KeyguardStatusViewControllerTest extends SysuiTestCase {
                 mConfigurationController,
                 mDozeParameters,
                 mKeyguardUnlockAnimationController,
-                mScreenOffAnimationController);
+                mSmartSpaceTransitionController,
+                mUnlockedScreenOffAnimationController);
     }
 
     @Test
@@ -111,14 +115,5 @@ public class KeyguardStatusViewControllerTest extends SysuiTestCase {
 
         mKeyguardUpdateMonitorCallbackCaptor.getValue().onUserSwitchComplete(0);
         verify(mKeyguardClockSwitchController).refreshFormat();
-    }
-
-    @Test
-    public void setTranslationYExcludingMedia_forwardsCallToView() {
-        float translationY = 123f;
-
-        mController.setTranslationYExcludingMedia(translationY);
-
-        verify(mKeyguardStatusView).setChildrenTranslationYExcludingMediaView(translationY);
     }
 }

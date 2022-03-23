@@ -161,8 +161,7 @@ public class DataManager {
 
         mStatusExpReceiver = new ConversationStatusExpirationBroadcastReceiver();
         mContext.registerReceiver(mStatusExpReceiver,
-                ConversationStatusExpirationBroadcastReceiver.getFilter(),
-                Context.RECEIVER_NOT_EXPORTED);
+                ConversationStatusExpirationBroadcastReceiver.getFilter());
 
         IntentFilter shutdownIntentFilter = new IntentFilter(Intent.ACTION_SHUTDOWN);
         BroadcastReceiver shutdownBroadcastReceiver = new ShutdownBroadcastReceiver();

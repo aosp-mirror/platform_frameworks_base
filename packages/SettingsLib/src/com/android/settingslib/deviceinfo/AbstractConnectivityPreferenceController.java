@@ -73,8 +73,7 @@ public abstract class AbstractConnectivityPreferenceController
         }
 
         mContext.registerReceiver(mConnectivityReceiver, connectivityIntentFilter,
-                android.Manifest.permission.CHANGE_NETWORK_STATE, null,
-                Context.RECEIVER_EXPORTED_UNAUDITED);
+                android.Manifest.permission.CHANGE_NETWORK_STATE, null);
     }
 
     protected abstract String[] getConnectivityIntents();

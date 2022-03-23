@@ -47,7 +47,7 @@ public final class UriPermission implements Parcelable {
 
     /** {@hide} */
     public UriPermission(Parcel in) {
-        mUri = in.readParcelable(null, android.net.Uri.class);
+        mUri = in.readParcelable(null);
         mModeFlags = in.readInt();
         mPersistedTime = in.readLong();
     }

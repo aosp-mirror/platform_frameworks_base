@@ -41,11 +41,6 @@ public interface ViewTranslationCallback {
      * method will not be called before {@link View#onViewTranslationResponse} or
      * {@link View#onVirtualViewTranslationResponses}.
      *
-     * <p> NOTE: It is possible the user changes text that causes a new
-     * {@link ViewTranslationResponse} returns to show the new translation. If you cache the
-     * {@link ViewTranslationResponse} here, you should remember to keep the cached value up
-     * to date.
-     *
      * <p> NOTE: For TextView implementation, {@link ContentCaptureSession#notifyViewTextChanged}
      * shouldn't be called with the translated text, simply calling setText() here will trigger the
      * method. You should either override {@code View#onProvideContentCaptureStructure()} to report
@@ -60,7 +55,7 @@ public interface ViewTranslationCallback {
     /**
      * Called when user wants to view the original content instead of the translated content. This
      * method will not be called before {@link View#onViewTranslationResponse} or
-     * {@link View#onVirtualViewTranslationResponses}.
+     * {@link View#onViewTranslationResponse}.
      *
      * @return {@code true} if the View handles hiding the translation.
      */

@@ -7,6 +7,7 @@ import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_A
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.SearchManager;
 import android.content.ActivityNotFoundException;
@@ -26,16 +27,17 @@ import android.util.Log;
 
 import com.android.internal.app.AssistUtils;
 import com.android.internal.app.IVoiceInteractionSessionListener;
+import com.android.internal.app.IVoiceInteractionSessionShowCallback;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.R;
 import com.android.systemui.assist.ui.DefaultUiController;
 import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 
 import javax.inject.Inject;
@@ -122,7 +124,22 @@ public class AssistManager {
 
     private final DeviceProvisionedController mDeviceProvisionedController;
     private final CommandQueue mCommandQueue;
+    private final AssistOrbController mOrbController;
     protected final AssistUtils mAssistUtils;
+
+    private IVoiceInteractionSessionShowCallback mShowCallback =
+            new IVoiceInteractionSessionShowCallback.Stub() {
+
+                @Override
+                public void onFailed() throws RemoteException {
+                    mOrbController.postHide();
+                }
+
+                @Override
+                public void onShown() throws RemoteException {
+                    mOrbController.postHide();
+                }
+            };
 
     @Inject
     public AssistManager(
@@ -132,17 +149,19 @@ public class AssistManager {
             CommandQueue commandQueue,
             PhoneStateMonitor phoneStateMonitor,
             OverviewProxyService overviewProxyService,
+            ConfigurationController configurationController,
             Lazy<SysUiState> sysUiState,
             DefaultUiController defaultUiController,
-            AssistLogger assistLogger,
-            @Main Handler uiHandler) {
+            AssistLogger assistLogger) {
         mContext = context;
         mDeviceProvisionedController = controller;
         mCommandQueue = commandQueue;
         mAssistUtils = assistUtils;
-        mAssistDisclosure = new AssistDisclosure(context, uiHandler);
+        mAssistDisclosure = new AssistDisclosure(context, new Handler());
         mPhoneStateMonitor = phoneStateMonitor;
         mAssistLogger = assistLogger;
+
+        mOrbController = new AssistOrbController(configurationController, context);
 
         registerVoiceInteractionSessionListener();
 
@@ -204,6 +223,10 @@ public class AssistManager {
                 });
     }
 
+    protected boolean shouldShowOrb() {
+        return !ActivityManager.isLowRamDeviceStatic();
+    }
+
     public void startAssist(Bundle args) {
         final ComponentName assistComponent = getAssistInfo();
         if (assistComponent == null) {
@@ -211,6 +234,10 @@ public class AssistManager {
         }
 
         final boolean isService = assistComponent.equals(getVoiceInteractorComponentName());
+        if (!isService || (!isVoiceSessionRunning() && shouldShowOrb())) {
+            mOrbController.showOrb(assistComponent, isService);
+            mOrbController.postHideDelayed(isService ? TIMEOUT_SERVICE : TIMEOUT_ACTIVITY);
+        }
 
         if (args == null) {
             args = new Bundle();
@@ -302,7 +329,7 @@ public class AssistManager {
 
     private void startVoiceInteractor(Bundle args) {
         mAssistUtils.showSessionForActiveService(args,
-                VoiceInteractionSession.SHOW_SOURCE_ASSIST_GESTURE, null, null);
+                VoiceInteractionSession.SHOW_SOURCE_ASSIST_GESTURE, mShowCallback, null);
     }
 
     public void launchVoiceAssistFromKeyguard() {

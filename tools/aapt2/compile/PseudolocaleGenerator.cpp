@@ -33,7 +33,7 @@ namespace aapt {
 // The struct that represents both Span objects and UntranslatableSections.
 struct UnifiedSpan {
   // Only present for Span objects. If not present, this was an UntranslatableSection.
-  std::optional<std::string> tag;
+  Maybe<std::string> tag;
 
   // The UTF-16 index into the string where this span starts.
   uint32_t first_char;

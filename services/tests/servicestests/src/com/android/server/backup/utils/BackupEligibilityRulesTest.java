@@ -20,6 +20,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import android.app.backup.BackupManager.OperationType;
@@ -29,8 +30,8 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.Property;
 import android.content.pm.PackageManagerInternal;
+import android.content.pm.PackageParser;
 import android.content.pm.Signature;
-import android.content.pm.SigningDetails;
 import android.content.pm.SigningInfo;
 import android.os.Process;
 import android.os.UserHandle;
@@ -40,6 +41,7 @@ import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.backup.UserBackupManagerService;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
 
 import libcore.junit.util.compat.CoreCompatChangeRule.DisableCompatChanges;
 import libcore.junit.util.compat.CoreCompatChangeRule.EnableCompatChanges;
@@ -538,9 +540,9 @@ public class BackupEligibilityRulesTest {
         PackageInfo packageInfo = new PackageInfo();
         packageInfo.packageName = "test";
         packageInfo.signingInfo = new SigningInfo(
-                new SigningDetails(
+                new PackageParser.SigningDetails(
                         new Signature[] {SIGNATURE_1},
-                        SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
+                        PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
                         null,
                         null));
         packageInfo.applicationInfo = new ApplicationInfo();
@@ -556,9 +558,9 @@ public class BackupEligibilityRulesTest {
         PackageInfo packageInfo = new PackageInfo();
         packageInfo.packageName = "test";
         packageInfo.signingInfo = new SigningInfo(
-                new SigningDetails(
+                new PackageParser.SigningDetails(
                         new Signature[] {SIGNATURE_1},
-                        SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
+                        PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
                         null,
                         null));
         packageInfo.applicationInfo = new ApplicationInfo();
@@ -633,9 +635,9 @@ public class BackupEligibilityRulesTest {
         PackageInfo packageInfo = new PackageInfo();
         packageInfo.packageName = "test";
         packageInfo.signingInfo = new SigningInfo(
-                new SigningDetails(
+                new PackageParser.SigningDetails(
                         new Signature[] {SIGNATURE_1, SIGNATURE_2, SIGNATURE_3},
-                        SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
+                        PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
                         null,
                         null));
         packageInfo.applicationInfo = new ApplicationInfo();
@@ -654,9 +656,9 @@ public class BackupEligibilityRulesTest {
         PackageInfo packageInfo = new PackageInfo();
         packageInfo.packageName = "test";
         packageInfo.signingInfo = new SigningInfo(
-                new SigningDetails(
+                new PackageParser.SigningDetails(
                         new Signature[] {SIGNATURE_1, SIGNATURE_2, SIGNATURE_3},
-                        SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
+                        PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
                         null,
                         null));
         packageInfo.applicationInfo = new ApplicationInfo();
@@ -675,9 +677,9 @@ public class BackupEligibilityRulesTest {
         PackageInfo packageInfo = new PackageInfo();
         packageInfo.packageName = "test";
         packageInfo.signingInfo = new SigningInfo(
-                new SigningDetails(
+                new PackageParser.SigningDetails(
                         new Signature[] {signature1Copy, signature2Copy},
-                        SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
+                        PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
                         null,
                         null));
         packageInfo.applicationInfo = new ApplicationInfo();
@@ -696,9 +698,9 @@ public class BackupEligibilityRulesTest {
         PackageInfo packageInfo = new PackageInfo();
         packageInfo.packageName = "test";
         packageInfo.signingInfo = new SigningInfo(
-                new SigningDetails(
+                new PackageParser.SigningDetails(
                         new Signature[] {SIGNATURE_1, SIGNATURE_2, SIGNATURE_3},
-                        SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
+                        PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
                         null,
                         null));
         packageInfo.applicationInfo = new ApplicationInfo();
@@ -717,9 +719,9 @@ public class BackupEligibilityRulesTest {
         PackageInfo packageInfo = new PackageInfo();
         packageInfo.packageName = "test";
         packageInfo.signingInfo = new SigningInfo(
-                new SigningDetails(
+                new PackageParser.SigningDetails(
                         new Signature[] {SIGNATURE_1},
-                        SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
+                        PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
                         null,
                         null));
         packageInfo.applicationInfo = new ApplicationInfo();
@@ -741,9 +743,9 @@ public class BackupEligibilityRulesTest {
         PackageInfo packageInfo = new PackageInfo();
         packageInfo.packageName = "test";
         packageInfo.signingInfo = new SigningInfo(
-                new SigningDetails(
+                new PackageParser.SigningDetails(
                         new Signature[] {SIGNATURE_2},
-                        SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
+                        PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
                         null,
                         new Signature[] {SIGNATURE_1, SIGNATURE_2}));
         packageInfo.applicationInfo = new ApplicationInfo();
@@ -768,9 +770,9 @@ public class BackupEligibilityRulesTest {
         PackageInfo packageInfo = new PackageInfo();
         packageInfo.packageName = "test";
         packageInfo.signingInfo = new SigningInfo(
-                new SigningDetails(
+                new PackageParser.SigningDetails(
                         new Signature[] {SIGNATURE_2},
-                        SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
+                        PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
                         null,
                         new Signature[] {SIGNATURE_1, SIGNATURE_2}));
         packageInfo.applicationInfo = new ApplicationInfo();

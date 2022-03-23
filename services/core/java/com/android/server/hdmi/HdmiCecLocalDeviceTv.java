@@ -16,8 +16,6 @@
 
 package com.android.server.hdmi;
 
-import static android.hardware.hdmi.DeviceFeatures.FEATURE_NOT_SUPPORTED;
-import static android.hardware.hdmi.DeviceFeatures.FEATURE_SUPPORTED;
 import static android.hardware.hdmi.HdmiControlManager.CLEAR_TIMER_STATUS_CEC_DISABLE;
 import static android.hardware.hdmi.HdmiControlManager.CLEAR_TIMER_STATUS_CHECK_RECORDER_CONNECTION;
 import static android.hardware.hdmi.HdmiControlManager.CLEAR_TIMER_STATUS_FAIL_TO_CLEAR_SELECTED_SOURCE;
@@ -33,7 +31,6 @@ import static android.hardware.hdmi.HdmiControlManager.TIMER_RECORDING_TYPE_DIGI
 import static android.hardware.hdmi.HdmiControlManager.TIMER_RECORDING_TYPE_EXTERNAL;
 
 import android.annotation.Nullable;
-import android.hardware.hdmi.DeviceFeatures;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.HdmiPortInfo;
@@ -41,12 +38,11 @@ import android.hardware.hdmi.HdmiRecordSources;
 import android.hardware.hdmi.HdmiTimerRecordSources;
 import android.hardware.hdmi.IHdmiControlCallback;
 import android.hardware.tv.cec.V1_0.SendMessageResult;
-import android.media.AudioDescriptor;
-import android.media.AudioDeviceAttributes;
-import android.media.AudioDeviceInfo;
-import android.media.AudioProfile;
+import android.media.AudioManager;
+import android.media.AudioSystem;
 import android.media.tv.TvInputInfo;
 import android.media.tv.TvInputManager.TvInputCallback;
+import android.provider.Settings.Global;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
 
@@ -61,7 +57,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Represent a logical device of type TV residing in Android system.
@@ -95,6 +90,8 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
 
     @GuardedBy("mLock")
     private boolean mSystemAudioMute = false;
+
+    private final HdmiCecStandbyModeHandler mStandbyHandler;
 
     // If true, do not do routing control/send active source for internal source.
     // Set to true when the device was woken up by <Text/Image View On>.
@@ -158,9 +155,8 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     HdmiCecLocalDeviceTv(HdmiControlService service) {
         super(service, HdmiDeviceInfo.DEVICE_TV);
         mPrevPortId = Constants.INVALID_PORT_ID;
-        mSystemAudioControlFeatureEnabled = service.getHdmiCecConfig().getIntValue(
-                HdmiControlManager.CEC_SETTING_NAME_SYSTEM_AUDIO_CONTROL)
-                    == HdmiControlManager.SYSTEM_AUDIO_CONTROL_ENABLED;
+        mSystemAudioControlFeatureEnabled =
+                mService.readBooleanSetting(Global.HDMI_SYSTEM_AUDIO_CONTROL_ENABLED, true);
         mStandbyHandler = new HdmiCecStandbyModeHandler(service, this);
     }
 
@@ -173,14 +169,10 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             mArcFeatureEnabled.put(port.getId(), port.isArcSupported());
         }
         mService.registerTvInputCallback(mTvInputCallback);
-        mService.sendCecCommand(
-                HdmiCecMessageBuilder.buildReportPhysicalAddressCommand(
-                        getDeviceInfo().getLogicalAddress(),
-                        mService.getPhysicalAddress(),
-                        mDeviceType));
-        mService.sendCecCommand(
-                HdmiCecMessageBuilder.buildDeviceVendorIdCommand(
-                        getDeviceInfo().getLogicalAddress(), mService.getVendorId()));
+        mService.sendCecCommand(HdmiCecMessageBuilder.buildReportPhysicalAddressCommand(
+                mAddress, mService.getPhysicalAddress(), mDeviceType));
+        mService.sendCecCommand(HdmiCecMessageBuilder.buildDeviceVendorIdCommand(
+                mAddress, mService.getVendorId()));
         mService.getHdmiCecNetwork().addCecSwitch(
                 mService.getHdmiCecNetwork().getPhysicalAddress());  // TV is a CEC switch too.
         mTvInputs.clear();
@@ -191,9 +183,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         launchDeviceDiscovery();
         startQueuedActions();
         if (!mDelayedMessageBuffer.isBuffered(Constants.MESSAGE_ACTIVE_SOURCE)) {
-            mService.sendCecCommand(
-                    HdmiCecMessageBuilder.buildRequestActiveSource(
-                            getDeviceInfo().getLogicalAddress()));
+            mService.sendCecCommand(HdmiCecMessageBuilder.buildRequestActiveSource(mAddress));
         }
     }
 
@@ -247,7 +237,11 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             return;
         }
         int targetAddress = targetDevice.getLogicalAddress();
-        if (isAlreadyActiveSource(targetDevice, targetAddress, callback)) {
+        ActiveSource active = getActiveSource();
+        if (targetDevice.getDevicePowerStatus() == HdmiControlManager.POWER_STATUS_ON
+                && active.isValid()
+                && targetAddress == active.logicalAddress) {
+            invokeCallback(callback, HdmiControlManager.RESULT_SUCCESS);
             return;
         }
         if (targetAddress == Constants.ADDR_INTERNAL) {
@@ -264,27 +258,23 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             invokeCallback(callback, HdmiControlManager.RESULT_INCORRECT_MODE);
             return;
         }
-        removeAction(DeviceSelectActionFromTv.class);
-        addAndStartAction(new DeviceSelectActionFromTv(this, targetDevice, callback));
+        removeAction(DeviceSelectAction.class);
+        addAndStartAction(new DeviceSelectAction(this, targetDevice, callback));
     }
 
     @ServiceThreadOnly
     private void handleSelectInternalSource() {
         assertRunOnServiceThread();
         // Seq #18
-        if (mService.isControlEnabled()
-                && getActiveSource().logicalAddress != getDeviceInfo().getLogicalAddress()) {
-            updateActiveSource(
-                    getDeviceInfo().getLogicalAddress(),
-                    mService.getPhysicalAddress(),
+        if (mService.isControlEnabled() && getActiveSource().logicalAddress != mAddress) {
+            updateActiveSource(mAddress, mService.getPhysicalAddress(),
                     "HdmiCecLocalDeviceTv#handleSelectInternalSource()");
             if (mSkipRoutingControl) {
                 mSkipRoutingControl = false;
                 return;
             }
-            HdmiCecMessage activeSource =
-                    HdmiCecMessageBuilder.buildActiveSource(
-                            getDeviceInfo().getLogicalAddress(), mService.getPhysicalAddress());
+            HdmiCecMessage activeSource = HdmiCecMessageBuilder.buildActiveSource(
+                    mAddress, mService.getPhysicalAddress());
             mService.sendCecCommand(activeSource);
         }
     }
@@ -305,7 +295,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         setActiveSource(newActive, caller);
         int logicalAddress = newActive.logicalAddress;
         if (mService.getHdmiCecNetwork().getCecDeviceInfo(logicalAddress) != null
-                && logicalAddress != getDeviceInfo().getLogicalAddress()) {
+                && logicalAddress != mAddress) {
             if (mService.pathToPortId(newActive.physicalAddress) == getActivePortId()) {
                 setPrevPortId(getActivePortId());
             }
@@ -351,7 +341,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
                 if (info == null) {
                     // No CEC/MHL device is present at the port. Attempt to switch to
                     // the hardware port itself for non-CEC devices that may be connected.
-                    info = HdmiDeviceInfo.hardwarePort(path, getActivePortId());
+                    info = new HdmiDeviceInfo(path, getActivePortId());
                 }
             }
             mService.invokeInputChangeListener(info);
@@ -384,22 +374,22 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             return;
         }
         int newPath = mService.portIdToPath(portId);
-        startRoutingControl(oldPath, newPath, callback);
+        startRoutingControl(oldPath, newPath, true, callback);
     }
 
     @ServiceThreadOnly
-    void startRoutingControl(int oldPath, int newPath, IHdmiControlCallback callback) {
+    void startRoutingControl(int oldPath, int newPath, boolean queryDevicePowerStatus,
+            IHdmiControlCallback callback) {
         assertRunOnServiceThread();
         if (oldPath == newPath) {
             return;
         }
         HdmiCecMessage routingChange =
-                HdmiCecMessageBuilder.buildRoutingChange(
-                        getDeviceInfo().getLogicalAddress(), oldPath, newPath);
+                HdmiCecMessageBuilder.buildRoutingChange(mAddress, oldPath, newPath);
         mService.sendCecCommand(routingChange);
         removeAction(RoutingControlAction.class);
         addAndStartAction(
-                new RoutingControlAction(this, newPath, callback));
+                new RoutingControlAction(this, newPath, queryDevicePowerStatus, callback));
     }
 
     @ServiceThreadOnly
@@ -418,11 +408,6 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             return info.getLogicalAddress();
         }
         return Constants.ADDR_INVALID;
-    }
-
-    @Override
-    protected int findAudioReceiverAddress() {
-        return Constants.ADDR_AUDIO_SYSTEM;
     }
 
     @Override
@@ -497,10 +482,9 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     protected int handleRequestActiveSource(HdmiCecMessage message) {
         assertRunOnServiceThread();
         // Seq #19
-        if (getDeviceInfo().getLogicalAddress() == getActiveSource().logicalAddress) {
+        if (mAddress == getActiveSource().logicalAddress) {
             mService.sendCecCommand(
-                    HdmiCecMessageBuilder.buildActiveSource(
-                            getDeviceInfo().getLogicalAddress(), getActivePath()));
+                    HdmiCecMessageBuilder.buildActiveSource(mAddress, getActivePath()));
         }
         return Constants.HANDLED;
     }
@@ -519,9 +503,8 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     @ServiceThreadOnly
     boolean broadcastMenuLanguage(String language) {
         assertRunOnServiceThread();
-        HdmiCecMessage command =
-                HdmiCecMessageBuilder.buildSetMenuLanguageCommand(
-                        getDeviceInfo().getLogicalAddress(), language);
+        HdmiCecMessage command = HdmiCecMessageBuilder.buildSetMenuLanguageCommand(
+                mAddress, language);
         if (command != null) {
             mService.sendCecCommand(command);
             return true;
@@ -573,8 +556,10 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             }
         }
 
-        addAndStartAction(new NewDeviceAction(this, activeSource.logicalAddress,
-                activeSource.physicalAddress, deviceType));
+        if (!mService.isPowerStandbyOrTransient()) {
+            addAndStartAction(new NewDeviceAction(this, activeSource.logicalAddress,
+                    activeSource.physicalAddress, deviceType));
+        }
     }
 
     private boolean handleNewDeviceAtTheTailOfActivePath(int path) {
@@ -582,7 +567,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         if (isTailOfActivePath(path, getActivePath())) {
             int newPath = mService.portIdToPath(getActivePortId());
             setActivePath(newPath);
-            startRoutingControl(getActivePath(), newPath, null);
+            startRoutingControl(getActivePath(), newPath, false, null);
             return true;
         }
         return false;
@@ -627,7 +612,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             getActiveSource().invalidate();
             removeAction(RoutingControlAction.class);
             int newPath = HdmiUtils.twoBytesToInt(params, 2);
-            addAndStartAction(new RoutingControlAction(this, newPath, null));
+            addAndStartAction(new RoutingControlAction(this, newPath, true, null));
         }
         return Constants.HANDLED;
     }
@@ -654,17 +639,14 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     protected int handleTextViewOn(HdmiCecMessage message) {
         assertRunOnServiceThread();
 
-        // Note that if the device is in sleep mode, the <Text View On> (and <Image View On>)
-        // command won't be handled here in most cases. A dedicated microcontroller should be in
-        // charge while the Android system is in sleep mode, and the command doesn't need to be
-        // passed up to this service.
-        // The only situations where the command reaches this handler are
-        // 1. if sleep mode is implemented in such a way that Android system is not really put to
-        // standby mode but only the display is set to blank. Then the command leads to
+        // Note that <Text View On> (and <Image View On>) command won't be handled here in
+        // most cases. A dedicated microcontroller should be in charge while Android system
+        // is in sleep mode, and the command need not be passed up to this service.
+        // The only situation where the command reaches this handler is that sleep mode is
+        // implemented in such a way that Android system is not really put to standby mode
+        // but only the display is set to blank. Then the command leads to the effect of
         // turning on the display by the invocation of PowerManager.wakeUp().
-        // 2. if the device is in dream mode, not sleep mode. Then this command leads to
-        // waking up the device from dream mode by the invocation of PowerManager.wakeUp().
-        if (getAutoWakeup()) {
+        if (mService.isPowerStandbyOrTransient() && getAutoWakeup()) {
             mService.wakeUp();
         }
         return Constants.HANDLED;
@@ -691,7 +673,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
                             mService.getHdmiCecNetwork().addCecDevice(info);
                         }
 
-                        // Since we removed all devices when it starts and
+                        // Since we removed all devices when it's start and
                         // device discovery action does not poll local devices,
                         // we should put device info of local device manually here
                         for (HdmiCecLocalDevice device : mService.getAllLocalDevices()) {
@@ -729,13 +711,22 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     @ServiceThreadOnly
     void onNewAvrAdded(HdmiDeviceInfo avr) {
         assertRunOnServiceThread();
-        addAndStartAction(new SystemAudioAutoInitiationAction(this, avr.getLogicalAddress()));
-        if (!isDirectConnectAddress(avr.getPhysicalAddress())) {
-            startArcAction(false);
-        } else if (isConnected(avr.getPortId()) && isArcFeatureEnabled(avr.getPortId())
-                && !hasAction(SetArcTransmissionStateAction.class)) {
-            startArcAction(true);
+        if (!mService.isPowerStandbyOrTransient()) {
+            addAndStartAction(new SystemAudioAutoInitiationAction(this, avr.getLogicalAddress()));
+            if (!isDirectConnectAddress(avr.getPhysicalAddress())) {
+                startArcAction(false);
+            } else if (isConnected(avr.getPortId()) && isArcFeatureEnabled(avr.getPortId())
+                    && !hasAction(SetArcTransmissionStateAction.class)) {
+                startArcAction(true);
+            }
         }
+    }
+
+    // Clear all device info.
+    @ServiceThreadOnly
+    private void clearDeviceInfoList() {
+        assertRunOnServiceThread();
+        mService.getHdmiCecNetwork().clearDeviceList();
     }
 
     @ServiceThreadOnly
@@ -821,23 +812,12 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
 
         HdmiLogger.debug("Set Arc Status[old:%b new:%b]", mArcEstablished, enabled);
         boolean oldStatus = mArcEstablished;
-        if (enabled) {
-            RequestSadAction action = new RequestSadAction(
-                    this, Constants.ADDR_AUDIO_SYSTEM,
-                    new RequestSadAction.RequestSadCallback() {
-                        @Override
-                        public void onRequestSadDone(List<byte[]> supportedSads) {
-                            enableAudioReturnChannel(enabled);
-                            notifyArcStatusToAudioService(enabled, supportedSads);
-                            mArcEstablished = enabled;
-                        }
-                    });
-            addAndStartAction(action);
-        } else {
-            enableAudioReturnChannel(enabled);
-            notifyArcStatusToAudioService(enabled, new ArrayList<>());
-            mArcEstablished = enabled;
-        }
+        // 1. Enable/disable ARC circuit.
+        enableAudioReturnChannel(enabled);
+        // 2. Notify arc status to audio service.
+        notifyArcStatusToAudioService(enabled);
+        // 3. Update arc status;
+        mArcEstablished = enabled;
         return oldStatus;
     }
 
@@ -859,15 +839,11 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         return mService.isConnected(portId);
     }
 
-    private void notifyArcStatusToAudioService(boolean enabled, List<byte[]> supportedSads) {
+    private void notifyArcStatusToAudioService(boolean enabled) {
         // Note that we don't set any name to ARC.
-        AudioDeviceAttributes attributes = new AudioDeviceAttributes(
-                AudioDeviceAttributes.ROLE_OUTPUT, AudioDeviceInfo.TYPE_HDMI_ARC, "", "",
-                new ArrayList<AudioProfile>(), supportedSads.stream()
-                .map(sad -> new AudioDescriptor(AudioDescriptor.STANDARD_EDID,
-                        AudioProfile.AUDIO_ENCAPSULATION_TYPE_NONE, sad))
-                .collect(Collectors.toList()));
-        mService.getAudioManager().setWiredDeviceConnectionState(attributes, enabled ? 1 : 0);
+        mService.getAudioManager().setWiredDeviceConnectionState(
+                AudioSystem.DEVICE_OUT_HDMI_ARC,
+                enabled ? 1 : 0, "", "");
     }
 
     /**
@@ -950,6 +926,10 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         synchronized (mLock) {
             mSystemAudioMute = mute;
             mSystemAudioVolume = volume;
+            int maxVolume = mService.getAudioManager().getStreamMaxVolume(
+                    AudioManager.STREAM_MUSIC);
+            mService.setAudioStatus(mute,
+                    VolumeControlAction.scaleToCustomVolume(volume, maxVolume));
             displayOsd(HdmiControlManager.OSD_MESSAGE_AVR_VOLUME_CHANGED,
                     mute ? HdmiControlManager.AVR_VOLUME_MUTED : volume);
         }
@@ -1209,7 +1189,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         // Seq #23
         if (isTailOfActivePath(path, getActivePath())) {
             int newPath = mService.portIdToPath(getActivePortId());
-            startRoutingControl(getActivePath(), newPath, null);
+            startRoutingControl(getActivePath(), newPath, true, null);
         }
     }
 
@@ -1227,16 +1207,15 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             if (!routingForBootup && !isProhibitMode()) {
                 int newPath = mService.portIdToPath(getActivePortId());
                 setActivePath(newPath);
-                startRoutingControl(getActivePath(), newPath, null);
+                startRoutingControl(getActivePath(), newPath, routingForBootup, null);
             }
         } else {
             int activePath = mService.getPhysicalAddress();
             setActivePath(activePath);
             if (!routingForBootup
                     && !mDelayedMessageBuffer.isBuffered(Constants.MESSAGE_ACTIVE_SOURCE)) {
-                mService.sendCecCommand(
-                        HdmiCecMessageBuilder.buildActiveSource(
-                                getDeviceInfo().getLogicalAddress(), activePath));
+                mService.sendCecCommand(HdmiCecMessageBuilder.buildActiveSource(mAddress,
+                        activePath));
             }
         }
     }
@@ -1358,9 +1337,8 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
                     HdmiControlManager.CEC_SETTING_NAME_TV_SEND_STANDBY_ON_SLEEP)
                         == HdmiControlManager.TV_SEND_STANDBY_ON_SLEEP_ENABLED;
         if (!initiatedByCec && sendStandbyOnSleep) {
-            mService.sendCecCommand(
-                    HdmiCecMessageBuilder.buildStandby(
-                            getDeviceInfo().getLogicalAddress(), Constants.ADDR_BROADCAST));
+            mService.sendCecCommand(HdmiCecMessageBuilder.buildStandby(
+                    mAddress, Constants.ADDR_BROADCAST));
         }
     }
 
@@ -1433,9 +1411,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
 
         // Remove one touch record action so that other one touch record can be started.
         removeAction(OneTouchRecordAction.class);
-        mService.sendCecCommand(
-                HdmiCecMessageBuilder.buildRecordOff(
-                        getDeviceInfo().getLogicalAddress(), recorderAddress));
+        mService.sendCecCommand(HdmiCecMessageBuilder.buildRecordOff(mAddress, recorderAddress));
         Slog.i(TAG, "Stop [One Touch Record]-Target:" + recorderAddress);
     }
 
@@ -1516,19 +1492,16 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         HdmiCecMessage message = null;
         switch (sourceType) {
             case TIMER_RECORDING_TYPE_DIGITAL:
-                message =
-                        HdmiCecMessageBuilder.buildClearDigitalTimer(
-                                getDeviceInfo().getLogicalAddress(), recorderAddress, recordSource);
+                message = HdmiCecMessageBuilder.buildClearDigitalTimer(mAddress, recorderAddress,
+                        recordSource);
                 break;
             case TIMER_RECORDING_TYPE_ANALOGUE:
-                message =
-                        HdmiCecMessageBuilder.buildClearAnalogueTimer(
-                                getDeviceInfo().getLogicalAddress(), recorderAddress, recordSource);
+                message = HdmiCecMessageBuilder.buildClearAnalogueTimer(mAddress, recorderAddress,
+                        recordSource);
                 break;
             case TIMER_RECORDING_TYPE_EXTERNAL:
-                message =
-                        HdmiCecMessageBuilder.buildClearExternalTimer(
-                                getDeviceInfo().getLogicalAddress(), recorderAddress, recordSource);
+                message = HdmiCecMessageBuilder.buildClearExternalTimer(mAddress, recorderAddress,
+                        recordSource);
                 break;
             default:
                 Slog.w(TAG, "Invalid source type:" + recorderAddress);
@@ -1571,7 +1544,9 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     }
 
     @Override
-    protected DeviceFeatures computeDeviceFeatures() {
+    protected List<Integer> getDeviceFeatures() {
+        List<Integer> deviceFeatures = new ArrayList<>();
+
         boolean hasArcPort = false;
         List<HdmiPortInfo> ports = mService.getPortInfo();
         for (HdmiPortInfo port : ports) {
@@ -1580,11 +1555,11 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
                 break;
             }
         }
-
-        return DeviceFeatures.NO_FEATURES_SUPPORTED.toBuilder()
-                .setRecordTvScreenSupport(FEATURE_SUPPORTED)
-                .setArcTxSupport(hasArcPort ? FEATURE_SUPPORTED : FEATURE_NOT_SUPPORTED)
-                .build();
+        if (hasArcPort) {
+            deviceFeatures.add(Constants.DEVICE_FEATURE_SINK_SUPPORTS_ARC_TX);
+        }
+        deviceFeatures.add(Constants.DEVICE_FEATURE_TV_SUPPORTS_RECORD_TV_SCREEN);
+        return deviceFeatures;
     }
 
     @Override
@@ -1594,9 +1569,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             return;
         }
         int targetAddress = targetDevice.getLogicalAddress();
-        mService.sendCecCommand(
-                HdmiCecMessageBuilder.buildStandby(
-                        getDeviceInfo().getLogicalAddress(), targetAddress));
+        mService.sendCecCommand(HdmiCecMessageBuilder.buildStandby(mAddress, targetAddress));
     }
 
     @ServiceThreadOnly

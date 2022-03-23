@@ -19,8 +19,9 @@ package com.android.server.testing.shadows;
 import android.annotation.Nullable;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 
-import com.android.server.backup.transport.TransportConnection;
+import com.android.server.backup.transport.TransportClient;
 import com.android.server.backup.utils.BackupEligibilityRules;
 
 import org.robolectric.annotation.Implementation;
@@ -53,7 +54,7 @@ public class ShadowBackupEligibilityRules {
 
     @Implementation
     protected boolean appIsRunningAndEligibleForBackupWithTransport(
-            @Nullable TransportConnection transportConnection,
+            @Nullable TransportClient transportClient,
             String packageName) {
         return sAppsRunningAndEligibleForBackupWithTransport.contains(packageName);
     }
