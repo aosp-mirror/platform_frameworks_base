@@ -2805,8 +2805,11 @@ package android.companion.virtual {
   public final class VirtualDeviceParams implements android.os.Parcelable {
     method public int describeContents();
     method @NonNull public java.util.Set<android.content.ComponentName> getAllowedActivities();
+    method @NonNull public java.util.Set<android.content.ComponentName> getAllowedCrossTaskNavigations();
     method @NonNull public java.util.Set<android.content.ComponentName> getBlockedActivities();
+    method @NonNull public java.util.Set<android.content.ComponentName> getBlockedCrossTaskNavigations();
     method public int getDefaultActivityPolicy();
+    method public int getDefaultNavigationPolicy();
     method public int getLockState();
     method @NonNull public java.util.Set<android.os.UserHandle> getUsersWithMatchingAccounts();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
@@ -2815,13 +2818,17 @@ package android.companion.virtual {
     field @NonNull public static final android.os.Parcelable.Creator<android.companion.virtual.VirtualDeviceParams> CREATOR;
     field public static final int LOCK_STATE_ALWAYS_UNLOCKED = 1; // 0x1
     field public static final int LOCK_STATE_DEFAULT = 0; // 0x0
+    field public static final int NAVIGATION_POLICY_DEFAULT_ALLOWED = 0; // 0x0
+    field public static final int NAVIGATION_POLICY_DEFAULT_BLOCKED = 1; // 0x1
   }
 
   public static final class VirtualDeviceParams.Builder {
     ctor public VirtualDeviceParams.Builder();
     method @NonNull public android.companion.virtual.VirtualDeviceParams build();
     method @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setAllowedActivities(@NonNull java.util.Set<android.content.ComponentName>);
+    method @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setAllowedCrossTaskNavigations(@NonNull java.util.Set<android.content.ComponentName>);
     method @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setBlockedActivities(@NonNull java.util.Set<android.content.ComponentName>);
+    method @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setBlockedCrossTaskNavigations(@NonNull java.util.Set<android.content.ComponentName>);
     method @NonNull @RequiresPermission(value=android.Manifest.permission.ADD_ALWAYS_UNLOCKED_DISPLAY, conditional=true) public android.companion.virtual.VirtualDeviceParams.Builder setLockState(int);
     method @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setUsersWithMatchingAccounts(@NonNull java.util.Set<android.os.UserHandle>);
   }
