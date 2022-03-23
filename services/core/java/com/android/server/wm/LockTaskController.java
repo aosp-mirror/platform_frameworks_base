@@ -251,47 +251,15 @@ public class LockTaskController {
      */
     boolean activityBlockedFromFinish(ActivityRecord activity) {
         final Task task = activity.getTask();
-        if (task.mLockTaskAuth == LOCK_TASK_AUTH_LAUNCHABLE_PRIV || !isRootTask(task)) {
-            return false;
+        if (activity == task.getRootActivity()
+                && activity == task.getTopNonFinishingActivity()
+                && task.mLockTaskAuth != LOCK_TASK_AUTH_LAUNCHABLE_PRIV
+                && isRootTask(task)) {
+            Slog.i(TAG, "Not finishing task in lock task mode");
+            showLockTaskToast();
+            return true;
         }
-
-        final ActivityRecord taskTop = task.getTopNonFinishingActivity();
-        final ActivityRecord taskRoot = task.getRootActivity();
-        // If task has more than one Activity, verify if there's only adjacent TaskFragments that
-        // should be finish together in the Task.
-        if (activity != taskRoot || activity != taskTop) {
-            final TaskFragment taskFragment = activity.getTaskFragment();
-            final TaskFragment adjacentTaskFragment = taskFragment.getAdjacentTaskFragment();
-            if (taskFragment.asTask() != null
-                    || !taskFragment.isDelayLastActivityRemoval()
-                    || adjacentTaskFragment == null) {
-                // Don't block activity from finishing if the TaskFragment don't have any adjacent
-                // TaskFragment, or it won't finish together with its adjacent TaskFragment.
-                return false;
-            }
-
-            final boolean hasOtherActivityInTaskFragment =
-                    taskFragment.getActivity(a -> !a.finishing && a != activity) != null;
-            if (hasOtherActivityInTaskFragment) {
-                // Don't block activity from finishing if there's other Activity in the same
-                // TaskFragment.
-                return false;
-            }
-
-            final boolean hasOtherActivityInTask = task.getActivity(a -> !a.finishing
-                    && a != activity && a.getTaskFragment() != adjacentTaskFragment) != null;
-            if (hasOtherActivityInTask) {
-                // Do not block activity from finishing if there are another running activities
-                // after the current and adjacent TaskFragments are removed. Note that we don't
-                // check activities in adjacent TaskFragment because it will be finished together
-                // with TaskFragment regardless of numbers of activities.
-                return false;
-            }
-        }
-
-        Slog.i(TAG, "Not finishing task in lock task mode");
-        showLockTaskToast();
-        return true;
+        return false;
     }
 
     /**
@@ -542,7 +510,7 @@ public class LockTaskController {
         if (mLockTaskModeTasks.isEmpty()) {
             return;
         }
-        task.performClearTaskForReuse(false /* excludingTaskOverlay*/);
+        task.performClearTaskLocked();
         mSupervisor.mRootWindowContainer.resumeFocusedTasksTopActivities();
     }
 
@@ -740,7 +708,7 @@ public class LockTaskController {
             ProtoLog.d(WM_DEBUG_LOCKTASK, "onLockTaskPackagesUpdated: removing %s"
                     + " mLockTaskAuth()=%s", lockedTask, lockedTask.lockTaskAuthToString());
             removeLockedTask(lockedTask);
-            lockedTask.performClearTaskForReuse(false /* excludingTaskOverlay*/);
+            lockedTask.performClearTaskLocked();
             taskChanged = true;
         }
 

@@ -285,18 +285,11 @@ public class Build {
         public static final String RELEASE = getString("ro.build.version.release");
 
         /**
-         * The version string.  May be {@link #RELEASE} or {@link #CODENAME} if
-         * not a final release build.
+         * The version string we show to the user; may be {@link #RELEASE} or
+         * {@link #CODENAME} if not a final release build.
          */
         @NonNull public static final String RELEASE_OR_CODENAME = getString(
                 "ro.build.version.release_or_codename");
-
-        /**
-         * The version string we show to the user; may be {@link #RELEASE} or
-         * a descriptive string if not a final release build.
-         */
-        @NonNull public static final String RELEASE_OR_PREVIEW_DISPLAY = getString(
-                "ro.build.version.release_or_preview_display");
 
         /**
          * The base OS build the product is based on.
@@ -406,20 +399,15 @@ public class Build {
         public static final String CODENAME = getString("ro.build.version.codename");
 
         /**
-         * All known codenames that are present in {@link VERSION_CODES}.
+         * All known codenames starting from {@link VERSION_CODES.Q}.
          *
-         * <p>This includes in development codenames as well, i.e. if {@link #CODENAME} is not "REL"
-         * then the value of that is present in this set.
-         *
-         * <p>If a particular string is not present in this set, then it is either not a codename
-         * or a codename for a future release. For example, during Android R development, "Tiramisu"
-         * was not a known codename.
+         * <p>This includes in development codenames as well.
          *
          * @hide
          */
         @SystemApi
         @NonNull public static final Set<String> KNOWN_CODENAMES =
-                new ArraySet<>(getStringList("ro.build.version.known_codenames", ","));
+                new ArraySet<>(new String[]{"Q", "R", "S", "Sv2", "Tiramisu"});
 
         private static final String[] ALL_CODENAMES
                 = getStringList("ro.build.version.all_codenames", ",");
@@ -1049,7 +1037,7 @@ public class Build {
          * will also enable {@link StrictMode.ThreadPolicy.Builder#detectUnbufferedIo}.</li>
          * <li>{@link android.provider.DocumentsContract}'s various methods will throw failure
          * exceptions back to the caller instead of returning null.
-         * <li>{@link View#hasFocusable() View.hasFocusable} now includes auto-focusable views.</li>
+         * <li>{@link View#hasFocusable View.hasFocusable} now includes auto-focusable views.</li>
          * <li>{@link android.view.SurfaceView} will no longer always change the underlying
          * Surface object when something about it changes; apps need to look at the current
          * state of the object to determine which things they are interested in have changed.</li>
@@ -1155,18 +1143,6 @@ public class Build {
          * S.
          */
         public static final int S = 31;
-
-        /**
-         * S V2.
-         *
-         * Once more unto the breach, dear friends, once more.
-         */
-        public static final int S_V2 = 32;
-
-        /**
-         * Tiramisu.
-         */
-        public static final int TIRAMISU = CUR_DEVELOPMENT;
     }
 
     /** The type of build, like "user" or "eng". */
@@ -1319,18 +1295,6 @@ public class Build {
     public static class Partition {
         /** The name identifying the system partition. */
         public static final String PARTITION_NAME_SYSTEM = "system";
-        /** @hide */
-        public static final String PARTITION_NAME_BOOTIMAGE = "bootimage";
-        /** @hide */
-        public static final String PARTITION_NAME_ODM = "odm";
-        /** @hide */
-        public static final String PARTITION_NAME_OEM = "oem";
-        /** @hide */
-        public static final String PARTITION_NAME_PRODUCT = "product";
-        /** @hide */
-        public static final String PARTITION_NAME_SYSTEM_EXT = "system_ext";
-        /** @hide */
-        public static final String PARTITION_NAME_VENDOR = "vendor";
 
         private final String mName;
         private final String mFingerprint;
@@ -1387,12 +1351,8 @@ public class Build {
         ArrayList<Partition> partitions = new ArrayList();
 
         String[] names = new String[] {
-                Partition.PARTITION_NAME_BOOTIMAGE,
-                Partition.PARTITION_NAME_ODM,
-                Partition.PARTITION_NAME_PRODUCT,
-                Partition.PARTITION_NAME_SYSTEM_EXT,
-                Partition.PARTITION_NAME_SYSTEM,
-                Partition.PARTITION_NAME_VENDOR
+            "bootimage", "odm", "product", "system_ext", Partition.PARTITION_NAME_SYSTEM,
+            "vendor"
         };
         for (String name : names) {
             String fingerprint = SystemProperties.get("ro." + name + ".build.fingerprint");
@@ -1447,11 +1407,7 @@ public class Build {
     public static final boolean IS_USER = "user".equals(TYPE);
 
     /**
-     * Whether this build is running on ARC, the Android Runtime for Chrome
-     * (https://chromium.googlesource.com/chromiumos/docs/+/master/containers_and_vms.md).
-     * Prior to R this was implemented as a container but from R this will be
-     * a VM. The name of the property remains ro.boot.conntainer as it is
-     * referenced in other projects.
+     * Whether this build is running inside a container.
      *
      * We should try to avoid checking this flag if possible to minimize
      * unnecessarily diverging from non-container Android behavior.
@@ -1462,7 +1418,7 @@ public class Build {
      * For higher-level behavior differences, other checks should be preferred.
      * @hide
      */
-    public static final boolean IS_ARC =
+    public static final boolean IS_CONTAINER =
             SystemProperties.getBoolean("ro.boot.container", false);
 
     /**

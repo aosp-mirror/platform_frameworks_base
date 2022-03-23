@@ -40,12 +40,10 @@ import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutManager;
 import android.graphics.drawable.Icon;
 import android.os.UserHandle;
-import android.platform.test.annotations.Presubmit;
 import android.test.MoreAsserts;
+import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Log;
 import android.util.Pair;
-
-import androidx.test.filters.SmallTest;
 
 import com.android.frameworks.servicestests.R;
 
@@ -65,7 +63,6 @@ import org.mockito.ArgumentCaptor;
  * - Reading icons from requested shortcuts.
  * - Invalid pre-approved token.
  */
-@Presubmit
 @SmallTest
 public class ShortcutManagerTest8 extends BaseShortcutManagerTest {
     private ShortcutRequestPinProcessor mProcessor;

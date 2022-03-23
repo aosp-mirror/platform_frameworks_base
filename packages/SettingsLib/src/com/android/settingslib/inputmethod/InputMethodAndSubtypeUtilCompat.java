@@ -18,13 +18,11 @@ package com.android.settingslib.inputmethod;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.UserIdInt;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.icu.text.ListFormatter;
-import android.os.UserHandle;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.text.TextUtils;
@@ -38,7 +36,6 @@ import androidx.preference.PreferenceScreen;
 import androidx.preference.TwoStatePreference;
 
 import com.android.internal.app.LocaleHelper;
-import com.android.settingslib.PrimarySwitchPreference;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -157,41 +154,9 @@ public class InputMethodAndSubtypeUtilCompat {
         return set;
     }
 
-    /**
-     * Save the enabled/disabled input methods and selected subtype states into system settings.
-     *
-     * @param fragment The preference fragment user interact with.
-     * @param resolver The {@link ContentResolver} used to access the database.
-     * @param inputMethodInfos The list of {@link InputMethodInfo} to be checked.
-     * @param hasHardKeyboard {@code true} if the device has the hardware keyboard.
-     */
-    public static void saveInputMethodSubtypeList(PreferenceFragmentCompat fragment,
+    public static void saveInputMethodSubtypeList(PreferenceFragmentCompat context,
             ContentResolver resolver, List<InputMethodInfo> inputMethodInfos,
             boolean hasHardKeyboard) {
-        saveInputMethodSubtypeListForUserInternal(
-                fragment, resolver, inputMethodInfos, hasHardKeyboard, UserHandle.myUserId());
-    }
-
-    /**
-     * Save the enabled/disabled input methods and selected subtype states into system settings as
-     * given userId.
-     *
-     * @param fragment The preference fragment user interact with.
-     * @param resolver The {@link ContentResolver} used to access the database.
-     * @param inputMethodInfos The list of {@link InputMethodInfo} to be checked.
-     * @param hasHardKeyboard {@code true} if the device has the hardware keyboard.
-     * @param userId The given userId
-     */
-    public static void saveInputMethodSubtypeListForUser(PreferenceFragmentCompat fragment,
-            ContentResolver resolver, List<InputMethodInfo> inputMethodInfos,
-            boolean hasHardKeyboard, @UserIdInt int userId) {
-        saveInputMethodSubtypeListForUserInternal(
-                fragment, resolver, inputMethodInfos, hasHardKeyboard, userId);
-    }
-
-    private static void saveInputMethodSubtypeListForUserInternal(PreferenceFragmentCompat fragment,
-            ContentResolver resolver, List<InputMethodInfo> inputMethodInfos,
-            boolean hasHardKeyboard, @UserIdInt int userId) {
         String currentInputMethodId = Settings.Secure.getString(resolver,
                 Settings.Secure.DEFAULT_INPUT_METHOD);
         final int selectedInputMethodSubtype = getInputMethodSubtypeSelected(resolver);
@@ -202,27 +167,19 @@ public class InputMethodAndSubtypeUtilCompat {
         boolean needsToResetSelectedSubtype = false;
         for (final InputMethodInfo imi : inputMethodInfos) {
             final String imiId = imi.getId();
-            final Preference pref = fragment.findPreference(imiId);
+            final Preference pref = context.findPreference(imiId);
             if (pref == null) {
                 continue;
             }
             // In the choose input method screen or in the subtype enabler screen,
             // <code>pref</code> is an instance of TwoStatePreference.
-            final boolean isImeChecked;
-            if (pref instanceof TwoStatePreference) {
-                isImeChecked = ((TwoStatePreference) pref).isChecked();
-            } else if (pref instanceof PrimarySwitchPreference) {
-                isImeChecked = ((PrimarySwitchPreference) pref).isChecked();
-            } else {
-                isImeChecked = enabledIMEsAndSubtypesMap.containsKey(imiId);
-            }
+            final boolean isImeChecked = (pref instanceof TwoStatePreference) ?
+                    ((TwoStatePreference) pref).isChecked()
+                    : enabledIMEsAndSubtypesMap.containsKey(imiId);
             final boolean isCurrentInputMethod = imiId.equals(currentInputMethodId);
             final boolean systemIme = imi.isSystem();
-            // Create context as given userId
-            final Context wrapperContext = userId == UserHandle.myUserId() ? fragment.getActivity()
-                    : fragment.getActivity().createContextAsUser(UserHandle.of(userId), 0);
             if ((!hasHardKeyboard && InputMethodSettingValuesWrapper.getInstance(
-                    wrapperContext).isAlwaysCheckedIme(imi))
+                    context.getActivity()).isAlwaysCheckedIme(imi))
                     || isImeChecked) {
                 if (!enabledIMEsAndSubtypesMap.containsKey(imiId)) {
                     // imiId has just been enabled
@@ -235,7 +192,7 @@ public class InputMethodAndSubtypeUtilCompat {
                 for (int i = 0; i < subtypeCount; ++i) {
                     final InputMethodSubtype subtype = imi.getSubtypeAt(i);
                     final String subtypeHashCodeStr = String.valueOf(subtype.hashCode());
-                    final TwoStatePreference subtypePref = (TwoStatePreference) fragment
+                    final TwoStatePreference subtypePref = (TwoStatePreference) context
                             .findPreference(imiId + subtypeHashCodeStr);
                     // In the Configure input method screen which does not have subtype preferences.
                     if (subtypePref == null) {

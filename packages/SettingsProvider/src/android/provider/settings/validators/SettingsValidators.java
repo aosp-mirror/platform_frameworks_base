@@ -74,20 +74,6 @@ public class SettingsValidators {
         }
     };
 
-    public static final Validator NON_NEGATIVE_FLOAT_VALIDATOR = new Validator() {
-        @Override
-        public boolean validate(@Nullable String value) {
-            if (value == null) {
-                return true;
-            }
-            try {
-                return Float.parseFloat(value) >= 0.0f;
-            } catch (NumberFormatException e) {
-                return false;
-            }
-        }
-    };
-
     public static final Validator URI_VALIDATOR = new Validator() {
         @Override
         public boolean validate(@Nullable String value) {

@@ -18,13 +18,15 @@ package android.telephony.data;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
-import android.annotation.Nullable;
+import android.net.InetAddresses;
 import android.net.LinkAddress;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.net.InetAddress;
+import java.net.Inet4Address;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -36,10 +38,11 @@ import java.util.Objects;
  * @hide
  */
 public final class QosBearerFilter implements Parcelable {
-    private @NonNull List<LinkAddress> localAddresses;
-    private @NonNull List<LinkAddress> remoteAddresses;
-    private @Nullable PortRange localPort;
-    private @Nullable PortRange remotePort;
+
+    private List<LinkAddress> localAddresses;
+    private List<LinkAddress> remoteAddresses;
+    private PortRange localPort;
+    private PortRange remotePort;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
@@ -56,12 +59,13 @@ public final class QosBearerFilter implements Parcelable {
     public static final int QOS_PROTOCOL_AH = android.hardware.radio.V1_6.QosProtocol.AH;
     public static final int QOS_MIN_PORT = android.hardware.radio.V1_6.QosPortRange.MIN;
     /**
-     * Hardcoded in place of android.hardware.radio.V1_6.QosPortRange.MAX as it
+     * Hardcoded inplace of android.hardware.radio.V1_6.QosPortRange.MAX as it
      * returns -1 due to uint16_t to int conversion in java. (TODO: Fix the HAL)
      */
     public static final int QOS_MAX_PORT = 65535; // android.hardware.radio.V1_6.QosPortRange.MIN;
 
-    private @QosProtocol int protocol;
+    @QosProtocol
+    private int protocol;
 
     private int typeOfServiceMask;
 
@@ -84,7 +88,8 @@ public final class QosBearerFilter implements Parcelable {
     public static final int QOS_FILTER_DIRECTION_BIDIRECTIONAL =
             android.hardware.radio.V1_6.QosFilterDirection.BIDIRECTIONAL;
 
-    private @QosBearerFilterDirection int filterDirection;
+    @QosBearerFilterDirection
+    private int filterDirection;
 
     /**
      * Specified the order in which the filter needs to be matched.
@@ -92,14 +97,20 @@ public final class QosBearerFilter implements Parcelable {
      */
     private int precedence;
 
-    public QosBearerFilter(@NonNull List<LinkAddress> localAddresses,
-            @NonNull List<LinkAddress> remoteAddresses, @Nullable PortRange localPort,
-            @Nullable PortRange remotePort, @QosProtocol int protocol, int tos, long flowLabel,
-            long spi, @QosBearerFilterDirection int direction, int precedence) {
-        this.localAddresses = new ArrayList<>();
-        this.localAddresses.addAll(localAddresses);
-        this.remoteAddresses = new ArrayList<>();
-        this.remoteAddresses.addAll(remoteAddresses);
+    QosBearerFilter() {
+        localAddresses = new ArrayList<>();
+        remoteAddresses = new ArrayList<>();
+        localPort = new PortRange();
+        remotePort = new PortRange();
+        protocol = QOS_PROTOCOL_UNSPECIFIED;
+        filterDirection = QOS_FILTER_DIRECTION_BIDIRECTIONAL;
+    }
+
+    public QosBearerFilter(List<LinkAddress> localAddresses, List<LinkAddress> remoteAddresses,
+            PortRange localPort, PortRange remotePort, int protocol, int tos,
+            long flowLabel, long spi, int direction, int precedence) {
+        this.localAddresses = localAddresses;
+        this.remoteAddresses = remoteAddresses;
         this.localPort = localPort;
         this.remotePort = remotePort;
         this.protocol = protocol;
@@ -110,19 +121,19 @@ public final class QosBearerFilter implements Parcelable {
         this.precedence = precedence;
     }
 
-    public @NonNull List<LinkAddress> getLocalAddresses() {
+    public List<LinkAddress> getLocalAddresses() {
         return localAddresses;
     }
 
-    public @NonNull List<LinkAddress> getRemoteAddresses() {
+    public List<LinkAddress> getRemoteAddresses() {
         return remoteAddresses;
     }
 
-    public @Nullable PortRange getLocalPortRange() {
+    public PortRange getLocalPortRange() {
         return localPort;
     }
 
-    public @Nullable PortRange getRemotePortRange() {
+    public PortRange getRemotePortRange() {
         return remotePort;
     }
 
@@ -130,9 +141,81 @@ public final class QosBearerFilter implements Parcelable {
         return precedence;
     }
 
+    /** @hide */
+    public static @NonNull QosBearerFilter create(
+            @NonNull android.hardware.radio.V1_6.QosFilter qosFilter) {
+        QosBearerFilter ret = new QosBearerFilter();
+
+        String[] localAddresses = qosFilter.localAddresses.stream().toArray(String[]::new);
+        if (localAddresses != null) {
+            for (String address : localAddresses) {
+                ret.localAddresses.add(createLinkAddressFromString(address));
+            }
+        }
+
+        String[] remoteAddresses = qosFilter.remoteAddresses.stream().toArray(String[]::new);
+        if (remoteAddresses != null) {
+            for (String address : remoteAddresses) {
+                ret.remoteAddresses.add(createLinkAddressFromString(address));
+            }
+        }
+
+        if (qosFilter.localPort != null) {
+            if (qosFilter.localPort.getDiscriminator()
+                    == android.hardware.radio.V1_6.MaybePort.hidl_discriminator.range) {
+                final android.hardware.radio.V1_6.PortRange portRange = qosFilter.localPort.range();
+                ret.localPort.start = portRange.start;
+                ret.localPort.end = portRange.end;
+            }
+        }
+
+        if (qosFilter.remotePort != null) {
+            if (qosFilter.remotePort.getDiscriminator()
+                    == android.hardware.radio.V1_6.MaybePort.hidl_discriminator.range) {
+                final android.hardware.radio.V1_6.PortRange portRange
+                        = qosFilter.remotePort.range();
+                ret.remotePort.start = portRange.start;
+                ret.remotePort.end = portRange.end;
+            }
+        }
+
+        ret.protocol = qosFilter.protocol;
+
+        if (qosFilter.tos != null) {
+            if (qosFilter.tos.getDiscriminator()
+                == android.hardware.radio.V1_6.QosFilter.TypeOfService.hidl_discriminator.value) {
+                ret.typeOfServiceMask = qosFilter.tos.value();
+            }
+        }
+
+        if (qosFilter.flowLabel != null) {
+            if (qosFilter.flowLabel.getDiscriminator()
+                == android.hardware.radio.V1_6.QosFilter.Ipv6FlowLabel.hidl_discriminator.value) {
+                ret.flowLabel = qosFilter.flowLabel.value();
+            }
+        }
+
+        if (qosFilter.spi != null) {
+            if (qosFilter.spi.getDiscriminator()
+                == android.hardware.radio.V1_6.QosFilter.IpsecSpi.hidl_discriminator.value) {
+                ret.securityParameterIndex = qosFilter.spi.value();
+            }
+        }
+
+        ret.filterDirection = qosFilter.direction;
+        ret.precedence = qosFilter.precedence;
+
+        return ret;
+    }
+
     public static class PortRange implements Parcelable {
         int start;
         int end;
+
+        PortRange() {
+            start = -1;
+            end = -1;
+        }
 
         private PortRange(Parcel source) {
             start = source.readInt();
@@ -244,8 +327,8 @@ public final class QosBearerFilter implements Parcelable {
                 && localAddresses.containsAll(other.localAddresses)
                 && remoteAddresses.size() == other.remoteAddresses.size()
                 && remoteAddresses.containsAll(other.remoteAddresses)
-                && Objects.equals(localPort, other.localPort)
-                && Objects.equals(remotePort, other.remotePort)
+                && localPort.equals(other.localPort)
+                && remotePort.equals(other.remotePort)
                 && protocol == other.protocol
                 && typeOfServiceMask == other.typeOfServiceMask
                 && flowLabel == other.flowLabel
@@ -254,13 +337,39 @@ public final class QosBearerFilter implements Parcelable {
                 && precedence == other.precedence;
     }
 
+    private static LinkAddress createLinkAddressFromString(String addressString) {
+        addressString = addressString.trim();
+        InetAddress address = null;
+        int prefixLength = -1;
+        try {
+            String[] pieces = addressString.split("/", 2);
+            address = InetAddresses.parseNumericAddress(pieces[0]);
+            if (pieces.length == 1) {
+                prefixLength = (address instanceof Inet4Address) ? 32 : 128;
+            } else if (pieces.length == 2) {
+                prefixLength = Integer.parseInt(pieces[1]);
+            }
+        } catch (NullPointerException e) {            // Null string.
+        } catch (ArrayIndexOutOfBoundsException e) {  // No prefix length.
+        } catch (NumberFormatException e) {           // Non-numeric prefix.
+        } catch (IllegalArgumentException e) {        // Invalid IP address.
+        }
+
+        if (address == null || prefixLength == -1) {
+            throw new IllegalArgumentException("Invalid link address " + addressString);
+        }
+
+        return new LinkAddress(address, prefixLength, 0, 0,
+                LinkAddress.LIFETIME_UNKNOWN, LinkAddress.LIFETIME_UNKNOWN);
+    }
+
     private QosBearerFilter(Parcel source) {
         localAddresses = new ArrayList<>();
-        source.readList(localAddresses, LinkAddress.class.getClassLoader(), android.net.LinkAddress.class);
+        source.readList(localAddresses, LinkAddress.class.getClassLoader());
         remoteAddresses = new ArrayList<>();
-        source.readList(remoteAddresses, LinkAddress.class.getClassLoader(), android.net.LinkAddress.class);
-        localPort = source.readParcelable(PortRange.class.getClassLoader(), android.telephony.data.QosBearerFilter.PortRange.class);
-        remotePort = source.readParcelable(PortRange.class.getClassLoader(), android.telephony.data.QosBearerFilter.PortRange.class);
+        source.readList(remoteAddresses, LinkAddress.class.getClassLoader());
+        localPort = source.readParcelable(PortRange.class.getClassLoader());
+        remotePort = source.readParcelable(PortRange.class.getClassLoader());
         protocol = source.readInt();
         typeOfServiceMask = source.readInt();
         flowLabel = source.readLong();

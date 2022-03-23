@@ -195,11 +195,10 @@ class ControlsEditingActivity @Inject constructor(
         val margin = resources
                 .getDimensionPixelSize(R.dimen.controls_card_margin)
         val itemDecorator = MarginItemDecorator(margin, margin)
-        val spanCount = ControlAdapter.findMaxColumns(resources)
 
         recyclerView.apply {
             this.adapter = adapter
-            layoutManager = object : GridLayoutManager(recyclerView.context, spanCount) {
+            layoutManager = object : GridLayoutManager(recyclerView.context, 2) {
 
                 // This will remove from the announcement the row corresponding to the divider,
                 // as it's not something that should be announced.
@@ -211,12 +210,7 @@ class ControlsEditingActivity @Inject constructor(
                     return if (initial > 0) initial - 1 else initial
                 }
             }.apply {
-                spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
-                    override fun getSpanSize(position: Int): Int {
-                        return if (adapter?.getItemViewType(position)
-                                != ControlAdapter.TYPE_CONTROL) spanCount else 1
-                    }
-                }
+                spanSizeLookup = adapter.spanSizeLookup
             }
             addItemDecoration(itemDecorator)
         }

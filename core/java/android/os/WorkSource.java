@@ -130,7 +130,7 @@ public class WorkSource implements Parcelable {
         int numChains = in.readInt();
         if (numChains > 0) {
             mChains = new ArrayList<>(numChains);
-            in.readParcelableList(mChains, WorkChain.class.getClassLoader(), android.os.WorkSource.WorkChain.class);
+            in.readParcelableList(mChains, WorkChain.class.getClassLoader());
         } else {
             mChains = null;
         }

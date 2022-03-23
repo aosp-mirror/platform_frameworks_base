@@ -229,7 +229,7 @@ final class IdmapManager {
 
     private boolean matchesActorSignature(@NonNull AndroidPackage targetPackage,
             @NonNull AndroidPackage overlayPackage, int userId) {
-        String targetOverlayableName = overlayPackage.getOverlayTargetOverlayableName();
+        String targetOverlayableName = overlayPackage.getOverlayTargetName();
         if (targetOverlayableName != null) {
             try {
                 OverlayableInfo overlayableInfo = mPackageManager.getOverlayableForTarget(

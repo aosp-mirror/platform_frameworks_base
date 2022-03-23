@@ -41,7 +41,6 @@ import com.android.server.devicestate.DeviceState;
 import com.android.server.devicestate.DeviceStateProvider;
 import com.android.server.policy.devicestate.config.Conditions;
 import com.android.server.policy.devicestate.config.DeviceStateConfig;
-import com.android.server.policy.devicestate.config.Flags;
 import com.android.server.policy.devicestate.config.LidSwitchCondition;
 import com.android.server.policy.devicestate.config.NumericRange;
 import com.android.server.policy.devicestate.config.SensorCondition;
@@ -82,19 +81,17 @@ import javax.xml.datatype.DatatypeConfigurationException;
 public final class DeviceStateProviderImpl implements DeviceStateProvider,
         InputManagerInternal.LidSwitchCallback, SensorEventListener {
     private static final String TAG = "DeviceStateProviderImpl";
-    private static final boolean DEBUG = false;
 
     private static final BooleanSupplier TRUE_BOOLEAN_SUPPLIER = () -> true;
     private static final BooleanSupplier FALSE_BOOLEAN_SUPPLIER = () -> false;
 
     @VisibleForTesting
     static final DeviceState DEFAULT_DEVICE_STATE = new DeviceState(MINIMUM_DEVICE_STATE,
-            "DEFAULT", 0 /* flags */);
+            "DEFAULT");
 
     private static final String VENDOR_CONFIG_FILE_PATH = "etc/devicestate/";
     private static final String DATA_CONFIG_FILE_PATH = "system/devicestate/";
     private static final String CONFIG_FILE_NAME = "device_state_configuration.xml";
-    private static final String FLAG_CANCEL_OVERRIDE_REQUESTS = "FLAG_CANCEL_OVERRIDE_REQUESTS";
 
     /** Interface that allows reading the device state configuration. */
     interface ReadableConfig {
@@ -134,26 +131,7 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
                         config.getDeviceState()) {
                     final int state = stateConfig.getIdentifier().intValue();
                     final String name = stateConfig.getName() == null ? "" : stateConfig.getName();
-
-                    int flags = 0;
-                    final Flags configFlags = stateConfig.getFlags();
-                    if (configFlags != null) {
-                        List<String> configFlagStrings = configFlags.getFlag();
-                        for (int i = 0; i < configFlagStrings.size(); i++) {
-                            final String configFlagString = configFlagStrings.get(i);
-                            switch (configFlagString) {
-                                case FLAG_CANCEL_OVERRIDE_REQUESTS:
-                                    flags |= DeviceState.FLAG_CANCEL_OVERRIDE_REQUESTS;
-                                    break;
-                                default:
-                                    Slog.w(TAG, "Parsed unknown flag with name: "
-                                            + configFlagString);
-                                    break;
-                            }
-                        }
-                    }
-
-                    deviceStateList.add(new DeviceState(state, name, flags));
+                    deviceStateList.add(new DeviceState(state, name));
 
                     final Conditions condition = stateConfig.getConditions();
                     conditionsList.add(condition);
@@ -215,10 +193,6 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
 
         for (int i = 0; i < stateConditions.size(); i++) {
             final int state = deviceStates.get(i).getIdentifier();
-            if (DEBUG) {
-                Slog.d(TAG, "Evaluating conditions for device state " + state
-                        + " (" + deviceStates.get(i).getName() + ")");
-            }
             final Conditions conditions = stateConditions.get(i);
             if (conditions == null) {
                 mStateConditions.put(state, TRUE_BOOLEAN_SUPPLIER);
@@ -239,9 +213,6 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
             if (lidSwitchCondition != null) {
                 suppliers.add(new LidSwitchBooleanSupplier(lidSwitchCondition.getOpen()));
                 lidSwitchRequired = true;
-                if (DEBUG) {
-                    Slog.d(TAG, "Lid switch required");
-                }
             }
 
             List<SensorCondition> sensorConditions = conditions.getSensor();
@@ -256,11 +227,6 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
                             + " and name: " + expectedSensorName);
                     allRequiredComponentsFound = false;
                     break;
-                }
-
-                if (DEBUG) {
-                    Slog.d(TAG, "Found sensor with type: " + expectedSensorType
-                            + " (" + expectedSensorName + ")");
                 }
 
                 suppliers.add(new SensorBooleanSupplier(foundSensor, sensorCondition.getValue()));
@@ -357,10 +323,6 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
             int newState = mOrderedStates[0].getIdentifier();
             for (int i = 0; i < mOrderedStates.length; i++) {
                 int state = mOrderedStates[i].getIdentifier();
-                if (DEBUG) {
-                    Slog.d(TAG, "Checking conditions for " + mOrderedStates[i].getName() + "("
-                            + i + ")");
-                }
                 boolean conditionSatisfied;
                 try {
                     conditionSatisfied = mStateConditions.get(state).getAsBoolean();
@@ -368,16 +330,10 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
                     // Failed to compute the current state based on current available data. Return
                     // with the expectation that notifyDeviceStateChangedIfNeeded() will be called
                     // when a callback with the missing data is triggered.
-                    if (DEBUG) {
-                        Slog.d(TAG, "Unable to check current state", e);
-                    }
                     return;
                 }
 
                 if (conditionSatisfied) {
-                    if (DEBUG) {
-                        Slog.d(TAG, "Device State conditions satisfied, transition to " + state);
-                    }
                     newState = state;
                     break;
                 }
@@ -398,9 +354,6 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
     public void notifyLidSwitchChanged(long whenNanos, boolean lidOpen) {
         synchronized (mLock) {
             mIsLidOpen = lidOpen;
-        }
-        if (DEBUG) {
-            Slog.d(TAG, "Lid switch state: " + (lidOpen ? "open" : "closed"));
         }
         notifyDeviceStateChangedIfNeeded();
     }
@@ -487,9 +440,6 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
         private boolean adheresToRange(float value, @NonNull NumericRange range) {
             final BigDecimal min = range.getMin_optional();
             if (min != null) {
-                if (DEBUG) {
-                    Slog.d(TAG, "value: " + value + ", constraint min: " + min.floatValue());
-                }
                 if (value <= min.floatValue()) {
                     return false;
                 }
@@ -497,10 +447,6 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
 
             final BigDecimal minInclusive = range.getMinInclusive_optional();
             if (minInclusive != null) {
-                if (DEBUG) {
-                    Slog.d(TAG, "value: " + value + ", constraint min-inclusive: "
-                            + minInclusive.floatValue());
-                }
                 if (value < minInclusive.floatValue()) {
                     return false;
                 }
@@ -508,9 +454,6 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
 
             final BigDecimal max = range.getMax_optional();
             if (max != null) {
-                if (DEBUG) {
-                    Slog.d(TAG, "value: " + value + ", constraint max: " + max.floatValue());
-                }
                 if (value >= max.floatValue()) {
                     return false;
                 }
@@ -518,10 +461,6 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
 
             final BigDecimal maxInclusive = range.getMaxInclusive_optional();
             if (maxInclusive != null) {
-                if (DEBUG) {
-                    Slog.d(TAG, "value: " + value + ", constraint max-inclusive: "
-                            + maxInclusive.floatValue());
-                }
                 if (value > maxInclusive.floatValue()) {
                     return false;
                 }

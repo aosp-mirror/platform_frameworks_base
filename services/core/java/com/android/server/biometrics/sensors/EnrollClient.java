@@ -19,23 +19,19 @@ package com.android.server.biometrics.sensors;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.hardware.biometrics.BiometricAuthenticator;
-import android.hardware.biometrics.BiometricOverlayConstants;
-import android.hardware.fingerprint.FingerprintManager;
+import android.hardware.biometrics.BiometricsProtoEnums;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
 
 import com.android.server.biometrics.BiometricsProto;
-import com.android.server.biometrics.log.BiometricContext;
-import com.android.server.biometrics.log.BiometricLogger;
 
 import java.util.Arrays;
-import java.util.function.Supplier;
 
 /**
  * A class to keep track of the enrollment state for a given client.
  */
-public abstract class EnrollClient<T> extends AcquisitionClient<T> implements EnrollmentModifier {
+public abstract class EnrollClient<T> extends AcquisitionClient<T> {
 
     private static final String TAG = "Biometrics/EnrollClient";
 
@@ -44,35 +40,22 @@ public abstract class EnrollClient<T> extends AcquisitionClient<T> implements En
     protected final BiometricUtils mBiometricUtils;
 
     private long mEnrollmentStartTimeMs;
-    private final boolean mHasEnrollmentsBeforeStarting;
 
     /**
      * @return true if the user has already enrolled the maximum number of templates.
      */
     protected abstract boolean hasReachedEnrollmentLimit();
 
-    public EnrollClient(@NonNull Context context, @NonNull Supplier<T> lazyDaemon,
+    public EnrollClient(@NonNull Context context, @NonNull LazyDaemon<T> lazyDaemon,
             @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener, int userId,
             @NonNull byte[] hardwareAuthToken, @NonNull String owner, @NonNull BiometricUtils utils,
-            int timeoutSec, int sensorId, boolean shouldVibrate,
-            @NonNull BiometricLogger logger, @NonNull BiometricContext biometricContext) {
+            int timeoutSec, int statsModality, int sensorId, boolean shouldVibrate) {
         super(context, lazyDaemon, token, listener, userId, owner, 0 /* cookie */, sensorId,
-                shouldVibrate, logger, biometricContext);
+                shouldVibrate, statsModality, BiometricsProtoEnums.ACTION_ENROLL,
+                BiometricsProtoEnums.CLIENT_UNKNOWN);
         mBiometricUtils = utils;
         mHardwareAuthToken = Arrays.copyOf(hardwareAuthToken, hardwareAuthToken.length);
         mTimeoutSec = timeoutSec;
-        mHasEnrollmentsBeforeStarting = hasEnrollments();
-    }
-
-    @Override
-    public boolean hasEnrollmentStateChanged() {
-        final boolean hasEnrollmentsNow = hasEnrollments();
-        return hasEnrollmentsNow != mHasEnrollmentsBeforeStarting;
-    }
-
-    @Override
-    public boolean hasEnrollments() {
-        return !mBiometricUtils.getBiometricsForUser(getContext(), getTargetUserId()).isEmpty();
     }
 
     public void onEnrollResult(BiometricAuthenticator.Identifier identifier, int remaining) {
@@ -91,8 +74,7 @@ public abstract class EnrollClient<T> extends AcquisitionClient<T> implements En
 
         if (remaining == 0) {
             mBiometricUtils.addBiometricForUser(getContext(), getTargetUserId(), identifier);
-            getLogger().logOnEnrolled(getTargetUserId(),
-                    System.currentTimeMillis() - mEnrollmentStartTimeMs,
+            logOnEnrolled(getTargetUserId(), System.currentTimeMillis() - mEnrollmentStartTimeMs,
                     true /* enrollSuccessful */);
             mCallback.onClientFinished(this, true /* success */);
         }
@@ -100,7 +82,7 @@ public abstract class EnrollClient<T> extends AcquisitionClient<T> implements En
     }
 
     @Override
-    public void start(@NonNull ClientMonitorCallback callback) {
+    public void start(@NonNull Callback callback) {
         super.start(callback);
 
         if (hasReachedEnrollmentLimit()) {
@@ -119,8 +101,7 @@ public abstract class EnrollClient<T> extends AcquisitionClient<T> implements En
      */
     @Override
     public void onError(int error, int vendorCode) {
-        getLogger().logOnEnrolled(getTargetUserId(),
-                System.currentTimeMillis() - mEnrollmentStartTimeMs,
+        logOnEnrolled(getTargetUserId(), System.currentTimeMillis() - mEnrollmentStartTimeMs,
                 false /* enrollSuccessful */);
         super.onError(error, vendorCode);
     }
@@ -133,16 +114,5 @@ public abstract class EnrollClient<T> extends AcquisitionClient<T> implements En
     @Override
     public boolean interruptsPrecedingClients() {
         return true;
-    }
-
-    protected int getOverlayReasonFromEnrollReason(@FingerprintManager.EnrollReason int reason) {
-        switch (reason) {
-            case FingerprintManager.ENROLL_FIND_SENSOR:
-                return BiometricOverlayConstants.REASON_ENROLL_FIND_SENSOR;
-            case FingerprintManager.ENROLL_ENROLL:
-                return BiometricOverlayConstants.REASON_ENROLL_ENROLLING;
-            default:
-                return BiometricOverlayConstants.REASON_UNKNOWN;
-        }
     }
 }

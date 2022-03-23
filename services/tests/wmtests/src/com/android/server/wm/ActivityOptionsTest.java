@@ -33,7 +33,6 @@ import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityOptions;
 import android.app.Instrumentation;
 import android.app.Instrumentation.ActivityMonitor;
-import android.app.PictureInPictureParams;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -41,7 +40,6 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.platform.test.annotations.Presubmit;
-import android.util.Rational;
 import android.view.SurfaceControl;
 import android.window.TaskOrganizer;
 
@@ -93,20 +91,6 @@ public class ActivityOptionsTest {
     }
 
     @Test
-    public void testMakeLaunchIntoPip() {
-        // Construct some params with set values
-        PictureInPictureParams params = new PictureInPictureParams.Builder()
-                .setAspectRatio(new Rational(1, 1))
-                .build();
-        // Construct ActivityOptions via makeLaunchIntoPip
-        ActivityOptions opts = ActivityOptions.makeLaunchIntoPip(params);
-
-        // Verify the params in ActivityOptions has the right flag being turned on
-        assertNotNull(opts.getLaunchIntoPipParams());
-        assertTrue(opts.isLaunchIntoPip());
-    }
-
-    @Test
     public void testTransferLaunchCookie() {
         final Binder cookie = new Binder();
         final ActivityOptions options = ActivityOptions.makeBasic();
@@ -126,20 +110,18 @@ public class ActivityOptionsTest {
             @Override
             public void onTaskAppeared(RunningTaskInfo taskInfo, SurfaceControl leash) {
                 try (SurfaceControl.Transaction t = new SurfaceControl.Transaction()) {
-                    t.show(leash).apply();
+                    t.setVisibility(leash, true /* visible */).apply();
                 }
                 int cookieIndex = -1;
                 if (trampoline.equals(taskInfo.baseActivity)) {
                     cookieIndex = 0;
                 } else if (main.equals(taskInfo.baseActivity)) {
                     cookieIndex = 1;
+                    mainLatch.countDown();
                 }
                 if (cookieIndex >= 0) {
                     appearedCookies[cookieIndex] = taskInfo.launchCookies.isEmpty()
                             ? null : taskInfo.launchCookies.get(0);
-                    if (cookieIndex == 1) {
-                        mainLatch.countDown();
-                    }
                 }
             }
         };

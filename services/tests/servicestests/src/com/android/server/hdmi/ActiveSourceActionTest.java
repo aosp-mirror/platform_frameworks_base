@@ -16,20 +16,23 @@
 
 package com.android.server.hdmi;
 
-import static com.android.server.SystemService.PHASE_SYSTEM_SERVICES_READY;
 import static com.android.server.hdmi.Constants.ADDR_TV;
 import static com.android.server.hdmi.HdmiControlService.INITIATED_BY_ENABLE_CEC;
 
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.media.AudioManager;
+import android.os.Handler;
+import android.os.IPowerManager;
+import android.os.IThermalService;
 import android.os.Looper;
+import android.os.PowerManager;
 import android.os.test.TestLooper;
-import android.platform.test.annotations.Presubmit;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
@@ -38,30 +41,42 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
-import java.util.Collections;
 
 /** Tests for {@link ActiveSourceAction} */
 @SmallTest
-@Presubmit
 @RunWith(JUnit4.class)
 public class ActiveSourceActionTest {
 
     private Context mContextSpy;
     private HdmiControlService mHdmiControlService;
     private FakeNativeWrapper mNativeWrapper;
-    private FakePowerManagerWrapper mPowerManager;
 
     private TestLooper mTestLooper = new TestLooper();
     private ArrayList<HdmiCecLocalDevice> mLocalDevices = new ArrayList<>();
     private int mPhysicalAddress;
 
+    @Mock private IPowerManager mIPowerManagerMock;
+    @Mock private IThermalService mIThermalServiceMock;
+
     @Before
     public void setUp() throws Exception {
+        MockitoAnnotations.initMocks(this);
+
         mContextSpy = spy(new ContextWrapper(InstrumentationRegistry.getTargetContext()));
 
-        mHdmiControlService = new HdmiControlService(mContextSpy, Collections.emptyList()) {
+        when(mContextSpy.getSystemService(Context.POWER_SERVICE)).thenAnswer(i ->
+                new PowerManager(mContextSpy, mIPowerManagerMock,
+                mIThermalServiceMock, new Handler(mTestLooper.getLooper())));
+        when(mContextSpy.getSystemService(PowerManager.class)).thenAnswer(i ->
+                new PowerManager(mContextSpy, mIPowerManagerMock,
+                mIThermalServiceMock, new Handler(mTestLooper.getLooper())));
+        when(mIPowerManagerMock.isInteractive()).thenReturn(true);
+
+        mHdmiControlService = new HdmiControlService(mContextSpy) {
             @Override
             AudioManager getAudioManager() {
                 return new AudioManager() {
@@ -74,8 +89,18 @@ public class ActiveSourceActionTest {
             }
 
             @Override
+            void wakeUp() {
+            }
+
+            @Override
             boolean isPowerStandby() {
                 return false;
+            }
+
+            @Override
+            protected PowerManager getPowerManager() {
+                return new PowerManager(mContextSpy, mIPowerManagerMock,
+                        mIThermalServiceMock, new Handler(mTestLooper.getLooper()));
             }
 
             @Override
@@ -92,9 +117,8 @@ public class ActiveSourceActionTest {
                 this.mHdmiControlService, mNativeWrapper, mHdmiControlService.getAtomWriter());
         mHdmiControlService.setCecController(hdmiCecController);
         mHdmiControlService.setHdmiMhlController(HdmiMhlControllerStub.create(mHdmiControlService));
+        mHdmiControlService.setMessageValidator(new HdmiCecMessageValidator(mHdmiControlService));
         mHdmiControlService.initService();
-        mPowerManager = new FakePowerManagerWrapper(mContextSpy);
-        mHdmiControlService.setPowerManager(mPowerManager);
         mPhysicalAddress = 0x2000;
         mNativeWrapper.setPhysicalAddress(mPhysicalAddress);
         mTestLooper.dispatchAll();
@@ -114,14 +138,10 @@ public class ActiveSourceActionTest {
         playbackDevice.addAndStartAction(action);
         mTestLooper.dispatchAll();
 
-        HdmiCecMessage activeSource =
-                HdmiCecMessageBuilder.buildActiveSource(
-                        playbackDevice.getDeviceInfo().getLogicalAddress(), mPhysicalAddress);
-        HdmiCecMessage menuStatus =
-                HdmiCecMessageBuilder.buildReportMenuStatus(
-                        playbackDevice.getDeviceInfo().getLogicalAddress(),
-                        ADDR_TV,
-                        Constants.MENU_STATE_ACTIVATED);
+        HdmiCecMessage activeSource = HdmiCecMessageBuilder.buildActiveSource(
+                playbackDevice.mAddress, mPhysicalAddress);
+        HdmiCecMessage menuStatus = HdmiCecMessageBuilder.buildReportMenuStatus(
+                playbackDevice.mAddress, ADDR_TV, Constants.MENU_STATE_ACTIVATED);
 
         assertThat(mNativeWrapper.getResultMessages()).contains(activeSource);
         assertThat(mNativeWrapper.getResultMessages()).contains(menuStatus);
@@ -141,8 +161,8 @@ public class ActiveSourceActionTest {
         playbackDevice.addAndStartAction(action);
         mTestLooper.dispatchAll();
 
-        assertThat(playbackDevice.getActiveSource().logicalAddress)
-                .isEqualTo(playbackDevice.getDeviceInfo().getLogicalAddress());
+        assertThat(playbackDevice.getActiveSource().logicalAddress).isEqualTo(
+                playbackDevice.mAddress);
         assertThat(playbackDevice.getActiveSource().physicalAddress).isEqualTo(mPhysicalAddress);
         assertThat(playbackDevice.isActiveSource()).isTrue();
     }
@@ -153,7 +173,6 @@ public class ActiveSourceActionTest {
                 mHdmiControlService);
         audioDevice.init();
         mLocalDevices.add(audioDevice);
-        mHdmiControlService.onBootPhase(PHASE_SYSTEM_SERVICES_READY);
         mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
         mTestLooper.dispatchAll();
 
@@ -162,14 +181,10 @@ public class ActiveSourceActionTest {
         audioDevice.addAndStartAction(action);
         mTestLooper.dispatchAll();
 
-        HdmiCecMessage activeSource =
-                HdmiCecMessageBuilder.buildActiveSource(
-                        audioDevice.getDeviceInfo().getLogicalAddress(), mPhysicalAddress);
-        HdmiCecMessage menuStatus =
-                HdmiCecMessageBuilder.buildReportMenuStatus(
-                        audioDevice.getDeviceInfo().getLogicalAddress(),
-                        ADDR_TV,
-                        Constants.MENU_STATE_ACTIVATED);
+        HdmiCecMessage activeSource = HdmiCecMessageBuilder.buildActiveSource(audioDevice.mAddress,
+                mPhysicalAddress);
+        HdmiCecMessage menuStatus = HdmiCecMessageBuilder.buildReportMenuStatus(
+                audioDevice.mAddress, ADDR_TV, Constants.MENU_STATE_ACTIVATED);
 
         assertThat(mNativeWrapper.getResultMessages()).contains(activeSource);
         assertThat(mNativeWrapper.getResultMessages()).doesNotContain(menuStatus);

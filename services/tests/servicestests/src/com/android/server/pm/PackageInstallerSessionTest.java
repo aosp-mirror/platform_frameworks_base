@@ -20,15 +20,10 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.START_TAG;
 
 import android.content.pm.PackageInstaller;
-import android.content.pm.PackageManager;
 import android.platform.test.annotations.Presubmit;
 import android.util.AtomicFile;
 import android.util.Slog;
@@ -73,17 +68,12 @@ public class PackageInstallerSessionTest {
     @Mock
     PackageManagerService mMockPackageManagerInternal;
 
-    @Mock
-    Computer mSnapshot;
-
     @Before
     public void setUp() throws Exception {
         mTmpDir = mTemporaryFolder.newFolder("PackageInstallerSessionTest");
         mSessionsFile = new AtomicFile(
                 new File(mTmpDir.getAbsolutePath() + "/sessions.xml"), "package-session");
         MockitoAnnotations.initMocks(this);
-        when(mSnapshot.getPackageUid(anyString(), anyLong(), anyInt())).thenReturn(0);
-        when(mMockPackageManagerInternal.snapshotComputer()).thenReturn(mSnapshot);
     }
 
     @Test
@@ -167,8 +157,7 @@ public class PackageInstallerSessionTest {
             params.isMultiPackage = true;
         }
         InstallSource installSource = InstallSource.create("testInstallInitiator",
-                "testInstallOriginator", "testInstaller", "testAttributionTag",
-                PackageInstaller.PACKAGE_SOURCE_UNSPECIFIED);
+                "testInstallOriginator", "testInstaller", "testAttributionTag");
         return new PackageInstallerSession(
                 /* callback */ null,
                 /* context */null,
@@ -198,7 +187,7 @@ public class PackageInstallerSessionTest {
                 /* isFailed */ false,
                 /* isApplied */false,
                 /* stagedSessionErrorCode */
-                PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE,
+                PackageInstaller.SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
                 /* stagedSessionErrorMessage */ "some error");
     }
 
@@ -317,12 +306,12 @@ public class PackageInstallerSessionTest {
         assertEquals(expected.stageCid, actual.stageCid);
         assertEquals(expected.isPrepared(), actual.isPrepared());
         assertEquals(expected.isStaged(), actual.isStaged());
-        assertEquals(expected.isSessionApplied(), actual.isSessionApplied());
-        assertEquals(expected.isSessionFailed(), actual.isSessionFailed());
-        assertEquals(expected.isSessionReady(), actual.isSessionReady());
-        assertEquals(expected.getSessionErrorCode(), actual.getSessionErrorCode());
-        assertEquals(expected.getSessionErrorMessage(),
-                actual.getSessionErrorMessage());
+        assertEquals(expected.isStagedSessionApplied(), actual.isStagedSessionApplied());
+        assertEquals(expected.isStagedSessionFailed(), actual.isStagedSessionFailed());
+        assertEquals(expected.isStagedSessionReady(), actual.isStagedSessionReady());
+        assertEquals(expected.getStagedSessionErrorCode(), actual.getStagedSessionErrorCode());
+        assertEquals(expected.getStagedSessionErrorMessage(),
+                actual.getStagedSessionErrorMessage());
         assertEquals(expected.isPrepared(), actual.isPrepared());
         assertEquals(expected.isCommitted(), actual.isCommitted());
         assertEquals(expected.createdMillis, actual.createdMillis);

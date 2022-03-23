@@ -16,8 +16,6 @@
 
 package com.android.keyguard;
 
-import static android.app.StatusBarManager.SESSION_KEYGUARD;
-
 import static com.android.keyguard.KeyguardSecurityContainer.BOUNCER_DISMISS_BIOMETRIC;
 import static com.android.keyguard.KeyguardSecurityContainer.BOUNCER_DISMISS_EXTENDED_ACCESS;
 import static com.android.keyguard.KeyguardSecurityContainer.BOUNCER_DISMISS_NONE_SECURITY;
@@ -38,10 +36,7 @@ import android.util.Log;
 import android.util.Slog;
 import android.view.MotionEvent;
 
-import androidx.annotation.Nullable;
-
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.logging.InstanceId;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.nano.MetricsProto;
@@ -54,18 +49,10 @@ import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 import com.android.keyguard.dagger.KeyguardBouncerScope;
 import com.android.settingslib.utils.ThreadUtils;
 import com.android.systemui.Gefingerpoken;
-import com.android.systemui.R;
-import com.android.systemui.classifier.FalsingCollector;
-import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
-import com.android.systemui.log.SessionTracker;
-import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.shared.system.SysUiStatsLog;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
-import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.util.ViewController;
-import com.android.systemui.util.settings.GlobalSettings;
 
 import javax.inject.Inject;
 
@@ -87,19 +74,12 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
     private final KeyguardSecurityViewFlipperController mSecurityViewFlipperController;
     private final SecurityCallback mSecurityCallback;
     private final ConfigurationController mConfigurationController;
-    private final FalsingCollector mFalsingCollector;
-    private final FalsingManager mFalsingManager;
-    private final UserSwitcherController mUserSwitcherController;
-    private final GlobalSettings mGlobalSettings;
-    private final FeatureFlags mFeatureFlags;
-    private final SessionTracker mSessionTracker;
 
     private int mLastOrientation = Configuration.ORIENTATION_UNDEFINED;
 
     private SecurityMode mCurrentSecurityMode = SecurityMode.Invalid;
 
-    @VisibleForTesting
-    final Gefingerpoken mGlobalTouchListener = new Gefingerpoken() {
+    private final Gefingerpoken mGlobalTouchListener = new Gefingerpoken() {
         private MotionEvent mTouchDown;
         @Override
         public boolean onInterceptTouchEvent(MotionEvent ev) {
@@ -111,17 +91,6 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
             // Do just a bit of our own falsing. People should only be tapping on the input, not
             // swiping.
             if (ev.getActionMasked() == MotionEvent.ACTION_DOWN) {
-                // If we're in one handed mode, the user can tap on the opposite side of the screen
-                // to move the bouncer across. In that case, inhibit the falsing (otherwise the taps
-                // to move the bouncer to each screen side can end up closing it instead).
-                if (mView.getMode() == KeyguardSecurityContainer.MODE_ONE_HANDED) {
-                    boolean isLeftAligned = mView.isOneHandedModeLeftAligned();
-                    if ((isLeftAligned && ev.getX() > mView.getWidth() / 2f)
-                            || (!isLeftAligned && ev.getX() <= mView.getWidth() / 2f)) {
-                        mFalsingCollector.avoidGesture();
-                    }
-                }
-
                 if (mTouchDown != null) {
                     mTouchDown.recycle();
                     mTouchDown = null;
@@ -166,17 +135,9 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         }
 
         public void reportUnlockAttempt(int userId, boolean success, int timeoutMs) {
-            int bouncerSide = SysUiStatsLog.KEYGUARD_BOUNCER_PASSWORD_ENTERED__SIDE__DEFAULT;
-            if (mView.getMode() == KeyguardSecurityContainer.MODE_ONE_HANDED) {
-                bouncerSide = mView.isOneHandedModeLeftAligned()
-                        ? SysUiStatsLog.KEYGUARD_BOUNCER_PASSWORD_ENTERED__SIDE__LEFT
-                        : SysUiStatsLog.KEYGUARD_BOUNCER_PASSWORD_ENTERED__SIDE__RIGHT;
-            }
-
             if (success) {
                 SysUiStatsLog.write(SysUiStatsLog.KEYGUARD_BOUNCER_PASSWORD_ENTERED,
-                        SysUiStatsLog.KEYGUARD_BOUNCER_PASSWORD_ENTERED__RESULT__SUCCESS,
-                        bouncerSide);
+                        SysUiStatsLog.KEYGUARD_BOUNCER_PASSWORD_ENTERED__RESULT__SUCCESS);
                 mLockPatternUtils.reportSuccessfulPasswordAttempt(userId);
                 // Force a garbage collection in an attempt to erase any lockscreen password left in
                 // memory. Do it asynchronously with a 5-sec delay to avoid making the keyguard
@@ -191,14 +152,13 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
                 });
             } else {
                 SysUiStatsLog.write(SysUiStatsLog.KEYGUARD_BOUNCER_PASSWORD_ENTERED,
-                        SysUiStatsLog.KEYGUARD_BOUNCER_PASSWORD_ENTERED__RESULT__FAILURE,
-                        bouncerSide);
+                        SysUiStatsLog.KEYGUARD_BOUNCER_PASSWORD_ENTERED__RESULT__FAILURE);
                 reportFailedUnlockAttempt(userId, timeoutMs);
             }
             mMetricsLogger.write(new LogMaker(MetricsEvent.BOUNCER)
                     .setType(success ? MetricsEvent.TYPE_SUCCESS : MetricsEvent.TYPE_FAILURE));
             mUiEventLogger.log(success ? BouncerUiEvent.BOUNCER_PASSWORD_SUCCESS
-                            : BouncerUiEvent.BOUNCER_PASSWORD_FAILURE, getSessionId());
+                    : BouncerUiEvent.BOUNCER_PASSWORD_FAILURE);
         }
 
         public void reset() {
@@ -224,7 +184,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
     private ConfigurationController.ConfigurationListener mConfigurationListener =
             new ConfigurationController.ConfigurationListener() {
                 @Override
-                public void onThemeChanged() {
+                public void onOverlayChanged() {
                     mSecurityViewFlipperController.reloadColors();
                 }
 
@@ -244,13 +204,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
             KeyguardStateController keyguardStateController,
             SecurityCallback securityCallback,
             KeyguardSecurityViewFlipperController securityViewFlipperController,
-            ConfigurationController configurationController,
-            FalsingCollector falsingCollector,
-            FalsingManager falsingManager,
-            UserSwitcherController userSwitcherController,
-            FeatureFlags featureFlags,
-            GlobalSettings globalSettings,
-            SessionTracker sessionTracker) {
+            ConfigurationController configurationController) {
         super(view);
         mLockPatternUtils = lockPatternUtils;
         mUpdateMonitor = keyguardUpdateMonitor;
@@ -264,12 +218,6 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
                 mKeyguardSecurityCallback);
         mConfigurationController = configurationController;
         mLastOrientation = getResources().getConfiguration().orientation;
-        mFalsingCollector = falsingCollector;
-        mFalsingManager = falsingManager;
-        mUserSwitcherController = userSwitcherController;
-        mFeatureFlags = featureFlags;
-        mGlobalSettings = globalSettings;
-        mSessionTracker = sessionTracker;
     }
 
     @Override
@@ -348,14 +296,6 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
     @Override
     public void onResume(int reason) {
         if (mCurrentSecurityMode != SecurityMode.None) {
-            int state = SysUiStatsLog.KEYGUARD_BOUNCER_STATE_CHANGED__STATE__SHOWN;
-            if (mView.getMode() == KeyguardSecurityContainer.MODE_ONE_HANDED) {
-                state = mView.isOneHandedModeLeftAligned()
-                        ? SysUiStatsLog.KEYGUARD_BOUNCER_STATE_CHANGED__STATE__SHOWN_LEFT
-                        : SysUiStatsLog.KEYGUARD_BOUNCER_STATE_CHANGED__STATE__SHOWN_RIGHT;
-            }
-            SysUiStatsLog.write(SysUiStatsLog.KEYGUARD_BOUNCER_STATE_CHANGED, state);
-
             getCurrentSecurityController().onResume(reason);
         }
         mView.onResume(
@@ -365,14 +305,14 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
 
     public void startAppearAnimation() {
         if (mCurrentSecurityMode != SecurityMode.None) {
-            mView.startAppearAnimation(mCurrentSecurityMode);
             getCurrentSecurityController().startAppearAnimation();
         }
     }
 
     public boolean startDisappearAnimation(Runnable onFinishRunnable) {
+        mView.startDisappearAnimation(getCurrentSecurityMode());
+
         if (mCurrentSecurityMode != SecurityMode.None) {
-            mView.startDisappearAnimation(mCurrentSecurityMode);
             return getCurrentSecurityController().startDisappearAnimation(onFinishRunnable);
         }
 
@@ -465,7 +405,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
                     .setType(MetricsProto.MetricsEvent.TYPE_DISMISS).setSubtype(eventSubtype));
         }
         if (uiEvent != BouncerUiEvent.UNKNOWN) {
-            mUiEventLogger.log(uiEvent, getSessionId());
+            mUiEventLogger.log(uiEvent);
         }
         if (finish) {
             mSecurityCallback.finish(strongAuth, targetUserId);
@@ -502,42 +442,11 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         if (newView != null) {
             newView.onResume(KeyguardSecurityView.VIEW_REVEALED);
             mSecurityViewFlipperController.show(newView);
-            configureMode();
+            mView.updateLayoutForSecurityMode(securityMode);
         }
 
         mSecurityCallback.onSecurityModeChanged(
                 securityMode, newView != null && newView.needsInput());
-    }
-
-    /**
-     * Returns whether the given security view should be used in a "one handed" way. This can be
-     * used to change how the security view is drawn (e.g. take up less of the screen, and align to
-     * one side).
-     */
-    private boolean canUseOneHandedBouncer() {
-        if (!(mCurrentSecurityMode == SecurityMode.Pattern
-                || mCurrentSecurityMode == SecurityMode.PIN)) {
-            return false;
-        }
-
-        return getResources().getBoolean(R.bool.can_use_one_handed_bouncer);
-    }
-
-    private boolean canDisplayUserSwitcher() {
-        return mFeatureFlags.isEnabled(Flags.BOUNCER_USER_SWITCHER);
-    }
-
-    private void configureMode() {
-        boolean useSimSecurity = mCurrentSecurityMode == SecurityMode.SimPin
-                || mCurrentSecurityMode == SecurityMode.SimPuk;
-        int mode = KeyguardSecurityContainer.MODE_DEFAULT;
-        if (canDisplayUserSwitcher() && !useSimSecurity) {
-            mode = KeyguardSecurityContainer.MODE_USER_SWITCHER;
-        } else if (canUseOneHandedBouncer()) {
-            mode = KeyguardSecurityContainer.MODE_ONE_HANDED;
-        }
-
-        mView.initMode(mode, mGlobalSettings, mFalsingManager, mUserSwitcherController);
     }
 
     public void reportFailedUnlockAttempt(int userId, int timeoutMs) {
@@ -604,17 +513,13 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         int newOrientation = getResources().getConfiguration().orientation;
         if (newOrientation != mLastOrientation) {
             mLastOrientation = newOrientation;
-            configureMode();
+            mView.updateLayoutForSecurityMode(mCurrentSecurityMode);
         }
-    }
-
-    private @Nullable InstanceId getSessionId() {
-        return mSessionTracker.getSessionId(SESSION_KEYGUARD);
     }
 
     /** Update keyguard position based on a tapped X coordinate. */
     public void updateKeyguardPosition(float x) {
-        mView.updatePositionByTouchX(x);
+        mView.updateKeyguardPosition(x);
     }
 
     static class Factory {
@@ -630,12 +535,6 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         private final KeyguardStateController mKeyguardStateController;
         private final KeyguardSecurityViewFlipperController mSecurityViewFlipperController;
         private final ConfigurationController mConfigurationController;
-        private final FalsingCollector mFalsingCollector;
-        private final FalsingManager mFalsingManager;
-        private final GlobalSettings mGlobalSettings;
-        private final FeatureFlags mFeatureFlags;
-        private final UserSwitcherController mUserSwitcherController;
-        private final SessionTracker mSessionTracker;
 
         @Inject
         Factory(KeyguardSecurityContainer view,
@@ -648,13 +547,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
                 UiEventLogger uiEventLogger,
                 KeyguardStateController keyguardStateController,
                 KeyguardSecurityViewFlipperController securityViewFlipperController,
-                ConfigurationController configurationController,
-                FalsingCollector falsingCollector,
-                FalsingManager falsingManager,
-                UserSwitcherController userSwitcherController,
-                FeatureFlags featureFlags,
-                GlobalSettings globalSettings,
-                SessionTracker sessionTracker) {
+                ConfigurationController configurationController) {
             mView = view;
             mAdminSecondaryLockScreenControllerFactory = adminSecondaryLockScreenControllerFactory;
             mLockPatternUtils = lockPatternUtils;
@@ -665,12 +558,6 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
             mKeyguardStateController = keyguardStateController;
             mSecurityViewFlipperController = securityViewFlipperController;
             mConfigurationController = configurationController;
-            mFalsingCollector = falsingCollector;
-            mFalsingManager = falsingManager;
-            mFeatureFlags = featureFlags;
-            mGlobalSettings = globalSettings;
-            mUserSwitcherController = userSwitcherController;
-            mSessionTracker = sessionTracker;
         }
 
         public KeyguardSecurityContainerController create(
@@ -679,8 +566,8 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
                     mAdminSecondaryLockScreenControllerFactory, mLockPatternUtils,
                     mKeyguardUpdateMonitor, mKeyguardSecurityModel, mMetricsLogger, mUiEventLogger,
                     mKeyguardStateController, securityCallback, mSecurityViewFlipperController,
-                    mConfigurationController, mFalsingCollector, mFalsingManager,
-                    mUserSwitcherController, mFeatureFlags, mGlobalSettings, mSessionTracker);
+                    mConfigurationController);
         }
+
     }
 }

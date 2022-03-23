@@ -27,7 +27,6 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.ActivityTaskSupervisor.ON_TOP;
 
-import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityOptions;
 import android.app.IApplicationThread;
@@ -39,7 +38,6 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Binder;
-import android.os.Bundle;
 import android.os.IBinder;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -455,10 +453,6 @@ public class ActivityStartController {
             // Lock the loop to ensure the activities launched in a sequence.
             synchronized (mService.mGlobalLock) {
                 mService.deferWindowLayout();
-                // To avoid creating multiple starting window when creating starting multiples
-                // activities, we defer the creation of the starting window once all start request
-                // are processed
-                mService.mWindowManager.mStartingSurfaceController.beginDeferAddStartingWindow();
                 try {
                     for (int i = 0; i < starters.length; i++) {
                         final int startResult = starters[i].setResultTo(resultTo)
@@ -474,7 +468,7 @@ public class ActivityStartController {
                         if (started != null && started.getUid() == filterCallingUid) {
                             // Only the started activity which has the same uid as the source caller
                             // can be the caller of next activity.
-                            resultTo = started.token;
+                            resultTo = started.appToken;
                         } else {
                             resultTo = sourceResultTo;
                             // Different apps not adjacent to the caller are forced to be new task.
@@ -484,8 +478,6 @@ public class ActivityStartController {
                         }
                     }
                 } finally {
-                    mService.mWindowManager.mStartingSurfaceController.endDeferAddStartingWindow(
-                            options != null ? options.getOriginalOptions() : null);
                     mService.continueWindowLayout();
                 }
             }
@@ -496,35 +488,9 @@ public class ActivityStartController {
         return START_SUCCESS;
     }
 
-    /**
-     * Starts an activity in the TaskFragment.
-     * @param taskFragment TaskFragment {@link TaskFragment} to start the activity in.
-     * @param activityIntent intent to start the activity.
-     * @param activityOptions ActivityOptions to start the activity with.
-     * @param resultTo the caller activity
-     * @param callingUid the caller uid
-     * @param callingPid the caller pid
-     * @return the start result.
-     */
-    int startActivityInTaskFragment(@NonNull TaskFragment taskFragment,
-            @NonNull Intent activityIntent, @Nullable Bundle activityOptions,
-            @Nullable IBinder resultTo, int callingUid, int callingPid) {
-        final ActivityRecord caller =
-                resultTo != null ? ActivityRecord.forTokenLocked(resultTo) : null;
-        return obtainStarter(activityIntent, "startActivityInTaskFragment")
-                .setActivityOptions(activityOptions)
-                .setInTaskFragment(taskFragment)
-                .setResultTo(resultTo)
-                .setRequestCode(-1)
-                .setCallingUid(callingUid)
-                .setCallingPid(callingPid)
-                .setUserId(caller != null ? caller.mUserId : mService.getCurrentUserId())
-                .execute();
-    }
-
     void registerRemoteAnimationForNextActivityStart(String packageName,
-            RemoteAnimationAdapter adapter, @Nullable IBinder launchCookie) {
-        mPendingRemoteAnimationRegistry.addPendingAnimation(packageName, adapter, launchCookie);
+            RemoteAnimationAdapter adapter) {
+        mPendingRemoteAnimationRegistry.addPendingAnimation(packageName, adapter);
     }
 
     PendingRemoteAnimationRegistry getPendingRemoteAnimationRegistry() {

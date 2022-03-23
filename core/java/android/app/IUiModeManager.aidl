@@ -48,43 +48,18 @@ interface IUiModeManager {
     
     /**
      * Sets the night mode.
-     * <p>
      * The mode can be one of:
-     * <ol>notnight mode</ol>
-     * <ol>night mode</ol>
-     * <ol>custom schedule mode switching</ol>
+     *   1 - notnight mode
+     *   2 - night mode
+     *   3 - automatic mode switching
      */
     void setNightMode(int mode);
 
     /**
-     * Gets the currently configured night mode.
-     * <p>
-     * Returns
-     * <ol>notnight mode</ol>
-     * <ol>night mode</ol>
-     * <ol>custom schedule mode switching</ol>
+     * Gets the currently configured night mode.  Return 1 for notnight,
+     * 2 for night, and 3 for automatic mode switching.
      */
     int getNightMode();
-
-    /**
-     * Sets the current night mode to {@link #MODE_NIGHT_CUSTOM} with the custom night mode type
-     * {@code nightModeCustomType}.
-     *
-     * @param nightModeCustomType
-     * @hide
-     */
-    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MODIFY_DAY_NIGHT_MODE)")
-    void setNightModeCustomType(int nightModeCustomType);
-
-    /**
-     * Returns the custom night mode type.
-     * <p>
-     * If the current night mode is not {@link #MODE_NIGHT_CUSTOM}, returns
-     * {@link #MODE_NIGHT_CUSTOM_TYPE_UNKNOWN}.
-     * @hide
-     */
-    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MODIFY_DAY_NIGHT_MODE)")
-    int getNightModeCustomType();
 
     /**
      * Sets the dark mode for the given application. This setting is persisted and will override the
@@ -106,22 +81,8 @@ interface IUiModeManager {
     boolean isNightModeLocked();
 
     /**
-     * [De]activating night mode for the current user if the current night mode is custom and the
-     * custom type matches {@code nightModeCustomType}.
-     *
-     * @param nightModeCustomType the specify type of custom mode
-     * @param active {@code true} to activate night mode. Otherwise, deactivate night mode
-     * @return {@code true} if night mode has successfully activated for the requested
-     *         {@code nightModeCustomType}.
-     * @hide
-     */
-    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MODIFY_DAY_NIGHT_MODE)")
-    boolean setNightModeActivatedForCustomMode(int nightModeCustom, boolean active);
-
-    /**
-     * [De]Activates night mode.
-     * @hide
-     */
+    * [De]Activates night mode
+    */
     boolean setNightModeActivated(boolean active);
 
     /**

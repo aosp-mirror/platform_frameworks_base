@@ -118,7 +118,7 @@ cc_library {
                 "libz",
             ],
         },
-        host_linux: {
+        linux_glibc: {
             srcs: [
                 "CursorWindow.cpp",
             ],

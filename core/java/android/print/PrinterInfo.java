@@ -270,15 +270,15 @@ public final class PrinterInfo implements Parcelable {
     private PrinterInfo(Parcel parcel) {
         // mName can be null due to unchecked set in Builder.setName and status can be invalid
         // due to unchecked set in Builder.setStatus, hence we can only check mId for a valid state
-        mId = checkPrinterId((PrinterId) parcel.readParcelable(null, android.print.PrinterId.class));
+        mId = checkPrinterId((PrinterId) parcel.readParcelable(null));
         mName = checkName(parcel.readString());
         mStatus = checkStatus(parcel.readInt());
         mDescription = parcel.readString();
-        mCapabilities = parcel.readParcelable(null, android.print.PrinterCapabilitiesInfo.class);
+        mCapabilities = parcel.readParcelable(null);
         mIconResourceId = parcel.readInt();
         mHasCustomPrinterIcon = parcel.readByte() != 0;
         mCustomPrinterIconGen = parcel.readInt();
-        mInfoIntent = parcel.readParcelable(null, android.app.PendingIntent.class);
+        mInfoIntent = parcel.readParcelable(null);
     }
 
     @Override

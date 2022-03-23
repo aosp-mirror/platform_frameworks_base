@@ -16,7 +16,6 @@
 
 package android.app;
 
-import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -28,7 +27,6 @@ import android.graphics.drawable.Drawable;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
-import android.util.MathUtils;
 import android.util.Size;
 
 import com.android.internal.graphics.ColorUtils;
@@ -46,7 +44,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -176,22 +173,6 @@ public final class WallpaperColors implements Parcelable {
         if (bitmap == null) {
             throw new IllegalArgumentException("Bitmap can't be null");
         }
-        return fromBitmap(bitmap, 0f /* dimAmount */);
-    }
-
-    /**
-     * Constructs {@link WallpaperColors} from a bitmap with dimming applied.
-     * <p>
-     * Main colors will be extracted from the bitmap with dimming taken into account when
-     * calculating dark hints.
-     *
-     * @param bitmap Source where to extract from.
-     * @param dimAmount Wallpaper dim amount
-     * @hide
-     */
-    public static WallpaperColors fromBitmap(@NonNull Bitmap bitmap,
-            @FloatRange (from = 0f, to = 1f) float dimAmount) {
-        Objects.requireNonNull(bitmap, "Bitmap can't be null");
 
         final int bitmapArea = bitmap.getWidth() * bitmap.getHeight();
         boolean shouldRecycle = false;
@@ -230,7 +211,7 @@ public final class WallpaperColors implements Parcelable {
 
         }
 
-        int hints = calculateDarkHints(bitmap, dimAmount);
+        int hints = calculateDarkHints(bitmap);
 
         if (shouldRecycle) {
             bitmap.recycle();
@@ -526,15 +507,13 @@ public final class WallpaperColors implements Parcelable {
      * Checks if image is bright and clean enough to support light text.
      *
      * @param source What to read.
-     * @param dimAmount How much wallpaper dim amount was applied.
      * @return Whether image supports dark text or not.
      */
-    private static int calculateDarkHints(Bitmap source, float dimAmount) {
+    private static int calculateDarkHints(Bitmap source) {
         if (source == null) {
             return 0;
         }
 
-        dimAmount = MathUtils.saturate(dimAmount);
         int[] pixels = new int[source.getWidth() * source.getHeight()];
         double totalLuminance = 0;
         final int maxDarkPixels = (int) (pixels.length * MAX_DARK_AREA);
@@ -542,37 +521,24 @@ public final class WallpaperColors implements Parcelable {
         source.getPixels(pixels, 0 /* offset */, source.getWidth(), 0 /* x */, 0 /* y */,
                 source.getWidth(), source.getHeight());
 
-        // Create a new black layer with dimAmount as the alpha to be accounted for when computing
-        // the luminance.
-        int dimmingLayerAlpha = (int) (255 * dimAmount);
-        int blackTransparent = ColorUtils.setAlphaComponent(Color.BLACK, dimmingLayerAlpha);
-
         // This bitmap was already resized to fit the maximum allowed area.
         // Let's just loop through the pixels, no sweat!
         float[] tmpHsl = new float[3];
         for (int i = 0; i < pixels.length; i++) {
-            int pixelColor = pixels[i];
-            ColorUtils.colorToHSL(pixelColor, tmpHsl);
-            final int alpha = Color.alpha(pixelColor);
-
-            // Apply composite colors where the foreground is a black layer with an alpha value of
-            // the dim amount and the background is the wallpaper pixel color.
-            int compositeColors = ColorUtils.compositeColors(blackTransparent, pixelColor);
-
-            // Calculate the adjusted luminance of the dimmed wallpaper pixel color.
-            double adjustedLuminance = ColorUtils.calculateLuminance(compositeColors);
-
+            ColorUtils.colorToHSL(pixels[i], tmpHsl);
+            final float luminance = tmpHsl[2];
+            final int alpha = Color.alpha(pixels[i]);
             // Make sure we don't have a dark pixel mass that will
             // make text illegible.
             final boolean satisfiesTextContrast = ContrastColorUtil
-                    .calculateContrast(pixelColor, Color.BLACK) > DARK_PIXEL_CONTRAST;
+                    .calculateContrast(pixels[i], Color.BLACK) > DARK_PIXEL_CONTRAST;
             if (!satisfiesTextContrast && alpha != 0) {
                 darkPixels++;
                 if (DEBUG_DARK_PIXELS) {
                     pixels[i] = Color.RED;
                 }
             }
-            totalLuminance += adjustedLuminance;
+            totalLuminance += luminance;
         }
 
         int hints = 0;

@@ -269,7 +269,7 @@ void FullPath::FullPathProperties::setPropertyValue(int propertyId, float value)
 
 void ClipPath::draw(SkCanvas* outCanvas, bool useStagingData) {
     SkPath tempStagingPath;
-    outCanvas->clipPath(getUpdatedPath(useStagingData, &tempStagingPath), true);
+    outCanvas->clipPath(getUpdatedPath(useStagingData, &tempStagingPath));
 }
 
 Group::Group(const Group& group) : Node(group) {
@@ -463,10 +463,10 @@ void Tree::drawStaging(Canvas* outCanvas) {
         mStagingCache.dirty = false;
     }
 
-    Paint skp;
+    SkPaint skp;
     getPaintFor(&skp, mStagingProperties);
     Paint paint;
-    paint.setFilterBitmap(skp.isFilterBitmap());
+    paint.setFilterQuality(skp.getFilterQuality());
     paint.setColorFilter(skp.refColorFilter());
     paint.setAlpha(skp.getAlpha());
     outCanvas->drawBitmap(*mStagingCache.bitmap, 0, 0, mStagingCache.bitmap->width(),
@@ -476,9 +476,9 @@ void Tree::drawStaging(Canvas* outCanvas) {
                           mStagingProperties.getBounds().bottom(), &paint);
 }
 
-void Tree::getPaintFor(Paint* outPaint, const TreeProperties& prop) const {
+void Tree::getPaintFor(SkPaint* outPaint, const TreeProperties& prop) const {
     // HWUI always draws VD with bilinear filtering.
-    outPaint->setFilterBitmap(true);
+    outPaint->setFilterQuality(kLow_SkFilterQuality);
     if (prop.getColorFilter() != nullptr) {
         outPaint->setColorFilter(sk_ref_sp(prop.getColorFilter()));
     }

@@ -16,7 +16,6 @@
 
 package com.android.systemui.qs;
 
-import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.drawable.Drawable;
@@ -74,7 +73,7 @@ public class AlphaControlledSignalTileView extends SignalTileView {
         }
 
         @Override
-        protected void setDrawableTintList(@Nullable ColorStateList tint) {
+        protected void setDrawableTintList(ColorStateList tint) {
         }
 
         /**

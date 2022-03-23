@@ -33,11 +33,9 @@ import android.widget.FrameLayout;
  * - sends sensor rect updates to fingerprint drawable
  * - optionally can override dozeTimeTick to adjust views for burn-in mitigation
  */
-public abstract class UdfpsAnimationView extends FrameLayout {
-    private float mDialogSuggestedAlpha = 1f;
-    private float mNotificationShadeExpansion = 0f;
-
-    // mAlpha takes into consideration the status bar expansion amount and dialog suggested alpha
+abstract class UdfpsAnimationView extends FrameLayout {
+    // mAlpha takes into consideration the status bar expansion amount to fade out icon when
+    // the status bar is expanded
     private int mAlpha;
     boolean mPauseAuth;
 
@@ -94,10 +92,6 @@ public abstract class UdfpsAnimationView extends FrameLayout {
     }
 
     int calculateAlpha() {
-        int alpha = expansionToAlpha(mNotificationShadeExpansion);
-        alpha *= mDialogSuggestedAlpha;
-        mAlpha = alpha;
-
         return mPauseAuth ? mAlpha : 255;
     }
 
@@ -117,26 +111,8 @@ public abstract class UdfpsAnimationView extends FrameLayout {
         return (int) ((1 - percent) * 255);
     }
 
-    /**
-     * Set the suggested alpha based on whether a dialog was recently shown or hidden.
-     * @param dialogSuggestedAlpha value from 0f to 1f.
-     */
-    public void setDialogSuggestedAlpha(float dialogSuggestedAlpha) {
-        mDialogSuggestedAlpha = dialogSuggestedAlpha;
-        updateAlpha();
-    }
-
-    public float getDialogSuggestedAlpha() {
-        return mDialogSuggestedAlpha;
-    }
-
-    /**
-     * Sets the amount the notification shade is expanded. This will influence the opacity of the
-     * this visual affordance.
-     * @param expansion amount the shade has expanded from 0f to 1f.
-     */
-    public void onExpansionChanged(float expansion) {
-        mNotificationShadeExpansion = expansion;
+    public void onExpansionChanged(float expansion, boolean expanded) {
+        mAlpha = expansionToAlpha(expansion);
         updateAlpha();
     }
 

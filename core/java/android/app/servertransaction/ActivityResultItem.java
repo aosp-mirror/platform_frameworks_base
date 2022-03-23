@@ -16,8 +16,6 @@
 
 package android.app.servertransaction;
 
-import static android.app.servertransaction.ActivityLifecycleItem.ON_RESUME;
-import static android.app.servertransaction.ActivityLifecycleItem.UNDEFINED;
 import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
 
 import android.annotation.NonNull;
@@ -25,9 +23,6 @@ import android.annotation.Nullable;
 import android.app.ActivityThread.ActivityClientRecord;
 import android.app.ClientTransactionHandler;
 import android.app.ResultInfo;
-import android.app.compat.CompatChanges;
-import android.compat.annotation.ChangeId;
-import android.compat.annotation.EnabledAfter;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
 import android.os.Parcel;
@@ -46,19 +41,11 @@ public class ActivityResultItem extends ActivityTransactionItem {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private List<ResultInfo> mResultInfoList;
 
-    /**
-     * Correct the lifecycle of activity result after {@link android.os.Build.VERSION_CODES#S} to
-     * guarantee that an activity gets activity result just before resume.
-     */
-    @ChangeId
-    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.S)
-    public static final long CALL_ACTIVITY_RESULT_BEFORE_RESUME = 78294732L;
-
+    /* TODO(b/78294732)
     @Override
     public int getPostExecutionState() {
-        return CompatChanges.isChangeEnabled(CALL_ACTIVITY_RESULT_BEFORE_RESUME)
-                ? ON_RESUME : UNDEFINED;
-    }
+        return ON_RESUME;
+    }*/
 
     @Override
     public void execute(ClientTransactionHandler client, ActivityClientRecord r,

@@ -23,8 +23,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.hardware.soundtrigger.SoundTrigger.RecognitionEvent;
-import android.hardware.soundtrigger.SoundTrigger.GenericSoundModel;
 import android.media.AudioAttributes;
 import android.media.AudioFormat;
 import android.media.AudioManager;
@@ -48,7 +46,6 @@ import java.util.Properties;
 import java.util.Random;
 import java.util.UUID;
 
-
 public class SoundTriggerTestService extends Service {
     private static final String TAG = "SoundTriggerTestSrv";
     private static final String INTENT_ACTION = "com.android.intent.action.MANAGE_SOUND_TRIGGER";
@@ -59,8 +56,6 @@ public class SoundTriggerTestService extends Service {
     private SoundTriggerUtil mSoundTriggerUtil;
     private Random mRandom;
     private UserActivity mUserActivity;
-
-    private static int captureCount;
 
     public interface UserActivity {
         void addModel(UUID modelUuid, String state);
@@ -136,8 +131,6 @@ public class SoundTriggerTestService extends Service {
                         } else if (command.equals("set_capture_timeout")) {
                             setCaptureAudioTimeout(getModelUuidFromIntent(intent),
                                     intent.getIntExtra("timeout", 5000));
-                        } else if (command.equals("get_model_state")) {
-                            getModelState(getModelUuidFromIntent(intent));
                         } else {
                             Log.e(TAG, "Unknown command '" + command + "'");
                         }
@@ -439,17 +432,6 @@ public class SoundTriggerTestService extends Service {
         return modelInfo != null && modelInfo.captureAudioTrack != null;
     }
 
-    public synchronized void getModelState(UUID modelUuid) {
-        ModelInfo modelInfo = mModelInfoMap.get(modelUuid);
-        if (modelInfo == null) {
-            postError("Could not find model for: " + modelUuid.toString());
-            return;
-        }
-        int status = mSoundTriggerUtil.getModelState(modelUuid);
-        postMessage("GetModelState for: " + modelInfo.name + " returns: "
-            + status);
-    }
-
     private void loadModelsInDataDir() {
         // Load all the models in the data dir.
         boolean loadedModel = false;
@@ -545,29 +527,18 @@ public class SoundTriggerTestService extends Service {
         }
     }
 
-
     private class CaptureAudioRecorder implements Runnable {
         private final ModelInfo mModelInfo;
-
-        // EventPayload and RecognitionEvent are equivalant.  Only one will be non-null.
         private final SoundTriggerDetector.EventPayload mEvent;
-        private final RecognitionEvent mRecognitionEvent;
 
         public CaptureAudioRecorder(ModelInfo modelInfo, SoundTriggerDetector.EventPayload event) {
             mModelInfo = modelInfo;
             mEvent = event;
-            mRecognitionEvent = null;
-        }
-
-        public CaptureAudioRecorder(ModelInfo modelInfo, RecognitionEvent event) {
-            mModelInfo = modelInfo;
-            mEvent = null;
-            mRecognitionEvent = event;
         }
 
         @Override
         public void run() {
-            AudioFormat format = getAudioFormat();
+            AudioFormat format = mEvent.getCaptureAudioFormat();
             if (format == null) {
                 postErrorToast("No audio format in recognition event.");
                 return;
@@ -629,21 +600,18 @@ public class SoundTriggerTestService extends Service {
                 }
 
                 audioRecord = new AudioRecord(attributes, format, bytesRequired,
-                        getCaptureSession());
+                        mEvent.getCaptureSession());
 
                 byte[] buffer = new byte[bytesRequired];
 
                 // Create a file so we can save the output data there for analysis later.
                 FileOutputStream fos  = null;
                 try {
-                    File file = new File(
-                        getFilesDir() + File.separator
-                        + mModelInfo.name.replace(' ', '_')
-                        + "_capture_" + format.getChannelCount() + "ch_"
-                        + format.getSampleRate() + "hz_" + encoding
-                        + "_" + (++captureCount) + ".pcm");
-                    Log.i(TAG, "Writing audio to: " + file);
-                    fos = new FileOutputStream(file);
+                    fos = new FileOutputStream( new File(
+                            getFilesDir() + File.separator
+                                    + mModelInfo.name.replace(' ', '_')
+                                    + "_capture_" + format.getChannelCount() + "ch_"
+                                    + format.getSampleRate() + "hz_" + encoding + ".pcm"));
                 } catch (IOException e) {
                     Log.e(TAG, "Failed to open output for saving PCM data", e);
                     postErrorToast("Failed to open output for saving PCM data: "
@@ -667,10 +635,6 @@ public class SoundTriggerTestService extends Service {
                     bytesRequired -= bytesRead;
                 }
                 audioRecord.stop();
-                if (fos != null) {
-                  fos.flush();
-                  fos.close();
-                }
             } catch (Exception e) {
                 Log.e(TAG, "Error recording trigger audio", e);
                 postErrorToast("Error recording trigger audio: " + e.getMessage());
@@ -686,26 +650,6 @@ public class SoundTriggerTestService extends Service {
                 }
                 setModelState(mModelInfo, "Recording finished");
             }
-        }
-
-        private AudioFormat getAudioFormat() {
-            if (mEvent != null) {
-                return mEvent.getCaptureAudioFormat();
-            }
-            if (mRecognitionEvent != null) {
-                return mRecognitionEvent.captureFormat;
-            }
-            return null;
-        }
-
-        private int getCaptureSession() {
-            if (mEvent != null) {
-                return mEvent.getCaptureSession();
-            }
-            if (mRecognitionEvent != null) {
-                return mRecognitionEvent.captureSession;
-            }
-            return 0;
         }
     }
 

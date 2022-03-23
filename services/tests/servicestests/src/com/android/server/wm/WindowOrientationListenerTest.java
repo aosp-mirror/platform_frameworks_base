@@ -114,20 +114,11 @@ public class WindowOrientationListenerTest {
     }
 
     @Test
-    public void testOnSensorChanged_normalCase2() {
+    public void testSensorChanged_normalCase2() {
         mWindowOrientationListener.mOrientationJudge.onSensorChanged(mFakeSensorEvent);
 
         mFakeRotationResolverInternal.callbackWithFailureResult(
                 RotationResolverService.ROTATION_RESULT_FAILURE_CANCELLED);
-
-        assertThat(mFinalizedRotation).isEqualTo(DEFAULT_SENSOR_ROTATION);
-    }
-
-    @Test
-    public void testOnSensorChanged_rotationResolverServiceIsNull_useSensorResult() {
-        mWindowOrientationListener.mRotationResolverService = null;
-
-        mWindowOrientationListener.mOrientationJudge.onSensorChanged(mFakeSensorEvent);
 
         assertThat(mFinalizedRotation).isEqualTo(DEFAULT_SENSOR_ROTATION);
     }

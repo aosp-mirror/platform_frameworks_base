@@ -188,6 +188,7 @@ public class SettingsProviderTest extends BaseSettingsProviderTest {
         int insertedCount = 0;
         try {
             for (; insertedCount < 1200; insertedCount++) {
+                Log.w(LOG_TAG, "Adding app specific setting: " + insertedCount);
                 insertStringViaProviderApi(SETTING_TYPE_SYSTEM,
                         String.valueOf(insertedCount), FAKE_SETTING_VALUE, false);
             }
@@ -196,6 +197,7 @@ public class SettingsProviderTest extends BaseSettingsProviderTest {
             // expected
         } finally {
             for (; insertedCount >= 0; insertedCount--) {
+                Log.w(LOG_TAG, "Removing app specific setting: " + insertedCount);
                 deleteStringViaProviderApi(SETTING_TYPE_SYSTEM,
                         String.valueOf(insertedCount));
             }

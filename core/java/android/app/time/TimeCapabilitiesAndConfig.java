@@ -59,8 +59,8 @@ public final class TimeCapabilitiesAndConfig implements Parcelable {
 
     @NonNull
     private static TimeCapabilitiesAndConfig readFromParcel(Parcel in) {
-        TimeCapabilities capabilities = in.readParcelable(null, android.app.time.TimeCapabilities.class);
-        TimeConfiguration configuration = in.readParcelable(null, android.app.time.TimeConfiguration.class);
+        TimeCapabilities capabilities = in.readParcelable(null);
+        TimeConfiguration configuration = in.readParcelable(null);
         return new TimeCapabilitiesAndConfig(capabilities, configuration);
     }
 

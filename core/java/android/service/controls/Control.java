@@ -121,7 +121,6 @@ public final class Control implements Parcelable {
     private final @Status int mStatus;
     private final @NonNull ControlTemplate mControlTemplate;
     private final @NonNull CharSequence mStatusText;
-    private final boolean mAuthRequired;
 
     /**
      * @param controlId the unique persistent identifier for this object.
@@ -138,8 +137,6 @@ public final class Control implements Parcelable {
      * @param status
      * @param controlTemplate
      * @param statusText
-     * @param authRequired true if the control can not be interacted with until the device is
-     *                     unlocked
      */
     Control(@NonNull String controlId,
             @DeviceTypes.DeviceType int deviceType,
@@ -152,8 +149,7 @@ public final class Control implements Parcelable {
             @Nullable ColorStateList customColor,
             @Status int status,
             @NonNull ControlTemplate controlTemplate,
-            @NonNull CharSequence statusText,
-            boolean authRequired) {
+            @NonNull CharSequence statusText) {
         Preconditions.checkNotNull(controlId);
         Preconditions.checkNotNull(title);
         Preconditions.checkNotNull(subtitle);
@@ -184,7 +180,6 @@ public final class Control implements Parcelable {
         }
         mControlTemplate = controlTemplate;
         mStatusText = statusText;
-        mAuthRequired = authRequired;
     }
 
     /**
@@ -224,7 +219,6 @@ public final class Control implements Parcelable {
         ControlTemplateWrapper wrapper = ControlTemplateWrapper.CREATOR.createFromParcel(in);
         mControlTemplate = wrapper.getWrappedTemplate();
         mStatusText = in.readCharSequence();
-        mAuthRequired = in.readBoolean();
     }
 
     /**
@@ -342,13 +336,6 @@ public final class Control implements Parcelable {
         return mStatusText;
     }
 
-    /**
-     * @return true if the control can not be interacted with until the device is unlocked
-     */
-    public boolean isAuthRequired() {
-        return mAuthRequired;
-    }
-
     @Override
     public int describeContents() {
         return 0;
@@ -389,7 +376,6 @@ public final class Control implements Parcelable {
         dest.writeInt(mStatus);
         new ControlTemplateWrapper(mControlTemplate).writeToParcel(dest, flags);
         dest.writeCharSequence(mStatusText);
-        dest.writeBoolean(mAuthRequired);
     }
 
     public static final @NonNull Creator<Control> CREATOR = new Creator<Control>() {
@@ -423,7 +409,6 @@ public final class Control implements Parcelable {
      *     <li> Status: {@link Status#STATUS_UNKNOWN}
      *     <li> Control template: {@link ControlTemplate#getNoTemplateObject}
      *     <li> Status text: {@code ""}
-     *     <li> Auth Required: {@code true}
      * </ul>
      */
     @SuppressLint("MutableBareField")
@@ -600,8 +585,7 @@ public final class Control implements Parcelable {
                     mCustomColor,
                     STATUS_UNKNOWN,
                     ControlTemplate.NO_TEMPLATE,
-                    "",
-                    true /* authRequired */);
+                    "");
         }
     }
 
@@ -623,7 +607,6 @@ public final class Control implements Parcelable {
      *     <li> Status: {@link Status#STATUS_UNKNOWN}
      *     <li> Control template: {@link ControlTemplate#getNoTemplateObject}
      *     <li> Status text: {@code ""}
-     *     <li> Auth Required: {@code true}
      * </ul>
      */
     public static final class StatefulBuilder {
@@ -640,7 +623,6 @@ public final class Control implements Parcelable {
         private @Status int mStatus = STATUS_UNKNOWN;
         private @NonNull ControlTemplate mControlTemplate = ControlTemplate.NO_TEMPLATE;
         private @NonNull CharSequence mStatusText = "";
-        private boolean mAuthRequired = true;
 
         /**
          * @param controlId the identifier for the {@link Control}.
@@ -673,7 +655,6 @@ public final class Control implements Parcelable {
             mStatus = control.mStatus;
             mControlTemplate = control.mControlTemplate;
             mStatusText = control.mStatusText;
-            mAuthRequired = control.mAuthRequired;
         }
 
         /**
@@ -840,17 +821,6 @@ public final class Control implements Parcelable {
         }
 
         /**
-         * @param authRequired true if the control can not be interacted with until the device is
-         *                     unlocked
-         * @return {@code this}
-         */
-        @NonNull
-        public StatefulBuilder setAuthRequired(boolean authRequired) {
-            mAuthRequired = authRequired;
-            return this;
-        }
-
-        /**
          * @return a valid {@link Control}
          */
         @NonNull
@@ -866,8 +836,7 @@ public final class Control implements Parcelable {
                     mCustomColor,
                     mStatus,
                     mControlTemplate,
-                    mStatusText,
-                    mAuthRequired);
+                    mStatusText);
         }
     }
 }

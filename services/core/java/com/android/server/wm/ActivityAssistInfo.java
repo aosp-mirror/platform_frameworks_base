@@ -30,7 +30,7 @@ public class ActivityAssistInfo {
     private final int mTaskId;
 
     public ActivityAssistInfo(ActivityRecord activityRecord) {
-        this.mActivityToken = activityRecord.token;
+        this.mActivityToken = activityRecord.appToken;
         this.mAssistToken = activityRecord.assistToken;
         this.mTaskId = activityRecord.getTask().mTaskId;
     }

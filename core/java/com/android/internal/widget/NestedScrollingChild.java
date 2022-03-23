@@ -16,7 +16,6 @@
 
 package com.android.internal.widget;
 
-import android.annotation.Nullable;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
@@ -150,7 +149,7 @@ public interface NestedScrollingChild {
      * @see #dispatchNestedPreScroll(int, int, int[], int[])
      */
     boolean dispatchNestedScroll(int dxConsumed, int dyConsumed,
-            int dxUnconsumed, int dyUnconsumed, @Nullable int[] offsetInWindow);
+            int dxUnconsumed, int dyUnconsumed, int[] offsetInWindow);
 
     /**
      * Dispatch one step of a nested scroll in progress before this view consumes any portion of it.
@@ -171,8 +170,7 @@ public interface NestedScrollingChild {
      * @return true if the parent consumed some or all of the scroll delta
      * @see #dispatchNestedScroll(int, int, int, int, int[])
      */
-    boolean dispatchNestedPreScroll(int dx, int dy, @Nullable int[] consumed,
-            @Nullable int[] offsetInWindow);
+    boolean dispatchNestedPreScroll(int dx, int dy, int[] consumed, int[] offsetInWindow);
 
     /**
      * Dispatch a fling to a nested scrolling parent.

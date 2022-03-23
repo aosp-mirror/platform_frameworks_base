@@ -4,7 +4,6 @@
             "name": "CtsJobSchedulerTestCases",
             "options": [
                 {"exclude-annotation": "android.platform.test.annotations.FlakyTest"},
-                {"exclude-annotation": "android.platform.test.annotations.LargeTest"},
                 {"exclude-annotation": "androidx.test.filters.FlakyTest"},
                 {"exclude-annotation": "androidx.test.filters.LargeTest"}
             ]
@@ -14,7 +13,6 @@
             "options": [
                 {"include-filter": "com.android.server.job"},
                 {"exclude-annotation": "android.platform.test.annotations.FlakyTest"},
-                {"exclude-annotation": "android.platform.test.annotations.LargeTest"},
                 {"exclude-annotation": "androidx.test.filters.FlakyTest"}
             ]
         },
@@ -23,7 +21,6 @@
             "options": [
                 {"include-filter": "com.android.server.job"},
                 {"exclude-annotation": "android.platform.test.annotations.FlakyTest"},
-                {"exclude-annotation": "android.platform.test.annotations.LargeTest"},
                 {"exclude-annotation": "androidx.test.filters.FlakyTest"}
             ]
         }
@@ -49,12 +46,6 @@
             "options": [
                 {"include-filter": "com.android.cts.net.HostsideRestrictBackgroundNetworkTests#testMeteredNetworkAccess_expeditedJob"},
                 {"include-filter": "com.android.cts.net.HostsideRestrictBackgroundNetworkTests#testNonMeteredNetworkAccess_expeditedJob"}
-            ]
-        },
-        {
-            "name": "CtsStatsdAtomHostTestCases",
-            "options": [
-                {"include-filter": "android.cts.statsdatom.jobscheduler"}
             ]
         }
     ]

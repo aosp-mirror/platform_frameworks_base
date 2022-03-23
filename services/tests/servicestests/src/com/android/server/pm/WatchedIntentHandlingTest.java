@@ -20,7 +20,6 @@ import static org.junit.Assert.assertTrue;
 
 import android.content.ComponentName;
 import android.content.IntentFilter;
-import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
 
@@ -30,7 +29,6 @@ import org.junit.Test;
 
 import java.util.Iterator;
 
-@Presubmit
 @SmallTest
 public class WatchedIntentHandlingTest {
 
@@ -145,7 +143,7 @@ public class WatchedIntentHandlingTest {
         IntentFilter i = new IntentFilter("TEST_ACTION");
         PreferredActivity a1 = new PreferredActivity(i, 1, components, component, true);
 
-        r.addFilter(null, a1);
+        r.addFilter(a1);
         watcher.verifyChangeReported("addFilter");
         i.setPriority(i.getPriority() + 1);
         watcher.verifyNoChangeReported("indepenent intent");

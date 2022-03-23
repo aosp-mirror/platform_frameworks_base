@@ -25,7 +25,7 @@ import android.content.Context;
 import android.util.Log;
 
 /**
- * Provides access to all vibrators from the device, as well as the ability to run them
+ * Class that provides access to all vibrators from the device, as well as the ability to run them
  * in a synchronized fashion.
  * <p>
  * If your process exits, any vibration you started will stop.

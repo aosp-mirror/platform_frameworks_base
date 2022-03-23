@@ -86,7 +86,7 @@ abstract class MediaRoute2Provider {
             mProviderInfo = null;
         } else {
             mProviderInfo = new MediaRoute2ProviderInfo.Builder(providerInfo)
-                    .setUniqueId(mComponentName.getPackageName(), mUniqueId)
+                    .setUniqueId(mUniqueId)
                     .setSystemRouteProvider(mIsSystemRouteProvider)
                     .build();
         }

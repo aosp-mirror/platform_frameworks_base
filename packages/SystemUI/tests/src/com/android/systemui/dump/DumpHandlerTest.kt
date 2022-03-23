@@ -62,7 +62,7 @@ class DumpHandlerTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
-        dumpHandler = DumpHandler(mContext, dumpManager, logBufferEulogizer, mutableMapOf())
+        dumpHandler = DumpHandler(mContext, dumpManager, logBufferEulogizer)
     }
 
     @Test

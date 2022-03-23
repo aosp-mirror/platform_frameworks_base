@@ -29,13 +29,10 @@ import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.window.WindowContainerTransaction;
 
-import androidx.test.annotation.UiThreadTest;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
-import com.android.launcher3.icons.IconProvider;
 import com.android.wm.shell.ShellTaskOrganizer;
-import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestRunningTaskInfoBuilder;
 import com.android.wm.shell.common.SyncTransactionQueue;
 
@@ -49,24 +46,22 @@ import org.mockito.Spy;
 /** Tests for {@link SideStage} */
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class SideStageTests extends ShellTestCase {
+public class SideStageTests {
     @Mock private ShellTaskOrganizer mTaskOrganizer;
     @Mock private StageTaskListener.StageListenerCallbacks mCallbacks;
     @Mock private SyncTransactionQueue mSyncQueue;
     @Mock private ActivityManager.RunningTaskInfo mRootTask;
     @Mock private SurfaceControl mRootLeash;
-    @Mock private IconProvider mIconProvider;
     @Spy private WindowContainerTransaction mWct;
     private SurfaceSession mSurfaceSession = new SurfaceSession();
     private SideStage mSideStage;
 
     @Before
-    @UiThreadTest
     public void setup() {
         MockitoAnnotations.initMocks(this);
         mRootTask = new TestRunningTaskInfoBuilder().build();
-        mSideStage = new SideStage(mContext, mTaskOrganizer, DEFAULT_DISPLAY, mCallbacks,
-                mSyncQueue, mSurfaceSession, mIconProvider, null);
+        mSideStage = new SideStage(mTaskOrganizer, DEFAULT_DISPLAY, mCallbacks, mSyncQueue,
+                mSurfaceSession);
         mSideStage.onTaskAppeared(mRootTask, mRootLeash);
     }
 
@@ -74,7 +69,7 @@ public class SideStageTests extends ShellTestCase {
     public void testAddTask() {
         final ActivityManager.RunningTaskInfo task = new TestRunningTaskInfoBuilder().build();
 
-        mSideStage.addTask(task, mWct);
+        mSideStage.addTask(task, mRootTask.configuration.windowConfiguration.getBounds(), mWct);
 
         verify(mWct).reparent(eq(task.token), eq(mRootTask.token), eq(true));
     }

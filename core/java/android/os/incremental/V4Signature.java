@@ -28,7 +28,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.ArrayList;
 
 /**
  * V4 signature fields.
@@ -75,7 +74,7 @@ public class V4Signature {
     }
 
     /**
-     * Signature data.
+     * V4 signature data.
      */
     public static class SigningInfo {
         public final byte[] apkDigest;  // used to match with the corresponding APK
@@ -99,13 +98,7 @@ public class V4Signature {
          * Constructs SigningInfo from byte array.
          */
         public static SigningInfo fromByteArray(byte[] bytes) throws IOException {
-            return fromByteBuffer(ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN));
-        }
-
-        /**
-         * Constructs SigningInfo from byte buffer.
-         */
-        public static SigningInfo fromByteBuffer(ByteBuffer buffer) throws IOException {
+            ByteBuffer buffer = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN);
             byte[] apkDigest = readBytes(buffer);
             byte[] certificate = readBytes(buffer);
             byte[] additionalData = readBytes(buffer);
@@ -117,62 +110,6 @@ public class V4Signature {
         }
     }
 
-    /**
-     * Optional signature data block with ID.
-     */
-    public static class SigningInfoBlock {
-        public final int blockId;
-        public final byte[] signingInfo;
-
-        public SigningInfoBlock(int blockId, byte[] signingInfo) {
-            this.blockId = blockId;
-            this.signingInfo = signingInfo;
-        }
-
-        static SigningInfoBlock fromByteBuffer(ByteBuffer buffer) throws IOException {
-            int blockId = buffer.getInt();
-            byte[] signingInfo = readBytes(buffer);
-            return new SigningInfoBlock(blockId, signingInfo);
-        }
-    }
-
-    /**
-     * V4 signature data.
-     */
-    public static class SigningInfos {
-        // Default signature.
-        public final SigningInfo signingInfo;
-        // Additional signatures corresponding to extended V2/V3/V31 blocks.
-        public final SigningInfoBlock[] signingInfoBlocks;
-
-        public SigningInfos(SigningInfo signingInfo) {
-            this.signingInfo = signingInfo;
-            this.signingInfoBlocks = new SigningInfoBlock[0];
-        }
-
-        public SigningInfos(SigningInfo signingInfo, SigningInfoBlock... signingInfoBlocks) {
-            this.signingInfo = signingInfo;
-            this.signingInfoBlocks = signingInfoBlocks;
-        }
-
-        /**
-         * Constructs SigningInfos from byte array.
-         */
-        public static SigningInfos fromByteArray(byte[] bytes) throws IOException {
-            ByteBuffer buffer = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN);
-            SigningInfo signingInfo = SigningInfo.fromByteBuffer(buffer);
-            if (!buffer.hasRemaining()) {
-                return new SigningInfos(signingInfo);
-            }
-            ArrayList<SigningInfoBlock> signingInfoBlocks = new ArrayList<>(1);
-            while (buffer.hasRemaining()) {
-                signingInfoBlocks.add(SigningInfoBlock.fromByteBuffer(buffer));
-            }
-            return new SigningInfos(signingInfo,
-                    signingInfoBlocks.toArray(new SigningInfoBlock[signingInfoBlocks.size()]));
-        }
-    }
-
     public final int version; // Always 2 for now.
     /**
      * Raw byte array containing the IncFS hashing data.
@@ -181,11 +118,11 @@ public class V4Signature {
     @Nullable public final byte[] hashingInfo;
 
     /**
-     * Raw byte array containing V4 signatures.
+     * Raw byte array containing the V4 signature data.
      * <p>Passed as-is to the kernel. Can be retrieved later.
-     * @see SigningInfos#fromByteArray(byte[])
+     * @see SigningInfo#fromByteArray(byte[])
      */
-    @Nullable public final byte[] signingInfos;
+    @Nullable public final byte[] signingInfo;
 
     /**
      * Construct a V4Signature from .idsig file.
@@ -248,10 +185,10 @@ public class V4Signature {
         return this.version == SUPPORTED_VERSION;
     }
 
-    private V4Signature(int version, @Nullable byte[] hashingInfo, @Nullable byte[] signingInfos) {
+    private V4Signature(int version, @Nullable byte[] hashingInfo, @Nullable byte[] signingInfo) {
         this.version = version;
         this.hashingInfo = hashingInfo;
-        this.signingInfos = signingInfos;
+        this.signingInfo = signingInfo;
     }
 
     private static V4Signature readFrom(InputStream stream) throws IOException {
@@ -268,7 +205,7 @@ public class V4Signature {
     private void writeTo(OutputStream stream) throws IOException {
         writeIntLE(stream, this.version);
         writeBytes(stream, this.hashingInfo);
-        writeBytes(stream, this.signingInfos);
+        writeBytes(stream, this.signingInfo);
     }
 
     // Utility methods.

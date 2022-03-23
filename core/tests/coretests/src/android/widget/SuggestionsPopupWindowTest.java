@@ -17,6 +17,9 @@
 package android.widget;
 
 import static android.widget.espresso.DragHandleUtils.onHandleView;
+import static android.widget.espresso.FloatingToolbarEspressoUtils.assertFloatingToolbarContainsItem;
+import static android.widget.espresso.FloatingToolbarEspressoUtils.clickFloatingToolbarItem;
+import static android.widget.espresso.FloatingToolbarEspressoUtils.sleepForFloatingToolbarPopup;
 import static android.widget.espresso.SuggestionsPopupwindowUtils.assertSuggestionsPopupContainsItem;
 import static android.widget.espresso.SuggestionsPopupwindowUtils.assertSuggestionsPopupIsDisplayed;
 import static android.widget.espresso.SuggestionsPopupwindowUtils.assertSuggestionsPopupIsNotDisplayed;
@@ -69,7 +72,6 @@ public class SuggestionsPopupWindowTest {
     @Rule
     public final ActivityTestRule<TextViewActivity> mActivityRule =
             new ActivityTestRule<>(TextViewActivity.class);
-    private final FloatingToolbarUtils mToolbar = new FloatingToolbarUtils();
 
     private TextViewActivity getActivity() {
         return mActivityRule.getActivity();
@@ -116,19 +118,22 @@ public class SuggestionsPopupWindowTest {
         setSuggestionSpan(suggestionSpan, text.indexOf('d'), text.indexOf('f') + 1);
 
         onView(withId(R.id.textview)).perform(longPressOnTextAtIndex(text.indexOf('e')));
-        mToolbar.clickFloatingToolbarOverflowItem(
+        sleepForFloatingToolbarPopup();
+        assertFloatingToolbarContainsItem(
+                getActivity().getString(com.android.internal.R.string.replace));
+        sleepForFloatingToolbarPopup();
+        clickFloatingToolbarItem(
                 getActivity().getString(com.android.internal.R.string.replace));
 
         assertSuggestionsPopupIsDisplayed();
     }
 
     @Test
-    public void testInsertionActionMode() throws Throwable {
+    public void testInsertionActionMode() {
         final String text = "abc def ghi";
 
         onView(withId(R.id.textview)).perform(click());
         onView(withId(R.id.textview)).perform(replaceText(text));
-        Thread.sleep(500);
 
         final SuggestionSpan suggestionSpan = new SuggestionSpan(getActivity(),
                 new String[]{"DEF", "Def"}, SuggestionSpan.FLAG_AUTO_CORRECTION);
@@ -136,7 +141,10 @@ public class SuggestionsPopupWindowTest {
 
         onView(withId(R.id.textview)).perform(clickOnTextAtIndex(text.indexOf('e')));
         onHandleView(com.android.internal.R.id.insertion_handle).perform(click());
-        mToolbar.clickFloatingToolbarItem(
+        sleepForFloatingToolbarPopup();
+        assertFloatingToolbarContainsItem(
+                getActivity().getString(com.android.internal.R.string.replace));
+        clickFloatingToolbarItem(
                 getActivity().getString(com.android.internal.R.string.replace));
 
         assertSuggestionsPopupIsDisplayed();

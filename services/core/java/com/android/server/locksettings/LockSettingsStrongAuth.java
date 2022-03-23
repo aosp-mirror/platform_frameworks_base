@@ -262,7 +262,7 @@ public class LockSettingsStrongAuth {
         long nextAlarmTime = strongAuthTime + dpm.getRequiredStrongAuthTimeout(null, userId);
 
         // schedule a new alarm listener for the user
-        mAlarmManager.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP, nextAlarmTime,
+        mAlarmManager.set(AlarmManager.ELAPSED_REALTIME, nextAlarmTime,
                 STRONG_AUTH_TIMEOUT_ALARM_TAG, alarm, mHandler);
     }
 
@@ -303,7 +303,7 @@ public class LockSettingsStrongAuth {
             alarm = new NonStrongBiometricTimeoutAlarmListener(userId);
             mNonStrongBiometricTimeoutAlarmListener.put(userId, alarm);
             // schedule a new alarm listener for the user
-            mAlarmManager.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP, nextAlarmTime,
+            mAlarmManager.set(AlarmManager.ELAPSED_REALTIME, nextAlarmTime,
                     NON_STRONG_BIOMETRIC_TIMEOUT_ALARM_TAG, alarm, mHandler);
         }
 
@@ -394,7 +394,7 @@ public class LockSettingsStrongAuth {
         }
         // schedule a new alarm listener for the user
         if (DEBUG) Slog.d(TAG, "Schedule a new alarm for non-strong biometric idle timeout");
-        mAlarmManager.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP, nextAlarmTime,
+        mAlarmManager.set(AlarmManager.ELAPSED_REALTIME, nextAlarmTime,
                 NON_STRONG_BIOMETRIC_IDLE_TIMEOUT_ALARM_TAG, alarm, mHandler);
     }
 

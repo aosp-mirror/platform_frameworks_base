@@ -45,13 +45,13 @@ using namespace android;
 #define COLORSPACE_SRGB       1
 #define COLORSPACE_DISPLAY_P3 2
 
-static void usage(const char* pname, DisplayId displayId)
+static void usage(const char* pname, PhysicalDisplayId displayId)
 {
     fprintf(stderr,
             "usage: %s [-hp] [-d display-id] [FILENAME]\n"
             "   -h: this message\n"
             "   -p: save the file as a png.\n"
-            "   -d: specify the display ID to capture (default: %s)\n"
+            "   -d: specify the physical display ID to capture (default: %s)\n"
             "       see \"dumpsys SurfaceFlinger --display-id\" for valid display IDs.\n"
             "If FILENAME ends with .png it will be saved as a png.\n"
             "If FILENAME is not given, the results will be printed to stdout.\n",
@@ -121,9 +121,9 @@ static status_t notifyMediaScanner(const char* fileName) {
 
 int main(int argc, char** argv)
 {
-    std::optional<DisplayId> displayId = SurfaceComposerClient::getInternalDisplayId();
+    std::optional<PhysicalDisplayId> displayId = SurfaceComposerClient::getInternalDisplayId();
     if (!displayId) {
-        fprintf(stderr, "Failed to get ID for internal display\n");
+        fprintf(stderr, "Failed to get token for internal display\n");
         return 1;
     }
 
@@ -136,11 +136,7 @@ int main(int argc, char** argv)
                 png = true;
                 break;
             case 'd':
-                displayId = DisplayId::fromValue(atoll(optarg));
-                if (!displayId) {
-                    fprintf(stderr, "Invalid display ID\n");
-                    return 1;
-                }
+                displayId = PhysicalDisplayId(atoll(optarg));
                 break;
             case '?':
             case 'h':
@@ -186,7 +182,7 @@ int main(int argc, char** argv)
     ProcessState::self()->startThreadPool();
 
     sp<SyncScreenCaptureListener> captureListener = new SyncScreenCaptureListener();
-    status_t result = ScreenshotClient::captureDisplay(*displayId, captureListener);
+    status_t result = ScreenshotClient::captureDisplay(displayId->value, captureListener);
     if (result != NO_ERROR) {
         close(fd);
         return 1;

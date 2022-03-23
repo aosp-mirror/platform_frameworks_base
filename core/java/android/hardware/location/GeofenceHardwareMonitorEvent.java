@@ -81,7 +81,7 @@ public class GeofenceHardwareMonitorEvent implements Parcelable {
                     int monitoringType = source.readInt();
                     int monitoringStatus = source.readInt();
                     int sourceTechnologies = source.readInt();
-                    Location location = source.readParcelable(classLoader, android.location.Location.class);
+                    Location location = source.readParcelable(classLoader);
 
                     return new GeofenceHardwareMonitorEvent(
                             monitoringType,

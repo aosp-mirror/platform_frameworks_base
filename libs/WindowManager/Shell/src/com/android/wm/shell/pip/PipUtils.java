@@ -24,10 +24,8 @@ import android.app.ActivityTaskManager.RootTaskInfo;
 import android.content.ComponentName;
 import android.content.Context;
 import android.os.RemoteException;
+import android.util.Log;
 import android.util.Pair;
-
-import com.android.internal.protolog.common.ProtoLog;
-import com.android.wm.shell.protolog.ShellProtoLogGroup;
 
 /** A class that includes convenience methods. */
 public class PipUtils {
@@ -53,8 +51,7 @@ public class PipUtils {
                 }
             }
         } catch (RemoteException e) {
-            ProtoLog.w(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                    "%s: Unable to get pinned stack.", TAG);
+            Log.w(TAG, "Unable to get pinned stack.");
         }
         return new Pair<>(null, 0);
     }

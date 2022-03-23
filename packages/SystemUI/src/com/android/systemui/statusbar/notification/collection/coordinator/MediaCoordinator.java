@@ -21,7 +21,6 @@ import static com.android.systemui.media.MediaDataManagerKt.isMediaNotification;
 import com.android.systemui.media.MediaFeatureFlag;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
-import com.android.systemui.statusbar.notification.collection.coordinator.dagger.CoordinatorScope;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
 
 import javax.inject.Inject;
@@ -29,7 +28,6 @@ import javax.inject.Inject;
 /**
  * Coordinates hiding (filtering) of media notifications.
  */
-@CoordinatorScope
 public class MediaCoordinator implements Coordinator {
     private static final String TAG = "MediaCoordinator";
 
@@ -49,6 +47,6 @@ public class MediaCoordinator implements Coordinator {
 
     @Override
     public void attach(NotifPipeline pipeline) {
-        pipeline.addPreGroupFilter(mMediaFilter);
+        pipeline.addFinalizeFilter(mMediaFilter);
     }
 }

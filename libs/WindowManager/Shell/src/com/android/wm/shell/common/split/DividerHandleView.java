@@ -70,8 +70,7 @@ public class DividerHandleView extends View {
     private final Paint mPaint = new Paint();
     private final int mWidth;
     private final int mHeight;
-    private final int mTouchingWidth;
-    private final int mTouchingHeight;
+    private final int mCircleDiameter;
     private int mCurrentWidth;
     private int mCurrentHeight;
     private AnimatorSet mAnimator;
@@ -81,12 +80,11 @@ public class DividerHandleView extends View {
         super(context, attrs);
         mPaint.setColor(getResources().getColor(R.color.docked_divider_handle, null));
         mPaint.setAntiAlias(true);
-        mWidth = getResources().getDimensionPixelSize(R.dimen.split_divider_handle_width);
-        mHeight = getResources().getDimensionPixelSize(R.dimen.split_divider_handle_height);
+        mWidth = getResources().getDimensionPixelSize(R.dimen.docked_divider_handle_width);
+        mHeight = getResources().getDimensionPixelSize(R.dimen.docked_divider_handle_height);
         mCurrentWidth = mWidth;
         mCurrentHeight = mHeight;
-        mTouchingWidth = mWidth > mHeight ? mWidth / 2 : mWidth;
-        mTouchingHeight = mHeight > mWidth ? mHeight / 2 : mHeight;
+        mCircleDiameter = (mWidth + mHeight) / 3;
     }
 
     /** Sets touching state for this handle view. */
@@ -100,16 +98,16 @@ public class DividerHandleView extends View {
         }
         if (!animate) {
             if (touching) {
-                mCurrentWidth = mTouchingWidth;
-                mCurrentHeight = mTouchingHeight;
+                mCurrentWidth = mCircleDiameter;
+                mCurrentHeight = mCircleDiameter;
             } else {
                 mCurrentWidth = mWidth;
                 mCurrentHeight = mHeight;
             }
             invalidate();
         } else {
-            animateToTarget(touching ? mTouchingWidth : mWidth,
-                    touching ? mTouchingHeight : mHeight, touching);
+            animateToTarget(touching ? mCircleDiameter : mWidth,
+                    touching ? mCircleDiameter : mHeight, touching);
         }
         mTouching = touching;
     }

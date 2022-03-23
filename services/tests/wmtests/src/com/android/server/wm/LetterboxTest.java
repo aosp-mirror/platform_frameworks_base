@@ -62,8 +62,7 @@ public class LetterboxTest {
         mSurfaces = new SurfaceControlMocker();
         mLetterbox = new Letterbox(mSurfaces, StubTransaction::new,
                 () -> mAreCornersRounded, () -> Color.valueOf(mColor),
-                () -> mHasWallpaperBackground, () -> mBlurRadius, () -> mDarkScrimAlpha,
-                /* doubleTapCallback= */ x -> {});
+                () -> mHasWallpaperBackground, () -> mBlurRadius, () -> mDarkScrimAlpha);
         mTransaction = spy(StubTransaction.class);
     }
 
@@ -201,37 +200,28 @@ public class LetterboxTest {
         assertTrue(mLetterbox.needsApplySurfaceChanges());
 
         mLetterbox.applySurfaceChanges(mTransaction);
-        verify(mTransaction).setAlpha(mSurfaces.fullWindowSurface, mDarkScrimAlpha);
+        verify(mTransaction).setAlpha(mSurfaces.top, mDarkScrimAlpha);
     }
 
     @Test
-    public void testApplySurfaceChanges_cornersNotRounded_surfaceFullWindowSurfaceNotCreated() {
+    public void testApplySurfaceChanges_cornersNotRounded_surfaceBehindNotCreated() {
         mLetterbox.layout(new Rect(0, 0, 10, 10), new Rect(0, 1, 10, 10), new Point(1000, 2000));
         mLetterbox.applySurfaceChanges(mTransaction);
 
-        assertNull(mSurfaces.fullWindowSurface);
+        assertNull(mSurfaces.behind);
     }
 
     @Test
-    public void testApplySurfaceChanges_cornersRounded_surfaceFullWindowSurfaceCreated() {
+    public void testApplySurfaceChanges_cornersRounded_surfaceBehindCreated() {
         mAreCornersRounded = true;
         mLetterbox.layout(new Rect(0, 0, 10, 10), new Rect(0, 1, 10, 10), new Point(1000, 2000));
         mLetterbox.applySurfaceChanges(mTransaction);
 
-        assertNotNull(mSurfaces.fullWindowSurface);
+        assertNotNull(mSurfaces.behind);
     }
 
     @Test
-    public void testApplySurfaceChanges_wallpaperBackground_surfaceFullWindowSurfaceCreated() {
-        mHasWallpaperBackground = true;
-        mLetterbox.layout(new Rect(0, 0, 10, 10), new Rect(0, 1, 10, 10), new Point(1000, 2000));
-        mLetterbox.applySurfaceChanges(mTransaction);
-
-        assertNotNull(mSurfaces.fullWindowSurface);
-    }
-
-    @Test
-    public void testNotIntersectsOrFullyContains_cornersRounded() {
+    public void testNotIntersectsOrFullyContains_cornersRounded_doesNotCheckSurfaceBehind() {
         mAreCornersRounded = true;
         mLetterbox.layout(new Rect(0, 0, 10, 10), new Rect(0, 1, 10, 10), new Point(0, 0));
         mLetterbox.applySurfaceChanges(mTransaction);
@@ -259,8 +249,8 @@ public class LetterboxTest {
         public SurfaceControl right;
         private SurfaceControl.Builder mBottomBuilder;
         public SurfaceControl bottom;
-        private SurfaceControl.Builder mFullWindowSurfaceBuilder;
-        public SurfaceControl fullWindowSurface;
+        private SurfaceControl.Builder mBehindBuilder;
+        public SurfaceControl behind;
 
         @Override
         public SurfaceControl.Builder get() {
@@ -275,8 +265,8 @@ public class LetterboxTest {
                     mRightBuilder = (SurfaceControl.Builder) i.getMock();
                 } else if (((String) i.getArgument(0)).contains("bottom")) {
                     mBottomBuilder = (SurfaceControl.Builder) i.getMock();
-                } else if (((String) i.getArgument(0)).contains("fullWindow")) {
-                    mFullWindowSurfaceBuilder = (SurfaceControl.Builder) i.getMock();
+                } else if (((String) i.getArgument(0)).contains("behind")) {
+                    mBehindBuilder = (SurfaceControl.Builder) i.getMock();
                 }
                 return i.getMock();
             });
@@ -291,8 +281,8 @@ public class LetterboxTest {
                     right = control;
                 } else if (i.getMock() == mBottomBuilder) {
                     bottom = control;
-                } else if (i.getMock() == mFullWindowSurfaceBuilder) {
-                    fullWindowSurface = control;
+                } else if (i.getMock() == mBehindBuilder) {
+                    behind = control;
                 }
                 return control;
             }).when(builder).build();

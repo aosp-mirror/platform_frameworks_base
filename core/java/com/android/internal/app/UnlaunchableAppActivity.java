@@ -16,14 +16,11 @@
 
 package com.android.internal.app;
 
-import static android.app.admin.DevicePolicyResources.Strings.Core.UNLAUNCHABLE_APP_WORK_PAUSED_MESSAGE;
-import static android.app.admin.DevicePolicyResources.Strings.Core.UNLAUNCHABLE_APP_WORK_PAUSED_TITLE;
 import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -73,8 +70,8 @@ public class UnlaunchableAppActivity extends Activity
         String dialogTitle;
         String dialogMessage = null;
         if (mReason == UNLAUNCHABLE_REASON_QUIET_MODE) {
-            dialogTitle = getDialogTitle();
-            dialogMessage = getDialogMessage();
+            dialogTitle = getResources().getString(R.string.work_mode_off_title);
+            dialogMessage = getResources().getString(R.string.work_mode_off_message);
         } else {
             Log.wtf(TAG, "Invalid unlaunchable type: " + mReason);
             finish();
@@ -92,17 +89,6 @@ public class UnlaunchableAppActivity extends Activity
             builder.setPositiveButton(R.string.ok, null);
         }
         builder.show();
-    }
-
-    private String getDialogTitle() {
-        return getSystemService(DevicePolicyManager.class).getResources().getString(
-                UNLAUNCHABLE_APP_WORK_PAUSED_TITLE, () -> getString(R.string.work_mode_off_title));
-    }
-
-    private String getDialogMessage() {
-        return getSystemService(DevicePolicyManager.class).getResources().getString(
-                UNLAUNCHABLE_APP_WORK_PAUSED_MESSAGE,
-                () -> getString(R.string.work_mode_off_message));
     }
 
     @Override

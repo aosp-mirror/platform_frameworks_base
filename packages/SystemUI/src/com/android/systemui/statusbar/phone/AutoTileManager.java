@@ -31,7 +31,7 @@ import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.qs.AutoAddTracker;
 import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.qs.ReduceBrightColorsController;
-import com.android.systemui.qs.SettingObserver;
+import com.android.systemui.qs.SecureSetting;
 import com.android.systemui.qs.external.CustomTile;
 import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.CastController.CastDevice;
@@ -68,7 +68,6 @@ public class AutoTileManager implements UserAwareController {
 
     private UserHandle mCurrentUser;
     private boolean mInitialized;
-    private final String mSafetySpec;
 
     protected final Context mContext;
     protected final QSTileHost mHost;
@@ -114,13 +113,6 @@ public class AutoTileManager implements UserAwareController {
         mIsReduceBrightColorsAvailable = isReduceBrightColorsAvailable;
         mDeviceControlsController = deviceControlsController;
         mWalletController = walletController;
-        String safetySpecRes;
-        try {
-            safetySpecRes = context.getResources().getString(R.string.safety_quick_settings_tile);
-        } catch (Resources.NotFoundException | NullPointerException e) {
-            safetySpecRes = null;
-        }
-        mSafetySpec = safetySpecRes;
     }
 
     /**
@@ -162,9 +154,6 @@ public class AutoTileManager implements UserAwareController {
         }
         if (!mAutoTracker.isAdded(WALLET)) {
             initWalletController();
-        }
-        if (mSafetySpec != null && !mAutoTracker.isAdded(mSafetySpec)) {
-            initSafetyTile();
         }
 
         int settingsN = mAutoAddSettingList.size();
@@ -326,15 +315,6 @@ public class AutoTileManager implements UserAwareController {
         }
     }
 
-    private void initSafetyTile() {
-        if (mSafetySpec == null) {
-            return;
-        }
-        if (mAutoTracker.isAdded(mSafetySpec)) return;
-        mHost.addTile(CustomTile.getComponentFromSpec(mSafetySpec), true);
-        mAutoTracker.setTileAdded(mSafetySpec);
-    }
-
     @VisibleForTesting
     final NightDisplayListener.Callback mNightDisplayCallback =
             new NightDisplayListener.Callback() {
@@ -403,8 +383,8 @@ public class AutoTileManager implements UserAwareController {
     };
 
     @VisibleForTesting
-    protected SettingObserver getSecureSettingForKey(String key) {
-        for (SettingObserver s : mAutoAddSettingList) {
+    protected SecureSetting getSecureSettingForKey(String key) {
+        for (SecureSetting s : mAutoAddSettingList) {
             if (Objects.equals(key, s.getKey())) {
                 return s;
             }
@@ -418,7 +398,7 @@ public class AutoTileManager implements UserAwareController {
      * When the setting changes to a value different from 0, if the tile has not been auto added
      * before, it will be added and the listener will be stopped.
      */
-    private class AutoAddSetting extends SettingObserver {
+    private class AutoAddSetting extends SecureSetting {
         private final String mSpec;
 
         AutoAddSetting(

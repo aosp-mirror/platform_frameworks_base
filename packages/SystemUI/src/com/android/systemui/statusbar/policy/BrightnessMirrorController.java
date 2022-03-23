@@ -26,7 +26,7 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
 import com.android.systemui.R;
-import com.android.systemui.settings.brightness.BrightnessSliderController;
+import com.android.systemui.settings.brightness.BrightnessSlider;
 import com.android.systemui.settings.brightness.ToggleSlider;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.phone.NotificationPanelViewController;
@@ -46,8 +46,8 @@ public class BrightnessMirrorController
     private final NotificationPanelViewController mNotificationPanel;
     private final NotificationShadeDepthController mDepthController;
     private final ArraySet<BrightnessMirrorListener> mBrightnessMirrorListeners = new ArraySet<>();
-    private final BrightnessSliderController.Factory mToggleSliderFactory;
-    private BrightnessSliderController mToggleSliderController;
+    private final BrightnessSlider.Factory mToggleSliderFactory;
+    private BrightnessSlider mToggleSliderController;
     private final int[] mInt2Cache = new int[2];
     private FrameLayout mBrightnessMirror;
     private int mBrightnessMirrorBackgroundPadding;
@@ -56,7 +56,7 @@ public class BrightnessMirrorController
     public BrightnessMirrorController(NotificationShadeWindowView statusBarWindow,
             NotificationPanelViewController notificationPanelViewController,
             NotificationShadeDepthController notificationShadeDepthController,
-            BrightnessSliderController.Factory factory,
+            BrightnessSlider.Factory factory,
             @NonNull Consumer<Boolean> visibilityCallback) {
         mStatusBarWindow = statusBarWindow;
         mToggleSliderFactory = factory;
@@ -135,10 +135,9 @@ public class BrightnessMirrorController
         reinflate();
     }
 
-    private BrightnessSliderController setMirrorLayout() {
+    private BrightnessSlider setMirrorLayout() {
         Context context = mBrightnessMirror.getContext();
-        BrightnessSliderController controller = mToggleSliderFactory.create(context,
-                mBrightnessMirror);
+        BrightnessSlider controller = mToggleSliderFactory.create(context, mBrightnessMirror);
         controller.init();
 
         mBrightnessMirror.addView(controller.getRootView(), ViewGroup.LayoutParams.MATCH_PARENT,
@@ -150,7 +149,7 @@ public class BrightnessMirrorController
     private void reinflate() {
         int index = mStatusBarWindow.indexOfChild(mBrightnessMirror);
         mStatusBarWindow.removeView(mBrightnessMirror);
-        mBrightnessMirror = (FrameLayout) LayoutInflater.from(mStatusBarWindow.getContext())
+        mBrightnessMirror = (FrameLayout) LayoutInflater.from(mBrightnessMirror.getContext())
                 .inflate(R.layout.brightness_mirror_container, mStatusBarWindow, false);
         mToggleSliderController = setMirrorLayout();
         mStatusBarWindow.addView(mBrightnessMirror, index);

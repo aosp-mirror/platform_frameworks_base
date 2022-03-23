@@ -60,15 +60,14 @@ class SoftwareHotwordDetector extends AbstractHotwordDetector {
             PersistableBundle options,
             SharedMemory sharedMemory,
             HotwordDetector.Callback callback) {
-        super(managerService, callback, DETECTOR_TYPE_TRUSTED_HOTWORD_SOFTWARE);
+        super(managerService, callback);
 
         mManagerService = managerService;
         mAudioFormat = audioFormat;
         mCallback = callback;
         mHandler = new Handler(Looper.getMainLooper());
         updateStateLocked(options, sharedMemory,
-                new InitializationStateListener(mHandler, mCallback),
-                DETECTOR_TYPE_TRUSTED_HOTWORD_SOFTWARE);
+                new InitializationStateListener(mHandler, mCallback));
     }
 
     @RequiresPermission(RECORD_AUDIO)
@@ -77,7 +76,7 @@ class SoftwareHotwordDetector extends AbstractHotwordDetector {
         if (DEBUG) {
             Slog.i(TAG, "#startRecognition");
         }
-        throwIfDetectorIsNoLongerActive();
+
         maybeCloseExistingSession();
 
         try {
@@ -100,7 +99,6 @@ class SoftwareHotwordDetector extends AbstractHotwordDetector {
         if (DEBUG) {
             Slog.i(TAG, "#stopRecognition");
         }
-        throwIfDetectorIsNoLongerActive();
 
         try {
             mManagerService.stopListeningFromMic();
@@ -109,19 +107,6 @@ class SoftwareHotwordDetector extends AbstractHotwordDetector {
         }
 
         return true;
-    }
-
-    @Override
-    public void destroy() {
-        stopRecognition();
-        maybeCloseExistingSession();
-
-        try {
-            mManagerService.shutdownHotwordDetectionService();
-        } catch (RemoteException ex) {
-            ex.rethrowFromSystemServer();
-        }
-        super.destroy();
     }
 
     private void maybeCloseExistingSession() {
@@ -149,11 +134,8 @@ class SoftwareHotwordDetector extends AbstractHotwordDetector {
             mHandler.sendMessage(obtainMessage(
                     HotwordDetector.Callback::onDetected,
                     mCallback,
-                    new AlwaysOnHotwordDetector.EventPayload.Builder()
-                            .setCaptureAudioFormat(audioFormat)
-                            .setAudioStream(audioStream)
-                            .setHotwordDetectedResult(hotwordDetectedResult)
-                            .build()));
+                    new AlwaysOnHotwordDetector.EventPayload(
+                            audioFormat, hotwordDetectedResult, audioStream)));
         }
     }
 

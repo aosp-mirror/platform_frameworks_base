@@ -82,7 +82,7 @@ public class RollbackStoreTest {
             + "'ceSnapshotInodes':[]}],'isStaged':false,'causePackages':[{'packageName':'hello',"
             + "'longVersionCode':23},{'packageName':'something','longVersionCode':999}],"
             + "'committedSessionId':45654465},'timestamp':'2019-10-01T12:29:08.855Z',"
-            + "'originalSessionId':567,'state':'enabling','apkSessionId':-1,"
+            + "'stagedSessionId':-1,'state':'enabling','apkSessionId':-1,"
             + "'restoreUserDataInProgress':true, 'userId':0,"
             + "'installerPackageName':'some.installer'}";
 
@@ -102,7 +102,7 @@ public class RollbackStoreTest {
             + "'ceSnapshotInodes':[]}],'isStaged':false,'causePackages':[{'packageName':'hello',"
             + "'longVersionCode':23},{'packageName':'something','longVersionCode':999}],"
             + "'committedSessionId':45654465},'timestamp':'2019-10-01T12:29:08.855Z',"
-            + "'originalSessionId':567,'state':'enabling','apkSessionId':-1,"
+            + "'stagedSessionId':-1,'state':'enabling','apkSessionId':-1,"
             + "'restoreUserDataInProgress':true, 'userId':0,"
             + "'installerPackageName':'some.installer',"
             + "'extensionVersions':[{'sdkVersion':5,'extensionVersion':25},"
@@ -129,13 +129,12 @@ public class RollbackStoreTest {
         SparseIntArray extensionVersions = new SparseIntArray();
         extensionVersions.put(30, 71);
         Rollback rollback = mRollbackStore.createNonStagedRollback(
-                ID, 567, USER, INSTALLER, null, extensionVersions);
+                ID, USER, INSTALLER, null, extensionVersions);
 
         assertThat(rollback.getBackupDir().getAbsolutePath())
                 .isEqualTo(mFolder.getRoot().getAbsolutePath() + "/" + ID);
 
         assertThat(rollback.isStaged()).isFalse();
-        assertThat(rollback.getOriginalSessionId()).isEqualTo(567);
         assertThat(rollback.info.getRollbackId()).isEqualTo(ID);
         assertThat(rollback.info.getPackages()).isEmpty();
         assertThat(rollback.isEnabling()).isTrue();
@@ -154,7 +153,7 @@ public class RollbackStoreTest {
                 .isEqualTo(mFolder.getRoot().getAbsolutePath() + "/" + ID);
 
         assertThat(rollback.isStaged()).isTrue();
-        assertThat(rollback.getOriginalSessionId()).isEqualTo(897);
+        assertThat(rollback.getStagedSessionId()).isEqualTo(897);
 
         assertThat(rollback.info.getRollbackId()).isEqualTo(ID);
         assertThat(rollback.info.getPackages()).isEmpty();
@@ -169,7 +168,7 @@ public class RollbackStoreTest {
         extensionVersions.put(5, 25);
         extensionVersions.put(30, 71);
         Rollback origRb = mRollbackStore.createNonStagedRollback(
-                ID, 567, USER, INSTALLER, null, extensionVersions);
+                ID, USER, INSTALLER, null, extensionVersions);
 
         origRb.setRestoreUserDataInProgress(true);
         origRb.info.getCausePackages().add(new VersionedPackage("com.made.up", 2));
@@ -219,7 +218,7 @@ public class RollbackStoreTest {
     @Test
     public void loadFromJsonNoExtensionVersions() throws Exception {
         Rollback expectedRb = mRollbackStore.createNonStagedRollback(
-                ID, 567, USER, INSTALLER, null, new SparseIntArray(0));
+                ID, USER, INSTALLER, null, new SparseIntArray(0));
 
         expectedRb.setTimestamp(Instant.parse("2019-10-01T12:29:08.855Z"));
         expectedRb.setRestoreUserDataInProgress(true);
@@ -269,7 +268,7 @@ public class RollbackStoreTest {
         extensionVersions.put(5, 25);
         extensionVersions.put(30, 71);
         Rollback expectedRb = mRollbackStore.createNonStagedRollback(
-                ID, 567, USER, INSTALLER, null, extensionVersions);
+                ID, USER, INSTALLER, null, extensionVersions);
 
         expectedRb.setTimestamp(Instant.parse("2019-10-01T12:29:08.855Z"));
         expectedRb.setRestoreUserDataInProgress(true);
@@ -316,7 +315,7 @@ public class RollbackStoreTest {
     @Test
     public void saveAndDelete() {
         Rollback rollback = mRollbackStore.createNonStagedRollback(
-                ID, 567, USER, INSTALLER, null, new SparseIntArray(0));
+                ID, USER, INSTALLER, null, new SparseIntArray(0));
 
         RollbackStore.saveRollback(rollback);
 
@@ -332,7 +331,7 @@ public class RollbackStoreTest {
     @Test
     public void saveToHistoryAndLoad() {
         Rollback origRb = mRollbackStore.createNonStagedRollback(
-                ID, 567, USER, INSTALLER, null, new SparseIntArray(0));
+                ID, USER, INSTALLER, null, new SparseIntArray(0));
         mRollbackStore.saveRollbackToHistory(origRb);
 
         List<Rollback> loadedRollbacks = mRollbackStore.loadHistorialRollbacks();
@@ -365,7 +364,7 @@ public class RollbackStoreTest {
         assertThat(b.getApexPackageNames())
                 .containsExactlyElementsIn(a.getApexPackageNames());
 
-        assertThat(b.getOriginalSessionId()).isEqualTo(a.getOriginalSessionId());
+        assertThat(b.getStagedSessionId()).isEqualTo(a.getStagedSessionId());
 
         assertThat(b.info.getCommittedSessionId()).isEqualTo(a.info.getCommittedSessionId());
 

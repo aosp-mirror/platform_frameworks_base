@@ -23,18 +23,13 @@ import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
-import com.android.server.wm.flicker.annotation.Group4
+import com.android.server.wm.flicker.annotation.Group3
 import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.server.wm.flicker.helpers.setRotation
-import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
 import com.android.server.wm.flicker.helpers.WindowUtils
-import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
-import com.android.server.wm.flicker.rules.RemoveAllTasksButHomeRule.Companion.removeAllTasksButHome
 import com.android.wm.shell.flicker.pip.PipTransition.BroadcastActionTrigger.Companion.ORIENTATION_LANDSCAPE
-import com.android.wm.shell.flicker.testapp.Components
 import com.android.wm.shell.flicker.testapp.Components.FixedActivity.EXTRA_FIXED_ORIENTATION
-import org.junit.Assume
-import org.junit.Before
+import com.android.wm.shell.flicker.testapp.Components.PipActivity.EXTRA_ENTER_PIP
+import org.junit.Assert.assertEquals
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -42,87 +37,55 @@ import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
 
 /**
- * Test exiting Pip with orientation changes.
- * To run this test: `atest WMShellFlickerTests:SetRequestedOrientationWhilePinnedTest`
+ * Test Pip with orientation changes.
+ * To run this test: `atest WMShellFlickerTests:PipOrientationTest`
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@Group4
-@FlakyTest(bugId = 218604389)
-open class SetRequestedOrientationWhilePinnedTest(
+@Group3
+class SetRequestedOrientationWhilePinnedTest(
     testSpec: FlickerTestParameter
 ) : PipTransition(testSpec) {
     private val startingBounds = WindowUtils.getDisplayBounds(Surface.ROTATION_0)
     private val endingBounds = WindowUtils.getDisplayBounds(Surface.ROTATION_90)
 
-    @Before
-    open fun before() {
-        Assume.assumeFalse(isShellTransitionsEnabled)
-    }
+    override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
+        get() = { configuration ->
+            setupAndTeardown(this, configuration)
 
-    override val transition: FlickerBuilder.() -> Unit
-        get() = {
             setup {
-                test {
-                    removeAllTasksButHome()
-                    device.wakeUpAndGoToHomeScreen()
-                }
                 eachRun {
-                    // Launch the PiP activity fixed as landscape.
+                    // Launch the PiP activity fixed as landscape
                     pipApp.launchViaIntent(wmHelper, stringExtras = mapOf(
-                        EXTRA_FIXED_ORIENTATION to ORIENTATION_LANDSCAPE.toString()))
-                    // Enter PiP.
-                    broadcastActionTrigger.doAction(Components.PipActivity.ACTION_ENTER_PIP)
-                    wmHelper.waitPipShown()
-                    wmHelper.waitForRotation(Surface.ROTATION_0)
-                    wmHelper.waitForAppTransitionIdle()
-                    // System bar may fade out during fixed rotation.
-                    wmHelper.waitForNavBarStatusBarVisible()
+                        EXTRA_FIXED_ORIENTATION to ORIENTATION_LANDSCAPE.toString(),
+                        EXTRA_ENTER_PIP to "true"))
                 }
             }
             teardown {
                 eachRun {
                     pipApp.exit(wmHelper)
-                    setRotation(Surface.ROTATION_0)
-                }
-                test {
-                    removeAllTasksButHome()
                 }
             }
             transitions {
-                // Launch the activity back into fullscreen and ensure that it is now in landscape
+                // Request that the orientation is set to landscape
+                broadcastActionTrigger.requestOrientationForPip(ORIENTATION_LANDSCAPE)
+
+                // Launch the activity back into fullscreen and
+                // ensure that it is now in landscape
                 pipApp.launchViaIntent(wmHelper)
                 wmHelper.waitForFullScreenApp(pipApp.component)
                 wmHelper.waitForRotation(Surface.ROTATION_90)
-                wmHelper.waitForAppTransitionIdle()
-                // System bar may fade out during fixed rotation.
-                wmHelper.waitForNavBarStatusBarVisible()
+                assertEquals(Surface.ROTATION_90, device.displayRotation)
             }
         }
-
-    @Presubmit
-    @Test
-    fun displayEndsAt90Degrees() {
-        testSpec.assertWmEnd {
-            hasRotation(Surface.ROTATION_90)
-        }
-    }
-
-    @Presubmit
-    @Test
-    override fun navBarLayerIsVisible() = super.navBarLayerIsVisible()
-
-    @Presubmit
-    @Test
-    override fun statusBarLayerIsVisible() = super.statusBarLayerIsVisible()
 
     @FlakyTest
     @Test
     override fun navBarLayerRotatesAndScales() = super.navBarLayerRotatesAndScales()
 
-    @FlakyTest(bugId = 206753786)
+    @FlakyTest
     @Test
     override fun statusBarLayerRotatesScales() = super.statusBarLayerRotatesScales()
 
@@ -130,7 +93,7 @@ open class SetRequestedOrientationWhilePinnedTest(
     @Test
     fun pipWindowInsideDisplay() {
         testSpec.assertWmStart {
-            frameRegion(pipApp.component).coversAtMost(startingBounds)
+            frameRegion(pipApp.defaultWindowName).coversAtMost(startingBounds)
         }
     }
 
@@ -138,7 +101,7 @@ open class SetRequestedOrientationWhilePinnedTest(
     @Test
     fun pipAppShowsOnTop() {
         testSpec.assertWmEnd {
-            isAppWindowOnTop(pipApp.component)
+            showsAppWindowOnTop(pipApp.defaultWindowName)
         }
     }
 
@@ -146,24 +109,28 @@ open class SetRequestedOrientationWhilePinnedTest(
     @Test
     fun pipLayerInsideDisplay() {
         testSpec.assertLayersStart {
-            visibleRegion(pipApp.component).coversAtMost(startingBounds)
+            visibleRegion(pipApp.defaultWindowName).coversAtMost(startingBounds)
         }
     }
 
     @Presubmit
     @Test
-    fun pipAlwaysVisible() {
-        testSpec.assertWm {
-            this.isAppWindowVisible(pipApp.component)
-        }
+    fun pipAlwaysVisible() = testSpec.assertWm {
+        this.showsAppWindow(pipApp.windowName)
     }
 
     @Presubmit
     @Test
     fun pipAppLayerCoversFullScreen() {
         testSpec.assertLayersEnd {
-            visibleRegion(pipApp.component).coversExactly(endingBounds)
+            visibleRegion(pipApp.defaultWindowName).coversExactly(endingBounds)
         }
+    }
+
+    @FlakyTest
+    @Test
+    override fun noUncoveredRegions() {
+        super.noUncoveredRegions()
     }
 
     companion object {

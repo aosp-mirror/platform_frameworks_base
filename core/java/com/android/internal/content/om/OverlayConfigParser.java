@@ -28,7 +28,6 @@ import android.util.Log;
 import android.util.Xml;
 
 import com.android.internal.content.om.OverlayScanner.ParsedOverlayInfo;
-import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
 
 import libcore.io.IoUtils;
@@ -41,8 +40,6 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Responsible for parsing configurations of Runtime Resource Overlays that control mutability,
@@ -195,20 +192,13 @@ final class OverlayConfigParser {
      */
     @Nullable
     static ArrayList<ParsedConfiguration> getConfigurations(
-            @NonNull OverlayPartition partition, @Nullable OverlayScanner scanner,
-            @Nullable Map<String, ParsedOverlayInfo> packageManagerOverlayInfos,
-            @NonNull List<String> activeApexes) {
-        if (scanner != null) {
-            if (partition.getOverlayFolder() != null) {
-                scanner.scanDir(partition.getOverlayFolder());
-            }
-            for (String apex : activeApexes) {
-                scanner.scanDir(new File("/apex/" + apex + "/overlay/"));
-            }
-        }
-
+            @NonNull OverlayPartition partition, @Nullable OverlayScanner scanner) {
         if (partition.getOverlayFolder() == null) {
             return null;
+        }
+
+        if (scanner != null) {
+            scanner.scanDir(partition.getOverlayFolder());
         }
 
         final File configFile = new File(partition.getOverlayFolder(), CONFIG_DEFAULT_FILENAME);
@@ -217,12 +207,11 @@ final class OverlayConfigParser {
         }
 
         final ParsingContext parsingContext = new ParsingContext(partition);
-        readConfigFile(configFile, scanner, packageManagerOverlayInfos, parsingContext);
+        readConfigFile(configFile, scanner, parsingContext);
         return parsingContext.mOrderedConfigurations;
     }
 
     private static void readConfigFile(@NonNull File configFile, @Nullable OverlayScanner scanner,
-            @Nullable Map<String, ParsedOverlayInfo> packageManagerOverlayInfos,
             @NonNull ParsingContext parsingContext) {
         FileReader configReader;
         try {
@@ -242,12 +231,10 @@ final class OverlayConfigParser {
                 final String name = parser.getName();
                 switch (name) {
                     case "merge":
-                        parseMerge(configFile, parser, scanner, packageManagerOverlayInfos,
-                                parsingContext);
+                        parseMerge(configFile, parser, scanner, parsingContext);
                         break;
                     case "overlay":
-                        parseOverlay(configFile, parser, scanner, packageManagerOverlayInfos,
-                                parsingContext);
+                        parseOverlay(configFile, parser, scanner, parsingContext);
                         break;
                     default:
                         Log.w(TAG, String.format("Tag %s is unknown in %s at %s",
@@ -271,9 +258,7 @@ final class OverlayConfigParser {
      * configuration files.
      */
     private static void parseMerge(@NonNull File configFile, @NonNull XmlPullParser parser,
-            @Nullable OverlayScanner scanner,
-            @Nullable Map<String, ParsedOverlayInfo> packageManagerOverlayInfos,
-            @NonNull ParsingContext parsingContext) {
+            @Nullable OverlayScanner scanner, @NonNull ParsingContext parsingContext) {
         final String path = parser.getAttributeValue(null, "path");
         if (path == null) {
             throw new IllegalStateException(String.format("<merge> without path in %s at %s"
@@ -319,7 +304,7 @@ final class OverlayConfigParser {
                             parser.getPositionDescription()));
         }
 
-        readConfigFile(includedConfigFile, scanner, packageManagerOverlayInfos, parsingContext);
+        readConfigFile(includedConfigFile, scanner, parsingContext);
         parsingContext.mMergeDepth--;
     }
 
@@ -345,12 +330,7 @@ final class OverlayConfigParser {
      * order of non-configured overlays when enabled by the OverlayManagerService is undefined.
      */
     private static void parseOverlay(@NonNull File configFile, @NonNull XmlPullParser parser,
-            @Nullable OverlayScanner scanner,
-            @Nullable Map<String, ParsedOverlayInfo> packageManagerOverlayInfos,
-            @NonNull ParsingContext parsingContext) {
-        Preconditions.checkArgument((scanner == null) != (packageManagerOverlayInfos == null),
-                "scanner and packageManagerOverlayInfos cannot be both null or both non-null");
-
+            @Nullable OverlayScanner scanner, @NonNull ParsingContext parsingContext) {
         final String packageName = parser.getAttributeValue(null, "package");
         if (packageName == null) {
             throw new IllegalStateException(String.format("\"<overlay> without package in %s at %s",
@@ -358,29 +338,15 @@ final class OverlayConfigParser {
         }
 
         // Ensure the overlay being configured is present in the partition during zygote
-        // initialization, unless the package is an excluded overlay package.
+        // initialization.
         ParsedOverlayInfo info = null;
         if (scanner != null) {
             info = scanner.getParsedInfo(packageName);
-            if (info == null
-                    && scanner.isExcludedOverlayPackage(packageName, parsingContext.mPartition)) {
-                Log.d(TAG, "overlay " + packageName + " in partition "
-                        + parsingContext.mPartition.getOverlayFolder() + " is ignored.");
-                return;
-            } else if (info == null || !parsingContext.mPartition.containsOverlay(info.path)) {
+            if (info == null|| !parsingContext.mPartition.containsOverlay(info.path)) {
                 throw new IllegalStateException(
                         String.format("overlay %s not present in partition %s in %s at %s",
                                 packageName, parsingContext.mPartition.getOverlayFolder(),
                                 configFile, parser.getPositionDescription()));
-            }
-        } else {
-            // Zygote shall have crashed itself, if there's an overlay apk not present in the
-            // partition. For the overlay package not found in the package manager, we can assume
-            // that it's an excluded overlay package.
-            if (packageManagerOverlayInfos.get(packageName) == null) {
-                Log.d(TAG, "overlay " + packageName + " in partition "
-                        + parsingContext.mPartition.getOverlayFolder() + " is ignored.");
-                return;
             }
         }
 

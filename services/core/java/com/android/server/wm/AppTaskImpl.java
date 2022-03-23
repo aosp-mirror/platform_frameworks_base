@@ -35,10 +35,10 @@ import android.os.UserHandle;
  */
 class AppTaskImpl extends IAppTask.Stub {
     private static final String TAG = "AppTaskImpl";
-    private final ActivityTaskManagerService mService;
+    private ActivityTaskManagerService mService;
 
-    private final int mTaskId;
-    private final int mCallingUid;
+    private int mTaskId;
+    private int mCallingUid;
 
     public AppTaskImpl(ActivityTaskManagerService service, int taskId, int callingUid) {
         mService = service;
@@ -108,14 +108,14 @@ class AppTaskImpl extends IAppTask.Stub {
                 final ActivityStarter starter = mService.getActivityStartController().obtainStarter(
                         null /* intent */, "moveToFront");
                 if (starter.shouldAbortBackgroundActivityStart(callingUid, callingPid,
-                        callingPackage, -1, -1, callerApp, null, false, null, null)) {
+                        callingPackage, -1, -1, callerApp, null, false, null)) {
                     if (!mService.isBackgroundActivityStartsEnabled()) {
                         return;
                     }
                 }
+                mService.mTaskSupervisor.startActivityFromRecents(callingPid,
+                        callingUid, mTaskId, null);
             }
-            mService.mTaskSupervisor.startActivityFromRecents(callingPid, callingUid, mTaskId,
-                    null /* options */);
         } finally {
             Binder.restoreCallingIdentity(origId);
         }
