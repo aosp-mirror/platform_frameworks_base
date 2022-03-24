@@ -523,8 +523,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
             }
             PowerManager powerManager = mContext.getSystemService(PowerManager.class);
             PowerManager.WakeLock wakeLock = powerManager.newWakeLock(
-                    PowerManager.SCREEN_BRIGHT_WAKE_LOCK
-                            | PowerManager.ACQUIRE_CAUSES_WAKEUP,
+                    PowerManager.SCREEN_BRIGHT_WAKE_LOCK,
                     TAG + ":" + displayId, displayId);
             wakeLock.acquire();
             mPerDisplayWakelocks.put(displayId, wakeLock);
