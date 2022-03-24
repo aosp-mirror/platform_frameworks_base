@@ -304,10 +304,6 @@ class RecentsAnimation implements RecentsAnimationCallbacks, OnRootTaskOrderChan
                 mService.stopAppSwitches();
             }
 
-            if (mCaller != null) {
-                mCaller.setRunningRecentsAnimation(false);
-            }
-
             mWindowManager.inSurfaceTransaction(() -> {
                 Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER,
                         "RecentsAnimation#onAnimationFinished_inSurfaceTransaction");
@@ -412,6 +408,9 @@ class RecentsAnimation implements RecentsAnimationCallbacks, OnRootTaskOrderChan
                     // {@link DisplayContent#mWaitingForConfig} is true).
                     if (mWindowManager.mRoot.isLayoutNeeded()) {
                         mWindowManager.mRoot.performSurfacePlacement();
+                    }
+                    if (mCaller != null) {
+                        mCaller.setRunningRecentsAnimation(false);
                     }
                     Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
                 }
