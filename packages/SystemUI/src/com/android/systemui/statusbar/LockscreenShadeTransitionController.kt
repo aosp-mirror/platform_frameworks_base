@@ -494,6 +494,9 @@ class LockscreenShadeTransitionController @Inject constructor(
         }
         notificationPanelController
             .setKeyguardTransitionProgress(keyguardAlpha, keyguardTranslationY)
+
+        val statusBarAlpha = if (useSplitShade) keyguardAlpha else -1f
+        notificationPanelController.setKeyguardStatusBarAlpha(statusBarAlpha)
     }
 
     private fun setDragDownAmountAnimated(
