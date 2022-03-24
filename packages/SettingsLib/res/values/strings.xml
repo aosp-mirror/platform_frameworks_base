@@ -1434,44 +1434,6 @@
     <string name="guest_reset_guest_confirm_button">Reset</string>
     <!-- Status message indicating the device is in the process of resetting the guest user. [CHAR_LIMIT=NONE] -->
     <string name="guest_resetting">Resetting guest\u2026</string>
-    <!-- Dialog title on action reset and restart guest [CHAR LIMIT=60] -->
-    <string name="guest_reset_and_restart_dialog_title">Reset guest session?</string>
-    <!-- Dialog message on action reset and restart guest [CHAR LIMIT=160] -->
-    <string name="guest_reset_and_restart_dialog_message">This will start a new guest
-        session and delete all apps and data from the current session</string>
-    <!-- Dialog title on action exit guest (ephemeral guest) [CHAR LIMIT=32] -->
-    <string name="guest_exit_dialog_title">Exit guest mode?</string>
-    <!-- Dialog message on action exit guest (ephemeral guest) [CHAR LIMIT=80] -->
-    <string name="guest_exit_dialog_message">This will delete
-        apps and data from the current guest session</string>
-    <!-- Dialog button on action exit guest (ephemeral guest) [CHAR LIMIT=80] -->
-    <string name="guest_exit_dialog_button">Exit</string>
-    <!-- Dialog title on action exit guest (non-ephemeral guest) [CHAR LIMIT=32] -->
-    <string name="guest_exit_dialog_title_non_ephemeral">Save guest activity?</string>
-    <!-- Dialog message on action exit guest (non-ephemeral guest) [CHAR LIMIT=80] -->
-    <string name="guest_exit_dialog_message_non_ephemeral">You can save activity from
-        the current session or delete all apps and data</string>
-    <!-- Button on guest exit, clear data (non-ephemeral guest) [CHAR LIMIT=80] -->
-    <string name="guest_exit_clear_data_button">Delete</string>
-    <!-- Button on guest exit, save data (non-ephemeral guest) [CHAR LIMIT=80] -->
-    <string name="guest_exit_save_data_button">Save</string>
-    <!-- Label for button in confirmation dialog when exiting guest user [CHAR LIMIT=35] -->
-    <string name="guest_exit_button">Exit guest mode</string>
-    <!-- Label for button in confirmation dialog when resetting guest user [CHAR LIMIT=35] -->
-    <string name="guest_reset_button">Reset guest session</string>
-    <!-- Label for guest icon in quick settings user switcher [CHAR LIMIT=35] -->
-    <string name="guest_exit_quick_settings_button">Exit guest</string>
-    <!-- Message of the notification when guest mode is entered
-         and it's a ephemeral guest [CHAR LIMIT=60] -->
-    <string name="guest_notification_ephemeral">All activity will be deleted on exit</string>
-    <!-- Message of the notification when guest mode is entered
-         and it's not a ephemeral guest and it's a first time guest login [CHAR LIMIT=60] -->
-    <string name="guest_notification_non_ephemeral">You can save or delete your activity on exit</string>
-    <!-- Message of the notification when guest mode is entered
-         and it's not a ephemeral guest and it's not a first time guest login [CHAR LIMIT=NONE] -->
-    <string name="guest_notification_non_ephemeral_non_first_login">Reset to delete session
-        activity now, or you can save or delete activity on exit</string>
-
     <!-- An option in a photo selection dialog to take a new photo [CHAR LIMIT=50] -->
     <string name="user_image_take_photo">Take a photo</string>
     <!-- An option in a photo selection dialog to choose a pre-existing image [CHAR LIMIT=50] -->

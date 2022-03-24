@@ -35,18 +35,12 @@ import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.util.settings.SecureSettings;
 
-import javax.inject.Inject;
-
-import dagger.assisted.Assisted;
-import dagger.assisted.AssistedFactory;
-import dagger.assisted.AssistedInject;
-
 /**
  * Manages notification when a guest session is resumed.
  */
 public class GuestResumeSessionReceiver extends BroadcastReceiver {
 
-    private static final String TAG = GuestResumeSessionReceiver.class.getSimpleName();
+    private static final String TAG = "GuestResumeSessionReceiver";
 
     @VisibleForTesting
     public static final String SETTING_GUEST_HAS_LOGGED_IN = "systemui.guest_has_logged_in";
@@ -54,31 +48,27 @@ public class GuestResumeSessionReceiver extends BroadcastReceiver {
     @VisibleForTesting
     public AlertDialog mNewSessionDialog;
     private final UserTracker mUserTracker;
+    private final UserSwitcherController mUserSwitcherController;
+    private final UiEventLogger mUiEventLogger;
     private final SecureSettings mSecureSettings;
-    private final BroadcastDispatcher mBroadcastDispatcher;
-    private final ResetSessionDialog.Factory mResetSessionDialogFactory;
-    private final GuestSessionNotification mGuestSessionNotification;
 
-    @Inject
-    public GuestResumeSessionReceiver(
-            UserTracker userTracker,
-            SecureSettings secureSettings,
-            BroadcastDispatcher broadcastDispatcher,
-            GuestSessionNotification guestSessionNotification,
-            ResetSessionDialog.Factory resetSessionDialogFactory) {
+    public GuestResumeSessionReceiver(UserSwitcherController userSwitcherController,
+            UserTracker userTracker, UiEventLogger uiEventLogger,
+            SecureSettings secureSettings) {
+        mUserSwitcherController = userSwitcherController;
         mUserTracker = userTracker;
+        mUiEventLogger = uiEventLogger;
         mSecureSettings = secureSettings;
-        mBroadcastDispatcher = broadcastDispatcher;
-        mGuestSessionNotification = guestSessionNotification;
-        mResetSessionDialogFactory = resetSessionDialogFactory;
     }
 
     /**
      * Register this receiver with the {@link BroadcastDispatcher}
+     *
+     * @param broadcastDispatcher to register the receiver.
      */
-    public void register() {
+    public void register(BroadcastDispatcher broadcastDispatcher) {
         IntentFilter f = new IntentFilter(Intent.ACTION_USER_SWITCHED);
-        mBroadcastDispatcher.registerReceiver(this, f, null /* handler */, UserHandle.SYSTEM);
+        broadcastDispatcher.registerReceiver(this, f, null /* handler */, UserHandle.SYSTEM);
     }
 
     @Override
@@ -99,25 +89,14 @@ public class GuestResumeSessionReceiver extends BroadcastReceiver {
                 return;
             }
 
-            int guestLoginState = mSecureSettings.getIntForUser(
+            int notFirstLogin = mSecureSettings.getIntForUser(
                     SETTING_GUEST_HAS_LOGGED_IN, 0, userId);
-
-            if (guestLoginState == 0) {
-                // set 1 to indicate, 1st login
-                guestLoginState = 1;
-                mSecureSettings.putIntForUser(SETTING_GUEST_HAS_LOGGED_IN, guestLoginState, userId);
-            } else if (guestLoginState == 1) {
-                // set 2 to indicate, 2nd or later login
-                guestLoginState = 2;
-                mSecureSettings.putIntForUser(SETTING_GUEST_HAS_LOGGED_IN, guestLoginState, userId);
-            }
-
-            mGuestSessionNotification.createPersistentNotification(currentUser,
-                                                                   (guestLoginState <= 1));
-
-            if (guestLoginState > 1) {
-                mNewSessionDialog = mResetSessionDialogFactory.create(userId);
+            if (notFirstLogin != 0) {
+                mNewSessionDialog = new ResetSessionDialog(context, mUserSwitcherController,
+                        mUiEventLogger, userId);
                 mNewSessionDialog.show();
+            } else {
+                mSecureSettings.putIntForUser(SETTING_GUEST_HAS_LOGGED_IN, 1, userId);
             }
         }
     }
@@ -145,19 +124,10 @@ public class GuestResumeSessionReceiver extends BroadcastReceiver {
         private final UiEventLogger mUiEventLogger;
         private final int mUserId;
 
-
-        /** Factory class to create guest reset dialog instance */
-        @AssistedFactory
-        public interface Factory {
-            /** Create a guest reset dialog instance */
-            ResetSessionDialog create(int userId);
-        }
-
-        @AssistedInject
-        public ResetSessionDialog(Context context,
+        ResetSessionDialog(Context context,
                 UserSwitcherController userSwitcherController,
                 UiEventLogger uiEventLogger,
-                @Assisted int userId) {
+                int userId) {
             super(context, false /* dismissOnDeviceLock */);
 
             setTitle(context.getString(R.string.guest_wipe_session_title));
