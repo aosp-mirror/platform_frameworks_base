@@ -3210,12 +3210,14 @@ public class NotificationPanelViewController extends PanelViewController {
     @Override
     protected void onUnlockHintFinished() {
         super.onUnlockHintFinished();
+        mScrimController.setExpansionAffectsAlpha(true);
         mNotificationStackScrollLayoutController.setUnlockHintRunning(false);
     }
 
     @Override
     protected void onUnlockHintStarted() {
         super.onUnlockHintStarted();
+        mScrimController.setExpansionAffectsAlpha(false);
         mNotificationStackScrollLayoutController.setUnlockHintRunning(true);
     }
 
