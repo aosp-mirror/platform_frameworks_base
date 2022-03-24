@@ -210,7 +210,6 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
     private static final int KEYGUARD_DONE_PENDING_TIMEOUT = 13;
     private static final int NOTIFY_STARTED_WAKING_UP = 14;
     private static final int NOTIFY_SCREEN_TURNED_ON = 15;
-    private static final int NOTIFY_SCREEN_TURNED_OFF = 16;
     private static final int NOTIFY_STARTED_GOING_TO_SLEEP = 17;
     private static final int SYSTEM_READY = 18;
     private static final int CANCEL_KEYGUARD_EXIT_ANIM = 19;
@@ -441,7 +440,6 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
     private boolean mInGestureNavigationMode;
 
     private boolean mWakeAndUnlocking;
-    private IKeyguardDrawnCallback mDrawnCallback;
     private CharSequence mCustomMessage;
 
     /**
@@ -1264,7 +1262,6 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
     }
 
     public void onScreenTurnedOff() {
-        notifyScreenTurnedOff();
         mUpdateMonitor.dispatchScreenTurnedOff();
     }
 
@@ -1668,12 +1665,6 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
         mHandler.sendMessage(msg);
     }
 
-    private void notifyScreenTurnedOff() {
-        if (DEBUG) Log.d(TAG, "notifyScreenTurnedOff");
-        Message msg = mHandler.obtainMessage(NOTIFY_SCREEN_TURNED_OFF);
-        mHandler.sendMessage(msg);
-    }
-
     /**
      * Send message to keyguard telling it to show itself
      * @see #handleShow
@@ -1860,9 +1851,6 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
                             "KeyguardViewMediator#handleMessage NOTIFY_SCREEN_TURNED_ON");
                     handleNotifyScreenTurnedOn();
                     Trace.endSection();
-                    break;
-                case NOTIFY_SCREEN_TURNED_OFF:
-                    handleNotifyScreenTurnedOff();
                     break;
                 case NOTIFY_STARTED_WAKING_UP:
                     Trace.beginSection(
@@ -2245,16 +2233,6 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
             IRemoteAnimationRunner runner = mKeyguardExitAnimationRunner;
             mKeyguardExitAnimationRunner = null;
 
-            if (mWakeAndUnlocking && mDrawnCallback != null) {
-
-                // Hack level over 9000: To speed up wake-and-unlock sequence, force it to report
-                // the next draw from here so we don't have to wait for window manager to signal
-                // this to our ViewRootImpl.
-                mKeyguardViewControllerLazy.get().getViewRootImpl().setReportNextDraw();
-                notifyDrawn(mDrawnCallback);
-                mDrawnCallback = null;
-            }
-
             LatencyTracker.getInstance(mContext)
                     .onActionEnd(LatencyTracker.ACTION_LOCKSCREEN_UNLOCK);
 
@@ -2610,11 +2588,7 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
 
             mKeyguardViewControllerLazy.get().onScreenTurningOn();
             if (callback != null) {
-                if (mWakeAndUnlocking) {
-                    mDrawnCallback = callback;
-                } else {
-                    notifyDrawn(callback);
-                }
+                notifyDrawn(callback);
             }
         }
         Trace.endSection();
@@ -2627,13 +2601,6 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
             mKeyguardViewControllerLazy.get().onScreenTurnedOn();
         }
         Trace.endSection();
-    }
-
-    private void handleNotifyScreenTurnedOff() {
-        synchronized (this) {
-            if (DEBUG) Log.d(TAG, "handleNotifyScreenTurnedOff");
-            mDrawnCallback = null;
-        }
     }
 
     private void notifyDrawn(final IKeyguardDrawnCallback callback) {
@@ -2804,7 +2771,6 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
         pw.print("  mPendingLock: "); pw.println(mPendingLock);
         pw.print("  mPendingDrawnTasks: "); pw.println(mPendingDrawnTasks.get());
         pw.print("  mWakeAndUnlocking: "); pw.println(mWakeAndUnlocking);
-        pw.print("  mDrawnCallback: "); pw.println(mDrawnCallback);
     }
 
     /**
