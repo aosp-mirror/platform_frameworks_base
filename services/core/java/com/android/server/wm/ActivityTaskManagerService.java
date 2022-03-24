@@ -1851,7 +1851,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         if (mBackNavigationController == null) {
             return null;
         }
-        return mBackNavigationController.startBackNavigation(getTopDisplayFocusedRootTask());
+        return mBackNavigationController.startBackNavigation(mWindowManager);
     }
 
     /**

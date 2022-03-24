@@ -44,6 +44,7 @@ import com.android.wm.shell.TestShellExecutor;
 import com.android.wm.shell.common.ShellExecutor;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -109,6 +110,7 @@ public class BackAnimationControllerTest {
     }
 
     @Test
+    @Ignore("b/207481538")
     public void crossActivity_screenshotAttachedAndVisible() {
         SurfaceControl screenshotSurface = new SurfaceControl();
         HardwareBuffer hardwareBuffer = mock(HardwareBuffer.class);
