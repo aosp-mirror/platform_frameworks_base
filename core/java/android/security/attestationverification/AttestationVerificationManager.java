@@ -226,10 +226,10 @@ public class AttestationVerificationManager {
     public static final int PROFILE_SELF_TRUSTED = 2;
 
     /**
-     * A system-defined profile which verifies that the attesting environment environment is similar
-     * to the current device in terms of security model and security configuration. This category is
-     * fairly broad and most securely configured Android devices should qualify, along with a
-     * variety of non-Android devices.
+     * A system-defined profile which verifies that the attesting environment is similar to the
+     * current device in terms of security model and security configuration. This category is fairly
+     * broad and most securely configured Android devices should qualify, along with a variety of
+     * non-Android devices.
      */
     public static final int PROFILE_PEER_DEVICE = 3;
 
@@ -321,4 +321,52 @@ public class AttestationVerificationManager {
 
     /** Requirements bundle parameter for a challenge. */
     public static final String PARAM_CHALLENGE = "localbinding.challenge";
+
+    /** @hide */
+    public static String localBindingTypeToString(@LocalBindingType int localBindingType) {
+        final String text;
+        switch (localBindingType) {
+            case TYPE_UNKNOWN:
+                text = "UNKNOWN";
+                break;
+
+            case TYPE_APP_DEFINED:
+                text = "APP_DEFINED";
+                break;
+
+            case TYPE_PUBLIC_KEY:
+                text = "PUBLIC_KEY";
+                break;
+
+            case TYPE_CHALLENGE:
+                text = "CHALLENGE";
+                break;
+
+            default:
+                return Integer.toString(localBindingType);
+        }
+        return text + "(" + localBindingType + ")";
+    }
+
+    /** @hide */
+    public static String verificationResultCodeToString(@VerificationResult int resultCode) {
+        final String text;
+        switch (resultCode) {
+            case RESULT_UNKNOWN:
+                text = "UNKNOWN";
+                break;
+
+            case RESULT_SUCCESS:
+                text = "SUCCESS";
+                break;
+
+            case RESULT_FAILURE:
+                text = "FAILURE";
+                break;
+
+            default:
+                return Integer.toString(resultCode);
+        }
+        return text + "(" + resultCode + ")";
+    }
 }
