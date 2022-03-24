@@ -182,8 +182,10 @@ class PendingJobQueue {
         if (earliestQueue != null) {
             final JobStatus job = earliestQueue.next();
             // Change the front of the queue if we've pulled pullLimit jobs from the current head
+            // or we're dealing with test jobs
             // or the current head has no more jobs to provide.
             if (++mPullCount >= pullLimit
+                    || (job != null && earliestQueue.peekNextOverrideState() != job.overrideState)
                     || earliestQueue.peekNextTimestamp() == AppJobQueue.NO_NEXT_TIMESTAMP) {
                 mOrderedQueues.poll();
                 if (earliestQueue.peekNextTimestamp() != AppJobQueue.NO_NEXT_TIMESTAMP) {
