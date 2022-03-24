@@ -2789,6 +2789,11 @@ public final class ActiveServices {
                             + ") set BIND_ALLOW_INSTANT when binding service " + service);
         }
 
+        if ((flags & Context.BIND_ALMOST_PERCEPTIBLE) != 0 && !isCallerSystem) {
+            throw new SecurityException("Non-system caller (pid=" + callingPid
+                    + ") set BIND_ALMOST_PERCEPTIBLE when binding service " + service);
+        }
+
         if ((flags & Context.BIND_ALLOW_BACKGROUND_ACTIVITY_STARTS) != 0) {
             mAm.enforceCallingPermission(
                     android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND,
