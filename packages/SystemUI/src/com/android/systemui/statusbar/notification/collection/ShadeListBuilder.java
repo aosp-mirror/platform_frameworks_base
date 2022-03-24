@@ -641,28 +641,37 @@ public class ShadeListBuilder implements Dumpable {
      * Returns true if the group change was suppressed, else false
      */
     private boolean maybeSuppressGroupChange(NotificationEntry entry, List<ListEntry> out) {
-        if (!entry.wasAttachedInPreviousPass()) {
-            return false; // new entries are allowed
-        }
-
         final GroupEntry prevParent = entry.getPreviousAttachState().getParent();
+        if (prevParent == null) {
+            // New entries are always allowed.
+            return false;
+        }
         final GroupEntry assignedParent = entry.getParent();
-        if (prevParent != assignedParent
-                && !getStabilityManager().isGroupChangeAllowed(entry.getRepresentativeEntry())) {
+        if (prevParent == assignedParent) {
+            // Nothing to change.
+            return false;
+        }
+        if (prevParent != ROOT_ENTRY && prevParent.getParent() == null) {
+            // Previous parent was a group, which has been removed (hence, its parent is null).
+            // Always allow this group change, otherwise the child will remain attached to the
+            // removed group and be removed from the shade until visual stability ends.
+            return false;
+        }
+        // TODO: Rather than perform "half" of the move here and require the caller remove the child
+        //  from the assignedParent, ideally we would have an atomic "move" operation.
+        if (!getStabilityManager().isGroupChangeAllowed(entry.getRepresentativeEntry())) {
             entry.getAttachState().getSuppressedChanges().setParent(assignedParent);
             entry.setParent(prevParent);
             if (prevParent == ROOT_ENTRY) {
                 out.add(entry);
-            } else if (prevParent != null) {
+            } else {
                 prevParent.addChild(entry);
                 if (!mGroups.containsKey(prevParent.getKey())) {
                     mGroups.put(prevParent.getKey(), prevParent);
                 }
             }
-
             return true;
         }
-
         return false;
     }
 
