@@ -158,8 +158,8 @@ public class MediaControlPanel {
 
         mSeekBarViewModel.setLogSmartspaceClick(() -> {
             logSmartspaceCardReported(
-                    760, // SMARTSPACE_CARD_CLICK
-                    /* isRecommendationCard */ false);
+                    760 // SMARTSPACE_CARD_CLICK
+            );
             return Unit.INSTANCE;
         });
     }
@@ -326,8 +326,9 @@ public class MediaControlPanel {
                 if (mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) return;
                 if (mMediaViewController.isGutsVisible()) return;
 
-                logSmartspaceCardReported(760, // SMARTSPACE_CARD_CLICK
-                        /* isRecommendationCard */ false);
+                logSmartspaceCardReported(
+                        760 // SMARTSPACE_CARD_CLICK
+                );
                 mActivityStarter.postStartActivityDismissingKeyguard(clickIntent,
                         buildLaunchAnimatorController(mPlayerViewHolder.getPlayer()));
             });
@@ -447,8 +448,9 @@ public class MediaControlPanel {
                 button.setEnabled(true);
                 button.setOnClickListener(v -> {
                     if (!mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
-                        logSmartspaceCardReported(760, // SMARTSPACE_CARD_CLICK
-                                /* isRecommendationCard */ false);
+                        logSmartspaceCardReported(
+                                760 // SMARTSPACE_CARD_CLICK
+                        );
                         action.run();
                     }
                 });
@@ -484,8 +486,9 @@ public class MediaControlPanel {
         mPlayerViewHolder.getDismiss().setOnClickListener(v -> {
             if (mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) return;
 
-            logSmartspaceCardReported(761, // SMARTSPACE_CARD_DISMISS
-                    /* isRecommendationCard */ false);
+            logSmartspaceCardReported(
+                    761 // SMARTSPACE_CARD_DISMISS
+            );
 
             if (mKey != null) {
                 closeGuts();
@@ -683,8 +686,9 @@ public class MediaControlPanel {
         mRecommendationViewHolder.getDismiss().setOnClickListener(v -> {
             if (mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) return;
 
-            logSmartspaceCardReported(761, // SMARTSPACE_CARD_DISMISS
-                    /* isRecommendationCard */ true);
+            logSmartspaceCardReported(
+                    761 // SMARTSPACE_CARD_DISMISS
+            );
             closeGuts();
             mMediaDataManagerLazy.get().dismissSmartspaceRecommendation(
                     data.getTargetId(), MediaViewController.GUTS_ANIMATION_DURATION + 100L);
@@ -841,7 +845,6 @@ public class MediaControlPanel {
             if (mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) return;
 
             logSmartspaceCardReported(760, // SMARTSPACE_CARD_CLICK
-                    /* isRecommendationCard */ true,
                     interactedSubcardRank,
                     getSmartspaceSubCardCardinality());
 
@@ -911,18 +914,17 @@ public class MediaControlPanel {
         return SysUiStatsLog.SMART_SPACE_CARD_REPORTED__DISPLAY_SURFACE__DEFAULT_SURFACE;
     }
 
-    private void logSmartspaceCardReported(int eventId, boolean isRecommendationCard) {
-        logSmartspaceCardReported(eventId, isRecommendationCard,
+    private void logSmartspaceCardReported(int eventId) {
+        logSmartspaceCardReported(eventId,
                 /* interactedSubcardRank */ 0,
                 /* interactedSubcardCardinality */ 0);
     }
 
-    private void logSmartspaceCardReported(int eventId, boolean isRecommendationCard,
+    private void logSmartspaceCardReported(int eventId,
             int interactedSubcardRank, int interactedSubcardCardinality) {
         mMediaCarouselController.logSmartspaceCardReported(eventId,
                 mInstanceId,
                 mUid,
-                isRecommendationCard,
                 new int[]{getSurfaceForSmartspaceLogging()},
                 interactedSubcardRank,
                 interactedSubcardCardinality);
