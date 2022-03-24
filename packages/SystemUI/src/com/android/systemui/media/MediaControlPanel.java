@@ -23,6 +23,7 @@ import android.app.WallpaperColors;
 import android.app.smartspace.SmartspaceAction;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
@@ -35,6 +36,8 @@ import android.media.session.MediaController;
 import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
 import android.os.Process;
+import android.text.Layout;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -87,6 +90,7 @@ public class MediaControlPanel {
     private static final int MEDIA_RECOMMENDATION_MAX_NUM = 6;
     private static final String KEY_SMARTSPACE_ARTIST_NAME = "artist_name";
     private static final String KEY_SMARTSPACE_OPEN_IN_FOREGROUND = "KEY_OPEN_IN_FOREGROUND";
+    private static final String KEY_SMARTSPACE_APP_NAME = "KEY_SMARTSPACE_APP_NAME";
 
     // Event types logged by smartspace
     private static final int SMARTSPACE_CARD_CLICK_EVENT = 760;
@@ -735,18 +739,33 @@ public class MediaControlPanel {
         icon.setColorFilter(getGrayscaleFilter());
         ImageView headerLogoImageView = mRecommendationViewHolder.getCardIcon();
         headerLogoImageView.setImageDrawable(icon);
+
         // Set up media source app's label text.
-        CharSequence appLabel = packageManager.getApplicationLabel(applicationInfo);
-        if (appLabel.length() != 0) {
-            TextView headerTitleText = mRecommendationViewHolder.getCardText();
-            headerTitleText.setText(appLabel);
+        CharSequence appName = getAppName(data.getCardAction());
+        if (TextUtils.isEmpty(appName)) {
+            Intent launchIntent =
+                    packageManager.getLaunchIntentForPackage(data.getPackageName());
+            if (launchIntent != null) {
+                ActivityInfo launchActivity = launchIntent.resolveActivityInfo(packageManager, 0);
+                appName = launchActivity.loadLabel(packageManager);
+            } else {
+                Log.w(TAG, "Package " + data.getPackageName()
+                        +  " does not have a main launcher activity. Fallback to full app name");
+                appName = packageManager.getApplicationLabel(applicationInfo);
+            }
         }
+        // Set the app name as card's title.
+        if (!TextUtils.isEmpty(appName)) {
+            TextView headerTitleText = mRecommendationViewHolder.getCardText();
+            headerTitleText.setText(appName);
+        }
+
         // Set up media rec card's tap action if applicable.
         setSmartspaceRecItemOnClickListener(recommendationCard, data.getCardAction(),
                 /* interactedSubcardRank */ -1);
         // Set up media rec card's accessibility label.
         recommendationCard.setContentDescription(
-                mContext.getString(R.string.controls_media_smartspace_rec_description, appLabel));
+                mContext.getString(R.string.controls_media_smartspace_rec_description, appName));
 
         List<ImageView> mediaCoverItems = mRecommendationViewHolder.getMediaCoverItems();
         List<ViewGroup> mediaCoverContainers = mRecommendationViewHolder.getMediaCoverContainers();
@@ -791,12 +810,12 @@ public class MediaControlPanel {
                 mediaCoverImageView.setContentDescription(
                         mContext.getString(
                                 R.string.controls_media_smartspace_rec_item_no_artist_description,
-                                recommendation.getTitle(), appLabel));
+                                recommendation.getTitle(), appName));
             } else {
                 mediaCoverImageView.setContentDescription(
                         mContext.getString(
                                 R.string.controls_media_smartspace_rec_item_description,
-                                recommendation.getTitle(), artistName, appLabel));
+                                recommendation.getTitle(), artistName, appName));
             }
 
             if (uiComponentIndex < MEDIA_RECOMMENDATION_ITEMS_PER_ROW) {
@@ -976,6 +995,17 @@ public class MediaControlPanel {
             // Automatically scroll to the active player once the media is loaded.
             mMediaCarouselController.setShouldScrollToActivePlayer(true);
         });
+    }
+
+    /** Returns the upstream app name if available. */
+    @Nullable
+    private String getAppName(SmartspaceAction action) {
+        if (action == null || action.getIntent() == null
+                || action.getIntent().getExtras() == null) {
+            return null;
+        }
+
+        return action.getIntent().getExtras().getString(KEY_SMARTSPACE_APP_NAME);
     }
 
     /** Returns if the Smartspace action will open the activity in foreground. */
