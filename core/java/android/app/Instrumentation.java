@@ -381,6 +381,10 @@ public class Instrumentation {
      * Force the global system in or out of touch mode. This can be used if your
      * instrumentation relies on the UI being in one more or the other when it starts.
      *
+     * <p><b>Note:</b> Starting from Android {@link Build.VERSION_CODES#TIRAMISU}, this method
+     * will only take effect if the instrumentation was sourced from a process with
+     * {@code MODIFY_TOUCH_MODE_STATE} internal permission granted (shell already have it).
+     *
      * @param inTouch Set to true to be in touch mode, false to be in focus mode.
      */
     public void setInTouchMode(boolean inTouch) {
