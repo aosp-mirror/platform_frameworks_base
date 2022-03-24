@@ -5739,7 +5739,7 @@
 
     <!-- Content for the log access confirmation dialog. [CHAR LIMIT=NONE]-->
     <string name="log_access_confirmation_body">Device logs record what happens on your device. Apps can use these logs to find and fix issues.\n\nSome logs may contain sensitive info, so only allow apps you trust to access all device logs.
-        \n\nIf you don’t allow this app to access all device logs, it can still access its own logs and your device manufacturer may still be able to access some logs or info on your device. Learn more
+        \n\nIf you don’t allow this app to access all device logs, it can still access its own logs. Your device manufacturer may still be able to access some logs or info on your device. Learn more
     </string>
 
     <!-- Privacy notice do not show [CHAR LIMIT=20] -->
