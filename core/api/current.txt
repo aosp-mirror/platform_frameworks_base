@@ -39634,12 +39634,9 @@ package android.speech {
 
   public final class RecognitionSupport implements android.os.Parcelable {
     method public int describeContents();
-    method @Deprecated @NonNull public java.util.List<java.lang.String> getInstalledLanguages();
     method @NonNull public java.util.List<java.lang.String> getInstalledOnDeviceLanguages();
     method @NonNull public java.util.List<java.lang.String> getOnlineLanguages();
-    method @Deprecated @NonNull public java.util.List<java.lang.String> getPendingLanguages();
     method @NonNull public java.util.List<java.lang.String> getPendingOnDeviceLanguages();
-    method @Deprecated @NonNull public java.util.List<java.lang.String> getSupportedLanguages();
     method @NonNull public java.util.List<java.lang.String> getSupportedOnDeviceLanguages();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.speech.RecognitionSupport> CREATOR;
@@ -39647,20 +39644,14 @@ package android.speech {
 
   public static final class RecognitionSupport.Builder {
     ctor public RecognitionSupport.Builder();
-    method @Deprecated @NonNull public android.speech.RecognitionSupport.Builder addInstalledLanguage(@NonNull String);
     method @NonNull public android.speech.RecognitionSupport.Builder addInstalledOnDeviceLanguage(@NonNull String);
     method @NonNull public android.speech.RecognitionSupport.Builder addOnlineLanguage(@NonNull String);
-    method @Deprecated @NonNull public android.speech.RecognitionSupport.Builder addPendingLanguage(@NonNull String);
     method @NonNull public android.speech.RecognitionSupport.Builder addPendingOnDeviceLanguage(@NonNull String);
-    method @Deprecated @NonNull public android.speech.RecognitionSupport.Builder addSupportedLanguage(@NonNull String);
     method @NonNull public android.speech.RecognitionSupport.Builder addSupportedOnDeviceLanguage(@NonNull String);
     method @NonNull public android.speech.RecognitionSupport build();
-    method @Deprecated @NonNull public android.speech.RecognitionSupport.Builder setInstalledLanguages(@NonNull java.util.List<java.lang.String>);
     method @NonNull public android.speech.RecognitionSupport.Builder setInstalledOnDeviceLanguages(@NonNull java.util.List<java.lang.String>);
     method @NonNull public android.speech.RecognitionSupport.Builder setOnlineLanguages(@NonNull java.util.List<java.lang.String>);
-    method @Deprecated @NonNull public android.speech.RecognitionSupport.Builder setPendingLanguages(@NonNull java.util.List<java.lang.String>);
     method @NonNull public android.speech.RecognitionSupport.Builder setPendingOnDeviceLanguages(@NonNull java.util.List<java.lang.String>);
-    method @Deprecated @NonNull public android.speech.RecognitionSupport.Builder setSupportedLanguages(@NonNull java.util.List<java.lang.String>);
     method @NonNull public android.speech.RecognitionSupport.Builder setSupportedOnDeviceLanguages(@NonNull java.util.List<java.lang.String>);
   }
 
