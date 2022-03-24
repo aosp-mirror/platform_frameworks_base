@@ -23,6 +23,8 @@ import android.net.EthernetNetworkUpdateRequest;
 import android.net.INetworkInterfaceOutcomeReceiver;
 import android.net.ITetheredInterfaceCallback;
 
+import java.util.List;
+
 /**
  * Interface that answers queries about, and allows changing
  * ethernet configuration.
@@ -44,4 +46,5 @@ interface IEthernetManager
     void connectNetwork(String iface, in INetworkInterfaceOutcomeReceiver listener);
     void disconnectNetwork(String iface, in INetworkInterfaceOutcomeReceiver listener);
     void setEthernetEnabled(boolean enabled);
+    List<String> getInterfaceList();
 }
