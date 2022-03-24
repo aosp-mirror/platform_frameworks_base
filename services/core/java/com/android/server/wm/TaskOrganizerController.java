@@ -31,6 +31,7 @@ import android.app.ActivityManager.RunningTaskInfo;
 import android.app.WindowConfiguration;
 import android.content.Intent;
 import android.content.pm.ParceledListSlice;
+import android.graphics.Rect;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.Parcel;
@@ -474,10 +475,12 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         }
     }
 
-    static SurfaceControl applyStartingWindowAnimation(WindowContainer window) {
+    static SurfaceControl applyStartingWindowAnimation(WindowState window) {
+        final SurfaceControl.Transaction t = window.getPendingTransaction();
+        final Rect mainFrame = window.getRelativeFrame();
         final StartingWindowAnimationAdaptor adaptor = new StartingWindowAnimationAdaptor();
-        window.startAnimation(window.getPendingTransaction(), adaptor, false,
-                ANIMATION_TYPE_STARTING_REVEAL);
+        window.startAnimation(t, adaptor, false, ANIMATION_TYPE_STARTING_REVEAL);
+        t.setPosition(adaptor.mAnimationLeash, mainFrame.left, mainFrame.top);
         return adaptor.mAnimationLeash;
     }
 
@@ -530,8 +533,6 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                     final SurfaceControl.Transaction t = mainWindow.getPendingTransaction();
                     removalInfo.windowAnimationLeash = applyStartingWindowAnimation(mainWindow);
                     removalInfo.mainFrame = mainWindow.getRelativeFrame();
-                    t.setPosition(removalInfo.windowAnimationLeash,
-                            removalInfo.mainFrame.left, removalInfo.mainFrame.top);
                 }
             }
         }
