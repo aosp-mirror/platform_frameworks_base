@@ -2627,6 +2627,19 @@ public class WindowManagerService extends IWindowManager.Stub
         return result;
     }
 
+    int updateViewVisibility(Session session, IWindow client, LayoutParams attrs,
+            int viewVisibility, MergedConfiguration outMergedConfiguration,
+            SurfaceControl outSurfaceControl, InsetsState outInsetsState,
+            InsetsSourceControl[] outActiveControls) {
+        // TODO(b/161810301): Finish the implementation.
+        return 0;
+    }
+
+    void updateWindowLayout(Session session, IWindow client, LayoutParams attrs, int flags,
+            ClientWindowFrames clientWindowFrames, int requestedWidth, int requestedHeight) {
+        // TODO(b/161810301): Finish the implementation.
+    }
+
     public boolean outOfMemoryWindow(Session session, IWindow client) {
         final long origId = Binder.clearCallingIdentity();
 
