@@ -5290,7 +5290,7 @@ package android.hardware.soundtrigger {
 
   public static final class SoundTrigger.KeyphraseRecognitionExtra implements android.os.Parcelable {
     method public int describeContents();
-    method public int getCoarseConfidenceLevel();
+    method @IntRange(from=0, to=100) public int getCoarseConfidenceLevel();
     method public int getKeyphraseId();
     method public int getRecognitionModes();
     method public void writeToParcel(@NonNull android.os.Parcel, int);

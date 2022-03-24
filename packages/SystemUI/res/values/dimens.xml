@@ -368,10 +368,12 @@
     <dimen name="match_parent">-1px</dimen>
 
     <!-- Height of status bar in split shade mode - visible only on large screens -->
-    <dimen name="split_shade_header_height">@*android:dimen/quick_qs_offset_height</dimen>
-    <dimen name="split_shade_header_min_height">@dimen/qs_header_row_min_height</dimen>
+    <dimen name="large_screen_shade_header_height">@*android:dimen/quick_qs_offset_height</dimen>
+    <dimen name="large_screen_shade_header_min_height">@dimen/qs_header_row_min_height</dimen>
 
-    <!-- The top margin of the panel that holds the list of notifications. -->
+    <!-- The top margin of the panel that holds the list of notifications.
+         On phones it's always 0dp but it's overridden in Car UI
+    -->
     <dimen name="notification_panel_margin_top">0dp</dimen>
 
     <!-- The minimum content height for the split shade NSSL.

@@ -68,7 +68,6 @@ import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -578,7 +577,7 @@ class JobConcurrencyManager {
             Slog.d(TAG, printPendingQueueLocked());
         }
 
-        final List<JobStatus> pendingJobs = mService.mPendingJobs;
+        final PendingJobQueue pendingJobQueue = mService.mPendingJobQueue;
         final List<JobServiceContext> activeServices = mActiveServices;
 
         // To avoid GC churn, we recycle the arrays.
@@ -597,7 +596,7 @@ class JobConcurrencyManager {
         // Update the priorities of jobs that aren't running, and also count the pending work types.
         // Do this before the following loop to hopefully reduce the cost of
         // shouldStopRunningJobLocked().
-        updateNonRunningPrioritiesLocked(pendingJobs, true);
+        updateNonRunningPrioritiesLocked(pendingJobQueue, true);
 
         for (int i = 0; i < MAX_JOB_CONTEXTS_COUNT; i++) {
             final JobServiceContext js = activeServices.get(i);
@@ -620,9 +619,9 @@ class JobConcurrencyManager {
 
         mWorkCountTracker.onCountDone();
 
-        for (int i = 0; i < pendingJobs.size(); i++) {
-            final JobStatus nextPending = pendingJobs.get(i);
-
+        JobStatus nextPending;
+        pendingJobQueue.resetIterator();
+        while ((nextPending = pendingJobQueue.next()) != null) {
             if (mRunningJobs.contains(nextPending)) {
                 continue;
             }
@@ -841,10 +840,11 @@ class JobConcurrencyManager {
     }
 
     @GuardedBy("mLock")
-    private void updateNonRunningPrioritiesLocked(@NonNull final List<JobStatus> pendingJobs,
+    private void updateNonRunningPrioritiesLocked(@NonNull final PendingJobQueue jobQueue,
             boolean updateCounter) {
-        for (int i = 0; i < pendingJobs.size(); i++) {
-            final JobStatus pending = pendingJobs.get(i);
+        JobStatus pending;
+        jobQueue.resetIterator();
+        while ((pending = jobQueue.next()) != null) {
 
             // If job is already running, go to next job.
             if (mRunningJobs.contains(pending)) {
@@ -882,7 +882,8 @@ class JobConcurrencyManager {
         }
         // Use < instead of <= as that gives us a little wiggle room in case a new job comes
         // along very shortly.
-        if (mService.mPendingJobs.size() + mRunningJobs.size() < mWorkTypeConfig.getMaxTotal()) {
+        if (mService.mPendingJobQueue.size() + mRunningJobs.size()
+                < mWorkTypeConfig.getMaxTotal()) {
             // Don't artificially limit a single package if we don't even have enough jobs to use
             // the maximum number of slots. We'll preempt the job later if we need the slot.
             return false;
@@ -936,8 +937,7 @@ class JobConcurrencyManager {
                         jobStatus.getSourceUserId(), jobStatus.getSourcePackageName(),
                         packageStats);
             }
-            final List<JobStatus> pendingJobs = mService.mPendingJobs;
-            if (pendingJobs.remove(jobStatus)) {
+            if (mService.mPendingJobQueue.remove(jobStatus)) {
                 mService.mJobPackageTracker.noteNonpending(jobStatus);
             }
         } finally {
@@ -962,11 +962,11 @@ class JobConcurrencyManager {
             }
         }
 
-        final List<JobStatus> pendingJobs = mService.mPendingJobs;
+        final PendingJobQueue pendingJobQueue = mService.mPendingJobQueue;
         if (worker.getPreferredUid() != JobServiceContext.NO_PREFERRED_UID) {
             updateCounterConfigLocked();
             // Preemption case needs special care.
-            updateNonRunningPrioritiesLocked(pendingJobs, false);
+            updateNonRunningPrioritiesLocked(pendingJobQueue, false);
 
             JobStatus highestBiasJob = null;
             int highBiasWorkType = workType;
@@ -974,9 +974,10 @@ class JobConcurrencyManager {
             JobStatus backupJob = null;
             int backupWorkType = WORK_TYPE_NONE;
             int backupAllWorkTypes = WORK_TYPE_NONE;
-            for (int i = 0; i < pendingJobs.size(); i++) {
-                final JobStatus nextPending = pendingJobs.get(i);
 
+            JobStatus nextPending;
+            pendingJobQueue.resetIterator();
+            while ((nextPending = pendingJobQueue.next()) != null) {
                 if (mRunningJobs.contains(nextPending)) {
                     continue;
                 }
@@ -1041,16 +1042,18 @@ class JobConcurrencyManager {
                     startJobLocked(worker, backupJob, backupWorkType);
                 }
             }
-        } else if (pendingJobs.size() > 0) {
+        } else if (pendingJobQueue.size() > 0) {
             updateCounterConfigLocked();
-            updateNonRunningPrioritiesLocked(pendingJobs, false);
+            updateNonRunningPrioritiesLocked(pendingJobQueue, false);
 
             // This slot is now free and we have pending jobs. Start the highest bias job we find.
             JobStatus highestBiasJob = null;
             int highBiasWorkType = workType;
             int highBiasAllWorkTypes = workType;
-            for (int i = 0; i < pendingJobs.size(); i++) {
-                final JobStatus nextPending = pendingJobs.get(i);
+
+            JobStatus nextPending;
+            pendingJobQueue.resetIterator();
+            while ((nextPending = pendingJobQueue.next()) != null) {
 
                 if (mRunningJobs.contains(nextPending)) {
                     continue;
@@ -1127,8 +1130,8 @@ class JobConcurrencyManager {
             return "too many jobs running";
         }
 
-        final List<JobStatus> pendingJobs = mService.mPendingJobs;
-        final int numPending = pendingJobs.size();
+        final PendingJobQueue pendingJobQueue = mService.mPendingJobQueue;
+        final int numPending = pendingJobQueue.size();
         if (numPending == 0) {
             // All quiet. We can let this job run to completion.
             return null;
@@ -1163,8 +1166,9 @@ class JobConcurrencyManager {
 
         // Harder check. We need to see if a different work type can replace this job.
         int remainingWorkTypes = ALL_WORK_TYPES;
-        for (int i = 0; i < numPending; ++i) {
-            final JobStatus pending = pendingJobs.get(i);
+        JobStatus pending;
+        pendingJobQueue.resetIterator();
+        while ((pending = pendingJobQueue.next()) != null) {
             final int workTypes = getJobWorkTypes(pending);
             if ((workTypes & remainingWorkTypes) > 0
                     && mWorkCountTracker.canJobStart(workTypes, workType) != WORK_TYPE_NONE) {
@@ -1201,9 +1205,10 @@ class JobConcurrencyManager {
     @GuardedBy("mLock")
     private String printPendingQueueLocked() {
         StringBuilder s = new StringBuilder("Pending queue: ");
-        Iterator<JobStatus> it = mService.mPendingJobs.iterator();
-        while (it.hasNext()) {
-            JobStatus js = it.next();
+        PendingJobQueue pendingJobQueue = mService.mPendingJobQueue;
+        JobStatus js;
+        pendingJobQueue.resetIterator();
+        while ((js = pendingJobQueue.next()) != null) {
             s.append("(")
                     .append(js.getJob().getId())
                     .append(", ")

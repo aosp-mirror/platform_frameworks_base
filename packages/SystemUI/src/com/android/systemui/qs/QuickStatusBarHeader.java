@@ -44,6 +44,7 @@ import com.android.systemui.statusbar.phone.StatusBarIconController.TintedIconMa
 import com.android.systemui.statusbar.phone.StatusIconContainer;
 import com.android.systemui.statusbar.policy.Clock;
 import com.android.systemui.statusbar.policy.VariableDateView;
+import com.android.systemui.util.LargeScreenUtils;
 
 import java.util.List;
 
@@ -242,11 +243,10 @@ public class QuickStatusBarHeader extends FrameLayout {
 
     void updateResources() {
         Resources resources = mContext.getResources();
-        // status bar is already displayed out of QS in split shade
-        boolean shouldUseSplitShade =
-                resources.getBoolean(R.bool.config_use_split_notification_shade);
+        boolean largeScreenHeaderActive =
+                LargeScreenUtils.shouldUseLargeScreenShadeHeader(resources);
 
-        boolean gone = shouldUseSplitShade || mUseCombinedQSHeader || mQsDisabled;
+        boolean gone = largeScreenHeaderActive || mUseCombinedQSHeader || mQsDisabled;
         mStatusIconsView.setVisibility(gone ? View.GONE : View.VISIBLE);
         mDatePrivacyView.setVisibility(gone ? View.GONE : View.VISIBLE);
 
@@ -287,7 +287,7 @@ public class QuickStatusBarHeader extends FrameLayout {
         }
 
         MarginLayoutParams qqsLP = (MarginLayoutParams) mHeaderQsPanel.getLayoutParams();
-        qqsLP.topMargin = shouldUseSplitShade || !mUseCombinedQSHeader ? mContext.getResources()
+        qqsLP.topMargin = largeScreenHeaderActive || !mUseCombinedQSHeader ? mContext.getResources()
                 .getDimensionPixelSize(R.dimen.qqs_layout_margin_top) : qsOffsetHeight;
         mHeaderQsPanel.setLayoutParams(qqsLP);
 

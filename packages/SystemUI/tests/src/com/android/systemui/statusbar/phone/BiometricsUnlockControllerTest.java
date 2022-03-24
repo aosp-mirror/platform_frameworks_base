@@ -408,7 +408,7 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
     @Test
     public void onFinishedGoingToSleep_authenticatesWhenPending() {
         when(mUpdateMonitor.isGoingToSleep()).thenReturn(true);
-        mBiometricUnlockController.onFinishedGoingToSleep(-1);
+        mBiometricUnlockController.mWakefulnessObserver.onFinishedGoingToSleep();
         verify(mHandler, never()).post(any());
 
         ArgumentCaptor<Runnable> captor = ArgumentCaptor.forClass(Runnable.class);
@@ -416,7 +416,7 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
         // value of isUnlockingWithBiometricAllowed()
         mBiometricUnlockController.onBiometricAuthenticated(1 /* userId */,
                 BiometricSourceType.FACE, true /* isStrongBiometric */);
-        mBiometricUnlockController.onFinishedGoingToSleep(-1);
+        mBiometricUnlockController.mWakefulnessObserver.onFinishedGoingToSleep();
         verify(mHandler).post(captor.capture());
         captor.getValue().run();
     }

@@ -30,7 +30,7 @@ import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.notification.stack.MediaContainerView
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.policy.ConfigurationController
-import com.android.systemui.util.Utils
+import com.android.systemui.util.LargeScreenUtils
 import javax.inject.Inject
 import javax.inject.Named
 
@@ -71,7 +71,7 @@ class KeyguardMediaController @Inject constructor(
     }
 
     private fun updateResources() {
-        useSplitShade = Utils.shouldUseSplitNotificationShade(context.resources)
+        useSplitShade = LargeScreenUtils.shouldUseSplitNotificationShade(context.resources)
     }
 
     @VisibleForTesting

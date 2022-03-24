@@ -3784,7 +3784,8 @@ public class WindowManagerService extends IWindowManager.Stub
             final int uid = Binder.getCallingUid();
             final boolean hasPermission =
                     mAtmService.instrumentationSourceHasPermission(pid, MODIFY_TOUCH_MODE_STATE)
-                            || checkCallingPermission(MODIFY_TOUCH_MODE_STATE, "setInTouchMode()");
+                            || checkCallingPermission(MODIFY_TOUCH_MODE_STATE, "setInTouchMode()",
+                                                      /* printlog= */ false);
             final long token = Binder.clearCallingIdentity();
             try {
                 if (mInputManager.setInTouchMode(mode, pid, uid, hasPermission)) {

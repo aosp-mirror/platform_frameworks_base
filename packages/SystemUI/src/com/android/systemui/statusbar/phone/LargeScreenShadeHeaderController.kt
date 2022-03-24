@@ -31,35 +31,35 @@ import com.android.systemui.qs.ChipVisibilityListener
 import com.android.systemui.qs.HeaderPrivacyIconsController
 import com.android.systemui.qs.carrier.QSCarrierGroupController
 import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent.CentralSurfacesScope
-import com.android.systemui.statusbar.phone.dagger.StatusBarViewModule.SPLIT_SHADE_BATTERY_CONTROLLER
-import com.android.systemui.statusbar.phone.dagger.StatusBarViewModule.SPLIT_SHADE_HEADER
+import com.android.systemui.statusbar.phone.dagger.StatusBarViewModule.LARGE_SCREEN_BATTERY_CONTROLLER
+import com.android.systemui.statusbar.phone.dagger.StatusBarViewModule.LARGE_SCREEN_SHADE_HEADER
 import java.io.FileDescriptor
 import java.io.PrintWriter
 import javax.inject.Inject
 import javax.inject.Named
 
 @CentralSurfacesScope
-class SplitShadeHeaderController @Inject constructor(
-    @Named(SPLIT_SHADE_HEADER) private val statusBar: View,
+class LargeScreenShadeHeaderController @Inject constructor(
+    @Named(LARGE_SCREEN_SHADE_HEADER) private val header: View,
     private val statusBarIconController: StatusBarIconController,
     private val privacyIconsController: HeaderPrivacyIconsController,
     qsCarrierGroupControllerBuilder: QSCarrierGroupController.Builder,
     featureFlags: FeatureFlags,
-    @Named(SPLIT_SHADE_BATTERY_CONTROLLER) batteryMeterViewController: BatteryMeterViewController,
+    @Named(LARGE_SCREEN_BATTERY_CONTROLLER) batteryMeterViewController: BatteryMeterViewController,
     dumpManager: DumpManager
 ) : Dumpable {
 
     companion object {
         private val HEADER_TRANSITION_ID = R.id.header_transition
-        private val SPLIT_HEADER_TRANSITION_ID = R.id.split_header_transition
+        private val LARGE_SCREEN_HEADER_TRANSITION_ID = R.id.large_screen_header_transition
         private val QQS_HEADER_CONSTRAINT = R.id.qqs_header_constraint
         private val QS_HEADER_CONSTRAINT = R.id.qs_header_constraint
-        private val SPLIT_HEADER_CONSTRAINT = R.id.split_header_constraint
+        private val LARGE_SCREEN_HEADER_CONSTRAINT = R.id.large_screen_header_constraint
 
         private fun Int.stateToString() = when (this) {
             QQS_HEADER_CONSTRAINT -> "QQS Header"
             QS_HEADER_CONSTRAINT -> "QS Header"
-            SPLIT_HEADER_CONSTRAINT -> "Split Header"
+            LARGE_SCREEN_HEADER_CONSTRAINT -> "Large Screen Header"
             else -> "Unknown state"
         }
     }
@@ -87,19 +87,19 @@ class SplitShadeHeaderController @Inject constructor(
             onShadeExpandedChanged()
         }
 
-    var splitShadeMode = false
+    var active = false
         set(value) {
             if (field == value) {
                 return
             }
             field = value
-            onSplitShadeModeChanged()
+            onHeaderStateChanged()
         }
 
     var shadeExpandedFraction = -1f
         set(value) {
             if (visible && field != value) {
-                statusBar.alpha = ShadeInterpolation.getContentAlpha(value)
+                header.alpha = ShadeInterpolation.getContentAlpha(value)
                 field = value
             }
         }
@@ -123,53 +123,53 @@ class SplitShadeHeaderController @Inject constructor(
 
     private val chipVisibilityListener: ChipVisibilityListener = object : ChipVisibilityListener {
         override fun onChipVisibilityRefreshed(visible: Boolean) {
-            if (statusBar is MotionLayout) {
-                val state = statusBar.getConstraintSet(QQS_HEADER_CONSTRAINT).apply {
+            if (header is MotionLayout) {
+                val state = header.getConstraintSet(QQS_HEADER_CONSTRAINT).apply {
                     setAlpha(R.id.statusIcons, if (visible) 0f else 1f)
                     setAlpha(R.id.batteryRemainingIcon, if (visible) 0f else 1f)
                 }
-                statusBar.updateState(QQS_HEADER_CONSTRAINT, state)
+                header.updateState(QQS_HEADER_CONSTRAINT, state)
             }
         }
     }
 
     init {
-        if (statusBar is MotionLayout) {
-            val context = statusBar.context
-            val resources = statusBar.resources
-            statusBar.getConstraintSet(QQS_HEADER_CONSTRAINT)
+        if (header is MotionLayout) {
+            val context = header.context
+            val resources = header.resources
+            header.getConstraintSet(QQS_HEADER_CONSTRAINT)
                     .load(context, resources.getXml(R.xml.qqs_header))
-            statusBar.getConstraintSet(QS_HEADER_CONSTRAINT)
+            header.getConstraintSet(QS_HEADER_CONSTRAINT)
                     .load(context, resources.getXml(R.xml.qs_header))
-            statusBar.getConstraintSet(SPLIT_HEADER_CONSTRAINT)
-                    .load(context, resources.getXml(R.xml.split_header))
+            header.getConstraintSet(LARGE_SCREEN_HEADER_CONSTRAINT)
+                    .load(context, resources.getXml(R.xml.large_screen_shade_header))
             privacyIconsController.chipVisibilityListener = chipVisibilityListener
         }
     }
 
     init {
         batteryMeterViewController.init()
-        val batteryIcon: BatteryMeterView = statusBar.findViewById(R.id.batteryRemainingIcon)
+        val batteryIcon: BatteryMeterView = header.findViewById(R.id.batteryRemainingIcon)
 
         // battery settings same as in QS icons
         batteryMeterViewController.ignoreTunerUpdates()
         batteryIcon.setPercentShowMode(BatteryMeterView.MODE_ESTIMATE)
 
-        iconContainer = statusBar.findViewById(R.id.statusIcons)
+        iconContainer = header.findViewById(R.id.statusIcons)
         iconManager = StatusBarIconController.TintedIconManager(iconContainer, featureFlags)
-        iconManager.setTint(Utils.getColorAttrDefaultColor(statusBar.context,
+        iconManager.setTint(Utils.getColorAttrDefaultColor(header.context,
                 android.R.attr.textColorPrimary))
 
         carrierIconSlots = if (featureFlags.isEnabled(Flags.COMBINED_STATUS_BAR_SIGNAL_ICONS)) {
             listOf(
-                statusBar.context.getString(com.android.internal.R.string.status_bar_no_calling),
-                statusBar.context.getString(com.android.internal.R.string.status_bar_call_strength)
+                header.context.getString(com.android.internal.R.string.status_bar_no_calling),
+                header.context.getString(com.android.internal.R.string.status_bar_call_strength)
             )
         } else {
-            listOf(statusBar.context.getString(com.android.internal.R.string.status_bar_mobile))
+            listOf(header.context.getString(com.android.internal.R.string.status_bar_mobile))
         }
         qsCarrierGroupController = qsCarrierGroupControllerBuilder
-                .setQSCarrierGroup(statusBar.findViewById(R.id.carrier_group))
+                .setQSCarrierGroup(header.findViewById(R.id.carrier_group))
                 .build()
 
         dumpManager.registerDumpable(this)
@@ -179,8 +179,8 @@ class SplitShadeHeaderController @Inject constructor(
     }
 
     private fun updateScrollY() {
-        if (!splitShadeMode && combinedHeaders) {
-            statusBar.scrollY = qsScrollY
+        if (!active && combinedHeaders) {
+            header.scrollY = qsScrollY
         }
     }
 
@@ -194,8 +194,8 @@ class SplitShadeHeaderController @Inject constructor(
         updatePosition()
     }
 
-    private fun onSplitShadeModeChanged() {
-        if (splitShadeMode || combinedHeaders) {
+    private fun onHeaderStateChanged() {
+        if (active || combinedHeaders) {
             privacyIconsController.onParentVisible()
         } else {
             privacyIconsController.onParentInvisible()
@@ -205,15 +205,15 @@ class SplitShadeHeaderController @Inject constructor(
     }
 
     private fun updateVisibility() {
-        val visibility = if (!splitShadeMode && !combinedHeaders) {
+        val visibility = if (!active && !combinedHeaders) {
             View.GONE
         } else if (shadeExpanded) {
             View.VISIBLE
         } else {
             View.INVISIBLE
         }
-        if (statusBar.visibility != visibility) {
-            statusBar.visibility = visibility
+        if (header.visibility != visibility) {
+            header.visibility = visibility
             visible = visibility == View.VISIBLE
         }
     }
@@ -222,20 +222,20 @@ class SplitShadeHeaderController @Inject constructor(
         if (!combinedHeaders) {
             return
         }
-        statusBar as MotionLayout
-        if (splitShadeMode) {
-            statusBar.setTransition(SPLIT_HEADER_TRANSITION_ID)
+        header as MotionLayout
+        if (active) {
+            header.setTransition(LARGE_SCREEN_HEADER_TRANSITION_ID)
         } else {
-            statusBar.setTransition(HEADER_TRANSITION_ID)
-            statusBar.transitionToStart()
+            header.setTransition(HEADER_TRANSITION_ID)
+            header.transitionToStart()
             updatePosition()
             updateScrollY()
         }
     }
 
     private fun updatePosition() {
-        if (statusBar is MotionLayout && !splitShadeMode && visible) {
-            statusBar.setProgress(qsExpandedFraction)
+        if (header is MotionLayout && !active && visible) {
+            header.setProgress(qsExpandedFraction)
         }
     }
 
@@ -263,12 +263,12 @@ class SplitShadeHeaderController @Inject constructor(
         pw.println("visible: $visible")
         pw.println("shadeExpanded: $shadeExpanded")
         pw.println("shadeExpandedFraction: $shadeExpandedFraction")
-        pw.println("splitShadeMode: $splitShadeMode")
+        pw.println("active: $active")
         pw.println("qsExpandedFraction: $qsExpandedFraction")
         pw.println("qsScrollY: $qsScrollY")
         if (combinedHeaders) {
-            statusBar as MotionLayout
-            pw.println("currentState: ${statusBar.currentState.stateToString()}")
+            header as MotionLayout
+            pw.println("currentState: ${header.currentState.stateToString()}")
         }
     }
 }

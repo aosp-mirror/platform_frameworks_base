@@ -108,6 +108,18 @@ class Utils {
         return appInfo.metaData.getCharSequence(COMPANION_DEVICE_ACTIVITY_VENDOR_NAME, "");
     }
 
+    static boolean hasVendorIcon(@NonNull Context context,
+            @NonNull String packageName, int userId) throws PackageManager.NameNotFoundException {
+        final ApplicationInfo appInfo = getApplicationInfo(context, packageName, userId);
+        final Bundle bundle = appInfo.metaData;
+
+        if (bundle == null) {
+            return false;
+        } else {
+            return bundle.getInt(COMPANION_DEVICE_ACTIVITY_VENDOR_ICON) != 0;
+        }
+    }
+
     /**
      * Getting ApplicationInfo from meta-data.
      */
