@@ -5288,7 +5288,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (mControllableInsetProvider != null) {
             return;
         }
-        if (mDisplayContent.inTransition()) {
+        if (getDisplayContent().inTransition()) {
             // Skip because the animation is usually unnoticeable (e.g. covered by rotation
             // animation) and the animation bounds could be inconsistent, such as depending
             // on when the window applies its draw transaction with new rotation.
