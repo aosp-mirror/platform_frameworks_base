@@ -228,7 +228,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Queue;
 import java.util.concurrent.CountDownLatch;
-import java.util.function.Consumer;
 
 /**
  * The top of a view hierarchy, implementing the needed protocol between View
@@ -826,8 +825,6 @@ public final class ViewRootImpl implements ViewParent,
      * the RenderThread.
      */
     private long mRtLastAttemptedDrawFrameNum = 0;
-
-    private Consumer<SurfaceControl.Transaction> mBLASTDrawConsumer;
 
     private HashSet<ScrollCaptureCallback> mRootScrollCaptureCallbacks;
 
@@ -3493,35 +3490,23 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     private void createSyncIfNeeded() {
-        // Started a sync already.
-        if (mLastSyncId != -1) {
+        // Started a sync already or there's nothing needing to sync
+        if (mLastSyncId != -1 || !mReportNextDraw) {
             return;
         }
 
-        Consumer<Transaction> syncConsumer = null;
         final int seqId = mSyncSeqId;
-
-        if (mBLASTDrawConsumer != null) {
-            syncConsumer = mBLASTDrawConsumer;
-            mBLASTDrawConsumer = null;
-        } else if (mReportNextDraw) {
-            syncConsumer = transaction -> {
+        mLastSyncId = mSurfaceSyncer.setupSync(transaction -> {
+            // Callback will be invoked on executor thread so post to main thread.
+            mHandler.postAtFrontOfQueue(() -> {
                 mSurfaceChangedTransaction.merge(transaction);
                 reportDrawFinished(seqId);
-            };
-        }
-
-        if (syncConsumer != null) {
-            final Consumer<Transaction> capturedSyncConsumer = syncConsumer;
-            mLastSyncId = mSurfaceSyncer.setupSync(transaction -> {
-                // Callback will be invoked on executor thread so post to main thread.
-                mHandler.postAtFrontOfQueue(() -> capturedSyncConsumer.accept(transaction));
             });
-            if (DEBUG_BLAST) {
-                Log.d(mTag, "Setup new sync id=" + mLastSyncId);
-            }
-            mSurfaceSyncer.addToSync(mLastSyncId, mSyncTarget);
+        });
+        if (DEBUG_BLAST) {
+            Log.d(mTag, "Setup new sync id=" + mLastSyncId);
         }
+        mSurfaceSyncer.addToSync(mLastSyncId, mSyncTarget);
     }
 
     private void notifyContentCatpureEvents() {
@@ -10773,37 +10758,6 @@ public final class ViewRootImpl implements ViewParent,
                 ICompatCameraControlCallback callback) {
         mActivityConfigCallback.requestCompatCameraControl(
                 showControl, transformationApplied, callback);
-    }
-
-    /**
-     * Redirect the next draw of this ViewRoot (from the UI thread perspective)
-     * to the passed in consumer. This can be used to create P2P synchronization
-     * between ViewRoot's however it comes with many caveats.
-     *
-     * 1. You MUST consume the transaction, by either applying it immediately or
-     *    merging it in to another transaction. The threading model doesn't
-     *    allow you to hold in the passed transaction.
-     * 2. If you merge it in to another transaction, this ViewRootImpl will be
-     *    paused until you finally apply that transaction and it receives
-     *    the callback from SF. If you lose track of the transaction you will
-     *    ANR the app.
-     * 3. Only one person can consume the transaction at a time, if you already
-     *    have a pending consumer for this frame, the function will return false
-     * 4. Someone else may have requested to consume the next frame, in which case
-     *    this function will return false and you will not receive a callback.
-     * 5. This function does not trigger drawing so even if it returns true you
-     *    may not receive a callback unless there is some other UI thread work
-     *    to trigger drawing. If it returns true, and a draw occurs, the callback
-     *    will be called (Though again watch out for the null transaction case!)
-     * 6. This function must be called on the UI thread. The consumer will likewise
-     *    be called on the UI thread.
-     */
-    public boolean consumeNextDraw(Consumer<SurfaceControl.Transaction> consume) {
-       if (mBLASTDrawConsumer != null) {
-           return false;
-       }
-       mBLASTDrawConsumer = consume;
-       return true;
     }
 
     boolean wasRelayoutRequested() {
