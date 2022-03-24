@@ -19,8 +19,9 @@ package com.android.systemui.media
 import org.mockito.Mockito.`when` as whenever
 import android.content.Intent
 import android.graphics.Color
+import android.graphics.drawable.Animatable2
+import android.graphics.drawable.AnimatedVectorDrawable
 import android.graphics.drawable.GradientDrawable
-import android.graphics.drawable.Icon
 import android.graphics.drawable.RippleDrawable
 import android.media.MediaMetadata
 import android.media.session.MediaSession
@@ -60,6 +61,7 @@ import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.anyLong
 import org.mockito.Mock
+import org.mockito.Mockito.any
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.times
@@ -290,15 +292,15 @@ public class MediaControlPanelTest : SysuiTestCase() {
 
     @Test
     fun bindSemanticActions() {
-        val icon = Icon.createWithResource(context, android.R.drawable.ic_media_play)
+        val icon = context.getDrawable(android.R.drawable.ic_media_play)
+        val bg = context.getDrawable(R.drawable.qs_media_round_button_background)
         val semanticActions = MediaButton(
-                playOrPause = MediaAction(icon, Runnable {}, "play"),
-                nextOrCustom = MediaAction(icon, Runnable {}, "next"),
-                custom0 = MediaAction(icon, null, "custom 0"),
-                custom1 = MediaAction(icon, null, "custom 1")
+            playOrPause = MediaAction(icon, Runnable {}, "play", bg),
+            nextOrCustom = MediaAction(icon, Runnable {}, "next", bg),
+            custom0 = MediaAction(icon, null, "custom 0", bg),
+            custom1 = MediaAction(icon, null, "custom 1", bg)
         )
         val state = mediaData.copy(semanticActions = semanticActions)
-
         player.attachPlayer(viewHolder)
         player.bindPlayer(state, PACKAGE)
 
@@ -338,10 +340,10 @@ public class MediaControlPanelTest : SysuiTestCase() {
     fun bind_seekBarDisabled_seekBarVisibilityIsSetToInvisible() {
         whenever(seekBarViewModel.getEnabled()).thenReturn(false)
 
-        val icon = Icon.createWithResource(context, android.R.drawable.ic_media_play)
+        val icon = context.getDrawable(android.R.drawable.ic_media_play)
         val semanticActions = MediaButton(
-            playOrPause = MediaAction(icon, Runnable {}, "play"),
-            nextOrCustom = MediaAction(icon, Runnable {}, "next")
+            playOrPause = MediaAction(icon, Runnable {}, "play", null),
+            nextOrCustom = MediaAction(icon, Runnable {}, "next", null)
         )
         val state = mediaData.copy(semanticActions = semanticActions)
 
@@ -365,13 +367,14 @@ public class MediaControlPanelTest : SysuiTestCase() {
 
     @Test
     fun bindNotificationActions() {
-        val icon = Icon.createWithResource(context, android.R.drawable.ic_media_play)
+        val icon = context.getDrawable(android.R.drawable.ic_media_play)
+        val bg = context.getDrawable(R.drawable.qs_media_round_button_background)
         val actions = listOf(
-            MediaAction(icon, Runnable {}, "previous"),
-            MediaAction(icon, Runnable {}, "play"),
-            MediaAction(icon, null, "next"),
-            MediaAction(icon, null, "custom 0"),
-            MediaAction(icon, Runnable {}, "custom 1")
+            MediaAction(icon, Runnable {}, "previous", bg),
+            MediaAction(icon, Runnable {}, "play", bg),
+            MediaAction(icon, null, "next", bg),
+            MediaAction(icon, null, "custom 0", bg),
+            MediaAction(icon, Runnable {}, "custom 1", bg)
         )
         val state = mediaData.copy(actions = actions,
             actionsToShowInCompact = listOf(1, 2),
@@ -410,6 +413,72 @@ public class MediaControlPanelTest : SysuiTestCase() {
         assertThat(action4.contentDescription).isEqualTo("custom 1")
         assertThat(action4.isEnabled()).isTrue()
         verify(collapsedSet).setVisibility(R.id.action4, ConstraintSet.GONE)
+    }
+
+    @Test
+    fun bindAnimatedSemanticActions() {
+        val mockAvd0 = mock(AnimatedVectorDrawable::class.java)
+        val mockAvd1 = mock(AnimatedVectorDrawable::class.java)
+        val mockAvd2 = mock(AnimatedVectorDrawable::class.java)
+        whenever(mockAvd0.mutate()).thenReturn(mockAvd0)
+        whenever(mockAvd1.mutate()).thenReturn(mockAvd1)
+        whenever(mockAvd2.mutate()).thenReturn(mockAvd2)
+
+        val icon = context.getDrawable(R.drawable.ic_media_play)
+        val bg = context.getDrawable(R.drawable.ic_media_play_container)
+        val semanticActions0 = MediaButton(
+                playOrPause = MediaAction(mockAvd0, Runnable {}, "play", null))
+        val semanticActions1 = MediaButton(
+                playOrPause = MediaAction(mockAvd1, Runnable {}, "pause", null))
+        val semanticActions2 = MediaButton(
+                playOrPause = MediaAction(mockAvd2, Runnable {}, "loading", null))
+        val state0 = mediaData.copy(semanticActions = semanticActions0)
+        val state1 = mediaData.copy(semanticActions = semanticActions1)
+        val state2 = mediaData.copy(semanticActions = semanticActions2)
+
+        player.attachPlayer(viewHolder)
+        player.bindPlayer(state0, PACKAGE)
+
+        // Validate first binding
+        assertThat(actionPlayPause.isEnabled()).isTrue()
+        assertThat(actionPlayPause.contentDescription).isEqualTo("play")
+        verify(collapsedSet).setVisibility(R.id.actionPlayPause, ConstraintSet.VISIBLE)
+        assertThat(actionPlayPause.hasOnClickListeners()).isTrue()
+
+        // Trigger animation & update mock
+        actionPlayPause.performClick()
+        verify(mockAvd0, times(1)).start()
+        whenever(mockAvd0.isRunning()).thenReturn(true)
+
+        // Validate states no longer bind
+        player.bindPlayer(state1, PACKAGE)
+        player.bindPlayer(state2, PACKAGE)
+        assertThat(actionPlayPause.contentDescription).isEqualTo("play")
+
+        // Complete animation and run callbacks
+        whenever(mockAvd0.isRunning()).thenReturn(false)
+        val captor = ArgumentCaptor.forClass(Animatable2.AnimationCallback::class.java)
+        verify(mockAvd0, times(1)).registerAnimationCallback(captor.capture())
+        verify(mockAvd1, never())
+            .registerAnimationCallback(any(Animatable2.AnimationCallback::class.java))
+        verify(mockAvd2, never())
+            .registerAnimationCallback(any(Animatable2.AnimationCallback::class.java))
+        captor.getValue().onAnimationEnd(mockAvd0)
+
+        // Validate correct state was bound
+        assertThat(actionPlayPause.contentDescription).isEqualTo("loading")
+        verify(mockAvd0, times(1))
+            .registerAnimationCallback(any(Animatable2.AnimationCallback::class.java))
+        verify(mockAvd1, times(1)
+            ).registerAnimationCallback(any(Animatable2.AnimationCallback::class.java))
+        verify(mockAvd2, times(1))
+            .registerAnimationCallback(any(Animatable2.AnimationCallback::class.java))
+        verify(mockAvd0, times(1))
+            .unregisterAnimationCallback(any(Animatable2.AnimationCallback::class.java))
+        verify(mockAvd1, times(1))
+            .unregisterAnimationCallback(any(Animatable2.AnimationCallback::class.java))
+        verify(mockAvd2, never())
+            .unregisterAnimationCallback(any(Animatable2.AnimationCallback::class.java))
     }
 
     @Test
