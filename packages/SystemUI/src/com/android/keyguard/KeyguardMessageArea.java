@@ -27,8 +27,12 @@ import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.TextView;
 
+import androidx.annotation.Nullable;
+
+import com.android.internal.policy.SystemBarUtils;
 import com.android.settingslib.Utils;
 import com.android.systemui.R;
 
@@ -53,8 +57,15 @@ public class KeyguardMessageArea extends TextView implements SecurityMessageDisp
     private ColorStateList mDefaultColorState;
     private CharSequence mMessage;
     private ColorStateList mNextMessageColorState = ColorStateList.valueOf(DEFAULT_COLOR);
-    private boolean mBouncerVisible;
+    private boolean mBouncerShowing;
     private boolean mAltBouncerShowing;
+    /**
+     * Container that wraps the KeyguardMessageArea - may be null if current view hierarchy doesn't
+     * contain {@link R.id.keyguard_message_area_container}.
+     */
+    @Nullable
+    private ViewGroup mContainer;
+    private int mTopMargin;
 
     public KeyguardMessageArea(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -62,6 +73,27 @@ public class KeyguardMessageArea extends TextView implements SecurityMessageDisp
 
         mHandler = new Handler(Looper.myLooper());
         onThemeChanged();
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        mContainer = getRootView().findViewById(R.id.keyguard_message_area_container);
+    }
+
+    void onConfigChanged() {
+        if (mContainer == null) {
+            return;
+        }
+        final int newTopMargin = SystemBarUtils.getStatusBarHeight(getContext());
+        if (mTopMargin == newTopMargin) {
+            return;
+        }
+        mTopMargin = newTopMargin;
+        ViewGroup.MarginLayoutParams lp =
+                (ViewGroup.MarginLayoutParams) mContainer.getLayoutParams();
+        lp.topMargin = mTopMargin;
+        mContainer.setLayoutParams(lp);
     }
 
     @Override
@@ -145,7 +177,7 @@ public class KeyguardMessageArea extends TextView implements SecurityMessageDisp
 
     void update() {
         CharSequence status = mMessage;
-        setVisibility(TextUtils.isEmpty(status) || (!mBouncerVisible && !mAltBouncerShowing)
+        setVisibility(TextUtils.isEmpty(status) || (!mBouncerShowing && !mAltBouncerShowing)
                 ? INVISIBLE : VISIBLE);
         setText(status);
         ColorStateList colorState = mDefaultColorState;
@@ -153,11 +185,21 @@ public class KeyguardMessageArea extends TextView implements SecurityMessageDisp
             colorState = mNextMessageColorState;
             mNextMessageColorState = ColorStateList.valueOf(DEFAULT_COLOR);
         }
+        if (mAltBouncerShowing) {
+            // alt bouncer has a black scrim, so always show the text in white
+            colorState = ColorStateList.valueOf(Color.WHITE);
+        }
         setTextColor(colorState);
     }
 
-    public void setBouncerVisible(boolean bouncerVisible) {
-        mBouncerVisible = bouncerVisible;
+    /**
+     * Set whether the bouncer is fully showing
+     */
+    public void setBouncerShowing(boolean bouncerShowing) {
+        if (mBouncerShowing != bouncerShowing) {
+            mBouncerShowing = bouncerShowing;
+            update();
+        }
     }
 
     /**

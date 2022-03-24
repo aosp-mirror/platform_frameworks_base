@@ -24,12 +24,14 @@ import static org.junit.Assert.fail;
 
 import android.content.pm.PackageManager.Property;
 import android.os.Bundle;
+import android.platform.test.annotations.Presubmit;
 
 import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+@Presubmit
 @RunWith(AndroidJUnit4.class)
 public class PackageManagerPropertyTests {
 

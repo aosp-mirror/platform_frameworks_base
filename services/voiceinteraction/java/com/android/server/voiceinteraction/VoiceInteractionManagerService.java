@@ -167,6 +167,16 @@ public class VoiceInteractionManagerService extends SystemService {
     public void onStart() {
         publishBinderService(Context.VOICE_INTERACTION_MANAGER_SERVICE, mServiceStub);
         publishLocalService(VoiceInteractionManagerInternal.class, new LocalService());
+        mAmInternal.setVoiceInteractionManagerProvider(
+                new ActivityManagerInternal.VoiceInteractionManagerProvider() {
+                    @Override
+                    public void notifyActivityEventChanged() {
+                        if (DEBUG) {
+                            Slog.d(TAG, "call notifyActivityEventChanged");
+                        }
+                        mServiceStub.notifyActivityEventChanged();
+                    }
+                });
     }
 
     @Override
@@ -250,6 +260,25 @@ public class VoiceInteractionManagerService extends SystemService {
             }
 
             return TextUtils.equals(packageName, session.mSessionComponentName.getPackageName());
+        }
+
+        @Override
+        public String getVoiceInteractorPackageName(IBinder callingVoiceInteractor) {
+            VoiceInteractionManagerServiceImpl impl =
+                    VoiceInteractionManagerService.this.mServiceStub.mImpl;
+            if (impl == null) {
+                return null;
+            }
+            VoiceInteractionSessionConnection session =
+                    impl.mActiveSession;
+            if (session == null) {
+                return null;
+            }
+            IVoiceInteractor voiceInteractor = session.mInteractor;
+            if (voiceInteractor == null || voiceInteractor.asBinder() != callingVoiceInteractor) {
+                return null;
+            }
+            return session.mSessionComponentName.getPackageName();
         }
 
         @Override
@@ -384,6 +413,14 @@ public class VoiceInteractionManagerService extends SystemService {
             if (mImpl == null) return false;
 
             return mImpl.supportsLocalVoiceInteraction();
+        }
+
+        void notifyActivityEventChanged() {
+            synchronized (this) {
+                if (mImpl == null) return;
+
+                Binder.withCleanCallingIdentity(() -> mImpl.notifyActivityEventChangedLocked());
+            }
         }
 
         @Override
@@ -1109,6 +1146,40 @@ public class VoiceInteractionManagerService extends SystemService {
             }
         }
 
+        @Override
+        public void startListeningVisibleActivityChanged(@NonNull IBinder token) {
+            synchronized (this) {
+                if (mImpl == null) {
+                    Slog.w(TAG, "startListeningVisibleActivityChanged without running"
+                            + " voice interaction service");
+                    return;
+                }
+                final long caller = Binder.clearCallingIdentity();
+                try {
+                    mImpl.startListeningVisibleActivityChangedLocked(token);
+                } finally {
+                    Binder.restoreCallingIdentity(caller);
+                }
+            }
+        }
+
+        @Override
+        public void stopListeningVisibleActivityChanged(@NonNull IBinder token) {
+            synchronized (this) {
+                if (mImpl == null) {
+                    Slog.w(TAG, "stopListeningVisibleActivityChanged without running"
+                            + " voice interaction service");
+                    return;
+                }
+                final long caller = Binder.clearCallingIdentity();
+                try {
+                    mImpl.stopListeningVisibleActivityChangedLocked(token);
+                } finally {
+                    Binder.restoreCallingIdentity(caller);
+                }
+            }
+        }
+
         //----------------- Hotword Detection/Validation APIs --------------------------------//
 
         @Override
@@ -1116,7 +1187,8 @@ public class VoiceInteractionManagerService extends SystemService {
                 @NonNull Identity voiceInteractorIdentity,
                 @Nullable PersistableBundle options,
                 @Nullable SharedMemory sharedMemory,
-                IHotwordRecognitionStatusCallback callback) {
+                IHotwordRecognitionStatusCallback callback,
+                int detectorType) {
             enforceCallingPermission(Manifest.permission.MANAGE_HOTWORD_DETECTION);
             synchronized (this) {
                 enforceIsCurrentVoiceInteractionService();
@@ -1132,7 +1204,7 @@ public class VoiceInteractionManagerService extends SystemService {
                 final long caller = Binder.clearCallingIdentity();
                 try {
                     mImpl.updateStateLocked(
-                            voiceInteractorIdentity, options, sharedMemory, callback);
+                            voiceInteractorIdentity, options, sharedMemory, callback, detectorType);
                 } finally {
                     Binder.restoreCallingIdentity(caller);
                 }

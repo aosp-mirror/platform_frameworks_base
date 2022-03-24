@@ -54,13 +54,13 @@ interface IStorageManager {
      */
     void shutdown(IStorageShutdownObserver observer) = 19;
     /**
-     * Mounts an Opaque Binary Blob (OBB) with the specified decryption key and
-     * only allows the calling process's UID access to the contents.
-     * StorageManagerService will call back to the supplied IObbActionListener to inform
-     * it of the terminal state of the call.
+     * Mounts an Opaque Binary Blob (OBB). Only allows the calling process's UID
+     * access to the contents. StorageManagerService will call back to the
+     * supplied IObbActionListener to inform it of the terminal state of the
+     * call.
      */
-    void mountObb(in String rawPath, in String canonicalPath, in String key,
-            IObbActionListener token, int nonce, in ObbInfo obbInfo) = 21;
+    void mountObb(in String rawPath, in String canonicalPath, IObbActionListener token,
+            int nonce, in ObbInfo obbInfo) = 21;
     /**
      * Unmounts an Opaque Binary Blob (OBB). When the force flag is specified,
      * any program using it will be forcibly killed to unmount the image.
@@ -78,36 +78,9 @@ interface IStorageManager {
      */
     String getMountedObbPath(in String rawPath) = 24;
     /**
-     * Decrypts any encrypted volumes.
+     * Returns list of all mountable volumes for the specified userId
      */
-    int decryptStorage(in String password) = 26;
-    /**
-     * Encrypts storage.
-     */
-    int encryptStorage(int type, in String password) = 27;
-    /**
-     * Changes the encryption password.
-     */
-    int changeEncryptionPassword(int type, in String password) = 28;
-    /**
-     * Returns list of all mountable volumes.
-     */
-    StorageVolume[] getVolumeList(int uid, in String packageName, int flags) = 29;
-    /**
-     * Determines the encryption state of the volume.
-     * @return a numerical value. See {@code ENCRYPTION_STATE_*} for possible
-     * values.
-     * Note that this has been replaced in most cases by the APIs in
-     * StorageManager (see isEncryptable and below)
-     * This is still useful to get the error state when encryption has failed
-     * and CryptKeeper needs to throw up a screen advising the user what to do
-     */
-    int getEncryptionState() = 31;
-    /**
-     * Verify the encryption password against the stored volume.  This method
-     * may only be called by the system process.
-     */
-    int verifyEncryptionPassword(in String password) = 32;
+    StorageVolume[] getVolumeList(int userId, in String callingPackage, int flags) = 29;
     /**
      * Ensure that all directories along given path exist, creating parent
      * directories as needed. Validates that given path is absolute and that it
@@ -116,32 +89,6 @@ interface IStorageManager {
      * external storage data or OBB directory belonging to calling app.
      */
     void mkdirs(in String callingPkg, in String path) = 34;
-    /**
-     * Determines the type of the encryption password
-     * @return PasswordType
-     */
-    int getPasswordType() = 35;
-    /**
-     * Get password from vold
-     * @return password or empty string
-     */
-    String getPassword() = 36;
-    /**
-     * Securely clear password from vold
-     */
-    oneway void clearPassword() = 37;
-    /**
-     * Set a field in the crypto header.
-     * @param field field to set
-     * @param contents contents to set in field
-     */
-    oneway void setField(in String field, in String contents) = 38;
-    /**
-     * Gets a field from the crypto header.
-     * @param field field to get
-     * @return contents of field
-     */
-    String getField(in String field) = 39;
     /**
      * Report the time of the last maintenance operation such as fstrim.
      * @return Timestamp of the last maintenance operation, in the
@@ -173,13 +120,12 @@ interface IStorageManager {
     void setDebugFlags(int flags, int mask) = 60;
     void createUserKey(int userId, int serialNumber, boolean ephemeral) = 61;
     void destroyUserKey(int userId) = 62;
-    void unlockUserKey(int userId, int serialNumber, in byte[] token, in byte[] secret) = 63;
+    void unlockUserKey(int userId, int serialNumber, in byte[] secret) = 63;
     void lockUserKey(int userId) = 64;
     boolean isUserKeyUnlocked(int userId) = 65;
     void prepareUserStorage(in String volumeUuid, int userId, int serialNumber, int flags) = 66;
     void destroyUserStorage(in String volumeUuid, int userId, int flags) = 67;
-    boolean isConvertibleToFBE() = 68;
-    void addUserKeyAuth(int userId, int serialNumber, in byte[] token, in byte[] secret) = 70;
+    void addUserKeyAuth(int userId, int serialNumber, in byte[] secret) = 70;
     void fixateNewestUserKeyAuth(int userId) = 71;
     void fstrim(int flags, IVoldTaskListener listener) = 72;
     AppFuseMount mountProxyFileDescriptorBridge() = 73;
@@ -195,12 +141,14 @@ interface IStorageManager {
     void startCheckpoint(int numTries) = 85;
     boolean needsCheckpoint() = 86;
     void abortChanges(in String message, boolean retry) = 87;
-    void clearUserKeyAuth(int userId, int serialNumber, in byte[] token, in byte[] secret) = 88;
+    void clearUserKeyAuth(int userId, int serialNumber, in byte[] secret) = 88;
     void fixupAppDir(in String path) = 89;
     void disableAppDataIsolation(in String pkgName, int pid, int userId) = 90;
-    void notifyAppIoBlocked(in String volumeUuid, int uid, int tid, int reason) = 91;
-    void notifyAppIoResumed(in String volumeUuid, int uid, int tid, int reason) = 92;
-    PendingIntent getManageSpaceActivityIntent(in String packageName, int requestCode) = 93;
-    boolean isAppIoBlocked(in String volumeUuid, int uid, int tid, int reason) = 94;
-    int getExternalStorageMountMode(int uid, in String packageName) = 95;
+    PendingIntent getManageSpaceActivityIntent(in String packageName, int requestCode) = 91;
+    void notifyAppIoBlocked(in String volumeUuid, int uid, int tid, int reason) = 92;
+    void notifyAppIoResumed(in String volumeUuid, int uid, int tid, int reason) = 93;
+    int getExternalStorageMountMode(int uid, in String packageName) = 94;
+    boolean isAppIoBlocked(in String volumeUuid, int uid, int tid, int reason) = 95;
+    void setCloudMediaProvider(in String authority) = 96;
+    String getCloudMediaProvider() = 97;
 }

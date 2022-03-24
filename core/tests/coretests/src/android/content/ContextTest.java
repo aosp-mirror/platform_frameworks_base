@@ -32,9 +32,9 @@ import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.VirtualDisplay;
-import android.inputmethodservice.InputMethodService;
 import android.media.ImageReader;
 import android.os.UserHandle;
+import android.platform.test.annotations.Presubmit;
 import android.view.Display;
 
 import androidx.test.core.app.ApplicationProvider;
@@ -49,6 +49,7 @@ import org.junit.runner.RunWith;
  *  Build/Install/Run:
  *   atest FrameworksCoreTests:ContextTest
  */
+@Presubmit
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class ContextTest {
@@ -137,13 +138,6 @@ public class ContextTest {
                 ActivityThread.currentActivityThread().getSystemUiContext();
 
         assertThat(systemUiContext.isUiContext()).isTrue();
-    }
-
-    @Test
-    public void testIsUiContext_InputMethodService_returnsTrue() {
-        final InputMethodService ims = new InputMethodService();
-
-        assertTrue(ims.isUiContext());
     }
 
     @Test

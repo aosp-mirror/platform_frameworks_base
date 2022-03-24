@@ -16,28 +16,43 @@
 
 package com.android.systemui.media.dialog;
 
+import static android.provider.Settings.ACTION_BLUETOOTH_PAIRING_SETTINGS;
+
 import android.app.Notification;
+import android.app.WallpaperColors;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
+import android.media.INearbyMediaDevicesUpdateCallback;
 import android.media.MediaMetadata;
 import android.media.MediaRoute2Info;
+import android.media.NearbyDevice;
 import android.media.RoutingSessionInfo;
 import android.media.session.MediaController;
 import android.media.session.MediaSessionManager;
 import android.media.session.PlaybackState;
+import android.os.IBinder;
+import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 import androidx.core.graphics.drawable.IconCompat;
+import androidx.mediarouter.media.MediaRouter;
+import androidx.mediarouter.media.MediaRouterParams;
 
-import com.android.internal.logging.UiEventLogger;
 import com.android.settingslib.RestrictedLockUtilsInternal;
 import com.android.settingslib.Utils;
 import com.android.settingslib.bluetooth.BluetoothUtils;
@@ -45,17 +60,22 @@ import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.settingslib.media.InfoMediaManager;
 import com.android.settingslib.media.LocalMediaManager;
 import com.android.settingslib.media.MediaDevice;
-import com.android.settingslib.media.MediaOutputConstants;
 import com.android.settingslib.utils.ThreadUtils;
 import com.android.systemui.R;
+import com.android.systemui.animation.ActivityLaunchAnimator;
+import com.android.systemui.animation.DialogLaunchAnimator;
+import com.android.systemui.media.nearby.NearbyMediaDevicesManager;
+import com.android.systemui.monet.ColorScheme;
 import com.android.systemui.plugins.ActivityStarter;
-import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
-import com.android.systemui.statusbar.phone.ShadeController;
+import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.inject.Inject;
@@ -63,22 +83,24 @@ import javax.inject.Inject;
 /**
  * Controller for media output dialog
  */
-public class MediaOutputController implements LocalMediaManager.DeviceCallback {
+public class MediaOutputController implements LocalMediaManager.DeviceCallback,
+        INearbyMediaDevicesUpdateCallback {
 
     private static final String TAG = "MediaOutputController";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
-
+    private static final String PAGE_CONNECTED_DEVICES_KEY =
+            "top_level_connected_devices";
     private final String mPackageName;
     private final Context mContext;
     private final MediaSessionManager mMediaSessionManager;
-    private final ShadeController mShadeController;
     private final ActivityStarter mActivityStarter;
+    private final DialogLaunchAnimator mDialogLaunchAnimator;
     private final List<MediaDevice> mGroupMediaDevices = new CopyOnWriteArrayList<>();
-    private final boolean mAboveStatusbar;
-    private final boolean mVolumeAdjustmentForRemoteGroupSessions;
-    private final NotificationEntryManager mNotificationEntryManager;
+    private final CommonNotifCollection mNotifCollection;
     @VisibleForTesting
     final List<MediaDevice> mMediaDevices = new CopyOnWriteArrayList<>();
+    private final NearbyMediaDevicesManager mNearbyMediaDevicesManager;
+    private final Map<String, Integer> mNearbyDeviceInfoMap = new ConcurrentHashMap<>();
 
     private MediaController mMediaController;
     @VisibleForTesting
@@ -87,30 +109,51 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback {
     LocalMediaManager mLocalMediaManager;
 
     private MediaOutputMetricLogger mMetricLogger;
-    private UiEventLogger mUiEventLogger;
+
+    private int mColorItemContent;
+    private int mColorSeekbarProgress;
+    private int mColorButtonBackground;
+    private int mColorItemBackground;
+    private int mColorConnectedItemBackground;
+    private int mColorPositiveButtonText;
 
     @Inject
     public MediaOutputController(@NonNull Context context, String packageName,
-            boolean aboveStatusbar, MediaSessionManager mediaSessionManager, LocalBluetoothManager
-            lbm, ShadeController shadeController, ActivityStarter starter,
-            NotificationEntryManager notificationEntryManager, UiEventLogger uiEventLogger) {
+            MediaSessionManager mediaSessionManager, LocalBluetoothManager
+            lbm, ActivityStarter starter,
+            CommonNotifCollection notifCollection,
+            DialogLaunchAnimator dialogLaunchAnimator,
+            Optional<NearbyMediaDevicesManager> nearbyMediaDevicesManagerOptional) {
         mContext = context;
         mPackageName = packageName;
         mMediaSessionManager = mediaSessionManager;
-        mShadeController = shadeController;
         mActivityStarter = starter;
-        mAboveStatusbar = aboveStatusbar;
-        mNotificationEntryManager = notificationEntryManager;
+        mNotifCollection = notifCollection;
         InfoMediaManager imm = new InfoMediaManager(mContext, packageName, null, lbm);
         mLocalMediaManager = new LocalMediaManager(mContext, lbm, imm, packageName);
         mMetricLogger = new MediaOutputMetricLogger(mContext, mPackageName);
-        mUiEventLogger = uiEventLogger;
-        mVolumeAdjustmentForRemoteGroupSessions = mContext.getResources().getBoolean(
-                com.android.internal.R.bool.config_volumeAdjustmentForRemoteGroupSessions);
+        mDialogLaunchAnimator = dialogLaunchAnimator;
+        mNearbyMediaDevicesManager = nearbyMediaDevicesManagerOptional.orElse(null);
+        mColorItemContent = Utils.getColorStateListDefaultColor(mContext,
+                R.color.media_dialog_item_main_content);
+        mColorSeekbarProgress = Utils.getColorStateListDefaultColor(mContext,
+                R.color.media_dialog_seekbar_progress);
+        mColorButtonBackground = Utils.getColorStateListDefaultColor(mContext,
+                R.color.media_dialog_button_background);
+        mColorItemBackground = Utils.getColorStateListDefaultColor(mContext,
+                R.color.media_dialog_item_background);
+        mColorConnectedItemBackground = Utils.getColorStateListDefaultColor(mContext,
+                R.color.media_dialog_connected_item_background);
+        mColorPositiveButtonText = Utils.getColorStateListDefaultColor(mContext,
+                R.color.media_dialog_solid_button_text);
     }
 
     void start(@NonNull Callback cb) {
         mMediaDevices.clear();
+        mNearbyDeviceInfoMap.clear();
+        if (mNearbyMediaDevicesManager != null) {
+            mNearbyMediaDevicesManager.registerNearbyDevicesCallback(this);
+        }
         if (!TextUtils.isEmpty(mPackageName)) {
             for (MediaController controller : mMediaSessionManager.getActiveSessions(null)) {
                 if (TextUtils.equals(controller.getPackageName(), mPackageName)) {
@@ -139,6 +182,12 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback {
         mLocalMediaManager.startScan();
     }
 
+    boolean shouldShowLaunchSection() {
+        MediaRouterParams routerParams = MediaRouter.getInstance(mContext).getRouterParams();
+        Log.d(TAG, "try to get routerParams: " + routerParams);
+        return routerParams != null && !routerParams.isMediaTransferReceiverEnabled();
+    }
+
     void stop() {
         if (mMediaController != null) {
             mMediaController.unregisterCallback(mCb);
@@ -148,12 +197,16 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback {
             mLocalMediaManager.stopScan();
         }
         mMediaDevices.clear();
+        if (mNearbyMediaDevicesManager != null) {
+            mNearbyMediaDevicesManager.unregisterNearbyDevicesCallback(this);
+        }
+        mNearbyDeviceInfoMap.clear();
     }
 
     @Override
     public void onDeviceListUpdate(List<MediaDevice> devices) {
         buildMediaDevices(devices);
-        mCallback.onRouteChanged();
+        mCallback.onDeviceListChanged();
     }
 
     @Override
@@ -172,6 +225,46 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback {
     public void onRequestFailed(int reason) {
         mCallback.onRouteChanged();
         mMetricLogger.logOutputFailure(mMediaDevices, reason);
+    }
+
+    Drawable getAppSourceIcon() {
+        if (mPackageName.isEmpty()) {
+            return null;
+        }
+        try {
+            Log.d(TAG, "try to get app icon");
+            return mContext.getPackageManager()
+                    .getApplicationIcon(mPackageName);
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.d(TAG, "icon not found");
+            return null;
+        }
+    }
+
+    String getAppSourceName() {
+        if (mPackageName.isEmpty()) {
+            return null;
+        }
+        final PackageManager packageManager = mContext.getPackageManager();
+        ApplicationInfo applicationInfo;
+        try {
+            applicationInfo = packageManager.getApplicationInfo(mPackageName,
+                    PackageManager.ApplicationInfoFlags.of(0));
+        } catch (PackageManager.NameNotFoundException e) {
+            applicationInfo = null;
+        }
+        final String applicationName =
+                (String) (applicationInfo != null ? packageManager.getApplicationLabel(
+                        applicationInfo)
+                        : mContext.getString(R.string.media_output_dialog_unknown_launch_app_name));
+        return applicationName;
+    }
+
+    Intent getAppLaunchIntent() {
+        if (mPackageName.isEmpty()) {
+            return null;
+        }
+        return mContext.getPackageManager().getLaunchIntentForPackage(mPackageName);
     }
 
     CharSequence getHeaderTitle() {
@@ -225,17 +318,33 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback {
             // Use default Bluetooth device icon to handle getIcon() is null case.
             drawable = mContext.getDrawable(com.android.internal.R.drawable.ic_bt_headphones_a2dp);
         }
+        if (!(drawable instanceof BitmapDrawable)) {
+            setColorFilter(drawable, isActiveItem(device));
+        }
         return BluetoothUtils.createIconWithDrawable(drawable);
+    }
+
+    void setColorFilter(Drawable drawable, boolean isActive) {
+        drawable.setColorFilter(new PorterDuffColorFilter(mColorItemContent,
+                PorterDuff.Mode.SRC_IN));
+    }
+
+    boolean isActiveItem(MediaDevice device) {
+        boolean isConnected = mLocalMediaManager.getCurrentConnectedDevice().getId().equals(
+                device.getId());
+        boolean isSelectedDeviceInGroup = getSelectedMediaDevice().size() > 1
+                && getSelectedMediaDevice().contains(device);
+        return (!hasAdjustVolumeUserRestriction() && isConnected && !isTransferring())
+                || isSelectedDeviceInGroup;
     }
 
     IconCompat getNotificationIcon() {
         if (TextUtils.isEmpty(mPackageName)) {
             return null;
         }
-        for (NotificationEntry entry
-                : mNotificationEntryManager.getActiveNotificationsForCurrentUser()) {
+        for (NotificationEntry entry : mNotifCollection.getAllNotifs()) {
             final Notification notification = entry.getSbn().getNotification();
-            if (notification.hasMediaSession()
+            if (notification.isMediaNotification()
                     && TextUtils.equals(entry.getSbn().getPackageName(), mPackageName)) {
                 final Icon icon = notification.getLargeIcon();
                 if (icon == null) {
@@ -245,6 +354,50 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback {
             }
         }
         return null;
+    }
+
+    void setCurrentColorScheme(WallpaperColors wallpaperColors, boolean isDarkTheme) {
+        ColorScheme mCurrentColorScheme = new ColorScheme(wallpaperColors,
+                isDarkTheme);
+        if (isDarkTheme) {
+            mColorItemContent = mCurrentColorScheme.getAccent1().get(2); // A1-100
+            mColorSeekbarProgress = mCurrentColorScheme.getAccent2().get(7); // A2-600
+            mColorButtonBackground = mCurrentColorScheme.getAccent1().get(4); // A1-300
+            mColorItemBackground = mCurrentColorScheme.getNeutral2().get(9); // N2-800
+            mColorConnectedItemBackground = mCurrentColorScheme.getAccent2().get(9); // A2-800
+            mColorPositiveButtonText = mCurrentColorScheme.getAccent2().get(9); // A2-800
+        } else {
+            mColorItemContent = mCurrentColorScheme.getAccent1().get(9); // A1-800
+            mColorSeekbarProgress = mCurrentColorScheme.getAccent1().get(4); // A1-300
+            mColorButtonBackground = mCurrentColorScheme.getAccent1().get(7); // A1-600
+            mColorItemBackground = mCurrentColorScheme.getAccent2().get(1); // A2-50
+            mColorConnectedItemBackground = mCurrentColorScheme.getAccent1().get(2); // A1-100
+            mColorPositiveButtonText = mCurrentColorScheme.getNeutral1().get(1); // N1-50
+        }
+    }
+
+    public int getColorConnectedItemBackground() {
+        return mColorConnectedItemBackground;
+    }
+
+    public int getColorPositiveButtonText() {
+        return mColorPositiveButtonText;
+    }
+
+    public int getColorItemContent() {
+        return mColorItemContent;
+    }
+
+    public int getColorSeekbarProgress() {
+        return mColorSeekbarProgress;
+    }
+
+    public int getColorButtonBackground() {
+        return mColorButtonBackground;
+    }
+
+    public int getColorItemBackground() {
+        return mColorItemBackground;
     }
 
     private void buildMediaDevices(List<MediaDevice> devices) {
@@ -283,6 +436,15 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback {
         }
         mMediaDevices.clear();
         mMediaDevices.addAll(targetMediaDevices);
+        attachRangeInfo();
+    }
+
+    private void attachRangeInfo() {
+        for (MediaDevice mediaDevice : mMediaDevices) {
+            if (mNearbyDeviceInfoMap.containsKey(mediaDevice.getId())) {
+                mediaDevice.setRangeZone(mNearbyDeviceInfoMap.get(mediaDevice.getId()));
+            }
+        }
     }
 
     List<MediaDevice> getGroupMediaDevices() {
@@ -438,26 +600,32 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback {
         return false;
     }
 
-    void launchBluetoothPairing() {
-        mCallback.dismissDialog();
-        final ActivityStarter.OnDismissAction postKeyguardAction = () -> {
-            mContext.sendBroadcast(new Intent()
-                    .setAction(MediaOutputConstants.ACTION_LAUNCH_BLUETOOTH_PAIRING)
-                    .setPackage(MediaOutputConstants.SETTINGS_PACKAGE_NAME));
-            mShadeController.animateCollapsePanels();
-            return true;
-        };
-        mActivityStarter.dismissKeyguardThenExecute(postKeyguardAction, null, true);
-    }
+    void launchBluetoothPairing(View view) {
+        ActivityLaunchAnimator.Controller controller =
+                mDialogLaunchAnimator.createActivityLaunchController(view);
 
-    void launchMediaOutputDialog() {
-        mCallback.dismissDialog();
-        new MediaOutputDialog(mContext, mAboveStatusbar, this, mUiEventLogger);
-    }
+        if (controller == null) {
+            mCallback.dismissDialog();
+        }
 
-    void launchMediaOutputGroupDialog() {
-        mCallback.dismissDialog();
-        new MediaOutputGroupDialog(mContext, mAboveStatusbar, this);
+        Intent launchIntent =
+                new Intent(ACTION_BLUETOOTH_PAIRING_SETTINGS)
+                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        final Intent deepLinkIntent =
+                new Intent(Settings.ACTION_SETTINGS_EMBED_DEEP_LINK_ACTIVITY);
+        if (deepLinkIntent.resolveActivity(mContext.getPackageManager()) != null) {
+            Log.d(TAG, "Device support split mode, launch page with deep link");
+            deepLinkIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            deepLinkIntent.putExtra(
+                    Settings.EXTRA_SETTINGS_EMBEDDED_DEEP_LINK_INTENT_URI,
+                    launchIntent.toUri(Intent.URI_INTENT_SCHEME));
+            deepLinkIntent.putExtra(
+                    Settings.EXTRA_SETTINGS_EMBEDDED_DEEP_LINK_HIGHLIGHT_MENU_KEY,
+                    PAGE_CONNECTED_DEVICES_KEY);
+            mActivityStarter.startActivity(deepLinkIntent, true, controller);
+            return;
+        }
+        mActivityStarter.startActivity(launchIntent, true, controller);
     }
 
     boolean isActiveRemoteDevice(@NonNull MediaDevice device) {
@@ -468,10 +636,30 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback {
                 || features.contains(MediaRoute2Info.FEATURE_REMOTE_GROUP_PLAYBACK));
     }
 
+    private boolean isPlayBackInfoLocal() {
+        return mMediaController != null
+                && mMediaController.getPlaybackInfo() != null
+                && mMediaController.getPlaybackInfo().getPlaybackType()
+                == MediaController.PlaybackInfo.PLAYBACK_TYPE_LOCAL;
+    }
+
     boolean isVolumeControlEnabled(@NonNull MediaDevice device) {
-        // TODO(b/202500642): Also enable volume control for remote non-group sessions.
-        return !isActiveRemoteDevice(device)
-            || mVolumeAdjustmentForRemoteGroupSessions;
+        return isPlayBackInfoLocal()
+                || mLocalMediaManager.isMediaSessionAvailableForVolumeControl();
+    }
+
+    @Override
+    public void onDevicesUpdated(List<NearbyDevice> nearbyDevices) throws RemoteException {
+        mNearbyDeviceInfoMap.clear();
+        for (NearbyDevice nearbyDevice : nearbyDevices) {
+            mNearbyDeviceInfoMap.put(nearbyDevice.getMediaRoute2Id(), nearbyDevice.getRangeZone());
+        }
+        mNearbyMediaDevicesManager.unregisterNearbyDevicesCallback(this);
+    }
+
+    @Override
+    public IBinder asBinder() {
+        return null;
     }
 
     private final MediaController.Callback mCb = new MediaController.Callback() {
@@ -501,9 +689,14 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback {
         void onMediaStoppedOrPaused();
 
         /**
-         * Override to handle the device updating.
+         * Override to handle the device status or attributes updating.
          */
         void onRouteChanged();
+
+        /**
+         * Override to handle the devices set updating.
+         */
+        void onDeviceListChanged();
 
         /**
          * Override to dismiss dialog.

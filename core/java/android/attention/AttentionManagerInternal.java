@@ -46,6 +46,23 @@ public abstract class AttentionManagerInternal {
      */
     public abstract void cancelAttentionCheck(AttentionCallbackInternal callback);
 
+    /**
+     * Requests the continuous updates of proximity signal via the provided callback,
+     * until the given callback is unregistered. Currently, AttentionManagerService only
+     * anticipates one client and updates one client at a time.
+     *
+     * @param callback      a callback that receives the proximity updates
+     * @return {@code true} if the registration should succeed.
+     */
+    public abstract boolean onStartProximityUpdates(ProximityUpdateCallbackInternal callback);
+
+    /**
+     * Requests to stop providing continuous updates until the callback is registered.
+     *
+     * @param callback a callback that was used in {@link #onStartProximityUpdates}
+     */
+    public abstract void onStopProximityUpdates(ProximityUpdateCallbackInternal callback);
+
     /** Internal interface for attention callback. */
     public abstract static class AttentionCallbackInternal {
         /**
@@ -63,5 +80,14 @@ public abstract class AttentionManagerInternal {
          * @param error       an int with the reason for failure
          */
         public abstract void onFailure(int error);
+    }
+
+    /** Internal interface for proximity callback. */
+    public abstract static class ProximityUpdateCallbackInternal {
+        /**
+         * @param distance the estimated distance of the user (in meter)
+         * The distance will be PROXIMITY_UNKNOWN if the proximity sensing was inconclusive.
+         */
+        public abstract void onProximityUpdate(double distance);
     }
 }

@@ -24,7 +24,7 @@ package {
 android_test_helper_app {
     name: "PackageManagerTestAppDeclaresStaticLibrary",
     manifest: "AndroidManifestDeclaresStaticLibrary.xml",
-    certificate: ":FrameworksCoreTests_keyset_A_cert",
+    certificate: ":FrameworksServicesTests_keyset_A_cert",
 }
 
 android_test_helper_app {

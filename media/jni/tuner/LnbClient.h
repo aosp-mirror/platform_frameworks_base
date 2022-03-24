@@ -17,30 +17,23 @@
 #ifndef _ANDROID_MEDIA_TV_LNB_CLIENT_H_
 #define _ANDROID_MEDIA_TV_LNB_CLIENT_H_
 
+#include <aidl/android/hardware/tv/tuner/LnbPosition.h>
+#include <aidl/android/hardware/tv/tuner/LnbTone.h>
+#include <aidl/android/hardware/tv/tuner/LnbVoltage.h>
 #include <aidl/android/media/tv/tuner/BnTunerLnbCallback.h>
 #include <aidl/android/media/tv/tuner/ITunerLnb.h>
-#include <android/hardware/tv/tuner/1.0/ILnb.h>
-#include <android/hardware/tv/tuner/1.0/ILnbCallback.h>
-#include <android/hardware/tv/tuner/1.1/types.h>
+#include <utils/RefBase.h>
 
 #include "ClientHelper.h"
 #include "LnbClientCallback.h"
 
 using Status = ::ndk::ScopedAStatus;
 
+using ::aidl::android::hardware::tv::tuner::LnbPosition;
+using ::aidl::android::hardware::tv::tuner::LnbTone;
+using ::aidl::android::hardware::tv::tuner::LnbVoltage;
 using ::aidl::android::media::tv::tuner::BnTunerLnbCallback;
 using ::aidl::android::media::tv::tuner::ITunerLnb;
-
-using ::android::hardware::Return;
-using ::android::hardware::Void;
-using ::android::hardware::hidl_vec;
-using ::android::hardware::tv::tuner::V1_0::ILnb;
-using ::android::hardware::tv::tuner::V1_0::ILnbCallback;
-using ::android::hardware::tv::tuner::V1_0::LnbId;
-using ::android::hardware::tv::tuner::V1_0::LnbPosition;
-using ::android::hardware::tv::tuner::V1_0::LnbTone;
-using ::android::hardware::tv::tuner::V1_0::LnbVoltage;
-using ::android::hardware::tv::tuner::V1_0::Result;
 
 using namespace std;
 
@@ -51,19 +44,8 @@ class TunerLnbCallback : public BnTunerLnbCallback {
 public:
     TunerLnbCallback(sp<LnbClientCallback> lnbClientCallback);
 
-    Status onEvent(int lnbEventType);
+    Status onEvent(LnbEventType lnbEventType);
     Status onDiseqcMessage(const vector<uint8_t>& diseqcMessage);
-
-private:
-    sp<LnbClientCallback> mLnbClientCallback;
-};
-
-struct HidlLnbCallback : public ILnbCallback {
-
-public:
-    HidlLnbCallback(sp<LnbClientCallback> lnbClientCallback);
-    virtual Return<void> onEvent(const LnbEventType lnbEventType);
-    virtual Return<void> onDiseqcMessage(const hidl_vec<uint8_t>& diseqcMessage);
 
 private:
     sp<LnbClientCallback> mLnbClientCallback;
@@ -74,9 +56,6 @@ struct LnbClient : public RefBase {
 public:
     LnbClient(shared_ptr<ITunerLnb> tunerLnb);
     ~LnbClient();
-
-    // TODO: remove after migration to Tuner Service is done.
-    void setHidlLnb(sp<ILnb> lnb);
 
     /**
      * Set the lnb callback.
@@ -109,8 +88,6 @@ public:
     Result close();
 
     shared_ptr<ITunerLnb> getAidlLnb() { return mTunerLnb; }
-    void setId(LnbId id) { mId = id; }
-    LnbId getId() { return mId; }
 
 private:
     /**
@@ -118,15 +95,6 @@ private:
      * opens an Lnb. Default null when lnb is not opened.
      */
     shared_ptr<ITunerLnb> mTunerLnb;
-
-    /**
-     * A Lnb HAL interface that is ready before migrating to the TunerLnb.
-     * This is a temprary interface before Tuner Framework migrates to use TunerService.
-     * Default null when the HAL service does not exist.
-     */
-    sp<ILnb> mLnb;
-
-    LnbId mId;
 };
 }  // namespace android
 

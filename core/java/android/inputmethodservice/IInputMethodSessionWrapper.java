@@ -32,14 +32,18 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.CursorAnchorInfo;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.ExtractedText;
 import android.view.inputmethod.InputMethodSession;
 
 import com.android.internal.os.HandlerCaller;
 import com.android.internal.os.SomeArgs;
+import com.android.internal.view.IInputContext;
 import com.android.internal.view.IInputMethodSession;
 
-class IInputMethodSessionWrapper extends IInputMethodSession.Stub
+/** @hide */
+// TODO(b/215636776): move IInputMethodSessionWrapper to proper package
+public class IInputMethodSessionWrapper extends IInputMethodSession.Stub
         implements HandlerCaller.Callback {
     private static final String TAG = "InputMethodWrapper";
 
@@ -54,6 +58,7 @@ class IInputMethodSessionWrapper extends IInputMethodSession.Stub
     private static final int DO_NOTIFY_IME_HIDDEN = 120;
     private static final int DO_REMOVE_IME_SURFACE = 130;
     private static final int DO_FINISH_INPUT = 140;
+    private static final int DO_INVALIDATE_INPUT = 150;
 
 
     @UnsupportedAppUsage
@@ -142,6 +147,16 @@ class IInputMethodSessionWrapper extends IInputMethodSession.Stub
                 mInputMethodSession.finishInput();
                 return;
             }
+            case DO_INVALIDATE_INPUT: {
+                final SomeArgs args = (SomeArgs) msg.obj;
+                try {
+                    mInputMethodSession.invalidateInputInternal((EditorInfo) args.arg1,
+                            (IInputContext) args.arg2, msg.arg1);
+                } finally {
+                    args.recycle();
+                }
+                return;
+            }
         }
         Log.w(TAG, "Unhandled message code: " + msg.what);
     }
@@ -215,6 +230,12 @@ class IInputMethodSessionWrapper extends IInputMethodSession.Stub
     @Override
     public void finishSession() {
         mCaller.executeOrSendMessage(mCaller.obtainMessage(DO_FINISH_SESSION));
+    }
+
+    @Override
+    public void invalidateInput(EditorInfo editorInfo, IInputContext inputContext,  int sessionId) {
+        mCaller.executeOrSendMessage(mCaller.obtainMessageIOO(
+                DO_INVALIDATE_INPUT, sessionId, editorInfo, inputContext));
     }
 
     @Override

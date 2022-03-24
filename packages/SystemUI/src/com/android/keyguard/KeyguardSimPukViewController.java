@@ -169,6 +169,7 @@ public class KeyguardSimPukViewController
             boolean isEsimLocked = KeyguardEsimArea.isEsimLocked(mView.getContext(), mSubId);
 
             KeyguardEsimArea esimButton = mView.findViewById(R.id.keyguard_esim_area);
+            esimButton.setSubscriptionId(mSubId);
             esimButton.setVisibility(isEsimLocked ? View.VISIBLE : View.GONE);
             mPasswordEntry.requestFocus();
         }

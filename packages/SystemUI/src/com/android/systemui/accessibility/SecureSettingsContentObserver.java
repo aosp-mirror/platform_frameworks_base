@@ -71,7 +71,9 @@ public abstract class SecureSettingsContentObserver<T> {
     public void addListener(@NonNull T listener) {
         Objects.requireNonNull(listener, "listener must be non-null");
 
-        mListeners.add(listener);
+        if (!mListeners.contains(listener)) {
+            mListeners.add(listener);
+        }
 
         if (mListeners.size() == 1) {
             mContentResolver.registerContentObserver(

@@ -24,4 +24,5 @@ import android.hardware.fingerprint.Fingerprint;
  */
 oneway interface IFingerprintStateListener {
     void onStateChanged(int newState);
+    void onEnrollmentsChanged(int userId, int sensorId, boolean hasEnrollments);
 }

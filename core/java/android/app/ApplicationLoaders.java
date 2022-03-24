@@ -48,18 +48,19 @@ public class ApplicationLoaders {
                                ClassLoader parent, String classLoaderName) {
         return getClassLoaderWithSharedLibraries(zip, targetSdkVersion, isBundled,
                               librarySearchPath, libraryPermittedPath, parent, classLoaderName,
-                              null, null);
+                              null, null, null);
     }
 
     ClassLoader getClassLoaderWithSharedLibraries(
             String zip, int targetSdkVersion, boolean isBundled,
             String librarySearchPath, String libraryPermittedPath,
             ClassLoader parent, String classLoaderName,
-            List<ClassLoader> sharedLibraries, List<String> nativeSharedLibraries) {
+            List<ClassLoader> sharedLibraries, List<String> nativeSharedLibraries,
+            List<ClassLoader> sharedLibrariesLoadedAfterApp) {
         // For normal usage the cache key used is the same as the zip path.
         return getClassLoader(zip, targetSdkVersion, isBundled, librarySearchPath,
                               libraryPermittedPath, parent, zip, classLoaderName, sharedLibraries,
-                              nativeSharedLibraries);
+                              nativeSharedLibraries, sharedLibrariesLoadedAfterApp);
     }
 
     /**
@@ -71,7 +72,8 @@ public class ApplicationLoaders {
      */
     ClassLoader getSharedLibraryClassLoaderWithSharedLibraries(String zip, int targetSdkVersion,
             boolean isBundled, String librarySearchPath, String libraryPermittedPath,
-            ClassLoader parent, String classLoaderName, List<ClassLoader> sharedLibraries) {
+            ClassLoader parent, String classLoaderName, List<ClassLoader> sharedLibraries,
+            List<ClassLoader> sharedLibrariesAfter) {
         ClassLoader loader = getCachedNonBootclasspathSystemLib(zip, parent, classLoaderName,
                 sharedLibraries);
         if (loader != null) {
@@ -86,14 +88,15 @@ public class ApplicationLoaders {
         nativeSharedLibraries.add("ALL");
         return getClassLoaderWithSharedLibraries(zip, targetSdkVersion, isBundled,
               librarySearchPath, libraryPermittedPath, parent, classLoaderName, sharedLibraries,
-              nativeSharedLibraries);
+              nativeSharedLibraries, sharedLibrariesAfter);
     }
 
     private ClassLoader getClassLoader(String zip, int targetSdkVersion, boolean isBundled,
                                        String librarySearchPath, String libraryPermittedPath,
                                        ClassLoader parent, String cacheKey,
                                        String classLoaderName, List<ClassLoader> sharedLibraries,
-                                       List<String> nativeSharedLibraries) {
+                                       List<String> nativeSharedLibraries,
+                                       List<ClassLoader> sharedLibrariesLoadedAfterApp) {
         /*
          * This is the parent we use if they pass "null" in.  In theory
          * this should be the "system" class loader; in practice we
@@ -123,7 +126,7 @@ public class ApplicationLoaders {
                 ClassLoader classloader = ClassLoaderFactory.createClassLoader(
                         zip,  librarySearchPath, libraryPermittedPath, parent,
                         targetSdkVersion, isBundled, classLoaderName, sharedLibraries,
-                        nativeSharedLibraries);
+                        nativeSharedLibraries, sharedLibrariesLoadedAfterApp);
 
                 Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
 
@@ -140,7 +143,8 @@ public class ApplicationLoaders {
 
             Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, zip);
             ClassLoader loader = ClassLoaderFactory.createClassLoader(
-                    zip, null, parent, classLoaderName, sharedLibraries);
+                    zip, null, parent, classLoaderName, sharedLibraries,
+                    null /*sharedLibrariesLoadedAfterApp*/);
             Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
             return loader;
         }
@@ -196,7 +200,7 @@ public class ApplicationLoaders {
         ClassLoader classLoader = getClassLoader(path, Build.VERSION.SDK_INT, true /*isBundled*/,
                 null /*librarySearchPath*/, null /*libraryPermittedPath*/, null /*parent*/,
                 null /*cacheKey*/, null /*classLoaderName*/, sharedLibraries /*sharedLibraries*/,
-                null /* nativeSharedLibraries */);
+                null /* nativeSharedLibraries */, null /*sharedLibrariesLoadedAfterApp*/);
 
         if (classLoader == null) {
             // bad configuration or break in classloading code
@@ -267,7 +271,8 @@ public class ApplicationLoaders {
         // stub's APK path, when the actual package path is the donor APK.
         return getClassLoader(packagePath, Build.VERSION.SDK_INT, false, libsPath, null, null,
                               cacheKey, null /* classLoaderName */, null /* sharedLibraries */,
-                              null /* nativeSharedLibraries */);
+                              null /* nativeSharedLibraries */,
+                              null /*sharedLibrariesLoadedAfterApp*/);
     }
 
     /**

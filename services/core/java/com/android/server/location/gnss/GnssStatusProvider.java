@@ -43,6 +43,7 @@ public class GnssStatusProvider extends
 
     private final AppOpsHelper mAppOpsHelper;
     private final LocationUsageLogger mLogger;
+    private final GnssNative mGnssNative;
 
     private boolean mIsNavigating = false;
 
@@ -50,6 +51,7 @@ public class GnssStatusProvider extends
         super(injector);
         mAppOpsHelper = injector.getAppOpsHelper();
         mLogger = injector.getLocationUsageLogger();
+        mGnssNative = gnssNative;
 
         gnssNative.addBaseCallbacks(this);
         gnssNative.addStatusCallbacks(this);
@@ -64,16 +66,25 @@ public class GnssStatusProvider extends
     @Override
     protected boolean registerWithService(Void ignored,
             Collection<GnssListenerRegistration> registrations) {
-        if (D) {
-            Log.d(TAG, "starting gnss status");
+        if (mGnssNative.startSvStatusCollection()) {
+            if (D) {
+                Log.d(TAG, "starting gnss sv status");
+            }
+            return true;
+        } else {
+            Log.e(TAG, "error starting gnss sv status");
+            return false;
         }
-        return true;
     }
 
     @Override
     protected void unregisterWithService() {
-        if (D) {
-            Log.d(TAG, "stopping gnss status");
+        if (mGnssNative.stopSvStatusCollection()) {
+            if (D) {
+                Log.d(TAG, "stopping gnss sv status");
+            }
+        } else {
+            Log.e(TAG, "error stopping gnss sv status");
         }
     }
 

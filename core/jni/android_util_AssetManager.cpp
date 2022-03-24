@@ -92,6 +92,7 @@ static struct configuration_offsets_t {
   jfieldID mSmallestScreenWidthDpOffset;
   jfieldID mScreenWidthDpOffset;
   jfieldID mScreenHeightDpOffset;
+  jfieldID mScreenLayoutOffset;
 } gConfigurationOffsets;
 
 static struct arraymap_offsets_t {
@@ -880,6 +881,12 @@ static jint NativeGetResourceArray(JNIEnv* env, jclass /*clazz*/, jlong ptr, jin
   return static_cast<jint>(bag->entry_count);
 }
 
+static jint NativeGetParentThemeIdentifier(JNIEnv* env, jclass /*clazz*/, jlong ptr, jint resid) {
+  ScopedLock<AssetManager2> assetmanager(AssetManagerFromLong(ptr));
+  const auto parentThemeResId = assetmanager->GetParentThemeResourceId(resid);
+  return parentThemeResId.value_or(0);
+}
+
 static jint NativeGetResourceIdentifier(JNIEnv* env, jclass /*clazz*/, jlong ptr, jstring name,
                                         jstring def_type, jstring def_package) {
   ScopedUtfChars name_utf8(env, name);
@@ -1019,6 +1026,7 @@ static jobject ConstructConfigurationObject(JNIEnv* env, const ResTable_config& 
                    config.smallestScreenWidthDp);
   env->SetIntField(result, gConfigurationOffsets.mScreenWidthDpOffset, config.screenWidthDp);
   env->SetIntField(result, gConfigurationOffsets.mScreenHeightDpOffset, config.screenHeightDp);
+  env->SetIntField(result, gConfigurationOffsets.mScreenLayoutOffset, config.screenLayout);
   return result;
 }
 
@@ -1462,6 +1470,8 @@ static const JNINativeMethod gAssetManagerMethods[] = {
     {"nativeGetResourceIntArray", "(JI)[I", (void*)NativeGetResourceIntArray},
     {"nativeGetResourceArraySize", "(JI)I", (void*)NativeGetResourceArraySize},
     {"nativeGetResourceArray", "(JI[I)I", (void*)NativeGetResourceArray},
+    {"nativeGetParentThemeIdentifier", "(JI)I",
+     (void*)NativeGetParentThemeIdentifier},
 
     // AssetManager resource name/ID methods.
     {"nativeGetResourceIdentifier", "(JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;)I",
@@ -1553,6 +1563,8 @@ int register_android_content_AssetManager(JNIEnv* env) {
       GetFieldIDOrDie(env, configurationClass, "screenWidthDp", "I");
   gConfigurationOffsets.mScreenHeightDpOffset =
       GetFieldIDOrDie(env, configurationClass, "screenHeightDp", "I");
+  gConfigurationOffsets.mScreenLayoutOffset =
+          GetFieldIDOrDie(env, configurationClass, "screenLayout", "I");
 
   jclass arrayMapClass = FindClassOrDie(env, "android/util/ArrayMap");
   gArrayMapOffsets.classObject = MakeGlobalRefOrDie(env, arrayMapClass);

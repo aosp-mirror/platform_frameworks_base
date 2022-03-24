@@ -180,7 +180,7 @@ public final class PackageRollbackInfo implements Parcelable {
             @NonNull List<Integer> pendingBackups, @NonNull ArrayList<RestoreInfo> pendingRestores,
             boolean isApex, boolean isApkInApex, @NonNull List<Integer> snapshottedUsers) {
         this(packageRolledBackFrom, packageRolledBackTo, pendingBackups, pendingRestores, isApex,
-                isApkInApex, snapshottedUsers, PackageManager.RollbackDataPolicy.RESTORE);
+                isApkInApex, snapshottedUsers, PackageManager.ROLLBACK_DATA_POLICY_RESTORE);
     }
 
     /** @hide */
@@ -207,7 +207,7 @@ public final class PackageRollbackInfo implements Parcelable {
         this.mPendingRestores = null;
         this.mPendingBackups = null;
         this.mSnapshottedUsers = null;
-        this.mRollbackDataPolicy = PackageManager.RollbackDataPolicy.RESTORE;
+        this.mRollbackDataPolicy = PackageManager.ROLLBACK_DATA_POLICY_RESTORE;
     }
 
     @Override

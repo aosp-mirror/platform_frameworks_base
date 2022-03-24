@@ -31,13 +31,13 @@ import android.content.pm.dex.ArtManagerInternal;
 import android.content.pm.dex.DexMetadataHelper;
 import android.content.pm.dex.ISnapshotRuntimeProfileCallback;
 import android.content.pm.dex.PackageOptimizationInfo;
-import android.content.pm.parsing.PackageInfoWithoutStateUtils;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.system.Os;
@@ -55,6 +55,7 @@ import com.android.server.pm.Installer;
 import com.android.server.pm.Installer.InstallerException;
 import com.android.server.pm.PackageManagerServiceCompilerMapping;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.pkg.parsing.PackageInfoWithoutStateUtils;
 
 import dalvik.system.DexFile;
 import dalvik.system.VMRuntime;
@@ -92,7 +93,7 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
     private static final String BOOT_IMAGE_PROFILE_NAME = "android.prof";
 
     private final Context mContext;
-    private final IPackageManager mPackageManager;
+    private IPackageManager mPackageManager;
     private final Object mInstallLock;
     @GuardedBy("mInstallLock")
     private final Installer mInstaller;
@@ -103,15 +104,23 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
         verifyTronLoggingConstants();
     }
 
-    public ArtManagerService(Context context, IPackageManager pm, Installer installer,
+    public ArtManagerService(Context context, Installer installer,
             Object installLock) {
         mContext = context;
-        mPackageManager = pm;
         mInstaller = installer;
         mInstallLock = installLock;
         mHandler = new Handler(BackgroundThread.getHandler().getLooper());
 
         LocalServices.addService(ArtManagerInternal.class, new ArtManagerInternalImpl());
+    }
+
+    @NonNull
+    private IPackageManager getPackageManager() {
+        if (mPackageManager == null) {
+            mPackageManager = IPackageManager.Stub.asInterface(
+                    ServiceManager.getService("package"));
+        }
+        return mPackageManager;
     }
 
     private boolean checkAndroidPermissions(int callingUid, String callingPackage) {
@@ -157,7 +166,7 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
         }
         PackageInfo info = null;
         try {
-            info = mPackageManager.getPackageInfo(packageName, /*flags*/ 0, /*userId*/ 0);
+            info =  getPackageManager().getPackageInfo(packageName, /*flags*/ 0, /*userId*/ 0);
         } catch (RemoteException ignored) {
             // Should not happen.
         }
@@ -221,7 +230,7 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
 
             // TODO(calin): consider adding an API to PMS which can retrieve the
             // PackageParser.Package.
-            info = mPackageManager.getPackageInfo(packageName, /*flags*/ 0, /*userId*/ 0);
+            info =  getPackageManager().getPackageInfo(packageName, /*flags*/ 0, /*userId*/ 0);
         } catch (RemoteException ignored) {
             // Should not happen.
         }
@@ -608,6 +617,8 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
     private static final int TRON_COMPILATION_REASON_BOOT_AFTER_OTA = 20;
     private static final int TRON_COMPILATION_REASON_POST_BOOT = 21;
     private static final int TRON_COMPILATION_REASON_CMDLINE = 22;
+    private static final int TRON_COMPILATION_REASON_PREBUILT = 23;
+    private static final int TRON_COMPILATION_REASON_VDEX = 24;
 
     // The annotation to add as a suffix to the compilation reason when dexopt was
     // performed with dex metadata.
@@ -628,6 +639,8 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
             case "ab-ota" : return TRON_COMPILATION_REASON_AB_OTA;
             case "inactive" : return TRON_COMPILATION_REASON_INACTIVE;
             case "shared" : return TRON_COMPILATION_REASON_SHARED;
+            case "prebuilt" : return TRON_COMPILATION_REASON_PREBUILT;
+            case "vdex" : return TRON_COMPILATION_REASON_VDEX;
             case "install-fast" :
                 return TRON_COMPILATION_REASON_INSTALL_FAST;
             case "install-bulk" :

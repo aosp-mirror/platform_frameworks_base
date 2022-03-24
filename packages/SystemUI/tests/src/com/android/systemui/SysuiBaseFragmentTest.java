@@ -29,8 +29,10 @@ import com.android.systemui.utils.leaks.LeakCheckedTest;
 import com.android.systemui.utils.leaks.LeakCheckedTest.SysuiLeakCheck;
 
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Rule;
+import org.mockito.Mockito;
 
 public abstract class SysuiBaseFragmentTest extends BaseFragmentTest {
 
@@ -76,6 +78,11 @@ public abstract class SysuiBaseFragmentTest extends BaseFragmentTest {
         InstrumentationRegistry.registerInstance(mRealInstrumentation,
                 InstrumentationRegistry.getArguments());
         SystemUIFactory.cleanup();
+    }
+
+    @AfterClass
+    public static void mockitoTeardown() {
+        Mockito.framework().clearInlineMocks();
     }
 
     @Override

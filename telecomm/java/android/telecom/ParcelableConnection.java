@@ -261,10 +261,10 @@ public final class ParcelableConnection implements Parcelable {
         public ParcelableConnection createFromParcel(Parcel source) {
             ClassLoader classLoader = ParcelableConnection.class.getClassLoader();
 
-            PhoneAccountHandle phoneAccount = source.readParcelable(classLoader);
+            PhoneAccountHandle phoneAccount = source.readParcelable(classLoader, android.telecom.PhoneAccountHandle.class);
             int state = source.readInt();
             int capabilities = source.readInt();
-            Uri address = source.readParcelable(classLoader);
+            Uri address = source.readParcelable(classLoader, android.net.Uri.class);
             int addressPresentation = source.readInt();
             String callerDisplayName = source.readString();
             int callerDisplayNamePresentation = source.readInt();
@@ -274,8 +274,8 @@ public final class ParcelableConnection implements Parcelable {
             boolean ringbackRequested = source.readByte() == 1;
             boolean audioModeIsVoip = source.readByte() == 1;
             long connectTimeMillis = source.readLong();
-            StatusHints statusHints = source.readParcelable(classLoader);
-            DisconnectCause disconnectCause = source.readParcelable(classLoader);
+            StatusHints statusHints = source.readParcelable(classLoader, android.telecom.StatusHints.class);
+            DisconnectCause disconnectCause = source.readParcelable(classLoader, android.telecom.DisconnectCause.class);
             List<String> conferenceableConnectionIds = new ArrayList<>();
             source.readStringList(conferenceableConnectionIds);
             Bundle extras = Bundle.setDefusable(source.readBundle(classLoader), true);

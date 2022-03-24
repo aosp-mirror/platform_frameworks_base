@@ -17,6 +17,7 @@
 package com.android.systemui.privacy
 
 import android.content.Context
+import android.content.Intent
 import android.graphics.drawable.LayerDrawable
 import android.os.Bundle
 import android.text.TextUtils
@@ -24,7 +25,6 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.view.WindowInsets
 import android.widget.ImageView
 import android.widget.TextView
@@ -41,12 +41,12 @@ import java.util.concurrent.atomic.AtomicBoolean
  * @param context A context to create the dialog
  * @param list list of elements to show in the dialog. The elements will show in the same order they
  *             appear in the list
- * @param activityStarter a callback to start an activity for a given package name and user id
+ * @param activityStarter a callback to start an activity for a given package name, user id, attributionTag and intent
  */
 class PrivacyDialog(
     context: Context,
     private val list: List<PrivacyElement>,
-    activityStarter: (String, Int) -> Unit
+    activityStarter: (String, Int, CharSequence?, Intent?) -> Unit
 ) : SystemUIDialog(context, R.style.PrivacyDialog) {
 
     private val dismissListeners = mutableListOf<WeakReference<OnDialogDismissed>>()
@@ -65,7 +65,6 @@ class PrivacyDialog(
         window?.apply {
             attributes.fitInsetsTypes = attributes.fitInsetsTypes or WindowInsets.Type.statusBars()
             attributes.receiveInsetsIgnoringZOrder = true
-            setLayout(context.resources.getDimensionPixelSize(R.dimen.qs_panel_width), WRAP_CONTENT)
             setGravity(Gravity.TOP or Gravity.CENTER_HORIZONTAL)
         }
 
@@ -120,13 +119,7 @@ class PrivacyDialog(
             app
         }
         val firstLine = context.getString(stringId, appName)
-        val finalText = element.attribution?.let {
-            TextUtils.concat(
-                    firstLine,
-                    " ",
-                    context.getString(R.string.ongoing_privacy_dialog_attribution_text, it)
-            )
-        } ?: firstLine
+        val finalText = getFinalText(firstLine, element.attributionLabel, element.proxyLabel)
         newView.requireViewById<TextView>(R.id.text).text = finalText
         if (element.phoneCall) {
             newView.requireViewById<View>(R.id.chevron).visibility = View.GONE
@@ -138,6 +131,25 @@ class PrivacyDialog(
             }
         }
         return newView
+    }
+
+    private fun getFinalText(
+        firstLine: CharSequence,
+        attributionLabel: CharSequence?,
+        proxyLabel: CharSequence?
+    ): CharSequence {
+        var dialogText: CharSequence? = null
+        if (attributionLabel != null && proxyLabel != null) {
+            dialogText = context.getString(R.string.ongoing_privacy_dialog_attribution_proxy_label,
+                attributionLabel, proxyLabel)
+        } else if (attributionLabel != null) {
+            dialogText = context.getString(R.string.ongoing_privacy_dialog_attribution_label,
+                attributionLabel)
+        } else if (proxyLabel != null) {
+            dialogText = context.getString(R.string.ongoing_privacy_dialog_attribution_text,
+                proxyLabel)
+        }
+        return if (dialogText != null) TextUtils.concat(firstLine, " ", dialogText) else firstLine
     }
 
     private fun getStringIdForState(active: Boolean): Int {
@@ -159,7 +171,8 @@ class PrivacyDialog(
     private val clickListener = View.OnClickListener { v ->
         v.tag?.let {
             val element = it as PrivacyElement
-            activityStarter(element.packageName, element.userId)
+            activityStarter(element.packageName, element.userId,
+                element.attributionTag, element.navigationIntent)
         }
     }
 
@@ -169,11 +182,15 @@ class PrivacyDialog(
         val packageName: String,
         val userId: Int,
         val applicationName: CharSequence,
-        val attribution: CharSequence?,
+        val attributionTag: CharSequence?,
+        val attributionLabel: CharSequence?,
+        val proxyLabel: CharSequence?,
         val lastActiveTimestamp: Long,
         val active: Boolean,
         val enterprise: Boolean,
-        val phoneCall: Boolean
+        val phoneCall: Boolean,
+        val permGroupName: CharSequence,
+        val navigationIntent: Intent?
     ) {
         private val builder = StringBuilder("PrivacyElement(")
 
@@ -182,8 +199,14 @@ class PrivacyDialog(
             builder.append(", packageName=$packageName")
             builder.append(", userId=$userId")
             builder.append(", appName=$applicationName")
-            if (attribution != null) {
-                builder.append(", attribution=$attribution")
+            if (attributionTag != null) {
+                builder.append(", attributionTag=$attributionTag")
+            }
+            if (attributionLabel != null) {
+                builder.append(", attributionLabel=$attributionLabel")
+            }
+            if (proxyLabel != null) {
+                builder.append(", proxyLabel=$proxyLabel")
             }
             builder.append(", lastActive=$lastActiveTimestamp")
             if (active) {
@@ -195,7 +218,10 @@ class PrivacyDialog(
             if (phoneCall) {
                 builder.append(", phoneCall")
             }
-            builder.append(")")
+            builder.append(", permGroupName=$permGroupName)")
+            if (navigationIntent != null) {
+                builder.append(", navigationIntent=$navigationIntent")
+            }
         }
 
         override fun toString(): String = builder.toString()

@@ -238,7 +238,7 @@ public class UpdateEngine {
         public static final int DISABLED = 9;
     }
 
-    private IUpdateEngine mUpdateEngine;
+    private final IUpdateEngine mUpdateEngine;
     private IUpdateEngineCallback mUpdateEngineCallback = null;
     private final Object mUpdateEngineCallbackLock = new Object();
 
@@ -248,6 +248,9 @@ public class UpdateEngine {
     public UpdateEngine() {
         mUpdateEngine = IUpdateEngine.Stub.asInterface(
                 ServiceManager.getService(UPDATE_ENGINE_SERVICE));
+        if (mUpdateEngine == null) {
+            throw new IllegalStateException("Failed to find update_engine");
+        }
     }
 
     /**
@@ -409,16 +412,50 @@ public class UpdateEngine {
 
     /**
      * Resets the bootable flag on the non-current partition and all internal
-     * update_engine state. This can be used after an unwanted payload has been
-     * successfully applied and the device has not yet been rebooted to signal
-     * that we no longer want to boot into that updated system. After this call
-     * completes, update_engine will no longer report
+     * update_engine state. Note this call will clear the entire update
+     * progress. So a subsequent {@link #applyPayload} will apply the update
+     * from scratch.
+     *
+     * <p>After this call completes, update_engine will no longer report
      * {@code UPDATED_NEED_REBOOT}, so your callback can remove any outstanding
      * notification that rebooting into the new system is possible.
      */
     public void resetStatus() {
         try {
             mUpdateEngine.resetStatus();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Sets the A/B slot switch for the next boot after applying an ota update. If
+     * {@link #applyPayload} hasn't switched the slot, the updater APP can call
+     * this API to switch the slot and apply the update on next boot.
+     *
+     * @param payloadMetadataFilename the location of the metadata without the
+     * {@code file://} prefix.
+     */
+    public void setShouldSwitchSlotOnReboot(@NonNull String payloadMetadataFilename) {
+        try {
+            mUpdateEngine.setShouldSwitchSlotOnReboot(payloadMetadataFilename);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+   /**
+    * Resets the boot slot to the source/current slot, without cancelling the
+    * update progress. This can be called after the update is installed, and to
+    * prevent the device from accidentally taking the update when it reboots.
+    *
+    * This is useful when users don't want to take the update immediately; or
+    * the updater determines some condition hasn't met, e.g. insufficient space
+    * for boot.
+    */
+    public void resetShouldSwitchSlotOnReboot() {
+        try {
+            mUpdateEngine.resetShouldSwitchSlotOnReboot();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

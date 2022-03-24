@@ -46,7 +46,7 @@ public final class FaceAuthenticationFrame implements Parcelable {
     }
 
     private FaceAuthenticationFrame(@NonNull Parcel source) {
-        mData = source.readParcelable(FaceDataFrame.class.getClassLoader());
+        mData = source.readParcelable(FaceDataFrame.class.getClassLoader(), android.hardware.face.FaceDataFrame.class);
     }
 
     @Override

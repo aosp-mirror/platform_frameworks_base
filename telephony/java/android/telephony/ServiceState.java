@@ -19,6 +19,7 @@ package android.telephony;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -444,7 +445,9 @@ public class ServiceState implements Parcelable {
         mArfcnRsrpBoost = s.mArfcnRsrpBoost;
         synchronized (mNetworkRegistrationInfos) {
             mNetworkRegistrationInfos.clear();
-            mNetworkRegistrationInfos.addAll(s.getNetworkRegistrationInfoList());
+            for (NetworkRegistrationInfo nri : s.getNetworkRegistrationInfoList()) {
+                mNetworkRegistrationInfos.add(new NetworkRegistrationInfo(nri));
+            }
         }
         mNrFrequencyRange = s.mNrFrequencyRange;
         mOperatorAlphaLongRaw = s.mOperatorAlphaLongRaw;
@@ -477,7 +480,7 @@ public class ServiceState implements Parcelable {
         mIsEmergencyOnly = in.readInt() != 0;
         mArfcnRsrpBoost = in.readInt();
         synchronized (mNetworkRegistrationInfos) {
-            in.readList(mNetworkRegistrationInfos, NetworkRegistrationInfo.class.getClassLoader());
+            in.readList(mNetworkRegistrationInfos, NetworkRegistrationInfo.class.getClassLoader(), android.telephony.NetworkRegistrationInfo.class);
         }
         mChannelNumber = in.readInt();
         mCellBandwidths = in.createIntArray();
@@ -610,7 +613,7 @@ public class ServiceState implements Parcelable {
     /**
      * Get the channel number of the current primary serving cell, or -1 if unknown
      *
-     * <p>This is EARFCN for LTE, UARFCN for UMTS, and ARFCN for GSM.
+     * <p>This is NRARFCN for NR, EARFCN for LTE, UARFCN for UMTS, and ARFCN for GSM.
      *
      * @return Channel number of primary serving cell
      */
@@ -765,6 +768,10 @@ public class ServiceState implements Parcelable {
      *
      * @return long name of operator, null if unregistered or unknown
      */
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.ACCESS_FINE_LOCATION,
+            android.Manifest.permission.ACCESS_COARSE_LOCATION
+    })
     public String getOperatorAlphaLong() {
         return mOperatorAlphaLong;
     }
@@ -780,6 +787,10 @@ public class ServiceState implements Parcelable {
      * @return long name of operator
      * @hide
      */
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.ACCESS_FINE_LOCATION,
+            android.Manifest.permission.ACCESS_COARSE_LOCATION
+    })
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.Q,
             publicAlternatives = "Use {@link #getOperatorAlphaLong} instead.")
     public String getVoiceOperatorAlphaLong() {
@@ -798,6 +809,10 @@ public class ServiceState implements Parcelable {
      *
      * @return short name of operator, null if unregistered or unknown
      */
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.ACCESS_FINE_LOCATION,
+            android.Manifest.permission.ACCESS_COARSE_LOCATION
+    })
     public String getOperatorAlphaShort() {
         return mOperatorAlphaShort;
     }
@@ -813,6 +828,10 @@ public class ServiceState implements Parcelable {
      * @return short name of operator, null if unregistered or unknown
      * @hide
      */
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.ACCESS_FINE_LOCATION,
+            android.Manifest.permission.ACCESS_COARSE_LOCATION
+    })
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.Q,
             publicAlternatives = "Use {@link #getOperatorAlphaShort} instead.")
     public String getVoiceOperatorAlphaShort() {
@@ -830,6 +849,10 @@ public class ServiceState implements Parcelable {
      * @return short name of operator, null if unregistered or unknown
      * @hide
      */
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.ACCESS_FINE_LOCATION,
+            android.Manifest.permission.ACCESS_COARSE_LOCATION
+    })
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.Q,
             publicAlternatives = "Use {@link #getOperatorAlphaShort} instead.")
     public String getDataOperatorAlphaShort() {
@@ -851,6 +874,10 @@ public class ServiceState implements Parcelable {
      * @return name of operator, null if unregistered or unknown
      * @hide
      */
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.ACCESS_FINE_LOCATION,
+            android.Manifest.permission.ACCESS_COARSE_LOCATION
+    })
     public String getOperatorAlpha() {
         if (TextUtils.isEmpty(mOperatorAlphaLong)) {
             return mOperatorAlphaShort;
@@ -876,6 +903,10 @@ public class ServiceState implements Parcelable {
      * The country code can be decoded using
      * {@link com.android.internal.telephony.MccTable#countryCodeForMcc(int)}.
      */
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.ACCESS_FINE_LOCATION,
+            android.Manifest.permission.ACCESS_COARSE_LOCATION
+    })
     public String getOperatorNumeric() {
         return mOperatorNumeric;
     }
@@ -891,6 +922,10 @@ public class ServiceState implements Parcelable {
      * @return numeric format of operator, null if unregistered or unknown
      * @hide
      */
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.ACCESS_FINE_LOCATION,
+            android.Manifest.permission.ACCESS_COARSE_LOCATION
+    })
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public String getVoiceOperatorNumeric() {
         return mOperatorNumeric;
@@ -907,6 +942,10 @@ public class ServiceState implements Parcelable {
      * @return numeric format of operator, null if unregistered or unknown
      * @hide
      */
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.ACCESS_FINE_LOCATION,
+            android.Manifest.permission.ACCESS_COARSE_LOCATION
+    })
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.Q,
             publicAlternatives = "Use {@link #getOperatorNumeric} instead.")
     public String getDataOperatorNumeric() {
@@ -1166,7 +1205,15 @@ public class ServiceState implements Parcelable {
         }
     }
 
-    private void init() {
+    /**
+     * Initialize the service state. Set everything to the default value.
+     *
+     * @param legacyMode {@code true} if the device is on IWLAN legacy mode, where IWLAN is
+     * considered as a RAT on WWAN {@link NetworkRegistrationInfo}. {@code false} if the device
+     * is on AP-assisted mode, where IWLAN should be reported through WLAN.
+     * {@link NetworkRegistrationInfo}.
+     */
+    private void init(boolean legacyMode) {
         if (DBG) Rlog.d(LOG_TAG, "init");
         mVoiceRegState = STATE_OUT_OF_SERVICE;
         mDataRegState = STATE_OUT_OF_SERVICE;
@@ -1198,6 +1245,13 @@ public class ServiceState implements Parcelable {
                     .setTransportType(AccessNetworkConstants.TRANSPORT_TYPE_WWAN)
                     .setRegistrationState(NetworkRegistrationInfo.REGISTRATION_STATE_UNKNOWN)
                     .build());
+            if (!legacyMode) {
+                addNetworkRegistrationInfo(new NetworkRegistrationInfo.Builder()
+                        .setDomain(NetworkRegistrationInfo.DOMAIN_PS)
+                        .setTransportType(AccessNetworkConstants.TRANSPORT_TYPE_WLAN)
+                        .setRegistrationState(NetworkRegistrationInfo.REGISTRATION_STATE_UNKNOWN)
+                        .build());
+            }
         }
         mOperatorAlphaLongRaw = null;
         mOperatorAlphaShortRaw = null;
@@ -1206,13 +1260,30 @@ public class ServiceState implements Parcelable {
     }
 
     public void setStateOutOfService() {
-        init();
+        init(true);
     }
 
     public void setStateOff() {
-        init();
+        init(true);
         mVoiceRegState = STATE_POWER_OFF;
         mDataRegState = STATE_POWER_OFF;
+    }
+
+    /**
+     * Set the service state to out-of-service
+     *
+     * @param legacyMode {@code true} if the device is on IWLAN legacy mode, where IWLAN is
+     * considered as a RAT on WWAN {@link NetworkRegistrationInfo}. {@code false} if the device
+     * is on AP-assisted mode, where IWLAN should be reported through WLAN.
+     * @param powerOff {@code true} if this is a power off case (i.e. Airplane mode on).
+     * @hide
+     */
+    public void setOutOfService(boolean legacyMode, boolean powerOff) {
+        init(legacyMode);
+        if (powerOff) {
+            mVoiceRegState = STATE_POWER_OFF;
+            mDataRegState = STATE_POWER_OFF;
+        }
     }
 
     public void setState(int state) {
@@ -1407,7 +1478,7 @@ public class ServiceState implements Parcelable {
         m.putString("data-operator-numeric", mOperatorNumeric);
         m.putBoolean("manual", mIsManualNetworkSelection);
         m.putInt("radioTechnology", getRilVoiceRadioTechnology());
-        m.putInt("dataRadioTechnology", getRadioTechnology());
+        m.putInt("dataRadioTechnology", getRilDataRadioTechnology());
         m.putBoolean("cssIndicator", mCssIndicator);
         m.putInt("networkId", mNetworkId);
         m.putInt("systemId", mSystemId);
@@ -1543,17 +1614,6 @@ public class ServiceState implements Parcelable {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public int getRilDataRadioTechnology() {
         return networkTypeToRilRadioTechnology(getDataNetworkType());
-    }
-
-    /**
-     * @hide
-     * @Deprecated to be removed Q3 2013 use {@link #getRilDataRadioTechnology} or
-     * {@link #getRilVoiceRadioTechnology}
-     */
-    @UnsupportedAppUsage
-    public int getRadioTechnology() {
-        Rlog.e(LOG_TAG, "ServiceState.getRadioTechnology() DEPRECATED will be removed *******");
-        return getRilDataRadioTechnology();
     }
 
     /**
@@ -1756,8 +1816,17 @@ public class ServiceState implements Parcelable {
     /**
      * Get the CDMA NID (Network Identification Number), a number uniquely identifying a network
      * within a wireless system. (Defined in 3GPP2 C.S0023 3.4.8)
+     *
+     * <p>Require at least {@link android.Manifest.permission#ACCESS_FINE_LOCATION} or
+     * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION}. Otherwise return
+     * {@link #UNKNOWN_ID}.
+     *
      * @return The CDMA NID or {@link #UNKNOWN_ID} if not available.
      */
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.ACCESS_FINE_LOCATION,
+            android.Manifest.permission.ACCESS_COARSE_LOCATION
+    })
     public int getCdmaNetworkId() {
         return this.mNetworkId;
     }
@@ -1765,8 +1834,17 @@ public class ServiceState implements Parcelable {
     /**
      * Get the CDMA SID (System Identification Number), a number uniquely identifying a wireless
      * system. (Defined in 3GPP2 C.S0023 3.4.8)
+     *
+     * <p>Require at least {@link android.Manifest.permission#ACCESS_FINE_LOCATION} or
+     * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION}. Otherwise return
+     * {@link #UNKNOWN_ID}.
+     *
      * @return The CDMA SID or {@link #UNKNOWN_ID} if not available.
      */
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.ACCESS_FINE_LOCATION,
+            android.Manifest.permission.ACCESS_COARSE_LOCATION
+    })
     public int getCdmaSystemId() {
         return this.mSystemId;
     }
@@ -2067,6 +2145,8 @@ public class ServiceState implements Parcelable {
         state.mOperatorAlphaLong = null;
         state.mOperatorAlphaShort = null;
         state.mOperatorNumeric = null;
+        state.mSystemId = UNKNOWN_ID;
+        state.mNetworkId = UNKNOWN_ID;
 
         return state;
     }

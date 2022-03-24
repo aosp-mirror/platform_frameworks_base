@@ -52,48 +52,11 @@ public final class CellInfoCdma extends CellInfo implements Parcelable {
     }
 
     /** @hide */
-    public CellInfoCdma(android.hardware.radio.V1_0.CellInfo ci) {
-        super(ci);
-        final android.hardware.radio.V1_0.CellInfoCdma cic = ci.cdma.get(0);
-        mCellIdentityCdma = new CellIdentityCdma(cic.cellIdentityCdma);
-        mCellSignalStrengthCdma =
-            new CellSignalStrengthCdma(cic.signalStrengthCdma, cic.signalStrengthEvdo);
-    }
-
-    /** @hide */
-    public CellInfoCdma(android.hardware.radio.V1_2.CellInfo ci) {
-        super(ci);
-        final android.hardware.radio.V1_2.CellInfoCdma cic = ci.cdma.get(0);
-        mCellIdentityCdma = new CellIdentityCdma(cic.cellIdentityCdma);
-        mCellSignalStrengthCdma =
-            new CellSignalStrengthCdma(cic.signalStrengthCdma, cic.signalStrengthEvdo);
-    }
-
-    /** @hide */
-    public CellInfoCdma(android.hardware.radio.V1_4.CellInfo ci, long timeStamp) {
-        super(ci, timeStamp);
-        final android.hardware.radio.V1_2.CellInfoCdma cic = ci.info.cdma();
-        mCellIdentityCdma = new CellIdentityCdma(cic.cellIdentityCdma);
-        mCellSignalStrengthCdma =
-                new CellSignalStrengthCdma(cic.signalStrengthCdma, cic.signalStrengthEvdo);
-    }
-
-    /** @hide */
-    public CellInfoCdma(android.hardware.radio.V1_5.CellInfo ci, long timeStamp) {
-        super(ci, timeStamp);
-        final android.hardware.radio.V1_2.CellInfoCdma cic = ci.ratSpecificInfo.cdma();
-        mCellIdentityCdma = new CellIdentityCdma(cic.cellIdentityCdma);
-        mCellSignalStrengthCdma =
-                new CellSignalStrengthCdma(cic.signalStrengthCdma, cic.signalStrengthEvdo);
-    }
-
-    /** @hide */
-    public CellInfoCdma(android.hardware.radio.V1_6.CellInfo ci, long timeStamp) {
-        super(ci, timeStamp);
-        final android.hardware.radio.V1_2.CellInfoCdma cic = ci.ratSpecificInfo.cdma();
-        mCellIdentityCdma = new CellIdentityCdma(cic.cellIdentityCdma);
-        mCellSignalStrengthCdma =
-                new CellSignalStrengthCdma(cic.signalStrengthCdma, cic.signalStrengthEvdo);
+    public CellInfoCdma(int connectionStatus, boolean registered, long timeStamp,
+            CellIdentityCdma cellIdentityCdma, CellSignalStrengthCdma cellSignalStrengthCdma) {
+        super(connectionStatus, registered, timeStamp);
+        mCellIdentityCdma = cellIdentityCdma;
+        mCellSignalStrengthCdma = cellSignalStrengthCdma;
     }
 
     /**

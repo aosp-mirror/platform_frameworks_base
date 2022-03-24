@@ -30,6 +30,7 @@ import static org.mockito.Mockito.when;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.RemoteInput;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
@@ -119,7 +120,8 @@ public class SmartReplyViewTest extends SysuiTestCase {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         mReceiver = new BlockingQueueIntentReceiver();
-        mContext.registerReceiver(mReceiver, new IntentFilter(TEST_ACTION));
+        mContext.registerReceiver(mReceiver, new IntentFilter(TEST_ACTION),
+                Context.RECEIVER_EXPORTED_UNAUDITED);
         mKeyguardDismissUtil.setDismissHandler((action, unused, afterKgGone) -> action.onDismiss());
         mDependency.injectMockDependency(KeyguardUpdateMonitor.class);
         mDependency.injectMockDependency(ShadeController.class);

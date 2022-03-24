@@ -57,7 +57,8 @@ import java.util.concurrent.ArrayBlockingQueue;
  * This class should not take any active action in sending CEC messages.
  *
  * Note that the information cached in this class is not guaranteed to be up-to-date, especially OSD
- * names, power states can be outdated.
+ * names, power states can be outdated. For local devices, more up-to-date information can be
+ * accessed through {@link HdmiCecLocalDevice#getDeviceInfo()}.
  */
 @VisibleForTesting
 public class HdmiCecNetwork {
@@ -165,18 +166,6 @@ public class HdmiCecNetwork {
             }
         }
         return false;
-    }
-    /**
-     * Clear all logical addresses registered in the device.
-     *
-     * <p>Declared as package-private. accessed by {@link HdmiControlService} only.
-     */
-    @ServiceThreadOnly
-    void clearLogicalAddress() {
-        assertRunOnServiceThread();
-        for (int i = 0; i < mLocalDevices.size(); ++i) {
-            mLocalDevices.valueAt(i).clearAddress();
-        }
     }
 
     @ServiceThreadOnly
@@ -402,7 +391,7 @@ public class HdmiCecNetwork {
             return;
         }
 
-        updateCecDevice(HdmiUtils.cloneHdmiDeviceInfo(info, newPowerStatus));
+        updateCecDevice(info.toBuilder().setDevicePowerStatus(newPowerStatus).build());
     }
 
     /**
@@ -439,7 +428,8 @@ public class HdmiCecNetwork {
         for (HdmiPortInfo info : cecPortInfo) {
             portIdMap.put(info.getAddress(), info.getId());
             portInfoMap.put(info.getId(), info);
-            portDeviceMap.put(info.getId(), new HdmiDeviceInfo(info.getAddress(), info.getId()));
+            portDeviceMap.put(info.getId(),
+                    HdmiDeviceInfo.hardwarePort(info.getAddress(), info.getId()));
         }
         mPortIdMap = new UnmodifiableSparseIntArray(portIdMap);
         mPortInfoMap = new UnmodifiableSparseArray<>(portInfoMap);
@@ -508,11 +498,17 @@ public class HdmiCecNetwork {
         // Add device by logical address if it's not already known
         int sourceAddress = message.getSource();
         if (getCecDeviceInfo(sourceAddress) == null) {
-            HdmiDeviceInfo newDevice = new HdmiDeviceInfo(sourceAddress,
-                    HdmiDeviceInfo.PATH_INVALID, HdmiDeviceInfo.PORT_INVALID,
-                    HdmiDeviceInfo.DEVICE_RESERVED, Constants.UNKNOWN_VENDOR_ID,
-                    HdmiUtils.getDefaultDeviceName(sourceAddress));
+            HdmiDeviceInfo newDevice = HdmiDeviceInfo.cecDeviceBuilder()
+                    .setLogicalAddress(sourceAddress)
+                    .setDisplayName(HdmiUtils.getDefaultDeviceName(sourceAddress))
+                    .build();
             addCecDevice(newDevice);
+        }
+
+        // If a message type has its own class, all valid messages of that type
+        // will be represented by an instance of that class.
+        if (message instanceof ReportFeaturesMessage) {
+            handleReportFeatures((ReportFeaturesMessage) message);
         }
 
         switch (message.getOpcode()) {
@@ -531,18 +527,20 @@ public class HdmiCecNetwork {
             case Constants.MESSAGE_CEC_VERSION:
                 handleCecVersion(message);
                 break;
-            case Constants.MESSAGE_REPORT_FEATURES:
-                handleReportFeatures(message);
-                break;
         }
     }
 
     @ServiceThreadOnly
-    private void handleReportFeatures(HdmiCecMessage message) {
+    private void handleReportFeatures(ReportFeaturesMessage message) {
         assertRunOnServiceThread();
 
-        int version = Byte.toUnsignedInt(message.getParams()[0]);
-        updateDeviceCecVersion(message.getSource(), version);
+        HdmiDeviceInfo currentDeviceInfo = getCecDeviceInfo(message.getSource());
+        HdmiDeviceInfo newDeviceInfo = currentDeviceInfo.toBuilder()
+                .setCecVersion(message.getCecVersion())
+                .updateDeviceFeatures(message.getDeviceFeatures())
+                .build();
+
+        updateCecDevice(newDeviceInfo);
     }
 
     @ServiceThreadOnly
@@ -566,11 +564,11 @@ public class HdmiCecNetwork {
         if (deviceInfo == null) {
             Slog.i(TAG, "Unknown source device info for <Report Physical Address> " + message);
         } else {
-            HdmiDeviceInfo updatedDeviceInfo = new HdmiDeviceInfo(deviceInfo.getLogicalAddress(),
-                    physicalAddress,
-                    physicalAddressToPortId(physicalAddress), type, deviceInfo.getVendorId(),
-                    deviceInfo.getDisplayName(), deviceInfo.getDevicePowerStatus(),
-                    deviceInfo.getCecVersion());
+            HdmiDeviceInfo updatedDeviceInfo = deviceInfo.toBuilder()
+                    .setPhysicalAddress(physicalAddress)
+                    .setPortId(physicalAddressToPortId(physicalAddress))
+                    .setDeviceType(type)
+                    .build();
             updateCecDevice(updatedDeviceInfo);
         }
     }
@@ -600,11 +598,9 @@ public class HdmiCecNetwork {
             return;
         }
 
-        HdmiDeviceInfo updatedDeviceInfo = new HdmiDeviceInfo(deviceInfo.getLogicalAddress(),
-                deviceInfo.getPhysicalAddress(), deviceInfo.getPortId(), deviceInfo.getDeviceType(),
-                deviceInfo.getVendorId(),
-                deviceInfo.getDisplayName(), deviceInfo.getDevicePowerStatus(),
-                hdmiCecVersion);
+        HdmiDeviceInfo updatedDeviceInfo = deviceInfo.toBuilder()
+                .setCecVersion(hdmiCecVersion)
+                .build();
         updateCecDevice(updatedDeviceInfo);
     }
 
@@ -635,10 +631,11 @@ public class HdmiCecNetwork {
         Slog.d(TAG, "Updating device OSD name from "
                 + deviceInfo.getDisplayName()
                 + " to " + osdName);
-        updateCecDevice(new HdmiDeviceInfo(deviceInfo.getLogicalAddress(),
-                deviceInfo.getPhysicalAddress(), deviceInfo.getPortId(),
-                deviceInfo.getDeviceType(), deviceInfo.getVendorId(), osdName,
-                deviceInfo.getDevicePowerStatus(), deviceInfo.getCecVersion()));
+
+        HdmiDeviceInfo updatedDeviceInfo = deviceInfo.toBuilder()
+                .setDisplayName(osdName)
+                .build();
+        updateCecDevice(updatedDeviceInfo);
     }
 
     @ServiceThreadOnly
@@ -651,11 +648,9 @@ public class HdmiCecNetwork {
         if (deviceInfo == null) {
             Slog.i(TAG, "Unknown source device info for <Device Vendor ID> " + message);
         } else {
-            HdmiDeviceInfo updatedDeviceInfo = new HdmiDeviceInfo(deviceInfo.getLogicalAddress(),
-                    deviceInfo.getPhysicalAddress(),
-                    deviceInfo.getPortId(), deviceInfo.getDeviceType(), vendorId,
-                    deviceInfo.getDisplayName(), deviceInfo.getDevicePowerStatus(),
-                    deviceInfo.getCecVersion());
+            HdmiDeviceInfo updatedDeviceInfo = deviceInfo.toBuilder()
+                    .setVendorId(vendorId)
+                    .build();
             updateCecDevice(updatedDeviceInfo);
         }
     }
@@ -735,10 +730,7 @@ public class HdmiCecNetwork {
 
     /**
      * Returns the {@link HdmiDeviceInfo} instance whose physical address matches
-     *
-     *
-     *
-     * qq   * the given routing path. CEC devices use routing path for its physical address to
+     * the given routing path. CEC devices use routing path for its physical address to
      * describe the hierarchy of the devices in the network.
      *
      * @param path routing path or physical address
@@ -862,7 +854,7 @@ public class HdmiCecNetwork {
     private boolean isLocalDeviceAddress(int address) {
         for (int i = 0; i < mLocalDevices.size(); i++) {
             int key = mLocalDevices.keyAt(i);
-            if (mLocalDevices.get(key).mAddress == address) {
+            if (mLocalDevices.get(key).getDeviceInfo().getLogicalAddress() == address) {
                 return true;
             }
         }

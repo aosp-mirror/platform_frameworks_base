@@ -24,7 +24,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.android.internal.util.DataClass;
-import com.android.internal.util.Preconditions;
+
+import java.util.Objects;
 
 /** Container class representing a request to share data with Content Capture service. */
 @DataClass(
@@ -47,7 +48,7 @@ public final class DataShareRequest implements Parcelable {
 
     /** Constructs a request to share data with the Content Capture Service. */
     public DataShareRequest(@Nullable LocusId locusId, @NonNull String mimeType) {
-        Preconditions.checkNotNull(mimeType);
+        Objects.requireNonNull(mimeType);
 
         mPackageName = ActivityThread.currentActivityThread().getApplication().getPackageName();
         mLocusId = locusId;

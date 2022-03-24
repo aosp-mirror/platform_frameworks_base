@@ -2677,30 +2677,27 @@ bool ResTable_config::isBetterThan(const ResTable_config& o,
                 // DENSITY_ANY is now dealt with. We should look to
                 // pick a density bucket and potentially scale it.
                 // Any density is potentially useful
-                // because the system will scale it.  Scaling down
-                // is generally better than scaling up.
+                // because the system will scale it.  Always prefer
+                // scaling down.
                 int h = thisDensity;
                 int l = otherDensity;
                 bool bImBigger = true;
                 if (l > h) {
-                    int t = h;
-                    h = l;
-                    l = t;
+                    std::swap(l, h);
                     bImBigger = false;
                 }
 
-                if (requestedDensity >= h) {
-                    // requested value higher than both l and h, give h
+                if (h == requestedDensity) {
+                    // This handles the case where l == h == requestedDensity.
+                    // In that case, this and o are equally good so both
+                    // true and false are valid. This preserves previous
+                    // behavior.
                     return bImBigger;
-                }
-                if (l >= requestedDensity) {
+                } else if (l >= requestedDensity) {
                     // requested value lower than both l and h, give l
                     return !bImBigger;
-                }
-                // saying that scaling down is 2x better than up
-                if (((2 * l) - requestedDensity) * h > requestedDensity * requestedDensity) {
-                    return !bImBigger;
                 } else {
+                    // otherwise give h
                     return bImBigger;
                 }
             }

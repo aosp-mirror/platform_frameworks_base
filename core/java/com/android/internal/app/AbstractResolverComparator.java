@@ -161,6 +161,11 @@ public abstract class AbstractResolverComparator implements Comparator<ResolvedC
         final ResolveInfo lhs = lhsp.getResolveInfoAt(0);
         final ResolveInfo rhs = rhsp.getResolveInfoAt(0);
 
+        final boolean lFixedAtTop = lhsp.isFixedAtTop();
+        final boolean rFixedAtTop = rhsp.isFixedAtTop();
+        if (lFixedAtTop && !rFixedAtTop) return -1;
+        if (!lFixedAtTop && rFixedAtTop) return 1;
+
         // We want to put the one targeted to another user at the end of the dialog.
         if (lhs.targetUserId != UserHandle.USER_CURRENT) {
             return rhs.targetUserId != UserHandle.USER_CURRENT ? 0 : 1;

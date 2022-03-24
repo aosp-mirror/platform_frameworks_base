@@ -20,6 +20,7 @@ import android.Manifest;
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresFeature;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.StringDef;
@@ -33,6 +34,7 @@ import android.telephony.CarrierConfigManager;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyFrameworkInitializer;
 import android.telephony.TelephonyManager;
+import android.telephony.ims.aidl.IFeatureProvisioningCallback;
 import android.telephony.ims.aidl.IImsConfigCallback;
 import android.telephony.ims.aidl.IRcsConfigCallback;
 import android.telephony.ims.feature.MmTelFeature;
@@ -53,16 +55,11 @@ import java.util.concurrent.Executor;
  * IMS provisioning keys are defined per carrier or OEM using OMA-DM or other provisioning
  * applications and may vary. It is up to the carrier and OEM applications to ensure that the
  * correct provisioning keys are being used when integrating with a vendor's ImsService.
- *
- * Note: For compatibility purposes, the integer values [0 - 99] used in
- * {@link #setProvisioningIntValue(int, int)} have been reserved for existing provisioning keys
- * previously defined in the Android framework. Please do not redefine new provisioning keys in this
- * range or it may generate collisions with existing keys. Some common constants have also been
- * defined in this class to make integrating with other system apps easier.
- * @hide
  */
-@SystemApi
+@RequiresFeature(PackageManager.FEATURE_TELEPHONY_IMS)
 public class ProvisioningManager {
+
+    private static final String TAG = "ProvisioningManager";
 
     /**@hide*/
     @StringDef(prefix = "STRING_QUERY_RESULT_ERROR_", value = {
@@ -74,14 +71,18 @@ public class ProvisioningManager {
 
     /**
      * The query from {@link #getProvisioningStringValue(int)} has resulted in an unspecified error.
+     * @hide
      */
+    @SystemApi
     public static final String STRING_QUERY_RESULT_ERROR_GENERIC =
             "STRING_QUERY_RESULT_ERROR_GENERIC";
 
     /**
      * The query from {@link #getProvisioningStringValue(int)} has resulted in an error because the
      * ImsService implementation was not ready for provisioning queries.
+     * @hide
      */
+    @SystemApi
     public static final String STRING_QUERY_RESULT_ERROR_NOT_READY =
             "STRING_QUERY_RESULT_ERROR_NOT_READY";
 
@@ -93,12 +94,16 @@ public class ProvisioningManager {
 
     /**
      * The integer result of provisioning for the queried key is disabled.
+     * @hide
      */
+    @SystemApi
     public static final int PROVISIONING_VALUE_DISABLED = 0;
 
     /**
      * The integer result of provisioning for the queried key is enabled.
+     * @hide
      */
+    @SystemApi
     public static final int PROVISIONING_VALUE_ENABLED = 1;
 
 
@@ -443,27 +448,31 @@ public class ProvisioningManager {
 
     /**
      * Override the user-defined WiFi Roaming enabled setting for this subscription, defined in
-     * {@link SubscriptionManager#WFC_ROAMING_ENABLED_CONTENT_URI}, for the purposes of provisioning
-     * the subscription for WiFi Calling.
+     * {@link android.telephony.SubscriptionManager#WFC_ROAMING_ENABLED_CONTENT_URI},
+     * for the purposes of provisioning the subscription for WiFi Calling.
      *
-     * @see #getProvisioningIntValue(int)
      * @see #setProvisioningIntValue(int, int)
+     * @see #getProvisioningIntValue(int)
+     * @hide
      */
+    @SystemApi
     public static final int KEY_VOICE_OVER_WIFI_ROAMING_ENABLED_OVERRIDE = 26;
 
     /**
      * Override the user-defined WiFi mode for this subscription, defined in
-     * {@link SubscriptionManager#WFC_MODE_CONTENT_URI}, for the purposes of provisioning
-     * this subscription for WiFi Calling.
+     * {@link android.telephony.SubscriptionManager#WFC_MODE_CONTENT_URI},
+     * for the purposes of provisioning this subscription for WiFi Calling.
      *
      * Valid values for this key are:
      * {@link ImsMmTelManager#WIFI_MODE_WIFI_ONLY},
      * {@link ImsMmTelManager#WIFI_MODE_CELLULAR_PREFERRED}, or
      * {@link ImsMmTelManager#WIFI_MODE_WIFI_PREFERRED}.
      *
-     * @see #getProvisioningIntValue(int)
      * @see #setProvisioningIntValue(int, int)
+     * @see #getProvisioningIntValue(int)
+     * @hide
      */
+    @SystemApi
     public static final int KEY_VOICE_OVER_WIFI_MODE_OVERRIDE = 27;
 
     /**
@@ -862,7 +871,9 @@ public class ProvisioningManager {
      * <p>Value is in String format.
      * @see #setProvisioningStringValue(int, String)
      * @see #getProvisioningStringValue(int)
+     * @hide
      */
+    @SystemApi
     public static final int KEY_VOICE_OVER_WIFI_ENTITLEMENT_ID = 67;
 
     /**
@@ -884,7 +895,9 @@ public class ProvisioningManager {
 
     /**
      * Callback for IMS provisioning changes.
+     * @hide
      */
+    @SystemApi
     public static class Callback {
 
         private static class CallbackBinder extends IImsConfigCallback.Stub {
@@ -954,11 +967,105 @@ public class ProvisioningManager {
         }
     }
 
+    /**
+     * Callback for IMS provisioning feature changes.
+     */
+    public static class FeatureProvisioningCallback {
+
+        private static class CallbackBinder extends IFeatureProvisioningCallback.Stub {
+
+            private final FeatureProvisioningCallback mFeatureProvisioningCallback;
+            private Executor mExecutor;
+
+            private CallbackBinder(FeatureProvisioningCallback featureProvisioningCallback) {
+                mFeatureProvisioningCallback = featureProvisioningCallback;
+            }
+
+            @Override
+            public final void onFeatureProvisioningChanged(
+                    int capability, int tech, boolean isProvisioned) {
+                final long callingIdentity = Binder.clearCallingIdentity();
+                try {
+                    mExecutor.execute(() ->
+                            mFeatureProvisioningCallback.onFeatureProvisioningChanged(
+                                    capability, tech, isProvisioned));
+                } finally {
+                    restoreCallingIdentity(callingIdentity);
+                }
+            }
+
+            @Override
+            public final void onRcsFeatureProvisioningChanged(
+                    int capability, int tech, boolean isProvisioned) {
+                final long callingIdentity = Binder.clearCallingIdentity();
+                try {
+                    mExecutor.execute(() ->
+                            mFeatureProvisioningCallback.onRcsFeatureProvisioningChanged(
+                                    capability, tech, isProvisioned));
+                } finally {
+                    restoreCallingIdentity(callingIdentity);
+                }
+            }
+
+            private void setExecutor(Executor executor) {
+                mExecutor = executor;
+            }
+        }
+
+        private final CallbackBinder mBinder = new CallbackBinder(this);
+
+        /**
+         * The IMS MMTEL provisioning has changed for a specific capability and IMS
+         * registration technology.
+         * @param capability The MMTEL capability that provisioning has changed for.
+         * @param tech The IMS registration technology associated with the MMTEL capability that
+         * provisioning has changed for.
+         * @param isProvisioned {@code true} if the capability is provisioned for the technology
+         * specified, or {@code false} if the capability is not provisioned for the technology
+         * specified.
+         */
+        public void onFeatureProvisioningChanged(
+                @MmTelFeature.MmTelCapabilities.MmTelCapability int capability,
+                @ImsRegistrationImplBase.ImsRegistrationTech int tech,
+                boolean isProvisioned) {
+            // Base Implementation
+        }
+
+        /**
+         * The IMS RCS provisioning has changed for a specific capability and IMS
+         * registration technology.
+         * @param capability The RCS capability that provisioning has changed for.
+         * @param tech The IMS registration technology associated with the RCS capability that
+         * provisioning has changed for.
+         * @param isProvisioned {@code true} if the capability is provisioned for the technology
+         * specified, or {@code false} if the capability is not provisioned for the technology
+         * specified.
+         */
+        public void onRcsFeatureProvisioningChanged(
+                @RcsFeature.RcsImsCapabilities.RcsImsCapabilityFlag int capability,
+                @ImsRegistrationImplBase.ImsRegistrationTech int tech,
+                boolean isProvisioned) {
+            // Base Implementation
+        }
+
+        /**@hide*/
+        public final IFeatureProvisioningCallback getBinder() {
+            return mBinder;
+        }
+
+        /**@hide*/
+        public void setExecutor(Executor executor) {
+            mBinder.setExecutor(executor);
+        }
+    }
+
     private int mSubId;
 
     /**
      * The callback for RCS provisioning changes.
+     * @hide
      */
+    @SystemApi
     public static class RcsProvisioningCallback {
         private static class CallbackBinder extends IRcsConfigCallback.Stub {
 
@@ -1096,7 +1203,9 @@ public class ProvisioningManager {
      * @param subId The ID of the subscription that this ProvisioningManager will use.
      * @see android.telephony.SubscriptionManager#getActiveSubscriptionInfoList()
      * @throws IllegalArgumentException if the subscription is invalid.
+     * @hide
      */
+    @SystemApi
     public static @NonNull ProvisioningManager createForSubscriptionId(int subId) {
         if (!SubscriptionManager.isValidSubscriptionId(subId)) {
             throw new IllegalArgumentException("Invalid subscription ID");
@@ -1105,7 +1214,9 @@ public class ProvisioningManager {
         return new ProvisioningManager(subId);
     }
 
-    private ProvisioningManager(int subId) {
+    /**@hide*/
+    //@SystemApi
+    public ProvisioningManager(int subId) {
         mSubId = subId;
     }
 
@@ -1114,6 +1225,12 @@ public class ProvisioningManager {
      *
      * When the subscription associated with this callback is removed (SIM removed, ESIM swap,
      * etc...), this callback will automatically be removed.
+     *
+     * <p> Requires Permission:
+     * <ul>
+     *     <li>{@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE},</li>
+     * </ul>
+     *
      * @param executor The {@link Executor} to call the callback methods on
      * @param callback The provisioning callbackto be registered.
      * @see #unregisterProvisioningChangedCallback(Callback)
@@ -1124,7 +1241,9 @@ public class ProvisioningManager {
      * the {@link ImsService} associated with the subscription is not available. This can happen if
      * the service crashed, for example. See {@link ImsException#getCode()} for a more detailed
      * reason.
+     * @hide
      */
+    @SystemApi
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public void registerProvisioningChangedCallback(@NonNull @CallbackExecutor Executor executor,
             @NonNull Callback callback) throws ImsException {
@@ -1142,16 +1261,80 @@ public class ProvisioningManager {
      * Unregister an existing {@link Callback}. When the subscription associated with this
      * callback is removed (SIM removed, ESIM swap, etc...), this callback will automatically be
      * removed. If this method is called for an inactive subscription, it will result in a no-op.
+     *
+     * <p> Requires Permission:
+     * <ul>
+     *     <li>{@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE},</li>
+     * </ul>
+     *
      * @param callback The existing {@link Callback} to be removed.
      * @see #registerProvisioningChangedCallback(Executor, Callback)
      *
      * @throws IllegalArgumentException if the subscription associated with this callback is
      * invalid.
+     * @hide
      */
+    @SystemApi
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public void unregisterProvisioningChangedCallback(@NonNull Callback callback) {
         try {
             getITelephony().unregisterImsProvisioningChangedCallback(mSubId, callback.getBinder());
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    /**
+     * Register a new {@link FeatureProvisioningCallback}, which is used to listen for
+     * IMS feature provisioning updates.
+     * <p>
+     * When the subscription associated with this callback is removed (SIM removed,
+     * ESIM swap,etc...), this callback will automatically be removed.
+     *
+     * <p> Requires Permission:
+     * <ul>
+     *     <li> android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE,</li>
+     *     <li>{@link android.Manifest.permission#READ_PRECISE_PHONE_STATE},</li>
+     *     <li>or that the caller has carrier privileges (see
+     *         {@link TelephonyManager#hasCarrierPrivileges()}).</li>
+     * </ul>
+     *
+     * @param executor The executor that the callback methods will be called on.
+     * @param callback The callback instance being registered.
+     * @throws ImsException if the subscription associated with this callback is
+     * valid, but the {@link ImsService the service crashed, for example. See
+     * {@link ImsException#getCode()} for a more detailed reason.
+     */
+    @RequiresPermission(Manifest.permission.READ_PRECISE_PHONE_STATE)
+    public void registerFeatureProvisioningChangedCallback(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull FeatureProvisioningCallback callback) throws ImsException {
+        callback.setExecutor(executor);
+        try {
+            getITelephony().registerFeatureProvisioningChangedCallback(mSubId,
+                    callback.getBinder());
+        } catch (ServiceSpecificException e) {
+            throw new ImsException(e.getMessage(), e.errorCode);
+        } catch (RemoteException | IllegalStateException e) {
+            throw new ImsException(e.getMessage(), ImsException.CODE_ERROR_SERVICE_UNAVAILABLE);
+        }
+    }
+
+    /**
+     * Unregisters a previously registered {@link FeatureProvisioningCallback}
+     * instance.  When the subscription associated with this
+     * callback is removed (SIM removed, ESIM swap, etc...), this callback will
+     * automatically be removed. If this method is called for an inactive
+     * subscription, it will result in a no-op.
+     *
+     * @param callback The existing {@link FeatureProvisioningCallback} to be removed.
+     * @see #registerFeatureProvisioningChangedCallback(Executor, FeatureProvisioningCallback)
+     */
+    public void unregisterFeatureProvisioningChangedCallback(
+            @NonNull FeatureProvisioningCallback callback) {
+        try {
+            getITelephony().unregisterFeatureProvisioningChangedCallback(mSubId,
+                    callback.getBinder());
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }
@@ -1166,7 +1349,9 @@ public class ProvisioningManager {
      * @return an integer value for the provided key, or
      * {@link ImsConfigImplBase#CONFIG_RESULT_UNKNOWN} if the key doesn't exist.
      * @throws IllegalArgumentException if the key provided was invalid.
+     * @hide
      */
+    @SystemApi
     @WorkerThread
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public int getProvisioningIntValue(int key) {
@@ -1186,7 +1371,9 @@ public class ProvisioningManager {
      * @return a String value for the provided key, {@code null} if the key doesn't exist, or
      * {@link StringResultError} if there was an error getting the value for the provided key.
      * @throws IllegalArgumentException if the key provided was invalid.
+     * @hide
      */
+    @SystemApi
     @WorkerThread
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public @Nullable @StringResultError String getProvisioningStringValue(int key) {
@@ -1207,7 +1394,15 @@ public class ProvisioningManager {
      * @param key An integer that represents the provisioning key, which is defined by the OEM.
      * @param value a integer value for the provided key.
      * @return the result of setting the configuration value.
+     * @hide
+     *
+     * Note: For compatibility purposes, the integer values [0 - 99] used in
+     * {@link #setProvisioningIntValue(int, int)} have been reserved for existing provisioning keys
+     * previously defined in the Android framework. Please do not redefine new provisioning keys
+     * in this range or it may generate collisions with existing keys. Some common constants have
+     * also been defined in this class to make integrating with other system apps easier.
      */
+    @SystemApi
     @WorkerThread
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     public @ImsConfigImplBase.SetConfigResult int setProvisioningIntValue(int key, int value) {
@@ -1227,7 +1422,9 @@ public class ProvisioningManager {
      *     should be appropriately namespaced to avoid collision.
      * @param value a String value for the provided key.
      * @return the result of setting the configuration value.
+     * @hide
      */
+    @SystemApi
     @WorkerThread
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     public @ImsConfigImplBase.SetConfigResult int setProvisioningStringValue(int key,
@@ -1247,8 +1444,14 @@ public class ProvisioningManager {
      * does not support the capability/technology combination specified, this operation will be a
      * no-op.
      *
-     * @see CarrierConfigManager#KEY_CARRIER_UT_PROVISIONING_REQUIRED_BOOL
-     * @see CarrierConfigManager#KEY_CARRIER_VOLTE_PROVISIONING_REQUIRED_BOOL
+     * <p>Requires Permission:
+     * <ul>
+     *     <li>{@link android.Manifest.permission#MODIFY_PHONE_STATE},</li>
+     *     <li>or that the calling app has carrier privileges (see</li>
+     *     <li>{@link TelephonyManager#hasCarrierPrivileges}).</li>
+     * </ul>
+     *
+     * @see CarrierConfigManager.Ims#KEY_MMTEL_REQUIRES_PROVISIONING_BUNDLE
      * @param isProvisioned true if the device is provisioned for UT over IMS, false otherwise.
      */
     @WorkerThread
@@ -1256,9 +1459,10 @@ public class ProvisioningManager {
     public void setProvisioningStatusForCapability(
             @MmTelFeature.MmTelCapabilities.MmTelCapability int capability,
             @ImsRegistrationImplBase.ImsRegistrationTech int tech,  boolean isProvisioned) {
+
         try {
             getITelephony().setImsProvisioningStatusForCapability(mSubId, capability, tech,
-                    isProvisioned);
+                        isProvisioned);
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }
@@ -1272,14 +1476,21 @@ public class ProvisioningManager {
      * {@link ImsRegistrationImplBase.ImsRegistrationTech} combination specified, this method will
      * always return {@code true}.
      *
-     * @see CarrierConfigManager#KEY_CARRIER_UT_PROVISIONING_REQUIRED_BOOL
-     * @see CarrierConfigManager#KEY_CARRIER_VOLTE_PROVISIONING_REQUIRED_BOOL
+     * <p> Requires Permission:
+     * <ul>
+     *     <li>android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE,</li>
+     *     <li>{@link android.Manifest.permission#READ_PRECISE_PHONE_STATE},</li>
+     *     <li>or that the caller has carrier privileges (see
+     *         {@link TelephonyManager#hasCarrierPrivileges()}).</li>
+     * </ul>
+     *
+     * @see CarrierConfigManager.Ims#KEY_MMTEL_REQUIRES_PROVISIONING_BUNDLE
      * @return true if the device is provisioned for the capability or does not require
      * provisioning, false if the capability does require provisioning and has not been
      * provisioned yet.
      */
     @WorkerThread
-    @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @RequiresPermission(Manifest.permission.READ_PRECISE_PHONE_STATE)
     public boolean getProvisioningStatusForCapability(
             @MmTelFeature.MmTelCapabilities.MmTelCapability int capability,
             @ImsRegistrationImplBase.ImsRegistrationTech int tech) {
@@ -1297,17 +1508,93 @@ public class ProvisioningManager {
      * {@link RcsFeature.RcsImsCapabilities.RcsImsCapabilityFlag} this method will always return
      * {@code true}.
      *
-     * @see CarrierConfigManager#KEY_CARRIER_RCS_PROVISIONING_REQUIRED_BOOL
+     * @see CarrierConfigManager.Ims#KEY_CARRIER_RCS_PROVISIONING_REQUIRED_BOOL
      * @return true if the device is provisioned for the capability or does not require
      * provisioning, false if the capability does require provisioning and has not been
      * provisioned yet.
+     * @deprecated Use {@link #getRcsProvisioningStatusForCapability(int, int)} instead,
+     * as this only retrieves provisioning information for
+     * {@link ImsRegistrationImplBase#REGISTRATION_TECH_LTE}
+     * @hide
      */
+    @Deprecated
+    @SystemApi
     @WorkerThread
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public boolean getRcsProvisioningStatusForCapability(
             @RcsFeature.RcsImsCapabilities.RcsImsCapabilityFlag int capability) {
         try {
-            return getITelephony().getRcsProvisioningStatusForCapability(mSubId, capability);
+            return getITelephony().getRcsProvisioningStatusForCapability(mSubId, capability,
+            ImsRegistrationImplBase.REGISTRATION_TECH_LTE);
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    /**
+     * Get the provisioning status for the IMS RCS capability specified.
+     *
+     * If provisioning is not required for the queried
+     * {@link RcsFeature.RcsImsCapabilities.RcsImsCapabilityFlag} this method
+     * will always return {@code true}.
+     *
+     * <p> Requires Permission:
+     * <ul>
+     *     <li>{@link android.Manifest.permission#READ_PRECISE_PHONE_STATE},</li>
+     *     <li>or that the caller has carrier privileges (see
+     *         {@link TelephonyManager#hasCarrierPrivileges()}).</li>
+     * </ul>
+     *
+     * @see CarrierConfigManager.Ims#KEY_RCS_REQUIRES_PROVISIONING_BUNDLE
+     * @return true if the device is provisioned for the capability or does not require
+     * provisioning, false if the capability does require provisioning and has not been
+     * provisioned yet.
+     */
+    @WorkerThread
+    @RequiresPermission(Manifest.permission.READ_PRECISE_PHONE_STATE)
+    public boolean getRcsProvisioningStatusForCapability(
+            @RcsFeature.RcsImsCapabilities.RcsImsCapabilityFlag int capability,
+            @ImsRegistrationImplBase.ImsRegistrationTech int tech) {
+        try {
+            return getITelephony().getRcsProvisioningStatusForCapability(mSubId, capability, tech);
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    /**
+     * Set the provisioning status for the IMS RCS capability using the specified subscription.
+     *
+     * <p> Requires Permission:
+     * <ul>
+     *     <li>{@link android.Manifest.permission#MODIFY_PHONE_STATE}</li>
+     *     <li>or that the caller has carrier privileges (see
+     *         {@link TelephonyManager#hasCarrierPrivileges()}).</li>
+     * </ul>
+
+     * Provisioning may or may not be required, depending on the carrier configuration. If
+     * provisioning is not required for the carrier associated with this subscription or the device
+     * does not support the capability/technology combination specified, this operation will be a
+     * no-op.
+     *
+     * @see CarrierConfigManager#KEY_CARRIER_RCS_PROVISIONING_REQUIRED_BOOL
+     * @param isProvisioned true if the device is provisioned for the RCS capability specified,
+     *                      false otherwise.
+     * @deprecated Use {@link #setRcsProvisioningStatusForCapability(int, int, boolean)} instead,
+     * as this method only sets provisioning information for
+     * {@link ImsRegistrationImplBase#REGISTRATION_TECH_LTE}
+     * @hide
+     */
+    @Deprecated
+    @SystemApi
+    @WorkerThread
+    @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
+    public void setRcsProvisioningStatusForCapability(
+            @RcsFeature.RcsImsCapabilities.RcsImsCapabilityFlag int capability,
+            boolean isProvisioned) {
+        try {
+            getITelephony().setRcsProvisioningStatusForCapability(mSubId, capability,
+                    ImsRegistrationImplBase.REGISTRATION_TECH_LTE, isProvisioned);
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }
@@ -1321,7 +1608,14 @@ public class ProvisioningManager {
      * does not support the capability/technology combination specified, this operation will be a
      * no-op.
      *
-     * @see CarrierConfigManager#KEY_CARRIER_RCS_PROVISIONING_REQUIRED_BOOL
+     * <p> Requires Permission:
+     * <ul>
+     *     <li>{@link android.Manifest.permission#MODIFY_PHONE_STATE},</li>
+     *     <li>or that the caller has carrier privileges (see
+     *         {@link TelephonyManager#hasCarrierPrivileges()}).</li>
+     * </ul>
+     *
+     * @see CarrierConfigManager.Ims#KEY_RCS_REQUIRES_PROVISIONING_BUNDLE
      * @param isProvisioned true if the device is provisioned for the RCS capability specified,
      *                      false otherwise.
      */
@@ -1329,31 +1623,92 @@ public class ProvisioningManager {
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     public void setRcsProvisioningStatusForCapability(
             @RcsFeature.RcsImsCapabilities.RcsImsCapabilityFlag int capability,
-            boolean isProvisioned) {
+            @ImsRegistrationImplBase.ImsRegistrationTech int tech, boolean isProvisioned) {
         try {
             getITelephony().setRcsProvisioningStatusForCapability(mSubId, capability,
-                    isProvisioned);
+                    tech, isProvisioned);
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }
     }
 
     /**
+     * Indicates whether provisioning for the MMTEL capability and IMS registration technology
+     * specified is required or not
+     *
+     * <p> Requires Permission:
+     * <ul>
+     *     <li> android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE,</li>
+     *     <li>{@link android.Manifest.permission#READ_PRECISE_PHONE_STATE},</li>
+     *     <li> or that the caller has carrier privileges (see
+     *         {@link TelephonyManager#hasCarrierPrivileges()}).</li>
+     * </ul>
+     *
+     * @return true if provisioning is required for the MMTEL capability and IMS
+     * registration technology specified, false if it is not required.
+     */
+    @RequiresPermission(Manifest.permission.READ_PRECISE_PHONE_STATE)
+    public boolean isProvisioningRequiredForCapability(
+            @MmTelFeature.MmTelCapabilities.MmTelCapability int capability,
+            @ImsRegistrationImplBase.ImsRegistrationTech int tech) {
+        try {
+            return getITelephony().isProvisioningRequiredForCapability(mSubId, capability, tech);
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
+
+
+    /**
+     * Indicates whether provisioning for the RCS capability and IMS registration technology
+     * specified is required or not
+     *
+     * <p> Requires Permission:
+     * <ul>
+     *     <li> android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE,</li>
+     *     <li>{@link android.Manifest.permission#READ_PRECISE_PHONE_STATE},</li>
+     *     <li> or that the caller has carrier privileges (see
+     *         {@link TelephonyManager#hasCarrierPrivileges()}).</li>
+     * </ul>
+     *
+     * @return true if provisioning is required for the RCS capability and IMS
+     * registration technology specified, false if it is not required.
+     */
+    @RequiresPermission(Manifest.permission.READ_PRECISE_PHONE_STATE)
+    public boolean isRcsProvisioningRequiredForCapability(
+            @RcsFeature.RcsImsCapabilities.RcsImsCapabilityFlag int capability,
+            @ImsRegistrationImplBase.ImsRegistrationTech int tech) {
+        try {
+            return getITelephony().isRcsProvisioningRequiredForCapability(mSubId, capability, tech);
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
+
+
+    /**
      * Notify the framework that an RCS autoconfiguration XML file has been received for
      * provisioning.
-     * <p>
-     * Requires Permission: Manifest.permission.MODIFY_PHONE_STATE or that the calling app has
-     * carrier privileges (see {@link TelephonyManager#hasCarrierPrivileges}).
+     *
+     * <p>Requires Permission:
+     * <ul>
+     *     <li>{@link Manifest.permission#MODIFY_PHONE_STATE},</li>
+     *     <li>or that the calling app has carrier privileges (see
+     *         {@link TelephonyManager#hasCarrierPrivileges()}).</li>
+     * </ul>
+     *
      * @param config The XML file to be read. ASCII/UTF8 encoded text if not compressed.
      * @param isCompressed The XML file is compressed in gzip format and must be decompressed
      *         before being read.
-     *
+     * @hide
      */
+    @SystemApi
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     public void notifyRcsAutoConfigurationReceived(@NonNull byte[] config, boolean isCompressed) {
         if (config == null) {
             throw new IllegalArgumentException("Must include a non-null config XML file.");
         }
+
         try {
             getITelephony().notifyRcsAutoConfigurationReceived(mSubId, config, isCompressed);
         } catch (RemoteException e) {
@@ -1372,7 +1727,9 @@ public class ProvisioningManager {
      * <p>Contains {@link #EXTRA_SUBSCRIPTION_ID} to specify the subscription index for which
      * the intent is valid. and {@link #EXTRA_STATUS} to specify RCS VoLTE single registration
      * status.
+     * @hide
      */
+    @SystemApi
     @RequiresPermission(Manifest.permission.PERFORM_IMS_SINGLE_REGISTRATION)
     @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_RCS_SINGLE_REGISTRATION_CAPABILITY_UPDATE =
@@ -1380,7 +1737,9 @@ public class ProvisioningManager {
 
     /**
      * Integer extra to specify subscription index.
+     * @hide
      */
+    @SystemApi
     public static final String EXTRA_SUBSCRIPTION_ID =
             "android.telephony.ims.extra.SUBSCRIPTION_ID";
 
@@ -1390,22 +1749,30 @@ public class ProvisioningManager {
      * <p>The value can be {@link #STATUS_CAPABLE}, {@link #STATUS_DEVICE_NOT_CAPABLE},
      * {@link #STATUS_CARRIER_NOT_CAPABLE}, or bitwise OR of
      * {@link #STATUS_DEVICE_NOT_CAPABLE} and {@link #STATUS_CARRIER_NOT_CAPABLE}.
+     * @hide
      */
+    @SystemApi
     public static final String EXTRA_STATUS = "android.telephony.ims.extra.STATUS";
 
     /**
      * RCS VoLTE single registration is supported by the device and carrier.
+     * @hide
      */
+    @SystemApi
     public static final int STATUS_CAPABLE                       = 0;
 
     /**
      * RCS VoLTE single registration is not supported by the device.
+     * @hide
      */
+    @SystemApi
     public static final int STATUS_DEVICE_NOT_CAPABLE            = 0x01;
 
     /**
      * RCS VoLTE single registration is not supported by the carrier
+     * @hide
      */
+    @SystemApi
     public static final int STATUS_CARRIER_NOT_CAPABLE           = 0x01 << 1;
 
     /**
@@ -1415,11 +1782,14 @@ public class ProvisioningManager {
      * provisioning is done using autoconfiguration, then these parameters shall be
      * sent in the HTTP get request to fetch the RCS provisioning. RCS client
      * configuration must be provided by the application before registering for the
-     * provisioning status events {@link #registerRcsProvisioningCallback()}
+     * provisioning status events
+     * {@link #registerRcsProvisioningCallback(Executor, RcsProvisioningCallback)}
      * When the IMS/RCS service receives the RCS client configuration, it will detect
      * the change in the configuration, and trigger the auto-configuration as needed.
      * @param rcc RCS client configuration {@link RcsClientConfiguration}
+     * @hide
      */
+    @SystemApi
     @RequiresPermission(Manifest.permission.PERFORM_IMS_SINGLE_REGISTRATION)
     public void setRcsClientConfiguration(
             @NonNull RcsClientConfiguration rcc) throws ImsException {
@@ -1440,18 +1810,21 @@ public class ProvisioningManager {
      * <ul>
      *     <li>{@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE},</li>
      *     <li>{@link android.Manifest.permission#PERFORM_IMS_SINGLE_REGISTRATION},</li>
-     *     <li>or that the caller has carrier privileges (see
+     *     <li>or that the calling app has carrier privileges (see
      *         {@link TelephonyManager#hasCarrierPrivileges()}).</li>
      * </ul>
+     *
      * @return true if IMS single registration is capable at this time, or false otherwise
-     * @throws ImsException If the remote ImsService is not available for
-     * any reason or the subscription associated with this instance is no
-     * longer active. See {@link ImsException#getCode()} for more
-     * information.
+     * @throws ImsException If the remote ImsService is not available for any reason or
+     * the subscription associated with this instance is no longer active.
+     * See {@link ImsException#getCode()} for more information.
      * @see PackageManager#FEATURE_TELEPHONY_IMS_SINGLE_REGISTRATION for whether or not this
      * device supports IMS single registration.
+     * @hide
      */
-    @RequiresPermission(anyOf = {Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
+    @SystemApi
+    @RequiresPermission(anyOf = {
+            Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
             Manifest.permission.PERFORM_IMS_SINGLE_REGISTRATION})
     public boolean isRcsVolteSingleRegistrationCapable() throws ImsException {
         try {
@@ -1478,8 +1851,6 @@ public class ProvisioningManager {
     * <ul>
     *     <li>{@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE},</li>
     *     <li>{@link android.Manifest.permission#PERFORM_IMS_SINGLE_REGISTRATION},</li>
-    *     <li>or that the caller has carrier privileges (see
-    *         {@link TelephonyManager#hasCarrierPrivileges()}).</li>
     * </ul>
     *
     * @param executor The {@link Executor} to call the callback methods on
@@ -1497,8 +1868,11 @@ public class ProvisioningManager {
     * params (See {@link #setRcsClientConfiguration}) and re register the
     * callback.
     * See {@link ImsException#getCode()} for a more detailed reason.
+    * @hide
     */
-    @RequiresPermission(anyOf = {Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
+    @SystemApi
+    @RequiresPermission(anyOf = {
+            Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
             Manifest.permission.PERFORM_IMS_SINGLE_REGISTRATION})
     public void registerRcsProvisioningCallback(
             @NonNull @CallbackExecutor Executor executor,
@@ -1525,8 +1899,6 @@ public class ProvisioningManager {
      * <ul>
      *     <li>{@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE},</li>
      *     <li>{@link android.Manifest.permission#PERFORM_IMS_SINGLE_REGISTRATION},</li>
-     *     <li>or that the caller has carrier privileges (see
-     *         {@link TelephonyManager#hasCarrierPrivileges()}).</li>
      * </ul>
      *
      * @param callback The existing {@link RcsProvisioningCallback} to be
@@ -1534,8 +1906,11 @@ public class ProvisioningManager {
      * @see #registerRcsProvisioningCallback(Executor, RcsProvisioningCallback)
      * @throws IllegalArgumentException if the subscription associated with
      * this callback is invalid.
+     * @hide
      */
-    @RequiresPermission(anyOf = {Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
+    @SystemApi
+    @RequiresPermission(anyOf = {
+            Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
             Manifest.permission.PERFORM_IMS_SINGLE_REGISTRATION})
     public void unregisterRcsProvisioningCallback(
             @NonNull RcsProvisioningCallback callback) {
@@ -1556,9 +1931,10 @@ public class ProvisioningManager {
      * {@link RcsProvisioningCallback} may expect to receive
      * {@link RcsProvisioningCallback#onConfigurationReset}, then
      * {@link RcsProvisioningCallback#onConfigurationChanged} when the new
-     * RCS configuration is received and notified by
-     * {@link #notifyRcsAutoConfigurationReceived}
+     * RCS configuration is received and notified by {@link #notifyRcsAutoConfigurationReceived}
+     * @hide
      */
+    @SystemApi
     @RequiresPermission(Manifest.permission.PERFORM_IMS_SINGLE_REGISTRATION)
     public void triggerRcsReconfiguration() {
         try {

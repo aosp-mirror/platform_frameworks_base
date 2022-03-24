@@ -134,6 +134,24 @@ static const std::map<StringPiece, ResourceType> sResourceTypeMap{
     {"xml", ResourceType::kXml},
 };
 
+ResourceNamedTypeRef ResourceNamedTypeWithDefaultName(ResourceType t) {
+  return {to_string(t), t};
+}
+
+std::optional<ResourceNamedTypeRef> ParseResourceNamedType(const android::StringPiece& s) {
+  auto colon = std::find(s.begin(), s.end(), ':');
+  const ResourceType* parsedType;
+  if (colon != s.end() && colon != std::prev(s.end())) {
+    parsedType = ParseResourceType(s.substr(s.begin(), colon));
+  } else {
+    parsedType = ParseResourceType(s);
+  }
+  if (parsedType == nullptr) {
+    return std::nullopt;
+  }
+  return ResourceNamedTypeRef(s, *parsedType);
+}
+
 const ResourceType* ParseResourceType(const StringPiece& str) {
   auto iter = sResourceTypeMap.find(str);
   if (iter == std::end(sResourceTypeMap)) {

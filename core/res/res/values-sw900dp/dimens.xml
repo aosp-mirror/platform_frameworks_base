@@ -24,4 +24,12 @@
          the same as @dimen/navigation_bar_height -->
     <dimen name="navigation_bar_height_landscape">56dp</dimen>
 
+    <!-- Copied from SysUI's @dimen/navigation_key_width for the embedded nav bar in the IME. -->
+    <dimen name="input_method_navigation_key_width">80dp</dimen>
+    <!-- Copied from SysUI's @dimen/navigation_key_padding for the embedded nav bar in the IME. -->
+    <dimen name="input_method_navigation_key_padding">0dp</dimen>
+    <!-- Copied from SysUI's @dimen/key_button_ripple_max_width for the embedded nav bar in the
+         IME. -->
+    <dimen name="input_method_nav_key_button_ripple_max_width">76dp</dimen>
+
 </resources>

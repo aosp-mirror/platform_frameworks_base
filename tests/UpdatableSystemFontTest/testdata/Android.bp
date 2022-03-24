@@ -21,11 +21,19 @@ package {
     default_applicable_licenses: ["frameworks_base_license"],
 }
 
-// An existing module name is reused to avoid merge conflicts.
-// TODO: fix the font and module name.
 filegroup {
-    name: "NotoColorEmojiTtf",
-    srcs: ["NotoColorEmoji.ttf"],
+    name: "UpdatableSystemFontTest_NotoColorEmoji.ttf",
+    srcs: ["UpdatableSystemFontTest_NotoColorEmoji.ttf"],
+}
+
+filegroup {
+    name: "UpdatableSystemFontTest_NotoSerif-Regular.ttf",
+    srcs: ["UpdatableSystemFontTest_NotoSerif-Regular.ttf"],
+}
+
+filegroup {
+    name: "UpdatableSystemFontTest_NotoSerif-Bold.ttf",
+    srcs: ["UpdatableSystemFontTest_NotoSerif-Bold.ttf"],
 }
 
 filegroup {
@@ -43,14 +51,10 @@ filegroup {
     srcs: ["UpdatableSystemFontTestCert.der"],
 }
 
-genrule_defaults {
-    name: "updatable_system_font_increment_font_revision_default",
-}
-
 genrule {
-    name: "UpdatableSystemFontTestNotoColorEmojiV0Ttf",
-    srcs: [":NotoColorEmojiTtf"],
-    out: ["UpdatableSystemFontTestNotoColorEmojiV0.ttf"],
+    name: "UpdatableSystemFontTest_NotoColorEmojiV0.ttf",
+    srcs: [":UpdatableSystemFontTest_NotoColorEmoji.ttf"],
+    out: ["UpdatableSystemFontTest_NotoColorEmojiV0.ttf"],
     tools: ["update_font_metadata"],
     cmd: "$(location update_font_metadata) " +
         "--input=$(in) " +
@@ -59,9 +63,9 @@ genrule {
 }
 
 genrule {
-    name: "UpdatableSystemFontTestNotoColorEmojiVPlus1Ttf",
-    srcs: [":NotoColorEmojiTtf"],
-    out: ["UpdatableSystemFontTestNotoColorEmojiVPlus1.ttf"],
+    name: "UpdatableSystemFontTest_NotoColorEmojiVPlus1.ttf",
+    srcs: [":UpdatableSystemFontTest_NotoColorEmoji.ttf"],
+    out: ["UpdatableSystemFontTest_NotoColorEmojiVPlus1.ttf"],
     tools: ["update_font_metadata"],
     cmd: "$(location update_font_metadata) " +
         "--input=$(in) " +
@@ -70,9 +74,9 @@ genrule {
 }
 
 genrule {
-    name: "UpdatableSystemFontTestNotoColorEmojiVPlus2Ttf",
-    srcs: [":NotoColorEmojiTtf"],
-    out: ["UpdatableSystemFontTestNotoColorEmojiVPlus2.ttf"],
+    name: "UpdatableSystemFontTest_NotoColorEmojiVPlus2.ttf",
+    srcs: [":UpdatableSystemFontTest_NotoColorEmoji.ttf"],
+    out: ["UpdatableSystemFontTest_NotoColorEmojiVPlus2.ttf"],
     tools: ["update_font_metadata"],
     cmd: "$(location update_font_metadata) " +
         "--input=$(in) " +
@@ -94,29 +98,43 @@ genrule_defaults {
 }
 
 genrule {
-    name: "UpdatableSystemFontTestNotoColorEmojiTtfFsvSig",
+    name: "UpdatableSystemFontTest_NotoColorEmoji.sig",
     defaults: ["updatable_system_font_sig_gen_default"],
-    srcs: [":NotoColorEmojiTtf"],
-    out: ["UpdatableSystemFontTestNotoColorEmoji.ttf.fsv_sig"],
+    srcs: [":UpdatableSystemFontTest_NotoColorEmoji.ttf"],
+    out: ["UpdatableSystemFontTest_NotoColorEmoji.sig"],
 }
 
 genrule {
-    name: "UpdatableSystemFontTestNotoColorEmojiV0TtfFsvSig",
+    name: "UpdatableSystemFontTest_NotoColorEmojiV0.sig",
     defaults: ["updatable_system_font_sig_gen_default"],
-    srcs: [":UpdatableSystemFontTestNotoColorEmojiV0Ttf"],
-    out: ["UpdatableSystemFontTestNotoColorEmojiV0.ttf.fsv_sig"],
+    srcs: [":UpdatableSystemFontTest_NotoColorEmojiV0.ttf"],
+    out: ["UpdatableSystemFontTest_NotoColorEmojiV0.sig"],
 }
 
 genrule {
-    name: "UpdatableSystemFontTestNotoColorEmojiVPlus1TtfFsvSig",
+    name: "UpdatableSystemFontTest_NotoColorEmojiVPlus1.sig",
     defaults: ["updatable_system_font_sig_gen_default"],
-    srcs: [":UpdatableSystemFontTestNotoColorEmojiVPlus1Ttf"],
-    out: ["UpdatableSystemFontTestNotoColorEmojiVPlus1.ttf.fsv_sig"],
+    srcs: [":UpdatableSystemFontTest_NotoColorEmojiVPlus1.ttf"],
+    out: ["UpdatableSystemFontTest_NotoColorEmojiVPlus1.sig"],
 }
 
 genrule {
-    name: "UpdatableSystemFontTestNotoColorEmojiVPlus2TtfFsvSig",
+    name: "UpdatableSystemFontTest_NotoColorEmojiVPlus2.sig",
     defaults: ["updatable_system_font_sig_gen_default"],
-    srcs: [":UpdatableSystemFontTestNotoColorEmojiVPlus2Ttf"],
-    out: ["UpdatableSystemFontTestNotoColorEmojiVPlus2.ttf.fsv_sig"],
+    srcs: [":UpdatableSystemFontTest_NotoColorEmojiVPlus2.ttf"],
+    out: ["UpdatableSystemFontTest_NotoColorEmojiVPlus2.sig"],
+}
+
+genrule {
+    name: "UpdatableSystemFontTest_NotoSerif-Regular.sig",
+    defaults: ["updatable_system_font_sig_gen_default"],
+    srcs: ["UpdatableSystemFontTest_NotoSerif-Regular.ttf"],
+    out: ["UpdatableSystemFontTest_NotoSerif-Regular.sig"],
+}
+
+genrule {
+    name: "UpdatableSystemFontTest_NotoSerif-Bold.sig",
+    defaults: ["updatable_system_font_sig_gen_default"],
+    srcs: ["UpdatableSystemFontTest_NotoSerif-Bold.ttf"],
+    out: ["UpdatableSystemFontTest_NotoSerif-Bold.sig"],
 }

@@ -16,7 +16,8 @@
 
 package com.android.systemui.statusbar.notification.collection;
 
-import com.android.internal.statusbar.IStatusBarService;
+import androidx.annotation.NonNull;
+
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.statusbar.notification.InflationException;
 import com.android.systemui.statusbar.notification.collection.inflation.NotifInflater;
@@ -34,23 +35,13 @@ import javax.inject.Inject;
 @SysUISingleton
 public class NotifInflaterImpl implements NotifInflater {
 
-    private final IStatusBarService mStatusBarService;
-    private final NotifCollection mNotifCollection;
     private final NotifInflationErrorManager mNotifErrorManager;
-    private final NotifPipeline mNotifPipeline;
 
     private NotificationRowBinderImpl mNotificationRowBinder;
 
     @Inject
-    public NotifInflaterImpl(
-            IStatusBarService statusBarService,
-            NotifCollection notifCollection,
-            NotifInflationErrorManager errorManager,
-            NotifPipeline notifPipeline) {
-        mStatusBarService = statusBarService;
-        mNotifCollection = notifCollection;
+    public NotifInflaterImpl(NotifInflationErrorManager errorManager) {
         mNotifErrorManager = errorManager;
-        mNotifPipeline = notifPipeline;
     }
 
     /**
@@ -61,8 +52,9 @@ public class NotifInflaterImpl implements NotifInflater {
     }
 
     @Override
-    public void rebindViews(NotificationEntry entry, InflationCallback callback) {
-        inflateViews(entry, callback);
+    public void rebindViews(@NonNull NotificationEntry entry, @NonNull Params params,
+            @NonNull InflationCallback callback) {
+        inflateViews(entry, params, callback);
     }
 
     /**
@@ -70,10 +62,12 @@ public class NotifInflaterImpl implements NotifInflater {
      * views are bound.
      */
     @Override
-    public void inflateViews(NotificationEntry entry, InflationCallback callback) {
+    public void inflateViews(@NonNull NotificationEntry entry, @NonNull Params params,
+            @NonNull InflationCallback callback) {
         try {
             requireBinder().inflateViews(
                     entry,
+                    params,
                     wrapInflationCallback(callback));
         } catch (InflationException e) {
             mNotifErrorManager.setInflationError(entry, e);
@@ -99,7 +93,7 @@ public class NotifInflaterImpl implements NotifInflater {
             public void onAsyncInflationFinished(NotificationEntry entry) {
                 mNotifErrorManager.clearInflationError(entry);
                 if (callback != null) {
-                    callback.onInflationFinished(entry);
+                    callback.onInflationFinished(entry, entry.getRowController());
                 }
             }
         };

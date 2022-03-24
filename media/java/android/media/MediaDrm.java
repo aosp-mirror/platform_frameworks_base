@@ -41,9 +41,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
-import java.time.Instant;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
@@ -1864,7 +1864,16 @@ public final class MediaDrm implements AutoCloseable {
      * <p>
      * Each secure stop has a unique ID that can be used to identify it during
      * enumeration, access and removal.
+     *
      * @return a list of all secure stops from secure persistent memory
+     * @deprecated This method is deprecated and may be removed in a future
+     * release. Secure stops are a way to enforce limits on the number of
+     * concurrent streams per subscriber across devices. They provide secure
+     * monitoring of the lifetime of content decryption keys in MediaDrm
+     * sessions. Limits on concurrent streams may also be enforced by
+     * periodically renewing licenses. This can be achieved by calling
+     * {@link #getKeyRequest} to initiate a renewal. MediaDrm users should
+     * transition away from secure stops to periodic renewals.
      */
     @NonNull
     public native List<byte[]> getSecureStops();
@@ -1875,6 +1884,10 @@ public final class MediaDrm implements AutoCloseable {
      * secure stop.
      *
      * @return a list of secure stop IDs
+     * @deprecated This method is deprecated and may be removed in a future
+     * release. Use renewals by calling {@link #getKeyRequest} to track
+     * concurrent playback. See additional information in
+     * {@link #getSecureStops}
      */
     @NonNull
     public native List<byte[]> getSecureStopIds();
@@ -1885,6 +1898,10 @@ public final class MediaDrm implements AutoCloseable {
      *
      * @param ssid the ID of the secure stop to return
      * @return the secure stop identified by ssid
+     * @deprecated This method is deprecated and may be removed in a future
+     * release. Use renewals by calling {@link #getKeyRequest} to track
+     * concurrent playback. See additional information in
+     * {@link #getSecureStops}
      */
     @NonNull
     public native byte[] getSecureStop(@NonNull byte[] ssid);
@@ -1895,6 +1912,10 @@ public final class MediaDrm implements AutoCloseable {
      * response.
      *
      * @param ssRelease the server response indicating which secure stops to release
+     * @deprecated This method is deprecated and may be removed in a future
+     * release. Use renewals by calling {@link #getKeyRequest} to track
+     * concurrent playback. See additional information in
+     * {@link #getSecureStops}
      */
     public native void releaseSecureStops(@NonNull byte[] ssRelease);
 
@@ -1902,6 +1923,10 @@ public final class MediaDrm implements AutoCloseable {
      * Remove a specific secure stop without requiring a secure stop release message
      * from the license server.
      * @param ssid the ID of the secure stop to remove
+     * @deprecated This method is deprecated and may be removed in a future
+     * release. Use renewals by calling {@link #getKeyRequest} to track
+     * concurrent playback. See additional information in
+     * {@link #getSecureStops}
      */
     public native void removeSecureStop(@NonNull byte[] ssid);
 
@@ -1912,6 +1937,10 @@ public final class MediaDrm implements AutoCloseable {
      * This method was added in API 28. In API versions 18 through 27,
      * {@link #releaseAllSecureStops} should be called instead. There is no need to
      * do anything for API versions prior to 18.
+     * @deprecated This method is deprecated and may be removed in a future
+     * release. Use renewals by calling {@link #getKeyRequest} to track
+     * concurrent playback. See additional information in
+     * {@link #getSecureStops}
      */
     public native void removeAllSecureStops();
 

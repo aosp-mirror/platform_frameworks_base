@@ -31,15 +31,6 @@
       ]
     },
     {
-      "file_patterns": ["Environment\\.java"],
-      "name": "FrameworksServicesTests",
-      "options": [
-        {
-          "include-filter": "com.android.server.pm.parsing.PackageInfoUserFieldsTest"
-        }
-      ]
-    },
-    {
       "file_patterns": [
         "BatteryStats[^/]*\\.java",
         "BatteryUsageStats[^/]*\\.java",
@@ -73,6 +64,15 @@
         "[^/]*BatteryConsumer[^/]*\\.java"
       ],
       "name": "BatteryUsageStatsProtoTests"
+    },
+    {
+      "file_patterns": ["SharedMemory[^/]*\\.java"],
+      "name": "CtsOsTestCases",
+      "options": [
+        {
+          "include-filter": "android.os.cts.SharedMemoryTest"
+        }
+      ]
     }
   ],
   "postsubmit": [

@@ -16,7 +16,19 @@
 -->
 <resources>
     <!-- The dimensions to user for picture-in-picture action buttons. -->
-    <dimen name="picture_in_picture_button_width">100dp</dimen>
-    <dimen name="picture_in_picture_button_start_margin">-50dp</dimen>
+    <dimen name="pip_menu_button_size">40dp</dimen>
+    <dimen name="pip_menu_button_radius">20dp</dimen>
+    <dimen name="pip_menu_icon_size">20dp</dimen>
+    <dimen name="pip_menu_button_margin">4dp</dimen>
+    <dimen name="pip_menu_button_wrapper_margin">26dp</dimen>
+    <dimen name="pip_menu_border_width">4dp</dimen>
+    <dimen name="pip_menu_border_radius">4dp</dimen>
+    <dimen name="pip_menu_outer_space">24dp</dimen>
+
+    <!-- outer space minus border width -->
+    <dimen name="pip_menu_outer_space_frame">20dp</dimen>
+
+    <dimen name="pip_menu_arrow_size">24dp</dimen>
+    <dimen name="pip_menu_arrow_elevation">5dp</dimen>
 </resources>
 

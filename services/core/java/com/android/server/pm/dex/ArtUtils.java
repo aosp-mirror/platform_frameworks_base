@@ -21,9 +21,9 @@ import static com.android.server.pm.InstructionSets.getAppDexInstructionSets;
 import android.annotation.NonNull;
 
 import com.android.server.pm.PackageDexOptimizer;
-import com.android.server.pm.PackageSetting;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
+import com.android.server.pm.pkg.PackageStateInternal;
 
 import java.io.File;
 import java.util.Arrays;
@@ -39,7 +39,7 @@ public final class ArtUtils {
      * Create the ART-representation of package info.
      */
     public static ArtPackageInfo createArtPackageInfo(
-            AndroidPackage pkg, PackageSetting pkgSetting) {
+            AndroidPackage pkg, PackageStateInternal pkgSetting) {
         return new ArtPackageInfo(
                 pkg.getPackageName(),
                 Arrays.asList(getAppDexInstructionSets(
@@ -49,9 +49,9 @@ public final class ArtUtils {
                 getOatDir(pkg, pkgSetting));
     }
 
-    private static String getOatDir(AndroidPackage pkg, @NonNull PackageSetting pkgSetting) {
+    private static String getOatDir(AndroidPackage pkg, @NonNull PackageStateInternal pkgSetting) {
         if (!AndroidPackageUtils.canHaveOatDir(pkg,
-                pkgSetting.getPkgState().isUpdatedSystemApp())) {
+                pkgSetting.getTransientState().isUpdatedSystemApp())) {
             return null;
         }
         File codePath = new File(pkg.getPath());

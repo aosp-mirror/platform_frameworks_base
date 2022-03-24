@@ -21,6 +21,7 @@ import static android.content.ClipDescription.MIMETYPE_APPLICATION_ACTIVITY;
 import static android.content.ClipDescription.MIMETYPE_APPLICATION_SHORTCUT;
 import static android.content.ClipDescription.MIMETYPE_APPLICATION_TASK;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.view.DragEvent.ACTION_DRAG_ENDED;
 import static android.view.DragEvent.ACTION_DRAG_STARTED;
 import static android.view.DragEvent.ACTION_DROP;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_INTERCEPT_GLOBAL_DRAG_AND_DROP;
@@ -37,6 +38,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 
@@ -44,6 +46,7 @@ import android.app.PendingIntent;
 import android.content.ClipData;
 import android.content.ClipDescription;
 import android.content.Intent;
+import android.content.pm.ShortcutServiceInternal;
 import android.graphics.PixelFormat;
 import android.os.Binder;
 import android.os.IBinder;
@@ -58,6 +61,7 @@ import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.accessibility.AccessibilityManager;
 
 import androidx.test.filters.SmallTest;
 
@@ -70,6 +74,8 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
 
 import java.util.ArrayList;
 import java.util.concurrent.CountDownLatch;
@@ -87,6 +93,7 @@ import java.util.concurrent.TimeUnit;
 public class DragDropControllerTests extends WindowTestsBase {
     private static final int TIMEOUT_MS = 3000;
     private static final int TEST_UID = 12345;
+    private static final int TEST_PROFILE_UID = 12345 * UserHandle.PER_USER_RANGE;
     private static final int TEST_PID = 67890;
     private static final String TEST_PACKAGE = "com.test.package";
 
@@ -97,14 +104,20 @@ public class DragDropControllerTests extends WindowTestsBase {
     static class TestDragDropController extends DragDropController {
         private Runnable mCloseCallback;
         boolean mDeferDragStateClosed;
+        boolean mIsAccessibilityDrag;
 
         TestDragDropController(WindowManagerService service, Looper looper) {
             super(service, looper);
         }
 
         void setOnClosedCallbackLocked(Runnable runnable) {
-            assertTrue(dragDropActiveLocked());
-            mCloseCallback = runnable;
+            if (mIsAccessibilityDrag) {
+                // Accessibility does not use animation
+                assertTrue(!dragDropActiveLocked());
+            } else {
+                assertTrue(dragDropActiveLocked());
+                mCloseCallback = runnable;
+            }
         }
 
         @Override
@@ -133,7 +146,9 @@ public class DragDropControllerTests extends WindowTestsBase {
         final WindowState window = createWindow(
                 null, TYPE_BASE_APPLICATION, activity, name, ownerId, false, new TestIWindow());
         window.mInputChannel = new InputChannel();
+        window.mInputChannelToken = window.mInputChannel.getToken();
         window.mHasSurface = true;
+        mWm.mWindowMap.put(window.mClient.asBinder(), window);
         mWm.mInputToWindowMap.put(window.mInputChannelToken, window);
         return window;
     }
@@ -171,12 +186,22 @@ public class DragDropControllerTests extends WindowTestsBase {
         }
         latch = new CountDownLatch(1);
         mTarget.setOnClosedCallbackLocked(latch::countDown);
+        if (mTarget.mIsAccessibilityDrag) {
+            mTarget.mIsAccessibilityDrag = false;
+            return;
+        }
         assertTrue(awaitInWmLock(() -> latch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS)));
     }
 
     @Test
     public void testDragFlow() {
         doDragAndDrop(0, ClipData.newPlainText("label", "Test"), 0, 0);
+    }
+
+    @Test
+    public void testA11yDragFlow() {
+        mTarget.mIsAccessibilityDrag = true;
+        doA11yDragAndDrop(0, ClipData.newPlainText("label", "Test"), 0, 0);
     }
 
     @Test
@@ -237,7 +262,7 @@ public class DragDropControllerTests extends WindowTestsBase {
                     } finally {
                         mTarget.mDeferDragStateClosed = false;
                     }
-                    assertTrue(mTarget.dragSurfaceRelinquished());
+                    assertTrue(mTarget.dragSurfaceRelinquishedToDropTarget());
                 });
     }
 
@@ -369,6 +394,32 @@ public class DragDropControllerTests extends WindowTestsBase {
         }
     }
 
+    @Test
+    public void testValidateProfileAppShortcutArguments_notCallingUid() {
+        doReturn(PERMISSION_GRANTED).when(mWm.mContext)
+                .checkCallingOrSelfPermission(eq(START_TASKS_FROM_RECENTS));
+        final Session session = Mockito.spy(new Session(mWm, new IWindowSessionCallback.Stub() {
+            @Override
+            public void onAnimatorScaleChanged(float scale) {}
+        }));
+        final ShortcutServiceInternal shortcutService = mock(ShortcutServiceInternal.class);
+        final Intent[] shortcutIntents = new Intent[1];
+        shortcutIntents[0] = new Intent();
+        doReturn(shortcutIntents).when(shortcutService).createShortcutIntents(anyInt(), any(),
+                any(), any(), anyInt(), anyInt(), anyInt());
+        LocalServices.removeServiceForTest(ShortcutServiceInternal.class);
+        LocalServices.addService(ShortcutServiceInternal.class, shortcutService);
+
+        ArgumentCaptor<Integer> callingUser = ArgumentCaptor.forClass(Integer.class);
+        session.validateAndResolveDragMimeTypeExtras(
+                createClipDataForShortcut("test_package", "test_shortcut_id",
+                        mock(UserHandle.class)),
+                TEST_PROFILE_UID, TEST_PID, TEST_PACKAGE);
+        verify(shortcutService).createShortcutIntents(callingUser.capture(), any(),
+                any(), any(), anyInt(), anyInt(), anyInt());
+        assertTrue(callingUser.getValue() == UserHandle.getUserId(TEST_PROFILE_UID));
+    }
+
     private ClipData createClipDataForShortcut(String packageName, String shortcutId,
             UserHandle user) {
         final Intent data = new Intent();
@@ -409,6 +460,100 @@ public class DragDropControllerTests extends WindowTestsBase {
         }
     }
 
+    @Test
+    public void testValidateFlags() {
+        final Session session = new Session(mWm, new IWindowSessionCallback.Stub() {
+            @Override
+            public void onAnimatorScaleChanged(float scale) {}
+        });
+        try {
+            session.validateDragFlags(View.DRAG_FLAG_REQUEST_SURFACE_FOR_RETURN_ANIMATION,
+                    TEST_UID);
+            fail("Expected failure without permission");
+        } catch (SecurityException e) {
+            // Expected failure
+        }
+    }
+
+    @Test
+    public void testValidateFlagsWithPermission() {
+        doReturn(PERMISSION_GRANTED).when(mWm.mContext)
+                .checkCallingOrSelfPermission(eq(START_TASKS_FROM_RECENTS));
+        final Session session = new Session(mWm, new IWindowSessionCallback.Stub() {
+            @Override
+            public void onAnimatorScaleChanged(float scale) {}
+        });
+        try {
+            session.validateDragFlags(View.DRAG_FLAG_REQUEST_SURFACE_FOR_RETURN_ANIMATION,
+                    TEST_UID);
+            // Expected pass
+        } catch (SecurityException e) {
+            fail("Expected no failure with permission");
+        }
+    }
+
+    @Test
+    public void testRequestSurfaceForReturnAnimationFlag_dropSuccessful() {
+        WindowState otherWindow = createDropTargetWindow("App drag test window", 0);
+        TestIWindow otherIWindow = (TestIWindow) otherWindow.mClient;
+
+        // Necessary for now since DragState.sendDragStartedLocked() will recycle drag events
+        // immediately after dispatching, which is a problem when using mockito arguments captor
+        // because it returns and modifies the same drag event
+        TestIWindow iwindow = (TestIWindow) mWindow.mClient;
+        final ArrayList<DragEvent> dragEvents = new ArrayList<>();
+        iwindow.setDragEventJournal(dragEvents);
+
+        startDrag(View.DRAG_FLAG_GLOBAL | View.DRAG_FLAG_GLOBAL_URI_READ
+                        | View.DRAG_FLAG_REQUEST_SURFACE_FOR_RETURN_ANIMATION,
+                ClipData.newPlainText("label", "text"), () -> {
+                    assertTrue(dragEvents.get(0).getAction() == ACTION_DRAG_STARTED);
+
+                    // Verify after consuming that the drag surface is relinquished
+                    mTarget.reportDropWindow(otherWindow.mInputChannelToken, 0, 0);
+                    mTarget.handleMotionEvent(false, 0, 0);
+                    mToken = otherWindow.mClient.asBinder();
+                    mTarget.reportDropResult(otherIWindow, true);
+
+                    // Verify the DRAG_ENDED event does NOT include the drag surface
+                    final DragEvent dropEvent = dragEvents.get(dragEvents.size() - 1);
+                    assertTrue(dragEvents.get(dragEvents.size() - 1).getAction()
+                            == ACTION_DRAG_ENDED);
+                    assertTrue(dropEvent.getDragSurface() == null);
+                });
+    }
+
+    @Test
+    public void testRequestSurfaceForReturnAnimationFlag_dropUnsuccessful() {
+        WindowState otherWindow = createDropTargetWindow("App drag test window", 0);
+        TestIWindow otherIWindow = (TestIWindow) otherWindow.mClient;
+
+        // Necessary for now since DragState.sendDragStartedLocked() will recycle drag events
+        // immediately after dispatching, which is a problem when using mockito arguments captor
+        // because it returns and modifies the same drag event
+        TestIWindow iwindow = (TestIWindow) mWindow.mClient;
+        final ArrayList<DragEvent> dragEvents = new ArrayList<>();
+        iwindow.setDragEventJournal(dragEvents);
+
+        startDrag(View.DRAG_FLAG_GLOBAL | View.DRAG_FLAG_GLOBAL_URI_READ
+                        | View.DRAG_FLAG_REQUEST_SURFACE_FOR_RETURN_ANIMATION,
+                ClipData.newPlainText("label", "text"), () -> {
+                    assertTrue(dragEvents.get(0).getAction() == ACTION_DRAG_STARTED);
+
+                    // Verify after consuming that the drag surface is relinquished
+                    mTarget.reportDropWindow(otherWindow.mInputChannelToken, 0, 0);
+                    mTarget.handleMotionEvent(false, 0, 0);
+                    mToken = otherWindow.mClient.asBinder();
+                    mTarget.reportDropResult(otherIWindow, false);
+
+                    // Verify the DRAG_ENDED event includes the drag surface
+                    final DragEvent dropEvent = dragEvents.get(dragEvents.size() - 1);
+                    assertTrue(dragEvents.get(dragEvents.size() - 1).getAction()
+                            == ACTION_DRAG_ENDED);
+                    assertTrue(dropEvent.getDragSurface() != null);
+                });
+    }
+
     private void doDragAndDrop(int flags, ClipData data, float dropX, float dropY) {
         startDrag(flags, data, () -> {
             mTarget.reportDropWindow(mWindow.mInputChannelToken, dropX, dropY);
@@ -435,5 +580,23 @@ public class DragDropControllerTests extends WindowTestsBase {
         } finally {
             appSession.kill();
         }
+    }
+
+    private void doA11yDragAndDrop(int flags, ClipData data, float dropX, float dropY) {
+        spyOn(mTarget);
+        AccessibilityManager accessibilityManager = Mockito.mock(AccessibilityManager.class);
+        when(accessibilityManager.isEnabled()).thenReturn(true);
+        doReturn(accessibilityManager).when(mTarget).getAccessibilityManager();
+        startA11yDrag(flags, data, () -> {
+            boolean dropped = mTarget.dropForAccessibility(mWindow.mClient, dropX, dropY);
+            mToken = mWindow.mClient.asBinder();
+        });
+    }
+
+    private void startA11yDrag(int flags, ClipData data, Runnable r) {
+        mToken = mTarget.performDrag(0, 0, mWindow.mClient,
+                flags | View.DRAG_FLAG_ACCESSIBILITY_ACTION, null, 0, 0, 0, 0, 0, data);
+        assertNotNull(mToken);
+        r.run();
     }
 }

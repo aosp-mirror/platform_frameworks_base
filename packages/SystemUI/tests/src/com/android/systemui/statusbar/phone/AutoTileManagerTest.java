@@ -51,7 +51,8 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.qs.AutoAddTracker;
 import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.qs.ReduceBrightColorsController;
-import com.android.systemui.qs.SecureSetting;
+import com.android.systemui.qs.SettingObserver;
+import com.android.systemui.qs.external.CustomTile;
 import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.CastController.CastDevice;
 import com.android.systemui.statusbar.policy.DataSaverController;
@@ -85,6 +86,7 @@ public class AutoTileManagerTest extends SysuiTestCase {
     private static final String TEST_SETTING_COMPONENT = "setting_component";
     private static final String TEST_COMPONENT = "test_pkg/test_cls";
     private static final String TEST_CUSTOM_SPEC = "custom(" + TEST_COMPONENT + ")";
+    private static final String TEST_CUSTOM_SAFETY_SPEC = "custom(safety_pkg/safety_cls)";
     private static final String SEPARATOR = AutoTileManager.SETTING_SEPARATOR;
 
     private static final int USER = 0;
@@ -121,6 +123,8 @@ public class AutoTileManagerTest extends SysuiTestCase {
         );
         mContext.getOrCreateTestableResources().addOverride(
                 com.android.internal.R.bool.config_nightDisplayAvailable, true);
+        mContext.getOrCreateTestableResources().addOverride(
+                R.string.safety_quick_settings_tile, TEST_CUSTOM_SAFETY_SPEC);
 
         when(mAutoAddTrackerBuilder.build()).thenReturn(mAutoAddTracker);
         when(mQsTileHost.getUserContext()).thenReturn(mUserContext);
@@ -249,7 +253,7 @@ public class AutoTileManagerTest extends SysuiTestCase {
 
         verify(mWalletController, times(2)).getWalletPosition();
 
-        SecureSetting setting = mAutoTileManager.getSecureSettingForKey(TEST_SETTING);
+        SettingObserver setting = mAutoTileManager.getSecureSettingForKey(TEST_SETTING);
         assertEquals(USER + 1, setting.getCurrentUser());
         assertTrue(setting.isListening());
     }
@@ -299,7 +303,7 @@ public class AutoTileManagerTest extends SysuiTestCase {
 
         verify(mWalletController, times(2)).getWalletPosition();
 
-        SecureSetting setting = mAutoTileManager.getSecureSettingForKey(TEST_SETTING);
+        SettingObserver setting = mAutoTileManager.getSecureSettingForKey(TEST_SETTING);
         assertEquals(USER + 1, setting.getCurrentUser());
         assertFalse(setting.isListening());
     }
@@ -434,6 +438,25 @@ public class AutoTileManagerTest extends SysuiTestCase {
         verify(mQsTileHost, never()).addTile(TEST_SPEC);
     }
 
+    @Test
+    public void testSafetyTileNotAdded_ifPreviouslyAdded() {
+        ComponentName safetyComponent = CustomTile.getComponentFromSpec(TEST_CUSTOM_SAFETY_SPEC);
+        mAutoTileManager.init();
+        verify(mQsTileHost, times(1)).addTile(safetyComponent, true);
+        when(mAutoAddTracker.isAdded(TEST_CUSTOM_SAFETY_SPEC)).thenReturn(true);
+        mAutoTileManager.init();
+        verify(mQsTileHost, times(1)).addTile(safetyComponent, true);
+    }
+
+    @Test
+    public void testSafetyTileAdded_onUserChange() {
+        ComponentName safetyComponent = CustomTile.getComponentFromSpec(TEST_CUSTOM_SAFETY_SPEC);
+        mAutoTileManager.init();
+        verify(mQsTileHost, times(1)).addTile(safetyComponent, true);
+        when(mAutoAddTracker.isAdded(TEST_CUSTOM_SAFETY_SPEC)).thenReturn(false);
+        mAutoTileManager.changeUser(UserHandle.of(USER + 1));
+        verify(mQsTileHost, times(2)).addTile(safetyComponent, true);
+    }
     @Test
     public void testEmptyArray_doesNotCrash() {
         mContext.getOrCreateTestableResources().addOverride(

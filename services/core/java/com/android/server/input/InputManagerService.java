@@ -16,7 +16,7 @@
 
 package com.android.server.input;
 
-import static android.view.Surface.ROTATION_0;
+import static android.view.KeyEvent.KEYCODE_UNKNOWN;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -40,8 +40,10 @@ import android.content.res.Resources.NotFoundException;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.database.ContentObserver;
-import android.graphics.Point;
-import android.graphics.Rect;
+import android.graphics.PointF;
+import android.hardware.SensorPrivacyManager;
+import android.hardware.SensorPrivacyManager.Sensors;
+import android.hardware.SensorPrivacyManagerInternal;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayViewport;
 import android.hardware.input.IInputDevicesChangedListener;
@@ -64,6 +66,7 @@ import android.os.CombinedVibration;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.IInputConstants;
 import android.os.IVibratorStateListener;
 import android.os.InputEventInjectionResult;
 import android.os.InputEventInjectionSync;
@@ -76,7 +79,6 @@ import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
-import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.VibrationEffect;
 import android.os.vibrator.StepSegment;
@@ -100,9 +102,9 @@ import android.view.InputDevice;
 import android.view.InputEvent;
 import android.view.InputMonitor;
 import android.view.KeyEvent;
-import android.view.MotionEvent;
 import android.view.PointerIcon;
 import android.view.Surface;
+import android.view.SurfaceControl;
 import android.view.VerifiedInputEvent;
 import android.view.ViewConfiguration;
 import android.widget.Toast;
@@ -142,6 +144,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.OptionalInt;
 
 /*
  * Wraps the C++ InputManager and provides its callbacks.
@@ -179,9 +182,6 @@ public class InputManagerService extends IInputManager.Stub
     /** TODO(b/169067926): Remove this. */
     private static final boolean UNTRUSTED_TOUCHES_TOAST = false;
 
-    public static final boolean ENABLE_PER_WINDOW_INPUT_ROTATION =
-            SystemProperties.getBoolean("persist.debug.per_window_input_rotation", false);
-
     // Pointer to native input manager service object.
     private final long mPtr;
 
@@ -189,7 +189,7 @@ public class InputManagerService extends IInputManager.Stub
     private final InputManagerHandler mHandler;
 
     // Context cache used for loading pointer resources.
-    private Context mDisplayContext;
+    private Context mPointerIconDisplayContext;
 
     private final File mDoubleTouchGestureEnableFile;
 
@@ -200,8 +200,9 @@ public class InputManagerService extends IInputManager.Stub
 
     private final Object mTabletModeLock = new Object();
     // List of currently registered tablet mode changed listeners by process id
+    @GuardedBy("mTabletModeLock")
     private final SparseArray<TabletModeChangedListenerRecord> mTabletModeChangedListeners =
-            new SparseArray<>(); // guarded by mTabletModeLock
+            new SparseArray<>();
     private final List<TabletModeChangedListenerRecord> mTempTabletModeChangedListenersToNotify =
             new ArrayList<>();
 
@@ -219,40 +220,39 @@ public class InputManagerService extends IInputManager.Stub
     private final PersistentDataStore mDataStore = new PersistentDataStore();
 
     // List of currently registered input devices changed listeners by process id.
-    private Object mInputDevicesLock = new Object();
+    private final Object mInputDevicesLock = new Object();
     @GuardedBy("mInputDevicesLock")
-    private boolean mInputDevicesChangedPending; // guarded by mInputDevicesLock
+    private boolean mInputDevicesChangedPending;
     @GuardedBy("mInputDevicesLock")
     private InputDevice[] mInputDevices = new InputDevice[0];
+    @GuardedBy("mInputDevicesLock")
     private final SparseArray<InputDevicesChangedListenerRecord> mInputDevicesChangedListeners =
-            new SparseArray<InputDevicesChangedListenerRecord>(); // guarded by mInputDevicesLock
+            new SparseArray<>();
     private final ArrayList<InputDevicesChangedListenerRecord>
-            mTempInputDevicesChangedListenersToNotify =
-                    new ArrayList<InputDevicesChangedListenerRecord>(); // handler thread only
-    private final ArrayList<InputDevice>
-            mTempFullKeyboards = new ArrayList<InputDevice>(); // handler thread only
+            mTempInputDevicesChangedListenersToNotify = new ArrayList<>(); // handler thread only
+    private final ArrayList<InputDevice> mTempFullKeyboards =
+            new ArrayList<>(); // handler thread only
     private boolean mKeyboardLayoutNotificationShown;
     private Toast mSwitchedKeyboardLayoutToast;
 
     // State for vibrator tokens.
-    private Object mVibratorLock = new Object();
-    private Map<IBinder, VibratorToken> mVibratorTokens = new ArrayMap<IBinder, VibratorToken>();
+    private final Object mVibratorLock = new Object();
+    private final Map<IBinder, VibratorToken> mVibratorTokens = new ArrayMap<>();
     private int mNextVibratorTokenValue;
 
     // List of currently registered vibrator state changed listeners by device id.
     @GuardedBy("mVibratorLock")
     private final SparseArray<RemoteCallbackList<IVibratorStateListener>> mVibratorStateListeners =
-            new SparseArray<RemoteCallbackList<IVibratorStateListener>>();
+            new SparseArray<>();
     // List of vibrator states by device id.
     @GuardedBy("mVibratorLock")
     private final SparseBooleanArray mIsVibrating = new SparseBooleanArray();
-    private Object mLightLock = new Object();
+    private final Object mLightLock = new Object();
     // State for light tokens. A light token marks a lights manager session, it is generated
     // by light session open() and deleted in session close().
     // When lights session requests light states, the token will be used to find the light session.
     @GuardedBy("mLightLock")
-    private final ArrayMap<IBinder, LightSession> mLightSessions =
-            new ArrayMap<IBinder, LightSession>();
+    private final ArrayMap<IBinder, LightSession> mLightSessions = new ArrayMap<>();
 
     // State for lid switch
     // Lock for the lid switch state. Held when triggering callbacks to guarantee lid switch events
@@ -261,21 +261,42 @@ public class InputManagerService extends IInputManager.Stub
     // events that occur at the same time are delivered after the callback has returned.
     private final Object mLidSwitchLock = new Object();
     @GuardedBy("mLidSwitchLock")
-    private List<LidSwitchCallback> mLidSwitchCallbacks = new ArrayList<>();
+    private final List<LidSwitchCallback> mLidSwitchCallbacks = new ArrayList<>();
 
     // State for the currently installed input filter.
     final Object mInputFilterLock = new Object();
-    IInputFilter mInputFilter; // guarded by mInputFilterLock
-    InputFilterHost mInputFilterHost; // guarded by mInputFilterLock
+    @GuardedBy("mInputFilterLock")
+    IInputFilter mInputFilter;
+    @GuardedBy("mInputFilterLock")
+    InputFilterHost mInputFilterHost;
 
     // The associations of input devices to displays by port. Maps from input device port (String)
     // to display id (int). Currently only accessed by InputReader.
     private final Map<String, Integer> mStaticAssociations;
     private final Object mAssociationsLock = new Object();
     @GuardedBy("mAssociationLock")
-    private final Map<String, Integer> mRuntimeAssociations = new ArrayMap<String, Integer>();
+    private final Map<String, Integer> mRuntimeAssociations = new ArrayMap<>();
     @GuardedBy("mAssociationLock")
     private final Map<String, String> mUniqueIdAssociations = new ArrayMap<>();
+
+    private final Object mAdditionalDisplayInputPropertiesLock = new Object();
+
+    // Forces the MouseCursorController to target a specific display id.
+    @GuardedBy("mAdditionalDisplayInputPropertiesLock")
+    private int mOverriddenPointerDisplayId = Display.INVALID_DISPLAY;
+    @GuardedBy("mAdditionalDisplayInputPropertiesLock")
+    private final SparseArray<AdditionalDisplayInputProperties> mAdditionalDisplayInputProperties =
+            new SparseArray<>();
+    @GuardedBy("mAdditionalDisplayInputPropertiesLock")
+    private int mIconType = PointerIcon.TYPE_NOT_SPECIFIED;
+    @GuardedBy("mAdditionalDisplayInputPropertiesLock")
+    private PointerIcon mIcon;
+
+
+    // Holds all the registered gesture monitors that are implemented as spy windows. The spy
+    // windows are mapped by their InputChannel tokens.
+    @GuardedBy("mInputMonitors")
+    final Map<IBinder, GestureMonitorSpyWindow> mInputMonitors = new HashMap<>();
 
     private static native long nativeInit(InputManagerService service,
             Context context, MessageQueue messageQueue);
@@ -291,13 +312,16 @@ public class InputManagerService extends IInputManager.Stub
             int deviceId, int sourceMask, int sw);
     private static native boolean nativeHasKeys(long ptr,
             int deviceId, int sourceMask, int[] keyCodes, boolean[] keyExists);
+    private static native int nativeGetKeyCodeForKeyLocation(long ptr, int deviceId,
+            int locationKeyCode);
     private static native InputChannel nativeCreateInputChannel(long ptr, String name);
     private static native InputChannel nativeCreateInputMonitor(long ptr, int displayId,
-            boolean isGestureMonitor, String name, int pid);
+            String name, int pid);
     private static native void nativeRemoveInputChannel(long ptr, IBinder connectionToken);
     private static native void nativePilferPointers(long ptr, IBinder token);
     private static native void nativeSetInputFilterEnabled(long ptr, boolean enable);
-    private static native void nativeSetInTouchMode(long ptr, boolean inTouchMode);
+    private static native boolean nativeSetInTouchMode(long ptr, boolean inTouchMode, int pid,
+            int uid, boolean hasPermission);
     private static native void nativeSetMaximumObscuringOpacityForTouch(long ptr, float opacity);
     private static native void nativeSetBlockUntrustedTouchesMode(long ptr, int mode);
     private static native int nativeInjectInputEvent(long ptr, InputEvent event,
@@ -315,6 +339,7 @@ public class InputManagerService extends IInputManager.Stub
             IBinder fromChannelToken, IBinder toChannelToken, boolean isDragDrop);
     private static native boolean nativeTransferTouch(long ptr, IBinder destChannelToken);
     private static native void nativeSetPointerSpeed(long ptr, int speed);
+    private static native void nativeSetPointerAcceleration(long ptr, float acceleration);
     private static native void nativeSetShowTouches(long ptr, boolean enabled);
     private static native void nativeSetInteractive(long ptr, boolean interactive);
     private static native void nativeReloadCalibration(long ptr);
@@ -348,12 +373,16 @@ public class InputManagerService extends IInputManager.Stub
     private static native boolean nativeCanDispatchToDisplay(long ptr, int deviceId, int displayId);
     private static native void nativeNotifyPortAssociationsChanged(long ptr);
     private static native void nativeChangeUniqueIdAssociation(long ptr);
+    private static native void nativeNotifyPointerDisplayIdChanged(long ptr);
+    private static native void nativeSetDisplayEligibilityForPointerCapture(long ptr, int displayId,
+            boolean enabled);
     private static native void nativeSetMotionClassifierEnabled(long ptr, boolean enabled);
     private static native InputSensorInfo[] nativeGetSensorList(long ptr, int deviceId);
     private static native boolean nativeFlushSensor(long ptr, int deviceId, int sensorType);
     private static native boolean nativeEnableSensor(long ptr, int deviceId, int sensorType,
             int samplingPeriodUs, int maxBatchReportLatencyUs);
     private static native void nativeDisableSensor(long ptr, int deviceId, int sensorType);
+    private static native void nativeCancelCurrentTouch(long ptr);
 
     // Maximum number of milliseconds to wait for input event injection.
     private static final int INJECTION_TIMEOUT_MILLIS = 30 * 1000;
@@ -525,6 +554,19 @@ public class InputManagerService extends IInputManager.Stub
             }
         }
 
+        // Set the HW mic toggle switch state
+        final int micMuteState = getSwitchState(-1 /* deviceId */, InputDevice.SOURCE_ANY,
+                SW_MUTE_DEVICE);
+        if (micMuteState != InputManager.SWITCH_STATE_UNKNOWN) {
+            setSensorPrivacy(Sensors.MICROPHONE, micMuteState != InputManager.SWITCH_STATE_OFF);
+        }
+        // Set the HW camera toggle switch state
+        final int cameraMuteState = getSwitchState(-1 /* deviceId */, InputDevice.SOURCE_ANY,
+                SW_CAMERA_LENS_COVER);
+        if (cameraMuteState != InputManager.SWITCH_STATE_UNKNOWN) {
+            setSensorPrivacy(Sensors.CAMERA, cameraMuteState != InputManager.SWITCH_STATE_OFF);
+        }
+
         IntentFilter filter = new IntentFilter(Intent.ACTION_PACKAGE_ADDED);
         filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
         filter.addAction(Intent.ACTION_PACKAGE_CHANGED);
@@ -567,49 +609,27 @@ public class InputManagerService extends IInputManager.Stub
         nativeReloadDeviceAliases(mPtr);
     }
 
-    /** Rotates CCW by `delta` 90-degree increments. */
-    private static void rotateBounds(Rect inOutBounds, int parentW, int parentH, int delta) {
-        int rdelta = ((delta % 4) + 4) % 4;
-        int origLeft = inOutBounds.left;
-        switch (rdelta) {
-            case 0:
-                return;
-            case 1:
-                inOutBounds.left = inOutBounds.top;
-                inOutBounds.top = parentW - inOutBounds.right;
-                inOutBounds.right = inOutBounds.bottom;
-                inOutBounds.bottom = parentW - origLeft;
-                return;
-            case 2:
-                inOutBounds.left = parentW - inOutBounds.right;
-                inOutBounds.right = parentW - origLeft;
-                return;
-            case 3:
-                inOutBounds.left = parentH - inOutBounds.bottom;
-                inOutBounds.bottom = inOutBounds.right;
-                inOutBounds.right = parentH - inOutBounds.top;
-                inOutBounds.top = origLeft;
-                return;
-        }
-    }
-
     private void setDisplayViewportsInternal(List<DisplayViewport> viewports) {
-        final DisplayViewport[] vArray = new DisplayViewport[viewports.size()];
-        if (ENABLE_PER_WINDOW_INPUT_ROTATION) {
-            // Remove display projection information from DisplayViewport, leaving only the
-            // orientation. The display projection will be built-into the window transforms.
-            for (int i = viewports.size() - 1; i >= 0; --i) {
-                final DisplayViewport v = vArray[i] = viewports.get(i).makeCopy();
-                // Note: the deviceWidth/Height are in rotated with the orientation.
-                v.logicalFrame.set(0, 0, v.deviceWidth, v.deviceHeight);
-                v.physicalFrame.set(0, 0, v.deviceWidth, v.deviceHeight);
-            }
-        } else {
+        synchronized (mAdditionalDisplayInputPropertiesLock) {
+            final DisplayViewport[] vArray = new DisplayViewport[viewports.size()];
             for (int i = viewports.size() - 1; i >= 0; --i) {
                 vArray[i] = viewports.get(i);
             }
+            nativeSetDisplayViewports(mPtr, vArray);
+
+            if (mOverriddenPointerDisplayId != Display.INVALID_DISPLAY) {
+                final AdditionalDisplayInputProperties properties =
+                        mAdditionalDisplayInputProperties.get(mOverriddenPointerDisplayId);
+                if (properties != null) {
+                    updatePointerIconVisibleLocked(properties.pointerIconVisible);
+                    updatePointerAccelerationLocked(properties.pointerAcceleration);
+                    return;
+                }
+            }
+            updatePointerIconVisibleLocked(
+                    AdditionalDisplayInputProperties.DEFAULT_POINTER_ICON_VISIBLE);
+            updatePointerAccelerationLocked(IInputConstants.DEFAULT_POINTER_ACCELERATION);
         }
-        nativeSetDisplayViewports(mPtr, vArray);
     }
 
     /**
@@ -665,15 +685,29 @@ public class InputManagerService extends IInputManager.Stub
      */
     @Override // Binder call
     public boolean hasKeys(int deviceId, int sourceMask, int[] keyCodes, boolean[] keyExists) {
-        if (keyCodes == null) {
-            throw new IllegalArgumentException("keyCodes must not be null.");
-        }
-        if (keyExists == null || keyExists.length < keyCodes.length) {
-            throw new IllegalArgumentException("keyExists must not be null and must be at "
-                    + "least as large as keyCodes.");
+        Objects.requireNonNull(keyCodes, "keyCodes must not be null");
+        Objects.requireNonNull(keyExists, "keyExists must not be null");
+        if (keyExists.length < keyCodes.length) {
+            throw new IllegalArgumentException("keyExists must be at least as large as keyCodes");
         }
 
         return nativeHasKeys(mPtr, deviceId, sourceMask, keyCodes, keyExists);
+    }
+
+    /**
+     * Returns the keyCode generated by the specified location on a US keyboard layout.
+     * This takes into consideration the currently active keyboard layout.
+     *
+     * @param deviceId The input device id.
+     * @param locationKeyCode The location of a key on a US keyboard layout.
+     * @return The KeyCode this physical key location produces.
+     */
+    @Override // Binder call
+    public int getKeyCodeForKeyLocation(int deviceId, int locationKeyCode) {
+        if (locationKeyCode <= KEYCODE_UNKNOWN || locationKeyCode > KeyEvent.getMaxKeyCode()) {
+            return KEYCODE_UNKNOWN;
+        }
+        return nativeGetKeyCodeForKeyLocation(mPtr, deviceId, locationKeyCode);
     }
 
     /**
@@ -685,7 +719,7 @@ public class InputManagerService extends IInputManager.Stub
      */
     public boolean transferTouch(IBinder destChannelToken) {
         // TODO(b/162194035): Replace this with a SPY window
-        Objects.requireNonNull(destChannelToken, "destChannelToken must not be null.");
+        Objects.requireNonNull(destChannelToken, "destChannelToken must not be null");
         return nativeTransferTouch(mPtr, destChannelToken);
     }
 
@@ -696,46 +730,83 @@ public class InputManagerService extends IInputManager.Stub
      * @return The input channel.
      */
     public InputChannel monitorInput(String inputChannelName, int displayId) {
-        if (inputChannelName == null) {
-            throw new IllegalArgumentException("inputChannelName must not be null.");
-        }
+        Objects.requireNonNull(inputChannelName, "inputChannelName not be null");
 
         if (displayId < Display.DEFAULT_DISPLAY) {
             throw new IllegalArgumentException("displayId must >= 0.");
         }
 
-        return nativeCreateInputMonitor(mPtr, displayId, false /* isGestureMonitor */,
-                inputChannelName, Binder.getCallingPid());
+        return nativeCreateInputMonitor(mPtr, displayId, inputChannelName, Binder.getCallingPid());
+    }
+
+    @NonNull
+    private InputChannel createSpyWindowGestureMonitor(IBinder monitorToken, String name,
+            int displayId, int pid, int uid) {
+        final SurfaceControl sc = mWindowManagerCallbacks.createSurfaceForGestureMonitor(name,
+                displayId);
+        if (sc == null) {
+            throw new IllegalArgumentException(
+                    "Could not create gesture monitor surface on display: " + displayId);
+        }
+        final InputChannel channel = createInputChannel(name);
+
+        try {
+            monitorToken.linkToDeath(() -> removeSpyWindowGestureMonitor(channel.getToken()), 0);
+        } catch (RemoteException e) {
+            Slog.i(TAG, "Client died before '" + name + "' could be created.");
+            return null;
+        }
+        synchronized (mInputMonitors) {
+            mInputMonitors.put(channel.getToken(),
+                    new GestureMonitorSpyWindow(monitorToken, name, displayId, pid, uid, sc,
+                            channel));
+        }
+
+        final InputChannel outInputChannel = new InputChannel();
+        channel.copyTo(outInputChannel);
+        return outInputChannel;
+    }
+
+    private void removeSpyWindowGestureMonitor(IBinder inputChannelToken) {
+        final GestureMonitorSpyWindow monitor;
+        synchronized (mInputMonitors) {
+            monitor = mInputMonitors.remove(inputChannelToken);
+        }
+        removeInputChannel(inputChannelToken);
+        if (monitor == null) return;
+        monitor.remove();
     }
 
     /**
      * Creates an input monitor that will receive pointer events for the purposes of system-wide
      * gesture interpretation.
      *
-     * @param inputChannelName The input channel name.
+     * @param requestedName The input channel name.
      * @param displayId Target display id.
      * @return The input channel.
      */
     @Override // Binder call
-    public InputMonitor monitorGestureInput(String inputChannelName, int displayId) {
+    public InputMonitor monitorGestureInput(IBinder monitorToken, @NonNull String requestedName,
+            int displayId) {
         if (!checkCallingPermission(android.Manifest.permission.MONITOR_INPUT,
-                "monitorInputRegion()")) {
+                "monitorGestureInput()")) {
             throw new SecurityException("Requires MONITOR_INPUT permission");
         }
-
-        Objects.requireNonNull(inputChannelName, "inputChannelName must not be null.");
+        Objects.requireNonNull(requestedName, "name must not be null.");
+        Objects.requireNonNull(monitorToken, "token must not be null.");
 
         if (displayId < Display.DEFAULT_DISPLAY) {
             throw new IllegalArgumentException("displayId must >= 0.");
         }
+        final String name = "[Gesture Monitor] " + requestedName;
         final int pid = Binder.getCallingPid();
+        final int uid = Binder.getCallingUid();
 
         final long ident = Binder.clearCallingIdentity();
         try {
-            InputChannel inputChannel = nativeCreateInputMonitor(
-                    mPtr, displayId, true /*isGestureMonitor*/, inputChannelName, pid);
-            InputMonitorHost host = new InputMonitorHost(inputChannel.getToken());
-            return new InputMonitor(inputChannel, host);
+            final InputChannel inputChannel =
+                            createSpyWindowGestureMonitor(monitorToken, name, displayId, pid, uid);
+            return new InputMonitor(inputChannel, new InputMonitorHost(inputChannel.getToken()));
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
@@ -755,10 +826,7 @@ public class InputManagerService extends IInputManager.Stub
      * @param connectionToken The input channel to unregister.
      */
     public void removeInputChannel(IBinder connectionToken) {
-        if (connectionToken == null) {
-            throw new IllegalArgumentException("connectionToken must not be null.");
-        }
-
+        Objects.requireNonNull(connectionToken, "connectionToken must not be null");
         nativeRemoveInputChannel(mPtr, connectionToken);
     }
 
@@ -816,12 +884,16 @@ public class InputManagerService extends IInputManager.Stub
      * other apps, when they become focused.
      *
      * When input dispatches focus to the apps, the touch mode state
-     * will be sent together with the focus change.
+     * will be sent together with the focus change (but each one in its own event).
      *
-     * @param inTouchMode true if the device is in touch mode.
+     * @param inTouchMode true if the device is in touch mode
+     * @param pid the pid of the process that requested to switch touch mode state
+     * @param uid the uid of the process that requested to switch touch mode state
+     * @param hasPermission if set to {@code true} then no further authorization will be performed
+     * @return {@code true} if the touch mode was successfully changed, {@code false} otherwise
      */
-    public void setInTouchMode(boolean inTouchMode) {
-        nativeSetInTouchMode(mPtr, inTouchMode);
+    public boolean setInTouchMode(boolean inTouchMode, int pid, int uid, boolean hasPermission) {
+        return nativeSetInTouchMode(mPtr, inTouchMode, pid, uid, hasPermission);
     }
 
     @Override // Binder call
@@ -830,35 +902,11 @@ public class InputManagerService extends IInputManager.Stub
     }
 
     private boolean injectInputEventInternal(InputEvent event, int mode) {
-        if (event == null) {
-            throw new IllegalArgumentException("event must not be null");
-        }
+        Objects.requireNonNull(event, "event must not be null");
         if (mode != InputEventInjectionSync.NONE
                 && mode != InputEventInjectionSync.WAIT_FOR_FINISHED
                 && mode != InputEventInjectionSync.WAIT_FOR_RESULT) {
             throw new IllegalArgumentException("mode is invalid");
-        }
-        if (ENABLE_PER_WINDOW_INPUT_ROTATION) {
-            if (event instanceof MotionEvent) {
-                final Context dispCtx = getContextForDisplay(event.getDisplayId());
-                final Display display = dispCtx.getDisplay();
-                final int rotation = display.getRotation();
-                if (rotation != ROTATION_0) {
-                    final MotionEvent motion = (MotionEvent) event;
-                    // Injections are currently expected to be in the space of the injector (ie.
-                    // usually assumed to be post-rotated). Thus we need to unrotate into raw
-                    // input coordinates for dispatch.
-                    final Point sz = new Point();
-                    display.getRealSize(sz);
-                    if ((rotation % 2) != 0) {
-                        final int tmpX = sz.x;
-                        sz.x = sz.y;
-                        sz.y = tmpX;
-                    }
-                    motion.applyTransform(MotionEvent.createRotateMatrix(
-                            (4 - rotation), sz.x, sz.y));
-                }
-            }
         }
 
         final int pid = Binder.getCallingPid();
@@ -890,6 +938,7 @@ public class InputManagerService extends IInputManager.Stub
 
     @Override // Binder call
     public VerifiedInputEvent verifyInputEvent(InputEvent event) {
+        Objects.requireNonNull(event, "event must not be null");
         return nativeVerifyInputEvent(mPtr, event);
     }
 
@@ -901,9 +950,7 @@ public class InputManagerService extends IInputManager.Stub
     @Override // Binder call
     public InputDevice getInputDevice(int deviceId) {
         synchronized (mInputDevicesLock) {
-            final int count = mInputDevices.length;
-            for (int i = 0; i < count; i++) {
-                final InputDevice inputDevice = mInputDevices[i];
+            for (final InputDevice inputDevice : mInputDevices) {
                 if (inputDevice.getId() == deviceId) {
                     return inputDevice;
                 }
@@ -966,9 +1013,7 @@ public class InputManagerService extends IInputManager.Stub
 
     @Override // Binder call
     public void registerInputDevicesChangedListener(IInputDevicesChangedListener listener) {
-        if (listener == null) {
-            throw new IllegalArgumentException("listener must not be null");
-        }
+        Objects.requireNonNull(listener, "listener must not be null");
 
         synchronized (mInputDevicesLock) {
             int callingPid = Binder.getCallingPid();
@@ -1088,23 +1133,19 @@ public class InputManagerService extends IInputManager.Stub
             return null;
         }
         final List<KeyboardLayout> layouts = new ArrayList<>();
-        visitAllKeyboardLayouts(new KeyboardLayoutVisitor() {
-            @Override
-            public void visitKeyboardLayout(Resources resources,
-                    int keyboardLayoutResId, KeyboardLayout layout) {
-                // Only select a default when we know the layout is appropriate. For now, this
-                // means its a custom layout for a specific keyboard.
-                if (layout.getVendorId() != d.getVendorId()
-                        || layout.getProductId() != d.getProductId()) {
-                    return;
-                }
-                final LocaleList locales = layout.getLocales();
-                final int numLocales = locales.size();
-                for (int localeIndex = 0; localeIndex < numLocales; ++localeIndex) {
-                    if (isCompatibleLocale(systemLocale, locales.get(localeIndex))) {
-                        layouts.add(layout);
-                        break;
-                    }
+        visitAllKeyboardLayouts((resources, keyboardLayoutResId, layout) -> {
+            // Only select a default when we know the layout is appropriate. For now, this
+            // means it's a custom layout for a specific keyboard.
+            if (layout.getVendorId() != d.getVendorId()
+                    || layout.getProductId() != d.getProductId()) {
+                return;
+            }
+            final LocaleList locales = layout.getLocales();
+            final int numLocales = locales.size();
+            for (int localeIndex = 0; localeIndex < numLocales; ++localeIndex) {
+                if (isCompatibleLocale(systemLocale, locales.get(localeIndex))) {
+                    layouts.add(layout);
+                    break;
                 }
             }
         });
@@ -1163,9 +1204,7 @@ public class InputManagerService extends IInputManager.Stub
     @Override // Binder call & native callback
     public TouchCalibration getTouchCalibrationForInputDevice(String inputDeviceDescriptor,
             int surfaceRotation) {
-        if (inputDeviceDescriptor == null) {
-            throw new IllegalArgumentException("inputDeviceDescriptor must not be null");
-        }
+        Objects.requireNonNull(inputDeviceDescriptor, "inputDeviceDescriptor must not be null");
 
         synchronized (mDataStore) {
             return mDataStore.getTouchCalibration(inputDeviceDescriptor, surfaceRotation);
@@ -1179,12 +1218,8 @@ public class InputManagerService extends IInputManager.Stub
                 "setTouchCalibrationForInputDevice()")) {
             throw new SecurityException("Requires SET_INPUT_CALIBRATION permission");
         }
-        if (inputDeviceDescriptor == null) {
-            throw new IllegalArgumentException("inputDeviceDescriptor must not be null");
-        }
-        if (calibration == null) {
-            throw new IllegalArgumentException("calibration must not be null");
-        }
+        Objects.requireNonNull(inputDeviceDescriptor, "inputDeviceDescriptor must not be null");
+        Objects.requireNonNull(calibration, "calibration must not be null");
         if (surfaceRotation < Surface.ROTATION_0 || surfaceRotation > Surface.ROTATION_270) {
             throw new IllegalArgumentException("surfaceRotation value out of bounds");
         }
@@ -1221,9 +1256,7 @@ public class InputManagerService extends IInputManager.Stub
                 "registerTabletModeChangedListener()")) {
             throw new SecurityException("Requires TABLET_MODE_LISTENER permission");
         }
-        if (listener == null) {
-            throw new IllegalArgumentException("listener must not be null");
-        }
+        Objects.requireNonNull(listener, "event must not be null");
 
         synchronized (mTabletModeLock) {
             final int callingPid = Binder.getCallingPid();
@@ -1312,13 +1345,8 @@ public class InputManagerService extends IInputManager.Stub
     private void updateKeyboardLayouts() {
         // Scan all input devices state for keyboard layouts that have been uninstalled.
         final HashSet<String> availableKeyboardLayouts = new HashSet<String>();
-        visitAllKeyboardLayouts(new KeyboardLayoutVisitor() {
-            @Override
-            public void visitKeyboardLayout(Resources resources,
-                    int keyboardLayoutResId, KeyboardLayout layout) {
-                availableKeyboardLayouts.add(layout.getDescriptor());
-            }
-        });
+        visitAllKeyboardLayouts((resources, keyboardLayoutResId, layout) ->
+                availableKeyboardLayouts.add(layout.getDescriptor()));
         synchronized (mDataStore) {
             try {
                 mDataStore.removeUninstalledKeyboardLayouts(availableKeyboardLayouts);
@@ -1345,14 +1373,8 @@ public class InputManagerService extends IInputManager.Stub
 
     @Override // Binder call
     public KeyboardLayout[] getKeyboardLayouts() {
-        final ArrayList<KeyboardLayout> list = new ArrayList<KeyboardLayout>();
-        visitAllKeyboardLayouts(new KeyboardLayoutVisitor() {
-            @Override
-            public void visitKeyboardLayout(Resources resources,
-                    int keyboardLayoutResId, KeyboardLayout layout) {
-                list.add(layout);
-            }
-        });
+        final ArrayList<KeyboardLayout> list = new ArrayList<>();
+        visitAllKeyboardLayouts((resources, keyboardLayoutResId, layout) -> list.add(layout));
         return list.toArray(new KeyboardLayout[list.size()]);
     }
 
@@ -1360,10 +1382,10 @@ public class InputManagerService extends IInputManager.Stub
     public KeyboardLayout[] getKeyboardLayoutsForInputDevice(
             final InputDeviceIdentifier identifier) {
         final String[] enabledLayoutDescriptors =
-            getEnabledKeyboardLayoutsForInputDevice(identifier);
+                getEnabledKeyboardLayoutsForInputDevice(identifier);
         final ArrayList<KeyboardLayout> enabledLayouts =
-            new ArrayList<KeyboardLayout>(enabledLayoutDescriptors.length);
-        final ArrayList<KeyboardLayout> potentialLayouts = new ArrayList<KeyboardLayout>();
+                new ArrayList<>(enabledLayoutDescriptors.length);
+        final ArrayList<KeyboardLayout> potentialLayouts = new ArrayList<>();
         visitAllKeyboardLayouts(new KeyboardLayoutVisitor() {
             boolean mHasSeenDeviceSpecificLayout;
 
@@ -1407,18 +1429,12 @@ public class InputManagerService extends IInputManager.Stub
 
     @Override // Binder call
     public KeyboardLayout getKeyboardLayout(String keyboardLayoutDescriptor) {
-        if (keyboardLayoutDescriptor == null) {
-            throw new IllegalArgumentException("keyboardLayoutDescriptor must not be null");
-        }
+        Objects.requireNonNull(keyboardLayoutDescriptor,
+                "keyboardLayoutDescriptor must not be null");
 
         final KeyboardLayout[] result = new KeyboardLayout[1];
-        visitKeyboardLayout(keyboardLayoutDescriptor, new KeyboardLayoutVisitor() {
-            @Override
-            public void visitKeyboardLayout(Resources resources,
-                    int keyboardLayoutResId, KeyboardLayout layout) {
-                result[0] = layout;
-            }
-        });
+        visitKeyboardLayout(keyboardLayoutDescriptor,
+                (resources, keyboardLayoutResId, layout) -> result[0] = layout);
         if (result[0] == null) {
             Slog.w(TAG, "Could not get keyboard layout with descriptor '"
                     + keyboardLayoutDescriptor + "'.");
@@ -1450,7 +1466,7 @@ public class InputManagerService extends IInputManager.Stub
                                 | PackageManager.MATCH_DIRECT_BOOT_AWARE
                                 | PackageManager.MATCH_DIRECT_BOOT_UNAWARE);
                 visitKeyboardLayoutsInPackage(pm, receiver, d.keyboardLayoutName, 0, visitor);
-            } catch (NameNotFoundException ex) {
+            } catch (NameNotFoundException ignored) {
             }
         }
     }
@@ -1480,11 +1496,10 @@ public class InputManagerService extends IInputManager.Stub
 
         try {
             Resources resources = pm.getResourcesForApplication(receiver.applicationInfo);
-            XmlResourceParser parser = resources.getXml(configResId);
-            try {
+            try (XmlResourceParser parser = resources.getXml(configResId)) {
                 XmlUtils.beginDocument(parser, "keyboard-layouts");
 
-                for (;;) {
+                while (true) {
                     XmlUtils.nextElement(parser);
                     String element = parser.getName();
                     if (element == null) {
@@ -1492,22 +1507,22 @@ public class InputManagerService extends IInputManager.Stub
                     }
                     if (element.equals("keyboard-layout")) {
                         TypedArray a = resources.obtainAttributes(
-                                parser, com.android.internal.R.styleable.KeyboardLayout);
+                                parser, R.styleable.KeyboardLayout);
                         try {
                             String name = a.getString(
-                                    com.android.internal.R.styleable.KeyboardLayout_name);
+                                    R.styleable.KeyboardLayout_name);
                             String label = a.getString(
-                                    com.android.internal.R.styleable.KeyboardLayout_label);
+                                    R.styleable.KeyboardLayout_label);
                             int keyboardLayoutResId = a.getResourceId(
-                                    com.android.internal.R.styleable.KeyboardLayout_keyboardLayout,
+                                    R.styleable.KeyboardLayout_keyboardLayout,
                                     0);
                             String languageTags = a.getString(
-                                    com.android.internal.R.styleable.KeyboardLayout_locale);
+                                    R.styleable.KeyboardLayout_locale);
                             LocaleList locales = getLocalesFromLanguageTags(languageTags);
                             int vid = a.getInt(
-                                    com.android.internal.R.styleable.KeyboardLayout_vendorId, -1);
+                                    R.styleable.KeyboardLayout_vendorId, -1);
                             int pid = a.getInt(
-                                    com.android.internal.R.styleable.KeyboardLayout_productId, -1);
+                                    R.styleable.KeyboardLayout_productId, -1);
 
                             if (name == null || label == null || keyboardLayoutResId == 0) {
                                 Slog.w(TAG, "Missing required 'name', 'label' or 'keyboardLayout' "
@@ -1534,8 +1549,6 @@ public class InputManagerService extends IInputManager.Stub
                                 + receiver.packageName + "/" + receiver.name);
                     }
                 }
-            } finally {
-                parser.close();
             }
         } catch (Exception ex) {
             Slog.w(TAG, "Could not parse keyboard layout resource from receiver "
@@ -1556,17 +1569,13 @@ public class InputManagerService extends IInputManager.Stub
      * descriptor for ids that aren't useful (such as the default 0, 0).
      */
     private String getLayoutDescriptor(InputDeviceIdentifier identifier) {
-        if (identifier == null || identifier.getDescriptor() == null) {
-            throw new IllegalArgumentException("identifier and descriptor must not be null");
-        }
+        Objects.requireNonNull(identifier, "identifier must not be null");
+        Objects.requireNonNull(identifier.getDescriptor(), "descriptor must not be null");
 
         if (identifier.getVendorId() == 0 && identifier.getProductId() == 0) {
             return identifier.getDescriptor();
         }
-        StringBuilder bob = new StringBuilder();
-        bob.append("vendor:").append(identifier.getVendorId());
-        bob.append(",product:").append(identifier.getProductId());
-        return bob.toString();
+        return "vendor:" + identifier.getVendorId() + ",product:" + identifier.getProductId();
     }
 
     @Override // Binder call
@@ -1574,7 +1583,7 @@ public class InputManagerService extends IInputManager.Stub
 
         String key = getLayoutDescriptor(identifier);
         synchronized (mDataStore) {
-            String layout = null;
+            String layout;
             // try loading it using the layout descriptor if we have it
             layout = mDataStore.getCurrentKeyboardLayout(key);
             if (layout == null && !key.equals(identifier.getDescriptor())) {
@@ -1596,9 +1605,9 @@ public class InputManagerService extends IInputManager.Stub
                 "setCurrentKeyboardLayoutForInputDevice()")) {
             throw new SecurityException("Requires SET_KEYBOARD_LAYOUT permission");
         }
-        if (keyboardLayoutDescriptor == null) {
-            throw new IllegalArgumentException("keyboardLayoutDescriptor must not be null");
-        }
+
+        Objects.requireNonNull(keyboardLayoutDescriptor,
+                "keyboardLayoutDescriptor must not be null");
 
         String key = getLayoutDescriptor(identifier);
         synchronized (mDataStore) {
@@ -1635,9 +1644,8 @@ public class InputManagerService extends IInputManager.Stub
                 "addKeyboardLayoutForInputDevice()")) {
             throw new SecurityException("Requires SET_KEYBOARD_LAYOUT permission");
         }
-        if (keyboardLayoutDescriptor == null) {
-            throw new IllegalArgumentException("keyboardLayoutDescriptor must not be null");
-        }
+        Objects.requireNonNull(keyboardLayoutDescriptor,
+                "keyboardLayoutDescriptor must not be null");
 
         String key = getLayoutDescriptor(identifier);
         synchronized (mDataStore) {
@@ -1664,9 +1672,8 @@ public class InputManagerService extends IInputManager.Stub
                 "removeKeyboardLayoutForInputDevice()")) {
             throw new SecurityException("Requires SET_KEYBOARD_LAYOUT permission");
         }
-        if (keyboardLayoutDescriptor == null) {
-            throw new IllegalArgumentException("keyboardLayoutDescriptor must not be null");
-        }
+        Objects.requireNonNull(keyboardLayoutDescriptor,
+                "keyboardLayoutDescriptor must not be null");
 
         String key = getLayoutDescriptor(identifier);
         synchronized (mDataStore) {
@@ -1742,14 +1749,17 @@ public class InputManagerService extends IInputManager.Stub
 
     /** Clean up input window handles of the given display. */
     public void onDisplayRemoved(int displayId) {
+        if (mPointerIconDisplayContext != null
+                && mPointerIconDisplayContext.getDisplay().getDisplayId() == displayId) {
+            mPointerIconDisplayContext = null;
+        }
+
         nativeDisplayRemoved(mPtr, displayId);
     }
 
     @Override
     public void requestPointerCapture(IBinder inputChannelToken, boolean enabled) {
-        if (inputChannelToken == null) {
-            return;
-        }
+        Objects.requireNonNull(inputChannelToken, "event must not be null");
 
         nativeRequestPointerCapture(mPtr, inputChannelToken, enabled);
     }
@@ -1828,6 +1838,60 @@ public class InputManagerService extends IInputManager.Stub
         nativeSetPointerSpeed(mPtr, speed);
     }
 
+    private void setPointerAcceleration(float acceleration, int displayId) {
+        synchronized (mAdditionalDisplayInputPropertiesLock) {
+            AdditionalDisplayInputProperties properties =
+                    mAdditionalDisplayInputProperties.get(displayId);
+            if (properties == null) {
+                properties = new AdditionalDisplayInputProperties();
+                mAdditionalDisplayInputProperties.put(displayId, properties);
+            }
+            properties.pointerAcceleration = acceleration;
+            if (properties.allDefaults()) {
+                mAdditionalDisplayInputProperties.remove(displayId);
+            }
+            if (mOverriddenPointerDisplayId == displayId) {
+                updatePointerAccelerationLocked(acceleration);
+            }
+        }
+    }
+
+    @GuardedBy("mAdditionalDisplayInputPropertiesLock")
+    private void updatePointerAccelerationLocked(float acceleration) {
+        nativeSetPointerAcceleration(mPtr, acceleration);
+    }
+
+    private void setPointerIconVisible(boolean visible, int displayId) {
+        synchronized (mAdditionalDisplayInputPropertiesLock) {
+            AdditionalDisplayInputProperties properties =
+                    mAdditionalDisplayInputProperties.get(displayId);
+            if (properties == null) {
+                properties = new AdditionalDisplayInputProperties();
+                mAdditionalDisplayInputProperties.put(displayId, properties);
+            }
+            properties.pointerIconVisible = visible;
+            if (properties.allDefaults()) {
+                mAdditionalDisplayInputProperties.remove(displayId);
+            }
+            if (mOverriddenPointerDisplayId == displayId) {
+                updatePointerIconVisibleLocked(visible);
+            }
+        }
+    }
+
+    @GuardedBy("mAdditionalDisplayInputPropertiesLock")
+    private void updatePointerIconVisibleLocked(boolean visible) {
+        if (visible) {
+            if (mIconType == PointerIcon.TYPE_CUSTOM) {
+                nativeSetCustomPointerIcon(mPtr, mIcon);
+            } else {
+                nativeSetPointerIconType(mPtr, mIconType);
+            }
+        } else {
+            nativeSetPointerIconType(mPtr, PointerIcon.TYPE_NULL);
+        }
+    }
+
     private void registerPointerSpeedSettingObserver() {
         mContext.getContentResolver().registerContentObserver(
                 Settings.System.getUriFor(Settings.System.POINTER_SPEED), true,
@@ -1844,7 +1908,7 @@ public class InputManagerService extends IInputManager.Stub
         try {
             speed = Settings.System.getIntForUser(mContext.getContentResolver(),
                     Settings.System.POINTER_SPEED, UserHandle.USER_CURRENT);
-        } catch (SettingNotFoundException snfe) {
+        } catch (SettingNotFoundException ignored) {
         }
         return speed;
     }
@@ -1959,6 +2023,32 @@ public class InputManagerService extends IInputManager.Stub
         } catch (SettingNotFoundException snfe) {
         }
         return result;
+    }
+
+    private void setVirtualMousePointerDisplayId(int displayId) {
+        synchronized (mAdditionalDisplayInputPropertiesLock) {
+            mOverriddenPointerDisplayId = displayId;
+            if (displayId != Display.INVALID_DISPLAY) {
+                final AdditionalDisplayInputProperties properties =
+                        mAdditionalDisplayInputProperties.get(displayId);
+                if (properties != null) {
+                    updatePointerAccelerationLocked(properties.pointerAcceleration);
+                    updatePointerIconVisibleLocked(properties.pointerIconVisible);
+                }
+            }
+        }
+        // TODO(b/215597605): trigger MousePositionTracker update
+        nativeNotifyPointerDisplayIdChanged(mPtr);
+    }
+
+    private int getVirtualMousePointerDisplayId() {
+        synchronized (mAdditionalDisplayInputPropertiesLock) {
+            return mOverriddenPointerDisplayId;
+        }
+    }
+
+    private void setDisplayEligibilityForPointerCapture(int displayId, boolean isEligible) {
+        nativeSetDisplayEligibilityForPointerCapture(mPtr, displayId, isEligible);
     }
 
     private static class VibrationInfo {
@@ -2096,7 +2186,7 @@ public class InputManagerService extends IInputManager.Stub
                 SparseArray<VibrationEffect> effects = stereo.getEffects();
                 long[] pattern = new long[0];
                 int repeat = Integer.MIN_VALUE;
-                SparseArray<int[]> amplitudes = new SparseArray<int[]>(effects.size());
+                SparseArray<int[]> amplitudes = new SparseArray<>(effects.size());
                 for (int i = 0; i < effects.size(); i++) {
                     VibrationInfo info = new VibrationInfo(effects.valueAt(i));
                     // Pattern of all effects should be same
@@ -2146,6 +2236,7 @@ public class InputManagerService extends IInputManager.Stub
     }
 
     // Native callback.
+    @SuppressWarnings("unused")
     private void notifyVibratorState(int deviceId, boolean isOn) {
         if (DEBUG) {
             Slog.d(TAG, "notifyVibratorState: deviceId=" + deviceId + " isOn=" + isOn);
@@ -2187,7 +2278,7 @@ public class InputManagerService extends IInputManager.Stub
 
     @Override // Binder call
     public boolean registerVibratorStateListener(int deviceId, IVibratorStateListener listener) {
-        Preconditions.checkNotNull(listener, "listener must not be null");
+        Objects.requireNonNull(listener, "listener must not be null");
 
         RemoteCallbackList<IVibratorStateListener> listeners;
         synchronized (mVibratorLock) {
@@ -2245,15 +2336,44 @@ public class InputManagerService extends IInputManager.Stub
 
     // Binder call
     @Override
-    public void setPointerIconType(int iconId) {
-        nativeSetPointerIconType(mPtr, iconId);
+    public void setPointerIconType(int iconType) {
+        if (iconType == PointerIcon.TYPE_CUSTOM) {
+            throw new IllegalArgumentException("Use setCustomPointerIcon to set custom pointers");
+        }
+        synchronized (mAdditionalDisplayInputPropertiesLock) {
+            mIcon = null;
+            mIconType = iconType;
+            if (mOverriddenPointerDisplayId != Display.INVALID_DISPLAY) {
+                final AdditionalDisplayInputProperties properties =
+                        mAdditionalDisplayInputProperties.get(mOverriddenPointerDisplayId);
+                if (properties == null || properties.pointerIconVisible) {
+                    nativeSetPointerIconType(mPtr, mIconType);
+                }
+            } else {
+                nativeSetPointerIconType(mPtr, mIconType);
+            }
+        }
     }
 
     // Binder call
     @Override
     public void setCustomPointerIcon(PointerIcon icon) {
         Objects.requireNonNull(icon);
-        nativeSetCustomPointerIcon(mPtr, icon);
+        synchronized (mAdditionalDisplayInputPropertiesLock) {
+            mIconType = PointerIcon.TYPE_CUSTOM;
+            mIcon = icon;
+            if (mOverriddenPointerDisplayId != Display.INVALID_DISPLAY) {
+                final AdditionalDisplayInputProperties properties =
+                        mAdditionalDisplayInputProperties.get(mOverriddenPointerDisplayId);
+                if (properties == null || properties.pointerIconVisible) {
+                    // Only set the icon if it is not currently hidden; otherwise, it will be set
+                    // once it's no longer hidden.
+                    nativeSetCustomPointerIcon(mPtr, mIcon);
+                }
+            } else {
+                nativeSetCustomPointerIcon(mPtr, mIcon);
+            }
+        }
     }
 
     /**
@@ -2299,14 +2419,8 @@ public class InputManagerService extends IInputManager.Stub
         nativeNotifyPortAssociationsChanged(mPtr);
     }
 
-    /**
-     * Add a runtime association between the input device name and the display unique id.
-     * @param inputDeviceName The name of the input device.
-     * @param displayUniqueId The unique id of the associated display.
-     */
     @Override // Binder call
-    public void addUniqueIdAssociation(@NonNull String inputDeviceName,
-            @NonNull String displayUniqueId) {
+    public void addUniqueIdAssociation(@NonNull String inputPort, @NonNull String displayUniqueId) {
         if (!checkCallingPermission(
                 android.Manifest.permission.ASSOCIATE_INPUT_DEVICE_TO_DISPLAY,
                 "addNameAssociation()")) {
@@ -2314,20 +2428,16 @@ public class InputManagerService extends IInputManager.Stub
                     "Requires ASSOCIATE_INPUT_DEVICE_TO_DISPLAY permission");
         }
 
-        Objects.requireNonNull(inputDeviceName);
+        Objects.requireNonNull(inputPort);
         Objects.requireNonNull(displayUniqueId);
         synchronized (mAssociationsLock) {
-            mUniqueIdAssociations.put(inputDeviceName, displayUniqueId);
+            mUniqueIdAssociations.put(inputPort, displayUniqueId);
         }
         nativeChangeUniqueIdAssociation(mPtr);
     }
 
-    /**
-     * Remove the runtime association between the input device and the display.
-     * @param inputDeviceName The port of the input device to be cleared.
-     */
     @Override // Binder call
-    public void removeUniqueIdAssociation(@NonNull String inputDeviceName) {
+    public void removeUniqueIdAssociation(@NonNull String inputPort) {
         if (!checkCallingPermission(
                 android.Manifest.permission.ASSOCIATE_INPUT_DEVICE_TO_DISPLAY,
                 "removeUniqueIdAssociation()")) {
@@ -2335,9 +2445,9 @@ public class InputManagerService extends IInputManager.Stub
                     "Requires ASSOCIATE_INPUT_DEVICE_TO_DISPLAY permission");
         }
 
-        Objects.requireNonNull(inputDeviceName);
+        Objects.requireNonNull(inputPort);
         synchronized (mAssociationsLock) {
-            mUniqueIdAssociations.remove(inputDeviceName);
+            mUniqueIdAssociations.remove(inputPort);
         }
         nativeChangeUniqueIdAssociation(mPtr);
     }
@@ -2353,12 +2463,9 @@ public class InputManagerService extends IInputManager.Stub
             Slog.d(TAG, "registerSensorListener: listener=" + listener + " callingPid="
                     + Binder.getCallingPid());
         }
-        if (listener == null) {
-            Slog.e(TAG, "listener must not be null");
-            return false;
-        }
+        Objects.requireNonNull(listener, "listener must not be null");
 
-        synchronized (mInputDevicesLock) {
+        synchronized (mSensorEventLock) {
             int callingPid = Binder.getCallingPid();
             if (mSensorEventListeners.get(callingPid) != null) {
                 Slog.e(TAG, "The calling process " + callingPid + " has already "
@@ -2388,11 +2495,9 @@ public class InputManagerService extends IInputManager.Stub
                     + Binder.getCallingPid());
         }
 
-        if (listener == null) {
-            throw new IllegalArgumentException("listener must not be null");
-        }
+        Objects.requireNonNull(listener, "listener must not be null");
 
-        synchronized (mInputDevicesLock) {
+        synchronized (mSensorEventLock) {
             int callingPid = Binder.getCallingPid();
             if (mSensorEventListeners.get(callingPid) != null) {
                 SensorEventListenerRecord record = mSensorEventListeners.get(callingPid);
@@ -2406,7 +2511,7 @@ public class InputManagerService extends IInputManager.Stub
 
     @Override // Binder call
     public boolean flushSensor(int deviceId, int sensorType) {
-        synchronized (mInputDevicesLock) {
+        synchronized (mSensorEventLock) {
             int callingPid = Binder.getCallingPid();
             SensorEventListenerRecord listener = mSensorEventListeners.get(callingPid);
             if (listener != null) {
@@ -2474,7 +2579,7 @@ public class InputManagerService extends IInputManager.Stub
      * Set specified light state with for a specific input device.
      */
     private void setLightStateInternal(int deviceId, Light light, LightState lightState) {
-        Preconditions.checkNotNull(light, "light does not exist");
+        Objects.requireNonNull(light, "light does not exist");
         if (DEBUG) {
             Slog.d(TAG, "setLightStateInternal device " + deviceId + " light " + light
                     + "lightState " + lightState);
@@ -2537,7 +2642,7 @@ public class InputManagerService extends IInputManager.Stub
 
     @Override
     public void openLightSession(int deviceId, String opPkg, IBinder token) {
-        Preconditions.checkNotNull(token);
+        Objects.requireNonNull(token);
         synchronized (mLightLock) {
             Preconditions.checkState(mLightSessions.get(token) == null, "already registered");
             LightSession lightSession = new LightSession(deviceId, opPkg, token);
@@ -2556,7 +2661,7 @@ public class InputManagerService extends IInputManager.Stub
 
     @Override
     public void closeLightSession(int deviceId, IBinder token) {
-        Preconditions.checkNotNull(token);
+        Objects.requireNonNull(token);
         synchronized (mLightLock) {
             LightSession lightSession = mLightSessions.get(token);
             Preconditions.checkState(lightSession != null, "not registered");
@@ -2575,6 +2680,16 @@ public class InputManagerService extends IInputManager.Stub
     }
 
     @Override
+    public void cancelCurrentTouch() {
+        if (!checkCallingPermission(android.Manifest.permission.MONITOR_INPUT,
+                "cancelCurrentTouch()")) {
+            throw new SecurityException("Requires MONITOR_INPUT permission");
+        }
+
+        nativeCancelCurrentTouch(mPtr);
+    }
+
+    @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
 
@@ -2582,26 +2697,67 @@ public class InputManagerService extends IInputManager.Stub
         String dumpStr = nativeDump(mPtr);
         if (dumpStr != null) {
             pw.println(dumpStr);
-            dumpAssociations(pw);
         }
+
+        pw.println("Input Manager Service (Java) State:");
+        dumpAssociations(pw, "  " /*prefix*/);
+        dumpSpyWindowGestureMonitors(pw, "  " /*prefix*/);
+        dumpDisplayInputPropertiesValues(pw, "  " /* prefix */);
     }
 
-    private void dumpAssociations(PrintWriter pw) {
+    private void dumpAssociations(PrintWriter pw, String prefix) {
         if (!mStaticAssociations.isEmpty()) {
-            pw.println("Static Associations:");
+            pw.println(prefix + "Static Associations:");
             mStaticAssociations.forEach((k, v) -> {
-                pw.print("  port: " + k);
+                pw.print(prefix + "  port: " + k);
                 pw.println("  display: " + v);
             });
         }
 
         synchronized (mAssociationsLock) {
             if (!mRuntimeAssociations.isEmpty()) {
-                pw.println("Runtime Associations:");
+                pw.println(prefix + "Runtime Associations:");
                 mRuntimeAssociations.forEach((k, v) -> {
-                    pw.print("  port: " + k);
+                    pw.print(prefix + "  port: " + k);
                     pw.println("  display: " + v);
                 });
+            }
+            if (!mUniqueIdAssociations.isEmpty()) {
+                pw.println(prefix + "Unique Id Associations:");
+                mUniqueIdAssociations.forEach((k, v) -> {
+                    pw.print(prefix + "  port: " + k);
+                    pw.println("  uniqueId: " + v);
+                });
+            }
+        }
+    }
+
+    private void dumpSpyWindowGestureMonitors(PrintWriter pw, String prefix) {
+        synchronized (mInputMonitors) {
+            if (mInputMonitors.isEmpty()) return;
+            pw.println(prefix + "Gesture Monitors (implemented as spy windows):");
+            int i = 0;
+            for (final GestureMonitorSpyWindow monitor : mInputMonitors.values()) {
+                pw.append(prefix + "  " + i++ + ": ").println(monitor.dump());
+            }
+        }
+    }
+
+    private void dumpDisplayInputPropertiesValues(PrintWriter pw, String prefix) {
+        synchronized (mAdditionalDisplayInputPropertiesLock) {
+            if (mAdditionalDisplayInputProperties.size() != 0) {
+                pw.println(prefix + "mAdditionalDisplayInputProperties:");
+                for (int i = 0; i < mAdditionalDisplayInputProperties.size(); i++) {
+                    pw.println(prefix + "  displayId: "
+                            + mAdditionalDisplayInputProperties.keyAt(i));
+                    final AdditionalDisplayInputProperties properties =
+                            mAdditionalDisplayInputProperties.valueAt(i);
+                    pw.println(prefix + "  pointerAcceleration: " + properties.pointerAcceleration);
+                    pw.println(prefix + "  pointerIconVisible: " + properties.pointerIconVisible);
+                }
+            }
+            if (mOverriddenPointerDisplayId != Display.INVALID_DISPLAY) {
+                pw.println(prefix + "mOverriddenPointerDisplayId: " + mOverriddenPointerDisplayId);
             }
         }
     }
@@ -2629,15 +2785,19 @@ public class InputManagerService extends IInputManager.Stub
         synchronized (mInputFilterLock) { }
         synchronized (mAssociationsLock) { /* Test if blocked by associations lock. */}
         synchronized (mLidSwitchLock) { /* Test if blocked by lid switch lock. */ }
+        synchronized (mInputMonitors) { /* Test if blocked by input monitor lock. */ }
+        synchronized (mAdditionalDisplayInputPropertiesLock) { /* Test if blocked by props lock */ }
         nativeMonitor(mPtr);
     }
 
     // Native callback.
+    @SuppressWarnings("unused")
     private void notifyConfigurationChanged(long whenNanos) {
         mWindowManagerCallbacks.notifyConfigurationChanged();
     }
 
     // Native callback.
+    @SuppressWarnings("unused")
     private void notifyInputDevicesChanged(InputDevice[] inputDevices) {
         synchronized (mInputDevicesLock) {
             if (!mInputDevicesChangedPending) {
@@ -2651,6 +2811,7 @@ public class InputManagerService extends IInputManager.Stub
     }
 
     // Native callback.
+    @SuppressWarnings("unused")
     private void notifySwitch(long whenNanos, int switchValues, int switchMask) {
         if (DEBUG) {
             Slog.d(TAG, "notifySwitch: values=" + Integer.toHexString(switchValues)
@@ -2672,6 +2833,8 @@ public class InputManagerService extends IInputManager.Stub
         if ((switchMask & SW_CAMERA_LENS_COVER_BIT) != 0) {
             final boolean lensCovered = ((switchValues & SW_CAMERA_LENS_COVER_BIT) != 0);
             mWindowManagerCallbacks.notifyCameraLensCoverSwitchChanged(whenNanos, lensCovered);
+            // Use SW_CAMERA_LENS_COVER code for camera privacy toggles
+            setSensorPrivacy(Sensors.CAMERA, lensCovered);
         }
 
         if (mUseDevInputEventForAudioJack && (switchMask & SW_JACK_BITS) != 0) {
@@ -2683,7 +2846,7 @@ public class InputManagerService extends IInputManager.Stub
             SomeArgs args = SomeArgs.obtain();
             args.argi1 = (int) (whenNanos & 0xFFFFFFFF);
             args.argi2 = (int) (whenNanos >> 32);
-            args.arg1 = Boolean.valueOf((switchValues & SW_TABLET_MODE_BIT) != 0);
+            args.arg1 = (switchValues & SW_TABLET_MODE_BIT) != 0;
             mHandler.obtainMessage(MSG_DELIVER_TABLET_MODE_CHANGED,
                     args).sendToTarget();
         }
@@ -2692,25 +2855,45 @@ public class InputManagerService extends IInputManager.Stub
             final boolean micMute = ((switchValues & SW_MUTE_DEVICE_BIT) != 0);
             AudioManager audioManager = mContext.getSystemService(AudioManager.class);
             audioManager.setMicrophoneMuteFromSwitch(micMute);
+
+            setSensorPrivacy(Sensors.MICROPHONE, micMute);
         }
     }
 
+    // Set the sensor privacy state based on the hardware toggles switch states
+    private void setSensorPrivacy(@SensorPrivacyManager.Sensors.Sensor int sensor,
+            boolean enablePrivacy) {
+        final SensorPrivacyManagerInternal sensorPrivacyManagerInternal =
+                LocalServices.getService(SensorPrivacyManagerInternal.class);
+        sensorPrivacyManagerInternal.setPhysicalToggleSensorPrivacy(UserHandle.USER_CURRENT, sensor,
+                enablePrivacy);
+    }
+
     // Native callback.
+    @SuppressWarnings("unused")
     private void notifyInputChannelBroken(IBinder token) {
+        synchronized (mInputMonitors) {
+            if (mInputMonitors.containsKey(token)) {
+                removeSpyWindowGestureMonitor(token);
+            }
+        }
         mWindowManagerCallbacks.notifyInputChannelBroken(token);
     }
 
     // Native callback
+    @SuppressWarnings("unused")
     private void notifyFocusChanged(IBinder oldToken, IBinder newToken) {
         mWindowManagerCallbacks.notifyFocusChanged(oldToken, newToken);
     }
 
     // Native callback
+    @SuppressWarnings("unused")
     private void notifyDropWindow(IBinder token, float x, float y) {
         mWindowManagerCallbacks.notifyDropWindow(token, x, y);
     }
 
     // Native callback
+    @SuppressWarnings("unused")
     private void notifyUntrustedTouch(String packageName) {
         // TODO(b/169067926): Remove toast after gathering feedback on dogfood.
         if (!UNTRUSTED_TOUCHES_TOAST || ArrayUtils.contains(
@@ -2726,31 +2909,28 @@ public class InputManagerService extends IInputManager.Stub
     }
 
     // Native callback.
+    @SuppressWarnings("unused")
     private void notifyNoFocusedWindowAnr(InputApplicationHandle inputApplicationHandle) {
         mWindowManagerCallbacks.notifyNoFocusedWindowAnr(inputApplicationHandle);
     }
 
     // Native callback
-    private void notifyWindowUnresponsive(IBinder token, String reason) {
-        mWindowManagerCallbacks.notifyWindowUnresponsive(token, reason);
+    @SuppressWarnings("unused")
+    private void notifyWindowUnresponsive(IBinder token, int pid, boolean isPidValid,
+            String reason) {
+        mWindowManagerCallbacks.notifyWindowUnresponsive(token,
+                isPidValid ? OptionalInt.of(pid) : OptionalInt.empty(), reason);
     }
 
     // Native callback
-    private void notifyMonitorUnresponsive(int pid, String reason) {
-        mWindowManagerCallbacks.notifyGestureMonitorUnresponsive(pid, reason);
-    }
-
-    // Native callback
-    private void notifyWindowResponsive(IBinder token) {
-        mWindowManagerCallbacks.notifyWindowResponsive(token);
-    }
-
-    // Native callback
-    private void notifyMonitorResponsive(int pid) {
-        mWindowManagerCallbacks.notifyGestureMonitorResponsive(pid);
+    @SuppressWarnings("unused")
+    private void notifyWindowResponsive(IBinder token, int pid, boolean isPidValid) {
+        mWindowManagerCallbacks.notifyWindowResponsive(token,
+                isPidValid ? OptionalInt.of(pid) : OptionalInt.empty());
     }
 
     // Native callback.
+    @SuppressWarnings("unused")
     private void notifySensorEvent(int deviceId, int sensorType, int accuracy, long timestamp,
             float[] values) {
         if (DEBUG) {
@@ -2774,6 +2954,7 @@ public class InputManagerService extends IInputManager.Stub
     }
 
     // Native callback.
+    @SuppressWarnings("unused")
     private void notifySensorAccuracy(int deviceId, int sensorType, int accuracy) {
         mSensorAccuracyListenersToNotify.clear();
         final int numListeners;
@@ -2791,6 +2972,7 @@ public class InputManagerService extends IInputManager.Stub
     }
 
     // Native callback.
+    @SuppressWarnings("unused")
     final boolean filterInputEvent(InputEvent event, int policyFlags) {
         synchronized (mInputFilterLock) {
             if (mInputFilter != null) {
@@ -2807,11 +2989,13 @@ public class InputManagerService extends IInputManager.Stub
     }
 
     // Native callback.
+    @SuppressWarnings("unused")
     private int interceptKeyBeforeQueueing(KeyEvent event, int policyFlags) {
         return mWindowManagerCallbacks.interceptKeyBeforeQueueing(event, policyFlags);
     }
 
     // Native callback.
+    @SuppressWarnings("unused")
     private int interceptMotionBeforeQueueingNonInteractive(int displayId,
             long whenNanos, int policyFlags) {
         return mWindowManagerCallbacks.interceptMotionBeforeQueueingNonInteractive(
@@ -2819,33 +3003,39 @@ public class InputManagerService extends IInputManager.Stub
     }
 
     // Native callback.
+    @SuppressWarnings("unused")
     private long interceptKeyBeforeDispatching(IBinder focus, KeyEvent event, int policyFlags) {
         return mWindowManagerCallbacks.interceptKeyBeforeDispatching(focus, event, policyFlags);
     }
 
     // Native callback.
+    @SuppressWarnings("unused")
     private KeyEvent dispatchUnhandledKey(IBinder focus, KeyEvent event, int policyFlags) {
         return mWindowManagerCallbacks.dispatchUnhandledKey(focus, event, policyFlags);
     }
 
     // Native callback.
+    @SuppressWarnings("unused")
     private boolean checkInjectEventsPermission(int injectorPid, int injectorUid) {
         return mContext.checkPermission(android.Manifest.permission.INJECT_EVENTS,
                 injectorPid, injectorUid) == PackageManager.PERMISSION_GRANTED;
     }
 
     // Native callback.
+    @SuppressWarnings("unused")
     private void onPointerDownOutsideFocus(IBinder touchedToken) {
         mWindowManagerCallbacks.onPointerDownOutsideFocus(touchedToken);
     }
 
     // Native callback.
+    @SuppressWarnings("unused")
     private int getVirtualKeyQuietTimeMillis() {
         return mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_virtualKeyQuietTimeMillis);
     }
 
     // Native callback.
+    @SuppressWarnings("unused")
     private static String[] getExcludedDeviceNames() {
         List<String> names = new ArrayList<>();
         // Read partner-provided list of excluded input devices
@@ -2856,8 +3046,7 @@ public class InputManagerService extends IInputManager.Stub
         };
         for (File baseDir: baseDirs) {
             File confFile = new File(baseDir, EXCLUDED_DEVICES_PATH);
-            try {
-                InputStream stream = new FileInputStream(confFile);
+            try (InputStream stream = new FileInputStream(confFile)) {
                 names.addAll(ConfigurationProcessor.processExcludedDeviceNames(stream));
             } catch (FileNotFoundException e) {
                 // It's ok if the file does not exist.
@@ -2890,8 +3079,7 @@ public class InputManagerService extends IInputManager.Stub
         final File baseDir = Environment.getVendorDirectory();
         final File confFile = new File(baseDir, PORT_ASSOCIATIONS_PATH);
 
-        try {
-            final InputStream stream = new FileInputStream(confFile);
+        try (final InputStream stream = new FileInputStream(confFile)) {
             return ConfigurationProcessor.processInputPortAssociations(stream);
         } catch (FileNotFoundException e) {
             // Most of the time, file will not exist, which is expected.
@@ -2903,6 +3091,7 @@ public class InputManagerService extends IInputManager.Stub
     }
 
     // Native callback
+    @SuppressWarnings("unused")
     private String[] getInputPortAssociations() {
         final Map<String, Integer> associations = new HashMap<>(mStaticAssociations);
 
@@ -2915,6 +3104,7 @@ public class InputManagerService extends IInputManager.Stub
     }
 
     // Native callback
+    @SuppressWarnings("unused")
     private String[] getInputUniqueIdAssociations() {
         final Map<String, String> associations;
         synchronized (mAssociationsLock) {
@@ -2935,68 +3125,113 @@ public class InputManagerService extends IInputManager.Stub
     }
 
     // Native callback.
+    @SuppressWarnings("unused")
     private int getKeyRepeatTimeout() {
         return ViewConfiguration.getKeyRepeatTimeout();
     }
 
     // Native callback.
+    @SuppressWarnings("unused")
     private int getKeyRepeatDelay() {
         return ViewConfiguration.getKeyRepeatDelay();
     }
 
     // Native callback.
+    @SuppressWarnings("unused")
     private int getHoverTapTimeout() {
         return ViewConfiguration.getHoverTapTimeout();
     }
 
     // Native callback.
+    @SuppressWarnings("unused")
     private int getHoverTapSlop() {
         return ViewConfiguration.getHoverTapSlop();
     }
 
     // Native callback.
+    @SuppressWarnings("unused")
     private int getDoubleTapTimeout() {
         return ViewConfiguration.getDoubleTapTimeout();
     }
 
     // Native callback.
+    @SuppressWarnings("unused")
     private int getLongPressTimeout() {
         return ViewConfiguration.getLongPressTimeout();
     }
 
     // Native callback.
+    @SuppressWarnings("unused")
     private int getPointerLayer() {
         return mWindowManagerCallbacks.getPointerLayer();
     }
 
     // Native callback.
+    @SuppressWarnings("unused")
     private PointerIcon getPointerIcon(int displayId) {
-        return PointerIcon.getDefaultIcon(getContextForDisplay(displayId));
-    }
-
-    private Context getContextForDisplay(int displayId) {
-        if (mDisplayContext != null && mDisplayContext.getDisplay().getDisplayId() == displayId) {
-            return mDisplayContext;
-        }
-
-        if (mContext.getDisplay().getDisplayId() == displayId) {
-            mDisplayContext = mContext;
-            return mDisplayContext;
-        }
-
-        // Create and cache context for non-default display.
-        final DisplayManager displayManager = mContext.getSystemService(DisplayManager.class);
-        final Display display = displayManager.getDisplay(displayId);
-        mDisplayContext = mContext.createDisplayContext(display);
-        return mDisplayContext;
+        return PointerIcon.getDefaultIcon(getContextForPointerIcon(displayId));
     }
 
     // Native callback.
+    @SuppressWarnings("unused")
+    private long getParentSurfaceForPointers(int displayId) {
+        final SurfaceControl sc = mWindowManagerCallbacks.getParentSurfaceForPointers(displayId);
+        if (sc == null) {
+            return 0;
+        }
+        return sc.mNativeObject;
+    }
+
+    @NonNull
+    private Context getContextForPointerIcon(int displayId) {
+        if (mPointerIconDisplayContext != null
+                && mPointerIconDisplayContext.getDisplay().getDisplayId() == displayId) {
+            return mPointerIconDisplayContext;
+        }
+
+        // Create and cache context for non-default display.
+        mPointerIconDisplayContext = getContextForDisplay(displayId);
+
+        // Fall back to default display if the requested displayId does not exist.
+        if (mPointerIconDisplayContext == null) {
+            mPointerIconDisplayContext = getContextForDisplay(Display.DEFAULT_DISPLAY);
+        }
+        return mPointerIconDisplayContext;
+    }
+
+    @Nullable
+    private Context getContextForDisplay(int displayId) {
+        if (displayId == Display.INVALID_DISPLAY) {
+            return null;
+        }
+        if (mContext.getDisplay().getDisplayId() == displayId) {
+            return mContext;
+        }
+
+        final DisplayManager displayManager = Objects.requireNonNull(
+                mContext.getSystemService(DisplayManager.class));
+        final Display display = displayManager.getDisplay(displayId);
+        if (display == null) {
+            return null;
+        }
+
+        return mContext.createDisplayContext(display);
+    }
+
+    // Native callback.
+    @SuppressWarnings("unused")
     private int getPointerDisplayId() {
+        synchronized (mAdditionalDisplayInputPropertiesLock) {
+            // Prefer the override to all other displays.
+            if (mOverriddenPointerDisplayId != Display.INVALID_DISPLAY) {
+                return mOverriddenPointerDisplayId;
+            }
+        }
         return mWindowManagerCallbacks.getPointerDisplayId();
     }
 
     // Native callback.
+    @SuppressWarnings("unused")
     private String[] getKeyboardLayoutOverlay(InputDeviceIdentifier identifier) {
         if (!mSystemReady) {
             return null;
@@ -3008,19 +3243,15 @@ public class InputManagerService extends IInputManager.Stub
         }
 
         final String[] result = new String[2];
-        visitKeyboardLayout(keyboardLayoutDescriptor, new KeyboardLayoutVisitor() {
-            @Override
-            public void visitKeyboardLayout(Resources resources,
-                    int keyboardLayoutResId, KeyboardLayout layout) {
-                try {
-                    result[0] = layout.getDescriptor();
-                    result[1] = Streams.readFully(new InputStreamReader(
-                            resources.openRawResource(keyboardLayoutResId)));
-                } catch (IOException ex) {
-                } catch (NotFoundException ex) {
-                }
-            }
-        });
+        visitKeyboardLayout(keyboardLayoutDescriptor,
+                (resources, keyboardLayoutResId, layout) -> {
+                    try (InputStreamReader stream = new InputStreamReader(
+                            resources.openRawResource(keyboardLayoutResId))) {
+                        result[0] = layout.getDescriptor();
+                        result[1] = Streams.readFully(stream);
+                    } catch (IOException | NotFoundException ignored) {
+                    }
+                });
         if (result[0] == null) {
             Slog.w(TAG, "Could not get keyboard layout with descriptor '"
                     + keyboardLayoutDescriptor + "'.");
@@ -3030,6 +3261,7 @@ public class InputManagerService extends IInputManager.Stub
     }
 
     // Native callback.
+    @SuppressWarnings("unused")
     private String getDeviceAlias(String uniqueId) {
         if (BluetoothAdapter.checkBluetoothAddress(uniqueId)) {
             // TODO(BT) mBluetoothService.getRemoteAlias(uniqueId)
@@ -3067,34 +3299,22 @@ public class InputManagerService extends IInputManager.Stub
         void notifyNoFocusedWindowAnr(InputApplicationHandle applicationHandle);
 
         /**
-         * Notify the window manager about a gesture monitor that is unresponsive.
-         *
-         * @param pid the pid of the gesture monitor process
-         * @param reason the reason why this connection is unresponsive
-         */
-        void notifyGestureMonitorUnresponsive(int pid, @NonNull String reason);
-
-        /**
          * Notify the window manager about a window that is unresponsive.
          *
          * @param token the token that can be used to look up the window
+         * @param pid the pid of the window owner, if known
          * @param reason the reason why this connection is unresponsive
          */
-        void notifyWindowUnresponsive(@NonNull IBinder token, @NonNull String reason);
-
-        /**
-         * Notify the window manager about a gesture monitor that has become responsive.
-         *
-         * @param pid the pid of the gesture monitor process
-         */
-        void notifyGestureMonitorResponsive(int pid);
+        void notifyWindowUnresponsive(@NonNull IBinder token, @NonNull OptionalInt pid,
+                @NonNull String reason);
 
         /**
          * Notify the window manager about a window that has become responsive.
          *
          * @param token the token that can be used to look up the window
+         * @param pid the pid of the window owner, if known
          */
-        void notifyWindowResponsive(@NonNull IBinder token);
+        void notifyWindowResponsive(@NonNull IBinder token, @NonNull OptionalInt pid);
 
         /**
          * This callback is invoked when an event first arrives to InputDispatcher and before it is
@@ -3137,6 +3357,9 @@ public class InputManagerService extends IInputManager.Stub
 
         int getPointerDisplayId();
 
+        /** Gets the x and y coordinates of the cursor's current position. */
+        PointF getCursorPosition();
+
         /**
          * Notifies window manager that a {@link android.view.MotionEvent#ACTION_DOWN} pointer event
          * occurred on a window that did not have focus.
@@ -3154,14 +3377,40 @@ public class InputManagerService extends IInputManager.Stub
          * Called when the drag over window has changed.
          */
         void notifyDropWindow(IBinder token, float x, float y);
+
+        /**
+         * Get the {@link SurfaceControl} that should be the parent for the surfaces created for
+         * pointers such as the mouse cursor and touch spots for the given display.
+         */
+        SurfaceControl getParentSurfaceForPointers(int displayId);
+
+        /**
+         * Create a {@link SurfaceControl} that can be configured to receive input over the entire
+         * display to implement a gesture monitor. The surface will not have a graphical buffer.
+         * @param name the name of the gesture monitor
+         * @param displayId the display to create the window in
+         * @return the SurfaceControl of the new layer container surface
+         */
+        @Nullable
+        SurfaceControl createSurfaceForGestureMonitor(String name, int displayId);
     }
 
     /**
      * Callback interface implemented by WiredAccessoryObserver.
      */
     public interface WiredAccessoryCallbacks {
-        public void notifyWiredAccessoryChanged(long whenNanos, int switchValues, int switchMask);
-        public void systemReady();
+        /**
+         * Notifies WiredAccessoryObserver that input state for wired accessories has changed
+         * @param whenNanos When the wired accessories changed
+         * @param switchValues The state of the switches
+         * @param switchMask The mask of switches that changed
+         */
+        void notifyWiredAccessoryChanged(long whenNanos, int switchValues, int switchMask);
+
+        /**
+         * Notifies WiredAccessoryObserver that the system is now ready.
+         */
+        void systemReady();
     }
 
     /**
@@ -3192,7 +3441,7 @@ public class InputManagerService extends IInputManager.Stub
                     break;
                 case MSG_DELIVER_TABLET_MODE_CHANGED:
                     SomeArgs args = (SomeArgs) msg.obj;
-                    long whenNanos = (args.argi1 & 0xFFFFFFFFl) | ((long) args.argi2 << 32);
+                    long whenNanos = (args.argi1 & 0xFFFFFFFFL) | ((long) args.argi2 << 32);
                     boolean inTabletMode = (boolean) args.arg1;
                     deliverTabletModeChanged(whenNanos, inTabletMode);
                     break;
@@ -3204,17 +3453,17 @@ public class InputManagerService extends IInputManager.Stub
      * Hosting interface for input filters to call back into the input manager.
      */
     private final class InputFilterHost extends IInputFilterHost.Stub {
+        @GuardedBy("mInputFilterLock")
         private boolean mDisconnected;
 
+        @GuardedBy("mInputFilterLock")
         public void disconnectLocked() {
             mDisconnected = true;
         }
 
         @Override
         public void sendInputEvent(InputEvent event, int policyFlags) {
-            if (event == null) {
-                throw new IllegalArgumentException("event must not be null");
-            }
+            Objects.requireNonNull(event, "event must not be null");
 
             synchronized (mInputFilterLock) {
                 if (!mDisconnected) {
@@ -3230,31 +3479,20 @@ public class InputManagerService extends IInputManager.Stub
      * Interface for the system to handle request from InputMonitors.
      */
     private final class InputMonitorHost extends IInputMonitorHost.Stub {
-        private IBinder mToken;
+        private final IBinder mInputChannelToken;
 
-        InputMonitorHost(IBinder token) {
-            mToken = token;
+        InputMonitorHost(IBinder inputChannelToken) {
+            mInputChannelToken = inputChannelToken;
         }
 
         @Override
         public void pilferPointers() {
-            if (mToken == null) {
-                throw new IllegalStateException(
-                        "Illegal call to pilferPointers after InputMonitorHost is disposed.");
-            }
-            nativePilferPointers(mPtr, mToken);
+            nativePilferPointers(mPtr, mInputChannelToken);
         }
 
         @Override
         public void dispose() {
-            // We do not remove the input monitor here by calling nativeRemoveInputChannel because
-            // it causes a race in InputDispatcher between the removal of the InputChannel through
-            // that call and the InputChannel#dispose call (which causes an FD hangup) from the
-            // client (b/189135695).
-            //
-            // NOTE: This means the client is responsible for properly closing the InputMonitor by
-            // disposing the InputChannel and all its duplicates.
-            mToken = null;
+            removeSpyWindowGestureMonitor(mInputChannelToken);
         }
     }
 
@@ -3462,6 +3700,36 @@ public class InputManagerService extends IInputManager.Stub
         }
 
         @Override
+        public void setVirtualMousePointerDisplayId(int pointerDisplayId) {
+            InputManagerService.this.setVirtualMousePointerDisplayId(pointerDisplayId);
+        }
+
+        @Override
+        public int getVirtualMousePointerDisplayId() {
+            return InputManagerService.this.getVirtualMousePointerDisplayId();
+        }
+
+        @Override
+        public PointF getCursorPosition() {
+            return mWindowManagerCallbacks.getCursorPosition();
+        }
+
+        @Override
+        public void setPointerAcceleration(float acceleration, int displayId) {
+            InputManagerService.this.setPointerAcceleration(acceleration, displayId);
+        }
+
+        @Override
+        public void setDisplayEligibilityForPointerCapture(int displayId, boolean isEligible) {
+            InputManagerService.this.setDisplayEligibilityForPointerCapture(displayId, isEligible);
+        }
+
+        @Override
+        public void setPointerIconVisible(boolean visible, int displayId) {
+            InputManagerService.this.setPointerIconVisible(visible, displayId);
+        }
+
+        @Override
         public void registerLidSwitchCallback(LidSwitchCallback callbacks) {
             registerLidSwitchCallbackInternal(callbacks);
         }
@@ -3469,6 +3737,16 @@ public class InputManagerService extends IInputManager.Stub
         @Override
         public void unregisterLidSwitchCallback(LidSwitchCallback callbacks) {
             unregisterLidSwitchCallbackInternal(callbacks);
+        }
+
+        @Override
+        public InputChannel createInputChannel(String inputChannelName) {
+            return InputManagerService.this.createInputChannel(inputChannelName);
+        }
+
+        @Override
+        public void pilferPointers(IBinder token) {
+            nativePilferPointers(mPtr, token);
         }
     }
 
@@ -3478,4 +3756,21 @@ public class InputManagerService extends IInputManager.Stub
         new InputShellCommand().exec(this, in, out, err, args, callback, resultReceiver);
     }
 
+    private static class AdditionalDisplayInputProperties {
+
+        static final boolean DEFAULT_POINTER_ICON_VISIBLE = true;
+        static final float DEFAULT_POINTER_ACCELERATION =
+                (float) IInputConstants.DEFAULT_POINTER_ACCELERATION;
+
+        // The pointer acceleration for this display.
+        public float pointerAcceleration = DEFAULT_POINTER_ACCELERATION;
+
+        // Whether the pointer icon should be visible or hidden on this display.
+        public boolean pointerIconVisible = DEFAULT_POINTER_ICON_VISIBLE;
+
+        public boolean allDefaults() {
+            return Float.compare(pointerAcceleration, DEFAULT_POINTER_ACCELERATION) == 0
+                    && pointerIconVisible == DEFAULT_POINTER_ICON_VISIBLE;
+        }
+    }
 }

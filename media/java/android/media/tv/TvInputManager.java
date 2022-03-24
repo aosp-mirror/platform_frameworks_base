@@ -18,6 +18,7 @@ package android.media.tv;
 
 import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -27,7 +28,10 @@ import android.annotation.TestApi;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Rect;
+import android.media.AudioDeviceInfo;
+import android.media.AudioFormat.Encoding;
 import android.media.PlaybackParams;
+import android.media.tv.interactive.TvInteractiveAppManager;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
@@ -59,6 +63,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 
 /**
@@ -356,6 +361,42 @@ public final class TvInputManager {
      */
     public static final int INPUT_STATE_DISCONNECTED = 2;
 
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = "BROADCAST_INFO_TYPE_", value =
+            {BROADCAST_INFO_TYPE_TS, BROADCAST_INFO_TYPE_TABLE, BROADCAST_INFO_TYPE_SECTION,
+            BROADCAST_INFO_TYPE_PES, BROADCAST_INFO_STREAM_EVENT, BROADCAST_INFO_TYPE_DSMCC,
+            BROADCAST_INFO_TYPE_COMMAND, BROADCAST_INFO_TYPE_TIMELINE})
+    public @interface BroadcastInfoType {}
+
+    public static final int BROADCAST_INFO_TYPE_TS = 1;
+    public static final int BROADCAST_INFO_TYPE_TABLE = 2;
+    public static final int BROADCAST_INFO_TYPE_SECTION = 3;
+    public static final int BROADCAST_INFO_TYPE_PES = 4;
+    public static final int BROADCAST_INFO_STREAM_EVENT = 5;
+    public static final int BROADCAST_INFO_TYPE_DSMCC = 6;
+    public static final int BROADCAST_INFO_TYPE_COMMAND = 7;
+    public static final int BROADCAST_INFO_TYPE_TIMELINE = 8;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = "SIGNAL_STRENGTH_",
+            value = {SIGNAL_STRENGTH_LOST, SIGNAL_STRENGTH_WEAK, SIGNAL_STRENGTH_STRONG})
+    public @interface SignalStrength {}
+
+    /**
+     * Signal lost.
+     */
+    public static final int SIGNAL_STRENGTH_LOST = 1;
+    /**
+     * Weak signal.
+     */
+    public static final int SIGNAL_STRENGTH_WEAK = 2;
+    /**
+     * Strong signal.
+     */
+    public static final int SIGNAL_STRENGTH_STRONG = 3;
+
     /**
      * An unknown state of the client pid gets from the TvInputManager. Client gets this value when
      * query through {@link getClientPid(String sessionId)} fails.
@@ -626,14 +667,28 @@ public final class TvInputManager {
         public void onTimeShiftCurrentPositionChanged(Session session, long timeMs) {
         }
 
-        // For the recording session only
         /**
-         * This is called when the recording session has been tuned to the given channel and is
-         * ready to start recording.
+         * This is called when AIT info is updated.
+         * @param session A {@link TvInputManager.Session} associated with this callback.
+         * @param aitInfo The current AIT info.
+         */
+        public void onAitInfoUpdated(Session session, AitInfo aitInfo) {
+        }
+
+        /**
+         * This is called when signal strength is updated.
+         * @param session A {@link TvInputManager.Session} associated with this callback.
+         * @param strength The current signal strength.
+         */
+        public void onSignalStrengthUpdated(Session session, @SignalStrength int strength) {
+        }
+
+        /**
+         * This is called when the session has been tuned to the given channel.
          *
          * @param channelUri The URI of a channel.
          */
-        void onTuned(Session session, Uri channelUri) {
+        public void onTuned(Session session, Uri channelUri) {
         }
 
         // For the recording session only
@@ -702,6 +757,10 @@ public final class TvInputManager {
                 @Override
                 public void run() {
                     mSessionCallback.onTracksChanged(mSession, tracks);
+                    if (mSession.mIAppNotificationEnabled
+                            && mSession.getInteractiveAppSession() != null) {
+                        mSession.getInteractiveAppSession().notifyTracksChanged(tracks);
+                    }
                 }
             });
         }
@@ -711,6 +770,10 @@ public final class TvInputManager {
                 @Override
                 public void run() {
                     mSessionCallback.onTrackSelected(mSession, type, trackId);
+                    if (mSession.mIAppNotificationEnabled
+                            && mSession.getInteractiveAppSession() != null) {
+                        mSession.getInteractiveAppSession().notifyTrackSelected(type, trackId);
+                    }
                 }
             });
         }
@@ -729,6 +792,10 @@ public final class TvInputManager {
                 @Override
                 public void run() {
                     mSessionCallback.onVideoAvailable(mSession);
+                    if (mSession.mIAppNotificationEnabled
+                            && mSession.getInteractiveAppSession() != null) {
+                        mSession.getInteractiveAppSession().notifyVideoAvailable();
+                    }
                 }
             });
         }
@@ -738,6 +805,10 @@ public final class TvInputManager {
                 @Override
                 public void run() {
                     mSessionCallback.onVideoUnavailable(mSession, reason);
+                    if (mSession.mIAppNotificationEnabled
+                            && mSession.getInteractiveAppSession() != null) {
+                        mSession.getInteractiveAppSession().notifyVideoUnavailable(reason);
+                    }
                 }
             });
         }
@@ -747,6 +818,10 @@ public final class TvInputManager {
                 @Override
                 public void run() {
                     mSessionCallback.onContentAllowed(mSession);
+                    if (mSession.mIAppNotificationEnabled
+                            && mSession.getInteractiveAppSession() != null) {
+                        mSession.getInteractiveAppSession().notifyContentAllowed();
+                    }
                 }
             });
         }
@@ -756,6 +831,10 @@ public final class TvInputManager {
                 @Override
                 public void run() {
                     mSessionCallback.onContentBlocked(mSession, rating);
+                    if (mSession.mIAppNotificationEnabled
+                            && mSession.getInteractiveAppSession() != null) {
+                        mSession.getInteractiveAppSession().notifyContentBlocked(rating);
+                    }
                 }
             });
         }
@@ -806,12 +885,37 @@ public final class TvInputManager {
             });
         }
 
-        // For the recording session only
+        void postAitInfoUpdated(final AitInfo aitInfo) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSessionCallback.onAitInfoUpdated(mSession, aitInfo);
+                }
+            });
+        }
+
+        void postSignalStrength(final int strength) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSessionCallback.onSignalStrengthUpdated(mSession, strength);
+                    if (mSession.mIAppNotificationEnabled
+                            && mSession.getInteractiveAppSession() != null) {
+                        mSession.getInteractiveAppSession().notifySignalStrength(strength);
+                    }
+                }
+            });
+        }
+
         void postTuned(final Uri channelUri) {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
                     mSessionCallback.onTuned(mSession, channelUri);
+                    if (mSession.mIAppNotificationEnabled
+                            && mSession.getInteractiveAppSession() != null) {
+                        mSession.getInteractiveAppSession().notifyTuned(channelUri);
+                    }
                 }
             });
         }
@@ -834,6 +938,33 @@ public final class TvInputManager {
                     mSessionCallback.onError(mSession, error);
                 }
             });
+        }
+
+        void postBroadcastInfoResponse(final BroadcastInfoResponse response) {
+            if (mSession.mIAppNotificationEnabled) {
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (mSession.getInteractiveAppSession() != null) {
+                            mSession.getInteractiveAppSession()
+                                    .notifyBroadcastInfoResponse(response);
+                        }
+                    }
+                });
+            }
+        }
+
+        void postAdResponse(final AdResponse response) {
+            if (mSession.mIAppNotificationEnabled) {
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (mSession.getInteractiveAppSession() != null) {
+                            mSession.getInteractiveAppSession().notifyAdResponse(response);
+                        }
+                    }
+                });
+            }
         }
     }
 
@@ -1199,7 +1330,31 @@ public final class TvInputManager {
             }
 
             @Override
-            public void onTuned(int seq, Uri channelUri) {
+            public void onAitInfoUpdated(AitInfo aitInfo, int seq) {
+                synchronized (mSessionCallbackRecordMap) {
+                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
+                    if (record == null) {
+                        Log.e(TAG, "Callback not found for seq " + seq);
+                        return;
+                    }
+                    record.postAitInfoUpdated(aitInfo);
+                }
+            }
+
+            @Override
+            public void onSignalStrength(int strength, int seq) {
+                synchronized (mSessionCallbackRecordMap) {
+                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
+                    if (record == null) {
+                        Log.e(TAG, "Callback not found for seq " + seq);
+                        return;
+                    }
+                    record.postSignalStrength(strength);
+                }
+            }
+
+            @Override
+            public void onTuned(Uri channelUri, int seq) {
                 synchronized (mSessionCallbackRecordMap) {
                     SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
                     if (record == null) {
@@ -1207,6 +1362,7 @@ public final class TvInputManager {
                         return;
                     }
                     record.postTuned(channelUri);
+                    // TODO: synchronized and wrap the channelUri
                 }
             }
 
@@ -1231,6 +1387,30 @@ public final class TvInputManager {
                         return;
                     }
                     record.postError(error);
+                }
+            }
+
+            @Override
+            public void onBroadcastInfoResponse(BroadcastInfoResponse response, int seq) {
+                synchronized (mSessionCallbackRecordMap) {
+                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
+                    if (record == null) {
+                        Log.e(TAG, "Callback not found for seq " + seq);
+                        return;
+                    }
+                    record.postBroadcastInfoResponse(response);
+                }
+            }
+
+            @Override
+            public void onAdResponse(AdResponse response, int seq) {
+                synchronized (mSessionCallbackRecordMap) {
+                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
+                    if (record == null) {
+                        Log.e(TAG, "Callback not found for seq " + seq);
+                        return;
+                    }
+                    record.postAdResponse(response);
                 }
             }
         };
@@ -1386,6 +1566,59 @@ public final class TvInputManager {
                 return INPUT_STATE_DISCONNECTED;
             }
             return state;
+        }
+    }
+
+    /**
+     * Returns available extension interfaces of a given hardware TV input. This can be used to
+     * provide domain-specific features that are only known between certain hardware TV inputs
+     * and their clients.
+     *
+     * @param inputId The ID of the TV input.
+     * @return a non-null list of extension interface names available to the caller. An empty
+     *         list indicates the given TV input is not found, or the given TV input is not a
+     *         hardware TV input, or the given TV input doesn't support any extension
+     *         interfaces, or the caller doesn't hold the required permission for the extension
+     *         interfaces supported by the given TV input.
+     * @see #getExtensionInterface
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.TIS_EXTENSION_INTERFACE)
+    @NonNull
+    public List<String> getAvailableExtensionInterfaceNames(@NonNull String inputId) {
+        Preconditions.checkNotNull(inputId);
+        try {
+            return mService.getAvailableExtensionInterfaceNames(inputId, mUserId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns an extension interface of a given hardware TV input. This can be used to provide
+     * domain-specific features that are only known between certain hardware TV inputs and
+     * their clients.
+     *
+     * @param inputId The ID of the TV input.
+     * @param name The extension interface name.
+     * @return an {@link IBinder} for the given extension interface, {@code null} if the given TV
+     *         input is not found, or if the given TV input is not a hardware TV input, or if the
+     *         given TV input doesn't support the given extension interface, or if the caller
+     *         doesn't hold the required permission for the given extension interface.
+     * @see #getAvailableExtensionInterfaceNames
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.TIS_EXTENSION_INTERFACE)
+    @Nullable
+    public IBinder getExtensionInterface(@NonNull String inputId, @NonNull String name) {
+        Preconditions.checkNotNull(inputId);
+        Preconditions.checkNotNull(name);
+        try {
+            return mService.getExtensionInterface(inputId, name, mUserId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1620,11 +1853,57 @@ public final class TvInputManager {
      *
      * @hide
      */
+    @SystemApi
     @RequiresPermission(android.Manifest.permission.TUNER_RESOURCE_ACCESS)
     public int getClientPid(@NonNull String sessionId) {
         return getClientPidInternal(sessionId);
     };
 
+    /**
+     * Returns a priority for the given use case type and the client's foreground or background
+     * status.
+     *
+     * @param useCase the use case type of the client.
+     *        {@see TvInputService#PriorityHintUseCaseType}.
+     * @param sessionId the unique id of the session owned by the client.
+     *        {@see TvInputService#onCreateSession(String, String)}.
+     *
+     * @return the use case priority value for the given use case type and the client's foreground
+     *         or background status.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.TUNER_RESOURCE_ACCESS)
+    public int getClientPriority(@TvInputService.PriorityHintUseCaseType int useCase,
+            @NonNull String sessionId) {
+        Preconditions.checkNotNull(sessionId);
+        if (!isValidUseCase(useCase)) {
+            throw new IllegalArgumentException("Invalid use case: " + useCase);
+        }
+        return getClientPriorityInternal(useCase, sessionId);
+    };
+
+    /**
+     * Returns a priority for the given use case type and the caller's foreground or background
+     * status.
+     *
+     * @param useCase the use case type of the caller.
+     *        {@see TvInputService#PriorityHintUseCaseType}.
+     *
+     * @return the use case priority value for the given use case type and the caller's foreground
+     *         or background status.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.TUNER_RESOURCE_ACCESS)
+    public int getClientPriority(@TvInputService.PriorityHintUseCaseType int useCase) {
+        if (!isValidUseCase(useCase)) {
+            throw new IllegalArgumentException("Invalid use case: " + useCase);
+        }
+        return getClientPriorityInternal(useCase, null);
+    };
     /**
      * Creates a recording {@link Session} for a given TV input.
      *
@@ -1667,6 +1946,22 @@ public final class TvInputManager {
             throw e.rethrowFromSystemServer();
         }
         return clientPid;
+    }
+
+    private int getClientPriorityInternal(int useCase, String sessionId) {
+        try {
+            return mService.getClientPriority(useCase, sessionId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    private boolean isValidUseCase(int useCase) {
+        return useCase == TvInputService.PRIORITY_HINT_USE_CASE_TYPE_BACKGROUND
+            || useCase == TvInputService.PRIORITY_HINT_USE_CASE_TYPE_SCAN
+            || useCase == TvInputService.PRIORITY_HINT_USE_CASE_TYPE_PLAYBACK
+            || useCase == TvInputService.PRIORITY_HINT_USE_CASE_TYPE_LIVE
+            || useCase == TvInputService.PRIORITY_HINT_USE_CASE_TYPE_RECORD;
     }
 
     /**
@@ -2045,6 +2340,9 @@ public final class TvInputManager {
         // @GuardedBy("mMetadataLock")
         private int mVideoHeight;
 
+        private TvInteractiveAppManager.Session mIAppSession;
+        private boolean mIAppNotificationEnabled = false;
+
         private Session(IBinder token, InputChannel channel, ITvInputManager service, int userId,
                 int seq, SparseArray<SessionCallbackRecord> sessionCallbackRecordMap) {
             mToken = token;
@@ -2053,6 +2351,14 @@ public final class TvInputManager {
             mUserId = userId;
             mSeq = seq;
             mSessionCallbackRecordMap = sessionCallbackRecordMap;
+        }
+
+        public TvInteractiveAppManager.Session getInteractiveAppSession() {
+            return mIAppSession;
+        }
+
+        public void setInteractiveAppSession(TvInteractiveAppManager.Session iAppSession) {
+            this.mIAppSession = iAppSession;
         }
 
         /**
@@ -2305,6 +2611,25 @@ public final class TvInputManager {
                 }
             }
             throw new IllegalArgumentException("invalid type: " + type);
+        }
+
+        /**
+         * Enables interactive app notification.
+         *
+         * @param enabled {@code true} if you want to enable interactive app notifications.
+         *                {@code false} otherwise.
+         */
+        public void setInteractiveAppNotificationEnabled(boolean enabled) {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.setInteractiveAppNotificationEnabled(mToken, enabled, mUserId);
+                mIAppNotificationEnabled = enabled;
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
         }
 
         /**
@@ -2839,6 +3164,47 @@ public final class TvInputManager {
             }
         }
 
+        public void requestBroadcastInfo(BroadcastInfoRequest request) {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.requestBroadcastInfo(mToken, request, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        /**
+         * Removes broadcast info.
+         * @param requestId the corresponding request ID sent from
+         *                  {@link #requestBroadcastInfo(android.media.tv.BroadcastInfoRequest)}
+         */
+        public void removeBroadcastInfo(int requestId) {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.removeBroadcastInfo(mToken, requestId, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        public void requestAd(AdRequest request) {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.requestAd(mToken, request, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
         private final class InputEventHandler extends Handler {
             public static final int MSG_SEND_INPUT_EVENT = 1;
             public static final int MSG_TIMEOUT_INPUT_EVENT = 2;
@@ -2947,11 +3313,43 @@ public final class TvInputManager {
             return false;
         }
 
+        /**
+         * Override default audio sink from audio policy.
+         *
+         * @param audioType device type of the audio sink to override with.
+         * @param audioAddress device address of the audio sink to override with.
+         * @param samplingRate desired sampling rate. Use default when it's 0.
+         * @param channelMask desired channel mask. Use default when it's
+         *        AudioFormat.CHANNEL_OUT_DEFAULT.
+         * @param format desired format. Use default when it's AudioFormat.ENCODING_DEFAULT.
+         */
         public void overrideAudioSink(int audioType, String audioAddress, int samplingRate,
                 int channelMask, int format) {
             try {
                 mInterface.overrideAudioSink(audioType, audioAddress, samplingRate, channelMask,
                         format);
+            } catch (RemoteException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        /**
+         * Override default audio sink from audio policy.
+         *
+         * @param device {@link android.media.AudioDeviceInfo} to use.
+         * @param samplingRate desired sampling rate. Use default when it's 0.
+         * @param channelMask desired channel mask. Use default when it's
+         *        AudioFormat.CHANNEL_OUT_DEFAULT.
+         * @param format desired format. Use default when it's AudioFormat.ENCODING_DEFAULT.
+         */
+        public void overrideAudioSink(@NonNull AudioDeviceInfo device,
+                @IntRange(from = 0) int samplingRate,
+                int channelMask, @Encoding int format) {
+            Objects.requireNonNull(device);
+            try {
+                mInterface.overrideAudioSink(
+                        AudioDeviceInfo.convertDeviceTypeToInternalDevice(device.getType()),
+                        device.getAddress(), samplingRate, channelMask, format);
             } catch (RemoteException e) {
                 throw new RuntimeException(e);
             }

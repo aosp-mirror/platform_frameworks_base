@@ -43,7 +43,11 @@ class RunningTasks {
 
     // Comparator to sort by last active time (descending)
     private static final Comparator<Task> LAST_ACTIVE_TIME_COMPARATOR =
-            (o1, o2) -> Long.signum(o2.lastActiveTime - o1.lastActiveTime);
+            (o1, o2) -> {
+                return o1.lastActiveTime == o2.lastActiveTime
+                        ? Integer.signum(o2.mTaskId - o1.mTaskId) :
+                        Long.signum(o2.lastActiveTime - o1.lastActiveTime);
+            };
 
     private final TreeSet<Task> mTmpSortedSet = new TreeSet<>(LAST_ACTIVE_TIME_COMPARATOR);
 
@@ -53,7 +57,6 @@ class RunningTasks {
     private ArraySet<Integer> mProfileIds;
     private boolean mAllowed;
     private boolean mFilterOnlyVisibleRecents;
-    private Task mTopDisplayFocusRootTask;
     private RecentTasks mRecentTasks;
     private boolean mKeepIntentExtra;
 
@@ -73,7 +76,6 @@ class RunningTasks {
         mAllowed = (flags & FLAG_ALLOWED) == FLAG_ALLOWED;
         mFilterOnlyVisibleRecents =
                 (flags & FLAG_FILTER_ONLY_VISIBLE_RECENTS) == FLAG_FILTER_ONLY_VISIBLE_RECENTS;
-        mTopDisplayFocusRootTask = root.getTopDisplayFocusedRootTask();
         mRecentTasks = root.mService.getRecentTasks();
         mKeepIntentExtra = (flags & FLAG_KEEP_INTENT_EXTRA) == FLAG_KEEP_INTENT_EXTRA;
 
@@ -120,12 +122,15 @@ class RunningTasks {
             return;
         }
 
-        final Task rootTask = task.getRootTask();
-        if (rootTask == mTopDisplayFocusRootTask && rootTask.getTopMostTask() == task) {
-            // For the focused top root task, update the last root task active time so that it
-            // can be used to determine the order of the tasks (it may not be set for newly
-            // created tasks)
+        if (task.isVisible()) {
+            // For the visible task, update the last active time so that it can be used to determine
+            // the order of the tasks (it may not be set for newly created tasks)
             task.touchActiveTime();
+            if (!task.isFocused()) {
+                // TreeSet doesn't allow the same value and make sure this task is lower than the
+                // focused one.
+                task.lastActiveTime -= mTmpSortedSet.size();
+            }
         }
 
         mTmpSortedSet.add(task);

@@ -15,7 +15,7 @@
  */
 package com.android.server.autofill;
 
-import static com.android.server.autofill.AutofillManagerService.getWhitelistedCompatModePackages;
+import static com.android.server.autofill.AutofillManagerService.getAllowedCompatModePackages;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -29,54 +29,54 @@ import java.util.Map;
 public class AutofillManagerServiceTest {
 
     @Test
-    public void testGetWhitelistedCompatModePackages_null() {
-        assertThat(getWhitelistedCompatModePackages(null)).isNull();
+    public void testGetAllowedCompatModePackages_null() {
+        assertThat(getAllowedCompatModePackages(null)).isNull();
     }
 
     @Test
-    public void testGetWhitelistedCompatModePackages_empty() {
-        assertThat(getWhitelistedCompatModePackages("")).isNull();
+    public void testGetAllowedCompatModePackages_empty() {
+        assertThat(getAllowedCompatModePackages("")).isNull();
     }
 
     @Test
-    public void testGetWhitelistedCompatModePackages_onePackageNoUrls() {
-        assertThat(getWhitelistedCompatModePackages("one_is_the_loniest_package"))
+    public void testGetAllowedCompatModePackages_onePackageNoUrls() {
+        assertThat(getAllowedCompatModePackages("one_is_the_loniest_package"))
                 .containsExactly("one_is_the_loniest_package", null);
     }
 
     @Test
-    public void testGetWhitelistedCompatModePackages_onePackageMissingEndDelimiter() {
-        assertThat(getWhitelistedCompatModePackages("one_is_the_loniest_package[")).isEmpty();
+    public void testGetAllowedCompatModePackages_onePackageMissingEndDelimiter() {
+        assertThat(getAllowedCompatModePackages("one_is_the_loniest_package[")).isEmpty();
     }
 
     @Test
-    public void testGetWhitelistedCompatModePackages_onePackageOneUrl() {
+    public void testGetAllowedCompatModePackages_onePackageOneUrl() {
         final Map<String, String[]> result =
-                getWhitelistedCompatModePackages("one_is_the_loniest_package[url]");
+                getAllowedCompatModePackages("one_is_the_loniest_package[url]");
         assertThat(result).hasSize(1);
         assertThat(result.get("one_is_the_loniest_package")).asList().containsExactly("url");
     }
 
     @Test
-    public void testGetWhitelistedCompatModePackages_onePackageMultipleUrls() {
+    public void testGetAllowedCompatModePackages_onePackageMultipleUrls() {
         final Map<String, String[]> result =
-                getWhitelistedCompatModePackages("one_is_the_loniest_package[4,5,8,15,16,23,42]");
+                getAllowedCompatModePackages("one_is_the_loniest_package[4,5,8,15,16,23,42]");
         assertThat(result).hasSize(1);
         assertThat(result.get("one_is_the_loniest_package")).asList()
             .containsExactly("4", "5", "8", "15", "16", "23", "42");
     }
 
     @Test
-    public void testGetWhitelistedCompatModePackages_multiplePackagesOneInvalid() {
-        final Map<String, String[]> result = getWhitelistedCompatModePackages("one:two[");
+    public void testGetAllowedCompatModePackages_multiplePackagesOneInvalid() {
+        final Map<String, String[]> result = getAllowedCompatModePackages("one:two[");
         assertThat(result).hasSize(1);
         assertThat(result.get("one")).isNull();
     }
 
     @Test
-    public void testGetWhitelistedCompatModePackages_multiplePackagesMultipleUrls() {
+    public void testGetAllowedCompatModePackages_multiplePackagesMultipleUrls() {
         final Map<String, String[]> result =
-                getWhitelistedCompatModePackages("p1[p1u1]:p2:p3[p3u1,p3u2]");
+                getAllowedCompatModePackages("p1[p1u1]:p2:p3[p3u1,p3u2]");
         assertThat(result).hasSize(3);
         assertThat(result.get("p1")).asList().containsExactly("p1u1");
         assertThat(result.get("p2")).isNull();
@@ -84,9 +84,9 @@ public class AutofillManagerServiceTest {
     }
 
     @Test
-    public void testGetWhitelistedCompatModePackages_threePackagesOneInvalid() {
+    public void testGetAllowedCompatModePackages_threePackagesOneInvalid() {
         final Map<String, String[]> result =
-                getWhitelistedCompatModePackages("p1[p1u1]:p2[:p3[p3u1,p3u2]");
+                getAllowedCompatModePackages("p1[p1u1]:p2[:p3[p3u1,p3u2]");
         assertThat(result).hasSize(2);
         assertThat(result.get("p1")).asList().containsExactly("p1u1");
         assertThat(result.get("p3")).asList().containsExactly("p3u1", "p3u2");

@@ -23,6 +23,7 @@ import android.util.Slog;
 
 import com.android.server.backup.BackupAgentTimeoutParameters;
 import com.android.server.backup.BackupRestoreTask;
+import com.android.server.backup.OperationStorage;
 import com.android.server.backup.UserBackupManagerService;
 
 import java.util.Objects;
@@ -36,13 +37,16 @@ public class AdbRestoreFinishedLatch implements BackupRestoreTask {
 
     private static final String TAG = "AdbRestoreFinishedLatch";
     private UserBackupManagerService backupManagerService;
+    private final OperationStorage mOperationStorage;
     final CountDownLatch mLatch;
     private final int mCurrentOpToken;
     private final BackupAgentTimeoutParameters mAgentTimeoutParameters;
 
     public AdbRestoreFinishedLatch(UserBackupManagerService backupManagerService,
+            OperationStorage operationStorage,
             int currentOpToken) {
         this.backupManagerService = backupManagerService;
+        mOperationStorage = operationStorage;
         mLatch = new CountDownLatch(1);
         mCurrentOpToken = currentOpToken;
         mAgentTimeoutParameters = Objects.requireNonNull(
@@ -72,7 +76,7 @@ public class AdbRestoreFinishedLatch implements BackupRestoreTask {
             Slog.w(TAG, "adb onRestoreFinished() complete");
         }
         mLatch.countDown();
-        backupManagerService.removeOperation(mCurrentOpToken);
+        mOperationStorage.removeOperation(mCurrentOpToken);
     }
 
     @Override
@@ -81,6 +85,6 @@ public class AdbRestoreFinishedLatch implements BackupRestoreTask {
             Slog.w(TAG, "adb onRestoreFinished() timed out");
         }
         mLatch.countDown();
-        backupManagerService.removeOperation(mCurrentOpToken);
+        mOperationStorage.removeOperation(mCurrentOpToken);
     }
 }

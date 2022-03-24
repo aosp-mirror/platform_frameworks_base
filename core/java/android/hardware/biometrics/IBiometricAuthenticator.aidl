@@ -48,13 +48,13 @@ interface IBiometricAuthenticator {
     // startPreparedClient().
     void prepareForAuthentication(boolean requireConfirmation, IBinder token, long operationId,
             int userId, IBiometricSensorReceiver sensorReceiver, String opPackageName,
-            int cookie, boolean allowBackgroundAuthentication);
+            long requestId, int cookie, boolean allowBackgroundAuthentication);
 
     // Starts authentication with the previously prepared client.
     void startPreparedClient(int cookie);
 
-    // Cancels authentication.
-    void cancelAuthenticationFromService(IBinder token, String opPackageName);
+    // Cancels authentication for the given requestId.
+    void cancelAuthenticationFromService(IBinder token, String opPackageName, long requestId);
 
     // Determine if HAL is loaded and ready
     boolean isHardwareDetected(String opPackageName);

@@ -25,7 +25,6 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.os.Build;
 import android.os.SystemProperties;
-import android.util.ArraySet;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
@@ -35,7 +34,6 @@ import com.android.server.timezonedetector.ConfigurationChangeListener;
 
 import java.time.Instant;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -65,11 +63,10 @@ final class ServiceConfigAccessor {
             Long.max(android.os.Environment.getRootDirectory().lastModified(), Build.TIME));
 
     /** Device config keys that affect the {@link TimeDetectorService}. */
-    private static final Set<String> SERVER_FLAGS_KEYS_TO_WATCH = Collections.unmodifiableSet(
-            new ArraySet<>(new String[] {
-                    KEY_TIME_DETECTOR_LOWER_BOUND_MILLIS_OVERRIDE,
-                    KEY_TIME_DETECTOR_ORIGIN_PRIORITIES_OVERRIDE,
-            }));
+    private static final Set<String> SERVER_FLAGS_KEYS_TO_WATCH = Set.of(
+            KEY_TIME_DETECTOR_LOWER_BOUND_MILLIS_OVERRIDE,
+            KEY_TIME_DETECTOR_ORIGIN_PRIORITIES_OVERRIDE
+    );
 
     private static final Object SLOCK = new Object();
 

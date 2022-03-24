@@ -26,7 +26,7 @@ import android.util.Log;
 import com.android.systemui.Dependency;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.shared.recents.IOverviewProxy;
-import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.systemui.statusbar.phone.CentralSurfaces;
 
 import java.util.Optional;
 
@@ -42,7 +42,7 @@ public class OverviewProxyRecentsImpl implements RecentsImplementation {
 
     private final static String TAG = "OverviewProxyRecentsImpl";
     @Nullable
-    private final Lazy<StatusBar> mStatusBarLazy;
+    private final Lazy<Optional<CentralSurfaces>> mCentralSurfacesOptionalLazy;
 
     private Context mContext;
     private Handler mHandler;
@@ -51,8 +51,8 @@ public class OverviewProxyRecentsImpl implements RecentsImplementation {
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     @Inject
-    public OverviewProxyRecentsImpl(Optional<Lazy<StatusBar>> statusBarLazy) {
-        mStatusBarLazy = statusBarLazy.orElse(null);
+    public OverviewProxyRecentsImpl(Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy) {
+        mCentralSurfacesOptionalLazy = centralSurfacesOptionalLazy;
     }
 
     @Override
@@ -109,10 +109,10 @@ public class OverviewProxyRecentsImpl implements RecentsImplementation {
                 }
             };
             // Preload only if device for current user is unlocked
-            if (mStatusBarLazy != null && mStatusBarLazy.get().isKeyguardShowing()) {
-                mStatusBarLazy.get().executeRunnableDismissingKeyguard(() -> {
-                        // Flush trustmanager before checking device locked per user
-                        mTrustManager.reportKeyguardShowingChanged();
+            final Optional<CentralSurfaces> centralSurfacesOptional =
+                    mCentralSurfacesOptionalLazy.get();
+            if (centralSurfacesOptional.map(CentralSurfaces::isKeyguardShowing).orElse(false)) {
+                centralSurfacesOptional.get().executeRunnableDismissingKeyguard(() -> {
                         mHandler.post(toggleRecents);
                     }, null,  true /* dismissShade */, false /* afterKeyguardGone */,
                     true /* deferred */);

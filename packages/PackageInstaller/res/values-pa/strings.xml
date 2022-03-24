@@ -56,6 +56,7 @@
     <string name="uninstall_application_text" msgid="3816830743706143980">"ਕੀ ਤੁਸੀਂ ਇਸ ਐਪ ਨੂੰ ਅਣਸਥਾਪਤ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ?"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"ਕੀ ਤੁਸੀਂ ਇਸ ਐਪ ਨੂੰ "<b>"ਸਾਰੇ"</b>" ਵਰਤੋਂਕਾਰਾਂ ਲਈ ਅਣਸਥਾਪਤ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ? ਐਪਲੀਕੇਸ਼ਨ ਅਤੇ ਇਸਦਾ ਡਾਟਾ ਡੀਵਾਈਸ \'ਤੇ "<b>"ਸਾਰੇ"</b>" ਵਰਤੋਂਕਾਰਾਂ ਵੱਲੋਂ ਹਟਾ ਦਿੱਤਾ ਜਾਵੇਗਾ।"</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"ਕੀ ਤੁਸੀਂ ਵਰਤੋਂਕਾਰ <xliff:g id="USERNAME">%1$s</xliff:g> ਲਈ ਇਸ ਐਪ ਨੂੰ ਅਣਸਥਾਪਤ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ?"</string>
+    <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"ਕੀ ਤੁਸੀਂ ਇਸ ਐਪ ਨੂੰ ਆਪਣੇ ਕਾਰਜ ਪ੍ਰੋਫਾਈਲ ਤੋਂ ਅਣਸਥਾਪਤ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ?"</string>
     <string name="uninstall_update_text" msgid="863648314632448705">"ਕੀ ਇਸ ਐਪ ਨੂੰ ਫੈਕਟਰੀ ਵਰਜਨ ਨਾਲ ਬਦਲਣਾ ਹੈ? ਸਾਰਾ ਡਾਟਾ ਹਟਾ ਦਿੱਤਾ ਜਾਵੇਗਾ।"</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"ਕੀ ਇਸ ਐਪ ਨੂੰ ਫੈਕਟਰੀ ਵਰਜਨ ਨਾਲ ਬਦਲਣਾ ਹੈ? ਸਾਰਾ ਡਾਟਾ ਹਟਾ ਦਿੱਤਾ ਜਾਵੇਗਾ। ਇਹ ਇਸ ਡੀਵਾਈਸ ਦੇ ਸਾਰੇ ਵਰਤੋਂਕਾਰਾਂ ਨੂੰ ਪ੍ਰਭਾਵਿਤ ਕਰੇਗਾ, ਜਿਸ ਵਿੱਚ ਕਾਰਜ ਪ੍ਰੋਫਾਈਲ ਵਾਲੇ ਵਰਤੋਂਕਾਰ ਵੀ ਸ਼ਾਮਲ ਹਨ।"</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"<xliff:g id="SIZE">%1$s</xliff:g> ਐਪ ਡਾਟਾ ਰੱਖੋ।"</string>

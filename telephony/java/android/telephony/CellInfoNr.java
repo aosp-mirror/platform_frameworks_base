@@ -53,27 +53,11 @@ public final class CellInfoNr extends CellInfo {
     }
 
     /** @hide */
-    public CellInfoNr(android.hardware.radio.V1_4.CellInfo ci, long timeStamp) {
-        super(ci, timeStamp);
-        final android.hardware.radio.V1_4.CellInfoNr cil = ci.info.nr();
-        mCellIdentity = new CellIdentityNr(cil.cellidentity);
-        mCellSignalStrength = new CellSignalStrengthNr(cil.signalStrength);
-    }
-
-    /** @hide */
-    public CellInfoNr(android.hardware.radio.V1_5.CellInfo ci, long timeStamp) {
-        super(ci, timeStamp);
-        final android.hardware.radio.V1_5.CellInfoNr cil = ci.ratSpecificInfo.nr();
-        mCellIdentity = new CellIdentityNr(cil.cellIdentityNr);
-        mCellSignalStrength = new CellSignalStrengthNr(cil.signalStrengthNr);
-    }
-
-    /** @hide */
-    public CellInfoNr(android.hardware.radio.V1_6.CellInfo ci, long timeStamp) {
-        super(ci, timeStamp);
-        final android.hardware.radio.V1_6.CellInfoNr cil = ci.ratSpecificInfo.nr();
-        mCellIdentity = new CellIdentityNr(cil.cellIdentityNr);
-        mCellSignalStrength = new CellSignalStrengthNr(cil.signalStrengthNr);
+    public CellInfoNr(int connectionStatus, boolean registered, long timeStamp,
+            CellIdentityNr cellIdentityNr, CellSignalStrengthNr cellSignalStrengthNr) {
+        super(connectionStatus, registered, timeStamp);
+        mCellIdentity = cellIdentityNr;
+        mCellSignalStrength = cellSignalStrengthNr;
     }
 
     /**

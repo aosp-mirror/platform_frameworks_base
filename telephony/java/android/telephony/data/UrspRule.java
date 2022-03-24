@@ -19,11 +19,8 @@ package android.telephony.data;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.hardware.radio.V1_6.OptionalDnn;
-import android.hardware.radio.V1_6.OptionalOsAppId;
 import android.os.Parcel;
 import android.os.Parcelable;
-
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,48 +49,14 @@ public final class UrspRule implements Parcelable {
     private final List<TrafficDescriptor> mTrafficDescriptors;
     private final List<RouteSelectionDescriptor> mRouteSelectionDescriptor;
 
-    UrspRule(android.hardware.radio.V1_6.UrspRule ur) {
-        this(ur.precedence, ur.trafficDescriptors, ur.routeSelectionDescriptor);
-    }
-
     /** @hide */
-    public UrspRule(int precedence,
-            List<android.hardware.radio.V1_6.TrafficDescriptor> trafficDescriptors,
-            List<android.hardware.radio.V1_6.RouteSelectionDescriptor> routeSelectionDescriptor) {
+    public UrspRule(int precedence, List<TrafficDescriptor> trafficDescriptors,
+            List<RouteSelectionDescriptor> routeSelectionDescriptor) {
         mPrecedence = precedence;
-        mTrafficDescriptors = new ArrayList<TrafficDescriptor>();
-        for (android.hardware.radio.V1_6.TrafficDescriptor td : trafficDescriptors) {
-            mTrafficDescriptors.add(convertToTrafficDescriptor(td));
-        }
-        mRouteSelectionDescriptor = new ArrayList<RouteSelectionDescriptor>();
-        for (android.hardware.radio.V1_6.RouteSelectionDescriptor rsd : routeSelectionDescriptor) {
-            mRouteSelectionDescriptor.add(new RouteSelectionDescriptor(rsd));
-        }
-    }
-
-    /** Convert an ArrayList of Bytes to an exactly-sized primitive array */
-    private byte[] arrayListToPrimitiveArray(ArrayList<Byte> bytes) {
-        byte[] ret = new byte[bytes.size()];
-        for (int i = 0; i < ret.length; i++) {
-            ret[i] = bytes.get(i);
-        }
-        return ret;
-    }
-
-    private TrafficDescriptor convertToTrafficDescriptor(
-            android.hardware.radio.V1_6.TrafficDescriptor td) {
-        String dnn = td.dnn.getDiscriminator() == OptionalDnn.hidl_discriminator.noinit
-                ? null : td.dnn.value();
-        byte[] osAppId = td.osAppId.getDiscriminator() == OptionalOsAppId.hidl_discriminator.noinit
-                ? null : arrayListToPrimitiveArray(td.osAppId.value().osAppId);
-        TrafficDescriptor.Builder builder = new TrafficDescriptor.Builder();
-        if (dnn != null) {
-            builder.setDataNetworkName(dnn);
-        }
-        if (osAppId != null) {
-            builder.setOsAppId(osAppId);
-        }
-        return builder.build();
+        mTrafficDescriptors = new ArrayList<>();
+        mTrafficDescriptors.addAll(trafficDescriptors);
+        mRouteSelectionDescriptor = new ArrayList<>();
+        mRouteSelectionDescriptor.addAll(routeSelectionDescriptor);
     }
 
     private UrspRule(Parcel p) {

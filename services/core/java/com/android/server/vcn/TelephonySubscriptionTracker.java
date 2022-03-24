@@ -21,6 +21,7 @@ import static android.telephony.CarrierConfigManager.EXTRA_SLOT_INDEX;
 import static android.telephony.CarrierConfigManager.EXTRA_SUBSCRIPTION_INDEX;
 import static android.telephony.SubscriptionManager.INVALID_SIM_SLOT_INDEX;
 import static android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID;
+import static android.telephony.TelephonyManager.ACTION_MULTI_SIM_CONFIG_CHANGED;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -38,15 +39,19 @@ import android.telephony.SubscriptionManager;
 import android.telephony.SubscriptionManager.OnSubscriptionsChangedListener;
 import android.telephony.TelephonyCallback;
 import android.telephony.TelephonyManager;
+import android.telephony.TelephonyManager.CarrierPrivilegesCallback;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.annotations.VisibleForTesting.Visibility;
 import com.android.internal.util.IndentingPrintWriter;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -92,6 +97,9 @@ public class TelephonySubscriptionTracker extends BroadcastReceiver {
     @NonNull private final Map<Integer, Integer> mReadySubIdsBySlotId = new HashMap<>();
     @NonNull private final OnSubscriptionsChangedListener mSubscriptionChangedListener;
 
+    @NonNull
+    private final List<CarrierPrivilegesCallback> mCarrierPrivilegesCallbacks = new ArrayList<>();
+
     @NonNull private TelephonySubscriptionSnapshot mCurrentSnapshot;
 
     public TelephonySubscriptionTracker(
@@ -126,22 +134,72 @@ public class TelephonySubscriptionTracker extends BroadcastReceiver {
                 };
     }
 
-    /** Registers the receivers, and starts tracking subscriptions. */
+    /**
+     * Registers the receivers, and starts tracking subscriptions.
+     *
+     * <p>Must always be run on the VcnManagementService thread.
+     */
     public void register() {
         final HandlerExecutor executor = new HandlerExecutor(mHandler);
+        final IntentFilter filter = new IntentFilter();
+        filter.addAction(ACTION_CARRIER_CONFIG_CHANGED);
+        filter.addAction(ACTION_MULTI_SIM_CONFIG_CHANGED);
 
-        mContext.registerReceiver(
-                this, new IntentFilter(ACTION_CARRIER_CONFIG_CHANGED), null, mHandler);
+        mContext.registerReceiver(this, filter, null, mHandler, Context.RECEIVER_NOT_EXPORTED);
         mSubscriptionManager.addOnSubscriptionsChangedListener(
                 executor, mSubscriptionChangedListener);
         mTelephonyManager.registerTelephonyCallback(executor, mActiveDataSubIdListener);
+
+        registerCarrierPrivilegesCallbacks();
     }
 
-    /** Unregisters the receivers, and stops tracking subscriptions. */
+    // TODO(b/221306368): Refactor with the new onCarrierServiceChange in the new CPCallback
+    private void registerCarrierPrivilegesCallbacks() {
+        final HandlerExecutor executor = new HandlerExecutor(mHandler);
+        final int modemCount = mTelephonyManager.getActiveModemCount();
+        try {
+            for (int i = 0; i < modemCount; i++) {
+                CarrierPrivilegesCallback carrierPrivilegesCallback =
+                        new CarrierPrivilegesCallback() {
+                            @Override
+                            public void onCarrierPrivilegesChanged(
+                                    @NonNull Set<String> privilegedPackageNames,
+                                    @NonNull Set<Integer> privilegedUids) {
+                                // Re-trigger the synchronous check (which is also very cheap due
+                                // to caching in CarrierPrivilegesTracker). This allows consistency
+                                // with the onSubscriptionsChangedListener and broadcasts.
+                                handleSubscriptionsChanged();
+                            }
+                        };
+
+                mTelephonyManager.registerCarrierPrivilegesCallback(
+                        i, executor, carrierPrivilegesCallback);
+                mCarrierPrivilegesCallbacks.add(carrierPrivilegesCallback);
+            }
+        } catch (IllegalArgumentException e) {
+            Slog.wtf(TAG, "Encounted exception registering carrier privileges listeners", e);
+        }
+    }
+
+    /**
+     * Unregisters the receivers, and stops tracking subscriptions.
+     *
+     * <p>Must always be run on the VcnManagementService thread.
+     */
     public void unregister() {
         mContext.unregisterReceiver(this);
         mSubscriptionManager.removeOnSubscriptionsChangedListener(mSubscriptionChangedListener);
         mTelephonyManager.unregisterTelephonyCallback(mActiveDataSubIdListener);
+
+        unregisterCarrierPrivilegesCallbacks();
+    }
+
+    private void unregisterCarrierPrivilegesCallbacks() {
+        for (CarrierPrivilegesCallback carrierPrivilegesCallback :
+                mCarrierPrivilegesCallbacks) {
+            mTelephonyManager.unregisterCarrierPrivilegesCallback(carrierPrivilegesCallback);
+        }
+        mCarrierPrivilegesCallbacks.clear();
     }
 
     /**
@@ -178,8 +236,6 @@ public class TelephonySubscriptionTracker extends BroadcastReceiver {
             // group.
             if (subInfo.getSimSlotIndex() != INVALID_SIM_SLOT_INDEX
                     && mReadySubIdsBySlotId.values().contains(subInfo.getSubscriptionId())) {
-                // TODO (b/172619301): Cache based on callbacks from CarrierPrivilegesTracker
-
                 final TelephonyManager subIdSpecificTelephonyManager =
                         mTelephonyManager.createForSubscriptionId(subInfo.getSubscriptionId());
 
@@ -214,12 +270,39 @@ public class TelephonySubscriptionTracker extends BroadcastReceiver {
      */
     @Override
     public void onReceive(Context context, Intent intent) {
-        // Accept sticky broadcasts; if CARRIER_CONFIG_CHANGED was previously broadcast and it
-        // already was for an identified carrier, we can stop waiting for initial load to complete
-        if (!ACTION_CARRIER_CONFIG_CHANGED.equals(intent.getAction())) {
-            return;
+        switch (intent.getAction()) {
+            case ACTION_CARRIER_CONFIG_CHANGED:
+                handleActionCarrierConfigChanged(context, intent);
+                break;
+            case ACTION_MULTI_SIM_CONFIG_CHANGED:
+                handleActionMultiSimConfigChanged(context, intent);
+                break;
+            default:
+                Slog.v(TAG, "Unknown intent received with action: " + intent.getAction());
+        }
+    }
+
+    private void handleActionMultiSimConfigChanged(Context context, Intent intent) {
+        unregisterCarrierPrivilegesCallbacks();
+
+        // Clear invalid slotIds from the mReadySubIdsBySlotId map.
+        final int modemCount = mTelephonyManager.getActiveModemCount();
+        final Iterator<Integer> slotIdIterator = mReadySubIdsBySlotId.keySet().iterator();
+        while (slotIdIterator.hasNext()) {
+            final int slotId = slotIdIterator.next();
+
+            if (slotId >= modemCount) {
+                slotIdIterator.remove();
+            }
         }
 
+        registerCarrierPrivilegesCallbacks();
+        handleSubscriptionsChanged();
+    }
+
+    private void handleActionCarrierConfigChanged(Context context, Intent intent) {
+        // Accept sticky broadcasts; if CARRIER_CONFIG_CHANGED was previously broadcast and it
+        // already was for an identified carrier, we can stop waiting for initial load to complete
         final int subId = intent.getIntExtra(EXTRA_SUBSCRIPTION_INDEX, INVALID_SUBSCRIPTION_ID);
         final int slotId = intent.getIntExtra(EXTRA_SLOT_INDEX, INVALID_SIM_SLOT_INDEX);
 

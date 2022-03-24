@@ -17,6 +17,7 @@
 package android.hardware;
 
 import android.annotation.NonNull;
+import android.annotation.SuppressLint;
 import android.compat.annotation.UnsupportedAppUsage;
 
 /**
@@ -641,6 +642,166 @@ public class SensorEvent {
      *  <li> values[0]: Measured hinge angle between 0 and 360 degrees inclusive</li>
      * </ul>
      *
+     * <h4>{@link android.hardware.Sensor#TYPE_HEAD_TRACKER Sensor.TYPE_HEAD_TRACKER}:</h4>
+     *
+     * A sensor of this type measures the orientation of a user's head relative to an arbitrary
+     * reference frame, as well as the rate of rotation.
+     *
+     * Events produced by this sensor follow a special head-centric coordinate frame, where:
+     * <ul>
+     *  <li> The X axis crosses through the user's ears, with the positive X direction extending
+     *       out of the user's right ear</li>
+     *  <li> The Y axis crosses from the back of the user's head through their nose, with the
+     *       positive direction extending out of the nose, and the X/Y plane being nominally
+     *       parallel to the ground when the user is upright and looking straight ahead</li>
+     *  <li> The Z axis crosses from the neck through the top of the user's head, with the
+     *       positive direction extending out from the top of the head</li>
+     * </ul>
+     *
+     * Data is provided in Euler vector representation, which is a vector whose direction indicates
+     * the axis of rotation and magnitude indicates the angle to rotate around that axis, in
+     * radians.
+     *
+     * The first three elements provide the transform from the (arbitrary, possibly slowly drifting)
+     * reference frame to the head frame. The magnitude of this vector is in range [0, &pi;]
+     * radians, while the value of individual axes is in range [-&pi;, &pi;]. The next three
+     * elements optionally provide the estimated rotational velocity of the user's head relative to
+     * itself, in radians per second. If a given sensor does not support determining velocity, these
+     * elements are set to 0.
+     *
+     * <ul>
+     *  <li> values[0] : X component of Euler vector representing rotation</li>
+     *  <li> values[1] : Y component of Euler vector representing rotation</li>
+     *  <li> values[2] : Z component of Euler vector representing rotation</li>
+     *  <li> values[3] : X component of Euler vector representing angular velocity (if
+     *  supported, otherwise 0)</li>
+     *  <li> values[4] : Y component of Euler vector representing angular velocity (if
+     *  supported, otherwise 0)</li>
+     *  <li> values[5] : Z component of Euler vector representing angular velocity (if
+     *  supported, otherwise 0)</li>
+     * </ul>
+     *
+     * <h4>{@link android.hardware.Sensor#TYPE_ACCELEROMETER_LIMITED_AXES
+     * Sensor.TYPE_ACCELEROMETER_LIMITED_AXES}:
+     * </h4> Equivalent to TYPE_ACCELEROMETER, but supporting cases where one
+     * or two axes are not supported.
+     *
+     * The last three values represent whether the acceleration value for a
+     * given axis is supported. A value of 1.0 indicates that the axis is
+     * supported, while a value of 0 means it isn't supported. The supported
+     * axes should be determined at build time and these values do not change
+     * during runtime.
+     *
+     * The acceleration values for axes that are not supported are set to 0.
+     *
+     * Similar to {@link android.hardware.Sensor#TYPE_ACCELEROMETER}.
+     *
+     * <ul>
+     * <li> values[0]: Acceleration minus Gx on the x-axis (if supported)</li>
+     * <li> values[1]: Acceleration minus Gy on the y-axis (if supported)</li>
+     * <li> values[2]: Acceleration minus Gz on the z-axis (if supported)</li>
+     * <li> values[3]: Acceleration supported for x-axis</li>
+     * <li> values[4]: Acceleration supported for y-axis</li>
+     * <li> values[5]: Acceleration supported for z-axis</li>
+     * </ul>
+     *
+     * <h4>{@link android.hardware.Sensor#TYPE_GYROSCOPE_LIMITED_AXES
+     * Sensor.TYPE_GYROSCOPE_LIMITED_AXES}:
+     * </h4> Equivalent to TYPE_GYROSCOPE, but supporting cases where one or two
+     * axes are not supported.
+     *
+     * The last three values represent whether the angular speed value for a
+     * given axis is supported. A value of 1.0 indicates that the axis is
+     * supported, while a value of 0 means it isn't supported. The supported
+     * axes should be determined at build time and these values do not change
+     * during runtime.
+     *
+     * The angular speed values for axes that are not supported are set to 0.
+     *
+     * Similar to {@link android.hardware.Sensor#TYPE_GYROSCOPE}.
+     *
+     * <ul>
+     * <li> values[0]: Angular speed around the x-axis (if supported)</li>
+     * <li> values[1]: Angular speed around the y-axis (if supported)</li>
+     * <li> values[2]: Angular speed around the z-axis (if supported)</li>
+     * <li> values[3]: Angular speed supported for x-axis</li>
+     * <li> values[4]: Angular speed supported for y-axis</li>
+     * <li> values[5]: Angular speed supported for z-axis</li>
+     * </ul>
+     * <p>
+     *
+     * <h4>{@link android.hardware.Sensor#TYPE_ACCELEROMETER_LIMITED_AXES_UNCALIBRATED
+     * Sensor.TYPE_ACCELEROMETER_LIMITED_AXES_UNCALIBRATED}:
+     * </h4> Equivalent to TYPE_ACCELEROMETER_UNCALIBRATED, but supporting cases
+     * where one or two axes are not supported.
+     *
+     * The last three values represent whether the acceleration value for a
+     * given axis is supported. A value of 1.0 indicates that the axis is
+     * supported, while a value of 0 means it isn't supported. The supported
+     * axes should be determined at build time and these values do not change
+     * during runtime.
+     *
+     * The acceleration values and bias values for axes that are not supported
+     * are set to 0.
+     *
+     * <ul>
+     * <li> values[0]: x_uncalib without bias compensation (if supported)</li>
+     * <li> values[1]: y_uncalib without bias compensation (if supported)</li>
+     * <li> values[2]: z_uncalib without bias compensation (if supported)</li>
+     * <li> values[3]: estimated x_bias (if supported)</li>
+     * <li> values[4]: estimated y_bias (if supported)</li>
+     * <li> values[5]: estimated z_bias (if supported)</li>
+     * <li> values[6]: Acceleration supported for x-axis</li>
+     * <li> values[7]: Acceleration supported for y-axis</li>
+     * <li> values[8]: Acceleration supported for z-axis</li>
+     * </ul>
+     * </p>
+     *
+     * <h4> {@link android.hardware.Sensor#TYPE_GYROSCOPE_LIMITED_AXES_UNCALIBRATED
+     * Sensor.TYPE_GYROSCOPE_LIMITED_AXES_UNCALIBRATED}:
+     * </h4> Equivalent to TYPE_GYROSCOPE_UNCALIBRATED, but supporting cases
+     * where one or two axes are not supported.
+     *
+     * The last three values represent whether the angular speed value for a
+     * given axis is supported. A value of 1.0 indicates that the axis is
+     * supported, while a value of 0 means it isn't supported. The supported
+     * axes should be determined at build time and these values do not change
+     * during runtime.
+     *
+     * The angular speed values and drift values for axes that are not supported
+     * are set to 0.
+     *
+     * <ul>
+     * <li> values[0]: Angular speed (w/o drift compensation) around the X axis (if supported)</li>
+     * <li> values[1]: Angular speed (w/o drift compensation) around the Y axis (if supported)</li>
+     * <li> values[2]: Angular speed (w/o drift compensation) around the Z axis (if supported)</li>
+     * <li> values[3]: estimated drift around X axis (if supported)</li>
+     * <li> values[4]: estimated drift around Y axis (if supported)</li>
+     * <li> values[5]: estimated drift around Z axis (if supported)</li>
+     * <li> values[6]: Angular speed supported for x-axis</li>
+     * <li> values[7]: Angular speed supported for y-axis</li>
+     * <li> values[8]: Angular speed supported for z-axis</li>
+     * </ul>
+     * </p>
+     *
+     * <h4>{@link android.hardware.Sensor#TYPE_HEADING Sensor.TYPE_HEADING}:</h4>
+     *
+     * A sensor of this type measures the direction in which the device is
+     * pointing relative to true north in degrees. The value must be between
+     * 0.0 (inclusive) and 360.0 (exclusive), with 0 indicating north, 90 east,
+     * 180 south, and 270 west.
+     *
+     * Accuracy is defined at 68% confidence. In the case where the underlying
+     * distribution is assumed Gaussian normal, this would be considered one
+     * standard deviation. For example, if heading returns 60 degrees, and
+     * accuracy returns 10 degrees, then there is a 68 percent probability of
+     * the true heading being between 50 degrees and 70 degrees.
+     *
+     * <ul>
+     *  <li> values[0]: Measured heading in degrees.</li>
+     *  <li> values[1]: Heading accuracy in degrees.</li>
+     * </ul>
+     *
      * @see GeomagneticField
      */
     public final float[] values;
@@ -663,6 +824,21 @@ public class SensorEvent {
      * time base as {@link android.os.SystemClock#elapsedRealtimeNanos()}.
      */
     public long timestamp;
+
+    /**
+     * Set to true when this is the first sensor event after a discontinuity.
+     *
+     * The exact meaning of discontinuity depends on the sensor type. For
+     * {@link android.hardware.Sensor#TYPE_HEAD_TRACKER Sensor.TYPE_HEAD_TRACKER}, this means that
+     * the reference frame has suddenly and significantly changed, for example if the head tracking
+     * device was removed then put back.
+     *
+     * Note that this concept is either not relevant to or not supported by most sensor types,
+     * {@link android.hardware.Sensor#TYPE_HEAD_TRACKER Sensor.TYPE_HEAD_TRACKER} being the notable
+     * exception.
+     */
+    @SuppressLint("MutableBareField")
+    public boolean firstEventAfterDiscontinuity;
 
     @UnsupportedAppUsage
     SensorEvent(int valueSize) {

@@ -16,6 +16,10 @@
 
 package com.android.systemui.statusbar.notification.collection.legacy;
 
+import static com.android.systemui.statusbar.notification.NotificationUtils.logKey;
+
+import static java.util.Objects.requireNonNull;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Notification;
@@ -25,6 +29,7 @@ import android.util.Log;
 
 import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.statusbar.StatusBarState;
@@ -33,9 +38,9 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManager;
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier;
-import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
+import com.android.systemui.util.Compile;
 import com.android.wm.shell.bubbles.Bubbles;
 
 import java.io.FileDescriptor;
@@ -48,6 +53,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.TreeSet;
+import java.util.function.Function;
 
 import javax.inject.Inject;
 
@@ -60,12 +66,16 @@ import dagger.Lazy;
  * 2. Tracking group expansion states
  */
 @SysUISingleton
-public class NotificationGroupManagerLegacy implements OnHeadsUpChangedListener, StateListener,
-        GroupMembershipManager, GroupExpansionManager, Dumpable {
+public class NotificationGroupManagerLegacy implements
+        OnHeadsUpChangedListener,
+        StateListener,
+        GroupMembershipManager,
+        GroupExpansionManager,
+        Dumpable {
 
-    private static final String TAG = "NotifGroupManager";
-    private static final boolean DEBUG = StatusBar.DEBUG;
-    private static final boolean SPEW = StatusBar.SPEW;
+    private static final String TAG = "LegacyNotifGroupManager";
+    private static final boolean DEBUG = Compile.IS_DEBUG && Log.isLoggable(TAG, Log.DEBUG);
+    private static final boolean SPEW = Compile.IS_DEBUG && Log.isLoggable(TAG, Log.VERBOSE);
     /**
      * The maximum amount of time (in ms) between the posting of notifications that can be
      * considered part of the same update batch.
@@ -74,10 +84,9 @@ public class NotificationGroupManagerLegacy implements OnHeadsUpChangedListener,
     private final HashMap<String, NotificationGroup> mGroupMap = new HashMap<>();
     private final ArraySet<OnGroupExpansionChangeListener> mExpansionChangeListeners =
             new ArraySet<>();
-    private final ArraySet<OnGroupChangeListener> mGroupChangeListeners = new ArraySet<>();
     private final Lazy<PeopleNotificationIdentifier> mPeopleNotificationIdentifier;
     private final Optional<Bubbles> mBubblesOptional;
-    private final EventBuffer mEventBuffer = new EventBuffer();
+    private final GroupEventDispatcher mEventDispatcher = new GroupEventDispatcher(mGroupMap::get);
     private int mBarState = -1;
     private HashMap<String, StatusBarNotification> mIsolatedEntries = new HashMap<>();
     private HeadsUpManager mHeadsUpManager;
@@ -87,17 +96,20 @@ public class NotificationGroupManagerLegacy implements OnHeadsUpChangedListener,
     public NotificationGroupManagerLegacy(
             StatusBarStateController statusBarStateController,
             Lazy<PeopleNotificationIdentifier> peopleNotificationIdentifier,
-            Optional<Bubbles> bubblesOptional) {
+            Optional<Bubbles> bubblesOptional,
+            DumpManager dumpManager) {
         statusBarStateController.addCallback(this);
         mPeopleNotificationIdentifier = peopleNotificationIdentifier;
         mBubblesOptional = bubblesOptional;
+
+        dumpManager.registerDumpable(this);
     }
 
     /**
      * Add a listener for changes to groups.
      */
     public void registerGroupChangeListener(OnGroupChangeListener listener) {
-        mGroupChangeListeners.add(listener);
+        mEventDispatcher.registerGroupChangeListener(listener);
     }
 
     @Override
@@ -148,13 +160,15 @@ public class NotificationGroupManagerLegacy implements OnHeadsUpChangedListener,
      */
     public void onEntryRemoved(NotificationEntry removed) {
         if (SPEW) {
-            Log.d(TAG, "onEntryRemoved: entry=" + removed);
+            Log.d(TAG, "onEntryRemoved: entry=" + logKey(removed));
         }
+        mEventDispatcher.openBufferScope();
         onEntryRemovedInternal(removed, removed.getSbn());
         StatusBarNotification oldSbn = mIsolatedEntries.remove(removed.getKey());
         if (oldSbn != null) {
             updateSuppression(mGroupMap.get(oldSbn.getGroupKey()));
         }
+        mEventDispatcher.closeBufferScope();
     }
 
     /**
@@ -182,7 +196,8 @@ public class NotificationGroupManagerLegacy implements OnHeadsUpChangedListener,
             return;
         }
         if (SPEW) {
-            Log.d(TAG, "onEntryRemovedInternal: entry=" + removed + " group=" + group.groupKey);
+            Log.d(TAG, "onEntryRemovedInternal: entry=" + logKey(removed)
+                    + " group=" + logGroupKey(group));
         }
         if (isGroupChild(removed.getKey(), isGroup, isGroupSummary)) {
             group.children.remove(removed.getKey());
@@ -193,9 +208,7 @@ public class NotificationGroupManagerLegacy implements OnHeadsUpChangedListener,
         if (group.children.isEmpty()) {
             if (group.summary == null) {
                 mGroupMap.remove(groupKey);
-                for (OnGroupChangeListener listener : mGroupChangeListeners) {
-                    listener.onGroupRemoved(group, groupKey);
-                }
+                mEventDispatcher.notifyGroupRemoved(group);
             }
         }
     }
@@ -205,10 +218,12 @@ public class NotificationGroupManagerLegacy implements OnHeadsUpChangedListener,
      */
     public void onEntryAdded(final NotificationEntry added) {
         if (SPEW) {
-            Log.d(TAG, "onEntryAdded: entry=" + added);
+            Log.d(TAG, "onEntryAdded: entry=" + logKey(added));
         }
+        mEventDispatcher.openBufferScope();
         updateIsolation(added);
         onEntryAddedInternal(added);
+        mEventDispatcher.closeBufferScope();
     }
 
     private void onEntryAddedInternal(final NotificationEntry added) {
@@ -222,19 +237,17 @@ public class NotificationGroupManagerLegacy implements OnHeadsUpChangedListener,
         if (group == null) {
             group = new NotificationGroup(groupKey);
             mGroupMap.put(groupKey, group);
-
-            for (OnGroupChangeListener listener : mGroupChangeListeners) {
-                listener.onGroupCreated(group, groupKey);
-            }
+            mEventDispatcher.notifyGroupCreated(group);
         }
         if (SPEW) {
-            Log.d(TAG, "onEntryAddedInternal: entry=" + added + " group=" + group.groupKey);
+            Log.d(TAG, "onEntryAddedInternal: entry=" + logKey(added)
+                    + " group=" + logGroupKey(group));
         }
         if (isGroupChild) {
             NotificationEntry existing = group.children.get(added.getKey());
             if (existing != null && existing != added) {
                 Throwable existingThrowable = existing.getDebugThrowable();
-                Log.wtf(TAG, "Inconsistent entries found with the same key " + added.getKey()
+                Log.wtf(TAG, "Inconsistent entries found with the same key " + logKey(added)
                         + "existing removed: " + existing.isRowRemoved()
                         + (existingThrowable != null
                                 ? Log.getStackTraceString(existingThrowable) + "\n" : "")
@@ -254,9 +267,7 @@ public class NotificationGroupManagerLegacy implements OnHeadsUpChangedListener,
                 for (NotificationEntry child : childrenCopy) {
                     onEntryBecomingChild(child);
                 }
-                for (OnGroupChangeListener listener : mGroupChangeListeners) {
-                    listener.onGroupCreatedFromChildren(group);
-                }
+                mEventDispatcher.notifyGroupsChanged();
             }
         }
     }
@@ -315,29 +326,26 @@ public class NotificationGroupManagerLegacy implements OnHeadsUpChangedListener,
         boolean alertOverrideChanged = prevAlertOverride != group.alertOverride;
         boolean suppressionChanged = prevSuppressed != group.suppressed;
         if (alertOverrideChanged || suppressionChanged) {
-            if (DEBUG && alertOverrideChanged) {
-                Log.d(TAG, "updateSuppression: alertOverride was=" + prevAlertOverride
-                        + " now=" + group.alertOverride + " group:\n" + group);
-            }
-            if (DEBUG && suppressionChanged) {
-                Log.d(TAG,
-                        "updateSuppression: suppressed changed to " + group.suppressed
-                                + " group:\n" + group);
-            }
-            if (!mIsUpdatingUnchangedGroup) {
+            if (DEBUG) {
+                Log.d(TAG, "updateSuppression:"
+                        + " willNotifyListeners=" + !mIsUpdatingUnchangedGroup
+                        + " changes for group:\n" + group);
                 if (alertOverrideChanged) {
-                    mEventBuffer.notifyAlertOverrideChanged(group, prevAlertOverride);
+                    Log.d(TAG, "updateSuppression: alertOverride was=" + logKey(prevAlertOverride)
+                            + " now=" + logKey(group.alertOverride));
                 }
                 if (suppressionChanged) {
-                    for (OnGroupChangeListener listener : mGroupChangeListeners) {
-                        listener.onGroupSuppressionChanged(group, group.suppressed);
-                    }
+                    Log.d(TAG, "updateSuppression: suppressed changed to " + group.suppressed);
                 }
-                mEventBuffer.notifyGroupsChanged();
-            } else {
-                if (DEBUG) {
-                    Log.d(TAG, group + " did not notify listeners of above change(s)");
-                }
+            }
+            if (alertOverrideChanged) {
+                mEventDispatcher.notifyAlertOverrideChanged(group, prevAlertOverride);
+            }
+            if (suppressionChanged) {
+                mEventDispatcher.notifySuppressedChanged(group);
+            }
+            if (!mIsUpdatingUnchangedGroup) {
+                mEventDispatcher.notifyGroupsChanged();
             }
         }
     }
@@ -361,13 +369,15 @@ public class NotificationGroupManagerLegacy implements OnHeadsUpChangedListener,
         // but which should be alerting (because priority conversations are isolated), find it.
         if (group == null || group.summary == null) {
             if (SPEW) {
-                Log.d(TAG, "getPriorityConversationAlertOverride: null group or summary");
+                Log.d(TAG, "getPriorityConversationAlertOverride: null group or summary"
+                        + " group=" + logGroupKey(group));
             }
             return null;
         }
         if (isIsolated(group.summary.getKey())) {
             if (SPEW) {
-                Log.d(TAG, "getPriorityConversationAlertOverride: isolated group");
+                Log.d(TAG, "getPriorityConversationAlertOverride: isolated group"
+                        + " group=" + logGroupKey(group));
             }
             return null;
         }
@@ -376,9 +386,10 @@ public class NotificationGroupManagerLegacy implements OnHeadsUpChangedListener,
         // * Only necessary when all notifications in the group use GROUP_ALERT_SUMMARY
         // * Only necessary when at least one notification in the group is on a priority channel
         if (group.summary.getSbn().getNotification().getGroupAlertBehavior()
-                != Notification.GROUP_ALERT_SUMMARY) {
+                == Notification.GROUP_ALERT_CHILDREN) {
             if (SPEW) {
-                Log.d(TAG, "getPriorityConversationAlertOverride: summary != GROUP_ALERT_SUMMARY");
+                Log.d(TAG, "getPriorityConversationAlertOverride: summary == GROUP_ALERT_CHILDREN"
+                        + " group=" + logGroupKey(group));
             }
             return null;
         }
@@ -388,7 +399,8 @@ public class NotificationGroupManagerLegacy implements OnHeadsUpChangedListener,
         HashMap<String, NotificationEntry> children = getImportantConversations(group);
         if (children == null || children.isEmpty()) {
             if (SPEW) {
-                Log.d(TAG, "getPriorityConversationAlertOverride: no important conversations");
+                Log.d(TAG, "getPriorityConversationAlertOverride: no important conversations"
+                        + " group=" + logGroupKey(group));
             }
             return null;
         }
@@ -400,8 +412,8 @@ public class NotificationGroupManagerLegacy implements OnHeadsUpChangedListener,
             if (child.getSbn().getNotification().getGroupAlertBehavior()
                     != Notification.GROUP_ALERT_SUMMARY) {
                 if (SPEW) {
-                    Log.d(TAG, "getPriorityConversationAlertOverride: "
-                            + "child != GROUP_ALERT_SUMMARY");
+                    Log.d(TAG, "getPriorityConversationAlertOverride: child != GROUP_ALERT_SUMMARY"
+                            + " group=" + logGroupKey(group));
                 }
                 return null;
             }
@@ -442,13 +454,16 @@ public class NotificationGroupManagerLegacy implements OnHeadsUpChangedListener,
         }
         if (newestChild != null && importantChildKeys.contains(newestChild.getKey())) {
             if (SPEW) {
-                Log.d(TAG, "getPriorityConversationAlertOverride: result=" + newestChild);
+                Log.d(TAG, "getPriorityConversationAlertOverride:"
+                        + " result=" + logKey(newestChild)
+                        + " group=" + logGroupKey(group));
             }
             return newestChild;
         }
         if (SPEW) {
-            Log.d(TAG, "getPriorityConversationAlertOverride: result=null, newestChild="
-                    + newestChild);
+            Log.d(TAG, "getPriorityConversationAlertOverride:"
+                    + " result=null newestChild=" + logKey(newestChild)
+                    + " group=" + logGroupKey(group));
         }
         return null;
     }
@@ -492,7 +507,7 @@ public class NotificationGroupManagerLegacy implements OnHeadsUpChangedListener,
      */
     public void onEntryUpdated(NotificationEntry entry, StatusBarNotification oldNotification) {
         if (SPEW) {
-            Log.d(TAG, "onEntryUpdated: entry=" + entry);
+            Log.d(TAG, "onEntryUpdated: entry=" + logKey(entry));
         }
         onEntryUpdated(entry, oldNotification.getGroupKey(), oldNotification.isGroup(),
                 oldNotification.getNotification().isGroupSummary());
@@ -511,6 +526,7 @@ public class NotificationGroupManagerLegacy implements OnHeadsUpChangedListener,
         boolean groupKeysChanged = !oldGroupKey.equals(newGroupKey);
         boolean wasGroupChild = isGroupChild(entry.getKey(), oldIsGroup, oldIsGroupSummary);
         boolean isGroupChild = isGroupChild(entry.getSbn());
+        mEventDispatcher.openBufferScope();
         mIsUpdatingUnchangedGroup = !groupKeysChanged && wasGroupChild == isGroupChild;
         if (mGroupMap.get(getGroupKey(entry.getKey(), oldGroupKey)) != null) {
             onEntryRemovedInternal(entry, oldGroupKey, oldIsGroup, oldIsGroupSummary);
@@ -521,11 +537,14 @@ public class NotificationGroupManagerLegacy implements OnHeadsUpChangedListener,
             mIsolatedEntries.put(entry.getKey(), entry.getSbn());
             if (groupKeysChanged) {
                 updateSuppression(mGroupMap.get(oldGroupKey));
-                updateSuppression(mGroupMap.get(newGroupKey));
             }
+            // Always update the suppression of the group from which you're isolated, in case
+            // this entry was or now is the alertOverride for that group.
+            updateSuppression(mGroupMap.get(newGroupKey));
         } else if (!wasGroupChild && isGroupChild) {
             onEntryBecomingChild(entry);
         }
+        mEventDispatcher.closeBufferScope();
     }
 
     /**
@@ -788,7 +807,7 @@ public class NotificationGroupManagerLegacy implements OnHeadsUpChangedListener,
      */
     private void isolateNotification(NotificationEntry entry) {
         if (SPEW) {
-            Log.d(TAG, "isolateNotification: entry=" + entry);
+            Log.d(TAG, "isolateNotification: entry=" + logKey(entry));
         }
         // We will be isolated now, so lets update the groups
         onEntryRemovedInternal(entry, entry.getSbn());
@@ -801,9 +820,7 @@ public class NotificationGroupManagerLegacy implements OnHeadsUpChangedListener,
         // When the notification gets added afterwards it is already isolated and therefore
         // it doesn't lead to an update.
         updateSuppression(mGroupMap.get(entry.getSbn().getGroupKey()));
-        for (OnGroupChangeListener listener : mGroupChangeListeners) {
-            listener.onGroupsChanged();
-        }
+        mEventDispatcher.notifyGroupsChanged();
     }
 
     /**
@@ -817,7 +834,7 @@ public class NotificationGroupManagerLegacy implements OnHeadsUpChangedListener,
         // listener may be unable to correctly determine the true state of the group.  By delaying
         // the alertOverride change until after the add phase, we can ensure that listeners only
         // have to handle a consistent state.
-        mEventBuffer.startBuffering();
+        mEventDispatcher.openBufferScope();
         boolean isIsolated = isIsolated(entry.getSbn().getKey());
         if (shouldIsolate(entry)) {
             if (!isIsolated) {
@@ -826,7 +843,7 @@ public class NotificationGroupManagerLegacy implements OnHeadsUpChangedListener,
         } else if (isIsolated) {
             stopIsolatingNotification(entry);
         }
-        mEventBuffer.flushAndStopBuffering();
+        mEventDispatcher.closeBufferScope();
     }
 
     /**
@@ -836,15 +853,13 @@ public class NotificationGroupManagerLegacy implements OnHeadsUpChangedListener,
      */
     private void stopIsolatingNotification(NotificationEntry entry) {
         if (SPEW) {
-            Log.d(TAG, "stopIsolatingNotification: entry=" + entry);
+            Log.d(TAG, "stopIsolatingNotification: entry=" + logKey(entry));
         }
         // not isolated anymore, we need to update the groups
         onEntryRemovedInternal(entry, entry.getSbn());
         mIsolatedEntries.remove(entry.getKey());
         onEntryAddedInternal(entry);
-        for (OnGroupChangeListener listener : mGroupChangeListeners) {
-            listener.onGroupsChanged();
-        }
+        mEventDispatcher.notifyGroupsChanged();
     }
 
     private boolean isGroupNotFullyVisible(NotificationGroup notificationGroup) {
@@ -864,11 +879,11 @@ public class NotificationGroupManagerLegacy implements OnHeadsUpChangedListener,
         pw.println("GroupManagerLegacy state:");
         pw.println("  number of groups: " +  mGroupMap.size());
         for (Map.Entry<String, NotificationGroup>  entry : mGroupMap.entrySet()) {
-            pw.println("\n    key: " + entry.getKey()); pw.println(entry.getValue());
+            pw.println("\n    key: " + logKey(entry.getKey())); pw.println(entry.getValue());
         }
         pw.println("\n    isolated entries: " +  mIsolatedEntries.size());
         for (Map.Entry<String, StatusBarNotification> entry : mIsolatedEntries.entrySet()) {
-            pw.print("      "); pw.print(entry.getKey());
+            pw.print("      "); pw.print(logKey(entry.getKey()));
             pw.print(", "); pw.println(entry.getValue());
         }
     }
@@ -876,6 +891,14 @@ public class NotificationGroupManagerLegacy implements OnHeadsUpChangedListener,
     @Override
     public void onStateChanged(int newState) {
         setStatusBarState(newState);
+    }
+
+    /** Get the group key, reformatted for logging, for the (optional) group */
+    public static String logGroupKey(NotificationGroup group) {
+        if (group == null) {
+            return "null";
+        }
+        return logKey(group.groupKey);
     }
 
     /**
@@ -967,18 +990,35 @@ public class NotificationGroupManagerLegacy implements OnHeadsUpChangedListener,
      * When buffering, instead of notifying the listeners it will set internal state that will allow
      * it to notify listeners of those events later
      */
-    private class EventBuffer {
+    static class GroupEventDispatcher {
+        private final Function<String, NotificationGroup> mGroupMapGetter;
+        private final ArraySet<OnGroupChangeListener> mGroupChangeListeners = new ArraySet<>();
         private final HashMap<String, NotificationEntry> mOldAlertOverrideByGroup = new HashMap<>();
-        private boolean mIsBuffering = false;
+        private final HashMap<String, Boolean> mOldSuppressedByGroup = new HashMap<>();
+        private int mBufferScopeDepth = 0;
         private boolean mDidGroupsChange = false;
+
+        GroupEventDispatcher(Function<String, NotificationGroup> groupMapGetter) {
+            mGroupMapGetter = requireNonNull(groupMapGetter);
+        }
+
+        void registerGroupChangeListener(OnGroupChangeListener listener) {
+            mGroupChangeListeners.add(listener);
+        }
+
+        private boolean isBuffering() {
+            return mBufferScopeDepth > 0;
+        }
 
         void notifyAlertOverrideChanged(NotificationGroup group,
                 NotificationEntry oldAlertOverride) {
-            if (mIsBuffering) {
+            if (isBuffering()) {
                 // The value in this map is the override before the event.  If there is an entry
                 // already in the map, then we are effectively coalescing two events, which means
                 // we need to preserve the original initial value.
-                mOldAlertOverrideByGroup.putIfAbsent(group.groupKey, oldAlertOverride);
+                if (!mOldAlertOverrideByGroup.containsKey(group.groupKey)) {
+                    mOldAlertOverrideByGroup.put(group.groupKey, oldAlertOverride);
+                }
             } else {
                 for (OnGroupChangeListener listener : mGroupChangeListeners) {
                     listener.onGroupAlertOverrideChanged(group, oldAlertOverride,
@@ -987,8 +1027,21 @@ public class NotificationGroupManagerLegacy implements OnHeadsUpChangedListener,
             }
         }
 
+        void notifySuppressedChanged(NotificationGroup group) {
+            if (isBuffering()) {
+                // The value in this map is the 'suppressed' before the event.  If there is a value
+                // already in the map, then we are effectively coalescing two events, which means
+                // we need to preserve the original initial value.
+                mOldSuppressedByGroup.putIfAbsent(group.groupKey, !group.suppressed);
+            } else {
+                for (OnGroupChangeListener listener : mGroupChangeListeners) {
+                    listener.onGroupSuppressionChanged(group, group.suppressed);
+                }
+            }
+        }
+
         void notifyGroupsChanged() {
-            if (mIsBuffering) {
+            if (isBuffering()) {
                 mDidGroupsChange = true;
             } else {
                 for (OnGroupChangeListener listener : mGroupChangeListeners) {
@@ -997,26 +1050,94 @@ public class NotificationGroupManagerLegacy implements OnHeadsUpChangedListener,
             }
         }
 
-        void startBuffering() {
-            mIsBuffering = true;
+        void notifyGroupCreated(NotificationGroup group) {
+            // NOTE: given how this event is used, it doesn't need to be buffered right now
+            final String groupKey = group.groupKey;
+            for (OnGroupChangeListener listener : mGroupChangeListeners) {
+                listener.onGroupCreated(group, groupKey);
+            }
         }
 
-        void flushAndStopBuffering() {
-            // stop buffering so that we can call our own helpers
-            mIsBuffering = false;
+        void notifyGroupRemoved(NotificationGroup group) {
+            // NOTE: given how this event is used, it doesn't need to be buffered right now
+            final String groupKey = group.groupKey;
+            for (OnGroupChangeListener listener : mGroupChangeListeners) {
+                listener.onGroupRemoved(group, groupKey);
+            }
+        }
+
+        void openBufferScope() {
+            mBufferScopeDepth++;
+            if (SPEW) {
+                Log.d(TAG, "openBufferScope: scopeDepth=" + mBufferScopeDepth);
+            }
+        }
+
+        void closeBufferScope() {
+            mBufferScopeDepth--;
+            if (SPEW) {
+                Log.d(TAG, "closeBufferScope: scopeDepth=" + mBufferScopeDepth);
+            }
+            // Flush buffered events if the last buffer scope has closed
+            if (!isBuffering()) {
+                flushBuffer();
+            }
+        }
+
+        private void flushBuffer() {
+            if (SPEW) {
+                Log.d(TAG, "flushBuffer: "
+                        + " suppressed.size=" + mOldSuppressedByGroup.size()
+                        + " alertOverride.size=" + mOldAlertOverrideByGroup.size()
+                        + " mDidGroupsChange=" + mDidGroupsChange);
+            }
+            // alert all group suppressed changes for groups that were not removed
+            for (Map.Entry<String, Boolean> entry : mOldSuppressedByGroup.entrySet()) {
+                NotificationGroup group = mGroupMapGetter.apply(entry.getKey());
+                if (group == null) {
+                    // The group can be null if this suppressed changed before the group was
+                    // permanently removed, meaning that there's no guarantee that listeners will
+                    // that field clear.
+                    if (SPEW) {
+                        Log.d(TAG, "flushBuffer: suppressed:"
+                                + " cannot report for removed group: " + logKey(entry.getKey()));
+                    }
+                    continue;
+                }
+                boolean oldSuppressed = entry.getValue();
+                if (group.suppressed == oldSuppressed) {
+                    // If the final suppressed equals the initial, it means we coalesced two
+                    // events which undid the change, so we can drop it entirely.
+                    if (SPEW) {
+                        Log.d(TAG, "flushBuffer: suppressed:"
+                                + " did not change for group: " + logKey(entry.getKey()));
+                    }
+                    continue;
+                }
+                notifySuppressedChanged(group);
+            }
+            mOldSuppressedByGroup.clear();
             // alert all group alert override changes for groups that were not removed
             for (Map.Entry<String, NotificationEntry> entry : mOldAlertOverrideByGroup.entrySet()) {
-                NotificationGroup group = mGroupMap.get(entry.getKey());
+                NotificationGroup group = mGroupMapGetter.apply(entry.getKey());
                 if (group == null) {
                     // The group can be null if this alertOverride changed before the group was
                     // permanently removed, meaning that there's no guarantee that listeners will
                     // that field clear.
+                    if (SPEW) {
+                        Log.d(TAG, "flushBuffer: alertOverride:"
+                                + " cannot report for removed group: " + entry.getKey());
+                    }
                     continue;
                 }
                 NotificationEntry oldAlertOverride = entry.getValue();
                 if (group.alertOverride == oldAlertOverride) {
                     // If the final alertOverride equals the initial, it means we coalesced two
                     // events which undid the change, so we can drop it entirely.
+                    if (SPEW) {
+                        Log.d(TAG, "flushBuffer: alertOverride:"
+                                + " did not change for group: " + logKey(entry.getKey()));
+                    }
                     continue;
                 }
                 notifyAlertOverrideChanged(group, oldAlertOverride);
@@ -1076,14 +1197,6 @@ public class NotificationGroupManagerLegacy implements OnHeadsUpChangedListener,
                 NotificationGroup group,
                 @Nullable NotificationEntry oldAlertOverride,
                 @Nullable NotificationEntry newAlertOverride) {}
-
-        /**
-         * A group of children just received a summary notification and should therefore become
-         * children of it.
-         *
-         * @param group the group created
-         */
-        default void onGroupCreatedFromChildren(NotificationGroup group) {}
 
         /**
          * The groups have changed. This can happen if the isolation of a child has changes or if a

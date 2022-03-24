@@ -41,7 +41,7 @@ import android.content.LocusId;
 import android.content.pm.PackageInstaller.SessionCallback;
 import android.content.pm.PackageInstaller.SessionCallbackDelegate;
 import android.content.pm.PackageInstaller.SessionInfo;
-import android.content.pm.PackageManager.ApplicationInfoFlags;
+import android.content.pm.PackageManager.ApplicationInfoFlagsBits;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -69,6 +69,7 @@ import android.util.Log;
 import android.util.Pair;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.infra.AndroidFuture;
 import com.android.internal.util.function.pooled.PooledLambda;
 
 import java.io.FileNotFoundException;
@@ -84,6 +85,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 
 /**
@@ -440,6 +442,17 @@ public class LauncherApps {
         public static final int FLAG_GET_KEY_FIELDS_ONLY = 1 << 2;
 
         /**
+         * Includes shortcuts from persistence layer in the search result.
+         *
+         * <p>The caller should make the query on a worker thread since accessing persistence layer
+         * is considered asynchronous.
+         *
+         * @hide
+         */
+        @SystemApi
+        public static final int FLAG_GET_PERSISTED_DATA = 1 << 12;
+
+        /**
          * Populate the persons field in the result. See {@link ShortcutInfo#getPersons()}.
          *
          * <p>The caller must have the system {@code ACCESS_SHORTCUTS} permission.
@@ -459,6 +472,7 @@ public class LauncherApps {
                 FLAG_MATCH_PINNED_BY_ANY_LAUNCHER,
                 FLAG_GET_KEY_FIELDS_ONLY,
                 FLAG_GET_PERSONS_DATA,
+                FLAG_GET_PERSISTED_DATA
         })
         @Retention(RetentionPolicy.SOURCE)
         public @interface QueryFlags {}
@@ -735,24 +749,29 @@ public class LauncherApps {
     }
 
     /**
-     * Returns a PendingIntent that would start the same activity started from
-     * {@link #startMainActivity(ComponentName, UserHandle, Rect, Bundle)}.
+     * Returns a mutable PendingIntent that would start the same activity started from
+     * {@link #startMainActivity(ComponentName, UserHandle, Rect, Bundle)}.  The caller needs to
+     * take care in ensuring that the mutable intent returned is not passed to untrusted parties.
      *
      * @param component The ComponentName of the activity to launch
      * @param startActivityOptions This parameter is no longer supported
      * @param user The UserHandle of the profile
      * @hide
      */
+    @RequiresPermission(android.Manifest.permission.START_TASKS_FROM_RECENTS)
     @Nullable
     public PendingIntent getMainActivityLaunchIntent(@NonNull ComponentName component,
             @Nullable Bundle startActivityOptions, @NonNull UserHandle user) {
+        if (mContext.checkSelfPermission(android.Manifest.permission.START_TASKS_FROM_RECENTS)
+                != PackageManager.PERMISSION_GRANTED) {
+            Log.w(TAG, "Only allowed for recents.");
+        }
         logErrorForInvalidProfileAccess(user);
         if (DEBUG) {
             Log.i(TAG, "GetMainActivityLaunchIntent " + component + " " + user);
         }
         try {
-            // due to b/209607104, startActivityOptions will be ignored
-            return mService.getActivityLaunchIntent(component, null /* opts */, user);
+            return mService.getActivityLaunchIntent(mContext.getPackageName(), component, user);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -1014,7 +1033,7 @@ public class LauncherApps {
      *         isn't enabled.
      */
     public ApplicationInfo getApplicationInfo(@NonNull String packageName,
-            @ApplicationInfoFlags int flags, @NonNull UserHandle user)
+            @ApplicationInfoFlagsBits int flags, @NonNull UserHandle user)
             throws PackageManager.NameNotFoundException {
         Objects.requireNonNull(packageName, "packageName");
         Objects.requireNonNull(user, "user");
@@ -1139,6 +1158,9 @@ public class LauncherApps {
             @NonNull UserHandle user) {
         logErrorForInvalidProfileAccess(user);
         try {
+            if ((query.mQueryFlags & ShortcutQuery.FLAG_GET_PERSISTED_DATA) != 0) {
+                return getShortcutsBlocked(query, user);
+            }
             // Note this is the only case we need to update the disabled message for shortcuts
             // that weren't restored.
             // The restore problem messages are only shown by the user, and publishers will never
@@ -1146,10 +1168,26 @@ public class LauncherApps {
             // changed callback, but that only returns shortcuts with the "key" information, so
             // that won't return disabled message.
             return maybeUpdateDisabledMessage(mService.getShortcuts(mContext.getPackageName(),
-                    new ShortcutQueryWrapper(query), user)
-                    .getList());
+                                new ShortcutQueryWrapper(query), user)
+                        .getList());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        }
+    }
+
+    private List<ShortcutInfo> getShortcutsBlocked(@NonNull ShortcutQuery query,
+            @NonNull UserHandle user) {
+        logErrorForInvalidProfileAccess(user);
+        final AndroidFuture<List<ShortcutInfo>> future = new AndroidFuture<>();
+        future.thenApply(this::maybeUpdateDisabledMessage);
+        try {
+            mService.getShortcutsAsync(mContext.getPackageName(),
+                            new ShortcutQueryWrapper(query), user, future);
+            return future.get();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -1905,6 +1943,10 @@ public class LauncherApps {
 
     /**
      * Register a callback to watch for session lifecycle events in this user and managed profiles.
+     * Callers need to either declare &lt;queries&gt; element with the specific package name in the
+     * app's manifest, have the android.permission.QUERY_ALL_PACKAGES, or be the session owner to
+     * watch for these events.
+     *
      * @param callback The callback to register.
      * @param executor {@link Executor} to handle the callbacks, cannot be null.
      *
@@ -1949,7 +1991,9 @@ public class LauncherApps {
 
     /**
      * Return list of all known install sessions in this user and managed profiles, regardless
-     * of the installer.
+     * of the installer. Callers need to either declare &lt;queries&gt; element with the specific
+     * package name in the app's manifest, have the android.permission.QUERY_ALL_PACKAGES, or be
+     * the session owner to retrieve these details.
      *
      * @see PackageInstaller#getAllSessions()
      */

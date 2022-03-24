@@ -16,7 +16,6 @@
 
 package com.android.server.wm;
 
-import static android.util.DisplayMetrics.DENSITY_DEFAULT;
 import static android.view.DisplayCutout.BOUNDS_POSITION_BOTTOM;
 import static android.view.DisplayCutout.BOUNDS_POSITION_LEFT;
 import static android.view.DisplayCutout.BOUNDS_POSITION_RIGHT;
@@ -31,6 +30,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.server.wm.utils.CoordinateTransforms.transformPhysicalToLogicalCoordinates;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.anyInt;
 
 import android.content.Context;
 import android.content.ContextWrapper;
@@ -44,7 +44,6 @@ import android.testing.TestableResources;
 import android.util.Pair;
 import android.view.DisplayCutout;
 import android.view.DisplayInfo;
-import android.view.Gravity;
 import android.view.WindowManagerGlobal;
 
 import com.android.internal.R;
@@ -56,10 +55,7 @@ public class DisplayPolicyTestsBase extends WindowTestsBase {
 
     static final int DISPLAY_WIDTH = 500;
     static final int DISPLAY_HEIGHT = 1000;
-    static final int DISPLAY_DENSITY = 320;
 
-    static final int STATUS_BAR_HEIGHT = 10;
-    static final int NAV_BAR_HEIGHT = 15;
     static final int DISPLAY_CUTOUT_HEIGHT = 8;
     static final int IME_HEIGHT = 415;
 
@@ -77,29 +73,20 @@ public class DisplayPolicyTestsBase extends WindowTestsBase {
         final TestContextWrapper context = new TestContextWrapper(
                 mDisplayPolicy.getContext(), mDisplayPolicy.getCurrentUserResources());
         final TestableResources resources = context.getResourceMocker();
-        resources.addOverride(R.dimen.status_bar_height_portrait, STATUS_BAR_HEIGHT);
-        resources.addOverride(R.dimen.status_bar_height_landscape, STATUS_BAR_HEIGHT);
         resources.addOverride(R.dimen.navigation_bar_height, NAV_BAR_HEIGHT);
         resources.addOverride(R.dimen.navigation_bar_height_landscape, NAV_BAR_HEIGHT);
         resources.addOverride(R.dimen.navigation_bar_width, NAV_BAR_HEIGHT);
         resources.addOverride(R.dimen.navigation_bar_frame_height_landscape, NAV_BAR_HEIGHT);
         resources.addOverride(R.dimen.navigation_bar_frame_height, NAV_BAR_HEIGHT);
+        doReturn(STATUS_BAR_HEIGHT).when(mDisplayPolicy).getStatusBarHeightForRotation(anyInt());
         doReturn(resources.getResources()).when(mDisplayPolicy).getCurrentUserResources();
         doReturn(true).when(mDisplayPolicy).hasNavigationBar();
         doReturn(true).when(mDisplayPolicy).hasStatusBar();
 
-        final int shortSizeDp =
-                Math.min(DISPLAY_WIDTH, DISPLAY_HEIGHT) * DENSITY_DEFAULT / DISPLAY_DENSITY;
-        final int longSizeDp =
-                Math.min(DISPLAY_WIDTH, DISPLAY_HEIGHT) * DENSITY_DEFAULT / DISPLAY_DENSITY;
-        mDisplayContent.getDisplayRotation().configure(
-                DISPLAY_WIDTH, DISPLAY_HEIGHT, shortSizeDp, longSizeDp);
+        mDisplayContent.getDisplayRotation().configure(DISPLAY_WIDTH, DISPLAY_HEIGHT);
         mDisplayPolicy.onConfigurationChanged();
 
-        mStatusBarWindow.mAttrs.gravity = Gravity.TOP;
         addWindow(mStatusBarWindow);
-
-        mNavBarWindow.mAttrs.gravity = Gravity.BOTTOM;
         addWindow(mNavBarWindow);
 
         // Update source frame and visibility of insets providers.

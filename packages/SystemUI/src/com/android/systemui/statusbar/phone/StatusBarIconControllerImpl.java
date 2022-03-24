@@ -23,15 +23,16 @@ import android.os.Bundle;
 import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.Log;
 import android.view.ViewGroup;
 
 import com.android.internal.statusbar.StatusBarIcon;
-import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.demomode.DemoMode;
 import com.android.systemui.demomode.DemoModeController;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.StatusIconDisplayable;
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.CallIndicatorIconState;
@@ -71,23 +72,35 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
     public StatusBarIconControllerImpl(
             Context context,
             CommandQueue commandQueue,
-            DemoModeController demoModeController) {
+            DemoModeController demoModeController,
+            ConfigurationController configurationController,
+            TunerService tunerService,
+            DumpManager dumpManager) {
         super(context.getResources().getStringArray(
                 com.android.internal.R.array.config_statusBarIcons));
-        Dependency.get(ConfigurationController.class).addCallback(this);
+        configurationController.addCallback(this);
 
         mContext = context;
 
         loadDimens();
 
         commandQueue.addCallback(this);
-        Dependency.get(TunerService.class).addTunable(this, ICON_HIDE_LIST);
+        tunerService.addTunable(this, ICON_HIDE_LIST);
         demoModeController.addCallback(this);
+        dumpManager.registerDumpable(getClass().getSimpleName(), this);
     }
 
     /** */
     @Override
     public void addIconGroup(IconManager group) {
+        for (IconManager existingIconManager : mIconGroups) {
+            if (existingIconManager.mGroup == group.mGroup) {
+                Log.e(TAG, "Adding new IconManager for the same ViewGroup. This could cause "
+                        + "unexpected results.");
+            }
+        }
+
+        group.setController(this);
         mIconGroups.add(group);
         List<Slot> allSlots = getSlots();
         for (int i = 0; i < allSlots.size(); i++) {
@@ -100,6 +113,20 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
                 int viewIndex = getViewIndex(getSlotIndex(slot.getName()), holder.getTag());
                 group.onIconAdded(viewIndex, slot.getName(), hidden, holder);
             }
+        }
+    }
+
+    @Override
+    public void refreshIconGroup(IconManager iconManager) {
+        removeIconGroup(iconManager);
+        addIconGroup(iconManager);
+    }
+
+    private void refreshIconGroups() {
+        for (int i = mIconGroups.size() - 1; i >= 0; --i) {
+            IconManager group = mIconGroups.get(i);
+            removeIconGroup(group);
+            addIconGroup(group);
         }
     }
 
@@ -225,7 +252,7 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
 
     /**
      * Accept a list of CallIndicatorIconStates, and show the call strength icons.
-     * @param slot StatusBar slot for the call strength icons
+     * @param slot statusbar slot for the call strength icons
      * @param states All of the no Calling & SMS icon states
      */
     @Override
@@ -252,7 +279,7 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
 
     /**
      * Accept a list of CallIndicatorIconStates, and show the no calling icons.
-     * @param slot StatusBar slot for the no calling icons
+     * @param slot statusbar slot for the no calling icons
      * @param states All of the no Calling & SMS icon states
      */
     @Override
@@ -457,5 +484,6 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
     @Override
     public void onDensityOrFontScaleChanged() {
         loadDimens();
+        refreshIconGroups();
     }
 }

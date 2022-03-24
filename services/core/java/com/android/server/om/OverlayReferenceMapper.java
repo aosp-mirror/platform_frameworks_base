@@ -129,7 +129,7 @@ public class OverlayReferenceMapper {
                     return Collections.emptyMap();
                 }
 
-                String overlayable = pkg.getOverlayTargetName();
+                String overlayable = pkg.getOverlayTargetOverlayableName();
                 Map<String, Set<String>> targetToOverlayables = new HashMap<>();
                 Set<String> overlayables = new HashSet<>();
                 overlayables.add(overlayable);

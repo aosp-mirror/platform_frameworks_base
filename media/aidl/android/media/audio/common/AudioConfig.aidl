@@ -14,12 +14,9 @@
  * limitations under the License.
  */
 
- // This file has been semi-automatically generated using hidl2aidl from its counterpart in
- // hardware/interfaces/audio/common/5.0/types.hal
-
 package android.media.audio.common;
 
-import android.media.audio.common.AudioFormat;
+import android.media.audio.common.AudioConfigBase;
 import android.media.audio.common.AudioOffloadInfo;
 
 /**
@@ -27,10 +24,11 @@ import android.media.audio.common.AudioOffloadInfo;
  *
  * {@hide}
  */
+@JavaDerive(equals=true, toString=true)
+@VintfStability
 parcelable AudioConfig {
-    int sampleRateHz;
-    int channelMask;
-    AudioFormat format;
+    AudioConfigBase base;
     AudioOffloadInfo offloadInfo;
+    /** I/O buffer size in frames. */
     long frameCount;
 }

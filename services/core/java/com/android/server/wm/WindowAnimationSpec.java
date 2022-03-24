@@ -21,6 +21,7 @@ import static com.android.server.wm.AnimationSpecProto.WINDOW;
 import static com.android.server.wm.WindowAnimationSpecProto.ANIMATION;
 import static com.android.server.wm.WindowStateAnimator.ROOT_TASK_CLIP_NONE;
 
+import android.graphics.Insets;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.SystemClock;
@@ -75,13 +76,44 @@ public class WindowAnimationSpec implements AnimationSpec {
     }
 
     @Override
+    public WindowAnimationSpec asWindowAnimationSpec() {
+        return this;
+    }
+
+    @Override
     public boolean getShowWallpaper() {
         return mAnimation.getShowWallpaper();
     }
 
     @Override
+    public boolean getShowBackground() {
+        return mAnimation.getShowBackground();
+    }
+
+    @Override
+    public int getBackgroundColor() {
+        return mAnimation.getBackgroundColor();
+    }
+
+    /**
+     * @return If a window animation has outsets applied to it.
+     * @see Animation#hasExtension()
+     */
+    public boolean hasExtension() {
+        return mAnimation.hasExtension();
+    }
+
+    @Override
     public long getDuration() {
         return mAnimation.computeDurationHint();
+    }
+
+    public Rect getRootTaskBounds() {
+        return mRootTaskBounds;
+    }
+
+    public Animation getAnimation() {
+        return mAnimation;
     }
 
     @Override
@@ -96,7 +128,9 @@ public class WindowAnimationSpec implements AnimationSpec {
         boolean cropSet = false;
         if (mRootTaskClipMode == ROOT_TASK_CLIP_NONE) {
             if (tmp.transformation.hasClipRect()) {
-                t.setWindowCrop(leash, tmp.transformation.getClipRect());
+                final Rect clipRect = tmp.transformation.getClipRect();
+                accountForExtension(tmp.transformation, clipRect);
+                t.setWindowCrop(leash, clipRect);
                 cropSet = true;
             }
         } else {
@@ -104,6 +138,7 @@ public class WindowAnimationSpec implements AnimationSpec {
             if (tmp.transformation.hasClipRect()) {
                 mTmpRect.intersect(tmp.transformation.getClipRect());
             }
+            accountForExtension(tmp.transformation, mTmpRect);
             t.setWindowCrop(leash, mTmpRect);
             cropSet = true;
         }
@@ -115,19 +150,41 @@ public class WindowAnimationSpec implements AnimationSpec {
         }
     }
 
+    private void accountForExtension(Transformation transformation, Rect clipRect) {
+        Insets extensionInsets = Insets.min(transformation.getInsets(), Insets.NONE);
+        if (!extensionInsets.equals(Insets.NONE)) {
+            // Extend the surface to allow for the edge extension to be visible
+            clipRect.inset(extensionInsets);
+        }
+    }
+
     @Override
     public long calculateStatusBarTransitionStartTime() {
         TranslateAnimation openTranslateAnimation = findTranslateAnimation(mAnimation);
-        if (openTranslateAnimation != null) {
 
-            // Some interpolators are extremely quickly mostly finished, but not completely. For
-            // our purposes, we need to find the fraction for which ther interpolator is mostly
-            // there, and use that value for the calculation.
-            float t = findAlmostThereFraction(openTranslateAnimation.getInterpolator());
-            return SystemClock.uptimeMillis()
-                    + openTranslateAnimation.getStartOffset()
-                    + (long)(openTranslateAnimation.getDuration() * t)
-                    - STATUS_BAR_TRANSITION_DURATION;
+        if (openTranslateAnimation != null) {
+            if (openTranslateAnimation.isXAxisTransition()
+                    && openTranslateAnimation.isFullWidthTranslate()) {
+                // On X axis transitions that are fullscreen (heuristic for task like transitions)
+                // we want the status bar to animate right in the middle of the translation when
+                // the windows/tasks have each moved half way across.
+                float t = findMiddleOfTranslationFraction(openTranslateAnimation.getInterpolator());
+
+                return SystemClock.uptimeMillis()
+                        + openTranslateAnimation.getStartOffset()
+                        + (long) (openTranslateAnimation.getDuration() * t)
+                        - (long) (STATUS_BAR_TRANSITION_DURATION * 0.5);
+            } else {
+                // Some interpolators are extremely quickly mostly finished, but not completely. For
+                // our purposes, we need to find the fraction for which their interpolator is mostly
+                // there, and use that value for the calculation.
+                float t = findAlmostThereFraction(openTranslateAnimation.getInterpolator());
+
+                return SystemClock.uptimeMillis()
+                        + openTranslateAnimation.getStartOffset()
+                        + (long) (openTranslateAnimation.getDuration() * t)
+                        - STATUS_BAR_TRANSITION_DURATION;
+            }
         } else {
             return SystemClock.uptimeMillis();
         }
@@ -176,20 +233,39 @@ public class WindowAnimationSpec implements AnimationSpec {
     }
 
     /**
-     * Binary searches for a {@code t} such that there exists a {@code -0.01 < eps < 0.01} for which
-     * {@code interpolator(t + eps) > 0.99}.
+     * Finds the fraction of the animation's duration at which the transition is almost done with a
+     * maximal error of 0.01 when it is animated with {@code interpolator}.
      */
     private static float findAlmostThereFraction(Interpolator interpolator) {
+        return findInterpolationAdjustedTargetFraction(interpolator, 0.99f, 0.01f);
+    }
+
+    /**
+     * Finds the fraction of the animation's duration at which the transition is spacially half way
+     * done with a maximal error of 0.01 when it is animated with {@code interpolator}.
+     */
+    private float findMiddleOfTranslationFraction(Interpolator interpolator) {
+        return findInterpolationAdjustedTargetFraction(interpolator, 0.5f, 0.01f);
+    }
+
+    /**
+     * Binary searches for a {@code val} such that there exists an {@code -0.01 < epsilon < 0.01}
+     * for which {@code interpolator(val + epsilon) > target}.
+     */
+    private static float findInterpolationAdjustedTargetFraction(
+            Interpolator interpolator, float target, float epsilon) {
         float val = 0.5f;
         float adj = 0.25f;
-        while (adj >= 0.01f) {
-            if (interpolator.getInterpolation(val) < 0.99f) {
+
+        while (adj >= epsilon) {
+            if (interpolator.getInterpolation(val) < target) {
                 val += adj;
             } else {
                 val -= adj;
             }
             adj /= 2;
         }
+
         return val;
     }
 

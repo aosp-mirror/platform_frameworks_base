@@ -21,8 +21,14 @@ import static android.accessibilityservice.AccessibilityService.KEY_ACCESSIBILIT
 import static android.accessibilityservice.AccessibilityService.KEY_ACCESSIBILITY_SCREENSHOT_STATUS;
 import static android.accessibilityservice.AccessibilityService.KEY_ACCESSIBILITY_SCREENSHOT_TIMESTAMP;
 import static android.accessibilityservice.AccessibilityServiceInfo.DEFAULT;
+import static android.accessibilityservice.AccessibilityTrace.FLAGS_ACCESSIBILITY_INTERACTION_CONNECTION;
+import static android.accessibilityservice.AccessibilityTrace.FLAGS_ACCESSIBILITY_SERVICE_CLIENT;
+import static android.accessibilityservice.AccessibilityTrace.FLAGS_ACCESSIBILITY_SERVICE_CONNECTION;
+import static android.accessibilityservice.AccessibilityTrace.FLAGS_WINDOW_MANAGER_INTERNAL;
+import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
 import static android.view.accessibility.AccessibilityInteractionClient.CALL_STACK;
+import static android.view.accessibility.AccessibilityInteractionClient.IGNORE_CALL_STACK;
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS;
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_CLEAR_ACCESSIBILITY_FOCUS;
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_CLICK;
@@ -31,8 +37,10 @@ import static android.view.accessibility.AccessibilityNodeInfo.ACTION_LONG_CLICK
 import android.accessibilityservice.AccessibilityGestureEvent;
 import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
+import android.accessibilityservice.AccessibilityTrace;
 import android.accessibilityservice.IAccessibilityServiceClient;
 import android.accessibilityservice.IAccessibilityServiceConnection;
+import android.accessibilityservice.MagnificationConfig;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.PendingIntent;
@@ -59,6 +67,8 @@ import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
+import android.os.Trace;
+import android.provider.Settings;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Display;
@@ -72,15 +82,21 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityWindowInfo;
 import android.view.accessibility.IAccessibilityInteractionConnectionCallback;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputBinding;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.compat.IPlatformCompat;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.function.pooled.PooledLambda;
+import com.android.internal.view.IInputContext;
+import com.android.internal.view.IInputMethodSession;
+import com.android.internal.view.IInputSessionWithIdCallback;
 import com.android.server.LocalServices;
 import com.android.server.accessibility.AccessibilityWindowManager.RemoteAccessibilityConnection;
-import com.android.server.accessibility.magnification.FullScreenMagnificationController;
+import com.android.server.accessibility.magnification.MagnificationProcessor;
+import com.android.server.inputmethod.InputMethodManagerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
 
@@ -103,10 +119,9 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         FingerprintGestureDispatcher.FingerprintGestureClient {
     private static final boolean DEBUG = false;
     private static final String LOG_TAG = "AbstractAccessibilityServiceConnection";
-    private static final String TRACE_A11Y_SERVICE_CONNECTION =
-            LOG_TAG + ".IAccessibilityServiceConnection";
-    private static final String TRACE_A11Y_SERVICE_CLIENT =
-            LOG_TAG + ".IAccessibilityServiceClient";
+    private static final String TRACE_SVC_CONN = LOG_TAG + ".IAccessibilityServiceConnection";
+    private static final String TRACE_SVC_CLIENT = LOG_TAG + ".IAccessibilityServiceClient";
+    private static final String TRACE_WM = "WindowManagerInternal";
     private static final int WAIT_WINDOWS_TIMEOUT_MILLIS = 5000;
 
     protected static final String TAKE_SCREENSHOT = "takeScreenshot";
@@ -133,6 +148,9 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
 
     protected final AccessibilitySecurityPolicy mSecurityPolicy;
     protected final AccessibilityTrace mTrace;
+
+    // The attribution tag set by the service that is bound to this instance
+    protected String mAttributionTag;
 
     // The service that's bound to this instance. Whenever this value is non-null, this
     // object is registered as a death recipient
@@ -169,6 +187,8 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
     boolean mReceivedAccessibilityButtonCallbackSinceBind;
 
     boolean mLastAccessibilityButtonCallbackState;
+
+    boolean mRequestImeApis;
 
     int mFetchFlags;
 
@@ -215,10 +235,10 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         @Nullable FingerprintGestureDispatcher getFingerprintGestureDispatcher();
 
         /**
-         * @return The magnification controller
+         * @return The magnification processor
          */
         @NonNull
-        FullScreenMagnificationController getFullScreenMagnificationController();
+        MagnificationProcessor getMagnificationProcessor();
 
         /**
          * Called back to notify system that the client has changed
@@ -248,6 +268,22 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         void setGestureDetectionPassthroughRegion(int displayId, Region region);
 
         void setTouchExplorationPassthroughRegion(int displayId, Region region);
+
+        void setServiceDetectsGesturesEnabled(int displayId, boolean mode);
+
+        void requestTouchExploration(int displayId);
+
+        void requestDragging(int displayId, int pointerId);
+
+        void requestDelegating(int displayId);
+
+        void onDoubleTap(int displayId);
+
+        void onDoubleTapAndHold(int displayId);
+
+        void requestImeLocked(AbstractAccessibilityServiceConnection connection);
+
+        void unbindImeLocked(AbstractAccessibilityServiceConnection connection);
     }
 
     public AbstractAccessibilityServiceConnection(Context context, ComponentName componentName,
@@ -298,9 +334,8 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
             return false;
         }
         try {
-            if (mTrace.isA11yTracingEnabled()) {
-                mTrace.logTrace(TRACE_A11Y_SERVICE_CLIENT + ".onKeyEvent",
-                        keyEvent + ", " + sequenceNumber);
+            if (svcClientTracingEnabled()) {
+                logTraceSvcClient("onKeyEvent", keyEvent + ", " + sequenceNumber);
             }
             mServiceInterface.onKeyEvent(keyEvent, sequenceNumber);
         } catch (RemoteException e) {
@@ -352,6 +387,8 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
                 & AccessibilityServiceInfo.FLAG_REQUEST_FINGERPRINT_GESTURES) != 0;
         mRequestAccessibilityButton = (info.flags
                 & AccessibilityServiceInfo.FLAG_REQUEST_ACCESSIBILITY_BUTTON) != 0;
+        mRequestImeApis = (info.flags
+                & AccessibilityServiceInfo.FLAG_INPUT_METHOD_EDITOR) != 0;
     }
 
     protected boolean supportsFlagForNotImportantViews(AccessibilityServiceInfo info) {
@@ -365,17 +402,16 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
 
     @Override
     public void setOnKeyEventResult(boolean handled, int sequence) {
-        if (mTrace.isA11yTracingEnabled()) {
-            mTrace.logTrace(TRACE_A11Y_SERVICE_CONNECTION + ".setOnKeyEventResult",
-                    "handled=" + handled + ";sequence=" + sequence);
+        if (svcConnTracingEnabled()) {
+            logTraceSvcConn("setOnKeyEventResult", "handled=" + handled + ";sequence=" + sequence);
         }
         mSystemSupport.getKeyEventDispatcher().setOnKeyEventResult(this, handled, sequence);
     }
 
     @Override
     public AccessibilityServiceInfo getServiceInfo() {
-        if (mTrace.isA11yTracingEnabled()) {
-            mTrace.logTrace(TRACE_A11Y_SERVICE_CONNECTION + ".getServiceInfo");
+        if (svcConnTracingEnabled()) {
+            logTraceSvcConn("getServiceInfo", "");
         }
         synchronized (mLock) {
             return mAccessibilityServiceInfo;
@@ -393,8 +429,8 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
 
     @Override
     public void setServiceInfo(AccessibilityServiceInfo info) {
-        if (mTrace.isA11yTracingEnabled()) {
-            mTrace.logTrace(TRACE_A11Y_SERVICE_CONNECTION + ".setServiceInfo", "info=" + info);
+        if (svcConnTracingEnabled()) {
+            logTraceSvcConn("setServiceInfo", "info=" + info);
         }
         final long identity = Binder.clearCallingIdentity();
         try {
@@ -402,6 +438,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
                 // If the XML manifest had data to configure the service its info
                 // should be already set. In such a case update only the dynamically
                 // configurable properties.
+                boolean oldRequestIme = mRequestImeApis;
                 AccessibilityServiceInfo oldInfo = mAccessibilityServiceInfo;
                 if (oldInfo != null) {
                     oldInfo.updateDynamicallyConfigurableProperties(mIPlatformCompat, info);
@@ -410,10 +447,24 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
                     setDynamicallyConfigurableProperties(info);
                 }
                 mSystemSupport.onClientChangeLocked(true);
+                if (!oldRequestIme && mRequestImeApis) {
+                    mSystemSupport.requestImeLocked(this);
+                } else if (oldRequestIme && !mRequestImeApis) {
+                    mSystemSupport.unbindImeLocked(this);
+                }
             }
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
+    }
+
+    @Override
+    public void setAttributionTag(String attributionTag) {
+        mAttributionTag = attributionTag;
+    }
+
+    String getAttributionTag() {
+        return mAttributionTag;
     }
 
     protected abstract boolean hasRightsToCurrentUserLocked();
@@ -421,8 +472,8 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
     @Nullable
     @Override
     public AccessibilityWindowInfo.WindowListSparseArray getWindows() {
-        if (mTrace.isA11yTracingEnabled()) {
-            mTrace.logTrace(TRACE_A11Y_SERVICE_CONNECTION + ".getWindows");
+        if (svcConnTracingEnabled()) {
+            logTraceSvcConn("getWindows", "");
         }
         synchronized (mLock) {
             if (!hasRightsToCurrentUserLocked()) {
@@ -458,8 +509,8 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
 
     @Override
     public AccessibilityWindowInfo getWindow(int windowId) {
-        if (mTrace.isA11yTracingEnabled()) {
-            mTrace.logTrace(TRACE_A11Y_SERVICE_CONNECTION + ".getWindow", "windowId=" + windowId);
+        if (svcConnTracingEnabled()) {
+            logTraceSvcConn("getWindow", "windowId=" + windowId);
         }
         synchronized (mLock) {
             int displayId = Display.INVALID_DISPLAY;
@@ -496,8 +547,8 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
             long accessibilityNodeId, String viewIdResName, int interactionId,
             IAccessibilityInteractionConnectionCallback callback, long interrogatingTid)
             throws RemoteException {
-        if (mTrace.isA11yTracingEnabled()) {
-            mTrace.logTrace(TRACE_A11Y_SERVICE_CONNECTION + ".findAccessibilityNodeInfosByViewId",
+        if (svcConnTracingEnabled()) {
+            logTraceSvcConn("findAccessibilityNodeInfosByViewId",
                     "accessibilityWindowId=" + accessibilityWindowId + ";accessibilityNodeId="
                     + accessibilityNodeId + ";viewIdResName=" + viewIdResName + ";interactionId="
                     + interactionId + ";callback=" + callback + ";interrogatingTid="
@@ -539,6 +590,12 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         callback = replaceCallbackIfNeeded(callback, resolvedWindowId, interactionId,
                 interrogatingPid, interrogatingTid);
         final long identityToken = Binder.clearCallingIdentity();
+        if (intConnTracingEnabled()) {
+            logTraceIntConn("findAccessibilityNodeInfosByViewId",
+                    accessibilityNodeId + ";" + viewIdResName + ";" + partialInteractiveRegion + ";"
+                    + interactionId + ";" + callback + ";" + mFetchFlags + ";" + interrogatingPid
+                    + ";" + interrogatingTid + ";" + spec);
+        }
         try {
             connection.getRemote().findAccessibilityNodeInfosByViewId(accessibilityNodeId,
                     viewIdResName, partialInteractiveRegion, interactionId, callback, mFetchFlags,
@@ -564,8 +621,8 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
             long accessibilityNodeId, String text, int interactionId,
             IAccessibilityInteractionConnectionCallback callback, long interrogatingTid)
             throws RemoteException {
-        if (mTrace.isA11yTracingEnabled()) {
-            mTrace.logTrace(TRACE_A11Y_SERVICE_CONNECTION + ".findAccessibilityNodeInfosByText",
+        if (svcConnTracingEnabled()) {
+            logTraceSvcConn("findAccessibilityNodeInfosByText",
                     "accessibilityWindowId=" + accessibilityWindowId + ";accessibilityNodeId="
                     + accessibilityNodeId + ";text=" + text + ";interactionId=" + interactionId
                     + ";callback=" + callback + ";interrogatingTid=" + interrogatingTid);
@@ -606,6 +663,12 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         callback = replaceCallbackIfNeeded(callback, resolvedWindowId, interactionId,
                 interrogatingPid, interrogatingTid);
         final long identityToken = Binder.clearCallingIdentity();
+        if (intConnTracingEnabled()) {
+            logTraceIntConn("findAccessibilityNodeInfosByText",
+                    accessibilityNodeId + ";" + text + ";" + partialInteractiveRegion + ";"
+                    + interactionId + ";" + callback + ";" + mFetchFlags + ";" + interrogatingPid
+                    + ";" + interrogatingTid + ";" + spec);
+        }
         try {
             connection.getRemote().findAccessibilityNodeInfosByText(accessibilityNodeId,
                     text, partialInteractiveRegion, interactionId, callback, mFetchFlags,
@@ -631,13 +694,12 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
             int accessibilityWindowId, long accessibilityNodeId, int interactionId,
             IAccessibilityInteractionConnectionCallback callback, int flags,
             long interrogatingTid, Bundle arguments) throws RemoteException {
-        if (mTrace.isA11yTracingEnabled()) {
-            mTrace.logTrace(
-                    TRACE_A11Y_SERVICE_CONNECTION + ".findAccessibilityNodeInfoByAccessibilityId",
+        if (svcConnTracingEnabled()) {
+            logTraceSvcConn("findAccessibilityNodeInfoByAccessibilityId",
                     "accessibilityWindowId=" + accessibilityWindowId + ";accessibilityNodeId="
-                            + accessibilityNodeId + ";interactionId=" + interactionId + ";callback="
-                            + callback + ";flags=" + flags + ";interrogatingTid=" + interrogatingTid
-                            + ";arguments=" + arguments);
+                    + accessibilityNodeId + ";interactionId=" + interactionId + ";callback="
+                    + callback + ";flags=" + flags + ";interrogatingTid=" + interrogatingTid
+                    + ";arguments=" + arguments);
         }
         final int resolvedWindowId;
         RemoteAccessibilityConnection connection;
@@ -675,6 +737,12 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         callback = replaceCallbackIfNeeded(callback, resolvedWindowId, interactionId,
                 interrogatingPid, interrogatingTid);
         final long identityToken = Binder.clearCallingIdentity();
+        if (intConnTracingEnabled()) {
+            logTraceIntConn("findAccessibilityNodeInfoByAccessibilityId",
+                    accessibilityNodeId + ";" + partialInteractiveRegion + ";" + interactionId + ";"
+                    + callback + ";" + (mFetchFlags | flags) + ";" + interrogatingPid + ";"
+                    + interrogatingTid + ";" + spec + ";" + arguments);
+        }
         try {
             connection.getRemote().findAccessibilityNodeInfoByAccessibilityId(
                     accessibilityNodeId, partialInteractiveRegion, interactionId, callback,
@@ -700,12 +768,12 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
             int focusType, int interactionId,
             IAccessibilityInteractionConnectionCallback callback, long interrogatingTid)
             throws RemoteException {
-        if (mTrace.isA11yTracingEnabled()) {
-            mTrace.logTrace(TRACE_A11Y_SERVICE_CONNECTION + ".findFocus",
+        if (svcConnTracingEnabled()) {
+            logTraceSvcConn("findFocus",
                     "accessibilityWindowId=" + accessibilityWindowId + ";accessibilityNodeId="
-                            + accessibilityNodeId + ";focusType=" + focusType + ";interactionId="
-                            + interactionId + ";callback=" + callback + ";interrogatingTid="
-                            + interrogatingTid);
+                    + accessibilityNodeId + ";focusType=" + focusType + ";interactionId="
+                    + interactionId + ";callback=" + callback + ";interrogatingTid="
+                    + interrogatingTid);
         }
         final int resolvedWindowId;
         RemoteAccessibilityConnection connection;
@@ -743,6 +811,12 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         callback = replaceCallbackIfNeeded(callback, resolvedWindowId, interactionId,
                 interrogatingPid, interrogatingTid);
         final long identityToken = Binder.clearCallingIdentity();
+        if (intConnTracingEnabled()) {
+            logTraceIntConn("findFocus",
+                    accessibilityNodeId + ";" + focusType + ";" + partialInteractiveRegion + ";"
+                    + interactionId + ";" + callback + ";" + mFetchFlags + ";" + interrogatingPid
+                    + ";" + interrogatingTid + ";" + spec);
+        }
         try {
             connection.getRemote().findFocus(accessibilityNodeId, focusType,
                     partialInteractiveRegion, interactionId, callback, mFetchFlags,
@@ -768,12 +842,12 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
             int direction, int interactionId,
             IAccessibilityInteractionConnectionCallback callback, long interrogatingTid)
             throws RemoteException {
-        if (mTrace.isA11yTracingEnabled()) {
-            mTrace.logTrace(TRACE_A11Y_SERVICE_CONNECTION + ".focusSearch",
+        if (svcConnTracingEnabled()) {
+            logTraceSvcConn("focusSearch",
                     "accessibilityWindowId=" + accessibilityWindowId + ";accessibilityNodeId="
-                            + accessibilityNodeId + ";direction=" + direction + ";interactionId="
-                            + interactionId + ";callback=" + callback + ";interrogatingTid="
-                            + interrogatingTid);
+                    + accessibilityNodeId + ";direction=" + direction + ";interactionId="
+                    + interactionId + ";callback=" + callback + ";interrogatingTid="
+                    + interrogatingTid);
         }
         final int resolvedWindowId;
         RemoteAccessibilityConnection connection;
@@ -810,6 +884,12 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         callback = replaceCallbackIfNeeded(callback, resolvedWindowId, interactionId,
                 interrogatingPid, interrogatingTid);
         final long identityToken = Binder.clearCallingIdentity();
+        if (intConnTracingEnabled()) {
+            logTraceIntConn("focusSearch",
+                    accessibilityNodeId + ";" + direction + ";" + partialInteractiveRegion
+                    + ";" + interactionId + ";" + callback + ";" + mFetchFlags + ";"
+                    + interrogatingPid + ";" + interrogatingTid + ";" + spec);
+        }
         try {
             connection.getRemote().focusSearch(accessibilityNodeId, direction,
                     partialInteractiveRegion, interactionId, callback, mFetchFlags,
@@ -832,17 +912,17 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
 
     @Override
     public void sendGesture(int sequence, ParceledListSlice gestureSteps) {
-        if (mTrace.isA11yTracingEnabled()) {
-            mTrace.logTrace(TRACE_A11Y_SERVICE_CONNECTION + ".sendGesture",
-                    "sequence=" + sequence + ";gestureSteps=" + gestureSteps);
+        if (svcConnTracingEnabled()) {
+            logTraceSvcConn(
+                    "sendGesture", "sequence=" + sequence + ";gestureSteps=" + gestureSteps);
         }
     }
 
     @Override
     public void dispatchGesture(int sequence, ParceledListSlice gestureSteps, int displayId) {
-        if (mTrace.isA11yTracingEnabled()) {
-            mTrace.logTrace(TRACE_A11Y_SERVICE_CONNECTION + ".dispatchGesture", "sequence="
-                    + sequence + ";gestureSteps=" + gestureSteps + ";displayId=" + displayId);
+        if (svcConnTracingEnabled()) {
+            logTraceSvcConn("dispatchGesture", "sequence=" + sequence + ";gestureSteps="
+                    + gestureSteps + ";displayId=" + displayId);
         }
     }
 
@@ -851,12 +931,12 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
             long accessibilityNodeId, int action, Bundle arguments, int interactionId,
             IAccessibilityInteractionConnectionCallback callback, long interrogatingTid)
             throws RemoteException {
-        if (mTrace.isA11yTracingEnabled()) {
-            mTrace.logTrace(TRACE_A11Y_SERVICE_CONNECTION + ".performAccessibilityAction",
+        if (svcConnTracingEnabled()) {
+            logTraceSvcConn("performAccessibilityAction",
                     "accessibilityWindowId=" + accessibilityWindowId + ";accessibilityNodeId="
-                            + accessibilityNodeId + ";action=" + action + ";arguments=" + arguments
-                            + ";interactionId=" + interactionId + ";callback=" + callback
-                            + ";interrogatingTid=" + interrogatingTid);
+                    + accessibilityNodeId + ";action=" + action + ";arguments=" + arguments
+                    + ";interactionId=" + interactionId + ";callback=" + callback
+                    + ";interrogatingTid=" + interrogatingTid);
         }
         final int resolvedWindowId;
         synchronized (mLock) {
@@ -879,9 +959,8 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
 
     @Override
     public boolean performGlobalAction(int action) {
-        if (mTrace.isA11yTracingEnabled()) {
-            mTrace.logTrace(TRACE_A11Y_SERVICE_CONNECTION + ".performGlobalAction",
-                    "action=" + action);
+        if (svcConnTracingEnabled()) {
+            logTraceSvcConn("performGlobalAction", "action=" + action);
         }
         synchronized (mLock) {
             if (!hasRightsToCurrentUserLocked()) {
@@ -893,8 +972,8 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
 
     @Override
     public @NonNull List<AccessibilityNodeInfo.AccessibilityAction> getSystemActions() {
-        if (mTrace.isA11yTracingEnabled()) {
-            mTrace.logTrace(TRACE_A11Y_SERVICE_CONNECTION + ".getSystemActions");
+        if (svcConnTracingEnabled()) {
+            logTraceSvcConn("getSystemActions", "");
         }
         synchronized (mLock) {
             if (!hasRightsToCurrentUserLocked()) {
@@ -906,9 +985,8 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
 
     @Override
     public boolean isFingerprintGestureDetectionAvailable() {
-        if (mTrace.isA11yTracingEnabled()) {
-            mTrace.logTrace(
-                    TRACE_A11Y_SERVICE_CONNECTION + ".isFingerprintGestureDetectionAvailable");
+        if (svcConnTracingEnabled()) {
+            logTraceSvcConn("isFingerprintGestureDetectionAvailable", "");
         }
         if (!mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_FINGERPRINT)) {
             return false;
@@ -921,11 +999,29 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         return false;
     }
 
+    @Nullable
+    @Override
+    public MagnificationConfig getMagnificationConfig(int displayId) {
+        if (svcConnTracingEnabled()) {
+            logTraceSvcConn("getMagnificationConfig", "displayId=" + displayId);
+        }
+        synchronized (mLock) {
+            if (!hasRightsToCurrentUserLocked()) {
+                return null;
+            }
+        }
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            return mSystemSupport.getMagnificationProcessor().getMagnificationConfig(displayId);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
     @Override
     public float getMagnificationScale(int displayId) {
-        if (mTrace.isA11yTracingEnabled()) {
-            mTrace.logTrace(TRACE_A11Y_SERVICE_CONNECTION + ".getMagnificationScale",
-                    "displayId=" + displayId);
+        if (svcConnTracingEnabled()) {
+            logTraceSvcConn("getMagnificationScale", "displayId=" + displayId);
         }
         synchronized (mLock) {
             if (!hasRightsToCurrentUserLocked()) {
@@ -934,7 +1030,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         }
         final long identity = Binder.clearCallingIdentity();
         try {
-            return mSystemSupport.getFullScreenMagnificationController().getScale(displayId);
+            return mSystemSupport.getMagnificationProcessor().getScale(displayId);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
@@ -942,98 +1038,121 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
 
     @Override
     public Region getMagnificationRegion(int displayId) {
-        if (mTrace.isA11yTracingEnabled()) {
-            mTrace.logTrace(TRACE_A11Y_SERVICE_CONNECTION + ".getMagnificationRegion",
-                    "displayId=" + displayId);
+        if (svcConnTracingEnabled()) {
+            logTraceSvcConn("getMagnificationRegion", "displayId=" + displayId);
         }
         synchronized (mLock) {
             final Region region = Region.obtain();
             if (!hasRightsToCurrentUserLocked()) {
                 return region;
             }
-            FullScreenMagnificationController magnificationController =
-                    mSystemSupport.getFullScreenMagnificationController();
-            boolean registeredJustForThisCall =
-                    registerMagnificationIfNeeded(displayId, magnificationController);
+            MagnificationProcessor magnificationProcessor =
+                    mSystemSupport.getMagnificationProcessor();
             final long identity = Binder.clearCallingIdentity();
             try {
-                magnificationController.getMagnificationRegion(displayId, region);
+                magnificationProcessor.getFullscreenMagnificationRegion(displayId,
+                        region, mSecurityPolicy.canControlMagnification(this));
                 return region;
             } finally {
                 Binder.restoreCallingIdentity(identity);
-                if (registeredJustForThisCall) {
-                    magnificationController.unregister(displayId);
-                }
+            }
+        }
+    }
+
+
+    @Override
+    public Region getCurrentMagnificationRegion(int displayId) {
+        if (svcConnTracingEnabled()) {
+            logTraceSvcConn("getCurrentMagnificationRegion", "displayId=" + displayId);
+        }
+        synchronized (mLock) {
+            final Region region = Region.obtain();
+            if (!hasRightsToCurrentUserLocked()) {
+                return region;
+            }
+            MagnificationProcessor magnificationProcessor =
+                    mSystemSupport.getMagnificationProcessor();
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                magnificationProcessor.getCurrentMagnificationRegion(displayId,
+                        region, mSecurityPolicy.canControlMagnification(this));
+                return region;
+            } finally {
+                Binder.restoreCallingIdentity(identity);
             }
         }
     }
 
     @Override
     public float getMagnificationCenterX(int displayId) {
-        if (mTrace.isA11yTracingEnabled()) {
-            mTrace.logTrace(TRACE_A11Y_SERVICE_CONNECTION + ".getMagnificationCenterX",
-                    "displayId=" + displayId);
+        if (svcConnTracingEnabled()) {
+            logTraceSvcConn("getMagnificationCenterX", "displayId=" + displayId);
         }
         synchronized (mLock) {
             if (!hasRightsToCurrentUserLocked()) {
                 return 0.0f;
             }
-            FullScreenMagnificationController magnificationController =
-                    mSystemSupport.getFullScreenMagnificationController();
-            boolean registeredJustForThisCall =
-                    registerMagnificationIfNeeded(displayId, magnificationController);
+            MagnificationProcessor magnificationProcessor =
+                    mSystemSupport.getMagnificationProcessor();
             final long identity = Binder.clearCallingIdentity();
             try {
-                return magnificationController.getCenterX(displayId);
+                return magnificationProcessor.getCenterX(displayId,
+                        mSecurityPolicy.canControlMagnification(this));
             } finally {
                 Binder.restoreCallingIdentity(identity);
-                if (registeredJustForThisCall) {
-                    magnificationController.unregister(displayId);
-                }
             }
         }
     }
 
     @Override
     public float getMagnificationCenterY(int displayId) {
-        if (mTrace.isA11yTracingEnabled()) {
-            mTrace.logTrace(TRACE_A11Y_SERVICE_CONNECTION + ".getMagnificationCenterY",
-                    "displayId=" + displayId);
+        if (svcConnTracingEnabled()) {
+            logTraceSvcConn("getMagnificationCenterY", "displayId=" + displayId);
         }
         synchronized (mLock) {
             if (!hasRightsToCurrentUserLocked()) {
                 return 0.0f;
             }
-            FullScreenMagnificationController magnificationController =
-                    mSystemSupport.getFullScreenMagnificationController();
-            boolean registeredJustForThisCall =
-                    registerMagnificationIfNeeded(displayId, magnificationController);
+            MagnificationProcessor magnificationProcessor =
+                    mSystemSupport.getMagnificationProcessor();
             final long identity = Binder.clearCallingIdentity();
             try {
-                return magnificationController.getCenterY(displayId);
+                return magnificationProcessor.getCenterY(displayId,
+                        mSecurityPolicy.canControlMagnification(this));
             } finally {
                 Binder.restoreCallingIdentity(identity);
-                if (registeredJustForThisCall) {
-                    magnificationController.unregister(displayId);
-                }
             }
         }
     }
 
-    private boolean registerMagnificationIfNeeded(int displayId,
-            FullScreenMagnificationController magnificationController) {
-        if (!magnificationController.isRegistered(displayId)
-                && mSecurityPolicy.canControlMagnification(this)) {
-            magnificationController.register(displayId);
-            return true;
+    @Override
+    public boolean resetMagnification(int displayId, boolean animate) {
+        if (svcConnTracingEnabled()) {
+            logTraceSvcConn("resetMagnification", "displayId=" + displayId + ";animate=" + animate);
         }
-        return false;
+        synchronized (mLock) {
+            if (!hasRightsToCurrentUserLocked()) {
+                return false;
+            }
+            if (!mSecurityPolicy.canControlMagnification(this)) {
+                return false;
+            }
+        }
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            MagnificationProcessor magnificationProcessor =
+                    mSystemSupport.getMagnificationProcessor();
+            return (magnificationProcessor.resetFullscreenMagnification(displayId, animate)
+                    || !magnificationProcessor.isMagnifying(displayId));
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
     }
 
     @Override
-    public boolean resetMagnification(int displayId, boolean animate) {
-        if (mTrace.isA11yTracingEnabled()) {
-            mTrace.logTrace(TRACE_A11Y_SERVICE_CONNECTION + ".resetMagnification",
+    public boolean resetCurrentMagnification(int displayId, boolean animate) {
+        if (svcConnTracingEnabled()) {
+            logTraceSvcConn("resetCurrentMagnification",
                     "displayId=" + displayId + ";animate=" + animate);
         }
         synchronized (mLock) {
@@ -1046,22 +1165,21 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         }
         final long identity = Binder.clearCallingIdentity();
         try {
-            FullScreenMagnificationController magnificationController =
-                    mSystemSupport.getFullScreenMagnificationController();
-            return (magnificationController.reset(displayId, animate)
-                    || !magnificationController.isMagnifying(displayId));
+            MagnificationProcessor magnificationProcessor =
+                    mSystemSupport.getMagnificationProcessor();
+            return (magnificationProcessor.resetCurrentMagnification(displayId, animate)
+                    || !magnificationProcessor.isMagnifying(displayId));
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
     }
 
     @Override
-    public boolean setMagnificationScaleAndCenter(int displayId, float scale, float centerX,
-            float centerY, boolean animate) {
-        if (mTrace.isA11yTracingEnabled()) {
-            mTrace.logTrace(TRACE_A11Y_SERVICE_CONNECTION + ".setMagnificationScaleAndCenter",
-                    "displayId=" + displayId + ";scale=" + scale + ";centerX=" + centerX
-                            + ";centerY=" + centerY + ";animate=" + animate);
+    public boolean setMagnificationConfig(int displayId,
+            @NonNull MagnificationConfig config, boolean animate) {
+        if (svcConnTracingEnabled()) {
+            logTraceSvcConn("setMagnificationSpec",
+                    "displayId=" + displayId + ", config=" + config.toString());
         }
         synchronized (mLock) {
             if (!hasRightsToCurrentUserLocked()) {
@@ -1072,13 +1190,10 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
             }
             final long identity = Binder.clearCallingIdentity();
             try {
-                FullScreenMagnificationController magnificationController =
-                        mSystemSupport.getFullScreenMagnificationController();
-                if (!magnificationController.isRegistered(displayId)) {
-                    magnificationController.register(displayId);
-                }
-                return magnificationController
-                        .setScaleAndCenter(displayId, scale, centerX, centerY, animate, mId);
+                MagnificationProcessor magnificationProcessor =
+                        mSystemSupport.getMagnificationProcessor();
+                return magnificationProcessor.setMagnificationConfig(displayId, config, animate,
+                        mId);
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
@@ -1087,8 +1202,8 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
 
     @Override
     public void setMagnificationCallbackEnabled(int displayId, boolean enabled) {
-        if (mTrace.isA11yTracingEnabled()) {
-            mTrace.logTrace(TRACE_A11Y_SERVICE_CONNECTION + ".setMagnificationCallbackEnabled",
+        if (svcConnTracingEnabled()) {
+            logTraceSvcConn("setMagnificationCallbackEnabled",
                     "displayId=" + displayId + ";enabled=" + enabled);
         }
         mInvocationHandler.setMagnificationCallbackEnabled(displayId, enabled);
@@ -1100,18 +1215,16 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
 
     @Override
     public void setSoftKeyboardCallbackEnabled(boolean enabled) {
-        if (mTrace.isA11yTracingEnabled()) {
-            mTrace.logTrace(TRACE_A11Y_SERVICE_CONNECTION + ".setSoftKeyboardCallbackEnabled",
-                    "enabled=" + enabled);
+        if (svcConnTracingEnabled()) {
+            logTraceSvcConn("setSoftKeyboardCallbackEnabled", "enabled=" + enabled);
         }
         mInvocationHandler.setSoftKeyboardCallbackEnabled(enabled);
     }
 
     @Override
     public void takeScreenshot(int displayId, RemoteCallback callback) {
-        if (mTrace.isA11yTracingEnabled()) {
-            mTrace.logTrace(TRACE_A11Y_SERVICE_CONNECTION + ".takeScreenshot",
-                    "displayId=" + displayId + ";callback=" + callback);
+        if (svcConnTracingEnabled()) {
+            logTraceSvcConn("takeScreenshot", "displayId=" + displayId + ";callback=" + callback);
         }
         final long currentTimestamp = SystemClock.uptimeMillis();
         if (mRequestTakeScreenshotTimestampMs != 0
@@ -1237,6 +1350,10 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         final long identity = Binder.clearCallingIdentity();
         try {
             final IBinder overlayWindowToken = new Binder();
+            if (wmTracingEnabled()) {
+                logTraceWM("addWindowToken",
+                        overlayWindowToken + ";TYPE_ACCESSIBILITY_OVERLAY;" + displayId + ";null");
+            }
             mWindowManagerService.addWindowToken(overlayWindowToken, TYPE_ACCESSIBILITY_OVERLAY,
                     displayId, null /* options */);
             synchronized (mLock) {
@@ -1263,6 +1380,10 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
      */
     public void onDisplayRemoved(int displayId) {
         final long identity = Binder.clearCallingIdentity();
+        if (wmTracingEnabled()) {
+            logTraceWM(
+                    "addWindowToken", mOverlayWindowTokens.get(displayId) + ";true;" + displayId);
+        }
         try {
             mWindowManagerService.removeWindowToken(mOverlayWindowTokens.get(displayId), true,
                     displayId);
@@ -1282,9 +1403,8 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
      */
     @Override
     public IBinder getOverlayWindowToken(int displayId) {
-        if (mTrace.isA11yTracingEnabled()) {
-            mTrace.logTrace(TRACE_A11Y_SERVICE_CONNECTION + ".getOverlayWindowToken",
-                    "displayId=" + displayId);
+        if (svcConnTracingEnabled()) {
+            logTraceSvcConn("getOverlayWindowToken", "displayId=" + displayId);
         }
         synchronized (mLock) {
             return mOverlayWindowTokens.get(displayId);
@@ -1299,9 +1419,8 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
      */
     @Override
     public int getWindowIdForLeashToken(@NonNull IBinder token) {
-        if (mTrace.isA11yTracingEnabled()) {
-            mTrace.logTrace(TRACE_A11Y_SERVICE_CONNECTION + ".getWindowIdForLeashToken",
-                    "token=" + token);
+        if (svcConnTracingEnabled()) {
+            logTraceSvcConn("getWindowIdForLeashToken", "token=" + token);
         }
         synchronized (mLock) {
             return mA11yWindowManager.getWindowIdLocked(token);
@@ -1314,8 +1433,8 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
             // Clear the proxy in the other process so this
             // IAccessibilityServiceConnection can be garbage collected.
             if (mServiceInterface != null) {
-                if (mTrace.isA11yTracingEnabled()) {
-                    mTrace.logTrace(TRACE_A11Y_SERVICE_CLIENT + ".init", "null, " + mId + ", null");
+                if (svcClientTracingEnabled()) {
+                    logTraceSvcClient("init", "null, " + mId + ", null");
                 }
                 mServiceInterface.init(null, mId, null);
             }
@@ -1465,9 +1584,8 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         }
 
         try {
-            if (mTrace.isA11yTracingEnabled()) {
-                mTrace.logTrace(TRACE_A11Y_SERVICE_CLIENT + ".onAccessibilityEvent",
-                        event + ";" + serviceWantsEvent);
+            if (svcClientTracingEnabled()) {
+                logTraceSvcClient("onAccessibilityEvent", event + ";" + serviceWantsEvent);
             }
             listener.onAccessibilityEvent(event, serviceWantsEvent);
             if (DEBUG) {
@@ -1496,9 +1614,9 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
     }
 
     public void notifyMagnificationChangedLocked(int displayId, @NonNull Region region,
-            float scale, float centerX, float centerY) {
+            @NonNull MagnificationConfig config) {
         mInvocationHandler
-                .notifyMagnificationChangedLocked(displayId, region, scale, centerX, centerY);
+                .notifyMagnificationChangedLocked(displayId, region, config);
     }
 
     public void notifySoftKeyboardShowModeChangedLocked(int showState) {
@@ -1513,20 +1631,41 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         mInvocationHandler.notifyAccessibilityButtonAvailabilityChangedLocked(available);
     }
 
+    public void createImeSessionLocked() {
+        mInvocationHandler.createImeSessionLocked();
+    }
+
+    public void setImeSessionEnabledLocked(IInputMethodSession session, boolean enabled) {
+        mInvocationHandler.setImeSessionEnabledLocked(session, enabled);
+    }
+
+    public void bindInputLocked(InputBinding binding) {
+        mInvocationHandler.bindInputLocked(binding);
+    }
+
+    public  void unbindInputLocked() {
+        mInvocationHandler.unbindInputLocked();
+    }
+
+    public void startInputLocked(IBinder startInputToken, IInputContext inputContext,
+            EditorInfo editorInfo, boolean restarting) {
+        mInvocationHandler.startInputLocked(startInputToken, inputContext, editorInfo, restarting);
+    }
+
     /**
      * Called by the invocation handler to notify the service that the
      * state of magnification has changed.
      */
     private void notifyMagnificationChangedInternal(int displayId, @NonNull Region region,
-            float scale, float centerX, float centerY) {
+            @NonNull MagnificationConfig config) {
         final IAccessibilityServiceClient listener = getServiceInterfaceSafely();
         if (listener != null) {
             try {
-                if (mTrace.isA11yTracingEnabled()) {
-                    mTrace.logTrace(TRACE_A11Y_SERVICE_CLIENT + ".onMagnificationChanged", displayId
-                            + ", " + region + ", " + scale + ", " + centerX + ", " + centerY);
+                if (svcClientTracingEnabled()) {
+                    logTraceSvcClient("onMagnificationChanged", displayId + ", " + region + ", "
+                            + config.toString());
                 }
-                listener.onMagnificationChanged(displayId, region, scale, centerX, centerY);
+                listener.onMagnificationChanged(displayId, region, config);
             } catch (RemoteException re) {
                 Slog.e(LOG_TAG, "Error sending magnification changes to " + mService, re);
             }
@@ -1541,9 +1680,8 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         final IAccessibilityServiceClient listener = getServiceInterfaceSafely();
         if (listener != null) {
             try {
-                if (mTrace.isA11yTracingEnabled()) {
-                    mTrace.logTrace(TRACE_A11Y_SERVICE_CLIENT + ".onSoftKeyboardShowModeChanged",
-                            String.valueOf(showState));
+                if (svcClientTracingEnabled()) {
+                    logTraceSvcClient("onSoftKeyboardShowModeChanged", String.valueOf(showState));
                 }
                 listener.onSoftKeyboardShowModeChanged(showState);
             } catch (RemoteException re) {
@@ -1557,9 +1695,8 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         final IAccessibilityServiceClient listener = getServiceInterfaceSafely();
         if (listener != null) {
             try {
-                if (mTrace.isA11yTracingEnabled()) {
-                    mTrace.logTrace(TRACE_A11Y_SERVICE_CLIENT + ".onAccessibilityButtonClicked",
-                            String.valueOf(displayId));
+                if (svcClientTracingEnabled()) {
+                    logTraceSvcClient("onAccessibilityButtonClicked", String.valueOf(displayId));
                 }
                 listener.onAccessibilityButtonClicked(displayId);
             } catch (RemoteException re) {
@@ -1579,9 +1716,8 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         final IAccessibilityServiceClient listener = getServiceInterfaceSafely();
         if (listener != null) {
             try {
-                if (mTrace.isA11yTracingEnabled()) {
-                    mTrace.logTrace(
-                            TRACE_A11Y_SERVICE_CLIENT + ".onAccessibilityButtonAvailabilityChanged",
+                if (svcClientTracingEnabled()) {
+                    logTraceSvcClient("onAccessibilityButtonAvailabilityChanged",
                             String.valueOf(available));
                 }
                 listener.onAccessibilityButtonAvailabilityChanged(available);
@@ -1597,9 +1733,8 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         final IAccessibilityServiceClient listener = getServiceInterfaceSafely();
         if (listener != null) {
             try {
-                if (mTrace.isA11yTracingEnabled()) {
-                    mTrace.logTrace(TRACE_A11Y_SERVICE_CLIENT + ".onGesture",
-                            gestureInfo.toString());
+                if (svcClientTracingEnabled()) {
+                    logTraceSvcClient("onGesture", gestureInfo.toString());
                 }
                 listener.onGesture(gestureInfo);
             } catch (RemoteException re) {
@@ -1613,8 +1748,8 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         final IAccessibilityServiceClient listener = getServiceInterfaceSafely();
         if (listener != null) {
             try {
-                if (mTrace.isA11yTracingEnabled()) {
-                    mTrace.logTrace(TRACE_A11Y_SERVICE_CLIENT + ".onSystemActionsChanged");
+                if (svcClientTracingEnabled()) {
+                    logTraceSvcClient("onSystemActionsChanged", "");
                 }
                 listener.onSystemActionsChanged();
             } catch (RemoteException re) {
@@ -1628,8 +1763,8 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         final IAccessibilityServiceClient listener = getServiceInterfaceSafely();
         if (listener != null) {
             try {
-                if (mTrace.isA11yTracingEnabled()) {
-                    mTrace.logTrace(TRACE_A11Y_SERVICE_CLIENT + ".clearAccessibilityCache");
+                if (svcClientTracingEnabled()) {
+                    logTraceSvcClient("clearAccessibilityCache", "");
                 }
                 listener.clearAccessibilityCache();
             } catch (RemoteException re) {
@@ -1639,7 +1774,85 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         }
     }
 
-    private IAccessibilityServiceClient getServiceInterfaceSafely() {
+    private void createImeSessionInternal() {
+        final IAccessibilityServiceClient listener = getServiceInterfaceSafely();
+        if (listener != null) {
+            try {
+                if (svcClientTracingEnabled()) {
+                    logTraceSvcClient("createImeSession", "");
+                }
+                AccessibilityCallback callback = new AccessibilityCallback();
+                listener.createImeSession(callback);
+            } catch (RemoteException re) {
+                Slog.e(LOG_TAG,
+                        "Error requesting IME session from " + mService, re);
+            }
+        }
+    }
+
+    private void setImeSessionEnabledInternal(IInputMethodSession session, boolean enabled) {
+        final IAccessibilityServiceClient listener = getServiceInterfaceSafely();
+        if (listener != null && session != null) {
+            try {
+                if (svcClientTracingEnabled()) {
+                    logTraceSvcClient("createImeSession", "");
+                }
+                listener.setImeSessionEnabled(session, enabled);
+            } catch (RemoteException re) {
+                Slog.e(LOG_TAG,
+                        "Error requesting IME session from " + mService, re);
+            }
+        }
+    }
+
+    private void bindInputInternal(InputBinding binding) {
+        final IAccessibilityServiceClient listener = getServiceInterfaceSafely();
+        if (listener != null) {
+            try {
+                if (svcClientTracingEnabled()) {
+                    logTraceSvcClient("bindInput", binding.toString());
+                }
+                listener.bindInput(binding);
+            } catch (RemoteException re) {
+                Slog.e(LOG_TAG,
+                        "Error binding input to " + mService, re);
+            }
+        }
+    }
+
+    private void unbindInputInternal() {
+        final IAccessibilityServiceClient listener = getServiceInterfaceSafely();
+        if (listener != null) {
+            try {
+                if (svcClientTracingEnabled()) {
+                    logTraceSvcClient("unbindInput", "");
+                }
+                listener.unbindInput();
+            } catch (RemoteException re) {
+                Slog.e(LOG_TAG,
+                        "Error unbinding input to " + mService, re);
+            }
+        }
+    }
+
+    private void startInputInternal(IBinder startInputToken, IInputContext inputContext,
+            EditorInfo editorInfo, boolean restarting) {
+        final IAccessibilityServiceClient listener = getServiceInterfaceSafely();
+        if (listener != null) {
+            try {
+                if (svcClientTracingEnabled()) {
+                    logTraceSvcClient("startInput", startInputToken + " "
+                            + inputContext + " " + editorInfo + restarting);
+                }
+                listener.startInput(startInputToken, inputContext, editorInfo, restarting);
+            } catch (RemoteException re) {
+                Slog.e(LOG_TAG,
+                        "Error starting input to " + mService, re);
+            }
+        }
+    }
+
+    protected IAccessibilityServiceClient getServiceInterfaceSafely() {
         synchronized (mLock) {
             return mServiceInterface;
         }
@@ -1668,6 +1881,10 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
      * @param displayId The logical display id.
      */
     private void ensureWindowsAvailableTimedLocked(int displayId) {
+        if (displayId == Display.INVALID_DISPLAY) {
+            return;
+        }
+
         if (mA11yWindowManager.getWindowListLocked(displayId) != null) {
             return;
         }
@@ -1747,6 +1964,12 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
                 LocalServices.getService(ActivityTaskManagerInternal.class)
                         .setFocusedActivity(activityToken);
             }
+            if (intConnTracingEnabled()) {
+                logTraceIntConn("performAccessibilityAction",
+                        accessibilityNodeId + ";" + action + ";" + arguments + ";" + interactionId
+                        + ";" + callback + ";" + mFetchFlags + ";" + interrogatingPid + ";"
+                        + interrogatingTid);
+            }
             connection.getRemote().performAccessibilityAction(accessibilityNodeId, action,
                     arguments, interactionId, callback, fetchFlags, interrogatingPid,
                     interrogatingTid);
@@ -1822,6 +2045,11 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         private static final int MSG_ON_ACCESSIBILITY_BUTTON_CLICKED = 7;
         private static final int MSG_ON_ACCESSIBILITY_BUTTON_AVAILABILITY_CHANGED = 8;
         private static final int MSG_ON_SYSTEM_ACTIONS_CHANGED = 9;
+        private static final int MSG_CREATE_IME_SESSION = 10;
+        private static final int MSG_SET_IME_SESSION_ENABLED = 11;
+        private static final int MSG_BIND_INPUT = 12;
+        private static final int MSG_UNBIND_INPUT = 13;
+        private static final int MSG_START_INPUT = 14;
 
         /** List of magnification callback states, mapping from displayId -> Boolean */
         @GuardedBy("mlock")
@@ -1847,11 +2075,9 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
                 case MSG_ON_MAGNIFICATION_CHANGED: {
                     final SomeArgs args = (SomeArgs) message.obj;
                     final Region region = (Region) args.arg1;
-                    final float scale = (float) args.arg2;
-                    final float centerX = (float) args.arg3;
-                    final float centerY = (float) args.arg4;
+                    final MagnificationConfig config = (MagnificationConfig) args.arg2;
                     final int displayId = args.argi1;
-                    notifyMagnificationChangedInternal(displayId, region, scale, centerX, centerY);
+                    notifyMagnificationChangedInternal(displayId, region, config);
                     args.recycle();
                 } break;
 
@@ -1873,6 +2099,29 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
                     notifySystemActionsChangedInternal();
                     break;
                 }
+                case MSG_CREATE_IME_SESSION:
+                    createImeSessionInternal();
+                    break;
+                case MSG_SET_IME_SESSION_ENABLED:
+                    final boolean enabled = (message.arg1 != 0);
+                    final IInputMethodSession session = (IInputMethodSession) message.obj;
+                    setImeSessionEnabledInternal(session, enabled);
+                    break;
+                case MSG_BIND_INPUT:
+                    final InputBinding binding = (InputBinding) message.obj;
+                    bindInputInternal(binding);
+                    break;
+                case MSG_UNBIND_INPUT:
+                    unbindInputInternal();
+                    break;
+                case MSG_START_INPUT:
+                    final boolean restarting = (message.arg1 != 0);
+                    final SomeArgs args = (SomeArgs) message.obj;
+                    final IBinder startInputToken = (IBinder) args.arg1;
+                    final IInputContext inputContext = (IInputContext) args.arg2;
+                    final EditorInfo editorInfo = (EditorInfo) args.arg3;
+                    startInputInternal(startInputToken, inputContext, editorInfo, restarting);
+                    break;
                 default: {
                     throw new IllegalArgumentException("Unknown message: " + type);
                 }
@@ -1880,7 +2129,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         }
 
         public void notifyMagnificationChangedLocked(int displayId, @NonNull Region region,
-                float scale, float centerX, float centerY) {
+                @NonNull MagnificationConfig config) {
             synchronized (mLock) {
                 if (mMagnificationCallbackState.get(displayId) == null) {
                     return;
@@ -1889,9 +2138,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
 
             final SomeArgs args = SomeArgs.obtain();
             args.arg1 = region;
-            args.arg2 = scale;
-            args.arg3 = centerX;
-            args.arg4 = centerY;
+            args.arg2 = config;
             args.argi1 = displayId;
 
             final Message msg = obtainMessage(MSG_ON_MAGNIFICATION_CHANGED, args);
@@ -1937,6 +2184,37 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
                     (available ? 1 : 0), 0);
             msg.sendToTarget();
         }
+
+        public void createImeSessionLocked() {
+            final Message msg = obtainMessage(MSG_CREATE_IME_SESSION);
+            msg.sendToTarget();
+        }
+
+        public void setImeSessionEnabledLocked(IInputMethodSession session, boolean enabled) {
+            final Message msg = obtainMessage(MSG_SET_IME_SESSION_ENABLED, (enabled ? 1 : 0),
+                    0, session);
+            msg.sendToTarget();
+        }
+
+        public void bindInputLocked(InputBinding binding) {
+            final Message msg = obtainMessage(MSG_BIND_INPUT, binding);
+            msg.sendToTarget();
+        }
+
+        public void unbindInputLocked() {
+            final Message msg = obtainMessage(MSG_UNBIND_INPUT);
+            msg.sendToTarget();
+        }
+
+        public void startInputLocked(IBinder startInputToken, IInputContext inputContext,
+                EditorInfo editorInfo, boolean restarting) {
+            final SomeArgs args = SomeArgs.obtain();
+            args.arg1 = startInputToken;
+            args.arg2 = inputContext;
+            args.arg3 = editorInfo;
+            final Message msg = obtainMessage(MSG_START_INPUT, restarting ? 1 : 0, 0, args);
+            msg.sendToTarget();
+        }
     }
 
     public boolean isServiceHandlesDoubleTapEnabled() {
@@ -1957,8 +2235,8 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
 
     @Override
     public void setGestureDetectionPassthroughRegion(int displayId, Region region) {
-        if (mTrace.isA11yTracingEnabled()) {
-            mTrace.logTrace(TRACE_A11Y_SERVICE_CONNECTION + ".setGestureDetectionPassthroughRegion",
+        if (svcConnTracingEnabled()) {
+            logTraceSvcConn("setGestureDetectionPassthroughRegion",
                     "displayId=" + displayId + ";region=" + region);
         }
         mSystemSupport.setGestureDetectionPassthroughRegion(displayId, region);
@@ -1966,8 +2244,8 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
 
     @Override
     public void setTouchExplorationPassthroughRegion(int displayId, Region region) {
-        if (mTrace.isA11yTracingEnabled()) {
-            mTrace.logTrace(TRACE_A11Y_SERVICE_CONNECTION + ".setTouchExplorationPassthroughRegion",
+        if (svcConnTracingEnabled()) {
+            logTraceSvcConn("setTouchExplorationPassthroughRegion",
                     "displayId=" + displayId + ";region=" + region);
         }
         mSystemSupport.setTouchExplorationPassthroughRegion(displayId, region);
@@ -1975,20 +2253,129 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
 
     @Override
     public void setFocusAppearance(int strokeWidth, int color) {
-        if (mTrace.isA11yTracingEnabled()) {
-            mTrace.logTrace(TRACE_A11Y_SERVICE_CONNECTION + ".setFocusAppearance",
-                    "strokeWidth=" + strokeWidth + ";color=" + color);
+        if (svcConnTracingEnabled()) {
+            logTraceSvcConn("setFocusAppearance", "strokeWidth=" + strokeWidth + ";color=" + color);
         }
     }
 
     @Override
-    public void logTrace(long timestamp, String where, String callingParams, int processId,
-            long threadId, int callingUid, Bundle callingStack) {
-        if (mTrace.isA11yTracingEnabled()) {
+    public void setCacheEnabled(boolean enabled) {
+        if (svcConnTracingEnabled()) {
+            logTraceSvcConn("setCacheEnabled", "enabled=" + enabled);
+        }
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            synchronized (mLock) {
+                mUsesAccessibilityCache = enabled;
+                mSystemSupport.onClientChangeLocked(true);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    @Override
+    public void logTrace(long timestamp, String where, long loggingTypes, String callingParams,
+            int processId, long threadId, int callingUid, Bundle callingStack) {
+        if (mTrace.isA11yTracingEnabledForTypes(loggingTypes)) {
             ArrayList<StackTraceElement> list =
                     (ArrayList<StackTraceElement>) callingStack.getSerializable(CALL_STACK);
-            mTrace.logTrace(timestamp, where, callingParams, processId, threadId, callingUid,
-                    list.toArray(new StackTraceElement[list.size()]));
+            HashSet<String> ignoreList =
+                    (HashSet<String>) callingStack.getSerializable(IGNORE_CALL_STACK);
+            mTrace.logTrace(timestamp, where, loggingTypes, callingParams, processId, threadId,
+                    callingUid, list.toArray(new StackTraceElement[list.size()]), ignoreList);
+        }
+    }
+
+    protected boolean svcClientTracingEnabled() {
+        return mTrace.isA11yTracingEnabledForTypes(FLAGS_ACCESSIBILITY_SERVICE_CLIENT);
+    }
+
+    protected void logTraceSvcClient(String methodName, String params) {
+        mTrace.logTrace(TRACE_SVC_CLIENT + "." + methodName,
+                    FLAGS_ACCESSIBILITY_SERVICE_CLIENT, params);
+    }
+
+    protected boolean svcConnTracingEnabled() {
+        return mTrace.isA11yTracingEnabledForTypes(FLAGS_ACCESSIBILITY_SERVICE_CONNECTION);
+    }
+
+    protected void logTraceSvcConn(String methodName, String params) {
+        mTrace.logTrace(TRACE_SVC_CONN + "." + methodName,
+                FLAGS_ACCESSIBILITY_SERVICE_CONNECTION, params);
+    }
+
+    protected boolean intConnTracingEnabled() {
+        return mTrace.isA11yTracingEnabledForTypes(FLAGS_ACCESSIBILITY_INTERACTION_CONNECTION);
+    }
+
+    protected void logTraceIntConn(String methodName, String params) {
+        mTrace.logTrace(LOG_TAG + "." + methodName,
+                FLAGS_ACCESSIBILITY_INTERACTION_CONNECTION, params);
+    }
+
+    protected boolean wmTracingEnabled() {
+        return mTrace.isA11yTracingEnabledForTypes(FLAGS_WINDOW_MANAGER_INTERNAL);
+    }
+
+    protected void logTraceWM(String methodName, String params) {
+        mTrace.logTrace(TRACE_WM + "." + methodName, FLAGS_WINDOW_MANAGER_INTERNAL, params);
+    }
+
+    public void setServiceDetectsGesturesEnabled(int displayId, boolean mode) {
+        mSystemSupport.setServiceDetectsGesturesEnabled(displayId, mode);
+    }
+
+    public void requestTouchExploration(int displayId) {
+        mSystemSupport.requestTouchExploration(displayId);
+    }
+
+    public void requestDragging(int displayId, int pointerId) {
+        mSystemSupport.requestDragging(displayId, pointerId);
+    }
+
+    public void requestDelegating(int displayId) {
+        mSystemSupport.requestDelegating(displayId);
+    }
+
+    public void onDoubleTap(int displayId) {
+        mSystemSupport.onDoubleTap(displayId);
+    }
+
+    public void onDoubleTapAndHold(int displayId) {
+        mSystemSupport.onDoubleTapAndHold(displayId);
+    }
+
+    /**
+     * Sets the scaling factor for animations.
+     */
+    public void setAnimationScale(float scale) {
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            Settings.Global.putFloat(
+                    mContext.getContentResolver(), Settings.Global.WINDOW_ANIMATION_SCALE, scale);
+            Settings.Global.putFloat(
+                    mContext.getContentResolver(),
+                    Settings.Global.TRANSITION_ANIMATION_SCALE,
+                    scale);
+            Settings.Global.putFloat(
+                    mContext.getContentResolver(), Settings.Global.ANIMATOR_DURATION_SCALE, scale);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    private static final class AccessibilityCallback extends IInputSessionWithIdCallback.Stub {
+        @Override
+        public void sessionCreated(IInputMethodSession session, int id) {
+            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMMS.sessionCreated");
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                InputMethodManagerInternal.get().onSessionForAccessibilityCreated(id, session);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
     }
 }

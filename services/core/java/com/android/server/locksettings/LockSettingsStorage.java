@@ -47,6 +47,7 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockPatternUtils.CredentialType;
 import com.android.server.LocalServices;
 import com.android.server.PersistentDataBlockManagerInternal;
+import com.android.server.utils.WatchableImpl;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -66,7 +67,7 @@ import java.util.Map;
 /**
  * Storage for the lock settings service.
  */
-class LockSettingsStorage {
+class LockSettingsStorage extends WatchableImpl {
 
     private static final String TAG = "LockSettingsStorage";
     private static final String TABLE = "locksettings";
@@ -173,7 +174,7 @@ class LockSettingsStorage {
         } finally {
             db.endTransaction();
         }
-
+        dispatchChange(this);
     }
 
     @VisibleForTesting
@@ -221,7 +222,7 @@ class LockSettingsStorage {
         } finally {
             db.endTransaction();
         }
-
+        dispatchChange(this);
     }
 
     public void prefetchUser(int userId) {
@@ -412,6 +413,7 @@ class LockSettingsStorage {
                 }
             }
             mCache.putFile(name, hash);
+            dispatchChange(this);
         }
     }
 
@@ -423,6 +425,7 @@ class LockSettingsStorage {
                 file.delete();
                 mCache.putFile(name, null);
             }
+            dispatchChange(this);
         }
     }
 
@@ -500,6 +503,7 @@ class LockSettingsStorage {
                 Slog.w(TAG, "Failed to zeroize " + path, e);
             } finally {
                 file.delete();
+                dispatchChange(this);
             }
             mCache.putFile(path, null);
         }
@@ -587,6 +591,7 @@ class LockSettingsStorage {
         } finally {
             db.endTransaction();
         }
+        dispatchChange(this);
     }
 
     private void deleteFilesAndRemoveCache(String... names) {
@@ -595,6 +600,7 @@ class LockSettingsStorage {
             if (file.exists()) {
                 file.delete();
                 mCache.putFile(name, null);
+                dispatchChange(this);
             }
         }
     }
@@ -675,6 +681,7 @@ class LockSettingsStorage {
         }
         persistentDataBlock.setFrpCredentialHandle(PersistentData.toBytes(
                 persistentType, userId, qualityForUi, payload));
+        dispatchChange(this);
     }
 
     public PersistentData readPersistentDataBlock() {

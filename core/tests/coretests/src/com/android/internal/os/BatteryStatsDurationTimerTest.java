@@ -33,7 +33,7 @@ public class BatteryStatsDurationTimerTest extends TestCase {
 
     @SmallTest
     public void testStartStop() throws Exception {
-        final MockClocks clocks = new MockClocks();
+        final MockClock clocks = new MockClock();
 
         final BatteryStatsImpl.TimeBase timeBase = new BatteryStatsImpl.TimeBase();
         timeBase.init(clocks.uptimeMillis(), clocks.elapsedRealtime());
@@ -105,7 +105,7 @@ public class BatteryStatsDurationTimerTest extends TestCase {
      */
     @SmallTest
     public void testReset() throws Exception {
-        final MockClocks clocks = new MockClocks();
+        final MockClock clocks = new MockClock();
 
         final BatteryStatsImpl.TimeBase timeBase = new BatteryStatsImpl.TimeBase();
         timeBase.init(clocks.uptimeMillis(), clocks.elapsedRealtime());
@@ -141,7 +141,7 @@ public class BatteryStatsDurationTimerTest extends TestCase {
      */
     @SmallTest
     public void testResetAndDetach() throws Exception {
-        final MockClocks clocks = new MockClocks();
+        final MockClock clocks = new MockClock();
 
         final BatteryStatsImpl.TimeBase timeBase = new BatteryStatsImpl.TimeBase();
         timeBase.init(clocks.uptimeMillis(), clocks.elapsedRealtime());
@@ -168,7 +168,7 @@ public class BatteryStatsDurationTimerTest extends TestCase {
 
     @SmallTest
     public void testParceling() throws Exception {
-        final MockClocks clocks = new MockClocks();
+        final MockClock clocks = new MockClock();
 
         final BatteryStatsImpl.TimeBase timeBase = new BatteryStatsImpl.TimeBase();
         timeBase.init(clocks.uptimeMillis(), clocks.elapsedRealtime());

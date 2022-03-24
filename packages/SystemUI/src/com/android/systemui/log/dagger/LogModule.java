@@ -49,7 +49,24 @@ public class LogModule {
     @SysUISingleton
     @NotificationLog
     public static LogBuffer provideNotificationsLogBuffer(LogBufferFactory factory) {
-        return factory.create("NotifLog", 1000);
+        return factory.create("NotifLog", 1000 /* maxPoolSize */,
+                10 /* flexSize */, false /* systrace */);
+    }
+
+    /** Provides a logging buffer for all logs related to the data layer of notifications. */
+    @Provides
+    @SysUISingleton
+    @NotificationHeadsUpLog
+    public static LogBuffer provideNotificationHeadsUpLogBuffer(LogBufferFactory factory) {
+        return factory.create("NotifHeadsUpLog", 1000);
+    }
+
+    /** Provides a logging buffer for all logs for lockscreen to shade transition events. */
+    @Provides
+    @SysUISingleton
+    @LSShadeTransitionLog
+    public static LogBuffer provideLSShadeTransitionControllerBuffer(LogBufferFactory factory) {
+        return factory.create("LSShadeTransitionLog", 50);
     }
 
     /** Provides a logging buffer for all logs related to managing notification sections. */
@@ -57,7 +74,8 @@ public class LogModule {
     @SysUISingleton
     @NotificationSectionLog
     public static LogBuffer provideNotificationSectionLogBuffer(LogBufferFactory factory) {
-        return factory.create("NotifSectionLog", 1000);
+        return factory.create("NotifSectionLog", 1000 /* maxPoolSize */,
+                10 /* flexSize */, false /* systrace */);
     }
 
     /** Provides a logging buffer for all logs related to the data layer of notifications. */
@@ -73,7 +91,8 @@ public class LogModule {
     @SysUISingleton
     @QSLog
     public static LogBuffer provideQuickSettingsLogBuffer(LogBufferFactory factory) {
-        return factory.create("QSLog", 500);
+        return factory.create("QSLog", 500 /* maxPoolSize */,
+                10 /* flexSize */, false /* systrace */);
     }
 
     /** Provides a logging buffer for {@link com.android.systemui.broadcast.BroadcastDispatcher} */
@@ -81,7 +100,8 @@ public class LogModule {
     @SysUISingleton
     @BroadcastDispatcherLog
     public static LogBuffer provideBroadcastDispatcherLogBuffer(LogBufferFactory factory) {
-        return factory.create("BroadcastDispatcherLog", 500);
+        return factory.create("BroadcastDispatcherLog", 500 /* maxPoolSize */,
+                10 /* flexSize */, false /* systrace */);
     }
 
     /** Provides a logging buffer for all logs related to Toasts shown by SystemUI. */
@@ -100,13 +120,69 @@ public class LogModule {
         return factory.create("PrivacyLog", 100);
     }
 
+    /**
+     * Provides a logging buffer for
+     * {@link com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragment}.
+     */
+    @Provides
+    @SysUISingleton
+    @CollapsedSbFragmentLog
+    public static LogBuffer provideCollapsedSbFragmentLogBuffer(LogBufferFactory factory) {
+        return factory.create("CollapsedSbFragmentLog", 20);
+    }
+
+    /**
+     * Provides a logging buffer for logs related to {@link com.android.systemui.qs.QSFragment}'s
+     * disable flag adjustments.
+     */
+    @Provides
+    @SysUISingleton
+    @QSFragmentDisableLog
+    public static LogBuffer provideQSFragmentDisableLogBuffer(LogBufferFactory factory) {
+        return factory.create("QSFragmentDisableFlagsLog", 10 /* maxPoolSize */,
+                10 /* flexSize */, false /* systrace */);
+    }
+
+    /**
+     * Provides a logging buffer for logs related to swiping away the status bar while in immersive
+     * mode. See {@link com.android.systemui.statusbar.gesture.SwipeStatusBarAwayGestureLogger}.
+     */
+    @Provides
+    @SysUISingleton
+    @SwipeStatusBarAwayLog
+    public static LogBuffer provideSwipeAwayGestureLogBuffer(LogBufferFactory factory) {
+        return factory.create("SwipeStatusBarAwayLog", 30);
+    }
+
+    /**
+     * Provides a logging buffer for logs related to the media tap-to-transfer chip on the sender
+     * device. See {@link com.android.systemui.media.taptotransfer.sender.MediaTttSenderLogger}.
+     */
+    @Provides
+    @SysUISingleton
+    @MediaTttSenderLogBuffer
+    public static LogBuffer provideMediaTttSenderLogBuffer(LogBufferFactory factory) {
+        return factory.create("MediaTttSender", 20);
+    }
+
+    /**
+     * Provides a logging buffer for logs related to the media tap-to-transfer chip on the receiver
+     * device. See {@link com.android.systemui.media.taptotransfer.receiver.MediaTttReceiverLogger}.
+     */
+    @Provides
+    @SysUISingleton
+    @MediaTttReceiverLogBuffer
+    public static LogBuffer provideMediaTttReceiverLogBuffer(LogBufferFactory factory) {
+        return factory.create("MediaTttReceiver", 20);
+    }
+
     /** Allows logging buffers to be tweaked via adb on debug builds but not on prod builds. */
     @Provides
     @SysUISingleton
     public static LogcatEchoTracker provideLogcatEchoTracker(
             ContentResolver contentResolver,
             @Main Looper looper) {
-        if (Build.IS_DEBUGGABLE) {
+        if (Build.isDebuggable()) {
             return LogcatEchoTrackerDebug.create(contentResolver, looper);
         } else {
             return new LogcatEchoTrackerProd();

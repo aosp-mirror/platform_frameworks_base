@@ -16,6 +16,8 @@
 
 package android.location;
 
+import static android.Manifest.permission.LOCATION_BYPASS;
+
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
@@ -53,7 +55,9 @@ public final class LastLocationRequest implements Parcelable {
      *
      * @return true if this request should be ignored while updating app ops with location usage
      *
+     * @hide
      */
+    @SystemApi
     public boolean isHiddenFromAppOps() {
         return mHiddenFromAppOps;
     }
@@ -65,9 +69,10 @@ public final class LastLocationRequest implements Parcelable {
      * Driving Assistance Systems) application.
      *
      * @return true if all limiting factors will be ignored to satisfy GNSS request
+     *
      * @hide
      */
-    // TODO: make this system api
+    @SystemApi
     public boolean isAdasGnssBypass() {
         return mAdasGnssBypass;
     }
@@ -78,7 +83,10 @@ public final class LastLocationRequest implements Parcelable {
      * possible limiting factors will be ignored in order to satisfy this last location request.
      *
      * @return true if all limiting factors will be ignored to satisfy this request
+     *
+     * @hide
      */
+    @SystemApi
     public boolean isLocationSettingsIgnored() {
         return mLocationSettingsIgnored;
     }
@@ -192,7 +200,10 @@ public final class LastLocationRequest implements Parcelable {
          *
          * <p>Permissions enforcement occurs when resulting last location request is actually used,
          * not when this method is invoked.
+         *
+         * @hide
          */
+        @SystemApi
         @RequiresPermission(Manifest.permission.UPDATE_APP_OPS_STATS)
         public @NonNull Builder setHiddenFromAppOps(boolean hiddenFromAppOps) {
             mHiddenFromAppOps = hiddenFromAppOps;
@@ -211,8 +222,8 @@ public final class LastLocationRequest implements Parcelable {
          *
          * @hide
          */
-        // TODO: make this system api
-        @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
+        @SystemApi
+        @RequiresPermission(LOCATION_BYPASS)
         public @NonNull LastLocationRequest.Builder setAdasGnssBypass(boolean adasGnssBypass) {
             mAdasGnssBypass = adasGnssBypass;
             return this;
@@ -226,8 +237,11 @@ public final class LastLocationRequest implements Parcelable {
          *
          * <p>Permissions enforcement occurs when resulting last location request is actually used,
          * not when this method is invoked.
+         *
+         * @hide
          */
-        @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
+        @SystemApi
+        @RequiresPermission(LOCATION_BYPASS)
         public @NonNull Builder setLocationSettingsIgnored(boolean locationSettingsIgnored) {
             mLocationSettingsIgnored = locationSettingsIgnored;
             return this;

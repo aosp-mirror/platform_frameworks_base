@@ -69,7 +69,7 @@ public class LegacyVpnInfo implements Parcelable {
             LegacyVpnInfo info = new LegacyVpnInfo();
             info.key = in.readString();
             info.state = in.readInt();
-            info.intent = in.readParcelable(null);
+            info.intent = in.readParcelable(null, android.app.PendingIntent.class);
             return info;
         }
 

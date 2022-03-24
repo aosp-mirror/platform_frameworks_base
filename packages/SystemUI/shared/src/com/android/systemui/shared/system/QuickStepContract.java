@@ -55,11 +55,12 @@ public class QuickStepContract {
     // See IStartingWindow.aidl
     public static final String KEY_EXTRA_SHELL_STARTING_WINDOW =
             "extra_shell_starting_window";
-    // See ISmartspaceTransitionController.aidl
-    public static final String KEY_EXTRA_SMARTSPACE_TRANSITION_CONTROLLER = "smartspace_transition";
+    // See ISysuiUnlockAnimationController.aidl
+    public static final String KEY_EXTRA_UNLOCK_ANIMATION_CONTROLLER = "unlock_animation";
+    // See IRecentTasks.aidl
+    public static final String KEY_EXTRA_RECENT_TASKS = "recent_tasks";
+    public static final String KEY_EXTRA_SHELL_BACK_ANIMATION = "extra_shell_back_animation";
 
-    public static final String NAV_BAR_MODE_2BUTTON_OVERLAY =
-            WindowManagerPolicyConstants.NAV_BAR_MODE_2BUTTON_OVERLAY;
     public static final String NAV_BAR_MODE_3BUTTON_OVERLAY =
             WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON_OVERLAY;
     public static final String NAV_BAR_MODE_GESTURAL_OVERLAY =
@@ -102,8 +103,8 @@ public class QuickStepContract {
     // enabled (since it's used to navigate back within the bubbled app, or to collapse the bubble
     // stack.
     public static final int SYSUI_STATE_BUBBLES_EXPANDED = 1 << 14;
-    // The global actions dialog is showing
-    public static final int SYSUI_STATE_GLOBAL_ACTIONS_SHOWING = 1 << 15;
+    // A SysUI dialog is showing.
+    public static final int SYSUI_STATE_DIALOG_SHOWING = 1 << 15;
     // The one-handed mode is active
     public static final int SYSUI_STATE_ONE_HANDED_ACTIVE = 1 << 16;
     // Allow system gesture no matter the system bar(s) is visible or not
@@ -112,6 +113,16 @@ public class QuickStepContract {
     public static final int SYSUI_STATE_IME_SHOWING = 1 << 18;
     // The window magnification is overlapped with system gesture insets at the bottom.
     public static final int SYSUI_STATE_MAGNIFICATION_OVERLAP = 1 << 19;
+    // ImeSwitcher is showing
+    public static final int SYSUI_STATE_IME_SWITCHER_SHOWING = 1 << 20;
+    // Device dozing/AOD state
+    public static final int SYSUI_STATE_DEVICE_DOZING = 1 << 21;
+    // The home feature is disabled (either by SUW/SysUI/device policy)
+    public static final int SYSUI_STATE_BACK_DISABLED = 1 << 22;
+    // The bubble stack is expanded AND the mange menu for bubbles is expanded on top of it.
+    public static final int SYSUI_STATE_BUBBLES_MANAGE_MENU_EXPANDED = 1 << 23;
+    // The current app is in immersive mode
+    public static final int SYSUI_STATE_IMMERSIVE_MODE = 1 << 24;
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({SYSUI_STATE_SCREEN_PINNING,
@@ -129,11 +140,16 @@ public class QuickStepContract {
             SYSUI_STATE_TRACING_ENABLED,
             SYSUI_STATE_ASSIST_GESTURE_CONSTRAINED,
             SYSUI_STATE_BUBBLES_EXPANDED,
-            SYSUI_STATE_GLOBAL_ACTIONS_SHOWING,
+            SYSUI_STATE_DIALOG_SHOWING,
             SYSUI_STATE_ONE_HANDED_ACTIVE,
             SYSUI_STATE_ALLOW_GESTURE_IGNORING_BAR_VISIBILITY,
             SYSUI_STATE_IME_SHOWING,
-            SYSUI_STATE_MAGNIFICATION_OVERLAP
+            SYSUI_STATE_MAGNIFICATION_OVERLAP,
+            SYSUI_STATE_IME_SWITCHER_SHOWING,
+            SYSUI_STATE_DEVICE_DOZING,
+            SYSUI_STATE_BACK_DISABLED,
+            SYSUI_STATE_BUBBLES_MANAGE_MENU_EXPANDED,
+            SYSUI_STATE_IMMERSIVE_MODE
     })
     public @interface SystemUiStateFlags {}
 
@@ -150,7 +166,7 @@ public class QuickStepContract {
         str.add((flags & SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING_OCCLUDED) != 0
                 ? "keygrd_occluded" : "");
         str.add((flags & SYSUI_STATE_BOUNCER_SHOWING) != 0 ? "bouncer_visible" : "");
-        str.add((flags & SYSUI_STATE_GLOBAL_ACTIONS_SHOWING) != 0 ? "global_actions" : "");
+        str.add((flags & SYSUI_STATE_DIALOG_SHOWING) != 0 ? "dialog_showing" : "");
         str.add((flags & SYSUI_STATE_A11Y_BUTTON_CLICKABLE) != 0 ? "a11y_click" : "");
         str.add((flags & SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE) != 0 ? "a11y_long_click" : "");
         str.add((flags & SYSUI_STATE_TRACING_ENABLED) != 0 ? "tracing" : "");
@@ -162,6 +178,12 @@ public class QuickStepContract {
                 ? "allow_gesture" : "");
         str.add((flags & SYSUI_STATE_IME_SHOWING) != 0 ? "ime_visible" : "");
         str.add((flags & SYSUI_STATE_MAGNIFICATION_OVERLAP) != 0 ? "magnification_overlap" : "");
+        str.add((flags & SYSUI_STATE_IME_SWITCHER_SHOWING) != 0 ? "ime_switcher_showing" : "");
+        str.add((flags & SYSUI_STATE_DEVICE_DOZING) != 0 ? "device_dozing" : "");
+        str.add((flags & SYSUI_STATE_BACK_DISABLED) != 0 ? "back_disabled" : "");
+        str.add((flags & SYSUI_STATE_BUBBLES_MANAGE_MENU_EXPANDED) != 0
+                ? "bubbles_mange_menu_expanded" : "");
+        str.add((flags & SYSUI_STATE_IMMERSIVE_MODE) != 0 ? "immersive_mode" : "");
         return str.toString();
     }
 
@@ -234,7 +256,7 @@ public class QuickStepContract {
     public static boolean isBackGestureDisabled(int sysuiStateFlags) {
         // Always allow when the bouncer/global actions is showing (even on top of the keyguard)
         if ((sysuiStateFlags & SYSUI_STATE_BOUNCER_SHOWING) != 0
-                || (sysuiStateFlags & SYSUI_STATE_GLOBAL_ACTIONS_SHOWING) != 0) {
+                || (sysuiStateFlags & SYSUI_STATE_DIALOG_SHOWING) != 0) {
             return false;
         }
         if ((sysuiStateFlags & SYSUI_STATE_ALLOW_GESTURE_IGNORING_BAR_VISIBILITY) != 0) {
@@ -273,8 +295,8 @@ public class QuickStepContract {
      * These values are expressed in pixels because they should not respect display or font
      * scaling, this means that we don't have to reload them on config changes.
      */
-    public static float getWindowCornerRadius(Resources resources) {
-        return ScreenDecorationsUtils.getWindowCornerRadius(resources);
+    public static float getWindowCornerRadius(Context context) {
+        return ScreenDecorationsUtils.getWindowCornerRadius(context);
     }
 
     /**

@@ -1,11 +1,6 @@
 set noparent
+file:platform/packages/modules/Connectivity:master:/OWNERS_core_networking
 
-codewiz@google.com
-jchalard@google.com
 jsharkey@android.com
-junyulai@google.com
-lorenzo@google.com
-reminv@google.com
-satk@google.com
 sudheersai@google.com
 yamasani@google.com

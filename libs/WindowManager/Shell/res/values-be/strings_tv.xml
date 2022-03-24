@@ -21,4 +21,8 @@
     <string name="pip_notification_unknown_title" msgid="2729870284350772311">"(Праграма без назвы)"</string>
     <string name="pip_close" msgid="9135220303720555525">"Закрыць PIP"</string>
     <string name="pip_fullscreen" msgid="7278047353591302554">"Поўнаэкранны рэжым"</string>
+    <string name="pip_move" msgid="1544227837964635439">"Перамясціць PIP"</string>
+    <string name="pip_expand" msgid="7605396312689038178">"Разгарнуць відарыс у відарысе"</string>
+    <string name="pip_collapse" msgid="5732233773786896094">"Згарнуць відарыс у відарысе"</string>
+    <string name="pip_edu_text" msgid="3672999496647508701">" Двойчы націсніце "<annotation icon="home_icon">" ГАЛОЎНЫ ЭКРАН "</annotation>" для пераходу ў налады"</string>
 </resources>

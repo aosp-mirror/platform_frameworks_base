@@ -490,8 +490,12 @@ final class WiredAccessoryManager implements WiredAccessoryCallbacks {
         private final List<ExtconInfo> mExtconInfos;
 
         WiredAccessoryExtconObserver() {
-            mExtconInfos = ExtconInfo.getExtconInfos(".*audio.*");
-
+            mExtconInfos = ExtconInfo.getExtconInfoForTypes(new String[] {
+                    ExtconInfo.EXTCON_HEADPHONE,
+                    ExtconInfo.EXTCON_MICROPHONE,
+                    ExtconInfo.EXTCON_HDMI,
+                    ExtconInfo.EXTCON_LINE_OUT,
+            });
         }
 
         private void init() {
@@ -521,15 +525,23 @@ final class WiredAccessoryManager implements WiredAccessoryCallbacks {
         @Override
         public Pair<Integer, Integer> parseState(ExtconInfo extconInfo, String status) {
             if (LOG) Slog.v(TAG, "status  " + status);
-            int []maskAndState = {0,0};
+            int[] maskAndState = {0, 0};
             // extcon event state changes from kernel4.9
             // new state will be like STATE=MICROPHONE=1\nHEADPHONE=0
-            updateBit(maskAndState, BIT_HEADSET_NO_MIC, status, "HEADPHONE") ;
-            updateBit(maskAndState, BIT_HEADSET, status,"MICROPHONE") ;
-            updateBit(maskAndState, BIT_HDMI_AUDIO, status,"HDMI") ;
-            updateBit(maskAndState, BIT_LINEOUT, status,"LINE-OUT") ;
+            if (extconInfo.hasCableType(ExtconInfo.EXTCON_HEADPHONE)) {
+                updateBit(maskAndState, BIT_HEADSET_NO_MIC, status, ExtconInfo.EXTCON_HEADPHONE);
+            }
+            if (extconInfo.hasCableType(ExtconInfo.EXTCON_MICROPHONE)) {
+                updateBit(maskAndState, BIT_HEADSET, status, ExtconInfo.EXTCON_MICROPHONE);
+            }
+            if (extconInfo.hasCableType(ExtconInfo.EXTCON_HDMI)) {
+                updateBit(maskAndState, BIT_HDMI_AUDIO, status, ExtconInfo.EXTCON_HDMI);
+            }
+            if (extconInfo.hasCableType(ExtconInfo.EXTCON_LINE_OUT)) {
+                updateBit(maskAndState, BIT_LINEOUT, status, ExtconInfo.EXTCON_LINE_OUT);
+            }
             if (LOG) Slog.v(TAG, "mask " + maskAndState[0] + " state " + maskAndState[1]);
-            return Pair.create(maskAndState[0],maskAndState[1]);
+            return Pair.create(maskAndState[0], maskAndState[1]);
         }
 
         @Override

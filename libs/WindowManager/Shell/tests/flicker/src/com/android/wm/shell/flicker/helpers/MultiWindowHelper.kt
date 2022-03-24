@@ -17,14 +17,14 @@
 package com.android.wm.shell.flicker.helpers
 
 import android.app.Instrumentation
-import android.content.ComponentName
 import android.content.Context
 import android.provider.Settings
+import com.android.server.wm.traces.common.FlickerComponentName
 
 class MultiWindowHelper(
     instrumentation: Instrumentation,
     activityLabel: String,
-    componentsInfo: ComponentName
+    componentsInfo: FlickerComponentName
 ) : BaseAppHelper(instrumentation, activityLabel, componentsInfo) {
 
     companion object {

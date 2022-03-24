@@ -171,25 +171,28 @@ public class NetdEventListenerService extends INetdEventListener.Stub {
     }
 
     private NetworkMetrics getMetricsForNetwork(long timeMs, int netId) {
-        collectPendingMetricsSnapshot(timeMs);
         NetworkMetrics metrics = mNetworkMetrics.get(netId);
-        if (metrics == null) {
-            // TODO: allow to change transport for a given netid.
-            metrics = new NetworkMetrics(netId, getTransports(netId), mConnectTb);
+        final NetworkCapabilities nc = mCallback.getNetworkCapabilities(netId);
+        final long transports = (nc != null) ? BitUtils.packBits(nc.getTransportTypes()) : 0;
+        final boolean forceCollect =
+                (metrics != null && nc != null && metrics.transports != transports);
+        collectPendingMetricsSnapshot(timeMs, forceCollect);
+        if (metrics == null || forceCollect) {
+            metrics = new NetworkMetrics(netId, transports, mConnectTb);
             mNetworkMetrics.put(netId, metrics);
         }
         return metrics;
     }
 
     private NetworkMetricsSnapshot[] getNetworkMetricsSnapshots() {
-        collectPendingMetricsSnapshot(System.currentTimeMillis());
+        collectPendingMetricsSnapshot(System.currentTimeMillis(), false /* forceCollect */);
         return mNetworkMetricsSnapshots.toArray();
     }
 
-    private void collectPendingMetricsSnapshot(long timeMs) {
+    private void collectPendingMetricsSnapshot(long timeMs, boolean forceCollect) {
         // Detects time differences larger than the snapshot collection period.
         // This is robust against clock jumps and long inactivity periods.
-        if (Math.abs(timeMs - mLastSnapshot) <= METRICS_SNAPSHOT_SPAN_MS) {
+        if (!forceCollect && Math.abs(timeMs - mLastSnapshot) <= METRICS_SNAPSHOT_SPAN_MS) {
             return;
         }
         mLastSnapshot = projectSnapshotTime(timeMs);
@@ -392,14 +395,6 @@ public class NetdEventListenerService extends INetdEventListener.Stub {
             list.add(IpConnectivityEventBuilder.toProto(mWakeupStats.valueAt(i)));
         }
         return list;
-    }
-
-    private long getTransports(int netId) {
-        final NetworkCapabilities nc = mCallback.getNetworkCapabilities(netId);
-        if (nc == null) {
-            return 0;
-        }
-        return BitUtils.packBits(nc.getTransportTypes());
     }
 
     /** Helper class for buffering summaries of NetworkMetrics at regular time intervals */

@@ -19,6 +19,7 @@ package com.android.internal.inputmethod;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import android.annotation.IntDef;
+import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 
 import java.lang.annotation.Retention;
@@ -53,7 +54,8 @@ import java.lang.annotation.Retention;
         SoftInputShowHideReason.SHOW_RESTORE_IME_VISIBILITY,
         SoftInputShowHideReason.SHOW_TOGGLE_SOFT_INPUT,
         SoftInputShowHideReason.HIDE_TOGGLE_SOFT_INPUT,
-        SoftInputShowHideReason.SHOW_SOFT_INPUT_BY_INSETS_API})
+        SoftInputShowHideReason.SHOW_SOFT_INPUT_BY_INSETS_API,
+        SoftInputShowHideReason.HIDE_DISPLAY_IME_POLICY_HIDE})
 public @interface SoftInputShowHideReason {
     /** Show soft input by {@link android.view.inputmethod.InputMethodManager#showSoftInput}. */
     int SHOW_SOFT_INPUT = 0;
@@ -195,4 +197,10 @@ public @interface SoftInputShowHideReason {
      * {@link android.view.InsetsController#show(int)};
      */
     int SHOW_SOFT_INPUT_BY_INSETS_API = 25;
+
+    /**
+     * Hide soft input if Ime policy has been set to {@link WindowManager#DISPLAY_IME_POLICY_HIDE}.
+     * See also {@code InputMethodManagerService#mImeHiddenByDisplayPolicy}.
+     */
+    int HIDE_DISPLAY_IME_POLICY_HIDE = 26;
 }

@@ -44,6 +44,7 @@ import android.view.View;
 import android.view.autofill.AutofillId;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
@@ -91,6 +92,7 @@ public class EditorInfo implements InputType, Parcelable {
      *                1                  TYPE_TEXT_FLAG_MULTI_LINE
      *               1                   TYPE_TEXT_FLAG_IME_MULTI_LINE
      *              1                    TYPE_TEXT_FLAG_NO_SUGGESTIONS
+     *             1                     TYPE_TEXT_FLAG_ENABLE_TEXT_CONVERSION_SUGGESTIONS
      * |-------|-------|-------|-------|
      *                                1  TYPE_CLASS_NUMBER
      *                             1     TYPE_NUMBER_VARIATION_PASSWORD
@@ -528,10 +530,6 @@ public class EditorInfo implements InputType, Parcelable {
      * If not {@code null}, this editor needs to talk to IMEs that run for the specified user, no
      * matter what user ID the calling process has.
      *
-     * <p>Note: This field will be silently ignored when
-     * {@link com.android.server.inputmethod.InputMethodSystemProperty#MULTI_CLIENT_IME_ENABLED} is
-     * {@code true}.</p>
-     *
      * <p>Note also that pseudo handles such as {@link UserHandle#ALL} are not supported.</p>
      *
      * @hide
@@ -586,6 +584,16 @@ public class EditorInfo implements InputType, Parcelable {
      */
     public void setInitialSurroundingText(@NonNull CharSequence sourceText) {
         setInitialSurroundingSubText(sourceText, /* subTextStart = */ 0);
+    }
+
+    /**
+     * An internal variant of {@link #setInitialSurroundingText(CharSequence)}.
+     *
+     * @param surroundingText {@link SurroundingText} to be set.
+     * @hide
+     */
+    public final void setInitialSurroundingTextInternal(@NonNull SurroundingText surroundingText) {
+        mInitialSurroundingText = surroundingText;
     }
 
     /**
@@ -976,6 +984,35 @@ public class EditorInfo implements InputType, Parcelable {
     }
 
     /**
+     * @return A deep copy of {@link EditorInfo}.
+     * @hide
+     */
+    @NonNull
+    public final EditorInfo createCopyInternal() {
+        final EditorInfo newEditorInfo = new EditorInfo();
+        newEditorInfo.inputType = inputType;
+        newEditorInfo.imeOptions = imeOptions;
+        newEditorInfo.privateImeOptions = privateImeOptions;
+        newEditorInfo.internalImeOptions = internalImeOptions;
+        newEditorInfo.actionLabel = TextUtils.stringOrSpannedString(actionLabel);
+        newEditorInfo.actionId = actionId;
+        newEditorInfo.initialSelStart = initialSelStart;
+        newEditorInfo.initialSelEnd = initialSelEnd;
+        newEditorInfo.initialCapsMode = initialCapsMode;
+        newEditorInfo.hintText = TextUtils.stringOrSpannedString(hintText);
+        newEditorInfo.label = TextUtils.stringOrSpannedString(label);
+        newEditorInfo.packageName = packageName;
+        newEditorInfo.autofillId = autofillId;
+        newEditorInfo.fieldId = fieldId;
+        newEditorInfo.fieldName = fieldName;
+        newEditorInfo.extras = extras != null ? extras.deepCopy() : null;
+        newEditorInfo.mInitialSurroundingText = mInitialSurroundingText;
+        newEditorInfo.hintLocales = hintLocales;
+        newEditorInfo.contentMimeTypes = ArrayUtils.cloneOrNull(contentMimeTypes);
+        return newEditorInfo;
+    }
+
+    /**
      * Used to package this object into a {@link Parcel}.
      *
      * @param dest The {@link Parcel} to be written.
@@ -1030,7 +1067,7 @@ public class EditorInfo implements InputType, Parcelable {
                     res.hintText = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);
                     res.label = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);
                     res.packageName = source.readString();
-                    res.autofillId = source.readParcelable(AutofillId.class.getClassLoader());
+                    res.autofillId = source.readParcelable(AutofillId.class.getClassLoader(), android.view.autofill.AutofillId.class);
                     res.fieldId = source.readInt();
                     res.fieldName = source.readString();
                     res.extras = source.readBundle();

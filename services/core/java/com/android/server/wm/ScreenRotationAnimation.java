@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.util.RotationUtils.deltaRotation;
+import static android.view.WindowManagerPolicyConstants.SCREEN_FREEZE_LAYER_BASE;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ORIENTATION;
 import static com.android.internal.protolog.ProtoLogGroup.WM_SHOW_SURFACE_ALLOC;
@@ -30,8 +31,6 @@ import static com.android.server.wm.ScreenRotationAnimationProto.STARTED;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_SCREEN_ROTATION;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
-import static com.android.server.wm.WindowManagerService.TYPE_LAYER_MULTIPLIER;
-import static com.android.server.wm.WindowStateAnimator.WINDOW_FREEZE_LAYER;
 
 import android.animation.ArgbEvaluator;
 import android.content.Context;
@@ -91,13 +90,6 @@ import java.io.PrintWriter;
 class ScreenRotationAnimation {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "ScreenRotationAnimation" : TAG_WM;
 
-    /*
-     * Layers for screen rotation animation. We put these layers above
-     * WINDOW_FREEZE_LAYER so that screen freeze will cover all windows.
-     */
-    private static final int SCREEN_FREEZE_LAYER_BASE = WINDOW_FREEZE_LAYER + TYPE_LAYER_MULTIPLIER;
-    private static final int SCREEN_FREEZE_LAYER_ENTER = SCREEN_FREEZE_LAYER_BASE;
-
     private final Context mContext;
     private final DisplayContent mDisplayContent;
     private final float[] mTmpFloats = new float[9];
@@ -116,15 +108,12 @@ class ScreenRotationAnimation {
      */
     private SurfaceControl mBackColorSurface;
     private BlackFrame mEnteringBlackFrame;
-    private int mWidth, mHeight;
 
     private final int mOriginalRotation;
     private final int mOriginalWidth;
     private final int mOriginalHeight;
     private int mCurRotation;
 
-    private Rect mOriginalDisplayRect = new Rect();
-    private Rect mCurrentDisplayRect = new Rect();
     // The current active animation to move from the old to the new rotated
     // state.  Which animation is run here will depend on the old and new
     // rotations.
@@ -135,7 +124,6 @@ class ScreenRotationAnimation {
     private boolean mAnimRunning;
     private boolean mFinishAnimReady;
     private long mFinishAnimStartTime;
-    private boolean mForceDefaultOrientation;
     private SurfaceRotationAnimationController mSurfaceRotationAnimationController;
     /** Intensity of light/whiteness of the layout before rotation occurs. */
     private float mStartLuma;
@@ -146,25 +134,13 @@ class ScreenRotationAnimation {
         mService = displayContent.mWmService;
         mContext = mService.mContext;
         mDisplayContent = displayContent;
-        displayContent.getBounds(mOriginalDisplayRect);
+        final Rect currentBounds = displayContent.getBounds();
+        final int width = currentBounds.width();
+        final int height = currentBounds.height();
 
         // Screenshot does NOT include rotation!
         final DisplayInfo displayInfo = displayContent.getDisplayInfo();
         final int realOriginalRotation = displayInfo.rotation;
-        final int originalWidth;
-        final int originalHeight;
-        if (displayContent.getDisplayRotation().isFixedToUserRotation()) {
-            // Emulated orientation.
-            mForceDefaultOrientation = true;
-            originalWidth = displayContent.mBaseDisplayWidth;
-            originalHeight = displayContent.mBaseDisplayHeight;
-        } else {
-            // Normal situation
-            originalWidth = displayInfo.logicalWidth;
-            originalHeight = displayInfo.logicalHeight;
-        }
-        mWidth = originalWidth;
-        mHeight = originalHeight;
 
         mOriginalRotation = originalRotation;
         // If the delta is not zero, the rotation of display may not change, but we still want to
@@ -173,8 +149,8 @@ class ScreenRotationAnimation {
         // when restoring the rotated app to the same rotation as current display.
         final int delta = deltaRotation(originalRotation, realOriginalRotation);
         final boolean flipped = delta == Surface.ROTATION_90 || delta == Surface.ROTATION_270;
-        mOriginalWidth = flipped ? originalHeight : originalWidth;
-        mOriginalHeight = flipped ? originalWidth : originalHeight;
+        mOriginalWidth = flipped ? height : width;
+        mOriginalHeight = flipped ? width : height;
         mSurfaceRotationAnimationController = new SurfaceRotationAnimationController();
 
         // Check whether the current screen contains any secure content.
@@ -187,7 +163,7 @@ class ScreenRotationAnimation {
                     new SurfaceControl.LayerCaptureArgs.Builder(displayContent.getSurfaceControl())
                             .setCaptureSecureLayers(true)
                             .setAllowProtected(true)
-                            .setSourceCrop(new Rect(0, 0, mWidth, mHeight))
+                            .setSourceCrop(new Rect(0, 0, width, height))
                             .build();
             SurfaceControl.ScreenshotHardwareBuffer screenshotBuffer =
                     SurfaceControl.captureLayers(args);
@@ -252,6 +228,19 @@ class ScreenRotationAnimation {
             Slog.w(TAG, "Unable to allocate freeze surface", e);
         }
 
+        // If display size is changed with the same orientation, map the bounds of screenshot to
+        // the new logical display size. Currently pending transaction and RWC#mDisplayTransaction
+        // are merged to global transaction, so it can be synced with display change when calling
+        // DisplayManagerInternal#performTraversal(transaction).
+        final int logicalWidth = displayInfo.logicalWidth;
+        final int logicalHeight = displayInfo.logicalHeight;
+        if (logicalWidth > mOriginalWidth == logicalHeight > mOriginalHeight
+                && (logicalWidth != mOriginalWidth || logicalHeight != mOriginalHeight)) {
+            displayContent.getPendingTransaction().setGeometry(mScreenshotLayer,
+                    new Rect(0, 0, mOriginalWidth, mOriginalHeight),
+                    new Rect(0, 0, logicalWidth, logicalHeight), Surface.ROTATION_0);
+        }
+
         ProtoLog.i(WM_SHOW_SURFACE_ALLOC,
                 "  FREEZE %s: CREATE", mScreenshotLayer);
         if (originalRotation == realOriginalRotation) {
@@ -285,11 +274,6 @@ class ScreenRotationAnimation {
         matrix.getValues(mTmpFloats);
         float x = mTmpFloats[Matrix.MTRANS_X];
         float y = mTmpFloats[Matrix.MTRANS_Y];
-        if (mForceDefaultOrientation) {
-            mDisplayContent.getBounds(mCurrentDisplayRect);
-            x -= mCurrentDisplayRect.left;
-            y -= mCurrentDisplayRect.top;
-        }
         t.setPosition(mScreenshotLayer, x, y);
         t.setMatrix(mScreenshotLayer,
                 mTmpFloats[Matrix.MSCALE_X], mTmpFloats[Matrix.MSKEW_Y],
@@ -301,8 +285,6 @@ class ScreenRotationAnimation {
 
     public void printTo(String prefix, PrintWriter pw) {
         pw.print(prefix); pw.print("mSurface="); pw.print(mScreenshotLayer);
-        pw.print(" mWidth="); pw.print(mWidth);
-        pw.print(" mHeight="); pw.println(mHeight);
         pw.print(prefix);
         pw.print("mEnteringBlackFrame=");
         pw.println(mEnteringBlackFrame);
@@ -323,11 +305,6 @@ class ScreenRotationAnimation {
         pw.print(" "); mRotateEnterTransformation.printShortString(pw); pw.println();
         pw.print(prefix); pw.print("mSnapshotInitialMatrix=");
         mSnapshotInitialMatrix.dump(pw); pw.println();
-        pw.print(prefix); pw.print("mForceDefaultOrientation="); pw.print(mForceDefaultOrientation);
-        if (mForceDefaultOrientation) {
-            pw.print(" mOriginalDisplayRect="); pw.print(mOriginalDisplayRect.toShortString());
-            pw.print(" mCurrentDisplayRect="); pw.println(mCurrentDisplayRect.toShortString());
-        }
     }
 
     public void setRotation(SurfaceControl.Transaction t, int rotation) {
@@ -337,7 +314,8 @@ class ScreenRotationAnimation {
         // to the snapshot to make it stay in the same original position
         // with the current screen rotation.
         int delta = deltaRotation(rotation, mOriginalRotation);
-        RotationAnimationUtils.createRotationMatrix(delta, mWidth, mHeight, mSnapshotInitialMatrix);
+        RotationAnimationUtils.createRotationMatrix(delta, mOriginalWidth, mOriginalHeight,
+                mSnapshotInitialMatrix);
         setRotationTransform(t, mSnapshotInitialMatrix);
     }
 
@@ -423,7 +401,7 @@ class ScreenRotationAnimation {
                         finalWidth * 2, finalHeight * 2);
                 Rect inner = new Rect(0, 0, finalWidth, finalHeight);
                 mEnteringBlackFrame = new BlackFrame(mService.mTransactionFactory, t, outer, inner,
-                        SCREEN_FREEZE_LAYER_ENTER, mDisplayContent, false, mEnterBlackFrameLayer);
+                        SCREEN_FREEZE_LAYER_BASE, mDisplayContent, false, mEnterBlackFrameLayer);
             } catch (OutOfResourcesException e) {
                 Slog.w(TAG, "Unable to allocate black surface", e);
             }
@@ -737,7 +715,12 @@ class ScreenRotationAnimation {
                 mScreenshotRotationAnimator = null;
                 mRotateScreenAnimator = null;
                 mService.mAnimator.mBulkUpdateParams |= WindowSurfacePlacer.SET_UPDATE_ROTATION;
-                kill();
+                if (mDisplayContent.getRotationAnimation() == ScreenRotationAnimation.this) {
+                    // It also invokes kill().
+                    mDisplayContent.setRotationAnimation(null);
+                } else {
+                    kill();
+                }
                 mService.updateRotation(false, false);
             }
         }

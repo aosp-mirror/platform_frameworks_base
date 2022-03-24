@@ -66,24 +66,37 @@ public abstract class MediaRouteDialogPresenter {
         }
     }
 
+    /** Create a media route dialog as appropriate. */
     public static Dialog createDialog(Context context,
             int routeTypes, View.OnClickListener extendedSettingsClickListener) {
-        final MediaRouter router = (MediaRouter)context.getSystemService(
-                Context.MEDIA_ROUTER_SERVICE);
-
         int theme = MediaRouteChooserDialog.isLightTheme(context)
                 ? android.R.style.Theme_DeviceDefault_Light_Dialog
                 : android.R.style.Theme_DeviceDefault_Dialog;
+        return createDialog(context, routeTypes, extendedSettingsClickListener, theme);
+    }
+
+    /** Create a media route dialog as appropriate. */
+    public static Dialog createDialog(Context context,
+            int routeTypes, View.OnClickListener extendedSettingsClickListener, int theme) {
+        return createDialog(context, routeTypes, extendedSettingsClickListener, theme,
+                true /* showProgressBarWhenEmpty */);
+    }
+
+    /** Create a media route dialog as appropriate. */
+    public static Dialog createDialog(Context context, int routeTypes,
+            View.OnClickListener extendedSettingsClickListener, int theme,
+            boolean showProgressBarWhenEmpty) {
+        final MediaRouter router = context.getSystemService(MediaRouter.class);
 
         MediaRouter.RouteInfo route = router.getSelectedRoute();
         if (route.isDefault() || !route.matchesTypes(routeTypes)) {
-            final MediaRouteChooserDialog d = new MediaRouteChooserDialog(context, theme);
+            final MediaRouteChooserDialog d = new MediaRouteChooserDialog(context, theme,
+                    showProgressBarWhenEmpty);
             d.setRouteTypes(routeTypes);
             d.setExtendedSettingsClickListener(extendedSettingsClickListener);
             return d;
         } else {
-            MediaRouteControllerDialog d = new MediaRouteControllerDialog(context, theme);
-            return d;
+            return new MediaRouteControllerDialog(context, theme);
         }
     }
 }

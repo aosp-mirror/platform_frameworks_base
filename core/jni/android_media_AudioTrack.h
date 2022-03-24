@@ -18,14 +18,8 @@
 #define ANDROID_MEDIA_AUDIOTRACK_H
 
 #include "jni.h"
-
+#include <media/AudioTrack.h>
 #include <utils/StrongPointer.h>
-
-namespace android {
-
-class AudioTrack;
-
-}; // namespace android
 
 /* Gets the underlying AudioTrack from an AudioTrack Java object. */
 extern android::sp<android::AudioTrack> android_media_AudioTrack_getAudioTrack(

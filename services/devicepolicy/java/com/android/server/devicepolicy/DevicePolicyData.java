@@ -23,6 +23,7 @@ import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.os.FileUtils;
 import android.os.PersistableBundle;
+import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.DebugUtils;
@@ -83,7 +84,7 @@ class DevicePolicyData {
     private static final String ATTR_NEW_USER_DISCLAIMER = "new-user-disclaimer";
 
     // Values of ATTR_NEW_USER_DISCLAIMER
-    static final String NEW_USER_DISCLAIMER_SHOWN = "shown";
+    static final String NEW_USER_DISCLAIMER_ACKNOWLEDGED = "acked";
     static final String NEW_USER_DISCLAIMER_NOT_NEEDED = "not_needed";
     static final String NEW_USER_DISCLAIMER_NEEDED = "needed";
 
@@ -610,6 +611,28 @@ class DevicePolicyData {
         }
         if (wipeResetProtectionData) {
             mFactoryResetFlags |= FACTORY_RESET_FLAG_WIPE_FACTORY_RESET_PROTECTION;
+        }
+    }
+
+    boolean isNewUserDisclaimerAcknowledged() {
+        if (mNewUserDisclaimer == null) {
+            if (mUserId == UserHandle.USER_SYSTEM) {
+                return true;
+            }
+            Slogf.w(TAG, "isNewUserDisclaimerAcknowledged(%d): mNewUserDisclaimer is null",
+                    mUserId);
+            return false;
+        }
+        switch (mNewUserDisclaimer) {
+            case NEW_USER_DISCLAIMER_ACKNOWLEDGED:
+            case NEW_USER_DISCLAIMER_NOT_NEEDED:
+                return true;
+            case NEW_USER_DISCLAIMER_NEEDED:
+                return false;
+            default:
+                Slogf.w(TAG, "isNewUserDisclaimerAcknowledged(%d): invalid value %d", mUserId,
+                        mNewUserDisclaimer);
+                return false;
         }
     }
 

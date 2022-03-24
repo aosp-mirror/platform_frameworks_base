@@ -41,6 +41,6 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
 include $(BUILD_STATIC_JAVA_LIBRARY)
 
 # Archive a copy of the classes.jar in SDK build.
-$(call dist-for-goals,sdk win_sdk,$(full_classes_jar):android.test.legacy.jar)
+$(call dist-for-goals,sdk,$(full_classes_jar):android.test.legacy.jar)
 
 endif  # not TARGET_BUILD_APPS not TARGET_BUILD_PDK=true

@@ -23,21 +23,23 @@ import static androidx.window.util.ExtensionHelper.transformToWindowSpaceRect;
 
 import android.app.Activity;
 import android.app.ActivityThread;
+import android.app.Application;
 import android.content.Context;
 import android.graphics.Rect;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
-import androidx.window.common.DeviceStateManagerPostureProducer;
-import androidx.window.common.DisplayFeature;
-import androidx.window.common.ResourceConfigDisplayFeatureProducer;
-import androidx.window.common.SettingsDevicePostureProducer;
+import androidx.window.common.CommonFoldingFeature;
+import androidx.window.common.DeviceStateManagerFoldingFeatureProducer;
+import androidx.window.common.EmptyLifecycleCallbacksAdapter;
 import androidx.window.common.SettingsDisplayFeatureProducer;
 import androidx.window.util.DataProducer;
 import androidx.window.util.PriorityDataProducer;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -48,34 +50,24 @@ import java.util.Optional;
 class SampleSidecarImpl extends StubSidecar {
     private static final String TAG = "SampleSidecar";
 
-    private final SettingsDevicePostureProducer mSettingsDevicePostureProducer;
-    private final DataProducer<Integer> mDevicePostureProducer;
+    private final DataProducer<List<CommonFoldingFeature>> mFoldingFeatureProducer;
 
-    private final SettingsDisplayFeatureProducer mSettingsDisplayFeatureProducer;
-    private final DataProducer<List<DisplayFeature>> mDisplayFeatureProducer;
+    private final SettingsDisplayFeatureProducer mSettingsFoldingFeatureProducer;
 
     SampleSidecarImpl(Context context) {
-        mSettingsDevicePostureProducer = new SettingsDevicePostureProducer(context);
-        mDevicePostureProducer = new PriorityDataProducer<>(List.of(
-                mSettingsDevicePostureProducer,
-                new DeviceStateManagerPostureProducer(context)
+        ((Application) context.getApplicationContext())
+                .registerActivityLifecycleCallbacks(new NotifyOnConfigurationChanged());
+        mSettingsFoldingFeatureProducer = new SettingsDisplayFeatureProducer(context);
+        mFoldingFeatureProducer = new PriorityDataProducer<>(List.of(
+                mSettingsFoldingFeatureProducer,
+                new DeviceStateManagerFoldingFeatureProducer(context)
         ));
 
-        mSettingsDisplayFeatureProducer = new SettingsDisplayFeatureProducer(context);
-        mDisplayFeatureProducer = new PriorityDataProducer<>(List.of(
-                mSettingsDisplayFeatureProducer,
-                new ResourceConfigDisplayFeatureProducer(context)
-        ));
-
-        mDevicePostureProducer.addDataChangedCallback(this::onDevicePostureChanged);
-        mDisplayFeatureProducer.addDataChangedCallback(this::onDisplayFeaturesChanged);
-    }
-
-    private void onDevicePostureChanged() {
-        updateDeviceState(getDeviceState());
+        mFoldingFeatureProducer.addDataChangedCallback(this::onDisplayFeaturesChanged);
     }
 
     private void onDisplayFeaturesChanged() {
+        updateDeviceState(getDeviceState());
         for (IBinder windowToken : getWindowsListeningForLayoutChanges()) {
             SidecarWindowLayoutInfo newLayout = getWindowLayoutInfo(windowToken);
             updateWindowLayout(windowToken, newLayout);
@@ -85,11 +77,25 @@ class SampleSidecarImpl extends StubSidecar {
     @NonNull
     @Override
     public SidecarDeviceState getDeviceState() {
-        Optional<Integer> posture = mDevicePostureProducer.getData();
-
         SidecarDeviceState deviceState = new SidecarDeviceState();
-        deviceState.posture = posture.orElse(SidecarDeviceState.POSTURE_UNKNOWN);
+        deviceState.posture = deviceStateFromFeature();
         return deviceState;
+    }
+
+    private int deviceStateFromFeature() {
+        List<CommonFoldingFeature> storedFeatures = mFoldingFeatureProducer.getData()
+                .orElse(Collections.emptyList());
+        for (int i = 0; i < storedFeatures.size(); i++) {
+            CommonFoldingFeature feature = storedFeatures.get(i);
+            final int state = feature.getState();
+            switch (state) {
+                case CommonFoldingFeature.COMMON_STATE_FLAT:
+                    return SidecarDeviceState.POSTURE_OPENED;
+                case CommonFoldingFeature.COMMON_STATE_HALF_OPENED:
+                    return SidecarDeviceState.POSTURE_HALF_OPENED;
+            }
+        }
+        return SidecarDeviceState.POSTURE_UNKNOWN;
     }
 
     @NonNull
@@ -105,22 +111,22 @@ class SampleSidecarImpl extends StubSidecar {
     }
 
     private List<SidecarDisplayFeature> getDisplayFeatures(@NonNull Activity activity) {
-        List<SidecarDisplayFeature> features = new ArrayList<SidecarDisplayFeature>();
         int displayId = activity.getDisplay().getDisplayId();
         if (displayId != DEFAULT_DISPLAY) {
             Log.w(TAG, "This sample doesn't support display features on secondary displays");
-            return features;
+            return Collections.emptyList();
         }
 
         if (activity.isInMultiWindowMode()) {
             // It is recommended not to report any display features in multi-window mode, since it
             // won't be possible to synchronize the display feature positions with window movement.
-            return features;
+            return Collections.emptyList();
         }
 
-        Optional<List<DisplayFeature>> storedFeatures = mDisplayFeatureProducer.getData();
+        Optional<List<CommonFoldingFeature>> storedFeatures = mFoldingFeatureProducer.getData();
+        List<SidecarDisplayFeature> features = new ArrayList<>();
         if (storedFeatures.isPresent()) {
-            for (DisplayFeature baseFeature : storedFeatures.get()) {
+            for (CommonFoldingFeature baseFeature : storedFeatures.get()) {
                 SidecarDisplayFeature feature = new SidecarDisplayFeature();
                 Rect featureRect = baseFeature.getRect();
                 rotateRectToDisplayRotation(displayId, featureRect);
@@ -130,17 +136,37 @@ class SampleSidecarImpl extends StubSidecar {
                 features.add(feature);
             }
         }
-        return features;
+        return Collections.unmodifiableList(features);
     }
 
     @Override
     protected void onListenersChanged() {
         if (hasListeners()) {
-            mSettingsDevicePostureProducer.registerObserversIfNeeded();
-            mSettingsDisplayFeatureProducer.registerObserversIfNeeded();
+            mSettingsFoldingFeatureProducer.registerObserversIfNeeded();
+            onDisplayFeaturesChanged();
         } else {
-            mSettingsDevicePostureProducer.unregisterObserversIfNeeded();
-            mSettingsDisplayFeatureProducer.unregisterObserversIfNeeded();
+            mSettingsFoldingFeatureProducer.unregisterObserversIfNeeded();
+        }
+    }
+
+    private final class NotifyOnConfigurationChanged extends EmptyLifecycleCallbacksAdapter {
+        @Override
+        public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
+            super.onActivityCreated(activity, savedInstanceState);
+            onDisplayFeaturesChangedForActivity(activity);
+        }
+
+        @Override
+        public void onActivityConfigurationChanged(Activity activity) {
+            super.onActivityConfigurationChanged(activity);
+            onDisplayFeaturesChangedForActivity(activity);
+        }
+
+        private void onDisplayFeaturesChangedForActivity(@NonNull Activity activity) {
+            IBinder token = activity.getWindow().getAttributes().token;
+            if (token == null || mWindowLayoutChangeListenerTokens.contains(token)) {
+                onDisplayFeaturesChanged();
+            }
         }
     }
 }

@@ -147,7 +147,8 @@ final class WifiDisplayAdapter extends DisplayAdapter {
                         getContext(), getHandler(), mWifiDisplayListener);
 
                 getContext().registerReceiverAsUser(mBroadcastReceiver, UserHandle.ALL,
-                        new IntentFilter(ACTION_DISCONNECT), null, mHandler);
+                        new IntentFilter(ACTION_DISCONNECT), null, mHandler,
+                        Context.RECEIVER_NOT_EXPORTED);
             }
         });
     }

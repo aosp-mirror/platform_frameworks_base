@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.policy;
 
+import android.annotation.WorkerThread;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -33,6 +34,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dump.DumpManager;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -72,10 +74,11 @@ public class FlashlightControllerImpl implements FlashlightController {
     private boolean mTorchAvailable;
 
     @Inject
-    public FlashlightControllerImpl(Context context) {
+    public FlashlightControllerImpl(Context context, DumpManager dumpManager) {
         mContext = context;
         mCameraManager = (CameraManager) mContext.getSystemService(Context.CAMERA_SERVICE);
 
+        dumpManager.registerDumpable(getClass().getSimpleName(), this);
         tryInitCamera();
     }
 
@@ -217,6 +220,7 @@ public class FlashlightControllerImpl implements FlashlightController {
             new CameraManager.TorchCallback() {
 
         @Override
+        @WorkerThread
         public void onTorchModeUnavailable(String cameraId) {
             if (TextUtils.equals(cameraId, mCameraId)) {
                 setCameraAvailable(false);
@@ -227,6 +231,7 @@ public class FlashlightControllerImpl implements FlashlightController {
         }
 
         @Override
+        @WorkerThread
         public void onTorchModeChanged(String cameraId, boolean enabled) {
             if (TextUtils.equals(cameraId, mCameraId)) {
                 setCameraAvailable(true);

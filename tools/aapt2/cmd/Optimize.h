@@ -29,9 +29,9 @@ struct OptimizeOptions {
   friend class OptimizeCommand;
 
   // Path to the output APK.
-  Maybe<std::string> output_path;
+  std::optional<std::string> output_path;
   // Path to the output APK directory for splits.
-  Maybe<std::string> output_dir;
+  std::optional<std::string> output_dir;
 
   // Details of the app extracted from the AndroidManifest.xml
   AppInfo app_info;
@@ -50,7 +50,7 @@ struct OptimizeOptions {
 
   TableFlattenerOptions table_flattener_options;
 
-  Maybe<std::vector<aapt::configuration::OutputArtifact>> apk_artifacts;
+  std::optional<std::vector<aapt::configuration::OutputArtifact>> apk_artifacts;
 
   // Set of artifacts to keep when generating multi-APK splits. If the list is empty, all artifacts
   // are kept and will be written as output.
@@ -60,7 +60,7 @@ struct OptimizeOptions {
   bool shorten_resource_paths = false;
 
   // Path to the output map of original resource paths to shortened paths.
-  Maybe<std::string> shortened_paths_map_path;
+  std::optional<std::string> shortened_paths_map_path;
 };
 
 class OptimizeCommand : public Command {
@@ -122,9 +122,9 @@ class OptimizeCommand : public Command {
   bool WriteObfuscatedPathsMap(const std::map<std::string, std::string> &path_map,
                                const std::string &file_path);
 
-  Maybe<std::string> config_path_;
-  Maybe<std::string> resources_config_path_;
-  Maybe<std::string> target_densities_;
+  std::optional<std::string> config_path_;
+  std::optional<std::string> resources_config_path_;
+  std::optional<std::string> target_densities_;
   std::vector<std::string> configs_;
   std::vector<std::string> split_args_;
   std::unordered_set<std::string> kept_artifacts_;

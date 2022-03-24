@@ -36,6 +36,8 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.compat.AndroidBuildClassifier;
 import com.android.internal.compat.CompatibilityOverrideConfig;
+import com.android.internal.compat.CompatibilityOverridesByPackageConfig;
+import com.android.internal.compat.CompatibilityOverridesToRemoveByPackageConfig;
 import com.android.internal.compat.CompatibilityOverridesToRemoveConfig;
 
 import org.junit.Before;
@@ -265,9 +267,10 @@ public class CompatConfigTest {
     }
 
     @Test
-    public void testInstallerCanSetOverrides() throws Exception {
+    public void testInstallerCanAddOverrides() throws Exception {
         final long disabledChangeId1 = 1234L;
         final long disabledChangeId2 = 1235L;
+        final long unknownChangeId = 1236L;
         // We make disabledChangeId2 non-overridable to make sure it is ignored.
         CompatConfig compatConfig = CompatConfigBuilder.create(mBuildClassifier, mContext)
                 .addDisabledOverridableChangeWithId(disabledChangeId1)
@@ -284,18 +287,69 @@ public class CompatConfigTest {
         // Force the validator to prevent overriding non-overridable changes by using a user build.
         when(mBuildClassifier.isDebuggableBuild()).thenReturn(false);
         when(mBuildClassifier.isFinalBuild()).thenReturn(true);
+        Map<Long, PackageOverride> overrides = new HashMap<>();
+        overrides.put(disabledChangeId1, new PackageOverride.Builder()
+                .setMaxVersionCode(99L)
+                .setEnabled(true)
+                .build());
+        // Adding an unknown change ID to make sure it's skipped if skipUnknownChangeIds is true.
+        overrides.put(unknownChangeId, new PackageOverride.Builder().setEnabled(false).build());
+        CompatibilityOverrideConfig config = new CompatibilityOverrideConfig(overrides);
 
-        CompatibilityOverrideConfig config = new CompatibilityOverrideConfig(
-                Collections.singletonMap(disabledChangeId1,
-                        new PackageOverride.Builder()
-                                .setMaxVersionCode(99L)
-                                .setEnabled(true)
-                                .build()));
-
-        compatConfig.addOverrides(config, "com.some.package");
+        compatConfig.addPackageOverrides(config, "com.some.package", /* skipUnknownChangeIds */
+                true);
         assertThat(compatConfig.isChangeEnabled(disabledChangeId1, applicationInfo)).isTrue();
         assertThat(compatConfig.isChangeEnabled(disabledChangeId2, applicationInfo)).isFalse();
+        // Making sure the unknown change ID is still unknown and isChangeEnabled returns true.
+        assertThat(compatConfig.isKnownChangeId(unknownChangeId)).isFalse();
+        assertThat(compatConfig.isChangeEnabled(unknownChangeId, applicationInfo)).isTrue();
     }
+
+    @Test
+    public void testInstallerCanAddOverridesForMultiplePackages() throws Exception {
+        final String packageName1 = "com.some.package1";
+        final String packageName2 = "com.some.package2";
+        final long disabledChangeId1 = 1234L;
+        final long disabledChangeId2 = 1235L;
+        CompatConfig compatConfig = CompatConfigBuilder.create(mBuildClassifier, mContext)
+                .addDisabledOverridableChangeWithId(disabledChangeId1)
+                .addDisabledOverridableChangeWithId(disabledChangeId2)
+                .build();
+        ApplicationInfo applicationInfo1 = ApplicationInfoBuilder.create()
+                .withPackageName(packageName1)
+                .build();
+        ApplicationInfo applicationInfo2 = ApplicationInfoBuilder.create()
+                .withPackageName(packageName2)
+                .build();
+        PackageManager packageManager = mock(PackageManager.class);
+        when(mContext.getPackageManager()).thenReturn(packageManager);
+        when(packageManager.getApplicationInfo(eq(packageName1), anyInt()))
+                .thenReturn(applicationInfo1);
+        when(packageManager.getApplicationInfo(eq(packageName2), anyInt()))
+                .thenReturn(applicationInfo2);
+
+        // Force the validator to prevent overriding non-overridable changes by using a user build.
+        when(mBuildClassifier.isDebuggableBuild()).thenReturn(false);
+        when(mBuildClassifier.isFinalBuild()).thenReturn(true);
+        Map<Long, PackageOverride> overrides1 = new HashMap<>();
+        overrides1.put(disabledChangeId1, new PackageOverride.Builder().setEnabled(true).build());
+        Map<Long, PackageOverride> overrides2 = new HashMap<>();
+        overrides2.put(disabledChangeId1, new PackageOverride.Builder().setEnabled(true).build());
+        overrides2.put(disabledChangeId2, new PackageOverride.Builder().setEnabled(true).build());
+        Map<String, CompatibilityOverrideConfig> packageNameToOverrides = new HashMap<>();
+        packageNameToOverrides.put(packageName1, new CompatibilityOverrideConfig(overrides1));
+        packageNameToOverrides.put(packageName2, new CompatibilityOverrideConfig(overrides2));
+        CompatibilityOverridesByPackageConfig config = new CompatibilityOverridesByPackageConfig(
+                packageNameToOverrides);
+
+        compatConfig.addAllPackageOverrides(config, /* skipUnknownChangeIds */ true);
+
+        assertThat(compatConfig.isChangeEnabled(disabledChangeId1, applicationInfo1)).isTrue();
+        assertThat(compatConfig.isChangeEnabled(disabledChangeId2, applicationInfo1)).isFalse();
+        assertThat(compatConfig.isChangeEnabled(disabledChangeId1, applicationInfo2)).isTrue();
+        assertThat(compatConfig.isChangeEnabled(disabledChangeId2, applicationInfo2)).isTrue();
+    }
+
 
     @Test
     public void testPreventInstallerSetNonOverridable() throws Exception {
@@ -326,11 +380,44 @@ public class CompatConfigTest {
         CompatibilityOverrideConfig config = new CompatibilityOverrideConfig(overrides);
 
         assertThrows(SecurityException.class,
-                () -> compatConfig.addOverrides(config, "com.some.package")
+                () -> compatConfig.addPackageOverrides(config, "com.some.package",
+                        /* skipUnknownChangeIds */ true)
         );
         assertThat(compatConfig.isChangeEnabled(disabledChangeId1, applicationInfo)).isTrue();
         assertThat(compatConfig.isChangeEnabled(disabledChangeId2, applicationInfo)).isFalse();
         assertThat(compatConfig.isChangeEnabled(disabledChangeId3, applicationInfo)).isFalse();
+    }
+
+    @Test
+    public void testCanAddOverridesForUnknownChangeIdOnDebugBuild() throws Exception {
+        final long disabledChangeId = 1234L;
+        final long unknownChangeId = 1235L;
+        // We make disabledChangeId2 non-overridable to make sure it is ignored.
+        CompatConfig compatConfig = CompatConfigBuilder.create(mBuildClassifier, mContext)
+                .addDisabledChangeWithId(disabledChangeId)
+                .build();
+        ApplicationInfo applicationInfo = ApplicationInfoBuilder.create()
+                .withPackageName("com.some.package")
+                .build();
+        PackageManager packageManager = mock(PackageManager.class);
+        when(mContext.getPackageManager()).thenReturn(packageManager);
+        when(packageManager.getApplicationInfo(eq("com.some.package"), anyInt()))
+                .thenReturn(applicationInfo);
+
+        when(mBuildClassifier.isDebuggableBuild()).thenReturn(true);
+        Map<Long, PackageOverride> overrides = new HashMap<>();
+        overrides.put(disabledChangeId, new PackageOverride.Builder().setEnabled(true).build());
+        // Adding an unknown change ID to make sure it isn't skipped if skipUnknownChangeIds is
+        // false.
+        overrides.put(unknownChangeId, new PackageOverride.Builder().setEnabled(false).build());
+        CompatibilityOverrideConfig config = new CompatibilityOverrideConfig(overrides);
+
+        compatConfig.addPackageOverrides(config, "com.some.package", /* skipUnknownChangeIds */
+                false);
+        assertThat(compatConfig.isChangeEnabled(disabledChangeId, applicationInfo)).isTrue();
+        // Making sure the unknown change ID is now known and has an override.
+        assertThat(compatConfig.isKnownChangeId(unknownChangeId)).isTrue();
+        assertThat(compatConfig.isChangeEnabled(unknownChangeId, applicationInfo)).isFalse();
     }
 
     @Test
@@ -377,7 +464,8 @@ public class CompatConfigTest {
                                 .setMaxVersionCode(99L)
                                 .setEnabled(true)
                                 .build()));
-        compatConfig.addOverrides(config, "com.installed.foo");
+        compatConfig.addPackageOverrides(config, "com.installed.foo", /* skipUnknownChangeIds */
+                true);
         assertThat(compatConfig.isChangeEnabled(1234L, applicationInfo)).isFalse();
 
         // Add override that does include the installed app version
@@ -388,7 +476,8 @@ public class CompatConfigTest {
                                 .setMaxVersionCode(100L)
                                 .setEnabled(true)
                                 .build()));
-        compatConfig.addOverrides(config, "com.installed.foo");
+        compatConfig.addPackageOverrides(config, "com.installed.foo", /* skipUnknownChangeIds */
+                true);
         assertThat(compatConfig.isChangeEnabled(1234L, applicationInfo)).isTrue();
     }
 
@@ -411,7 +500,8 @@ public class CompatConfigTest {
                         .setMaxVersionCode(99L)
                         .setEnabled(true)
                         .build()));
-        compatConfig.addOverrides(config, "com.notinstalled.foo");
+        compatConfig.addPackageOverrides(config, "com.notinstalled.foo", /* skipUnknownChangeIds */
+                true);
         assertThat(compatConfig.isChangeEnabled(1234L, applicationInfo)).isFalse();
 
         // Pretend the app is now installed.
@@ -557,6 +647,7 @@ public class CompatConfigTest {
         final long disabledChangeId1 = 1234L;
         final long disabledChangeId2 = 1235L;
         final long enabledChangeId = 1236L;
+        final long unknownChangeId = 1237L;
         // We make disabledChangeId2 non-overridable to make sure it is ignored.
         CompatConfig compatConfig = CompatConfigBuilder.create(mBuildClassifier, mContext)
                 .addDisabledOverridableChangeWithId(disabledChangeId1)
@@ -583,6 +674,8 @@ public class CompatConfigTest {
         Set<Long> overridesToRemove = new HashSet<>();
         overridesToRemove.add(disabledChangeId1);
         overridesToRemove.add(enabledChangeId);
+        // Adding an unknown change ID to make sure it's skipped.
+        overridesToRemove.add(unknownChangeId);
         CompatibilityOverridesToRemoveConfig config = new CompatibilityOverridesToRemoveConfig(
                 overridesToRemove);
 
@@ -590,6 +683,75 @@ public class CompatConfigTest {
         assertThat(compatConfig.isChangeEnabled(disabledChangeId1, applicationInfo)).isFalse();
         assertThat(compatConfig.isChangeEnabled(disabledChangeId2, applicationInfo)).isTrue();
         assertThat(compatConfig.isChangeEnabled(enabledChangeId, applicationInfo)).isTrue();
+        // Making sure the unknown change ID is still unknown.
+        assertThat(compatConfig.isKnownChangeId(unknownChangeId)).isFalse();
+    }
+
+    @Test
+    public void testInstallerCanRemoveOverridesForMultiplePackages() throws Exception {
+        final String packageName1 = "com.some.package1";
+        final String packageName2 = "com.some.package2";
+        final long disabledChangeId1 = 1234L;
+        final long disabledChangeId2 = 1235L;
+        final long enabledChangeId = 1236L;
+        CompatConfig compatConfig = CompatConfigBuilder.create(mBuildClassifier, mContext)
+                .addDisabledOverridableChangeWithId(disabledChangeId1)
+                .addDisabledOverridableChangeWithId(disabledChangeId2)
+                .addEnabledOverridableChangeWithId(enabledChangeId)
+                .build();
+        ApplicationInfo applicationInfo1 = ApplicationInfoBuilder.create()
+                .withPackageName(packageName1)
+                .build();
+        ApplicationInfo applicationInfo2 = ApplicationInfoBuilder.create()
+                .withPackageName(packageName2)
+                .build();
+        PackageManager packageManager = mock(PackageManager.class);
+        when(mContext.getPackageManager()).thenReturn(packageManager);
+        when(packageManager.getApplicationInfo(eq(packageName1), anyInt()))
+                .thenReturn(applicationInfo1);
+        when(packageManager.getApplicationInfo(eq(packageName2), anyInt()))
+                .thenReturn(applicationInfo2);
+
+        assertThat(compatConfig.addOverride(disabledChangeId1, packageName1, true)).isTrue();
+        assertThat(compatConfig.addOverride(disabledChangeId2, packageName1, true)).isTrue();
+        assertThat(compatConfig.addOverride(enabledChangeId, packageName1, false)).isTrue();
+        assertThat(compatConfig.addOverride(disabledChangeId1, packageName2, true)).isTrue();
+        assertThat(compatConfig.addOverride(disabledChangeId2, packageName2, true)).isTrue();
+        assertThat(compatConfig.addOverride(enabledChangeId, packageName2, false)).isTrue();
+        assertThat(compatConfig.isChangeEnabled(disabledChangeId1, applicationInfo1)).isTrue();
+        assertThat(compatConfig.isChangeEnabled(disabledChangeId2, applicationInfo1)).isTrue();
+        assertThat(compatConfig.isChangeEnabled(enabledChangeId, applicationInfo1)).isFalse();
+        assertThat(compatConfig.isChangeEnabled(disabledChangeId1, applicationInfo1)).isTrue();
+        assertThat(compatConfig.isChangeEnabled(disabledChangeId2, applicationInfo1)).isTrue();
+        assertThat(compatConfig.isChangeEnabled(enabledChangeId, applicationInfo1)).isFalse();
+
+        // Force the validator to prevent overriding non-overridable changes by using a user build.
+        when(mBuildClassifier.isDebuggableBuild()).thenReturn(false);
+        when(mBuildClassifier.isFinalBuild()).thenReturn(true);
+
+        Set<Long> overridesToRemove1 = new HashSet<>();
+        overridesToRemove1.add(disabledChangeId1);
+        overridesToRemove1.add(enabledChangeId);
+        Set<Long> overridesToRemove2 = new HashSet<>();
+        overridesToRemove2.add(disabledChangeId1);
+        overridesToRemove2.add(disabledChangeId2);
+        Map<String, CompatibilityOverridesToRemoveConfig> packageNameToOverridesToRemove =
+                new HashMap<>();
+        packageNameToOverridesToRemove.put(packageName1,
+                new CompatibilityOverridesToRemoveConfig(overridesToRemove1));
+        packageNameToOverridesToRemove.put(packageName2,
+                new CompatibilityOverridesToRemoveConfig(overridesToRemove2));
+        CompatibilityOverridesToRemoveByPackageConfig config =
+                new CompatibilityOverridesToRemoveByPackageConfig(packageNameToOverridesToRemove);
+
+        compatConfig.removeAllPackageOverrides(config);
+
+        assertThat(compatConfig.isChangeEnabled(disabledChangeId1, applicationInfo1)).isFalse();
+        assertThat(compatConfig.isChangeEnabled(disabledChangeId2, applicationInfo1)).isTrue();
+        assertThat(compatConfig.isChangeEnabled(enabledChangeId, applicationInfo1)).isTrue();
+        assertThat(compatConfig.isChangeEnabled(disabledChangeId1, applicationInfo2)).isFalse();
+        assertThat(compatConfig.isChangeEnabled(disabledChangeId2, applicationInfo2)).isFalse();
+        assertThat(compatConfig.isChangeEnabled(enabledChangeId, applicationInfo2)).isFalse();
     }
 
     @Test
@@ -797,18 +959,18 @@ public class CompatConfigTest {
                         .build());
         when(mPackageManager.getApplicationInfo(eq("bar.baz"), anyInt()))
                 .thenThrow(new NameNotFoundException());
-        compatConfig.addOverrides(
+        compatConfig.addPackageOverrides(
                 new CompatibilityOverrideConfig(
                         Collections.singletonMap(
                                 1L,
                                 new PackageOverride.Builder().setEnabled(true).build())),
-                "foo.bar");
-        compatConfig.addOverrides(
+                "foo.bar", /* skipUnknownChangeIds */ true);
+        compatConfig.addPackageOverrides(
                 new CompatibilityOverrideConfig(
                         Collections.singletonMap(
                                 2L,
                                 new PackageOverride.Builder().setEnabled(false).build())),
-                "bar.baz");
+                "bar.baz", /* skipUnknownChangeIds */ true);
 
         assertThat(readFile(overridesFile)).isEqualTo("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
                 + "<overrides>\n"
@@ -847,12 +1009,12 @@ public class CompatConfigTest {
         compatConfig.forceNonDebuggableFinalForTest(true);
         compatConfig.initOverrides(overridesFile, new File(""));
 
-        compatConfig.addOverrides(new CompatibilityOverrideConfig(Collections.singletonMap(1L,
-                new PackageOverride.Builder()
+        compatConfig.addPackageOverrides(new CompatibilityOverrideConfig(
+                Collections.singletonMap(1L, new PackageOverride.Builder()
                         .setMinVersionCode(99L)
                         .setMaxVersionCode(101L)
                         .setEnabled(true)
-                        .build())), "foo.bar");
+                        .build())), "foo.bar", /* skipUnknownChangeIds */ true);
 
         assertThat(readFile(overridesFile)).isEqualTo("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
                 + "<overrides>\n"

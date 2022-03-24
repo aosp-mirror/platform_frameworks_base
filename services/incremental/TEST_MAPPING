@@ -10,6 +10,12 @@
     },
     {
       "name": "CtsIncrementalInstallHostTestCases"
+    },
+    {
+      "name": "libincfs-test"
+    },
+    {
+      "name": "service.incremental_test"
     }
   ],
   "presubmit-large": [

@@ -557,7 +557,7 @@ public class LockTaskControllerTest {
         mLockTaskController.updateLockTaskPackages(TEST_USER_ID, allowlist);
 
         // THEN the task running that package should be stopped
-        verify(tr2).performClearTaskLocked();
+        verify(tr2).performClearTaskForReuse(false /* excludingTaskOverlay*/);
         assertFalse(mLockTaskController.isTaskLocked(tr2));
         // THEN the other task should remain locked
         assertEquals(LOCK_TASK_MODE_LOCKED, mLockTaskController.getLockTaskModeState());
@@ -569,7 +569,7 @@ public class LockTaskControllerTest {
         mLockTaskController.updateLockTaskPackages(TEST_USER_ID, allowlist);
 
         // THEN the last task should be cleared, and the system should quit LockTask mode
-        verify(tr1).performClearTaskLocked();
+        verify(tr1).performClearTaskForReuse(false /* excludingTaskOverlay*/);
         assertFalse(mLockTaskController.isTaskLocked(tr1));
         assertEquals(LOCK_TASK_MODE_NONE, mLockTaskController.getLockTaskModeState());
         verifyLockTaskStopped(times(1));

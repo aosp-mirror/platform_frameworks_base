@@ -16,6 +16,8 @@
 
 package com.android.server.notification;
 
+import static android.service.notification.ZenPolicy.CONVERSATION_SENDERS_IMPORTANT;
+
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertNull;
@@ -36,13 +38,10 @@ import android.util.Xml;
 
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.internal.util.FastXmlSerializer;
 import com.android.server.UiServiceTestCase;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -81,10 +80,12 @@ public class ZenModeConfigTest extends UiServiceTestCase {
         ZenModeConfig config = getMutedAllConfig();
         config.suppressedVisualEffects |= Policy.SUPPRESSED_EFFECT_BADGE;
 
+        // Explicitly allow conversations from priority senders to make sure that goes through
         ZenPolicy zenPolicy = new ZenPolicy.Builder()
                 .allowAlarms(true)
                 .allowReminders(true)
                 .allowEvents(true)
+                .allowConversations(CONVERSATION_SENDERS_IMPORTANT)
                 .showLights(false)
                 .showInAmbientDisplay(false)
                 .build();
@@ -93,11 +94,12 @@ public class ZenModeConfigTest extends UiServiceTestCase {
         int priorityCategories = originalPolicy.priorityCategories;
         int priorityCallSenders = originalPolicy.priorityCallSenders;
         int priorityMessageSenders = originalPolicy.priorityMessageSenders;
-        int priorityConversationsSenders = originalPolicy.priorityConversationSenders;
+        int priorityConversationsSenders = CONVERSATION_SENDERS_IMPORTANT;
         int suppressedVisualEffects = originalPolicy.suppressedVisualEffects;
         priorityCategories |= Policy.PRIORITY_CATEGORY_ALARMS;
         priorityCategories |= Policy.PRIORITY_CATEGORY_REMINDERS;
         priorityCategories |= Policy.PRIORITY_CATEGORY_EVENTS;
+        priorityCategories |= Policy.PRIORITY_CATEGORY_CONVERSATIONS;
         suppressedVisualEffects |= Policy.SUPPRESSED_EFFECT_LIGHTS;
         suppressedVisualEffects |= Policy.SUPPRESSED_EFFECT_AMBIENT;
 
@@ -344,7 +346,7 @@ public class ZenModeConfigTest extends UiServiceTestCase {
         config.allowCallsFrom = ZenModeConfig.SOURCE_ANYONE;
         config.allowMessagesFrom = ZenModeConfig.SOURCE_ANYONE;
         config.allowConversations = true;
-        config.allowConversationsFrom = ZenPolicy.CONVERSATION_SENDERS_IMPORTANT;
+        config.allowConversationsFrom = CONVERSATION_SENDERS_IMPORTANT;
 
         config.suppressedVisualEffects = 0;
         return config;

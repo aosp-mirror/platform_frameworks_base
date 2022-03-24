@@ -71,6 +71,8 @@ public class TextLine {
     private Spanned mSpanned;
     private PrecomputedText mComputed;
 
+    private boolean mUseFallbackExtent = false;
+
     // The start and end of a potentially existing ellipsis on this text line.
     // We use them to filter out replacement and metric affecting spans on ellipsized away chars.
     private int mEllipsisStart;
@@ -141,6 +143,7 @@ public class TextLine {
         tl.mTabs = null;
         tl.mChars = null;
         tl.mComputed = null;
+        tl.mUseFallbackExtent = false;
 
         tl.mMetricAffectingSpanSpanSet.recycle();
         tl.mCharacterStyleSpanSet.recycle();
@@ -171,17 +174,20 @@ public class TextLine {
      * @param ellipsisStart the start of the ellipsis relative to the line
      * @param ellipsisEnd the end of the ellipsis relative to the line. When there
      *                    is no ellipsis, this should be equal to ellipsisStart.
+     * @param useFallbackLineSpacing true for enabling fallback line spacing. false for disabling
+     *                              fallback line spacing.
      */
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
     public void set(TextPaint paint, CharSequence text, int start, int limit, int dir,
             Directions directions, boolean hasTabs, TabStops tabStops,
-            int ellipsisStart, int ellipsisEnd) {
+            int ellipsisStart, int ellipsisEnd, boolean useFallbackLineSpacing) {
         mPaint = paint;
         mText = text;
         mStart = start;
         mLen = limit - start;
         mDir = dir;
         mDirections = directions;
+        mUseFallbackExtent = useFallbackLineSpacing;
         if (mDirections == null) {
             throw new IllegalArgumentException("Directions cannot be null");
         }
@@ -845,6 +851,34 @@ public class TextLine {
                 previousLeading);
     }
 
+    private void expandMetricsFromPaint(TextPaint wp, int start, int end,
+            int contextStart, int contextEnd, boolean runIsRtl, FontMetricsInt fmi) {
+
+        final int previousTop     = fmi.top;
+        final int previousAscent  = fmi.ascent;
+        final int previousDescent = fmi.descent;
+        final int previousBottom  = fmi.bottom;
+        final int previousLeading = fmi.leading;
+
+        int count = end - start;
+        int contextCount = contextEnd - contextStart;
+        if (mCharsValid) {
+            wp.getFontMetricsInt(mChars, start, count, contextStart, contextCount, runIsRtl,
+                    fmi);
+        } else {
+            if (mComputed == null) {
+                wp.getFontMetricsInt(mText, mStart + start, count, mStart + contextStart,
+                        contextCount, runIsRtl, fmi);
+            } else {
+                mComputed.getFontMetricsInt(mStart + start, mStart + end, fmi);
+            }
+        }
+
+        updateMetrics(fmi, previousTop, previousAscent, previousDescent, previousBottom,
+                previousLeading);
+    }
+
+
     static void updateMetrics(FontMetricsInt fmi, int previousTop, int previousAscent,
             int previousDescent, int previousBottom, int previousLeading) {
         fmi.top     = Math.min(fmi.top,     previousTop);
@@ -947,6 +981,10 @@ public class TextLine {
 
         if (consumer != null) {
             shapeTextRun(consumer, wp, start, end, contextStart, contextEnd, runIsRtl, leftX);
+        }
+
+        if (mUseFallbackExtent && fmi != null) {
+            expandMetricsFromPaint(wp, start, end, contextStart, contextEnd, runIsRtl, fmi);
         }
 
         if (c != null) {

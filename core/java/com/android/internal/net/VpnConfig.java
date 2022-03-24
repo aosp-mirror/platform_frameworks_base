@@ -34,8 +34,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.UserHandle;
 
-import java.net.Inet4Address;
-import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -93,8 +91,8 @@ public class VpnConfig implements Parcelable {
     public String interfaze;
     public String session;
     public int mtu = -1;
-    public List<LinkAddress> addresses = new ArrayList<LinkAddress>();
-    public List<RouteInfo> routes = new ArrayList<RouteInfo>();
+    public List<LinkAddress> addresses = new ArrayList<>();
+    public List<RouteInfo> routes = new ArrayList<>();
     public List<String> dnsServers;
     public List<String> searchDomains;
     public List<String> allowedApplications;
@@ -107,6 +105,8 @@ public class VpnConfig implements Parcelable {
     public boolean allowIPv4;
     public boolean allowIPv6;
     public boolean isMetered = true;
+    public boolean requiresInternetValidation = false;
+    public boolean excludeLocalRoutes = false;
     public Network[] underlyingNetworks;
     public ProxyInfo proxyInfo;
 
@@ -114,12 +114,34 @@ public class VpnConfig implements Parcelable {
     public VpnConfig() {
     }
 
-    public void updateAllowedFamilies(InetAddress address) {
-        if (address instanceof Inet4Address) {
-            allowIPv4 = true;
-        } else {
-            allowIPv6 = true;
-        }
+    public VpnConfig(VpnConfig other) {
+        user = other.user;
+        interfaze = other.interfaze;
+        session = other.session;
+        mtu = other.mtu;
+        addresses = copyOf(other.addresses);
+        routes = copyOf(other.routes);
+        dnsServers = copyOf(other.dnsServers);
+        searchDomains = copyOf(other.searchDomains);
+        allowedApplications = copyOf(other.allowedApplications);
+        disallowedApplications = copyOf(other.disallowedApplications);
+        configureIntent = other.configureIntent;
+        startTime = other.startTime;
+        legacy = other.legacy;
+        blocking = other.blocking;
+        allowBypass = other.allowBypass;
+        allowIPv4 = other.allowIPv4;
+        allowIPv6 = other.allowIPv6;
+        isMetered = other.isMetered;
+        requiresInternetValidation = other.requiresInternetValidation;
+        excludeLocalRoutes = other.excludeLocalRoutes;
+        underlyingNetworks = other.underlyingNetworks != null ? Arrays.copyOf(
+                other.underlyingNetworks, other.underlyingNetworks.length) : null;
+        proxyInfo = other.proxyInfo;
+    }
+
+    private static <T> List<T> copyOf(List<T> list) {
+        return list != null ? new ArrayList<>(list) : null;
     }
 
     public void addLegacyRoutes(String routesStr) {
@@ -131,7 +153,6 @@ public class VpnConfig implements Parcelable {
             //each route is ip/prefix
             RouteInfo info = new RouteInfo(new IpPrefix(route), null, null, RouteInfo.RTN_UNICAST);
             this.routes.add(info);
-            updateAllowedFamilies(info.getDestination().getAddress());
         }
     }
 
@@ -144,7 +165,6 @@ public class VpnConfig implements Parcelable {
             //each address is ip/prefix
             LinkAddress addr = new LinkAddress(address);
             this.addresses.add(addr);
-            updateAllowedFamilies(addr.getAddress());
         }
     }
 
@@ -173,6 +193,8 @@ public class VpnConfig implements Parcelable {
         out.writeInt(allowIPv4 ? 1 : 0);
         out.writeInt(allowIPv6 ? 1 : 0);
         out.writeInt(isMetered ? 1 : 0);
+        out.writeInt(requiresInternetValidation ? 1 : 0);
+        out.writeInt(excludeLocalRoutes ? 1 : 0);
         out.writeTypedArray(underlyingNetworks, flags);
         out.writeParcelable(proxyInfo, flags);
     }
@@ -192,7 +214,7 @@ public class VpnConfig implements Parcelable {
             config.searchDomains = in.createStringArrayList();
             config.allowedApplications = in.createStringArrayList();
             config.disallowedApplications = in.createStringArrayList();
-            config.configureIntent = in.readParcelable(null);
+            config.configureIntent = in.readParcelable(null, android.app.PendingIntent.class);
             config.startTime = in.readLong();
             config.legacy = in.readInt() != 0;
             config.blocking = in.readInt() != 0;
@@ -200,8 +222,10 @@ public class VpnConfig implements Parcelable {
             config.allowIPv4 = in.readInt() != 0;
             config.allowIPv6 = in.readInt() != 0;
             config.isMetered = in.readInt() != 0;
+            config.requiresInternetValidation = in.readInt() != 0;
+            config.excludeLocalRoutes = in.readInt() != 0;
             config.underlyingNetworks = in.createTypedArray(Network.CREATOR);
-            config.proxyInfo = in.readParcelable(null);
+            config.proxyInfo = in.readParcelable(null, android.net.ProxyInfo.class);
             return config;
         }
 
@@ -232,6 +256,9 @@ public class VpnConfig implements Parcelable {
                 .append(", allowBypass=").append(allowBypass)
                 .append(", allowIPv4=").append(allowIPv4)
                 .append(", allowIPv6=").append(allowIPv6)
+                .append(", isMetered=").append(isMetered)
+                .append(", requiresInternetValidation=").append(requiresInternetValidation)
+                .append(", excludeLocalRoutes=").append(excludeLocalRoutes)
                 .append(", underlyingNetworks=").append(Arrays.toString(underlyingNetworks))
                 .append(", proxyInfo=").append(proxyInfo)
                 .append("}")

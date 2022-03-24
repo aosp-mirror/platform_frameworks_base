@@ -189,7 +189,7 @@ TEST(ProtoSerializeTest, SerializeSinglePackage) {
   ASSERT_THAT(new_id, NotNull());
   EXPECT_THAT(new_id->IsWeak(), Eq(id->IsWeak()));
 
-  Maybe<ResourceTable::SearchResult> result =
+  std::optional<ResourceTable::SearchResult> result =
       new_table.FindResource(test::ParseNameOrDie("com.app.a:layout/main"));
   ASSERT_TRUE(result);
 
@@ -234,7 +234,7 @@ TEST(ProtoSerializeTest, SerializeSinglePackage) {
   EXPECT_THAT(actual_styled_str->value->spans[0].first_char, Eq(0u));
   EXPECT_THAT(actual_styled_str->value->spans[0].last_char, Eq(4u));
 
-  Maybe<ResourceTable::SearchResult> search_result =
+  std::optional<ResourceTable::SearchResult> search_result =
       new_table.FindResource(test::ParseNameOrDie("com.app.a:integer/overlayable"));
   ASSERT_TRUE(search_result);
   ASSERT_THAT(search_result.value().entry, NotNull());
@@ -637,7 +637,7 @@ TEST(ProtoSerializeTest, SerializeAndDeserializeOverlayable) {
   ASSERT_TRUE(DeserializeTableFromPb(pb_table, &files, &new_table, &error));
   EXPECT_THAT(error, IsEmpty());
 
-  Maybe<ResourceTable::SearchResult> search_result =
+  std::optional<ResourceTable::SearchResult> search_result =
       new_table.FindResource(test::ParseNameOrDie("com.app.a:bool/foo"));
   ASSERT_TRUE(search_result);
   ASSERT_TRUE(search_result.value().entry->overlayable_item);

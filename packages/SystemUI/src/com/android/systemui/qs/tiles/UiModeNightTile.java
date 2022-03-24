@@ -129,17 +129,27 @@ public class UiModeNightTile extends QSTileImpl<QSTile.BooleanState> implements
                     ? R.string.quick_settings_dark_mode_secondary_label_until_sunrise
                     : R.string.quick_settings_dark_mode_secondary_label_on_at_sunset);
         } else if (uiMode == UiModeManager.MODE_NIGHT_CUSTOM) {
-            final boolean use24HourFormat = android.text.format.DateFormat.is24HourFormat(mContext);
-            final LocalTime time;
-            if (nightMode) {
-                time = mUiModeManager.getCustomNightModeEnd();
+            int nightModeCustomType = mUiModeManager.getNightModeCustomType();
+            if (nightModeCustomType == UiModeManager.MODE_NIGHT_CUSTOM_TYPE_SCHEDULE) {
+                final boolean use24HourFormat = android.text.format.DateFormat.is24HourFormat(
+                        mContext);
+                final LocalTime time;
+                if (nightMode) {
+                    time = mUiModeManager.getCustomNightModeEnd();
+                } else {
+                    time = mUiModeManager.getCustomNightModeStart();
+                }
+                state.secondaryLabel = mContext.getResources().getString(nightMode
+                                ? R.string.quick_settings_dark_mode_secondary_label_until
+                                : R.string.quick_settings_dark_mode_secondary_label_on_at,
+                        use24HourFormat ? time.toString() : formatter.format(time));
+            } else if (nightModeCustomType == UiModeManager.MODE_NIGHT_CUSTOM_TYPE_BEDTIME) {
+                state.secondaryLabel = mContext.getResources().getString(nightMode
+                        ? R.string.quick_settings_dark_mode_secondary_label_until_bedtime_ends
+                        : R.string.quick_settings_dark_mode_secondary_label_on_at_bedtime);
             } else {
-                time = mUiModeManager.getCustomNightModeStart();
+                state.secondaryLabel = null;
             }
-            state.secondaryLabel = mContext.getResources().getString(nightMode
-                    ? R.string.quick_settings_dark_mode_secondary_label_until
-                    : R.string.quick_settings_dark_mode_secondary_label_on_at,
-                    use24HourFormat ? time.toString() : formatter.format(time));
         } else {
             state.secondaryLabel = null;
         }

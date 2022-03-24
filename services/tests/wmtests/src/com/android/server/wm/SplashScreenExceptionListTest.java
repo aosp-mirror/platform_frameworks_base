@@ -39,6 +39,7 @@ import org.junit.Test;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 /**
  * Test for the splash screen exception list
@@ -55,7 +56,16 @@ public class SplashScreenExceptionListTest {
     private DeviceConfig.Properties mInitialWindowManagerProperties;
     private final HandlerExecutor mExecutor = new HandlerExecutor(
             new Handler(Looper.getMainLooper()));
-    private final SplashScreenExceptionList mList = new SplashScreenExceptionList(mExecutor);
+    private final SplashScreenExceptionList mList = new SplashScreenExceptionList(mExecutor) {
+        @Override
+        void updateDeviceConfig(String rawList) {
+            super.updateDeviceConfig(rawList);
+            if (mOnUpdateDeviceConfig != null) {
+                mOnUpdateDeviceConfig.accept(rawList);
+            }
+        }
+    };
+    private Consumer<String> mOnUpdateDeviceConfig;
 
     @Before
     public void setUp() throws Exception {
@@ -91,13 +101,11 @@ public class SplashScreenExceptionListTest {
 
     private void setExceptionListAndWaitForCallback(String commaSeparatedList) {
         CountDownLatch latch = new CountDownLatch(1);
-        DeviceConfig.OnPropertiesChangedListener onPropertiesChangedListener = (p) -> {
-            if (commaSeparatedList.equals(p.getString(KEY_SPLASH_SCREEN_EXCEPTION_LIST, null))) {
+        mOnUpdateDeviceConfig = rawList -> {
+            if (commaSeparatedList.equals(rawList)) {
                 latch.countDown();
             }
         };
-        DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_WINDOW_MANAGER,
-                mExecutor, onPropertiesChangedListener);
         DeviceConfig.setProperty(DeviceConfig.NAMESPACE_WINDOW_MANAGER,
                 KEY_SPLASH_SCREEN_EXCEPTION_LIST, commaSeparatedList, false);
         try {
@@ -105,8 +113,6 @@ public class SplashScreenExceptionListTest {
                     latch.await(1, TimeUnit.SECONDS));
         } catch (InterruptedException e) {
             Assert.fail(e.getMessage());
-        } finally {
-            DeviceConfig.removeOnPropertiesChangedListener(onPropertiesChangedListener);
         }
     }
 

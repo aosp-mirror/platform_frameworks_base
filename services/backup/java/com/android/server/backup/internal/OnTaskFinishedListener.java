@@ -16,7 +16,7 @@
 
 package com.android.server.backup.internal;
 
-import com.android.server.backup.transport.TransportClient;
+import com.android.server.backup.transport.TransportConnection;
 import com.android.server.backup.transport.TransportConnectionListener;
 
 /** Listener to be called when a task finishes, successfully or not. */
@@ -27,7 +27,7 @@ public interface OnTaskFinishedListener {
      * Called when a task finishes, successfully or not.
      *
      * @param caller A {@link String} identifying the caller for logging/debugging purposes. Check
-     *     {@link TransportClient#connectAsync(TransportConnectionListener, String)} for more
+     *     {@link TransportConnection#connectAsync(TransportConnectionListener, String)} for more
      *     details.
      */
     void onFinished(String caller);

@@ -153,7 +153,7 @@ public final class ImsRegistrationAttributes implements Parcelable {
         mTransportType = source.readInt();
         mImsAttributeFlags = source.readInt();
         mFeatureTags = new ArrayList<>();
-        source.readList(mFeatureTags, null /*classloader*/);
+        source.readList(mFeatureTags, null /*classloader*/, java.lang.String.class);
     }
 
     /**

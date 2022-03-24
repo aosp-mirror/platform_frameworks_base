@@ -34,7 +34,9 @@ public class BatteryConsumerData {
     enum EntryType {
         UID_TOTAL_POWER,
         UID_POWER_MODELED,
+        UID_POWER_MODELED_PROCESS_STATE,
         UID_POWER_MEASURED,
+        UID_POWER_MEASURED_PROCESS_STATE,
         UID_POWER_CUSTOM,
         UID_DURATION,
         DEVICE_TOTAL_POWER,
@@ -128,17 +130,20 @@ public class BatteryConsumerData {
                     || powerModel == BatteryConsumer.POWER_MODEL_UNDEFINED) {
                 addEntry(metricTitle, EntryType.UID_POWER_MODELED,
                         requestedBatteryConsumer.getConsumedPower(component),
-                        totalPowerByComponentMah[component]
-                );
+                        totalPowerByComponentMah[component]);
+                addProcessStateEntries(metricTitle, EntryType.UID_POWER_MODELED_PROCESS_STATE,
+                        requestedBatteryConsumer, component);
             } else {
                 addEntry(metricTitle + " (measured)", EntryType.UID_POWER_MEASURED,
                         requestedBatteryConsumer.getConsumedPower(component),
-                        totalPowerByComponentMah[component]
-                );
+                        totalPowerByComponentMah[component]);
+                addProcessStateEntries(metricTitle, EntryType.UID_POWER_MEASURED_PROCESS_STATE,
+                        requestedBatteryConsumer, component);
                 addEntry(metricTitle + " (modeled)", EntryType.UID_POWER_MODELED,
                         requestedModeledBatteryConsumer.getConsumedPower(component),
-                        totalModeledPowerByComponentMah[component]
-                );
+                        totalModeledPowerByComponentMah[component]);
+                addProcessStateEntries(metricTitle, EntryType.UID_POWER_MODELED_PROCESS_STATE,
+                        requestedModeledBatteryConsumer, component);
             }
         }
 
@@ -162,6 +167,36 @@ public class BatteryConsumerData {
 
         mBatteryConsumerInfo = BatteryConsumerInfoHelper.makeBatteryConsumerInfo(batteryUsageStats,
                 batteryConsumerId, context.getPackageManager());
+    }
+
+    private void addProcessStateEntries(String metricTitle, EntryType entryType,
+            BatteryConsumer batteryConsumer, int component) {
+        final BatteryConsumer.Key[] keys = batteryConsumer.getKeys(component);
+        if (keys == null || keys.length <= 1) {
+            return;
+        }
+
+        for (BatteryConsumer.Key key : keys) {
+            String label;
+            switch (key.processState) {
+                case BatteryConsumer.PROCESS_STATE_FOREGROUND:
+                    label = "foreground";
+                    break;
+                case BatteryConsumer.PROCESS_STATE_BACKGROUND:
+                    label = "background";
+                    break;
+                case BatteryConsumer.PROCESS_STATE_FOREGROUND_SERVICE:
+                    label = "FGS";
+                    break;
+                case BatteryConsumer.PROCESS_STATE_CACHED:
+                    label = "cached";
+                    break;
+                default:
+                    continue;
+            }
+            addEntry(metricTitle + " \u2022 " + label, entryType,
+                    batteryConsumer.getConsumedPower(key), 0);
+        }
     }
 
     private void populateForAggregateBatteryConsumer(Context context,

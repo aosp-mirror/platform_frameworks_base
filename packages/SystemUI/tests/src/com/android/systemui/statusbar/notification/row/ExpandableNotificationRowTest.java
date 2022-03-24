@@ -16,9 +16,12 @@
 
 package com.android.systemui.statusbar.notification.row;
 
+import static android.app.Notification.FLAG_NO_CLEAR;
+import static android.app.Notification.FLAG_ONGOING_EVENT;
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 
 import static com.android.systemui.statusbar.NotificationEntryHelper.modifyRanking;
+import static com.android.systemui.statusbar.NotificationEntryHelper.modifySbn;
 import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_ALL;
 
 import static org.junit.Assert.assertEquals;
@@ -29,6 +32,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -39,7 +43,6 @@ import android.app.NotificationChannel;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
-import android.util.Pair;
 import android.view.View;
 
 import androidx.test.filters.SmallTest;
@@ -49,6 +52,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.AboveShelfChangedListener;
+import com.android.systemui.statusbar.notification.FeedbackIcon;
 import com.android.systemui.statusbar.notification.stack.NotificationChildrenContainer;
 
 import org.junit.Assert;
@@ -212,7 +216,7 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
         // public notification is custom layout - no header
         mGroupRow.setSensitive(true, true);
         mGroupRow.setOnFeedbackClickListener(null);
-        mGroupRow.showFeedbackIcon(false, null);
+        mGroupRow.setFeedbackIcon(null);
     }
 
     @Test
@@ -226,13 +230,13 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
         mGroupRow.setChildrenContainer(mockContainer);
 
         final boolean show = true;
-        final Pair<Integer, Integer> resIds = new Pair(R.drawable.ic_feedback_alerted,
-                R.string.notification_feedback_indicator_alerted);
-        mGroupRow.showFeedbackIcon(show, resIds);
+        final FeedbackIcon icon = new FeedbackIcon(
+                R.drawable.ic_feedback_alerted, R.string.notification_feedback_indicator_alerted);
+        mGroupRow.setFeedbackIcon(icon);
 
-        verify(mockContainer, times(1)).showFeedbackIcon(show, resIds);
-        verify(privateLayout, times(1)).showFeedbackIcon(show, resIds);
-        verify(publicLayout, times(1)).showFeedbackIcon(show, resIds);
+        verify(mockContainer, times(1)).setFeedbackIcon(icon);
+        verify(privateLayout, times(1)).setFeedbackIcon(icon);
+        verify(publicLayout, times(1)).setFeedbackIcon(icon);
     }
 
     @Test
@@ -329,5 +333,29 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
         row.getEntry().getChannel().setImportanceLockedByCriticalDeviceFunction(true);
 
         assertTrue(row.getIsNonblockable());
+    }
+
+    @Test
+    public void testCanDismissNoClear() throws Exception {
+        ExpandableNotificationRow row =
+                mNotificationTestHelper.createRow(mNotificationTestHelper.createNotification());
+        modifySbn(row.getEntry())
+                .setFlag(mContext, FLAG_NO_CLEAR, true)
+                .build();
+        row.performDismiss(false);
+        verify(mNotificationTestHelper.mOnUserInteractionCallback)
+                .onDismiss(any(), anyInt(), any());
+    }
+
+    @Test
+    public void testCannotDismissOngoing() throws Exception {
+        ExpandableNotificationRow row =
+                mNotificationTestHelper.createRow(mNotificationTestHelper.createNotification());
+        modifySbn(row.getEntry())
+                .setFlag(mContext, FLAG_ONGOING_EVENT, true)
+                .build();
+        row.performDismiss(false);
+        verify(mNotificationTestHelper.mOnUserInteractionCallback, never())
+                .onDismiss(any(), anyInt(), any());
     }
 }

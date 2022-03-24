@@ -27,7 +27,9 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.widget.FrameLayout;
 
+import com.android.internal.logging.UiEventLogger;
 import com.android.keyguard.KeyguardConstants;
 import com.android.keyguard.KeyguardVisibilityHelper;
 import com.android.keyguard.dagger.KeyguardUserSwitcherScope;
@@ -37,26 +39,25 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.qs.tiles.UserDetailView;
+import com.android.systemui.qs.user.UserSwitchDialogController;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.AnimatableProperty;
 import com.android.systemui.statusbar.notification.PropertyAnimator;
 import com.android.systemui.statusbar.notification.stack.AnimationProperties;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.statusbar.phone.DozeParameters;
-import com.android.systemui.statusbar.phone.NotificationPanelViewController;
-import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
+import com.android.systemui.statusbar.phone.LockscreenGestureLogger;
+import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
 import com.android.systemui.statusbar.phone.UserAvatarView;
 import com.android.systemui.util.ViewController;
 
 import javax.inject.Inject;
-import javax.inject.Provider;
 
 /**
  * Manages the user switch on the Keyguard that is used for opening the QS user panel.
  */
 @KeyguardUserSwitcherScope
-public class KeyguardQsUserSwitchController extends ViewController<UserAvatarView> {
+public class KeyguardQsUserSwitchController extends ViewController<FrameLayout> {
 
     private static final String TAG = "KeyguardQsUserSwitchController";
     private static final boolean DEBUG = KeyguardConstants.DEBUG;
@@ -74,8 +75,9 @@ public class KeyguardQsUserSwitchController extends ViewController<UserAvatarVie
     protected final SysuiStatusBarStateController mStatusBarStateController;
     private final ConfigurationController mConfigurationController;
     private final KeyguardVisibilityHelper mKeyguardVisibilityHelper;
-    private final KeyguardUserDetailAdapter mUserDetailAdapter;
-    private NotificationPanelViewController mNotificationPanelViewController;
+    private final UserSwitchDialogController mUserSwitchDialogController;
+    private final UiEventLogger mUiEventLogger;
+    private UserAvatarView mUserAvatarView;
     UserSwitcherController.UserRecord mCurrentUser;
 
     // State info for the user switch and keyguard
@@ -111,7 +113,7 @@ public class KeyguardQsUserSwitchController extends ViewController<UserAvatarVie
 
     @Inject
     public KeyguardQsUserSwitchController(
-            UserAvatarView view,
+            FrameLayout view,
             Context context,
             @Main Resources resources,
             ScreenLifecycle screenLifecycle,
@@ -121,8 +123,9 @@ public class KeyguardQsUserSwitchController extends ViewController<UserAvatarVie
             ConfigurationController configurationController,
             SysuiStatusBarStateController statusBarStateController,
             DozeParameters dozeParameters,
-            Provider<UserDetailView.Adapter> userDetailViewAdapterProvider,
-            UnlockedScreenOffAnimationController unlockedScreenOffAnimationController) {
+            ScreenOffAnimationController screenOffAnimationController,
+            UserSwitchDialogController userSwitchDialogController,
+            UiEventLogger uiEventLogger) {
         super(view);
         if (DEBUG) Log.d(TAG, "New KeyguardQsUserSwitchController");
         mContext = context;
@@ -135,14 +138,16 @@ public class KeyguardQsUserSwitchController extends ViewController<UserAvatarVie
         mStatusBarStateController = statusBarStateController;
         mKeyguardVisibilityHelper = new KeyguardVisibilityHelper(mView,
                 keyguardStateController, dozeParameters,
-                unlockedScreenOffAnimationController,  /* animateYPos= */ false);
-        mUserDetailAdapter = new KeyguardUserDetailAdapter(context, userDetailViewAdapterProvider);
+                screenOffAnimationController,  /* animateYPos= */ false);
+        mUserSwitchDialogController = userSwitchDialogController;
+        mUiEventLogger = uiEventLogger;
     }
 
     @Override
     protected void onInit() {
         super.onInit();
         if (DEBUG) Log.d(TAG, "onInit");
+        mUserAvatarView = mView.findViewById(R.id.kg_multi_user_avatar);
         mAdapter = new UserSwitcherController.BaseUserAdapter(mUserSwitcherController) {
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
@@ -150,20 +155,22 @@ public class KeyguardQsUserSwitchController extends ViewController<UserAvatarVie
             }
         };
 
-        mView.setOnClickListener(v -> {
+        mUserAvatarView.setOnClickListener(v -> {
             if (mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
                 return;
             }
-
             if (isListAnimating()) {
                 return;
             }
 
-            // Tapping anywhere in the view will open QS user panel
-            openQsUserPanel();
+            // Tapping anywhere in the view will open the user switcher
+            mUiEventLogger.log(
+                    LockscreenGestureLogger.LockscreenUiEvent.LOCKSCREEN_SWITCH_USER_TAP);
+
+            mUserSwitchDialogController.showDialog(mView);
         });
 
-        mView.setAccessibilityDelegate(new View.AccessibilityDelegate() {
+        mUserAvatarView.setAccessibilityDelegate(new View.AccessibilityDelegate() {
             public void onInitializeAccessibilityNodeInfo(View host, AccessibilityNodeInfo info) {
                 super.onInitializeAccessibilityNodeInfo(host, info);
                 info.addAction(new AccessibilityNodeInfo.AccessibilityAction(
@@ -237,12 +244,12 @@ public class KeyguardQsUserSwitchController extends ViewController<UserAvatarVie
                     R.string.accessibility_multi_user_switch_switcher);
         }
 
-        if (!TextUtils.equals(mView.getContentDescription(), contentDescription)) {
-            mView.setContentDescription(contentDescription);
+        if (!TextUtils.equals(mUserAvatarView.getContentDescription(), contentDescription)) {
+            mUserAvatarView.setContentDescription(contentDescription);
         }
 
         int userId = mCurrentUser != null ? mCurrentUser.resolveId() : UserHandle.USER_NULL;
-        mView.setDrawableWithBadge(getCurrentUserIcon().mutate(), userId);
+        mUserAvatarView.setDrawableWithBadge(getCurrentUserIcon().mutate(), userId);
     }
 
     Drawable getCurrentUserIcon() {
@@ -260,7 +267,7 @@ public class KeyguardQsUserSwitchController extends ViewController<UserAvatarVie
             drawable = new CircleFramedDrawable(mCurrentUser.picture, avatarSize);
         }
 
-        Drawable bg = mContext.getDrawable(R.drawable.kg_bg_avatar);
+        Drawable bg = mContext.getDrawable(R.drawable.user_avatar_bg);
         drawable = new LayerDrawable(new Drawable[]{bg, drawable});
         return drawable;
     }
@@ -269,7 +276,7 @@ public class KeyguardQsUserSwitchController extends ViewController<UserAvatarVie
      * Get the height of the keyguard user switcher view when closed.
      */
     public int getUserIconHeight() {
-        return mView.getHeight();
+        return mUserAvatarView.getHeight();
     }
 
     /**
@@ -304,41 +311,5 @@ public class KeyguardQsUserSwitchController extends ViewController<UserAvatarVie
 
     private boolean isListAnimating() {
         return mKeyguardVisibilityHelper.isVisibilityAnimating();
-    }
-
-    private void openQsUserPanel() {
-        mNotificationPanelViewController.expandWithQsDetail(mUserDetailAdapter);
-    }
-
-    public void setNotificationPanelViewController(
-            NotificationPanelViewController notificationPanelViewController) {
-        mNotificationPanelViewController = notificationPanelViewController;
-    }
-
-    class KeyguardUserDetailAdapter extends UserSwitcherController.UserDetailAdapter {
-        KeyguardUserDetailAdapter(Context context,
-                Provider<UserDetailView.Adapter> userDetailViewAdapterProvider) {
-            super(context, userDetailViewAdapterProvider);
-        }
-
-        @Override
-        public boolean shouldAnimate() {
-            return false;
-        }
-
-        @Override
-        public int getDoneText() {
-            return R.string.quick_settings_close_user_panel;
-        }
-
-        @Override
-        public boolean onDoneButtonClicked() {
-            if (mNotificationPanelViewController != null) {
-                mNotificationPanelViewController.animateCloseQs(true /* animateAway */);
-                return true;
-            } else {
-                return false;
-            }
-        }
     }
 }

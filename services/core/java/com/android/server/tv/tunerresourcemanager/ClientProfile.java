@@ -50,8 +50,6 @@ public final class ClientProfile {
      */
     private final int mProcessId;
 
-    private boolean mIsForeground;
-
     /**
      * All the clients that share the same resource would be under the same group id.
      *
@@ -90,6 +88,12 @@ public final class ClientProfile {
     private int mUsingCiCamId = INVALID_RESOURCE_ID;
 
     /**
+     * If the priority is overwritten through
+     * {@link TunerResourceManagerService#setPriority(int, int)}.
+     */
+    private boolean mIsPriorityOverwritten = false;
+
+    /**
      * Optional arbitrary priority value given by the client.
      *
      * <p>This value can override the default priorotiy calculated from
@@ -121,17 +125,10 @@ public final class ClientProfile {
     }
 
     /**
-     * Set the current isForeground status.
+     * If the client priority is overwrttien.
      */
-    public void setForeground(boolean isForeground) {
-        mIsForeground = isForeground;
-    }
-
-    /**
-     * Get the previous recorded isForeground status.
-     */
-    public boolean isForeground() {
-        return mIsForeground;
+    public boolean isPriorityOverwritten() {
+        return mIsPriorityOverwritten;
     }
 
     public int getGroupId() {
@@ -150,6 +147,17 @@ public final class ClientProfile {
         if (priority < 0) {
             return;
         }
+        mPriority = priority;
+    }
+
+    /**
+     * Overwrite the client priority.
+     */
+    public void overwritePriority(int priority) {
+        if (priority < 0) {
+            return;
+        }
+        mIsPriorityOverwritten = true;
         mPriority = priority;
     }
 

@@ -17,16 +17,19 @@
 package com.android.server.pm;
 
 import android.compat.annotation.ChangeId;
+import android.compat.annotation.Disabled;
 import android.compat.annotation.EnabledAfter;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageParser.SigningDetails;
 import android.content.pm.Signature;
+import android.content.pm.SigningDetails;
 import android.os.Environment;
 import android.util.Slog;
 import android.util.Xml;
 
 import com.android.server.compat.PlatformCompat;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
+import com.android.server.pm.pkg.SharedUserApi;
 
 import libcore.io.IoUtils;
 
@@ -79,20 +82,20 @@ public final class SELinuxMMAC {
 
     /**
      * Allows opt-in to the latest targetSdkVersion enforced changes without changing target SDK.
-     * Turning this change off for an app targeting the latest SDK is a no-op.
+     * Turning this change on for an app targeting the latest SDK or higher is a no-op.
      *
      * <p>Has no effect for apps using shared user id.
      *
      * TODO(b/143539591): Update description with relevant SELINUX changes this opts in to.
      */
-    @EnabledAfter(targetSdkVersion = android.os.Build.VERSION_CODES.R)
+    @Disabled
     @ChangeId
     static final long SELINUX_LATEST_CHANGES = 143539591L;
 
     /**
      * This change gates apps access to untrusted_app_R-targetSDK SELinux domain. Allows opt-in
      * to R targetSdkVersion enforced changes without changing target SDK. Turning this change
-     * off for an app targeting S is a no-op.
+     * off for an app targeting {@code >= android.os.Build.VERSION_CODES.R} is a no-op.
      *
      * <p>Has no effect for apps using shared user id.
      *
@@ -123,16 +126,10 @@ public final class SELinuxMMAC {
         }
 
         // Vendor mac permissions.
-        // The filename has been renamed from nonplat_mac_permissions to
-        // vendor_mac_permissions. Either of them should exist.
         final File vendorMacPermission = new File(
             Environment.getVendorDirectory(), "/etc/selinux/vendor_mac_permissions.xml");
         if (vendorMacPermission.exists()) {
             sMacPermissions.add(vendorMacPermission);
-        } else {
-            // For backward compatibility.
-            sMacPermissions.add(new File(Environment.getVendorDirectory(),
-                                         "/etc/selinux/nonplat_mac_permissions.xml"));
         }
 
         // ODM mac permissions (optional).
@@ -350,7 +347,7 @@ public final class SELinuxMMAC {
     }
 
     private static int getTargetSdkVersionForSeInfo(AndroidPackage pkg,
-            SharedUserSetting sharedUserSetting, PlatformCompat compatibility) {
+            SharedUserApi sharedUser, PlatformCompat compatibility) {
         // Apps which share a sharedUserId must be placed in the same selinux domain. If this
         // package is the first app installed as this shared user, set seInfoTargetSdkVersion to its
         // targetSdkVersion. These are later adjusted in PackageManagerService's constructor to be
@@ -359,12 +356,13 @@ public final class SELinuxMMAC {
         // NOTE: As new packages are installed / updated, the shared user's seinfoTargetSdkVersion
         // will NOT be modified until next boot, even if a lower targetSdkVersion is used. This
         // ensures that all packages continue to run in the same selinux domain.
-        if ((sharedUserSetting != null) && (sharedUserSetting.packages.size() != 0)) {
-            return sharedUserSetting.seInfoTargetSdkVersion;
+        if ((sharedUser != null) && (sharedUser.getPackages().size() != 0)) {
+            return sharedUser.getSeInfoTargetSdkVersion();
         }
-        final ApplicationInfo appInfo = pkg.toAppInfoWithoutState();
+        final ApplicationInfo appInfo = AndroidPackageUtils.generateAppInfoWithoutState(pkg);
         if (compatibility.isChangeEnabledInternal(SELINUX_LATEST_CHANGES, appInfo)) {
-            return android.os.Build.VERSION_CODES.S;
+            return Math.max(
+                    android.os.Build.VERSION_CODES.CUR_DEVELOPMENT, pkg.getTargetSdkVersion());
         } else if (compatibility.isChangeEnabledInternal(SELINUX_R_CHANGES, appInfo)) {
             return Math.max(android.os.Build.VERSION_CODES.R, pkg.getTargetSdkVersion());
         }
@@ -379,18 +377,18 @@ public final class SELinuxMMAC {
      * the ApplicationInfo instance of the package.
      *
      * @param pkg               object representing the package to be labeled.
-     * @param sharedUserSetting if the app shares a sharedUserId, then this has the shared setting.
+     * @param sharedUser if the app shares a sharedUserId, then this has the shared setting.
      * @param compatibility     the PlatformCompat service to ask about state of compat changes.
      * @return String representing the resulting seinfo.
      */
-    public static String getSeInfo(AndroidPackage pkg, SharedUserSetting sharedUserSetting,
+    public static String getSeInfo(AndroidPackage pkg, SharedUserApi sharedUser,
             PlatformCompat compatibility) {
-        final int targetSdkVersion = getTargetSdkVersionForSeInfo(pkg, sharedUserSetting,
+        final int targetSdkVersion = getTargetSdkVersionForSeInfo(pkg, sharedUser,
                 compatibility);
         // TODO(b/71593002): isPrivileged for sharedUser and appInfo should never be out of sync.
         // They currently can be if the sharedUser apps are signed with the platform key.
-        final boolean isPrivileged = (sharedUserSetting != null)
-                ? sharedUserSetting.isPrivileged() | pkg.isPrivileged() : pkg.isPrivileged();
+        final boolean isPrivileged = (sharedUser != null)
+                ? sharedUser.isPrivileged() | pkg.isPrivileged() : pkg.isPrivileged();
         return getSeInfo(pkg, isPrivileged, targetSdkVersion);
     }
 
@@ -569,7 +567,7 @@ final class Policy {
      * In all cases, a return value of null should be interpreted as the apk failing
      * to match this Policy instance; i.e. failing this policy stanza.
      * </p>
-     * @param pkg the apk to check given as a PackageParser.Package object
+     * @param pkg the apk to check given as a AndroidPackage object
      * @return A string representing the seinfo matched during policy lookup.
      *         A value of null can also be returned if no match occured.
      */
@@ -577,7 +575,7 @@ final class Policy {
         // Check for exact signature matches across all certs.
         Signature[] certs = mCerts.toArray(new Signature[0]);
         if (pkg.getSigningDetails() != SigningDetails.UNKNOWN
-                && !Signature.areExactMatch(certs, pkg.getSigningDetails().signatures)) {
+                && !Signature.areExactMatch(certs, pkg.getSigningDetails().getSignatures())) {
 
             // certs aren't exact match, but the package may have rotated from the known system cert
             if (certs.length > 1 || !pkg.getSigningDetails().hasCertificate(certs[0])) {

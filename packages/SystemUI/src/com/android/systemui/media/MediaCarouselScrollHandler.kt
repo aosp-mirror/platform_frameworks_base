@@ -528,7 +528,7 @@ class MediaCarouselScrollHandler(
      * where it was and update our scroll position.
      */
     fun onPrePlayerRemoved(removed: MediaControlPanel) {
-        val removedIndex = mediaContent.indexOfChild(removed.playerViewHolder?.player)
+        val removedIndex = mediaContent.indexOfChild(removed.mediaViewHolder?.player)
         // If the removed index is less than the visibleMediaIndex, then we need to decrement it.
         // RTL has no effect on this, because indices are always relative (start-to-end).
         // Update the index 'manually' since we won't always get a call to onMediaScrollingChanged

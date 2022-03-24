@@ -23,10 +23,10 @@ package android.inputmethodservice;
 option java_multiple_files = true;
 
 message SoftInputWindowProto {
-    optional string name = 1;
-    optional int32 window_type = 2;
-    optional int32 gravity = 3;
-    optional bool takes_focus = 4;
+    reserved 1;  // name
+    reserved 2;  // window_type
+    reserved 3;  // gravity
+    reserved 4;  // takes_focus
     optional .android.graphics.RectProto bounds = 5;
     optional int32 window_state = 6;
 }

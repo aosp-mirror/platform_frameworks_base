@@ -16,6 +16,7 @@
 
 package android.content.pm;
 
+import android.platform.test.annotations.Presubmit;
 import android.test.AndroidTestCase;
 
 import androidx.test.filters.MediumTest;
@@ -25,6 +26,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 
+@Presubmit
 public class LimitedLengthInputStreamTest extends AndroidTestCase {
     private final byte[] TEST_STRING1 = "This is a test".getBytes();
 

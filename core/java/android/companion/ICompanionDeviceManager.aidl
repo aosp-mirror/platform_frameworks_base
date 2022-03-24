@@ -17,8 +17,9 @@
 package android.companion;
 
 import android.app.PendingIntent;
-import android.companion.IFindDeviceCallback;
-import android.companion.Association;
+import android.companion.IAssociationRequestCallback;
+import android.companion.IOnAssociationsChangedListener;
+import android.companion.AssociationInfo;
 import android.companion.AssociationRequest;
 import android.content.ComponentName;
 
@@ -28,30 +29,46 @@ import android.content.ComponentName;
  * @hide
  */
 interface ICompanionDeviceManager {
-    void associate(in AssociationRequest request,
-        in IFindDeviceCallback callback,
-        in String callingPackage);
-    void stopScan(in AssociationRequest request,
-        in IFindDeviceCallback callback,
-        in String callingPackage);
+    void associate(in AssociationRequest request, in IAssociationRequestCallback callback,
+        in String callingPackage, int userId);
 
-    List<String> getAssociations(String callingPackage, int userId);
-    List<Association> getAssociationsForUser(int userId);
+    List<AssociationInfo> getAssociations(String callingPackage, int userId);
+    List<AssociationInfo> getAllAssociationsForUser(int userId);
 
-    void disassociate(String deviceMacAddress, String callingPackage);
+    /** @deprecated */
+    void legacyDisassociate(String deviceMacAddress, String callingPackage, int userId);
 
+    void disassociate(int associationId);
+
+    /** @deprecated */
     boolean hasNotificationAccess(in ComponentName component);
-    PendingIntent requestNotificationAccess(in ComponentName component);
 
+    PendingIntent requestNotificationAccess(in ComponentName component, int userId);
+
+    /** @deprecated */
     boolean isDeviceAssociatedForWifiConnection(in String packageName, in String macAddress,
         int userId);
 
-    void registerDevicePresenceListenerService(in String packageName, in String deviceAddress);
+    void registerDevicePresenceListenerService(in String deviceAddress, in String callingPackage,
+        int userId);
 
-    void unregisterDevicePresenceListenerService(in String packageName, in String deviceAddress);
+    void unregisterDevicePresenceListenerService(in String deviceAddress, in String callingPackage,
+        int userId);
 
+    /** @deprecated */
     boolean canPairWithoutPrompt(in String packageName, in String deviceMacAddress, int userId);
 
+    /** @deprecated */
     void createAssociation(in String packageName, in String macAddress, int userId,
         in byte[] certificate);
+
+    void dispatchMessage(in int messageId, in int associationId, in byte[] message);
+
+    void addOnAssociationsChangedListener(IOnAssociationsChangedListener listener, int userId);
+
+    void removeOnAssociationsChangedListener(IOnAssociationsChangedListener listener, int userId);
+
+    void notifyDeviceAppeared(int associationId);
+
+    void notifyDeviceDisappeared(int associationId);
 }

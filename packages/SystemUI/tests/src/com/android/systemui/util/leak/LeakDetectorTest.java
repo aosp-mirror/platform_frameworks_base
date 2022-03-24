@@ -21,12 +21,14 @@ import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.util.leak.ReferenceTestUtils.CollectionWaiter;
 
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
@@ -67,7 +69,7 @@ public class LeakDetectorTest extends SysuiTestCase {
 
     @Before
     public void setup() {
-        mLeakDetector = LeakDetector.create();
+        mLeakDetector = LeakDetector.create(Mockito.mock(DumpManager.class));
 
         // Note: Do not try to factor out object / collection waiter creation. The optimizer will
         // try and cache accesses to fields and thus create a GC root for the duration of the test
@@ -112,7 +114,7 @@ public class LeakDetectorTest extends SysuiTestCase {
 
     @Test
     public void testDisabled() throws Exception {
-        mLeakDetector = new LeakDetector(null, null, null);
+        mLeakDetector = new LeakDetector(null, null, null, Mockito.mock(DumpManager.class));
 
         Object o1 = new Object();
         Object o2 = new Object();

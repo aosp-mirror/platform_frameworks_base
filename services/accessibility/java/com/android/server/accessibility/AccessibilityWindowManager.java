@@ -16,6 +16,8 @@
 
 package com.android.server.accessibility;
 
+import static android.accessibilityservice.AccessibilityTrace.FLAGS_ACCESSIBILITY_INTERACTION_CONNECTION;
+import static android.accessibilityservice.AccessibilityTrace.FLAGS_WINDOW_MANAGER_INTERNAL;
 import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
 import static android.view.accessibility.AccessibilityEvent.WINDOWS_CHANGE_ACCESSIBILITY_FOCUSED;
 
@@ -69,6 +71,7 @@ public class AccessibilityWindowManager {
     private final AccessibilityEventSender mAccessibilityEventSender;
     private final AccessibilitySecurityPolicy mSecurityPolicy;
     private final AccessibilityUserManager mAccessibilityUserManager;
+    private final AccessibilityTraceManager mTraceManager;
 
     // Connections and window tokens for cross-user windows
     private final SparseArray<RemoteAccessibilityConnection>
@@ -140,26 +143,20 @@ public class AccessibilityWindowManager {
 
         /**
          * Starts tracking windows changes from window manager by registering callback.
-         *
-         * @return true if callback registers successful.
          */
-        boolean startTrackingWindowsLocked() {
-            boolean result = true;
-
+        void startTrackingWindowsLocked() {
             if (!mTrackingWindows) {
                 // Turns on the flag before setup the callback.
                 // In some cases, onWindowsForAccessibilityChanged will be called immediately in
                 // setWindowsForAccessibilityCallback. We'll lost windows if flag is false.
                 mTrackingWindows = true;
-                result = mWindowManagerInternal.setWindowsForAccessibilityCallback(
-                        mDisplayId, this);
-                if (!result) {
-                    mTrackingWindows = false;
-                    Slog.w(LOG_TAG, "set windowsObserver callbacks fail, displayId:"
-                            + mDisplayId);
+                if (traceWMEnabled()) {
+                    logTraceWM("setWindowsForAccessibilityCallback",
+                            "displayId=" + mDisplayId + ";callback=" + this);
                 }
+                mWindowManagerInternal.setWindowsForAccessibilityCallback(
+                        mDisplayId, this);
             }
-            return result;
         }
 
         /**
@@ -167,6 +164,10 @@ public class AccessibilityWindowManager {
          */
         void stopTrackingWindowsLocked() {
             if (mTrackingWindows) {
+                if (traceWMEnabled()) {
+                    logTraceWM("setWindowsForAccessibilityCallback",
+                            "displayId=" + mDisplayId + ";callback=null");
+                }
                 mWindowManagerInternal.setWindowsForAccessibilityCallback(
                         mDisplayId, null);
                 mTrackingWindows = false;
@@ -474,6 +475,9 @@ public class AccessibilityWindowManager {
             if (oldWindow.displayId != newWindow.displayId) {
                 return true;
             }
+            if (oldWindow.taskId != newWindow.taskId) {
+                return true;
+            }
             return false;
         }
 
@@ -663,6 +667,10 @@ public class AccessibilityWindowManager {
                 return null;
             }
 
+            // Don't need to add the embedded hierarchy windows into the accessibility windows list.
+            if (mHostEmbeddedMap.size() > 0 && isEmbeddedHierarchyWindowsLocked(windowId)) {
+                return null;
+            }
             final AccessibilityWindowInfo reportedWindow = AccessibilityWindowInfo.obtain();
 
             reportedWindow.setId(windowId);
@@ -674,6 +682,7 @@ public class AccessibilityWindowManager {
             reportedWindow.setAnchorId(window.accessibilityIdOfAnchor);
             reportedWindow.setPictureInPicture(window.inPictureInPicture);
             reportedWindow.setDisplayId(window.displayId);
+            reportedWindow.setTaskId(window.taskId);
 
             final int parentId = findWindowIdLocked(userId, window.parentToken);
             if (parentId >= 0) {
@@ -692,6 +701,21 @@ public class AccessibilityWindowManager {
             }
 
             return reportedWindow;
+        }
+
+        private boolean isEmbeddedHierarchyWindowsLocked(int windowId) {
+            final IBinder leashToken = mWindowIdMap.get(windowId);
+            if (leashToken == null) {
+                return false;
+            }
+
+            for (int i = 0; i < mHostEmbeddedMap.size(); i++) {
+                if (mHostEmbeddedMap.keyAt(i).equals(leashToken)) {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private int getTypeForWindowManagerWindowType(int windowType) {
@@ -730,8 +754,7 @@ public class AccessibilityWindowManager {
                 case WindowManager.LayoutParams.TYPE_SYSTEM_ERROR:
                 case WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY:
                 case WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY:
-                case WindowManager.LayoutParams.TYPE_SCREENSHOT:
-                case WindowManager.LayoutParams.TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY: {
+                case WindowManager.LayoutParams.TYPE_SCREENSHOT: {
                     return AccessibilityWindowInfo.TYPE_SYSTEM;
                 }
 
@@ -741,6 +764,10 @@ public class AccessibilityWindowManager {
 
                 case TYPE_ACCESSIBILITY_OVERLAY: {
                     return AccessibilityWindowInfo.TYPE_ACCESSIBILITY_OVERLAY;
+                }
+
+                case WindowManager.LayoutParams.TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY: {
+                    return AccessibilityWindowInfo.TYPE_MAGNIFICATION_OVERLAY;
                 }
 
                 default: {
@@ -844,19 +871,21 @@ public class AccessibilityWindowManager {
     }
 
     /**
-     * Constructor for AccessibilityManagerService.
+     * Constructor for AccessibilityWindowManager.
      */
     public AccessibilityWindowManager(@NonNull Object lock, @NonNull Handler handler,
             @NonNull WindowManagerInternal windowManagerInternal,
             @NonNull AccessibilityEventSender accessibilityEventSender,
             @NonNull AccessibilitySecurityPolicy securityPolicy,
-            @NonNull AccessibilityUserManager accessibilityUserManager) {
+            @NonNull AccessibilityUserManager accessibilityUserManager,
+            @NonNull AccessibilityTraceManager traceManager) {
         mLock = lock;
         mHandler = handler;
         mWindowManagerInternal = windowManagerInternal;
         mAccessibilityEventSender = accessibilityEventSender;
         mSecurityPolicy = securityPolicy;
         mAccessibilityUserManager = accessibilityUserManager;
+        mTraceManager = traceManager;
     }
 
     /**
@@ -873,9 +902,8 @@ public class AccessibilityWindowManager {
             if (observer.isTrackingWindowsLocked()) {
                 return;
             }
-            if (observer.startTrackingWindowsLocked()) {
-                mDisplayWindowsObservers.put(displayId, observer);
-            }
+            observer.startTrackingWindowsLocked();
+            mDisplayWindowsObservers.put(displayId, observer);
         }
     }
 
@@ -957,6 +985,9 @@ public class AccessibilityWindowManager {
         final int windowId;
         boolean shouldComputeWindows = false;
         final IBinder token = window.asBinder();
+        if (traceWMEnabled()) {
+            logTraceWM("getDisplayIdForWindow", "token=" + token);
+        }
         final int displayId = mWindowManagerInternal.getDisplayIdForWindow(token);
         synchronized (mLock) {
             // We treat calls from a profile as if made by its parent as profiles
@@ -1003,9 +1034,15 @@ public class AccessibilityWindowManager {
             registerIdLocked(leashToken, windowId);
         }
         if (shouldComputeWindows) {
+            if (traceWMEnabled()) {
+                logTraceWM("computeWindowsForAccessibility", "displayId=" + displayId);
+            }
             mWindowManagerInternal.computeWindowsForAccessibility(displayId);
         }
-
+        if (traceWMEnabled()) {
+            logTraceWM("setAccessibilityIdToSurfaceMetadata",
+                    "token=" + token + ";windowId=" + windowId);
+        }
         mWindowManagerInternal.setAccessibilityIdToSurfaceMetadata(token, windowId);
         return windowId;
     }
@@ -1139,6 +1176,10 @@ public class AccessibilityWindowManager {
             mActiveWindowId = AccessibilityWindowInfo.UNDEFINED_WINDOW_ID;
         }
         if (binder != null) {
+            if (traceWMEnabled()) {
+                logTraceWM("setAccessibilityIdToSurfaceMetadata", "token=" + binder
+                        + ";windowId=AccessibilityWindowInfo.UNDEFINED_WINDOW_ID");
+            }
             mWindowManagerInternal.setAccessibilityIdToSurfaceMetadata(
                     binder, AccessibilityWindowInfo.UNDEFINED_WINDOW_ID);
         }
@@ -1169,6 +1210,9 @@ public class AccessibilityWindowManager {
      * @return The userId
      */
     public int getWindowOwnerUserId(@NonNull IBinder windowToken) {
+        if (traceWMEnabled()) {
+            logTraceWM("getWindowOwnerUserId", "token=" + windowToken);
+        }
         return mWindowManagerInternal.getWindowOwnerUserId(windowToken);
     }
 
@@ -1361,20 +1405,9 @@ public class AccessibilityWindowManager {
             // the touched window are delivered is fine.
             final int oldActiveWindow = mActiveWindowId;
             setActiveWindowLocked(mTopFocusedWindowId);
-
-            // If there is no service that can operate with interactive windows
-            // then we keep the old behavior where a window loses accessibility
-            // focus if it is no longer active. This still changes the behavior
-            // for services that do not operate with interactive windows and run
-            // at the same time as the one(s) which does. In practice however,
-            // there is only one service that uses accessibility focus and it
-            // is typically the one that operates with interactive windows, So,
-            // this is fine. Note that to allow a service to work across windows
-            // we have to allow accessibility focus stay in any of them. Sigh...
-            final boolean accessibilityFocusOnlyInActiveWindow = !isTrackingWindowsLocked();
             if (oldActiveWindow != mActiveWindowId
                     && mAccessibilityFocusedWindowId == oldActiveWindow
-                    && accessibilityFocusOnlyInActiveWindow) {
+                    && accessibilityFocusOnlyInActiveWindowLocked()) {
                 clearAccessibilityFocusLocked(oldActiveWindow);
             }
         }
@@ -1547,6 +1580,10 @@ public class AccessibilityWindowManager {
         for (int i = 0; i < connectionList.size(); i++) {
             final RemoteAccessibilityConnection connection = connectionList.get(i);
             if (connection != null) {
+                if (traceIntConnEnabled()) {
+                    logTraceIntConn("notifyOutsideTouch");
+                }
+
                 try {
                     connection.getRemote().notifyOutsideTouch();
                 } catch (RemoteException re) {
@@ -1567,6 +1604,9 @@ public class AccessibilityWindowManager {
      */
     public int getDisplayIdByUserIdAndWindowIdLocked(int userId, int windowId) {
         final IBinder windowToken = getWindowTokenForUserAndWindowIdLocked(userId, windowId);
+        if (traceWMEnabled()) {
+            logTraceWM("getDisplayIdForWindow", "token=" + windowToken);
+        }
         final int displayId = mWindowManagerInternal.getDisplayIdForWindow(windowToken);
         return displayId;
     }
@@ -1588,6 +1628,15 @@ public class AccessibilityWindowManager {
         return displayList;
     }
 
+    // If there is no service that can operate with interactive windows
+    // then a window loses accessibility focus if it is no longer active.
+    // This inspection happens when the user interaction is ended.
+    // Note that to allow a service to work across windows,
+    // we have to allow accessibility focus stay in any of them.
+    boolean accessibilityFocusOnlyInActiveWindowLocked() {
+        return !isTrackingWindowsLocked();
+    }
+
     /**
      * Gets current input focused window token from window manager, and returns its windowId.
      *
@@ -1595,6 +1644,9 @@ public class AccessibilityWindowManager {
      * @return The input focused windowId, or -1 if not found
      */
     private int findFocusedWindowId(int userId) {
+        if (traceWMEnabled()) {
+            logTraceWM("getFocusedWindowToken", "");
+        }
         final IBinder token = mWindowManagerInternal.getFocusedWindowToken();
         synchronized (mLock) {
             return findWindowIdLocked(userId, token);
@@ -1644,6 +1696,9 @@ public class AccessibilityWindowManager {
                 return;
             }
         }
+        if (traceIntConnEnabled()) {
+            logTraceIntConn("notifyOutsideTouch");
+        }
         try {
             connection.getRemote().clearAccessibilityFocus();
         } catch (RemoteException re) {
@@ -1664,6 +1719,25 @@ public class AccessibilityWindowManager {
             }
         }
         return null;
+    }
+
+    private boolean traceWMEnabled() {
+        return mTraceManager.isA11yTracingEnabledForTypes(FLAGS_WINDOW_MANAGER_INTERNAL);
+    }
+
+    private void logTraceWM(String methodName, String params) {
+        mTraceManager.logTrace("WindowManagerInternal." + methodName,
+                    FLAGS_WINDOW_MANAGER_INTERNAL, params);
+    }
+
+    private boolean traceIntConnEnabled() {
+        return mTraceManager.isA11yTracingEnabledForTypes(
+                FLAGS_ACCESSIBILITY_INTERACTION_CONNECTION);
+    }
+
+    private void logTraceIntConn(String methodName) {
+        mTraceManager.logTrace(
+                    LOG_TAG + "." + methodName, FLAGS_ACCESSIBILITY_INTERACTION_CONNECTION);
     }
 
     /**

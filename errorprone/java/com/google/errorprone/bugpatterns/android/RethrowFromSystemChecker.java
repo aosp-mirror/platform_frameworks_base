@@ -16,6 +16,7 @@
 
 package com.google.errorprone.bugpatterns.android;
 
+import static com.google.errorprone.BugPattern.LinkType.NONE;
 import static com.google.errorprone.BugPattern.SeverityLevel.WARNING;
 import static com.google.errorprone.matchers.Matchers.allOf;
 import static com.google.errorprone.matchers.Matchers.contains;
@@ -60,6 +61,7 @@ import java.util.List;
 @BugPattern(
     name = "AndroidFrameworkRethrowFromSystem",
     summary = "Verifies that system_server calls use rethrowFromSystemServer()",
+    linkType = NONE,
     severity = WARNING)
 public final class RethrowFromSystemChecker extends BugChecker implements TryTreeMatcher {
     private static final Matcher<Tree> INSIDE_MANAGER =

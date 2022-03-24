@@ -46,7 +46,7 @@ public class BatteryStatsBinderCallStatsTest extends TestCase {
      */
     @Test
     public void testNoteBinderCallStats() throws Exception {
-        final MockClocks clocks = new MockClocks(); // holds realtime and uptime in ms
+        final MockClock clocks = new MockClock(); // holds realtime and uptime in ms
         MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
 
         int callingUid = Process.FIRST_APPLICATION_UID + 1;
@@ -89,7 +89,7 @@ public class BatteryStatsBinderCallStatsTest extends TestCase {
 
     @Test
     public void testProportionalSystemServiceUsage_noStatsForSomeMethods() throws Exception {
-        final MockClocks clocks = new MockClocks(); // holds realtime and uptime in ms
+        final MockClock clocks = new MockClock(); // holds realtime and uptime in ms
         MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
 
         int callingUid = Process.FIRST_APPLICATION_UID + 1;

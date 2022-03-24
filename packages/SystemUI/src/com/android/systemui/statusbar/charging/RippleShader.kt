@@ -15,7 +15,6 @@
  */
 package com.android.systemui.statusbar.charging
 
-import android.graphics.Color
 import android.graphics.PointF
 import android.graphics.RuntimeShader
 import android.util.MathUtils
@@ -29,7 +28,7 @@ import android.util.MathUtils
  *
  * Modeled after frameworks/base/graphics/java/android/graphics/drawable/RippleShader.java.
  */
-class RippleShader internal constructor() : RuntimeShader(SHADER, false) {
+class RippleShader internal constructor() : RuntimeShader(SHADER) {
     companion object {
         private const val SHADER_UNIFORMS = """uniform vec2 in_origin;
                 uniform float in_progress;
@@ -43,7 +42,7 @@ class RippleShader internal constructor() : RuntimeShader(SHADER, false) {
                 uniform float in_fadeRing;
                 uniform float in_blur;
                 uniform float in_pixelDensity;
-                uniform vec4 in_color;
+                layout(color) uniform vec4 in_color;
                 uniform float in_sparkle_strength;"""
         private const val SHADER_LIB = """float triangleNoise(vec2 n) {
                     n  = fract(n * vec2(5.3987, 5.4421));
@@ -122,7 +121,7 @@ class RippleShader internal constructor() : RuntimeShader(SHADER, false) {
     var radius: Float = 0.0f
         set(value) {
             field = value
-            setUniform("in_maxRadius", value)
+            setFloatUniform("in_maxRadius", value)
         }
 
     /**
@@ -131,7 +130,7 @@ class RippleShader internal constructor() : RuntimeShader(SHADER, false) {
     var origin: PointF = PointF()
         set(value) {
             field = value
-            setUniform("in_origin", floatArrayOf(value.x, value.y))
+            setFloatUniform("in_origin", value.x, value.y)
         }
 
     /**
@@ -140,10 +139,10 @@ class RippleShader internal constructor() : RuntimeShader(SHADER, false) {
     var progress: Float = 0.0f
         set(value) {
             field = value
-            setUniform("in_progress", value)
-            setUniform("in_radius",
+            setFloatUniform("in_progress", value)
+            setFloatUniform("in_radius",
                     (1 - (1 - value) * (1 - value) * (1 - value))* radius)
-            setUniform("in_blur", MathUtils.lerp(1.25f, 0.5f, value))
+            setFloatUniform("in_blur", MathUtils.lerp(1.25f, 0.5f, value))
 
             val fadeIn = subProgress(0f, 0.1f, value)
             val fadeOutNoise = subProgress(0.4f, 1f, value)
@@ -153,9 +152,9 @@ class RippleShader internal constructor() : RuntimeShader(SHADER, false) {
                 fadeCircle = subProgress(0f, 0.2f, value)
                 fadeOutRipple = subProgress(0.3f, 1f, value)
             }
-            setUniform("in_fadeSparkle", Math.min(fadeIn, 1 - fadeOutNoise))
-            setUniform("in_fadeCircle", 1 - fadeCircle)
-            setUniform("in_fadeRing", Math.min(fadeIn, 1 - fadeOutRipple))
+            setFloatUniform("in_fadeSparkle", Math.min(fadeIn, 1 - fadeOutNoise))
+            setFloatUniform("in_fadeCircle", 1 - fadeCircle)
+            setFloatUniform("in_fadeRing", Math.min(fadeIn, 1 - fadeOutRipple))
         }
 
     /**
@@ -164,7 +163,7 @@ class RippleShader internal constructor() : RuntimeShader(SHADER, false) {
     var time: Float = 0.0f
         set(value) {
             field = value
-            setUniform("in_time", value)
+            setFloatUniform("in_time", value)
         }
 
     /**
@@ -173,9 +172,7 @@ class RippleShader internal constructor() : RuntimeShader(SHADER, false) {
     var color: Int = 0xffffff.toInt()
         set(value) {
             field = value
-            val color = Color.valueOf(value)
-            setUniform("in_color", floatArrayOf(color.red(),
-                    color.green(), color.blue(), color.alpha()))
+            setColorUniform("in_color", value)
         }
 
     /**
@@ -186,7 +183,7 @@ class RippleShader internal constructor() : RuntimeShader(SHADER, false) {
     var sparkleStrength: Float = 0.0f
         set(value) {
             field = value
-            setUniform("in_sparkle_strength", value)
+            setFloatUniform("in_sparkle_strength", value)
         }
 
     /**
@@ -195,14 +192,14 @@ class RippleShader internal constructor() : RuntimeShader(SHADER, false) {
     var distortionStrength: Float = 0.0f
         set(value) {
             field = value
-            setUniform("in_distort_radial", 75 * progress * value)
-            setUniform("in_distort_xy", 75 * value)
+            setFloatUniform("in_distort_radial", 75 * progress * value)
+            setFloatUniform("in_distort_xy", 75 * value)
         }
 
     var pixelDensity: Float = 1.0f
         set(value) {
             field = value
-            setUniform("in_pixelDensity", value)
+            setFloatUniform("in_pixelDensity", value)
         }
 
     var shouldFadeOutRipple: Boolean = true

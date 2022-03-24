@@ -25,6 +25,8 @@ import static android.content.Intent.FLAG_ACTIVITY_NO_ANIMATION;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_RECENTS_ANIMATIONS;
+import static com.android.server.wm.ActivityRecord.State.STOPPED;
+import static com.android.server.wm.ActivityRecord.State.STOPPING;
 import static com.android.server.wm.ActivityTaskSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.wm.RecentsAnimationController.REORDER_KEEP_IN_PLACE;
 import static com.android.server.wm.RecentsAnimationController.REORDER_MOVE_TO_ORIGINAL_POSITION;
@@ -123,6 +125,11 @@ class RecentsAnimation implements RecentsAnimationCallbacks, OnRootTaskOrderChan
                 ProtoLog.d(WM_DEBUG_RECENTS_ANIMATIONS, "Updated config=%s",
                         targetActivity.getConfiguration());
             }
+        } else if (mDefaultTaskDisplayArea.getActivity(
+                ActivityRecord::occludesParent, false /* traverseTopToBottom */) == null) {
+            // Skip because none of above activities can occlude the target activity. The preload
+            // should be done silently in background without being visible.
+            return;
         } else {
             // Create the activity record. Because the activity is invisible, this doesn't really
             // start the client.
@@ -149,8 +156,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks, OnRootTaskOrderChan
 
         // Invisible activity should be stopped. If the recents activity is alive and its doesn't
         // need to relaunch by current configuration, then it may be already in stopped state.
-        if (!targetActivity.isState(Task.ActivityState.STOPPING,
-                Task.ActivityState.STOPPED)) {
+        if (!targetActivity.isState(STOPPING, STOPPED)) {
             // Add to stopping instead of stop immediately. So the client has the chance to perform
             // traversal in non-stopped state (ViewRootImpl.mStopped) that would initialize more
             // things (e.g. the measure can be done earlier). The actual stop will be performed when
@@ -467,7 +473,8 @@ class RecentsAnimation implements RecentsAnimationCallbacks, OnRootTaskOrderChan
      */
     static void notifyAnimationCancelBeforeStart(IRecentsAnimationRunner recentsAnimationRunner) {
         try {
-            recentsAnimationRunner.onAnimationCanceled(null /* taskSnapshot */);
+            recentsAnimationRunner.onAnimationCanceled(null /* taskIds */,
+                    null /* taskSnapshots */);
         } catch (RemoteException e) {
             Slog.e(TAG, "Failed to cancel recents animation before start", e);
         }

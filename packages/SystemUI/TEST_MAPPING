@@ -1,7 +1,7 @@
 {
   // Looking for unit test presubmit configuration?
   // This currently lives in ATP config apct/system_ui/unit_test
-  "presubmit": [
+  "presubmit-large": [
     {
       "name": "PlatformScenarioTests",
       "options": [
@@ -15,13 +15,26 @@
             "exclude-annotation": "org.junit.Ignore"
         },
         {
-            "exclude-annotation": "androidx.test.filters.FlakyTest"
-        },
-        {
-            "exclude-annotation": "android.platform.helpers.Staging"
-        },
-        {
             "exclude-annotation": "android.platform.test.annotations.Postsubmit"
+        },
+        {
+            "exclude-annotation": "android.platform.test.scenario.annotation.LargeScreenOnly"
+        },
+        {
+            "exclude-annotation": "android.platform.test.scenario.annotation.FoldableOnly"
+        }
+      ]
+    }
+  ],
+  "presubmit": [
+    {
+      "name": "SystemUIGoogleTests",
+      "options": [
+        {
+          "exclude-annotation": "org.junit.Ignore"
+        },
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
         }
       ]
     },
@@ -53,8 +66,9 @@
 
   // Curious where your @Scenario tests will run?
   //
-  // @Ignore or @FlakyTest: nowhere
-  // @Staging: in staged-postsubmit, but not postsubmit or presubmit
+  // @Ignore: nowhere
+  // @Staging or @FlakyTest: in staged-postsubmit, but not postsubmit or
+  // 	presubmit
   // @Postsubmit: in postsubmit and staged-postsubmit, but not presubmit
   // none of the above: in presubmit, postsubmit, and staged-postsubmit
   //
@@ -81,7 +95,10 @@
             "exclude-annotation": "androidx.test.filters.FlakyTest"
         },
         {
-            "exclude-annotation": "android.platform.helpers.Staging"
+            "exclude-annotation": "android.platform.test.scenario.annotation.LargeScreenOnly"
+        },
+        {
+            "exclude-annotation": "android.platform.test.scenario.annotation.FoldableOnly"
         }
       ]
     }
@@ -100,21 +117,92 @@
             "exclude-annotation": "org.junit.Ignore"
         },
         {
-            "exclude-annotation": "androidx.test.filters.FlakyTest"
+            "exclude-annotation": "android.platform.test.scenario.annotation.LargeScreenOnly"
+        },
+        {
+            "exclude-annotation": "android.platform.test.scenario.annotation.FoldableOnly"
         }
       ]
     }
   ],
   "auto-end-to-end-postsubmit": [
     {
-      "name": "AndroidAutoUiTests",
+      "name": "AndroidAutomotiveHomeTests",
       "options" : [
         {
-          "include-filter": "android.test.functional.auto.apps.HomeHelperTest"
-        },
-        {
-          "include-filter": "android.test.functional.auto.apps.NotificationHelperTest"
+          "include-filter": "android.platform.tests.HomeTest"
         }
+      ]
+    },
+    {
+      "name": "AndroidAutomotiveNotificationsTests",
+      "options" : [
+        {
+          "include-filter": "android.platform.tests.NotificationTest"
+        }
+      ]
+    }
+  ],
+  "large-screen-postsubmit": [
+      {
+        "name": "PlatformScenarioTests",
+        "options" : [
+          {
+              "include-filter": "android.platform.test.scenario.sysui"
+          },
+          {
+              "include-annotation": "android.platform.test.scenario.annotation.LargeScreenOnly"
+          },
+          {
+              "exclude-annotation": "org.junit.Ignore"
+          },
+          {
+              "exclude-annotation": "androidx.test.filters.FlakyTest"
+          }
+        ]
+      }
+  ],
+  "hubui-postsubmit": [
+      {
+        "name": "PlatformScenarioTests",
+        "options": [
+          {
+              "include-filter": "android.platform.test.scenario.hubui"
+          },
+          {
+              "include-annotation": "android.platform.test.scenario.annotation.HubUi"
+          },
+          {
+              "exclude-annotation": "org.junit.Ignore"
+          },
+          {
+              "exclude-annotation": "androidx.test.filters.FlakyTest"
+          }
+      ]
+    }
+  ],
+  "hubui-presubmit": [
+      {
+        "name": "PlatformScenarioTests",
+        "options": [
+          {
+              "include-annotation": "android.platform.test.annotations.Presubmit"
+          },
+          {
+              "include-annotation": "android.platform.test.scenario.annotation.HubUi"
+          },
+          {
+              "include-filter": "android.platform.test.scenario.hubui"
+          },
+          {
+              "exclude-annotation": "org.junit.Ignore"
+          },
+          {
+              "exclude-annotation": "androidx.test.filters.FlakyTest"
+          },
+          {
+              "exclude-annotation": "android.platform.test.annotations.Postsubmit"
+          }
       ]
     }
   ]

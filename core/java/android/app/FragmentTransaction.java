@@ -23,7 +23,7 @@ import java.lang.annotation.RetentionPolicy;
  * </div>
  *
  * @deprecated Use the <a href="{@docRoot}tools/extras/support-library.html">Support Library</a>
- *      {@link android.support.v4.app.FragmentTransaction}
+ *      {@link androidx.fragment.app.FragmentTransaction}
  */
 @Deprecated
 public abstract class FragmentTransaction {

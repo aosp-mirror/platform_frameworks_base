@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2021 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<configuration>
+    <target_preparer class="com.android.tradefed.targetprep.suite.SuiteApkInstaller">
+        <option name="cleanup-apks" value="true" />
+        <option name="test-file-name" value="ComponentAliasTests.apk" />
+        <option name="test-file-name" value="ComponentAliasTests1.apk" />
+        <option name="test-file-name" value="ComponentAliasTests2.apk" />
+    </target_preparer>
+    <target_preparer class="com.android.tradefed.targetprep.RunCommandTargetPreparer">
+        <!-- Exempt the helper APKs from the BG restriction, so they can start BG services. -->
+        <option name="run-command" value="cmd deviceidle whitelist +android.content.componentalias.tests" />
+        <option name="run-command" value="cmd deviceidle whitelist +android.content.componentalias.tests.sub1" />
+        <option name="run-command" value="cmd deviceidle whitelist +android.content.componentalias.tests.sub2" />
+
+        <option name="teardown-command" value="cmd deviceidle whitelist -android.content.componentalias.tests" />
+        <option name="teardown-command" value="cmd deviceidle whitelist -android.content.componentalias.tests.sub1" />
+        <option name="teardown-command" value="cmd deviceidle whitelist -android.content.componentalias.tests.sub2" />
+    </target_preparer>
+    <test class="com.android.tradefed.testtype.AndroidJUnitTest" >
+        <option name="package" value="{PACKAGE}" />
+        <option name="runtime-hint" value="2m" />
+        <option name="isolated-storage" value="false" />
+    </test>
+</configuration>

@@ -21,7 +21,34 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="wifi_fail_to_scan" msgid="2333336097603822490">"Ni mogoče iskati omrežij"</string>
+    <string name="wifi_security_short_wep" msgid="7939809393561636237">"WEP"</string>
+    <string name="wifi_security_short_wpa" msgid="6998160832497442533">"WPA"</string>
+    <string name="wifi_security_short_wpa2" msgid="7697856994856831026">"WPA2"</string>
+    <string name="wifi_security_short_wpa_wpa2" msgid="2399839645955520093">"WPA/WPA2"</string>
+    <string name="wifi_security_short_eap" msgid="5029688687205212985">"802.1x"</string>
+    <string name="wifi_security_short_eap_wpa" msgid="8510772177310043426">"WPA-EAP"</string>
+    <string name="wifi_security_short_eap_wpa2_wpa3" msgid="6455656470422244501">"RSN-EAP"</string>
+    <string name="wifi_security_short_sae" msgid="78353562671556266">"WPA3"</string>
+    <string name="wifi_security_short_psk_sae" msgid="4965830739185952958">"WPA2/WPA3"</string>
+    <string name="wifi_security_short_none_owe" msgid="8827409046261759703">"Brez/OWE"</string>
+    <string name="wifi_security_short_owe" msgid="5073524307942025369">"OWE"</string>
+    <string name="wifi_security_short_eap_suiteb" msgid="4174071135081556115">"Suite-B-192"</string>
     <string name="wifi_security_none" msgid="7392696451280611452">"Brez"</string>
+    <string name="wifi_security_wep" msgid="1413627788581122366">"WEP"</string>
+    <string name="wifi_security_wpa" msgid="1072450904799930636">"WPA-Personal"</string>
+    <string name="wifi_security_wpa2" msgid="4038267581230425543">"WPA2-Personal"</string>
+    <string name="wifi_security_wpa_wpa2" msgid="946853615482465986">"WPA/WPA2-Personal"</string>
+    <string name="wifi_security_eap" msgid="6179633834446852269">"WPA/WPA2/WPA3-Enterprise"</string>
+    <string name="wifi_security_eap_wpa" msgid="6189023812330549957">"WPA-Enterprise"</string>
+    <string name="wifi_security_eap_wpa_wpa2" msgid="1089879674896108216">"WPA/WPA2-Enterprise"</string>
+    <string name="wifi_security_eap_wpa2_wpa3" msgid="2952912020876252266">"WPA2/WPA3-Enterprise"</string>
+    <string name="wifi_security_eap_wpa3" msgid="7961135182909018796">"WPA3-Enterprise"</string>
+    <string name="wifi_security_passpoint" msgid="2209078477216565387">"Passpoint"</string>
+    <string name="wifi_security_sae" msgid="3644520541721422843">"WPA3-Personal"</string>
+    <string name="wifi_security_psk_sae" msgid="8135104122179904684">"WPA2/WPA3-Personal"</string>
+    <string name="wifi_security_none_owe" msgid="5241745828327404101">"Brez/Enhanced Open"</string>
+    <string name="wifi_security_owe" msgid="3343421403561657809">"Enhanced Open"</string>
+    <string name="wifi_security_eap_suiteb" msgid="415842785991698142">"192-bitni WPA3-Enterprise"</string>
     <string name="wifi_remembered" msgid="3266709779723179188">"Shranjeno"</string>
     <string name="wifi_disconnected" msgid="7054450256284661757">"Ni povezave"</string>
     <string name="wifi_disabled_generic" msgid="2651916945380294607">"Onemogočeno"</string>
@@ -95,7 +122,9 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"Zvok visoke kakovosti: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"Zvok visoke kakovosti"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Slušni pripomočki"</string>
+    <string name="bluetooth_profile_le_audio" msgid="5158149987518342036">"LE_AUDIO"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Povezava s slušnimi pripomočki je vzpostavljena"</string>
+    <string name="bluetooth_le_audio_profile_summary_connected" msgid="3162538609379333442">"Povezano s profilom LE_AUDIO"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Povezan s profilom za predstavnostni zvok"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"Povezava s profilom za zvok telefona vzpostavljena"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"Povezava s strežnikom za prenos datotek je vzpostavljena"</string>
@@ -113,6 +142,7 @@
     <string name="bluetooth_opp_profile_summary_use_for" msgid="461981154387015457">"Uporabi za prenos datotek"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="4289460627406490952">"Uporabi za vnos"</string>
     <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="7689393730163320483">"Uporabi za slušne pripomočke"</string>
+    <string name="bluetooth_le_audio_profile_summary_use_for" msgid="2778318636027348572">"Uporaba za profil LE_AUDIO"</string>
     <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"Seznani"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"SEZNANI"</string>
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Prekliči"</string>
@@ -252,7 +282,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Potrdilo brezžičnega zaslona"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Omogoči podrobno zapisovanje dnevnika za Wi-Fi"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Omejevanje iskanja omrežij Wi-Fi"</string>
-    <string name="wifi_enhanced_mac_randomization" msgid="882650208573834301">"Dodeljevanje nestalnega naključnega naslova MAC za Wi-Fi"</string>
+    <string name="wifi_non_persistent_mac_randomization" msgid="7482769677894247316">"Dodeljevanje nestalnega naključnega naslova MAC za Wi-Fi"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Prenos podatkov v mobilnem omrežju je vedno aktiven"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Strojno pospeševanje za internetno povezavo prek mobilnega telefona"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Prikaži naprave Bluetooth brez imen"</string>
@@ -284,7 +314,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Pokaži možnosti za potrdilo brezžičnega zaslona."</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Povečaj raven zapisovanja dnevnika za Wi-Fi; v izbirniku Wi‑Fi-ja pokaži glede na SSID RSSI."</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Zmanjša porabo energije baterije in izboljša delovanje omrežja."</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Ko je ta način omogočen, se lahko naslov MAC te naprave spremeni vsakič, ko se naprava poveže v omrežje z omogočenim naključnim dodeljevanjem naslova MAC."</string>
+    <string name="wifi_non_persistent_mac_randomization_summary" msgid="2159794543105053930">"Ko je ta način omogočen, se lahko naslov MAC te naprave spremeni vsakič, ko se naprava poveže v omrežje z omogočenim dodeljevanjem naključnega naslova MAC."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Omejen prenos podatkov"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Z neomejenim prenosom podatkov"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Velikosti medpomnilnikov zapisovalnika dnevnika"</string>
@@ -426,7 +456,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomalija (rdeča in zelena)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomalija (modra in rumena)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Popravljanje barv"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="2333641630205214702">"Prilagodite prikaz barv v napravi. To je uporabno, ko želite:&lt;br/&gt;&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;videti bolj prave barve;&lt;/li&gt; &lt;li&gt;&amp;nbsp;odstraniti barve, da se lažje osredotočite.&lt;/li&gt; &lt;/ol&gt;"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"Popravljanje barv je lahko koristno, ko želite:&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;natančneje videti barve;&lt;/li&gt; &lt;li&gt;&amp;nbsp;odstraniti barve, da se lažje osredotočite.&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Preglasila nastavitev: <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> – <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Še približno <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
@@ -463,7 +493,9 @@
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Se ne polni"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Povezano, se ne polni"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"Napolnjeno"</string>
+    <string name="battery_info_status_full_charged" msgid="3536054261505567948">"Popolnoma napolnjena"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Nadzira skrbnik"</string>
+    <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"Pod nadzorom omejene nastavitve"</string>
     <string name="disabled" msgid="8017887509554714950">"Onemogočeno"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"Dovoljene"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"Ni dovoljeno"</string>
@@ -496,16 +528,13 @@
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"Ni registrirana"</string>
     <string name="status_unavailable" msgid="5279036186589861608">"Ni na voljo"</string>
     <string name="wifi_status_mac_randomized" msgid="466382542497832189">"Naslov MAC je naključno izbran"</string>
-    <plurals name="wifi_tether_connected_summary" formatted="false" msgid="6317236306047306139">
-      <item quantity="one">Povezana je %1$d naprava</item>
-      <item quantity="two">Povezani sta %1$d napravi</item>
-      <item quantity="few">Povezane so %1$d naprave</item>
-      <item quantity="other">Povezanih je %1$d naprav</item>
-    </plurals>
+    <string name="wifi_tether_connected_summary" msgid="5282919920463340158">"{count,plural, =0{0 naprav ni povezanih}=1{1 naprava je povezana}one{# naprava je povezana}two{# napravi sta povezani}few{# naprave so povezane}other{# naprav je povezanih}}"</string>
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Daljši čas."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Krajši čas."</string>
     <string name="cancel" msgid="5665114069455378395">"Prekliči"</string>
     <string name="okay" msgid="949938843324579502">"V redu"</string>
+    <!-- no translation found for done (381184316122520313) -->
+    <skip />
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Alarmi in opomniki"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Dovoli nastavljanje alarmov in opomnikov"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Alarmi in opomniki"</string>
@@ -524,7 +553,9 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Vedno vprašaj"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"Dokler ne izklopite"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Pravkar"</string>
-    <string name="media_transfer_this_device_name" msgid="2716555073132169240">"Zvočnik telefona"</string>
+    <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Ta telefon"</string>
+    <!-- no translation found for media_transfer_this_device_name (3714653244000242800) -->
+    <skip />
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Ta telefon"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Težava pri povezovanju. Napravo izklopite in znova vklopite."</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Žična zvočna naprava"</string>
@@ -564,7 +595,9 @@
     <string name="user_set_lock_button" msgid="1427128184982594856">"Nastavi zaklepanje"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"Preklopi na račun <xliff:g id="USER_NAME">%s</xliff:g>"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"Ustvarjanje novega uporabnika …"</string>
+    <string name="creating_new_guest_dialog_message" msgid="1114905602181350690">"Ustvarjanje novega gosta …"</string>
     <string name="add_user_failed" msgid="4809887794313944872">"Ustvarjanje novega uporabnika ni uspelo."</string>
+    <string name="add_guest_failed" msgid="8074548434469843443">"Ustvarjanje novega gosta ni uspelo."</string>
     <string name="user_nickname" msgid="262624187455825083">"Vzdevek"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Dodajanje gosta"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Odstranitev gosta"</string>
@@ -610,4 +643,14 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"Ethernetna povezava je prekinjena."</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"Ethernet"</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"Klicanje ni mogoče."</string>
+    <string name="dream_complication_title_time" msgid="701747800712893499">"Ura"</string>
+    <string name="dream_complication_title_date" msgid="8661176085446135789">"Datum"</string>
+    <string name="dream_complication_title_weather" msgid="598609151677172783">"Vreme"</string>
+    <string name="dream_complication_title_aqi" msgid="4587552608957834110">"Kakovost zraka"</string>
+    <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"O zasedbi"</string>
+    <string name="avatar_picker_title" msgid="8492884172713170652">"Izbira profilne slike"</string>
+    <string name="default_user_icon_description" msgid="6554047177298972638">"Privzeta ikona uporabnika"</string>
+    <string name="physical_keyboard_title" msgid="4811935435315835220">"Fizična tipkovnica"</string>
+    <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"Izbira razporeditve tipkovnice"</string>
+    <string name="keyboard_layout_default_label" msgid="1997292217218546957">"Privzeto"</string>
 </resources>

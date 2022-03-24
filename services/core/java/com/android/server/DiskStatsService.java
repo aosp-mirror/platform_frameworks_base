@@ -125,6 +125,8 @@ public class DiskStatsService extends Binder {
                 DiskStatsFreeSpaceProto.FOLDER_CACHE);
         reportFreeSpace(new File("/system"), "System", pw, proto,
                 DiskStatsFreeSpaceProto.FOLDER_SYSTEM);
+        reportFreeSpace(Environment.getMetadataDirectory(), "Metadata", pw, proto,
+                DiskStatsFreeSpaceProto.FOLDER_METADATA);
 
         boolean fileBased = StorageManager.isFileEncryptedNativeOnly();
         boolean blockBased = fileBased ? false : StorageManager.isBlockEncrypted();

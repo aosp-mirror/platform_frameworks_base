@@ -48,7 +48,9 @@ public abstract class IdentityCredential {
      * encryption".
      *
      * @return ephemeral key pair to use to establish a secure channel with a reader.
+     * @deprecated Use {@link PresentationSession} instead.
      */
+    @Deprecated
     public @NonNull abstract KeyPair createEphemeralKeyPair();
 
     /**
@@ -58,7 +60,9 @@ public abstract class IdentityCredential {
      * @param readerEphemeralPublicKey The ephemeral public key provided by the reader to
      *                                 establish a secure session.
      * @throws InvalidKeyException if the given key is invalid.
+     * @deprecated Use {@link PresentationSession} instead.
      */
+    @Deprecated
     public abstract void setReaderEphemeralPublicKey(@NonNull PublicKey readerEphemeralPublicKey)
             throws InvalidKeyException;
 
@@ -72,7 +76,10 @@ public abstract class IdentityCredential {
      *
      * @param messagePlaintext unencrypted message to encrypt.
      * @return encrypted message.
+     * @deprecated Applications should use {@link PresentationSession} and
+     *             implement encryption/decryption themselves.
      */
+    @Deprecated
     public @NonNull abstract byte[] encryptMessageToReader(@NonNull byte[] messagePlaintext);
 
     /**
@@ -86,7 +93,10 @@ public abstract class IdentityCredential {
      * @param messageCiphertext encrypted message to decrypt.
      * @return decrypted message.
      * @throws MessageDecryptionException if the ciphertext couldn't be decrypted.
+     * @deprecated Applications should use {@link PresentationSession} and
+     *             implement encryption/decryption themselves.
      */
+    @Deprecated
     public @NonNull abstract byte[] decryptMessageFromReader(@NonNull byte[] messageCiphertext)
             throws MessageDecryptionException;
 
@@ -111,7 +121,9 @@ public abstract class IdentityCredential {
      *
      * @param allowUsingExhaustedKeys whether to allow using an authentication key which use count
      *                                has been exceeded if no other key is available.
+     * @deprecated Use {@link PresentationSession} instead.
      */
+    @Deprecated
     public abstract void setAllowUsingExhaustedKeys(boolean allowUsingExhaustedKeys);
 
     /**
@@ -128,8 +140,32 @@ public abstract class IdentityCredential {
      *
      * @param allowUsingExpiredKeys whether to allow using an authentication key which use count
      *                              has been exceeded if no other key is available.
+     * @deprecated Use {@link PresentationSession} instead.
      */
+    @Deprecated
     public void setAllowUsingExpiredKeys(boolean allowUsingExpiredKeys) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * @hide
+     *
+     * Sets whether the usage count of an authentication key should be increased. This must be
+     * called prior to calling
+     * {@link #getEntries(byte[], Map, byte[], byte[])} or using a
+     * {@link android.hardware.biometrics.BiometricPrompt.CryptoObject} which references this object.
+     *
+     * <p>By default this is set to true.
+     *
+     * <p>This is only implemented in feature version 202201 or later. If not implemented, the call
+     * fails with {@link UnsupportedOperationException}. See
+     * {@link android.content.pm.PackageManager#FEATURE_IDENTITY_CREDENTIAL_HARDWARE} for known
+     * feature versions.
+     *
+     * @param incrementKeyUsageCount whether the usage count of the key should be increased.
+     * @deprecated Use {@link PresentationSession} instead.
+     */
+    public void setIncrementKeyUsageCount(boolean incrementKeyUsageCount) {
         throw new UnsupportedOperationException();
     }
 
@@ -149,18 +185,22 @@ public abstract class IdentityCredential {
      * by using the {@link ResultData#getStatus(String, String)} method on each of the requested
      * entries.
      *
-     * <p>It is the responsibility of the calling application to know if authentication is needed
-     * and use e.g. {@link android.hardware.biometrics.BiometricPrompt} to make the user
-     * authenticate using a {@link android.hardware.biometrics.BiometricPrompt.CryptoObject} which
-     * references this object. If needed, this must be done before calling
-     * {@link #getEntries(byte[], Map, byte[], byte[])}.
-     *
      * <p>It is permissible to call this method multiple times using the same instance but if this
      * is done, the {@code sessionTranscript} parameter must be identical for each call. If this is
      * not the case, the {@link SessionTranscriptMismatchException} exception is thrown.
+     * Additionally, if this is done the same auth-key will be used.
+     *
+     * <p>The application should not make any assumptions on whether user authentication is needed.
+     * Instead, the application should request the data elements values first and then examine
+     * the returned {@link ResultData}. If {@link ResultData#STATUS_USER_AUTHENTICATION_FAILED}
+     * is returned the application should get a
+     * {@link android.hardware.biometrics.BiometricPrompt.CryptoObject} which references this
+     * object and use it with a {@link android.hardware.biometrics.BiometricPrompt}. Upon successful
+     * authentication the application may call {@link #getEntries(byte[], Map, byte[], byte[])}
+     * again.
      *
      * <p>If not {@code null} the {@code requestMessage} parameter must contain data for the request
-     * from the verifier. The content can be defined in the way appropriate for the credential, byt
+     * from the verifier. The content can be defined in the way appropriate for the credential, but
      * there are three requirements that must be met to work with this API:
      * <ul>
      * <li>The content must be a CBOR-encoded structure.</li>
@@ -205,9 +245,9 @@ public abstract class IdentityCredential {
      * must appear somewhere in {@code sessionTranscript} and ditto for the 32 bytes for the Y
      * coordinate.
      *
-     * <p>If {@code readerAuth} is not {@code null} it must be the bytes of a {@code COSE_Sign1}
-     * structure as defined in RFC 8152. For the payload nil shall be used and the
-     * detached payload is the ReaderAuthenticationBytes CBOR described below.
+     * <p>If {@code readerSignature} is not {@code null} it must be the bytes of a
+     * {@code COSE_Sign1} structure as defined in RFC 8152. For the payload nil shall be used and
+     * the detached payload is the ReaderAuthenticationBytes CBOR described below.
      * <pre>
      *     ReaderAuthentication = [
      *       "ReaderAuthentication",
@@ -269,7 +309,9 @@ public abstract class IdentityCredential {
      * @throws InvalidRequestMessageException         if the requestMessage is malformed.
      * @throws EphemeralPublicKeyNotFoundException    if the ephemeral public key was not found in
      *                                                the session transcript.
+     * @deprecated Use {@link PresentationSession} instead.
      */
+    @Deprecated
     public abstract @NonNull ResultData getEntries(
             @Nullable byte[] requestMessage,
             @NonNull Map<String, Collection<String>> entriesToRequest,
@@ -412,7 +454,8 @@ public abstract class IdentityCredential {
      * @param challenge is a non-empty byte array whose contents should be unique, fresh and
      *                  provided by the issuing authority. The value provided is embedded in the
      *                  generated CBOR and enables the issuing authority to verify that the
-     *                  returned proof is fresh.
+     *                  returned proof is fresh. Implementations are required to support
+     *                  challenges at least 32 bytes of length.
      * @return the COSE_Sign1 data structure above
      */
     public @NonNull byte[] proveOwnership(@NonNull byte[] challenge)  {
@@ -443,7 +486,8 @@ public abstract class IdentityCredential {
      * @param challenge is a non-empty byte array whose contents should be unique, fresh and
      *                  provided by the issuing authority. The value provided is embedded in the
      *                  generated CBOR and enables the issuing authority to verify that the
-     *                  returned proof is fresh.
+     *                  returned proof is fresh. Implementations are required to support
+     *                  challenges at least 32 bytes of length.
      * @return the COSE_Sign1 data structure above
      */
     public @NonNull byte[] delete(@NonNull byte[] challenge)  {

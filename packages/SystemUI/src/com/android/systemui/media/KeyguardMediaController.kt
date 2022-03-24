@@ -24,14 +24,13 @@ import androidx.annotation.VisibleForTesting
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.media.dagger.MediaModule.KEYGUARD
 import com.android.systemui.plugins.statusbar.StatusBarStateController
-import com.android.systemui.statusbar.FeatureFlags
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.SysuiStatusBarStateController
-import com.android.systemui.statusbar.notification.stack.MediaHeaderView
+import com.android.systemui.statusbar.notification.stack.MediaContainerView
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.policy.ConfigurationController
-import com.android.systemui.util.Utils
+import com.android.systemui.util.LargeScreenUtils
 import javax.inject.Inject
 import javax.inject.Named
 
@@ -45,7 +44,6 @@ class KeyguardMediaController @Inject constructor(
     private val bypassController: KeyguardBypassController,
     private val statusBarStateController: SysuiStatusBarStateController,
     private val notifLockscreenUserManager: NotificationLockscreenUserManager,
-    private val featureFlags: FeatureFlags,
     private val context: Context,
     configurationController: ConfigurationController
 ) {
@@ -63,7 +61,7 @@ class KeyguardMediaController @Inject constructor(
         })
 
         // First let's set the desired state that we want for this host
-        mediaHost.expansion = MediaHostState.COLLAPSED
+        mediaHost.expansion = MediaHostState.EXPANDED
         mediaHost.showsOnlyActiveMedia = true
         mediaHost.falsingProtectionNeeded = true
 
@@ -73,7 +71,7 @@ class KeyguardMediaController @Inject constructor(
     }
 
     private fun updateResources() {
-        useSplitShade = Utils.shouldUseSplitNotificationShade(featureFlags, context.resources)
+        useSplitShade = LargeScreenUtils.shouldUseSplitNotificationShade(context.resources)
     }
 
     @VisibleForTesting
@@ -98,14 +96,14 @@ class KeyguardMediaController @Inject constructor(
     /**
      * single pane media container placed at the top of the notifications list
      */
-    var singlePaneContainer: MediaHeaderView? = null
+    var singlePaneContainer: MediaContainerView? = null
         private set
     private var splitShadeContainer: ViewGroup? = null
 
     /**
      * Attaches media container in single pane mode, situated at the top of the notifications list
      */
-    fun attachSinglePaneContainer(mediaView: MediaHeaderView?) {
+    fun attachSinglePaneContainer(mediaView: MediaContainerView?) {
         val needsListener = singlePaneContainer == null
         singlePaneContainer = mediaView
         if (needsListener) {
@@ -161,8 +159,7 @@ class KeyguardMediaController @Inject constructor(
     }
 
     fun refreshMediaPosition() {
-        val keyguardOrUserSwitcher = (statusBarStateController.state == StatusBarState.KEYGUARD ||
-                statusBarStateController.state == StatusBarState.FULLSCREEN_USER_SWITCHER)
+        val keyguardOrUserSwitcher = (statusBarStateController.state == StatusBarState.KEYGUARD)
         // mediaHost.visible required for proper animations handling
         visible = mediaHost.visible &&
                 !bypassController.bypassEnabled &&

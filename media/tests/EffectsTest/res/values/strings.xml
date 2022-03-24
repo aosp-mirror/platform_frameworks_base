@@ -37,4 +37,6 @@
     <string name="send_level_name">Send Level</string>
     <!-- Toggles use of a multi-threaded client for an effect [CHAR LIMIT=24] -->
     <string name="effect_multithreaded">Multithreaded Use</string>
+    <!-- Runs a stress test for a bug related to simultaneous release of multiple effect instances [CHAR LIMIT=24] -->
+    <string name="hammer_on_release_bug_name">Hammer on release()</string>
 </resources>

@@ -7,6 +7,12 @@ package {
     default_applicable_licenses: ["frameworks_base_license"],
 }
 
+filegroup {
+    name: "SettingsLibRestrictedLockUtilsSrc",
+    srcs: ["src/**/*.java"],
+    visibility: ["//frameworks/base/services/accessibility"],
+}
+
 android_library {
     name: "SettingsLibRestrictedLockUtils",
 

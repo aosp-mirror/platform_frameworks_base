@@ -74,6 +74,9 @@ import java.util.List;
  * <p>
  * Note that toasts being sent from the background are rate limited, so avoid sending such toasts
  * in quick succession.
+ * <p>
+ * Starting with Android 12 (API level 31), apps targeting Android 12 or newer will have
+ * their toasts limited to two lines.
  *
  * <div class="special reference">
  * <h3>Developer Guides</h3>

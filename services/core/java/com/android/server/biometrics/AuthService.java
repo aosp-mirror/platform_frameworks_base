@@ -47,6 +47,7 @@ import android.hardware.biometrics.IInvalidationCallback;
 import android.hardware.biometrics.ITestSession;
 import android.hardware.biometrics.ITestSessionCallback;
 import android.hardware.biometrics.PromptInfo;
+import android.hardware.biometrics.SensorLocationInternal;
 import android.hardware.biometrics.SensorPropertiesInternal;
 import android.hardware.face.FaceSensorProperties;
 import android.hardware.face.FaceSensorPropertiesInternal;
@@ -60,6 +61,7 @@ import android.os.Build;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Slog;
@@ -70,6 +72,7 @@ import com.android.internal.util.ArrayUtils;
 import com.android.server.SystemService;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -81,6 +84,8 @@ public class AuthService extends SystemService {
     private static final String SETTING_HIDL_DISABLED =
             "com.android.server.biometrics.AuthService.hidlDisabled";
     private static final int DEFAULT_HIDL_DISABLED = 0;
+    private static final String SYSPROP_FIRST_API_LEVEL = "ro.board.first_api_level";
+    private static final String SYSPROP_API_LEVEL = "ro.board.api_level";
 
     private final Injector mInjector;
 
@@ -206,7 +211,7 @@ public class AuthService extends SystemService {
         }
 
         @Override
-        public void authenticate(IBinder token, long sessionId, int userId,
+        public long authenticate(IBinder token, long sessionId, int userId,
                 IBiometricServiceReceiver receiver, String opPackageName, PromptInfo promptInfo)
                 throws RemoteException {
             // Only allow internal clients to authenticate with a different userId.
@@ -223,18 +228,18 @@ public class AuthService extends SystemService {
 
             if (!checkAppOps(callingUid, opPackageName, "authenticate()")) {
                 authenticateFastFail("Denied by app ops: " + opPackageName, receiver);
-                return;
+                return -1;
             }
 
             if (token == null || receiver == null || opPackageName == null || promptInfo == null) {
                 authenticateFastFail(
                         "Unable to authenticate, one or more null arguments", receiver);
-                return;
+                return -1;
             }
 
             if (!Utils.isForeground(callingUid, callingPid)) {
                 authenticateFastFail("Caller is not foreground: " + opPackageName, receiver);
-                return;
+                return -1;
             }
 
             if (promptInfo.containsTestConfigurations()) {
@@ -251,7 +256,7 @@ public class AuthService extends SystemService {
 
             final long identity = Binder.clearCallingIdentity();
             try {
-                mBiometricService.authenticate(
+                return mBiometricService.authenticate(
                         token, sessionId, userId, receiver, opPackageName, promptInfo);
             } finally {
                 Binder.restoreCallingIdentity(identity);
@@ -270,7 +275,7 @@ public class AuthService extends SystemService {
         }
 
         @Override
-        public void cancelAuthentication(IBinder token, String opPackageName)
+        public void cancelAuthentication(IBinder token, String opPackageName, long requestId)
                 throws RemoteException {
             checkPermission();
 
@@ -281,7 +286,7 @@ public class AuthService extends SystemService {
 
             final long identity = Binder.clearCallingIdentity();
             try {
-                mBiometricService.cancelAuthentication(token, opPackageName);
+                mBiometricService.cancelAuthentication(token, opPackageName, requestId);
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
@@ -623,7 +628,16 @@ public class AuthService extends SystemService {
 
         final SensorConfig[] hidlConfigs;
         if (!mInjector.isHidlDisabled(getContext())) {
-            final String[] configStrings = mInjector.getConfiguration(getContext());
+            final int firstApiLevel = SystemProperties.getInt(SYSPROP_FIRST_API_LEVEL, 0);
+            final int apiLevel = SystemProperties.getInt(SYSPROP_API_LEVEL, firstApiLevel);
+            String[] configStrings = mInjector.getConfiguration(getContext());
+            if (configStrings.length == 0 && apiLevel == Build.VERSION_CODES.R) {
+                // For backwards compatibility with R where biometrics could work without being
+                // configured in config_biometric_sensors. In the absence of a vendor provided
+                // configuration, we assume the weakest biometric strength (i.e. convenience).
+                Slog.w(TAG, "Found R vendor partition without config_biometric_sensors");
+                configStrings = generateRSdkCompatibleConfiguration();
+            }
             hidlConfigs = new SensorConfig[configStrings.length];
             for (int i = 0; i < configStrings.length; ++i) {
                 hidlConfigs[i] = new SensorConfig(configStrings[i]);
@@ -636,6 +650,31 @@ public class AuthService extends SystemService {
         registerAuthenticators(hidlConfigs);
 
         mInjector.publishBinderService(this, mImpl);
+    }
+
+    /**
+     * Generates an array of string configs with entries that correspond to the biometric features
+     * declared on the device. Returns an empty array if no biometric features are declared.
+     * Biometrics are assumed to be of the weakest strength class, i.e. convenience.
+     */
+    private @NonNull String[] generateRSdkCompatibleConfiguration() {
+        final PackageManager pm = getContext().getPackageManager();
+        final ArrayList<String> modalities = new ArrayList<>();
+        if (pm.hasSystemFeature(PackageManager.FEATURE_FINGERPRINT)) {
+            modalities.add(String.valueOf(BiometricAuthenticator.TYPE_FINGERPRINT));
+        }
+        if (pm.hasSystemFeature(PackageManager.FEATURE_FACE)) {
+            modalities.add(String.valueOf(BiometricAuthenticator.TYPE_FACE));
+        }
+        final String strength = String.valueOf(Authenticators.BIOMETRIC_CONVENIENCE);
+        final String[] configStrings = new String[modalities.size()];
+        for (int i = 0; i < modalities.size(); ++i) {
+            final String id = String.valueOf(i);
+            final String modality = modalities.get(i);
+            configStrings[i] = String.join(":" /* delimiter */, id, modality, strength);
+        }
+        Slog.d(TAG, "Generated config_biometric_sensors: " + Arrays.toString(configStrings));
+        return configStrings;
     }
 
     /**
@@ -766,8 +805,9 @@ public class AuthService extends SystemService {
         if (isUdfps && udfpsProps.length == 3) {
             return new FingerprintSensorPropertiesInternal(sensorId,
                     Utils.authenticatorStrengthToPropertyStrength(strength), maxEnrollmentsPerUser,
-                    componentInfo, sensorType, resetLockoutRequiresHardwareAuthToken, udfpsProps[0],
-                    udfpsProps[1], udfpsProps[2]);
+                    componentInfo, sensorType, resetLockoutRequiresHardwareAuthToken,
+                    List.of(new SensorLocationInternal("" /* display */,
+                            udfpsProps[0], udfpsProps[1], udfpsProps[2])));
         } else {
             return new FingerprintSensorPropertiesInternal(sensorId,
                     Utils.authenticatorStrengthToPropertyStrength(strength), maxEnrollmentsPerUser,

@@ -89,6 +89,7 @@ import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.AttributeSet;
 import android.util.IntArray;
+import android.util.Log;
 import android.util.LongSparseArray;
 import android.util.Pair;
 import android.util.Slog;
@@ -147,7 +148,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         OnCrossProfileWidgetProvidersChangeListener {
     private static final String TAG = "AppWidgetServiceImpl";
 
-    private static boolean DEBUG = false;
+    private static final boolean DEBUG = false;
 
     private static final String OLD_KEYGUARD_HOST_PACKAGE = "android";
     private static final String NEW_KEYGUARD_HOST_PACKAGE = "com.android.keyguard";
@@ -1616,14 +1617,17 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             final int providerCount = mProviders.size();
             for (int i = 0; i < providerCount; i++) {
                 Provider provider = mProviders.get(i);
-                AppWidgetProviderInfo info = provider.getInfoLocked(mContext);
                 final String providerPackageName = provider.id.componentName.getPackageName();
 
-                // Ignore an invalid provider, one not matching the filter,
-                // or one that isn't in the given package, if any.
-                boolean inPackage = packageName == null
-                        || providerPackageName.equals(packageName);
-                if (provider.zombie || (info.widgetCategory & categoryFilter) == 0 || !inPackage) {
+                // Ignore an invalid provider or one that isn't in the given package, if any.
+                boolean inPackage = packageName == null || providerPackageName.equals(packageName);
+                if (provider.zombie || !inPackage) {
+                    continue;
+                }
+
+                // Ignore the ones not matching the filter.
+                AppWidgetProviderInfo info = provider.getInfoLocked(mContext);
+                if ((info.widgetCategory & categoryFilter) == 0) {
                     continue;
                 }
 
@@ -1935,6 +1939,14 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     private void scheduleNotifyUpdateAppWidgetLocked(Widget widget, RemoteViews updateViews) {
         long requestId = UPDATE_COUNTER.incrementAndGet();
         if (widget != null) {
+            if (widget.trackingUpdate) {
+                // This is the first update, end the trace
+                widget.trackingUpdate = false;
+                Log.i(TAG, "Widget update received " + widget.toString());
+                Trace.asyncTraceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER,
+                        "appwidget update-intent " + widget.provider.id.toString(),
+                        widget.appWidgetId);
+            }
             widget.updateSequenceNos.put(ID_VIEWS_UPDATE, requestId);
         }
         if (widget == null || widget.provider == null || widget.provider.zombie
@@ -2011,6 +2023,15 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     private void scheduleNotifyAppWidgetRemovedLocked(Widget widget) {
         long requestId = UPDATE_COUNTER.incrementAndGet();
         if (widget != null) {
+            if (widget.trackingUpdate) {
+                // Widget is being removed without any update, end the trace
+                widget.trackingUpdate = false;
+                Log.i(TAG, "Widget removed " + widget.toString());
+                Trace.asyncTraceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER,
+                        "appwidget update-intent " + widget.provider.id.toString(),
+                        widget.appWidgetId);
+            }
+
             widget.updateSequenceNos.clear();
         }
         if (widget == null || widget.provider == null || widget.provider.zombie
@@ -2724,6 +2745,13 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                     Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
                             "appwidget init " + provider.id.componentName.getPackageName());
                     sendEnableIntentLocked(provider);
+                    provider.widgets.forEach(widget -> {
+                        widget.trackingUpdate = true;
+                        Trace.asyncTraceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
+                                "appwidget update-intent " + provider.id.toString(),
+                                widget.appWidgetId);
+                        Log.i(TAG, "Widget update scheduled on unlock " + widget.toString());
+                    });
                     int[] appWidgetIds = getWidgetIds(provider.widgets);
                     sendUpdateIntentLocked(provider, appWidgetIds);
                     registerForBroadcastsLocked(provider, appWidgetIds);
@@ -3321,8 +3349,10 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             // Isolate the changes relating to RROs. The app info must be copied to prevent
             // affecting other parts of system server that may have cached this app info.
             oldAppInfo = new ApplicationInfo(oldAppInfo);
-            oldAppInfo.overlayPaths = newAppInfo.overlayPaths.clone();
-            oldAppInfo.resourceDirs = newAppInfo.resourceDirs.clone();
+            oldAppInfo.overlayPaths = newAppInfo.overlayPaths == null
+                    ? null : newAppInfo.overlayPaths.clone();
+            oldAppInfo.resourceDirs = newAppInfo.resourceDirs == null
+                    ? null : newAppInfo.resourceDirs.clone();
             provider.info.providerInfo.applicationInfo = oldAppInfo;
 
             for (int j = 0, M = provider.widgets.size(); j < M; j++) {
@@ -4249,6 +4279,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         Host host;
         // Map of request type to updateSequenceNo.
         SparseLongArray updateSequenceNos = new SparseLongArray(2);
+        boolean trackingUpdate = false;
 
         @Override
         public String toString() {

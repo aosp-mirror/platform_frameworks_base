@@ -157,6 +157,18 @@ public final class SystemUiDeviceConfigFlags {
      */
     public static final String PROPERTY_LOCATION_INDICATORS_ENABLED = "location_indicators_enabled";
 
+    /**
+     * Whether to show old location indicator on all location accesses.
+     */
+    public static final String PROPERTY_LOCATION_INDICATORS_SMALL_ENABLED =
+            "location_indicators_small_enabled";
+
+    /**
+     * Whether to show the location indicator for system apps.
+     */
+    public static final String PROPERTY_LOCATION_INDICATORS_SHOW_SYSTEM =
+            "location_indicators_show_system";
+
     // Flags related to Assistant
 
     /**
@@ -494,6 +506,34 @@ public final class SystemUiDeviceConfigFlags {
      */
     public static final String SHORTCUT_APPSEARCH_INTEGRATION =
             "shortcut_appsearch_integration";
+
+    /**
+     * (boolean) Whether nearby share should be the first target in ranked apps.
+     */
+    public static final String IS_NEARBY_SHARE_FIRST_TARGET_IN_RANKED_APP =
+            "is_nearby_share_first_target_in_ranked_app";
+
+    /**
+     * (boolean) Whether to enable the new unbundled "delegate chooser" implementation.
+     */
+    public static final String USE_DELEGATE_CHOOSER = "use_delegate_chooser";
+
+    /**
+     * (string) Name of the default QR code scanner activity. On the eligible devices this activity
+     * is provided by GMS core.
+     */
+    public static final String DEFAULT_QR_CODE_SCANNER = "default_qr_code_scanner";
+
+    /**
+     * (boolean) Whether the task manager entrypoint is enabled.
+     */
+    public static final String TASK_MANAGER_ENABLED = "task_manager_enabled";
+
+
+    /**
+     * (boolean) Whether the clipboard overlay is enabled.
+     */
+    public static final String CLIPBOARD_OVERLAY_ENABLED = "clipboard_overlay_enabled";
 
     private SystemUiDeviceConfigFlags() {
     }

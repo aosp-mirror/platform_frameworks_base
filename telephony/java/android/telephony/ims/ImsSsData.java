@@ -365,8 +365,8 @@ public final class ImsSsData implements Parcelable {
         serviceClass = in.readInt();
         result = in.readInt();
         mSsInfo = in.createIntArray();
-        mCfInfo = in.readParcelableList(new ArrayList<>(), this.getClass().getClassLoader());
-        mImsSsInfo = in.readParcelableList(new ArrayList<>(), this.getClass().getClassLoader());
+        mCfInfo = in.readParcelableList(new ArrayList<>(), this.getClass().getClassLoader(), android.telephony.ims.ImsCallForwardInfo.class);
+        mImsSsInfo = in.readParcelableList(new ArrayList<>(), this.getClass().getClassLoader(), android.telephony.ims.ImsSsInfo.class);
     }
 
     public static final @android.annotation.NonNull Creator<ImsSsData> CREATOR = new Creator<ImsSsData>() {

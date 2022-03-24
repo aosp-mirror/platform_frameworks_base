@@ -56,6 +56,7 @@
     <string name="uninstall_application_text" msgid="3816830743706143980">"Удалить приложение?"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"Удалить это приложение для "<b>"всех"</b>" пользователей устройства? Они потеряют доступ как к приложению, так и к связанным с ним данным."<b></b></string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"Удалить это приложение из профиля <xliff:g id="USERNAME">%1$s</xliff:g>?"</string>
+    <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"Удалить это приложение из рабочего профиля?"</string>
     <string name="uninstall_update_text" msgid="863648314632448705">"Установить исходную версию приложения? Все его данные будут удалены."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"Установить исходную версию приложения? Его данные будут удалены из всех профилей устройства, в том числе рабочих."</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"Сохранить данные приложения (<xliff:g id="SIZE">%1$s</xliff:g>)"</string>

@@ -28,7 +28,6 @@
 #include "utils/ByteOrder.h"
 
 #include "util/BigBuffer.h"
-#include "util/Maybe.h"
 
 #ifdef _WIN32
 // TODO(adamlesinski): remove once http://b/32447322 is resolved.
@@ -105,8 +104,8 @@ bool IsAndroidSharedUserId(const android::StringPiece& package_name,
 // .asdf        --> package.asdf
 // .a.b         --> package.a.b
 // asdf.adsf    --> asdf.adsf
-Maybe<std::string> GetFullyQualifiedClassName(const android::StringPiece& package,
-                                              const android::StringPiece& class_name);
+std::optional<std::string> GetFullyQualifiedClassName(const android::StringPiece& package,
+                                                      const android::StringPiece& class_name);
 
 // Retrieves the formatted name of aapt2.
 const char* GetToolName();

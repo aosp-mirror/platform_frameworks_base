@@ -60,6 +60,10 @@ class AnrHelper {
      */
     private long mLastAnrTimeMs = 0L;
 
+    /** The pid which is running appNotResponding(). */
+    @GuardedBy("mAnrRecords")
+    private int mProcessingPid = -1;
+
     AnrHelper(final ActivityManagerService service) {
         mService = service;
     }
@@ -73,7 +77,18 @@ class AnrHelper {
     void appNotResponding(ProcessRecord anrProcess, String activityShortComponentName,
             ApplicationInfo aInfo, String parentShortComponentName,
             WindowProcessController parentProcess, boolean aboveSystem, String annotation) {
+        final int incomingPid = anrProcess.mPid;
         synchronized (mAnrRecords) {
+            if (mProcessingPid == incomingPid) {
+                Slog.i(TAG, "Skip duplicated ANR, pid=" + incomingPid + " " + annotation);
+                return;
+            }
+            for (int i = mAnrRecords.size() - 1; i >= 0; i--) {
+                if (mAnrRecords.get(i).mPid == incomingPid) {
+                    Slog.i(TAG, "Skip queued ANR, pid=" + incomingPid + " " + annotation);
+                    return;
+                }
+            }
             mAnrRecords.add(new AnrRecord(anrProcess, activityShortComponentName, aInfo,
                     parentShortComponentName, parentProcess, aboveSystem, annotation));
         }
@@ -87,8 +102,8 @@ class AnrHelper {
     }
 
     /**
-     * The thread to execute {@link ProcessRecord#appNotResponding}. It will terminate if all
-     * records are handled.
+     * The thread to execute {@link ProcessErrorStateRecord#appNotResponding}. It will terminate if
+     * all records are handled.
      */
     private class AnrConsumerThread extends Thread {
         AnrConsumerThread() {
@@ -97,7 +112,12 @@ class AnrHelper {
 
         private AnrRecord next() {
             synchronized (mAnrRecords) {
-                return mAnrRecords.isEmpty() ? null : mAnrRecords.remove(0);
+                if (mAnrRecords.isEmpty()) {
+                    return null;
+                }
+                final AnrRecord record = mAnrRecords.remove(0);
+                mProcessingPid = record.mPid;
+                return record;
             }
         }
 
@@ -106,6 +126,13 @@ class AnrHelper {
             AnrRecord r;
             while ((r = next()) != null) {
                 scheduleBinderHeavyHitterAutoSamplerIfNecessary();
+                final int currentPid = r.mApp.mPid;
+                if (currentPid != r.mPid) {
+                    // The process may have restarted or died.
+                    Slog.i(TAG, "Skip ANR with mismatched pid=" + r.mPid + ", current pid="
+                            + currentPid);
+                    continue;
+                }
                 final long startTime = SystemClock.uptimeMillis();
                 // If there are many ANR at the same time, the latency may be larger. If the latency
                 // is too large, the stack trace might not be meaningful.
@@ -120,6 +147,7 @@ class AnrHelper {
 
             mRunning.set(false);
             synchronized (mAnrRecords) {
+                mProcessingPid = -1;
                 // The race should be unlikely to happen. Just to make sure we don't miss.
                 if (!mAnrRecords.isEmpty()) {
                     startAnrConsumerIfNeeded();
@@ -139,6 +167,7 @@ class AnrHelper {
 
     private static class AnrRecord {
         final ProcessRecord mApp;
+        final int mPid;
         final String mActivityShortComponentName;
         final String mParentShortComponentName;
         final String mAnnotation;
@@ -151,6 +180,7 @@ class AnrHelper {
                 ApplicationInfo aInfo, String parentShortComponentName,
                 WindowProcessController parentProcess, boolean aboveSystem, String annotation) {
             mApp = anrProcess;
+            mPid = anrProcess.mPid;
             mActivityShortComponentName = activityShortComponentName;
             mParentShortComponentName = parentShortComponentName;
             mAnnotation = annotation;

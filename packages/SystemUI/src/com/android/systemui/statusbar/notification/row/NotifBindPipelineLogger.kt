@@ -18,7 +18,6 @@ package com.android.systemui.statusbar.notification.row
 
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.LogLevel.INFO
-import com.android.systemui.log.LogLevel.WARNING
 import com.android.systemui.log.dagger.NotificationLog
 import javax.inject.Inject
 
@@ -50,7 +49,7 @@ class NotifBindPipelineLogger @Inject constructor(
     }
 
     fun logRequestPipelineRowNotSet(notifKey: String) {
-        buffer.log(TAG, WARNING, {
+        buffer.log(TAG, INFO, {
             str1 = notifKey
         }, {
             "Row is not set so pipeline will not run. notif = $str1"

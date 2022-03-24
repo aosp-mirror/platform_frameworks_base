@@ -297,12 +297,12 @@ public final class SelectionActionModeHelper {
         } else {
             mTextClassification = null;
         }
-        final SelectionModifierCursorController controller = mEditor.getSelectionController();
-        if (controller != null
-                && (mTextView.isTextSelectable() || mTextView.isTextEditable())) {
-            controller.show();
-        }
         if (mEditor.startActionModeInternal(actionMode)) {
+            final SelectionModifierCursorController controller = mEditor.getSelectionController();
+            if (controller != null
+                    && (mTextView.isTextSelectable() || mTextView.isTextEditable())) {
+                controller.show();
+            }
             if (result != null) {
                 switch (actionMode) {
                     case Editor.TextActionMode.SELECTION:

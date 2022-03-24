@@ -1292,6 +1292,9 @@ public class AppOpsManager {
     /** @hide */
     public static final int OP_UWB_RANGING = AppProtoEnums.APP_OP_UWB_RANGING;
 
+    /** @hide */
+    public static final int OP_NEARBY_WIFI_DEVICES = AppProtoEnums.APP_OP_NEARBY_WIFI_DEVICES;
+
     /**
      * Activity recognition being accessed by an activity recognition source, which
      * is a component that already has access since it is the one that detects
@@ -1310,9 +1313,31 @@ public class AppOpsManager {
     public static final int OP_RECORD_INCOMING_PHONE_AUDIO =
             AppProtoEnums.APP_OP_RECORD_INCOMING_PHONE_AUDIO;
 
+    /**
+     * VPN app establishes a connection through the VpnService API.
+     *
+     * @hide
+     */
+    public static final int OP_ESTABLISH_VPN_SERVICE = AppProtoEnums.APP_OP_ESTABLISH_VPN_SERVICE;
+
+    /**
+     * VPN app establishes a connection through the VpnManager API.
+     *
+     * @hide
+     */
+    public static final int OP_ESTABLISH_VPN_MANAGER = AppProtoEnums.APP_OP_ESTABLISH_VPN_MANAGER;
+
+    /**
+     * Access restricted settings.
+     *
+     * @hide
+     */
+    public static final int OP_ACCESS_RESTRICTED_SETTINGS =
+            AppProtoEnums.APP_OP_ACCESS_RESTRICTED_SETTINGS;
+
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public static final int _NUM_OP = 116;
+    public static final int _NUM_OP = 120;
 
     /** Access to coarse location information. */
     public static final String OPSTR_COARSE_LOCATION = "android:coarse_location";
@@ -1731,6 +1756,8 @@ public class AppOpsManager {
     public static final String OPSTR_MANAGE_MEDIA = "android:manage_media";
     /** @hide */
     public static final String OPSTR_UWB_RANGING = "android:uwb_ranging";
+    /** @hide */
+    public static final String OPSTR_NEARBY_WIFI_DEVICES = "android:nearby_wifi_devices";
 
     /**
      * Activity recognition being accessed by an activity recognition source, which
@@ -1748,6 +1775,30 @@ public class AppOpsManager {
      */
     public static final String OPSTR_RECORD_INCOMING_PHONE_AUDIO =
             "android:record_incoming_phone_audio";
+
+    /**
+     * VPN app establishes a connection through the VpnService API.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String OPSTR_ESTABLISH_VPN_SERVICE = "android:establish_vpn_service";
+
+    /**
+     * VPN app establishes a connection through the VpnManager API.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String OPSTR_ESTABLISH_VPN_MANAGER = "android:establish_vpn_manager";
+
+    /**
+     * Limit user accessing restricted settings.
+     *
+     * @hide
+     */
+    public static final String OPSTR_ACCESS_RESTRICTED_SETTINGS =
+            "android:access_restricted_settings";
 
     /** {@link #sAppOpsToNote} not initialized yet for this op */
     private static final byte SHOULD_COLLECT_NOTE_OP_NOT_INITIALIZED = 0;
@@ -1819,6 +1870,9 @@ public class AppOpsManager {
             OP_BLUETOOTH_CONNECT,
             OP_BLUETOOTH_ADVERTISE,
             OP_UWB_RANGING,
+            OP_NEARBY_WIFI_DEVICES,
+            // Notifications
+            OP_POST_NOTIFICATION,
 
             // APPOP PERMISSIONS
             OP_ACCESS_NOTIFICATIONS,
@@ -1963,6 +2017,10 @@ public class AppOpsManager {
             OP_ACTIVITY_RECOGNITION,            // OP_ACTIVITY_RECOGNITION_SOURCE
             OP_BLUETOOTH_ADVERTISE,             // OP_BLUETOOTH_ADVERTISE
             OP_RECORD_INCOMING_PHONE_AUDIO,     // OP_RECORD_INCOMING_PHONE_AUDIO
+            OP_NEARBY_WIFI_DEVICES,             // OP_NEARBY_WIFI_DEVICES
+            OP_ESTABLISH_VPN_SERVICE,           // OP_ESTABLISH_VPN_SERVICE
+            OP_ESTABLISH_VPN_MANAGER,           // OP_ESTABLISH_VPN_MANAGER
+            OP_ACCESS_RESTRICTED_SETTINGS,      // OP_ACCESS_RESTRICTED_SETTINGS
     };
 
     /**
@@ -2085,6 +2143,10 @@ public class AppOpsManager {
             OPSTR_ACTIVITY_RECOGNITION_SOURCE,
             OPSTR_BLUETOOTH_ADVERTISE,
             OPSTR_RECORD_INCOMING_PHONE_AUDIO,
+            OPSTR_NEARBY_WIFI_DEVICES,
+            OPSTR_ESTABLISH_VPN_SERVICE,
+            OPSTR_ESTABLISH_VPN_MANAGER,
+            OPSTR_ACCESS_RESTRICTED_SETTINGS,
     };
 
     /**
@@ -2208,6 +2270,10 @@ public class AppOpsManager {
             "ACTIVITY_RECOGNITION_SOURCE",
             "BLUETOOTH_ADVERTISE",
             "RECORD_INCOMING_PHONE_AUDIO",
+            "NEARBY_WIFI_DEVICES",
+            "ESTABLISH_VPN_SERVICE",
+            "ESTABLISH_VPN_MANAGER",
+            "ACCESS_RESTRICTED_SETTINGS",
     };
 
     /**
@@ -2227,7 +2293,7 @@ public class AppOpsManager {
             android.Manifest.permission.READ_CALENDAR,
             android.Manifest.permission.WRITE_CALENDAR,
             android.Manifest.permission.ACCESS_WIFI_STATE,
-            null, // no permission required for notifications
+            android.Manifest.permission.POST_NOTIFICATIONS,
             null, // neighboring cells shares the coarse location perm
             android.Manifest.permission.CALL_PHONE,
             android.Manifest.permission.READ_SMS,
@@ -2297,11 +2363,11 @@ public class AppOpsManager {
             Manifest.permission.USE_BIOMETRIC,
             Manifest.permission.ACTIVITY_RECOGNITION,
             Manifest.permission.SMS_FINANCIAL_TRANSACTIONS,
-            null,
+            Manifest.permission.READ_MEDIA_AUDIO,
             null, // no permission for OP_WRITE_MEDIA_AUDIO
-            null,
+            Manifest.permission.READ_MEDIA_VIDEO,
             null, // no permission for OP_WRITE_MEDIA_VIDEO
-            null,
+            Manifest.permission.READ_MEDIA_IMAGES,
             null, // no permission for OP_WRITE_MEDIA_IMAGES
             null, // no permission for OP_LEGACY_STORAGE
             null, // no permission for OP_ACCESS_ACCESSIBILITY
@@ -2332,6 +2398,10 @@ public class AppOpsManager {
             null, // no permission for OP_ACTIVITY_RECOGNITION_SOURCE,
             Manifest.permission.BLUETOOTH_ADVERTISE,
             null, // no permission for OP_RECORD_INCOMING_PHONE_AUDIO,
+            Manifest.permission.NEARBY_WIFI_DEVICES,
+            null, // no permission for OP_ESTABLISH_VPN_SERVICE
+            null, // no permission for OP_ESTABLISH_VPN_MANAGER
+            null, // no permission for OP_ACCESS_RESTRICTED_SETTINGS,
     };
 
     /**
@@ -2456,6 +2526,10 @@ public class AppOpsManager {
             null, // ACTIVITY_RECOGNITION_SOURCE
             null, // BLUETOOTH_ADVERTISE
             null, // RECORD_INCOMING_PHONE_AUDIO
+            null, // NEARBY_WIFI_DEVICES
+            null, // ESTABLISH_VPN_SERVICE
+            null, // ESTABLISH_VPN_MANAGER
+            null, // ACCESS_RESTRICTED_SETTINGS,
     };
 
     /**
@@ -2579,6 +2653,10 @@ public class AppOpsManager {
             null, // ACTIVITY_RECOGNITION_SOURCE
             null, // BLUETOOTH_ADVERTISE
             null, // RECORD_INCOMING_PHONE_AUDIO
+            null, // NEARBY_WIFI_DEVICES
+            null, // ESTABLISH_VPN_SERVICE
+            null, // ESTABLISH_VPN_MANAGER
+            null, // ACCESS_RESTRICTED_SETTINGS,
     };
 
     /**
@@ -2609,7 +2687,7 @@ public class AppOpsManager {
             AppOpsManager.MODE_ALLOWED, // READ_ICC_SMS
             AppOpsManager.MODE_ALLOWED, // WRITE_ICC_SMS
             AppOpsManager.MODE_DEFAULT, // WRITE_SETTINGS
-            getSystemAlertWindowDefault(), // SYSTEM_ALERT_WINDOW
+            AppOpsManager.MODE_DEFAULT, // SYSTEM_ALERT_WINDOW /*Overridden in opToDefaultMode()*/
             AppOpsManager.MODE_ALLOWED, // ACCESS_NOTIFICATIONS
             AppOpsManager.MODE_ALLOWED, // CAMERA
             AppOpsManager.MODE_ALLOWED, // RECORD_AUDIO
@@ -2701,6 +2779,10 @@ public class AppOpsManager {
             AppOpsManager.MODE_ALLOWED, // ACTIVITY_RECOGNITION_SOURCE
             AppOpsManager.MODE_ALLOWED, // BLUETOOTH_ADVERTISE
             AppOpsManager.MODE_ALLOWED, // RECORD_INCOMING_PHONE_AUDIO
+            AppOpsManager.MODE_ALLOWED, // NEARBY_WIFI_DEVICES
+            AppOpsManager.MODE_ALLOWED, // ESTABLISH_VPN_SERVICE
+            AppOpsManager.MODE_ALLOWED, // ESTABLISH_VPN_MANAGER
+            AppOpsManager.MODE_ALLOWED, // ACCESS_RESTRICTED_SETTINGS,
     };
 
     /**
@@ -2827,6 +2909,10 @@ public class AppOpsManager {
             false, // ACTIVITY_RECOGNITION_SOURCE
             false, // BLUETOOTH_ADVERTISE
             false, // RECORD_INCOMING_PHONE_AUDIO
+            false, // NEARBY_WIFI_DEVICES
+            false, // OP_ESTABLISH_VPN_SERVICE
+            false, // OP_ESTABLISH_VPN_MANAGER
+            true, // ACCESS_RESTRICTED_SETTINGS
     };
 
     /**
@@ -2924,6 +3010,8 @@ public class AppOpsManager {
     private static final String DEBUG_LOGGING_PACKAGES_PROP = "appops.logging_packages";
     private static final String DEBUG_LOGGING_OPS_PROP = "appops.logging_ops";
     private static final String DEBUG_LOGGING_TAG = "AppOpsManager";
+
+    private static volatile Integer sOpSystemAlertWindowDefaultMode;
 
     /**
      * Retrieve the op switch that controls the given operation.
@@ -3023,6 +3111,9 @@ public class AppOpsManager {
      * @hide
      */
     public static @Mode int opToDefaultMode(int op) {
+        if (op == OP_SYSTEM_ALERT_WINDOW) {
+            return getSystemAlertWindowDefault();
+        }
         return sOpDefaultMode[op];
     }
 
@@ -3996,7 +4087,7 @@ public class AppOpsManager {
                 LongSparseArray<NoteOpEvent> array = new LongSparseArray<>(numEntries);
 
                 for (int i = 0; i < numEntries; i++) {
-                    array.put(source.readLong(), source.readParcelable(null));
+                    array.put(source.readLong(), source.readParcelable(null, android.app.AppOpsManager.NoteOpEvent.class));
                 }
 
                 return array;
@@ -5116,7 +5207,7 @@ public class AppOpsManager {
             final int[] uids = parcel.createIntArray();
             if (!ArrayUtils.isEmpty(uids)) {
                 final ParceledListSlice<HistoricalUidOps> listSlice = parcel.readParcelable(
-                        HistoricalOps.class.getClassLoader());
+                        HistoricalOps.class.getClassLoader(), android.content.pm.ParceledListSlice.class);
                 final List<HistoricalUidOps> uidOps = (listSlice != null)
                         ? listSlice.getList() : null;
                 if (uidOps == null) {
@@ -9407,23 +9498,23 @@ public class AppOpsManager {
                     e.rethrowFromSystemServer();
                 }
 
-                if (missedAsyncOps != null) {
+                // Copy pointer so callback can be dispatched out of lock
+                OnOpNotedCallback onOpNotedCallback = sOnOpNotedCallback;
+                if (onOpNotedCallback != null && missedAsyncOps != null) {
                     int numMissedAsyncOps = missedAsyncOps.size();
                     for (int i = 0; i < numMissedAsyncOps; i++) {
                         final AsyncNotedAppOp asyncNotedAppOp = missedAsyncOps.get(i);
-                        if (sOnOpNotedCallback != null) {
-                            sOnOpNotedCallback.getAsyncNotedExecutor().execute(
-                                    () -> sOnOpNotedCallback.onAsyncNoted(asyncNotedAppOp));
-                        }
+                        onOpNotedCallback.getAsyncNotedExecutor().execute(
+                                () -> onOpNotedCallback.onAsyncNoted(asyncNotedAppOp));
                     }
                 }
                 synchronized (this) {
                     int numMissedSyncOps = sUnforwardedOps.size();
-                    for (int i = 0; i < numMissedSyncOps; i++) {
-                        final AsyncNotedAppOp syncNotedAppOp = sUnforwardedOps.get(i);
-                        if (sOnOpNotedCallback != null) {
-                            sOnOpNotedCallback.getAsyncNotedExecutor().execute(
-                                    () -> sOnOpNotedCallback.onAsyncNoted(syncNotedAppOp));
+                    if (onOpNotedCallback != null) {
+                        for (int i = 0; i < numMissedSyncOps; i++) {
+                            final AsyncNotedAppOp syncNotedAppOp = sUnforwardedOps.get(i);
+                            onOpNotedCallback.getAsyncNotedExecutor().execute(
+                                    () -> onOpNotedCallback.onAsyncNoted(syncNotedAppOp));
                         }
                     }
                     sUnforwardedOps.clear();
@@ -9938,7 +10029,7 @@ public class AppOpsManager {
 
     private static @Nullable List<AttributedOpEntry> readDiscreteAccessArrayFromParcel(
             @NonNull Parcel parcel) {
-        final ParceledListSlice<AttributedOpEntry> listSlice = parcel.readParcelable(null);
+        final ParceledListSlice<AttributedOpEntry> listSlice = parcel.readParcelable(null, android.content.pm.ParceledListSlice.class);
         return listSlice == null ? null : listSlice.getList();
     }
 
@@ -10027,6 +10118,11 @@ public class AppOpsManager {
     }
 
     private static int getSystemAlertWindowDefault() {
+        // This is indeed racy but we aren't expecting the result to change so it's not worth
+        // the synchronization.
+        if (sOpSystemAlertWindowDefaultMode != null) {
+            return sOpSystemAlertWindowDefaultMode;
+        }
         final Context context = ActivityThread.currentApplication();
         if (context == null) {
             return AppOpsManager.MODE_DEFAULT;
@@ -10037,10 +10133,11 @@ public class AppOpsManager {
         // TVs are constantly plugged in and has less concern for memory/power
         if (ActivityManager.isLowRamDeviceStatic()
                 && !pm.hasSystemFeature(PackageManager.FEATURE_LEANBACK, 0)) {
-            return AppOpsManager.MODE_IGNORED;
+            sOpSystemAlertWindowDefaultMode = AppOpsManager.MODE_IGNORED;
+        } else {
+            sOpSystemAlertWindowDefaultMode = AppOpsManager.MODE_DEFAULT;
         }
-
-        return AppOpsManager.MODE_DEFAULT;
+        return sOpSystemAlertWindowDefaultMode;
     }
 
     /**

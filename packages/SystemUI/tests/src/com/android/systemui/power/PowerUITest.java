@@ -28,7 +28,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.IntentFilter;
 import android.os.BatteryManager;
 import android.os.Handler;
@@ -49,7 +48,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.power.PowerUI.WarningsUI;
 import com.android.systemui.statusbar.CommandQueue;
-import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.systemui.statusbar.phone.CentralSurfaces;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -58,6 +57,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.time.Duration;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import dagger.Lazy;
@@ -80,27 +80,23 @@ public class PowerUITest extends SysuiTestCase {
     private static final int OLD_BATTERY_LEVEL_10 = 10;
     private static final long VERY_BELOW_SEVERE_HYBRID_THRESHOLD = TimeUnit.MINUTES.toMillis(15);
     public static final int BATTERY_LEVEL_10 = 10;
-    private WarningsUI mMockWarnings;
+    @Mock private WarningsUI mMockWarnings;
     private PowerUI mPowerUI;
-    private EnhancedEstimates mEnhancedEstimates;
+    @Mock private EnhancedEstimates mEnhancedEstimates;
     @Mock private PowerManager mPowerManager;
     @Mock private IThermalService mThermalServiceMock;
     private IThermalEventListener mUsbThermalEventListener;
     private IThermalEventListener mSkinThermalEventListener;
     @Mock private BroadcastDispatcher mBroadcastDispatcher;
     @Mock private CommandQueue mCommandQueue;
-    @Mock private Lazy<StatusBar> mStatusBarLazy;
-    @Mock private StatusBar mStatusBar;
+    @Mock private Lazy<Optional<CentralSurfaces>> mCentralSurfacesOptionalLazy;
+    @Mock private CentralSurfaces mCentralSurfaces;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        mMockWarnings = mDependency.injectMockDependency(WarningsUI.class);
-        mEnhancedEstimates = mDependency.injectMockDependency(EnhancedEstimates.class);
 
-        when(mStatusBarLazy.get()).thenReturn(mStatusBar);
-
-        mContext.addMockSystemService(Context.POWER_SERVICE, mPowerManager);
+        when(mCentralSurfacesOptionalLazy.get()).thenReturn(Optional.of(mCentralSurfaces));
 
         createPowerUi();
         mSkinThermalEventListener = mPowerUI.new SkinThermalEventListener();
@@ -434,12 +430,6 @@ public class PowerUITest extends SysuiTestCase {
         state.mIsPowerSaver = true;
         shouldShow = mPowerUI.shouldShowHybridWarning(state.get());
         assertThat(shouldShow).isFalse();
-
-        state.mIsPowerSaver = false;
-        // if disabled we should not show the low warning.
-        state.mIsLowLevelWarningEnabled = false;
-        shouldShow = mPowerUI.shouldShowHybridWarning(state.get());
-        assertThat(shouldShow).isFalse();
     }
 
     @Test
@@ -688,7 +678,9 @@ public class PowerUITest extends SysuiTestCase {
     }
 
     private void createPowerUi() {
-        mPowerUI = new PowerUI(mContext, mBroadcastDispatcher, mCommandQueue, mStatusBarLazy);
+        mPowerUI = new PowerUI(
+                mContext, mBroadcastDispatcher, mCommandQueue, mCentralSurfacesOptionalLazy,
+                mMockWarnings, mEnhancedEstimates, mPowerManager);
         mPowerUI.mThermalService = mThermalServiceMock;
     }
 

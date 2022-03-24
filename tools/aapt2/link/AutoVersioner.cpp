@@ -90,7 +90,7 @@ bool AutoVersioner::Consume(IAaptContext* context, ResourceTable* table) {
           }
 
           if (Style* style = ValueCast<Style>(config_value->value.get())) {
-            Maybe<ApiVersion> min_sdk_stripped;
+            std::optional<ApiVersion> min_sdk_stripped;
             std::vector<Style::Entry> stripped;
 
             auto iter = style->entries.begin();

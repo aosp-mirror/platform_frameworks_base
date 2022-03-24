@@ -61,6 +61,7 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.Locale;
 
@@ -1271,6 +1272,12 @@ public class ResourcesImpl {
             NativeAllocationRegistry.createMalloced(ResourcesImpl.class.getClassLoader(),
                     AssetManager.getThemeFreeFunction());
 
+    void dump(PrintWriter pw, String prefix) {
+        pw.println(prefix + "class=" + getClass());
+        pw.println(prefix + "assets");
+        mAssets.dump(pw, prefix + "  ");
+    }
+
     public class ThemeImpl {
         /**
          * Unique key for the series of styles applied to this theme.
@@ -1308,6 +1315,14 @@ public class ResourcesImpl {
 
         /*package*/ int getAppliedStyleResId() {
             return mThemeResId;
+        }
+
+        @StyleRes
+        /*package*/ int getParentThemeIdentifier(@StyleRes int resId) {
+            if (resId > 0) {
+                return mAssets.getParentThemeIdentifier(resId);
+            }
+            return 0;
         }
 
         void applyStyle(int resId, boolean force) {

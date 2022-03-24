@@ -16,12 +16,15 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static android.app.admin.DevicePolicyResources.Strings.SystemUi.STATUS_BAR_WORK_ICON_ACCESSIBILITY;
+
 import android.annotation.Nullable;
 import android.app.ActivityTaskManager;
 import android.app.AlarmManager;
 import android.app.AlarmManager.AlarmClockInfo;
 import android.app.IActivityManager;
 import android.app.SynchronousUserSwitchObserver;
+import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -132,6 +135,7 @@ public class PhoneStatusBarPolicy
     private final UserInfoController mUserInfoController;
     private final IActivityManager mIActivityManager;
     private final UserManager mUserManager;
+    private final DevicePolicyManager mDevicePolicyManager;
     private final StatusBarIconController mIconController;
     private final CommandQueue mCommandQueue;
     private final BroadcastDispatcher mBroadcastDispatcher;
@@ -172,7 +176,7 @@ public class PhoneStatusBarPolicy
             LocationController locationController,
             SensorPrivacyController sensorPrivacyController, IActivityManager iActivityManager,
             AlarmManager alarmManager, UserManager userManager,
-            RecordingController recordingController,
+            DevicePolicyManager devicePolicyManager, RecordingController recordingController,
             @Nullable TelecomManager telecomManager, @DisplayId int displayId,
             @Main SharedPreferences sharedPreferences, DateFormatUtil dateFormatUtil,
             RingerModeTracker ringerModeTracker,
@@ -190,6 +194,7 @@ public class PhoneStatusBarPolicy
         mUserInfoController = userInfoController;
         mIActivityManager = iActivityManager;
         mUserManager = userManager;
+        mDevicePolicyManager = devicePolicyManager;
         mRotationLockController = rotationLockController;
         mDataSaver = dataSaverController;
         mZenController = zenModeController;
@@ -288,7 +293,7 @@ public class PhoneStatusBarPolicy
 
         // managed profile
         mIconController.setIcon(mSlotManagedProfile, R.drawable.stat_sys_managed_profile_status,
-                mResources.getString(R.string.accessibility_managed_profile));
+                getManagedProfileAccessibilityString());
         mIconController.setIconVisibility(mSlotManagedProfile, mManagedProfileIconVisible);
 
         // data saver
@@ -341,6 +346,12 @@ public class PhoneStatusBarPolicy
         mRecordingController.addCallback(this);
 
         mCommandQueue.addCallback(this);
+    }
+
+    private String getManagedProfileAccessibilityString() {
+        return mDevicePolicyManager.getResources().getString(
+                STATUS_BAR_WORK_ICON_ACCESSIBILITY,
+                () -> mResources.getString(R.string.accessibility_managed_profile));
     }
 
     @Override
@@ -525,7 +536,7 @@ public class PhoneStatusBarPolicy
                         showIcon = true;
                         mIconController.setIcon(mSlotManagedProfile,
                                 R.drawable.stat_sys_managed_profile_status,
-                                mResources.getString(R.string.accessibility_managed_profile));
+                                getManagedProfileAccessibilityString());
                     } else {
                         showIcon = false;
                     }
@@ -604,8 +615,7 @@ public class PhoneStatusBarPolicy
 
     @Override
     public void onUserSetupChanged() {
-        boolean userSetup = mProvisionedController.isUserSetup(
-                mProvisionedController.getCurrentUser());
+        boolean userSetup = mProvisionedController.isCurrentUserSetup();
         if (mCurrentUserSetup == userSetup) return;
         mCurrentUserSetup = userSetup;
         updateAlarm();

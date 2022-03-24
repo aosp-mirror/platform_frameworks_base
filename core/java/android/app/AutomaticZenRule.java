@@ -118,11 +118,11 @@ public final class AutomaticZenRule implements Parcelable {
             name = source.readString();
         }
         interruptionFilter = source.readInt();
-        conditionId = source.readParcelable(null);
-        owner = source.readParcelable(null);
-        configurationActivity = source.readParcelable(null);
+        conditionId = source.readParcelable(null, android.net.Uri.class);
+        owner = source.readParcelable(null, android.content.ComponentName.class);
+        configurationActivity = source.readParcelable(null, android.content.ComponentName.class);
         creationTime = source.readLong();
-        mZenPolicy = source.readParcelable(null);
+        mZenPolicy = source.readParcelable(null, android.service.notification.ZenPolicy.class);
         mModified = source.readInt() == ENABLED;
         mPkg = source.readString();
     }

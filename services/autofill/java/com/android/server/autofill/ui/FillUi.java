@@ -32,6 +32,7 @@ import android.service.autofill.Dataset;
 import android.service.autofill.Dataset.DatasetFieldFilter;
 import android.service.autofill.FillResponse;
 import android.text.TextUtils;
+import android.util.PluralsMessageFormatter;
 import android.util.Slog;
 import android.util.TypedValue;
 import android.view.ContextThemeWrapper;
@@ -63,7 +64,9 @@ import com.android.server.autofill.Helper;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -898,8 +901,11 @@ final class FillUi {
             if (count <= 0) {
                 text = mContext.getString(R.string.autofill_picker_no_suggestions);
             } else {
-                text = mContext.getResources().getQuantityString(
-                        R.plurals.autofill_picker_some_suggestions, count, count);
+                Map<String, Object> arguments = new HashMap<>();
+                arguments.put("count", count);
+                text = PluralsMessageFormatter.format(mContext.getResources(),
+                        arguments,
+                        R.string.autofill_picker_some_suggestions);
             }
             mListView.announceForAccessibility(text);
         }

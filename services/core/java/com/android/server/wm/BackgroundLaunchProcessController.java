@@ -20,6 +20,8 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_ACTIVIT
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.ActivityTaskManagerService.ACTIVITY_BG_START_GRACE_PERIOD_MS;
+import static com.android.server.wm.ActivityTaskManagerService.APP_SWITCH_ALLOW;
+import static com.android.server.wm.ActivityTaskManagerService.APP_SWITCH_FG_ONLY;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -70,13 +72,13 @@ class BackgroundLaunchProcessController {
     }
 
     boolean areBackgroundActivityStartsAllowed(int pid, int uid, String packageName,
-            boolean appSwitchAllowed, boolean isCheckingForFgsStart,
+            int appSwitchState, boolean isCheckingForFgsStart,
             boolean hasActivityInVisibleTask, boolean hasBackgroundActivityStartPrivileges,
             long lastStopAppSwitchesTime, long lastActivityLaunchTime,
             long lastActivityFinishTime) {
         // If app switching is not allowed, we ignore all the start activity grace period
         // exception so apps cannot start itself in onPause() after pressing home button.
-        if (appSwitchAllowed) {
+        if (appSwitchState == APP_SWITCH_ALLOW) {
             // Allow if any activity in the caller has either started or finished very recently, and
             // it must be started or finished after last stop app switches time.
             final long now = SystemClock.uptimeMillis();
@@ -111,7 +113,8 @@ class BackgroundLaunchProcessController {
             return true;
         }
         // Allow if the caller has an activity in any foreground task.
-        if (appSwitchAllowed && hasActivityInVisibleTask) {
+        if (hasActivityInVisibleTask
+                && (appSwitchState == APP_SWITCH_ALLOW || appSwitchState == APP_SWITCH_FG_ONLY)) {
             if (DEBUG_ACTIVITY_STARTS) {
                 Slog.d(TAG, "[Process(" + pid
                         + ")] Activity start allowed: process has activity in foreground task");

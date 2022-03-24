@@ -16,10 +16,6 @@
 
 package android.net;
 
-import static android.net.PlatformVpnProfile.TYPE_IKEV2_IPSEC_PSK;
-import static android.net.PlatformVpnProfile.TYPE_IKEV2_IPSEC_RSA;
-import static android.net.PlatformVpnProfile.TYPE_IKEV2_IPSEC_USER_PASS;
-
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 
@@ -66,13 +62,46 @@ public abstract class PlatformVpnProfile {
     @PlatformVpnType protected final int mType;
 
     /** @hide */
-    PlatformVpnProfile(@PlatformVpnType int type) {
+    protected final boolean mExcludeLocalRoutes;
+    /** @hide */
+    protected final boolean mRequiresInternetValidation;
+
+    /** @hide */
+    PlatformVpnProfile(@PlatformVpnType int type, boolean excludeLocalRoutes,
+            boolean requiresValidation) {
         mType = type;
+        mExcludeLocalRoutes = excludeLocalRoutes;
+        mRequiresInternetValidation = requiresValidation;
     }
+
     /** Returns the profile integer type. */
     @PlatformVpnType
     public final int getType() {
         return mType;
+    }
+
+    /**
+     * Returns whether the local traffic is exempted from the VPN.
+     */
+    public final boolean areLocalRoutesExcluded() {
+        return mExcludeLocalRoutes;
+    }
+
+    /**
+     * Returns whether this VPN should undergo Internet validation.
+     *
+     * If this is true, the platform will perform basic validation checks for Internet
+     * connectivity over this VPN. If and when they succeed, the VPN network capabilities will
+     * reflect this by gaining the {@link NetworkCapabilities#NET_CAPABILITY_VALIDATED}
+     * capability.
+     *
+     * If this is false, the platform assumes the VPN either is always capable of reaching the
+     * Internet or intends not to. In this case, the VPN network capabilities will
+     * always gain the {@link NetworkCapabilities#NET_CAPABILITY_VALIDATED} capability
+     * immediately after it connects, whether it can reach public Internet destinations or not.
+     */
+    public final boolean isInternetValidationRequired() {
+        return mRequiresInternetValidation;
     }
 
     /** Returns a type string describing the VPN profile type */

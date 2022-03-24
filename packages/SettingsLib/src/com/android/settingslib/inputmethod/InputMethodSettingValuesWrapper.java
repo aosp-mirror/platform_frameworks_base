@@ -16,12 +16,18 @@
 
 package com.android.settingslib.inputmethod;
 
+import android.annotation.AnyThread;
+import android.annotation.NonNull;
 import android.annotation.UiThread;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
+
+import com.android.internal.annotations.GuardedBy;
+import com.android.internal.inputmethod.DirectBootAwareness;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -39,20 +45,39 @@ import java.util.List;
 public class InputMethodSettingValuesWrapper {
     private static final String TAG = InputMethodSettingValuesWrapper.class.getSimpleName();
 
-    private static volatile InputMethodSettingValuesWrapper sInstance;
+    private static final Object sInstanceMapLock = new Object();
+    /**
+     * Manages mapping between user ID and corresponding singleton
+     * {@link InputMethodSettingValuesWrapper} object.
+     */
+    @GuardedBy("sInstanceMapLock")
+    private static SparseArray<InputMethodSettingValuesWrapper> sInstanceMap = new SparseArray<>();
     private final ArrayList<InputMethodInfo> mMethodList = new ArrayList<>();
     private final ContentResolver mContentResolver;
     private final InputMethodManager mImm;
 
-    public static InputMethodSettingValuesWrapper getInstance(Context context) {
-        if (sInstance == null) {
-            synchronized (TAG) {
-                if (sInstance == null) {
-                    sInstance = new InputMethodSettingValuesWrapper(context);
-                }
+    @AnyThread
+    @NonNull
+    public static InputMethodSettingValuesWrapper getInstance(@NonNull Context context) {
+        final int requestUserId = context.getUserId();
+        InputMethodSettingValuesWrapper valuesWrapper;
+        // First time to create the wrapper.
+        synchronized (sInstanceMapLock) {
+            if (sInstanceMap.size() == 0) {
+                valuesWrapper = new InputMethodSettingValuesWrapper(context);
+                sInstanceMap.put(requestUserId, valuesWrapper);
+                return valuesWrapper;
             }
+            // We have same user context as request.
+            if (sInstanceMap.indexOfKey(requestUserId) >= 0) {
+                return sInstanceMap.get(requestUserId);
+            }
+            // Request by a new user context.
+            valuesWrapper = new InputMethodSettingValuesWrapper(context);
+            sInstanceMap.put(context.getUserId(), valuesWrapper);
         }
-        return sInstance;
+
+        return valuesWrapper;
     }
 
     // Ensure singleton
@@ -64,7 +89,8 @@ public class InputMethodSettingValuesWrapper {
 
     public void refreshAllInputMethodAndSubtypes() {
         mMethodList.clear();
-        mMethodList.addAll(mImm.getInputMethodList());
+        mMethodList.addAll(mImm.getInputMethodListAsUser(
+                mContentResolver.getUserId(), DirectBootAwareness.ANY));
     }
 
     public List<InputMethodInfo> getInputMethodList() {

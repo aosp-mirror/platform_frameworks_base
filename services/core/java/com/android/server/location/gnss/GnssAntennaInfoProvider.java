@@ -82,7 +82,7 @@ public class GnssAntennaInfoProvider extends
     }
 
     public void addListener(CallerIdentity callerIdentity, IGnssAntennaInfoListener listener) {
-        long identity = Binder.clearCallingIdentity();
+        final long identity = Binder.clearCallingIdentity();
         try {
             putRegistration(listener.asBinder(),
                     new AntennaInfoListenerRegistration(callerIdentity, listener));
@@ -92,7 +92,7 @@ public class GnssAntennaInfoProvider extends
     }
 
     public void removeListener(IGnssAntennaInfoListener listener) {
-        long identity = Binder.clearCallingIdentity();
+        final long identity = Binder.clearCallingIdentity();
         try {
             removeRegistration(listener.asBinder());
         } finally {

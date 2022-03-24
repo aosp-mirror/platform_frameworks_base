@@ -17,16 +17,11 @@
 package com.android.test.input
 
 import android.os.HandlerThread
-import android.os.InputConstants.DEFAULT_DISPATCHING_TIMEOUT_MILLIS
 import android.os.Looper
 import android.view.InputChannel
 import android.view.InputEvent
 import android.view.InputEventReceiver
-import android.view.InputEventSender
 import android.view.KeyEvent
-import android.view.MotionEvent
-import java.util.concurrent.LinkedBlockingQueue
-import java.util.concurrent.TimeUnit
 import org.junit.Assert.assertEquals
 import org.junit.After
 import org.junit.Before
@@ -46,54 +41,19 @@ private fun assertKeyEvent(expected: KeyEvent, received: KeyEvent) {
     assertEquals(expected.displayId, received.displayId)
 }
 
-private fun <T> getEvent(queue: LinkedBlockingQueue<T>): T {
-    try {
-        return queue.poll(DEFAULT_DISPATCHING_TIMEOUT_MILLIS.toLong(), TimeUnit.MILLISECONDS)
-    } catch (e: InterruptedException) {
-        throw RuntimeException("Unexpectedly interrupted while waiting for event")
-    }
+private fun getTestKeyEvent(): KeyEvent {
+    return KeyEvent(1 /*downTime*/, 1 /*eventTime*/, KeyEvent.ACTION_DOWN,
+                KeyEvent.KEYCODE_A, 0 /*repeat*/)
 }
 
-class TestInputEventReceiver(channel: InputChannel, looper: Looper) :
+private class CrashingInputEventReceiver(channel: InputChannel, looper: Looper) :
         InputEventReceiver(channel, looper) {
-    private val mInputEvents = LinkedBlockingQueue<InputEvent>()
-
     override fun onInputEvent(event: InputEvent) {
-        when (event) {
-            is KeyEvent -> mInputEvents.put(KeyEvent.obtain(event))
-            is MotionEvent -> mInputEvents.put(MotionEvent.obtain(event))
-            else -> throw Exception("Received $event is neither a key nor a motion")
+        try {
+            throw IllegalArgumentException("This receiver crashes when it receives input event")
+        } finally {
+            finishInputEvent(event, true /*handled*/)
         }
-        finishInputEvent(event, true /*handled*/)
-    }
-
-    fun getInputEvent(): InputEvent {
-        return getEvent(mInputEvents)
-    }
-}
-
-class TestInputEventSender(channel: InputChannel, looper: Looper) :
-        InputEventSender(channel, looper) {
-    data class FinishedSignal(val seq: Int, val handled: Boolean)
-    data class Timeline(val inputEventId: Int, val gpuCompletedTime: Long, val presentTime: Long)
-
-    private val mFinishedSignals = LinkedBlockingQueue<FinishedSignal>()
-    private val mTimelines = LinkedBlockingQueue<Timeline>()
-
-    override fun onInputEventFinished(seq: Int, handled: Boolean) {
-        mFinishedSignals.put(FinishedSignal(seq, handled))
-    }
-
-    override fun onTimelineReported(inputEventId: Int, gpuCompletedTime: Long, presentTime: Long) {
-        mTimelines.put(Timeline(inputEventId, gpuCompletedTime, presentTime))
-    }
-
-    fun getFinishedSignal(): FinishedSignal {
-        return getEvent(mFinishedSignals)
-    }
-
-    fun getTimeline(): Timeline {
-        return getEvent(mTimelines)
     }
 }
 
@@ -102,8 +62,8 @@ class InputEventSenderAndReceiverTest {
         private const val TAG = "InputEventSenderAndReceiverTest"
     }
     private val mHandlerThread = HandlerThread("Process input events")
-    private lateinit var mReceiver: TestInputEventReceiver
-    private lateinit var mSender: TestInputEventSender
+    private lateinit var mReceiver: SpyInputEventReceiver
+    private lateinit var mSender: SpyInputEventSender
 
     @Before
     fun setUp() {
@@ -111,8 +71,8 @@ class InputEventSenderAndReceiverTest {
         mHandlerThread.start()
 
         val looper = mHandlerThread.getLooper()
-        mSender = TestInputEventSender(channels[0], looper)
-        mReceiver = TestInputEventReceiver(channels[1], looper)
+        mSender = SpyInputEventSender(channels[0], looper)
+        mReceiver = SpyInputEventReceiver(channels[1], looper)
     }
 
     @After
@@ -122,8 +82,7 @@ class InputEventSenderAndReceiverTest {
 
     @Test
     fun testSendAndReceiveKey() {
-        val key = KeyEvent(1 /*downTime*/, 1 /*eventTime*/, KeyEvent.ACTION_DOWN,
-                KeyEvent.KEYCODE_A, 0 /*repeat*/)
+        val key = getTestKeyEvent()
         val seq = 10
         mSender.sendInputEvent(seq, key)
         val receivedKey = mReceiver.getInputEvent() as KeyEvent
@@ -133,13 +92,13 @@ class InputEventSenderAndReceiverTest {
         assertKeyEvent(key, receivedKey)
 
         // Check sender
-        assertEquals(TestInputEventSender.FinishedSignal(seq, handled = true), finishedSignal)
+        assertEquals(SpyInputEventSender.FinishedSignal(seq, handled = true), finishedSignal)
     }
 
     // The timeline case is slightly unusual because it goes from InputConsumer to InputPublisher.
     @Test
     fun testSendAndReceiveTimeline() {
-        val sent = TestInputEventSender.Timeline(
+        val sent = SpyInputEventSender.Timeline(
             inputEventId = 1, gpuCompletedTime = 2, presentTime = 3)
         mReceiver.reportTimeline(sent.inputEventId, sent.gpuCompletedTime, sent.presentTime)
         val received = mSender.getTimeline()
@@ -151,7 +110,7 @@ class InputEventSenderAndReceiverTest {
     // event processing.
     @Test
     fun testSendAndReceiveInvalidTimeline() {
-        val sent = TestInputEventSender.Timeline(
+        val sent = SpyInputEventSender.Timeline(
             inputEventId = 1, gpuCompletedTime = 3, presentTime = 2)
         mReceiver.reportTimeline(sent.inputEventId, sent.gpuCompletedTime, sent.presentTime)
         val received = mSender.getTimeline()
@@ -161,5 +120,42 @@ class InputEventSenderAndReceiverTest {
         mReceiver.reportTimeline(2 /*inputEventId*/, 3 /*gpuCompletedTime*/, 4 /*presentTime*/)
         val receivedSecondTimeline = mSender.getTimeline()
         assertEquals(null, receivedSecondTimeline)
+    }
+
+    /**
+     * If a receiver throws an exception during 'onInputEvent' execution, the 'finally' block still
+     * completes, and therefore, finishInputEvent is called. Make sure that there's no crash in the
+     * native layer in these circumstances.
+     * In this test, we are reusing the 'mHandlerThread', but we are creating new sender and
+     * receiver.
+     */
+    @Test
+    fun testCrashingReceiverDoesNotCrash() {
+        val channels = InputChannel.openInputChannelPair("TestChannel2")
+        val sender = SpyInputEventSender(channels[0], mHandlerThread.getLooper())
+
+        // Need a separate thread for the receiver so that the sender can still get the response
+        // after the receiver crashes
+        val receiverThread = HandlerThread("Receive input events")
+        receiverThread.start()
+        val crashingReceiver = CrashingInputEventReceiver(channels[1], receiverThread.getLooper())
+        receiverThread.setUncaughtExceptionHandler { thread, exception ->
+            if (thread == receiverThread && exception is IllegalArgumentException) {
+                // do nothing - this is the exception that we need to ignore
+            } else {
+                throw exception
+            }
+        }
+
+        val key = getTestKeyEvent()
+        val seq = 11
+        sender.sendInputEvent(seq, key)
+        val finishedSignal = sender.getFinishedSignal()
+        assertEquals(SpyInputEventSender.FinishedSignal(seq, handled = true), finishedSignal)
+
+        // Clean up
+        crashingReceiver.dispose()
+        sender.dispose()
+        receiverThread.quitSafely()
     }
 }

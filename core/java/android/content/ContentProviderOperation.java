@@ -108,7 +108,7 @@ public class ContentProviderOperation implements Parcelable {
             mExtras = null;
         }
         mSelection = source.readInt() != 0 ? source.readString8() : null;
-        mSelectionArgs = source.readSparseArray(null);
+        mSelectionArgs = source.readSparseArray(null, java.lang.Object.class);
         mExpectedCount = source.readInt() != 0 ? source.readInt() : null;
         mYieldAllowed = source.readInt() != 0;
         mExceptionAllowed = source.readInt() != 0;

@@ -49,9 +49,10 @@ import com.android.settingslib.bluetooth.CachedBluetoothDeviceManager;
 import com.android.settingslib.bluetooth.LocalBluetoothAdapter;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.settingslib.bluetooth.LocalBluetoothProfileManager;
+import com.android.systemui.CoreStartable;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
-import com.android.systemui.SystemUI;
+import com.android.systemui.dagger.SysUISingleton;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -60,7 +61,11 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
-public class KeyboardUI extends SystemUI implements InputManager.OnTabletModeChangedListener {
+import javax.inject.Inject;
+
+/** */
+@SysUISingleton
+public class KeyboardUI extends CoreStartable implements InputManager.OnTabletModeChangedListener {
     private static final String TAG = "KeyboardUI";
     private static final boolean DEBUG = false;
 
@@ -117,6 +122,7 @@ public class KeyboardUI extends SystemUI implements InputManager.OnTabletModeCha
 
     private int mState;
 
+    @Inject
     public KeyboardUI(Context context) {
         super(context);
     }

@@ -76,7 +76,7 @@ public final class PrintServiceInfo implements Parcelable {
     public PrintServiceInfo(Parcel parcel) {
         mId = parcel.readString();
         mIsEnabled = parcel.readByte() != 0;
-        mResolveInfo = parcel.readParcelable(null);
+        mResolveInfo = parcel.readParcelable(null, android.content.pm.ResolveInfo.class);
         mSettingsActivityName = parcel.readString();
         mAddPrintersActivityName = parcel.readString();
         mAdvancedPrintOptionsActivityName = parcel.readString();

@@ -18,12 +18,10 @@ package com.android.server.pm.parsing
 
 import android.annotation.RawRes
 import android.content.Context
-import android.content.pm.parsing.ParsingPackage
-import android.content.pm.parsing.ParsingPackageUtils
-import android.content.pm.parsing.result.ParseInput
-import android.content.pm.parsing.result.ParseInput.DeferredError
+import com.android.server.pm.pkg.parsing.ParsingPackage
+import com.android.server.pm.pkg.parsing.ParsingPackageUtils
 import android.content.pm.parsing.result.ParseResult
-import android.os.Build
+import android.platform.test.annotations.Presubmit
 import androidx.test.InstrumentationRegistry
 import com.android.frameworks.servicestests.R
 import com.google.common.truth.Truth.assertThat
@@ -39,6 +37,7 @@ import org.junit.rules.TemporaryFolder
  *
  * This verifies these failures when the APK targets R.
  */
+@Presubmit
 class PackageParsingDeferErrorTest {
 
     companion object {
@@ -54,14 +53,6 @@ class PackageParsingDeferErrorTest {
 
     private val context: Context = InstrumentationRegistry.getContext()
 
-    private val inputCallback = ParseInput.Callback { changeId, _, targetSdk ->
-        when (changeId) {
-            DeferredError.MISSING_APP_TAG -> targetSdk > Build.VERSION_CODES.Q
-            DeferredError.EMPTY_INTENT_ACTION_CATEGORY -> targetSdk > Build.VERSION_CODES.Q
-            else -> throw IllegalStateException("changeId $changeId is not mocked for test")
-        }
-    }
-
     @get:Rule
     val tempFolder = TemporaryFolder(context.filesDir)
 
@@ -76,8 +67,9 @@ class PackageParsingDeferErrorTest {
         assertThat(first.name).isEqualTo(TEST_ACTIVITY)
         val intents = first.intents
         assertThat(intents).hasSize(1)
-        assertThat(intents.first().hasCategory(TEST_CATEGORY)).isTrue()
-        assertThat(intents.first().hasAction(TEST_ACTION)).isTrue()
+        val intentFilter = intents.first().intentFilter
+        assertThat(intentFilter.hasCategory(TEST_CATEGORY)).isTrue()
+        assertThat(intentFilter.hasAction(TEST_ACTION)).isTrue()
     }
 
     @Test
@@ -97,7 +89,8 @@ class PackageParsingDeferErrorTest {
         assertThat(first.name).isEqualTo(TEST_ACTIVITY)
         val intents = first.intents
         assertThat(intents).hasSize(1)
-        assertThat(intents.first().hasAction(TEST_ACTION)).isTrue()
+        val intentFilter = intents.first().intentFilter
+        assertThat(intentFilter.hasAction(TEST_ACTION)).isTrue()
     }
 
     @Test

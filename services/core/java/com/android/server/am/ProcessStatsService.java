@@ -38,8 +38,13 @@ import com.android.internal.app.procstats.DumpUtils;
 import com.android.internal.app.procstats.IProcessStats;
 import com.android.internal.app.procstats.ProcessState;
 import com.android.internal.app.procstats.ProcessStats;
+import com.android.internal.app.procstats.ProcessStatsInternal;
 import com.android.internal.app.procstats.ServiceState;
+import com.android.internal.app.procstats.UidState;
 import com.android.internal.os.BackgroundThread;
+import com.android.server.LocalServices;
+
+import dalvik.annotation.optimization.NeverCompile;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -783,6 +788,63 @@ public final class ProcessStatsService extends IProcessStats.Stub {
         }
     }
 
+    private SparseArray<long[]> getUidProcStateStatsOverTime(long minTime) {
+        final ProcessStats stats = new ProcessStats();
+        long curTime;
+        synchronized (mLock) {
+            final long now = SystemClock.uptimeMillis();
+            mProcessStats.mTimePeriodEndRealtime = SystemClock.elapsedRealtime();
+            mProcessStats.mTimePeriodEndUptime = now;
+            stats.add(mProcessStats);
+            curTime = mProcessStats.mTimePeriodEndRealtime - mProcessStats.mTimePeriodStartRealtime;
+        }
+        if (curTime < minTime) {
+            try {
+                mFileLock.lock();
+                // Need to add in older stats to reach desired time.
+                ArrayList<String> files = getCommittedFilesLF(0, false, true);
+                if (files != null && files.size() > 0) {
+                    int i = files.size() - 1;
+                    while (i >= 0 && (stats.mTimePeriodEndRealtime
+                            - stats.mTimePeriodStartRealtime) < minTime) {
+                        AtomicFile file = new AtomicFile(new File(files.get(i)));
+                        i--;
+                        ProcessStats moreStats = new ProcessStats(false);
+                        readLF(moreStats, file);
+                        if (moreStats.mReadError == null) {
+                            stats.add(moreStats);
+                        } else {
+                            Slog.w(TAG, "Failure reading " + files.get(i + 1) + "; "
+                                    + moreStats.mReadError);
+                            continue;
+                        }
+                    }
+                }
+            } finally {
+                mFileLock.unlock();
+            }
+        }
+        final SparseArray<UidState> uidStates = stats.mUidStates;
+        final SparseArray<long[]> results = new SparseArray<>();
+        for (int i = 0, size = uidStates.size(); i < size; i++) {
+            final int uid = uidStates.keyAt(i);
+            final UidState uidState = uidStates.valueAt(i);
+            results.put(uid, uidState.getAggregatedDurationsInStates());
+        }
+        return results;
+    }
+
+    void publish() {
+        LocalServices.addService(ProcessStatsInternal.class, new LocalService());
+    }
+
+    private final class LocalService extends ProcessStatsInternal {
+        @Override
+        public SparseArray<long[]> getUidProcStateStatsOverTime(long minTime) {
+            return ProcessStatsService.this.getUidProcStateStatsOverTime(minTime);
+        }
+    }
+
     private void dumpAggregatedStats(PrintWriter pw, long aggregateHours, long now,
             String reqPackage, boolean isCompact, boolean dumpDetails, boolean dumpFullDetails,
             boolean dumpAll, boolean activeOnly, int section) {
@@ -872,6 +934,7 @@ public final class ProcessStatsService extends IProcessStats.Stub {
         }
     }
 
+    @NeverCompile // Avoid size overhead of debugging code.
     private void dumpInner(PrintWriter pw, String[] args) {
         final long now = SystemClock.uptimeMillis();
 

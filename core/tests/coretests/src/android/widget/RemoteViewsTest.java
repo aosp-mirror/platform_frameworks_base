@@ -16,8 +16,12 @@
 
 package android.widget;
 
+import static com.android.internal.R.id.pending_intent_tag;
+
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
@@ -31,7 +35,10 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Binder;
+import android.os.Looper;
 import android.os.Parcel;
+import android.util.SizeF;
+import android.view.ContextThemeWrapper;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -49,6 +56,7 @@ import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -259,6 +267,148 @@ public class RemoteViewsTest {
         View asyncView = listener.waitAndGetView();
 
         verifyViewTree(syncView, asyncView, "row1-c1", "row1-c2", "row1-c3", "row2-c1", "row2-c2");
+    }
+
+    @Test
+    public void nestedViews_setRemoteAdapter_intent() {
+        Looper.prepare();
+
+        AppWidgetHostView widget = new AppWidgetHostView(mContext);
+        RemoteViews top = new RemoteViews(mPackage, R.layout.remote_view_host);
+        RemoteViews inner1 = new RemoteViews(mPackage, R.layout.remote_view_host);
+        RemoteViews inner2 = new RemoteViews(mPackage, R.layout.remote_views_list);
+        inner2.setRemoteAdapter(R.id.list, new Intent());
+        inner1.addView(R.id.container, inner2);
+        top.addView(R.id.container, inner1);
+
+        View view = top.apply(mContext, widget);
+        widget.addView(view);
+
+        ListView listView = (ListView) view.findViewById(R.id.list);
+        listView.onRemoteAdapterConnected();
+        assertNotNull(listView.getAdapter());
+
+        top.reapply(mContext, view);
+        listView = (ListView) view.findViewById(R.id.list);
+        assertNotNull(listView.getAdapter());
+    }
+
+    @Test
+    public void nestedViews_setRemoteAdapter_remoteCollectionItems() {
+        AppWidgetHostView widget = new AppWidgetHostView(mContext);
+        RemoteViews top = new RemoteViews(mPackage, R.layout.remote_view_host);
+        RemoteViews inner1 = new RemoteViews(mPackage, R.layout.remote_view_host);
+        RemoteViews inner2 = new RemoteViews(mPackage, R.layout.remote_views_list);
+        inner2.setRemoteAdapter(
+                R.id.list,
+                new RemoteViews.RemoteCollectionItems.Builder()
+                    .addItem(0, new RemoteViews(mPackage, R.layout.remote_view_host))
+                    .build());
+        inner1.addView(R.id.container, inner2);
+        top.addView(R.id.container, inner1);
+
+        View view = top.apply(mContext, widget);
+        widget.addView(view);
+
+        ListView listView = (ListView) view.findViewById(R.id.list);
+        assertNotNull(listView.getAdapter());
+
+        top.reapply(mContext, view);
+        listView = (ListView) view.findViewById(R.id.list);
+        assertNotNull(listView.getAdapter());
+    }
+
+    @Test
+    public void nestedViews_collectionChildFlag() throws Exception {
+        RemoteViews nested = new RemoteViews(mPackage, R.layout.remote_views_text);
+        nested.setOnClickPendingIntent(
+                R.id.text,
+                PendingIntent.getActivity(mContext, 0, new Intent(), PendingIntent.FLAG_MUTABLE)
+        );
+
+        RemoteViews listItem = new RemoteViews(mPackage, R.layout.remote_view_host);
+        listItem.addView(R.id.container, nested);
+        listItem.addFlags(RemoteViews.FLAG_WIDGET_IS_COLLECTION_CHILD);
+
+        View view = listItem.apply(mContext, mContainer);
+        TextView text = (TextView) view.findViewById(R.id.text);
+        assertNull(text.getTag(pending_intent_tag));
+    }
+
+    @Test
+    public void landscapePortraitViews_collectionChildFlag() throws Exception {
+        RemoteViews inner = new RemoteViews(mPackage, R.layout.remote_views_text);
+        inner.setOnClickPendingIntent(
+                R.id.text,
+                PendingIntent.getActivity(mContext, 0, new Intent(), PendingIntent.FLAG_MUTABLE)
+        );
+
+        RemoteViews listItem = new RemoteViews(inner, inner);
+        listItem.addFlags(RemoteViews.FLAG_WIDGET_IS_COLLECTION_CHILD);
+
+        View view = listItem.apply(mContext, mContainer);
+        TextView text = (TextView) view.findViewById(R.id.text);
+        assertNull(text.getTag(pending_intent_tag));
+    }
+
+    @Test
+    public void sizedViews_collectionChildFlag() throws Exception {
+        RemoteViews inner = new RemoteViews(mPackage, R.layout.remote_views_text);
+        inner.setOnClickPendingIntent(
+                R.id.text,
+                PendingIntent.getActivity(mContext, 0, new Intent(), PendingIntent.FLAG_MUTABLE)
+        );
+
+        RemoteViews listItem = new RemoteViews(
+                Map.of(new SizeF(0, 0), inner, new SizeF(100, 100), inner));
+        listItem.addFlags(RemoteViews.FLAG_WIDGET_IS_COLLECTION_CHILD);
+
+        View view = listItem.apply(mContext, mContainer);
+        TextView text = (TextView) view.findViewById(R.id.text);
+        assertNull(text.getTag(pending_intent_tag));
+    }
+
+    @Test
+    public void nestedViews_lightBackgroundLayoutFlag() {
+        RemoteViews nested = new RemoteViews(mPackage, R.layout.remote_views_text);
+        nested.setLightBackgroundLayoutId(R.layout.remote_views_light_background_text);
+
+        RemoteViews parent = new RemoteViews(mPackage, R.layout.remote_view_host);
+        parent.addView(R.id.container, nested);
+        parent.setLightBackgroundLayoutId(R.layout.remote_view_host);
+        parent.addFlags(RemoteViews.FLAG_USE_LIGHT_BACKGROUND_LAYOUT);
+
+        View view = parent.apply(mContext, mContainer);
+        assertNull(view.findViewById(R.id.text));
+        assertNotNull(view.findViewById(R.id.light_background_text));
+    }
+
+
+    @Test
+    public void landscapePortraitViews_lightBackgroundLayoutFlag() {
+        RemoteViews inner = new RemoteViews(mPackage, R.layout.remote_views_text);
+        inner.setLightBackgroundLayoutId(R.layout.remote_views_light_background_text);
+
+        RemoteViews parent = new RemoteViews(inner, inner);
+        parent.addFlags(RemoteViews.FLAG_USE_LIGHT_BACKGROUND_LAYOUT);
+
+        View view = parent.apply(mContext, mContainer);
+        assertNull(view.findViewById(R.id.text));
+        assertNotNull(view.findViewById(R.id.light_background_text));
+    }
+
+    @Test
+    public void sizedViews_lightBackgroundLayoutFlag() {
+        RemoteViews inner = new RemoteViews(mPackage, R.layout.remote_views_text);
+        inner.setLightBackgroundLayoutId(R.layout.remote_views_light_background_text);
+
+        RemoteViews parent = new RemoteViews(
+                Map.of(new SizeF(0, 0), inner, new SizeF(100, 100), inner));
+        parent.addFlags(RemoteViews.FLAG_USE_LIGHT_BACKGROUND_LAYOUT);
+
+        View view = parent.apply(mContext, mContainer);
+        assertNull(view.findViewById(R.id.text));
+        assertNotNull(view.findViewById(R.id.light_background_text));
     }
 
     private RemoteViews createViewChained(int depth, String... texts) {
@@ -481,6 +631,47 @@ public class RemoteViewsTest {
 
         assertEquals(
                 index, inflated.getTag(com.android.internal.R.id.notification_action_index_tag));
+    }
+
+    @Test
+    public void nestedViews_themesPropagateCorrectly() {
+        Context themedContext =
+                new ContextThemeWrapper(mContext, R.style.RelativeLayoutAlignBottom50Alpha);
+        RelativeLayout rootParent = new RelativeLayout(themedContext);
+
+        RemoteViews top = new RemoteViews(mPackage, R.layout.remote_view_relative_layout);
+        RemoteViews inner1 =
+                new RemoteViews(mPackage, R.layout.remote_view_relative_layout_with_theme);
+        RemoteViews inner2 =
+                new RemoteViews(mPackage, R.layout.remote_view_relative_layout);
+
+        inner1.addView(R.id.themed_layout, inner2);
+        top.addView(R.id.container, inner1);
+
+        RelativeLayout root = (RelativeLayout) top.apply(themedContext, rootParent);
+        assertEquals(0.5, root.getAlpha(), 0.);
+        RelativeLayout.LayoutParams rootParams =
+                (RelativeLayout.LayoutParams) root.getLayoutParams();
+        assertEquals(RelativeLayout.TRUE,
+                rootParams.getRule(RelativeLayout.ALIGN_PARENT_BOTTOM));
+
+        // The theme is set on inner1View and its descendants. However, inner1View does
+        // not get its layout params from its theme (though its descendants do), but other
+        // attributes such as alpha are set.
+        RelativeLayout inner1View = (RelativeLayout) root.getChildAt(0);
+        assertEquals(R.id.themed_layout, inner1View.getId());
+        assertEquals(0.25, inner1View.getAlpha(), 0.);
+        RelativeLayout.LayoutParams inner1Params =
+                (RelativeLayout.LayoutParams) inner1View.getLayoutParams();
+        assertEquals(RelativeLayout.TRUE,
+                inner1Params.getRule(RelativeLayout.ALIGN_PARENT_BOTTOM));
+
+        RelativeLayout inner2View = (RelativeLayout) inner1View.getChildAt(0);
+        assertEquals(0.25, inner2View.getAlpha(), 0.);
+        RelativeLayout.LayoutParams inner2Params =
+                (RelativeLayout.LayoutParams) inner2View.getLayoutParams();
+        assertEquals(RelativeLayout.TRUE,
+                inner2Params.getRule(RelativeLayout.ALIGN_PARENT_TOP));
     }
 
     private class WidgetContainer extends AppWidgetHostView {

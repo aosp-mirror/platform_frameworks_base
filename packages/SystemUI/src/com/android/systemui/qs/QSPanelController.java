@@ -31,17 +31,18 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.media.MediaHierarchyManager;
 import com.android.systemui.media.MediaHost;
+import com.android.systemui.media.MediaHostState;
 import com.android.systemui.plugins.FalsingManager;
-import com.android.systemui.plugins.qs.DetailAdapter;
-import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.qs.customize.QSCustomizerController;
 import com.android.systemui.qs.dagger.QSScope;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.settings.brightness.BrightnessController;
-import com.android.systemui.settings.brightness.BrightnessSlider;
-import com.android.systemui.statusbar.FeatureFlags;
+import com.android.systemui.settings.brightness.BrightnessMirrorHandler;
+import com.android.systemui.settings.brightness.BrightnessSliderController;
 import com.android.systemui.statusbar.policy.BrightnessMirrorController;
 import com.android.systemui.tuner.TunerService;
 
@@ -53,18 +54,18 @@ import javax.inject.Named;
  */
 @QSScope
 public class QSPanelController extends QSPanelControllerBase<QSPanel> {
-    public static final String QS_REMOVE_LABELS = "sysui_remove_labels";
 
+    private final QSFgsManagerFooter mQSFgsManagerFooter;
     private final QSSecurityFooter mQsSecurityFooter;
     private final TunerService mTunerService;
     private final QSCustomizerController mQsCustomizerController;
     private final QSTileRevealController.Factory mQsTileRevealControllerFactory;
     private final FalsingManager mFalsingManager;
     private final BrightnessController mBrightnessController;
-    private final BrightnessSlider.Factory mBrightnessSliderFactory;
-    private final BrightnessSlider mBrightnessSlider;
+    private final BrightnessSliderController mBrightnessSliderController;
+    private final BrightnessMirrorHandler mBrightnessMirrorHandler;
+    private final FeatureFlags mFeatureFlags;
 
-    private BrightnessMirrorController mBrightnessMirrorController;
     private boolean mGridContentVisible = true;
 
     private final QSPanel.OnConfigurationChangedListener mOnConfigurationChangedListener =
@@ -76,12 +77,9 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
             if (mView.isListening()) {
                 refreshAllTiles();
             }
-            updateBrightnessMirror();
+            mView.switchSecurityFooter(mShouldUseSplitNotificationShade);
         }
     };
-
-    private final BrightnessMirrorController.BrightnessMirrorListener mBrightnessMirrorListener =
-            mirror -> updateBrightnessMirror();
 
     private View.OnTouchListener mTileLayoutTouchListener = new View.OnTouchListener() {
         @Override
@@ -94,39 +92,43 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
     };
 
     @Inject
-    QSPanelController(QSPanel view, QSSecurityFooter qsSecurityFooter, TunerService tunerService,
+    QSPanelController(QSPanel view, QSFgsManagerFooter qsFgsManagerFooter,
+            QSSecurityFooter qsSecurityFooter, TunerService tunerService,
             QSTileHost qstileHost, QSCustomizerController qsCustomizerController,
             @Named(QS_USING_MEDIA_PLAYER) boolean usingMediaPlayer,
             @Named(QS_PANEL) MediaHost mediaHost,
             QSTileRevealController.Factory qsTileRevealControllerFactory,
             DumpManager dumpManager, MetricsLogger metricsLogger, UiEventLogger uiEventLogger,
             QSLogger qsLogger, BrightnessController.Factory brightnessControllerFactory,
-            BrightnessSlider.Factory brightnessSliderFactory, FalsingManager falsingManager,
-            FeatureFlags featureFlags) {
+            BrightnessSliderController.Factory brightnessSliderFactory,
+            FalsingManager falsingManager, FeatureFlags featureFlags) {
         super(view, qstileHost, qsCustomizerController, usingMediaPlayer, mediaHost,
-                metricsLogger, uiEventLogger, qsLogger, dumpManager, featureFlags);
+                metricsLogger, uiEventLogger, qsLogger, dumpManager);
+        mQSFgsManagerFooter = qsFgsManagerFooter;
         mQsSecurityFooter = qsSecurityFooter;
         mTunerService = tunerService;
         mQsCustomizerController = qsCustomizerController;
         mQsTileRevealControllerFactory = qsTileRevealControllerFactory;
         mFalsingManager = falsingManager;
-        mQsSecurityFooter.setHostEnvironment(qstileHost);
-        mBrightnessSliderFactory = brightnessSliderFactory;
 
-        mBrightnessSlider = mBrightnessSliderFactory.create(getContext(), mView);
-        mView.setBrightnessView(mBrightnessSlider.getRootView());
+        mBrightnessSliderController = brightnessSliderFactory.create(getContext(), mView);
+        mView.setBrightnessView(mBrightnessSliderController.getRootView());
 
-        mBrightnessController = brightnessControllerFactory.create(mBrightnessSlider);
+        mBrightnessController = brightnessControllerFactory.create(mBrightnessSliderController);
+        mBrightnessMirrorHandler = new BrightnessMirrorHandler(mBrightnessController);
+        mFeatureFlags = featureFlags;
+        view.setUseNewFooter(featureFlags.isEnabled(Flags.NEW_FOOTER));
     }
 
     @Override
     public void onInit() {
         super.onInit();
-        mMediaHost.setExpansion(1);
+        mMediaHost.setExpansion(MediaHostState.EXPANDED);
         mMediaHost.setShowsOnlyActiveMedia(false);
         mMediaHost.init(MediaHierarchyManager.LOCATION_QS);
         mQsCustomizerController.init();
-        mBrightnessSlider.init();
+        mBrightnessSliderController.init();
+        mQSFgsManagerFooter.init();
     }
 
     @Override
@@ -141,11 +143,12 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
             refreshAllTiles();
         }
         mView.addOnConfigurationChangedListener(mOnConfigurationChangedListener);
-        mView.setSecurityFooter(mQsSecurityFooter.getView());
-        switchTileLayout(true);
-        if (mBrightnessMirrorController != null) {
-            mBrightnessMirrorController.addCallback(mBrightnessMirrorListener);
+        if (!mFeatureFlags.isEnabled(Flags.NEW_FOOTER)) {
+            mView.setSecurityFooter(mQsSecurityFooter.getView(), mShouldUseSplitNotificationShade);
+            mView.setFgsManagerFooter(mQSFgsManagerFooter.getView());
         }
+        switchTileLayout(true);
+        mBrightnessMirrorHandler.onQsPanelAttached();
 
         ((PagedTileLayout) mView.getOrCreateTileLayout())
                 .setOnTouchListener(mTileLayoutTouchListener);
@@ -161,9 +164,7 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
     protected void onViewDetached() {
         mTunerService.removeTunable(mView);
         mView.removeOnConfigurationChangedListener(mOnConfigurationChangedListener);
-        if (mBrightnessMirrorController != null) {
-            mBrightnessMirrorController.removeCallback(mBrightnessMirrorListener);
-        }
+        mBrightnessMirrorHandler.onQsPanelDettached();
         super.onViewDetached();
     }
 
@@ -186,7 +187,10 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
             refreshAllTiles();
         }
 
-        mQsSecurityFooter.setListening(listening);
+        if (!mFeatureFlags.isEnabled(Flags.NEW_FOOTER)) {
+            mQSFgsManagerFooter.setListening(listening);
+            mQsSecurityFooter.setListening(listening);
+        }
 
         // Set the listening as soon as the QS fragment starts listening regardless of the
         //expansion, so it will update the current brightness before the slider is visible.
@@ -197,37 +201,13 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
         }
     }
 
-    /** */
     public void setBrightnessMirror(BrightnessMirrorController brightnessMirrorController) {
-        mBrightnessMirrorController = brightnessMirrorController;
-        if (mBrightnessMirrorController != null) {
-            mBrightnessMirrorController.removeCallback(mBrightnessMirrorListener);
-        }
-        mBrightnessMirrorController = brightnessMirrorController;
-        if (mBrightnessMirrorController != null) {
-            mBrightnessMirrorController.addCallback(mBrightnessMirrorListener);
-        }
-        updateBrightnessMirror();
-    }
-
-    private void updateBrightnessMirror() {
-        if (mBrightnessMirrorController != null) {
-            mBrightnessSlider.setMirrorControllerAndMirror(mBrightnessMirrorController);
-        }
+        mBrightnessMirrorHandler.setController(brightnessMirrorController);
     }
 
     /** Get the QSTileHost this panel uses. */
     public QSTileHost getHost() {
         return mHost;
-    }
-
-
-    /** Open the details for a specific tile.. */
-    public void openDetails(String subPanel) {
-        QSTile tile = getTile(subPanel);
-        if (tile != null) {
-            mView.openDetails(tile);
-        }
     }
 
     /** Show the device monitoring dialog. */
@@ -244,6 +224,7 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
     public void refreshAllTiles() {
         mBrightnessController.checkRestrictionAndSetEnabled();
         super.refreshAllTiles();
+        mQSFgsManagerFooter.refreshState();
         mQsSecurityFooter.refreshState();
     }
 
@@ -260,11 +241,6 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
     }
 
     /** */
-    public void setCallback(QSDetail.Callback qsPanelCallback) {
-        mView.setCallback(qsPanelCallback);
-    }
-
-    /** */
     public void setGridContentVisibility(boolean visible) {
         int newVis = visible ? View.VISIBLE : View.INVISIBLE;
         setVisibility(newVis);
@@ -276,10 +252,6 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
 
     public boolean isLayoutRtl() {
         return mView.isLayoutRtl();
-    }
-
-    public View getBrightnessView() {
-        return mView.getBrightnessView();
     }
 
     /** */
@@ -294,11 +266,6 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
     /** */
     public void setContentMargins(int startMargin, int endMargin) {
         mView.setContentMargins(startMargin, endMargin, mMediaHost.getHostView());
-    }
-
-    /** */
-    public void showDetailAdapter(DetailAdapter detailAdapter, int x, int y) {
-        mView.showDetailAdapter(true, detailAdapter, new int[]{x, y});
     }
 
     /** */

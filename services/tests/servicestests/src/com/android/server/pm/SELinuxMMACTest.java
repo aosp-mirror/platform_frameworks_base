@@ -44,7 +44,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 public class SELinuxMMACTest {
 
     private static final String PACKAGE_NAME = "my.package";
-    private static final int LATEST_OPT_IN_VERSION = Build.VERSION_CODES.S;
+    private static final int LATEST_OPT_IN_VERSION = Build.VERSION_CODES.CUR_DEVELOPMENT;
     private static final int R_OPT_IN_VERSION = Build.VERSION_CODES.R;
 
     @Mock
@@ -88,6 +88,16 @@ public class SELinuxMMACTest {
                 .thenReturn(false);
         assertThat(SELinuxMMAC.getSeInfo(pkg, null, mMockCompatibility),
                 is("default:targetSdkVersion=" + LATEST_OPT_IN_VERSION));
+    }
+
+    @Test
+    public void getSeInfoTargetingCurDevelopment() {
+        AndroidPackage pkg = makePackage(Build.VERSION_CODES.CUR_DEVELOPMENT);
+        when(mMockCompatibility.isChangeEnabledInternal(eq(SELinuxMMAC.SELINUX_LATEST_CHANGES),
+                argThat(argument -> argument.packageName.equals(pkg.getPackageName()))))
+                .thenReturn(true);
+        assertThat(SELinuxMMAC.getSeInfo(pkg, null, mMockCompatibility),
+                is("default:targetSdkVersion=" + Build.VERSION_CODES.CUR_DEVELOPMENT));
     }
 
     @Test

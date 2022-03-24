@@ -95,6 +95,13 @@ public class ChooserActivityLoggerFake implements ChooserActivityLogger {
         return mCalls.get(index).event;
     }
 
+    public void removeCallsForUiEventsOfType(int uiEventType) {
+        mCalls.removeIf(
+                call ->
+                        (call.atomId == FrameworkStatsLog.UI_EVENT_REPORTED)
+                                && (call.event.getId() == uiEventType));
+    }
+
     @Override
     public void logShareStarted(int eventId, String packageName, String mimeType,
             int appProvidedDirect, int appProvidedApp, boolean isWorkprofile, int previewType,

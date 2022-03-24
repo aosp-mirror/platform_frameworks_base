@@ -1369,7 +1369,10 @@ public class AdbDebuggingManager {
                 if (args.length > 1) {
                     hostname = args[1];
                 }
-                PairDevice device = new PairDevice(fingerprints, hostname, false);
+                PairDevice device = new PairDevice();
+                device.name = fingerprints;
+                device.guid = hostname;
+                device.connected = false;
                 intent.putExtra(AdbManager.WIRELESS_PAIR_DEVICE_EXTRA, device);
                 AdbDebuggingManager.sendBroadcastWithDebugPermission(mContext, intent,
                         UserHandle.ALL);
@@ -1852,8 +1855,11 @@ public class AdbDebuggingManager {
                 if (args.length > 1) {
                     hostname = args[1];
                 }
-                pairedDevices.put(keyEntry.getKey(), new PairDevice(
-                        hostname, fingerprints, mWifiConnectedKeys.contains(keyEntry.getKey())));
+                PairDevice pairDevice = new PairDevice();
+                pairDevice.name = hostname;
+                pairDevice.guid = fingerprints;
+                pairDevice.connected = mWifiConnectedKeys.contains(keyEntry.getKey());
+                pairedDevices.put(keyEntry.getKey(), pairDevice);
             }
             return pairedDevices;
         }

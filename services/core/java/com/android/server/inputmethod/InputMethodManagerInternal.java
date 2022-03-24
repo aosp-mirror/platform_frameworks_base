@@ -19,12 +19,14 @@ package com.android.server.inputmethod;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.inputmethodservice.InputMethodService;
 import android.os.IBinder;
 import android.view.inputmethod.InlineSuggestionsRequest;
 import android.view.inputmethod.InputMethodInfo;
 
 import com.android.internal.inputmethod.SoftInputShowHideReason;
 import com.android.internal.view.IInlineSuggestionsRequestCallback;
+import com.android.internal.view.IInputMethodSession;
 import com.android.internal.view.InlineSuggestionsRequestInfo;
 import com.android.server.LocalServices;
 
@@ -95,6 +97,21 @@ public abstract class InputMethodManagerInternal {
     public abstract boolean switchToInputMethod(String imeId, @UserIdInt int userId);
 
     /**
+     * Force enable or disable the input method associated with {@code imeId} for given user. If
+     * the input method associated with {@code imeId} is not installed, do nothing.
+     *
+     * @param imeId  The input method ID to be enabled or disabled.
+     * @param enabled {@code true} if the input method associated with {@code imeId} should be
+     *                enabled.
+     * @param userId The user ID to be queried.
+     * @return {@code true} if the input method associated with {@code imeId} was successfully
+     *         enabled or disabled, {@code false} if the input method specified is not installed
+     *         or was unable to be enabled/disabled for some other reason.
+     */
+    public abstract boolean setInputMethodEnabled(String imeId, boolean enabled,
+            @UserIdInt int userId);
+
+    /**
      * Registers a new {@link InputMethodListListener}.
      */
     public abstract void registerInputMethodListListener(InputMethodListListener listener);
@@ -134,6 +151,30 @@ public abstract class InputMethodManagerInternal {
     public abstract void updateImeWindowStatus(boolean disableImeIcon);
 
     /**
+     * Finish stylus handwriting by calling {@link InputMethodService#finishStylusHandwriting()} if
+     * there is an ongoing handwriting session.
+     */
+    public abstract void maybeFinishStylusHandwriting();
+
+    /**
+     * Callback when the IInputMethodSession from the accessibility service with the specified
+     * accessibilityConnectionId is created.
+     *
+     * @param accessibilityConnectionId The connection id of the accessibility service.
+     * @param session The session passed back from the accessibility service.
+     */
+    public abstract void onSessionForAccessibilityCreated(int accessibilityConnectionId,
+            IInputMethodSession session);
+
+    /**
+     * Unbind the accessibility service with the specified accessibilityConnectionId from current
+     * client.
+     *
+     * @param accessibilityConnectionId The connection id of the accessibility service.
+     */
+    public abstract void unbindAccessibilityFromCurrentClient(int accessibilityConnectionId);
+
+    /**
      * Fake implementation of {@link InputMethodManagerInternal}.  All the methods do nothing.
      */
     private static final InputMethodManagerInternal NOP =
@@ -147,23 +188,30 @@ public abstract class InputMethodManagerInternal {
                 }
 
                 @Override
-                public List<InputMethodInfo> getInputMethodListAsUser(int userId) {
+                public List<InputMethodInfo> getInputMethodListAsUser(@UserIdInt int userId) {
                     return Collections.emptyList();
                 }
 
                 @Override
-                public List<InputMethodInfo> getEnabledInputMethodListAsUser(int userId) {
+                public List<InputMethodInfo> getEnabledInputMethodListAsUser(
+                        @UserIdInt int userId) {
                     return Collections.emptyList();
                 }
 
                 @Override
-                public void onCreateInlineSuggestionsRequest(int userId,
+                public void onCreateInlineSuggestionsRequest(@UserIdInt int userId,
                         InlineSuggestionsRequestInfo requestInfo,
                         IInlineSuggestionsRequestCallback cb) {
                 }
 
                 @Override
-                public boolean switchToInputMethod(String imeId, int userId) {
+                public boolean switchToInputMethod(String imeId, @UserIdInt int userId) {
+                    return false;
+                }
+
+                @Override
+                public boolean setInputMethodEnabled(String imeId, boolean enabled,
+                        @UserIdInt int userId) {
                     return false;
                 }
 
@@ -188,6 +236,19 @@ public abstract class InputMethodManagerInternal {
 
                 @Override
                 public void updateImeWindowStatus(boolean disableImeIcon) {
+                }
+
+                @Override
+                public void onSessionForAccessibilityCreated(int accessibilityConnectionId,
+                        IInputMethodSession session) {
+                }
+
+                @Override
+                public void unbindAccessibilityFromCurrentClient(int accessibilityConnectionId) {
+                }
+
+                @Override
+                public void maybeFinishStylusHandwriting() {
                 }
             };
 

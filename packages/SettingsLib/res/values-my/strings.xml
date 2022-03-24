@@ -21,7 +21,34 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="wifi_fail_to_scan" msgid="2333336097603822490">"ကွန်ယက်များကို စကင်မလုပ်နိုင်ပါ"</string>
+    <string name="wifi_security_short_wep" msgid="7939809393561636237">"WEP"</string>
+    <string name="wifi_security_short_wpa" msgid="6998160832497442533">"WPA"</string>
+    <string name="wifi_security_short_wpa2" msgid="7697856994856831026">"WPA2"</string>
+    <string name="wifi_security_short_wpa_wpa2" msgid="2399839645955520093">"WPA/WPA2"</string>
+    <string name="wifi_security_short_eap" msgid="5029688687205212985">"802.1x"</string>
+    <string name="wifi_security_short_eap_wpa" msgid="8510772177310043426">"WPA-EAP"</string>
+    <string name="wifi_security_short_eap_wpa2_wpa3" msgid="6455656470422244501">"RSN-EAP"</string>
+    <string name="wifi_security_short_sae" msgid="78353562671556266">"WPA3"</string>
+    <string name="wifi_security_short_psk_sae" msgid="4965830739185952958">"WPA2/WPA3"</string>
+    <string name="wifi_security_short_none_owe" msgid="8827409046261759703">"မရှိ/OWE"</string>
+    <string name="wifi_security_short_owe" msgid="5073524307942025369">"OWE"</string>
+    <string name="wifi_security_short_eap_suiteb" msgid="4174071135081556115">"Suite-B-192"</string>
     <string name="wifi_security_none" msgid="7392696451280611452">"မရှိ"</string>
+    <string name="wifi_security_wep" msgid="1413627788581122366">"WEP"</string>
+    <string name="wifi_security_wpa" msgid="1072450904799930636">"WPA-Personal"</string>
+    <string name="wifi_security_wpa2" msgid="4038267581230425543">"WPA2-Personal"</string>
+    <string name="wifi_security_wpa_wpa2" msgid="946853615482465986">"WPA/WPA2-Personal"</string>
+    <string name="wifi_security_eap" msgid="6179633834446852269">"WPA/WPA2/WPA3-Enterprise"</string>
+    <string name="wifi_security_eap_wpa" msgid="6189023812330549957">"WPA-Enterprise"</string>
+    <string name="wifi_security_eap_wpa_wpa2" msgid="1089879674896108216">"WPA/WPA2-Enterprise"</string>
+    <string name="wifi_security_eap_wpa2_wpa3" msgid="2952912020876252266">"WPA2/WPA3-Enterprise"</string>
+    <string name="wifi_security_eap_wpa3" msgid="7961135182909018796">"WPA3-Enterprise"</string>
+    <string name="wifi_security_passpoint" msgid="2209078477216565387">"ဖြတ်သန်းခွင့်ပြုမှတ်"</string>
+    <string name="wifi_security_sae" msgid="3644520541721422843">"WPA3-Personal"</string>
+    <string name="wifi_security_psk_sae" msgid="8135104122179904684">"WPA2/WPA3-Personal"</string>
+    <string name="wifi_security_none_owe" msgid="5241745828327404101">"မရှိ/Enhanced Open"</string>
+    <string name="wifi_security_owe" msgid="3343421403561657809">"Enhanced Open"</string>
+    <string name="wifi_security_eap_suiteb" msgid="415842785991698142">"WPA3-Enterprise 192-bit"</string>
     <string name="wifi_remembered" msgid="3266709779723179188">"သိမ်းဆည်းပြီး"</string>
     <string name="wifi_disconnected" msgid="7054450256284661757">"ချိတ်ဆက်မထားပါ"</string>
     <string name="wifi_disabled_generic" msgid="2651916945380294607">"ပိတ်ထားသည်"</string>
@@ -95,7 +122,9 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD အသံ- <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD အသံ"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"နားကြားကိရိယာ"</string>
+    <string name="bluetooth_profile_le_audio" msgid="5158149987518342036">"LE_AUDIO"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"နားကြားကိရိယာနှင့် ချိတ်ဆက်ပြီးပါပြီ"</string>
+    <string name="bluetooth_le_audio_profile_summary_connected" msgid="3162538609379333442">"LE_AUDIO နှင့် ချိတ်ဆက်ထားသည်"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"မီဒီယာအသံအား ချိတ်ဆက်ရန်"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"ဖုန်းအသံအား ချိတ်ဆက်ရန်"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"ဖိုင်လွှဲပြောင်းမည့်ဆာဗာနှင့် ချိတ်ဆက်ထားပြီး"</string>
@@ -113,6 +142,7 @@
     <string name="bluetooth_opp_profile_summary_use_for" msgid="461981154387015457">"ဖိုင်လွဲပြောင်းရန်အတွက်အသုံးပြုရန်"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="4289460627406490952">"ထည့်သွင်းရန်အသုံးပြုသည်"</string>
     <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="7689393730163320483">"နားကြားကိရိယာအတွက် အသုံးပြုသည်"</string>
+    <string name="bluetooth_le_audio_profile_summary_use_for" msgid="2778318636027348572">"LE_AUDIO အတွက် သုံးသည်"</string>
     <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"တွဲချိတ်ရန်"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"တွဲချိတ်ရန်"</string>
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"မလုပ်တော့"</string>
@@ -252,7 +282,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"ကြိုးမဲ့ပြသမှု အသိအမှတ်ပြုလက်မှတ်"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Wi‑Fi Verbose မှတ်တမ်းတင်ခြင်းအား ဖွင့်မည်"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Wi‑Fi ရှာဖွေခြင်း ထိန်းချုပ်မှု"</string>
-    <string name="wifi_enhanced_mac_randomization" msgid="882650208573834301">"Wi‑Fi ပြောင်းလဲသော MAC ကျပန်းပြုလုပ်ခြင်း"</string>
+    <string name="wifi_non_persistent_mac_randomization" msgid="7482769677894247316">"Wi‑Fi ပြောင်းလဲသော MAC ကျပန်းပြုလုပ်ခြင်း"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"မိုဘိုင်းဒေတာကို အမြဲဖွင့်ထားရန်"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"ဖုန်းကို မိုဒမ်အဖြစ်အသုံးပြုမှု စက်ပစ္စည်းဖြင့် အရှိန်မြှင့်တင်ခြင်း"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"အမည်မရှိသော ဘလူးတုသ်စက်ပစ္စည်းများကို ပြသရန်"</string>
@@ -284,7 +314,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"ကြိုးမဲ့ အခင်းအကျင်း အသိအမှတ်ပြုလက်မှတ်အတွက် ရွေးချယ်စရာများပြရန်"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Wi‑Fi မှတ်တမ်းတင်ခြင်း နှုန်းအားမြင့်ကာ၊ Wi‑Fi ရွေးရာတွင် SSID RSSI ဖြင့်ပြပါ"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"ဘက်ထရီ အသုံးပြုမှုကို လျှော့ကျစေပြီး ကွန်ရက်စွမ်းဆောင်ရည်ကို ပိုမိုကောင်းမွန်စေသည်"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"ဤမုဒ်ကို ဖွင့်ထားသည့်အခါ MAC ကျပန်းပြုလုပ်ထားသည့် ကွန်ရက်သို့ ချိတ်ဆက်လိုက်သည့်အခါတိုင်း ဤစက်၏ MAC လိပ်စာ ပြောင်းသွားပါမည်။"</string>
+    <string name="wifi_non_persistent_mac_randomization_summary" msgid="2159794543105053930">"ဤမုဒ်ကို ဖွင့်ထားသည့်အခါ MAC ကျပန်းပြုလုပ်ထားသည့် ကွန်ရက်သို့ ချိတ်ဆက်လိုက်သည့်အခါတိုင်း ဤစက်၏ MAC လိပ်စာ ပြောင်းသွားနိုင်သည်။"</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"အခမဲ့ မဟုတ်ပါ"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"အခမဲ့"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"မှတ်တမ်းကြားခံနယ် အရွယ်အစားများ"</string>
@@ -426,7 +456,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomaly (အနီ-အစိမ်း)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomaly (အပြာ-အဝါ)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"အရောင်ပြင်ဆင်မှု"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="2333641630205214702">"သင့်စက်ပစ္စည်းတွင် အရောင်များပြသပုံကို ချိန်ညှိပါ။ ၎င်းက အောက်ပါတို့တွင် အသုံးဝင်နိုင်သည်-&lt;br/&gt;&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;အရောင်များကို ပိုမိုတိကျစွာ မြင်လိုခြင်း&lt;/li&gt; &lt;li&gt;&amp;nbsp;သင်အာရုံစိုက်နိုင်ရန် အရောင်များကို ဖယ်ရှားခြင်း&lt;/li&gt; &lt;/ol&gt;"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"အရောင် အမှန်ပြင်ခြင်းသည် အောက်ပါတို့အတွက် အသုံးဝင်နိုင်သည်-&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;အရောင်များကို ပိုမိုမှန်ကန်စွာ ကြည့်ရှုခြင်း&lt;/li&gt; &lt;li&gt;နှင့်nbsp;အာရုံစိုက်နိုင်ရန် အရောင်များ ဖယ်ရှားခြင်း&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> မှ ကျော်၍ လုပ်ထားသည်။"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> ခန့် ကျန်သည်"</string>
@@ -463,7 +493,9 @@
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"အားသွင်းမနေပါ"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"ချိတ်ဆက်ထားသည်၊ အားသွင်းမနေပါ"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"အားသွင်းပြီးပါပြီ"</string>
+    <string name="battery_info_status_full_charged" msgid="3536054261505567948">"အားအပြည့်သွင်းထားသည်"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"စီမံခန့်ခွဲသူမှ ထိန်းချုပ်ပါသည်"</string>
+    <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"ကန့်သတ်ထားသော ဆက်တင်များဖြင့် ထိန်းချုပ်ထားသည်"</string>
     <string name="disabled" msgid="8017887509554714950">"ပိတ်ထားပြီး"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"ခွင့်ပြုထားသည်"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"ခွင့်မပြုပါ"</string>
@@ -496,14 +528,13 @@
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"မှတ်ပုံတင်မထားပါ"</string>
     <string name="status_unavailable" msgid="5279036186589861608">"မရရှိနိုင်ပါ။"</string>
     <string name="wifi_status_mac_randomized" msgid="466382542497832189">"MAC ကို ကျပန်းပေးထားသည်"</string>
-    <plurals name="wifi_tether_connected_summary" formatted="false" msgid="6317236306047306139">
-      <item quantity="other">စက် %1$d ခု ချိတ်ဆက်ထားသည်</item>
-      <item quantity="one">စက် %1$d ခု ချိတ်ဆက်ထားသည်</item>
-    </plurals>
+    <string name="wifi_tether_connected_summary" msgid="5282919920463340158">"{count,plural, =0{စက်တစ်ခုမျှ ချိတ်ဆက်မထားပါ}=1{စက် 1 ခု ချိတ်ဆက်ထားသည်}other{စက် # ခု ချိတ်ဆက်ထားသည်}}"</string>
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"အချိန်တိုးရန်။"</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"အချိန်လျှော့ရန်။"</string>
     <string name="cancel" msgid="5665114069455378395">"မလုပ်တော့"</string>
     <string name="okay" msgid="949938843324579502">"OK"</string>
+    <!-- no translation found for done (381184316122520313) -->
+    <skip />
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"နှိုးစက်နှင့် သတိပေးချက်များ"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"နှိုးစက်နှင့် သတိပေးချက်များ သတ်မှတ်ခွင့်ပြုရန်"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"နှိုးစက်နှင့် သတိပေးချက်များ"</string>
@@ -522,7 +553,9 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"အမြဲမေးရန်"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"သင်ပိတ်လိုက်သည် အထိ"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"ယခုလေးတင်"</string>
-    <string name="media_transfer_this_device_name" msgid="2716555073132169240">"ဖုန်းစပီကာ"</string>
+    <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"ဤဖုန်း"</string>
+    <!-- no translation found for media_transfer_this_device_name (3714653244000242800) -->
+    <skip />
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"ဤဖုန်း"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"ချိတ်ဆက်ရာတွင် ပြဿနာရှိပါသည်။ စက်ကိုပိတ်ပြီး ပြန်ဖွင့်ပါ"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"ကြိုးတပ် အသံစက်ပစ္စည်း"</string>
@@ -562,7 +595,9 @@
     <string name="user_set_lock_button" msgid="1427128184982594856">"သော့ချရန် သတ်မှတ်ပါ"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"<xliff:g id="USER_NAME">%s</xliff:g> သို့ ပြောင်းရန်"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"အသုံးပြုသူအသစ် ပြုလုပ်နေသည်…"</string>
+    <string name="creating_new_guest_dialog_message" msgid="1114905602181350690">"ဧည့်သည်သစ် ပြုလုပ်နေသည်…"</string>
     <string name="add_user_failed" msgid="4809887794313944872">"အသုံးပြုသူအသစ် ပြုလုပ်၍မရပါ"</string>
+    <string name="add_guest_failed" msgid="8074548434469843443">"ဧည့်သည်သစ် ပြုလုပ်၍မရပါ"</string>
     <string name="user_nickname" msgid="262624187455825083">"နာမည်ပြောင်"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"ဧည့်သည့် ထည့်ရန်"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"ဧည့်သည်ကို ဖယ်ထုတ်ရန်"</string>
@@ -608,4 +643,14 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"Ethernet နှင့်ချိတ်ဆက်မှုပြတ်တောက်"</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"အီသာနက်။"</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"ခေါ်ဆိုမှု မရှိပါ။"</string>
+    <string name="dream_complication_title_time" msgid="701747800712893499">"အချိန်"</string>
+    <string name="dream_complication_title_date" msgid="8661176085446135789">"ရက်စွဲ"</string>
+    <string name="dream_complication_title_weather" msgid="598609151677172783">"မိုးလေဝသ"</string>
+    <string name="dream_complication_title_aqi" msgid="4587552608957834110">"လေထုအရည်အသွေး"</string>
+    <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"ကာစ် အချက်အလက်"</string>
+    <string name="avatar_picker_title" msgid="8492884172713170652">"ပရိုဖိုင်ပုံ ရွေးပါ"</string>
+    <string name="default_user_icon_description" msgid="6554047177298972638">"မူရင်းအသုံးပြုသူ သင်္ကေတ"</string>
+    <string name="physical_keyboard_title" msgid="4811935435315835220">"ပကတိ ကီးဘုတ်"</string>
+    <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"လက်ကွက်အပြင်အဆင်ရွေးချယ်ခြင်း"</string>
+    <string name="keyboard_layout_default_label" msgid="1997292217218546957">"မူရင်း"</string>
 </resources>

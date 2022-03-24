@@ -157,6 +157,7 @@ int32_t StreamManager::queueForPlay(const std::shared_ptr<Sound> &sound,
             __func__, sound.get(), soundID, leftVolume, rightVolume, priority, loop, rate);
     bool launchThread = false;
     int32_t streamID = 0;
+    std::vector<std::any> garbage;
 
     { // for lock
         std::unique_lock lock(mStreamManagerLock);
@@ -243,7 +244,7 @@ int32_t StreamManager::queueForPlay(const std::shared_ptr<Sound> &sound,
             removeFromQueues_l(newStream);
             mProcessingStreams.emplace(newStream);
             lock.unlock();
-            if (Stream* nextStream = newStream->playPairStream()) {
+            if (Stream* nextStream = newStream->playPairStream(garbage)) {
                 lock.lock();
                 ALOGV("%s: starting streamID:%d", __func__, nextStream->getStreamID());
                 addToActiveQueue_l(nextStream);
@@ -266,6 +267,7 @@ int32_t StreamManager::queueForPlay(const std::shared_ptr<Sound> &sound,
         ALOGV_IF(id != 0, "%s: launched thread %d", __func__, id);
     }
     ALOGV("%s: returning %d", __func__, streamID);
+    // garbage is cleared here outside mStreamManagerLock.
     return streamID;
 }
 
@@ -359,6 +361,7 @@ void StreamManager::run(int32_t id)
 {
     ALOGV("%s(%d) entering", __func__, id);
     int64_t waitTimeNs = 0;  // on thread start, mRestartStreams can be non-empty.
+    std::vector<std::any> garbage; // used for garbage collection
     std::unique_lock lock(mStreamManagerLock);
     while (!mQuit) {
         if (waitTimeNs > 0) {
@@ -388,7 +391,7 @@ void StreamManager::run(int32_t id)
             if (!mLockStreamManagerStop) lock.unlock();
             stream->stop();
             ALOGV("%s(%d) stopping streamID:%d", __func__, id, stream->getStreamID());
-            if (Stream* nextStream = stream->playPairStream()) {
+            if (Stream* nextStream = stream->playPairStream(garbage)) {
                 ALOGV("%s(%d) starting streamID:%d", __func__, id, nextStream->getStreamID());
                 if (!mLockStreamManagerStop) lock.lock();
                 if (nextStream->getStopTimeNs() > 0) {
@@ -405,6 +408,12 @@ void StreamManager::run(int32_t id)
             }
             mProcessingStreams.erase(stream);
             sanityCheckQueue_l();
+            if (!garbage.empty()) {
+                lock.unlock();
+                // garbage audio tracks (etc) are cleared here outside mStreamManagerLock.
+                garbage.clear();
+                lock.lock();
+            }
         }
     }
     ALOGV("%s(%d) exiting", __func__, id);

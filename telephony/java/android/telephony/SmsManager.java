@@ -22,6 +22,7 @@ import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresFeature;
 import android.annotation.RequiresPermission;
 import android.annotation.SuppressAutoDoc;
 import android.annotation.SystemApi;
@@ -32,6 +33,7 @@ import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledAfter;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.database.CursorWindow;
 import android.net.Uri;
 import android.os.Build;
@@ -75,6 +77,7 @@ import java.util.concurrent.Executor;
  *
  * @see SubscriptionManager#getActiveSubscriptionInfoList()
  */
+@RequiresFeature(PackageManager.FEATURE_TELEPHONY_MESSAGING)
 public final class SmsManager {
     private static final String TAG = "SmsManager";
 
@@ -771,37 +774,6 @@ public final class SmsManager {
                 notifySmsError(sentIntent, RESULT_REMOTE_EXCEPTION);
             }
         }
-    }
-
-    /**
-     * Send a text based SMS without writing it into the SMS Provider.
-     *
-     * <p>Requires Permission:
-     * {@link android.Manifest.permission#MODIFY_PHONE_STATE} or the calling app has carrier
-     * privileges.
-     * </p>
-     *
-     * <p class="note"><strong>Note:</strong> This method is intended for internal use by carrier
-     * applications or the Telephony framework and will never trigger an SMS disambiguation
-     * dialog. If this method is called on a device that has multiple active subscriptions, this
-     * {@link SmsManager} instance has been created with {@link #getDefault()}, and no user-defined
-     * default subscription is defined, the subscription ID associated with this message will be
-     * INVALID, which will result in the SMS being sent on the subscription associated with logical
-     * slot 0. Use {@link #getSmsManagerForSubscriptionId(int)} to ensure the SMS is sent on the
-     * correct subscription.
-     * </p>
-     *
-     * @see #sendTextMessage(String, String, String, PendingIntent,
-     * PendingIntent, int, boolean, int)
-     * @hide
-     */
-    @UnsupportedAppUsage
-    public void sendTextMessageWithoutPersisting(
-            String destinationAddress, String scAddress, String text,
-            PendingIntent sentIntent, PendingIntent deliveryIntent, int priority,
-            boolean expectMore, int validityPeriod) {
-        sendTextMessageInternal(destinationAddress, scAddress, text, sentIntent, deliveryIntent,
-                false /* persistMessage */, priority, expectMore, validityPeriod);
     }
 
     /**
@@ -2576,6 +2548,11 @@ public final class SmsManager {
      */
     public static final int RESULT_RIL_BLOCKED_DUE_TO_CALL = 123;
 
+    /**
+     * A RIL error occurred during the SMS send.
+     */
+    public static final int RESULT_RIL_GENERIC_ERROR = 124;
+
     // SMS receiving results sent as a "result" extra in {@link Intents.SMS_REJECTED_ACTION}
 
     /**
@@ -2633,6 +2610,19 @@ public final class SmsManager {
      *  sending the message.
      * @param sentIntent if not NULL this <code>PendingIntent</code> is
      *  broadcast when the message is successfully sent, or failed
+     * The result code will be <code>Activity.RESULT_OK</code> for success
+     * or one of these errors:<br>
+     * <code>MMS_ERROR_UNSPECIFIED</code><br>
+     * <code>MMS_ERROR_INVALID_APN</code><br>
+     * <code>MMS_ERROR_UNABLE_CONNECT_MMS</code><br>
+     * <code>MMS_ERROR_HTTP_FAILURE</code><br>
+     * <code>MMS_ERROR_IO_ERROR</code><br>
+     * <code>MMS_ERROR_RETRY</code><br>
+     * <code>MMS_ERROR_CONFIGURATION_ERROR</code><br>
+     * <code>MMS_ERROR_NO_DATA_NETWORK</code><br>
+     * <code>MMS_ERROR_INVALID_SUBSCRIPTION_ID</code><br>
+     * <code>MMS_ERROR_INACTIVE_SUBSCRIPTION</code><br>
+     * <code>MMS_ERROR_DATA_DISABLED</code><br>
      * @throws IllegalArgumentException if contentUri is empty
      */
     public void sendMultimediaMessage(Context context, Uri contentUri, String locationUrl,
@@ -2661,12 +2651,26 @@ public final class SmsManager {
      *  sending the message.
      * @param sentIntent if not NULL this <code>PendingIntent</code> is
      *  broadcast when the message is successfully sent, or failed
+     * The result code will be <code>Activity.RESULT_OK</code> for success
+     * or one of these errors:<br>
+     * <code>MMS_ERROR_UNSPECIFIED</code><br>
+     * <code>MMS_ERROR_INVALID_APN</code><br>
+     * <code>MMS_ERROR_UNABLE_CONNECT_MMS</code><br>
+     * <code>MMS_ERROR_HTTP_FAILURE</code><br>
+     * <code>MMS_ERROR_IO_ERROR</code><br>
+     * <code>MMS_ERROR_RETRY</code><br>
+     * <code>MMS_ERROR_CONFIGURATION_ERROR</code><br>
+     * <code>MMS_ERROR_NO_DATA_NETWORK</code><br>
+     * <code>MMS_ERROR_INVALID_SUBSCRIPTION_ID</code><br>
+     * <code>MMS_ERROR_INACTIVE_SUBSCRIPTION</code><br>
+     * <code>MMS_ERROR_DATA_DISABLED</code><br>
      * @param messageId an id that uniquely identifies the message requested to be sent.
      * Used for logging and diagnostics purposes. The id may be 0.
      * @throws IllegalArgumentException if contentUri is empty
      */
     public void sendMultimediaMessage(@NonNull Context context, @NonNull Uri contentUri,
-            @Nullable String locationUrl, @Nullable Bundle configOverrides,
+            @Nullable String locationUrl,
+            @SuppressWarnings("NullableCollection") @Nullable Bundle configOverrides,
             @Nullable PendingIntent sentIntent, long messageId) {
         if (contentUri == null) {
             throw new IllegalArgumentException("Uri contentUri null");
@@ -2707,6 +2711,19 @@ public final class SmsManager {
      *  downloading the message.
      * @param downloadedIntent if not NULL this <code>PendingIntent</code> is
      *  broadcast when the message is downloaded, or the download is failed
+     * The result code will be <code>Activity.RESULT_OK</code> for success
+     * or one of these errors:<br>
+     * <code>MMS_ERROR_UNSPECIFIED</code><br>
+     * <code>MMS_ERROR_INVALID_APN</code><br>
+     * <code>MMS_ERROR_UNABLE_CONNECT_MMS</code><br>
+     * <code>MMS_ERROR_HTTP_FAILURE</code><br>
+     * <code>MMS_ERROR_IO_ERROR</code><br>
+     * <code>MMS_ERROR_RETRY</code><br>
+     * <code>MMS_ERROR_CONFIGURATION_ERROR</code><br>
+     * <code>MMS_ERROR_NO_DATA_NETWORK</code><br>
+     * <code>MMS_ERROR_INVALID_SUBSCRIPTION_ID</code><br>
+     * <code>MMS_ERROR_INACTIVE_SUBSCRIPTION</code><br>
+     * <code>MMS_ERROR_DATA_DISABLED</code><br>
      * @throws IllegalArgumentException if locationUrl or contentUri is empty
      */
     public void downloadMultimediaMessage(Context context, String locationUrl, Uri contentUri,
@@ -2737,12 +2754,26 @@ public final class SmsManager {
      *  downloading the message.
      * @param downloadedIntent if not NULL this <code>PendingIntent</code> is
      *  broadcast when the message is downloaded, or the download is failed
+     * The result code will be <code>Activity.RESULT_OK</code> for success
+     * or one of these errors:<br>
+     * <code>MMS_ERROR_UNSPECIFIED</code><br>
+     * <code>MMS_ERROR_INVALID_APN</code><br>
+     * <code>MMS_ERROR_UNABLE_CONNECT_MMS</code><br>
+     * <code>MMS_ERROR_HTTP_FAILURE</code><br>
+     * <code>MMS_ERROR_IO_ERROR</code><br>
+     * <code>MMS_ERROR_RETRY</code><br>
+     * <code>MMS_ERROR_CONFIGURATION_ERROR</code><br>
+     * <code>MMS_ERROR_NO_DATA_NETWORK</code><br>
+     * <code>MMS_ERROR_INVALID_SUBSCRIPTION_ID</code><br>
+     * <code>MMS_ERROR_INACTIVE_SUBSCRIPTION</code><br>
+     * <code>MMS_ERROR_DATA_DISABLED</code><br>
      * @param messageId an id that uniquely identifies the message requested to be downloaded.
      * Used for logging and diagnostics purposes. The id may be 0.
      * @throws IllegalArgumentException if locationUrl or contentUri is empty
      */
     public void downloadMultimediaMessage(@NonNull Context context, @NonNull String locationUrl,
-            @NonNull Uri contentUri, @Nullable Bundle configOverrides,
+            @NonNull Uri contentUri,
+            @SuppressWarnings("NullableCollection") @Nullable Bundle configOverrides,
             @Nullable PendingIntent downloadedIntent, long messageId) {
         if (TextUtils.isEmpty(locationUrl)) {
             throw new IllegalArgumentException("Empty MMS location URL");
@@ -2768,14 +2799,61 @@ public final class SmsManager {
     }
 
     // MMS send/download failure result codes
+
+    /**
+     * Unspecific MMS error occurred during send/download.
+     */
     public static final int MMS_ERROR_UNSPECIFIED = 1;
+
+    /**
+     * ApnException occurred during MMS network setup.
+     */
     public static final int MMS_ERROR_INVALID_APN = 2;
+
+    /**
+     * An error occurred during the MMS connection setup.
+     */
     public static final int MMS_ERROR_UNABLE_CONNECT_MMS = 3;
+
+    /**
+     * An error occurred during the HTTP client setup.
+     */
     public static final int MMS_ERROR_HTTP_FAILURE = 4;
+
+    /**
+     * An I/O error occurred reading the PDU.
+     */
     public static final int MMS_ERROR_IO_ERROR = 5;
+
+    /**
+     * An error occurred while retrying sending/downloading the MMS.
+     */
     public static final int MMS_ERROR_RETRY = 6;
+
+    /**
+     * The carrier-dependent configuration values could not be loaded.
+     */
     public static final int MMS_ERROR_CONFIGURATION_ERROR = 7;
+
+    /**
+     * There is no data network.
+     */
     public static final int MMS_ERROR_NO_DATA_NETWORK = 8;
+
+    /**
+     * The subscription id for the send/download is invalid.
+     */
+    public static final int MMS_ERROR_INVALID_SUBSCRIPTION_ID = 9;
+
+    /**
+     * The subscription id for the send/download is inactive.
+     */
+    public static final int MMS_ERROR_INACTIVE_SUBSCRIPTION = 10;
+
+    /**
+     * Data is disabled for the MMS APN.
+     */
+    public static final int MMS_ERROR_DATA_DISABLED = 11;
 
     /** Intent extra name for MMS sending result data in byte array type */
     public static final String EXTRA_MMS_DATA = "android.telephony.extra.MMS_DATA";

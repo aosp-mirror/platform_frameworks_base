@@ -52,9 +52,9 @@ public final class BuildCompatUtils {
         }
 
         return (VERSION.CODENAME.equals("REL") && VERSION.SDK_INT >= 31)
-                || (VERSION.CODENAME.length() == 1
-                && VERSION.CODENAME.compareTo("S") >= 0
-                && VERSION.CODENAME.compareTo("Z") <= 0);
+                || (VERSION.CODENAME.length() >= 1
+                && VERSION.CODENAME.toUpperCase().charAt(0) >= 'S'
+                && VERSION.CODENAME.toUpperCase().charAt(0) <= 'Z');
     }
 
     private BuildCompatUtils() {}

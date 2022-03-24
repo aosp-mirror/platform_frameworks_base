@@ -33,6 +33,9 @@ import android.text.TextUtils;
 
 import com.android.internal.annotations.GuardedBy;
 
+import java.io.PrintWriter;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Objects;
 import java.util.function.Supplier;
 
@@ -81,14 +84,23 @@ public class NtpTrustedTime implements TrustedTime {
 
         /** Calculates and returns the age of this result. */
         public long getAgeMillis() {
-            return SystemClock.elapsedRealtime() - mElapsedRealtimeMillis;
+            return getAgeMillis(SystemClock.elapsedRealtime());
+        }
+
+        /**
+         * Calculates and returns the age of this result relative to currentElapsedRealtimeMillis.
+         *
+         * @param currentElapsedRealtimeMillis - reference elapsed real time
+         */
+        public long getAgeMillis(long currentElapsedRealtimeMillis) {
+            return currentElapsedRealtimeMillis - mElapsedRealtimeMillis;
         }
 
         @Override
         public String toString() {
             return "TimeResult{"
-                    + "mTimeMillis=" + mTimeMillis
-                    + ", mElapsedRealtimeMillis=" + mElapsedRealtimeMillis
+                    + "mTimeMillis=" + Instant.ofEpochMilli(mTimeMillis)
+                    + ", mElapsedRealtimeMillis=" + Duration.ofMillis(mElapsedRealtimeMillis)
                     + ", mCertaintyMillis=" + mCertaintyMillis
                     + '}';
         }
@@ -122,6 +134,18 @@ public class NtpTrustedTime implements TrustedTime {
         }
     };
 
+    /** An in-memory config override for use during tests. */
+    @Nullable
+    private String mHostnameForTests;
+
+    /** An in-memory config override for use during tests. */
+    @Nullable
+    private Integer mPortForTests;
+
+    /** An in-memory config override for use during tests. */
+    @Nullable
+    private Duration mTimeoutForTests;
+
     // Declared volatile and accessed outside of synchronized blocks to avoid blocking reads during
     // forceRefresh().
     private volatile TimeResult mTimeResult;
@@ -139,12 +163,25 @@ public class NtpTrustedTime implements TrustedTime {
         return sSingleton;
     }
 
+    /**
+     * Overrides the NTP server config for tests. Passing {@code null} to a parameter clears the
+     * test value, i.e. so the normal value will be used next time.
+     */
+    public void setServerConfigForTests(
+            @Nullable String hostname, @Nullable Integer port, @Nullable Duration timeout) {
+        synchronized (this) {
+            mHostnameForTests = hostname;
+            mPortForTests = port;
+            mTimeoutForTests = timeout;
+        }
+    }
+
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public boolean forceRefresh() {
         synchronized (this) {
             NtpConnectionInfo connectionInfo = getNtpConnectionInfo();
             if (connectionInfo == null) {
-                // missing server config, so no trusted time available
+                // missing server config, so no NTP time available
                 if (LOGD) Log.d(TAG, "forceRefresh: invalid server config");
                 return false;
             }
@@ -164,8 +201,9 @@ public class NtpTrustedTime implements TrustedTime {
             if (LOGD) Log.d(TAG, "forceRefresh() from cache miss");
             final SntpClient client = new SntpClient();
             final String serverName = connectionInfo.getServer();
+            final int port = connectionInfo.getPort();
             final int timeoutMillis = connectionInfo.getTimeoutMillis();
-            if (client.requestTime(serverName, timeoutMillis, network)) {
+            if (client.requestTime(serverName, port, timeoutMillis, network)) {
                 long ntpCertainty = client.getRoundTripTime() / 2;
                 mTimeResult = new TimeResult(
                         client.getNtpTime(), client.getNtpTimeReference(), ntpCertainty);
@@ -256,13 +294,22 @@ public class NtpTrustedTime implements TrustedTime {
         return mTimeResult;
     }
 
+    /** Clears the last received NTP. Intended for use during tests. */
+    public void clearCachedTimeResult() {
+        synchronized (this) {
+            mTimeResult = null;
+        }
+    }
+
     private static class NtpConnectionInfo {
 
         @NonNull private final String mServer;
+        private final int mPort;
         private final int mTimeoutMillis;
 
-        NtpConnectionInfo(@NonNull String server, int timeoutMillis) {
+        NtpConnectionInfo(@NonNull String server, int port, int timeoutMillis) {
             mServer = Objects.requireNonNull(server);
+            mPort = port;
             mTimeoutMillis = timeoutMillis;
         }
 
@@ -271,8 +318,22 @@ public class NtpTrustedTime implements TrustedTime {
             return mServer;
         }
 
+        @NonNull
+        public int getPort() {
+            return mPort;
+        }
+
         int getTimeoutMillis() {
             return mTimeoutMillis;
+        }
+
+        @Override
+        public String toString() {
+            return "NtpConnectionInfo{"
+                    + "mServer='" + mServer + '\''
+                    + ", mPort='" + mPort + '\''
+                    + ", mTimeoutMillis=" + mTimeoutMillis
+                    + '}';
         }
     }
 
@@ -281,17 +342,49 @@ public class NtpTrustedTime implements TrustedTime {
         final ContentResolver resolver = mContext.getContentResolver();
 
         final Resources res = mContext.getResources();
-        final String defaultServer = res.getString(
-                com.android.internal.R.string.config_ntpServer);
-        final int defaultTimeoutMillis = res.getInteger(
-                com.android.internal.R.integer.config_ntpTimeout);
 
-        final String secureServer = Settings.Global.getString(
-                resolver, Settings.Global.NTP_SERVER);
-        final int timeoutMillis = Settings.Global.getInt(
-                resolver, Settings.Global.NTP_TIMEOUT, defaultTimeoutMillis);
+        final String hostname;
+        if (mHostnameForTests != null) {
+            hostname = mHostnameForTests;
+        } else {
+            String serverGlobalSetting =
+                    Settings.Global.getString(resolver, Settings.Global.NTP_SERVER);
+            if (serverGlobalSetting != null) {
+                hostname = serverGlobalSetting;
+            } else {
+                hostname = res.getString(com.android.internal.R.string.config_ntpServer);
+            }
+        }
 
-        final String server = secureServer != null ? secureServer : defaultServer;
-        return TextUtils.isEmpty(server) ? null : new NtpConnectionInfo(server, timeoutMillis);
+        final Integer port;
+        if (mPortForTests != null) {
+            port = mPortForTests;
+        } else {
+            port = SntpClient.STANDARD_NTP_PORT;
+        }
+
+        final int timeoutMillis;
+        if (mTimeoutForTests != null) {
+            timeoutMillis = (int) mTimeoutForTests.toMillis();
+        } else {
+            int defaultTimeoutMillis =
+                    res.getInteger(com.android.internal.R.integer.config_ntpTimeout);
+            timeoutMillis = Settings.Global.getInt(
+                    resolver, Settings.Global.NTP_TIMEOUT, defaultTimeoutMillis);
+        }
+        return TextUtils.isEmpty(hostname) ? null :
+            new NtpConnectionInfo(hostname, port, timeoutMillis);
+    }
+
+    /** Prints debug information. */
+    public void dump(PrintWriter pw) {
+        synchronized (this) {
+            pw.println("getNtpConnectionInfo()=" + getNtpConnectionInfo());
+            pw.println("mTimeResult=" + mTimeResult);
+            if (mTimeResult != null) {
+                pw.println("mTimeResult.getAgeMillis()="
+                        + Duration.ofMillis(mTimeResult.getAgeMillis()));
+            }
+        }
     }
 }

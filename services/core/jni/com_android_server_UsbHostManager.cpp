@@ -23,15 +23,12 @@
 #include "android_runtime/Log.h"
 
 #include <stdio.h>
-#include <asm/byteorder.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
 
 #include <usbhost/usbhost.h>
-
-#define MAX_DESCRIPTORS_LENGTH 4096
 
 namespace android
 {

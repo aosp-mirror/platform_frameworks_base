@@ -1,20 +1,15 @@
 package com.android.keyguard
 
 import android.annotation.CurrentTimeMillisLong
-import android.hardware.biometrics.BiometricAuthenticator.Modality
-import android.hardware.biometrics.BiometricAuthenticator.TYPE_FACE
-import android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRINT
 
 /** Verbose logging for various keyguard listening states. */
 sealed class KeyguardListenModel {
     /** Timestamp of the state change. */
     abstract val timeMillis: Long
-    /** Current user */
+    /** Current user. */
     abstract val userId: Int
-    /** If keyguard is listening for the given [modality]. */
+    /** If keyguard is listening for the modality represented by this model. */
     abstract val listening: Boolean
-    /** Sensor type */
-    @Modality abstract val modality: Int
 }
 
 /**
@@ -43,12 +38,8 @@ data class KeyguardFingerprintListenModel(
     val shouldListenForFingerprintAssistant: Boolean,
     val switchingUser: Boolean,
     val udfps: Boolean,
-    val userDoesNotHaveTrust: Boolean,
-    val userNeedsStrongAuth: Boolean
-) : KeyguardListenModel() {
-    override val modality: Int = TYPE_FACE
-}
-
+    val userDoesNotHaveTrust: Boolean
+) : KeyguardListenModel()
 /**
  * Verbose debug information associated with [KeyguardUpdateMonitor.shouldListenForFace].
  */
@@ -72,6 +63,20 @@ data class KeyguardFaceListenModel(
     val scanningAllowedByStrongAuth: Boolean,
     val secureCameraLaunched: Boolean,
     val switchingUser: Boolean
-) : KeyguardListenModel() {
-    override val modality: Int = TYPE_FINGERPRINT
-}
+) : KeyguardListenModel()
+/**
+ * Verbose debug information associated with [KeyguardUpdateMonitor.shouldTriggerActiveUnlock].
+ */
+data class KeyguardActiveUnlockModel(
+    @CurrentTimeMillisLong override val timeMillis: Long,
+    override val userId: Int,
+    override val listening: Boolean,
+    // keep sorted
+    val authInterruptActive: Boolean,
+    val encryptedOrTimedOut: Boolean,
+    val fpLockout: Boolean,
+    val lockDown: Boolean,
+    val switchingUser: Boolean,
+    val triggerActiveUnlockForAssistant: Boolean,
+    val userCanDismissLockScreen: Boolean
+) : KeyguardListenModel()

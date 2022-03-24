@@ -22,6 +22,8 @@ import java.util.Map;
 
 parcelable CompatibilityChangeConfig;
 parcelable CompatibilityOverrideConfig;
+parcelable CompatibilityOverridesByPackageConfig;
+parcelable CompatibilityOverridesToRemoveByPackageConfig;
 parcelable CompatibilityOverridesToRemoveConfig;
 parcelable CompatibilityChangeInfo;
 /**
@@ -152,6 +154,26 @@ interface IPlatformCompat {
     void setOverrides(in CompatibilityChangeConfig overrides, in String packageName);
 
     /**
+     * Adds overrides to compatibility changes on release builds for multiple apps.
+     *
+     * <p>The caller to this API needs to hold
+     * {@code android.permission.OVERRIDE_COMPAT_CHANGE_CONFIG_ON_RELEASE_BUILD} and all change ids
+     * in {@code overridesByPackage} need to annotated with {@link
+     * android.compat.annotation.Overridable}.
+     *
+     * A release build in this definition means that {@link android.os.Build#IS_DEBUGGABLE} needs to
+     * be {@code false}.
+     *
+     * <p>Note that this does not kill the app, and therefore overrides read from the app process
+     * will not be updated. Overrides read from the system process do take effect.
+     *
+     * @param overridesByPackage parcelable containing the compat change overrides to be applied
+     *                           on specific apps by their package name
+     * @throws SecurityException if overriding changes is not permitted
+     */
+    void putAllOverridesOnReleaseBuilds(in CompatibilityOverridesByPackageConfig overridesByPackage);
+
+    /**
      * Adds overrides to compatibility changes on release builds.
      *
      * <p>The caller to this API needs to hold
@@ -204,6 +226,26 @@ interface IPlatformCompat {
      * @throws SecurityException if overriding changes is not permitted
      */
     boolean clearOverrideForTest(long changeId, String packageName);
+
+    /**
+     * Restores the default behaviour for compatibility changes on release builds for multiple apps.
+     *
+     * <p>The caller to this API needs to hold
+     * {@code android.permission.OVERRIDE_COMPAT_CHANGE_CONFIG_ON_RELEASE_BUILD} and all change ids
+     * in {@code overridesToRemoveByPackage} need to annotated with {@link
+     * android.compat.annotation.Overridable}.
+     *
+     * A release build in this definition means that {@link android.os.Build#IS_DEBUGGABLE} needs to
+     * be {@code false}.
+     *
+     * <p>Note that this does not kill the app, and therefore overrides read from the app process
+     * will not be updated. Overrides read from the system process do take effect.
+     *
+     * @param overridesToRemoveByPackage parcelable containing the compat change overrides to be
+     *                                   removed for specific apps by their package name
+     * @throws SecurityException if overriding changes is not permitted
+     */
+    void removeAllOverridesOnReleaseBuilds(in CompatibilityOverridesToRemoveByPackageConfig overridesToRemoveByPackage);
 
     /**
      * Restores the default behaviour for compatibility changes on release builds.

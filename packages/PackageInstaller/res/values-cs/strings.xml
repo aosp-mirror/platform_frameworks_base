@@ -56,6 +56,7 @@
     <string name="uninstall_application_text" msgid="3816830743706143980">"Chcete tuto aplikaci odinstalovat?"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"Chcete tuto aplikaci odinstalovat "<b>"všem"</b>" uživatelům? Aplikace a její údaje budou odstraněny "<b>"všem"</b>" uživatelům tohoto zařízení."</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"Chcete tuto aplikaci pro uživatele <xliff:g id="USERNAME">%1$s</xliff:g> odinstalovat?"</string>
+    <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"Chcete tuto aplikaci odinstalovat ze svého pracovního profilu?"</string>
     <string name="uninstall_update_text" msgid="863648314632448705">"Chcete tuto aplikaci nahradit tovární verzí? Všechna data budou odstraněna."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"Chcete tuto aplikaci nahradit tovární verzí? Všechna data budou odstraněna. Tato akce ovlivní všechny uživatele zařízení, včetně uživatelů s pracovním profilem."</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"Ponechat data aplikace o velikosti <xliff:g id="SIZE">%1$s</xliff:g>."</string>

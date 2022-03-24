@@ -22,13 +22,14 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import com.android.settingslib.Utils
 import com.android.systemui.R
+import com.android.systemui.statusbar.events.BackgroundAnimatableView
 
 class OngoingPrivacyChip @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttrs: Int = 0,
     defStyleRes: Int = 0
-) : FrameLayout(context, attrs, defStyleAttrs, defStyleRes) {
+) : FrameLayout(context, attrs, defStyleAttrs, defStyleRes), BackgroundAnimatableView {
 
     private var iconMargin = 0
     private var iconSize = 0
@@ -48,6 +49,16 @@ class OngoingPrivacyChip @JvmOverloads constructor(
         iconsContainer = requireViewById(R.id.icons_container)
 
         updateResources()
+    }
+
+    /**
+     * When animating as a chip in the status bar, we want to animate the width for the container
+     * of the privacy items. We have to subtract our own top and left offset because the bounds
+     * come to us as absolute on-screen bounds, and `iconsContainer` is laid out relative to the
+     * frame layout's bounds.
+     */
+    override fun setBoundsForAnimation(l: Int, t: Int, r: Int, b: Int) {
+        iconsContainer.setLeftTopRightBottom(l - left, t - top, r - left, b - top)
     }
 
     // Should only be called if the builder icons or app changed

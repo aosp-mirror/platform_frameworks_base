@@ -28,6 +28,7 @@ import android.os.Bundle;
 import android.os.RemoteException;
 import android.speech.IRecognitionListener;
 import android.speech.IRecognitionService;
+import android.speech.IRecognitionSupportCallback;
 import android.speech.RecognitionService;
 import android.speech.SpeechRecognizer;
 import android.util.Log;
@@ -211,6 +212,30 @@ final class RemoteSpeechRecognitionService extends ServiceConnector.Impl<IRecogn
         }
     }
 
+    void checkRecognitionSupport(
+            Intent recognizerIntent,
+            IRecognitionSupportCallback callback) {
+
+        if (!mConnected) {
+            try {
+                callback.onError(SpeechRecognizer.ERROR_SERVER_DISCONNECTED);
+            } catch (RemoteException e) {
+                Slog.w(TAG, "Failed to report the connection broke to the caller.", e);
+                e.printStackTrace();
+            }
+            return;
+        }
+        run(service -> service.checkRecognitionSupport(recognizerIntent, callback));
+    }
+
+    void triggerModelDownload(Intent recognizerIntent) {
+        if (!mConnected) {
+            Slog.e(TAG, "#downloadModel failed due to connection.");
+            return;
+        }
+        run(service -> service.triggerModelDownload(recognizerIntent));
+    }
+
     void shutdown() {
         synchronized (mLock) {
             if (this.mListener == null) {
@@ -337,6 +362,20 @@ final class RemoteSpeechRecognitionService extends ServiceConnector.Impl<IRecogn
         @Override
         public void onPartialResults(Bundle results) throws RemoteException {
             mRemoteListener.onPartialResults(results);
+        }
+
+        @Override
+        public void onSegmentResults(Bundle results) throws RemoteException {
+            mRemoteListener.onSegmentResults(results);
+        }
+
+        @Override
+        public void onEndOfSegmentedSession() throws RemoteException {
+            if (DEBUG) {
+                Slog.i(TAG, "#onEndOfSegmentedSession invoked for a recognition session");
+            }
+            mOnSessionComplete.run();
+            mRemoteListener.onEndOfSegmentedSession();
         }
 
         @Override

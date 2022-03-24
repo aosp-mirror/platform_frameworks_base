@@ -50,6 +50,10 @@ interface IInputManager {
     // Reports whether the hardware supports the given keys; returns true if successful
     boolean hasKeys(int deviceId, int sourceMask, in int[] keyCodes, out boolean[] keyExists);
 
+    // Returns the keyCode produced when pressing the key at the specified location, given the
+    // active keyboard layout.
+    int getKeyCodeForKeyLocation(int deviceId, in int locationKeyCode);
+
     // Temporarily changes the pointer speed.
     void tryPointerSpeed(int speed);
 
@@ -108,7 +112,7 @@ interface IInputManager {
     oneway void requestPointerCapture(IBinder inputChannelToken, boolean enabled);
 
     /** Create an input monitor for gestures. */
-    InputMonitor monitorGestureInput(String name, int displayId);
+    InputMonitor monitorGestureInput(IBinder token, String name, int displayId);
 
     // Add a runtime association between the input port and the display port. This overrides any
     // static associations.
@@ -118,9 +122,9 @@ interface IInputManager {
     void removePortAssociation(in String inputPort);
 
     // Add a runtime association between the input device and display.
-    void addUniqueIdAssociation(in String inputDeviceName, in String displayUniqueId);
+    void addUniqueIdAssociation(in String inputPort, in String displayUniqueId);
     // Remove the runtime association between the input device and display.
-    void removeUniqueIdAssociation(in String inputDeviceName);
+    void removeUniqueIdAssociation(in String inputPort);
 
     InputSensorInfo[] getSensorList(int deviceId);
 
@@ -144,4 +148,6 @@ interface IInputManager {
     void openLightSession(int deviceId, String opPkg, in IBinder token);
 
     void closeLightSession(int deviceId, in IBinder token);
+
+    void cancelCurrentTouch();
 }

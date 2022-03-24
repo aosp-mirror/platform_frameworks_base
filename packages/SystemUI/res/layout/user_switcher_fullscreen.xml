@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     Copyright (C) 2022 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
+    android:id="@+id/user_switcher_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_marginVertical="40dp"
+    android:layout_marginHorizontal="60dp">
+
+  <androidx.constraintlayout.helper.widget.Flow
+      android:id="@+id/flow"
+      android:layout_width="0dp"
+      android:layout_height="wrap_content"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintTop_toTopOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:flow_horizontalBias="0.5"
+      app:flow_verticalAlign="center"
+      app:flow_wrapMode="chain"
+      app:flow_horizontalGap="@dimen/user_switcher_fullscreen_horizontal_gap"
+      app:flow_verticalGap="44dp"
+      app:flow_horizontalStyle="packed"/>
+
+  <TextView
+      android:id="@+id/cancel"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_gravity="center"
+      android:gravity="center"
+      app:layout_constraintHeight_min="48dp"
+      app:layout_constraintEnd_toStartOf="@+id/add"
+      app:layout_constraintBottom_toBottomOf="parent"
+      android:paddingHorizontal="@dimen/user_switcher_fullscreen_button_padding"
+      android:textSize="@dimen/user_switcher_fullscreen_button_text_size"
+      android:textColor="?androidprv:attr/colorAccentPrimary"
+      android:text="@string/cancel" />
+
+  <TextView
+      android:id="@+id/add"
+      style="@style/Widget.Dialog.Button.BorderButton"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_gravity="center"
+      android:gravity="center"
+      android:paddingHorizontal="@dimen/user_switcher_fullscreen_button_padding"
+      android:text="@string/add"
+      android:textColor="?androidprv:attr/colorAccentPrimary"
+      android:textSize="@dimen/user_switcher_fullscreen_button_text_size"
+      android:visibility="gone"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintHeight_min="48dp" />
+</androidx.constraintlayout.widget.ConstraintLayout>

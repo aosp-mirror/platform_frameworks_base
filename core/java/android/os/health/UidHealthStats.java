@@ -43,14 +43,14 @@ public final class UidHealthStats {
 
     /**
      * How many milliseconds this statistics report covers in wall-clock time while the
-     * device was on battery including both screen-on and screen-off time.
+     * device was on battery including only screen-off time.
      */
     @HealthKeys.Constant(type=HealthKeys.TYPE_MEASUREMENT)
     public static final int MEASUREMENT_REALTIME_SCREEN_OFF_BATTERY_MS = HealthKeys.BASE_UID + 3;
 
     /**
      * How many milliseconds this statistics report covers that the CPU was running while the
-     * device was on battery including both screen-on and screen-off time.
+     * device was on battery including only screen-off time.
      */
     @HealthKeys.Constant(type=HealthKeys.TYPE_MEASUREMENT)
     public static final int MEASUREMENT_UPTIME_SCREEN_OFF_BATTERY_MS = HealthKeys.BASE_UID + 4;
@@ -65,7 +65,7 @@ public final class UidHealthStats {
 
     /**
      * Key for a TimerStat for the times a
-     * {@link android.os.PowerManager#PARTIAL_WAKE_LOCK full wake lock}
+     * {@link android.os.PowerManager#PARTIAL_WAKE_LOCK partial wake lock}
      * was acquired for this uid.
      */
     @HealthKeys.Constant(type=HealthKeys.TYPE_TIMERS)

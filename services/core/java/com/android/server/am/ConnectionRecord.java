@@ -18,9 +18,12 @@ package com.android.server.am;
 
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 
+import android.annotation.Nullable;
 import android.app.IServiceConnection;
 import android.app.PendingIntent;
+import android.content.ComponentName;
 import android.content.Context;
+import android.os.SystemClock;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 import android.util.proto.ProtoUtils;
@@ -48,6 +51,12 @@ final class ConnectionRecord {
     String stringName;              // Caching of toString.
     boolean serviceDead;            // Well is it?
     private Object mProcStatsLock;  // Internal lock for accessing AssociationState
+    /**
+     * If the connection was made against an alias, then the alias conponent name. Otherwise, null.
+     * We return this component name to the client.
+     */
+    @Nullable
+    final ComponentName aliasComponent;
 
     // Please keep the following two enum list synced.
     private static final int[] BIND_ORIG_ENUMS = new int[] {
@@ -102,7 +111,8 @@ final class ConnectionRecord {
             ActivityServiceConnectionsHolder<ConnectionRecord> _activity,
             IServiceConnection _conn, int _flags,
             int _clientLabel, PendingIntent _clientIntent,
-            int _clientUid, String _clientProcessName, String _clientPackageName) {
+            int _clientUid, String _clientProcessName, String _clientPackageName,
+            ComponentName _aliasComponent) {
         binding = _binding;
         activity = _activity;
         conn = _conn;
@@ -112,6 +122,7 @@ final class ConnectionRecord {
         clientUid = _clientUid;
         clientProcessName = _clientProcessName;
         clientPackageName = _clientPackageName;
+        aliasComponent = _aliasComponent;
     }
 
     public boolean hasFlag(final int flag) {
@@ -148,10 +159,10 @@ final class ConnectionRecord {
         }
     }
 
-    public void trackProcState(int procState, int seq, long now) {
+    public void trackProcState(int procState, int seq) {
         if (association != null) {
             synchronized (mProcStatsLock) {
-                association.trackProcState(procState, seq, now);
+                association.trackProcState(procState, seq, SystemClock.uptimeMillis());
             }
         }
     }

@@ -396,8 +396,9 @@ public class QuickContactBadge extends ImageView implements OnClickListener {
                 // Prompt user to add this person to contacts
                 final Intent intent = new Intent(Intents.SHOW_OR_CREATE_CONTACT, createUri);
                 if (extras != null) {
-                    extras.remove(EXTRA_URI_CONTENT);
-                    intent.putExtras(extras);
+                    Bundle bundle = new Bundle(extras);
+                    bundle.remove(EXTRA_URI_CONTENT);
+                    intent.putExtras(bundle);
                 }
                 getContext().startActivity(intent);
             }

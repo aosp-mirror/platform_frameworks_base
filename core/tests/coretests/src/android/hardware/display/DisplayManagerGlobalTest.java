@@ -32,6 +32,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -119,6 +120,46 @@ public class DisplayManagerGlobalTest {
         callback.onDisplayEvent(displayId, DisplayManagerGlobal.EVENT_DISPLAY_REMOVED);
         waitForHandler();
         Mockito.verifyZeroInteractions(mListener);
+    }
+
+    @Test
+    public void testDisplayManagerGlobalRegistersWithDisplayManager_WhenThereAreNoOtherListeners()
+            throws RemoteException {
+        mDisplayManagerGlobal.registerNativeChoreographerForRefreshRateCallbacks();
+        Mockito.verify(mDisplayManager)
+                .registerCallbackWithEventMask(mCallbackCaptor.capture(), eq(ALL_DISPLAY_EVENTS));
+
+        mDisplayManagerGlobal.unregisterNativeChoreographerForRefreshRateCallbacks();
+        Mockito.verify(mDisplayManager)
+                .registerCallbackWithEventMask(mCallbackCaptor.capture(), eq(0L));
+
+    }
+
+    @Test
+    public void testDisplayManagerGlobalRegistersWithDisplayManager_WhenThereAreListeners()
+            throws RemoteException {
+        mDisplayManagerGlobal.registerDisplayListener(mListener, mHandler,
+                DisplayManager.EVENT_FLAG_DISPLAY_BRIGHTNESS);
+        InOrder inOrder = Mockito.inOrder(mDisplayManager);
+
+        inOrder.verify(mDisplayManager)
+                .registerCallbackWithEventMask(mCallbackCaptor.capture(),
+                        eq(DisplayManager.EVENT_FLAG_DISPLAY_BRIGHTNESS));
+
+        mDisplayManagerGlobal.registerNativeChoreographerForRefreshRateCallbacks();
+        inOrder.verify(mDisplayManager)
+                .registerCallbackWithEventMask(mCallbackCaptor.capture(),
+                        eq(ALL_DISPLAY_EVENTS | DisplayManager.EVENT_FLAG_DISPLAY_BRIGHTNESS));
+
+        mDisplayManagerGlobal.unregisterNativeChoreographerForRefreshRateCallbacks();
+        inOrder.verify(mDisplayManager)
+                .registerCallbackWithEventMask(mCallbackCaptor.capture(),
+                        eq(DisplayManager.EVENT_FLAG_DISPLAY_BRIGHTNESS));
+
+        mDisplayManagerGlobal.unregisterDisplayListener(mListener);
+        inOrder.verify(mDisplayManager)
+                .registerCallbackWithEventMask(mCallbackCaptor.capture(), eq(0L));
+
     }
 
     private void waitForHandler() {

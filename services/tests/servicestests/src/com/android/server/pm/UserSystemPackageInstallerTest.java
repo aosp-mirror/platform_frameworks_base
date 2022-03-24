@@ -43,6 +43,7 @@ import android.content.pm.UserInfo;
 import android.os.Looper;
 import android.os.SystemProperties;
 import android.os.UserManager;
+import android.platform.test.annotations.Postsubmit;
 import android.support.test.uiautomator.UiDevice;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -76,6 +77,7 @@ import java.util.Set;
  * atest com.android.server.pm.UserSystemPackageInstallerTest
  * </pre>
  */
+@Postsubmit
 @RunWith(AndroidJUnit4.class)
 @MediumTest
 public class UserSystemPackageInstallerTest {

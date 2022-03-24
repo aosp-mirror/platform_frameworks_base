@@ -26,11 +26,13 @@ import android.app.IWallpaperManager;
 import android.app.KeyguardManager;
 import android.app.NotificationManager;
 import android.app.StatsManager;
+import android.app.UiModeManager;
 import android.app.WallpaperManager;
 import android.app.admin.DevicePolicyManager;
 import android.app.role.RoleManager;
 import android.app.smartspace.SmartspaceManager;
 import android.app.trust.TrustManager;
+import android.content.ClipboardManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.om.OverlayManager;
@@ -41,6 +43,7 @@ import android.content.pm.ShortcutManager;
 import android.content.res.Resources;
 import android.hardware.SensorManager;
 import android.hardware.SensorPrivacyManager;
+import android.hardware.devicestate.DeviceStateManager;
 import android.hardware.display.ColorDisplayManager;
 import android.hardware.display.DisplayManager;
 import android.hardware.face.FaceManager;
@@ -69,10 +72,12 @@ import android.view.ViewConfiguration;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityManager;
+import android.view.accessibility.CaptioningManager;
 import android.view.inputmethod.InputMethodManager;
 
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.appwidget.IAppWidgetService;
+import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.LatencyTracker;
 import com.android.systemui.dagger.qualifiers.DisplayId;
@@ -117,6 +122,12 @@ public class FrameworkServicesModule {
 
     @Provides
     @Singleton
+    static CaptioningManager provideCaptioningManager(Context context) {
+        return context.getSystemService(CaptioningManager.class);
+    }
+
+    @Provides
+    @Singleton
     static ColorDisplayManager provideColorDisplayManager(Context context) {
         return context.getSystemService(ColorDisplayManager.class);
     }
@@ -155,6 +166,12 @@ public class FrameworkServicesModule {
     @Singleton
     static DisplayManager provideDisplayManager(Context context) {
         return context.getSystemService(DisplayManager.class);
+    }
+
+    @Provides
+    @Singleton
+    static DeviceStateManager provideDeviceStateManager(Context context) {
+        return context.getSystemService(DeviceStateManager.class);
     }
 
     @Provides
@@ -209,6 +226,12 @@ public class FrameworkServicesModule {
     @Nullable
     static FingerprintManager providesFingerprintManager(Context context) {
         return context.getSystemService(FingerprintManager.class);
+    }
+
+    @Provides
+    @Singleton
+    static InteractionJankMonitor provideInteractionJankMonitor() {
+        return InteractionJankMonitor.getInstance();
     }
 
     @Provides
@@ -309,6 +332,13 @@ public class FrameworkServicesModule {
         return context.getSystemService(PowerManager.class);
     }
 
+    /** */
+    @Provides
+    @Singleton
+    static UiModeManager provideUiModeManager(Context context) {
+        return context.getSystemService(UiModeManager.class);
+    }
+
     @Provides
     @Main
     static Resources provideResources(Context context) {
@@ -356,6 +386,12 @@ public class FrameworkServicesModule {
     @Nullable
     static TelecomManager provideTelecomManager(Context context) {
         return context.getSystemService(TelecomManager.class);
+    }
+
+    @Provides
+    @Singleton
+    static Optional<TelecomManager> provideOptionalTelecomManager(Context context) {
+        return Optional.ofNullable(context.getSystemService(TelecomManager.class));
     }
 
     @Provides
@@ -422,7 +458,17 @@ public class FrameworkServicesModule {
     @Provides
     @Singleton
     static PermissionManager providePermissionManager(Context context) {
-        return context.getSystemService(PermissionManager.class);
+        PermissionManager pm = context.getSystemService(PermissionManager.class);
+        if (pm != null) {
+            pm.initializeUsageHelper();
+        }
+        return pm;
+    }
+
+    @Provides
+    @Singleton
+    static ClipboardManager provideClipboardManager(Context context) {
+        return context.getSystemService(ClipboardManager.class);
     }
 
     @Provides

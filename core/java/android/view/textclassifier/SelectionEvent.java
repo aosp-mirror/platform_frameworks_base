@@ -172,7 +172,7 @@ public final class SelectionEvent implements Parcelable {
         mEnd = in.readInt();
         mSmartStart = in.readInt();
         mSmartEnd = in.readInt();
-        mSystemTcMetadata = in.readParcelable(null);
+        mSystemTcMetadata = in.readParcelable(null, android.view.textclassifier.SystemTextClassifierMetadata.class);
     }
 
     @Override

@@ -18,7 +18,7 @@ package android.media.tv.tuner.frontend;
 
 import android.annotation.IntDef;
 import android.annotation.SystemApi;
-import android.hardware.tv.tuner.V1_0.Constants;
+import android.hardware.tv.tuner.FrontendEventType;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -37,11 +37,11 @@ public interface OnTuneEventListener {
     @interface TuneEvent {}
 
     /** The frontend has locked to the signal specified by the tune method. */
-    int SIGNAL_LOCKED = Constants.FrontendEventType.LOCKED;
+    int SIGNAL_LOCKED = FrontendEventType.LOCKED;
     /** The frontend is unable to lock to the signal specified by the tune method. */
-    int SIGNAL_NO_SIGNAL = Constants.FrontendEventType.NO_SIGNAL;
+    int SIGNAL_NO_SIGNAL = FrontendEventType.NO_SIGNAL;
     /** The frontend has lost the lock to the signal specified by the tune method. */
-    int SIGNAL_LOST_LOCK = Constants.FrontendEventType.LOST_LOCK;
+    int SIGNAL_LOST_LOCK = FrontendEventType.LOST_LOCK;
 
     /** Tune Event from the frontend */
     void onTuneEvent(@TuneEvent int tuneEvent);

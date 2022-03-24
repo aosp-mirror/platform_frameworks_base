@@ -18,6 +18,7 @@ android_test {
         "java/**/*.kt",
     ],
     platform_apis: true,
+    defaults: ["framework-connectivity-test-defaults"],
     test_suites: ["device-tests"],
     certificate: "platform",
     static_libs: [
@@ -28,6 +29,7 @@ android_test {
         "net-tests-utils",
         "platform-test-annotations",
         "services.core",
+        "service-connectivity-tiramisu-pre-jarjar",
     ],
     libs: [
         "android.test.runner",

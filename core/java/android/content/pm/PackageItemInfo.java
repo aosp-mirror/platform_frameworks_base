@@ -207,7 +207,9 @@ public class PackageItemInfo {
             return loadSafeLabel(pm, DEFAULT_MAX_LABEL_SIZE_PX, SAFE_STRING_FLAG_TRIM
                     | SAFE_STRING_FLAG_FIRST_LINE);
         } else {
-            return loadUnsafeLabel(pm);
+            // Trims the label string to the MAX_SAFE_LABEL_LENGTH. This is to prevent that the
+            // system is overwhelmed by an enormous string returned by the application.
+            return TextUtils.trimToSize(loadUnsafeLabel(pm), MAX_SAFE_LABEL_LENGTH);
         }
     }
 

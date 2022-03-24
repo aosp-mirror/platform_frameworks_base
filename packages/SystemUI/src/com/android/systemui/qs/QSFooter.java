@@ -35,11 +35,6 @@ public interface QSFooter {
     void setExpanded(boolean expanded);
 
     /**
-     * Returns the full height of the footer.
-     */
-    int getHeight();
-
-    /**
      * Sets the percentage amount that the quick settings has been expanded.
      *
      * @param expansion A value from 1 to 0 that indicates how much the quick settings have been
@@ -47,11 +42,6 @@ public interface QSFooter {
      */
     void setExpansion(float expansion);
 
-    /**
-     * Sets whether or not this footer should set itself to listen for changes in any callbacks
-     * that it has implemented.
-     */
-    void setListening(boolean listening);
 
     /**
      * Sets whether or not the keyguard is currently being shown.

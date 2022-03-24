@@ -18,6 +18,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="prompt" msgid="3183836924226407828">"Барање за поврзување"</string>
     <string name="warning" msgid="809658604548412033">"<xliff:g id="APP">%s</xliff:g> сака да постави поврзување со ВПН коешто му дозволува да го набљудува сообраќајот на мрежата. Прифатете само доколку му верувате на изворот. &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; се појавува на врвот на екранот кога ВПН е активна."</string>
+    <string name="warning" product="tv" msgid="5188957997628124947">"<xliff:g id="APP">%s</xliff:g> сака да постави поврзување со VPN што ќе дозволи да го набљудува сообраќајот на мрежата. Прифатете само ако му верувате на изворот. &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; ќе се појави на екранот кога ќе се активира VPN."</string>
     <string name="legacy_title" msgid="192936250066580964">"VPN е поврзана"</string>
     <string name="session" msgid="6470628549473641030">"Сесија:"</string>
     <string name="duration" msgid="3584782459928719435">"Времетраење:"</string>
@@ -30,7 +31,7 @@
     <string name="always_on_disconnected_message_separator" msgid="3310614409322581371">" "</string>
     <string name="always_on_disconnected_message_settings_link" msgid="6172280302829992412">"Променете ги поставките за VPN"</string>
     <string name="configure" msgid="4905518375574791375">"Конфигурирај"</string>
-    <string name="disconnect" msgid="971412338304200056">"Исклучи"</string>
+    <string name="disconnect" msgid="971412338304200056">"Прекини врска"</string>
     <string name="open_app" msgid="3717639178595958667">"Отвори ја апликацијата"</string>
     <string name="dismiss" msgid="6192859333764711227">"Отфрли"</string>
 </resources>

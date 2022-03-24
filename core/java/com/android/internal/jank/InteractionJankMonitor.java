@@ -16,13 +16,10 @@
 
 package com.android.internal.jank;
 
-import static android.content.Intent.FLAG_RECEIVER_REGISTERED_ONLY;
-
-import static com.android.internal.jank.FrameTracker.ChoreographerWrapper;
 import static com.android.internal.jank.FrameTracker.REASON_CANCEL_NORMAL;
-import static com.android.internal.jank.FrameTracker.REASON_CANCEL_NOT_BEGUN;
+import static com.android.internal.jank.FrameTracker.REASON_CANCEL_TIMEOUT;
 import static com.android.internal.jank.FrameTracker.REASON_END_NORMAL;
-import static com.android.internal.jank.FrameTracker.SurfaceControlWrapper;
+import static com.android.internal.jank.FrameTracker.REASON_END_UNKNOWN;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_ALL_APPS_SCROLL;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_APP_CLOSE_TO_HOME;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_APP_CLOSE_TO_PIP;
@@ -41,6 +38,11 @@ import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_IN
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LOCKSCREEN_TRANSITION_TO_AOD;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LOCKSCREEN_UNLOCK_ANIMATION;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__NOTIFICATION_SHADE_SWIPE;
+import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__ONE_HANDED_ENTER_TRANSITION;
+import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__ONE_HANDED_EXIT_TRANSITION;
+import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__PIP_TRANSITION;
+import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SCREEN_OFF;
+import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SCREEN_OFF_SHOW_AOD;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SETTINGS_PAGE_SCROLL;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_APP_LAUNCH;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_APP_LAUNCH_FROM_HISTORY_BUTTON;
@@ -57,26 +59,37 @@ import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_IN
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_ROW_EXPAND;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_ROW_SWIPE;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_SCROLL_FLING;
+import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SPLASHSCREEN_AVD;
+import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SPLASHSCREEN_EXIT_ANIM;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__STATUS_BAR_APP_LAUNCH_FROM_CALL_CHIP;
+import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SUW_LOADING_SCREEN_FOR_STATUS;
+import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SUW_LOADING_TO_NEXT_FLOW;
+import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SUW_LOADING_TO_SHOW_INFO_WITH_ACTIONS;
+import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SUW_SHOW_FUNCTION_SCREEN_WITH_ACTIONS;
+import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__UNFOLD_ANIM;
+import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__USER_SWITCH;
+import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__WALLPAPER_TRANSITION;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Build;
 import android.os.HandlerExecutor;
 import android.os.HandlerThread;
-import android.os.SystemProperties;
 import android.provider.DeviceConfig;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.Choreographer;
+import android.view.SurfaceControl;
 import android.view.View;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.jank.FrameTracker.ChoreographerWrapper;
 import com.android.internal.jank.FrameTracker.FrameMetricsWrapper;
 import com.android.internal.jank.FrameTracker.FrameTrackerListener;
+import com.android.internal.jank.FrameTracker.Reasons;
+import com.android.internal.jank.FrameTracker.SurfaceControlWrapper;
 import com.android.internal.jank.FrameTracker.ThreadedRendererWrapper;
 import com.android.internal.jank.FrameTracker.ViewRootWrapper;
 import com.android.internal.util.PerfettoTrigger;
@@ -118,14 +131,8 @@ public class InteractionJankMonitor {
     private static final int DEFAULT_TRACE_THRESHOLD_MISSED_FRAMES = 3;
     private static final int DEFAULT_TRACE_THRESHOLD_FRAME_TIME_MILLIS = 64;
 
-    public static final String ACTION_SESSION_BEGIN = ACTION_PREFIX + ".ACTION_SESSION_BEGIN";
     public static final String ACTION_SESSION_END = ACTION_PREFIX + ".ACTION_SESSION_END";
     public static final String ACTION_SESSION_CANCEL = ACTION_PREFIX + ".ACTION_SESSION_CANCEL";
-    public static final String ACTION_METRICS_LOGGED = ACTION_PREFIX + ".ACTION_METRICS_LOGGED";
-    public static final String BUNDLE_KEY_CUJ_NAME = ACTION_PREFIX + ".CUJ_NAME";
-    public static final String BUNDLE_KEY_TIMESTAMP = ACTION_PREFIX + ".TIMESTAMP";
-    @VisibleForTesting
-    public static final String PROP_NOTIFY_CUJ_EVENT = "debug.jank.notify_cuj_events";
 
     // Every value must have a corresponding entry in CUJ_STATSD_INTERACTION_TYPE.
     public static final int CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE = 0;
@@ -163,6 +170,20 @@ public class InteractionJankMonitor {
     public static final int CUJ_SHADE_APP_LAUNCH_FROM_QS_TILE = 32;
     public static final int CUJ_SHADE_APP_LAUNCH_FROM_SETTINGS_BUTTON = 33;
     public static final int CUJ_STATUS_BAR_APP_LAUNCH_FROM_CALL_CHIP = 34;
+    public static final int CUJ_PIP_TRANSITION = 35;
+    public static final int CUJ_WALLPAPER_TRANSITION = 36;
+    public static final int CUJ_USER_SWITCH = 37;
+    public static final int CUJ_SPLASHSCREEN_AVD = 38;
+    public static final int CUJ_SPLASHSCREEN_EXIT_ANIM = 39;
+    public static final int CUJ_SCREEN_OFF = 40;
+    public static final int CUJ_SCREEN_OFF_SHOW_AOD = 41;
+    public static final int CUJ_ONE_HANDED_ENTER_TRANSITION = 42;
+    public static final int CUJ_ONE_HANDED_EXIT_TRANSITION = 43;
+    public static final int CUJ_UNFOLD_ANIM = 44;
+    public static final int CUJ_SUW_LOADING_TO_SHOW_INFO_WITH_ACTIONS = 45;
+    public static final int CUJ_SUW_SHOW_FUNCTION_SCREEN_WITH_ACTIONS = 46;
+    public static final int CUJ_SUW_LOADING_TO_NEXT_FLOW = 47;
+    public static final int CUJ_SUW_LOADING_SCREEN_FOR_STATUS = 48;
 
     private static final int NO_STATSD_LOGGING = -1;
 
@@ -206,6 +227,20 @@ public class InteractionJankMonitor {
             UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_APP_LAUNCH_FROM_QS_TILE,
             UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_APP_LAUNCH_FROM_SETTINGS_BUTTON,
             UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__STATUS_BAR_APP_LAUNCH_FROM_CALL_CHIP,
+            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__PIP_TRANSITION,
+            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__WALLPAPER_TRANSITION,
+            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__USER_SWITCH,
+            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SPLASHSCREEN_AVD,
+            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SPLASHSCREEN_EXIT_ANIM,
+            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SCREEN_OFF,
+            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SCREEN_OFF_SHOW_AOD,
+            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__ONE_HANDED_ENTER_TRANSITION,
+            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__ONE_HANDED_EXIT_TRANSITION,
+            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__UNFOLD_ANIM,
+            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SUW_LOADING_TO_SHOW_INFO_WITH_ACTIONS,
+            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SUW_SHOW_FUNCTION_SCREEN_WITH_ACTIONS,
+            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SUW_LOADING_TO_NEXT_FLOW,
+            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SUW_LOADING_SCREEN_FOR_STATUS,
     };
 
     private static volatile InteractionJankMonitor sInstance;
@@ -213,10 +248,11 @@ public class InteractionJankMonitor {
     private final DeviceConfig.OnPropertiesChangedListener mPropertiesChangedListener =
             this::updateProperties;
 
-    private FrameMetricsWrapper mMetrics;
-    private SparseArray<FrameTracker> mRunningTrackers;
-    private SparseArray<Runnable> mTimeoutActions;
-    private HandlerThread mWorker;
+    private final FrameMetricsWrapper mMetrics;
+    private final SparseArray<FrameTracker> mRunningTrackers;
+    private final SparseArray<Runnable> mTimeoutActions;
+    private final HandlerThread mWorker;
+    private final Object mLock = new Object();
 
     private boolean mEnabled = DEFAULT_ENABLED;
     private int mSamplingInterval = DEFAULT_SAMPLING_INTERVAL;
@@ -260,6 +296,20 @@ public class InteractionJankMonitor {
             CUJ_SHADE_APP_LAUNCH_FROM_QS_TILE,
             CUJ_SHADE_APP_LAUNCH_FROM_SETTINGS_BUTTON,
             CUJ_STATUS_BAR_APP_LAUNCH_FROM_CALL_CHIP,
+            CUJ_PIP_TRANSITION,
+            CUJ_WALLPAPER_TRANSITION,
+            CUJ_USER_SWITCH,
+            CUJ_SPLASHSCREEN_AVD,
+            CUJ_SPLASHSCREEN_EXIT_ANIM,
+            CUJ_SCREEN_OFF,
+            CUJ_SCREEN_OFF_SHOW_AOD,
+            CUJ_ONE_HANDED_ENTER_TRANSITION,
+            CUJ_ONE_HANDED_EXIT_TRANSITION,
+            CUJ_UNFOLD_ANIM,
+            CUJ_SUW_LOADING_TO_SHOW_INFO_WITH_ACTIONS,
+            CUJ_SUW_SHOW_FUNCTION_SCREEN_WITH_ACTIONS,
+            CUJ_SUW_LOADING_TO_NEXT_FLOW,
+            CUJ_SUW_LOADING_SCREEN_FOR_STATUS
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface CujType {
@@ -309,39 +359,44 @@ public class InteractionJankMonitor {
                 mPropertiesChangedListener);
     }
 
+    Object getLock() {
+        return mLock;
+    }
+
     /**
-     * Create a {@link FrameTracker} instance.
+     * Creates a {@link FrameTracker} instance.
      *
+     * @param config the config used in instrumenting
      * @param session the session associates with this tracker
      * @return instance of the FrameTracker
      */
     @VisibleForTesting
-    public FrameTracker createFrameTracker(Configuration conf, Session session) {
-        final View v = conf.mView;
-        final Context c = v.getContext().getApplicationContext();
-        final ThreadedRendererWrapper r = new ThreadedRendererWrapper(v.getThreadedRenderer());
-        final ViewRootWrapper vr = new ViewRootWrapper(v.getViewRootImpl());
-        final SurfaceControlWrapper sc = new SurfaceControlWrapper();
-        final ChoreographerWrapper cg = new ChoreographerWrapper(Choreographer.getInstance());
+    public FrameTracker createFrameTracker(Configuration config, Session session) {
+        final View view = config.mView;
+        final ThreadedRendererWrapper threadedRenderer =
+                view == null ? null : new ThreadedRendererWrapper(view.getThreadedRenderer());
+        final ViewRootWrapper viewRoot =
+                view == null ? null : new ViewRootWrapper(view.getViewRootImpl());
 
-        synchronized (this) {
-            FrameTrackerListener eventsListener = (s, act) -> handleCujEvents(c, act, s);
-            return new FrameTracker(session, mWorker.getThreadHandler(), r, vr, sc, cg, mMetrics,
-                    mTraceThresholdMissedFrames, mTraceThresholdFrameTimeMillis, eventsListener);
+        final SurfaceControlWrapper surfaceControl = new SurfaceControlWrapper();
+        final ChoreographerWrapper choreographer =
+                new ChoreographerWrapper(Choreographer.getInstance());
+
+        synchronized (mLock) {
+            FrameTrackerListener eventsListener = (s, act) -> handleCujEvents(act, s);
+            return new FrameTracker(session, mWorker.getThreadHandler(),
+                    threadedRenderer, viewRoot, surfaceControl, choreographer, mMetrics,
+                    mTraceThresholdMissedFrames, mTraceThresholdFrameTimeMillis,
+                    eventsListener, config);
         }
     }
 
-    private void handleCujEvents(Context context, String action, Session session) {
+    private void handleCujEvents(String action, Session session) {
         // Clear the running and timeout tasks if the end / cancel was fired within the tracker.
         // Or we might have memory leaks.
         if (needRemoveTasks(action, session)) {
             removeTimeout(session.getCuj());
             removeTracker(session.getCuj());
-        }
-
-        // Notify the receivers if necessary.
-        if (session.shouldNotify()) {
-            notifyEvents(context, action, session);
         }
     }
 
@@ -349,24 +404,13 @@ public class InteractionJankMonitor {
         final boolean badEnd = action.equals(ACTION_SESSION_END)
                 && session.getReason() != REASON_END_NORMAL;
         final boolean badCancel = action.equals(ACTION_SESSION_CANCEL)
-                && session.getReason() != REASON_CANCEL_NORMAL;
+                && !(session.getReason() == REASON_CANCEL_NORMAL
+                || session.getReason() == REASON_CANCEL_TIMEOUT);
         return badEnd || badCancel;
     }
 
-    private void notifyEvents(Context context, String action, Session session) {
-        if (action.equals(ACTION_SESSION_CANCEL)
-                && session.getReason() == REASON_CANCEL_NOT_BEGUN) {
-            return;
-        }
-        Intent intent = new Intent(action);
-        intent.putExtra(BUNDLE_KEY_CUJ_NAME, getNameOfCuj(session.getCuj()));
-        intent.putExtra(BUNDLE_KEY_TIMESTAMP, session.getTimeStamp());
-        intent.addFlags(FLAG_RECEIVER_REGISTERED_ONLY);
-        context.sendBroadcast(intent);
-    }
-
     private void removeTimeout(@CujType int cujType) {
-        synchronized (this) {
+        synchronized (mLock) {
             Runnable timeout = mTimeoutActions.get(cujType);
             if (timeout != null) {
                 mWorker.getThreadHandler().removeCallbacks(timeout);
@@ -376,7 +420,17 @@ public class InteractionJankMonitor {
     }
 
     /**
-     * Begin a trace session.
+     * @param cujType cuj type
+     * @return true if the cuj is under instrumenting, false otherwise.
+     */
+    public boolean isInstrumenting(@CujType int cujType) {
+        synchronized (mLock) {
+            return mRunningTrackers.contains(cujType);
+        }
+    }
+
+    /**
+     * Begins a trace session.
      *
      * @param v an attached view.
      * @param cujType the specific {@link InteractionJankMonitor.CujType}.
@@ -385,8 +439,7 @@ public class InteractionJankMonitor {
     public boolean begin(View v, @CujType int cujType) {
         try {
             return beginInternal(
-                    new Configuration.Builder(cujType)
-                            .setView(v)
+                    Configuration.Builder.withView(cujType, v)
                             .build());
         } catch (IllegalArgumentException ex) {
             Log.d(TAG, "Build configuration failed!", ex);
@@ -395,7 +448,7 @@ public class InteractionJankMonitor {
     }
 
     /**
-     * Begin a trace session.
+     * Begins a trace session.
      *
      * @param builder the builder of the configurations for instrumenting the CUJ.
      * @return boolean true if the tracker is started successfully, false otherwise.
@@ -410,17 +463,9 @@ public class InteractionJankMonitor {
     }
 
     private boolean beginInternal(@NonNull Configuration conf) {
-        synchronized (this) {
+        synchronized (mLock) {
             int cujType = conf.mCujType;
-            boolean shouldSample = ThreadLocalRandom.current().nextInt() % mSamplingInterval == 0;
-            if (!mEnabled || !shouldSample) {
-                if (DEBUG) {
-                    Log.d(TAG, "Skip monitoring cuj: " + getNameOfCuj(cujType)
-                            + ", enable=" + mEnabled + ", debuggable=" + DEFAULT_ENABLED
-                            + ", sample=" + shouldSample + ", interval=" + mSamplingInterval);
-                }
-                return false;
-            }
+            if (!shouldMonitor(cujType)) return false;
             FrameTracker tracker = getTracker(cujType);
             // Skip subsequent calls if we already have an ongoing tracing.
             if (tracker != null) return false;
@@ -431,67 +476,103 @@ public class InteractionJankMonitor {
             tracker.begin();
 
             // Cancel the trace if we don't get an end() call in specified duration.
-            Runnable timeoutAction = () -> cancel(cujType);
-            mTimeoutActions.put(cujType, timeoutAction);
-            mWorker.getThreadHandler().postDelayed(timeoutAction, conf.mTimeout);
+            scheduleTimeoutAction(
+                    cujType, conf.mTimeout, () -> cancel(cujType, REASON_CANCEL_TIMEOUT));
             return true;
         }
     }
 
     /**
-     * End a trace session.
+     * Check if the monitoring is enabled and if it should be sampled.
+     */
+    @SuppressWarnings("RandomModInteger")
+    @VisibleForTesting
+    public boolean shouldMonitor(@CujType int cujType) {
+        boolean shouldSample = ThreadLocalRandom.current().nextInt() % mSamplingInterval == 0;
+        if (!mEnabled || !shouldSample) {
+            if (DEBUG) {
+                Log.d(TAG, "Skip monitoring cuj: " + getNameOfCuj(cujType)
+                        + ", enable=" + mEnabled + ", debuggable=" + DEFAULT_ENABLED
+                        + ", sample=" + shouldSample + ", interval=" + mSamplingInterval);
+            }
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Schedules a timeout action.
+     * @param cuj cuj type
+     * @param timeout duration to timeout
+     * @param action action once timeout
+     */
+    @VisibleForTesting
+    public void scheduleTimeoutAction(@CujType int cuj, long timeout, Runnable action) {
+        mTimeoutActions.put(cuj, action);
+        mWorker.getThreadHandler().postDelayed(action, timeout);
+    }
+
+    /**
+     * Ends a trace session.
      *
      * @param cujType the specific {@link InteractionJankMonitor.CujType}.
      * @return boolean true if the tracker is ended successfully, false otherwise.
      */
     public boolean end(@CujType int cujType) {
-        //TODO (163505250): This should be no-op if not in droid food rom.
-        synchronized (this) {
-
+        synchronized (mLock) {
             // remove the timeout action first.
             removeTimeout(cujType);
             FrameTracker tracker = getTracker(cujType);
             // Skip this call since we haven't started a trace yet.
             if (tracker == null) return false;
-            tracker.end(FrameTracker.REASON_END_NORMAL);
-            removeTracker(cujType);
+            // if the end call doesn't return true, another thread is handling end of the cuj.
+            if (tracker.end(REASON_END_NORMAL)) {
+                removeTracker(cujType);
+            }
             return true;
         }
     }
 
     /**
-     * Cancel the trace session.
+     * Cancels the trace session.
      *
      * @return boolean true if the tracker is cancelled successfully, false otherwise.
      */
     public boolean cancel(@CujType int cujType) {
-        //TODO (163505250): This should be no-op if not in droid food rom.
-        synchronized (this) {
+        return cancel(cujType, REASON_CANCEL_NORMAL);
+    }
+
+    /**
+     * Cancels the trace session.
+     *
+     * @return boolean true if the tracker is cancelled successfully, false otherwise.
+     */
+    @VisibleForTesting
+    public boolean cancel(@CujType int cujType, @Reasons int reason) {
+        synchronized (mLock) {
             // remove the timeout action first.
             removeTimeout(cujType);
             FrameTracker tracker = getTracker(cujType);
             // Skip this call since we haven't started a trace yet.
             if (tracker == null) return false;
-            tracker.cancel(FrameTracker.REASON_CANCEL_NORMAL);
-            removeTracker(cujType);
+            // if the cancel call doesn't return true, another thread is handling cancel of the cuj.
+            if (tracker.cancel(reason)) {
+                removeTracker(cujType);
+            }
             return true;
         }
     }
 
     private FrameTracker getTracker(@CujType int cuj) {
-        synchronized (this) {
-            return mRunningTrackers.get(cuj);
-        }
+        return mRunningTrackers.get(cuj);
     }
 
     private void removeTracker(@CujType int cuj) {
-        synchronized (this) {
-            mRunningTrackers.remove(cuj);
-        }
+        mRunningTrackers.remove(cuj);
     }
 
     private void updateProperties(DeviceConfig.Properties properties) {
-        synchronized (this) {
+        synchronized (mLock) {
             mSamplingInterval = properties.getInt(SETTINGS_SAMPLING_INTERVAL_KEY,
                     DEFAULT_SAMPLING_INTERVAL);
             mEnabled = properties.getBoolean(SETTINGS_ENABLED_KEY, DEFAULT_ENABLED);
@@ -509,14 +590,12 @@ public class InteractionJankMonitor {
     }
 
     /**
-     * Trigger the perfetto daemon to collect and upload data.
+     * Triggers the perfetto daemon to collect and upload data.
      */
     @VisibleForTesting
     public void trigger(Session session) {
-        synchronized (this) {
-            mWorker.getThreadHandler().post(
-                    () -> PerfettoTrigger.trigger(session.getPerfettoTrigger()));
-        }
+        mWorker.getThreadHandler().post(
+                () -> PerfettoTrigger.trigger(session.getPerfettoTrigger()));
     }
 
     /**
@@ -527,7 +606,17 @@ public class InteractionJankMonitor {
      */
     public static String getNameOfInteraction(int interactionType) {
         // There is an offset amount of 1 between cujType and interactionType.
-        return getNameOfCuj(interactionType - 1);
+        return getNameOfCuj(getCujTypeFromInteraction(interactionType));
+    }
+
+    /**
+     * A helper method to translate interaction type to CUJ type.
+     *
+     * @param interactionType the interaction type defined in AtomsProto.java
+     * @return the integer in {@link CujType}
+     */
+    private static int getCujTypeFromInteraction(int interactionType) {
+        return interactionType - 1;
     }
 
     /**
@@ -608,6 +697,34 @@ public class InteractionJankMonitor {
                 return "SHADE_APP_LAUNCH_FROM_SETTINGS_BUTTON";
             case CUJ_STATUS_BAR_APP_LAUNCH_FROM_CALL_CHIP:
                 return "STATUS_BAR_APP_LAUNCH_FROM_CALL_CHIP";
+            case CUJ_PIP_TRANSITION:
+                return "PIP_TRANSITION";
+            case CUJ_WALLPAPER_TRANSITION:
+                return "WALLPAPER_TRANSITION";
+            case CUJ_USER_SWITCH:
+                return "USER_SWITCH";
+            case CUJ_SPLASHSCREEN_AVD:
+                return "SPLASHSCREEN_AVD";
+            case CUJ_SPLASHSCREEN_EXIT_ANIM:
+                return "SPLASHSCREEN_EXIT_ANIM";
+            case CUJ_SCREEN_OFF:
+                return "SCREEN_OFF";
+            case CUJ_SCREEN_OFF_SHOW_AOD:
+                return "SCREEN_OFF_SHOW_AOD";
+            case CUJ_ONE_HANDED_ENTER_TRANSITION:
+                return "ONE_HANDED_ENTER_TRANSITION";
+            case CUJ_ONE_HANDED_EXIT_TRANSITION:
+                return "ONE_HANDED_EXIT_TRANSITION";
+            case CUJ_UNFOLD_ANIM:
+                return "UNFOLD_ANIM";
+            case CUJ_SUW_LOADING_TO_SHOW_INFO_WITH_ACTIONS:
+                return "SUW_LOADING_TO_SHOW_INFO_WITH_ACTIONS";
+            case CUJ_SUW_SHOW_FUNCTION_SCREEN_WITH_ACTIONS:
+                return "SUW_SHOW_FUNCTION_SCREEN_WITH_ACTIONS";
+            case CUJ_SUW_LOADING_TO_NEXT_FLOW:
+                return "SUW_LOADING_TO_NEXT_FLOW";
+            case CUJ_SUW_LOADING_SCREEN_FOR_STATUS:
+                return "SUW_LOADING_SCREEN_FOR_STATUS";
         }
         return "UNKNOWN";
     }
@@ -618,32 +735,67 @@ public class InteractionJankMonitor {
      */
     public static class Configuration {
         private final View mView;
+        private final Context mContext;
         private final long mTimeout;
         private final String mTag;
+        private final boolean mSurfaceOnly;
+        private final SurfaceControl mSurfaceControl;
         private final @CujType int mCujType;
+        private final boolean mDeferMonitor;
 
         /**
-         * A builder for building Configuration. <br/>
+         * A builder for building Configuration. {@link #setView(View)} is essential
+         * if {@link #setSurfaceOnly(boolean)} is not set, otherwise both
+         * {@link #setSurfaceControl(SurfaceControl)} and {@link #setContext(Context)}
+         * are necessary<br/>
          * <b>It may refer to an attached view, don't use static reference for any purpose.</b>
          */
         public static class Builder {
             private View mAttrView = null;
+            private Context mAttrContext = null;
             private long mAttrTimeout = DEFAULT_TIMEOUT_MS;
             private String mAttrTag = "";
+            private boolean mAttrSurfaceOnly;
+            private SurfaceControl mAttrSurfaceControl;
             private @CujType int mAttrCujType;
+            private boolean mAttrDeferMonitor = true;
 
             /**
+             * Creates a builder which instruments only surface.
              * @param cuj The enum defined in {@link InteractionJankMonitor.CujType}.
+             * @param context context
+             * @param surfaceControl surface control
+             * @return builder
              */
-            public Builder(@CujType int cuj) {
+            public static Builder withSurface(@CujType int cuj, @NonNull Context context,
+                    @NonNull SurfaceControl surfaceControl) {
+                return new Builder(cuj)
+                        .setContext(context)
+                        .setSurfaceControl(surfaceControl)
+                        .setSurfaceOnly(true);
+            }
+
+            /**
+             * Creates a builder which instruments both surface and view.
+             * @param cuj The enum defined in {@link InteractionJankMonitor.CujType}.
+             * @param view view
+             * @return builder
+             */
+            public static Builder withView(@CujType int cuj, @NonNull View view) {
+                return new Builder(cuj).setView(view)
+                        .setContext(view.getContext());
+            }
+
+            private Builder(@CujType int cuj) {
                 mAttrCujType = cuj;
             }
 
             /**
+             * Specifies a view, must be set if {@link #setSurfaceOnly(boolean)} is set to false.
              * @param view an attached view
              * @return builder
              */
-            public Builder setView(@NonNull View view) {
+            private Builder setView(@NonNull View view) {
                 mAttrView = view;
                 return this;
             }
@@ -669,20 +821,69 @@ public class InteractionJankMonitor {
             }
 
             /**
-             * Build the {@link Configuration} instance
+             * Indicates if only instrument with surface,
+             * if true, must also setup with {@link #setContext(Context)}
+             * and {@link #setSurfaceControl(SurfaceControl)}.
+             * @param surfaceOnly true if only instrument with surface, false otherwise
+             * @return builder Surface only builder.
+             */
+            private Builder setSurfaceOnly(boolean surfaceOnly) {
+                mAttrSurfaceOnly = surfaceOnly;
+                return this;
+            }
+
+            /**
+             * Specifies a context, must set if {@link #setSurfaceOnly(boolean)} is set.
+             */
+            private Builder setContext(Context context) {
+                mAttrContext = context;
+                return this;
+            }
+
+            /**
+             * Specifies a surface control, must be set if {@link #setSurfaceOnly(boolean)} is set.
+             */
+            private Builder setSurfaceControl(SurfaceControl surfaceControl) {
+                mAttrSurfaceControl = surfaceControl;
+                return this;
+            }
+
+            /**
+             * Indicates if the instrument should be deferred to the next frame.
+             * @param defer true if the instrument should be deferred to the next frame.
+             * @return builder
+             */
+            public Builder setDeferMonitorForAnimationStart(boolean defer) {
+                mAttrDeferMonitor = defer;
+                return this;
+            }
+
+            /**
+             * Builds the {@link Configuration} instance
              * @return the instance of {@link Configuration}
              * @throws IllegalArgumentException if any invalid attribute is set
              */
             public Configuration build() throws IllegalArgumentException {
-                return new Configuration(mAttrCujType, mAttrView, mAttrTag, mAttrTimeout);
+                return new Configuration(
+                        mAttrCujType, mAttrView, mAttrTag, mAttrTimeout,
+                        mAttrSurfaceOnly, mAttrContext, mAttrSurfaceControl,
+                        mAttrDeferMonitor);
             }
         }
 
-        private Configuration(@CujType int cuj, View view, String tag, long timeout) {
+        private Configuration(@CujType int cuj, View view, String tag, long timeout,
+                boolean surfaceOnly, Context context, SurfaceControl surfaceControl,
+                boolean deferMonitor) {
             mCujType = cuj;
             mTag = tag;
             mTimeout = timeout;
             mView = view;
+            mSurfaceOnly = surfaceOnly;
+            mContext = context != null
+                    ? context
+                    : (view != null ? view.getContext().getApplicationContext() : null);
+            mSurfaceControl = surfaceControl;
+            mDeferMonitor = deferMonitor;
             validate();
         }
 
@@ -698,13 +899,53 @@ public class InteractionJankMonitor {
                 shouldThrow = true;
                 msg.append("Invalid timeout value; ");
             }
-            if (mView == null || !mView.isAttachedToWindow()) {
-                shouldThrow = true;
-                msg.append("Null view or view is not attached yet; ");
+            if (mSurfaceOnly) {
+                if (mContext == null) {
+                    shouldThrow = true;
+                    msg.append("Must pass in a context if only instrument surface; ");
+                }
+                if (mSurfaceControl == null || !mSurfaceControl.isValid()) {
+                    shouldThrow = true;
+                    msg.append("Must pass in a valid surface control if only instrument surface; ");
+                }
+            } else {
+                if (mView == null || !mView.isAttachedToWindow()) {
+                    shouldThrow = true;
+                    msg.append("Null view or unattached view while instrumenting view; ");
+                }
             }
             if (shouldThrow) {
                 throw new IllegalArgumentException(msg.toString());
             }
+        }
+
+        /**
+         * @return true if only instrumenting surface, false otherwise
+         */
+        public boolean isSurfaceOnly() {
+            return mSurfaceOnly;
+        }
+
+        /**
+         * @return the surafce control which is instrumenting
+         */
+        public SurfaceControl getSurfaceControl() {
+            return mSurfaceControl;
+        }
+
+        View getView() {
+            return mView;
+        }
+
+        Context getContext() {
+            return mContext;
+        }
+
+        /**
+         * @return true if the monitoring should be deferred to the next frame, false otherwise.
+         */
+        public boolean shouldDeferMonitor() {
+            return mDeferMonitor;
         }
     }
 
@@ -715,15 +956,13 @@ public class InteractionJankMonitor {
         @CujType
         private final int mCujType;
         private final long mTimeStamp;
-        @FrameTracker.Reasons
-        private int mReason = FrameTracker.REASON_END_UNKNOWN;
-        private final boolean mShouldNotify;
+        @Reasons
+        private int mReason = REASON_END_UNKNOWN;
         private final String mName;
 
         public Session(@CujType int cujType, @NonNull String postfix) {
             mCujType = cujType;
             mTimeStamp = System.nanoTime();
-            mShouldNotify = SystemProperties.getBoolean(PROP_NOTIFY_CUJ_EVENT, false);
             mName = TextUtils.isEmpty(postfix)
                     ? String.format("J<%s>", getNameOfCuj(mCujType))
                     : String.format("J<%s::%s>", getNameOfCuj(mCujType), postfix);
@@ -756,17 +995,12 @@ public class InteractionJankMonitor {
             return mTimeStamp;
         }
 
-        public void setReason(@FrameTracker.Reasons int reason) {
+        public void setReason(@Reasons int reason) {
             mReason = reason;
         }
 
-        public int getReason() {
+        public @Reasons int getReason() {
             return mReason;
-        }
-
-        /** Determine if should notify the receivers of cuj events */
-        public boolean shouldNotify() {
-            return mShouldNotify;
         }
     }
 }

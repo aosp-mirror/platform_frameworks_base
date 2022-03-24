@@ -144,7 +144,7 @@ public class PipMediaController {
         mediaControlFilter.addAction(ACTION_NEXT);
         mediaControlFilter.addAction(ACTION_PREV);
         mContext.registerReceiverForAllUsers(mMediaActionReceiver, mediaControlFilter,
-                SYSTEMUI_PERMISSION, mainHandler);
+                SYSTEMUI_PERMISSION, mainHandler, Context.RECEIVER_EXPORTED);
 
         // Creates the standard media buttons that we may show.
         mPauseAction = getDefaultRemoteAction(R.string.pip_pause,

@@ -391,15 +391,6 @@ final class HdmiUtils {
     }
 
     /**
-     * Clone {@link HdmiDeviceInfo} with new power status.
-     */
-    static HdmiDeviceInfo cloneHdmiDeviceInfo(HdmiDeviceInfo info, int newPowerStatus) {
-        return new HdmiDeviceInfo(info.getLogicalAddress(),
-                info.getPhysicalAddress(), info.getPortId(), info.getDeviceType(),
-                info.getVendorId(), info.getDisplayName(), newPowerStatus, info.getCecVersion());
-    }
-
-    /**
      * Dump a {@link SparseArray} to the print writer.
      *
      * <p>The dump is formatted:
@@ -470,7 +461,7 @@ final class HdmiUtils {
     }
 
     /**
-     * Method to parse target physical address to the port number on the current device.
+     * Method to build target physical address to the port number on the current device.
      *
      * <p>This check assumes target address is valid.
      *
@@ -562,7 +553,28 @@ final class HdmiUtils {
         for (int i = 0; i < params.length; i++) {
             params[i] = (byte) Integer.parseInt(parts[i + 2], 16);
         }
-        return new HdmiCecMessage(src, dest, opcode, params);
+        return HdmiCecMessage.build(src, dest, opcode, params);
+    }
+
+    /**
+     * Some operands in the CEC spec consist of a variable number of bytes, where each byte except
+     * the last one has bit 7 set to 1.
+     * Given the index of a byte in such an operand, this method returns the index of the last byte
+     * in the operand, or -1 if the input is invalid (e.g. operand not terminated properly).
+     * @param params Byte array representing a CEC message's parameters
+     * @param offset Index of a byte in the operand to find the end of
+     */
+    public static int getEndOfSequence(byte[] params, int offset) {
+        if (offset < 0) {
+            return -1;
+        }
+        while (offset < params.length && ((params[offset] >> 7) & 1) == 1) {
+            offset++;
+        }
+        if (offset >= params.length) {
+            return -1;
+        }
+        return offset;
     }
 
     public static class ShortAudioDescriptorXmlParser {

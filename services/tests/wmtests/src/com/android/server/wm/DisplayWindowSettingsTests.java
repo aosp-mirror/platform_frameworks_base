@@ -20,10 +20,10 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.view.IWindowManager.FIXED_TO_USER_ROTATION_DEFAULT;
 import static android.view.IWindowManager.FIXED_TO_USER_ROTATION_DISABLED;
 import static android.view.IWindowManager.FIXED_TO_USER_ROTATION_ENABLED;
+import static android.view.WindowManager.DISPLAY_IME_POLICY_FALLBACK_DISPLAY;
+import static android.view.WindowManager.DISPLAY_IME_POLICY_LOCAL;
 import static android.view.WindowManager.REMOVE_CONTENT_MODE_DESTROY;
 import static android.view.WindowManager.REMOVE_CONTENT_MODE_MOVE_TO_PRIMARY;
-import static android.view.WindowManager.DISPLAY_IME_POLICY_LOCAL;
-import static android.view.WindowManager.DISPLAY_IME_POLICY_FALLBACK_DISPLAY;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
@@ -51,6 +51,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.server.LocalServices;
 import com.android.server.policy.WindowManagerPolicy;
+import com.android.server.wm.DisplayWindowSettings.SettingsProvider.SettingsEntry;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -259,6 +260,17 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
     }
 
     @Test
+    public void testResetAllowAllRotations() {
+        final DisplayRotation displayRotation = mock(DisplayRotation.class);
+        spyOn(mPrimaryDisplay);
+        doReturn(displayRotation).when(mPrimaryDisplay).getDisplayRotation();
+
+        mDisplayWindowSettings.applyRotationSettingsToDisplayLocked(mPrimaryDisplay);
+
+        verify(displayRotation).resetAllowAllRotations();
+    }
+
+    @Test
     public void testDefaultToFreeUserRotation() {
         mDisplayWindowSettings.applySettingsToDisplayLocked(mSecondaryDisplay);
 
@@ -445,6 +457,21 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
         assertEquals(123, config.densityDpi);
         dc.computeScreenConfiguration(config);
         assertEquals(456, config.densityDpi);
+    }
+
+    @Test
+    public void testDisplayRotationSettingsAppliedOnCreation() {
+        // Create new displays with different rotation settings
+        final SettingsEntry settingsEntry1 = new SettingsEntry();
+        settingsEntry1.mIgnoreOrientationRequest = false;
+        final DisplayContent dcDontIgnoreOrientation = createMockSimulatedDisplay(settingsEntry1);
+        final SettingsEntry settingsEntry2 = new SettingsEntry();
+        settingsEntry2.mIgnoreOrientationRequest = true;
+        final DisplayContent dcIgnoreOrientation = createMockSimulatedDisplay(settingsEntry2);
+
+        // Verify that newly created displays are created with correct rotation settings
+        assertFalse(dcDontIgnoreOrientation.getIgnoreOrientationRequest());
+        assertTrue(dcIgnoreOrientation.getIgnoreOrientationRequest());
     }
 
     public final class TestSettingsProvider implements DisplayWindowSettings.SettingsProvider {

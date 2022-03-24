@@ -17,6 +17,10 @@
 package android.app;
 
 import static android.annotation.Dimension.DP;
+import static android.app.admin.DevicePolicyResources.Drawables.Source.NOTIFICATION;
+import static android.app.admin.DevicePolicyResources.Drawables.Style.SOLID_COLORED;
+import static android.app.admin.DevicePolicyResources.Drawables.WORK_PROFILE_ICON;
+import static android.app.admin.DevicePolicyResources.UNDEFINED;
 import static android.graphics.drawable.Icon.TYPE_URI;
 import static android.graphics.drawable.Icon.TYPE_URI_ADAPTIVE_BITMAP;
 
@@ -39,6 +43,7 @@ import android.annotation.StyleableRes;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
+import android.app.admin.DevicePolicyManager;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.Intent;
@@ -71,6 +76,7 @@ import android.os.Parcelable;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.provider.Settings;
 import android.text.BidiFormatter;
 import android.text.SpannableStringBuilder;
@@ -1324,6 +1330,32 @@ public class Notification implements Parcelable
     public static final String EXTRA_MEDIA_SESSION = "android.mediaSession";
 
     /**
+     * {@link #extras} key: A {@code CharSequence} name of a remote device used for a media session
+     * associated with a {@link Notification.MediaStyle} notification. This will show in the media
+     * controls output switcher instead of the local device name.
+     * @hide
+     */
+    @TestApi
+    public static final String EXTRA_MEDIA_REMOTE_DEVICE = "android.mediaRemoteDevice";
+
+    /**
+     * {@link #extras} key: A {@code int} resource ID for an icon that should show in the output
+     * switcher of the media controls for a {@link Notification.MediaStyle} notification.
+     * @hide
+     */
+    @TestApi
+    public static final String EXTRA_MEDIA_REMOTE_ICON = "android.mediaRemoteIcon";
+
+    /**
+     * {@link #extras} key: A {@code PendingIntent} that will replace the default action for the
+     * media controls output switcher chip, associated with a {@link Notification.MediaStyle}
+     * notification. This should launch an activity.
+     * @hide
+     */
+    @TestApi
+    public static final String EXTRA_MEDIA_REMOTE_INTENT = "android.mediaRemoteIntent";
+
+    /**
      * {@link #extras} key: the indices of actions to be shown in the compact view,
      * as supplied to (e.g.) {@link MediaStyle#setShowActionsInCompactView(int...)}.
      */
@@ -1883,6 +1915,14 @@ public class Notification implements Parcelable
              * while processing broadcast receivers or services in response to notification action
              * clicks. To launch an activity in those cases, provide a {@link PendingIntent} for the
              * activity itself.
+             *
+             * <p>How an Action is displayed, including whether the {@code icon}, {@code text}, or
+             * both are displayed or required, depends on where and how the action is used, and the
+             * {@link Style} applied to the Notification.
+             *
+             * <p>When the {@code title} is a {@link android.text.Spanned}, any colors set by a
+             * {@link ForegroundColorSpan} or {@link TextAppearanceSpan} may be removed or displayed
+             * with an altered in luminance to ensure proper contrast within the Notification.
              *
              * @param icon icon to show for this action
              * @param title the title of the action
@@ -3705,7 +3745,7 @@ public class Notification implements Parcelable
      * Provides a convenient way to set the various fields of a {@link Notification} and generate
      * content views using the platform's notification layout template. If your app supports
      * versions of Android as old as API level 4, you can instead use
-     * {@link android.support.v4.app.NotificationCompat.Builder NotificationCompat.Builder},
+     * {@link androidx.core.app.NotificationCompat.Builder NotificationCompat.Builder},
      * available in the <a href="{@docRoot}tools/extras/support-library.html">Android Support
      * library</a>.
      *
@@ -5038,6 +5078,18 @@ public class Notification implements Parcelable
             }
             // Note: This assumes that the current user can read the profile badge of the
             // originating user.
+            DevicePolicyManager dpm = mContext.getSystemService(DevicePolicyManager.class);
+            return dpm.getResources().getDrawable(
+                    getUpdatableProfileBadgeId(), SOLID_COLORED, NOTIFICATION,
+                    this::getDefaultProfileBadgeDrawable);
+        }
+
+        private String getUpdatableProfileBadgeId() {
+            return mContext.getSystemService(UserManager.class).isManagedProfile()
+                    ? WORK_PROFILE_ICON : UNDEFINED;
+        }
+
+        private Drawable getDefaultProfileBadgeDrawable() {
             return mContext.getPackageManager().getUserBadgeForDensityNoBackground(
                     new UserHandle(mContext.getUserId()), 0);
         }
@@ -5387,8 +5439,8 @@ public class Notification implements Parcelable
             contentView.setInt(R.id.expand_button, "setDefaultPillColor", pillColor);
             // Use different highlighted colors for conversations' unread count
             if (p.mHighlightExpander) {
-                pillColor = Colors.flattenAlpha(getPrimaryAccentColor(p), bgColor);
-                textColor = Colors.flattenAlpha(bgColor, pillColor);
+                pillColor = Colors.flattenAlpha(getColors(p).getTertiaryAccentColor(), bgColor);
+                textColor = Colors.flattenAlpha(getColors(p).getOnAccentTextColor(), pillColor);
             }
             contentView.setInt(R.id.expand_button, "setHighlightTextColor", textColor);
             contentView.setInt(R.id.expand_button, "setHighlightPillColor", pillColor);
@@ -5539,12 +5591,11 @@ public class Notification implements Parcelable
 
         /**
          * Determines if the notification should be colorized *for the purposes of applying colors*.
-         * If this is the minimized view of a colorized notification, or if the app did not provide
-         * a color to colorize with, this will return false so that internal coloring logic can
-         * still render the notification normally.
+         * If this is the minimized view of a colorized notification, this will return false so that
+         * internal coloring logic can still render the notification normally.
          */
         private boolean isBackgroundColorized(StandardTemplateParams p) {
-            return p.allowColorization && mN.color != COLOR_DEFAULT && mN.isColorized();
+            return p.allowColorization && mN.isColorized();
         }
 
         private boolean isCallActionColorCustomizable() {
@@ -5552,8 +5603,7 @@ public class Notification implements Parcelable
             //  that is only used for disallowing colorization of headers for the minimized state,
             //  and neither of those conditions applies when showing actions.
             //  Not requiring StandardTemplateParams as an argument simplifies the creation process.
-            return mN.color != COLOR_DEFAULT && mN.isColorized()
-                    && mContext.getResources().getBoolean(
+            return mN.isColorized() && mContext.getResources().getBoolean(
                     R.bool.config_callNotificationActionColorsRequireColorized);
         }
 
@@ -5802,6 +5852,7 @@ public class Notification implements Parcelable
                     p, result);
             buildCustomContentIntoTemplate(mContext, standard, customContent,
                     p, result);
+            makeHeaderExpanded(standard);
             return standard;
         }
 
@@ -6121,21 +6172,22 @@ public class Notification implements Parcelable
             if (emphasizedMode) {
                 // change the background bgColor
                 CharSequence title = action.title;
-                ColorStateList[] outResultColor = new ColorStateList[1];
                 int buttonFillColor = getColors(p).getSecondaryAccentColor();
                 if (isLegacy()) {
                     title = ContrastColorUtil.clearColorSpans(title);
                 } else {
-                    int notifBackgroundColor = getColors(p).getBackgroundColor();
-                    title = ensureColorSpanContrast(title, notifBackgroundColor, outResultColor);
+                    // Check for a full-length span color to use as the button fill color.
+                    Integer fullLengthColor = getFullLengthSpanColor(title);
+                    if (fullLengthColor != null) {
+                        // Ensure the custom button fill has 1.3:1 contrast w/ notification bg.
+                        int notifBackgroundColor = getColors(p).getBackgroundColor();
+                        buttonFillColor = ensureButtonFillContrast(
+                                fullLengthColor, notifBackgroundColor);
+                    }
+                    // Remove full-length color spans and ensure text contrast with the button fill.
+                    title = ensureColorSpanContrast(title, buttonFillColor);
                 }
                 button.setTextViewText(R.id.action0, processTextSpans(title));
-                boolean hasColorOverride = outResultColor[0] != null;
-                if (hasColorOverride) {
-                    // There's a span spanning the full text, let's take it and use it as the
-                    // background color
-                    buttonFillColor = outResultColor[0].getDefaultColor();
-                }
                 final int textColor = ContrastColorUtil.resolvePrimaryColor(mContext,
                         buttonFillColor, mInNightMode);
                 button.setTextColor(R.id.action0, textColor);
@@ -6168,17 +6220,58 @@ public class Notification implements Parcelable
         }
 
         /**
-         * Ensures contrast on color spans against a background color. also returns the color of the
-         * text if a span was found that spans over the whole text.
+         * Extract the color from a full-length span from the text.
+         *
+         * @param charSequence the charSequence containing spans
+         * @return the raw color of the text's last full-length span containing a color, or null if
+         * no full-length span sets the text color.
+         * @hide
+         */
+        @VisibleForTesting
+        @Nullable
+        public static Integer getFullLengthSpanColor(CharSequence charSequence) {
+            // NOTE: this method preserves the functionality that for a CharSequence with multiple
+            // full-length spans, the color of the last one is used.
+            Integer result = null;
+            if (charSequence instanceof Spanned) {
+                Spanned ss = (Spanned) charSequence;
+                Object[] spans = ss.getSpans(0, ss.length(), Object.class);
+                // First read through all full-length spans to get the button fill color, which will
+                //  be used as the background color for ensuring contrast of non-full-length spans.
+                for (Object span : spans) {
+                    int spanStart = ss.getSpanStart(span);
+                    int spanEnd = ss.getSpanEnd(span);
+                    boolean fullLength = (spanEnd - spanStart) == charSequence.length();
+                    if (!fullLength) {
+                        continue;
+                    }
+                    if (span instanceof TextAppearanceSpan) {
+                        TextAppearanceSpan originalSpan = (TextAppearanceSpan) span;
+                        ColorStateList textColor = originalSpan.getTextColor();
+                        if (textColor != null) {
+                            result = textColor.getDefaultColor();
+                        }
+                    } else if (span instanceof ForegroundColorSpan) {
+                        ForegroundColorSpan originalSpan = (ForegroundColorSpan) span;
+                        result = originalSpan.getForegroundColor();
+                    }
+                }
+            }
+            return result;
+        }
+
+        /**
+         * Ensures contrast on color spans against a background color.
+         * Note that any full-length color spans will be removed instead of being contrasted.
          *
          * @param charSequence the charSequence on which the spans are
          * @param background the background color to ensure the contrast against
-         * @param outResultColor an array in which a color will be returned as the first element if
-         *                    there exists a full length color span.
          * @return the contrasted charSequence
+         * @hide
          */
-        private static CharSequence ensureColorSpanContrast(CharSequence charSequence,
-                int background, ColorStateList[] outResultColor) {
+        @VisibleForTesting
+        public static CharSequence ensureColorSpanContrast(CharSequence charSequence,
+                int background) {
             if (charSequence instanceof Spanned) {
                 Spanned ss = (Spanned) charSequence;
                 Object[] spans = ss.getSpans(0, ss.length(), Object.class);
@@ -6195,19 +6288,19 @@ public class Notification implements Parcelable
                         TextAppearanceSpan originalSpan = (TextAppearanceSpan) resultSpan;
                         ColorStateList textColor = originalSpan.getTextColor();
                         if (textColor != null) {
-                            int[] colors = textColor.getColors();
-                            int[] newColors = new int[colors.length];
-                            for (int i = 0; i < newColors.length; i++) {
-                                boolean isBgDark = isColorDark(background);
-                                newColors[i] = ContrastColorUtil.ensureLargeTextContrast(
-                                        colors[i], background, isBgDark);
-                            }
-                            textColor = new ColorStateList(textColor.getStates().clone(),
-                                    newColors);
                             if (fullLength) {
-                                outResultColor[0] = textColor;
                                 // Let's drop the color from the span
                                 textColor = null;
+                            } else {
+                                int[] colors = textColor.getColors();
+                                int[] newColors = new int[colors.length];
+                                for (int i = 0; i < newColors.length; i++) {
+                                    boolean isBgDark = isColorDark(background);
+                                    newColors[i] = ContrastColorUtil.ensureLargeTextContrast(
+                                            colors[i], background, isBgDark);
+                                }
+                                textColor = new ColorStateList(textColor.getStates().clone(),
+                                        newColors);
                             }
                             resultSpan = new TextAppearanceSpan(
                                     originalSpan.getFamily(),
@@ -6217,15 +6310,14 @@ public class Notification implements Parcelable
                                     originalSpan.getLinkTextColor());
                         }
                     } else if (resultSpan instanceof ForegroundColorSpan) {
-                        ForegroundColorSpan originalSpan = (ForegroundColorSpan) resultSpan;
-                        int foregroundColor = originalSpan.getForegroundColor();
-                        boolean isBgDark = isColorDark(background);
-                        foregroundColor = ContrastColorUtil.ensureLargeTextContrast(
-                                foregroundColor, background, isBgDark);
                         if (fullLength) {
-                            outResultColor[0] = ColorStateList.valueOf(foregroundColor);
                             resultSpan = null;
                         } else {
+                            ForegroundColorSpan originalSpan = (ForegroundColorSpan) resultSpan;
+                            int foregroundColor = originalSpan.getForegroundColor();
+                            boolean isBgDark = isColorDark(background);
+                            foregroundColor = ContrastColorUtil.ensureLargeTextContrast(
+                                    foregroundColor, background, isBgDark);
                             resultSpan = new ForegroundColorSpan(foregroundColor);
                         }
                     } else {
@@ -6247,11 +6339,27 @@ public class Notification implements Parcelable
          *
          * @param color the color to check
          * @return true if the color has higher contrast with white than black
+         * @hide
          */
-        private static boolean isColorDark(int color) {
+        public static boolean isColorDark(int color) {
             // as per ContrastColorUtil.shouldUseDark, this uses the color contrast midpoint.
             return ContrastColorUtil.calculateLuminance(color) <= 0.17912878474;
         }
+
+        /**
+         * Finds a button fill color with sufficient contrast over bg (1.3:1) that has the same hue
+         * as the original color, but is lightened or darkened depending on whether the background
+         * is dark or light.
+         *
+         * @hide
+         */
+        @VisibleForTesting
+        public static int ensureButtonFillContrast(int color, int bg) {
+            return isColorDark(bg)
+                    ? ContrastColorUtil.findContrastColorAgainstDark(color, bg, true, 1.3)
+                    : ContrastColorUtil.findContrastColor(color, bg, true, 1.3);
+        }
+
 
         /**
          * @return Whether we are currently building a notification from a legacy (an app that
@@ -6441,25 +6549,34 @@ public class Notification implements Parcelable
 
             if (mContext.getApplicationInfo().targetSdkVersion < Build.VERSION_CODES.N
                     && !styleDisplaysCustomViewInline()) {
-                if (mN.contentView == null) {
-                    mN.contentView = createContentView();
+                RemoteViews newContentView = mN.contentView;
+                RemoteViews newBigContentView = mN.bigContentView;
+                RemoteViews newHeadsUpContentView = mN.headsUpContentView;
+                if (newContentView == null) {
+                    newContentView = createContentView();
                     mN.extras.putInt(EXTRA_REBUILD_CONTENT_VIEW_ACTION_COUNT,
-                            mN.contentView.getSequenceNumber());
+                            newContentView.getSequenceNumber());
                 }
-                if (mN.bigContentView == null) {
-                    mN.bigContentView = createBigContentView();
-                    if (mN.bigContentView != null) {
+                if (newBigContentView == null) {
+                    newBigContentView = createBigContentView();
+                    if (newBigContentView != null) {
                         mN.extras.putInt(EXTRA_REBUILD_BIG_CONTENT_VIEW_ACTION_COUNT,
-                                mN.bigContentView.getSequenceNumber());
+                                newBigContentView.getSequenceNumber());
                     }
                 }
-                if (mN.headsUpContentView == null) {
-                    mN.headsUpContentView = createHeadsUpContentView();
-                    if (mN.headsUpContentView != null) {
+                if (newHeadsUpContentView == null) {
+                    newHeadsUpContentView = createHeadsUpContentView();
+                    if (newHeadsUpContentView != null) {
                         mN.extras.putInt(EXTRA_REBUILD_HEADS_UP_CONTENT_VIEW_ACTION_COUNT,
-                                mN.headsUpContentView.getSequenceNumber());
+                                newHeadsUpContentView.getSequenceNumber());
                     }
                 }
+                // Don't set any of the content views until after they have all been generated,
+                //  to avoid the generated .contentView triggering the logic which skips generating
+                //  the .bigContentView.
+                mN.contentView = newContentView;
+                mN.bigContentView = newBigContentView;
+                mN.headsUpContentView = newHeadsUpContentView;
             }
 
             if ((mN.defaults & DEFAULT_LIGHTS) != 0) {
@@ -6639,6 +6756,18 @@ public class Notification implements Parcelable
             return;
         }
         boolean isLowRam = ActivityManager.isLowRamDeviceStatic();
+
+        if (mSmallIcon != null
+                // Only bitmap icons can be downscaled.
+                && (mSmallIcon.getType() == Icon.TYPE_BITMAP
+                        || mSmallIcon.getType() == Icon.TYPE_ADAPTIVE_BITMAP)) {
+            Resources resources = context.getResources();
+            int maxSize = resources.getDimensionPixelSize(
+                    isLowRam ? R.dimen.notification_small_icon_size_low_ram
+                            : R.dimen.notification_small_icon_size);
+            mSmallIcon.scaleDownIfNecessary(maxSize, maxSize);
+        }
+
         if (mLargeIcon != null || largeIcon != null) {
             Resources resources = context.getResources();
             Class<? extends Style> style = getNotificationStyle();
@@ -6719,7 +6848,7 @@ public class Notification implements Parcelable
 
         // We show these sorts of notifications immediately in the absence of
         // any explicit app declaration
-        if (isMediaNotification() || hasMediaSession()
+        if (isMediaNotification()
                     || CATEGORY_CALL.equals(category)
                     || CATEGORY_NAVIGATION.equals(category)
                     || (actions != null && actions.length > 0)) {
@@ -6736,14 +6865,6 @@ public class Notification implements Parcelable
      */
     public boolean isForegroundDisplayForceDeferred() {
         return FOREGROUND_SERVICE_DEFERRED == mFgsDeferBehavior;
-    }
-
-    /**
-     * @return whether this notification has a media session attached
-     * @hide
-     */
-    public boolean hasMediaSession() {
-        return extras.getParcelable(Notification.EXTRA_MEDIA_SESSION) != null;
     }
 
     /**
@@ -6789,18 +6910,20 @@ public class Notification implements Parcelable
     }
 
     /**
-     * @return true if this is a media notification
+     * @return true if this is a media style notification with a media session
      *
      * @hide
      */
     public boolean isMediaNotification() {
         Class<? extends Style> style = getNotificationStyle();
-        if (MediaStyle.class.equals(style)) {
-            return true;
-        } else if (DecoratedMediaCustomViewStyle.class.equals(style)) {
-            return true;
-        }
-        return false;
+        boolean isMediaStyle = (MediaStyle.class.equals(style)
+                || DecoratedMediaCustomViewStyle.class.equals(style));
+
+        boolean hasMediaSession = (extras.getParcelable(Notification.EXTRA_MEDIA_SESSION) != null
+                && extras.getParcelable(Notification.EXTRA_MEDIA_SESSION)
+                instanceof MediaSession.Token);
+
+        return isMediaStyle && hasMediaSession;
     }
 
     /**
@@ -7843,7 +7966,7 @@ public class Notification implements Parcelable
          * Adds a message for display by this notification. Convenience call for a simple
          * {@link Message} in {@link #addMessage(Notification.MessagingStyle.Message)}.
          * @param text A {@link CharSequence} to be displayed as the message content
-         * @param timestamp Time at which the message arrived
+         * @param timestamp Time in milliseconds at which the message arrived
          * @param sender A {@link CharSequence} to be used for displaying the name of the
          * sender. Should be <code>null</code> for messages by the current user, in which case
          * the platform will insert {@link #getUserDisplayName()}.
@@ -7865,7 +7988,7 @@ public class Notification implements Parcelable
          * Adds a message for display by this notification. Convenience call for a simple
          * {@link Message} in {@link #addMessage(Notification.MessagingStyle.Message)}.
          * @param text A {@link CharSequence} to be displayed as the message content
-         * @param timestamp Time at which the message arrived
+         * @param timestamp Time in milliseconds at which the message arrived
          * @param sender The {@link Person} who sent the message.
          * Should be <code>null</code> for messages by the current user, in which case
          * the platform will insert the user set in {@code MessagingStyle(Person)}.
@@ -8846,6 +8969,9 @@ public class Notification implements Parcelable
 
         private int[] mActionsToShowInCompact = null;
         private MediaSession.Token mToken;
+        private CharSequence mDeviceName;
+        private int mDeviceIcon;
+        private PendingIntent mDeviceIntent;
 
         public MediaStyle() {
         }
@@ -8875,6 +9001,36 @@ public class Notification implements Parcelable
          */
         public MediaStyle setMediaSession(MediaSession.Token token) {
             mToken = token;
+            return this;
+        }
+
+        /**
+         * For media notifications associated with playback on a remote device, provide device
+         * information that will replace the default values for the output switcher chip on the
+         * media control, as well as an intent to use when the output switcher chip is tapped,
+         * on devices where this is supported.
+         * <p>
+         * This method is intended for system applications to provide information and/or
+         * functionality that would otherwise be unavailable to the default output switcher because
+         * the media originated on a remote device.
+         *
+         * @param deviceName The name of the remote device to display
+         * @param iconResource Icon resource representing the device
+         * @param chipIntent PendingIntent to send when the output switcher is tapped. May be
+         *                   {@code null}, in which case the output switcher will be disabled.
+         *                   This intent should open an Activity or it will be ignored.
+         * @return MediaStyle
+         *
+         * @hide
+         */
+        @SystemApi
+        @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL)
+        @NonNull
+        public MediaStyle setRemotePlaybackInfo(@NonNull CharSequence deviceName,
+                @DrawableRes int iconResource, @Nullable PendingIntent chipIntent) {
+            mDeviceName = deviceName;
+            mDeviceIcon = iconResource;
+            mDeviceIntent = chipIntent;
             return this;
         }
 
@@ -8926,6 +9082,15 @@ public class Notification implements Parcelable
             if (mActionsToShowInCompact != null) {
                 extras.putIntArray(EXTRA_COMPACT_ACTIONS, mActionsToShowInCompact);
             }
+            if (mDeviceName != null) {
+                extras.putCharSequence(EXTRA_MEDIA_REMOTE_DEVICE, mDeviceName);
+            }
+            if (mDeviceIcon > 0) {
+                extras.putInt(EXTRA_MEDIA_REMOTE_ICON, mDeviceIcon);
+            }
+            if (mDeviceIntent != null) {
+                extras.putParcelable(EXTRA_MEDIA_REMOTE_INTENT, mDeviceIntent);
+            }
         }
 
         /**
@@ -8940,6 +9105,15 @@ public class Notification implements Parcelable
             }
             if (extras.containsKey(EXTRA_COMPACT_ACTIONS)) {
                 mActionsToShowInCompact = extras.getIntArray(EXTRA_COMPACT_ACTIONS);
+            }
+            if (extras.containsKey(EXTRA_MEDIA_REMOTE_DEVICE)) {
+                mDeviceName = extras.getCharSequence(EXTRA_MEDIA_REMOTE_DEVICE);
+            }
+            if (extras.containsKey(EXTRA_MEDIA_REMOTE_ICON)) {
+                mDeviceIcon = extras.getInt(EXTRA_MEDIA_REMOTE_ICON);
+            }
+            if (extras.containsKey(EXTRA_MEDIA_REMOTE_INTENT)) {
+                mDeviceIntent = extras.getParcelable(EXTRA_MEDIA_REMOTE_INTENT);
             }
         }
 
@@ -12305,6 +12479,8 @@ public class Notification implements Parcelable
         private int mSecondaryTextColor = COLOR_INVALID;
         private int mPrimaryAccentColor = COLOR_INVALID;
         private int mSecondaryAccentColor = COLOR_INVALID;
+        private int mTertiaryAccentColor = COLOR_INVALID;
+        private int mOnAccentTextColor = COLOR_INVALID;
         private int mErrorColor = COLOR_INVALID;
         private int mContrastColor = COLOR_INVALID;
         private int mRippleAlpha = 0x33;
@@ -12362,7 +12538,7 @@ public class Notification implements Parcelable
 
             if (isColorized) {
                 if (rawColor == COLOR_DEFAULT) {
-                    int[] attrs = {R.attr.colorAccentTertiary};
+                    int[] attrs = {R.attr.colorAccentSecondary};
                     try (TypedArray ta = obtainDayNightAttributes(ctx, attrs)) {
                         mBackgroundColor = getColor(ta, 0, Color.WHITE);
                     }
@@ -12379,6 +12555,8 @@ public class Notification implements Parcelable
                 mContrastColor = mPrimaryTextColor;
                 mPrimaryAccentColor = mPrimaryTextColor;
                 mSecondaryAccentColor = mSecondaryTextColor;
+                mTertiaryAccentColor = flattenAlpha(mPrimaryTextColor, mBackgroundColor);
+                mOnAccentTextColor = mBackgroundColor;
                 mErrorColor = mPrimaryTextColor;
                 mRippleAlpha = 0x33;
             } else {
@@ -12389,6 +12567,8 @@ public class Notification implements Parcelable
                         R.attr.textColorSecondary,
                         R.attr.colorAccent,
                         R.attr.colorAccentSecondary,
+                        R.attr.colorAccentTertiary,
+                        R.attr.textColorOnAccent,
                         R.attr.colorError,
                         R.attr.colorControlHighlight
                 };
@@ -12399,8 +12579,10 @@ public class Notification implements Parcelable
                     mSecondaryTextColor = getColor(ta, 3, COLOR_INVALID);
                     mPrimaryAccentColor = getColor(ta, 4, COLOR_INVALID);
                     mSecondaryAccentColor = getColor(ta, 5, COLOR_INVALID);
-                    mErrorColor = getColor(ta, 6, COLOR_INVALID);
-                    mRippleAlpha = Color.alpha(getColor(ta, 7, 0x33ffffff));
+                    mTertiaryAccentColor = getColor(ta, 6, COLOR_INVALID);
+                    mOnAccentTextColor = getColor(ta, 7, COLOR_INVALID);
+                    mErrorColor = getColor(ta, 8, COLOR_INVALID);
+                    mRippleAlpha = Color.alpha(getColor(ta, 9, 0x33ffffff));
                 }
                 mContrastColor = calculateContrastColor(ctx, rawColor, mPrimaryAccentColor,
                         mBackgroundColor, nightMode);
@@ -12419,6 +12601,14 @@ public class Notification implements Parcelable
                 }
                 if (mSecondaryAccentColor == COLOR_INVALID) {
                     mSecondaryAccentColor = mContrastColor;
+                }
+                if (mTertiaryAccentColor == COLOR_INVALID) {
+                    mTertiaryAccentColor = mContrastColor;
+                }
+                if (mOnAccentTextColor == COLOR_INVALID) {
+                    mOnAccentTextColor = ColorUtils.setAlphaComponent(
+                            ContrastColorUtil.resolvePrimaryColor(
+                                    ctx, mTertiaryAccentColor, nightMode), 0xFF);
                 }
                 if (mErrorColor == COLOR_INVALID) {
                     mErrorColor = mPrimaryTextColor;
@@ -12483,6 +12673,16 @@ public class Notification implements Parcelable
         /** @return the theme's secondary accent color for colored UI elements. */
         public @ColorInt int getSecondaryAccentColor() {
             return mSecondaryAccentColor;
+        }
+
+        /** @return the theme's tertiary accent color for colored UI elements. */
+        public @ColorInt int getTertiaryAccentColor() {
+            return mTertiaryAccentColor;
+        }
+
+        /** @return the theme's text color to be used on the tertiary accent color. */
+        public @ColorInt int getOnAccentTextColor() {
+            return mOnAccentTextColor;
         }
 
         /**

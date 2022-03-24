@@ -22,6 +22,7 @@ import static android.view.Display.HdrCapabilities.HdrType;
 import android.Manifest;
 import android.annotation.FloatRange;
 import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.LongDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -30,6 +31,7 @@ import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.app.KeyguardManager;
+import android.companion.virtual.IVirtualDevice;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.Resources;
@@ -37,6 +39,8 @@ import android.graphics.Point;
 import android.media.projection.MediaProjection;
 import android.os.Build;
 import android.os.Handler;
+import android.os.HandlerExecutor;
+import android.os.Looper;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -47,6 +51,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 
 /**
@@ -102,6 +107,25 @@ public final class DisplayManager {
      */
     public static final String DISPLAY_CATEGORY_PRESENTATION =
             "android.hardware.display.category.PRESENTATION";
+
+    /** @hide **/
+    @IntDef(prefix = "VIRTUAL_DISPLAY_FLAG_", flag = true, value = {
+            VIRTUAL_DISPLAY_FLAG_PUBLIC,
+            VIRTUAL_DISPLAY_FLAG_PRESENTATION,
+            VIRTUAL_DISPLAY_FLAG_SECURE,
+            VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY,
+            VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR,
+            VIRTUAL_DISPLAY_FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD,
+            VIRTUAL_DISPLAY_FLAG_SUPPORTS_TOUCH,
+            VIRTUAL_DISPLAY_FLAG_ROTATES_WITH_CONTENT,
+            VIRTUAL_DISPLAY_FLAG_DESTROY_CONTENT_ON_REMOVAL,
+            VIRTUAL_DISPLAY_FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS,
+            VIRTUAL_DISPLAY_FLAG_TRUSTED,
+            VIRTUAL_DISPLAY_FLAG_OWN_DISPLAY_GROUP,
+            VIRTUAL_DISPLAY_FLAG_ALWAYS_UNLOCKED
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface VirtualDisplayFlag {}
 
     /**
      * Virtual display flag: Create a public display.
@@ -332,7 +356,7 @@ public final class DisplayManager {
      * @see #VIRTUAL_DISPLAY_FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS
      * @hide
      */
-    @TestApi
+    @SystemApi
     public static final int VIRTUAL_DISPLAY_FLAG_TRUSTED = 1 << 10;
 
     /**
@@ -344,6 +368,16 @@ public final class DisplayManager {
      */
     public static final int VIRTUAL_DISPLAY_FLAG_OWN_DISPLAY_GROUP = 1 << 11;
 
+    /**
+     * Virtual display flags: Indicates that the virtual display should always be unlocked and not
+     * have keyguard displayed on it. Only valid for virtual displays that aren't in the default
+     * display group.
+     *
+     * @see #createVirtualDisplay
+     * @see #VIRTUAL_DISPLAY_FLAG_OWN_DISPLAY_GROUP
+     * @hide
+     */
+    public static final int VIRTUAL_DISPLAY_FLAG_ALWAYS_UNLOCKED = 1 << 12;
 
     /** @hide */
     @IntDef(prefix = {"MATCH_CONTENT_FRAMERATE_"}, value = {
@@ -808,7 +842,11 @@ public final class DisplayManager {
      * VirtualDisplay.Callback, Handler)
      */
     public VirtualDisplay createVirtualDisplay(@NonNull String name,
-            int width, int height, int densityDpi, @Nullable Surface surface, int flags) {
+            @IntRange(from = 1) int width,
+            @IntRange(from = 1) int height,
+            @IntRange(from = 1) int densityDpi,
+            @Nullable Surface surface,
+            @VirtualDisplayFlag int flags) {
         return createVirtualDisplay(name, width, height, densityDpi, surface, flags, null, null);
     }
 
@@ -856,22 +894,35 @@ public final class DisplayManager {
      * a virtual display with the specified flags.
      */
     public VirtualDisplay createVirtualDisplay(@NonNull String name,
-            int width, int height, int densityDpi, @Nullable Surface surface, int flags,
-            @Nullable VirtualDisplay.Callback callback, @Nullable Handler handler) {
+            @IntRange(from = 1) int width,
+            @IntRange(from = 1) int height,
+            @IntRange(from = 1) int densityDpi,
+            @Nullable Surface surface,
+            @VirtualDisplayFlag int flags,
+            @Nullable VirtualDisplay.Callback callback,
+            @Nullable Handler handler) {
         final VirtualDisplayConfig.Builder builder = new VirtualDisplayConfig.Builder(name, width,
                 height, densityDpi);
         builder.setFlags(flags);
         if (surface != null) {
             builder.setSurface(surface);
         }
-        return createVirtualDisplay(null /* projection */, builder.build(), callback, handler);
+        return createVirtualDisplay(null /* projection */, builder.build(), callback, handler,
+                null /* windowContext */);
     }
 
     // TODO : Remove this hidden API after remove all callers. (Refer to MultiDisplayService)
     /** @hide */
-    public VirtualDisplay createVirtualDisplay(@Nullable MediaProjection projection,
-            @NonNull String name, int width, int height, int densityDpi, @Nullable Surface surface,
-            int flags, @Nullable VirtualDisplay.Callback callback, @Nullable Handler handler,
+    public VirtualDisplay createVirtualDisplay(
+            @Nullable MediaProjection projection,
+            @NonNull String name,
+            @IntRange(from = 1) int width,
+            @IntRange(from = 1) int height,
+            @IntRange(from = 1) int densityDpi,
+            @Nullable Surface surface,
+            @VirtualDisplayFlag int flags,
+            @Nullable VirtualDisplay.Callback callback,
+            @Nullable Handler handler,
             @Nullable String uniqueId) {
         final VirtualDisplayConfig.Builder builder = new VirtualDisplayConfig.Builder(name, width,
                 height, densityDpi);
@@ -882,15 +933,33 @@ public final class DisplayManager {
         if (surface != null) {
             builder.setSurface(surface);
         }
-        return createVirtualDisplay(projection, builder.build(), callback, handler);
+        return createVirtualDisplay(projection, builder.build(), callback, handler,
+                null /* windowContext */);
     }
 
     /** @hide */
     public VirtualDisplay createVirtualDisplay(@Nullable MediaProjection projection,
             @NonNull VirtualDisplayConfig virtualDisplayConfig,
-            @Nullable VirtualDisplay.Callback callback, @Nullable Handler handler) {
-        return mGlobal.createVirtualDisplay(mContext, projection, virtualDisplayConfig, callback,
-                handler);
+            @Nullable VirtualDisplay.Callback callback, @Nullable Handler handler,
+            @Nullable Context windowContext) {
+        Executor executor = null;
+        // If callback is null, the executor will not be used. Avoid creating the handler and the
+        // handler executor.
+        if (callback != null) {
+            executor = new HandlerExecutor(
+                    Handler.createAsync(handler != null ? handler.getLooper() : Looper.myLooper()));
+        }
+        return mGlobal.createVirtualDisplay(mContext, projection, null /* virtualDevice */,
+                virtualDisplayConfig, callback, executor, windowContext);
+    }
+
+    /** @hide */
+    public VirtualDisplay createVirtualDisplay(@Nullable IVirtualDevice virtualDevice,
+            @NonNull VirtualDisplayConfig virtualDisplayConfig,
+            @Nullable VirtualDisplay.Callback callback,
+            @Nullable Executor executor) {
+        return mGlobal.createVirtualDisplay(mContext, null /* projection */, virtualDevice,
+                virtualDisplayConfig, callback, executor, null);
     }
 
     /**
@@ -937,6 +1006,34 @@ public final class DisplayManager {
     @RequiresPermission(Manifest.permission.CONFIGURE_DISPLAY_BRIGHTNESS)
     public void setBrightnessConfiguration(BrightnessConfiguration c) {
         setBrightnessConfigurationForUser(c, mContext.getUserId(), mContext.getPackageName());
+    }
+
+    /**
+     * Sets the brightness configuration for the specified display.
+     * If the specified display doesn't exist, then this will return and do nothing.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.CONFIGURE_DISPLAY_BRIGHTNESS)
+    public void setBrightnessConfigurationForDisplay(@NonNull BrightnessConfiguration c,
+            @NonNull String uniqueId) {
+        mGlobal.setBrightnessConfigurationForDisplay(c, uniqueId, mContext.getUserId(),
+                mContext.getPackageName());
+    }
+
+    /**
+     * Gets the brightness configuration for the specified display and default user.
+     * Returns the default configuration if unset or display is invalid.
+     *
+     * @hide
+     */
+    @Nullable
+    @SystemApi
+    @RequiresPermission(Manifest.permission.CONFIGURE_DISPLAY_BRIGHTNESS)
+    public BrightnessConfiguration getBrightnessConfigurationForDisplay(
+            @NonNull String uniqueId) {
+        return mGlobal.getBrightnessConfigurationForDisplay(uniqueId, mContext.getUserId());
     }
 
     /**
@@ -1079,6 +1176,51 @@ public final class DisplayManager {
     @SystemApi
     public Pair<float[], float[]> getMinimumBrightnessCurve() {
         return mGlobal.getMinimumBrightnessCurve();
+    }
+
+    /**
+     * Sets the global default {@link Display.Mode}.  The display mode includes preference for
+     * resolution and refresh rate. The mode change is applied globally, i.e. to all the connected
+     * displays. If the mode specified is not supported by a connected display, then no mode change
+     * occurs for that display.
+     *
+     * @param mode The {@link Display.Mode} to set, which can include resolution and/or
+     * refresh-rate. It is created using {@link Display.Mode.Builder}.
+     *`
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(Manifest.permission.MODIFY_USER_PREFERRED_DISPLAY_MODE)
+    public void setGlobalUserPreferredDisplayMode(@NonNull Display.Mode mode) {
+        // Create a new object containing default values for the unused fields like mode ID and
+        // alternative refresh rates.
+        Display.Mode preferredMode = new Display.Mode(mode.getPhysicalWidth(),
+                mode.getPhysicalHeight(), mode.getRefreshRate());
+        mGlobal.setUserPreferredDisplayMode(Display.INVALID_DISPLAY, preferredMode);
+    }
+
+    /**
+     * Removes the global user preferred display mode.
+     * User preferred display mode is cleared for all the connected displays.
+     *
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(Manifest.permission.MODIFY_USER_PREFERRED_DISPLAY_MODE)
+    public void clearGlobalUserPreferredDisplayMode() {
+        mGlobal.setUserPreferredDisplayMode(Display.INVALID_DISPLAY, null);
+    }
+
+    /**
+     * Returns the global user preferred display mode.
+     * If no user preferred mode has been set, or it has been cleared, this method returns null.
+     *
+     * @hide
+     */
+    @TestApi
+    @Nullable
+    public Display.Mode getGlobalUserPreferredDisplayMode() {
+        return mGlobal.getUserPreferredDisplayMode(Display.INVALID_DISPLAY);
     }
 
     /**
@@ -1294,5 +1436,13 @@ public final class DisplayManager {
          * @hide
          */
         String KEY_HIGH_REFRESH_RATE_BLACKLIST = "high_refresh_rate_blacklist";
+
+        /**
+         * Whether to allow the creation of always unlocked virtual displays by apps having the
+         * required permissions.
+         * @hide
+         */
+        String KEY_ALLOW_ALWAYS_UNLOCKED_VIRTUAL_DISPLAYS =
+                "allow_always_unlocked_virtual_displays";
     }
 }

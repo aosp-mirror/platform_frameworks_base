@@ -17,8 +17,10 @@
 package android.hardware.input;
 
 import android.annotation.NonNull;
+import android.graphics.PointF;
 import android.hardware.display.DisplayViewport;
 import android.os.IBinder;
+import android.view.InputChannel;
 import android.view.InputEvent;
 
 import java.util.List;
@@ -79,6 +81,37 @@ public abstract class InputManagerInternal {
     public abstract boolean transferTouchFocus(@NonNull IBinder fromChannelToken,
             @NonNull IBinder toChannelToken);
 
+    /**
+     * Sets the display id that the MouseCursorController will be forced to target. Pass
+     * {@link android.view.Display#INVALID_DISPLAY} to clear the override.
+     */
+    public abstract void setVirtualMousePointerDisplayId(int pointerDisplayId);
+
+    /**
+     * Gets the display id that the MouseCursorController is being forced to target. Returns
+     * {@link android.view.Display#INVALID_DISPLAY} if there is no override
+     */
+    public abstract int getVirtualMousePointerDisplayId();
+
+    /** Gets the current position of the mouse cursor. */
+    public abstract PointF getCursorPosition();
+
+    /**
+     * Sets the pointer acceleration.
+     * See {@code frameworks/native/include/input/VelocityControl.h#VelocityControlParameters}.
+     */
+    public abstract void setPointerAcceleration(float acceleration, int displayId);
+
+    /**
+     * Sets the eligibility of windows on a given display for pointer capture. If a display is
+     * marked ineligible, requests to enable pointer capture for windows on that display will be
+     * ignored.
+     */
+    public abstract void setDisplayEligibilityForPointerCapture(int displayId, boolean isEligible);
+
+    /** Sets the visibility of the cursor. */
+    public abstract void setPointerIconVisible(boolean visible, int displayId);
+
     /** Registers the {@link LidSwitchCallback} to begin receiving notifications. */
     public abstract void registerLidSwitchCallback(@NonNull LidSwitchCallback callbacks);
 
@@ -100,4 +133,13 @@ public abstract class InputManagerInternal {
          */
         void notifyLidSwitchChanged(long whenNanos, boolean lidOpen);
     }
+
+    /** Create an {@link InputChannel} that is registered to InputDispatcher. */
+    public abstract InputChannel createInputChannel(String inputChannelName);
+
+    /**
+     * Pilfer pointers from the input channel with the given token so that ongoing gestures are
+     * canceled for all other channels.
+     */
+    public abstract void pilferPointers(IBinder token);
 }

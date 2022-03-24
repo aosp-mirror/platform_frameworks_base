@@ -16,8 +16,6 @@
 
 package com.android.server.backup.encryption;
 
-import static com.android.server.backup.encryption.BackupEncryptionService.TAG;
-
 import android.content.Context;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
@@ -36,6 +34,8 @@ import java.security.SecureRandom;
 import java.util.Map;
 
 public class KeyValueEncrypter {
+    private static final String TAG = "KeyValueEncrypter";
+
     private final Context mContext;
     private final EncryptionKeyHelper mKeyHelper;
 

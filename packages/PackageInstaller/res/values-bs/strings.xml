@@ -56,6 +56,7 @@
     <string name="uninstall_application_text" msgid="3816830743706143980">"Želite li deinstalirati ovu aplikaciju?"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"Želite li deinstalirati ovu aplikaciju za "<b>" sve "</b>" korisnike? Aplikacija i njeni podaci će biti uklonjeni iz "<b>" svih "</b>" korisničkih računa na uređaju."</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"Želite li deinstalirati ovu aplikaciju za korisnika <xliff:g id="USERNAME">%1$s</xliff:g>?"</string>
+    <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"Želite li deinstalirati ovu aplikaciju s radnog profila?"</string>
     <string name="uninstall_update_text" msgid="863648314632448705">"Želite li ovu aplikaciju zamijeniti s fabričkom verzijom? Svi podaci će biti uklonjeni."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"Želite li ovu aplikaciju zamijeniti s fabričkom verzijom? Svi podaci će biti uklonjeni. To će uticati na sve korisnike uređaja, uključujući i one s radnim profilima."</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"Zadržati <xliff:g id="SIZE">%1$s</xliff:g> podataka aplikacije."</string>

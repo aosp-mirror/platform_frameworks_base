@@ -376,14 +376,12 @@ public class Instrumentation {
             Debug.stopMethodTracing();
         }
     }
-    
+
     /**
-     * Force the global system in or out of touch mode.  This can be used if
-     * your instrumentation relies on the UI being in one more or the other
-     * when it starts.
-     * 
-     * @param inTouch Set to true to be in touch mode, false to be in
-     * focus mode.
+     * Force the global system in or out of touch mode. This can be used if your
+     * instrumentation relies on the UI being in one more or the other when it starts.
+     *
+     * @param inTouch Set to true to be in touch mode, false to be in focus mode.
      */
     public void setInTouchMode(boolean inTouch) {
         try {
@@ -393,11 +391,20 @@ public class Instrumentation {
             // Shouldn't happen!
         }
     }
-    
+
+    /**
+     * Resets the {@link #setInTouchMode touch mode} to the device default.
+     */
+    public void resetInTouchMode() {
+        final boolean defaultInTouchMode = getContext().getResources().getBoolean(
+                com.android.internal.R.bool.config_defaultInTouchMode);
+        setInTouchMode(defaultInTouchMode);
+    }
+
     /**
      * Schedule a callback for when the application's main thread goes idle
      * (has no more events to process).
-     * 
+     *
      * @param recipient Called the next time the thread's message queue is
      *                  idle.
      */
@@ -740,6 +747,18 @@ public class Instrumentation {
                     return res;
                 }
             }
+        }
+
+        /**
+         * This overload is used for notifying the {@link android.window.TaskFragmentOrganizer}
+         * implementation internally about started activities.
+         *
+         * @see #onStartActivity(Intent)
+         * @hide
+         */
+        public ActivityResult onStartActivity(@NonNull Context who, @NonNull Intent intent,
+                @NonNull Bundle options) {
+            return onStartActivity(intent);
         }
 
         /**
@@ -1247,7 +1266,7 @@ public class Instrumentation {
                 info, title, parent, id,
                 (Activity.NonConfigurationInstances)lastNonConfigurationInstance,
                 new Configuration(), null /* referrer */, null /* voiceInteractor */,
-                null /* window */, null /* activityConfigCallback */, null /*assistToken*/,
+                null /* window */, null /* activityCallback */, null /*assistToken*/,
                 null /*shareableActivityToken*/);
         return activity;
     }
@@ -1722,7 +1741,10 @@ public class Instrumentation {
                     final ActivityMonitor am = mActivityMonitors.get(i);
                     ActivityResult result = null;
                     if (am.ignoreMatchingSpecificIntents()) {
-                        result = am.onStartActivity(intent);
+                        if (options == null) {
+                            options = ActivityOptions.makeBasic().toBundle();
+                        }
+                        result = am.onStartActivity(who, intent, options);
                     }
                     if (result != null) {
                         am.mHits++;
@@ -1790,7 +1812,10 @@ public class Instrumentation {
                     final ActivityMonitor am = mActivityMonitors.get(i);
                     ActivityResult result = null;
                     if (am.ignoreMatchingSpecificIntents()) {
-                        result = am.onStartActivity(intents[0]);
+                        if (options == null) {
+                            options = ActivityOptions.makeBasic().toBundle();
+                        }
+                        result = am.onStartActivity(who, intents[0], options);
                     }
                     if (result != null) {
                         am.mHits++;
@@ -1861,7 +1886,10 @@ public class Instrumentation {
                     final ActivityMonitor am = mActivityMonitors.get(i);
                     ActivityResult result = null;
                     if (am.ignoreMatchingSpecificIntents()) {
-                        result = am.onStartActivity(intent);
+                        if (options == null) {
+                            options = ActivityOptions.makeBasic().toBundle();
+                        }
+                        result = am.onStartActivity(who, intent, options);
                     }
                     if (result != null) {
                         am.mHits++;
@@ -1928,7 +1956,10 @@ public class Instrumentation {
                     final ActivityMonitor am = mActivityMonitors.get(i);
                     ActivityResult result = null;
                     if (am.ignoreMatchingSpecificIntents()) {
-                        result = am.onStartActivity(intent);
+                        if (options == null) {
+                            options = ActivityOptions.makeBasic().toBundle();
+                        }
+                        result = am.onStartActivity(who, intent, options);
                     }
                     if (result != null) {
                         am.mHits++;
@@ -1974,7 +2005,10 @@ public class Instrumentation {
                     final ActivityMonitor am = mActivityMonitors.get(i);
                     ActivityResult result = null;
                     if (am.ignoreMatchingSpecificIntents()) {
-                        result = am.onStartActivity(intent);
+                        if (options == null) {
+                            options = ActivityOptions.makeBasic().toBundle();
+                        }
+                        result = am.onStartActivity(who, intent, options);
                     }
                     if (result != null) {
                         am.mHits++;
@@ -2021,7 +2055,10 @@ public class Instrumentation {
                     final ActivityMonitor am = mActivityMonitors.get(i);
                     ActivityResult result = null;
                     if (am.ignoreMatchingSpecificIntents()) {
-                        result = am.onStartActivity(intent);
+                        if (options == null) {
+                            options = ActivityOptions.makeBasic().toBundle();
+                        }
+                        result = am.onStartActivity(who, intent, options);
                     }
                     if (result != null) {
                         am.mHits++;
@@ -2083,7 +2120,8 @@ public class Instrumentation {
                     throw new ActivityNotFoundException(
                             "Unable to find explicit activity class "
                             + ((Intent)intent).getComponent().toShortString()
-                            + "; have you declared this activity in your AndroidManifest.xml?");
+                            + "; have you declared this activity in your AndroidManifest.xml"
+                            + ", or does your intent not match its declared <intent-filter>?");
                 throw new ActivityNotFoundException(
                         "No Activity found to handle " + intent);
             case ActivityManager.START_PERMISSION_DENIED:

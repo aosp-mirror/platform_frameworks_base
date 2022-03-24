@@ -21,7 +21,34 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="wifi_fail_to_scan" msgid="2333336097603822490">"네트워크를 검색할 수 없습니다."</string>
+    <string name="wifi_security_short_wep" msgid="7939809393561636237">"WEP"</string>
+    <string name="wifi_security_short_wpa" msgid="6998160832497442533">"WPA"</string>
+    <string name="wifi_security_short_wpa2" msgid="7697856994856831026">"WPA2"</string>
+    <string name="wifi_security_short_wpa_wpa2" msgid="2399839645955520093">"WPA/WPA2"</string>
+    <string name="wifi_security_short_eap" msgid="5029688687205212985">"802.1x"</string>
+    <string name="wifi_security_short_eap_wpa" msgid="8510772177310043426">"WPA-EAP"</string>
+    <string name="wifi_security_short_eap_wpa2_wpa3" msgid="6455656470422244501">"RSN-EAP"</string>
+    <string name="wifi_security_short_sae" msgid="78353562671556266">"WPA3"</string>
+    <string name="wifi_security_short_psk_sae" msgid="4965830739185952958">"WPA2/WPA3"</string>
+    <string name="wifi_security_short_none_owe" msgid="8827409046261759703">"없음/OWE"</string>
+    <string name="wifi_security_short_owe" msgid="5073524307942025369">"OWE"</string>
+    <string name="wifi_security_short_eap_suiteb" msgid="4174071135081556115">"Suite-B-192"</string>
     <string name="wifi_security_none" msgid="7392696451280611452">"없음"</string>
+    <string name="wifi_security_wep" msgid="1413627788581122366">"WEP"</string>
+    <string name="wifi_security_wpa" msgid="1072450904799930636">"WPA-Personal"</string>
+    <string name="wifi_security_wpa2" msgid="4038267581230425543">"WPA2-Personal"</string>
+    <string name="wifi_security_wpa_wpa2" msgid="946853615482465986">"WPA/WPA2-Personal"</string>
+    <string name="wifi_security_eap" msgid="6179633834446852269">"WPA/WPA2/WPA3-Enterprise"</string>
+    <string name="wifi_security_eap_wpa" msgid="6189023812330549957">"WPA-Enterprise"</string>
+    <string name="wifi_security_eap_wpa_wpa2" msgid="1089879674896108216">"WPA/WPA2-Enterprise"</string>
+    <string name="wifi_security_eap_wpa2_wpa3" msgid="2952912020876252266">"WPA/WPA2-Enterprise"</string>
+    <string name="wifi_security_eap_wpa3" msgid="7961135182909018796">"WPA3-Enterprise"</string>
+    <string name="wifi_security_passpoint" msgid="2209078477216565387">"Passpoint"</string>
+    <string name="wifi_security_sae" msgid="3644520541721422843">"WPA3-Personal"</string>
+    <string name="wifi_security_psk_sae" msgid="8135104122179904684">"WPA2/WPA3-Personal"</string>
+    <string name="wifi_security_none_owe" msgid="5241745828327404101">"없음/Enhanced Open"</string>
+    <string name="wifi_security_owe" msgid="3343421403561657809">"Enhanced Open"</string>
+    <string name="wifi_security_eap_suiteb" msgid="415842785991698142">"WPA3-Enterprise 192비트"</string>
     <string name="wifi_remembered" msgid="3266709779723179188">"저장됨"</string>
     <string name="wifi_disconnected" msgid="7054450256284661757">"연결 끊김"</string>
     <string name="wifi_disabled_generic" msgid="2651916945380294607">"사용 중지됨"</string>
@@ -95,7 +122,9 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD 오디오: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD 오디오"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"보청기"</string>
+    <string name="bluetooth_profile_le_audio" msgid="5158149987518342036">"LE_AUDIO"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"보청기에 연결됨"</string>
+    <string name="bluetooth_le_audio_profile_summary_connected" msgid="3162538609379333442">"LE_AUDIO에 연결됨"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"미디어 오디오에 연결됨"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"휴대전화 오디오에 연결됨"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"파일 전송 서버에 연결됨"</string>
@@ -113,6 +142,7 @@
     <string name="bluetooth_opp_profile_summary_use_for" msgid="461981154387015457">"파일 전송에 사용"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="4289460627406490952">"입력에 사용"</string>
     <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="7689393730163320483">"보청기로 사용"</string>
+    <string name="bluetooth_le_audio_profile_summary_use_for" msgid="2778318636027348572">"LE_AUDIO에 사용"</string>
     <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"페어링"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"페어링"</string>
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"취소"</string>
@@ -252,7 +282,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"무선 디스플레이 인증서"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Wi-Fi 상세 로깅 사용"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Wi‑Fi 검색 제한"</string>
-    <string name="wifi_enhanced_mac_randomization" msgid="882650208573834301">"Wi‑Fi 비지속적인 MAC 주소 무작위 순서 지정"</string>
+    <string name="wifi_non_persistent_mac_randomization" msgid="7482769677894247316">"Wi‑Fi 비지속적인 MAC 주소 무작위 순서 지정"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"항상 모바일 데이터 활성화"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"테더링 하드웨어 가속"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"이름이 없는 블루투스 기기 표시"</string>
@@ -284,7 +314,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"무선 디스플레이 인증서 옵션 표시"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Wi‑Fi 로깅 수준을 높이고, Wi‑Fi 선택도구에서 SSID RSSI당 값을 표시"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"배터리 소모를 줄이고 네트워크 성능 개선"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"이 모드를 사용 설정하면 기기가 MAC 주소 무작위 지정이 설정된 네트워크에 연결될 때마다 기기의 MAC 주소가 변경될 수 있습니다."</string>
+    <string name="wifi_non_persistent_mac_randomization_summary" msgid="2159794543105053930">"이 모드를 사용 설정하면 기기가 MAC 주소 무작위 지정이 설정된 네트워크에 연결될 때마다 기기의 MAC 주소가 변경될 수 있습니다."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"종량제 네트워크"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"무제한 네트워크"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"로거 버퍼 크기"</string>
@@ -426,7 +456,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"적색약(적녹)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"청색약(청황)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"색상 보정"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="2333641630205214702">"기기에 색상이 표시되는 방식을 조정합니다. 다음과 같은 상황에서 유용합니다.&lt;br/&gt;&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;색상을 더욱 정확하게 보고 싶을 때&lt;/li&gt; &lt;li&gt;&amp;nbsp;집중을 위해 색상을 제거하고 싶을 때&lt;/li&gt; &lt;/ol&gt;"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"색상 보정은 다음과 같은 경우에 유용할 수 있습니다.&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;색상을 보다 정확하게 확인하려는 경우&lt;/li&gt; &lt;li&gt;&amp;nbsp;집중에 도움이 되도록 색상을 제거하려는 경우&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> 우선 적용됨"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g>, <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"남은 시간: 약 <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
@@ -463,7 +493,9 @@
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"충전 안함"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"연결됨, 충전 중 아님"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"충전됨"</string>
+    <string name="battery_info_status_full_charged" msgid="3536054261505567948">"완전히 충전됨"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"관리자가 제어"</string>
+    <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"제한된 설정으로 제어됨"</string>
     <string name="disabled" msgid="8017887509554714950">"사용 안함"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"허용됨"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"허용되지 않음"</string>
@@ -496,14 +528,13 @@
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"등록되지 않음"</string>
     <string name="status_unavailable" msgid="5279036186589861608">"사용할 수 없음"</string>
     <string name="wifi_status_mac_randomized" msgid="466382542497832189">"MAC가 임의 선택됨"</string>
-    <plurals name="wifi_tether_connected_summary" formatted="false" msgid="6317236306047306139">
-      <item quantity="other">기기 %1$d개 연결됨</item>
-      <item quantity="one">기기 %1$d개 연결됨</item>
-    </plurals>
+    <string name="wifi_tether_connected_summary" msgid="5282919920463340158">"{count,plural, =0{기기 0대 연결됨}=1{기기 1대 연결됨}other{기기 #대 연결됨}}"</string>
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"시간 늘리기"</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"시간 줄이기"</string>
     <string name="cancel" msgid="5665114069455378395">"취소"</string>
     <string name="okay" msgid="949938843324579502">"확인"</string>
+    <!-- no translation found for done (381184316122520313) -->
+    <skip />
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"알람 및 리마인더"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"알람 및 리마인더 설정 허용"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"알람 및 리마인더"</string>
@@ -522,7 +553,9 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"항상 확인"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"사용 중지할 때까지"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"조금 전"</string>
-    <string name="media_transfer_this_device_name" msgid="2716555073132169240">"휴대전화 스피커"</string>
+    <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"이 휴대전화"</string>
+    <!-- no translation found for media_transfer_this_device_name (3714653244000242800) -->
+    <skip />
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"이 휴대전화"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"연결 중에 문제가 발생했습니다. 기기를 껐다가 다시 켜 보세요."</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"유선 오디오 기기"</string>
@@ -562,7 +595,9 @@
     <string name="user_set_lock_button" msgid="1427128184982594856">"잠금 설정"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"<xliff:g id="USER_NAME">%s</xliff:g>(으)로 전환"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"새로운 사용자를 만드는 중…"</string>
+    <string name="creating_new_guest_dialog_message" msgid="1114905602181350690">"새 게스트 생성 중…"</string>
     <string name="add_user_failed" msgid="4809887794313944872">"새 사용자를 만들지 못함"</string>
+    <string name="add_guest_failed" msgid="8074548434469843443">"새 게스트 생성 실패"</string>
     <string name="user_nickname" msgid="262624187455825083">"닉네임"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"게스트 추가"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"게스트 삭제"</string>
@@ -608,4 +643,14 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"이더넷에서 연결 해제되었습니다."</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"이더넷에 연결되었습니다."</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"통화 모드가 없습니다."</string>
+    <string name="dream_complication_title_time" msgid="701747800712893499">"시간"</string>
+    <string name="dream_complication_title_date" msgid="8661176085446135789">"날짜"</string>
+    <string name="dream_complication_title_weather" msgid="598609151677172783">"날씨"</string>
+    <string name="dream_complication_title_aqi" msgid="4587552608957834110">"대기 상태"</string>
+    <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"전송 정보"</string>
+    <string name="avatar_picker_title" msgid="8492884172713170652">"프로필 사진 선택하기"</string>
+    <string name="default_user_icon_description" msgid="6554047177298972638">"기본 사용자 아이콘"</string>
+    <string name="physical_keyboard_title" msgid="4811935435315835220">"물리적 키보드"</string>
+    <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"키보드 레이아웃 선택"</string>
+    <string name="keyboard_layout_default_label" msgid="1997292217218546957">"기본"</string>
 </resources>

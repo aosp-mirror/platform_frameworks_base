@@ -18,7 +18,7 @@ package com.android.server.pm.permission;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.content.pm.parsing.component.ParsedPermissionGroup;
+import com.android.server.pm.pkg.component.ParsedPermissionGroup;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 

@@ -17,6 +17,7 @@
 package com.android.systemui.media
 
 import android.app.smartspace.SmartspaceAction
+import android.content.Intent
 
 /** State of a Smartspace media recommendations view. */
 data class SmartspaceMediaData(
@@ -45,7 +46,15 @@ data class SmartspaceMediaData(
      */
     val recommendations: List<SmartspaceAction>,
     /**
+     * Intent for the user's initiated dismissal.
+     */
+    val dismissIntent: Intent?,
+    /**
      * View's background color.
      */
-    val backgroundColor: Int
+    val backgroundColor: Int,
+    /**
+     * The timestamp in milliseconds that headphone is connected.
+     */
+    val headphoneConnectionTimeMillis: Long
 )

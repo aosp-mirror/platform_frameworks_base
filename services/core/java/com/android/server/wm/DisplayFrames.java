@@ -84,7 +84,7 @@ public class DisplayFrames {
         final Rect safe = mDisplayCutoutSafe;
         final DisplayCutout cutout = displayCutout.getDisplayCutout();
         if (mDisplayWidth == info.logicalWidth && mDisplayHeight == info.logicalHeight
-                 && state.getDisplayCutout().equals(cutout)
+                && state.getDisplayCutout().equals(cutout)
                 && state.getRoundedCorners().equals(roundedCorners)
                 && state.getPrivacyIndicatorBounds().equals(indicatorBounds)) {
             return false;
@@ -93,24 +93,12 @@ public class DisplayFrames {
         mDisplayHeight = info.logicalHeight;
         final Rect unrestricted = mUnrestricted;
         unrestricted.set(0, 0, mDisplayWidth, mDisplayHeight);
-        safe.set(Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE);
         state.setDisplayFrame(unrestricted);
         state.setDisplayCutout(cutout);
         state.setRoundedCorners(roundedCorners);
         state.setPrivacyIndicatorBounds(indicatorBounds);
+        state.getDisplayCutoutSafe(safe);
         if (!cutout.isEmpty()) {
-            if (cutout.getSafeInsetLeft() > 0) {
-                safe.left = unrestricted.left + cutout.getSafeInsetLeft();
-            }
-            if (cutout.getSafeInsetTop() > 0) {
-                safe.top = unrestricted.top + cutout.getSafeInsetTop();
-            }
-            if (cutout.getSafeInsetRight() > 0) {
-                safe.right = unrestricted.right - cutout.getSafeInsetRight();
-            }
-            if (cutout.getSafeInsetBottom() > 0) {
-                safe.bottom = unrestricted.bottom - cutout.getSafeInsetBottom();
-            }
             state.getSource(ITYPE_LEFT_DISPLAY_CUTOUT).setFrame(
                     unrestricted.left, unrestricted.top, safe.left, unrestricted.bottom);
             state.getSource(ITYPE_TOP_DISPLAY_CUTOUT).setFrame(

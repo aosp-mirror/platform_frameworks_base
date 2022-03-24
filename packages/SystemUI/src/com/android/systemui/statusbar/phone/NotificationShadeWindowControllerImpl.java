@@ -26,17 +26,22 @@ import static com.android.systemui.statusbar.NotificationRemoteInputManager.ENAB
 import android.app.IActivityManager;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.graphics.PixelFormat;
+import android.graphics.Region;
 import android.os.Binder;
 import android.os.RemoteException;
 import android.os.Trace;
 import android.util.Log;
 import android.view.Display;
 import android.view.Gravity;
+import android.view.IWindow;
+import android.view.IWindowSession;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
+import android.view.WindowManagerGlobal;
 
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.Dumpable;
@@ -84,8 +89,8 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
     private final WindowManager mWindowManager;
     private final IActivityManager mActivityManager;
     private final DozeParameters mDozeParameters;
+    private final KeyguardStateController mKeyguardStateController;
     private final LayoutParams mLpChanged;
-    private final boolean mKeyguardScreenRotation;
     private final long mLockScreenDisplayTimeout;
     private final float mKeyguardPreferredRefreshRate; // takes precedence over max
     private final float mKeyguardMaxRefreshRate;
@@ -105,8 +110,15 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
             mCallbacks = new ArrayList<>();
 
     private final SysuiColorExtractor mColorExtractor;
-    private final UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
+    private final ScreenOffAnimationController mScreenOffAnimationController;
     private float mFaceAuthDisplayBrightness = LayoutParams.BRIGHTNESS_OVERRIDE_NONE;
+    /**
+     * Layout params would be aggregated and dispatched all at once if this is > 0.
+     *
+     * @see #batchApplyWindowLayoutParams(Runnable)
+     */
+    private int mDeferWindowLayoutParams;
+    private boolean mLastKeyguardRotationAllowed;
 
     @Inject
     public NotificationShadeWindowControllerImpl(Context context, WindowManager windowManager,
@@ -118,22 +130,22 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
             SysuiColorExtractor colorExtractor,
             DumpManager dumpManager,
             KeyguardStateController keyguardStateController,
-            UnlockedScreenOffAnimationController unlockedScreenOffAnimationController,
+            ScreenOffAnimationController screenOffAnimationController,
             AuthController authController) {
         mContext = context;
         mWindowManager = windowManager;
         mActivityManager = activityManager;
-        mKeyguardScreenRotation = keyguardStateController.isKeyguardScreenRotationAllowed();
         mDozeParameters = dozeParameters;
+        mKeyguardStateController = keyguardStateController;
         mScreenBrightnessDoze = mDozeParameters.getScreenBrightnessDoze();
         mLpChanged = new LayoutParams();
         mKeyguardViewMediator = keyguardViewMediator;
         mKeyguardBypassController = keyguardBypassController;
         mColorExtractor = colorExtractor;
-        mUnlockedScreenOffAnimationController = unlockedScreenOffAnimationController;
+        mScreenOffAnimationController = screenOffAnimationController;
         dumpManager.registerDumpable(getClass().getName(), this);
         mAuthController = authController;
-
+        mLastKeyguardRotationAllowed = mKeyguardStateController.isKeyguardScreenRotationAllowed();
         mLockScreenDisplayTimeout = context.getResources()
                 .getInteger(R.integer.config_lockScreenDisplayTimeout);
         ((SysuiStatusBarStateController) statusBarStateController)
@@ -300,10 +312,8 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
             if (onKeyguard
                     && mAuthController.isUdfpsEnrolled(KeyguardUpdateMonitor.getCurrentUser())) {
                 mLpChanged.preferredMaxDisplayRefreshRate = mKeyguardPreferredRefreshRate;
-                mLpChanged.preferredMinDisplayRefreshRate = mKeyguardPreferredRefreshRate;
             } else {
                 mLpChanged.preferredMaxDisplayRefreshRate = 0;
-                mLpChanged.preferredMinDisplayRefreshRate = 0;
             }
             Trace.setCounter("display_set_preferred_refresh_rate",
                     (long) mKeyguardPreferredRefreshRate);
@@ -323,7 +333,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
 
     private void adjustScreenOrientation(State state) {
         if (state.isKeyguardShowingAndNotOccluded() || state.mDozing) {
-            if (mKeyguardScreenRotation) {
+            if (mKeyguardStateController.isKeyguardScreenRotationAllowed()) {
                 mLpChanged.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_USER;
             } else {
                 mLpChanged.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_NOSENSOR;
@@ -340,7 +350,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
                 // Make the panel focusable if we're doing the screen off animation, since the light
                 // reveal scrim is drawing in the panel and should consume touch events so that they
                 // don't go to the app behind.
-                || mUnlockedScreenOffAnimationController.isScreenOffAnimationPlaying()) {
+                || mScreenOffAnimationController.shouldIgnoreKeyguardTouches()) {
             mLpChanged.flags &= ~LayoutParams.FLAG_NOT_FOCUSABLE;
             mLpChanged.flags &= ~LayoutParams.FLAG_ALT_FOCUSABLE_IM;
         } else if (state.isKeyguardShowingAndNotOccluded() || panelFocusable) {
@@ -376,10 +386,12 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
             }
             visible = true;
         }
-        if (visible) {
-            mNotificationShadeView.setVisibility(View.VISIBLE);
-        } else {
-            mNotificationShadeView.setVisibility(View.INVISIBLE);
+        if (mNotificationShadeView != null) {
+            if (visible) {
+                mNotificationShadeView.setVisibility(View.VISIBLE);
+            } else {
+                mNotificationShadeView.setVisibility(View.INVISIBLE);
+            }
         }
     }
 
@@ -433,6 +445,20 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
         }
     }
 
+    private void applyWindowLayoutParams() {
+        if (mDeferWindowLayoutParams == 0 && mLp != null && mLp.copyFrom(mLpChanged) != 0) {
+            mWindowManager.updateViewLayout(mNotificationShadeView, mLp);
+        }
+    }
+
+    @Override
+    public void batchApplyWindowLayoutParams(Runnable scope) {
+        mDeferWindowLayoutParams++;
+        scope.run();
+        mDeferWindowLayoutParams--;
+        applyWindowLayoutParams();
+    }
+
     private void apply(State state) {
         applyKeyguardFlags(state);
         applyFocusableFlag(state);
@@ -447,9 +473,8 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
         applyHasTopUi(state);
         applyNotTouchable(state);
         applyStatusBarColorSpaceAgnosticFlag(state);
-        if (mLp != null && mLp.copyFrom(mLpChanged) != 0) {
-            mWindowManager.updateViewLayout(mNotificationShadeView, mLp);
-        }
+        applyWindowLayoutParams();
+
         if (mHasTopUi != mHasTopUiChanged) {
             whitelistIpcs(() -> {
                 try {
@@ -473,7 +498,8 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
         for (StatusBarWindowCallback cb : activeCallbacks) {
             cb.onStateChanged(mCurrentState.mKeyguardShowing,
                     mCurrentState.mKeyguardOccluded,
-                    mCurrentState.mBouncerShowing);
+                    mCurrentState.mBouncerShowing,
+                    mCurrentState.mDozing);
         }
     }
 
@@ -504,6 +530,19 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
             mLpChanged.flags &= ~LayoutParams.FLAG_NOT_TOUCHABLE;
         }
     }
+
+    @Override
+    public void setTouchExclusionRegion(Region region) {
+        try {
+            final IWindowSession session = WindowManagerGlobal.getWindowSession();
+            session.updateTapExcludeRegion(
+                    IWindow.Stub.asInterface(getNotificationShadeView().getWindowToken()),
+                    region);
+        } catch (RemoteException e) {
+            Log.e(TAG, "could not update the tap exclusion region:" + e);
+        }
+    }
+
 
     @Override
     public void setKeyguardShowing(boolean showing) {
@@ -721,6 +760,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
         pw.println(TAG + ":");
         pw.println("  mKeyguardMaxRefreshRate=" + mKeyguardMaxRefreshRate);
         pw.println("  mKeyguardPreferredRefreshRate=" + mKeyguardPreferredRefreshRate);
+        pw.println("  mDeferWindowLayoutParams=" + mDeferWindowLayoutParams);
         pw.println(mCurrentState);
         if (mNotificationShadeView != null && mNotificationShadeView.getViewRootImpl() != null) {
             mNotificationShadeView.getViewRootImpl().dump("  ", pw);
@@ -741,6 +781,17 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
         final boolean useDarkText = mColorExtractor.getNeutralColors().supportsDarkText();
         // Make sure we have the correct navbar/statusbar colors.
         setKeyguardDark(useDarkText);
+    }
+
+    @Override
+    public void onConfigChanged(Configuration newConfig) {
+        final boolean newScreenRotationAllowed = mKeyguardStateController
+                .isKeyguardScreenRotationAllowed();
+
+        if (mLastKeyguardRotationAllowed != newScreenRotationAllowed) {
+            apply(mCurrentState);
+            mLastKeyguardRotationAllowed = newScreenRotationAllowed;
+        }
     }
 
     /**
@@ -791,7 +842,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
         Set<String> mComponentsForcingTopUi = new HashSet<>();
 
         /**
-         * The {@link StatusBar} state from the status bar.
+         * The status bar state from {@link CentralSurfaces}.
          */
         int mStatusBarState;
 

@@ -16,17 +16,21 @@
 
 package android.window;
 
+import static java.lang.annotation.RetentionPolicy.SOURCE;
+
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.os.RemoteException;
+import android.util.Log;
 import android.view.IWindowManager;
 import android.view.WindowManager.LayoutParams.WindowType;
-import android.view.WindowManagerGlobal;
 
 import com.android.internal.annotations.VisibleForTesting;
+
+import java.lang.annotation.Retention;
 
 /**
  * The controller to manage {@link WindowContext}, such as attaching to a window manager node or
@@ -37,16 +41,45 @@ import com.android.internal.annotations.VisibleForTesting;
  * @hide
  */
 public class WindowContextController {
-    private final IWindowManager mWms;
+    // TODO(220049234): Disable attach debug logging before shipping.
+    private static final boolean DEBUG_ATTACH = true;
+    private static final String TAG = "WindowContextController";
+
     /**
-     * {@code true} to indicate that the {@code mToken} is associated with a
+     * {@link AttachStatus.STATUS_ATTACHED} to indicate that the {@code mToken} is associated with a
      * {@link com.android.server.wm.DisplayArea}. Note that {@code mToken} is able to attach a
-     * WindowToken after this flag sets to {@code true}.
+     * WindowToken after this flag sets to {@link AttachStatus.STATUS_ATTACHED}.
      */
     @VisibleForTesting
-    public boolean mAttachedToDisplayArea;
+    public int mAttachedToDisplayArea = AttachStatus.STATUS_INITIALIZED;
+
+    /**
+     * Status to indicate that the Window Context attach to a
+     * {@link com.android.server.wm.DisplayArea}.
+     */
+    @Retention(SOURCE)
+    @IntDef({AttachStatus.STATUS_INITIALIZED, AttachStatus.STATUS_ATTACHED,
+            AttachStatus.STATUS_DETACHED, AttachStatus.STATUS_FAILED})
+    public @interface AttachStatus{
+        /**
+         * The Window Context haven't attached to a {@link com.android.server.wm.DisplayArea}.
+         */
+        int STATUS_INITIALIZED = 0;
+        /**
+         * The Window Context has already attached to a {@link com.android.server.wm.DisplayArea}.
+         */
+        int STATUS_ATTACHED = 1;
+        /**
+         * The Window Context has detached from a {@link com.android.server.wm.DisplayArea}.
+         */
+        int STATUS_DETACHED = 2;
+        /**
+         * The Window Context fails to attach to a {@link com.android.server.wm.DisplayArea}.
+         */
+        int STATUS_FAILED = 3;
+    }
     @NonNull
-    private final IBinder mToken;
+    private final WindowTokenClient mToken;
 
     /**
      * Window Context Controller constructor
@@ -54,16 +87,8 @@ public class WindowContextController {
      * @param token The token used to attach to a window manager node. It is usually from
      *              {@link Context#getWindowContextToken()}.
      */
-    public WindowContextController(@NonNull IBinder token) {
+    public WindowContextController(@NonNull WindowTokenClient token) {
         mToken = token;
-        mWms = WindowManagerGlobal.getWindowManagerService();
-    }
-
-    /** Used for test only. DO NOT USE it in production code. */
-    @VisibleForTesting
-    public WindowContextController(@NonNull IBinder token, IWindowManager mockWms) {
-        mToken = token;
-        mWms = mockWms;
     }
 
     /**
@@ -76,15 +101,18 @@ public class WindowContextController {
      * DisplayArea.
      */
     public void attachToDisplayArea(@WindowType int type, int displayId, @Nullable Bundle options) {
-        if (mAttachedToDisplayArea) {
+        if (mAttachedToDisplayArea == AttachStatus.STATUS_ATTACHED) {
             throw new IllegalStateException("A Window Context can be only attached to "
                     + "a DisplayArea once.");
         }
-        try {
-            mAttachedToDisplayArea = mWms.attachWindowContextToDisplayArea(mToken, type, displayId,
-                    options);
-        }  catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
+        mAttachedToDisplayArea = mToken.attachToDisplayArea(type, displayId, options)
+                ? AttachStatus.STATUS_ATTACHED : AttachStatus.STATUS_FAILED;
+        if (mAttachedToDisplayArea == AttachStatus.STATUS_FAILED) {
+            Log.w(TAG, "attachToDisplayArea fail, type:" + type + ", displayId:"
+                    + displayId);
+        } else if (DEBUG_ATTACH) {
+            Log.d(TAG, "attachToDisplayArea success, type:" + type + ", displayId:"
+                    + displayId);
         }
     }
 
@@ -109,25 +137,20 @@ public class WindowContextController {
      * @see IWindowManager#attachWindowContextToWindowToken(IBinder, IBinder)
      */
     public void attachToWindowToken(IBinder windowToken) {
-        if (!mAttachedToDisplayArea) {
+        if (mAttachedToDisplayArea != AttachStatus.STATUS_ATTACHED) {
             throw new IllegalStateException("The Window Context should have been attached"
-                    + " to a DisplayArea.");
+                    + " to a DisplayArea. AttachToDisplayArea:" + mAttachedToDisplayArea);
         }
-        try {
-            mWms.attachWindowContextToWindowToken(mToken, windowToken);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        mToken.attachToWindowToken(windowToken);
     }
 
     /** Detaches the window context from the node it's currently associated with. */
     public void detachIfNeeded() {
-        if (mAttachedToDisplayArea) {
-            try {
-                mWms.detachWindowContextFromWindowContainer(mToken);
-                mAttachedToDisplayArea = false;
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
+        if (mAttachedToDisplayArea == AttachStatus.STATUS_ATTACHED) {
+            mToken.detachFromWindowContainerIfNeeded();
+            mAttachedToDisplayArea = AttachStatus.STATUS_DETACHED;
+            if (DEBUG_ATTACH) {
+                Log.d(TAG, "Detach Window Context.");
             }
         }
     }

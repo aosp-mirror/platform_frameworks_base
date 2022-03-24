@@ -21,9 +21,9 @@ import static android.provider.AndroidDeviceConfig.KEY_SYSTEM_GESTURE_EXCLUSION_
 
 import android.provider.AndroidDeviceConfig;
 import android.provider.DeviceConfig;
+import android.provider.DeviceConfigInterface;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.server.utils.DeviceConfigInterface;
 
 import java.io.PrintWriter;
 import java.util.Objects;
@@ -89,12 +89,6 @@ final class WindowManagerConstants {
         updateSystemGestureExclusionLogDebounceMillis();
         updateSystemGestureExclusionLimitDp();
         updateSystemGestureExcludedByPreQStickyImmersive();
-    }
-
-    @VisibleForTesting
-    void dispose() {
-        mDeviceConfig.removeOnPropertiesChangedListener(mListenerAndroid);
-        mDeviceConfig.removeOnPropertiesChangedListener(mListenerWindowManager);
     }
 
     private void onAndroidPropertiesChanged(DeviceConfig.Properties properties) {

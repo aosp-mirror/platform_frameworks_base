@@ -32,16 +32,8 @@ message GeolocationTimeZoneSuggestionProto {
 }
 
 /*
- * An obfuscated and simplified time zone suggestion for metrics use.
- *
- * The suggestion's time zone IDs (which relate to location) are obfuscated by
- * mapping them to an ordinal. When the ordinal is assigned consistently across
- * several objects (i.e. so the same time zone ID is always mapped to the same
- * ordinal), this allows comparisons between those objects. For example, we can
- * answer "did these two suggestions agree?", "does the suggestion match the
- * device's current time zone?", without leaking knowledge of location. Ordinals
- * are also significantly more compact than full IANA TZDB IDs, albeit highly
- * unstable and of limited use.
+ * A generic-form time zone suggestion for metrics use. Required to be a superset of the
+ * MetricsTimeZoneSuggestion proto defined in atoms.proto to ensure binary compatibility.
  */
 message MetricsTimeZoneSuggestion {
   option (android.msg_privacy).dest = DEST_AUTOMATIC;
@@ -55,5 +47,24 @@ message MetricsTimeZoneSuggestion {
   // The ordinals for time zone(s) in the suggestion. Always empty for
   // UNCERTAIN, and can be empty for CERTAIN, for example when the device is in
   // a disputed area / on an ocean.
-  repeated uint32 time_zone_ordinals = 2;
+  //
+  // The suggestion's time zone IDs (which relate to location) are obfuscated by
+  // mapping them to an ordinal. When the ordinal is assigned consistently across
+  // several objects (i.e. so the same time zone ID is always mapped to the same
+  // ordinal), this allows comparisons between those objects. For example, we can
+  // answer "did these two suggestions agree?", "does the suggestion match the
+  // device's current time zone?", without leaking knowledge of location. Ordinals
+  // are also significantly more compact than full IANA TZDB IDs, albeit unstable
+  // and of limited use.
+  repeated int32 time_zone_ordinals = 2;
+
+  // The actual time zone ID(s) in the suggestion. Similar to time_zone_ordinals
+  // but contains the actual string IDs.
+  //
+  // This information is only captured / reported for some devices based on the
+  // value of a server side flag, i.e. it could be enabled for internal testers.
+  // Therefore the list can be empty even when time_zone_ordinals is populated.
+  //
+  // When enabled, see time_zone_ordinals for the expected number of values.
+  repeated string time_zone_ids = 3;
 }

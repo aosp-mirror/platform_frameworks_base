@@ -42,25 +42,44 @@ public class ExternalVibration implements Parcelable {
     // boundaries.
     @NonNull
     private IBinder mToken;
-
     public ExternalVibration(int uid, @NonNull String pkg, @NonNull AudioAttributes attrs,
             @NonNull IExternalVibrationController controller) {
+        this(uid, pkg, attrs, controller, new Binder());
+    }
+
+    /**
+     * Full constructor, but exposed to construct the ExternalVibration with an explicit binder
+     * token (for mocks).
+     *
+     * @hide
+     */
+    public ExternalVibration(int uid, @NonNull String pkg, @NonNull AudioAttributes attrs,
+            @NonNull IExternalVibrationController controller, @NonNull IBinder token) {
         mUid = uid;
         mPkg = Preconditions.checkNotNull(pkg);
         mAttrs = Preconditions.checkNotNull(attrs);
         mController = Preconditions.checkNotNull(controller);
-        mToken = new Binder();
+        mToken = Preconditions.checkNotNull(token);
+
+        // IExternalVibrationController is a hidden AIDL interface with implementation provided by
+        // the audio framework to allow mute/unmute control over the external vibration.
+        //
+        // Transactions are locked in audioflinger, and should be blocking to avoid racing
+        // conditions on multiple audio playback.
+        //
+        // They can also be triggered before starting a new external vibration in
+        // IExternalVibratorService, as the ongoing external vibration needs to be muted before the
+        // new one can start, which also requires blocking calls to mute.
+        Binder.allowBlocking(mController.asBinder());
     }
 
     private ExternalVibration(Parcel in) {
-        mUid = in.readInt();
-        mPkg = in.readString();
-        mAttrs = readAudioAttributes(in);
-        mController = IExternalVibrationController.Stub.asInterface(in.readStrongBinder());
-        mToken = in.readStrongBinder();
+        this(in.readInt(), in.readString(), readAudioAttributes(in),
+                IExternalVibrationController.Stub.asInterface(in.readStrongBinder()),
+                in.readStrongBinder());
     }
 
-    private AudioAttributes readAudioAttributes(Parcel in) {
+    private static AudioAttributes readAudioAttributes(Parcel in) {
         int usage = in.readInt();
         int contentType = in.readInt();
         int capturePreset = in.readInt();
@@ -86,7 +105,7 @@ public class ExternalVibration implements Parcelable {
     }
 
     public VibrationAttributes getVibrationAttributes() {
-        return new VibrationAttributes.Builder(mAttrs, null).build();
+        return new VibrationAttributes.Builder(mAttrs).build();
     }
 
     /**
@@ -153,7 +172,7 @@ public class ExternalVibration implements Parcelable {
             + "pkg=" + mPkg + ", "
             + "attrs=" + mAttrs + ", "
             + "controller=" + mController
-            + "token=" + mController
+            + "token=" + mToken
             + "}";
     }
 

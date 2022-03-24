@@ -14,10 +14,13 @@
 
 package com.android.internal.notification;
 
+import static android.app.admin.DevicePolicyResources.Strings.Core.NOTIFICATION_CHANNEL_DEVICE_ADMIN;
+
 import android.app.INotificationManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.content.pm.ParceledListSlice;
 import android.media.AudioAttributes;
@@ -59,6 +62,7 @@ public class SystemNotificationChannels {
     public static String DO_NOT_DISTURB = "DO_NOT_DISTURB";
     public static String ACCESSIBILITY_MAGNIFICATION = "ACCESSIBILITY_MAGNIFICATION";
     public static String ACCESSIBILITY_SECURITY_POLICY = "ACCESSIBILITY_SECURITY_POLICY";
+    public static String ABUSIVE_BACKGROUND_APPS = "ABUSIVE_BACKGROUND_APPS";
 
     public static void createAll(Context context) {
         final NotificationManager nm = context.getSystemService(NotificationManager.class);
@@ -143,7 +147,7 @@ public class SystemNotificationChannels {
 
         final NotificationChannel deviceAdmin = new NotificationChannel(
                 DEVICE_ADMIN,
-                context.getString(R.string.notification_channel_device_admin),
+                getDeviceAdminNotificationChannelName(context),
                 NotificationManager.IMPORTANCE_HIGH);
         channelsList.add(deviceAdmin);
 
@@ -206,7 +210,19 @@ public class SystemNotificationChannels {
                 NotificationManager.IMPORTANCE_LOW);
         channelsList.add(accessibilitySecurityPolicyChannel);
 
+        final NotificationChannel abusiveBackgroundAppsChannel = new NotificationChannel(
+                ABUSIVE_BACKGROUND_APPS,
+                context.getString(R.string.notification_channel_abusive_bg_apps),
+                NotificationManager.IMPORTANCE_LOW);
+        channelsList.add(abusiveBackgroundAppsChannel);
+
         nm.createNotificationChannels(channelsList);
+    }
+
+    private static String getDeviceAdminNotificationChannelName(Context context) {
+        DevicePolicyManager dpm = context.getSystemService(DevicePolicyManager.class);
+        return dpm.getResources().getString(NOTIFICATION_CHANNEL_DEVICE_ADMIN,
+                () -> context.getString(R.string.notification_channel_device_admin));
     }
 
     /** Remove notification channels which are no longer used */

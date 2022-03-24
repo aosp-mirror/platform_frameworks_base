@@ -35,9 +35,9 @@ import android.os.Bundle;
 
 /** @hide */
 oneway interface IEuiccService {
-    void downloadSubscription(int slotId, in DownloadableSubscription subscription,
-            boolean switchAfterDownload, boolean forceDeactivateSim, in Bundle resolvedBundle,
-            in IDownloadSubscriptionCallback callback);
+    void downloadSubscription(int slotId, int portIndex, in DownloadableSubscription subscription,
+                boolean switchAfterDownload, boolean forceDeactivateSim, in Bundle resolvedBundle,
+                in IDownloadSubscriptionCallback callback);
     void getDownloadableSubscriptionMetadata(int slotId, in DownloadableSubscription subscription,
             boolean forceDeactivateSim, in IGetDownloadableSubscriptionMetadataCallback callback);
     void getEid(int slotId, in IGetEidCallback callback);
@@ -48,8 +48,8 @@ oneway interface IEuiccService {
             in IGetDefaultDownloadableSubscriptionListCallback callback);
     void getEuiccInfo(int slotId, in IGetEuiccInfoCallback callback);
     void deleteSubscription(int slotId, String iccid, in IDeleteSubscriptionCallback callback);
-    void switchToSubscription(int slotId, String iccid, boolean forceDeactivateSim,
-            in ISwitchToSubscriptionCallback callback);
+    void switchToSubscription(int slotId, int portIndex, String iccid, boolean forceDeactivateSim,
+            in ISwitchToSubscriptionCallback callback, boolean useLegacyApi);
     void updateSubscriptionNickname(int slotId, String iccid, String nickname,
             in IUpdateSubscriptionNicknameCallback callback);
     void eraseSubscriptions(int slotId, in IEraseSubscriptionsCallback callback);

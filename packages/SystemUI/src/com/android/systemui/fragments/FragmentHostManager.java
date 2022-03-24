@@ -28,6 +28,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Parcelable;
+import android.os.Trace;
 import android.util.ArrayMap;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -42,7 +43,6 @@ import com.android.systemui.util.leak.LeakDetector;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -54,7 +54,7 @@ public class FragmentHostManager {
     private final View mRootView;
     private final InterestingConfigChanges mConfigChanges = new InterestingConfigChanges(
             ActivityInfo.CONFIG_FONT_SCALE | ActivityInfo.CONFIG_LOCALE
-                | ActivityInfo.CONFIG_SCREEN_LAYOUT | ActivityInfo.CONFIG_ASSETS_PATHS);
+                    | ActivityInfo.CONFIG_LAYOUT_DIRECTION | ActivityInfo.CONFIG_ASSETS_PATHS);
     private final FragmentService mManager;
     private final ExtensionFragmentManager mPlugins = new ExtensionFragmentManager();
 
@@ -109,7 +109,18 @@ public class FragmentHostManager {
         return p;
     }
 
-    public FragmentHostManager addTagListener(String tag, FragmentListener listener) {
+    /**
+     * Add a {@link FragmentListener} for a given tag
+     *
+     * @param tag string identifier for the fragment
+     * @param listener the listener to register
+     *
+     * @return this
+     */
+    public FragmentHostManager addTagListener(
+            @NonNull String tag,
+            @NonNull FragmentListener listener
+    ) {
         ArrayList<FragmentListener> listeners = mListeners.get(tag);
         if (listeners == null) {
             listeners = new ArrayList<>();
@@ -214,10 +225,12 @@ public class FragmentHostManager {
     }
 
     public void reloadFragments() {
+        Trace.beginSection("FrargmentHostManager#reloadFragments");
         // Save the old state.
         Parcelable p = destroyFragmentHost();
         // Generate a new fragment host and restore its state.
         createFragmentHost(p);
+        Trace.endSection();
     }
 
     class HostCallbacks extends FragmentHostCallback<FragmentHostManager> {
@@ -308,22 +321,22 @@ public class FragmentHostManager {
             return instantiateWithInjections(context, className, arguments);
         }
 
-        private Fragment instantiateWithInjections(Context context, String className,
-                Bundle args) {
-            Method method = mManager.getInjectionMap().get(className);
-            if (method != null) {
+        private Fragment instantiateWithInjections(
+                Context context, String className, Bundle args) {
+            FragmentService.FragmentInstantiationInfo fragmentInstantiationInfo =
+                    mManager.getInjectionMap().get(className);
+            if (fragmentInstantiationInfo != null) {
                 try {
-                    Fragment f = (Fragment) method.invoke(mManager.getFragmentCreator());
+                    Fragment f = (Fragment) fragmentInstantiationInfo
+                            .mMethod
+                            .invoke(fragmentInstantiationInfo.mDaggerComponent);
                     // Setup the args, taken from Fragment#instantiate.
                     if (args != null) {
                         args.setClassLoader(f.getClass().getClassLoader());
                         f.setArguments(args);
                     }
                     return f;
-                } catch (IllegalAccessException e) {
-                    throw new Fragment.InstantiationException("Unable to instantiate " + className,
-                            e);
-                } catch (InvocationTargetException e) {
+                } catch (IllegalAccessException | InvocationTargetException e) {
                     throw new Fragment.InstantiationException("Unable to instantiate " + className,
                             e);
                 }

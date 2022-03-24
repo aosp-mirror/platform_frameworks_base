@@ -65,7 +65,6 @@ cc_defaults {
         "libincremental_manager_aidl-cpp",
         "libprotobuf-cpp-lite",
         "service.incremental.proto",
-        "libutils",
         "libvold_binder",
         "libc++fs",
         "libziparchive_for_incfs",
@@ -78,6 +77,7 @@ cc_defaults {
         "libincfs",
         "liblog",
         "libpermission",
+        "libutils",
         "libz",
     ],
 }

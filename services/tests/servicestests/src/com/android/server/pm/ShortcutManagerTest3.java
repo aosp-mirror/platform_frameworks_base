@@ -21,7 +21,9 @@ import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils
 
 import android.content.ComponentName;
 import android.content.pm.ShortcutInfo;
-import android.test.suitebuilder.annotation.SmallTest;
+import android.platform.test.annotations.Presubmit;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.frameworks.servicestests.R;
 import com.android.server.pm.ShortcutService.ConfigConstants;
@@ -31,6 +33,7 @@ import java.util.Set;
 /**
  * Tests related to shortcut rank auto-adjustment.
  */
+@Presubmit
 @SmallTest
 public class ShortcutManagerTest3 extends BaseShortcutManagerTest {
 

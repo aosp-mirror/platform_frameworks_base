@@ -185,7 +185,7 @@ public class PresSipResponse implements Parcelable {
         mRequestId = source.readInt();
         mSipResponseCode = source.readInt();
         mReasonPhrase = source.readString();
-        mCmdId = source.readParcelable(PresCmdId.class.getClassLoader());
+        mCmdId = source.readParcelable(PresCmdId.class.getClassLoader(), com.android.ims.internal.uce.presence.PresCmdId.class);
         mRetryAfter = source.readInt();
         mReasonHeader = source.readString();
     }

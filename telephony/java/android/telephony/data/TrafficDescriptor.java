@@ -21,8 +21,13 @@ import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import java.util.Arrays;
+import java.math.BigInteger;
+import java.nio.ByteBuffer;
 import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * A traffic descriptor, as defined in 3GPP TS 24.526 Section 5.2. It is used for UE Route Selection
@@ -31,24 +36,215 @@ import java.util.Objects;
  * not specify the end point to be used for the data call.
  */
 public final class TrafficDescriptor implements Parcelable {
+    /**
+     * The OS/App id
+     *
+     * @hide
+     */
+    public static final class OsAppId {
+        /**
+         * OSId for "Android", using UUID version 5 with namespace ISO OSI.
+         * Prepended to the OsAppId in TrafficDescriptor to use for URSP matching.
+         */
+        public static final UUID ANDROID_OS_ID =
+                UUID.fromString("97a498e3-fc92-5c94-8986-0333d06e4e47");
+
+        /**
+         * Allowed app ids.
+         */
+        // The following app ids are the only apps id Android supports. OEMs or vendors are
+        // prohibited to modify/extend the allowed list, especially passing the real package name to
+        // the network.
+        private static final Set<String> ALLOWED_APP_IDS = Set.of(
+                "ENTERPRISE", "PRIORITIZE_LATENCY", "PRIORITIZE_BANDWIDTH", "CBS"
+        );
+
+        /** OS id in UUID format. */
+        private final @NonNull UUID mOsId;
+
+        /**
+         * App id in string format. Note that Android will not allow use specific app id. This must
+         * be a category/capability identifier.
+         */
+        private final @NonNull String mAppId;
+
+        /**
+         * The differentiator when multiple traffic descriptor has the same OS and app id. Must be
+         * greater than 1.
+         */
+        private final int mDifferentiator;
+
+        /**
+         * Constructor
+         *
+         * @param osId OS id in UUID format.
+         * @param appId App id in string format. Note that Android will not allow use specific app
+         * id. This must be a category/capability identifier.
+         */
+        public OsAppId(@NonNull UUID osId, @NonNull String appId) {
+            this(osId, appId, 1);
+        }
+
+        /**
+         * Constructor
+         *
+         * @param osId OS id in UUID format.
+         * @param appId App id in string format. Note that Android will not allow use specific app
+         * id. This must be a category/capability identifier.
+         * @param differentiator The differentiator when multiple traffic descriptor has the same
+         * OS and app id. Must be greater than 0.
+         */
+        public OsAppId(@NonNull UUID osId, @NonNull String appId, int differentiator) {
+            Objects.requireNonNull(osId);
+            Objects.requireNonNull(appId);
+            if (differentiator < 1) {
+                throw new IllegalArgumentException("Invalid differentiator " + differentiator);
+            }
+
+            mOsId = osId;
+            mAppId = appId;
+            mDifferentiator = differentiator;
+        }
+
+        /**
+         * Constructor from raw byte array.
+         *
+         * @param rawOsAppId The raw OS/App id.
+         */
+        public OsAppId(@NonNull byte[] rawOsAppId) {
+            try {
+                ByteBuffer bb = ByteBuffer.wrap(rawOsAppId);
+                // OS id is the first 16 bytes.
+                mOsId = new UUID(bb.getLong(), bb.getLong());
+                // App id length is 1 byte.
+                int appIdLen = bb.get();
+                // The remaining is the app id + differentiator.
+                byte[] appIdAndDifferentiator = new byte[appIdLen];
+                bb.get(appIdAndDifferentiator, 0, appIdLen);
+                // Extract trailing numbers, for example, "ENTERPRISE", "ENTERPRISE3".
+                String appIdAndDifferentiatorStr = new String(appIdAndDifferentiator);
+                Pattern pattern = Pattern.compile("[^0-9]+([0-9]+)$");
+                Matcher matcher = pattern.matcher(new String(appIdAndDifferentiator));
+                if (matcher.find()) {
+                    mDifferentiator = Integer.parseInt(matcher.group(1));
+                    mAppId = appIdAndDifferentiatorStr.replace(matcher.group(1), "");
+                } else {
+                    mDifferentiator = 1;
+                    mAppId = appIdAndDifferentiatorStr;
+                }
+            } catch (Exception e) {
+                throw new IllegalArgumentException("Failed to decode " + (rawOsAppId != null
+                        ? new BigInteger(1, rawOsAppId).toString(16) : null));
+            }
+        }
+
+        /**
+         * @return The OS id in UUID format.
+         */
+        public @NonNull UUID getOsId() {
+            return mOsId;
+        }
+
+        /**
+         * @return App id in string format. Note that Android will not allow use specific app id.
+         * This must be a category/capability identifier.
+         */
+        public @NonNull String getAppId() {
+            return mAppId;
+        }
+
+        /**
+         * @return The differentiator when multiple traffic descriptor has the same OS and app id.
+         * Must be greater than 1.
+         */
+        public int getDifferentiator() {
+            return mDifferentiator;
+        }
+
+        /**
+         * @return OS/App id in raw byte format.
+         */
+        public @NonNull byte[] getBytes() {
+            byte[] osAppId = (mAppId + (mDifferentiator > 1 ? mDifferentiator : "")).getBytes();
+            // 16 bytes for UUID, 1 byte for length of osAppId, and up to 255 bytes for osAppId
+            ByteBuffer bb = ByteBuffer.allocate(16 + 1 + osAppId.length);
+            bb.putLong(mOsId.getMostSignificantBits());
+            bb.putLong(mOsId.getLeastSignificantBits());
+            bb.put((byte) osAppId.length);
+            bb.put(osAppId);
+            return bb.array();
+        }
+
+        @Override
+        public String toString() {
+            return "[OsAppId: OS=" + mOsId + ", App=" + mAppId + ", differentiator="
+                    + mDifferentiator + ", raw="
+                    + new BigInteger(1, getBytes()).toString(16) + "]";
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            OsAppId osAppId = (OsAppId) o;
+            return mDifferentiator == osAppId.mDifferentiator && mOsId.equals(osAppId.mOsId)
+                    && mAppId.equals(osAppId.mAppId);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(mOsId, mAppId, mDifferentiator);
+        }
+    }
+
     private final String mDnn;
-    private final byte[] mOsAppId;
+    private final OsAppId mOsAppId;
 
     private TrafficDescriptor(@NonNull Parcel in) {
         mDnn = in.readString();
-        mOsAppId = in.createByteArray();
+        byte[] osAppIdBytes = in.createByteArray();
+        OsAppId osAppId = null;
+        if (osAppIdBytes != null) {
+            osAppId = new OsAppId(osAppIdBytes);
+        }
+        mOsAppId = osAppId;
+
+        enforceAllowedIds();
     }
 
     /**
      * Create a traffic descriptor, as defined in 3GPP TS 24.526 Section 5.2
      * @param dnn optional DNN, which must be used for traffic matching, if present
-     * @param osAppId OsId + osAppId of the traffic descriptor
+     * @param osAppIdRawBytes Raw bytes of OsId + osAppId of the traffic descriptor
      *
      * @hide
      */
-    public TrafficDescriptor(String dnn, byte[] osAppId) {
+    public TrafficDescriptor(String dnn, @Nullable byte[] osAppIdRawBytes) {
         mDnn = dnn;
+        OsAppId osAppId = null;
+        if (osAppIdRawBytes != null) {
+            osAppId = new OsAppId(osAppIdRawBytes);
+        }
         mOsAppId = osAppId;
+
+        enforceAllowedIds();
+    }
+
+    /**
+     * Enforce the OS id and app id are in the allowed list.
+     *
+     * @throws IllegalArgumentException if ids are not allowed.
+     */
+    private void enforceAllowedIds() {
+        if (mOsAppId != null && !mOsAppId.getOsId().equals(OsAppId.ANDROID_OS_ID)) {
+            throw new IllegalArgumentException("OS id " + mOsAppId.getOsId() + " does not match "
+                    + OsAppId.ANDROID_OS_ID);
+        }
+
+        if (mOsAppId != null && !OsAppId.ALLOWED_APP_IDS.contains(mOsAppId.getAppId())) {
+            throw new IllegalArgumentException("Illegal app id " + mOsAppId.getAppId()
+                    + ". Only allowing one of the following " + OsAppId.ALLOWED_APP_IDS);
+        }
     }
 
     /**
@@ -61,13 +257,13 @@ public final class TrafficDescriptor implements Parcelable {
     }
 
     /**
-     * OsAppId is the app id as defined in 3GPP TS 24.526 Section 5.2, and it identifies a traffic
-     * category. It includes the OS Id component of the field as defined in the specs.
-     * @return the OS App ID of this traffic descriptor if one is included by the network, null
-     * otherwise.
+     * OsAppId identifies a broader traffic category. Although it names Os/App id, it only includes
+     * OS version with a general/broader category id used as app id.
+     *
+     * @return The id in byte format. {@code null} if not available.
      */
     public @Nullable byte[] getOsAppId() {
-        return mOsAppId;
+        return mOsAppId != null ? mOsAppId.getBytes() : null;
     }
 
     @Override
@@ -77,13 +273,13 @@ public final class TrafficDescriptor implements Parcelable {
 
     @NonNull @Override
     public String toString() {
-        return "TrafficDescriptor={mDnn=" + mDnn + ", mOsAppId=" + mOsAppId + "}";
+        return "TrafficDescriptor={mDnn=" + mDnn + ", " + mOsAppId + "}";
     }
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeString(mDnn);
-        dest.writeByteArray(mOsAppId);
+        dest.writeByteArray(mOsAppId != null ? mOsAppId.getBytes() : null);
     }
 
     public static final @NonNull Parcelable.Creator<TrafficDescriptor> CREATOR =
@@ -104,7 +300,7 @@ public final class TrafficDescriptor implements Parcelable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         TrafficDescriptor that = (TrafficDescriptor) o;
-        return Objects.equals(mDnn, that.mDnn) && Arrays.equals(mOsAppId, that.mOsAppId);
+        return Objects.equals(mDnn, that.mDnn) && Objects.equals(mOsAppId, that.mOsAppId);
     }
 
     @Override
@@ -148,7 +344,7 @@ public final class TrafficDescriptor implements Parcelable {
         }
 
         /**
-         * Set the OS App ID (including OS Id as defind in the specs).
+         * Set the OS App ID (including OS Id as defined in the specs).
          *
          * @return The same instance of the builder.
          */

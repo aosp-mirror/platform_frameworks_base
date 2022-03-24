@@ -26,7 +26,7 @@ import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
 abstract class LegacySplitScreenRotateTransition(
     testSpec: FlickerTestParameter
 ) : LegacySplitScreenTransition(testSpec) {
-    override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
+    override val transition: FlickerBuilder.() -> Unit
         get() = {
             setup {
                 eachRun {

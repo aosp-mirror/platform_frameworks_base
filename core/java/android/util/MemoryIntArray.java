@@ -75,18 +75,18 @@ public final class MemoryIntArray implements Parcelable, Closeable {
         final String name = UUID.randomUUID().toString();
         mFd = nativeCreate(name, size);
         mMemoryAddr = nativeOpen(mFd, mIsOwner);
-        mCloseGuard.open("close");
+        mCloseGuard.open("MemoryIntArray.close");
     }
 
     private MemoryIntArray(Parcel parcel) throws IOException {
         mIsOwner = false;
-        ParcelFileDescriptor pfd = parcel.readParcelable(null);
+        ParcelFileDescriptor pfd = parcel.readParcelable(null, android.os.ParcelFileDescriptor.class);
         if (pfd == null) {
             throw new IOException("No backing file descriptor");
         }
         mFd = pfd.detachFd();
         mMemoryAddr = nativeOpen(mFd, mIsOwner);
-        mCloseGuard.open("close");
+        mCloseGuard.open("MemoryIntArray.close");
     }
 
     /**

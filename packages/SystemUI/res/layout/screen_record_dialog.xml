@@ -17,8 +17,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:background="@drawable/rounded_bg_full">
+    android:orientation="vertical">
 
     <!-- Scrollview is necessary to fit everything in landscape layout -->
     <ScrollView
@@ -28,10 +27,10 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingStart="24dp"
-            android:paddingEnd="24dp"
-            android:paddingTop="26dp"
-            android:paddingBottom="30dp"
+            android:paddingStart="@dimen/dialog_side_padding"
+            android:paddingEnd="@dimen/dialog_side_padding"
+            android:paddingTop="@dimen/dialog_top_padding"
+            android:paddingBottom="@dimen/dialog_bottom_padding"
             android:orientation="vertical">
 
             <!-- Header -->
@@ -113,6 +112,8 @@
                         android:layout_height="wrap_content"
                         android:minHeight="48dp"
                         android:layout_weight="1"
+                        android:layout_gravity="fill_vertical"
+                        android:gravity="center_vertical"
                         android:text="@string/screenrecord_taps_label"
                         android:textAppearance="?android:attr/textAppearanceMedium"
                         android:fontFamily="@*android:string/config_headlineFontFamily"
@@ -142,10 +143,7 @@
                     android:layout_weight="0"
                     android:layout_gravity="start"
                     android:text="@string/cancel"
-                    android:textColor="?android:textColorPrimary"
-                    android:background="@drawable/screenrecord_button_background_outline"
-                    android:textAppearance="?android:attr/textAppearanceMedium"
-                    android:textSize="14sp"/>
+                    style="@style/Widget.Dialog.Button.BorderButton" />
                 <Space
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
@@ -157,10 +155,7 @@
                     android:layout_weight="0"
                     android:layout_gravity="end"
                     android:text="@string/screenrecord_start"
-                    android:textColor="@android:color/system_neutral1_900"
-                    android:background="@drawable/screenrecord_button_background_solid"
-                    android:textAppearance="?android:attr/textAppearanceMedium"
-                    android:textSize="14sp"/>
+                    style="@style/Widget.Dialog.Button" />
             </LinearLayout>
         </LinearLayout>
     </ScrollView>

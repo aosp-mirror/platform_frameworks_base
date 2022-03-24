@@ -19,6 +19,10 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="notification_channel_tv_pip" msgid="2576686079160402435">"תמונה בתוך תמונה"</string>
     <string name="pip_notification_unknown_title" msgid="2729870284350772311">"(תוכנית ללא כותרת)"</string>
-    <string name="pip_close" msgid="9135220303720555525">"‏סגור PIP"</string>
+    <string name="pip_close" msgid="9135220303720555525">"‏סגירת PIP"</string>
     <string name="pip_fullscreen" msgid="7278047353591302554">"מסך מלא"</string>
+    <string name="pip_move" msgid="1544227837964635439">"‏העברת תמונה בתוך תמונה (PIP)"</string>
+    <string name="pip_expand" msgid="7605396312689038178">"הרחבת חלון תמונה-בתוך-תמונה"</string>
+    <string name="pip_collapse" msgid="5732233773786896094">"כיווץ של חלון תמונה-בתוך-תמונה"</string>
+    <string name="pip_edu_text" msgid="3672999496647508701">" לחיצה כפולה על "<annotation icon="home_icon">" הלחצן הראשי "</annotation>" תציג את אמצעי הבקרה"</string>
 </resources>

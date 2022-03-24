@@ -20,6 +20,13 @@
 
     <target_preparer class="com.android.tradefed.targetprep.RootTargetPreparer"/>
 
+    <target_preparer class="com.android.tradefed.targetprep.RunCommandTargetPreparer">
+        <option name="run-command"
+            value="pm uninstall com.android.cts.install.lib.testapp.A" />
+        <option name="teardown-command"
+            value="pm uninstall com.android.cts.install.lib.testapp.A" />
+    </target_preparer>
+
     <test class="com.android.tradefed.testtype.HostTest">
         <option name="jar" value="PackageManagerServiceHostTests.jar" />
     </test>

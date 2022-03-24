@@ -14,7 +14,8 @@
      limitations under the License.
 -->
 
-<resources xmlns:android="http://schemas.android.com/apk/res/android">
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android">
     <style name="Theme.SystemUI.Dialog" parent="@android:style/Theme.DeviceDefault.Dialog" />
     <style name="Theme.SystemUI.Dialog.Alert" parent="@*android:style/Theme.DeviceDefault.Dialog.Alert" />
 
@@ -25,7 +26,7 @@
 
     <style name="volume_dialog_theme" parent="Theme.SystemUI">
         <item name="android:colorAccent">@color/tv_volume_dialog_accent</item>
-        <item name="android:textColorPrimaryInverse">@color/tv_volume_dialog_accent</item>
+        <item name="androidprv:textColorOnAccent">@color/tv_volume_dialog_accent</item>
         <item name="android:dialogCornerRadius">@dimen/volume_dialog_panel_width_half</item>
     </style>
 

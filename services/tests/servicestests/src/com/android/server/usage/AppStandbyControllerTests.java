@@ -62,7 +62,10 @@ import static org.mockito.AdditionalMatchers.not;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.intThat;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -76,11 +79,13 @@ import android.app.usage.UsageStatsManagerInternal;
 import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
+import android.content.pm.ResolveInfo;
 import android.hardware.display.DisplayManager;
 import android.os.Handler;
 import android.os.Looper;
@@ -118,6 +123,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * Unit test for AppStandbyController.
@@ -421,8 +427,31 @@ public class AppStandbyControllerTests {
         pib.packageName = PACKAGE_BACKGROUND_LOCATION;
         packages.add(pib);
 
-        doReturn(packages).when(mockPm).getInstalledPackagesAsUser(anyInt(), anyInt());
 
+        // Set up getInstalledPackagesAsUser().
+        doReturn(packages).when(mockPm).getInstalledPackagesAsUser(anyInt(),
+                anyInt());
+
+        // Set up getInstalledPackagesAsUser() for "MATCH_ONLY_SYSTEM"
+        doReturn(
+                packages.stream().filter(pinfo -> pinfo.applicationInfo.isSystemApp())
+                .collect(Collectors.toList())
+        ).when(mockPm).getInstalledPackagesAsUser(
+                intThat(i -> (i & PackageManager.MATCH_SYSTEM_ONLY) != 0),
+                anyInt());
+
+        // Set up queryIntentActivitiesAsUser()
+        final ArrayList<ResolveInfo> systemFrontDoorActivities = new ArrayList<>();
+        final ResolveInfo frontDoorActivity = new ResolveInfo();
+        frontDoorActivity.activityInfo = new ActivityInfo();
+        frontDoorActivity.activityInfo.packageName = pis.packageName;
+        systemFrontDoorActivities.add(frontDoorActivity);
+        doReturn(systemFrontDoorActivities).when(mockPm)
+                .queryIntentActivitiesAsUser(any(Intent.class),
+                intThat(i -> (i & PackageManager.MATCH_SYSTEM_ONLY) != 0),
+                anyInt());
+
+        // Set up other APIs.
         try {
             for (int i = 0; i < packages.size(); ++i) {
                 PackageInfo pkg = packages.get(i);
@@ -489,6 +518,7 @@ public class AppStandbyControllerTests {
 
     @Before
     public void setUp() throws Exception {
+        LocalServices.removeServiceForTest(UsageStatsManagerInternal.class);
         LocalServices.addService(
                 UsageStatsManagerInternal.class, mock(UsageStatsManagerInternal.class));
         MyContextWrapper myContext = new MyContextWrapper(InstrumentationRegistry.getContext());
@@ -530,8 +560,8 @@ public class AppStandbyControllerTests {
                     eq(UserHandle.getAppId(ai.uid)), eq(userIdForTest), anyLong()))
                     .thenReturn(idle[i]);
         }
-        when(mInjector.mPackageManagerInternal.getInstalledApplications(anyInt(), eq(userIdForTest),
-                anyInt())).thenReturn(installedApps);
+        when(mInjector.mPackageManagerInternal.getInstalledApplications(anyLong(),
+                eq(userIdForTest), anyInt())).thenReturn(installedApps);
         final int[] returnedIdleUids = controllerUnderTest.getIdleUidsForUser(userIdForTest);
 
         assertEquals(expectedIdleUids.length, returnedIdleUids.length);
@@ -827,7 +857,6 @@ public class AppStandbyControllerTests {
     }
 
     @Test
-    @FlakyTest(bugId = 185169504)
     public void testNotificationEvent() throws Exception {
         reportEvent(mController, USER_INTERACTION, 0, PACKAGE_1);
         assertEquals(STANDBY_BUCKET_ACTIVE, getStandbyBucket(mController, PACKAGE_1));
@@ -838,6 +867,22 @@ public class AppStandbyControllerTests {
         mController.forceIdleState(PACKAGE_1, USER_ID, true);
         reportEvent(mController, NOTIFICATION_SEEN, mInjector.mElapsedRealtime, PACKAGE_1);
         assertEquals(STANDBY_BUCKET_WORKING_SET, getStandbyBucket(mController, PACKAGE_1));
+    }
+
+    @Test
+    public void testNotificationEvent_changePromotedBucket() throws Exception {
+        mController.forceIdleState(PACKAGE_1, USER_ID, true);
+        reportEvent(mController, NOTIFICATION_SEEN, mInjector.mElapsedRealtime, PACKAGE_1);
+        assertEquals(STANDBY_BUCKET_WORKING_SET, getStandbyBucket(mController, PACKAGE_1));
+
+        // TODO: Avoid hardcoding these string constants.
+        mInjector.mSettingsBuilder.setInt("notification_seen_promoted_bucket",
+                STANDBY_BUCKET_FREQUENT);
+        mInjector.mPropertiesChangedListener.onPropertiesChanged(
+                mInjector.getDeviceConfigProperties());
+        mController.forceIdleState(PACKAGE_1, USER_ID, true);
+        reportEvent(mController, NOTIFICATION_SEEN, mInjector.mElapsedRealtime, PACKAGE_1);
+        assertEquals(STANDBY_BUCKET_FREQUENT, getStandbyBucket(mController, PACKAGE_1));
     }
 
     @Test

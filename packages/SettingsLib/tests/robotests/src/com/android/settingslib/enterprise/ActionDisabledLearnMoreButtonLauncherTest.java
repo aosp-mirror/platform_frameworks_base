@@ -54,7 +54,7 @@ import org.robolectric.RobolectricTestRunner;
 public final class ActionDisabledLearnMoreButtonLauncherTest {
 
     private static final int CONTEXT_USER_ID = -ENFORCEMENT_ADMIN_USER_ID;
-    private static final UserHandle CONTEXT_USER = UserHandle.of(CONTEXT_USER_ID);
+    private static final UserHandle CONTEXT_USER = new UserHandle(CONTEXT_USER_ID);
 
     @Rule
     public final MockitoRule mMockitoRule = MockitoJUnit.rule();
@@ -80,7 +80,7 @@ public final class ActionDisabledLearnMoreButtonLauncherTest {
     @Before
     public void setUp() {
         when(mContext.getUserId()).thenReturn(CONTEXT_USER_ID);
-        when(mUserManager.getUserHandle()).thenReturn(CONTEXT_USER_ID);
+        when(mUserManager.getProcessUserId()).thenReturn(CONTEXT_USER_ID);
         when(mContext.getSystemService(DevicePolicyManager.class)).thenReturn(mDevicePolicyManager);
         when(mContext.getSystemService(UserManager.class)).thenReturn(mUserManager);
     }

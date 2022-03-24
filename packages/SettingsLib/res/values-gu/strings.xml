@@ -21,7 +21,34 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="wifi_fail_to_scan" msgid="2333336097603822490">"નેટવર્ક્સ માટે સ્કૅન કરી શકતા નથી"</string>
+    <string name="wifi_security_short_wep" msgid="7939809393561636237">"WEP"</string>
+    <string name="wifi_security_short_wpa" msgid="6998160832497442533">"WPA"</string>
+    <string name="wifi_security_short_wpa2" msgid="7697856994856831026">"WPA2"</string>
+    <string name="wifi_security_short_wpa_wpa2" msgid="2399839645955520093">"WPA/WPA2"</string>
+    <string name="wifi_security_short_eap" msgid="5029688687205212985">"802.1x"</string>
+    <string name="wifi_security_short_eap_wpa" msgid="8510772177310043426">"WPA-EAP"</string>
+    <string name="wifi_security_short_eap_wpa2_wpa3" msgid="6455656470422244501">"RSN-EAP"</string>
+    <string name="wifi_security_short_sae" msgid="78353562671556266">"WPA3"</string>
+    <string name="wifi_security_short_psk_sae" msgid="4965830739185952958">"WPA2/WPA3"</string>
+    <string name="wifi_security_short_none_owe" msgid="8827409046261759703">"એકપણ નહીં/OWE"</string>
+    <string name="wifi_security_short_owe" msgid="5073524307942025369">"OWE"</string>
+    <string name="wifi_security_short_eap_suiteb" msgid="4174071135081556115">"સ્યૂટ-B-192"</string>
     <string name="wifi_security_none" msgid="7392696451280611452">"કોઈ નહીં"</string>
+    <string name="wifi_security_wep" msgid="1413627788581122366">"WEP"</string>
+    <string name="wifi_security_wpa" msgid="1072450904799930636">"WPA-વ્યક્તિગત"</string>
+    <string name="wifi_security_wpa2" msgid="4038267581230425543">"WPA2-વ્યક્તિગત"</string>
+    <string name="wifi_security_wpa_wpa2" msgid="946853615482465986">"WPA/WPA2-વ્યક્તિગત"</string>
+    <string name="wifi_security_eap" msgid="6179633834446852269">"WPA/WPA2/WPA3-એન્ટરપ્રાઇઝ"</string>
+    <string name="wifi_security_eap_wpa" msgid="6189023812330549957">"WPA-એન્ટરપ્રાઇઝ"</string>
+    <string name="wifi_security_eap_wpa_wpa2" msgid="1089879674896108216">"WPA/WPA2-એન્ટરપ્રાઇઝ"</string>
+    <string name="wifi_security_eap_wpa2_wpa3" msgid="2952912020876252266">"WPA2/WPA3-એન્ટરપ્રાઇઝ"</string>
+    <string name="wifi_security_eap_wpa3" msgid="7961135182909018796">"WPA3-એન્ટરપ્રાઇઝ"</string>
+    <string name="wifi_security_passpoint" msgid="2209078477216565387">"Passpoint"</string>
+    <string name="wifi_security_sae" msgid="3644520541721422843">"WPA3-વ્યક્તિગત"</string>
+    <string name="wifi_security_psk_sae" msgid="8135104122179904684">"WPA2/WPA3-વ્યક્તિગત"</string>
+    <string name="wifi_security_none_owe" msgid="5241745828327404101">"એકપણ નહીં/Enhanced Open"</string>
+    <string name="wifi_security_owe" msgid="3343421403561657809">"Enhanced Open"</string>
+    <string name="wifi_security_eap_suiteb" msgid="415842785991698142">"WPA3-એન્ટરપ્રાઇઝ 192-બિટ"</string>
     <string name="wifi_remembered" msgid="3266709779723179188">"સાચવેલા"</string>
     <string name="wifi_disconnected" msgid="7054450256284661757">"ડિસ્કનેક્ટ કર્યું"</string>
     <string name="wifi_disabled_generic" msgid="2651916945380294607">"અક્ષમ કર્યો"</string>
@@ -95,7 +122,9 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD ઑડિયો: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD ઑડિયો"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"શ્રવણ યંત્રો"</string>
+    <string name="bluetooth_profile_le_audio" msgid="5158149987518342036">"LE_AUDIO"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"શ્રવણ યંત્રો સાથે કનેક્ટ કરેલું છે"</string>
+    <string name="bluetooth_le_audio_profile_summary_connected" msgid="3162538609379333442">"LE_AUDIO સાથે કનેક્ટેડ છે"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"મીડિયા ઑડિઓ સાથે કનેક્ટ કર્યુ"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"ફોન ઑડિઓ સાથે કનેક્ટ થયાં"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"ફાઇલ સ્થાનાંતરણ સેવાથી કનેક્ટ થયાં"</string>
@@ -113,6 +142,7 @@
     <string name="bluetooth_opp_profile_summary_use_for" msgid="461981154387015457">"ફાઇલ સ્થાનાંતર માટે ઉપયોગ કરો"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="4289460627406490952">"ઇનપુટ માટે ઉપયોગ કરો"</string>
     <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="7689393730163320483">"શ્રવણ યંત્રો માટે ઉપયોગ કરો"</string>
+    <string name="bluetooth_le_audio_profile_summary_use_for" msgid="2778318636027348572">"LE_AUDIO માટે ઉપયોગ કરો"</string>
     <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"જોડી"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"જોડી કરો"</string>
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"રદ કરો"</string>
@@ -252,7 +282,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"વાયરલેસ ડિસ્પ્લે પ્રમાણન"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"વાઇ-ફાઇ વર્બોઝ લૉગિંગ ચાલુ કરો"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"વાઇ-ફાઇ સ્કૅનની ક્ષમતા મર્યાદિત કરવી"</string>
-    <string name="wifi_enhanced_mac_randomization" msgid="882650208573834301">"વાઇ-ફાઇ માટે સતત બદલાતું MAC રેન્ડમાઇઝેશન"</string>
+    <string name="wifi_non_persistent_mac_randomization" msgid="7482769677894247316">"વાઇ-ફાઇ માટે સતત બદલાતું MAC રેન્ડમાઇઝેશન"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"મોબાઇલ ડેટા હંમેશાં સક્રિય"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"ટિથરિંગ માટે હાર્ડવેર ગતિવૃદ્ધિ"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"નામ વિનાના બ્લૂટૂથ ડિવાઇસ બતાવો"</string>
@@ -284,7 +314,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"વાયરલેસ ડિસ્પ્લે પ્રમાણપત્ર માટેના વિકલ્પો બતાવો"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"વાઇ-ફાઇ લોગિંગ સ્તર વધારો, વાઇ-ફાઇ પીકરમાં SSID RSSI દીઠ બતાવો"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"બૅટરીનો ચાર્જ ઝડપથી ઓછો થવાનું ટાળે છે અને નેટવર્કના કાર્યપ્રદર્શનમાં સુધારો કરે છે"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"આ મોડ ચાલુ કરેલો હશે, ત્યારે MAC રેન્ડમાઇઝેશન ચાલુ કરેલું હોય તેવા નેટવર્ક સાથે આ ડિવાઇસ જોડાશે ત્યારે દર વખતે તેનું MAC ઍડ્રેસ બદલાય તેમ બની શકે છે."</string>
+    <string name="wifi_non_persistent_mac_randomization_summary" msgid="2159794543105053930">"આ મોડ ચાલુ કરેલો હોય ત્યારે MAC રેન્ડમાઇઝેશન ચાલુ કરેલું હોય તેવા નેટવર્ક સાથે આ ડિવાઇસ કનેક્ટ થશે, ત્યારે દર વખતે તેનું MAC ઍડ્રેસ બદલાય તેવું બની શકે છે."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"મીટર કરેલું"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"મીટર ન કરેલ"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"લોગર બફર કદ"</string>
@@ -426,7 +456,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"પ્રોટેનોમલી (લાલ-લીલો)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"ટ્રાઇટેનોમલી(વાદળી-પીળો)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"રંગ સુધારણા"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="2333641630205214702">"તમારા ડિવાઇસ પર રંગો કેવી રીતે બતાવવામાં આવે તેની ગોઠવણી કરો. આ ત્યારે સહાયરૂપ થઈ શકે છે જ્યારે તમારે:&lt;br/&gt;&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;રંગો વધુ યોગ્ય રીતે જોવા હોય&lt;/li&gt; &lt;li&gt;&amp;nbsp;તમને ફોકસ કરવામાં સહાયતા રહે તે માટે રંગો કાઢી નાખવા હોય&lt;/li&gt; &lt;/ol&gt;"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"રંગમાં સુધારણા કરવાની સુવિધાનો ઉપયોગ ત્યારે સહાયરૂપ બની શકે છે કે જ્યારે તમે આ કરવા માગતા હો:&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;વધુ સચોટપણે રંગ જોવા&lt;/li&gt; &lt;li&gt;&amp;nbsp;ફોકસ કરવામાં સહાય માટે અમુક રંગ કાઢી નાખવા&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> દ્વારા ઓવરરાઇડ થયું"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"લગભગ <xliff:g id="TIME_REMAINING">%1$s</xliff:g> બાકી છે"</string>
@@ -463,7 +493,9 @@
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"ચાર્જ થઈ રહ્યું નથી"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"કનેક્ટ કરેલું છે, પણ ચાર્જ થઈ રહ્યું નથી"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"ચાર્જ થયું"</string>
+    <string name="battery_info_status_full_charged" msgid="3536054261505567948">"સંપૂર્ણપણે ચાર્જ છે"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"વ્યવસ્થાપક દ્વારા નિયંત્રિત"</string>
+    <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"પ્રતિબંધિત સેટિંગ દ્વારા નિયંત્રિત"</string>
     <string name="disabled" msgid="8017887509554714950">"અક્ષમ કર્યો"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"મંજૂરી છે"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"મંજૂરી નથી"</string>
@@ -496,14 +528,13 @@
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"રજિસ્ટર કરેલ નથી"</string>
     <string name="status_unavailable" msgid="5279036186589861608">"અનુપલબ્ધ"</string>
     <string name="wifi_status_mac_randomized" msgid="466382542497832189">"MACને રેન્ડમ કરેલ છે"</string>
-    <plurals name="wifi_tether_connected_summary" formatted="false" msgid="6317236306047306139">
-      <item quantity="one">%1$d ડિવાઇસ કનેક્ટ કર્યું</item>
-      <item quantity="other">%1$d ડિવાઇસ કનેક્ટ કર્યા</item>
-    </plurals>
+    <string name="wifi_tether_connected_summary" msgid="5282919920463340158">"{count,plural, =0{કોઈ ડિવાઇસ કનેક્ટેડ નથી}=1{1 ડિવાઇસ કનેક્ટેડ છે}one{# ડિવાઇસ કનેક્ટેડ છે}other{# ડિવાઇસ કનેક્ટેડ છે}}"</string>
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"વધુ સમય."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"ઓછો સમય."</string>
     <string name="cancel" msgid="5665114069455378395">"રદ કરો"</string>
     <string name="okay" msgid="949938843324579502">"ઓકે"</string>
+    <!-- no translation found for done (381184316122520313) -->
+    <skip />
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"અલાર્મ અને રિમાઇન્ડર"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"અલાર્મ અને રિમાન્ડરના સેટિંગની મંજૂરી આપો"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"અલાર્મ અને રિમાઇન્ડર"</string>
@@ -522,7 +553,9 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"દર વખતે પૂછો"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"તમે બંધ ન કરો ત્યાં સુધી"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"હમણાં જ"</string>
-    <string name="media_transfer_this_device_name" msgid="2716555073132169240">"ફોન સ્પીકર"</string>
+    <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"આ ફોન"</string>
+    <!-- no translation found for media_transfer_this_device_name (3714653244000242800) -->
+    <skip />
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"આ ફોન"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"કનેક્ટ કરવામાં સમસ્યા આવી રહી છે. ડિવાઇસને બંધ કરીને ફરી ચાલુ કરો"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"વાયરવાળો ઑડિયો ડિવાઇસ"</string>
@@ -562,7 +595,9 @@
     <string name="user_set_lock_button" msgid="1427128184982594856">"લૉક સેટ કરો"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"<xliff:g id="USER_NAME">%s</xliff:g> પર સ્વિચ કરો"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"નવા વપરાશકર્તા બનાવી રહ્યાં છીએ…"</string>
+    <string name="creating_new_guest_dialog_message" msgid="1114905602181350690">"નવા અતિથિની પ્રોફાઇલ બનાવી રહ્યાં છીએ…"</string>
     <string name="add_user_failed" msgid="4809887794313944872">"નવો વપરાશકર્તા બનાવવામાં નિષ્ફળ"</string>
+    <string name="add_guest_failed" msgid="8074548434469843443">"નવી અતિથિ બનાવવામાં નિષ્ફળ રહ્યાં"</string>
     <string name="user_nickname" msgid="262624187455825083">"ઉપનામ"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"અતિથિ ઉમેરો"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"અતિથિને કાઢી નાખો"</string>
@@ -608,4 +643,14 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"ઇથરનેટ ડિસ્કનેક્ટ થયું."</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"ઇથરનેટ."</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"કોઈ કૉલિંગ નહીં."</string>
+    <string name="dream_complication_title_time" msgid="701747800712893499">"સમય"</string>
+    <string name="dream_complication_title_date" msgid="8661176085446135789">"તારીખ"</string>
+    <string name="dream_complication_title_weather" msgid="598609151677172783">"હવામાન"</string>
+    <string name="dream_complication_title_aqi" msgid="4587552608957834110">"હવાની ક્વૉલિટી"</string>
+    <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"કાસ્ટ વિશેની માહિતી"</string>
+    <string name="avatar_picker_title" msgid="8492884172713170652">"પ્રોફાઇલ ફોટો પસંદ કરો"</string>
+    <string name="default_user_icon_description" msgid="6554047177298972638">"ડિફૉલ્ટ વપરાશકર્તાનું આઇકન"</string>
+    <string name="physical_keyboard_title" msgid="4811935435315835220">"ભૌતિક કીબોર્ડ"</string>
+    <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"કીબોર્ડ લેઆઉટ પસંદ કરો"</string>
+    <string name="keyboard_layout_default_label" msgid="1997292217218546957">"ડિફૉલ્ટ"</string>
 </resources>

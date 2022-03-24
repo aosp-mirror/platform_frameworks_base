@@ -121,8 +121,8 @@ jint DoLoadWithRelroFile(JNIEnv* env, const char* lib, const char* relro,
                          jobject clazzLoader) {
   int relro_fd = TEMP_FAILURE_RETRY(open(relro, O_RDONLY));
   if (relro_fd == -1) {
-    ALOGE("Failed to open relro file %s: %s", relro, strerror(errno));
-    return LIBLOAD_FAILED_TO_OPEN_RELRO_FILE;
+      ALOGW("Failed to open relro file %s: %s", relro, strerror(errno));
+      return LIBLOAD_FAILED_TO_OPEN_RELRO_FILE;
   }
   android_namespace_t* ns =
       android::FindNamespaceByClassLoader(env, clazzLoader);

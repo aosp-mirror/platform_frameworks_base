@@ -24,8 +24,9 @@ import static com.android.server.notification.NotificationManagerService.Notific
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
+import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertTrue;
+
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
@@ -41,7 +42,6 @@ import android.service.notification.NotificationListenerFilter;
 import android.service.notification.NotificationListenerService;
 import android.util.ArraySet;
 import android.util.Pair;
-import android.util.Slog;
 import android.util.TypedXmlPullParser;
 import android.util.TypedXmlSerializer;
 import android.util.Xml;
@@ -355,4 +355,19 @@ public class NotificationListenersTest extends UiServiceTestCase {
                 .getDisallowedPackages()).isEmpty();
     }
 
+    @Test
+    public void testHasAllowedListener() {
+        final int uid1 = 1, uid2 = 2;
+        // enable mCn1 but not mCn2 for uid1
+        mListeners.addApprovedList(mCn1.flattenToString(), uid1, true);
+
+        // verify that:
+        // the package for mCn1 has an allowed listener for uid1 and not uid2
+        assertTrue(mListeners.hasAllowedListener(mCn1.getPackageName(), uid1));
+        assertFalse(mListeners.hasAllowedListener(mCn1.getPackageName(), uid2));
+
+        // and that mCn2 has no allowed listeners for either user id
+        assertFalse(mListeners.hasAllowedListener(mCn2.getPackageName(), uid1));
+        assertFalse(mListeners.hasAllowedListener(mCn2.getPackageName(), uid2));
+    }
 }

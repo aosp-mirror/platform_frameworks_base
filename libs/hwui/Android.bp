@@ -35,7 +35,6 @@ cc_defaults {
         "skia_deps",
         //"hwui_bugreport_font_cache_usage",
         //"hwui_compile_for_perf",
-        "hwui_pgo",
         "hwui_lto",
     ],
 
@@ -107,6 +106,8 @@ cc_defaults {
     target: {
         android: {
             shared_libs: [
+                "android.hardware.graphics.common-V3-ndk",
+                "android.hardware.graphics.common@1.2",
                 "liblog",
                 "libcutils",
                 "libutils",
@@ -126,9 +127,11 @@ cc_defaults {
             static_libs: [
                 "libEGL_blobCache",
                 "libprotoutil",
+                "libshaders",
                 "libstatslog_hwui",
                 "libstatspull_lazy",
                 "libstatssocket_lazy",
+                "libtonemap",
             ],
         },
         host: {
@@ -153,22 +156,6 @@ cc_defaults {
         "-marm",
         "-mapcs",
     ],
-}
-
-// Build libhwui with PGO by default.
-// Location of PGO profile data is defined in build/soong/cc/pgo.go
-// and is separate from hwui.
-// To turn it off, set ANDROID_PGO_NO_PROFILE_USE environment variable
-// or set enable_profile_use property to false.
-cc_defaults {
-    name: "hwui_pgo",
-
-    pgo: {
-        instrumentation: true,
-        profile_file: "hwui/hwui.profdata",
-        benchmarks: ["hwui"],
-        enable_profile_use: true,
-    },
 }
 
 // Build hwui library with ThinLTO by default.
@@ -272,7 +259,6 @@ cc_defaults {
                 "apex/android_bitmap.cpp",
                 "apex/android_canvas.cpp",
                 "apex/jni_runtime.cpp",
-                "apex/renderthread.cpp",
             ],
         },
         host: {
@@ -359,6 +345,7 @@ cc_defaults {
         "jni/PathEffect.cpp",
         "jni/PathMeasure.cpp",
         "jni/Picture.cpp",
+        "jni/Region.cpp",
         "jni/Shader.cpp",
         "jni/RenderEffect.cpp",
         "jni/Typeface.cpp",
@@ -408,7 +395,6 @@ cc_defaults {
                 "jni/GraphicsStatsService.cpp",
                 "jni/Movie.cpp",
                 "jni/MovieImpl.cpp",
-                "jni/Region.cpp", // requires libbinder_ndk
                 "jni/pdf/PdfDocument.cpp",
                 "jni/pdf/PdfEditor.cpp",
                 "jni/pdf/PdfRenderer.cpp",
@@ -549,7 +535,10 @@ cc_defaults {
 
     target: {
         android: {
-            header_libs: ["libandroid_headers_private"],
+            header_libs: [
+                "libandroid_headers_private",
+                "libtonemap_headers",
+            ],
 
             srcs: [
                 "hwui/AnimatedImageThread.cpp",
@@ -570,6 +559,7 @@ cc_defaults {
                 "renderthread/DrawFrameTask.cpp",
                 "renderthread/EglManager.cpp",
                 "renderthread/ReliableSurface.cpp",
+                "renderthread/RenderEffectCapabilityQuery.cpp",
                 "renderthread/VulkanManager.cpp",
                 "renderthread/VulkanSurface.cpp",
                 "renderthread/RenderProxy.cpp",
@@ -587,6 +577,7 @@ cc_defaults {
                 "HardwareBitmapUploader.cpp",
                 "HWUIProperties.sysprop",
                 "JankTracker.cpp",
+                "FrameMetricsReporter.cpp",
                 "Layer.cpp",
                 "LayerUpdateQueue.cpp",
                 "ProfileData.cpp",
@@ -626,6 +617,7 @@ cc_library {
             version_script: "libhwui.map.txt",
         },
     },
+    afdo: true,
 }
 
 cc_library_static {
@@ -691,11 +683,13 @@ cc_test {
         "tests/unit/FatVectorTests.cpp",
         "tests/unit/GraphicsStatsServiceTests.cpp",
         "tests/unit/JankTrackerTests.cpp",
+        "tests/unit/FrameMetricsReporterTests.cpp",
         "tests/unit/LayerUpdateQueueTests.cpp",
         "tests/unit/LinearAllocatorTests.cpp",
         "tests/unit/MatrixTests.cpp",
         "tests/unit/OpBufferTests.cpp",
         "tests/unit/PathInterpolatorTests.cpp",
+        "tests/unit/RenderEffectCapabilityQueryTests.cpp",
         "tests/unit/RenderNodeDrawableTests.cpp",
         "tests/unit/RenderNodeTests.cpp",
         "tests/unit/RenderPropertiesTests.cpp",
@@ -755,17 +749,5 @@ cc_benchmark {
         "tests/microbench/LinearAllocatorBench.cpp",
         "tests/microbench/PathParserBench.cpp",
         "tests/microbench/RenderNodeBench.cpp",
-    ],
-}
-
-// ----------------------------------------
-// Phony target to build benchmarks for PGO
-// ----------------------------------------
-
-phony {
-    name: "pgo-targets-hwui",
-    required: [
-        "hwuimicro",
-        "hwuimacro",
     ],
 }

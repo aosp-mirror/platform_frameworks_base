@@ -21,7 +21,6 @@
         <item name="*android:windowFixedHeightMajor">100%</item>
         <item name="*android:windowFixedHeightMinor">100%</item>
         <item name="android:windowBackground">@android:color/transparent</item>
-        <item name="android:forceDarkAllowed">true</item>
     </style>
 
 </resources>

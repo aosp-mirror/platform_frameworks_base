@@ -37,6 +37,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
+import java.util.Random;
 
 /**
  * Benchmarks for {@link android.content.res.Resources}.
@@ -220,6 +221,26 @@ public class ResourcesPerfTest {
             state.pauseTiming();
             mRes.flushLayoutCache();
             state.resumeTiming();
+        }
+    }
+
+    @Test
+    public void getIdentifier() {
+        final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final Random random = new Random(System.currentTimeMillis());
+        final Context context = InstrumentationRegistry.getTargetContext();
+        final String packageName = context.getPackageName();
+        while (state.keepRunning()) {
+            state.pauseTiming();
+            final int expectedInteger = random.nextInt(10001);
+            final String expectedString = Integer.toHexString(expectedInteger);
+            final String entryName = "i_am_color_" + expectedString;
+            state.resumeTiming();
+
+            final int resIdentifier = mRes.getIdentifier(entryName, "color", packageName);
+            if (resIdentifier == 0) {
+                fail("Color \"" + entryName + "\" is not found");
+            }
         }
     }
 }

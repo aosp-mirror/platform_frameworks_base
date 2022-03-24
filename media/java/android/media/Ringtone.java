@@ -504,49 +504,51 @@ public class Ringtone {
     }
 
     private boolean playFallbackRingtone() {
-        if (mAudioManager.getStreamVolume(AudioAttributes.toLegacyStreamType(mAudioAttributes))
-                != 0) {
-            int ringtoneType = RingtoneManager.getDefaultType(mUri);
-            if (ringtoneType == -1 ||
-                    RingtoneManager.getActualDefaultRingtoneUri(mContext, ringtoneType) != null) {
-                // Default ringtone, try fallback ringtone.
-                try {
-                    AssetFileDescriptor afd = mContext.getResources().openRawResourceFd(
-                            com.android.internal.R.raw.fallbackring);
-                    if (afd != null) {
-                        mLocalPlayer = new MediaPlayer();
-                        if (afd.getDeclaredLength() < 0) {
-                            mLocalPlayer.setDataSource(afd.getFileDescriptor());
-                        } else {
-                            mLocalPlayer.setDataSource(afd.getFileDescriptor(),
-                                    afd.getStartOffset(),
-                                    afd.getDeclaredLength());
-                        }
-                        mLocalPlayer.setAudioAttributes(mAudioAttributes);
-                        synchronized (mPlaybackSettingsLock) {
-                            applyPlaybackProperties_sync();
-                        }
-                        if (mVolumeShaperConfig != null) {
-                            mVolumeShaper = mLocalPlayer.createVolumeShaper(mVolumeShaperConfig);
-                        }
-                        mLocalPlayer.prepare();
-                        startLocalPlayer();
-                        afd.close();
-                        return true;
-                    } else {
-                        Log.e(TAG, "Could not load fallback ringtone");
-                    }
-                } catch (IOException ioe) {
-                    destroyLocalPlayer();
-                    Log.e(TAG, "Failed to open fallback ringtone");
-                } catch (NotFoundException nfe) {
-                    Log.e(TAG, "Fallback ringtone does not exist");
-                }
-            } else {
-                Log.w(TAG, "not playing fallback for " + mUri);
-            }
+        int streamType = AudioAttributes.toLegacyStreamType(mAudioAttributes);
+        if (mAudioManager.getStreamVolume(streamType) == 0) {
+            return false;
         }
-        return false;
+        int ringtoneType = RingtoneManager.getDefaultType(mUri);
+        if (ringtoneType != -1 &&
+                RingtoneManager.getActualDefaultRingtoneUri(mContext, ringtoneType) == null) {
+            Log.w(TAG, "not playing fallback for " + mUri);
+            return false;
+        }
+        // Default ringtone, try fallback ringtone.
+        try {
+            AssetFileDescriptor afd = mContext.getResources().openRawResourceFd(
+                    com.android.internal.R.raw.fallbackring);
+            if (afd == null) {
+                Log.e(TAG, "Could not load fallback ringtone");
+                return false;
+            }
+            mLocalPlayer = new MediaPlayer();
+            if (afd.getDeclaredLength() < 0) {
+                mLocalPlayer.setDataSource(afd.getFileDescriptor());
+            } else {
+                mLocalPlayer.setDataSource(afd.getFileDescriptor(),
+                        afd.getStartOffset(),
+                        afd.getDeclaredLength());
+            }
+            mLocalPlayer.setAudioAttributes(mAudioAttributes);
+            synchronized (mPlaybackSettingsLock) {
+                applyPlaybackProperties_sync();
+            }
+            if (mVolumeShaperConfig != null) {
+                mVolumeShaper = mLocalPlayer.createVolumeShaper(mVolumeShaperConfig);
+            }
+            mLocalPlayer.prepare();
+            startLocalPlayer();
+            afd.close();
+        } catch (IOException ioe) {
+            destroyLocalPlayer();
+            Log.e(TAG, "Failed to open fallback ringtone");
+            return false;
+        } catch (NotFoundException nfe) {
+            Log.e(TAG, "Fallback ringtone does not exist");
+            return false;
+        }
+        return true;
     }
 
     void setTitle(String title) {

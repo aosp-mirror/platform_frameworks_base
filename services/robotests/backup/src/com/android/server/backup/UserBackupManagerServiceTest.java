@@ -243,7 +243,7 @@ public class UserBackupManagerServiceTest {
 
         assertThat(result).isTrue();
         verify(mTransportManager)
-                .disposeOfTransportClient(eq(transportMock.transportClient), any());
+                .disposeOfTransportClient(eq(transportMock.mTransportConnection), any());
     }
 
     /**
@@ -282,7 +282,7 @@ public class UserBackupManagerServiceTest {
 
         assertThat(filtered).asList().containsExactly(PACKAGE_1);
         verify(mTransportManager)
-                .disposeOfTransportClient(eq(transportMock.transportClient), any());
+                .disposeOfTransportClient(eq(transportMock.mTransportConnection), any());
     }
 
     /**
@@ -357,7 +357,7 @@ public class UserBackupManagerServiceTest {
         assertThat(getSettingsTransport()).isEqualTo(mNewTransport.transportName);
         assertThat(oldTransport).isEqualTo(mOldTransport.transportName);
         verify(mTransportManager)
-                .disposeOfTransportClient(eq(mNewTransportMock.transportClient), any());
+                .disposeOfTransportClient(eq(mNewTransportMock.mTransportConnection), any());
     }
 
     /**
@@ -395,7 +395,7 @@ public class UserBackupManagerServiceTest {
         assertThat(getSettingsTransport()).isEqualTo(mNewTransport.transportName);
         verify(callback).onSuccess(eq(mNewTransport.transportName));
         verify(mTransportManager)
-                .disposeOfTransportClient(eq(mNewTransportMock.transportClient), any());
+                .disposeOfTransportClient(eq(mNewTransportMock.mTransportConnection), any());
     }
 
     /**

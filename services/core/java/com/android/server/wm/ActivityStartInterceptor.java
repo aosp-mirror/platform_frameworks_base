@@ -37,6 +37,7 @@ import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 import android.annotation.Nullable;
 import android.app.ActivityOptions;
 import android.app.KeyguardManager;
+import android.app.TaskInfo;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.content.Context;
 import android.content.IIntentSender;
@@ -51,6 +52,7 @@ import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.util.SparseArray;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.BlockedAppActivity;
@@ -59,6 +61,7 @@ import com.android.internal.app.SuspendedAppActivity;
 import com.android.internal.app.UnlaunchableAppActivity;
 import com.android.server.LocalServices;
 import com.android.server.am.ActivityManagerService;
+import com.android.server.wm.ActivityInterceptorCallback.ActivityInterceptResult;
 
 /**
  * A class that contains activity intercepting logic for {@link ActivityStarter#startActivityLocked}
@@ -178,7 +181,31 @@ class ActivityStartInterceptor {
             // before issuing the work challenge.
             return true;
         }
-        return interceptLockedManagedProfileIfNeeded();
+        if (interceptLockedManagedProfileIfNeeded()) {
+            return true;
+        }
+
+        final SparseArray<ActivityInterceptorCallback> callbacks =
+                mService.getActivityInterceptorCallbacks();
+        final ActivityInterceptorCallback.ActivityInterceptorInfo interceptorInfo =
+                getInterceptorInfo();
+
+        for (int i = 0; i < callbacks.size(); i++) {
+            final ActivityInterceptorCallback callback = callbacks.valueAt(i);
+            final ActivityInterceptResult interceptResult = callback.intercept(interceptorInfo);
+            if (interceptResult == null) {
+                continue;
+            }
+            mIntent = interceptResult.intent;
+            mActivityOptions = interceptResult.activityOptions;
+            mCallingPid = mRealCallingPid;
+            mCallingUid = mRealCallingUid;
+            mRInfo = mSupervisor.resolveIntent(mIntent, null, mUserId, 0, mRealCallingUid);
+            mAInfo = mSupervisor.resolveActivity(mIntent, mRInfo, mStartFlags,
+                    null /*profilerInfo*/);
+            return true;
+        }
+        return false;
     }
 
     private boolean hasCrossProfileAnimation() {
@@ -328,10 +355,10 @@ class ActivityStartInterceptor {
      * @return The intercepting intent if needed.
      */
     private Intent interceptWithConfirmCredentialsIfNeeded(ActivityInfo aInfo, int userId) {
-        if (!mService.mAmInternal.shouldConfirmCredentials(userId)) {
+        if ((aInfo.flags & ActivityInfo.FLAG_SHOW_WHEN_LOCKED) != 0
+                || !mService.mAmInternal.shouldConfirmCredentials(userId)) {
             return null;
         }
-        // TODO(b/28935539): should allow certain activities to bypass work challenge
         final IntentSender target = createIntentSenderForOriginalIntent(mCallingUid,
                 FLAG_CANCEL_CURRENT | FLAG_ONE_SHOT | FLAG_IMMUTABLE);
         final KeyguardManager km = (KeyguardManager) mServiceContext
@@ -374,5 +401,25 @@ class ActivityStartInterceptor {
         mRInfo = mSupervisor.resolveIntent(mIntent, mResolvedType, mUserId, 0, mRealCallingUid);
         mAInfo = mSupervisor.resolveActivity(mIntent, mRInfo, mStartFlags, null /*profilerInfo*/);
         return true;
+    }
+
+    /**
+     * Called when an activity is successfully launched.
+     */
+    void onActivityLaunched(TaskInfo taskInfo, ActivityInfo activityInfo) {
+        final SparseArray<ActivityInterceptorCallback> callbacks =
+                mService.getActivityInterceptorCallbacks();
+        ActivityInterceptorCallback.ActivityInterceptorInfo info = getInterceptorInfo();
+        for (int i = 0; i < callbacks.size(); i++) {
+            final ActivityInterceptorCallback callback = callbacks.valueAt(i);
+            callback.onActivityLaunched(taskInfo, activityInfo, info);
+        }
+    }
+
+    private ActivityInterceptorCallback.ActivityInterceptorInfo getInterceptorInfo() {
+        return new ActivityInterceptorCallback.ActivityInterceptorInfo(mRealCallingUid,
+                mRealCallingPid, mUserId, mCallingPackage, mCallingFeatureId, mIntent,
+                mRInfo, mAInfo, mResolvedType, mCallingPid, mCallingUid,
+                mActivityOptions);
     }
 }

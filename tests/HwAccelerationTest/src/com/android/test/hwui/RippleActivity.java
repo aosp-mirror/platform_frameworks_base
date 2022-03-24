@@ -91,7 +91,7 @@ public class RippleActivity extends Activity {
                 + "    d = rand(float2(x, y)) > density ? d : d * .2;\n"
                 + "    d = d * rand(float2(fraction, x * y));\n"
                 + "    float alpha = 1. - pow(fraction, 3.);\n"
-                + "    return float4(sample(in_paintColor, p).rgb, d * alpha);\n"
+                + "    return float4(in_paintColor.eval(p).rgb, d * alpha);\n"
                 + "}";
 
         RippleView(Context c) {
@@ -109,8 +109,8 @@ public class RippleActivity extends Activity {
             p.setColor(mColor);
             mPaint = CanvasProperty.createPaint(p);
 
-            mRuntimeShader = new RuntimeShader(sSkSL, false);
-            mRuntimeShader.setUniform("in_maxRadius", MAX_RADIUS);
+            mRuntimeShader = new RuntimeShader(sSkSL);
+            mRuntimeShader.setFloatUniform("in_maxRadius", MAX_RADIUS);
         }
 
         @Override

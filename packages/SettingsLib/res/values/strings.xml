@@ -20,68 +20,68 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <!-- Toast message when Wi-Fi cannot scan for networks -->
     <string name="wifi_fail_to_scan">Can\'t scan for networks</string>
-    <!-- Do not translate.  Concise terminology for wifi with WEP security -->
-    <string name="wifi_security_short_wep" translatable="false">WEP</string>
-    <!-- Do not translate.  Concise terminology for wifi with WPA security -->
-    <string name="wifi_security_short_wpa" translatable="false">WPA</string>
-    <!-- Do not translate.  Concise terminology for wifi with WPA2 security -->
-    <string name="wifi_security_short_wpa2" translatable="false">WPA2</string>
-    <!-- Do not translate.  Concise terminology for wifi with both WPA/WPA2 security -->
-    <string name="wifi_security_short_wpa_wpa2" translatable="false">WPA/WPA2</string>
-    <!-- Do not translate.  Concise terminology for wifi with unknown PSK type -->
+    <!-- Concise terminology for wifi with WEP security [CHAR LIMIT=40] -->
+    <string name="wifi_security_short_wep">WEP</string>
+    <!-- Concise terminology for wifi with WPA security [CHAR LIMIT=40] -->
+    <string name="wifi_security_short_wpa">WPA</string>
+    <!-- Concise terminology for wifi with WPA2 security [CHAR LIMIT=40] -->
+    <string name="wifi_security_short_wpa2">WPA2</string>
+    <!-- Concise terminology for wifi with both WPA/WPA2 security [CHAR LIMIT=40] -->
+    <string name="wifi_security_short_wpa_wpa2">WPA/WPA2</string>
+    <!-- Concise terminology for wifi with unknown PSK type -->
     <string name="wifi_security_short_psk_generic" translatable="false">@string/wifi_security_short_wpa_wpa2</string>
-    <!-- Do not translate.  Concise terminology for wifi with 802.1x EAP security -->
-    <string name="wifi_security_short_eap" translatable="false">802.1x</string>
-    <!-- Do not translate.  Concise terminology for wifi with WPA 802.1x EAP security -->
-    <string name="wifi_security_short_eap_wpa" translatable="false">WPA-EAP</string>
-    <!-- Do not translate.  Concise terminology for wifi with WPA2/WPA3 802.1x EAP security -->
-    <string name="wifi_security_short_eap_wpa2_wpa3" translatable="false">RSN-EAP</string>
-    <!-- Do not translate.  Concise terminology for wifi with WPA3 security -->
-    <string name="wifi_security_short_sae" translatable="false">WPA3</string>
-    <!-- Do not translate.  Concise terminology for wifi with WPA2/WPA3 transition security -->
-    <string name="wifi_security_short_psk_sae" translatable="false">WPA2/WPA3</string>
-    <!-- Do not translate.  Concise terminology for Wi-Fi with None/OWE transition mode security -->
-    <string name="wifi_security_short_none_owe" translatable="false">None/OWE</string>
-    <!-- Do not translate.  Concise terminology for wifi with OWE security -->
-    <string name="wifi_security_short_owe" translatable="false">OWE</string>
-    <!-- Do not translate.  Concise terminology for wifi with 802.1x EAP Suite-B-192 security -->
-    <string name="wifi_security_short_eap_suiteb" translatable="false">Suite-B-192</string>
+    <!-- Concise terminology for wifi with 802.1x EAP security [CHAR LIMIT=40] -->
+    <string name="wifi_security_short_eap">802.1x</string>
+    <!-- Concise terminology for wifi with WPA 802.1x EAP security [CHAR LIMIT=40] -->
+    <string name="wifi_security_short_eap_wpa">WPA-EAP</string>
+    <!-- Concise terminology for wifi with WPA2/WPA3 802.1x EAP security [CHAR LIMIT=40] -->
+    <string name="wifi_security_short_eap_wpa2_wpa3">RSN-EAP</string>
+    <!-- Concise terminology for wifi with WPA3 security [CHAR LIMIT=40] -->
+    <string name="wifi_security_short_sae">WPA3</string>
+    <!-- Concise terminology for wifi with WPA2/WPA3 transition security [CHAR LIMIT=40] -->
+    <string name="wifi_security_short_psk_sae">WPA2/WPA3</string>
+    <!-- Concise terminology for Wi-Fi with None/OWE transition mode security [CHAR LIMIT=40] -->
+    <string name="wifi_security_short_none_owe">None/OWE</string>
+    <!-- Concise terminology for wifi with OWE security [CHAR LIMIT=40] -->
+    <string name="wifi_security_short_owe">OWE</string>
+    <!-- Concise terminology for wifi with 802.1x EAP Suite-B-192 security [CHAR LIMIT=40] -->
+    <string name="wifi_security_short_eap_suiteb">Suite-B-192</string>
 
     <!-- Used in Wi-Fi settings dialogs when Wi-Fi does not have any security. [CHAR LIMIT=40] -->
     <string name="wifi_security_none">None</string>
 
-    <!-- Do not translate.  Terminology for wifi with WEP security -->
-    <string name="wifi_security_wep" translatable="false">WEP</string>
-    <!-- Do not translate.  Terminology for wifi with WPA security -->
-    <string name="wifi_security_wpa" translatable="false">WPA-Personal</string>
-    <!-- Do not translate.  Terminology for wifi with WPA2 security -->
-    <string name="wifi_security_wpa2" translatable="false">WPA2-Personal</string>
-    <!-- Do not translate.  Terminology for wifi with both WPA/WPA2 security, or unknown -->
-    <string name="wifi_security_wpa_wpa2" translatable="false">WPA/WPA2-Personal</string>
-    <!-- Do not translate.  Terminology for wifi with unknown PSK type -->
+    <!-- Terminology for wifi with WEP security [CHAR LIMIT=40] -->
+    <string name="wifi_security_wep">WEP</string>
+    <!-- Terminology for wifi with WPA security [CHAR LIMIT=40] -->
+    <string name="wifi_security_wpa">WPA-Personal</string>
+    <!-- Terminology for wifi with WPA2 security [CHAR LIMIT=40] -->
+    <string name="wifi_security_wpa2">WPA2-Personal</string>
+    <!-- Terminology for wifi with both WPA/WPA2 security, or unknown [CHAR LIMIT=40] -->
+    <string name="wifi_security_wpa_wpa2">WPA/WPA2-Personal</string>
+    <!-- Terminology for wifi with unknown PSK type -->
     <string name="wifi_security_psk_generic" translatable="false">@string/wifi_security_wpa_wpa2</string>
-    <!-- Do not translate.  Concise terminology for wifi with 802.1x EAP security -->
-    <string name="wifi_security_eap" translatable="false">WPA/WPA2/WPA3-Enterprise</string>
-    <!-- Do not translate.  Concise terminology for wifi with WPA 802.1x EAP security -->
-    <string name="wifi_security_eap_wpa" translatable="false">WPA-Enterprise</string>
-    <!-- Do not translate.  Concise terminology for wifi with 802.1x EAP security -->
-    <string name="wifi_security_eap_wpa_wpa2" translatable="false">WPA/WPA2-Enterprise</string>
-    <!-- Do not translate.  Concise terminology for wifi with WPA2/WPA3 802.1x EAP security -->
-    <string name="wifi_security_eap_wpa2_wpa3" translatable="false">WPA2/WPA3-Enterprise</string>
-    <!-- Do not translate.  Concise terminology for wifi with WPA3 802.1x EAP security -->
-    <string name="wifi_security_eap_wpa3" translatable="false">WPA3-Enterprise</string>
-    <!-- Do not translate.  Concise terminology for Passpoint network -->
-    <string name="wifi_security_passpoint" translatable="false">Passpoint</string>
-    <!-- Do not translate.  Terminology for wifi with WPA3 security -->
-    <string name="wifi_security_sae" translatable="false">WPA3-Personal</string>
-    <!-- Do not translate.  Terminology for wifi with WPA2/WPA3 Transition mode security -->
-    <string name="wifi_security_psk_sae" translatable="false">WPA2/WPA3-Personal</string>
-    <!-- Do not translate.  Terminology for Wi-Fi with None/OWE transition mode security -->
-    <string name="wifi_security_none_owe" translatable="false">None/Enhanced Open</string>
-    <!-- Do not translate.  Terminology for wifi with OWE security -->
-    <string name="wifi_security_owe" translatable="false">Enhanced Open</string>
-    <!-- Do not translate.  Concise terminology for wifi with 802.1x EAP Suite-B-192 security -->
-    <string name="wifi_security_eap_suiteb" translatable="false">WPA3-Enterprise 192-bit</string>
+    <!-- Concise terminology for wifi with 802.1x EAP security [CHAR LIMIT=40] -->
+    <string name="wifi_security_eap">WPA/WPA2/WPA3-Enterprise</string>
+    <!-- Concise terminology for wifi with WPA 802.1x EAP security [CHAR LIMIT=40] -->
+    <string name="wifi_security_eap_wpa">WPA-Enterprise</string>
+    <!-- Concise terminology for wifi with 802.1x EAP security [CHAR LIMIT=40] -->
+    <string name="wifi_security_eap_wpa_wpa2">WPA/WPA2-Enterprise</string>
+    <!-- Concise terminology for wifi with WPA2/WPA3 802.1x EAP security [CHAR LIMIT=40] -->
+    <string name="wifi_security_eap_wpa2_wpa3">WPA2/WPA3-Enterprise</string>
+    <!-- Concise terminology for wifi with WPA3 802.1x EAP security [CHAR LIMIT=40] -->
+    <string name="wifi_security_eap_wpa3">WPA3-Enterprise</string>
+    <!-- Concise terminology for Passpoint network [CHAR LIMIT=40] -->
+    <string name="wifi_security_passpoint">Passpoint</string>
+    <!-- Terminology for wifi with WPA3 security [CHAR LIMIT=40] -->
+    <string name="wifi_security_sae">WPA3-Personal</string>
+    <!-- Terminology for wifi with WPA2/WPA3 Transition mode security [CHAR LIMIT=40] -->
+    <string name="wifi_security_psk_sae">WPA2/WPA3-Personal</string>
+    <!-- Terminology for Wi-Fi with None/OWE transition mode security [CHAR LIMIT=40] -->
+    <string name="wifi_security_none_owe">None/Enhanced Open</string>
+    <!-- Terminology for wifi with OWE security [CHAR LIMIT=40] -->
+    <string name="wifi_security_owe">Enhanced Open</string>
+    <!-- Concise terminology for wifi with 802.1x EAP Suite-B-192 security [CHAR LIMIT=40] -->
+    <string name="wifi_security_eap_suiteb">WPA3-Enterprise 192-bit</string>
 
     <!-- Summary for the remembered network. -->
     <string name="wifi_remembered">Saved</string>
@@ -228,6 +228,13 @@
     <!-- Connected devices settings. Message when Bluetooth is connected and active but no battery information, showing remote device status. [CHAR LIMIT=NONE] -->
     <string name="bluetooth_active_no_battery_level">Active</string>
 
+    <!-- Connected device settings. Message when the left-side hearing aid device is active. [CHAR LIMIT=NONE] -->
+    <string name="bluetooth_hearing_aid_left_active">Active, left only</string>
+    <!-- Connected device settings. Message when the right-side hearing aid device is active. [CHAR LIMIT=NONE] -->
+    <string name="bluetooth_hearing_aid_right_active">Active, right only</string>
+    <!-- Connected device settings. Message when the left-side and right-side hearing aids device are active. [CHAR LIMIT=NONE] -->
+    <string name="bluetooth_hearing_aid_left_and_right_active">Active, left and right</string>
+
     <!-- Bluetooth settings.  The user-visible string that is used whenever referring to the A2DP profile. -->
     <string name="bluetooth_profile_a2dp">Media audio</string>
     <!-- Bluetooth settings.  The user-visible string that is used whenever referring to the headset or handsfree profile. -->
@@ -257,8 +264,12 @@
 
     <!-- Bluetooth settings.  The user-visible string that is used whenever referring to the Hearing Aid profile. -->
     <string name="bluetooth_profile_hearing_aid">Hearing Aids</string>
+    <!-- Bluetooth settings.  The user-visible string that is used whenever referring to the LE_AUDIO profile. -->
+    <string name="bluetooth_profile_le_audio">LE_AUDIO</string>
     <!-- Bluetooth settings.  Connection options screen.  The summary for the Hearing Aid checkbox preference when Hearing Aid is connected. -->
     <string name="bluetooth_hearing_aid_profile_summary_connected">Connected to Hearing Aids</string>
+    <!-- Bluetooth settings.  Connection options screen.  The summary for the LE_AUDIO checkbox preference when LE_AUDIO is connected. -->
+    <string name="bluetooth_le_audio_profile_summary_connected">Connected to LE_AUDIO</string>
 
     <!-- Bluetooth settings.  Connection options screen.  The summary for the A2DP checkbox preference when A2DP is connected. -->
     <string name="bluetooth_a2dp_profile_summary_connected">Connected to media audio</string>
@@ -299,6 +310,8 @@
     <string name="bluetooth_hid_profile_summary_use_for">Use for input</string>
     <!-- Bluetooth settings.  Connection options screen.  The summary for the Hearing Aid checkbox preference that describes how checking it will set the Hearing Aid profile as preferred. -->
     <string name="bluetooth_hearing_aid_profile_summary_use_for">Use for Hearing Aids</string>
+    <!-- Bluetooth settings.  Connection options screen.  The summary for the LE_AUDIO checkbox preference that describes how checking it will set the LE_AUDIO profile as preferred. -->
+    <string name="bluetooth_le_audio_profile_summary_use_for">Use for LE_AUDIO</string>
 
     <!-- Button text for accepting an incoming pairing request. [CHAR LIMIT=20] -->
     <string name="bluetooth_pairing_accept">Pair</string>
@@ -340,15 +353,6 @@
 
     <!-- Message for telling the user the kind of BT device being displayed in list. [CHAR LIMIT=30 BACKUP_MESSAGE_ID=5615463912185280812] -->
     <string name="bluetooth_talkback_bluetooth">Bluetooth</string>
-
-    <!-- Message for telling the user the left-side hearing aid device is doing its pairing operation [CHAR LIMIT=NONE] -->
-    <string name="bluetooth_hearingaid_left_pairing_message">Pairing left hearing aid\u2026</string>
-    <!-- Message for telling the user the right-side hearing aid device is doing its pairing operation [CHAR LIMIT=NONE] -->
-    <string name="bluetooth_hearingaid_right_pairing_message">Pairing right hearing aid\u2026</string>
-    <!-- Bluetooth settings.  Message when connected to a left-side Hearing Aid device, showing remote device battery level. [CHAR LIMIT=NONE] -->
-    <string name="bluetooth_hearingaid_left_battery_level">Left - <xliff:g id="battery_level_as_percentage">%1$s</xliff:g> battery</string>
-    <!-- Bluetooth settings.  Message when connected to a right-side Hearing Aid device, showing remote device battery level. [CHAR LIMIT=NONE] -->
-    <string name="bluetooth_hearingaid_right_battery_level">Right - <xliff:g id="battery_level_as_percentage">%1$s</xliff:g> battery</string>
 
     <!-- Content description of the WIFI signal when WIFI is disabled for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_wifi_off">Wifi off.</string>
@@ -393,9 +397,6 @@
 
     <!-- Title for a work profile. [CHAR LIMIT=25] -->
     <string name="managed_user_title">All work apps</string>
-
-    <!-- Title for Guest user [CHAR LIMIT=35] -->
-    <string name="user_guest">Guest</string>
 
     <!-- Manage apps, individual app screen, substituted for the application's label when the app's label CAN NOT be determined.-->
     <string name="unknown">Unknown</string>
@@ -654,7 +655,7 @@
     <!-- Setting Checkbox title whether to disable WiFi Scan Throttling. [CHAR LIMIT=40] -->
     <string name="wifi_scan_throttling">Wi\u2011Fi scan throttling</string>
     <!-- Setting Checkbox title whether to enable WiFi non-persistent mac randomization. [CHAR LIMIT=80] -->
-    <string name="wifi_enhanced_mac_randomization">Wi\u2011Fi non\u2011persistent MAC randomization</string>
+    <string name="wifi_non_persistent_mac_randomization">Wi\u2011Fi non\u2011persistent MAC randomization</string>
     <!-- Setting Checkbox title whether to always keep mobile data active. [CHAR LIMIT=80] -->
     <string name="mobile_data_always_on">Mobile data always active</string>
     <!-- Setting Checkbox title whether to enable hardware acceleration for tethering. [CHAR LIMIT=80] -->
@@ -722,8 +723,8 @@
     <string name="wifi_verbose_logging_summary">Increase Wi\u2011Fi logging level, show per SSID RSSI in Wi\u2011Fi Picker</string>
     <!-- Setting Checkbox summary whether to disable Wifi scan throttling [CHAR LIMIT=NONE] -->
     <string name="wifi_scan_throttling_summary">Reduces battery drain &amp; improves network performance</string>
-    <!-- Setting Checkbox title whether to enable WiFi enhanced mac randomization. [CHAR LIMIT=NONE] -->
-    <string name="wifi_enhanced_mac_randomization_summary">When this mode is enabled, this device\u2019s MAC address may change each time it connects to a network that has MAC randomization enabled.</string>
+    <!-- Setting Checkbox summary whether to enable WiFi non-persistent mac randomization. [CHAR LIMIT=NONE] -->
+    <string name="wifi_non_persistent_mac_randomization_summary">When this mode is enabled, this device\u2019s MAC address may change each time it connects to a network that has MAC randomization enabled.</string>
     <!-- Label indicating network has been manually marked as metered -->
     <string name="wifi_metered_label">Metered</string>
     <!-- Label indicating network has been manually marked as unmetered -->
@@ -1032,23 +1033,6 @@
     <!-- Developer settings: text for the WebView provider selection toast shown if an invalid provider was chosen (i.e. the setting list was stale). [CHAR LIMIT=NONE] -->
     <string name="select_webview_provider_toast_text">This choice is no longer valid. Try again.</string>
 
-    <!-- Developer settings screen, convert userdata to file encryption option name -->
-    <string name="convert_to_file_encryption">Convert to file encryption</string>
-    <!-- Developer settings screen, convert userdata to file encryption summary when option is available -->
-    <string name="convert_to_file_encryption_enabled">Convert\u2026</string>
-    <!-- Developer settings screen, convert userdata to file encryption summary when option is already done -->
-    <string name="convert_to_file_encryption_done">Already file encrypted</string>
-    <!-- Title used on dialog with final prompt for converting to file encryption -->
-    <string name="title_convert_fbe">Converting to file based encryption</string>
-    <!-- Warning displayed on dialog with final prompt for converting to file encryption -->
-    <string name="convert_to_fbe_warning">
-        Convert data partition to file based encryption.\n
-        !!Warning!! This will erase all your data.\n
-        This feature is alpha, and may not work correctly.\n
-        Press \'Wipe and convert\u2026\' to continue.</string>
-    <!-- Button on dialog that triggers convertion to file encryption -->
-    <string name="button_convert_fbe">Wipe and convert\u2026</string>
-
     <!-- Name of feature to change color setting for the display [CHAR LIMIT=60] -->
     <string name="picture_color_mode">Picture color mode</string>
 
@@ -1071,7 +1055,7 @@
     <!-- Subtitle for the accessibility preference to configure display color space correction. [CHAR LIMIT=NONE] -->
     <string name="accessibility_display_daltonizer_preference_subtitle">
         <![CDATA[
-        Adjust how colors display on your device. This can be helpful when you want to:<br/><br/>
+        Color correction can be helpful when you want to:<br/>
         <ol>
             <li>&nbsp;See colors more accurately</li>
             <li>&nbsp;Remove colors to help you focus</li>
@@ -1154,9 +1138,14 @@
     <string name="battery_info_status_not_charging">Connected, not charging</string>
     <!-- Battery Info screen. Value for a status item.  Used for diagnostic info screens, precise translation isn't needed -->
     <string name="battery_info_status_full">Charged</string>
+    <!-- [CHAR_LIMIT=40] Battery Info screen. Value for a status item. A state which device is fully charged -->
+    <string name="battery_info_status_full_charged">Fully Charged</string>
 
     <!-- Summary for settings preference disabled by administrator [CHAR LIMIT=50] -->
     <string name="disabled_by_admin_summary_text">Controlled by admin</string>
+
+    <!-- Summary for settings preference disabled by app ops [CHAR LIMIT=50] -->
+    <string name="disabled_by_app_ops_text">Controlled by Restricted Setting</string>
 
     <!-- [CHAR LIMIT=25] Manage applications, text telling using an application is disabled. -->
     <string name="disabled">Disabled</string>
@@ -1265,10 +1254,13 @@
     <string name="wifi_status_mac_randomized">MAC is randomized</string>
 
     <!-- Summary to show how many devices are connected in wifi hotspot [CHAR LIMIT=NONE] -->
-    <plurals name="wifi_tether_connected_summary">
-        <item quantity="one">%1$d device connected</item>
-        <item quantity="other">%1$d devices connected</item>
-    </plurals>
+    <string name="wifi_tether_connected_summary">
+        {count, plural,
+            =0    {0 device connected}
+            =1    {1 device connected}
+            other {# devices connected}
+        }
+    </string>
 
     <!-- Content description of zen mode time condition plus button (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_manual_zen_more_time">More time.</string>
@@ -1279,6 +1271,8 @@
     <string name="cancel">Cancel</string>
     <!-- Button label for generic OK action [CHAR LIMIT=20] -->
     <string name="okay">OK</string>
+    <!-- Button label for generic Done action, to be pressed when an action has been completed [CHAR LIMIT=20] -->
+    <string name="done">Done</string>
 
     <!-- Label for the settings activity for controlling apps that can schedule alarms [CHAR LIMIT=30] -->
     <string name="alarms_and_reminders_label">Alarms and reminders</string>
@@ -1328,7 +1322,9 @@
     <string name="notice_header" translatable="false"></string>
 
     <!-- Name of the phone device. [CHAR LIMIT=30] -->
-    <string name="media_transfer_this_device_name">Phone speaker</string>
+    <string name="media_transfer_this_device_name" product="default">This phone</string>
+    <!-- Name of the tablet device. [CHAR LIMIT=30] -->
+    <string name="media_transfer_this_device_name" product="tablet">This tablet</string>
     <!-- Name of the phone device with an active remote session. [CHAR LIMIT=30] -->
     <string name="media_transfer_this_phone">This phone</string>
 
@@ -1412,22 +1408,28 @@
     <string name="user_switch_to_user">Switch to <xliff:g id="user_name" example="John Doe">%s</xliff:g></string>
     <!-- Dialog message when creating a new user [CHAR LIMIT=NONE] -->
     <string name="creating_new_user_dialog_message">Creating new user…</string>
+    <!-- Dialog message when creating a new guest [CHAR LIMIT=NONE] -->
+    <string name="creating_new_guest_dialog_message">Creating new guest…</string>
     <!-- Text shown to notify that the creation of new user has failed. [CHAR LIMIT=40] -->
     <string name="add_user_failed">Failed to create a new user</string>
+    <!-- Text shown to notify that the creation of new guest has failed. [CHAR LIMIT=40] -->
+    <string name="add_guest_failed">Failed to create a new guest</string>
 
     <!-- Title for the preference to enter the nickname of the user to display in the user switcher [CHAR LIMIT=25]-->
     <string name="user_nickname">Nickname</string>
 
+    <!-- Label for adding a new user in the user switcher [CHAR LIMIT=35] -->
+    <string name="user_add_user">Add user</string>
     <!-- Label for adding a new guest in the user switcher [CHAR LIMIT=35] -->
     <string name="guest_new_guest">Add guest</string>
     <!-- Label for exiting and removing the guest session in the user switcher [CHAR LIMIT=35] -->
     <string name="guest_exit_guest">Remove guest</string>
     <!-- Label for resetting guest session in the user switcher, which will remove all data from the current guest session [CHAR LIMIT=35] -->
     <string name="guest_reset_guest">Reset guest</string>
-    <!-- Name for the guest user [CHAR LIMIT=35] -->
-    <string name="guest_nickname">Guest</string>
     <!-- Title of the confirmation dialog to confirm resetting guest. [CHAR LIMIT=NONE] -->
     <string name="guest_reset_guest_dialog_title">Reset guest?</string>
+    <!-- Title of the confirmation dialog to confirm removing guest. [CHAR LIMIT=NONE] -->
+    <string name="guest_remove_guest_dialog_title">Remove guest?</string>
     <!-- Label for button in confirmation dialog when resetting guest user [CHAR LIMIT=35] -->
     <string name="guest_reset_guest_confirm_button">Reset</string>
     <!-- Status message indicating the device is in the process of resetting the guest user. [CHAR_LIMIT=NONE] -->
@@ -1438,6 +1440,15 @@
     <string name="user_image_choose_photo">Choose an image</string>
     <!-- Accessibility message for the photo selector which is a button/popup with the current photo [CHAR LIMIT=50] -->
     <string name="user_image_photo_selector">Select photo</string>
+
+    <!-- Content of the dialog shown when the user has failed to provide the device lock too many times and the device is wiped. [CHAR LIMIT=NONE] -->
+    <string name="failed_attempts_now_wiping_device">Too many incorrect attempts. This device\'s data will be deleted.</string>
+    <!-- Content of the dialog shown when the user has failed to provide the user lock too many times and the user is removed. [CHAR LIMIT=NONE] -->
+    <string name="failed_attempts_now_wiping_user">Too many incorrect attempts. This user will be deleted.</string>
+    <!-- Content of the dialog shown when the user has failed to provide the work lock too many times and the work profile is removed. [CHAR LIMIT=NONE] -->
+    <string name="failed_attempts_now_wiping_profile">Too many incorrect attempts. This work profile and its data will be deleted.</string>
+    <!-- Button label to dismiss the dialog telling the user the work profile has been wiped. [CHAR LIMIT=40] -->
+    <string name="failed_attempts_now_wiping_dialog_dismiss">Dismiss</string>
 
     <!-- List entry in developer settings to choose default device/system behavior for the app freezer [CHAR LIMIT=30]-->
     <string name="cached_apps_freezer_device_default">Device default</string>
@@ -1536,4 +1547,35 @@
 
     <!-- Content description of the no calling for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_no_calling">No calling.</string>
+
+    <!-- Screensaver overlay which displays the time. [CHAR LIMIT=20] -->
+    <string name="dream_complication_title_time">Time</string>
+    <!-- Screensaver overlay which displays the date. [CHAR LIMIT=20] -->
+    <string name="dream_complication_title_date">Date</string>
+    <!-- Screensaver overlay which displays the weather. [CHAR LIMIT=20] -->
+    <string name="dream_complication_title_weather">Weather</string>
+    <!-- Screensaver overlay which displays air quality. [CHAR LIMIT=20] -->
+    <string name="dream_complication_title_aqi">Air Quality</string>
+    <!-- Screensaver overlay which displays cast info. [CHAR LIMIT=20] -->
+    <string name="dream_complication_title_cast_info">Cast Info</string>
+
+    <!-- Title for a screen allowing the user to choose a profile picture. [CHAR LIMIT=NONE] -->
+    <string name="avatar_picker_title">Choose a profile picture</string>
+
+    <!-- Content description for a default user icon. [CHAR LIMIT=NONE] -->
+    <string name="default_user_icon_description">Default user icon</string>
+
+    <!-- Title for the 'physical keyboard' settings screen. [CHAR LIMIT=35] -->
+    <string name="physical_keyboard_title">Physical keyboard</string>
+    <!-- Title for the keyboard layout preference dialog. [CHAR LIMIT=35] -->
+    <string name="keyboard_layout_dialog_title">Choose keyboard layout</string>
+    <!-- Label of the default keyboard layout.  [CHAR LIMIT=35] -->
+    <string name="keyboard_layout_default_label">Default</string>
+
+    <!-- Special access > Title for managing turn screen on settings. [CHAR LIMIT=50] -->
+    <string name="turn_screen_on_title">Turn screen on</string>
+    <!-- Label for a setting which controls whether an app can turn the screen on [CHAR LIMIT=45] -->
+    <string name="allow_turn_screen_on">Allow turning the screen on</string>
+    <!-- Description for a setting which controls whether an app can turn the screen on [CHAR LIMIT=NONE] -->
+    <string name="allow_turn_screen_on_description">Allow an app to turn the screen on. If granted, the app may turn on the screen at any time without your explicit intent.</string>
 </resources>

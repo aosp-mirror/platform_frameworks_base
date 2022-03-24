@@ -27,7 +27,7 @@ import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.os.IBinder;
 import android.util.MergedConfiguration;
-import android.view.DisplayAdjustments.FixedRotationAdjustments;
+import android.view.SurfaceControl;
 import android.window.SplashScreenView.SplashScreenViewParcelable;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -81,6 +81,9 @@ public abstract class ClientTransactionHandler {
 
     /** Set current process state. */
     public abstract void updateProcessState(int processState, boolean fromIpc);
+
+    /** Count how many activities are launching. */
+    public abstract void countLaunchingActivities(int num);
 
     // Execute phase related logic and handlers. Methods here execute actual lifecycle transactions
     // and deliver callbacks.
@@ -138,7 +141,7 @@ public abstract class ClientTransactionHandler {
     public abstract void performRestartActivity(@NonNull ActivityClientRecord r, boolean start);
 
     /** Set pending activity configuration in case it will be updated by other transaction item. */
-    public abstract void updatePendingActivityConfiguration(@NonNull ActivityClientRecord r,
+    public abstract void updatePendingActivityConfiguration(@NonNull IBinder token,
             Configuration overrideConfig);
 
     /** Deliver activity (override) configuration change. */
@@ -165,10 +168,8 @@ public abstract class ClientTransactionHandler {
 
     /** Attach a splash screen window view to the top of the activity */
     public abstract void handleAttachSplashScreenView(@NonNull ActivityClientRecord r,
-            @NonNull SplashScreenViewParcelable parcelable);
-
-    /** Hand over the splash screen window view to the activity */
-    public abstract void handOverSplashScreenView(@NonNull ActivityClientRecord r);
+            @NonNull SplashScreenViewParcelable parcelable,
+            @NonNull SurfaceControl startingWindowLeash);
 
     /** Perform activity launch. */
     public abstract Activity handleLaunchActivity(@NonNull ActivityClientRecord r,
@@ -184,30 +185,6 @@ public abstract class ClientTransactionHandler {
 
     /** Deliver app configuration change notification. */
     public abstract void handleConfigurationChanged(Configuration config);
-
-    /** Apply addition adjustments to override display information. */
-    public abstract void handleFixedRotationAdjustments(IBinder token,
-            FixedRotationAdjustments fixedRotationAdjustments);
-
-    /**
-     * Add {@link ActivityClientRecord} that is preparing to be launched.
-     * @param token Activity token.
-     * @param activity An initialized instance of {@link ActivityClientRecord} to use during launch.
-     */
-    public abstract void addLaunchingActivity(IBinder token, ActivityClientRecord activity);
-
-    /**
-     * Get {@link ActivityClientRecord} that is preparing to be launched.
-     * @param token Activity token.
-     * @return An initialized instance of {@link ActivityClientRecord} to use during launch.
-     */
-    public abstract ActivityClientRecord getLaunchingActivity(IBinder token);
-
-    /**
-     * Remove {@link ActivityClientRecord} from the launching activity list.
-     * @param token Activity token.
-     */
-    public abstract void removeLaunchingActivity(IBinder token);
 
     /**
      * Get {@link android.app.ActivityThread.ActivityClientRecord} instance that corresponds to the

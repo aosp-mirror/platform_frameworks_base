@@ -1,0 +1,2 @@
+# We do not guard tests - everyone is welcomed to contribute to tests.
+per-file *.java=*

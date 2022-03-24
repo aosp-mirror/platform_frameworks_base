@@ -1,3 +1,8 @@
 # Bug component: 847766
+# This is the main list for platform time / time zone detection maintainers, for this dir and
+# ultimately referenced by other OWNERS files for components maintained by the same team.
+nfuller@google.com
+jmorace@google.com
+kanyinsola@google.com
 mingaleev@google.com
-include /core/java/android/app/timedetector/OWNERS
+narayan@google.com

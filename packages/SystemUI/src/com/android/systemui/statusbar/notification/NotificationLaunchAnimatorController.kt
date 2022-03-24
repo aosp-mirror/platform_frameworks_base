@@ -3,28 +3,37 @@ package com.android.systemui.statusbar.notification
 import android.view.ViewGroup
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.systemui.animation.ActivityLaunchAnimator
+import com.android.systemui.animation.LaunchAnimator
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone
 import com.android.systemui.statusbar.phone.NotificationShadeWindowViewController
+import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent
 import com.android.systemui.statusbar.policy.HeadsUpUtil
+import javax.inject.Inject
 import kotlin.math.ceil
 import kotlin.math.max
 
 /** A provider of [NotificationLaunchAnimatorController]. */
-class NotificationLaunchAnimatorControllerProvider(
+@CentralSurfacesComponent.CentralSurfacesScope
+class NotificationLaunchAnimatorControllerProvider @Inject constructor(
     private val notificationShadeWindowViewController: NotificationShadeWindowViewController,
     private val notificationListContainer: NotificationListContainer,
-    private val headsUpManager: HeadsUpManagerPhone
+    private val headsUpManager: HeadsUpManagerPhone,
+    private val jankMonitor: InteractionJankMonitor
 ) {
+    @JvmOverloads
     fun getAnimatorController(
-        notification: ExpandableNotificationRow
+        notification: ExpandableNotificationRow,
+        onFinishAnimationCallback: Runnable? = null
     ): NotificationLaunchAnimatorController {
         return NotificationLaunchAnimatorController(
             notificationShadeWindowViewController,
             notificationListContainer,
             headsUpManager,
-            notification
+            notification,
+            jankMonitor,
+            onFinishAnimationCallback
         )
     }
 }
@@ -38,7 +47,9 @@ class NotificationLaunchAnimatorController(
     private val notificationShadeWindowViewController: NotificationShadeWindowViewController,
     private val notificationListContainer: NotificationListContainer,
     private val headsUpManager: HeadsUpManagerPhone,
-    private val notification: ExpandableNotificationRow
+    private val notification: ExpandableNotificationRow,
+    private val jankMonitor: InteractionJankMonitor,
+    private val onFinishAnimationCallback: Runnable?
 ) : ActivityLaunchAnimator.Controller {
 
     companion object {
@@ -54,7 +65,7 @@ class NotificationLaunchAnimatorController(
             // Do nothing. Notifications are always animated inside their rootView.
         }
 
-    override fun createAnimatorState(): ActivityLaunchAnimator.State {
+    override fun createAnimatorState(): LaunchAnimator.State {
         // If the notification panel is collapsed, the clip may be larger than the height.
         val height = max(0, notification.actualHeight - notification.clipBottomAmount)
         val location = notification.locationOnScreen
@@ -72,12 +83,12 @@ class NotificationLaunchAnimatorController(
             notification.currentBackgroundRadiusTop
         }
         val params = ExpandAnimationParameters(
-                top = windowTop,
-                bottom = location[1] + height,
-                left = location[0],
-                right = location[0] + notification.width,
-                topCornerRadius = topCornerRadius,
-                bottomCornerRadius = notification.currentBackgroundRadiusBottom
+            top = windowTop,
+            bottom = location[1] + height,
+            left = location[0],
+            right = location[0] + notification.width,
+            topCornerRadius = topCornerRadius,
+            bottomCornerRadius = notification.currentBackgroundRadiusBottom
         )
 
         params.startTranslationZ = notification.translationZ
@@ -86,8 +97,8 @@ class NotificationLaunchAnimatorController(
         params.startClipTopAmount = notification.clipTopAmount
         if (notification.isChildInGroup) {
             params.startNotificationTop += notification.notificationParent.translationY
-            val parentRoundedClip = Math.max(clipStartLocation
-                - notification.notificationParent.locationOnScreen[1], 0)
+            val parentRoundedClip = Math.max(
+                clipStartLocation - notification.notificationParent.locationOnScreen[1], 0)
             params.parentStartRoundedTopClipping = parentRoundedClip
 
             val parentClip = notification.notificationParent.clipTopAmount
@@ -112,6 +123,7 @@ class NotificationLaunchAnimatorController(
 
         if (!willAnimate) {
             removeHun(animate = true)
+            onFinishAnimationCallback?.run()
         }
     }
 
@@ -130,18 +142,19 @@ class NotificationLaunchAnimatorController(
         notificationShadeWindowViewController.setExpandAnimationRunning(false)
         notificationEntry.isExpandAnimationRunning = false
         removeHun(animate = true)
+        onFinishAnimationCallback?.run()
     }
 
     override fun onLaunchAnimationStart(isExpandingFullyAbove: Boolean) {
         notification.isExpandAnimationRunning = true
         notificationListContainer.setExpandingNotification(notification)
 
-        InteractionJankMonitor.getInstance().begin(notification,
+        jankMonitor.begin(notification,
             InteractionJankMonitor.CUJ_NOTIFICATION_APP_START)
     }
 
     override fun onLaunchAnimationEnd(isExpandingFullyAbove: Boolean) {
-        InteractionJankMonitor.getInstance().end(InteractionJankMonitor.CUJ_NOTIFICATION_APP_START)
+        jankMonitor.end(InteractionJankMonitor.CUJ_NOTIFICATION_APP_START)
 
         notification.isExpandAnimationRunning = false
         notificationShadeWindowViewController.setExpandAnimationRunning(false)
@@ -149,6 +162,7 @@ class NotificationLaunchAnimatorController(
         notificationListContainer.setExpandingNotification(null)
         applyParams(null)
         removeHun(animate = false)
+        onFinishAnimationCallback?.run()
     }
 
     private fun applyParams(params: ExpandAnimationParameters?) {
@@ -157,7 +171,7 @@ class NotificationLaunchAnimatorController(
     }
 
     override fun onLaunchAnimationProgress(
-        state: ActivityLaunchAnimator.State,
+        state: LaunchAnimator.State,
         progress: Float,
         linearProgress: Float
     ) {

@@ -19,7 +19,6 @@ package com.android.server.location.geofence;
 import static android.location.LocationManager.FUSED_PROVIDER;
 import static android.location.LocationManager.KEY_PROXIMITY_ENTERING;
 
-import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
 import static com.android.server.location.LocationPermissions.PERMISSION_FINE;
 
 import android.annotation.Nullable;
@@ -41,6 +40,7 @@ import android.stats.location.LocationStatsEnums;
 import android.util.ArraySet;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.server.FgThread;
 import com.android.server.PendingIntentUtils;
 import com.android.server.location.LocationPermissions;
 import com.android.server.location.injector.Injector;
@@ -131,8 +131,8 @@ public class GeofenceManager extends
             return mPermitted;
         }
 
-        boolean onLocationPermissionsChanged(String packageName) {
-            if (getIdentity().getPackageName().equals(packageName)) {
+        boolean onLocationPermissionsChanged(@Nullable String packageName) {
+            if (packageName == null || getIdentity().getPackageName().equals(packageName)) {
                 return onLocationPermissionsChanged();
             }
 
@@ -242,7 +242,7 @@ public class GeofenceManager extends
             mLocationPermissionsListener =
             new LocationPermissionsHelper.LocationPermissionsListener() {
                 @Override
-                public void onLocationPermissionsChanged(String packageName) {
+                public void onLocationPermissionsChanged(@Nullable String packageName) {
                     GeofenceManager.this.onLocationPermissionsChanged(packageName);
                 }
 
@@ -396,7 +396,7 @@ public class GeofenceManager extends
     protected boolean registerWithService(LocationRequest locationRequest,
             Collection<GeofenceRegistration> registrations) {
         getLocationManager().requestLocationUpdates(FUSED_PROVIDER, locationRequest,
-                DIRECT_EXECUTOR, this);
+                FgThread.getExecutor(), this);
         return true;
     }
 
@@ -494,7 +494,7 @@ public class GeofenceManager extends
         updateRegistrations(registration -> registration.getIdentity().getUserId() == userId);
     }
 
-    void onLocationPermissionsChanged(String packageName) {
+    void onLocationPermissionsChanged(@Nullable String packageName) {
         updateRegistrations(registration -> registration.onLocationPermissionsChanged(packageName));
     }
 

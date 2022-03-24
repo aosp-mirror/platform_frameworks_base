@@ -37,7 +37,6 @@ import com.android.keyguard.dagger.KeyguardBouncerScope;
 import com.android.settingslib.Utils;
 import com.android.systemui.R;
 import com.android.systemui.plugins.ActivityStarter;
-import com.android.systemui.statusbar.phone.KeyguardBouncer;
 import com.android.systemui.util.ViewController;
 
 import java.io.File;
@@ -64,6 +63,7 @@ public class KeyguardHostViewController extends ViewController<KeyguardHostView>
 
     private ActivityStarter.OnDismissAction mDismissAction;
     private Runnable mCancelAction;
+    private int mTranslationY;
 
     private final KeyguardUpdateMonitorCallback mUpdateCallback =
             new KeyguardUpdateMonitorCallback() {
@@ -320,10 +320,16 @@ public class KeyguardHostViewController extends ViewController<KeyguardHostView>
         mKeyguardSecurityContainerController.showPrimarySecurityScreen(false);
     }
 
+    /**
+     * Fades and translates in/out the security screen.
+     * Fades in as expansion approaches 0.
+     * Animation duration is between 0.33f and 0.67f of panel expansion fraction.
+     * @param fraction amount of the screen that should show.
+     */
     public void setExpansion(float fraction) {
-        float alpha = MathUtils.map(KeyguardBouncer.ALPHA_EXPANSION_THRESHOLD, 1, 1, 0, fraction);
-        mView.setAlpha(MathUtils.constrain(alpha, 0f, 1f));
-        mView.setTranslationY(fraction * mView.getHeight());
+        float scaledFraction = BouncerPanelExpansionCalculator.getHostViewScaledExpansion(fraction);
+        mView.setAlpha(MathUtils.constrain(1 - scaledFraction, 0f, 1f));
+        mView.setTranslationY(scaledFraction * mTranslationY);
     }
 
     /**
@@ -479,15 +485,15 @@ public class KeyguardHostViewController extends ViewController<KeyguardHostView>
 
         Resources resources = mView.getResources();
 
-        if (resources.getBoolean(R.bool.can_use_one_handed_bouncer)
-                && resources.getBoolean(
-                com.android.internal.R.bool.config_enableDynamicKeyguardPositioning)) {
+        if (resources.getBoolean(R.bool.can_use_one_handed_bouncer)) {
             gravity = resources.getInteger(
                     R.integer.keyguard_host_view_one_handed_gravity);
         } else {
             gravity = resources.getInteger(R.integer.keyguard_host_view_gravity);
         }
 
+        mTranslationY = resources
+                .getDimensionPixelSize(R.dimen.keyguard_host_view_translation_y);
         // Android SysUI uses a FrameLayout as the top-level, but Auto uses RelativeLayout.
         // We're just changing the gravity here though (which can't be applied to RelativeLayout),
         // so only attempt the update if mView is inside a FrameLayout.

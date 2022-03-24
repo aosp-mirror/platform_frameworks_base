@@ -18,7 +18,6 @@ package com.android.server.pm
 import android.content.pm.ApplicationInfo.FLAG_SYSTEM
 import android.content.pm.ApplicationInfo.PRIVATE_FLAG_PRIVILEGED
 import android.content.pm.PackageManager
-import android.content.pm.PackageParser
 import android.os.Build
 import android.os.Process
 import android.util.Log
@@ -34,6 +33,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
+import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.argThat
@@ -121,8 +121,9 @@ class PackageManagerServiceBootTest {
         whenever(rule.mocks().packageParser.parsePackage(
                 argThat { path: File -> path.path.contains("a.data.package") },
                 anyInt(),
-                anyBoolean()))
-                .thenThrow(PackageParser.PackageParserException(
+                anyBoolean(),
+                any()))
+                .thenThrow(PackageManagerException(
                         PackageManager.INSTALL_FAILED_INVALID_APK, "Oh no!"))
         val pm = createPackageManagerService()
         verify(rule.mocks().settings, Mockito.never()).insertPackageSettingLPw(

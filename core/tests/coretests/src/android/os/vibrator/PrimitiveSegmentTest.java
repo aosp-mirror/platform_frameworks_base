@@ -127,4 +127,28 @@ public class PrimitiveSegmentTest {
         assertEquals(0f, initial.scale(1.5f).scale(2 / 3f).getScale(), TOLERANCE);
         assertEquals(0f, initial.scale(0.8f).scale(1.25f).getScale(), TOLERANCE);
     }
+
+    @Test
+    public void testDuration() {
+        assertEquals(-1, new PrimitiveSegment(
+                VibrationEffect.Composition.PRIMITIVE_NOOP, 1, 10).getDuration());
+        assertEquals(-1, new PrimitiveSegment(
+                VibrationEffect.Composition.PRIMITIVE_CLICK, 1, 100).getDuration());
+        assertEquals(-1, new PrimitiveSegment(
+                VibrationEffect.Composition.PRIMITIVE_SPIN, 1, 0).getDuration());
+    }
+
+    @Test
+    public void testIsHapticFeedbackCandidate_returnsTrue() {
+        assertTrue(new PrimitiveSegment(
+                VibrationEffect.Composition.PRIMITIVE_NOOP, 1, 10).isHapticFeedbackCandidate());
+        assertTrue(new PrimitiveSegment(
+                VibrationEffect.Composition.PRIMITIVE_CLICK, 1, 10).isHapticFeedbackCandidate());
+        assertTrue(new PrimitiveSegment(
+                VibrationEffect.Composition.PRIMITIVE_TICK, 1, 10).isHapticFeedbackCandidate());
+        assertTrue(new PrimitiveSegment(
+                VibrationEffect.Composition.PRIMITIVE_THUD, 1, 10).isHapticFeedbackCandidate());
+        assertTrue(new PrimitiveSegment(
+                VibrationEffect.Composition.PRIMITIVE_SPIN, 1, 10).isHapticFeedbackCandidate());
+    }
 }

@@ -31,6 +31,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.graphics.Insets;
 import android.graphics.Matrix;
 import android.graphics.Path;
@@ -38,6 +39,7 @@ import android.graphics.Rect;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
+import android.util.DisplayUtils;
 import android.util.Pair;
 import android.util.RotationUtils;
 import android.util.proto.ProtoOutputStream;
@@ -51,6 +53,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -257,7 +260,7 @@ public final class DisplayCutout {
         private final float mScale;
 
         public CutoutPathParserInfo(int displayWidth, int displayHeight, float density,
-                String cutoutSpec, @Rotation int rotation, float scale) {
+                @Nullable String cutoutSpec, @Rotation int rotation, float scale) {
             mDisplayWidth = displayWidth;
             mDisplayHeight = displayHeight;
             mDensity = density;
@@ -266,7 +269,7 @@ public final class DisplayCutout {
             mScale = scale;
         }
 
-        public CutoutPathParserInfo(CutoutPathParserInfo cutoutPathParserInfo) {
+        public CutoutPathParserInfo(@NonNull CutoutPathParserInfo cutoutPathParserInfo) {
             mDisplayWidth = cutoutPathParserInfo.mDisplayWidth;
             mDisplayHeight = cutoutPathParserInfo.mDisplayHeight;
             mDensity = cutoutPathParserInfo.mDensity;
@@ -365,6 +368,33 @@ public final class DisplayCutout {
             @Nullable Rect boundTop, @Nullable Rect boundRight, @Nullable Rect boundBottom) {
         this(safeInsets.toRect(), Insets.NONE, boundLeft, boundTop, boundRight, boundBottom, null,
                 true);
+    }
+
+    /**
+     * Creates a DisplayCutout instance.
+     *
+     * <p>Note that this is only useful for tests. For production code, developers should always
+     * use a {@link DisplayCutout} obtained from the system.</p>
+     *
+     * @param safeInsets the insets from each edge which avoid the display cutout as returned by
+     *                   {@link #getSafeInsetTop()} etc.
+     * @param boundLeft the left bounding rect of the display cutout in pixels. If null is passed,
+     *                  it's treated as an empty rectangle (0,0)-(0,0).
+     * @param boundTop the top bounding rect of the display cutout in pixels.  If null is passed,
+     *                  it's treated as an empty rectangle (0,0)-(0,0).
+     * @param boundRight the right bounding rect of the display cutout in pixels.  If null is
+     *                  passed, it's treated as an empty rectangle (0,0)-(0,0).
+     * @param boundBottom the bottom bounding rect of the display cutout in pixels.  If null is
+     *                   passed, it's treated as an empty rectangle (0,0)-(0,0).
+     * @param waterfallInsets the insets for the curved areas in waterfall display.
+     * @param info the cutout path parser info.
+     * @hide
+     */
+    public DisplayCutout(@NonNull Insets safeInsets, @Nullable Rect boundLeft,
+            @Nullable Rect boundTop, @Nullable Rect boundRight, @Nullable Rect boundBottom,
+            @NonNull Insets waterfallInsets, @Nullable CutoutPathParserInfo info) {
+        this(safeInsets.toRect(), waterfallInsets, boundLeft, boundTop, boundRight, boundBottom,
+                info, true);
     }
 
     /**
@@ -583,8 +613,10 @@ public final class DisplayCutout {
      * Returns a list of {@code Rect}s, each of which is the bounding rectangle for a non-functional
      * area on the display.
      *
-     * There will be at most one non-functional area per short edge of the device, and none on
-     * the long edges.
+     * There will be at most one non-functional area per edge of the device.
+     *
+     * <p>Note that there is no bounding rectangle for waterfall cutout since it just represents the
+     * curved areas of the display but not the non-functional areas.</p>
      *
      * @return a list of bounding {@code Rect}s, one for each display cutout area. No empty Rect is
      * returned.
@@ -605,8 +637,10 @@ public final class DisplayCutout {
      * functional area on the display. Ordinal value of BoundPosition is used as an index of
      * the array.
      *
-     * There will be at most one non-functional area per short edge of the device, and none on
-     * the long edges.
+     * There will be at most one non-functional area per edge of the device.
+     *
+     * <p>Note that there is no bounding rectangle for waterfall cutout since it just represents the
+     * curved areas of the display but not the non-functional areas.</p>
      *
      * @return an array of bounding {@code Rect}s, one for each display cutout area. This might
      * contain ZERO_RECT, which means there is no cutout area at the position.
@@ -873,18 +907,122 @@ public final class DisplayCutout {
     }
 
     /**
+     * Gets the display cutout by the given display unique id.
+     *
+     * Loads the default config {@link R.string#config_mainBuiltInDisplayCutout) if
+     * {@link R.array#config_displayUniqueIdArray} is not set.
+     */
+    private static String getDisplayCutoutPath(Resources res, String displayUniqueId) {
+        final int index = DisplayUtils.getDisplayUniqueIdConfigIndex(res, displayUniqueId);
+        final String[] array = res.getStringArray(R.array.config_displayCutoutPathArray);
+        if (index >= 0 && index < array.length) {
+            return array[index];
+        }
+        return res.getString(R.string.config_mainBuiltInDisplayCutout);
+    }
+
+    /**
+     * Gets the display cutout approximation rect by the given display unique id.
+     *
+     * Loads the default config {@link R.string#config_mainBuiltInDisplayCutoutRectApproximation} if
+     * {@link R.array#config_displayUniqueIdArray} is not set.
+     */
+    private static String getDisplayCutoutApproximationRect(Resources res, String displayUniqueId) {
+        final int index = DisplayUtils.getDisplayUniqueIdConfigIndex(res, displayUniqueId);
+        final String[] array = res.getStringArray(
+                R.array.config_displayCutoutApproximationRectArray);
+        if (index >= 0 && index < array.length) {
+            return array[index];
+        }
+        return res.getString(R.string.config_mainBuiltInDisplayCutoutRectApproximation);
+    }
+
+    /**
+     * Gets whether to mask a built-in display cutout of a display which is determined by the
+     * given display unique id.
+     *
+     * Loads the default config {@link R.bool#config_maskMainBuiltInDisplayCutout} if
+     * {@link R.array#config_displayUniqueIdArray} is not set.
+     *
+     * @hide
+     */
+    public static boolean getMaskBuiltInDisplayCutout(Resources res, String displayUniqueId) {
+        final int index = DisplayUtils.getDisplayUniqueIdConfigIndex(res, displayUniqueId);
+        final TypedArray array = res.obtainTypedArray(R.array.config_maskBuiltInDisplayCutoutArray);
+        boolean maskCutout;
+        if (index >= 0 && index < array.length()) {
+            maskCutout = array.getBoolean(index, false);
+        } else {
+            maskCutout = res.getBoolean(R.bool.config_maskMainBuiltInDisplayCutout);
+        }
+        array.recycle();
+        return maskCutout;
+    }
+
+    /**
+     * Gets whether to fill a built-in display cutout of a display which is determined by the
+     * given display unique id.
+     *
+     * Loads the default config{@link R.bool#config_fillMainBuiltInDisplayCutout} if
+     * {@link R.array#config_displayUniqueIdArray} is not set.
+     *
+     * @hide
+     */
+    public static boolean getFillBuiltInDisplayCutout(Resources res, String displayUniqueId) {
+        final int index = DisplayUtils.getDisplayUniqueIdConfigIndex(res, displayUniqueId);
+        final TypedArray array = res.obtainTypedArray(R.array.config_fillBuiltInDisplayCutoutArray);
+        boolean fillCutout;
+        if (index >= 0 && index < array.length()) {
+            fillCutout = array.getBoolean(index, false);
+        } else {
+            fillCutout = res.getBoolean(R.bool.config_fillMainBuiltInDisplayCutout);
+        }
+        array.recycle();
+        return fillCutout;
+    }
+
+    /**
+     * Gets the waterfall cutout by the given display unique id.
+     *
+     * Loads the default waterfall dimens if {@link R.array#config_displayUniqueIdArray} is not set.
+     * {@link R.dimen#waterfall_display_left_edge_size},
+     * {@link R.dimen#waterfall_display_top_edge_size},
+     * {@link R.dimen#waterfall_display_right_edge_size},
+     * {@link R.dimen#waterfall_display_bottom_edge_size}
+     */
+    private static Insets getWaterfallInsets(Resources res, String displayUniqueId) {
+        Insets insets;
+        final int index = DisplayUtils.getDisplayUniqueIdConfigIndex(res, displayUniqueId);
+        final TypedArray array = res.obtainTypedArray(R.array.config_waterfallCutoutArray);
+        if (index >= 0 && index < array.length() && array.getResourceId(index, 0) > 0) {
+            final int resourceId = array.getResourceId(index, 0);
+            final TypedArray waterfall = res.obtainTypedArray(resourceId);
+            insets = Insets.of(
+                    waterfall.getDimensionPixelSize(0 /* waterfall left edge size */, 0),
+                    waterfall.getDimensionPixelSize(1 /* waterfall top edge size */, 0),
+                    waterfall.getDimensionPixelSize(2 /* waterfall right edge size */, 0),
+                    waterfall.getDimensionPixelSize(3 /* waterfall bottom edge size */, 0));
+            waterfall.recycle();
+        } else {
+            insets = loadWaterfallInset(res);
+        }
+        array.recycle();
+        return insets;
+    }
+
+    /**
      * Creates the display cutout according to
      * @android:string/config_mainBuiltInDisplayCutoutRectApproximation, which is the closest
      * rectangle-base approximation of the cutout.
      *
      * @hide
      */
-    public static DisplayCutout fromResourcesRectApproximation(Resources res, int displayWidth,
-            int displayHeight) {
-        return pathAndDisplayCutoutFromSpec(res.getString(R.string.config_mainBuiltInDisplayCutout),
-                res.getString(R.string.config_mainBuiltInDisplayCutoutRectApproximation),
+    public static DisplayCutout fromResourcesRectApproximation(Resources res,
+            String displayUniqueId, int displayWidth, int displayHeight) {
+        return pathAndDisplayCutoutFromSpec(getDisplayCutoutPath(res, displayUniqueId),
+                getDisplayCutoutApproximationRect(res, displayUniqueId),
                 displayWidth, displayHeight, DENSITY_DEVICE_STABLE / (float) DENSITY_DEFAULT,
-                loadWaterfallInset(res)).second;
+                getWaterfallInsets(res, displayUniqueId)).second;
     }
 
     /**
@@ -892,11 +1030,11 @@ public final class DisplayCutout {
      *
      * @hide
      */
-    public static Path pathFromResources(Resources res, int displayWidth, int displayHeight) {
-        return pathAndDisplayCutoutFromSpec(
-                res.getString(R.string.config_mainBuiltInDisplayCutout), null,
+    public static Path pathFromResources(Resources res, String displayUniqueId, int displayWidth,
+            int displayHeight) {
+        return pathAndDisplayCutoutFromSpec(getDisplayCutoutPath(res, displayUniqueId), null,
                 displayWidth, displayHeight, DENSITY_DEVICE_STABLE / (float) DENSITY_DEFAULT,
-                loadWaterfallInset(res)).first;
+                getWaterfallInsets(res, displayUniqueId)).first;
     }
 
     /**
@@ -985,6 +1123,85 @@ public final class DisplayCutout {
                 res.getDimensionPixelSize(R.dimen.waterfall_display_top_edge_size),
                 res.getDimensionPixelSize(R.dimen.waterfall_display_right_edge_size),
                 res.getDimensionPixelSize(R.dimen.waterfall_display_bottom_edge_size));
+    }
+
+    /**
+     * @return a copy of this cutout that has been rotated for a display in toRotation.
+     * @hide
+     */
+    public DisplayCutout getRotated(int startWidth, int startHeight,
+            int fromRotation, int toRotation) {
+        if (this == DisplayCutout.NO_CUTOUT) {
+            return DisplayCutout.NO_CUTOUT;
+        }
+        final int rotation = RotationUtils.deltaRotation(fromRotation, toRotation);
+        if (rotation == ROTATION_0) {
+            return this;
+        }
+        final Insets waterfallInsets = RotationUtils.rotateInsets(getWaterfallInsets(), rotation);
+        // returns a copy
+        final Rect[] newBounds = getBoundingRectsAll();
+        final Rect displayBounds = new Rect(0, 0, startWidth, startHeight);
+        for (int i = 0; i < newBounds.length; ++i) {
+            if (newBounds[i].isEmpty()) continue;
+            RotationUtils.rotateBounds(newBounds[i], displayBounds, rotation);
+        }
+        Collections.rotate(Arrays.asList(newBounds), -rotation);
+        final CutoutPathParserInfo info = getCutoutPathParserInfo();
+        final CutoutPathParserInfo newInfo = new CutoutPathParserInfo(
+                info.getDisplayWidth(), info.getDisplayHeight(), info.getDensity(),
+                info.getCutoutSpec(), toRotation, info.getScale());
+        final boolean swapAspect = (rotation % 2) != 0;
+        final int endWidth = swapAspect ? startHeight : startWidth;
+        final int endHeight = swapAspect ? startWidth : startHeight;
+        final DisplayCutout tmp =
+                DisplayCutout.constructDisplayCutout(newBounds, waterfallInsets, newInfo);
+        final Rect safeInsets = DisplayCutout.computeSafeInsets(endWidth, endHeight, tmp);
+        return tmp.replaceSafeInsets(safeInsets);
+    }
+
+    /**
+     * Compute the insets derived from a cutout. This is usually used to populate the safe-insets
+     * of the cutout via {@link #replaceSafeInsets}.
+     * @hide
+     */
+    public static Rect computeSafeInsets(int displayW, int displayH, DisplayCutout cutout) {
+        if (displayW == displayH) {
+            throw new UnsupportedOperationException("not implemented: display=" + displayW + "x"
+                    + displayH + " cutout=" + cutout);
+        }
+
+        int leftInset = Math.max(cutout.getWaterfallInsets().left, findCutoutInsetForSide(
+                displayW, displayH, cutout.getBoundingRectLeft(), Gravity.LEFT));
+        int topInset = Math.max(cutout.getWaterfallInsets().top, findCutoutInsetForSide(
+                displayW, displayH, cutout.getBoundingRectTop(), Gravity.TOP));
+        int rightInset = Math.max(cutout.getWaterfallInsets().right, findCutoutInsetForSide(
+                displayW, displayH, cutout.getBoundingRectRight(), Gravity.RIGHT));
+        int bottomInset = Math.max(cutout.getWaterfallInsets().bottom, findCutoutInsetForSide(
+                displayW, displayH, cutout.getBoundingRectBottom(), Gravity.BOTTOM));
+
+        return new Rect(leftInset, topInset, rightInset, bottomInset);
+    }
+
+    private static int findCutoutInsetForSide(int displayW, int displayH, Rect boundingRect,
+            int gravity) {
+        if (boundingRect.isEmpty()) {
+            return 0;
+        }
+
+        int inset = 0;
+        switch (gravity) {
+            case Gravity.TOP:
+                return Math.max(inset, boundingRect.bottom);
+            case Gravity.BOTTOM:
+                return Math.max(inset, displayH - boundingRect.top);
+            case Gravity.LEFT:
+                return Math.max(inset, boundingRect.right);
+            case Gravity.RIGHT:
+                return Math.max(inset, displayW - boundingRect.left);
+            default:
+                throw new IllegalArgumentException("unknown gravity: " + gravity);
+        }
     }
 
     /**
@@ -1137,6 +1354,121 @@ public final class DisplayCutout {
         @Override
         public String toString() {
             return String.valueOf(mInner);
+        }
+    }
+
+    /**
+     * A Builder class to construct a DisplayCutout instance.
+     *
+     * <p>Note that this is only for tests purpose. For production code, developers should always
+     * use a {@link DisplayCutout} obtained from the system.</p>
+     */
+    public static final class Builder {
+        private Insets mSafeInsets = Insets.NONE;
+        private Insets mWaterfallInsets = Insets.NONE;
+        private Path mCutoutPath;
+        private final Rect mBoundingRectLeft = new Rect();
+        private final Rect mBoundingRectTop = new Rect();
+        private final Rect mBoundingRectRight = new Rect();
+        private final Rect mBoundingRectBottom = new Rect();
+
+        /**
+         * Begin building a DisplayCutout.
+         */
+        public Builder() {
+        }
+
+        /**
+         * Construct a new {@link DisplayCutout} with the set parameters.
+         */
+        @NonNull
+        public DisplayCutout build() {
+            final CutoutPathParserInfo info;
+            if (mCutoutPath != null) {
+                // Create a fake CutoutPathParserInfo and set it to sCachedCutoutPathParserInfo so
+                // that when getCutoutPath() is called, it will return the cached Path.
+                info = new CutoutPathParserInfo(0, 0, 0, "test", 0, 1f);
+                synchronized (CACHE_LOCK) {
+                    DisplayCutout.sCachedCutoutPathParserInfo = info;
+                    DisplayCutout.sCachedCutoutPath = mCutoutPath;
+                }
+            } else {
+                info = null;
+            }
+            return new DisplayCutout(mSafeInsets.toRect(), mWaterfallInsets, mBoundingRectLeft,
+                    mBoundingRectTop, mBoundingRectRight, mBoundingRectBottom, info, false);
+        }
+
+        /**
+         * Set the safe insets. If not set, the default value is {@link Insets#NONE}.
+         */
+        @SuppressWarnings("MissingGetterMatchingBuilder")
+        @NonNull
+        public Builder setSafeInsets(@NonNull Insets safeInsets) {
+            mSafeInsets = safeInsets;
+            return this;
+        }
+
+        /**
+         * Set the waterfall insets of the DisplayCutout. If not set, the default value is
+         * {@link Insets#NONE}
+         */
+        @NonNull
+        public Builder setWaterfallInsets(@NonNull Insets waterfallInsets) {
+            mWaterfallInsets = waterfallInsets;
+            return this;
+        }
+
+        /**
+         * Set a bounding rectangle for a non-functional area on the display which is located on
+         * the left of the screen. If not set, the default value is an empty rectangle.
+         */
+        @NonNull
+        public Builder setBoundingRectLeft(@NonNull Rect boundingRectLeft) {
+            mBoundingRectLeft.set(boundingRectLeft);
+            return this;
+        }
+
+        /**
+         * Set a bounding rectangle for a non-functional area on the display which is located on
+         * the top of the screen. If not set, the default value is an empty rectangle.
+         */
+        @NonNull
+        public Builder setBoundingRectTop(@NonNull Rect boundingRectTop) {
+            mBoundingRectTop.set(boundingRectTop);
+            return this;
+        }
+
+        /**
+         * Set a bounding rectangle for a non-functional area on the display which is located on
+         * the right of the screen. If not set, the default value is an empty rectangle.
+         */
+        @NonNull
+        public Builder setBoundingRectRight(@NonNull Rect boundingRectRight) {
+            mBoundingRectRight.set(boundingRectRight);
+            return this;
+        }
+
+        /**
+         * Set a bounding rectangle for a non-functional area on the display which is located on
+         * the bottom of the screen. If not set, the default value is an empty rectangle.
+         */
+        @NonNull
+        public Builder setBoundingRectBottom(@NonNull Rect boundingRectBottom) {
+            mBoundingRectBottom.set(boundingRectBottom);
+            return this;
+        }
+
+        /**
+         * Set the cutout {@link Path}.
+         *
+         * Note that not support creating/testing multiple display cutouts with setCutoutPath() in
+         * parallel.
+         */
+        @NonNull
+        public Builder setCutoutPath(@NonNull Path cutoutPath) {
+            mCutoutPath = cutoutPath;
+            return this;
         }
     }
 }

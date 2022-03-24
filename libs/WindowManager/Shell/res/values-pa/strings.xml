@@ -20,6 +20,7 @@
     <string name="pip_phone_close" msgid="5783752637260411309">"ਬੰਦ ਕਰੋ"</string>
     <string name="pip_phone_expand" msgid="2579292903468287504">"ਵਿਸਤਾਰ ਕਰੋ"</string>
     <string name="pip_phone_settings" msgid="5468987116750491918">"ਸੈਟਿੰਗਾਂ"</string>
+    <string name="pip_phone_enter_split" msgid="7042877263880641911">"ਸਪਲਿਟ ਸਕ੍ਰੀਨ ਵਿੱਚ ਦਾਖਲ ਹੋਵੋ"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"ਮੀਨੂ"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> ਤਸਵੀਰ-ਅੰਦਰ-ਤਸਵੀਰ ਵਿੱਚ ਹੈ"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"ਜੇਕਰ ਤੁਸੀਂ ਨਹੀਂ ਚਾਹੁੰਦੇ ਕਿ <xliff:g id="NAME">%s</xliff:g> ਐਪ ਇਸ ਵਿਸ਼ੇਸ਼ਤਾ ਦੀ ਵਰਤੋਂ ਕਰੇ, ਤਾਂ ਸੈਟਿੰਗਾਂ ਖੋਲ੍ਹਣ ਲਈ ਟੈਪ ਕਰੋ ਅਤੇ ਇਸਨੂੰ ਬੰਦ ਕਰੋ।"</string>
@@ -28,6 +29,8 @@
     <string name="pip_skip_to_next" msgid="8403429188794867653">"ਅਗਲੇ \'ਤੇ ਜਾਓ"</string>
     <string name="pip_skip_to_prev" msgid="7172158111196394092">"ਪਿਛਲੇ \'ਤੇ ਜਾਓ"</string>
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"ਆਕਾਰ ਬਦਲੋ"</string>
+    <string name="accessibility_action_pip_stash" msgid="4060775037619702641">"ਸਟੈਸ਼"</string>
+    <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"ਅਣਸਟੈਸ਼"</string>
     <string name="dock_forced_resizable" msgid="1749750436092293116">"ਹੋ ਸਕਦਾ ਹੈ ਕਿ ਐਪ ਸਪਲਿਟ-ਸਕ੍ਰੀਨ ਨਾਲ ਕੰਮ ਨਾ ਕਰੇ।"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"ਐਪ ਸਪਲਿਟ-ਸਕ੍ਰੀਨ ਨੂੰ ਸਮਰਥਨ ਨਹੀਂ ਕਰਦੀ।"</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"ਹੋ ਸਕਦਾ ਹੈ ਕਿ ਐਪ ਸੈਕੰਡਰੀ ਡਿਸਪਲੇ \'ਤੇ ਕੰਮ ਨਾ ਕਰੇ।"</string>
@@ -69,4 +72,13 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"ਬੁਲਬੁਲਾ"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"ਪ੍ਰਬੰਧਨ ਕਰੋ"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"ਬਬਲ ਨੂੰ ਖਾਰਜ ਕੀਤਾ ਗਿਆ।"</string>
+    <string name="restart_button_description" msgid="5887656107651190519">"ਇਸ ਐਪ ਨੂੰ ਮੁੜ-ਸ਼ੁਰੂ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ ਅਤੇ ਪੂਰੀ ਸਕ੍ਰੀਨ ਮੋਡ \'ਤੇ ਜਾਓ।"</string>
+    <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"ਕੀ ਕੈਮਰੇ ਸੰਬੰਧੀ ਸਮੱਸਿਆਵਾਂ ਹਨ?\nਮੁੜ-ਫਿੱਟ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ"</string>
+    <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"ਕੀ ਇਹ ਠੀਕ ਨਹੀਂ ਹੋਈ?\nਵਾਪਸ ਉਹੀ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ"</string>
+    <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"ਕੀ ਕੈਮਰੇ ਸੰਬੰਧੀ ਕੋਈ ਸਮੱਸਿਆ ਨਹੀਂ ਹੈ? ਖਾਰਜ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ।"</string>
+    <string name="letterbox_education_dialog_title" msgid="6688664582871779215">"ਕੁਝ ਐਪਾਂ ਪੋਰਟਰੇਟ ਵਿੱਚ ਬਿਹਤਰ ਕੰਮ ਕਰਦੀਆਂ ਹਨ"</string>
+    <string name="letterbox_education_dialog_subtext" msgid="4853542518367719562">"ਆਪਣੀ ਜਗ੍ਹਾ ਦਾ ਵੱਧ ਤੋਂ ਵੱਧ ਲਾਹਾ ਲੈਣ ਲਈ ਇਨ੍ਹਾਂ ਵਿਕਲਪਾਂ ਵਿੱਚੋਂ ਕੋਈ ਇੱਕ ਵਰਤ ਕੇ ਦੇਖੋ"</string>
+    <string name="letterbox_education_screen_rotation_text" msgid="5085786687366339027">"ਪੂਰੀ-ਸਕ੍ਰੀਨ ਮੋਡ \'ਤੇ ਜਾਣ ਲਈ ਆਪਣੇ ਡੀਵਾਈਸ ਨੂੰ ਘੁਮਾਓ"</string>
+    <string name="letterbox_education_reposition_text" msgid="1068293354123934727">"ਕਿਸੇ ਐਪ ਦੀ ਜਗ੍ਹਾ ਬਦਲਣ ਲਈ ਉਸ ਦੇ ਅੱਗੇ ਡਬਲ ਟੈਪ ਕਰੋ"</string>
+    <string name="letterbox_education_got_it" msgid="4057634570866051177">"ਸਮਝ ਲਿਆ"</string>
 </resources>

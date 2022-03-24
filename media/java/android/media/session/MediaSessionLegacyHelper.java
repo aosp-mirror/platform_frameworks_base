@@ -26,6 +26,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.RectF;
+import android.media.MediaCommunicationManager;
 import android.media.MediaMetadata;
 import android.media.MediaMetadataEditor;
 import android.media.MediaMetadataRetriever;
@@ -53,6 +54,7 @@ public class MediaSessionLegacyHelper {
 
     private Context mContext;
     private MediaSessionManager mSessionManager;
+    private MediaCommunicationManager mCommunicationManager;
     private Handler mHandler = new Handler(Looper.getMainLooper());
     // The legacy APIs use PendingIntents to register/unregister media button
     // receivers and these are associated with RCC.
@@ -63,6 +65,7 @@ public class MediaSessionLegacyHelper {
         mContext = context;
         mSessionManager = (MediaSessionManager) context
                 .getSystemService(Context.MEDIA_SESSION_SERVICE);
+        mCommunicationManager = context.getSystemService(MediaCommunicationManager.class);
     }
 
     @UnsupportedAppUsage
@@ -171,7 +174,7 @@ public class MediaSessionLegacyHelper {
             Log.w(TAG, "Tried to send a null key event. Ignoring.");
             return;
         }
-        mSessionManager.dispatchMediaKeyEvent(keyEvent, needWakeLock);
+        mCommunicationManager.dispatchMediaKeyEvent(keyEvent, needWakeLock);
         if (DEBUG) {
             Log.d(TAG, "dispatched media key " + keyEvent);
         }

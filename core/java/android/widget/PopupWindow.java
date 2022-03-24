@@ -2521,7 +2521,8 @@ public class PopupWindow {
 
         @Override
         public boolean dispatchKeyEvent(KeyEvent event) {
-            if (event.getKeyCode() == KeyEvent.KEYCODE_BACK) {
+            if (event.getKeyCode() == KeyEvent.KEYCODE_BACK
+                      || event.getKeyCode() == KeyEvent.KEYCODE_ESCAPE) {
                 if (getKeyDispatcherState() == null) {
                     return super.dispatchKeyEvent(event);
                 }

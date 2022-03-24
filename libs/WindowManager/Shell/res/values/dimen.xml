@@ -18,8 +18,8 @@
     <dimen name="dismiss_circle_size">96dp</dimen>
     <dimen name="dismiss_circle_small">60dp</dimen>
 
-    <!-- The height of the gradient indicating the dismiss edge when moving a PIP. -->
-    <dimen name="floating_dismiss_gradient_height">250dp</dimen>
+    <!-- The height of the gradient indicating the dismiss edge when moving a PIP or bubble. -->
+    <dimen name="floating_dismiss_gradient_height">548dp</dimen>
 
     <!-- The padding around a PiP actions. -->
     <dimen name="pip_action_padding">16dp</dimen>
@@ -67,6 +67,10 @@
     <dimen name="pip_resize_handle_margin">4dp</dimen>
     <dimen name="pip_resize_handle_padding">0dp</dimen>
 
+    <!-- PIP Split icon size and margin. -->
+    <dimen name="pip_split_icon_size">24dp</dimen>
+    <dimen name="pip_split_icon_margin">12dp</dimen>
+
     <!-- PIP stash offset size, which is the width of visible PIP region when stashed. -->
     <dimen name="pip_stash_offset">32dp</dimen>
 
@@ -76,8 +80,15 @@
     <!-- How high we lift the divider when touching -->
     <dimen name="docked_stack_divider_lift_elevation">4dp</dimen>
 
+    <!-- Divider handle size for legacy split screen -->
     <dimen name="docked_divider_handle_width">16dp</dimen>
     <dimen name="docked_divider_handle_height">2dp</dimen>
+    <!-- Divider handle size for split screen -->
+    <dimen name="split_divider_handle_width">72dp</dimen>
+    <dimen name="split_divider_handle_height">3dp</dimen>
+
+    <dimen name="split_divider_bar_width">10dp</dimen>
+    <dimen name="split_divider_corner_size">42dp</dimen>
 
     <!-- One-Handed Mode -->
     <!-- Threshold for dragging distance to enable one-handed mode -->
@@ -100,12 +111,16 @@
     <dimen name="bubble_flyout_space_from_bubble">8dp</dimen>
     <!-- How much space to leave between the flyout text and the avatar displayed in the flyout. -->
     <dimen name="bubble_flyout_avatar_message_space">6dp</dimen>
+    <!-- If the screen percentage is smaller than this, we'll use this value instead.  -->
+    <dimen name="bubbles_flyout_min_width_large_screen">200dp</dimen>
     <!-- Padding between status bar and bubbles when displayed in expanded state -->
     <dimen name="bubble_padding_top">16dp</dimen>
     <!-- Space between bubbles when expanded. -->
     <dimen name="bubble_spacing">3dp</dimen>
     <!-- Size of the bubble. -->
     <dimen name="bubble_size">60dp</dimen>
+    <!-- Width of bubble name view -->
+    <dimen name="bubble_name_width">90dp</dimen>
     <!-- Size of the badge shown on the bubble. -->
     <dimen name="bubble_badge_size">24dp</dimen>
     <!-- Extra padding added to the touchable rect for bubbles so they are easier to grab. -->
@@ -114,6 +129,9 @@
     <dimen name="bubble_dismiss_encircle_size">52dp</dimen>
     <!-- Padding around the view displayed when the bubble is expanded -->
     <dimen name="bubble_expanded_view_padding">16dp</dimen>
+    <!-- Padding for the edge of the expanded view that is closest to the edge of the screen used
+         when displaying in landscape on a large screen. -->
+    <dimen name="bubble_expanded_view_largescreen_landscape_padding">128dp</dimen>
     <!-- This should be at least the size of bubble_expanded_view_padding; it is used to include
          a slight touch slop around the expanded view. -->
     <dimen name="bubble_expanded_view_slop">8dp</dimen>
@@ -121,16 +139,21 @@
          If this value changes then R.dimen.bubble_expanded_view_min_height in CtsVerifier
          should also be updated. -->
     <dimen name="bubble_expanded_default_height">180dp</dimen>
-    <!-- On large screens the width of the expanded view is restricted to this size. -->
-    <dimen name="bubble_expanded_view_tablet_width">412dp</dimen>
+    <!-- The width of the overflow view on large screens or in landscape on phone. -->
+    <dimen name="bubble_expanded_view_overflow_width">380dp</dimen>
     <!-- Inset to apply to the icon in the overflow button. -->
     <dimen name="bubble_overflow_icon_inset">30dp</dimen>
     <!-- Default (and minimum) height of bubble overflow -->
     <dimen name="bubble_overflow_height">480dp</dimen>
     <!-- Bubble overflow padding when there are no bubbles  -->
     <dimen name="bubble_overflow_empty_state_padding">16dp</dimen>
-    <!-- Padding of container for overflow bubbles -->
-    <dimen name="bubble_overflow_padding">15dp</dimen>
+    <!-- Horizontal padding of the overflow container. Total desired padding is 16dp but the items
+         already have 5dp added to each side. -->
+    <dimen name="bubble_overflow_container_padding_horizontal">11dp</dimen>
+    <!-- Horizontal padding between items in the overflow view, half of the desired amount. -->
+    <dimen name="bubble_overflow_item_padding_horizontal">5dp</dimen>
+    <!-- Vertical padding between items in the overflow view, half the desired amount. -->
+    <dimen name="bubble_overflow_item_padding_vertical">16dp</dimen>
     <!-- Padding of label for bubble overflow view -->
     <dimen name="bubble_overflow_text_padding">7dp</dimen>
     <!-- Height of bubble overflow empty state illustration -->
@@ -149,9 +172,17 @@
     <!-- Extra padding around the dismiss target for bubbles -->
     <dimen name="bubble_dismiss_slop">16dp</dimen>
     <!-- Height of button allowing users to adjust settings for bubbles. -->
-    <dimen name="bubble_manage_button_height">56dp</dimen>
+    <dimen name="bubble_manage_button_height">36dp</dimen>
+    <!-- Height of manage button including margins. -->
+    <dimen name="bubble_manage_button_total_height">68dp</dimen>
+    <!-- The margin around the outside of the manage button. -->
+    <dimen name="bubble_manage_button_margin">16dp</dimen>
     <!-- Height of an item in the bubble manage menu. -->
     <dimen name="bubble_menu_item_height">60dp</dimen>
+    <!-- Padding applied to the bubble manage menu. -->
+    <dimen name="bubble_menu_padding">16dp</dimen>
+    <!-- Size of the icons in the manage menu. -->
+    <dimen name="bubble_menu_icon_size">24dp</dimen>
     <!-- Max width of the message bubble-->
     <dimen name="bubble_message_max_width">144dp</dimen>
     <!-- Min width of the message bubble -->
@@ -174,17 +205,52 @@
     <dimen name="bubble_dismiss_target_padding_x">40dp</dimen>
     <dimen name="bubble_dismiss_target_padding_y">20dp</dimen>
     <dimen name="bubble_manage_menu_elevation">4dp</dimen>
+    <!-- Size of manage user education views on large screens or in landscape. -->
+    <dimen name="bubbles_user_education_width">480dp</dimen>
+    <!-- Margin applied to the end of the user education views (really only matters for phone
+         since the width is match parent). -->
+    <dimen name="bubble_user_education_margin_end">24dp</dimen>
+    <!-- Padding applied to the end of the user education view. -->
+    <dimen name="bubble_user_education_padding_end">58dp</dimen>
+    <!-- Padding between the bubble and the user education text. -->
+    <dimen name="bubble_user_education_stack_padding">16dp</dimen>
 
-    <!-- Bubbles user education views -->
-    <dimen name="bubbles_manage_education_width">160dp</dimen>
-    <!-- The inset from the top bound of the manage button to place the user education. -->
-    <dimen name="bubbles_manage_education_top_inset">65dp</dimen>
-    <!-- Size of padding for the user education cling, this should at minimum be larger than
-        individual_bubble_size + some padding. -->
-    <dimen name="bubble_stack_user_education_side_inset">72dp</dimen>
+    <!-- Bottom and end margin for compat buttons. -->
+    <dimen name="compat_button_margin">16dp</dimen>
 
-    <!-- The width/height of the size compat restart button. -->
-    <dimen name="size_compat_button_size">48dp</dimen>
+    <!-- The radius of the corners of the compat hint bubble. -->
+    <dimen name="compat_hint_corner_radius">28dp</dimen>
+
+    <!-- The width of the compat hint point. -->
+    <dimen name="compat_hint_point_width">10dp</dimen>
+
+    <!-- The end padding for the compat hint. Computed as (compat button width (=48) / 2
+        + compat_button_margin - compat_hint_corner_radius - compat_hint_point_width / 2). -->
+    <dimen name="compat_hint_padding_end">7dp</dimen>
+
+    <!-- The width of the size compat hint. -->
+    <dimen name="size_compat_hint_width">188dp</dimen>
+
+    <!-- The width of the camera compat hint. -->
+    <dimen name="camera_compat_hint_width">143dp</dimen>
+
+    <!-- The corner radius of the letterbox education dialog. -->
+    <dimen name="letterbox_education_dialog_corner_radius">28dp</dimen>
+
+    <!-- The size of an icon in the letterbox education dialog. -->
+    <dimen name="letterbox_education_dialog_icon_size">48dp</dimen>
+
+    <!-- The fixed width of the dialog if there is enough space in the parent. -->
+    <dimen name="letterbox_education_dialog_width">472dp</dimen>
+
+    <!-- The margin between the dialog container and its parent. -->
+    <dimen name="letterbox_education_dialog_margin">16dp</dimen>
+
+    <!-- The width of each action container in the letterbox education dialog -->
+    <dimen name="letterbox_education_dialog_action_width">140dp</dimen>
+
+    <!-- The space between two actions in the letterbox education dialog -->
+    <dimen name="letterbox_education_dialog_space_between_actions">24dp</dimen>
 
     <!-- The width of the brand image on staring surface. -->
     <dimen name="starting_surface_brand_image_width">200dp</dimen>
@@ -200,4 +266,14 @@
 
     <!-- The distance of the shift icon when early exit starting window. -->
     <dimen name="starting_surface_early_exit_icon_distance">32dp</dimen>
+
+    <!-- The default minimal size of a PiP task, in both dimensions. -->
+    <dimen name="default_minimal_size_pip_resizable_task">108dp</dimen>
+
+    <!--
+      The overridable minimal size of a PiP task, in both dimensions.
+      Different from default_minimal_size_pip_resizable_task, this is to limit the dimension
+      when the pinned stack size is overridden by app via minWidth/minHeight.
+    -->
+    <dimen name="overridable_minimal_size_pip_resizable_task">48dp</dimen>
 </resources>

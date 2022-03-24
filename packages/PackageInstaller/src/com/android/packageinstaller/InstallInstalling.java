@@ -37,7 +37,7 @@ import android.view.View;
 import android.widget.Button;
 
 import com.android.internal.app.AlertActivity;
-import com.android.internal.content.PackageHelper;
+import com.android.internal.content.InstallLocationUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -130,8 +130,12 @@ public class InstallInstalling extends AlertActivity {
             } else {
                 PackageInstaller.SessionParams params = new PackageInstaller.SessionParams(
                         PackageInstaller.SessionParams.MODE_FULL_INSTALL);
+                final Uri referrerUri = getIntent().getParcelableExtra(Intent.EXTRA_REFERRER);
+                params.setPackageSource(
+                        referrerUri != null ? PackageInstaller.PACKAGE_SOURCE_DOWNLOADED_FILE
+                                : PackageInstaller.PACKAGE_SOURCE_LOCAL_FILE);
                 params.setInstallAsInstantApp(false);
-                params.setReferrerUri(getIntent().getParcelableExtra(Intent.EXTRA_REFERRER));
+                params.setReferrerUri(referrerUri);
                 params.setOriginatingUri(getIntent()
                         .getParcelableExtra(Intent.EXTRA_ORIGINATING_URI));
                 params.setOriginatingUid(getIntent().getIntExtra(Intent.EXTRA_ORIGINATING_UID,
@@ -154,8 +158,8 @@ public class InstallInstalling extends AlertActivity {
                         final PackageLite pkg = result.getResult();
                         params.setAppPackageName(pkg.getPackageName());
                         params.setInstallLocation(pkg.getInstallLocation());
-                        params.setSize(
-                                PackageHelper.calculateInstalledSize(pkg, params.abiOverride));
+                        params.setSize(InstallLocationUtils.calculateInstalledSize(pkg,
+                                params.abiOverride));
                     }
                 } catch (IOException e) {
                     Log.e(LOG_TAG,

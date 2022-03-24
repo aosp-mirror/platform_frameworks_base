@@ -16,19 +16,18 @@
 
 package com.android.systemui.media.dialog;
 
-import static android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE;
-
+import android.content.res.ColorStateList;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
-import android.text.SpannableString;
 import android.text.TextUtils;
-import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
 
 import androidx.annotation.NonNull;
+import androidx.core.widget.CompoundButtonCompat;
 
 import com.android.settingslib.Utils;
 import com.android.settingslib.media.LocalMediaManager.MediaDeviceState;
@@ -44,12 +43,18 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
 
     private static final String TAG = "MediaOutputAdapter";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
+    private static final float DEVICE_DISCONNECTED_ALPHA = 0.5f;
+    private static final float DEVICE_CONNECTED_ALPHA = 1f;
 
+    private final MediaOutputDialog mMediaOutputDialog;
     private ViewGroup mConnectedItem;
     private boolean mIncludeDynamicGroup;
 
-    public MediaOutputAdapter(MediaOutputController controller) {
+    public MediaOutputAdapter(MediaOutputController controller,
+            MediaOutputDialog mediaOutputDialog) {
         super(controller);
+        mMediaOutputDialog = mediaOutputDialog;
+        setHasStableIds(true);
     }
 
     @Override
@@ -65,18 +70,6 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
         if (position == size && mController.isZeroMode()) {
             viewHolder.onBind(CUSTOMIZED_ITEM_PAIR_NEW, false /* topMargin */,
                     true /* bottomMargin */);
-        } else if (mIncludeDynamicGroup) {
-            if (position == 0) {
-                viewHolder.onBind(CUSTOMIZED_ITEM_DYNAMIC_GROUP, true /* topMargin */,
-                        false /* bottomMargin */);
-            } else {
-                // When group item is added at the first(position == 0), devices will be added from
-                // the second item(position == 1). It means that the index of device list starts
-                // from "position - 1".
-                viewHolder.onBind(((List<MediaDevice>) (mController.getMediaDevices()))
-                                .get(position - 1),
-                        false /* topMargin */, position == size /* bottomMargin */, position);
-            }
         } else if (position < size) {
             viewHolder.onBind(((List<MediaDevice>) (mController.getMediaDevices())).get(position),
                     position == 0 /* topMargin */, position == (size - 1) /* bottomMargin */,
@@ -87,30 +80,26 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
     }
 
     @Override
+    public long getItemId(int position) {
+        final int size = mController.getMediaDevices().size();
+        if (position == size && mController.isZeroMode()) {
+            return -1;
+        } else if (position < size) {
+            return ((List<MediaDevice>) (mController.getMediaDevices()))
+                    .get(position).getId().hashCode();
+        } else if (DEBUG) {
+            Log.d(TAG, "Incorrect position for item id: " + position);
+        }
+        return position;
+    }
+
+    @Override
     public int getItemCount() {
-        mIncludeDynamicGroup = mController.getSelectedMediaDevice().size() > 1;
-        if (mController.isZeroMode() || mIncludeDynamicGroup) {
+        if (mController.isZeroMode()) {
             // Add extra one for "pair new" or dynamic group
             return mController.getMediaDevices().size() + 1;
         }
         return mController.getMediaDevices().size();
-    }
-
-    @Override
-    CharSequence getItemTitle(MediaDevice device) {
-        if (device.getDeviceType() == MediaDevice.MediaDeviceType.TYPE_BLUETOOTH_DEVICE
-                && !device.isConnected()) {
-            final CharSequence deviceName = device.getName();
-            // Append status to title only for the disconnected Bluetooth device.
-            final SpannableString spannableTitle = new SpannableString(
-                    mContext.getString(R.string.media_output_dialog_disconnected, deviceName));
-            spannableTitle.setSpan(new ForegroundColorSpan(
-                    Utils.getColorAttrDefaultColor(mContext, android.R.attr.textColorSecondary)),
-                    deviceName.length(),
-                    spannableTitle.length(), SPAN_EXCLUSIVE_EXCLUSIVE);
-            return spannableTitle;
-        }
-        return super.getItemTitle(device);
     }
 
     class MediaDeviceViewHolder extends MediaDeviceBaseViewHolder {
@@ -127,45 +116,83 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
             if (currentlyConnected) {
                 mConnectedItem = mContainerLayout;
             }
-            mBottomDivider.setVisibility(View.GONE);
             mCheckBox.setVisibility(View.GONE);
-            if (currentlyConnected && mController.isActiveRemoteDevice(device)
-                    && mController.getSelectableMediaDevice().size() > 0) {
-                // Init active device layout
-                mDivider.setVisibility(View.VISIBLE);
-                mDivider.setTransitionAlpha(1);
-                mAddIcon.setVisibility(View.VISIBLE);
-                mAddIcon.setTransitionAlpha(1);
-                mAddIcon.setOnClickListener(v -> onEndItemClick());
-            } else {
-                // Init non-active device layout
-                mDivider.setVisibility(View.GONE);
-                mAddIcon.setVisibility(View.GONE);
-            }
+            mStatusIcon.setVisibility(View.GONE);
+            mContainerLayout.setOnClickListener(null);
+            mTitleText.setTextColor(mController.getColorItemContent());
+            mSubTitleText.setTextColor(mController.getColorItemContent());
+            mTwoLineTitleText.setTextColor(mController.getColorItemContent());
+            mSeekBar.getProgressDrawable().setColorFilter(
+                    new PorterDuffColorFilter(mController.getColorSeekbarProgress(),
+                            PorterDuff.Mode.SRC_IN));
             if (mCurrentActivePosition == position) {
                 mCurrentActivePosition = -1;
             }
+            if (device.getDeviceType() == MediaDevice.MediaDeviceType.TYPE_BLUETOOTH_DEVICE
+                    && !device.isConnected()) {
+                mTitleText.setAlpha(DEVICE_DISCONNECTED_ALPHA);
+                mTitleIcon.setAlpha(DEVICE_DISCONNECTED_ALPHA);
+            } else {
+                mTitleText.setAlpha(DEVICE_CONNECTED_ALPHA);
+                mTitleIcon.setAlpha(DEVICE_CONNECTED_ALPHA);
+            }
+
             if (mController.isTransferring()) {
                 if (device.getState() == MediaDeviceState.STATE_CONNECTING
                         && !mController.hasAdjustVolumeUserRestriction()) {
-                    setTwoLineLayout(device, true /* bFocused */, false /* showSeekBar*/,
-                            true /* showProgressBar */, false /* showSubtitle */);
+                    mProgressBar.getIndeterminateDrawable().setColorFilter(
+                            new PorterDuffColorFilter(
+                                    mController.getColorItemContent(),
+                                    PorterDuff.Mode.SRC_IN));
+                    setSingleLineLayout(getItemTitle(device), true /* bFocused */,
+                            false /* showSeekBar*/,
+                            true /* showProgressBar */, false /* showStatus */);
                 } else {
                     setSingleLineLayout(getItemTitle(device), false /* bFocused */);
                 }
             } else {
                 // Set different layout for each device
                 if (device.getState() == MediaDeviceState.STATE_CONNECTING_FAILED) {
+                    mTitleText.setAlpha(DEVICE_CONNECTED_ALPHA);
+                    mTitleIcon.setAlpha(DEVICE_CONNECTED_ALPHA);
+                    mStatusIcon.setImageDrawable(
+                            mContext.getDrawable(R.drawable.media_output_status_failed));
+                    mStatusIcon.setColorFilter(mController.getColorItemContent());
                     setTwoLineLayout(device, false /* bFocused */,
                             false /* showSeekBar */, false /* showProgressBar */,
-                            true /* showSubtitle */);
+                            true /* showSubtitle */, true /* showStatus */);
                     mSubTitleText.setText(R.string.media_output_dialog_connect_failed);
                     mContainerLayout.setOnClickListener(v -> onItemClick(v, device));
+                } else if (mController.getSelectedMediaDevice().size() > 1
+                        && isDeviceIncluded(mController.getSelectedMediaDevice(), device)) {
+                    mTitleText.setTextColor(mController.getColorItemContent());
+                    setSingleLineLayout(getItemTitle(device), true /* bFocused */,
+                            true /* showSeekBar */,
+                            false /* showProgressBar */, false /* showStatus */);
+                    mCheckBox.setVisibility(View.VISIBLE);
+                    mCheckBox.setChecked(true);
+                    mSeekBar.setOnClickListener(null);
+                    mSeekBar.setOnClickListener(v -> onGroupActionTriggered(false, device));
+                    setCheckBoxColor(mCheckBox, mController.getColorItemContent());
+                    initSeekbar(device);
                 } else if (!mController.hasAdjustVolumeUserRestriction() && currentlyConnected) {
-                    setTwoLineLayout(device, true /* bFocused */, true /* showSeekBar */,
-                            false /* showProgressBar */, false /* showSubtitle */);
+                    mStatusIcon.setImageDrawable(
+                            mContext.getDrawable(R.drawable.media_output_status_check));
+                    mStatusIcon.setColorFilter(mController.getColorItemContent());
+                    mTitleText.setTextColor(mController.getColorItemContent());
+                    setSingleLineLayout(getItemTitle(device), true /* bFocused */,
+                            true /* showSeekBar */,
+                            false /* showProgressBar */, true /* showStatus */);
                     initSeekbar(device);
                     mCurrentActivePosition = position;
+                } else if (isDeviceIncluded(mController.getSelectableMediaDevice(), device)) {
+                    mCheckBox.setVisibility(View.VISIBLE);
+                    mCheckBox.setChecked(false);
+                    mContainerLayout.setOnClickListener(v -> onGroupActionTriggered(true, device));
+                    setCheckBoxColor(mCheckBox, mController.getColorItemContent());
+                    setSingleLineLayout(getItemTitle(device), false /* bFocused */,
+                            false /* showSeekBar */,
+                            false /* showProgressBar */, false /* showStatus */);
                 } else {
                     setSingleLineLayout(getItemTitle(device), false /* bFocused */);
                     mContainerLayout.setOnClickListener(v -> onItemClick(v, device));
@@ -173,67 +200,60 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
             }
         }
 
+        public void setCheckBoxColor(CheckBox checkBox, int color) {
+            int[][] states = {{android.R.attr.state_checked}, {}};
+            int[] colors = {color, color};
+            CompoundButtonCompat.setButtonTintList(checkBox, new
+                    ColorStateList(states, colors));
+        }
+
         @Override
         void onBind(int customizedItem, boolean topMargin, boolean bottomMargin) {
-            super.onBind(customizedItem, topMargin, bottomMargin);
             if (customizedItem == CUSTOMIZED_ITEM_PAIR_NEW) {
+                mTitleText.setTextColor(mController.getColorItemContent());
                 mCheckBox.setVisibility(View.GONE);
-                mDivider.setVisibility(View.GONE);
-                mAddIcon.setVisibility(View.GONE);
-                mBottomDivider.setVisibility(View.GONE);
                 setSingleLineLayout(mContext.getText(R.string.media_output_dialog_pairing_new),
                         false /* bFocused */);
                 final Drawable d = mContext.getDrawable(R.drawable.ic_add);
                 d.setColorFilter(new PorterDuffColorFilter(
                         Utils.getColorAccentDefaultColor(mContext), PorterDuff.Mode.SRC_IN));
                 mTitleIcon.setImageDrawable(d);
-                mContainerLayout.setOnClickListener(v -> onItemClick(CUSTOMIZED_ITEM_PAIR_NEW));
-            } else if (customizedItem == CUSTOMIZED_ITEM_DYNAMIC_GROUP) {
-                mConnectedItem = mContainerLayout;
-                mBottomDivider.setVisibility(View.GONE);
-                mCheckBox.setVisibility(View.GONE);
-                if (mController.getSelectableMediaDevice().size() > 0) {
-                    mDivider.setVisibility(View.VISIBLE);
-                    mDivider.setTransitionAlpha(1);
-                    mAddIcon.setVisibility(View.VISIBLE);
-                    mAddIcon.setTransitionAlpha(1);
-                    mAddIcon.setOnClickListener(v -> onEndItemClick());
-                } else {
-                    mDivider.setVisibility(View.GONE);
-                    mAddIcon.setVisibility(View.GONE);
-                }
-                mTitleIcon.setImageDrawable(getSpeakerDrawable());
-                final CharSequence sessionName = mController.getSessionName();
-                final CharSequence title = TextUtils.isEmpty(sessionName)
-                        ? mContext.getString(R.string.media_output_dialog_group) : sessionName;
-                setTwoLineLayout(title, true /* bFocused */, true /* showSeekBar */,
-                        false /* showProgressBar */, false /* showSubtitle */);
-                initSessionSeekbar();
+                mContainerLayout.setOnClickListener(mController::launchBluetoothPairing);
             }
+        }
+
+        private void onGroupActionTriggered(boolean isChecked, MediaDevice device) {
+            if (isChecked && isDeviceIncluded(mController.getSelectableMediaDevice(), device)) {
+                mController.addDeviceToPlayMedia(device);
+            } else if (!isChecked && isDeviceIncluded(mController.getDeselectableMediaDevice(),
+                    device)) {
+                mController.removeDeviceFromPlayMedia(device);
+            }
+        }
+
+        private boolean isDeviceIncluded(List<MediaDevice> deviceList, MediaDevice targetDevice) {
+            for (MediaDevice device : deviceList) {
+                if (TextUtils.equals(device.getId(), targetDevice.getId())) {
+                    return true;
+                }
+            }
+            return false;
         }
 
         private void onItemClick(View view, MediaDevice device) {
             if (mController.isTransferring()) {
                 return;
             }
-
+            if (isCurrentlyConnected(device)) {
+                Log.d(TAG, "This device is already connected! : " + device.getName());
+                return;
+            }
             mCurrentActivePosition = -1;
-            playSwitchingAnim(mConnectedItem, view);
             mController.connectDevice(device);
             device.setState(MediaDeviceState.STATE_CONNECTING);
             if (!isAnimating()) {
                 notifyDataSetChanged();
             }
-        }
-
-        private void onItemClick(int customizedItem) {
-            if (customizedItem == CUSTOMIZED_ITEM_PAIR_NEW) {
-                mController.launchBluetoothPairing();
-            }
-        }
-
-        private void onEndItemClick() {
-            mController.launchMediaOutputGroupDialog();
         }
     }
 }

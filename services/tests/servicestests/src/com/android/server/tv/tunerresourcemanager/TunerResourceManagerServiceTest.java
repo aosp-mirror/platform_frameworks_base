@@ -25,7 +25,6 @@ import android.content.ContextWrapper;
 import android.media.tv.ITvInputManager;
 import android.media.tv.TvInputManager;
 import android.media.tv.TvInputService;
-import android.media.tv.tuner.TunerFrontendInfo;
 import android.media.tv.tuner.frontend.FrontendSettings;
 import android.media.tv.tunerresourcemanager.CasSessionRequest;
 import android.media.tv.tunerresourcemanager.IResourcesReclaimListener;
@@ -33,6 +32,7 @@ import android.media.tv.tunerresourcemanager.ResourceClientProfile;
 import android.media.tv.tunerresourcemanager.TunerCiCamRequest;
 import android.media.tv.tunerresourcemanager.TunerDemuxRequest;
 import android.media.tv.tunerresourcemanager.TunerDescramblerRequest;
+import android.media.tv.tunerresourcemanager.TunerFrontendInfo;
 import android.media.tv.tunerresourcemanager.TunerFrontendRequest;
 import android.media.tv.tunerresourcemanager.TunerLnbRequest;
 import android.media.tv.tunerresourcemanager.TunerResourceManager;
@@ -365,13 +365,13 @@ public class TunerResourceManagerServiceTest {
         mTunerResourceManagerService.registerClientProfileInternal(
                 profiles[0], listener, clientId0);
         assertThat(clientId0[0]).isNotEqualTo(TunerResourceManagerService.INVALID_CLIENT_ID);
-        mTunerResourceManagerService.getClientProfile(clientId0[0])
-                .setPriority(clientPriorities[0]);
+        mTunerResourceManagerService.updateClientPriorityInternal(
+                clientId0[0], clientPriorities[0], 0/*niceValue*/);
         mTunerResourceManagerService.registerClientProfileInternal(
                 profiles[1], new TestResourcesReclaimListener(), clientId1);
         assertThat(clientId1[0]).isNotEqualTo(TunerResourceManagerService.INVALID_CLIENT_ID);
-        mTunerResourceManagerService.getClientProfile(clientId1[0])
-                .setPriority(clientPriorities[1]);
+        mTunerResourceManagerService.updateClientPriorityInternal(
+                clientId1[0], clientPriorities[1], 0/*niceValue*/);
 
         // Init frontend resources.
         TunerFrontendInfo[] infos = new TunerFrontendInfo[2];
@@ -415,13 +415,13 @@ public class TunerResourceManagerServiceTest {
         mTunerResourceManagerService.registerClientProfileInternal(
                 profiles[0], listener, clientId0);
         assertThat(clientId0[0]).isNotEqualTo(TunerResourceManagerService.INVALID_CLIENT_ID);
-        mTunerResourceManagerService.getClientProfile(clientId0[0])
-                .setPriority(clientPriorities[0]);
+        mTunerResourceManagerService.updateClientPriorityInternal(
+                clientId0[0], clientPriorities[0], 0/*niceValue*/);
         mTunerResourceManagerService.registerClientProfileInternal(
                 profiles[1], new TestResourcesReclaimListener(), clientId1);
         assertThat(clientId1[0]).isNotEqualTo(TunerResourceManagerService.INVALID_CLIENT_ID);
-        mTunerResourceManagerService.getClientProfile(clientId1[0])
-                .setPriority(clientPriorities[1]);
+        mTunerResourceManagerService.updateClientPriorityInternal(
+                clientId1[0], clientPriorities[1], 0/*niceValue*/);
 
         // Init frontend resources.
         TunerFrontendInfo[] infos = new TunerFrontendInfo[2];
@@ -511,13 +511,13 @@ public class TunerResourceManagerServiceTest {
         mTunerResourceManagerService.registerClientProfileInternal(
                 profiles[0], listener, clientId0);
         assertThat(clientId0[0]).isNotEqualTo(TunerResourceManagerService.INVALID_CLIENT_ID);
-        mTunerResourceManagerService.getClientProfile(clientId0[0])
-                .setPriority(clientPriorities[0]);
+        mTunerResourceManagerService.updateClientPriorityInternal(
+                clientId0[0], clientPriorities[0], 0/*niceValue*/);
         mTunerResourceManagerService.registerClientProfileInternal(
                 profiles[1], new TestResourcesReclaimListener(), clientId1);
         assertThat(clientId1[0]).isNotEqualTo(TunerResourceManagerService.INVALID_CLIENT_ID);
-        mTunerResourceManagerService.getClientProfile(clientId1[0])
-                .setPriority(clientPriorities[1]);
+        mTunerResourceManagerService.updateClientPriorityInternal(
+                clientId1[0], clientPriorities[1], 0/*niceValue*/);
 
         // Init cas resources.
         mTunerResourceManagerService.updateCasInfoInternal(1 /*casSystemId*/, 2 /*maxSessionNum*/);
@@ -567,13 +567,13 @@ public class TunerResourceManagerServiceTest {
         mTunerResourceManagerService.registerClientProfileInternal(
                 profiles[0], listener, clientId0);
         assertThat(clientId0[0]).isNotEqualTo(TunerResourceManagerService.INVALID_CLIENT_ID);
-        mTunerResourceManagerService.getClientProfile(clientId0[0])
-                .setPriority(clientPriorities[0]);
+        mTunerResourceManagerService.updateClientPriorityInternal(
+                clientId0[0], clientPriorities[0], 0/*niceValue*/);
         mTunerResourceManagerService.registerClientProfileInternal(
                 profiles[1], new TestResourcesReclaimListener(), clientId1);
         assertThat(clientId1[0]).isNotEqualTo(TunerResourceManagerService.INVALID_CLIENT_ID);
-        mTunerResourceManagerService.getClientProfile(clientId1[0])
-                .setPriority(clientPriorities[1]);
+        mTunerResourceManagerService.updateClientPriorityInternal(
+                clientId1[0], clientPriorities[1], 0/*niceValue*/);
 
         // Init cicam/cas resources.
         mTunerResourceManagerService.updateCasInfoInternal(1 /*casSystemId*/, 2 /*maxSessionNum*/);
@@ -697,13 +697,13 @@ public class TunerResourceManagerServiceTest {
         mTunerResourceManagerService.registerClientProfileInternal(
                 profiles[0], listener, clientId0);
         assertThat(clientId0[0]).isNotEqualTo(TunerResourceManagerService.INVALID_CLIENT_ID);
-        mTunerResourceManagerService.getClientProfile(clientId0[0])
-                .setPriority(clientPriorities[0]);
+        mTunerResourceManagerService.updateClientPriorityInternal(
+                clientId0[0], clientPriorities[0], 0/*niceValue*/);
         mTunerResourceManagerService.registerClientProfileInternal(
                 profiles[1], new TestResourcesReclaimListener(), clientId1);
         assertThat(clientId1[0]).isNotEqualTo(TunerResourceManagerService.INVALID_CLIENT_ID);
-        mTunerResourceManagerService.getClientProfile(clientId1[0])
-                .setPriority(clientPriorities[1]);
+        mTunerResourceManagerService.updateClientPriorityInternal(
+                clientId1[0], clientPriorities[1], 0/*niceValue*/);
 
         // Init lnb resources.
         int[] lnbHandles = {1};

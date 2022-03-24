@@ -92,6 +92,8 @@ option java_package com.android.server
 27533 notification_autogrouped (key|3)
 # notification was removed from an autogroup
 275534 notification_unautogrouped (key|3)
+# when a notification is adjusted via assistant
+27535 notification_adjusted (key|3),(adjustment_type|3),(new_value|3)
 
 # ---------------------------
 # Watchdog.java

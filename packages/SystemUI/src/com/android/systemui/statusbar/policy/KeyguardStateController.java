@@ -50,13 +50,6 @@ public interface KeyguardStateController extends CallbackController<Callback> {
     boolean canDismissLockScreen();
 
     /**
-     * Whether we can currently perform the shared element SmartSpace transition. This is true if
-     * we're on the lockscreen, it can be dismissed with a swipe, and the Launcher is underneath the
-     * keyguard and displaying a SmartSpace that it has registered with System UI.
-     */
-    boolean canPerformSmartSpaceTransition();
-
-    /**
      * Whether the keyguard is allowed to rotate, or needs to be locked to the default orientation.
      */
     boolean isKeyguardScreenRotationAllowed();
@@ -245,6 +238,12 @@ public interface KeyguardStateController extends CallbackController<Callback> {
          * animation.
          */
         default void onKeyguardDismissAmountChanged() {}
+
+        /**
+         * Triggered when face auth becomes available or unavailable. Value should be queried with
+         * {@link KeyguardStateController#isFaceAuthEnabled()}.
+         */
+        default void onFaceAuthEnabledChanged() {}
 
         /**
          * Triggered when the notification panel is starting or has finished

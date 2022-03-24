@@ -62,4 +62,9 @@ message CameraStreamProto {
     // The frame counts for each histogram bins
     // Expected number of fields: 10
     repeated int64 histogram_counts = 13;
+
+    // The dynamic range profile of the stream
+    optional int64 dynamic_range_profile = 14;
+    // The stream use case
+    optional int64 stream_use_case = 15;
 }

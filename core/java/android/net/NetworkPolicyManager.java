@@ -167,12 +167,17 @@ public class NetworkPolicyManager {
     public static final String FIREWALL_CHAIN_NAME_POWERSAVE = "powersave";
     /** @hide */
     public static final String FIREWALL_CHAIN_NAME_RESTRICTED = "restricted";
+    /** @hide */
+    public static final String FIREWALL_CHAIN_NAME_LOW_POWER_STANDBY = "low_power_standby";
 
     private static final boolean ALLOW_PLATFORM_APP_POLICY = true;
 
     /** @hide */
     public static final int FOREGROUND_THRESHOLD_STATE =
             ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE;
+
+    /** @hide */
+    public static final int TOP_THRESHOLD_STATE = ActivityManager.PROCESS_STATE_BOUND_TOP;
 
     /**
      * {@link Intent} extra that indicates which {@link NetworkTemplate} rule it
@@ -244,6 +249,20 @@ public class NetworkPolicyManager {
      * @hide
      */
     public static final int ALLOWED_REASON_RESTRICTED_MODE_PERMISSIONS = 1 << 4;
+    /**
+     * Flag to indicate that app is exempt from certain network restrictions because of it being
+     * in the bound top or top procstate.
+     *
+     * @hide
+     */
+    public static final int ALLOWED_REASON_TOP = 1 << 5;
+    /**
+     * Flag to indicate that app is exempt from low power standby restrictions because of it being
+     * allowlisted.
+     *
+     * @hide
+     */
+    public static final int ALLOWED_REASON_LOW_POWER_STANDBY_ALLOWLIST = 1 << 6;
     /**
      * Flag to indicate that app is exempt from certain metered network restrictions because user
      * explicitly exempted it.
@@ -482,8 +501,8 @@ public class NetworkPolicyManager {
      * @param networkTypes the network types this override applies to. If no
      *            network types are specified, override values will be ignored.
      *            {@see TelephonyManager#getAllNetworkTypes()}
-     * @param timeoutMillis the timeout after which the requested override will
-     *            be automatically cleared, or {@code 0} to leave in the
+     * @param expirationDurationMillis the duration after which the requested override
+     *            will be automatically cleared, or {@code 0} to leave in the
      *            requested state until explicitly cleared, or the next reboot,
      *            whichever happens first
      * @param callingPackage the name of the package making the call.
@@ -491,11 +510,11 @@ public class NetworkPolicyManager {
      */
     public void setSubscriptionOverride(int subId, @SubscriptionOverrideMask int overrideMask,
             @SubscriptionOverrideMask int overrideValue,
-            @NonNull @Annotation.NetworkType int[] networkTypes, long timeoutMillis,
+            @NonNull @Annotation.NetworkType int[] networkTypes, long expirationDurationMillis,
             @NonNull String callingPackage) {
         try {
             mService.setSubscriptionOverride(subId, overrideMask, overrideValue, networkTypes,
-                    timeoutMillis, callingPackage);
+                    expirationDurationMillis, callingPackage);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -506,13 +525,16 @@ public class NetworkPolicyManager {
      *
      * @param subId the subscriber this relationship applies to.
      * @param plans the list of plans.
+     * @param expirationDurationMillis the duration after which the subscription plans
+     *            will be automatically cleared, or {@code 0} to leave the plans until
+     *            explicitly cleared, or the next reboot, whichever happens first
      * @param callingPackage the name of the package making the call
      * @hide
      */
     public void setSubscriptionPlans(int subId, @NonNull SubscriptionPlan[] plans,
-            @NonNull String callingPackage) {
+            long expirationDurationMillis, @NonNull String callingPackage) {
         try {
-            mService.setSubscriptionPlans(subId, plans, callingPackage);
+            mService.setSubscriptionPlans(subId, plans, expirationDurationMillis, callingPackage);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -523,12 +545,72 @@ public class NetworkPolicyManager {
      *
      * @param subId the subscriber to get the subscription plans for.
      * @param callingPackage the name of the package making the call.
+     * @return the active {@link SubscriptionPlan}s for the given subscription id, or
+     *         {@code null} if not found.
      * @hide
      */
-    @NonNull
+    @Nullable
     public SubscriptionPlan[] getSubscriptionPlans(int subId, @NonNull String callingPackage) {
         try {
             return mService.getSubscriptionPlans(subId, callingPackage);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Get subscription plan for the given networkTemplate.
+     *
+     * @param template the networkTemplate to get the subscription plan for.
+     * @return the active {@link SubscriptionPlan}s for the given template, or
+     *         {@code null} if not found.
+     * @hide
+     */
+    @Nullable
+    @RequiresPermission(anyOf = {
+            NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
+            android.Manifest.permission.NETWORK_STACK})
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public SubscriptionPlan getSubscriptionPlan(@NonNull NetworkTemplate template) {
+        try {
+            return mService.getSubscriptionPlan(template);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Notifies that the specified {@link NetworkStatsProvider} has reached its warning threshold
+     * which was set through {@link NetworkStatsProvider#onSetWarningAndLimit(String, long, long)}.
+     *
+     * @hide
+     */
+    @RequiresPermission(anyOf = {
+            NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
+            android.Manifest.permission.NETWORK_STACK})
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public void notifyStatsProviderWarningReached() {
+        try {
+            mService.notifyStatsProviderWarningOrLimitReached();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Notifies that the specified {@link NetworkStatsProvider} has reached its quota
+     * which was set through {@link NetworkStatsProvider#onSetLimit(String, long)} or
+     * {@link NetworkStatsProvider#onSetWarningAndLimit(String, long, long)}.
+     *
+     * @hide
+     */
+    @RequiresPermission(anyOf = {
+            NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
+            android.Manifest.permission.NETWORK_STACK})
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public void notifyStatsProviderLimitReached() {
+        try {
+            mService.notifyStatsProviderWarningOrLimitReached();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -703,6 +785,14 @@ public class NetworkPolicyManager {
             int procState, @ProcessCapability int capability) {
         return procState <= FOREGROUND_THRESHOLD_STATE
                 || (capability & ActivityManager.PROCESS_CAPABILITY_NETWORK) != 0;
+    }
+
+    /** @hide */
+    public static boolean isProcStateAllowedWhileInLowPowerStandby(@Nullable UidState uidState) {
+        if (uidState == null) {
+            return false;
+        }
+        return uidState.procState <= TOP_THRESHOLD_STATE;
     }
 
     /**

@@ -36,19 +36,16 @@ RENDERTHREAD_TEST(DeferredLayerUpdater, updateLayer) {
     EXPECT_EQ(0u, layerUpdater->backingLayer()->getHeight());
     EXPECT_FALSE(layerUpdater->backingLayer()->getForceFilter());
     EXPECT_FALSE(layerUpdater->backingLayer()->isBlend());
-    EXPECT_EQ(Matrix4::identity(), layerUpdater->backingLayer()->getTexTransform());
 
     // push the deferred updates to the layer
-    SkMatrix scaledMatrix = SkMatrix::Scale(0.5, 0.5);
     SkBitmap bitmap;
     bitmap.allocN32Pixels(16, 16);
     sk_sp<SkImage> layerImage = SkImage::MakeFromBitmap(bitmap);
-    layerUpdater->updateLayer(true, scaledMatrix, layerImage);
+    layerUpdater->updateLayer(true, layerImage, 0, SkRect::MakeEmpty());
 
     // the backing layer should now have all the properties applied.
     EXPECT_EQ(100u, layerUpdater->backingLayer()->getWidth());
     EXPECT_EQ(100u, layerUpdater->backingLayer()->getHeight());
     EXPECT_TRUE(layerUpdater->backingLayer()->getForceFilter());
     EXPECT_TRUE(layerUpdater->backingLayer()->isBlend());
-    EXPECT_EQ(scaledMatrix, layerUpdater->backingLayer()->getTexTransform());
 }
