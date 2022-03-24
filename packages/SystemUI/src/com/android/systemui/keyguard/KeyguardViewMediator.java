@@ -2373,7 +2373,8 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
                 // Hack level over 9000: To speed up wake-and-unlock sequence, force it to report
                 // the next draw from here, so we don't have to wait for window manager to signal
                 // this to our ViewRootImpl.
-                mKeyguardViewControllerLazy.get().getViewRootImpl().setReportNextDraw();
+                mKeyguardViewControllerLazy.get().getViewRootImpl().setReportNextDraw(
+                        false /* syncBuffer */);
                 mScreenOnCoordinator.setWakeAndUnlocking(false);
             }
 
