@@ -1830,9 +1830,6 @@ public class ComputerEngine implements Computer {
                 list.addAll(mApexManager.getFactoryPackages());
             } else {
                 list.addAll(mApexManager.getActivePackages());
-                if (listUninstalled) {
-                    list.addAll(mApexManager.getInactivePackages());
-                }
             }
         }
         return new ParceledListSlice<>(list);

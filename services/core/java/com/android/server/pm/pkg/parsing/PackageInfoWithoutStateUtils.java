@@ -322,17 +322,14 @@ public class PackageInfoWithoutStateUtils {
             pi.applicationInfo.sourceDir = apexFile.getPath();
             pi.applicationInfo.publicSourceDir = apexFile.getPath();
             pi.applicationInfo.flags |= ApplicationInfo.FLAG_SYSTEM;
+            pi.applicationInfo.flags |= ApplicationInfo.FLAG_INSTALLED;
             if (apexInfo.isFactory) {
                 pi.applicationInfo.flags &= ~ApplicationInfo.FLAG_UPDATED_SYSTEM_APP;
             } else {
                 pi.applicationInfo.flags |= ApplicationInfo.FLAG_UPDATED_SYSTEM_APP;
             }
-            if (apexInfo.isActive) {
-                pi.applicationInfo.flags |= ApplicationInfo.FLAG_INSTALLED;
-            } else {
-                pi.applicationInfo.flags &= ~ApplicationInfo.FLAG_INSTALLED;
-            }
             pi.isApex = true;
+            pi.isActiveApex = apexInfo.isActive;
         }
 
         final SigningDetails signingDetails = pkg.getSigningDetails();
