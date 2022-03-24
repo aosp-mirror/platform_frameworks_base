@@ -4140,6 +4140,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         final SurfaceControl.Transaction t = getPendingTransaction();
         // Prepare IME screenshot for the target if it allows to attach into.
         if (mInputMethodWindow != null && mInputMethodWindow.isVisible()) {
+            // Remove the obsoleted IME snapshot first in case the new snapshot happens to
+            // override the current one before the transition finish and the surface never be
+            // removed on the task.
+            removeImeSurfaceImmediately();
             mImeScreenshot = new ImeScreenshot(
                     mWmService.mSurfaceControlFactory.apply(null), mImeLayeringTarget);
             mImeScreenshot.attachAndShow(t);
