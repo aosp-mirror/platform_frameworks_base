@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <!--
- * Copyright (c) 2022, The Android Open Source Project
+ * Copyright (c) 2006, The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,15 +16,5 @@
 */
 -->
 <resources>
-    <dimen name="controls_padding_horizontal">205dp</dimen>
-    <dimen name="split_shade_notifications_scrim_margin_bottom">16dp</dimen>
-    <dimen name="notification_panel_margin_bottom">56dp</dimen>
-
-    <dimen name="keyguard_split_shade_top_margin">72dp</dimen>
-
-    <dimen name="status_bar_header_height_keyguard">56dp</dimen>
-
-    <dimen name="qs_media_session_height_expanded">251dp</dimen>
-
-    <dimen name="lockscreen_shade_max_over_scroll_amount">42dp</dimen>
+    <integer name="lockscreen_shade_over_scroll_release_duration">500</integer>
 </resources>
