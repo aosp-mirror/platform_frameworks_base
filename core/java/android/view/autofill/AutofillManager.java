@@ -3152,11 +3152,26 @@ public final class AutofillManager {
     }
 
     /**
-     * Like {@link #showAutofillDialog(View)} but for virtual views.
+     * If autofill suggestions for a
+     * <a href="{@docRoot}reference/android/service/autofill/Dataset.html#FillDialogUI">
+     * dialog-style UI</a> are available for virtual {@code view}, shows a dialog allowing the user
+     * to select a suggestion and returns {@code true}.
+     * <p>
+     * The dialog may not be shown if the autofill service does not support it, if the autofill
+     * request has not returned a response yet, if the dialog was shown previously, or if the
+     * input method is already shown.
+     * <p>
+     * It is recommended apps to call this method the first time a user focuses on
+     * an autofill-able form, and to avoid showing the input method if the dialog is shown. If
+     * this method returns {@code false}, you should then instead show the input method (assuming
+     * that is how the view normally handles the focus event). If the user re-focuses on the view,
+     * you should not call this method again so as to not disrupt usage of the input method.
      *
-     * @param virtualId id identifying the virtual child inside the parent view.
+     * @param view the view hosting the virtual view hierarchy which is used to show autofill
+     *            suggestions.
+     * @param virtualId id identifying the virtual view inside the host view.
+     * @return {@code true} if the autofill dialog is being shown
      */
-    // TODO(b/210926084): Consider whether to include the one-time show logic within this method.
     public boolean showAutofillDialog(@NonNull View view, int virtualId) {
         Objects.requireNonNull(view);
         if (shouldShowAutofillDialog(getAutofillId(view, virtualId))) {
