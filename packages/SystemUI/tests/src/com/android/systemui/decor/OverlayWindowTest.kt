@@ -19,19 +19,25 @@ package com.android.systemui.decor
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
 import android.view.DisplayCutout
+import android.view.LayoutInflater
 import android.view.Surface
 import android.view.View
+import android.view.ViewGroup
 import androidx.test.filters.SmallTest
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.util.mockito.eq
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mockito.never
+import org.mockito.Mock
+import org.mockito.Mockito
+import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.spy
-import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
+import org.mockito.MockitoAnnotations
+import org.mockito.Mockito.`when` as whenever
 
 @RunWith(AndroidTestingRunner::class)
 @RunWithLooper(setAsMainLooper = true)
@@ -39,88 +45,62 @@ import org.mockito.Mockito.verify
 class OverlayWindowTest : SysuiTestCase() {
 
     companion object {
-        private val TEST_DECOR_VIEW_ID_1 = R.id.privacy_dot_top_left_container
-        private val TEST_DECOR_VIEW_ID_2 = R.id.privacy_dot_bottom_right_container
+        private val TEST_DECOR_VIEW_ID = R.id.privacy_dot_bottom_right_container
+        private val TEST_DECOR_LAYOUT_ID = R.layout.privacy_dot_bottom_right
     }
 
     private lateinit var overlay: OverlayWindow
-    private lateinit var decorProvider1: DecorProvider
-    private lateinit var decorProvider2: DecorProvider
+
+    @Mock private lateinit var layoutInflater: LayoutInflater
+    @Mock private lateinit var decorProvider: DecorProvider
 
     @Before
     fun setUp() {
-        decorProvider1 = spy(PrivacyDotCornerDecorProviderImpl(
-                viewId = TEST_DECOR_VIEW_ID_1,
-                alignedBound1 = DisplayCutout.BOUNDS_POSITION_TOP,
-                alignedBound2 = DisplayCutout.BOUNDS_POSITION_LEFT,
-                layoutId = R.layout.privacy_dot_top_left))
-        decorProvider2 = spy(PrivacyDotCornerDecorProviderImpl(
-                viewId = TEST_DECOR_VIEW_ID_2,
-                alignedBound1 = DisplayCutout.BOUNDS_POSITION_BOTTOM,
-                alignedBound2 = DisplayCutout.BOUNDS_POSITION_RIGHT,
-                layoutId = R.layout.privacy_dot_bottom_right))
+        MockitoAnnotations.initMocks(this)
 
-        overlay = OverlayWindow(mContext)
+        layoutInflater = spy(LayoutInflater.from(mContext))
+
+        overlay = OverlayWindow(layoutInflater, DisplayCutout.BOUNDS_POSITION_RIGHT)
+
+        whenever(decorProvider.viewId).thenReturn(TEST_DECOR_VIEW_ID)
+        whenever(decorProvider.inflateView(
+            eq(layoutInflater),
+            eq(overlay.rootView),
+            anyInt())
+        ).then {
+            val layoutInflater = it.getArgument<LayoutInflater>(0)
+            val parent = it.getArgument<ViewGroup>(1)
+            layoutInflater.inflate(TEST_DECOR_LAYOUT_ID, parent)
+            return@then parent.getChildAt(parent.childCount - 1)
+        }
+    }
+
+    @Test
+    fun testAnyBoundsPositionShallNoExceptionForConstructor() {
+        OverlayWindow(layoutInflater, DisplayCutout.BOUNDS_POSITION_LEFT)
+        OverlayWindow(layoutInflater, DisplayCutout.BOUNDS_POSITION_TOP)
+        OverlayWindow(layoutInflater, DisplayCutout.BOUNDS_POSITION_RIGHT)
+        OverlayWindow(layoutInflater, DisplayCutout.BOUNDS_POSITION_BOTTOM)
     }
 
     @Test
     fun testAddProvider() {
         @Surface.Rotation val rotation = Surface.ROTATION_270
-        overlay.addDecorProvider(decorProvider1, rotation)
-        overlay.addDecorProvider(decorProvider2, rotation)
-
-        verify(decorProvider1, times(1)).inflateView(
-                mContext, overlay.rootView, rotation)
-        verify(decorProvider2, times(1)).inflateView(
-                mContext, overlay.rootView, rotation)
-
-        val view1FoundFromRootView = overlay.rootView.findViewById<View>(TEST_DECOR_VIEW_ID_1)
-        Assert.assertNotNull(view1FoundFromRootView)
-        Assert.assertEquals(view1FoundFromRootView, overlay.getView(TEST_DECOR_VIEW_ID_1))
-        val view2FoundFromRootView = overlay.rootView.findViewById<View>(TEST_DECOR_VIEW_ID_2)
-        Assert.assertNotNull(view2FoundFromRootView)
-        Assert.assertEquals(view2FoundFromRootView, overlay.getView(TEST_DECOR_VIEW_ID_2))
+        overlay.addDecorProvider(decorProvider, rotation)
+        verify(decorProvider, Mockito.times(1)).inflateView(
+                eq(layoutInflater), eq(overlay.rootView), eq(rotation))
+        val viewFoundFromRootView = overlay.rootView.findViewById<View>(TEST_DECOR_VIEW_ID)
+        Assert.assertNotNull(viewFoundFromRootView)
+        Assert.assertEquals(viewFoundFromRootView, overlay.getView(TEST_DECOR_VIEW_ID))
     }
 
     @Test
     fun testRemoveView() {
-        overlay.addDecorProvider(decorProvider1, Surface.ROTATION_270)
-        overlay.addDecorProvider(decorProvider2, Surface.ROTATION_270)
-        overlay.removeView(TEST_DECOR_VIEW_ID_1)
-
-        val viewFoundFromRootView = overlay.rootView.findViewById<View>(TEST_DECOR_VIEW_ID_1)
+        @Surface.Rotation val rotation = Surface.ROTATION_270
+        overlay.addDecorProvider(decorProvider, rotation)
+        overlay.removeView(TEST_DECOR_VIEW_ID)
+        val viewFoundFromRootView = overlay.rootView.findViewById<View>(TEST_DECOR_VIEW_ID)
         Assert.assertNull(viewFoundFromRootView)
-        Assert.assertNull(overlay.getView(TEST_DECOR_VIEW_ID_1))
-    }
-
-    @Test
-    fun testOnReloadResAndMeasureWithoutIds() {
-        overlay.addDecorProvider(decorProvider1, Surface.ROTATION_0)
-        overlay.addDecorProvider(decorProvider2, Surface.ROTATION_0)
-
-        overlay.onReloadResAndMeasure(
-                reloadToken = 1,
-                rotation = Surface.ROTATION_90,
-                displayUniqueId = null)
-        verify(decorProvider1, times(1)).onReloadResAndMeasure(
-                overlay.getView(TEST_DECOR_VIEW_ID_1)!!, 1, Surface.ROTATION_90, null)
-        verify(decorProvider2, times(1)).onReloadResAndMeasure(
-                overlay.getView(TEST_DECOR_VIEW_ID_2)!!, 1, Surface.ROTATION_90, null)
-    }
-
-    @Test
-    fun testOnReloadResAndMeasureWithIds() {
-        overlay.addDecorProvider(decorProvider1, Surface.ROTATION_0)
-        overlay.addDecorProvider(decorProvider2, Surface.ROTATION_0)
-
-        overlay.onReloadResAndMeasure(
-                filterIds = arrayOf(TEST_DECOR_VIEW_ID_2),
-                reloadToken = 1,
-                rotation = Surface.ROTATION_90,
-                displayUniqueId = null)
-        verify(decorProvider1, never()).onReloadResAndMeasure(
-                overlay.getView(TEST_DECOR_VIEW_ID_1)!!, 1, Surface.ROTATION_90, null)
-        verify(decorProvider2, times(1)).onReloadResAndMeasure(
-                overlay.getView(TEST_DECOR_VIEW_ID_2)!!, 1, Surface.ROTATION_90, null)
+        Assert.assertNull(overlay.getView(TEST_DECOR_LAYOUT_ID))
     }
 }
