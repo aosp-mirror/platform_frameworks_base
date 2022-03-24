@@ -30,13 +30,14 @@ import android.content.res.ColorStateList;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Rect;
+import android.graphics.drawable.Animatable;
+import android.graphics.drawable.Animatable2;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.media.session.MediaController;
 import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
 import android.os.Process;
-import android.text.Layout;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -67,6 +68,7 @@ import com.android.systemui.util.animation.TransitionLayout;
 import com.android.systemui.util.time.SystemClock;
 
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executor;
 
@@ -637,9 +639,34 @@ public class MediaControlPanel {
 
     private void setSemanticButton(final ImageButton button, MediaAction mediaAction,
             ConstraintSet collapsedSet, ConstraintSet expandedSet, boolean showInCompact) {
+        AnimationBindHandler animHandler;
+        if (button.getTag() == null) {
+            animHandler = new AnimationBindHandler();
+            button.setTag(animHandler);
+        } else {
+            animHandler = (AnimationBindHandler) button.getTag();
+        }
+
+        animHandler.tryExecute(() -> {
+            bindSemanticButton(animHandler, button, mediaAction,
+                               collapsedSet, expandedSet, showInCompact);
+        });
+    }
+
+    private void bindSemanticButton(final AnimationBindHandler animHandler,
+            final ImageButton button, MediaAction mediaAction, ConstraintSet collapsedSet,
+            ConstraintSet expandedSet, boolean showInCompact) {
+
+        animHandler.unregisterAll();
         if (mediaAction != null) {
-            button.setImageIcon(mediaAction.getIcon());
+            final Drawable icon = mediaAction.getIcon();
+            button.setImageDrawable(icon);
             button.setContentDescription(mediaAction.getContentDescription());
+            final Drawable bgDrawable = mediaAction.getBackground();
+            button.setBackground(bgDrawable);
+
+            animHandler.tryRegister(icon);
+            animHandler.tryRegister(bgDrawable);
 
             Runnable action = mediaAction.getAction();
             if (action == null) {
@@ -651,17 +678,73 @@ public class MediaControlPanel {
                         logSmartspaceCardReported(SMARTSPACE_CARD_CLICK_EVENT,
                                 /* isRecommendationCard */ false);
                         action.run();
+
+                        if (icon instanceof Animatable) {
+                            ((Animatable) icon).start();
+                        }
+                        if (bgDrawable instanceof Animatable) {
+                            ((Animatable) bgDrawable).start();
+                        }
                     }
                 });
             }
         } else {
-            button.setImageIcon(null);
+            button.setImageDrawable(null);
             button.setContentDescription(null);
             button.setEnabled(false);
+            button.setBackground(mContext.getDrawable(R.drawable.qs_media_round_button_background));
         }
 
         setVisibleAndAlpha(collapsedSet, button.getId(), mediaAction != null && showInCompact);
         setVisibleAndAlpha(expandedSet, button.getId(), mediaAction != null);
+    }
+
+    private static class AnimationBindHandler extends Animatable2.AnimationCallback {
+        private ArrayList<Runnable> mOnAnimationsComplete = new ArrayList<>();
+        private ArrayList<Animatable2> mRegistrations = new ArrayList<>();
+
+        public void tryRegister(Drawable drawable) {
+            if (drawable instanceof Animatable2) {
+                Animatable2 anim = (Animatable2) drawable;
+                anim.registerAnimationCallback(this);
+                mRegistrations.add(anim);
+            }
+        }
+
+        public void unregisterAll() {
+            for (Animatable2 anim : mRegistrations) {
+                anim.unregisterAnimationCallback(this);
+            }
+            mRegistrations.clear();
+        }
+
+        public boolean isAnimationRunning() {
+            for (Animatable2 anim : mRegistrations) {
+                if (anim.isRunning()) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public void tryExecute(Runnable action) {
+            if (isAnimationRunning()) {
+                mOnAnimationsComplete.add(action);
+            } else {
+                action.run();
+            }
+        }
+
+        @Override
+        public void onAnimationEnd(Drawable drawable) {
+            super.onAnimationEnd(drawable);
+            if (!isAnimationRunning()) {
+                for (Runnable action : mOnAnimationsComplete) {
+                    action.run();
+                }
+                mOnAnimationsComplete.clear();
+            }
+        }
     }
 
     @Nullable
