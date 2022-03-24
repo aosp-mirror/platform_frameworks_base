@@ -45,7 +45,7 @@ public class EditTextActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.clipboard_edit_text_activity);
-        findViewById(R.id.copy_button).setOnClickListener((v) -> saveToClipboard());
+        findViewById(R.id.done_button).setOnClickListener((v) -> saveToClipboard());
         findViewById(R.id.share).setOnClickListener((v) -> share());
         mEditText = findViewById(R.id.edit_text);
         mAttribution = findViewById(R.id.attribution);
