@@ -4531,21 +4531,41 @@
          For more details, see <a
          href="{@docRoot}about/versions/12/behavior-changes-12#exact-alarm-permission">
          Exact alarm permission</a>.
-         <p>Apps who hold this permission and target API level 31 or above, always stay in the
+         <p>Apps need to target API {@link android.os.Build.VERSION_CODES#S} or above to be able to
+         request this permission. Note that apps targeting lower API levels do not need this
+         permission to use exact alarm APIs.
+         <p>Apps that hold this permission, always stay in the
          {@link android.app.usage.UsageStatsManager#STANDBY_BUCKET_WORKING_SET WORKING_SET} or
          lower standby bucket.
-         Applications targeting API level 30 or below do not need this permission to use
-         exact alarm APIs.
+         <p>If your app relies on exact alarms for core functionality, it can instead request
+         {@link android.Manifest.permission#USE_EXACT_ALARM} once it targets API
+         {@link android.os.Build.VERSION_CODES#TIRAMISU}. All apps using exact alarms for secondary
+         features (which should still be user facing) should continue using this permission.
      -->
     <permission android:name="android.permission.SCHEDULE_EXACT_ALARM"
         android:protectionLevel="normal|appop"/>
 
-    <!-- Allows apps to use exact alarms just like with SCHEDULE_EXACT_ALARM but without needing
-        to request this permission from the user.
-        <p><b>This is only for apps that rely on exact alarms for their core functionality.</b>
-        App stores may enforce policies to audit and review the use of this permission. Any app that
-        requests this but is found to not require exact alarms for its primary function may be
-        removed from the app store.
+    <!-- Allows apps to use exact alarms just like with {@link
+         android.Manifest.permission#SCHEDULE_EXACT_ALARM} but without needing to request this
+         permission from the user.
+         <p><b> This is only intended for use by apps that rely on exact alarms for their core
+         functionality.</b> You should continue using {@code SCHEDULE_EXACT_ALARM} if your app needs
+         exact alarms for a secondary feature that users may or may not use within your app.
+         <p> Keep in mind that this is a powerful permission and app stores may enforce policies to
+         audit and review the use of this permission. Such audits may involve removal from the app
+         store if the app is found to be misusing this permission.
+         <p> Apps need to target API {@link android.os.Build.VERSION_CODES#TIRAMISU} or above to be
+         able to request this permission. Note that only one of {@code USE_EXACT_ALARM} or
+         {@code SCHEDULE_EXACT_ALARM} should be requested on a device. If your app is already using
+         {@code SCHEDULE_EXACT_ALARM} on older SDKs but need {@code USE_EXACT_ALARM} on SDK 33 and
+         above, then {@code SCHEDULE_EXACT_ALARM} should be declared with a max-sdk attribute, like:
+         <pre>
+         &lt;uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"
+         &Tab; android:maxSdkVersion="32" /&gt;
+         </pre>
+         <p>Apps that hold this permission, always stay in the
+         {@link android.app.usage.UsageStatsManager#STANDBY_BUCKET_WORKING_SET WORKING_SET} or
+         lower standby bucket.
     -->
     <permission android:name="android.permission.USE_EXACT_ALARM"
                 android:protectionLevel="normal"/>
