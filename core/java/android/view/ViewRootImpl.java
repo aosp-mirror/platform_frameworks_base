@@ -595,6 +595,9 @@ public final class ViewRootImpl implements ViewParent,
      */
     private boolean mSyncBuffer = false;
 
+    int mSyncSeqId = 0;
+    int mLastSyncSeqId = 0;
+
     boolean mFullRedrawNeeded;
     boolean mNewSurfaceNeeded;
     boolean mForceNextWindowRelayout;
@@ -855,8 +858,6 @@ public final class ViewRootImpl implements ViewParent,
      * integer back over relayout.
      */
     private Bundle mRelayoutBundle = new Bundle();
-    private int mSyncSeqId = 0;
-    private int mLastSyncSeqId = 0;
 
     private String mTag = TAG;
 
@@ -2660,7 +2661,6 @@ public final class ViewRootImpl implements ViewParent,
     private void performTraversals() {
         // cache mView since it is used so much below...
         final View host = mView;
-
         if (DBG) {
             System.out.println("======================================");
             System.out.println("performTraversals");
@@ -3499,13 +3499,15 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         Consumer<Transaction> syncConsumer = null;
+        final int seqId = mSyncSeqId;
+
         if (mBLASTDrawConsumer != null) {
             syncConsumer = mBLASTDrawConsumer;
             mBLASTDrawConsumer = null;
         } else if (mReportNextDraw) {
             syncConsumer = transaction -> {
                 mSurfaceChangedTransaction.merge(transaction);
-                reportDrawFinished();
+                reportDrawFinished(seqId);
             };
         }
 
@@ -4133,13 +4135,13 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
-    private void reportDrawFinished() {
+    private void reportDrawFinished(int seqId) {
         if (DEBUG_BLAST) {
             Log.d(mTag, "reportDrawFinished " + Debug.getCallers(5));
         }
 
         try {
-            mWindowSession.finishDrawing(mWindow, mSurfaceChangedTransaction, Integer.MAX_VALUE);
+            mWindowSession.finishDrawing(mWindow, mSurfaceChangedTransaction, seqId);
         } catch (RemoteException e) {
             Log.e(mTag, "Unable to report draw finished", e);
             mSurfaceChangedTransaction.apply();
@@ -4212,6 +4214,7 @@ public final class ViewRootImpl implements ViewParent,
 
         final BackgroundBlurDrawable.BlurRegion[] blurRegionsForFrame =
                 mBlurRegionAggregator.getBlurRegionsCopyForRT();
+
         // The callback will run on the render thread.
         registerRtFrameCallback((frame) -> mBlurRegionAggregator
                 .dispatchBlurTransactionIfNeeded(frame, blurRegionsForFrame, hasBlurUpdates));
@@ -7955,7 +7958,6 @@ public final class ViewRootImpl implements ViewParent,
 
     private int relayoutWindow(WindowManager.LayoutParams params, int viewVisibility,
             boolean insetsPending) throws RemoteException {
-
         mRelayoutRequested = true;
         float appScale = mAttachInfo.mApplicationScale;
         boolean restore = false;
@@ -8528,7 +8530,8 @@ public final class ViewRootImpl implements ViewParent,
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private void dispatchResized(ClientWindowFrames frames, boolean reportDraw,
             MergedConfiguration mergedConfiguration, boolean forceLayout,
-            boolean alwaysConsumeSystemBars, int displayId, int seqId, int resizeMode) {
+            boolean alwaysConsumeSystemBars, int displayId, int syncSeqId, int resizeMode) {
+
         Message msg = mHandler.obtainMessage(reportDraw ? MSG_RESIZED_REPORT : MSG_RESIZED);
         SomeArgs args = SomeArgs.obtain();
         final boolean sameProcessCall = (Binder.getCallingPid() == android.os.Process.myPid());
@@ -8538,8 +8541,9 @@ public final class ViewRootImpl implements ViewParent,
         args.argi1 = forceLayout ? 1 : 0;
         args.argi2 = alwaysConsumeSystemBars ? 1 : 0;
         args.argi3 = displayId;
-        args.argi4 = seqId;
+        args.argi4 = syncSeqId;
         args.argi5 = resizeMode;
+
         msg.obj = args;
         mHandler.sendMessage(msg);
     }
@@ -9929,11 +9933,11 @@ public final class ViewRootImpl implements ViewParent,
         @Override
         public void resized(ClientWindowFrames frames, boolean reportDraw,
                 MergedConfiguration mergedConfiguration, boolean forceLayout,
-                boolean alwaysConsumeSystemBars, int displayId, int seqId, int resizeMode) {
+                boolean alwaysConsumeSystemBars, int displayId, int syncSeqId, int resizeMode) {
             final ViewRootImpl viewAncestor = mViewAncestor.get();
             if (viewAncestor != null) {
                 viewAncestor.dispatchResized(frames, reportDraw, mergedConfiguration, forceLayout,
-                        alwaysConsumeSystemBars, displayId, seqId, resizeMode);
+                        alwaysConsumeSystemBars, displayId, syncSeqId, resizeMode);
             }
         }
 
