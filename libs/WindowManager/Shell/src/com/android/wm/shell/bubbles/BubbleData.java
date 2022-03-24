@@ -1057,6 +1057,22 @@ public class BubbleData {
         return null;
     }
 
+    /**
+     * Get a pending bubble with given notification <code>key</code>
+     *
+     * @param key notification key
+     * @return bubble that matches or null
+     */
+    @VisibleForTesting(visibility = PRIVATE)
+    public Bubble getPendingBubbleWithKey(String key) {
+        for (Bubble b : mPendingBubbles.values()) {
+            if (b.getKey().equals(key)) {
+                return b;
+            }
+        }
+        return null;
+    }
+
     @VisibleForTesting(visibility = PRIVATE)
     void setTimeSource(TimeSource timeSource) {
         mTimeSource = timeSource;
