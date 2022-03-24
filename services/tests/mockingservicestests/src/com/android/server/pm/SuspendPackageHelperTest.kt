@@ -20,20 +20,14 @@ import android.content.Intent
 import android.content.pm.SuspendDialogInfo
 import android.os.Binder
 import android.os.PersistableBundle
-import android.util.ArrayMap
-import android.util.SparseArray
-import com.android.server.pm.KnownPackages
-import com.android.server.pm.pkg.PackageStateInternal
 import com.android.server.testutils.any
 import com.android.server.testutils.eq
 import com.android.server.testutils.nullable
-import com.android.server.testutils.whenever
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
 import org.mockito.ArgumentMatchers.anyInt
-import org.mockito.Mockito.argThat
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 
@@ -382,17 +376,5 @@ class SuspendPackageHelperTest : PackageHelperTestBase() {
         assertThat(modifiedPackages).asList().containsExactly(TEST_PACKAGE_1, TEST_PACKAGE_2)
         assertThat(modifiedUids).asList().containsExactly(
                 packageSetting1.appId, packageSetting2.appId)
-    }
-
-    private fun allowList(vararg uids: Int) = SparseArray<IntArray>().apply {
-        this.put(TEST_USER_ID, uids)
-    }
-
-    private fun mockAllowList(pkgSetting: PackageStateInternal, list: SparseArray<IntArray>?) {
-        whenever(rule.mocks().appsFilter.getVisibilityAllowList(
-            argThat { it?.packageName == pkgSetting.packageName }, any(IntArray::class.java),
-            any() as ArrayMap<String, out PackageStateInternal>
-        ))
-            .thenReturn(list)
     }
 }
