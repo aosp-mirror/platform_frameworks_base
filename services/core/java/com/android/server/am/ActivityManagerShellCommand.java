@@ -183,6 +183,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
     private boolean mAsync;
     private BroadcastOptions mBroadcastOptions;
     private boolean mShowSplashScreen;
+    private boolean mDismissKeyguardIfInsecure;
 
     final boolean mDumping;
 
@@ -439,6 +440,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     mAsync = true;
                 } else if (opt.equals("--splashscreen-show-icon")) {
                     mShowSplashScreen = true;
+                } else if (opt.equals("--dismiss-keyguard-if-insecure")) {
+                    mDismissKeyguardIfInsecure = true;
                 } else {
                     return false;
                 }
@@ -582,6 +585,12 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     options = ActivityOptions.makeBasic();
                 }
                 options.setSplashScreenStyle(SplashScreen.SPLASH_SCREEN_STYLE_ICON);
+            }
+            if (mDismissKeyguardIfInsecure) {
+                if (options == null) {
+                    options = ActivityOptions.makeBasic();
+                }
+                options.setDismissKeyguardIfInsecure();
             }
             if (mWaitOption) {
                 result = mInternal.startActivityAndWait(null, SHELL_PACKAGE_NAME, null, intent,
