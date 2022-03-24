@@ -141,6 +141,8 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
      */
     private float mFullShadeProgress;
 
+    private boolean mOverScrolling;
+
     @Inject
     public QSFragment(RemoteInputQuickSettingsDisabler remoteInputQsDisabler,
             QSTileHost qsTileHost,
@@ -498,6 +500,12 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     }
 
     @Override
+    public void setOverScrollAmount(int overScrollAmount) {
+        mOverScrolling = overScrollAmount != 0;
+        getView().setTranslationY(overScrollAmount);
+    }
+
+    @Override
     public int getHeightDiff() {
         return mQSPanelScrollView.getBottom() - mHeader.getBottom()
                 + mHeader.getPaddingBottom();
@@ -515,7 +523,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
                 ? 1 : QSAnimator.SHORT_PARALLAX_AMOUNT) * (expansion - 1);
         boolean onKeyguard = isKeyguardState();
         boolean onKeyguardAndExpanded = onKeyguard && !mShowCollapsedOnKeyguard;
-        if (!mHeaderAnimating && !headerWillBeAnimating()) {
+        if (!mHeaderAnimating && !headerWillBeAnimating() && !mOverScrolling) {
             getView().setTranslationY(
                     onKeyguardAndExpanded
                             ? translationScaleY * mHeader.getHeight()

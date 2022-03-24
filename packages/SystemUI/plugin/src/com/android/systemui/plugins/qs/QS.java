@@ -123,6 +123,11 @@ public interface QS extends FragmentBase {
     default void setScrollListener(ScrollListener scrollListener) {}
 
     /**
+     * Sets the amount of vertical over scroll that should be performed on QS.
+     */
+    default void setOverScrollAmount(int overScrollAmount) {}
+
+    /**
      * Callback for when QSPanel container is scrolled
      */
     @ProvidesInterface(version = ScrollListener.VERSION)
