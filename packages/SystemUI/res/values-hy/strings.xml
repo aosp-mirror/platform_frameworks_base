@@ -818,7 +818,7 @@
     <string name="keyboard_key_enter" msgid="8633362970109751646">"Մուտք"</string>
     <string name="keyboard_key_backspace" msgid="4095278312039628074">"Հետշարժ"</string>
     <string name="keyboard_key_media_play_pause" msgid="8389984232732277478">"Նվագարկում/դադար"</string>
-    <string name="keyboard_key_media_stop" msgid="1509943745250377699">"Դադարեցնել"</string>
+    <string name="keyboard_key_media_stop" msgid="1509943745250377699">"Կանգնեցնել"</string>
     <string name="keyboard_key_media_next" msgid="8502476691227914952">"Հաջորդը"</string>
     <string name="keyboard_key_media_previous" msgid="5637875709190955351">"Նախորդը"</string>
     <string name="keyboard_key_media_rewind" msgid="3450387734224327577">"Հետ անցնել"</string>
