@@ -419,8 +419,8 @@ public class PackageInstaller {
     public @interface FileLocation{}
 
     /**
-     * The installer did not call SessionParams#setPackageSource(int) to specify the package
-     * source.
+     * The installer did not call {@link PackageInstaller.SessionParams#setPackageSource(int)} to
+     * specify the package source.
      */
     public static final int PACKAGE_SOURCE_UNSPECIFIED = 0;
 
@@ -444,8 +444,8 @@ public class PackageInstaller {
 
     /**
      * Code indicating that the package being installed comes from a file that was downloaded to
-     * the device by the user. For use in place of PACKAGE_SOURCE_LOCAL_FILE when the installer
-     * knows the package was downloaded.
+     * the device by the user. For use in place of {@link #PACKAGE_SOURCE_LOCAL_FILE} when the
+     * installer knows the package was downloaded.
      */
     public static final int PACKAGE_SOURCE_DOWNLOADED_FILE = 4;
 
@@ -1986,7 +1986,13 @@ public class PackageInstaller {
         }
 
         /**
-         * Sets the apk package installation source.
+         * Optionally indicate the package source of the app being installed. This is
+         * informational and may be used as a signal by the system.
+         *
+         * An installer should specify {@link #PACKAGE_SOURCE_OTHER} if no other package source
+         * constant adequately reflects the source for this session.
+         *
+         * The default value is {@link #PACKAGE_SOURCE_UNSPECIFIED}.
          */
         public void setPackageSource(@PackageSourceType int packageSource) {
             this.packageSource = packageSource;
@@ -2999,7 +3005,8 @@ public class PackageInstaller {
         }
 
         /**
-         * Gets the apk package installation source.
+         * Get the package source that was set in
+         * {@link PackageInstaller.SessionParams#setPackageSource(int)}.
          */
         public @PackageSourceType int getPackageSource() {
             return packageSource;
