@@ -38,6 +38,7 @@ import android.content.om.FabricatedOverlay;
 import android.content.om.OverlayIdentifier;
 import android.content.pm.UserInfo;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.graphics.Color;
 import android.net.Uri;
@@ -53,6 +54,7 @@ import android.util.SparseIntArray;
 import android.util.TypedValue;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.graphics.ColorUtils;
 import com.android.systemui.CoreStartable;
@@ -114,10 +116,12 @@ public class ThemeOverlayController extends CoreStartable implements Dumpable {
     private final boolean mIsMonetEnabled;
     private final UserTracker mUserTracker;
     private final DeviceProvisionedController mDeviceProvisionedController;
+    private final Resources mResources;
     // Current wallpaper colors associated to a user.
     private final SparseArray<WallpaperColors> mCurrentColors = new SparseArray<>();
     private final WallpaperManager mWallpaperManager;
-    private ColorScheme mColorScheme;
+    @VisibleForTesting
+    protected ColorScheme mColorScheme;
     // If fabricated overlays were already created for the current theme.
     private boolean mNeedsOverlayCreation;
     // Dominant color extracted from wallpaper, NOT the color used on the overlay
@@ -344,7 +348,7 @@ public class ThemeOverlayController extends CoreStartable implements Dumpable {
             SecureSettings secureSettings, WallpaperManager wallpaperManager,
             UserManager userManager, DeviceProvisionedController deviceProvisionedController,
             UserTracker userTracker, DumpManager dumpManager, FeatureFlags featureFlags,
-            WakefulnessLifecycle wakefulnessLifecycle) {
+            @Main Resources resources, WakefulnessLifecycle wakefulnessLifecycle) {
         super(context);
 
         mIsMonetEnabled = featureFlags.isEnabled(Flags.MONET);
@@ -358,6 +362,7 @@ public class ThemeOverlayController extends CoreStartable implements Dumpable {
         mSecureSettings = secureSettings;
         mWallpaperManager = wallpaperManager;
         mUserTracker = userTracker;
+        mResources = resources;
         mWakefulnessLifecycle = wakefulnessLifecycle;
         dumpManager.registerDumpable(TAG, this);
     }
@@ -466,8 +471,13 @@ public class ThemeOverlayController extends CoreStartable implements Dumpable {
         mMainWallpaperColor = mainColor;
 
         if (mIsMonetEnabled) {
+            mThemeStyle = fetchThemeStyleFromSetting();
             mSecondaryOverlay = getOverlay(mMainWallpaperColor, ACCENT, mThemeStyle);
             mNeutralOverlay = getOverlay(mMainWallpaperColor, NEUTRAL, mThemeStyle);
+            if (colorSchemeIsApplied()) {
+                Log.d(TAG, "Skipping overlay creation. Theme was already: " + mColorScheme);
+                return;
+            }
             mNeedsOverlayCreation = true;
             if (DEBUG) {
                 Log.d(TAG, "fetched overlays. accent: " + mSecondaryOverlay
@@ -493,7 +503,7 @@ public class ThemeOverlayController extends CoreStartable implements Dumpable {
      * Given a color candidate, return an overlay definition.
      */
     protected @Nullable FabricatedOverlay getOverlay(int color, int type, Style style) {
-        boolean nightMode = (mContext.getResources().getConfiguration().uiMode
+        boolean nightMode = (mResources.getConfiguration().uiMode
                 & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES;
 
         mColorScheme = new ColorScheme(color, nightMode, style);
@@ -525,6 +535,23 @@ public class ThemeOverlayController extends CoreStartable implements Dumpable {
         return overlay.build();
     }
 
+    /**
+     * Checks if the color scheme in mColorScheme matches the current system palettes.
+     */
+    private boolean colorSchemeIsApplied() {
+        return mResources.getColor(
+                android.R.color.system_accent1_500, mContext.getTheme())
+                        == mColorScheme.getAccent1().get(6)
+                && mResources.getColor(android.R.color.system_accent2_500, mContext.getTheme())
+                        == mColorScheme.getAccent2().get(6)
+                && mResources.getColor(android.R.color.system_accent3_500, mContext.getTheme())
+                        == mColorScheme.getAccent3().get(6)
+                && mResources.getColor(android.R.color.system_neutral1_500, mContext.getTheme())
+                        == mColorScheme.getNeutral1().get(6)
+                && mResources.getColor(android.R.color.system_neutral2_500, mContext.getTheme())
+                        == mColorScheme.getNeutral2().get(6);
+    }
+
     private void updateThemeOverlays() {
         final int currentUser = mUserTracker.getUserId();
         final String overlayPackageJson = mSecureSettings.getStringForUser(
@@ -532,7 +559,6 @@ public class ThemeOverlayController extends CoreStartable implements Dumpable {
                 currentUser);
         if (DEBUG) Log.d(TAG, "updateThemeOverlays. Setting: " + overlayPackageJson);
         final Map<String, OverlayIdentifier> categoryToPackage = new ArrayMap<>();
-        Style newStyle = mThemeStyle;
         if (!TextUtils.isEmpty(overlayPackageJson)) {
             try {
                 JSONObject object = new JSONObject(overlayPackageJson);
@@ -543,23 +569,9 @@ public class ThemeOverlayController extends CoreStartable implements Dumpable {
                         categoryToPackage.put(category, identifier);
                     }
                 }
-
-                try {
-                    newStyle = Style.valueOf(
-                            object.getString(ThemeOverlayApplier.OVERLAY_CATEGORY_THEME_STYLE));
-                } catch (IllegalArgumentException e) {
-                    newStyle = Style.TONAL_SPOT;
-                }
             } catch (JSONException e) {
                 Log.i(TAG, "Failed to parse THEME_CUSTOMIZATION_OVERLAY_PACKAGES.", e);
             }
-        }
-
-        if (mIsMonetEnabled && newStyle != mThemeStyle) {
-            mThemeStyle = newStyle;
-            mNeutralOverlay = getOverlay(mMainWallpaperColor, NEUTRAL, mThemeStyle);
-            mSecondaryOverlay = getOverlay(mMainWallpaperColor, ACCENT, mThemeStyle);
-            mNeedsOverlayCreation = true;
         }
 
         // Let's generate system overlay if the style picker decided to override it.
@@ -624,6 +636,24 @@ public class ThemeOverlayController extends CoreStartable implements Dumpable {
             mThemeManager.applyCurrentUserOverlays(categoryToPackage, null, currentUser,
                     managedProfiles);
         }
+    }
+
+    private Style fetchThemeStyleFromSetting() {
+        Style style = mThemeStyle;
+        final String overlayPackageJson = mSecureSettings.getStringForUser(
+                Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES,
+                mUserTracker.getUserId());
+        if (!TextUtils.isEmpty(overlayPackageJson)) {
+            try {
+                JSONObject object = new JSONObject(overlayPackageJson);
+                style = Style.valueOf(
+                        object.getString(ThemeOverlayApplier.OVERLAY_CATEGORY_THEME_STYLE));
+            } catch (JSONException | IllegalArgumentException e) {
+                Log.i(TAG, "Failed to parse THEME_CUSTOMIZATION_OVERLAY_PACKAGES.", e);
+                style = Style.TONAL_SPOT;
+            }
+        }
+        return style;
     }
 
     @Override
