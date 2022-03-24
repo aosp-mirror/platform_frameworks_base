@@ -52,6 +52,7 @@ import com.android.systemui.animation.ShadeInterpolation;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dock.DockManager;
+import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.scrim.ScrimView;
 import com.android.systemui.statusbar.notification.stack.ViewState;
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
@@ -195,6 +196,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
     private final Handler mHandler;
     private final Executor mMainExecutor;
     private final ScreenOffAnimationController mScreenOffAnimationController;
+    private final KeyguardUnlockAnimationController mKeyguardUnlockAnimationController;
 
     private GradientColors mColors;
     private boolean mNeedsDrawableColorUpdate;
@@ -211,6 +213,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
     private float mPanelExpansionFraction = 1f; // Assume shade is expanded during initialization
     private float mQsExpansion;
     private boolean mQsBottomVisible;
+    private boolean mAnimatingPanelExpansionOnUnlock; // don't animate scrim
 
     private boolean mDarkenWhileDragging;
     private boolean mExpansionAffectsAlpha = true;
@@ -255,7 +258,8 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
             KeyguardUpdateMonitor keyguardUpdateMonitor, DockManager dockManager,
             ConfigurationController configurationController, @Main Executor mainExecutor,
             ScreenOffAnimationController screenOffAnimationController,
-            PanelExpansionStateManager panelExpansionStateManager) {
+            PanelExpansionStateManager panelExpansionStateManager,
+            KeyguardUnlockAnimationController keyguardUnlockAnimationController) {
         mScrimStateListener = lightBarController::setScrimState;
         mDefaultScrimAlpha = BUSY_SCRIM_ALPHA;
 
@@ -273,6 +277,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
         // to make sure that text on top of it is legible.
         mDozeParameters = dozeParameters;
         mDockManager = dockManager;
+        mKeyguardUnlockAnimationController = keyguardUnlockAnimationController;
         keyguardStateController.addCallback(new KeyguardStateController.Callback() {
             @Override
             public void onKeyguardFadingAwayChanged() {
@@ -497,6 +502,9 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
     public void onTrackingStarted() {
         mTracking = true;
         mDarkenWhileDragging = !mKeyguardStateController.canDismissLockScreen();
+        if (!mKeyguardUnlockAnimationController.isPlayingCannedUnlockAnimation()) {
+            mAnimatingPanelExpansionOnUnlock = false;
+        }
     }
 
     public void onExpandingFinished() {
@@ -567,13 +575,20 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
         }
 
         if (mPanelExpansionFraction != panelExpansionFraction) {
+            if (panelExpansionFraction != 0f
+                    && mKeyguardUnlockAnimationController.isPlayingCannedUnlockAnimation()) {
+                mAnimatingPanelExpansionOnUnlock = true;
+            } else if (panelExpansionFraction == 0f) {
+                mAnimatingPanelExpansionOnUnlock = false;
+            }
+
             mPanelExpansionFraction = panelExpansionFraction;
 
             boolean relevantState = (mState == ScrimState.UNLOCKED
                     || mState == ScrimState.KEYGUARD
                     || mState == ScrimState.SHADE_LOCKED
                     || mState == ScrimState.PULSING);
-            if (!(relevantState && mExpansionAffectsAlpha)) {
+            if (!(relevantState && mExpansionAffectsAlpha) || mAnimatingPanelExpansionOnUnlock) {
                 return;
             }
             applyAndDispatchState();
@@ -721,8 +736,10 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
 
         if (mState == ScrimState.UNLOCKED) {
             // Darken scrim as you pull down the shade when unlocked, unless the shade is expanding
-            // because we're doing the screen off animation.
-            if (!mScreenOffAnimationController.shouldExpandNotifications()) {
+            // because we're doing the screen off animation OR the shade is collapsing because
+            // we're playing the unlock animation
+            if (!mScreenOffAnimationController.shouldExpandNotifications()
+                    && !mAnimatingPanelExpansionOnUnlock) {
                 float behindFraction = getInterpolatedFraction();
                 behindFraction = (float) Math.pow(behindFraction, 0.8f);
                 if (mClipsQsScrim) {
@@ -793,6 +810,9 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
                 mNotificationsAlpha = ScrimState.KEYGUARD.getNotifAlpha();
                 mNotificationsTint = ScrimState.KEYGUARD.getNotifTint();
             }
+        }
+        if (mState != ScrimState.UNLOCKED) {
+            mAnimatingPanelExpansionOnUnlock = false;
         }
 
         assertAlphasValid();
