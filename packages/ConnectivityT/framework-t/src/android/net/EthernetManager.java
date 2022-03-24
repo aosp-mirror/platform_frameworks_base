@@ -579,14 +579,13 @@ public class EthernetManager {
     }
 
     /**
-     * Set an ethernet network's link state up.
+     * Enable a network interface.
      *
-     * When the link is successfully turned up, the callback will be called with the network
-     * interface was torn down, if any. If any error or unexpected condition happens while the
-     * system tries to turn the interface down, the callback will be called with an appropriate
-     * exception. The callback is guaranteed to be called exactly once for each call to this method.
+     * Enables a previously disabled network interface.
+     * This function accepts an {@link OutcomeReceiver} that is called once the operation has
+     * finished execution.
      *
-     * @param iface the name of the interface to act upon.
+     * @param iface the name of the interface to enable.
      * @param executor an {@link Executor} to execute the callback on. Optional if callback is null.
      * @param callback an optional {@link OutcomeReceiver} to listen for completion of the
      *                 operation. On success, {@link OutcomeReceiver#onResult} is called with the
@@ -594,7 +593,6 @@ public class EthernetManager {
      *                 information about the error.
      * @throws SecurityException if the process doesn't hold
      *                          {@link android.Manifest.permission.MANAGE_ETHERNET_NETWORKS}.
-     * @throws UnsupportedOperationException if called on a non-automotive device.
      * @hide
      */
     @SystemApi
@@ -603,7 +601,7 @@ public class EthernetManager {
             android.Manifest.permission.NETWORK_STACK,
             android.Manifest.permission.MANAGE_ETHERNET_NETWORKS})
     @RequiresFeature(PackageManager.FEATURE_AUTOMOTIVE)
-    public void connectNetwork(
+    public void enableInterface(
             @NonNull String iface,
             @Nullable @CallbackExecutor Executor executor,
             @Nullable OutcomeReceiver<String, EthernetNetworkManagementException> callback) {
@@ -618,14 +616,14 @@ public class EthernetManager {
     }
 
     /**
-     * Set an ethernet network's link state down.
+     * Disable a network interface.
      *
-     * When the link is successfully turned down, the callback will be called with the network
-     * interface was torn down, if any. If any error or unexpected condition happens while the
-     * system tries to turn the interface down, the callback will be called with an appropriate
-     * exception. The callback is guaranteed to be called exactly once for each call to this method.
+     * Disables the use of a network interface to fulfill network requests. If the interface
+     * currently serves a request, the network will be torn down.
+     * This function accepts an {@link OutcomeReceiver} that is called once the operation has
+     * finished execution.
      *
-     * @param iface the name of the interface to act upon.
+     * @param iface the name of the interface to disable.
      * @param executor an {@link Executor} to execute the callback on. Optional if callback is null.
      * @param callback an optional {@link OutcomeReceiver} to listen for completion of the
      *                 operation. On success, {@link OutcomeReceiver#onResult} is called with the
@@ -633,7 +631,6 @@ public class EthernetManager {
      *                 information about the error.
      * @throws SecurityException if the process doesn't hold
      *                          {@link android.Manifest.permission.MANAGE_ETHERNET_NETWORKS}.
-     * @throws UnsupportedOperationException if called on a non-automotive device.
      * @hide
      */
     @SystemApi
@@ -642,7 +639,7 @@ public class EthernetManager {
             android.Manifest.permission.NETWORK_STACK,
             android.Manifest.permission.MANAGE_ETHERNET_NETWORKS})
     @RequiresFeature(PackageManager.FEATURE_AUTOMOTIVE)
-    public void disconnectNetwork(
+    public void disableInterface(
             @NonNull String iface,
             @Nullable @CallbackExecutor Executor executor,
             @Nullable OutcomeReceiver<String, EthernetNetworkManagementException> callback) {
