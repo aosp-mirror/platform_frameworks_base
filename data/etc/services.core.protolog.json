@@ -613,6 +613,12 @@
       "group": "WM_DEBUG_CONFIGURATION",
       "at": "com\/android\/server\/wm\/ActivityStarter.java"
     },
+    "-1488852351": {
+      "message": "Task=%d contains embedded TaskFragment in untrusted mode. Disabled all input during TaskFragment remote animation.",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_APP_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/AppTransitionController.java"
+    },
     "-1483435730": {
       "message": "InsetsSource setWin %s for type %s",
       "level": "DEBUG",

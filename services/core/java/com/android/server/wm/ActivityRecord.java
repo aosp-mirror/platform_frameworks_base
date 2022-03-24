@@ -156,6 +156,7 @@ import static com.android.server.wm.ActivityRecordProto.IN_SIZE_COMPAT_MODE;
 import static com.android.server.wm.ActivityRecordProto.IS_ANIMATING;
 import static com.android.server.wm.ActivityRecordProto.IS_WAITING_FOR_TRANSITION_START;
 import static com.android.server.wm.ActivityRecordProto.LAST_ALL_DRAWN;
+import static com.android.server.wm.ActivityRecordProto.LAST_DROP_INPUT_MODE;
 import static com.android.server.wm.ActivityRecordProto.LAST_SURFACE_SHOWING;
 import static com.android.server.wm.ActivityRecordProto.MIN_ASPECT_RATIO;
 import static com.android.server.wm.ActivityRecordProto.NAME;
@@ -786,6 +787,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     /** The last set {@link DropInputMode} for this activity surface. */
     @DropInputMode
     private int mLastDropInputMode = DropInputMode.NONE;
+    /** Whether the input to this activity will be dropped during the current playing animation. */
+    private boolean mIsInputDroppedForAnimation;
 
     /**
      * If it is non-null, it requires all activities who have the same starting data to be drawn
@@ -1567,6 +1570,15 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
     }
 
+    /** Sets if all input will be dropped as a protection during the client-driven animation. */
+    void setDropInputForAnimation(boolean isInputDroppedForAnimation) {
+        if (mIsInputDroppedForAnimation == isInputDroppedForAnimation) {
+            return;
+        }
+        mIsInputDroppedForAnimation = isInputDroppedForAnimation;
+        updateUntrustedEmbeddingInputProtection();
+    }
+
     /**
      * Sets to drop input when obscured to activity if it is embedded in untrusted mode.
      *
@@ -1576,11 +1588,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * all untrusted activities.
      */
     private void updateUntrustedEmbeddingInputProtection() {
-        final SurfaceControl sc = getSurfaceControl();
-        if (sc == null) {
+        if (getSurfaceControl() == null) {
             return;
         }
-        if (isEmbeddedInUntrustedMode()) {
+        if (mIsInputDroppedForAnimation) {
+            // Disable all input during the animation.
+            setDropInputMode(DropInputMode.ALL);
+        } else if (isEmbeddedInUntrustedMode()) {
             // Set drop input to OBSCURED when untrusted embedded.
             setDropInputMode(DropInputMode.OBSCURED);
         } else {
@@ -1591,7 +1605,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     @VisibleForTesting
     void setDropInputMode(@DropInputMode int mode) {
-        if (mLastDropInputMode != mode && getSurfaceControl() != null) {
+        if (mLastDropInputMode != mode) {
             mLastDropInputMode = mode;
             mWmService.mTransactionFactory.get()
                     .setDropInputMode(getSurfaceControl(), mode)
@@ -9299,6 +9313,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // permission to access the device configs.
         proto.write(PROVIDES_MAX_BOUNDS, providesMaxBounds());
         proto.write(ENABLE_RECENTS_SCREENSHOT, mEnableRecentsScreenshot);
+        proto.write(LAST_DROP_INPUT_MODE, mLastDropInputMode);
     }
 
     @Override
