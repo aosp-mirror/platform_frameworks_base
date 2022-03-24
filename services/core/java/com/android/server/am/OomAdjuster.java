@@ -1378,7 +1378,7 @@ public class OomAdjuster {
                     mService.mServices.foregroundServiceProcStateChangedLocked(uidRec);
                 }
             }
-            mService.mInternal.deletePendingTopUid(uidRec.getUid());
+            mService.mInternal.deletePendingTopUid(uidRec.getUid(), nowElapsed);
         }
         if (mLocalPowerManager != null) {
             mLocalPowerManager.finishUidChanges();
