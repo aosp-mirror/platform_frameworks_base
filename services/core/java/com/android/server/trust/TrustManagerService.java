@@ -16,6 +16,7 @@
 
 package com.android.server.trust;
 
+import static android.service.trust.GrantTrustResult.STATUS_UNLOCKED_BY_GRANT;
 import static android.service.trust.TrustAgentService.FLAG_GRANT_TRUST_TEMPORARY_AND_RENEWABLE;
 
 import android.Manifest;
@@ -642,9 +643,7 @@ public class TrustManagerService extends SystemService {
         if (shouldSendCallback) {
             if (resultCallback != null) {
                 if (DEBUG) Slog.d(TAG, "calling back with UNLOCKED_BY_GRANT");
-                resultCallback.complete(
-                        GrantTrustResult.withStatus(
-                                GrantTrustResult.STATUS_UNLOCKED_BY_GRANT));
+                resultCallback.complete(new GrantTrustResult(STATUS_UNLOCKED_BY_GRANT));
             }
         }
     }
