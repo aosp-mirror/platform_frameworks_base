@@ -433,6 +433,10 @@ public final class JobServiceContext implements ServiceConnection {
         mPreferredUid = NO_PREFERRED_UID;
     }
 
+    int getId() {
+        return hashCode();
+    }
+
     long getExecutionStartTimeElapsed() {
         return mExecutionStartTimeElapsed;
     }
