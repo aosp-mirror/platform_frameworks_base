@@ -604,6 +604,13 @@ public class AudioManager {
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final int FLAG_FROM_KEY = 1 << 12;
 
+    /**
+     * Indicates that an absolute volume controller is notifying AudioService of a change in the
+     * volume or mute status of an external audio system.
+     * @hide
+     */
+    public static final int FLAG_ABSOLUTE_VOLUME = 1 << 13;
+
     /** @hide */
     @IntDef(prefix = {"ENCODED_SURROUND_OUTPUT_"}, value = {
             ENCODED_SURROUND_OUTPUT_UNKNOWN,
@@ -661,6 +668,7 @@ public class AudioManager {
             FLAG_SHOW_UI_WARNINGS,
             FLAG_SHOW_VIBRATE_HINT,
             FLAG_FROM_KEY,
+            FLAG_ABSOLUTE_VOLUME,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Flags {}
@@ -682,6 +690,7 @@ public class AudioManager {
         FLAG_NAMES.put(FLAG_SHOW_UI_WARNINGS, "FLAG_SHOW_UI_WARNINGS");
         FLAG_NAMES.put(FLAG_SHOW_VIBRATE_HINT, "FLAG_SHOW_VIBRATE_HINT");
         FLAG_NAMES.put(FLAG_FROM_KEY, "FLAG_FROM_KEY");
+        FLAG_NAMES.put(FLAG_ABSOLUTE_VOLUME, "FLAG_ABSOLUTE_VOLUME");
     }
 
     /** @hide */
