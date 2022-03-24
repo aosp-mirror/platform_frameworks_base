@@ -2854,8 +2854,7 @@ public class OomAdjuster {
         // To avoid some abuse patterns, we are going to be careful about what we consider
         // to be an app interaction.  Being the top activity doesn't count while the display
         // is sleeping, nor do short foreground services.
-        if (state.getCurProcState() <= PROCESS_STATE_TOP
-                || state.getCurProcState() == PROCESS_STATE_BOUND_TOP) {
+        if (ActivityManager.isProcStateConsideredInteraction(state.getCurProcState())) {
             isInteraction = true;
             state.setFgInteractionTime(0);
         } else if (state.getCurProcState() <= PROCESS_STATE_FOREGROUND_SERVICE) {
