@@ -31,6 +31,7 @@ import android.annotation.IntDef;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.admin.DeviceAdminReceiver;
+import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -54,7 +55,9 @@ import com.android.server.utils.Slogf;
 import java.io.FileNotFoundException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.security.SecureRandom;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Class managing bugreport collection upon device owner's request.
@@ -78,6 +81,9 @@ public class RemoteBugreportManager {
     private final DevicePolicyManagerService mService;
     private final DevicePolicyManagerService.Injector mInjector;
 
+    private final SecureRandom mRng = new SecureRandom();
+
+    private final AtomicLong mRemoteBugreportNonce = new AtomicLong();
     private final AtomicBoolean mRemoteBugreportServiceIsActive = new AtomicBoolean();
     private final AtomicBoolean mRemoteBugreportSharingAccepted = new AtomicBoolean();
     private final Context mContext;
@@ -197,8 +203,13 @@ public class RemoteBugreportManager {
 
         final long callingIdentity = mInjector.binderClearCallingIdentity();
         try {
-            mInjector.getIActivityManager().requestRemoteBugReport();
+            long nonce;
+            do {
+                nonce = mRng.nextLong();
+            } while (nonce == 0);
+            mInjector.getIActivityManager().requestRemoteBugReport(nonce);
 
+            mRemoteBugreportNonce.set(nonce);
             mRemoteBugreportServiceIsActive.set(true);
             mRemoteBugreportSharingAccepted.set(false);
             registerRemoteBugreportReceivers();
@@ -231,6 +242,11 @@ public class RemoteBugreportManager {
     }
 
     private void onBugreportFinished(Intent intent) {
+        long nonce = intent.getLongExtra(DevicePolicyManager.EXTRA_REMOTE_BUGREPORT_NONCE, 0);
+        if (nonce == 0 || mRemoteBugreportNonce.get() != nonce) {
+            Slogf.w(LOG_TAG, "Invalid nonce provided, ignoring " + nonce);
+            return;
+        }
         mHandler.removeCallbacks(mRemoteBugreportTimeoutRunnable);
         mRemoteBugreportServiceIsActive.set(false);
         final Uri bugreportUri = intent.getData();
