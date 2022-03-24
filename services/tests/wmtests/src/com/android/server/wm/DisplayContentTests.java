@@ -2050,6 +2050,32 @@ public class DisplayContentTests extends WindowTestsBase {
         verify(mDisplayContent, never()).showImeScreenshot();
     }
 
+    @UseTestDisplay(addWindows = {W_INPUT_METHOD})
+    @Test
+    public void testShowImeScreenshot_removeCurSnapshotBeforeCreateNext() {
+        final Task rootTask = createTask(mDisplayContent);
+        final Task task = createTaskInRootTask(rootTask, 0 /* userId */);
+        final ActivityRecord activity = createActivityRecord(mDisplayContent, task);
+        final WindowState win = createWindow(null, TYPE_BASE_APPLICATION, activity, "win");
+
+        mDisplayContent.setImeLayeringTarget(win);
+        mDisplayContent.setImeInputTarget(win);
+        spyOn(mDisplayContent);
+        spyOn(mDisplayContent.mInputMethodWindow);
+        doReturn(true).when(mDisplayContent.mInputMethodWindow).isVisible();
+        mDisplayContent.getInsetsStateController().getImeSourceProvider().setImeShowing(true);
+
+        // Verify when the timing of 2 showImeScreenshot invocations are very close, will first
+        // detach the current snapshot then create the next one.
+        mDisplayContent.showImeScreenshot();
+        DisplayContent.ImeScreenshot curSnapshot = mDisplayContent.mImeScreenshot;
+        spyOn(curSnapshot);
+        mDisplayContent.showImeScreenshot();
+        verify(curSnapshot).detach(any());
+        assertNotNull(mDisplayContent.mImeScreenshot);
+        assertNotEquals(curSnapshot, mDisplayContent.mImeScreenshot);
+    }
+
     @Test
     public void testRotateBounds_keepSamePhysicalPosition() {
         final DisplayContent dc =
