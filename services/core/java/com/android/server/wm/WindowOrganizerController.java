@@ -426,6 +426,14 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 }
                 if (transition != null) transition.collect(wc);
 
+                if (finishTransition != null) {
+                    // Deal with edge-cases in recents where it pretends to finish itself.
+                    if ((entry.getValue().getChangeMask()
+                            & WindowContainerTransaction.Change.CHANGE_FORCE_NO_PIP) != 0) {
+                        finishTransition.setCanPipOnFinish(false /* canPipOnFinish */);
+                    }
+                }
+
                 int containerEffect = applyWindowContainerChange(wc, entry.getValue());
                 effects |= containerEffect;
 
