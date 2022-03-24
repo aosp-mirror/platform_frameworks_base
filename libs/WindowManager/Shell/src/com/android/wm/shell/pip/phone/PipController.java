@@ -89,13 +89,14 @@ import com.android.wm.shell.transition.Transitions;
 
 import java.io.PrintWriter;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Consumer;
 
 /**
  * Manages the picture-in-picture (PIP) UI and states for Phones.
  */
 public class PipController implements PipTransitionController.PipTransitionCallback,
-        RemoteCallable<PipController> {
+        RemoteCallable<PipController>, DisplayController.OnDisplaysChangedListener {
     private static final String TAG = "PipController";
 
     private Context mContext;
@@ -143,6 +144,9 @@ public class PipController implements PipTransitionController.PipTransitionCallb
      */
     private final DisplayChangeController.OnDisplayChangingListener mRotationController = (
             int displayId, int fromRotation, int toRotation, WindowContainerTransaction t) -> {
+        if (mPipTransitionController.handleRotateDisplay(fromRotation, toRotation, t)) {
+            return;
+        }
         if (mPipBoundsState.getDisplayLayout().rotation() == toRotation) {
             // The same rotation may have been set by auto PiP-able or fixed rotation. So notify
             // the change with fromRotation=false to apply the rotated destination bounds from
@@ -452,6 +456,14 @@ public class PipController implements PipTransitionController.PipTransitionCallb
     @Override
     public ShellExecutor getRemoteCallExecutor() {
         return mMainExecutor;
+    }
+
+    @Override
+    public void onKeepClearAreasChanged(int displayId, Set<Rect> restricted,
+            Set<Rect> unrestricted) {
+        if (mPipBoundsState.getDisplayId() == displayId) {
+            mPipBoundsState.setKeepClearAreas(restricted, unrestricted);
+        }
     }
 
     private void onConfigurationChanged(Configuration newConfig) {

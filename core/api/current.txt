@@ -39631,22 +39631,34 @@ package android.speech {
 
   public final class RecognitionSupport implements android.os.Parcelable {
     method public int describeContents();
-    method @NonNull public java.util.List<java.lang.String> getInstalledLanguages();
-    method @NonNull public java.util.List<java.lang.String> getPendingLanguages();
-    method @NonNull public java.util.List<java.lang.String> getSupportedLanguages();
+    method @Deprecated @NonNull public java.util.List<java.lang.String> getInstalledLanguages();
+    method @NonNull public java.util.List<java.lang.String> getInstalledOnDeviceLanguages();
+    method @NonNull public java.util.List<java.lang.String> getOnlineLanguages();
+    method @Deprecated @NonNull public java.util.List<java.lang.String> getPendingLanguages();
+    method @NonNull public java.util.List<java.lang.String> getPendingOnDeviceLanguages();
+    method @Deprecated @NonNull public java.util.List<java.lang.String> getSupportedLanguages();
+    method @NonNull public java.util.List<java.lang.String> getSupportedOnDeviceLanguages();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.speech.RecognitionSupport> CREATOR;
   }
 
   public static final class RecognitionSupport.Builder {
     ctor public RecognitionSupport.Builder();
-    method @NonNull public android.speech.RecognitionSupport.Builder addInstalledLanguage(@NonNull String);
-    method @NonNull public android.speech.RecognitionSupport.Builder addPendingLanguage(@NonNull String);
-    method @NonNull public android.speech.RecognitionSupport.Builder addSupportedLanguage(@NonNull String);
+    method @Deprecated @NonNull public android.speech.RecognitionSupport.Builder addInstalledLanguage(@NonNull String);
+    method @NonNull public android.speech.RecognitionSupport.Builder addInstalledOnDeviceLanguage(@NonNull String);
+    method @NonNull public android.speech.RecognitionSupport.Builder addOnlineLanguage(@NonNull String);
+    method @Deprecated @NonNull public android.speech.RecognitionSupport.Builder addPendingLanguage(@NonNull String);
+    method @NonNull public android.speech.RecognitionSupport.Builder addPendingOnDeviceLanguage(@NonNull String);
+    method @Deprecated @NonNull public android.speech.RecognitionSupport.Builder addSupportedLanguage(@NonNull String);
+    method @NonNull public android.speech.RecognitionSupport.Builder addSupportedOnDeviceLanguage(@NonNull String);
     method @NonNull public android.speech.RecognitionSupport build();
-    method @NonNull public android.speech.RecognitionSupport.Builder setInstalledLanguages(@NonNull java.util.List<java.lang.String>);
-    method @NonNull public android.speech.RecognitionSupport.Builder setPendingLanguages(@NonNull java.util.List<java.lang.String>);
-    method @NonNull public android.speech.RecognitionSupport.Builder setSupportedLanguages(@NonNull java.util.List<java.lang.String>);
+    method @Deprecated @NonNull public android.speech.RecognitionSupport.Builder setInstalledLanguages(@NonNull java.util.List<java.lang.String>);
+    method @NonNull public android.speech.RecognitionSupport.Builder setInstalledOnDeviceLanguages(@NonNull java.util.List<java.lang.String>);
+    method @NonNull public android.speech.RecognitionSupport.Builder setOnlineLanguages(@NonNull java.util.List<java.lang.String>);
+    method @Deprecated @NonNull public android.speech.RecognitionSupport.Builder setPendingLanguages(@NonNull java.util.List<java.lang.String>);
+    method @NonNull public android.speech.RecognitionSupport.Builder setPendingOnDeviceLanguages(@NonNull java.util.List<java.lang.String>);
+    method @Deprecated @NonNull public android.speech.RecognitionSupport.Builder setSupportedLanguages(@NonNull java.util.List<java.lang.String>);
+    method @NonNull public android.speech.RecognitionSupport.Builder setSupportedOnDeviceLanguages(@NonNull java.util.List<java.lang.String>);
   }
 
   public interface RecognitionSupportCallback {
@@ -52527,7 +52539,6 @@ package android.view.autofill {
 
   public final class AutofillManager {
     method public void cancel();
-    method public void clearAutofillRequestCallback();
     method public void commit();
     method public void disableAutofillServices();
     method @Nullable public android.content.ComponentName getAutofillServiceComponentName();
@@ -52553,7 +52564,6 @@ package android.view.autofill {
     method public void registerCallback(@Nullable android.view.autofill.AutofillManager.AutofillCallback);
     method public void requestAutofill(@NonNull android.view.View);
     method public void requestAutofill(@NonNull android.view.View, int, @NonNull android.graphics.Rect);
-    method public void setAutofillRequestCallback(@NonNull java.util.concurrent.Executor, @NonNull android.view.autofill.AutofillRequestCallback);
     method public void setUserData(@Nullable android.service.autofill.UserData);
     method public boolean showAutofillDialog(@NonNull android.view.View);
     method public boolean showAutofillDialog(@NonNull android.view.View, int);
@@ -52572,10 +52582,6 @@ package android.view.autofill {
     field public static final int EVENT_INPUT_HIDDEN = 2; // 0x2
     field public static final int EVENT_INPUT_SHOWN = 1; // 0x1
     field public static final int EVENT_INPUT_UNAVAILABLE = 3; // 0x3
-  }
-
-  public interface AutofillRequestCallback {
-    method public void onFillRequest(@Nullable android.view.inputmethod.InlineSuggestionsRequest, @NonNull android.os.CancellationSignal, @NonNull android.service.autofill.FillCallback);
   }
 
   public final class AutofillValue implements android.os.Parcelable {
@@ -52965,12 +52971,10 @@ package android.view.inputmethod {
     ctor public InlineSuggestionsRequest.Builder(@NonNull java.util.List<android.widget.inline.InlinePresentationSpec>);
     method @NonNull public android.view.inputmethod.InlineSuggestionsRequest.Builder addInlinePresentationSpecs(@NonNull android.widget.inline.InlinePresentationSpec);
     method @NonNull public android.view.inputmethod.InlineSuggestionsRequest build();
-    method @NonNull public android.view.inputmethod.InlineSuggestionsRequest.Builder setClientSupported(boolean);
     method @NonNull public android.view.inputmethod.InlineSuggestionsRequest.Builder setExtras(@NonNull android.os.Bundle);
     method @NonNull public android.view.inputmethod.InlineSuggestionsRequest.Builder setInlinePresentationSpecs(@NonNull java.util.List<android.widget.inline.InlinePresentationSpec>);
     method @NonNull public android.view.inputmethod.InlineSuggestionsRequest.Builder setInlineTooltipPresentationSpec(@NonNull android.widget.inline.InlinePresentationSpec);
     method @NonNull public android.view.inputmethod.InlineSuggestionsRequest.Builder setMaxSuggestionCount(int);
-    method @NonNull public android.view.inputmethod.InlineSuggestionsRequest.Builder setServiceSupported(boolean);
     method @NonNull public android.view.inputmethod.InlineSuggestionsRequest.Builder setSupportedLocales(@NonNull android.os.LocaleList);
   }
 

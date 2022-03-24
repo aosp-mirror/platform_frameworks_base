@@ -19,7 +19,6 @@ package com.android.systemui.statusbar.notification.stack;
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_NOTIFICATION_SHADE_SCROLL_FLING;
 import static com.android.systemui.statusbar.notification.stack.NotificationPriorityBucketKt.BUCKET_SILENT;
 import static com.android.systemui.statusbar.notification.stack.StackStateAnimator.ANIMATION_DURATION_SWIPE;
-import static com.android.systemui.util.Utils.shouldUseSplitNotificationShade;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
@@ -110,6 +109,7 @@ import com.android.systemui.statusbar.policy.HeadsUpUtil;
 import com.android.systemui.statusbar.policy.ScrollAdapter;
 import com.android.systemui.util.Assert;
 import com.android.systemui.util.DumpUtilsKt;
+import com.android.systemui.util.LargeScreenUtils;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -5540,7 +5540,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     private void updateSplitNotificationShade() {
-        boolean split = shouldUseSplitNotificationShade(getResources());
+        boolean split = LargeScreenUtils.shouldUseSplitNotificationShade(getResources());
         if (split != mShouldUseSplitNotificationShade) {
             mShouldUseSplitNotificationShade = split;
             updateDismissBehavior();

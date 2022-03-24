@@ -105,6 +105,17 @@ fun isMediaNotification(sbn: StatusBarNotification): Boolean {
 }
 
 /**
+ * Allow recommendations from smartspace to show in media controls.
+ * Requires [Utils.useQsMediaPlayer] to be enabled.
+ * On by default, but can be disabled by setting to 0
+ */
+private fun allowMediaRecommendations(context: Context): Boolean {
+    val flag = Settings.Secure.getInt(context.contentResolver,
+            Settings.Secure.MEDIA_CONTROLS_RECOMMENDATION, 1)
+    return Utils.useQsMediaPlayer(context) && flag > 0
+}
+
+/**
  * A class that facilitates management and loading of Media Data, ready for binding.
  */
 @SysUISingleton
@@ -164,7 +175,7 @@ class MediaDataManager(
     // There should ONLY be at most one Smartspace media recommendation.
     var smartspaceMediaData: SmartspaceMediaData = EMPTY_SMARTSPACE_MEDIA_DATA
     private var smartspaceSession: SmartspaceSession? = null
-    private var allowMediaRecommendations = Utils.allowMediaRecommendations(context)
+    private var allowMediaRecommendations = allowMediaRecommendations(context)
 
     /**
      * Check whether this notification is an RCN
@@ -272,7 +283,7 @@ class MediaDataManager(
         smartspaceSession?.let { it.requestSmartspaceUpdate() }
         tunerService.addTunable(object : TunerService.Tunable {
             override fun onTuningChanged(key: String?, newValue: String?) {
-                allowMediaRecommendations = Utils.allowMediaRecommendations(context)
+                allowMediaRecommendations = allowMediaRecommendations(context)
                 if (!allowMediaRecommendations) {
                     dismissSmartspaceRecommendation(key = smartspaceMediaData.targetId, delay = 0L)
                 }

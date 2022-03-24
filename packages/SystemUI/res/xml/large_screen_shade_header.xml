@@ -18,7 +18,7 @@
 <ConstraintSet
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/split_header_constraint">
+    android:id="@+id/large_screen_header_constraint">
 
     <Constraint
         android:id="@+id/clock">
@@ -58,7 +58,7 @@
         <Layout
             android:layout_width="wrap_content"
             android:layout_height="0dp"
-            app:layout_constraintHeight_min="@dimen/split_shade_header_min_height"
+            app:layout_constraintHeight_min="@dimen/large_screen_shade_header_min_height"
             app:layout_constraintStart_toEndOf="@id/statusIcons"
             app:layout_constraintEnd_toStartOf="@id/privacy_container"
             app:layout_constraintTop_toTopOf="@id/clock"

@@ -826,7 +826,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                 }
 
                 // Avoid WindowState#getRootTask() so we don't attribute system windows to a task.
-                final Task task = imeLayeringTarget.getWindow().asTask();
+                final Task task = imeLayeringTarget.getWindow().getTask();
                 if (task == null) {
                     return null;
                 }

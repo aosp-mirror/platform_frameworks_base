@@ -43,7 +43,7 @@
 
     <ImageButton
         android:id="@+id/vendor_header_button"
-        style="?android:attr/actionOverflowButtonStyle"
+        android:background="@drawable/ic_info"
         android:layout_width="31dp"
         android:layout_height="32dp"
         android:layout_alignParentRight="true" />

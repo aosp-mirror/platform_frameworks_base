@@ -908,6 +908,14 @@ public class DevicePolicyManager {
             "android.intent.extra.REMOTE_BUGREPORT_HASH";
 
     /**
+     * Extra for shared bugreport's nonce in long integer type.
+     *
+     * @hide
+     */
+    public static final String EXTRA_REMOTE_BUGREPORT_NONCE =
+            "android.intent.extra.REMOTE_BUGREPORT_NONCE";
+
+    /**
      * Extra for remote bugreport notification shown type.
      *
      * @hide

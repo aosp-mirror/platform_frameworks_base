@@ -468,6 +468,29 @@ class NotificationQSContainerControllerTest : SysuiTestCase() {
     }
 
     @Test
+    fun testLargeScreenLayout_qsAndNotifsTopMarginIsOfHeaderHeight() {
+        setLargeScreen()
+        val largeScreenHeaderHeight = 100
+        overrideResource(R.dimen.large_screen_shade_header_height, largeScreenHeaderHeight)
+
+        controller.updateResources()
+
+        assertThat(getConstraintSetLayout(R.id.qs_frame).topMargin)
+                .isEqualTo(largeScreenHeaderHeight)
+        assertThat(getConstraintSetLayout(R.id.notification_stack_scroller).topMargin)
+                .isEqualTo(largeScreenHeaderHeight)
+    }
+
+    @Test
+    fun testSmallScreenLayout_qsAndNotifsTopMarginIsZero() {
+        setSmallScreen()
+        controller.updateResources()
+        assertThat(getConstraintSetLayout(R.id.qs_frame).topMargin).isEqualTo(0)
+        assertThat(getConstraintSetLayout(R.id.notification_stack_scroller).topMargin)
+                .isEqualTo(0)
+    }
+
+    @Test
     fun testSinglePaneShadeLayout_qsFrameHasHorizontalMarginsSetToCorrectValue() {
         disableSplitShade()
         controller.updateResources()
@@ -535,6 +558,18 @@ class NotificationQSContainerControllerTest : SysuiTestCase() {
     private fun setSplitShadeEnabled(enabled: Boolean) {
         overrideResource(R.bool.config_use_split_notification_shade, enabled)
         controller.updateResources()
+    }
+
+    private fun setSmallScreen() {
+        setLargeScreenEnabled(false)
+    }
+
+    private fun setLargeScreen() {
+        setLargeScreenEnabled(true)
+    }
+
+    private fun setLargeScreenEnabled(enabled: Boolean) {
+        overrideResource(R.bool.config_use_large_screen_shade_header, enabled)
     }
 
     private fun given(

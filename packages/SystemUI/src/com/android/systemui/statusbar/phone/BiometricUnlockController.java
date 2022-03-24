@@ -537,27 +537,6 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
         mPendingShowBouncer = false;
     }
 
-    @Override
-    public void onStartedGoingToSleep(int why) {
-        resetMode();
-        mFadedAwayAfterWakeAndUnlock = false;
-        mPendingAuthenticated = null;
-    }
-
-    @Override
-    public void onFinishedGoingToSleep(int why) {
-        Trace.beginSection("BiometricUnlockController#onFinishedGoingToSleep");
-        if (mPendingAuthenticated != null) {
-            PendingAuthenticated pendingAuthenticated = mPendingAuthenticated;
-            // Post this to make sure it's executed after the device is fully locked.
-            mHandler.post(() -> onBiometricAuthenticated(pendingAuthenticated.userId,
-                    pendingAuthenticated.biometricSourceType,
-                    pendingAuthenticated.isStrongBiometric));
-            mPendingAuthenticated = null;
-        }
-        Trace.endSection();
-    }
-
     public boolean hasPendingAuthentication() {
         return mPendingAuthenticated != null
                 && mUpdateMonitor
@@ -752,13 +731,34 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
     @VisibleForTesting
     final WakefulnessLifecycle.Observer mWakefulnessObserver =
             new WakefulnessLifecycle.Observer() {
-        @Override
-        public void onFinishedWakingUp() {
-            if (mPendingShowBouncer) {
-                BiometricUnlockController.this.showBouncer();
-            }
-        }
-    };
+                @Override
+                public void onFinishedWakingUp() {
+                    if (mPendingShowBouncer) {
+                        BiometricUnlockController.this.showBouncer();
+                    }
+                }
+
+                @Override
+                public void onStartedGoingToSleep() {
+                    resetMode();
+                    mFadedAwayAfterWakeAndUnlock = false;
+                    mPendingAuthenticated = null;
+                }
+
+                @Override
+                public void onFinishedGoingToSleep() {
+                    Trace.beginSection("BiometricUnlockController#onFinishedGoingToSleep");
+                    if (mPendingAuthenticated != null) {
+                        PendingAuthenticated pendingAuthenticated = mPendingAuthenticated;
+                        // Post this to make sure it's executed after the device is fully locked.
+                        mHandler.post(() -> onBiometricAuthenticated(pendingAuthenticated.userId,
+                                pendingAuthenticated.biometricSourceType,
+                                pendingAuthenticated.isStrongBiometric));
+                        mPendingAuthenticated = null;
+                    }
+                    Trace.endSection();
+                }
+            };
 
     private final ScreenLifecycle.Observer mScreenObserver =
             new ScreenLifecycle.Observer() {
