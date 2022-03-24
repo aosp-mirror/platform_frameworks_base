@@ -83,6 +83,7 @@ import android.util.Log;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
+import android.view.InsetsState;
 import android.view.InsetsState.InternalInsetsType;
 import android.view.InsetsVisibilities;
 import android.view.KeyEvent;
@@ -1551,10 +1552,12 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
                         | WindowManager.LayoutParams.FLAG_SLIPPERY,
                 PixelFormat.TRANSLUCENT);
         lp.gravity = gravity;
+        lp.providedInternalInsets = new Insets[InsetsState.SIZE];
         if (insetsHeight != -1) {
-            lp.providedInternalInsets = Insets.of(0, height - insetsHeight, 0, 0);
+            lp.providedInternalInsets[ITYPE_NAVIGATION_BAR] =
+                    Insets.of(0, height - insetsHeight, 0, 0);
         } else {
-            lp.providedInternalInsets = Insets.NONE;
+            lp.providedInternalInsets[ITYPE_NAVIGATION_BAR] = null;
         }
         lp.token = new Binder();
         lp.accessibilityTitle = mContext.getString(R.string.nav_bar);

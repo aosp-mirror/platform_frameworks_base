@@ -1146,8 +1146,13 @@ public class DisplayPolicy {
                 mDisplayContent.setInsetProvider(ITYPE_NAVIGATION_BAR, win,
                         (displayFrames, windowContainer, inOutFrame) -> {
                             if (!mNavButtonForcedVisible) {
-                                inOutFrame.inset(win.getLayoutingAttrs(
-                                        displayFrames.mRotation).providedInternalInsets);
+                                final Insets[] providedInternalInsets = win.getLayoutingAttrs(
+                                        displayFrames.mRotation).providedInternalInsets;
+                                if (providedInternalInsets != null
+                                        && providedInternalInsets.length > ITYPE_NAVIGATION_BAR
+                                        && providedInternalInsets[ITYPE_NAVIGATION_BAR] != null) {
+                                    inOutFrame.inset(providedInternalInsets[ITYPE_NAVIGATION_BAR]);
+                                }
                                 inOutFrame.inset(win.mGivenContentInsets);
                             }
                         },
@@ -1193,13 +1198,16 @@ public class DisplayPolicy {
                 if (attrs.providesInsetsTypes != null) {
                     for (@InternalInsetsType int insetsType : attrs.providesInsetsTypes) {
                         final TriConsumer<DisplayFrames, WindowContainer, Rect> imeFrameProvider =
-                                !attrs.providedInternalImeInsets.equals(Insets.NONE)
-                                        ? (displayFrames, windowContainer, inOutFrame) -> {
-                                            inOutFrame.inset(win.getLayoutingAttrs(
-                                                    displayFrames.mRotation)
-                                                    .providedInternalImeInsets);
-                                        }
-                                        : null;
+                                (displayFrames, windowContainer, inOutFrame) -> {
+                                    final Insets[] providedInternalImeInsets =
+                                            win.getLayoutingAttrs(displayFrames.mRotation)
+                                                    .providedInternalImeInsets;
+                                    if (providedInternalImeInsets != null
+                                            && providedInternalImeInsets.length > insetsType
+                                            && providedInternalImeInsets[insetsType] != null) {
+                                        inOutFrame.inset(providedInternalImeInsets[insetsType]);
+                                    }
+                                };
                         switch (insetsType) {
                             case ITYPE_STATUS_BAR:
                                 mStatusBarAlt = win;
@@ -1220,8 +1228,13 @@ public class DisplayPolicy {
                         }
                         mDisplayContent.setInsetProvider(insetsType, win, (displayFrames,
                                 windowContainer, inOutFrame) -> {
-                            inOutFrame.inset(win.getLayoutingAttrs(
-                                    displayFrames.mRotation).providedInternalInsets);
+                            final Insets[] providedInternalInsets = win.getLayoutingAttrs(
+                                    displayFrames.mRotation).providedInternalInsets;
+                            if (providedInternalInsets != null
+                                    && providedInternalInsets.length > insetsType
+                                    && providedInternalInsets[insetsType] != null) {
+                                inOutFrame.inset(providedInternalInsets[insetsType]);
+                            }
                             inOutFrame.inset(win.mGivenContentInsets);
                         }, imeFrameProvider);
                         mInsetsSourceWindowsExceptIme.add(win);
@@ -1941,15 +1954,23 @@ public class DisplayPolicy {
                 && lp.paramsForRotation[rotation] != null) {
             lp = lp.paramsForRotation[rotation];
         }
+        final Insets providedInternalInsets;
+        if (lp.providedInternalInsets != null
+                && lp.providedInternalInsets.length > ITYPE_NAVIGATION_BAR
+                && lp.providedInternalInsets[ITYPE_NAVIGATION_BAR] != null) {
+            providedInternalInsets = lp.providedInternalInsets[ITYPE_NAVIGATION_BAR];
+        } else {
+            providedInternalInsets = Insets.NONE;
+        }
         if (position == NAV_BAR_LEFT) {
-            if (lp.width > lp.providedInternalInsets.right) {
-                return lp.width - lp.providedInternalInsets.right;
+            if (lp.width > providedInternalInsets.right) {
+                return lp.width - providedInternalInsets.right;
             } else {
                 return 0;
             }
         } else if (position == NAV_BAR_RIGHT) {
-            if (lp.width > lp.providedInternalInsets.left) {
-                return lp.width - lp.providedInternalInsets.left;
+            if (lp.width > providedInternalInsets.left) {
+                return lp.width - providedInternalInsets.left;
             } else {
                 return 0;
             }
@@ -1998,10 +2019,18 @@ public class DisplayPolicy {
             return 0;
         }
         LayoutParams lp = mNavigationBar.getLayoutingAttrs(rotation);
-        if (lp.height < lp.providedInternalInsets.top) {
+        final Insets providedInternalInsets;
+        if (lp.providedInternalInsets != null
+                && lp.providedInternalInsets.length > ITYPE_NAVIGATION_BAR
+                && lp.providedInternalInsets[ITYPE_NAVIGATION_BAR] != null) {
+            providedInternalInsets = lp.providedInternalInsets[ITYPE_NAVIGATION_BAR];
+        } else {
+            providedInternalInsets = Insets.NONE;
+        }
+        if (lp.height < providedInternalInsets.top) {
             return 0;
         }
-        return lp.height - lp.providedInternalInsets.top;
+        return lp.height - providedInternalInsets.top;
     }
 
     /**
