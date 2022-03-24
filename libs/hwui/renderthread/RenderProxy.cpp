@@ -137,6 +137,10 @@ int64_t* RenderProxy::frameInfo() {
     return mDrawFrameTask.frameInfo();
 }
 
+void RenderProxy::forceDrawNextFrame() {
+    mDrawFrameTask.forceDrawNextFrame();
+}
+
 int RenderProxy::syncAndDrawFrame() {
     return mDrawFrameTask.drawFrame();
 }

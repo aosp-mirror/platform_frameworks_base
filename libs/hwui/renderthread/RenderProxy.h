@@ -86,6 +86,7 @@ public:
     void setOpaque(bool opaque);
     void setColorMode(ColorMode mode);
     int64_t* frameInfo();
+    void forceDrawNextFrame();
     int syncAndDrawFrame();
     void destroy();
 
