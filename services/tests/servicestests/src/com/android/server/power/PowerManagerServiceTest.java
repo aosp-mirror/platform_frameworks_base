@@ -1086,6 +1086,23 @@ public class PowerManagerServiceTest {
         assertThat(mService.getGlobalWakefulnessLocked()).isNotEqualTo(WAKEFULNESS_ASLEEP);
     }
 
+
+    @SuppressWarnings("GuardedBy")
+    @Test
+    public void testInattentiveSleep_goesToSleepFromDream() {
+        setAttentiveTimeout(20000);
+        createService();
+        startSystem();
+        setPluggedIn(true);
+        forceAwake();
+        forceDream();
+        when(mDreamManagerInternalMock.isDreaming()).thenReturn(true);
+        assertThat(mService.getGlobalWakefulnessLocked()).isEqualTo(WAKEFULNESS_DREAMING);
+
+        advanceTime(20500);
+        assertThat(mService.getGlobalWakefulnessLocked()).isEqualTo(WAKEFULNESS_ASLEEP);
+    }
+
     @Test
     public void testWakeLock_affectsProperDisplayGroup() {
         final int nonDefaultDisplayGroupId = Display.DEFAULT_DISPLAY_GROUP + 1;
