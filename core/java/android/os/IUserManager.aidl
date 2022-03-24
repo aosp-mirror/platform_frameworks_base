@@ -131,5 +131,4 @@ interface IUserManager {
     String getUserName();
     long getUserStartRealtime();
     long getUserUnlockRealtime();
-    boolean setUserEphemeral(int userId, boolean enableEphemeral);
 }
