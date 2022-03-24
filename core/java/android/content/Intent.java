@@ -5987,6 +5987,22 @@ public class Intent implements Parcelable, Cloneable {
     public static final String EXTRA_UID = "android.intent.extra.UID";
 
     /**
+     * Used as an optional int extra field in {@link android.content.Intent#ACTION_PACKAGE_ADDED}
+     * intents to supply the previous uid the package had been assigned.
+     * This would only be set when a package is leaving sharedUserId in an upgrade, or when a
+     * system app upgrade that had left sharedUserId is getting uninstalled.
+     */
+    public static final String EXTRA_PREVIOUS_UID = "android.intent.extra.PREVIOUS_UID";
+
+    /**
+     * Used as an optional int extra field in {@link android.content.Intent#ACTION_PACKAGE_REMOVED}
+     * intents to supply the new uid the package will be assigned.
+     * This would only be set when a package is leaving sharedUserId in an upgrade, or when a
+     * system app upgrade that had left sharedUserId is getting uninstalled.
+     */
+    public static final String EXTRA_NEW_UID = "android.intent.extra.NEW_UID";
+
+    /**
      * @hide String array of package names.
      */
     @SystemApi
@@ -6016,6 +6032,16 @@ public class Intent implements Parcelable, Cloneable {
      * different version of the same package.
      */
     public static final String EXTRA_REPLACING = "android.intent.extra.REPLACING";
+
+    /**
+     * Used as a boolean extra field in {@link android.content.Intent#ACTION_PACKAGE_REMOVED},
+     * {@link android.content.Intent#ACTION_UID_REMOVED}, and
+     * {@link android.content.Intent#ACTION_PACKAGE_ADDED}
+     * intents to indicate that this package is changing its UID.
+     * This would only be set when a package is leaving sharedUserId in an upgrade, or when a
+     * system app upgrade that had left sharedUserId is getting uninstalled.
+     */
+    public static final String EXTRA_UID_CHANGING = "android.intent.extra.UID_CHANGING";
 
     /**
      * Used as an int extra field in {@link android.app.AlarmManager} pending intents
