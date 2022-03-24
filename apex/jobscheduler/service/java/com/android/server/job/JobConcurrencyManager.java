@@ -265,14 +265,6 @@ class JobConcurrencyManager {
                     )
             );
 
-    /**
-     * This array essentially stores the state of mActiveServices array.
-     * The ith index stores the job present on the ith JobServiceContext.
-     * We manipulate this array until we arrive at what jobs should be running on
-     * what JobServiceContext.
-     */
-    JobStatus[] mRecycledAssignContextIdToJobMap = new JobStatus[MAX_JOB_CONTEXTS_COUNT];
-
     private final ArraySet<ContextAssignment> mRecycledChanged = new ArraySet<>();
     private final ArraySet<ContextAssignment> mRecycledIdle = new ArraySet<>();
     private final ArraySet<ContextAssignment> mRecycledPreferredUidOnly = new ArraySet<>();
@@ -580,7 +572,6 @@ class JobConcurrencyManager {
         final List<JobServiceContext> activeServices = mActiveServices;
 
         // To avoid GC churn, we recycle the arrays.
-        JobStatus[] contextIdToJobMap = mRecycledAssignContextIdToJobMap;
         final ArraySet<ContextAssignment> changed = mRecycledChanged;
         final ArraySet<ContextAssignment> idle = mRecycledIdle;
         final ArraySet<ContextAssignment> preferredUidOnly = mRecycledPreferredUidOnly;
@@ -638,7 +629,7 @@ class JobConcurrencyManager {
             idle.add(assignment);
         }
         if (DEBUG) {
-            Slog.d(TAG, printContextIdToJobMap(contextIdToJobMap, "running jobs initial"));
+            Slog.d(TAG, printAssignments("running jobs initial", stoppable, preferredUidOnly));
         }
 
         mWorkCountTracker.onCountDone();
@@ -747,7 +738,8 @@ class JobConcurrencyManager {
             }
         }
         if (DEBUG) {
-            Slog.d(TAG, printContextIdToJobMap(contextIdToJobMap, "running jobs final"));
+            Slog.d(TAG, printAssignments("running jobs final",
+                    stoppable, preferredUidOnly, changed));
 
             Slog.d(TAG, "assignJobsToContexts: " + mWorkCountTracker.toString());
         }
@@ -1283,13 +1275,26 @@ class JobConcurrencyManager {
         return s.toString();
     }
 
-    private static String printContextIdToJobMap(JobStatus[] map, String initial) {
-        StringBuilder s = new StringBuilder(initial + ": ");
-        for (int i=0; i<map.length; i++) {
-            s.append("(")
-                    .append(map[i] == null? -1: map[i].getJobId())
-                    .append(map[i] == null? -1: map[i].getUid())
-                    .append(")" );
+    private static String printAssignments(String header, ArraySet<ContextAssignment>... list) {
+        final StringBuilder s = new StringBuilder(header + ": ");
+        for (int l = 0; l < list.length; ++l) {
+            ArraySet<ContextAssignment> assignments = list[l];
+            for (int c = 0; c < assignments.size(); ++c) {
+                final ContextAssignment assignment = assignments.valueAt(c);
+                final JobStatus job = assignment.newJob == null
+                        ? assignment.context.getRunningJobLocked() : assignment.newJob;
+
+                if (l > 0 || c > 0) {
+                    s.append(" ");
+                }
+                s.append("(").append(assignment.context.getId()).append("=");
+                if (job == null) {
+                    s.append("nothing");
+                } else {
+                    s.append(job.getJobId()).append("/").append(job.getUid());
+                }
+                s.append(")");
+            }
         }
         return s.toString();
     }
