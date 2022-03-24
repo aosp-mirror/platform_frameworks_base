@@ -1636,8 +1636,10 @@ public class AudioManager {
      *
      * @param on set <var>true</var> to turn on speakerphone;
      *           <var>false</var> to turn it off
+     * @deprecated Use {@link AudioManager#setCommunicationDevice(AudioDeviceInfo)} or
+     *           {@link AudioManager#clearCommunicationDevice()} instead.
      */
-    public void setSpeakerphoneOn(boolean on){
+    @Deprecated public void setSpeakerphoneOn(boolean on) {
         final IAudioService service = getService();
         try {
             service.setSpeakerphoneOn(mICallBack, on);
@@ -1650,8 +1652,9 @@ public class AudioManager {
      * Checks whether the speakerphone is on or off.
      *
      * @return true if speakerphone is on, false if it's off
+     * @deprecated Use {@link AudioManager#getCommunicationDevice()} instead.
      */
-    public boolean isSpeakerphoneOn() {
+    @Deprecated public boolean isSpeakerphoneOn() {
         final IAudioService service = getService();
         try {
             return service.isSpeakerphoneOn();
@@ -2717,8 +2720,9 @@ public class AudioManager {
      * connection is established.
      * @see #stopBluetoothSco()
      * @see #ACTION_SCO_AUDIO_STATE_UPDATED
+     * @deprecated Use {@link AudioManager#setCommunicationDevice(AudioDeviceInfo)} instead.
      */
-    public void startBluetoothSco(){
+    @Deprecated public void startBluetoothSco() {
         final IAudioService service = getService();
         try {
             service.startBluetoothSco(mICallBack,
@@ -2761,9 +2765,10 @@ public class AudioManager {
      * bluetooth SCO audio with {@link #startBluetoothSco()} when finished with the SCO
      * connection or if connection fails.
      * @see #startBluetoothSco()
+     * @deprecated Use {@link AudioManager#clearCommunicationDevice()} instead.
      */
     // Also used for connections started with {@link #startBluetoothScoVirtualCall()}
-    public void stopBluetoothSco(){
+    @Deprecated public void stopBluetoothSco() {
         final IAudioService service = getService();
         try {
             service.stopBluetoothSco(mICallBack);
@@ -2795,8 +2800,9 @@ public class AudioManager {
      *
      * @return true if SCO is used for communications;
      *         false if otherwise
+     * @deprecated Use {@link AudioManager#getCommunicationDevice()} instead.
      */
-    public boolean isBluetoothScoOn() {
+    @Deprecated public boolean isBluetoothScoOn() {
         final IAudioService service = getService();
         try {
             return service.isBluetoothScoOn();

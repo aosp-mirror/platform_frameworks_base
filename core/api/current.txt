@@ -20103,14 +20103,14 @@ package android.media {
     method @Deprecated public int getVibrateSetting(int);
     method @Deprecated public boolean isBluetoothA2dpOn();
     method public boolean isBluetoothScoAvailableOffCall();
-    method public boolean isBluetoothScoOn();
+    method @Deprecated public boolean isBluetoothScoOn();
     method public boolean isCallScreeningModeSupported();
     method public static boolean isHapticPlaybackSupported();
     method public boolean isMicrophoneMute();
     method public boolean isMusicActive();
     method public static boolean isOffloadedPlaybackSupported(@NonNull android.media.AudioFormat, @NonNull android.media.AudioAttributes);
     method public boolean isRampingRingerEnabled();
-    method public boolean isSpeakerphoneOn();
+    method @Deprecated public boolean isSpeakerphoneOn();
     method public boolean isStreamMute(int);
     method public boolean isSurroundFormatEnabled(int);
     method public boolean isVolumeFixed();
@@ -20139,7 +20139,7 @@ package android.media {
     method public void setParameters(String);
     method public void setRingerMode(int);
     method @Deprecated public void setRouting(int, int, int);
-    method public void setSpeakerphoneOn(boolean);
+    method @Deprecated public void setSpeakerphoneOn(boolean);
     method @Deprecated public void setStreamMute(int, boolean);
     method @Deprecated public void setStreamSolo(int, boolean);
     method public void setStreamVolume(int, int, int);
@@ -20147,8 +20147,8 @@ package android.media {
     method @Deprecated public void setVibrateSetting(int, int);
     method @Deprecated public void setWiredHeadsetOn(boolean);
     method @Deprecated public boolean shouldVibrate(int);
-    method public void startBluetoothSco();
-    method public void stopBluetoothSco();
+    method @Deprecated public void startBluetoothSco();
+    method @Deprecated public void stopBluetoothSco();
     method public void unloadSoundEffects();
     method public void unregisterAudioDeviceCallback(android.media.AudioDeviceCallback);
     method public void unregisterAudioPlaybackCallback(@NonNull android.media.AudioManager.AudioPlaybackCallback);
