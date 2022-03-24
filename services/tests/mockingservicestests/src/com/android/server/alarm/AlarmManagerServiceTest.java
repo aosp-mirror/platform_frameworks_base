@@ -217,6 +217,8 @@ public class AlarmManagerServiceTest {
     @Mock
     private AppOpsManager mAppOpsManager;
     @Mock
+    private BatteryManager mBatteryManager;
+    @Mock
     private DeviceIdleInternal mDeviceIdleInternal;
     @Mock
     private PermissionManagerServiceInternal mPermissionManagerInternal;
@@ -453,6 +455,7 @@ public class AlarmManagerServiceTest {
                         eq(Manifest.permission.USE_EXACT_ALARM), anyInt(), anyInt(), anyString()));
 
         when(mMockContext.getSystemService(Context.APP_OPS_SERVICE)).thenReturn(mAppOpsManager);
+        when(mMockContext.getSystemService(BatteryManager.class)).thenReturn(mBatteryManager);
 
         registerAppIds(new String[]{TEST_CALLING_PACKAGE},
                 new Integer[]{UserHandle.getAppId(TEST_CALLING_UID)});
@@ -477,6 +480,8 @@ public class AlarmManagerServiceTest {
 
         // Other boot phases don't matter
         mService.onBootPhase(SystemService.PHASE_SYSTEM_SERVICES_READY);
+
+        verify(mBatteryManager).isCharging();
         setTareEnabled(false);
         mAppStandbyWindow = mService.mConstants.APP_STANDBY_WINDOW;
         mAllowWhileIdleWindow = mService.mConstants.ALLOW_WHILE_IDLE_WINDOW;
@@ -1101,6 +1106,7 @@ public class AlarmManagerServiceTest {
                 new Intent(parole ? BatteryManager.ACTION_CHARGING
                         : BatteryManager.ACTION_DISCHARGING));
         assertAndHandleMessageSync(CHARGING_STATUS_CHANGED);
+        assertEquals(parole, mService.mAppStandbyParole);
     }
 
     @Test
