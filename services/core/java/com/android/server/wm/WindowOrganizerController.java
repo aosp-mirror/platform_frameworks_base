@@ -99,7 +99,7 @@ import java.util.function.IntSupplier;
  * @see android.window.WindowOrganizer
  */
 class WindowOrganizerController extends IWindowOrganizerController.Stub
-        implements BLASTSyncEngine.TransactionReadyListener, BLASTSyncEngine.SyncEngineListener {
+        implements BLASTSyncEngine.TransactionReadyListener {
 
     private static final String TAG = "WindowOrganizerController";
 
@@ -121,21 +121,6 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
 
     private final HashMap<Integer, IWindowContainerTransactionCallback>
             mTransactionCallbacksByPendingSyncId = new HashMap();
-
-    /**
-     * A queue of transaction waiting for their turn to sync. Currently {@link BLASTSyncEngine} only
-     * supports 1 sync at a time, so we have to queue them.
-     *
-     * WMCore has enough information to ensure that it won't end up collecting multiple transitions
-     * in parallel by itself; however, Shell can start transitions/apply sync transaction at
-     * arbitrary times via {@link WindowOrganizerController#startTransition} and
-     * {@link WindowOrganizerController#applySyncTransaction}, so we have to support those coming in
-     * at any time (even while already syncing).
-     *
-     * This is really just a back-up for unrealistic situations (eg. during tests). In practice,
-     * this shouldn't ever happen.
-     */
-    private final ArrayList<PendingTransaction> mPendingTransactions = new ArrayList<>();
 
     final TaskOrganizerController mTaskOrganizerController;
     final DisplayAreaOrganizerController mDisplayAreaOrganizerController;
@@ -160,7 +145,6 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
     void setWindowManager(WindowManagerService wms) {
         mTransitionController = new TransitionController(mService, wms.mTaskSnapshotController);
         mTransitionController.registerLegacyListener(wms.mActivityManagerAppTransitionNotifier);
-        wms.mSyncEngine.setSyncEngineListener(this);
     }
 
     TransitionController getTransitionController() {
@@ -231,16 +215,12 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 } else {
                     // Because the BLAST engine only supports one sync at a time, queue the
                     // transaction.
-                    final PendingTransaction pt = new PendingTransaction();
-                    // Start sync group immediately when the SyncEngine is free.
-                    pt.setStartSync(() ->
-                            mService.mWindowManager.mSyncEngine.startSyncSet(syncGroup));
-                    // Those will be post so that it won't interrupt ongoing transition.
-                    pt.setStartTransaction(() -> {
-                        applyTransaction(t, syncId, null /*transition*/, caller);
-                        setSyncReady(syncId);
-                    });
-                    mPendingTransactions.add(pt);
+                    mService.mWindowManager.mSyncEngine.queueSyncSet(
+                            () -> mService.mWindowManager.mSyncEngine.startSyncSet(syncGroup),
+                            () -> {
+                                applyTransaction(t, syncId, null /*transition*/, caller);
+                                setSyncReady(syncId);
+                            });
                 }
                 return syncId;
             }
@@ -283,19 +263,24 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                     // transition starts collecting. This should almost never happen except during
                     // tests.
                     if (mService.mWindowManager.mSyncEngine.hasActiveSync()) {
-                        Slog.e(TAG, "startTransition() while one is already collecting.");
-                        final TransitionController.PendingStartTransition pt =
-                                mTransitionController.createPendingTransition(type);
-                        // Those will be post so that it won't interrupt ongoing transition.
-                        pt.setStartTransaction(() -> {
-                            pt.mTransition.start();
-                            applyTransaction(wct, -1 /*syncId*/, pt.mTransition, caller);
-                            if (needsSetReady) {
-                                pt.mTransition.setAllReady();
-                            }
-                        });
-                        mPendingTransactions.add(pt);
-                        return pt.mTransition;
+                        Slog.w(TAG, "startTransition() while one is already collecting.");
+                        final Transition nextTransition = new Transition(type, 0 /* flags */,
+                                mTransitionController, mService.mWindowManager.mSyncEngine);
+                        ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
+                                "Creating Pending Transition: %s", nextTransition);
+                        mService.mWindowManager.mSyncEngine.queueSyncSet(
+                                // Make sure to collect immediately to prevent another transition
+                                // from sneaking in before it. Note: moveToCollecting internally
+                                // calls startSyncSet.
+                                () -> mTransitionController.moveToCollecting(nextTransition),
+                                () -> {
+                                    nextTransition.start();
+                                    applyTransaction(wct, -1 /*syncId*/, nextTransition, caller);
+                                    if (needsSetReady) {
+                                        nextTransition.setAllReady();
+                                    }
+                                });
+                        return nextTransition;
                     }
                     transition = mTransitionController.createTransition(type);
                 }
@@ -1198,23 +1183,6 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
     }
 
     @Override
-    public void onSyncEngineFree() {
-        if (mPendingTransactions.isEmpty()) {
-            return;
-        }
-
-        ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "PendingStartTransaction found");
-        final PendingTransaction pt = mPendingTransactions.remove(0);
-        pt.startSync();
-        // Post this so that the now-playing transition setup isn't interrupted.
-        mService.mH.post(() -> {
-            synchronized (mGlobalLock) {
-                pt.startTransaction();
-            }
-        });
-    }
-
-    @Override
     public void registerTransitionPlayer(ITransitionPlayer player) {
         enforceTaskPermission("registerTransitionPlayer()");
         final int callerPid = Binder.getCallingPid();
@@ -1561,40 +1529,6 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             default:
                 return new AndroidRuntimeException("Start activity failed with error code : "
                         + result + " when starting " + intent);
-        }
-    }
-
-    /**
-     *  Represents a sync {@link WindowContainerTransaction} call made while there is other active
-     *  {@link BLASTSyncEngine.SyncGroup}.
-     */
-    static class PendingTransaction {
-        private Runnable mStartSync;
-        private Runnable mStartTransaction;
-
-        /**
-         * The callback will be called immediately when the {@link BLASTSyncEngine} is free. One
-         * should call {@link BLASTSyncEngine#startSyncSet(BLASTSyncEngine.SyncGroup)} here to
-         * reserve the {@link BLASTSyncEngine}.
-         */
-        void setStartSync(@NonNull Runnable callback) {
-            mStartSync = callback;
-        }
-
-        /**
-         * The callback will be post to the main handler after the {@link BLASTSyncEngine} is free
-         * to apply the pending {@link WindowContainerTransaction}.
-         */
-        void setStartTransaction(@NonNull Runnable callback) {
-            mStartTransaction = callback;
-        }
-
-        private void startSync() {
-            mStartSync.run();
-        }
-
-        private void startTransaction() {
-            mStartTransaction.run();
         }
     }
 }
