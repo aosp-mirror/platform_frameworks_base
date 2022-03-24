@@ -126,6 +126,8 @@ public class ScreenDecorationsTest extends SysuiTestCase {
     private CornerDecorProvider mPrivacyDotBottomLeftDecorProvider;
     @Mock
     private CornerDecorProvider mPrivacyDotBottomRightDecorProvider;
+    @Mock
+    private Display.Mode mDisplayMode;
 
     @Before
     public void setup() {
@@ -1161,6 +1163,56 @@ public class ScreenDecorationsTest extends SysuiTestCase {
         assertEquals(topOverlay.getVisibility(), View.INVISIBLE);
         assertEquals(botOverlay.getVisibility(), View.INVISIBLE);
 
+    }
+
+    @Test
+    public void testOnDisplayChanged_hwcLayer() {
+        setupResources(0 /* radius */, 0 /* radiusTop */, 0 /* radiusBottom */,
+                0 /* roundedPadding */, false /* multipleRadius */,
+                true /* fillCutout */, false /* privacyDot */);
+        final DisplayDecorationSupport decorationSupport = new DisplayDecorationSupport();
+        decorationSupport.format = PixelFormat.R_8;
+        doReturn(decorationSupport).when(mDisplay).getDisplayDecorationSupport();
+
+        // top cutout
+        final Rect[] bounds = {null, new Rect(9, 0, 10, 1), null, null};
+        doReturn(getDisplayCutoutForRotation(Insets.of(0, 1, 0, 0), bounds))
+                .when(mScreenDecorations).getCutout();
+
+        mScreenDecorations.start();
+
+        final ScreenDecorHwcLayer hwcLayer = mScreenDecorations.mScreenDecorHwcLayer;
+        spyOn(hwcLayer);
+        doReturn(mDisplay).when(hwcLayer).getDisplay();
+        doReturn(mDisplayMode).when(mDisplay).getMode();
+
+        mScreenDecorations.mDisplayListener.onDisplayChanged(1);
+
+        verify(hwcLayer, times(1)).onDisplayChanged(1);
+    }
+
+    @Test
+    public void testOnDisplayChanged_nonHwcLayer() {
+        setupResources(0 /* radius */, 0 /* radiusTop */, 0 /* radiusBottom */,
+                0 /* roundedPadding */, false /* multipleRadius */,
+                true /* fillCutout */, false /* privacyDot */);
+
+        // top cutout
+        final Rect[] bounds = {null, new Rect(9, 0, 10, 1), null, null};
+        doReturn(getDisplayCutoutForRotation(Insets.of(0, 1, 0, 0), bounds))
+                .when(mScreenDecorations).getCutout();
+
+        mScreenDecorations.start();
+
+        final ScreenDecorations.DisplayCutoutView cutoutView =
+                mScreenDecorations.mCutoutViews[BOUNDS_POSITION_TOP];
+        spyOn(cutoutView);
+        doReturn(mDisplay).when(cutoutView).getDisplay();
+        doReturn(mDisplayMode).when(mDisplay).getMode();
+
+        mScreenDecorations.mDisplayListener.onDisplayChanged(1);
+
+        verify(cutoutView, times(1)).onDisplayChanged(1);
     }
 
     private void setupResources(int radius, int radiusTop, int radiusBottom, int roundedPadding,

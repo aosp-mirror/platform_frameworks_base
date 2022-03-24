@@ -143,8 +143,9 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
     private int mProviderRefreshToken = 0;
     @VisibleForTesting
     protected OverlayWindow[] mOverlays = null;
+    @VisibleForTesting
     @Nullable
-    private DisplayCutoutView[] mCutoutViews;
+    DisplayCutoutView[] mCutoutViews;
     @VisibleForTesting
     ViewGroup mScreenDecorHwcWindow;
     @VisibleForTesting
@@ -364,6 +365,16 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
                         return;
                     }
                     updateHwLayerRoundedCornerDrawable();
+                }
+                if (mCutoutViews != null) {
+                    final int size = mCutoutViews.length;
+                    for (int i = 0; i < size; i++) {
+                        final DisplayCutoutView cutoutView = mCutoutViews[i];
+                        if (cutoutView == null) {
+                            continue;
+                        }
+                        cutoutView.onDisplayChanged(displayId);
+                    }
                 }
                 if (mScreenDecorHwcLayer != null) {
                     mScreenDecorHwcLayer.onDisplayChanged(displayId);
