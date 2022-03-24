@@ -16,6 +16,8 @@
 
 package com.android.systemui.media
 
+import android.animation.Animator
+import android.animation.AnimatorSet
 import android.app.PendingIntent
 import android.app.smartspace.SmartspaceAction
 import android.content.Context
@@ -39,6 +41,7 @@ import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.Interpolator
 import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.ImageView
@@ -58,6 +61,7 @@ import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.util.animation.TransitionLayout
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.KotlinArgumentCaptor
+import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.withArgCaptor
 import com.android.systemui.util.time.FakeSystemClock
@@ -140,6 +144,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
     private lateinit var actionsTopBarrier: Barrier
     @Mock private lateinit var longPressText: TextView
     @Mock private lateinit var handler: Handler
+    @Mock private lateinit var mockAnimator: AnimatorSet
     private lateinit var settings: ImageButton
     private lateinit var cancel: View
     private lateinit var cancelText: TextView
@@ -181,7 +186,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
         whenever(packageManager.getApplicationLabel(any())).thenReturn(PACKAGE)
         context.setMockPackageManager(packageManager)
 
-        player = MediaControlPanel(
+        player = object : MediaControlPanel(
             context,
             bgExecutor,
             mainExecutor,
@@ -194,8 +199,15 @@ public class MediaControlPanelTest : SysuiTestCase() {
             mediaCarouselController,
             falsingManager,
             clock,
-            logger
-        )
+            logger) {
+                override fun loadAnimator(
+                    animId: Int,
+                    otionInterpolator: Interpolator,
+                    vararg targets: View
+                ): AnimatorSet {
+                    return mockAnimator
+                }
+            }
 
         initMediaViewHolderMocks()
 
@@ -470,7 +482,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
         val icon = context.getDrawable(android.R.drawable.ic_media_play)
         val semanticActions = MediaButton(
             prevOrCustom = MediaAction(icon, {}, "prev", null),
-            nextOrCustom = MediaAction(icon, {}, "next", null),
+            nextOrCustom = MediaAction(icon, {}, "next", null)
         )
         val state = mediaData.copy(semanticActions = semanticActions)
 
@@ -504,7 +516,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
         val icon = context.getDrawable(android.R.drawable.ic_media_play)
         val semanticActions = MediaButton(
             prevOrCustom = null,
-            nextOrCustom = MediaAction(icon, {}, "next", null),
+            nextOrCustom = MediaAction(icon, {}, "next", null)
         )
         val state = mediaData.copy(semanticActions = semanticActions)
         player.attachPlayer(viewHolder)
@@ -524,7 +536,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
         val icon = context.getDrawable(android.R.drawable.ic_media_play)
         val semanticActions = MediaButton(
             prevOrCustom = MediaAction(icon, {}, "prev", null),
-            nextOrCustom = null,
+            nextOrCustom = null
         )
         val state = mediaData.copy(semanticActions = semanticActions)
         player.attachPlayer(viewHolder)
@@ -544,7 +556,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
         val icon = context.getDrawable(android.R.drawable.ic_media_play)
         val semanticActions = MediaButton(
             prevOrCustom = MediaAction(icon, {}, "prev", null),
-            nextOrCustom = MediaAction(icon, {}, "next", null),
+            nextOrCustom = MediaAction(icon, {}, "next", null)
         )
         val state = mediaData.copy(semanticActions = semanticActions)
         player.attachPlayer(viewHolder)
@@ -566,7 +578,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
         val icon = context.getDrawable(android.R.drawable.ic_media_play)
         val semanticActions = MediaButton(
             prevOrCustom = MediaAction(icon, {}, "prev", null),
-            nextOrCustom = MediaAction(icon, {}, "next", null),
+            nextOrCustom = MediaAction(icon, {}, "next", null)
         )
         val state = mediaData.copy(semanticActions = semanticActions)
 
@@ -709,8 +721,53 @@ public class MediaControlPanelTest : SysuiTestCase() {
     fun bindText() {
         player.attachPlayer(viewHolder)
         player.bindPlayer(mediaData, PACKAGE)
+
+        // Capture animation handler
+        val captor = argumentCaptor<Animator.AnimatorListener>()
+        verify(mockAnimator, times(2)).addListener(captor.capture())
+        val handler = captor.value
+
+        // Validate text views unchanged but animation started
+        assertThat(titleText.getText()).isEqualTo("")
+        assertThat(artistText.getText()).isEqualTo("")
+        verify(mockAnimator, times(1)).start()
+
+        // Binding only after animator runs
+        handler.onAnimationEnd(mockAnimator)
         assertThat(titleText.getText()).isEqualTo(TITLE)
         assertThat(artistText.getText()).isEqualTo(ARTIST)
+
+        // Rebinding should not trigger animation
+        player.bindPlayer(mediaData, PACKAGE)
+        verify(mockAnimator, times(1)).start()
+    }
+
+    @Test
+    fun bindTextInterrupted() {
+        val data0 = mediaData.copy(artist = "ARTIST_0")
+        val data1 = mediaData.copy(artist = "ARTIST_1")
+        val data2 = mediaData.copy(artist = "ARTIST_2")
+
+        player.attachPlayer(viewHolder)
+        player.bindPlayer(data0, PACKAGE)
+
+        // Capture animation handler
+        val captor = argumentCaptor<Animator.AnimatorListener>()
+        verify(mockAnimator, times(2)).addListener(captor.capture())
+        val handler = captor.value
+
+        handler.onAnimationEnd(mockAnimator)
+        assertThat(artistText.getText()).isEqualTo("ARTIST_0")
+
+        // Bind trigges new animation
+        player.bindPlayer(data1, PACKAGE)
+        verify(mockAnimator, times(2)).start()
+        whenever(mockAnimator.isRunning()).thenReturn(true)
+
+        // Rebind before animation end binds corrct data
+        player.bindPlayer(data2, PACKAGE)
+        handler.onAnimationEnd(mockAnimator)
+        assertThat(artistText.getText()).isEqualTo("ARTIST_2")
     }
 
     @Test
