@@ -22,12 +22,10 @@ import android.view.View.VISIBLE
 import androidx.test.filters.SmallTest
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.statusbar.NotificationLockscreenUserManager
 import com.android.systemui.statusbar.StatusBarState.KEYGUARD
 import com.android.systemui.statusbar.StatusBarState.SHADE
 import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
-import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.ExpandableView
 import com.android.systemui.util.mockito.any
@@ -38,16 +36,12 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.mock
-import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
+import org.mockito.Mockito.`when` as whenever
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
 class NotificationStackSizeCalculatorTest : SysuiTestCase() {
-
-    @Mock private lateinit var groupManager: NotificationGroupManagerLegacy
-
-    @Mock private lateinit var notificationLockscreenUserManager: NotificationLockscreenUserManager
 
     @Mock private lateinit var sysuiStatusBarStateController: SysuiStatusBarStateController
 
@@ -63,7 +57,6 @@ class NotificationStackSizeCalculatorTest : SysuiTestCase() {
 
         whenever(stackLayout.calculateGapHeight(nullable(), nullable(), any()))
             .thenReturn(GAP_HEIGHT)
-        whenever(groupManager.isSummaryOfSuppressedGroup(any())).thenReturn(false)
         with(testableResources) {
             addOverride(R.integer.keyguard_max_notification_count, -1)
             addOverride(R.dimen.notification_divider_height, NOTIFICATION_PADDING.toInt())
@@ -71,15 +64,13 @@ class NotificationStackSizeCalculatorTest : SysuiTestCase() {
 
         sizeCalculator =
             NotificationStackSizeCalculator(
-                groupManager = groupManager,
-                lockscreenUserManager = notificationLockscreenUserManager,
                 statusBarStateController = sysuiStatusBarStateController,
                 testableResources.resources)
     }
 
     @Test
     fun computeMaxKeyguardNotifications_zeroSpace_returnZero() {
-        val rows = listOf(createMockRow(height = ROW_HEIGHT, visibleOnLockscreen = true))
+        val rows = listOf(createMockRow(height = ROW_HEIGHT))
 
         val maxNotifications =
             computeMaxKeyguardNotifications(rows, availableSpace = 0f, shelfHeight = 0f)
@@ -106,8 +97,8 @@ class NotificationStackSizeCalculatorTest : SysuiTestCase() {
         val spaceForOne = totalSpaceForEachRow
         val rows =
             listOf(
-                createMockRow(rowHeight, visibleOnLockscreen = true),
-                createMockRow(rowHeight, visibleOnLockscreen = true))
+                createMockRow(rowHeight),
+                createMockRow(rowHeight))
 
         val maxNotifications =
             computeMaxKeyguardNotifications(
@@ -124,8 +115,8 @@ class NotificationStackSizeCalculatorTest : SysuiTestCase() {
         val spaceForOne = totalSpaceForEachRow
         val rows =
             listOf(
-                createMockRow(rowHeight, visibleOnLockscreen = true),
-                createMockRow(rowHeight, visibleOnLockscreen = true))
+                createMockRow(rowHeight),
+                createMockRow(rowHeight))
 
         val maxNotifications =
             computeMaxKeyguardNotifications(
@@ -135,24 +126,15 @@ class NotificationStackSizeCalculatorTest : SysuiTestCase() {
     }
 
     @Test
-    fun computeMaxKeyguardNotifications_invisibleOnLockscreen_returnsZero() {
-        val rows = listOf(createMockRow(visibleOnLockscreen = false))
-
-        val maxNotifications = computeMaxKeyguardNotifications(rows, Float.MAX_VALUE)
-
-        assertThat(maxNotifications).isEqualTo(0)
-    }
-
-    @Test
     fun computeMaxKeyguardNotifications_spaceForTwo_returnsTwo() {
         val rowHeight = ROW_HEIGHT
         val totalSpaceForEachRow = GAP_HEIGHT + rowHeight
         val spaceForTwo = totalSpaceForEachRow * 2 + NOTIFICATION_PADDING
         val rows =
             listOf(
-                createMockRow(rowHeight, visibleOnLockscreen = true),
-                createMockRow(rowHeight, visibleOnLockscreen = true),
-                createMockRow(rowHeight, visibleOnLockscreen = true))
+                createMockRow(rowHeight),
+                createMockRow(rowHeight),
+                createMockRow(rowHeight))
 
         val maxNotifications = computeMaxKeyguardNotifications(rows, spaceForTwo, shelfHeight = 0f)
 
@@ -167,40 +149,15 @@ class NotificationStackSizeCalculatorTest : SysuiTestCase() {
         val availableSpace = totalSpaceForEachRow * 2
         val rows =
             listOf(
-                createMockRow(rowHeight, visibleOnLockscreen = true),
-                createMockRow(rowHeight, visibleOnLockscreen = true),
-                createMockRow(rowHeight, visibleOnLockscreen = true))
+                createMockRow(rowHeight),
+                createMockRow(rowHeight),
+                createMockRow(rowHeight))
 
         val maxNotifications = computeMaxKeyguardNotifications(rows, availableSpace, shelfHeight)
         assertThat(maxNotifications).isEqualTo(2)
 
         val height = sizeCalculator.computeHeight(stackLayout, maxNotifications, SHELF_HEIGHT)
         assertThat(height).isAtMost(availableSpace + SHELF_HEIGHT)
-    }
-
-    @Test
-    fun computeHeight_allInvisibleToLockscreen_NotInLockscreen_returnsHigherThanZero() {
-        setOnLockscreen(false)
-        val rowHeight = 10f
-        setupChildren(listOf(createMockRow(rowHeight, visibleOnLockscreen = false)))
-
-        val height =
-            sizeCalculator.computeHeight(
-                stackLayout, maxNotifications = Int.MAX_VALUE, SHELF_HEIGHT)
-
-        assertThat(height).isGreaterThan(rowHeight)
-    }
-
-    @Test
-    fun computeHeight_allInvisibleToLockscreen_onLockscreen_returnsZero() {
-        setOnLockscreen(true)
-        setupChildren(listOf(createMockRow(visibleOnLockscreen = false)))
-
-        val height =
-            sizeCalculator.computeHeight(
-                stackLayout, maxNotifications = Int.MAX_VALUE, SHELF_HEIGHT)
-
-        assertThat(height).isEqualTo(0)
     }
 
     private fun computeMaxKeyguardNotifications(
@@ -222,14 +179,12 @@ class NotificationStackSizeCalculatorTest : SysuiTestCase() {
     }
 
     private fun createLockscreenRows(number: Int): List<ExpandableNotificationRow> =
-        (1..number).map { createMockRow(visibleOnLockscreen = true) }.toList()
+        (1..number).map { createMockRow() }.toList()
 
     private fun createMockRow(
         height: Float = ROW_HEIGHT,
-        visibleOnLockscreen: Boolean = true,
         isRemoved: Boolean = false,
         visibility: Int = VISIBLE,
-        summaryOfSuppressed: Boolean = false
     ): ExpandableNotificationRow {
         val row = mock(ExpandableNotificationRow::class.java)
         val entry = mock(NotificationEntry::class.java)
@@ -238,22 +193,9 @@ class NotificationStackSizeCalculatorTest : SysuiTestCase() {
         whenever(row.entry).thenReturn(entry)
         whenever(row.isRemoved).thenReturn(isRemoved)
         whenever(row.visibility).thenReturn(visibility)
-        whenever(notificationLockscreenUserManager.shouldShowOnKeyguard(entry))
-            .thenReturn(visibleOnLockscreen)
-        whenever(groupManager.isSummaryOfSuppressedGroup(sbn)).thenReturn(summaryOfSuppressed)
         whenever(row.getMinHeight(any())).thenReturn(height.toInt())
         whenever(row.intrinsicHeight).thenReturn(height.toInt())
         return row
-    }
-
-    private fun setOnLockscreen(onLockscreen: Boolean) {
-        whenever(sysuiStatusBarStateController.state)
-            .thenReturn(
-                if (onLockscreen) {
-                    KEYGUARD
-                } else {
-                    SHADE
-                })
     }
 
     /** Default dimensions for tests that don't overwrite them. */
