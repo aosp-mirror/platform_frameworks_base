@@ -481,6 +481,17 @@ public class ImsConfigImplBase {
             }
         }
 
+        /**
+         * Clear cached configuration value.
+         */
+        public void clearCachedValue() {
+            Log.i(TAG, "clearCachedValue");
+            synchronized (mLock) {
+                mProvisionedIntValue.clear();
+                mProvisionedStringValue.clear();
+            }
+        }
+
         // Call the methods with a clean calling identity on the executor and wait indefinitely for
         // the future to return.
         private void executeMethodAsync(Runnable r, String errorLogName) throws RemoteException {
@@ -538,6 +549,7 @@ public class ImsConfigImplBase {
     private final RemoteCallbackListExt<IRcsConfigCallback> mRcsCallbacks =
             new RemoteCallbackListExt<>();
     private byte[] mRcsConfigData;
+    private final Object mRcsConfigDataLock = new Object();
     ImsConfigStub mImsConfigStub;
 
     /**
@@ -616,12 +628,20 @@ public class ImsConfigImplBase {
 
     private void addRcsConfigCallback(IRcsConfigCallback c) {
         mRcsCallbacks.register(c);
-        if (mRcsConfigData != null) {
-            try {
-                c.onConfigurationChanged(mRcsConfigData);
-            } catch (RemoteException e) {
-                Log.w(TAG, "dead binder to call onConfigurationChanged, skipping.");
+
+        // This is used to avoid calling the binder out of the synchronized scope.
+        byte[] cloneRcsConfigData;
+        synchronized (mRcsConfigDataLock) {
+            if (mRcsConfigData == null) {
+                return;
             }
+            cloneRcsConfigData = mRcsConfigData.clone();
+        }
+
+        try {
+            c.onConfigurationChanged(cloneRcsConfigData);
+        } catch (RemoteException e) {
+            Log.w(TAG, "dead binder to call onConfigurationChanged, skipping.");
         }
     }
 
@@ -631,18 +651,23 @@ public class ImsConfigImplBase {
 
     private void onNotifyRcsAutoConfigurationReceived(byte[] config, boolean isCompressed) {
         // cache uncompressed config
-        config = isCompressed ? RcsConfig.decompressGzip(config) : config;
-        if (Arrays.equals(mRcsConfigData, config)) {
-            return;
+        final byte[] rcsConfigData = isCompressed ? RcsConfig.decompressGzip(config) : config;
+
+        synchronized (mRcsConfigDataLock) {
+            if (Arrays.equals(mRcsConfigData, config)) {
+                return;
+            }
+            mRcsConfigData = rcsConfigData;
         }
-        mRcsConfigData = config;
 
         // can be null in testing
         if (mRcsCallbacks != null) {
             synchronized (mRcsCallbacks) {
                 mRcsCallbacks.broadcastAction(c -> {
                     try {
-                        c.onConfigurationChanged(mRcsConfigData);
+                        // config is cloned here so modifications to the config passed to the
+                        // vendor do not accidentally modify the cache.
+                        c.onConfigurationChanged(rcsConfigData.clone());
                     } catch (RemoteException e) {
                         Log.w(TAG, "dead binder in notifyRcsAutoConfigurationReceived, skipping.");
                     }
@@ -653,7 +678,9 @@ public class ImsConfigImplBase {
     }
 
     private void onNotifyRcsAutoConfigurationRemoved() {
-        mRcsConfigData = null;
+        synchronized (mRcsConfigDataLock) {
+            mRcsConfigData = null;
+        }
         if (mRcsCallbacks != null) {
             synchronized (mRcsCallbacks) {
                 mRcsCallbacks.broadcastAction(c -> {
@@ -855,6 +882,19 @@ public class ImsConfigImplBase {
     public final void setDefaultExecutor(@NonNull Executor executor) {
         if (mImsConfigStub.mExecutor == null) {
             mImsConfigStub.mExecutor = executor;
+        }
+    }
+
+    /**
+     * Clear all cached config data. This will be called when the config data is no longer valid
+     * such as when the SIM was removed.
+     * @hide
+     */
+    public final void clearConfigurationCache() {
+        mImsConfigStub.clearCachedValue();
+
+        synchronized (mRcsConfigDataLock) {
+            mRcsConfigData = null;
         }
     }
 }
