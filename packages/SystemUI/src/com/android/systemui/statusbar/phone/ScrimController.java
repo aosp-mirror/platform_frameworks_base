@@ -630,6 +630,13 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
     }
 
     /**
+     * Sets the amount of vertical over scroll that should be performed on the notifications scrim.
+     */
+    public void setNotificationsOverScrollAmount(int overScrollAmount) {
+        mNotificationsScrim.setTranslationY(overScrollAmount);
+    }
+
+    /**
      * Current state of the QuickSettings when pulling it from the top.
      *
      * @param expansionFraction From 0 to 1 where 0 means collapsed and 1 expanded.

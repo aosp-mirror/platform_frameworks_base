@@ -44,6 +44,7 @@ import org.mockito.Mockito
 import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.verifyZeroInteractions
 import org.mockito.junit.MockitoJUnit
 
 private fun <T> anyObject(): T {
@@ -75,6 +76,8 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
     @Mock lateinit var expandHelperCallback: ExpandHelper.Callback
     @Mock lateinit var mCentralSurfaces: CentralSurfaces
     @Mock lateinit var qS: QS
+    @Mock lateinit var singleShadeOverScroller: SingleShadeLockScreenOverScroller
+    @Mock lateinit var splitShadeOverScroller: SplitShadeLockScreenOverScroller
     @JvmField @Rule val mockito = MockitoJUnit.rule()
 
     private val configurationController = FakeConfigurationController()
@@ -104,7 +107,9 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
             context = context,
             configurationController = configurationController,
             falsingManager = falsingManager,
-            dumpManager = dumpManager
+            dumpManager = dumpManager,
+            splitShadeOverScrollerFactory = { _, _ -> splitShadeOverScroller },
+            singleShadeOverScrollerFactory = { singleShadeOverScroller }
         )
         whenever(nsslController.view).thenReturn(stackscroller)
         whenever(nsslController.expandHelperCallback).thenReturn(expandHelperCallback)
@@ -229,7 +234,7 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
     fun testDragDownAmountDoesntCallOutInLockedDownShade() {
         whenever(nsslController.isInLockedDownShade).thenReturn(true)
         transitionController.dragDownAmount = 10f
-        verify(nsslController, never()).setTransitionToFullShadeAmount(anyFloat(), anyFloat())
+        verify(nsslController, never()).setTransitionToFullShadeAmount(anyFloat())
         verify(mediaHierarchyManager, never()).setTransitionToFullShadeAmount(anyFloat())
         verify(scrimController, never()).setTransitionToFullShadeProgress(anyFloat(), anyFloat())
         verify(notificationPanelController, never()).setTransitionToFullShadeAmount(anyFloat(),
@@ -240,7 +245,7 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
     @Test
     fun testDragDownAmountCallsOut() {
         transitionController.dragDownAmount = 10f
-        verify(nsslController).setTransitionToFullShadeAmount(anyFloat(), anyFloat())
+        verify(nsslController).setTransitionToFullShadeAmount(anyFloat())
         verify(mediaHierarchyManager).setTransitionToFullShadeAmount(anyFloat())
         verify(scrimController).setTransitionToFullShadeProgress(anyFloat(), anyFloat())
         verify(notificationPanelController).setTransitionToFullShadeAmount(anyFloat(),
@@ -386,6 +391,26 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
         transitionController.dragDownAmount = 10f
 
         verify(mediaHierarchyManager).setTransitionToFullShadeAmount(10f)
+    }
+
+    @Test
+    fun setDragAmount_notInSplitShade_forwardsToSingleShadeOverScroller() {
+        disableSplitShade()
+
+        transitionController.dragDownAmount = 10f
+
+        verify(singleShadeOverScroller).expansionDragDownAmount = 10f
+        verifyZeroInteractions(splitShadeOverScroller)
+    }
+
+    @Test
+    fun setDragAmount_inSplitShade_forwardsToSplitShadeOverScroller() {
+        enableSplitShade()
+
+        transitionController.dragDownAmount = 10f
+
+        verify(splitShadeOverScroller).expansionDragDownAmount = 10f
+        verifyZeroInteractions(singleShadeOverScroller)
     }
 
     private fun enableSplitShade() {
