@@ -32,6 +32,15 @@ public final class BundleSession implements AutoCloseable {
     private final @NonNull MediaMetricsManager mManager;
     private final @NonNull LogSessionId mLogSessionId;
 
+    /**
+     * A key describing the statsd atom into which to place this bundle's other contents.
+     * The associated value is an integer.
+     *
+     * @see #reportBundleMetrics
+     */
+
+    public static final String KEY_STATSD_ATOM = "bundlesession-statsd-atom";
+
     /** @hide */
     public BundleSession(@NonNull String id, @NonNull MediaMetricsManager manager) {
         mId = id;
@@ -43,6 +52,10 @@ public final class BundleSession implements AutoCloseable {
 
     /**
      * Reports metrics via bundle.
+     *
+     * The key {@link #KEY_STATSD_ATOM} references an integer value that
+     * indicates the statsd atom for the data in this bundle. Other keys
+     * and their types are defined on a per-atom basis.
      *
      */
     public void reportBundleMetrics(@NonNull PersistableBundle metrics) {
@@ -68,5 +81,6 @@ public final class BundleSession implements AutoCloseable {
 
     @Override
     public void close() {
+        mManager.releaseSessionId(mLogSessionId.getStringId());
     }
 }
