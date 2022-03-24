@@ -6859,6 +6859,9 @@
             </intent-filter>
         </receiver>
 
+        <!-- Broadcast Receiver listen to sufficient verifier requests from Package Manager
+             when install new SDK, to verifier SDK code during installation time
+             and terminate install if SDK not compatible with privacy sandbox restrictions. -->
         <receiver android:name="com.android.server.sdksandbox.SdkSandboxVerifierReceiver"
                  android:exported="false">
             <intent-filter>
