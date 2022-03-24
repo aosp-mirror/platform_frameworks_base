@@ -101,6 +101,8 @@ public final class CachedAppOptimizer {
     private static final int COMPACT_ACTION_FILE_FLAG = 1;
     private static final int COMPACT_ACTION_ANON_FLAG = 2;
 
+    private static final String ATRACE_COMPACTION_TRACK = "Compaction";
+
     // Defaults for phenotype flags.
     @VisibleForTesting static final Boolean DEFAULT_USE_COMPACTION = false;
     @VisibleForTesting static final Boolean DEFAULT_USE_FREEZER = true;
@@ -462,6 +464,8 @@ public final class CachedAppOptimizer {
     void compactAppSome(ProcessRecord app) {
         app.mOptRecord.setReqCompactAction(COMPACT_PROCESS_SOME);
         if (!app.mOptRecord.hasPendingCompact()) {
+            Trace.instantForTrack(Trace.TRACE_TAG_ACTIVITY_MANAGER, ATRACE_COMPACTION_TRACK,
+                    "compactAppSome " + app.processName != null ? app.processName : "");
             app.mOptRecord.setHasPendingCompact(true);
             mPendingCompactionProcesses.add(app);
             mCompactionHandler.sendMessage(
@@ -479,6 +483,8 @@ public final class CachedAppOptimizer {
                 && app.mState.getCurAdj() <= mCompactThrottleMaxOomAdj) {
             app.mOptRecord.setReqCompactAction(COMPACT_PROCESS_FULL);
             if (!app.mOptRecord.hasPendingCompact()) {
+                Trace.instantForTrack(Trace.TRACE_TAG_ACTIVITY_MANAGER, ATRACE_COMPACTION_TRACK,
+                        "compactAppFull " + app.processName != null ? app.processName : "");
                 app.mOptRecord.setHasPendingCompact(true);
                 mPendingCompactionProcesses.add(app);
                 mCompactionHandler.sendMessage(
@@ -498,6 +504,8 @@ public final class CachedAppOptimizer {
     void compactAppPersistent(ProcessRecord app) {
         app.mOptRecord.setReqCompactAction(COMPACT_PROCESS_PERSISTENT);
         if (!app.mOptRecord.hasPendingCompact()) {
+            Trace.instantForTrack(Trace.TRACE_TAG_ACTIVITY_MANAGER, ATRACE_COMPACTION_TRACK,
+                    "compactAppPersistent " + app.processName != null ? app.processName : "");
             app.mOptRecord.setHasPendingCompact(true);
             mPendingCompactionProcesses.add(app);
             mCompactionHandler.sendMessage(
@@ -516,6 +524,8 @@ public final class CachedAppOptimizer {
     void compactAppBfgs(ProcessRecord app) {
         app.mOptRecord.setReqCompactAction(COMPACT_PROCESS_BFGS);
         if (!app.mOptRecord.hasPendingCompact()) {
+            Trace.instantForTrack(Trace.TRACE_TAG_ACTIVITY_MANAGER, ATRACE_COMPACTION_TRACK,
+                    "compactAppBfgs " + app.processName != null ? app.processName : "");
             app.mOptRecord.setHasPendingCompact(true);
             mPendingCompactionProcesses.add(app);
             mCompactionHandler.sendMessage(
@@ -532,6 +542,8 @@ public final class CachedAppOptimizer {
 
     void compactAllSystem() {
         if (useCompaction()) {
+            Trace.instantForTrack(
+                    Trace.TRACE_TAG_ACTIVITY_MANAGER, ATRACE_COMPACTION_TRACK, "compactAllSystem");
             mCompactionHandler.sendMessage(mCompactionHandler.obtainMessage(
                                               COMPACT_SYSTEM_MSG));
         }

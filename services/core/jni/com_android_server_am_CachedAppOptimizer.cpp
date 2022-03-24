@@ -16,6 +16,8 @@
 
 #define LOG_TAG "CachedAppOptimizer"
 //#define LOG_NDEBUG 0
+#define ATRACE_TAG ATRACE_TAG_ACTIVITY_MANAGER
+#define ATRACE_COMPACTION_TRACK "Compaction"
 
 #include <android-base/file.h>
 #include <android-base/logging.h>
@@ -40,6 +42,7 @@
 #include <sys/sysinfo.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <utils/Trace.h>
 
 #include <algorithm>
 
@@ -115,6 +118,8 @@ static int64_t compactMemory(const std::vector<Vma>& vmas, int pid, int madviseT
                 // is requested and when it is handled during this time our
                 // OOM adjust could have improved.
                 LOG(DEBUG) << "Cancelled running compaction for " << pid;
+                ATRACE_INSTANT_FOR_TRACK(ATRACE_COMPACTION_TRACK,
+                                         StringPrintf("Cancelled compaction for %d", pid).c_str());
                 break;
             }
 
@@ -150,7 +155,9 @@ static int64_t compactMemory(const std::vector<Vma>& vmas, int pid, int madviseT
             break;
         }
 
+        ATRACE_BEGIN(StringPrintf("Compact %d VMAs", iVec).c_str());
         auto bytesProcessed = process_madvise(pidfd, vmasToKernel, iVec, madviseType, 0);
+        ATRACE_END();
 
         if (CC_UNLIKELY(bytesProcessed == -1)) {
             if (errno == EINVAL) {
@@ -303,6 +310,7 @@ static void com_android_server_am_CachedAppOptimizer_compactSystem(JNIEnv *, job
 static void com_android_server_am_CachedAppOptimizer_cancelCompaction(JNIEnv*, jobject) {
     if (compactionInProgress) {
         cancelRunningCompaction = true;
+        ATRACE_INSTANT_FOR_TRACK(ATRACE_COMPACTION_TRACK, "Cancel compaction");
     }
 }
 
