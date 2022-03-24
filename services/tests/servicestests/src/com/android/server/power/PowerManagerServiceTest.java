@@ -210,6 +210,8 @@ public class PowerManagerServiceTest {
 
         Settings.Global.putInt(mContextSpy.getContentResolver(),
                 Settings.Global.STAY_ON_WHILE_PLUGGED_IN, 0);
+        Settings.Secure.putInt(mContextSpy.getContentResolver(),
+                Settings.Secure.SCREENSAVER_ACTIVATE_ON_SLEEP, 0);
 
         mClock = new OffsettableClock.Stopped();
         mTestLooper = new TestLooper(mClock::now);
@@ -709,6 +711,48 @@ public class PowerManagerServiceTest {
         assertThat(mService.getBinderServiceInstance().forceSuspend()).isFalse();
     }
 
+    @SuppressWarnings("GuardedBy")
+    @Test
+    public void testScreensaverActivateOnSleepDisabled_powered_afterTimeout_goesToDozing() {
+        when(mBatteryManagerInternalMock.isPowered(anyInt())).thenReturn(true);
+
+        doAnswer(inv -> {
+            when(mDreamManagerInternalMock.isDreaming()).thenReturn(true);
+            return null;
+        }).when(mDreamManagerInternalMock).startDream(anyBoolean());
+
+        setMinimumScreenOffTimeoutConfig(5);
+        createService();
+        startSystem();
+
+        assertThat(mService.getGlobalWakefulnessLocked()).isEqualTo(WAKEFULNESS_AWAKE);
+
+        advanceTime(15000);
+        assertThat(mService.getGlobalWakefulnessLocked()).isEqualTo(WAKEFULNESS_DOZING);
+    }
+
+    @SuppressWarnings("GuardedBy")
+    @Test
+    public void testScreensaverActivateOnSleepEnabled_powered_afterTimeout_goesToDreaming() {
+        when(mBatteryManagerInternalMock.isPowered(anyInt())).thenReturn(true);
+        Settings.Secure.putInt(mContextSpy.getContentResolver(),
+                Settings.Secure.SCREENSAVER_ACTIVATE_ON_SLEEP, 1);
+
+        doAnswer(inv -> {
+            when(mDreamManagerInternalMock.isDreaming()).thenReturn(true);
+            return null;
+        }).when(mDreamManagerInternalMock).startDream(anyBoolean());
+
+        setMinimumScreenOffTimeoutConfig(5);
+        createService();
+        startSystem();
+
+        assertThat(mService.getGlobalWakefulnessLocked()).isEqualTo(WAKEFULNESS_AWAKE);
+
+        advanceTime(15000);
+        assertThat(mService.getGlobalWakefulnessLocked()).isEqualTo(WAKEFULNESS_DREAMING);
+    }
+
     @Test
     public void testSetDozeOverrideFromDreamManager_triggersSuspendBlocker() {
         final String suspendBlockerName = "PowerManagerService.Display";
@@ -1135,6 +1179,11 @@ public class PowerManagerServiceTest {
         final DisplayInfo info = new DisplayInfo();
         info.displayGroupId = nonDefaultDisplayGroupId;
         when(mDisplayManagerInternalMock.getDisplayInfo(nonDefaultDisplay)).thenReturn(info);
+
+        doAnswer(inv -> {
+            when(mDreamManagerInternalMock.isDreaming()).thenReturn(true);
+            return null;
+        }).when(mDreamManagerInternalMock).startDream(anyBoolean());
 
         final String pkg = mContextSpy.getOpPackageName();
         final Binder token = new Binder();
