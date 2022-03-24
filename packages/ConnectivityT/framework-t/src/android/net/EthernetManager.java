@@ -39,8 +39,10 @@ import com.android.modules.utils.BackgroundThread;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Executor;
+import java.util.function.IntConsumer;
 
 /**
  * A class that manages and configures Ethernet interfaces.
@@ -53,15 +55,31 @@ public class EthernetManager {
     private static final String TAG = "EthernetManager";
 
     private final IEthernetManager mService;
-    @GuardedBy("mListeners")
-    private final ArrayList<ListenerInfo> mListeners = new ArrayList<>();
+    @GuardedBy("mListenerLock")
+    private final ArrayList<ListenerInfo<InterfaceStateListener>> mIfaceListeners =
+            new ArrayList<>();
+    @GuardedBy("mListenerLock")
+    private final ArrayList<ListenerInfo<IntConsumer>> mEthernetStateListeners =
+            new ArrayList<>();
+    final Object mListenerLock = new Object();
     private final IEthernetServiceListener.Stub mServiceListener =
             new IEthernetServiceListener.Stub() {
                 @Override
+                public void onEthernetStateChanged(int state) {
+                    synchronized (mListenerLock) {
+                        for (ListenerInfo<IntConsumer> li : mEthernetStateListeners) {
+                            li.executor.execute(() -> {
+                                li.listener.accept(state);
+                            });
+                        }
+                    }
+                }
+
+                @Override
                 public void onInterfaceStateChanged(String iface, int state, int role,
                         IpConfiguration configuration) {
-                    synchronized (mListeners) {
-                        for (ListenerInfo li : mListeners) {
+                    synchronized (mListenerLock) {
+                        for (ListenerInfo<InterfaceStateListener> li : mIfaceListeners) {
                             li.executor.execute(() ->
                                     li.listener.onInterfaceStateChanged(iface, state, role,
                                             configuration));
@@ -70,13 +88,29 @@ public class EthernetManager {
                 }
             };
 
-    private static class ListenerInfo {
+    /**
+     * Indicates that Ethernet is disabled.
+     *
+     * @hide
+     */
+    @SystemApi(client = MODULE_LIBRARIES)
+    public static final int ETHERNET_STATE_DISABLED = 0;
+
+    /**
+     * Indicates that Ethernet is enabled.
+     *
+     * @hide
+     */
+    @SystemApi(client = MODULE_LIBRARIES)
+    public static final int ETHERNET_STATE_ENABLED  = 1;
+
+    private static class ListenerInfo<T> {
         @NonNull
         public final Executor executor;
         @NonNull
-        public final InterfaceStateListener listener;
+        public final T listener;
 
-        private ListenerInfo(@NonNull Executor executor, @NonNull InterfaceStateListener listener) {
+        private ListenerInfo(@NonNull Executor executor, @NonNull T listener) {
             this.executor = executor;
             this.listener = listener;
         }
@@ -289,16 +323,22 @@ public class EthernetManager {
         if (listener == null || executor == null) {
             throw new NullPointerException("listener and executor must not be null");
         }
-        synchronized (mListeners) {
-            mListeners.add(new ListenerInfo(executor, listener));
-            if (mListeners.size() == 1) {
-                try {
-                    mService.addListener(mServiceListener);
-                } catch (RemoteException e) {
-                    throw e.rethrowFromSystemServer();
-                }
-            }
+        synchronized (mListenerLock) {
+            maybeAddServiceListener();
+            mIfaceListeners.add(new ListenerInfo<InterfaceStateListener>(executor, listener));
         }
+    }
+
+    @GuardedBy("mListenerLock")
+    private void maybeAddServiceListener() {
+        if (!mIfaceListeners.isEmpty() || !mEthernetStateListeners.isEmpty()) return;
+
+        try {
+            mService.addListener(mServiceListener);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+
     }
 
     /**
@@ -323,15 +363,20 @@ public class EthernetManager {
     @SystemApi(client = MODULE_LIBRARIES)
     public void removeInterfaceStateListener(@NonNull InterfaceStateListener listener) {
         Objects.requireNonNull(listener);
-        synchronized (mListeners) {
-            mListeners.removeIf(l -> l.listener == listener);
-            if (mListeners.isEmpty()) {
-                try {
-                    mService.removeListener(mServiceListener);
-                } catch (RemoteException e) {
-                    throw e.rethrowFromSystemServer();
-                }
-            }
+        synchronized (mListenerLock) {
+            mIfaceListeners.removeIf(l -> l.listener == listener);
+            maybeRemoveServiceListener();
+        }
+    }
+
+    @GuardedBy("mListenerLock")
+    private void maybeRemoveServiceListener() {
+        if (!mIfaceListeners.isEmpty() || !mEthernetStateListeners.isEmpty()) return;
+
+        try {
+            mService.removeListener(mServiceListener);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -535,14 +580,13 @@ public class EthernetManager {
     }
 
     /**
-     * Set an ethernet network's link state up.
+     * Enable a network interface.
      *
-     * When the link is successfully turned up, the callback will be called with the network
-     * interface was torn down, if any. If any error or unexpected condition happens while the
-     * system tries to turn the interface down, the callback will be called with an appropriate
-     * exception. The callback is guaranteed to be called exactly once for each call to this method.
+     * Enables a previously disabled network interface.
+     * This function accepts an {@link OutcomeReceiver} that is called once the operation has
+     * finished execution.
      *
-     * @param iface the name of the interface to act upon.
+     * @param iface the name of the interface to enable.
      * @param executor an {@link Executor} to execute the callback on. Optional if callback is null.
      * @param callback an optional {@link OutcomeReceiver} to listen for completion of the
      *                 operation. On success, {@link OutcomeReceiver#onResult} is called with the
@@ -550,7 +594,6 @@ public class EthernetManager {
      *                 information about the error.
      * @throws SecurityException if the process doesn't hold
      *                          {@link android.Manifest.permission.MANAGE_ETHERNET_NETWORKS}.
-     * @throws UnsupportedOperationException if called on a non-automotive device.
      * @hide
      */
     @SystemApi
@@ -559,7 +602,7 @@ public class EthernetManager {
             android.Manifest.permission.NETWORK_STACK,
             android.Manifest.permission.MANAGE_ETHERNET_NETWORKS})
     @RequiresFeature(PackageManager.FEATURE_AUTOMOTIVE)
-    public void connectNetwork(
+    public void enableInterface(
             @NonNull String iface,
             @Nullable @CallbackExecutor Executor executor,
             @Nullable OutcomeReceiver<String, EthernetNetworkManagementException> callback) {
@@ -574,14 +617,14 @@ public class EthernetManager {
     }
 
     /**
-     * Set an ethernet network's link state down.
+     * Disable a network interface.
      *
-     * When the link is successfully turned down, the callback will be called with the network
-     * interface was torn down, if any. If any error or unexpected condition happens while the
-     * system tries to turn the interface down, the callback will be called with an appropriate
-     * exception. The callback is guaranteed to be called exactly once for each call to this method.
+     * Disables the use of a network interface to fulfill network requests. If the interface
+     * currently serves a request, the network will be torn down.
+     * This function accepts an {@link OutcomeReceiver} that is called once the operation has
+     * finished execution.
      *
-     * @param iface the name of the interface to act upon.
+     * @param iface the name of the interface to disable.
      * @param executor an {@link Executor} to execute the callback on. Optional if callback is null.
      * @param callback an optional {@link OutcomeReceiver} to listen for completion of the
      *                 operation. On success, {@link OutcomeReceiver#onResult} is called with the
@@ -589,7 +632,6 @@ public class EthernetManager {
      *                 information about the error.
      * @throws SecurityException if the process doesn't hold
      *                          {@link android.Manifest.permission.MANAGE_ETHERNET_NETWORKS}.
-     * @throws UnsupportedOperationException if called on a non-automotive device.
      * @hide
      */
     @SystemApi
@@ -598,7 +640,7 @@ public class EthernetManager {
             android.Manifest.permission.NETWORK_STACK,
             android.Manifest.permission.MANAGE_ETHERNET_NETWORKS})
     @RequiresFeature(PackageManager.FEATURE_AUTOMOTIVE)
-    public void disconnectNetwork(
+    public void disableInterface(
             @NonNull String iface,
             @Nullable @CallbackExecutor Executor executor,
             @Nullable OutcomeReceiver<String, EthernetNetworkManagementException> callback) {
@@ -609,6 +651,79 @@ public class EthernetManager {
             mService.disconnectNetwork(iface, proxy);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Change ethernet setting.
+     *
+     * @param enabled enable or disable ethernet settings.
+     *
+     * @hide
+     */
+    @RequiresPermission(anyOf = {
+            NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
+            android.Manifest.permission.NETWORK_STACK,
+            android.Manifest.permission.NETWORK_SETTINGS})
+    @SystemApi(client = MODULE_LIBRARIES)
+    public void setEthernetEnabled(boolean enabled) {
+        try {
+            mService.setEthernetEnabled(enabled);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Listen to changes in the state of ethernet.
+     *
+     * @param executor to run callbacks on.
+     * @param listener to listen ethernet state changed.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)
+    @SystemApi(client = MODULE_LIBRARIES)
+    public void addEthernetStateListener(@NonNull Executor executor,
+            @NonNull IntConsumer listener) {
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(listener);
+        synchronized (mListenerLock) {
+            maybeAddServiceListener();
+            mEthernetStateListeners.add(new ListenerInfo<IntConsumer>(executor, listener));
+        }
+    }
+
+    /**
+     * Removes a listener.
+     *
+     * @param listener to listen ethernet state changed.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)
+    @SystemApi(client = MODULE_LIBRARIES)
+    public void removeEthernetStateListener(@NonNull IntConsumer listener) {
+        Objects.requireNonNull(listener);
+        synchronized (mListenerLock) {
+            mEthernetStateListeners.removeIf(l -> l.listener == listener);
+            maybeRemoveServiceListener();
+        }
+    }
+
+    /**
+     * Returns an array of existing Ethernet interface names regardless whether the interface
+     * is available or not currently.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)
+    @SystemApi(client = MODULE_LIBRARIES)
+    @NonNull
+    public List<String> getInterfaceList() {
+        try {
+            return mService.getInterfaceList();
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
         }
     }
 }
