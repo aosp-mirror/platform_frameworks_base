@@ -51,6 +51,7 @@ import android.util.SparseBooleanArray;
 import android.view.View;
 import android.view.WindowManagerGlobal;
 import android.widget.BaseAdapter;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 
@@ -59,6 +60,8 @@ import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.util.LatencyTracker;
 import com.android.settingslib.RestrictedLockUtilsInternal;
+import com.android.settingslib.users.UserCreatingDialog;
+import com.android.settingslib.utils.ThreadUtils;
 import com.android.systemui.Dumpable;
 import com.android.systemui.GuestResumeSessionReceiver;
 import com.android.systemui.Prefs;
@@ -89,6 +92,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 
 import javax.inject.Inject;
 
@@ -482,26 +486,25 @@ public class UserSwitcherController implements Dumpable {
 
     @VisibleForTesting
     void onUserListItemClicked(UserRecord record, DialogShower dialogShower) {
-        int id;
         if (record.isGuest && record.info == null) {
             // No guest user. Create one.
-            int guestId = createGuest();
-            if (guestId == UserHandle.USER_NULL) {
-                // This may happen if we haven't reloaded the user list yet.
-                return;
-            }
-            mUiEventLogger.log(QSUserSwitcherEvent.QS_USER_GUEST_ADD);
-            id = guestId;
+            createGuestAsync(guestId -> {
+                // guestId may be USER_NULL if we haven't reloaded the user list yet.
+                if (guestId != UserHandle.USER_NULL) {
+                    mUiEventLogger.log(QSUserSwitcherEvent.QS_USER_GUEST_ADD);
+                    onUserListItemClicked(guestId, record, dialogShower);
+                }
+            });
         } else if (record.isAddUser) {
             showAddUserDialog(dialogShower);
-            return;
         } else if (record.isAddSupervisedUser) {
             startSupervisedUserActivity();
-            return;
         } else {
-            id = record.info.id;
+            onUserListItemClicked(record.info.id, record, dialogShower);
         }
+    }
 
+    private void onUserListItemClicked(int id, UserRecord record, DialogShower dialogShower) {
         int currUserId = mUserTracker.getUserId();
         if (currUserId == id) {
             if (record.isGuest) {
@@ -509,7 +512,6 @@ public class UserSwitcherController implements Dumpable {
             }
             return;
         }
-
         if (UserManager.isGuestUserEphemeral()) {
             // If switching from guest, we want to bring up the guest exit dialog instead of switching
             UserInfo currUserInfo = mUserManager.getUserInfo(currUserId);
@@ -760,29 +762,30 @@ public class UserSwitcherController implements Dumpable {
             return;
         }
 
-        try {
-            if (targetUserId == UserHandle.USER_NULL) {
-                // Create a new guest in the foreground, and then immediately switch to it
-                int newGuestId = createGuest();
+        if (targetUserId == UserHandle.USER_NULL) {
+            // Create a new guest in the foreground, and then immediately switch to it
+            createGuestAsync(newGuestId -> {
                 if (newGuestId == UserHandle.USER_NULL) {
                     Log.e(TAG, "Could not create new guest, switching back to system user");
                     switchToUserId(UserHandle.USER_SYSTEM);
                     mUserManager.removeUser(currentUser.id);
-                    WindowManagerGlobal.getWindowManagerService().lockNow(/* options= */ null);
+                    try {
+                        WindowManagerGlobal.getWindowManagerService().lockNow(/* options= */ null);
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Couldn't remove guest because ActivityManager "
+                                + "or WindowManager is dead");
+                    }
                     return;
                 }
                 switchToUserId(newGuestId);
                 mUserManager.removeUser(currentUser.id);
-            } else {
-                if (mGuestUserAutoCreated) {
-                    mGuestIsResetting.set(true);
-                }
-                switchToUserId(targetUserId);
-                mUserManager.removeUser(currentUser.id);
+            });
+        } else {
+            if (mGuestUserAutoCreated) {
+                mGuestIsResetting.set(true);
             }
-        } catch (RemoteException e) {
-            Log.e(TAG, "Couldn't remove guest because ActivityManager or WindowManager is dead");
-            return;
+            switchToUserId(targetUserId);
+            mUserManager.removeUser(currentUser.id);
         }
     }
 
@@ -829,6 +832,24 @@ public class UserSwitcherController implements Dumpable {
         if (isDeviceAllowedToAddGuest() && mUserManager.findCurrentGuestUser() == null) {
             scheduleGuestCreation();
         }
+    }
+
+    private void createGuestAsync(Consumer<Integer> callback) {
+        final Dialog guestCreationProgressDialog =
+                new UserCreatingDialog(mContext, /* isGuest= */true);
+        guestCreationProgressDialog.show();
+
+        // userManager.createGuest will block the thread so post is needed for the dialog to show
+        ThreadUtils.postOnMainThread(() -> {
+            final int guestId = createGuest();
+            guestCreationProgressDialog.dismiss();
+            if (guestId == UserHandle.USER_NULL) {
+                Toast.makeText(mContext,
+                        com.android.settingslib.R.string.add_guest_failed,
+                        Toast.LENGTH_SHORT).show();
+            }
+            callback.accept(guestId);
+        });
     }
 
     /**
