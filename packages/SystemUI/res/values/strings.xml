@@ -840,6 +840,23 @@
     <!-- Notification when resuming an existing guest session: Action that continues with the current session [CHAR LIMIT=35] -->
     <string name="guest_wipe_session_dontwipe">Yes, continue</string>
 
+    <!-- App name of the notification when guest mode is entered [CHAR LIMIT=35] -->
+    <string name="guest_notification_app_name">Guest mode</string>
+    <!-- Title of the notification when guest mode is entered [CHAR LIMIT=35] -->
+    <string name="guest_notification_session_active">You are in guest mode</string>
+
+    <!-- Title for add user confirmation dialog [CHAR LIMIT=30] -->
+    <string name="user_add_user_title" msgid="2108112641783146007">Add new user?</string>
+
+    <!-- Message for add user confirmation dialog - short version. [CHAR LIMIT=none] -->
+    <string name="user_add_user_message_short" msgid="1511354412249044381">When you add a new user, that person needs to set up their space.\n\nAny user can update apps for all other users. </string>
+
+    <!-- Additional message for add user confirmation dialog that is appended when current user is
+         guest and guest is ephemeral. This is to warn users that current guest session
+         would get removed after a new user is added and switched to [CHAR LIMIT=none] -->
+    <string name="user_add_user_message_guest_remove">\n\nAdding a new user will exit guest mode
+        and delete all apps and data from the current guest session.</string>
+
     <!-- Title for the dialog that lets users know that the maximum allowed number of users on the device has been reached. [CHAR LIMIT=35]-->
     <string name="user_limit_reached_title">User limit reached</string>
 

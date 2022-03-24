@@ -3773,6 +3773,9 @@
          "Guest" and "Reset guest". -->
     <bool name="config_guestUserAutoCreated">false</bool>
 
+    <!-- If true, owner can change guest user ephemeral state via UI option -->
+    <bool name="config_guestUserAllowEphemeralStateChange">true</bool>
+
     <!-- Enforce strong auth on boot. Setting this to false represents a security risk and should
          not be ordinarily done. The only case in which this might be permissible is in a car head
          unit where there are hardware mechanisms to protect the device (physical keys) and not
