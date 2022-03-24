@@ -684,6 +684,11 @@ public abstract class ActivityManagerInternal {
     public abstract @TempAllowListType int getPushMessagingOverQuotaBehavior();
 
     /**
+     * Return the startForeground() grace period after calling startForegroundService().
+     */
+    public abstract int getServiceStartForegroundTimeout();
+
+    /**
      * Returns the capability of the given uid
      */
     public abstract @ProcessCapability int getUidCapability(int uid);
