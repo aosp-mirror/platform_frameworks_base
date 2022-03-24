@@ -152,6 +152,11 @@ public final class CachedAppOptimizer {
     static final int SET_FROZEN_PROCESS_MSG = 3;
     static final int REPORT_UNFREEZE_MSG = 4;
 
+    // When free swap falls below this percentage threshold any full (file + anon)
+    // compactions will be downgraded to file only compactions to reduce pressure
+    // on swap resources as file.
+    static final double COMPACT_DOWNGRADE_FREE_SWAP_THRESHOLD = 0.2;
+
     static final int DO_FREEZE = 1;
     static final int REPORT_UNFREEZE = 2;
 
@@ -543,6 +548,11 @@ public final class CachedAppOptimizer {
     static private native void compactProcess(int pid, int compactionFlags);
 
     static private native void cancelCompaction();
+
+    /**
+     * Retrieves the free swap percentage.
+     */
+    static private native double getFreeSwapPercent();
 
     /**
      * Reads the flag value from DeviceConfig to determine whether app compaction
@@ -1338,6 +1348,18 @@ public final class CachedAppOptimizer {
                         default:
                             break;
                     }
+                    // Downgrade compaction if facing swap memory pressure
+                    if (action.equals(mCompactActionFull)) {
+                        double swapUsagePercent = getFreeSwapPercent();
+                        if (swapUsagePercent < COMPACT_DOWNGRADE_FREE_SWAP_THRESHOLD) {
+                            Slog.d(TAG_AM,
+                                    "Downgraded compaction to file only due to low swap."
+                                            + " Swap Free% " + swapUsagePercent);
+                            action = mCompactActionSome;
+                            pendingAction = COMPACT_PROCESS_SOME;
+                        }
+                    }
+
                     try {
                         Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "Compact "
                                 + ((pendingAction == COMPACT_PROCESS_SOME) ? "some" : "full")

@@ -37,6 +37,7 @@
 #include <sys/pidfd.h>
 #include <sys/stat.h>
 #include <sys/syscall.h>
+#include <sys/sysinfo.h>
 #include <sys/types.h>
 #include <unistd.h>
 
@@ -305,6 +306,16 @@ static void com_android_server_am_CachedAppOptimizer_cancelCompaction(JNIEnv*, j
     }
 }
 
+static jdouble com_android_server_am_CachedAppOptimizer_getFreeSwapPercent(JNIEnv*, jobject) {
+    struct sysinfo memoryInfo;
+    int error = sysinfo(&memoryInfo);
+    if(error == -1) {
+        LOG(ERROR) << "Could not check free swap space";
+        return 0;
+    }
+    return (double)memoryInfo.freeswap / (double)memoryInfo.totalswap;
+}
+
 static void com_android_server_am_CachedAppOptimizer_compactProcess(JNIEnv*, jobject, jint pid,
                                                                     jint compactionFlags) {
     compactProcessOrFallback(pid, compactionFlags);
@@ -358,6 +369,8 @@ static const JNINativeMethod sMethods[] = {
         /* name, signature, funcPtr */
         {"cancelCompaction", "()V",
          (void*)com_android_server_am_CachedAppOptimizer_cancelCompaction},
+        {"getFreeSwapPercent", "()D",
+         (void*)com_android_server_am_CachedAppOptimizer_getFreeSwapPercent},
         {"compactSystem", "()V", (void*)com_android_server_am_CachedAppOptimizer_compactSystem},
         {"compactProcess", "(II)V", (void*)com_android_server_am_CachedAppOptimizer_compactProcess},
         {"freezeBinder", "(IZ)I", (void*)com_android_server_am_CachedAppOptimizer_freezeBinder},
