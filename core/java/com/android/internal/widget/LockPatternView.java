@@ -77,8 +77,6 @@ public class LockPatternView extends View {
 
     private static final boolean PROFILE_DRAWING = false;
     private static final int LINE_END_ANIMATION_DURATION_MILLIS = 50;
-    private static final int LINE_FADE_OUT_DURATION_MILLIS = 500;
-    private static final int LINE_FADE_OUT_DELAY_MILLIS = 150;
     private static final int DOT_ACTIVATION_DURATION_MILLIS = 50;
     private static final int DOT_RADIUS_INCREASE_DURATION_MILLIS = 96;
     private static final int DOT_RADIUS_DECREASE_DURATION_MILLIS = 192;
@@ -89,6 +87,8 @@ public class LockPatternView extends View {
     private final int mDotSizeActivated;
     private final float mDotHitFactor;
     private final int mPathWidth;
+    private final int mLineFadeOutAnimationDurationMs;
+    private final int mLineFadeOutAnimationDelayMs;
 
     private boolean mDrawingProfilingStarted = false;
 
@@ -345,6 +345,11 @@ public class LockPatternView extends View {
 
         mPathWidth = getResources().getDimensionPixelSize(R.dimen.lock_pattern_dot_line_width);
         mPathPaint.setStrokeWidth(mPathWidth);
+
+        mLineFadeOutAnimationDurationMs =
+            getResources().getInteger(R.integer.lock_pattern_line_fade_out_duration);
+        mLineFadeOutAnimationDelayMs =
+            getResources().getInteger(R.integer.lock_pattern_line_fade_out_delay);
 
         mDotSize = getResources().getDimensionPixelSize(R.dimen.lock_pattern_dot_size);
         mDotSizeActivated = getResources().getDimensionPixelSize(
@@ -831,7 +836,7 @@ public class LockPatternView extends View {
         deactivateAnimator.setDuration(DOT_ACTIVATION_DURATION_MILLIS);
         AnimatorSet set = new AnimatorSet();
         set.play(deactivateAnimator)
-                .after(LINE_FADE_OUT_DELAY_MILLIS + LINE_FADE_OUT_DURATION_MILLIS
+                .after(mLineFadeOutAnimationDelayMs + mLineFadeOutAnimationDurationMs
                         - DOT_ACTIVATION_DURATION_MILLIS * 2)
                 .after(activateAnimator);
         return set;
@@ -862,8 +867,8 @@ public class LockPatternView extends View {
     private Animator createLineDisappearingAnimation() {
         ValueAnimator valueAnimator = ValueAnimator.ofFloat(0, 1);
         valueAnimator.addUpdateListener(animation -> invalidate());
-        valueAnimator.setStartDelay(LINE_FADE_OUT_DELAY_MILLIS);
-        valueAnimator.setDuration(LINE_FADE_OUT_DURATION_MILLIS);
+        valueAnimator.setStartDelay(mLineFadeOutAnimationDelayMs);
+        valueAnimator.setDuration(mLineFadeOutAnimationDurationMs);
         return valueAnimator;
     }
 
@@ -1278,14 +1283,14 @@ public class LockPatternView extends View {
         float fadeAwayProgress;
         if (mFadePattern) {
             if (elapsedRealtime - lineFadeStart
-                    >= LINE_FADE_OUT_DELAY_MILLIS + LINE_FADE_OUT_DURATION_MILLIS) {
+                    >= mLineFadeOutAnimationDelayMs + mLineFadeOutAnimationDurationMs) {
                 // Time for this segment animation is out so we don't need to draw it.
                 return;
             }
             // Set this line segment to fade away animated.
             fadeAwayProgress = Math.max(
-                    ((float) (elapsedRealtime - lineFadeStart - LINE_FADE_OUT_DELAY_MILLIS))
-                            / LINE_FADE_OUT_DURATION_MILLIS, 0f);
+                    ((float) (elapsedRealtime - lineFadeStart - mLineFadeOutAnimationDelayMs))
+                            / mLineFadeOutAnimationDurationMs, 0f);
             drawFadingAwayLineSegment(canvas, startX, startY, endX, endY, fadeAwayProgress);
         } else {
             mPathPaint.setAlpha(255);
