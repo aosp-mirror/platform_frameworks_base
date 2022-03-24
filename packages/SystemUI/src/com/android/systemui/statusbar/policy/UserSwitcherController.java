@@ -73,6 +73,7 @@ import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.broadcast.BroadcastSender;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
+import com.android.systemui.dagger.qualifiers.LongRunning;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.ActivityStarter;
@@ -153,6 +154,7 @@ public class UserSwitcherController implements Dumpable {
     private final IActivityManager mActivityManager;
     private final Executor mBgExecutor;
     private final Executor mUiExecutor;
+    private final Executor mLongRunningExecutor;
     private final boolean mGuestUserAutoCreated;
     private final AtomicBoolean mGuestIsResetting;
     private final AtomicBoolean mGuestCreationScheduled;
@@ -177,6 +179,7 @@ public class UserSwitcherController implements Dumpable {
             TelephonyListenerManager telephonyListenerManager,
             SecureSettings secureSettings,
             @Background Executor bgExecutor,
+            @LongRunning Executor longRunningExecutor,
             @Main Executor uiExecutor,
             InteractionJankMonitor interactionJankMonitor,
             LatencyTracker latencyTracker,
@@ -195,6 +198,7 @@ public class UserSwitcherController implements Dumpable {
         mGuestResumeSessionReceiver = new GuestResumeSessionReceiver(
                 this, mUserTracker, mUiEventLogger, secureSettings);
         mBgExecutor = bgExecutor;
+        mLongRunningExecutor = longRunningExecutor;
         mUiExecutor = uiExecutor;
         if (!UserManager.isGuestUserEphemeral()) {
             mGuestResumeSessionReceiver.register(mBroadcastDispatcher);
@@ -794,7 +798,7 @@ public class UserSwitcherController implements Dumpable {
             return;
         }
 
-        mBgExecutor.execute(() -> {
+        mLongRunningExecutor.execute(() -> {
             int newGuestId = createGuest();
             mGuestCreationScheduled.set(false);
             mGuestIsResetting.set(false);
