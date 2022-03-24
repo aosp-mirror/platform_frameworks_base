@@ -1195,13 +1195,16 @@ package android.app.admin {
   public static final class DevicePolicyResources.Strings {
   }
 
-  public static final class DevicePolicyResources.Strings.PermissionController {
-    field public static final String BACKGROUND_ACCESS_DISABLED_BY_ADMIN_MESSAGE = "PermissionController.BACKGROUND_ACCESS_DISABLED_BY_ADMIN_MESSAGE";
-    field public static final String BACKGROUND_ACCESS_ENABLED_BY_ADMIN_MESSAGE = "PermissionController.BACKGROUND_ACCESS_ENABLED_BY_ADMIN_MESSAGE";
-    field public static final String FOREGROUND_ACCESS_ENABLED_BY_ADMIN_MESSAGE = "PermissionController.FOREGROUND_ACCESS_ENABLED_BY_ADMIN_MESSAGE";
-    field public static final String HOME_MISSING_WORK_PROFILE_SUPPORT_MESSAGE = "PermissionController.HOME_MISSING_WORK_PROFILE_SUPPORT_MESSAGE";
-    field public static final String LOCATION_AUTO_GRANTED_MESSAGE = "PermissionController.LOCATION_AUTO_GRANTED_MESSAGE";
-    field public static final String WORK_PROFILE_DEFAULT_APPS_TITLE = "PermissionController.WORK_PROFILE_DEFAULT_APPS_TITLE";
+  public static final class DevicePolicyResources.Strings.DefaultAppSettings {
+    field public static final String HOME_MISSING_WORK_PROFILE_SUPPORT_MESSAGE = "DefaultAppSettings.HOME_MISSING_WORK_PROFILE_SUPPORT_MESSAGE";
+    field public static final String WORK_PROFILE_DEFAULT_APPS_TITLE = "DefaultAppSettings.WORK_PROFILE_DEFAULT_APPS_TITLE";
+  }
+
+  public static final class DevicePolicyResources.Strings.PermissionSettings {
+    field public static final String BACKGROUND_ACCESS_DISABLED_BY_ADMIN_MESSAGE = "PermissionSettings.BACKGROUND_ACCESS_DISABLED_BY_ADMIN_MESSAGE";
+    field public static final String BACKGROUND_ACCESS_ENABLED_BY_ADMIN_MESSAGE = "PermissionSettings.BACKGROUND_ACCESS_ENABLED_BY_ADMIN_MESSAGE";
+    field public static final String FOREGROUND_ACCESS_ENABLED_BY_ADMIN_MESSAGE = "PermissionSettings.FOREGROUND_ACCESS_ENABLED_BY_ADMIN_MESSAGE";
+    field public static final String LOCATION_AUTO_GRANTED_MESSAGE = "PermissionSettings.LOCATION_AUTO_GRANTED_MESSAGE";
   }
 
   public class DevicePolicyResourcesManager {
