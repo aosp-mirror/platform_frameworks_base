@@ -1351,6 +1351,15 @@ public class ScrimControllerTest extends SysuiTestCase {
         ));
     }
 
+    @Test
+    public void keyguardGoingAwayUpdateScrims() {
+        when(mKeyguardStateController.isKeyguardGoingAway()).thenReturn(true);
+        mScrimController.updateScrims();
+        finishAnimationsImmediately();
+        assertThat(mNotificationsScrim.getViewAlpha()).isEqualTo(TRANSPARENT);
+    }
+
+
     private void assertAlphaAfterExpansion(ScrimView scrim, float expectedAlpha, float expansion) {
         mScrimController.setRawPanelExpansionFraction(expansion);
         finishAnimationsImmediately();
