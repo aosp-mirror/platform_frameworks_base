@@ -2717,12 +2717,20 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     }
 
     /**
-     * Handle {@link #MSG_DPM_STATE_CHANGED}
+     * Handle {@link #MSG_DPM_STATE_CHANGED} which can change primary authentication methods to
+     * pin/pattern/password/none.
      */
     private void handleDevicePolicyManagerStateChanged(int userId) {
         Assert.isMainThread();
         updateFingerprintListeningState(BIOMETRIC_ACTION_UPDATE);
         updateSecondaryLockscreenRequirement(userId);
+
+        for (int i = 0; i < mCallbacks.size(); i++) {
+            KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
+            if (cb != null) {
+                cb.onDevicePolicyManagerStateChanged();
+            }
+        }
     }
 
     /**
