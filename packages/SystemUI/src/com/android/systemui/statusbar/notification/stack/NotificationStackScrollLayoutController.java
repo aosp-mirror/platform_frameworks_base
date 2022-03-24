@@ -41,7 +41,6 @@ import android.provider.Settings;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.util.Log;
-import android.util.MathUtils;
 import android.util.Pair;
 import android.view.Display;
 import android.view.LayoutInflater;
@@ -65,7 +64,6 @@ import com.android.systemui.ExpandHelper;
 import com.android.systemui.Gefingerpoken;
 import com.android.systemui.R;
 import com.android.systemui.SwipeHelper;
-import com.android.systemui.animation.Interpolators;
 import com.android.systemui.classifier.Classifier;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
@@ -205,18 +203,6 @@ public class NotificationStackScrollLayoutController {
 
     private ColorExtractor.OnColorsChangedListener mOnColorsChangedListener;
 
-    /**
-     * The total distance in pixels that the full shade transition takes to transition entirely to
-     * the full shade.
-     */
-    private int mTotalDistanceForFullShadeTransition;
-
-    /**
-     * The amount of movement the notifications do when transitioning to the full shade before
-     * reaching the overstrech
-     */
-    private int mNotificationDragDownMovement;
-
     @VisibleForTesting
     final View.OnAttachStateChangeListener mOnAttachStateChangeListener =
             new View.OnAttachStateChangeListener() {
@@ -304,10 +290,6 @@ public class NotificationStackScrollLayoutController {
     private NotifStats mNotifStats = NotifStats.getEmpty();
 
     private void updateResources() {
-        mNotificationDragDownMovement = mResources.getDimensionPixelSize(
-                R.dimen.lockscreen_shade_notification_movement);
-        mTotalDistanceForFullShadeTransition = mResources.getDimensionPixelSize(
-                R.dimen.lockscreen_shade_qs_transition_distance);
         mNotificationStackSizeCalculator.updateResources();
     }
 
@@ -1537,8 +1519,6 @@ public class NotificationStackScrollLayoutController {
     }
 
     /**
-     * @param amount The amount of pixels we have currently dragged down
-     *               for the lockscreen to shade transition. 0f for all other states.
      * @param fraction The fraction of lockscreen to shade transition.
      *                 0f for all other states.
      *
@@ -1546,18 +1526,15 @@ public class NotificationStackScrollLayoutController {
      * LockscreenShadeTransitionController resets amount and fraction to 0, where they remain
      * until the next lockscreen-to-shade transition.
      */
-    public void setTransitionToFullShadeAmount(float amount, float fraction) {
+    public void setTransitionToFullShadeAmount(float fraction) {
         mView.setFractionToShade(fraction);
+    }
 
-        float extraTopInset = 0.0f;
-        if (mStatusBarStateController.getState() == KEYGUARD) {
-            float overallProgress = MathUtils.saturate(amount / mView.getHeight());
-            float transitionProgress = Interpolators.getOvershootInterpolation(overallProgress,
-                    0.6f,
-                    (float) mTotalDistanceForFullShadeTransition / (float) mView.getHeight());
-            extraTopInset = transitionProgress * mNotificationDragDownMovement;
-        }
-        mView.setExtraTopInsetForFullShadeTransition(extraTopInset);
+    /**
+     * Sets the amount of vertical over scroll that should be performed on NSSL.
+     */
+    public void setOverScrollAmount(int overScrollAmount) {
+        mView.setExtraTopInsetForFullShadeTransition(overScrollAmount);
     }
 
     /** */
