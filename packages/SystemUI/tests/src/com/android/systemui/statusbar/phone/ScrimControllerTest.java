@@ -1078,8 +1078,9 @@ public class ScrimControllerTest extends SysuiTestCase {
                 ScrimState.OFF, ScrimState.AOD, ScrimState.PULSING));
         HashSet<ScrimState> regularStates = new HashSet<>(Arrays.asList(
                 ScrimState.UNINITIALIZED, ScrimState.KEYGUARD, ScrimState.BOUNCER,
-                ScrimState.BOUNCER_SCRIMMED, ScrimState.BRIGHTNESS_MIRROR, ScrimState.UNLOCKED,
-                ScrimState.SHADE_LOCKED, ScrimState.AUTH_SCRIMMED, ScrimState.AUTH_SCRIMMED_SHADE));
+                ScrimState.DREAMING, ScrimState.BOUNCER_SCRIMMED, ScrimState.BRIGHTNESS_MIRROR,
+                ScrimState.UNLOCKED, ScrimState.SHADE_LOCKED, ScrimState.AUTH_SCRIMMED,
+                ScrimState.AUTH_SCRIMMED_SHADE));
 
         for (ScrimState state : ScrimState.values()) {
             if (!lowPowerModeStates.contains(state) && !regularStates.contains(state)) {
@@ -1321,6 +1322,25 @@ public class ScrimControllerTest extends SysuiTestCase {
         mScrimController.setNotificationsOverScrollAmount(overScrollAmount);
 
         assertThat(mScrimInFront.getTranslationY()).isEqualTo(0);
+    }
+
+    @Test
+    public void transitionToDreaming() {
+        mScrimController.setRawPanelExpansionFraction(0f);
+        mScrimController.setBouncerHiddenFraction(KeyguardBouncer.EXPANSION_HIDDEN);
+        mScrimController.transitionTo(ScrimState.DREAMING);
+        finishAnimationsImmediately();
+
+        assertScrimAlpha(Map.of(
+                mScrimInFront, TRANSPARENT,
+                mNotificationsScrim, TRANSPARENT,
+                mScrimBehind, TRANSPARENT));
+
+        assertScrimTinted(Map.of(
+                mScrimInFront, false,
+                mScrimBehind, true,
+                mNotificationsScrim, false
+        ));
     }
 
     private void assertAlphaAfterExpansion(ScrimView scrim, float expectedAlpha, float expansion) {

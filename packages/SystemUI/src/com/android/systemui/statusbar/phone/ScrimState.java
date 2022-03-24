@@ -262,6 +262,25 @@ public enum ScrimState {
                 updateScrimColor(mScrimBehind, 1f /* alpha */, Color.BLACK);
             }
         }
+    },
+
+    DREAMING {
+        @Override
+        public void prepare(ScrimState previousState) {
+            mFrontTint = Color.TRANSPARENT;
+            mBehindTint = Color.BLACK;
+            mNotifTint = mClipQsScrim ? Color.BLACK : Color.TRANSPARENT;
+
+            mFrontAlpha = 0;
+            mBehindAlpha = mClipQsScrim ? 1 : 0;
+            mNotifAlpha = 0;
+
+            mBlankScreen = false;
+
+            if (mClipQsScrim) {
+                updateScrimColor(mScrimBehind, 1f /* alpha */, Color.BLACK);
+            }
+        }
     };
 
     boolean mBlankScreen = false;
