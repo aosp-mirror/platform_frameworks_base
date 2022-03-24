@@ -151,10 +151,6 @@
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"Jika anda memasukkan corak yang salah pada percubaan seterusnya, profil kerja anda dan data profil itu akan dipadamkan."</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"Jika anda memasukkan PIN yang salah pada percubaan seterusnya, profil kerja anda dan data profil itu akan dipadamkan."</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"Jika anda memasukkan kata laluan yang salah pada percubaan seterusnya, profil kerja anda dan data profil itu akan dipadamkan."</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"Terlalu banyak percubaan yang salah. Data peranti ini akan dipadamkan."</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"Terlalu banyak percubaan yang salah. Pengguna ini akan dipadamkan."</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"Terlalu banyak percubaan yang salah. Profil kerja ini dan data profil itu akan dipadamkan."</string>
-    <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"Ketepikan"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Sentuh penderia cap jari"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"Ikon cap jari"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Tidak mengenali wajah. Gunakan cap jari."</string>
@@ -323,17 +319,12 @@
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Mengecas dengan perlahan • Penuh dalam masa <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Mengecas dengan Dok • Penuh dalam masa <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Tukar pengguna"</string>
-    <string name="user_add_user" msgid="4336657383006913022">"Tambah pengguna"</string>
-    <string name="user_new_user_name" msgid="2019166282704195789">"Pengguna baharu"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Alih keluar tetamu?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Semua apl dan data dalam sesi ini akan dipadam."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Alih keluar"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Selamat kembali, tetamu!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Adakah anda ingin meneruskan sesi anda?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Mulakan semula"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Ya, teruskan"</string>
-    <string name="user_add_user_title" msgid="4172327541504825032">"Tambah pengguna baharu?"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"Apabila anda menambah pengguna baharu, orang itu perlu menyediakan ruang mereka.\n\nMana-mana pengguna boleh mengemas kini apl untuk semua pengguna lain."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Had pengguna dicapai"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="other">Anda boleh menambah sehingga <xliff:g id="COUNT">%d</xliff:g> pengguna.</item>
@@ -459,8 +450,7 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Buka kunci untuk menggunakan"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Terdapat masalah sewaktu mendapatkan kad anda. Sila cuba sebentar lagi"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Tetapan skrin kunci"</string>
-    <!-- no translation found for qr_code_scanner_title (5290201053875420785) -->
-    <skip />
+    <string name="qr_code_scanner_title" msgid="5290201053875420785">"Imbas kod QR"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Profil kerja"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Mod pesawat"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"Anda tidak akan mendengar penggera yang seterusnya <xliff:g id="WHEN">%1$s</xliff:g>"</string>
@@ -785,9 +775,10 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Leret untuk melihat selanjutnya"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Memuatkan cadangan"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Media"</string>
-    <string name="controls_media_close_session" msgid="1193000643003066508">"Sembunyikan sesi media ini?"</string>
+    <!-- no translation found for controls_media_close_session (4780485355795635052) -->
+    <skip />
     <string name="controls_media_active_session" msgid="3146882316024153337">"Sesi media semasa tidak dapat disembunyikan."</string>
-    <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Tolak"</string>
+    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Sembunyikan"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Sambung semula"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Tetapan"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"<xliff:g id="SONG_NAME">%1$s</xliff:g> oleh <xliff:g id="ARTIST_NAME">%2$s</xliff:g> dimainkan daripada <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
@@ -805,7 +796,7 @@
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Dekatkan dengan <xliff:g id="DEVICENAME">%1$s</xliff:g> untuk bermain di sini"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Dimainkan pada <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_transfer_playing_this_device" msgid="1856890686844499172">"Dimainkan pada telefon ini"</string>
-    <string name="media_transfer_failed" msgid="2640354446629980227">"Ralat telah berlaku"</string>
+    <string name="media_transfer_failed" msgid="7955354964610603723">"Kesilapan telah berlaku. Cuba lagi."</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Tidak aktif, semak apl"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Tidak ditemukan"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Kawalan tidak tersedia"</string>

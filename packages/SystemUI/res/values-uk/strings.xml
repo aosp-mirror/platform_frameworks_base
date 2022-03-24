@@ -151,10 +151,6 @@
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"Якщо наступного разу ви введете неправильний ключ, ваш робочий профіль і його дані буде видалено."</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"Якщо наступного разу ви введете неправильний PIN-код, ваш робочий профіль і його дані буде видалено."</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"Якщо наступного разу ви введете неправильний пароль, ваш робочий профіль і його дані буде видалено."</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"Забагато невдалих спроб. Дані на цьому пристрої буде видалено."</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"Забагато невдалих спроб. Цього користувача буде видалено."</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"Забагато невдалих спроб. Цей робочий профіль і його дані буде видалено."</string>
-    <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"Закрити"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Торкніться сканера відбитків пальців"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"Значок відбитка пальця"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Обличчя не розпізнано. Скористайтеся відбитком пальця."</string>
@@ -327,17 +323,12 @@
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Повільне заряджання • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> до повного заряду"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Док-станція для заряджання • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> до повного заряду"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Змінити користувача"</string>
-    <string name="user_add_user" msgid="4336657383006913022">"Додати користувача"</string>
-    <string name="user_new_user_name" msgid="2019166282704195789">"Новий користувач"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Видалити гостя?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Усі додатки й дані з цього сеансу буде видалено."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Вийти"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"З поверненням!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Продовжити сеанс?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Почати знову"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Так, продовжити"</string>
-    <string name="user_add_user_title" msgid="4172327541504825032">"Додати нового користувача?"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"Користувач має налаштувати свій профіль після створення.\n\nБудь-який користувач пристрою може оновлювати додатки для решти користувачів."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Ви досягли ліміту користувачів"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="one">Можна додати до <xliff:g id="COUNT">%d</xliff:g> користувача.</item>
@@ -465,8 +456,7 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Розблокувати, щоб використовувати"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Не вдалось отримати ваші картки. Повторіть спробу пізніше."</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Параметри блокування екрана"</string>
-    <!-- no translation found for qr_code_scanner_title (5290201053875420785) -->
-    <skip />
+    <string name="qr_code_scanner_title" msgid="5290201053875420785">"Сканувати QR-код"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Робочий профіль"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Режим польоту"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"Наступний сигнал о <xliff:g id="WHEN">%1$s</xliff:g> не пролунає"</string>
@@ -797,9 +787,10 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Гортайте, щоб переглянути інші"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Завантаження рекомендацій"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Медіа"</string>
-    <string name="controls_media_close_session" msgid="1193000643003066508">"Приховати цей медіасеанс?"</string>
+    <!-- no translation found for controls_media_close_session (4780485355795635052) -->
+    <skip />
     <string name="controls_media_active_session" msgid="3146882316024153337">"Поточний медіасеанс не можна приховати."</string>
-    <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Закрити"</string>
+    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Приховати"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Відновити"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Налаштування"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"Пісня \"<xliff:g id="SONG_NAME">%1$s</xliff:g>\", яку виконує <xliff:g id="ARTIST_NAME">%2$s</xliff:g>, грає в додатку <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
@@ -817,7 +808,8 @@
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Наблизьтеся до пристрою <xliff:g id="DEVICENAME">%1$s</xliff:g>, щоб відтворити медіафайли на ньому"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Відтворюється на пристрої <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_transfer_playing_this_device" msgid="1856890686844499172">"Відтворюється на цьому телефоні"</string>
-    <string name="media_transfer_failed" msgid="2640354446629980227">"Сталася помилка"</string>
+    <!-- no translation found for media_transfer_failed (7955354964610603723) -->
+    <skip />
     <string name="controls_error_timeout" msgid="794197289772728958">"Неактивно, перейдіть у додаток"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Не знайдено"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Елемент керування недоступний"</string>

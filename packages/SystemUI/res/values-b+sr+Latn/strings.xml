@@ -151,10 +151,6 @@
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"Ako unesete netačan šablon pri sledećem pokušaju, izbrisaćemo poslovni profil i njegove podatke."</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"Ako unesete netačan PIN pri sledećem pokušaju, izbrisaćemo poslovni profil i njegove podatke."</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"Ako unesete netačnu lozinku pri sledećem pokušaju, izbrisaćemo poslovni profil i njegove podatke."</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"Previše netačnih pokušaja. Izbrisaćemo podatke sa ovog uređaja."</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"Previše netačnih pokušaja. Izbrisaćemo ovog korisnika."</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"Previše netačnih pokušaja. Izbrisaćemo ovaj poslovni profil i njegove podatke."</string>
-    <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"Odbaci"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Dodirnite senzor za otisak prsta"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"Ikona otiska prsta"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Lice nije prepoznato. Koristite otisak prsta."</string>
@@ -325,17 +321,12 @@
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Sporo se puni • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> do kraja punjenja"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Bazna stanica za punjenje • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> do kraja punjenja"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Zameni korisnika"</string>
-    <string name="user_add_user" msgid="4336657383006913022">"Dodaj korisnika"</string>
-    <string name="user_new_user_name" msgid="2019166282704195789">"Novi korisnik"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Želite li da uklonite gosta?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Sve aplikacije i podaci u ovoj sesiji će biti izbrisani."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Ukloni"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Dobro došli nazad, goste!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Želite li da nastavite sesiju?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Počni iz početka"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Da, nastavi"</string>
-    <string name="user_add_user_title" msgid="4172327541504825032">"Dodajete novog korisnika?"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"Kada dodate novog korisnika, ta osoba treba da podesi svoj prostor.\n\nSvaki korisnik može da ažurira aplikacije za sve ostale korisnike."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Dostignut maksimalni broj korisnika"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="one">Možete da dodate najviše <xliff:g id="COUNT">%d</xliff:g> korisnika.</item>
@@ -790,9 +781,10 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Prevucite da biste videli još"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Učitavaju se preporuke"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Mediji"</string>
-    <string name="controls_media_close_session" msgid="1193000643003066508">"Želite li da sakrijete ovu sesiju medija?"</string>
+    <!-- no translation found for controls_media_close_session (4780485355795635052) -->
+    <skip />
     <string name="controls_media_active_session" msgid="3146882316024153337">"Aktuelna sesija medija ne može da bude sakrivena."</string>
-    <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Odbaci"</string>
+    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Sakrij"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Nastavi"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Podešavanja"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"<xliff:g id="SONG_NAME">%1$s</xliff:g> izvođača <xliff:g id="ARTIST_NAME">%2$s</xliff:g> se pušta iz aplikacije <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
@@ -810,7 +802,8 @@
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Približite se uređaju <xliff:g id="DEVICENAME">%1$s</xliff:g> da biste na njemu puštali"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Pušta se na uređaju <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_transfer_playing_this_device" msgid="1856890686844499172">"Pušta se na ovom telefonu"</string>
-    <string name="media_transfer_failed" msgid="2640354446629980227">"Došlo je do greške"</string>
+    <!-- no translation found for media_transfer_failed (7955354964610603723) -->
+    <skip />
     <string name="controls_error_timeout" msgid="794197289772728958">"Neaktivno. Vidite aplikaciju"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Nije pronađeno"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Kontrola nije dostupna"</string>
