@@ -60,6 +60,8 @@ private const val DEBUG = true
  * Use only for IntentFilters with actions and optionally categories. It does not support,
  * permissions, schemes, data types, data authorities or priority different than 0.
  * Cannot be used for getting sticky broadcasts (either as return of registering or as re-delivery).
+ * Broadcast handling may be asynchronous *without* calling goAsync(), as it's running within sysui
+ * and doesn't need to worry about being killed.
  */
 open class BroadcastDispatcher constructor (
     private val context: Context,
