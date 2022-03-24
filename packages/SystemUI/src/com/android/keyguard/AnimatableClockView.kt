@@ -24,10 +24,12 @@ import android.content.Context
 import android.graphics.Canvas
 import android.text.format.DateFormat
 import android.util.AttributeSet
+import android.util.Log
 import android.widget.TextView
 import com.android.systemui.R
 import com.android.systemui.animation.Interpolators
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator
+import java.io.PrintWriter
 import java.util.Calendar
 import java.util.Locale
 import java.util.TimeZone
@@ -42,6 +44,9 @@ class AnimatableClockView @JvmOverloads constructor(
     defStyleAttr: Int = 0,
     defStyleRes: Int = 0
 ) : TextView(context, attrs, defStyleAttr, defStyleRes) {
+    private val tag = "AnimatableClockView"
+
+    private var lastMeasureCall: CharSequence = ""
 
     private val time = Calendar.getInstance()
 
@@ -122,6 +127,11 @@ class AnimatableClockView @JvmOverloads constructor(
         time.timeInMillis = System.currentTimeMillis()
         text = DateFormat.format(format, time)
         contentDescription = DateFormat.format(descFormat, time)
+        Log.d(tag, "refreshTime this=$this" +
+                " currTimeContextDesc=$contentDescription" +
+                " measuredHeight=$measuredHeight" +
+                " lastMeasureCall=$lastMeasureCall" +
+                " isSingleLineInternal=$isSingleLineInternal")
     }
 
     fun onTimeZoneChanged(timeZone: TimeZone?) {
@@ -132,6 +142,7 @@ class AnimatableClockView @JvmOverloads constructor(
     @SuppressLint("DrawAllocation")
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
+        lastMeasureCall = DateFormat.format(descFormat, System.currentTimeMillis())
         val animator = textAnimator
         if (animator == null) {
             textAnimator = TextAnimator(layout) { invalidate() }
@@ -140,9 +151,20 @@ class AnimatableClockView @JvmOverloads constructor(
         } else {
             animator.updateLayout(layout)
         }
+        Log.v(tag, "onMeasure this=$this" +
+                " currTimeContextDesc=$contentDescription" +
+                " heightMeasureSpecMode=${MeasureSpec.getMode(heightMeasureSpec)}" +
+                " heightMeasureSpecSize=${MeasureSpec.getSize(heightMeasureSpec)}" +
+                " measuredWidth=$measuredWidth" +
+                " measuredHeight=$measuredHeight" +
+                " isSingleLineInternal=$isSingleLineInternal")
     }
 
     override fun onDraw(canvas: Canvas) {
+        // intentionally doesn't call super.onDraw here or else the text will be rendered twice
+        Log.d(tag, "onDraw this=$this" +
+                " currTimeContextDesc=$contentDescription" +
+                " isSingleLineInternal=$isSingleLineInternal")
         textAnimator?.draw(canvas)
     }
 
@@ -327,6 +349,17 @@ class AnimatableClockView @JvmOverloads constructor(
         descFormat = if (use24HourFormat) Patterns.sClockView24 else Patterns.sClockView12
 
         refreshTime()
+    }
+
+    fun dump(pw: PrintWriter) {
+        pw.println("$this")
+        pw.println("    measuredWidth=$measuredWidth")
+        pw.println("    measuredHeight=$measuredHeight")
+        pw.println("    singleLineInternal=$isSingleLineInternal")
+        pw.println("    lastMeasureCall=$lastMeasureCall")
+        pw.println("    currText=$text")
+        pw.println("    currTimeContextDesc=$contentDescription")
+        pw.println("    time=$time")
     }
 
     // DateFormat.getBestDateTimePattern is extremely expensive, and refresh is called often.

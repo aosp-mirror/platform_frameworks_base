@@ -33,12 +33,16 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
+import androidx.annotation.NonNull;
+
 import com.android.internal.colorextraction.ColorExtractor;
 import com.android.keyguard.clock.ClockManager;
+import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.plugins.ClockPlugin;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -46,13 +50,14 @@ import com.android.systemui.statusbar.lockscreen.LockscreenSmartspaceController;
 import com.android.systemui.statusbar.notification.AnimatableProperty;
 import com.android.systemui.statusbar.notification.PropertyAnimator;
 import com.android.systemui.statusbar.notification.stack.AnimationProperties;
-import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
 import com.android.systemui.statusbar.phone.NotificationIconContainer;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.util.ViewController;
 import com.android.systemui.util.settings.SecureSettings;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
@@ -64,7 +69,8 @@ import javax.inject.Inject;
 /**
  * Injectable controller for {@link KeyguardClockSwitch}.
  */
-public class KeyguardClockSwitchController extends ViewController<KeyguardClockSwitch> {
+public class KeyguardClockSwitchController extends ViewController<KeyguardClockSwitch>
+        implements Dumpable {
     private static final boolean CUSTOM_CLOCKS_ENABLED = true;
 
     private final StatusBarStateController mStatusBarStateController;
@@ -77,6 +83,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     private final LockscreenSmartspaceController mSmartspaceController;
     private final Resources mResources;
     private final SecureSettings mSecureSettings;
+    private final DumpManager mDumpManager;
 
     /**
      * Clock for both small and large sizes
@@ -90,7 +97,6 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     private int mCurrentClockSize = SMALL;
 
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
-    private final KeyguardBypassController mBypassController;
 
     private int mKeyguardClockTopMargin = 0;
 
@@ -135,12 +141,12 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
             BroadcastDispatcher broadcastDispatcher,
             BatteryController batteryController,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
-            KeyguardBypassController bypassController,
             LockscreenSmartspaceController smartspaceController,
             KeyguardUnlockAnimationController keyguardUnlockAnimationController,
             SecureSettings secureSettings,
             @Main Executor uiExecutor,
-            @Main Resources resources) {
+            @Main Resources resources,
+            DumpManager dumpManager) {
         super(keyguardClockSwitch);
         mStatusBarStateController = statusBarStateController;
         mColorExtractor = colorExtractor;
@@ -150,12 +156,12 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         mBroadcastDispatcher = broadcastDispatcher;
         mBatteryController = batteryController;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
-        mBypassController = bypassController;
         mSmartspaceController = smartspaceController;
         mResources = resources;
         mSecureSettings = secureSettings;
         mUiExecutor = uiExecutor;
         mKeyguardUnlockAnimationController = keyguardUnlockAnimationController;
+        mDumpManager = dumpManager;
         mKeyguardUnlockAnimationController.addKeyguardUnlockAnimationListener(
                 new KeyguardUnlockAnimationController.KeyguardUnlockAnimationListener() {
                     @Override
@@ -210,6 +216,9 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
                         mKeyguardUpdateMonitor,
                         mResources);
         mLargeClockViewController.init();
+
+        mDumpManager.unregisterDumpable(getClass().toString()); // unregister previous clocks
+        mDumpManager.registerDumpable(getClass().toString(), this);
     }
 
     @Override
@@ -486,4 +495,13 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
             mStatusArea.setClipChildren(clip);
         }
     }
+
+    @Override
+    public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
+        pw.println("currentClockSizeLarge=" + (mCurrentClockSize == LARGE));
+        pw.println("mCanShowDoubleLineClock=" + mCanShowDoubleLineClock);
+        mClockViewController.dump(pw);
+        mLargeClockViewController.dump(pw);
+    }
 }
+
