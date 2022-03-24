@@ -373,6 +373,11 @@ public class TileQueryHelperTest extends SysuiTestCase {
         }
 
         @Override
+        public boolean isListening() {
+            return mListening;
+        }
+
+        @Override
         public CharSequence getTileLabel() {
             return mSpec;
         }
