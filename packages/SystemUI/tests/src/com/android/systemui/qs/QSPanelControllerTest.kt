@@ -4,13 +4,13 @@ import android.test.suitebuilder.annotation.SmallTest
 import android.testing.AndroidTestingRunner
 import com.android.internal.logging.MetricsLogger
 import com.android.internal.logging.UiEventLogger
-import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.media.MediaHost
 import com.android.systemui.media.MediaHostState
 import com.android.systemui.plugins.FalsingManager
+import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.qs.customize.QSCustomizerController
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.settings.brightness.BrightnessController
@@ -21,11 +21,12 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
+import org.mockito.Mockito
 import org.mockito.Mockito.any
 import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
-import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
+import org.mockito.Mockito.`when` as whenever
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
@@ -49,6 +50,8 @@ class QSPanelControllerTest : SysuiTestCase() {
     @Mock private lateinit var falsingManager: FalsingManager
     @Mock private lateinit var featureFlags: FeatureFlags
     @Mock private lateinit var mediaHost: MediaHost
+    @Mock private lateinit var tile: QSTile
+    @Mock private lateinit var otherTile: QSTile
 
     private lateinit var controller: QSPanelController
 
@@ -93,8 +96,17 @@ class QSPanelControllerTest : SysuiTestCase() {
         verify(mediaHost).expansion = MediaHostState.EXPANDED
     }
 
-    private fun setSplitShadeEnabled(enabled: Boolean) {
-        mContext.orCreateTestableResources
-            .addOverride(R.bool.config_use_split_notification_shade, enabled)
+    @Test
+    fun testSetListeningDoesntRefreshListeningTiles() {
+        whenever(qsTileHost.getTiles()).thenReturn(listOf(tile, otherTile))
+        controller.setTiles()
+        whenever(tile.isListening()).thenReturn(false)
+        whenever(otherTile.isListening()).thenReturn(true)
+        whenever(qsPanel.isListening).thenReturn(true)
+
+        controller.setListening(true, true)
+
+        verify(tile).refreshState()
+        verify(otherTile, Mockito.never()).refreshState()
     }
 }
