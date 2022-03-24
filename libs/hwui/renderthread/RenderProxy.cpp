@@ -432,6 +432,15 @@ void RenderProxy::preload() {
     thread.queue().post([&thread]() { thread.preload(); });
 }
 
+void RenderProxy::setRtAnimationsEnabled(bool enabled) {
+    if (RenderThread::hasInstance()) {
+        RenderThread::getInstance().queue().post(
+                [enabled]() { Properties::enableRTAnimations = enabled; });
+    } else {
+        Properties::enableRTAnimations = enabled;
+    }
+}
+
 } /* namespace renderthread */
 } /* namespace uirenderer */
 } /* namespace android */
