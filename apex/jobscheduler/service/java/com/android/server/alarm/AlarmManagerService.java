@@ -348,7 +348,8 @@ public class AlarmManagerService extends SystemService {
             new SparseArray<>();
 
     private AppStateTrackerImpl mAppStateTracker;
-    private boolean mAppStandbyParole;
+    @VisibleForTesting
+    boolean mAppStandbyParole;
 
     /**
      * A container to keep rolling window history of previous times when an alarm was sent to
@@ -1890,6 +1891,9 @@ public class AlarmManagerService extends SystemService {
                 mAppStateTracker =
                         (AppStateTrackerImpl) LocalServices.getService(AppStateTracker.class);
                 mAppStateTracker.addListener(mForceAppStandbyListener);
+
+                final BatteryManager bm = getContext().getSystemService(BatteryManager.class);
+                mAppStandbyParole = bm.isCharging();
 
                 mClockReceiver.scheduleTimeTickEvent();
                 mClockReceiver.scheduleDateChangedEvent();
