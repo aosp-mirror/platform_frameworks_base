@@ -101,26 +101,26 @@ public final class UiTranslationManager {
     public static final String LOG_TAG = "UiTranslation";
 
     /**
-     * The state caller request to disable utranslation,, it is no longer need to ui translation.
+     * The state the caller requests to enable UI translation.
      *
      * @hide
      */
     public static final int STATE_UI_TRANSLATION_STARTED = 0;
     /**
-     * The state caller request to pause ui translation, it will switch back to the original text.
+     * The state caller requests to pause UI translation. It will switch back to the original text.
      *
      * @hide
      */
     public static final int STATE_UI_TRANSLATION_PAUSED = 1;
     /**
-     * The state caller request to resume the paused ui translation, it will show the translated
+     * The state caller requests to resume the paused UI translation. It will show the translated
      * text again if the text had been translated.
      *
      * @hide
      */
     public static final int STATE_UI_TRANSLATION_RESUMED = 2;
     /**
-     * The state the caller request to enable ui translation.
+     * The state the caller requests to disable UI translation when it no longer needs translation.
      *
      * @hide
      */
