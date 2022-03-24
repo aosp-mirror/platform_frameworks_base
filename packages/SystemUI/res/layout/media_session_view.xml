@@ -172,6 +172,15 @@
         app:layout_constraintStart_toStartOf="parent"
         />
 
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/media_action_barrier_top"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:barrierDirection="top"
+        app:constraint_referenced_ids="actionPrev,media_progress_bar,actionNext,action0,action1,action2,action3,action4"
+        />
+
     <!-- Button visibility will be controlled in code -->
     <ImageButton
         android:id="@+id/actionPrev"
