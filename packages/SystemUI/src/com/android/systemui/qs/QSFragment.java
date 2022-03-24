@@ -92,6 +92,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     private float mLastPanelFraction;
     private float mSquishinessFraction = 1;
     private boolean mQsDisabled;
+    private int[] mTemp = new int[2];
 
     private final RemoteInputQuickSettingsDisabler mRemoteInputQuickSettingsDisabler;
     private final MediaHost mQsMediaHost;
@@ -608,8 +609,11 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         }
         mQSPanelScrollView.setClipBounds(mQsBounds);
 
-        mQsMediaHost.getCurrentClipping().set(0, 0, getView().getMeasuredWidth(),
-                mQSPanelScrollView.getMeasuredHeight() - mQSPanelScrollView.getPaddingBottom());
+        mQSPanelScrollView.getLocationOnScreen(mTemp);
+        int top = mTemp[1];
+        mQsMediaHost.getCurrentClipping().set(0, top, getView().getMeasuredWidth(),
+                top + mQSPanelScrollView.getMeasuredHeight()
+                        - mQSPanelScrollView.getPaddingBottom());
     }
 
     private void updateMediaPositions() {
