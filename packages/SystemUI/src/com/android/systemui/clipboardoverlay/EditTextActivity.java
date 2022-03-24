@@ -34,7 +34,8 @@ import com.android.systemui.R;
 /**
  * Lightweight activity for editing text clipboard contents
  */
-public class EditTextActivity extends Activity {
+public class EditTextActivity extends Activity
+        implements ClipboardManager.OnPrimaryClipChangedListener {
     private static final String TAG = "EditTextActivity";
 
     private EditText mEditText;
@@ -71,6 +72,18 @@ public class EditTextActivity extends Activity {
         }
         mEditText.setText(clip.getItemAt(0).getText());
         mEditText.requestFocus();
+        mClipboardManager.addPrimaryClipChangedListener(this);
+    }
+
+    @Override
+    protected void onPause() {
+        mClipboardManager.removePrimaryClipChangedListener(this);
+        super.onPause();
+    }
+
+    @Override // ClipboardManager.OnPrimaryClipChangedListener
+    public void onPrimaryClipChanged() {
+        hideImeAndFinish();
     }
 
     private void saveToClipboard() {
