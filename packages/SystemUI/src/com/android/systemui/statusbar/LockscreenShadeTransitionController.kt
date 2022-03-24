@@ -40,7 +40,7 @@ import com.android.systemui.statusbar.phone.LSShadeTransitionLogger
 import com.android.systemui.statusbar.phone.NotificationPanelViewController
 import com.android.systemui.statusbar.phone.ScrimController
 import com.android.systemui.statusbar.policy.ConfigurationController
-import com.android.systemui.util.Utils
+import com.android.systemui.util.LargeScreenUtils
 import java.io.FileDescriptor
 import java.io.PrintWriter
 import javax.inject.Inject
@@ -251,7 +251,7 @@ class LockscreenShadeTransitionController @Inject constructor(
                 R.dimen.lockscreen_shade_udfps_keyguard_transition_distance)
         statusBarTransitionDistance = context.resources.getDimensionPixelSize(
                 R.dimen.lockscreen_shade_status_bar_transition_distance)
-        useSplitShade = Utils.shouldUseSplitNotificationShade(context.resources)
+        useSplitShade = LargeScreenUtils.shouldUseSplitNotificationShade(context.resources)
     }
 
     fun setStackScroller(nsslController: NotificationStackScrollLayoutController) {
@@ -441,7 +441,9 @@ class LockscreenShadeTransitionController @Inject constructor(
     }
 
     private fun transitionToShadeAmountCommon(dragDownAmount: Float) {
-        if (depthControllerTransitionDistance > 0) {
+        if (depthControllerTransitionDistance == 0) { // split shade
+            depthController.transitionToFullShadeProgress = 0f
+        } else {
             val depthProgress =
                 MathUtils.saturate(dragDownAmount / depthControllerTransitionDistance)
             depthController.transitionToFullShadeProgress = depthProgress

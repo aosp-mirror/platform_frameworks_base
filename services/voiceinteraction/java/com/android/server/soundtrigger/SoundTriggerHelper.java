@@ -923,10 +923,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
         if (modelData != null && modelData.isModelStarted()) {
             modelData.setStoppedLocked();
             try {
-                IRecognitionStatusCallback callback = modelData.getCallback();
-                if (callback != null) {
-                    callback.onRecognitionPaused();
-                }
+                modelData.getCallback().onRecognitionPaused();
             } catch (DeadObjectException e) {
                 forceStopAndUnloadModelLocked(modelData, e);
             } catch (RemoteException e) {

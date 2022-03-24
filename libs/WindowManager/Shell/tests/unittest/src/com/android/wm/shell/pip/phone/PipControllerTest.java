@@ -59,6 +59,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * Unit tests for {@link PipController}
@@ -208,5 +209,16 @@ public class PipControllerTest extends ShellTestCase {
                 displayId, new Configuration());
 
         verify(mMockPipMotionHelper, never()).movePip(any(Rect.class));
+    }
+
+    @Test
+    public void onKeepClearAreasChanged_updatesPipBoundsState() {
+        final int displayId = 1;
+        final Rect keepClearArea = new Rect(0, 0, 10, 10);
+        when(mMockPipBoundsState.getDisplayId()).thenReturn(displayId);
+
+        mPipController.onKeepClearAreasChanged(displayId, Set.of(keepClearArea), Set.of());
+
+        verify(mMockPipBoundsState).setKeepClearAreas(Set.of(keepClearArea), Set.of());
     }
 }

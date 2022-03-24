@@ -36,7 +36,6 @@
     <item name="controls_task_view_width_percentage" translatable="false" format="float" type="dimen">0.45</item>
     <dimen name="controls_task_view_right_margin">8dp</dimen>
 
-    <dimen name="split_shade_header_height">42dp</dimen>
     <dimen name="status_bar_header_height_keyguard">42dp</dimen>
 
     <!-- Distance that the full shade transition takes in order to complete by tapping on a button
