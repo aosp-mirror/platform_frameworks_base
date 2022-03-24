@@ -699,6 +699,10 @@
         <item name="overlayButtonTextColor">?android:attr/textColorPrimary</item>
     </style>
 
+    <style name="EditTextActivityButton" parent="@android:style/Widget.DeviceDefault.Button.Colored">
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+    </style>
+
     <!-- Clipboard overlay's edit text activity. -->
     <style name="EditTextActivity" parent="@android:style/Theme.DeviceDefault.DayNight">
         <item name="android:windowNoTitle">true</item>

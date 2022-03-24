@@ -51,6 +51,10 @@
         <item name="overlayButtonTextColor">?android:attr/textColorPrimaryInverse</item>
     </style>
 
+    <style name="EditTextActivityButton" parent="@android:style/Widget.DeviceDefault.Button.Colored">
+        <item name="android:textColor">?android:attr/textColorPrimaryInverse</item>
+    </style>
+
     <style name="Theme.PeopleTileConfigActivity" parent="@style/Theme.SystemUI">
         <item name="android:windowActionBar">false</item>
         <item name="android:windowNoTitle">true</item>
