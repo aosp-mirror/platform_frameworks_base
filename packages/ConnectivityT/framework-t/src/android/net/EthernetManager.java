@@ -39,6 +39,7 @@ import com.android.modules.utils.BackgroundThread;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.function.IntConsumer;
@@ -707,6 +708,22 @@ public class EthernetManager {
         synchronized (mListenerLock) {
             mEthernetStateListeners.removeIf(l -> l.listener == listener);
             maybeRemoveServiceListener();
+        }
+    }
+
+    /**
+     * Returns an array of existing Ethernet interface names regardless whether the interface
+     * is available or not currently.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)
+    @SystemApi(client = MODULE_LIBRARIES)
+    @NonNull
+    public List<String> getInterfaceList() {
+        try {
+            return mService.getInterfaceList();
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
         }
     }
 }
