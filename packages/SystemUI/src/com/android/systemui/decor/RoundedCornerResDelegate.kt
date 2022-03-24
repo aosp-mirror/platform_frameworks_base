@@ -125,17 +125,16 @@ class RoundedCornerResDelegate(
             bottomRoundedSize = Size(bottomRadius, bottomRadius)
         }
 
+        if (roundedSizeFactor != null && roundedSizeFactor > 0) {
+            val length: Int = (roundedSizeFactor * density).toInt()
+            roundedSize = Size(length, length)
+        }
+
         if (topRoundedSize.width == 0) {
             topRoundedSize = roundedSize
         }
         if (bottomRoundedSize.width == 0) {
             bottomRoundedSize = roundedSize
-        }
-
-        if (roundedSizeFactor != null && roundedSizeFactor > 0) {
-            val length: Int = (roundedSizeFactor * density).toInt()
-            topRoundedSize = Size(length, length)
-            bottomRoundedSize = Size(length, length)
         }
     }
 
