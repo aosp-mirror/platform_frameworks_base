@@ -1174,9 +1174,8 @@
          the shade -->
     <dimen name="lockscreen_shade_media_transition_distance">120dp</dimen>
 
-    <!-- Maximum overshoot for the topPadding of notifications when transitioning to the full
-         shade -->
-    <dimen name="lockscreen_shade_notification_movement">24dp</dimen>
+    <!-- Maximum over scroll amount for the shade when transition to the full shade. -->
+    <dimen name="lockscreen_shade_max_over_scroll_amount">24dp</dimen>
 
     <!-- Maximum overshoot for the pulse expansion -->
     <dimen name="pulse_expansion_max_top_overshoot">32dp</dimen>

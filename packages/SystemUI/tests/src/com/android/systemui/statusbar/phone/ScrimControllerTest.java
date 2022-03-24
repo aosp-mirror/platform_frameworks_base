@@ -1296,6 +1296,33 @@ public class ScrimControllerTest extends SysuiTestCase {
         assertThat(mNotificationsScrim.getViewAlpha()).isEqualTo(notifProgress);
     }
 
+    @Test
+    public void setNotificationsOverScrollAmount_setsTranslationYOnNotificationsScrim() {
+        int overScrollAmount = 10;
+
+        mScrimController.setNotificationsOverScrollAmount(overScrollAmount);
+
+        assertThat(mNotificationsScrim.getTranslationY()).isEqualTo(overScrollAmount);
+    }
+
+    @Test
+    public void setNotificationsOverScrollAmount_doesNotSetTranslationYOnBehindScrim() {
+        int overScrollAmount = 10;
+
+        mScrimController.setNotificationsOverScrollAmount(overScrollAmount);
+
+        assertThat(mScrimBehind.getTranslationY()).isEqualTo(0);
+    }
+
+    @Test
+    public void setNotificationsOverScrollAmount_doesNotSetTranslationYOnFrontScrim() {
+        int overScrollAmount = 10;
+
+        mScrimController.setNotificationsOverScrollAmount(overScrollAmount);
+
+        assertThat(mScrimInFront.getTranslationY()).isEqualTo(0);
+    }
+
     private void assertAlphaAfterExpansion(ScrimView scrim, float expectedAlpha, float expansion) {
         mScrimController.setRawPanelExpansionFraction(expansion);
         finishAnimationsImmediately();
