@@ -338,7 +338,7 @@ class ShortcutPackage extends ShortcutPackageItem {
 
     public void ensureAllShortcutsVisibleToLauncher(@NonNull List<ShortcutInfo> shortcuts) {
         for (ShortcutInfo shortcut : shortcuts) {
-            if (!shortcut.isIncludedIn(ShortcutInfo.SURFACE_LAUNCHER)) {
+            if (shortcut.isExcludedFromSurfaces(ShortcutInfo.SURFACE_LAUNCHER)) {
                 throw new IllegalArgumentException("Shortcut ID=" + shortcut.getId()
                         + " is hidden from launcher and may not be manipulated via APIs");
             }
@@ -399,7 +399,7 @@ class ShortcutPackage extends ShortcutPackageItem {
                     & (ShortcutInfo.FLAG_PINNED | ShortcutInfo.FLAG_CACHED_ALL));
         }
 
-        if (!newShortcut.isIncludedIn(ShortcutInfo.SURFACE_LAUNCHER)) {
+        if (newShortcut.isExcludedFromSurfaces(ShortcutInfo.SURFACE_LAUNCHER)) {
             if (isAppSearchEnabled()) {
                 synchronized (mLock) {
                     mTransientShortcuts.put(newShortcut.getId(), newShortcut);
@@ -477,7 +477,7 @@ class ShortcutPackage extends ShortcutPackageItem {
                     & (ShortcutInfo.FLAG_PINNED | ShortcutInfo.FLAG_CACHED_ALL));
         }
 
-        if (!newShortcut.isIncludedIn(ShortcutInfo.SURFACE_LAUNCHER)) {
+        if (newShortcut.isExcludedFromSurfaces(ShortcutInfo.SURFACE_LAUNCHER)) {
             if (isAppSearchEnabled()) {
                 synchronized (mLock) {
                     mTransientShortcuts.put(newShortcut.getId(), newShortcut);
