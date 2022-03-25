@@ -938,6 +938,15 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
         verify(mScrimController).setExpansionAffectsAlpha(true);
     }
 
+    @Test
+    public void setKeyguardStatusBarAlpha_setsAlphaOnKeyguardStatusBarController() {
+        float statusBarAlpha = 0.5f;
+
+        mNotificationPanelViewController.setKeyguardStatusBarAlpha(statusBarAlpha);
+
+        verify(mKeyguardStatusBarViewController).setAlpha(statusBarAlpha);
+    }
+
     private void triggerPositionClockAndNotifications() {
         mNotificationPanelViewController.closeQs();
     }
