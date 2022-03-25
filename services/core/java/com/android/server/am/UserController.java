@@ -107,6 +107,7 @@ import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.server.FactoryResetter;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemService.UserCompletedEventType;
@@ -1795,6 +1796,10 @@ class UserController implements Handler.Callback {
         }
         if (targetUserInfo.isProfile()) {
             Slogf.w(TAG, "Cannot switch to User #" + targetUserId + ": not a full user");
+            return false;
+        }
+        if (FactoryResetter.isFactoryResetting()) {
+            Slogf.w(TAG, "Cannot switch to User #" + targetUserId + ": factory reset in progress");
             return false;
         }
         boolean userSwitchUiEnabled;

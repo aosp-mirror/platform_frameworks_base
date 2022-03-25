@@ -99,9 +99,6 @@ class TransitionController {
     // TODO(b/188595497): remove when not needed.
     final StatusBarManagerInternal mStatusBar;
 
-    /** Pending transitions from Shell that are waiting the SyncEngine to be free. */
-    private final ArrayList<PendingStartTransition> mPendingTransitions = new ArrayList<>();
-
     TransitionController(ActivityTaskManagerService atm,
             TaskSnapshotController taskSnapshotController) {
         mAtm = atm;
@@ -146,7 +143,7 @@ class TransitionController {
     }
 
     /** Starts Collecting */
-    private void moveToCollecting(@NonNull Transition transition) {
+    void moveToCollecting(@NonNull Transition transition) {
         if (mCollectingTransition != null) {
             throw new IllegalStateException("Simultaneous transition collection not supported.");
         }
@@ -158,26 +155,6 @@ class TransitionController {
         ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "Start collecting in Transition: %s",
                 mCollectingTransition);
         dispatchLegacyAppTransitionPending();
-    }
-
-    /** Creates a transition representation but doesn't start collecting. */
-    @NonNull
-    PendingStartTransition createPendingTransition(@WindowManager.TransitionType int type) {
-        if (mTransitionPlayer == null) {
-            throw new IllegalStateException("Shell Transitions not enabled");
-        }
-        final PendingStartTransition out = new PendingStartTransition(new Transition(type,
-                0 /* flags */, this, mAtm.mWindowManager.mSyncEngine));
-        mPendingTransitions.add(out);
-        // We want to start collecting immediately when the engine is free, otherwise it may
-        // be busy again.
-        out.setStartSync(() -> {
-            mPendingTransitions.remove(out);
-            moveToCollecting(out.mTransition);
-        });
-        ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "Creating PendingTransition: %s",
-                out.mTransition);
-        return out;
     }
 
     void registerTransitionPlayer(@Nullable ITransitionPlayer player,
@@ -601,22 +578,14 @@ class TransitionController {
         if (!mPlayingTransitions.isEmpty()) {
             state = LEGACY_STATE_RUNNING;
         } else if ((mCollectingTransition != null && mCollectingTransition.getLegacyIsReady())
-                || !mPendingTransitions.isEmpty()) {
-            // The transition may not be "ready", but we have transition waiting to start, so it
-            // can't be IDLE for test purpose. Ideally, we should have a STATE_COLLECTING.
+                || mAtm.mWindowManager.mSyncEngine.hasPendingSyncSets()) {
+            // The transition may not be "ready", but we have a sync-transaction waiting to start.
+            // Usually the pending transaction is for a transition, so assuming that is the case,
+            // we can't be IDLE for test purposes. Ideally, we should have a STATE_COLLECTING.
             state = LEGACY_STATE_READY;
         }
         proto.write(AppTransitionProto.APP_TRANSITION_STATE, state);
         proto.end(token);
-    }
-
-    /** Represents a startTransition call made while there is other active BLAST SyncGroup. */
-    class PendingStartTransition extends WindowOrganizerController.PendingTransaction {
-        final Transition mTransition;
-
-        PendingStartTransition(Transition transition) {
-            mTransition = transition;
-        }
     }
 
     static class TransitionMetricsReporter extends ITransitionMetricsReporter.Stub {

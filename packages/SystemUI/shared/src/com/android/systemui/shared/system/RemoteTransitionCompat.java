@@ -331,13 +331,12 @@ public class RemoteTransitionCompat implements Parcelable {
             }
             if (mWrapped != null) mWrapped.finish(toHome, sendUserLeaveHint);
             final SurfaceControl.Transaction t = new SurfaceControl.Transaction();
-            final WindowContainerTransaction wct;
+            final WindowContainerTransaction wct = new WindowContainerTransaction();
 
             if (!toHome && mPausingTasks != null && mOpeningLeashes == null) {
                 // The gesture went back to opening the app rather than continuing with
                 // recents, so end the transition by moving the app back to the top (and also
                 // re-showing it's task).
-                wct = new WindowContainerTransaction();
                 for (int i = mPausingTasks.size() - 1; i >= 0; --i) {
                     // reverse order so that index 0 ends up on top
                     wct.reorder(mPausingTasks.get(i), true /* onTop */);
@@ -347,8 +346,14 @@ public class RemoteTransitionCompat implements Parcelable {
                     wct.restoreTransientOrder(mRecentsTask);
                 }
             } else {
-                wct = null;
-                if (mPipTask != null && mPipTransaction != null) {
+                if (!sendUserLeaveHint) {
+                    for (int i = 0; i < mPausingTasks.size(); ++i) {
+                        // This means recents is not *actually* finishing, so of course we gotta
+                        // do special stuff in WMCore to accommodate.
+                        wct.setDoNotPip(mPausingTasks.get(i));
+                    }
+                }
+                if (mPipTask != null && mPipTransaction != null && sendUserLeaveHint) {
                     t.show(mInfo.getChange(mPipTask).getLeash());
                     PictureInPictureSurfaceTransaction.apply(mPipTransaction,
                             mInfo.getChange(mPipTask).getLeash(), t);
@@ -363,7 +368,7 @@ public class RemoteTransitionCompat implements Parcelable {
                 t.remove(mLeashMap.valueAt(i));
             }
             try {
-                mFinishCB.onTransitionFinished(wct, t);
+                mFinishCB.onTransitionFinished(wct.isEmpty() ? null : wct, t);
             } catch (RemoteException e) {
                 Log.e("RemoteTransitionCompat", "Failed to call animation finish callback", e);
                 t.apply();

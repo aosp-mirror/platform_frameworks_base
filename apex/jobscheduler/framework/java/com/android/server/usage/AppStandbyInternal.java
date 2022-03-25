@@ -245,4 +245,7 @@ public interface AppStandbyInternal {
      */
     @Nullable
     String getAppStandbyConstant(@NonNull String key);
+
+    /** Clears the last used timestamps data for the given {@code packageName}. */
+    void clearLastUsedTimestampsForTest(@NonNull String packageName, @UserIdInt int userId);
 }

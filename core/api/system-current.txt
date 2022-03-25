@@ -1195,13 +1195,16 @@ package android.app.admin {
   public static final class DevicePolicyResources.Strings {
   }
 
-  public static final class DevicePolicyResources.Strings.PermissionController {
-    field public static final String BACKGROUND_ACCESS_DISABLED_BY_ADMIN_MESSAGE = "PermissionController.BACKGROUND_ACCESS_DISABLED_BY_ADMIN_MESSAGE";
-    field public static final String BACKGROUND_ACCESS_ENABLED_BY_ADMIN_MESSAGE = "PermissionController.BACKGROUND_ACCESS_ENABLED_BY_ADMIN_MESSAGE";
-    field public static final String FOREGROUND_ACCESS_ENABLED_BY_ADMIN_MESSAGE = "PermissionController.FOREGROUND_ACCESS_ENABLED_BY_ADMIN_MESSAGE";
-    field public static final String HOME_MISSING_WORK_PROFILE_SUPPORT_MESSAGE = "PermissionController.HOME_MISSING_WORK_PROFILE_SUPPORT_MESSAGE";
-    field public static final String LOCATION_AUTO_GRANTED_MESSAGE = "PermissionController.LOCATION_AUTO_GRANTED_MESSAGE";
-    field public static final String WORK_PROFILE_DEFAULT_APPS_TITLE = "PermissionController.WORK_PROFILE_DEFAULT_APPS_TITLE";
+  public static final class DevicePolicyResources.Strings.DefaultAppSettings {
+    field public static final String HOME_MISSING_WORK_PROFILE_SUPPORT_MESSAGE = "DefaultAppSettings.HOME_MISSING_WORK_PROFILE_SUPPORT_MESSAGE";
+    field public static final String WORK_PROFILE_DEFAULT_APPS_TITLE = "DefaultAppSettings.WORK_PROFILE_DEFAULT_APPS_TITLE";
+  }
+
+  public static final class DevicePolicyResources.Strings.PermissionSettings {
+    field public static final String BACKGROUND_ACCESS_DISABLED_BY_ADMIN_MESSAGE = "PermissionSettings.BACKGROUND_ACCESS_DISABLED_BY_ADMIN_MESSAGE";
+    field public static final String BACKGROUND_ACCESS_ENABLED_BY_ADMIN_MESSAGE = "PermissionSettings.BACKGROUND_ACCESS_ENABLED_BY_ADMIN_MESSAGE";
+    field public static final String FOREGROUND_ACCESS_ENABLED_BY_ADMIN_MESSAGE = "PermissionSettings.FOREGROUND_ACCESS_ENABLED_BY_ADMIN_MESSAGE";
+    field public static final String LOCATION_AUTO_GRANTED_MESSAGE = "PermissionSettings.LOCATION_AUTO_GRANTED_MESSAGE";
   }
 
   public class DevicePolicyResourcesManager {
@@ -2805,8 +2808,11 @@ package android.companion.virtual {
   public final class VirtualDeviceParams implements android.os.Parcelable {
     method public int describeContents();
     method @NonNull public java.util.Set<android.content.ComponentName> getAllowedActivities();
+    method @NonNull public java.util.Set<android.content.ComponentName> getAllowedCrossTaskNavigations();
     method @NonNull public java.util.Set<android.content.ComponentName> getBlockedActivities();
+    method @NonNull public java.util.Set<android.content.ComponentName> getBlockedCrossTaskNavigations();
     method public int getDefaultActivityPolicy();
+    method public int getDefaultNavigationPolicy();
     method public int getLockState();
     method @NonNull public java.util.Set<android.os.UserHandle> getUsersWithMatchingAccounts();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
@@ -2815,13 +2821,17 @@ package android.companion.virtual {
     field @NonNull public static final android.os.Parcelable.Creator<android.companion.virtual.VirtualDeviceParams> CREATOR;
     field public static final int LOCK_STATE_ALWAYS_UNLOCKED = 1; // 0x1
     field public static final int LOCK_STATE_DEFAULT = 0; // 0x0
+    field public static final int NAVIGATION_POLICY_DEFAULT_ALLOWED = 0; // 0x0
+    field public static final int NAVIGATION_POLICY_DEFAULT_BLOCKED = 1; // 0x1
   }
 
   public static final class VirtualDeviceParams.Builder {
     ctor public VirtualDeviceParams.Builder();
     method @NonNull public android.companion.virtual.VirtualDeviceParams build();
     method @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setAllowedActivities(@NonNull java.util.Set<android.content.ComponentName>);
+    method @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setAllowedCrossTaskNavigations(@NonNull java.util.Set<android.content.ComponentName>);
     method @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setBlockedActivities(@NonNull java.util.Set<android.content.ComponentName>);
+    method @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setBlockedCrossTaskNavigations(@NonNull java.util.Set<android.content.ComponentName>);
     method @NonNull @RequiresPermission(value=android.Manifest.permission.ADD_ALWAYS_UNLOCKED_DISPLAY, conditional=true) public android.companion.virtual.VirtualDeviceParams.Builder setLockState(int);
     method @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setUsersWithMatchingAccounts(@NonNull java.util.Set<android.os.UserHandle>);
   }
@@ -13368,7 +13378,6 @@ package android.telephony {
   }
 
   public class TelephonyManager {
-    method @Deprecated @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void addCarrierPrivilegesListener(int, @NonNull java.util.concurrent.Executor, @NonNull android.telephony.TelephonyManager.CarrierPrivilegesListener);
     method @RequiresPermission(anyOf={android.Manifest.permission.MODIFY_PHONE_STATE, android.Manifest.permission.PERFORM_IMS_SINGLE_REGISTRATION}) @WorkerThread public void bootstrapAuthenticationRequest(int, @NonNull android.net.Uri, @NonNull android.telephony.gba.UaSecurityProtocolIdentifier, boolean, @NonNull java.util.concurrent.Executor, @NonNull android.telephony.TelephonyManager.BootstrapAuthenticationCallback);
     method @Deprecated @RequiresPermission(android.Manifest.permission.CALL_PHONE) public void call(String, String);
     method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public android.telephony.PinResult changeIccLockPin(@NonNull String, @NonNull String);
@@ -13469,7 +13478,6 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.REBOOT) public int prepareForUnattendedReboot();
     method @Deprecated @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean rebootRadio();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void registerCarrierPrivilegesCallback(int, @NonNull java.util.concurrent.Executor, @NonNull android.telephony.TelephonyManager.CarrierPrivilegesCallback);
-    method @Deprecated @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void removeCarrierPrivilegesListener(@NonNull android.telephony.TelephonyManager.CarrierPrivilegesListener);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void reportDefaultNetworkStatus(boolean);
     method @RequiresPermission(allOf={android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.MODIFY_PHONE_STATE}) public void requestCellInfoUpdate(@NonNull android.os.WorkSource, @NonNull java.util.concurrent.Executor, @NonNull android.telephony.TelephonyManager.CellInfoCallback);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void requestModemActivityInfo(@NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<android.telephony.ModemActivityInfo,android.telephony.TelephonyManager.ModemActivityInfoException>);
@@ -13628,10 +13636,6 @@ package android.telephony {
   public static interface TelephonyManager.CarrierPrivilegesCallback {
     method public void onCarrierPrivilegesChanged(@NonNull java.util.Set<java.lang.String>, @NonNull java.util.Set<java.lang.Integer>);
     method public default void onCarrierServiceChanged(@Nullable String, int);
-  }
-
-  @Deprecated public static interface TelephonyManager.CarrierPrivilegesListener {
-    method @Deprecated public void onCarrierPrivilegesChanged(@NonNull java.util.List<java.lang.String>, @NonNull int[]);
   }
 
   public static class TelephonyManager.ModemActivityInfoException extends java.lang.Exception {

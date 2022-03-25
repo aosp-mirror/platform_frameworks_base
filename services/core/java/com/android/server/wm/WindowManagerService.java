@@ -2627,6 +2627,19 @@ public class WindowManagerService extends IWindowManager.Stub
         return result;
     }
 
+    int updateViewVisibility(Session session, IWindow client, LayoutParams attrs,
+            int viewVisibility, MergedConfiguration outMergedConfiguration,
+            SurfaceControl outSurfaceControl, InsetsState outInsetsState,
+            InsetsSourceControl[] outActiveControls) {
+        // TODO(b/161810301): Finish the implementation.
+        return 0;
+    }
+
+    void updateWindowLayout(Session session, IWindow client, LayoutParams attrs, int flags,
+            ClientWindowFrames clientWindowFrames, int requestedWidth, int requestedHeight) {
+        // TODO(b/161810301): Finish the implementation.
+    }
+
     public boolean outOfMemoryWindow(Session session, IWindow client) {
         final long origId = Binder.clearCallingIdentity();
 
@@ -9032,13 +9045,18 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         TaskSnapshot taskSnapshot;
-        synchronized (mGlobalLock) {
-            Task task = mRoot.anyTaskForId(taskId, MATCH_ATTACHED_TASK_OR_RECENT_TASKS);
-            if (task == null) {
-                throw new IllegalArgumentException(
-                        "Failed to find matching task for taskId=" + taskId);
+        final long token = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                Task task = mRoot.anyTaskForId(taskId, MATCH_ATTACHED_TASK_OR_RECENT_TASKS);
+                if (task == null) {
+                    throw new IllegalArgumentException(
+                            "Failed to find matching task for taskId=" + taskId);
+                }
+                taskSnapshot = mTaskSnapshotController.captureTaskSnapshot(task, false);
             }
-            taskSnapshot = mTaskSnapshotController.captureTaskSnapshot(task, false);
+        } finally {
+            Binder.restoreCallingIdentity(token);
         }
 
         if (taskSnapshot == null || taskSnapshot.getHardwareBuffer() == null) {

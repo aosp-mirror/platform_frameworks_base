@@ -903,7 +903,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
         doReturn(100).when(hardwareBuffer).getHeight();
     }
 
-    private static ComponentName getUniqueComponentName() {
+    static ComponentName getUniqueComponentName() {
         return ComponentName.createRelative(DEFAULT_COMPONENT_PACKAGE_NAME,
                 DEFAULT_COMPONENT_CLASS_NAME + sCurrentActivityId++);
     }

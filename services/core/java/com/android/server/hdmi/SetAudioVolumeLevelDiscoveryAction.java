@@ -16,7 +16,6 @@
 
 package com.android.server.hdmi;
 
-import static android.hardware.hdmi.DeviceFeatures.FEATURE_NOT_SUPPORTED;
 import static android.hardware.hdmi.DeviceFeatures.FEATURE_SUPPORTED;
 
 import static com.android.server.hdmi.Constants.MESSAGE_SET_AUDIO_VOLUME_LEVEL;
@@ -78,13 +77,13 @@ public class SetAudioVolumeLevelDiscoveryAction extends HdmiCecFeatureAction {
     }
 
     private boolean handleFeatureAbort(HdmiCecMessage cmd) {
+        if (cmd.getParams().length < 2) {
+            return false;
+        }
         int originalOpcode = cmd.getParams()[0] & 0xFF;
         if (originalOpcode == MESSAGE_SET_AUDIO_VOLUME_LEVEL && cmd.getSource() == mTargetAddress) {
-            if (updateAvcSupport(FEATURE_NOT_SUPPORTED)) {
-                finishWithCallback(HdmiControlManager.RESULT_SUCCESS);
-            } else {
-                finishWithCallback(HdmiControlManager.RESULT_EXCEPTION);
-            }
+            // No need to update the network, since it should already have processed this message.
+            finishWithCallback(HdmiControlManager.RESULT_SUCCESS);
             return true;
         }
         return false;
@@ -107,7 +106,7 @@ public class SetAudioVolumeLevelDiscoveryAction extends HdmiCecFeatureAction {
      */
     private boolean updateAvcSupport(
             @DeviceFeatures.FeatureSupportStatus int setAudioVolumeLevelSupport) {
-        HdmiCecNetwork network = source().mService.getHdmiCecNetwork();
+        HdmiCecNetwork network = localDevice().mService.getHdmiCecNetwork();
         HdmiDeviceInfo currentDeviceInfo = network.getCecDeviceInfo(mTargetAddress);
 
         if (currentDeviceInfo == null) {

@@ -25,27 +25,27 @@
     <string name="permission_apps" msgid="6142133265286656158">"Праграмы"</string>
     <string name="permission_apps_summary" msgid="798718816711515431">"Трансліруйце змесціва праграм з вашага тэлефона"</string>
     <string name="title_app_streaming" msgid="2270331024626446950">"Дазвольце праграме &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; мець доступ да гэтай інфармацыі з вашага тэлефона"</string>
-    <string name="summary_app_streaming" product="default" msgid="6105916810614498138">"Дазвольце праграме &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; атрымліваць аддалены доступ да праграм, усталяваных на тэлефоне &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; (калі тэлефон падключаны)."</string>
-    <string name="summary_app_streaming" product="tablet" msgid="2996373715966272792">"Дазвольце праграме &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; атрымліваць аддалены доступ да праграм, усталяваных на планшэце &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; (калі планшэт падключаны)."</string>
-    <string name="summary_app_streaming" product="device" msgid="7614171699434639963">"Дазвольце праграме &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; атрымліваць аддалены доступ да праграм, усталяваных на прыладзе &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; (калі прылада падключана)."</string>
     <string name="helper_title_app_streaming" msgid="4151687003439969765">"Сэрвісы для некалькіх прылад"</string>
-    <string name="helper_summary_app_streaming" msgid="5344341720432827388">"Гэты сэрвіс выкарыстоўваецца для перадачы праграм плынню паміж прыладамі"</string>
+    <!-- no translation found for helper_summary_app_streaming (7380294597268573523) -->
+    <skip />
     <string name="title_automotive_projection" msgid="3296005598978412847"></string>
     <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
     <string name="title_computer" msgid="4693714143506569253">"Дазвольце праграме &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; мець доступ да гэтай інфармацыі з вашага тэлефона"</string>
     <string name="summary_computer" msgid="3798467601598297062"></string>
     <string name="permission_notification" msgid="693762568127741203">"Апавяшчэнні"</string>
-    <string name="permission_notification_summary" msgid="4398672775023193663">"Можа счытваць усе апавяшчэнні, уключаючы паведамленні, фота і інфармацыю пра кантакты"</string>
+    <!-- no translation found for permission_notification_summary (884075314530071011) -->
+    <skip />
     <string name="permission_storage" msgid="6831099350839392343">"Фота і медыяфайлы"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
     <string name="helper_title_computer" msgid="4671071173916176037">"Сэрвісы Google Play"</string>
-    <string name="helper_summary_computer" product="default" msgid="467996390095403648">"Гэты сэрвіс абагульвае з іншымі прыладамі фота, медыяфайлы і апавяшчэнні, якія захоўваюцца на вашым тэлефоне"</string>
-    <string name="helper_summary_computer" product="tablet" msgid="467996390095403648">"Гэты сэрвіс абагульвае з іншымі прыладамі фота, медыяфайлы і апавяшчэнні, якія захоўваюцца на вашым тэлефоне"</string>
+    <!-- no translation found for helper_summary_computer (1676407599909474428) -->
+    <skip />
     <string name="profile_name_generic" msgid="6851028682723034988">"прылада"</string>
     <string name="summary_generic" msgid="2346762210105903720"></string>
     <string name="consent_yes" msgid="8344487259618762872">"Дазволіць"</string>
     <string name="consent_no" msgid="2640796915611404382">"Не дазваляць"</string>
-    <string name="consent_ok" msgid="3662376764371001106">"ОК"</string>
+    <!-- no translation found for consent_back (2560683030046918882) -->
+    <skip />
     <string name="permission_sync_confirmation_title" msgid="667074294393493186">"Перанос дазволаў праграм на ваш гадзіннік"</string>
     <string name="permission_sync_summary" msgid="8873391306499120778">"Для праграм, усталяваных на гадзіннік падчас наладжвання, будуць дзейнічаць тыя самыя дазволы, што і на тэлефоне.\n\n Так гадзіннік можа атрымаць доступ да мікрафона і даных пра месцазнаходжанне."</string>
 </resources>

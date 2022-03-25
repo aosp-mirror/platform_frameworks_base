@@ -8,9 +8,6 @@ package android {
   public static final class Manifest.permission {
     ctor public Manifest.permission();
     field public static final String ACCEPT_HANDOVER = "android.permission.ACCEPT_HANDOVER";
-    field public static final String ACCESS_ADSERVICES_ATTRIBUTION = "android.permission.ACCESS_ADSERVICES_ATTRIBUTION";
-    field public static final String ACCESS_ADSERVICES_CUSTOM_AUDIENCES = "android.permission.ACCESS_ADSERVICES_CUSTOM_AUDIENCES";
-    field public static final String ACCESS_ADSERVICES_TOPICS = "android.permission.ACCESS_ADSERVICES_TOPICS";
     field public static final String ACCESS_BACKGROUND_LOCATION = "android.permission.ACCESS_BACKGROUND_LOCATION";
     field public static final String ACCESS_BLOBS_ACROSS_USERS = "android.permission.ACCESS_BLOBS_ACROSS_USERS";
     field public static final String ACCESS_CHECKIN_PROPERTIES = "android.permission.ACCESS_CHECKIN_PROPERTIES";
@@ -854,6 +851,7 @@ package android {
     field public static final int indicatorRight = 16843022; // 0x101010e
     field public static final int indicatorStart = 16843729; // 0x10103d1
     field public static final int inflatedId = 16842995; // 0x10100f3
+    field public static final int inheritKeyStoreKeys;
     field public static final int inheritShowWhenLocked = 16844188; // 0x101059c
     field public static final int initOrder = 16842778; // 0x101001a
     field public static final int initialKeyguardLayout = 16843714; // 0x10103c2
@@ -10440,11 +10438,13 @@ package android.content {
     field public static final String EXTRA_LOCAL_ONLY = "android.intent.extra.LOCAL_ONLY";
     field public static final String EXTRA_LOCUS_ID = "android.intent.extra.LOCUS_ID";
     field public static final String EXTRA_MIME_TYPES = "android.intent.extra.MIME_TYPES";
+    field public static final String EXTRA_NEW_UID = "android.intent.extra.NEW_UID";
     field public static final String EXTRA_NOT_UNKNOWN_SOURCE = "android.intent.extra.NOT_UNKNOWN_SOURCE";
     field public static final String EXTRA_ORIGINATING_URI = "android.intent.extra.ORIGINATING_URI";
     field public static final String EXTRA_PACKAGE_NAME = "android.intent.extra.PACKAGE_NAME";
     field public static final String EXTRA_PERMISSION_GROUP_NAME = "android.intent.extra.PERMISSION_GROUP_NAME";
     field public static final String EXTRA_PHONE_NUMBER = "android.intent.extra.PHONE_NUMBER";
+    field public static final String EXTRA_PREVIOUS_UID = "android.intent.extra.PREVIOUS_UID";
     field public static final String EXTRA_PROCESS_TEXT = "android.intent.extra.PROCESS_TEXT";
     field public static final String EXTRA_PROCESS_TEXT_READONLY = "android.intent.extra.PROCESS_TEXT_READONLY";
     field public static final String EXTRA_QUICK_VIEW_FEATURES = "android.intent.extra.QUICK_VIEW_FEATURES";
@@ -10476,6 +10476,7 @@ package android.content {
     field public static final String EXTRA_TIMEZONE = "time-zone";
     field public static final String EXTRA_TITLE = "android.intent.extra.TITLE";
     field public static final String EXTRA_UID = "android.intent.extra.UID";
+    field public static final String EXTRA_UID_CHANGING = "android.intent.extra.UID_CHANGING";
     field public static final String EXTRA_USER = "android.intent.extra.USER";
     field public static final String EXTRA_USER_INITIATED = "android.intent.extra.USER_INITIATED";
     field public static final int FILL_IN_ACTION = 1; // 0x1
@@ -24461,6 +24462,7 @@ package android.media.metrics {
     method public void close();
     method @NonNull public android.media.metrics.LogSessionId getSessionId();
     method public void reportBundleMetrics(@NonNull android.os.PersistableBundle);
+    field public static final String KEY_STATSD_ATOM = "bundlesession-statsd-atom";
   }
 
   public final class EditingSession implements java.lang.AutoCloseable {
@@ -24484,6 +24486,7 @@ package android.media.metrics {
     method @NonNull public android.media.metrics.PlaybackSession createPlaybackSession();
     method @NonNull public android.media.metrics.RecordingSession createRecordingSession();
     method @NonNull public android.media.metrics.TranscodingSession createTranscodingSession();
+    method @NonNull public void releaseSessionId(@NonNull String);
     field public static final long INVALID_TIMESTAMP = -1L; // 0xffffffffffffffffL
   }
 

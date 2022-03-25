@@ -894,10 +894,17 @@ public class NotificationPanelViewController extends PanelViewController {
                         mDepthController.setBlursDisabledForUnlock(mTracking);
 
                         if (playingCannedAnimation && !isWakeAndUnlock) {
-                            // Fling the panel away so it's not in the way or the surface behind the
+                            // Hide the panel so it's not in the way or the surface behind the
                             // keyguard, which will be appearing. If we're wake and unlocking, the
                             // lock screen is hidden instantly so should not be flung away.
-                            fling(0f, false, 0.7f, false);
+                            if (isTracking() || isFlinging()) {
+                                // Instant collpase the notification panel since the notification
+                                // panel is already in the middle animating
+                                onTrackingStopped(false);
+                                instantCollapse();
+                            } else {
+                                fling(0f, false, 0.7f, false);
+                            }
                         }
                     }
                 });
