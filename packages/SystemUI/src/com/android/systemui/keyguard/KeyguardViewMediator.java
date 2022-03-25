@@ -900,7 +900,7 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
      * ActivityLaunchAnimator since we're just translating down, rather than emerging from a view
      * or the power button.
      */
-    private IRemoteAnimationRunner mUnoccludeAnimationRunner =
+    private final IRemoteAnimationRunner mUnoccludeAnimationRunner =
             new IRemoteAnimationRunner.Stub() {
 
                 @Nullable private ValueAnimator mUnoccludeAnimator;
@@ -965,6 +965,7 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
                             public void onAnimationEnd(Animator animation) {
                                 try {
                                     finishedCallback.onAnimationFinished();
+                                    mUnoccludeAnimator = null;
                                 } catch (RemoteException e) {
                                     e.printStackTrace();
                                 }
