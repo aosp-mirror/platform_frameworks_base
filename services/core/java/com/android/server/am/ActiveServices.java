@@ -2894,6 +2894,12 @@ public final class ActiveServices {
                 s.isNotAppComponentUsage = true;
             }
 
+            if (s.app != null && s.app.mState != null
+                    && s.app.mState.getCurProcState() <= PROCESS_STATE_TOP
+                    && (flags & Context.BIND_ALMOST_PERCEPTIBLE) != 0) {
+                s.lastTopAlmostPerceptibleBindRequestUptimeMs = SystemClock.uptimeMillis();
+            }
+
             if (s.app != null) {
                 updateServiceClientActivitiesLocked(s.app.mServices, c, true);
             }
@@ -4797,6 +4803,10 @@ public final class ActiveServices {
             // And do the same for bg activity starts ability.
             if ((c.flags & Context.BIND_ALLOW_BACKGROUND_ACTIVITY_STARTS) != 0) {
                 s.updateIsAllowedBgActivityStartsByBinding();
+            }
+            // And for almost perceptible exceptions.
+            if ((c.flags & Context.BIND_ALMOST_PERCEPTIBLE) != 0) {
+                psr.updateHasTopStartedAlmostPerceptibleServices();
             }
             if (s.app != null) {
                 updateServiceClientActivitiesLocked(s.app.mServices, c, true);
