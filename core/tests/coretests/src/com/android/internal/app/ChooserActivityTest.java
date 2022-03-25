@@ -3070,8 +3070,15 @@ public class ChooserActivityTest {
     // framework code on the device is up-to-date.
     // TODO: is there a better way to do this? (Other than abandoning inheritance-based DI wrapper?)
     private int getRuntimeResourceId(String name, String defType) {
-        int id = mActivityRule.getActivity().getResources().getIdentifier(name, defType, "android");
+        int id = -1;
+        if (ChooserActivityOverrideData.getInstance().resources != null) {
+            id = ChooserActivityOverrideData.getInstance().resources.getIdentifier(
+                  name, defType, "android");
+        } else {
+            id = mActivityRule.getActivity().getResources().getIdentifier(name, defType, "android");
+        }
         assertThat(id, greaterThan(0));
+
         return id;
     }
 }
