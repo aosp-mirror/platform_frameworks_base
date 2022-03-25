@@ -13985,16 +13985,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                         return;
                     }
                 }
-                try {
-                    if (!isRuntimePermission(permission)) {
-                        callback.sendResult(null);
-                        return;
-                    }
-                } catch (NameNotFoundException e) {
-                    throw new RemoteException("Cannot check if " + permission
-                            + "is a runtime permission", e, false, true);
+                if (!isRuntimePermission(permission)) {
+                    callback.sendResult(null);
+                    return;
                 }
-
                 if (grantState == DevicePolicyManager.PERMISSION_GRANT_STATE_GRANTED
                         || grantState == DevicePolicyManager.PERMISSION_GRANT_STATE_DENIED
                         || grantState == DevicePolicyManager.PERMISSION_GRANT_STATE_DEFAULT) {
@@ -14107,11 +14101,15 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         });
     }
 
-    public boolean isRuntimePermission(String permissionName) throws NameNotFoundException {
-        final PackageManager packageManager = mInjector.getPackageManager();
-        PermissionInfo permissionInfo = packageManager.getPermissionInfo(permissionName, 0);
-        return (permissionInfo.protectionLevel & PermissionInfo.PROTECTION_MASK_BASE)
-                == PermissionInfo.PROTECTION_DANGEROUS;
+    private boolean isRuntimePermission(String permissionName) {
+        try {
+            final PackageManager packageManager = mInjector.getPackageManager();
+            PermissionInfo permissionInfo = packageManager.getPermissionInfo(permissionName, 0);
+            return (permissionInfo.protectionLevel & PermissionInfo.PROTECTION_MASK_BASE)
+                    == PermissionInfo.PROTECTION_DANGEROUS;
+        } catch (NameNotFoundException e) {
+            return false;
+        }
     }
 
     @Override
