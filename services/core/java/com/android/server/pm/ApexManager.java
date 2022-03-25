@@ -214,7 +214,7 @@ public abstract class ApexManager {
      * @return {@code true} if this package is pre-installed, {@code false} otherwise.
      */
     public static boolean isFactory(@NonNull PackageInfo packageInfo) {
-        return (packageInfo.applicationInfo.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) == 0;
+        return (packageInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
     }
 
     /**
