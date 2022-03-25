@@ -681,6 +681,7 @@ public class LocationManager {
      */
     @SystemApi
     @RequiresPermission(LOCATION_BYPASS)
+    @RequiresFeature(PackageManager.FEATURE_AUTOMOTIVE)
     public void setAdasGnssLocationEnabled(boolean enabled) {
         try {
             mService.setAdasGnssLocationEnabledForUser(enabled, mContext.getUser().getIdentifier());
