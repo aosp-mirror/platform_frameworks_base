@@ -190,6 +190,13 @@ public class ClipboardOverlayController {
             }
         });
 
+        mTextPreview.getViewTreeObserver().addOnPreDrawListener(() -> {
+            int availableHeight = mTextPreview.getHeight()
+                    - (mTextPreview.getPaddingTop() + mTextPreview.getPaddingBottom());
+            mTextPreview.setMaxLines(availableHeight / mTextPreview.getLineHeight());
+            return true;
+        });
+
         mDismissButton.setOnClickListener(view -> animateOut());
 
         mEditChip.setIcon(Icon.createWithResource(mContext, R.drawable.ic_screenshot_edit), true);

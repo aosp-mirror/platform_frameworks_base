@@ -899,7 +899,7 @@ public class BubbleStackView extends FrameLayout
                     mStackAnimationController.updateResources();
                     mBubbleOverflow.updateResources();
 
-                    if (mRelativeStackPositionBeforeRotation != null) {
+                    if (!isStackEduShowing() && mRelativeStackPositionBeforeRotation != null) {
                         mStackAnimationController.setStackPosition(
                                 mRelativeStackPositionBeforeRotation);
                         mRelativeStackPositionBeforeRotation = null;
@@ -1200,6 +1200,8 @@ public class BubbleStackView extends FrameLayout
             addView(mStackEduView);
         }
         mBubbleContainer.bringToFront();
+        // Ensure the stack is in the correct spot
+        mStackAnimationController.setStackPosition(mPositioner.getDefaultStartPosition());
         return mStackEduView.show(mPositioner.getDefaultStartPosition());
     }
 
@@ -1214,6 +1216,8 @@ public class BubbleStackView extends FrameLayout
             mStackEduView = new StackEducationView(mContext, mPositioner, mBubbleController);
             addView(mStackEduView);
             mBubbleContainer.bringToFront(); // Stack appears on top of the stack education
+            // Ensure the stack is in the correct spot
+            mStackAnimationController.setStackPosition(mPositioner.getDefaultStartPosition());
             mStackEduView.show(mPositioner.getDefaultStartPosition());
         }
         if (mManageEduView != null && mManageEduView.getVisibility() == VISIBLE) {
@@ -1331,10 +1335,12 @@ public class BubbleStackView extends FrameLayout
         mStackAnimationController.updateResources();
         mDismissView.updateResources();
         mMagneticTarget.setMagneticFieldRadiusPx(mBubbleSize * 2);
-        mStackAnimationController.setStackPosition(
-                new RelativeStackPosition(
-                        mPositioner.getRestingPosition(),
-                        mStackAnimationController.getAllowableStackPositionRegion()));
+        if (!isStackEduShowing()) {
+            mStackAnimationController.setStackPosition(
+                    new RelativeStackPosition(
+                            mPositioner.getRestingPosition(),
+                            mStackAnimationController.getAllowableStackPositionRegion()));
+        }
         if (mIsExpanded) {
             updateExpandedView();
         }

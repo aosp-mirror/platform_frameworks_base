@@ -540,13 +540,15 @@ public class ComplicationLayoutEngine implements Complication.VisibilityControll
     /**
      * Removes a complication by {@link ComplicationId}.
      */
-    public void removeComplication(ComplicationId id) {
-        if (!mEntries.containsKey(id)) {
+    public boolean removeComplication(ComplicationId id) {
+        final ViewEntry entry = mEntries.remove(id);
+
+        if (entry == null) {
             Log.e(TAG, "could not find id:" + id);
-            return;
+            return false;
         }
 
-        final ViewEntry entry = mEntries.get(id);
         entry.remove();
+        return true;
     }
 }

@@ -108,6 +108,32 @@ void NativeDisplayEventReceiver::dispose() {
     DisplayEventDispatcher::dispose();
 }
 
+static jobject createJavaVsyncEventData(JNIEnv* env, VsyncEventData vsyncEventData) {
+    ScopedLocalRef<jobjectArray>
+            frameTimelineObjs(env,
+                              env->NewObjectArray(VsyncEventData::kFrameTimelinesLength,
+                                                  gDisplayEventReceiverClassInfo
+                                                          .frameTimelineClassInfo.clazz,
+                                                  /*initial element*/ NULL));
+    for (int i = 0; i < VsyncEventData::kFrameTimelinesLength; i++) {
+        VsyncEventData::FrameTimeline frameTimeline = vsyncEventData.frameTimelines[i];
+        ScopedLocalRef<jobject>
+                frameTimelineObj(env,
+                                 env->NewObject(gDisplayEventReceiverClassInfo
+                                                        .frameTimelineClassInfo.clazz,
+                                                gDisplayEventReceiverClassInfo
+                                                        .frameTimelineClassInfo.init,
+                                                frameTimeline.vsyncId,
+                                                frameTimeline.expectedPresentationTime,
+                                                frameTimeline.deadlineTimestamp));
+        env->SetObjectArrayElement(frameTimelineObjs.get(), i, frameTimelineObj.get());
+    }
+    return env->NewObject(gDisplayEventReceiverClassInfo.vsyncEventDataClassInfo.clazz,
+                          gDisplayEventReceiverClassInfo.vsyncEventDataClassInfo.init,
+                          frameTimelineObjs.get(), vsyncEventData.preferredFrameTimelineIndex,
+                          vsyncEventData.frameInterval);
+}
+
 void NativeDisplayEventReceiver::dispatchVsync(nsecs_t timestamp, PhysicalDisplayId displayId,
                                                uint32_t count, VsyncEventData vsyncEventData) {
     JNIEnv* env = AndroidRuntime::getJNIEnv();
@@ -116,37 +142,9 @@ void NativeDisplayEventReceiver::dispatchVsync(nsecs_t timestamp, PhysicalDispla
     if (receiverObj.get()) {
         ALOGV("receiver %p ~ Invoking vsync handler.", this);
 
-        ScopedLocalRef<jobjectArray>
-                frameTimelineObjs(env,
-                                  env->NewObjectArray(VsyncEventData::kFrameTimelinesLength,
-                                                      gDisplayEventReceiverClassInfo
-                                                              .frameTimelineClassInfo.clazz,
-                                                      /*initial element*/ NULL));
-        for (int i = 0; i < VsyncEventData::kFrameTimelinesLength; i++) {
-            VsyncEventData::FrameTimeline frameTimeline = vsyncEventData.frameTimelines[i];
-            ScopedLocalRef<jobject>
-                    frameTimelineObj(env,
-                                     env->NewObject(gDisplayEventReceiverClassInfo
-                                                            .frameTimelineClassInfo.clazz,
-                                                    gDisplayEventReceiverClassInfo
-                                                            .frameTimelineClassInfo.init,
-                                                    frameTimeline.vsyncId,
-                                                    frameTimeline.expectedPresentationTime,
-                                                    frameTimeline.deadlineTimestamp));
-            env->SetObjectArrayElement(frameTimelineObjs.get(), i, frameTimelineObj.get());
-        }
-        ScopedLocalRef<jobject>
-                vsyncEventDataJava(env,
-                                   env->NewObject(gDisplayEventReceiverClassInfo
-                                                          .vsyncEventDataClassInfo.clazz,
-                                                  gDisplayEventReceiverClassInfo
-                                                          .vsyncEventDataClassInfo.init,
-                                                  frameTimelineObjs.get(),
-                                                  vsyncEventData.preferredFrameTimelineIndex,
-                                                  vsyncEventData.frameInterval));
-
+        jobject javaVsyncEventData = createJavaVsyncEventData(env, vsyncEventData);
         env->CallVoidMethod(receiverObj.get(), gDisplayEventReceiverClassInfo.dispatchVsync,
-                            timestamp, displayId.value, count, vsyncEventDataJava.get());
+                            timestamp, displayId.value, count, javaVsyncEventData);
         ALOGV("receiver %p ~ Returned from vsync handler.", this);
     }
 
@@ -255,19 +253,27 @@ static void nativeScheduleVsync(JNIEnv* env, jclass clazz, jlong receiverPtr) {
     }
 }
 
+static jobject nativeGetLatestVsyncEventData(JNIEnv* env, jclass clazz, jlong receiverPtr) {
+    sp<NativeDisplayEventReceiver> receiver =
+            reinterpret_cast<NativeDisplayEventReceiver*>(receiverPtr);
+    gui::ParcelableVsyncEventData parcelableVsyncEventData;
+    status_t status = receiver->getLatestVsyncEventData(&parcelableVsyncEventData);
+    if (status) {
+        ALOGW("Failed to get latest vsync event data from surface flinger");
+        return NULL;
+    }
+    return createJavaVsyncEventData(env, parcelableVsyncEventData.vsync);
+}
 
 static const JNINativeMethod gMethods[] = {
-    /* name, signature, funcPtr */
-    { "nativeInit",
-            "(Ljava/lang/ref/WeakReference;Landroid/os/MessageQueue;II)J",
-            (void*)nativeInit },
-    { "nativeDispose",
-            "(J)V",
-            (void*)nativeDispose },
-    // @FastNative
-    { "nativeScheduleVsync", "(J)V",
-            (void*)nativeScheduleVsync }
-};
+        /* name, signature, funcPtr */
+        {"nativeInit", "(Ljava/lang/ref/WeakReference;Landroid/os/MessageQueue;II)J",
+         (void*)nativeInit},
+        {"nativeDispose", "(J)V", (void*)nativeDispose},
+        // @FastNative
+        {"nativeScheduleVsync", "(J)V", (void*)nativeScheduleVsync},
+        {"nativeGetLatestVsyncEventData", "(J)Landroid/view/DisplayEventReceiver$VsyncEventData;",
+         (void*)nativeGetLatestVsyncEventData}};
 
 int register_android_view_DisplayEventReceiver(JNIEnv* env) {
     int res = RegisterMethodsOrDie(env, "android/view/DisplayEventReceiver", gMethods,

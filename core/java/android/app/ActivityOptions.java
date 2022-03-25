@@ -361,6 +361,10 @@ public class ActivityOptions extends ComponentOptions {
     private static final String KEY_LAUNCH_INTO_PIP_PARAMS =
             "android.activity.launchIntoPipParams";
 
+    /** See {@link #setDismissKeyguardIfInsecure()}. */
+    private static final String KEY_DISMISS_KEYGUARD_IF_INSECURE =
+            "android.activity.dismissKeyguardIfInsecure";
+
     /**
      * @see #setLaunchCookie
      * @hide
@@ -457,6 +461,7 @@ public class ActivityOptions extends ComponentOptions {
     private boolean mLaunchedFromBubble;
     private boolean mTransientLaunch;
     private PictureInPictureParams mLaunchIntoPipParams;
+    private boolean mDismissKeyguardIfInsecure;
 
     /**
      * Create an ActivityOptions specifying a custom animation to run when
@@ -1254,6 +1259,7 @@ public class ActivityOptions extends ComponentOptions {
         mLaunchIntoPipParams = opts.getParcelable(KEY_LAUNCH_INTO_PIP_PARAMS);
         mIsEligibleForLegacyPermissionPrompt =
                 opts.getBoolean(KEY_LEGACY_PERMISSION_PROMPT_ELIGIBLE);
+        mDismissKeyguardIfInsecure = opts.getBoolean(KEY_DISMISS_KEYGUARD_IF_INSECURE);
     }
 
     /**
@@ -1850,6 +1856,27 @@ public class ActivityOptions extends ComponentOptions {
     }
 
     /**
+     * Sets whether the insecure keyguard should go away when this activity launches. In case the
+     * keyguard is secure, this option will be ignored.
+     *
+     * @see Activity#setShowWhenLocked(boolean)
+     * @see android.R.attr#showWhenLocked
+     * @hide
+     */
+    public void setDismissKeyguardIfInsecure() {
+        mDismissKeyguardIfInsecure = true;
+    }
+
+    /**
+     * @see #setDismissKeyguardIfInsecure()
+     * @return whether the insecure keyguard should go away when the activity launches.
+     * @hide
+     */
+    public boolean getDismissKeyguardIfInsecure() {
+        return mDismissKeyguardIfInsecure;
+    }
+
+    /**
      * Update the current values in this ActivityOptions from those supplied
      * in <var>otherOptions</var>.  Any values
      * defined in <var>otherOptions</var> replace those in the base options.
@@ -2109,6 +2136,9 @@ public class ActivityOptions extends ComponentOptions {
         if (mIsEligibleForLegacyPermissionPrompt) {
             b.putBoolean(KEY_LEGACY_PERMISSION_PROMPT_ELIGIBLE,
                     mIsEligibleForLegacyPermissionPrompt);
+        }
+        if (mDismissKeyguardIfInsecure) {
+            b.putBoolean(KEY_DISMISS_KEYGUARD_IF_INSECURE, mDismissKeyguardIfInsecure);
         }
         return b;
     }

@@ -17,7 +17,10 @@
 package com.android.systemui.dreams;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyFloat;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -25,12 +28,17 @@ import android.content.res.Resources;
 import android.os.Handler;
 import android.testing.AndroidTestingRunner;
 import android.view.ViewGroup;
+import android.view.ViewRootImpl;
 import android.view.ViewTreeObserver;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dreams.complication.ComplicationHostViewController;
+import com.android.systemui.statusbar.BlurUtils;
+import com.android.systemui.statusbar.phone.KeyguardBouncer;
+import com.android.systemui.statusbar.phone.KeyguardBouncer.BouncerExpansionCallback;
+import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -67,6 +75,18 @@ public class DreamOverlayContainerViewControllerTest extends SysuiTestCase {
     @Mock
     Handler mHandler;
 
+    @Mock
+    BlurUtils mBlurUtils;
+
+    @Mock
+    StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
+
+    @Mock
+    KeyguardBouncer mBouncer;
+
+    @Mock
+    ViewRootImpl mViewRoot;
+
     DreamOverlayContainerViewController mController;
 
     @Before
@@ -75,12 +95,16 @@ public class DreamOverlayContainerViewControllerTest extends SysuiTestCase {
 
         when(mDreamOverlayContainerView.getResources()).thenReturn(mResources);
         when(mDreamOverlayContainerView.getViewTreeObserver()).thenReturn(mViewTreeObserver);
+        when(mStatusBarKeyguardViewManager.getBouncer()).thenReturn(mBouncer);
+        when(mDreamOverlayContainerView.getViewRootImpl()).thenReturn(mViewRoot);
 
         mController = new DreamOverlayContainerViewController(
                 mDreamOverlayContainerView,
                 mComplicationHostViewController,
                 mDreamOverlayContentView,
                 mDreamOverlayStatusBarViewController,
+                mStatusBarKeyguardViewManager,
+                mBlurUtils,
                 mHandler,
                 MAX_BURN_IN_OFFSET,
                 BURN_IN_PROTECTION_UPDATE_INTERVAL,
@@ -124,5 +148,35 @@ public class DreamOverlayContainerViewControllerTest extends SysuiTestCase {
                 runnableCaptor.capture(), eq(BURN_IN_PROTECTION_UPDATE_INTERVAL));
         runnableCaptor.getValue().run();
         verify(mHandler).postDelayed(runnableCaptor.getValue(), BURN_IN_PROTECTION_UPDATE_INTERVAL);
+    }
+
+    @Test
+    public void testBouncerAnimation_doesNotApply() {
+        final ArgumentCaptor<BouncerExpansionCallback> bouncerExpansionCaptor =
+                ArgumentCaptor.forClass(BouncerExpansionCallback.class);
+        mController.onViewAttached();
+        verify(mBouncer).addBouncerExpansionCallback(bouncerExpansionCaptor.capture());
+
+        bouncerExpansionCaptor.getValue().onExpansionChanged(0.5f);
+        verify(mBlurUtils, never()).applyBlur(eq(mViewRoot), anyInt(), eq(false));
+        verify(mDreamOverlayContainerView, never()).setAlpha(anyFloat());
+    }
+
+    @Test
+    public void testBouncerAnimation_updateBlurAndAlpha() {
+        final ArgumentCaptor<BouncerExpansionCallback> bouncerExpansionCaptor =
+                ArgumentCaptor.forClass(BouncerExpansionCallback.class);
+        mController.onViewAttached();
+        verify(mBouncer).addBouncerExpansionCallback(bouncerExpansionCaptor.capture());
+
+        final float blurRadius = 1337f;
+        when(mBlurUtils.blurRadiusOfRatio(anyFloat())).thenReturn(blurRadius);
+
+        bouncerExpansionCaptor.getValue().onStartingToShow();
+        final float bouncerHideAmount = 0.1f;
+        bouncerExpansionCaptor.getValue().onExpansionChanged(bouncerHideAmount);
+        verify(mBlurUtils).blurRadiusOfRatio(1 - bouncerHideAmount);
+        verify(mBlurUtils).applyBlur(mViewRoot, (int) blurRadius, false);
+        verify(mDreamOverlayContainerView).setAlpha(bouncerHideAmount);
     }
 }

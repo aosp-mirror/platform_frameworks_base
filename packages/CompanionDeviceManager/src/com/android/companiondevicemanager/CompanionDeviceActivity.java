@@ -38,6 +38,7 @@ import static com.android.companiondevicemanager.Utils.getHtmlFromResources;
 import static com.android.companiondevicemanager.Utils.getIcon;
 import static com.android.companiondevicemanager.Utils.getVendorHeaderIcon;
 import static com.android.companiondevicemanager.Utils.getVendorHeaderName;
+import static com.android.companiondevicemanager.Utils.hasVendorIcon;
 import static com.android.companiondevicemanager.Utils.prepareResultReceiverForIpc;
 
 import static java.util.Objects.requireNonNull;
@@ -285,7 +286,7 @@ public class CompanionDeviceActivity extends FragmentActivity implements
         mVendorHeaderButton.setOnClickListener(this::onShowHelperDialog);
 
         if (mRequest.isSelfManaged()) {
-            initUiForSelfManagedAssociation(appLabel);
+            initUiForSelfManagedAssociation();
         } else if (mRequest.isSingleDevice()) {
             initUiForSingleDevice(appLabel);
         } else {
@@ -396,7 +397,7 @@ public class CompanionDeviceActivity extends FragmentActivity implements
         finish();
     }
 
-    private void initUiForSelfManagedAssociation(CharSequence appLabel) {
+    private void initUiForSelfManagedAssociation() {
         if (DEBUG) Log.i(TAG, "initUiFor_SelfManaged_Association()");
 
         final CharSequence deviceName = mRequest.getDisplayName();
@@ -412,6 +413,12 @@ public class CompanionDeviceActivity extends FragmentActivity implements
         try {
             vendorIcon = getVendorHeaderIcon(this, packageName, userId);
             vendorName = getVendorHeaderName(this, packageName, userId);
+
+            mVendorHeaderImage.setImageDrawable(vendorIcon);
+            if (hasVendorIcon(this, packageName, userId)) {
+                mVendorHeaderImage.setColorFilter(getResources().getColor(
+                                android.R.color.system_accent1_600, /* Theme= */null));
+            }
         } catch (PackageManager.NameNotFoundException e) {
             Log.e(TAG, "Package u" + userId + "/" + packageName + " not found.");
             setResultAndFinish(null, RESULT_INTERNAL_ERROR);
@@ -446,9 +453,7 @@ public class CompanionDeviceActivity extends FragmentActivity implements
         mPermissionListRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         mTitle.setText(title);
-        mVendorHeaderImage.setImageDrawable(vendorIcon);
         mVendorHeaderName.setText(vendorName);
-
         mDeviceListRecyclerView.setVisibility(View.GONE);
         mProfileIcon.setVisibility(View.GONE);
         mVendorHeader.setVisibility(View.VISIBLE);
@@ -586,8 +591,7 @@ public class CompanionDeviceActivity extends FragmentActivity implements
     private void onShowHelperDialog(View view) {
         FragmentManager fragmentManager = getSupportFragmentManager();
         CompanionVendorHelperDialogFragment fragmentDialog =
-                CompanionVendorHelperDialogFragment.newInstance(mRequest.getPackageName(),
-                        mRequest.getUserId(), mRequest.getDeviceProfile());
+                CompanionVendorHelperDialogFragment.newInstance(mRequest);
 
         mAssociationConfirmationDialog.setVisibility(View.INVISIBLE);
 

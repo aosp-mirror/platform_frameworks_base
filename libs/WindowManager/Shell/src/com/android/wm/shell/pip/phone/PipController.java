@@ -89,6 +89,7 @@ import com.android.wm.shell.transition.Transitions;
 
 import java.io.PrintWriter;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Consumer;
 
 /**
@@ -136,6 +137,11 @@ public class PipController implements PipTransitionController.PipTransitionCallb
          * @param cornerRadius the pixel value of the corner radius, zero means it's disabled.
          */
         void onPipCornerRadiusChanged(int cornerRadius);
+
+        /**
+         * Notifies the listener that user leaves PiP by tapping on the expand button.
+         */
+        void onExpandPip();
     }
 
     /**
@@ -227,6 +233,14 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                     }
                     onDisplayChanged(mDisplayController.getDisplayLayout(displayId),
                             true /* saveRestoreSnapFraction */);
+                }
+
+                @Override
+                public void onKeepClearAreasChanged(int displayId, Set<Rect> restricted,
+                        Set<Rect> unrestricted) {
+                    if (mPipBoundsState.getDisplayId() == displayId) {
+                        mPipBoundsState.setKeepClearAreas(restricted, unrestricted);
+                    }
                 }
             };
 
@@ -643,6 +657,9 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         mTouchHandler.setTouchEnabled(false);
         if (mPinnedStackAnimationRecentsCallback != null) {
             mPinnedStackAnimationRecentsCallback.onPipAnimationStarted();
+            if (direction == TRANSITION_DIRECTION_LEAVE_PIP) {
+                mPinnedStackAnimationRecentsCallback.onExpandPip();
+            }
         }
     }
 
@@ -901,6 +918,11 @@ public class PipController implements PipTransitionController.PipTransitionCallb
             @Override
             public void onPipCornerRadiusChanged(int cornerRadius) {
                 mListener.call(l -> l.onPipCornerRadiusChanged(cornerRadius));
+            }
+
+            @Override
+            public void onExpandPip() {
+                mListener.call(l -> l.onExpandPip());
             }
         };
 

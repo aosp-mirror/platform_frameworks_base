@@ -641,6 +641,7 @@ public class CentralSurfaces extends CoreStartable implements
     private boolean mWallpaperSupported;
 
     private Runnable mLaunchTransitionEndRunnable;
+    private Runnable mLaunchTransitionCancelRunnable;
     private boolean mLaunchCameraWhenFinishedWaking;
     private boolean mLaunchCameraOnFinishedGoingToSleep;
     private boolean mLaunchEmergencyActionWhenFinishedWaking;
@@ -2967,12 +2968,15 @@ public class CentralSurfaces extends CoreStartable implements
      *
      * @param beforeFading the runnable to be run when the circle is fully expanded and the fading
      *                     starts
-     * @param endRunnable the runnable to be run when the transition is done
+     * @param endRunnable the runnable to be run when the transition is done. Will not run
+     *                    if the transition is cancelled, instead cancelRunnable will run
+     * @param cancelRunnable the runnable to be run if the transition is cancelled
      */
     public void fadeKeyguardAfterLaunchTransition(final Runnable beforeFading,
-            Runnable endRunnable) {
+            Runnable endRunnable, Runnable cancelRunnable) {
         mMessageRouter.cancelMessages(MSG_LAUNCH_TRANSITION_TIMEOUT);
         mLaunchTransitionEndRunnable = endRunnable;
+        mLaunchTransitionCancelRunnable = cancelRunnable;
         Runnable hideRunnable = () -> {
             mKeyguardStateController.setLaunchTransitionFadingAway(true);
             if (beforeFading != null) {
@@ -2992,6 +2996,15 @@ public class CentralSurfaces extends CoreStartable implements
         } else {
             hideRunnable.run();
         }
+    }
+
+    private void cancelAfterLaunchTransitionRunnables() {
+        if (mLaunchTransitionCancelRunnable != null) {
+            mLaunchTransitionCancelRunnable.run();
+        }
+        mLaunchTransitionEndRunnable = null;
+        mLaunchTransitionCancelRunnable = null;
+        mNotificationPanelViewController.setLaunchTransitionEndRunnable(null);
     }
 
     /**
@@ -3033,6 +3046,7 @@ public class CentralSurfaces extends CoreStartable implements
     }
 
     private void runLaunchTransitionEndRunnable() {
+        mLaunchTransitionCancelRunnable = null;
         if (mLaunchTransitionEndRunnable != null) {
             Runnable r = mLaunchTransitionEndRunnable;
 
@@ -3524,6 +3538,10 @@ public class CentralSurfaces extends CoreStartable implements
         public void onStartedGoingToSleep() {
             String tag = "CentralSurfaces#onStartedGoingToSleep";
             DejankUtils.startDetectingBlockingIpcs(tag);
+
+            //  cancel stale runnables that could put the device in the wrong state
+            cancelAfterLaunchTransitionRunnables();
+
             updateRevealEffect(false /* wakingUp */);
             updateNotificationPanelTouchState();
             maybeEscalateHeadsUp();
