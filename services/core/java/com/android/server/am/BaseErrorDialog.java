@@ -53,7 +53,7 @@ public class BaseErrorDialog extends AlertDialog {
         mHandler.sendEmptyMessage(DISABLE_BUTTONS);
         mHandler.sendMessageDelayed(mHandler.obtainMessage(ENABLE_BUTTONS), 1000);
         getContext().registerReceiver(mReceiver,
-                new IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
+                new IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS), Context.RECEIVER_EXPORTED);
     }
 
     @Override

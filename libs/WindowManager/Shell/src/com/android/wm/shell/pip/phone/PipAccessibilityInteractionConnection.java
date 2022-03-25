@@ -151,7 +151,7 @@ public class PipAccessibilityInteractionConnection {
                         result = true;
                         break;
                     case AccessibilityNodeInfo.ACTION_EXPAND:
-                        mMotionHelper.expandLeavePip();
+                        mMotionHelper.expandLeavePip(false /* skipAnimation */);
                         result = true;
                         break;
                     default:

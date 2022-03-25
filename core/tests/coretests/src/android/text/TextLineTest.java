@@ -48,7 +48,7 @@ public class TextLineTest {
         final TextLine tl = TextLine.obtain();
         tl.set(paint, line, 0, line.length(), Layout.DIR_LEFT_TO_RIGHT,
                 Layout.DIRS_ALL_LEFT_TO_RIGHT, false /* hasTabs */, null /* tabStops */,
-                0, 0 /* no ellipsis */);
+                0, 0 /* no ellipsis */, false /* useFallbackLinespace */);
         final float originalWidth = tl.metrics(null);
         final float expandedWidth = 2 * originalWidth;
 
@@ -105,7 +105,7 @@ public class TextLineTest {
         tl.set(paint, str, 0, str.length(),
                 TextDirectionHeuristics.FIRSTSTRONG_LTR.isRtl(str, 0, str.length()) ? -1 : 1,
                 layout.getLineDirections(0), tabStops != null, tabStops,
-                0, 0 /* no ellipsis */);
+                0, 0 /* no ellipsis */, false /* useFallbackLineSpacing */);
         return tl;
     }
 
@@ -276,7 +276,8 @@ public class TextLineTest {
 
         final TextLine tl = TextLine.obtain();
         tl.set(new TextPaint(), text, 0, text.length(), 1, Layout.DIRS_ALL_LEFT_TO_RIGHT,
-                false /* hasTabs */, null /* tabStops */, 9, 12);
+                false /* hasTabs */, null /* tabStops */, 9, 12,
+                false /* useFallbackLineSpacing */);
         tl.measure(text.length(), false /* trailing */, null /* fmi */);
 
         assertFalse(span.mIsUsed);
@@ -292,7 +293,8 @@ public class TextLineTest {
 
         final TextLine tl = TextLine.obtain();
         tl.set(new TextPaint(), text, 0, text.length(), 1, Layout.DIRS_ALL_LEFT_TO_RIGHT,
-                false /* hasTabs */, null /* tabStops */, 9, 12);
+                false /* hasTabs */, null /* tabStops */, 9, 12,
+                false /* useFallbackLineSpacing */);
         tl.measure(text.length(), false /* trailing */, null /* fmi */);
 
         assertTrue(span.mIsUsed);
@@ -308,7 +310,8 @@ public class TextLineTest {
 
         final TextLine tl = TextLine.obtain();
         tl.set(new TextPaint(), text, 0, text.length(), 1, Layout.DIRS_ALL_LEFT_TO_RIGHT,
-                false /* hasTabs */, null /* tabStops */, 9, 12);
+                false /* hasTabs */, null /* tabStops */, 9, 12,
+                false /* useFallbackLineSpacing */);
         tl.measure(text.length(), false /* trailing */, null /* fmi */);
         assertTrue(span.mIsUsed);
     }

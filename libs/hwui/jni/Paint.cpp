@@ -541,26 +541,6 @@ namespace PaintGlue {
         return result;
     }
 
-    // ------------------ @FastNative ---------------------------
-
-    static jint setTextLocales(JNIEnv* env, jobject clazz, jlong objHandle, jstring locales) {
-        Paint* obj = reinterpret_cast<Paint*>(objHandle);
-        ScopedUtfChars localesChars(env, locales);
-        jint minikinLocaleListId = minikin::registerLocaleList(localesChars.c_str());
-        obj->setMinikinLocaleListId(minikinLocaleListId);
-        return minikinLocaleListId;
-    }
-
-    static void setFontFeatureSettings(JNIEnv* env, jobject clazz, jlong paintHandle, jstring settings) {
-        Paint* paint = reinterpret_cast<Paint*>(paintHandle);
-        if (!settings) {
-            paint->setFontFeatureSettings(std::string());
-        } else {
-            ScopedUtfChars settingsChars(env, settings);
-            paint->setFontFeatureSettings(std::string(settingsChars.c_str(), settingsChars.size()));
-        }
-    }
-
     static SkScalar getMetricsInternal(jlong paintHandle, SkFontMetrics *metrics) {
         const int kElegantTop = 2500;
         const int kElegantBottom = -1000;
@@ -591,6 +571,67 @@ namespace PaintGlue {
             spacing = metrics->fDescent - metrics->fAscent + metrics->fLeading;
         }
         return spacing;
+    }
+
+    static void doFontExtent(JNIEnv* env, jlong paintHandle, const jchar buf[], jint start,
+                             jint count, jint bufSize, jboolean isRtl, jobject fmi) {
+        const Paint* paint = reinterpret_cast<Paint*>(paintHandle);
+        const Typeface* typeface = paint->getAndroidTypeface();
+        minikin::Bidi bidiFlags = isRtl ? minikin::Bidi::FORCE_RTL : minikin::Bidi::FORCE_LTR;
+        minikin::MinikinExtent extent =
+                MinikinUtils::getFontExtent(paint, bidiFlags, typeface, buf, start, count, bufSize);
+
+        SkFontMetrics metrics;
+        getMetricsInternal(paintHandle, &metrics);
+
+        metrics.fAscent = extent.ascent;
+        metrics.fDescent = extent.descent;
+
+        // If top/bottom is narrower than ascent/descent, adjust top/bottom to ascent/descent.
+        metrics.fTop = std::min(metrics.fAscent, metrics.fTop);
+        metrics.fBottom = std::max(metrics.fDescent, metrics.fBottom);
+
+        GraphicsJNI::set_metrics_int(env, fmi, metrics);
+    }
+
+    static void getFontMetricsIntForText___C(JNIEnv* env, jclass, jlong paintHandle,
+                                             jcharArray text, jint start, jint count, jint ctxStart,
+                                             jint ctxCount, jboolean isRtl, jobject fmi) {
+        ScopedCharArrayRO textArray(env, text);
+
+        doFontExtent(env, paintHandle, textArray.get() + ctxStart, start - ctxStart, count,
+                     ctxCount, isRtl, fmi);
+    }
+
+    static void getFontMetricsIntForText___String(JNIEnv* env, jclass, jlong paintHandle,
+                                                  jstring text, jint start, jint count,
+                                                  jint ctxStart, jint ctxCount, jboolean isRtl,
+                                                  jobject fmi) {
+        ScopedStringChars textChars(env, text);
+
+        doFontExtent(env, paintHandle, textChars.get() + ctxStart, start - ctxStart, count,
+                     ctxCount, isRtl, fmi);
+    }
+
+    // ------------------ @FastNative ---------------------------
+
+    static jint setTextLocales(JNIEnv* env, jobject clazz, jlong objHandle, jstring locales) {
+        Paint* obj = reinterpret_cast<Paint*>(objHandle);
+        ScopedUtfChars localesChars(env, locales);
+        jint minikinLocaleListId = minikin::registerLocaleList(localesChars.c_str());
+        obj->setMinikinLocaleListId(minikinLocaleListId);
+        return minikinLocaleListId;
+    }
+
+    static void setFontFeatureSettings(JNIEnv* env, jobject clazz, jlong paintHandle,
+                                       jstring settings) {
+        Paint* paint = reinterpret_cast<Paint*>(paintHandle);
+        if (!settings) {
+            paint->setFontFeatureSettings(std::string());
+        } else {
+            ScopedUtfChars settingsChars(env, settings);
+            paint->setFontFeatureSettings(std::string(settingsChars.c_str(), settingsChars.size()));
+        }
     }
 
     static jfloat getFontMetrics(JNIEnv* env, jobject, jlong paintHandle, jobject metricsObj) {
@@ -663,8 +704,7 @@ namespace PaintGlue {
     }
 
     static void setFilterBitmap(CRITICAL_JNI_PARAMS_COMMA jlong paintHandle, jboolean filterBitmap) {
-        reinterpret_cast<Paint*>(paintHandle)->setFilterQuality(
-                filterBitmap ? kLow_SkFilterQuality : kNone_SkFilterQuality);
+        reinterpret_cast<Paint*>(paintHandle)->setFilterBitmap(filterBitmap);
     }
 
     static void setDither(CRITICAL_JNI_PARAMS_COMMA jlong paintHandle, jboolean dither) {
@@ -1016,6 +1056,11 @@ static const JNINativeMethod methods[] = {
     {"nGetRunAdvance", "(J[CIIIIZI)F", (void*) PaintGlue::getRunAdvance___CIIIIZI_F},
     {"nGetOffsetForAdvance", "(J[CIIIIZF)I",
             (void*) PaintGlue::getOffsetForAdvance___CIIIIZF_I},
+    {"nGetFontMetricsIntForText", "(J[CIIIIZLandroid/graphics/Paint$FontMetricsInt;)V",
+      (void*)PaintGlue::getFontMetricsIntForText___C},
+    {"nGetFontMetricsIntForText",
+      "(JLjava/lang/String;IIIIZLandroid/graphics/Paint$FontMetricsInt;)V",
+      (void*)PaintGlue::getFontMetricsIntForText___String},
 
     // --------------- @FastNative ----------------------
 
@@ -1093,6 +1138,7 @@ static const JNINativeMethod methods[] = {
     {"nHasShadowLayer", "(J)Z", (void*)PaintGlue::hasShadowLayer},
     {"nEqualsForTextMeasurement", "(JJ)Z", (void*)PaintGlue::equalsForTextMeasurement},
 };
+
 
 int register_android_graphics_Paint(JNIEnv* env) {
     return RegisterMethodsOrDie(env, "android/graphics/Paint", methods, NELEM(methods));

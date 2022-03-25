@@ -17,23 +17,11 @@
 package com.android.internal.app;
 
 import android.app.prediction.AppPredictionManager;
-import android.provider.DeviceConfig;
-
-import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 
 /**
  * Common flags for {@link ChooserListAdapter} and {@link ChooserActivity}.
  */
 public class ChooserFlags {
-
-    /**
-     * Whether to use the deprecated {@link android.service.chooser.ChooserTargetService} API for
-     * direct share targets. If true, both CTS and Shortcuts will be used to find Direct Share
-     * targets. If false, only Shortcuts will be used.
-     */
-    public static final boolean USE_SERVICE_TARGETS_FOR_DIRECT_TARGETS =
-            DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_SYSTEMUI,
-                SystemUiDeviceConfigFlags.SHARE_USE_SERVICE_TARGETS, false);
 
     /**
      * Whether to use {@link AppPredictionManager} to query for direct share targets (as opposed to

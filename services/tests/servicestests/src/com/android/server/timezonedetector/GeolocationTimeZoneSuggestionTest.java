@@ -34,26 +34,36 @@ public class GeolocationTimeZoneSuggestionTest {
 
     @Test
     public void testEquals() {
-        GeolocationTimeZoneSuggestion one = new GeolocationTimeZoneSuggestion(ARBITRARY_ZONE_IDS1);
-        assertEquals(one, one);
+        long time1 = 1111L;
+        GeolocationTimeZoneSuggestion certain1v1 =
+                GeolocationTimeZoneSuggestion.createCertainSuggestion(time1, ARBITRARY_ZONE_IDS1);
+        assertEquals(certain1v1, certain1v1);
 
-        GeolocationTimeZoneSuggestion two = new GeolocationTimeZoneSuggestion(ARBITRARY_ZONE_IDS1);
-        assertEquals(one, two);
-        assertEquals(two, one);
-
-        GeolocationTimeZoneSuggestion nullZone = new GeolocationTimeZoneSuggestion(null);
-        assertNotEquals(one, nullZone);
-        assertNotEquals(nullZone, one);
-        assertEquals(nullZone, nullZone);
-
-        GeolocationTimeZoneSuggestion three =
-                new GeolocationTimeZoneSuggestion(ARBITRARY_ZONE_IDS2);
-        assertNotEquals(one, three);
-        assertNotEquals(three, one);
+        GeolocationTimeZoneSuggestion certain1v2 =
+                GeolocationTimeZoneSuggestion.createCertainSuggestion(time1, ARBITRARY_ZONE_IDS1);
+        assertEquals(certain1v1, certain1v2);
+        assertEquals(certain1v2, certain1v1);
 
         // DebugInfo must not be considered in equals().
-        one.addDebugInfo("Debug info 1");
-        two.addDebugInfo("Debug info 2");
-        assertEquals(one, two);
+        certain1v1.addDebugInfo("Debug info 1");
+        certain1v2.addDebugInfo("Debug info 2");
+        assertEquals(certain1v1, certain1v2);
+
+        long time2 = 2222L;
+        GeolocationTimeZoneSuggestion certain2 =
+                GeolocationTimeZoneSuggestion.createCertainSuggestion(time2, ARBITRARY_ZONE_IDS1);
+        assertNotEquals(certain1v1, certain2);
+        assertNotEquals(certain2, certain1v1);
+
+        GeolocationTimeZoneSuggestion uncertain =
+                GeolocationTimeZoneSuggestion.createUncertainSuggestion(time1);
+        assertNotEquals(certain1v1, uncertain);
+        assertNotEquals(uncertain, certain1v1);
+        assertEquals(uncertain, uncertain);
+
+        GeolocationTimeZoneSuggestion certain3 =
+                GeolocationTimeZoneSuggestion.createCertainSuggestion(time1, ARBITRARY_ZONE_IDS2);
+        assertNotEquals(certain1v1, certain3);
+        assertNotEquals(certain3, certain1v1);
     }
 }

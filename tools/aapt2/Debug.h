@@ -40,6 +40,7 @@ struct Debug {
   static void DumpXml(const xml::XmlResource& doc, text::Printer* printer);
   static void DumpResStringPool(const android::ResStringPool* pool, text::Printer* printer);
   static void DumpOverlayable(const ResourceTable& table, text::Printer* printer);
+  static void DumpChunks(const void* data, size_t len, text::Printer* printer, IDiagnostics* diag);
 };
 
 }  // namespace aapt

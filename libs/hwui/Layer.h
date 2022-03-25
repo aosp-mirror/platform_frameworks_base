@@ -74,9 +74,17 @@ public:
 
     void setColorFilter(sk_sp<SkColorFilter> filter) { mColorFilter = filter; };
 
-    inline SkMatrix& getTexTransform() { return texTransform; }
-
     inline SkMatrix& getTransform() { return transform; }
+
+    inline SkRect getCurrentCropRect() { return mCurrentCropRect; }
+
+    inline void setCurrentCropRect(const SkRect currentCropRect) {
+        mCurrentCropRect = currentCropRect;
+    }
+
+    inline void setWindowTransform(uint32_t windowTransform) { mWindowTransform = windowTransform; }
+
+    inline uint32_t getWindowTransform() { return mWindowTransform; }
 
     /**
      * Posts a decStrong call to the appropriate thread.
@@ -87,6 +95,12 @@ public:
     inline void setImage(const sk_sp<SkImage>& image) { this->layerImage = image; }
 
     inline sk_sp<SkImage> getImage() const { return this->layerImage; }
+
+    inline void setMaxLuminanceNits(float maxLuminanceNits) {
+        mMaxLuminanceNits = maxLuminanceNits;
+    }
+
+    inline float getMaxLuminanceNits() { return mMaxLuminanceNits; }
 
     void draw(SkCanvas* canvas);
 
@@ -116,14 +130,19 @@ private:
     SkBlendMode mode;
 
     /**
-     * Optional texture coordinates transform.
-     */
-    SkMatrix texTransform;
-
-    /**
      * Optional transform.
      */
     SkMatrix transform;
+
+    /**
+     * Optional crop
+     */
+    SkRect mCurrentCropRect;
+
+    /**
+     * Optional transform
+     */
+    uint32_t mWindowTransform;
 
     /**
      * An image backing the layer.
@@ -144,6 +163,11 @@ private:
      * enable blending
      */
     bool mBlend = false;
+
+    /**
+     * Max input luminance if the layer is HDR
+     */
+    float mMaxLuminanceNits = -1;
 
 };  // struct Layer
 

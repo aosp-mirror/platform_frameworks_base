@@ -19,8 +19,11 @@ package com.android.internal.util;
 import android.test.AndroidTestCase;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 
 /**
  * Tests for {@link ProcFileReader}.
@@ -204,6 +207,41 @@ public class ProcFileReaderTest extends AndroidTestCase {
         assertEquals("c", reader.nextString());
         reader.finishLine();
         assertFalse(reader.hasMoreData());
+    }
+
+    public void testRewind() throws Exception {
+        final ProcFileReader reader = buildReader("abc\n");
+
+        assertEquals("abc", reader.nextString());
+        reader.finishLine();
+        assertFalse(reader.hasMoreData());
+
+        reader.rewind();
+        assertTrue(reader.hasMoreData());
+
+        assertEquals("abc", reader.nextString());
+        reader.finishLine();
+        assertFalse(reader.hasMoreData());
+    }
+
+
+    public void testRewindFileInputStream() throws Exception {
+        File tempFile = File.createTempFile("procfile", null, null);
+        Files.write(tempFile.toPath(), "abc\n".getBytes(StandardCharsets.US_ASCII));
+        final ProcFileReader reader = new ProcFileReader(new FileInputStream(tempFile));
+
+        assertEquals("abc", reader.nextString());
+        reader.finishLine();
+        assertFalse(reader.hasMoreData());
+
+        reader.rewind();
+        assertTrue(reader.hasMoreData());
+
+        assertEquals("abc", reader.nextString());
+        reader.finishLine();
+        assertFalse(reader.hasMoreData());
+
+        Files.delete(tempFile.toPath());
     }
 
     private static ProcFileReader buildReader(String string) throws IOException {

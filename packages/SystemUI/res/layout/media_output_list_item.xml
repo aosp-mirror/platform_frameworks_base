@@ -23,17 +23,36 @@
     android:orientation="vertical">
     <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="64dp">
+        android:layout_height="64dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="12dp">
+        <FrameLayout
+            android:id="@+id/item_layout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/media_output_item_background"
+            android:layout_gravity="center_vertical|start">
+            <com.android.systemui.media.dialog.MediaOutputSeekbar
+                android:id="@+id/volume_seekbar"
+                android:splitTrack="false"
+                android:visibility="gone"
+                android:paddingStart="0dp"
+                android:paddingEnd="0dp"
+                android:progressDrawable="@drawable/media_output_dialog_seekbar_background"
+                android:thumb="@null"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"/>
+        </FrameLayout>
 
         <FrameLayout
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:layout_gravity="center_vertical|start"
-            android:layout_marginStart="16dp">
+            android:layout_width="56dp"
+            android:layout_height="64dp"
+            android:layout_gravity="center_vertical|start">
             <ImageView
                 android:id="@+id/title_icon"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
                 android:layout_gravity="center"/>
         </FrameLayout>
 
@@ -42,98 +61,73 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical|start"
-            android:layout_marginStart="68dp"
+            android:layout_marginStart="56dp"
+            android:layout_marginEnd="56dp"
             android:ellipsize="end"
             android:maxLines="1"
-            android:textColor="?android:attr/textColorPrimary"
-            android:textSize="14sp"/>
+            android:fontFamily="@*android:string/config_headlineFontFamilyMedium"
+            android:textSize="16sp"/>
 
-        <RelativeLayout
+        <LinearLayout
             android:id="@+id/two_line_layout"
+            android:orientation="vertical"
             android:layout_width="wrap_content"
+            android:layout_gravity="center_vertical|start"
             android:layout_height="48dp"
-            android:layout_marginStart="52dp"
-            android:layout_marginEnd="69dp"
-            android:layout_marginTop="10dp">
+            android:layout_marginEnd="56dp"
+            android:layout_marginStart="56dp">
             <TextView
                 android:id="@+id/two_line_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginEnd="15dp"
                 android:ellipsize="end"
                 android:maxLines="1"
-                android:textColor="?android:attr/textColorPrimary"
-                android:textSize="14sp"/>
+                android:fontFamily="@*android:string/config_headlineFontFamilyMedium"
+                android:textColor="@color/media_dialog_item_main_content"
+                android:textSize="16sp"/>
             <TextView
                 android:id="@+id/subtitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginEnd="15dp"
-                android:layout_marginBottom="7dp"
-                android:layout_alignParentBottom="true"
                 android:ellipsize="end"
                 android:maxLines="1"
-                android:textColor="?android:attr/textColorSecondary"
-                android:textSize="12sp"
-                android:fontFamily="roboto-regular"
+                android:textColor="@color/media_dialog_item_main_content"
+                android:textSize="14sp"
+                android:fontFamily="@*android:string/config_bodyFontFamily"
                 android:visibility="gone"/>
-            <SeekBar
-                android:id="@+id/volume_seekbar"
-                style="@*android:style/Widget.DeviceDefault.SeekBar"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true"/>
-        </RelativeLayout>
+        </LinearLayout>
 
         <ProgressBar
             android:id="@+id/volume_indeterminate_progress"
-            style="@*android:style/Widget.Material.ProgressBar.Horizontal"
-            android:layout_width="258dp"
-            android:layout_height="18dp"
-            android:layout_marginStart="68dp"
-            android:layout_marginTop="40dp"
+            style="?android:attr/progressBarStyleSmallTitle"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginEnd="16dp"
             android:indeterminate="true"
+            android:layout_gravity="right|center"
             android:indeterminateOnly="true"
             android:visibility="gone"/>
 
-        <View
-            android:id="@+id/end_divider"
-            android:layout_width="1dp"
-            android:layout_height="36dp"
-            android:layout_marginEnd="68dp"
-            android:layout_gravity="right|center_vertical"
-            android:background="?android:attr/listDivider"
-            android:visibility="gone"/>
-
         <ImageView
-            android:id="@+id/add_icon"
+            android:id="@+id/media_output_item_status"
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:layout_gravity="right|center_vertical"
-            android:layout_marginEnd="24dp"
-            android:src="@drawable/ic_add"
-            android:tint="?android:attr/colorAccent"
+            android:layout_marginEnd="16dp"
+            android:indeterminate="true"
+            android:layout_gravity="right|center"
+            android:indeterminateOnly="true"
+            android:importantForAccessibility="no"
             android:visibility="gone"/>
 
         <CheckBox
             android:id="@+id/check_box"
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:layout_gravity="right|center_vertical"
-            android:layout_marginEnd="24dp"
-            android:button="@drawable/ic_check_box"
-            android:visibility="gone"/>
+            android:layout_marginEnd="16dp"
+            android:layout_gravity="right|center"
+            android:button="@drawable/ic_circle_check_box"
+            android:visibility="gone"
+            android:clickable="false"
+        />
     </FrameLayout>
-
-    <View
-        android:id="@+id/bottom_divider"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginTop="12dp"
-        android:layout_marginBottom="12dp"
-        android:layout_gravity="bottom"
-        android:background="?android:attr/listDivider"
-        android:visibility="gone"/>
 </LinearLayout>

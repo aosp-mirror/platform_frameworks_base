@@ -20,6 +20,7 @@ import com.android.internal.os.BinderCallsStats;
 import com.android.internal.os.SystemServerCpuThreadReader.SystemServiceCpuThreadTimes;
 
 import java.util.Collection;
+import java.util.List;
 
 /**
  * Battery stats local system service interface. This is used to pass internal data out of
@@ -40,6 +41,17 @@ public abstract class BatteryStatsInternal {
 
     /** Returns CPU times for system server thread groups. */
     public abstract SystemServiceCpuThreadTimes getSystemServiceCpuThreadTimes();
+
+    /**
+     * Returns BatteryUsageStats, which contains power attribution data on a per-subsystem
+     * and per-UID basis.
+     *
+     * <p>
+     * Note: This is a slow running method and should be called from non-blocking threads only.
+     * </p>
+     */
+    public abstract List<BatteryUsageStats> getBatteryUsageStats(
+            List<BatteryUsageStatsQuery> queries);
 
     /**
      * Inform battery stats how many deferred jobs existed when the app got launched and how

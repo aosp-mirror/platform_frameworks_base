@@ -16,6 +16,7 @@
 
 package com.google.errorprone.bugpatterns.android;
 
+import static com.google.errorprone.BugPattern.LinkType.NONE;
 import static com.google.errorprone.BugPattern.SeverityLevel.WARNING;
 import static com.google.errorprone.matchers.Matchers.anyOf;
 import static com.google.errorprone.matchers.Matchers.contains;
@@ -45,6 +46,7 @@ import java.util.regex.Pattern;
 @BugPattern(
         name = "AndroidFrameworkPendingIntentMutability",
         summary = "Verifies that FLAG_MUTABLE or FLAG_IMMUTABLE is always set",
+        linkType = NONE,
         severity = WARNING)
 public final class PendingIntentMutabilityChecker extends BugChecker
         implements MethodInvocationTreeMatcher {

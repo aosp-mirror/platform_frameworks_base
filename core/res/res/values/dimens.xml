@@ -39,15 +39,21 @@
     <!-- Elevation of toast view -->
     <dimen name="toast_elevation">2dp</dimen>
 
-    <!-- Height of the status bar -->
-    <dimen name="status_bar_height">@dimen/status_bar_height_portrait</dimen>
-    <!-- Height of the status bar in portrait. The height should be
-         Max((status bar content height + waterfall top size), top cutout size) -->
-    <dimen name="status_bar_height_portrait">24dp</dimen>
-    <!-- Height of the status bar in landscape. The height should be
-         Max((status bar content height + waterfall top size), top cutout size) -->
+    <!-- Height of the status bar.
+         Do not read this dimen directly. Use {@link SystemBarUtils#getStatusBarHeight} instead.
+         -->
+    <dimen name="status_bar_height">24dp</dimen>
+    <!-- Height of the status bar in portrait.
+         Do not read this dimen directly. Use {@link SystemBarUtils#getStatusBarHeight} instead.
+         -->
+    <dimen name="status_bar_height_portrait">@dimen/status_bar_height</dimen>
+    <!-- Height of the status bar in landscape.
+         Do not read this dimen directly. Use {@link SystemBarUtils#getStatusBarHeight} instead.
+         -->
     <dimen name="status_bar_height_landscape">@dimen/status_bar_height_portrait</dimen>
-    <!-- Height of area above QQS where battery/time go -->
+    <!-- Height of area above QQS where battery/time go.
+         Do not read this dimen directly. Use {@link SystemBarUtils#getQuickQsOffsetHeight} instead.
+         -->
     <dimen name="quick_qs_offset_height">48dp</dimen>
     <!-- Height of the bottom navigation / system bar. -->
     <dimen name="navigation_bar_height">48dp</dimen>
@@ -55,9 +61,14 @@
     <dimen name="navigation_bar_height_landscape">48dp</dimen>
     <!-- Width of the navigation bar when it is placed vertically on the screen -->
     <dimen name="navigation_bar_width">48dp</dimen>
+    <!-- Height of the bottom taskbar not including decorations like rounded corners. -->
+    <dimen name="taskbar_frame_height">60dp</dimen>
     <!-- How much we expand the touchable region of the status bar below the notch to catch touches
          that just start below the notch. -->
     <dimen name="display_cutout_touchable_region_size">12dp</dimen>
+    <!-- The default margin used in immersive mode to capture the start of a swipe gesture from the
+         edge of the screen to show the system bars. -->
+    <dimen name="system_gestures_start_threshold">24dp</dimen>
 
     <!-- Height of the bottom navigation bar frame; this is different than navigation_bar_height
          where that is the height reported to all the other windows to resize themselves around the
@@ -119,6 +130,19 @@
         rounded_corner_radius_bottom to more accurately provide a "radius" for the bottom rounded
         corners. -->
     <dimen name="rounded_corner_radius_bottom_adjustment">0px</dimen>
+
+    <!-- Default paddings for content around the corners. -->
+    <dimen name="rounded_corner_content_padding">0dp</dimen>
+
+    <!-- Copied from SysUI's @dimen/navigation_key_width for the embedded nav bar in the IME. -->
+    <dimen name="input_method_navigation_key_width">70dp</dimen>
+    <!-- Copied from SysUI's @dimen/navigation_key_padding for the embedded nav bar in the IME. -->
+    <dimen name="input_method_navigation_key_padding">0dp</dimen>
+    <!-- Copied from SysUI's @dimen/nav_content_padding for the embedded nav bar in the IME. -->
+    <dimen name="input_method_nav_content_padding">0px</dimen>
+    <!-- Copied from SysUI's @dimen/key_button_ripple_max_width for the embedded nav bar in the
+         IME. -->
+    <dimen name="input_method_nav_key_button_ripple_max_width">95dp</dimen>
 
     <!-- Width of the window of the divider bar used to resize docked stacks. -->
     <dimen name="docked_stack_divider_thickness">48dp</dimen>
@@ -236,6 +260,9 @@
     <!-- The padding of the actions in non-conversation layout. For conversations, the analogous
          value is calculated in ConversationLayout#updateActionListPadding() -->
     <dimen name="notification_actions_padding_start">36dp</dimen>
+
+    <!-- The max width of a priority action button when it is collapsed to just the icon. -->
+    <dimen name="notification_actions_collapsed_priority_width">60dp</dimen>
 
     <!-- The start padding to optionally use (e.g. if there's extra space) for CallStyle
          notification actions.
@@ -579,6 +606,9 @@
     <!-- The padding ratio of the Accessibility icon foreground drawable -->
     <item name="accessibility_icon_foreground_padding_ratio" type="dimen">21.88%</item>
 
+    <!-- The minimum window size of the accessibility window magnifier -->
+    <dimen name="accessibility_window_magnifier_min_size">122dp</dimen>
+
     <!-- Margin around the various security views -->
     <dimen name="keyguard_muliuser_selector_margin">8dp</dimen>
 
@@ -638,6 +668,14 @@
     <dimen name="lock_pattern_dot_line_width">22dp</dimen>
     <dimen name="lock_pattern_dot_size">14dp</dimen>
     <dimen name="lock_pattern_dot_size_activated">30dp</dimen>
+    <!-- How much of the cell space is classified as hit areas [0..1] where 1 means that hit area is
+         a circle with diameter equals to cell minimum side min(width, height). -->
+    <item type="dimen" format="float" name="lock_pattern_dot_hit_factor">0.6</item>
+    <!-- Width of a gradient applied to a lock pattern line while its disappearing animation. -->
+    <dimen name="lock_pattern_fade_away_gradient_width">8dp</dimen>
+    <!-- Parameters applied to line disappearing animation in LockPatternView in milliseconds. -->
+    <integer name="lock_pattern_line_fade_out_duration">500</integer>
+    <integer name="lock_pattern_line_fade_out_delay">150</integer>
 
     <dimen name="text_handle_min_size">40dp</dimen>
 
@@ -675,9 +713,6 @@
     <dimen name="default_magnifier_horizontal_offset">0dp</dimen>
     <item type="dimen" format="float" name="default_magnifier_zoom">1.25</item>
 
-    <!-- Spacing around the background change frome service to non-service -->
-    <dimen name="chooser_service_spacing">8dp</dimen>
-
     <item type="dimen" name="aerr_padding_list_top">15dp</item>
     <item type="dimen" name="aerr_padding_list_bottom">8dp</item>
 
@@ -687,16 +722,6 @@
 
     <!-- The default minimal size of a resizable task, in both dimensions. -->
     <dimen name="default_minimal_size_resizable_task">220dp</dimen>
-
-    <!-- The default minimal size of a PiP task, in both dimensions. -->
-    <dimen name="default_minimal_size_pip_resizable_task">108dp</dimen>
-
-    <!--
-      The overridable minimal size of a PiP task, in both dimensions.
-      Different from default_minimal_size_pip_resizable_task, this is to limit the dimension
-      when the pinned stack size is overridden by app via minWidth/minHeight.
-    -->
-    <dimen name="overridable_minimal_size_pip_resizable_task">48dp</dimen>
 
     <!-- Height of a task when in minimized mode from the top when launcher is resizable. -->
     <dimen name="task_height_of_minimized_mode">80dp</dimen>
@@ -729,6 +754,8 @@
     <dimen name="item_touch_helper_swipe_escape_velocity">120dp</dimen>
     <dimen name="item_touch_helper_swipe_escape_max_velocity">800dp</dimen>
 
+    <!-- The maximum size of the small notification icon. -->
+    <dimen name="notification_small_icon_size">48dp</dimen>
     <!-- The maximum height of any image in a remote view. This is applied to all images in custom remoteviews. This value is determined by the maximum notification height -->
     <dimen name="notification_custom_view_max_image_height">284dp</dimen>
     <!-- The maximum height of any image in a remote view. This is applied to all images in custom remoteviews. This value is determined a maximum notification width -->
@@ -753,6 +780,8 @@
     <!-- The alpha of a disabled notification button -->
     <item type="dimen" format="float" name="notification_action_disabled_alpha">0.5</item>
 
+    <!-- The maximum size of the small notification icon on low memory devices. -->
+    <dimen name="notification_small_icon_size_low_ram">@dimen/notification_small_icon_size</dimen>
     <!-- The maximum height of any image in a remote view. This is applied to all images in custom remoteviews. -->
     <dimen name="notification_custom_view_max_image_height_low_ram">208dp</dimen>
     <!-- The maximum height of any image in a remote view. This is applied to all images in custom remoteviews. -->
@@ -847,6 +876,9 @@
     <!-- Maximum number of datasets that are visible in the UX picker without scrolling -->
     <integer name="autofill_max_visible_datasets">3</integer>
 
+    <!-- Size of an icon in the Autolfill fill dialog -->
+    <dimen name="autofill_dialog_icon_size">24dp</dimen>
+
     <!-- Size of a slice shortcut view -->
     <dimen name="slice_shortcut_size">56dp</dimen>
     <!-- Size of action icons in a slice -->
@@ -886,7 +918,8 @@
     <dimen name="seekbar_thumb_exclusion_max_size">48dp</dimen>
 
     <!-- chooser/resolver (sharesheet) spacing -->
-    <dimen name="chooser_corner_radius">16dp</dimen>
+    <dimen name="chooser_width">412dp</dimen>
+    <dimen name="chooser_corner_radius">28dp</dimen>
     <dimen name="chooser_row_text_option_translate">25dp</dimen>
     <dimen name="chooser_view_spacing">18dp</dimen>
     <dimen name="chooser_edge_margin_thin">16dp</dimen>
@@ -903,7 +936,7 @@
     <dimen name="resolver_icon_size">32dp</dimen>
     <dimen name="resolver_button_bar_spacing">0dp</dimen>
     <dimen name="resolver_badge_size">18dp</dimen>
-    <dimen name="resolver_icon_margin">16dp</dimen>
+    <dimen name="resolver_icon_margin">8dp</dimen>
     <dimen name="resolver_small_margin">18dp</dimen>
     <dimen name="resolver_edge_margin">24dp</dimen>
     <dimen name="resolver_elevation">1dp</dimen>
@@ -920,7 +953,7 @@
 
     <dimen name="chooser_action_button_icon_size">18dp</dimen>
 
-    <!-- For Waterfall Display -->
+    <!-- For main built-in Waterfall Display -->
     <dimen name="waterfall_display_left_edge_size">0px</dimen>
     <dimen name="waterfall_display_top_edge_size">0px</dimen>
     <dimen name="waterfall_display_right_edge_size">0px</dimen>
@@ -943,4 +976,25 @@
     <dimen name="starting_surface_icon_size">160dp</dimen>
     <!-- The default width/height of the icon on the spec of adaptive icon drawable. -->
     <dimen name="starting_surface_default_icon_size">108dp</dimen>
+
+    <!-- For secondary built-in Waterfall Display -->
+    <dimen name="secondary_waterfall_display_left_edge_size">0px</dimen>
+    <dimen name="secondary_waterfall_display_top_edge_size">0px</dimen>
+    <dimen name="secondary_waterfall_display_right_edge_size">0px</dimen>
+    <dimen name="secondary_waterfall_display_bottom_edge_size">0px</dimen>
+
+    <!-- Rounded corner settings for secondary built-in display -->
+    <dimen name="secondary_rounded_corner_radius">0px</dimen>
+    <dimen name="secondary_rounded_corner_radius_top">0px</dimen>
+    <dimen name="secondary_rounded_corner_radius_bottom">0px</dimen>
+    <dimen name="secondary_rounded_corner_radius_adjustment">0px</dimen>
+    <dimen name="secondary_rounded_corner_radius_top_adjustment">0px</dimen>
+    <dimen name="secondary_rounded_corner_radius_bottom_adjustment">0px</dimen>
+
+    <!-- Default size for user icons (a.k.a. avatar images) -->
+    <dimen name="user_icon_size">190dp</dimen>
+
+    <!-- Dimensions for the translations of the default dialog animation. -->
+    <dimen name="popup_enter_animation_from_y_delta">20dp</dimen>
+    <dimen name="popup_exit_animation_to_y_delta">-10dp</dimen>
 </resources>

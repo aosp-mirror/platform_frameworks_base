@@ -184,6 +184,21 @@ public abstract class PowerManagerInternal {
 
     public abstract void setDeviceIdleTempWhitelist(int[] appids);
 
+    /**
+     * Updates the Low Power Standby allowlist.
+     *
+     * @param uids UIDs that are exempt from Low Power Standby restrictions
+     */
+    public abstract void setLowPowerStandbyAllowlist(int[] uids);
+
+    /**
+     * Used by LowPowerStandbyController to notify the power manager that Low Power Standby's
+     * active state has changed.
+     *
+     * @param active {@code true} to activate Low Power Standby, {@code false} to turn it off.
+     */
+    public abstract void setLowPowerStandbyActive(boolean active);
+
     public abstract void startUidChanges();
 
     public abstract void finishUidChanges();

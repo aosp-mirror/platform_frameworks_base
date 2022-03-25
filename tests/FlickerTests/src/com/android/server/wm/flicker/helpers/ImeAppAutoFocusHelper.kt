@@ -17,9 +17,12 @@
 package com.android.server.wm.flicker.helpers
 
 import android.app.Instrumentation
-import android.content.ComponentName
+import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
+import androidx.test.uiautomator.Until
 import com.android.server.wm.flicker.testapp.ActivityOptions
+import com.android.server.wm.traces.common.FlickerComponentName
+import com.android.server.wm.traces.parser.toFlickerComponent
 import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 
 class ImeAppAutoFocusHelper @JvmOverloads constructor(
@@ -27,7 +30,8 @@ class ImeAppAutoFocusHelper @JvmOverloads constructor(
     private val rotation: Int,
     private val imePackageName: String = IME_PACKAGE,
     launcherName: String = ActivityOptions.IME_ACTIVITY_AUTO_FOCUS_LAUNCHER_NAME,
-    component: ComponentName = ActivityOptions.IME_ACTIVITY_AUTO_FOCUS_COMPONENT_NAME
+    component: FlickerComponentName =
+        ActivityOptions.IME_ACTIVITY_AUTO_FOCUS_COMPONENT_NAME.toFlickerComponent()
 ) : ImeAppHelper(instr, launcherName, component) {
     override fun openIME(
         device: UiDevice,
@@ -44,5 +48,29 @@ class ImeAppAutoFocusHelper @JvmOverloads constructor(
             getPackage()
         }
         launcherStrategy.launch(appName, expectedPackage)
+    }
+
+    fun startDialogThemedActivity(wmHelper: WindowManagerStateHelper) {
+        val button = uiDevice.wait(Until.findObject(By.res(getPackage(),
+                "start_dialog_themed_activity_btn")), FIND_TIMEOUT)
+
+        require(button != null) {
+            "Button not found, this usually happens when the device " +
+                    "was left in an unknown state (e.g. Screen turned off)"
+        }
+        button.click()
+        wmHelper.waitForAppTransitionIdle()
+        wmHelper.waitForFullScreenApp(
+                ActivityOptions.DIALOG_THEMED_ACTIVITY_COMPONENT_NAME.toFlickerComponent())
+    }
+    fun dismissDialog(wmHelper: WindowManagerStateHelper) {
+        val dialog = uiDevice.wait(
+                Until.findObject(By.text("Dialog for test")), FIND_TIMEOUT)
+
+        // Pressing back key to dismiss the dialog
+        if (dialog != null) {
+            uiDevice.pressBack()
+            wmHelper.waitForAppTransitionIdle()
+        }
     }
 }

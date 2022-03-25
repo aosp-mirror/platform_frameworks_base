@@ -42,12 +42,14 @@ import static org.mockito.Mockito.when;
 import android.hardware.display.AmbientDisplayConfiguration;
 import android.testing.AndroidTestingRunner;
 import android.testing.UiThreadTest;
+import android.view.Display;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
+import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.util.wakelock.WakeLockFake;
 
@@ -141,8 +143,8 @@ public class DozeMachineTest extends SysuiTestCase {
     }
 
     @Test
-    public void testInitialize_dozeSuppressed_alwaysOnDisabled_goesToDoze() {
-        when(mHost.isDozeSuppressed()).thenReturn(true);
+    public void testInitialize_alwaysOnSuppressed_alwaysOnDisabled_goesToDoze() {
+        when(mHost.isAlwaysOnSuppressed()).thenReturn(true);
         when(mConfigMock.alwaysOnEnabled(anyInt())).thenReturn(false);
 
         mMachine.requestState(INITIALIZED);
@@ -152,8 +154,8 @@ public class DozeMachineTest extends SysuiTestCase {
     }
 
     @Test
-    public void testInitialize_dozeSuppressed_alwaysOnEnabled_goesToDoze() {
-        when(mHost.isDozeSuppressed()).thenReturn(true);
+    public void testInitialize_alwaysOnSuppressed_alwaysOnEnabled_goesToDoze() {
+        when(mHost.isAlwaysOnSuppressed()).thenReturn(true);
         when(mConfigMock.alwaysOnEnabled(anyInt())).thenReturn(true);
 
         mMachine.requestState(INITIALIZED);
@@ -163,8 +165,8 @@ public class DozeMachineTest extends SysuiTestCase {
     }
 
     @Test
-    public void testInitialize_dozeSuppressed_afterDocked_goesToDoze() {
-        when(mHost.isDozeSuppressed()).thenReturn(true);
+    public void testInitialize_alwaysOnSuppressed_afterDocked_goesToDoze() {
+        when(mHost.isAlwaysOnSuppressed()).thenReturn(true);
         when(mDockManager.isDocked()).thenReturn(true);
 
         mMachine.requestState(INITIALIZED);
@@ -174,8 +176,8 @@ public class DozeMachineTest extends SysuiTestCase {
     }
 
     @Test
-    public void testInitialize_dozeSuppressed_alwaysOnDisabled_afterDockPaused_goesToDoze() {
-        when(mHost.isDozeSuppressed()).thenReturn(true);
+    public void testInitialize_alwaysOnSuppressed_alwaysOnDisabled_afterDockPaused_goesToDoze() {
+        when(mHost.isAlwaysOnSuppressed()).thenReturn(true);
         when(mConfigMock.alwaysOnEnabled(anyInt())).thenReturn(false);
         when(mDockManager.isDocked()).thenReturn(true);
         when(mDockManager.isHidden()).thenReturn(true);
@@ -187,8 +189,8 @@ public class DozeMachineTest extends SysuiTestCase {
     }
 
     @Test
-    public void testInitialize_dozeSuppressed_alwaysOnEnabled_afterDockPaused_goesToDoze() {
-        when(mHost.isDozeSuppressed()).thenReturn(true);
+    public void testInitialize_alwaysOnSuppressed_alwaysOnEnabled_afterDockPaused_goesToDoze() {
+        when(mHost.isAlwaysOnSuppressed()).thenReturn(true);
         when(mConfigMock.alwaysOnEnabled(anyInt())).thenReturn(true);
         when(mDockManager.isDocked()).thenReturn(true);
         when(mDockManager.isHidden()).thenReturn(true);
@@ -226,8 +228,8 @@ public class DozeMachineTest extends SysuiTestCase {
     }
 
     @Test
-    public void testPulseDone_dozeSuppressed_goesToSuppressed() {
-        when(mHost.isDozeSuppressed()).thenReturn(true);
+    public void testPulseDone_alwaysOnSuppressed_goesToSuppressed() {
+        when(mHost.isAlwaysOnSuppressed()).thenReturn(true);
         when(mConfigMock.alwaysOnEnabled(anyInt())).thenReturn(true);
         mMachine.requestState(INITIALIZED);
         mMachine.requestPulse(DozeLog.PULSE_REASON_NOTIFICATION);
@@ -264,8 +266,8 @@ public class DozeMachineTest extends SysuiTestCase {
     }
 
     @Test
-    public void testPulseDone_dozeSuppressed_afterDocked_goesToDoze() {
-        when(mHost.isDozeSuppressed()).thenReturn(true);
+    public void testPulseDone_alwaysOnSuppressed_afterDocked_goesToDoze() {
+        when(mHost.isAlwaysOnSuppressed()).thenReturn(true);
         when(mDockManager.isDocked()).thenReturn(true);
         mMachine.requestState(INITIALIZED);
         mMachine.requestPulse(DozeLog.PULSE_REASON_NOTIFICATION);
@@ -293,8 +295,8 @@ public class DozeMachineTest extends SysuiTestCase {
     }
 
     @Test
-    public void testPulseDone_dozeSuppressed_afterDockPaused_goesToDoze() {
-        when(mHost.isDozeSuppressed()).thenReturn(true);
+    public void testPulseDone_alwaysOnSuppressed_afterDockPaused_goesToDoze() {
+        when(mHost.isAlwaysOnSuppressed()).thenReturn(true);
         when(mConfigMock.alwaysOnEnabled(anyInt())).thenReturn(true);
         when(mDockManager.isDocked()).thenReturn(true);
         when(mDockManager.isHidden()).thenReturn(true);
@@ -443,5 +445,21 @@ public class DozeMachineTest extends SysuiTestCase {
         mMachine.wakeUp();
 
         assertTrue(mServiceFake.requestedWakeup);
+    }
+
+    @Test
+    public void testDozePulsing_displayRequiresBlanking_screenState() {
+        DozeParameters dozeParameters = mock(DozeParameters.class);
+        when(dozeParameters.getDisplayNeedsBlanking()).thenReturn(true);
+
+        assertEquals(Display.STATE_OFF, DOZE_REQUEST_PULSE.screenState(dozeParameters));
+    }
+
+    @Test
+    public void testDozePulsing_displayDoesNotRequireBlanking_screenState() {
+        DozeParameters dozeParameters = mock(DozeParameters.class);
+        when(dozeParameters.getDisplayNeedsBlanking()).thenReturn(false);
+
+        assertEquals(Display.STATE_ON, DOZE_REQUEST_PULSE.screenState(dozeParameters));
     }
 }

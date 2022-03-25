@@ -99,17 +99,13 @@ public class WalletView extends FrameLayout implements WalletCardCarousel.OnCard
         mCardCarousel.setExpectedViewWidth(getWidth());
     }
 
-    @Override
-    protected void onConfigurationChanged(Configuration newConfig) {
-        updateViewForOrientation(newConfig.orientation);
-    }
-
     private void updateViewForOrientation(@Configuration.Orientation int orientation) {
         if (orientation == Configuration.ORIENTATION_PORTRAIT) {
             renderViewPortrait();
         } else if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
             renderViewLandscape();
         }
+        mCardCarousel.resetAdapter(); // necessary to update cards width
         ViewGroup.LayoutParams params = mCardCarouselContainer.getLayoutParams();
         if (params instanceof MarginLayoutParams) {
             ((MarginLayoutParams) params).topMargin =

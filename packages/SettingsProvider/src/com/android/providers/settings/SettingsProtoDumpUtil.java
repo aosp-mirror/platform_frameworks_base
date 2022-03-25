@@ -244,9 +244,6 @@ class SettingsProtoDumpUtil {
 
         final long autofillToken = p.start(GlobalSettingsProto.AUTOFILL);
         dumpSetting(s, p,
-                Settings.Global.AUTOFILL_COMPAT_MODE_ALLOWED_PACKAGES,
-                GlobalSettingsProto.Autofill.COMPAT_MODE_ALLOWED_PACKAGES);
-        dumpSetting(s, p,
                 Settings.Global.AUTOFILL_LOGGING_LEVEL,
                 GlobalSettingsProto.Autofill.LOGGING_LEVEL);
         dumpSetting(s, p,
@@ -699,6 +696,14 @@ class SettingsProtoDumpUtil {
                 Settings.Global.MAX_ERROR_BYTES_PREFIX,
                 GlobalSettingsProto.MAX_ERROR_BYTES);
 
+        final long managedDeviceProvisioningToken =
+                p.start(GlobalSettingsProto.MANAGED_DEVICE_PROVISIONING);
+        dumpSetting(s, p,
+                Settings.Global.MANAGED_PROVISIONING_DEFER_PROVISIONING_TO_ROLE_HOLDER,
+                GlobalSettingsProto.ManagedDeviceProvisioning
+                        .MANAGED_PROVISIONING_DEFER_PROVISIONING_TO_ROLE_HOLDER);
+        p.end(managedDeviceProvisioningToken);
+
         final long euiccToken = p.start(GlobalSettingsProto.EUICC);
         dumpSetting(s, p,
                 Settings.Global.EUICC_PROVISIONED,
@@ -763,9 +768,6 @@ class SettingsProtoDumpUtil {
                 Settings.Global.ANGLE_GL_DRIVER_SELECTION_VALUES,
                 GlobalSettingsProto.Gpu.ANGLE_GL_DRIVER_SELECTION_VALUES);
         dumpSetting(s, p,
-                Settings.Global.ANGLE_ALLOWLIST,
-                GlobalSettingsProto.Gpu.ANGLE_ALLOWLIST);
-        dumpSetting(s, p,
                 Settings.Global.ANGLE_EGL_FEATURES,
                 GlobalSettingsProto.Gpu.ANGLE_EGL_FEATURES);
         dumpSetting(s, p,
@@ -802,21 +804,6 @@ class SettingsProtoDumpUtil {
                 Settings.Global.UPDATABLE_DRIVER_SPHAL_LIBRARIES,
                 GlobalSettingsProto.Gpu.UPDATABLE_DRIVER_SPHAL_LIBRARIES);
         p.end(gpuToken);
-
-        final long hdmiToken = p.start(GlobalSettingsProto.HDMI);
-        dumpSetting(s, p,
-                Settings.Global.HDMI_CONTROL_ENABLED,
-                GlobalSettingsProto.Hdmi.CONTROL_ENABLED);
-        dumpSetting(s, p,
-                Settings.Global.HDMI_SYSTEM_AUDIO_CONTROL_ENABLED,
-                GlobalSettingsProto.Hdmi.SYSTEM_AUDIO_CONTROL_ENABLED);
-        dumpSetting(s, p,
-                Settings.Global.HDMI_CONTROL_AUTO_WAKEUP_ENABLED,
-                GlobalSettingsProto.Hdmi.CONTROL_AUTO_WAKEUP_ENABLED);
-        dumpSetting(s, p,
-                Settings.Global.HDMI_CONTROL_AUTO_DEVICE_OFF_ENABLED,
-                GlobalSettingsProto.Hdmi.CONTROL_AUTO_DEVICE_OFF_ENABLED);
-        p.end(hdmiToken);
 
         dumpSetting(s, p,
                 Settings.Global.HEADS_UP_NOTIFICATIONS_ENABLED,
@@ -1085,14 +1072,17 @@ class SettingsProtoDumpUtil {
                 Settings.Global.NIGHT_DISPLAY_FORCED_AUTO_MODE_AVAILABLE,
                 GlobalSettingsProto.NIGHT_DISPLAY_FORCED_AUTO_MODE_AVAILABLE);
 
-        final long nitzUpdateToken = p.start(GlobalSettingsProto.NITZ_UPDATE);
+        final long nitzToken = p.start(GlobalSettingsProto.NITZ);
         dumpSetting(s, p,
                 Settings.Global.NITZ_UPDATE_DIFF,
-                GlobalSettingsProto.NitzUpdate.DIFF);
+                GlobalSettingsProto.Nitz.UPDATE_DIFF);
         dumpSetting(s, p,
                 Settings.Global.NITZ_UPDATE_SPACING,
-                GlobalSettingsProto.NitzUpdate.SPACING);
-        p.end(nitzUpdateToken);
+                GlobalSettingsProto.Nitz.UPDATE_SPACING);
+        dumpSetting(s, p,
+                Settings.Global.NITZ_NETWORK_DISCONNECT_RETENTION,
+                GlobalSettingsProto.Nitz.NETWORK_DISCONNECT_RETENTION);
+        p.end(nitzToken);
 
         final long notificationToken = p.start(GlobalSettingsProto.NOTIFICATION);
         dumpSetting(s, p,
@@ -1113,10 +1103,6 @@ class SettingsProtoDumpUtil {
                 Settings.Global.SMART_SUGGESTIONS_IN_NOTIFICATIONS_FLAGS,
                 GlobalSettingsProto.Notification.SMART_SUGGESTIONS_IN_NOTIFICATIONS_FLAGS);
         p.end(notificationToken);
-
-        dumpSetting(s, p,
-                Settings.Global.NSD_ON,
-                GlobalSettingsProto.NSD_ON);
 
         dumpSetting(s, p,
                 Settings.Global.NR_NSA_TRACKING_SCREEN_OFF_MODE,
@@ -1195,6 +1181,9 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Global.POWER_MANAGER_CONSTANTS,
                 GlobalSettingsProto.POWER_MANAGER_CONSTANTS);
+        dumpSetting(s, p,
+                Settings.Global.POWER_BUTTON_LONG_PRESS_DURATION_MS,
+                GlobalSettingsProto.POWER_BUTTON_LONG_PRESS_DURATION_MS);
 
         final long prepaidSetupToken = p.start(GlobalSettingsProto.PREPAID_SETUP);
         dumpSetting(s, p,
@@ -1397,9 +1386,6 @@ class SettingsProtoDumpUtil {
                 Settings.Global.SYS_STORAGE_CACHE_PERCENTAGE,
                 GlobalSettingsProto.Sys.STORAGE_CACHE_PERCENTAGE);
         dumpSetting(s, p,
-                Settings.Global.SYS_STORAGE_CACHE_MAX_BYTES,
-                GlobalSettingsProto.Sys.STORAGE_CACHE_MAX_BYTES);
-        dumpSetting(s, p,
                 Settings.Global.SYS_UIDCPUPOWER,
                 GlobalSettingsProto.Sys.UIDCPUPOWER);
         p.end(sysToken);
@@ -1475,6 +1461,9 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Global.USE_OPEN_WIFI_PACKAGE,
                 GlobalSettingsProto.USE_OPEN_WIFI_PACKAGE);
+        dumpSetting(s, p,
+                Settings.Global.UWB_ENABLED,
+                GlobalSettingsProto.UWB_ENABLED);
         dumpSetting(s, p,
                 Settings.Global.VT_IMS_ENABLED,
                 GlobalSettingsProto.VT_IMS_ENABLED);
@@ -1632,7 +1621,11 @@ class SettingsProtoDumpUtil {
         p.end(token);
         // Please insert new settings using the same order as in GlobalSettingsProto.
 
+        // The rest of the settings were moved to Settings.Secure or Settings.System, and are thus
+        // excluded here since they're deprecated from Settings.Global.
+
         // Settings.Global.INSTALL_NON_MARKET_APPS intentionally excluded since it's deprecated.
+        // Settings.Global.APPLY_RAMPING_RINGER intentionally excluded since it's deprecated.
     }
 
     private static void dumpProtoConfigSettingsLocked(
@@ -1822,6 +1815,13 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Secure.ACCESSIBILITY_FLOATING_MENU_FADE_ENABLED,
                 SecureSettingsProto.Accessibility.ACCESSIBILITY_FLOATING_MENU_FADE_ENABLED);
+        dumpSetting(s, p,
+                Settings.Secure.ODI_CAPTIONS_VOLUME_UI_ENABLED,
+                SecureSettingsProto.Accessibility.ODI_CAPTIONS_VOLUME_UI_ENABLED);
+        dumpSetting(s, p,
+                Settings.Secure.ACCESSIBILITY_MAGNIFICATION_FOLLOW_TYPING_ENABLED,
+                SecureSettingsProto.Accessibility
+                        .ACCESSIBILITY_MAGNIFICATION_FOLLOW_TYPING_ENABLED);
         p.end(accessibilityToken);
 
         final long adaptiveSleepToken = p.start(SecureSettingsProto.ADAPTIVE_SLEEP);
@@ -2251,6 +2251,15 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Secure.MULTI_PRESS_TIMEOUT,
                 SecureSettingsProto.MULTI_PRESS_TIMEOUT);
+
+        final long navBar = p.start(SecureSettingsProto.NAV_BAR);
+        dumpSetting(s, p,
+                Settings.Secure.NAV_BAR_FORCE_VISIBLE,
+                SecureSettingsProto.NavBar.NAV_BAR_FORCE_VISIBLE);
+        dumpSetting(s, p,
+                Settings.Secure.NAV_BAR_KIDS_MODE,
+                SecureSettingsProto.NavBar.NAV_BAR_KIDS_MODE);
+        p.end(navBar);
 
         dumpSetting(s, p,
                 Settings.Secure.NAVIGATION_MODE,
@@ -2917,6 +2926,18 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.System.VIBRATE_WHEN_RINGING,
                 SystemSettingsProto.Vibrate.WHEN_RINGING);
+
+        // NOTIFICATION_VIBRATION_INTENSITY is already logged at Notification.vibration_intensity
+        // HAPTIC_FEEDBACK_INTENSITY is already logged at HapticFeedback.intensity
+        dumpSetting(s, p,
+                Settings.System.ALARM_VIBRATION_INTENSITY,
+                SystemSettingsProto.Vibrate.ALARM_INTENSITY);
+        dumpSetting(s, p,
+                Settings.System.MEDIA_VIBRATION_INTENSITY,
+                SystemSettingsProto.Vibrate.MEDIA_INTENSITY);
+        dumpSetting(s, p,
+                Settings.System.RING_VIBRATION_INTENSITY,
+                SystemSettingsProto.Vibrate.RING_INTENSITY);
         p.end(vibrateToken);
 
         final long volumeToken = p.start(SystemSettingsProto.VOLUME);
@@ -2964,6 +2985,10 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.System.WHEN_TO_MAKE_WIFI_CALLS,
                 SystemSettingsProto.WHEN_TO_MAKE_WIFI_CALLS);
+
+        dumpSetting(s, p,
+                Settings.System.APPLY_RAMPING_RINGER,
+                SystemSettingsProto.APPLY_RAMPING_RINGER);
 
         // Please insert new settings using the same order as in SecureSettingsProto.
 

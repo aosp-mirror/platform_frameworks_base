@@ -17,12 +17,9 @@
 package com.android.server.soundtrigger_middleware;
 
 import android.annotation.NonNull;
-import android.hardware.soundtrigger.V2_0.ISoundTriggerHw;
 import android.media.soundtrigger_middleware.ISoundTriggerCallback;
-import android.media.soundtrigger_middleware.ISoundTriggerMiddlewareService;
 import android.media.soundtrigger_middleware.ISoundTriggerModule;
 import android.media.soundtrigger_middleware.SoundTriggerModuleDescriptor;
-import android.os.IBinder;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -39,7 +36,7 @@ import java.util.List;
  * <li>There is no binder instance associated with this implementation. Do not call asBinder().
  * <li>The implementation may throw a {@link RecoverableException} to indicate non-fatal,
  * recoverable faults. The error code would one of the
- * {@link android.media.soundtrigger_middleware.Status}
+ * {@link android.media.soundtrigger.Status}
  * constants. Any other exception thrown should be regarded as a bug in the implementation or one
  * of its dependencies (assuming correct usage).
  * <li>The implementation is designed for testibility by featuring dependency injection (the
@@ -84,15 +81,15 @@ public class SoundTriggerMiddlewareImpl implements ISoundTriggerMiddlewareIntern
             @NonNull AudioSessionProvider audioSessionProvider) {
         List<SoundTriggerModule> modules = new ArrayList<>(halFactories.length);
 
-        for (int i = 0; i < halFactories.length; ++i) {
+        for (HalFactory halFactory : halFactories) {
             try {
-                modules.add(new SoundTriggerModule(halFactories[i], audioSessionProvider));
+                modules.add(new SoundTriggerModule(halFactory, audioSessionProvider));
             } catch (Exception e) {
                 Log.e(TAG, "Failed to add a SoundTriggerModule instance", e);
             }
         }
 
-        mModules = modules.toArray(new SoundTriggerModule[modules.size()]);
+        mModules = modules.toArray(new SoundTriggerModule[0]);
     }
 
     /**
@@ -121,19 +118,5 @@ public class SoundTriggerMiddlewareImpl implements ISoundTriggerMiddlewareIntern
     public @NonNull
     ISoundTriggerModule attach(int handle, @NonNull ISoundTriggerCallback callback) {
         return mModules[handle].attach(callback);
-    }
-
-    @Override
-    public void setCaptureState(boolean active) {
-        for (SoundTriggerModule module : mModules) {
-            module.setExternalCaptureState(active);
-        }
-    }
-
-    @Override
-    public @NonNull
-    IBinder asBinder() {
-        throw new UnsupportedOperationException(
-                "This implementation is not inteded to be used directly with Binder.");
     }
 }

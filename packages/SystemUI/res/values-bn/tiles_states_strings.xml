@@ -86,6 +86,11 @@
     <item msgid="5715725170633593906">"বন্ধ আছে"</item>
     <item msgid="2075645297847971154">"চালু আছে"</item>
   </string-array>
+  <string-array name="tile_states_color_correction">
+    <item msgid="2840507878437297682">"অনুপলভ্য"</item>
+    <item msgid="1909756493418256167">"বন্ধ আছে"</item>
+    <item msgid="4531508423703413340">"চালু আছে"</item>
+  </string-array>
   <string-array name="tile_states_inversion">
     <item msgid="3638187931191394628">"উপলভ্য নেই"</item>
     <item msgid="9103697205127645916">"বন্ধ আছে"</item>
@@ -151,9 +156,19 @@
     <item msgid="7571394439974244289">"বন্ধ আছে"</item>
     <item msgid="6866424167599381915">"চালু আছে"</item>
   </string-array>
+  <string-array name="tile_states_qr_code_scanner">
+    <item msgid="7435143266149257618">"উপলভ্য নয়"</item>
+    <item msgid="3301403109049256043">"বন্ধ করা আছে"</item>
+    <item msgid="8878684975184010135">"চালু আছে"</item>
+  </string-array>
   <string-array name="tile_states_alarm">
     <item msgid="4936533380177298776">"উপলভ্য নেই"</item>
     <item msgid="2710157085538036590">"বন্ধ আছে"</item>
     <item msgid="7809470840976856149">"চালু আছে"</item>
+  </string-array>
+  <string-array name="tile_states_onehanded">
+    <item msgid="8189342855739930015">"উপলভ্য নয়"</item>
+    <item msgid="146088982397753810">"বন্ধ আছে"</item>
+    <item msgid="460891964396502657">"চালু আছে"</item>
   </string-array>
 </resources>

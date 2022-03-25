@@ -16,9 +16,12 @@
 
 package android.app.admin;
 
+import static android.net.NetworkCapabilities.NET_ENTERPRISE_ID_1;
+
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 
 import android.Manifest.permission;
+import android.accounts.Account;
 import android.annotation.CallbackExecutor;
 import android.annotation.ColorInt;
 import android.annotation.IntDef;
@@ -53,9 +56,13 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.UserInfo;
 import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.net.PrivateDnsConnectivityChecker;
 import android.net.ProxyInfo;
 import android.net.Uri;
+import android.net.wifi.WifiSsid;
+import android.nfc.NfcAdapter;
+import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
@@ -92,6 +99,7 @@ import android.util.Log;
 import android.util.Pair;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.infra.AndroidFuture;
 import com.android.internal.net.NetworkUtilsInternal;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.Preconditions;
@@ -104,6 +112,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
@@ -125,6 +134,7 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 
 // TODO(b/172376923) - add CarDevicePolicyManager examples below (or remove reference to it).
 /**
@@ -159,6 +169,7 @@ public class DevicePolicyManager {
     private final Context mContext;
     private final IDevicePolicyManager mService;
     private final boolean mParentInstance;
+    private final DevicePolicyResourcesManager mResourcesManager;
 
     /** @hide */
     public DevicePolicyManager(Context context, IDevicePolicyManager service) {
@@ -172,6 +183,7 @@ public class DevicePolicyManager {
         mContext = context;
         mService = service;
         mParentInstance = parentInstance;
+        mResourcesManager = new DevicePolicyResourcesManager(context, service);
     }
 
     /** @hide test will override it. */
@@ -230,6 +242,17 @@ public class DevicePolicyManager {
      * the provisioning flow was successful, although this doesn't guarantee the full flow will
      * succeed. Conversely a result code of {@link android.app.Activity#RESULT_CANCELED} implies
      * that the user backed-out of provisioning, or some precondition for provisioning wasn't met.
+     *
+     * <p>If a device policy management role holder (DPMRH) updater is present on the device, an
+     * internet connection attempt must be made prior to launching this intent. If internet
+     * connection could not be established, provisioning will fail unless {@link
+     * #EXTRA_PROVISIONING_ALLOW_OFFLINE} is explicitly set to {@code true}, in which case
+     * provisioning will continue without using the DPMRH. If an internet connection has been
+     * established, the DPMRH updater will be launched, which will update the DPMRH if it's not
+     * present on the device, or if it's present and not valid.
+     *
+     * <p>If a DPMRH is present on the device and valid, the provisioning flow will be deferred to
+     * it.
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_PROVISION_MANAGED_PROFILE
@@ -332,8 +355,12 @@ public class DevicePolicyManager {
      * {@link android.Manifest.permission#DISPATCH_PROVISIONING_MESSAGE} to be launched.
      * Only one {@link ComponentName} in the entire system should be enabled, and the rest of the
      * components are not started by this intent.
+     *
+     * @deprecated Starting from Android T, the system no longer launches an intent with this action
+     * when user provisioning completes.
      * @hide
      */
+    @Deprecated
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     @SystemApi
     public static final String ACTION_STATE_USER_SETUP_COMPLETE =
@@ -381,6 +408,23 @@ public class DevicePolicyManager {
      * <p>Unlike {@link #ACTION_PROVISION_MANAGED_DEVICE}, the provisioning message can only be sent
      * by a privileged app with the permission
      * {@link android.Manifest.permission#DISPATCH_PROVISIONING_MESSAGE}.
+     *
+     * <p>If a device policy management role holder (DPMRH) updater is present on the device, an
+     * internet connection attempt must be made prior to launching this intent. If internet
+     * connection could not be established, provisioning will fail unless {@link
+     * #EXTRA_PROVISIONING_ALLOW_OFFLINE} is explicitly set to {@code true}, in which case
+     * provisioning will continue without using the DPMRH. If an internet connection has been
+     * established, the DPMRH updater will be launched via {@link
+     * #ACTION_UPDATE_DEVICE_MANAGEMENT_ROLE_HOLDER}, which will update the DPMRH if it's not
+     * present on the device, or if it's present and not valid.
+     *
+     * <p>A DPMRH is considered valid if it has intent filters for {@link
+     * #ACTION_ROLE_HOLDER_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE}, {@link
+     * #ACTION_ROLE_HOLDER_PROVISION_MANAGED_PROFILE} and {@link
+     * #ACTION_ROLE_HOLDER_PROVISION_FINALIZATION}.
+     *
+     * <p>If a DPMRH is present on the device and valid, the provisioning flow will be deferred to
+     * it via the {@link #ACTION_ROLE_HOLDER_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE} intent.
      *
      * <p>The provisioning intent contains the following properties:
      * <ul>
@@ -441,6 +485,70 @@ public class DevicePolicyManager {
      * <li>{@link #EXTRA_PROVISIONING_ADMIN_EXTRAS_BUNDLE}, optional</li>
      * </ul>
      *
+     * <p>Once the device admin app is set as the device owner, the following APIs are available for
+     * managing polices on the device:
+     * <ul>
+     * <li>{@link #isDeviceManaged()}</li>
+     * <li>{@link #isUninstallBlocked(ComponentName, String)}</li>
+     * <li>{@link #setUninstallBlocked(ComponentName, String, boolean)}</li>
+     * <li>{@link #setUserControlDisabledPackages(ComponentName, List)}</li>
+     * <li>{@link #getUserControlDisabledPackages(ComponentName)}</li>
+     * <li>{@link #setOrganizationName(ComponentName, CharSequence)}</li>
+     * <li>{@link #getOrganizationName(ComponentName)} </li>
+     * <li>{@link #setShortSupportMessage(ComponentName, CharSequence)}</li>
+     * <li>{@link #getShortSupportMessage(ComponentName)}</li>
+     * <li>{@link #isBackupServiceEnabled(ComponentName)}</li>
+     * <li>{@link #setBackupServiceEnabled(ComponentName, boolean)}</li>
+     * <li>{@link #isLockTaskPermitted(String)}</li>
+     * <li>{@link #setLockTaskFeatures(ComponentName, int)}, where the following lock task features
+     * can be set (otherwise a {@link SecurityException} will be thrown):</li>
+     * <ul>
+     *     <li>{@link #LOCK_TASK_FEATURE_SYSTEM_INFO}</li>
+     *     <li>{@link #LOCK_TASK_FEATURE_KEYGUARD}</li>
+     *     <li>{@link #LOCK_TASK_FEATURE_HOME}</li>
+     *     <li>{@link #LOCK_TASK_FEATURE_GLOBAL_ACTIONS}</li>
+     *     <li>{@link #LOCK_TASK_FEATURE_NOTIFICATIONS}</li>
+     * </ul>
+     * <li>{@link #getLockTaskFeatures(ComponentName)}</li>
+     * <li>{@link #setLockTaskPackages(ComponentName, String[])}</li>
+     * <li>{@link #getLockTaskPackages(ComponentName)}</li>
+     * <li>{@link #addPersistentPreferredActivity(ComponentName, IntentFilter, ComponentName)}</li>
+     * <li>{@link #clearPackagePersistentPreferredActivities(ComponentName, String)} </li>
+     * <li>{@link #wipeData(int)}</li>
+     * <li>{@link #isDeviceOwnerApp(String)}</li>
+     * <li>{@link #clearDeviceOwnerApp(String)}</li>
+     * <li>{@link #setPermissionGrantState(ComponentName, String, String, int)}, where
+     * {@link permission#READ_PHONE_STATE} is the <b>only</b> permission that can be
+     * {@link #PERMISSION_GRANT_STATE_GRANTED}, {@link #PERMISSION_GRANT_STATE_DENIED}, or
+     * {@link #PERMISSION_GRANT_STATE_DEFAULT} and can <b>only</b> be applied to the device admin
+     * app (otherwise a {@link SecurityException} will be thrown)</li>
+     * <li>{@link #getPermissionGrantState(ComponentName, String, String)}, where
+     * {@link permission#READ_PHONE_STATE} is the <b>only</b> permission that can be
+     * used and device admin app is the only package that can be used to retrieve the permission
+     * permission grant state for (otherwise a {@link SecurityException} will be thrown)</li>
+     * <li>{@link #addUserRestriction(ComponentName, String)}, where the following user restrictions
+     * are permitted (otherwise a {@link SecurityException} will be thrown):</li>
+     * <ul>
+     *     <li>{@link UserManager#DISALLOW_ADD_USER}</li>
+     *     <li>{@link UserManager#DISALLOW_DEBUGGING_FEATURES}</li>
+     *     <li>{@link UserManager#DISALLOW_INSTALL_UNKNOWN_SOURCES}</li>
+     *     <li>{@link UserManager#DISALLOW_SAFE_BOOT}</li>
+     *     <li>{@link UserManager#DISALLOW_CONFIG_DATE_TIME}</li>
+     *     <li>{@link UserManager#DISALLOW_OUTGOING_CALLS}</li>
+     * </ul>
+     * <li>{@link #getUserRestrictions(ComponentName)}</li>
+     * <li>{@link #clearUserRestriction(ComponentName, String)}, where the following user
+     * restrictions are permitted (otherwise a {@link SecurityException} will be thrown):</li>
+     * <ul>
+     *     <li>{@link UserManager#DISALLOW_ADD_USER}</li>
+     *     <li>{@link UserManager#DISALLOW_DEBUGGING_FEATURES}</li>
+     *     <li>{@link UserManager#DISALLOW_INSTALL_UNKNOWN_SOURCES}</li>
+     *     <li>{@link UserManager#DISALLOW_SAFE_BOOT}</li>
+     *     <li>{@link UserManager#DISALLOW_CONFIG_DATE_TIME}</li>
+     *     <li>{@link UserManager#DISALLOW_OUTGOING_CALLS}</li>
+     * </ul>
+     * </ul>
+     *
      * @hide
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
@@ -457,12 +565,315 @@ public class DevicePolicyManager {
      * <li>{@link #STATE_USER_PROFILE_COMPLETE}</li>
      * </ul>
      *
+     * <p>If a device policy management role holder (DPMRH) is present on the device and
+     * valid, the provisioning flow will be deferred to it via the {@link
+     * #ACTION_ROLE_HOLDER_PROVISION_FINALIZATION} intent.
+     *
      * @hide
      */
     @SystemApi
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_PROVISION_FINALIZATION
             = "android.app.action.PROVISION_FINALIZATION";
+
+    /**
+     * Activity action: starts the managed profile provisioning flow inside the device policy
+     * management role holder.
+     *
+     * <p>During the managed profile provisioning flow, the platform-provided provisioning handler
+     * will delegate provisioning to the device policy management role holder, by firing this
+     * intent. Third-party mobile device management applications attempting to fire this intent will
+     * receive a {@link SecurityException}.
+     *
+     * <p>Device policy management role holders are required to have a handler for this intent
+     * action.
+     *
+     * <p>If {@link #EXTRA_ROLE_HOLDER_STATE} is supplied to this intent, it is the responsibility
+     * of the role holder to restore its state from this extra. This is the same {@link Bundle}
+     * which the role holder returns alongside {@link #RESULT_UPDATE_ROLE_HOLDER}.
+     *
+     * <p>A result code of {@link Activity#RESULT_OK} implies that managed profile provisioning
+     * finished successfully. If it did not, a result code of {@link Activity#RESULT_CANCELED}
+     * is used instead.
+     *
+     * @see #ACTION_PROVISION_MANAGED_PROFILE
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.LAUNCH_DEVICE_MANAGER_SETUP)
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    @SystemApi
+    public static final String ACTION_ROLE_HOLDER_PROVISION_MANAGED_PROFILE =
+            "android.app.action.ROLE_HOLDER_PROVISION_MANAGED_PROFILE";
+
+    /**
+     * Result code that can be returned by the {@link
+     * #ACTION_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE} or {@link
+     * #ACTION_ROLE_HOLDER_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE} intent handlers if a work
+     * profile has been created.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int RESULT_WORK_PROFILE_CREATED = 122;
+
+    /**
+     * Result code that can be returned by the {@link
+     * #ACTION_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE} or {@link
+     * #ACTION_ROLE_HOLDER_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE} intent handlers if the
+     * device owner was set.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int RESULT_DEVICE_OWNER_SET = 123;
+
+    /**
+     * Activity action: starts the trusted source provisioning flow inside the device policy
+     * management role holder.
+     *
+     * <p>During the trusted source provisioning flow, the platform-provided provisioning handler
+     * will delegate provisioning to the device policy management role holder, by firing this
+     * intent. Third-party mobile device management applications attempting to fire this intent will
+     * receive a {@link SecurityException}.
+     *
+     * <p>Device policy management role holders are required to have a handler for this intent
+     * action.
+     *
+     * <p>If {@link #EXTRA_ROLE_HOLDER_STATE} is supplied to this intent, it is the responsibility
+     * of the role holder to restore its state from this extra. This is the same {@link Bundle}
+     * which the role holder returns alongside {@link #RESULT_UPDATE_ROLE_HOLDER}.
+     *
+     * <p>The result codes can be either {@link #RESULT_WORK_PROFILE_CREATED}, {@link
+     * #RESULT_DEVICE_OWNER_SET} or {@link Activity#RESULT_CANCELED} if provisioning failed.
+     *
+     * @see #ACTION_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.LAUNCH_DEVICE_MANAGER_SETUP)
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    @SystemApi
+    public static final String ACTION_ROLE_HOLDER_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE =
+            "android.app.action.ROLE_HOLDER_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE";
+
+    /**
+     * Activity action: starts the provisioning finalization flow inside the device policy
+     * management role holder.
+     *
+     * <p>During the provisioning finalization flow, the platform-provided provisioning handler
+     * will delegate provisioning to the device policy management role holder, by firing this
+     * intent. Third-party mobile device management applications attempting to fire this intent will
+     * receive a {@link SecurityException}.
+     *
+     * <p>Device policy management role holders are required to have a handler for this intent
+     * action.
+     *
+     * <p>This handler forwards the result from the admin app's {@link
+     * #ACTION_ADMIN_POLICY_COMPLIANCE} handler. Result code {@link Activity#RESULT_CANCELED}
+     * implies the provisioning finalization flow has failed.
+     *
+     * @see #ACTION_PROVISION_FINALIZATION
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.LAUNCH_DEVICE_MANAGER_SETUP)
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    @SystemApi
+    public static final String ACTION_ROLE_HOLDER_PROVISION_FINALIZATION =
+            "android.app.action.ROLE_HOLDER_PROVISION_FINALIZATION";
+
+    /**
+     * {@link Activity} result code which can be returned by {@link
+     * #ACTION_ROLE_HOLDER_PROVISION_MANAGED_PROFILE} and {@link
+     * #ACTION_ROLE_HOLDER_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE} to signal that an update
+     * to the role holder is required.
+     *
+     * <p>This result code can be accompanied by {@link #EXTRA_ROLE_HOLDER_STATE}.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int RESULT_UPDATE_ROLE_HOLDER = 2;
+
+    /**
+     * A {@link PersistableBundle} extra which the role holder can use to describe its own state
+     * when it returns {@link #RESULT_UPDATE_ROLE_HOLDER}.
+     *
+     * <p>If {@link #RESULT_UPDATE_ROLE_HOLDER} was accompanied by this extra, after the update
+     * completes, the role holder's {@link #ACTION_ROLE_HOLDER_PROVISION_MANAGED_PROFILE} or {@link
+     * #ACTION_ROLE_HOLDER_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE} intent will be relaunched,
+     * which will contain this extra. It is the role holder's responsibility to restore its
+     * state from this extra.
+     *
+     * <p>The content of this {@link PersistableBundle} is entirely up to the role holder. It
+     * should contain anything the role holder needs to restore its original state when it gets
+     * restarted.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_ROLE_HOLDER_STATE = "android.app.extra.ROLE_HOLDER_STATE";
+
+    /**
+     * A {@code boolean} extra which determines whether to force a role holder update, regardless
+     * of any internal conditions {@link #ACTION_UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER} might
+     * have.
+     *
+     * <p>This extra can be provided to intents with action {@link
+     * #ACTION_UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER}.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_FORCE_UPDATE_ROLE_HOLDER =
+            "android.app.extra.FORCE_UPDATE_ROLE_HOLDER";
+
+    /**
+     * A boolean extra indicating whether offline provisioning is allowed.
+     *
+     * <p>For the online provisioning flow, there will be an attempt to download and install
+     * the latest version of the device policy management role holder. The platform will then
+     * delegate provisioning to the device policy management role holder via role holder-specific
+     * provisioning actions.
+     *
+     * <p>For the offline provisioning flow, the provisioning flow will always be handled by
+     * the platform.
+     *
+     * <p>If this extra is set to {@code false}, the provisioning flow will enforce that an
+     * internet connection is established, which will start the online provisioning flow. If an
+     * internet connection cannot be established, provisioning will fail.
+     *
+     * <p>If this extra is set to {@code true}, the provisioning flow will still try to connect to
+     * the internet, but if it fails it will start the offline provisioning flow.
+     *
+     * <p>The default value is {@code false}.
+     *
+     * <p>This extra is respected when provided via the provisioning intent actions such as {@link
+     * #ACTION_PROVISION_MANAGED_PROFILE}.
+     */
+    public static final String EXTRA_PROVISIONING_ALLOW_OFFLINE =
+            "android.app.extra.PROVISIONING_ALLOW_OFFLINE";
+
+    /**
+     * A String extra holding a url that specifies the download location of the device policy
+     * management role holder package.
+     *
+     * <p>This is only meant to be used in cases when a specific variant of the role holder package
+     * is needed (such as a debug variant). If not provided, the default variant of the device
+     * manager role holder package is downloaded.
+     *
+     * <p>Use in an intent with action {@link #ACTION_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE}
+     * or in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
+     * provisioning via an NFC bump.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_PROVISIONING_ROLE_HOLDER_PACKAGE_DOWNLOAD_LOCATION =
+            "android.app.extra.PROVISIONING_ROLE_HOLDER_PACKAGE_DOWNLOAD_LOCATION";
+
+    /**
+     * A String extra holding the URL-safe base64 encoded SHA-256 checksum of any signature of the
+     * android package archive at the download location specified in {@link
+     * #EXTRA_PROVISIONING_ROLE_HOLDER_PACKAGE_DOWNLOAD_LOCATION}.
+     *
+     * <p>The signatures of an android package archive can be obtained using
+     * {@link android.content.pm.PackageManager#getPackageArchiveInfo} with flag
+     * {@link android.content.pm.PackageManager#GET_SIGNING_CERTIFICATES}.
+     *
+     * <p>If {@link #EXTRA_PROVISIONING_ROLE_HOLDER_PACKAGE_DOWNLOAD_LOCATION} is provided, it must
+     * be accompanied by this extra. The provided checksum must match the checksum of any signature
+     * of the file at the download location. If the checksum does not match an error will be shown
+     * to the user and the user will be asked to factory reset the device.
+     *
+     * <p>Use in an intent with action {@link #ACTION_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE}
+     * or in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
+     * provisioning via an NFC bump.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_PROVISIONING_ROLE_HOLDER_SIGNATURE_CHECKSUM =
+            "android.app.extra.PROVISIONING_ROLE_HOLDER_SIGNATURE_CHECKSUM";
+
+    /**
+     * A String extra holding a http cookie header which should be used in the http request to the
+     * url specified in {@link #EXTRA_PROVISIONING_ROLE_HOLDER_PACKAGE_DOWNLOAD_LOCATION}.
+     *
+     * <p>Use in an intent with action {@link #ACTION_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE}
+     * or in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
+     * provisioning via an NFC bump.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_PROVISIONING_ROLE_HOLDER_PACKAGE_DOWNLOAD_COOKIE_HEADER =
+            "android.app.extra.PROVISIONING_ROLE_HOLDER_PACKAGE_DOWNLOAD_COOKIE_HEADER";
+
+    /**
+     * An extra of type {@link android.os.PersistableBundle} that allows the provisioning initiator
+     * to pass data to the device policy management role holder.
+     *
+     * <p>The device policy management role holder will receive this extra via the {@link
+     * #ACTION_ROLE_HOLDER_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE} intent.
+     *
+     * <p>The contents of this extra are up to the contract between the provisioning initiator
+     * and the device policy management role holder.
+     *
+     * <p>Use in an intent with action {@link #ACTION_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE}
+     * or in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
+     * provisioning via an NFC bump.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_PROVISIONING_ROLE_HOLDER_EXTRAS_BUNDLE =
+            "android.app.extra.PROVISIONING_ROLE_HOLDER_EXTRAS_BUNDLE";
+
+    /**
+     * A String extra containing the package name of the provisioning initiator.
+     *
+     * <p>Use in an intent with action {@link
+     * #ACTION_ROLE_HOLDER_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE}.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_ROLE_HOLDER_PROVISIONING_INITIATOR_PACKAGE =
+            "android.app.extra.ROLE_HOLDER_PROVISIONING_INITIATOR_PACKAGE";
+
+    /**
+     * An {@link Intent} result extra specifying the {@link Intent} to be launched after
+     * provisioning is finalized.
+     *
+     * <p>If {@link #EXTRA_PROVISIONING_SHOULD_LAUNCH_RESULT_INTENT} is set to {@code false},
+     * this result will be supplied as part of the result {@link Intent} for provisioning actions
+     * such as {@link #ACTION_PROVISION_MANAGED_PROFILE}. This result will also be supplied as
+     * part of the result {@link Intent} for the device policy management role holder provisioning
+     * actions.
+     */
+    public static final String EXTRA_RESULT_LAUNCH_INTENT =
+            "android.app.extra.RESULT_LAUNCH_INTENT";
+
+    /**
+     * A boolean extra that determines whether the provisioning flow should launch the resulting
+     * launch intent, if one is supplied by the device policy management role holder via {@link
+     * #EXTRA_RESULT_LAUNCH_INTENT}. Default value is {@code false}.
+     *
+     * <p>If {@code true}, the resulting intent will be launched by the provisioning flow, if one
+     * is supplied by the device policy management role holder.
+     *
+     * <p>If {@code false}, the resulting intent will be returned as {@link
+     * #EXTRA_RESULT_LAUNCH_INTENT} to the provisioning initiator, if one is supplied by the device
+     * manager role holder. It will be the responsibility of the provisioning initiator to launch
+     * this {@link Intent} after provisioning completes.
+     *
+     * <p>This extra is respected when provided via the provisioning intent actions such as {@link
+     * #ACTION_PROVISION_MANAGED_PROFILE}.
+     */
+    public static final String EXTRA_PROVISIONING_SHOULD_LAUNCH_RESULT_INTENT =
+            "android.app.extra.PROVISIONING_SHOULD_LAUNCH_RESULT_INTENT";
 
     /**
      * Action: Bugreport sharing with device owner has been accepted by the user.
@@ -495,6 +906,14 @@ public class DevicePolicyManager {
      */
     public static final String EXTRA_REMOTE_BUGREPORT_HASH =
             "android.intent.extra.REMOTE_BUGREPORT_HASH";
+
+    /**
+     * Extra for shared bugreport's nonce in long integer type.
+     *
+     * @hide
+     */
+    public static final String EXTRA_REMOTE_BUGREPORT_NONCE =
+            "android.intent.extra.REMOTE_BUGREPORT_NONCE";
 
     /**
      * Extra for remote bugreport notification shown type.
@@ -679,8 +1098,9 @@ public class DevicePolicyManager {
      * A String extra holding the time zone {@link android.app.AlarmManager} that the device
      * will be set to.
      *
-     * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
-     * provisioning via an NFC bump.
+     * <p>Use only for device owner provisioning. This extra can be returned by the admin app when
+     * performing the admin-integrated provisioning flow as a result of the {@link
+     * #ACTION_GET_PROVISIONING_MODE} activity.
      */
     public static final String EXTRA_PROVISIONING_TIME_ZONE
         = "android.app.extra.PROVISIONING_TIME_ZONE";
@@ -689,8 +1109,9 @@ public class DevicePolicyManager {
      * A Long extra holding the wall clock time (in milliseconds) to be set on the device's
      * {@link android.app.AlarmManager}.
      *
-     * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
-     * provisioning via an NFC bump.
+     * <p>Use only for device owner provisioning. This extra can be returned by the admin app when
+     * performing the admin-integrated provisioning flow as a result of the {@link
+     * #ACTION_GET_PROVISIONING_MODE} activity.
      */
     public static final String EXTRA_PROVISIONING_LOCAL_TIME
         = "android.app.extra.PROVISIONING_LOCAL_TIME";
@@ -699,8 +1120,9 @@ public class DevicePolicyManager {
      * A String extra holding the {@link java.util.Locale} that the device will be set to.
      * Format: xx_yy, where xx is the language code, and yy the country code.
      *
-     * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
-     * provisioning via an NFC bump.
+     * <p>Use only for device owner provisioning. This extra can be returned by the admin app when
+     * performing the admin-integrated provisioning flow as a result of the {@link
+     * #ACTION_GET_PROVISIONING_MODE} activity.
      */
     public static final String EXTRA_PROVISIONING_LOCALE
         = "android.app.extra.PROVISIONING_LOCALE";
@@ -996,7 +1418,13 @@ public class DevicePolicyManager {
      * The default for this extra is {@code false} - by default, the admin of a fully-managed
      * device has the ability to grant sensors-related permissions.
      *
-     * <p>Use only for device owner provisioning.
+     * <p>Use only for device owner provisioning. This extra can be returned by the
+     * admin app when performing the admin-integrated provisioning flow as a result of the
+     * {@link #ACTION_GET_PROVISIONING_MODE} activity.
+     *
+     * <p>This extra may also be provided to the admin app via an intent extra for {@link
+     * #ACTION_GET_PROVISIONING_MODE}.
+     *
      * @see #ACTION_GET_PROVISIONING_MODE
      */
     public static final String EXTRA_PROVISIONING_SENSORS_PERMISSION_GRANT_OPT_OUT =
@@ -1065,6 +1493,9 @@ public class DevicePolicyManager {
      *
      * <p>From {@link android.os.Build.VERSION_CODES#N} onwards, this is also supported for an
      * intent with action {@link #ACTION_PROVISION_MANAGED_PROFILE}.
+     *
+     * <p>This extra can also be returned by the admin app when performing the admin-integrated
+     * provisioning flow as a result of the {@link #ACTION_GET_PROVISIONING_MODE} activity.
      */
     public static final String EXTRA_PROVISIONING_SKIP_ENCRYPTION =
              "android.app.extra.PROVISIONING_SKIP_ENCRYPTION";
@@ -1087,7 +1518,10 @@ public class DevicePolicyManager {
      *
      * <p>Use in an intent with action {@link #ACTION_PROVISION_MANAGED_PROFILE} or
      * {@link #ACTION_PROVISION_MANAGED_DEVICE}
+     *
+     * @deprecated Logo customization is no longer supported in the provisioning flow.
      */
+    @Deprecated
     public static final String EXTRA_PROVISIONING_LOGO_URI =
             "android.app.extra.PROVISIONING_LOGO_URI";
 
@@ -1104,8 +1538,9 @@ public class DevicePolicyManager {
      *
      * <p> Maximum 3 key-value pairs can be specified. The rest will be ignored.
      *
-     * <p> Use in an intent with action {@link #ACTION_PROVISION_MANAGED_PROFILE} or
-     * {@link #ACTION_PROVISION_MANAGED_DEVICE}
+     * <p> Can be used in an intent with action {@link #ACTION_PROVISION_MANAGED_PROFILE}. This
+     * extra can also be returned by the admin app when performing the admin-integrated
+     * provisioning flow as a result of the {@link #ACTION_GET_PROVISIONING_MODE} activity.
      */
     public static final String EXTRA_PROVISIONING_DISCLAIMERS =
             "android.app.extra.PROVISIONING_DISCLAIMERS";
@@ -1194,14 +1629,26 @@ public class DevicePolicyManager {
             "android.app.extra.PROVISIONING_SKIP_EDUCATION_SCREENS";
 
     /**
-     * A boolean extra indicating if mobile data should be used during NFC device owner provisioning
-     * for downloading the mobile device management application. If {@link
-     * #EXTRA_PROVISIONING_WIFI_SSID} is also specified, wifi network will be used instead.
+     * A boolean extra indicating if mobile data should be used during the provisioning flow
+     * for downloading the admin app. If {@link #EXTRA_PROVISIONING_WIFI_SSID} is also specified,
+     * wifi network will be used instead.
      *
-     * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
-     * provisioning via an NFC bump.
+     * <p>Default value is {@code false}.
      *
-     * @hide
+     * <p>If this extra is set to {@code true} and {@link #EXTRA_PROVISIONING_WIFI_SSID} is not
+     * specified, this extra has different behaviour depending on the way provisioning is triggered:
+     * <ul>
+     * <li>
+     *     For provisioning started via a QR code or an NFC tag, mobile data is always used for
+     *     downloading the admin app.
+     * </li>
+     * <li>
+     *     For all other provisioning methods, a mobile data connection check is made at the start
+     *     of provisioning. If mobile data is connected at that point, the admin app download will
+     *     happen using mobile data. If mobile data is not connected at that point, the end-user
+     *     will be asked to pick a wifi network and the admin app download will proceed over wifi.
+     * </li>
+     * </ul>
      */
     public static final String EXTRA_PROVISIONING_USE_MOBILE_DATA =
             "android.app.extra.PROVISIONING_USE_MOBILE_DATA";
@@ -1216,7 +1663,8 @@ public class DevicePolicyManager {
             PROVISIONING_TRIGGER_CLOUD_ENROLLMENT,
             PROVISIONING_TRIGGER_QR_CODE,
             PROVISIONING_TRIGGER_PERSISTENT_DEVICE_OWNER,
-            PROVISIONING_TRIGGER_MANAGED_ACCOUNT
+            PROVISIONING_TRIGGER_MANAGED_ACCOUNT,
+            PROVISIONING_TRIGGER_NFC
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ProvisioningTrigger {}
@@ -1254,6 +1702,7 @@ public class DevicePolicyManager {
      * @see #PROVISIONING_TRIGGER_CLOUD_ENROLLMENT
      * @see #PROVISIONING_TRIGGER_QR_CODE
      * @see #PROVISIONING_TRIGGER_MANAGED_ACCOUNT
+     * @see #PROVISIONING_TRIGGER_NFC
      * @hide
      */
     @SystemApi
@@ -1265,6 +1714,7 @@ public class DevicePolicyManager {
      * @see #PROVISIONING_TRIGGER_QR_CODE
      * @see #PROVISIONING_TRIGGER_MANAGED_ACCOUNT
      * @see #PROVISIONING_TRIGGER_UNSPECIFIED
+     * @see #PROVISIONING_TRIGGER_NFC
      * @hide
      */
     @SystemApi
@@ -1276,6 +1726,7 @@ public class DevicePolicyManager {
      * @see #PROVISIONING_TRIGGER_CLOUD_ENROLLMENT
      * @see #PROVISIONING_TRIGGER_MANAGED_ACCOUNT
      * @see #PROVISIONING_TRIGGER_UNSPECIFIED
+     * @see #PROVISIONING_TRIGGER_NFC
      * @hide
      */
     @SystemApi
@@ -1295,6 +1746,7 @@ public class DevicePolicyManager {
      * @see #PROVISIONING_TRIGGER_CLOUD_ENROLLMENT
      * @see #PROVISIONING_TRIGGER_QR_CODE
      * @see #PROVISIONING_TRIGGER_UNSPECIFIED
+     * @see #PROVISIONING_TRIGGER_NFC
      * @hide
      */
     @SystemApi
@@ -1308,10 +1760,23 @@ public class DevicePolicyManager {
      * @see #PROVISIONING_TRIGGER_CLOUD_ENROLLMENT
      * @see #PROVISIONING_TRIGGER_QR_CODE
      * @see #PROVISIONING_TRIGGER_UNSPECIFIED
+     * @see #PROVISIONING_TRIGGER_NFC
      * @hide
      */
     @SystemApi
     public static final int PROVISIONING_TRIGGER_MANAGED_ACCOUNT = 4;
+
+    /**
+     * A value for {@link #EXTRA_PROVISIONING_TRIGGER} indicating that the provisioning is
+     * triggered by tapping an NFC tag.
+     * @see #PROVISIONING_TRIGGER_CLOUD_ENROLLMENT
+     * @see #PROVISIONING_TRIGGER_QR_CODE
+     * @see #PROVISIONING_TRIGGER_UNSPECIFIED
+     * @see #PROVISIONING_TRIGGER_MANAGED_ACCOUNT
+     * @hide
+     */
+    @SystemApi
+    public static final int PROVISIONING_TRIGGER_NFC = 5;
 
     /**
      * Flag for {@link #EXTRA_PROVISIONING_SUPPORTED_MODES} indicating that provisioning is
@@ -1365,6 +1830,78 @@ public class DevicePolicyManager {
      */
     @SystemApi
     public static final int FLAG_SUPPORTED_MODES_DEVICE_OWNER = 1 << 2;
+
+    /**
+     * Constant for {@link #getMinimumRequiredWifiSecurityLevel()} and
+     * {@link #setMinimumRequiredWifiSecurityLevel(int)}: no minimum security level.
+     *
+     * <p> When returned from {@link #getMinimumRequiredWifiSecurityLevel()}, the constant
+     * represents the current minimum security level required.
+     * When passed to {@link #setMinimumRequiredWifiSecurityLevel(int)}, it sets the
+     * minimum security level a Wi-Fi network must meet.
+     *
+     * @see #WIFI_SECURITY_PERSONAL
+     * @see #WIFI_SECURITY_ENTERPRISE_EAP
+     * @see #WIFI_SECURITY_ENTERPRISE_192
+     */
+    public static final int WIFI_SECURITY_OPEN = 0;
+
+    /**
+     * Constant for {@link #getMinimumRequiredWifiSecurityLevel()} and
+     * {@link #setMinimumRequiredWifiSecurityLevel(int)}: personal network such as WEP, WPA2-PSK.
+     *
+     * <p> When returned from {@link #getMinimumRequiredWifiSecurityLevel()}, the constant
+     * represents the current minimum security level required.
+     * When passed to {@link #setMinimumRequiredWifiSecurityLevel(int)}, it sets the
+     * minimum security level a Wi-Fi network must meet.
+     *
+     * @see #WIFI_SECURITY_OPEN
+     * @see #WIFI_SECURITY_ENTERPRISE_EAP
+     * @see #WIFI_SECURITY_ENTERPRISE_192
+     */
+    public static final int WIFI_SECURITY_PERSONAL = 1;
+
+    /**
+     * Constant for {@link #getMinimumRequiredWifiSecurityLevel()} and
+     * {@link #setMinimumRequiredWifiSecurityLevel(int)}: enterprise EAP network.
+     *
+     * <p> When returned from {@link #getMinimumRequiredWifiSecurityLevel()}, the constant
+     * represents the current minimum security level required.
+     * When passed to {@link #setMinimumRequiredWifiSecurityLevel(int)}, it sets the
+     * minimum security level a Wi-Fi network must meet.
+     *
+     * @see #WIFI_SECURITY_OPEN
+     * @see #WIFI_SECURITY_PERSONAL
+     * @see #WIFI_SECURITY_ENTERPRISE_192
+     */
+    public static final int WIFI_SECURITY_ENTERPRISE_EAP = 2;
+
+    /**
+     * Constant for {@link #getMinimumRequiredWifiSecurityLevel()} and
+     * {@link #setMinimumRequiredWifiSecurityLevel(int)}: enterprise 192 bit network.
+     *
+     * <p> When returned from {@link #getMinimumRequiredWifiSecurityLevel()}, the constant
+     * represents the current minimum security level required.
+     * When passed to {@link #setMinimumRequiredWifiSecurityLevel(int)}, it sets the
+     * minimum security level a Wi-Fi network must meet.
+     *
+     * @see #WIFI_SECURITY_OPEN
+     * @see #WIFI_SECURITY_PERSONAL
+     * @see #WIFI_SECURITY_ENTERPRISE_EAP
+     */
+    public static final int WIFI_SECURITY_ENTERPRISE_192 = 3;
+
+    /**
+     * Possible Wi-Fi minimum security levels
+     *
+     * @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"WIFI_SECURITY_"}, value = {
+            WIFI_SECURITY_OPEN,
+            WIFI_SECURITY_PERSONAL,
+            WIFI_SECURITY_ENTERPRISE_EAP,
+            WIFI_SECURITY_ENTERPRISE_192})
+    public @interface WifiSecurity {}
 
     /**
      * This MIME type is used for starting the device owner provisioning.
@@ -1510,6 +2047,28 @@ public class DevicePolicyManager {
     @SystemApi
     public static final String ACTION_RESET_PROTECTION_POLICY_CHANGED =
             "android.app.action.RESET_PROTECTION_POLICY_CHANGED";
+
+    /**
+     * Broadcast action: sent when there is a location update on a device in lost mode. This
+     * broadcast is explicitly sent to the device policy controller app only.
+     *
+     * @see DevicePolicyManager#sendLostModeLocationUpdate
+     * @hide
+     */
+    @SystemApi
+    public static final String ACTION_LOST_MODE_LOCATION_UPDATE =
+            "android.app.action.LOST_MODE_LOCATION_UPDATE";
+
+    /**
+     * Extra used with {@link #ACTION_LOST_MODE_LOCATION_UPDATE} to send the location of a device
+     * in lost mode. Value is {@code Location}.
+     *
+     * @see DevicePolicyManager#sendLostModeLocationUpdate
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_LOST_MODE_LOCATION =
+            "android.app.extra.LOST_MODE_LOCATION";
 
     /**
      * The ComponentName of the administrator component.
@@ -2024,7 +2583,18 @@ public class DevicePolicyManager {
     public @interface UserProvisioningState {}
 
     /**
-     * Result code for {@link #checkProvisioningPreCondition}.
+     * Result code for {@link #checkProvisioningPrecondition}.
+     *
+     * <p>Unknown error code returned  for {@link #ACTION_PROVISION_MANAGED_DEVICE},
+     * {@link #ACTION_PROVISION_MANAGED_PROFILE} and {@link #ACTION_PROVISION_MANAGED_USER}.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int STATUS_UNKNOWN_ERROR = -1;
+
+    /**
+     * Result code for {@link #checkProvisioningPrecondition}.
      *
      * <p>Returned for {@link #ACTION_PROVISION_MANAGED_DEVICE},
      * {@link #ACTION_PROVISION_MANAGED_PROFILE} and {@link #ACTION_PROVISION_MANAGED_USER}
@@ -2032,91 +2602,91 @@ public class DevicePolicyManager {
      *
      * @hide
      */
-    @TestApi
-    public static final int CODE_OK = 0;
+    @SystemApi
+    public static final int STATUS_OK = 0;
 
     /**
-     * Result code for {@link #checkProvisioningPreCondition}.
+     * Result code for {@link #checkProvisioningPrecondition}.
      *
      * <p>Returned for {@link #ACTION_PROVISION_MANAGED_DEVICE} when the device already has a
      * device owner.
      *
      * @hide
      */
-    @TestApi
-    public static final int CODE_HAS_DEVICE_OWNER = 1;
+    @SystemApi
+    public static final int STATUS_HAS_DEVICE_OWNER = 1;
 
     /**
-     * Result code for {@link #checkProvisioningPreCondition}.
+     * Result code for {@link #checkProvisioningPrecondition}.
      *
      * <p>Returned for {@link #ACTION_PROVISION_MANAGED_DEVICE} when the user has a profile owner
      *  and for {@link #ACTION_PROVISION_MANAGED_PROFILE} when the profile owner is already set.
      *
      * @hide
      */
-    @TestApi
-    public static final int CODE_USER_HAS_PROFILE_OWNER = 2;
+    @SystemApi
+    public static final int STATUS_USER_HAS_PROFILE_OWNER = 2;
 
     /**
-     * Result code for {@link #checkProvisioningPreCondition}.
+     * Result code for {@link #checkProvisioningPrecondition}.
      *
      * <p>Returned for {@link #ACTION_PROVISION_MANAGED_DEVICE} when the user isn't running.
      *
      * @hide
      */
-    @TestApi
-    public static final int CODE_USER_NOT_RUNNING = 3;
+    @SystemApi
+    public static final int STATUS_USER_NOT_RUNNING = 3;
 
     /**
-     * Result code for {@link #checkProvisioningPreCondition}.
+     * Result code for {@link #checkProvisioningPrecondition}.
      *
      * <p>Returned for {@link #ACTION_PROVISION_MANAGED_DEVICE} if the device has already been
      * setup and for {@link #ACTION_PROVISION_MANAGED_USER} if the user has already been setup.
      *
      * @hide
      */
-    @TestApi
-    public static final int CODE_USER_SETUP_COMPLETED = 4;
+    @SystemApi
+    public static final int STATUS_USER_SETUP_COMPLETED = 4;
 
     /**
      * Code used to indicate that the device also has a user other than the system user.
      *
      * @hide
      */
-    @TestApi
-    public static final int CODE_NONSYSTEM_USER_EXISTS = 5;
+    @SystemApi
+    public static final int STATUS_NONSYSTEM_USER_EXISTS = 5;
 
     /**
      * Code used to indicate that device has an account that prevents provisioning.
      *
      * @hide
      */
-    @TestApi
-    public static final int CODE_ACCOUNTS_NOT_EMPTY = 6;
+    @SystemApi
+    public static final int STATUS_ACCOUNTS_NOT_EMPTY = 6;
 
     /**
-     * Result code for {@link #checkProvisioningPreCondition}.
+     * Result code for {@link #checkProvisioningPrecondition}.
      *
      * <p>Returned for {@link #ACTION_PROVISION_MANAGED_DEVICE} if the user is not a system user.
      *
      * @hide
      */
-    @TestApi
-    public static final int CODE_NOT_SYSTEM_USER = 7;
+    @SystemApi
+    public static final int STATUS_NOT_SYSTEM_USER = 7;
 
     /**
-     * Result code for {@link #checkProvisioningPreCondition}.
+     * Result code for {@link #checkProvisioningPrecondition}.
      *
      * <p>Returned for {@link #ACTION_PROVISION_MANAGED_DEVICE} and
      * {@link #ACTION_PROVISION_MANAGED_USER} when the device is a watch and is already paired.
      *
      * @hide
      */
-    @TestApi
-    public static final int CODE_HAS_PAIRED = 8;
+    @SystemApi
+    public static final int STATUS_HAS_PAIRED = 8;
 
     /**
-     * Result code for {@link #checkProvisioningPreCondition}.
+     * Result code for {@link #checkProvisioningPrecondition}.
      *
      * <p>Returned for {@link #ACTION_PROVISION_MANAGED_PROFILE} and
      * {@link #ACTION_PROVISION_MANAGED_USER} on devices which do not support managed users.
@@ -2124,11 +2694,11 @@ public class DevicePolicyManager {
      * @see {@link PackageManager#FEATURE_MANAGED_USERS}
      * @hide
      */
-    @TestApi
-    public static final int CODE_MANAGED_USERS_NOT_SUPPORTED = 9;
+    @SystemApi
+    public static final int STATUS_MANAGED_USERS_NOT_SUPPORTED = 9;
 
     /**
-     * Result code for {@link #checkProvisioningPreCondition}.
+     * Result code for {@link #checkProvisioningPrecondition}.
      *
      * <p>Returned for {@link #ACTION_PROVISION_MANAGED_USER} if the user is a system user and
      * for {@link #ACTION_PROVISION_MANAGED_DEVICE} on devices running headless system user mode
@@ -2136,32 +2706,22 @@ public class DevicePolicyManager {
      *
      * @hide
      */
-    @TestApi
-    public static final int CODE_SYSTEM_USER = 10;
+    @SystemApi
+    public static final int STATUS_SYSTEM_USER = 10;
 
     /**
-     * Result code for {@link #checkProvisioningPreCondition}.
+     * Result code for {@link #checkProvisioningPrecondition}.
      *
      * <p>Returned for {@link #ACTION_PROVISION_MANAGED_PROFILE} when the user cannot have more
      * managed profiles.
      *
      * @hide
      */
-    @TestApi
-    public static final int CODE_CANNOT_ADD_MANAGED_PROFILE = 11;
+    @SystemApi
+    public static final int STATUS_CANNOT_ADD_MANAGED_PROFILE = 11;
 
     /**
-     * TODO (b/137101239): clean up split system user codes
-     *
-     * @hide
-     * @deprecated not used anymore but can't be removed since it's a @TestApi.
-     **/
-    @Deprecated
-    @TestApi
-    public static final int CODE_NOT_SYSTEM_USER_SPLIT = 12;
-
-    /**
-     * Result code for {@link #checkProvisioningPreCondition}.
+     * Result code for {@link #checkProvisioningPrecondition}.
      *
      * <p>Returned for {@link #ACTION_PROVISION_MANAGED_DEVICE},
      * {@link #ACTION_PROVISION_MANAGED_PROFILE} on devices which do not support device
@@ -2169,129 +2729,47 @@ public class DevicePolicyManager {
      *
      * @hide
      */
-    @TestApi
-    public static final int CODE_DEVICE_ADMIN_NOT_SUPPORTED = 13;
+    @SystemApi
+    public static final int STATUS_DEVICE_ADMIN_NOT_SUPPORTED = 13;
 
     /**
      * TODO (b/137101239): clean up split system user codes
-     * Result code for {@link #checkProvisioningPreCondition}.
+     * Result code for {@link #checkProvisioningPrecondition}.
      *
      * @hide
      * @deprecated not used anymore but can't be removed since it's a @TestApi.
      */
     @Deprecated
     @TestApi
-    public static final int CODE_SPLIT_SYSTEM_USER_DEVICE_SYSTEM_USER = 14;
+    public static final int STATUS_SPLIT_SYSTEM_USER_DEVICE_SYSTEM_USER = 14;
 
     /**
-     * Result code for {@link #checkProvisioningPreCondition}.
+     * Result code for {@link #checkProvisioningPrecondition}.
      *
      * <p>Returned for {@link #ACTION_PROVISION_MANAGED_DEVICE} and
      * {@link #ACTION_PROVISION_MANAGED_PROFILE} on devices which do not support provisioning.
      *
      * @hide
      */
-    @TestApi
-    public static final int CODE_PROVISIONING_NOT_ALLOWED_FOR_NON_DEVELOPER_USERS = 15;
+    @SystemApi
+    public static final int STATUS_PROVISIONING_NOT_ALLOWED_FOR_NON_DEVELOPER_USERS = 15;
 
     /**
-     * Result codes for {@link #checkProvisioningPreCondition} indicating all the provisioning pre
+     * Result codes for {@link #checkProvisioningPrecondition} indicating all the provisioning pre
      * conditions.
      *
      * @hide
      */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(prefix = { "CODE_" }, value = {
-            CODE_OK, CODE_HAS_DEVICE_OWNER, CODE_USER_HAS_PROFILE_OWNER, CODE_USER_NOT_RUNNING,
-            CODE_USER_SETUP_COMPLETED, CODE_NOT_SYSTEM_USER, CODE_HAS_PAIRED,
-            CODE_MANAGED_USERS_NOT_SUPPORTED, CODE_SYSTEM_USER, CODE_CANNOT_ADD_MANAGED_PROFILE,
-            CODE_NOT_SYSTEM_USER_SPLIT, CODE_DEVICE_ADMIN_NOT_SUPPORTED,
-            CODE_SPLIT_SYSTEM_USER_DEVICE_SYSTEM_USER,
-            CODE_PROVISIONING_NOT_ALLOWED_FOR_NON_DEVELOPER_USERS
+    @IntDef(prefix = { "STATUS_" }, value = {
+            STATUS_UNKNOWN_ERROR, STATUS_OK, STATUS_HAS_DEVICE_OWNER, STATUS_USER_HAS_PROFILE_OWNER,
+            STATUS_USER_NOT_RUNNING, STATUS_USER_SETUP_COMPLETED, STATUS_NOT_SYSTEM_USER,
+            STATUS_HAS_PAIRED, STATUS_MANAGED_USERS_NOT_SUPPORTED, STATUS_SYSTEM_USER,
+            STATUS_CANNOT_ADD_MANAGED_PROFILE, STATUS_DEVICE_ADMIN_NOT_SUPPORTED,
+            STATUS_SPLIT_SYSTEM_USER_DEVICE_SYSTEM_USER,
+            STATUS_PROVISIONING_NOT_ALLOWED_FOR_NON_DEVELOPER_USERS
     })
-    public @interface ProvisioningPreCondition {}
-
-    /**
-     * Service-specific error code for {@link #provisionFullyManagedDevice} and
-     * {@link #createAndProvisionManagedProfile}:
-     * Indicates the call to {@link #checkProvisioningPreCondition} returned an error code.
-     *
-     * @hide
-     */
-    @TestApi
-    public static final int PROVISIONING_RESULT_PRE_CONDITION_FAILED = 1;
-
-    /**
-     * Service-specific error code for {@link #createAndProvisionManagedProfile}:
-     * Indicates the call to {@link UserManager#createProfileForUserEvenWhenDisallowed}
-     * returned {@code null}.
-     *
-     * @hide
-     */
-    @TestApi
-    public static final int PROVISIONING_RESULT_PROFILE_CREATION_FAILED = 2;
-
-    /**
-     * Service-specific error code for {@link #createAndProvisionManagedProfile}:
-     * Indicates the call to {@link PackageManager#installExistingPackageAsUser} has failed.
-     *
-     * @hide
-     */
-    @TestApi
-    public static final int PROVISIONING_RESULT_ADMIN_PACKAGE_INSTALLATION_FAILED = 3;
-
-    /**
-     * Service-specific error code for {@link #createAndProvisionManagedProfile}:
-     * Indicates the call to {@link #setProfileOwner} returned {@code false}.
-     *
-     * @hide
-     */
-    @TestApi
-    public static final int PROVISIONING_RESULT_SETTING_PROFILE_OWNER_FAILED = 4;
-
-    /**
-     * Service-specific error code for {@link #createAndProvisionManagedProfile}:
-     * Indicates that starting the newly created profile has failed.
-     *
-     * @hide
-     */
-    @TestApi
-    public static final int PROVISIONING_RESULT_STARTING_PROFILE_FAILED = 5;
-
-    /**
-     * Service-specific error code for {@link #provisionFullyManagedDevice}:
-     * Indicates that removing the non required apps have failed.
-     *
-     * @hide
-     */
-    @TestApi
-    public static final int PROVISIONING_RESULT_REMOVE_NON_REQUIRED_APPS_FAILED = 6;
-
-    /**
-     * Service-specific error code for {@link #provisionFullyManagedDevice}:
-     * Indicates the call to {@link #setDeviceOwner} returned {@code false}.
-     *
-     * @hide
-     */
-    @TestApi
-    public static final int PROVISIONING_RESULT_SET_DEVICE_OWNER_FAILED = 7;
-
-    /**
-     * Service-specific error codes for {@link #createAndProvisionManagedProfile} and
-     * {@link #provisionFullyManagedDevice} indicating all the errors during provisioning.
-     *
-     * @hide
-     */
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef(prefix = { "PROVISIONING_RESULT_" }, value = {
-            PROVISIONING_RESULT_PRE_CONDITION_FAILED, PROVISIONING_RESULT_PROFILE_CREATION_FAILED,
-            PROVISIONING_RESULT_ADMIN_PACKAGE_INSTALLATION_FAILED,
-            PROVISIONING_RESULT_SETTING_PROFILE_OWNER_FAILED,
-            PROVISIONING_RESULT_STARTING_PROFILE_FAILED,
-            PROVISIONING_RESULT_REMOVE_NON_REQUIRED_APPS_FAILED,
-            PROVISIONING_RESULT_SET_DEVICE_OWNER_FAILED
-    })
-    public @interface ProvisioningResult {}
+    public @interface ProvisioningPrecondition {}
 
     /**
      * Disable all configurable SystemUI features during LockTask mode. This includes,
@@ -2608,6 +3086,8 @@ public class DevicePolicyManager {
      *     <li>{@link #EXTRA_PROVISIONING_ADMIN_EXTRAS_BUNDLE}</li>
      *     <li>{@link #EXTRA_PROVISIONING_IMEI}</li>
      *     <li>{@link #EXTRA_PROVISIONING_SERIAL_NUMBER}</li>
+     *     <li>{@link #EXTRA_PROVISIONING_ALLOWED_PROVISIONING_MODES}</li>
+     *     <li>{@link #EXTRA_PROVISIONING_SENSORS_PERMISSION_GRANT_OPT_OUT}</li>
      * </ul>
      *
      * <p>The target activity should return one of the following values in
@@ -2631,8 +3111,22 @@ public class DevicePolicyManager {
      * activity, along with the values of the {@link #EXTRA_PROVISIONING_ADMIN_EXTRAS_BUNDLE} extra
      * that are already supplied to this activity.
      *
-     * @see #EXTRA_PROVISIONING_KEEP_ACCOUNT_ON_MIGRATION
-     * @see #EXTRA_PROVISIONING_LEAVE_ALL_SYSTEM_APPS_ENABLED
+     * <p>Other extras the target activity may include in the intent result:
+     * <ul>
+     *     <li>{@link #EXTRA_PROVISIONING_DISCLAIMERS}</li>
+     *     <li>{@link #EXTRA_PROVISIONING_SKIP_ENCRYPTION}</li>
+     *     <li>{@link #EXTRA_PROVISIONING_KEEP_SCREEN_ON}</li>
+     *     <li>{@link #EXTRA_PROVISIONING_KEEP_ACCOUNT_ON_MIGRATION} for work profile
+     *     provisioning</li>
+     *     <li>{@link #EXTRA_PROVISIONING_LEAVE_ALL_SYSTEM_APPS_ENABLED} for work profile
+     *     provisioning</li>
+     *     <li>{@link #EXTRA_PROVISIONING_SENSORS_PERMISSION_GRANT_OPT_OUT} for fully-managed
+     *     device provisioning</li>
+     *     <li>{@link #EXTRA_PROVISIONING_LOCALE} for fully-managed device provisioning</li>
+     *     <li>{@link #EXTRA_PROVISIONING_LOCAL_TIME} for fully-managed device provisioning</li>
+     *     <li>{@link #EXTRA_PROVISIONING_TIME_ZONE} for fully-managed device provisioning</li>
+     * </ul>
+     *
      * @see #ACTION_ADMIN_POLICY_COMPLIANCE
      */
     public static final String ACTION_GET_PROVISIONING_MODE =
@@ -2772,6 +3266,20 @@ public class DevicePolicyManager {
             "android.app.extra.PROVISIONING_RETURN_BEFORE_POLICY_COMPLIANCE";
 
     /**
+     * A {@code boolean} flag that indicates whether the screen should be on throughout the
+     * provisioning flow.
+     *
+     * <p>The default value is {@code false}.
+     *
+     * <p>This extra can either be passed as an extra to the {@link
+     * #ACTION_PROVISION_MANAGED_PROFILE} intent, or it can be returned by the
+     * admin app when performing the admin-integrated provisioning flow as a result of the
+     * {@link #ACTION_GET_PROVISIONING_MODE} activity.
+     */
+    public static final String EXTRA_PROVISIONING_KEEP_SCREEN_ON =
+            "android.app.extra.PROVISIONING_KEEP_SCREEN_ON";
+
+    /**
      * Activity action: Starts the administrator to show policy compliance for the provisioning.
      * This action is used any time that the administrator has an opportunity to show policy
      * compliance before the end of setup wizard. This could happen as part of the admin-integrated
@@ -2786,6 +3294,180 @@ public class DevicePolicyManager {
      */
     public static final String ACTION_ADMIN_POLICY_COMPLIANCE =
             "android.app.action.ADMIN_POLICY_COMPLIANCE";
+
+    /**
+     * Activity action: Starts the device policy management role holder updater.
+     *
+     * <p>The activity must handle the device policy management role holder update and set the
+     * intent result to either {@link Activity#RESULT_OK} if the update was successful, {@link
+     * #RESULT_UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER_RECOVERABLE_ERROR} if it encounters a
+     * problem that may be solved by relaunching it again, {@link
+     * #RESULT_UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER_PROVISIONING_DISABLED} if role holder
+     * provisioning is disabled, or {@link
+     * #RESULT_UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER_UNRECOVERABLE_ERROR} if it encounters
+     * any other problem that will not be solved by relaunching it again.
+     *
+     * <p>If this activity has additional internal conditions which are not met, it should return
+     * {@link #RESULT_UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER_UNRECOVERABLE_ERROR}.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.LAUNCH_DEVICE_MANAGER_SETUP)
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    @SystemApi
+    public static final String ACTION_UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER =
+            "android.app.action.UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER";
+
+    /**
+     * Result code that can be returned by the {@link
+     * #ACTION_UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER} handler if it encounters a problem
+     * that may be solved by relaunching it again.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int RESULT_UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER_RECOVERABLE_ERROR =
+            1;
+
+    /**
+     * Result code that can be returned by the {@link
+     * #ACTION_UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER} handler if it encounters a problem that
+     * will not be solved by relaunching it again.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int RESULT_UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER_UNRECOVERABLE_ERROR =
+            2;
+
+    /**
+     * Result code that can be returned by the {@link
+     * #ACTION_UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER} handler if role holder provisioning
+     * is disabled.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int
+            RESULT_UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER_PROVISIONING_DISABLED = 3;
+
+    /**
+     * An {@code int} extra which contains the result code of the last attempt to update
+     * the device policy management role holder.
+     *
+     * <p>This extra is provided to the device policy management role holder via either {@link
+     * #ACTION_ROLE_HOLDER_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE} or {@link
+     * #ACTION_ROLE_HOLDER_PROVISION_MANAGED_PROFILE} when started after the role holder
+     * had previously returned {@link #RESULT_UPDATE_ROLE_HOLDER}.
+     *
+     * <p>If the role holder update had failed, the role holder can use the value of this extra to
+     * make a decision whether to fail the provisioning flow or to carry on with the older version
+     * of the role holder.
+     *
+     * <p>Possible values can be:
+     * <ul>
+     *    <li>{@link Activity#RESULT_OK} if the update was successful
+     *    <li>{@link #RESULT_UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER_RECOVERABLE_ERROR} if it
+     *    encounters a problem that may be solved by relaunching it again.
+     *    <li>{@link #RESULT_UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER_UNRECOVERABLE_ERROR} if
+     *    it encounters a problem that will not be solved by relaunching it again.
+     * </ul>
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_ROLE_HOLDER_UPDATE_RESULT_CODE =
+            "android.app.extra.ROLE_HOLDER_UPDATE_RESULT_CODE";
+
+    /**
+     * An {@link Intent} extra which resolves to a custom user consent screen.
+     *
+     * <p>If this extra is provided to the device policy management role holder via either {@link
+     * #ACTION_ROLE_HOLDER_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE} or {@link
+     * #ACTION_ROLE_HOLDER_PROVISION_MANAGED_PROFILE}, the device policy management role holder must
+     * launch this intent which shows the custom user consent screen, replacing its own standard
+     * consent screen.
+     *
+     * <p>If this extra is provided, it is the responsibility of the intent handler to show the
+     * list of disclaimers which are normally shown by the standard consent screen:
+     * <ul>
+     *     <li>Disclaimers set by the IT admin via the {@link #EXTRA_PROVISIONING_DISCLAIMERS}
+     *     provisioning extra</li>
+     *     <li>For fully-managed device provisioning, disclaimers defined in system apps via the
+     *     {@link #EXTRA_PROVISIONING_DISCLAIMER_HEADER} and {@link
+     *     #EXTRA_PROVISIONING_DISCLAIMER_CONTENT} metadata in their manifests</li>
+     *     <li>General disclaimer relevant to the provisioning mode</li>
+     * </ul>
+     *
+     * <p>When this {@link Intent} is started, the following intent extras will be supplied:
+     * <ul>
+     *     <li>{@link #EXTRA_PROVISIONING_DISCLAIMERS}</li>
+     *     <li>{@link #EXTRA_PROVISIONING_MODE}</li>
+     *     <li>{@link #EXTRA_PROVISIONING_LOCALE}</li>
+     *     <li>{@link #EXTRA_PROVISIONING_LOCAL_TIME}</li>
+     *     <li>{@link #EXTRA_PROVISIONING_TIME_ZONE}</li>
+     *     <li>{@link #EXTRA_PROVISIONING_SKIP_EDUCATION_SCREENS}</li>
+     * </ul>
+     *
+     * <p>If the custom consent screens are granted by the user {@link Activity#RESULT_OK} is
+     * returned, otherwise {@link Activity#RESULT_CANCELED} is returned. The device policy
+     * management role holder should ensure that the provisioning flow terminates immediately if
+     * consent is not granted by the user.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    @SystemApi
+    public static final String EXTRA_PROVISIONING_ROLE_HOLDER_CUSTOM_USER_CONSENT_INTENT =
+            "android.app.extra.PROVISIONING_ROLE_HOLDER_CUSTOM_USER_CONSENT_INTENT";
+
+    /**
+     * Activity action: attempts to establish network connection
+     *
+     * <p>This intent can be accompanied by any of the relevant provisioning extras related to
+     * network connectivity, such as:
+     * <ul>
+     *     <li>{@link #EXTRA_PROVISIONING_WIFI_SSID}</li>
+     *     <li>{@link #EXTRA_PROVISIONING_WIFI_HIDDEN}</li>
+     *     <li>{@link #EXTRA_PROVISIONING_WIFI_SECURITY_TYPE}</li>
+     *     <li>{@link #EXTRA_PROVISIONING_WIFI_PASSWORD}</li>
+     *     <li>{@link #EXTRA_PROVISIONING_WIFI_PROXY_HOST}</li>
+     *     <li>{@link #EXTRA_PROVISIONING_WIFI_PROXY_PORT}</li>
+     *     <li>{@link #EXTRA_PROVISIONING_WIFI_PROXY_BYPASS}</li>
+     *     <li>{@link #EXTRA_PROVISIONING_WIFI_PAC_URL}</li>
+     *     <li>{@code #EXTRA_PROVISIONING_WIFI_EAP_METHOD}</li>
+     *     <li>{@code #EXTRA_PROVISIONING_WIFI_PHASE2_AUTH}</li>
+     *     <li>{@code #EXTRA_PROVISIONING_WIFI_CA_CERTIFICATE}</li>
+     *     <li>{@code #EXTRA_PROVISIONING_WIFI_USER_CERTIFICATE}</li>
+     *     <li>{@code #EXTRA_PROVISIONING_WIFI_IDENTITY}</li>
+     *     <li>{@code #EXTRA_PROVISIONING_WIFI_ANONYMOUS_IDENTITY}</li>
+     *     <li>{@code #EXTRA_PROVISIONING_WIFI_DOMAIN}</li>
+     * </ul>
+     *
+     * <p>If there are provisioning extras related to network connectivity, this activity
+     * attempts to connect to the specified network. Otherwise it prompts the end-user to connect.
+     *
+     * <p>This activity is meant to be started by the provisioning initiator prior to starting
+     * {@link #ACTION_PROVISION_MANAGED_PROFILE} or {@link
+     * #ACTION_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE}.
+     *
+     * <p>Note that network connectivity is still also handled when provisioning via {@link
+     * #ACTION_PROVISION_MANAGED_PROFILE} or {@link
+     * #ACTION_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE}. {@link
+     * #ACTION_ESTABLISH_NETWORK_CONNECTION} should only be used in cases when the provisioning
+     * initiator would like to do some additional logic after the network connectivity step and
+     * before the start of provisioning.
+     *
+     * If network connection is established, {@link Activity#RESULT_OK} will be returned. Otherwise
+     * the result will be {@link Activity#RESULT_CANCELED}.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.DISPATCH_PROVISIONING_MESSAGE)
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    @SystemApi
+    public static final String ACTION_ESTABLISH_NETWORK_CONNECTION =
+            "android.app.action.ESTABLISH_NETWORK_CONNECTION";
 
     /**
      * Maximum supported password length. Kind-of arbitrary.
@@ -2837,6 +3519,7 @@ public class DevicePolicyManager {
      *
      * @hide
      */
+    @TestApi
     public static final int DEVICE_OWNER_TYPE_DEFAULT = 0;
 
     /**
@@ -2844,6 +3527,7 @@ public class DevicePolicyManager {
      *
      * @hide
      */
+    @TestApi
     public static final int DEVICE_OWNER_TYPE_FINANCED = 1;
 
     /**
@@ -3056,6 +3740,49 @@ public class DevicePolicyManager {
      */
     public static final int OPERATION_SAFETY_REASON_DRIVING_DISTRACTION = 1;
 
+    /**
+     * Broadcast action: notify system apps (e.g. settings, SysUI, etc) that the device management
+     * resources with IDs {@link #EXTRA_RESOURCE_IDS} has been updated, the updated resources can be
+     * retrieved using {@link DevicePolicyResourcesManager#getDrawable} and
+     * {@link DevicePolicyResourcesManager#getString}.
+     *
+     * <p>This broadcast is sent to registered receivers only.
+     *
+     * <p> {@link #EXTRA_RESOURCE_TYPE} will be included to identify the type of resource being
+     * updated.
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_DEVICE_POLICY_RESOURCE_UPDATED =
+            "android.app.action.DEVICE_POLICY_RESOURCE_UPDATED";
+
+    /**
+     * An {@code int} extra for {@link #ACTION_DEVICE_POLICY_RESOURCE_UPDATED} to indicate the type
+     * of the resource being updated, the type can be {@link #EXTRA_RESOURCE_TYPE_DRAWABLE} or
+     * {@link #EXTRA_RESOURCE_TYPE_STRING}
+     */
+    public static final String EXTRA_RESOURCE_TYPE =
+            "android.app.extra.RESOURCE_TYPE";
+
+    /**
+     * A {@code int} value for {@link #EXTRA_RESOURCE_TYPE} to indicate that a resource of type
+     * {@link Drawable} is being updated.
+     */
+    public static final int EXTRA_RESOURCE_TYPE_DRAWABLE = 1;
+
+    /**
+     * A {@code int} value for {@link #EXTRA_RESOURCE_TYPE} to indicate that a resource of type
+     * {@link String} is being updated.
+     */
+    public static final int EXTRA_RESOURCE_TYPE_STRING = 2;
+
+    /**
+     * An integer array extra for {@link #ACTION_DEVICE_POLICY_RESOURCE_UPDATED} to indicate which
+     * resource IDs (see {@link DevicePolicyResources.Drawables} and
+     * {@link DevicePolicyResources.Strings}) have been updated.
+     */
+    public static final String EXTRA_RESOURCE_IDS =
+            "android.app.extra.RESOURCE_IDS";
+
     /** @hide */
     @NonNull
     @TestApi
@@ -3093,15 +3820,46 @@ public class DevicePolicyManager {
         }
     }
 
-    /** @hide */
-    public void resetNewUserDisclaimer() {
+    /**
+     * Acknoledges that the new managed user disclaimer was viewed by the (human) user
+     * so that {@link #ACTION_SHOW_NEW_USER_DISCLAIMER broadcast} is not sent again the next time
+     * this user is switched to.
+     *
+     * @hide
+     */
+    @RequiresPermission(anyOf = {android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.INTERACT_ACROSS_USERS})
+    @UserHandleAware
+    @TestApi
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public void acknowledgeNewUserDisclaimer() {
         if (mService != null) {
             try {
-                mService.resetNewUserDisclaimer();
+                mService.acknowledgeNewUserDisclaimer(mContext.getUserId());
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
         }
+    }
+
+    /**
+     * Checks whether the new managed user disclaimer was viewed by the user.
+     *
+     * @hide
+     */
+    @RequiresPermission(anyOf = {android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.INTERACT_ACROSS_USERS})
+    @TestApi
+    @UserHandleAware
+    public boolean isNewUserDisclaimerAcknowledged() {
+        if (mService != null) {
+            try {
+                return mService.isNewUserDisclaimerAcknowledged(mContext.getUserId());
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return false;
     }
 
     /**
@@ -3136,6 +3894,7 @@ public class DevicePolicyManager {
      * for the user.
      * @hide
      */
+    @TestApi
     public boolean isRemovingAdmin(@NonNull ComponentName admin, int userId) {
         if (mService != null) {
             try {
@@ -3239,22 +3998,6 @@ public class DevicePolicyManager {
         if (mService != null) {
             try {
                 return mService.hasGrantedPolicy(admin, usesPolicy, myUserId());
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Returns true if the Profile Challenge is available to use for the given profile user.
-     *
-     * @hide
-     */
-    public boolean isSeparateProfileChallengeAllowed(int userHandle) {
-        if (mService != null) {
-            try {
-                return mService.isSeparateProfileChallengeAllowed(userHandle);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -3437,13 +4180,19 @@ public class DevicePolicyManager {
      * set on the primary {@link DevicePolicyManager} must be cleared first by calling
      * {@link #setRequiredPasswordComplexity} with {@link #PASSWORD_COMPLEXITY_NONE) first.
      *
+     * <p><string>Note:</strong> this method is ignored on
+     * {PackageManager#FEATURE_AUTOMOTIVE automotive builds}.
+     *
      * @deprecated Prefer using {@link #setRequiredPasswordComplexity(int)}, to require a password
      * that satisfies a complexity level defined by the platform, rather than specifying custom
      * password requirement.
      * Setting custom, overly-complicated password requirements leads to passwords that are hard
      * for users to remember and may not provide any security benefits given as Android uses
      * hardware-backed throttling to thwart online and offline brute-forcing of the device's
-     * screen lock.
+     * screen lock. Company-owned devices (fully-managed and organization-owned managed profile
+     * devices) are able to continue using this method, though it is recommended that
+     * {@link #setRequiredPasswordComplexity(int)} should be used instead.
+     *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param quality The new desired quality. One of {@link #PASSWORD_QUALITY_UNSPECIFIED},
      *            {@link #PASSWORD_QUALITY_BIOMETRIC_WEAK},
@@ -3527,11 +4276,13 @@ public class DevicePolicyManager {
      * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call this method; if it has
      * not, a security exception will be thrown.
      * <p>
-     *
      * Apps targeting {@link android.os.Build.VERSION_CODES#R} and below can call this method on the
      * {@link DevicePolicyManager} instance returned by
      * {@link #getParentProfileInstance(ComponentName)} in order to set restrictions on the parent
      * profile.
+     *
+     * <p><string>Note:</strong> this method is ignored on
+     * {PackageManager#FEATURE_AUTOMOTIVE automotive builds}.
      *
      * @deprecated see {@link #setPasswordQuality(ComponentName, int)} for details.
      *
@@ -3610,11 +4361,13 @@ public class DevicePolicyManager {
      * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call this method; if it has
      * not, a security exception will be thrown.
      * <p>
-     *
      * Apps targeting {@link android.os.Build.VERSION_CODES#R} and below can call this method on the
      * {@link DevicePolicyManager} instance returned by
      * {@link #getParentProfileInstance(ComponentName)} in order to set restrictions on the parent
      * profile.
+     *
+     * <p><string>Note:</strong> this method is ignored on
+     * {PackageManager#FEATURE_AUTOMOTIVE automotive builds}.
      *
      * @deprecated see {@link #setPasswordQuality(ComponentName, int)} for details.
      *
@@ -3700,11 +4453,13 @@ public class DevicePolicyManager {
      * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call this method; if it has
      * not, a security exception will be thrown.
      * <p>
-     *
      * Apps targeting {@link android.os.Build.VERSION_CODES#R} and below can call this method on the
      * {@link DevicePolicyManager} instance returned by
      * {@link #getParentProfileInstance(ComponentName)} in order to set restrictions on the parent
      * profile.
+     *
+     * <p><string>Note:</strong> this method is ignored on
+     * {PackageManager#FEATURE_AUTOMOTIVE automotive builds}.
      *
      * @deprecated see {@link #setPasswordQuality(ComponentName, int)} for details.
      *
@@ -3790,11 +4545,13 @@ public class DevicePolicyManager {
      * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call this method; if it has
      * not, a security exception will be thrown.
      * <p>
-     *
      * Apps targeting {@link android.os.Build.VERSION_CODES#R} and below can call this method on the
      * {@link DevicePolicyManager} instance returned by
      * {@link #getParentProfileInstance(ComponentName)} in order to set restrictions on the parent
      * profile.
+     *
+     * <p><string>Note:</strong> this method is ignored on
+     * {PackageManager#FEATURE_AUTOMOTIVE automotive builds}.
      *
      * @deprecated see {@link #setPasswordQuality(ComponentName, int)} for details.
      *
@@ -3879,11 +4636,13 @@ public class DevicePolicyManager {
      * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call this method; if it has
      * not, a security exception will be thrown.
      * <p>
-     *
      * Apps targeting {@link android.os.Build.VERSION_CODES#R} and below can call this method on the
      * {@link DevicePolicyManager} instance returned by
      * {@link #getParentProfileInstance(ComponentName)} in order to set restrictions on the parent
      * profile.
+     *
+     * <p><string>Note:</strong> this method is ignored on
+     * {PackageManager#FEATURE_AUTOMOTIVE automotive builds}.
      *
      * @deprecated see {@link #setPasswordQuality(ComponentName, int)} for details.
      *
@@ -3968,11 +4727,13 @@ public class DevicePolicyManager {
      * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call this method; if it has
      * not, a security exception will be thrown.
      * <p>
-     *
      * Apps targeting {@link android.os.Build.VERSION_CODES#R} and below can call this method on the
      * {@link DevicePolicyManager} instance returned by
      * {@link #getParentProfileInstance(ComponentName)} in order to set restrictions on the parent
      * profile.
+     *
+     * <p><string>Note:</strong> this method is ignored on
+     * {PackageManager#FEATURE_AUTOMOTIVE automotive builds}.
      *
      * @deprecated see {@link #setPasswordQuality(ComponentName, int)} for details.
      *
@@ -4056,11 +4817,13 @@ public class DevicePolicyManager {
      * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call this method; if it has
      * not, a security exception will be thrown.
      * <p>
-     *
      * Apps targeting {@link android.os.Build.VERSION_CODES#R} and below can call this method on the
      * {@link DevicePolicyManager} instance returned by
      * {@link #getParentProfileInstance(ComponentName)} in order to set restrictions on the parent
      * profile.
+     *
+     * <p><string>Note:</strong> this method is ignored on
+     * {PackageManager#FEATURE_AUTOMOTIVE automotive builds}.
      *
      * @deprecated see {@link #setPasswordQuality(ComponentName, int)} for details.
      *
@@ -5429,6 +6192,56 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Send a lost mode location update to the admin. This API is limited to organization-owned
+     * devices, which includes devices with a device owner or devices with a profile owner on an
+     * organization-owned managed profile.
+     *
+     * <p>The caller must hold the
+     * {@link android.Manifest.permission#TRIGGER_LOST_MODE} permission.
+     *
+     * <p> Not for use by third-party applications.
+     *
+     * @param executor The executor through which the callback should be invoked.
+     * @param callback A callback object that will inform the caller whether a lost mode location
+     *                 update was successfully sent
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.TRIGGER_LOST_MODE)
+    public void sendLostModeLocationUpdate(@NonNull @CallbackExecutor Executor executor,
+            @NonNull Consumer<Boolean> callback) {
+        throwIfParentInstance("sendLostModeLocationUpdate");
+        if (mService == null) {
+            executeCallback(AndroidFuture.completedFuture(false), executor, callback);
+            return;
+        }
+        try {
+            final AndroidFuture<Boolean> future = new AndroidFuture<>();
+            mService.sendLostModeLocationUpdate(future);
+            executeCallback(future, executor, callback);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    private void executeCallback(AndroidFuture<Boolean> future,
+            @CallbackExecutor @NonNull Executor executor,
+            Consumer<Boolean> callback) {
+        future.whenComplete((result, error) -> executor.execute(() -> {
+            final long token = Binder.clearCallingIdentity();
+            try {
+                if (error != null) {
+                    callback.accept(false);
+                } else {
+                    callback.accept(result);
+                }
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }));
+    }
+
+    /**
      * Called by an application that is administering the device to set the
      * global proxy and exclusion list.
      * <p>
@@ -5630,13 +6443,23 @@ public class DevicePolicyManager {
             "android.app.action.CHECK_POLICY_COMPLIANCE";
 
     /**
-     * Broadcast action: notify managed provisioning that new managed user is created.
+     * Broadcast action: notify managed provisioning that PO/DO provisioning has completed.
      *
      * @hide
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String ACTION_MANAGED_USER_CREATED =
-            "android.app.action.MANAGED_USER_CREATED";
+    public static final String ACTION_PROVISIONING_COMPLETED =
+            "android.app.action.PROVISIONING_COMPLETED";
+
+    /**
+     * Extra for {@link #ACTION_PROVISIONING_COMPLETED} to indicate the provisioning action that has
+     * been completed, this can either be {@link #ACTION_PROVISION_MANAGED_PROFILE},
+     * {@link #ACTION_PROVISION_MANAGED_DEVICE}, or {@link #ACTION_PROVISION_MANAGED_USER}.
+     *
+     * @hide
+     */
+    public static final String EXTRA_PROVISIONING_ACTION =
+            "android.app.extra.PROVISIONING_ACTION";
 
     /**
      * Broadcast action: notify system that a new (Android) user was added when the device is
@@ -5644,9 +6467,10 @@ public class DevicePolicyManager {
      *
      * @hide
      */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_SHOW_NEW_USER_DISCLAIMER =
-            "android.app.action.ACTION_SHOW_NEW_USER_DISCLAIMER";
+            "android.app.action.SHOW_NEW_USER_DISCLAIMER";
 
     /**
      * Widgets are enabled in keyguard
@@ -5690,8 +6514,10 @@ public class DevicePolicyManager {
 
     /**
      * Disable text entry into notifications on secure keyguard screens (e.g. PIN/Pattern/Password).
-     * This flag has no effect starting from version {@link android.os.Build.VERSION_CODES#N}
+     * @deprecated This flag was added in version {@link android.os.Build.VERSION_CODES#N}, but it
+     * never had any effect.
      */
+    @Deprecated
     public static final int KEYGUARD_DISABLE_REMOTE_INPUT = 1 << 6;
 
     /**
@@ -6334,10 +7160,10 @@ public class DevicePolicyManager {
      * management app can use {@link #ID_TYPE_BASE_INFO} to request inclusion of the general device
      * information including manufacturer, model, brand, device and product in the attestation
      * record.
-     * Only device owner, profile owner on an organization-owned device and their delegated
-     * certificate installers can use {@link #ID_TYPE_SERIAL}, {@link #ID_TYPE_IMEI} and
-     * {@link #ID_TYPE_MEID} to request unique device identifiers to be attested (the serial number,
-     * IMEI and MEID correspondingly), if supported by the device
+     * Only device owner, profile owner on an organization-owned device or affiliated user, and
+     * their delegated certificate installers can use {@link #ID_TYPE_SERIAL}, {@link #ID_TYPE_IMEI}
+     * and {@link #ID_TYPE_MEID} to request unique device identifiers to be attested (the serial
+     * number, IMEI and MEID correspondingly), if supported by the device
      * (see {@link #isDeviceIdAttestationSupported()}).
      * Additionally, device owner, profile owner on an organization-owned device and their delegated
      * certificate installers can also request the attestation record to be signed using an
@@ -7223,7 +8049,14 @@ public class DevicePolicyManager {
     /**
      * Returns the current runtime nearby notification streaming policy set by the device or profile
      * owner.
+     * <p>
+     * The caller must be the target user's device owner/profile owner or hold the
+     * {@link android.Manifest.permission#READ_NEARBY_STREAMING_POLICY READ_NEARBY_STREAMING_POLICY}
+     * permission.
      */
+    @RequiresPermission(
+            value = android.Manifest.permission.READ_NEARBY_STREAMING_POLICY,
+            conditional = true)
     public @NearbyStreamingPolicy int getNearbyNotificationStreamingPolicy() {
         return getNearbyNotificationStreamingPolicy(myUserId());
     }
@@ -7263,7 +8096,14 @@ public class DevicePolicyManager {
 
     /**
      * Returns the current runtime nearby app streaming policy set by the device or profile owner.
+     * <p>
+     * The caller must be the target user's device owner/profile owner or hold the
+     * {@link android.Manifest.permission#READ_NEARBY_STREAMING_POLICY READ_NEARBY_STREAMING_POLICY}
+     * permission.
      */
+    @RequiresPermission(
+            value = android.Manifest.permission.READ_NEARBY_STREAMING_POLICY,
+            conditional = true)
     public @NearbyStreamingPolicy int getNearbyAppStreamingPolicy() {
         return getNearbyAppStreamingPolicy(myUserId());
     }
@@ -7602,10 +8442,10 @@ public class DevicePolicyManager {
      * @hide
      */
     @RequiresFeature(PackageManager.FEATURE_SECURE_LOCK_SCREEN)
-    public void reportPasswordChanged(@UserIdInt int userId) {
+    public void reportPasswordChanged(PasswordMetrics metrics, @UserIdInt int userId) {
         if (mService != null) {
             try {
-                mService.reportPasswordChanged(userId);
+                mService.reportPasswordChanged(metrics, userId);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -7699,54 +8539,64 @@ public class DevicePolicyManager {
     }
 
     /**
-     * @hide
      * Sets the given package as the device owner.
-     * Same as {@link #setDeviceOwner(ComponentName, String)} but without setting a device owner name.
-     * @param who the component name to be registered as device owner.
-     * @return whether the package was successfully registered as the device owner.
-     * @throws IllegalArgumentException if the package name is null or invalid
-     * @throws IllegalStateException If the preconditions mentioned are not met.
-     */
-    public boolean setDeviceOwner(ComponentName who) {
-        return setDeviceOwner(who, null);
-    }
-
-    /**
-     * @hide
-     */
-    public boolean setDeviceOwner(ComponentName who, int userId)  {
-        return setDeviceOwner(who, null, userId);
-    }
-
-    /**
-     * @hide
-     */
-    public boolean setDeviceOwner(ComponentName who, String ownerName) {
-        return setDeviceOwner(who, ownerName, UserHandle.USER_SYSTEM);
-    }
-
-    /**
-     * @hide
-     * Sets the given package as the device owner. The package must already be installed. There
-     * must not already be a device owner.
-     * Only apps with the MANAGE_PROFILE_AND_DEVICE_OWNERS permission and the shell uid can call
-     * this method.
-     * Calling this after the setup phase of the primary user has completed is allowed only if
-     * the caller is the shell uid, and there are no additional users and no accounts.
+     *
+     * <p>Preconditions:
+     * <ul>
+     *   <li>The package must already be installed.
+     *   <li>There must not already be a device owner.
+     *   <li>Only apps with the {@code MANAGE_PROFILE_AND_DEVICE_OWNERS} permission or the
+     *       {@link Process#SHELL_UID Shell UID} can call this method.
+     * </ul>
+     *
+     * <p>Calling this after the setup phase of the device owner user has completed is allowed only
+     * if the caller is the {@link Process#SHELL_UID Shell UID}, and there are no additional users
+     * (except when the device runs on headless system user mode, in which case it could have exact
+     * one extra user, which is the current user - the device owner will be set in the
+     * {@link UserHandle#SYSTEM system} user and a profile owner will be set in the current user)
+     * and no accounts.
+     *
      * @param who the component name to be registered as device owner.
      * @param ownerName the human readable name of the institution that owns this device.
      * @param userId ID of the user on which the device owner runs.
+     *
      * @return whether the package was successfully registered as the device owner.
-     * @throws IllegalArgumentException if the package name is null or invalid
+     *
+     * @throws IllegalArgumentException if the package name is {@code null} or invalid.
      * @throws IllegalStateException If the preconditions mentioned are not met.
+     *
+     * @hide
      */
     @TestApi
     @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS)
-    public boolean setDeviceOwner(
+    public boolean setDeviceOwner(@NonNull ComponentName who, @Nullable String ownerName,
+            @UserIdInt int userId) {
+        if (mService != null) {
+            try {
+                return mService.setDeviceOwner(who, ownerName, userId,
+                        /* setProfileOwnerOnCurrentUserIfNecessary= */ true);
+            } catch (RemoteException re) {
+                throw re.rethrowFromSystemServer();
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Same as {@link #setDeviceOwner(ComponentName, String, int)}, but without setting the profile
+     * owner on current user when running on headless system user mode - should be used only by
+     * testing infra.
+     *
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS)
+    public boolean setDeviceOwnerOnly(
             @NonNull ComponentName who, @Nullable String ownerName, @UserIdInt int userId) {
         if (mService != null) {
             try {
-                return mService.setDeviceOwner(who, ownerName, userId);
+                return mService.setDeviceOwner(who, ownerName, userId,
+                        /* setProfileOwnerOnCurrentUserIfNecessary= */ false);
             } catch (RemoteException re) {
                 throw re.rethrowFromSystemServer();
             }
@@ -7812,7 +8662,7 @@ public class DevicePolicyManager {
     @SystemApi
     @RequiresPermission(anyOf = {
             android.Manifest.permission.MANAGE_USERS,
-            android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS,
+            android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS
     })
     public ComponentName getDeviceOwnerComponentOnAnyUser() {
         return getDeviceOwnerComponentInner(/* callingUserOnly =*/ false);
@@ -7925,8 +8775,8 @@ public class DevicePolicyManager {
      * Called by the system to find out whether the device is managed by a Device Owner.
      *
      * @return whether the device is managed by a Device Owner.
-     * @throws SecurityException if the caller is not the device owner, does not hold the
-     *         MANAGE_USERS permission and is not the system.
+     * @throws SecurityException if the caller is not the device owner, does not hold
+     *         MANAGE_USERS or MANAGE_PROFILE_AND_DEVICE_OWNERS permissions and is not the system.
      *
      * @hide
      */
@@ -7947,7 +8797,10 @@ public class DevicePolicyManager {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS
+    })
     public String getDeviceOwnerNameOnAnyUser() {
         throwIfParentInstance("getDeviceOwnerNameOnAnyUser");
         if (mService != null) {
@@ -8337,7 +9190,10 @@ public class DevicePolicyManager {
      * @throws IllegalArgumentException if the userId is invalid.
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS
+    })
     public @Nullable String getProfileOwnerNameAsUser(int userId) throws IllegalArgumentException {
         throwIfParentInstance("getProfileOwnerNameAsUser");
         if (mService != null) {
@@ -8993,9 +9849,9 @@ public class DevicePolicyManager {
      * service. When zero or more packages have been added, accessibility services that are not in
      * the list and not part of the system can not be enabled by the user.
      * <p>
-     * Calling with a null value for the list disables the restriction so that all services can be
-     * used, calling with an empty list only allows the built-in system services. Any non-system
-     * accessibility service that's currently enabled must be included in the list.
+     * Calling with a {@code null} value for the list disables the restriction so that all services
+     * can be used, calling with an empty list only allows the built-in system services. Any
+     * non-system accessibility service that's currently enabled must be included in the list.
      * <p>
      * System accessibility services are always available to the user and this method can't
      * disable them.
@@ -9021,8 +9877,8 @@ public class DevicePolicyManager {
     /**
      * Returns the list of permitted accessibility services set by this device or profile owner.
      * <p>
-     * An empty list means no accessibility services except system services are allowed. Null means
-     * all accessibility services are allowed.
+     * An empty list means no accessibility services except system services are allowed.
+     * {@code null} means all accessibility services are allowed.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @return List of accessiblity service package names.
@@ -9067,7 +9923,7 @@ public class DevicePolicyManager {
      * Returns the list of accessibility services permitted by the device or profiles
      * owners of this user.
      *
-     * <p>Null means all accessibility services are allowed, if a non-null list is returned
+     * <p>{@code null} means all accessibility services are allowed, if a non-null list is returned
      * it will contain the intersection of the permitted lists for any device or profile
      * owners that apply to this user. It will also include any system accessibility services.
      *
@@ -9076,7 +9932,9 @@ public class DevicePolicyManager {
      * @hide
      */
      @SystemApi
-     @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
+     @RequiresPermission(anyOf = {
+             android.Manifest.permission.MANAGE_USERS,
+             android.Manifest.permission.QUERY_ADMIN_POLICY})
      public @Nullable List<String> getPermittedAccessibilityServices(int userId) {
         throwIfParentInstance("getPermittedAccessibilityServices");
         if (mService != null) {
@@ -9211,14 +10069,47 @@ public class DevicePolicyManager {
      *
      * @return List of input method package names.
      * @hide
+     *
+     * @see #setPermittedAccessibilityServices(ComponentName, List)
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.QUERY_ADMIN_POLICY})
     public @Nullable List<String> getPermittedInputMethodsForCurrentUser() {
         throwIfParentInstance("getPermittedInputMethodsForCurrentUser");
         if (mService != null) {
             try {
-                return mService.getPermittedInputMethodsForCurrentUser();
+                return mService.getPermittedInputMethodsAsUser(UserHandle.myUserId());
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Returns the list of input methods permitted.
+     *
+     * <p>{@code null} means all input methods are allowed, if a non-null list is returned
+     * it will contain the intersection of the permitted lists for any device or profile
+     * owners that apply to this user. It will also include any system input methods.
+     *
+     * @return List of input method package names.
+     * @hide
+     *
+     * @see #setPermittedAccessibilityServices(ComponentName, List)
+     */
+    @UserHandleAware
+    @RequiresPermission(allOf = {
+            android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+            android.Manifest.permission.MANAGE_USERS
+            }, conditional = true)
+    public @Nullable List<String> getPermittedInputMethods() {
+        throwIfParentInstance("getPermittedInputMethods");
+        if (mService != null) {
+            try {
+                return mService.getPermittedInputMethodsAsUser(myUserId());
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -9528,7 +10419,16 @@ public class DevicePolicyManager {
 
     /**
      * Called by a profile owner of secondary user that is affiliated with the device to stop the
-     * calling user and switch back to primary.
+     * calling user and switch back to primary user (when the user was
+     * {@link #switchUser(ComponentName, UserHandle)} switched to) or stop the user (when it was
+     * {@link #startUserInBackground(ComponentName, UserHandle) started in background}.
+     *
+     * <p>Notice that on devices running with
+     * {@link UserManager#isHeadlessSystemUserMode() headless system user mode}, there is no primary
+     * user, so it switches back to the user that was in the foreground before the first call to
+     * {@link #switchUser(ComponentName, UserHandle)} (or fails with
+     * {@link UserManager#USER_OPERATION_ERROR_UNKNOWN} if that method was not called prior to this
+     * call).
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @return one of the following result codes:
@@ -9543,6 +10443,50 @@ public class DevicePolicyManager {
         throwIfParentInstance("logoutUser");
         try {
             return mService.logoutUser(admin);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Similar to {@link #logoutUser(ComponentName)}, except:
+     *
+     * <ul>
+     *   <li>Called by system (like Settings), not admin.
+     *   <li>It logs out the current user, not the caller.
+     * </ul>
+     *
+     * @hide
+     */
+    @RequiresPermission(anyOf = {android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.INTERACT_ACROSS_USERS})
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public @UserOperationResult int logoutUser() {
+        // TODO(b/214336184): add CTS test
+        try {
+            return mService.logoutUserInternal();
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Gets the user a {@link #logoutUser(ComponentName)} call would switch to,
+     * or {@code null} if the current user is not in a session (i.e., if it was not
+     * {@link #switchUser(ComponentName, UserHandle) switched} or
+     * {@link #startUserInBackground(ComponentName, UserHandle) started in background} by the
+     * device admin.
+     *
+     * @hide
+     */
+    @RequiresPermission(anyOf = {android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.INTERACT_ACROSS_USERS})
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public @Nullable UserHandle getLogoutUser() {
+        // TODO(b/214336184): add CTS test
+        try {
+            int userId = mService.getLogoutUserId();
+            return userId == UserHandle.USER_NULL ? null : UserHandle.of(userId);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -9726,6 +10670,27 @@ public class DevicePolicyManager {
         if (mService != null) {
             try {
                 return mService.createAdminSupportIntent(restriction);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return null;
+    }
+
+    /**
+     * @param userId      The user for whom to retrieve information.
+     * @param restriction The restriction enforced by admin. It could be any user restriction or
+     *                    policy like {@link DevicePolicyManager#POLICY_DISABLE_CAMERA} and
+     *                    {@link DevicePolicyManager#POLICY_DISABLE_SCREEN_CAPTURE}.
+     * @return Details of admin and user which enforced the restriction for the userId. If
+     * restriction is null, profile owner for the user or device owner info is returned.
+     * @hide
+     */
+    public @Nullable Bundle getEnforcingAdminAndUserDetails(int userId,
+            @Nullable String restriction) {
+        if (mService != null) {
+            try {
+                return mService.getEnforcingAdminAndUserDetails(userId, restriction);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -10143,7 +11108,7 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Sets whether preferential network service is enabled on the work profile.
+     * Sets whether preferential network service is enabled.
      * For example, an organization can have a deal/agreement with a carrier that all of
      * the work data from its employees’ devices will be sent via a network service dedicated
      * for enterprise use.
@@ -10151,43 +11116,91 @@ public class DevicePolicyManager {
      * An example of a supported preferential network service is the Enterprise
      * slice on 5G networks.
      *
-     * By default, preferential network service is disabled on the work profile on supported
-     * carriers and devices. Admins can explicitly enable it with this API.
-     * On fully-managed devices this method is unsupported because all traffic is considered
-     * work traffic.
+     * By default, preferential network service is disabled on the work profile and
+     * fully managed devices, on supported carriers and devices.
+     * Admins can explicitly enable it with this API.
      *
-     * <p>This method can only be called by the profile owner of a managed profile.
+     * <p> This method enables preferential network service with a default configuration.
+     * To fine-tune the configuration, use {@link #setPreferentialNetworkServiceConfigs) instead.
+     * <p> Before Android version {@link android.os.Build.VERSION_CODES#TIRAMISU}:
+     * this method can be called by the profile owner of a managed profile.
+     * <p> Starting from Android version {@link android.os.Build.VERSION_CODES#TIRAMISU}:
+     * This method can be called by the profile owner of a managed profile
+     * or device owner.
+     *
      * @param enabled whether preferential network service should be enabled.
-     * @throws SecurityException if the caller is not the profile owner.
+     * @throws SecurityException if the caller is not the profile owner or device owner.
      **/
     public void setPreferentialNetworkServiceEnabled(boolean enabled) {
         throwIfParentInstance("setPreferentialNetworkServiceEnabled");
+        PreferentialNetworkServiceConfig.Builder configBuilder =
+                new PreferentialNetworkServiceConfig.Builder();
+        configBuilder.setEnabled(enabled);
+        if (enabled) {
+            configBuilder.setNetworkId(NET_ENTERPRISE_ID_1);
+        }
+        setPreferentialNetworkServiceConfigs(List.of(configBuilder.build()));
+    }
+
+    /**
+     * Indicates whether preferential network service is enabled.
+     *
+     * <p> Before Android version {@link android.os.Build.VERSION_CODES#TIRAMISU}:
+     * This method can be called by the profile owner of a managed profile.
+     * <p> Starting from Android version {@link android.os.Build.VERSION_CODES#TIRAMISU}:
+     * This method can be called by the profile owner of a managed profile
+     * or device owner.
+     *
+     * @return whether preferential network service is enabled.
+     * @throws SecurityException if the caller is not the profile owner or device owner.
+     */
+    public boolean isPreferentialNetworkServiceEnabled() {
+        throwIfParentInstance("isPreferentialNetworkServiceEnabled");
+        return getPreferentialNetworkServiceConfigs().stream().anyMatch(c -> c.isEnabled());
+    }
+
+    /**
+     * Sets preferential network configurations.
+     * {@see PreferentialNetworkServiceConfig}
+     *
+     * An example of a supported preferential network service is the Enterprise
+     * slice on 5G networks.
+     *
+     * By default, preferential network service is disabled on the work profile and fully managed
+     * devices, on supported carriers and devices. Admins can explicitly enable it with this API.
+     * If admin wants to have multiple enterprise slices,
+     * it can be configured by passing list of {@link PreferentialNetworkServiceConfig} objects.
+     *
+     * @param preferentialNetworkServiceConfigs list of preferential network configurations.
+     * @throws SecurityException if the caller is not the profile owner or device owner.
+     **/
+    public void setPreferentialNetworkServiceConfigs(
+            @NonNull List<PreferentialNetworkServiceConfig> preferentialNetworkServiceConfigs) {
+        throwIfParentInstance("setPreferentialNetworkServiceConfigs");
         if (mService == null) {
             return;
         }
-
         try {
-            mService.setPreferentialNetworkServiceEnabled(enabled);
+            mService.setPreferentialNetworkServiceConfigs(preferentialNetworkServiceConfigs);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
     /**
-     * Indicates whether preferential network service is enabled.
+     * Get preferential network configuration
+     * {@see PreferentialNetworkServiceConfig}
      *
-     * <p>This method can be called by the profile owner of a managed profile.
-     *
-     * @return whether preferential network service is enabled.
-     * @throws SecurityException if the caller is not the profile owner.
+     * @return preferential network configuration.
+     * @throws SecurityException if the caller is not the profile owner or device owner.
      */
-    public boolean isPreferentialNetworkServiceEnabled() {
-        throwIfParentInstance("isPreferentialNetworkServiceEnabled");
+    public @NonNull List<PreferentialNetworkServiceConfig> getPreferentialNetworkServiceConfigs() {
+        throwIfParentInstance("getPreferentialNetworkServiceConfigs");
         if (mService == null) {
-            return false;
+            return List.of(PreferentialNetworkServiceConfig.DEFAULT);
         }
         try {
-            return mService.isPreferentialNetworkServiceEnabled(myUserId());
+            return mService.getPreferentialNetworkServiceConfigs();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -10571,11 +11584,16 @@ public class DevicePolicyManager {
      * behavior of this API is changed such that passing {@code null} as the {@code admin} parameter
      * will return if any admin has blocked the uninstallation. Before L MR1, passing {@code null}
      * will cause a NullPointerException to be raised.
+     * <p>
+     * <strong>Note:</strong> If your app targets Android 11 (API level 30) or higher,
+     * this method returns a filtered result. Learn more about how to
+     * <a href="/training/basics/intents/package-visibility">manage package visibility</a>.
      *
      * @param admin The name of the admin component whose blocking policy will be checked, or
      *            {@code null} to check whether any admin has blocked the uninstallation.
      * @param packageName package to check.
-     * @return true if uninstallation is blocked.
+     * @return true if uninstallation is blocked and the given package is visible to you, false
+     *         otherwise if uninstallation isn't blocked or the given package isn't visible to you.
      * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
     public boolean isUninstallBlocked(@Nullable ComponentName admin, String packageName) {
@@ -11108,14 +12126,16 @@ public class DevicePolicyManager {
      *        {@link #ACTION_PROVISION_MANAGED_PROFILE}
      * @param packageName The package of the component that would be set as device, user, or profile
      *        owner.
-     * @return A {@link ProvisioningPreCondition} value indicating whether provisioning is allowed.
+     * @return An int constant value indicating whether provisioning is allowed.
      * @hide
      */
-    @TestApi
-    public @ProvisioningPreCondition int checkProvisioningPreCondition(
-            @Nullable String action, @NonNull String packageName) {
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS)
+    @ProvisioningPrecondition
+    public int checkProvisioningPrecondition(
+            @NonNull String action, @NonNull String packageName) {
         try {
-            return mService.checkProvisioningPreCondition(action, packageName);
+            return mService.checkProvisioningPrecondition(action, packageName);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -11811,7 +12831,10 @@ public class DevicePolicyManager {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS
+    })
     @UserProvisioningState
     public int getUserProvisioningState() {
         throwIfParentInstance("getUserProvisioningState");
@@ -11830,8 +12853,10 @@ public class DevicePolicyManager {
      *
      * @param state to store
      * @param userHandle for user
+     *
      * @hide
      */
+    @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS)
     public void setUserProvisioningState(@UserProvisioningState int state, int userHandle) {
         if (mService != null) {
             try {
@@ -11840,6 +12865,34 @@ public class DevicePolicyManager {
                 throw e.rethrowFromSystemServer();
             }
         }
+    }
+
+    /**
+     * Set the {@link UserProvisioningState} for the supplied user. The supplied user has to be
+     * manged, otherwise it will throw an {@link IllegalStateException}.
+     *
+     * <p> For managed users/profiles/devices, only the following state changes are allowed:
+     * <ul>
+     *     <li>{@link #STATE_USER_UNMANAGED} can change to any other state except itself
+     *     <li>{@link #STATE_USER_SETUP_INCOMPLETE} and {@link #STATE_USER_SETUP_COMPLETE} can only
+     *     change to {@link #STATE_USER_SETUP_FINALIZED}</li>
+     *     <li>{@link #STATE_USER_PROFILE_COMPLETE} can only change to
+     *     {@link #STATE_USER_PROFILE_FINALIZED}</li>
+     *     <li>{@link #STATE_USER_SETUP_FINALIZED} can't be changed to any other state</li>
+     *     <li>{@link #STATE_USER_PROFILE_FINALIZED} can only change to
+     *     {@link #STATE_USER_UNMANAGED}</li>
+     * </ul>
+     * @param state to store
+     * @param userHandle for user
+     * @throws IllegalStateException if called with an invalid state change.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS)
+    public void setUserProvisioningState(
+            @UserProvisioningState int state, @NonNull UserHandle userHandle) {
+        setUserProvisioningState(state, userHandle.getIdentifier());
     }
 
     /**
@@ -12631,13 +13684,18 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by device owner to add an override APN.
+     * Called by device owner or profile owner to add an override APN.
      *
      * <p>This method may returns {@code -1} if {@code apnSetting} conflicts with an existing
      * override APN. Update the existing conflicted APN with
      * {@link #updateOverrideApn(ComponentName, int, ApnSetting)} instead of adding a new entry.
      * <p>Two override APNs are considered to conflict when all the following APIs return
      * the same values on both override APNs:
+     * <p> Before Android version {@link android.os.Build.VERSION_CODES#TIRAMISU}:
+     * Only device owners can add APNs.
+     * <p> Starting from Android version {@link android.os.Build.VERSION_CODES#TIRAMISU}:
+     * Device and profile owners can add enterprise APNs
+     * ({@link ApnSetting#TYPE_ENTERPRISE}), while only device owners can add other type of APNs.
      * <ul>
      *   <li>{@link ApnSetting#getOperatorNumeric()}</li>
      *   <li>{@link ApnSetting#getApnName()}</li>
@@ -12656,7 +13714,8 @@ public class DevicePolicyManager {
      * @param apnSetting the override APN to insert
      * @return The {@code id} of inserted override APN. Or {@code -1} when failed to insert into
      *         the database.
-     * @throws SecurityException if {@code admin} is not a device owner.
+     * @throws SecurityException If request is for enterprise APN {@code admin} is either device
+     * owner or profile owner and in all other types of APN if {@code admin} is not a device owner.
      *
      * @see #setOverrideApnsEnabled(ComponentName, boolean)
      */
@@ -12673,20 +13732,26 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by device owner to update an override APN.
+     * Called by device owner or profile owner to update an override APN.
      *
      * <p>This method may returns {@code false} if there is no override APN with the given
      * {@code apnId}.
      * <p>This method may also returns {@code false} if {@code apnSetting} conflicts with an
      * existing override APN. Update the existing conflicted APN instead.
      * <p>See {@link #addOverrideApn} for the definition of conflict.
+     * <p> Before Android version {@link android.os.Build.VERSION_CODES#TIRAMISU}:
+     * Only device owners can update APNs.
+     * <p> Starting from Android version {@link android.os.Build.VERSION_CODES#TIRAMISU}:
+     * Device and profile owners can update enterprise APNs
+     * ({@link ApnSetting#TYPE_ENTERPRISE}), while only device owners can update other type of APNs.
      *
      * @param admin which {@link DeviceAdminReceiver} this request is associated with
      * @param apnId the {@code id} of the override APN to update
      * @param apnSetting the override APN to update
      * @return {@code true} if the required override APN is successfully updated,
      *         {@code false} otherwise.
-     * @throws SecurityException if {@code admin} is not a device owner.
+     * @throws SecurityException If request is for enterprise APN {@code admin} is either device
+     * owner or profile owner and in all other types of APN if {@code admin} is not a device owner.
      *
      * @see #setOverrideApnsEnabled(ComponentName, boolean)
      */
@@ -12704,16 +13769,22 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by device owner to remove an override APN.
+     * Called by device owner or profile owner to remove an override APN.
      *
      * <p>This method may returns {@code false} if there is no override APN with the given
      * {@code apnId}.
+     * <p> Before Android version {@link android.os.Build.VERSION_CODES#TIRAMISU}:
+     * Only device owners can remove APNs.
+     * <p> Starting from Android version {@link android.os.Build.VERSION_CODES#TIRAMISU}:
+     * Device and profile owners can remove enterprise APNs
+     * ({@link ApnSetting#TYPE_ENTERPRISE}), while only device owners can remove other type of APNs.
      *
      * @param admin which {@link DeviceAdminReceiver} this request is associated with
      * @param apnId the {@code id} of the override APN to remove
      * @return {@code true} if the required override APN is successfully removed, {@code false}
      *         otherwise.
-     * @throws SecurityException if {@code admin} is not a device owner.
+     * @throws SecurityException If request is for enterprise APN {@code admin} is either device
+     * owner or profile owner and in all other types of APN if {@code admin} is not a device owner.
      *
      * @see #setOverrideApnsEnabled(ComponentName, boolean)
      */
@@ -13008,12 +14079,12 @@ public class DevicePolicyManager {
     /**
      * Deprecated. Use {@code markProfileOwnerOnOrganizationOwnedDevice} instead.
      * When called by an app targeting SDK level {@link android.os.Build.VERSION_CODES#Q} or
-     * below, will behave the same as {@link #markProfileOwnerOnOrganizationOwnedDevice}.
+     * below, will behave the same as {@link #setProfileOwnerOnOrganizationOwnedDevice}.
      *
      * When called by an app targeting SDK level {@link android.os.Build.VERSION_CODES#R}
      * or above, will throw an UnsupportedOperationException when called.
      *
-     * @deprecated Use {@link #markProfileOwnerOnOrganizationOwnedDevice} instead.
+     * @deprecated Use {@link #setProfileOwnerOnOrganizationOwnedDevice} instead.
      *
      * @hide
      */
@@ -13028,14 +14099,14 @@ public class DevicePolicyManager {
                     "This method is deprecated. use markProfileOwnerOnOrganizationOwnedDevice"
                     + " instead.");
         } else {
-            markProfileOwnerOnOrganizationOwnedDevice(who);
+            setProfileOwnerOnOrganizationOwnedDevice(who, true);
         }
     }
 
     /**
-     * Marks the profile owner of the given user as managing an organization-owned device.
-     * That will give it access to device identifiers (such as serial number, IMEI and MEID)
-     * as well as other privileges.
+     * Sets whether the profile owner of the given user as managing an organization-owned device.
+     * Managing an organization-owned device will give it access to device identifiers (such as
+     * serial number, IMEI and MEID) as well as other privileges.
      *
      * @hide
      */
@@ -13043,13 +14114,15 @@ public class DevicePolicyManager {
     @RequiresPermission(anyOf = {
             android.Manifest.permission.MARK_DEVICE_ORGANIZATION_OWNED,
             android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS
-    }, conditional = true)
-    public void markProfileOwnerOnOrganizationOwnedDevice(@NonNull ComponentName who) {
+            }, conditional = true)
+    public void setProfileOwnerOnOrganizationOwnedDevice(@NonNull ComponentName who,
+            boolean isProfileOwnerOnOrganizationOwnedDevice) {
         if (mService == null) {
             return;
         }
         try {
-            mService.markProfileOwnerOnOrganizationOwnedDevice(who, myUserId());
+            mService.setProfileOwnerOnOrganizationOwnedDevice(who, myUserId(),
+                    isProfileOwnerOnOrganizationOwnedDevice);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -13273,8 +14346,8 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Returns the default package names set by the OEM that are allowed to request user consent for
-     * cross-profile communication without being explicitly enabled by the admin, via {@link
+     * Returns the default package names set by the OEM that are allowed to communicate
+     * cross-profile without being explicitly enabled by the admin, via {@link
      * com.android.internal.R.array#cross_profile_apps} and {@link com.android.internal.R.array
      * #vendor_cross_profile_apps}.
      *
@@ -13320,7 +14393,10 @@ public class DevicePolicyManager {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS
+    })
     public boolean isManagedKiosk() {
         throwIfParentInstance("isManagedKiosk");
         if (mService != null) {
@@ -13349,7 +14425,10 @@ public class DevicePolicyManager {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS
+    })
     public boolean isUnattendedManagedKiosk() {
         throwIfParentInstance("isUnattendedManagedKiosk");
         if (mService != null) {
@@ -13740,11 +14819,28 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Clears organization ID set by the DPC and resets the precomputed enrollment specific ID.
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS)
+    public void clearOrganizationId() {
+        if (mService == null) {
+            return;
+        }
+        try {
+            mService.clearOrganizationIdForUser(myUserId());
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Creates and provisions a managed profile and sets the
      * {@link ManagedProfileProvisioningParams#getProfileAdminComponentName()} as the profile
      * owner.
      *
-     * <p>The method {@link #checkProvisioningPreCondition} must be returning {@link #CODE_OK}
+     * <p>The method {@link #checkProvisioningPrecondition} must be returning {@link #STATUS_OK}
      * before calling this method.
      *
      * @param provisioningParams Params required to provision a managed profile,
@@ -13757,7 +14853,8 @@ public class DevicePolicyManager {
      * @hide
      */
     @Nullable
-    @TestApi
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS)
     public UserHandle createAndProvisionManagedProfile(
             @NonNull ManagedProfileProvisioningParams provisioningParams)
             throws ProvisioningException {
@@ -13768,30 +14865,64 @@ public class DevicePolicyManager {
             return mService.createAndProvisionManagedProfile(
                     provisioningParams, mContext.getPackageName());
         } catch (ServiceSpecificException e) {
-            throw new ProvisioningException(e, e.errorCode);
+            throw new ProvisioningException(e, e.errorCode, getErrorMessage(e));
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
     /**
+     * Called when a managed profile has been provisioned.
+     *
+     * @throws SecurityException if the caller does not hold
+     * {@link android.Manifest.permission#MANAGE_PROFILE_AND_DEVICE_OWNERS}.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS)
+    public void finalizeWorkProfileProvisioning(
+            @NonNull UserHandle managedProfileUser, @Nullable Account migratedAccount) {
+        Objects.requireNonNull(managedProfileUser, "managedProfileUser can't be null");
+        if (mService == null) {
+            throw new IllegalStateException("Could not find DevicePolicyManagerService");
+        }
+        try {
+            mService.finalizeWorkProfileProvisioning(managedProfileUser, migratedAccount);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * The localized error message to show to the end-user. If {@code null}, a generic error
+     * message will be shown.
+     */
+    private String getErrorMessage(ServiceSpecificException e) {
+        return null;
+    }
+
+
+    /**
      * Provisions a managed device and sets the {@code deviceAdminComponentName} as the device
      * owner.
      *
-     * <p>The method {@link #checkProvisioningPreCondition} must be returning {@link #CODE_OK}
+     * <p>The method {@link #checkProvisioningPrecondition} must be returning {@link #STATUS_OK}
      * before calling this method.
+     *
+     * <p>Holders of {@link android.Manifest.permission#PROVISION_DEMO_DEVICE} can call this API
+     * only if {@link FullyManagedDeviceProvisioningParams#isDemoDevice()} is {@code true}.</p>
      *
      * @param provisioningParams Params required to provision a fully managed device,
      * see {@link FullyManagedDeviceProvisioningParams}.
      *
-     * @throws SecurityException if the caller does not hold
-     * {@link android.Manifest.permission#MANAGE_PROFILE_AND_DEVICE_OWNERS}.
      * @throws ProvisioningException if an error occurred during provisioning.
      *
      * @hide
      */
-    @TestApi
-    @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS)
+    @SystemApi
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS,
+            android.Manifest.permission.PROVISION_DEMO_DEVICE})
     public void provisionFullyManagedDevice(
             @NonNull FullyManagedDeviceProvisioningParams provisioningParams)
             throws ProvisioningException {
@@ -13799,7 +14930,7 @@ public class DevicePolicyManager {
             try {
                 mService.provisionFullyManagedDevice(provisioningParams, mContext.getPackageName());
             } catch (ServiceSpecificException e) {
-                throw new ProvisioningException(e, e.errorCode);
+                throw new ProvisioningException(e, e.errorCode, getErrorMessage(e));
             } catch (RemoteException re) {
                 throw re.rethrowFromSystemServer();
             }
@@ -13863,6 +14994,7 @@ public class DevicePolicyManager {
      *
      * @hide
      */
+    @TestApi
     public void setDeviceOwnerType(@NonNull ComponentName admin,
             @DeviceOwnerType int deviceOwnerType) {
         throwIfParentInstance("setDeviceOwnerType");
@@ -13886,6 +15018,7 @@ public class DevicePolicyManager {
      *
      * @hide
      */
+    @TestApi
     @DeviceOwnerType
     public int getDeviceOwnerType(@NonNull ComponentName admin) {
         throwIfParentInstance("getDeviceOwnerType");
@@ -14016,5 +15149,306 @@ public class DevicePolicyManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Creates a {@link #ACTION_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE} intent
+     * from the provided {@code nfcIntent}.
+     *
+     * <p>Prerequisites to create the provisioning intent:
+     *
+     * <ul>
+     * <li>{@code nfcIntent}'s action is {@link NfcAdapter#ACTION_NDEF_DISCOVERED}</li>
+     * <li>{@code nfcIntent}'s NFC properties contain either
+     * {@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_NAME} or
+     * {@link #EXTRA_PROVISIONING_DEVICE_ADMIN_COMPONENT_NAME} </li>
+     * </ul>
+     *
+     * This method returns {@code null} if the prerequisites are not met or if an error occurs
+     * when reading the NFC properties.
+     *
+     * @param nfcIntent the nfc intent generated from scanning a NFC tag
+     * @return a {@link #ACTION_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE} intent with
+     * intent extras as read by {@code nfcIntent}'s NFC properties or {@code null} if the
+     * prerequisites are not met or if an error occurs when reading the NFC properties.
+     *
+     * @hide
+     */
+    @Nullable
+    @SystemApi
+    public Intent createProvisioningIntentFromNfcIntent(@NonNull Intent nfcIntent) {
+        return ProvisioningIntentHelper.createProvisioningIntentFromNfcIntent(nfcIntent);
+    }
+
+    /**
+     * Called by device owner or profile owner of an organization-owned managed profile to
+     * specify the minimum security level required for Wi-Fi networks.
+     * The device may not connect to networks that do not meet the minimum security level.
+     * If the current network does not meet the minimum security level set, it will be disconnected.
+     *
+     * The following shows the Wi-Fi security levels from the lowest to the highest security level:
+     * {@link #WIFI_SECURITY_OPEN}
+     * {@link #WIFI_SECURITY_PERSONAL}
+     * {@link #WIFI_SECURITY_ENTERPRISE_EAP}
+     * {@link #WIFI_SECURITY_ENTERPRISE_192}
+     *
+     * @param level minimum security level
+     * @throws SecurityException if the caller is not a device owner or a profile owner on
+     *         an organization-owned managed profile.
+     */
+    public void setMinimumRequiredWifiSecurityLevel(@WifiSecurity int level) {
+        throwIfParentInstance("setMinimumRequiredWifiSecurityLevel");
+        if (mService != null) {
+            try {
+                mService.setMinimumRequiredWifiSecurityLevel(level);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Returns the current Wi-Fi minimum security level.
+     *
+     * @see #setMinimumRequiredWifiSecurityLevel(int)
+     */
+    public @WifiSecurity int getMinimumRequiredWifiSecurityLevel() {
+        throwIfParentInstance("getMinimumRequiredWifiSecurityLevel");
+        if (mService == null) {
+            return WIFI_SECURITY_OPEN;
+        }
+        try {
+            return mService.getMinimumRequiredWifiSecurityLevel();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Called by device owner or profile owner of an organization-owned managed profile to
+     * specify the Wi-Fi SSID policy ({@link WifiSsidPolicy}).
+     * Wi-Fi SSID policy specifies the SSID restriction the network must satisfy
+     * in order to be eligible for a connection. Providing a null policy results in the
+     * deactivation of the SSID restriction
+     *
+     * @param policy Wi-Fi SSID policy
+     * @throws SecurityException if the caller is not a device owner or a profile owner on
+     *         an organization-owned managed profile.
+     */
+    public void setWifiSsidPolicy(@Nullable WifiSsidPolicy policy) {
+        throwIfParentInstance("setWifiSsidPolicy");
+        if (mService != null) {
+            try {
+                if (policy == null) {
+                    mService.setSsidAllowlist(new ArrayList<>());
+                } else {
+                    int policyType = policy.getPolicyType();
+                    List<String> ssidList = new ArrayList<>();
+                    for (WifiSsid ssid : policy.getSsids()) {
+                        ssidList.add(new String(ssid.getBytes(), StandardCharsets.UTF_8));
+                    }
+                    if (policyType == WifiSsidPolicy.WIFI_SSID_POLICY_TYPE_ALLOWLIST) {
+                        mService.setSsidAllowlist(ssidList);
+                    } else {
+                        mService.setSsidDenylist(ssidList);
+                    }
+                }
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Returns the current Wi-Fi SSID policy.
+     * If the policy has not been set, it will return NULL.
+     *
+     * @see #setWifiSsidPolicy(WifiSsidPolicy)
+     * @throws SecurityException if the caller is not a device owner or a profile owner on
+     * an organization-owned managed profile or a system app.
+     */
+    @Nullable
+    public WifiSsidPolicy getWifiSsidPolicy() {
+        throwIfParentInstance("getWifiSsidPolicy");
+        if (mService == null) {
+            return null;
+        }
+        try {
+            List<String> allowlist = mService.getSsidAllowlist();
+            if (!allowlist.isEmpty()) {
+                List<WifiSsid> wifiSsidAllowlist = new ArrayList<>();
+                for (String ssid : allowlist) {
+                    wifiSsidAllowlist.add(
+                            WifiSsid.fromBytes(ssid.getBytes(StandardCharsets.UTF_8)));
+                }
+                return new WifiSsidPolicy(WifiSsidPolicy.WIFI_SSID_POLICY_TYPE_ALLOWLIST,
+                        new ArraySet<>(wifiSsidAllowlist));
+            }
+            List<String> denylist = mService.getSsidDenylist();
+            if (!denylist.isEmpty()) {
+                List<WifiSsid> wifiSsidDenylist = new ArrayList<>();
+                for (String ssid : denylist) {
+                    wifiSsidDenylist.add(
+                            WifiSsid.fromBytes(ssid.getBytes(StandardCharsets.UTF_8)));
+                }
+                return new WifiSsidPolicy(WifiSsidPolicy.WIFI_SSID_POLICY_TYPE_DENYLIST,
+                        new ArraySet<>(wifiSsidDenylist));
+            }
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+        return null;
+    }
+
+    /**
+     * Returns a {@link DevicePolicyResourcesManager} containing the required APIs to set, reset,
+     * and get device policy related resources.
+     */
+    @NonNull
+    public DevicePolicyResourcesManager getResources() {
+        return mResourcesManager;
+    }
+
+    /**
+     * Returns a boolean for whether the DPC
+     * (Device Policy Controller, the agent responsible for enforcing policy)
+     * has been downloaded during provisioning.
+     *
+     * <p>If true is returned, then any attempts to begin setup again should result in factory reset
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS)
+    public boolean isDpcDownloaded() {
+        throwIfParentInstance("isDpcDownloaded");
+        if (mService != null) {
+            try {
+                return mService.isDpcDownloaded();
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Indicates that the DPC (Device Policy Controller, the agent responsible for enforcing policy)
+     * has or has not been downloaded during provisioning.
+     *
+     * @param downloaded {@code true} if the dpc has been downloaded during provisioning.
+     *                               {@code false} otherwise.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS)
+    public void setDpcDownloaded(boolean downloaded) {
+        throwIfParentInstance("setDpcDownloaded");
+        if (mService != null) {
+            try {
+                mService.setDpcDownloaded(downloaded);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Returns the package name of the device policy management role holder.
+     *
+     * <p>If the device policy management role holder is not configured for this device, returns
+     * {@code null}.
+     */
+    @Nullable
+    public String getDevicePolicyManagementRoleHolderPackage() {
+        String devicePolicyManagementConfig = mContext.getString(
+                com.android.internal.R.string.config_devicePolicyManagement);
+        return extractPackageNameFromDeviceManagerConfig(devicePolicyManagementConfig);
+    }
+
+    /**
+     * Returns the package name of the device policy management role holder updater.
+     *
+     * <p>If the device policy management role holder updater is not configured for this device,
+     * returns {@code null}.
+     *
+     * @hide
+     */
+    @Nullable
+    @TestApi
+    public String getDevicePolicyManagementRoleHolderUpdaterPackage() {
+        String devicePolicyManagementUpdaterConfig = mContext.getString(
+                com.android.internal.R.string.config_devicePolicyManagementUpdater);
+        if (TextUtils.isEmpty(devicePolicyManagementUpdaterConfig)) {
+            return null;
+        }
+        return devicePolicyManagementUpdaterConfig;
+    }
+
+    /**
+     * Returns a {@link List} of managed profiles managed by some profile owner within the profile
+     * group of the given user, or an empty {@link List} if there is not one.
+     *
+     * @param user the user whose profile group to look within to return managed profiles
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS)
+    @NonNull
+    public List<UserHandle> getPolicyManagedProfiles(@NonNull UserHandle user) {
+        Objects.requireNonNull(user);
+        if (mService != null) {
+            try {
+                return mService.getPolicyManagedProfiles(user);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return Collections.emptyList();
+    }
+
+    /**
+     * Retrieves the package name for a given {@code deviceManagerConfig}.
+     *
+     * <p>Valid configs look like:
+     * <ul>
+     *     <li>{@code com.package.name}</li>
+     *     <li>{@code com.package.name:<SHA256 checksum>}</li>
+     * </ul>
+     *
+     * <p>If the supplied {@code deviceManagerConfig} is {@code null} or empty, returns
+     * {@code null}.
+     */
+    @Nullable
+    private String extractPackageNameFromDeviceManagerConfig(
+            @Nullable String deviceManagerConfig) {
+        if (TextUtils.isEmpty(deviceManagerConfig)) {
+            return null;
+        }
+        if (deviceManagerConfig.contains(":")) {
+            return deviceManagerConfig.split(":")[0];
+        }
+        return deviceManagerConfig;
+    }
+
+    /**
+     * @return {@code true} if bypassing the device policy management role qualification is allowed
+     * with the current state of the device.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_ROLE_HOLDERS)
+    public boolean shouldAllowBypassingDevicePolicyManagementRoleQualification() {
+        if (mService != null) {
+            try {
+                return mService.shouldAllowBypassingDevicePolicyManagementRoleQualification();
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return false;
     }
 }

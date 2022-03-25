@@ -1,0 +1,30 @@
+// Signature format: 2.0
+package omapi.uuid.map.config {
+
+  public class RefDo {
+    ctor public RefDo();
+    method public java.util.List<omapi.uuid.map.config.RefDo.UuidRefDo> getUuid_ref_do();
+  }
+
+  public static class RefDo.UuidRefDo {
+    ctor public RefDo.UuidRefDo();
+    method public omapi.uuid.map.config.RefDo.UuidRefDo.Uids getUids();
+    method public String getUuid();
+    method public void setUids(omapi.uuid.map.config.RefDo.UuidRefDo.Uids);
+    method public void setUuid(String);
+  }
+
+  public static class RefDo.UuidRefDo.Uids {
+    ctor public RefDo.UuidRefDo.Uids();
+    method public java.util.List<java.lang.Short> getUid();
+  }
+
+  public class XmlParser {
+    ctor public XmlParser();
+    method public static omapi.uuid.map.config.RefDo read(java.io.InputStream) throws javax.xml.datatype.DatatypeConfigurationException, java.io.IOException, org.xmlpull.v1.XmlPullParserException;
+    method public static String readText(org.xmlpull.v1.XmlPullParser) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
+    method public static void skip(org.xmlpull.v1.XmlPullParser) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
+  }
+
+}
+

@@ -62,6 +62,7 @@ public class LegacySplitDisplayLayout {
     Rect mSecondary = null;
     Rect mAdjustedPrimary = null;
     Rect mAdjustedSecondary = null;
+    final Rect mTmpBounds = new Rect();
 
     public LegacySplitDisplayLayout(Context ctx, DisplayLayout dl,
             LegacySplitScreenTaskListener taskTiles) {
@@ -136,31 +137,41 @@ public class LegacySplitDisplayLayout {
         return mMinimizedSnapAlgorithm;
     }
 
-    void resizeSplits(int position) {
+    /**
+     * Resize primary bounds and secondary bounds by divider position.
+     *
+     * @param position divider position.
+     * @return true if calculated bounds changed.
+     */
+    boolean resizeSplits(int position) {
         mPrimary = mPrimary == null ? new Rect() : mPrimary;
         mSecondary = mSecondary == null ? new Rect() : mSecondary;
-        calcSplitBounds(position, mPrimary, mSecondary);
+        int dockSide = getPrimarySplitSide();
+        boolean boundsChanged;
+
+        mTmpBounds.set(mPrimary);
+        DockedDividerUtils.calculateBoundsForPosition(position, dockSide, mPrimary,
+                mDisplayLayout.width(), mDisplayLayout.height(), mDividerSize);
+        boundsChanged = !mPrimary.equals(mTmpBounds);
+
+        mTmpBounds.set(mSecondary);
+        DockedDividerUtils.calculateBoundsForPosition(position,
+                DockedDividerUtils.invertDockSide(dockSide), mSecondary, mDisplayLayout.width(),
+                mDisplayLayout.height(), mDividerSize);
+        boundsChanged |= !mSecondary.equals(mTmpBounds);
+        return boundsChanged;
     }
 
     void resizeSplits(int position, WindowContainerTransaction t) {
-        resizeSplits(position);
-        t.setBounds(mTiles.mPrimary.token, mPrimary);
-        t.setBounds(mTiles.mSecondary.token, mSecondary);
+        if (resizeSplits(position)) {
+            t.setBounds(mTiles.mPrimary.token, mPrimary);
+            t.setBounds(mTiles.mSecondary.token, mSecondary);
 
-        t.setSmallestScreenWidthDp(mTiles.mPrimary.token,
-                getSmallestWidthDpForBounds(mContext, mDisplayLayout, mPrimary));
-        t.setSmallestScreenWidthDp(mTiles.mSecondary.token,
-                getSmallestWidthDpForBounds(mContext, mDisplayLayout, mSecondary));
-    }
-
-    void calcSplitBounds(int position, @NonNull Rect outPrimary, @NonNull Rect outSecondary) {
-        int dockSide = getPrimarySplitSide();
-        DockedDividerUtils.calculateBoundsForPosition(position, dockSide, outPrimary,
-                mDisplayLayout.width(), mDisplayLayout.height(), mDividerSize);
-
-        DockedDividerUtils.calculateBoundsForPosition(position,
-                DockedDividerUtils.invertDockSide(dockSide), outSecondary, mDisplayLayout.width(),
-                mDisplayLayout.height(), mDividerSize);
+            t.setSmallestScreenWidthDp(mTiles.mPrimary.token,
+                    getSmallestWidthDpForBounds(mContext, mDisplayLayout, mPrimary));
+            t.setSmallestScreenWidthDp(mTiles.mSecondary.token,
+                    getSmallestWidthDpForBounds(mContext, mDisplayLayout, mSecondary));
+        }
     }
 
     Rect calcResizableMinimizedHomeStackBounds() {

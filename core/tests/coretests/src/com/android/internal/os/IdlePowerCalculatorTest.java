@@ -39,7 +39,7 @@ public class IdlePowerCalculatorTest {
 
     @Test
     public void testTimerBasedModel() {
-        mStatsRule.setTime(3_000_000, 2_000_000);
+        mStatsRule.setTime(3_000, 2_000);
 
         IdlePowerCalculator calculator = new IdlePowerCalculator(mStatsRule.getPowerProfile());
 

@@ -257,12 +257,11 @@ int DumpConfigsCommand::Dump(LoadedApk* apk) {
 }
 
 int DumpPackageNameCommand::Dump(LoadedApk* apk) {
-  Maybe<std::string> package_name = GetPackageName(apk);
-  if (!package_name) {
+  auto package_name = GetPackageName(apk);
+  if (!package_name.has_value()) {
     return 1;
   }
-
-  GetPrinter()->Println(package_name.value());
+  GetPrinter()->Println(*package_name);
   return 0;
 }
 
@@ -283,12 +282,12 @@ int DumpStringsCommand::Dump(LoadedApk* apk) {
 }
 
 int DumpStyleParentCommand::Dump(LoadedApk* apk) {
-  Maybe<std::string> package_name = GetPackageName(apk);
-  if (!package_name) {
+  auto package_name = GetPackageName(apk);
+  if (!package_name.has_value()) {
     return 1;
   }
 
-  const auto target_style = ResourceName(package_name.value(), ResourceType::kStyle, style_);
+  const auto target_style = ResourceName(*package_name, ResourceType::kStyle, style_);
   const auto table = apk->GetResourceTable();
 
   if (!table) {
@@ -296,7 +295,7 @@ int DumpStyleParentCommand::Dump(LoadedApk* apk) {
     return 1;
   }
 
-  Maybe<ResourceTable::SearchResult> target = table->FindResource(target_style);
+  std::optional<ResourceTable::SearchResult> target = table->FindResource(target_style);
   if (!target) {
     GetDiagnostics()->Error(
         DiagMessage() << "Target style \"" << target_style.entry << "\" does not exist");
@@ -560,5 +559,22 @@ const char DumpBadgerCommand::kBadgerData[2925] = {
     32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,
     32,  32,  32,  32,  32,  32,  32,  32,  32,  46,  32,  32,  46,  32,  32,  32,  32,  32,  32,
     32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  10};
+
+int DumpChunks::Dump(LoadedApk* apk) {
+  auto file = apk->GetFileCollection()->FindFile("resources.arsc");
+  if (!file) {
+    GetDiagnostics()->Error(DiagMessage() << "Failed to find resources.arsc in APK");
+    return 1;
+  }
+
+  auto data = file->OpenAsData();
+  if (!data) {
+    GetDiagnostics()->Error(DiagMessage() << "Failed to open resources.arsc ");
+    return 1;
+  }
+
+  Debug::DumpChunks(data->data(), data->size(), GetPrinter(), GetDiagnostics());
+  return 0;
+}
 
 }  // namespace aapt

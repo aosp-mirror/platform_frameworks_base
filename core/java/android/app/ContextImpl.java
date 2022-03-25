@@ -77,6 +77,7 @@ import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.StorageManager;
+import android.permission.PermissionControllerManager;
 import android.permission.PermissionManager;
 import android.system.ErrnoException;
 import android.system.Os;
@@ -113,6 +114,7 @@ import java.nio.ByteOrder;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -215,6 +217,12 @@ class ContextImpl extends Context {
     @UnsupportedAppUsage
     private @Nullable ClassLoader mClassLoader;
 
+    /**
+     * The {@link com.android.server.wm.WindowToken} representing this instance if it is
+     * {@link #CONTEXT_TYPE_WINDOW_CONTEXT} or {@link #CONTEXT_TYPE_SYSTEM_OR_SYSTEM_UI}.
+     * If the type is {@link #CONTEXT_TYPE_ACTIVITY}, then represents the
+     * {@link android.window.WindowContainerToken} of the activity.
+     */
     private final @Nullable IBinder mToken;
 
     private final @NonNull UserHandle mUser;
@@ -310,6 +318,14 @@ class ContextImpl extends Context {
 
     @ContextType
     private int mContextType;
+
+    /**
+     * {@code true} to indicate that the {@link Context} owns the {@link #getWindowContextToken()}
+     * and is responsible for detaching the token when the Context is released.
+     *
+     * @see #finalize()
+     */
+    private boolean mOwnsToken = false;
 
     @GuardedBy("mSync")
     private File mDatabasesDir;
@@ -1272,12 +1288,22 @@ class ContextImpl extends Context {
         String resolvedType = intent.resolveTypeIfNeeded(getContentResolver());
         String[] receiverPermissions = receiverPermission == null ? null
                 : new String[] {receiverPermission};
+        String[] excludedPermissions = null;
+        if (options != null) {
+            String[] receiverPermissionsBundle = options.getStringArray(
+                    BroadcastOptions.KEY_REQUIRE_ALL_OF_PERMISSIONS);
+            if (receiverPermissionsBundle != null) {
+                receiverPermissions = receiverPermissionsBundle;
+            }
+            excludedPermissions = options.getStringArray(
+                    BroadcastOptions.KEY_REQUIRE_NONE_OF_PERMISSIONS);
+        }
         try {
             intent.prepareToLeaveProcess(this);
             ActivityManager.getService().broadcastIntentWithFeature(
                     mMainThread.getApplicationThread(), getAttributionTag(), intent, resolvedType,
                     null, Activity.RESULT_OK, null, null, receiverPermissions,
-                    null /*excludedPermissions=*/, AppOpsManager.OP_NONE, options, false, false,
+                    excludedPermissions, AppOpsManager.OP_NONE, options, false, false,
                     getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -1739,10 +1765,24 @@ class ContextImpl extends Context {
     }
 
     @Override
+    public Intent registerReceiverForAllUsers(BroadcastReceiver receiver,
+            IntentFilter filter, String broadcastPermission, Handler scheduler, int flags) {
+        return registerReceiverAsUser(receiver, UserHandle.ALL,
+                filter, broadcastPermission, scheduler, flags);
+    }
+
+    @Override
     public Intent registerReceiverAsUser(BroadcastReceiver receiver, UserHandle user,
             IntentFilter filter, String broadcastPermission, Handler scheduler) {
         return registerReceiverInternal(receiver, user.getIdentifier(),
                 filter, broadcastPermission, scheduler, getOuterContext(), 0);
+    }
+
+    @Override
+    public Intent registerReceiverAsUser(BroadcastReceiver receiver, UserHandle user,
+            IntentFilter filter, String broadcastPermission, Handler scheduler, int flags) {
+        return registerReceiverInternal(receiver, user.getIdentifier(),
+                filter, broadcastPermission, scheduler, getOuterContext(), flags);
     }
 
     private Intent registerReceiverInternal(BroadcastReceiver receiver, int userId,
@@ -1766,6 +1806,12 @@ class ContextImpl extends Context {
             }
         }
         try {
+            ActivityThread thread = ActivityThread.currentActivityThread();
+            Instrumentation instrumentation = thread.getInstrumentation();
+            if (instrumentation.isInstrumenting()
+                    && ((flags & Context.RECEIVER_NOT_EXPORTED) == 0)) {
+                flags = flags | Context.RECEIVER_EXPORTED;
+            }
             final Intent intent = ActivityManager.getService().registerReceiverWithFeature(
                     mMainThread.getApplicationThread(), mBasePackageName, getAttributionTag(),
                     AppOpsManager.toReceiverId(receiver), rd, filter, broadcastPermission, userId,
@@ -1862,6 +1908,14 @@ class ContextImpl extends Context {
                             "Not allowed to start service " + service + ": " + cn.getClassName());
                 }
             }
+            // If we started a foreground service in the same package, remember the stack trace.
+            if (cn != null && requireForeground) {
+                if (cn.getPackageName().equals(getOpPackageName())) {
+                    Service.setStartForegroundServiceStackTrace(cn.getClassName(),
+                            new StackTrace("Last startServiceCommon() call for this service was "
+                                    + "made here"));
+                }
+            }
             return cn;
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -1950,7 +2004,8 @@ class ContextImpl extends Context {
 
     private boolean bindServiceCommon(Intent service, ServiceConnection conn, int flags,
             String instanceName, Handler handler, Executor executor, UserHandle user) {
-        // Keep this in sync with DevicePolicyManager.bindDeviceAdminServiceAsUser.
+        // Keep this in sync with DevicePolicyManager.bindDeviceAdminServiceAsUser and
+        // ActivityManagerLocal.bindSdkSandboxService
         IServiceConnection sd;
         if (conn == null) {
             throw new IllegalArgumentException("connection is null");
@@ -1976,10 +2031,10 @@ class ContextImpl extends Context {
                 flags |= BIND_WAIVE_PRIORITY;
             }
             service.prepareToLeaveProcess(this);
-            int res = ActivityManager.getService().bindIsolatedService(
-                mMainThread.getApplicationThread(), getActivityToken(), service,
-                service.resolveTypeIfNeeded(getContentResolver()),
-                sd, flags, instanceName, getOpPackageName(), user.getIdentifier());
+            int res = ActivityManager.getService().bindServiceInstance(
+                    mMainThread.getApplicationThread(), getActivityToken(), service,
+                    service.resolveTypeIfNeeded(getContentResolver()),
+                    sd, flags, instanceName, getOpPackageName(), user.getIdentifier());
             if (res < 0) {
                 throw new SecurityException(
                         "Not allowed to bind to service " + service);
@@ -2132,6 +2187,12 @@ class ContextImpl extends Context {
     }
 
     @Override
+    public void revokeSelfPermissionsOnKill(@NonNull Collection<String> permissions) {
+        getSystemService(PermissionControllerManager.class).revokeSelfPermissionsOnKill(
+                getPackageName(), new ArrayList<String>(permissions));
+    }
+
+    @Override
     public int checkCallingPermission(String permission) {
         if (permission == null) {
             throw new IllegalArgumentException("permission is null");
@@ -2260,7 +2321,7 @@ class ContextImpl extends Context {
             int modeFlags) {
         try {
             return ActivityManager.getService().checkUriPermissions(uris, pid, uid, modeFlags,
-                    null);
+                    getUserId(), null);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2618,7 +2679,10 @@ class ContextImpl extends Context {
                 overrideConfig, display.getDisplayAdjustments().getCompatibilityInfo(),
                 mResources.getLoaders()));
         context.mDisplay = display;
-        context.mContextType = CONTEXT_TYPE_DISPLAY_CONTEXT;
+        // Inherit context type if the container is from System or System UI context to bypass
+        // UI context check.
+        context.mContextType = mContextType == CONTEXT_TYPE_SYSTEM_OR_SYSTEM_UI
+                ? CONTEXT_TYPE_SYSTEM_OR_SYSTEM_UI : CONTEXT_TYPE_DISPLAY_CONTEXT;
         // Display contexts and any context derived from a display context should always override
         // the display that would otherwise be inherited from mToken (or the global configuration if
         // mToken is null).
@@ -2671,7 +2735,8 @@ class ContextImpl extends Context {
 
         // Step 2. Create the base context of the window context, it will also create a Resources
         //         associated with the WindowTokenClient and set the token to the base context.
-        final ContextImpl windowContextBase = createWindowContextBase(windowTokenClient, display);
+        final ContextImpl windowContextBase = createWindowContextBase(windowTokenClient,
+                display.getDisplayId());
 
         // Step 3. Create a WindowContext instance and set it as the outer context of the base
         //         context to make the service obtained by #getSystemService(String) able to query
@@ -2696,9 +2761,7 @@ class ContextImpl extends Context {
         if (display == null) {
             throw new IllegalArgumentException("Display must not be null");
         }
-        final ContextImpl tokenContext = createWindowContextBase(token, display);
-        tokenContext.setResources(createWindowContextResources(tokenContext));
-        return tokenContext;
+        return createWindowContextBase(token, display.getDisplayId());
     }
 
     /**
@@ -2706,13 +2769,13 @@ class ContextImpl extends Context {
      * window.
      *
      * @param token The token to associate with {@link Resources}
-     * @param display The {@link Display} to associate with.
+     * @param displayId The ID of {@link Display} to associate with.
      *
      * @see #createWindowContext(Display, int, Bundle)
      * @see #createTokenContext(IBinder, Display)
      */
     @UiContext
-    ContextImpl createWindowContextBase(@NonNull IBinder token, @NonNull Display display) {
+    ContextImpl createWindowContextBase(@NonNull IBinder token, int displayId) {
         ContextImpl baseContext = new ContextImpl(this, mMainThread, mPackageInfo, mParams,
                 mAttributionSource.getAttributionTag(),
                 mAttributionSource.getNext(),
@@ -2721,10 +2784,13 @@ class ContextImpl extends Context {
         // need to override their display in ResourcesManager.
         baseContext.mForceDisplayOverrideInResources = false;
         baseContext.mContextType = CONTEXT_TYPE_WINDOW_CONTEXT;
-        baseContext.mDisplay = display;
 
         final Resources windowContextResources = createWindowContextResources(baseContext);
         baseContext.setResources(windowContextResources);
+        // Associate the display with window context resources so that configuration update from
+        // the server side will also apply to the display's metrics.
+        baseContext.mDisplay = ResourcesManager.getInstance().getAdjustedDisplay(displayId,
+                windowContextResources);
 
         return baseContext;
     }
@@ -2740,7 +2806,7 @@ class ContextImpl extends Context {
      */
     private static Resources createWindowContextResources(@NonNull ContextImpl windowContextBase) {
         final LoadedApk packageInfo = windowContextBase.mPackageInfo;
-        final ClassLoader classLoader = windowContextBase.mClassLoader;
+        final ClassLoader classLoader = windowContextBase.getClassLoader();
         final IBinder token = windowContextBase.getWindowContextToken();
 
         final String resDir = packageInfo.getResDir();
@@ -2840,6 +2906,14 @@ class ContextImpl extends Context {
             default:
                 return false;
         }
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public int getAssociatedDisplayId()  {
+        return isAssociatedWithDisplay() ? getDisplayId() : Display.INVALID_DISPLAY;
     }
 
     @Override
@@ -2960,6 +3034,18 @@ class ContextImpl extends Context {
         mContentCaptureOptions = options;
     }
 
+    @Override
+    protected void finalize() throws Throwable {
+        // If mToken is a WindowTokenClient, the Context is usually associated with a
+        // WindowContainer. We should detach from WindowContainer when the Context is finalized
+        // if this Context is not a WindowContext. WindowContext finalization is handled in
+        // WindowContext class.
+        if (mToken instanceof WindowTokenClient && mOwnsToken) {
+            ((WindowTokenClient) mToken).detachFromWindowContainerIfNeeded();
+        }
+        super.finalize();
+    }
+
     @UnsupportedAppUsage
     static ContextImpl createSystemContext(ActivityThread mainThread) {
         LoadedApk packageInfo = new LoadedApk(mainThread);
@@ -2980,22 +3066,14 @@ class ContextImpl extends Context {
      * @param displayId The ID of the display where the UI is shown.
      */
     static ContextImpl createSystemUiContext(ContextImpl systemContext, int displayId) {
-        final LoadedApk packageInfo = systemContext.mPackageInfo;
-        ContextImpl context = new ContextImpl(null, systemContext.mMainThread, packageInfo,
-                ContextParams.EMPTY, null, null, null, null, null, 0, null, null);
-        context.setResources(createResources(null, packageInfo, null, displayId, null,
-                packageInfo.getCompatibilityInfo(), null));
-        context.updateDisplay(displayId);
+        final WindowTokenClient token = new WindowTokenClient();
+        final ContextImpl context = systemContext.createWindowContextBase(token, displayId);
+        token.attachContext(context);
+        token.attachToDisplayContent(displayId);
         context.mContextType = CONTEXT_TYPE_SYSTEM_OR_SYSTEM_UI;
-        return context;
-    }
+        context.mOwnsToken = true;
 
-    /**
-     * The overloaded method of {@link #createSystemUiContext(ContextImpl, int)}.
-     * Uses {@Code Display.DEFAULT_DISPLAY} as the target display.
-     */
-    static ContextImpl createSystemUiContext(ContextImpl systemContext) {
-        return createSystemUiContext(systemContext, Display.DEFAULT_DISPLAY);
+        return context;
     }
 
     @UnsupportedAppUsage
@@ -3121,6 +3199,7 @@ class ContextImpl extends Context {
             mIsConfigurationBasedContext = container.mIsConfigurationBasedContext;
             mContextType = container.mContextType;
             mContentCaptureOptions = container.mContentCaptureOptions;
+            mAutofillOptions = container.mAutofillOptions;
         } else {
             mBasePackageName = packageInfo.mPackageName;
             ApplicationInfo ainfo = packageInfo.getApplicationInfo();
@@ -3175,6 +3254,10 @@ class ContextImpl extends Context {
     final void performFinalCleanup(String who, String what) {
         //Log.i(TAG, "Cleanup up context: " + this);
         mPackageInfo.removeContextRegistrations(getOuterContext(), who, what);
+        if (mContextType == CONTEXT_TYPE_SYSTEM_OR_SYSTEM_UI
+                && mToken instanceof WindowTokenClient) {
+            mMainThread.onSystemUiContextCleanup(this);
+        }
     }
 
     @UnsupportedAppUsage
@@ -3188,12 +3271,6 @@ class ContextImpl extends Context {
     @UnsupportedAppUsage
     final void setOuterContext(@NonNull Context context) {
         mOuterContext = context;
-        // TODO(b/149463653): check if we still need this method after migrating IMS to
-        //  WindowContext.
-        if (mOuterContext.isUiContext() && mContextType <= CONTEXT_TYPE_DISPLAY_CONTEXT) {
-            mContextType = CONTEXT_TYPE_WINDOW_CONTEXT;
-            mIsConfigurationBasedContext = true;
-        }
     }
 
     @UnsupportedAppUsage
@@ -3209,7 +3286,13 @@ class ContextImpl extends Context {
 
     @Override
     public IBinder getWindowContextToken() {
-        return mContextType == CONTEXT_TYPE_WINDOW_CONTEXT ? mToken : null;
+        switch (mContextType) {
+            case CONTEXT_TYPE_WINDOW_CONTEXT:
+            case CONTEXT_TYPE_SYSTEM_OR_SYSTEM_UI:
+                return mToken;
+            default:
+                return null;
+        }
     }
 
     private void checkMode(int mode) {

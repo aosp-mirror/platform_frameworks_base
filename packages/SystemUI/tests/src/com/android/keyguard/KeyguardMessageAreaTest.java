@@ -40,7 +40,7 @@ public class KeyguardMessageAreaTest extends SysuiTestCase {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         mKeyguardMessageArea = new KeyguardMessageArea(mContext, null);
-        mKeyguardMessageArea.setBouncerVisible(true);
+        mKeyguardMessageArea.setBouncerShowing(true);
     }
 
     @Test
@@ -53,7 +53,7 @@ public class KeyguardMessageAreaTest extends SysuiTestCase {
 
     @Test
     public void testHiddenWhenBouncerHidden() {
-        mKeyguardMessageArea.setBouncerVisible(false);
+        mKeyguardMessageArea.setBouncerShowing(false);
         mKeyguardMessageArea.setVisibility(View.INVISIBLE);
         mKeyguardMessageArea.setMessage("oobleck");
         assertThat(mKeyguardMessageArea.getVisibility()).isEqualTo(View.INVISIBLE);

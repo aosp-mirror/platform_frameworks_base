@@ -17,12 +17,13 @@
 package com.android.systemui.statusbar.tv;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 
 import com.android.internal.statusbar.IStatusBarService;
-import com.android.systemui.SystemUI;
+import com.android.systemui.CoreStartable;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.statusbar.CommandQueue;
@@ -36,7 +37,11 @@ import dagger.Lazy;
  * Serves as a collection of UI components, rather than showing its own UI.
  */
 @SysUISingleton
-public class TvStatusBar extends SystemUI implements CommandQueue.Callbacks {
+public class TvStatusBar extends CoreStartable implements CommandQueue.Callbacks {
+
+    private static final String ACTION_SHOW_PIP_MENU =
+            "com.android.wm.shell.pip.tv.notification.action.SHOW_PIP_MENU";
+    private static final String SYSTEMUI_PERMISSION = "com.android.systemui.permission.SELF";
 
     private final CommandQueue mCommandQueue;
     private final Lazy<AssistManager> mAssistManagerLazy;
@@ -64,5 +69,12 @@ public class TvStatusBar extends SystemUI implements CommandQueue.Callbacks {
     @Override
     public void startAssist(Bundle args) {
         mAssistManagerLazy.get().startAssist(args);
+    }
+
+    @Override
+    public void showPictureInPictureMenu() {
+        mContext.sendBroadcast(
+                new Intent(ACTION_SHOW_PIP_MENU).setPackage(mContext.getPackageName()),
+                SYSTEMUI_PERMISSION);
     }
 }

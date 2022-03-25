@@ -17,6 +17,7 @@
 package com.android.effectstest;
 
 import android.app.Activity;
+import android.media.audiofx.Visualizer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -24,6 +25,8 @@ import android.os.Message;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
@@ -74,11 +77,22 @@ public class VisualizerTest extends Activity implements OnCheckedChangeListener 
         mCallbackOn = false;
         mCallbackButton.setChecked(mCallbackOn);
 
+        final Button hammerReleaseTest = (Button) findViewById(R.id.hammer_on_release_bug);
+        hammerReleaseTest.setEnabled(false);
+
         mMultithreadedButton.setOnCheckedChangeListener(this);
         if (getEffect(sSession) != null) {
             mReleaseButton.setOnCheckedChangeListener(this);
             mOnOffButton.setOnCheckedChangeListener(this);
             mCallbackButton.setOnCheckedChangeListener(this);
+
+            hammerReleaseTest.setEnabled(true);
+            hammerReleaseTest.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    runHammerReleaseTest(hammerReleaseTest);
+                }
+            });
         }
     }
 
@@ -212,6 +226,52 @@ public class VisualizerTest extends Activity implements OnCheckedChangeListener 
                 mVisualizer = null;
             }
         }
+    }
+
+    // Stress-tests releasing of AudioEffect by doing repeated creation
+    // and subsequent releasing. Unlike a similar class in BassBoostTest,
+    // this one doesn't sets a control status listener because Visualizer
+    // doesn't inherit from AudioEffect and doesn't implement this method
+    // by itself.
+    class HammerReleaseTest extends Thread {
+        private static final int NUM_EFFECTS = 10;
+        private static final int NUM_ITERATIONS = 100;
+        private final int mSession;
+        private final Runnable mOnComplete;
+
+        HammerReleaseTest(int session, Runnable onComplete) {
+            mSession = session;
+            mOnComplete = onComplete;
+        }
+
+        @Override
+        public void run() {
+            Log.w(TAG, "HammerReleaseTest started");
+            Visualizer[] effects = new Visualizer[NUM_EFFECTS];
+            for (int i = 0; i < NUM_ITERATIONS; i++) {
+                for (int j = 0; j < NUM_EFFECTS; j++) {
+                    effects[j] = new Visualizer(mSession);
+                    yield();
+                }
+                for (int j = NUM_EFFECTS - 1; j >= 0; j--) {
+                    Log.w(TAG, "HammerReleaseTest releasing effect " + (Object) effects[j]);
+                    effects[j].release();
+                    effects[j] = null;
+                    yield();
+                }
+            }
+            Log.w(TAG, "HammerReleaseTest ended");
+            runOnUiThread(mOnComplete);
+        }
+    }
+
+    private void runHammerReleaseTest(Button controlButton) {
+        controlButton.setEnabled(false);
+        HammerReleaseTest thread = new HammerReleaseTest(sSession,
+                () -> {
+                    controlButton.setEnabled(true);
+                });
+        thread.start();
     }
 
 }

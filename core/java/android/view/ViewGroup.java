@@ -2603,7 +2603,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * It's the responsibility of the caller to recycle it once they're finished with it.
      * @param event The event to transform.
      * @param child The view whose coordinate space is to be used.
-     * @return A copy of the the given MotionEvent, transformed into the given View's coordinate
+     * @return A copy of the given MotionEvent, transformed into the given View's coordinate
      *         space.
      */
     private MotionEvent getTransformedMotionEvent(MotionEvent event, View child) {
@@ -2723,7 +2723,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                                     continue;
                                 }
                                 childWithAccessibilityFocus = null;
-                                i = childrenCount - 1;
+                                i = childrenCount;
                             }
 
                             if (!child.canReceivePointerEvents()
@@ -4266,7 +4266,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         int transientIndex = transientCount != 0 ? 0 : -1;
         // Only use the preordered list if not HW accelerated, since the HW pipeline will do the
         // draw reordering internally
-        final ArrayList<View> preorderedList = isHardwareAccelerated()
+        final ArrayList<View> preorderedList = drawsWithRenderNode(canvas)
                 ? null : buildOrderedChildList();
         final boolean customOrder = preorderedList == null
                 && isChildrenDrawingOrderEnabled();

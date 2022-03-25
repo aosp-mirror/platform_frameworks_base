@@ -112,7 +112,7 @@ public class CallerInfoAsyncQuery {
         if (DBG) Log.d(LOG_TAG, "Trying to get current content resolver...");
 
         final int currentUser = ActivityManager.getCurrentUser();
-        final int myUser = UserManager.get(context).getUserHandle();
+        final int myUser = UserManager.get(context).getProcessUserId();
 
         if (DBG) Log.d(LOG_TAG, "myUser=" + myUser + "currentUser=" + currentUser);
 

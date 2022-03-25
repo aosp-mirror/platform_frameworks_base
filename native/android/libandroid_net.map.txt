@@ -18,6 +18,10 @@ LIBANDROID_NET {
     android_getprocnetwork; # llndk
     android_setprocdns; # llndk
     android_getprocdns; # llndk
+    # These functions have been part of the NDK since API 33.
+    android_tag_socket_with_uid; # llndk
+    android_tag_socket;  # llndk
+    android_untag_socket; # llndk
   local:
     *;
 };
