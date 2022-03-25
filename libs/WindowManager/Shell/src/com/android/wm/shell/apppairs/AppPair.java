@@ -19,7 +19,6 @@ package com.android.wm.shell.apppairs;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
-import static android.view.WindowManagerPolicyConstants.SPLIT_DIVIDER_LAYER;
 
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
@@ -83,7 +82,7 @@ class AppPair implements ShellTaskOrganizer.TaskListener, SplitLayout.SplitLayou
         public void onLeashReady(SurfaceControl leash) {
             mSyncQueue.runInSync(t -> t
                     .show(leash)
-                    .setLayer(leash, SPLIT_DIVIDER_LAYER)
+                    .setLayer(leash, Integer.MAX_VALUE)
                     .setPosition(leash,
                             mSplitLayout.getDividerBounds().left,
                             mSplitLayout.getDividerBounds().top));
