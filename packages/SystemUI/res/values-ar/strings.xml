@@ -151,10 +151,6 @@
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"عند إدخال نقش غير صحيح في المحاولة التالية، سيتم حذف ملفك الشخصي للعمل وبياناته."</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"عند إدخال رقم تعريف شخصي غير صحيح في المحاولة التالية، سيتم حذف ملفك الشخصي للعمل وبياناته."</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"عند إدخال كلمة مرور غير صحيحة في المحاولة التالية، سيتم حذف ملفك الشخصي للعمل وبياناته."</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"لقد استنفدت عدد المحاولات غير الصحيحة وسيتم حذف بيانات هذا الجهاز."</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"لقد استنفدت عدد المحاولات غير الصحيحة وسيتم حذف هذا المستخدم."</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"لقد استنفدت عدد المحاولات غير الصحيحة وسيتم حذف الملف الشخصي للعمل وبياناته."</string>
-    <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"إغلاق"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"المس مستشعر بصمة الإصبع"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"رمز بصمة الإصبع"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"يتعذّر التعرّف على الوجه. استخدِم بصمة الإصبع بدلاً من ذلك."</string>
@@ -331,17 +327,12 @@
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • جارٍ الشحن ببطء • ستمتلئ البطارية خلال <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • جارٍ الشحن على وحدة الإرساء • ستمتلئ البطارية خلال <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"تبديل المستخدم"</string>
-    <string name="user_add_user" msgid="4336657383006913022">"إضافة مستخدم"</string>
-    <string name="user_new_user_name" msgid="2019166282704195789">"مستخدم جديد"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"هل تريد إزالة جلسة الضيف؟"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"سيتم حذف كل التطبيقات والبيانات في هذه الجلسة."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"إزالة"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"مرحبًا بك مجددًا في جلسة الضيف"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"هل تريد متابعة جلستك؟"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"البدء من جديد"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"نعم، متابعة"</string>
-    <string name="user_add_user_title" msgid="4172327541504825032">"هل تريد إضافة مستخدم جديد؟"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"عند إضافة مستخدم جديد، عليه إعداد مساحته.\n\nويُمكن لأي مستخدم تحديث التطبيقات لجميع المستخدمين الآخرين."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"تم الوصول إلى أقصى عدد للمستخدمين"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="zero">يمكنك إضافة ما يصل إلى <xliff:g id="COUNT">%d</xliff:g> مستخدم.</item>
@@ -809,9 +800,10 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"مرّر سريعًا لرؤية المزيد."</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"جارٍ تحميل الاقتراحات"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"الوسائط"</string>
-    <string name="controls_media_close_session" msgid="1193000643003066508">"هل تريد إخفاء جلسة الوسائط هذه؟"</string>
+    <!-- no translation found for controls_media_close_session (4780485355795635052) -->
+    <skip />
     <string name="controls_media_active_session" msgid="3146882316024153337">"لا يمكن إخفاء جلسة الوسائط الحالية."</string>
-    <string name="controls_media_dismiss_button" msgid="9081375542265132213">"إغلاق"</string>
+    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"إخفاء"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"استئناف التشغيل"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"الإعدادات"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"يتم تشغيل <xliff:g id="SONG_NAME">%1$s</xliff:g> للفنان <xliff:g id="ARTIST_NAME">%2$s</xliff:g> من تطبيق <xliff:g id="APP_LABEL">%3$s</xliff:g>."</string>
@@ -829,7 +821,8 @@
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"يُرجى الاقتراب من <xliff:g id="DEVICENAME">%1$s</xliff:g> لتشغيل الوسائط هنا."</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"جارٍ تشغيل الوسائط على <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_transfer_playing_this_device" msgid="1856890686844499172">"جارٍ تشغيل الوسائط على هذا الهاتف"</string>
-    <string name="media_transfer_failed" msgid="2640354446629980227">"حدث خطأ."</string>
+    <!-- no translation found for media_transfer_failed (7955354964610603723) -->
+    <skip />
     <string name="controls_error_timeout" msgid="794197289772728958">"غير نشط، تحقّق من التطبيق."</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"لم يتم العثور عليه."</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"عنصر التحكّم غير متوفّر"</string>
@@ -925,7 +918,7 @@
       <item quantity="one">تطبيق واحد (<xliff:g id="COUNT_0">%s</xliff:g>) نشط</item>
     </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"معلومات جديدة"</string>
-    <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"# تطبيق نشط"</string>
+    <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"التطبيقات النشطة"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"إيقاف"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"متوقّف"</string>
     <string name="clipboard_edit_text_copy" msgid="770856373439969178">"نسخ"</string>

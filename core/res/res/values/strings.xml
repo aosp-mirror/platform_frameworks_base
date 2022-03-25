@@ -4091,21 +4091,6 @@
     <!-- Description of an application permission that lets it query all other packages. [CHAR LIMIT=NONE] -->
     <string name="permdesc_queryAllPackages">Allows an app to see all installed packages.</string>
 
-    <!-- Title of an application permission that lets it access AdServices Topics API. [CHAR LIMIT=NONE] -->
-    <string name="permlab_accessAdServicesTopics">access AdServices Topics API</string>
-    <!-- Description of an application permission that lets it access AdServices Topics API. [CHAR LIMIT=NONE]-->
-    <string name="permdesc_accessAdServicesTopics">Allows an application to access AdServices Topics API.</string>
-
-    <!-- Title of an application permission that lets it access AdServices Attribution APIs. [CHAR LIMIT=NONE] -->
-    <string name="permlab_accessAdServicesAttribution">access AdServices Attribution APIs</string>
-    <!-- Description of an application permission that lets it access AdServices Attribution APIs. [CHAR LIMIT=NONE]-->
-    <string name="permdesc_accessAdServicesAttribution">Allows an application to access AdServices Attribution APIs.</string>
-
-    <!-- Title of an application permission that lets it access AdServices Custom Audiences API. [CHAR LIMIT=NONE] -->
-    <string name="permlab_accessAdServicesCustomAudiences">access AdServices Custom Audiences API</string>
-    <!-- Description of an application permission that lets it access AdServices Custom Audiences API. [CHAR LIMIT=NONE]-->
-    <string name="permdesc_accessAdServicesCustomAudiences">Allows an application to access AdServices Custom Audiences  API.</string>
-
     <!-- Shown in the tutorial for tap twice for zoom control. -->
     <string name="tutorial_double_tap_to_zoom_message_short">Tap twice for zoom control</string>
 
@@ -5479,6 +5464,8 @@
 
     <!-- Title of the dialog shown when an app is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
     <string name="app_streaming_blocked_title"><xliff:g id="activity" example="Permission dialog">%1$s</xliff:g> unavailable</string>
+    <!-- Title of the dialog shown when the permissioncontroller is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
+    <string name="app_streaming_blocked_title_for_permission_dialog">Permission needed</string>
     <!-- Message shown when an app is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
     <string name="app_streaming_blocked_message" product="tv">This can’t be accessed on your <xliff:g id="device" example="Chromebook">%1$s</xliff:g> at this time. Try on your Android TV device instead.</string>
     <!-- Message shown when an app is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->

@@ -53,7 +53,6 @@ class SeekBarObserverTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
-
         context.orCreateTestableResources
             .addOverride(R.dimen.qs_media_enabled_seekbar_height, enabledHeight)
         context.orCreateTestableResources
@@ -72,7 +71,7 @@ class SeekBarObserverTest : SysuiTestCase() {
     fun seekBarGone() {
         // WHEN seek bar is disabled
         val isEnabled = false
-        val data = SeekBarViewModel.Progress(isEnabled, false, false, null, 0)
+        val data = SeekBarViewModel.Progress(isEnabled, false, false, false, null, 0)
         observer.onChanged(data)
         // THEN seek bar shows just a thin line with no text
         assertThat(seekBarView.isEnabled()).isFalse()
@@ -85,7 +84,7 @@ class SeekBarObserverTest : SysuiTestCase() {
     fun seekBarVisible() {
         // WHEN seek bar is enabled
         val isEnabled = true
-        val data = SeekBarViewModel.Progress(isEnabled, true, false, 3000, 12000)
+        val data = SeekBarViewModel.Progress(isEnabled, true, false, false, 3000, 12000)
         observer.onChanged(data)
         // THEN seek bar is visible and thick
         assertThat(seekBarView.getVisibility()).isEqualTo(View.VISIBLE)
@@ -95,7 +94,7 @@ class SeekBarObserverTest : SysuiTestCase() {
     @Test
     fun seekBarProgress() {
         // WHEN part of the track has been played
-        val data = SeekBarViewModel.Progress(true, true, true, 3000, 120000)
+        val data = SeekBarViewModel.Progress(true, true, true, false, 3000, 120000)
         observer.onChanged(data)
         // THEN seek bar shows the progress
         assertThat(seekBarView.progress).isEqualTo(3000)
@@ -109,7 +108,7 @@ class SeekBarObserverTest : SysuiTestCase() {
     fun seekBarDisabledWhenSeekNotAvailable() {
         // WHEN seek is not available
         val isSeekAvailable = false
-        val data = SeekBarViewModel.Progress(true, isSeekAvailable, false, 3000, 120000)
+        val data = SeekBarViewModel.Progress(true, isSeekAvailable, false, false, 3000, 120000)
         observer.onChanged(data)
         // THEN seek bar is not enabled
         assertThat(seekBarView.isEnabled()).isFalse()
@@ -119,27 +118,51 @@ class SeekBarObserverTest : SysuiTestCase() {
     fun seekBarEnabledWhenSeekNotAvailable() {
         // WHEN seek is available
         val isSeekAvailable = true
-        val data = SeekBarViewModel.Progress(true, isSeekAvailable, false, 3000, 120000)
+        val data = SeekBarViewModel.Progress(true, isSeekAvailable, false, false, 3000, 120000)
         observer.onChanged(data)
         // THEN seek bar is not enabled
         assertThat(seekBarView.isEnabled()).isTrue()
     }
 
     @Test
-    fun seekBarPlaying() {
+    fun seekBarPlayingNotScrubbing() {
         // WHEN playing
         val isPlaying = true
-        val data = SeekBarViewModel.Progress(true, true, isPlaying, 3000, 120000)
+        val isScrubbing = false
+        val data = SeekBarViewModel.Progress(true, true, isPlaying, isScrubbing, 3000, 120000)
         observer.onChanged(data)
         // THEN progress drawable is animating
         verify(mockSquigglyProgress).animate = true
     }
 
     @Test
-    fun seekBarNotPlaying() {
-        // WHEN not playing
+    fun seekBarNotPlayingNotScrubbing() {
+        // WHEN not playing & not scrubbing
         val isPlaying = false
-        val data = SeekBarViewModel.Progress(true, true, isPlaying, 3000, 120000)
+        val isScrubbing = false
+        val data = SeekBarViewModel.Progress(true, true, isPlaying, isScrubbing, 3000, 120000)
+        observer.onChanged(data)
+        // THEN progress drawable is not animating
+        verify(mockSquigglyProgress).animate = false
+    }
+
+    @Test
+    fun seekBarPlayingScrubbing() {
+        // WHEN playing & scrubbing
+        val isPlaying = true
+        val isScrubbing = true
+        val data = SeekBarViewModel.Progress(true, true, isPlaying, isScrubbing, 3000, 120000)
+        observer.onChanged(data)
+        // THEN progress drawable is not animating
+        verify(mockSquigglyProgress).animate = false
+    }
+
+    @Test
+    fun seekBarNotPlayingScrubbing() {
+        // WHEN playing & scrubbing
+        val isPlaying = false
+        val isScrubbing = true
+        val data = SeekBarViewModel.Progress(true, true, isPlaying, isScrubbing, 3000, 120000)
         observer.onChanged(data)
         // THEN progress drawable is not animating
         verify(mockSquigglyProgress).animate = false

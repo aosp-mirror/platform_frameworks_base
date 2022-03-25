@@ -52,6 +52,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
@@ -188,6 +189,7 @@ public class ImsService extends Service {
             new SparseArray<>();
 
     private IImsServiceControllerListener mListener;
+    private final Object mListenerLock = new Object();
     private Executor mExecutor;
 
     /**
@@ -225,7 +227,30 @@ public class ImsService extends Service {
     protected final IBinder mImsServiceController = new IImsServiceController.Stub() {
         @Override
         public void setListener(IImsServiceControllerListener l) {
-            mListener = l;
+            synchronized (mListenerLock) {
+                if (mListener != null && mListener.asBinder().isBinderAlive()) {
+                    try {
+                        mListener.asBinder().unlinkToDeath(mDeathRecipient, 0);
+                    } catch (NoSuchElementException e) {
+                        Log.w(LOG_TAG, "IImsServiceControllerListener does not exist");
+                    }
+                }
+
+                mListener = l;
+                if (mListener == null) {
+                    executeMethodAsync(() -> releaseResource(), "releaseResource");
+                    return;
+                }
+
+                try {
+                    mListener.asBinder().linkToDeath(mDeathRecipient, 0);
+                    Log.i(LOG_TAG, "setListener: register linkToDeath");
+                } catch (RemoteException e) {
+                    // RemoteException means target binder process was crashed
+                    // release resource
+                    executeMethodAsync(() -> releaseResource(), "releaseResource");
+                }
+            }
         }
 
         @Override
@@ -364,28 +389,15 @@ public class ImsService extends Service {
                     ImsService.this.disableImsForSubscription(slotId, subId), "disableIms");
         }
 
-        // Call the methods with a clean calling identity on the executor and wait indefinitely for
-        // the future to return.
-        private void executeMethodAsync(Runnable r, String errorLogName) {
-            try {
-                CompletableFuture.runAsync(
-                        () -> TelephonyUtils.runWithCleanCallingIdentity(r), mExecutor).join();
-            } catch (CancellationException | CompletionException e) {
-                Log.w(LOG_TAG, "ImsService Binder - " + errorLogName + " exception: "
-                        + e.getMessage());
-            }
-        }
 
-        private <T> T executeMethodAsyncForResult(Supplier<T> r, String errorLogName) {
-            CompletableFuture<T> future = CompletableFuture.supplyAsync(
-                    () -> TelephonyUtils.runWithCleanCallingIdentity(r), mExecutor);
-            try {
-                return future.get();
-            } catch (ExecutionException | InterruptedException e) {
-                Log.w(LOG_TAG, "ImsService Binder - " + errorLogName + " exception: "
-                        + e.getMessage());
-                return null;
-            }
+    };
+
+    private final IBinder.DeathRecipient mDeathRecipient = new IBinder.DeathRecipient() {
+        @Override
+        public void binderDied() {
+            Log.w(LOG_TAG,
+                    "IImsServiceControllerListener binder to framework has died. Cleaning up");
+            executeMethodAsync(() -> releaseResource(), "releaseResource");
         }
     };
 
@@ -490,6 +502,9 @@ public class ImsService extends Service {
     }
 
     private void removeImsFeature(int slotId, int featureType) {
+        // clear cached data
+        notifySubscriptionRemoved(slotId);
+
         synchronized (mFeaturesBySlot) {
             // get ImsFeature associated with the slot/feature
             SparseArray<ImsFeature> features = mFeaturesBySlot.get(slotId);
@@ -507,7 +522,6 @@ public class ImsService extends Service {
             f.onFeatureRemoved();
             features.remove(featureType);
         }
-
     }
 
     /**
@@ -552,6 +566,54 @@ public class ImsService extends Service {
         return createFlag;
     }
 
+    private void releaseResource() {
+        Log.w(LOG_TAG, "cleaning up features");
+        synchronized (mFeaturesBySlot) {
+            SparseArray<ImsFeature> features;
+            ImsFeature imsFeature;
+
+            for (int i = 0; i < mFeaturesBySlot.size(); i++) {
+                features = mFeaturesBySlot.valueAt(i);
+                if (features == null) {
+                    continue;
+                }
+
+                for (int index = 0; index < features.size(); index++) {
+                    imsFeature = features.valueAt(index);
+                    if (imsFeature != null) {
+                        imsFeature.onFeatureRemoved();
+                    }
+                }
+                features.clear();
+            }
+            mFeaturesBySlot.clear();
+        }
+    }
+
+    // Call the methods with a clean calling identity on the executor and wait indefinitely for
+    // the future to return.
+    private void executeMethodAsync(Runnable r, String errorLogName) {
+        try {
+            CompletableFuture.runAsync(
+                    () -> TelephonyUtils.runWithCleanCallingIdentity(r), mExecutor).join();
+        } catch (CancellationException | CompletionException e) {
+            Log.w(LOG_TAG, "ImsService Binder - " + errorLogName + " exception: "
+                    + e.getMessage());
+        }
+    }
+
+    private <T> T executeMethodAsyncForResult(Supplier<T> r, String errorLogName) {
+        CompletableFuture<T> future = CompletableFuture.supplyAsync(
+                () -> TelephonyUtils.runWithCleanCallingIdentity(r), mExecutor);
+        try {
+            return future.get();
+        } catch (ExecutionException | InterruptedException e) {
+            Log.w(LOG_TAG, "ImsService Binder - " + errorLogName + " exception: "
+                    + e.getMessage());
+            return null;
+        }
+    }
+
     /**
      * When called, provide the {@link ImsFeatureConfiguration} that this {@link ImsService}
      * currently supports. This will trigger the framework to set up the {@link ImsFeature}s that
@@ -574,10 +636,14 @@ public class ImsService extends Service {
      */
     public final void onUpdateSupportedImsFeatures(ImsFeatureConfiguration c)
             throws RemoteException {
-        if (mListener == null) {
-            throw new IllegalStateException("Framework is not ready");
+        IImsServiceControllerListener l;
+        synchronized (mListenerLock) {
+            if (mListener == null) {
+                throw new IllegalStateException("Framework is not ready");
+            }
+            l = mListener;
         }
-        mListener.onUpdateSupportedImsFeatures(c);
+        l.onUpdateSupportedImsFeatures(c);
     }
 
     /**
@@ -626,6 +692,24 @@ public class ImsService extends Service {
      */
     public void disableImsForSubscription(int slotId, int subscriptionId) {
         disableIms(slotId);
+    }
+
+    /**
+     * The subscription has removed. The ImsService should notify ImsRegistrationImplBase and
+     * ImsConfigImplBase the SIM state was changed.
+     * @param slotId The slot ID which has removed.
+     */
+    private void notifySubscriptionRemoved(int slotId) {
+        ImsRegistrationImplBase registrationImplBase =
+                getRegistration(slotId);
+        if (registrationImplBase != null) {
+            registrationImplBase.clearRegistrationCache();
+        }
+
+        ImsConfigImplBase imsConfigImplBase = getConfig(slotId);
+        if (imsConfigImplBase != null) {
+            imsConfigImplBase.clearConfigurationCache();
+        }
     }
 
     /**

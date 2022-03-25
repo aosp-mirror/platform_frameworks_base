@@ -69,7 +69,6 @@ RenderPipelineType Properties::sRenderPipelineType = RenderPipelineType::NotInit
 bool Properties::enableHighContrastText = false;
 
 bool Properties::waitForGpuCompletion = false;
-bool Properties::forceDrawFrame = false;
 
 bool Properties::filterOutTestOverhead = false;
 bool Properties::disableVsync = false;

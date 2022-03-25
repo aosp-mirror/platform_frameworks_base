@@ -36,12 +36,14 @@ import com.android.keyguard.LockIconViewController;
 import com.android.systemui.R;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.dock.DockManager;
+import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.lowlightclock.LowLightClockController;
 import com.android.systemui.statusbar.DragDownHelper;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
+import com.android.systemui.statusbar.notification.stack.AmbientState;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent;
@@ -71,6 +73,8 @@ public class NotificationShadeWindowViewController {
     private final LockIconViewController mLockIconViewController;
     private final StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     private final StatusBarWindowStateController mStatusBarWindowStateController;
+    private final KeyguardUnlockAnimationController mKeyguardUnlockAnimationController;
+    private final AmbientState mAmbientState;
 
     private GestureDetector mGestureDetector;
     private View mBrightnessMirror;
@@ -109,7 +113,9 @@ public class NotificationShadeWindowViewController {
             LockIconViewController lockIconViewController,
             Optional<LowLightClockController> lowLightClockController,
             CentralSurfaces centralSurfaces,
-            NotificationShadeWindowController controller) {
+            NotificationShadeWindowController controller,
+            KeyguardUnlockAnimationController keyguardUnlockAnimationController,
+            AmbientState ambientState) {
         mLockscreenShadeTransitionController = transitionController;
         mFalsingCollector = falsingCollector;
         mTunerService = tunerService;
@@ -126,6 +132,8 @@ public class NotificationShadeWindowViewController {
         mLowLightClockController = lowLightClockController;
         mService = centralSurfaces;
         mNotificationShadeWindowController = controller;
+        mKeyguardUnlockAnimationController = keyguardUnlockAnimationController;
+        mAmbientState = ambientState;
 
         // This view is not part of the newly inflated expanded status bar.
         mBrightnessMirror = mView.findViewById(R.id.brightness_mirror_container);
@@ -203,7 +211,6 @@ public class NotificationShadeWindowViewController {
                 // Reset manual touch dispatch state here but make sure the UP/CANCEL event still
                 // gets
                 // delivered.
-
                 if (!isCancel && mService.shouldIgnoreTouch()) {
                     return false;
                 }
@@ -217,6 +224,16 @@ public class NotificationShadeWindowViewController {
                 }
                 if (mTouchCancelled || mExpandAnimationRunning) {
                     return false;
+                }
+
+                if (mKeyguardUnlockAnimationController.isPlayingCannedUnlockAnimation()) {
+                    // If the user was sliding their finger across the lock screen,
+                    // we may have been intercepting the touch and forwarding it to the
+                    // UDFPS affordance via mStatusBarKeyguardViewManager.onTouch (see below).
+                    // If this touch ended up unlocking the device, we want to cancel the touch
+                    // immediately, so we don't cause swipe or expand animations afterwards.
+                    cancelCurrentTouch();
+                    return true;
                 }
 
                 mFalsingCollector.onTouchEvent(ev);
@@ -430,6 +447,7 @@ public class NotificationShadeWindowViewController {
             event.recycle();
             mTouchCancelled = true;
         }
+        mAmbientState.setSwipingUp(false);
     }
 
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {

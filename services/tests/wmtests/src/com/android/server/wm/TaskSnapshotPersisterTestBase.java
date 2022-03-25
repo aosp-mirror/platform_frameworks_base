@@ -131,8 +131,7 @@ class TaskSnapshotPersisterTestBase extends WindowTestsBase {
     }
 
     TaskSnapshot createSnapshot() {
-        return new TaskSnapshotBuilder()
-                .build();
+        return new TaskSnapshotBuilder().setTopActivityComponent(getUniqueComponentName()).build();
     }
 
     protected static void assertTrueForFiles(File[] files, Predicate<File> predicate,

@@ -681,6 +681,7 @@ final class HotwordDetectionConnection {
     private void restartProcessLocked() {
         Slog.v(TAG, "Restarting hotword detection process");
         ServiceConnection oldConnection = mRemoteHotwordDetectionService;
+        HotwordDetectionServiceIdentity previousIdentity = mIdentity;
 
         // TODO(volnov): this can be done after connect() has been successful.
         if (mValidatingDspTrigger) {
@@ -724,6 +725,9 @@ final class HotwordDetectionConnection {
         }
         oldConnection.ignoreConnectionStatusEvents();
         oldConnection.unbind();
+        if (previousIdentity != null) {
+            removeServiceUidForAudioPolicy(previousIdentity.getIsolatedUid());
+        }
     }
 
     static final class SoundTriggerCallback extends IRecognitionStatusCallback.Stub {

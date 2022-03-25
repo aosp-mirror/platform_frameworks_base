@@ -3913,6 +3913,7 @@ public abstract class Context {
             MEDIA_METRICS_SERVICE,
             //@hide: ATTESTATION_VERIFICATION_SERVICE,
             //@hide: SAFETY_CENTER_SERVICE,
+            DISPLAY_HASH_SERVICE,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ServiceName {}
@@ -3999,6 +4000,8 @@ public abstract class Context {
      * <dt> {@link #DOMAIN_VERIFICATION_SERVICE} ("domain_verification")
      * <dd> A {@link android.content.pm.verify.domain.DomainVerificationManager} for accessing
      * web domain approval state.
+     * <dt> {@link #DISPLAY_HASH_SERVICE} ("display_hash")
+     * <dd> A {@link android.view.displayhash.DisplayHashManager} for management of display hashes.
      * </dl>
      *
      * <p>Note:  System services obtained via this API may be closely associated with
@@ -4082,6 +4085,8 @@ public abstract class Context {
      * @see #HARDWARE_PROPERTIES_SERVICE
      * @see #DOMAIN_VERIFICATION_SERVICE
      * @see android.content.pm.verify.domain.DomainVerificationManager
+     * @see #DISPLAY_HASH_SERVICE
+     * @see android.view.displayhash.DisplayHashManager
      */
     public abstract @Nullable Object getSystemService(@ServiceName @NonNull String name);
 
@@ -4102,7 +4107,8 @@ public abstract class Context {
      * {@link android.app.UiModeManager}, {@link android.app.DownloadManager},
      * {@link android.os.BatteryManager}, {@link android.app.job.JobScheduler},
      * {@link android.app.usage.NetworkStatsManager},
-     * {@link android.content.pm.verify.domain.DomainVerificationManager}.
+     * {@link android.content.pm.verify.domain.DomainVerificationManager},
+     * {@link android.view.displayhash.DisplayHashManager}.
      * </p>
      *
      * <p>

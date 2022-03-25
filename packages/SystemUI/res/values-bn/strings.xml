@@ -151,10 +151,6 @@
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"আপনি পরের বারও ভুল প্যাটার্ন দিলে আপনার অফিস প্রোফাইল এবং তার ডেটা মুছে দেওয়া হবে।"</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"আপনি পরের বারও ভুল পিন দিলে আপনার অফিস প্রোফাইল এবং তার ডেটা মুছে দেওয়া হবে।"</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"আপনি পরের বারও ভুল পাসওয়ার্ড দিলে আপনার অফিস প্রোফাইল এবং তার ডেটা মুছে দেওয়া হবে।"</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"বহুবার ভুল লেখা হয়েছে। এই ডিভাইসের ডেটা মুছে যাবে।"</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"বহুবার ভুল লেখা হয়েছে। এই ব্যবহারকারীর ডেটা মুছে যাবে।"</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"বহুবার ভুল লেখা হয়েছে। এই অফিসের প্রোফাইল ও সংশ্লিষ্ট ডেটা মুছে যাবে।"</string>
-    <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"বাতিল করুন"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"আঙ্গুলের ছাপের সেন্সর স্পর্শ করুন"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"আঙ্গুলের ছাপের আইকন"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"মুখ শনাক্ত করতে পারছি না। পরিবর্তে আঙ্গুলের ছাপ ব্যবহার করুন।"</string>
@@ -323,17 +319,12 @@
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • ধীরে চার্জ হচ্ছে • পুরো চার্জ হতে <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> লাগবে"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • চার্জিং ডক • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>-এর মধ্যে সম্পূর্ণ হয়ে যাবে"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"ব্যবহারকারী পাল্টে দিন"</string>
-    <string name="user_add_user" msgid="4336657383006913022">"ব্যবহারকারী জুড়ুন"</string>
-    <string name="user_new_user_name" msgid="2019166282704195789">"নতুন ব্যবহারকারী"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"অতিথি সরাবেন?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"এই সেশনের সব অ্যাপ ও ডেটা মুছে ফেলা হবে।"</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"সরান"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"অতিথি, আপনি ফিরে আসায় আপনাকে স্বাগত!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"আপনি কি আপনার সেশনটি চালিয়ে যেতে চান?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"আবার শুরু করুন"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"হ্যাঁ, চালিয়ে যান"</string>
-    <string name="user_add_user_title" msgid="4172327541504825032">"নতুন ব্যবহারকারীকে যোগ করবেন?"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"আপনি একজন নতুন ব্যবহারকারী যোগ করলে তাকে তার জায়গা সেট-আপ করে নিতে হবে৷\n\nযেকোনও ব্যবহারকারী অন্য সব ব্যবহারকারীর জন্য অ্যাপ আপডেট করতে পারবেন৷"</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"আর কোনও প্রোফাইল যোগ করা যাবে না"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="one">আপনি <xliff:g id="COUNT">%d</xliff:g> জন পর্যন্ত ব্যবহারকারীর প্রোফাইল যোগ করতে পারেন।</item>
@@ -459,8 +450,7 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"ব্যবহার করতে আনলক করুন"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"আপনার কার্ড সংক্রান্ত তথ্য পেতে সমস্যা হয়েছে, পরে আবার চেষ্টা করুন"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"লক স্ক্রিন সেটিংস"</string>
-    <!-- no translation found for qr_code_scanner_title (5290201053875420785) -->
-    <skip />
+    <string name="qr_code_scanner_title" msgid="5290201053875420785">"QR কোড স্ক্যান করুন"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"কাজের প্রোফাইল"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"বিমান মোড"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"আপনি আপনার পরবর্তী <xliff:g id="WHEN">%1$s</xliff:g> অ্যালার্ম শুনতে পাবেন না"</string>
@@ -785,9 +775,10 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"আরও দেখতে সোয়াইপ করুন"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"সাজেশন লোড করা হচ্ছে"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"মিডিয়া"</string>
-    <string name="controls_media_close_session" msgid="1193000643003066508">"এই মিডিয়া সেশন লুকিয়ে রাখতে চান?"</string>
+    <!-- no translation found for controls_media_close_session (4780485355795635052) -->
+    <skip />
     <string name="controls_media_active_session" msgid="3146882316024153337">"বর্তমান মিডিয়া সেশন লুকিয়ে রাখা যাবে না।"</string>
-    <string name="controls_media_dismiss_button" msgid="9081375542265132213">"খারিজ করুন"</string>
+    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"লুকান"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"আবার চালু করুন"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"সেটিংস"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"<xliff:g id="ARTIST_NAME">%2$s</xliff:g>-এর <xliff:g id="SONG_NAME">%1$s</xliff:g> গানটি <xliff:g id="APP_LABEL">%3$s</xliff:g> অ্যাপে চলছে"</string>
@@ -805,7 +796,7 @@
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"এখান থেকে চালাতে <xliff:g id="DEVICENAME">%1$s</xliff:g>-এর কাছে নিয়ে যান"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"<xliff:g id="DEVICENAME">%1$s</xliff:g>-এ ভিডিও চালানো হচ্ছে"</string>
     <string name="media_transfer_playing_this_device" msgid="1856890686844499172">"এই ফোনে চালানো হচ্ছে"</string>
-    <string name="media_transfer_failed" msgid="2640354446629980227">"কোনও সমস্যা হয়েছে"</string>
+    <string name="media_transfer_failed" msgid="7955354964610603723">"কোনও সমস্যা হয়েছে। আবার চেষ্টা করুন।"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"বন্ধ আছে, অ্যাপ চেক করুন"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"খুঁজে পাওয়া যায়নি"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"কন্ট্রোল উপলভ্য নেই"</string>

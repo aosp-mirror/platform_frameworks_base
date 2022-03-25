@@ -86,6 +86,7 @@ public:
     void setOpaque(bool opaque);
     void setColorMode(ColorMode mode);
     int64_t* frameInfo();
+    void forceDrawNextFrame();
     int syncAndDrawFrame();
     void destroy();
 
@@ -146,6 +147,8 @@ public:
     static void disableVsync();
 
     static void preload();
+
+    static void setRtAnimationsEnabled(bool enabled);
 
 private:
     RenderThread& mRenderThread;

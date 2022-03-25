@@ -267,7 +267,8 @@ static void android_view_ThreadedRenderer_setIsHighEndGfx(JNIEnv* env, jobject c
 }
 
 static int android_view_ThreadedRenderer_syncAndDrawFrame(JNIEnv* env, jobject clazz,
-        jlong proxyPtr, jlongArray frameInfo, jint frameInfoSize) {
+                                                          jlong proxyPtr, jlongArray frameInfo,
+                                                          jint frameInfoSize) {
     LOG_ALWAYS_FATAL_IF(frameInfoSize != UI_THREAD_FRAME_INFO_SIZE,
                         "Mismatched size expectations, given %d expected %zu", frameInfoSize,
                         UI_THREAD_FRAME_INFO_SIZE);
@@ -419,6 +420,12 @@ static void android_view_ThreadedRenderer_setContentDrawBounds(JNIEnv* env,
         jobject clazz, jlong proxyPtr, jint left, jint top, jint right, jint bottom) {
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
     proxy->setContentDrawBounds(left, top, right, bottom);
+}
+
+static void android_view_ThreadedRenderer_forceDrawNextFrame(JNIEnv* env, jobject clazz,
+                                                             jlong proxyPtr) {
+    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
+    proxy->forceDrawNextFrame();
 }
 
 class JGlobalRefHolder {
@@ -778,11 +785,6 @@ static void android_view_ThreadedRenderer_setHighContrastText(JNIEnv*, jclass, j
     Properties::enableHighContrastText = enable;
 }
 
-static void android_view_ThreadedRenderer_hackySetRTAnimationsEnabled(JNIEnv*, jclass,
-        jboolean enable) {
-    Properties::enableRTAnimations = enable;
-}
-
 static void android_view_ThreadedRenderer_setDebuggingEnabled(JNIEnv*, jclass, jboolean enable) {
     Properties::debuggingEnabled = enable;
 }
@@ -810,6 +812,11 @@ static void android_view_ThreadedRenderer_setForceDark(JNIEnv* env, jobject claz
 
 static void android_view_ThreadedRenderer_preload(JNIEnv*, jclass) {
     RenderProxy::preload();
+}
+
+static void android_view_ThreadedRenderer_setRtAnimationsEnabled(JNIEnv* env, jobject clazz,
+                                                                 jboolean enabled) {
+    RenderProxy::setRtAnimationsEnabled(enabled);
 }
 
 // Plumbs the display density down to DeviceInfo.
@@ -943,6 +950,7 @@ static const JNINativeMethod gMethods[] = {
         {"nDrawRenderNode", "(JJ)V", (void*)android_view_ThreadedRendererd_drawRenderNode},
         {"nSetContentDrawBounds", "(JIIII)V",
          (void*)android_view_ThreadedRenderer_setContentDrawBounds},
+        {"nForceDrawNextFrame", "(J)V", (void*)android_view_ThreadedRenderer_forceDrawNextFrame},
         {"nSetPictureCaptureCallback",
          "(JLandroid/graphics/HardwareRenderer$PictureCapturedCallback;)V",
          (void*)android_view_ThreadedRenderer_setPictureCapturedCallbackJNI},
@@ -967,8 +975,6 @@ static const JNINativeMethod gMethods[] = {
          (void*)android_view_ThreadedRenderer_createHardwareBitmapFromRenderNode},
         {"disableVsync", "()V", (void*)android_view_ThreadedRenderer_disableVsync},
         {"nSetHighContrastText", "(Z)V", (void*)android_view_ThreadedRenderer_setHighContrastText},
-        {"nHackySetRTAnimationsEnabled", "(Z)V",
-         (void*)android_view_ThreadedRenderer_hackySetRTAnimationsEnabled},
         {"nSetDebuggingEnabled", "(Z)V", (void*)android_view_ThreadedRenderer_setDebuggingEnabled},
         {"nSetIsolatedProcess", "(Z)V", (void*)android_view_ThreadedRenderer_setIsolatedProcess},
         {"nSetContextPriority", "(I)V", (void*)android_view_ThreadedRenderer_setContextPriority},
@@ -982,6 +988,8 @@ static const JNINativeMethod gMethods[] = {
          (void*)android_view_ThreadedRenderer_isWebViewOverlaysEnabled},
         {"nSetDrawingEnabled", "(Z)V", (void*)android_view_ThreadedRenderer_setDrawingEnabled},
         {"nIsDrawingEnabled", "()Z", (void*)android_view_ThreadedRenderer_isDrawingEnabled},
+        {"nSetRtAnimationsEnabled", "(Z)V",
+         (void*)android_view_ThreadedRenderer_setRtAnimationsEnabled},
 };
 
 static JavaVM* mJvm = nullptr;

@@ -16832,32 +16832,6 @@ public class TelephonyManager {
     }
 
     /**
-     * Callback to listen for when the set of packages with carrier privileges for a SIM changes.
-     *
-     * @hide
-     * @deprecated Use {@link CarrierPrivilegesCallback} instead. This API will be removed soon
-     * prior to API finalization.
-     */
-    @Deprecated
-    @SystemApi
-    public interface CarrierPrivilegesListener {
-        /**
-         * Called when the set of packages with carrier privileges has changed.
-         *
-         * <p>Of note, this callback will <b>not</b> be fired if a carrier triggers a SIM profile
-         * switch and the same set of packages remains privileged after the switch.
-         *
-         * <p>At registration, the callback will receive the current set of privileged packages.
-         *
-         * @param privilegedPackageNames The updated set of package names that have carrier
-         *     privileges
-         * @param privilegedUids The updated set of UIDs that have carrier privileges
-         */
-        void onCarrierPrivilegesChanged(
-                @NonNull List<String> privilegedPackageNames, @NonNull int[] privilegedUids);
-    }
-
-    /**
      * Callbacks to listen for when the set of packages with carrier privileges for a SIM changes.
      *
      * <p>Of note, when multiple callbacks are registered, they may be triggered one after another.
@@ -16903,61 +16877,6 @@ public class TelephonyManager {
                 @Nullable String carrierServicePackageName, int carrierServiceUid) {
             // do nothing by default
         }
-    }
-
-    /**
-     * Registers a {@link CarrierPrivilegesListener} on the given {@code logicalSlotIndex} to
-     * receive callbacks when the set of packages with carrier privileges changes. The callback will
-     * immediately be called with the latest state.
-     *
-     * @param logicalSlotIndex The SIM slot to listen on
-     * @param executor The executor where {@code listener} will be invoked
-     * @param listener The callback to register
-     * @hide
-     * @deprecated Use {@link #registerCarrierPrivilegesCallback} instead. This API will be
-     * removed prior to API finalization.
-     */
-    @Deprecated
-    @SystemApi
-    @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
-    public void addCarrierPrivilegesListener(
-            int logicalSlotIndex,
-            @NonNull @CallbackExecutor Executor executor,
-            @NonNull CarrierPrivilegesListener listener) {
-        if (mContext == null) {
-            throw new IllegalStateException("Telephony service is null");
-        } else if (executor == null || listener == null) {
-            throw new IllegalArgumentException(
-                    "CarrierPrivilegesListener and executor must be non-null");
-        }
-        mTelephonyRegistryMgr = mContext.getSystemService(TelephonyRegistryManager.class);
-        if (mTelephonyRegistryMgr == null) {
-            throw new IllegalStateException("Telephony registry service is null");
-        }
-        mTelephonyRegistryMgr.addCarrierPrivilegesListener(logicalSlotIndex, executor, listener);
-    }
-
-    /**
-     * Unregisters an existing {@link CarrierPrivilegesListener}.
-     *
-     * @hide
-     * @deprecated Use {@link #unregisterCarrierPrivilegesCallback} instead. This API will be
-     * removed prior to API finalization.
-     */
-    @Deprecated
-    @SystemApi
-    @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
-    public void removeCarrierPrivilegesListener(@NonNull CarrierPrivilegesListener listener) {
-        if (mContext == null) {
-            throw new IllegalStateException("Telephony service is null");
-        } else if (listener == null) {
-            throw new IllegalArgumentException("CarrierPrivilegesListener must be non-null");
-        }
-        mTelephonyRegistryMgr = mContext.getSystemService(TelephonyRegistryManager.class);
-        if (mTelephonyRegistryMgr == null) {
-            throw new IllegalStateException("Telephony registry service is null");
-        }
-        mTelephonyRegistryMgr.removeCarrierPrivilegesListener(listener);
     }
 
     /**

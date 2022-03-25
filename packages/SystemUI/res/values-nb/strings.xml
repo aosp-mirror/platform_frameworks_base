@@ -151,10 +151,6 @@
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"Hvis du oppgir feil mønster på neste forsøk, slettes jobbprofilen din og tilknyttede data."</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"Hvis du skriver inn feil PIN-kode på neste forsøk, slettes jobbprofilen din og tilknyttede data."</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"Hvis du skriver inn feil passord på neste forsøk, slettes jobbprofilen din og tilknyttede data."</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"For mange mislykkede forsøk. Dataene på denne enheten blir slettet."</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"For mange mislykkede forsøk. Denne brukeren blir slettet."</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"For mange mislykkede forsøk. Denne jobbprofilen og tilknyttede data blir slettet."</string>
-    <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"Avvis"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Trykk på fingeravtrykkssensoren"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"Ikon for fingeravtrykk"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Ansiktet gjenkjennes ikke. Bruk fingeravtrykk."</string>
@@ -323,17 +319,12 @@
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Lader sakte • Fulladet om <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Ladedokk • Fulladet om <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Bytt bruker"</string>
-    <string name="user_add_user" msgid="4336657383006913022">"Legg til brukere"</string>
-    <string name="user_new_user_name" msgid="2019166282704195789">"Ny bruker"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Vil du fjerne gjesten?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Alle appene og all informasjon i denne økten slettes."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Fjern"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Velkommen tilbake, gjest!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Vil du fortsette økten?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Start på nytt"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Ja, fortsett"</string>
-    <string name="user_add_user_title" msgid="4172327541504825032">"Vil du legge til en ny bruker?"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"Når du legger til en ny bruker, må vedkommende konfigurere sitt eget område.\n\nAlle brukere kan oppdatere apper for alle andre brukere."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Grensen for antall brukere er nådd"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="other">Du kan legge til opptil <xliff:g id="COUNT">%d</xliff:g> brukere.</item>
@@ -459,8 +450,7 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Lås opp for å bruke"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Det oppsto et problem med henting av kortene. Prøv igjen senere"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Innstillinger for låseskjermen"</string>
-    <!-- no translation found for qr_code_scanner_title (5290201053875420785) -->
-    <skip />
+    <string name="qr_code_scanner_title" msgid="5290201053875420785">"Skann QR-koden"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Work-profil"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Flymodus"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"Du hører ikke neste innstilte alarm <xliff:g id="WHEN">%1$s</xliff:g>"</string>
@@ -785,9 +775,10 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Sveip for å se flere"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Laster inn anbefalinger"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Medier"</string>
-    <string name="controls_media_close_session" msgid="1193000643003066508">"Vil du skjule denne medieøkten?"</string>
+    <!-- no translation found for controls_media_close_session (4780485355795635052) -->
+    <skip />
     <string name="controls_media_active_session" msgid="3146882316024153337">"Den nåværende medieøkten kan ikke skjules."</string>
-    <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Lukk"</string>
+    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Skjul"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Gjenoppta"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Innstillinger"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"<xliff:g id="SONG_NAME">%1$s</xliff:g> av <xliff:g id="ARTIST_NAME">%2$s</xliff:g> spilles av fra <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
@@ -805,7 +796,8 @@
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Flytt deg nærmere <xliff:g id="DEVICENAME">%1$s</xliff:g> for å spille av her"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Spilles av på <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_transfer_playing_this_device" msgid="1856890686844499172">"Spilles av på denne telefonen"</string>
-    <string name="media_transfer_failed" msgid="2640354446629980227">"Noe gikk galt"</string>
+    <!-- no translation found for media_transfer_failed (7955354964610603723) -->
+    <skip />
     <string name="controls_error_timeout" msgid="794197289772728958">"Inaktiv. Sjekk appen"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Ikke funnet"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Kontrollen er utilgjengelig"</string>
