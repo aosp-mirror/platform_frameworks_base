@@ -155,14 +155,16 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
     }
 
     @Test
-    public void attach_scrimHidesWallpaper() {
+    public void attach_scrimDoesntHideWallpaper() {
         when(mKeyguardViewMediator.isShowingAndNotOccluded()).thenReturn(true);
         mNotificationShadeWindowController.attach();
 
         clearInvocations(mWindowManager);
         mNotificationShadeWindowController.setScrimsVisibility(ScrimController.OPAQUE);
-        verify(mWindowManager).updateViewLayout(any(), mLayoutParameters.capture());
-        assertThat((mLayoutParameters.getValue().flags & FLAG_SHOW_WALLPAPER) == 0).isTrue();
+        // The scrim used to remove the wallpaper flag, but this causes a relayout.
+        // Instead, we're not relying on SurfaceControl#setOpaque on
+        // NotificationShadeDepthController.
+        verify(mWindowManager, never()).updateViewLayout(any(), mLayoutParameters.capture());
     }
 
     @Test
