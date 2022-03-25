@@ -21,14 +21,11 @@ import static com.android.server.wm.ActivityInterceptorCallback.INTENT_RESOLVER_
 import android.Manifest;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
-import android.app.ActivityTaskManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
-import android.os.RemoteException;
 import android.provider.DeviceConfig;
-import android.util.Slog;
 
 import com.android.internal.R;
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
@@ -39,10 +36,8 @@ import com.android.server.wm.ActivityTaskManagerInternal;
 
 /**
  * Service to register an {@code ActivityInterceptorCallback} that modifies any {@code Intent}
- * that's being used to launch a user-space {@code ChooserActivity}, by adding
- * EXTRA_PERMISSION_TOKEN, a Binder representing a single-use-only permission to invoke the
- * #startActivityAsCaller() API (which normally isn't available in user-space); and setting the
- * destination component to the delegated component when appropriate.
+ * that's being used to launch a user-space {@code ChooserActivity} by setting the destination
+ * component to the delegated component when appropriate.
  */
 public final class IntentResolverInterceptor {
     private static final String TAG = "IntentResolverIntercept";
@@ -92,7 +87,6 @@ public final class IntentResolverInterceptor {
 
     private Intent modifyChooserIntent(Intent intent) {
         intent.setComponent(getUnbundledChooserComponentName());
-        addStartActivityPermissionTokenToIntent(intent, getUnbundledChooserComponentName());
         return intent;
     }
 
@@ -101,18 +95,6 @@ public final class IntentResolverInterceptor {
 
         return targetComponent.equals(getSystemChooserComponentName())
                 || targetComponent.equals(getUnbundledChooserComponentName());
-    }
-
-    private static Intent addStartActivityPermissionTokenToIntent(
-            Intent intent, ComponentName grantee) {
-        try {
-            intent.putExtra(
-                    ActivityTaskManager.EXTRA_PERMISSION_TOKEN,
-                    ActivityTaskManager.getService().requestStartActivityPermissionToken(grantee));
-        } catch (RemoteException e) {
-            Slog.w(TAG, "Failed to add permission token to chooser intent");
-        }
-        return intent;
     }
 
     private static ComponentName getSystemChooserComponentName() {
