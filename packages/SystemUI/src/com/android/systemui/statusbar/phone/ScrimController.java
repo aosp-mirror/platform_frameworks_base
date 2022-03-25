@@ -767,6 +767,10 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
 
             mBehindAlpha = behindFraction * mDefaultScrimAlpha;
             mNotificationsAlpha = mBehindAlpha;
+            if (mClipsQsScrim) {
+                mBehindAlpha = 1;
+                mBehindTint = Color.BLACK;
+            }
         } else if (mState == ScrimState.KEYGUARD || mState == ScrimState.SHADE_LOCKED
                 || mState == ScrimState.PULSING) {
             Pair<Integer, Float> result = calculateBackStateForState(mState);
