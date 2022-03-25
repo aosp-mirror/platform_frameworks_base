@@ -114,7 +114,8 @@ public final class DynamicCodeLoggerIntegrationTests {
         // Obtained via "echo -n copied.jar | sha256sum"
         String expectedNameHash =
                 "1B6C71DB26F36582867432CCA12FB6A517470C9F9AABE9198DD4C5C030D6DC0C";
-        String expectedContentHash = copyAndHashResource("/javalib.jar", privateCopyFile);
+        String expectedContentHash = copyAndHashResource(
+                "/DynamicCodeLoggerTestLibrary.jar", privateCopyFile);
 
         // Feed the jar to a class loader and make sure it contains what we expect.
         ClassLoader parentClassLoader = sContext.getClass().getClassLoader();
@@ -135,7 +136,8 @@ public final class DynamicCodeLoggerIntegrationTests {
         File privateCopyFile = privateFile("copied2.jar");
         String expectedNameHash =
                 "202158B6A3169D78F1722487205A6B036B3F2F5653FDCFB4E74710611AC7EB93";
-        String expectedContentHash = copyAndHashResource("/javalib.jar", privateCopyFile);
+        String expectedContentHash = copyAndHashResource(
+                "/DynamicCodeLoggerTestLibrary.jar", privateCopyFile);
 
         // This time make sure an unknown class loader is an ancestor of the class loader we use.
         ClassLoader knownClassLoader = sContext.getClass().getClassLoader();

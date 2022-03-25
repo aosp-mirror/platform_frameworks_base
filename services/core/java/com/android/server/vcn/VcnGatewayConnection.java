@@ -77,6 +77,8 @@ import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.os.Process;
 import android.os.SystemClock;
+import android.provider.Settings;
+import android.telephony.TelephonyManager;
 import android.util.ArraySet;
 import android.util.Slog;
 
@@ -87,9 +89,10 @@ import com.android.internal.util.State;
 import com.android.internal.util.StateMachine;
 import com.android.internal.util.WakeupMessage;
 import com.android.server.vcn.TelephonySubscriptionTracker.TelephonySubscriptionSnapshot;
-import com.android.server.vcn.UnderlyingNetworkTracker.UnderlyingNetworkRecord;
-import com.android.server.vcn.UnderlyingNetworkTracker.UnderlyingNetworkTrackerCallback;
 import com.android.server.vcn.Vcn.VcnGatewayStatusCallback;
+import com.android.server.vcn.routeselection.UnderlyingNetworkController;
+import com.android.server.vcn.routeselection.UnderlyingNetworkController.UnderlyingNetworkControllerCallback;
+import com.android.server.vcn.routeselection.UnderlyingNetworkRecord;
 import com.android.server.vcn.util.LogUtils;
 import com.android.server.vcn.util.MtuUtils;
 import com.android.server.vcn.util.OneWayBoolean;
@@ -98,6 +101,7 @@ import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
+import java.net.NetworkInterface;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -160,6 +164,14 @@ import java.util.function.Consumer;
 public class VcnGatewayConnection extends StateMachine {
     private static final String TAG = VcnGatewayConnection.class.getSimpleName();
 
+    // Matches DataConnection.NETWORK_TYPE private constant, and magic string from
+    // ConnectivityManager#getNetworkTypeName()
+    @VisibleForTesting(visibility = Visibility.PRIVATE)
+    static final String NETWORK_INFO_NETWORK_TYPE_STRING = "MOBILE";
+
+    @VisibleForTesting(visibility = Visibility.PRIVATE)
+    static final String NETWORK_INFO_EXTRA_INFO = "VCN";
+
     @VisibleForTesting(visibility = Visibility.PRIVATE)
     static final InetAddress DUMMY_ADDR = InetAddresses.parseNumericAddress("192.0.2.0");
 
@@ -200,7 +212,7 @@ public class VcnGatewayConnection extends StateMachine {
     private interface EventInfo {}
 
     /**
-     * Sent when there are changes to the underlying network (per the UnderlyingNetworkTracker).
+     * Sent when there are changes to the underlying network (per the UnderlyingNetworkController).
      *
      * <p>May indicate an entirely new underlying network, OR a change in network properties.
      *
@@ -521,11 +533,14 @@ public class VcnGatewayConnection extends StateMachine {
 
     @NonNull private final VcnContext mVcnContext;
     @NonNull private final ParcelUuid mSubscriptionGroup;
-    @NonNull private final UnderlyingNetworkTracker mUnderlyingNetworkTracker;
+    @NonNull private final UnderlyingNetworkController mUnderlyingNetworkController;
     @NonNull private final VcnGatewayConnectionConfig mConnectionConfig;
     @NonNull private final VcnGatewayStatusCallback mGatewayStatusCallback;
     @NonNull private final Dependencies mDeps;
-    @NonNull private final VcnUnderlyingNetworkTrackerCallback mUnderlyingNetworkTrackerCallback;
+
+    @NonNull
+    private final VcnUnderlyingNetworkControllerCallback mUnderlyingNetworkControllerCallback;
+
     private final boolean mIsMobileDataEnabled;
 
     @NonNull private final IpSecManager mIpSecManager;
@@ -673,17 +688,18 @@ public class VcnGatewayConnection extends StateMachine {
 
         mLastSnapshot = Objects.requireNonNull(snapshot, "Missing snapshot");
 
-        mUnderlyingNetworkTrackerCallback = new VcnUnderlyingNetworkTrackerCallback();
+        mUnderlyingNetworkControllerCallback = new VcnUnderlyingNetworkControllerCallback();
 
         mWakeLock =
                 mDeps.newWakeLock(mVcnContext.getContext(), PowerManager.PARTIAL_WAKE_LOCK, TAG);
 
-        mUnderlyingNetworkTracker =
-                mDeps.newUnderlyingNetworkTracker(
+        mUnderlyingNetworkController =
+                mDeps.newUnderlyingNetworkController(
                         mVcnContext,
+                        mConnectionConfig,
                         subscriptionGroup,
                         mLastSnapshot,
-                        mUnderlyingNetworkTrackerCallback);
+                        mUnderlyingNetworkControllerCallback);
         mIpSecManager = mVcnContext.getContext().getSystemService(IpSecManager.class);
 
         addState(mDisconnectedState);
@@ -747,7 +763,7 @@ public class VcnGatewayConnection extends StateMachine {
         cancelRetryTimeoutAlarm();
         cancelSafeModeAlarm();
 
-        mUnderlyingNetworkTracker.teardown();
+        mUnderlyingNetworkController.teardown();
 
         mGatewayStatusCallback.onQuit();
     }
@@ -763,12 +779,13 @@ public class VcnGatewayConnection extends StateMachine {
         mVcnContext.ensureRunningOnLooperThread();
 
         mLastSnapshot = snapshot;
-        mUnderlyingNetworkTracker.updateSubscriptionSnapshot(mLastSnapshot);
+        mUnderlyingNetworkController.updateSubscriptionSnapshot(mLastSnapshot);
 
         sendMessageAndAcquireWakeLock(EVENT_SUBSCRIPTIONS_CHANGED, TOKEN_ALL);
     }
 
-    private class VcnUnderlyingNetworkTrackerCallback implements UnderlyingNetworkTrackerCallback {
+    private class VcnUnderlyingNetworkControllerCallback
+            implements UnderlyingNetworkControllerCallback {
         @Override
         public void onSelectedUnderlyingNetworkChanged(
                 @Nullable UnderlyingNetworkRecord underlying) {
@@ -782,8 +799,19 @@ public class VcnGatewayConnection extends StateMachine {
             // TODO(b/179091925): Move the delayed-message handling to BaseState
 
             // If underlying is null, all underlying networks have been lost. Disconnect VCN after a
-            // timeout.
+            // timeout (or immediately if in airplane mode, since the device user has indicated that
+            // the radios should all be turned off).
             if (underlying == null) {
+                if (mDeps.isAirplaneModeOn(mVcnContext)) {
+                    sendMessageAndAcquireWakeLock(
+                            EVENT_UNDERLYING_NETWORK_CHANGED,
+                            TOKEN_ALL,
+                            new EventUnderlyingNetworkChangedInfo(null));
+                    sendDisconnectRequestedAndAcquireWakelock(
+                            DISCONNECT_REASON_UNDERLYING_NETWORK_LOST, false /* shouldQuit */);
+                    return;
+                }
+
                 setDisconnectRequestAlarm();
             } else {
                 // Received a new Network so any previous alarm is irrelevant - cancel + clear it,
@@ -1612,6 +1640,12 @@ public class VcnGatewayConnection extends StateMachine {
             final NetworkAgentConfig nac =
                     new NetworkAgentConfig.Builder()
                             .setLegacyType(ConnectivityManager.TYPE_MOBILE)
+                            .setLegacyTypeName(NETWORK_INFO_NETWORK_TYPE_STRING)
+                            .setLegacySubType(TelephonyManager.NETWORK_TYPE_UNKNOWN)
+                            .setLegacySubTypeName(
+                                    TelephonyManager.getNetworkTypeName(
+                                            TelephonyManager.NETWORK_TYPE_UNKNOWN))
+                            .setLegacyExtraInfo(NETWORK_INFO_EXTRA_INFO)
                             .build();
 
             final VcnNetworkAgent agent =
@@ -1663,8 +1697,6 @@ public class VcnGatewayConnection extends StateMachine {
                             } /* validationStatusCallback */);
 
             agent.register();
-            agent.setUnderlyingNetworks(
-                    mUnderlying == null ? null : Collections.singletonList(mUnderlying.network));
             agent.markConnected();
 
             return agent;
@@ -1677,10 +1709,8 @@ public class VcnGatewayConnection extends StateMachine {
             mFailedAttempts = 0;
             cancelSafeModeAlarm();
 
-            if (mIsInSafeMode) {
-                mIsInSafeMode = false;
-                mGatewayStatusCallback.onSafeModeStatusChanged();
-            }
+            mIsInSafeMode = false;
+            mGatewayStatusCallback.onSafeModeStatusChanged();
         }
 
         protected void applyTransform(
@@ -2041,6 +2071,7 @@ public class VcnGatewayConnection extends StateMachine {
                         "Unknown transport type or missing TransportInfo/NetworkSpecifier for"
                                 + " non-null underlying network");
             }
+            builder.setUnderlyingNetworks(List.of(underlying.network));
         } else {
             Slog.wtf(
                     TAG,
@@ -2051,7 +2082,8 @@ public class VcnGatewayConnection extends StateMachine {
         return builder.build();
     }
 
-    private static LinkProperties buildConnectedLinkProperties(
+    @VisibleForTesting(visibility = Visibility.PRIVATE)
+    LinkProperties buildConnectedLinkProperties(
             @NonNull VcnGatewayConnectionConfig gatewayConnectionConfig,
             @NonNull IpSecTunnelInterface tunnelIface,
             @NonNull VcnChildSessionConfiguration childConfig,
@@ -2079,6 +2111,13 @@ public class VcnGatewayConnection extends StateMachine {
 
             lp.setTcpBufferSizes(underlyingLp.getTcpBufferSizes());
             underlyingMtu = underlyingLp.getMtu();
+
+            // WiFi LinkProperties uses DHCP as the sole source of MTU information, and as a result
+            // often lists MTU as 0 (see b/184678973). Use the interface MTU as retrieved by
+            // NetworkInterface APIs.
+            if (underlyingMtu == 0 && underlyingLp.getInterfaceName() != null) {
+                underlyingMtu = mDeps.getUnderlyingIfaceMtu(underlyingLp.getInterfaceName());
+            }
         } else {
             Slog.wtf(
                     TAG,
@@ -2258,7 +2297,7 @@ public class VcnGatewayConnection extends StateMachine {
                         + (mNetworkAgent == null ? null : mNetworkAgent.getNetwork()));
         pw.println();
 
-        mUnderlyingNetworkTracker.dump(pw);
+        mUnderlyingNetworkController.dump(pw);
         pw.println();
 
         pw.decreaseIndent();
@@ -2270,8 +2309,8 @@ public class VcnGatewayConnection extends StateMachine {
     }
 
     @VisibleForTesting(visibility = Visibility.PRIVATE)
-    UnderlyingNetworkTrackerCallback getUnderlyingNetworkTrackerCallback() {
-        return mUnderlyingNetworkTrackerCallback;
+    UnderlyingNetworkControllerCallback getUnderlyingNetworkControllerCallback() {
+        return mUnderlyingNetworkControllerCallback;
     }
 
     @VisibleForTesting(visibility = Visibility.PRIVATE)
@@ -2350,17 +2389,15 @@ public class VcnGatewayConnection extends StateMachine {
     /** External dependencies used by VcnGatewayConnection, for injection in tests */
     @VisibleForTesting(visibility = Visibility.PRIVATE)
     public static class Dependencies {
-        /** Builds a new UnderlyingNetworkTracker. */
-        public UnderlyingNetworkTracker newUnderlyingNetworkTracker(
+        /** Builds a new UnderlyingNetworkController. */
+        public UnderlyingNetworkController newUnderlyingNetworkController(
                 VcnContext vcnContext,
+                VcnGatewayConnectionConfig connectionConfig,
                 ParcelUuid subscriptionGroup,
                 TelephonySubscriptionSnapshot snapshot,
-                UnderlyingNetworkTrackerCallback callback) {
-            return new UnderlyingNetworkTracker(
-                    vcnContext,
-                    subscriptionGroup,
-                    snapshot,
-                    callback);
+                UnderlyingNetworkControllerCallback callback) {
+            return new UnderlyingNetworkController(
+                    vcnContext, connectionConfig, subscriptionGroup, snapshot, callback);
         }
 
         /** Builds a new IkeSession. */
@@ -2416,9 +2453,26 @@ public class VcnGatewayConnection extends StateMachine {
                     validationStatusCallback);
         }
 
+        /** Checks if airplane mode is enabled. */
+        public boolean isAirplaneModeOn(@NonNull VcnContext vcnContext) {
+            return Settings.Global.getInt(vcnContext.getContext().getContentResolver(),
+                    Settings.Global.AIRPLANE_MODE_ON, 0) != 0;
+        }
+
         /** Gets the elapsed real time since boot, in millis. */
         public long getElapsedRealTime() {
             return SystemClock.elapsedRealtime();
+        }
+
+        /** Gets the MTU for the given underlying interface. */
+        public int getUnderlyingIfaceMtu(String ifaceName) {
+            try {
+                final NetworkInterface underlyingIface = NetworkInterface.getByName(ifaceName);
+                return underlyingIface == null ? 0 : underlyingIface.getMTU();
+            } catch (IOException e) {
+                Slog.d(TAG, "Could not get MTU of underlying network", e);
+                return 0;
+            }
         }
     }
 

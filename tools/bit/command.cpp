@@ -192,10 +192,11 @@ exec_with_path_search(const char* prog, char const* const* argv, char const* con
     if (strchr(prog, '/') != NULL) {
         return execve(prog, (char*const*)argv, (char*const*)envp);
     } else {
-        char* pathEnv = strdup(getenv("PATH"));
-        if (pathEnv == NULL) {
+        const char* pathEnvRaw = getenv("PATH");
+        if (pathEnvRaw == NULL) {
             return 1;
         }
+        char* pathEnv = strdup(pathEnvRaw);
         char* dir = pathEnv;
         while (dir) {
             char* next = strchr(dir, ':');

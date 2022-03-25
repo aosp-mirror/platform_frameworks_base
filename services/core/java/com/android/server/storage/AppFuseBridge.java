@@ -24,7 +24,7 @@ import android.util.SparseArray;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.FuseUnavailableMountException;
 import com.android.internal.util.Preconditions;
-import com.android.server.NativeDaemonConnectorException;
+import com.android.server.AppFuseMountException;
 import libcore.io.IoUtils;
 import java.util.concurrent.CountDownLatch;
 
@@ -55,7 +55,7 @@ public class AppFuseBridge implements Runnable {
     }
 
     public ParcelFileDescriptor addBridge(MountScope mountScope)
-            throws FuseUnavailableMountException, NativeDaemonConnectorException {
+            throws FuseUnavailableMountException, AppFuseMountException {
         /*
         ** Dead Lock between Java lock (AppFuseBridge.java) and Native lock (FuseBridgeLoop.cc)
         **
@@ -112,7 +112,7 @@ public class AppFuseBridge implements Runnable {
         try {
             int flags = FileUtils.translateModePfdToPosix(mode);
             return scope.openFile(mountId, fileId, flags);
-        } catch (NativeDaemonConnectorException error) {
+        } catch (AppFuseMountException error) {
             throw new FuseUnavailableMountException(mountId);
         }
     }
@@ -160,9 +160,9 @@ public class AppFuseBridge implements Runnable {
             return mMountResult;
         }
 
-        public abstract ParcelFileDescriptor open() throws NativeDaemonConnectorException;
+        public abstract ParcelFileDescriptor open() throws AppFuseMountException;
         public abstract ParcelFileDescriptor openFile(int mountId, int fileId, int flags)
-                throws NativeDaemonConnectorException;
+                throws AppFuseMountException;
     }
 
     private native long native_new();

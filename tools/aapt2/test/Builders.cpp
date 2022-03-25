@@ -159,7 +159,8 @@ std::unique_ptr<ResourceTable> ResourceTableBuilder::Build() {
   return std::move(table_);
 }
 
-std::unique_ptr<Reference> BuildReference(const StringPiece& ref, const Maybe<ResourceId>& id) {
+std::unique_ptr<Reference> BuildReference(const StringPiece& ref,
+                                          const std::optional<ResourceId>& id) {
   std::unique_ptr<Reference> reference = util::make_unique<Reference>(ParseNameOrDie(ref));
   reference->id = id;
   return reference;
@@ -218,7 +219,8 @@ std::unique_ptr<Style> StyleBuilder::Build() {
   return std::move(style_);
 }
 
-StyleableBuilder& StyleableBuilder::AddItem(const StringPiece& str, const Maybe<ResourceId>& id) {
+StyleableBuilder& StyleableBuilder::AddItem(const StringPiece& str,
+                                            const std::optional<ResourceId>& id) {
   styleable_->entries.push_back(Reference(ParseNameOrDie(str)));
   styleable_->entries.back().id = id;
   return *this;

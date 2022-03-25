@@ -1,0 +1,15 @@
+{
+  "presubmit": [
+    {
+      "name": "CtsTileServiceTestCases",
+      "options": [
+        {
+          "exclude-annotation": "org.junit.Ignore"
+        },
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        }
+      ]
+    }
+  ]
+}

@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar;
 
 import static com.android.systemui.plugins.DarkIconDispatcher.getTint;
-import static com.android.systemui.plugins.DarkIconDispatcher.isInArea;
 import static com.android.systemui.statusbar.StatusBarIconView.STATE_DOT;
 import static com.android.systemui.statusbar.StatusBarIconView.STATE_HIDDEN;
 import static com.android.systemui.statusbar.StatusBarIconView.STATE_ICON;
@@ -36,6 +35,8 @@ import android.widget.LinearLayout;
 import com.android.systemui.R;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.WifiIconState;
+
+import java.util.ArrayList;
 
 /**
  * Start small: StatusBarWifiView will be able to layout from a WifiIconState
@@ -235,8 +236,8 @@ public class StatusBarWifiView extends FrameLayout implements DarkReceiver,
     }
 
     @Override
-    public void onDarkChanged(Rect area, float darkIntensity, int tint) {
-        int areaTint = getTint(area, this, tint);
+    public void onDarkChanged(ArrayList<Rect> areas, float darkIntensity, int tint) {
+        int areaTint = getTint(areas, this, tint);
         ColorStateList color = ColorStateList.valueOf(areaTint);
         mWifiIcon.setImageTintList(color);
         mIn.setImageTintList(color);

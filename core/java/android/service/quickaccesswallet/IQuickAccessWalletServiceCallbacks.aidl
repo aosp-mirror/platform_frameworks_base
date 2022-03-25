@@ -16,6 +16,7 @@
 
 package android.service.quickaccesswallet;
 
+import android.app.PendingIntent;
 import android.service.quickaccesswallet.GetWalletCardsError;
 import android.service.quickaccesswallet.GetWalletCardsResponse;
 import android.service.quickaccesswallet.WalletServiceEvent;
@@ -34,4 +35,6 @@ interface IQuickAccessWalletServiceCallbacks {
     // Called in response to registerWalletServiceEventListener. May be called multiple times as
     // long as the event listener is registered.
     oneway void onWalletServiceEvent(in WalletServiceEvent event);
+    // Called in response to onTargetActivityIntentRequested. May only be called once per request.
+    oneway void onTargetActivityPendingIntentReceived(in PendingIntent pendingIntent);
 }

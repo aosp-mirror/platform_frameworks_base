@@ -48,7 +48,9 @@ import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationLockscreenUserManagerImpl;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
+import com.android.systemui.statusbar.dagger.StartCentralSurfacesModule;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.notification.collection.provider.VisualStabilityProvider;
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
 import com.android.systemui.statusbar.phone.DozeServiceHost;
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
@@ -64,10 +66,12 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedControllerImpl;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
+import com.android.systemui.statusbar.policy.HeadsUpManagerLogger;
 import com.android.systemui.statusbar.policy.IndividualSensorPrivacyController;
 import com.android.systemui.statusbar.policy.IndividualSensorPrivacyControllerImpl;
 import com.android.systemui.statusbar.policy.SensorPrivacyController;
 import com.android.systemui.statusbar.policy.SensorPrivacyControllerImpl;
+import com.android.systemui.volume.dagger.VolumeModule;
 
 import javax.inject.Named;
 
@@ -82,7 +86,9 @@ import dagger.Provides;
 @Module(includes = {
         MediaModule.class,
         PowerModule.class,
-        QSModule.class
+        QSModule.class,
+        StartCentralSurfacesModule.class,
+        VolumeModule.class
 })
 public abstract class SystemUIDefaultModule {
 
@@ -167,12 +173,21 @@ public abstract class SystemUIDefaultModule {
     @Provides
     static HeadsUpManagerPhone provideHeadsUpManagerPhone(
             Context context,
+            HeadsUpManagerLogger headsUpManagerLogger,
             StatusBarStateController statusBarStateController,
             KeyguardBypassController bypassController,
             GroupMembershipManager groupManager,
+            VisualStabilityProvider visualStabilityProvider,
             ConfigurationController configurationController) {
-        return new HeadsUpManagerPhone(context, statusBarStateController, bypassController,
-                groupManager, configurationController);
+        return new HeadsUpManagerPhone(
+                context,
+                headsUpManagerLogger,
+                statusBarStateController,
+                bypassController,
+                groupManager,
+                visualStabilityProvider,
+                configurationController
+        );
     }
 
     @Binds
@@ -185,9 +200,13 @@ public abstract class SystemUIDefaultModule {
         return new Recents(context, recentsImplementation, commandQueue);
     }
 
-    @Binds
-    abstract DeviceProvisionedController bindDeviceProvisionedController(
-            DeviceProvisionedControllerImpl deviceProvisionedController);
+    @SysUISingleton
+    @Provides
+    static DeviceProvisionedController bindDeviceProvisionedController(
+            DeviceProvisionedControllerImpl deviceProvisionedController) {
+        deviceProvisionedController.init();
+        return deviceProvisionedController;
+    }
 
     @Binds
     abstract KeyguardViewController bindKeyguardViewController(

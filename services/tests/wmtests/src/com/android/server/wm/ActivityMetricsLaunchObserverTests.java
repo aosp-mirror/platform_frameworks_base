@@ -27,6 +27,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.verifyNoMor
 
 import static com.google.common.truth.Truth.assertWithMessage;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.argThat;
@@ -44,6 +45,7 @@ import android.os.IBinder;
 import android.os.SystemClock;
 import android.platform.test.annotations.Presubmit;
 import android.util.ArrayMap;
+import android.window.WindowContainerToken;
 
 import androidx.test.filters.SmallTest;
 
@@ -69,6 +71,7 @@ import java.util.function.ToIntFunction;
 @Presubmit
 @RunWith(WindowTestRunner.class)
 public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
+    private static final long TIMEOUT_MS = TimeUnit.SECONDS.toMillis(5);
     private ActivityMetricsLogger mActivityMetricsLogger;
     private ActivityMetricsLogger.LaunchingState mLaunchingState;
     private ActivityMetricsLaunchObserver mLaunchObserver;
@@ -136,7 +139,7 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
         // messages that are waiting for the lock.
         waitHandlerIdle(mAtm.mH);
         // AMLO callbacks happen on a separate thread than AML calls, so we need to use a timeout.
-        return verify(mock, timeout(TimeUnit.SECONDS.toMillis(5)));
+        return verify(mock, timeout(TIMEOUT_MS));
     }
 
     private void verifyOnActivityLaunchFinished(ActivityRecord activity) {
@@ -253,33 +256,67 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
         mActivityMetricsLogger.notifyVisibilityChanged(noDrawnActivity);
 
         verifyAsync(mLaunchObserver).onActivityLaunchCancelled(eqProto(noDrawnActivity));
+
+        // If an activity is removed immediately before visibility update, it should cancel too.
+        final ActivityRecord removedImm = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        clearInvocations(mLaunchObserver);
+        onActivityLaunched(removedImm);
+        removedImm.removeImmediately();
+        // Verify any() instead of proto because the field of record may be changed.
+        verifyAsync(mLaunchObserver).onActivityLaunchCancelled(any());
     }
 
     @Test
     public void testOnActivityLaunchWhileSleeping() {
-        notifyActivityLaunching(mTopActivity.intent);
-        notifyActivityLaunched(START_SUCCESS, mTopActivity);
-        doReturn(true).when(mTopActivity.mDisplayContent).isSleeping();
-        mTopActivity.setState(Task.ActivityState.RESUMED, "test");
-        mTopActivity.setVisibility(false);
+        notifyActivityLaunching(mTrampolineActivity.intent);
+        notifyActivityLaunched(START_SUCCESS, mTrampolineActivity);
+        doReturn(true).when(mTrampolineActivity.mDisplayContent).isSleeping();
+        mTrampolineActivity.setState(ActivityRecord.State.RESUMED, "test");
+        mTrampolineActivity.setVisibility(false);
         waitHandlerIdle(mAtm.mH);
         // Not cancel immediately because in one of real cases, the keyguard may be going away or
         // occluded later, then the activity can be drawn.
-        verify(mLaunchObserver, never()).onActivityLaunchCancelled(eqProto(mTopActivity));
+        verify(mLaunchObserver, never()).onActivityLaunchCancelled(eqProto(mTrampolineActivity));
+
+        clearInvocations(mLaunchObserver);
+        mLaunchTopByTrampoline = true;
+        mTopActivity.mVisibleRequested = false;
+        notifyActivityLaunching(mTopActivity.intent);
+        // It should schedule a message with UNKNOWN_VISIBILITY_CHECK_DELAY_MS to check whether
+        // the launch event is still valid.
+        notifyActivityLaunched(START_SUCCESS, mTopActivity);
+
+        // The posted message will acquire wm lock, so the test needs to release the lock to verify.
+        final Throwable error = awaitInWmLock(() -> {
+            try {
+                // Though the aborting target should be eqProto(mTopActivity), use any() to avoid
+                // any changes in proto that may cause failure by different arguments.
+                verify(mLaunchObserver, timeout(TIMEOUT_MS)).onActivityLaunchCancelled(any());
+            } catch (Throwable e) {
+                // Catch any errors including assertion because this runs in another thread.
+                return e;
+            }
+            return null;
+        });
+        // The launch event must be cancelled because the activity keeps invisible.
+        if (error != null) {
+            throw new AssertionError(error);
+        }
     }
 
     @Test
     public void testOnReportFullyDrawn() {
         // Create an invisible event that should be cancelled after the next event starts.
-        onActivityLaunched(mTrampolineActivity);
-        mTrampolineActivity.mVisibleRequested = false;
+        final ActivityRecord prev = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        onActivityLaunched(prev);
+        prev.mVisibleRequested = false;
 
         mActivityOptions = ActivityOptions.makeBasic();
         mActivityOptions.setSourceInfo(SourceInfo.TYPE_LAUNCHER, SystemClock.uptimeMillis() - 10);
         onIntentStarted(mTopActivity.intent);
         notifyActivityLaunched(START_SUCCESS, mTopActivity);
         verifyAsync(mLaunchObserver).onActivityLaunched(eqProto(mTopActivity), anyInt());
-        verifyAsync(mLaunchObserver).onActivityLaunchCancelled(eqProto(mTrampolineActivity));
+        verifyAsync(mLaunchObserver).onActivityLaunchCancelled(eqProto(prev));
 
         // The activity reports fully drawn before windows drawn, then the fully drawn event will
         // be pending (see {@link WindowingModeTransitionInfo#pendingFullyDrawn}).
@@ -376,6 +413,7 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
 
         // Another round without setting visibility of the trampoline activity.
         onActivityLaunchedTrampoline();
+        mTrampolineActivity.setState(ActivityRecord.State.PAUSING, "test");
         notifyWindowsDrawn(mTopActivity);
         // If the transition can start, the invisible activities should be discarded and the launch
         // event be reported successfully.
@@ -447,10 +485,21 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
     }
 
     @Test
+    public void testConsecutiveLaunch() {
+        onActivityLaunched(mTrampolineActivity);
+        mActivityMetricsLogger.notifyActivityLaunching(mTopActivity.intent,
+                mTrampolineActivity /* caller */, mTrampolineActivity.getUid());
+        notifyActivityLaunched(START_SUCCESS, mTopActivity);
+        transitToDrawnAndVerifyOnLaunchFinished(mTopActivity);
+    }
+
+    @Test
     public void testConsecutiveLaunchNewTask() {
         final IBinder launchCookie = mock(IBinder.class);
+        final WindowContainerToken launchRootTask = mock(WindowContainerToken.class);
         mTrampolineActivity.noDisplay = true;
         mTrampolineActivity.mLaunchCookie = launchCookie;
+        mTrampolineActivity.mLaunchRootTask = launchRootTask;
         onActivityLaunched(mTrampolineActivity);
         final ActivityRecord activityOnNewTask = new ActivityBuilder(mAtm)
                 .setCreateTask(true)
@@ -464,6 +513,10 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
                 mTrampolineActivity.mLaunchCookie).isNull();
         assertWithMessage("The last launch task has the transferred cookie").that(
                 activityOnNewTask.mLaunchCookie).isEqualTo(launchCookie);
+        assertWithMessage("Trampoline's launch root task must be transferred").that(
+                mTrampolineActivity.mLaunchRootTask).isNull();
+        assertWithMessage("The last launch task has the transferred launch root task").that(
+                activityOnNewTask.mLaunchRootTask).isEqualTo(launchRootTask);
     }
 
     @Test

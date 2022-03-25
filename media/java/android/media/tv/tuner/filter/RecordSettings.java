@@ -19,9 +19,12 @@ package android.media.tv.tuner.filter;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
-import android.hardware.tv.tuner.V1_0.Constants;
+import android.hardware.tv.tuner.DemuxRecordScIndexType;
+import android.hardware.tv.tuner.DemuxScAvcIndex;
+import android.hardware.tv.tuner.DemuxScHevcIndex;
+import android.hardware.tv.tuner.DemuxScIndex;
+import android.hardware.tv.tuner.DemuxTsIndex;
 import android.media.tv.tuner.TunerUtils;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
@@ -37,8 +40,7 @@ public class RecordSettings extends Settings {
      *
      * @hide
      */
-    @IntDef(flag = true,
-            value = {TS_INDEX_INVALID, TS_INDEX_FIRST_PACKET, TS_INDEX_PAYLOAD_UNIT_START_INDICATOR,
+    @IntDef(value = {TS_INDEX_INVALID, TS_INDEX_FIRST_PACKET, TS_INDEX_PAYLOAD_UNIT_START_INDICATOR,
                     TS_INDEX_CHANGE_TO_NOT_SCRAMBLED, TS_INDEX_CHANGE_TO_EVEN_SCRAMBLED,
                     TS_INDEX_CHANGE_TO_ODD_SCRAMBLED, TS_INDEX_DISCONTINUITY_INDICATOR,
                     TS_INDEX_RANDOM_ACCESS_INDICATOR, TS_INDEX_PRIORITY_INDICATOR,
@@ -57,108 +59,104 @@ public class RecordSettings extends Settings {
     /**
      * TS index FIRST_PACKET.
      */
-    public static final int TS_INDEX_FIRST_PACKET = Constants.DemuxTsIndex.FIRST_PACKET;
+    public static final int TS_INDEX_FIRST_PACKET = DemuxTsIndex.FIRST_PACKET;
     /**
      * TS index PAYLOAD_UNIT_START_INDICATOR.
      */
     public static final int TS_INDEX_PAYLOAD_UNIT_START_INDICATOR =
-            Constants.DemuxTsIndex.PAYLOAD_UNIT_START_INDICATOR;
+            DemuxTsIndex.PAYLOAD_UNIT_START_INDICATOR;
     /**
      * TS index CHANGE_TO_NOT_SCRAMBLED.
      */
-    public static final int TS_INDEX_CHANGE_TO_NOT_SCRAMBLED =
-            Constants.DemuxTsIndex.CHANGE_TO_NOT_SCRAMBLED;
+    public static final int TS_INDEX_CHANGE_TO_NOT_SCRAMBLED = DemuxTsIndex.CHANGE_TO_NOT_SCRAMBLED;
     /**
      * TS index CHANGE_TO_EVEN_SCRAMBLED.
      */
     public static final int TS_INDEX_CHANGE_TO_EVEN_SCRAMBLED =
-            Constants.DemuxTsIndex.CHANGE_TO_EVEN_SCRAMBLED;
+            DemuxTsIndex.CHANGE_TO_EVEN_SCRAMBLED;
     /**
      * TS index CHANGE_TO_ODD_SCRAMBLED.
      */
-    public static final int TS_INDEX_CHANGE_TO_ODD_SCRAMBLED =
-            Constants.DemuxTsIndex.CHANGE_TO_ODD_SCRAMBLED;
+    public static final int TS_INDEX_CHANGE_TO_ODD_SCRAMBLED = DemuxTsIndex.CHANGE_TO_ODD_SCRAMBLED;
     /**
      * TS index DISCONTINUITY_INDICATOR.
      */
-    public static final int TS_INDEX_DISCONTINUITY_INDICATOR =
-            Constants.DemuxTsIndex.DISCONTINUITY_INDICATOR;
+    public static final int TS_INDEX_DISCONTINUITY_INDICATOR = DemuxTsIndex.DISCONTINUITY_INDICATOR;
     /**
      * TS index RANDOM_ACCESS_INDICATOR.
      */
-    public static final int TS_INDEX_RANDOM_ACCESS_INDICATOR =
-            Constants.DemuxTsIndex.RANDOM_ACCESS_INDICATOR;
+    public static final int TS_INDEX_RANDOM_ACCESS_INDICATOR = DemuxTsIndex.RANDOM_ACCESS_INDICATOR;
     /**
      * TS index PRIORITY_INDICATOR.
      */
-    public static final int TS_INDEX_PRIORITY_INDICATOR = Constants.DemuxTsIndex.PRIORITY_INDICATOR;
+    public static final int TS_INDEX_PRIORITY_INDICATOR = DemuxTsIndex.PRIORITY_INDICATOR;
     /**
      * TS index PCR_FLAG.
      */
-    public static final int TS_INDEX_PCR_FLAG = Constants.DemuxTsIndex.PCR_FLAG;
+    public static final int TS_INDEX_PCR_FLAG = DemuxTsIndex.PCR_FLAG;
     /**
      * TS index OPCR_FLAG.
      */
-    public static final int TS_INDEX_OPCR_FLAG = Constants.DemuxTsIndex.OPCR_FLAG;
+    public static final int TS_INDEX_OPCR_FLAG = DemuxTsIndex.OPCR_FLAG;
     /**
      * TS index SPLICING_POINT_FLAG.
      */
-    public static final int TS_INDEX_SPLICING_POINT_FLAG =
-            Constants.DemuxTsIndex.SPLICING_POINT_FLAG;
+    public static final int TS_INDEX_SPLICING_POINT_FLAG = DemuxTsIndex.SPLICING_POINT_FLAG;
     /**
      * TS index PRIVATE_DATA.
      */
-    public static final int TS_INDEX_PRIVATE_DATA = Constants.DemuxTsIndex.PRIVATE_DATA;
+    public static final int TS_INDEX_PRIVATE_DATA = DemuxTsIndex.PRIVATE_DATA;
     /**
      * TS index ADAPTATION_EXTENSION_FLAG.
      */
     public static final int TS_INDEX_ADAPTATION_EXTENSION_FLAG =
-            Constants.DemuxTsIndex.ADAPTATION_EXTENSION_FLAG;
+            DemuxTsIndex.ADAPTATION_EXTENSION_FLAG;
     /**
      * Index the address of MPEG Media Transport Packet Table(MPT).
      */
-    public static final int MPT_INDEX_MPT =
-            android.hardware.tv.tuner.V1_1.Constants.DemuxTsIndex.MPT_INDEX_MPT;
+    public static final int MPT_INDEX_MPT = DemuxTsIndex.MPT_INDEX_MPT;
     /**
      * Index the address of Video.
      */
-    public static final int MPT_INDEX_VIDEO =
-            android.hardware.tv.tuner.V1_1.Constants.DemuxTsIndex.MPT_INDEX_VIDEO;
+    public static final int MPT_INDEX_VIDEO = DemuxTsIndex.MPT_INDEX_VIDEO;
     /**
      * Index the address of Audio.
      */
-    public static final int MPT_INDEX_AUDIO =
-            android.hardware.tv.tuner.V1_1.Constants.DemuxTsIndex.MPT_INDEX_AUDIO;
+    public static final int MPT_INDEX_AUDIO = DemuxTsIndex.MPT_INDEX_AUDIO;
     /**
      * Index to indicate this is a target of timestamp extraction for video.
      */
     public static final int MPT_INDEX_TIMESTAMP_TARGET_VIDEO =
-            android.hardware.tv.tuner.V1_1.Constants.DemuxTsIndex.MPT_INDEX_TIMESTAMP_TARGET_VIDEO;
+            DemuxTsIndex.MPT_INDEX_TIMESTAMP_TARGET_VIDEO;
     /**
      * Index to indicate this is a target of timestamp extraction for audio.
      */
     public static final int MPT_INDEX_TIMESTAMP_TARGET_AUDIO =
-            android.hardware.tv.tuner.V1_1.Constants.DemuxTsIndex.MPT_INDEX_TIMESTAMP_TARGET_AUDIO;
+            DemuxTsIndex.MPT_INDEX_TIMESTAMP_TARGET_AUDIO;
 
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = "INDEX_TYPE_", value =
-            {INDEX_TYPE_NONE, INDEX_TYPE_SC, INDEX_TYPE_SC_HEVC})
+            {INDEX_TYPE_NONE, INDEX_TYPE_SC, INDEX_TYPE_SC_HEVC, INDEX_TYPE_SC_AVC})
     public @interface ScIndexType {}
 
     /**
      * Start Code Index is not used.
      */
-    public static final int INDEX_TYPE_NONE = Constants.DemuxRecordScIndexType.NONE;
+    public static final int INDEX_TYPE_NONE = DemuxRecordScIndexType.NONE;
     /**
      * Start Code index.
      */
-    public static final int INDEX_TYPE_SC = Constants.DemuxRecordScIndexType.SC;
+    public static final int INDEX_TYPE_SC = DemuxRecordScIndexType.SC;
     /**
      * Start Code index for HEVC.
      */
-    public static final int INDEX_TYPE_SC_HEVC = Constants.DemuxRecordScIndexType.SC_HEVC;
+    public static final int INDEX_TYPE_SC_HEVC = DemuxRecordScIndexType.SC_HEVC;
+    /**
+     * Start Code index for AVC.
+     */
+    public static final int INDEX_TYPE_SC_AVC = DemuxRecordScIndexType.SC_AVC;
 
     /**
      * Indexes can be tagged by Start Code in PES (Packetized Elementary Stream)
@@ -166,7 +164,6 @@ public class RecordSettings extends Settings {
      * @hide
      */
     @IntDef(prefix = "SC_INDEX_",
-            flag = true,
             value = {SC_INDEX_I_FRAME, SC_INDEX_P_FRAME, SC_INDEX_B_FRAME,
                     SC_INDEX_SEQUENCE, SC_INDEX_I_SLICE, SC_INDEX_P_SLICE,
                     SC_INDEX_B_SLICE, SC_INDEX_SI_SLICE, SC_INDEX_SP_SLICE})
@@ -176,52 +173,46 @@ public class RecordSettings extends Settings {
     /**
      * SC index for a new I-frame.
      */
-    public static final int SC_INDEX_I_FRAME = Constants.DemuxScIndex.I_FRAME;
+    public static final int SC_INDEX_I_FRAME = DemuxScIndex.I_FRAME;
     /**
      * SC index for a new P-frame.
      */
-    public static final int SC_INDEX_P_FRAME = Constants.DemuxScIndex.P_FRAME;
+    public static final int SC_INDEX_P_FRAME = DemuxScIndex.P_FRAME;
     /**
      * SC index for a new B-frame.
      */
-    public static final int SC_INDEX_B_FRAME = Constants.DemuxScIndex.B_FRAME;
+    public static final int SC_INDEX_B_FRAME = DemuxScIndex.B_FRAME;
     /**
      * SC index for a new sequence.
      */
-    public static final int SC_INDEX_SEQUENCE = Constants.DemuxScIndex.SEQUENCE;
+    public static final int SC_INDEX_SEQUENCE = DemuxScIndex.SEQUENCE;
     /**
      * All blocks are coded as I blocks.
      */
-    public static final int SC_INDEX_I_SLICE =
-            android.hardware.tv.tuner.V1_1.Constants.DemuxScIndex.I_SLICE;
+    public static final int SC_INDEX_I_SLICE = DemuxScAvcIndex.I_SLICE << 4;
     /**
      * Blocks are coded as I or P blocks.
      */
-    public static final int SC_INDEX_P_SLICE =
-            android.hardware.tv.tuner.V1_1.Constants.DemuxScIndex.P_SLICE;
+    public static final int SC_INDEX_P_SLICE = DemuxScAvcIndex.P_SLICE << 4;
     /**
      * Blocks are coded as I, P or B blocks.
      */
-    public static final int SC_INDEX_B_SLICE =
-            android.hardware.tv.tuner.V1_1.Constants.DemuxScIndex.B_SLICE;
+    public static final int SC_INDEX_B_SLICE = DemuxScAvcIndex.B_SLICE << 4;
     /**
      * A so-called switching I slice that is coded.
      */
-    public static final int SC_INDEX_SI_SLICE =
-            android.hardware.tv.tuner.V1_1.Constants.DemuxScIndex.SI_SLICE;
+    public static final int SC_INDEX_SI_SLICE = DemuxScAvcIndex.SI_SLICE << 4;
     /**
      * A so-called switching P slice that is coded.
      */
-    public static final int SC_INDEX_SP_SLICE =
-            android.hardware.tv.tuner.V1_1.Constants.DemuxScIndex.SP_SLICE;
+    public static final int SC_INDEX_SP_SLICE = DemuxScAvcIndex.SP_SLICE << 4;
 
     /**
      * Indexes can be tagged by NAL unit group in HEVC according to ISO/IEC 23008-2.
      *
      * @hide
      */
-    @IntDef(flag = true,
-            value = {SC_HEVC_INDEX_SPS, SC_HEVC_INDEX_AUD, SC_HEVC_INDEX_SLICE_CE_BLA_W_LP,
+    @IntDef(value = {SC_HEVC_INDEX_SPS, SC_HEVC_INDEX_AUD, SC_HEVC_INDEX_SLICE_CE_BLA_W_LP,
             SC_HEVC_INDEX_SLICE_BLA_W_RADL, SC_HEVC_INDEX_SLICE_BLA_N_LP,
             SC_HEVC_INDEX_SLICE_IDR_W_RADL, SC_HEVC_INDEX_SLICE_IDR_N_LP,
             SC_HEVC_INDEX_SLICE_TRAIL_CRA})
@@ -231,47 +222,40 @@ public class RecordSettings extends Settings {
     /**
      * SC HEVC index SPS.
      */
-    public static final int SC_HEVC_INDEX_SPS = Constants.DemuxScHevcIndex.SPS;
+    public static final int SC_HEVC_INDEX_SPS = DemuxScHevcIndex.SPS;
     /**
      * SC HEVC index AUD.
      */
-    public static final int SC_HEVC_INDEX_AUD = Constants.DemuxScHevcIndex.AUD;
+    public static final int SC_HEVC_INDEX_AUD = DemuxScHevcIndex.AUD;
     /**
      * SC HEVC index SLICE_CE_BLA_W_LP.
      */
-    public static final int SC_HEVC_INDEX_SLICE_CE_BLA_W_LP =
-            Constants.DemuxScHevcIndex.SLICE_CE_BLA_W_LP;
+    public static final int SC_HEVC_INDEX_SLICE_CE_BLA_W_LP = DemuxScHevcIndex.SLICE_CE_BLA_W_LP;
     /**
      * SC HEVC index SLICE_BLA_W_RADL.
      */
-    public static final int SC_HEVC_INDEX_SLICE_BLA_W_RADL =
-            Constants.DemuxScHevcIndex.SLICE_BLA_W_RADL;
+    public static final int SC_HEVC_INDEX_SLICE_BLA_W_RADL = DemuxScHevcIndex.SLICE_BLA_W_RADL;
     /**
      * SC HEVC index SLICE_BLA_N_LP.
      */
-    public static final int SC_HEVC_INDEX_SLICE_BLA_N_LP =
-            Constants.DemuxScHevcIndex.SLICE_BLA_N_LP;
+    public static final int SC_HEVC_INDEX_SLICE_BLA_N_LP = DemuxScHevcIndex.SLICE_BLA_N_LP;
     /**
      * SC HEVC index SLICE_IDR_W_RADL.
      */
-    public static final int SC_HEVC_INDEX_SLICE_IDR_W_RADL =
-            Constants.DemuxScHevcIndex.SLICE_IDR_W_RADL;
+    public static final int SC_HEVC_INDEX_SLICE_IDR_W_RADL = DemuxScHevcIndex.SLICE_IDR_W_RADL;
     /**
      * SC HEVC index SLICE_IDR_N_LP.
      */
-    public static final int SC_HEVC_INDEX_SLICE_IDR_N_LP =
-            Constants.DemuxScHevcIndex.SLICE_IDR_N_LP;
+    public static final int SC_HEVC_INDEX_SLICE_IDR_N_LP = DemuxScHevcIndex.SLICE_IDR_N_LP;
     /**
      * SC HEVC index SLICE_TRAIL_CRA.
      */
-    public static final int SC_HEVC_INDEX_SLICE_TRAIL_CRA =
-            Constants.DemuxScHevcIndex.SLICE_TRAIL_CRA;
+    public static final int SC_HEVC_INDEX_SLICE_TRAIL_CRA = DemuxScHevcIndex.SLICE_TRAIL_CRA;
 
     /**
      * @hide
      */
-    @IntDef(flag = true,
-            prefix = "SC_",
+    @IntDef(prefix = "SC_",
             value = {
                 SC_INDEX_I_FRAME,
                 SC_INDEX_P_FRAME,

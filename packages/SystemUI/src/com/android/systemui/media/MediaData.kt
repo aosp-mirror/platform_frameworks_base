@@ -20,6 +20,7 @@ import android.app.PendingIntent
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.Icon
 import android.media.session.MediaSession
+import com.android.systemui.R
 
 /** State of a media view. */
 data class MediaData(
@@ -47,13 +48,18 @@ data class MediaData(
      */
     val artwork: Icon?,
     /**
-     * List of actions that can be performed on the player: prev, next, play, pause, etc.
+     * List of generic action buttons for the media player, based on notification actions
      */
     val actions: List<MediaAction>,
     /**
      * Same as above, but shown on smaller versions of the player, like in QQS or keyguard.
      */
     val actionsToShowInCompact: List<Int>,
+    /**
+     * Semantic actions buttons, based on the PlaybackState of the media session.
+     * If present, these actions will be preferred in the UI over [actions]
+     */
+    val semanticActions: MediaButton? = null,
     /**
      * Package name of the app that's posting the media.
      */
@@ -82,9 +88,9 @@ data class MediaData(
      */
     var resumeAction: Runnable?,
     /**
-     * Local or remote playback
+     * Playback location: one of PLAYBACK_LOCAL, PLAYBACK_CAST_LOCAL, or PLAYBACK_CAST_REMOTE
      */
-    var isLocalSession: Boolean = true,
+    var playbackLocation: Int = PLAYBACK_LOCAL,
     /**
      * Indicates that this player is a resumption player (ie. It only shows a play actions which
      * will start the app and start playing).
@@ -110,18 +116,78 @@ data class MediaData(
      * Timestamp when this player was last active.
      */
     var lastActive: Long = 0L
-)
+) {
+    companion object {
+        /** Media is playing on the local device */
+        const val PLAYBACK_LOCAL = 0
+        /** Media is cast but originated on the local device */
+        const val PLAYBACK_CAST_LOCAL = 1
+        /** Media is from a remote cast notification */
+        const val PLAYBACK_CAST_REMOTE = 2
+    }
+
+    fun isLocalSession(): Boolean {
+        return playbackLocation == PLAYBACK_LOCAL
+    }
+}
+
+/**
+ * Contains [MediaAction] objects which represent specific buttons in the UI
+ */
+data class MediaButton(
+    /**
+     * Play/pause button
+     */
+    var playOrPause: MediaAction? = null,
+    /**
+     * Next button, or custom action
+     */
+    var nextOrCustom: MediaAction? = null,
+    /**
+     * Previous button, or custom action
+     */
+    var prevOrCustom: MediaAction? = null,
+    /**
+     * First custom action space
+     */
+    var custom0: MediaAction? = null,
+    /**
+     * Second custom action space
+     */
+    var custom1: MediaAction? = null
+) {
+    fun getActionById(id: Int): MediaAction? {
+        return when (id) {
+            R.id.actionPlayPause -> playOrPause
+            R.id.actionNext -> nextOrCustom
+            R.id.actionPrev -> prevOrCustom
+            R.id.action0 -> custom0
+            R.id.action1 -> custom1
+            else -> null
+        }
+    }
+}
 
 /** State of a media action. */
 data class MediaAction(
-    val icon: Icon?,
+    val icon: Drawable?,
     val action: Runnable?,
-    val contentDescription: CharSequence?
+    val contentDescription: CharSequence?,
+    val background: Drawable?
 )
 
 /** State of the media device. */
-data class MediaDeviceData(
+data class MediaDeviceData
+@JvmOverloads constructor(
+    /** Whether or not to enable the chip */
     val enabled: Boolean,
+
+    /** Device icon to show in the chip */
     val icon: Drawable?,
-    val name: String?
+
+    /** Device display name */
+    val name: CharSequence?,
+
+    /** Optional intent to override the default output switcher for this control */
+    val intent: PendingIntent? = null
 )

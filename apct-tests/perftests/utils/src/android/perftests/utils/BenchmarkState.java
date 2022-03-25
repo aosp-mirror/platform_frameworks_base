@@ -266,9 +266,9 @@ public final class BenchmarkState {
     public void sendFullStatusReport(Instrumentation instrumentation, String key) {
         Log.i(TAG, key + summaryLine());
         Bundle status = new Bundle();
-        status.putLong(key + "_median", median());
-        status.putLong(key + "_mean", mean());
-        status.putLong(key + "_min", min());
+        status.putLong(key + "_median (ns)", median());
+        status.putLong(key + "_mean (ns)", mean());
+        status.putLong(key + "_min (ns)", min());
         status.putLong(key + "_standardDeviation", standardDeviation());
         instrumentation.sendStatus(Activity.RESULT_OK, status);
     }

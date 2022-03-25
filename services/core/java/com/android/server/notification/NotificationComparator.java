@@ -104,6 +104,12 @@ public class NotificationComparator
             return -1 * Boolean.compare(leftPeople, rightPeople);
         }
 
+        boolean leftSystemMax = isSystemMax(left);
+        boolean rightSystemMax = isSystemMax(right);
+        if (leftSystemMax != rightSystemMax) {
+            return -1 * Boolean.compare(leftSystemMax, rightSystemMax);
+        }
+
         if (leftImportance != rightImportance) {
             // by importance, high to low
             return -1 * Integer.compare(leftImportance, rightImportance);
@@ -173,13 +179,27 @@ public class NotificationComparator
         return mMessagingUtil.isImportantMessaging(record.getSbn(), record.getImportance());
     }
 
+    protected boolean isSystemMax(NotificationRecord record) {
+        if (record.getImportance() < NotificationManager.IMPORTANCE_HIGH) {
+            return false;
+        }
+        String packageName = record.getSbn().getPackageName();
+        if ("android".equals(packageName)) {
+            return true;
+        }
+        if ("com.android.systemui".equals(packageName)) {
+            return true;
+        }
+        return false;
+    }
+
     private boolean isOngoing(NotificationRecord record) {
         final int ongoingFlags = Notification.FLAG_FOREGROUND_SERVICE;
         return (record.getNotification().flags & ongoingFlags) != 0;
     }
 
     private boolean isMediaNotification(NotificationRecord record) {
-        return record.getNotification().hasMediaSession();
+        return record.getNotification().isMediaNotification();
     }
 
     private boolean isCallCategory(NotificationRecord record) {

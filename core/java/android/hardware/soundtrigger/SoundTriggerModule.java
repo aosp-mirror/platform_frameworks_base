@@ -22,13 +22,13 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.media.permission.ClearCallingIdentityContext;
 import android.media.permission.Identity;
 import android.media.permission.SafeCloseable;
+import android.media.soundtrigger.PhraseRecognitionEvent;
+import android.media.soundtrigger.PhraseSoundModel;
+import android.media.soundtrigger.RecognitionEvent;
+import android.media.soundtrigger.SoundModel;
 import android.media.soundtrigger_middleware.ISoundTriggerCallback;
 import android.media.soundtrigger_middleware.ISoundTriggerMiddlewareService;
 import android.media.soundtrigger_middleware.ISoundTriggerModule;
-import android.media.soundtrigger_middleware.PhraseRecognitionEvent;
-import android.media.soundtrigger_middleware.PhraseSoundModel;
-import android.media.soundtrigger_middleware.RecognitionEvent;
-import android.media.soundtrigger_middleware.SoundModel;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
@@ -36,6 +36,8 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.util.Log;
+
+import java.io.IOException;
 
 /**
  * The SoundTriggerModule provides APIs to control sound models and sound detection
@@ -48,7 +50,8 @@ public class SoundTriggerModule {
 
     private static final int EVENT_RECOGNITION = 1;
     private static final int EVENT_SERVICE_DIED = 2;
-    private static final int EVENT_SERVICE_STATE_CHANGE = 3;
+    private static final int EVENT_RESOURCES_AVAILABLE = 3;
+    private static final int EVENT_MODEL_UNLOADED = 4;
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private int mId;
     private EventHandlerDelegate mEventHandlerDelegate;
@@ -120,6 +123,7 @@ public class SoundTriggerModule {
      * @param soundModelHandle an array of int where the sound model handle will be returned.
      * @return - {@link SoundTrigger#STATUS_OK} in case of success
      *         - {@link SoundTrigger#STATUS_ERROR} in case of unspecified error
+     *         - {@link SoundTrigger#STATUS_BUSY} in case of transient resource constraints
      *         - {@link SoundTrigger#STATUS_PERMISSION_DENIED} if the caller does not have
      *         system permission
      *         - {@link SoundTrigger#STATUS_NO_INIT} if the native service cannot be reached
@@ -135,13 +139,39 @@ public class SoundTriggerModule {
             if (model instanceof SoundTrigger.GenericSoundModel) {
                 SoundModel aidlModel = ConversionUtil.api2aidlGenericSoundModel(
                         (SoundTrigger.GenericSoundModel) model);
-                soundModelHandle[0] = mService.loadModel(aidlModel);
+                try {
+                    soundModelHandle[0] = mService.loadModel(aidlModel);
+                } finally {
+                    // TODO(b/219825762): We should be able to use the entire object in a
+                    //  try-with-resources
+                    //   clause, instead of having to explicitly close internal fields.
+                    if (aidlModel.data != null) {
+                        try {
+                            aidlModel.data.close();
+                        } catch (IOException e) {
+                            Log.e(TAG, "Failed to close file", e);
+                        }
+                    }
+                }
                 return SoundTrigger.STATUS_OK;
             }
             if (model instanceof SoundTrigger.KeyphraseSoundModel) {
                 PhraseSoundModel aidlModel = ConversionUtil.api2aidlPhraseSoundModel(
                         (SoundTrigger.KeyphraseSoundModel) model);
-                soundModelHandle[0] = mService.loadPhraseModel(aidlModel);
+                try {
+                    soundModelHandle[0] = mService.loadPhraseModel(aidlModel);
+                } finally {
+                    // TODO(b/219825762): We should be able to use the entire object in a
+                    //  try-with-resources
+                    //   clause, instead of having to explicitly close internal fields.
+                    if (aidlModel.common.data != null) {
+                        try {
+                            aidlModel.common.data.close();
+                        } catch (IOException e) {
+                            Log.e(TAG, "Failed to close file", e);
+                        }
+                    }
+                }
                 return SoundTrigger.STATUS_OK;
             }
             return SoundTrigger.STATUS_BAD_VALUE;
@@ -181,6 +211,7 @@ public class SoundTriggerModule {
      *  recognition mode, keyphrases, users, minimum confidence levels...
      * @return - {@link SoundTrigger#STATUS_OK} in case of success
      *         - {@link SoundTrigger#STATUS_ERROR} in case of unspecified error
+     *         - {@link SoundTrigger#STATUS_BUSY} in case of transient resource constraints
      *         - {@link SoundTrigger#STATUS_PERMISSION_DENIED} if the caller does not have
      *         system permission
      *         - {@link SoundTrigger#STATUS_NO_INIT} if the native service cannot be reached
@@ -333,8 +364,11 @@ public class SoundTriggerModule {
                             listener.onRecognition(
                                     (SoundTrigger.RecognitionEvent) msg.obj);
                             break;
-                        case EVENT_SERVICE_STATE_CHANGE:
-                            listener.onServiceStateChange((int) msg.obj);
+                        case EVENT_RESOURCES_AVAILABLE:
+                            listener.onResourcesAvailable();
+                            break;
+                        case EVENT_MODEL_UNLOADED:
+                            listener.onModelUnloaded((Integer) msg.obj);
                             break;
                         case EVENT_SERVICE_DIED:
                             listener.onServiceDied();
@@ -348,27 +382,32 @@ public class SoundTriggerModule {
         }
 
         @Override
-        public synchronized void onRecognition(int handle, RecognitionEvent event)
+        public synchronized void onRecognition(int handle, RecognitionEvent event,
+                int captureSession)
                 throws RemoteException {
             Message m = mHandler.obtainMessage(EVENT_RECOGNITION,
-                    ConversionUtil.aidl2apiRecognitionEvent(handle, event));
+                    ConversionUtil.aidl2apiRecognitionEvent(handle, captureSession, event));
             mHandler.sendMessage(m);
         }
 
         @Override
-        public synchronized void onPhraseRecognition(int handle, PhraseRecognitionEvent event)
+        public synchronized void onPhraseRecognition(int handle, PhraseRecognitionEvent event,
+                int captureSession)
                 throws RemoteException {
             Message m = mHandler.obtainMessage(EVENT_RECOGNITION,
-                    ConversionUtil.aidl2apiPhraseRecognitionEvent(handle, event));
+                    ConversionUtil.aidl2apiPhraseRecognitionEvent(handle, captureSession, event));
             mHandler.sendMessage(m);
         }
 
         @Override
-        public synchronized void onRecognitionAvailabilityChange(boolean available)
-                throws RemoteException {
-            Message m = mHandler.obtainMessage(EVENT_SERVICE_STATE_CHANGE,
-                    available ? SoundTrigger.SERVICE_STATE_ENABLED
-                            : SoundTrigger.SERVICE_STATE_DISABLED);
+        public void onModelUnloaded(int modelHandle) throws RemoteException {
+            Message m = mHandler.obtainMessage(EVENT_MODEL_UNLOADED, modelHandle);
+            mHandler.sendMessage(m);
+        }
+
+        @Override
+        public synchronized void onResourcesAvailable() throws RemoteException {
+            Message m = mHandler.obtainMessage(EVENT_RESOURCES_AVAILABLE);
             mHandler.sendMessage(m);
         }
 

@@ -16,10 +16,8 @@
 package com.android.server.audio;
 
 import android.annotation.NonNull;
-import android.bluetooth.BluetoothA2dp;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothHearingAid;
 import android.bluetooth.BluetoothProfile;
 import android.content.Intent;
 import android.media.AudioDeviceAttributes;
@@ -50,7 +48,9 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * Class to manage the inventory of all connected devices.
@@ -187,12 +187,20 @@ public class AudioDeviceInventory {
         final @NonNull String mDeviceName;
         final @NonNull String mDeviceAddress;
         int mDeviceCodecFormat;
+        final UUID mSensorUuid;
 
-        DeviceInfo(int deviceType, String deviceName, String deviceAddress, int deviceCodecFormat) {
+        DeviceInfo(int deviceType, String deviceName, String deviceAddress,
+                   int deviceCodecFormat, UUID sensorUuid) {
             mDeviceType = deviceType;
             mDeviceName = deviceName == null ? "" : deviceName;
             mDeviceAddress = deviceAddress == null ? "" : deviceAddress;
             mDeviceCodecFormat = deviceCodecFormat;
+            mSensorUuid = sensorUuid;
+        }
+
+        DeviceInfo(int deviceType, String deviceName, String deviceAddress,
+                   int deviceCodecFormat) {
+            this(deviceType, deviceName, deviceAddress, deviceCodecFormat, null);
         }
 
         @Override
@@ -201,7 +209,8 @@ public class AudioDeviceInventory {
                     + " (" + AudioSystem.getDeviceName(mDeviceType)
                     + ") name:" + mDeviceName
                     + " addr:" + mDeviceAddress
-                    + " codec: " + Integer.toHexString(mDeviceCodecFormat) + "]";
+                    + " codec: " + Integer.toHexString(mDeviceCodecFormat)
+                    + " sensorUuid: " + Objects.toString(mSensorUuid) + "]";
         }
 
         @NonNull String getKey() {
@@ -221,24 +230,24 @@ public class AudioDeviceInventory {
      * A class just for packaging up a set of connection parameters.
      */
     /*package*/ class WiredDeviceConnectionState {
-        public final int mType;
+        public final AudioDeviceAttributes mAttributes;
         public final @AudioService.ConnectionState int mState;
-        public final String mAddress;
-        public final String mName;
         public final String mCaller;
+        public boolean mForTest = false;
 
-        /*package*/ WiredDeviceConnectionState(int type, @AudioService.ConnectionState int state,
-                                               String address, String name, String caller) {
-            mType = type;
+        /*package*/ WiredDeviceConnectionState(AudioDeviceAttributes attributes,
+                @AudioService.ConnectionState int state, String caller) {
+            mAttributes = attributes;
             mState = state;
-            mAddress = address;
-            mName = name;
             mCaller = caller;
         }
     }
 
     //------------------------------------------------------------
     /*package*/ void dump(PrintWriter pw, String prefix) {
+        pw.println("\n" + prefix + "BECOMING_NOISY_INTENT_DEVICES_SET=");
+        BECOMING_NOISY_INTENT_DEVICES_SET.forEach(device -> {
+            pw.print(" 0x" +  Integer.toHexString(device)); });
         pw.println("\n" + prefix + "Preferred devices for strategy:");
         mPreferredDevices.forEach((strategy, device) -> {
             pw.println("  " + prefix + "strategy:" + strategy + " device:" + device); });
@@ -267,11 +276,10 @@ public class AudioDeviceInventory {
         synchronized (mDevicesLock) {
             //TODO iterate on mApmConnectedDevices instead once it handles all device types
             for (DeviceInfo di : mConnectedDevices.values()) {
-                mAudioSystem.setDeviceConnectionState(
-                        di.mDeviceType,
-                        AudioSystem.DEVICE_STATE_AVAILABLE,
+                mAudioSystem.setDeviceConnectionState(new AudioDeviceAttributes(di.mDeviceType,
                         di.mDeviceAddress,
-                        di.mDeviceName,
+                        di.mDeviceName),
+                        AudioSystem.DEVICE_STATE_AVAILABLE,
                         di.mDeviceCodecFormat);
             }
         }
@@ -285,147 +293,102 @@ public class AudioDeviceInventory {
         }
     }
 
-    // only public for mocking/spying
     @GuardedBy("AudioDeviceBroker.mDeviceStateLock")
-    @VisibleForTesting
-    public void onSetA2dpSinkConnectionState(@NonNull BtHelper.BluetoothA2dpDeviceInfo btInfo,
-            @AudioService.BtProfileConnectionState int state) {
-        final BluetoothDevice btDevice = btInfo.getBtDevice();
-        int a2dpVolume = btInfo.getVolume();
+    void onSetBtActiveDevice(@NonNull AudioDeviceBroker.BtDeviceInfo btInfo, int streamType) {
         if (AudioService.DEBUG_DEVICES) {
-            Log.d(TAG, "onSetA2dpSinkConnectionState btDevice=" + btDevice + " state="
-                    + state + " vol=" + a2dpVolume);
+            Log.d(TAG, "onSetBtActiveDevice"
+                    + " btDevice=" + btInfo.mDevice
+                    + " profile=" + BluetoothProfile.getProfileName(btInfo.mProfile)
+                    + " state=" + BluetoothProfile.getConnectionStateName(btInfo.mState));
         }
-        String address = btDevice.getAddress();
-        if (address == null) {
-            address = "";
-        }
+        String address = btInfo.mDevice.getAddress();
         if (!BluetoothAdapter.checkBluetoothAddress(address)) {
             address = "";
         }
 
-        final @AudioSystem.AudioFormatNativeEnumForBtCodec int a2dpCodec = btInfo.getCodec();
+        AudioService.sDeviceLogger.log(new AudioEventLogger.StringEvent("BT connected:"
+                        + " addr=" + address
+                        + " profile=" + btInfo.mProfile
+                        + " state=" + btInfo.mState
+                        + " codec=" + AudioSystem.audioFormatToString(btInfo.mCodec)));
 
-        AudioService.sDeviceLogger.log(new AudioEventLogger.StringEvent(
-                "A2DP sink connected: device addr=" + address + " state=" + state
-                        + " codec=" + AudioSystem.audioFormatToString(a2dpCodec)
-                        + " vol=" + a2dpVolume));
-
-        new MediaMetrics.Item(mMetricsId + "a2dp")
+        new MediaMetrics.Item(mMetricsId + "onSetBtActiveDevice")
+                .set(MediaMetrics.Property.STATUS, btInfo.mProfile)
+                .set(MediaMetrics.Property.DEVICE,
+                        AudioSystem.getDeviceName(btInfo.mAudioSystemDevice))
                 .set(MediaMetrics.Property.ADDRESS, address)
-                .set(MediaMetrics.Property.ENCODING, AudioSystem.audioFormatToString(a2dpCodec))
-                .set(MediaMetrics.Property.EVENT, "onSetA2dpSinkConnectionState")
-                .set(MediaMetrics.Property.INDEX, a2dpVolume)
+                .set(MediaMetrics.Property.ENCODING,
+                        AudioSystem.audioFormatToString(btInfo.mCodec))
+                .set(MediaMetrics.Property.EVENT, "onSetBtActiveDevice")
+                .set(MediaMetrics.Property.STREAM_TYPE,
+                        AudioSystem.streamToString(streamType))
                 .set(MediaMetrics.Property.STATE,
-                        state == BluetoothProfile.STATE_CONNECTED
+                        btInfo.mState == BluetoothProfile.STATE_CONNECTED
                         ? MediaMetrics.Value.CONNECTED : MediaMetrics.Value.DISCONNECTED)
                 .record();
 
         synchronized (mDevicesLock) {
-            final String key = DeviceInfo.makeDeviceListKey(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,
-                    btDevice.getAddress());
+            final String key = DeviceInfo.makeDeviceListKey(btInfo.mAudioSystemDevice, address);
             final DeviceInfo di = mConnectedDevices.get(key);
-            boolean isConnected = di != null;
 
-            if (isConnected) {
-                if (state == BluetoothProfile.STATE_CONNECTED) {
-                    // device is already connected, but we are receiving a connection again,
-                    // it could be for a codec change
-                    if (a2dpCodec != di.mDeviceCodecFormat) {
-                        mDeviceBroker.postBluetoothA2dpDeviceConfigChange(btDevice);
+            final boolean isConnected = di != null;
+
+            final boolean switchToUnavailable = isConnected
+                    && btInfo.mState != BluetoothProfile.STATE_CONNECTED;
+            final boolean switchToAvailable = !isConnected
+                    && btInfo.mState == BluetoothProfile.STATE_CONNECTED;
+
+            switch (btInfo.mProfile) {
+                case BluetoothProfile.A2DP_SINK:
+                    if (switchToUnavailable) {
+                        makeA2dpSrcUnavailable(address);
+                    } else if (switchToAvailable) {
+                        makeA2dpSrcAvailable(address);
                     }
-                } else {
-                    makeA2dpDeviceUnavailableNow(address, di.mDeviceCodecFormat);
-                }
-            } else if (state == BluetoothProfile.STATE_CONNECTED) {
-                // device is not already connected
-                if (a2dpVolume != -1) {
-                    mDeviceBroker.postSetVolumeIndexOnDevice(AudioSystem.STREAM_MUSIC,
-                            // convert index to internal representation in VolumeStreamState
-                            a2dpVolume * 10,
-                            AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP, "onSetA2dpSinkConnectionState");
-                }
-                makeA2dpDeviceAvailable(address, BtHelper.getName(btDevice),
-                        "onSetA2dpSinkConnectionState", a2dpCodec);
+                    break;
+                case BluetoothProfile.A2DP:
+                    if (switchToUnavailable) {
+                        makeA2dpDeviceUnavailableNow(address, di.mDeviceCodecFormat);
+                    } else if (switchToAvailable) {
+                        // device is not already connected
+                        if (btInfo.mVolume != -1) {
+                            mDeviceBroker.postSetVolumeIndexOnDevice(AudioSystem.STREAM_MUSIC,
+                                    // convert index to internal representation in VolumeStreamState
+                                    btInfo.mVolume * 10, btInfo.mAudioSystemDevice,
+                                    "onSetBtActiveDevice");
+                        }
+                        makeA2dpDeviceAvailable(address, BtHelper.getName(btInfo.mDevice),
+                                "onSetBtActiveDevice", btInfo.mCodec);
+                    }
+                    break;
+                case BluetoothProfile.HEARING_AID:
+                    if (switchToUnavailable) {
+                        makeHearingAidDeviceUnavailable(address);
+                    } else if (switchToAvailable) {
+                        makeHearingAidDeviceAvailable(address, BtHelper.getName(btInfo.mDevice),
+                                streamType, "onSetBtActiveDevice");
+                    }
+                    break;
+                case BluetoothProfile.LE_AUDIO:
+                    if (switchToUnavailable) {
+                        makeLeAudioDeviceUnavailable(address, btInfo.mAudioSystemDevice);
+                    } else if (switchToAvailable) {
+                        makeLeAudioDeviceAvailable(address, BtHelper.getName(btInfo.mDevice),
+                                streamType, btInfo.mAudioSystemDevice, "onSetBtActiveDevice");
+                    }
+                    break;
+                default: throw new IllegalArgumentException("Invalid profile "
+                                 + BluetoothProfile.getProfileName(btInfo.mProfile));
             }
         }
     }
 
-    /*package*/ void onSetA2dpSourceConnectionState(
-            @NonNull BtHelper.BluetoothA2dpDeviceInfo btInfo, int state) {
-        final BluetoothDevice btDevice = btInfo.getBtDevice();
-        if (AudioService.DEBUG_DEVICES) {
-            Log.d(TAG, "onSetA2dpSourceConnectionState btDevice=" + btDevice + " state="
-                    + state);
-        }
-        String address = btDevice.getAddress();
-        if (!BluetoothAdapter.checkBluetoothAddress(address)) {
-            address = "";
-        }
-
-        synchronized (mDevicesLock) {
-            final String key = DeviceInfo.makeDeviceListKey(
-                    AudioSystem.DEVICE_IN_BLUETOOTH_A2DP, address);
-            final DeviceInfo di = mConnectedDevices.get(key);
-            boolean isConnected = di != null;
-
-            new MediaMetrics.Item(mMetricsId + "onSetA2dpSourceConnectionState")
-                    .set(MediaMetrics.Property.ADDRESS, address)
-                    .set(MediaMetrics.Property.DEVICE,
-                            AudioSystem.getDeviceName(AudioSystem.DEVICE_IN_BLUETOOTH_A2DP))
-                    .set(MediaMetrics.Property.STATE,
-                            state == BluetoothProfile.STATE_CONNECTED
-                            ? MediaMetrics.Value.CONNECTED : MediaMetrics.Value.DISCONNECTED)
-                    .record();
-
-            if (isConnected && state != BluetoothProfile.STATE_CONNECTED) {
-                makeA2dpSrcUnavailable(address);
-            } else if (!isConnected && state == BluetoothProfile.STATE_CONNECTED) {
-                makeA2dpSrcAvailable(address);
-            }
-        }
-    }
-
-    /*package*/ void onSetHearingAidConnectionState(BluetoothDevice btDevice,
-                @AudioService.BtProfileConnectionState int state, int streamType) {
-        String address = btDevice.getAddress();
-        if (!BluetoothAdapter.checkBluetoothAddress(address)) {
-            address = "";
-        }
-        AudioService.sDeviceLogger.log(new AudioEventLogger.StringEvent(
-                "onSetHearingAidConnectionState addr=" + address));
-
-        new MediaMetrics.Item(mMetricsId + "onSetHearingAidConnectionState")
-                .set(MediaMetrics.Property.ADDRESS, address)
-                .set(MediaMetrics.Property.DEVICE,
-                        AudioSystem.getDeviceName(AudioSystem.DEVICE_IN_BLUETOOTH_A2DP))
-                .set(MediaMetrics.Property.STATE,
-                        state == BluetoothProfile.STATE_CONNECTED
-                                ? MediaMetrics.Value.CONNECTED : MediaMetrics.Value.DISCONNECTED)
-                .set(MediaMetrics.Property.STREAM_TYPE,
-                        AudioSystem.streamToString(streamType))
-                .record();
-
-        synchronized (mDevicesLock) {
-            final String key = DeviceInfo.makeDeviceListKey(AudioSystem.DEVICE_OUT_HEARING_AID,
-                    btDevice.getAddress());
-            final DeviceInfo di = mConnectedDevices.get(key);
-            boolean isConnected = di != null;
-
-            if (isConnected && state != BluetoothProfile.STATE_CONNECTED) {
-                makeHearingAidDeviceUnavailable(address);
-            } else if (!isConnected && state == BluetoothProfile.STATE_CONNECTED) {
-                makeHearingAidDeviceAvailable(address, BtHelper.getName(btDevice), streamType,
-                        "onSetHearingAidConnectionState");
-            }
-        }
-    }
 
     @GuardedBy("AudioDeviceBroker.mDeviceStateLock")
-        /*package*/ void onBluetoothA2dpActiveDeviceChange(
+        /*package*/ void onBluetoothA2dpDeviceConfigChange(
             @NonNull BtHelper.BluetoothA2dpDeviceInfo btInfo, int event) {
         MediaMetrics.Item mmi = new MediaMetrics.Item(mMetricsId
-                + "onBluetoothA2dpActiveDeviceChange")
+                + "onBluetoothA2dpDeviceConfigChange")
                 .set(MediaMetrics.Property.EVENT, BtHelper.a2dpDeviceEventToString(event));
 
         final BluetoothDevice btDevice = btInfo.getBtDevice();
@@ -434,7 +397,7 @@ public class AudioDeviceInventory {
             return;
         }
         if (AudioService.DEBUG_DEVICES) {
-            Log.d(TAG, "onBluetoothA2dpActiveDeviceChange btDevice=" + btDevice);
+            Log.d(TAG, "onBluetoothA2dpDeviceConfigChange btDevice=" + btDevice);
         }
         int a2dpVolume = btInfo.getVolume();
         @AudioSystem.AudioFormatNativeEnumForBtCodec final int a2dpCodec = btInfo.getCodec();
@@ -444,11 +407,11 @@ public class AudioDeviceInventory {
             address = "";
         }
         AudioService.sDeviceLogger.log(new AudioEventLogger.StringEvent(
-                "onBluetoothA2dpActiveDeviceChange addr=" + address
+                "onBluetoothA2dpDeviceConfigChange addr=" + address
                     + " event=" + BtHelper.a2dpDeviceEventToString(event)));
 
         synchronized (mDevicesLock) {
-            if (mDeviceBroker.hasScheduledA2dpSinkConnectionState(btDevice)) {
+            if (mDeviceBroker.hasScheduledA2dpConnection(btDevice)) {
                 AudioService.sDeviceLogger.log(new AudioEventLogger.StringEvent(
                         "A2dp config change ignored (scheduled connection change)")
                         .printLog(TAG));
@@ -460,7 +423,7 @@ public class AudioDeviceInventory {
                     AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP, address);
             final DeviceInfo di = mConnectedDevices.get(key);
             if (di == null) {
-                Log.e(TAG, "invalid null DeviceInfo in onBluetoothA2dpActiveDeviceChange");
+                Log.e(TAG, "invalid null DeviceInfo in onBluetoothA2dpDeviceConfigChange");
                 mmi.set(MediaMetrics.Property.EARLY_RETURN, "null DeviceInfo").record();
                 return;
             }
@@ -478,7 +441,7 @@ public class AudioDeviceInventory {
                             // convert index to internal representation in VolumeStreamState
                             a2dpVolume * 10,
                             AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,
-                            "onBluetoothA2dpActiveDeviceChange");
+                            "onBluetoothA2dpDeviceConfigChange");
                 }
             } else if (event == BtHelper.EVENT_DEVICE_CONFIG_CHANGE) {
                 if (di.mDeviceCodecFormat != a2dpCodec) {
@@ -499,10 +462,9 @@ public class AudioDeviceInventory {
                 int musicDevice = mDeviceBroker.getDeviceForStream(AudioSystem.STREAM_MUSIC);
                 // force A2DP device disconnection in case of error so that AudioService state is
                 // consistent with audio policy manager state
-                setBluetoothA2dpDeviceConnectionState(
-                        btDevice, BluetoothA2dp.STATE_DISCONNECTED, BluetoothProfile.A2DP,
-                        false /* suppressNoisyIntent */, musicDevice,
-                        -1 /* a2dpVolume */);
+                setBluetoothActiveDevice(new AudioDeviceBroker.BtDeviceInfo(btDevice,
+                                BluetoothProfile.A2DP, BluetoothProfile.STATE_DISCONNECTED,
+                                musicDevice, AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP));
             } else {
                 AudioService.sDeviceLogger.log(new AudioEventLogger.StringEvent(
                         "APM handleDeviceConfigChange success for A2DP device addr=" + address
@@ -541,7 +503,7 @@ public class AudioDeviceInventory {
         mDeviceBroker.postObserveDevicesForAllStreams();
     }
 
-    private static final Set<Integer> DEVICE_OVERRIDE_A2DP_ROUTE_ON_PLUG_SET;
+    /* package */ static final Set<Integer> DEVICE_OVERRIDE_A2DP_ROUTE_ON_PLUG_SET;
     static {
         DEVICE_OVERRIDE_A2DP_ROUTE_ON_PLUG_SET = new HashSet<>();
         DEVICE_OVERRIDE_A2DP_ROUTE_ON_PLUG_SET.add(AudioSystem.DEVICE_OUT_WIRED_HEADSET);
@@ -552,41 +514,45 @@ public class AudioDeviceInventory {
 
     /*package*/ void onSetWiredDeviceConnectionState(
                             AudioDeviceInventory.WiredDeviceConnectionState wdcs) {
+        int type = wdcs.mAttributes.getInternalType();
+
         AudioService.sDeviceLogger.log(new AudioServiceEvents.WiredDevConnectEvent(wdcs));
 
         MediaMetrics.Item mmi = new MediaMetrics.Item(mMetricsId
                 + "onSetWiredDeviceConnectionState")
-                .set(MediaMetrics.Property.ADDRESS, wdcs.mAddress)
-                .set(MediaMetrics.Property.DEVICE, AudioSystem.getDeviceName(wdcs.mType))
+                .set(MediaMetrics.Property.ADDRESS, wdcs.mAttributes.getAddress())
+                .set(MediaMetrics.Property.DEVICE,
+                        AudioSystem.getDeviceName(type))
                 .set(MediaMetrics.Property.STATE,
                         wdcs.mState == AudioService.CONNECTION_STATE_DISCONNECTED
                                 ? MediaMetrics.Value.DISCONNECTED : MediaMetrics.Value.CONNECTED);
         synchronized (mDevicesLock) {
             if ((wdcs.mState == AudioService.CONNECTION_STATE_DISCONNECTED)
-                    && DEVICE_OVERRIDE_A2DP_ROUTE_ON_PLUG_SET.contains(wdcs.mType)) {
+                    && DEVICE_OVERRIDE_A2DP_ROUTE_ON_PLUG_SET.contains(type)) {
                 mDeviceBroker.setBluetoothA2dpOnInt(true, false /*fromA2dp*/,
                         "onSetWiredDeviceConnectionState state DISCONNECTED");
             }
 
-            if (!handleDeviceConnection(wdcs.mState == AudioService.CONNECTION_STATE_CONNECTED,
-                    wdcs.mType, wdcs.mAddress, wdcs.mName)) {
+            if (!handleDeviceConnection(wdcs.mAttributes,
+                    wdcs.mState == AudioService.CONNECTION_STATE_CONNECTED, wdcs.mForTest)) {
                 // change of connection state failed, bailout
                 mmi.set(MediaMetrics.Property.EARLY_RETURN, "change of connection state failed")
                         .record();
                 return;
             }
             if (wdcs.mState != AudioService.CONNECTION_STATE_DISCONNECTED) {
-                if (DEVICE_OVERRIDE_A2DP_ROUTE_ON_PLUG_SET.contains(wdcs.mType)) {
+                if (DEVICE_OVERRIDE_A2DP_ROUTE_ON_PLUG_SET.contains(type)) {
                     mDeviceBroker.setBluetoothA2dpOnInt(false, false /*fromA2dp*/,
                             "onSetWiredDeviceConnectionState state not DISCONNECTED");
                 }
-                mDeviceBroker.checkMusicActive(wdcs.mType, wdcs.mCaller);
+                mDeviceBroker.checkMusicActive(type, wdcs.mCaller);
             }
-            if (wdcs.mType == AudioSystem.DEVICE_OUT_HDMI) {
+            if (type == AudioSystem.DEVICE_OUT_HDMI) {
                 mDeviceBroker.checkVolumeCecOnHdmiConnection(wdcs.mState, wdcs.mCaller);
             }
-            sendDeviceConnectionIntent(wdcs.mType, wdcs.mState, wdcs.mAddress, wdcs.mName);
-            updateAudioRoutes(wdcs.mType, wdcs.mState);
+            sendDeviceConnectionIntent(type, wdcs.mState,
+                    wdcs.mAttributes.getAddress(), wdcs.mAttributes.getName());
+            updateAudioRoutes(type, wdcs.mState);
         }
         mmi.record();
     }
@@ -605,12 +571,12 @@ public class AudioDeviceInventory {
                 return;
             }
             // Toggle HDMI to retrigger broadcast with proper formats.
-            setWiredDeviceConnectionState(AudioSystem.DEVICE_OUT_HDMI,
-                    AudioSystem.DEVICE_STATE_UNAVAILABLE, "", "",
-                    "android"); // disconnect
-            setWiredDeviceConnectionState(AudioSystem.DEVICE_OUT_HDMI,
-                    AudioSystem.DEVICE_STATE_AVAILABLE, "", "",
-                    "android"); // reconnect
+            setWiredDeviceConnectionState(
+                    new AudioDeviceAttributes(AudioSystem.DEVICE_OUT_HDMI, ""),
+                    AudioSystem.DEVICE_STATE_UNAVAILABLE, "android"); // disconnect
+            setWiredDeviceConnectionState(
+                    new AudioDeviceAttributes(AudioSystem.DEVICE_OUT_HDMI, ""),
+                    AudioSystem.DEVICE_STATE_AVAILABLE, "android"); // reconnect
         }
         mmi.record();
     }
@@ -641,7 +607,7 @@ public class AudioDeviceInventory {
     }
 
     //------------------------------------------------------------
-    //
+    // preferred device(s)
 
     /*package*/ int setPreferredDevicesForStrategySync(int strategy,
             @NonNull List<AudioDeviceAttributes> devices) {
@@ -722,16 +688,35 @@ public class AudioDeviceInventory {
         mDevRoleCapturePresetDispatchers.unregister(dispatcher);
     }
 
+    //-----------------------------------------------------------------------
+
+    /**
+     * Check if a device is in the list of connected devices
+     * @param device the device whose connection state is queried
+     * @return true if connected
+     */
+    // called with AudioDeviceBroker.mDeviceStateLock lock held
+    public boolean isDeviceConnected(@NonNull AudioDeviceAttributes device) {
+        final String key = DeviceInfo.makeDeviceListKey(device.getInternalType(),
+                device.getAddress());
+        synchronized (mDevicesLock) {
+            return (mConnectedDevices.get(key) != null);
+        }
+    }
+
     /**
      * Implements the communication with AudioSystem to (dis)connect a device in the native layers
+     * @param attributes the attributes of the device
      * @param connect true if connection
-     * @param device the device type
-     * @param address the address of the device
-     * @param deviceName human-readable name of device
+     * @param isForTesting if true, not calling AudioSystem for the connection as this is
+     *                    just for testing
      * @return false if an error was reported by AudioSystem
      */
-    /*package*/ boolean handleDeviceConnection(boolean connect, int device, String address,
-            String deviceName) {
+    /*package*/ boolean handleDeviceConnection(AudioDeviceAttributes attributes, boolean connect,
+            boolean isForTesting) {
+        int device = attributes.getInternalType();
+        String address = attributes.getAddress();
+        String deviceName = attributes.getName();
         if (AudioService.DEBUG_DEVICES) {
             Slog.i(TAG, "handleDeviceConnection(" + connect + " dev:"
                     + Integer.toHexString(device) + " address:" + address
@@ -754,9 +739,13 @@ public class AudioDeviceInventory {
                 Slog.i(TAG, "deviceInfo:" + di + " is(already)Connected:" + isConnected);
             }
             if (connect && !isConnected) {
-                final int res = mAudioSystem.setDeviceConnectionState(device,
-                        AudioSystem.DEVICE_STATE_AVAILABLE, address, deviceName,
-                        AudioSystem.AUDIO_FORMAT_DEFAULT);
+                final int res;
+                if (isForTesting) {
+                    res = AudioSystem.AUDIO_STATUS_OK;
+                } else {
+                    res = mAudioSystem.setDeviceConnectionState(attributes,
+                            AudioSystem.DEVICE_STATE_AVAILABLE, AudioSystem.AUDIO_FORMAT_DEFAULT);
+                }
                 if (res != AudioSystem.AUDIO_STATUS_OK) {
                     final String reason = "not connecting device 0x" + Integer.toHexString(device)
                             + " due to command error " + res;
@@ -772,9 +761,8 @@ public class AudioDeviceInventory {
                 mmi.set(MediaMetrics.Property.STATE, MediaMetrics.Value.CONNECTED).record();
                 return true;
             } else if (!connect && isConnected) {
-                mAudioSystem.setDeviceConnectionState(device,
-                        AudioSystem.DEVICE_STATE_UNAVAILABLE, address, deviceName,
-                        AudioSystem.AUDIO_FORMAT_DEFAULT);
+                mAudioSystem.setDeviceConnectionState(attributes,
+                        AudioSystem.DEVICE_STATE_UNAVAILABLE, AudioSystem.AUDIO_FORMAT_DEFAULT);
                 // always remove even if disconnection failed
                 mConnectedDevices.remove(deviceKey);
                 mmi.set(MediaMetrics.Property.STATE, MediaMetrics.Value.CONNECTED).record();
@@ -788,7 +776,7 @@ public class AudioDeviceInventory {
     }
 
 
-    /*package*/ void disconnectA2dp() {
+    private void disconnectA2dp() {
         synchronized (mDevicesLock) {
             final ArraySet<String> toRemove = new ArraySet<>();
             // Disconnect ALL DEVICE_OUT_BLUETOOTH_A2DP devices
@@ -810,7 +798,7 @@ public class AudioDeviceInventory {
         }
     }
 
-    /*package*/ void disconnectA2dpSink() {
+    private void disconnectA2dpSink() {
         synchronized (mDevicesLock) {
             final ArraySet<String> toRemove = new ArraySet<>();
             // Disconnect ALL DEVICE_IN_BLUETOOTH_A2DP devices
@@ -825,7 +813,7 @@ public class AudioDeviceInventory {
         }
     }
 
-    /*package*/ void disconnectHearingAid() {
+    private void disconnectHearingAid() {
         synchronized (mDevicesLock) {
             final ArraySet<String> toRemove = new ArraySet<>();
             // Disconnect ALL DEVICE_OUT_HEARING_AID devices
@@ -842,6 +830,50 @@ public class AudioDeviceInventory {
                 toRemove.stream().forEach(deviceAddress ->
                         // TODO delay not used?
                         makeHearingAidDeviceUnavailable(deviceAddress /*, delay*/)
+                );
+            }
+        }
+    }
+
+    /*package*/ synchronized void onBtProfileDisconnected(int profile) {
+        switch (profile) {
+            case BluetoothProfile.A2DP:
+                disconnectA2dp();
+                break;
+            case BluetoothProfile.A2DP_SINK:
+                disconnectA2dpSink();
+                break;
+            case BluetoothProfile.HEARING_AID:
+                disconnectHearingAid();
+                break;
+            case BluetoothProfile.LE_AUDIO:
+                disconnectLeAudio();
+                break;
+            default:
+                // Not a valid profile to disconnect
+                Log.e(TAG, "onBtProfileDisconnected: Not a valid profile to disconnect "
+                        + BluetoothProfile.getProfileName(profile));
+                break;
+        }
+    }
+
+     /*package*/ void disconnectLeAudio() {
+        synchronized (mDevicesLock) {
+            final ArraySet<String> toRemove = new ArraySet<>();
+            // Disconnect ALL DEVICE_OUT_BLE_HEADSET devices
+            mConnectedDevices.values().forEach(deviceInfo -> {
+                if (deviceInfo.mDeviceType == AudioSystem.DEVICE_OUT_BLE_HEADSET) {
+                    toRemove.add(deviceInfo.mDeviceAddress);
+                }
+            });
+            new MediaMetrics.Item(mMetricsId + "disconnectLeAudio")
+                    .record();
+            if (toRemove.size() > 0) {
+                final int delay = checkSendBecomingNoisyIntentInt(
+                        AudioSystem.DEVICE_OUT_BLE_HEADSET, 0, AudioSystem.DEVICE_NONE);
+                toRemove.stream().forEach(deviceAddress ->
+                        makeLeAudioDeviceUnavailable(deviceAddress,
+                            AudioSystem.DEVICE_OUT_BLE_HEADSET)
                 );
             }
         }
@@ -872,80 +904,59 @@ public class AudioDeviceInventory {
     // only public for mocking/spying
     @GuardedBy("AudioDeviceBroker.mDeviceStateLock")
     @VisibleForTesting
-    public void setBluetoothA2dpDeviceConnectionState(
-            @NonNull BluetoothDevice device, @AudioService.BtProfileConnectionState int state,
-            int profile, boolean suppressNoisyIntent, int musicDevice, int a2dpVolume) {
+    public int setBluetoothActiveDevice(@NonNull AudioDeviceBroker.BtDeviceInfo info) {
         int delay;
-        if (profile != BluetoothProfile.A2DP && profile != BluetoothProfile.A2DP_SINK) {
-            throw new IllegalArgumentException("invalid profile " + profile);
-        }
         synchronized (mDevicesLock) {
-            if (profile == BluetoothProfile.A2DP && !suppressNoisyIntent) {
+            if (!info.mSupprNoisy
+                    && ((info.mProfile == BluetoothProfile.LE_AUDIO && info.mIsLeOutput)
+                        || info.mProfile == BluetoothProfile.HEARING_AID
+                        || info.mProfile == BluetoothProfile.A2DP)) {
                 @AudioService.ConnectionState int asState =
-                        (state == BluetoothA2dp.STATE_CONNECTED)
+                        (info.mState == BluetoothProfile.STATE_CONNECTED)
                                 ? AudioService.CONNECTION_STATE_CONNECTED
                                 : AudioService.CONNECTION_STATE_DISCONNECTED;
-                delay = checkSendBecomingNoisyIntentInt(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,
-                        asState, musicDevice);
+                delay = checkSendBecomingNoisyIntentInt(info.mAudioSystemDevice, asState,
+                        info.mMusicDevice);
             } else {
                 delay = 0;
             }
-
-            final int a2dpCodec = mDeviceBroker.getA2dpCodec(device);
 
             if (AudioService.DEBUG_DEVICES) {
-                Log.i(TAG, "setBluetoothA2dpDeviceConnectionState device: " + device
-                        + " state: " + state + " delay(ms): " + delay
-                        + " codec:" + Integer.toHexString(a2dpCodec)
-                        + " suppressNoisyIntent: " + suppressNoisyIntent);
+                Log.i(TAG, "setBluetoothActiveDevice device: " + info.mDevice
+                        + " profile: " + BluetoothProfile.getProfileName(info.mProfile)
+                        + " state: " + BluetoothProfile.getConnectionStateName(info.mState)
+                        + " delay(ms): " + delay
+                        + " codec:" + Integer.toHexString(info.mCodec)
+                        + " suppressNoisyIntent: " + info.mSupprNoisy);
             }
-
-            final BtHelper.BluetoothA2dpDeviceInfo a2dpDeviceInfo =
-                    new BtHelper.BluetoothA2dpDeviceInfo(device, a2dpVolume, a2dpCodec);
-            if (profile == BluetoothProfile.A2DP) {
-                mDeviceBroker.postA2dpSinkConnection(state,
-                            a2dpDeviceInfo,
-                            delay);
-            } else { //profile == BluetoothProfile.A2DP_SINK
-                mDeviceBroker.postA2dpSourceConnection(state,
-                        a2dpDeviceInfo,
-                        delay);
-            }
-        }
-    }
-
-    /*package*/ int setWiredDeviceConnectionState(int type, @AudioService.ConnectionState int state,
-                                                  String address, String name, String caller) {
-        synchronized (mDevicesLock) {
-            int delay = checkSendBecomingNoisyIntentInt(type, state, AudioSystem.DEVICE_NONE);
-            mDeviceBroker.postSetWiredDeviceConnectionState(
-                    new WiredDeviceConnectionState(type, state, address, name, caller),
-                    delay);
-            return delay;
-        }
-    }
-
-    /*package*/ int  setBluetoothHearingAidDeviceConnectionState(
-            @NonNull BluetoothDevice device, @AudioService.BtProfileConnectionState int state,
-            boolean suppressNoisyIntent, int musicDevice) {
-        int delay;
-        synchronized (mDevicesLock) {
-            if (!suppressNoisyIntent) {
-                int intState = (state == BluetoothHearingAid.STATE_CONNECTED) ? 1 : 0;
-                delay = checkSendBecomingNoisyIntentInt(AudioSystem.DEVICE_OUT_HEARING_AID,
-                        intState, musicDevice);
-            } else {
-                delay = 0;
-            }
-            mDeviceBroker.postSetHearingAidConnectionState(state, device, delay);
-            if (state == BluetoothHearingAid.STATE_CONNECTED) {
+            mDeviceBroker.postBluetoothActiveDevice(info, delay);
+            if (info.mProfile == BluetoothProfile.HEARING_AID
+                    && info.mState == BluetoothProfile.STATE_CONNECTED) {
                 mDeviceBroker.setForceUse_Async(AudioSystem.FOR_MEDIA, AudioSystem.FORCE_NONE,
                                 "HEARING_AID set to CONNECTED");
             }
+        }
+        return delay;
+    }
+
+    /*package*/ int setWiredDeviceConnectionState(AudioDeviceAttributes attributes,
+            @AudioService.ConnectionState int state, String caller) {
+        synchronized (mDevicesLock) {
+            int delay = checkSendBecomingNoisyIntentInt(
+                    attributes.getInternalType(), state, AudioSystem.DEVICE_NONE);
+            mDeviceBroker.postSetWiredDeviceConnectionState(
+                    new WiredDeviceConnectionState(attributes, state, caller), delay);
             return delay;
         }
     }
 
+    /*package*/ void setTestDeviceConnectionState(@NonNull AudioDeviceAttributes device,
+            @AudioService.ConnectionState int state) {
+        final WiredDeviceConnectionState connection = new WiredDeviceConnectionState(
+                device, state, "com.android.server.audio");
+        connection.mForTest = true;
+        onSetWiredDeviceConnectionState(connection);
+    }
 
     //-------------------------------------------------------------------
     // Internal utilities
@@ -958,8 +969,9 @@ public class AudioDeviceInventory {
         mDeviceBroker.setBluetoothA2dpOnInt(true, true /*fromA2dp*/, eventSource);
         // at this point there could be another A2DP device already connected in APM, but it
         // doesn't matter as this new one will overwrite the previous one
-        final int res = mAudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,
-                AudioSystem.DEVICE_STATE_AVAILABLE, address, name, a2dpCodec);
+        final int res = mAudioSystem.setDeviceConnectionState(new AudioDeviceAttributes(
+                AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP, address, name),
+                AudioSystem.DEVICE_STATE_AVAILABLE, a2dpCodec);
 
         // TODO: log in MediaMetrics once distinction between connection failure and
         // double connection is made.
@@ -977,8 +989,13 @@ public class AudioDeviceInventory {
         // Reset A2DP suspend state each time a new sink is connected
         mAudioSystem.setParameters("A2dpSuspended=false");
 
+        // The convention for head tracking sensors associated with A2DP devices is to
+        // use a UUID derived from the MAC address as follows:
+        //   time_low = 0, time_mid = 0, time_hi = 0, clock_seq = 0, node = MAC Address
+        UUID sensorUuid = UuidUtils.uuidFromAudioDeviceAttributes(
+                new AudioDeviceAttributes(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP, address));
         final DeviceInfo di = new DeviceInfo(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP, name,
-                address, a2dpCodec);
+                address, a2dpCodec, sensorUuid);
         final String diKey = di.getKey();
         mConnectedDevices.put(diKey, di);
         // on a connection always overwrite the device seen by AudioPolicy, see comment above when
@@ -1016,8 +1033,9 @@ public class AudioDeviceInventory {
 
         // device to remove was visible by APM, update APM
         mDeviceBroker.clearAvrcpAbsoluteVolumeSupported();
-        final int res = mAudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,
-                AudioSystem.DEVICE_STATE_UNAVAILABLE, address, "", a2dpCodec);
+        final int res = mAudioSystem.setDeviceConnectionState(new AudioDeviceAttributes(
+                AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP, address),
+                AudioSystem.DEVICE_STATE_UNAVAILABLE, a2dpCodec);
 
         if (res != AudioSystem.AUDIO_STATUS_OK) {
             AudioService.sDeviceLogger.log(new AudioEventLogger.StringEvent(
@@ -1055,8 +1073,9 @@ public class AudioDeviceInventory {
 
     @GuardedBy("mDevicesLock")
     private void makeA2dpSrcAvailable(String address) {
-        mAudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_IN_BLUETOOTH_A2DP,
-                AudioSystem.DEVICE_STATE_AVAILABLE, address, "",
+        mAudioSystem.setDeviceConnectionState(new AudioDeviceAttributes(
+                AudioSystem.DEVICE_IN_BLUETOOTH_A2DP, address),
+                AudioSystem.DEVICE_STATE_AVAILABLE,
                 AudioSystem.AUDIO_FORMAT_DEFAULT);
         mConnectedDevices.put(
                 DeviceInfo.makeDeviceListKey(AudioSystem.DEVICE_IN_BLUETOOTH_A2DP, address),
@@ -1066,8 +1085,9 @@ public class AudioDeviceInventory {
 
     @GuardedBy("mDevicesLock")
     private void makeA2dpSrcUnavailable(String address) {
-        mAudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_IN_BLUETOOTH_A2DP,
-                AudioSystem.DEVICE_STATE_UNAVAILABLE, address, "",
+        mAudioSystem.setDeviceConnectionState(new AudioDeviceAttributes(
+                AudioSystem.DEVICE_IN_BLUETOOTH_A2DP, address),
+                AudioSystem.DEVICE_STATE_UNAVAILABLE,
                 AudioSystem.AUDIO_FORMAT_DEFAULT);
         mConnectedDevices.remove(
                 DeviceInfo.makeDeviceListKey(AudioSystem.DEVICE_IN_BLUETOOTH_A2DP, address));
@@ -1080,8 +1100,9 @@ public class AudioDeviceInventory {
                 AudioSystem.DEVICE_OUT_HEARING_AID);
         mDeviceBroker.postSetHearingAidVolumeIndex(hearingAidVolIndex, streamType);
 
-        mAudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_HEARING_AID,
-                AudioSystem.DEVICE_STATE_AVAILABLE, address, name,
+        mAudioSystem.setDeviceConnectionState(new AudioDeviceAttributes(
+                AudioSystem.DEVICE_OUT_HEARING_AID, address, name),
+                AudioSystem.DEVICE_STATE_AVAILABLE,
                 AudioSystem.AUDIO_FORMAT_DEFAULT);
         mConnectedDevices.put(
                 DeviceInfo.makeDeviceListKey(AudioSystem.DEVICE_OUT_HEARING_AID, address),
@@ -1103,8 +1124,9 @@ public class AudioDeviceInventory {
 
     @GuardedBy("mDevicesLock")
     private void makeHearingAidDeviceUnavailable(String address) {
-        mAudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_HEARING_AID,
-                AudioSystem.DEVICE_STATE_UNAVAILABLE, address, "",
+        mAudioSystem.setDeviceConnectionState(new AudioDeviceAttributes(
+                AudioSystem.DEVICE_OUT_HEARING_AID, address),
+                AudioSystem.DEVICE_STATE_UNAVAILABLE,
                 AudioSystem.AUDIO_FORMAT_DEFAULT);
         mConnectedDevices.remove(
                 DeviceInfo.makeDeviceListKey(AudioSystem.DEVICE_OUT_HEARING_AID, address));
@@ -1115,6 +1137,48 @@ public class AudioDeviceInventory {
                 .set(MediaMetrics.Property.DEVICE,
                         AudioSystem.getDeviceName(AudioSystem.DEVICE_OUT_HEARING_AID))
                 .record();
+    }
+
+    @GuardedBy("mDevicesLock")
+    private void makeLeAudioDeviceAvailable(String address, String name, int streamType, int device,
+            String eventSource) {
+        if (device != AudioSystem.DEVICE_NONE) {
+            /* Audio Policy sees Le Audio similar to A2DP. Let's make sure
+             * AUDIO_POLICY_FORCE_NO_BT_A2DP is not set
+             */
+            mDeviceBroker.setBluetoothA2dpOnInt(true, false /*fromA2dp*/, eventSource);
+
+            AudioSystem.setDeviceConnectionState(new AudioDeviceAttributes(device, address, name),
+                    AudioSystem.DEVICE_STATE_AVAILABLE,
+                    AudioSystem.AUDIO_FORMAT_DEFAULT);
+            mConnectedDevices.put(DeviceInfo.makeDeviceListKey(device, address),
+                    new DeviceInfo(device, name, address, AudioSystem.AUDIO_FORMAT_DEFAULT));
+            mDeviceBroker.postAccessoryPlugMediaUnmute(device);
+            setCurrentAudioRouteNameIfPossible(name, /*fromA2dp=*/false);
+        }
+
+        if (streamType == AudioSystem.STREAM_DEFAULT) {
+            // No need to update volume for input devices
+            return;
+        }
+
+        final int leAudioVolIndex = mDeviceBroker.getVssVolumeForDevice(streamType,
+                                    AudioSystem.DEVICE_OUT_BLE_HEADSET);
+        final int maxIndex = mDeviceBroker.getMaxVssVolumeForStream(streamType);
+        mDeviceBroker.postSetLeAudioVolumeIndex(leAudioVolIndex, maxIndex, streamType);
+        mDeviceBroker.postApplyVolumeOnDevice(streamType, device, "makeLeAudioDeviceAvailable");
+    }
+
+    @GuardedBy("mDevicesLock")
+    private void makeLeAudioDeviceUnavailable(String address, int device) {
+        if (device != AudioSystem.DEVICE_NONE) {
+            AudioSystem.setDeviceConnectionState(new AudioDeviceAttributes(device, address),
+                    AudioSystem.DEVICE_STATE_UNAVAILABLE,
+                    AudioSystem.AUDIO_FORMAT_DEFAULT);
+            mConnectedDevices.remove(DeviceInfo.makeDeviceListKey(device, address));
+        }
+
+        setCurrentAudioRouteNameIfPossible(null, false /*fromA2dp*/);
     }
 
     @GuardedBy("mDevicesLock")
@@ -1148,11 +1212,12 @@ public class AudioDeviceInventory {
         BECOMING_NOISY_INTENT_DEVICES_SET.add(AudioSystem.DEVICE_OUT_WIRED_HEADPHONE);
         BECOMING_NOISY_INTENT_DEVICES_SET.add(AudioSystem.DEVICE_OUT_HDMI);
         BECOMING_NOISY_INTENT_DEVICES_SET.add(AudioSystem.DEVICE_OUT_ANLG_DOCK_HEADSET);
-        BECOMING_NOISY_INTENT_DEVICES_SET.add(AudioSystem.DEVICE_OUT_DGTL_DOCK_HEADSET);
         BECOMING_NOISY_INTENT_DEVICES_SET.add(AudioSystem.DEVICE_OUT_LINE);
         BECOMING_NOISY_INTENT_DEVICES_SET.add(AudioSystem.DEVICE_OUT_HEARING_AID);
+        BECOMING_NOISY_INTENT_DEVICES_SET.add(AudioSystem.DEVICE_OUT_BLE_HEADSET);
         BECOMING_NOISY_INTENT_DEVICES_SET.addAll(AudioSystem.DEVICE_OUT_ALL_A2DP_SET);
         BECOMING_NOISY_INTENT_DEVICES_SET.addAll(AudioSystem.DEVICE_OUT_ALL_USB_SET);
+        BECOMING_NOISY_INTENT_DEVICES_SET.addAll(AudioSystem.DEVICE_OUT_ALL_BLE_SET);
     }
 
     // must be called before removing the device from mConnectedDevices
@@ -1168,10 +1233,13 @@ public class AudioDeviceInventory {
                         state == AudioService.CONNECTION_STATE_CONNECTED
                                 ? MediaMetrics.Value.CONNECTED : MediaMetrics.Value.DISCONNECTED);
         if (state != AudioService.CONNECTION_STATE_DISCONNECTED) {
+            Log.i(TAG, "not sending NOISY: state=" + state);
             mmi.set(MediaMetrics.Property.DELAY_MS, 0).record(); // OK to return
             return 0;
         }
         if (!BECOMING_NOISY_INTENT_DEVICES_SET.contains(device)) {
+            Log.i(TAG, "not sending NOISY: device=0x" + Integer.toHexString(device)
+                    + " not in set " + BECOMING_NOISY_INTENT_DEVICES_SET);
             mmi.set(MediaMetrics.Property.DELAY_MS, 0).record(); // OK to return
             return 0;
         }
@@ -1181,18 +1249,24 @@ public class AudioDeviceInventory {
             if (((di.mDeviceType & AudioSystem.DEVICE_BIT_IN) == 0)
                     && BECOMING_NOISY_INTENT_DEVICES_SET.contains(di.mDeviceType)) {
                 devices.add(di.mDeviceType);
+                Log.i(TAG, "NOISY: adding 0x" + Integer.toHexString(di.mDeviceType));
             }
         }
         if (musicDevice == AudioSystem.DEVICE_NONE) {
             musicDevice = mDeviceBroker.getDeviceForStream(AudioSystem.STREAM_MUSIC);
+            Log.i(TAG, "NOISY: musicDevice changing from NONE to 0x"
+                    + Integer.toHexString(musicDevice));
         }
 
         // always ignore condition on device being actually used for music when in communication
         // because music routing is altered in this case.
         // also checks whether media routing if affected by a dynamic policy or mirroring
-        if (((device == musicDevice) || mDeviceBroker.isInCommunication())
-                && AudioSystem.isSingleAudioDeviceType(devices, device)
-                && !mDeviceBroker.hasMediaDynamicPolicy()
+        final boolean inCommunication = mDeviceBroker.isInCommunication();
+        final boolean singleAudioDeviceType = AudioSystem.isSingleAudioDeviceType(devices, device);
+        final boolean hasMediaDynamicPolicy = mDeviceBroker.hasMediaDynamicPolicy();
+        if (((device == musicDevice) || inCommunication)
+                && singleAudioDeviceType
+                && !hasMediaDynamicPolicy
                 && (musicDevice != AudioSystem.DEVICE_OUT_REMOTE_SUBMIX)) {
             if (!mAudioSystem.isStreamActive(AudioSystem.STREAM_MUSIC, 0 /*not looking in past*/)
                     && !mDeviceBroker.hasAudioFocusUsers()) {
@@ -1205,6 +1279,12 @@ public class AudioDeviceInventory {
             }
             mDeviceBroker.postBroadcastBecomingNoisy();
             delay = AudioService.BECOMING_NOISY_DELAY_MS;
+        } else {
+            Log.i(TAG, "not sending NOISY: device:0x" + Integer.toHexString(device)
+                    + " musicDevice:0x" + Integer.toHexString(musicDevice)
+                    + " inComm:" + inCommunication
+                    + " mediaPolicy:" + hasMediaDynamicPolicy
+                    + " singleDevice:" + singleAudioDeviceType);
         }
 
         mmi.set(MediaMetrics.Property.DELAY_MS, delay).record();
@@ -1300,6 +1380,9 @@ public class AudioDeviceInventory {
             case AudioSystem.DEVICE_OUT_USB_HEADSET:
                 connType = AudioRoutesInfo.MAIN_USB;
                 break;
+            case AudioSystem.DEVICE_OUT_DGTL_DOCK_HEADSET:
+                connType = AudioRoutesInfo.MAIN_DOCK_SPEAKERS;
+                break;
         }
 
         synchronized (mCurAudioRoutes) {
@@ -1393,6 +1476,17 @@ public class AudioDeviceInventory {
         mDevRoleCapturePresetDispatchers.finishBroadcast();
     }
 
+    UUID getDeviceSensorUuid(AudioDeviceAttributes device) {
+        final String key = DeviceInfo.makeDeviceListKey(device.getInternalType(),
+                device.getAddress());
+        synchronized (mDevicesLock) {
+            DeviceInfo di = mConnectedDevices.get(key);
+            if (di == null) {
+                return null;
+            }
+            return di.mSensorUuid;
+        }
+    }
     //----------------------------------------------------------
     // For tests only
 

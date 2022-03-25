@@ -28,6 +28,7 @@ import static android.app.NotificationManager.Policy.PRIORITY_CATEGORY_REPEAT_CA
 import static android.app.NotificationManager.Policy.PRIORITY_CATEGORY_SYSTEM;
 import static android.app.NotificationManager.Policy.PRIORITY_SENDERS_ANY;
 import static android.app.NotificationManager.Policy.PRIORITY_SENDERS_STARRED;
+import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_AMBIENT;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_BADGE;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_FULL_SCREEN_INTENT;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_LIGHTS;
@@ -1264,6 +1265,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
 
         assertEquals(SUPPRESSED_EFFECT_FULL_SCREEN_INTENT
                         | SUPPRESSED_EFFECT_LIGHTS
+                        | SUPPRESSED_EFFECT_AMBIENT
                         | SUPPRESSED_EFFECT_PEEK,
                 mZenModeHelperSpy.mConfig.suppressedVisualEffects);
 
@@ -1297,7 +1299,9 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         parser.nextTag();
         mZenModeHelperSpy.readXml(parser, false, UserHandle.USER_ALL);
 
-        assertEquals(SUPPRESSED_EFFECT_FULL_SCREEN_INTENT | SUPPRESSED_EFFECT_LIGHTS,
+        assertEquals(SUPPRESSED_EFFECT_FULL_SCREEN_INTENT
+                        | SUPPRESSED_EFFECT_LIGHTS
+                        | SUPPRESSED_EFFECT_AMBIENT,
                 mZenModeHelperSpy.mConfig.suppressedVisualEffects);
     }
 

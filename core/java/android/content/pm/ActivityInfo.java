@@ -16,12 +16,16 @@
 
 package android.content.pm;
 
+import android.annotation.FloatRange;
 import android.annotation.IntDef;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.app.Activity;
 import android.app.compat.CompatChanges;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.Disabled;
+import android.compat.annotation.EnabledSince;
 import android.compat.annotation.Overridable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
@@ -33,10 +37,16 @@ import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.UserHandle;
+import android.util.ArraySet;
 import android.util.Printer;
+
+import com.android.internal.util.Parcelling;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Collections;
+import java.util.Locale;
+import java.util.Set;
 
 /**
  * Information you can retrieve about a particular application
@@ -45,6 +55,9 @@ import java.lang.annotation.RetentionPolicy;
  * &lt;receiver&gt; tags.
  */
 public class ActivityInfo extends ComponentInfo implements Parcelable {
+
+    private static final Parcelling.BuiltIn.ForStringSet sForStringSet =
+            Parcelling.Cache.getOrCreate(Parcelling.BuiltIn.ForStringSet.class);
 
      // NOTE: When adding new data members be sure to update the copy-constructor, Parcel
      // constructor, and writeToParcel.
@@ -302,12 +315,23 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
      * @see android.R.attr#colorMode
      */
     public static final int COLOR_MODE_HDR = 2;
+    // 3 Corresponds to android::uirenderer::ColorMode::Hdr10.
+    /**
+     * Value of {@link #colorMode} indicating that the activity should use an
+     * 8 bit alpha buffer if the presentation display supports it.
+     *
+     * @see android.R.attr#colorMode
+     * @hide
+     */
+    public static final int COLOR_MODE_A8 = 4;
+
 
     /** @hide */
     @IntDef(prefix = { "COLOR_MODE_" }, value = {
             COLOR_MODE_DEFAULT,
             COLOR_MODE_WIDE_COLOR_GAMUT,
             COLOR_MODE_HDR,
+            COLOR_MODE_A8,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ColorMode {}
@@ -446,6 +470,12 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
      * @see android.app.Activity#setVrModeEnabled(boolean, ComponentName)
      */
     public static final int FLAG_ENABLE_VR_MODE = 0x8000;
+    /**
+     * Bit in {@link #flags} indicating if the activity can be displayed on a remote device.
+     * Corresponds to {@link android.R.attr#canDisplayOnRemoteDevices}
+     * @hide
+     */
+    public static final int FLAG_CAN_DISPLAY_ON_REMOTE_DEVICES = 0x10000;
 
     /**
      * Bit in {@link #flags} indicating if the activity is always focusable regardless of if it is
@@ -506,6 +536,13 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     public static final int FLAG_PREFER_MINIMAL_POST_PROCESSING = 0x2000000;
 
     /**
+     * Bit in {@link #flags}: If set, indicates that the activity can be embedded by untrusted
+     * hosts. In this case the interactions with and visibility of the embedded activity may be
+     * limited. Set from the {@link android.R.attr#allowUntrustedActivityEmbedding} attribute.
+     */
+    public static final int FLAG_ALLOW_UNTRUSTED_ACTIVITY_EMBEDDING = 0x10000000;
+
+    /**
      * @hide Bit in {@link #flags}: If set, this component will only be seen
      * by the system user.  Only works with broadcast receivers.  Set from the
      * android.R.attr#systemUserOnly attribute.
@@ -542,7 +579,8 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
      * {@link #FLAG_STATE_NOT_NEEDED}, {@link #FLAG_EXCLUDE_FROM_RECENTS},
      * {@link #FLAG_ALLOW_TASK_REPARENTING}, {@link #FLAG_NO_HISTORY},
      * {@link #FLAG_FINISH_ON_CLOSE_SYSTEM_DIALOGS},
-     * {@link #FLAG_HARDWARE_ACCELERATED}, {@link #FLAG_SINGLE_USER}.
+     * {@link #FLAG_HARDWARE_ACCELERATED}, {@link #FLAG_SINGLE_USER},
+     * {@link #FLAG_ALLOW_UNTRUSTED_ACTIVITY_EMBEDDING}.
      */
     public int flags;
 
@@ -994,9 +1032,9 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
      * OVERRIDE_MIN_ASPECT_RATIO_MEDIUM
      * OVERRIDE_MIN_ASPECT_RATIO_LARGE
      *
-     * If OVERRIDE_MIN_ASPECT_RATIO is applied, the min aspect ratio given in the app's
-     * manifest will be overridden to the largest enabled aspect ratio treatment unless the app's
-     * manifest value is higher.
+     * If OVERRIDE_MIN_ASPECT_RATIO is applied, the min aspect ratio given in the app's manifest
+     * will be overridden to the largest enabled aspect ratio treatment unless the app's manifest
+     * value is higher.
      * @hide
      */
     @ChangeId
@@ -1004,6 +1042,19 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     @Disabled
     @TestApi
     public static final long OVERRIDE_MIN_ASPECT_RATIO = 174042980L; // buganizer id
+
+    /**
+     * This change id restricts treatments that force a given min aspect ratio to activities
+     * whose orientation is fixed to portrait.
+     *
+     * This treatment is enabled by default and only takes effect if OVERRIDE_MIN_ASPECT_RATIO is
+     * also enabled.
+     * @hide
+     */
+    @ChangeId
+    @Overridable
+    @TestApi
+    public static final long OVERRIDE_MIN_ASPECT_RATIO_PORTRAIT_ONLY = 203647190L; // buganizer id
 
     /**
      * This change id sets the activity's min aspect ratio to a medium value as defined by
@@ -1038,6 +1089,21 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     /** @hide Large override aspect ratio, currently 16:9 */
     @TestApi
     public static final float OVERRIDE_MIN_ASPECT_RATIO_LARGE_VALUE = 16 / 9f;
+
+    /**
+     * Compares activity window layout min width/height with require space for multi window to
+     * determine if it can be put into multi window mode.
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.S)
+    private static final long CHECK_MIN_WIDTH_HEIGHT_FOR_MULTI_WINDOW = 197654537L;
+
+    /**
+     * Optional set of a certificates identifying apps that are allowed to embed this activity. From
+     * the "knownActivityEmbeddingCerts" attribute.
+     */
+    @Nullable
+    private Set<String> mKnownActivityEmbeddingCerts;
 
     /**
      * Convert Java change bits to native.
@@ -1187,6 +1253,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
         launchMode = orig.launchMode;
         documentLaunchMode = orig.documentLaunchMode;
         permission = orig.permission;
+        mKnownActivityEmbeddingCerts = orig.mKnownActivityEmbeddingCerts;
         taskAffinity = orig.taskAffinity;
         targetActivity = orig.targetActivity;
         flags = orig.flags;
@@ -1232,8 +1299,8 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
      * Returns true if the activity has maximum or minimum aspect ratio.
      * @hide
      */
-    public boolean hasFixedAspectRatio() {
-        return getMaxAspectRatio() != 0 || getMinAspectRatio() != 0;
+    public boolean hasFixedAspectRatio(@ScreenOrientation int orientation) {
+        return getMaxAspectRatio() != 0 || getMinAspectRatio(orientation) != 0;
     }
 
     /**
@@ -1326,9 +1393,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
      */
     @SizeChangesSupportMode
     public int supportsSizeChanges() {
-        if (CompatChanges.isChangeEnabled(FORCE_NON_RESIZE_APP,
-                applicationInfo.packageName,
-                UserHandle.getUserHandleForUid(applicationInfo.uid))) {
+        if (isChangeEnabled(FORCE_NON_RESIZE_APP)) {
             return SIZE_CHANGES_UNSUPPORTED_OVERRIDE;
         }
 
@@ -1336,9 +1401,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
             return SIZE_CHANGES_SUPPORTED_METADATA;
         }
 
-        if (CompatChanges.isChangeEnabled(FORCE_RESIZE_APP,
-                applicationInfo.packageName,
-                UserHandle.getUserHandleForUid(applicationInfo.uid))) {
+        if (isChangeEnabled(FORCE_RESIZE_APP)) {
             return SIZE_CHANGES_SUPPORTED_OVERRIDE;
         }
 
@@ -1349,27 +1412,23 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
      * Returns if the activity should never be sandboxed to the activity window bounds.
      * @hide
      */
-    public boolean neverSandboxDisplayApis() {
-        return CompatChanges.isChangeEnabled(NEVER_SANDBOX_DISPLAY_APIS,
-                applicationInfo.packageName,
-                UserHandle.getUserHandleForUid(applicationInfo.uid))
-                || ConstrainDisplayApisConfig.neverConstrainDisplayApis(applicationInfo);
+    public boolean neverSandboxDisplayApis(ConstrainDisplayApisConfig constrainDisplayApisConfig) {
+        return isChangeEnabled(NEVER_SANDBOX_DISPLAY_APIS)
+                || constrainDisplayApisConfig.getNeverConstrainDisplayApis(applicationInfo);
     }
 
     /**
      * Returns if the activity should always be sandboxed to the activity window bounds.
      * @hide
      */
-    public boolean alwaysSandboxDisplayApis() {
-        return CompatChanges.isChangeEnabled(ALWAYS_SANDBOX_DISPLAY_APIS,
-                applicationInfo.packageName,
-                UserHandle.getUserHandleForUid(applicationInfo.uid))
-                || ConstrainDisplayApisConfig.alwaysConstrainDisplayApis(applicationInfo);
+    public boolean alwaysSandboxDisplayApis(ConstrainDisplayApisConfig constrainDisplayApisConfig) {
+        return isChangeEnabled(ALWAYS_SANDBOX_DISPLAY_APIS)
+                || constrainDisplayApisConfig.getAlwaysConstrainDisplayApis(applicationInfo);
     }
 
     /** @hide */
-    public void setMaxAspectRatio(float maxAspectRatio) {
-        this.mMaxAspectRatio = maxAspectRatio;
+    public void setMaxAspectRatio(@FloatRange(from = 0f) float maxAspectRatio) {
+        this.mMaxAspectRatio = maxAspectRatio >= 0f ? maxAspectRatio : 0f;
     }
 
     /** @hide */
@@ -1378,8 +1437,8 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     }
 
     /** @hide */
-    public void setMinAspectRatio(float minAspectRatio) {
-        this.mMinAspectRatio = minAspectRatio;
+    public void setMinAspectRatio(@FloatRange(from = 0f) float minAspectRatio) {
+        this.mMinAspectRatio = minAspectRatio >= 0f ? minAspectRatio : 0f;
     }
 
     /**
@@ -1392,26 +1451,52 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
      * {@code getManifestMinAspectRatio}.
      * @hide
      */
-    public float getMinAspectRatio() {
-        if (applicationInfo == null || !CompatChanges.isChangeEnabled(OVERRIDE_MIN_ASPECT_RATIO,
-                applicationInfo.packageName,
-                UserHandle.getUserHandleForUid(applicationInfo.uid))) {
+    public float getMinAspectRatio(@ScreenOrientation int orientation) {
+        if (applicationInfo == null || !isChangeEnabled(OVERRIDE_MIN_ASPECT_RATIO) || (
+                isChangeEnabled(OVERRIDE_MIN_ASPECT_RATIO_PORTRAIT_ONLY)
+                        && !isFixedOrientationPortrait(orientation))) {
             return mMinAspectRatio;
         }
 
-        if (CompatChanges.isChangeEnabled(OVERRIDE_MIN_ASPECT_RATIO_LARGE,
-                applicationInfo.packageName,
-                UserHandle.getUserHandleForUid(applicationInfo.uid))) {
+        if (isChangeEnabled(OVERRIDE_MIN_ASPECT_RATIO_LARGE)) {
             return Math.max(OVERRIDE_MIN_ASPECT_RATIO_LARGE_VALUE, mMinAspectRatio);
         }
 
-        if (CompatChanges.isChangeEnabled(OVERRIDE_MIN_ASPECT_RATIO_MEDIUM,
-                applicationInfo.packageName,
-                UserHandle.getUserHandleForUid(applicationInfo.uid))) {
+        if (isChangeEnabled(OVERRIDE_MIN_ASPECT_RATIO_MEDIUM)) {
             return Math.max(OVERRIDE_MIN_ASPECT_RATIO_MEDIUM_VALUE, mMinAspectRatio);
         }
 
         return mMinAspectRatio;
+    }
+
+    /**
+     * Gets the trusted host certificate digests of apps that are allowed to embed this activity.
+     * The digests are computed using the SHA-256 digest algorithm.
+     * @see android.R.attr#knownActivityEmbeddingCerts
+     */
+    @NonNull
+    public Set<String> getKnownActivityEmbeddingCerts() {
+        return mKnownActivityEmbeddingCerts == null ? Collections.emptySet()
+                : mKnownActivityEmbeddingCerts;
+    }
+
+    /**
+     * Sets the trusted host certificates of apps that are allowed to embed this activity.
+     * @see #getKnownActivityEmbeddingCerts()
+     * @hide
+     */
+    public void setKnownActivityEmbeddingCerts(@NonNull Set<String> knownActivityEmbeddingCerts) {
+        // Convert the provided digest to upper case for consistent Set membership
+        // checks when verifying the signing certificate digests of requesting apps.
+        mKnownActivityEmbeddingCerts = new ArraySet<>();
+        for (String knownCert : knownActivityEmbeddingCerts) {
+            mKnownActivityEmbeddingCerts.add(knownCert.toUpperCase(Locale.US));
+        }
+    }
+
+    private boolean isChangeEnabled(long changeId) {
+        return CompatChanges.isChangeEnabled(changeId, applicationInfo.packageName,
+                UserHandle.getUserHandleForUid(applicationInfo.uid));
     }
 
     /** @hide */
@@ -1475,6 +1560,15 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
         }
     }
 
+    /**
+     * Whether we should compare activity window layout min width/height with require space for
+     * multi window to determine if it can be put into multi window mode.
+     * @hide
+     */
+    public boolean shouldCheckMinWidthHeightForMultiWindow() {
+        return isChangeEnabled(CHECK_MIN_WIDTH_HEIGHT_FOR_MULTI_WINDOW);
+    }
+
     public void dump(Printer pw, String prefix) {
         dump(pw, prefix, DUMP_FLAG_ALL);
     }
@@ -1521,14 +1615,18 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
         if (getMaxAspectRatio() != 0) {
             pw.println(prefix + "maxAspectRatio=" + getMaxAspectRatio());
         }
-        if (getMinAspectRatio() != 0) {
-            pw.println(prefix + "minAspectRatio=" + getMinAspectRatio());
-            if (getManifestMinAspectRatio() !=  getMinAspectRatio()) {
+        final float minAspectRatio = getMinAspectRatio(screenOrientation);
+        if (minAspectRatio != 0) {
+            pw.println(prefix + "minAspectRatio=" + minAspectRatio);
+            if (getManifestMinAspectRatio() !=  minAspectRatio) {
                 pw.println(prefix + "getManifestMinAspectRatio=" + getManifestMinAspectRatio());
             }
         }
         if (supportsSizeChanges) {
             pw.println(prefix + "supportsSizeChanges=true");
+        }
+        if (mKnownActivityEmbeddingCerts != null) {
+            pw.println(prefix + "knownActivityEmbeddingCerts=" + mKnownActivityEmbeddingCerts);
         }
         super.dumpBack(pw, prefix, dumpFlags);
     }
@@ -1575,6 +1673,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
         dest.writeFloat(mMaxAspectRatio);
         dest.writeFloat(mMinAspectRatio);
         dest.writeBoolean(supportsSizeChanges);
+        sForStringSet.parcel(mKnownActivityEmbeddingCerts, dest, flags);
     }
 
     /**
@@ -1650,6 +1749,8 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
                 return "COLOR_MODE_WIDE_COLOR_GAMUT";
             case COLOR_MODE_HDR:
                 return "COLOR_MODE_HDR";
+            case COLOR_MODE_A8:
+                return "COLOR_MODE_A8";
             default:
                 return Integer.toString(colorMode);
         }
@@ -1694,6 +1795,10 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
         mMaxAspectRatio = source.readFloat();
         mMinAspectRatio = source.readFloat();
         supportsSizeChanges = source.readBoolean();
+        mKnownActivityEmbeddingCerts = sForStringSet.unparcel(source);
+        if (mKnownActivityEmbeddingCerts.isEmpty()) {
+            mKnownActivityEmbeddingCerts = null;
+        }
     }
 
     /**

@@ -267,4 +267,6 @@
     <item msgid="8828567335701536560">" ਆਡੀਓ  ਸਰੋਤ"</item>
     <item msgid="8688681727755534982">"MIDI"</item>
   </string-array>
+  <string-array name="avatar_image_descriptions">
+  </string-array>
 </resources>

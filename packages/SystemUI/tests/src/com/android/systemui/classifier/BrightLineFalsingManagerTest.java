@@ -91,7 +91,7 @@ public class BrightLineFalsingManagerTest extends SysuiTestCase {
     @Test
     public void testA11yDisablesGesture() {
         assertThat(mBrightLineFalsingManager.isFalseTap(1)).isTrue();
-        when(mAccessibilityManager.isEnabled()).thenReturn(true);
+        when(mAccessibilityManager.isTouchExplorationEnabled()).thenReturn(true);
         assertThat(mBrightLineFalsingManager.isFalseTap(1)).isFalse();
     }
 
@@ -99,7 +99,7 @@ public class BrightLineFalsingManagerTest extends SysuiTestCase {
     @Test
     public void testA11yDisablesTap() {
         assertThat(mBrightLineFalsingManager.isFalseTouch(Classifier.GENERIC)).isTrue();
-        when(mAccessibilityManager.isEnabled()).thenReturn(true);
+        when(mAccessibilityManager.isTouchExplorationEnabled()).thenReturn(true);
         assertThat(mBrightLineFalsingManager.isFalseTouch(Classifier.GENERIC)).isFalse();
     }
 
@@ -107,7 +107,7 @@ public class BrightLineFalsingManagerTest extends SysuiTestCase {
     @Test
     public void testA11yDisablesDoubleTap() {
         assertThat(mBrightLineFalsingManager.isFalseDoubleTap()).isTrue();
-        when(mAccessibilityManager.isEnabled()).thenReturn(true);
+        when(mAccessibilityManager.isTouchExplorationEnabled()).thenReturn(true);
         assertThat(mBrightLineFalsingManager.isFalseDoubleTap()).isFalse();
     }
 

@@ -378,8 +378,7 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
             List<Notification.Action> actions, Context context) {
         List<Notification.Action> broadcastActions = new ArrayList<>();
         for (Notification.Action action : actions) {
-            // Proxy smart actions through {@link GlobalScreenshot.SmartActionsReceiver}
-            // for logging smart actions.
+            // Proxy smart actions through {@link SmartActionsReceiver} for logging smart actions.
             Bundle extras = action.getExtras();
             String actionType = extras.getString(
                     ScreenshotNotificationSmartActionsProvider.ACTION_TYPE,
@@ -433,8 +432,7 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
                 context, 0, sharingIntent,
                 PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
-        // Proxy smart actions through {@link GlobalScreenshot.SmartActionsReceiver}
-        // for logging smart actions.
+        // Proxy smart actions through {@link SmartActionsReceiver} for logging smart actions.
         Bundle extras = action.getExtras();
         String actionType = extras.getString(
                 ScreenshotNotificationSmartActionsProvider.ACTION_TYPE,

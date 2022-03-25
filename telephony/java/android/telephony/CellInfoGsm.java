@@ -51,43 +51,11 @@ public final class CellInfoGsm extends CellInfo implements Parcelable {
     }
 
     /** @hide */
-    public CellInfoGsm(android.hardware.radio.V1_0.CellInfo ci) {
-        super(ci);
-        final android.hardware.radio.V1_0.CellInfoGsm cig = ci.gsm.get(0);
-        mCellIdentityGsm = new CellIdentityGsm(cig.cellIdentityGsm);
-        mCellSignalStrengthGsm = new CellSignalStrengthGsm(cig.signalStrengthGsm);
-    }
-
-    /** @hide */
-    public CellInfoGsm(android.hardware.radio.V1_2.CellInfo ci) {
-        super(ci);
-        final android.hardware.radio.V1_2.CellInfoGsm cig = ci.gsm.get(0);
-        mCellIdentityGsm = new CellIdentityGsm(cig.cellIdentityGsm);
-        mCellSignalStrengthGsm = new CellSignalStrengthGsm(cig.signalStrengthGsm);
-    }
-
-    /** @hide */
-    public CellInfoGsm(android.hardware.radio.V1_4.CellInfo ci, long timeStamp) {
-        super(ci, timeStamp);
-        final android.hardware.radio.V1_2.CellInfoGsm cig = ci.info.gsm();
-        mCellIdentityGsm = new CellIdentityGsm(cig.cellIdentityGsm);
-        mCellSignalStrengthGsm = new CellSignalStrengthGsm(cig.signalStrengthGsm);
-    }
-
-    /** @hide */
-    public CellInfoGsm(android.hardware.radio.V1_5.CellInfo ci, long timeStamp) {
-        super(ci, timeStamp);
-        final android.hardware.radio.V1_5.CellInfoGsm cig = ci.ratSpecificInfo.gsm();
-        mCellIdentityGsm = new CellIdentityGsm(cig.cellIdentityGsm);
-        mCellSignalStrengthGsm = new CellSignalStrengthGsm(cig.signalStrengthGsm);
-    }
-
-    /** @hide */
-    public CellInfoGsm(android.hardware.radio.V1_6.CellInfo ci, long timeStamp) {
-        super(ci, timeStamp);
-        final android.hardware.radio.V1_5.CellInfoGsm cig = ci.ratSpecificInfo.gsm();
-        mCellIdentityGsm = new CellIdentityGsm(cig.cellIdentityGsm);
-        mCellSignalStrengthGsm = new CellSignalStrengthGsm(cig.signalStrengthGsm);
+    public CellInfoGsm(int cellConnectionStatus, boolean registered, long timeStamp,
+            CellIdentityGsm cellIdentityGsm, CellSignalStrengthGsm cellSignalStrengthGsm) {
+        super(cellConnectionStatus, registered, timeStamp);
+        mCellIdentityGsm = cellIdentityGsm;
+        mCellSignalStrengthGsm = cellSignalStrengthGsm;
     }
 
     /**

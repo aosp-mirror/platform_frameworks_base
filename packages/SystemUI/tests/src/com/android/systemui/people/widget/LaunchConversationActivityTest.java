@@ -21,7 +21,9 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -43,8 +45,9 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.CommandQueue;
-import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
+import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
 import com.android.systemui.wmshell.BubblesManager;
 import com.android.wm.shell.bubbles.Bubble;
 
@@ -76,7 +79,9 @@ public class LaunchConversationActivityTest extends SysuiTestCase {
     private LaunchConversationActivity mActivity;
 
     @Mock
-    private NotificationEntryManager mNotificationEntryManager;
+    private NotificationVisibilityProvider mVisibilityProvider;
+    @Mock
+    private CommonNotifCollection mNotifCollection;
     @Mock
     private IStatusBarService mIStatusBarService;
     @Mock
@@ -104,8 +109,13 @@ public class LaunchConversationActivityTest extends SysuiTestCase {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        mActivity = new LaunchConversationActivity(mNotificationEntryManager,
-                Optional.of(mBubblesManager), mUserManager, mCommandQueue);
+        mActivity = new LaunchConversationActivity(
+                mVisibilityProvider,
+                mNotifCollection,
+                Optional.of(mBubblesManager),
+                mUserManager,
+                mCommandQueue
+        );
         verify(mCommandQueue, times(1)).addCallback(mCallbacksCaptor.capture());
 
         mActivity.setIsForTesting(true, mIStatusBarService);
@@ -114,19 +124,26 @@ public class LaunchConversationActivityTest extends SysuiTestCase {
         mIntent.putExtra(PeopleSpaceWidgetProvider.EXTRA_PACKAGE_NAME, PACKAGE_NAME);
         mIntent.putExtra(PeopleSpaceWidgetProvider.EXTRA_USER_HANDLE, USER_HANDLE);
 
-        when(mNotificationEntryManager.getActiveNotificationsCount()).thenReturn(NOTIF_COUNT);
-        when(mNotificationEntryManager.getPendingOrActiveNotif(NOTIF_KEY)).thenReturn(mNotifEntry);
-        when(mNotificationEntryManager.getPendingOrActiveNotif(NOTIF_KEY_NO_ENTRY))
-                .thenReturn(null);
-        when(mNotificationEntryManager.getPendingOrActiveNotif(NOTIF_KEY_NO_RANKING))
-                .thenReturn(mNotifEntryNoRanking);
-        when(mNotificationEntryManager.getPendingOrActiveNotif(NOTIF_KEY_CAN_BUBBLE))
-                .thenReturn(mNotifEntryCanBubble);
+        when(mNotifCollection.getEntry(NOTIF_KEY)).thenReturn(mNotifEntry);
+        when(mNotifCollection.getEntry(NOTIF_KEY_NO_ENTRY)).thenReturn(null);
+        when(mNotifCollection.getEntry(NOTIF_KEY_NO_RANKING)).thenReturn(mNotifEntryNoRanking);
+        when(mNotifCollection.getEntry(NOTIF_KEY_CAN_BUBBLE)).thenReturn(mNotifEntryCanBubble);
+        when(mVisibilityProvider.obtain(anyString(), anyBoolean())).thenAnswer(
+                invocation-> {
+                    String key = invocation.getArgument(0);
+                    boolean visible = invocation.getArgument(1);
+                    return NotificationVisibility.obtain(key, NOTIF_RANK, NOTIF_COUNT, visible);
+                });
+        when(mVisibilityProvider.obtain(any(NotificationEntry.class), anyBoolean())).thenAnswer(
+                invocation-> {
+                    String key = invocation.<NotificationEntry>getArgument(0).getKey();
+                    boolean visible = invocation.getArgument(1);
+                    return NotificationVisibility.obtain(key, NOTIF_RANK, NOTIF_COUNT, visible);
+                });
         when(mNotifEntry.getRanking()).thenReturn(mRanking);
         when(mNotifEntryCanBubble.getRanking()).thenReturn(mRanking);
         when(mNotifEntryCanBubble.canBubble()).thenReturn(true);
         when(mNotifEntryNoRanking.getRanking()).thenReturn(null);
-        when(mRanking.getRank()).thenReturn(NOTIF_RANK);
         when(mUserManager.isQuietModeEnabled(any(UserHandle.class))).thenReturn(false);
     }
 
@@ -173,8 +190,12 @@ public class LaunchConversationActivityTest extends SysuiTestCase {
         assertThat(mActivity.isFinishing()).isTrue();
         mCallbacksCaptor.getValue().appTransitionFinished(DEFAULT_DISPLAY);
 
+        // Ensure callback removed
+        verify(mCommandQueue).removeCallback(any());
+        // Clear the notification for bubbles.
         verify(mIStatusBarService, times(1)).onNotificationClear(any(),
                 anyInt(), any(), anyInt(), anyInt(), mNotificationVisibilityCaptor.capture());
+        // Do not select the bubble.
         verify(mBubblesManager, never()).expandStackAndSelectBubble(any(Bubble.class));
         verify(mBubblesManager, never()).expandStackAndSelectBubble(any(NotificationEntry.class));
 
@@ -194,6 +215,8 @@ public class LaunchConversationActivityTest extends SysuiTestCase {
         assertThat(mActivity.isFinishing()).isTrue();
         mCallbacksCaptor.getValue().appTransitionFinished(DEFAULT_DISPLAY);
 
+        // Ensure callback removed
+        verify(mCommandQueue).removeCallback(any());
         // Don't clear the notification for bubbles.
         verify(mIStatusBarService, never()).onNotificationClear(any(),
                 anyInt(), any(), anyInt(), anyInt(), any());
@@ -211,10 +234,14 @@ public class LaunchConversationActivityTest extends SysuiTestCase {
         mActivity.onCreate(new Bundle());
 
         assertThat(mActivity.isFinishing()).isTrue();
-        mCommandQueue.appTransitionFinished(DEFAULT_DISPLAY);
+        mCallbacksCaptor.getValue().appTransitionFinished(DEFAULT_DISPLAY);
 
+        // Ensure callback removed
+        verify(mCommandQueue).removeCallback(any());
+        // Don't clear the notification for bubbles.
         verify(mIStatusBarService, never()).onNotificationClear(any(),
                 anyInt(), any(), anyInt(), anyInt(), any());
+        // Do not select the bubble.
         verify(mBubblesManager, never()).expandStackAndSelectBubble(any(Bubble.class));
         verify(mBubblesManager, never()).expandStackAndSelectBubble(any(NotificationEntry.class));
     }
@@ -233,6 +260,9 @@ public class LaunchConversationActivityTest extends SysuiTestCase {
         assertThat(mActivity.isFinishing()).isTrue();
         mCallbacksCaptor.getValue().appTransitionFinished(DEFAULT_DISPLAY);
 
+        // Ensure callback removed
+        verify(mCommandQueue).removeCallback(any());
+        // Select the bubble.
         verify(mBubblesManager, times(1)).expandStackAndSelectBubble(eq(bubble));
     }
 }

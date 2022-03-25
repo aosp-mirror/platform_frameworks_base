@@ -23,15 +23,15 @@ package {
 
 android_test_helper_app {
     name: "LargeResourcesCompressed",
-    static_libs: [ "androidx.appcompat_appcompat" ],
+    static_libs: ["androidx.appcompat_appcompat"],
 }
 
 genrule {
     name: "LargeResourcesUncompressed",
-    srcs: [ ":LargeResourcesCompressed" ],
+    srcs: [":LargeResourcesCompressed"],
     out: ["LargeResourcesUncompressed.apk"],
-    cmd: "cp $(in) $(out) && unzip -o $(out) resources.arsc"
-         + " && zip $(out) resources.arsc"
+    cmd: "cp $(in) $(out) && unzip -o $(out) resources.arsc -d $(genDir)" +
+        " && zip -j $(out) $(genDir)/resources.arsc",
 }
 
 java_library {

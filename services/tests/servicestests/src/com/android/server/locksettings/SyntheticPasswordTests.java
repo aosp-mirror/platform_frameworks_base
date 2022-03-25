@@ -36,6 +36,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.admin.PasswordMetrics;
+import android.app.PropertyInvalidatedCache;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
@@ -49,6 +50,7 @@ import com.android.server.locksettings.SyntheticPasswordManager.AuthenticationRe
 import com.android.server.locksettings.SyntheticPasswordManager.AuthenticationToken;
 import com.android.server.locksettings.SyntheticPasswordManager.PasswordData;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -67,6 +69,11 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
 
     public static final byte[] PAYLOAD = new byte[] {1, 2, -1, -2, 55};
     public static final byte[] PAYLOAD2 = new byte[] {2, 3, -2, -3, 44, 1};
+
+    @Before
+    public void disableProcessCaches() {
+        PropertyInvalidatedCache.disableForTestMode();
+    }
 
     @Test
     public void testPasswordBasedSyntheticPassword() throws RemoteException {
@@ -250,7 +257,7 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         flushHandlerTasks();
         final PasswordMetrics metric = PasswordMetrics.computeForCredential(pattern);
         assertEquals(metric, mService.getUserPasswordMetrics(PRIMARY_USER_ID));
-        verify(mDevicePolicyManager).reportPasswordChanged(PRIMARY_USER_ID);
+        verify(mDevicePolicyManager).reportPasswordChanged(metric, PRIMARY_USER_ID);
 
         assertEquals(VerifyCredentialResponse.RESPONSE_OK, mService.verifyCredential(
                 pattern, PRIMARY_USER_ID, 0 /* flags */).getResponseCode());

@@ -213,7 +213,7 @@ public class LocationProviderManagerTest {
     public void testProperties() {
         assertThat(mManager.getName()).isEqualTo(NAME);
         assertThat(mManager.getProperties()).isEqualTo(PROPERTIES);
-        assertThat(mManager.getIdentity()).isEqualTo(IDENTITY);
+        assertThat(mManager.getProviderIdentity()).isEqualTo(IDENTITY);
         assertThat(mManager.hasProvider()).isTrue();
 
         ProviderProperties newProperties = new ProviderProperties.Builder()
@@ -230,7 +230,7 @@ public class LocationProviderManagerTest {
         CallerIdentity newIdentity = CallerIdentity.forTest(OTHER_USER, 1, "otherpackage",
                 "otherattribution");
         mProvider.setIdentity(newIdentity);
-        assertThat(mManager.getIdentity()).isEqualTo(newIdentity);
+        assertThat(mManager.getProviderIdentity()).isEqualTo(newIdentity);
 
         mManager.setRealProvider(null);
         assertThat(mManager.hasProvider()).isFalse();
@@ -333,6 +333,10 @@ public class LocationProviderManagerTest {
 
     @Test
     public void testGetLastLocation_Bypass() {
+        mInjector.getSettingsHelper().setIgnoreSettingsAllowlist(
+                new PackageTagsList.Builder().add(
+                        IDENTITY.getPackageName()).build());
+
         assertThat(mManager.getLastLocation(new LastLocationRequest.Builder().build(), IDENTITY,
                 PERMISSION_FINE)).isNull();
         assertThat(mManager.getLastLocation(
@@ -381,6 +385,14 @@ public class LocationProviderManagerTest {
                 new LastLocationRequest.Builder().setLocationSettingsIgnored(true).build(),
                 IDENTITY, PERMISSION_FINE)).isEqualTo(
                 loc);
+
+        mInjector.getSettingsHelper().setIgnoreSettingsAllowlist(
+                new PackageTagsList.Builder().build());
+        mProvider.setProviderAllowed(false);
+
+        assertThat(mManager.getLastLocation(
+                new LastLocationRequest.Builder().setLocationSettingsIgnored(true).build(),
+                IDENTITY, PERMISSION_FINE)).isNull();
     }
 
     @Test
@@ -845,6 +857,48 @@ public class LocationProviderManagerTest {
     }
 
     @Test
+    public void testLocationMonitoring_multipleIdentities() {
+        CallerIdentity identity1 = CallerIdentity.forTest(CURRENT_USER, 1,
+                "mypackage", "attribution", "listener1");
+        CallerIdentity identity2 = CallerIdentity.forTest(CURRENT_USER, 1,
+                "mypackage", "attribution", "listener2");
+
+        assertThat(mInjector.getAppOpsHelper().isAppOpStarted(OP_MONITOR_LOCATION,
+                IDENTITY.getPackageName())).isFalse();
+        assertThat(mInjector.getAppOpsHelper().isAppOpStarted(OP_MONITOR_HIGH_POWER_LOCATION,
+                IDENTITY.getPackageName())).isFalse();
+
+        ILocationListener listener1 = createMockLocationListener();
+        LocationRequest request1 = new LocationRequest.Builder(0).setWorkSource(
+                WORK_SOURCE).build();
+        mManager.registerLocationRequest(request1, identity1, PERMISSION_FINE, listener1);
+
+        ILocationListener listener2 = createMockLocationListener();
+        LocationRequest request2 = new LocationRequest.Builder(0).setWorkSource(
+                WORK_SOURCE).build();
+        mManager.registerLocationRequest(request2, identity2, PERMISSION_FINE, listener2);
+
+        assertThat(mInjector.getAppOpsHelper().isAppOpStarted(OP_MONITOR_LOCATION,
+                "mypackage")).isTrue();
+        assertThat(mInjector.getAppOpsHelper().isAppOpStarted(OP_MONITOR_HIGH_POWER_LOCATION,
+                "mypackage")).isTrue();
+
+        mManager.unregisterLocationRequest(listener2);
+
+        assertThat(mInjector.getAppOpsHelper().isAppOpStarted(OP_MONITOR_LOCATION,
+                "mypackage")).isTrue();
+        assertThat(mInjector.getAppOpsHelper().isAppOpStarted(OP_MONITOR_HIGH_POWER_LOCATION,
+                "mypackage")).isTrue();
+
+        mManager.unregisterLocationRequest(listener1);
+
+        assertThat(mInjector.getAppOpsHelper().isAppOpStarted(OP_MONITOR_LOCATION,
+                "mypackage")).isFalse();
+        assertThat(mInjector.getAppOpsHelper().isAppOpStarted(OP_MONITOR_HIGH_POWER_LOCATION,
+                "mypackage")).isFalse();
+    }
+
+    @Test
     public void testProviderRequest() {
         assertThat(mProvider.getRequest().isActive()).isFalse();
 
@@ -903,6 +957,21 @@ public class LocationProviderManagerTest {
         mInjector.getAlarmHelper().incrementAlarmTime(60000);
         assertThat(mProvider.getRequest().isActive()).isTrue();
         assertThat(mProvider.getRequest().getIntervalMillis()).isEqualTo(60000);
+    }
+
+    @Test
+    public void testProviderRequest_DelayedRequest_Remove() {
+        mProvider.setProviderLocation(createLocation(NAME, mRandom));
+
+        ILocationListener listener1 = createMockLocationListener();
+        LocationRequest request1 = new LocationRequest.Builder(60000)
+                .setWorkSource(WORK_SOURCE)
+                .build();
+        mManager.registerLocationRequest(request1, IDENTITY, PERMISSION_FINE, listener1);
+        mManager.unregisterLocationRequest(listener1);
+
+        mInjector.getAlarmHelper().incrementAlarmTime(60000);
+        assertThat(mProvider.getRequest().isActive()).isFalse();
     }
 
     @Test

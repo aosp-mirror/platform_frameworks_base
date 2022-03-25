@@ -20,15 +20,14 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.database.ContentObserver;
-import android.graphics.Point;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.Display;
 import android.view.IWindowManager;
 import android.view.Surface;
 import android.view.WindowManagerGlobal;
@@ -73,19 +72,16 @@ public final class RotationPolicy {
      * otherwise Configuration.ORIENTATION_UNDEFINED if any orientation is lockable.
      */
     public static int getRotationLockOrientation(Context context) {
-        if (!areAllRotationsAllowed(context)) {
-            final Point size = new Point();
-            final IWindowManager wm = WindowManagerGlobal.getWindowManagerService();
-            try {
-                final int displayId = context.getDisplayId();
-                wm.getInitialDisplaySize(displayId, size);
-                return size.x < size.y ?
-                        Configuration.ORIENTATION_PORTRAIT : Configuration.ORIENTATION_LANDSCAPE;
-            } catch (RemoteException e) {
-                Log.w(TAG, "Unable to get the display size");
-            }
+        if (areAllRotationsAllowed(context)) {
+            return Configuration.ORIENTATION_UNDEFINED;
         }
-        return Configuration.ORIENTATION_UNDEFINED;
+        final DisplayMetrics metrics = context.getResources().getDisplayMetrics();
+        final int rotation =
+                context.getResources().getConfiguration().windowConfiguration.getRotation();
+        final boolean rotated = rotation % 2 != 0;
+        final int w = rotated ? metrics.heightPixels : metrics.widthPixels;
+        final int h = rotated ? metrics.widthPixels : metrics.heightPixels;
+        return w < h ? Configuration.ORIENTATION_PORTRAIT : Configuration.ORIENTATION_LANDSCAPE;
     }
 
     /**

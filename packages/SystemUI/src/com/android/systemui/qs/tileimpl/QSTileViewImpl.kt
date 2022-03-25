@@ -25,6 +25,7 @@ import android.content.res.Configuration
 import android.content.res.Resources.ID_NULL
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.RippleDrawable
+import android.os.Trace
 import android.service.quicksettings.Tile
 import android.text.TextUtils
 import android.util.Log
@@ -42,6 +43,7 @@ import androidx.annotation.VisibleForTesting
 import com.android.settingslib.Utils
 import com.android.systemui.FontSizeUtils
 import com.android.systemui.R
+import com.android.systemui.animation.LaunchableView
 import com.android.systemui.plugins.qs.QSIconView
 import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.plugins.qs.QSTile.BooleanState
@@ -54,7 +56,7 @@ open class QSTileViewImpl @JvmOverloads constructor(
     context: Context,
     private val _icon: QSIconView,
     private val collapsed: Boolean = false
-) : QSTileView(context), HeightOverrideable {
+) : QSTileView(context), HeightOverrideable, LaunchableView {
 
     companion object {
         private const val INVALID = -1
@@ -68,6 +70,18 @@ open class QSTileViewImpl @JvmOverloads constructor(
     }
 
     override var heightOverride: Int = HeightOverrideable.NO_OVERRIDE
+        set(value) {
+            if (field == value) return
+            field = value
+            updateHeight()
+        }
+
+    override var squishinessFraction: Float = 1f
+        set(value) {
+            if (field == value) return
+            field = value
+            updateHeight()
+        }
 
     private val colorActive = Utils.getColorAttrDefaultColor(context,
             com.android.internal.R.attr.colorAccentPrimary)
@@ -75,7 +89,7 @@ open class QSTileViewImpl @JvmOverloads constructor(
     private val colorUnavailable = Utils.applyAlpha(UNAVAILABLE_ALPHA, colorInactive)
 
     private val colorLabelActive =
-            Utils.getColorAttrDefaultColor(context, android.R.attr.textColorPrimaryInverse)
+            Utils.getColorAttrDefaultColor(context, com.android.internal.R.attr.textColorOnAccent)
     private val colorLabelInactive =
             Utils.getColorAttrDefaultColor(context, android.R.attr.textColorPrimary)
     private val colorLabelUnavailable = Utils.applyAlpha(UNAVAILABLE_ALPHA, colorLabelInactive)
@@ -118,6 +132,8 @@ open class QSTileViewImpl @JvmOverloads constructor(
     private var lastStateDescription: CharSequence? = null
     private var tileState = false
     private var lastState = INVALID
+    private var blockVisibilityChanges = false
+    private var lastVisibility = View.VISIBLE
 
     private val locInScreen = IntArray(2)
 
@@ -146,6 +162,17 @@ open class QSTileViewImpl @JvmOverloads constructor(
     override fun onConfigurationChanged(newConfig: Configuration?) {
         super.onConfigurationChanged(newConfig)
         updateResources()
+    }
+
+    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        Trace.traceBegin(Trace.TRACE_TAG_APP, "QSTileViewImpl#onMeasure")
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
+        Trace.endSection()
+    }
+
+    override fun resetOverride() {
+        heightOverride = HeightOverrideable.NO_OVERRIDE
+        updateHeight()
     }
 
     fun updateResources() {
@@ -218,9 +245,20 @@ open class QSTileViewImpl @JvmOverloads constructor(
 
     override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
         super.onLayout(changed, l, t, r, b)
-        if (heightOverride != HeightOverrideable.NO_OVERRIDE) {
-            bottom = top + heightOverride
+        updateHeight()
+    }
+
+    private fun updateHeight() {
+        val actualHeight = if (heightOverride != HeightOverrideable.NO_OVERRIDE) {
+            heightOverride
+        } else {
+            measuredHeight
         }
+        // Limit how much we affect the height, so we don't have rounding artifacts when the tile
+        // is too short.
+        val constrainedSquishiness = 0.1f + squishinessFraction * 0.9f
+        bottom = top + (actualHeight * constrainedSquishiness).toInt()
+        scrollY = (actualHeight - height) / 2
     }
 
     override fun updateAccessibilityOrder(previousView: View?): View {
@@ -286,12 +324,46 @@ open class QSTileViewImpl @JvmOverloads constructor(
         return labelContainer
     }
 
+    override fun getLabel(): View {
+        return label
+    }
+
     override fun getSecondaryLabel(): View {
         return secondaryLabel
     }
 
     override fun getSecondaryIcon(): View {
         return sideView
+    }
+
+    override fun setShouldBlockVisibilityChanges(block: Boolean) {
+        blockVisibilityChanges = block
+
+        if (block) {
+            lastVisibility = visibility
+        } else {
+            visibility = lastVisibility
+        }
+    }
+
+    override fun setVisibility(visibility: Int) {
+        if (blockVisibilityChanges) {
+            lastVisibility = visibility
+            return
+        }
+
+        super.setVisibility(visibility)
+    }
+
+    override fun setTransitionVisibility(visibility: Int) {
+        if (blockVisibilityChanges) {
+            // View.setTransitionVisibility just sets the visibility flag, so we don't have to save
+            // the transition visibility separately from the normal visibility.
+            lastVisibility = visibility
+            return
+        }
+
+        super.setTransitionVisibility(visibility)
     }
 
     // Accessibility
@@ -459,7 +531,7 @@ open class QSTileViewImpl @JvmOverloads constructor(
     }
 
     private fun setColor(color: Int) {
-        colorBackgroundDrawable.setTint(color)
+        colorBackgroundDrawable.mutate().setTint(color)
         paintColor = color
     }
 
@@ -585,7 +657,10 @@ internal object SubtitleArrayMapping {
         "mictoggle" to R.array.tile_states_mictoggle,
         "controls" to R.array.tile_states_controls,
         "wallet" to R.array.tile_states_wallet,
-        "alarm" to R.array.tile_states_alarm
+        "qr_code_scanner" to R.array.tile_states_qr_code_scanner,
+        "alarm" to R.array.tile_states_alarm,
+        "onehanded" to R.array.tile_states_onehanded,
+        "color_correction" to R.array.tile_states_color_correction
     )
 
     fun getSubtitleId(spec: String?): Int {

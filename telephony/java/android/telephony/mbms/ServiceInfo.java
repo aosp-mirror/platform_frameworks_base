@@ -80,7 +80,7 @@ public class ServiceInfo {
         }
         names = new HashMap(mapCount);
         while (mapCount-- > 0) {
-            Locale locale = (java.util.Locale) in.readSerializable();
+            Locale locale = (java.util.Locale) in.readSerializable(java.util.Locale.class.getClassLoader(), java.util.Locale.class);
             String name = in.readString();
             names.put(locale, name);
         }
@@ -91,12 +91,12 @@ public class ServiceInfo {
         }
         locales = new ArrayList<Locale>(localesCount);
         while (localesCount-- > 0) {
-            Locale l = (java.util.Locale) in.readSerializable();
+            Locale l = (java.util.Locale) in.readSerializable(java.util.Locale.class.getClassLoader(), java.util.Locale.class);
             locales.add(l);
         }
         serviceId = in.readString();
-        sessionStartTime = (java.util.Date) in.readSerializable();
-        sessionEndTime = (java.util.Date) in.readSerializable();
+        sessionStartTime = (java.util.Date) in.readSerializable(java.util.Date.class.getClassLoader(), java.util.Date.class);
+        sessionEndTime = (java.util.Date) in.readSerializable(java.util.Date.class.getClassLoader(), java.util.Date.class);
     }
 
     /** @hide */

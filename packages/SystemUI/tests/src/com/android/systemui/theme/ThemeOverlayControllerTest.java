@@ -39,6 +39,8 @@ import android.content.BroadcastReceiver;
 import android.content.Intent;
 import android.content.om.FabricatedOverlay;
 import android.content.om.OverlayIdentifier;
+import android.content.res.Resources;
+import android.database.ContentObserver;
 import android.graphics.Color;
 import android.os.Handler;
 import android.os.UserHandle;
@@ -52,9 +54,12 @@ import androidx.test.filters.SmallTest;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
+import com.android.systemui.monet.ColorScheme;
+import com.android.systemui.monet.Style;
 import com.android.systemui.settings.UserTracker;
-import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceProvisionedListener;
 import com.android.systemui.util.settings.SecureSettings;
@@ -75,6 +80,9 @@ import java.util.concurrent.Executor;
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 public class ThemeOverlayControllerTest extends SysuiTestCase {
+
+    private static final int USER_SYSTEM = UserHandle.USER_SYSTEM;
+    private static final int USER_SECONDARY = 10;
 
     private ThemeOverlayController mThemeOverlayController;
     @Mock
@@ -102,6 +110,8 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
     @Mock
     private FeatureFlags mFeatureFlags;
     @Mock
+    private Resources mResources;
+    @Mock
     private WakefulnessLifecycle mWakefulnessLifecycle;
     @Captor
     private ArgumentCaptor<BroadcastReceiver> mBroadcastReceiver;
@@ -111,28 +121,47 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
     private ArgumentCaptor<DeviceProvisionedListener> mDeviceProvisionedListener;
     @Captor
     private ArgumentCaptor<WakefulnessLifecycle.Observer> mWakefulnessLifecycleObserver;
+    @Captor
+    private ArgumentCaptor<UserTracker.Callback> mUserTrackerCallback;
+    @Captor
+    private ArgumentCaptor<ContentObserver> mSettingsObserver;
+    private Style mCurrentStyle;
+
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        when(mFeatureFlags.isMonetEnabled()).thenReturn(true);
+        when(mFeatureFlags.isEnabled(Flags.MONET)).thenReturn(true);
         when(mWakefulnessLifecycle.getWakefulness()).thenReturn(WAKEFULNESS_AWAKE);
         when(mDeviceProvisionedController.isCurrentUserSetup()).thenReturn(true);
-        mThemeOverlayController = new ThemeOverlayController(null /* context */,
+        when(mResources.getColor(eq(android.R.color.system_accent1_500), any()))
+                .thenReturn(Color.RED);
+        when(mResources.getColor(eq(android.R.color.system_accent2_500), any()))
+                .thenReturn(Color.GREEN);
+        when(mResources.getColor(eq(android.R.color.system_accent3_500), any()))
+                .thenReturn(Color.BLUE);
+        when(mResources.getColor(eq(android.R.color.system_neutral1_500), any()))
+                .thenReturn(Color.YELLOW);
+        when(mResources.getColor(eq(android.R.color.system_neutral2_500), any()))
+                .thenReturn(Color.BLACK);
+        mThemeOverlayController = new ThemeOverlayController(mContext,
                 mBroadcastDispatcher, mBgHandler, mMainExecutor, mBgExecutor, mThemeOverlayApplier,
                 mSecureSettings, mWallpaperManager, mUserManager, mDeviceProvisionedController,
-                mUserTracker, mDumpManager, mFeatureFlags, mWakefulnessLifecycle) {
+                mUserTracker, mDumpManager, mFeatureFlags, mResources, mWakefulnessLifecycle) {
             @Nullable
             @Override
-            protected FabricatedOverlay getOverlay(int color, int type) {
+            protected FabricatedOverlay getOverlay(int color, int type, Style style) {
                 FabricatedOverlay overlay = mock(FabricatedOverlay.class);
                 when(overlay.getIdentifier())
                         .thenReturn(new OverlayIdentifier(Integer.toHexString(color | 0xff000000)));
+                mCurrentStyle = style;
+                mColorScheme = new ColorScheme(color, false /* nightMode */, style);
                 return overlay;
             }
         };
 
         mWakefulnessLifecycle.dispatchFinishedWakingUp();
         mThemeOverlayController.start();
+        verify(mUserTracker).addCallback(mUserTrackerCallback.capture(), eq(mMainExecutor));
         verify(mWallpaperManager).addOnColorsChangedListener(mColorsListener.capture(), eq(null),
                 eq(UserHandle.USER_ALL));
         verify(mBroadcastDispatcher).registerReceiver(mBroadcastReceiver.capture(), any(),
@@ -140,6 +169,10 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
         verify(mWakefulnessLifecycle).addObserver(mWakefulnessLifecycleObserver.capture());
         verify(mDumpManager).registerDumpable(any(), any());
         verify(mDeviceProvisionedController).addCallback(mDeviceProvisionedListener.capture());
+        verify(mSecureSettings).registerContentObserverForUser(
+                eq(Settings.Secure.getUriFor(Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES)),
+                eq(false), mSettingsObserver.capture(), eq(UserHandle.USER_ALL)
+        );
     }
 
     @Test
@@ -156,7 +189,8 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
         // Should ask for a new theme when wallpaper colors change
         WallpaperColors mainColors = new WallpaperColors(Color.valueOf(Color.RED),
                 Color.valueOf(Color.BLUE), null);
-        mColorsListener.getValue().onColorsChanged(mainColors, WallpaperManager.FLAG_SYSTEM);
+        mColorsListener.getValue().onColorsChanged(mainColors, WallpaperManager.FLAG_SYSTEM,
+                USER_SYSTEM);
         ArgumentCaptor<Map<String, OverlayIdentifier>> themeOverlays =
                 ArgumentCaptor.forClass(Map.class);
 
@@ -167,15 +201,16 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
         assertThat(themeOverlays.getValue().get(OVERLAY_CATEGORY_SYSTEM_PALETTE))
                 .isEqualTo(new OverlayIdentifier("ffff0000"));
         assertThat(themeOverlays.getValue().get(OVERLAY_CATEGORY_ACCENT_COLOR))
-                .isEqualTo(new OverlayIdentifier("ff0000ff"));
+                .isEqualTo(new OverlayIdentifier("ffff0000"));
 
         // Should not ask again if changed to same value
-        mColorsListener.getValue().onColorsChanged(mainColors, WallpaperManager.FLAG_SYSTEM);
+        mColorsListener.getValue().onColorsChanged(mainColors, WallpaperManager.FLAG_SYSTEM,
+                USER_SYSTEM);
         verifyNoMoreInteractions(mThemeOverlayApplier);
 
         // Should not ask again even for new colors until we change wallpapers
         mColorsListener.getValue().onColorsChanged(new WallpaperColors(Color.valueOf(Color.BLACK),
-                null, null), WallpaperManager.FLAG_SYSTEM);
+                null, null), WallpaperManager.FLAG_SYSTEM, USER_SYSTEM);
         verifyNoMoreInteractions(mThemeOverlayApplier);
 
         // But should change theme after changing wallpapers
@@ -184,7 +219,7 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
         intent.putExtra(WallpaperManager.EXTRA_FROM_FOREGROUND_APP, true);
         mBroadcastReceiver.getValue().onReceive(null, intent);
         mColorsListener.getValue().onColorsChanged(new WallpaperColors(Color.valueOf(Color.BLACK),
-                null, null), WallpaperManager.FLAG_SYSTEM);
+                null, null), WallpaperManager.FLAG_SYSTEM, USER_SYSTEM);
         verify(mThemeOverlayApplier).applyCurrentUserOverlays(any(), any(), anyInt(), any());
     }
 
@@ -193,7 +228,8 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
         // Should ask for a new theme when wallpaper colors change
         WallpaperColors mainColors = new WallpaperColors(Color.valueOf(Color.RED),
                 Color.valueOf(Color.BLUE), null);
-        mColorsListener.getValue().onColorsChanged(mainColors, WallpaperManager.FLAG_SYSTEM);
+        mColorsListener.getValue().onColorsChanged(mainColors, WallpaperManager.FLAG_SYSTEM,
+                USER_SYSTEM);
         ArgumentCaptor<Map<String, OverlayIdentifier>> themeOverlays =
                 ArgumentCaptor.forClass(Map.class);
 
@@ -205,7 +241,7 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
         clearInvocations(mThemeOverlayApplier);
         mBroadcastReceiver.getValue().onReceive(null, new Intent(Intent.ACTION_WALLPAPER_CHANGED));
         mColorsListener.getValue().onColorsChanged(new WallpaperColors(Color.valueOf(Color.BLACK),
-                null, null), WallpaperManager.FLAG_SYSTEM);
+                null, null), WallpaperManager.FLAG_SYSTEM, USER_SYSTEM);
         verify(mThemeOverlayApplier, never())
                 .applyCurrentUserOverlays(any(), any(), anyInt(), any());
     }
@@ -223,7 +259,8 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
                 eq(Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES), anyInt()))
                 .thenReturn(jsonString);
 
-        mColorsListener.getValue().onColorsChanged(mainColors, WallpaperManager.FLAG_SYSTEM);
+        mColorsListener.getValue().onColorsChanged(mainColors, WallpaperManager.FLAG_SYSTEM,
+                USER_SYSTEM);
         ArgumentCaptor<Map<String, OverlayIdentifier>> themeOverlays =
                 ArgumentCaptor.forClass(Map.class);
 
@@ -242,15 +279,17 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
                 Color.valueOf(Color.BLUE), null);
 
         String jsonString =
-                "{\"android.theme.customization.system_palette\":\"override.package.name\","
-                        + "\"android.theme.customization.color_source\":\"home_wallpaper\","
+                "{\"android.theme.customization.color_source\":\"home_wallpaper\","
+                        + "\"android.theme.customization.system_palette\":\"A16B00\","
+                        + "\"android.theme.customization.accent_color\":\"A16B00\","
                         + "\"android.theme.customization.color_index\":\"2\"}";
 
         when(mSecureSettings.getStringForUser(
                 eq(Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES), anyInt()))
                 .thenReturn(jsonString);
 
-        mColorsListener.getValue().onColorsChanged(mainColors, WallpaperManager.FLAG_SYSTEM);
+        mColorsListener.getValue().onColorsChanged(mainColors, WallpaperManager.FLAG_SYSTEM,
+                USER_SYSTEM);
 
         ArgumentCaptor<String> updatedSetting = ArgumentCaptor.forClass(String.class);
         verify(mSecureSettings).putString(
@@ -268,23 +307,27 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void onWallpaperColorsChanged_ResetThemeWithDifferentWallpapers() {
+    public void onWallpaperColorsChanged_ResetThemeWithNewHomeWallpapers() {
         // Should ask for a new theme when wallpaper colors change
         WallpaperColors mainColors = new WallpaperColors(Color.valueOf(Color.RED),
                 Color.valueOf(Color.BLUE), null);
 
         String jsonString =
-                "{\"android.theme.customization.system_palette\":\"override.package.name\","
-                        + "\"android.theme.customization.color_source\":\"home_wallpaper\","
+                "{\"android.theme.customization.color_source\":\"home_wallpaper\","
+                        + "\"android.theme.customization.system_palette\":\"A16B00\","
+                        + "\"android.theme.customization.accent_color\":\"A16B00\","
                         + "\"android.theme.customization.color_index\":\"2\"}";
 
         when(mSecureSettings.getStringForUser(
                 eq(Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES), anyInt()))
                 .thenReturn(jsonString);
-        when(mWallpaperManager.getWallpaperId(WallpaperManager.FLAG_LOCK)).thenReturn(20);
-        when(mWallpaperManager.getWallpaperId(WallpaperManager.FLAG_SYSTEM)).thenReturn(21);
+        when(mWallpaperManager.getWallpaperIdForUser(WallpaperManager.FLAG_LOCK, USER_SYSTEM))
+                .thenReturn(20);
+        when(mWallpaperManager.getWallpaperIdForUser(WallpaperManager.FLAG_SYSTEM, USER_SYSTEM))
+                .thenReturn(21);
 
-        mColorsListener.getValue().onColorsChanged(mainColors, WallpaperManager.FLAG_SYSTEM);
+        mColorsListener.getValue().onColorsChanged(mainColors, WallpaperManager.FLAG_SYSTEM,
+                USER_SYSTEM);
 
         ArgumentCaptor<String> updatedSetting = ArgumentCaptor.forClass(String.class);
         verify(mSecureSettings).putString(
@@ -298,23 +341,59 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void onWallpaperColorsChanged_ResetThemeWithSameWallpaper() {
+    public void onSettingChanged_honorThemeStyle() {
+        when(mDeviceProvisionedController.isUserSetup(anyInt())).thenReturn(true);
+        for (Style style : Style.values()) {
+            reset(mSecureSettings);
+
+            String jsonString = "{\"android.theme.customization.system_palette\":\"A16B00\","
+                    + "\"android.theme.customization.theme_style\":\"" + style.name() + "\"}";
+
+            when(mSecureSettings.getStringForUser(
+                    eq(Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES), anyInt()))
+                    .thenReturn(jsonString);
+
+            mSettingsObserver.getValue().onChange(true, null, 0, mUserTracker.getUserId());
+
+            assertThat(mCurrentStyle).isEqualTo(style);
+        }
+    }
+
+    @Test
+    public void onSettingChanged_invalidStyle() {
+        when(mDeviceProvisionedController.isUserSetup(anyInt())).thenReturn(true);
+        String jsonString = "{\"android.theme.customization.system_palette\":\"A16B00\","
+                + "\"android.theme.customization.theme_style\":\"some_invalid_name\"}";
+
+        when(mSecureSettings.getStringForUser(
+                eq(Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES), anyInt()))
+                .thenReturn(jsonString);
+
+        mSettingsObserver.getValue().onChange(true, null, 0, mUserTracker.getUserId());
+
+        assertThat(mCurrentStyle).isEqualTo(Style.TONAL_SPOT);
+    }
+
+    @Test
+    public void onWallpaperColorsChanged_ResetThemeWithNewHomeAndLockWallpaper() {
         // Should ask for a new theme when wallpaper colors change
         WallpaperColors mainColors = new WallpaperColors(Color.valueOf(Color.RED),
                 Color.valueOf(Color.BLUE), null);
 
         String jsonString =
-                "{\"android.theme.customization.system_palette\":\"override.package.name\","
-                        + "\"android.theme.customization.color_source\":\"home_wallpaper\","
+                "{\"android.theme.customization.color_source\":\"home_wallpaper\","
+                        + "\"android.theme.customization.system_palette\":\"A16B00\","
+                        + "\"android.theme.customization.accent_color\":\"A16B00\","
                         + "\"android.theme.customization.color_index\":\"2\"}";
 
         when(mSecureSettings.getStringForUser(
                 eq(Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES), anyInt()))
                 .thenReturn(jsonString);
-        when(mWallpaperManager.getWallpaperId(WallpaperManager.FLAG_LOCK)).thenReturn(-1);
+        when(mWallpaperManager.getWallpaperIdForUser(WallpaperManager.FLAG_LOCK, USER_SYSTEM))
+                .thenReturn(-1);
 
         mColorsListener.getValue().onColorsChanged(mainColors,
-                WallpaperManager.FLAG_SYSTEM | WallpaperManager.FLAG_LOCK);
+                WallpaperManager.FLAG_SYSTEM | WallpaperManager.FLAG_LOCK, USER_SYSTEM);
 
         ArgumentCaptor<String> updatedSetting = ArgumentCaptor.forClass(String.class);
         verify(mSecureSettings).putString(
@@ -333,15 +412,18 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
         WallpaperColors mainColors = new WallpaperColors(Color.valueOf(Color.RED),
                 Color.valueOf(Color.BLUE), null);
         String jsonString =
-                "{\"android.theme.customization.system_palette\":\"override.package.name\","
-                        + "\"android.theme.customization.color_source\":\"home_wallpaper\","
+                "{\"android.theme.customization.color_source\":\"home_wallpaper\","
+                        + "\"android.theme.customization.system_palette\":\"A16B00\","
+                        + "\"android.theme.customization.accent_color\":\"A16B00\","
                         + "\"android.theme.customization.color_index\":\"2\"}";
         when(mSecureSettings.getStringForUser(
                 eq(Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES), anyInt()))
                 .thenReturn(jsonString);
-        when(mWallpaperManager.getWallpaperId(WallpaperManager.FLAG_LOCK)).thenReturn(1);
+        when(mWallpaperManager.getWallpaperIdForUser(WallpaperManager.FLAG_LOCK, USER_SYSTEM))
+                .thenReturn(1);
 
-        mColorsListener.getValue().onColorsChanged(mainColors, WallpaperManager.FLAG_LOCK);
+        mColorsListener.getValue().onColorsChanged(mainColors, WallpaperManager.FLAG_LOCK,
+                USER_SYSTEM);
 
         ArgumentCaptor<String> updatedSetting = ArgumentCaptor.forClass(String.class);
         verify(mSecureSettings).putString(
@@ -360,15 +442,18 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
         WallpaperColors mainColors = new WallpaperColors(Color.valueOf(Color.RED),
                 Color.valueOf(Color.BLUE), null);
         String jsonString =
-                "{\"android.theme.customization.system_palette\":\"override.package.name\","
-                        + "\"android.theme.customization.color_source\":\"lock_wallpaper\","
+                "{\"android.theme.customization.color_source\":\"lock_wallpaper\","
+                        + "\"android.theme.customization.system_palette\":\"A16B00\","
+                        + "\"android.theme.customization.accent_color\":\"A16B00\","
                         + "\"android.theme.customization.color_index\":\"2\"}";
         when(mSecureSettings.getStringForUser(
                 eq(Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES), anyInt()))
                 .thenReturn(jsonString);
-        when(mWallpaperManager.getWallpaperId(WallpaperManager.FLAG_LOCK)).thenReturn(-1);
+        when(mWallpaperManager.getWallpaperIdForUser(WallpaperManager.FLAG_LOCK, USER_SYSTEM))
+                .thenReturn(-1);
 
-        mColorsListener.getValue().onColorsChanged(mainColors, WallpaperManager.FLAG_SYSTEM);
+        mColorsListener.getValue().onColorsChanged(mainColors, WallpaperManager.FLAG_SYSTEM,
+                USER_SYSTEM);
 
         ArgumentCaptor<String> updatedSetting = ArgumentCaptor.forClass(String.class);
         verify(mSecureSettings).putString(
@@ -388,18 +473,22 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
                 Color.valueOf(Color.BLUE), null);
 
         String jsonString =
-                "{\"android.theme.customization.system_palette\":\"override.package.name\","
-                        + "\"android.theme.customization.color_source\":\"home_wallpaper\","
+                "{\"android.theme.customization.color_source\":\"home_wallpaper\","
+                        + "\"android.theme.customization.system_palette\":\"A16B00\","
+                        + "\"android.theme.customization.accent_color\":\"A16B00\","
                         + "\"android.theme.customization.color_index\":\"2\"}";
 
         when(mSecureSettings.getStringForUser(
                 eq(Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES), anyInt()))
                 .thenReturn(jsonString);
-        when(mWallpaperManager.getWallpaperId(WallpaperManager.FLAG_LOCK)).thenReturn(1);
+        when(mWallpaperManager.getWallpaperIdForUser(WallpaperManager.FLAG_LOCK, USER_SYSTEM))
+                .thenReturn(1);
         // SYSTEM wallpaper is the last applied one
-        when(mWallpaperManager.getWallpaperId(WallpaperManager.FLAG_SYSTEM)).thenReturn(2);
+        when(mWallpaperManager.getWallpaperIdForUser(WallpaperManager.FLAG_SYSTEM, USER_SYSTEM))
+                .thenReturn(2);
 
-        mColorsListener.getValue().onColorsChanged(mainColors, WallpaperManager.FLAG_SYSTEM);
+        mColorsListener.getValue().onColorsChanged(mainColors, WallpaperManager.FLAG_SYSTEM,
+                USER_SYSTEM);
 
         ArgumentCaptor<String> updatedSetting = ArgumentCaptor.forClass(String.class);
         verify(mSecureSettings).putString(
@@ -410,6 +499,39 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void onWallpaperColorsChanged_keepThemeWhenFromLatestWallpaperAndSpecifiedColor() {
+        // Shouldn't ask for a new theme when the colors of the last applied wallpaper change
+        // with the same specified system palette one.
+        WallpaperColors mainColors = new WallpaperColors(Color.valueOf(Color.RED),
+                Color.valueOf(0xffa16b00), null);
+
+        String jsonString =
+                "{\"android.theme.customization.color_source\":\"home_wallpaper\","
+                        + "\"android.theme.customization.system_palette\":\"A16B00\","
+                        + "\"android.theme.customization.accent_color\":\"A16B00\","
+                        + "\"android.theme.customization.color_index\":\"2\"}";
+
+        when(mSecureSettings.getStringForUser(
+                eq(Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES), anyInt()))
+                .thenReturn(jsonString);
+        when(mWallpaperManager.getWallpaperIdForUser(WallpaperManager.FLAG_LOCK, USER_SYSTEM))
+                .thenReturn(1);
+        // SYSTEM wallpaper is the last applied one
+        when(mWallpaperManager.getWallpaperIdForUser(WallpaperManager.FLAG_SYSTEM, USER_SYSTEM))
+                .thenReturn(2);
+
+        mColorsListener.getValue().onColorsChanged(mainColors, WallpaperManager.FLAG_SYSTEM,
+                USER_SYSTEM);
+
+        ArgumentCaptor<String> updatedSetting = ArgumentCaptor.forClass(String.class);
+        verify(mSecureSettings, never()).putString(
+                eq(Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES), updatedSetting.capture());
+
+        // Apply overlay by existing theme from secure setting
+        verify(mThemeOverlayApplier).applyCurrentUserOverlays(any(), any(), anyInt(), any());
+    }
+
+    @Test
     public void onWallpaperColorsChanged_keepThemeIfNotLatestWallpaper() {
         // Shouldn't ask for a new theme when the colors of the wallpaper that is not the last
         // applied one change
@@ -417,18 +539,22 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
                 Color.valueOf(Color.BLUE), null);
 
         String jsonString =
-                "{\"android.theme.customization.system_palette\":\"override.package.name\","
-                        + "\"android.theme.customization.color_source\":\"home_wallpaper\","
+                "{\"android.theme.customization.color_source\":\"home_wallpaper\","
+                        + "\"android.theme.customization.system_palette\":\"A16B00\","
+                        + "\"android.theme.customization.accent_color\":\"A16B00\","
                         + "\"android.theme.customization.color_index\":\"2\"}";
 
         when(mSecureSettings.getStringForUser(
                 eq(Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES), anyInt()))
                 .thenReturn(jsonString);
-        when(mWallpaperManager.getWallpaperId(WallpaperManager.FLAG_LOCK)).thenReturn(1);
+        when(mWallpaperManager.getWallpaperIdForUser(WallpaperManager.FLAG_LOCK, USER_SYSTEM))
+                .thenReturn(1);
         // SYSTEM wallpaper is the last applied one
-        when(mWallpaperManager.getWallpaperId(WallpaperManager.FLAG_SYSTEM)).thenReturn(2);
+        when(mWallpaperManager.getWallpaperIdForUser(WallpaperManager.FLAG_SYSTEM, USER_SYSTEM))
+                .thenReturn(2);
 
-        mColorsListener.getValue().onColorsChanged(mainColors, WallpaperManager.FLAG_LOCK);
+        mColorsListener.getValue().onColorsChanged(mainColors, WallpaperManager.FLAG_LOCK,
+                USER_SYSTEM);
 
         verify(mSecureSettings, never()).putString(
                 eq(Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES), any());
@@ -436,6 +562,34 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
 
         verify(mThemeOverlayApplier, never())
                 .applyCurrentUserOverlays(any(), any(), anyInt(), any());
+    }
+
+    @Test
+    public void onUserSwitching_setsTheme() {
+        // Setup users with different colors
+        WallpaperColors mainColors = new WallpaperColors(Color.valueOf(Color.RED), null, null);
+        WallpaperColors secondaryColors =
+                new WallpaperColors(Color.valueOf(Color.BLUE), null, null);
+        mColorsListener.getValue().onColorsChanged(mainColors, WallpaperManager.FLAG_SYSTEM,
+                USER_SYSTEM);
+        mColorsListener.getValue().onColorsChanged(secondaryColors, WallpaperManager.FLAG_SYSTEM,
+                USER_SECONDARY);
+
+        // When changing users
+        clearInvocations(mThemeOverlayApplier);
+        when(mUserTracker.getUserId()).thenReturn(USER_SECONDARY);
+        mUserTrackerCallback.getValue().onUserChanged(USER_SECONDARY, mContext);
+
+        ArgumentCaptor<Map<String, OverlayIdentifier>> themeOverlays =
+                ArgumentCaptor.forClass(Map.class);
+        verify(mThemeOverlayApplier)
+                .applyCurrentUserOverlays(themeOverlays.capture(), any(), anyInt(), any());
+
+        // Assert that we received secondary user colors
+        assertThat(themeOverlays.getValue().get(OVERLAY_CATEGORY_SYSTEM_PALETTE))
+                .isEqualTo(new OverlayIdentifier("ff0000ff"));
+        assertThat(themeOverlays.getValue().get(OVERLAY_CATEGORY_ACCENT_COLOR))
+                .isEqualTo(new OverlayIdentifier("ff0000ff"));
     }
 
     @Test
@@ -472,7 +626,8 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
         reset(mDeviceProvisionedController);
         WallpaperColors mainColors = new WallpaperColors(Color.valueOf(Color.RED),
                 Color.valueOf(Color.BLUE), null);
-        mColorsListener.getValue().onColorsChanged(mainColors, WallpaperManager.FLAG_SYSTEM);
+        mColorsListener.getValue().onColorsChanged(mainColors, WallpaperManager.FLAG_SYSTEM,
+                USER_SYSTEM);
 
         verify(mThemeOverlayApplier).applyCurrentUserOverlays(any(), any(), anyInt(), any());
 
@@ -482,11 +637,11 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
         Intent intent = new Intent(Intent.ACTION_WALLPAPER_CHANGED);
         intent.putExtra(WallpaperManager.EXTRA_FROM_FOREGROUND_APP, true);
         mBroadcastReceiver.getValue().onReceive(null, intent);
-        mColorsListener.getValue().onColorsChanged(null, WallpaperManager.FLAG_SYSTEM);
+        mColorsListener.getValue().onColorsChanged(null, WallpaperManager.FLAG_SYSTEM, USER_SYSTEM);
         verify(mThemeOverlayApplier, never()).applyCurrentUserOverlays(any(), any(), anyInt(),
                 any());
         mColorsListener.getValue().onColorsChanged(new WallpaperColors(Color.valueOf(Color.GREEN),
-                null, null), WallpaperManager.FLAG_SYSTEM);
+                null, null), WallpaperManager.FLAG_SYSTEM, USER_SYSTEM);
         verify(mThemeOverlayApplier, never()).applyCurrentUserOverlays(any(), any(), anyInt(),
                 any());
     }
@@ -503,17 +658,17 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
 
         Executor executor = MoreExecutors.directExecutor();
 
-        mThemeOverlayController = new ThemeOverlayController(null /* context */,
+        mThemeOverlayController = new ThemeOverlayController(mContext,
                 mBroadcastDispatcher, mBgHandler, executor, executor, mThemeOverlayApplier,
                 mSecureSettings, mWallpaperManager, mUserManager, mDeviceProvisionedController,
-                mUserTracker, mDumpManager, mFeatureFlags, mWakefulnessLifecycle) {
+                mUserTracker, mDumpManager, mFeatureFlags, mResources, mWakefulnessLifecycle) {
             @Nullable
             @Override
-            protected FabricatedOverlay getOverlay(int color, int type) {
+            protected FabricatedOverlay getOverlay(int color, int type, Style style) {
                 FabricatedOverlay overlay = mock(FabricatedOverlay.class);
                 when(overlay.getIdentifier())
                         .thenReturn(new OverlayIdentifier("com.thebest.livewallpaperapp.ever"));
-
+                mColorScheme = new ColorScheme(color, false /* nightMode */, style);
                 return overlay;
             }
 
@@ -540,16 +695,17 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
                 .thenReturn(new WallpaperColors(Color.valueOf(Color.GRAY), null, null));
 
         Executor executor = MoreExecutors.directExecutor();
-        mThemeOverlayController = new ThemeOverlayController(null /* context */,
+        mThemeOverlayController = new ThemeOverlayController(mContext,
                 mBroadcastDispatcher, mBgHandler, executor, executor, mThemeOverlayApplier,
                 mSecureSettings, mWallpaperManager, mUserManager, mDeviceProvisionedController,
-                mUserTracker, mDumpManager, mFeatureFlags, mWakefulnessLifecycle) {
+                mUserTracker, mDumpManager, mFeatureFlags, mResources, mWakefulnessLifecycle) {
             @Nullable
             @Override
-            protected FabricatedOverlay getOverlay(int color, int type) {
+            protected FabricatedOverlay getOverlay(int color, int type, Style style) {
                 FabricatedOverlay overlay = mock(FabricatedOverlay.class);
                 when(overlay.getIdentifier())
                         .thenReturn(new OverlayIdentifier(Integer.toHexString(color | 0xff000000)));
+                mColorScheme = new ColorScheme(color, false /* nightMode */, style);
                 return overlay;
             }
         };
@@ -564,7 +720,8 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
 
         WallpaperColors mainColors = new WallpaperColors(Color.valueOf(Color.RED),
                 Color.valueOf(Color.BLUE), null);
-        mColorsListener.getValue().onColorsChanged(mainColors, WallpaperManager.FLAG_SYSTEM);
+        mColorsListener.getValue().onColorsChanged(mainColors, WallpaperManager.FLAG_SYSTEM,
+                USER_SYSTEM);
 
         // Defers event because we already have initial colors.
         verify(mThemeOverlayApplier, never())
@@ -585,14 +742,16 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
         // Second color application is not applied.
         WallpaperColors mainColors = new WallpaperColors(Color.valueOf(Color.RED),
                 Color.valueOf(Color.BLUE), null);
-        mColorsListener.getValue().onColorsChanged(mainColors, WallpaperManager.FLAG_SYSTEM);
+        mColorsListener.getValue().onColorsChanged(mainColors, WallpaperManager.FLAG_SYSTEM,
+                USER_SYSTEM);
 
         clearInvocations(mThemeOverlayApplier);
 
         // Device went to sleep and second set of colors was applied.
         mainColors =  new WallpaperColors(Color.valueOf(Color.BLUE),
                 Color.valueOf(Color.RED), null);
-        mColorsListener.getValue().onColorsChanged(mainColors, WallpaperManager.FLAG_SYSTEM);
+        mColorsListener.getValue().onColorsChanged(mainColors, WallpaperManager.FLAG_SYSTEM,
+                USER_SYSTEM);
         verify(mThemeOverlayApplier, never())
                 .applyCurrentUserOverlays(any(), any(), anyInt(), any());
 
@@ -609,14 +768,16 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
         // Second color application is not applied.
         WallpaperColors mainColors = new WallpaperColors(Color.valueOf(Color.RED),
                 Color.valueOf(Color.BLUE), null);
-        mColorsListener.getValue().onColorsChanged(mainColors, WallpaperManager.FLAG_SYSTEM);
+        mColorsListener.getValue().onColorsChanged(mainColors, WallpaperManager.FLAG_SYSTEM,
+                USER_SYSTEM);
 
         clearInvocations(mThemeOverlayApplier);
 
         // Device went to sleep and second set of colors was applied.
         mainColors =  new WallpaperColors(Color.valueOf(Color.BLUE),
                 Color.valueOf(Color.RED), null);
-        mColorsListener.getValue().onColorsChanged(mainColors, WallpaperManager.FLAG_SYSTEM);
+        mColorsListener.getValue().onColorsChanged(mainColors, WallpaperManager.FLAG_SYSTEM,
+                USER_SYSTEM);
         verify(mThemeOverlayApplier, never())
                 .applyCurrentUserOverlays(any(), any(), anyInt(), any());
 
@@ -635,7 +796,8 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
                 eq(Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES), anyInt()))
                 .thenReturn(jsonString);
 
-        mColorsListener.getValue().onColorsChanged(mainColors, WallpaperManager.FLAG_SYSTEM);
+        mColorsListener.getValue().onColorsChanged(mainColors, WallpaperManager.FLAG_SYSTEM,
+                USER_SYSTEM);
         ArgumentCaptor<Map<String, OverlayIdentifier>> themeOverlays =
                 ArgumentCaptor.forClass(Map.class);
 

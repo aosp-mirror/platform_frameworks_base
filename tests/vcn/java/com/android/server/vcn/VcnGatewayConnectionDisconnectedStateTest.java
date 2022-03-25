@@ -78,7 +78,7 @@ public class VcnGatewayConnectionDisconnectedStateTest extends VcnGatewayConnect
     @Test
     public void testNetworkChangesTriggerStateTransitions() throws Exception {
         mGatewayConnection
-                .getUnderlyingNetworkTrackerCallback()
+                .getUnderlyingNetworkControllerCallback()
                 .onSelectedUnderlyingNetworkChanged(TEST_UNDERLYING_NETWORK_RECORD_1);
         mTestLooper.dispatchAll();
 
@@ -89,7 +89,7 @@ public class VcnGatewayConnectionDisconnectedStateTest extends VcnGatewayConnect
     @Test
     public void testNullNetworkDoesNotTriggerStateTransition() throws Exception {
         mGatewayConnection
-                .getUnderlyingNetworkTrackerCallback()
+                .getUnderlyingNetworkControllerCallback()
                 .onSelectedUnderlyingNetworkChanged(null);
         mTestLooper.dispatchAll();
 
