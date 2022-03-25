@@ -721,7 +721,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
 
     boolean isVolumeControlEnabled(@NonNull MediaDevice device) {
         return isPlayBackInfoLocal()
-                || mLocalMediaManager.isMediaSessionAvailableForVolumeControl();
+                || device.getDeviceType() != MediaDevice.MediaDeviceType.TYPE_CAST_GROUP_DEVICE;
     }
 
     @Override
