@@ -97,7 +97,24 @@ public final class DelegateRegistrationState implements Parcelable {
      */
     public static final int DEREGISTERING_REASON_DESTROY_PENDING = 6;
 
-    /** @hide */
+    /**
+     * This feature tag is deregistering because the PDN that the IMS registration is on
+     * is being torn down.
+     * <p>
+     * All open SIP Dialogs associated with this feature tag must be  closed
+     * using {@link SipDelegateConnection#cleanupSession(String)} before this operation can proceed.
+     */
+    public static final int DEREGISTERING_REASON_LOSING_PDN = 7;
+
+    /**
+     * This feature tag is deregistering because of an unspecified reason.
+     * <p>
+     * All open SIP Dialogs associated with this feature tag must be  closed
+     * using {@link SipDelegateConnection#cleanupSession(String)} before this operation can proceed.
+     */
+    public static final int DEREGISTERING_REASON_UNSPECIFIED = 8;
+
+/** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = "DEREGISTERED_REASON_", value = {
             DEREGISTERED_REASON_UNKNOWN,
@@ -113,10 +130,13 @@ public final class DelegateRegistrationState implements Parcelable {
             DEREGISTERING_REASON_PDN_CHANGE,
             DEREGISTERING_REASON_PROVISIONING_CHANGE,
             DEREGISTERING_REASON_FEATURE_TAGS_CHANGING,
-            DEREGISTERING_REASON_DESTROY_PENDING
+            DEREGISTERING_REASON_DESTROY_PENDING,
+            DEREGISTERING_REASON_LOSING_PDN,
+            DEREGISTERING_REASON_UNSPECIFIED
     })
     public @interface DeregisteringReason {}
 
+    private ArraySet<String> mRegisteringTags = new ArraySet<>();
     private ArraySet<String> mRegisteredTags = new ArraySet<>();
     private final ArraySet<FeatureTagState> mDeregisteringTags = new ArraySet<>();
     private final ArraySet<FeatureTagState> mDeregisteredTags = new ArraySet<>();
@@ -131,6 +151,20 @@ public final class DelegateRegistrationState implements Parcelable {
         /* Create a new instance of {@link Builder} */
         public Builder() {
             mState = new DelegateRegistrationState();
+        }
+
+        /**
+         * Add the set of feature tags that are associated with this SipDelegate and
+         * the IMS stack is actively trying to register on the carrier network.
+         *
+         * The feature tags will either move to the registered or deregistered state
+         * depending on the result of the registration.
+         * @param featureTags The IMS media feature tags that are in the progress of registering.
+         * @return The in-progress Builder instance for RegistrationState. ]
+         */
+        public @NonNull Builder addRegisteringFeatureTags(@NonNull Set<String> featureTags) {
+            mState.mRegisteringTags.addAll(featureTags);
+            return this;
         }
 
         /**
@@ -209,6 +243,17 @@ public final class DelegateRegistrationState implements Parcelable {
         mRegisteredTags = (ArraySet<String>) source.readArraySet(null);
         readStateFromParcel(source, mDeregisteringTags);
         readStateFromParcel(source, mDeregisteredTags);
+        mRegisteringTags = (ArraySet<String>) source.readArraySet(null);
+    }
+
+    /**
+     * Get the feature tags that are associated with this SipDelegate that the IMS stack is actively
+     * trying to register on the carrier network.
+     * @return A Set of feature tags associated with this SipDelegate that the IMS service is
+     * currently trying to register on the  carrier network.
+     */
+    public @NonNull Set<String> getRegisteringFeatureTags() {
+        return new ArraySet<>(mRegisteringTags);
     }
 
     /**
@@ -286,6 +331,7 @@ public final class DelegateRegistrationState implements Parcelable {
         dest.writeArraySet(mRegisteredTags);
         writeStateToParcel(dest, mDeregisteringTags);
         writeStateToParcel(dest, mDeregisteredTags);
+        dest.writeArraySet(mRegisteringTags);
     }
 
     private void writeStateToParcel(Parcel dest, Set<FeatureTagState> state) {
@@ -311,19 +357,22 @@ public final class DelegateRegistrationState implements Parcelable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         DelegateRegistrationState that = (DelegateRegistrationState) o;
-        return mRegisteredTags.equals(that.mRegisteredTags)
+        return mRegisteringTags.equals(that.mRegisteringTags)
+                && mRegisteredTags.equals(that.mRegisteredTags)
                 && mDeregisteringTags.equals(that.mDeregisteringTags)
                 && mDeregisteredTags.equals(that.mDeregisteredTags);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mRegisteredTags, mDeregisteringTags, mDeregisteredTags);
+        return Objects.hash(mRegisteringTags, mRegisteredTags,
+                mDeregisteringTags, mDeregisteredTags);
     }
 
     @Override
     public String toString() {
         return "DelegateRegistrationState{ registered={" + mRegisteredTags
+                + "}, registering={" + mRegisteringTags
                 + "}, deregistering={" + mDeregisteringTags + "}, deregistered={"
                 + mDeregisteredTags + "}}";
     }

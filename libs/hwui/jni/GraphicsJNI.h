@@ -34,16 +34,17 @@ public:
     // This enum must keep these int values, to match the int values
     // in the java Bitmap.Config enum.
     enum LegacyBitmapConfig {
-        kNo_LegacyBitmapConfig          = 0,
-        kA8_LegacyBitmapConfig          = 1,
-        kIndex8_LegacyBitmapConfig      = 2,
-        kRGB_565_LegacyBitmapConfig     = 3,
-        kARGB_4444_LegacyBitmapConfig   = 4,
-        kARGB_8888_LegacyBitmapConfig   = 5,
-        kRGBA_16F_LegacyBitmapConfig    = 6,
-        kHardware_LegacyBitmapConfig    = 7,
+        kNo_LegacyBitmapConfig = 0,
+        kA8_LegacyBitmapConfig = 1,
+        kIndex8_LegacyBitmapConfig = 2,
+        kRGB_565_LegacyBitmapConfig = 3,
+        kARGB_4444_LegacyBitmapConfig = 4,
+        kARGB_8888_LegacyBitmapConfig = 5,
+        kRGBA_16F_LegacyBitmapConfig = 6,
+        kHardware_LegacyBitmapConfig = 7,
+        kRGBA_1010102_LegacyBitmapConfig = 8,
 
-        kLastEnum_LegacyBitmapConfig = kHardware_LegacyBitmapConfig
+        kLastEnum_LegacyBitmapConfig = kRGBA_1010102_LegacyBitmapConfig
     };
 
     static void setJavaVM(JavaVM* javaVM);

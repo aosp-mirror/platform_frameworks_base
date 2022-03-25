@@ -27,7 +27,7 @@ TEST(XmlUtilTest, ExtractPackageFromNamespace) {
   ASSERT_FALSE(xml::ExtractPackageFromNamespace("http://schemas.android.com/apk/res/"));
   ASSERT_FALSE(xml::ExtractPackageFromNamespace("http://schemas.android.com/apk/prv/res/"));
 
-  Maybe<xml::ExtractedPackage> p =
+  std::optional<xml::ExtractedPackage> p =
       xml::ExtractPackageFromNamespace("http://schemas.android.com/apk/res/a");
   ASSERT_TRUE(p);
   EXPECT_EQ(std::string("a"), p.value().package);

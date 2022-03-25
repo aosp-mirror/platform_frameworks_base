@@ -21,4 +21,8 @@
     <string name="pip_notification_unknown_title" msgid="2729870284350772311">"(Aucun programme de titre)"</string>
     <string name="pip_close" msgid="9135220303720555525">"Fermer mode IDI"</string>
     <string name="pip_fullscreen" msgid="7278047353591302554">"Plein écran"</string>
+    <string name="pip_move" msgid="1544227837964635439">"Déplacer l\'image incrustée"</string>
+    <string name="pip_expand" msgid="7605396312689038178">"Développer l\'image incrustée"</string>
+    <string name="pip_collapse" msgid="5732233773786896094">"Réduire l\'image incrustée"</string>
+    <string name="pip_edu_text" msgid="3672999496647508701">" Appuyez deux fois sur "<annotation icon="home_icon">" ACCUEIL "</annotation>" pour les commandes"</string>
 </resources>

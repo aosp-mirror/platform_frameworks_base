@@ -706,6 +706,25 @@ public class CallLog {
 
     /**
      * Contains the recent calls.
+     * <p>
+     * Note: If you want to query the call log and limit the results to a single value, you should
+     * append the {@link #LIMIT_PARAM_KEY} parameter to the content URI.  For example:
+     * <pre>
+     * {@code
+     * getContentResolver().query(
+     *                 Calls.CONTENT_URI.buildUpon().appendQueryParameter(LIMIT_PARAM_KEY, "1")
+     *                 .build(),
+     *                 null, null, null, null);
+     * }
+     * </pre>
+     * <p>
+     * The call log provider enforces strict SQL grammar, so you CANNOT append "LIMIT" to the SQL
+     * query as below:
+     * <pre>
+     * {@code
+     * getContentResolver().query(Calls.CONTENT_URI, null, "LIMIT 1", null, null);
+     * }
+     * </pre>
      */
     public static class Calls implements BaseColumns {
         /**
@@ -891,6 +910,7 @@ public class CallLog {
          * <li>{@link #PRESENTATION_RESTRICTED}</li>
          * <li>{@link #PRESENTATION_UNKNOWN}</li>
          * <li>{@link #PRESENTATION_PAYPHONE}</li>
+         * <li>{@link #PRESENTATION_UNAVAILABLE}</li>
          * </ul>
          * </p>
          *
@@ -906,6 +926,8 @@ public class CallLog {
         public static final int PRESENTATION_UNKNOWN = 3;
         /** Number is a pay phone. */
         public static final int PRESENTATION_PAYPHONE = 4;
+        /** Number is unavailable. */
+        public static final int PRESENTATION_UNAVAILABLE = 5;
 
         /**
          * The ISO 3166-1 two letters country code of the country where the
@@ -1742,7 +1764,7 @@ public class CallLog {
             Uri result = null;
 
             final UserManager userManager = context.getSystemService(UserManager.class);
-            final int currentUserId = userManager.getUserHandle();
+            final int currentUserId = userManager.getProcessUserId();
 
             if (params.mAddForAllUsers) {
                 if (userManager.isUserUnlocked(UserHandle.SYSTEM)) {
@@ -2007,6 +2029,10 @@ public class CallLog {
 
             if (presentation == TelecomManager.PRESENTATION_PAYPHONE) {
                 return presentation;
+            }
+
+            if (presentation == TelecomManager.PRESENTATION_UNAVAILABLE) {
+                return PRESENTATION_UNAVAILABLE;
             }
 
             if (TextUtils.isEmpty(number)

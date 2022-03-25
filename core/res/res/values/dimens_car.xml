@@ -17,7 +17,7 @@
 -->
 <resources>
     <dimen name="car_large_avatar_size">96dp</dimen>
-    <dimen name="car_large_avatar_badge_size">32dp</dimen>
+    <dimen name="car_large_avatar_badge_size">24dp</dimen>
     <!-- Application Bar -->
     <dimen name="car_app_bar_height">80dp</dimen>
     <!-- Margin -->
@@ -110,10 +110,10 @@
     <dimen name="car_textview_fading_edge_length">40dp</dimen>
 
     <!-- Dialog start padding for button bar layout -->
-    <dimen name="button_bar_layout_start_padding">@*android:dimen/car_keyline_1</dimen>
+    <dimen name="button_bar_layout_start_padding">@dimen/car_padding_2</dimen>
 
     <!-- Dialog end padding for button bar layout -->
-    <dimen name="button_bar_layout_end_padding">@*android:dimen/car_keyline_1</dimen>
+    <dimen name="button_bar_layout_end_padding">@dimen/car_padding_2</dimen>
 
     <!-- Dialog top padding for button bar layout -->
     <dimen name="button_bar_layout_top_padding">@*android:dimen/car_padding_2</dimen>
@@ -122,7 +122,7 @@
     <dimen name="button_layout_height">@*android:dimen/car_card_action_bar_height</dimen>
 
     <!-- Dialog button end margin -->
-    <dimen name="button_end_margin">@*android:dimen/car_padding_4</dimen>
+    <dimen name="button_end_margin">@*android:dimen/car_padding_2</dimen>
 
     <!-- Dialog top padding when there is no title -->
     <dimen name="dialog_no_title_padding_top">@*android:dimen/car_padding_4</dimen>

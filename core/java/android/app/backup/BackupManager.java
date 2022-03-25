@@ -281,6 +281,32 @@ public class BackupManager {
     }
 
     /**
+     * Convenience method for callers who need to indicate that some other package or
+     * some other user needs a backup pass. This can be useful in the case of groups of
+     * packages that share a uid and/or have user-specific data.
+     * <p>
+     * This method requires that the application hold the "android.permission.BACKUP"
+     * permission if the package named in the package argument does not run under the
+     * same uid as the caller. This method also requires that the application hold the
+     * "android.permission.INTERACT_ACROSS_USERS_FULL" if the user argument is not the
+     * same as the user the caller is running under.
+     * @param userId The user to back up
+     * @param packageName The package name identifying the application to back up.
+     *
+     * @hide
+     */
+    public static void dataChangedForUser(int userId, String packageName) {
+        checkServiceBinder();
+        if (sService != null) {
+            try {
+                sService.dataChangedForUser(userId, packageName);
+            } catch (RemoteException e) {
+                Log.e(TAG, "dataChanged(userId,pkg) couldn't connect");
+            }
+        }
+    }
+
+    /**
      * @deprecated Applications shouldn't request a restore operation using this method. In Android
      * P and later, this method is a no-op.
      *

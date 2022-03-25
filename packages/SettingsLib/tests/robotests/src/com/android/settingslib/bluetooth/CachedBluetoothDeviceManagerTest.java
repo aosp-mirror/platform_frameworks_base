@@ -26,7 +26,10 @@ import static org.mockito.Mockito.when;
 
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothUuid;
 import android.content.Context;
+import android.os.Parcel;
+import android.os.ParcelUuid;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -37,6 +40,8 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 @RunWith(RobolectricTestRunner.class)
 public class CachedBluetoothDeviceManagerTest {
@@ -51,10 +56,14 @@ public class CachedBluetoothDeviceManagerTest {
     private final static String DEVICE_ADDRESS_3 = "AA:BB:CC:DD:EE:33";
     private final static long HISYNCID1 = 10;
     private final static long HISYNCID2 = 11;
+    private final static Map<Integer, ParcelUuid> CAP_GROUP1 =
+            Map.of(1, BluetoothUuid.CAP);
+    private final static Map<Integer, ParcelUuid> CAP_GROUP2 =
+            Map.of(2, BluetoothUuid.CAP);
     private final BluetoothClass DEVICE_CLASS_1 =
-        new BluetoothClass(BluetoothClass.Device.AUDIO_VIDEO_HEADPHONES);
+            createBtClass(BluetoothClass.Device.AUDIO_VIDEO_HEADPHONES);
     private final BluetoothClass DEVICE_CLASS_2 =
-        new BluetoothClass(BluetoothClass.Device.AUDIO_VIDEO_HANDSFREE);
+            createBtClass(BluetoothClass.Device.AUDIO_VIDEO_HANDSFREE);
     @Mock
     private LocalBluetoothProfileManager mLocalProfileManager;
     @Mock
@@ -70,6 +79,8 @@ public class CachedBluetoothDeviceManagerTest {
     @Mock
     private HearingAidProfile mHearingAidProfile;
     @Mock
+    private CsipSetCoordinatorProfile mCsipSetCoordinatorProfile;
+    @Mock
     private BluetoothDevice mDevice1;
     @Mock
     private BluetoothDevice mDevice2;
@@ -81,6 +92,16 @@ public class CachedBluetoothDeviceManagerTest {
     private CachedBluetoothDeviceManager mCachedDeviceManager;
     private HearingAidDeviceManager mHearingAidDeviceManager;
     private Context mContext;
+
+    private BluetoothClass createBtClass(int deviceClass) {
+        Parcel p = Parcel.obtain();
+        p.writeInt(deviceClass);
+        p.setDataPosition(0); // reset position of parcel before passing to constructor
+
+        BluetoothClass bluetoothClass = BluetoothClass.CREATOR.createFromParcel(p);
+        p.recycle();
+        return bluetoothClass;
+    }
 
     @Before
     public void setUp() {
@@ -105,8 +126,12 @@ public class CachedBluetoothDeviceManagerTest {
         when(mA2dpProfile.isProfileReady()).thenReturn(true);
         when(mPanProfile.isProfileReady()).thenReturn(true);
         when(mHearingAidProfile.isProfileReady()).thenReturn(true);
+        when(mCsipSetCoordinatorProfile.isProfileReady())
+                .thenReturn(true);
         doAnswer((invocation) -> mHearingAidProfile).
                 when(mLocalProfileManager).getHearingAidProfile();
+        doAnswer((invocation) -> mCsipSetCoordinatorProfile)
+                .when(mLocalProfileManager).getCsipSetCoordinatorProfile();
         mCachedDeviceManager = new CachedBluetoothDeviceManager(mContext, mLocalBluetoothManager);
         mCachedDevice1 = spy(new CachedBluetoothDevice(mContext, mLocalProfileManager, mDevice1));
         mCachedDevice2 = spy(new CachedBluetoothDevice(mContext, mLocalProfileManager, mDevice2));
@@ -298,7 +323,7 @@ public class CachedBluetoothDeviceManagerTest {
      * Test to verify OnDeviceUnpaired() for main hearing Aid device unpair.
      */
     @Test
-    public void onDeviceUnpaired_unpairMainDevice() {
+    public void onDeviceUnpaired_unpairHearingAidMainDevice() {
         when(mDevice1.getBondState()).thenReturn(BluetoothDevice.BOND_BONDED);
         CachedBluetoothDevice cachedDevice1 = mCachedDeviceManager.addDevice(mDevice1);
         CachedBluetoothDevice cachedDevice2 = mCachedDeviceManager.addDevice(mDevice2);
@@ -397,5 +422,154 @@ public class CachedBluetoothDeviceManagerTest {
 
         when(mDevice1.getBondState()).thenReturn(BluetoothDevice.BOND_NONE);
         assertThat(mCachedDeviceManager.onDeviceDisappeared(cachedDevice1)).isTrue();
+    }
+
+     /**
+     * Test to verify getMemberDevice(), new device has the same group id.
+     */
+    @Test
+    public void addDevice_sameGroupId_validMemberDevice() {
+        doAnswer((invocation) -> CAP_GROUP1).when(mCsipSetCoordinatorProfile)
+                .getGroupUuidMapByDevice(mDevice1);
+        doAnswer((invocation) -> CAP_GROUP1).when(mCsipSetCoordinatorProfile)
+                .getGroupUuidMapByDevice(mDevice2);
+        doAnswer((invocation) -> CAP_GROUP1).when(mCsipSetCoordinatorProfile)
+                .getGroupUuidMapByDevice(mDevice3);
+        CachedBluetoothDevice cachedDevice1 = mCachedDeviceManager.addDevice(mDevice1);
+        CachedBluetoothDevice cachedDevice2 = mCachedDeviceManager.addDevice(mDevice2);
+        CachedBluetoothDevice cachedDevice3 = mCachedDeviceManager.addDevice(mDevice3);
+
+        assertThat(cachedDevice1.getMemberDevice()).contains(cachedDevice2);
+        assertThat(cachedDevice1.getMemberDevice()).contains(cachedDevice3);
+    }
+
+    /**
+     * Test to verify getMemberDevice(), new device has the different group id.
+     */
+    @Test
+    public void addDevice_differentGroupId_validMemberDevice() {
+        doAnswer((invocation) -> CAP_GROUP1).when(mCsipSetCoordinatorProfile)
+                .getGroupUuidMapByDevice(mDevice1);
+        doAnswer((invocation) -> CAP_GROUP2).when(mCsipSetCoordinatorProfile)
+                .getGroupUuidMapByDevice(mDevice2);
+        CachedBluetoothDevice cachedDevice1 = mCachedDeviceManager.addDevice(mDevice1);
+        CachedBluetoothDevice cachedDevice2 = mCachedDeviceManager.addDevice(mDevice2);
+
+        assertThat(cachedDevice1.getMemberDevice()).isEmpty();
+    }
+
+    /**
+     * Test to verify addDevice(), new device has the same group id.
+     */
+    @Test
+    public void addDevice_sameGroupId_validCachedDevices_mainDevicesAdded_memberDevicesNotAdded() {
+        doAnswer((invocation) -> CAP_GROUP1).when(mCsipSetCoordinatorProfile)
+                .getGroupUuidMapByDevice(mDevice1);
+        doAnswer((invocation) -> CAP_GROUP1).when(mCsipSetCoordinatorProfile)
+                .getGroupUuidMapByDevice(mDevice2);
+        CachedBluetoothDevice cachedDevice1 = mCachedDeviceManager.addDevice(mDevice1);
+        CachedBluetoothDevice cachedDevice2 = mCachedDeviceManager.addDevice(mDevice2);
+
+        Collection<CachedBluetoothDevice> devices = mCachedDeviceManager.getCachedDevicesCopy();
+        assertThat(devices).contains(cachedDevice1);
+        assertThat(devices).doesNotContain(cachedDevice2);
+    }
+
+    /**
+     * Test to verify addDevice(), new device has the different group id.
+     */
+    @Test
+    public void addDevice_differentGroupId_validCachedDevices_bothAdded() {
+        doAnswer((invocation) -> CAP_GROUP1).when(mCsipSetCoordinatorProfile)
+                .getGroupUuidMapByDevice(mDevice1);
+        doAnswer((invocation) -> CAP_GROUP2).when(mCsipSetCoordinatorProfile)
+                .getGroupUuidMapByDevice(mDevice2);
+        CachedBluetoothDevice cachedDevice1 = mCachedDeviceManager.addDevice(mDevice1);
+        CachedBluetoothDevice cachedDevice2 = mCachedDeviceManager.addDevice(mDevice2);
+
+        Collection<CachedBluetoothDevice> devices = mCachedDeviceManager.getCachedDevicesCopy();
+        assertThat(devices).contains(cachedDevice1);
+        assertThat(devices).contains(cachedDevice2);
+    }
+
+    /**
+     * Test to verify clearNonBondedDevices() for csip set member device.
+     */
+    @Test
+    public void clearNonBondedDevices_nonBondedMemberDevice() {
+        when(mDevice1.getBondState()).thenReturn(BluetoothDevice.BOND_BONDED);
+        when(mDevice2.getBondState()).thenReturn(BluetoothDevice.BOND_NONE);
+        when(mDevice3.getBondState()).thenReturn(BluetoothDevice.BOND_BONDED);
+        CachedBluetoothDevice cachedDevice1 = mCachedDeviceManager.addDevice(mDevice1);
+        CachedBluetoothDevice cachedDevice2 = mCachedDeviceManager.addDevice(mDevice2);
+        CachedBluetoothDevice cachedDevice3 = mCachedDeviceManager.addDevice(mDevice3);
+        cachedDevice1.setMemberDevice(cachedDevice2);
+        cachedDevice1.setMemberDevice(cachedDevice3);
+
+        assertThat(cachedDevice1.getMemberDevice()).contains(cachedDevice2);
+        assertThat(cachedDevice1.getMemberDevice()).contains(cachedDevice3);
+        mCachedDeviceManager.clearNonBondedDevices();
+
+        assertThat(cachedDevice1.getMemberDevice().contains(cachedDevice2)).isFalse();
+        assertThat(cachedDevice1.getMemberDevice().contains(cachedDevice3)).isTrue();
+    }
+
+    /**
+     * Test to verify OnDeviceUnpaired() for csip device unpair.
+     */
+    @Test
+    public void onDeviceUnpaired_unpairCsipMainDevice() {
+        when(mDevice1.getBondState()).thenReturn(BluetoothDevice.BOND_BONDED);
+        CachedBluetoothDevice cachedDevice1 = mCachedDeviceManager.addDevice(mDevice1);
+        CachedBluetoothDevice cachedDevice2 = mCachedDeviceManager.addDevice(mDevice2);
+        cachedDevice1.setGroupId(1);
+        cachedDevice2.setGroupId(1);
+        cachedDevice1.setMemberDevice(cachedDevice2);
+
+        // Call onDeviceUnpaired for the one in mCachedDevices.
+        mCachedDeviceManager.onDeviceUnpaired(cachedDevice1);
+        verify(mDevice2).removeBond();
+    }
+
+    /**
+     * Test to verify OnDeviceUnpaired() for csip device unpair.
+     */
+    @Test
+    public void onDeviceUnpaired_unpairCsipSubDevice() {
+        when(mDevice1.getBondState()).thenReturn(BluetoothDevice.BOND_BONDED);
+        CachedBluetoothDevice cachedDevice1 = mCachedDeviceManager.addDevice(mDevice1);
+        CachedBluetoothDevice cachedDevice2 = mCachedDeviceManager.addDevice(mDevice2);
+        cachedDevice1.setGroupId(1);
+        cachedDevice2.setGroupId(1);
+        cachedDevice1.setMemberDevice(cachedDevice2);
+
+        // Call onDeviceUnpaired for the one in mCachedDevices.
+        mCachedDeviceManager.onDeviceUnpaired(cachedDevice2);
+        verify(mDevice1).removeBond();
+    }
+
+    /**
+     * Test to verify isSubDevice_validSubDevice().
+     */
+    @Test
+    public void isSubDevice_validMemberDevice() {
+        doReturn(CAP_GROUP1).when(mCsipSetCoordinatorProfile).getGroupUuidMapByDevice(mDevice1);
+        mCachedDeviceManager.addDevice(mDevice1);
+
+        // Both device are not sub device in default value.
+        assertThat(mCachedDeviceManager.isSubDevice(mDevice1)).isFalse();
+        assertThat(mCachedDeviceManager.isSubDevice(mDevice2)).isFalse();
+
+        // Add Device-2 as device with Device-1 with the same group id, and add Device-3 with
+        // the different group id.
+        doReturn(CAP_GROUP1).when(mCsipSetCoordinatorProfile).getGroupUuidMapByDevice(mDevice2);
+        doReturn(CAP_GROUP2).when(mCsipSetCoordinatorProfile).getGroupUuidMapByDevice(mDevice3);
+        mCachedDeviceManager.addDevice(mDevice2);
+        mCachedDeviceManager.addDevice(mDevice3);
+
+        // Verify Device-2 is sub device, but Device-1, and Device-3 is not.
+        assertThat(mCachedDeviceManager.isSubDevice(mDevice1)).isFalse();
+        assertThat(mCachedDeviceManager.isSubDevice(mDevice2)).isTrue();
+        assertThat(mCachedDeviceManager.isSubDevice(mDevice3)).isFalse();
     }
 }

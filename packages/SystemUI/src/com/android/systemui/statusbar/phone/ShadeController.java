@@ -18,9 +18,9 @@ import com.android.systemui.statusbar.StatusBarState;
 
 /**
  * {@link ShadeController} is an abstraction of the work that used to be hard-coded in
- * {@link StatusBar}. The shade itself represents the concept of the status bar window state, and
- * can be in multiple states: dozing, locked, showing the bouncer, occluded, etc. All/some of these
- * are coordinated with {@link StatusBarKeyguardViewManager} via
+ * {@link CentralSurfaces}. The shade itself represents the concept of the status bar window state,
+ * and can be in multiple states: dozing, locked, showing the bouncer, occluded, etc. All/some of
+ * these are coordinated with {@link StatusBarKeyguardViewManager} via
  * {@link com.android.systemui.keyguard.KeyguardViewMediator} and others.
  */
 public interface ShadeController {
@@ -38,7 +38,7 @@ public interface ShadeController {
 
     /**
      * Collapse the shade animated, showing the bouncer when on {@link StatusBarState#KEYGUARD} or
-     * dismissing {@link StatusBar} when on {@link StatusBarState#SHADE}.
+     * dismissing {@link CentralSurfaces} when on {@link StatusBarState#SHADE}.
      */
     void animateCollapsePanels(int flags, boolean force);
 
@@ -54,6 +54,9 @@ public interface ShadeController {
      * @return Seems to always return false
      */
     boolean closeShadeIfOpen();
+
+    /** Returns whether the shade is currently open or opening. */
+    boolean isShadeOpen();
 
     /**
      * Add a runnable for NotificationPanelView to post when the panel is expanded.

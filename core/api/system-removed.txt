@@ -1,12 +1,4 @@
 // Signature format: 2.0
-package android {
-
-  public static final class Manifest.permission {
-    field public static final String MANAGE_DEVICE_ADMINS = "android.permission.MANAGE_DEVICE_ADMINS";
-  }
-
-}
-
 package android.app {
 
   public class AppOpsManager {
@@ -64,14 +56,6 @@ package android.app.search {
 
   public static final class SearchTarget.Builder {
     method @Deprecated @NonNull public android.app.search.SearchTarget.Builder setShouldHide(boolean);
-  }
-
-}
-
-package android.bluetooth {
-
-  public final class BluetoothHeadset implements android.bluetooth.BluetoothProfile {
-    method @Deprecated @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.MODIFY_PHONE_STATE}) public boolean setPriority(android.bluetooth.BluetoothDevice, int);
   }
 
 }

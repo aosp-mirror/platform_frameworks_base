@@ -1,1 +1,5 @@
 include /graphics/java/android/graphics/fonts/OWNERS
+
+# Bug component: 568761
+per-file /apct-tests/perftests/core/res/* = felkachang@google.com,zyy@google.com
+

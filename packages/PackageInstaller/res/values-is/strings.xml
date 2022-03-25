@@ -56,6 +56,7 @@
     <string name="uninstall_application_text" msgid="3816830743706143980">"Viltu fjarlægja þetta forrit?"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"Viltu fjarlægja þetta forrit hjá "<b>"öllum"</b>" notendum? Forritið og gögn þess verða fjarlægð hjá "<b>"öllum"</b>" notendum tækisins."</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"Viltu fjarlægja þetta forrit fyrir notandann <xliff:g id="USERNAME">%1$s</xliff:g>?"</string>
+    <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"Viltu fjarlægja þetta forrit af vinnuprófílnum þínum?"</string>
     <string name="uninstall_update_text" msgid="863648314632448705">"Viltu skipta þessu forriti út fyrir verksmiðjuútgáfuna? Öll gögn verða fjarlægð."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"Viltu skipta þessu forriti út fyrir verksmiðjuútgáfuna? Öll gögn verða fjarlægð. Þetta hefur áhrif á alla notendur tækisins, þar á meðal þá sem eru með vinnusnið."</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"Halda <xliff:g id="SIZE">%1$s</xliff:g> af forritagögnum."</string>

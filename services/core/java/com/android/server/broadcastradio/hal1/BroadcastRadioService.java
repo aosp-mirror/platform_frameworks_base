@@ -17,16 +17,9 @@
 package com.android.server.broadcastradio.hal1;
 
 import android.annotation.NonNull;
-import android.Manifest;
-import android.content.Context;
-import android.content.pm.PackageManager;
-import android.hardware.radio.IRadioService;
 import android.hardware.radio.ITuner;
 import android.hardware.radio.ITunerCallback;
 import android.hardware.radio.RadioManager;
-import android.os.ParcelableException;
-
-import com.android.server.SystemService;
 
 import java.util.List;
 import java.util.Objects;
@@ -37,7 +30,7 @@ public class BroadcastRadioService {
      */
     private final long mNativeContext = nativeInit();
 
-    private final Object mLock = new Object();
+    private final Object mLock;
 
     @Override
     protected void finalize() throws Throwable {
@@ -50,6 +43,14 @@ public class BroadcastRadioService {
     private native List<RadioManager.ModuleProperties> nativeLoadModules(long nativeContext);
     private native Tuner nativeOpenTuner(long nativeContext, int moduleId,
             RadioManager.BandConfig config, boolean withAudio, ITunerCallback callback);
+
+    /**
+     * Constructor. should pass
+     * {@code com.android.server.broadcastradio.BroadcastRadioService#mLock} for lock.
+     */
+    public BroadcastRadioService(@NonNull Object lock) {
+        mLock = lock;
+    }
 
     public @NonNull List<RadioManager.ModuleProperties> loadModules() {
         synchronized (mLock) {

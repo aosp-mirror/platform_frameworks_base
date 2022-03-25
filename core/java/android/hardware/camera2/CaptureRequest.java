@@ -85,7 +85,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
 
     /**
      * A {@code Key} is used to do capture request field lookups with
-     * {@link CaptureResult#get} or to set fields with
+     * {@link CaptureRequest#get} or to set fields with
      * {@link CaptureRequest.Builder#set(Key, Object)}.
      *
      * <p>For example, to set the crop rectangle for the next capture:
@@ -95,11 +95,11 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * </pre></code>
      * </p>
      *
-     * <p>To enumerate over all possible keys for {@link CaptureResult}, see
-     * {@link CameraCharacteristics#getAvailableCaptureResultKeys}.</p>
+     * <p>To enumerate over all possible keys for {@link CaptureRequest}, see
+     * {@link CameraCharacteristics#getAvailableCaptureRequestKeys}.</p>
      *
-     * @see CaptureResult#get
-     * @see CameraCharacteristics#getAvailableCaptureResultKeys
+     * @see CaptureRequest#get
+     * @see CameraCharacteristics#getAvailableCaptureRequestKeys
      */
     public final static class Key<T> {
         private final CameraMetadataNative.Key<T> mKey;
@@ -599,7 +599,8 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
 
         synchronized (mSurfacesLock) {
             mSurfaceSet.clear();
-            Parcelable[] parcelableArray = in.readParcelableArray(Surface.class.getClassLoader());
+            Parcelable[] parcelableArray = in.readParcelableArray(Surface.class.getClassLoader(),
+                    Surface.class);
             if (parcelableArray != null) {
                 for (Parcelable p : parcelableArray) {
                     Surface s = (Surface) p;
@@ -2081,10 +2082,20 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * ({@link CaptureRequest#LENS_OPTICAL_STABILIZATION_MODE android.lens.opticalStabilizationMode}), turning both modes on may
      * produce undesirable interaction, so it is recommended not to enable
      * both at the same time.</p>
+     * <p>If video stabilization is set to "PREVIEW_STABILIZATION",
+     * {@link CaptureRequest#LENS_OPTICAL_STABILIZATION_MODE android.lens.opticalStabilizationMode} is overridden. The camera sub-system may choose
+     * to turn on hardware based image stabilization in addition to software based stabilization
+     * if it deems that appropriate.
+     * This key may be a part of the available session keys, which camera clients may
+     * query via
+     * {@link android.hardware.camera2.CameraCharacteristics#getAvailableSessionKeys }.
+     * If this is the case, changing this key over the life-time of a capture session may
+     * cause delays / glitches.</p>
      * <p><b>Possible values:</b></p>
      * <ul>
      *   <li>{@link #CONTROL_VIDEO_STABILIZATION_MODE_OFF OFF}</li>
      *   <li>{@link #CONTROL_VIDEO_STABILIZATION_MODE_ON ON}</li>
+     *   <li>{@link #CONTROL_VIDEO_STABILIZATION_MODE_PREVIEW_STABILIZATION PREVIEW_STABILIZATION}</li>
      * </ul>
      *
      * <p>This key is available on all devices.</p>
@@ -2094,6 +2105,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * @see CaptureRequest#SCALER_CROP_REGION
      * @see #CONTROL_VIDEO_STABILIZATION_MODE_OFF
      * @see #CONTROL_VIDEO_STABILIZATION_MODE_ON
+     * @see #CONTROL_VIDEO_STABILIZATION_MODE_PREVIEW_STABILIZATION
      */
     @PublicKey
     @NonNull
@@ -2785,6 +2797,11 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * <p>If a camera device supports both OIS and digital image stabilization
      * ({@link CaptureRequest#CONTROL_VIDEO_STABILIZATION_MODE android.control.videoStabilizationMode}), turning both modes on may produce undesirable
      * interaction, so it is recommended not to enable both at the same time.</p>
+     * <p>If {@link CaptureRequest#CONTROL_VIDEO_STABILIZATION_MODE android.control.videoStabilizationMode} is set to "PREVIEW_STABILIZATION",
+     * {@link CaptureRequest#LENS_OPTICAL_STABILIZATION_MODE android.lens.opticalStabilizationMode} is overridden. The camera sub-system may choose
+     * to turn on hardware based image stabilization in addition to software based stabilization
+     * if it deems that appropriate. This key's value in the capture result will reflect which
+     * OIS mode was chosen.</p>
      * <p>Not all devices will support OIS; see
      * {@link CameraCharacteristics#LENS_INFO_AVAILABLE_OPTICAL_STABILIZATION android.lens.info.availableOpticalStabilization} for
      * available controls.</p>
@@ -2804,6 +2821,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * @see CaptureRequest#CONTROL_VIDEO_STABILIZATION_MODE
      * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
      * @see CameraCharacteristics#LENS_INFO_AVAILABLE_OPTICAL_STABILIZATION
+     * @see CaptureRequest#LENS_OPTICAL_STABILIZATION_MODE
      * @see #LENS_OPTICAL_STABILIZATION_MODE_OFF
      * @see #LENS_OPTICAL_STABILIZATION_MODE_ON
      */

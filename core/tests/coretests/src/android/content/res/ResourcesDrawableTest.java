@@ -24,6 +24,7 @@ import android.content.Context;
 import android.graphics.drawable.ColorStateListDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
+import android.platform.test.annotations.Presubmit;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
@@ -34,6 +35,7 @@ import com.android.frameworks.coretests.R;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+@Presubmit
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class ResourcesDrawableTest {

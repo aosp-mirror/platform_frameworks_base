@@ -33,6 +33,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ParceledListSlice;
 import android.database.ContentObserver;
+import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.display.AmbientBrightnessDayStats;
@@ -42,6 +43,7 @@ import android.hardware.display.ColorDisplayManager;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayedContentSample;
 import android.hardware.display.DisplayedContentSamplingAttributes;
+import android.hardware.input.InputSensorInfo;
 import android.os.BatteryManager;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -63,6 +65,8 @@ import com.android.internal.R;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -84,8 +88,11 @@ public class BrightnessTrackerTest {
     private static final String DEFAULT_DISPLAY_ID = "123";
     private static final float FLOAT_DELTA = 0.01f;
 
+    @Mock private InputSensorInfo mInputSensorInfoMock;
+
     private BrightnessTracker mTracker;
     private TestInjector mInjector;
+    private Sensor mLightSensorFake;
 
     private static Object sHandlerLock = new Object();
     private static Handler sHandler;
@@ -108,9 +115,12 @@ public class BrightnessTrackerTest {
 
     @Before
     public void setUp() throws Exception {
+        MockitoAnnotations.initMocks(this);
         mInjector = new TestInjector(ensureHandler());
+        mLightSensorFake = new Sensor(mInputSensorInfoMock);
 
         mTracker = new BrightnessTracker(InstrumentationRegistry.getContext(), mInjector);
+        mTracker.setLightSensor(mLightSensorFake);
         mDefaultNightModeColorTemperature =
                 InstrumentationRegistry.getContext().getResources().getInteger(
                 R.integer.config_nightDisplayColorTemperatureDefault);
@@ -834,6 +844,47 @@ public class BrightnessTrackerTest {
         mTracker.stop();
     }
 
+    @Test
+    public void testLightSensorChange() {
+        // verify the tracker started correctly and a listener registered
+        startTracker(mTracker);
+        assertNotNull(mInjector.mSensorListener);
+        assertEquals(mInjector.mLightSensor, mLightSensorFake);
+
+        // Setting the sensor to null should stop the registered listener.
+        mTracker.setLightSensor(null);
+        mInjector.waitForHandler();
+        assertNull(mInjector.mSensorListener);
+        assertNull(mInjector.mLightSensor);
+
+        // Resetting sensor should start listener again
+        mTracker.setLightSensor(mLightSensorFake);
+        mInjector.waitForHandler();
+        assertNotNull(mInjector.mSensorListener);
+        assertEquals(mInjector.mLightSensor, mLightSensorFake);
+
+        Sensor secondSensor = new Sensor(mInputSensorInfoMock);
+        // Setting a different listener should keep things working
+        mTracker.setLightSensor(secondSensor);
+        mInjector.waitForHandler();
+        assertNotNull(mInjector.mSensorListener);
+        assertEquals(mInjector.mLightSensor, secondSensor);
+    }
+
+    @Test
+    public void testSetLightSensorDoesntStartListener() {
+        mTracker.setLightSensor(mLightSensorFake);
+        assertNull(mInjector.mSensorListener);
+    }
+
+    @Test
+    public void testNullLightSensorWontRegister() {
+        mTracker.setLightSensor(null);
+        startTracker(mTracker);
+        assertNull(mInjector.mSensorListener);
+        assertNull(mInjector.mLightSensor);
+    }
+
     private InputStream getInputStream(String data) {
         return new ByteArrayInputStream(data.getBytes(StandardCharsets.UTF_8));
     }
@@ -924,6 +975,7 @@ public class BrightnessTrackerTest {
 
     private class TestInjector extends BrightnessTracker.Injector {
         SensorEventListener mSensorListener;
+        Sensor mLightSensor;
         BroadcastReceiver mBroadcastReceiver;
         DisplayManager.DisplayListener mDisplayListener;
         Map<String, Integer> mSecureIntSettings = new HashMap<>();
@@ -974,14 +1026,16 @@ public class BrightnessTrackerTest {
 
         @Override
         public void registerSensorListener(Context context,
-                SensorEventListener sensorListener, Handler handler) {
+                SensorEventListener sensorListener, Sensor lightSensor, Handler handler) {
             mSensorListener = sensorListener;
+            mLightSensor = lightSensor;
         }
 
         @Override
         public void unregisterSensorListener(Context context,
                 SensorEventListener sensorListener) {
             mSensorListener = null;
+            mLightSensor = null;
         }
 
         @Override

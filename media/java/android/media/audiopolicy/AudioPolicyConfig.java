@@ -101,7 +101,7 @@ public class AudioPolicyConfig implements Parcelable {
             // write voice communication capture allowed flag
             dest.writeBoolean(mix.getRule().voiceCommunicationCaptureAllowed());
             // write specified mix type
-            dest.writeInt(mix.getRule().getTargetMixType());
+            dest.writeInt(mix.getRule().getTargetMixRole());
             // write mix rules
             final ArrayList<AudioMixMatchCriterion> criteria = mix.getRule().getCriteria();
             dest.writeInt(criteria.size());
@@ -137,7 +137,7 @@ public class AudioPolicyConfig implements Parcelable {
             // read voice capture allowed flag
             ruleBuilder.voiceCommunicationCaptureAllowed(in.readBoolean());
             // read specified mix type
-            ruleBuilder.setTargetMixType(in.readInt());
+            ruleBuilder.setTargetMixRole(in.readInt());
             // read mix rules
             int nbRules = in.readInt();
             for (int j = 0 ; j < nbRules ; j++) {
@@ -181,7 +181,7 @@ public class AudioPolicyConfig implements Parcelable {
                     + mix.getRule().voiceCommunicationCaptureAllowed() + "\n";
             // write mix rules
             textDump += "  specified mix type="
-                    + mix.getRule().getTargetMixType() + "\n";
+                    + mix.getRule().getTargetMixRole() + "\n";
             final ArrayList<AudioMixMatchCriterion> criteria = mix.getRule().getCriteria();
             for (AudioMixMatchCriterion criterion : criteria) {
                 switch(criterion.mRule) {

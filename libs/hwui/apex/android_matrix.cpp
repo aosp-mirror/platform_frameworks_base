@@ -35,3 +35,10 @@ bool AMatrix_getContents(JNIEnv* env, jobject matrixObj, float values[9]) {
     }
     return false;
 }
+
+jobject AMatrix_newInstance(JNIEnv* env, float values[9]) {
+    jobject matrixObj = android::android_graphics_Matrix_newInstance(env);
+    SkMatrix* m = android::android_graphics_Matrix_getSkMatrix(env, matrixObj);
+    m->set9(values);
+    return matrixObj;
+}

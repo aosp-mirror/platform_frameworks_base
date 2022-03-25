@@ -1,6 +1,15 @@
 {
   "presubmit": [
     {
+      "name": "CtsCompanionDeviceManagerCoreTestCases"
+    },
+    {
+      "name": "CtsCompanionDeviceManagerUiAutomationTestCases"
+    },
+    {
+      "name": "CtsCompanionDeviceManagerNoCompanionServicesTestCases"
+    },
+    {
       "name": "CtsOsTestCases",
       "options": [
         {

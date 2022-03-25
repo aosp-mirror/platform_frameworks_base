@@ -50,9 +50,11 @@ abstract class BaseParceledListSlice<T> implements Parcelable {
      */
     private static final int MAX_IPC_SIZE = IBinder.getSuggestedMaxIpcSizeBytes();
 
-    private final List<T> mList;
+    private List<T> mList;
 
     private int mInlineCountLimit = Integer.MAX_VALUE;
+
+    private boolean mHasBeenParceled = false;
 
     public BaseParceledListSlice(List<T> list) {
         mList = list;
@@ -151,9 +153,17 @@ abstract class BaseParceledListSlice<T> implements Parcelable {
      * Write this to another Parcel. Note that this discards the internal Parcel
      * and should not be used anymore. This is so we can pass this to a Binder
      * where we won't have a chance to call recycle on this.
+     *
+     * This method can only be called once per BaseParceledListSlice to ensure that
+     * the referenced list can be cleaned up before the recipient cleans up the
+     * Binder reference.
      */
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        if (mHasBeenParceled) {
+            throw new IllegalStateException("Can't Parcel a ParceledListSlice more than once");
+        }
+        mHasBeenParceled = true;
         final int N = mList.size();
         final int callFlags = flags;
         dest.writeInt(N);
@@ -180,9 +190,17 @@ abstract class BaseParceledListSlice<T> implements Parcelable {
                             throws RemoteException {
                         if (code != FIRST_CALL_TRANSACTION) {
                             return super.onTransact(code, data, reply, flags);
+                        } else if (mList == null) {
+                            throw new IllegalArgumentException("Attempt to transfer null list, "
+                                    + "did transfer finish?");
                         }
                         int i = data.readInt();
-                        if (DEBUG) Log.d(TAG, "Writing more @" + i + " of " + N);
+
+                        if (DEBUG) {
+                            Log.d(TAG, "Writing more @" + i + " of " + N + " to "
+                                    + Binder.getCallingPid() + ", sender=" + this);
+                        }
+
                         while (i < N && reply.dataSize() < MAX_IPC_SIZE) {
                             reply.writeInt(1);
 
@@ -196,6 +214,9 @@ abstract class BaseParceledListSlice<T> implements Parcelable {
                         if (i < N) {
                             if (DEBUG) Log.d(TAG, "Breaking @" + i + " of " + N);
                             reply.writeInt(0);
+                        } else {
+                            if (DEBUG) Log.d(TAG, "Transfer complete, clearing mList reference");
+                            mList = null;
                         }
                         return true;
                     }

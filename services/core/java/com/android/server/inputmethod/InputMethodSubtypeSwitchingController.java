@@ -39,7 +39,7 @@ import java.util.Objects;
  * InputMethodSubtypeSwitchingController controls the switching behavior of the subtypes.
  *
  * <p>This class is designed to be used from and only from {@link InputMethodManagerService} by
- * using {@link InputMethodManagerService#mMethodMap} as a global lock.</p>
+ * using {@link ImfLock ImfLock.class} as a global lock.</p>
  */
 final class InputMethodSubtypeSwitchingController {
     private static final String TAG = InputMethodSubtypeSwitchingController.class.getSimpleName();

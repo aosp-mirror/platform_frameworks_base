@@ -20,6 +20,7 @@
     <string name="pip_phone_close" msgid="5783752637260411309">"დახურვა"</string>
     <string name="pip_phone_expand" msgid="2579292903468287504">"გაშლა"</string>
     <string name="pip_phone_settings" msgid="5468987116750491918">"პარამეტრები"</string>
+    <string name="pip_phone_enter_split" msgid="7042877263880641911">"გაყოფილ ეკრანში შესვლა"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"მენიუ"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> იყენებს რეჟიმს „ეკრანი ეკრანში“"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"თუ არ გსურთ, რომ <xliff:g id="NAME">%s</xliff:g> ამ ფუნქციას იყენებდეს, აქ შეხებით შეგიძლიათ გახსნათ პარამეტრები და გამორთოთ ის."</string>
@@ -28,6 +29,8 @@
     <string name="pip_skip_to_next" msgid="8403429188794867653">"შემდეგზე გადასვლა"</string>
     <string name="pip_skip_to_prev" msgid="7172158111196394092">"წინაზე გადასვლა"</string>
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"ზომის შეცვლა"</string>
+    <string name="accessibility_action_pip_stash" msgid="4060775037619702641">"გადანახვა"</string>
+    <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"გადანახვის გაუქმება"</string>
     <string name="dock_forced_resizable" msgid="1749750436092293116">"აპმა შეიძლება არ იმუშაოს გაყოფილი ეკრანის რეჟიმში."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"ეკრანის გაყოფა არ არის მხარდაჭერილი აპის მიერ."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"აპმა შეიძლება არ იმუშაოს მეორეულ ეკრანზე."</string>
@@ -69,4 +72,13 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"ბუშტი"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"მართვა"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"ბუშტი დაიხურა."</string>
+    <string name="restart_button_description" msgid="5887656107651190519">"შეეხეთ ამ აპის გადასატვირთად და გადადით სრულ ეკრანზე."</string>
+    <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"კამერად პრობლემები აქვს?\nშეეხეთ გამოსასწორებლად"</string>
+    <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"არ გამოსწორდა?\nშეეხეთ წინა ვერსიის დასაბრუნებლად"</string>
+    <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"კამერას პრობლემები არ აქვს? შეეხეთ უარყოფისთვის."</string>
+    <string name="letterbox_education_dialog_title" msgid="6688664582871779215">"ზოგიერთი აპი უკეთ მუშაობს პორტრეტის რეჟიმში"</string>
+    <string name="letterbox_education_dialog_subtext" msgid="4853542518367719562">"გამოცადეთ ამ ვარიანტებიდან ერთ-ერთი, რათა მაქსიმალურად ისარგებლოთ თქვენი მეხსიერებით"</string>
+    <string name="letterbox_education_screen_rotation_text" msgid="5085786687366339027">"მოატრიალეთ თქვენი მოწყობილობა სრული ეკრანის გასაშლელად"</string>
+    <string name="letterbox_education_reposition_text" msgid="1068293354123934727">"ორმაგად შეეხეთ აპის გვერდითა სივრცეს, რათა ის სხვაგან გადაიტანოთ"</string>
+    <string name="letterbox_education_got_it" msgid="4057634570866051177">"გასაგებია"</string>
 </resources>

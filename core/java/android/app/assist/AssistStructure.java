@@ -658,6 +658,7 @@ public class AssistStructure implements Parcelable {
         float mElevation;
         float mAlpha = 1.0f;
 
+        // TODO: The FLAGS_* below have filled all bits, will need to be refactored.
         static final int FLAGS_DISABLED = 0x00000001;
         static final int FLAGS_VISIBILITY_MASK = View.VISIBLE|View.INVISIBLE|View.GONE;
         static final int FLAGS_FOCUSABLE = 0x00000010;
@@ -672,6 +673,10 @@ public class AssistStructure implements Parcelable {
         static final int FLAGS_ACTIVATED = 0x00002000;
         static final int FLAGS_CONTEXT_CLICKABLE = 0x00004000;
         static final int FLAGS_OPAQUE = 0x00008000;
+
+        // --IMPORTANT-- must update this flag if any below flags extend to further bits.
+        // This flag is used to clear all FLAGS_HAS_* values in mFlags prior to parceling.
+        static final int FLAGS_ALL_CONTROL = 0xffff0000;
 
         static final int FLAGS_HAS_MIME_TYPES = 0x80000000;
         static final int FLAGS_HAS_MATRIX = 0x40000000;
@@ -689,7 +694,7 @@ public class AssistStructure implements Parcelable {
         static final int FLAGS_HAS_INPUT_TYPE = 0x00040000;
         static final int FLAGS_HAS_URL_SCHEME = 0x00020000;
         static final int FLAGS_HAS_LOCALE_LIST = 0x00010000;
-        static final int FLAGS_ALL_CONTROL = 0xfff00000;
+        // --IMPORTANT END--
 
         static final int AUTOFILL_FLAGS_HAS_AUTOFILL_VIEW_ID =         0x0001;
         static final int AUTOFILL_FLAGS_HAS_AUTOFILL_VIRTUAL_VIEW_ID = 0x0002;
@@ -810,13 +815,13 @@ public class AssistStructure implements Parcelable {
                     mAutofillHints = in.readStringArray();
                 }
                 if ((autofillFlags & AUTOFILL_FLAGS_HAS_AUTOFILL_VALUE) != 0) {
-                    mAutofillValue = in.readParcelable(null);
+                    mAutofillValue = in.readParcelable(null, android.view.autofill.AutofillValue.class);
                 }
                 if ((autofillFlags & AUTOFILL_FLAGS_HAS_AUTOFILL_OPTIONS) != 0) {
                     mAutofillOptions = in.readCharSequenceArray();
                 }
                 if ((autofillFlags & AUTOFILL_FLAGS_HAS_HTML_INFO) != 0) {
-                    mHtmlInfo = in.readParcelable(null);
+                    mHtmlInfo = in.readParcelable(null, android.view.ViewStructure.HtmlInfo.class);
                 }
                 if ((autofillFlags & AUTOFILL_FLAGS_HAS_MIN_TEXT_EMS) != 0) {
                     mMinEms = in.readInt();
@@ -881,7 +886,7 @@ public class AssistStructure implements Parcelable {
                 mWebDomain = in.readString();
             }
             if ((flags&FLAGS_HAS_LOCALE_LIST) != 0) {
-                mLocaleList = in.readParcelable(null);
+                mLocaleList = in.readParcelable(null, android.os.LocaleList.class);
             }
             if ((flags & FLAGS_HAS_MIME_TYPES) != 0) {
                 mReceiveContentMimeTypes = in.readStringArray();

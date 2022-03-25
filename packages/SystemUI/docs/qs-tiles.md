@@ -357,10 +357,12 @@ Following are methods that need to be implemented when creating a new SystemUI t
   Updates the `State` of the Tile based on the state of the device as provided by the respective controller. It will be called every time the Tile becomes visible, is interacted with or `QSTileImpl#refreshState` is called. After this is done, the updated state will be reflected in the UI.
 
 * ```java
+  @Deprecated
   public int getMetricsCategory()
   ```
 
-  Identifier for this Tile, as defined in [proto/src/metrics_constants/metrics_constants.proto](/proto/src/metrics_constants/metrics_constants.proto). This is used to log events related to this Tile.
+  ~~Identifier for this Tile, as defined in [proto/src/metrics_constants/metrics_constants.proto](/proto/src/metrics_constants/metrics_constants.proto). This is used to log events related to this Tile.~~
+  This is now deprecated in favor of `UiEvent` that use the tile spec.
 
 * ```java
   public boolean isAvailable()

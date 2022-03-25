@@ -26,6 +26,7 @@ import android.app.GrantedUriPermission;
 import android.app.IApplicationThread;
 import android.app.IActivityController;
 import android.app.IAppTask;
+import android.app.IForegroundServiceObserver;
 import android.app.IInstrumentationWatcher;
 import android.app.IProcessObserver;
 import android.app.IServiceConnection;
@@ -168,7 +169,7 @@ interface IActivityManager {
     int bindService(in IApplicationThread caller, in IBinder token, in Intent service,
             in String resolvedType, in IServiceConnection connection, int flags,
             in String callingPackage, int userId);
-    int bindIsolatedService(in IApplicationThread caller, in IBinder token, in Intent service,
+    int bindServiceInstance(in IApplicationThread caller, in IBinder token, in Intent service,
             in String resolvedType, in IServiceConnection connection, int flags,
             in String instanceName, in String callingPackage, int userId);
     void updateServiceGroup(in IServiceConnection connection, int group, int importance);
@@ -221,7 +222,7 @@ interface IActivityManager {
     int getProcessLimit();
     int checkUriPermission(in Uri uri, int pid, int uid, int mode, int userId,
             in IBinder callerToken);
-    int[] checkUriPermissions(in List<Uri> uris, int pid, int uid, int mode,
+    int[] checkUriPermissions(in List<Uri> uris, int pid, int uid, int mode, int userId,
                 in IBinder callerToken);
     void grantUriPermission(in IApplicationThread caller, in String targetPkg, in Uri uri,
             int mode, int userId);
@@ -250,7 +251,14 @@ interface IActivityManager {
             in String[] resolvedTypes, int flags, in Bundle options, int userId);
     void cancelIntentSender(in IIntentSender sender);
     ActivityManager.PendingIntentInfo getInfoForIntentSender(in IIntentSender sender);
-    void registerIntentSenderCancelListener(in IIntentSender sender, in IResultReceiver receiver);
+    /**
+      This method used to be called registerIntentSenderCancelListener(), was void, and
+      would call `receiver` if the PI has already been canceled.
+      Now it returns false if the PI is cancelled, without calling `receiver`.
+      The method was renamed to catch calls to the original method.
+     */
+    boolean registerIntentSenderCancelListenerEx(in IIntentSender sender,
+        in IResultReceiver receiver);
     void unregisterIntentSenderCancelListener(in IIntentSender sender, in IResultReceiver receiver);
     void enterSafeMode();
     void noteWakeupAlarm(in IIntentSender sender, in WorkSource workSource, int sourceUid,
@@ -271,6 +279,9 @@ interface IActivityManager {
     List<ActivityManager.ProcessErrorStateInfo> getProcessesInErrorState();
     boolean clearApplicationUserData(in String packageName, boolean keepState,
             in IPackageDataObserver observer, int userId);
+    void stopAppForUser(in String packageName, int userId);
+    /** Returns {@code false} if the callback could not be registered, {@true} otherwise. */
+    boolean registerForegroundServiceObserver(in IForegroundServiceObserver callback);
     @UnsupportedAppUsage
     void forceStopPackage(in String packageName, int userId);
     boolean killPids(in int[] pids, in String reason, boolean secure);
@@ -319,10 +330,10 @@ interface IActivityManager {
     void handleApplicationStrictModeViolation(in IBinder app, int penaltyMask,
             in StrictMode.ViolationInfo crashInfo);
     boolean isTopActivityImmersive();
-    void crashApplication(int uid, int initialPid, in String packageName, int userId,
-            in String message, boolean force);
     void crashApplicationWithType(int uid, int initialPid, in String packageName, int userId,
             in String message, boolean force, int exceptionTypeId);
+    void crashApplicationWithTypeWithExtras(int uid, int initialPid, in String packageName,
+            int userId, in String message, boolean force, int exceptionTypeId, in Bundle extras);
     /** @deprecated -- use getProviderMimeTypeAsync */
     @UnsupportedAppUsage(maxTargetSdk = 29, publicAlternatives =
             "Use {@link android.content.ContentResolver#getType} public API instead.")
@@ -340,7 +351,10 @@ interface IActivityManager {
     void setPackageScreenCompatMode(in String packageName, int mode);
     @UnsupportedAppUsage
     boolean switchUser(int userid);
+    String getSwitchingFromUserMessage();
+    String getSwitchingToUserMessage();
     @UnsupportedAppUsage
+    void setStopUserOnSwitch(int value);
     boolean removeTask(int taskId);
     @UnsupportedAppUsage
     void registerProcessObserver(in IProcessObserver observer);
@@ -435,7 +449,7 @@ interface IActivityManager {
 
     void requestInteractiveBugReport();
     void requestFullBugReport();
-    void requestRemoteBugReport();
+    void requestRemoteBugReport(long nonce);
     boolean launchBugReportHandlerApp();
     List<String> getBugreportWhitelistedPackages();
 
@@ -496,7 +510,6 @@ interface IActivityManager {
     void noteAlarmFinish(in IIntentSender sender, in WorkSource workSource, int sourceUid, in String tag);
     @UnsupportedAppUsage
     int getPackageProcessState(in String packageName, in String callingPackage);
-    void updateDeviceOwner(in String packageName);
 
     // Start of N transactions
     // Start Binder transaction tracking for all applications.
@@ -506,6 +519,10 @@ interface IActivityManager {
     // descriptor.
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     boolean stopBinderTrackingAndDump(in ParcelFileDescriptor fd);
+
+    /** Enables server-side binder tracing for the calling uid. */
+    void enableBinderTracing();
+
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void suppressResizeConfigChanges(boolean suppress);
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
@@ -661,6 +678,10 @@ interface IActivityManager {
      */
     boolean isAppFreezerSupported();
 
+    /**
+     * Return whether the app freezer is enabled (true) or not (false) by this system.
+     */
+    boolean isAppFreezerEnabled();
 
     /**
      * Kills uid with the reason of permission change.
@@ -725,4 +746,14 @@ interface IActivityManager {
 
     /** Blocks until all broadcast queues become idle. */
     void waitForBroadcastIdle();
+
+    /**
+     * @return The reason code of whether or not the given UID should be exempted from background
+     * restrictions here.
+     *
+     * <p>
+     * Note: Call it with caution as it'll try to acquire locks in other services.
+     * </p>
+     */
+    int getBackgroundRestrictionExemptionReason(int uid);
 }

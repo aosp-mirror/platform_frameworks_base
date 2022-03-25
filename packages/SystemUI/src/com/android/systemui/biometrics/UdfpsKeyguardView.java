@@ -29,14 +29,15 @@ import android.graphics.PorterDuffColorFilter;
 import android.util.AttributeSet;
 import android.util.MathUtils;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import androidx.annotation.Nullable;
+import androidx.asynclayoutinflater.view.AsyncLayoutInflater;
 
 import com.android.settingslib.Utils;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
-import com.android.systemui.statusbar.StatusBarState;
 
 import com.airbnb.lottie.LottieAnimationView;
 import com.airbnb.lottie.LottieProperty;
@@ -66,6 +67,8 @@ public class UdfpsKeyguardView extends UdfpsAnimationView {
     private float mBurnInOffsetY;
     private float mBurnInProgress;
     private float mInterpolatedDarkAmount;
+    private boolean mAnimatingBetweenAodAndLockscreen; // As opposed to Unlocked => AOD
+    private boolean mFullyInflated;
 
     public UdfpsKeyguardView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
@@ -80,17 +83,11 @@ public class UdfpsKeyguardView extends UdfpsAnimationView {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        mAodFp = findViewById(R.id.udfps_aod_fp);
-        mLockScreenFp = findViewById(R.id.udfps_lockscreen_fp);
-        mBgProtection = findViewById(R.id.udfps_keyguard_fp_bg);
 
-        updateColor();
-
-        // requires call to invalidate to update the color
-        mLockScreenFp.addValueCallback(
-                new KeyPath("**"), LottieProperty.COLOR_FILTER,
-                frameInfo -> new PorterDuffColorFilter(mTextColorPrimary, PorterDuff.Mode.SRC_ATOP)
-        );
+        // inflate Lottie views on a background thread in case it takes a while to inflate
+        AsyncLayoutInflater inflater = new AsyncLayoutInflater(mContext);
+        inflater.inflate(R.layout.udfps_keyguard_view_internal, this,
+                mLayoutInflaterFinishListener);
     }
 
     @Override
@@ -113,23 +110,36 @@ public class UdfpsKeyguardView extends UdfpsAnimationView {
     }
 
     private void updateBurnInOffsets() {
+        if (!mFullyInflated) {
+            return;
+        }
+
+        final float darkAmountForAnimation = mAnimatingBetweenAodAndLockscreen
+                ? mInterpolatedDarkAmount : 1f /* animating from unlocked to AOD */;
         mBurnInOffsetX = MathUtils.lerp(0f,
             getBurnInOffset(mMaxBurnInOffsetX * 2, true /* xAxis */)
-                - mMaxBurnInOffsetX, mInterpolatedDarkAmount);
+                - mMaxBurnInOffsetX, darkAmountForAnimation);
         mBurnInOffsetY = MathUtils.lerp(0f,
             getBurnInOffset(mMaxBurnInOffsetY * 2, false /* xAxis */)
-                - mMaxBurnInOffsetY, mInterpolatedDarkAmount);
-        mBurnInProgress = MathUtils.lerp(0f, getBurnInProgressOffset(), mInterpolatedDarkAmount);
+                - mMaxBurnInOffsetY, darkAmountForAnimation);
+        mBurnInProgress = MathUtils.lerp(0f, getBurnInProgressOffset(), darkAmountForAnimation);
+
+        if (mAnimatingBetweenAodAndLockscreen) {
+            mBgProtection.setAlpha(1f - mInterpolatedDarkAmount);
+
+            mLockScreenFp.setTranslationX(mBurnInOffsetX);
+            mLockScreenFp.setTranslationY(mBurnInOffsetY);
+            mLockScreenFp.setProgress(1f - mInterpolatedDarkAmount);
+            mLockScreenFp.setAlpha(1f - mInterpolatedDarkAmount);
+        } else {
+            mBgProtection.setAlpha(0f);
+            mLockScreenFp.setAlpha(0f);
+        }
 
         mAodFp.setTranslationX(mBurnInOffsetX);
         mAodFp.setTranslationY(mBurnInOffsetY);
         mAodFp.setProgress(mBurnInProgress);
-        mAodFp.setAlpha(255 * mInterpolatedDarkAmount);
-
-        mLockScreenFp.setTranslationX(mBurnInOffsetX);
-        mLockScreenFp.setTranslationY(mBurnInOffsetY);
-        mLockScreenFp.setProgress(1f - mInterpolatedDarkAmount);
-        mLockScreenFp.setAlpha((1f - mInterpolatedDarkAmount) * 255);
+        mAodFp.setAlpha(mInterpolatedDarkAmount);
     }
 
     void requestUdfps(boolean request, int color) {
@@ -141,6 +151,10 @@ public class UdfpsKeyguardView extends UdfpsAnimationView {
     }
 
     void updateColor() {
+        if (!mFullyInflated) {
+            return;
+        }
+
         mTextColorPrimary = Utils.getColorAttrDefaultColor(mContext,
             android.R.attr.textColorPrimary);
         mBgProtection.setImageDrawable(getContext().getDrawable(R.drawable.fingerprint_bg));
@@ -165,11 +179,13 @@ public class UdfpsKeyguardView extends UdfpsAnimationView {
     @Override
     protected int updateAlpha() {
         int alpha = super.updateAlpha();
-        mLockScreenFp.setAlpha(alpha / 255f);
-        if (mInterpolatedDarkAmount != 0f) {
-            mBgProtection.setAlpha(1f - mInterpolatedDarkAmount);
-        } else {
-            mBgProtection.setAlpha(alpha / 255f);
+        if (mFullyInflated) {
+            if (mInterpolatedDarkAmount == 0f) {
+                mLockScreenFp.setAlpha(alpha / 255f);
+                mBgProtection.setAlpha(alpha / 255f);
+            } else {
+                updateBurnInOffsets();
+            }
         }
 
         return alpha;
@@ -183,8 +199,10 @@ public class UdfpsKeyguardView extends UdfpsAnimationView {
         return mAlpha;
     }
 
-    void onDozeAmountChanged(float linear, float eased) {
+    void onDozeAmountChanged(float linear, float eased, boolean animatingBetweenAodAndLockscreen) {
+        mAnimatingBetweenAodAndLockscreen = animatingBetweenAodAndLockscreen;
         mInterpolatedDarkAmount = eased;
+
         updateAlpha();
         updateBurnInOffsets();
     }
@@ -193,8 +211,8 @@ public class UdfpsKeyguardView extends UdfpsAnimationView {
      * Animates in the bg protection circle behind the fp icon to highlight the icon.
      */
     void animateInUdfpsBouncer(Runnable onEndAnimation) {
-        if (mBackgroundInAnimator.isRunning()) {
-            // already animating in
+        if (mBackgroundInAnimator.isRunning() || !mFullyInflated) {
+            // already animating in or not yet inflated
             return;
         }
 
@@ -217,7 +235,26 @@ public class UdfpsKeyguardView extends UdfpsAnimationView {
         mBackgroundInAnimator.start();
     }
 
-    private boolean isShadeLocked() {
-        return mStatusBarState == StatusBarState.SHADE_LOCKED;
-    }
+    private final AsyncLayoutInflater.OnInflateFinishedListener mLayoutInflaterFinishListener =
+            new AsyncLayoutInflater.OnInflateFinishedListener() {
+        @Override
+        public void onInflateFinished(View view, int resid, ViewGroup parent) {
+            mFullyInflated = true;
+            parent.addView(view);
+            mAodFp = findViewById(R.id.udfps_aod_fp);
+            mLockScreenFp = findViewById(R.id.udfps_lockscreen_fp);
+            mBgProtection = findViewById(R.id.udfps_keyguard_fp_bg);
+
+            updateBurnInOffsets();
+            updateColor();
+            updateAlpha();
+
+            // requires call to invalidate to update the color
+            mLockScreenFp.addValueCallback(
+                    new KeyPath("**"), LottieProperty.COLOR_FILTER,
+                    frameInfo -> new PorterDuffColorFilter(mTextColorPrimary,
+                            PorterDuff.Mode.SRC_ATOP)
+            );
+        }
+    };
 }

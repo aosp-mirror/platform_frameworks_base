@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.app.ActivityTaskManager;
 import android.graphics.Region;
 import android.os.IBinder;
 import android.os.Parcel;
@@ -51,6 +52,7 @@ public class WindowInfo implements Parcelable {
     public boolean inPictureInPicture;
     public boolean hasFlagWatchOutsideTouch;
     public int displayId = Display.INVALID_DISPLAY;
+    public int taskId = ActivityTaskManager.INVALID_TASK_ID;
 
     private WindowInfo() {
         /* do nothing - hide constructor */
@@ -67,6 +69,7 @@ public class WindowInfo implements Parcelable {
     public static WindowInfo obtain(WindowInfo other) {
         WindowInfo window = obtain();
         window.displayId = other.displayId;
+        window.taskId = other.taskId;
         window.type = other.type;
         window.layer = other.layer;
         window.token = other.token;
@@ -103,6 +106,7 @@ public class WindowInfo implements Parcelable {
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
         parcel.writeInt(displayId);
+        parcel.writeInt(taskId);
         parcel.writeInt(type);
         parcel.writeInt(layer);
         parcel.writeStrongBinder(token);
@@ -129,6 +133,7 @@ public class WindowInfo implements Parcelable {
         builder.append("WindowInfo[");
         builder.append("title=").append(title);
         builder.append(", displayId=").append(displayId);
+        builder.append(", taskId=").append(taskId);
         builder.append(", type=").append(type);
         builder.append(", layer=").append(layer);
         builder.append(", token=").append(token);
@@ -146,6 +151,7 @@ public class WindowInfo implements Parcelable {
 
     private void initFromParcel(Parcel parcel) {
         displayId = parcel.readInt();
+        taskId = parcel.readInt();
         type = parcel.readInt();
         layer = parcel.readInt();
         token = parcel.readStrongBinder();
@@ -169,6 +175,7 @@ public class WindowInfo implements Parcelable {
 
     private void clear() {
         displayId = Display.INVALID_DISPLAY;
+        taskId = ActivityTaskManager.INVALID_TASK_ID;
         type = 0;
         layer = 0;
         token = null;

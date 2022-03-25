@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Describes the properties of a route.
@@ -106,7 +107,7 @@ public final class MediaRoute2Info implements Parcelable {
     @IntDef({
             TYPE_UNKNOWN, TYPE_BUILTIN_SPEAKER, TYPE_WIRED_HEADSET,
             TYPE_WIRED_HEADPHONES, TYPE_BLUETOOTH_A2DP, TYPE_HDMI, TYPE_USB_DEVICE,
-            TYPE_USB_ACCESSORY, TYPE_DOCK, TYPE_USB_HEADSET, TYPE_HEARING_AID,
+            TYPE_USB_ACCESSORY, TYPE_DOCK, TYPE_USB_HEADSET, TYPE_HEARING_AID, TYPE_BLE_HEADSET,
             TYPE_REMOTE_TV, TYPE_REMOTE_SPEAKER, TYPE_GROUP})
     @Retention(RetentionPolicy.SOURCE)
     public @interface Type {}
@@ -200,6 +201,14 @@ public final class MediaRoute2Info implements Parcelable {
      * @hide
      */
     public static final int TYPE_HEARING_AID = AudioDeviceInfo.TYPE_HEARING_AID;
+
+    /**
+     * A route type describing a BLE HEADSET.
+     *
+     * @see #getType
+     * @hide
+     */
+    public static final int TYPE_BLE_HEADSET = AudioDeviceInfo.TYPE_BLE_HEADSET;
 
     /**
      * A route type indicating the presentation of the media is happening on a TV.
@@ -332,10 +341,12 @@ public final class MediaRoute2Info implements Parcelable {
     @ConnectionState
     final int mConnectionState;
     final String mClientPackageName;
+    final String mPackageName;
     final int mVolumeHandling;
     final int mVolumeMax;
     final int mVolume;
     final String mAddress;
+    final Set<String> mDeduplicationIds;
     final Bundle mExtras;
     final String mProviderId;
 
@@ -349,10 +360,12 @@ public final class MediaRoute2Info implements Parcelable {
         mDescription = builder.mDescription;
         mConnectionState = builder.mConnectionState;
         mClientPackageName = builder.mClientPackageName;
+        mPackageName = builder.mPackageName;
         mVolumeHandling = builder.mVolumeHandling;
         mVolumeMax = builder.mVolumeMax;
         mVolume = builder.mVolume;
         mAddress = builder.mAddress;
+        mDeduplicationIds = builder.mDeduplicationIds;
         mExtras = builder.mExtras;
         mProviderId = builder.mProviderId;
     }
@@ -363,14 +376,16 @@ public final class MediaRoute2Info implements Parcelable {
         mFeatures = in.createStringArrayList();
         mType = in.readInt();
         mIsSystem = in.readBoolean();
-        mIconUri = in.readParcelable(null);
+        mIconUri = in.readParcelable(null, android.net.Uri.class);
         mDescription = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
         mConnectionState = in.readInt();
         mClientPackageName = in.readString();
+        mPackageName = in.readString();
         mVolumeHandling = in.readInt();
         mVolumeMax = in.readInt();
         mVolume = in.readInt();
         mAddress = in.readString();
+        mDeduplicationIds = Set.of(in.readStringArray());
         mExtras = in.readBundle();
         mProviderId = in.readString();
     }
@@ -478,6 +493,17 @@ public final class MediaRoute2Info implements Parcelable {
     }
 
     /**
+     * Gets the package name of the provider that published the route.
+     * <p>
+     * It is set by the system service.
+     * @hide
+     */
+    @Nullable
+    public String getPackageName() {
+        return mPackageName;
+    }
+
+    /**
      * Gets information about how volume is handled on the route.
      *
      * @return {@link #PLAYBACK_VOLUME_FIXED} or {@link #PLAYBACK_VOLUME_VARIABLE}
@@ -510,6 +536,19 @@ public final class MediaRoute2Info implements Parcelable {
         return mAddress;
     }
 
+    /**
+     * Gets the Deduplication ID of the route if available.
+     * @see RouteDiscoveryPreference#shouldRemoveDuplicates()
+     * @hide
+     */
+    @NonNull
+    public Set<String> getDeduplicationIds() {
+        return mDeduplicationIds;
+    }
+
+    /**
+     * Gets an optional bundle with extra data.
+     */
     @Nullable
     public Bundle getExtras() {
         return mExtras == null ? null : new Bundle(mExtras);
@@ -541,7 +580,7 @@ public final class MediaRoute2Info implements Parcelable {
      * Returns if the route has at least one of the specified route features.
      *
      * @param features the list of route features to consider
-     * @return true if the route has at least one feature in the list
+     * @return {@code true} if the route has at least one feature in the list
      * @hide
      */
     public boolean hasAnyFeatures(@NonNull Collection<String> features) {
@@ -552,6 +591,21 @@ public final class MediaRoute2Info implements Parcelable {
             }
         }
         return false;
+    }
+
+    /**
+     * Returns if the route has all the specified route features.
+     *
+     * @hide
+     */
+    public boolean hasAllFeatures(@NonNull Collection<String> features) {
+        Objects.requireNonNull(features, "features must not be null");
+        for (String feature : features) {
+            if (!getFeatures().contains(feature)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -588,10 +642,12 @@ public final class MediaRoute2Info implements Parcelable {
                 && Objects.equals(mDescription, other.mDescription)
                 && (mConnectionState == other.mConnectionState)
                 && Objects.equals(mClientPackageName, other.mClientPackageName)
+                && Objects.equals(mPackageName, other.mPackageName)
                 && (mVolumeHandling == other.mVolumeHandling)
                 && (mVolumeMax == other.mVolumeMax)
                 && (mVolume == other.mVolume)
                 && Objects.equals(mAddress, other.mAddress)
+                && Objects.equals(mDeduplicationIds, other.mDeduplicationIds)
                 && Objects.equals(mProviderId, other.mProviderId);
     }
 
@@ -599,8 +655,8 @@ public final class MediaRoute2Info implements Parcelable {
     public int hashCode() {
         // Note: mExtras is not included.
         return Objects.hash(mId, mName, mFeatures, mType, mIsSystem, mIconUri, mDescription,
-                mConnectionState, mClientPackageName, mVolumeHandling, mVolumeMax, mVolume,
-                mAddress, mProviderId);
+                mConnectionState, mClientPackageName, mPackageName, mVolumeHandling, mVolumeMax,
+                mVolume, mAddress, mDeduplicationIds, mProviderId);
     }
 
     @Override
@@ -618,6 +674,7 @@ public final class MediaRoute2Info implements Parcelable {
                 .append(", volumeHandling=").append(getVolumeHandling())
                 .append(", volumeMax=").append(getVolumeMax())
                 .append(", volume=").append(getVolume())
+                .append(", deduplicationIds=").append(String.join(",", getDeduplicationIds()))
                 .append(", providerId=").append(getProviderId())
                 .append(" }");
         return result.toString();
@@ -639,10 +696,12 @@ public final class MediaRoute2Info implements Parcelable {
         TextUtils.writeToParcel(mDescription, dest, flags);
         dest.writeInt(mConnectionState);
         dest.writeString(mClientPackageName);
+        dest.writeString(mPackageName);
         dest.writeInt(mVolumeHandling);
         dest.writeInt(mVolumeMax);
         dest.writeInt(mVolume);
         dest.writeString(mAddress);
+        dest.writeStringArray(mDeduplicationIds.toArray(new String[mDeduplicationIds.size()]));
         dest.writeBundle(mExtras);
         dest.writeString(mProviderId);
     }
@@ -663,10 +722,12 @@ public final class MediaRoute2Info implements Parcelable {
         @ConnectionState
         int mConnectionState;
         String mClientPackageName;
+        String mPackageName;
         int mVolumeHandling = PLAYBACK_VOLUME_FIXED;
         int mVolumeMax;
         int mVolume;
         String mAddress;
+        Set<String> mDeduplicationIds;
         Bundle mExtras;
         String mProviderId;
 
@@ -690,6 +751,7 @@ public final class MediaRoute2Info implements Parcelable {
             mId = id;
             mName = name;
             mFeatures = new ArrayList<>();
+            mDeduplicationIds = Set.of();
         }
 
         /**
@@ -725,10 +787,12 @@ public final class MediaRoute2Info implements Parcelable {
             mDescription = routeInfo.mDescription;
             mConnectionState = routeInfo.mConnectionState;
             mClientPackageName = routeInfo.mClientPackageName;
+            mPackageName = routeInfo.mPackageName;
             mVolumeHandling = routeInfo.mVolumeHandling;
             mVolumeMax = routeInfo.mVolumeMax;
             mVolume = routeInfo.mVolume;
             mAddress = routeInfo.mAddress;
+            mDeduplicationIds = Set.copyOf(routeInfo.mDeduplicationIds);
             if (routeInfo.mExtras != null) {
                 mExtras = new Bundle(routeInfo.mExtras);
             }
@@ -852,6 +916,16 @@ public final class MediaRoute2Info implements Parcelable {
         }
 
         /**
+         * Sets the package name of the route.
+         * @hide
+         */
+        @NonNull
+        public Builder setPackageName(@NonNull String packageName) {
+            mPackageName = packageName;
+            return this;
+        }
+
+        /**
          * Sets the route's volume handling.
          */
         @NonNull
@@ -885,6 +959,21 @@ public final class MediaRoute2Info implements Parcelable {
         @NonNull
         public Builder setAddress(String address) {
             mAddress = address;
+            return this;
+        }
+
+        /**
+         * Sets the deduplication ID of the route.
+         * Routes have the same ID could be removed even when
+         * they are from different providers.
+         * <p>
+         * If it's {@code null}, the route will not be removed.
+         * @see RouteDiscoveryPreference#shouldRemoveDuplicates()
+         * @hide
+         */
+        @NonNull
+        public Builder setDeduplicationIds(@NonNull Set<String> id) {
+            mDeduplicationIds = Set.copyOf(id);
             return this;
         }
 

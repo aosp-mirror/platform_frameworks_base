@@ -37,6 +37,7 @@ cc_library_shared {
 
     srcs: [
         ":ITracingServiceProxy.aidl",
+        ":TraceReportParams.aidl",
     ],
 
     shared_libs: [

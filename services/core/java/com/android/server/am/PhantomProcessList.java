@@ -18,6 +18,7 @@ package com.android.server.am;
 
 import static android.os.MessageQueue.OnFileDescriptorEventListener.EVENT_ERROR;
 import static android.os.MessageQueue.OnFileDescriptorEventListener.EVENT_INPUT;
+import static android.util.FeatureFlagUtils.SETTINGS_ENABLE_MONITOR_PHANTOM_PROCS;
 
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_PROCESSES;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
@@ -28,6 +29,7 @@ import android.app.ApplicationExitInfo.SubReason;
 import android.os.Handler;
 import android.os.Process;
 import android.os.StrictMode;
+import android.util.FeatureFlagUtils;
 import android.util.Slog;
 import android.util.SparseArray;
 
@@ -419,6 +421,10 @@ public final class PhantomProcessList {
      * order of the oom adjs of their parent process.
      */
     void trimPhantomProcessesIfNecessary() {
+        if (!mService.mSystemReady || !FeatureFlagUtils.isEnabled(mService.mContext,
+                SETTINGS_ENABLE_MONITOR_PHANTOM_PROCS)) {
+            return;
+        }
         synchronized (mService.mProcLock) {
             synchronized (mLock) {
                 mTrimPhantomProcessScheduled = false;

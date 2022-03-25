@@ -138,12 +138,14 @@ public class BatteryStatsViewerActivity extends ComponentActivity {
             final BatteryUsageStatsQuery queryDefault =
                     new BatteryUsageStatsQuery.Builder()
                             .includePowerModels()
+                            .includeProcessStateData()
                             .setMaxStatsAgeMs(maxStatsAgeMs)
                             .build();
             final BatteryUsageStatsQuery queryPowerProfileModeledOnly =
                     new BatteryUsageStatsQuery.Builder()
                             .powerProfileModeledOnly()
                             .includePowerModels()
+                            .includeProcessStateData()
                             .setMaxStatsAgeMs(maxStatsAgeMs)
                             .build();
             return mBatteryStatsManager.getBatteryUsageStats(
@@ -290,12 +292,26 @@ public class BatteryStatsViewerActivity extends ComponentActivity {
                     setPowerText(viewHolder.value1TextView, entry.value1);
                     setProportionText(viewHolder.value2TextView, entry);
                     break;
+                case UID_POWER_MODELED_PROCESS_STATE:
+                    setTitleIconAndBackground(viewHolder, "    " + entry.title,
+                            R.drawable.gm_calculate_24,
+                            R.color.battery_consumer_bg_power_profile);
+                    setPowerText(viewHolder.value1TextView, entry.value1);
+                    viewHolder.value2TextView.setVisibility(View.INVISIBLE);
+                    break;
                 case UID_POWER_MEASURED:
                     setTitleIconAndBackground(viewHolder, entry.title,
                             R.drawable.gm_amp_24,
                             R.color.battery_consumer_bg_measured_energy);
                     setPowerText(viewHolder.value1TextView, entry.value1);
                     setProportionText(viewHolder.value2TextView, entry);
+                    break;
+                case UID_POWER_MEASURED_PROCESS_STATE:
+                    setTitleIconAndBackground(viewHolder, "    " + entry.title,
+                            R.drawable.gm_amp_24,
+                            R.color.battery_consumer_bg_measured_energy);
+                    setPowerText(viewHolder.value1TextView, entry.value1);
+                    viewHolder.value2TextView.setVisibility(View.INVISIBLE);
                     break;
                 case UID_POWER_CUSTOM:
                     setTitleIconAndBackground(viewHolder, entry.title,

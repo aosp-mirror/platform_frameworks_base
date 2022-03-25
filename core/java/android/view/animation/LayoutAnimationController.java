@@ -106,7 +106,7 @@ public class LayoutAnimationController {
         TypedArray a = context.obtainStyledAttributes(attrs, com.android.internal.R.styleable.LayoutAnimation);
 
         Animation.Description d = Animation.Description.parseValue(
-                a.peekValue(com.android.internal.R.styleable.LayoutAnimation_delay));
+                a.peekValue(com.android.internal.R.styleable.LayoutAnimation_delay), context);
         mDelay = d.value;
 
         mOrder = a.getInt(com.android.internal.R.styleable.LayoutAnimation_animationOrder, ORDER_NORMAL);

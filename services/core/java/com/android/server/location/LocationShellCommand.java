@@ -69,6 +69,14 @@ class LocationShellCommand extends BasicShellCommandHandler {
                 handleSetAdasGnssLocationEnabled();
                 return 0;
             }
+            case "set-automotive-gnss-suspended": {
+                handleSetAutomotiveGnssSuspended();
+                return 0;
+            }
+            case "is-automotive-gnss-suspended": {
+                handleIsAutomotiveGnssSuspended();
+                return 0;
+            }
             case "providers": {
                 String command = getNextArgRequired();
                 return parseProvidersCommand(command);
@@ -187,6 +195,24 @@ class LocationShellCommand extends BasicShellCommandHandler {
         } while (true);
 
         mService.setAdasGnssLocationEnabledForUser(enabled, userId);
+    }
+
+    private void handleSetAutomotiveGnssSuspended() {
+        if (!mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE)) {
+            throw new IllegalStateException("command only recognized on automotive devices");
+        }
+
+        boolean suspended = Boolean.parseBoolean(getNextArgRequired());
+
+        mService.setAutomotiveGnssSuspended(suspended);
+    }
+
+    private void handleIsAutomotiveGnssSuspended() {
+        if (!mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE)) {
+            throw new IllegalStateException("command only recognized on automotive devices");
+        }
+
+        getOutPrintWriter().println(mService.isAutomotiveGnssSuspended());
     }
 
     private void handleAddTestProvider() {
@@ -359,6 +385,10 @@ class LocationShellCommand extends BasicShellCommandHandler {
             pw.println("  set-adas-gnss-location-enabled true|false [--user <USER_ID>]");
             pw.println("    Sets the ADAS GNSS location enabled state. If no user is specified,");
             pw.println("    the current user is assumed.");
+            pw.println("  is-automotive-gnss-suspended");
+            pw.println("    Gets the automotive GNSS suspended state.");
+            pw.println("  set-automotive-gnss-suspended true|false");
+            pw.println("    Sets the automotive GNSS suspended state.");
         }
         pw.println("  providers");
         pw.println("    The providers command is followed by a subcommand, as listed below:");

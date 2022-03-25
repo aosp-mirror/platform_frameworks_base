@@ -20,6 +20,7 @@ import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
@@ -41,7 +42,19 @@ public interface QuickAccessWalletClient extends Closeable {
      */
     @NonNull
     static QuickAccessWalletClient create(@NonNull Context context) {
-        return new QuickAccessWalletClientImpl(context);
+        return create(context, null /* bgExecutor */);
+    }
+
+    /**
+     * Create a client for accessing wallet cards from the {@link QuickAccessWalletService}. If the
+     * service is unavailable, {@link #isWalletServiceAvailable()} will return false.
+     * @param context Context.
+     * @param bgExecutor A background {@link Executor} for service registration.
+     * @hide
+     */
+    @NonNull
+    static QuickAccessWalletClient create(@NonNull Context context, @Nullable Executor bgExecutor) {
+        return new QuickAccessWalletClientImpl(context, bgExecutor);
     }
 
     /**
@@ -153,6 +166,21 @@ public interface QuickAccessWalletClient extends Closeable {
     void disconnect();
 
     /**
+     * The QuickAccessWalletService may provide a {@link PendingIntent} to start the activity that
+     * hosts the Wallet view. This is typically the home screen of the Wallet application. If this
+     * method returns null, the value returned by getWalletIntent() will be used instead.
+     */
+    void getWalletPendingIntent(@NonNull @CallbackExecutor Executor executor,
+            @NonNull WalletPendingIntentCallback walletPendingIntentCallback);
+
+    /**
+     * Callback for getWalletPendingIntent.
+     */
+    interface WalletPendingIntentCallback {
+        void onWalletPendingIntentRetrieved(@Nullable PendingIntent walletPendingIntent);
+    }
+
+    /**
      * The manifest entry for the QuickAccessWalletService may also publish information about the
      * activity that hosts the Wallet view. This is typically the home screen of the Wallet
      * application.
@@ -212,4 +240,15 @@ public interface QuickAccessWalletClient extends Closeable {
      */
     @Nullable
     CharSequence getShortcutLongLabel();
+
+    /**
+     * Return whether the system should use the component specified by the
+     * {@link android:targetActivity} or
+     * {@link QuickAccessWalletService#getTargetActivityPendingIntent()}
+     * as the "quick access" , invoked directly by the system.
+     * If false, the system will use the built-in UI instead of the component specified
+     * in {@link android:targetActivity} or
+     * {@link QuickAccessWalletService#getTargetActivityPendingIntent()}.
+     */
+    boolean useTargetActivityForQuickAccess();
 }

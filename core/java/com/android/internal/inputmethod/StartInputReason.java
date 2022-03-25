@@ -38,7 +38,9 @@ import java.lang.annotation.Retention;
         StartInputReason.UNBOUND_FROM_IMMS,
         StartInputReason.ACTIVATED_BY_IMMS,
         StartInputReason.DEACTIVATED_BY_IMMS,
-        StartInputReason.SESSION_CREATED_BY_IME})
+        StartInputReason.SESSION_CREATED_BY_IME,
+        StartInputReason.SESSION_CREATED_BY_ACCESSIBILITY,
+        StartInputReason.BOUND_ACCESSIBILITY_SESSION_TO_IMMS})
 public @interface StartInputReason {
     /**
      * Reason is not specified.
@@ -96,4 +98,14 @@ public @interface StartInputReason {
      * {@link com.android.internal.view.IInputSessionCallback#sessionCreated}.
      */
     int SESSION_CREATED_BY_IME = 10;
+    /**
+     * {@link android.accessibilityservice.AccessibilityService} is responding to
+     * {@link com.android.internal.view.IInputSessionWithIdCallback#sessionCreated}.
+     */
+    int SESSION_CREATED_BY_ACCESSIBILITY = 11;
+    /**
+     * {@link android.view.inputmethod.InputMethodManager} is responding to
+     * {@link com.android.internal.view.IInputMethodClient#onBindAccessibilityService(InputBindResult, int)}.
+     */
+    int BOUND_ACCESSIBILITY_SESSION_TO_IMMS = 12;
 }

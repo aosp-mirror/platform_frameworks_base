@@ -207,7 +207,7 @@ class FeatureSplitSymbolTableDelegate : public DefaultSymbolTableDelegate {
     }
 
     // Check to see if this is an 'id' with the target package.
-    if (name.type == ResourceType::kId && symbol->id) {
+    if (name.type.type == ResourceType::kId && symbol->id) {
       ResourceId* id = &symbol->id.value();
       if (id->package_id() > kAppPackageId) {
         // Rewrite the resource ID to be compatible pre-O.
@@ -299,7 +299,7 @@ struct ResourceFileFlattenerOptions {
   bool do_not_fail_on_missing_resources = false;
   OutputFormat output_format = OutputFormat::kApk;
   std::unordered_set<std::string> extensions_to_not_compress;
-  Maybe<std::regex> regex_to_not_compress;
+  std::optional<std::regex> regex_to_not_compress;
 };
 
 // A sampling of public framework resource IDs.
@@ -741,7 +741,7 @@ static bool LoadStableIdMap(IDiagnostics* diag, const std::string& path,
     const size_t res_id_str_len = line.size() - res_id_start_idx;
     StringPiece res_id_str = util::TrimWhitespace(line.substr(res_id_start_idx, res_id_str_len));
 
-    Maybe<ResourceId> maybe_id = ResourceUtils::ParseResourceId(res_id_str);
+    std::optional<ResourceId> maybe_id = ResourceUtils::ParseResourceId(res_id_str);
     if (!maybe_id) {
       diag->Error(DiagMessage(Source(path, line_no)) << "invalid resource ID '" << res_id_str
                                                      << "'");
@@ -793,7 +793,7 @@ class Linker {
     if (!options_.manifest_fixer_options.compile_sdk_version) {
       xml::Attribute* attr = manifest_xml->root->FindAttribute(xml::kSchemaAndroid, "versionCode");
       if (attr != nullptr) {
-        Maybe<std::string>& compile_sdk_version = options_.manifest_fixer_options.compile_sdk_version;
+        auto& compile_sdk_version = options_.manifest_fixer_options.compile_sdk_version;
         if (BinaryPrimitive* prim = ValueCast<BinaryPrimitive>(attr->compiled_value.get())) {
           switch (prim->value.dataType) {
             case Res_value::TYPE_INT_DEC:
@@ -816,7 +816,7 @@ class Linker {
     if (!options_.manifest_fixer_options.compile_sdk_version_codename) {
       xml::Attribute* attr = manifest_xml->root->FindAttribute(xml::kSchemaAndroid, "versionName");
       if (attr != nullptr) {
-        Maybe<std::string>& compile_sdk_version_codename =
+        std::optional<std::string>& compile_sdk_version_codename =
             options_.manifest_fixer_options.compile_sdk_version_codename;
         if (String* str = ValueCast<String>(attr->compiled_value.get())) {
           compile_sdk_version_codename = *str->value;
@@ -912,7 +912,7 @@ class Linker {
     return true;
   }
 
-  Maybe<AppInfo> ExtractAppInfoFromManifest(xml::XmlResource* xml_res, IDiagnostics* diag) {
+  std::optional<AppInfo> ExtractAppInfoFromManifest(xml::XmlResource* xml_res, IDiagnostics* diag) {
     TRACE_CALL();
     // Make sure the first element is <manifest> with package attribute.
     xml::Element* manifest_el = xml::FindRootElement(xml_res->root.get());
@@ -937,7 +937,7 @@ class Linker {
 
     if (xml::Attribute* version_code_attr =
             manifest_el->FindAttribute(xml::kSchemaAndroid, "versionCode")) {
-      Maybe<uint32_t> maybe_code = ResourceUtils::ParseInt(version_code_attr->value);
+      std::optional<uint32_t> maybe_code = ResourceUtils::ParseInt(version_code_attr->value);
       if (!maybe_code) {
         diag->Error(DiagMessage(xml_res->file.source.WithLine(manifest_el->line_number))
                     << "invalid android:versionCode '" << version_code_attr->value << "'");
@@ -948,7 +948,7 @@ class Linker {
 
     if (xml::Attribute* version_code_major_attr =
         manifest_el->FindAttribute(xml::kSchemaAndroid, "versionCodeMajor")) {
-      Maybe<uint32_t> maybe_code = ResourceUtils::ParseInt(version_code_major_attr->value);
+      std::optional<uint32_t> maybe_code = ResourceUtils::ParseInt(version_code_major_attr->value);
       if (!maybe_code) {
         diag->Error(DiagMessage(xml_res->file.source.WithLine(manifest_el->line_number))
                         << "invalid android:versionCodeMajor '"
@@ -960,7 +960,7 @@ class Linker {
 
     if (xml::Attribute* revision_code_attr =
             manifest_el->FindAttribute(xml::kSchemaAndroid, "revisionCode")) {
-      Maybe<uint32_t> maybe_code = ResourceUtils::ParseInt(revision_code_attr->value);
+      std::optional<uint32_t> maybe_code = ResourceUtils::ParseInt(revision_code_attr->value);
       if (!maybe_code) {
         diag->Error(DiagMessage(xml_res->file.source.WithLine(manifest_el->line_number))
                     << "invalid android:revisionCode '" << revision_code_attr->value << "'");
@@ -1094,7 +1094,7 @@ class Linker {
 
   bool WriteJavaFile(ResourceTable* table, const StringPiece& package_name_to_generate,
                      const StringPiece& out_package, const JavaClassGeneratorOptions& java_options,
-                     const Maybe<std::string>& out_text_symbols_path = {}) {
+                     const std::optional<std::string>& out_text_symbols_path = {}) {
     if (!options_.generate_java_class_path && !out_text_symbols_path) {
       return true;
     }
@@ -1251,7 +1251,7 @@ class Linker {
     }
 
     const std::string package_utf8 =
-        options_.custom_java_package.value_or_default(context_->GetCompilationPackage());
+        options_.custom_java_package.value_or(context_->GetCompilationPackage());
 
     std::string out_path = options_.generate_java_class_path.value();
     file::AppendPath(&out_path, file::PackageToPath(package_utf8));
@@ -1283,7 +1283,7 @@ class Linker {
     return true;
   }
 
-  bool WriteProguardFile(const Maybe<std::string>& out, const proguard::KeepSet& keep_set) {
+  bool WriteProguardFile(const std::optional<std::string>& out, const proguard::KeepSet& keep_set) {
     TRACE_CALL();
     if (!out) {
       return true;
@@ -1374,7 +1374,7 @@ class Linker {
         res_name.package = context_->GetCompilationPackage();
       }
 
-      Maybe<ResourceName> mangled_name = context_->GetNameMangler()->MangleName(res_name);
+      std::optional<ResourceName> mangled_name = context_->GetNameMangler()->MangleName(res_name);
       if (mangled_name) {
         res_name = mangled_name.value();
       }
@@ -1550,7 +1550,7 @@ class Linker {
   bool CopyAssetsDirsToApk(IArchiveWriter* writer) {
     std::map<std::string, std::unique_ptr<io::RegularFile>> merged_assets;
     for (const std::string& assets_dir : options_.assets_dirs) {
-      Maybe<std::vector<std::string>> files =
+      std::optional<std::vector<std::string>> files =
           file::FindFiles(assets_dir, context_->GetDiagnostics(), nullptr);
       if (!files) {
         return false;
@@ -1783,7 +1783,7 @@ class Linker {
         package_to_rewrite = table->packages.back().get();
         std::string new_package_name =
             StringPrintf("%s.%s", package_to_rewrite->name.c_str(),
-                         app_info_.split_name.value_or_default("feature").c_str());
+                         app_info_.split_name.value_or("feature").c_str());
 
         if (context_->IsVerbose()) {
           context_->GetDiagnostics()->Note(
@@ -1823,7 +1823,7 @@ class Linker {
     }
 
     // First extract the Package name without modifying it (via --rename-manifest-package).
-    if (Maybe<AppInfo> maybe_app_info =
+    if (std::optional<AppInfo> maybe_app_info =
             ExtractAppInfoFromManifest(manifest_xml.get(), context_->GetDiagnostics())) {
       const AppInfo& app_info = maybe_app_info.value();
       context_->SetCompilationPackage(app_info.package);
@@ -1850,14 +1850,14 @@ class Linker {
       return 1;
     }
 
-    Maybe<AppInfo> maybe_app_info =
+    std::optional<AppInfo> maybe_app_info =
         ExtractAppInfoFromManifest(manifest_xml.get(), context_->GetDiagnostics());
     if (!maybe_app_info) {
       return 1;
     }
 
     app_info_ = maybe_app_info.value();
-    context_->SetMinSdkVersion(app_info_.min_sdk_version.value_or_default(0));
+    context_->SetMinSdkVersion(app_info_.min_sdk_version.value_or(0));
 
     context_->SetNameManglerPolicy(NameManglerPolicy{context_->GetCompilationPackage()});
     context_->SetSplitNameDependencies(app_info_.split_name_dependencies);
@@ -2231,7 +2231,7 @@ class Linker {
   std::map<size_t, std::string> shared_libs_;
 
   // The package name of the base application, if it is included.
-  Maybe<std::string> included_feature_base_;
+  std::optional<std::string> included_feature_base_;
 };
 
 int LinkCommand::Action(const std::vector<std::string>& args) {
@@ -2315,7 +2315,8 @@ int LinkCommand::Action(const std::vector<std::string>& args) {
       return 1;
     }
 
-    const Maybe<uint32_t> maybe_package_id_int = ResourceUtils::ParseInt(package_id_.value());
+    const std::optional<uint32_t> maybe_package_id_int =
+        ResourceUtils::ParseInt(package_id_.value());
     if (!maybe_package_id_int) {
       context.GetDiagnostics()->Error(DiagMessage() << "package ID '" << package_id_.value()
                                                     << "' is not a valid integer");
@@ -2360,7 +2361,7 @@ int LinkCommand::Action(const std::vector<std::string>& args) {
   }
 
   if (preferred_density_) {
-    Maybe<uint16_t> density =
+    std::optional<uint16_t> density =
         ParseTargetDensityParameter(preferred_density_.value(), context.GetDiagnostics());
     if (!density) {
       return 1;

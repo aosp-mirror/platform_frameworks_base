@@ -25,6 +25,7 @@ import android.app.ActivityTaskManager;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Singleton;
+import android.view.RemoteAnimationAdapter;
 
 /**
  * Base class for organizing specific types of windows like Tasks and DisplayAreas
@@ -36,9 +37,16 @@ public class WindowOrganizer {
 
     /**
      * Apply multiple WindowContainer operations at once.
+     *
+     * Note that using this API requires the caller to hold
+     * {@link android.Manifest.permission#MANAGE_ACTIVITY_TASKS}, unless the caller is using
+     * {@link TaskFragmentOrganizer}, in which case it is allowed to change TaskFragment that is
+     * created by itself.
+     *
      * @param t The transaction to apply.
      */
-    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
+    @RequiresPermission(value = android.Manifest.permission.MANAGE_ACTIVITY_TASKS,
+            conditional = true)
     public void applyTransaction(@NonNull WindowContainerTransaction t) {
         try {
             if (!t.isEmpty()) {
@@ -51,6 +59,12 @@ public class WindowOrganizer {
 
     /**
      * Apply multiple WindowContainer operations at once.
+     *
+     * Note that using this API requires the caller to hold
+     * {@link android.Manifest.permission#MANAGE_ACTIVITY_TASKS}, unless the caller is using
+     * {@link TaskFragmentOrganizer}, in which case it is allowed to change TaskFragment that is
+     * created by itself.
+     *
      * @param t The transaction to apply.
      * @param callback This transaction will use the synchronization scheme described in
      *        BLASTSyncEngine.java. The SurfaceControl transaction containing the effects of this
@@ -58,7 +72,8 @@ public class WindowOrganizer {
      * @return An ID for the sync operation which will later be passed to transactionReady callback.
      *         This lets the caller differentiate overlapping sync operations.
      */
-    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
+    @RequiresPermission(value = android.Manifest.permission.MANAGE_ACTIVITY_TASKS,
+            conditional = true)
     public int applySyncTransaction(@NonNull WindowContainerTransaction t,
             @NonNull WindowContainerTransactionCallback callback) {
         try {
@@ -111,6 +126,27 @@ public class WindowOrganizer {
     }
 
     /**
+     * Start a legacy transition.
+     * @param type The type of the transition. This is ignored if a transitionToken is provided.
+     * @param adapter An existing transition to start. If null, a new transition is created.
+     * @param t The set of window operations that are part of this transition.
+     * @return true on success, false if a transition was already running.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
+    @NonNull
+    public int startLegacyTransition(int type, @NonNull RemoteAnimationAdapter adapter,
+            @NonNull WindowContainerTransactionCallback syncCallback,
+            @NonNull WindowContainerTransaction t) {
+        try {
+            return getWindowOrganizerController().startLegacyTransition(
+                    type, adapter, syncCallback.mInterface, t);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Register an ITransitionPlayer to handle transition animations.
      * @hide
      */
@@ -123,8 +159,19 @@ public class WindowOrganizer {
         }
     }
 
-    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
-    IWindowOrganizerController getWindowOrganizerController() {
+    /**
+     * @see TransitionMetrics
+     * @hide
+     */
+    public static ITransitionMetricsReporter getTransitionMetricsReporter() {
+        try {
+            return getWindowOrganizerController().getTransitionMetricsReporter();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    static IWindowOrganizerController getWindowOrganizerController() {
         return IWindowOrganizerControllerSingleton.get();
     }
 

@@ -21,7 +21,6 @@ import android.util.Slog;
 import android.util.Spline;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
 import com.android.server.display.color.ColorDisplayService.ColorDisplayServiceInternal;
 import com.android.server.display.utils.AmbientFilter;
@@ -45,26 +44,18 @@ public class DisplayWhiteBalanceController implements
         AmbientSensor.AmbientBrightnessSensor.Callbacks,
         AmbientSensor.AmbientColorTemperatureSensor.Callbacks {
 
-    protected static final String TAG = "DisplayWhiteBalanceController";
-    protected boolean mLoggingEnabled;
+    private static final String TAG = "DisplayWhiteBalanceController";
+    private boolean mLoggingEnabled;
 
-    private boolean mEnabled;
+    private final ColorDisplayServiceInternal mColorDisplayServiceInternal;
 
-    // To decouple the DisplayPowerController from the DisplayWhiteBalanceController, the DPC
-    // implements Callbacks and passes itself to the DWBC so it can call back into it without
-    // knowing about it.
-    private Callbacks mCallbacks;
-
-    private AmbientSensor.AmbientBrightnessSensor mBrightnessSensor;
-
+    private final AmbientSensor.AmbientBrightnessSensor mBrightnessSensor;
     @VisibleForTesting
     AmbientFilter mBrightnessFilter;
-    private AmbientSensor.AmbientColorTemperatureSensor mColorTemperatureSensor;
-
+    private final AmbientSensor.AmbientColorTemperatureSensor mColorTemperatureSensor;
     @VisibleForTesting
     AmbientFilter mColorTemperatureFilter;
-    private DisplayWhiteBalanceThrottler mThrottler;
-
+    private final DisplayWhiteBalanceThrottler mThrottler;
     // In low brightness conditions the ALS readings are more noisy and produce
     // high errors. This default is introduced to provide a fixed display color
     // temperature when sensor readings become unreliable.
@@ -75,22 +66,22 @@ public class DisplayWhiteBalanceController implements
     private final float mHighLightAmbientColorTemperature;
 
     private float mAmbientColorTemperature;
-
     @VisibleForTesting
     float mPendingAmbientColorTemperature;
     private float mLastAmbientColorTemperature;
 
-    private ColorDisplayServiceInternal mColorDisplayServiceInternal;
-
     // The most recent ambient color temperature values are kept for debugging purposes.
-    private static final int HISTORY_SIZE = 50;
-    private History mAmbientColorTemperatureHistory;
+    private final History mAmbientColorTemperatureHistory;
 
     // Override the ambient color temperature for debugging purposes.
     private float mAmbientColorTemperatureOverride;
 
     // A piecewise linear relationship between ambient and display color temperatures.
     private Spline.LinearSpline mAmbientToDisplayColorTemperatureSpline;
+
+    // A piecewise linear relationship between ambient and display color temperatures, with a
+    // stronger change between the two sets of values.
+    private Spline.LinearSpline mStrongAmbientToDisplayColorTemperatureSpline;
 
     // In very low or very high brightness conditions Display White Balance should
     // be to set to a default instead of using mAmbientToDisplayColorTemperatureSpline.
@@ -109,6 +100,17 @@ public class DisplayWhiteBalanceController implements
     private float mLatestAmbientBrightness;
     private float mLatestLowLightBias;
     private float mLatestHighLightBias;
+
+    private boolean mEnabled;
+
+    // Whether a higher-strength adjustment should be applied; this must be enabled in addition to
+    // mEnabled in order to be applied.
+    private boolean mStrongModeEnabled;
+
+    // To decouple the DisplayPowerController from the DisplayWhiteBalanceController, the DPC
+    // implements Callbacks and passes itself to the DWBC so it can call back into it without
+    // knowing about it.
+    private Callbacks mDisplayPowerControllerCallbacks;
 
     /**
      * @param brightnessSensor
@@ -160,16 +162,18 @@ public class DisplayWhiteBalanceController implements
             @NonNull AmbientSensor.AmbientColorTemperatureSensor colorTemperatureSensor,
             @NonNull AmbientFilter colorTemperatureFilter,
             @NonNull DisplayWhiteBalanceThrottler throttler,
-            float[] lowLightAmbientBrightnesses, float[] lowLightAmbientBiases,
+            float[] lowLightAmbientBrightnesses,
+            float[] lowLightAmbientBiases,
             float lowLightAmbientColorTemperature,
-            float[] highLightAmbientBrightnesses, float[] highLightAmbientBiases,
+            float[] highLightAmbientBrightnesses,
+            float[] highLightAmbientBiases,
             float highLightAmbientColorTemperature,
-            float[] ambientColorTemperatures, float[] displayColorTemperatures) {
+            float[] ambientColorTemperatures,
+            float[] displayColorTemperatures,
+            float[] strongAmbientColorTemperatures,
+            float[] strongDisplayColorTemperatures) {
         validateArguments(brightnessSensor, brightnessFilter, colorTemperatureSensor,
                 colorTemperatureFilter, throttler);
-        mLoggingEnabled = false;
-        mEnabled = false;
-        mCallbacks = null;
         mBrightnessSensor = brightnessSensor;
         mBrightnessFilter = brightnessFilter;
         mColorTemperatureSensor = colorTemperatureSensor;
@@ -180,7 +184,7 @@ public class DisplayWhiteBalanceController implements
         mAmbientColorTemperature = -1.0f;
         mPendingAmbientColorTemperature = -1.0f;
         mLastAmbientColorTemperature = -1.0f;
-        mAmbientColorTemperatureHistory = new History(HISTORY_SIZE);
+        mAmbientColorTemperatureHistory = new History(/* size= */ 50);
         mAmbientColorTemperatureOverride = -1.0f;
 
         try {
@@ -236,6 +240,13 @@ public class DisplayWhiteBalanceController implements
             mAmbientToDisplayColorTemperatureSpline = null;
         }
 
+        try {
+            mStrongAmbientToDisplayColorTemperatureSpline = new Spline.LinearSpline(
+                    strongAmbientColorTemperatures, strongDisplayColorTemperatures);
+        } catch (Exception e) {
+            Slog.e(TAG, "Failed to create strong ambient to display color temperature spline", e);
+        }
+
         mColorDisplayServiceInternal = LocalServices.getService(ColorDisplayServiceInternal.class);
     }
 
@@ -256,6 +267,19 @@ public class DisplayWhiteBalanceController implements
     }
 
     /**
+     * Enable/disable the stronger adjustment option.
+     *
+     * @param enabled whether the stronger adjustment option should be turned on
+     */
+    public void setStrongModeEnabled(boolean enabled) {
+        mStrongModeEnabled = enabled;
+        if (mEnabled) {
+            updateAmbientColorTemperature();
+            updateDisplayColorTemperature();
+        }
+    }
+
+    /**
      * Set an object to call back to when the display color temperature should be updated.
      *
      * @param callbacks
@@ -264,10 +288,10 @@ public class DisplayWhiteBalanceController implements
      * @return Whether the method succeeded or not.
      */
     public boolean setCallbacks(Callbacks callbacks) {
-        if (mCallbacks == callbacks) {
+        if (mDisplayPowerControllerCallbacks == callbacks) {
             return false;
         }
-        mCallbacks = callbacks;
+        mDisplayPowerControllerCallbacks = callbacks;
         return true;
     }
 
@@ -322,7 +346,8 @@ public class DisplayWhiteBalanceController implements
         writer.println("DisplayWhiteBalanceController");
         writer.println("  mLoggingEnabled=" + mLoggingEnabled);
         writer.println("  mEnabled=" + mEnabled);
-        writer.println("  mCallbacks=" + mCallbacks);
+        writer.println("  mStrongModeEnabled=" + mStrongModeEnabled);
+        writer.println("  mDisplayPowerControllerCallbacks=" + mDisplayPowerControllerCallbacks);
         mBrightnessSensor.dump(writer);
         mBrightnessFilter.dump(writer);
         mColorTemperatureSensor.dump(writer);
@@ -337,6 +362,8 @@ public class DisplayWhiteBalanceController implements
         writer.println("  mAmbientColorTemperatureOverride=" + mAmbientColorTemperatureOverride);
         writer.println("  mAmbientToDisplayColorTemperatureSpline="
                 + mAmbientToDisplayColorTemperatureSpline);
+        writer.println("  mStrongAmbientToDisplayColorTemperatureSpline="
+                + mStrongAmbientToDisplayColorTemperatureSpline);
         writer.println("  mLowLightAmbientBrightnessToBiasSpline="
                 + mLowLightAmbientBrightnessToBiasSpline);
         writer.println("  mHighLightAmbientBrightnessToBiasSpline="
@@ -365,9 +392,20 @@ public class DisplayWhiteBalanceController implements
         float ambientColorTemperature = mColorTemperatureFilter.getEstimate(time);
         mLatestAmbientColorTemperature = ambientColorTemperature;
 
-        if (mAmbientToDisplayColorTemperatureSpline != null && ambientColorTemperature != -1.0f) {
-            ambientColorTemperature =
-                mAmbientToDisplayColorTemperatureSpline.interpolate(ambientColorTemperature);
+        if (mStrongModeEnabled) {
+            if (mStrongAmbientToDisplayColorTemperatureSpline != null
+                    && ambientColorTemperature != -1.0f) {
+                ambientColorTemperature =
+                        mStrongAmbientToDisplayColorTemperatureSpline.interpolate(
+                                ambientColorTemperature);
+            }
+        } else {
+            if (mAmbientToDisplayColorTemperatureSpline != null
+                    && ambientColorTemperature != -1.0f) {
+                ambientColorTemperature =
+                        mAmbientToDisplayColorTemperatureSpline.interpolate(
+                                ambientColorTemperature);
+            }
         }
 
         float ambientBrightness = mBrightnessFilter.getEstimate(time);
@@ -410,8 +448,8 @@ public class DisplayWhiteBalanceController implements
             Slog.d(TAG, "pending ambient color temperature: " + ambientColorTemperature);
         }
         mPendingAmbientColorTemperature = ambientColorTemperature;
-        if (mCallbacks != null) {
-            mCallbacks.updateWhiteBalance();
+        if (mDisplayPowerControllerCallbacks != null) {
+            mDisplayPowerControllerCallbacks.updateWhiteBalance();
         }
     }
 
@@ -453,6 +491,22 @@ public class DisplayWhiteBalanceController implements
         mColorDisplayServiceInternal.setDisplayWhiteBalanceColorTemperature(
                 (int) mAmbientColorTemperature);
         mLastAmbientColorTemperature = mAmbientColorTemperature;
+    }
+
+    /**
+     * Calculate the adjusted brightness, in nits, due to the DWB color adaptation
+     *
+     * @param requestedBrightnessNits brightness the framework requires to be output
+     * @return the adjusted brightness the framework needs to output to counter the drop in
+     *         brightness due to DWB, or the requestedBrightnessNits if an adjustment cannot be made
+     */
+    public float calculateAdjustedBrightnessNits(float requestedBrightnessNits) {
+        float luminance = mColorDisplayServiceInternal.getDisplayWhiteBalanceLuminance();
+        if (luminance == -1) {
+            return requestedBrightnessNits;
+        }
+        float effectiveBrightness = requestedBrightnessNits * luminance;
+        return (requestedBrightnessNits - effectiveBrightness) + requestedBrightnessNits;
     }
 
     /**

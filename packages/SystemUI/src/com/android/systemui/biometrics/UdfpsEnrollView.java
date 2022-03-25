@@ -63,7 +63,7 @@ public class UdfpsEnrollView extends UdfpsAnimationView {
 
     void updateSensorLocation(@NonNull FingerprintSensorPropertiesInternal sensorProps) {
         View fingerprintAccessibilityView = findViewById(R.id.udfps_enroll_accessibility_view);
-        final int sensorHeight = sensorProps.sensorRadius * 2;
+        final int sensorHeight = sensorProps.getLocation().sensorRadius * 2;
         final int sensorWidth = sensorHeight;
         ViewGroup.LayoutParams params = fingerprintAccessibilityView.getLayoutParams();
         params.width = sensorWidth;
@@ -78,19 +78,16 @@ public class UdfpsEnrollView extends UdfpsAnimationView {
 
     void onEnrollmentProgress(int remaining, int totalSteps) {
         mHandler.post(() -> {
-            mFingerprintProgressDrawable.setEnrollmentProgress(remaining, totalSteps);
+            mFingerprintProgressDrawable.onEnrollmentProgress(remaining, totalSteps);
             mFingerprintDrawable.onEnrollmentProgress(remaining, totalSteps);
         });
     }
 
     void onEnrollmentHelp(int remaining, int totalSteps) {
-        mHandler.post(
-                () -> mFingerprintProgressDrawable.setEnrollmentProgress(remaining, totalSteps));
+        mHandler.post(() -> mFingerprintProgressDrawable.onEnrollmentHelp(remaining, totalSteps));
     }
 
     void onLastStepAcquired() {
-        mHandler.post(() -> {
-            mFingerprintProgressDrawable.onLastStepAcquired();
-        });
+        mHandler.post(mFingerprintProgressDrawable::onLastStepAcquired);
     }
 }

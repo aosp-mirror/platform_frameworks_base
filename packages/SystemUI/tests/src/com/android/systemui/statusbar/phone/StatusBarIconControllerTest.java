@@ -30,8 +30,8 @@ import android.widget.LinearLayout;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.statusbar.StatusBarIcon;
+import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.DarkIconDispatcher;
-import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.StatusBarMobileView;
 import com.android.systemui.statusbar.StatusBarWifiView;

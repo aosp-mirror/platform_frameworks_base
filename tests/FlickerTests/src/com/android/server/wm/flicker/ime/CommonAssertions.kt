@@ -14,128 +14,56 @@
  * limitations under the License.
  */
 
+@file:JvmName("CommonAssertions")
 package com.android.server.wm.flicker.ime
 
-import android.platform.helpers.IAppHelper
 import com.android.server.wm.flicker.FlickerTestParameter
-
-const val IME_WINDOW_TITLE = "InputMethod"
-
-fun FlickerTestParameter.imeLayerIsAlwaysVisible(rotatesScreen: Boolean = false) {
-    if (rotatesScreen) {
-        assertLayers {
-            this.isVisible(IME_WINDOW_TITLE)
-                .then()
-                .isInvisible(IME_WINDOW_TITLE)
-                .then()
-                .isVisible(IME_WINDOW_TITLE)
-        }
-    } else {
-        assertLayers {
-            this.isVisible(IME_WINDOW_TITLE)
-        }
-    }
-}
+import com.android.server.wm.traces.common.FlickerComponentName
 
 fun FlickerTestParameter.imeLayerBecomesVisible() {
     assertLayers {
-        this.isInvisible(IME_WINDOW_TITLE)
+        this.isInvisible(FlickerComponentName.IME)
             .then()
-            .isVisible(IME_WINDOW_TITLE)
+            .isVisible(FlickerComponentName.IME)
     }
 }
 
 fun FlickerTestParameter.imeLayerBecomesInvisible() {
     assertLayers {
-        this.isVisible(IME_WINDOW_TITLE)
+        this.isVisible(FlickerComponentName.IME)
             .then()
-            .isInvisible(IME_WINDOW_TITLE)
-    }
-}
-
-fun FlickerTestParameter.imeAppLayerIsAlwaysVisible(testApp: IAppHelper) {
-    assertLayers {
-        this.isVisible(testApp.getPackage())
-    }
-}
-
-fun FlickerTestParameter.imeAppWindowIsAlwaysVisible(testApp: IAppHelper) {
-    assertWm {
-        this.showsAppWindowOnTop(testApp.getPackage())
+            .isInvisible(FlickerComponentName.IME)
     }
 }
 
 fun FlickerTestParameter.imeWindowIsAlwaysVisible(rotatesScreen: Boolean = false) {
     if (rotatesScreen) {
         assertWm {
-            this.showsNonAppWindow(IME_WINDOW_TITLE)
+            this.isNonAppWindowVisible(FlickerComponentName.IME)
                 .then()
-                .hidesNonAppWindow(IME_WINDOW_TITLE)
+                .isNonAppWindowInvisible(FlickerComponentName.IME)
                 .then()
-                .showsNonAppWindow(IME_WINDOW_TITLE)
+                .isNonAppWindowVisible(FlickerComponentName.IME)
         }
     } else {
         assertWm {
-            this.showsNonAppWindow(IME_WINDOW_TITLE)
+            this.isNonAppWindowVisible(FlickerComponentName.IME)
         }
     }
 }
 
 fun FlickerTestParameter.imeWindowBecomesVisible() {
     assertWm {
-        this.hidesNonAppWindow(IME_WINDOW_TITLE)
+        this.isNonAppWindowInvisible(FlickerComponentName.IME)
             .then()
-            .showsNonAppWindow(IME_WINDOW_TITLE)
+            .isNonAppWindowVisible(FlickerComponentName.IME)
     }
 }
 
 fun FlickerTestParameter.imeWindowBecomesInvisible() {
     assertWm {
-        this.showsNonAppWindow(IME_WINDOW_TITLE)
+        this.isNonAppWindowVisible(FlickerComponentName.IME)
             .then()
-            .hidesNonAppWindow(IME_WINDOW_TITLE)
-    }
-}
-
-fun FlickerTestParameter.imeAppWindowIsAlwaysVisible(
-    testApp: IAppHelper,
-    rotatesScreen: Boolean = false
-) {
-    if (rotatesScreen) {
-        assertWm {
-            this.showsAppWindow(testApp.getPackage())
-                .then()
-                .hidesAppWindow(testApp.getPackage())
-                .then()
-                .showsAppWindow(testApp.getPackage())
-        }
-    } else {
-        assertWm {
-            this.showsAppWindow(testApp.getPackage())
-        }
-    }
-}
-
-fun FlickerTestParameter.imeAppWindowBecomesVisible(windowName: String) {
-    assertWm {
-        this.hidesAppWindow(windowName)
-            .then()
-            .showsAppWindow(windowName)
-    }
-}
-
-fun FlickerTestParameter.imeAppWindowBecomesInvisible(testApp: IAppHelper) {
-    assertWm {
-        this.showsAppWindowOnTop(testApp.getPackage())
-            .then()
-            .appWindowNotOnTop(testApp.getPackage())
-    }
-}
-
-fun FlickerTestParameter.imeAppLayerBecomesInvisible(testApp: IAppHelper) {
-    assertLayers {
-        this.isVisible(testApp.getPackage())
-            .then()
-            .isInvisible(testApp.getPackage())
+            .isNonAppWindowInvisible(FlickerComponentName.IME)
     }
 }

@@ -24,7 +24,7 @@ import android.service.notification.StatusBarNotification;
 import android.util.Log;
 import android.util.SparseArray;
 
-import com.android.systemui.SystemUI;
+import com.android.systemui.CoreStartable;
 import com.android.systemui.statusbar.NotificationListener;
 
 import javax.inject.Inject;
@@ -32,7 +32,7 @@ import javax.inject.Inject;
 /**
  * Keeps track of the notifications on TV.
  */
-public class TvNotificationHandler extends SystemUI implements
+public class TvNotificationHandler extends CoreStartable implements
         NotificationListener.NotificationHandler {
     private static final String TAG = "TvNotificationHandler";
     private final NotificationListener mNotificationListener;

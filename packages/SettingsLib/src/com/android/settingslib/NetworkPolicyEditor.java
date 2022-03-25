@@ -27,9 +27,7 @@ import static com.android.internal.util.Preconditions.checkNotNull;
 import android.net.NetworkPolicy;
 import android.net.NetworkPolicyManager;
 import android.net.NetworkTemplate;
-import android.net.wifi.WifiInfo;
 import android.os.AsyncTask;
-import android.text.TextUtils;
 import android.util.RecurrenceRule;
 
 import com.google.android.collect.Lists;
@@ -124,7 +122,7 @@ public class NetworkPolicyEditor {
         if (policy != null) {
             return policy;
         } else {
-            return getPolicy(buildUnquotedNetworkTemplate(template));
+            return getPolicy(template);
         }
     }
 
@@ -206,22 +204,5 @@ public class NetworkPolicyEditor {
         policy.inferred = false;
         policy.clearSnooze();
         writeAsync();
-    }
-
-    /**
-     * Build a revised {@link NetworkTemplate} that matches the same rule, but
-     * with an unquoted {@link NetworkTemplate#getNetworkId()}. Used to work
-     * around legacy bugs.
-     */
-    private static NetworkTemplate buildUnquotedNetworkTemplate(NetworkTemplate template) {
-        if (template == null) return null;
-        final String networkId = template.getNetworkId();
-        final String strippedNetworkId = WifiInfo.sanitizeSsid(networkId);
-        if (!TextUtils.equals(strippedNetworkId, networkId)) {
-            return new NetworkTemplate(
-                    template.getMatchRule(), template.getSubscriberId(), strippedNetworkId);
-        } else {
-            return null;
-        }
     }
 }

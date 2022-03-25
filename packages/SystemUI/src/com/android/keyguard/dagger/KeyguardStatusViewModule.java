@@ -34,6 +34,6 @@ public abstract class KeyguardStatusViewModule {
 
     @Provides
     static KeyguardSliceView getKeyguardSliceView(KeyguardClockSwitch keyguardClockSwitch) {
-        return keyguardClockSwitch.findViewById(R.id.keyguard_status_area);
+        return keyguardClockSwitch.findViewById(R.id.keyguard_slice_view);
     }
 }

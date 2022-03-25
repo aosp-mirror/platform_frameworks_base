@@ -79,7 +79,7 @@ public class SmsMessage {
     public static final int ENCODING_8BIT = 2;
     public static final int ENCODING_16BIT = 3;
     /**
-     * @hide This value is not defined in global standard. Only in Korea, this is used.
+     * This value is not defined in global standard. Only in Korea, this is used.
      */
     public static final int ENCODING_KSC5601 = 4;
 

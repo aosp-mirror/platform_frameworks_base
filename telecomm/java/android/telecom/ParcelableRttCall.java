@@ -46,8 +46,8 @@ public class ParcelableRttCall implements Parcelable {
 
     protected ParcelableRttCall(Parcel in) {
         mRttMode = in.readInt();
-        mTransmitStream = in.readParcelable(ParcelFileDescriptor.class.getClassLoader());
-        mReceiveStream = in.readParcelable(ParcelFileDescriptor.class.getClassLoader());
+        mTransmitStream = in.readParcelable(ParcelFileDescriptor.class.getClassLoader(), android.os.ParcelFileDescriptor.class);
+        mReceiveStream = in.readParcelable(ParcelFileDescriptor.class.getClassLoader(), android.os.ParcelFileDescriptor.class);
     }
 
     public static final @android.annotation.NonNull Creator<ParcelableRttCall> CREATOR = new Creator<ParcelableRttCall>() {

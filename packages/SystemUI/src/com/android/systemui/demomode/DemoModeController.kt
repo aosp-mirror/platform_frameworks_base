@@ -81,7 +81,7 @@ class DemoModeController constructor(
         val demoFilter = IntentFilter()
         demoFilter.addAction(ACTION_DEMO)
         context.registerReceiverAsUser(broadcastReceiver, UserHandle.ALL, demoFilter,
-                android.Manifest.permission.DUMP, null)
+                android.Manifest.permission.DUMP, null, Context.RECEIVER_EXPORTED)
     }
 
     override fun addCallback(listener: DemoMode) {

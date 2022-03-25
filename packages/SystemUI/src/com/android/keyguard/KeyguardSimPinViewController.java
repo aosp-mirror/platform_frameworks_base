@@ -103,7 +103,7 @@ public class KeyguardSimPinViewController
             showDefaultMessage();
         }
 
-        mView.setEsimLocked(KeyguardEsimArea.isEsimLocked(mView.getContext(), mSubId));
+        mView.setEsimLocked(KeyguardEsimArea.isEsimLocked(mView.getContext(), mSubId), mSubId);
     }
 
     @Override

@@ -16,10 +16,54 @@ java_defaults {
             // "-Xep:AndroidFrameworkBinderIdentity:ERROR",
             "-Xep:AndroidFrameworkCompatChange:ERROR",
             // "-Xep:AndroidFrameworkUid:ERROR",
+            "-Xep:SelfEquals:ERROR",
+            "-Xep:NullTernary:ERROR",
+            "-Xep:TryFailThrowable:ERROR",
+            "-Xep:HashtableContains:ERROR",
+            "-Xep:FormatString:ERROR",
+            "-Xep:ArrayHashCode:ERROR",
+            "-Xep:SelfAssignment:ERROR",
+            "-Xep:ArrayEquals:ERROR",
+            "-Xep:IdentityBinaryExpression:ERROR",
             // NOTE: only enable to generate local patchfiles
             // "-XepPatchChecks:refaster:frameworks/base/errorprone/refaster/EfficientXml.java.refaster",
             // "-XepPatchLocation:/tmp/refaster/",
         ],
+    },
+    lint: {
+        extra_check_modules: ["AndroidFrameworkLintChecker"],
+    },
+}
+
+// Opt-in config for optimizing and shrinking the services target using R8.
+// Enabled via `export SYSTEM_OPTIMIZE_JAVA=true`, or explicitly in Make via the
+// `SOONG_CONFIG_ANDROID_SYSTEM_OPTIMIZE_JAVA` variable.
+// TODO(b/196084106): Enable optimizations by default after stabilizing and
+// building out retrace infrastructure.
+soong_config_module_type {
+    name: "system_optimized_java_defaults",
+    module_type: "java_defaults",
+    config_namespace: "ANDROID",
+    bool_variables: ["SYSTEM_OPTIMIZE_JAVA"],
+    properties: ["optimize"],
+}
+
+system_optimized_java_defaults {
+    name: "services_java_defaults",
+    soong_config_variables: {
+        SYSTEM_OPTIMIZE_JAVA: {
+            optimize: {
+                enabled: true,
+                // TODO(b/210510433): Enable optimizations after improving
+                // retracing infra.
+                optimize: false,
+                shrink: true,
+                proguard_flags_files: ["proguard.flags"],
+            },
+            // Note: Optimizations are disabled by default if unspecified in
+            // the java_library rule.
+            conditions_default: {},
+        },
     },
 }
 
@@ -45,6 +89,7 @@ filegroup {
         ":services.autofill-sources",
         ":services.backup-sources",
         ":backuplib-sources",
+        ":services.cloudsearch-sources",
         ":services.companion-sources",
         ":services.contentcapture-sources",
         ":services.contentsuggestions-sources",
@@ -57,16 +102,16 @@ filegroup {
         ":services.profcollect-sources",
         ":services.restrictions-sources",
         ":services.searchui-sources",
+        ":services.selectiontoolbar-sources",
         ":services.smartspace-sources",
         ":services.speech-sources",
-        ":services.startop.iorap-sources",
         ":services.systemcaptions-sources",
         ":services.translation-sources",
         ":services.texttospeech-sources",
         ":services.usage-sources",
         ":services.usb-sources",
-        ":services.uwb-sources",
         ":services.voiceinteraction-sources",
+        ":services.wallpapereffectsgeneration-sources",
         ":services.wifi-sources",
     ],
     visibility: ["//visibility:private"],
@@ -81,6 +126,7 @@ java_library {
 // ============================================================
 java_library {
     name: "services",
+    defaults: ["services_java_defaults"],
     installable: true,
 
     dex_preopt: {
@@ -98,6 +144,7 @@ java_library {
         "services.appwidget",
         "services.autofill",
         "services.backup",
+        "services.cloudsearch",
         "services.companion",
         "services.contentcapture",
         "services.contentsuggestions",
@@ -111,16 +158,16 @@ java_library {
         "services.profcollect",
         "services.restrictions",
         "services.searchui",
+        "services.selectiontoolbar",
         "services.smartspace",
         "services.speech",
-        "services.startop",
         "services.systemcaptions",
         "services.translation",
         "services.texttospeech",
         "services.usage",
         "services.usb",
-        "services.uwb",
         "services.voiceinteraction",
+        "services.wallpapereffectsgeneration",
         "services.wifi",
         "service-blobstore",
         "service-jobscheduler",
@@ -130,6 +177,7 @@ java_library {
     libs: [
         "android.hidl.manager-V1.0-java",
         "framework-tethering.stubs.module_lib",
+        "service-art.stubs.system_server",
     ],
 
     // Uncomment to enable output of certain warnings (deprecated, unchecked)
@@ -165,7 +213,6 @@ stubs_defaults {
         " --hide-annotation android.annotation.Hide" +
         " --hide InternalClasses" + // com.android.* classes are okay in this interface
         // TODO: remove the --hide options below
-        " --hide-package com.google.android.startop.iorap" +
         " --hide DeprecationMismatch" +
         " --hide HiddenTypedefConstant",
     visibility: ["//frameworks/base:__subpackages__"],
@@ -189,19 +236,13 @@ droidstubs {
     },
     dists: [
         {
-            targets: [
-                "sdk",
-                "win_sdk",
-            ],
+            targets: ["sdk"],
             dir: "apistubs/android/system-server/api",
             dest: "android-non-updatable.txt",
             tag: ".api.txt",
         },
         {
-            targets: [
-                "sdk",
-                "win_sdk",
-            ],
+            targets: ["sdk"],
             dir: "apistubs/android/system-server/api",
             dest: "android-non-updatable-removed.txt",
             tag: ".removed-api.txt",

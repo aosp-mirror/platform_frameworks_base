@@ -29,6 +29,7 @@ import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
+import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 
@@ -50,14 +51,17 @@ public class AppPairsController {
     private final SparseArray<AppPair> mActiveAppPairs = new SparseArray<>();
     private final DisplayController mDisplayController;
     private final DisplayImeController mDisplayImeController;
+    private final DisplayInsetsController mDisplayInsetsController;
 
     public AppPairsController(ShellTaskOrganizer organizer, SyncTransactionQueue syncQueue,
             DisplayController displayController, ShellExecutor mainExecutor,
-            DisplayImeController displayImeController) {
+            DisplayImeController displayImeController,
+            DisplayInsetsController displayInsetsController) {
         mTaskOrganizer = organizer;
         mSyncQueue = syncQueue;
         mDisplayController = displayController;
         mDisplayImeController = displayImeController;
+        mDisplayInsetsController = displayInsetsController;
         mMainExecutor = mainExecutor;
     }
 
@@ -146,6 +150,10 @@ public class AppPairsController {
 
     DisplayImeController getDisplayImeController() {
         return mDisplayImeController;
+    }
+
+    DisplayInsetsController getDisplayInsetsController() {
+        return mDisplayInsetsController;
     }
 
     public void dump(@NonNull PrintWriter pw, String prefix) {
