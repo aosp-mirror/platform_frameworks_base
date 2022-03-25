@@ -15,8 +15,8 @@
  */
 
 package com.android.systemui.decor
-import android.content.Context
 import android.view.DisplayCutout
+import android.view.LayoutInflater
 import android.view.Surface
 import android.view.View
 import android.view.ViewGroup
@@ -38,20 +38,9 @@ abstract class DecorProvider {
     /** The aligned bounds for the view which is created through inflateView() */
     abstract val alignedBounds: List<Int>
 
-    /**
-     * Called when res info changed.
-     * Child provider needs to implement it if its view needs to be updated.
-     */
-    abstract fun onReloadResAndMeasure(
-        view: View,
-        reloadToken: Int,
-        @Surface.Rotation rotation: Int,
-        displayUniqueId: String? = null
-    )
-
     /** Inflate view into parent as current rotation */
     abstract fun inflateView(
-        context: Context,
+        inflater: LayoutInflater,
         parent: ViewGroup,
         @Surface.Rotation rotation: Int
     ): View

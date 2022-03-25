@@ -369,15 +369,10 @@ class ScreenDecorHwcLayer(context: Context, displayDecorationSupport: DisplayDec
      * Update the rounded corner size.
      */
     fun updateRoundedCornerSize(top: Int, bottom: Int) {
-        if (roundedCornerTopSize == top && roundedCornerBottomSize == bottom) {
-            return
-        }
         roundedCornerTopSize = top
         roundedCornerBottomSize = bottom
         updateRoundedCornerDrawableBounds()
-
-        // Use requestLayout() to trigger transparent region recalculated
-        requestLayout()
+        invalidate()
     }
 
     private fun updateRoundedCornerDrawableBounds() {
