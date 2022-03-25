@@ -907,8 +907,10 @@ public final class ViewRootImpl implements ViewParent,
                 ? Choreographer.getSfInstance() : Choreographer.getInstance();
         mDisplayManager = (DisplayManager)context.getSystemService(Context.DISPLAY_SERVICE);
         mInsetsController = new InsetsController(new ViewRootInsetsControllerHost(this));
-        mHandwritingInitiator = new HandwritingInitiator(mViewConfiguration,
-                mContext.getSystemService(InputMethodManager.class));
+        mHandwritingInitiator = new HandwritingInitiator(
+                mViewConfiguration,
+                mContext.getSystemService(InputMethodManager.class),
+                context.getResources().getDisplayMetrics());
 
         String processorOverrideName = context.getResources().getString(
                                     R.string.config_inputEventCompatProcessorOverrideClassName);
