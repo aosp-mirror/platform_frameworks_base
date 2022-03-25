@@ -234,9 +234,9 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
         final float distanceY = SCREEN_HEIGHT_PX * scrollAmount;
 
         final MotionEvent event1 = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE,
-                0, SCREEN_HEIGHT_PX, 0);
-        final MotionEvent event2 = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE,
                 0, SCREEN_HEIGHT_PX - distanceY, 0);
+        final MotionEvent event2 = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE,
+                0, SCREEN_HEIGHT_PX, 0);
 
         assertThat(gestureListenerCaptor.getValue().onScroll(event1, event2, 0, distanceY))
                 .isTrue();
