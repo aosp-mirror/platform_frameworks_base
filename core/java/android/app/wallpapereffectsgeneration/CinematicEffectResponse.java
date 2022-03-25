@@ -39,27 +39,31 @@ import java.util.Objects;
 public final class CinematicEffectResponse implements Parcelable {
     /** @hide */
     @IntDef(prefix = {"CINEMATIC_EFFECT_STATUS_"},
-            value = {CINEMATIC_EFFECT_STATUS_UNKNOWN,
+            value = {CINEMATIC_EFFECT_STATUS_ERROR,
                     CINEMATIC_EFFECT_STATUS_OK,
-                    CINEMATIC_EFFECT_STATUS_ERROR,
                     CINEMATIC_EFFECT_STATUS_NOT_READY,
                     CINEMATIC_EFFECT_STATUS_PENDING,
-                    CINEMATIC_EFFECT_STATUS_TOO_MANY_REQUESTS})
+                    CINEMATIC_EFFECT_STATUS_TOO_MANY_REQUESTS
+            })
     @Retention(RetentionPolicy.SOURCE)
     public @interface CinematicEffectStatusCode {}
 
-    /** Cinematic effect generation unknown status. */
-    public static final int CINEMATIC_EFFECT_STATUS_UNKNOWN = 0;
+    /** Cinematic effect generation failure with internal error. */
+    public static final int CINEMATIC_EFFECT_STATUS_ERROR = 0;
+
     /** Cinematic effect generation success. */
     public static final int CINEMATIC_EFFECT_STATUS_OK = 1;
-    /** Cinematic effect generation failure. */
-    public static final int CINEMATIC_EFFECT_STATUS_ERROR = 2;
+
     /** Service not ready for cinematic effect generation. */
-    public static final int CINEMATIC_EFFECT_STATUS_NOT_READY = 3;
-    /** Cienmatic effect generation process is pending. */
-    public static final int CINEMATIC_EFFECT_STATUS_PENDING = 4;
-    /** Too manay requests for server to handle. */
-    public static final int CINEMATIC_EFFECT_STATUS_TOO_MANY_REQUESTS = 5;
+    public static final int CINEMATIC_EFFECT_STATUS_NOT_READY = 2;
+    /**
+     * There is already a task being processed for the same task id.
+     * Client should wait for the response and not send the same request
+     * again.
+     */
+    public static final int CINEMATIC_EFFECT_STATUS_PENDING = 3;
+    /** Too many requests for server to handle. */
+    public static final int CINEMATIC_EFFECT_STATUS_TOO_MANY_REQUESTS = 4;
 
     /** @hide */
     @IntDef(prefix = {"IMAGE_CONTENT_TYPE_"},
@@ -71,13 +75,13 @@ public final class CinematicEffectResponse implements Parcelable {
     @Retention(RetentionPolicy.SOURCE)
     public @interface ImageContentType {}
 
-    /** Image content unknown. */
+    /** Unable to determine image type. */
     public static final int IMAGE_CONTENT_TYPE_UNKNOWN = 0;
     /** Image content is people portrait. */
     public static final int IMAGE_CONTENT_TYPE_PEOPLE_PORTRAIT = 1;
     /** Image content is landscape. */
     public static final int IMAGE_CONTENT_TYPE_LANDSCAPE = 2;
-    /** Image content is doesn't belong to other types. */
+    /** Image content is not people portrait or landscape. */
     public static final int IMAGE_CONTENT_TYPE_OTHER = 3;
 
 
