@@ -30,6 +30,7 @@ import android.net.TetheringManager;
 import android.net.vcn.VcnTransportInfo;
 import android.net.wifi.WifiInfo;
 import android.os.BatteryManager;
+import android.os.Build;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -41,8 +42,10 @@ import android.telephony.ServiceState;
 import android.telephony.TelephonyManager;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.core.graphics.drawable.RoundedBitmapDrawable;
 import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory;
+import androidx.core.os.BuildCompat;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.UserIcons;
@@ -127,8 +130,9 @@ public class Utils {
         String name = info != null ? info.name : null;
         if (info.isManagedProfile()) {
             // We use predefined values for managed profiles
-            return context.getSystemService(DevicePolicyManager.class).getString(
-                    WORK_PROFILE_USER_LABEL, () -> context.getString(R.string.managed_user_title));
+            return  BuildCompat.isAtLeastT()
+                    ? getUpdatableManagedUserTitle(context)
+                    : context.getString(R.string.managed_user_title);
         } else if (info.isGuest()) {
             name = context.getString(com.android.internal.R.string.guest_name);
         }
@@ -138,6 +142,13 @@ public class Utils {
             name = context.getString(R.string.unknown);
         }
         return context.getResources().getString(R.string.running_process_item_user_label, name);
+    }
+
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    private static String getUpdatableManagedUserTitle(Context context) {
+        return context.getSystemService(DevicePolicyManager.class).getString(
+                WORK_PROFILE_USER_LABEL,
+                () -> context.getString(R.string.managed_user_title));
     }
 
     /**
