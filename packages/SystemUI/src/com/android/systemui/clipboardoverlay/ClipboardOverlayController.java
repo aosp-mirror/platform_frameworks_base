@@ -291,6 +291,7 @@ public class ClipboardOverlayController {
                     OverlayActionChip chip = constructActionChip(action);
                     mActionContainer.addView(chip);
                     mActionChips.add(chip);
+                    break; // only show at most one action chip
                 }
             }
         });
