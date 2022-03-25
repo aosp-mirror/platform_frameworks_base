@@ -26,7 +26,6 @@ import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.provider.Settings;
 import android.util.ArrayMap;
-import android.util.Log;
 import android.view.accessibility.AccessibilityManager;
 
 import com.android.internal.logging.MetricsLogger;
@@ -38,11 +37,10 @@ import com.android.systemui.R;
 import com.android.systemui.statusbar.AlertingNotificationManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag;
+import com.android.systemui.util.ListenerSet;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.HashSet;
 
 /**
  * A manager which handles heads up notifications which is a special mode where
@@ -52,7 +50,7 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
     private static final String TAG = "HeadsUpManager";
     private static final String SETTING_HEADS_UP_SNOOZE_LENGTH_MS = "heads_up_snooze_length_ms";
 
-    protected final HashSet<OnHeadsUpChangedListener> mListeners = new HashSet<>();
+    protected final ListenerSet<OnHeadsUpChangedListener> mListeners = new ListenerSet<>();
 
     protected final Context mContext;
 
@@ -82,7 +80,8 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
         }
     }
 
-    public HeadsUpManager(@NonNull final Context context) {
+    public HeadsUpManager(@NonNull final Context context, HeadsUpManagerLogger logger) {
+        super(logger);
         mContext = context;
         mAccessibilityMgr = Dependency.get(AccessibilityManagerWrapper.class);
         mUiEventLogger = Dependency.get(UiEventLogger.class);
@@ -103,9 +102,7 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
                         context.getContentResolver(), SETTING_HEADS_UP_SNOOZE_LENGTH_MS, -1);
                 if (packageSnoozeLengthMs > -1 && packageSnoozeLengthMs != mSnoozeLengthMs) {
                     mSnoozeLengthMs = packageSnoozeLengthMs;
-                    if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                        Log.v(TAG, "mSnoozeLengthMs = " + mSnoozeLengthMs);
-                    }
+                    mLogger.logSnoozeLengthChange(packageSnoozeLengthMs);
                 }
             }
         };
@@ -118,7 +115,7 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
      * Adds an OnHeadUpChangedListener to observe events.
      */
     public void addListener(@NonNull OnHeadsUpChangedListener listener) {
-        mListeners.add(listener);
+        mListeners.addIfAbsent(listener);
     }
 
     /**
@@ -146,9 +143,7 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
 
     protected void setEntryPinned(
             @NonNull HeadsUpManager.HeadsUpEntry headsUpEntry, boolean isPinned) {
-        if (Log.isLoggable(TAG, Log.VERBOSE)) {
-            Log.v(TAG, "setEntryPinned: " + isPinned);
-        }
+        mLogger.logSetEntryPinned(headsUpEntry.mEntry.getKey(), isPinned);
         NotificationEntry entry = headsUpEntry.mEntry;
         if (entry.isRowPinned() != isPinned) {
             entry.setRowPinned(isPinned);
@@ -158,7 +153,7 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
                         NotificationPeekEvent.NOTIFICATION_PEEK, entry.getSbn().getUid(),
                         entry.getSbn().getPackageName(), entry.getSbn().getInstanceId());
             }
-            for (OnHeadsUpChangedListener listener : new ArrayList<>(mListeners)) {
+            for (OnHeadsUpChangedListener listener : mListeners) {
                 if (isPinned) {
                     listener.onHeadsUpPinned(entry);
                 } else {
@@ -178,7 +173,7 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
         entry.setHeadsUp(true);
         setEntryPinned((HeadsUpEntry) alertEntry, shouldHeadsUpBecomePinned(entry));
         EventLogTags.writeSysuiHeadsUpStatus(entry.getKey(), 1 /* visible */);
-        for (OnHeadsUpChangedListener listener : new ArrayList<>(mListeners)) {
+        for (OnHeadsUpChangedListener listener : mListeners) {
             listener.onHeadsUpStateChanged(entry, true);
         }
     }
@@ -189,7 +184,8 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
         entry.setHeadsUp(false);
         setEntryPinned((HeadsUpEntry) alertEntry, false /* isPinned */);
         EventLogTags.writeSysuiHeadsUpStatus(entry.getKey(), 0 /* visible */);
-        for (OnHeadsUpChangedListener listener : new ArrayList<>(mListeners)) {
+        mLogger.logNotificationActuallyRemoved(entry.getKey());
+        for (OnHeadsUpChangedListener listener : mListeners) {
             listener.onHeadsUpStateChanged(entry, false);
         }
     }
@@ -199,15 +195,12 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
         if (hasPinnedNotification == mHasPinnedNotification) {
             return;
         }
-        if (Log.isLoggable(TAG, Log.VERBOSE)) {
-            Log.v(TAG, "Pinned mode changed: " + mHasPinnedNotification + " -> " +
-                       hasPinnedNotification);
-        }
+        mLogger.logUpdatePinnedMode(hasPinnedNotification);
         mHasPinnedNotification = hasPinnedNotification;
         if (mHasPinnedNotification) {
             MetricsLogger.count(mContext, "note_peek", 1);
         }
-        for (OnHeadsUpChangedListener listener : new ArrayList<>(mListeners)) {
+        for (OnHeadsUpChangedListener listener : mListeners) {
             listener.onHeadsUpPinnedModeChanged(hasPinnedNotification);
         }
     }
@@ -220,12 +213,11 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
         Long snoozedUntil = mSnoozedPackages.get(key);
         if (snoozedUntil != null) {
             if (snoozedUntil > mClock.currentTimeMillis()) {
-                if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                    Log.v(TAG, key + " snoozed");
-                }
+                mLogger.logIsSnoozedReturned(key);
                 return true;
             }
-            mSnoozedPackages.remove(packageName);
+            mLogger.logPackageUnsnoozed(key);
+            mSnoozedPackages.remove(key);
         }
         return false;
     }
@@ -237,8 +229,9 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
         for (String key : mAlertEntries.keySet()) {
             AlertEntry entry = getHeadsUpEntry(key);
             String packageName = entry.mEntry.getSbn().getPackageName();
-            mSnoozedPackages.put(snoozeKey(packageName, mUser),
-                    mClock.currentTimeMillis() + mSnoozeLengthMs);
+            String snoozeKey = snoozeKey(packageName, mUser);
+            mLogger.logPackageSnoozed(snoozeKey);
+            mSnoozedPackages.put(snoozeKey, mClock.currentTimeMillis() + mSnoozeLengthMs);
         }
     }
 
@@ -357,11 +350,14 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
      * @return -1 if the first argument should be ranked higher than the second, 1 if the second
      * one should be ranked higher and 0 if they are equal.
      */
-    public int compare(@NonNull NotificationEntry a, @NonNull NotificationEntry b) {
+    public int compare(@Nullable NotificationEntry a, @Nullable NotificationEntry b) {
+        if (a == null || b == null) {
+            return Boolean.compare(a == null, b == null);
+        }
         AlertEntry aEntry = getHeadsUpEntry(a.getKey());
         AlertEntry bEntry = getHeadsUpEntry(b.getKey());
         if (aEntry == null || bEntry == null) {
-            return aEntry == null ? 1 : -1;
+            return Boolean.compare(aEntry == null, bEntry == null);
         }
         return aEntry.compareTo(bEntry);
     }
@@ -384,10 +380,6 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
     }
 
     public void onDensityOrFontScaleChanged() {
-    }
-
-    public boolean isEntryAutoHeadsUpped(String key) {
-        return false;
     }
 
     /**

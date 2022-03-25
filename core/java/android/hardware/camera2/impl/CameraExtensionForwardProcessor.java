@@ -19,6 +19,7 @@ package android.hardware.camera2.impl;
 import android.annotation.SuppressLint;
 import android.hardware.camera2.CameraExtensionCharacteristics;
 import android.hardware.camera2.extension.IPreviewImageProcessorImpl;
+import android.hardware.camera2.extension.IProcessResultImpl;
 import android.hardware.camera2.extension.ParcelImage;
 import android.hardware.camera2.TotalCaptureResult;
 import android.media.Image;
@@ -114,12 +115,12 @@ public class CameraExtensionForwardProcessor {
         }
     }
 
-    public void process(ParcelImage image, TotalCaptureResult totalCaptureResult)
-            throws RemoteException {
+    public void process(ParcelImage image, TotalCaptureResult totalCaptureResult,
+            IProcessResultImpl resultCallback) throws RemoteException {
         if ((mIntermediateSurface != null) && (mIntermediateSurface.isValid()) &&
                 !mOutputAbandoned) {
             mProcessor.process(image, totalCaptureResult.getNativeMetadata(),
-                    totalCaptureResult.getSequenceId());
+                    totalCaptureResult.getSequenceId(), resultCallback);
         }
     }
 

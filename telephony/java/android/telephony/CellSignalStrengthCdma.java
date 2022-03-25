@@ -78,13 +78,6 @@ public final class CellSignalStrengthCdma extends CellSignalStrength implements 
     }
 
     /** @hide */
-    public CellSignalStrengthCdma(android.hardware.radio.V1_0.CdmaSignalStrength cdma,
-            android.hardware.radio.V1_0.EvdoSignalStrength evdo) {
-        // Convert from HAL values as part of construction.
-        this(-cdma.dbm, -cdma.ecio, -evdo.dbm, -evdo.ecio, evdo.signalNoiseRatio);
-    }
-
-    /** @hide */
     public CellSignalStrengthCdma(CellSignalStrengthCdma s) {
         copyFrom(s);
     }

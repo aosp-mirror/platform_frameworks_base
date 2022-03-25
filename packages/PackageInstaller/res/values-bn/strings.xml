@@ -56,6 +56,7 @@
     <string name="uninstall_application_text" msgid="3816830743706143980">"আপনি কি এই অ্যাপটি আনইনস্টল করতে চান?"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"আপনি কি "<b>"সব"</b>" ব্যবহারকারীর জন্য এই অ্যাপটিকে আনইনস্টল করতে চান? এই ডিভাইসের "<b>"সব"</b>" ব্যবহারকারীর ডেটা সহ এই অ্যাপ্লিকেশনটি সরিয়ে দেওয়া হবে।"</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"আপনি কি <xliff:g id="USERNAME">%1$s</xliff:g>-এর জন্য এই অ্যাপটি আনইনস্টল করতে চান?"</string>
+    <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"আপনার অফিস প্রোফাইল থেকে এই অ্যাপ আনইনস্টল করতে চান?"</string>
     <string name="uninstall_update_text" msgid="863648314632448705">"ফ্যাক্টরি ভার্সন দিয়ে এই অ্যাপটিকে বদলাতে চান? সব ডেটা মুছে যাবে।"</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"ফ্যাক্টরি ভার্সন দিয়ে এই অ্যাপটিকে বদলাতে চান? সব ডেটা মুছে যাবে। এই ডিভাইসে কাজের প্রোফাইল আছে এমন ব্যবহারকারী সহ সবাই এর দ্বারা প্রভাবিত হবেন।"</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"অ্যাপ ডেটার মধ্যে <xliff:g id="SIZE">%1$s</xliff:g> রেখে দিন।"</string>

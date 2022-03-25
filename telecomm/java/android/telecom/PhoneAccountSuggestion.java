@@ -84,7 +84,7 @@ public final class PhoneAccountSuggestion implements Parcelable {
     }
 
     private PhoneAccountSuggestion(Parcel in) {
-        mHandle = in.readParcelable(PhoneAccountHandle.class.getClassLoader());
+        mHandle = in.readParcelable(PhoneAccountHandle.class.getClassLoader(), android.telecom.PhoneAccountHandle.class);
         mReason = in.readInt();
         mShouldAutoSelect = in.readByte() != 0;
     }

@@ -69,6 +69,10 @@ class RoundedCornerProgressDrawable @JvmOverloads constructor(
         return super.getChangingConfigurations() or ActivityInfo.CONFIG_DENSITY
     }
 
+    override fun canApplyTheme(): Boolean {
+        return (drawable?.canApplyTheme() ?: false) || super.canApplyTheme()
+    }
+
     private class RoundedCornerState(private val wrappedState: ConstantState) : ConstantState() {
         override fun newDrawable(): Drawable {
             return newDrawable(null, null)
@@ -81,6 +85,10 @@ class RoundedCornerProgressDrawable @JvmOverloads constructor(
 
         override fun getChangingConfigurations(): Int {
             return wrappedState.changingConfigurations
+        }
+
+        override fun canApplyTheme(): Boolean {
+            return true
         }
     }
 }

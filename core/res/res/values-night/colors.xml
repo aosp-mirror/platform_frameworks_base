@@ -33,4 +33,6 @@
     <color name="call_notification_answer_color">#5DBA80</color>
 
     <color name="personal_apps_suspension_notification_color">#8AB4F8</color>
+
+    <color name="overview_background">@color/overview_background_dark</color>
 </resources>

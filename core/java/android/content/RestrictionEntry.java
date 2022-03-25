@@ -505,7 +505,7 @@ public class RestrictionEntry implements Parcelable {
         mChoiceValues = in.readStringArray();
         mCurrentValue = in.readString();
         mCurrentValues = in.readStringArray();
-        Parcelable[] parcelables = in.readParcelableArray(null);
+        Parcelable[] parcelables = in.readParcelableArray(null, RestrictionEntry.class);
         if (parcelables != null) {
             mRestrictions = new RestrictionEntry[parcelables.length];
             for (int i = 0; i < parcelables.length; i++) {

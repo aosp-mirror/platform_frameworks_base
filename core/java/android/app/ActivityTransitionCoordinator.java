@@ -871,6 +871,7 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
                 if (view.isAttachedToWindow()) {
                     tempMatrix.reset();
                     mSharedElementParentMatrices.get(i).invert(tempMatrix);
+                    decor.transformMatrixToLocal(tempMatrix);
                     GhostView.addGhost(view, decor, tempMatrix);
                     ViewGroup parent = (ViewGroup) view.getParent();
                     if (moveWithParent && !isInTransitionGroup(parent, decor)) {

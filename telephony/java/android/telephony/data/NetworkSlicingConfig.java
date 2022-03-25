@@ -33,39 +33,15 @@ public final class NetworkSlicingConfig implements Parcelable {
     private final List<NetworkSliceInfo> mSliceInfo;
 
     public NetworkSlicingConfig() {
-        mUrspRules = new ArrayList<UrspRule>();
-        mSliceInfo = new ArrayList<NetworkSliceInfo>();
+        mUrspRules = new ArrayList<>();
+        mSliceInfo = new ArrayList<>();
     }
 
     /** @hide */
-    public NetworkSlicingConfig(android.hardware.radio.V1_6.SlicingConfig sc) {
-        this(sc.urspRules, sc.sliceInfo);
-    }
-
-    /** @hide */
-    public NetworkSlicingConfig(List<android.hardware.radio.V1_6.UrspRule> urspRules,
-            List<android.hardware.radio.V1_6.SliceInfo> sliceInfo) {
-        mUrspRules = new ArrayList<UrspRule>();
-        for (android.hardware.radio.V1_6.UrspRule ur : urspRules) {
-            mUrspRules.add(new UrspRule(ur.precedence, ur.trafficDescriptors,
-                    ur.routeSelectionDescriptor));
-        }
-        mSliceInfo = new ArrayList<NetworkSliceInfo>();
-        for (android.hardware.radio.V1_6.SliceInfo si : sliceInfo) {
-            mSliceInfo.add(sliceInfoBuilder(si));
-        }
-    }
-
-    private NetworkSliceInfo sliceInfoBuilder(android.hardware.radio.V1_6.SliceInfo si) {
-        NetworkSliceInfo.Builder builder = new NetworkSliceInfo.Builder()
-                .setSliceServiceType(si.sst)
-                .setMappedHplmnSliceServiceType(si.mappedHplmnSst);
-        if (si.sliceDifferentiator != NetworkSliceInfo.SLICE_DIFFERENTIATOR_NO_SLICE) {
-            builder
-                .setSliceDifferentiator(si.sliceDifferentiator)
-                .setMappedHplmnSliceDifferentiator(si.mappedHplmnSD);
-        }
-        return builder.build();
+    public NetworkSlicingConfig(List<UrspRule> urspRules, List<NetworkSliceInfo> sliceInfo) {
+        this();
+        mUrspRules.addAll(urspRules);
+        mSliceInfo.addAll(sliceInfo);
     }
 
     /** @hide */

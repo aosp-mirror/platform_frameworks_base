@@ -18,14 +18,16 @@ package com.android.keyguard;
 
 import android.os.Bundle;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.ViewRootImpl;
+
+import androidx.annotation.Nullable;
 
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.statusbar.phone.BiometricUnlockController;
+import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.NotificationPanelViewController;
-import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
 
 /**
  *  Interface to control Keyguard View. It should be implemented by KeyguardViewManagers, which
@@ -66,16 +68,6 @@ public interface KeyguardViewController {
      * Called when the device started waking up.
      */
     default void onStartedWakingUp() {};
-
-    /**
-     * Called when the device started turning on.
-     */
-    default void onScreenTurningOn() {};
-
-    /**
-     * Called when the device has finished turning on.
-     */
-    default void onScreenTurnedOn() {};
 
     /**
      * Sets whether the Keyguard needs input.
@@ -184,17 +176,11 @@ public interface KeyguardViewController {
     //  achieving complete abstraction away from where the Keyguard View is mounted.
 
     /**
-     * Registers the StatusBar to which this Keyguard View is mounted.
-     * @param statusBar
-     * @param container
-     * @param notificationPanelViewController
-     * @param biometricUnlockController
-     * @param notificationContainer
-     * @param bypassController
+     * Registers the CentralSurfaces to which this Keyguard View is mounted.
      */
-    void registerStatusBar(StatusBar statusBar,
-            ViewGroup container,
+    void registerCentralSurfaces(CentralSurfaces centralSurfaces,
             NotificationPanelViewController notificationPanelViewController,
+            @Nullable PanelExpansionStateManager panelExpansionStateManager,
             BiometricUnlockController biometricUnlockController,
             View notificationContainer,
             KeyguardBypassController bypassController);

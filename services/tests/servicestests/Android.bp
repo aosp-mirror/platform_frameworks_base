@@ -32,13 +32,14 @@ android_test {
         "services.appwidget",
         "services.autofill",
         "services.backup",
+        "services.companion",
         "services.core",
         "services.devicepolicy",
         "services.net",
         "services.people",
         "services.usage",
-        "services.uwb",
         "guava",
+        "guava-android-testlib",
         "androidx.test.core",
         "androidx.test.ext.truth",
         "androidx.test.runner",
@@ -53,9 +54,9 @@ android_test {
         "testng",
         "ub-uiautomator",
         "platformprotosnano",
+        "framework-protos",
         "hamcrest-library",
         "servicestests-utils",
-        "service-appsearch",
         "service-jobscheduler",
         "service-permission.impl",
         // TODO: remove once Android migrates to JUnit 4.12,
@@ -63,6 +64,7 @@ android_test {
         "testng",
         "junit",
         "platform-compat-test-rules",
+        "ActivityContext",
     ],
 
     aidl: {
@@ -86,12 +88,10 @@ android_test {
 
     // These are not normally accessible from apps so they must be explicitly included.
     jni_libs: [
-        "libbacktrace",
         "libbase",
         "libbinder",
         "libc++",
         "libcutils",
-        "libicing",
         "liblog",
         "liblzma",
         "libnativehelper",
@@ -110,6 +110,7 @@ android_test {
 
     data: [
         ":JobTestApp",
+        ":StubTestApp",
     ],
 
     java_resources: [
@@ -117,6 +118,7 @@ android_test {
         ":PackageParserTestApp2",
         ":PackageParserTestApp3",
         ":PackageParserTestApp4",
+        ":PackageParserTestApp5",
         ":apex.test",
         ":test.rebootless_apex_v1",
         ":test.rebootless_apex_v2",
@@ -131,9 +133,11 @@ java_library {
     name: "servicestests-core-utils",
     srcs: [
         "src/com/android/server/pm/PackageSettingBuilder.java",
+        "src/com/android/server/am/DeviceConfigSession.java",
     ],
     static_libs: [
         "services.core",
+        "compatibility-device-util-axt",
     ],
 }
 
@@ -143,7 +147,6 @@ java_library {
         "utils/**/*.java",
         "utils/**/*.kt",
         "utils-mockito/**/*.kt",
-        ":services.core-sources-deviceconfig-interface",
     ],
     static_libs: [
         "junit",
@@ -160,7 +163,6 @@ java_library {
         "utils/**/*.java",
         "utils/**/*.kt",
         "utils-mockito/**/*.kt",
-        ":services.core-sources-deviceconfig-interface",
     ],
     static_libs: [
         "junit",
@@ -182,18 +184,41 @@ filegroup {
 java_genrule {
     name: "FrameworksServicesTests_apks_as_resources",
     srcs: [
-        ":FrameworksCoreTests_install_complete_package_info",
+        ":FrameworksServicesTests_install",
+        ":FrameworksServicesTests_install_bad_dex",
+        ":FrameworksServicesTests_install_complete_package_info",
+        ":FrameworksServicesTests_install_decl_perm",
         ":FrameworksServicesTests_install_intent_filters",
+        ":FrameworksServicesTests_install_loc_auto",
+        ":FrameworksServicesTests_install_loc_internal",
+        ":FrameworksServicesTests_install_loc_sdcard",
+        ":FrameworksServicesTests_install_loc_unspecified",
         ":FrameworksServicesTests_install_split_base",
         ":FrameworksServicesTests_install_split_feature_a",
+        ":FrameworksServicesTests_install_use_perm_good",
+        ":FrameworksServicesTests_install_uses_feature",
         ":FrameworksServicesTests_install_uses_sdk_0",
         ":FrameworksServicesTests_install_uses_sdk_q0",
         ":FrameworksServicesTests_install_uses_sdk_q0_r0",
-        ":FrameworksServicesTests_install_uses_sdk_r_none",
         ":FrameworksServicesTests_install_uses_sdk_r0",
         ":FrameworksServicesTests_install_uses_sdk_r5",
+        ":FrameworksServicesTests_install_uses_sdk_r_none",
         ":FrameworksServicesTests_install_uses_sdk_r0_s0",
         ":FrameworksServicesTests_install_uses_sdk_r0_s5",
+        ":FrameworksServicesTests_keyset_permdef_sa_unone",
+        ":FrameworksServicesTests_keyset_permuse_sa_ua_ub",
+        ":FrameworksServicesTests_keyset_permuse_sb_ua_ub",
+        ":FrameworksServicesTests_keyset_sa_ua",
+        ":FrameworksServicesTests_keyset_sa_ua_ub",
+        ":FrameworksServicesTests_keyset_sa_uab",
+        ":FrameworksServicesTests_keyset_sa_ub",
+        ":FrameworksServicesTests_keyset_sa_unone",
+        ":FrameworksServicesTests_keyset_sab_ua",
+        ":FrameworksServicesTests_keyset_sau_ub",
+        ":FrameworksServicesTests_keyset_sb_ua",
+        ":FrameworksServicesTests_keyset_sb_ub",
+        ":FrameworksServicesTests_keyset_splat_api",
+        ":FrameworksServicesTests_keyset_splata_api",
     ],
     out: ["FrameworkServicesTests_apks_as_resources.res.zip"],
     tools: ["soong_zip"],

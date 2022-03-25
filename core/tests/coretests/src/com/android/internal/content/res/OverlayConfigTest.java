@@ -19,9 +19,12 @@ package com.android.internal.content.res;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import android.os.FileUtils;
+import android.os.SystemProperties;
+import android.platform.test.annotations.Presubmit;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
@@ -44,6 +47,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 
+@Presubmit
 @RunWith(AndroidJUnit4.class)
 public class OverlayConfigTest {
     private static final String TEST_APK_PACKAGE_NAME =
@@ -599,5 +603,66 @@ public class OverlayConfigTest {
         assertEquals("android", info.targetPackageName);
         assertEquals(testApk.getPath(), info.path.getPath());
         assertEquals(21, info.targetSdkVersion);
+    }
+
+    @Test
+    public void testOverlayManifest_withRequiredSystemPropertyAndValueNotMatched()
+            throws IOException {
+        final String systemPropertyName = "foo.name";
+        final String systemPropertyValue = "foo.value";
+
+        createFile("/product/overlay/config/config.xml",
+                "<config>"
+                        + "  <overlay package=\"one\" />"
+                        + "  <overlay package=\"two\" />"
+                        + "  <overlay package=\"three\" />"
+                        + "</config>");
+
+        mScannerRule.addOverlay(createFile("/product/overlay/one.apk"), "one", "android", 0,
+                true, 1, systemPropertyName, systemPropertyValue);
+        mScannerRule.addOverlay(createFile("/product/overlay/two.apk"), "two", "android", 0,
+                true, 1, systemPropertyName, systemPropertyValue);
+        mScannerRule.addOverlay(createFile("/product/overlay/three.apk"), "three");
+
+        final OverlayConfig overlayConfig = createConfigImpl();
+        OverlayConfig.Configuration o1 = overlayConfig.getConfiguration("one");
+        assertNull(o1);
+
+        OverlayConfig.Configuration o2 = overlayConfig.getConfiguration("two");
+        assertNull(o2);
+
+        OverlayConfig.Configuration o3 = overlayConfig.getConfiguration("three");
+        assertNotNull(o3);
+    }
+
+    @Test
+    public void testOverlayManifest_withRequiredSystemPropertyAndValueMatched()
+            throws IOException {
+        final String systemPropertyName = "ro.build.version.sdk";
+        final String systemPropertyValue = SystemProperties.get(systemPropertyName, null);
+        assertNotNull(systemPropertyValue);
+
+        createFile("/product/overlay/config/config.xml",
+                "<config>"
+                        + "  <overlay package=\"one\" />"
+                        + "  <overlay package=\"two\" />"
+                        + "  <overlay package=\"three\" />"
+                        + "</config>");
+
+        mScannerRule.addOverlay(createFile("/product/overlay/one.apk"), "one", "android", 0,
+                true, 1, systemPropertyName, systemPropertyValue);
+        mScannerRule.addOverlay(createFile("/product/overlay/two.apk"), "two", "android", 0,
+                true, 1, systemPropertyName, systemPropertyValue);
+        mScannerRule.addOverlay(createFile("/product/overlay/three.apk"), "three");
+
+        final OverlayConfig overlayConfig = createConfigImpl();
+        OverlayConfig.Configuration o1 = overlayConfig.getConfiguration("one");
+        assertNotNull(o1);
+
+        OverlayConfig.Configuration o2 = overlayConfig.getConfiguration("two");
+        assertNotNull(o2);
+
+        OverlayConfig.Configuration o3 = overlayConfig.getConfiguration("three");
+        assertNotNull(o3);
     }
 }

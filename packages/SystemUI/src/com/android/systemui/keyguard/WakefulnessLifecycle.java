@@ -32,6 +32,7 @@ import androidx.annotation.Nullable;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dump.DumpManager;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -83,10 +84,13 @@ public class WakefulnessLifecycle extends Lifecycle<WakefulnessLifecycle.Observe
     @Inject
     public WakefulnessLifecycle(
             Context context,
-            @Nullable IWallpaperManager wallpaperManagerService) {
+            @Nullable IWallpaperManager wallpaperManagerService,
+            DumpManager dumpManager) {
         mContext = context;
         mDisplayMetrics = context.getResources().getDisplayMetrics();
         mWallpaperManagerService = wallpaperManagerService;
+
+        dumpManager.registerDumpable(getClass().getSimpleName(), this);
     }
 
     public @Wakefulness int getWakefulness() {
@@ -134,6 +138,7 @@ public class WakefulnessLifecycle extends Lifecycle<WakefulnessLifecycle.Observe
         }
         setWakefulness(WAKEFULNESS_AWAKE);
         dispatch(Observer::onFinishedWakingUp);
+        dispatch(Observer::onPostFinishedWakingUp);
     }
 
     public void dispatchStartedGoingToSleep(@PowerManager.GoToSleepReason int pmSleepReason) {
@@ -232,6 +237,12 @@ public class WakefulnessLifecycle extends Lifecycle<WakefulnessLifecycle.Observe
     public interface Observer {
         default void onStartedWakingUp() {}
         default void onFinishedWakingUp() {}
+
+        /**
+         * Called after the finished waking up call, ensuring it's after all the other listeners,
+         * reacting to {@link #onFinishedWakingUp()}
+         */
+        default void onPostFinishedWakingUp() {}
         default void onStartedGoingToSleep() {}
         default void onFinishedGoingToSleep() {}
     }

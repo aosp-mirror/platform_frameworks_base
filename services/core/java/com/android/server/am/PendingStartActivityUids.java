@@ -35,6 +35,8 @@ import android.util.SparseArray;
 final class PendingStartActivityUids {
     static final String TAG = ActivityManagerService.TAG;
 
+    public static final long INVALID_TIME = 0;
+
     // Key is uid, value is Pair of pid and SystemClock.elapsedRealtime() when the
     // uid is added.
     private final SparseArray<Pair<Integer, Long>> mPendingUids = new SparseArray();
@@ -44,15 +46,24 @@ final class PendingStartActivityUids {
         mContext = context;
     }
 
-    synchronized void add(int uid, int pid) {
+    /** Returns {@code true} if the uid is put to the pending array. Otherwise it existed. */
+    synchronized boolean add(int uid, int pid) {
         if (mPendingUids.get(uid) == null) {
             mPendingUids.put(uid, new Pair<>(pid, SystemClock.elapsedRealtime()));
+            return true;
         }
+        return false;
     }
 
-    synchronized void delete(int uid) {
+    synchronized void delete(int uid, long nowElapsed) {
         final Pair<Integer, Long> pendingPid = mPendingUids.get(uid);
         if (pendingPid != null) {
+            if (nowElapsed < pendingPid.second) {
+                Slog.i(TAG,
+                        "updateOomAdj start time is before than pendingPid added,"
+                        + " don't delete it");
+                return;
+            }
             final long delay = SystemClock.elapsedRealtime() - pendingPid.second;
             if (delay >= 1000 /*ms*/) {
                 Slog.i(TAG,
@@ -63,13 +74,20 @@ final class PendingStartActivityUids {
         }
     }
 
-    synchronized boolean isPendingTopPid(int uid, int pid) {
+    /**
+     * Return the elapsedRealtime when the uid is added to the mPendingUids map.
+     * @param uid
+     * @param pid
+     * @return elapsedRealtime if the uid is in the mPendingUids map;
+     *         INVALID_TIME if the uid is not in the mPendingUids map.
+     */
+    synchronized long getPendingTopPidTime(int uid, int pid) {
+        long ret = INVALID_TIME;
         final Pair<Integer, Long> pendingPid = mPendingUids.get(uid);
-        if (pendingPid != null) {
-            return pendingPid.first == pid;
-        } else {
-            return false;
+        if (pendingPid != null && pendingPid.first == pid) {
+            ret = pendingPid.second;
         }
+        return ret;
     }
 
     synchronized boolean isPendingTopUid(int uid) {

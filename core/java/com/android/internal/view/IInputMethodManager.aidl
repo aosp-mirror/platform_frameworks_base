@@ -21,7 +21,7 @@ import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodSubtype;
 import android.view.inputmethod.EditorInfo;
 
-import com.android.internal.view.InputBindResult;
+import com.android.internal.inputmethod.InputBindResult;
 import com.android.internal.view.IInputContext;
 import com.android.internal.view.IInputMethodClient;
 
@@ -35,6 +35,7 @@ interface IInputMethodManager {
 
     // TODO: Use ParceledListSlice instead
     List<InputMethodInfo> getInputMethodList(int userId);
+    List<InputMethodInfo> getAwareLockedInputMethodList(int userId, int directBootAwareness);
     // TODO: Use ParceledListSlice instead
     List<InputMethodInfo> getEnabledInputMethodList(int userId);
     List<InputMethodSubtype> getEnabledInputMethodSubtypeList(in String imiId,
@@ -54,7 +55,6 @@ interface IInputMethodManager {
             /* @StartInputFlags */ int startInputFlags,
             /* @android.view.WindowManager.LayoutParams.SoftInputModeFlags */ int softInputMode,
             int windowFlags, in EditorInfo attribute, IInputContext inputContext,
-            /* @InputConnectionInspector.MissingMethodFlags */ int missingMethodFlags,
             int unverifiedTargetSdkVersion);
 
     void showInputMethodPickerFromClient(in IInputMethodClient client,
@@ -67,7 +67,7 @@ interface IInputMethodManager {
     void setAdditionalInputMethodSubtypes(String id, in InputMethodSubtype[] subtypes);
     // This is kept due to @UnsupportedAppUsage.
     // TODO(Bug 113914148): Consider removing this.
-    int getInputMethodWindowVisibleHeight();
+    int getInputMethodWindowVisibleHeight(in IInputMethodClient client);
 
     oneway void reportPerceptibleAsync(in IBinder windowToken, boolean perceptible);
     /** Remove the IME surface. Requires INTERNAL_SYSTEM_WINDOW permission. */
@@ -81,4 +81,7 @@ interface IInputMethodManager {
     void startImeTrace();
     // Stops an ime trace.
     void stopImeTrace();
+
+    /** Start Stylus handwriting session **/
+    void startStylusHandwriting(in IInputMethodClient client);
 }

@@ -81,8 +81,8 @@ public class DataUsageUtilsTest {
         when(mSubscriptionManager.isActiveSubscriptionId(SUB_ID)).thenReturn(false);
 
         final NetworkTemplate networkTemplate = DataUsageUtils.getMobileTemplate(mContext, SUB_ID);
-        assertThat(networkTemplate.matchesSubscriberId(SUBSCRIBER_ID)).isTrue();
-        assertThat(networkTemplate.matchesSubscriberId(SUBSCRIBER_ID_2)).isFalse();
+        assertThat(networkTemplate.getSubscriberIds().contains(SUBSCRIBER_ID)).isTrue();
+        assertThat(networkTemplate.getSubscriberIds().contains(SUBSCRIBER_ID_2)).isFalse();
     }
 
     @Test
@@ -94,8 +94,8 @@ public class DataUsageUtilsTest {
                 .thenReturn(new String[] {SUBSCRIBER_ID});
 
         final NetworkTemplate networkTemplate = DataUsageUtils.getMobileTemplate(mContext, SUB_ID);
-        assertThat(networkTemplate.matchesSubscriberId(SUBSCRIBER_ID)).isTrue();
-        assertThat(networkTemplate.matchesSubscriberId(SUBSCRIBER_ID_2)).isFalse();
+        assertThat(networkTemplate.getSubscriberIds().contains(SUBSCRIBER_ID)).isTrue();
+        assertThat(networkTemplate.getSubscriberIds().contains(SUBSCRIBER_ID_2)).isFalse();
     }
 
     @Test
@@ -107,7 +107,7 @@ public class DataUsageUtilsTest {
                 .thenReturn(new String[] {SUBSCRIBER_ID, SUBSCRIBER_ID_2});
 
         final NetworkTemplate networkTemplate = DataUsageUtils.getMobileTemplate(mContext, SUB_ID);
-        assertThat(networkTemplate.matchesSubscriberId(SUBSCRIBER_ID)).isTrue();
-        assertThat(networkTemplate.matchesSubscriberId(SUBSCRIBER_ID_2)).isTrue();
+        assertThat(networkTemplate.getSubscriberIds().contains(SUBSCRIBER_ID)).isTrue();
+        assertThat(networkTemplate.getSubscriberIds().contains(SUBSCRIBER_ID_2)).isTrue();
     }
 }

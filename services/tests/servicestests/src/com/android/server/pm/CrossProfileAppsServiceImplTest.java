@@ -3,9 +3,10 @@ package com.android.server.pm;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.doAnswer;
@@ -14,12 +15,12 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
 import static org.testng.Assert.assertThrows;
 
 import android.Manifest;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
+import android.app.ActivityOptions;
 import android.app.AppOpsManager;
 import android.app.IApplicationThread;
 import android.app.admin.DevicePolicyManagerInternal;
@@ -46,6 +47,7 @@ import android.permission.PermissionManager;
 import android.platform.test.annotations.Presubmit;
 import android.util.SparseArray;
 
+import com.android.activitycontext.ActivityContext;
 import com.android.internal.util.FunctionalUtils.ThrowingRunnable;
 import com.android.internal.util.FunctionalUtils.ThrowingSupplier;
 import com.android.server.LocalServices;
@@ -240,7 +242,9 @@ public class CrossProfileAppsServiceImplTest {
                                 FEATURE_ID,
                                 ACTIVITY_COMPONENT,
                                 UserHandle.of(PRIMARY_USER).getIdentifier(),
-                                true));
+                                true,
+                                /* targetTask */ null,
+                                /* options */ null));
 
         verify(mActivityTaskManagerInternal, never())
                 .startActivityAsUser(
@@ -265,7 +269,9 @@ public class CrossProfileAppsServiceImplTest {
                                 FEATURE_ID,
                                 ACTIVITY_COMPONENT,
                                 UserHandle.of(PRIMARY_USER).getIdentifier(),
-                                false));
+                                false,
+                                /* targetTask */ null,
+                                /* options */ null));
 
         verify(mActivityTaskManagerInternal, never())
                 .startActivityAsUser(
@@ -292,7 +298,9 @@ public class CrossProfileAppsServiceImplTest {
                                 FEATURE_ID,
                                 ACTIVITY_COMPONENT,
                                 UserHandle.of(PROFILE_OF_PRIMARY_USER).getIdentifier(),
-                                true));
+                                true,
+                                /* targetTask */ null,
+                                /* options */ null));
 
         verify(mActivityTaskManagerInternal, never())
                 .startActivityAsUser(
@@ -319,7 +327,9 @@ public class CrossProfileAppsServiceImplTest {
                                 FEATURE_ID,
                                 ACTIVITY_COMPONENT,
                                 UserHandle.of(PROFILE_OF_PRIMARY_USER).getIdentifier(),
-                                false));
+                                false,
+                                /* targetTask */ null,
+                                /* options */ null));
 
         verify(mActivityTaskManagerInternal, never())
                 .startActivityAsUser(
@@ -344,7 +354,9 @@ public class CrossProfileAppsServiceImplTest {
                                 FEATURE_ID,
                                 ACTIVITY_COMPONENT,
                                 UserHandle.of(PROFILE_OF_PRIMARY_USER).getIdentifier(),
-                                true));
+                                true,
+                                /* targetTask */ null,
+                                /* options */ null));
 
         verify(mActivityTaskManagerInternal, never())
                 .startActivityAsUser(
@@ -369,7 +381,9 @@ public class CrossProfileAppsServiceImplTest {
                                 FEATURE_ID,
                                 ACTIVITY_COMPONENT,
                                 UserHandle.of(PROFILE_OF_PRIMARY_USER).getIdentifier(),
-                                false));
+                                false,
+                                /* targetTask */ null,
+                                /* options */ null));
 
         verify(mActivityTaskManagerInternal, never())
                 .startActivityAsUser(
@@ -396,7 +410,9 @@ public class CrossProfileAppsServiceImplTest {
                                 FEATURE_ID,
                                 ACTIVITY_COMPONENT,
                                 UserHandle.of(PROFILE_OF_PRIMARY_USER).getIdentifier(),
-                                true));
+                                true,
+                                /* targetTask */ null,
+                                /* options */ null));
 
         verify(mActivityTaskManagerInternal, never())
                 .startActivityAsUser(
@@ -440,7 +456,9 @@ public class CrossProfileAppsServiceImplTest {
                                 FEATURE_ID,
                                 ACTIVITY_COMPONENT,
                                 UserHandle.of(PROFILE_OF_PRIMARY_USER).getIdentifier(),
-                                false));
+                                false,
+                                /* targetTask */ null,
+                                /* options */ null));
 
         verify(mActivityTaskManagerInternal, never())
                 .startActivityAsUser(
@@ -465,7 +483,9 @@ public class CrossProfileAppsServiceImplTest {
                                 FEATURE_ID,
                                 new ComponentName(PACKAGE_TWO, "test"),
                                 UserHandle.of(PROFILE_OF_PRIMARY_USER).getIdentifier(),
-                                true));
+                                true,
+                                /* targetTask */ null,
+                                /* options */ null));
 
         verify(mActivityTaskManagerInternal, never())
                 .startActivityAsUser(
@@ -490,7 +510,9 @@ public class CrossProfileAppsServiceImplTest {
                                 FEATURE_ID,
                                 new ComponentName(PACKAGE_TWO, "test"),
                                 UserHandle.of(PROFILE_OF_PRIMARY_USER).getIdentifier(),
-                                false));
+                                false,
+                                /* targetTask */ null,
+                                /* options */ null));
 
         verify(mActivityTaskManagerInternal, never())
                 .startActivityAsUser(
@@ -515,7 +537,9 @@ public class CrossProfileAppsServiceImplTest {
                                 FEATURE_ID,
                                 ACTIVITY_COMPONENT,
                                 UserHandle.of(SECONDARY_USER).getIdentifier(),
-                                true));
+                                true,
+                                /* targetTask */ null,
+                                /* options */ null));
 
         verify(mActivityTaskManagerInternal, never())
                 .startActivityAsUser(
@@ -540,7 +564,9 @@ public class CrossProfileAppsServiceImplTest {
                                 FEATURE_ID,
                                 ACTIVITY_COMPONENT,
                                 UserHandle.of(SECONDARY_USER).getIdentifier(),
-                                false));
+                                false,
+                                /* targetTask */ null,
+                                /* options */ null));
 
         verify(mActivityTaskManagerInternal, never())
                 .startActivityAsUser(
@@ -564,7 +590,9 @@ public class CrossProfileAppsServiceImplTest {
                 FEATURE_ID,
                 ACTIVITY_COMPONENT,
                 UserHandle.of(PRIMARY_USER).getIdentifier(),
-                true);
+                true,
+                /* targetTask */ null,
+                /* options */ null);
 
         verify(mActivityTaskManagerInternal)
                 .startActivityAsUser(
@@ -578,10 +606,48 @@ public class CrossProfileAppsServiceImplTest {
                         eq(PRIMARY_USER));
     }
 
+    @Test
+    public void startActivityAsUser_sameTask_fromProfile_success() throws Exception {
+        mTestInjector.setCallingUserId(PROFILE_OF_PRIMARY_USER);
+
+        Bundle options = ActivityOptions.makeOpenCrossProfileAppsAnimation().toBundle();
+        IBinder result = ActivityContext.getWithContext(activity -> {
+            try {
+                IBinder targetTask = activity.getActivityToken();
+                mCrossProfileAppsServiceImpl.startActivityAsUser(
+                        mIApplicationThread,
+                        PACKAGE_ONE,
+                        FEATURE_ID,
+                        ACTIVITY_COMPONENT,
+                        UserHandle.of(PRIMARY_USER).getIdentifier(),
+                        true,
+                        targetTask,
+                        options);
+                return targetTask;
+            } catch (Exception re) {
+                return null;
+            }
+        });
+        if (result == null) {
+            throw new Exception();
+        }
+
+        verify(mActivityTaskManagerInternal)
+                .startActivityAsUser(
+                        nullable(IApplicationThread.class),
+                        eq(PACKAGE_ONE),
+                        eq(FEATURE_ID),
+                        any(Intent.class),
+                        eq(result),
+                        anyInt(),
+                        eq(options),
+                        eq(PRIMARY_USER));
+    }
+
     private void mockAppsInstalled(String packageName, int user, boolean installed) {
         when(mPackageManagerInternal.getPackageInfo(
                 eq(packageName),
-                anyInt(),
+                anyLong(),
                 anyInt(),
                 eq(user)))
                 .thenReturn(installed ? createInstalledPackageInfo() : null);
@@ -604,7 +670,7 @@ public class CrossProfileAppsServiceImplTest {
         mActivityInfo = activityInfo;
 
         when(mPackageManagerInternal.queryIntentActivities(
-                any(Intent.class), nullable(String.class), anyInt(), anyInt(), anyInt()))
+                any(Intent.class), nullable(String.class), anyLong(), anyInt(), anyInt()))
                 .thenReturn(Collections.singletonList(resolveInfo));
     }
 

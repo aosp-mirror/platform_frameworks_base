@@ -133,11 +133,18 @@ public abstract class StateController {
     }
 
     /**
-     * Called when a UID's base priority has changed. The more positive the priority, the more
+     * Called when the battery status changes.
+     */
+    @GuardedBy("mLock")
+    public void onBatteryStateChangedLocked() {
+    }
+
+    /**
+     * Called when a UID's base bias has changed. The more positive the bias, the more
      * important the UID is.
      */
     @GuardedBy("mLock")
-    public void onUidPriorityChangedLocked(int uid, int newPriority) {
+    public void onUidBiasChangedLocked(int uid, int prevBias, int newBias) {
     }
 
     protected boolean wouldBeReadyWithConstraintLocked(JobStatus jobStatus, int constraint) {
@@ -160,8 +167,8 @@ public abstract class StateController {
 
     public abstract void dumpControllerStateLocked(IndentingPrintWriter pw,
             Predicate<JobStatus> predicate);
-    public abstract void dumpControllerStateLocked(ProtoOutputStream proto, long fieldId,
-            Predicate<JobStatus> predicate);
+    public void dumpControllerStateLocked(ProtoOutputStream proto, long fieldId,
+            Predicate<JobStatus> predicate) {}
 
     /** Dump any internal constants the Controller may have. */
     public void dumpConstants(IndentingPrintWriter pw) {

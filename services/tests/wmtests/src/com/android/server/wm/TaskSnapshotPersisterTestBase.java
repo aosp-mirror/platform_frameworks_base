@@ -59,7 +59,8 @@ import java.util.function.Predicate;
  */
 class TaskSnapshotPersisterTestBase extends WindowTestsBase {
 
-    private static final Rect TEST_INSETS = new Rect(10, 20, 30, 40);
+    private static final Rect TEST_CONTENT_INSETS = new Rect(10, 20, 30, 40);
+    private static final Rect TEST_LETTERBOX_INSETS = new Rect();
     static final File FILES_DIR = getInstrumentation().getTargetContext().getFilesDir();
     static final long MOCK_SNAPSHOT_ID = 12345678;
 
@@ -91,7 +92,7 @@ class TaskSnapshotPersisterTestBase extends WindowTestsBase {
     @Before
     public void setUp() {
         final UserManager um = UserManager.get(getInstrumentation().getTargetContext());
-        mTestUserId = um.getUserHandle();
+        mTestUserId = um.getProcessUserId();
 
         final UserManagerInternal userManagerInternal =
                 LocalServices.getService(UserManagerInternal.class);
@@ -130,8 +131,7 @@ class TaskSnapshotPersisterTestBase extends WindowTestsBase {
     }
 
     TaskSnapshot createSnapshot() {
-        return new TaskSnapshotBuilder()
-                .build();
+        return new TaskSnapshotBuilder().setTopActivityComponent(getUniqueComponentName()).build();
     }
 
     protected static void assertTrueForFiles(File[] files, Predicate<File> predicate,
@@ -208,7 +208,7 @@ class TaskSnapshotPersisterTestBase extends WindowTestsBase {
             return new TaskSnapshot(MOCK_SNAPSHOT_ID, mTopActivityComponent,
                     HardwareBuffer.createFromGraphicBuffer(buffer),
                     ColorSpace.get(ColorSpace.Named.SRGB), ORIENTATION_PORTRAIT,
-                    mRotation, taskSize, TEST_INSETS,
+                    mRotation, taskSize, TEST_CONTENT_INSETS, TEST_LETTERBOX_INSETS,
                     // When building a TaskSnapshot with the Builder class, isLowResolution
                     // is always false. Low-res snapshots are only created when loading from
                     // disk.

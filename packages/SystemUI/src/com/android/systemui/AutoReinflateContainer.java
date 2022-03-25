@@ -86,7 +86,7 @@ public class AutoReinflateContainer extends FrameLayout implements
     }
 
     @Override
-    public void onOverlayChanged() {
+    public void onThemeChanged() {
         inflateLayout();
     }
 

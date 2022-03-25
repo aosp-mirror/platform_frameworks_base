@@ -108,6 +108,8 @@ public class Bubble implements BubbleViewProvider {
     private Bitmap mBubbleBitmap;
     // The app badge for the bubble
     private Bitmap mBadgeBitmap;
+    // App badge without any markings for important conversations
+    private Bitmap mRawBadgeBitmap;
     private int mDotColor;
     private Path mDotPath;
     private int mFlags;
@@ -121,7 +123,7 @@ public class Bubble implements BubbleViewProvider {
     @Nullable
     private Icon mIcon;
     private boolean mIsBubble;
-    private boolean mIsVisuallyInterruptive;
+    private boolean mIsTextChanged;
     private boolean mIsClearable;
     private boolean mShouldSuppressNotificationDot;
     private boolean mShouldSuppressNotificationList;
@@ -248,6 +250,11 @@ public class Bubble implements BubbleViewProvider {
     }
 
     @Override
+    public Bitmap getRawAppBadge() {
+        return mRawBadgeBitmap;
+    }
+
+    @Override
     public int getDotColor() {
         return mDotColor;
     }
@@ -342,12 +349,12 @@ public class Bubble implements BubbleViewProvider {
     }
 
     /**
-     * Sets whether this bubble is considered visually interruptive. This method is purely for
+     * Sets whether this bubble is considered text changed. This method is purely for
      * testing.
      */
     @VisibleForTesting
-    void setVisuallyInterruptiveForTest(boolean visuallyInterruptive) {
-        mIsVisuallyInterruptive = visuallyInterruptive;
+    void setTextChangedForTest(boolean textChanged) {
+        mIsTextChanged = textChanged;
     }
 
     /**
@@ -357,13 +364,15 @@ public class Bubble implements BubbleViewProvider {
      * @param context the context for the bubble.
      * @param controller the bubble controller.
      * @param stackView the stackView the bubble is eventually added to.
-     * @param iconFactory the iconfactory use to create badged images for the bubble.
+     * @param iconFactory the icon factory use to create images for the bubble.
+     * @param badgeIconFactory the icon factory to create app badges for the bubble.
      */
     void inflate(BubbleViewInfoTask.Callback callback,
             Context context,
             BubbleController controller,
             BubbleStackView stackView,
             BubbleIconFactory iconFactory,
+            BubbleBadgeIconFactory badgeIconFactory,
             boolean skipInflation) {
         if (isBubbleLoading()) {
             mInflationTask.cancel(true /* mayInterruptIfRunning */);
@@ -373,6 +382,7 @@ public class Bubble implements BubbleViewProvider {
                 controller,
                 stackView,
                 iconFactory,
+                badgeIconFactory,
                 skipInflation,
                 callback,
                 mMainExecutor);
@@ -409,6 +419,7 @@ public class Bubble implements BubbleViewProvider {
         mFlyoutMessage = info.flyoutMessage;
 
         mBadgeBitmap = info.badgeBitmap;
+        mRawBadgeBitmap = info.mRawBadgeBitmap;
         mBubbleBitmap = info.bubbleBitmap;
 
         mDotColor = info.dotColor;
@@ -419,14 +430,6 @@ public class Bubble implements BubbleViewProvider {
         }
         if (mIconView != null) {
             mIconView.setRenderedBubble(this /* bubble */);
-        }
-    }
-
-    @Override
-    public void setExpandedContentAlpha(float alpha) {
-        if (mExpandedView != null) {
-            mExpandedView.setAlpha(alpha);
-            mExpandedView.setTaskViewAlpha(alpha);
         }
     }
 
@@ -462,7 +465,7 @@ public class Bubble implements BubbleViewProvider {
         mFlyoutMessage = extractFlyoutMessage(entry);
         if (entry.getRanking() != null) {
             mShortcutInfo = entry.getRanking().getConversationShortcutInfo();
-            mIsVisuallyInterruptive = entry.getRanking().visuallyInterruptive();
+            mIsTextChanged = entry.getRanking().isTextChanged();
             if (entry.getRanking().getChannel() != null) {
                 mIsImportantConversation =
                         entry.getRanking().getChannel().isImportantConversation();
@@ -503,8 +506,8 @@ public class Bubble implements BubbleViewProvider {
         return mIcon;
     }
 
-    boolean isVisuallyInterruptive() {
-        return mIsVisuallyInterruptive;
+    boolean isTextChanged() {
+        return mIsTextChanged;
     }
 
     /**

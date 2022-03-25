@@ -16,6 +16,7 @@
 
 package android.view;
 
+import static android.view.InputDevice.SOURCE_CLASS_POINTER;
 import static android.view.MotionEvent.ACTION_DOWN;
 import static android.view.MotionEvent.ACTION_POINTER_DOWN;
 import static android.view.MotionEvent.TOOL_TYPE_FINGER;
@@ -26,6 +27,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 
+import android.graphics.Matrix;
+import android.platform.test.annotations.Presubmit;
 import android.view.MotionEvent.PointerCoords;
 import android.view.MotionEvent.PointerProperties;
 
@@ -40,6 +43,7 @@ import java.util.Set;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
+@Presubmit
 public class MotionEventTest {
     private static final int ID_SOURCE_MASK = 0x3 << 30;
 
@@ -172,21 +176,66 @@ public class MotionEventTest {
 
     @Test
     public void testEventRotation() {
+        // The un-rotated frame size.
+        final int width = 600;
+        final int height = 1000;
         final MotionEvent event = MotionEvent.obtain(0 /* downTime */, 0 /* eventTime */,
-                    ACTION_DOWN, 30 /* x */, 50 /* y */, 0 /* metaState */);
+                ACTION_DOWN, 30 /* x */, 50 /* y */, 0 /* metaState */);
+        event.setSource(InputDevice.SOURCE_TOUCHSCREEN);
+        assertEquals(Surface.ROTATION_0, event.getSurfaceRotation());
+
         MotionEvent rot90 = MotionEvent.obtain(event);
-        rot90.transform(MotionEvent.createRotateMatrix(/* 90 deg */1, 1000, 600));
+        rot90.transform(MotionEvent.createRotateMatrix(Surface.ROTATION_90, height, width));
         assertEquals(50, (int) rot90.getX());
         assertEquals(570, (int) rot90.getY());
+        assertEquals(Surface.ROTATION_90, rot90.getSurfaceRotation());
 
         MotionEvent rot180 = MotionEvent.obtain(event);
-        rot180.transform(MotionEvent.createRotateMatrix(/* 180 deg */2, 1000, 600));
-        assertEquals(970, (int) rot180.getX());
-        assertEquals(550, (int) rot180.getY());
+        rot180.transform(MotionEvent.createRotateMatrix(Surface.ROTATION_180, width, height));
+        assertEquals(570, (int) rot180.getX());
+        assertEquals(950, (int) rot180.getY());
+        assertEquals(Surface.ROTATION_180, rot180.getSurfaceRotation());
 
         MotionEvent rot270 = MotionEvent.obtain(event);
-        rot270.transform(MotionEvent.createRotateMatrix(/* 270 deg */3, 1000, 600));
+        rot270.transform(MotionEvent.createRotateMatrix(Surface.ROTATION_270, height, width));
         assertEquals(950, (int) rot270.getX());
         assertEquals(30, (int) rot270.getY());
+        assertEquals(Surface.ROTATION_270, rot270.getSurfaceRotation());
+
+        MotionEvent compoundRot = MotionEvent.obtain(event);
+        compoundRot.transform(MotionEvent.createRotateMatrix(Surface.ROTATION_90, height, width));
+        compoundRot.transform(MotionEvent.createRotateMatrix(Surface.ROTATION_180, height, width));
+        assertEquals(950, (int) compoundRot.getX());
+        assertEquals(30, (int) compoundRot.getY());
+        assertEquals(Surface.ROTATION_270, compoundRot.getSurfaceRotation());
+
+        MotionEvent rotInvalid = MotionEvent.obtain(event);
+        Matrix mat = new Matrix();
+        mat.setValues(new float[]{1, 2, 3, -4, -5, -6, 0, 0, 1});
+        rotInvalid.transform(mat);
+        assertEquals(-1, rotInvalid.getSurfaceRotation());
+    }
+
+    @Test
+    public void testUsesPointerSourceByDefault() {
+        final MotionEvent event = MotionEvent.obtain(0 /* downTime */, 0 /* eventTime */,
+                ACTION_DOWN, 0 /* x */, 0 /* y */, 0 /* metaState */);
+        assertTrue(event.isFromSource(SOURCE_CLASS_POINTER));
+    }
+
+    @Test
+    public void testLocationOffsetOnlyAppliedToNonPointerSources() {
+        final MotionEvent event = MotionEvent.obtain(0 /* downTime */, 0 /* eventTime */,
+                ACTION_DOWN, 10 /* x */, 20 /* y */, 0 /* metaState */);
+        event.offsetLocation(40, 50);
+
+        // The offset should be applied since a pointer source is used by default.
+        assertEquals(50, (int) event.getX());
+        assertEquals(70, (int) event.getY());
+
+        // The offset should not be applied if the source is changed to a non-pointer source.
+        event.setSource(InputDevice.SOURCE_JOYSTICK);
+        assertEquals(10, (int) event.getX());
+        assertEquals(20, (int) event.getY());
     }
 }

@@ -98,7 +98,8 @@ public class AccessibilityFloatingMenuController implements
         mAccessibilityButtonModeObserver = accessibilityButtonModeObserver;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
 
-        init();
+        mIsKeyguardVisible = false;
+        mIsAccessibilityManagerServiceReady = false;
     }
 
     /**
@@ -124,9 +125,8 @@ public class AccessibilityFloatingMenuController implements
         handleFloatingMenuVisibility(mIsKeyguardVisible, mBtnMode, mBtnTargets);
     }
 
-    private void init() {
-        mIsKeyguardVisible = false;
-        mIsAccessibilityManagerServiceReady = false;
+    /** Initializes the AccessibilityFloatingMenuController configurations. */
+    public void init() {
         mBtnMode = mAccessibilityButtonModeObserver.getCurrentAccessibilityButtonMode();
         mBtnTargets = mAccessibilityButtonTargetsObserver.getCurrentAccessibilityButtonTargets();
         registerContentObservers();

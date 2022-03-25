@@ -133,7 +133,7 @@ public class ViewRootInsetsControllerHost implements InsetsController.Host {
             //  frame instead.
             final SurfaceControl.Transaction t = new SurfaceControl.Transaction();
             mApplier.applyParams(t, params);
-            mApplier.applyTransaction(t, -1);
+            t.apply();
         }
     }
 
@@ -149,10 +149,10 @@ public class ViewRootInsetsControllerHost implements InsetsController.Host {
     }
 
     @Override
-    public void onInsetsModified(InsetsState insetsState) {
+    public void updateRequestedVisibilities(InsetsVisibilities vis) {
         try {
             if (mViewRoot.mAdded) {
-                mViewRoot.mWindowSession.insetsModified(mViewRoot.mWindow, insetsState);
+                mViewRoot.mWindowSession.updateRequestedVisibilities(mViewRoot.mWindow, vis);
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to call insetsModified", e);
@@ -171,8 +171,9 @@ public class ViewRootInsetsControllerHost implements InsetsController.Host {
     public void setSystemBarsAppearance(int appearance, int mask) {
         mViewRoot.mWindowAttributes.privateFlags |= PRIVATE_FLAG_APPEARANCE_CONTROLLED;
         final InsetsFlags insetsFlags = mViewRoot.mWindowAttributes.insetsFlags;
-        if (insetsFlags.appearance != appearance) {
-            insetsFlags.appearance = (insetsFlags.appearance & ~mask) | (appearance & mask);
+        final int newAppearance = (insetsFlags.appearance & ~mask) | (appearance & mask);
+        if (insetsFlags.appearance != newAppearance) {
+            insetsFlags.appearance = newAppearance;
             mViewRoot.mWindowAttributesChanged = true;
             mViewRoot.scheduleTraversals();
         }

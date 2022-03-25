@@ -53,24 +53,19 @@ public interface TimeDetectorStrategy extends Dumpable {
     @interface Origin {}
 
     /** Used when a time value originated from a telephony signal. */
-    @Origin
-    int ORIGIN_TELEPHONY = 1;
+    @Origin int ORIGIN_TELEPHONY = 1;
 
     /** Used when a time value originated from a user / manual settings. */
-    @Origin
-    int ORIGIN_MANUAL = 2;
+    @Origin int ORIGIN_MANUAL = 2;
 
     /** Used when a time value originated from a network signal. */
-    @Origin
-    int ORIGIN_NETWORK = 3;
+    @Origin int ORIGIN_NETWORK = 3;
 
     /** Used when a time value originated from a gnss signal. */
-    @Origin
-    int ORIGIN_GNSS = 4;
+    @Origin int ORIGIN_GNSS = 4;
 
     /** Used when a time value originated from an externally specified signal. */
-    @Origin
-    int ORIGIN_EXTERNAL = 5;
+    @Origin int ORIGIN_EXTERNAL = 5;
 
     /** Processes the suggested time from telephony sources. */
     void suggestTelephonyTime(@NonNull TelephonyTimeSuggestion timeSuggestion);

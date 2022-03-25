@@ -1736,35 +1736,9 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      * object and the given one.  Does not change the values of either.  Any
      * undefined fields in <var>delta</var> are ignored.
      * @return Returns a bit mask indicating which configuration
-     * values has changed, containing any combination of
-     * {@link android.content.pm.ActivityInfo#CONFIG_FONT_SCALE
-     * PackageManager.ActivityInfo.CONFIG_FONT_SCALE},
-     * {@link android.content.pm.ActivityInfo#CONFIG_MCC
-     * PackageManager.ActivityInfo.CONFIG_MCC},
-     * {@link android.content.pm.ActivityInfo#CONFIG_MNC
-     * PackageManager.ActivityInfo.CONFIG_MNC},
-     * {@link android.content.pm.ActivityInfo#CONFIG_LOCALE
-     * PackageManager.ActivityInfo.CONFIG_LOCALE},
-     * {@link android.content.pm.ActivityInfo#CONFIG_TOUCHSCREEN
-     * PackageManager.ActivityInfo.CONFIG_TOUCHSCREEN},
-     * {@link android.content.pm.ActivityInfo#CONFIG_KEYBOARD
-     * PackageManager.ActivityInfo.CONFIG_KEYBOARD},
-     * {@link android.content.pm.ActivityInfo#CONFIG_NAVIGATION
-     * PackageManager.ActivityInfo.CONFIG_NAVIGATION},
-     * {@link android.content.pm.ActivityInfo#CONFIG_ORIENTATION
-     * PackageManager.ActivityInfo.CONFIG_ORIENTATION},
-     * {@link android.content.pm.ActivityInfo#CONFIG_SCREEN_LAYOUT
-     * PackageManager.ActivityInfo.CONFIG_SCREEN_LAYOUT}, or
-     * {@link android.content.pm.ActivityInfo#CONFIG_SCREEN_SIZE
-     * PackageManager.ActivityInfo.CONFIG_SCREEN_SIZE}, or
-     * {@link android.content.pm.ActivityInfo#CONFIG_SMALLEST_SCREEN_SIZE
-     * PackageManager.ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE}.
-     * {@link android.content.pm.ActivityInfo#CONFIG_LAYOUT_DIRECTION
-     * PackageManager.ActivityInfo.CONFIG_LAYOUT_DIRECTION}.
-     * {@link android.content.pm.ActivityInfo#CONFIG_FONT_WEIGHT_ADJUSTMENT
-     *  PackageManager.ActivityInfo.CONFIG_FONT_WEIGHT_ADJUSTMENT.
+     * values have changed.
      */
-    public int diff(Configuration delta) {
+    public @Config int diff(Configuration delta) {
         return diff(delta, false /* compareUndefined */, false /* publicOnly */);
     }
 
@@ -2458,27 +2432,10 @@ public final class Configuration implements Parcelable, Comparable<Configuration
                 break;
         }
 
-        switch (config.uiMode & Configuration.UI_MODE_TYPE_MASK) {
-            case Configuration.UI_MODE_TYPE_APPLIANCE:
-                parts.add("appliance");
-                break;
-            case Configuration.UI_MODE_TYPE_DESK:
-                parts.add("desk");
-                break;
-            case Configuration.UI_MODE_TYPE_TELEVISION:
-                parts.add("television");
-                break;
-            case Configuration.UI_MODE_TYPE_CAR:
-                parts.add("car");
-                break;
-            case Configuration.UI_MODE_TYPE_WATCH:
-                parts.add("watch");
-                break;
-            case Configuration.UI_MODE_TYPE_VR_HEADSET:
-                parts.add("vrheadset");
-                break;
-            default:
-                break;
+        final String uiModeTypeString =
+                getUiModeTypeString(config.uiMode & Configuration.UI_MODE_TYPE_MASK);
+        if (uiModeTypeString != null) {
+            parts.add(uiModeTypeString);
         }
 
         switch (config.uiMode & Configuration.UI_MODE_NIGHT_MASK) {
@@ -2613,6 +2570,28 @@ public final class Configuration implements Parcelable, Comparable<Configuration
     }
 
     /**
+     * @hide
+     */
+    public static String getUiModeTypeString(int uiModeType) {
+        switch (uiModeType) {
+            case Configuration.UI_MODE_TYPE_APPLIANCE:
+                return "appliance";
+            case Configuration.UI_MODE_TYPE_DESK:
+                return "desk";
+            case Configuration.UI_MODE_TYPE_TELEVISION:
+                return "television";
+            case Configuration.UI_MODE_TYPE_CAR:
+                return "car";
+            case Configuration.UI_MODE_TYPE_WATCH:
+                return "watch";
+            case Configuration.UI_MODE_TYPE_VR_HEADSET:
+                return "vrheadset";
+            default:
+                return null;
+        }
+    }
+
+    /**
      * Generate a delta Configuration between <code>base</code> and <code>change</code>. The
      * resulting delta can be used with {@link #updateFrom(Configuration)}.
      * <p />
@@ -2620,10 +2599,10 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      * {@link #updateFrom(Configuration)} will treat it as a no-op and not update that member.
      *
      * This is fine for device configurations as no member is ever undefined.
-     * {@hide}
      */
-    @UnsupportedAppUsage
-    public static Configuration generateDelta(Configuration base, Configuration change) {
+    @NonNull
+    public static Configuration generateDelta(
+            @NonNull Configuration base, @NonNull Configuration change) {
         final Configuration delta = new Configuration();
         if (base.fontScale != change.fontScale) {
             delta.fontScale = change.fontScale;

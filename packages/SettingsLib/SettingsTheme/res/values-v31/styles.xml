@@ -17,13 +17,19 @@
 <resources>
     <style name="TextAppearance.PreferenceTitle.SettingsLib"
            parent="@android:style/TextAppearance.Material.Subhead">
+        <item name="android:textColor">@color/settingslib_text_color_primary</item>
         <item name="android:fontFamily">@string/settingslib_config_headlineFontFamily</item>
         <item name="android:textSize">20sp</item>
     </style>
 
+    <style name="TextAppearance.PreferenceSummary.SettingsLib"
+           parent="@android:style/TextAppearance.DeviceDefault.Small">
+        <item name="android:textColor">@color/settingslib_text_color_secondary</item>
+    </style>
+
     <style name="TextAppearance.CategoryTitle.SettingsLib"
            parent="@android:style/TextAppearance.DeviceDefault.Medium">
-        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:textColor">@color/settingslib_text_color_preference_category_title</item>
         <item name="android:textSize">14sp</item>
     </style>
 
@@ -39,4 +45,24 @@
         <item name="android:progressDrawable">@drawable/settingslib_progress_horizontal</item>
         <item name="android:scaleY">0.5</item>
     </style>
+
+    <style name="Spinner.SettingsLib"
+           parent="android:style/Widget.Material.Spinner">
+        <item name="android:background">@drawable/settingslib_spinner_background</item>
+        <item name="android:popupBackground">@drawable/settingslib_spinner_dropdown_background</item>
+        <item name="android:dropDownVerticalOffset">48dp</item>
+        <item name="android:layout_marginTop">16dp</item>
+        <item name="android:layout_marginBottom">8dp</item>
+    </style>
+
+    <style name="SpinnerItem.SettingsLib"
+           parent="@android:style/Widget.DeviceDefault.TextView.SpinnerItem">
+        <item name="android:textColor">@color/settingslib_spinner_dropdown_color</item>
+    </style>
+
+    <style name="SpinnerDropDownItem.SettingsLib"
+           parent="@android:style/Widget.Material.DropDownItem.Spinner">
+        <item name="android:textColor">@color/settingslib_spinner_dropdown_color</item>
+    </style>
+
 </resources>

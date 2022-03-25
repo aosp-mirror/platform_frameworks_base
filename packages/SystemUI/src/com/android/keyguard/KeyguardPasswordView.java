@@ -20,6 +20,7 @@ import static android.view.WindowInsets.Type.ime;
 
 import static com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_DEVICE_ADMIN;
 import static com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_NONE;
+import static com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_NON_STRONG_BIOMETRIC_TIMEOUT;
 import static com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_PREPARE_FOR_UPDATE;
 import static com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_RESTART;
 import static com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_TIMEOUT;
@@ -101,6 +102,8 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView {
                 return R.string.kg_prompt_reason_user_request;
             case PROMPT_REASON_PREPARE_FOR_UPDATE:
                 return R.string.kg_prompt_reason_timeout_password;
+            case PROMPT_REASON_NON_STRONG_BIOMETRIC_TIMEOUT:
+                return R.string.kg_prompt_reason_timeout_password;
             case PROMPT_REASON_NONE:
                 return 0;
             default:
@@ -156,8 +159,7 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView {
         setAlpha(0f);
         animate()
             .alpha(1f)
-            .setDuration(500)
-            .setStartDelay(300)
+            .setDuration(300)
             .start();
 
         setTranslationY(0f);
@@ -217,15 +219,6 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView {
                     }
                 });
         return true;
-    }
-
-
-    @Override
-    public void animateForIme(float interpolatedFraction, boolean appearingAnim) {
-        animate().cancel();
-        setAlpha(appearingAnim
-                ? Math.max(interpolatedFraction, getAlpha())
-                : 1 - interpolatedFraction);
     }
 
     @Override

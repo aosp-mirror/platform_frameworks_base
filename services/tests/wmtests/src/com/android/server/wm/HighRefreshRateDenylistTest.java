@@ -33,7 +33,6 @@ import com.android.internal.R;
 import com.android.internal.util.Preconditions;
 import com.android.server.testutils.FakeDeviceConfigInterface;
 
-import org.junit.After;
 import org.junit.Test;
 
 import java.util.concurrent.Executor;
@@ -50,11 +49,6 @@ public class HighRefreshRateDenylistTest {
     private static final String APP3 = "com.android.sample3";
 
     private HighRefreshRateDenylist mDenylist;
-
-    @After
-    public void tearDown() {
-        mDenylist.dispose();
-    }
 
     @Test
     public void testDefaultDenylist() {

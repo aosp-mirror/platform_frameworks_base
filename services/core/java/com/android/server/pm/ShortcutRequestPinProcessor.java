@@ -467,7 +467,7 @@ class ShortcutRequestPinProcessor {
             launcher.attemptToRestoreIfNeededAndSave();
             if (launcher.hasPinned(original)) {
                 if (DEBUG) {
-                    Slog.d(TAG, "Shortcut " + original + " already pinned.");                       // This too.
+                    Slog.d(TAG, "Shortcut " + original + " already pinned.");   // This too.
                 }
                 return true;
             }
@@ -517,7 +517,8 @@ class ShortcutRequestPinProcessor {
                 if (DEBUG) {
                     Slog.d(TAG, "Removing " + shortcutId + " as dynamic");
                 }
-                ps.deleteDynamicWithId(shortcutId, /*ignoreInvisible=*/ false);
+                ps.deleteDynamicWithId(shortcutId, /*ignoreInvisible=*/ false,
+                        /*wasPushedOut=*/ false);
             }
 
             ps.adjustRanks(); // Shouldn't be needed, but just in case.

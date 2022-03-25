@@ -32,4 +32,9 @@ oneway interface IPipAnimationListener {
      * @param cornerRadius the pixel value of the corner radius, zero means it's disabled.
      */
     void onPipCornerRadiusChanged(int cornerRadius);
+
+    /**
+     * Notifies the listener that user leaves PiP by tapping on the expand button.
+     */
+    void onExpandPip();
 }

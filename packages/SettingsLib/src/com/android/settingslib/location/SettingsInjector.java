@@ -319,23 +319,11 @@ public class SettingsInjector {
 
         @Override
         public boolean onPreferenceClick(Preference preference) {
-            // Activity to start if they click on the preference. Must start in new task to ensure
-            // that "android.settings.LOCATION_SOURCE_SETTINGS" brings user back to
-            // Settings > Location.
+            // Activity to start if they click on the preference.
             Intent settingIntent = new Intent();
             settingIntent.setClassName(mInfo.packageName, mInfo.settingsActivity);
+            // No flags set to ensure the activity is launched within the same settings task.
             logPreferenceClick(settingIntent);
-            // Sometimes the user may navigate back to "Settings" and launch another different
-            // injected setting after one injected setting has been launched.
-            //
-            // FLAG_ACTIVITY_CLEAR_TOP allows multiple Activities to stack on each other. When
-            // "back" button is clicked, the user will navigate through all the injected settings
-            // launched before. Such behavior could be quite confusing sometimes.
-            //
-            // In order to avoid such confusion, we use FLAG_ACTIVITY_CLEAR_TASK, which always clear
-            // up all existing injected settings and make sure that "back" button always brings the
-            // user back to "Settings" directly.
-            settingIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             mContext.startActivityAsUser(settingIntent, mInfo.mUserHandle);
             return true;
         }

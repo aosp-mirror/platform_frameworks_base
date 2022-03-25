@@ -21,7 +21,6 @@ import static com.android.systemui.statusbar.notification.TransformState.TRANSFO
 import android.app.Notification;
 import android.content.Context;
 import android.util.ArraySet;
-import android.util.Pair;
 import android.view.NotificationHeaderView;
 import android.view.NotificationTopLineView;
 import android.view.View;
@@ -32,12 +31,15 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.annotation.Nullable;
+
 import com.android.internal.widget.CachingIconView;
 import com.android.internal.widget.NotificationExpandButton;
 import com.android.systemui.animation.Interpolators;
 import com.android.systemui.statusbar.TransformableView;
 import com.android.systemui.statusbar.ViewTransformationHelper;
 import com.android.systemui.statusbar.notification.CustomInterpolatorTransformation;
+import com.android.systemui.statusbar.notification.FeedbackIcon;
 import com.android.systemui.statusbar.notification.ImageTransformState;
 import com.android.systemui.statusbar.notification.TransformState;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
@@ -126,16 +128,17 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
         }
     }
 
-    /** Shows or hides feedback indicator */
+    /** Shows the given feedback icon, or hides the icon if null. */
     @Override
-    public void showFeedbackIcon(boolean show, Pair<Integer, Integer> resIds) {
+    public void setFeedbackIcon(@Nullable FeedbackIcon icon) {
         if (mFeedbackIcon != null) {
-            mFeedbackIcon.setVisibility(show ? View.VISIBLE : View.GONE);
-            if (show) {
+            mFeedbackIcon.setVisibility(icon != null ? View.VISIBLE : View.GONE);
+            if (icon != null) {
                 if (mFeedbackIcon instanceof ImageButton) {
-                    ((ImageButton) mFeedbackIcon).setImageResource(resIds.first);
+                    ((ImageButton) mFeedbackIcon).setImageResource(icon.getIconRes());
                 }
-                mFeedbackIcon.setContentDescription(mView.getContext().getString(resIds.second));
+                mFeedbackIcon.setContentDescription(
+                        mView.getContext().getString(icon.getContentDescRes()));
             }
         }
     }

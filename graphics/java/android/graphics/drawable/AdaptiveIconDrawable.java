@@ -74,6 +74,10 @@ import java.io.IOException;
  *      getBounds().right + getBounds().getWidth() * #getExtraInsetFraction(),
  *      getBounds().bottom + getBounds().getHeight() * #getExtraInsetFraction())
  * </pre>
+ *
+ * <p>An alternate drawable can be specified using <code>&lt;monochrome></code> tag which can be
+ * drawn in place of the two (background and foreground) layers. This drawable is tinted
+ * according to the device or surface theme.
  */
 public class AdaptiveIconDrawable extends Drawable implements Drawable.Callback {
 
@@ -120,6 +124,7 @@ public class AdaptiveIconDrawable extends Drawable implements Drawable.Callback 
      */
     private static final int BACKGROUND_ID = 0;
     private static final int FOREGROUND_ID = 1;
+    private static final int MONOCHROME_ID = 2;
 
     /**
      * State variable that maintains the {@link ChildDrawable} array.
@@ -188,12 +193,27 @@ public class AdaptiveIconDrawable extends Drawable implements Drawable.Callback 
      */
     public AdaptiveIconDrawable(Drawable backgroundDrawable,
             Drawable foregroundDrawable) {
+        this(backgroundDrawable, foregroundDrawable, null);
+    }
+
+    /**
+     * Constructor used to dynamically create this drawable.
+     *
+     * @param backgroundDrawable drawable that should be rendered in the background
+     * @param foregroundDrawable drawable that should be rendered in the foreground
+     * @param monochromeDrawable an alternate drawable which can be tinted per system theme color
+     */
+    public AdaptiveIconDrawable(@Nullable Drawable backgroundDrawable,
+            @Nullable Drawable foregroundDrawable, @Nullable Drawable monochromeDrawable) {
         this((LayerState)null, null);
         if (backgroundDrawable != null) {
             addLayer(BACKGROUND_ID, createChildDrawable(backgroundDrawable));
         }
         if (foregroundDrawable != null) {
             addLayer(FOREGROUND_ID, createChildDrawable(foregroundDrawable));
+        }
+        if (monochromeDrawable != null) {
+            addLayer(MONOCHROME_ID, createChildDrawable(monochromeDrawable));
         }
     }
 
@@ -227,9 +247,8 @@ public class AdaptiveIconDrawable extends Drawable implements Drawable.Callback 
         state.mSourceDrawableId = Resources.getAttributeSetSourceResId(attrs);
 
         final ChildDrawable[] array = state.mChildren;
-        for (int i = 0; i < state.mChildren.length; i++) {
-            final ChildDrawable layer = array[i];
-            layer.setDensity(deviceDensity);
+        for (int i = 0; i < array.length; i++) {
+            array[i].setDensity(deviceDensity);
         }
 
         inflateLayers(r, parser, attrs, theme);
@@ -286,6 +305,18 @@ public class AdaptiveIconDrawable extends Drawable implements Drawable.Callback 
         return mLayerState.mChildren[BACKGROUND_ID].mDrawable;
     }
 
+
+    /**
+     * Returns the monochrome version of this drawable. Callers can use a tinted version of
+     * this drawable instead of the original drawable on surfaces stressing user theming.
+     *
+     *  @return the monochrome drawable
+     */
+    @Nullable
+    public Drawable getMonochrome() {
+        return mLayerState.mChildren[MONOCHROME_ID].mDrawable;
+    }
+
     @Override
     protected void onBoundsChange(Rect bounds) {
         if (bounds.isEmpty()) {
@@ -316,9 +347,6 @@ public class AdaptiveIconDrawable extends Drawable implements Drawable.Callback 
 
         for (int i = 0, count = mLayerState.N_CHILDREN; i < count; i++) {
             final ChildDrawable r = mLayerState.mChildren[i];
-            if (r == null) {
-                continue;
-            }
             final Drawable d = r.mDrawable;
             if (d == null) {
                 continue;
@@ -359,14 +387,11 @@ public class AdaptiveIconDrawable extends Drawable implements Drawable.Callback 
         if (mLayersShader == null) {
             mCanvas.setBitmap(mLayersBitmap);
             mCanvas.drawColor(Color.BLACK);
-            for (int i = 0; i < mLayerState.N_CHILDREN; i++) {
-                if (mLayerState.mChildren[i] == null) {
-                    continue;
-                }
-                final Drawable dr = mLayerState.mChildren[i].mDrawable;
-                if (dr != null) {
-                    dr.draw(mCanvas);
-                }
+            if (mLayerState.mChildren[BACKGROUND_ID].mDrawable != null) {
+                mLayerState.mChildren[BACKGROUND_ID].mDrawable.draw(mCanvas);
+            }
+            if (mLayerState.mChildren[FOREGROUND_ID].mDrawable != null) {
+                mLayerState.mChildren[FOREGROUND_ID].mDrawable.draw(mCanvas);
             }
             mLayersShader = new BitmapShader(mLayersBitmap, TileMode.CLAMP, TileMode.CLAMP);
             mPaint.setShader(mLayersShader);
@@ -480,12 +505,18 @@ public class AdaptiveIconDrawable extends Drawable implements Drawable.Callback 
                 continue;
             }
             String tagName = parser.getName();
-            if (tagName.equals("background")) {
-                childIndex = BACKGROUND_ID;
-            } else if (tagName.equals("foreground")) {
-                childIndex = FOREGROUND_ID;
-            } else {
-                continue;
+            switch (tagName) {
+                case "background":
+                    childIndex = BACKGROUND_ID;
+                    break;
+                case "foreground":
+                    childIndex = FOREGROUND_ID;
+                    break;
+                case "monochrome":
+                    childIndex = MONOCHROME_ID;
+                    break;
+                default:
+                    continue;
             }
 
             final ChildDrawable layer = new ChildDrawable(state.mDensity);
@@ -941,7 +972,7 @@ public class AdaptiveIconDrawable extends Drawable implements Drawable.Callback 
     static class LayerState extends ConstantState {
         private int[] mThemeAttrs;
 
-        final static int N_CHILDREN = 2;
+        static final int N_CHILDREN = 3;
         ChildDrawable[] mChildren;
 
         // The density at which to render the drawable and its children.

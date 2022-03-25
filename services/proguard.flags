@@ -1,0 +1,112 @@
+# TODO(b/210510433): Refine and optimize this configuration. Note that this
+# configuration is only used when `SOONG_CONFIG_ANDROID_SYSTEM_OPTIMIZE_JAVA=true`.
+
+# Preserve line number information for debugging stack traces.
+-keepattributes SourceFile,LineNumberTable
+
+# Allows making private and protected methods/fields public as part of
+# optimization. This enables inlining of trivial getter/setter methods.
+-allowaccessmodification
+
+# Process entrypoint
+-keep class com.android.server.SystemServer {
+  public static void main(java.lang.String[]);
+}
+
+# APIs referenced by dependent JAR files and modules
+-keep @interface android.annotation.SystemApi
+-keep @android.annotation.SystemApi class * {
+  public protected *;
+}
+-keepclasseswithmembers class * {
+  @android.annotation.SystemApi *;
+}
+
+# Derivatives of SystemService and other services created via reflection
+-keep,allowoptimization,allowaccessmodification class * extends com.android.server.SystemService {
+  public <methods>;
+}
+-keep,allowoptimization,allowaccessmodification class * extends com.android.server.devicepolicy.BaseIDevicePolicyManager {
+  public <init>(...);
+}
+-keep,allowoptimization,allowaccessmodification class com.android.server.wallpaper.WallpaperManagerService {
+  public <init>(...);
+}
+
+# Binder interfaces
+-keep,allowoptimization,allowaccessmodification class * extends android.os.IInterface
+-keep,allowoptimization,allowaccessmodification class * extends android.os.IHwInterface
+
+# Global entities normally kept through explicit Manifest entries
+# TODO(b/210510433): Revisit and consider generating from frameworks/base/core/res/AndroidManifest.xml,
+# by including that manifest with the library rule that triggers optimization.
+-keep,allowoptimization,allowaccessmodification class com.android.server.** extends android.app.Activity
+-keep,allowoptimization,allowaccessmodification class com.android.server.** extends android.app.Service
+-keep,allowoptimization,allowaccessmodification class com.android.server.** extends android.app.backup.BackupAgent
+-keep,allowoptimization,allowaccessmodification class com.android.server.** extends android.content.BroadcastReceiver
+-keep,allowoptimization,allowaccessmodification class com.android.server.** extends android.content.ContentProvider
+-keep,allowoptimization,allowaccessmodification class com.android.server.** extends android.preference.Preference
+-keep,allowoptimization,allowaccessmodification class com.android.server.** extends android.view.View {
+  public <init>(...);
+}
+
+# Various classes subclassed in or referenced via JNI in ethernet-service
+-keep public class android.net.** { *; }
+-keep,allowoptimization,allowaccessmodification class com.android.net.module.util.* { *; }
+-keep,allowoptimization,allowaccessmodification public class com.android.server.net.IpConfigStore { *; }
+-keep,allowoptimization,allowaccessmodification public class com.android.server.net.BaseNetworkObserver { *; }
+
+# Referenced via CarServiceHelperService in car-frameworks-service (avoid removing)
+-keep public class com.android.server.utils.Slogf { *; }
+
+# Notification extractors
+# TODO(b/210510433): Revisit and consider generating from frameworks/base/core/res/res/values/config.xml.
+-keep,allowoptimization,allowaccessmodification public class com.android.server.notification.** implements com.android.server.notification.NotificationSignalExtractor
+
+# JNI keep rules
+# TODO(b/210510433): Revisit and fix with @Keep, or consider auto-generating from
+# frameworks/base/services/core/jni/onload.cpp.
+-keep,allowoptimization,allowaccessmodification class com.android.server.broadcastradio.hal1.BroadcastRadioService { *; }
+-keep,allowoptimization,allowaccessmodification class com.android.server.broadcastradio.hal1.Convert { *; }
+-keep,allowoptimization,allowaccessmodification class com.android.server.broadcastradio.hal1.Tuner { *; }
+-keep,allowoptimization,allowaccessmodification class com.android.server.broadcastradio.hal1.TunerCallback { *; }
+-keep,allowoptimization,allowaccessmodification class com.android.server.location.gnss.GnssConfiguration$HalInterfaceVersion { *; }
+-keep,allowoptimization,allowaccessmodification class com.android.server.location.gnss.GnssPowerStats { *; }
+-keep,allowoptimization,allowaccessmodification class com.android.server.location.gnss.hal.GnssNative { *; }
+-keep,allowoptimization,allowaccessmodification class com.android.server.pm.PackageManagerShellCommandDataLoader { *; }
+-keep,allowoptimization,allowaccessmodification class com.android.server.sensors.SensorManagerInternal$ProximityActiveListener { *; }
+-keep,allowoptimization,allowaccessmodification class com.android.server.sensors.SensorService { *; }
+-keep,allowoptimization,allowaccessmodification class com.android.server.soundtrigger_middleware.SoundTriggerMiddlewareImpl$AudioSessionProvider$AudioSession { *; }
+-keep,allowoptimization,allowaccessmodification class com.android.server.soundtrigger_middleware.ExternalCaptureStateTracker { *; }
+-keep,allowoptimization,allowaccessmodification class com.android.server.storage.AppFuseBridge { *; }
+-keep,allowoptimization,allowaccessmodification class com.android.server.tv.TvInputHal { *; }
+-keep,allowoptimization,allowaccessmodification class com.android.server.usb.UsbAlsaJackDetector { *; }
+-keep,allowoptimization,allowaccessmodification class com.android.server.usb.UsbMidiDevice { *; }
+-keep,allowoptimization,allowaccessmodification class com.android.server.vibrator.VibratorController$OnVibrationCompleteListener { *; }
+-keep,allowoptimization,allowaccessmodification class com.android.server.vibrator.VibratorManagerService$OnSyncedVibrationCompleteListener { *; }
+-keepclasseswithmembers,allowoptimization,allowaccessmodification class com.android.server.** {
+  *** *FromNative(...);
+}
+-keep,allowoptimization,allowaccessmodification class com.android.server.input.InputManagerService {
+  <methods>;
+}
+-keep,allowoptimization,allowaccessmodification class com.android.server.usb.UsbHostManager {
+  *** usbDeviceRemoved(...);
+  *** usbDeviceAdded(...);
+}
+-keep,allowoptimization,allowaccessmodification class **.*NativeWrapper* { *; }
+
+# Miscellaneous reflection keep rules
+# TODO(b/210510433): Revisit and fix with @Keep.
+-keep,allowoptimization,allowaccessmodification class com.android.server.usage.AppStandbyController {
+  public <init>(...);
+}
+-keep,allowoptimization,allowaccessmodification class android.hardware.usb.gadget.** { *; }
+
+# Needed when optimizations enabled
+# TODO(b/210510433): Revisit and fix with @Keep.
+-keep,allowoptimization,allowaccessmodification class com.android.server.SystemService { *; }
+-keep,allowoptimization,allowaccessmodification class com.android.server.SystemService$TargetUser { *; }
+-keep,allowoptimization,allowaccessmodification class com.android.server.usage.StorageStatsManagerLocal { *; }
+-keep,allowoptimization,allowaccessmodification class com.android.internal.util.** { *; }
+-keep,allowoptimization,allowaccessmodification class android.os.** { *; }

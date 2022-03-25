@@ -30,6 +30,7 @@ import androidx.preference.Preference;
 import androidx.preference.PreferenceViewHolder;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -57,6 +58,7 @@ public class RestrictedPreferenceHelperTest {
     }
 
     @Test
+    @Ignore
     public void bindPreference_disabled_shouldDisplayDisabledSummary() {
         final TextView summaryView = mock(TextView.class, RETURNS_DEEP_STUBS);
         when(mViewHolder.itemView.findViewById(android.R.id.summary))
@@ -73,6 +75,7 @@ public class RestrictedPreferenceHelperTest {
     }
 
     @Test
+    @Ignore
     public void bindPreference_notDisabled_shouldNotHideSummary() {
         final TextView summaryView = mock(TextView.class, RETURNS_DEEP_STUBS);
         when(mViewHolder.itemView.findViewById(android.R.id.summary))

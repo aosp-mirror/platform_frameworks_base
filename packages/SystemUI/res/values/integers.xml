@@ -17,11 +17,6 @@
 <resources>
     <integer name="biometric_dialog_text_gravity">8388611</integer> <!-- gravity start -->
 
-    <!-- Action footer width used for layout_width to indicate WRAP_CONTENT (along with a weight of
-         0) as we can allow the carrier text to stretch as far as needed in the QS footer. -->
-    <integer name="qs_footer_actions_width">0</integer>
-    <integer name="qs_footer_actions_weight">1</integer>
-
     <integer name="qs_security_footer_maxLines">2</integer>
 
     <integer name="magnification_default_scale">2</integer>
@@ -30,4 +25,7 @@
          See com.android.systemui.volume.VolumeDialogImpl.
          Value 21 corresponds to RIGHT|CENTER_VERTICAL. -->
     <integer name="volume_dialog_gravity">21</integer>
+
+    <!-- The time it takes for the over scroll release animation to complete, in milli seconds.  -->
+    <integer name="lockscreen_shade_over_scroll_release_duration">0</integer>
 </resources>

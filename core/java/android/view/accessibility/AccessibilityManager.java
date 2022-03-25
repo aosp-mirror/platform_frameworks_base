@@ -23,6 +23,7 @@ import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.AccessibilityServiceInfo.FeedbackType;
 import android.accessibilityservice.AccessibilityShortcutInfo;
+import android.annotation.CallbackExecutor;
 import android.annotation.ColorInt;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -46,6 +47,7 @@ import android.content.res.Resources;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
+import android.os.HandlerExecutor;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
@@ -73,6 +75,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 /**
  * System level service that serves as an event dispatch for {@link AccessibilityEvent}s,
@@ -111,7 +114,15 @@ public final class AccessibilityManager {
     public static final int STATE_FLAG_REQUEST_MULTI_FINGER_GESTURES = 0x00000010;
 
     /** @hide */
-    public static final int STATE_FLAG_ACCESSIBILITY_TRACING_ENABLED = 0x00000020;
+    public static final int STATE_FLAG_TRACE_A11Y_INTERACTION_CONNECTION_ENABLED = 0x00000100;
+    /** @hide */
+    public static final int STATE_FLAG_TRACE_A11Y_INTERACTION_CONNECTION_CB_ENABLED = 0x00000200;
+    /** @hide */
+    public static final int STATE_FLAG_TRACE_A11Y_INTERACTION_CLIENT_ENABLED = 0x00000400;
+    /** @hide */
+    public static final int STATE_FLAG_TRACE_A11Y_SERVICE_ENABLED = 0x00000800;
+    /** @hide */
+    public static final int STATE_FLAG_AUDIO_DESCRIPTION_BY_DEFAULT_ENABLED = 0x00001000;
 
     /** @hide */
     public static final int DALTONIZER_DISABLED = -1;
@@ -235,8 +246,10 @@ public final class AccessibilityManager {
     @UnsupportedAppUsage(trackingBug = 123768939L)
     boolean mIsHighTextContrastEnabled;
 
-    // Whether accessibility tracing is enabled or not
-    boolean mIsAccessibilityTracingEnabled = false;
+    boolean mIsAudioDescriptionByDefaultRequested;
+
+    // accessibility tracing state
+    int mAccessibilityTracingState = 0;
 
     AccessibilityPolicy mAccessibilityPolicy;
 
@@ -257,8 +270,11 @@ public final class AccessibilityManager {
     private final ArrayMap<HighTextContrastChangeListener, Handler>
             mHighTextContrastStateChangeListeners = new ArrayMap<>();
 
-    private final ArrayMap<AccessibilityServicesStateChangeListener, Handler>
+    private final ArrayMap<AccessibilityServicesStateChangeListener, Executor>
             mServicesStateChangeListeners = new ArrayMap<>();
+
+    private final ArrayMap<AudioDescriptionRequestedChangeListener, Executor>
+            mAudioDescriptionRequestedChangeListeners = new ArrayMap<>();
 
     /**
      * Map from a view's accessibility id to the list of request preparers set for that view
@@ -297,13 +313,20 @@ public final class AccessibilityManager {
     }
 
     /**
-     * Listener for changes to the state of accessibility services. Changes include services being
-     * enabled or disabled, or changes to the {@link AccessibilityServiceInfo} of a running service.
-     * {@see #addAccessibilityServicesStateChangeListener}.
+     * Listener for changes to the state of accessibility services.
      *
-     * @hide
+     * <p>
+     * This refers to changes to {@link AccessibilityServiceInfo}, including:
+     * <ul>
+     *     <li>Whenever a service is enabled or disabled, or its info has been set or removed.</li>
+     *     <li>Whenever a metadata attribute of any running service's info changes.</li>
+     * </ul>
+     *
+     * @see #getEnabledAccessibilityServiceList for a list of infos of the enabled accessibility
+     * services.
+     * @see #addAccessibilityServicesStateChangeListener
+     *
      */
-    @TestApi
     public interface AccessibilityServicesStateChangeListener {
 
         /**
@@ -311,7 +334,7 @@ public final class AccessibilityManager {
          *
          * @param manager The manager that is calling back
          */
-        void onAccessibilityServicesStateChanged(AccessibilityManager manager);
+        void onAccessibilityServicesStateChanged(@NonNull  AccessibilityManager manager);
     }
 
     /**
@@ -330,6 +353,21 @@ public final class AccessibilityManager {
          * @param enabled Whether high text contrast is enabled.
          */
         void onHighTextContrastStateChanged(boolean enabled);
+    }
+
+    /**
+     * Listener for the audio description by default state. To listen for
+     * changes to the audio description by default state on the device,
+     * implement this interface and register it with the system by calling
+     * {@link #addAudioDescriptionRequestedChangeListener}.
+     */
+    public interface AudioDescriptionRequestedChangeListener {
+        /**
+         * Called when the audio description enabled state changes.
+         *
+         * @param enabled Whether audio description by default is enabled.
+         */
+        void onAudioDescriptionRequestedChanged(boolean enabled);
     }
 
     /**
@@ -403,7 +441,7 @@ public final class AccessibilityManager {
         public void notifyServicesStateChanged(long updatedUiTimeout) {
             updateUiTimeout(updatedUiTimeout);
 
-            final ArrayMap<AccessibilityServicesStateChangeListener, Handler> listeners;
+            final ArrayMap<AccessibilityServicesStateChangeListener, Executor> listeners;
             synchronized (mLock) {
                 if (mServicesStateChangeListeners.isEmpty()) {
                     return;
@@ -415,7 +453,7 @@ public final class AccessibilityManager {
             for (int i = 0; i < numListeners; i++) {
                 final AccessibilityServicesStateChangeListener listener =
                         mServicesStateChangeListeners.keyAt(i);
-                mServicesStateChangeListeners.valueAt(i).post(() -> listener
+                mServicesStateChangeListeners.valueAt(i).execute(() -> listener
                         .onAccessibilityServicesStateChanged(AccessibilityManager.this));
             }
         }
@@ -908,32 +946,39 @@ public final class AccessibilityManager {
     /**
      * Registers a {@link AccessibilityServicesStateChangeListener}.
      *
+     * @param executor The executor.
      * @param listener The listener.
-     * @param handler The handler on which the listener should be called back, or {@code null}
-     *                for a callback on the process's main handler.
-     * @hide
      */
-    @TestApi
     public void addAccessibilityServicesStateChangeListener(
-            @NonNull AccessibilityServicesStateChangeListener listener, @Nullable Handler handler) {
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull AccessibilityServicesStateChangeListener listener) {
         synchronized (mLock) {
-            mServicesStateChangeListeners
-                    .put(listener, (handler == null) ? mHandler : handler);
+            mServicesStateChangeListeners.put(listener, executor);
         }
+    }
+
+    /**
+     * Registers a {@link AccessibilityServicesStateChangeListener}. This will execute a callback on
+     * the process's main handler.
+     *
+     * @param listener The listener.
+     *
+     */
+    public void addAccessibilityServicesStateChangeListener(
+            @NonNull AccessibilityServicesStateChangeListener listener) {
+        addAccessibilityServicesStateChangeListener(new HandlerExecutor(mHandler), listener);
     }
 
     /**
      * Unregisters a {@link AccessibilityServicesStateChangeListener}.
      *
      * @param listener The listener.
-     *
-     * @hide
+     * @return {@code true} if the listener was previously registered.
      */
-    @TestApi
-    public void removeAccessibilityServicesStateChangeListener(
+    public boolean removeAccessibilityServicesStateChangeListener(
             @NonNull AccessibilityServicesStateChangeListener listener) {
         synchronized (mLock) {
-            mServicesStateChangeListeners.remove(listener);
+            return mServicesStateChangeListeners.remove(listener) != null;
         }
     }
 
@@ -1029,13 +1074,50 @@ public final class AccessibilityManager {
     }
 
     /**
-     * Gets accessibility tracing enabled state.
+     * Gets accessibility interaction connection tracing enabled state.
      *
      * @hide
      */
-    public boolean isAccessibilityTracingEnabled() {
+    public boolean isA11yInteractionConnectionTraceEnabled() {
         synchronized (mLock) {
-            return mIsAccessibilityTracingEnabled;
+            return ((mAccessibilityTracingState
+                    & STATE_FLAG_TRACE_A11Y_INTERACTION_CONNECTION_ENABLED) != 0);
+        }
+    }
+
+    /**
+     * Gets accessibility interaction connection callback tracing enabled state.
+     *
+     * @hide
+     */
+    public boolean isA11yInteractionConnectionCBTraceEnabled() {
+        synchronized (mLock) {
+            return ((mAccessibilityTracingState
+                    & STATE_FLAG_TRACE_A11Y_INTERACTION_CONNECTION_CB_ENABLED) != 0);
+        }
+    }
+
+    /**
+     * Gets accessibility interaction client tracing enabled state.
+     *
+     * @hide
+     */
+    public boolean isA11yInteractionClientTraceEnabled() {
+        synchronized (mLock) {
+            return ((mAccessibilityTracingState
+                    & STATE_FLAG_TRACE_A11Y_INTERACTION_CLIENT_ENABLED) != 0);
+        }
+    }
+
+    /**
+     * Gets accessibility service tracing enabled state.
+     *
+     * @hide
+     */
+    public boolean isA11yServiceTraceEnabled() {
+        synchronized (mLock) {
+            return ((mAccessibilityTracingState
+                    & STATE_FLAG_TRACE_A11Y_SERVICE_ENABLED) != 0);
         }
     }
 
@@ -1091,6 +1173,35 @@ public final class AccessibilityManager {
             @NonNull HighTextContrastChangeListener listener) {
         synchronized (mLock) {
             mHighTextContrastStateChangeListeners.remove(listener);
+        }
+    }
+
+    /**
+     * Registers a {@link AudioDescriptionRequestedChangeListener}
+     * for changes in the audio description by default state of the system.
+     * The value could be read via {@link #isAudioDescriptionRequested}.
+     *
+     * @param executor The executor on which the listener should be called back.
+     * @param listener The listener.
+     */
+    public void addAudioDescriptionRequestedChangeListener(
+            @NonNull Executor executor,
+            @NonNull AudioDescriptionRequestedChangeListener listener) {
+        synchronized (mLock) {
+            mAudioDescriptionRequestedChangeListeners.put(listener, executor);
+        }
+    }
+
+    /**
+     * Unregisters a {@link AudioDescriptionRequestedChangeListener}.
+     *
+     * @param listener The listener.
+     * @return True if listener was previously registered.
+     */
+    public boolean removeAudioDescriptionRequestedChangeListener(
+            @NonNull AudioDescriptionRequestedChangeListener listener) {
+        synchronized (mLock) {
+            return (mAudioDescriptionRequestedChangeListeners.remove(listener) != null);
         }
     }
 
@@ -1233,17 +1344,19 @@ public final class AccessibilityManager {
                 (stateFlags & STATE_FLAG_TOUCH_EXPLORATION_ENABLED) != 0;
         final boolean highTextContrastEnabled =
                 (stateFlags & STATE_FLAG_HIGH_TEXT_CONTRAST_ENABLED) != 0;
-        final boolean accessibilityTracingEnabled =
-                (stateFlags & STATE_FLAG_ACCESSIBILITY_TRACING_ENABLED) != 0;
+        final boolean audioDescriptionEnabled =
+                (stateFlags & STATE_FLAG_AUDIO_DESCRIPTION_BY_DEFAULT_ENABLED) != 0;
 
         final boolean wasEnabled = isEnabled();
         final boolean wasTouchExplorationEnabled = mIsTouchExplorationEnabled;
         final boolean wasHighTextContrastEnabled = mIsHighTextContrastEnabled;
+        final boolean wasAudioDescriptionByDefaultRequested = mIsAudioDescriptionByDefaultRequested;
 
         // Ensure listeners get current state from isZzzEnabled() calls.
         mIsEnabled = enabled;
         mIsTouchExplorationEnabled = touchExplorationEnabled;
         mIsHighTextContrastEnabled = highTextContrastEnabled;
+        mIsAudioDescriptionByDefaultRequested = audioDescriptionEnabled;
 
         if (wasEnabled != isEnabled()) {
             notifyAccessibilityStateChanged();
@@ -1257,7 +1370,12 @@ public final class AccessibilityManager {
             notifyHighTextContrastStateChanged();
         }
 
-        updateAccessibilityTracingState(accessibilityTracingEnabled);
+        if (wasAudioDescriptionByDefaultRequested
+                != audioDescriptionEnabled) {
+            notifyAudioDescriptionbyDefaultStateChanged();
+        }
+
+        updateAccessibilityTracingState(stateFlags);
     }
 
     /**
@@ -1620,6 +1738,100 @@ public final class AccessibilityManager {
         }
     }
 
+    /**
+     * Determines if users want to select sound track with audio description by default.
+     * <p>
+     * Audio description, also referred to as a video description, described video, or
+     * more precisely called a visual description, is a form of narration used to provide
+     * information surrounding key visual elements in a media work for the benefit of
+     * blind and visually impaired consumers.
+     * </p>
+     * <p>
+     * The method provides the preference value to content provider apps to select the
+     * default sound track during playing a video or movie.
+     * </p>
+     * <p>
+     * Add listener to detect the state change via
+     * {@link #addAudioDescriptionRequestedChangeListener}
+     * </p>
+     * @return {@code true} if the audio description is enabled, {@code false} otherwise.
+     */
+    public boolean isAudioDescriptionRequested() {
+        synchronized (mLock) {
+            IAccessibilityManager service = getServiceLocked();
+            if (service == null) {
+                return false;
+            }
+            return mIsAudioDescriptionByDefaultRequested;
+        }
+    }
+
+    /**
+     * Sets the system audio caption enabled state.
+     *
+     * @param isEnabled The system audio captioning enabled state.
+     * @param userId The user Id.
+     * @hide
+     */
+    public void setSystemAudioCaptioningEnabled(boolean isEnabled, int userId) {
+        final IAccessibilityManager service;
+        synchronized (mLock) {
+            service = getServiceLocked();
+            if (service == null) {
+                return;
+            }
+        }
+        try {
+            service.setSystemAudioCaptioningEnabled(isEnabled, userId);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Gets the system audio caption UI enabled state.
+     *
+     * @param userId The user Id.
+     * @return the system audio caption UI enabled state.
+     * @hide
+     */
+    public boolean isSystemAudioCaptioningUiEnabled(int userId) {
+        final IAccessibilityManager service;
+        synchronized (mLock) {
+            service = getServiceLocked();
+            if (service == null) {
+                return false;
+            }
+        }
+        try {
+            return service.isSystemAudioCaptioningUiEnabled(userId);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Sets the system audio caption UI enabled state.
+     *
+     * @param isEnabled The system audio captioning UI enabled state.
+     * @param userId The user Id.
+     * @hide
+     */
+    public void setSystemAudioCaptioningUiEnabled(boolean isEnabled, int userId) {
+        final IAccessibilityManager service;
+        synchronized (mLock) {
+            service = getServiceLocked();
+            if (service == null) {
+                return;
+            }
+        }
+        try {
+            service.setSystemAudioCaptioningUiEnabled(isEnabled, userId);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
     private IAccessibilityManager getServiceLocked() {
         if (mService == null) {
             tryConnectToServiceLocked(null);
@@ -1715,11 +1927,34 @@ public final class AccessibilityManager {
     }
 
     /**
-     * Update mIsAccessibilityTracingEnabled.
+     * Notifies the registered {@link AudioDescriptionStateChangeListener}s.
      */
-    private void updateAccessibilityTracingState(boolean enabled) {
+    private void notifyAudioDescriptionbyDefaultStateChanged() {
+        final boolean isAudioDescriptionByDefaultRequested;
+        final ArrayMap<AudioDescriptionRequestedChangeListener, Executor> listeners;
         synchronized (mLock) {
-            mIsAccessibilityTracingEnabled = enabled;
+            if (mAudioDescriptionRequestedChangeListeners.isEmpty()) {
+                return;
+            }
+            isAudioDescriptionByDefaultRequested = mIsAudioDescriptionByDefaultRequested;
+            listeners = new ArrayMap<>(mAudioDescriptionRequestedChangeListeners);
+        }
+
+        final int numListeners = listeners.size();
+        for (int i = 0; i < numListeners; i++) {
+            final AudioDescriptionRequestedChangeListener listener = listeners.keyAt(i);
+            listeners.valueAt(i).execute(() ->
+                    listener.onAudioDescriptionRequestedChanged(
+                        isAudioDescriptionByDefaultRequested));
+        }
+    }
+
+    /**
+     * Update mAccessibilityTracingState.
+     */
+    private void updateAccessibilityTracingState(int stateFlag) {
+        synchronized (mLock) {
+            mAccessibilityTracingState = stateFlag;
         }
     }
 
