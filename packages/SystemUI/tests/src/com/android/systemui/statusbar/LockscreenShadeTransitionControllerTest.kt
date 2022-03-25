@@ -298,8 +298,9 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
     fun setDragAmount_notInSplitShade_setsKeyguardTranslationToZero() {
         val mediaTranslationY = 123
         disableSplitShade()
+        whenever(mediaHierarchyManager.isCurrentlyInGuidedTransformation()).thenReturn(true)
         whenever(mediaHierarchyManager.getGuidedTransformationTranslationY())
-                .thenReturn(mediaTranslationY)
+            .thenReturn(mediaTranslationY)
 
         transitionController.dragDownAmount = 10f
 
@@ -310,13 +311,33 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
     fun setDragAmount_inSplitShade_setsKeyguardTranslationBasedOnMediaTranslation() {
         val mediaTranslationY = 123
         enableSplitShade()
+        whenever(mediaHierarchyManager.isCurrentlyInGuidedTransformation()).thenReturn(true)
         whenever(mediaHierarchyManager.getGuidedTransformationTranslationY())
-                .thenReturn(mediaTranslationY)
+            .thenReturn(mediaTranslationY)
 
         transitionController.dragDownAmount = 10f
 
         verify(notificationPanelController)
-                .setKeyguardTransitionProgress(anyFloat(), eq(mediaTranslationY))
+            .setKeyguardTransitionProgress(anyFloat(), eq(mediaTranslationY))
+    }
+
+    @Test
+    fun setDragAmount_inSplitShade_mediaNotShowing_setsKeyguardTranslationBasedOnDistance() {
+        enableSplitShade()
+        whenever(mediaHierarchyManager.isCurrentlyInGuidedTransformation()).thenReturn(false)
+        whenever(mediaHierarchyManager.getGuidedTransformationTranslationY()).thenReturn(123)
+
+        transitionController.dragDownAmount = 10f
+
+        val distance =
+            context.resources.getDimensionPixelSize(
+                R.dimen.lockscreen_shade_keyguard_transition_distance)
+        val offset =
+            context.resources.getDimensionPixelSize(
+                R.dimen.lockscreen_shade_keyguard_transition_vertical_offset)
+        val expectedTranslation = 10f / distance * offset
+        verify(notificationPanelController)
+            .setKeyguardTransitionProgress(anyFloat(), eq(expectedTranslation.toInt()))
     }
 
     @Test
