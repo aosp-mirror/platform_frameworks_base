@@ -2682,6 +2682,15 @@ public class NotificationPanelViewController extends PanelViewController {
         updateClock();
     }
 
+    /**
+     * Sets the alpha value to be set on the keyguard status bar.
+     *
+     * @param alpha value between 0 and 1. -1 if the value is to be reset.
+     */
+    public void setKeyguardStatusBarAlpha(float alpha) {
+        mKeyguardStatusBarViewController.setAlpha(alpha);
+    }
+
     private void trackMovement(MotionEvent event) {
         if (mQsVelocityTracker != null) mQsVelocityTracker.addMovement(event);
     }
