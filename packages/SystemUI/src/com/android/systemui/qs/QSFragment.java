@@ -37,6 +37,7 @@ import android.view.ViewTreeObserver;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
+import com.android.keyguard.BouncerPanelExpansionCalculator;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
 import com.android.systemui.animation.ShadeInterpolation;
@@ -593,7 +594,9 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         } else if (progress > 0 && view.getVisibility() != View.VISIBLE) {
             view.setVisibility((View.VISIBLE));
         }
-        float alpha = ShadeInterpolation.getContentAlpha(progress);
+        float alpha = (mState == StatusBarState.KEYGUARD || mState == StatusBarState.SHADE_LOCKED)
+                ? BouncerPanelExpansionCalculator.getBackScrimScaledExpansion(progress)
+                : ShadeInterpolation.getContentAlpha(progress);
         view.setAlpha(alpha);
     }
 
