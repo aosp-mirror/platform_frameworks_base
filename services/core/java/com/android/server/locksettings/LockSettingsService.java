@@ -3316,6 +3316,10 @@ public class LockSettingsService extends ILockSettings.Stub {
             if (!mSpManager.hasEscrowData(userId)) {
                 throw new SecurityException("Escrow token is disabled on the current user");
             }
+            if (!isEscrowTokenActive(tokenHandle, userId)) {
+                Slog.e(TAG, "Unknown or unactivated token: " + Long.toHexString(tokenHandle));
+                return false;
+            }
             result = setLockCredentialWithTokenInternalLocked(
                     credential, tokenHandle, token, userId);
         }
