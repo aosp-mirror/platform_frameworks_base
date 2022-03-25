@@ -424,6 +424,28 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
         verifyZeroInteractions(singleShadeOverScroller)
     }
 
+    @Test
+    fun setDragDownAmount_inSplitShade_setsKeyguardStatusBarAlphaBasedOnDistance() {
+        val alphaDistance = context.resources.getDimensionPixelSize(
+            R.dimen.lockscreen_shade_npvc_keyguard_content_alpha_transition_distance)
+        val dragDownAmount = 10f
+        enableSplitShade()
+
+        transitionController.dragDownAmount = dragDownAmount
+
+        val expectedAlpha = 1 - dragDownAmount / alphaDistance
+        verify(notificationPanelController).setKeyguardStatusBarAlpha(expectedAlpha)
+    }
+
+    @Test
+    fun setDragDownAmount_notInSplitShade_setsKeyguardStatusBarAlphaToMinusOne() {
+        disableSplitShade()
+
+        transitionController.dragDownAmount = 10f
+
+        verify(notificationPanelController).setKeyguardStatusBarAlpha(-1f)
+    }
+
     private fun enableSplitShade() {
         setSplitShadeEnabled(true)
     }
