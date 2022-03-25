@@ -421,6 +421,7 @@ public class SettingsBackupTest {
                     Settings.Global.RADIO_NFC,
                     Settings.Global.RADIO_WIFI,
                     Settings.Global.RADIO_WIMAX,
+                    Settings.Global.REMOVE_GUEST_ON_EXIT,
                     Settings.Global.RECOMMENDED_NETWORK_EVALUATOR_CACHE_EXPIRY_MS,
                     Settings.Global.READ_EXTERNAL_STORAGE_ENFORCED_DEFAULT,
                     Settings.Global.RESTRICTED_NETWORKING_MODE,

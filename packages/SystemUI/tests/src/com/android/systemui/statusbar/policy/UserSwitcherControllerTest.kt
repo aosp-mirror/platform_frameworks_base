@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.policy
 
 import android.app.IActivityManager
+import android.app.NotificationManager
 import android.app.admin.DevicePolicyManager
 import android.content.Context
 import android.content.DialogInterface
@@ -36,7 +37,9 @@ import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.internal.util.LatencyTracker
 import com.android.internal.util.UserIcons
+import com.android.systemui.GuestResetOrExitSessionReceiver
 import com.android.systemui.GuestResumeSessionReceiver
+import com.android.systemui.GuestSessionNotification
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.DialogLaunchAnimator
@@ -95,6 +98,11 @@ class UserSwitcherControllerTest : SysuiTestCase() {
     @Mock private lateinit var notificationShadeWindowView: NotificationShadeWindowView
     @Mock private lateinit var threadedRenderer: ThreadedRenderer
     @Mock private lateinit var dialogLaunchAnimator: DialogLaunchAnimator
+    @Mock private lateinit var guestSessionNotification: GuestSessionNotification
+    @Mock private lateinit var guestResetOrExitSessionReceiver: GuestResetOrExitSessionReceiver
+    private lateinit var resetSessionDialogFactory:
+                            GuestResumeSessionReceiver.ResetSessionDialog.Factory
+    private lateinit var guestResumeSessionReceiver: GuestResumeSessionReceiver
     private lateinit var testableLooper: TestableLooper
     private lateinit var bgExecutor: FakeExecutor
     private lateinit var uiExecutor: FakeExecutor
@@ -124,8 +132,27 @@ class UserSwitcherControllerTest : SysuiTestCase() {
                 com.android.internal.R.bool.config_guestUserAutoCreated, false)
 
         mContext.addMockSystemService(Context.FACE_SERVICE, mock(FaceManager::class.java))
+        mContext.addMockSystemService(Context.NOTIFICATION_SERVICE,
+                mock(NotificationManager::class.java))
         mContext.addMockSystemService(Context.FINGERPRINT_SERVICE,
                 mock(FingerprintManager::class.java))
+
+        resetSessionDialogFactory = object : GuestResumeSessionReceiver.ResetSessionDialog.Factory {
+                override fun create(userId: Int): GuestResumeSessionReceiver.ResetSessionDialog {
+                    return GuestResumeSessionReceiver.ResetSessionDialog(
+                                mContext,
+                                mock(UserSwitcherController::class.java),
+                                uiEventLogger,
+                                userId
+                            )
+                }
+            }
+
+        guestResumeSessionReceiver = GuestResumeSessionReceiver(userTracker,
+                                        secureSettings,
+                                        broadcastDispatcher,
+                                        guestSessionNotification,
+                                        resetSessionDialogFactory)
 
         `when`(userManager.canAddMoreUsers(eq(UserManager.USER_TYPE_FULL_SECONDARY)))
                 .thenReturn(true)
@@ -171,7 +198,9 @@ class UserSwitcherControllerTest : SysuiTestCase() {
                 interactionJankMonitor,
                 latencyTracker,
                 dumpManager,
-                dialogLaunchAnimator)
+                dialogLaunchAnimator,
+                guestResumeSessionReceiver,
+                guestResetOrExitSessionReceiver)
         userSwitcherController.init(notificationShadeWindowView)
     }
 
@@ -261,7 +290,10 @@ class UserSwitcherControllerTest : SysuiTestCase() {
                 .getButton(DialogInterface.BUTTON_POSITIVE).performClick()
         testableLooper.processAllMessages()
         assertEquals(1, uiEventLogger.numLogs())
-        assertEquals(QSUserSwitcherEvent.QS_USER_GUEST_REMOVE.id, uiEventLogger.eventId(0))
+        assertTrue(
+            QSUserSwitcherEvent.QS_USER_GUEST_REMOVE.id == uiEventLogger.eventId(0) ||
+            QSUserSwitcherEvent.QS_USER_SWITCH.id == uiEventLogger.eventId(0)
+        )
     }
 
     @Test
@@ -323,7 +355,7 @@ class UserSwitcherControllerTest : SysuiTestCase() {
         userSwitcherController.onUserListItemClicked(currentGuestUserRecord, null)
         assertNotNull(userSwitcherController.mExitGuestDialog)
         userSwitcherController.mExitGuestDialog
-                .getButton(DialogInterface.BUTTON_NEGATIVE).performClick()
+                .getButton(DialogInterface.BUTTON_NEUTRAL).performClick()
         testableLooper.processAllMessages()
         assertEquals(0, uiEventLogger.numLogs())
     }
