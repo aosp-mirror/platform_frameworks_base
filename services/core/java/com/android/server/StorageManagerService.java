@@ -2116,15 +2116,19 @@ class StorageManagerService extends IStorageManager.Stub
             }
         }
 
-        PackageMonitor monitor = new PackageMonitor() {
+        if (mPackageMonitorsForUser.get(userId) == null) {
+            PackageMonitor monitor = new PackageMonitor() {
                 @Override
                 public void onPackageRemoved(String packageName, int uid) {
                     updateLegacyStorageApps(packageName, uid, false);
                 }
             };
-        // TODO(b/149391976): Use different handler?
-        monitor.register(mContext, user, true, mHandler);
-        mPackageMonitorsForUser.put(userId, monitor);
+            // TODO(b/149391976): Use different handler?
+            monitor.register(mContext, user, true, mHandler);
+            mPackageMonitorsForUser.put(userId, monitor);
+        } else {
+            Slog.w(TAG, "PackageMonitor is already registered for: " + userId);
+        }
     }
 
     private static long getLastAccessTime(AppOpsManager manager,
