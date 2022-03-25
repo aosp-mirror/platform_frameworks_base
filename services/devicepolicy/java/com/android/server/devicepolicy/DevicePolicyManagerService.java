@@ -18721,13 +18721,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         mInjector.binderWithCleanCallingIdentity(() -> {
             if (mDeviceManagementResourcesProvider.updateDrawables(drawables)) {
                 sendDrawableUpdatedBroadcast(
-                        drawables.stream().map(s -> s.getDrawableId()).toArray(String[]::new));
+                        drawables.stream().map(s -> s.getDrawableId()).collect(
+                                Collectors.toList()));
             }
         });
     }
 
     @Override
-    public void resetDrawables(@NonNull String[] drawableIds) {
+    public void resetDrawables(@NonNull List<String> drawableIds) {
         Preconditions.checkCallAuthorization(hasCallingOrSelfPermission(
                 android.Manifest.permission.UPDATE_DEVICE_MANAGEMENT_RESOURCES));
 
@@ -18748,7 +18749,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                         drawableId, drawableStyle, drawableSource));
     }
 
-    private void sendDrawableUpdatedBroadcast(String[] drawableIds) {
+    private void sendDrawableUpdatedBroadcast(List<String> drawableIds) {
         sendResourceUpdatedBroadcast(EXTRA_RESOURCE_TYPE_DRAWABLE, drawableIds);
     }
 
@@ -18762,12 +18763,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         mInjector.binderWithCleanCallingIdentity(() -> {
             if (mDeviceManagementResourcesProvider.updateStrings(strings))
             sendStringsUpdatedBroadcast(
-                    strings.stream().map(s -> s.getStringId()).toArray(String[]::new));
+                    strings.stream().map(s -> s.getStringId()).collect(Collectors.toList()));
         });
     }
 
     @Override
-    public void resetStrings(String[] stringIds) {
+    public void resetStrings(@NonNull List<String> stringIds) {
         Preconditions.checkCallAuthorization(hasCallingOrSelfPermission(
                 android.Manifest.permission.UPDATE_DEVICE_MANAGEMENT_RESOURCES));
 
@@ -18784,13 +18785,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 mDeviceManagementResourcesProvider.getString(stringId));
     }
 
-    private void sendStringsUpdatedBroadcast(String[] stringIds) {
+    private void sendStringsUpdatedBroadcast(List<String> stringIds) {
         sendResourceUpdatedBroadcast(EXTRA_RESOURCE_TYPE_STRING, stringIds);
     }
 
-    private void sendResourceUpdatedBroadcast(int resourceType, String[] resourceIds) {
+    private void sendResourceUpdatedBroadcast(int resourceType, List<String> resourceIds) {
         final Intent intent = new Intent(ACTION_DEVICE_POLICY_RESOURCE_UPDATED);
-        intent.putExtra(EXTRA_RESOURCE_IDS, resourceIds);
+        intent.putExtra(EXTRA_RESOURCE_IDS, resourceIds.toArray(String[]::new));
         intent.putExtra(EXTRA_RESOURCE_TYPE, resourceType);
         intent.setFlags(Intent.FLAG_RECEIVER_FOREGROUND);
         intent.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
