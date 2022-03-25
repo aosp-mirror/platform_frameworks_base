@@ -2338,10 +2338,9 @@ public final class ViewRootImpl implements ViewParent,
         final int systemUiFlag = publicType == Type.statusBars()
                 ? View.SYSTEM_UI_FLAG_FULLSCREEN
                 : View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
-        final boolean wasVisible = (info.globalVisibility & systemUiFlag) == 0;
         if (visible) {
             info.globalVisibility &= ~systemUiFlag;
-            if (!wasVisible && hasControl) {
+            if (hasControl && (mAttachInfo.mSystemUiVisibility & systemUiFlag) != 0) {
                 // The local system UI visibility can only be cleared while we have the control.
                 info.localChanges |= systemUiFlag;
             }
