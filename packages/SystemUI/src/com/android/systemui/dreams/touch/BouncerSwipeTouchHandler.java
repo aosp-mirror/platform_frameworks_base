@@ -116,8 +116,10 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
                     // bouncer. As that view's expansion shrinks, the bouncer appears. The bouncer
                     // is fully hidden at full expansion (1) and fully visible when fully collapsed
                     // (0).
-                    final float screenTravelPercentage =
-                            Math.abs((e1.getY() - e2.getY()) / mCentralSurfaces.getDisplayHeight());
+                    final float dy = mBouncerInitiallyShowing ? e2.getY() - e1.getY()
+                            : e1.getY() - e2.getY();
+                    final float screenTravelPercentage = Math.max(0,
+                            dy / mCentralSurfaces.getDisplayHeight());
                     setPanelExpansion(mBouncerInitiallyShowing
                             ? screenTravelPercentage : 1 - screenTravelPercentage);
                     return true;
