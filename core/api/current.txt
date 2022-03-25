@@ -12332,6 +12332,7 @@ package android.content.pm {
     method @Nullable public java.util.Set<java.lang.String> getCategories();
     method @Nullable public CharSequence getDisabledMessage();
     method public int getDisabledReason();
+    method public int getExcludedFromSurfaces();
     method @Nullable public android.os.PersistableBundle getExtras();
     method @NonNull public String getId();
     method @Nullable public android.content.Intent getIntent();
@@ -12348,8 +12349,8 @@ package android.content.pm {
     method public boolean isDeclaredInManifest();
     method public boolean isDynamic();
     method public boolean isEnabled();
+    method public boolean isExcludedFromSurfaces(int);
     method public boolean isImmutable();
-    method public boolean isIncludedIn(int);
     method public boolean isPinned();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.content.pm.ShortcutInfo> CREATOR;
