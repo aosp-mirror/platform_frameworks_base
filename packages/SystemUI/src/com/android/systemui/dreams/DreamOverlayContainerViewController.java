@@ -27,6 +27,9 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dreams.complication.ComplicationHostViewController;
 import com.android.systemui.dreams.dagger.DreamOverlayComponent;
 import com.android.systemui.dreams.dagger.DreamOverlayModule;
+import com.android.systemui.statusbar.BlurUtils;
+import com.android.systemui.statusbar.phone.KeyguardBouncer;
+import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.util.ViewController;
 
 import javax.inject.Inject;
@@ -38,6 +41,8 @@ import javax.inject.Named;
 @DreamOverlayComponent.DreamOverlayScope
 public class DreamOverlayContainerViewController extends ViewController<DreamOverlayContainerView> {
     private final DreamOverlayStatusBarViewController mStatusBarViewController;
+    private final StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
+    private final BlurUtils mBlurUtils;
 
     private final ComplicationHostViewController mComplicationHostViewController;
 
@@ -60,12 +65,57 @@ public class DreamOverlayContainerViewController extends ViewController<DreamOve
 
     private long mJitterStartTimeMillis;
 
+    private boolean mBouncerAnimating;
+
+    private final KeyguardBouncer.BouncerExpansionCallback mBouncerExpansionCallback =
+            new KeyguardBouncer.BouncerExpansionCallback() {
+
+                @Override
+                public void onStartingToShow() {
+                    mBouncerAnimating = true;
+                }
+
+                @Override
+                public void onStartingToHide() {
+                    mBouncerAnimating = true;
+                }
+
+                @Override
+                public void onFullyHidden() {
+                    mBouncerAnimating = false;
+                }
+
+                @Override
+                public void onFullyShown() {
+                    mBouncerAnimating = false;
+                }
+
+                @Override
+                public void onExpansionChanged(float bouncerHideAmount) {
+                    if (!mBouncerAnimating) return;
+                    final int blurRadius =
+                            (int) mBlurUtils.blurRadiusOfRatio(1 - bouncerHideAmount);
+                    updateTransitionState(blurRadius, bouncerHideAmount);
+                }
+
+                @Override
+                public void onVisibilityChanged(boolean isVisible) {
+                    // The bouncer may be hidden abruptly without triggering onExpansionChanged.
+                    // In this case, we should reset the transition state.
+                    if (!isVisible) {
+                        updateTransitionState(0, 1f);
+                    }
+                }
+            };
+
     @Inject
     public DreamOverlayContainerViewController(
             DreamOverlayContainerView containerView,
             ComplicationHostViewController complicationHostViewController,
             @Named(DreamOverlayModule.DREAM_OVERLAY_CONTENT_VIEW) ViewGroup contentView,
             DreamOverlayStatusBarViewController statusBarViewController,
+            StatusBarKeyguardViewManager statusBarKeyguardViewManager,
+            BlurUtils blurUtils,
             @Main Handler handler,
             @Named(DreamOverlayModule.MAX_BURN_IN_OFFSET) int maxBurnInOffset,
             @Named(DreamOverlayModule.BURN_IN_PROTECTION_UPDATE_INTERVAL) long
@@ -74,6 +124,8 @@ public class DreamOverlayContainerViewController extends ViewController<DreamOve
         super(containerView);
         mDreamOverlayContentView = contentView;
         mStatusBarViewController = statusBarViewController;
+        mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
+        mBlurUtils = blurUtils;
 
         mComplicationHostViewController = complicationHostViewController;
         final View view = mComplicationHostViewController.getView();
@@ -98,11 +150,19 @@ public class DreamOverlayContainerViewController extends ViewController<DreamOve
     protected void onViewAttached() {
         mJitterStartTimeMillis = System.currentTimeMillis();
         mHandler.postDelayed(this::updateBurnInOffsets, mBurnInProtectionUpdateInterval);
+        final KeyguardBouncer bouncer = mStatusBarKeyguardViewManager.getBouncer();
+        if (bouncer != null) {
+            bouncer.addBouncerExpansionCallback(mBouncerExpansionCallback);
+        }
     }
 
     @Override
     protected void onViewDetached() {
         mHandler.removeCallbacks(this::updateBurnInOffsets);
+        final KeyguardBouncer bouncer = mStatusBarKeyguardViewManager.getBouncer();
+        if (bouncer != null) {
+            bouncer.removeBouncerExpansionCallback(mBouncerExpansionCallback);
+        }
     }
 
     View getContainerView() {
@@ -130,5 +190,10 @@ public class DreamOverlayContainerViewController extends ViewController<DreamOve
         mView.setTranslationY(burnInOffsetY);
 
         mHandler.postDelayed(this::updateBurnInOffsets, mBurnInProtectionUpdateInterval);
+    }
+
+    private void updateTransitionState(int blurRadiusPixels, float alpha) {
+        mBlurUtils.applyBlur(mView.getViewRootImpl(), blurRadiusPixels, false);
+        mView.setAlpha(alpha);
     }
 }

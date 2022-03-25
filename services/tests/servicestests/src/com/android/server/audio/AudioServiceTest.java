@@ -62,7 +62,7 @@ public class AudioServiceTest {
         mSpySystemServer = spy(new NoOpSystemServerAdapter());
         mSettingsAdapter = new NoOpSettingsAdapter();
         mAudioService = new AudioService(mContext, mAudioSystem, mSpySystemServer,
-                mSettingsAdapter);
+                mSettingsAdapter, null);
     }
 
     /**

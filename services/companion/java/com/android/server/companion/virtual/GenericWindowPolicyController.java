@@ -165,7 +165,10 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
 
     @Override
     public void onTopActivityChanged(ComponentName topActivity, int uid) {
-        if (mActivityListener != null) {
+        // Don't send onTopActivityChanged() callback when topActivity is null because it's defined
+        // as @NonNull in ActivityListener interface. Sends onDisplayEmpty() callback instead when
+        // there is no activity running on virtual display.
+        if (mActivityListener != null && topActivity != null) {
             // Post callback on the main thread so it doesn't block activity launching
             mHandler.post(() ->
                     mActivityListener.onTopActivityChanged(Display.INVALID_DISPLAY, topActivity));

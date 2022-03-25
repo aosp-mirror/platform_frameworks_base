@@ -82,6 +82,8 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
 
     private Boolean mCapture;
 
+    private boolean mBouncerInitiallyShowing;
+
     private TouchSession mTouchSession;
 
     private ValueAnimatorCreator mValueAnimatorCreator;
@@ -97,6 +99,7 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
                         // If the user scrolling favors a vertical direction, begin capturing
                         // scrolls.
                         mCapture = Math.abs(distanceY) > Math.abs(distanceX);
+                        mBouncerInitiallyShowing = mCentralSurfaces.isBouncerShowing();
 
                         if (mCapture) {
                             // Since the user is dragging the bouncer up, set scrimmed to false.
@@ -115,7 +118,7 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
                     // (0).
                     final float screenTravelPercentage =
                             Math.abs((e1.getY() - e2.getY()) / mCentralSurfaces.getDisplayHeight());
-                    setPanelExpansion(mCentralSurfaces.isBouncerShowing()
+                    setPanelExpansion(mBouncerInitiallyShowing
                             ? screenTravelPercentage : 1 - screenTravelPercentage);
                     return true;
                 }
@@ -174,16 +177,16 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
         mTouchSession = session;
         mVelocityTracker.clear();
         mNotificationShadeWindowController.setForcePluginOpen(true, this);
+
+        session.registerCallback(() -> {
+            mVelocityTracker.recycle();
+            mCapture = null;
+            mNotificationShadeWindowController.setForcePluginOpen(false, this);
+        });
+
         session.registerGestureListener(mOnGestureListener);
         session.registerInputListener(ev -> onMotionEvent(ev));
 
-    }
-
-    @Override
-    public void onSessionEnd(TouchSession session) {
-        mVelocityTracker.recycle();
-        mCapture = null;
-        mNotificationShadeWindowController.setForcePluginOpen(false, this);
     }
 
     private void onMotionEvent(InputEvent event) {

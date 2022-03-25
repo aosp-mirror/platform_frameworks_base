@@ -246,7 +246,7 @@ public class DefaultCrossProfileIntentFiltersUtils {
     private static final DefaultCrossProfileIntentFilter MEDIA_CAPTURE =
             new DefaultCrossProfileIntentFilter.Builder(
                     DefaultCrossProfileIntentFilter.Direction.TO_PARENT,
-                    /* flags= */0,
+                    /* flags= */ ONLY_IF_NO_MATCH_FOUND,
                     /* letsPersonalDataIntoProfile= */ true)
                     .addAction(MediaStore.ACTION_IMAGE_CAPTURE)
                     .addAction(MediaStore.ACTION_IMAGE_CAPTURE_SECURE)

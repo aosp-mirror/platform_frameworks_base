@@ -31,6 +31,7 @@ import android.graphics.Region;
 import android.testing.AndroidTestingRunner;
 import android.util.DisplayMetrics;
 import android.view.GestureDetector;
+import android.view.GestureDetector.OnGestureListener;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 
@@ -111,6 +112,7 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
                 mFlingAnimationUtilsClosing,
                 TOUCH_REGION);
 
+        when(mCentralSurfaces.isBouncerShowing()).thenReturn(false);
         when(mCentralSurfaces.getDisplayHeight()).thenReturn((float) SCREEN_HEIGHT_PX);
         when(mCentralSurfaces.isBouncerShowing()).thenReturn(false);
         when(mValueAnimatorCreator.create(anyFloat(), anyFloat())).thenReturn(mValueAnimator);
@@ -162,24 +164,58 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
                 ArgumentCaptor.forClass(GestureDetector.OnGestureListener.class);
         verify(mTouchSession).registerGestureListener(gestureListenerCaptor.capture());
 
-        final float scrollAmount = .3f;
-        final float distanceY = SCREEN_HEIGHT_PX * scrollAmount;
+        final OnGestureListener gestureListener = gestureListenerCaptor.getValue();
+        when(mCentralSurfaces.isBouncerShowing()).thenReturn(false);
+        verifyScroll(.3f, Direction.UP, true, gestureListener);
+
+        // Ensure that subsequent gestures are treated as expanding even if the bouncer state
+        // changes.
+        when(mCentralSurfaces.isBouncerShowing()).thenReturn(true);
+        verifyScroll(.7f, Direction.UP, true, gestureListener);
+    }
+
+    /**
+     * Makes sure collapse amount is proportional to scroll.
+     */
+    @Test
+    public void testCollapseAmount() {
+        mTouchHandler.onSessionStart(mTouchSession);
+        ArgumentCaptor<GestureDetector.OnGestureListener> gestureListenerCaptor =
+                ArgumentCaptor.forClass(GestureDetector.OnGestureListener.class);
+        verify(mTouchSession).registerGestureListener(gestureListenerCaptor.capture());
+
+        final OnGestureListener gestureListener = gestureListenerCaptor.getValue();
+        when(mCentralSurfaces.isBouncerShowing()).thenReturn(true);
+        verifyScroll(.3f, Direction.DOWN, false, gestureListener);
+
+        // Ensure that subsequent gestures are treated as collapsing even if the bouncer state
+        // changes.
+        when(mCentralSurfaces.isBouncerShowing()).thenReturn(false);
+        verifyScroll(.7f, Direction.DOWN, false, gestureListener);
+    }
+
+    private enum Direction {
+        DOWN,
+        UP,
+    }
+
+    private void verifyScroll(float percent, Direction direction, boolean expanding,
+            android.view.GestureDetector.OnGestureListener gestureListener) {
+
+        final float distanceY = SCREEN_HEIGHT_PX * percent;
 
         final MotionEvent event1 = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE,
-                0, SCREEN_HEIGHT_PX, 0);
+                0, direction == Direction.UP ? SCREEN_HEIGHT_PX : 0, 0);
         final MotionEvent event2 = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE,
-                0, SCREEN_HEIGHT_PX - distanceY, 0);
+                0, direction == Direction.UP ? SCREEN_HEIGHT_PX - distanceY : distanceY, 0);
 
-        assertThat(gestureListenerCaptor.getValue().onScroll(event1, event2, 0, distanceY))
+        assertThat(gestureListener.onScroll(event1, event2, 0, distanceY))
                 .isTrue();
-
-        // Ensure only called once
-        verify(mStatusBarKeyguardViewManager)
-                .onPanelExpansionChanged(anyFloat(), anyBoolean(), anyBoolean());
 
         // Ensure correct expansion passed in.
         verify(mStatusBarKeyguardViewManager)
-                .onPanelExpansionChanged(eq(1 - scrollAmount), eq(false), eq(true));
+                .onPanelExpansionChanged(
+                        eq(expanding ? 1 - percent : percent), eq(false), eq(true));
     }
 
     /**

@@ -16,6 +16,7 @@
   -->
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:alpha="0"
     android:layout_width="match_parent"
@@ -118,7 +119,8 @@
                       android:autoSizeTextType="uniform"
                       android:autoSizeMinTextSize="10sp"
                       android:autoSizeMaxTextSize="200sp"
-                      android:textColor="?android:attr/textColorPrimary"
+                      android:textColor="?attr/overlayButtonTextColor"
+                      android:background="?androidprv:attr/colorAccentSecondary"
                       android:layout_width="@dimen/clipboard_preview_size"
                       android:layout_height="@dimen/clipboard_preview_size"/>
             <ImageView
