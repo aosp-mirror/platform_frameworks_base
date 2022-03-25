@@ -16,6 +16,7 @@
 
 package com.android.server.display;
 
+import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.Display.Mode.INVALID_MODE_ID;
 
 import android.app.ActivityThread;
@@ -1408,7 +1409,12 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         }
 
         public boolean getBootDisplayModeSupport() {
-            return SurfaceControl.getBootDisplayModeSupport();
+            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "getBootDisplayModeSupport");
+            try {
+                return SurfaceControl.getBootDisplayModeSupport();
+            } finally {
+                Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+            }
         }
 
         public void setBootDisplayMode(IBinder displayToken, int modeId) {
