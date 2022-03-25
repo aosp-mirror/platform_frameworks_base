@@ -23,7 +23,6 @@ import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.view.WindowManager.transitTypeToString;
-import static android.view.WindowManagerPolicyConstants.SPLIT_DIVIDER_LAYER;
 
 import static com.android.internal.util.FrameworkStatsLog.SPLITSCREEN_UICHANGED__EXIT_REASON__APP_DOES_NOT_SUPPORT_MULTIWINDOW;
 import static com.android.internal.util.FrameworkStatsLog.SPLITSCREEN_UICHANGED__EXIT_REASON__APP_FINISHED;
@@ -722,7 +721,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
         if (mDividerVisible) {
             t.show(dividerLeash)
-                    .setLayer(dividerLeash, SPLIT_DIVIDER_LAYER)
+                    .setLayer(dividerLeash, Integer.MAX_VALUE)
                     .setPosition(dividerLeash,
                             mSplitLayout.getDividerBounds().left,
                             mSplitLayout.getDividerBounds().top);
@@ -738,7 +737,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         }
 
         if (mDividerVisible) {
-            t.show(outlineLeash).setLayer(outlineLeash, SPLIT_DIVIDER_LAYER);
+            t.show(outlineLeash).setLayer(outlineLeash, Integer.MAX_VALUE);
         } else {
             t.hide(outlineLeash);
         }
@@ -1190,7 +1189,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         // Be default, make it visible. The remote animator can adjust alpha if it plans to animate.
         if (show) {
             t.setAlpha(leash, 1.f);
-            t.setLayer(leash, SPLIT_DIVIDER_LAYER);
+            t.setLayer(leash, Integer.MAX_VALUE);
             t.setPosition(leash, bounds.left, bounds.top);
             t.show(leash);
         }
