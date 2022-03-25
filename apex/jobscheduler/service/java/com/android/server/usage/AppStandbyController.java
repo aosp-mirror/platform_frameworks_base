@@ -1436,8 +1436,8 @@ public class AppStandbyController
         }
     }
 
-    @VisibleForTesting
-    int getAppStandbyBucketReason(String packageName, int userId, long elapsedRealtime) {
+    @Override
+    public int getAppStandbyBucketReason(String packageName, int userId, long elapsedRealtime) {
         synchronized (mAppIdleLock) {
             return mAppIdleHistory.getAppStandbyReason(packageName, userId, elapsedRealtime);
         }

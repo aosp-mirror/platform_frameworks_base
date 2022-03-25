@@ -1086,6 +1086,12 @@ public final class AppRestrictionController {
             }
             final @RestrictionLevel int level = calcAppRestrictionLevel(
                     userId, uid, info.mPackageName, info.mStandbyBucket, false, false);
+            if (DEBUG_BG_RESTRICTION_CONTROLLER) {
+                Slog.i(TAG, "Proposed restriction level of " + info.mPackageName + "/"
+                        + UserHandle.formatUid(uid) + ": "
+                        + ActivityManager.restrictionLevelToName(level)
+                        + " " + info.mStandbyBucket);
+            }
             applyRestrictionLevel(info.mPackageName, uid, level,
                     info.mStandbyBucket, true, reason, subReason);
         }
@@ -1183,6 +1189,25 @@ public final class AppRestrictionController {
             level = Math.max(level, l);
         }
         return level;
+    }
+
+    private static @RestrictionLevel int standbyBucketToRestrictionLevel(
+            @UsageStatsManager.StandbyBuckets int standbyBucket) {
+        switch (standbyBucket) {
+            case STANDBY_BUCKET_EXEMPTED:
+                return RESTRICTION_LEVEL_EXEMPTED;
+            case STANDBY_BUCKET_NEVER:
+                return RESTRICTION_LEVEL_BACKGROUND_RESTRICTED;
+            case STANDBY_BUCKET_ACTIVE:
+            case STANDBY_BUCKET_WORKING_SET:
+            case STANDBY_BUCKET_FREQUENT:
+            case STANDBY_BUCKET_RARE:
+                return RESTRICTION_LEVEL_ADAPTIVE_BUCKET;
+            case STANDBY_BUCKET_RESTRICTED:
+                return RESTRICTION_LEVEL_RESTRICTED_BUCKET;
+            default:
+                return RESTRICTION_LEVEL_UNKNOWN;
+        }
     }
 
     /**
@@ -1380,11 +1405,22 @@ public final class AppRestrictionController {
             int curBucket, boolean allowUpdateBucket, int reason, int subReason) {
         int curLevel;
         int prevReason;
+        final AppStandbyInternal appStandbyInternal = mInjector.getAppStandbyInternal();
         synchronized (mSettingsLock) {
             curLevel = getRestrictionLevel(uid, pkgName);
             if (curLevel == level) {
                 // Nothing to do.
                 return;
+            }
+            final int levelOfBucket = standbyBucketToRestrictionLevel(curBucket);
+            if (levelOfBucket == level) {
+                // If the standby bucket yield the same level, use the reason from standby bucket.
+                final int bucketReason = appStandbyInternal.getAppStandbyBucketReason(
+                        pkgName, UserHandle.getUserId(uid), SystemClock.elapsedRealtime());
+                if (bucketReason != 0) {
+                    reason = bucketReason & REASON_MAIN_MASK;
+                    subReason = bucketReason & REASON_SUB_MASK;
+                }
             }
             if (DEBUG_BG_RESTRICTION_CONTROLLER) {
                 Slog.i(TAG, "Updating the restriction level of " + pkgName + "/"
@@ -1393,7 +1429,6 @@ public final class AppRestrictionController {
                         + ActivityManager.restrictionLevelToName(level)
                         + " reason=" + reason + ", subReason=" + subReason);
             }
-
             prevReason = mRestrictionSettings.getReason(pkgName, uid);
             mRestrictionSettings.update(pkgName, uid, level, reason, subReason);
         }
@@ -1401,7 +1436,6 @@ public final class AppRestrictionController {
         if (!allowUpdateBucket || curBucket == STANDBY_BUCKET_EXEMPTED) {
             return;
         }
-        final AppStandbyInternal appStandbyInternal = mInjector.getAppStandbyInternal();
         if (level >= RESTRICTION_LEVEL_RESTRICTED_BUCKET
                 && curLevel < RESTRICTION_LEVEL_RESTRICTED_BUCKET) {
             if (!mConstantsObserver.mRestrictedBucketEnabled) {
@@ -1422,8 +1456,10 @@ public final class AppRestrictionController {
                     final int index = mActiveUids.indexOfKey(uid, pkgName);
                     if (index >= 0) {
                         // It's currently active, enqueue it.
+                        final int localReason = reason;
+                        final int localSubReason = subReason;
                         mActiveUids.add(uid, pkgName, () -> appStandbyInternal.restrictApp(
-                                pkgName, UserHandle.getUserId(uid), reason, subReason));
+                                pkgName, UserHandle.getUserId(uid), localReason, localSubReason));
                         doIt = false;
                     }
                 }
@@ -1841,9 +1877,6 @@ public final class AppRestrictionController {
     }
 
     void handleUidInactive(int uid, boolean disabled) {
-        if (!mConstantsObserver.mBgAutoRestrictedBucket) {
-            return;
-        }
         final ArrayList<Runnable> pendingTasks = mTmpRunnables;
         synchronized (mSettingsLock) {
             final int index = mActiveUids.indexOfKey(uid);
@@ -1866,14 +1899,12 @@ public final class AppRestrictionController {
     }
 
     void handleUidActive(int uid) {
-        if (!mConstantsObserver.mBgAutoRestrictedBucket) {
-            return;
-        }
         synchronized (mSettingsLock) {
             final AppStandbyInternal appStandbyInternal = mInjector.getAppStandbyInternal();
             final int userId = UserHandle.getUserId(uid);
             mRestrictionSettings.forEachPackageInUidLocked(uid, (pkgName, level, reason) -> {
-                if (level == RESTRICTION_LEVEL_BACKGROUND_RESTRICTED) {
+                if (mConstantsObserver.mBgAutoRestrictedBucket
+                        && level == RESTRICTION_LEVEL_BACKGROUND_RESTRICTED) {
                     mActiveUids.add(uid, pkgName, () -> appStandbyInternal.restrictApp(pkgName,
                             userId, reason & REASON_MAIN_MASK, reason & REASON_SUB_MASK));
                 } else {
