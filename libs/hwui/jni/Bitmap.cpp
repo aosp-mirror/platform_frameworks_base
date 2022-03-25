@@ -209,9 +209,21 @@ jobject createBitmap(JNIEnv* env, Bitmap* bitmap,
     if (!isMutable) {
         bitmapWrapper->bitmap().setImmutable();
     }
-    jobject obj = env->NewObject(gBitmap_class, gBitmap_constructorMethodID,
-            reinterpret_cast<jlong>(bitmapWrapper), bitmap->width(), bitmap->height(), density,
-            isPremultiplied, ninePatchChunk, ninePatchInsets, fromMalloc);
+    int robolectricApiLevel = GetRobolectricApiLevel(env);
+    jobject obj;
+    // The Bitmap constructor changed slightly in SDK 29 to include the
+    // 'mutable' param.
+    if (robolectricApiLevel >= 29) {
+        obj = env->NewObject(gBitmap_class, gBitmap_constructorMethodID,
+                             reinterpret_cast<jlong>(bitmapWrapper), bitmap->width(),
+                             bitmap->height(), density, isPremultiplied, ninePatchChunk,
+                             ninePatchInsets, fromMalloc);
+    } else {
+        obj = env->NewObject(
+                gBitmap_class, gBitmap_constructorMethodID, reinterpret_cast<jlong>(bitmapWrapper),
+                bitmap->width(), bitmap->height(), density,
+                /* mutable= */ false, isPremultiplied, ninePatchChunk, ninePatchInsets);
+    }
 
     if (env->ExceptionCheck() != 0) {
         ALOGE("*** Uncaught exception returned from Java call!\n");
@@ -1306,9 +1318,18 @@ static const JNINativeMethod gBitmapMethods[] = {
 
 int register_android_graphics_Bitmap(JNIEnv* env)
 {
+    int robolectricApiLevel = GetRobolectricApiLevel(env);
     gBitmap_class = MakeGlobalRefOrDie(env, FindClassOrDie(env, "android/graphics/Bitmap"));
     gBitmap_nativePtr = GetFieldIDOrDie(env, gBitmap_class, "mNativePtr", "J");
-    gBitmap_constructorMethodID = GetMethodIDOrDie(env, gBitmap_class, "<init>", "(JIIIZ[BLandroid/graphics/NinePatch$InsetStruct;Z)V");
+    if (robolectricApiLevel >= 29) {
+        gBitmap_constructorMethodID =
+                GetMethodIDOrDie(env, gBitmap_class, "<init>",
+                                 "(JIIIZ[BLandroid/graphics/NinePatch$InsetStruct;Z)V");
+    } else {
+        gBitmap_constructorMethodID =
+                GetMethodIDOrDie(env, gBitmap_class, "<init>",
+                                 "(JIIIZZ[BLandroid/graphics/NinePatch$InsetStruct;)V");
+    }
     gBitmap_reinitMethodID = GetMethodIDOrDie(env, gBitmap_class, "reinit", "(IIZ)V");
 
 #ifdef __ANDROID__ // Layoutlib does not support graphic buffer or parcel

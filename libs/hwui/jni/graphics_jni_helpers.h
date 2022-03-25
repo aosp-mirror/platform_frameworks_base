@@ -84,11 +84,20 @@ static inline int RegisterMethodsOrDie(JNIEnv* env, const char* className,
                                        const JNINativeMethod* gMethods, int numMethods) {
     std::string fullClassName = std::string(className);
     std::string classNameString = fullClassName.substr(fullClassName.find_last_of("/"));
+    classNameString.erase(std::remove(classNameString.begin(), classNameString.end(), '$'),
+                          classNameString.end());
     std::string roboNativeBindingClass =
             "org/robolectric/nativeruntime" + classNameString + "Natives";
     int res = jniRegisterNativeMethods(env, roboNativeBindingClass.c_str(), gMethods, numMethods);
     LOG_ALWAYS_FATAL_IF(res < 0, "Unable to register native methods.");
     return res;
+}
+
+static inline int GetRobolectricApiLevel(JNIEnv* env) {
+    jclass runtimeEnvironment = FindClassOrDie(env, "org/robolectric/RuntimeEnvironment");
+    jmethodID getApiLevelMethod =
+            GetStaticMethodIDOrDie(env, runtimeEnvironment, "getApiLevel", "()I");
+    return (jint)env->CallStaticIntMethod(runtimeEnvironment, getApiLevelMethod);
 }
 
 /**
