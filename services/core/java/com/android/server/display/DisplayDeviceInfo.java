@@ -39,7 +39,7 @@ final class DisplayDeviceInfo {
      * Flag: Indicates that this display device should be considered the default display
      * device of the system.
      */
-    public static final int FLAG_DEFAULT_DISPLAY = 1 << 0;
+    public static final int FLAG_ALLOWED_TO_BE_DEFAULT_DISPLAY = 1 << 0;
 
     /**
      * Flag: Indicates that the orientation of this display device is coupled to the
@@ -547,8 +547,8 @@ final class DisplayDeviceInfo {
 
     private static String flagsToString(int flags) {
         StringBuilder msg = new StringBuilder();
-        if ((flags & FLAG_DEFAULT_DISPLAY) != 0) {
-            msg.append(", FLAG_DEFAULT_DISPLAY");
+        if ((flags & FLAG_ALLOWED_TO_BE_DEFAULT_DISPLAY) != 0) {
+            msg.append(", FLAG_ALLOWED_TO_BE_DEFAULT_DISPLAY");
         }
         if ((flags & FLAG_ROTATES_WITH_CONTENT) != 0) {
             msg.append(", FLAG_ROTATES_WITH_CONTENT");
