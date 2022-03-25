@@ -2009,7 +2009,6 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
                 case KEYGUARD_TIMEOUT:
                     synchronized (KeyguardViewMediator.this) {
                         doKeyguardLocked((Bundle) msg.obj);
-                        notifyDefaultDisplayCallbacks(mShowing);
                     }
                     break;
                 case DISMISS:
@@ -2955,14 +2954,18 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
 
     private void setShowingLocked(boolean showing, boolean forceCallbacks) {
         final boolean aodShowing = mDozing && !mScreenOnCoordinator.getWakeAndUnlocking();
-        final boolean notifyDefaultDisplayCallbacks = showing != mShowing
+        final boolean notifyDefaultDisplayCallbacks = showing != mShowing || forceCallbacks;
+        final boolean updateActivityLockScreenState = showing != mShowing
                 || aodShowing != mAodShowing || forceCallbacks;
         mShowing = showing;
         mAodShowing = aodShowing;
         if (notifyDefaultDisplayCallbacks) {
             notifyDefaultDisplayCallbacks(showing);
+        }
+        if (updateActivityLockScreenState) {
             updateActivityLockScreenState(showing, aodShowing);
         }
+
     }
 
     private void notifyDefaultDisplayCallbacks(boolean showing) {
