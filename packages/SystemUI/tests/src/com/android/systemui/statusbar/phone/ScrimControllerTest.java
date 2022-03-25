@@ -1107,6 +1107,7 @@ public class ScrimControllerTest extends SysuiTestCase {
         // GIVEN device has an activity showing ('UNLOCKED' state can occur on the lock screen
         // with the camera app occluding the keyguard)
         mScrimController.transitionTo(ScrimState.UNLOCKED);
+        mScrimController.setClipsQsScrim(true);
         mScrimController.setRawPanelExpansionFraction(1);
         // notifications scrim alpha change require calling setQsPosition
         mScrimController.setQsPosition(0, 300);
@@ -1120,6 +1121,12 @@ public class ScrimControllerTest extends SysuiTestCase {
                 mScrimBehind.getViewAlpha(), 1, 0.0);
         assertEquals("Notifications scrim should be opaque",
                 mNotificationsScrim.getViewAlpha(), 1, 0.0);
+
+        assertScrimTinted(Map.of(
+                mScrimInFront, true,
+                mScrimBehind, true,
+                mNotificationsScrim, false
+        ));
     }
 
     @Test
