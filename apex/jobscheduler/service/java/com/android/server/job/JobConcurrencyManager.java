@@ -686,9 +686,6 @@ class JobConcurrencyManager {
                             stoppable.removeAt(s);
                             assignment.newJob = nextPending;
                             assignment.newWorkType = replaceWorkType;
-                            // Don't preserve the UID since we're stopping the job because
-                            // something is pending (eg. EJs).
-                            assignment.context.clearPreferredUid();
                             break;
                         }
                     }
@@ -769,20 +766,20 @@ class JobConcurrencyManager {
         }
         for (int s = stoppable.size() - 1; s >= 0; --s) {
             final ContextAssignment assignment = stoppable.valueAt(s);
+            // The preferred UID is set when we cancel with PREEMPT reason, but don't preserve the
+            // UID for any stoppable contexts since we want to open the context up to any/all apps.
             assignment.context.clearPreferredUid();
             assignment.clear();
             mContextAssignmentPool.release(assignment);
         }
         for (int p = preferredUidOnly.size() - 1; p >= 0; --p) {
             final ContextAssignment assignment = preferredUidOnly.valueAt(p);
-            assignment.context.clearPreferredUid();
             assignment.clear();
             mContextAssignmentPool.release(assignment);
         }
         for (int i = idle.size() - 1; i >= 0; --i) {
             final ContextAssignment assignment = idle.valueAt(i);
             mIdleContexts.add(assignment.context);
-            assignment.context.clearPreferredUid();
             assignment.clear();
             mContextAssignmentPool.release(assignment);
         }
