@@ -1154,6 +1154,7 @@ public class AudioDeviceInventory {
             mConnectedDevices.put(DeviceInfo.makeDeviceListKey(device, address),
                     new DeviceInfo(device, name, address, AudioSystem.AUDIO_FORMAT_DEFAULT));
             mDeviceBroker.postAccessoryPlugMediaUnmute(device);
+            setCurrentAudioRouteNameIfPossible(name, /*fromA2dp=*/false);
         }
 
         if (streamType == AudioSystem.STREAM_DEFAULT) {
