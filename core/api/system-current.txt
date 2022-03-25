@@ -11816,10 +11816,10 @@ package android.service.translation {
 package android.service.trust {
 
   public final class GrantTrustResult implements android.os.Parcelable {
+    ctor public GrantTrustResult(int);
     method public int describeContents();
     method public int getStatus();
     method @NonNull public static String statusToString(int);
-    method @NonNull public static android.service.trust.GrantTrustResult withStatus(int);
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.service.trust.GrantTrustResult> CREATOR;
     field public static final int STATUS_UNKNOWN = 0; // 0x0
