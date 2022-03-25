@@ -2308,8 +2308,14 @@ public class PackageInstaller {
          *
          * <ul>
          *     <li>{@code requireUserAction} is set to {@link #USER_ACTION_NOT_REQUIRED}.</li>
-         *     <li>The app being installed targets {@link android.os.Build.VERSION_CODES#Q API 29}
-         *     or higher.</li>
+         *     <li>The app being installed targets:
+         *          <ul>
+         *              <li>{@link android.os.Build.VERSION_CODES#Q API 29} or higher on
+         *              Android S ({@link android.os.Build.VERSION_CODES#S API 31})</li>
+         *              <li>{@link android.os.Build.VERSION_CODES#R API 30} or higher after
+         *              Android S ({@link android.os.Build.VERSION_CODES#S API 31})</li>
+         *          </ul>
+         *     </li>
          *     <li>The installer is the {@link InstallSourceInfo#getInstallingPackageName()
          *     installer of record} of an existing version of the app (in other words, this install
          *     session is an app update) or the installer is updating itself.</li>
