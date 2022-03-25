@@ -20,20 +20,16 @@ import static android.content.pm.PackageManager.CERT_INPUT_SHA256;
 
 import static com.android.server.pm.PackageManagerService.TAG;
 
-import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.IPackageChangeObserver;
 import android.content.pm.IPackageManagerNative;
 import android.content.pm.IStagedApexObserver;
 import android.content.pm.PackageInfo;
 import android.content.pm.StagedApexInfo;
 import android.os.Binder;
-import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.text.TextUtils;
-import android.util.Log;
 import android.util.Slog;
 
 import java.util.Arrays;
@@ -43,35 +39,6 @@ final class PackageManagerNative extends IPackageManagerNative.Stub {
 
     PackageManagerNative(PackageManagerService pm) {
         mPm = pm;
-    }
-
-    @Override
-    public void registerPackageChangeObserver(@NonNull IPackageChangeObserver observer) {
-        synchronized (mPm.mPackageChangeObservers) {
-            try {
-                observer.asBinder().linkToDeath(
-                        new PackageChangeObserverDeathRecipient(observer), 0);
-            } catch (RemoteException e) {
-                Log.e(TAG, e.getMessage());
-            }
-            mPm.mPackageChangeObservers.add(observer);
-            Log.d(TAG, "Size of mPackageChangeObservers after registry is "
-                    + mPm.mPackageChangeObservers.size());
-        }
-    }
-
-    @Override
-    public void unregisterPackageChangeObserver(@NonNull IPackageChangeObserver observer) {
-        synchronized (mPm.mPackageChangeObservers) {
-            mPm.mPackageChangeObservers.remove(observer);
-            Log.d(TAG, "Size of mPackageChangeObservers after unregistry is "
-                    + mPm.mPackageChangeObservers.size());
-        }
-    }
-
-    @Override
-    public String[] getAllPackages() {
-        return mPm.snapshotComputer().getAllPackages().toArray(new String[0]);
     }
 
     @Override
@@ -221,22 +188,5 @@ final class PackageManagerNative extends IPackageManagerNative.Stub {
     @Nullable
     public StagedApexInfo getStagedApexInfo(String moduleName) {
         return mPm.mInstallerService.getStagingManager().getStagedApexInfo(moduleName);
-    }
-
-    private final class PackageChangeObserverDeathRecipient implements IBinder.DeathRecipient {
-        private final IPackageChangeObserver mObserver;
-
-        PackageChangeObserverDeathRecipient(IPackageChangeObserver observer) {
-            mObserver = observer;
-        }
-
-        @Override
-        public void binderDied() {
-            synchronized (mPm.mPackageChangeObservers) {
-                mPm.mPackageChangeObservers.remove(mObserver);
-                Log.d(TAG, "Size of mPackageChangeObservers after removing dead observer is "
-                        + mPm.mPackageChangeObservers.size());
-            }
-        }
     }
 }

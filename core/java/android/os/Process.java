@@ -213,12 +213,6 @@ public class Process {
     public static final int SE_UID = 1068;
 
     /**
-     * Defines the UID/GID for the iorapd.
-     * @hide
-     */
-    public static final int IORAPD_UID = 1071;
-
-    /**
      * Defines the UID/GID for the NetworkStack app.
      * @hide
      */
