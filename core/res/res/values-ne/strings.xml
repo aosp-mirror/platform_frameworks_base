@@ -85,8 +85,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"SIM <xliff:g id="SIMNUMBER">%d</xliff:g> का लागि तपाईंको सेवा प्रदायकले अस्थायी रूपमा निष्क्रिय पार्नुभएको"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"मोबाइल नेटवर्कमाथि पहुँच राख्न सकिएन"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"रुचाइएको नेटवर्क परिवर्तन गरी हेर्नुहोस्‌। परिवर्तन गर्न ट्याप गर्नुहोस्‌।"</string>
-    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"आपत्‌कालीन कल सेवा अनुपलब्ध छ"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Wi‑Fi मार्फत आपत्‌कालीन कल गर्न सकिँदैन"</string>
+    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"आपत्कालीन कल गर्ने सुविधा उपलब्ध नहुन सक्छ"</string>
+    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"<xliff:g id="SPN">%s</xliff:g> प्रयोग गरेर Wi-Fi मार्फत आपत्कालीन कल गर्न मिल्दैन। विवरणहरू हेर्न ट्याप गर्नुहोस्।"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"अलर्टहरू"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"कल फर्वार्ड गर्ने सेवा"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"आपत्‌कालीन कलब्याक मोड"</string>
@@ -425,10 +425,10 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"आगमन तथा बहर्गमन डेटासहित तपाईँको ट्याब्लेटको कल लगको परिमार्जन गर्न एपलाई अनुमति दिन्छ। खराब एपहरूले यसलाई तपाईँको कल लग परिमार्जन गर्न वा मेटाउन प्रयोग गर्न सक्छन्।"</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"एपलाई तपाईंको Android टिभी डिभाइसको आगमन र बहिर्गमन कलसम्बन्धी डेटासहित कल लग परिमार्जन गर्ने अनुमति दिन्छ। हानिकारक एपहरूले यसलाई तपाईंको कल लग मेटाउन वा परिमार्जन गर्न प्रयोग गर्न सक्छन्।"</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"एपलाई तपाईंको फोनको आउने र बाहिर जाने कलहरूको बारेको डेटा सहित कल लग परिमार्जन गर्न अनुमति दिन्छ। खराब एपहरूले यसलाई तपाईंको कल लग मेटाउन वा परिमार्जन गर्न प्रयोग गर्न सक्दछ।"</string>
-    <string name="permlab_bodySensors" msgid="3411035315357380862">"शरीरका सेन्सरहरूमा पहुँच गराउनुहोस् (जस्तै हृदय धड्कन निगरानीहरू)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="3208940894182188063">"बडी सेन्सरका सहायताले हृदयको गति, शरीरको तापक्रम, रगतमा रहेको अक्सिजनको प्रतिशतलगायतका डेटा हेर्ने अनुमति।"</string>
-    <string name="permlab_bodySensors_background" msgid="4352831883331744370">"ब्याकग्राउन्डमा काम गर्ने बडी सेन्सरका सहायताले (हृदयको गति मापन जस्ता) डेटा हेर्ने अनुमति"</string>
-    <string name="permdesc_bodySensors_background" product="default" msgid="8512392249166660872">"ब्याकग्राउन्डमा काम गर्ने बडी सेन्सरका सहायताले हृदयको गति, शरीरको तापक्रम, रगतमा रहेको अक्सिजनको प्रतिशतलगायतका डेटा हेर्ने अनुमति।"</string>
+    <string name="permlab_bodySensors" msgid="662918578601619569">"प्रयोग गरिएका बेला हृदयको गति जस्ता बडी सेन्सरसम्बन्धी डेटा हेरियोस् र प्रयोग गरियोस्"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"यसले यो एप प्रयोग गरिँदै गरेका बेला यसलाई हृदयको गति, शरीरको तापक्रम तथा रगतमा रहेको अक्सिजनको प्रतिशत जस्ता बडी सेन्सरसम्बन्धी डेटा हेर्ने तथा प्रयोग गर्ने अनुमति दिन्छ।"</string>
+    <string name="permlab_bodySensors_background" msgid="4912560779957760446">"ब्याकग्राउन्डमा चलेका बेला हृदयको गति जस्ता बडी सेन्सरसम्बन्धी डेटा हेरियोस् र प्रयोग गरियोस्"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"यसले यो एप ब्याकग्राउन्डमा चलेका बेला यसलाई हृदयको गति, शरीरको तापक्रम तथा रगतमा रहेको अक्सिजनको प्रतिशत जस्ता बडी सेन्सरसम्बन्धी डेटा हेर्ने तथा प्रयोग गर्ने अनुमति दिन्छ।"</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"पात्रोका कार्यक्रम र विवरणहरू पढ्ने"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"यस एपले तपाईंको ट्याब्लेटमा भण्डारण गरिएका पात्रो सम्बन्धी सबै कार्यक्रमहरू पढ्न र तपाईंको पात्रोको डेटा आदान प्रदान वा सुरक्षित गर्न सक्छ।"</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"यस एपले तपाईंको Android टिभी डिभाइसमा भण्डार गरिएका पात्रोसम्बन्धी सबै कार्यक्रमहरू पढ्न र तपाईंको पात्रोको डेटा आदान प्रदान वा सुरक्षित गर्न सक्छ।"</string>
@@ -689,8 +689,8 @@
     <string name="permdesc_readMediaAudio" msgid="5299772574434619399">"एपलाई तपाईंको साझा भण्डारणमा भएका अडियो फाइलहरू पढ्ने अनुमति दिन्छ।"</string>
     <string name="permlab_readMediaVideo" msgid="7768003311260655007">"साझा भण्डारणमा भएका भिडियो फाइलहरू पढ्ने"</string>
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"एपलाई तपाईंको साझा भण्डारणमा भएका भिडियो फाइलहरू पढ्ने अनुमति दिन्छ।"</string>
-    <string name="permlab_readMediaImage" msgid="1507059005825769856">"साझा भण्डारणमा भएका फोटो फाइलहरू पढ्ने"</string>
-    <string name="permdesc_readMediaImage" msgid="8328052622292457588">"एपलाई तपाईंको साझा भण्डारणमा भएका फोटो फाइलहरू पढ्ने अनुमति दिन्छ।"</string>
+    <string name="permlab_readMediaImages" msgid="4057590631020986789">"साझा भण्डारणमा भएका फोटो फाइलहरू पढ्ने"</string>
+    <string name="permdesc_readMediaImages" msgid="5836219373138469259">"एपलाई तपाईंको साझा भण्डारणमा भएका फोटो फाइलहरू पढ्ने अनुमति दिन्छ।"</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"तपाईंको आदान प्रदान गरिएको भण्डारणको विषयवस्तुहरूलाई परिमार्जन गर्नहोस् वा मेटाउनुहोस्"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"एपलाई तपाईंको आदान प्रदान गरिएको भण्डारणको सामग्री लेख्न अनुमति दिन्छ।"</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"SIP कलहरू प्राप्त/बनाउन"</string>
@@ -912,7 +912,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"अनलक वा आपत्‌कालीन कल गर्न मेनु थिच्नुहोस्।"</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"अनलक गर्न मेनु थिच्नुहोस्।"</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"अनलक गर्नु ढाँचा खिच्नुहोस्"</string>
-    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"आपत्‌कालीन कल"</string>
+    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"आपत्‌कालीन"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"कलमा फर्किनुहोस्"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"सही!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"फेरि प्रयास गर्नुहोस्"</string>
@@ -1051,7 +1051,6 @@
     <string name="save_password_never" msgid="6776808375903410659">"कहिल्यै पनि होइन"</string>
     <string name="open_permission_deny" msgid="5136793905306987251">"यो पृष्ठ खोल्न तपाईँलाई अनुमति छैन।"</string>
     <string name="text_copied" msgid="2531420577879738860">"क्लिपबोर्डमा प्रतिलिप गरिएको पाठ।"</string>
-    <string name="copied" msgid="4675902854553014676">"प्रतिलिपि गरियो"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g> मा रहेको डेटा कपी गरी <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> मा पेस्ट गरियो"</string>
     <string name="pasted_from_clipboard" msgid="7355790625710831847">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ले तपाईंको क्लिपबोर्डमा रहेको जानकारी पेस्ट गरेको छ"</string>
     <string name="pasted_text" msgid="4298871641549173733">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ले तपाईंले कपी गरेको टेक्स्ट पेस्ट गरेको छ"</string>
@@ -1452,8 +1451,12 @@
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"कुनै एपलाई त्यसका ब्याट्री सम्बन्धी अनुकूलनहरूलाई बेवास्ता गर्नाका लागि अनुमति माग्न दिन्छ।"</string>
     <string name="permlab_queryAllPackages" msgid="2928450604653281650">"सबै प्याकेजहरू खोज्नुहोस्"</string>
     <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"यसले यस एपलाई इन्स्टल गरिएका सबै प्याकेजहरू हेर्ने अनुमति दिन्छ।"</string>
-    <string name="permlab_accessSupplementalApi" msgid="3544659160536960275">"SupplementalApis प्रयोग गर्ने अनुमति"</string>
-    <string name="permdesc_accessSupplementalApi" msgid="8974758769370951074">"एपलाई SupplementalApis प्रयोग गर्ने अनुमति दिन्छ।"</string>
+    <string name="permlab_accessAdServicesTopics" msgid="6687112022940098945">"AdServices Topics API प्रयोग गर्ने अनुमति"</string>
+    <string name="permdesc_accessAdServicesTopics" msgid="6011532458156465929">"एपलाई AdServices Topics API प्रयोग गर्ने अनुमति दिन्छ।"</string>
+    <string name="permlab_accessAdServicesAttribution" msgid="3268942271128309354">"AdServices Attribution API प्रयोग गर्ने अनुमति"</string>
+    <string name="permdesc_accessAdServicesAttribution" msgid="577482544832578288">"एपलाई AdServices Attribution API प्रयोग गर्ने अनुमति दिन्छ।"</string>
+    <string name="permlab_accessAdServicesCustomAudiences" msgid="7249286630514600684">"AdServices Custom Audiences API प्रयोग गर्ने अनुमति"</string>
+    <string name="permdesc_accessAdServicesCustomAudiences" msgid="645526926477180315">"एपलाई AdServices Custom Audiences API प्रयोग गर्ने अनुमति दिन्छ।"</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"जुम नियन्त्रणको लागि दुई चोटि ट्याप गर्नुहोस्"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"विजेट थप गर्न सकिँदैन।"</string>
     <string name="ime_action_go" msgid="5536744546326495436">"जानुहोस्"</string>
@@ -1716,6 +1719,7 @@
     <string name="user_switching_message" msgid="1912993630661332336">"स्विच गरेर <xliff:g id="NAME">%1$s</xliff:g> बनाइँदै..."</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"लग आउट गर्दै <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="owner_name" msgid="8713560351570795743">"मालिक"</string>
+    <string name="guest_name" msgid="8502103277839834324">"अतिथि"</string>
     <string name="error_message_title" msgid="4082495589294631966">"त्रुटि"</string>
     <string name="error_message_change_not_allowed" msgid="843159705042381454">"तपाईंका प्रशासकले यो परिवर्तनलाई अनुमति दिनुहुन्न"</string>
     <string name="app_not_found" msgid="3429506115332341800">"यस कार्य सम्हालने कुनै एप भेटिएन"</string>
@@ -2027,10 +2031,10 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"स्थापना रद्द गर्नु…"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"जे भए पनि खोल्नुहोस्"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"हानिकारक एप भेटियो"</string>
-    <string name="log_access_confirmation_title" msgid="3143035474800851565">"सिस्टम लग प्रयोग गर्ने अनुमति"</string>
+    <string name="log_access_confirmation_title" msgid="2343578467290592708">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> लाई डिभाइसका सबै लग हेर्ने अनुमति दिने हो?"</string>
     <string name="log_access_confirmation_allow" msgid="143157286283302512">"यस पटक मात्र"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"अनुमति नदिनुहोस्"</string>
-    <string name="log_access_confirmation_body" msgid="7599059550906238538">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> ले फङ्सनल डिबग प्रक्रियाका लागि सिस्टम लगहरू हेर्ने तथा प्रयोग गर्ने अनुमति माग्दै छ। यी लगहरूमा तपाईंको डिभाइसमा रहेका एप र सेवाहरूले राइट गरेको जानकारी समावेश हुन सक्छ।"</string>
+    <string name="log_access_confirmation_body" msgid="4483075525611652922">"डिभाइसका लगमा तपाईंको डिभाइसमा भएका विभिन्न गतिविधिको अभिलेख राखिन्छ। एपहरू यी लगका आधारमा समस्या पत्ता लगाउन र तिनको समाधान गर्न सक्छन्।\n\nकेही लगहरूमा संवेदनशील जानकारी समावेश हुन सक्ने भएकाले आफूले भरोसा गर्ने एपलाई मात्र डिभाइसका सबै लग हेर्ने अनुमति दिनुहोस्। \n\nतपाईंले यो एपलाई डिभाइसका सबै लग हेर्ने अनुमति दिनुभएन भने पनि यसले आफ्नै लग भने हेर्न सक्छ। यसै गरी तपाईंको डिभाइसको उत्पादकले पनि तपाईंको डिभाइसमा भएका केही लग वा जानकारी हेर्न सक्ने सम्भावना हुन्छ। थप जान्नुहोस्"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"फेरि नदेखाइयोस्"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> ले <xliff:g id="APP_2">%2$s</xliff:g> का स्लाइसहरू देखाउन चाहन्छ"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"सम्पादन गर्नुहोस्"</string>
@@ -2265,4 +2269,6 @@
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> लामो समयदेखि ब्याकग्राउन्डमा चलिरहेको छ। समीक्षा गर्न ट्याप गर्नुहोस्।"</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"कुन कुन एप सक्रिय छ भन्ने कुरा जाँच्नुहोस्"</string>
     <string name="vdm_camera_access_denied" msgid="6345652513729130490">"यो डिभाइसमा भएको क्यामेरा प्रयोग गर्न सकिएन"</string>
+    <!-- no translation found for system_locale_title (3978041860457277638) -->
+    <skip />
 </resources>
