@@ -138,6 +138,13 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
     private boolean mUnOcclusionAnimationRunning;
 
     /**
+     * The percentage of the bouncer which is hidden. If 1, the bouncer is completely hidden. If
+     * 0, the bouncer is visible.
+     */
+    @FloatRange(from = 0, to = 1)
+    private float mBouncerHiddenFraction = KeyguardBouncer.EXPANSION_HIDDEN;
+
+    /**
      * Set whether an unocclusion animation is currently running on the notification panel. Used
      * to avoid bright flickers of the notification scrim.
      */
@@ -586,6 +593,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
 
             boolean relevantState = (mState == ScrimState.UNLOCKED
                     || mState == ScrimState.KEYGUARD
+                    || mState == ScrimState.DREAMING
                     || mState == ScrimState.SHADE_LOCKED
                     || mState == ScrimState.PULSING);
             if (!(relevantState && mExpansionAffectsAlpha) || mAnimatingPanelExpansionOnUnlock) {
@@ -677,6 +685,21 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
     }
 
     /**
+     * Updates the percentage of the bouncer which is hidden.
+     */
+    public void setBouncerHiddenFraction(@FloatRange(from = 0, to = 1) float bouncerHiddenAmount) {
+        if (mBouncerHiddenFraction == bouncerHiddenAmount) {
+            return;
+        }
+        mBouncerHiddenFraction = bouncerHiddenAmount;
+        if (mState == ScrimState.DREAMING) {
+            // Only the dreaming state requires this for the scrim calculation, so we should
+            // only trigger an update if dreaming.
+            applyAndDispatchState();
+        }
+    }
+
+    /**
      * If QS and notification scrims should not overlap, and should be clipped to each other's
      * bounds instead.
      */
@@ -741,7 +764,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
             return;
         }
 
-        if (mState == ScrimState.UNLOCKED) {
+        if (mState == ScrimState.UNLOCKED || mState == ScrimState.DREAMING) {
             // Darken scrim as you pull down the shade when unlocked, unless the shade is expanding
             // because we're doing the screen off animation OR the shade is collapsing because
             // we're playing the unlock animation
@@ -759,7 +782,19 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
                     mNotificationsAlpha = MathUtils.constrainedMap(0f, 1f, 0.3f, 0.75f,
                             mPanelExpansionFraction);
                 }
+                mBehindTint = mState.getBehindTint();
                 mInFrontAlpha = 0;
+            }
+
+            if (mBouncerHiddenFraction != KeyguardBouncer.EXPANSION_HIDDEN) {
+                final float interpolatedFraction =
+                        BouncerPanelExpansionCalculator.getBackScrimScaledExpansion(
+                                mBouncerHiddenFraction);
+                mBehindAlpha = MathUtils.lerp(mDefaultScrimAlpha, mBehindAlpha,
+                        interpolatedFraction);
+                mBehindTint = ColorUtils.blendARGB(ScrimState.BOUNCER.getBehindTint(),
+                        mBehindTint,
+                        interpolatedFraction);
             }
         } else if (mState == ScrimState.AUTH_SCRIMMED_SHADE) {
             float behindFraction = getInterpolatedFraction();
