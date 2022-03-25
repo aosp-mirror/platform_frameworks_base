@@ -141,7 +141,7 @@ interface IActivityTaskManager {
     int startActivityAsCaller(in IApplicationThread caller, in String callingPackage,
             in Intent intent, in String resolvedType, in IBinder resultTo, in String resultWho,
             int requestCode, int flags, in ProfilerInfo profilerInfo, in Bundle options,
-            IBinder permissionToken, boolean ignoreTargetSecurity, int userId);
+            boolean ignoreTargetSecurity, int userId);
 
     boolean isActivityStartAllowedOnDisplay(int displayId, in Intent intent, in String resolvedType,
             int userId);
@@ -182,18 +182,6 @@ interface IActivityTaskManager {
     int addAppTask(in IBinder activityToken, in Intent intent,
             in ActivityManager.TaskDescription description, in Bitmap thumbnail);
     Point getAppTaskThumbnailSize();
-    /**
-     * Only callable from the system. This token grants a temporary permission to call
-     * #startActivityAsCaller. The token will time out after START_AS_CALLER_TOKEN_TIMEOUT
-     * if it is not used.
-     *
-     * @param componentName The component name of the delegated component that is allowed to
-     *                      call #startActivityAsCaller with the returned token.
-     *
-     * @return Returns a token that can be given to a "delegate" app that may call
-     *         #startActivityAsCaller
-     */
-    IBinder requestStartActivityPermissionToken(in ComponentName componentName);
 
     oneway void releaseSomeActivities(in IApplicationThread app);
     Bitmap getTaskDescriptionIcon(in String filename, int userId);
