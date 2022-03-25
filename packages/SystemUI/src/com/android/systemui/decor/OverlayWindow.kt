@@ -16,22 +16,31 @@
 package com.android.systemui.decor
 
 import android.annotation.IdRes
-import android.content.Context
+import android.view.DisplayCutout
+import android.view.LayoutInflater
 import android.view.Surface
 import android.view.View
 import android.view.ViewGroup
-import com.android.systemui.RegionInterceptingFrameLayout
+import com.android.systemui.R
+import java.util.HashMap
 
-class OverlayWindow(private val context: Context) {
+class OverlayWindow(private val layoutInflater: LayoutInflater, private val pos: Int) {
 
-    val rootView = RegionInterceptingFrameLayout(context) as ViewGroup
-    private val viewProviderMap = mutableMapOf<Int, Pair<View, DecorProvider>>()
+    private val layoutId: Int
+    get() {
+        return if (pos == DisplayCutout.BOUNDS_POSITION_LEFT ||
+                pos == DisplayCutout.BOUNDS_POSITION_TOP) {
+            R.layout.rounded_corners_top
+        } else {
+            R.layout.rounded_corners_bottom
+        }
+    }
 
-    fun addDecorProvider(
-        decorProvider: DecorProvider,
-        @Surface.Rotation rotation: Int
-    ) {
-        val view = decorProvider.inflateView(context, rootView, rotation)
+    val rootView = layoutInflater.inflate(layoutId, null) as ViewGroup
+    private val viewProviderMap: MutableMap<Int, Pair<View, DecorProvider>> = HashMap()
+
+    fun addDecorProvider(decorProvider: DecorProvider, @Surface.Rotation rotation: Int) {
+        val view = decorProvider.inflateView(layoutInflater, rootView, rotation)
         viewProviderMap[decorProvider.viewId] = Pair(view, decorProvider)
     }
 
@@ -45,37 +54,6 @@ class OverlayWindow(private val context: Context) {
         if (view != null) {
             rootView.removeView(view)
             viewProviderMap.remove(id)
-        }
-    }
-
-    /**
-     * Apply new configuration info into views.
-     * @param filterIds target view ids. Apply to all if null.
-     * @param rotation current or new rotation direction.
-     * @param displayUniqueId new displayUniqueId if any.
-     */
-    fun onReloadResAndMeasure(
-        filterIds: Array<Int>? = null,
-        reloadToken: Int,
-        @Surface.Rotation rotation: Int,
-        displayUniqueId: String? = null
-    ) {
-        filterIds?.forEach { id ->
-            viewProviderMap[id]?.let {
-                it.second.onReloadResAndMeasure(
-                        view = it.first,
-                        reloadToken = reloadToken,
-                        displayUniqueId = displayUniqueId,
-                        rotation = rotation)
-            }
-        } ?: run {
-            viewProviderMap.values.forEach {
-                it.second.onReloadResAndMeasure(
-                        view = it.first,
-                        reloadToken = reloadToken,
-                        displayUniqueId = displayUniqueId,
-                        rotation = rotation)
-            }
         }
     }
 }
