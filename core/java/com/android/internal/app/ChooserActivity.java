@@ -28,7 +28,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.ActivityManager;
-import android.app.ActivityTaskManager;
 import android.app.SharedElementCallback;
 import android.app.prediction.AppPredictionContext;
 import android.app.prediction.AppPredictionManager;
@@ -71,11 +70,9 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.Message;
 import android.os.Parcelable;
 import android.os.PatternMatcher;
-import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -765,25 +762,17 @@ public class ChooserActivity extends ResolverActivity implements
             return false;
         }
 
-        try {
-            Intent delegationIntent = new Intent();
-            final ComponentName delegateActivity = ComponentName.unflattenFromString(
-                    Resources.getSystem().getString(R.string.config_chooserActivity));
-            IBinder permissionToken = ActivityTaskManager.getService()
-                    .requestStartActivityPermissionToken(delegateActivity);
-            delegationIntent.setComponent(delegateActivity);
-            delegationIntent.putExtra(Intent.EXTRA_INTENT, getIntent());
-            delegationIntent.putExtra(ActivityTaskManager.EXTRA_PERMISSION_TOKEN, permissionToken);
-            delegationIntent.addFlags(Intent.FLAG_ACTIVITY_PREVIOUS_IS_TOP);
+        Intent delegationIntent = new Intent();
+        final ComponentName delegateActivity = ComponentName.unflattenFromString(
+                Resources.getSystem().getString(R.string.config_chooserActivity));
+        delegationIntent.setComponent(delegateActivity);
+        delegationIntent.putExtra(Intent.EXTRA_INTENT, getIntent());
+        delegationIntent.addFlags(Intent.FLAG_ACTIVITY_PREVIOUS_IS_TOP);
 
-            // Don't close until the delegate finishes, or the token will be invalidated.
-            mAwaitingDelegateResponse = true;
-            startActivityForResult(delegationIntent, REQUEST_CODE_RETURN_FROM_DELEGATE_CHOOSER);
-            return true;
-        } catch (RemoteException e) {
-            Log.e(TAG, e.toString());
-        }
-        return false;
+        // Don't close until the delegate finishes, or the token will be invalidated.
+        mAwaitingDelegateResponse = true;
+        startActivityForResult(delegationIntent, REQUEST_CODE_RETURN_FROM_DELEGATE_CHOOSER);
+        return true;
     }
 
     @Override
