@@ -22,6 +22,7 @@ import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
+import android.view.accessibility.AccessibilityManager;
 import android.view.animation.Interpolator;
 import android.view.animation.OvershootInterpolator;
 
@@ -71,7 +72,13 @@ public class UdfpsEnrollProgressBarDrawable extends Drawable {
     public UdfpsEnrollProgressBarDrawable(@NonNull Context context) {
         mStrokeWidthPx = Utils.dpToPixels(context, STROKE_WIDTH_DP);
         mProgressColor = context.getColor(R.color.udfps_enroll_progress);
-        mHelpColor = context.getColor(R.color.udfps_enroll_progress_help);
+        final AccessibilityManager am = context.getSystemService(AccessibilityManager.class);
+        final boolean isAccessbilityEnabled = am.isTouchExplorationEnabled();
+        if (!isAccessbilityEnabled) {
+            mHelpColor = context.getColor(R.color.udfps_enroll_progress_help);
+        } else {
+            mHelpColor = context.getColor(R.color.udfps_enroll_progress_help_with_talkback);
+        }
         mCheckmarkDrawable = context.getDrawable(R.drawable.udfps_enroll_checkmark);
         mCheckmarkDrawable.mutate();
         mCheckmarkInterpolator = new OvershootInterpolator();
