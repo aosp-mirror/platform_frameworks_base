@@ -512,8 +512,30 @@ public class AppStandbyControllerTests {
         return controller;
     }
 
-    private long getCurrentTime() {
-        return TimeUnit.NANOSECONDS.toMillis(System.nanoTime());
+    private void setupInitialUsageHistory() throws Exception {
+        final int[] userIds = new int[] { USER_ID, USER_ID2, USER_ID3 };
+        final String[] packages = new String[] {
+                PACKAGE_1,
+                PACKAGE_2,
+                PACKAGE_EXEMPTED_1,
+                PACKAGE_SYSTEM_HEADFULL,
+                PACKAGE_SYSTEM_HEADLESS,
+                PACKAGE_WELLBEING,
+                PACKAGE_BACKGROUND_LOCATION,
+                ADMIN_PKG,
+                ADMIN_PKG2,
+                ADMIN_PKG3
+        };
+        for (int userId : userIds) {
+            for (String pkg : packages) {
+                final AppIdleHistory.AppUsageHistory usageHistory = mController
+                        .getAppIdleHistoryForTest().getAppUsageHistory(
+                                pkg, userId, mInjector.mElapsedRealtime);
+                usageHistory.lastUsedElapsedTime = 0;
+                usageHistory.lastUsedByUserElapsedTime = 0;
+                usageHistory.lastUsedScreenTime = 0;
+            }
+        }
     }
 
     @Before
@@ -524,6 +546,7 @@ public class AppStandbyControllerTests {
         MyContextWrapper myContext = new MyContextWrapper(InstrumentationRegistry.getContext());
         mInjector = new MyInjector(myContext, Looper.getMainLooper());
         mController = setupController();
+        setupInitialUsageHistory();
     }
 
     @After

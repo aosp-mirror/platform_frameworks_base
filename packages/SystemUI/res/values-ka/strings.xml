@@ -151,10 +151,6 @@
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"შემდეგი მცდელობისას განმბლოკავი ნიმუშის არასწორად შეყვანის შემთხვევაში, თქვენი სამსახურის პროფილი და მისი მონაცემები წაიშლება."</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"შემდეგი მცდელობისას PIN-კოდის არასწორად შეყვანის შემთხვევაში, თქვენი სამსახურის პროფილი და მისი მონაცემები წაიშლება."</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"შემდეგი მცდელობისას პაროლის არასწორად შეყვანის შემთხვევაში, თქვენი სამსახურის პროფილი და მისი მონაცემები წაიშლება."</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"დაფიქსირდა ზედმეტად ბევრი არასწორი მცდელობა. შედეგად, ამ მოწყობილობის მონაცემები წაიშლება."</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"დაფიქსირდა ზედმეტად ბევრი არასწორი მცდელობა. შედეგად, ეს მომხმარებელი წაიშლება."</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"დაფიქსირდა ზედმეტად ბევრი არასწორი მცდელობა. შედეგად, სამსახურის ეს პროფილი და მისი მონაცემები წაიშლება."</string>
-    <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"დახურვა"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"შეეხეთ თითის ანაბეჭდის სენსორს"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"თითის ანაბეჭდის ხატულა"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"სახის ამოცნობა ვერ ხერხდება. სანაცვლოდ თითის ანაბეჭდი გამოიყენეთ."</string>
@@ -323,17 +319,12 @@
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • ნელა იტენება • სრულ დატენვამდე <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • დამტენი სამაგრი • დატენამდე დარჩა <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"მომხმარებლის გადართვა"</string>
-    <string name="user_add_user" msgid="4336657383006913022">"მომხმარებლის დამატება"</string>
-    <string name="user_new_user_name" msgid="2019166282704195789">"ახალი მომხმარებელი"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"სტუმრის ამოშლა?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"ამ სესიის ყველა აპი და მონაცემი წაიშლება."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"ამოშლა"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"სტუმარო, გვიხარია, რომ დაბრუნდით!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"გსურთ, თქვენი სესიის გაგრძელება?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"ხელახლა დაწყება"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"დიახ, გავაგრძელოთ"</string>
-    <string name="user_add_user_title" msgid="4172327541504825032">"დაემატოს ახალი მომხმარებელი?"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"ახალი მომხმარებლის დამატებისას, ამ მომხმარებელს საკუთარი სივრცის შექმნა მოუწევს.\n\nნებისმიერ მომხმარებელს შეუძლია აპები ყველა სხვა მომხმარებლისათვის განაახლოს."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"მიღწეულია მომხმარებელთა ლიმიტი"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="other">შესაძლებელია <xliff:g id="COUNT">%d</xliff:g>-მდე მომხმარებლის დამატება.</item>
@@ -459,8 +450,7 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"გამოსაყენებლად განბლოკვა"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"თქვენი ბარათების მიღებისას პრობლემა წარმოიშვა. ცადეთ ხელახლა მოგვიანებით"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"ჩაკეტილი ეკრანის პარამეტრები"</string>
-    <!-- no translation found for qr_code_scanner_title (5290201053875420785) -->
-    <skip />
+    <string name="qr_code_scanner_title" msgid="5290201053875420785">"QR კოდის სკანირება"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"სამსახურის პროფილი"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"თვითმფრინავის რეჟიმი"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"ვერ გაიგონებთ მომდევნო მაღვიძარას <xliff:g id="WHEN">%1$s</xliff:g>-ზე"</string>
@@ -785,9 +775,10 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"გადაფურცლეთ მეტის სანახავად"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"მიმდინარეობს რეკომენდაციების ჩატვირთვა"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"მედია"</string>
-    <string name="controls_media_close_session" msgid="1193000643003066508">"დაიმალოს მედიის ეს სესია?"</string>
+    <!-- no translation found for controls_media_close_session (4780485355795635052) -->
+    <skip />
     <string name="controls_media_active_session" msgid="3146882316024153337">"მედიის მიმდინარე სესიის დამალვა შეუძლებელია."</string>
-    <string name="controls_media_dismiss_button" msgid="9081375542265132213">"დახურვა"</string>
+    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"დამალვა"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"გაგრძელება"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"პარამეტრები"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"<xliff:g id="SONG_NAME">%1$s</xliff:g>, <xliff:g id="ARTIST_NAME">%2$s</xliff:g>, უკრავს <xliff:g id="APP_LABEL">%3$s</xliff:g>-დან"</string>
@@ -805,7 +796,7 @@
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"მიუახლოვდით <xliff:g id="DEVICENAME">%1$s</xliff:g>-ს მისი მეშვეობით დასაკრავად"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"მიმდინარეობს დაკვრა <xliff:g id="DEVICENAME">%1$s</xliff:g>-ზე"</string>
     <string name="media_transfer_playing_this_device" msgid="1856890686844499172">"მიმდინარეობს დაკვრა ამ ტელეფონზე"</string>
-    <string name="media_transfer_failed" msgid="2640354446629980227">"რაღაც შეცდომაა"</string>
+    <string name="media_transfer_failed" msgid="7955354964610603723">"რაღაც შეცდომა მოხდა. ცადეთ ხელახლა."</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"არააქტიურია, გადაამოწმეთ აპი"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"ვერ მოიძებნა"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"კონტროლი მიუწვდომელია"</string>

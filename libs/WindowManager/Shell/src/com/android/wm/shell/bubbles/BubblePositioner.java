@@ -579,11 +579,10 @@ public class BubblePositioner {
 
         // Showing vertically: might need to translate the bubbles above the IME.
         // Subtract spacing here to provide a margin between top of IME and bottom of bubble row.
-        final float bottomInset = getImeHeight() + mInsets.bottom - (mSpacingBetweenBubbles * 2);
+        final float bottomHeight = getImeHeight() + mInsets.bottom - (mSpacingBetweenBubbles * 2);
+        final float bottomInset = mScreenRect.bottom - bottomHeight;
         final float expandedStackSize = getExpandedStackSize(numberOfBubbles);
-        final float centerPosition = showBubblesVertically()
-                ? mPositionRect.centerY()
-                : mPositionRect.centerX();
+        final float centerPosition = mPositionRect.centerY();
         final float rowBottom = centerPosition + (expandedStackSize / 2f);
         final float rowTop = centerPosition - (expandedStackSize / 2f);
         float rowTopForIme = rowTop;

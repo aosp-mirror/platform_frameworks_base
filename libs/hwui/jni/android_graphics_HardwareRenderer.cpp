@@ -777,11 +777,6 @@ static void android_view_ThreadedRenderer_setHighContrastText(JNIEnv*, jclass, j
     Properties::enableHighContrastText = enable;
 }
 
-static void android_view_ThreadedRenderer_hackySetRTAnimationsEnabled(JNIEnv*, jclass,
-        jboolean enable) {
-    Properties::enableRTAnimations = enable;
-}
-
 static void android_view_ThreadedRenderer_setDebuggingEnabled(JNIEnv*, jclass, jboolean enable) {
     Properties::debuggingEnabled = enable;
 }
@@ -809,6 +804,11 @@ static void android_view_ThreadedRenderer_setForceDark(JNIEnv* env, jobject claz
 
 static void android_view_ThreadedRenderer_preload(JNIEnv*, jclass) {
     RenderProxy::preload();
+}
+
+static void android_view_ThreadedRenderer_setRtAnimationsEnabled(JNIEnv* env, jobject clazz,
+                                                                 jboolean enabled) {
+    RenderProxy::setRtAnimationsEnabled(enabled);
 }
 
 // Plumbs the display density down to DeviceInfo.
@@ -967,8 +967,6 @@ static const JNINativeMethod gMethods[] = {
          (void*)android_view_ThreadedRenderer_createHardwareBitmapFromRenderNode},
         {"disableVsync", "()V", (void*)android_view_ThreadedRenderer_disableVsync},
         {"nSetHighContrastText", "(Z)V", (void*)android_view_ThreadedRenderer_setHighContrastText},
-        {"nHackySetRTAnimationsEnabled", "(Z)V",
-         (void*)android_view_ThreadedRenderer_hackySetRTAnimationsEnabled},
         {"nSetDebuggingEnabled", "(Z)V", (void*)android_view_ThreadedRenderer_setDebuggingEnabled},
         {"nSetIsolatedProcess", "(Z)V", (void*)android_view_ThreadedRenderer_setIsolatedProcess},
         {"nSetContextPriority", "(I)V", (void*)android_view_ThreadedRenderer_setContextPriority},
@@ -982,6 +980,8 @@ static const JNINativeMethod gMethods[] = {
          (void*)android_view_ThreadedRenderer_isWebViewOverlaysEnabled},
         {"nSetDrawingEnabled", "(Z)V", (void*)android_view_ThreadedRenderer_setDrawingEnabled},
         {"nIsDrawingEnabled", "()Z", (void*)android_view_ThreadedRenderer_isDrawingEnabled},
+        {"nSetRtAnimationsEnabled", "(Z)V",
+         (void*)android_view_ThreadedRenderer_setRtAnimationsEnabled},
 };
 
 static JavaVM* mJvm = nullptr;

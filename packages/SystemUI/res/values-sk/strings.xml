@@ -151,10 +151,6 @@
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"Ak pri ďalšom pokuse zadáte nesprávny vzor, váš pracovný profil a jeho dáta budú odstránené."</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"Ak pri ďalšom pokuse zadáte nesprávny PIN, váš pracovný profil a jeho dáta budú odstránené."</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"Ak pri ďalšom pokuse zadáte nesprávne heslo, váš pracovný profil a jeho dáta budú odstránené."</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"Príliš veľa chybných pokusov. Dáta tohto zariadenia budú odstránené."</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"Príliš veľa chybných pokusov. Tento používateľ bude odstránený."</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"Príliš veľa chybných pokusov. Tento pracovný profil a jeho dáta budú odstránené."</string>
-    <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"Zrušiť"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Dotknite sa senzora odtlačkov prstov"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"Ikona odtlačku prsta"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Tvár sa nedá rozpoznať. Použite odtlačok prsta."</string>
@@ -327,17 +323,12 @@
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Nabíja sa pomaly • Do úplného nabitia zostáva <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Nabíjací dok • Do úplného nabitia zostáva <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Prepnutie používateľa"</string>
-    <string name="user_add_user" msgid="4336657383006913022">"Pridať používateľa"</string>
-    <string name="user_new_user_name" msgid="2019166282704195789">"Nový používateľ"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Odstrániť hosťa?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Všetky aplikácie a údaje v tejto relácii budú odstránené."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Odstrániť"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Hosť, vitajte späť!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Chcete v relácii pokračovať?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Začať odznova"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Áno, pokračovať"</string>
-    <string name="user_add_user_title" msgid="4172327541504825032">"Pridať nového používateľa?"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"Keď pridáte nového používateľa, musí si nastaviť vlastný priestor.\n\nKtorýkoľvek používateľ môže aktualizovať aplikácie všetkých ostatných používateľov."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Dosiahnutý limit počtu používateľov"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="few">Môžete pridať maximálne <xliff:g id="COUNT">%d</xliff:g> používateľov.</item>
@@ -796,9 +787,10 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Potiahnutím zobrazíte ďalšie položky"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Načítavajú sa odporúčania"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Médiá"</string>
-    <string name="controls_media_close_session" msgid="1193000643003066508">"Chcete skryť túto reláciu média?"</string>
+    <!-- no translation found for controls_media_close_session (4780485355795635052) -->
+    <skip />
     <string name="controls_media_active_session" msgid="3146882316024153337">"Aktuálna relácia média sa nedá skryť."</string>
-    <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Zavrieť"</string>
+    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Skryť"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Pokračovať"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Nastavenia"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"<xliff:g id="SONG_NAME">%1$s</xliff:g> od interpreta <xliff:g id="ARTIST_NAME">%2$s</xliff:g> sa prehráva z aplikácie <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
@@ -816,7 +808,7 @@
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Ak chcete prehrávať v zariadení <xliff:g id="DEVICENAME">%1$s</xliff:g>, priblížte sa k nemu"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Prehráva sa v zariadení <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_transfer_playing_this_device" msgid="1856890686844499172">"Prehráva sa v tomto telefóne"</string>
-    <string name="media_transfer_failed" msgid="2640354446629980227">"Vyskytol sa problém"</string>
+    <string name="media_transfer_failed" msgid="7955354964610603723">"Niečo sa pokazilo. Skúste to znova."</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Neaktívne, preverte aplikáciu"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Nenájdené"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Ovládač nie je k dispozícii"</string>

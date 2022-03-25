@@ -18,6 +18,7 @@ package com.android.systemui.decor
 
 import android.content.res.Resources
 import android.testing.AndroidTestingRunner
+import android.testing.TestableLooper.RunWithLooper
 import android.view.DisplayCutout
 import androidx.test.filters.SmallTest
 import com.android.systemui.R
@@ -31,6 +32,7 @@ import org.mockito.Mockito.spy
 import org.mockito.Mockito.`when` as whenever
 
 @RunWith(AndroidTestingRunner::class)
+@RunWithLooper(setAsMainLooper = true)
 @SmallTest
 class PrivacyDotDecorProviderFactoryTest : SysuiTestCase() {
     private lateinit var mPrivacyDotDecorProviderFactory: PrivacyDotDecorProviderFactory

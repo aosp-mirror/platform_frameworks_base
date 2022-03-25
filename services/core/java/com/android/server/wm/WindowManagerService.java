@@ -9045,13 +9045,18 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         TaskSnapshot taskSnapshot;
-        synchronized (mGlobalLock) {
-            Task task = mRoot.anyTaskForId(taskId, MATCH_ATTACHED_TASK_OR_RECENT_TASKS);
-            if (task == null) {
-                throw new IllegalArgumentException(
-                        "Failed to find matching task for taskId=" + taskId);
+        final long token = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                Task task = mRoot.anyTaskForId(taskId, MATCH_ATTACHED_TASK_OR_RECENT_TASKS);
+                if (task == null) {
+                    throw new IllegalArgumentException(
+                            "Failed to find matching task for taskId=" + taskId);
+                }
+                taskSnapshot = mTaskSnapshotController.captureTaskSnapshot(task, false);
             }
-            taskSnapshot = mTaskSnapshotController.captureTaskSnapshot(task, false);
+        } finally {
+            Binder.restoreCallingIdentity(token);
         }
 
         if (taskSnapshot == null || taskSnapshot.getHardwareBuffer() == null) {

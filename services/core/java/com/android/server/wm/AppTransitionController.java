@@ -666,22 +666,19 @@ public class AppTransitionController {
                 "Override with TaskFragment remote animation for transit=%s",
                 AppTransition.appTransitionOldToString(transit));
 
-        final boolean hasUntrustedEmbedding = task.forAllLeafTasks(
-                taskFragment -> !taskFragment.isAllowedToBeEmbeddedInTrustedMode());
         final RemoteAnimationController remoteAnimationController =
                 mDisplayContent.mAppTransition.getRemoteAnimationController();
-        if (hasUntrustedEmbedding && remoteAnimationController != null) {
-            // We are going to use client-driven animation, but the Task is in untrusted embedded
-            // mode. We need to disable all input on activity windows during the animation to
-            // ensure it is safe. This is needed for all activity windows in the animation Task.
+        if (remoteAnimationController != null) {
+            // We are going to use client-driven animation, Disable all input on activity windows
+            // during the animation to ensure it is safe to allow client to animate the surfaces.
+            // This is needed for all activity windows in the animation Task.
             remoteAnimationController.setOnRemoteAnimationReady(() -> {
                 final Consumer<ActivityRecord> updateActivities =
                         activity -> activity.setDropInputForAnimation(true);
                 task.forAllActivities(updateActivities);
             });
-            ProtoLog.d(WM_DEBUG_APP_TRANSITIONS, "Task=%d contains embedded TaskFragment in"
-                    + " untrusted mode. Disabled all input during TaskFragment remote animation.",
-                    task.mTaskId);
+            ProtoLog.d(WM_DEBUG_APP_TRANSITIONS, "Task=%d contains embedded TaskFragment."
+                    + " Disabled all input during TaskFragment remote animation.", task.mTaskId);
         }
         return true;
     }

@@ -217,7 +217,8 @@ public class PipControllerTest extends ShellTestCase {
         final Rect keepClearArea = new Rect(0, 0, 10, 10);
         when(mMockPipBoundsState.getDisplayId()).thenReturn(displayId);
 
-        mPipController.onKeepClearAreasChanged(displayId, Set.of(keepClearArea), Set.of());
+        mPipController.mDisplaysChangedListener.onKeepClearAreasChanged(
+                displayId, Set.of(keepClearArea), Set.of());
 
         verify(mMockPipBoundsState).setKeepClearAreas(Set.of(keepClearArea), Set.of());
     }

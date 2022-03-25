@@ -695,11 +695,12 @@ class MediaDataManager(
                     Icon.createWithResource(sbn.packageName, action.getIcon()!!.getResId())
                 } else {
                     action.getIcon()
-                }.setTint(themeText)
+                }.setTint(themeText).loadDrawable(context)
                 val mediaAction = MediaAction(
                     mediaActionIcon,
                     runnable,
-                    action.title)
+                    action.title,
+                    context.getDrawable(R.drawable.qs_media_round_button_background))
                 actionIcons.add(mediaAction)
             }
         }
@@ -789,30 +790,34 @@ class MediaDataManager(
         return when (action) {
             PlaybackState.ACTION_PLAY -> {
                 MediaAction(
-                    Icon.createWithResource(context, R.drawable.ic_media_play),
+                    context.getDrawable(R.drawable.ic_media_play),
                     { controller.transportControls.play() },
-                    context.getString(R.string.controls_media_button_play)
+                    context.getString(R.string.controls_media_button_play),
+                    context.getDrawable(R.drawable.ic_media_play_container)
                 )
             }
             PlaybackState.ACTION_PAUSE -> {
                 MediaAction(
-                    Icon.createWithResource(context, R.drawable.ic_media_pause),
+                    context.getDrawable(R.drawable.ic_media_pause),
                     { controller.transportControls.pause() },
-                    context.getString(R.string.controls_media_button_pause)
+                    context.getString(R.string.controls_media_button_pause),
+                    context.getDrawable(R.drawable.ic_media_pause_container)
                 )
             }
             PlaybackState.ACTION_SKIP_TO_PREVIOUS -> {
                 MediaAction(
-                    Icon.createWithResource(context, R.drawable.ic_media_prev),
+                    context.getDrawable(R.drawable.ic_media_prev),
                     { controller.transportControls.skipToPrevious() },
-                    context.getString(R.string.controls_media_button_prev)
+                    context.getString(R.string.controls_media_button_prev),
+                    context.getDrawable(R.drawable.qs_media_round_button_background)
                 )
             }
             PlaybackState.ACTION_SKIP_TO_NEXT -> {
                 MediaAction(
-                    Icon.createWithResource(context, R.drawable.ic_media_next),
+                    context.getDrawable(R.drawable.ic_media_next),
                     { controller.transportControls.skipToNext() },
-                    context.getString(R.string.controls_media_button_next)
+                    context.getString(R.string.controls_media_button_next),
+                    context.getDrawable(R.drawable.qs_media_round_button_background)
                 )
             }
             else -> null
@@ -835,9 +840,10 @@ class MediaDataManager(
 
         val it = state.customActions[index]
         return MediaAction(
-            Icon.createWithResource(packageName, it.icon),
+            Icon.createWithResource(packageName, it.icon).loadDrawable(context),
             { controller.transportControls.sendCustomAction(it, it.extras) },
-            it.name
+            it.name,
+            context.getDrawable(R.drawable.ic_media_pause_container)
         )
     }
 
@@ -900,9 +906,11 @@ class MediaDataManager(
 
     private fun getResumeMediaAction(action: Runnable): MediaAction {
         return MediaAction(
-            Icon.createWithResource(context, R.drawable.ic_media_play).setTint(themeText),
+            Icon.createWithResource(context, R.drawable.ic_media_play)
+                .setTint(themeText).loadDrawable(context),
             action,
-            context.getString(R.string.controls_media_resume)
+            context.getString(R.string.controls_media_resume),
+            context.getDrawable(R.drawable.ic_media_play_container)
         )
     }
 
