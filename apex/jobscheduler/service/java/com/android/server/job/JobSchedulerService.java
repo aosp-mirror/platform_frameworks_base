@@ -286,7 +286,7 @@ public class JobSchedulerService extends com.android.server.SystemService
      * Queue of pending jobs. The JobServiceContext class will receive jobs from this list
      * when ready to execute them.
      */
-    final PendingJobQueue mPendingJobQueue = new PendingJobQueue();
+    private final PendingJobQueue mPendingJobQueue = new PendingJobQueue();
 
     int[] mStartedUsers = EmptyArray.INT;
 
@@ -1025,6 +1025,11 @@ public class JobSchedulerService extends com.android.server.SystemService
 
     public Constants getConstants() {
         return mConstants;
+    }
+
+    @NonNull
+    PendingJobQueue getPendingJobQueue() {
+        return mPendingJobQueue;
     }
 
     @NonNull
