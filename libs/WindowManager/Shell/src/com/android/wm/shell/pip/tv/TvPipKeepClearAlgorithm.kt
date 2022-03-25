@@ -346,48 +346,54 @@ class TvPipKeepClearAlgorithm(private val clock: () -> Long) {
 
     private fun getNearbyStashedPosition(bounds: Rect, keepClearAreas: Set<Rect>): Rect {
         val screenBounds = transformedScreenBounds
-        val stashCandidates = Array(2) { Rect(bounds) }
+        val stashCandidates = mutableListOf<Rect>()
         val areasOverlappingPipX = keepClearAreas.filter { it.intersectsX(bounds) }
         val areasOverlappingPipY = keepClearAreas.filter { it.intersectsY(bounds) }
 
         if (screenBounds.bottom - bounds.bottom <= bounds.top - screenBounds.top) {
-            // bottom is closer than top, stash downwards
             val fullStashTop = screenBounds.bottom - stashOffset
 
             val maxBottom = areasOverlappingPipX.maxByOrNull { it.bottom }!!.bottom
             val partialStashTop = maxBottom + pipAreaPadding
 
-            val downPosition = stashCandidates[0]
+            val downPosition = Rect(bounds)
             downPosition.offsetTo(bounds.left, min(fullStashTop, partialStashTop))
-        } else {
-            // top is closer than bottom, stash upwards
-            val fullStashY = screenBounds.top - bounds.height() + stashOffset
+            stashCandidates += downPosition
+        }
+        if (screenBounds.bottom - bounds.bottom >= bounds.top - screenBounds.top) {
+            val fullStashBottom = screenBounds.top - bounds.height() + stashOffset
 
             val minTop = areasOverlappingPipX.minByOrNull { it.top }!!.top
-            val partialStashY = minTop - bounds.height() - pipAreaPadding
+            val partialStashBottom = minTop - bounds.height() - pipAreaPadding
 
-            val upPosition = stashCandidates[0]
-            upPosition.offsetTo(bounds.left, max(fullStashY, partialStashY))
+            val upPosition = Rect(bounds)
+            upPosition.offsetTo(bounds.left, max(fullStashBottom, partialStashBottom))
+            stashCandidates += upPosition
         }
 
         if (screenBounds.right - bounds.right <= bounds.left - screenBounds.left) {
-            // right is closer than left, stash rightwards
-            val fullStashLeft = screenBounds.right - stashOffset
+            val fullStashRight = screenBounds.right - stashOffset
 
             val maxRight = areasOverlappingPipY.maxByOrNull { it.right }!!.right
-            val partialStashLeft = maxRight + pipAreaPadding
+            val partialStashRight = maxRight + pipAreaPadding
 
-            val rightPosition = stashCandidates[1]
-            rightPosition.offsetTo(min(fullStashLeft, partialStashLeft), bounds.top)
-        } else {
-            // left is closer than right, stash leftwards
+            val rightPosition = Rect(bounds)
+            rightPosition.offsetTo(min(fullStashRight, partialStashRight), bounds.top)
+            stashCandidates += rightPosition
+        }
+        if (screenBounds.right - bounds.right >= bounds.left - screenBounds.left) {
             val fullStashLeft = screenBounds.left - bounds.width() + stashOffset
 
             val minLeft = areasOverlappingPipY.minByOrNull { it.left }!!.left
             val partialStashLeft = minLeft - bounds.width() - pipAreaPadding
 
-            val rightPosition = stashCandidates[1]
-            rightPosition.offsetTo(max(fullStashLeft, partialStashLeft), bounds.top)
+            val leftPosition = Rect(bounds)
+            leftPosition.offsetTo(max(fullStashLeft, partialStashLeft), bounds.top)
+            stashCandidates += leftPosition
+        }
+
+        if (stashCandidates.isEmpty()) {
+            return bounds
         }
 
         return stashCandidates.minByOrNull {
