@@ -84,10 +84,12 @@ class JobConcurrencyManager {
     private static final String KEY_SCREEN_OFF_ADJUSTMENT_DELAY_MS =
             CONFIG_KEY_PREFIX_CONCURRENCY + "screen_off_adjustment_delay_ms";
     private static final long DEFAULT_SCREEN_OFF_ADJUSTMENT_DELAY_MS = 30_000;
-    private static final String KEY_PKG_CONCURRENCY_LIMIT_EJ =
+    @VisibleForTesting
+    static final String KEY_PKG_CONCURRENCY_LIMIT_EJ =
             CONFIG_KEY_PREFIX_CONCURRENCY + "pkg_concurrency_limit_ej";
     private static final int DEFAULT_PKG_CONCURRENCY_LIMIT_EJ = 3;
-    private static final String KEY_PKG_CONCURRENCY_LIMIT_REGULAR =
+    @VisibleForTesting
+    static final String KEY_PKG_CONCURRENCY_LIMIT_REGULAR =
             CONFIG_KEY_PREFIX_CONCURRENCY + "pkg_concurrency_limit_regular";
     private static final int DEFAULT_PKG_CONCURRENCY_LIMIT_REGULAR = MAX_JOB_CONTEXTS_COUNT / 2;
 
@@ -299,13 +301,13 @@ class JobConcurrencyManager {
      * The maximum number of expedited jobs a single userId-package can have running simultaneously.
      * TOP apps are not limited.
      */
-    private long mPkgConcurrencyLimitEj = DEFAULT_PKG_CONCURRENCY_LIMIT_EJ;
+    private int mPkgConcurrencyLimitEj = DEFAULT_PKG_CONCURRENCY_LIMIT_EJ;
 
     /**
      * The maximum number of regular jobs a single userId-package can have running simultaneously.
      * TOP apps are not limited.
      */
-    private long mPkgConcurrencyLimitRegular = DEFAULT_PKG_CONCURRENCY_LIMIT_REGULAR;
+    private int mPkgConcurrencyLimitRegular = DEFAULT_PKG_CONCURRENCY_LIMIT_REGULAR;
 
     /** Current memory trim level. */
     private int mLastMemoryTrimLevel;
@@ -568,7 +570,7 @@ class JobConcurrencyManager {
             Slog.d(TAG, printPendingQueueLocked());
         }
 
-        final PendingJobQueue pendingJobQueue = mService.mPendingJobQueue;
+        final PendingJobQueue pendingJobQueue = mService.getPendingJobQueue();
         final List<JobServiceContext> activeServices = mActiveServices;
 
         // To avoid GC churn, we recycle the arrays.
@@ -919,7 +921,8 @@ class JobConcurrencyManager {
     }
 
     @GuardedBy("mLock")
-    private boolean isPkgConcurrencyLimitedLocked(@NonNull JobStatus jobStatus) {
+    @VisibleForTesting
+    boolean isPkgConcurrencyLimitedLocked(@NonNull JobStatus jobStatus) {
         if (jobStatus.lastEvaluatedBias >= JobInfo.BIAS_TOP_APP) {
             // Don't restrict top apps' concurrency. The work type limits will make sure
             // background jobs have slots to run if the system has resources.
@@ -927,7 +930,7 @@ class JobConcurrencyManager {
         }
         // Use < instead of <= as that gives us a little wiggle room in case a new job comes
         // along very shortly.
-        if (mService.mPendingJobQueue.size() + mRunningJobs.size()
+        if (mService.getPendingJobQueue().size() + mRunningJobs.size()
                 < mWorkTypeConfig.getMaxTotal()) {
             // Don't artificially limit a single package if we don't even have enough jobs to use
             // the maximum number of slots. We'll preempt the job later if we need the slot.
@@ -940,10 +943,10 @@ class JobConcurrencyManager {
             return false;
         }
         if (jobStatus.shouldTreatAsExpeditedJob()) {
-            return packageStats.numRunningEj + packageStats.numStagedEj < mPkgConcurrencyLimitEj;
+            return packageStats.numRunningEj + packageStats.numStagedEj >= mPkgConcurrencyLimitEj;
         } else {
             return packageStats.numRunningRegular + packageStats.numStagedRegular
-                    < mPkgConcurrencyLimitRegular;
+                    >= mPkgConcurrencyLimitRegular;
         }
     }
 
@@ -984,7 +987,7 @@ class JobConcurrencyManager {
                         jobStatus.getSourceUserId(), jobStatus.getSourcePackageName(),
                         packageStats);
             }
-            if (mService.mPendingJobQueue.remove(jobStatus)) {
+            if (mService.getPendingJobQueue().remove(jobStatus)) {
                 mService.mJobPackageTracker.noteNonpending(jobStatus);
             }
         } finally {
@@ -1011,7 +1014,7 @@ class JobConcurrencyManager {
             }
         }
 
-        final PendingJobQueue pendingJobQueue = mService.mPendingJobQueue;
+        final PendingJobQueue pendingJobQueue = mService.getPendingJobQueue();
         if (worker.getPreferredUid() != JobServiceContext.NO_PREFERRED_UID) {
             updateCounterConfigLocked();
             // Preemption case needs special care.
@@ -1179,7 +1182,7 @@ class JobConcurrencyManager {
             return "too many jobs running";
         }
 
-        final PendingJobQueue pendingJobQueue = mService.mPendingJobQueue;
+        final PendingJobQueue pendingJobQueue = mService.getPendingJobQueue();
         final int numPending = pendingJobQueue.size();
         if (numPending == 0) {
             // All quiet. We can let this job run to completion.
@@ -1262,7 +1265,7 @@ class JobConcurrencyManager {
     @GuardedBy("mLock")
     private String printPendingQueueLocked() {
         StringBuilder s = new StringBuilder("Pending queue: ");
-        PendingJobQueue pendingJobQueue = mService.mPendingJobQueue;
+        PendingJobQueue pendingJobQueue = mService.getPendingJobQueue();
         JobStatus js;
         pendingJobQueue.resetIterator();
         while ((js = pendingJobQueue.next()) != null) {
@@ -1526,8 +1529,8 @@ class JobConcurrencyManager {
 
     @VisibleForTesting
     static class WorkTypeConfig {
-        private static final String KEY_PREFIX_MAX_TOTAL =
-                CONFIG_KEY_PREFIX_CONCURRENCY + "max_total_";
+        @VisibleForTesting
+        static final String KEY_PREFIX_MAX_TOTAL = CONFIG_KEY_PREFIX_CONCURRENCY + "max_total_";
         private static final String KEY_PREFIX_MAX_TOP = CONFIG_KEY_PREFIX_CONCURRENCY + "max_top_";
         private static final String KEY_PREFIX_MAX_FGS = CONFIG_KEY_PREFIX_CONCURRENCY + "max_fgs_";
         private static final String KEY_PREFIX_MAX_EJ = CONFIG_KEY_PREFIX_CONCURRENCY + "max_ej_";
@@ -2028,7 +2031,8 @@ class JobConcurrencyManager {
         }
     }
 
-    private static class PackageStats {
+    @VisibleForTesting
+    static class PackageStats {
         public int userId;
         public String packageName;
         public int numRunningEj;
@@ -2097,5 +2101,33 @@ class JobConcurrencyManager {
             newJob = null;
             newWorkType = WORK_TYPE_NONE;
         }
+    }
+
+    // TESTING HELPERS
+
+    @VisibleForTesting
+    void addRunningJobForTesting(@NonNull JobStatus job) {
+        mRunningJobs.add(job);
+        final PackageStats packageStats =
+                getPackageStatsForTesting(job.getSourceUserId(), job.getSourcePackageName());
+        packageStats.adjustRunningCount(true, job.shouldTreatAsExpeditedJob());
+    }
+
+    @VisibleForTesting
+    int getPackageConcurrencyLimitEj() {
+        return mPkgConcurrencyLimitEj;
+    }
+
+    int getPackageConcurrencyLimitRegular() {
+        return mPkgConcurrencyLimitRegular;
+    }
+
+    /** Gets the {@link PackageStats} object for the app and saves it for testing use. */
+    @NonNull
+    @VisibleForTesting
+    PackageStats getPackageStatsForTesting(int userId, @NonNull String packageName) {
+        final PackageStats packageStats = getPkgStatsLocked(userId, packageName);
+        mActivePkgStats.add(userId, packageName, packageStats);
+        return packageStats;
     }
 }
