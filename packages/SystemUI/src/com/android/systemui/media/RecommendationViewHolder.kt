@@ -21,7 +21,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.annotation.IntegerRes
 import com.android.systemui.R
 import com.android.systemui.util.animation.TransitionLayout
 
@@ -47,14 +46,14 @@ class RecommendationViewHolder private constructor(itemView: View) {
         itemView.requireViewById(R.id.media_cover4_container),
         itemView.requireViewById(R.id.media_cover5_container),
         itemView.requireViewById(R.id.media_cover6_container))
-    val mediaCoverItemsResIds = listOf<@IntegerRes Int>(
+    val mediaCoverItemsResIds = listOf<Int>(
         R.id.media_cover1,
         R.id.media_cover2,
         R.id.media_cover3,
         R.id.media_cover4,
         R.id.media_cover5,
         R.id.media_cover6)
-    val mediaCoverContainersResIds = listOf<@IntegerRes Int>(
+    val mediaCoverContainersResIds = listOf<Int>(
         R.id.media_cover1_container,
         R.id.media_cover2_container,
         R.id.media_cover3_container,

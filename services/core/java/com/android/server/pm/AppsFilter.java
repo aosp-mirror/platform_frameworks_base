@@ -17,6 +17,8 @@
 package com.android.server.pm;
 
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
+import static android.os.UserHandle.USER_ALL;
+import static android.os.UserHandle.USER_NULL;
 import static android.provider.DeviceConfig.NAMESPACE_PACKAGE_MANAGER_SERVICE;
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PRIVATE;
@@ -24,17 +26,13 @@ import static com.android.internal.annotations.VisibleForTesting.Visibility.PRIV
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
-import android.content.pm.PackageParser;
+import android.content.pm.SigningDetails;
 import android.content.pm.UserInfo;
-import android.content.pm.parsing.component.ParsedComponent;
-import android.content.pm.parsing.component.ParsedInstrumentation;
-import android.content.pm.parsing.component.ParsedIntentInfo;
-import android.content.pm.parsing.component.ParsedMainComponent;
-import android.content.pm.parsing.component.ParsedProvider;
 import android.os.Binder;
 import android.os.Process;
 import android.os.Trace;
@@ -54,9 +52,17 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.function.QuadFunction;
 import com.android.server.FgThread;
+import com.android.server.LocalServices;
 import com.android.server.compat.CompatChange;
 import com.android.server.om.OverlayReferenceMapper;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
+import com.android.server.pm.pkg.PackageStateInternal;
+import com.android.server.pm.pkg.component.ParsedComponent;
+import com.android.server.pm.pkg.component.ParsedInstrumentation;
+import com.android.server.pm.pkg.component.ParsedIntentInfo;
+import com.android.server.pm.pkg.component.ParsedMainComponent;
+import com.android.server.pm.pkg.component.ParsedProvider;
 import com.android.server.utils.Snappable;
 import com.android.server.utils.SnapshotCache;
 import com.android.server.utils.Snapshots;
@@ -95,6 +101,13 @@ public class AppsFilter implements Watchable, Snappable {
      * entries.
      */
     private final SparseSetArray<Integer> mImplicitlyQueryable = new SparseSetArray<>();
+
+    /**
+     * This contains a list of app UIDs that are implicitly queryable because another app explicitly
+     * interacted with it, but could keep across package updates. For example, if application A
+     * grants persistable uri permission to application B; regardless of any manifest entries.
+     */
+    private final SparseSetArray<Integer> mRetainedImplicitlyQueryable = new SparseSetArray<>();
 
     /**
      * A mapping from the set of App IDs that query other App IDs via package name to the
@@ -146,8 +159,9 @@ public class AppsFilter implements Watchable, Snappable {
     private final FeatureConfig mFeatureConfig;
     private final OverlayReferenceMapper mOverlayReferenceMapper;
     private final StateProvider mStateProvider;
+    private final PackageManagerInternal mPmInternal;
 
-    private PackageParser.SigningDetails mSystemSigningDetails;
+    private SigningDetails mSystemSigningDetails;
     private Set<String> mProtectedBroadcasts = new ArraySet<>();
 
     private final Object mCacheLock = new Object();
@@ -155,7 +169,7 @@ public class AppsFilter implements Watchable, Snappable {
     /**
      * This structure maps uid -> uid and indicates whether access from the first should be
      * filtered to the second. It's essentially a cache of the
-     * {@link #shouldFilterApplicationInternal(int, SettingBase, PackageSetting, int)} call.
+     * {@link #shouldFilterApplicationInternal(int, Object, PackageStateInternal, int)} call.
      * NOTE: It can only be relied upon after the system is ready to avoid unnecessary update on
      * initial scam and is null until {@link #onSystemReady()} is called.
      */
@@ -238,13 +252,15 @@ public class AppsFilter implements Watchable, Snappable {
             String[] forceQueryableList,
             boolean systemAppsQueryable,
             @Nullable OverlayReferenceMapper.Provider overlayProvider,
-            Executor backgroundExecutor) {
+            Executor backgroundExecutor,
+            PackageManagerInternal pmInternal) {
         mFeatureConfig = featureConfig;
         mForceQueryableByDevicePackageNames = forceQueryableList;
         mSystemAppsQueryable = systemAppsQueryable;
         mOverlayReferenceMapper = new OverlayReferenceMapper(true /*deferRebuild*/,
                 overlayProvider);
         mStateProvider = stateProvider;
+        mPmInternal = pmInternal;
         mBackgroundExecutor = backgroundExecutor;
         mSnapshot = makeCache();
     }
@@ -256,6 +272,7 @@ public class AppsFilter implements Watchable, Snappable {
      */
     private AppsFilter(AppsFilter orig) {
         Snapshots.copy(mImplicitlyQueryable, orig.mImplicitlyQueryable);
+        Snapshots.copy(mRetainedImplicitlyQueryable, orig.mRetainedImplicitlyQueryable);
         Snapshots.copy(mQueriesViaPackage, orig.mQueriesViaPackage);
         Snapshots.copy(mQueriesViaComponent, orig.mQueriesViaComponent);
         Snapshots.copy(mQueryableViaUsesLibrary, orig.mQueryableViaUsesLibrary);
@@ -276,6 +293,7 @@ public class AppsFilter implements Watchable, Snappable {
         }
 
         mBackgroundExecutor = null;
+        mPmInternal = null;
         mSnapshot = new SnapshotCache.Sealed<>();
     }
 
@@ -291,13 +309,16 @@ public class AppsFilter implements Watchable, Snappable {
     /**
      * Provides system state to AppsFilter via {@link CurrentStateCallback} after properly guarding
      * the data with the package lock.
+     *
+     * Don't call {@link #runWithState} with {@link #mCacheLock} held.
      */
     @VisibleForTesting(visibility = PRIVATE)
     public interface StateProvider {
         void runWithState(CurrentStateCallback callback);
 
         interface CurrentStateCallback {
-            void currentState(ArrayMap<String, PackageSetting> settings, UserInfo[] users);
+            void currentState(ArrayMap<String, ? extends PackageStateInternal> settings,
+                    UserInfo[] users);
         }
     }
 
@@ -329,12 +350,12 @@ public class AppsFilter implements Watchable, Snappable {
          *
          * @param removed true if adding, false if removing
          */
-        void updatePackageState(PackageSetting setting, boolean removed);
+        void updatePackageState(PackageStateInternal setting, boolean removed);
     }
 
     private static class FeatureConfigImpl implements FeatureConfig, CompatChange.ChangeListener {
         private static final String FILTERING_ENABLED_NAME = "package_query_filtering_enabled";
-        private final PackageManagerService.Injector mInjector;
+        private final PackageManagerServiceInjector mInjector;
         private final PackageManagerInternal mPmInternal;
         private volatile boolean mFeatureEnabled =
                 PackageManager.APP_ENUMERATION_ENABLED_BY_DEFAULT;
@@ -345,7 +366,7 @@ public class AppsFilter implements Watchable, Snappable {
         private AppsFilter mAppsFilter;
 
         private FeatureConfigImpl(
-                PackageManagerInternal pmInternal, PackageManagerService.Injector injector) {
+                PackageManagerInternal pmInternal, PackageManagerServiceInjector injector) {
             mPmInternal = pmInternal;
             mInjector = injector;
         }
@@ -440,7 +461,8 @@ public class AppsFilter implements Watchable, Snappable {
             // TODO(b/135203078): Do not use toAppInfo
             // TODO(b/167551701): Make changeId non-logging
             final boolean enabled = mInjector.getCompatibility().isChangeEnabledInternalNoLogging(
-                    PackageManager.FILTER_APPLICATION_QUERY, pkg.toAppInfoWithoutState());
+                    PackageManager.FILTER_APPLICATION_QUERY,
+                    AndroidPackageUtils.generateAppInfoWithoutState(pkg));
             if (enabled) {
                 mDisabledPackages.remove(pkg.getPackageName());
             } else {
@@ -452,25 +474,25 @@ public class AppsFilter implements Watchable, Snappable {
         }
 
         @Override
-        public void updatePackageState(PackageSetting setting, boolean removed) {
-            final boolean enableLogging = setting.pkg != null &&
-                    !removed && (setting.pkg.isTestOnly() || setting.pkg.isDebuggable());
-            enableLogging(setting.appId, enableLogging);
+        public void updatePackageState(PackageStateInternal setting, boolean removed) {
+            final boolean enableLogging = setting.getPkg() != null &&
+                    !removed && (setting.getPkg().isTestOnly() || setting.getPkg().isDebuggable());
+            enableLogging(setting.getAppId(), enableLogging);
             if (removed) {
-                mDisabledPackages.remove(setting.name);
-            } else if (setting.pkg != null) {
-                updateEnabledState(setting.pkg);
+                mDisabledPackages.remove(setting.getPackageName());
+            } else if (setting.getPkg() != null) {
+                updateEnabledState(setting.getPkg());
             }
         }
     }
 
     /** Builder method for an AppsFilter */
-    public static AppsFilter create(
-            PackageManagerInternal pms, PackageManagerService.Injector injector) {
+    public static AppsFilter create(@NonNull PackageManagerServiceInjector injector,
+            @NonNull PackageManagerInternal pmInt) {
         final boolean forceSystemAppsQueryable =
                 injector.getContext().getResources()
                         .getBoolean(R.bool.config_forceSystemPackagesQueryable);
-        final FeatureConfigImpl featureConfig = new FeatureConfigImpl(pms, injector);
+        final FeatureConfigImpl featureConfig = new FeatureConfigImpl(pmInt, injector);
         final String[] forcedQueryablePackageNames;
         if (forceSystemAppsQueryable) {
             // all system apps already queryable, no need to read and parse individual exceptions
@@ -491,7 +513,7 @@ public class AppsFilter implements Watchable, Snappable {
         };
         AppsFilter appsFilter = new AppsFilter(stateProvider, featureConfig,
                 forcedQueryablePackageNames, forceSystemAppsQueryable, null,
-                injector.getBackgroundExecutor());
+                injector.getBackgroundExecutor(), pmInt);
         featureConfig.setAppsFilter(appsFilter);
         return appsFilter;
     }
@@ -523,9 +545,9 @@ public class AppsFilter implements Watchable, Snappable {
                 && querying.getQueriesPackages().contains(potentialTarget.getPackageName());
     }
 
-    private static boolean canQueryAsInstaller(PackageSetting querying,
+    private static boolean canQueryAsInstaller(PackageStateInternal querying,
             AndroidPackage potentialTarget) {
-        final InstallSource installSource = querying.installSource;
+        final InstallSource installSource = querying.getInstallSource();
         if (potentialTarget.getPackageName().equals(installSource.installerPackageName)) {
             return true;
         }
@@ -612,7 +634,7 @@ public class AppsFilter implements Watchable, Snappable {
             Set<String> protectedBroadcasts) {
         List<ParsedIntentInfo> intents = component.getIntents();
         for (int i = ArrayUtils.size(intents) - 1; i >= 0; i--) {
-            IntentFilter intentFilter = intents.get(i);
+            IntentFilter intentFilter = intents.get(i).getIntentFilter();
             if (matchesIntentFilter(intent, intentFilter, protectedBroadcasts)) {
                 return true;
             }
@@ -633,15 +655,19 @@ public class AppsFilter implements Watchable, Snappable {
      *
      * @param recipientUid the uid gaining visibility of the {@code visibleUid}.
      * @param visibleUid   the uid becoming visible to the {@recipientUid}
+     * @param retainOnUpdate  if the implicit access retained across package updates.
      * @return {@code true} if implicit access was not already granted.
      */
-    public boolean grantImplicitAccess(int recipientUid, int visibleUid) {
+    public boolean grantImplicitAccess(int recipientUid, int visibleUid, boolean retainOnUpdate) {
         if (recipientUid == visibleUid) {
             return false;
         }
-        final boolean changed = mImplicitlyQueryable.add(recipientUid, visibleUid);
+        final boolean changed = retainOnUpdate
+                ? mRetainedImplicitlyQueryable.add(recipientUid, visibleUid)
+                : mImplicitlyQueryable.add(recipientUid, visibleUid);
         if (changed && DEBUG_LOGGING) {
-            Slog.i(TAG, "implicit access granted: " + recipientUid + " -> " + visibleUid);
+            Slog.i(TAG, (retainOnUpdate ? "retained " : "") + "implicit access granted: "
+                    + recipientUid + " -> " + visibleUid);
         }
         synchronized (mCacheLock) {
             if (mShouldFilterCache != null) {
@@ -670,14 +696,14 @@ public class AppsFilter implements Watchable, Snappable {
      * @param newPkgSetting the new setting being added
      * @param isReplace if the package is being replaced and may need extra cleanup.
      */
-    public void addPackage(PackageSetting newPkgSetting, boolean isReplace) {
+    public void addPackage(PackageStateInternal newPkgSetting, boolean isReplace) {
         if (DEBUG_TRACING) {
             Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "filter.addPackage");
         }
         try {
             if (isReplace) {
                 // let's first remove any prior rules for this package
-                removePackage(newPkgSetting);
+                removePackage(newPkgSetting, true /*isReplace*/);
             }
             mStateProvider.runWithState((settings, users) -> {
                 ArraySet<String> additionalChangedPackages =
@@ -685,11 +711,12 @@ public class AppsFilter implements Watchable, Snappable {
                 synchronized (mCacheLock) {
                     if (mShouldFilterCache != null) {
                         updateShouldFilterCacheForPackage(mShouldFilterCache, null, newPkgSetting,
-                                settings, users, settings.size());
+                                settings, users, USER_ALL, settings.size());
                         if (additionalChangedPackages != null) {
                             for (int index = 0; index < additionalChangedPackages.size(); index++) {
                                 String changedPackage = additionalChangedPackages.valueAt(index);
-                                PackageSetting changedPkgSetting = settings.get(changedPackage);
+                                PackageStateInternal changedPkgSetting =
+                                        settings.get(changedPackage);
                                 if (changedPkgSetting == null) {
                                     // It's possible for the overlay mapper to know that an actor
                                     // package changed via an explicit reference, even if the actor
@@ -698,7 +725,8 @@ public class AppsFilter implements Watchable, Snappable {
                                 }
 
                                 updateShouldFilterCacheForPackage(mShouldFilterCache, null,
-                                        changedPkgSetting, settings, users, settings.size());
+                                        changedPkgSetting, settings, users, USER_ALL,
+                                        settings.size());
                             }
                         }
                     } // else, rebuild entire cache when system is ready
@@ -717,21 +745,21 @@ public class AppsFilter implements Watchable, Snappable {
      * to be updated in the cache. Returns null if there are no additional packages.
      */
     @Nullable
-    private ArraySet<String> addPackageInternal(PackageSetting newPkgSetting,
-            ArrayMap<String, PackageSetting> existingSettings) {
-        if (Objects.equals("android", newPkgSetting.name)) {
+    private ArraySet<String> addPackageInternal(PackageStateInternal newPkgSetting,
+            ArrayMap<String, ? extends PackageStateInternal> existingSettings) {
+        if (Objects.equals("android", newPkgSetting.getPackageName())) {
             // let's set aside the framework signatures
-            mSystemSigningDetails = newPkgSetting.signatures.mSigningDetails;
+            mSystemSigningDetails = newPkgSetting.getSigningDetails();
             // and since we add overlays before we add the framework, let's revisit already added
             // packages for signature matches
-            for (PackageSetting setting : existingSettings.values()) {
+            for (PackageStateInternal setting : existingSettings.values()) {
                 if (isSystemSigned(mSystemSigningDetails, setting)) {
-                    mForceQueryable.add(setting.appId);
+                    mForceQueryable.add(setting.getAppId());
                 }
             }
         }
 
-        final AndroidPackage newPkg = newPkgSetting.pkg;
+        final AndroidPackage newPkg = newPkgSetting.getPkg();
         if (newPkg == null) {
             return null;
         }
@@ -741,9 +769,9 @@ public class AppsFilter implements Watchable, Snappable {
         }
 
         final boolean newIsForceQueryable =
-                mForceQueryable.contains(newPkgSetting.appId)
+                mForceQueryable.contains(newPkgSetting.getAppId())
                         /* shared user that is already force queryable */
-                        || newPkgSetting.forceQueryableOverride /* adb override */
+                        || newPkgSetting.isForceQueryableOverride() /* adb override */
                         || (newPkgSetting.isSystem() && (mSystemAppsQueryable
                         || newPkg.isForceQueryable()
                         || ArrayUtils.contains(mForceQueryableByDevicePackageNames,
@@ -751,63 +779,66 @@ public class AppsFilter implements Watchable, Snappable {
         if (newIsForceQueryable
                 || (mSystemSigningDetails != null
                 && isSystemSigned(mSystemSigningDetails, newPkgSetting))) {
-            mForceQueryable.add(newPkgSetting.appId);
+            mForceQueryable.add(newPkgSetting.getAppId());
         }
 
         for (int i = existingSettings.size() - 1; i >= 0; i--) {
-            final PackageSetting existingSetting = existingSettings.valueAt(i);
-            if (existingSetting.appId == newPkgSetting.appId || existingSetting.pkg == null) {
+            final PackageStateInternal existingSetting = existingSettings.valueAt(i);
+            if (existingSetting.getAppId() == newPkgSetting.getAppId() || existingSetting.getPkg()
+                    == null) {
                 continue;
             }
-            final AndroidPackage existingPkg = existingSetting.pkg;
+            final AndroidPackage existingPkg = existingSetting.getPkg();
             // let's evaluate the ability of already added packages to see this new package
             if (!newIsForceQueryable) {
                 if (!mQueriesViaComponentRequireRecompute && canQueryViaComponents(existingPkg,
                         newPkg, mProtectedBroadcasts)) {
-                    mQueriesViaComponent.add(existingSetting.appId, newPkgSetting.appId);
+                    mQueriesViaComponent.add(existingSetting.getAppId(), newPkgSetting.getAppId());
                 }
                 if (canQueryViaPackage(existingPkg, newPkg)
                         || canQueryAsInstaller(existingSetting, newPkg)) {
-                    mQueriesViaPackage.add(existingSetting.appId, newPkgSetting.appId);
+                    mQueriesViaPackage.add(existingSetting.getAppId(), newPkgSetting.getAppId());
                 }
                 if (canQueryViaUsesLibrary(existingPkg, newPkg)) {
-                    mQueryableViaUsesLibrary.add(existingSetting.appId, newPkgSetting.appId);
+                    mQueryableViaUsesLibrary.add(existingSetting.getAppId(),
+                            newPkgSetting.getAppId());
                 }
             }
             // now we'll evaluate our new package's ability to see existing packages
-            if (!mForceQueryable.contains(existingSetting.appId)) {
+            if (!mForceQueryable.contains(existingSetting.getAppId())) {
                 if (!mQueriesViaComponentRequireRecompute && canQueryViaComponents(newPkg,
                         existingPkg, mProtectedBroadcasts)) {
-                    mQueriesViaComponent.add(newPkgSetting.appId, existingSetting.appId);
+                    mQueriesViaComponent.add(newPkgSetting.getAppId(), existingSetting.getAppId());
                 }
                 if (canQueryViaPackage(newPkg, existingPkg)
                         || canQueryAsInstaller(newPkgSetting, existingPkg)) {
-                    mQueriesViaPackage.add(newPkgSetting.appId, existingSetting.appId);
+                    mQueriesViaPackage.add(newPkgSetting.getAppId(), existingSetting.getAppId());
                 }
                 if (canQueryViaUsesLibrary(newPkg, existingPkg)) {
-                    mQueryableViaUsesLibrary.add(newPkgSetting.appId, existingSetting.appId);
+                    mQueryableViaUsesLibrary.add(newPkgSetting.getAppId(),
+                            existingSetting.getAppId());
                 }
             }
             // if either package instruments the other, mark both as visible to one another
-            if (newPkgSetting.pkg != null && existingSetting.pkg != null
-                    && (pkgInstruments(newPkgSetting.pkg, existingSetting.pkg)
-                    || pkgInstruments(existingSetting.pkg, newPkgSetting.pkg))) {
-                mQueriesViaPackage.add(newPkgSetting.appId, existingSetting.appId);
-                mQueriesViaPackage.add(existingSetting.appId, newPkgSetting.appId);
+            if (newPkgSetting.getPkg() != null && existingSetting.getPkg() != null
+                    && (pkgInstruments(newPkgSetting.getPkg(), existingSetting.getPkg())
+                    || pkgInstruments(existingSetting.getPkg(), newPkgSetting.getPkg()))) {
+                mQueriesViaPackage.add(newPkgSetting.getAppId(), existingSetting.getAppId());
+                mQueriesViaPackage.add(existingSetting.getAppId(), newPkgSetting.getAppId());
             }
         }
 
         int existingSize = existingSettings.size();
         ArrayMap<String, AndroidPackage> existingPkgs = new ArrayMap<>(existingSize);
         for (int index = 0; index < existingSize; index++) {
-            PackageSetting pkgSetting = existingSettings.valueAt(index);
-            if (pkgSetting.pkg != null) {
-                existingPkgs.put(pkgSetting.name, pkgSetting.pkg);
+            PackageStateInternal pkgSetting = existingSettings.valueAt(index);
+            if (pkgSetting.getPkg() != null) {
+                existingPkgs.put(pkgSetting.getPackageName(), pkgSetting.getPkg());
             }
         }
 
         ArraySet<String> changedPackages =
-                mOverlayReferenceMapper.addPkg(newPkgSetting.pkg, existingPkgs);
+                mOverlayReferenceMapper.addPkg(newPkgSetting.getPkg(), existingPkgs);
 
         mFeatureConfig.updatePackageState(newPkgSetting, false /*removed*/);
 
@@ -832,9 +863,25 @@ public class AppsFilter implements Watchable, Snappable {
     }
 
     private void updateEntireShouldFilterCache() {
+        updateEntireShouldFilterCache(USER_ALL);
+    }
+
+    private void updateEntireShouldFilterCache(int subjectUserId) {
         mStateProvider.runWithState((settings, users) -> {
+            int userId = USER_NULL;
+            for (int u = 0; u < users.length; u++) {
+                if (subjectUserId == users[u].id) {
+                    userId = subjectUserId;
+                    break;
+                }
+            }
+            if (userId == USER_NULL) {
+                Slog.e(TAG, "We encountered a new user that isn't a member of known users, "
+                        + "updating the whole cache");
+                userId = USER_ALL;
+            }
             WatchedSparseBooleanMatrix cache =
-                    updateEntireShouldFilterCacheInner(settings, users);
+                    updateEntireShouldFilterCacheInner(settings, users, userId);
             synchronized (mCacheLock) {
                 mShouldFilterCache = cache;
             }
@@ -842,19 +889,27 @@ public class AppsFilter implements Watchable, Snappable {
     }
 
     private WatchedSparseBooleanMatrix updateEntireShouldFilterCacheInner(
-            ArrayMap<String, PackageSetting> settings, UserInfo[] users) {
-        WatchedSparseBooleanMatrix cache =
-                new WatchedSparseBooleanMatrix(users.length * settings.size());
+            ArrayMap<String, ? extends PackageStateInternal> settings, UserInfo[] users,
+            int subjectUserId) {
+        final WatchedSparseBooleanMatrix cache;
+        if (subjectUserId == USER_ALL) {
+            cache = new WatchedSparseBooleanMatrix(users.length * settings.size());
+        } else {
+            synchronized (mCacheLock) {
+                cache = mShouldFilterCache.snapshot();
+            }
+            cache.setCapacity(users.length * settings.size());
+        }
         for (int i = settings.size() - 1; i >= 0; i--) {
             updateShouldFilterCacheForPackage(cache,
-                    null /*skipPackage*/, settings.valueAt(i), settings, users, i);
+                    null /*skipPackage*/, settings.valueAt(i), settings, users, subjectUserId, i);
         }
         return cache;
     }
 
     private void updateEntireShouldFilterCacheAsync() {
         mBackgroundExecutor.execute(() -> {
-            final ArrayMap<String, PackageSetting> settingsCopy = new ArrayMap<>();
+            final ArrayMap<String, PackageStateInternal> settingsCopy = new ArrayMap<>();
             final ArrayMap<String, AndroidPackage> packagesCache = new ArrayMap<>();
             final UserInfo[][] usersRef = new UserInfo[1][];
             mStateProvider.runWithState((settings, users) -> {
@@ -864,12 +919,12 @@ public class AppsFilter implements Watchable, Snappable {
                 // store away the references to the immutable packages, since settings are retained
                 // during updates.
                 for (int i = 0, max = settings.size(); i < max; i++) {
-                    final AndroidPackage pkg = settings.valueAt(i).pkg;
+                    final AndroidPackage pkg = settings.valueAt(i).getPkg();
                     packagesCache.put(settings.keyAt(i), pkg);
                 }
             });
-            WatchedSparseBooleanMatrix cache =
-                    updateEntireShouldFilterCacheInner(settingsCopy, usersRef[0]);
+            WatchedSparseBooleanMatrix cache = updateEntireShouldFilterCacheInner(
+                    settingsCopy, usersRef[0], USER_ALL);
             boolean[] changed = new boolean[1];
             // We have a cache, let's make sure the world hasn't changed out from under us.
             mStateProvider.runWithState((settings, users) -> {
@@ -878,7 +933,7 @@ public class AppsFilter implements Watchable, Snappable {
                     return;
                 }
                 for (int i = 0, max = settings.size(); i < max; i++) {
-                    final AndroidPackage pkg = settings.valueAt(i).pkg;
+                    final AndroidPackage pkg = settings.valueAt(i).getPkg();
                     if (!Objects.equals(pkg, packagesCache.get(settings.keyAt(i)))) {
                         changed[0] = true;
                         return;
@@ -899,73 +954,119 @@ public class AppsFilter implements Watchable, Snappable {
         });
     }
 
-    public void onUsersChanged() {
+    public void onUserCreated(int newUserId) {
         synchronized (mCacheLock) {
             if (mShouldFilterCache != null) {
-                updateEntireShouldFilterCache();
+                updateEntireShouldFilterCache(newUserId);
+                onChanged();
+            }
+        }
+    }
+
+    public void onUserDeleted(@UserIdInt int userId) {
+        synchronized (mCacheLock) {
+            if (mShouldFilterCache != null) {
+                removeShouldFilterCacheForUser(userId);
                 onChanged();
             }
         }
     }
 
     private void updateShouldFilterCacheForPackage(String packageName) {
-        synchronized (mCacheLock) {
-            if (mShouldFilterCache != null) {
-                mStateProvider.runWithState((settings, users) -> {
-                    updateShouldFilterCacheForPackage(mShouldFilterCache, null /* skipPackage */,
-                            settings.get(packageName), settings, users,
-                            settings.size() /*maxIndex*/);
-                });
+        mStateProvider.runWithState((settings, users) -> {
+            synchronized (mCacheLock) {
+                if (mShouldFilterCache == null) {
+                    return;
+                }
+                updateShouldFilterCacheForPackage(mShouldFilterCache, null /* skipPackage */,
+                        settings.get(packageName), settings, users, USER_ALL,
+                        settings.size() /*maxIndex*/);
             }
-        }
+        });
     }
 
     private void updateShouldFilterCacheForPackage(WatchedSparseBooleanMatrix cache,
-            @Nullable String skipPackageName, PackageSetting subjectSetting, ArrayMap<String,
-            PackageSetting> allSettings, UserInfo[] allUsers, int maxIndex) {
+            @Nullable String skipPackageName, PackageStateInternal subjectSetting, ArrayMap<String,
+            ? extends PackageStateInternal> allSettings, UserInfo[] allUsers, int subjectUserId,
+            int maxIndex) {
         for (int i = Math.min(maxIndex, allSettings.size() - 1); i >= 0; i--) {
-            PackageSetting otherSetting = allSettings.valueAt(i);
-            if (subjectSetting.appId == otherSetting.appId) {
+            PackageStateInternal otherSetting = allSettings.valueAt(i);
+            if (subjectSetting.getAppId() == otherSetting.getAppId()) {
                 continue;
             }
             //noinspection StringEquality
-            if (subjectSetting.name == skipPackageName || otherSetting.name == skipPackageName) {
+            if (subjectSetting.getPackageName() == skipPackageName || otherSetting.getPackageName()
+                    == skipPackageName) {
                 continue;
             }
-            final int userCount = allUsers.length;
-            final int appxUidCount = userCount * allSettings.size();
-            for (int su = 0; su < userCount; su++) {
-                int subjectUser = allUsers[su].id;
-                for (int ou = 0; ou < userCount; ou++) {
-                    int otherUser = allUsers[ou].id;
-                    int subjectUid = UserHandle.getUid(subjectUser, subjectSetting.appId);
-                    int otherUid = UserHandle.getUid(otherUser, otherSetting.appId);
-                    cache.put(subjectUid, otherUid,
-                            shouldFilterApplicationInternal(
-                                    subjectUid, subjectSetting, otherSetting, otherUser));
-                    cache.put(otherUid, subjectUid,
-                            shouldFilterApplicationInternal(
-                                    otherUid, otherSetting, subjectSetting, subjectUser));
+            if (subjectUserId == USER_ALL) {
+                for (int su = 0; su < allUsers.length; su++) {
+                    updateShouldFilterCacheForUser(cache, subjectSetting, allUsers, otherSetting,
+                            allUsers[su].id);
                 }
+            } else {
+                updateShouldFilterCacheForUser(cache, subjectSetting, allUsers, otherSetting,
+                        subjectUserId);
             }
         }
     }
 
-    private static boolean isSystemSigned(@NonNull PackageParser.SigningDetails sysSigningDetails,
-            PackageSetting pkgSetting) {
+    private void updateShouldFilterCacheForUser(WatchedSparseBooleanMatrix cache,
+            PackageStateInternal subjectSetting, UserInfo[] allUsers,
+            PackageStateInternal otherSetting, int subjectUserId) {
+        for (int ou = 0; ou < allUsers.length; ou++) {
+            int otherUser = allUsers[ou].id;
+            int subjectUid = UserHandle.getUid(subjectUserId, subjectSetting.getAppId());
+            int otherUid = UserHandle.getUid(otherUser, otherSetting.getAppId());
+            cache.put(subjectUid, otherUid,
+                    shouldFilterApplicationInternal(
+                            subjectUid, subjectSetting, otherSetting, otherUser));
+            cache.put(otherUid, subjectUid,
+                    shouldFilterApplicationInternal(
+                            otherUid, otherSetting, subjectSetting, subjectUserId));
+        }
+    }
+
+    @GuardedBy("mCacheLock")
+    private void removeShouldFilterCacheForUser(int userId) {
+        // Sorted uids with the ascending order
+        final int[] cacheUids = mShouldFilterCache.keys();
+        final int size = cacheUids.length;
+        int pos = Arrays.binarySearch(cacheUids, UserHandle.getUid(userId, 0));
+        final int fromIndex = (pos >= 0 ? pos : ~pos);
+        if (fromIndex >= size || UserHandle.getUserId(cacheUids[fromIndex]) != userId) {
+            Slog.w(TAG, "Failed to remove should filter cache for user " + userId
+                    + ", fromIndex=" + fromIndex);
+            return;
+        }
+        pos = Arrays.binarySearch(cacheUids, UserHandle.getUid(userId + 1, 0) - 1);
+        final int toIndex = (pos >= 0 ? pos + 1 : ~pos);
+        if (fromIndex >= toIndex || UserHandle.getUserId(cacheUids[toIndex - 1]) != userId) {
+            Slog.w(TAG, "Failed to remove should filter cache for user " + userId
+                    + ", fromIndex=" + fromIndex + ", toIndex=" + toIndex);
+            return;
+        }
+        mShouldFilterCache.removeRange(fromIndex, toIndex);
+        mShouldFilterCache.compact();
+    }
+
+    private static boolean isSystemSigned(@NonNull SigningDetails sysSigningDetails,
+            PackageStateInternal pkgSetting) {
         return pkgSetting.isSystem()
-                && pkgSetting.signatures.mSigningDetails.signaturesMatchExactly(sysSigningDetails);
+                && pkgSetting.getSigningDetails().signaturesMatchExactly(sysSigningDetails);
     }
 
     private ArraySet<String> collectProtectedBroadcasts(
-            ArrayMap<String, PackageSetting> existingSettings, @Nullable String excludePackage) {
+            ArrayMap<String, ? extends PackageStateInternal> existingSettings,
+            @Nullable String excludePackage) {
         ArraySet<String> ret = new ArraySet<>();
         for (int i = existingSettings.size() - 1; i >= 0; i--) {
-            PackageSetting setting = existingSettings.valueAt(i);
-            if (setting.pkg == null || setting.pkg.getPackageName().equals(excludePackage)) {
+            PackageStateInternal setting = existingSettings.valueAt(i);
+            if (setting.getPkg() == null || setting.getPkg().getPackageName().equals(
+                    excludePackage)) {
                 continue;
             }
-            final List<String> protectedBroadcasts = setting.pkg.getProtectedBroadcasts();
+            final List<String> protectedBroadcasts = setting.getPkg().getProtectedBroadcasts();
             if (!protectedBroadcasts.isEmpty()) {
                 ret.addAll(protectedBroadcasts);
             }
@@ -975,26 +1076,28 @@ public class AppsFilter implements Watchable, Snappable {
 
     /**
      * This method recomputes all component / intent-based visibility and is intended to match the
-     * relevant logic of {@link #addPackageInternal(PackageSetting, ArrayMap)}
+     * relevant logic of {@link #addPackageInternal(PackageStateInternal, ArrayMap)}
      */
     private void recomputeComponentVisibility(
-            ArrayMap<String, PackageSetting> existingSettings) {
+            ArrayMap<String, ? extends PackageStateInternal> existingSettings) {
         mQueriesViaComponent.clear();
         for (int i = existingSettings.size() - 1; i >= 0; i--) {
-            PackageSetting setting = existingSettings.valueAt(i);
-            if (setting.pkg == null || requestsQueryAllPackages(setting.pkg)) {
+            PackageStateInternal setting = existingSettings.valueAt(i);
+            if (setting.getPkg() == null || requestsQueryAllPackages(setting.getPkg())) {
                 continue;
             }
             for (int j = existingSettings.size() - 1; j >= 0; j--) {
                 if (i == j) {
                     continue;
                 }
-                final PackageSetting otherSetting = existingSettings.valueAt(j);
-                if (otherSetting.pkg == null || mForceQueryable.contains(otherSetting.appId)) {
+                final PackageStateInternal otherSetting = existingSettings.valueAt(j);
+                if (otherSetting.getPkg() == null || mForceQueryable.contains(
+                        otherSetting.getAppId())) {
                     continue;
                 }
-                if (canQueryViaComponents(setting.pkg, otherSetting.pkg, mProtectedBroadcasts)) {
-                    mQueriesViaComponent.add(setting.appId, otherSetting.appId);
+                if (canQueryViaComponents(setting.getPkg(), otherSetting.getPkg(),
+                        mProtectedBroadcasts)) {
+                    mQueriesViaComponent.add(setting.getAppId(), otherSetting.getAppId());
                 }
             }
         }
@@ -1016,9 +1119,9 @@ public class AppsFilter implements Watchable, Snappable {
      * applied.
      */
     @Nullable
-    public SparseArray<int[]> getVisibilityAllowList(PackageSetting setting, int[] users,
-            ArrayMap<String, PackageSetting> existingSettings) {
-        if (mForceQueryable.contains(setting.appId)) {
+    public SparseArray<int[]> getVisibilityAllowList(PackageStateInternal setting, int[] users,
+            ArrayMap<String, ? extends PackageStateInternal> existingSettings) {
+        if (mForceQueryable.contains(setting.getAppId())) {
             return null;
         }
         // let's reserve max memory to limit the number of allocations
@@ -1029,8 +1132,8 @@ public class AppsFilter implements Watchable, Snappable {
             int[] buffer = null;
             int allowListSize = 0;
             for (int i = existingSettings.size() - 1; i >= 0; i--) {
-                final PackageSetting existingSetting = existingSettings.valueAt(i);
-                final int existingAppId = existingSetting.appId;
+                final PackageStateInternal existingSetting = existingSettings.valueAt(i);
+                final int existingAppId = existingSetting.getAppId();
                 if (existingAppId < Process.FIRST_APPLICATION_UID) {
                     continue;
                 }
@@ -1060,17 +1163,17 @@ public class AppsFilter implements Watchable, Snappable {
      */
     @VisibleForTesting(visibility = PRIVATE)
     @Nullable
-    SparseArray<int[]> getVisibilityAllowList(PackageSetting setting, int[] users,
-            WatchedArrayMap<String, PackageSetting> existingSettings) {
+    SparseArray<int[]> getVisibilityAllowList(PackageStateInternal setting, int[] users,
+            WatchedArrayMap<String, ? extends PackageStateInternal> existingSettings) {
         return getVisibilityAllowList(setting, users, existingSettings.untrackedStorage());
     }
 
     /**
-     * Equivalent to calling {@link #addPackage(PackageSetting, boolean)} with {@code isReplace}
-     * equal to {@code false}.
-     * @see AppsFilter#addPackage(PackageSetting, boolean)
+     * Equivalent to calling {@link #addPackage(PackageStateInternal, boolean)} with
+     * {@code isReplace} equal to {@code false}.
+     * @see AppsFilter#addPackage(PackageStateInternal, boolean)
      */
-    public void addPackage(PackageSetting newPkgSetting) {
+    public void addPackage(PackageStateInternal newPkgSetting) {
         addPackage(newPkgSetting, false /* isReplace */);
     }
 
@@ -1078,38 +1181,50 @@ public class AppsFilter implements Watchable, Snappable {
      * Removes a package for consideration when filtering visibility between apps.
      *
      * @param setting the setting of the package being removed.
+     * @param isReplace if the package is being replaced.
      */
-    public void removePackage(PackageSetting setting) {
+    public void removePackage(PackageStateInternal setting, boolean isReplace) {
         mStateProvider.runWithState((settings, users) -> {
             final int userCount = users.length;
             for (int u = 0; u < userCount; u++) {
                 final int userId = users[u].id;
-                final int removingUid = UserHandle.getUid(userId, setting.appId);
+                final int removingUid = UserHandle.getUid(userId, setting.getAppId());
                 mImplicitlyQueryable.remove(removingUid);
                 for (int i = mImplicitlyQueryable.size() - 1; i >= 0; i--) {
                     mImplicitlyQueryable.remove(mImplicitlyQueryable.keyAt(i), removingUid);
                 }
+
+                if (isReplace) {
+                    continue;
+                }
+
+                mRetainedImplicitlyQueryable.remove(removingUid);
+                for (int i = mRetainedImplicitlyQueryable.size() - 1; i >= 0; i--) {
+                    mRetainedImplicitlyQueryable.remove(
+                            mRetainedImplicitlyQueryable.keyAt(i), removingUid);
+                }
             }
 
             if (!mQueriesViaComponentRequireRecompute) {
-                mQueriesViaComponent.remove(setting.appId);
+                mQueriesViaComponent.remove(setting.getAppId());
                 for (int i = mQueriesViaComponent.size() - 1; i >= 0; i--) {
-                    mQueriesViaComponent.remove(mQueriesViaComponent.keyAt(i), setting.appId);
+                    mQueriesViaComponent.remove(mQueriesViaComponent.keyAt(i), setting.getAppId());
                 }
             }
-            mQueriesViaPackage.remove(setting.appId);
+            mQueriesViaPackage.remove(setting.getAppId());
             for (int i = mQueriesViaPackage.size() - 1; i >= 0; i--) {
-                mQueriesViaPackage.remove(mQueriesViaPackage.keyAt(i), setting.appId);
+                mQueriesViaPackage.remove(mQueriesViaPackage.keyAt(i), setting.getAppId());
             }
-            mQueryableViaUsesLibrary.remove(setting.appId);
+            mQueryableViaUsesLibrary.remove(setting.getAppId());
             for (int i = mQueryableViaUsesLibrary.size() - 1; i >= 0; i--) {
-                mQueryableViaUsesLibrary.remove(mQueryableViaUsesLibrary.keyAt(i), setting.appId);
+                mQueryableViaUsesLibrary.remove(mQueryableViaUsesLibrary.keyAt(i),
+                        setting.getAppId());
             }
 
-            mForceQueryable.remove(setting.appId);
+            mForceQueryable.remove(setting.getAppId());
 
-            if (setting.pkg != null && !setting.pkg.getProtectedBroadcasts().isEmpty()) {
-                final String removingPackageName = setting.pkg.getPackageName();
+            if (setting.getPkg() != null && !setting.getPkg().getProtectedBroadcasts().isEmpty()) {
+                final String removingPackageName = setting.getPkg().getPackageName();
                 final Set<String> protectedBroadcasts = mProtectedBroadcasts;
                 mProtectedBroadcasts = collectProtectedBroadcasts(settings, removingPackageName);
                 if (!mProtectedBroadcasts.containsAll(protectedBroadcasts)) {
@@ -1118,7 +1233,7 @@ public class AppsFilter implements Watchable, Snappable {
             }
 
             ArraySet<String> additionalChangedPackages =
-                    mOverlayReferenceMapper.removePkg(setting.name);
+                    mOverlayReferenceMapper.removePkg(setting.getPackageName());
 
             mFeatureConfig.updatePackageState(setting, true /*removed*/);
 
@@ -1126,26 +1241,32 @@ public class AppsFilter implements Watchable, Snappable {
             // shared user members to re-establish visibility between them and other packages.
             // NOTE: this must come after all removals from data structures but before we update the
             //       cache
-            if (setting.sharedUser != null) {
-                for (int i = setting.sharedUser.packages.size() - 1; i >= 0; i--) {
-                    if (setting.sharedUser.packages.valueAt(i) == setting) {
+            if (setting.hasSharedUser()) {
+                final ArraySet<PackageStateInternal> sharedUserPackages =
+                        mPmInternal.getSharedUserPackages(setting.getSharedUserAppId());
+                for (int i = sharedUserPackages.size() - 1; i >= 0; i--) {
+                    if (sharedUserPackages.valueAt(i) == setting) {
                         continue;
                     }
                     addPackageInternal(
-                            setting.sharedUser.packages.valueAt(i), settings);
+                            sharedUserPackages.valueAt(i), settings);
                 }
             }
 
             synchronized (mCacheLock) {
-                removeAppIdFromVisibilityCache(setting.appId);
-                if (mShouldFilterCache != null && setting.sharedUser != null) {
-                    for (int i = setting.sharedUser.packages.size() - 1; i >= 0; i--) {
-                        PackageSetting siblingSetting = setting.sharedUser.packages.valueAt(i);
+                removeAppIdFromVisibilityCache(setting.getAppId());
+                if (mShouldFilterCache != null && setting.hasSharedUser()) {
+                    final ArraySet<PackageStateInternal> sharedUserPackages =
+                            mPmInternal.getSharedUserPackages(setting.getSharedUserAppId());
+                    for (int i = sharedUserPackages.size() - 1; i >= 0; i--) {
+                        PackageStateInternal siblingSetting =
+                                sharedUserPackages.valueAt(i);
                         if (siblingSetting == setting) {
                             continue;
                         }
-                        updateShouldFilterCacheForPackage(mShouldFilterCache, setting.name,
-                                siblingSetting, settings, users, settings.size());
+                        updateShouldFilterCacheForPackage(mShouldFilterCache,
+                                setting.getPackageName(), siblingSetting, settings, users,
+                                USER_ALL, settings.size());
                     }
                 }
 
@@ -1153,7 +1274,7 @@ public class AppsFilter implements Watchable, Snappable {
                     if (additionalChangedPackages != null) {
                         for (int index = 0; index < additionalChangedPackages.size(); index++) {
                             String changedPackage = additionalChangedPackages.valueAt(index);
-                            PackageSetting changedPkgSetting = settings.get(changedPackage);
+                            PackageStateInternal changedPkgSetting = settings.get(changedPackage);
                             if (changedPkgSetting == null) {
                                 // It's possible for the overlay mapper to know that an actor
                                 // package changed via an explicit reference, even if the actor
@@ -1162,7 +1283,7 @@ public class AppsFilter implements Watchable, Snappable {
                             }
 
                             updateShouldFilterCacheForPackage(mShouldFilterCache, null,
-                                    changedPkgSetting, settings, users, settings.size());
+                                    changedPkgSetting, settings, users, USER_ALL, settings.size());
                         }
                     }
                 }
@@ -1182,16 +1303,16 @@ public class AppsFilter implements Watchable, Snappable {
      * @param targetPkgSetting the package being accessed
      * @param userId           the user in which this access is being attempted
      */
-    public boolean shouldFilterApplication(int callingUid, @Nullable SettingBase callingSetting,
-            PackageSetting targetPkgSetting, int userId) {
+    public boolean shouldFilterApplication(int callingUid, @Nullable Object callingSetting,
+            PackageStateInternal targetPkgSetting, int userId) {
         if (DEBUG_TRACING) {
             Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "shouldFilterApplication");
         }
         try {
             int callingAppId = UserHandle.getAppId(callingUid);
             if (callingAppId < Process.FIRST_APPLICATION_UID
-                    || targetPkgSetting.appId < Process.FIRST_APPLICATION_UID
-                    || callingAppId == targetPkgSetting.appId) {
+                    || targetPkgSetting.getAppId() < Process.FIRST_APPLICATION_UID
+                    || callingAppId == targetPkgSetting.getAppId()) {
                 return false;
             }
             synchronized (mCacheLock) {
@@ -1202,14 +1323,16 @@ public class AppsFilter implements Watchable, Snappable {
                                 + callingUid);
                         return true;
                     }
-                    final int targetUid = UserHandle.getUid(userId, targetPkgSetting.appId);
+                    final int targetUid = UserHandle.getUid(userId, targetPkgSetting.getAppId());
                     final int targetIndex = mShouldFilterCache.indexOfKey(targetUid);
                     if (targetIndex < 0) {
                         Slog.w(TAG, "Encountered calling -> target with no cached rules: "
                                 + callingUid + " -> " + targetUid);
                         return true;
                     }
-                    return mShouldFilterCache.valueAt(callingIndex, targetIndex);
+                    if (!mShouldFilterCache.valueAt(callingIndex, targetIndex)) {
+                        return false;
+                    }
                 } else {
                     if (!shouldFilterApplicationInternal(
                             callingUid, callingSetting, targetPkgSetting, userId)) {
@@ -1228,8 +1351,8 @@ public class AppsFilter implements Watchable, Snappable {
         }
     }
 
-    private boolean shouldFilterApplicationInternal(int callingUid, SettingBase callingSetting,
-            PackageSetting targetPkgSetting, int targetUserId) {
+    private boolean shouldFilterApplicationInternal(int callingUid, Object callingSetting,
+            PackageStateInternal targetPkgSetting, int targetUserId) {
         if (DEBUG_TRACING) {
             Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "shouldFilterApplicationInternal");
         }
@@ -1245,31 +1368,32 @@ public class AppsFilter implements Watchable, Snappable {
                 Slog.wtf(TAG, "No setting found for non system uid " + callingUid);
                 return true;
             }
-            final PackageSetting callingPkgSetting;
-            final ArraySet<PackageSetting> callingSharedPkgSettings;
+            final PackageStateInternal callingPkgSetting;
+            final ArraySet<? extends PackageStateInternal> callingSharedPkgSettings;
             if (DEBUG_TRACING) {
                 Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "callingSetting instanceof");
             }
-            if (callingSetting instanceof PackageSetting) {
-                if (((PackageSetting) callingSetting).sharedUser == null) {
-                    callingPkgSetting = (PackageSetting) callingSetting;
-                    callingSharedPkgSettings = null;
-                } else {
+            if (callingSetting instanceof PackageStateInternal) {
+                final PackageStateInternal packageState = (PackageStateInternal) callingSetting;
+                if (packageState.hasSharedUser()) {
                     callingPkgSetting = null;
-                    callingSharedPkgSettings =
-                            ((PackageSetting) callingSetting).sharedUser.packages;
+                    callingSharedPkgSettings = mPmInternal.getSharedUserPackages(
+                            packageState.getSharedUserAppId());
+                } else {
+                    callingPkgSetting = packageState;
+                    callingSharedPkgSettings = null;
                 }
             } else {
                 callingPkgSetting = null;
-                callingSharedPkgSettings = ((SharedUserSetting) callingSetting).packages;
+                callingSharedPkgSettings = ((SharedUserSetting) callingSetting).getPackageStates();
             }
             if (DEBUG_TRACING) {
                 Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
             }
 
             if (callingPkgSetting != null) {
-                if (callingPkgSetting.pkg != null
-                        && !mFeatureConfig.packageIsEnabled(callingPkgSetting.pkg)) {
+                if (callingPkgSetting.getPkg() != null
+                        && !mFeatureConfig.packageIsEnabled(callingPkgSetting.getPkg())) {
                     if (DEBUG_LOGGING) {
                         log(callingSetting, targetPkgSetting, "DISABLED");
                     }
@@ -1277,7 +1401,7 @@ public class AppsFilter implements Watchable, Snappable {
                 }
             } else {
                 for (int i = callingSharedPkgSettings.size() - 1; i >= 0; i--) {
-                    final AndroidPackage pkg = callingSharedPkgSettings.valueAt(i).pkg;
+                    final AndroidPackage pkg = callingSharedPkgSettings.valueAt(i).getPkg();
                     if (pkg != null && !mFeatureConfig.packageIsEnabled(pkg)) {
                         if (DEBUG_LOGGING) {
                             log(callingSetting, targetPkgSetting, "DISABLED");
@@ -1292,11 +1416,12 @@ public class AppsFilter implements Watchable, Snappable {
             }
             final int callingAppId;
             if (callingPkgSetting != null) {
-                callingAppId = callingPkgSetting.appId;
+                callingAppId = callingPkgSetting.getAppId();
             } else {
-                callingAppId = callingSharedPkgSettings.valueAt(0).appId; // all should be the same
+                // all should be the same
+                callingAppId = callingSharedPkgSettings.valueAt(0).getAppId();
             }
-            final int targetAppId = targetPkgSetting.appId;
+            final int targetAppId = targetPkgSetting.getAppId();
             if (DEBUG_TRACING) {
                 Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
             }
@@ -1312,13 +1437,13 @@ public class AppsFilter implements Watchable, Snappable {
                     Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "requestsQueryAllPackages");
                 }
                 if (callingPkgSetting != null) {
-                        if (callingPkgSetting.pkg != null
-                                && requestsQueryAllPackages(callingPkgSetting.pkg)) {
+                        if (callingPkgSetting.getPkg() != null
+                                && requestsQueryAllPackages(callingPkgSetting.getPkg())) {
                             return false;
                         }
                 } else {
                     for (int i = callingSharedPkgSettings.size() - 1; i >= 0; i--) {
-                        AndroidPackage pkg = callingSharedPkgSettings.valueAt(i).pkg;
+                        AndroidPackage pkg = callingSharedPkgSettings.valueAt(i).getPkg();
                         if (pkg != null && requestsQueryAllPackages(pkg)) {
                             return false;
                         }
@@ -1332,7 +1457,7 @@ public class AppsFilter implements Watchable, Snappable {
 
             // This package isn't technically installed and won't be written to settings, so we can
             // treat it as filtered until it's available again.
-            final AndroidPackage targetPkg = targetPkgSetting.pkg;
+            final AndroidPackage targetPkg = targetPkgSetting.getPkg();
             if (targetPkg == null) {
                 if (DEBUG_LOGGING) {
                     Slog.wtf(TAG, "shouldFilterApplication: " + "targetPkg is null");
@@ -1414,14 +1539,33 @@ public class AppsFilter implements Watchable, Snappable {
 
             try {
                 if (DEBUG_TRACING) {
+                    Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "mRetainedImplicitlyQueryable");
+                }
+                final int targetUid = UserHandle.getUid(targetUserId, targetAppId);
+                if (mRetainedImplicitlyQueryable.contains(callingUid, targetUid)) {
+                    if (DEBUG_LOGGING) {
+                        log(callingSetting, targetPkgSetting,
+                                "retained implicitly queryable for user");
+                    }
+                    return false;
+                }
+            } finally {
+                if (DEBUG_TRACING) {
+                    Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+                }
+            }
+
+            try {
+                if (DEBUG_TRACING) {
                     Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "mOverlayReferenceMapper");
                 }
                 final String targetName = targetPkg.getPackageName();
                 if (callingSharedPkgSettings != null) {
                     int size = callingSharedPkgSettings.size();
                     for (int index = 0; index < size; index++) {
-                        PackageSetting pkgSetting = callingSharedPkgSettings.valueAt(index);
-                        if (mOverlayReferenceMapper.isValidActor(targetName, pkgSetting.name)) {
+                        PackageStateInternal pkgSetting = callingSharedPkgSettings.valueAt(index);
+                        if (mOverlayReferenceMapper.isValidActor(targetName,
+                                pkgSetting.getPackageName())) {
                             if (DEBUG_LOGGING) {
                                 log(callingPkgSetting, targetPkgSetting,
                                         "matches shared user of package that acts on target of "
@@ -1431,7 +1575,8 @@ public class AppsFilter implements Watchable, Snappable {
                         }
                     }
                 } else {
-                    if (mOverlayReferenceMapper.isValidActor(targetName, callingPkgSetting.name)) {
+                    if (mOverlayReferenceMapper.isValidActor(targetName,
+                            callingPkgSetting.getPackageName())) {
                         if (DEBUG_LOGGING) {
                             log(callingPkgSetting, targetPkgSetting, "acts on target of overlay");
                         }
@@ -1468,6 +1613,24 @@ public class AppsFilter implements Watchable, Snappable {
         }
     }
 
+    boolean canQueryPackage(@NonNull AndroidPackage querying, String potentialTarget) {
+        int appId = UserHandle.getAppId(querying.getUid());
+        if (appId < Process.FIRST_APPLICATION_UID) {
+            return true;
+        }
+
+        // Check if FILTER_APPLICATION_QUERY is enabled on the given package.
+        if (!mFeatureConfig.packageIsEnabled(querying)) {
+            return true;
+        }
+
+        if (requestsQueryAllPackages(querying)) {
+            return true;
+        }
+
+        return !querying.getQueriesPackages().isEmpty()
+                && querying.getQueriesPackages().contains(potentialTarget);
+    }
 
     private static boolean requestsQueryAllPackages(@NonNull AndroidPackage pkg) {
         // we're not guaranteed to have permissions yet analyzed at package add, so we inspect the
@@ -1498,7 +1661,7 @@ public class AppsFilter implements Watchable, Snappable {
         }
     }
 
-    private static void log(SettingBase callingSetting, PackageSetting targetPkgSetting,
+    private static void log(Object callingSetting, PackageStateInternal targetPkgSetting,
             String description) {
         Slog.i(TAG,
                 "interaction: " + (callingSetting == null ? "system" : callingSetting) + " -> "
@@ -1542,7 +1705,7 @@ public class AppsFilter implements Watchable, Snappable {
         dumpPackageSet(pw, filteringAppId, mForceQueryable, "forceQueryable", "  ", expandPackages);
         pw.println("  queries via package name:");
         dumpQueriesMap(pw, filteringAppId, mQueriesViaPackage, "    ", expandPackages);
-        pw.println("  queries via intent:");
+        pw.println("  queries via component:");
         dumpQueriesMap(pw, filteringAppId, mQueriesViaComponent, "    ", expandPackages);
         pw.println("  queryable via interaction:");
         for (int user : users) {
@@ -1550,6 +1713,9 @@ public class AppsFilter implements Watchable, Snappable {
             dumpQueriesMap(pw,
                     filteringAppId == null ? null : UserHandle.getUid(user, filteringAppId),
                     mImplicitlyQueryable, "      ", expandPackages);
+            dumpQueriesMap(pw,
+                    filteringAppId == null ? null : UserHandle.getUid(user, filteringAppId),
+                    mRetainedImplicitlyQueryable, "      ", expandPackages);
         }
         pw.println("  queryable via uses-library:");
         dumpQueriesMap(pw, filteringAppId, mQueryableViaUsesLibrary, "    ", expandPackages);

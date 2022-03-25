@@ -53,6 +53,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SharedMemory;
 import android.os.UserHandle;
+import android.service.voice.HotwordDetector;
 import android.service.voice.IMicrophoneHotwordDetectionVoiceInteractionCallback;
 import android.service.voice.IVoiceInteractionService;
 import android.service.voice.IVoiceInteractionSession;
@@ -102,6 +103,7 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
 
     VoiceInteractionSessionConnection mActiveSession;
     int mDisabledShowContext;
+    int mDetectorType;
 
     final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -190,7 +192,8 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
                 ServiceManager.getService(Context.WINDOW_SERVICE));
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
-        mContext.registerReceiver(mBroadcastReceiver, filter, null, handler);
+        mContext.registerReceiver(mBroadcastReceiver, filter, null, handler,
+                Context.RECEIVER_EXPORTED);
     }
 
     public boolean showSessionLocked(Bundle args, int flags,
@@ -414,30 +417,78 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
         return mInfo.getSupportsLocalInteraction();
     }
 
+    public void startListeningVisibleActivityChangedLocked(@NonNull IBinder token) {
+        if (DEBUG) {
+            Slog.d(TAG, "startListeningVisibleActivityChangedLocked: token=" + token);
+        }
+        if (mActiveSession == null || token != mActiveSession.mToken) {
+            Slog.w(TAG, "startListeningVisibleActivityChangedLocked does not match"
+                    + " active session");
+            return;
+        }
+        mActiveSession.startListeningVisibleActivityChangedLocked();
+    }
+
+    public void stopListeningVisibleActivityChangedLocked(@NonNull IBinder token) {
+        if (DEBUG) {
+            Slog.d(TAG, "stopListeningVisibleActivityChangedLocked: token=" + token);
+        }
+        if (mActiveSession == null || token != mActiveSession.mToken) {
+            Slog.w(TAG, "stopListeningVisibleActivityChangedLocked does not match"
+                    + " active session");
+            return;
+        }
+        mActiveSession.stopListeningVisibleActivityChangedLocked();
+    }
+
+    public void notifyActivityEventChangedLocked() {
+        if (DEBUG) {
+            Slog.d(TAG, "notifyActivityEventChangedLocked");
+        }
+        if (mActiveSession == null || !mActiveSession.mShown) {
+            if (DEBUG) {
+                Slog.d(TAG, "notifyActivityEventChangedLocked not allowed on no session or"
+                        + " hidden session");
+            }
+            return;
+        }
+        mActiveSession.notifyActivityEventChangedLocked();
+    }
+
     public void updateStateLocked(
             @NonNull Identity voiceInteractorIdentity,
             @Nullable PersistableBundle options,
             @Nullable SharedMemory sharedMemory,
-            IHotwordRecognitionStatusCallback callback) {
+            IHotwordRecognitionStatusCallback callback,
+            int detectorType) {
         Slog.v(TAG, "updateStateLocked");
+        int voiceInteractionServiceUid = mInfo.getServiceInfo().applicationInfo.uid;
         if (mHotwordDetectionComponentName == null) {
             Slog.w(TAG, "Hotword detection service name not found");
+            logDetectorCreateEventIfNeeded(callback, detectorType, false,
+                    voiceInteractionServiceUid);
             throw new IllegalStateException("Hotword detection service name not found");
         }
         ServiceInfo hotwordDetectionServiceInfo = getServiceInfoLocked(
                 mHotwordDetectionComponentName, mUser);
         if (hotwordDetectionServiceInfo == null) {
             Slog.w(TAG, "Hotword detection service info not found");
+            logDetectorCreateEventIfNeeded(callback, detectorType, false,
+                    voiceInteractionServiceUid);
             throw new IllegalStateException("Hotword detection service info not found");
         }
         if (!isIsolatedProcessLocked(hotwordDetectionServiceInfo)) {
             Slog.w(TAG, "Hotword detection service not in isolated process");
+            logDetectorCreateEventIfNeeded(callback, detectorType, false,
+                    voiceInteractionServiceUid);
             throw new IllegalStateException("Hotword detection service not in isolated process");
         }
         if (!Manifest.permission.BIND_HOTWORD_DETECTION_SERVICE.equals(
                 hotwordDetectionServiceInfo.permission)) {
             Slog.w(TAG, "Hotword detection service does not require permission "
                     + Manifest.permission.BIND_HOTWORD_DETECTION_SERVICE);
+            logDetectorCreateEventIfNeeded(callback, detectorType, false,
+                    voiceInteractionServiceUid);
             throw new SecurityException("Hotword detection service does not require permission "
                     + Manifest.permission.BIND_HOTWORD_DETECTION_SERVICE);
         }
@@ -446,23 +497,40 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
                 mInfo.getServiceInfo().packageName) == PackageManager.PERMISSION_GRANTED) {
             Slog.w(TAG, "Voice interaction service should not hold permission "
                     + Manifest.permission.BIND_HOTWORD_DETECTION_SERVICE);
+            logDetectorCreateEventIfNeeded(callback, detectorType, false,
+                    voiceInteractionServiceUid);
             throw new SecurityException("Voice interaction service should not hold permission "
                     + Manifest.permission.BIND_HOTWORD_DETECTION_SERVICE);
         }
 
         if (sharedMemory != null && !sharedMemory.setProtect(OsConstants.PROT_READ)) {
             Slog.w(TAG, "Can't set sharedMemory to be read-only");
+            logDetectorCreateEventIfNeeded(callback, detectorType, false,
+                    voiceInteractionServiceUid);
             throw new IllegalStateException("Can't set sharedMemory to be read-only");
         }
 
+        mDetectorType = detectorType;
+
+        logDetectorCreateEventIfNeeded(callback, detectorType, true,
+                voiceInteractionServiceUid);
         if (mHotwordDetectionConnection == null) {
             mHotwordDetectionConnection = new HotwordDetectionConnection(mServiceStub, mContext,
                     mInfo.getServiceInfo().applicationInfo.uid, voiceInteractorIdentity,
                     mHotwordDetectionComponentName, mUser, /* bindInstantServiceAllowed= */ false,
-                    options, sharedMemory, callback);
+                    options, sharedMemory, callback, detectorType);
         } else {
             mHotwordDetectionConnection.updateStateLocked(options, sharedMemory);
         }
+    }
+
+    private void logDetectorCreateEventIfNeeded(IHotwordRecognitionStatusCallback callback,
+            int detectorType, boolean isCreated, int voiceInteractionServiceUid) {
+        if (callback != null) {
+            HotwordMetricsLogger.writeDetectorCreateEvent(detectorType, true,
+                    voiceInteractionServiceUid);
+        }
+
     }
 
     public void shutdownHotwordDetectionServiceLocked() {
@@ -629,6 +697,8 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
             pw.println(Integer.toHexString(mDisabledShowContext));
         }
         pw.print("  mBound="); pw.print(mBound);  pw.print(" mService="); pw.println(mService);
+        pw.print("  mDetectorType=");
+        pw.println(HotwordDetector.detectorTypeToString(mDetectorType));
         if (mHotwordDetectionConnection != null) {
             pw.println("  Hotword detection connection:");
             mHotwordDetectionConnection.dump("    ", pw);

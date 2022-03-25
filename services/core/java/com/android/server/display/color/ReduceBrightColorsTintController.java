@@ -98,6 +98,13 @@ public class ReduceBrightColorsTintController extends TintController {
         return ColorDisplayManager.isColorTransformAccelerated(context);
     }
 
+    @Override
+    public void setActivated(Boolean isActivated) {
+        super.setActivated(isActivated);
+        Slog.i(ColorDisplayService.TAG, (isActivated != null && isActivated)
+                ? "Turning on reduce bright colors" : "Turning off reduce bright colors");
+    }
+
     public int getStrength() {
         return mStrength;
     }

@@ -27,9 +27,12 @@ import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
+import org.mockito.Mockito.any
+import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.eq
 import org.mockito.Mockito.mock
+import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
@@ -40,12 +43,11 @@ class BlurUtilsTest : SysuiTestCase() {
     @Mock lateinit var dumpManager: DumpManager
     @Mock lateinit var transaction: SurfaceControl.Transaction
     @Mock lateinit var crossWindowBlurListeners: CrossWindowBlurListeners
-    lateinit var blurUtils: BlurUtils
+    lateinit var blurUtils: TestableBlurUtils
 
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
-        `when`(crossWindowBlurListeners.isCrossWindowBlurEnabled).thenReturn(true)
         blurUtils = TestableBlurUtils()
     }
 
@@ -76,6 +78,21 @@ class BlurUtilsTest : SysuiTestCase() {
     }
 
     @Test
+    fun testApplyBlur_blurDisabled() {
+        val radius = 10
+        val surfaceControl = mock(SurfaceControl::class.java)
+        val viewRootImpl = mock(ViewRootImpl::class.java)
+        `when`(viewRootImpl.surfaceControl).thenReturn(surfaceControl)
+        `when`(surfaceControl.isValid).thenReturn(true)
+
+        blurUtils.blursEnabled = false
+        blurUtils.applyBlur(viewRootImpl, radius, true /* opaque */)
+        verify(transaction).setOpaque(eq(surfaceControl), eq(true))
+        verify(transaction, never()).setBackgroundBlurRadius(any(), anyInt())
+        verify(transaction).apply()
+    }
+
+    @Test
     fun testEarlyWakeUp() {
         val radius = 10
         val surfaceControl = mock(SurfaceControl::class.java)
@@ -89,9 +106,11 @@ class BlurUtilsTest : SysuiTestCase() {
         verify(transaction).setEarlyWakeupEnd()
     }
 
-    inner class TestableBlurUtils() : BlurUtils(resources, crossWindowBlurListeners, dumpManager) {
+    inner class TestableBlurUtils : BlurUtils(resources, crossWindowBlurListeners, dumpManager) {
+        var blursEnabled = true
+
         override fun supportsBlursOnWindows(): Boolean {
-            return true
+            return blursEnabled
         }
 
         override fun createTransaction(): SurfaceControl.Transaction {

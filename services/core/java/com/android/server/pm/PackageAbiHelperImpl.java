@@ -34,6 +34,7 @@ import android.os.Environment;
 import android.os.FileUtils;
 import android.os.Trace;
 import android.text.TextUtils;
+import android.util.ArraySet;
 import android.util.Pair;
 import android.util.Slog;
 
@@ -41,6 +42,7 @@ import com.android.internal.content.NativeLibraryHelper;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
+import com.android.server.pm.pkg.PackageStateInternal;
 
 import dalvik.system.VMRuntime;
 
@@ -48,7 +50,6 @@ import libcore.io.IoUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Set;
 
 final class PackageAbiHelperImpl implements PackageAbiHelper {
 
@@ -136,9 +137,9 @@ final class PackageAbiHelperImpl implements PackageAbiHelper {
             boolean isUpdatedSystemApp, File appLib32InstallDir) {
         // Trying to derive the paths, thus need the raw ABI info from the parsed package, and the
         // current state in PackageSetting is irrelevant.
-        return deriveNativeLibraryPaths(new Abis(pkg.getPrimaryCpuAbi(), pkg.getSecondaryCpuAbi()),
-                appLib32InstallDir, pkg.getPath(), pkg.getBaseApkPath(), pkg.isSystem(),
-                isUpdatedSystemApp);
+        return deriveNativeLibraryPaths(new Abis(AndroidPackageUtils.getRawPrimaryCpuAbi(pkg),
+                AndroidPackageUtils.getRawSecondaryCpuAbi(pkg)), appLib32InstallDir, pkg.getPath(),
+                pkg.getBaseApkPath(), pkg.isSystem(), isUpdatedSystemApp);
     }
 
     private static NativeLibraryPaths deriveNativeLibraryPaths(final Abis abis,
@@ -496,7 +497,8 @@ final class PackageAbiHelperImpl implements PackageAbiHelper {
     @Override
     @Nullable
     public String getAdjustedAbiForSharedUser(
-            Set<PackageSetting> packagesForUser, AndroidPackage scannedPackage) {
+            ArraySet<? extends PackageStateInternal> packagesForUser,
+            AndroidPackage scannedPackage) {
         String requiredInstructionSet = null;
         if (scannedPackage != null) {
             String pkgRawPrimaryCpuAbi = AndroidPackageUtils.getRawPrimaryCpuAbi(scannedPackage);
@@ -505,21 +507,22 @@ final class PackageAbiHelperImpl implements PackageAbiHelper {
             }
         }
 
-        PackageSetting requirer = null;
-        for (PackageSetting ps : packagesForUser) {
+        PackageStateInternal requirer = null;
+        for (PackageStateInternal ps : packagesForUser) {
             // If packagesForUser contains scannedPackage, we skip it. This will happen
             // when scannedPackage is an update of an existing package. Without this check,
             // we will never be able to change the ABI of any package belonging to a shared
             // user, even if it's compatible with other packages.
-            if (scannedPackage != null && scannedPackage.getPackageName().equals(ps.name)) {
+            if (scannedPackage != null && scannedPackage.getPackageName().equals(
+                    ps.getPackageName())) {
                 continue;
             }
-            if (ps.primaryCpuAbiString == null) {
+            if (ps.getPrimaryCpuAbi() == null) {
                 continue;
             }
 
             final String instructionSet =
-                    VMRuntime.getInstructionSet(ps.primaryCpuAbiString);
+                    VMRuntime.getInstructionSet(ps.getPrimaryCpuAbi());
             if (requiredInstructionSet != null && !requiredInstructionSet.equals(instructionSet)) {
                 // We have a mismatch between instruction sets (say arm vs arm64) warn about
                 // this but there's not much we can do.
@@ -545,7 +548,7 @@ final class PackageAbiHelperImpl implements PackageAbiHelper {
             // scannedPackage did not require an ABI, in which case we have to adjust
             // scannedPackage to match the ABI of the set (which is the same as
             // requirer's ABI)
-            adjustedAbi = requirer.primaryCpuAbiString;
+            adjustedAbi = requirer.getPrimaryCpuAbi();
         } else {
             // requirer == null implies that we're updating all ABIs in the set to
             // match scannedPackage.

@@ -26,11 +26,16 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.util.Log;
+import android.view.InputChannel;
+import android.view.MotionEvent;
 import android.view.View;
 
 import com.android.internal.inputmethod.IInputMethodPrivilegedOperations;
+import com.android.internal.inputmethod.InputMethodNavButtonFlags;
 import com.android.internal.view.IInlineSuggestionsRequestCallback;
 import com.android.internal.view.InlineSuggestionsRequestInfo;
+
+import java.util.List;
 
 /**
  * The InputMethod interface represents an input method which can generate key
@@ -96,18 +101,18 @@ public interface InputMethod {
      *
      * @param token special token for the system to identify
      *              {@link InputMethodService}
-     * @param displayId The id of the display that current IME shown.
-     *                  Used for {{@link #updateInputMethodDisplay(int)}}
      * @param privilegedOperations IPC endpoint to do some privileged
      *                             operations that are allowed only to the
      *                             current IME.
      * @param configChanges {@link InputMethodInfo#getConfigChanges()} declared by IME.
+     * @param stylusHwSupported {@link InputMethodInfo#supportsStylusHandwriting()} declared by IME.
+     * @param navButtonFlags The initial state of {@link InputMethodNavButtonFlags}.
      * @hide
      */
     @MainThread
-    default void initializeInternal(IBinder token, int displayId,
-            IInputMethodPrivilegedOperations privilegedOperations, int configChanges) {
-        updateInputMethodDisplay(displayId);
+    default void initializeInternal(IBinder token,
+            IInputMethodPrivilegedOperations privilegedOperations, int configChanges,
+            boolean stylusHwSupported, @InputMethodNavButtonFlags int navButtonFlags) {
         attachToken(token);
     }
 
@@ -141,16 +146,6 @@ public interface InputMethod {
      */
     @MainThread
     public void attachToken(IBinder token);
-
-    /**
-     * Update context display according to given displayId.
-     *
-     * @param displayId The id of the display that need to update for context.
-     * @hide
-     */
-    @MainThread
-    default void updateInputMethodDisplay(int displayId) {
-    }
 
     /**
      * Bind a new application environment in to the input method, so that it
@@ -236,6 +231,7 @@ public interface InputMethod {
      *                        the next {@link #startInput(InputConnection, EditorInfo, IBinder)} as
      *                        long as your implementation of {@link InputMethod} relies on such
      *                        IPCs
+     * @param navButtonFlags {@link InputMethodNavButtonFlags} in the initial state of this session.
      * @see #startInput(InputConnection, EditorInfo)
      * @see #restartInput(InputConnection, EditorInfo)
      * @see EditorInfo
@@ -244,12 +240,22 @@ public interface InputMethod {
     @MainThread
     default void dispatchStartInputWithToken(@Nullable InputConnection inputConnection,
             @NonNull EditorInfo editorInfo, boolean restarting,
-            @NonNull IBinder startInputToken) {
+            @NonNull IBinder startInputToken, @InputMethodNavButtonFlags int navButtonFlags) {
         if (restarting) {
             restartInput(inputConnection, editorInfo);
         } else {
             startInput(inputConnection, editorInfo);
         }
+    }
+
+    /**
+     * Notifies that {@link InputMethodNavButtonFlags} have been updated.
+     *
+     * @param navButtonFlags The new {@link InputMethodNavButtonFlags}.
+     * @hide
+     */
+    @MainThread
+    default void onNavButtonFlagsChanged(@InputMethodNavButtonFlags int navButtonFlags) {
     }
 
     /**
@@ -382,19 +388,38 @@ public interface InputMethod {
     public void changeInputMethodSubtype(InputMethodSubtype subtype);
 
     /**
-     * Update token of the client window requesting {@link #showSoftInput(int, ResultReceiver)}
-     * @param showInputToken placeholder app window token for window requesting
-     *        {@link InputMethodManager#showSoftInput(View, int)}
+     * Checks if IME is ready to start stylus handwriting session.
+     * If yes, {@link #startStylusHandwriting(InputChannel, List)} is called.
+     * @param requestId
      * @hide
      */
-    public void setCurrentShowInputToken(IBinder showInputToken);
+    default void canStartStylusHandwriting(int requestId) {
+        // intentionally empty
+    }
 
     /**
-     * Update token of the client window requesting {@link #hideSoftInput(int, ResultReceiver)}
-     * @param hideInputToken placeholder app window token for window requesting
-     *        {@link InputMethodManager#hideSoftInputFromWindow(IBinder, int)}
+     * Start stylus handwriting session.
      * @hide
      */
-    public void setCurrentHideInputToken(IBinder hideInputToken);
+    default void startStylusHandwriting(
+            int requestId, @NonNull InputChannel channel, @Nullable List<MotionEvent> events) {
+        // intentionally empty
+    }
+
+    /**
+     * Initialize Ink window early-on.
+     * @hide
+     */
+    default void initInkWindow() {
+        // intentionally empty
+    }
+
+    /**
+     * Finish stylus handwriting session.
+     * @hide
+     */
+    default void finishStylusHandwriting() {
+        // intentionally empty
+    }
 
 }

@@ -23,9 +23,12 @@ import static com.android.internal.view.ScrollCaptureViewSupport.transformFromRe
 
 import android.annotation.NonNull;
 import android.graphics.Rect;
+import android.os.CancellationSignal;
 import android.util.Log;
 import android.view.View;
 import android.widget.ListView;
+
+import java.util.function.Consumer;
 
 /**
  * Scroll capture support for ListView.
@@ -39,6 +42,12 @@ public class ListViewCaptureHelper implements ScrollCaptureViewHelper<ListView> 
     private int mOverScrollMode;
 
     @Override
+    public boolean onAcceptSession(@NonNull ListView view) {
+        return view.isVisibleToUser()
+                && (view.canScrollVertically(UP) || view.canScrollVertically(DOWN));
+    }
+
+    @Override
     public void onPrepareForStart(@NonNull ListView view, Rect scrollBounds) {
         mScrollDelta = 0;
 
@@ -50,8 +59,8 @@ public class ListViewCaptureHelper implements ScrollCaptureViewHelper<ListView> 
     }
 
     @Override
-    public ScrollResult onScrollRequested(@NonNull ListView listView, Rect scrollBounds,
-            Rect requestRect) {
+    public void onScrollRequested(@NonNull ListView listView, Rect scrollBounds,
+            Rect requestRect, CancellationSignal signal, Consumer<ScrollResult> resultConsumer) {
         Log.d(TAG, "-----------------------------------------------------------");
         Log.d(TAG, "onScrollRequested(scrollBounds=" + scrollBounds + ", "
                 + "requestRect=" + requestRect + ")");
@@ -63,7 +72,8 @@ public class ListViewCaptureHelper implements ScrollCaptureViewHelper<ListView> 
 
         if (!listView.isVisibleToUser() || listView.getChildCount() == 0) {
             Log.w(TAG, "listView is empty or not visible, cannot continue");
-            return result; // result.availableArea == empty Rect
+            resultConsumer.accept(result);  // result.availableArea == empty Rect
+            return;
         }
 
         // Make requestRect relative to RecyclerView (from scrollBounds)
@@ -111,9 +121,8 @@ public class ListViewCaptureHelper implements ScrollCaptureViewHelper<ListView> 
                     mScrollDelta, scrollBounds, requestedContainerBounds);
         }
         Log.d(TAG, "-----------------------------------------------------------");
-        return result;
+        resultConsumer.accept(result);
     }
-
 
     @Override
     public void onPrepareForEnd(@NonNull ListView listView) {

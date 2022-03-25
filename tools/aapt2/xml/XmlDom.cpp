@@ -349,7 +349,8 @@ std::unique_ptr<XmlResource> Inflate(const void* data, size_t len, std::string* 
         size_t len;
         const char16_t* str16 = tree.getText(&len);
         if (str16) {
-          text->text = util::Utf16ToUtf8(StringPiece16(str16, len));
+          text->text =
+              ResTable::normalizeForOutput(util::Utf16ToUtf8(StringPiece16(str16, len)).c_str());
         }
         CHECK(!node_stack.empty());
         node_stack.top()->AppendChild(std::move(text));
@@ -545,7 +546,7 @@ void Text::Accept(ConstVisitor* visitor) const {
 void PackageAwareVisitor::BeforeVisitElement(Element* el) {
   std::vector<PackageDecl> decls;
   for (const NamespaceDecl& decl : el->namespace_decls) {
-    if (Maybe<ExtractedPackage> maybe_package = ExtractPackageFromNamespace(decl.uri)) {
+    if (std::optional<ExtractedPackage> maybe_package = ExtractPackageFromNamespace(decl.uri)) {
       decls.push_back(PackageDecl{decl.prefix, std::move(maybe_package.value())});
     }
   }
@@ -556,7 +557,8 @@ void PackageAwareVisitor::AfterVisitElement(Element* el) {
   package_decls_.pop_back();
 }
 
-Maybe<ExtractedPackage> PackageAwareVisitor::TransformPackageAlias(const StringPiece& alias) const {
+std::optional<ExtractedPackage> PackageAwareVisitor::TransformPackageAlias(
+    const StringPiece& alias) const {
   if (alias.empty()) {
     return ExtractedPackage{{}, false /*private*/};
   }

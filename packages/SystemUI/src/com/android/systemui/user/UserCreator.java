@@ -19,6 +19,7 @@ package com.android.systemui.user;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.pm.UserInfo;
+import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.UserManager;
 
@@ -70,10 +71,12 @@ public class UserCreator {
             }
 
             Drawable newUserIcon = userIcon;
+            Resources res = mContext.getResources();
             if (newUserIcon == null) {
-                newUserIcon = UserIcons.getDefaultUserIcon(mContext.getResources(), user.id, false);
+                newUserIcon = UserIcons.getDefaultUserIcon(res, user.id, false);
             }
-            mUserManager.setUserIcon(user.id, UserIcons.convertToBitmap(newUserIcon));
+            mUserManager.setUserIcon(
+                    user.id, UserIcons.convertToBitmapAtUserIconSize(res, newUserIcon));
 
             userCreationProgressDialog.dismiss();
             successCallback.accept(user);

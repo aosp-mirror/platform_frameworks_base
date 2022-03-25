@@ -60,6 +60,10 @@ import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
+import android.window.OnBackInvokedCallback;
+import android.window.OnBackInvokedDispatcher;
+import android.window.OnBackInvokedDispatcherOwner;
+import android.window.WindowOnBackInvokedDispatcher;
 
 import com.android.internal.R;
 import com.android.internal.app.WindowDecorActionBar;
@@ -94,7 +98,8 @@ import java.lang.ref.WeakReference;
  * </div>
  */
 public class Dialog implements DialogInterface, Window.Callback,
-        KeyEvent.Callback, OnCreateContextMenuListener, Window.OnWindowDismissedCallback {
+        KeyEvent.Callback, OnCreateContextMenuListener, Window.OnWindowDismissedCallback,
+        OnBackInvokedDispatcherOwner {
     private static final String TAG = "Dialog";
     @UnsupportedAppUsage
     private Activity mOwnerActivity;
@@ -150,6 +155,10 @@ public class Dialog implements DialogInterface, Window.Callback,
     private int mActionModeTypeStarting = ActionMode.TYPE_PRIMARY;
 
     private final Runnable mDismissAction = this::dismissDialog;
+
+    /** A {@link Runnable} to run instead of dismissing when {@link #dismiss()} is called. */
+    private Runnable mDismissOverride;
+    private OnBackInvokedCallback mDefaultBackCallback;
 
     /**
      * Creates a dialog window that uses the default dialog theme.
@@ -370,6 +379,11 @@ public class Dialog implements DialogInterface, Window.Callback,
      */
     @Override
     public void dismiss() {
+        if (mDismissOverride != null) {
+            mDismissOverride.run();
+            return;
+        }
+
         if (Looper.myLooper() == mHandler.getLooper()) {
             dismissDialog();
         } else {
@@ -442,6 +456,19 @@ public class Dialog implements DialogInterface, Window.Callback,
      */
     protected void onStart() {
         if (mActionBar != null) mActionBar.setShowHideAnimationEnabled(true);
+        if (mContext != null
+                && WindowOnBackInvokedDispatcher.isOnBackInvokedCallbackEnabled(mContext)) {
+            // Add onBackPressed as default back behavior.
+            mDefaultBackCallback = new OnBackInvokedCallback() {
+                @Override
+                public void onBackInvoked() {
+                    onBackPressed();
+                }
+            };
+            getOnBackInvokedDispatcher().registerOnBackInvokedCallback(
+                    OnBackInvokedDispatcher.PRIORITY_DEFAULT, mDefaultBackCallback);
+            mDefaultBackCallback = null;
+        }
     }
 
     /**
@@ -449,6 +476,9 @@ public class Dialog implements DialogInterface, Window.Callback,
      */
     protected void onStop() {
         if (mActionBar != null) mActionBar.setShowHideAnimationEnabled(false);
+        if (mDefaultBackCallback != null) {
+            getOnBackInvokedDispatcher().unregisterOnBackInvokedCallback(mDefaultBackCallback);
+        }
     }
 
     private static final String DIALOG_SHOWING_TAG = "android:dialogShowing";
@@ -674,7 +704,8 @@ public class Dialog implements DialogInterface, Window.Callback,
     public boolean onKeyUp(int keyCode, @NonNull KeyEvent event) {
         if ((keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_ESCAPE)
                 && event.isTracking()
-                && !event.isCanceled()) {
+                && !event.isCanceled()
+                && !WindowOnBackInvokedDispatcher.isOnBackInvokedCallbackEnabled(mContext)) {
             onBackPressed();
             return true;
         }
@@ -1354,6 +1385,21 @@ public class Dialog implements DialogInterface, Window.Callback,
         mDismissMessage = msg;
     }
 
+    /**
+     * Set a {@link Runnable} to run when this dialog is dismissed instead of directly dismissing
+     * it. This allows to animate the dialog in its window before dismissing it.
+     *
+     * Note that {@code override} should always end up calling this method with {@code null}
+     * followed by a call to {@link #dismiss() dismiss} to actually dismiss the dialog.
+     *
+     * @see #dismiss()
+     *
+     * @hide
+     */
+    public void setDismissOverride(@Nullable Runnable override) {
+        mDismissOverride = override;
+    }
+
     /** @hide */
     public boolean takeCancelAndDismissListeners(@Nullable String msg,
             @Nullable OnCancelListener cancel, @Nullable OnDismissListener dismiss) {
@@ -1415,5 +1461,17 @@ public class Dialog implements DialogInterface, Window.Callback,
                     break;
             }
         }
+    }
+
+    /**
+     * Returns the {@link OnBackInvokedDispatcher} instance associated with the window that this
+     * dialog is attached to.
+     *
+     * Returns null if the dialog is not attached to a window with a decor.
+     */
+    @NonNull
+    @Override
+    public OnBackInvokedDispatcher getOnBackInvokedDispatcher() {
+        return ((OnBackInvokedDispatcherOwner) mWindow).getOnBackInvokedDispatcher();
     }
 }

@@ -90,6 +90,22 @@ static void android_os_Trace_nativeSetTracingEnabled(JNIEnv*, jclass, jboolean e
     atrace_set_tracing_enabled(enabled);
 }
 
+static void android_os_Trace_nativeInstant(JNIEnv* env, jclass,
+        jlong tag, jstring nameStr) {
+    withString(env, nameStr, [tag](char* str) {
+        atrace_instant(tag, str);
+    });
+}
+
+static void android_os_Trace_nativeInstantForTrack(JNIEnv* env, jclass,
+        jlong tag, jstring trackStr, jstring nameStr) {
+    withString(env, trackStr, [env, tag, nameStr](char* track) {
+        withString(env, nameStr, [tag, track](char* name) {
+            atrace_instant_for_track(tag, track, name);
+        });
+    });
+}
+
 static const JNINativeMethod gTraceMethods[] = {
     /* name, signature, funcPtr */
     { "nativeSetAppTracingAllowed",
@@ -116,6 +132,12 @@ static const JNINativeMethod gTraceMethods[] = {
     { "nativeAsyncTraceEnd",
             "(JLjava/lang/String;I)V",
             (void*)android_os_Trace_nativeAsyncTraceEnd },
+    { "nativeInstant",
+            "(JLjava/lang/String;)V",
+            (void*)android_os_Trace_nativeInstant },
+    { "nativeInstantForTrack",
+            "(JLjava/lang/String;Ljava/lang/String;)V",
+            (void*)android_os_Trace_nativeInstantForTrack },
 
     // ----------- @CriticalNative  ----------------
     { "nativeGetEnabledTags",

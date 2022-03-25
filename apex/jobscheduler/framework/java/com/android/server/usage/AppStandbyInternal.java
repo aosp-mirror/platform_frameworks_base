@@ -1,10 +1,13 @@
 package com.android.server.usage;
 
+import android.annotation.CurrentTimeMillisLong;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.app.ActivityManager.ProcessState;
 import android.app.usage.AppStandbyInfo;
+import android.app.usage.UsageStatsManager.ForcedReasons;
 import android.app.usage.UsageStatsManager.StandbyBuckets;
-import android.app.usage.UsageStatsManager.SystemForcedReasons;
 import android.content.Context;
 import android.util.IndentingPrintWriter;
 
@@ -23,7 +26,7 @@ public interface AppStandbyInternal {
         try {
             final Class<?> clazz = Class.forName("com.android.server.usage.AppStandbyController",
                     true, loader);
-            final Constructor<?> ctor =  clazz.getConstructor(Context.class);
+            final Constructor<?> ctor = clazz.getConstructor(Context.class);
             return (AppStandbyInternal) ctor.newInstance(context);
         } catch (NoSuchMethodException | InstantiationException
                 | IllegalAccessException | InvocationTargetException | ClassNotFoundException e) {
@@ -70,6 +73,23 @@ public interface AppStandbyInternal {
     void setLastJobRunTime(String packageName, int userId, long elapsedRealtime);
 
     long getTimeSinceLastJobRun(String packageName, int userId);
+
+    void setEstimatedLaunchTime(String packageName, int userId,
+            @CurrentTimeMillisLong long launchTimeMs);
+
+    /**
+     * Returns the saved estimated launch time for the app. Will return {@code Long#MAX_VALUE} if no
+     * value is saved.
+     */
+    @CurrentTimeMillisLong
+    long getEstimatedLaunchTime(String packageName, int userId);
+
+    /**
+     * Returns the time (in milliseconds) since the app was last interacted with by the user.
+     * This can be larger than the current elapsedRealtime, in case it happened before boot or
+     * a really large value if the app was never interacted with.
+     */
+    long getTimeSinceLastUsedByUser(String packageName, int userId);
 
     void onUserRemoved(int userId);
 
@@ -124,6 +144,11 @@ public interface AppStandbyInternal {
     void setAppStandbyBuckets(@NonNull List<AppStandbyInfo> appBuckets, int userId, int callingUid,
             int callingPid);
 
+    /** Return the lowest bucket this app can enter. */
+    @StandbyBuckets
+    int getAppMinStandbyBucket(String packageName, int appId, int userId,
+            boolean shouldObfuscateInstantApps);
+
     /**
      * Put the specified app in the
      * {@link android.app.usage.UsageStatsManager#STANDBY_BUCKET_RESTRICTED}
@@ -134,7 +159,7 @@ public interface AppStandbyInternal {
      *                       UsageStatsManager.REASON_SUB_FORCED_SYSTEM_FLAG_* reasons.
      */
     void restrictApp(@NonNull String packageName, int userId,
-            @SystemForcedReasons int restrictReason);
+            @ForcedReasons int restrictReason);
 
     /**
      * Put the specified app in the
@@ -151,7 +176,29 @@ public interface AppStandbyInternal {
      *                       UsageStatsManager.REASON_SUB_FORCED_SYSTEM_FLAG_* reasons.
      */
     void restrictApp(@NonNull String packageName, int userId, int mainReason,
-            @SystemForcedReasons int restrictReason);
+            @ForcedReasons int restrictReason);
+
+    /**
+     * Unrestrict an app if there is no other reason to restrict it.
+     *
+     * <p>
+     * The {@code prevMainReasonRestrict} and {@code prevSubReasonRestrict} are the previous
+     * reasons of why it was restricted, but the caller knows that these conditions are not true
+     * anymore; therefore if there is no other reasons to restrict it (as there could bemultiple
+     * reasons to restrict it), lift the restriction.
+     * </p>
+     *
+     * @param packageName            The package name of the app.
+     * @param userId                 The user id that this app runs in.
+     * @param prevMainReasonRestrict The main reason that why it was restricted, must be either
+     *                               {@link android.app.usage.UsageStatsManager#REASON_MAIN_FORCED_BY_SYSTEM}
+     *                               or {@link android.app.usage.UsageStatsManager#REASON_MAIN_FORCED_BY_USER}.
+     * @param prevSubReasonRestrict  The subreason that why it was restricted before.
+     * @param mainReasonUnrestrict   The main reason that why it could be unrestricted now.
+     * @param subReasonUnrestrict    The subreason that why it could be unrestricted now.
+     */
+    void maybeUnrestrictApp(@NonNull String packageName, int userId, int prevMainReasonRestrict,
+            int prevSubReasonRestrict, int mainReasonUnrestrict, int subReasonUnrestrict);
 
     void addActiveDeviceAdmin(String adminPkg, int userId);
 
@@ -176,4 +223,29 @@ public interface AppStandbyInternal {
     void dumpState(String[] args, PrintWriter pw);
 
     boolean isAppIdleEnabled();
+
+    /**
+     * Returns the duration (in millis) for the window where events occurring will be
+     * considered as broadcast response, starting from the point when an app receives
+     * a broadcast.
+     */
+    long getBroadcastResponseWindowDurationMs();
+
+    /**
+     * Returns the process state threshold that should be used for deciding whether or not an app
+     * is in the background in the context of recording broadcast response stats. Apps whose
+     * process state is higher than this threshold state should be considered to be in background.
+     */
+    @ProcessState
+    int getBroadcastResponseFgThresholdState();
+
+    /**
+     * Return the last known value corresponding to the {@code key} from
+     * {@link android.provider.DeviceConfig#NAMESPACE_APP_STANDBY} in AppStandbyController.
+     */
+    @Nullable
+    String getAppStandbyConstant(@NonNull String key);
+
+    /** Clears the last used timestamps data for the given {@code packageName}. */
+    void clearLastUsedTimestampsForTest(@NonNull String packageName, @UserIdInt int userId);
 }

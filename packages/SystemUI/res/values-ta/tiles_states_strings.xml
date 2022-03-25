@@ -86,6 +86,11 @@
     <item msgid="5715725170633593906">"முடக்கப்பட்டுள்ளது"</item>
     <item msgid="2075645297847971154">"இயக்கப்பட்டுள்ளது"</item>
   </string-array>
+  <string-array name="tile_states_color_correction">
+    <item msgid="2840507878437297682">"இல்லை"</item>
+    <item msgid="1909756493418256167">"முடக்கப்பட்டுள்ளது"</item>
+    <item msgid="4531508423703413340">"இயக்கப்பட்டுள்ளது"</item>
+  </string-array>
   <string-array name="tile_states_inversion">
     <item msgid="3638187931191394628">"கிடைக்கவில்லை"</item>
     <item msgid="9103697205127645916">"முடக்கப்பட்டுள்ளது"</item>
@@ -151,9 +156,19 @@
     <item msgid="7571394439974244289">"முடக்கப்பட்டுள்ளது"</item>
     <item msgid="6866424167599381915">"இயக்கப்பட்டுள்ளது"</item>
   </string-array>
+  <string-array name="tile_states_qr_code_scanner">
+    <item msgid="7435143266149257618">"கிடைக்கவில்லை"</item>
+    <item msgid="3301403109049256043">"இயக்கு"</item>
+    <item msgid="8878684975184010135">"முடக்கு"</item>
+  </string-array>
   <string-array name="tile_states_alarm">
     <item msgid="4936533380177298776">"கிடைக்கவில்லை"</item>
     <item msgid="2710157085538036590">"முடக்கப்பட்டுள்ளது"</item>
     <item msgid="7809470840976856149">"இயக்கப்பட்டுள்ளது"</item>
+  </string-array>
+  <string-array name="tile_states_onehanded">
+    <item msgid="8189342855739930015">"கிடைக்கவில்லை"</item>
+    <item msgid="146088982397753810">"முடக்கப்பட்டுள்ளது"</item>
+    <item msgid="460891964396502657">"இயக்கப்பட்டுள்ளது"</item>
   </string-array>
 </resources>

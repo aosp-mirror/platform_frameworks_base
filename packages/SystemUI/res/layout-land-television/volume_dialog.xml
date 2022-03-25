@@ -73,8 +73,7 @@
                 android:layout_height="match_parent"
                 android:tint="@color/caption_tint_color_selector"
                 android:layout_gravity="center"
-                android:soundEffectsEnabled="false"
-                sysui:optedOut="false"/>
+                android:soundEffectsEnabled="false"/>
 
         </FrameLayout>
 

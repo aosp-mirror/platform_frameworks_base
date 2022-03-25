@@ -19,10 +19,10 @@ package com.android.systemui.dagger;
 import android.app.Activity;
 
 import com.android.systemui.ForegroundServicesDialog;
+import com.android.systemui.hdmi.HdmiCecSetMenuLanguageActivity;
 import com.android.systemui.keyguard.WorkLockActivity;
 import com.android.systemui.people.PeopleSpaceActivity;
 import com.android.systemui.people.widget.LaunchConversationActivity;
-import com.android.systemui.screenrecord.ScreenRecordDialog;
 import com.android.systemui.screenshot.LongScreenshotActivity;
 import com.android.systemui.sensorprivacy.SensorUseStartedActivity;
 import com.android.systemui.sensorprivacy.television.TvUnblockSensorActivity;
@@ -66,12 +66,6 @@ public abstract class DefaultActivityBinder {
     @IntoMap
     @ClassKey(BrightnessDialog.class)
     public abstract Activity bindBrightnessDialog(BrightnessDialog activity);
-
-    /** Inject into ScreenRecordDialog */
-    @Binds
-    @IntoMap
-    @ClassKey(ScreenRecordDialog.class)
-    public abstract Activity bindScreenRecordDialog(ScreenRecordDialog activity);
 
     /** Inject into UsbDebuggingActivity. */
     @Binds
@@ -127,4 +121,11 @@ public abstract class DefaultActivityBinder {
     @IntoMap
     @ClassKey(TvUnblockSensorActivity.class)
     public abstract Activity bindTvUnblockSensorActivity(TvUnblockSensorActivity activity);
+
+    /** Inject into HdmiCecSetMenuLanguageActivity. */
+    @Binds
+    @IntoMap
+    @ClassKey(HdmiCecSetMenuLanguageActivity.class)
+    public abstract Activity bindHdmiCecSetMenuLanguageActivity(
+            HdmiCecSetMenuLanguageActivity activity);
 }

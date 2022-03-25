@@ -17,11 +17,18 @@
 package android.location;
 
 import android.annotation.FloatRange;
+import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import com.android.internal.util.Preconditions;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * A class that contains GNSS satellite position, velocity and time information at the
@@ -64,6 +71,60 @@ public final class SatellitePvt implements Parcelable {
     private static final int HAS_TROPO = 1 << 2;
 
     /**
+     * Bit mask for {@link #mFlags} indicating a valid Issue of Data, Clock field is stored in the
+     * SatellitePvt.
+     */
+    private static final int HAS_ISSUE_OF_DATA_CLOCK = 1 << 3;
+
+    /**
+     * Bit mask for {@link #mFlags} indicating a valid Issue of Data, Ephemeris field is stored in
+     * the SatellitePvt.
+     */
+    private static final int HAS_ISSUE_OF_DATA_EPHEMERIS = 1 << 4;
+
+    /**
+     * Bit mask for {@link #mFlags} indicating a valid Time of Clock field is stored in the
+     * SatellitePvt.
+     */
+    private static final int HAS_TIME_OF_CLOCK = 1 << 5;
+
+    /**
+     * Bit mask for {@link #mFlags} indicating a valid Time of Ephemeris field is stored in
+     * the SatellitePvt.
+     */
+    private static final int HAS_TIME_OF_EPHEMERIS = 1 << 6;
+
+
+    /** Ephemeris demodulated from broadcast signals */
+    public static final int EPHEMERIS_SOURCE_DEMODULATED = 0;
+
+    /**
+     * Server provided Normal type ephemeris data, which is similar to broadcast ephemeris in
+     * longevity (e.g. SUPL) - lasting for few hours and providing satellite orbit and clock
+     * with accuracy of 1 - 2 meters.
+     */
+    public static final int EPHEMERIS_SOURCE_SERVER_NORMAL = 1;
+
+    /**
+     * Server provided Long-Term type ephemeris data, which lasts for many hours to several days
+     * and often provides satellite orbit and clock accuracy of 2 - 20 meters.
+     */
+    public static final int EPHEMERIS_SOURCE_SERVER_LONG_TERM = 2;
+
+    /** Other ephemeris source */
+    public static final int EPHEMERIS_SOURCE_OTHER = 3;
+
+    /**
+     * Satellite ephemeris source
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({EPHEMERIS_SOURCE_DEMODULATED, EPHEMERIS_SOURCE_SERVER_NORMAL,
+            EPHEMERIS_SOURCE_SERVER_LONG_TERM, EPHEMERIS_SOURCE_OTHER})
+    public @interface EphemerisSource {
+    }
+
+    /**
      * A bitfield of flags indicating the validity of the fields in this SatellitePvt.
      * The bit masks are defined in the constants with prefix HAS_*
      *
@@ -83,6 +144,12 @@ public final class SatellitePvt implements Parcelable {
     private final ClockInfo mClockInfo;
     private final double mIonoDelayMeters;
     private final double mTropoDelayMeters;
+    private final long mTimeOfClockSeconds;
+    private final long mTimeOfEphemerisSeconds;
+    private final int mIssueOfDataClock;
+    private final int mIssueOfDataEphemeris;
+    @EphemerisSource
+    private final int mEphemerisSource;
 
     /**
      * Class containing estimates of the satellite position fields in ECEF coordinate frame.
@@ -389,13 +456,23 @@ public final class SatellitePvt implements Parcelable {
             @Nullable VelocityEcef velocityEcef,
             @Nullable ClockInfo clockInfo,
             double ionoDelayMeters,
-            double tropoDelayMeters) {
+            double tropoDelayMeters,
+            long timeOfClockSeconds,
+            long timeOfEphemerisSeconds,
+            int issueOfDataClock,
+            int issueOfDataEphemeris,
+            @EphemerisSource int ephemerisSource) {
         mFlags = flags;
         mPositionEcef = positionEcef;
         mVelocityEcef = velocityEcef;
         mClockInfo = clockInfo;
         mIonoDelayMeters = ionoDelayMeters;
         mTropoDelayMeters = tropoDelayMeters;
+        mTimeOfClockSeconds = timeOfClockSeconds;
+        mTimeOfEphemerisSeconds = timeOfEphemerisSeconds;
+        mIssueOfDataClock = issueOfDataClock;
+        mIssueOfDataEphemeris = issueOfDataEphemeris;
+        mEphemerisSource = ephemerisSource;
     }
 
     /**
@@ -441,6 +518,68 @@ public final class SatellitePvt implements Parcelable {
         return mTropoDelayMeters;
     }
 
+    /**
+     * Issue of Data, Clock.
+     *
+     * <p>This is defined in GPS ICD200 documentation (e.g.,
+     * <a href="https://www.gps.gov/technical/icwg/IS-GPS-200H.pdf"></a>).
+     *
+     * <p>This field is valid if {@link #hasIssueOfDataClock()} is true.
+     */
+    @IntRange(from = 0, to = 1023)
+    public int getIssueOfDataClock() {
+        return mIssueOfDataClock;
+    }
+
+    /**
+     * Issue of Data, Ephemeris.
+     *
+     * <p>This is defined in GPS ICD200 documentation (e.g.,
+     * <a href="https://www.gps.gov/technical/icwg/IS-GPS-200H.pdf"></a>).
+     *
+     * <p>This field is valid if {@link #hasIssueOfDataEphemeris()} is true.
+     */
+    @IntRange(from = 0, to = 255)
+    public int getIssueOfDataEphemeris() {
+        return mIssueOfDataEphemeris;
+    }
+
+    /**
+     * Time of Clock in seconds.
+     *
+     * <p>The value is in seconds since GPS epoch, regardless of the constellation.
+     *
+     * <p>The value is not encoded as in GPS ICD200 documentation.
+     *
+     * <p>This field is valid if {@link #hasTimeOfClockSeconds()} is true.
+     */
+    @IntRange(from = 0)
+    public long getTimeOfClockSeconds() {
+        return mTimeOfClockSeconds;
+    }
+
+    /**
+     * Time of ephemeris in seconds.
+     *
+     * <p>The value is in seconds since GPS epoch, regardless of the constellation.
+     *
+     * <p>The value is not encoded as in GPS ICD200 documentation.
+     *
+     * <p>This field is valid if {@link #hasTimeOfEphemerisSeconds()} is true.
+     */
+    @IntRange(from = 0)
+    public long getTimeOfEphemerisSeconds() {
+        return mTimeOfEphemerisSeconds;
+    }
+
+    /**
+     * Satellite ephemeris source.
+     */
+    @EphemerisSource
+    public int getEphemerisSource() {
+        return mEphemerisSource;
+    }
+
     /** Returns {@code true} if {@link #getPositionEcef()}, {@link #getVelocityEcef()},
      * and {@link #getClockInfo()} are valid.
      */
@@ -458,6 +597,26 @@ public final class SatellitePvt implements Parcelable {
         return (mFlags & HAS_TROPO) != 0;
     }
 
+    /** Returns {@code true} if {@link #getIssueOfDataClock()} is valid. */
+    public boolean hasIssueOfDataClock() {
+        return (mFlags & HAS_ISSUE_OF_DATA_CLOCK) != 0;
+    }
+
+    /** Returns {@code true} if {@link #getIssueOfDataEphemeris()} is valid. */
+    public boolean hasIssueOfDataEphemeris() {
+        return (mFlags & HAS_ISSUE_OF_DATA_EPHEMERIS) != 0;
+    }
+
+    /** Returns {@code true} if {@link #getTimeOfClockSeconds()} ()} is valid. */
+    public boolean hasTimeOfClockSeconds() {
+        return (mFlags & HAS_TIME_OF_CLOCK) != 0;
+    }
+
+    /** Returns {@code true} if {@link #getTimeOfEphemerisSeconds()} is valid. */
+    public boolean hasTimeOfEphemerisSeconds() {
+        return (mFlags & HAS_TIME_OF_EPHEMERIS) != 0;
+    }
+
     public static final @android.annotation.NonNull Creator<SatellitePvt> CREATOR =
             new Creator<SatellitePvt>() {
                 @Override
@@ -465,11 +624,19 @@ public final class SatellitePvt implements Parcelable {
                 public SatellitePvt createFromParcel(Parcel in) {
                     int flags = in.readInt();
                     ClassLoader classLoader = getClass().getClassLoader();
-                    PositionEcef positionEcef = in.readParcelable(classLoader);
-                    VelocityEcef velocityEcef = in.readParcelable(classLoader);
-                    ClockInfo clockInfo = in.readParcelable(classLoader);
+                    PositionEcef positionEcef = in.readParcelable(classLoader,
+                            android.location.SatellitePvt.PositionEcef.class);
+                    VelocityEcef velocityEcef = in.readParcelable(classLoader,
+                            android.location.SatellitePvt.VelocityEcef.class);
+                    ClockInfo clockInfo = in.readParcelable(classLoader,
+                            android.location.SatellitePvt.ClockInfo.class);
                     double ionoDelayMeters = in.readDouble();
                     double tropoDelayMeters = in.readDouble();
+                    long toc = in.readLong();
+                    long toe = in.readLong();
+                    int iodc = in.readInt();
+                    int iode = in.readInt();
+                    int ephemerisSource = in.readInt();
 
                     return new SatellitePvt(
                             flags,
@@ -477,7 +644,12 @@ public final class SatellitePvt implements Parcelable {
                             velocityEcef,
                             clockInfo,
                             ionoDelayMeters,
-                            tropoDelayMeters);
+                            tropoDelayMeters,
+                            toc,
+                            toe,
+                            iodc,
+                            iode,
+                            ephemerisSource);
                 }
 
                 @Override
@@ -499,18 +671,28 @@ public final class SatellitePvt implements Parcelable {
         parcel.writeParcelable(mClockInfo, flags);
         parcel.writeDouble(mIonoDelayMeters);
         parcel.writeDouble(mTropoDelayMeters);
+        parcel.writeLong(mTimeOfClockSeconds);
+        parcel.writeLong(mTimeOfEphemerisSeconds);
+        parcel.writeInt(mIssueOfDataClock);
+        parcel.writeInt(mIssueOfDataEphemeris);
+        parcel.writeInt(mEphemerisSource);
     }
 
     @Override
     public String toString() {
-        return "SatellitePvt{"
+        return "SatellitePvt["
                 + "Flags=" + mFlags
                 + ", PositionEcef=" + mPositionEcef
                 + ", VelocityEcef=" + mVelocityEcef
                 + ", ClockInfo=" + mClockInfo
                 + ", IonoDelayMeters=" + mIonoDelayMeters
                 + ", TropoDelayMeters=" + mTropoDelayMeters
-                + "}";
+                + ", TimeOfClockSeconds=" + mTimeOfClockSeconds
+                + ", TimeOfEphemerisSeconds=" + mTimeOfEphemerisSeconds
+                + ", IssueOfDataClock=" + mIssueOfDataClock
+                + ", IssueOfDataEphemeris=" + mIssueOfDataEphemeris
+                + ", EphemerisSource=" + mEphemerisSource
+                + "]";
     }
 
     /**
@@ -527,16 +709,21 @@ public final class SatellitePvt implements Parcelable {
         @Nullable private ClockInfo mClockInfo;
         private double mIonoDelayMeters;
         private double mTropoDelayMeters;
+        private long mTimeOfClockSeconds;
+        private long mTimeOfEphemerisSeconds;
+        private int mIssueOfDataClock;
+        private int mIssueOfDataEphemeris;
+        @EphemerisSource
+        private int mEphemerisSource = EPHEMERIS_SOURCE_OTHER;
 
         /**
          * Set position ECEF.
          *
          * @param positionEcef position ECEF object
-         * @return Builder builder object
+         * @return builder object
          */
         @NonNull
-        public Builder setPositionEcef(
-                @NonNull PositionEcef positionEcef) {
+        public Builder setPositionEcef(@NonNull PositionEcef positionEcef) {
             mPositionEcef = positionEcef;
             updateFlags();
             return this;
@@ -546,11 +733,10 @@ public final class SatellitePvt implements Parcelable {
          * Set velocity ECEF.
          *
          * @param velocityEcef velocity ECEF object
-         * @return Builder builder object
+         * @return builder object
          */
         @NonNull
-        public Builder setVelocityEcef(
-                @NonNull VelocityEcef velocityEcef) {
+        public Builder setVelocityEcef(@NonNull VelocityEcef velocityEcef) {
             mVelocityEcef = velocityEcef;
             updateFlags();
             return this;
@@ -560,11 +746,10 @@ public final class SatellitePvt implements Parcelable {
          * Set clock info.
          *
          * @param clockInfo clock info object
-         * @return Builder builder object
+         * @return builder object
          */
         @NonNull
-        public Builder setClockInfo(
-                @NonNull ClockInfo clockInfo) {
+        public Builder setClockInfo(@NonNull ClockInfo clockInfo) {
             mClockInfo = clockInfo;
             updateFlags();
             return this;
@@ -580,7 +765,7 @@ public final class SatellitePvt implements Parcelable {
          * Set ionospheric delay in meters.
          *
          * @param ionoDelayMeters ionospheric delay (meters)
-         * @return Builder builder object
+         * @return builder object
          */
         @NonNull
         public Builder setIonoDelayMeters(
@@ -594,13 +779,95 @@ public final class SatellitePvt implements Parcelable {
          * Set tropospheric delay in meters.
          *
          * @param tropoDelayMeters tropospheric delay (meters)
-         * @return Builder builder object
+         * @return builder object
          */
         @NonNull
         public Builder setTropoDelayMeters(
                 @FloatRange(from = 0.0f, to = 100.0f) double tropoDelayMeters) {
             mTropoDelayMeters = tropoDelayMeters;
             mFlags = (byte) (mFlags | HAS_TROPO);
+            return this;
+        }
+
+        /**
+         * Set time of clock in seconds.
+         *
+         * <p>The value is in seconds since GPS epoch, regardless of the constellation.
+         *
+         * <p>The value is not encoded as in GPS ICD200 documentation.
+         *
+         * @param timeOfClockSeconds time of clock (seconds)
+         * @return builder object
+         */
+        @NonNull
+        public Builder setTimeOfClockSeconds(@IntRange(from = 0) long timeOfClockSeconds) {
+            Preconditions.checkArgumentNonnegative(timeOfClockSeconds);
+            mTimeOfClockSeconds = timeOfClockSeconds;
+            mFlags = (byte) (mFlags | HAS_TIME_OF_CLOCK);
+            return this;
+        }
+
+        /**
+         * Set time of ephemeris in seconds.
+         *
+         * <p>The value is in seconds since GPS epoch, regardless of the constellation.
+         *
+         * <p>The value is not encoded as in GPS ICD200 documentation.
+         *
+         * @param timeOfEphemerisSeconds time of ephemeris (seconds)
+         * @return builder object
+         */
+        @NonNull
+        public Builder setTimeOfEphemerisSeconds(@IntRange(from = 0) long timeOfEphemerisSeconds) {
+            Preconditions.checkArgumentNonnegative(timeOfEphemerisSeconds);
+            mTimeOfEphemerisSeconds = timeOfEphemerisSeconds;
+            mFlags = (byte) (mFlags | HAS_TIME_OF_EPHEMERIS);
+            return this;
+        }
+
+        /**
+         * Set issue of data, clock.
+         *
+         * @param issueOfDataClock issue of data, clock.
+         * @return builder object
+         */
+        @NonNull
+        public Builder setIssueOfDataClock(@IntRange(from = 0, to = 1023) int issueOfDataClock) {
+            Preconditions.checkArgumentInRange(issueOfDataClock, 0, 1023, "issueOfDataClock");
+            mIssueOfDataClock = issueOfDataClock;
+            mFlags = (byte) (mFlags | HAS_ISSUE_OF_DATA_CLOCK);
+            return this;
+        }
+
+        /**
+         * Set issue of data, ephemeris.
+         *
+         * @param issueOfDataEphemeris issue of data, ephemeris.
+         * @return builder object
+         */
+        @NonNull
+        public Builder setIssueOfDataEphemeris(
+                @IntRange(from = 0, to = 255) int issueOfDataEphemeris) {
+            Preconditions.checkArgumentInRange(issueOfDataEphemeris, 0, 255,
+                    "issueOfDataEphemeris");
+            mIssueOfDataEphemeris = issueOfDataEphemeris;
+            mFlags = (byte) (mFlags | HAS_ISSUE_OF_DATA_EPHEMERIS);
+            return this;
+        }
+
+        /**
+         * Set satellite ephemeris source.
+         *
+         * @param ephemerisSource satellite ephemeris source
+         * @return builder object
+         */
+        @NonNull
+        public Builder setEphemerisSource(@EphemerisSource int ephemerisSource) {
+            Preconditions.checkArgument(ephemerisSource == EPHEMERIS_SOURCE_DEMODULATED
+                    || ephemerisSource == EPHEMERIS_SOURCE_SERVER_NORMAL
+                    || ephemerisSource == EPHEMERIS_SOURCE_SERVER_LONG_TERM
+                    || ephemerisSource == EPHEMERIS_SOURCE_OTHER);
+            mEphemerisSource = ephemerisSource;
             return this;
         }
 
@@ -612,7 +879,10 @@ public final class SatellitePvt implements Parcelable {
         @NonNull
         public SatellitePvt build() {
             return new SatellitePvt(mFlags, mPositionEcef, mVelocityEcef, mClockInfo,
-                    mIonoDelayMeters, mTropoDelayMeters);
+                    mIonoDelayMeters, mTropoDelayMeters, mTimeOfClockSeconds,
+                    mTimeOfEphemerisSeconds,
+                    mIssueOfDataClock, mIssueOfDataEphemeris,
+                    mEphemerisSource);
         }
     }
 }

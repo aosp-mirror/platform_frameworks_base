@@ -18,16 +18,19 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="pip_phone_close" msgid="5783752637260411309">"סגירה"</string>
-    <string name="pip_phone_expand" msgid="2579292903468287504">"הרחב"</string>
+    <string name="pip_phone_expand" msgid="2579292903468287504">"הרחבה"</string>
     <string name="pip_phone_settings" msgid="5468987116750491918">"הגדרות"</string>
+    <string name="pip_phone_enter_split" msgid="7042877263880641911">"כניסה למסך המפוצל"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"תפריט"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> במצב תמונה בתוך תמונה"</string>
-    <string name="pip_notification_message" msgid="8854051911700302620">"אם אינך רוצה שהתכונה הזו תשמש את <xliff:g id="NAME">%s</xliff:g>, יש להקיש כדי לפתוח את ההגדרות ולכבות את התכונה."</string>
+    <string name="pip_notification_message" msgid="8854051911700302620">"אם אינך רוצה שהתכונה הזו תשמש את <xliff:g id="NAME">%s</xliff:g>, יש להקיש כדי לפתוח את ההגדרות ולהשבית את התכונה."</string>
     <string name="pip_play" msgid="3496151081459417097">"הפעלה"</string>
-    <string name="pip_pause" msgid="690688849510295232">"השהה"</string>
+    <string name="pip_pause" msgid="690688849510295232">"השהיה"</string>
     <string name="pip_skip_to_next" msgid="8403429188794867653">"אפשר לדלג אל הבא"</string>
     <string name="pip_skip_to_prev" msgid="7172158111196394092">"אפשר לדלג אל הקודם"</string>
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"שינוי גודל"</string>
+    <string name="accessibility_action_pip_stash" msgid="4060775037619702641">"הסתרה זמנית"</string>
+    <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"ביטול ההסתרה הזמנית"</string>
     <string name="dock_forced_resizable" msgid="1749750436092293116">"ייתכן שהאפליקציה לא תפעל במסך מפוצל."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"האפליקציה אינה תומכת במסך מפוצל."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"ייתכן שהאפליקציה לא תפעל במסך משני."</string>
@@ -41,14 +44,14 @@
     <string name="accessibility_action_divider_top_full" msgid="3495871951082107594">"מסך עליון מלא"</string>
     <string name="accessibility_action_divider_top_70" msgid="1779164068887875474">"עליון 70%"</string>
     <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"עליון 50%"</string>
-    <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"עליון 30%"</string>
+    <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"למעלה 30%"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"מסך תחתון מלא"</string>
-    <string name="one_handed_tutorial_title" msgid="4583241688067426350">"איך להשתמש במצב שימוש ביד אחת"</string>
+    <string name="one_handed_tutorial_title" msgid="4583241688067426350">"איך להשתמש בתכונה \'מצב שימוש ביד אחת\'"</string>
     <string name="one_handed_tutorial_description" msgid="3486582858591353067">"כדי לצאת, יש להחליק למעלה מתחתית המסך או להקיש במקום כלשהו במסך מעל האפליקציה"</string>
     <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"הפעלה של מצב שימוש ביד אחת"</string>
     <string name="accessibility_action_stop_one_handed" msgid="1369940261782179442">"יציאה ממצב שימוש ביד אחת"</string>
-    <string name="bubbles_settings_button_description" msgid="1301286017420516912">"הגדרות בשביל בועות של <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="bubble_overflow_button_content_description" msgid="8160974472718594382">"גלישה"</string>
+    <string name="bubbles_settings_button_description" msgid="1301286017420516912">"הגדרות לבועות של <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="bubble_overflow_button_content_description" msgid="8160974472718594382">"אפשרויות נוספות"</string>
     <string name="bubble_accessibility_action_add_back" msgid="1830101076853540953">"הוספה בחזרה לערימה"</string>
     <string name="bubble_content_description_single" msgid="8495748092720065813">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> מהאפליקציה <xliff:g id="APP_NAME">%2$s</xliff:g>"</string>
     <string name="bubble_content_description_stack" msgid="8071515017164630429">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> מ-<xliff:g id="APP_NAME">%2$s</xliff:g> ועוד <xliff:g id="BUBBLE_COUNT">%3$d</xliff:g>"</string>
@@ -69,4 +72,13 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"בועה"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"ניהול"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"הבועה נסגרה."</string>
+    <string name="restart_button_description" msgid="5887656107651190519">"צריך להקיש כדי להפעיל מחדש את האפליקציה הזו ולעבור למסך מלא."</string>
+    <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"בעיות במצלמה?\nאפשר להקיש כדי לבצע התאמה מחדש"</string>
+    <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"הבעיה לא נפתרה?\nאפשר להקיש כדי לחזור לגרסה הקודמת"</string>
+    <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"אין בעיות במצלמה? אפשר להקיש כדי לסגור."</string>
+    <string name="letterbox_education_dialog_title" msgid="6688664582871779215">"חלק מהאפליקציות פועלות בצורה הטובה ביותר במצב תצוגה לאורך"</string>
+    <string name="letterbox_education_dialog_subtext" msgid="4853542518367719562">"כדי להפיק את המרב משטח המסך, ניתן לנסות את אחת מהאפשרויות האלה"</string>
+    <string name="letterbox_education_screen_rotation_text" msgid="5085786687366339027">"מסובבים את המכשיר כדי לעבור לתצוגה במסך מלא"</string>
+    <string name="letterbox_education_reposition_text" msgid="1068293354123934727">"מקישים הקשה כפולה ליד אפליקציה כדי למקם אותה מחדש"</string>
+    <string name="letterbox_education_got_it" msgid="4057634570866051177">"הבנתי"</string>
 </resources>

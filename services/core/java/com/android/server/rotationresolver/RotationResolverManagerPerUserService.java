@@ -42,6 +42,8 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.LatencyTracker;
 import com.android.server.infra.AbstractPerUserSystemService;
 
+import java.io.PrintWriter;
+
 /**
  * Manages the Rotation Resolver Service on a per-user basis.
  */
@@ -121,26 +123,26 @@ final class RotationResolverManagerPerUserService extends
         final RotationResolverInternal.RotationResolverCallbackInternal wrapper =
                 new RotationResolverInternal.RotationResolverCallbackInternal() {
 
-            @Override
-            public void onSuccess(int result) {
-                synchronized (mLock) {
-                    mLatencyTracker
-                            .onActionEnd(ACTION_ROTATE_SCREEN_CAMERA_CHECK);
-                }
-                callbackInternal.onSuccess(result);
-            }
+                    @Override
+                    public void onSuccess(int result) {
+                        synchronized (mLock) {
+                            mLatencyTracker
+                                    .onActionEnd(ACTION_ROTATE_SCREEN_CAMERA_CHECK);
+                        }
+                        callbackInternal.onSuccess(result);
+                    }
 
-            @Override
-            public void onFailure(int error) {
-                synchronized (mLock) {
-                    mLatencyTracker
-                            .onActionEnd(ACTION_ROTATE_SCREEN_CAMERA_CHECK);
-                }
-                callbackInternal.onFailure(error);
-            }
-        };
+                    @Override
+                    public void onFailure(int error) {
+                        synchronized (mLock) {
+                            mLatencyTracker
+                                    .onActionEnd(ACTION_ROTATE_SCREEN_CAMERA_CHECK);
+                        }
+                        callbackInternal.onFailure(error);
+                    }
+                };
         mCurrentRequest = new RemoteRotationResolverService.RotationRequest(wrapper,
-                request, cancellationSignalInternal);
+                request, cancellationSignalInternal, mLock);
 
         cancellationSignalInternal.setOnCancelListener(() -> {
             synchronized (mLock) {
@@ -152,7 +154,7 @@ final class RotationResolverManagerPerUserService extends
         });
 
 
-        mRemoteService.resolveRotationLocked(mCurrentRequest);
+        mRemoteService.resolveRotation(mCurrentRequest);
         mCurrentRequest.mIsDispatched = true;
     }
 
@@ -160,7 +162,7 @@ final class RotationResolverManagerPerUserService extends
     private void ensureRemoteServiceInitiated() {
         if (mRemoteService == null) {
             mRemoteService = new RemoteRotationResolverService(getContext(), mComponentName,
-                    getUserId(), CONNECTION_TTL_MILLIS, mLock);
+                    getUserId(), CONNECTION_TTL_MILLIS);
         }
     }
 
@@ -214,6 +216,13 @@ final class RotationResolverManagerPerUserService extends
         }
         mCurrentRequest.cancelInternal();
         mCurrentRequest = null;
+    }
+
+    @Override
+    @GuardedBy("mLock")
+    protected void dumpLocked(@NonNull String prefix, @NonNull PrintWriter pw) {
+        super.dumpLocked(prefix, pw);
+        dumpInternal(new IndentingPrintWriter(pw, "  "));
     }
 
     void dumpInternal(IndentingPrintWriter ipw) {

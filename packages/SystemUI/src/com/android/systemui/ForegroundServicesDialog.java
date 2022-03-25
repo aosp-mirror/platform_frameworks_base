@@ -58,7 +58,7 @@ public final class ForegroundServicesDialog extends AlertActivity implements
 
     LayoutInflater mInflater;
 
-    private MetricsLogger mMetricsLogger;
+    private final MetricsLogger mMetricsLogger;
 
     private String[] mPackages;
     private PackageItemAdapter mAdapter;
@@ -75,15 +75,14 @@ public final class ForegroundServicesDialog extends AlertActivity implements
             };
 
     @Inject
-    ForegroundServicesDialog() {
+    ForegroundServicesDialog(MetricsLogger metricsLogger) {
         super();
+        mMetricsLogger = metricsLogger;
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        mMetricsLogger = Dependency.get(MetricsLogger.class);
 
         mInflater = LayoutInflater.from(this);
 

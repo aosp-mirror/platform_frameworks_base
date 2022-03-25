@@ -141,8 +141,8 @@ public final class ImsExternalCallState implements Parcelable {
     public ImsExternalCallState(Parcel in) {
         mCallId = in.readInt();
         ClassLoader classLoader = ImsExternalCallState.class.getClassLoader();
-        mAddress = in.readParcelable(classLoader);
-        mLocalAddress = in.readParcelable(classLoader);
+        mAddress = in.readParcelable(classLoader, android.net.Uri.class);
+        mLocalAddress = in.readParcelable(classLoader, android.net.Uri.class);
         mIsPullable = (in.readInt() != 0);
         mCallState = in.readInt();
         mCallType = in.readInt();

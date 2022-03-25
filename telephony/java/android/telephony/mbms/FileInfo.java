@@ -55,7 +55,7 @@ public final class FileInfo implements Parcelable {
     }
 
     private FileInfo(Parcel in) {
-        uri = in.readParcelable(null);
+        uri = in.readParcelable(null, android.net.Uri.class);
         mimeType = in.readString();
     }
 

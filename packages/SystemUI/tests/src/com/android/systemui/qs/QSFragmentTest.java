@@ -39,7 +39,6 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
 import com.android.keyguard.CarrierText;
 import com.android.systemui.Dependency;
-import com.android.systemui.SystemUIFactory;
 import com.android.systemui.SysuiBaseFragmentTest;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dump.DumpManager;
@@ -48,22 +47,22 @@ import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.dagger.QSFragmentComponent;
 import com.android.systemui.qs.external.CustomTileStatePersister;
+import com.android.systemui.qs.external.TileLifecycleManager;
+import com.android.systemui.qs.external.TileServiceRequestController;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSFactoryImpl;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.statusbar.CommandQueue;
-import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.phone.AutoTileManager;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
-import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.policy.Clock;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.tuner.TunerService;
-import com.android.systemui.util.InjectionInflationController;
 import com.android.systemui.util.settings.SecureSettings;
 
 import org.junit.Before;
@@ -95,9 +94,11 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
     @Mock
     private KeyguardBypassController mBypassController;
     @Mock
-    private FeatureFlags mFeatureFlags;
-    @Mock
     private FalsingManager mFalsingManager;
+    @Mock
+    private TileServiceRequestController.Builder mTileServiceRequestControllerBuilder;
+    @Mock
+    private TileServiceRequestController mTileServiceRequestController;
 
     public QSFragmentTest() {
         super(QSFragment.class);
@@ -110,6 +111,9 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
         MockitoAnnotations.initMocks(this);
         when(mQsComponentFactory.create(any(QSFragment.class))).thenReturn(mQsFragmentComponent);
         when(mQsFragmentComponent.getQSPanelController()).thenReturn(mQSPanelController);
+
+        when(mTileServiceRequestControllerBuilder.create(any()))
+                .thenReturn(mTileServiceRequestController);
 
         mMockMetricsLogger = mDependency.injectMockDependency(MetricsLogger.class);
         mContext.addMockSystemService(Context.LAYOUT_INFLATER_SERVICE,
@@ -133,14 +137,15 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
         QSFragment qs = (QSFragment) mFragment;
         mFragments.dispatchResume();
         processAllMessages();
+
         QSTileHost host = new QSTileHost(mContext, mock(StatusBarIconController.class),
                 mock(QSFactoryImpl.class), new Handler(), Looper.myLooper(),
                 mock(PluginManager.class), mock(TunerService.class),
                 () -> mock(AutoTileManager.class), mock(DumpManager.class),
-                mock(BroadcastDispatcher.class), Optional.of(mock(StatusBar.class)),
+                mock(BroadcastDispatcher.class), Optional.of(mock(CentralSurfaces.class)),
                 mock(QSLogger.class), mock(UiEventLogger.class), mock(UserTracker.class),
-                mock(SecureSettings.class), mock(CustomTileStatePersister.class), mFeatureFlags);
-        qs.setHost(host);
+                mock(SecureSettings.class), mock(CustomTileStatePersister.class),
+                mTileServiceRequestControllerBuilder, mock(TileLifecycleManager.Factory.class));
 
         qs.setListening(true);
         processAllMessages();
@@ -175,21 +180,16 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
     protected Fragment instantiate(Context context, String className, Bundle arguments) {
         CommandQueue commandQueue = new CommandQueue(context);
         return new QSFragment(
-                new RemoteInputQuickSettingsDisabler(context, mock(ConfigurationController.class),
-                        commandQueue),
-                new InjectionInflationController(
-                        SystemUIFactory.getInstance()
-                                .getSysUIComponent()
-                                .createViewInstanceCreatorFactory()),
+                new RemoteInputQuickSettingsDisabler(context, commandQueue,
+                        mock(ConfigurationController.class)),
                 mock(QSTileHost.class),
                 mock(StatusBarStateController.class),
                 commandQueue,
-                new QSDetailDisplayer(),
                 mQSMediaHost,
                 mQQSMediaHost,
                 mBypassController,
                 mQsComponentFactory,
-                mFeatureFlags,
+                mock(QSFragmentDisableFlagsLogger.class),
                 mFalsingManager,
                 mock(DumpManager.class));
     }

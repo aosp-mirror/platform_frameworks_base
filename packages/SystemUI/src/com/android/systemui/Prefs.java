@@ -71,7 +71,9 @@ public final class Prefs {
             Key.HAS_SEEN_REVERSE_BOTTOM_SHEET,
             Key.CONTROLS_STRUCTURE_SWIPE_TOOLTIP_COUNT,
             Key.HAS_SEEN_ACCESSIBILITY_FLOATING_MENU_DOCK_TOOLTIP,
-            Key.ACCESSIBILITY_FLOATING_MENU_POSITION
+            Key.ACCESSIBILITY_FLOATING_MENU_POSITION,
+            Key.HAS_CLICKED_NUDGE_TO_SETUP_DREAM,
+            Key.HAS_DISMISSED_NUDGE_TO_SETUP_DREAM
     })
     // TODO: annotate these with their types so {@link PrefsCommandLine} can know how to set them
     public @interface Key {
@@ -115,6 +117,8 @@ public final class Prefs {
         String HAS_SEEN_ACCESSIBILITY_FLOATING_MENU_DOCK_TOOLTIP =
                 "HasSeenAccessibilityFloatingMenuDockTooltip";
         String ACCESSIBILITY_FLOATING_MENU_POSITION = "AccessibilityFloatingMenuPosition";
+        String HAS_CLICKED_NUDGE_TO_SETUP_DREAM = "HasClickedNudgeToSetupDream";
+        String HAS_DISMISSED_NUDGE_TO_SETUP_DREAM = "HasDismissedNudgeToSetupDream";
     }
 
     public static boolean getBoolean(Context context, @Key String key, boolean defaultValue) {

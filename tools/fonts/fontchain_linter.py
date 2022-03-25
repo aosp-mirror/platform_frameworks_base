@@ -13,41 +13,56 @@ from fontTools import ttLib
 EMOJI_VS = 0xFE0F
 
 LANG_TO_SCRIPT = {
+    'af': 'Latn',
     'as': 'Beng',
+    'am': 'Latn',
     'be': 'Cyrl',
     'bg': 'Cyrl',
     'bn': 'Beng',
+    'cs': 'Latn',
     'cu': 'Cyrl',
     'cy': 'Latn',
     'da': 'Latn',
     'de': 'Latn',
+    'el': 'Latn',
     'en': 'Latn',
     'es': 'Latn',
     'et': 'Latn',
     'eu': 'Latn',
     'fr': 'Latn',
     'ga': 'Latn',
+    'gl': 'Latn',
     'gu': 'Gujr',
     'hi': 'Deva',
     'hr': 'Latn',
     'hu': 'Latn',
     'hy': 'Armn',
+    'it': 'Latn',
     'ja': 'Jpan',
+    'ka': 'Latn',
     'kn': 'Knda',
     'ko': 'Kore',
     'la': 'Latn',
+    'lt': 'Latn',
+    'lv': 'Latn',
     'ml': 'Mlym',
     'mn': 'Cyrl',
     'mr': 'Deva',
     'nb': 'Latn',
+    'nl': 'Latn',
     'nn': 'Latn',
     'or': 'Orya',
     'pa': 'Guru',
     'pt': 'Latn',
+    'ru': 'Latn',
+    'sk': 'Latn',
     'sl': 'Latn',
+    'sq': 'Latn',
+    'sv': 'Latn',
     'ta': 'Taml',
     'te': 'Telu',
     'tk': 'Latn',
+    'uk': 'Latn',
 }
 
 def lang_to_script(lang_code):
@@ -228,6 +243,8 @@ def parse_fonts_xml(fonts_xml_path):
         name = family.get('name')
         variant = family.get('variant')
         langs = family.get('lang')
+        ignoreAttr = family.get('ignore')
+
         if name:
             assert variant is None, (
                 'No variant expected for LGC font %s.' % name)
@@ -244,6 +261,11 @@ def parse_fonts_xml(fonts_xml_path):
         name = family.get('name')
         variant = family.get('variant')
         langs = family.get('lang')
+        ignoreAttr = family.get('ignore')
+        ignore = ignoreAttr == 'true' or ignoreAttr == '1'
+
+        if ignore:
+            continue
 
         if langs:
             langs = langs.split()
@@ -620,23 +642,11 @@ def compute_expected_emoji():
         sequence = tuple(ch for ch in sequence if ch != EMOJI_VS)
         all_sequences.add(sequence)
         sequence_pieces.update(sequence)
-        if _emoji_sequences.get(sequence, None) == 'Emoji_Tag_Sequence':
-            # Add reverse of all emoji ZWJ sequences, which are added to the
-            # fonts as a workaround to get the sequences work in RTL text.
-            # TODO: test if these are actually needed by Minikin/HarfBuzz.
-            reversed_seq = reverse_emoji(sequence)
-            all_sequences.add(reversed_seq)
-            equivalent_emoji[reversed_seq] = sequence
 
     for sequence in adjusted_emoji_zwj_sequences.keys():
         sequence = tuple(ch for ch in sequence if ch != EMOJI_VS)
         all_sequences.add(sequence)
         sequence_pieces.update(sequence)
-        # Add reverse of all emoji ZWJ sequences, which are added to the fonts
-        # as a workaround to get the sequences work in RTL text.
-        reversed_seq = reverse_emoji(sequence)
-        all_sequences.add(reversed_seq)
-        equivalent_emoji[reversed_seq] = sequence
 
     for first, second in SAME_FLAG_MAPPINGS:
         equivalent_emoji[first] = second

@@ -16,6 +16,7 @@
 
 package com.android.server.am;
 
+import static android.app.ActivityManager.PROCESS_CAPABILITY_ALL;
 import static android.app.ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE;
 import static android.app.ActivityManager.PROCESS_STATE_BOUND_TOP;
 import static android.app.ActivityManager.PROCESS_STATE_CACHED_ACTIVITY;
@@ -67,7 +68,6 @@ import static org.mockito.AdditionalAnswers.answer;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyBoolean;
 import static org.mockito.Mockito.anyInt;
-import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doNothing;
@@ -1854,6 +1854,36 @@ public class MockingOomAdjusterTests {
 
     @SuppressWarnings("GuardedBy")
     @Test
+    public void testUpdateOomAdj_DoAll_BoundByPersService_Cycle_Branch_Capability() {
+        ProcessRecord app = spy(makeDefaultProcessRecord(MOCKAPP_PID, MOCKAPP_UID,
+                MOCKAPP_PROCESSNAME, MOCKAPP_PACKAGENAME, false));
+        ProcessRecord client = spy(makeDefaultProcessRecord(MOCKAPP2_PID, MOCKAPP2_UID,
+                MOCKAPP2_PROCESSNAME, MOCKAPP2_PACKAGENAME, false));
+        bindService(app, client, null, Context.BIND_INCLUDE_CAPABILITIES, mock(IBinder.class));
+        ProcessRecord client2 = spy(makeDefaultProcessRecord(MOCKAPP3_PID, MOCKAPP3_UID,
+                MOCKAPP3_PROCESSNAME, MOCKAPP3_PACKAGENAME, false));
+        bindService(client, client2, null, Context.BIND_INCLUDE_CAPABILITIES, mock(IBinder.class));
+        bindService(client2, app, null, Context.BIND_INCLUDE_CAPABILITIES, mock(IBinder.class));
+        ProcessRecord client3 = spy(makeDefaultProcessRecord(MOCKAPP4_PID, MOCKAPP4_UID,
+                MOCKAPP4_PROCESSNAME, MOCKAPP4_PACKAGENAME, false));
+        client3.mState.setMaxAdj(PERSISTENT_PROC_ADJ);
+        bindService(app, client3, null, Context.BIND_INCLUDE_CAPABILITIES, mock(IBinder.class));
+        ArrayList<ProcessRecord> lru = sService.mProcessList.getLruProcessesLOSP();
+        lru.clear();
+        lru.add(app);
+        lru.add(client);
+        lru.add(client2);
+        lru.add(client3);
+        sService.mWakefulness.set(PowerManagerInternal.WAKEFULNESS_AWAKE);
+        sService.mOomAdjuster.updateOomAdjLocked(OomAdjuster.OOM_ADJ_REASON_NONE);
+
+        assertEquals(PROCESS_CAPABILITY_ALL, client.mState.getSetCapability());
+        assertEquals(PROCESS_CAPABILITY_ALL, client2.mState.getSetCapability());
+        assertEquals(PROCESS_CAPABILITY_ALL, app.mState.getSetCapability());
+    }
+
+    @SuppressWarnings("GuardedBy")
+    @Test
     public void testUpdateOomAdj_DoAll_Provider_Cycle_Branch_2() {
         ProcessRecord app = spy(makeDefaultProcessRecord(MOCKAPP_PID, MOCKAPP_UID,
                 MOCKAPP_PROCESSNAME, MOCKAPP_PACKAGENAME, false));
@@ -2174,13 +2204,13 @@ public class MockingOomAdjusterTests {
         ConnectionRecord cr = spy(new ConnectionRecord(binding,
                 mock(ActivityServiceConnectionsHolder.class),
                 mock(IServiceConnection.class), bindFlags,
-                0, null, client.uid, client.processName, client.info.packageName));
+                0, null, client.uid, client.processName, client.info.packageName, null));
         doCallRealMethod().when(record).addConnection(any(IBinder.class),
                 any(ConnectionRecord.class));
         record.addConnection(binder, cr);
         client.mServices.addConnection(cr);
         binding.connections.add(cr);
-        doNothing().when(cr).trackProcState(anyInt(), anyInt(), anyLong());
+        doNothing().when(cr).trackProcState(anyInt(), anyInt());
         return record;
     }
 

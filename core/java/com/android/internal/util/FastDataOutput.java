@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Optimized implementation of {@link DataOutput} which buffers data in memory
@@ -41,23 +42,26 @@ import java.util.Objects;
 public class FastDataOutput implements DataOutput, Flushable, Closeable {
     private static final int MAX_UNSIGNED_SHORT = 65_535;
 
+    private static final int BUFFER_SIZE = 32_768;
+
+    private static AtomicReference<FastDataOutput> sOutCache = new AtomicReference<>();
+
     private final VMRuntime mRuntime;
-    private final OutputStream mOut;
 
     private final byte[] mBuffer;
     private final long mBufferPtr;
     private final int mBufferCap;
 
+    private OutputStream mOut;
     private int mBufferPos;
 
     /**
      * Values that have been "interned" by {@link #writeInternedUTF(String)}.
      */
-    private HashMap<String, Short> mStringRefs = new HashMap<>();
+    private final HashMap<String, Short> mStringRefs = new HashMap<>();
 
     public FastDataOutput(@NonNull OutputStream out, int bufferSize) {
         mRuntime = VMRuntime.getRuntime();
-        mOut = Objects.requireNonNull(out);
         if (bufferSize < 8) {
             throw new IllegalArgumentException();
         }
@@ -65,6 +69,48 @@ public class FastDataOutput implements DataOutput, Flushable, Closeable {
         mBuffer = (byte[]) mRuntime.newNonMovableArray(byte.class, bufferSize);
         mBufferPtr = mRuntime.addressOf(mBuffer);
         mBufferCap = mBuffer.length;
+
+        setOutput(out);
+    }
+
+    /**
+     * Create a new FastDataOutput object or retrieve one from cache.
+     */
+    public static FastDataOutput obtain(@NonNull OutputStream out) {
+        FastDataOutput instance = sOutCache.getAndSet(null);
+        if (instance != null) {
+            instance.setOutput(out);
+            return instance;
+        }
+        return new FastDataOutput(out, BUFFER_SIZE);
+    }
+
+    /**
+     * Put a FastDataOutput object back into the cache.
+     * You must not touch the object after this call.
+     */
+    public void release() {
+        if (mBufferPos > 0) {
+            throw new IllegalStateException("Lingering data, call flush() before releasing.");
+        }
+
+        mOut = null;
+        mBufferPos = 0;
+        mStringRefs.clear();
+
+        if (mBufferCap == BUFFER_SIZE) {
+            // Try to return to the cache.
+            sOutCache.compareAndSet(null, this);
+        }
+    }
+
+    /**
+     * Re-initializes the object for the new output.
+     */
+    private void setOutput(@NonNull OutputStream out) {
+        mOut = Objects.requireNonNull(out);
+        mBufferPos = 0;
+        mStringRefs.clear();
     }
 
     private void drain() throws IOException {
@@ -83,6 +129,7 @@ public class FastDataOutput implements DataOutput, Flushable, Closeable {
     @Override
     public void close() throws IOException {
         mOut.close();
+        release();
     }
 
     @Override

@@ -82,7 +82,7 @@ import java.util.zip.CRC32;
  * Supported for reading: JPEG, PNG, WebP, HEIF, DNG, CR2, NEF, NRW, ARW, RW2, ORF, PEF, SRW, RAF,
  * AVIF.
  * <p>
- * Supported for writing: JPEG, PNG, WebP.
+ * Supported for writing: JPEG, PNG, WebP, DNG.
  * <p>
  * Note: JPEG and HEIF files may contain XMP data either inside the Exif data chunk or outside of
  * it. This class will search both locations for XMP data, but if XMP data exist both inside and
@@ -577,7 +577,7 @@ public class ExifInterface {
     // 3.1. PNG file signature
     private static final byte[] PNG_SIGNATURE = new byte[] {(byte) 0x89, (byte) 0x50, (byte) 0x4e,
             (byte) 0x47, (byte) 0x0d, (byte) 0x0a, (byte) 0x1a, (byte) 0x0a};
-    // See PNG (Portable Network Graphics) Specification, Version 1.2,
+    // See "Extensions to the PNG 1.2 Specification, Version 1.5.0",
     // 3.7. eXIf Exchangeable Image File (Exif) Profile
     private static final byte[] PNG_CHUNK_TYPE_EXIF = new byte[]{(byte) 0x65, (byte) 0x58,
             (byte) 0x49, (byte) 0x66};
@@ -1294,6 +1294,7 @@ public class ExifInterface {
             new ExifTag(TAG_Y_CB_CR_SUB_SAMPLING, 530, IFD_FORMAT_USHORT),
             new ExifTag(TAG_Y_CB_CR_POSITIONING, 531, IFD_FORMAT_USHORT),
             new ExifTag(TAG_REFERENCE_BLACK_WHITE, 532, IFD_FORMAT_URATIONAL),
+            new ExifTag(TAG_XMP, 700, IFD_FORMAT_BYTE),
             new ExifTag(TAG_COPYRIGHT, 33432, IFD_FORMAT_STRING),
             new ExifTag(TAG_EXIF_IFD_POINTER, 34665, IFD_FORMAT_ULONG),
             new ExifTag(TAG_GPS_INFO_IFD_POINTER, 34853, IFD_FORMAT_ULONG),
@@ -1360,12 +1361,6 @@ public class ExifInterface {
             new ExifTag(TAG_ORF_CAMERA_SETTINGS_IFD_POINTER, 8224, IFD_FORMAT_BYTE),
             new ExifTag(TAG_ORF_IMAGE_PROCESSING_IFD_POINTER, 8256, IFD_FORMAT_BYTE)
     };
-
-    // Tags for indicating the thumbnail offset and length
-    private static final ExifTag JPEG_INTERCHANGE_FORMAT_TAG =
-            new ExifTag(TAG_JPEG_INTERCHANGE_FORMAT, 513, IFD_FORMAT_ULONG);
-    private static final ExifTag JPEG_INTERCHANGE_FORMAT_LENGTH_TAG =
-            new ExifTag(TAG_JPEG_INTERCHANGE_FORMAT_LENGTH, 514, IFD_FORMAT_ULONG);
 
     // Mappings from tag number to tag name and each item represents one IFD tag group.
     private static final HashMap[] sExifTagMapsForReading = new HashMap[EXIF_TAGS.length];
@@ -2081,7 +2076,7 @@ public class ExifInterface {
      * {@link #setAttribute(String,String)} to set all attributes to write and
      * make a single call rather than multiple calls for each attribute.
      * <p>
-     * This method is supported for JPEG, PNG and WebP files.
+     * This method is supported for JPEG, PNG, WebP, and DNG files.
      * <p class="note">
      * Note: after calling this method, any attempts to obtain range information
      * from {@link #getAttributeRange(String)} or {@link #getThumbnailRange()}
@@ -2090,16 +2085,22 @@ public class ExifInterface {
      * <p>
      * For WebP format, the Exif data will be stored as an Extended File Format, and it may not be
      * supported for older readers.
-     * </p>
+     * <p>
+     * For PNG format, the Exif data will be stored as an "eXIf" chunk as per
+     * "Extensions to the PNG 1.2 Specification, Version 1.5.0".
      */
     public void saveAttributes() throws IOException {
         if (!isSupportedFormatForSavingAttributes()) {
-            throw new IOException("ExifInterface only supports saving attributes on JPEG, PNG, "
-                    + "or WebP formats.");
+            throw new IOException("ExifInterface only supports saving attributes for JPEG, PNG, "
+                    + "WebP, and DNG formats.");
         }
         if (mIsInputStream || (mSeekableFileDescriptor == null && mFilename == null)) {
             throw new IOException(
                     "ExifInterface does not support saving attributes for the current input.");
+        }
+        if (mHasThumbnail && mHasThumbnailStrips && !mAreThumbnailStripsConsecutive) {
+            throw new IOException("ExifInterface does not support saving attributes when the image "
+                    + "file has non-consecutive thumbnail strips");
         }
 
         // Remember the fact that we've changed the file on disk from what was
@@ -2149,6 +2150,10 @@ public class ExifInterface {
                     savePngAttributes(bufferedIn, bufferedOut);
                 } else if (mMimeType == IMAGE_TYPE_WEBP) {
                     saveWebpAttributes(bufferedIn, bufferedOut);
+                } else if (mMimeType == IMAGE_TYPE_DNG || mMimeType == IMAGE_TYPE_UNKNOWN) {
+                    ByteOrderedDataOutputStream dataOutputStream =
+                            new ByteOrderedDataOutputStream(bufferedOut, ByteOrder.BIG_ENDIAN);
+                    writeExifSegment(dataOutputStream);
                 }
             }
         } catch (Exception e) {
@@ -2288,9 +2293,9 @@ public class ExifInterface {
             }
 
             ExifAttribute imageLengthAttribute =
-                    (ExifAttribute) mAttributes[IFD_TYPE_THUMBNAIL].get(TAG_IMAGE_LENGTH);
+                    (ExifAttribute) mAttributes[IFD_TYPE_THUMBNAIL].get(TAG_THUMBNAIL_IMAGE_LENGTH);
             ExifAttribute imageWidthAttribute =
-                    (ExifAttribute) mAttributes[IFD_TYPE_THUMBNAIL].get(TAG_IMAGE_WIDTH);
+                    (ExifAttribute) mAttributes[IFD_TYPE_THUMBNAIL].get(TAG_THUMBNAIL_IMAGE_WIDTH);
             if (imageLengthAttribute != null && imageWidthAttribute != null) {
                 int imageLength = imageLengthAttribute.getIntValue(mExifByteOrder);
                 int imageWidth = imageWidthAttribute.getIntValue(mExifByteOrder);
@@ -2521,7 +2526,7 @@ public class ExifInterface {
             }
             if (datetime == null) return -1;
             return datetime.getTime();
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException | ArrayIndexOutOfBoundsException e) {
             return -1;
         }
     }
@@ -2934,10 +2939,12 @@ public class ExifInterface {
                     if (in.skipBytes(1) != 1) {
                         throw new IOException("Invalid SOFx");
                     }
-                    mAttributes[imageType].put(TAG_IMAGE_LENGTH, ExifAttribute.createULong(
-                            in.readUnsignedShort(), mExifByteOrder));
-                    mAttributes[imageType].put(TAG_IMAGE_WIDTH, ExifAttribute.createULong(
-                            in.readUnsignedShort(), mExifByteOrder));
+                    mAttributes[imageType].put(imageType != IFD_TYPE_THUMBNAIL
+                                    ? TAG_IMAGE_LENGTH : TAG_THUMBNAIL_IMAGE_LENGTH,
+                            ExifAttribute.createULong(in.readUnsignedShort(), mExifByteOrder));
+                    mAttributes[imageType].put(imageType != IFD_TYPE_THUMBNAIL
+                                    ? TAG_IMAGE_WIDTH : TAG_THUMBNAIL_IMAGE_WIDTH,
+                            ExifAttribute.createULong(in.readUnsignedShort(), mExifByteOrder));
                     length -= 5;
                     break;
                 }
@@ -4508,6 +4515,17 @@ public class ExifInterface {
         if (!isThumbnail(mAttributes[IFD_TYPE_THUMBNAIL])) {
             Log.d(TAG, "No image meets the size requirements of a thumbnail image.");
         }
+
+        // TAG_THUMBNAIL_* tags should be replaced with TAG_* equivalents and vice versa if needed.
+        replaceInvalidTags(IFD_TYPE_PRIMARY, TAG_THUMBNAIL_ORIENTATION, TAG_ORIENTATION);
+        replaceInvalidTags(IFD_TYPE_PRIMARY, TAG_THUMBNAIL_IMAGE_LENGTH, TAG_IMAGE_LENGTH);
+        replaceInvalidTags(IFD_TYPE_PRIMARY, TAG_THUMBNAIL_IMAGE_WIDTH, TAG_IMAGE_WIDTH);
+        replaceInvalidTags(IFD_TYPE_PREVIEW, TAG_THUMBNAIL_ORIENTATION, TAG_ORIENTATION);
+        replaceInvalidTags(IFD_TYPE_PREVIEW, TAG_THUMBNAIL_IMAGE_LENGTH, TAG_IMAGE_LENGTH);
+        replaceInvalidTags(IFD_TYPE_PREVIEW, TAG_THUMBNAIL_IMAGE_WIDTH, TAG_IMAGE_WIDTH);
+        replaceInvalidTags(IFD_TYPE_THUMBNAIL, TAG_ORIENTATION, TAG_THUMBNAIL_ORIENTATION);
+        replaceInvalidTags(IFD_TYPE_THUMBNAIL, TAG_IMAGE_LENGTH, TAG_THUMBNAIL_IMAGE_LENGTH);
+        replaceInvalidTags(IFD_TYPE_THUMBNAIL, TAG_IMAGE_WIDTH, TAG_THUMBNAIL_IMAGE_WIDTH);
     }
 
     /**
@@ -4588,8 +4606,15 @@ public class ExifInterface {
             removeAttribute(tag.name);
         }
         // Remove old thumbnail data
-        removeAttribute(JPEG_INTERCHANGE_FORMAT_TAG.name);
-        removeAttribute(JPEG_INTERCHANGE_FORMAT_LENGTH_TAG.name);
+        if (mHasThumbnail) {
+            if (mHasThumbnailStrips) {
+                removeAttribute(TAG_STRIP_OFFSETS);
+                removeAttribute(TAG_STRIP_BYTE_COUNTS);
+            } else {
+                removeAttribute(TAG_JPEG_INTERCHANGE_FORMAT);
+                removeAttribute(TAG_JPEG_INTERCHANGE_FORMAT_LENGTH);
+            }
+        }
 
         // Remove null value tags.
         for (int ifdType = 0; ifdType < EXIF_TAGS.length; ++ifdType) {
@@ -4616,10 +4641,17 @@ public class ExifInterface {
                     ExifAttribute.createULong(0, mExifByteOrder));
         }
         if (mHasThumbnail) {
-            mAttributes[IFD_TYPE_THUMBNAIL].put(JPEG_INTERCHANGE_FORMAT_TAG.name,
-                    ExifAttribute.createULong(0, mExifByteOrder));
-            mAttributes[IFD_TYPE_THUMBNAIL].put(JPEG_INTERCHANGE_FORMAT_LENGTH_TAG.name,
-                    ExifAttribute.createULong(mThumbnailLength, mExifByteOrder));
+            if (mHasThumbnailStrips) {
+                mAttributes[IFD_TYPE_THUMBNAIL].put(TAG_STRIP_OFFSETS,
+                        ExifAttribute.createUShort(0, mExifByteOrder));
+                mAttributes[IFD_TYPE_THUMBNAIL].put(TAG_STRIP_BYTE_COUNTS,
+                        ExifAttribute.createUShort(mThumbnailLength, mExifByteOrder));
+            } else {
+                mAttributes[IFD_TYPE_THUMBNAIL].put(TAG_JPEG_INTERCHANGE_FORMAT,
+                        ExifAttribute.createULong(0, mExifByteOrder));
+                mAttributes[IFD_TYPE_THUMBNAIL].put(TAG_JPEG_INTERCHANGE_FORMAT_LENGTH,
+                        ExifAttribute.createULong(mThumbnailLength, mExifByteOrder));
+            }
         }
 
         // Calculate IFD group data area sizes. IFD group data area is assigned to save the entry
@@ -4648,8 +4680,13 @@ public class ExifInterface {
         }
         if (mHasThumbnail) {
             int thumbnailOffset = position;
-            mAttributes[IFD_TYPE_THUMBNAIL].put(JPEG_INTERCHANGE_FORMAT_TAG.name,
-                    ExifAttribute.createULong(thumbnailOffset, mExifByteOrder));
+            if (mHasThumbnailStrips) {
+                mAttributes[IFD_TYPE_THUMBNAIL].put(TAG_STRIP_OFFSETS,
+                        ExifAttribute.createUShort(thumbnailOffset, mExifByteOrder));
+            } else {
+                mAttributes[IFD_TYPE_THUMBNAIL].put(TAG_JPEG_INTERCHANGE_FORMAT,
+                        ExifAttribute.createULong(thumbnailOffset, mExifByteOrder));
+            }
             // Need to add mExifOffset, which is the offset to the EXIF data segment
             mThumbnailOffset = thumbnailOffset + mExifOffset;
             position += mThumbnailLength;
@@ -5213,9 +5250,20 @@ public class ExifInterface {
         }
     }
 
+    private void replaceInvalidTags(@IfdType int ifdType, String invalidTag, String validTag) {
+        if (!mAttributes[ifdType].isEmpty()) {
+            if (mAttributes[ifdType].get(invalidTag) != null) {
+                mAttributes[ifdType].put(validTag,
+                        mAttributes[ifdType].get(invalidTag));
+                mAttributes[ifdType].remove(invalidTag);
+            }
+        }
+    }
+
     private boolean isSupportedFormatForSavingAttributes() {
         if (mIsSupportedFile && (mMimeType == IMAGE_TYPE_JPEG || mMimeType == IMAGE_TYPE_PNG
-                || mMimeType == IMAGE_TYPE_WEBP)) {
+                || mMimeType == IMAGE_TYPE_WEBP || mMimeType == IMAGE_TYPE_DNG
+                || mMimeType == IMAGE_TYPE_UNKNOWN)) {
             return true;
         }
         return false;

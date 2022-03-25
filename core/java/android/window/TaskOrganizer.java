@@ -24,7 +24,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
 import android.annotation.TestApi;
 import android.app.ActivityManager;
-import android.graphics.Rect;
+import android.app.TaskInfo.CameraCompatControlState;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.view.SurfaceControl;
@@ -94,6 +94,7 @@ public class TaskOrganizer extends WindowOrganizer {
      * @param info The information about the Task that's available
      * @param appToken Token of the application being started.
      *        context to for resources
+     * @hide
      */
     @BinderThread
     public void addStartingWindow(@NonNull StartingWindowInfo info,
@@ -101,14 +102,11 @@ public class TaskOrganizer extends WindowOrganizer {
 
     /**
      * Called when the Task want to remove the starting window.
-     * @param leash A persistent leash for the top window in this task. Release it once exit
-     *              animation has finished.
-     * @param frame Window frame of the top window.
-     * @param playRevealAnimation Play vanish animation.
+     * @param removalInfo The information used to remove the starting window.
+     * @hide
      */
     @BinderThread
-    public void removeStartingWindow(int taskId, @Nullable SurfaceControl leash,
-            @Nullable Rect frame, boolean playRevealAnimation) {}
+    public void removeStartingWindow(@NonNull StartingWindowRemovalInfo removalInfo) {}
 
     /**
      * Called when the Task want to copy the splash screen.
@@ -201,7 +199,7 @@ public class TaskOrganizer extends WindowOrganizer {
         }
     }
 
-    /** Get the root task which contains the current ime target */
+    /** Get the {@link WindowContainerToken} of the task which contains the current ime target */
     @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
     @Nullable
     public WindowContainerToken getImeTarget(int display) {
@@ -226,6 +224,7 @@ public class TaskOrganizer extends WindowOrganizer {
         }
     }
 
+
     /**
      * Restarts the top activity in the given task by killing its process if it is visible.
      * @hide
@@ -234,6 +233,20 @@ public class TaskOrganizer extends WindowOrganizer {
     public void restartTaskTopActivityProcessIfVisible(@NonNull WindowContainerToken task) {
         try {
             mTaskOrganizerController.restartTaskTopActivityProcessIfVisible(task);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Updates a state of camera compat control for stretched issues in the viewfinder.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
+    public void updateCameraCompatControlState(@NonNull WindowContainerToken task,
+            @CameraCompatControlState int state) {
+        try {
+            mTaskOrganizerController.updateCameraCompatControlState(task, state);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -256,10 +269,8 @@ public class TaskOrganizer extends WindowOrganizer {
         }
 
         @Override
-        public void removeStartingWindow(int taskId, SurfaceControl leash, Rect frame,
-                boolean playRevealAnimation) {
-            mExecutor.execute(() -> TaskOrganizer.this.removeStartingWindow(taskId, leash, frame,
-                    playRevealAnimation));
+        public void removeStartingWindow(StartingWindowRemovalInfo removalInfo) {
+            mExecutor.execute(() -> TaskOrganizer.this.removeStartingWindow(removalInfo));
         }
 
         @Override
@@ -298,6 +309,7 @@ public class TaskOrganizer extends WindowOrganizer {
         }
     };
 
+    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
     private ITaskOrganizerController getController() {
         try {
             return getWindowOrganizerController().getTaskOrganizerController();

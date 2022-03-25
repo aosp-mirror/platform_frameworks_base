@@ -95,11 +95,11 @@ public class GeocoderParams implements Parcelable {
         new Parcelable.Creator<GeocoderParams>() {
             public GeocoderParams createFromParcel(Parcel in) {
                 int uid = in.readInt();
-                String packageName = in.readString();
-                String attributionTag = in.readString();
-                String language = in.readString();
-                String country = in.readString();
-                String variant = in.readString();
+                String packageName = in.readString8();
+                String attributionTag = in.readString8();
+                String language = in.readString8();
+                String country = in.readString8();
+                String variant = in.readString8();
 
                 return new GeocoderParams(uid, packageName, attributionTag,
                         new Locale(language, country, variant));
@@ -116,10 +116,10 @@ public class GeocoderParams implements Parcelable {
 
     public void writeToParcel(Parcel parcel, int flags) {
         parcel.writeInt(mUid);
-        parcel.writeString(mPackageName);
-        parcel.writeString(mAttributionTag);
-        parcel.writeString(mLocale.getLanguage());
-        parcel.writeString(mLocale.getCountry());
-        parcel.writeString(mLocale.getVariant());
+        parcel.writeString8(mPackageName);
+        parcel.writeString8(mAttributionTag);
+        parcel.writeString8(mLocale.getLanguage());
+        parcel.writeString8(mLocale.getCountry());
+        parcel.writeString8(mLocale.getVariant());
     }
 }

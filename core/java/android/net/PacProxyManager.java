@@ -94,7 +94,7 @@ public class PacProxyManager {
     }
 
     /**
-     * Updates the PAC Proxy Installer with current Proxy information.
+     * Updates the PAC Proxy Service with current Proxy information.
      */
     @RequiresPermission(anyOf = {
             android.Manifest.permission.NETWORK_STACK,

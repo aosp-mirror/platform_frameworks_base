@@ -40,13 +40,12 @@ import android.os.UserHandle;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.backup.IBackupTransport;
 import com.android.internal.util.ArrayUtils;
-import com.android.server.backup.transport.TransportClient;
+import com.android.server.backup.transport.BackupTransportClient;
+import com.android.server.backup.transport.TransportConnection;
 
 import com.google.android.collect.Sets;
 
-import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -225,7 +224,7 @@ public class BackupEligibilityRules {
      * </ol>
      */
     public boolean appIsRunningAndEligibleForBackupWithTransport(
-            @Nullable TransportClient transportClient,
+            @Nullable TransportConnection transportConnection,
             String packageName) {
         try {
             PackageInfo packageInfo = mPackageManager.getPackageInfoAsUser(packageName,
@@ -236,10 +235,10 @@ public class BackupEligibilityRules {
                     || appIsDisabled(applicationInfo)) {
                 return false;
             }
-            if (transportClient != null) {
+            if (transportConnection != null) {
                 try {
-                    IBackupTransport transport =
-                            transportClient.connectOrThrow(
+                    BackupTransportClient transport =
+                            transportConnection.connectOrThrow(
                                     "AppBackupUtils.appIsRunningAndEligibleForBackupWithTransport");
                     return transport.isAppEligibleForBackup(
                             packageInfo, appGetsFullBackup(packageInfo));

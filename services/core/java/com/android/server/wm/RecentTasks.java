@@ -27,7 +27,6 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
-import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
 import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
@@ -381,8 +380,11 @@ class RecentTasks {
         final ComponentName cn = ComponentName.unflattenFromString(rawRecentsComponent);
         if (cn != null) {
             try {
-                final ApplicationInfo appInfo = AppGlobals.getPackageManager()
-                        .getApplicationInfo(cn.getPackageName(), 0, mService.mContext.getUserId());
+                final ApplicationInfo appInfo = AppGlobals.getPackageManager().getApplicationInfo(
+                        cn.getPackageName(),
+                        PackageManager.MATCH_UNINSTALLED_PACKAGES
+                                | PackageManager.MATCH_DISABLED_COMPONENTS,
+                        mService.mContext.getUserId());
                 if (appInfo != null) {
                     mRecentsUid = appInfo.uid;
                     mRecentsComponent = cn;
@@ -527,7 +529,7 @@ class RecentTasks {
      */
     void notifyTaskPersisterLocked(Task task, boolean flush) {
         final Task rootTask = task != null ? task.getRootTask() : null;
-        if (rootTask != null && rootTask.isHomeOrRecentsRootTask()) {
+        if (rootTask != null && rootTask.isActivityTypeHomeOrRecents()) {
             // Never persist the home or recents task.
             return;
         }
@@ -561,7 +563,7 @@ class RecentTasks {
 
     private static boolean shouldPersistTaskLocked(Task task) {
         final Task rootTask = task.getRootTask();
-        return task.isPersistable && (rootTask == null || !rootTask.isHomeOrRecentsRootTask());
+        return task.isPersistable && (rootTask == null || !rootTask.isActivityTypeHomeOrRecents());
     }
 
     void onSystemReadyLocked() {
@@ -992,7 +994,7 @@ class RecentTasks {
             }
             final Task rootTask = task.getRootTask();
             if ((task.isPersistable || task.inRecents)
-                    && (rootTask == null || !rootTask.isHomeOrRecentsRootTask())) {
+                    && (rootTask == null || !rootTask.isActivityTypeHomeOrRecents())) {
                 if (TaskPersister.DEBUG) Slog.d(TAG, "adding to persistentTaskIds task=" + task);
                 persistentTaskIds.add(task.mTaskId);
             } else {
@@ -1108,13 +1110,15 @@ class RecentTasks {
         }
 
         if (DEBUG_RECENTS) Slog.d(TAG_RECENTS, "addRecent: trimming tasks for " + task);
-        removeForAddTask(task);
+        final int removedIndex = removeForAddTask(task);
 
         task.inRecents = true;
         if (!isAffiliated || needAffiliationFix) {
             // If this is a simple non-affiliated task, or we had some failure trying to
             // handle it as part of an affilated task, then just place it at the top.
-            mTasks.add(0, task);
+            // But if the list is frozen, adding the task to the removed index to keep the order.
+            int indexToAdd = mFreezeTaskListReordering && removedIndex != -1 ? removedIndex : 0;
+            mTasks.add(indexToAdd, task);
             notifyTaskAdded(task);
             if (DEBUG_RECENTS) Slog.d(TAG_RECENTS, "addRecent: adding " + task);
         } else if (isAffiliated) {
@@ -1344,7 +1348,8 @@ class RecentTasks {
                     + " activityType=" + task.getActivityType()
                     + " windowingMode=" + task.getWindowingMode()
                     + " isAlwaysOnTopWhenVisible=" + task.isAlwaysOnTopWhenVisible()
-                    + " intentFlags=" + task.getBaseIntent().getFlags());
+                    + " intentFlags=" + task.getBaseIntent().getFlags()
+                    + " isEmbedded=" + task.isEmbedded());
         }
 
         switch (task.getActivityType()) {
@@ -1367,16 +1372,6 @@ class RecentTasks {
         switch (task.getWindowingMode()) {
             case WINDOWING_MODE_PINNED:
                 return false;
-            case WINDOWING_MODE_SPLIT_SCREEN_PRIMARY:
-                if (DEBUG_RECENTS_TRIM_TASKS) {
-                    Slog.d(TAG, "\ttop=" + task.getRootTask().getTopMostTask());
-                }
-                final Task rootTask = task.getRootTask();
-                if (rootTask != null && rootTask.getTopMostTask() == task) {
-                    // Only the non-top task of the primary split screen mode is visible
-                    return false;
-                }
-                break;
             case WINDOWING_MODE_MULTI_WINDOW:
                 // Ignore tasks that are always on top
                 if (task.isAlwaysOnTopWhenVisible()) {
@@ -1387,6 +1382,11 @@ class RecentTasks {
 
         // If we're in lock task mode, ignore the root task
         if (task == mService.getLockTaskController().getRootTask()) {
+            return false;
+        }
+
+        // Ignore the task if it is a embedded task
+        if (task.isEmbedded()) {
             return false;
         }
 
@@ -1482,14 +1482,14 @@ class RecentTasks {
      * If needed, remove oldest existing entries in recents that are for the same kind
      * of task as the given one.
      */
-    private void removeForAddTask(Task task) {
+    private int removeForAddTask(Task task) {
         // The adding task will be in recents so it is not hidden.
         mHiddenTasks.remove(task);
 
         final int removeIndex = findRemoveIndexForAddTask(task);
         if (removeIndex == -1) {
             // Nothing to trim
-            return;
+            return removeIndex;
         }
 
         // There is a similar task that will be removed for the addition of {@param task}, but it
@@ -1511,6 +1511,7 @@ class RecentTasks {
             }
         }
         notifyTaskPersisterLocked(removedTask, false /* flush */);
+        return removeIndex;
     }
 
     /**
@@ -1518,11 +1519,6 @@ class RecentTasks {
      * list (if any).
      */
     private int findRemoveIndexForAddTask(Task task) {
-        if (mFreezeTaskListReordering) {
-            // Defer removing tasks due to the addition of new tasks until the task list is unfrozen
-            return -1;
-        }
-
         final int recentsCount = mTasks.size();
         final Intent intent = task.intent;
         final boolean document = intent != null && intent.isDocument();

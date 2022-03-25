@@ -16,14 +16,19 @@
 
 package android.media.audiopolicy;
 
+import static java.lang.annotation.RetentionPolicy.SOURCE;
+
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.media.AudioAttributes;
+import android.media.MediaRecorder;
 import android.os.Build;
 import android.os.Parcel;
 import android.util.Log;
 
+import java.lang.annotation.Retention;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Objects;
@@ -140,10 +145,8 @@ public class AudioMixingRule {
             final int match_rule = mRule & ~RULE_EXCLUSION_MASK;
             switch (match_rule) {
                 case RULE_MATCH_ATTRIBUTE_USAGE:
-                    dest.writeInt(mAttr.getSystemUsage());
-                    break;
                 case RULE_MATCH_ATTRIBUTE_CAPTURE_PRESET:
-                    dest.writeInt(mAttr.getCapturePreset());
+                    mAttr.writeToParcel(dest, AudioAttributes.FLATTEN_TAGS/*flags*/);
                     break;
                 case RULE_MATCH_UID:
                 case RULE_MATCH_USERID:
@@ -199,7 +202,36 @@ public class AudioMixingRule {
     }
 
     private final int mTargetMixType;
-    int getTargetMixType() { return mTargetMixType; }
+    int getTargetMixType() {
+        return mTargetMixType;
+    }
+
+    /**
+     * Captures an audio signal from one or more playback streams.
+     */
+    public static final int MIX_ROLE_PLAYERS = AudioMix.MIX_TYPE_PLAYERS;
+    /**
+     * Injects an audio signal into the framework to replace a recording source.
+     */
+    public static final int MIX_ROLE_INJECTOR = AudioMix.MIX_TYPE_RECORDERS;
+
+    /** @hide */
+    @IntDef({MIX_ROLE_PLAYERS, MIX_ROLE_INJECTOR})
+    @Retention(SOURCE)
+    public @interface MixRole {}
+
+    /**
+     * Gets target mix role of this mixing rule.
+     *
+     * <p>The mix role indicates playback streams will be captured or recording source will be
+     * injected.
+     *
+     * @return integer value of {@link #MIX_ROLE_PLAYERS} or {@link #MIX_ROLE_INJECTOR}
+     */
+    public @MixRole int getTargetMixRole() {
+        return mTargetMixType == AudioMix.MIX_TYPE_RECORDERS ? MIX_ROLE_INJECTOR : MIX_ROLE_PLAYERS;
+    }
+
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private final ArrayList<AudioMixMatchCriterion> mCriteria;
     /** @hide */
@@ -226,6 +258,24 @@ public class AudioMixingRule {
     /** @hide */
     public void setVoiceCommunicationCaptureAllowed(boolean allowed) {
         mVoiceCommunicationCaptureAllowed = allowed;
+    }
+
+    /** @hide */
+    public boolean isForCallRedirection() {
+        for (AudioMixMatchCriterion criterion : mCriteria) {
+            if (criterion.mAttr != null
+                    && criterion.mAttr.isForCallRedirection()
+                    && ((criterion.mRule == RULE_MATCH_ATTRIBUTE_USAGE
+                        && (criterion.mAttr.getUsage() == AudioAttributes.USAGE_VOICE_COMMUNICATION
+                            || criterion.mAttr.getUsage()
+                                == AudioAttributes.USAGE_VOICE_COMMUNICATION_SIGNALLING))
+                    || (criterion.mRule == RULE_MATCH_ATTRIBUTE_CAPTURE_PRESET
+                        && (criterion.mAttr.getCapturePreset()
+                            == MediaRecorder.AudioSource.VOICE_COMMUNICATION)))) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /** @hide */
@@ -469,19 +519,37 @@ public class AudioMixingRule {
         }
 
         /**
-         * Set target mix type of the mixing rule.
+         * Sets target mix role of the mixing rule.
          *
-         * <p>Note: If the mix type was not specified, it will be decided automatically by mixing
-         * rule. For {@link #RULE_MATCH_UID}, the default type is {@link AudioMix#MIX_TYPE_PLAYERS}.
+         * As each mixing rule is intended to be associated with an {@link AudioMix},
+         * explicitly setting the role of a mixing rule allows this {@link Builder} to
+         * verify validity of the mixing rules to be validated.<br>
+         * The mix role allows distinguishing between:
+         * <ul>
+         * <li>audio framework mixers that will mix / sample-rate convert / reformat the audio
+         *     signal of any audio player (e.g. a {@link android.media.MediaPlayer}) that matches
+         *     the selection rules defined in the object being built. Use
+         *     {@link AudioMixingRule#MIX_ROLE_PLAYERS} for such an {@code AudioMixingRule}</li>
+         * <li>audio framework mixers that will be used as the injection point (after sample-rate
+         *     conversion and reformatting of the audio signal) into any audio recorder (e.g. a
+         *     {@link android.media.AudioRecord}) that matches the selection rule defined in the
+         *     object being built. Use {@link AudioMixingRule#MIX_ROLE_INJECTOR} for such an
+         *     {@code AudioMixingRule}.</li>
+         * </ul>
+         * <p>If not specified, the mix role will be decided automatically when
+         * {@link #addRule(AudioAttributes, int)} or {@link #addMixRule(int, Object)} be called.
          *
-         * @param mixType {@link AudioMix#MIX_TYPE_PLAYERS} or {@link AudioMix#MIX_TYPE_RECORDERS}
+         * @param mixRole integer value of {@link #MIX_ROLE_PLAYERS} or {@link #MIX_ROLE_INJECTOR}
          * @return the same Builder instance.
-         *
-         * @hide
          */
-        public @NonNull Builder setTargetMixType(int mixType) {
-            mTargetMixType = mixType;
-            Log.i("AudioMixingRule", "Builder setTargetMixType " + mixType);
+        public @NonNull Builder setTargetMixRole(@MixRole int mixRole) {
+            if (mixRole != MIX_ROLE_PLAYERS && mixRole != MIX_ROLE_INJECTOR) {
+                throw new IllegalArgumentException("Illegal argument for mix role");
+            }
+
+            Log.i("AudioMixingRule", "Builder setTargetMixRole " + mixRole);
+            mTargetMixType = mixRole == MIX_ROLE_INJECTOR
+                    ? AudioMix.MIX_TYPE_RECORDERS : AudioMix.MIX_TYPE_PLAYERS;
             return this;
         }
 
@@ -645,19 +713,8 @@ public class AudioMixingRule {
             Integer intProp = null;
             switch (match_rule) {
                 case RULE_MATCH_ATTRIBUTE_USAGE:
-                    int usage = in.readInt();
-                    if (AudioAttributes.isSystemUsage(usage)) {
-                        attr = new AudioAttributes.Builder()
-                                .setSystemUsage(usage).build();
-                    } else {
-                        attr = new AudioAttributes.Builder()
-                                .setUsage(usage).build();
-                    }
-                    break;
                 case RULE_MATCH_ATTRIBUTE_CAPTURE_PRESET:
-                    int preset = in.readInt();
-                    attr = new AudioAttributes.Builder()
-                            .setInternalCapturePreset(preset).build();
+                    attr =  AudioAttributes.CREATOR.createFromParcel(in);
                     break;
                 case RULE_MATCH_UID:
                 case RULE_MATCH_USERID:

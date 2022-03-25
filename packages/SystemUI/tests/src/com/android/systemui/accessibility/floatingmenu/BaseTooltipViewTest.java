@@ -23,12 +23,16 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.content.Context;
+import android.graphics.Rect;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.MotionEvent;
+import android.view.WindowInsets;
 import android.view.WindowManager;
+import android.view.WindowMetrics;
 import android.view.accessibility.AccessibilityNodeInfo;
 
 import androidx.test.filters.SmallTest;
@@ -52,6 +56,9 @@ public class BaseTooltipViewTest extends SysuiTestCase {
     @Mock
     private WindowManager mWindowManager;
 
+    @Mock
+    private WindowMetrics mWindowMetrics;
+
     private AccessibilityFloatingMenuView mMenuView;
     private BaseTooltipView mToolTipView;
 
@@ -66,6 +73,9 @@ public class BaseTooltipViewTest extends SysuiTestCase {
         doAnswer(invocation -> wm.getMaximumWindowMetrics()).when(
                 mWindowManager).getMaximumWindowMetrics();
         mContext.addMockSystemService(Context.WINDOW_SERVICE, mWindowManager);
+        when(mWindowManager.getCurrentWindowMetrics()).thenReturn(mWindowMetrics);
+        when(mWindowMetrics.getBounds()).thenReturn(new Rect());
+        when(mWindowMetrics.getWindowInsets()).thenReturn(new WindowInsets.Builder().build());
 
         mMenuView = new AccessibilityFloatingMenuView(mContext, mPlaceholderPosition);
         mToolTipView = new BaseTooltipView(mContext, mMenuView);

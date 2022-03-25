@@ -16,10 +16,13 @@
 
 package android.content.pm;
 
+import android.platform.test.annotations.Presubmit;
+
 import androidx.test.filters.LargeTest;
 
 import junit.framework.TestCase;
 
+@Presubmit
 @LargeTest
 public class SignatureTest extends TestCase {
 

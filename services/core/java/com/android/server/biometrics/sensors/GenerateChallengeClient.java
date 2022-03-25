@@ -18,23 +18,26 @@ package com.android.server.biometrics.sensors;
 
 import android.annotation.NonNull;
 import android.content.Context;
-import android.hardware.biometrics.BiometricsProtoEnums;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
 
 import com.android.server.biometrics.BiometricsProto;
+import com.android.server.biometrics.log.BiometricContext;
+import com.android.server.biometrics.log.BiometricLogger;
+
+import java.util.function.Supplier;
 
 public abstract class GenerateChallengeClient<T> extends HalClientMonitor<T> {
 
     private static final String TAG = "GenerateChallengeClient";
 
-    public GenerateChallengeClient(@NonNull Context context, @NonNull LazyDaemon<T> lazyDaemon,
+    public GenerateChallengeClient(@NonNull Context context, @NonNull Supplier<T> lazyDaemon,
             @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener,
-            int userId, @NonNull String owner, int sensorId) {
+            int userId, @NonNull String owner, int sensorId,
+            @NonNull BiometricLogger biometricLogger, @NonNull BiometricContext biometricContext) {
         super(context, lazyDaemon, token, listener, userId, owner, 0 /* cookie */, sensorId,
-                BiometricsProtoEnums.MODALITY_UNKNOWN, BiometricsProtoEnums.ACTION_UNKNOWN,
-                BiometricsProtoEnums.CLIENT_UNKNOWN);
+                biometricLogger, biometricContext);
     }
 
     @Override
@@ -47,7 +50,7 @@ public abstract class GenerateChallengeClient<T> extends HalClientMonitor<T> {
     }
 
     @Override
-    public void start(@NonNull Callback callback) {
+    public void start(@NonNull ClientMonitorCallback callback) {
         super.start(callback);
 
         startHalOperation();

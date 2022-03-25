@@ -174,7 +174,7 @@ public abstract class RegisteredServicesCache<V> {
 
         // Register for user-related events
         IntentFilter userFilter = new IntentFilter();
-        sdFilter.addAction(Intent.ACTION_USER_REMOVED);
+        userFilter.addAction(Intent.ACTION_USER_REMOVED);
         mContext.registerReceiver(mUserRemovedReceiver, userFilter, null, handler);
     }
 

@@ -185,7 +185,7 @@ void SoundPool::stop(int32_t streamID)
     auto apiLock = kUseApiLock ? std::make_unique<std::lock_guard<std::mutex>>(mApiLock) : nullptr;
     soundpool::Stream* stream = mStreamManager.findStream(streamID);
     if (stream != nullptr && stream->requestStop(streamID)) {
-        mStreamManager.moveToRestartQueue(stream);
+        mStreamManager.moveToRestartQueue(stream, streamID);
     }
 }
 

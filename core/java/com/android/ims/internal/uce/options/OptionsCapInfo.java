@@ -89,6 +89,6 @@ public class OptionsCapInfo implements Parcelable {
 
     public void readFromParcel(Parcel source) {
         mSdp = source.readString();
-        mCapInfo = source.readParcelable(CapInfo.class.getClassLoader());
+        mCapInfo = source.readParcelable(CapInfo.class.getClassLoader(), com.android.ims.internal.uce.common.CapInfo.class);
     }
 }

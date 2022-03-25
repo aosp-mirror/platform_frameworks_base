@@ -62,7 +62,7 @@ public class SyncEngineTests extends WindowTestsBase {
     public void testTrivialSyncCallback() {
         TestWindowContainer mockWC = new TestWindowContainer(mWm, false /* waiter */);
 
-        BLASTSyncEngine bse = new BLASTSyncEngine(mWm);
+        final BLASTSyncEngine bse = createTestBLASTSyncEngine();
 
         BLASTSyncEngine.TransactionReadyListener listener = mock(
                 BLASTSyncEngine.TransactionReadyListener.class);
@@ -90,7 +90,7 @@ public class SyncEngineTests extends WindowTestsBase {
     public void testWaitingSyncCallback() {
         TestWindowContainer mockWC = new TestWindowContainer(mWm, true /* waiter */);
 
-        BLASTSyncEngine bse = new BLASTSyncEngine(mWm);
+        final BLASTSyncEngine bse = createTestBLASTSyncEngine();
 
         BLASTSyncEngine.TransactionReadyListener listener = mock(
                 BLASTSyncEngine.TransactionReadyListener.class);
@@ -114,7 +114,7 @@ public class SyncEngineTests extends WindowTestsBase {
     public void testInvisibleSyncCallback() {
         TestWindowContainer mockWC = new TestWindowContainer(mWm, true /* waiter */);
 
-        BLASTSyncEngine bse = new BLASTSyncEngine(mWm);
+        final BLASTSyncEngine bse = createTestBLASTSyncEngine();
 
         BLASTSyncEngine.TransactionReadyListener listener = mock(
                 BLASTSyncEngine.TransactionReadyListener.class);
@@ -142,7 +142,7 @@ public class SyncEngineTests extends WindowTestsBase {
         parentWC.addChild(childWC, POSITION_TOP);
         parentWC.addChild(childWC2, POSITION_TOP);
 
-        BLASTSyncEngine bse = new BLASTSyncEngine(mWm);
+        final BLASTSyncEngine bse = createTestBLASTSyncEngine();
 
         BLASTSyncEngine.TransactionReadyListener listener = mock(
                 BLASTSyncEngine.TransactionReadyListener.class);
@@ -175,7 +175,7 @@ public class SyncEngineTests extends WindowTestsBase {
         TestWindowContainer childWC = new TestWindowContainer(mWm, true /* waiter */);
         parentWC.addChild(childWC, POSITION_TOP);
 
-        BLASTSyncEngine bse = new BLASTSyncEngine(mWm);
+        final BLASTSyncEngine bse = createTestBLASTSyncEngine();
 
         BLASTSyncEngine.TransactionReadyListener listener = mock(
                 BLASTSyncEngine.TransactionReadyListener.class);
@@ -206,7 +206,7 @@ public class SyncEngineTests extends WindowTestsBase {
         parentWC.addChild(topChildWC, POSITION_TOP);
         parentWC.addChild(botChildWC, POSITION_BOTTOM);
 
-        BLASTSyncEngine bse = new BLASTSyncEngine(mWm);
+        final BLASTSyncEngine bse = createTestBLASTSyncEngine();
 
         BLASTSyncEngine.TransactionReadyListener listener = mock(
                 BLASTSyncEngine.TransactionReadyListener.class);
@@ -238,7 +238,7 @@ public class SyncEngineTests extends WindowTestsBase {
         parentWC.addChild(topChildWC, POSITION_TOP);
         parentWC.addChild(botChildWC, POSITION_BOTTOM);
 
-        BLASTSyncEngine bse = new BLASTSyncEngine(mWm);
+        final BLASTSyncEngine bse = createTestBLASTSyncEngine();
 
         BLASTSyncEngine.TransactionReadyListener listener = mock(
                 BLASTSyncEngine.TransactionReadyListener.class);
@@ -273,7 +273,7 @@ public class SyncEngineTests extends WindowTestsBase {
         parentWC.addChild(topChildWC, POSITION_TOP);
         nonMemberParentWC.addChild(botChildWC, POSITION_BOTTOM);
 
-        BLASTSyncEngine bse = new BLASTSyncEngine(mWm);
+        final BLASTSyncEngine bse = createTestBLASTSyncEngine();
 
         BLASTSyncEngine.TransactionReadyListener listener = mock(
                 BLASTSyncEngine.TransactionReadyListener.class);
@@ -312,7 +312,7 @@ public class SyncEngineTests extends WindowTestsBase {
         parentWC.addChild(topChildWC, POSITION_TOP);
         parentWC.addChild(botChildWC, POSITION_BOTTOM);
 
-        BLASTSyncEngine bse = new BLASTSyncEngine(mWm);
+        final BLASTSyncEngine bse = createTestBLASTSyncEngine();
 
         BLASTSyncEngine.TransactionReadyListener listener = mock(
                 BLASTSyncEngine.TransactionReadyListener.class);

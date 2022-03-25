@@ -43,14 +43,14 @@ import android.os.DeadObjectException;
 import android.platform.test.annotations.Presubmit;
 import android.util.Log;
 
-import com.android.internal.backup.IBackupTransport;
 import com.android.server.backup.BackupManagerService;
 import com.android.server.backup.TransportManager;
 import com.android.server.backup.UserBackupManagerService;
 import com.android.server.backup.testing.TransportData;
 import com.android.server.backup.testing.TransportTestUtils;
 import com.android.server.backup.testing.TransportTestUtils.TransportMock;
-import com.android.server.backup.transport.TransportClient;
+import com.android.server.backup.transport.BackupTransportClient;
+import com.android.server.backup.transport.TransportConnection;
 import com.android.server.testing.shadows.ShadowSlog;
 
 import org.junit.Before;
@@ -75,7 +75,7 @@ public class PerformInitializeTaskTest {
     @Mock private UserBackupManagerService mBackupManagerService;
     @Mock private TransportManager mTransportManager;
     @Mock private OnTaskFinishedListener mListener;
-    @Mock private IBackupTransport mTransportBinder;
+    @Mock private BackupTransportClient mTransportClient;
     @Mock private IBackupObserver mObserver;
     @Mock private AlarmManager mAlarmManager;
     @Mock private PendingIntent mRunInitIntent;
@@ -101,19 +101,19 @@ public class PerformInitializeTaskTest {
     @Test
     public void testRun_callsTransportCorrectly() throws Exception {
         setUpTransport(mTransport);
-        configureTransport(mTransportBinder, TRANSPORT_OK, TRANSPORT_OK);
+        configureTransport(mTransportClient, TRANSPORT_OK, TRANSPORT_OK);
         PerformInitializeTask performInitializeTask = createPerformInitializeTask(mTransportName);
 
         performInitializeTask.run();
 
-        verify(mTransportBinder).initializeDevice();
-        verify(mTransportBinder).finishBackup();
+        verify(mTransportClient).initializeDevice();
+        verify(mTransportClient).finishBackup();
     }
 
     @Test
     public void testRun_callsBackupManagerCorrectly() throws Exception {
         setUpTransport(mTransport);
-        configureTransport(mTransportBinder, TRANSPORT_OK, TRANSPORT_OK);
+        configureTransport(mTransportClient, TRANSPORT_OK, TRANSPORT_OK);
         PerformInitializeTask performInitializeTask = createPerformInitializeTask(mTransportName);
 
         performInitializeTask.run();
@@ -127,7 +127,7 @@ public class PerformInitializeTaskTest {
     @Test
     public void testRun_callsObserverAndListenerCorrectly() throws Exception {
         setUpTransport(mTransport);
-        configureTransport(mTransportBinder, TRANSPORT_OK, TRANSPORT_OK);
+        configureTransport(mTransportClient, TRANSPORT_OK, TRANSPORT_OK);
         PerformInitializeTask performInitializeTask = createPerformInitializeTask(mTransportName);
 
         performInitializeTask.run();
@@ -140,13 +140,13 @@ public class PerformInitializeTaskTest {
     @Test
     public void testRun_whenInitializeDeviceFails() throws Exception {
         setUpTransport(mTransport);
-        configureTransport(mTransportBinder, TRANSPORT_ERROR, 0);
+        configureTransport(mTransportClient, TRANSPORT_ERROR, 0);
         PerformInitializeTask performInitializeTask = createPerformInitializeTask(mTransportName);
 
         performInitializeTask.run();
 
-        verify(mTransportBinder).initializeDevice();
-        verify(mTransportBinder, never()).finishBackup();
+        verify(mTransportClient).initializeDevice();
+        verify(mTransportClient, never()).finishBackup();
         verify(mBackupManagerService)
                 .recordInitPending(true, mTransportName, mTransport.transportDirName);
     }
@@ -155,7 +155,7 @@ public class PerformInitializeTaskTest {
     public void testRun_whenInitializeDeviceFails_callsObserverAndListenerCorrectly()
             throws Exception {
         setUpTransport(mTransport);
-        configureTransport(mTransportBinder, TRANSPORT_ERROR, 0);
+        configureTransport(mTransportClient, TRANSPORT_ERROR, 0);
         PerformInitializeTask performInitializeTask = createPerformInitializeTask(mTransportName);
 
         performInitializeTask.run();
@@ -168,7 +168,7 @@ public class PerformInitializeTaskTest {
     @Test
     public void testRun_whenInitializeDeviceFails_schedulesAlarm() throws Exception {
         setUpTransport(mTransport);
-        configureTransport(mTransportBinder, TRANSPORT_ERROR, 0);
+        configureTransport(mTransportClient, TRANSPORT_ERROR, 0);
         PerformInitializeTask performInitializeTask = createPerformInitializeTask(mTransportName);
 
         performInitializeTask.run();
@@ -179,13 +179,13 @@ public class PerformInitializeTaskTest {
     @Test
     public void testRun_whenFinishBackupFails() throws Exception {
         setUpTransport(mTransport);
-        configureTransport(mTransportBinder, TRANSPORT_OK, TRANSPORT_ERROR);
+        configureTransport(mTransportClient, TRANSPORT_OK, TRANSPORT_ERROR);
         PerformInitializeTask performInitializeTask = createPerformInitializeTask(mTransportName);
 
         performInitializeTask.run();
 
-        verify(mTransportBinder).initializeDevice();
-        verify(mTransportBinder).finishBackup();
+        verify(mTransportClient).initializeDevice();
+        verify(mTransportClient).finishBackup();
         verify(mBackupManagerService)
                 .recordInitPending(true, mTransportName, mTransport.transportDirName);
     }
@@ -193,7 +193,7 @@ public class PerformInitializeTaskTest {
     @Test
     public void testRun_whenFinishBackupFails_callsObserverAndListenerCorrectly() throws Exception {
         setUpTransport(mTransport);
-        configureTransport(mTransportBinder, TRANSPORT_OK, TRANSPORT_ERROR);
+        configureTransport(mTransportClient, TRANSPORT_OK, TRANSPORT_ERROR);
         PerformInitializeTask performInitializeTask = createPerformInitializeTask(mTransportName);
 
         performInitializeTask.run();
@@ -206,7 +206,7 @@ public class PerformInitializeTaskTest {
     @Test
     public void testRun_whenFinishBackupFails_logs() throws Exception {
         setUpTransport(mTransport);
-        configureTransport(mTransportBinder, TRANSPORT_OK, TRANSPORT_ERROR);
+        configureTransport(mTransportClient, TRANSPORT_OK, TRANSPORT_ERROR);
         PerformInitializeTask performInitializeTask = createPerformInitializeTask(mTransportName);
 
         performInitializeTask.run();
@@ -219,7 +219,7 @@ public class PerformInitializeTaskTest {
     @Test
     public void testRun_whenInitializeDeviceFails_logs() throws Exception {
         setUpTransport(mTransport);
-        configureTransport(mTransportBinder, TRANSPORT_ERROR, 0);
+        configureTransport(mTransportClient, TRANSPORT_ERROR, 0);
         PerformInitializeTask performInitializeTask = createPerformInitializeTask(mTransportName);
 
         performInitializeTask.run();
@@ -232,7 +232,7 @@ public class PerformInitializeTaskTest {
     @Test
     public void testRun_whenFinishBackupFails_schedulesAlarm() throws Exception {
         setUpTransport(mTransport);
-        configureTransport(mTransportBinder, TRANSPORT_OK, TRANSPORT_ERROR);
+        configureTransport(mTransportClient, TRANSPORT_OK, TRANSPORT_ERROR);
         PerformInitializeTask performInitializeTask = createPerformInitializeTask(mTransportName);
 
         performInitializeTask.run();
@@ -285,7 +285,7 @@ public class PerformInitializeTaskTest {
             TransportData transport = transportsIterator.next();
             verify(mTransportManager).getTransportClient(eq(transport.transportName), any());
             verify(mTransportManager)
-                    .disposeOfTransportClient(eq(transportMock.transportClient), any());
+                    .disposeOfTransportClient(eq(transportMock.mTransportConnection), any());
         }
     }
 
@@ -303,9 +303,9 @@ public class PerformInitializeTaskTest {
         performInitializeTask.run();
 
         verify(mTransportManager)
-                .disposeOfTransportClient(eq(transportMocks.get(0).transportClient), any());
+                .disposeOfTransportClient(eq(transportMocks.get(0).mTransportConnection), any());
         verify(mTransportManager)
-                .disposeOfTransportClient(eq(transportMocks.get(1).transportClient), any());
+                .disposeOfTransportClient(eq(transportMocks.get(1).mTransportConnection), any());
     }
 
     @Test
@@ -327,15 +327,17 @@ public class PerformInitializeTaskTest {
         List<TransportMock> transportMocks =
                 setUpTransports(mTransportManager, transport1, transport2);
         String registeredTransportName = transport2.transportName;
-        IBackupTransport registeredTransport = transportMocks.get(1).transport;
-        TransportClient registeredTransportClient = transportMocks.get(1).transportClient;
+        BackupTransportClient registeredTransport = transportMocks.get(1).transport;
+        TransportConnection
+                registeredTransportConnection = transportMocks.get(1).mTransportConnection;
         PerformInitializeTask performInitializeTask =
                 createPerformInitializeTask(transport1.transportName, transport2.transportName);
 
         performInitializeTask.run();
 
         verify(registeredTransport).initializeDevice();
-        verify(mTransportManager).disposeOfTransportClient(eq(registeredTransportClient), any());
+        verify(mTransportManager).disposeOfTransportClient(eq(registeredTransportConnection),
+                any());
         verify(mObserver).onResult(eq(registeredTransportName), eq(TRANSPORT_OK));
     }
 
@@ -347,7 +349,7 @@ public class PerformInitializeTaskTest {
         performInitializeTask.run();
 
         verify(mTransportManager)
-                .disposeOfTransportClient(eq(transportMock.transportClient), any());
+                .disposeOfTransportClient(eq(transportMock.mTransportConnection), any());
         verify(mObserver).backupFinished(eq(TRANSPORT_ERROR));
         verify(mListener).onFinished(any());
     }
@@ -355,14 +357,14 @@ public class PerformInitializeTaskTest {
     @Test
     public void testRun_whenTransportThrowsDeadObjectException() throws Exception {
         TransportMock transportMock = setUpTransport(mTransport);
-        IBackupTransport transport = transportMock.transport;
-        TransportClient transportClient = transportMock.transportClient;
+        BackupTransportClient transport = transportMock.transport;
+        TransportConnection transportConnection = transportMock.mTransportConnection;
         when(transport.initializeDevice()).thenThrow(DeadObjectException.class);
         PerformInitializeTask performInitializeTask = createPerformInitializeTask(mTransportName);
 
         performInitializeTask.run();
 
-        verify(mTransportManager).disposeOfTransportClient(eq(transportClient), any());
+        verify(mTransportManager).disposeOfTransportClient(eq(transportConnection), any());
         verify(mObserver).backupFinished(eq(TRANSPORT_ERROR));
         verify(mListener).onFinished(any());
     }
@@ -378,7 +380,7 @@ public class PerformInitializeTaskTest {
     }
 
     private void configureTransport(
-            IBackupTransport transportMock, int initializeDeviceStatus, int finishBackupStatus)
+            BackupTransportClient transportMock, int initializeDeviceStatus, int finishBackupStatus)
             throws Exception {
         when(transportMock.initializeDevice()).thenReturn(initializeDeviceStatus);
         when(transportMock.finishBackup()).thenReturn(finishBackupStatus);
@@ -387,7 +389,7 @@ public class PerformInitializeTaskTest {
     private TransportMock setUpTransport(TransportData transport) throws Exception {
         TransportMock transportMock =
                 TransportTestUtils.setUpTransport(mTransportManager, transport);
-        mTransportBinder = transportMock.transport;
+        mTransportClient = transportMock.transport;
         return transportMock;
     }
 }

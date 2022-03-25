@@ -194,7 +194,7 @@ public class SimpleIconFactory {
      * @deprecated Do not use, functionality will be replaced by iconloader lib eventually.
      */
     @Deprecated
-    Bitmap createUserBadgedIconBitmap(@Nullable Drawable icon, UserHandle user) {
+    Bitmap createUserBadgedIconBitmap(@Nullable Drawable icon, @Nullable UserHandle user) {
         float [] scale = new float[1];
 
         // If no icon is provided use the system default

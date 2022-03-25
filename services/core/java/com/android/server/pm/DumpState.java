@@ -46,6 +46,7 @@ public final class DumpState {
     public static final int DUMP_KNOWN_PACKAGES = 1 << 27;
     public static final int DUMP_PER_UID_READ_TIMEOUTS = 1 << 28;
     public static final int DUMP_SNAPSHOT_STATISTICS = 1 << 29;
+    public static final int DUMP_PROTECTED_BROADCASTS = 1 << 30;
 
     public static final int OPTION_SHOW_FILTERS = 1 << 0;
     public static final int OPTION_DUMP_ALL_COMPONENTS = 1 << 1;

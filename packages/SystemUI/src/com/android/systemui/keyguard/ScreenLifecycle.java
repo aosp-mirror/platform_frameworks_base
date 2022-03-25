@@ -18,18 +18,21 @@ package com.android.systemui.keyguard;
 
 import android.os.Trace;
 
+import androidx.annotation.NonNull;
+
 import com.android.systemui.Dumpable;
-import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dump.DumpManager;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 /**
  * Tracks the screen lifecycle.
  */
-@SysUISingleton
+@Singleton
 public class ScreenLifecycle extends Lifecycle<ScreenLifecycle.Observer> implements Dumpable {
 
     public static final int SCREEN_OFF = 0;
@@ -40,16 +43,22 @@ public class ScreenLifecycle extends Lifecycle<ScreenLifecycle.Observer> impleme
     private int mScreenState = SCREEN_OFF;
 
     @Inject
-    public ScreenLifecycle() {
+    public ScreenLifecycle(DumpManager dumpManager) {
+        dumpManager.registerDumpable(getClass().getSimpleName(), this);
     }
 
     public int getScreenState() {
         return mScreenState;
     }
 
-    public void dispatchScreenTurningOn() {
+    /**
+     * Dispatch screen turning on events to the registered observers
+     *
+     * @param onDrawn Invoke to notify the caller that the event has been processed
+     */
+    public void dispatchScreenTurningOn(@NonNull Runnable onDrawn) {
         setScreenState(SCREEN_TURNING_ON);
-        dispatch(Observer::onScreenTurningOn);
+        dispatch(Observer::onScreenTurningOn, onDrawn);
     }
 
     public void dispatchScreenTurnedOn() {
@@ -79,7 +88,12 @@ public class ScreenLifecycle extends Lifecycle<ScreenLifecycle.Observer> impleme
     }
 
     public interface Observer {
-        default void onScreenTurningOn() {}
+        /**
+         * Receive the screen turning on event
+         *
+         * @param onDrawn Invoke to notify the caller that the event has been processed
+         */
+        default void onScreenTurningOn(@NonNull Runnable onDrawn) {}
         default void onScreenTurnedOn() {}
         default void onScreenTurningOff() {}
         default void onScreenTurnedOff() {}

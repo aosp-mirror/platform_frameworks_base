@@ -25,17 +25,14 @@ import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMA
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 
-import android.app.ActivityTaskManager;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.Binder;
-import android.os.IBinder;
-import android.os.RemoteException;
-import android.util.Slog;
 import android.view.IWindow;
+import android.view.InsetsState;
 import android.view.LayoutInflater;
 import android.view.SurfaceControl;
 import android.view.SurfaceControlViewHost;
@@ -43,6 +40,7 @@ import android.view.SurfaceSession;
 import android.view.WindowManager;
 import android.view.WindowlessWindowManager;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.wm.shell.R;
@@ -58,11 +56,14 @@ public final class SplitWindowManager extends WindowlessWindowManager {
     private Context mContext;
     private SurfaceControlViewHost mViewHost;
     private SurfaceControl mLeash;
-    private boolean mResizingSplits;
     private DividerView mDividerView;
+
+    // Used to "pass" a transaction to WWM.remove so that view removal can be synchronized.
+    private SurfaceControl.Transaction mSyncTransaction = null;
 
     public interface ParentContainerCallbacks {
         void attachToParentSurface(SurfaceControl.Builder b);
+        void onLeashReady(SurfaceControl leash);
     }
 
     public SplitWindowManager(String windowName, Context context, Configuration config,
@@ -73,9 +74,10 @@ public final class SplitWindowManager extends WindowlessWindowManager {
         mWindowName = windowName;
     }
 
-    @Override
-    public void setTouchRegion(IBinder window, Region region) {
-        super.setTouchRegion(window, region);
+    void setTouchRegion(@NonNull Rect region) {
+        if (mViewHost != null) {
+            setTouchRegion(mViewHost.getWindowToken().asBinder(), new Region(region));
+        }
     }
 
     @Override
@@ -95,15 +97,16 @@ public final class SplitWindowManager extends WindowlessWindowManager {
         final SurfaceControl.Builder builder = new SurfaceControl.Builder(new SurfaceSession())
                 .setContainerLayer()
                 .setName(TAG)
-                .setHidden(false)
+                .setHidden(true)
                 .setCallsite("SplitWindowManager#attachToParentSurface");
         mParentContainerCallbacks.attachToParentSurface(builder);
         mLeash = builder.build();
+        mParentContainerCallbacks.onLeashReady(mLeash);
         b.setParent(mLeash);
     }
 
     /** Inflates {@link DividerView} on to the root surface. */
-    void init(SplitLayout splitLayout) {
+    void init(SplitLayout splitLayout, InsetsState insetsState) {
         if (mDividerView != null || mViewHost != null) {
             throw new UnsupportedOperationException(
                     "Try to inflate divider view again without release first");
@@ -123,42 +126,48 @@ public final class SplitWindowManager extends WindowlessWindowManager {
         lp.setTitle(mWindowName);
         lp.privateFlags |= PRIVATE_FLAG_NO_MOVE_ANIMATION | PRIVATE_FLAG_TRUSTED_OVERLAY;
         mViewHost.setView(mDividerView, lp);
-        mDividerView.setup(splitLayout, mViewHost);
+        mDividerView.setup(splitLayout, this, mViewHost, insetsState);
     }
 
     /**
      * Releases the surface control of the current {@link DividerView} and tear down the view
      * hierarchy.
      */
-    void release() {
+    void release(@Nullable SurfaceControl.Transaction t) {
         if (mDividerView != null) {
             mDividerView = null;
         }
 
         if (mViewHost != null){
+            mSyncTransaction = t;
             mViewHost.release();
+            mSyncTransaction = null;
             mViewHost = null;
         }
 
         if (mLeash != null) {
-            new SurfaceControl.Transaction().remove(mLeash).apply();
+            if (t == null) {
+                new SurfaceControl.Transaction().remove(mLeash).apply();
+            } else {
+                t.remove(mLeash);
+            }
             mLeash = null;
+        }
+    }
+
+    @Override
+    protected void removeSurface(SurfaceControl sc) {
+        // This gets called via SurfaceControlViewHost.release()
+        if (mSyncTransaction != null) {
+            mSyncTransaction.remove(sc);
+        } else {
+            super.removeSurface(sc);
         }
     }
 
     void setInteractive(boolean interactive) {
         if (mDividerView == null) return;
         mDividerView.setInteractive(interactive);
-    }
-
-    void setResizingSplits(boolean resizing) {
-        if (resizing == mResizingSplits) return;
-        try {
-            ActivityTaskManager.getService().setSplitScreenResizing(resizing);
-            mResizingSplits = resizing;
-        } catch (RemoteException e) {
-            Slog.w(TAG, "Error calling setSplitScreenResizing", e);
-        }
     }
 
     /**
@@ -168,5 +177,11 @@ public final class SplitWindowManager extends WindowlessWindowManager {
     @Nullable
     SurfaceControl getSurfaceControl() {
         return mLeash;
+    }
+
+    void onInsetsChanged(InsetsState insetsState) {
+        if (mDividerView != null) {
+            mDividerView.onInsetsChanged(insetsState, true /* animate */);
+        }
     }
 }

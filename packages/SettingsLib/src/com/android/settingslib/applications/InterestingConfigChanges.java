@@ -16,25 +16,37 @@
 
 package com.android.settingslib.applications;
 
+import android.annotation.SuppressLint;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 
+/**
+ * A class for applying config changes and determing if doing so resulting in any "interesting"
+ * changes.
+ */
 public class InterestingConfigChanges {
     private final Configuration mLastConfiguration = new Configuration();
     private final int mFlags;
     private int mLastDensity;
 
     public InterestingConfigChanges() {
-        this(ActivityInfo.CONFIG_LOCALE
-                | ActivityInfo.CONFIG_UI_MODE | ActivityInfo.CONFIG_SCREEN_LAYOUT
-                | ActivityInfo.CONFIG_ASSETS_PATHS);
+        this(ActivityInfo.CONFIG_LOCALE | ActivityInfo.CONFIG_LAYOUT_DIRECTION
+                | ActivityInfo.CONFIG_UI_MODE | ActivityInfo.CONFIG_ASSETS_PATHS);
     }
 
     public InterestingConfigChanges(int flags) {
         mFlags = flags;
     }
 
+    /**
+     * Applies the given config change and returns whether an "interesting" change happened.
+     *
+     * @param res The source of the new config to apply
+     *
+     * @return Whether interesting changes occurred
+     */
+    @SuppressLint("NewApi")
     public boolean applyNewConfig(Resources res) {
         int configChanges = mLastConfiguration.updateFrom(
                 Configuration.generateDelta(mLastConfiguration, res.getConfiguration()));

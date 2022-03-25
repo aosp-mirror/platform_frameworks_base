@@ -70,7 +70,8 @@ fun UiDevice.waitForTvPipMenuElementWithDescription(desc: String): UiObject2? {
     // descendant and then retrieve the element from the menu and return to the caller of this
     // method.
     val elementSelector = By.desc(desc)
-    val menuContainingElementSelector = By.copy(TV_PIP_MENU_SELECTOR).hasDescendant(elementSelector)
+    val menuContainingElementSelector = By.copy(TV_PIP_MENU_SELECTOR)
+            .hasDescendant(elementSelector)
 
     return wait(Until.findObject(menuContainingElementSelector), WAIT_TIME_MS)
             ?.findObject(elementSelector)
@@ -94,7 +95,8 @@ fun UiDevice.clickTvPipMenuFullscreenButton() {
 }
 
 fun UiDevice.clickTvPipMenuElementWithDescription(desc: String) {
-    focusOnAndClickTvPipMenuElement(By.desc(desc).pkg(SYSTEM_UI_PACKAGE_NAME)) ||
+    focusOnAndClickTvPipMenuElement(By.desc(desc)
+            .pkg(SYSTEM_UI_PACKAGE_NAME)) ||
             error("Could not focus on the Pip menu object with \"$desc\" description")
     // So apparently Accessibility framework on TV is not very reliable and sometimes the state of
     // the tree of accessibility nodes as seen by the accessibility clients kind of lags behind of

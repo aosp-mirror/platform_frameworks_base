@@ -19,7 +19,6 @@
 #include <algorithm>
 #include <string>
 
-#include "util/Maybe.h"
 #include "util/Util.h"
 #include "xml/XmlDom.h"
 
@@ -34,8 +33,7 @@ std::string BuildPackageNamespace(const StringPiece& package, bool private_refer
   return result;
 }
 
-Maybe<ExtractedPackage> ExtractPackageFromNamespace(
-    const std::string& namespace_uri) {
+std::optional<ExtractedPackage> ExtractPackageFromNamespace(const std::string& namespace_uri) {
   if (util::StartsWith(namespace_uri, kSchemaPublicPrefix)) {
     StringPiece schema_prefix = kSchemaPublicPrefix;
     StringPiece package = namespace_uri;
@@ -62,7 +60,7 @@ Maybe<ExtractedPackage> ExtractPackageFromNamespace(
 
 void ResolvePackage(const IPackageDeclStack* decl_stack, Reference* in_ref) {
   if (in_ref->name) {
-    if (Maybe<ExtractedPackage> transformed_package =
+    if (std::optional<ExtractedPackage> transformed_package =
             decl_stack->TransformPackageAlias(in_ref->name.value().package)) {
       ExtractedPackage& extracted_package = transformed_package.value();
       in_ref->name.value().package = std::move(extracted_package.package);
