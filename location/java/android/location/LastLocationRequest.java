@@ -20,8 +20,10 @@ import static android.Manifest.permission.LOCATION_BYPASS;
 
 import android.Manifest;
 import android.annotation.NonNull;
+import android.annotation.RequiresFeature;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
+import android.content.pm.PackageManager;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -224,6 +226,7 @@ public final class LastLocationRequest implements Parcelable {
          */
         @SystemApi
         @RequiresPermission(LOCATION_BYPASS)
+        @RequiresFeature(PackageManager.FEATURE_AUTOMOTIVE)
         public @NonNull LastLocationRequest.Builder setAdasGnssBypass(boolean adasGnssBypass) {
             mAdasGnssBypass = adasGnssBypass;
             return this;

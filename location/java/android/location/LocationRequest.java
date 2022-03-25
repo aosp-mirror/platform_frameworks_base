@@ -27,10 +27,12 @@ import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresFeature;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledAfter;
+import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -1136,6 +1138,7 @@ public final class LocationRequest implements Parcelable {
          */
         @SystemApi
         @RequiresPermission(LOCATION_BYPASS)
+        @RequiresFeature(PackageManager.FEATURE_AUTOMOTIVE)
         public @NonNull Builder setAdasGnssBypass(boolean adasGnssBypass) {
             mAdasGnssBypass = adasGnssBypass;
             return this;
