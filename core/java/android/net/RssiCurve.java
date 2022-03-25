@@ -50,8 +50,10 @@ import java.util.Objects;
  * the system.
  *
  * @see ScoredNetwork
+ * @deprecated as part of the {@link NetworkScoreManager} deprecation.
  * @hide
  */
+@Deprecated
 @SystemApi
 public class RssiCurve implements Parcelable {
     private static final int DEFAULT_ACTIVE_NETWORK_RSSI_BOOST = 25;

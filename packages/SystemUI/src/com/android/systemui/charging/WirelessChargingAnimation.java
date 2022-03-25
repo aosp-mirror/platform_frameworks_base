@@ -16,6 +16,8 @@
 
 package com.android.systemui.charging;
 
+import static com.android.systemui.charging.WirelessChargingLayout.UNKNOWN_BATTERY_LEVEL;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
@@ -73,6 +75,16 @@ public class WirelessChargingAnimation {
             Callback callback, boolean isDozing, UiEventLogger uiEventLogger) {
         return new WirelessChargingAnimation(context, looper, transmittingBatteryLevel,
                 batteryLevel, callback, isDozing, uiEventLogger);
+    }
+
+    /**
+     * Creates a charging animation object using mostly default values for non-dozing and unknown
+     * battery level without charging number shown.
+     */
+    public static WirelessChargingAnimation makeChargingAnimationWithNoBatteryLevel(
+            @NonNull Context context, UiEventLogger uiEventLogger) {
+        return makeWirelessChargingAnimation(context, null,
+                UNKNOWN_BATTERY_LEVEL, UNKNOWN_BATTERY_LEVEL, null, false, uiEventLogger);
     }
 
     /**

@@ -306,7 +306,7 @@ public class TextKeyListener extends BaseKeyListener implements SpanWatcher {
 
     /* package */ int getPrefs(Context context) {
         synchronized (this) {
-            if (!mPrefsInited || mResolver.get() == null) {
+            if (!mPrefsInited || mResolver.refersTo(null)) {
                 initPrefs(context);
             }
         }

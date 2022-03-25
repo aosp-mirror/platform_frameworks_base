@@ -37,6 +37,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import android.app.ActivityManager.RunningTaskInfo;
+import android.app.TaskInfo;
 import android.content.Context;
 import android.content.LocusId;
 import android.content.pm.ParceledListSlice;
@@ -56,7 +57,7 @@ import androidx.test.filters.SmallTest;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TransactionPool;
-import com.android.wm.shell.sizecompatui.SizeCompatUIController;
+import com.android.wm.shell.compatui.CompatUIController;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -65,6 +66,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
+import java.util.Optional;
 
 /**
  * Tests for the shell task organizer.
@@ -81,7 +83,7 @@ public class ShellTaskOrganizerTests {
     @Mock
     private Context mContext;
     @Mock
-    private SizeCompatUIController mSizeCompatUI;
+    private CompatUIController mCompatUI;
 
     ShellTaskOrganizer mOrganizer;
     private final SyncTransactionQueue mSyncTransactionQueue = mock(SyncTransactionQueue.class);
@@ -131,7 +133,7 @@ public class ShellTaskOrganizerTests {
                     .when(mTaskOrganizerController).registerTaskOrganizer(any());
         } catch (RemoteException e) {}
         mOrganizer = spy(new ShellTaskOrganizer(mTaskOrganizerController, mTestExecutor, mContext,
-                mSizeCompatUI));
+                mCompatUI, Optional.empty()));
     }
 
     @Test
@@ -194,6 +196,43 @@ public class ShellTaskOrganizerTests {
         TrackingTaskListener listener = new TrackingTaskListener();
         mOrganizer.addListenerForType(listener, TASK_LISTENER_TYPE_MULTI_WINDOW);
         assertTrue(listener.appeared.contains(taskInfo));
+    }
+
+    @Test
+    public void testAddListenerForMultipleTypes() {
+        RunningTaskInfo taskInfo1 = createTaskInfo(1, WINDOWING_MODE_FULLSCREEN);
+        mOrganizer.onTaskAppeared(taskInfo1, null);
+        RunningTaskInfo taskInfo2 = createTaskInfo(2, WINDOWING_MODE_MULTI_WINDOW);
+        mOrganizer.onTaskAppeared(taskInfo2, null);
+
+        TrackingTaskListener listener = new TrackingTaskListener();
+        mOrganizer.addListenerForType(listener,
+                TASK_LISTENER_TYPE_MULTI_WINDOW, TASK_LISTENER_TYPE_FULLSCREEN);
+
+        // onTaskAppeared event should be delivered once for each taskInfo.
+        assertTrue(listener.appeared.contains(taskInfo1));
+        assertTrue(listener.appeared.contains(taskInfo2));
+        assertEquals(2, listener.appeared.size());
+    }
+
+    @Test
+    public void testRemoveListenerForMultipleTypes() {
+        RunningTaskInfo taskInfo1 = createTaskInfo(1, WINDOWING_MODE_FULLSCREEN);
+        mOrganizer.onTaskAppeared(taskInfo1, null);
+        RunningTaskInfo taskInfo2 = createTaskInfo(2, WINDOWING_MODE_MULTI_WINDOW);
+        mOrganizer.onTaskAppeared(taskInfo2, null);
+
+        TrackingTaskListener listener = new TrackingTaskListener();
+        mOrganizer.addListenerForType(listener,
+                TASK_LISTENER_TYPE_MULTI_WINDOW, TASK_LISTENER_TYPE_FULLSCREEN);
+
+        mOrganizer.removeListener(listener);
+
+        // If listener is removed properly, onTaskInfoChanged event shouldn't be delivered.
+        mOrganizer.onTaskInfoChanged(taskInfo1);
+        assertTrue(listener.infoChanged.isEmpty());
+        mOrganizer.onTaskInfoChanged(taskInfo2);
+        assertTrue(listener.infoChanged.isEmpty());
     }
 
     @Test
@@ -296,35 +335,141 @@ public class ShellTaskOrganizerTests {
         mOrganizer.onTaskAppeared(taskInfo1, null);
 
         // sizeCompatActivity is null if top activity is not in size compat.
-        verify(mSizeCompatUI).onSizeCompatInfoChanged(taskInfo1.displayId, taskInfo1.taskId,
-                null /* taskConfig */, null /* taskListener */);
+        verify(mCompatUI).onCompatInfoChanged(taskInfo1, null /* taskListener */);
 
         // sizeCompatActivity is non-null if top activity is in size compat.
-        clearInvocations(mSizeCompatUI);
+        clearInvocations(mCompatUI);
         final RunningTaskInfo taskInfo2 =
                 createTaskInfo(taskInfo1.taskId, taskInfo1.getWindowingMode());
         taskInfo2.displayId = taskInfo1.displayId;
         taskInfo2.topActivityInSizeCompat = true;
         taskInfo2.isVisible = true;
         mOrganizer.onTaskInfoChanged(taskInfo2);
-        verify(mSizeCompatUI).onSizeCompatInfoChanged(taskInfo1.displayId, taskInfo1.taskId,
-                taskInfo1.configuration, taskListener);
+        verify(mCompatUI).onCompatInfoChanged(taskInfo2, taskListener);
 
         // Not show size compat UI if task is not visible.
-        clearInvocations(mSizeCompatUI);
+        clearInvocations(mCompatUI);
         final RunningTaskInfo taskInfo3 =
                 createTaskInfo(taskInfo1.taskId, taskInfo1.getWindowingMode());
         taskInfo3.displayId = taskInfo1.displayId;
         taskInfo3.topActivityInSizeCompat = true;
         taskInfo3.isVisible = false;
         mOrganizer.onTaskInfoChanged(taskInfo3);
-        verify(mSizeCompatUI).onSizeCompatInfoChanged(taskInfo1.displayId, taskInfo1.taskId,
-                null /* taskConfig */, null /* taskListener */);
+        verify(mCompatUI).onCompatInfoChanged(taskInfo3, null /* taskListener */);
 
-        clearInvocations(mSizeCompatUI);
+        clearInvocations(mCompatUI);
         mOrganizer.onTaskVanished(taskInfo1);
-        verify(mSizeCompatUI).onSizeCompatInfoChanged(taskInfo1.displayId, taskInfo1.taskId,
-                null /* taskConfig */, null /* taskListener */);
+        verify(mCompatUI).onCompatInfoChanged(taskInfo1, null /* taskListener */);
+    }
+
+    @Test
+    public void testOnEligibleForLetterboxEducationActivityChanged() {
+        final RunningTaskInfo taskInfo1 = createTaskInfo(12, WINDOWING_MODE_FULLSCREEN);
+        taskInfo1.displayId = DEFAULT_DISPLAY;
+        taskInfo1.topActivityEligibleForLetterboxEducation = false;
+        final TrackingTaskListener taskListener = new TrackingTaskListener();
+        mOrganizer.addListenerForType(taskListener, TASK_LISTENER_TYPE_FULLSCREEN);
+        mOrganizer.onTaskAppeared(taskInfo1, null);
+
+        // Task listener sent to compat UI is null if top activity isn't eligible for letterbox
+        // education.
+        verify(mCompatUI).onCompatInfoChanged(taskInfo1, null /* taskListener */);
+
+        // Task listener is non-null if top activity is eligible for letterbox education and task
+        // is visible.
+        clearInvocations(mCompatUI);
+        final RunningTaskInfo taskInfo2 =
+                createTaskInfo(taskInfo1.taskId, WINDOWING_MODE_FULLSCREEN);
+        taskInfo2.displayId = taskInfo1.displayId;
+        taskInfo2.topActivityEligibleForLetterboxEducation = true;
+        taskInfo2.isVisible = true;
+        mOrganizer.onTaskInfoChanged(taskInfo2);
+        verify(mCompatUI).onCompatInfoChanged(taskInfo2, taskListener);
+
+        // Task listener is null if task is invisible.
+        clearInvocations(mCompatUI);
+        final RunningTaskInfo taskInfo3 =
+                createTaskInfo(taskInfo1.taskId, WINDOWING_MODE_FULLSCREEN);
+        taskInfo3.displayId = taskInfo1.displayId;
+        taskInfo3.topActivityEligibleForLetterboxEducation = true;
+        taskInfo3.isVisible = false;
+        mOrganizer.onTaskInfoChanged(taskInfo3);
+        verify(mCompatUI).onCompatInfoChanged(taskInfo3, null /* taskListener */);
+
+        clearInvocations(mCompatUI);
+        mOrganizer.onTaskVanished(taskInfo1);
+        verify(mCompatUI).onCompatInfoChanged(taskInfo1, null /* taskListener */);
+    }
+
+    @Test
+    public void testOnCameraCompatActivityChanged() {
+        final RunningTaskInfo taskInfo1 = createTaskInfo(1, WINDOWING_MODE_FULLSCREEN);
+        taskInfo1.displayId = DEFAULT_DISPLAY;
+        taskInfo1.cameraCompatControlState = TaskInfo.CAMERA_COMPAT_CONTROL_HIDDEN;
+        final TrackingTaskListener taskListener = new TrackingTaskListener();
+        mOrganizer.addListenerForType(taskListener, TASK_LISTENER_TYPE_FULLSCREEN);
+        mOrganizer.onTaskAppeared(taskInfo1, null);
+
+        // Task listener sent to compat UI is null if top activity doesn't request a camera
+        // compat control.
+        verify(mCompatUI).onCompatInfoChanged(taskInfo1, null /* taskListener */);
+
+        // Task listener is non-null when request a camera compat control for a visible task.
+        clearInvocations(mCompatUI);
+        final RunningTaskInfo taskInfo2 =
+                createTaskInfo(taskInfo1.taskId, taskInfo1.getWindowingMode());
+        taskInfo2.displayId = taskInfo1.displayId;
+        taskInfo2.cameraCompatControlState = TaskInfo.CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED;
+        taskInfo2.isVisible = true;
+        mOrganizer.onTaskInfoChanged(taskInfo2);
+        verify(mCompatUI).onCompatInfoChanged(taskInfo2, taskListener);
+
+        // CompatUIController#onCompatInfoChanged is called when requested state for a camera
+        // compat control changes for a visible task.
+        clearInvocations(mCompatUI);
+        final RunningTaskInfo taskInfo3 =
+                createTaskInfo(taskInfo1.taskId, taskInfo1.getWindowingMode());
+        taskInfo3.displayId = taskInfo1.displayId;
+        taskInfo3.cameraCompatControlState = TaskInfo.CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED;
+        taskInfo3.isVisible = true;
+        mOrganizer.onTaskInfoChanged(taskInfo3);
+        verify(mCompatUI).onCompatInfoChanged(taskInfo3, taskListener);
+
+        // CompatUIController#onCompatInfoChanged is called when a top activity goes in size compat
+        // mode for a visible task that has a compat control.
+        clearInvocations(mCompatUI);
+        final RunningTaskInfo taskInfo4 =
+                createTaskInfo(taskInfo1.taskId, taskInfo1.getWindowingMode());
+        taskInfo4.displayId = taskInfo1.displayId;
+        taskInfo4.topActivityInSizeCompat = true;
+        taskInfo4.cameraCompatControlState = TaskInfo.CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED;
+        taskInfo4.isVisible = true;
+        mOrganizer.onTaskInfoChanged(taskInfo4);
+        verify(mCompatUI).onCompatInfoChanged(taskInfo4, taskListener);
+
+        // Task linster is null when a camera compat control is dimissed for a visible task.
+        clearInvocations(mCompatUI);
+        final RunningTaskInfo taskInfo5 =
+                createTaskInfo(taskInfo1.taskId, taskInfo1.getWindowingMode());
+        taskInfo5.displayId = taskInfo1.displayId;
+        taskInfo5.cameraCompatControlState = TaskInfo.CAMERA_COMPAT_CONTROL_DISMISSED;
+        taskInfo5.isVisible = true;
+        mOrganizer.onTaskInfoChanged(taskInfo5);
+        verify(mCompatUI).onCompatInfoChanged(taskInfo5, null /* taskListener */);
+
+        // Task linster is null when request a camera compat control for a invisible task.
+        clearInvocations(mCompatUI);
+        final RunningTaskInfo taskInfo6 =
+                createTaskInfo(taskInfo1.taskId, taskInfo1.getWindowingMode());
+        taskInfo6.displayId = taskInfo1.displayId;
+        taskInfo6.cameraCompatControlState = TaskInfo.CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED;
+        taskInfo6.isVisible = false;
+        mOrganizer.onTaskInfoChanged(taskInfo6);
+        verify(mCompatUI).onCompatInfoChanged(taskInfo6, null /* taskListener */);
+
+        clearInvocations(mCompatUI);
+        mOrganizer.onTaskVanished(taskInfo1);
+        verify(mCompatUI).onCompatInfoChanged(taskInfo1, null /* taskListener */);
     }
 
     @Test

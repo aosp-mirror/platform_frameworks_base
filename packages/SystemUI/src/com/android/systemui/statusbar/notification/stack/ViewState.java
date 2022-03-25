@@ -29,6 +29,7 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
 import com.android.systemui.statusbar.notification.AnimatableProperty;
+import com.android.systemui.statusbar.notification.NotificationFadeAware.FadeOptimizedNotification;
 import com.android.systemui.statusbar.notification.PropertyAnimator;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.policy.HeadsUpUtil;
@@ -206,14 +207,26 @@ public class ViewState implements Dumpable {
         } else if (view.getAlpha() != this.alpha) {
             // apply layer type
             boolean becomesFullyVisible = this.alpha == 1.0f;
-            boolean newLayerTypeIsHardware = !becomesInvisible && !becomesFullyVisible
-                    && view.hasOverlappingRendering();
-            int layerType = view.getLayerType();
-            int newLayerType = newLayerTypeIsHardware
-                    ? View.LAYER_TYPE_HARDWARE
-                    : View.LAYER_TYPE_NONE;
-            if (layerType != newLayerType) {
-                view.setLayerType(newLayerType, null);
+            boolean becomesFaded = !becomesInvisible && !becomesFullyVisible;
+            if (FadeOptimizedNotification.FADE_LAYER_OPTIMIZATION_ENABLED
+                    && view instanceof FadeOptimizedNotification) {
+                // NOTE: A view that's going to utilize this interface to avoid having a hardware
+                //  layer will have to return false from hasOverlappingRendering(), so we
+                //  intentionally do not check that value in this if, even though we do in the else.
+                FadeOptimizedNotification fadeOptimizedView = (FadeOptimizedNotification) view;
+                boolean isFaded = fadeOptimizedView.isNotificationFaded();
+                if (isFaded != becomesFaded) {
+                    fadeOptimizedView.setNotificationFaded(becomesFaded);
+                }
+            } else {
+                boolean newLayerTypeIsHardware = becomesFaded && view.hasOverlappingRendering();
+                int layerType = view.getLayerType();
+                int newLayerType = newLayerTypeIsHardware
+                        ? View.LAYER_TYPE_HARDWARE
+                        : View.LAYER_TYPE_NONE;
+                if (layerType != newLayerType) {
+                    view.setLayerType(newLayerType, null);
+                }
             }
 
             // apply alpha

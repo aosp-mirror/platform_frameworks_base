@@ -43,6 +43,9 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadow.api.Shadow;
 
+import java.util.Arrays;
+import java.util.List;
+
 @RunWith(RobolectricTestRunner.class)
 @Config(shadows = {ShadowBluetoothAdapter.class})
 public class A2dpProfileTest {
@@ -57,6 +60,8 @@ public class A2dpProfileTest {
     private BluetoothDevice mDevice;
     @Mock
     private BluetoothA2dp mBluetoothA2dp;
+    @Mock
+    private BluetoothAdapter mBluetoothAdapter;
     private BluetoothProfile.ServiceListener mServiceListener;
 
     private A2dpProfile mProfile;
@@ -69,7 +74,8 @@ public class A2dpProfileTest {
         mProfile = new A2dpProfile(mContext, mDeviceManager, mProfileManager);
         mServiceListener = mShadowBluetoothAdapter.getServiceListener();
         mServiceListener.onServiceConnected(BluetoothProfile.A2DP, mBluetoothA2dp);
-        when(mBluetoothA2dp.getActiveDevice()).thenReturn(mDevice);
+        when(mBluetoothAdapter.getActiveDevices(eq(BluetoothProfile.A2DP)))
+                .thenReturn(Arrays.asList(mDevice));
     }
 
     @Test
@@ -179,7 +185,7 @@ public class A2dpProfileTest {
                 BluetoothProfile.STATE_CONNECTED);
         BluetoothCodecStatus status = mock(BluetoothCodecStatus.class);
         BluetoothCodecConfig config = mock(BluetoothCodecConfig.class);
-        BluetoothCodecConfig[] configs = {config};
+        List<BluetoothCodecConfig> configs = Arrays.asList(config);
         when(mBluetoothA2dp.getCodecStatus(mDevice)).thenReturn(status);
         when(status.getCodecsSelectableCapabilities()).thenReturn(configs);
 
@@ -194,15 +200,14 @@ public class A2dpProfileTest {
                 BluetoothProfile.STATE_CONNECTED);
         BluetoothCodecStatus status = mock(BluetoothCodecStatus.class);
         BluetoothCodecConfig config = mock(BluetoothCodecConfig.class);
-        BluetoothCodecConfig[] configs = {config};
+        List<BluetoothCodecConfig> configs = Arrays.asList(config);
         when(mBluetoothA2dp.getCodecStatus(mDevice)).thenReturn(status);
         when(status.getCodecsSelectableCapabilities()).thenReturn(configs);
 
         when(config.isMandatoryCodec()).thenReturn(false);
         when(config.getCodecType()).thenReturn(4);
-        when(config.getCodecName()).thenReturn("LDAC");
         assertThat(mProfile.getHighQualityAudioOptionLabel(mDevice)).isEqualTo(
-                String.format(KNOWN_CODEC_LABEL, config.getCodecName()));
+                String.format(KNOWN_CODEC_LABEL, "LDAC"));
     }
 
     @Test

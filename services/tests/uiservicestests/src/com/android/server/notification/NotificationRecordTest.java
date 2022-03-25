@@ -66,6 +66,7 @@ import android.os.Vibrator;
 import android.provider.Settings;
 import android.service.notification.Adjustment;
 import android.service.notification.StatusBarNotification;
+import android.util.ArraySet;
 import android.widget.RemoteViews;
 
 import androidx.test.filters.SmallTest;
@@ -1017,38 +1018,14 @@ public class NotificationRecordTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testIgnoreImportanceAdjustmentsForOemLockedChannels() {
+    public void testIgnoreImportanceAdjustmentsForFixedRecords() {
         NotificationChannel channel = new NotificationChannel("a", "a", IMPORTANCE_DEFAULT);
-        channel.setImportanceLockedByOEM(true);
 
         StatusBarNotification sbn = getNotification(PKG_O, true /* noisy */,
                 true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
                 false /* lights */, false /* defaultLights */, groupId /* group */);
         NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
-
-        assertEquals(IMPORTANCE_DEFAULT, record.getImportance());
-
-        Bundle bundle = new Bundle();
-        bundle.putInt(KEY_IMPORTANCE, IMPORTANCE_LOW);
-        Adjustment adjustment = new Adjustment(
-                PKG_O, record.getKey(), bundle, "", record.getUserId());
-
-        record.addAdjustment(adjustment);
-        record.applyAdjustments();
-        record.calculateImportance();
-
-        assertEquals(IMPORTANCE_DEFAULT, record.getImportance());
-    }
-
-    @Test
-    public void testIgnoreImportanceAdjustmentsForDefaultAppLockedChannels() {
-        NotificationChannel channel = new NotificationChannel("a", "a", IMPORTANCE_DEFAULT);
-        channel.setImportanceLockedByCriticalDeviceFunction(true);
-
-        StatusBarNotification sbn = getNotification(PKG_O, true /* noisy */,
-                true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
-                false /* lights */, false /* defaultLights */, groupId /* group */);
-        NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
+        record.setImportanceFixed(true);
 
         assertEquals(IMPORTANCE_DEFAULT, record.getImportance());
 
@@ -1327,5 +1304,46 @@ public class NotificationRecordTest extends UiServiceTestCase {
         record.setPkgAllowedAsConvo(true);
 
         assertFalse(record.isConversation());
+    }
+
+    @Test
+    public void mergePhoneNumbers_nulls() {
+        // make sure nothing dies if we just don't have any phone numbers
+        StatusBarNotification sbn = getNotification(PKG_N_MR1, true /* noisy */,
+                true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
+                false /* lights */, false /* defaultLights */, null /* group */);
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, defaultChannel);
+
+        // by default, no phone numbers
+        assertNull(record.getPhoneNumbers());
+
+        // nothing happens if we attempt to merge phone numbers but there aren't any
+        record.mergePhoneNumbers(null);
+        assertNull(record.getPhoneNumbers());
+    }
+
+    @Test
+    public void mergePhoneNumbers_addNumbers() {
+        StatusBarNotification sbn = getNotification(PKG_N_MR1, true /* noisy */,
+                true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
+                false /* lights */, false /* defaultLights */, null /* group */);
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, defaultChannel);
+
+        // by default, no phone numbers
+        assertNull(record.getPhoneNumbers());
+
+        // make sure it behaves properly when we merge in some real content
+        record.mergePhoneNumbers(new ArraySet<>(
+                new String[]{"16175551212", "16175552121"}));
+        assertTrue(record.getPhoneNumbers().contains("16175551212"));
+        assertTrue(record.getPhoneNumbers().contains("16175552121"));
+        assertFalse(record.getPhoneNumbers().contains("16175553434"));
+
+        // now merge in a new number, make sure old ones are still there and the new one
+        // is also there
+        record.mergePhoneNumbers(new ArraySet<>(new String[]{"16175553434"}));
+        assertTrue(record.getPhoneNumbers().contains("16175551212"));
+        assertTrue(record.getPhoneNumbers().contains("16175552121"));
+        assertTrue(record.getPhoneNumbers().contains("16175553434"));
     }
 }

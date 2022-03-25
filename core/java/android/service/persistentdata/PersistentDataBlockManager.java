@@ -17,6 +17,7 @@
 package android.service.persistentdata;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
@@ -200,6 +201,22 @@ public class PersistentDataBlockManager {
     public int getFlashLockState() {
         try {
             return sService.getFlashLockState();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the package name which can access the persistent data partition.
+     *
+     * @hide
+     */
+    @SystemApi
+    @NonNull
+    @RequiresPermission(android.Manifest.permission.ACCESS_PDB_STATE)
+    public String getPersistentDataPackageName() {
+        try {
+            return sService.getPersistentDataPackageName();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

@@ -17,8 +17,8 @@
 package com.android.server.location.contexthub;
 
 import android.annotation.Nullable;
-import android.hardware.contexthub.V1_2.HubAppInfo;
 import android.hardware.location.NanoAppInstanceInfo;
+import android.hardware.location.NanoAppState;
 import android.util.Log;
 
 import java.util.HashMap;
@@ -31,8 +31,8 @@ import java.util.function.Consumer;
  * Manages the state of loaded nanoapps at the Context Hubs.
  *
  * This class maintains a list of nanoapps that have been informed as loaded at the hubs. The state
- * should be updated based on the hub callbacks (defined in IContexthubCallback.hal), as a result
- * of either loadNanoApp, unloadNanoApp, or queryApps.
+ * should be updated based on the hub callbacks (defined in IContexthubCallback.hal), as a result of
+ * either loadNanoApp, unloadNanoApp, or queryApps.
  *
  * The state tracked by this manager is used by clients of ContextHubService that use the old APIs.
  *
@@ -61,7 +61,7 @@ import java.util.function.Consumer;
     /**
      * @param nanoAppHandle the nanoapp handle
      * @return the NanoAppInstanceInfo for the given nanoapp, or null if the nanoapp does not exist
-     *         in the cache
+     * in the cache
      */
     @Nullable
     /* package */
@@ -83,7 +83,7 @@ import java.util.function.Consumer;
 
     /**
      * @param contextHubId the ID of the hub to search for the instance
-     * @param nanoAppId the unique 64-bit ID of the nanoapp
+     * @param nanoAppId    the unique 64-bit ID of the nanoapp
      * @return the nanoapp handle, -1 if the nanoapp is not in the cache
      */
     /* package */
@@ -99,12 +99,12 @@ import java.util.function.Consumer;
 
     /**
      * Adds a nanoapp instance to the cache.
-     *
+     * <p>
      * If the cache already contained the nanoapp, the entry is removed and a new nanoapp handle is
      * generated.
      *
-     * @param contextHubId the ID of the hub the nanoapp is loaded in
-     * @param nanoAppId the unique 64-bit ID of the nanoapp
+     * @param contextHubId   the ID of the hub the nanoapp is loaded in
+     * @param nanoAppId      the unique 64-bit ID of the nanoapp
      * @param nanoAppVersion the version of the nanoapp
      */
     /* package */
@@ -147,15 +147,17 @@ import java.util.function.Consumer;
     /**
      * Performs a batch update of the nanoapp cache given a nanoapp query response.
      *
-     * @param contextHubId    the ID of the hub the response came from
-     * @param nanoAppInfoList the list of loaded nanoapps
+     * @param contextHubId     the ID of the hub the response came from
+     * @param nanoappStateList the list of loaded nanoapps
      */
     /* package */
-    synchronized void updateCache(int contextHubId, List<HubAppInfo> nanoAppInfoList) {
+    synchronized void updateCache(int contextHubId, List<NanoAppState> nanoappStateList) {
         HashSet<Long> nanoAppIdSet = new HashSet<>();
-        for (HubAppInfo appInfo : nanoAppInfoList) {
-            handleQueryAppEntry(contextHubId, appInfo.info_1_0.appId, appInfo.info_1_0.version);
-            nanoAppIdSet.add(appInfo.info_1_0.appId);
+        for (NanoAppState nanoappState : nanoappStateList) {
+            handleQueryAppEntry(
+                    contextHubId, nanoappState.getNanoAppId(),
+                    (int) nanoappState.getNanoAppVersion());
+            nanoAppIdSet.add(nanoappState.getNanoAppId());
         }
 
         Iterator<NanoAppInstanceInfo> iterator = mNanoAppHash.values().iterator();
@@ -172,8 +174,8 @@ import java.util.function.Consumer;
      * If the nanoapp exists in the cache, then the entry is updated. Otherwise, inserts a new
      * instance of the nanoapp in the cache. This method should only be invoked from updateCache.
      *
-     * @param contextHubId the ID of the hub the nanoapp is loaded in
-     * @param nanoAppId the unique 64-bit ID of the nanoapp
+     * @param contextHubId   the ID of the hub the nanoapp is loaded in
+     * @param nanoAppId      the unique 64-bit ID of the nanoapp
      * @param nanoAppVersion the version of the nanoapp
      */
     private void handleQueryAppEntry(int contextHubId, long nanoAppId, int nanoAppVersion) {

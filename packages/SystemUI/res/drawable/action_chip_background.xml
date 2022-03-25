@@ -17,11 +17,11 @@
 <ripple
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
-    android:color="@color/global_screenshot_button_ripple">
+    android:color="@color/overlay_button_ripple">
     <item android:id="@android:id/background">
         <shape android:shape="rectangle">
             <solid android:color="?androidprv:attr/colorAccentSecondary"/>
-            <corners android:radius="@dimen/screenshot_button_corner_radius"/>
+            <corners android:radius="@dimen/overlay_button_corner_radius"/>
         </shape>
     </item>
 </ripple>

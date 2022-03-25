@@ -41,14 +41,17 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Binder;
 import android.platform.test.annotations.Presubmit;
 import android.view.Display;
+import android.window.IDisplayAreaOrganizer;
 
 import androidx.test.filters.SmallTest;
 
@@ -343,6 +346,39 @@ public class DualDisplayAreaGroupPolicyTest extends WindowTestsBase {
         verify(mSecondRoot).placeImeContainer(imeContainer);
         // verify hide() was called on InputMethodWindow.
         verify(mDisplay.mInputMethodWindow).hide(false /* doAnimation */, false /* requestAnim */);
+    }
+
+    @Test
+    public void testPlaceImeContainer_skipReparentForOrganizedImeContainer() {
+        setupImeWindow();
+        final DisplayArea.Tokens imeContainer = mDisplay.getImeContainer();
+        final WindowToken imeToken = tokenOfType(TYPE_INPUT_METHOD);
+
+        // By default, the ime container is attached to DC as defined in DAPolicy.
+        assertThat(imeContainer.getRootDisplayArea()).isEqualTo(mDisplay);
+        assertThat(mDisplay.findAreaForTokenInLayer(imeToken)).isEqualTo(imeContainer);
+
+        final WindowState firstActivityWin =
+                createWindow(null /* parent */, TYPE_APPLICATION_STARTING, mFirstActivity,
+                        "firstActivityWin");
+        spyOn(firstActivityWin);
+        // firstActivityWin should be the target
+        doReturn(true).when(firstActivityWin).canBeImeTarget();
+
+        // Main precondition for this test: organize the ImeContainer.
+        final IDisplayAreaOrganizer mockImeOrganizer = mock(IDisplayAreaOrganizer.class);
+        when(mockImeOrganizer.asBinder()).thenReturn(new Binder());
+        imeContainer.setOrganizer(mockImeOrganizer);
+
+        WindowState imeTarget = mDisplay.computeImeTarget(true /* updateImeTarget */);
+
+        // The IME target must be updated but the don't reparent organized ImeContainers.
+        // See DisplayAreaOrganizer#FEATURE_IME.
+        assertThat(imeTarget).isEqualTo(firstActivityWin);
+        verify(mFirstRoot, never()).placeImeContainer(imeContainer);
+
+        // Clean up organizer.
+        imeContainer.setOrganizer(null);
     }
 
     @Test

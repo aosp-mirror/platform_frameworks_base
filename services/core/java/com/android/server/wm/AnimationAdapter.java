@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import android.annotation.NonNull;
 import android.util.proto.ProtoOutputStream;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
@@ -41,6 +42,22 @@ interface AnimationAdapter {
     boolean getShowWallpaper();
 
     /**
+     * @return Whether we should show a background behind the animating windows.
+     * @see Animation#getShowBackground()
+     */
+    default boolean getShowBackground() {
+        return false;
+    }
+
+    /**
+     * @return The background color to use during an animation if getShowBackground returns true.
+     * @see Animation#getBackgroundColor()
+     */
+    default int getBackgroundColor() {
+        return 0;
+    }
+
+    /**
      * Requests to start the animation.
      *
      * @param animationLeash The surface to run the animation on. See {@link SurfaceAnimator} for an
@@ -52,7 +69,7 @@ interface AnimationAdapter {
      * @param finishCallback The callback to be invoked when the animation has finished.
      */
     void startAnimation(SurfaceControl animationLeash, Transaction t, @AnimationType int type,
-            OnAnimationFinishedCallback finishCallback);
+            @NonNull OnAnimationFinishedCallback finishCallback);
 
     /**
      * Called when the animation that was started with {@link #startAnimation} was cancelled by the

@@ -18,6 +18,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="prompt" msgid="3183836924226407828">"Ulanish uchun so‘rov"</string>
     <string name="warning" msgid="809658604548412033">"<xliff:g id="APP">%s</xliff:g> ilovasi trafikni kuzatish uchun VPN tarmog‘iga ulanmoqchi. Agar ilovaga ishonsangiz, so‘rovga rozi bo‘ling.&lt;br /&gt; &lt;br /&gt;VPN faol bo‘lsa, ekranning yuqori qismida &lt;img src=vpn_icon /&gt; belgisi paydo bo‘ladi."</string>
+    <string name="warning" product="tv" msgid="5188957997628124947">"<xliff:g id="APP">%s</xliff:g> ilovasi tarmoqdagi trafikni kuzatish uchun VPN aloqasini sozlamoqchi. Agar unga ishonsangiz, ruxsat bering. VPN aloqa faolligida ekranda &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; chiqadi."</string>
     <string name="legacy_title" msgid="192936250066580964">"VPN ulangan"</string>
     <string name="session" msgid="6470628549473641030">"Seans:"</string>
     <string name="duration" msgid="3584782459928719435">"Davomiyligi:"</string>

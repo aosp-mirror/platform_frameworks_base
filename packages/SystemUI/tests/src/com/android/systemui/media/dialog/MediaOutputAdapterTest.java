@@ -54,10 +54,12 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
 
     // Mock
     private MediaOutputController mMediaOutputController = mock(MediaOutputController.class);
+    private MediaOutputDialog mMediaOutputDialog = mock(MediaOutputDialog.class);
     private MediaDevice mMediaDevice1 = mock(MediaDevice.class);
     private MediaDevice mMediaDevice2 = mock(MediaDevice.class);
     private Icon mIcon = mock(Icon.class);
     private IconCompat mIconCompat = mock(IconCompat.class);
+    private View mDialogLaunchView = mock(View.class);
 
     private MediaOutputAdapter mMediaOutputAdapter;
     private MediaOutputAdapter.MediaDeviceViewHolder mViewHolder;
@@ -65,7 +67,7 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
 
     @Before
     public void setUp() {
-        mMediaOutputAdapter = new MediaOutputAdapter(mMediaOutputController);
+        mMediaOutputAdapter = new MediaOutputAdapter(mMediaOutputController, mMediaOutputDialog);
         mViewHolder = (MediaOutputAdapter.MediaDeviceViewHolder) mMediaOutputAdapter
                 .onCreateViewHolder(new LinearLayout(mContext), 0);
 
@@ -107,7 +109,7 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
         when(mMediaOutputController.getSelectedMediaDevice()).thenReturn(mMediaDevices);
         when(mMediaOutputController.isZeroMode()).thenReturn(false);
 
-        assertThat(mMediaOutputAdapter.getItemCount()).isEqualTo(mMediaDevices.size() + 1);
+        assertThat(mMediaOutputAdapter.getItemCount()).isEqualTo(mMediaDevices.size());
     }
 
     @Test
@@ -118,10 +120,7 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
         assertThat(mViewHolder.mTitleText.getVisibility()).isEqualTo(View.VISIBLE);
         assertThat(mViewHolder.mTwoLineLayout.getVisibility()).isEqualTo(View.GONE);
         assertThat(mViewHolder.mProgressBar.getVisibility()).isEqualTo(View.GONE);
-        assertThat(mViewHolder.mDivider.getVisibility()).isEqualTo(View.GONE);
-        assertThat(mViewHolder.mAddIcon.getVisibility()).isEqualTo(View.GONE);
         assertThat(mViewHolder.mCheckBox.getVisibility()).isEqualTo(View.GONE);
-        assertThat(mViewHolder.mBottomDivider.getVisibility()).isEqualTo(View.GONE);
         assertThat(mViewHolder.mTitleText.getText()).isEqualTo(mContext.getText(
                 R.string.media_output_dialog_pairing_new));
     }
@@ -135,12 +134,10 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
         mMediaOutputAdapter.onBindViewHolder(mViewHolder, 0);
 
         assertThat(mViewHolder.mSeekBar.getVisibility()).isEqualTo(View.VISIBLE);
-        assertThat(mViewHolder.mTwoLineLayout.getVisibility()).isEqualTo(View.VISIBLE);
-        assertThat(mViewHolder.mTitleText.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mViewHolder.mTwoLineLayout.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mViewHolder.mTitleText.getVisibility()).isEqualTo(View.VISIBLE);
         assertThat(mViewHolder.mProgressBar.getVisibility()).isEqualTo(View.GONE);
-        assertThat(mViewHolder.mCheckBox.getVisibility()).isEqualTo(View.GONE);
-        assertThat(mViewHolder.mBottomDivider.getVisibility()).isEqualTo(View.GONE);
-        assertThat(mViewHolder.mTwoLineTitleText.getText()).isEqualTo(TEST_SESSION_NAME);
+        assertThat(mViewHolder.mCheckBox.getVisibility()).isEqualTo(View.VISIBLE);
     }
 
     @Test
@@ -152,57 +149,32 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
         mMediaOutputAdapter.onBindViewHolder(mViewHolder, 0);
 
         assertThat(mViewHolder.mSeekBar.getVisibility()).isEqualTo(View.VISIBLE);
-        assertThat(mViewHolder.mTwoLineLayout.getVisibility()).isEqualTo(View.VISIBLE);
-        assertThat(mViewHolder.mTitleText.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mViewHolder.mTwoLineLayout.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mViewHolder.mTitleText.getVisibility()).isEqualTo(View.VISIBLE);
         assertThat(mViewHolder.mProgressBar.getVisibility()).isEqualTo(View.GONE);
-        assertThat(mViewHolder.mCheckBox.getVisibility()).isEqualTo(View.GONE);
-        assertThat(mViewHolder.mBottomDivider.getVisibility()).isEqualTo(View.GONE);
-        assertThat(mViewHolder.mTwoLineTitleText.getText()).isEqualTo(mContext.getString(
-                R.string.media_output_dialog_group));
+        assertThat(mViewHolder.mCheckBox.getVisibility()).isEqualTo(View.VISIBLE);
     }
 
     @Test
     public void onBindViewHolder_bindConnectedDevice_verifyView() {
         mMediaOutputAdapter.onBindViewHolder(mViewHolder, 0);
 
-        assertThat(mViewHolder.mTitleText.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mViewHolder.mTitleText.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(mViewHolder.mTitleText.getText().toString()).isEqualTo(TEST_DEVICE_NAME_1);
         assertThat(mViewHolder.mSubTitleText.getVisibility()).isEqualTo(View.GONE);
         assertThat(mViewHolder.mProgressBar.getVisibility()).isEqualTo(View.GONE);
         assertThat(mViewHolder.mCheckBox.getVisibility()).isEqualTo(View.GONE);
-        assertThat(mViewHolder.mBottomDivider.getVisibility()).isEqualTo(View.GONE);
-        assertThat(mViewHolder.mTwoLineTitleText.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(mViewHolder.mTwoLineLayout.getVisibility()).isEqualTo(View.GONE);
         assertThat(mViewHolder.mSeekBar.getVisibility()).isEqualTo(View.VISIBLE);
-        assertThat(mViewHolder.mTwoLineTitleText.getText()).isEqualTo(TEST_DEVICE_NAME_1);
-    }
-
-    @Test
-    public void onBindViewHolder_bindConnectedDevice_withSelectableDevice_showAddIcon() {
-        when(mMediaOutputController.getSelectableMediaDevice()).thenReturn(mMediaDevices);
-        mMediaOutputAdapter.onBindViewHolder(mViewHolder, 0);
-
-        assertThat(mViewHolder.mDivider.getVisibility()).isEqualTo(View.VISIBLE);
-        assertThat(mViewHolder.mAddIcon.getVisibility()).isEqualTo(View.VISIBLE);
-    }
-
-    @Test
-    public void onBindViewHolder_bindConnectedDevice_withoutSelectableDevice_hideAddIcon() {
-        when(mMediaOutputController.getSelectableMediaDevice()).thenReturn(new ArrayList<>());
-        mMediaOutputAdapter.onBindViewHolder(mViewHolder, 0);
-
-        assertThat(mViewHolder.mDivider.getVisibility()).isEqualTo(View.GONE);
-        assertThat(mViewHolder.mAddIcon.getVisibility()).isEqualTo(View.GONE);
     }
 
     @Test
     public void onBindViewHolder_bindNonActiveConnectedDevice_verifyView() {
         mMediaOutputAdapter.onBindViewHolder(mViewHolder, 1);
 
-        assertThat(mViewHolder.mDivider.getVisibility()).isEqualTo(View.GONE);
-        assertThat(mViewHolder.mAddIcon.getVisibility()).isEqualTo(View.GONE);
         assertThat(mViewHolder.mTwoLineLayout.getVisibility()).isEqualTo(View.GONE);
         assertThat(mViewHolder.mProgressBar.getVisibility()).isEqualTo(View.GONE);
         assertThat(mViewHolder.mCheckBox.getVisibility()).isEqualTo(View.GONE);
-        assertThat(mViewHolder.mBottomDivider.getVisibility()).isEqualTo(View.GONE);
         assertThat(mViewHolder.mTitleText.getVisibility()).isEqualTo(View.VISIBLE);
         assertThat(mViewHolder.mTitleText.getText().toString()).isEqualTo(TEST_DEVICE_NAME_2);
     }
@@ -214,14 +186,11 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
         when(mMediaDevice2.isConnected()).thenReturn(false);
         mMediaOutputAdapter.onBindViewHolder(mViewHolder, 1);
 
-        assertThat(mViewHolder.mDivider.getVisibility()).isEqualTo(View.GONE);
-        assertThat(mViewHolder.mAddIcon.getVisibility()).isEqualTo(View.GONE);
-        assertThat(mViewHolder.mTwoLineLayout.getVisibility()).isEqualTo(View.GONE);
         assertThat(mViewHolder.mProgressBar.getVisibility()).isEqualTo(View.GONE);
-        assertThat(mViewHolder.mBottomDivider.getVisibility()).isEqualTo(View.GONE);
         assertThat(mViewHolder.mTitleText.getVisibility()).isEqualTo(View.VISIBLE);
         assertThat(mViewHolder.mTitleText.getText().toString()).isEqualTo(
-                mContext.getString(R.string.media_output_dialog_disconnected, TEST_DEVICE_NAME_2));
+                TEST_DEVICE_NAME_2);
+        assertThat(mViewHolder.mTwoLineLayout.getVisibility()).isEqualTo(View.GONE);
     }
 
     @Test
@@ -230,13 +199,10 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
                 LocalMediaManager.MediaDeviceState.STATE_CONNECTING_FAILED);
         mMediaOutputAdapter.onBindViewHolder(mViewHolder, 1);
 
-        assertThat(mViewHolder.mDivider.getVisibility()).isEqualTo(View.GONE);
-        assertThat(mViewHolder.mAddIcon.getVisibility()).isEqualTo(View.GONE);
         assertThat(mViewHolder.mTitleText.getVisibility()).isEqualTo(View.GONE);
         assertThat(mViewHolder.mSeekBar.getVisibility()).isEqualTo(View.GONE);
         assertThat(mViewHolder.mProgressBar.getVisibility()).isEqualTo(View.GONE);
         assertThat(mViewHolder.mCheckBox.getVisibility()).isEqualTo(View.GONE);
-        assertThat(mViewHolder.mBottomDivider.getVisibility()).isEqualTo(View.GONE);
         assertThat(mViewHolder.mSubTitleText.getVisibility()).isEqualTo(View.VISIBLE);
         assertThat(mViewHolder.mTwoLineTitleText.getVisibility()).isEqualTo(View.VISIBLE);
         assertThat(mViewHolder.mSubTitleText.getText()).isEqualTo(mContext.getText(
@@ -251,14 +217,13 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
                 LocalMediaManager.MediaDeviceState.STATE_CONNECTING);
         mMediaOutputAdapter.onBindViewHolder(mViewHolder, 0);
 
-        assertThat(mViewHolder.mTitleText.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mViewHolder.mTitleText.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(mViewHolder.mTitleText.getText().toString()).isEqualTo(TEST_DEVICE_NAME_1);
         assertThat(mViewHolder.mSeekBar.getVisibility()).isEqualTo(View.GONE);
         assertThat(mViewHolder.mSubTitleText.getVisibility()).isEqualTo(View.GONE);
         assertThat(mViewHolder.mCheckBox.getVisibility()).isEqualTo(View.GONE);
-        assertThat(mViewHolder.mBottomDivider.getVisibility()).isEqualTo(View.GONE);
         assertThat(mViewHolder.mProgressBar.getVisibility()).isEqualTo(View.VISIBLE);
-        assertThat(mViewHolder.mTwoLineTitleText.getVisibility()).isEqualTo(View.VISIBLE);
-        assertThat(mViewHolder.mTwoLineTitleText.getText()).isEqualTo(TEST_DEVICE_NAME_1);
+        assertThat(mViewHolder.mTwoLineLayout.getVisibility()).isEqualTo(View.GONE);
     }
 
     @Test
@@ -271,7 +236,6 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
         assertThat(mViewHolder.mTwoLineLayout.getVisibility()).isEqualTo(View.GONE);
         assertThat(mViewHolder.mProgressBar.getVisibility()).isEqualTo(View.GONE);
         assertThat(mViewHolder.mCheckBox.getVisibility()).isEqualTo(View.GONE);
-        assertThat(mViewHolder.mBottomDivider.getVisibility()).isEqualTo(View.GONE);
         assertThat(mViewHolder.mTitleText.getVisibility()).isEqualTo(View.VISIBLE);
         assertThat(mViewHolder.mTitleText.getText()).isEqualTo(TEST_DEVICE_NAME_1);
     }
@@ -282,7 +246,7 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
         mMediaOutputAdapter.onBindViewHolder(mViewHolder, 2);
         mViewHolder.mContainerLayout.performClick();
 
-        verify(mMediaOutputController).launchBluetoothPairing();
+        verify(mMediaOutputController).launchBluetoothPairing(mViewHolder.mContainerLayout);
     }
 
     @Test

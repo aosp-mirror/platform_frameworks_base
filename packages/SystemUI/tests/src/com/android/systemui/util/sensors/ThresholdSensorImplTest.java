@@ -380,7 +380,7 @@ public class ThresholdSensorImplTest extends SysuiTestCase {
         int mCallCount;
 
         @Override
-        public void onThresholdCrossed(ThresholdSensor.ThresholdSensorEvent event) {
+        public void onThresholdCrossed(ThresholdSensorEvent event) {
             mBelow = event.getBelow();
             mTimestampNs = event.getTimestampNs();
             mCallCount++;

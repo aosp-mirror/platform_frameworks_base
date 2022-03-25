@@ -63,7 +63,7 @@ public class ColorFiltersMutateActivity extends Activity {
                 "uniform shader bitmapShader;\n"
                 + "uniform float param1;\n"
                 + "half4 main(float2 xy) {\n"
-                + "  return half4(sample(bitmapShader, xy).rgb, param1);\n"
+                + "  return half4(bitmapShader.eval(xy).rgb, param1);\n"
                 + "}\n";
 
         BitmapsView(Context c) {
@@ -83,8 +83,8 @@ public class ColorFiltersMutateActivity extends Activity {
             mBlendPaint = new Paint();
             mBlendPaint.setColorFilter(new PorterDuffColorFilter(0, PorterDuff.Mode.SRC_OVER));
 
-            mRuntimeShader = new RuntimeShader(sSkSL, false);
-            mRuntimeShader.setUniform("param1", mShaderParam1);
+            mRuntimeShader = new RuntimeShader(sSkSL);
+            mRuntimeShader.setFloatUniform("param1", mShaderParam1);
             mRuntimeShader.setInputShader("bitmapShader", new BitmapShader(mBitmap1,
                                                                            Shader.TileMode.CLAMP,
                                                                            Shader.TileMode.CLAMP));
@@ -177,7 +177,7 @@ public class ColorFiltersMutateActivity extends Activity {
 
         public void setShaderParam1(float value) {
             mShaderParam1 = value;
-            mRuntimeShader.setUniform("param1", mShaderParam1);
+            mRuntimeShader.setFloatUniform("param1", mShaderParam1);
             invalidate();
         }
 

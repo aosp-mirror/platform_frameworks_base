@@ -249,6 +249,28 @@ public class CompoundFormulaTest {
     }
 
     @Test
+    public void testIsAppCertificateLineageFormula_false() {
+        CompoundFormula compoundFormula =
+                new CompoundFormula(
+                        CompoundFormula.AND, Arrays.asList(ATOMIC_FORMULA_1, ATOMIC_FORMULA_2));
+
+        assertThat(compoundFormula.isAppCertificateLineageFormula()).isFalse();
+    }
+
+    @Test
+    public void testIsAppCertificateLineageFormula_true() {
+        AtomicFormula appCertFormula =
+                new AtomicFormula.StringAtomicFormula(AtomicFormula.APP_CERTIFICATE_LINEAGE,
+                        "app.cert", /* isHashed= */false);
+        CompoundFormula compoundFormula =
+                new CompoundFormula(
+                        CompoundFormula.AND,
+                        Arrays.asList(ATOMIC_FORMULA_1, ATOMIC_FORMULA_2, appCertFormula));
+
+        assertThat(compoundFormula.isAppCertificateLineageFormula()).isTrue();
+    }
+
+    @Test
     public void testIsInstallerFormula_false() {
         CompoundFormula compoundFormula =
                 new CompoundFormula(
@@ -288,6 +310,7 @@ public class CompoundFormulaTest {
         return new AppInstallMetadata.Builder()
                 .setPackageName("abc")
                 .setAppCertificates(Collections.singletonList("abc"))
+                .setAppCertificateLineage(Collections.singletonList("abc"))
                 .setInstallerCertificates(Collections.singletonList("abc"))
                 .setInstallerName("abc")
                 .setVersionCode(-1)

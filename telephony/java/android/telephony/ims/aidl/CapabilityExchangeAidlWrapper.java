@@ -81,6 +81,26 @@ public class CapabilityExchangeAidlWrapper implements CapabilityExchangeEventLis
     }
 
     /**
+     * Receives the status of changes in the publishing connection from ims service
+     * and deliver this callback to the framework.
+     */
+    public void onPublishUpdated(int reasonCode, @NonNull String reasonPhrase,
+            int reasonHeaderCause, @NonNull String reasonHeaderText) throws ImsException {
+        ICapabilityExchangeEventListener listener = mListenerBinder;
+        if (listener == null) {
+            return;
+        }
+        try {
+            listener.onPublishUpdated(reasonCode, reasonPhrase,
+                    reasonHeaderCause, reasonHeaderText);
+        } catch (RemoteException e) {
+            Log.w(LOG_TAG, "onPublishUpdated exception: " + e);
+            throw new ImsException("Remote is not available",
+                    ImsException.CODE_ERROR_SERVICE_UNAVAILABLE);
+        }
+    }
+
+    /**
      * Receives the callback of the remote capability request from the network and deliver this
      * request to the framework.
      */

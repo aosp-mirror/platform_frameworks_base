@@ -196,16 +196,19 @@ public final class MediaSessionManager {
 
     /**
      * Gets the media key event session, which would receive a media key event unless specified.
+     * <p>
+     * This requires the {@link android.Manifest.permission#MEDIA_CONTENT_CONTROL}
+     * permission be held by the calling app, or the app has an enabled notification listener
+     * using the {@link NotificationListenerService} APIs. If none of them applies, it will throw
+     * a {@link SecurityException}.
+     *
      * @return The media key event session, which would receive key events by default, unless
      *          the caller has specified the target. Can be {@code null}.
-     * @hide
      */
-    @SystemApi
-    @RequiresPermission(value = android.Manifest.permission.MEDIA_CONTENT_CONTROL)
     @Nullable
     public MediaSession.Token getMediaKeyEventSession() {
         try {
-            return mService.getMediaKeyEventSession();
+            return mService.getMediaKeyEventSession(mContext.getPackageName());
         } catch (RemoteException ex) {
             Log.e(TAG, "Failed to get media key event session", ex);
         }
@@ -214,20 +217,25 @@ public final class MediaSessionManager {
 
     /**
      * Gets the package name of the media key event session.
+     * <p>
+     * This requires the {@link android.Manifest.permission#MEDIA_CONTENT_CONTROL}
+     * permission be held by the calling app, or the app has an enabled notification listener
+     * using the {@link NotificationListenerService} APIs. If none of them applies, it will throw
+     * a {@link SecurityException}.
+     *
      * @return The package name of the media key event session or the last session's media button
-     *          receiver if the media key event session is {@code null}.
+     *          receiver if the media key event session is {@code null}. Returns an empty string
+     *          if neither of them exists.
      * @see #getMediaKeyEventSession()
-     * @hide
      */
-    @SystemApi
-    @RequiresPermission(value = android.Manifest.permission.MEDIA_CONTENT_CONTROL)
     @NonNull
     public String getMediaKeyEventSessionPackageName() {
         try {
-            String packageName = mService.getMediaKeyEventSessionPackageName();
+            String packageName = mService.getMediaKeyEventSessionPackageName(
+                    mContext.getPackageName());
             return (packageName != null) ? packageName : "";
         } catch (RemoteException ex) {
-            Log.e(TAG, "Failed to get media key event session", ex);
+            Log.e(TAG, "Failed to get media key event session package name", ex);
         }
         return "";
     }
@@ -599,7 +607,7 @@ public final class MediaSessionManager {
      */
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public void dispatchMediaKeyEventAsSystemService(@NonNull KeyEvent keyEvent) {
-        dispatchMediaKeyEventInternal(keyEvent, /*asSystemService=*/true, /*needWakeLock=*/false);
+        dispatchMediaKeyEventInternal(keyEvent, /*asSystemService=*/true, /*needWakeLock=*/true);
     }
 
     private void dispatchMediaKeyEventInternal(KeyEvent keyEvent, boolean asSystemService,
@@ -894,14 +902,16 @@ public final class MediaSessionManager {
     }
 
     /**
-     * Add a {@link OnMediaKeyEventSessionChangedListener}.
+     * Add a listener to be notified when the media key session is changed.
+     * <p>
+     * This requires the {@link android.Manifest.permission#MEDIA_CONTENT_CONTROL}
+     * permission be held by the calling app, or the app has an enabled notification listener
+     * using the {@link NotificationListenerService} APIs. If none of them applies, it will throw
+     * a {@link SecurityException}.
      *
-     * @param executor The executor on which the listener should be invoked
+     * @param executor The executor on which the listener should be invoked.
      * @param listener A {@link OnMediaKeyEventSessionChangedListener}.
-     * @hide
      */
-    @SystemApi
-    @RequiresPermission(value = android.Manifest.permission.MEDIA_CONTENT_CONTROL)
     public void addOnMediaKeyEventSessionChangedListener(
             @NonNull @CallbackExecutor Executor executor,
             @NonNull OnMediaKeyEventSessionChangedListener listener) {
@@ -909,40 +919,37 @@ public final class MediaSessionManager {
         Objects.requireNonNull(listener, "listener shouldn't be null");
         synchronized (mLock) {
             try {
+                if (mMediaKeyEventSessionChangedCallbacks.isEmpty()) {
+                    mService.addOnMediaKeyEventSessionChangedListener(
+                            mOnMediaKeyEventSessionChangedListenerStub, mContext.getPackageName());
+                }
                 mMediaKeyEventSessionChangedCallbacks.put(listener, executor);
                 executor.execute(
                         () -> listener.onMediaKeyEventSessionChanged(
                                 mCurMediaKeyEventSessionPackage, mCurMediaKeyEventSession));
-                if (mMediaKeyEventSessionChangedCallbacks.size() == 1) {
-                    mService.addOnMediaKeyEventSessionChangedListener(
-                            mOnMediaKeyEventSessionChangedListenerStub);
-                }
             } catch (RemoteException e) {
-                Log.e(TAG, "Failed to set media key listener", e);
+                Log.e(TAG, "Failed to add MediaKeyEventSessionChangedListener", e);
             }
         }
     }
 
     /**
-     * Remove a {@link OnMediaKeyEventSessionChangedListener}.
+     * Stop receiving updates on media key event session change on the specified listener.
      *
      * @param listener A {@link OnMediaKeyEventSessionChangedListener}.
-     * @hide
      */
-    @SystemApi
-    @RequiresPermission(value = android.Manifest.permission.MEDIA_CONTENT_CONTROL)
     public void removeOnMediaKeyEventSessionChangedListener(
             @NonNull OnMediaKeyEventSessionChangedListener listener) {
         Objects.requireNonNull(listener, "listener shouldn't be null");
         synchronized (mLock) {
             try {
-                mMediaKeyEventSessionChangedCallbacks.remove(listener);
-                if (mMediaKeyEventSessionChangedCallbacks.size() == 0) {
+                if (mMediaKeyEventSessionChangedCallbacks.remove(listener) != null
+                        && mMediaKeyEventSessionChangedCallbacks.isEmpty()) {
                     mService.removeOnMediaKeyEventSessionChangedListener(
                             mOnMediaKeyEventSessionChangedListenerStub);
                 }
             } catch (RemoteException e) {
-                Log.e(TAG, "Failed to set media key listener", e);
+                Log.e(TAG, "Failed to remove MediaKeyEventSessionChangedListener", e);
             }
         }
     }
@@ -1124,16 +1131,14 @@ public final class MediaSessionManager {
     /**
      * Listener to receive changes in the media key event session, which would receive a media key
      * event unless specified.
-     * @hide
      */
-    @SystemApi
     public interface OnMediaKeyEventSessionChangedListener {
         /**
          * Called when the media key session is changed to the given media session. The key event
          * session is the media session which would receive key event by default, unless the caller
          * has specified the target.
          * <p>
-         * The session token can be {@link null} if the media button session is unset. In that case,
+         * The session token can be {@code null} if the media button session is unset. In that case,
          * packageName will return the package name of the last session's media button receiver, or
          * an empty string if the last session didn't set a media button receiver.
          *

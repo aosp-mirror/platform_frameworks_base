@@ -69,6 +69,8 @@ import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
 import com.android.server.uri.UriGrantsManagerInternal;
 
+import dalvik.annotation.optimization.NeverCompile;
+
 import java.io.PrintWriter;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -193,12 +195,21 @@ public final class NotificationRecord {
     private boolean mHasSentValidMsg;
     private boolean mAppDemotedFromConvo;
     private boolean mPkgAllowedAsConvo;
+    private boolean mImportanceFixed;
     /**
      * Whether this notification (and its channels) should be considered user locked. Used in
      * conjunction with user sentiment calculation.
      */
     private boolean mIsAppImportanceLocked;
     private ArraySet<Uri> mGrantableUris;
+
+    // Storage for phone numbers that were found to be associated with
+    // contacts in this notification.
+    private ArraySet<String> mPhoneNumbers;
+
+    // Whether this notification record should have an update logged the next time notifications
+    // are sorted.
+    private boolean mPendingLogUpdate = false;
 
     public NotificationRecord(Context context, StatusBarNotification sbn,
             NotificationChannel channel) {
@@ -458,6 +469,7 @@ public final class NotificationRecord {
             rv.getPackage(), rv.getLayoutId(), rv.estimateMemoryUsage(), rv.toString());
     }
 
+    @NeverCompile // Avoid size overhead of debugging code.
     void dump(PrintWriter pw, String prefix, Context baseContext, boolean redact) {
         final Notification notification = getSbn().getNotification();
         pw.println(prefix + this);
@@ -466,6 +478,7 @@ public final class NotificationRecord {
         pw.println(prefix + "opPkg=" + getSbn().getOpPkg());
         pw.println(prefix + "icon=" + notification.getSmallIcon());
         pw.println(prefix + "flags=0x" + Integer.toHexString(notification.flags));
+        pw.println(prefix + "originalFlags=0x" + Integer.toHexString(mOriginalFlags));
         pw.println(prefix + "pri=" + notification.priority);
         pw.println(prefix + "key=" + getSbn().getKey());
         pw.println(prefix + "seen=" + mStats.hasSeen());
@@ -532,6 +545,7 @@ public final class NotificationRecord {
         if (notification == null) {
             pw.println(prefix + "None");
             return;
+
         }
         pw.println(prefix + "fullscreenIntent=" + notification.fullScreenIntent);
         pw.println(prefix + "contentIntent=" + notification.contentIntent);
@@ -585,7 +599,8 @@ public final class NotificationRecord {
                     pw.println("null");
                 } else {
                     pw.print(val.getClass().getSimpleName());
-                    if (redact && (val instanceof CharSequence || val instanceof String)) {
+                    if (redact && (val instanceof CharSequence) && shouldRedactStringExtra(key)) {
+                        pw.print(String.format(" [length=%d]", ((CharSequence) val).length()));
                         // redact contents from bugreports
                     } else if (val instanceof Bitmap) {
                         pw.print(String.format(" (%dx%d)",
@@ -608,6 +623,19 @@ public final class NotificationRecord {
                 }
             }
             pw.println(prefix + "}");
+        }
+    }
+
+    private boolean shouldRedactStringExtra(String key) {
+        if (key == null) return true;
+        switch (key) {
+            // none of these keys contain user-related information; they do not need to be redacted
+            case Notification.EXTRA_SUBSTITUTE_APP_NAME:
+            case Notification.EXTRA_TEMPLATE:
+            case "android.support.v4.app.extra.COMPAT_TEMPLATE":
+                return false;
+            default:
+                return true;
         }
     }
 
@@ -648,17 +676,23 @@ public final class NotificationRecord {
                     final ArrayList<String> people =
                             adjustment.getSignals().getStringArrayList(Adjustment.KEY_PEOPLE);
                     setPeopleOverride(people);
+                    EventLogTags.writeNotificationAdjusted(
+                            getKey(), Adjustment.KEY_PEOPLE, people.toString());
                 }
                 if (signals.containsKey(Adjustment.KEY_SNOOZE_CRITERIA)) {
                     final ArrayList<SnoozeCriterion> snoozeCriterionList =
                             adjustment.getSignals().getParcelableArrayList(
                                     Adjustment.KEY_SNOOZE_CRITERIA);
                     setSnoozeCriteria(snoozeCriterionList);
+                    EventLogTags.writeNotificationAdjusted(getKey(), Adjustment.KEY_SNOOZE_CRITERIA,
+                            snoozeCriterionList.toString());
                 }
                 if (signals.containsKey(Adjustment.KEY_GROUP_KEY)) {
                     final String groupOverrideKey =
                             adjustment.getSignals().getString(Adjustment.KEY_GROUP_KEY);
                     setOverrideGroupKey(groupOverrideKey);
+                    EventLogTags.writeNotificationAdjusted(getKey(), Adjustment.KEY_GROUP_KEY,
+                            groupOverrideKey);
                 }
                 if (signals.containsKey(Adjustment.KEY_USER_SENTIMENT)) {
                     // Only allow user sentiment update from assistant if user hasn't already
@@ -667,27 +701,42 @@ public final class NotificationRecord {
                             && (getChannel().getUserLockedFields() & USER_LOCKED_IMPORTANCE) == 0) {
                         setUserSentiment(adjustment.getSignals().getInt(
                                 Adjustment.KEY_USER_SENTIMENT, USER_SENTIMENT_NEUTRAL));
+                        EventLogTags.writeNotificationAdjusted(getKey(),
+                                Adjustment.KEY_USER_SENTIMENT,
+                                Integer.toString(getUserSentiment()));
                     }
                 }
                 if (signals.containsKey(Adjustment.KEY_CONTEXTUAL_ACTIONS)) {
                     setSystemGeneratedSmartActions(
                             signals.getParcelableArrayList(Adjustment.KEY_CONTEXTUAL_ACTIONS));
+                    EventLogTags.writeNotificationAdjusted(getKey(),
+                            Adjustment.KEY_CONTEXTUAL_ACTIONS,
+                            getSystemGeneratedSmartActions().toString());
                 }
                 if (signals.containsKey(Adjustment.KEY_TEXT_REPLIES)) {
                     setSmartReplies(signals.getCharSequenceArrayList(Adjustment.KEY_TEXT_REPLIES));
+                    EventLogTags.writeNotificationAdjusted(getKey(), Adjustment.KEY_TEXT_REPLIES,
+                            getSmartReplies().toString());
                 }
                 if (signals.containsKey(Adjustment.KEY_IMPORTANCE)) {
                     int importance = signals.getInt(Adjustment.KEY_IMPORTANCE);
                     importance = Math.max(IMPORTANCE_UNSPECIFIED, importance);
                     importance = Math.min(IMPORTANCE_HIGH, importance);
                     setAssistantImportance(importance);
+                    EventLogTags.writeNotificationAdjusted(getKey(), Adjustment.KEY_IMPORTANCE,
+                            Integer.toString(importance));
                 }
                 if (signals.containsKey(Adjustment.KEY_RANKING_SCORE)) {
                     mRankingScore = signals.getFloat(Adjustment.KEY_RANKING_SCORE);
+                    EventLogTags.writeNotificationAdjusted(getKey(), Adjustment.KEY_RANKING_SCORE,
+                            Float.toString(mRankingScore));
                 }
                 if (signals.containsKey(Adjustment.KEY_NOT_CONVERSATION)) {
                     mIsNotConversationOverride = signals.getBoolean(
                             Adjustment.KEY_NOT_CONVERSATION);
+                    EventLogTags.writeNotificationAdjusted(getKey(),
+                            Adjustment.KEY_NOT_CONVERSATION,
+                            Boolean.toString(mIsNotConversationOverride));
                 }
                 if (!signals.isEmpty() && adjustment.getIssuer() != null) {
                     mAdjustmentIssuer = adjustment.getIssuer();
@@ -784,6 +833,14 @@ public final class NotificationRecord {
         return mAssistantImportance;
     }
 
+    public void setImportanceFixed(boolean fixed) {
+        mImportanceFixed = fixed;
+    }
+
+    public boolean isImportanceFixed() {
+        return mImportanceFixed;
+    }
+
     /**
      * Recalculates the importance of the record after fields affecting importance have changed,
      * and records an explanation.
@@ -795,8 +852,7 @@ public final class NotificationRecord {
         // Consider Notification Assistant and system overrides to importance. If both, system wins.
         if (!getChannel().hasUserSetImportance()
                 && mAssistantImportance != IMPORTANCE_UNSPECIFIED
-                && !getChannel().isImportanceLockedByOEM()
-                && !getChannel().isImportanceLockedByCriticalDeviceFunction()) {
+                && !mImportanceFixed) {
             mImportance = mAssistantImportance;
             mImportanceExplanationCode = MetricsEvent.IMPORTANCE_EXPLANATION_ASST;
         }
@@ -1116,6 +1172,10 @@ public final class NotificationRecord {
 
     public boolean isInterruptive() {
         return mIsInterruptive;
+    }
+
+    public boolean isTextChanged() {
+        return mTextChanged;
     }
 
     /** Returns the time the notification audibly alerted the user. */
@@ -1476,6 +1536,44 @@ public final class NotificationRecord {
 
     StatusBarNotification getSbn() {
         return sbn;
+    }
+
+    /**
+     * Returns whether this record's ranking score is approximately equal to otherScore
+     * (the difference must be within 0.0001).
+     */
+    public boolean rankingScoreMatches(float otherScore) {
+        return Math.abs(mRankingScore - otherScore) < 0.0001;
+    }
+
+    protected void setPendingLogUpdate(boolean pendingLogUpdate) {
+        mPendingLogUpdate = pendingLogUpdate;
+    }
+
+    // If a caller of this function subsequently logs the update, they should also call
+    // setPendingLogUpdate to false to make sure other callers don't also do so.
+    protected boolean hasPendingLogUpdate() {
+        return mPendingLogUpdate;
+    }
+
+    /**
+     * Merge the given set of phone numbers into the list of phone numbers that
+     * are cached on this notification record.
+     */
+    public void mergePhoneNumbers(ArraySet<String> phoneNumbers) {
+        // if the given phone numbers are null or empty then don't do anything
+        if (phoneNumbers == null || phoneNumbers.size() == 0) {
+            return;
+        }
+        // initialize if not already
+        if (mPhoneNumbers == null) {
+            mPhoneNumbers = new ArraySet<>();
+        }
+        mPhoneNumbers.addAll(phoneNumbers);
+    }
+
+    public ArraySet<String> getPhoneNumbers() {
+        return mPhoneNumbers;
     }
 
     @VisibleForTesting

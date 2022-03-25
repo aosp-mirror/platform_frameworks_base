@@ -21,16 +21,13 @@ import android.os.BatteryUsageStats;
 import android.os.BatteryUsageStatsQuery;
 import android.os.Process;
 import android.os.UidBatteryConsumer;
-import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.SparseArray;
 
-import java.util.List;
-
 public class WakelockPowerCalculator extends PowerCalculator {
     private static final String TAG = "WakelockPowerCalculator";
-    private static final boolean DEBUG = BatteryStatsHelper.DEBUG;
+    private static final boolean DEBUG = PowerCalculator.DEBUG;
     private final UsageBasedPowerEstimator mPowerEstimator;
 
     private static class PowerAndDuration {
@@ -41,6 +38,11 @@ public class WakelockPowerCalculator extends PowerCalculator {
     public WakelockPowerCalculator(PowerProfile profile) {
         mPowerEstimator = new UsageBasedPowerEstimator(
                 profile.getAveragePower(PowerProfile.POWER_CPU_IDLE));
+    }
+
+    @Override
+    public boolean isPowerComponentSupported(@BatteryConsumer.PowerComponent int powerComponent) {
+        return powerComponent == BatteryConsumer.POWER_COMPONENT_WAKELOCK;
     }
 
     @Override
@@ -60,8 +62,10 @@ public class WakelockPowerCalculator extends PowerCalculator {
                     BatteryStats.STATS_SINCE_CHARGED);
             app.setUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_WAKELOCK, result.durationMs)
                     .setConsumedPower(BatteryConsumer.POWER_COMPONENT_WAKELOCK, result.powerMah);
-            totalAppDurationMs += result.durationMs;
-            appPowerMah += result.powerMah;
+            if (!app.isVirtualUid()) {
+                totalAppDurationMs += result.durationMs;
+                appPowerMah += result.powerMah;
+            }
 
             if (app.getUid() == Process.ROOT_UID) {
                 osBatteryConsumer = app;
@@ -100,42 +104,6 @@ public class WakelockPowerCalculator extends PowerCalculator {
                         appPowerMah);
     }
 
-    @Override
-    public void calculate(List<BatterySipper> sippers, BatteryStats batteryStats,
-            long rawRealtimeUs, long rawUptimeUs, int statsType, SparseArray<UserHandle> asUsers) {
-        final PowerAndDuration result = new PowerAndDuration();
-        BatterySipper osSipper = null;
-        double osPowerMah = 0;
-        long osDurationMs = 0;
-        long totalAppDurationMs = 0;
-        for (int i = sippers.size() - 1; i >= 0; i--) {
-            final BatterySipper app = sippers.get(i);
-            if (app.drainType == BatterySipper.DrainType.APP) {
-                calculateApp(result, app.uidObj, rawRealtimeUs, statsType);
-                app.wakeLockTimeMs = result.durationMs;
-                app.wakeLockPowerMah = result.powerMah;
-                totalAppDurationMs += result.durationMs;
-
-                if (app.getUid() == Process.ROOT_UID) {
-                    osSipper = app;
-                    osPowerMah = result.powerMah;
-                    osDurationMs = result.durationMs;
-                }
-            }
-        }
-
-        // The device has probably been awake for longer than the screen on
-        // time and application wake lock time would account for.  Assign
-        // this remainder to the OS, if possible.
-        if (osSipper != null) {
-            calculateRemaining(result, batteryStats, rawRealtimeUs, rawUptimeUs, statsType,
-                    osPowerMah, osDurationMs, totalAppDurationMs);
-            osSipper.wakeLockTimeMs = result.durationMs;
-            osSipper.wakeLockPowerMah = result.powerMah;
-            osSipper.sumPower();
-        }
-    }
-
     private void calculateApp(PowerAndDuration result, BatteryStats.Uid u, long rawRealtimeUs,
             int statsType) {
         long wakeLockTimeUs = 0;
@@ -158,7 +126,7 @@ public class WakelockPowerCalculator extends PowerCalculator {
         result.powerMah = mPowerEstimator.calculatePower(result.durationMs);
         if (DEBUG && result.powerMah != 0) {
             Log.d(TAG, "UID " + u.getUid() + ": wake " + result.durationMs
-                    + " power=" + formatCharge(result.powerMah));
+                    + " power=" + BatteryStats.formatCharge(result.powerMah));
         }
     }
 
@@ -170,7 +138,8 @@ public class WakelockPowerCalculator extends PowerCalculator {
         if (wakeTimeMillis > 0) {
             final double power = mPowerEstimator.calculatePower(wakeTimeMillis);
             if (DEBUG) {
-                Log.d(TAG, "OS wakeLockTime " + wakeTimeMillis + " power " + formatCharge(power));
+                Log.d(TAG, "OS wakeLockTime " + wakeTimeMillis
+                        + " power " + BatteryStats.formatCharge(power));
             }
             result.durationMs = osDurationMs + wakeTimeMillis;
             result.powerMah = osPowerMah + power;

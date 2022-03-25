@@ -24,6 +24,7 @@ import dalvik.system.DelegateLastClassLoader;
 import dalvik.system.DexClassLoader;
 import dalvik.system.PathClassLoader;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -80,31 +81,46 @@ public class ClassLoaderFactory {
      */
     public static ClassLoader createClassLoader(String dexPath,
             String librarySearchPath, ClassLoader parent, String classloaderName,
-            List<ClassLoader> sharedLibraries) {
+            List<ClassLoader> sharedLibraries, List<ClassLoader> sharedLibrariesLoadedAfter) {
         ClassLoader[] arrayOfSharedLibraries = (sharedLibraries == null)
                 ? null
                 : sharedLibraries.toArray(new ClassLoader[sharedLibraries.size()]);
+        ClassLoader[] arrayOfSharedLibrariesLoadedAfterApp = (sharedLibrariesLoadedAfter == null)
+                ? null
+                : sharedLibrariesLoadedAfter.toArray(
+                        new ClassLoader[sharedLibrariesLoadedAfter.size()]);
         if (isPathClassLoaderName(classloaderName)) {
-            return new PathClassLoader(dexPath, librarySearchPath, parent, arrayOfSharedLibraries);
+            return new PathClassLoader(dexPath, librarySearchPath, parent, arrayOfSharedLibraries,
+                    arrayOfSharedLibrariesLoadedAfterApp);
         } else if (isDelegateLastClassLoaderName(classloaderName)) {
             return new DelegateLastClassLoader(dexPath, librarySearchPath, parent,
-                    arrayOfSharedLibraries);
+                    arrayOfSharedLibraries, arrayOfSharedLibrariesLoadedAfterApp);
         }
 
         throw new AssertionError("Invalid classLoaderName: " + classloaderName);
     }
 
     /**
-     * Same as {@code createClassLoader} below, but passes a null list of shared
-     * libraries.
+     * Same as {@code createClassLoader} below, but passes a null list of shared libraries. This
+     * method is used only to load platform classes (i.e. those in framework.jar or services.jar),
+     * and MUST NOT be used for loading untrusted classes, especially the app classes. For the
+     * latter case, use the below method which accepts list of shared libraries so that the classes
+     * don't have unlimited access to all shared libraries.
      */
     public static ClassLoader createClassLoader(String dexPath,
             String librarySearchPath, String libraryPermittedPath, ClassLoader parent,
             int targetSdkVersion, boolean isNamespaceShared, String classLoaderName) {
-        return createClassLoader(dexPath, librarySearchPath, libraryPermittedPath,
-            parent, targetSdkVersion, isNamespaceShared, classLoaderName, null, null);
-    }
+        // b/205164833: allow framework classes to have access to all public vendor libraries.
+        // This is because those classes are part of the platform and don't have an app manifest
+        // where required libraries can be specified using the <uses-native-library> tag.
+        // Note that this still does not give access to "private" vendor libraries.
+        List<String> nativeSharedLibraries = new ArrayList<>();
+        nativeSharedLibraries.add("ALL");
 
+        return createClassLoader(dexPath, librarySearchPath, libraryPermittedPath,
+            parent, targetSdkVersion, isNamespaceShared, classLoaderName, null,
+            nativeSharedLibraries, null);
+    }
 
     /**
      * Create a ClassLoader and initialize a linker-namespace for it.
@@ -112,10 +128,11 @@ public class ClassLoaderFactory {
     public static ClassLoader createClassLoader(String dexPath,
             String librarySearchPath, String libraryPermittedPath, ClassLoader parent,
             int targetSdkVersion, boolean isNamespaceShared, String classLoaderName,
-            List<ClassLoader> sharedLibraries, List<String> nativeSharedLibraries) {
+            List<ClassLoader> sharedLibraries, List<String> nativeSharedLibraries,
+            List<ClassLoader> sharedLibrariesAfter) {
 
         final ClassLoader classLoader = createClassLoader(dexPath, librarySearchPath, parent,
-                classLoaderName, sharedLibraries);
+                classLoaderName, sharedLibraries, sharedLibrariesAfter);
 
         String sonameList = "";
         if (nativeSharedLibraries != null) {

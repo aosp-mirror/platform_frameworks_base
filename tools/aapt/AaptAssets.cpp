@@ -319,12 +319,10 @@ int AaptLocaleValue::initFromDirName(const Vector<String8>& parts, const int sta
 
             // The second subtag can either be a script or a region code.
             // If its size is 4, it's a script code, else it's a region code.
-            bool hasRegion = false;
             if (subtags[1].size() == 4) {
                 setScript(subtags[1]);
             } else if (subtags[1].size() == 2 || subtags[1].size() == 3) {
                 setRegion(subtags[1]);
-                hasRegion = true;
             } else {
                 fprintf(stderr, "ERROR: Invalid BCP 47 tag in directory name %s\n", part.string());
                 return -1;

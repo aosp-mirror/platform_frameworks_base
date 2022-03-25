@@ -112,17 +112,6 @@ public final class CellIdentityCdma extends CellIdentity {
         updateGlobalCellId();
     }
 
-    /** @hide */
-    public CellIdentityCdma(@NonNull android.hardware.radio.V1_0.CellIdentityCdma cid) {
-        this(cid.networkId, cid.systemId, cid.baseStationId, cid.longitude, cid.latitude, "", "");
-    }
-
-    /** @hide */
-    public CellIdentityCdma(@NonNull android.hardware.radio.V1_2.CellIdentityCdma cid) {
-        this(cid.base.networkId, cid.base.systemId, cid.base.baseStationId, cid.base.longitude,
-                cid.base.latitude, cid.operatorNames.alphaLong, cid.operatorNames.alphaShort);
-    }
-
     private CellIdentityCdma(@NonNull CellIdentityCdma cid) {
         this(cid.mNetworkId, cid.mSystemId, cid.mBasestationId, cid.mLongitude, cid.mLatitude,
                 cid.mAlphaLong, cid.mAlphaShort);

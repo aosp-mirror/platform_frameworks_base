@@ -22,10 +22,9 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-import android.media.AudioAttributes;
-import android.os.UserHandle;
+import android.os.VibrationAttributes;
+import android.os.VibrationEffect;
 import android.os.Vibrator;
-import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Gravity;
@@ -68,10 +67,8 @@ public class SlidingTab extends ViewGroup {
     private boolean mHoldLeftOnTransition = true;
     private boolean mHoldRightOnTransition = true;
 
-    private static final AudioAttributes VIBRATION_ATTRIBUTES = new AudioAttributes.Builder()
-            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-            .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
-            .build();
+    private static final VibrationAttributes TOUCH_VIBRATION_ATTRIBUTES =
+            VibrationAttributes.createForUsage(VibrationAttributes.USAGE_TOUCH);
 
     private OnTriggerListener mOnTriggerListener;
     private int mGrabbedState = OnTriggerListener.NO_HANDLE;
@@ -834,16 +831,12 @@ public class SlidingTab extends ViewGroup {
      * Triggers haptic feedback.
      */
     private synchronized void vibrate(long duration) {
-        final boolean hapticEnabled = Settings.System.getIntForUser(
-                mContext.getContentResolver(), Settings.System.HAPTIC_FEEDBACK_ENABLED, 1,
-                UserHandle.USER_CURRENT) != 0;
-        if (hapticEnabled) {
-            if (mVibrator == null) {
-                mVibrator = (android.os.Vibrator) getContext()
-                        .getSystemService(Context.VIBRATOR_SERVICE);
-            }
-            mVibrator.vibrate(duration, VIBRATION_ATTRIBUTES);
+        if (mVibrator == null) {
+            mVibrator = getContext().getSystemService(Vibrator.class);
         }
+        mVibrator.vibrate(
+                VibrationEffect.createOneShot(duration, VibrationEffect.DEFAULT_AMPLITUDE),
+                TOUCH_VIBRATION_ATTRIBUTES);
     }
 
     /**

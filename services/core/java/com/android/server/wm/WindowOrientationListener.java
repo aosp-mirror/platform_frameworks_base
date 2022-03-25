@@ -1167,6 +1167,10 @@ public abstract class WindowOrientationListener {
                 if (mRotationResolverService == null) {
                     mRotationResolverService = LocalServices.getService(
                             RotationResolverInternal.class);
+                    if (mRotationResolverService == null) {
+                        finalizeRotation(reportedRotation);
+                        return;
+                    }
                 }
 
                 String packageName = null;

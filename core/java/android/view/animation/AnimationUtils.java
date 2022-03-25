@@ -190,6 +190,8 @@ public class AnimationUtils {
                 anim = new TranslateAnimation(c, attrs);
             } else if (name.equals("cliprect")) {
                 anim = new ClipRectAnimation(c, attrs);
+            } else if (name.equals("extend")) {
+                anim = new ExtendAnimation(c, attrs);
             } else {
                 throw new RuntimeException("Unknown animation name: " + parser.getName());
             }

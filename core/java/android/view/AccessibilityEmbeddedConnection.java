@@ -63,7 +63,6 @@ final class AccessibilityEmbeddedConnection extends IAccessibilityEmbeddedConnec
                     viewRootImpl.mContext);
             viewRootImpl.mAttachInfo.mLeashedParentToken = null;
             viewRootImpl.mAttachInfo.mLeashedParentAccessibilityViewId = View.NO_ID;
-            viewRootImpl.mAttachInfo.mLocationInParentDisplay.set(0, 0);
             if (accessibilityManager.isEnabled()) {
                 accessibilityManager.disassociateEmbeddedHierarchy(viewRootImpl.mLeashToken);
             }

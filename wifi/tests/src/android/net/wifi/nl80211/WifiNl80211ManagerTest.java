@@ -1137,6 +1137,26 @@ public class WifiNl80211ManagerTest {
         assertEquals(capaExpected, capaActual);
     }
 
+    /**
+     * Tests notifyCountryCodeChanged
+     */
+    @Test
+    public void testNotifyCountryCodeChanged() throws Exception {
+        doNothing().when(mWificond).notifyCountryCodeChanged();
+        mWificondControl.notifyCountryCodeChanged(TEST_COUNTRY_CODE);
+        verify(mWificond).notifyCountryCodeChanged();
+    }
+
+    /**
+     * Tests notifyCountryCodeChanged with RemoteException
+     */
+    @Test(expected = RuntimeException.class)
+    public void testNotifyCountryCodeChangedRemoteException() throws Exception {
+        doThrow(new RemoteException()).when(mWificond).notifyCountryCodeChanged();
+        mWificondControl.notifyCountryCodeChanged(TEST_COUNTRY_CODE);
+        verify(mWificond).notifyCountryCodeChanged();
+    }
+
     // Create a ArgumentMatcher which captures a SingleScanSettings parameter and checks if it
     // matches the provided frequency set and ssid set.
     private class ScanMatcher implements ArgumentMatcher<SingleScanSettings> {

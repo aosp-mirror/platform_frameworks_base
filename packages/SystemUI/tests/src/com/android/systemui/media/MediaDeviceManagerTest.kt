@@ -30,6 +30,8 @@ import com.android.settingslib.media.LocalMediaManager
 import com.android.settingslib.media.MediaDevice
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.media.muteawait.MediaMuteAwaitConnectionManager
+import com.android.systemui.media.muteawait.MediaMuteAwaitConnectionManagerFactory
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.time.FakeSystemClock
 
@@ -44,6 +46,7 @@ import org.mockito.ArgumentCaptor
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.Mockito.any
+import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
@@ -56,6 +59,7 @@ private const val PACKAGE = "PKG"
 private const val SESSION_KEY = "SESSION_KEY"
 private const val SESSION_TITLE = "SESSION_TITLE"
 private const val DEVICE_NAME = "DEVICE_NAME"
+private const val REMOTE_DEVICE_NAME = "REMOTE_DEVICE_NAME"
 private const val USER_ID = 0
 
 private fun <T> eq(value: T): T = Mockito.eq(value) ?: value
@@ -70,6 +74,8 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
     @Mock private lateinit var lmmFactory: LocalMediaManagerFactory
     @Mock private lateinit var lmm: LocalMediaManager
     @Mock private lateinit var mr2: MediaRouter2Manager
+    @Mock private lateinit var muteAwaitFactory: MediaMuteAwaitConnectionManagerFactory
+    @Mock private lateinit var muteAwaitManager: MediaMuteAwaitConnectionManager
     private lateinit var fakeFgExecutor: FakeExecutor
     private lateinit var fakeBgExecutor: FakeExecutor
     @Mock private lateinit var dumpster: DumpManager
@@ -87,23 +93,46 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
     fun setUp() {
         fakeFgExecutor = FakeExecutor(FakeSystemClock())
         fakeBgExecutor = FakeExecutor(FakeSystemClock())
-        manager = MediaDeviceManager(controllerFactory, lmmFactory, mr2, fakeFgExecutor,
-                fakeBgExecutor, dumpster)
+        manager = MediaDeviceManager(
+                controllerFactory,
+                lmmFactory,
+                mr2,
+                muteAwaitFactory,
+                fakeFgExecutor,
+                fakeBgExecutor,
+                dumpster
+        )
         manager.addListener(listener)
 
         // Configure mocks.
         whenever(device.name).thenReturn(DEVICE_NAME)
         whenever(device.iconWithoutBackground).thenReturn(icon)
         whenever(lmmFactory.create(PACKAGE)).thenReturn(lmm)
+        whenever(muteAwaitFactory.create(lmm)).thenReturn(muteAwaitManager)
         whenever(lmm.getCurrentConnectedDevice()).thenReturn(device)
         whenever(mr2.getRoutingSessionForMediaController(any())).thenReturn(route)
 
         // Create a media sesssion and notification for testing.
         session = MediaSession(context, SESSION_KEY)
 
-        mediaData = MediaData(USER_ID, true, 0, PACKAGE, null, null, SESSION_TITLE, null,
-            emptyList(), emptyList(), PACKAGE, session.sessionToken, clickIntent = null,
-            device = null, active = true, resumeAction = null)
+        mediaData = MediaData(
+                userId = USER_ID,
+                initialized = true,
+                backgroundColor = 0,
+                app = PACKAGE,
+                appIcon = null,
+                artist = null,
+                song = SESSION_TITLE,
+                artwork = null,
+                actions = emptyList(),
+                actionsToShowInCompact = emptyList(),
+                packageName = PACKAGE,
+                token = session.sessionToken,
+                clickIntent = null,
+                device = null,
+                active = true,
+                resumeAction = null)
+
         whenever(controllerFactory.create(session.sessionToken))
                 .thenReturn(controller)
     }
@@ -130,6 +159,7 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
         manager.onMediaDataRemoved(KEY)
         fakeBgExecutor.runAllReady()
         verify(lmm).unregisterCallback(any())
+        verify(muteAwaitManager).stopListening()
     }
 
     @Test
@@ -153,6 +183,7 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
         fakeFgExecutor.runAllReady()
         // THEN the listener for the old key should removed.
         verify(lmm).unregisterCallback(any())
+        verify(muteAwaitManager).stopListening()
         // AND a new device event emitted
         val data = captureDeviceData(KEY, KEY_OLD)
         assertThat(data.enabled).isTrue()
@@ -195,8 +226,6 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
         // THEN the device should be disabled
         val data = captureDeviceData(KEY)
         assertThat(data.enabled).isFalse()
-        assertThat(data.name).isNull()
-        assertThat(data.icon).isNull()
     }
 
     @Test
@@ -226,6 +255,7 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
         manager.onMediaDataLoaded(KEY, null, mediaData)
         fakeBgExecutor.runAllReady()
         val deviceCallback = captureCallback()
+        verify(muteAwaitManager).startListening()
         // WHEN the device list changes
         deviceCallback.onDeviceListUpdate(mutableListOf(device))
         assertThat(fakeBgExecutor.runAllReady()).isEqualTo(1)
@@ -254,12 +284,71 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
     }
 
     @Test
+    fun onAboutToConnectDeviceChangedWithNonNullParams() {
+        manager.onMediaDataLoaded(KEY, null, mediaData)
+        // Run and reset the executors and listeners so we only focus on new events.
+        fakeBgExecutor.runAllReady()
+        fakeFgExecutor.runAllReady()
+        reset(listener)
+
+        val deviceCallback = captureCallback()
+        // WHEN the about-to-connect device changes to non-null
+        val name = "AboutToConnectDeviceName"
+        val mockIcon = mock(Drawable::class.java)
+        deviceCallback.onAboutToConnectDeviceChanged(name, mockIcon)
+        assertThat(fakeFgExecutor.runAllReady()).isEqualTo(1)
+        // THEN the about-to-connect device is returned
+        val data = captureDeviceData(KEY)
+        assertThat(data.enabled).isTrue()
+        assertThat(data.name).isEqualTo(name)
+        assertThat(data.icon).isEqualTo(mockIcon)
+    }
+
+    @Test
+    fun onAboutToConnectDeviceChangedWithNullParams() {
+        manager.onMediaDataLoaded(KEY, null, mediaData)
+        fakeBgExecutor.runAllReady()
+        val deviceCallback = captureCallback()
+        // First set a non-null about-to-connect device
+        deviceCallback.onAboutToConnectDeviceChanged(
+            "AboutToConnectDeviceName", mock(Drawable::class.java)
+        )
+        // Run and reset the executors and listeners so we only focus on new events.
+        fakeBgExecutor.runAllReady()
+        fakeFgExecutor.runAllReady()
+        reset(listener)
+
+        // WHEN the about-to-connect device changes to null
+        deviceCallback.onAboutToConnectDeviceChanged(null, null)
+        assertThat(fakeFgExecutor.runAllReady()).isEqualTo(1)
+        // THEN the normal device is returned
+        val data = captureDeviceData(KEY)
+        assertThat(data.enabled).isTrue()
+        assertThat(data.name).isEqualTo(DEVICE_NAME)
+        assertThat(data.icon).isEqualTo(icon)
+    }
+
+    @Test
     fun listenerReceivesKeyRemoved() {
         manager.onMediaDataLoaded(KEY, null, mediaData)
         // WHEN the notification is removed
         manager.onMediaDataRemoved(KEY)
         // THEN the listener receives key removed event
         verify(listener).onKeyRemoved(eq(KEY))
+    }
+
+    @Test
+    fun deviceNameFromMR2RouteInfo() {
+        // GIVEN that MR2Manager returns a valid routing session
+        whenever(route.name).thenReturn(REMOTE_DEVICE_NAME)
+        // WHEN a notification is added
+        manager.onMediaDataLoaded(KEY, null, mediaData)
+        fakeBgExecutor.runAllReady()
+        fakeFgExecutor.runAllReady()
+        // THEN it uses the route name (instead of device name)
+        val data = captureDeviceData(KEY)
+        assertThat(data.enabled).isTrue()
+        assertThat(data.name).isEqualTo(REMOTE_DEVICE_NAME)
     }
 
     @Test
@@ -273,8 +362,6 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
         // THEN the device is disabled
         val data = captureDeviceData(KEY)
         assertThat(data.enabled).isFalse()
-        assertThat(data.name).isNull()
-        assertThat(data.icon).isNull()
     }
 
     @Test
@@ -294,8 +381,6 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
         // THEN the device is disabled
         val data = captureDeviceData(KEY)
         assertThat(data.enabled).isFalse()
-        assertThat(data.name).isNull()
-        assertThat(data.icon).isNull()
     }
 
     @Test
@@ -315,8 +400,6 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
         // THEN the device is disabled
         val data = captureDeviceData(KEY)
         assertThat(data.enabled).isFalse()
-        assertThat(data.name).isNull()
-        assertThat(data.icon).isNull()
     }
 
     @Test
@@ -352,6 +435,24 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
         captor.value.onAudioInfoChanged(playbackInfo)
         // THEN the route is not checked
         verify(mr2, never()).getRoutingSessionForMediaController(eq(controller))
+    }
+
+    @Test
+    fun testRemotePlaybackDeviceOverride() {
+        whenever(route.name).thenReturn(DEVICE_NAME)
+        val deviceData = MediaDeviceData(false, null, REMOTE_DEVICE_NAME, null)
+        val mediaDataWithDevice = mediaData.copy(device = deviceData)
+
+        // GIVEN media data that already has a device set
+        manager.onMediaDataLoaded(KEY, null, mediaDataWithDevice)
+        fakeBgExecutor.runAllReady()
+        fakeFgExecutor.runAllReady()
+
+        // THEN we keep the device info, and don't register a listener
+        val data = captureDeviceData(KEY)
+        assertThat(data.enabled).isFalse()
+        assertThat(data.name).isEqualTo(REMOTE_DEVICE_NAME)
+        verify(lmm, never()).registerCallback(any())
     }
 
     fun captureCallback(): LocalMediaManager.DeviceCallback {

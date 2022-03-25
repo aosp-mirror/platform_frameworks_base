@@ -1,1 +1,3 @@
 include /services/core/java/com/android/server/net/OWNERS
+
+per-file SntpClient* = file:/services/core/java/com/android/server/timedetector/OWNERS

@@ -32,11 +32,12 @@ public final class NrQos extends Qos implements Parcelable {
     int fiveQi;
     int averagingWindowMs;
 
-    public NrQos(@NonNull android.hardware.radio.V1_6.NrQos qos) {
-        super(Qos.QOS_TYPE_NR, qos.downlink, qos.uplink);
-        fiveQi = qos.fiveQi;
-        qosFlowId = qos.qfi;
-        averagingWindowMs = qos.averagingWindowMs;
+    public NrQos(QosBandwidth downlink, QosBandwidth uplink, int qosFlowId, int fiveQi,
+            int averagingWindowMs) {
+        super(Qos.QOS_TYPE_NR, downlink, uplink);
+        this.qosFlowId = qosFlowId;
+        this.fiveQi = fiveQi;
+        this.averagingWindowMs = averagingWindowMs;
     }
 
     private NrQos(Parcel source) {

@@ -221,7 +221,7 @@ public:
     sk_sp<SkSurface> onNewSurface(const SkImageInfo&) override { return nullptr; }
     sk_sp<SkImage> onNewImageSnapshot(const SkIRect* bounds) override { return nullptr; }
     T* canvas() { return static_cast<T*>(getCanvas()); }
-    void onCopyOnWrite(ContentChangeMode) override {}
+    bool onCopyOnWrite(ContentChangeMode) override { return true; }
     void onWritePixels(const SkPixmap&, int x, int y) override {}
 };
 }
@@ -382,7 +382,7 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, clip_replace) {
     std::vector<sp<RenderNode>> nodes;
     nodes.push_back(TestUtils::createSkiaNode(
             20, 20, 30, 30, [](RenderProperties& props, SkiaRecordingCanvas& canvas) {
-                canvas.clipRect(0, -20, 10, 30, SkClipOp::kReplace_deprecated);
+                canvas.replaceClipRect_deprecated(0, -20, 10, 30);
                 canvas.drawColor(SK_ColorWHITE, SkBlendMode::kSrcOver);
             }));
 

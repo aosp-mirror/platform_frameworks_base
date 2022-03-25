@@ -160,6 +160,7 @@ public class InterfaceConfiguration implements Parcelable {
         }
     }
 
+    @SuppressWarnings("UnsafeParcelApi")
     public static final @android.annotation.NonNull Creator<InterfaceConfiguration> CREATOR = new Creator<
             InterfaceConfiguration>() {
         public InterfaceConfiguration createFromParcel(Parcel in) {

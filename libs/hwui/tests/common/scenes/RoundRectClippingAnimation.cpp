@@ -21,14 +21,17 @@
 class RoundRectClippingAnimation : public TestScene {
 public:
     int mSpacing, mSize;
+    int mMaxCards;
 
-    RoundRectClippingAnimation(int spacing, int size) : mSpacing(spacing), mSize(size) {}
+    RoundRectClippingAnimation(int spacing, int size, int maxCards = INT_MAX)
+            : mSpacing(spacing), mSize(size), mMaxCards(maxCards) {}
 
     std::vector<sp<RenderNode> > cards;
     void createContent(int width, int height, Canvas& canvas) override {
         canvas.drawColor(0xFFFFFFFF, SkBlendMode::kSrcOver);
         canvas.enableZ(true);
         int ci = 0;
+        int numCards = 0;
 
         for (int x = 0; x < width; x += mSpacing) {
             for (int y = 0; y < height; y += mSpacing) {
@@ -42,6 +45,13 @@ public:
                         });
                 canvas.drawRenderNode(card.get());
                 cards.push_back(card);
+                ++numCards;
+                if (numCards >= mMaxCards) {
+                    break;
+                }
+            }
+            if (numCards >= mMaxCards) {
+                break;
             }
         }
 
@@ -70,4 +80,23 @@ static TestScene::Registrar _RoundRectClippingCpu(TestScene::Info{
         "A bunch of RenderNodes with round rect clipping outlines that's CPU limited.",
         [](const TestScene::Options&) -> test::TestScene* {
             return new RoundRectClippingAnimation(dp(20), dp(20));
+        }});
+
+static TestScene::Registrar _RoundRectClippingGrid(TestScene::Info{
+        "roundRectClipping-grid", "A grid of RenderNodes with round rect clipping outlines.",
+        [](const TestScene::Options&) -> test::TestScene* {
+            return new RoundRectClippingAnimation(dp(100), dp(80));
+        }});
+
+static TestScene::Registrar _RoundRectClippingSingle(TestScene::Info{
+        "roundRectClipping-single", "A single RenderNodes with round rect clipping outline.",
+        [](const TestScene::Options&) -> test::TestScene* {
+            return new RoundRectClippingAnimation(dp(100), dp(80), 1);
+        }});
+
+static TestScene::Registrar _RoundRectClippingSingleLarge(TestScene::Info{
+        "roundRectClipping-singlelarge",
+        "A single large RenderNodes with round rect clipping outline.",
+        [](const TestScene::Options&) -> test::TestScene* {
+            return new RoundRectClippingAnimation(dp(100), dp(350), 1);
         }});

@@ -1,18 +1,6 @@
 # Haptics
-per-file CombinedVibrationEffect.aidl = michaelwr@google.com
-per-file CombinedVibrationEffect.java = michaelwr@google.com
-per-file ExternalVibration.aidl = michaelwr@google.com
-per-file ExternalVibration.java = michaelwr@google.com
-per-file IExternalVibrationController.aidl = michaelwr@google.com
-per-file IExternalVibratorService.aidl = michaelwr@google.com
-per-file IVibratorManagerService.aidl = michaelwr@google.com
-per-file NullVibrator.java = michaelwr@google.com
-per-file SystemVibrator.java = michaelwr@google.com
-per-file SystemVibratorManager.java = michaelwr@google.com
-per-file VibrationEffect.aidl = michaelwr@google.com
-per-file VibrationEffect.java = michaelwr@google.com
-per-file Vibrator.java = michaelwr@google.com
-per-file VibratorManager.java = michaelwr@google.com
+per-file *Vibration* = file:/services/core/java/com/android/server/vibrator/OWNERS
+per-file *Vibrator* = file:/services/core/java/com/android/server/vibrator/OWNERS
 
 # PowerManager
 per-file IPowerManager.aidl = michaelwr@google.com, santoscordon@google.com
@@ -22,9 +10,8 @@ per-file PowerManagerInternal.java = michaelwr@google.com, santoscordon@google.c
 # BatteryStats
 per-file *BatteryConsumer* = file:/BATTERY_STATS_OWNERS
 per-file BatteryManager* = file:/BATTERY_STATS_OWNERS
-per-file BatteryStats* = file:/BATTERY_STATS_OWNERS
-per-file BatteryUsageStats* = file:/BATTERY_STATS_OWNERS
 per-file PowerComponents.java = file:/BATTERY_STATS_OWNERS
+per-file *Stats* = file:/BATTERY_STATS_OWNERS
 
 # Multiuser
 per-file IUser* = file:/MULTIUSER_OWNERS
@@ -65,8 +52,17 @@ per-file *Power* = file:/services/core/java/com/android/server/power/OWNERS
 per-file *Telephony* = file:/telephony/OWNERS
 per-file *Zygote* = file:/ZYGOTE_OWNERS
 
+# Time
+per-file *Clock* = file:/services/core/java/com/android/server/timezonedetector/OWNERS
+
 # RecoverySystem
 per-file *Recovery* = file:/services/core/java/com/android/server/recoverysystem/OWNERS
 
 # Bugreporting
 per-file Bugreport* = file:/platform/frameworks/native:/cmds/dumpstate/OWNERS
+
+# UpdateEngine
+per-file *UpdateEngine* = file:/platform/system/update_engine:/OWNERS
+
+# VINTF
+per-file Vintf* = file:/platform/system/libvintf:/OWNERS

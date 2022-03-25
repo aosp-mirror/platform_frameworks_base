@@ -20,36 +20,31 @@ import android.app.Instrumentation
 import android.content.Intent
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
-import androidx.test.filters.FlakyTest
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.server.wm.flicker.FlickerBuilderProvider
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.entireScreenCovered
 import com.android.server.wm.flicker.helpers.WindowUtils
-import com.android.server.wm.flicker.helpers.isRotated
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
-import com.android.server.wm.flicker.navBarLayerIsAlwaysVisible
+import com.android.server.wm.flicker.navBarLayerIsVisible
 import com.android.server.wm.flicker.navBarLayerRotatesAndScales
-import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
-import com.android.server.wm.flicker.noUncoveredRegions
-import com.android.server.wm.flicker.repetitions
+import com.android.server.wm.flicker.navBarWindowIsVisible
 import com.android.server.wm.flicker.rules.RemoveAllTasksButHomeRule.Companion.removeAllTasksButHome
-import com.android.server.wm.flicker.startRotation
-import com.android.server.wm.flicker.statusBarLayerIsAlwaysVisible
+import com.android.server.wm.flicker.statusBarLayerIsVisible
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
-import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
+import com.android.server.wm.flicker.statusBarWindowIsVisible
 import com.android.wm.shell.flicker.helpers.PipAppHelper
 import com.android.wm.shell.flicker.testapp.Components
 import org.junit.Test
 
 abstract class PipTransition(protected val testSpec: FlickerTestParameter) {
     protected val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
-    protected val isRotated = testSpec.config.startRotation.isRotated()
     protected val pipApp = PipAppHelper(instrumentation)
-    protected val displayBounds = WindowUtils.getDisplayBounds(testSpec.config.startRotation)
+    protected val displayBounds = WindowUtils.getDisplayBounds(testSpec.startRotation)
     protected val broadcastActionTrigger = BroadcastActionTrigger(instrumentation)
-    protected abstract val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
+    protected abstract val transition: FlickerBuilder.() -> Unit
     // Helper class to process test actions by broadcast.
     protected class BroadcastActionTrigger(private val instrumentation: Instrumentation) {
         private fun createIntentWithAction(broadcastAction: String): Intent {
@@ -59,13 +54,6 @@ abstract class PipTransition(protected val testSpec: FlickerTestParameter) {
         fun doAction(broadcastAction: String) {
             instrumentation.context
                 .sendBroadcast(createIntentWithAction(broadcastAction))
-        }
-
-        fun requestOrientationForPip(orientation: Int) {
-            instrumentation.context.sendBroadcast(
-                    createIntentWithAction(Components.PipActivity.ACTION_SET_REQUESTED_ORIENTATION)
-                    .putExtra(Components.PipActivity.EXTRA_PIP_ORIENTATION, orientation.toString())
-            )
         }
 
         companion object {
@@ -82,16 +70,14 @@ abstract class PipTransition(protected val testSpec: FlickerTestParameter) {
     @FlickerBuilderProvider
     fun buildFlicker(): FlickerBuilder {
         return FlickerBuilder(instrumentation).apply {
-            withTestName { testSpec.name }
-            repeat { testSpec.config.repetitions }
-            transition(this, testSpec.config)
+            transition(this)
         }
     }
 
     /**
      * Gets a configuration that handles basic setup and teardown of pip tests
      */
-    protected val setupAndTeardown: FlickerBuilder.(Map<String, Any?>) -> Unit
+    protected val setupAndTeardown: FlickerBuilder.() -> Unit
         get() = {
             setup {
                 test {
@@ -122,23 +108,22 @@ abstract class PipTransition(protected val testSpec: FlickerTestParameter) {
     protected open fun buildTransition(
         eachRun: Boolean,
         stringExtras: Map<String, String> = mapOf(Components.PipActivity.EXTRA_ENTER_PIP to "true"),
-        extraSpec: FlickerBuilder.(Map<String, Any?>) -> Unit = {}
-    ): FlickerBuilder.(Map<String, Any?>) -> Unit {
-        return { configuration ->
-            setupAndTeardown(this, configuration)
+        extraSpec: FlickerBuilder.() -> Unit = {}
+    ): FlickerBuilder.() -> Unit {
+        return {
+            setupAndTeardown(this)
 
             setup {
                 test {
-                    removeAllTasksButHome()
                     if (!eachRun) {
-                        pipApp.launchViaIntent(wmHelper, stringExtras = stringExtras)
-                        wmHelper.waitFor { it.wmState.hasPipWindow() }
+                        pipApp.launchViaIntentAndWaitForPip(wmHelper, stringExtras = stringExtras)
+                        wmHelper.waitPipShown()
                     }
                 }
                 eachRun {
                     if (eachRun) {
-                        pipApp.launchViaIntent(wmHelper, stringExtras = stringExtras)
-                        wmHelper.waitFor { it.wmState.hasPipWindow() }
+                        pipApp.launchViaIntentAndWaitForPip(wmHelper, stringExtras = stringExtras)
+                        wmHelper.waitPipShown()
                     }
                 }
             }
@@ -152,42 +137,38 @@ abstract class PipTransition(protected val testSpec: FlickerTestParameter) {
                     if (!eachRun) {
                         pipApp.exit(wmHelper)
                     }
-                    removeAllTasksButHome()
                 }
             }
 
-            extraSpec(this, configuration)
+            extraSpec(this)
         }
     }
 
     @Presubmit
     @Test
-    open fun navBarWindowIsAlwaysVisible() = testSpec.navBarWindowIsAlwaysVisible()
+    open fun navBarWindowIsVisible() = testSpec.navBarWindowIsVisible()
 
     @Presubmit
     @Test
-    open fun statusBarWindowIsAlwaysVisible() = testSpec.statusBarWindowIsAlwaysVisible()
-
-    @FlakyTest
-    @Test
-    open fun navBarLayerIsAlwaysVisible() = testSpec.navBarLayerIsAlwaysVisible()
-
-    @FlakyTest
-    @Test
-    open fun statusBarLayerIsAlwaysVisible() = testSpec.statusBarLayerIsAlwaysVisible()
+    open fun statusBarWindowIsVisible() = testSpec.statusBarWindowIsVisible()
 
     @Presubmit
     @Test
-    open fun navBarLayerRotatesAndScales() =
-        testSpec.navBarLayerRotatesAndScales(testSpec.config.startRotation, Surface.ROTATION_0)
+    open fun navBarLayerIsVisible() = testSpec.navBarLayerIsVisible()
 
     @Presubmit
     @Test
-    open fun statusBarLayerRotatesScales() =
-        testSpec.statusBarLayerRotatesScales(testSpec.config.startRotation, Surface.ROTATION_0)
+    open fun statusBarLayerIsVisible() = testSpec.statusBarLayerIsVisible()
 
     @Presubmit
     @Test
-    open fun noUncoveredRegions() =
-        testSpec.noUncoveredRegions(testSpec.config.startRotation, Surface.ROTATION_0)
+    open fun navBarLayerRotatesAndScales() = testSpec.navBarLayerRotatesAndScales()
+
+    @Presubmit
+    @Test
+    open fun statusBarLayerRotatesScales() = testSpec.statusBarLayerRotatesScales()
+
+    @Presubmit
+    @Test
+    open fun entireScreenCovered() = testSpec.entireScreenCovered()
 }

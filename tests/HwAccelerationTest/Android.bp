@@ -25,7 +25,17 @@ package {
 
 android_test {
     name: "HwAccelerationTest",
-    srcs: ["**/*.java"],
+    jni_libs: [
+        "libhwaccelerationtest_jni",
+    ],
+    srcs: [
+        "**/*.java",
+        "**/*.kt",
+    ],
+    static_libs: [
+        "androidx.cardview_cardview",
+    ],
+
     platform_apis: true,
     certificate: "platform",
 }

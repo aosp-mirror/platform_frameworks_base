@@ -469,7 +469,7 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(RenderNodeDrawable, projectionHwLayer) {
         }
         SkCanvas* onNewCanvas() override { return new ProjectionTestCanvas(mDrawCounter); }
         sk_sp<SkSurface> onNewSurface(const SkImageInfo&) override { return nullptr; }
-        void onCopyOnWrite(ContentChangeMode) override {}
+        bool onCopyOnWrite(ContentChangeMode) override { return true; }
         int* mDrawCounter;
         void onWritePixels(const SkPixmap&, int x, int y) {}
     };

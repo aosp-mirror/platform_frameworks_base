@@ -18,26 +18,21 @@ package com.android.settingslib.net;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.usage.NetworkStats;
 import android.app.usage.NetworkStatsManager;
 import android.content.Context;
-import android.net.INetworkStatsSession;
-import android.net.NetworkStatsHistory;
 import android.net.NetworkTemplate;
 import android.os.RemoteException;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
-import android.text.format.DateUtils;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -47,14 +42,14 @@ import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.shadows.ShadowSubscriptionManager;
 
+import java.util.Set;
+
 @RunWith(RobolectricTestRunner.class)
 public class DataUsageControllerTest {
 
     private static final String SUB_ID = "Test Subscriber";
     private static final String SUB_ID_2 = "Test Subscriber 2";
 
-    @Mock
-    private INetworkStatsSession mSession;
     @Mock
     private TelephonyManager mTelephonyManager;
     @Mock
@@ -68,7 +63,6 @@ public class DataUsageControllerTest {
     private NetworkTemplate mWifiNetworkTemplate;
 
     private DataUsageController mController;
-    private NetworkStatsHistory mNetworkStatsHistory;
     private final int mDefaultSubscriptionId = 1234;
 
     @Before
@@ -80,17 +74,16 @@ public class DataUsageControllerTest {
                 .thenReturn(mSubscriptionManager);
         when(mContext.getSystemService(NetworkStatsManager.class)).thenReturn(mNetworkStatsManager);
         mController = new DataUsageController(mContext);
-        mNetworkStatsHistory = spy(
-                new NetworkStatsHistory(DateUtils.DAY_IN_MILLIS /* bucketDuration */));
-        doReturn(mNetworkStatsHistory)
-                .when(mSession).getHistoryForNetwork(any(NetworkTemplate.class), anyInt());
         ShadowSubscriptionManager.setDefaultDataSubscriptionId(mDefaultSubscriptionId);
         doReturn(SUB_ID).when(mTelephonyManager).getSubscriberId();
 
-        mNetworkTemplate = NetworkTemplate.buildTemplateCarrierMetered(SUB_ID);
-        mNetworkTemplate2 = NetworkTemplate.buildTemplateCarrierMetered(SUB_ID_2);
-        mWifiNetworkTemplate = NetworkTemplate.buildTemplateWifi(
-                NetworkTemplate.WIFI_NETWORKID_ALL, null);
+        mNetworkTemplate = new NetworkTemplate.Builder(NetworkTemplate.MATCH_CARRIER)
+                .setMeteredness(android.net.NetworkStats.METERED_YES)
+                .setSubscriberIds(Set.of(SUB_ID)).build();
+        mNetworkTemplate2 = new NetworkTemplate.Builder(NetworkTemplate.MATCH_CARRIER)
+                .setMeteredness(android.net.NetworkStats.METERED_YES)
+                .setSubscriberIds(Set.of(SUB_ID_2)).build();
+        mWifiNetworkTemplate = new NetworkTemplate.Builder(NetworkTemplate.MATCH_WIFI).build();
     }
 
     @Test

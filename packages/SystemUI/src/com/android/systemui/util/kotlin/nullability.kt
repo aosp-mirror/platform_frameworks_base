@@ -16,7 +16,14 @@
 
 package com.android.systemui.util.kotlin
 
+import java.util.Optional
+
 /**
  * If [value] is not null, then returns block(value). Otherwise returns null.
  */
 inline fun <T : Any, R> transform(value: T?, block: (T) -> R): R? = value?.let(block)
+
+/**
+ * Assists type-checking to unpack a Java Optional into T?
+ */
+inline fun <T> Optional<T>.getOrNull(): T? = orElse(null)

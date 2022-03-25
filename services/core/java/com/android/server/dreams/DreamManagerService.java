@@ -87,13 +87,15 @@ public final class DreamManagerService extends SystemService {
     private Binder mCurrentDreamToken;
     private ComponentName mCurrentDreamName;
     private int mCurrentDreamUserId;
-    private boolean mCurrentDreamIsTest;
+    private boolean mCurrentDreamIsPreview;
     private boolean mCurrentDreamCanDoze;
     private boolean mCurrentDreamIsDozing;
     private boolean mCurrentDreamIsWaking;
     private boolean mForceAmbientDisplayEnabled;
     private int mCurrentDreamDozeScreenState = Display.STATE_UNKNOWN;
     private int mCurrentDreamDozeScreenBrightness = PowerManager.BRIGHTNESS_DEFAULT;
+
+    private ComponentName mDreamOverlayServiceName;
 
     private AmbientDisplayConfiguration mDozeConfig;
 
@@ -167,7 +169,7 @@ public final class DreamManagerService extends SystemService {
         pw.println("mCurrentDreamToken=" + mCurrentDreamToken);
         pw.println("mCurrentDreamName=" + mCurrentDreamName);
         pw.println("mCurrentDreamUserId=" + mCurrentDreamUserId);
-        pw.println("mCurrentDreamIsTest=" + mCurrentDreamIsTest);
+        pw.println("mCurrentDreamIsPreview=" + mCurrentDreamIsPreview);
         pw.println("mCurrentDreamCanDoze=" + mCurrentDreamCanDoze);
         pw.println("mCurrentDreamIsDozing=" + mCurrentDreamIsDozing);
         pw.println("mCurrentDreamIsWaking=" + mCurrentDreamIsWaking);
@@ -188,7 +190,7 @@ public final class DreamManagerService extends SystemService {
 
     private boolean isDreamingInternal() {
         synchronized (mLock) {
-            return mCurrentDreamToken != null && !mCurrentDreamIsTest
+            return mCurrentDreamToken != null && !mCurrentDreamIsPreview
                     && !mCurrentDreamIsWaking;
         }
     }
@@ -233,7 +235,7 @@ public final class DreamManagerService extends SystemService {
 
     private void testDreamInternal(ComponentName dream, int userId) {
         synchronized (mLock) {
-            startDreamLocked(dream, true /*isTest*/, false /*canDoze*/, userId);
+            startDreamLocked(dream, true /*isPreviewMode*/, false /*canDoze*/, userId);
         }
     }
 
@@ -242,7 +244,7 @@ public final class DreamManagerService extends SystemService {
         final ComponentName dream = chooseDreamForUser(doze, userId);
         if (dream != null) {
             synchronized (mLock) {
-                startDreamLocked(dream, false /*isTest*/, doze, userId);
+                startDreamLocked(dream, false /*isPreviewMode*/, doze, userId);
             }
         }
     }
@@ -393,10 +395,10 @@ public final class DreamManagerService extends SystemService {
     }
 
     private void startDreamLocked(final ComponentName name,
-            final boolean isTest, final boolean canDoze, final int userId) {
+            final boolean isPreviewMode, final boolean canDoze, final int userId) {
         if (!mCurrentDreamIsWaking
                 && Objects.equals(mCurrentDreamName, name)
-                && mCurrentDreamIsTest == isTest
+                && mCurrentDreamIsPreview == isPreviewMode
                 && mCurrentDreamCanDoze == canDoze
                 && mCurrentDreamUserId == userId) {
             Slog.i(TAG, "Already in target dream.");
@@ -410,18 +412,20 @@ public final class DreamManagerService extends SystemService {
         final Binder newToken = new Binder();
         mCurrentDreamToken = newToken;
         mCurrentDreamName = name;
-        mCurrentDreamIsTest = isTest;
+        mCurrentDreamIsPreview = isPreviewMode;
         mCurrentDreamCanDoze = canDoze;
         mCurrentDreamUserId = userId;
+
+        if (!mCurrentDreamName.equals(mAmbientDisplayComponent)) {
+            mUiEventLogger.log(DreamManagerEvent.DREAM_START);
+        }
 
         PowerManager.WakeLock wakeLock = mPowerManager
                 .newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "startDream");
         mHandler.post(wakeLock.wrap(() -> {
             mAtmInternal.notifyDreamStateChanged(true);
-            if (!mCurrentDreamName.equals(mAmbientDisplayComponent)) {
-                mUiEventLogger.log(DreamManagerEvent.DREAM_START);
-            }
-            mController.startDream(newToken, name, isTest, canDoze, userId, wakeLock);
+            mController.startDream(newToken, name, isPreviewMode, canDoze, userId, wakeLock,
+                    mDreamOverlayServiceName);
         }));
     }
 
@@ -453,7 +457,7 @@ public final class DreamManagerService extends SystemService {
         }
         mCurrentDreamToken = null;
         mCurrentDreamName = null;
-        mCurrentDreamIsTest = false;
+        mCurrentDreamIsPreview = false;
         mCurrentDreamCanDoze = false;
         mCurrentDreamUserId = 0;
         mCurrentDreamIsWaking = false;
@@ -463,7 +467,9 @@ public final class DreamManagerService extends SystemService {
         }
         mCurrentDreamDozeScreenState = Display.STATE_UNKNOWN;
         mCurrentDreamDozeScreenBrightness = PowerManager.BRIGHTNESS_DEFAULT;
-        mAtmInternal.notifyDreamStateChanged(false);
+        mHandler.post(() -> {
+            mAtmInternal.notifyDreamStateChanged(false);
+        });
     }
 
     private void checkPermission(String permission) {
@@ -481,14 +487,15 @@ public final class DreamManagerService extends SystemService {
     }
 
     private static String componentsToString(ComponentName[] componentNames) {
+        if (componentNames == null) {
+            return null;
+        }
         StringBuilder names = new StringBuilder();
-        if (componentNames != null) {
-            for (ComponentName componentName : componentNames) {
-                if (names.length() > 0) {
-                    names.append(',');
-                }
-                names.append(componentName.flattenToString());
+        for (ComponentName componentName : componentNames) {
+            if (names.length() > 0) {
+                names.append(',');
             }
+            names.append(componentName.flattenToString());
         }
         return names.toString();
     }
@@ -589,6 +596,15 @@ public final class DreamManagerService extends SystemService {
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
+        }
+
+        @Override // Binder call
+        public void registerDreamOverlayService(ComponentName overlayComponent) {
+            checkPermission(android.Manifest.permission.WRITE_DREAM_STATE);
+
+            // Store the overlay service component so that it can be passed to the dream when it is
+            // invoked.
+            mDreamOverlayServiceName = overlayComponent;
         }
 
         @Override // Binder call

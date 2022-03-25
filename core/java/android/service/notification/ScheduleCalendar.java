@@ -20,6 +20,8 @@ import android.service.notification.ZenModeConfig.ScheduleInfo;
 import android.util.ArraySet;
 import android.util.Log;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.util.Calendar;
 import java.util.Objects;
 import java.util.TimeZone;
@@ -92,16 +94,22 @@ public class ScheduleCalendar {
      */
     public long getNextChangeTime(long now) {
         if (mSchedule == null) return 0;
-        final long nextStart = getNextTime(now, mSchedule.startHour, mSchedule.startMinute);
-        final long nextEnd = getNextTime(now, mSchedule.endHour, mSchedule.endMinute);
+        final long nextStart = getNextTime(now, mSchedule.startHour, mSchedule.startMinute, true);
+        final long nextEnd = getNextTime(now, mSchedule.endHour, mSchedule.endMinute, false);
         long nextScheduleTime = Math.min(nextStart, nextEnd);
 
         return nextScheduleTime;
     }
 
-    private long getNextTime(long now, int hr, int min) {
-        final long time = getTime(now, hr, min);
-        return time <= now ? addDays(time, 1) : time;
+    private long getNextTime(long now, int hr, int min, boolean adjust) {
+        // The adjust parameter indicates whether to potentially adjust the time to the closest
+        // actual time if the indicated time is one skipped due to daylight time.
+        final long time = adjust ? getClosestActualTime(now, hr, min) : getTime(now, hr, min);
+        if (time <= now) {
+            final long tomorrow = addDays(time, 1);
+            return adjust ? getClosestActualTime(tomorrow, hr, min) : getTime(tomorrow, hr, min);
+        }
+        return time;
     }
 
     private long getTime(long millis, int hour, int min) {
@@ -119,7 +127,7 @@ public class ScheduleCalendar {
      */
     public boolean isInSchedule(long time) {
         if (mSchedule == null || mDays.size() == 0) return false;
-        final long start = getTime(time, mSchedule.startHour, mSchedule.startMinute);
+        final long start = getClosestActualTime(time, mSchedule.startHour, mSchedule.startMinute);
         long end = getTime(time, mSchedule.endHour, mSchedule.endMinute);
         if (end <= start) {
             end = addDays(end, 1);
@@ -134,7 +142,7 @@ public class ScheduleCalendar {
      */
     public boolean isAlarmInSchedule(long alarm, long now) {
         if (mSchedule == null || mDays.size() == 0) return false;
-        final long start = getTime(alarm, mSchedule.startHour, mSchedule.startMinute);
+        final long start = getClosestActualTime(alarm, mSchedule.startHour, mSchedule.startMinute);
         long end = getTime(alarm, mSchedule.endHour, mSchedule.endMinute);
         if (end <= start) {
             end = addDays(end, 1);
@@ -185,5 +193,42 @@ public class ScheduleCalendar {
         mCalendar.setTimeInMillis(time);
         mCalendar.add(Calendar.DATE, days);
         return mCalendar.getTimeInMillis();
+    }
+
+    /**
+     * This function returns the closest "actual" time to the provided hour/minute relative to the
+     * reference time. For most times this will behave exactly the same as getTime, but for any time
+     * during the hour skipped forward for daylight savings time (for instance, 02:xx when the
+     * clock is set to 03:00 after 01:59), this method will return the time when the clock changes
+     * (in this example, 03:00).
+     *
+     * Assumptions made in this implementation:
+     *   - Time is moved forward on an hour boundary (minute 0) by exactly 1hr when clocks shift
+     *   - a lenient Calendar implementation will interpret 02:xx on a day when 2-3AM is skipped
+     *     as 03:xx
+     *   - The skipped hour is never 11PM / 23:00.
+     *
+     * @hide
+     */
+    @VisibleForTesting
+    public long getClosestActualTime(long refTime, int hour, int min) {
+        long resTime = getTime(refTime, hour, min);
+        if (!mCalendar.getTimeZone().observesDaylightTime()) {
+            // Do nothing if the timezone doesn't observe daylight time at all.
+            return resTime;
+        }
+
+        // Approach to identifying whether the time is "skipped": get the result from starting with
+        // refTime and setting hour and minute, then re-extract the hour and minute of the resulting
+        // moment in time. If the hour is exactly one more than the passed-in hour and the minute is
+        // the same, then the provided hour is likely a skipped one. If the time doesn't fall into
+        // this category, return the unmodified time instead.
+        mCalendar.setTimeInMillis(resTime);
+        int resHr = mCalendar.get(Calendar.HOUR_OF_DAY);
+        int resMin = mCalendar.get(Calendar.MINUTE);
+        if (resHr == hour + 1 && resMin == min) {
+            return getTime(refTime, resHr, 0);
+        }
+        return resTime;
     }
 }

@@ -119,7 +119,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginEnd="@dimen/notification_header_separating_margin"
-                            android:ellipsize="marquee"
+                            android:ellipsize="end"
                             android:fadingEdge="horizontal"
                             android:singleLine="true"
                             android:textAlignment="viewStart"
