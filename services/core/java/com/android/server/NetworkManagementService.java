@@ -1528,7 +1528,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
         if (updateFirewallUidRuleLocked(chain, uid, rule)) {
             final ConnectivityManager cm = mContext.getSystemService(ConnectivityManager.class);
             try {
-                cm.updateFirewallRule(chain, uid, isFirewallRuleAllow(chain, rule));
+                cm.setUidFirewallRule(chain, uid, rule);
             } catch (RuntimeException e) {
                 throw new IllegalStateException(e);
             }
@@ -1599,14 +1599,6 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
             default:
                 throw new IllegalArgumentException("Unknown chain:" + chain);
         }
-    }
-
-    // There are only two type of firewall rule: FIREWALL_RULE_ALLOW or FIREWALL_RULE_DENY.
-    private boolean isFirewallRuleAllow(int chain, int rule) {
-        if (rule == NetworkPolicyManager.FIREWALL_RULE_DEFAULT) {
-            return getFirewallType(chain) == FIREWALL_DENYLIST;
-        }
-        return rule == INetd.FIREWALL_RULE_ALLOW;
     }
 
     private void enforceSystemUid() {
