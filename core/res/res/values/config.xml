@@ -2725,6 +2725,11 @@
     <!-- Whether force to enable telephony new data stack or not -->
     <bool name="config_force_enable_telephony_new_data_stack">true</bool>
 
+    <!-- Whether to adopt the predefined handover policies for IWLAN.
+         {@see CarrierConfigManager#KEY_IWLAN_HANDOVER_POLICY_STRING_ARRAY}
+    -->
+    <bool name="config_enable_iwlan_handover_policy">true</bool>
+
     <!-- Whether WiFi display is supported by this device.
          There are many prerequisites for this feature to work correctly.
          Here are a few of them:
