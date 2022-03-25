@@ -399,7 +399,7 @@ class TvPipKeepClearAlgorithm(private val clock: () -> Long) {
         return stashCandidates.minByOrNull {
             val dx = abs(it.left - bounds.left)
             val dy = abs(it.top - bounds.top)
-            dx * bounds.height() + dy * bounds.width()
+            return@minByOrNull dx + dy
         }!!
     }
 
