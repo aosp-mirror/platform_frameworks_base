@@ -207,7 +207,6 @@ public class IntentForwarderActivity extends Activity  {
             startActivityAsCaller(
                     newIntent,
                     /* options= */ null,
-                    /* permissionToken= */ null,
                     /* ignoreTargetSecurity= */ false,
                     userId);
         } catch (RuntimeException e) {
@@ -231,7 +230,7 @@ public class IntentForwarderActivity extends Activity  {
             return;
         }
         sanitizeIntent(innerIntent);
-        startActivityAsCaller(intentReceived, null, null, false, getUserId());
+        startActivityAsCaller(intentReceived, null, false, getUserId());
         finish();
     }
 
@@ -251,7 +250,7 @@ public class IntentForwarderActivity extends Activity  {
         sanitizeIntent(intentReceived);
         intentReceived.putExtra(EXTRA_SELECTED_PROFILE, selectedProfile);
         intentReceived.putExtra(EXTRA_CALLING_USER, UserHandle.of(callingUserId));
-        startActivityAsCaller(intentReceived, null, null, false, userId);
+        startActivityAsCaller(intentReceived, null, false, userId);
         finish();
     }
 

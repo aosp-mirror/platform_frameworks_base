@@ -1463,7 +1463,7 @@ public class ResolverActivity extends Activity implements
             int userId) {
         // Note: this method will be overridden in the delegate implementation to use the passed-in
         // permission token.
-        startActivityAsCaller(intent, options, null, false, userId);
+        startActivityAsCaller(intent, options, false, userId);
         return true;
     }
 
