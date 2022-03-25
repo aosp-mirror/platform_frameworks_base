@@ -343,6 +343,28 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
         assertThat(mKeyguardStatusBarView.getVisibility()).isEqualTo(View.INVISIBLE);
     }
 
+    @Test
+    public void setAlpha_explicitAlpha_setsExplicitAlpha() {
+        mController.onViewAttached();
+        updateStateToKeyguard();
+
+        mController.setAlpha(0.5f);
+
+        assertThat(mKeyguardStatusBarView.getAlpha()).isEqualTo(0.5f);
+    }
+
+    @Test
+    public void setAlpha_explicitAlpha_thenMinusOneAlpha_setsAlphaBasedOnDefaultCriteria() {
+        mController.onViewAttached();
+        updateStateToKeyguard();
+
+        mController.setAlpha(0.5f);
+        mController.setAlpha(-1f);
+
+        assertThat(mKeyguardStatusBarView.getAlpha()).isGreaterThan(0);
+        assertThat(mKeyguardStatusBarView.getAlpha()).isNotEqualTo(0.5f);
+    }
+
     // TODO(b/195442899): Add more tests for #updateViewState once CLs are finalized.
 
     @Test
