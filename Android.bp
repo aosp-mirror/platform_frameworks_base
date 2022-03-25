@@ -405,6 +405,7 @@ java_library {
     ],
     lint: {
         extra_check_modules: ["AndroidFrameworkLintChecker"],
+        disabled_checks: ["ApiMightLeakAppVisibility"],
     },
     errorprone: {
         javacflags: [
