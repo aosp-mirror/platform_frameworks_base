@@ -31,13 +31,13 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
-import android.window.TaskSnapshot;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.SystemClock;
 import android.platform.test.annotations.Presubmit;
 import android.util.ArraySet;
 import android.view.Surface;
+import android.window.TaskSnapshot;
 
 import androidx.test.filters.MediumTest;
 
@@ -83,6 +83,12 @@ public class TaskSnapshotPersisterLoaderTest extends TaskSnapshotPersisterTestBa
         assertEquals(TEST_INSETS, snapshot.getContentInsets());
         assertNotNull(snapshot.getSnapshot());
         assertEquals(Configuration.ORIENTATION_PORTRAIT, snapshot.getOrientation());
+
+        snapshot.getHardwareBuffer().close();
+        mPersister.persistSnapshot(1, mTestUserId, snapshot);
+        mPersister.waitForQueueEmpty();
+        assertTrueForFiles(files, file -> !file.exists(),
+                " snapshot files must be removed by invalid buffer");
     }
 
     @Test

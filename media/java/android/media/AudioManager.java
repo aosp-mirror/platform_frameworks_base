@@ -604,6 +604,13 @@ public class AudioManager {
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final int FLAG_FROM_KEY = 1 << 12;
 
+    /**
+     * Indicates that an absolute volume controller is notifying AudioService of a change in the
+     * volume or mute status of an external audio system.
+     * @hide
+     */
+    public static final int FLAG_ABSOLUTE_VOLUME = 1 << 13;
+
     /** @hide */
     @IntDef(prefix = {"ENCODED_SURROUND_OUTPUT_"}, value = {
             ENCODED_SURROUND_OUTPUT_UNKNOWN,
@@ -661,6 +668,7 @@ public class AudioManager {
             FLAG_SHOW_UI_WARNINGS,
             FLAG_SHOW_VIBRATE_HINT,
             FLAG_FROM_KEY,
+            FLAG_ABSOLUTE_VOLUME,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Flags {}
@@ -682,6 +690,7 @@ public class AudioManager {
         FLAG_NAMES.put(FLAG_SHOW_UI_WARNINGS, "FLAG_SHOW_UI_WARNINGS");
         FLAG_NAMES.put(FLAG_SHOW_VIBRATE_HINT, "FLAG_SHOW_VIBRATE_HINT");
         FLAG_NAMES.put(FLAG_FROM_KEY, "FLAG_FROM_KEY");
+        FLAG_NAMES.put(FLAG_ABSOLUTE_VOLUME, "FLAG_ABSOLUTE_VOLUME");
     }
 
     /** @hide */
@@ -8392,6 +8401,12 @@ public class AudioManager {
      * Get the assistants UIDs that been added with the
      * {@link #addAssistantServicesUids(int[])} and not yet removed with
      * {@link #removeAssistantServicesUids(int[])}
+     *
+     * <p> Note that during native audioserver crash and after boot up the list of assistant
+     * UIDs will be reset to an empty list (i.e. no UID will be considered as assistant)
+     * Just after user switch, the list of assistant will also reset to empty.
+     * In both cases,The component's UID of the assistiant role or assistant setting will be
+     * automitically added to the list by the audio service.
      *
      * @return array of assistants UIDs
      *

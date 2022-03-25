@@ -469,6 +469,10 @@ public final class VirtualDeviceManager {
         /**
          * Called when the top activity is changed.
          *
+         * <p>Note: When there are no activities running on the virtual display, the
+         * {@link #onDisplayEmpty(int)} will be called. If the value topActivity is cached, it
+         * should be cleared when {@link #onDisplayEmpty(int)} is called.
+         *
          * @param displayId The display ID on which the activity change happened.
          * @param topActivity The component name of the top activity.
          */

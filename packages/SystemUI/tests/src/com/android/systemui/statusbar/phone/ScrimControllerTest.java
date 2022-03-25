@@ -53,6 +53,7 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dock.DockManager;
+import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.scrim.ScrimView;
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -112,6 +113,8 @@ public class ScrimControllerTest extends SysuiTestCase {
     private ConfigurationController mConfigurationController;
     @Mock
     private ScreenOffAnimationController mScreenOffAnimationController;
+    @Mock
+    private KeyguardUnlockAnimationController mKeyguardUnlockAnimationController;
     // TODO(b/204991468): Use a real PanelExpansionStateManager object once this bug is fixed. (The
     //   event-dispatch-on-registration pattern caused some of these unit tests to fail.)
     @Mock
@@ -229,7 +232,8 @@ public class ScrimControllerTest extends SysuiTestCase {
                 new FakeHandler(mLooper.getLooper()), mKeyguardUpdateMonitor,
                 mDockManager, mConfigurationController, new FakeExecutor(new FakeSystemClock()),
                 mScreenOffAnimationController,
-                mPanelExpansionStateManager);
+                mPanelExpansionStateManager,
+                mKeyguardUnlockAnimationController);
         mScrimController.setScrimVisibleListener(visible -> mScrimVisibility = visible);
         mScrimController.attachViews(mScrimBehind, mNotificationsScrim, mScrimInFront);
         mScrimController.setAnimatorListener(mAnimatorListener);
@@ -1290,6 +1294,33 @@ public class ScrimControllerTest extends SysuiTestCase {
         mScrimController.setTransitionToFullShadeProgress(progress, notifProgress);
 
         assertThat(mNotificationsScrim.getViewAlpha()).isEqualTo(notifProgress);
+    }
+
+    @Test
+    public void setNotificationsOverScrollAmount_setsTranslationYOnNotificationsScrim() {
+        int overScrollAmount = 10;
+
+        mScrimController.setNotificationsOverScrollAmount(overScrollAmount);
+
+        assertThat(mNotificationsScrim.getTranslationY()).isEqualTo(overScrollAmount);
+    }
+
+    @Test
+    public void setNotificationsOverScrollAmount_doesNotSetTranslationYOnBehindScrim() {
+        int overScrollAmount = 10;
+
+        mScrimController.setNotificationsOverScrollAmount(overScrollAmount);
+
+        assertThat(mScrimBehind.getTranslationY()).isEqualTo(0);
+    }
+
+    @Test
+    public void setNotificationsOverScrollAmount_doesNotSetTranslationYOnFrontScrim() {
+        int overScrollAmount = 10;
+
+        mScrimController.setNotificationsOverScrollAmount(overScrollAmount);
+
+        assertThat(mScrimInFront.getTranslationY()).isEqualTo(0);
     }
 
     private void assertAlphaAfterExpansion(ScrimView scrim, float expectedAlpha, float expansion) {

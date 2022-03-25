@@ -171,6 +171,18 @@ public final class MediaMetricsManager {
     }
 
     /**
+     * Creates a generic bundle session.
+     */
+    @NonNull
+    public void releaseSessionId(@NonNull String sessionId) {
+        try {
+            mService.releaseSessionId(sessionId, mUserId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Reports error event.
      * @hide
      */

@@ -33,6 +33,7 @@ import android.util.Log;
 import com.android.systemui.R;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.util.settings.SecureSettings;
@@ -64,6 +65,7 @@ public class QuickAccessWalletController {
     private final Context mContext;
     private final Executor mExecutor;
     private final Executor mCallbackExecutor;
+    private final Executor mBgExecutor;
     private final SecureSettings mSecureSettings;
     private final SystemClock mClock;
 
@@ -80,12 +82,14 @@ public class QuickAccessWalletController {
             Context context,
             @Main Executor executor,
             @CallbackExecutor Executor callbackExecutor,
+            @Background Executor bgExecutor,
             SecureSettings secureSettings,
             QuickAccessWalletClient quickAccessWalletClient,
             SystemClock clock) {
         mContext = context;
         mExecutor = executor;
         mCallbackExecutor = callbackExecutor;
+        mBgExecutor = bgExecutor;
         mSecureSettings = secureSettings;
         mQuickAccessWalletClient = quickAccessWalletClient;
         mClock = clock;
@@ -182,7 +186,7 @@ public class QuickAccessWalletController {
      * Re-create the {@link QuickAccessWalletClient} of the controller.
      */
     public void reCreateWalletClient() {
-        mQuickAccessWalletClient = QuickAccessWalletClient.create(mContext);
+        mQuickAccessWalletClient = QuickAccessWalletClient.create(mContext, mBgExecutor);
         mQawClientCreatedTimeMillis = mClock.elapsedRealtime();
     }
 

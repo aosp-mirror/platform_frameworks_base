@@ -5026,6 +5026,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                 .append(" qsExpandFraction=").append(mQsExpansionFraction)
                 .append(" isCurrentUserSetup=").append(mIsCurrentUserSetup)
                 .append(" hideAmount=").append(mAmbientState.getHideAmount())
+                .append(" ambientStateSwipingUp=").append(mAmbientState.isSwipingUp())
                 .append("]");
         pw.println(sb.toString());
         DumpUtilsKt.withIncreasedIndent(pw, () -> {

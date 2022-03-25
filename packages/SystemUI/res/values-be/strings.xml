@@ -151,10 +151,6 @@
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"Калі вы ўведзяце няправільны ўзор разблакіроўкі яшчэ раз, ваш працоўны профіль і звязаныя з ім даныя будуць выдалены."</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"Калі вы ўведзяце няправільны PIN-код яшчэ раз, ваш працоўны профіль і звязаныя з ім даныя будуць выдалены."</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"Калі вы ўведзяце няправільны пароль яшчэ раз, ваш працоўны профіль і звязаныя з ім даныя будуць выдалены."</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"Занадта шмат няўдалых спроб. Даныя будуць выдалены з гэтай прылады."</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"Занадта шмат няўдалых спроб. Гэты карыстальнік будзе выдалены."</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"Занадта шмат няўдалых спроб. Гэты працоўны профіль і звязаныя з ім даныя будуць выдалены."</string>
-    <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"Адхіліць"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Дакраніцеся да сканера адбіткаў пальцаў"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"Значок адбіткаў пальцаў"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Твар не распазнаны. Скарыстайце адбітак пальца."</string>
@@ -327,17 +323,12 @@
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Ідзе павольная зарадка • Поўны зарад праз <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Ідзе зарадка праз док-станцыю • Поўнасцю зарадзіцца праз <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Перайсці да іншага карыстальніка"</string>
-    <string name="user_add_user" msgid="4336657383006913022">"Дадаць карыстальніка"</string>
-    <string name="user_new_user_name" msgid="2019166282704195789">"Новы карыстальнік"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Выдаліць госця?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Усе праграмы і даныя гэтага сеанса будуць выдалены."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Выдаліць"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"З вяртаннем, госць!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Хочаце працягнуць сеанс?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Пачаць зноў"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Так, працягнуць"</string>
-    <string name="user_add_user_title" msgid="4172327541504825032">"Дадаць новага карыстальніка?"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"Пасля стварэння профілю яго трэба наладзіць.\n\nЛюбы карыстальнік прылады можа абнаўляць праграмы ўсіх іншых карыстальнікаў."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Дасягнуты ліміт карыстальнікаў"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="one">Можна дадаць <xliff:g id="COUNT">%d</xliff:g> карыстальніка.</item>
@@ -465,8 +456,7 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Разблакіраваць для выкарыстання"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Узнікла праблема з загрузкай вашых карт. Паўтарыце спробу пазней"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Налады экрана блакіроўкі"</string>
-    <!-- no translation found for qr_code_scanner_title (5290201053875420785) -->
-    <skip />
+    <string name="qr_code_scanner_title" msgid="5290201053875420785">"Сканіраванне QR-кода"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Працоўны профіль"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Рэжым палёту"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"Вы не пачуеце наступны будзільнік <xliff:g id="WHEN">%1$s</xliff:g>"</string>
@@ -797,9 +787,10 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Правядзіце пальцам, каб убачыць больш інфармацыі"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Загружаюцца рэкамендацыі"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Мультымедыя"</string>
-    <string name="controls_media_close_session" msgid="1193000643003066508">"Схаваць гэты сеанс мультымедыя?"</string>
+    <!-- no translation found for controls_media_close_session (4780485355795635052) -->
+    <skip />
     <string name="controls_media_active_session" msgid="3146882316024153337">"Не ўдалося схаваць бягучы сеанс мультымедыя."</string>
-    <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Адхіліць"</string>
+    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Схаваць"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Узнавіць"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Налады"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"У праграме \"<xliff:g id="APP_LABEL">%3$s</xliff:g>\" прайграецца кампазіцыя \"<xliff:g id="SONG_NAME">%1$s</xliff:g>\", выканаўца – <xliff:g id="ARTIST_NAME">%2$s</xliff:g>"</string>
@@ -817,7 +808,8 @@
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Падыдзіце бліжэй да прылады \"<xliff:g id="DEVICENAME">%1$s</xliff:g>\", каб прайграць на гэтай"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Прайграецца на прыладзе \"<xliff:g id="DEVICENAME">%1$s</xliff:g>\""</string>
     <string name="media_transfer_playing_this_device" msgid="1856890686844499172">"Прайграецца на гэтым тэлефоне"</string>
-    <string name="media_transfer_failed" msgid="2640354446629980227">"Нешта пайшло не так"</string>
+    <!-- no translation found for media_transfer_failed (7955354964610603723) -->
+    <skip />
     <string name="controls_error_timeout" msgid="794197289772728958">"Неактыўна, праверце праграму"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Не знойдзена"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Кіраванне недаступнае"</string>

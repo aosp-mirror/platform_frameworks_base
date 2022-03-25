@@ -865,6 +865,10 @@ public abstract class PanelViewController {
         return mClosing || mIsLaunchAnimationRunning;
     }
 
+    public boolean isFlinging() {
+        return mIsFlinging;
+    }
+
     public boolean isTracking() {
         return mTracking;
     }

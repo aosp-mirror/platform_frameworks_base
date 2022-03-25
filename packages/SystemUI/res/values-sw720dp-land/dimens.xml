@@ -25,5 +25,7 @@
 
     <dimen name="status_bar_header_height_keyguard">56dp</dimen>
 
-    <dimen name="qs_media_session_height_expanded">184dp</dimen>
+    <dimen name="qs_media_session_height_expanded">251dp</dimen>
+
+    <dimen name="lockscreen_shade_max_over_scroll_amount">42dp</dimen>
 </resources>

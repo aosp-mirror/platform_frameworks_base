@@ -630,8 +630,9 @@ public abstract class ActivityManagerInternal {
     /**
      * Delete uid from the ActivityManagerService PendingStartActivityUids list.
      * @param uid uid
+     * @param nowElapsed starting time of updateOomAdj
      */
-    public abstract void deletePendingTopUid(int uid);
+    public abstract void deletePendingTopUid(int uid, long nowElapsed);
 
     /**
      * Is the uid in ActivityManagerService PendingStartActivityUids list?
@@ -682,6 +683,11 @@ public abstract class ActivityManagerInternal {
      * Return the temp allowlist type when server push messaging is over the quota.
      */
     public abstract @TempAllowListType int getPushMessagingOverQuotaBehavior();
+
+    /**
+     * Return the startForeground() grace period after calling startForegroundService().
+     */
+    public abstract int getServiceStartForegroundTimeout();
 
     /**
      * Returns the capability of the given uid
