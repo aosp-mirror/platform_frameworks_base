@@ -2640,7 +2640,17 @@ public class WindowManagerService extends IWindowManager.Stub
 
     void updateWindowLayout(Session session, IWindow client, LayoutParams attrs, int flags,
             ClientWindowFrames clientWindowFrames, int requestedWidth, int requestedHeight) {
-        // TODO(b/161810301): Finish the implementation.
+        final long origId = Binder.clearCallingIdentity();
+        synchronized (mGlobalLock) {
+            final WindowState win = windowForClientLocked(session, client, false);
+            if (win == null) {
+                return;
+            }
+            win.setFrames(clientWindowFrames, requestedWidth, requestedHeight);
+
+            // TODO(b/161810301): Finish the implementation.
+        }
+        Binder.restoreCallingIdentity(origId);
     }
 
     public boolean outOfMemoryWindow(Session session, IWindow client) {
@@ -6304,8 +6314,6 @@ public class WindowManagerService extends IWindowManager.Stub
                         + " callers=" + Debug.getCallers(3));
                 return NAV_BAR_INVALID;
             }
-            displayContent.performLayout(false /* initial */,
-                    false /* updateInputWindows */);
             return displayContent.getDisplayPolicy().getNavBarPosition();
         }
     }

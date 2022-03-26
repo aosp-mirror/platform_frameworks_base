@@ -1552,7 +1552,7 @@ public class DisplayPolicy {
                 win.getRequestedVisibilities(), attachedWindowFrame, win.mGlobalScale,
                 sTmpClientFrames);
 
-        win.setFrames(sTmpClientFrames);
+        win.setFrames(sTmpClientFrames, win.mRequestedWidth, win.mRequestedHeight);
     }
 
     WindowState getTopFullscreenOpaqueWindow() {
