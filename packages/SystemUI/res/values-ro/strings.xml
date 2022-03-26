@@ -781,8 +781,7 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Glisați pentru a vedea mai multe"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Se încarcă recomandările"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Media"</string>
-    <!-- no translation found for controls_media_close_session (4780485355795635052) -->
-    <skip />
+    <string name="controls_media_close_session" msgid="4780485355795635052">"Ascundeți comanda media pentru <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="controls_media_active_session" msgid="3146882316024153337">"Sesiunea media actuală nu se poate ascunde."</string>
     <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Ascunde"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Reia"</string>
@@ -802,8 +801,7 @@
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Mergeți mai aproape de <xliff:g id="DEVICENAME">%1$s</xliff:g> ca să redați acolo"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Se redă pe <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_transfer_playing_this_device" msgid="1856890686844499172">"Se redă pe acest telefon"</string>
-    <!-- no translation found for media_transfer_failed (7955354964610603723) -->
-    <skip />
+    <string name="media_transfer_failed" msgid="7955354964610603723">"A apărut o eroare. Încercați din nou."</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Inactiv, verificați aplicația"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Nu s-a găsit"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Comanda este indisponibilă"</string>

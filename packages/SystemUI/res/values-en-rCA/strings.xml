@@ -775,8 +775,7 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Swipe to see more"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Loading recommendations"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Media"</string>
-    <!-- no translation found for controls_media_close_session (4780485355795635052) -->
-    <skip />
+    <string name="controls_media_close_session" msgid="4780485355795635052">"Hide this media control for <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="controls_media_active_session" msgid="3146882316024153337">"The current media session cannot be hidden."</string>
     <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Hide"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Resume"</string>
@@ -879,7 +878,7 @@
     <string name="see_all_networks" msgid="3773666844913168122">"See all"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"To switch networks, disconnect Ethernet"</string>
     <string name="wifi_scan_notify_message" msgid="3753839537448621794">"To improve device experience, apps and services can still scan for Wi‑Fi networks at any time, even when Wi‑Fi is off. You can change this in Wi‑Fi scanning settings. "<annotation id="link">"Change"</annotation></string>
-    <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Turn off aeroplane mode"</string>
+    <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Turn off Airplane mode"</string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> wants to add the following tile to Quick Settings"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Add tile"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Do not add tile"</string>

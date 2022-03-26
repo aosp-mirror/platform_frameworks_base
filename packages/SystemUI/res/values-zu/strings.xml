@@ -775,8 +775,7 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Swayipha ukuze ubone okuningi"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Ilayisha izincomo"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Imidiya"</string>
-    <!-- no translation found for controls_media_close_session (4780485355795635052) -->
-    <skip />
+    <string name="controls_media_close_session" msgid="4780485355795635052">"Fihlela i-<xliff:g id="APP_NAME">%1$s</xliff:g> lesi silawuli semidiya?"</string>
     <string name="controls_media_active_session" msgid="3146882316024153337">"Iseshini yamanje yemidiya ayikwazi ukufihlwa."</string>
     <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Fihla"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Qalisa kabusha"</string>
