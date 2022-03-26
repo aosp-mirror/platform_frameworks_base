@@ -123,6 +123,7 @@ final class VerificationParams extends HandlerParams {
     final long mRequiredInstalledVersionCode;
     final int mDataLoaderType;
     final int mSessionId;
+    final boolean mUserActionRequired;
 
     private boolean mWaitForVerificationToComplete;
     private boolean mWaitForIntegrityVerificationToComplete;
@@ -135,7 +136,7 @@ final class VerificationParams extends HandlerParams {
     VerificationParams(UserHandle user, File stagedDir, IPackageInstallObserver2 observer,
             PackageInstaller.SessionParams sessionParams, InstallSource installSource,
             int installerUid, SigningDetails signingDetails, int sessionId, PackageLite lite,
-            PackageManagerService pm) {
+            boolean userActionRequired, PackageManagerService pm) {
         super(user, pm);
         mOriginInfo = OriginInfo.fromStagedFile(stagedDir);
         mObserver = observer;
@@ -154,6 +155,7 @@ final class VerificationParams extends HandlerParams {
                 ? sessionParams.dataLoaderParams.getType() : DataLoaderType.NONE;
         mSessionId = sessionId;
         mPackageLite = lite;
+        mUserActionRequired = userActionRequired;
     }
 
     @Override
@@ -429,6 +431,8 @@ final class VerificationParams extends HandlerParams {
         verification.putExtra(PackageInstaller.EXTRA_DATA_LOADER_TYPE, mDataLoaderType);
 
         verification.putExtra(PackageInstaller.EXTRA_SESSION_ID, mSessionId);
+
+        verification.putExtra(PackageManager.EXTRA_USER_ACTION_REQUIRED, mUserActionRequired);
 
         populateInstallerExtras(verification);
 
