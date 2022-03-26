@@ -808,8 +808,7 @@
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Падыдзіце бліжэй да прылады \"<xliff:g id="DEVICENAME">%1$s</xliff:g>\", каб прайграць на гэтай"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Прайграецца на прыладзе \"<xliff:g id="DEVICENAME">%1$s</xliff:g>\""</string>
     <string name="media_transfer_playing_this_device" msgid="1856890686844499172">"Прайграецца на гэтым тэлефоне"</string>
-    <!-- no translation found for media_transfer_failed (7955354964610603723) -->
-    <skip />
+    <string name="media_transfer_failed" msgid="7955354964610603723">"Нешта пайшло не так. Паўтарыце спробу."</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Неактыўна, праверце праграму"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Не знойдзена"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Кіраванне недаступнае"</string>
