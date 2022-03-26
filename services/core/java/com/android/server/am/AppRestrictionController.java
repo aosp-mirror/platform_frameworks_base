@@ -678,7 +678,7 @@ public final class AppRestrictionController {
         /**
          * Default value to {@link #mBgAbusiveNotificationMinIntervalMs}.
          */
-        static final long DEFAULT_BG_ABUSIVE_NOTIFICATION_MINIMAL_INTERVAL_MS = ONE_DAY;
+        static final long DEFAULT_BG_ABUSIVE_NOTIFICATION_MINIMAL_INTERVAL_MS = 30 * ONE_DAY;
 
         /**
          * Default value to {@link #mBgAbusiveNotificationMinIntervalMs}.
