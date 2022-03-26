@@ -20,6 +20,7 @@ import static android.Manifest.permission.ACCESS_BACKGROUND_LOCATION;
 import static android.app.ActivityManager.RESTRICTION_LEVEL_ADAPTIVE_BUCKET;
 import static android.app.ActivityManager.RESTRICTION_LEVEL_BACKGROUND_RESTRICTED;
 import static android.app.ActivityManager.RESTRICTION_LEVEL_RESTRICTED_BUCKET;
+import static android.app.ActivityManager.RESTRICTION_LEVEL_UNKNOWN;
 import static android.app.ActivityManager.isLowRamDeviceStatic;
 import static android.app.usage.UsageStatsManager.REASON_MAIN_FORCED_BY_SYSTEM;
 import static android.app.usage.UsageStatsManager.REASON_MAIN_USAGE;
@@ -1119,6 +1120,13 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
                 DEVICE_CONFIG_SUBNAMESPACE_PREFIX + "current_drain_high_threshold_by_bg_location";
 
         /**
+         * Whether or not the battery usage of the offending app should fulfill the 1st threshold
+         * before taking actions for the 2nd threshold.
+         */
+        static final String KEY_BG_CURRENT_DRAIN_DECOUPLE_THRESHOLDS =
+                DEVICE_CONFIG_SUBNAMESPACE_PREFIX + "current_drain_decouple_thresholds";
+
+        /**
          * Default value to the {@link #INDEX_REGULAR_CURRENT_DRAIN_THRESHOLD} of
          * the {@link #mBgCurrentDrainRestrictedBucketThreshold}.
          */
@@ -1191,6 +1199,11 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
         final boolean mDefaultBgCurrentDrainHighThresholdByBgLocation;
 
         /**
+         * Default value to {@link #mBgCurrentDrainDecoupleThresholds}.
+         */
+        static final boolean DEFAULT_BG_CURRENT_DRAIN_DECOUPLE_THRESHOLD = true;
+
+        /**
          * The index to {@link #mBgCurrentDrainRestrictedBucketThreshold}
          * and {@link #mBgCurrentDrainBgRestrictedThreshold}.
          */
@@ -1256,6 +1269,11 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
          * @see #KEY_BG_CURRENT_DRAIN_HIGH_THRESHOLD_BY_BG_LOCATION.
          */
         volatile boolean mBgCurrentDrainHighThresholdByBgLocation;
+
+        /**
+         * @see #KEY_BG_CURRENT_DRAIN_DECOUPLE_THRESHOLDS.
+         */
+        volatile boolean mBgCurrentDrainDecoupleThresholds;
 
         /**
          * The capacity of the battery when fully charged in mAh.
@@ -1369,6 +1387,9 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
                 case KEY_BG_CURRENT_DRAIN_EXEMPTED_TYPES:
                     updateCurrentDrainExemptedTypes();
                     break;
+                case KEY_BG_CURRENT_DRAIN_DECOUPLE_THRESHOLDS:
+                    updateCurrentDrainDecoupleThresholds();
+                    break;
                 default:
                     super.onPropertiesChanged(name);
                     break;
@@ -1466,6 +1487,13 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
                     mDefaultBgCurrentDrainExemptedTypes);
         }
 
+        private void updateCurrentDrainDecoupleThresholds() {
+            mBgCurrentDrainDecoupleThresholds = DeviceConfig.getBoolean(
+                    DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                    KEY_BG_CURRENT_DRAIN_DECOUPLE_THRESHOLDS,
+                    DEFAULT_BG_CURRENT_DRAIN_DECOUPLE_THRESHOLD);
+        }
+
         @Override
         public void onSystemReady() {
             mBatteryFullChargeMah =
@@ -1477,20 +1505,30 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
             updateCurrentDrainLocationMinDuration();
             updateCurrentDrainEventDurationBasedThresholdEnabled();
             updateCurrentDrainExemptedTypes();
+            updateCurrentDrainDecoupleThresholds();
         }
 
         @Override
-        public @RestrictionLevel int getProposedRestrictionLevel(String packageName, int uid) {
+        @RestrictionLevel
+        public int getProposedRestrictionLevel(String packageName, int uid,
+                @RestrictionLevel int maxLevel) {
+            if (maxLevel <= RESTRICTION_LEVEL_ADAPTIVE_BUCKET) {
+                return RESTRICTION_LEVEL_UNKNOWN;
+            }
             synchronized (mLock) {
-                final int index = mHighBgBatteryPackages.indexOfKey(uid);
-                if (index < 0) {
-                    // Not found, return adaptive as the default one.
-                    return RESTRICTION_LEVEL_ADAPTIVE_BUCKET;
+                final long[] ts = mHighBgBatteryPackages.get(uid);
+                if (ts != null) {
+                    final int restrictedLevel = ts[TIME_STAMP_INDEX_RESTRICTED_BUCKET] > 0
+                            ? RESTRICTION_LEVEL_RESTRICTED_BUCKET
+                            : RESTRICTION_LEVEL_ADAPTIVE_BUCKET;
+                    if (maxLevel > RESTRICTION_LEVEL_BACKGROUND_RESTRICTED) {
+                        return ts[TIME_STAMP_INDEX_BG_RESTRICTED] > 0
+                                ? RESTRICTION_LEVEL_BACKGROUND_RESTRICTED : restrictedLevel;
+                    } else if (maxLevel == RESTRICTION_LEVEL_BACKGROUND_RESTRICTED) {
+                        return restrictedLevel;
+                    }
                 }
-                final long[] ts = mHighBgBatteryPackages.valueAt(index);
-                return ts[TIME_STAMP_INDEX_BG_RESTRICTED] > 0
-                        ? RESTRICTION_LEVEL_BACKGROUND_RESTRICTED
-                        : RESTRICTION_LEVEL_RESTRICTED_BUCKET;
+                return RESTRICTION_LEVEL_ADAPTIVE_BUCKET;
             }
         }
 
@@ -1573,36 +1611,58 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
                 final int thresholdIndex = getCurrentDrainThresholdIndex(uid, now,
                         mBgCurrentDrainWindowMs);
                 final int index = mHighBgBatteryPackages.indexOfKey(uid);
+                final boolean decoupleThresholds = mBgCurrentDrainDecoupleThresholds;
+                final double rbThreshold = mBgCurrentDrainRestrictedBucketThreshold[thresholdIndex];
+                final double brThreshold = mBgCurrentDrainBgRestrictedThreshold[thresholdIndex];
                 if (index < 0) {
-                    if (rbPercentage >= mBgCurrentDrainRestrictedBucketThreshold[thresholdIndex]) {
+                    long[] ts = null;
+                    if (rbPercentage >= rbThreshold) {
                         // New findings to us, track it and let the controller know.
-                        final long[] ts = new long[TIME_STAMP_INDEX_LAST];
+                        ts = new long[TIME_STAMP_INDEX_LAST];
                         ts[TIME_STAMP_INDEX_RESTRICTED_BUCKET] = now;
                         mHighBgBatteryPackages.put(uid, ts);
                         notifyController = excessive = true;
                     }
+                    if (decoupleThresholds && brPercentage >= brThreshold) {
+                        if (ts == null) {
+                            ts = new long[TIME_STAMP_INDEX_LAST];
+                            mHighBgBatteryPackages.put(uid, ts);
+                        }
+                        ts[TIME_STAMP_INDEX_BG_RESTRICTED] = now;
+                        notifyController = excessive = true;
+                    }
                 } else {
                     final long[] ts = mHighBgBatteryPackages.valueAt(index);
-                    if (rbPercentage < mBgCurrentDrainRestrictedBucketThreshold[thresholdIndex]) {
-                        // it's actually back to normal, but we don't untrack it until
-                        // explicit user interactions.
-                        notifyController = true;
-                    } else {
-                        excessive = true;
-                        if (brPercentage >= mBgCurrentDrainBgRestrictedThreshold[thresholdIndex]
-                                && curLevel == RESTRICTION_LEVEL_RESTRICTED_BUCKET) {
-                            // If we're in the restricted standby bucket but still seeing high
-                            // current drains, tell the controller again.
-                            final long lastResbucket = ts[TIME_STAMP_INDEX_RESTRICTED_BUCKET];
-                            final long lastBgRes = ts[TIME_STAMP_INDEX_BG_RESTRICTED];
-                            // If it has been a while since restricting the app and since the last
-                            // time we notify the controller, notify it again.
-                            if ((now >= lastResbucket + mBgCurrentDrainWindowMs) && (lastBgRes == 0
-                                    || (now >= lastBgRes + mBgCurrentDrainWindowMs))) {
-                                ts[TIME_STAMP_INDEX_BG_RESTRICTED] = now;
-                                notifyController = true;
-                            }
+                    final long lastRestrictBucketTs = ts[TIME_STAMP_INDEX_RESTRICTED_BUCKET];
+                    if (rbPercentage >= rbThreshold) {
+                        if (lastRestrictBucketTs == 0) {
+                            ts[TIME_STAMP_INDEX_RESTRICTED_BUCKET] = now;
                         }
+                        notifyController = excessive = true;
+                    } else {
+                        // It's actually back to normal, but we don't untrack it until
+                        // explicit user interactions, because the restriction could be the cause
+                        // of going back to normal.
+                    }
+                    if (brPercentage >= brThreshold) {
+                        // If either
+                        // a) It's configured to goto threshold 2 directly without threshold 1;
+                        // b) It's already in the restricted standby bucket, but still seeing
+                        //    high current drains, and it's been a while since it's restricted;
+                        // tell the controller.
+                        notifyController = decoupleThresholds
+                                || (curLevel == RESTRICTION_LEVEL_RESTRICTED_BUCKET
+                                && (now > lastRestrictBucketTs + mBgCurrentDrainWindowMs));
+                        if (notifyController) {
+                            ts[TIME_STAMP_INDEX_BG_RESTRICTED] = now;
+                        }
+                        excessive = true;
+                    } else {
+                        // Reset the track now - if it's already background restricted, it requires
+                        // user consent to unrestrict it; or if it's in restricted bucket level,
+                        // resetting this won't lift it from that level.
+                        ts[TIME_STAMP_INDEX_BG_RESTRICTED] = 0;
+                        // Now need to notify the controller.
                     }
                 }
             }
