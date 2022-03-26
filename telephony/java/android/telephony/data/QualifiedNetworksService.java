@@ -129,31 +129,17 @@ public abstract class QualifiedNetworksService extends Service {
         }
 
         /**
-         * Update the suggested qualified networks list. Network availability provider must invoke
-         * this method whenever the suggested qualified networks changes. If this method is never
-         * invoked for certain APN types, then frameworks uses its own logic to determine the
-         * transport to setup the data network.
-         *
-         * For example, QNS can suggest frameworks to setup IMS on IWLAN by specifying
-         * {@link ApnSetting#TYPE_IMS} with a list containing single element
-         * {@link AccessNetworkType#IWLAN}.
-         *
-         * Or if QNS consider multiple access networks are qualified for certain APN type, it can
-         * suggest frameworks by specifying the APN type with multiple elements in the list like
-         * {{@link AccessNetworkType#EUTRAN}, {@link AccessNetworkType#IWLAN}}. Frameworks will then
-         * first attempt to setup data on LTE network. If the device moves from LTE to UMTS, then
-         * frameworks can perform handover the data network to the second preferred access network
-         * if available.
-         *
-         * If the {@code qualifiedNetworkTypes} list is empty, it means QNS has no suggestion to the
-         * frameworks, and frameworks will decide the transport to setup the data network.
+         * Update the qualified networks list. Network availability provider must invoke this method
+         * whenever the qualified networks changes. If this method is never invoked for certain
+         * APN types, then frameworks will always use the default (i.e. cellular) data and network
+         * service.
          *
          * @param apnTypes APN types of the qualified networks. This must be a bitmask combination
          * of {@link ApnType}.
          * @param qualifiedNetworkTypes List of network types which are qualified for data
          * connection setup for {@link @apnType} in the preferred order. Each element in the list
-         * is a {@link AccessNetworkType}. Note that {@link AccessNetworkType#UNKNOWN} is not a
-         * valid input here.
+         * is a {@link AccessNetworkType}. An empty list indicates no networks are qualified
+         * for data setup.
          */
         public final void updateQualifiedNetworkTypes(
                 @ApnType int apnTypes, @NonNull List<Integer> qualifiedNetworkTypes) {
