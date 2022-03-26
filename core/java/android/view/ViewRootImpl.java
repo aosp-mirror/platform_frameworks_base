@@ -679,9 +679,6 @@ public final class ViewRootImpl implements ViewParent,
 
     final Rect mPendingBackDropFrame = new Rect();
 
-    private boolean mWillMove;
-    private boolean mWillResize;
-
     boolean mPendingAlwaysConsumeSystemBars;
     private final InsetsState mTempInsets = new InsetsState();
     private final InsetsSourceControl[] mTempControls = new InsetsSourceControl[SIZE];
@@ -1869,10 +1866,6 @@ public final class ViewRootImpl implements ViewParent,
 
     void notifyInsetsChanged() {
         mApplyInsetsRequested = true;
-        if (mWillMove || mWillResize) {
-            // The window frame will be changed soon. The following logic will be executed then.
-            return;
-        }
         requestLayout();
 
         // See comment for View.sForceLayoutWhenInsetsChanged
@@ -2774,7 +2767,7 @@ public final class ViewRootImpl implements ViewParent,
         // Execute enqueued actions on every traversal in case a detached view enqueued an action
         getRunQueue().executeActions(mAttachInfo.mHandler);
 
-        if (mApplyInsetsRequested && !(mWillMove || mWillResize)) {
+        if (mApplyInsetsRequested) {
             dispatchApplyInsets(host);
         }
 
@@ -5322,14 +5315,13 @@ public final class ViewRootImpl implements ViewParent,
     private static final int MSG_REQUEST_KEYBOARD_SHORTCUTS = 26;
     private static final int MSG_UPDATE_POINTER_ICON = 27;
     private static final int MSG_POINTER_CAPTURE_CHANGED = 28;
-    private static final int MSG_INSETS_CHANGED = 30;
-    private static final int MSG_INSETS_CONTROL_CHANGED = 31;
-    private static final int MSG_SYSTEM_GESTURE_EXCLUSION_CHANGED = 32;
-    private static final int MSG_SHOW_INSETS = 34;
-    private static final int MSG_HIDE_INSETS = 35;
-    private static final int MSG_REQUEST_SCROLL_CAPTURE = 36;
-    private static final int MSG_WINDOW_TOUCH_MODE_CHANGED = 37;
-    private static final int MSG_KEEP_CLEAR_RECTS_CHANGED = 38;
+    private static final int MSG_INSETS_CONTROL_CHANGED = 29;
+    private static final int MSG_SYSTEM_GESTURE_EXCLUSION_CHANGED = 30;
+    private static final int MSG_SHOW_INSETS = 31;
+    private static final int MSG_HIDE_INSETS = 32;
+    private static final int MSG_REQUEST_SCROLL_CAPTURE = 33;
+    private static final int MSG_WINDOW_TOUCH_MODE_CHANGED = 34;
+    private static final int MSG_KEEP_CLEAR_RECTS_CHANGED = 35;
 
 
     final class ViewRootHandler extends Handler {
@@ -5384,8 +5376,6 @@ public final class ViewRootImpl implements ViewParent,
                     return "MSG_UPDATE_POINTER_ICON";
                 case MSG_POINTER_CAPTURE_CHANGED:
                     return "MSG_POINTER_CAPTURE_CHANGED";
-                case MSG_INSETS_CHANGED:
-                    return "MSG_INSETS_CHANGED";
                 case MSG_INSETS_CONTROL_CHANGED:
                     return "MSG_INSETS_CONTROL_CHANGED";
                 case MSG_SYSTEM_GESTURE_EXCLUSION_CHANGED:
@@ -5447,25 +5437,14 @@ public final class ViewRootImpl implements ViewParent,
                     break;
                 case MSG_RESIZED:
                 case MSG_RESIZED_REPORT: {
-                    mWillMove = false;
-                    mWillResize = false;
                     final SomeArgs args = (SomeArgs) msg.obj;
+                    mInsetsController.onStateChanged((InsetsState) args.arg3);
                     handleResized(msg.what, args);
-                    args.recycle();
-                    break;
-                }
-                case MSG_INSETS_CHANGED: {
-                    SomeArgs args = (SomeArgs) msg.obj;
-                    mWillMove = args.argi1 == 1;
-                    mWillResize = args.argi2 == 1;
-                    mInsetsController.onStateChanged((InsetsState) args.arg1);
                     args.recycle();
                     break;
                 }
                 case MSG_INSETS_CONTROL_CHANGED: {
                     SomeArgs args = (SomeArgs) msg.obj;
-                    mWillMove = args.argi1 == 1;
-                    mWillResize = args.argi2 == 1;
 
                     // Deliver state change before control change, such that:
                     // a) When gaining control, controller can compare with server state to evaluate
@@ -5501,7 +5480,6 @@ public final class ViewRootImpl implements ViewParent,
                     break;
                 }
                 case MSG_WINDOW_MOVED:
-                    mWillMove = false;
                     if (mAdded) {
                         final int w = mWinFrame.width();
                         final int h = mWinFrame.height();
@@ -7967,8 +7945,6 @@ public final class ViewRootImpl implements ViewParent,
         final int requestedWidth = (int) (mView.getMeasuredWidth() * appScale + 0.5f);
         final int requestedHeight = (int) (mView.getMeasuredHeight() * appScale + 0.5f);
 
-        mWillMove = false;
-        mWillResize = false;
         int relayoutResult = 0;
         WindowConfiguration winConfig = getConfiguration().windowConfiguration;
         if (LOCAL_LAYOUT) {
@@ -8513,15 +8489,25 @@ public final class ViewRootImpl implements ViewParent,
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private void dispatchResized(ClientWindowFrames frames, boolean reportDraw,
-            MergedConfiguration mergedConfiguration, boolean forceLayout,
+            MergedConfiguration mergedConfiguration, InsetsState insetsState, boolean forceLayout,
             boolean alwaysConsumeSystemBars, int displayId, int syncSeqId, int resizeMode) {
-
         Message msg = mHandler.obtainMessage(reportDraw ? MSG_RESIZED_REPORT : MSG_RESIZED);
         SomeArgs args = SomeArgs.obtain();
         final boolean sameProcessCall = (Binder.getCallingPid() == android.os.Process.myPid());
+        if (sameProcessCall) {
+            insetsState = new InsetsState(insetsState, true /* copySource */);
+        }
+        if (mTranslator != null) {
+            mTranslator.translateInsetsStateInScreenToAppWindow(insetsState);
+        }
+        if (insetsState.getSourceOrDefaultVisibility(ITYPE_IME)) {
+            ImeTracing.getInstance().triggerClientDump("ViewRootImpl#dispatchResized",
+                    getInsetsController().getHost().getInputMethodManager(), null /* icProto */);
+        }
         args.arg1 = sameProcessCall ? new ClientWindowFrames(frames) : frames;
         args.arg2 = sameProcessCall && mergedConfiguration != null
                 ? new MergedConfiguration(mergedConfiguration) : mergedConfiguration;
+        args.arg3 = insetsState;
         args.argi1 = forceLayout ? 1 : 0;
         args.argi2 = alwaysConsumeSystemBars ? 1 : 0;
         args.argi3 = displayId;
@@ -8532,27 +8518,8 @@ public final class ViewRootImpl implements ViewParent,
         mHandler.sendMessage(msg);
     }
 
-    private void dispatchInsetsChanged(InsetsState insetsState, boolean willMove,
-            boolean willResize) {
-        if (Binder.getCallingPid() == android.os.Process.myPid()) {
-            insetsState = new InsetsState(insetsState, true /* copySource */);
-        }
-        if (mTranslator != null) {
-            mTranslator.translateInsetsStateInScreenToAppWindow(insetsState);
-        }
-        if (insetsState != null && insetsState.getSourceOrDefaultVisibility(ITYPE_IME)) {
-            ImeTracing.getInstance().triggerClientDump("ViewRootImpl#dispatchInsetsChanged",
-                    getInsetsController().getHost().getInputMethodManager(), null /* icProto */);
-        }
-        SomeArgs args = SomeArgs.obtain();
-        args.arg1 = insetsState;
-        args.argi1 = willMove ? 1 : 0;
-        args.argi2 = willResize ? 1 : 0;
-        mHandler.obtainMessage(MSG_INSETS_CHANGED, args).sendToTarget();
-    }
-
     private void dispatchInsetsControlChanged(InsetsState insetsState,
-            InsetsSourceControl[] activeControls, boolean willMove, boolean willResize) {
+            InsetsSourceControl[] activeControls) {
         if (Binder.getCallingPid() == android.os.Process.myPid()) {
             insetsState = new InsetsState(insetsState, true /* copySource */);
             if (activeControls != null) {
@@ -8572,8 +8539,6 @@ public final class ViewRootImpl implements ViewParent,
         SomeArgs args = SomeArgs.obtain();
         args.arg1 = insetsState;
         args.arg2 = activeControls;
-        args.argi1 = willMove ? 1 : 0;
-        args.argi2 = willResize ? 1 : 0;
         mHandler.obtainMessage(MSG_INSETS_CONTROL_CHANGED, args).sendToTarget();
     }
 
@@ -9916,30 +9881,22 @@ public final class ViewRootImpl implements ViewParent,
 
         @Override
         public void resized(ClientWindowFrames frames, boolean reportDraw,
-                MergedConfiguration mergedConfiguration, boolean forceLayout,
-                boolean alwaysConsumeSystemBars, int displayId, int syncSeqId, int resizeMode) {
+                MergedConfiguration mergedConfiguration, InsetsState insetsState,
+                boolean forceLayout, boolean alwaysConsumeSystemBars, int displayId, int syncSeqId,
+                int resizeMode) {
             final ViewRootImpl viewAncestor = mViewAncestor.get();
             if (viewAncestor != null) {
-                viewAncestor.dispatchResized(frames, reportDraw, mergedConfiguration, forceLayout,
-                        alwaysConsumeSystemBars, displayId, syncSeqId, resizeMode);
-            }
-        }
-
-        @Override
-        public void insetsChanged(InsetsState insetsState, boolean willMove, boolean willResize) {
-            final ViewRootImpl viewAncestor = mViewAncestor.get();
-            if (viewAncestor != null) {
-                viewAncestor.dispatchInsetsChanged(insetsState, willMove, willResize);
+                viewAncestor.dispatchResized(frames, reportDraw, mergedConfiguration, insetsState,
+                        forceLayout, alwaysConsumeSystemBars, displayId, syncSeqId, resizeMode);
             }
         }
 
         @Override
         public void insetsControlChanged(InsetsState insetsState,
-                InsetsSourceControl[] activeControls, boolean willMove, boolean willResize) {
+                InsetsSourceControl[] activeControls) {
             final ViewRootImpl viewAncestor = mViewAncestor.get();
             if (viewAncestor != null) {
-                viewAncestor.dispatchInsetsControlChanged(
-                        insetsState, activeControls, willMove, willResize);
+                viewAncestor.dispatchInsetsControlChanged(insetsState, activeControls);
             }
         }
 
