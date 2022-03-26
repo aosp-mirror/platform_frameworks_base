@@ -692,7 +692,7 @@ public class MediaControlPanel {
             button.setImageDrawable(null);
             button.setContentDescription(null);
             button.setEnabled(false);
-            button.setBackground(mContext.getDrawable(R.drawable.qs_media_round_button_background));
+            button.setBackground(null);
         }
 
         setVisibleAndAlpha(collapsedSet, button.getId(), mediaAction != null && showInCompact);
