@@ -85,8 +85,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"Midlertidigt deaktiveret af dit mobilselskab for SIM-kortet <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Der er ingen forbindelse til mobilnetværket"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Prøv at skifte dit foretrukne netværk. Tryk for skifte."</string>
-    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Det er ikke muligt at foretage nødopkald"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Det er ikke muligt at foretage nødopkald via Wi‑Fi"</string>
+    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"Der kan muligvis ikke foretages nødopkald"</string>
+    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"<xliff:g id="SPN">%s</xliff:g> understøtter ikke nødopkald via Wi-Fi. Tryk for at få flere oplysninger."</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Underretninger"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Viderestilling af opkald"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Nødtilbagekaldstilstand"</string>
@@ -425,10 +425,10 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"Tillader, at appen ændrer din tablets opkaldshistorik, f.eks. data om indgående og udgående opkald. Ondsindede apps kan bruge dette til at slette eller ændre din opkaldshistorik."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Tillader, at appen ændrer din Android TV-enheds opkaldshistorik, bl.a. data om indgående og udgående opkald. Skadelige apps kan bruge dette til at rydde eller ændre din opkaldshistorik."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Tillader, at appen ændrer telefonens opkaldshistorik, f.eks. data om indgående og udgående opkald. Ondsindede apps kan bruge dette til at slette eller ændre din opkaldshistorik."</string>
-    <string name="permlab_bodySensors" msgid="3411035315357380862">"få adgang til kropssensorer (f.eks. pulsmålere)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="3208940894182188063">"Adgang til data fra kropssensorer såsom puls, temperatur, procentdelen af ilt i blodet m.m."</string>
-    <string name="permlab_bodySensors_background" msgid="4352831883331744370">"tilgå kropssensorer (f.eks. pulsmålere), mens appen kører i baggrunden."</string>
-    <string name="permdesc_bodySensors_background" product="default" msgid="8512392249166660872">"Adgang til data fra kropssensorer såsom puls, temperatur, procentdelen af ilt i blodet m.m., mens appen kører i baggrunden."</string>
+    <string name="permlab_bodySensors" msgid="662918578601619569">"Få adgang til kropssensordata, f.eks. pulsen, mens appen er i brug"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Tillader, at appen kan få adgang til kropssensordata, f.eks. pulsen, temperaturen og iltmætningen af blodet, mens appen er i brug."</string>
+    <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Få adgang til kropssensordata, f.eks. pulsen, mens appen er i baggrunden"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Tillader, at appen kan få adgang til kropssensordata, f.eks. pulsen, temperaturen og iltmætningen af blodet, mens appen er i baggrunden."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Læs kalenderbegivenheder og -info"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Denne app kan læse alle kalenderbegivenheder, der er gemt på din tablet, og dele eller gemme dine kalenderdata."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Denne app kan læse alle kalenderbegivenheder, der er gemt på din Android TV-enhed, og dele eller gemme dine kalenderdata."</string>
@@ -689,8 +689,8 @@
     <string name="permdesc_readMediaAudio" msgid="5299772574434619399">"Tillader, at appen læser lydfiler fra din delte lagerplads."</string>
     <string name="permlab_readMediaVideo" msgid="7768003311260655007">"Læse videofiler fra den delte lagerplads"</string>
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"Tillader, at appen læser videofiler fra din fælles lagerplads."</string>
-    <string name="permlab_readMediaImage" msgid="1507059005825769856">"Læse billedfiler fra den delte lagerplads"</string>
-    <string name="permdesc_readMediaImage" msgid="8328052622292457588">"Tillader, at appen læser billedfiler fra din delte lagerplads."</string>
+    <string name="permlab_readMediaImages" msgid="4057590631020986789">"Læse billedfiler fra den delte lagerplads"</string>
+    <string name="permdesc_readMediaImages" msgid="5836219373138469259">"Tillader, at appen læser billedfiler fra din delte lagerplads."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"ændre eller slette indholdet af din delte lagerplads"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Tillader, at appen kan skrive indholdet af din delte lagerplads."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"foretage/modtage SIP-opkald"</string>
@@ -912,7 +912,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"Tryk på Menu for at låse op eller foretage et nødopkald."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"Tryk på Menu for at låse op."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"Tegn oplåsningsmønster"</string>
-    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"Nødopkald"</string>
+    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"Nødsituation"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"Tilbage til opkald"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"Rigtigt!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Prøv igen"</string>
@@ -1051,7 +1051,6 @@
     <string name="save_password_never" msgid="6776808375903410659">"Aldrig"</string>
     <string name="open_permission_deny" msgid="5136793905306987251">"Du har ikke tilladelse til at åbne denne side."</string>
     <string name="text_copied" msgid="2531420577879738860">"Teksten er kopieret til udklipsholderen."</string>
-    <string name="copied" msgid="4675902854553014676">"Kopieret"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> indsatte indhold fra <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g>"</string>
     <string name="pasted_from_clipboard" msgid="7355790625710831847">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> indsatte indhold fra din udklipsholder"</string>
     <string name="pasted_text" msgid="4298871641549173733">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> indsatte tekst, som du har kopieret"</string>
@@ -1452,8 +1451,12 @@
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"Gør det muligt for en app at bede om tilladelse til at ignorere batterioptimeringer for den pågældende app."</string>
     <string name="permlab_queryAllPackages" msgid="2928450604653281650">"forespørg om alle pakker"</string>
     <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"Giver en app tilladelse til at se alle installerede pakker."</string>
-    <string name="permlab_accessSupplementalApi" msgid="3544659160536960275">"adgang til SupplementalApis"</string>
-    <string name="permdesc_accessSupplementalApi" msgid="8974758769370951074">"Giver en app adgang til SupplementalApis."</string>
+    <string name="permlab_accessAdServicesTopics" msgid="6687112022940098945">"få adgang til AdServices Topics API"</string>
+    <string name="permdesc_accessAdServicesTopics" msgid="6011532458156465929">"Tillader, at en app får adgang til AdServices Topics API."</string>
+    <string name="permlab_accessAdServicesAttribution" msgid="3268942271128309354">"få adgang til AdServices Attribution API\'er"</string>
+    <string name="permdesc_accessAdServicesAttribution" msgid="577482544832578288">"Tillader, at en app får adgang til AdServices Attribution API\'er."</string>
+    <string name="permlab_accessAdServicesCustomAudiences" msgid="7249286630514600684">"få adgang til Services Custom Audiences API"</string>
+    <string name="permdesc_accessAdServicesCustomAudiences" msgid="645526926477180315">"Tillader, at en app får adgang til AdServices Custom Audiences API."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"Tryk to gange for zoomkontrol"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"Widget kunne ikke tilføjes."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"Gå"</string>
@@ -1716,6 +1719,7 @@
     <string name="user_switching_message" msgid="1912993630661332336">"Skifter til <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"<xliff:g id="NAME">%1$s</xliff:g> logges ud…"</string>
     <string name="owner_name" msgid="8713560351570795743">"Ejer"</string>
+    <string name="guest_name" msgid="8502103277839834324">"Gæst"</string>
     <string name="error_message_title" msgid="4082495589294631966">"Fejl"</string>
     <string name="error_message_change_not_allowed" msgid="843159705042381454">"Din administrator har ikke givet tilladelse til at foretage denne ændring"</string>
     <string name="app_not_found" msgid="3429506115332341800">"Der blev ikke fundet nogen applikation, der kan håndtere denne handling"</string>
@@ -2027,10 +2031,10 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"AFINSTALLER"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"ÅBN ALLIGEVEL"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"Der er registreret en skadelig app"</string>
-    <string name="log_access_confirmation_title" msgid="3143035474800851565">"Anmodning om adgang til systemlogs"</string>
+    <string name="log_access_confirmation_title" msgid="2343578467290592708">"Vil du give <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> adgang til alle enhedslogs?"</string>
     <string name="log_access_confirmation_allow" msgid="143157286283302512">"Kun denne gang"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Tillad ikke"</string>
-    <string name="log_access_confirmation_body" msgid="7599059550906238538">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> anmoder om adgang til systemlogs med henblik på funktionel fejlretning. Disse logs indeholder muligvis oplysninger, som apps og tjenester på din enhed har genereret."</string>
+    <string name="log_access_confirmation_body" msgid="4483075525611652922">"Enhedslogs registrerer, hvad der sker på din enhed. Apps kan bruge disse logs til at finde og løse problemer.\n\nNogle logs kan indeholde følsomme oplysninger, så giv kun apps, du har tillid til, adgang til alle enhedslogs. \n\nHvis du ikke giver denne app adgang til alle enhedslogs, kan den stadig tilgå sine egne logs, og producenten af din enhed kan muligvis fortsat tilgå visse logs eller oplysninger på din enhed. Få flere oplysninger"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Vis ikke igen"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> anmoder om tilladelse til at vise eksempler fra <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Rediger"</string>
@@ -2265,4 +2269,6 @@
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> har kørt i baggrunden i lang tid. Tryk for at gennemgå."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Tjek aktive apps"</string>
     <string name="vdm_camera_access_denied" msgid="6345652513729130490">"Kameraet kan ikke tilgås fra denne enhed"</string>
+    <!-- no translation found for system_locale_title (3978041860457277638) -->
+    <skip />
 </resources>

@@ -96,7 +96,7 @@ import java.util.function.Consumer;
  * Manages the picture-in-picture (PIP) UI and states for Phones.
  */
 public class PipController implements PipTransitionController.PipTransitionCallback,
-        RemoteCallable<PipController>, DisplayController.OnDisplaysChangedListener {
+        RemoteCallable<PipController> {
     private static final String TAG = "PipController";
 
     private Context mContext;
@@ -233,6 +233,14 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                     }
                     onDisplayChanged(mDisplayController.getDisplayLayout(displayId),
                             true /* saveRestoreSnapFraction */);
+                }
+
+                @Override
+                public void onKeepClearAreasChanged(int displayId, Set<Rect> restricted,
+                        Set<Rect> unrestricted) {
+                    if (mPipBoundsState.getDisplayId() == displayId) {
+                        mPipBoundsState.setKeepClearAreas(restricted, unrestricted);
+                    }
                 }
             };
 
@@ -461,14 +469,6 @@ public class PipController implements PipTransitionController.PipTransitionCallb
     @Override
     public ShellExecutor getRemoteCallExecutor() {
         return mMainExecutor;
-    }
-
-    @Override
-    public void onKeepClearAreasChanged(int displayId, Set<Rect> restricted,
-            Set<Rect> unrestricted) {
-        if (mPipBoundsState.getDisplayId() == displayId) {
-            mPipBoundsState.setKeepClearAreas(restricted, unrestricted);
-        }
     }
 
     private void onConfigurationChanged(Configuration newConfig) {

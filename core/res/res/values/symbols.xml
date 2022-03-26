@@ -550,7 +550,6 @@
   <java-symbol type="string" name="activity_resolver_work_profiles_support" />
   <java-symbol type="string" name="app_running_notification_title" />
   <java-symbol type="string" name="app_running_notification_text" />
-  <java-symbol type="string" name="copied" />
   <java-symbol type="string" name="delete" />
   <java-symbol type="string" name="deleteText" />
   <java-symbol type="string" name="grant_permissions_header_text" />
@@ -3300,6 +3299,7 @@
   <java-symbol type="string" name="app_blocked_message" />
 
   <java-symbol type="string" name="app_streaming_blocked_title" />
+  <java-symbol type="string" name="app_streaming_blocked_title_for_permission_dialog" />
   <java-symbol type="string" name="app_streaming_blocked_message" />
 
   <!-- Used internally for assistant to launch activity transitions -->

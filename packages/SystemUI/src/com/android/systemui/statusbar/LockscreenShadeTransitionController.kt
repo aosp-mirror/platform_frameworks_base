@@ -64,6 +64,8 @@ class LockscreenShadeTransitionController @Inject constructor(
     private val scrimController: ScrimController,
     private val depthController: NotificationShadeDepthController,
     private val context: Context,
+    private val splitShadeOverScrollerFactory: SplitShadeLockScreenOverScroller.Factory,
+    private val singleShadeOverScrollerFactory: SingleShadeLockScreenOverScroller.Factory,
     wakefulnessLifecycle: WakefulnessLifecycle,
     configurationController: ConfigurationController,
     falsingManager: FalsingManager,
@@ -193,6 +195,27 @@ class LockscreenShadeTransitionController @Inject constructor(
      * The touch helper responsible for the drag down animation.
      */
     val touchHelper = DragDownHelper(falsingManager, falsingCollector, this, context)
+
+    private val splitShadeOverScroller: SplitShadeLockScreenOverScroller by lazy {
+        splitShadeOverScrollerFactory.create(qS, nsslController)
+    }
+
+    private val phoneShadeOverScroller: SingleShadeLockScreenOverScroller by lazy {
+        singleShadeOverScrollerFactory.create(nsslController)
+    }
+
+    /**
+     * [LockScreenShadeOverScroller] property that delegates to either
+     * [SingleShadeLockScreenOverScroller] or [SplitShadeLockScreenOverScroller].
+     *
+     * There are currently two different implementations, as the over scroll behavior is different
+     * on single shade and split shade.
+     *
+     * On single shade, only notifications are over scrolled, whereas on split shade, everything is
+     * over scrolled.
+     */
+    private val shadeOverScroller: LockScreenShadeOverScroller
+        get() = if (useSplitShade) splitShadeOverScroller else phoneShadeOverScroller
 
     init {
         updateResources()
@@ -410,7 +433,7 @@ class LockscreenShadeTransitionController @Inject constructor(
                 if (!nsslController.isInLockedDownShade() || field == 0f || forceApplyAmount) {
                     val notificationShelfProgress =
                         MathUtils.saturate(dragDownAmount / notificationShelfTransitionDistance)
-                    nsslController.setTransitionToFullShadeAmount(field, notificationShelfProgress)
+                    nsslController.setTransitionToFullShadeAmount(notificationShelfProgress)
 
                     qSDragProgress = MathUtils.saturate(dragDownAmount / qsTransitionDistance)
                     qS.setTransitionToFullShadeAmount(field, qSDragProgress)
@@ -422,6 +445,7 @@ class LockscreenShadeTransitionController @Inject constructor(
                     transitionToShadeAmountScrim(field)
                     transitionToShadeAmountCommon(field)
                     transitionToShadeAmountKeyguard(field)
+                    shadeOverScroller.expansionDragDownAmount = dragDownAmount
                 }
             }
         }
@@ -470,6 +494,9 @@ class LockscreenShadeTransitionController @Inject constructor(
         }
         notificationPanelController
             .setKeyguardTransitionProgress(keyguardAlpha, keyguardTranslationY)
+
+        val statusBarAlpha = if (useSplitShade) keyguardAlpha else -1f
+        notificationPanelController.setKeyguardStatusBarAlpha(statusBarAlpha)
     }
 
     private fun setDragDownAmountAnimated(

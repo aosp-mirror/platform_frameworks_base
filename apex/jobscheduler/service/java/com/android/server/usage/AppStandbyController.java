@@ -898,11 +898,9 @@ public class AppStandbyController
                     }
                 }
 
-                final long elapsedLastUsedByUserTimeDelta = app.lastUsedByUserElapsedTime >= 0
-                        ? elapsedTimeAdjusted - app.lastUsedByUserElapsedTime
-                        : Long.MAX_VALUE;
-                if (app.lastRestrictAttemptElapsedTime > app.lastUsedByUserElapsedTime
-                        && elapsedLastUsedByUserTimeDelta
+                if (app.lastUsedByUserElapsedTime >= 0
+                        && app.lastRestrictAttemptElapsedTime > app.lastUsedByUserElapsedTime
+                        && elapsedTimeAdjusted - app.lastUsedByUserElapsedTime
                         >= mInjector.getAutoRestrictedBucketDelayMs()) {
                     newBucket = STANDBY_BUCKET_RESTRICTED;
                     reason = app.lastRestrictReason;
@@ -974,7 +972,7 @@ public class AppStandbyController
             long elapsedRealtime) {
         int bucketIndex = mAppIdleHistory.getThresholdIndex(packageName, userId,
                 elapsedRealtime, mAppStandbyScreenThresholds, mAppStandbyElapsedThresholds);
-        return THRESHOLD_BUCKETS[bucketIndex];
+        return bucketIndex >= 0 ? THRESHOLD_BUCKETS[bucketIndex] : STANDBY_BUCKET_NEVER;
     }
 
     private void notifyBatteryStats(String packageName, int userId, boolean idle) {

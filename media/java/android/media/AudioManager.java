@@ -8402,6 +8402,12 @@ public class AudioManager {
      * {@link #addAssistantServicesUids(int[])} and not yet removed with
      * {@link #removeAssistantServicesUids(int[])}
      *
+     * <p> Note that during native audioserver crash and after boot up the list of assistant
+     * UIDs will be reset to an empty list (i.e. no UID will be considered as assistant)
+     * Just after user switch, the list of assistant will also reset to empty.
+     * In both cases,The component's UID of the assistiant role or assistant setting will be
+     * automitically added to the list by the audio service.
+     *
      * @return array of assistants UIDs
      *
      * @hide

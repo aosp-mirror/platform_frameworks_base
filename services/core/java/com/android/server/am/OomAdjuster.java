@@ -1254,7 +1254,7 @@ public class OomAdjuster {
                     mService.mServices.foregroundServiceProcStateChangedLocked(uidRec);
                 }
             }
-            mService.mInternal.deletePendingTopUid(uidRec.getUid());
+            mService.mInternal.deletePendingTopUid(uidRec.getUid(), nowElapsed);
         }
         if (mLocalPowerManager != null) {
             mLocalPowerManager.finishUidChanges();
@@ -1671,6 +1671,24 @@ public class OomAdjuster {
             state.setAdjType("fg-service-act");
             if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
                 reportOomAdjMessageLocked(TAG_OOM_ADJ, "Raise to recent fg: " + app);
+            }
+        }
+
+        // If the app was recently in the foreground and has expedited jobs running,
+        // allow it to get a higher rank in memory for some time, compared to other EJS and even
+        // foreground services so that it can finish performing any persistence/processing of
+        // in-memory state.
+        if (psr.hasTopStartedAlmostPerceptibleServices()
+                && adj > ProcessList.PERCEPTIBLE_RECENT_FOREGROUND_APP_ADJ
+                && (state.getLastTopTime()
+                        + mConstants.TOP_TO_ALMOST_PERCEPTIBLE_GRACE_DURATION > now
+                || state.getSetProcState() <= PROCESS_STATE_TOP)) {
+            adj = ProcessList.PERCEPTIBLE_RECENT_FOREGROUND_APP_ADJ;
+            // This shall henceforth be called the "EJ" exemption, despite utilizing the
+            // ALMOST_PERCEPTIBLE flag to work.
+            state.setAdjType("top-ej-act");
+            if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
+                reportOomAdjMessageLocked(TAG_OOM_ADJ, "Raise to recent fg for EJ: " + app);
             }
         }
 

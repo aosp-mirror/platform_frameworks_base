@@ -41,7 +41,7 @@ import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.google.common.truth.Truth.assertThat
-import org.junit.Ignore
+import org.junit.After
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -52,7 +52,6 @@ import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnit
 import org.mockito.Mockito.`when` as whenever
 
-@Ignore
 @RunWith(AndroidTestingRunner::class)
 @RunWithLooper
 @SmallTest
@@ -72,12 +71,19 @@ class AuthContainerViewTest : SysuiTestCase() {
     @Mock
     lateinit var windowToken: IBinder
 
-    private lateinit var authContainer: TestAuthContainerView
+    private var authContainer: TestAuthContainerView? = null
+
+    @After
+    fun tearDown() {
+        if (authContainer?.isAttachedToWindow == true) {
+            ViewUtils.detachView(authContainer)
+        }
+    }
 
     @Test
     fun testActionAuthenticated_sendsDismissedAuthenticated() {
-        initializeContainer(BiometricManager.Authenticators.BIOMETRIC_WEAK)
-        authContainer.mBiometricCallback.onAction(
+        val container = initializeContainer(BiometricManager.Authenticators.BIOMETRIC_WEAK)
+        container.mBiometricCallback.onAction(
             AuthBiometricView.Callback.ACTION_AUTHENTICATED
         )
         waitForIdleSync()
@@ -86,13 +92,13 @@ class AuthContainerViewTest : SysuiTestCase() {
             eq(AuthDialogCallback.DISMISSED_BIOMETRIC_AUTHENTICATED),
             eq<ByteArray?>(null) /* credentialAttestation */
         )
-        assertThat(authContainer.parent).isNull()
+        assertThat(container.parent).isNull()
     }
 
     @Test
     fun testActionUserCanceled_sendsDismissedUserCanceled() {
-        initializeContainer(BiometricManager.Authenticators.BIOMETRIC_WEAK)
-        authContainer.mBiometricCallback.onAction(
+        val container = initializeContainer(BiometricManager.Authenticators.BIOMETRIC_WEAK)
+        container.mBiometricCallback.onAction(
             AuthBiometricView.Callback.ACTION_USER_CANCELED
         )
         waitForIdleSync()
@@ -104,13 +110,13 @@ class AuthContainerViewTest : SysuiTestCase() {
             eq(AuthDialogCallback.DISMISSED_USER_CANCELED),
             eq<ByteArray?>(null) /* credentialAttestation */
         )
-        assertThat(authContainer.parent).isNull()
+        assertThat(container.parent).isNull()
     }
 
     @Test
     fun testActionButtonNegative_sendsDismissedButtonNegative() {
-        initializeContainer(BiometricManager.Authenticators.BIOMETRIC_WEAK)
-        authContainer.mBiometricCallback.onAction(
+        val container = initializeContainer(BiometricManager.Authenticators.BIOMETRIC_WEAK)
+        container.mBiometricCallback.onAction(
             AuthBiometricView.Callback.ACTION_BUTTON_NEGATIVE
         )
         waitForIdleSync()
@@ -119,13 +125,13 @@ class AuthContainerViewTest : SysuiTestCase() {
             eq(AuthDialogCallback.DISMISSED_BUTTON_NEGATIVE),
             eq<ByteArray?>(null) /* credentialAttestation */
         )
-        assertThat(authContainer.parent).isNull()
+        assertThat(container.parent).isNull()
     }
 
     @Test
     fun testActionTryAgain_sendsTryAgain() {
-        initializeContainer(BiometricManager.Authenticators.BIOMETRIC_WEAK)
-        authContainer.mBiometricCallback.onAction(
+        val container = initializeContainer(BiometricManager.Authenticators.BIOMETRIC_WEAK)
+        container.mBiometricCallback.onAction(
             AuthBiometricView.Callback.ACTION_BUTTON_TRY_AGAIN
         )
         waitForIdleSync()
@@ -135,8 +141,8 @@ class AuthContainerViewTest : SysuiTestCase() {
 
     @Test
     fun testActionError_sendsDismissedError() {
-        initializeContainer(BiometricManager.Authenticators.BIOMETRIC_WEAK)
-        authContainer.mBiometricCallback.onAction(
+        val container = initializeContainer(BiometricManager.Authenticators.BIOMETRIC_WEAK)
+        authContainer!!.mBiometricCallback.onAction(
             AuthBiometricView.Callback.ACTION_ERROR
         )
         waitForIdleSync()
@@ -145,53 +151,53 @@ class AuthContainerViewTest : SysuiTestCase() {
             eq(AuthDialogCallback.DISMISSED_ERROR),
             eq<ByteArray?>(null) /* credentialAttestation */
         )
-        assertThat(authContainer.parent).isNull()
+        assertThat(authContainer!!.parent).isNull()
     }
 
     @Test
     fun testActionUseDeviceCredential_sendsOnDeviceCredentialPressed() {
-        initializeContainer(
+        val container = initializeContainer(
             BiometricManager.Authenticators.BIOMETRIC_WEAK or
-                BiometricManager.Authenticators.DEVICE_CREDENTIAL
+                    BiometricManager.Authenticators.DEVICE_CREDENTIAL
         )
-        authContainer.mBiometricCallback.onAction(
+        container.mBiometricCallback.onAction(
             AuthBiometricView.Callback.ACTION_USE_DEVICE_CREDENTIAL
         )
         waitForIdleSync()
 
         verify(callback).onDeviceCredentialPressed()
-        assertThat(authContainer.hasCredentialView()).isTrue()
+        assertThat(container.hasCredentialView()).isTrue()
     }
 
     @Test
     fun testAnimateToCredentialUI_invokesStartTransitionToCredentialUI() {
-        initializeContainer(
+        val container = initializeContainer(
             BiometricManager.Authenticators.BIOMETRIC_WEAK or
-                BiometricManager.Authenticators.DEVICE_CREDENTIAL
+                    BiometricManager.Authenticators.DEVICE_CREDENTIAL
         )
-        authContainer.animateToCredentialUI()
+        container.animateToCredentialUI()
         waitForIdleSync()
 
-        assertThat(authContainer.hasCredentialView()).isTrue()
+        assertThat(container.hasCredentialView()).isTrue()
     }
 
     @Test
     fun testShowBiometricUI() {
-        initializeContainer(BiometricManager.Authenticators.BIOMETRIC_WEAK)
+        val container = initializeContainer(BiometricManager.Authenticators.BIOMETRIC_WEAK)
 
         waitForIdleSync()
 
-        assertThat(authContainer.hasCredentialView()).isFalse()
-        assertThat(authContainer.hasBiometricPrompt()).isTrue()
+        assertThat(container.hasCredentialView()).isFalse()
+        assertThat(container.hasBiometricPrompt()).isTrue()
     }
 
     @Test
     fun testShowCredentialUI() {
-        initializeContainer(BiometricManager.Authenticators.DEVICE_CREDENTIAL)
+        val container = initializeContainer(BiometricManager.Authenticators.DEVICE_CREDENTIAL)
         waitForIdleSync()
 
-        assertThat(authContainer.hasCredentialView()).isTrue()
-        assertThat(authContainer.hasBiometricPrompt()).isFalse()
+        assertThat(container.hasCredentialView()).isTrue()
+        assertThat(container.hasBiometricPrompt()).isFalse()
     }
 
     @Test
@@ -201,11 +207,11 @@ class AuthContainerViewTest : SysuiTestCase() {
             DevicePolicyManager.PASSWORD_QUALITY_SOMETHING
         )
 
-        initializeContainer(BiometricManager.Authenticators.DEVICE_CREDENTIAL)
+        val container = initializeContainer(BiometricManager.Authenticators.DEVICE_CREDENTIAL)
         waitForIdleSync()
 
-        assertThat(authContainer.hasCredentialPatternView()).isTrue()
-        assertThat(authContainer.hasBiometricPrompt()).isFalse()
+        assertThat(container.hasCredentialPatternView()).isTrue()
+        assertThat(container.hasBiometricPrompt()).isFalse()
     }
 
     @Test
@@ -218,20 +224,20 @@ class AuthContainerViewTest : SysuiTestCase() {
         // In the credential view, clicking on the background (to cancel authentication) is not
         // valid. Thus, the listener should be null, and it should not be in the accessibility
         // hierarchy.
-        initializeContainer(BiometricManager.Authenticators.DEVICE_CREDENTIAL)
+        val container = initializeContainer(BiometricManager.Authenticators.DEVICE_CREDENTIAL)
         waitForIdleSync()
 
-        assertThat(authContainer.hasCredentialPasswordView()).isTrue()
-        assertThat(authContainer.hasBiometricPrompt()).isFalse()
+        assertThat(container.hasCredentialPasswordView()).isTrue()
+        assertThat(container.hasBiometricPrompt()).isFalse()
         assertThat(
-            authContainer.findViewById<View>(R.id.background)?.isImportantForAccessibility
+            container.findViewById<View>(R.id.background)?.isImportantForAccessibility
         ).isFalse()
 
-        authContainer.findViewById<View>(R.id.background)?.performClick()
+        container.findViewById<View>(R.id.background)?.performClick()
         waitForIdleSync()
 
-        assertThat(authContainer.hasCredentialPasswordView()).isTrue()
-        assertThat(authContainer.hasBiometricPrompt()).isFalse()
+        assertThat(container.hasCredentialPasswordView()).isTrue()
+        assertThat(container.hasBiometricPrompt()).isFalse()
     }
 
     @Test
@@ -246,7 +252,7 @@ class AuthContainerViewTest : SysuiTestCase() {
         assertThat((layoutParams.fitInsetsTypes and WindowInsets.Type.ime()) == 0).isTrue()
     }
 
-    private fun initializeContainer(authenticators: Int) {
+    private fun initializeContainer(authenticators: Int): TestAuthContainerView {
         val config = AuthContainerView.Config()
         config.mContext = mContext
         config.mCallback = callback
@@ -286,6 +292,7 @@ class AuthContainerViewTest : SysuiTestCase() {
             Handler(TestableLooper.get(this).looper)
         )
         ViewUtils.attachView(authContainer)
+        return authContainer!!
     }
 
     private inner class TestAuthContainerView(
