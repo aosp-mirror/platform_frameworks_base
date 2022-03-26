@@ -809,11 +809,11 @@ class MediaHierarchyManager @Inject constructor(
         return resultBounds
     }
 
-    /**
-     * @return true if this transformation is guided by an external progress like a finger
-     */
-    private fun isCurrentlyInGuidedTransformation(): Boolean {
-        return hasValidStartAndEndLocations() && getTransformationProgress() >= 0
+    /** @return true if this transformation is guided by an external progress like a finger */
+    fun isCurrentlyInGuidedTransformation(): Boolean {
+        return hasValidStartAndEndLocations() &&
+                getTransformationProgress() >= 0 &&
+                areGuidedTransitionHostsVisible()
     }
 
     private fun hasValidStartAndEndLocations(): Boolean {

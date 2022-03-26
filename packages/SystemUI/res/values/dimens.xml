@@ -1170,6 +1170,13 @@
          whether the progress is > 0, therefore this value is not very important. -->
     <dimen name="lockscreen_shade_status_bar_transition_distance">@dimen/lockscreen_shade_full_transition_distance</dimen>
 
+    <!-- Distance that the full shade transition takes in order for the keyguard elements to fully
+         translate into their final position. -->
+    <dimen name="lockscreen_shade_keyguard_transition_distance">@dimen/lockscreen_shade_media_transition_distance</dimen>
+
+    <!-- The amount of vertical offset for the keyguard during the full shade transition. -->
+    <dimen name="lockscreen_shade_keyguard_transition_vertical_offset">0dp</dimen>
+
     <!-- Distance that the full shade transition takes in order for media to fully transition to
          the shade -->
     <dimen name="lockscreen_shade_media_transition_distance">120dp</dimen>
