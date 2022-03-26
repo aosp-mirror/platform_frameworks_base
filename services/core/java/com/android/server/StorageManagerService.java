@@ -128,6 +128,7 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.DataUnit;
+import android.util.EventLog;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
@@ -3401,6 +3402,7 @@ class StorageManagerService extends IStorageManager.Stub
                 }
             }
         } catch (Exception e) {
+            EventLog.writeEvent(0x534e4554, "224585613", -1, "");
             Slog.wtf(TAG, e);
             // Make sure to re-throw this exception; we must not ignore failure
             // to prepare the user storage as it could indicate that encryption
