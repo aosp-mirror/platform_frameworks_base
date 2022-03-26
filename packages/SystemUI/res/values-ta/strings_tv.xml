@@ -19,11 +19,15 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="mic_active" msgid="5766614241012047024">"மைக்ரோஃபோன் செயலிலுள்ளது"</string>
-    <string name="app_accessed_mic" msgid="2754428675130470196">"%1$s உங்கள் மைக்ரோஃபோனைப் பயன்படுத்தியது"</string>
     <string name="notification_vpn_connected" msgid="3891023882833274730">"VPN இணைக்கப்பட்டது"</string>
     <string name="notification_vpn_disconnected" msgid="7150747626448044843">"VPN துண்டிக்கப்பட்டது"</string>
     <string name="notification_disclosure_vpn_text" msgid="3873532735584866236">"<xliff:g id="VPN_APP">%1$s</xliff:g> வழியாக"</string>
     <string name="tv_notification_panel_title" msgid="5311050946506276154">"அறிவிப்புகள்"</string>
     <string name="tv_notification_panel_no_notifications" msgid="9115191912267270678">"அறிவிப்புகள் எதுவுமில்லை"</string>
+    <string name="mic_recording_announcement" msgid="7587123608060316575">"மைக்ரோஃபோன் ரெக்கார்டு செய்கிறது"</string>
+    <string name="camera_recording_announcement" msgid="7240177719403759112">"கேமரா ரெக்கார்டு செய்கிறது"</string>
+    <string name="mic_and_camera_recording_announcement" msgid="8599231390508812667">"கேமராவும் மைக்ரோஃபோனும் ரெக்கார்டு செய்கின்றன"</string>
+    <string name="mic_stopped_recording_announcement" msgid="7301537004900721242">"மைக்ரோஃபோன் ரெக்கார்டு செய்வதை நிறுத்திவிட்டது"</string>
+    <string name="camera_stopped_recording_announcement" msgid="8540496432367032801">"கேமரா ரெக்கார்டு செய்வதை நிறுத்திவிட்டது"</string>
+    <string name="mic_camera_stopped_recording_announcement" msgid="8708524579599977412">"கேமராவும் மைக்ரோஃபோனும் ரெக்கார்டு செய்வதை நிறுத்திவிட்டன"</string>
 </resources>
