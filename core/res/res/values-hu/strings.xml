@@ -70,6 +70,7 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"Háromutas hívás"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"A nem kívánt bosszantó hívások elutasítása"</string>
     <string name="CndMmi" msgid="185136449405618437">"Hívószám-kézbesítés"</string>
+    <string name="DndMmi" msgid="8797375819689129800">"Ne zavarjanak"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"A hívóazonosító alapértelmezett értéke korlátozott. Következő hívás: korlátozott"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"A hívóazonosító alapértelmezett értéke korlátozott. Következő hívás: nem korlátozott"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"A hívóazonosító alapértelmezett értéke nem korlátozott. Következő hívás: korlátozott"</string>
@@ -84,8 +85,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"A szolgáltató ideiglenesen kikapcsolta a következő SIM-kártya esetében: <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"A mobilhálózat nem érhető el"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Próbálja meg módosítani a preferált hálózatot. Koppintson a módosításhoz."</string>
-    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Segélyhívás nem lehetséges"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Nem lehet segélyhívást kezdeményezni Wi-Fi-n keresztül"</string>
+    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"Előfordulhat, hogy a segélyhívás funkció nem áll rendelkezésre"</string>
+    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"A(z) <xliff:g id="SPN">%s</xliff:g> nem támogatja segélyhívás indítását Wi-Fi-n keresztül. Koppintson a részletekért."</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Értesítések"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Hívásátirányítás"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Sürgősségi visszahívás mód"</string>
@@ -424,10 +425,10 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"Lehetővé teszi, hogy az alkalmazás módosítsa a táblagép híváslistáját, beleértve a bejövő és kimenő hívások adatait is. A rosszindulatú alkalmazások ezt arra használhatják, hogy híváslistáját töröljék vagy módosítsák."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Lehetővé teszi, hogy az alkalmazás módosítsa az Android TV eszköz híváslistáját, beleértve a bejövő és kimenő hívások adatait is. A rosszindulatú alkalmazások ezt felhasználhatják a híváslista törlésére vagy módosítására."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Lehetővé teszi, hogy az alkalmazás módosítsa a telefon híváslistáját, beleértve a bejövő és kimenő hívások adatait is. A rosszindulatú alkalmazások ezt arra használhatják, hogy híváslistáját töröljék vagy módosítsák."</string>
-    <string name="permlab_bodySensors" msgid="3411035315357380862">"hozzáférés a testérzékelőkhöz (például pulzusmérők)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="3208940894182188063">"Hozzáférhet olyan, testérzékelőktől származó adatokhoz, mint a pulzusszám, a testhőmérséklet, a véroxigénszint stb."</string>
-    <string name="permlab_bodySensors_background" msgid="4352831883331744370">"hozzáférés a háttérben futó testérzékelőkhöz (például pulzusmérők)"</string>
-    <string name="permdesc_bodySensors_background" product="default" msgid="8512392249166660872">"Hozzáférhet olyan, a háttérben futó testérzékelőktől származó adatokhoz, mint a pulzusszám, a testhőmérséklet, a véroxigénszint stb."</string>
+    <string name="permlab_bodySensors" msgid="662918578601619569">"Hozzáférés a testérzékelők adataihoz (pl. pulzusszám) használat közben"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Lehetővé teszi, hogy az alkalmazás hozzáférjen a testérzékelők adataihoz (pl. pulzusszám, testhőmérséklet és véroxigénszint), miközben az alkalmazás használatban van."</string>
+    <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Hozzáférés a testérzékelők adataihoz (pl. pulzusszám) a háttérben"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Lehetővé teszi, hogy az alkalmazás hozzáférjen a testérzékelők adataihoz (pl. pulzusszám, testhőmérséklet és véroxigénszint), miközben az alkalmazás a háttérben van."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Naptáresemények és a naptári adatok olvasása"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Az alkalmazás olvashatja a táblagépen tárolt összes naptáreseményt, és megoszthatja vagy mentheti a naptáradatokat."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Az alkalmazás olvashatja az Android TV eszközön tárolt összes naptáreseményt, és megoszthatja vagy mentheti a naptáradatokat."</string>
@@ -545,7 +546,7 @@
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Lehetővé teszi az alkalmazás számára, hogy közzétegye jelenlétét a közeli Bluetooth-eszközök számára"</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"közeli, ultraszélessávú eszközök közötti relatív pozíció meghatározása"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Az alkalmazás meghatározhatja a közeli, ultraszélessávú eszközök közötti relatív pozíciót"</string>
-    <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"műveleteket végezhet a közeli Wi‑Fi-eszközökkel"</string>
+    <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"műveletek végrehajtása a közeli Wi‑Fi-eszközökkel"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Engedélyezi az alkalmazás számára, hogy közzétegye és meghatározza a közeli Wi-Fi-eszközök viszonylagos helyzetét, és csatlakozzon hozzájuk."</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Preferált NFC fizetési szolgáltatási információk"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Lehetővé teszi az alkalmazás számára preferált NFC fizetési szolgáltatási információk (pl. regisztrált alkalmazásazonosítók és útvonali cél) lekérését."</string>
@@ -688,8 +689,8 @@
     <string name="permdesc_readMediaAudio" msgid="5299772574434619399">"Engedélyezi az alkalmazásnak a megosztott tárhelyen található hangfájlok olvasását."</string>
     <string name="permlab_readMediaVideo" msgid="7768003311260655007">"a megosztott tárhelyen található videófájlok olvasása"</string>
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"Engedélyezi az alkalmazásnak a megosztott tárhelyen található videófájlok olvasását."</string>
-    <string name="permlab_readMediaImage" msgid="1507059005825769856">"a megosztott tárhelyen található képfájlok olvasása"</string>
-    <string name="permdesc_readMediaImage" msgid="8328052622292457588">"Engedélyezi az alkalmazásnak a megosztott tárhelyen található képfájlok olvasását."</string>
+    <string name="permlab_readMediaImages" msgid="4057590631020986789">"a megosztott tárhelyen található képfájlok olvasása"</string>
+    <string name="permdesc_readMediaImages" msgid="5836219373138469259">"Engedélyezi az alkalmazásnak a megosztott tárhelyen található képfájlok olvasását."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"a közös tárhely tartalmainak törlése és módosítása"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Engedélyezi az alkalmazás számára a közös tárhely tartalmainak felülírását."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"SIP-hívások indítása/fogadása"</string>
@@ -736,6 +737,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"Lehetővé teszi, hogy a tulajdonos kapcsolódjon egy üzenetszolgáltatás legfelső szintű kezelőfelületéhez. A normál alkalmazásoknak erre soha nincs szükségük."</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"kapcsolódás szolgáltatókhoz"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"Lehetővé teszi a tulajdonos számára a szolgáltatókhoz való kapcsolódást. A normál alkalmazások esetében erre nincs szükség."</string>
+    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"hozzáférés a „Ne zavarjanak” funkcióhoz"</string>
+    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Az alkalmazás olvashatja és szerkesztheti a „Ne zavarjanak” funkció beállításait."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"engedélyhasználat megtekintésének elindítása"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Lehetővé teszi a felhasználó számára, hogy elindítsa az alkalmazás engedélyhasználatát. A normál alkalmazásoknak erre soha nincs szükségük."</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"engedélyezési döntések megtekintésének elindítása"</string>
@@ -909,7 +912,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"A feloldáshoz vagy segélyhívás kezdeményezéséhez nyomja meg a Menü gombot."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"A feloldáshoz nyomja meg a Menü gombot."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"Rajzolja le a mintát a feloldáshoz"</string>
-    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"Segélyhívás"</string>
+    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"Segélyhívás"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"Hívás folytatása"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"Helyes!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Próbálja újra"</string>
@@ -1048,7 +1051,6 @@
     <string name="save_password_never" msgid="6776808375903410659">"Soha"</string>
     <string name="open_permission_deny" msgid="5136793905306987251">"Nincs engedélye ennek az oldalnak a megnyitására."</string>
     <string name="text_copied" msgid="2531420577879738860">"A szöveg bemásolva a vágólapra."</string>
-    <string name="copied" msgid="4675902854553014676">"Átmásolva"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"A(z) <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> tartalmat másolt vágólapra a(z) <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g> appból"</string>
     <string name="pasted_from_clipboard" msgid="7355790625710831847">"A(z) <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> beillesztett a vágólapról"</string>
     <string name="pasted_text" msgid="4298871641549173733">"A(z) <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> beillesztette a másolt szöveget"</string>
@@ -1449,8 +1451,6 @@
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"Az alkalmazás engedélyt kérhet az akkumulátoroptimalizálási beállítások mellőzésére."</string>
     <string name="permlab_queryAllPackages" msgid="2928450604653281650">"az összes csomag lekérdezése"</string>
     <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"Engedélyezi az adott alkalmazás számára, hogy lássa az összes telepített csomagot."</string>
-    <string name="permlab_accessSupplementalApi" msgid="3544659160536960275">"hozzáférés ehhez: SupplementalApis"</string>
-    <string name="permdesc_accessSupplementalApi" msgid="8974758769370951074">"Lehetővé teszi egy alkalmazás számára, hogy hozzáférjen a következőhöz: SupplementalApis."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"Érintse meg kétszer a nagyítás beállításához"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"Nem sikerült hozzáadni a modult."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"Ugrás"</string>
@@ -1501,8 +1501,7 @@
     <string name="skip_button_label" msgid="3566599811326688389">"Kihagyás"</string>
     <string name="no_matches" msgid="6472699895759164599">"Nincs találat"</string>
     <string name="find_on_page" msgid="5400537367077438198">"Keresés az oldalon"</string>
-    <!-- no translation found for matches_found (2296462299979507689) -->
-    <skip />
+    <string name="matches_found" msgid="2296462299979507689">"{count,plural, =1{# egyezés}other{{total}/#}}"</string>
     <string name="action_mode_done" msgid="2536182504764803222">"Kész"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"Közös tárhely tartalmának törlése…"</string>
     <string name="share" msgid="4157615043345227321">"Megosztás"</string>
@@ -1714,6 +1713,7 @@
     <string name="user_switching_message" msgid="1912993630661332336">"Átváltás erre: <xliff:g id="NAME">%1$s</xliff:g>..."</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"<xliff:g id="NAME">%1$s</xliff:g> kijelentkeztetése folyamatban van…"</string>
     <string name="owner_name" msgid="8713560351570795743">"Tulajdonos"</string>
+    <string name="guest_name" msgid="8502103277839834324">"Vendég"</string>
     <string name="error_message_title" msgid="4082495589294631966">"Hiba"</string>
     <string name="error_message_change_not_allowed" msgid="843159705042381454">"Ezt a módosítást nem engedélyezi a rendszergazda"</string>
     <string name="app_not_found" msgid="3429506115332341800">"Nincs megfelelő alkalmazás a művelet elvégzésére."</string>
@@ -1867,8 +1867,10 @@
     <string name="zen_mode_until" msgid="2250286190237669079">"Eddig: <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"Eddig: <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (ez a következő ébresztés)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"Kikapcsolásig"</string>
+    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"Amíg ki nem kapcsolja a „Ne zavarjanak” lehetőséget"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"Összecsukás"</string>
+    <string name="zen_mode_feature_name" msgid="3785547207263754500">"Ne zavarjanak"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"Inaktivitás"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"Hétköznap éjszaka"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Hétvége"</string>
@@ -1931,6 +1933,8 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"Az alkalmazás nem hozzáférhető"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"A(z) <xliff:g id="APP_NAME">%1$s</xliff:g> jelenleg nem hozzáférhető."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"A(z) <xliff:g id="ACTIVITY">%1$s</xliff:g> nem áll rendelkezése"</string>
+    <!-- no translation found for app_streaming_blocked_title_for_permission_dialog (4483161748582966785) -->
+    <skip />
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"Ehhez jelenleg nem lehet hozzáférni a következő eszközön: <xliff:g id="DEVICE">%1$s</xliff:g>. Próbálja újra Android TV-eszközén."</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"Ehhez jelenleg nem lehet hozzáférni a következő eszközön: <xliff:g id="DEVICE">%1$s</xliff:g>. Próbálja újra a táblagépén."</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"Ehhez jelenleg nem lehet hozzáférni a következő eszközön: <xliff:g id="DEVICE">%1$s</xliff:g>. Próbálja újra a telefonján."</string>
@@ -2023,17 +2027,20 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"ELTÁVOLÍTÁS"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"MEGNYITÁS MÉGIS"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"A rendszer kártékony alkalmazást észlelt"</string>
-    <string name="log_access_confirmation_title" msgid="3143035474800851565">"Rendszernaplókhoz való hozzáférés kérése"</string>
+    <string name="log_access_confirmation_title" msgid="2343578467290592708">"Engedélyezi a(z) <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> számára, hogy hozzáférjen az összes eszköznaplóhoz?"</string>
     <string name="log_access_confirmation_allow" msgid="143157286283302512">"Csak most"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Tiltás"</string>
-    <string name="log_access_confirmation_body" msgid="7599059550906238538">"Funkcionális hibaelhárítás céljából a(z) <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> hozzáférést kér a rendszernaplókhoz. A naplókban olyan információk lehetnek, amelyek az eszközön használt alkalmazásoktól és szolgáltatásoktól származnak."</string>
+    <string name="log_access_confirmation_body" msgid="4483075525611652922">"Az eszköznaplók rögzítik, hogy mi történik az eszközén. Az alkalmazások ezeket a naplókat használhatják a problémák megkeresésére és kijavítására.\n\nBizonyos naplók érzékeny adatokat is tartalmazhatnak, ezért csak olyan alkalmazások számára engedélyezze az összes eszköznaplóhoz való hozzáférést, amelyekben megbízik. \n\nHa nem engedélyezi ennek az alkalmazásnak, hogy hozzáférjen az összes eszköznaplójához, az app továbbra is hozzáférhet a saját naplóihoz, és előfordulhat, hogy az eszköz gyártója továbbra is hozzáfér az eszközön található bizonyos naplókhoz és adatokhoz. További információ."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Ne jelenjen meg újra"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"A(z) <xliff:g id="APP_0">%1$s</xliff:g> alkalmazás részleteket szeretne megjeleníteni a(z) <xliff:g id="APP_2">%2$s</xliff:g> alkalmazásból"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Szerkesztés"</string>
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"A hívások és az értesítések rezegnek"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"A hívások és az értesítések némák"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Rendszermódosítások"</string>
+    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Ne zavarjanak"</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Újdonság: A Ne zavarjanak mód elrejti az értesítéseket"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Koppintással további információhoz juthat, és elvégezheti a módosítást."</string>
+    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Módosultak a Ne zavarjanak mód beállításai"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Koppintson a letiltott elemek megtekintéséhez."</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Rendszer"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Beállítások"</string>
@@ -2050,6 +2057,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Kikapcsolás"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"További információ"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"A bővített értesítések felváltják az androidos alkalmazkodó értesítéseket az Android 12-es verziójában. Ez a funkció javasolt műveleteket és válaszokat mutat, és rendszerezi az értesítéseket.\n\nA bővített értesítések minden értesítéstartalmat olvashatnak (így a személyes adatokat, mint például a névjegyek nevét és az üzeneteket is). Ez a funkció emellett elvetheti az értesítéseket, valamint reagálhat rájuk, például felveheti a telefonhívásokat, és vezérelheti a Ne zavarjanak módot."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Információs értesítés a rutinmódról"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Előfordulhat, hogy az akkumulátor lemerül a szokásos töltési időszak előtt"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Akkumulátorkímélő mód aktiválva az akkumulátor üzemidejének növelése érdekében"</string>
@@ -2253,9 +2261,9 @@
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Sikerült lefordítani az üzenetet <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> nyelvről <xliff:g id="TO_LANGUAGE">%2$s</xliff:g> nyelvre."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Háttértevékenység"</string>
     <string name="notification_title_abusive_bg_apps" msgid="344582472797982073">"Háttértevékenység"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"A(z) <xliff:g id="APP">%1$s</xliff:g> alkalmazás fut a háttérben, és meríti az akkumulátort. Koppintson az áttekintéshez."</string>
+    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"A(z) <xliff:g id="APP">%1$s</xliff:g> fut a háttérben, és meríti az akkumulátort. Koppintson az áttekintéshez."</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"A(z) <xliff:g id="APP">%1$s</xliff:g> alkalmazás már hosszú ideje fut a háttérben. Koppintson az áttekintéshez."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Aktív alkalmazások ellenőrzése"</string>
-    <!-- no translation found for vdm_camera_access_denied (6345652513729130490) -->
-    <skip />
+    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"Ezen az eszközön nem lehet hozzáférni a kamerához"</string>
+    <string name="system_locale_title" msgid="3978041860457277638">"Alapértelmezett nyelv"</string>
 </resources>

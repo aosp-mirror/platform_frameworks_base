@@ -70,6 +70,7 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"മൂന്നുവിധത്തിൽ കോൾ ചെയ്യൽ"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"ആവശ്യമില്ലാത്ത ശല്യപ്പെടുത്തൽ കോളുകൾ നിരസിക്കൽ"</string>
     <string name="CndMmi" msgid="185136449405618437">"കോൾ ചെയ്യാനുള്ള നമ്പർ ഡെലിവറി"</string>
+    <string name="DndMmi" msgid="8797375819689129800">"ശല്യം ചെയ്യരുത്"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"നിയന്ത്രിക്കേണ്ട സ്ഥിര കോളർ ഐഡികൾ. അടുത്ത കോൾ: നിയന്ത്രിച്ചിട്ടുണ്ട്"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"നിയന്ത്രിക്കേണ്ട സ്ഥിര കോളർ ഐഡികൾ. അടുത്ത കോൾ: നിയന്ത്രിച്ചിട്ടില്ല"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"നിയന്ത്രിക്കേണ്ടതല്ലാത്ത സ്ഥിര കോളർ ഐഡികൾ. അടുത്ത കോൾ: നിയന്ത്രിച്ചിട്ടുണ്ട്"</string>
@@ -84,8 +85,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"നിങ്ങളുടെ കാരിയർ, സിം <xliff:g id="SIMNUMBER">%d</xliff:g> താൽക്കാലികമായി ഓഫാക്കി"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"മൊബൈൽ നെറ്റ്‌വർക്കിലേക്ക് കണക്റ്റ് ചെയ്യാനാവുന്നില്ല"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"തിര‌ഞ്ഞെടുത്ത നെറ്റ്‌വർക്ക് മാറ്റുന്നത് പരീക്ഷിക്കുക. മാറ്റാൻ ടാപ്പ് ചെയ്യുക."</string>
-    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"എമർജൻസി കോളിംഗ് ലഭ്യമല്ല"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"വൈഫൈ വഴി എമർജൻസി കോളുകൾ ചെയ്യാനാകില്ല"</string>
+    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"എമർജൻസി കോളുകൾ ലഭ്യമായിരിക്കില്ല"</string>
+    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"വൈഫൈ ഉപയോഗിച്ചുള്ള എമർജൻസി കോളുകൾ <xliff:g id="SPN">%s</xliff:g> പിന്തുണയ്‌ക്കുന്നില്ല. വിശദാംശങ്ങൾക്ക് ടാപ്പ് ചെയ്യുക."</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"അലേർട്ടുകൾ"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"കോൾ ഫോർവേഡിംഗ്"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"അടിയന്തര കോൾബാക്ക് മോഡ്"</string>
@@ -424,10 +425,10 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"ഇൻകമ്മിംഗ്-ഔട്ട്ഗോയിംഗ് കോളുകളെക്കുറിച്ചുള്ള ഡാറ്റയുൾപ്പെടെയുള്ള നിങ്ങളുടെ ടാബ്‌ലെറ്റിന്‍റെ കോൾ ചരിത്രം പരിഷ്‌ക്കരിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു.ഇതു വഴി കോൾ ചരിത്ര ഡാറ്റകൾ പരിഷ്‌ക്കരിക്കാനും ഇല്ലാതാക്കാനും ദോഷകരമായ അപ്ലിക്കേഷനുകൾക്ക് കഴിഞ്ഞേയ്ക്കാം."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"ഇൻകമിംഗ്, ഔട്ട്‌ഗോയിംഗ് കോളുകളെക്കുറിച്ചുള്ള ഡാറ്റ ഉൾപ്പെടെ നിങ്ങളുടെ Android TV-യിലെ കോൾ ചരിത്രം പരിഷ്‌ക്കരിക്കാൻ ആപ്പിനെ അനുവദിക്കുന്നു. നിങ്ങളുടെ കോൾ ചരിത്രം മായ്‌ക്കാനോ പരിഷ്‌ക്കരിക്കാനോ ദോഷകരമായ ആപ്പുകൾ ഇത് ഉപയോഗിച്ചേക്കാം."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"ഇൻകമ്മിംഗ്-ഔട്ട്ഗോയിംഗ് കോളുകളെക്കുറിച്ചുള്ള ഡാറ്റയുൾപ്പെടെയുള്ള നിങ്ങളുടെ ഫോണിന്‍റെ കോൾ ചരിത്രം പരിഷ്‌ക്കരിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു.ഇതു വഴി കോൾ ചരിത്ര ഡാറ്റകൾ പരിഷ്‌ക്കരിക്കാനും ഇല്ലാതാക്കാനും ദോഷകരമായ അപ്ലിക്കേഷനുകൾക്ക് കഴിഞ്ഞേയ്ക്കാം."</string>
-    <string name="permlab_bodySensors" msgid="3411035315357380862">"ശരീര സെൻസറുകൾ (ഹൃദയമിടിപ്പ് നിരക്ക് മോണിറ്ററുകൾ പോലെ) ആക്സസ് ചെയ്യുക"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="3208940894182188063">"ഹൃദയമിടിപ്പ്, താപനില, രക്തത്തിലെ ഓക്‌സിജന്റെ ശതമാനം മുതലായവ പോലുള്ള ബോഡി സെൻസറുകളിൽ നിന്നുള്ള ഡാറ്റയിലേക്കുള്ള ആക്‌സസ്."</string>
-    <string name="permlab_bodySensors_background" msgid="4352831883331744370">"പശ്ചാത്തലത്തിൽ ബോഡി സെൻസറുകൾ (ഹൃദയമിടിപ്പ് മോണിറ്ററുകൾ പോലുള്ളവ) ആക്സസ് ചെയ്യുക"</string>
-    <string name="permdesc_bodySensors_background" product="default" msgid="8512392249166660872">"പശ്ചാത്തലത്തിൽ ആയിരിക്കുമ്പോൾ ഹൃദയമിടിപ്പ്, താപനില, രക്തത്തിലെ ഓക്‌സിജന്റെ ശതമാനം മുതലായവ പോലുള്ള ബോഡി സെൻസറുകളിൽ നിന്നുള്ള ഡാറ്റയിലേക്കുള്ള ആക്‌സസ്."</string>
+    <string name="permlab_bodySensors" msgid="662918578601619569">"ഉപയോഗത്തിലുള്ളപ്പോൾ, ഹൃദയമിടിപ്പ് പോലുള്ള ബോഡി സെൻസർ ഡാറ്റ ആക്‌സസ് ചെയ്യുക"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"ആപ്പ് ഉപയോഗത്തിലുള്ളപ്പോൾ അതിനെ ഹൃദയമിടിപ്പ്, ശരീരോഷ്മാവ്, രക്തത്തിലെ ഓക്സിജൻ ശതമാനം എന്നിവ പോലുള്ള ബോഡി സെൻസർ ഡാറ്റ ആക്‌സസ് ചെയ്യാൻ അനുവദിക്കുന്നു."</string>
+    <string name="permlab_bodySensors_background" msgid="4912560779957760446">"പശ്ചാത്തലത്തിലുള്ളപ്പോൾ ഹൃദയമിടിപ്പ് പോലുള്ള ബോഡി സെൻസർ ഡാറ്റ ആക്‌സസ് ചെയ്യുക"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"ആപ്പ് പശ്ചാത്തലത്തിലുള്ളപ്പോൾ അതിനെ ഹൃദയമിടിപ്പ്, ശരീരോഷ്മാവ്, രക്തത്തിലെ ഓക്സിജൻ ശതമാനം എന്നിവ പോലുള്ള ബോഡി സെൻസർ ഡാറ്റ ആക്‌സസ് ചെയ്യാൻ അനുവദിക്കുന്നു."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"കലണ്ടർ ഇവന്റുകളും വിശദാംശങ്ങളും വായിക്കുക"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"ഈ ആപ്പിന് നിങ്ങളുടെ ടാബ്‌ലെറ്റിൽ സംഭരിച്ചിരിക്കുന്ന എല്ലാ കലണ്ടർ ഇവന്റുകളും വായിക്കാനും നിങ്ങളുടെ കലണ്ടർ വിവരങ്ങൾ പങ്കിടാനും അല്ലെങ്കിൽ സംരക്ഷിക്കാനും കഴിയും."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"ഈ ആപ്പിന് നിങ്ങളുടെ Android TV-യിൽ സംഭരിച്ചിരിക്കുന്ന എല്ലാ കലണ്ടർ ഇവന്റുകളും വായിക്കാനും നിങ്ങളുടെ കലണ്ടർ ഡാറ്റ പങ്കിടാനോ സംരക്ഷിക്കാനോ സാധിക്കുകയും ചെയ്യും."</string>
@@ -546,7 +547,7 @@
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"സമീപമുള്ള അൾട്രാ-വെെഡ്ബാൻഡ് ഉപകരണങ്ങൾ തമ്മിലുള്ള ആപേക്ഷിക സ്ഥാനം നിർണ്ണയിക്കൂ"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"സമീപമുള്ള അൾട്രാ-വെെഡ്ബാൻഡ് ഉപകരണങ്ങൾ തമ്മിലുള്ള ആപേക്ഷിക സ്ഥാനം നിർണ്ണയിക്കാൻ ആപ്പിനെ അനുവദിക്കുക"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"സമീപമുള്ള വൈഫൈ ഉപകരണങ്ങളുമായി ഇടപഴകുക"</string>
-    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"സമീപമുള്ള വൈഫൈ ഉപകരണത്തെ കാണിക്കാനും അവയിലേക്ക് കണക്റ്റ് ചെയ്യാനും അവയുടെ ആപേക്ഷിക സ്ഥാനം നിർണ്ണയിക്കാനും ആപ്പിനെ അനുവദിക്കൂ"</string>
+    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"സമീപമുള്ള വൈഫൈ ഉപകരണങ്ങൾ കാണിക്കാനും അവയിലേക്ക് കണക്റ്റ് ചെയ്യാനും അവയുടെ ആപേക്ഷിക സ്ഥാനം നിർണ്ണയിക്കാനും ആപ്പിനെ അനുവദിക്കൂ"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"തിരഞ്ഞെടുത്ത NFC പേയ്‌മെന്റ് സേവനത്തെ സംബന്ധിച്ച വിവരങ്ങൾ"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"റൂട്ട് ലക്ഷ്യസ്ഥാനം, രജിസ്‌റ്റർ ചെയ്തിരിക്കുന്ന സഹായങ്ങൾ എന്നിവ പോലുള്ള, തിരഞ്ഞെടുത്ത NFC പേയ്‌മെന്റ് സേവനത്തെ സംബന്ധിച്ച വിവരങ്ങൾ ലഭിക്കാൻ ആപ്പിനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"സമീപ ഫീൽഡുമായുള്ള ആശയവിനിമയം നിയന്ത്രിക്കുക"</string>
@@ -688,8 +689,8 @@
     <string name="permdesc_readMediaAudio" msgid="5299772574434619399">"നിങ്ങളുടെ പങ്കിട്ട സ്‌റ്റോറേജിൽ നിന്നുള്ള ഓഡിയോ ഫയലുകൾ വായിക്കാൻ ആപ്പിനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_readMediaVideo" msgid="7768003311260655007">"പങ്കിട്ട സ്റ്റോറേജിൽ നിന്നുള്ള വീഡിയോ ഫയലുകൾ വായിക്കുക"</string>
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"നിങ്ങളുടെ പങ്കിട്ട സ്‌റ്റോറേജിൽ നിന്നുള്ള വീഡിയോ ഫയലുകൾ വായിക്കാൻ ആപ്പിനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_readMediaImage" msgid="1507059005825769856">"പങ്കിട്ട സ്റ്റോറേജിൽ നിന്നുള്ള ചിത്ര ഫയലുകൾ വായിക്കുക"</string>
-    <string name="permdesc_readMediaImage" msgid="8328052622292457588">"നിങ്ങളുടെ പങ്കിട്ട സ്‌റ്റോറേജിൽ നിന്നുള്ള ചിത്ര ഫയലുകൾ വായിക്കാൻ ആപ്പിനെ അനുവദിക്കുന്നു."</string>
+    <string name="permlab_readMediaImages" msgid="4057590631020986789">"പങ്കിട്ട സ്റ്റോറേജിൽ നിന്നുള്ള ചിത്ര ഫയലുകൾ വായിക്കുക"</string>
+    <string name="permdesc_readMediaImages" msgid="5836219373138469259">"നിങ്ങളുടെ പങ്കിട്ട സ്‌റ്റോറേജിൽ നിന്നുള്ള ചിത്ര ഫയലുകൾ വായിക്കാൻ ആപ്പിനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"നിങ്ങൾ പങ്കിടുന്ന സ്‌റ്റോറേജിലെ ഉള്ളടക്കങ്ങൾ പരിഷ്‌ക്കരിക്കുക അല്ലെങ്കിൽ ഇല്ലാതാക്കുക"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"നിങ്ങൾ പങ്കിടുന്ന സ്‌റ്റോറേജിലെ ഉള്ളടക്കങ്ങൾ എഴുതാൻ ആപ്പിനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"SIP കോളുകൾ വിളിക്കുക/സ്വീകരിക്കുക"</string>
@@ -736,6 +737,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"ഒരു കാരിയർ സന്ദേശമയയ്‌ക്കൽ സേവനത്തിന്റെ ഉയർന്ന നിലയിലുള്ള ഇന്റർഫേസിലേക്ക് ബന്ധിപ്പിക്കാൻ ദാതാവിനെ അനുവദിക്കുന്നു. സാധാരണ അപ്ലിക്കേഷനുകൾക്ക് ഒരിക്കലും ആവശ്യമില്ല."</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"കാരിയർ സേവനങ്ങളിലേക്ക് ബന്ധിപ്പിക്കുക"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"കാരിയർ സേവനങ്ങളെ ബന്ധിപ്പിക്കാൻ ഉടമയെ അനുവദിക്കുന്നു. സാധാരണ ആപ്പ്‌സിന് ഒരിക്കലും ആവശ്യമില്ല."</string>
+    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"\'ശല്യപ്പെടുത്തരുത്\' ആക്സസ് ചെയ്യുക"</string>
+    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"\'ശല്യപ്പെടുത്തരുത്\' കോൺഫിഗറേഷൻ വായിക്കുന്നതിനും എഴുതുന്നതിനും ആപ്പിനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"അനുമതി ഉപയോഗം കാണാൻ ആരംഭിക്കുക"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"ഒരു ആപ്പിനുള്ള അനുമതി ഉപയോഗം ആരംഭിക്കാൻ ഹോൾഡറിനെ അനുവദിക്കുന്നു. സാധാരണ ആപ്പുകൾക്ക് ഒരിക്കലും ആവശ്യമില്ല."</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"അനുമതിയുമായി ബന്ധപ്പെട്ട തീരുമാനങ്ങൾ കാണാൻ ആരംഭിക്കുക"</string>
@@ -909,7 +912,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"അൺലോക്ക് ചെയ്യുന്നതിനായി മെനു അമർത്തുക അല്ലെങ്കിൽ അടിയന്തര കോൾ വിളിക്കുക."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"അൺലോക്കുചെയ്യാൻ മെനു അമർത്തുക."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"അൺലോക്ക് ചെയ്യാൻ പാറ്റേൺ വരയ്‌ക്കുക"</string>
-    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"എമർജൻസി കോൾ"</string>
+    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"എമർജൻസി"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"കോളിലേക്ക് മടങ്ങുക"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"ശരി!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"വീണ്ടും ശ്രമിക്കുക"</string>
@@ -1048,7 +1051,6 @@
     <string name="save_password_never" msgid="6776808375903410659">"ഒരിക്കലും"</string>
     <string name="open_permission_deny" msgid="5136793905306987251">"ഈ പേജ് തുറക്കുന്നതിന് നിങ്ങൾക്ക് അനുമതിയില്ല."</string>
     <string name="text_copied" msgid="2531420577879738860">"ടെക്‌സ്റ്റ് ക്ലിപ്‍ബോർഡിലേക്ക് പകർത്തി."</string>
-    <string name="copied" msgid="4675902854553014676">"പകർത്തി"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g> എന്നതിൽ നിന്ന് <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ഒട്ടിച്ചു"</string>
     <string name="pasted_from_clipboard" msgid="7355790625710831847">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> നിങ്ങളുടെ ക്ലിപ്പ്ബോർഡിൽ നിന്ന് ഒട്ടിച്ചു"</string>
     <string name="pasted_text" msgid="4298871641549173733">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> നിങ്ങൾ പകർത്തിയ ടെക്സ്റ്റ് ഒട്ടിച്ചു"</string>
@@ -1449,8 +1451,6 @@
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"ആപ്പിന് വേണ്ടിയുള്ള ബാറ്ററി ഒപ്റ്റിമൈസേഷനുകളെ അവഗണിക്കാനുള്ള അനുമതി ചോദിക്കുന്നതിന് ആപ്പിനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_queryAllPackages" msgid="2928450604653281650">"എല്ലാ പാക്കേജുകളും നോക്കുക"</string>
     <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"ഇൻസ്‌റ്റാൾ ചെയ്‌ത എല്ലാ പാക്കേജുകളും കാണാൻ ഒരു ആപ്പിനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_accessSupplementalApi" msgid="3544659160536960275">"SupplementalApis ആക്‌സസ് ചെയ്യുക"</string>
-    <string name="permdesc_accessSupplementalApi" msgid="8974758769370951074">"SupplementalApis ആക്‌സസ് ചെയ്യാൻ ഒരു ആപ്പിനെ അനുവദിക്കുന്നു."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"സൂം നിയന്ത്രണം ലഭിക്കാൻ രണ്ടുതവണ ടാപ്പുചെയ്യുക"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"വിജറ്റ് ചേർക്കാനായില്ല."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"പോവുക"</string>
@@ -1501,8 +1501,7 @@
     <string name="skip_button_label" msgid="3566599811326688389">"ഒഴിവാക്കുക"</string>
     <string name="no_matches" msgid="6472699895759164599">"പൊരുത്തപ്പെടലുകൾ ഒന്നുമില്ല"</string>
     <string name="find_on_page" msgid="5400537367077438198">"പേജിൽ കണ്ടെത്തുക"</string>
-    <!-- no translation found for matches_found (2296462299979507689) -->
-    <skip />
+    <string name="matches_found" msgid="2296462299979507689">"{count,plural, =1{# പൊരുത്തം}other{{total}-ൽ #-ാമത്തേത്}}"</string>
     <string name="action_mode_done" msgid="2536182504764803222">"പൂർത്തിയായി"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"പങ്കിടുന്ന സ്‌റ്റോറേജ് മായ്‌ക്കുന്നു…"</string>
     <string name="share" msgid="4157615043345227321">"പങ്കിടുക"</string>
@@ -1714,6 +1713,7 @@
     <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g> എന്ന ഉപയോക്താവിലേക്ക് മാറുന്നു…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"<xliff:g id="NAME">%1$s</xliff:g> ലോഗൌട്ട് ചെയ്യുന്നു…"</string>
     <string name="owner_name" msgid="8713560351570795743">"ഉടമ"</string>
+    <string name="guest_name" msgid="8502103277839834324">"അതിഥി"</string>
     <string name="error_message_title" msgid="4082495589294631966">"പിശക്"</string>
     <string name="error_message_change_not_allowed" msgid="843159705042381454">"ഈ മാറ്റം നിങ്ങളുടെ അഡ്‌മിൻ അനുവദിക്കുന്നില്ല"</string>
     <string name="app_not_found" msgid="3429506115332341800">"ഈ പ്രവർത്തനം കൈകാര്യം ചെയ്യുന്ന അപ്ലിക്കേഷനുകളൊന്നും കണ്ടെത്തിയില്ല"</string>
@@ -1867,8 +1867,10 @@
     <string name="zen_mode_until" msgid="2250286190237669079">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> വരെ"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> വരെ (അടുത്ത അലാറം)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"നിങ്ങൾ ഓഫാക്കുന്നത് വരെ"</string>
+    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"\'ശല്ല്യപ്പെടുത്തരുത്\' ഓഫാക്കുന്നതുവരെ"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"ചുരുക്കുക"</string>
+    <string name="zen_mode_feature_name" msgid="3785547207263754500">"ശല്യപ്പെടുത്തരുത്"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"പ്രവർത്തനരഹിതമായ സമയം"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"പ്രവൃത്തിദിനരാവ്"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"വാരാന്ത്യം"</string>
@@ -1931,6 +1933,8 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"ആപ്പ് ലഭ്യമല്ല"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ഇപ്പോൾ ലഭ്യമല്ല."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> ലഭ്യമല്ല"</string>
+    <!-- no translation found for app_streaming_blocked_title_for_permission_dialog (4483161748582966785) -->
+    <skip />
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"ഇപ്പോൾ നിങ്ങളുടെ <xliff:g id="DEVICE">%1$s</xliff:g> ഉപകരണത്തിൽ ഇത് ആക്‌സസ് ചെയ്യാനാകില്ല. പകരം Android TV ഉപകരണത്തിൽ ശ്രമിച്ച് നോക്കൂ."</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"ഇപ്പോൾ നിങ്ങളുടെ <xliff:g id="DEVICE">%1$s</xliff:g> ഉപകരണത്തിൽ ഇത് ആക്‌സസ് ചെയ്യാനാകില്ല. പകരം നിങ്ങളുടെ ടാബ്‌ലെറ്റിൽ ശ്രമിച്ച് നോക്കൂ."</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"ഇപ്പോൾ നിങ്ങളുടെ <xliff:g id="DEVICE">%1$s</xliff:g> ഉപകരണത്തിൽ ഇത് ആക്‌സസ് ചെയ്യാനാകില്ല. പകരം നിങ്ങളുടെ ഫോണിൽ ശ്രമിച്ച് നോക്കൂ."</string>
@@ -2023,17 +2027,20 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"അൺഇൻസ്‌റ്റാള്‍ ചെയ്യുക"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"എന്തായാലും തുറക്കുക"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"ദോഷകരമായ ആപ്പ് കണ്ടെത്തി"</string>
-    <string name="log_access_confirmation_title" msgid="3143035474800851565">"സിസ്റ്റം ലോഗ് ആക്സസ് അഭ്യർത്ഥന"</string>
+    <string name="log_access_confirmation_title" msgid="2343578467290592708">"എല്ലാ ഉപകരണ ലോഗുകളും ആക്‌സസ് ചെയ്യാൻ <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> എന്നതിനെ അനുവദിക്കണോ?"</string>
     <string name="log_access_confirmation_allow" msgid="143157286283302512">"ഇപ്രാവശ്യം മാത്രം"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"അനുവദിക്കരുത്"</string>
-    <string name="log_access_confirmation_body" msgid="7599059550906238538">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g>, ഫംഗ്ഷണൽ ഡീബഗ്ഗിംഗിന് സിസ്റ്റം ലോഗുകൾ അഭ്യർത്ഥിക്കുന്നു. ഈ ലോഗുകളിൽ, നിങ്ങളുടെ ഉപകരണത്തിലെ ആപ്പുകളും സേവനങ്ങളും രേഖപ്പെടുത്തിയ വിവരങ്ങൾ അടങ്ങിയേക്കാം."</string>
+    <string name="log_access_confirmation_body" msgid="4483075525611652922">"നിങ്ങളുടെ ഉപകരണത്തിൽ എന്തൊക്കെയാണ് സംഭവിക്കുന്നതെന്ന് ഉപകരണ ലോഗുകൾ റെക്കോർഡ് ചെയ്യുന്നു. പ്രശ്‌നങ്ങൾ കണ്ടെത്തി പരിഹരിക്കുന്നതിന് ആപ്പുകൾക്ക് ഈ ലോഗുകൾ ഉപയോഗിക്കാൻ കഴിയും.\n\nചില ലോഗുകളിൽ സൂക്ഷ്‌മമായി കൈകാര്യം ചെയ്യേണ്ട വിവരങ്ങൾ അടങ്ങിയിരിക്കാൻ സാധ്യതയുള്ളതിനാൽ, നിങ്ങൾക്ക് വിശ്വാസമുള്ള ആപ്പുകളെ മാത്രം എല്ലാ ഉപകരണ ലോഗുകളും ആക്‌സസ് ചെയ്യാൻ അനുവദിക്കുക. \n\nഎല്ലാ ഉപകരണ ലോഗുകളും ആക്‌സസ് ചെയ്യാൻ നിങ്ങൾ ഈ ആപ്പിനെ അനുവദിക്കുന്നില്ലെങ്കിൽ പോലും ആപ്പിന് അതിന്റെ സ്വന്തം ലോഗുകൾ ആക്‌സസ് ചെയ്യാനാകും, നിങ്ങളുടെ ഉപകരണ നിർമ്മാതാവിന് ഉപകരണത്തിലെ ചില ലോഗുകളോ വിവരങ്ങളോ തുടർന്നും ആക്‌സസ് ചെയ്യാനായേക്കും. കൂടുതലറിയുക"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"വീണ്ടും കാണിക്കരുത്"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_2">%2$s</xliff:g> സ്ലൈസുകൾ കാണിക്കാൻ <xliff:g id="APP_0">%1$s</xliff:g> താൽപ്പര്യപ്പെടുന്നു"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"എഡിറ്റ് ചെയ്യുക"</string>
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"കോളുകളും അറിയിപ്പുകളും വൈബ്രേറ്റ് ചെയ്യും"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"കോളുകളും അറിയിപ്പുകളും മ്യൂട്ട് ചെയ്യപ്പെടും"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"സിസ്‌റ്റത്തിലെ മാറ്റങ്ങൾ"</string>
+    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"ശല്യപ്പെടുത്തരുത്"</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"പുതിയത്: അറിയിപ്പുകളെ \'ശല്യപ്പെടുത്തരുത്\' അദൃശ്യമാക്കുന്നു"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"കൂടുതലറിയാനും മാറ്റാനും ടാപ്പ് ചെയ്യുക."</string>
+    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"\'ശല്യപ്പെടുത്തരുത്\' മാറ്റി"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"എന്തിനെയാണ് ബ്ലോക്ക് ചെയ്‌തതെന്ന് പരിശോധിക്കാൻ ടാപ്പ് ചെയ്യുക."</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"സിസ്റ്റം"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"ക്രമീകരണം"</string>
@@ -2050,6 +2057,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"ശരി"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"ഓഫാക്കുക"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"കൂടുതലറിയുക"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Android 12-ൽ Android അഡാപ്റ്റീവ് അറിയിപ്പുകൾക്ക് പകരം മെച്ചപ്പെടുത്തിയ അറിയിപ്പുകൾ ഉൾപ്പെടുത്തിയിരിക്കുന്നു. നിർദ്ദേശിക്കുന്ന പ്രവർത്തനങ്ങളും മറുപടികളും കാണിക്കുന്നതിനൊപ്പം ഈ ഫീച്ചർ നിങ്ങളുടെ അറിയിപ്പുകൾ ഓർഗനൈസ് ചെയ്യുന്നു.\n\nമെച്ചപ്പെടുത്തിയ അറിയിപ്പുകൾക്ക്, കോൺടാക്റ്റ് പേരുകളും സന്ദേശങ്ങളും പോലുള്ള വ്യക്തിപരമായ വിവരങ്ങൾ ഉൾപ്പെടെയുള്ള അറിയിപ്പ് ഉള്ളടക്കം ആക്‌സസ് ചെയ്യാനാകും. ഫോൺ കോളുകൾക്ക് മറുപടി നൽകുക, \'ശല്യപ്പെടുത്തരുത്\' നിയന്ത്രിക്കുക എന്നിവ പോലെ, അറിയിപ്പുകൾ ഡിസ്‌മിസ് ചെയ്യാനും അവയ്‌ക്ക് മറുപടി നൽകാനും ഈ ഫീച്ചറിന് കഴിയും."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"ദിനചര്യ മോഡ് വിവരത്തെ കുറിച്ചുള്ള അറിയിപ്പ്"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"സാധാരണയുള്ളതിലും നേരത്തെ ബാറ്ററിയുടെ ചാർജ് തീർന്നേക്കാം"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"ബാറ്ററി ലൈഫ് വര്‍ദ്ധിപ്പിക്കാൻ, ബാറ്ററി ലാഭിക്കൽ സജീവമാക്കി"</string>
@@ -2256,6 +2264,7 @@
     <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> ആപ്പ് പശ്ചാത്തലത്തിൽ റൺ ചെയ്യുന്നു, ഇത് ബാറ്ററി ഉപയോഗിച്ചുതീർക്കുന്നു. അവലോകനം ചെയ്യാൻ ടാപ്പ് ചെയ്യുക."</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"പശ്ചാത്തലത്തിൽ <xliff:g id="APP">%1$s</xliff:g> ആപ്പ് ഒരുപാട് നേരമായി റൺ ചെയ്യുന്നു. അവലോകനം ചെയ്യാൻ ടാപ്പ് ചെയ്യുക."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"സജീവമായ ആപ്പുകൾ പരിശോധിക്കുക"</string>
-    <!-- no translation found for vdm_camera_access_denied (6345652513729130490) -->
+    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"ഈ ഉപകരണത്തിൽ നിന്ന് ക്യാമറ ആക്‌സസ് ചെയ്യാനാകില്ല"</string>
+    <!-- no translation found for system_locale_title (3978041860457277638) -->
     <skip />
 </resources>

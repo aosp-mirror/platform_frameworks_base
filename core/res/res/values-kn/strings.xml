@@ -70,6 +70,7 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"ಮೂರು ಮಾರ್ಗದಲ್ಲಿ ಕರೆ ಮಾಡುವಿಕೆ"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"ಅನಪೇಕ್ಷಿತ ಕಿರಿಕಿರಿ ಮಾಡುವ ಕರೆಗಳ ತಿರಸ್ಕಾರ"</string>
     <string name="CndMmi" msgid="185136449405618437">"ಕರೆ ಮಾಡುವ ಸಂಖ್ಯೆಯ ವಿತರಣೆ"</string>
+    <string name="DndMmi" msgid="8797375819689129800">"ಅಡಚಣೆ ಮಾಡಬೇಡ"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"ಕರೆಮಾಡುವವರ ID ಅನ್ನು ನಿರ್ಬಂಧಿಸುವಂತೆ ಡಿಫಾಲ್ಟ್ ಮಾಡಲಾಗಿದೆ. ಮುಂದಿನ ಕರೆ: ನಿರ್ಬಂಧಿಸಲಾಗಿದೆ"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"ಕರೆಮಾಡುವವರ ID ಅನ್ನು ನಿರ್ಬಂಧಿಸುವಂತೆ ಡಿಫಾಲ್ಟ್ ಮಾಡಲಾಗಿದೆ. ಮುಂದಿನ ಕರೆ: ನಿರ್ಬಂಧಿಸಿಲ್ಲ"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"ಕರೆಮಾಡುವವರ ID ಅನ್ನು ನಿರ್ಬಂಧಿಸದಿರುವಂತೆ ಡಿಫಾಲ್ಟ್ ಮಾಡಲಾಗಿದೆ. ಮುಂದಿನ ಕರೆ: ನಿರ್ಬಂಧಿಸಲಾಗಿದೆ"</string>
@@ -84,8 +85,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"ಸಿಮ್ <xliff:g id="SIMNUMBER">%d</xliff:g> ಗಾಗಿ ನಿಮ್ಮ ವಾಹಕದ ಮೂಲಕ ತಾತ್ಕಾಲಿಕವಾಗಿ ಆಫ್ ಮಾಡಲಾಗಿದೆ"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"ಮೊಬೈಲ್‌ ನೆಟ್‌ವರ್ಕ್ ತಲುಪಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"ಆದ್ಯತೆಗೊಳಿಸಿದ ನೆಟ್‌ವರ್ಕ್‌ಗಳನ್ನು ಬದಲಾಯಿಸಲು ಪ್ರಯತ್ನಿಸಿ. ಬದಲಾಯಿಸಲು ಟ್ಯಾಪ್‌ ಮಾಡಿ."</string>
-    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"ತುರ್ತು ಕರೆ ಮಾಡುವಿಕೆ ಲಭ್ಯವಿಲ್ಲ"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"ವೈ-ಫೈ ಮೂಲಕ ತುರ್ತು ಕರೆಗಳನ್ನು ಮಾಡಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
+    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"ತುರ್ತು ಕರೆಗಳು ಲಭ್ಯವಿಲ್ಲದಿರಬಹುದು"</string>
+    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"ವೈ-ಫೈ ಮೂಲಕ ತುರ್ತು ಕರೆಗಳನ್ನು <xliff:g id="SPN">%s</xliff:g> ಬೆಂಬಲಿಸುವುದಿಲ್ಲ. ವಿವರಗಳಿಗಾಗಿ ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"ಎಚ್ಚರಿಕೆಗಳು"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"ಕರೆ ಫಾರ್ವರ್ಡ್‌ ಮಾಡುವಿಕೆ"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"ತುರ್ತು ಕಾಲ್‌ಬ್ಯಾಕ್‌ ಮೋಡ್‌"</string>
@@ -424,10 +425,10 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"ಒಳಬರುವ ಮತ್ತು ಹೊರಹೋಗುವ ಕರೆಗಳ ಕುರಿತ ಡೇಟಾ ಸೇರಿದಂತೆ, ನಿಮ್ಮ ಟ್ಯಾಬ್ಲೆಟ್‌ನ ಕರೆಯ ಲಾಗ್ ಅನ್ನು ಮಾರ್ಪಡಿಸಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅವಕಾಶ ನೀಡುತ್ತದೆ. ದುರುದ್ದೇಶಪೂರಿತ ಅಪ್ಲಿಕೇಶನ್‍‍ಗಳು ನಿಮ್ಮ ಕರೆಯ ಲಾಗ್‍ ಅನ್ನು ಅಳಿಸಲು ಅಥವಾ ಮಾರ್ಪಡಿಸಲು ಇದನ್ನು ಬಳಸಿಕೊಳ್ಳಬಹುದು."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"ಒಳಬರುವ ಮತ್ತು ಹೊರಹೋಗುವ ಕರೆಗಳ ಕುರಿತ ಡೇಟಾ ಸೇರಿದಂತೆ ನಿಮ್ಮ Android TV ಸಾಧನದ ಕರೆಯ ಲಾಗ್ ಅನ್ನು ಮಾರ್ಪಡಿಸಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅನುಮತಿಸುತ್ತದೆ. ದುರುದ್ದೇಶಪೂರಿತ ಅಪ್ಲಿಕೇಶನ್‍‍ಗಳು ನಿಮ್ಮ ಕರೆಯ ಲಾಗ್‍ ಅನ್ನು ಅಳಿಸಲು ಅಥವಾ ಮಾರ್ಪಡಿಸಲು ಇದನ್ನು ಬಳಸಿಕೊಳ್ಳಬಹುದು."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"ಒಳಬರುವ ಮತ್ತು ಹೊರಹೋಗುವ ಕರೆಗಳ ಕುರಿತ ಡೇಟಾ ಸೇರಿದಂತೆ, ನಿಮ್ಮ ಫೋನ್‍‍ನ ಕರೆಯ ಲಾಗ್ ಅನ್ನು ಮಾರ್ಪಡಿಸಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅವಕಾಶ ನೀಡುತ್ತದೆ. ದುರುದ್ದೇಶಪೂರಿತ ಅಪ್ಲಿಕೇಶನ್‍‍ಗಳು ನಿಮ್ಮ ಕರೆಯ ಲಾಗ್‍ ಅನ್ನು ಅಳಿಸಲು ಅಥವಾ ಮಾರ್ಪಡಿಸಲು ಇದನ್ನು ಬಳಸಿಕೊಳ್ಳಬಹುದು."</string>
-    <string name="permlab_bodySensors" msgid="3411035315357380862">"ದೇಹ ಸೆನ್ಸರ್‌ಗಳನ್ನು ಪ್ರವೇಶಿಸಿ (ಹೃದಯದ ಬಡಿತ ಮಾನಿಟರ್‌ಗಳಂತಹ)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="3208940894182188063">"ಹೃದಯ ಬಡಿತ, ತಾಪಮಾನ, ರಕ್ತದ ಆಮ್ಲಜನಕದ ಶೇಕಡಾವಾರು ಮುಂತಾದ ದೇಹದ ಸೆನ್ಸರ್‌ಗಳಿಂದ ಡೇಟಾಗೆ ಪ್ರವೇಶವನ್ನು ನೀಡುತ್ತದೆ."</string>
-    <string name="permlab_bodySensors_background" msgid="4352831883331744370">"ಹಿನ್ನೆಲೆಯಲ್ಲಿರುವ ದೇಹದ ಸೆನ್ಸರ್‌ಗಳಿಗೆ (ಹೃದಯದ ಬಡಿತ ಮಾನಿಟರ್‌ಗಳು) ಪ್ರವೇಶ ನೀಡುತ್ತದೆ"</string>
-    <string name="permdesc_bodySensors_background" product="default" msgid="8512392249166660872">"ಹೃದಯ ಬಡಿತ, ತಾಪಮಾನ, ರಕ್ತದ ಆಮ್ಲಜನಕದ ಶೇಕಡಾವಾರು ಮುಂತಾದ ಹಿನ್ನೆಲೆಯಲ್ಲಿರುವ ದೇಹದ ಸೆನ್ಸರ್‌ಗಳಿಂದ ಡೇಟಾಗೆ ಪ್ರವೇಶವನ್ನು ನೀಡುತ್ತದೆ."</string>
+    <string name="permlab_bodySensors" msgid="662918578601619569">"ಬಳಕೆಯಲ್ಲಿರುವಾಗ ಹೃದಯ ಬಡಿತದಂತಹ ದೇಹದ ಸೆನ್ಸರ್‌ ಡೇಟಾವನ್ನು ಪ್ರವೇಶಿಸಿ"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"ಆ್ಯಪ್ ಬಳಕೆಯಲ್ಲಿರುವಾಗ ಹೃದಯ ಬಡಿತ, ತಾಪಮಾನ ಮತ್ತು ರಕ್ತದ ಆಮ್ಲಜನಕದ ಶೇಕಡಾವಾರು ಎಂಬಂತಹ ದೇಹದ ಸೆನ್ಸರ್‌ ಡೇಟಾವನ್ನು ಪ್ರವೇಶಿಸಲು ಆ್ಯಪ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
+    <string name="permlab_bodySensors_background" msgid="4912560779957760446">"ಹಿನ್ನಲೆಯಲ್ಲಿರುವಾಗ ಹೃದಯ ಬಡಿತದಂತಹ ದೇಹದ ಸೆನ್ಸರ್‌ ಡೇಟಾವನ್ನು ಪ್ರವೇಶಿಸಿ"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"ಆ್ಯಪ್ ಹಿನ್ನಲೆಯಲ್ಲಿರುವಾಗ ಹೃದಯ ಬಡಿತ, ತಾಪಮಾನ ಮತ್ತು ರಕ್ತದ ಆಮ್ಲಜನಕದ ಶೇಕಡಾವಾರು ಎಂಬಂತಹ ದೇಹದ ಸೆನ್ಸರ್‌ ಡೇಟಾವನ್ನು ಪ್ರವೇಶಿಸಲು ಆ್ಯಪ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"ಕ್ಯಾಲೆಂಡರ್ ಈವೆಂಟ್‌ಗಳು ಮತ್ತು ವಿವರಗಳನ್ನು ಓದಿ"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"ಈ ಅಪ್ಲಿಕೇಶನ್ ನಿಮ್ಮ ಟ್ಯಾಬ್ಲೆಟ್‌ನಲ್ಲಿ ಸಂಗ್ರಹವಾಗಿರುವ ಎಲ್ಲಾ ಕ್ಯಾಲೆಂಡರ್ ಈವೆಂಟ್‌ಗಳನ್ನು ಓದಬಹುದು ಮತ್ತು ನಿಮ್ಮ ಕ್ಯಾಲೆಂಡರ್ ಡೇಟಾವನ್ನು ಹಂಚಿಕೊಳ್ಳಬಹುದು ಅಥವಾ ಉಳಿಸಬಹುದು."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"ಈ ಅಪ್ಲಿಕೇಶನ್ ನಿಮ್ಮ Android TV ಸಾಧನದಲ್ಲಿ ಸಂಗ್ರಹವಾಗಿರುವ ಎಲ್ಲಾ ಕ್ಯಾಲೆಂಡರ್ ಈವೆಂಟ್‌ಗಳನ್ನು ಓದಬಹುದು ಮತ್ತು ನಿಮ್ಮ ಕ್ಯಾಲೆಂಡರ್ ಡೇಟಾವನ್ನು ಹಂಚಿಕೊಳ್ಳಬಹುದು ಅಥವಾ ಉಳಿಸಬಹುದು."</string>
@@ -688,8 +689,8 @@
     <string name="permdesc_readMediaAudio" msgid="5299772574434619399">"ನಿಮ್ಮ ಹಂಚಿಕೊಂಡ ಸಂಗ್ರಹಣೆಯಿಂದ ಆಡಿಯೋ ಫೈಲ್‌ಗಳನ್ನು ಓದಲು ಆ್ಯಪ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permlab_readMediaVideo" msgid="7768003311260655007">"ಹಂಚಿಕೊಂಡ ಸಂಗ್ರಹಣೆಯಿಂದ ವೀಡಿಯೊ ಫೈಲ್‌ಗಳನ್ನು ಓದಿ"</string>
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"ನಿಮ್ಮ ಹಂಚಿಕೊಂಡ ಸಂಗ್ರಹಣೆಯಿಂದ ವೀಡಿಯೊ ಫೈಲ್‌ಗಳನ್ನು ಓದಲು ಆ್ಯಪ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
-    <string name="permlab_readMediaImage" msgid="1507059005825769856">"ಹಂಚಿಕೊಂಡ ಸಂಗ್ರಹಣೆಯಿಂದ ಚಿತ್ರದ ಫೈಲ್‌ಗಳನ್ನು ಓದಿ"</string>
-    <string name="permdesc_readMediaImage" msgid="8328052622292457588">"ನಿಮ್ಮ ಹಂಚಿಕೊಂಡ ಸಂಗ್ರಹಣೆಯಿಂದ ಚಿತ್ರದ ಫೈಲ್‌ಗಳನ್ನು ಓದಲು ಆ್ಯಪ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
+    <string name="permlab_readMediaImages" msgid="4057590631020986789">"ಹಂಚಿಕೊಂಡ ಸಂಗ್ರಹಣೆಯಿಂದ ಚಿತ್ರದ ಫೈಲ್‌ಗಳನ್ನು ಓದಿ"</string>
+    <string name="permdesc_readMediaImages" msgid="5836219373138469259">"ನಿಮ್ಮ ಹಂಚಿಕೊಂಡ ಸಂಗ್ರಹಣೆಯಿಂದ ಚಿತ್ರದ ಫೈಲ್‌ಗಳನ್ನು ಓದಲು ಆ್ಯಪ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"ನಿಮ್ಮ ಹಂಚಿಕೊಂಡ ಸಂಗ್ರಹಣೆಯ ವಿಷಯಗಳನ್ನು ಮಾರ್ಪಡಿಸಿ ಅಥವಾ ಅಳಿಸಿ"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"ನಿಮ್ಮ ಹಂಚಿಕೊಂಡ ಸಂಗ್ರಹಣೆಯ ವಿಷಯಗಳನ್ನು ಬರೆಯಲು ಆ್ಯಪ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"ಎಸ್‌ಐಪಿ ಕರೆಗಳನ್ನು ಮಾಡಿ/ಸ್ವೀಕರಿಸಿ"</string>
@@ -736,6 +737,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"ವಾಹಕ ಸಂದೇಶ ಕಳುಹಿಸುವಿಕೆ ಸೇವೆಯ ಮೇಲ್ಮಟ್ಟದ ಇಂಟರ್ಫೇಸ್‌ಗೆ ಪ್ರತಿಬಂಧಿಸಲು ಹೊಂದಿರುವವರಿಗೆ ಅವಕಾಶ ಮಾಡಿಕೊಡುತ್ತದೆ. ಸಾಮಾನ್ಯ ಅಪ್ಲಿಕೇಶನ್‌ಗಳಿಗಾಗಿ ಎಂದಿಗೂ ಅಗತ್ಯವಿರುವುದಿಲ್ಲ."</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"ವಾಹಕ ಸೇವೆಗಳಿಗೆ ಪ್ರತಿಬಂಧಿಸಿ"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"ವಾಹಕ ಸೇವೆಗಳನ್ನು ಪ್ರತಿಬಂಧಿಸಲು ಹೊಂದಿರುವವರಿಗೆ ಅನುಮತಿಸುತ್ತದೆ. ಸಾಮಾನ್ಯ ಅಪ್ಲಿಕೇಶನ್‌ಗಳಿಗೆ ಎಂದಿಗೂ ಅಗತ್ಯವಿರುವುದಿಲ್ಲ."</string>
+    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"ಅಡಚಣೆ ಮಾಡಬೇಡಿಯನ್ನು ಪ್ರವೇಶಿಸಿ"</string>
+    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"ಅಡಚಣೆ ಮಾಡಬೇಡಿ ಕಾನ್ಫಿಗರೇಶನ್ ಅನ್ನು ಓದಲು ಮತ್ತು ಬರೆಯಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"ವೀಕ್ಷಣಾ ಅನುಮತಿಯ ಬಳಕೆಯನ್ನು ಪ್ರಾರಂಭಿಸಿ"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"ಆ್ಯಪ್‌ಗಾಗಿ ಅನುಮತಿ ಬಳಕೆಯನ್ನು ಪ್ರಾರಂಭಿಸಲು ಹೊಂದಿರುವವರಿಗೆ ಅನುಮತಿಸುತ್ತದೆ. ಸಾಮಾನ್ಯ ಆ್ಯಪ್‌ಗಳಿಗೆ ಎಂದಿಗೂ ಅಗತ್ಯವಿರುವುದಿಲ್ಲ."</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"ಅನುಮತಿಯ ನಿರ್ಧಾರಗಳನ್ನು ವೀಕ್ಷಿಸಲು ಪ್ರಾರಂಭಿಸಿ"</string>
@@ -909,7 +912,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"ಅನ್‌ಲಾಕ್ ಮಾಡಲು ಮೆನು ಒತ್ತಿರಿ ಇಲ್ಲವೇ ತುರ್ತು ಕರೆಯನ್ನು ಮಾಡಿ."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"ಅನ್‌ಲಾಕ್ ಮಾಡಲು ಮೆನು ಒತ್ತಿರಿ."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"ಅನ್‌ಲಾಕ್ ಮಾಡಲು ಪ್ಯಾಟರ್ನ್ ಚಿತ್ರಿಸಿ"</string>
-    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"ತುರ್ತು ಕರೆ"</string>
+    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"ತುರ್ತು"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"ಕರೆಗೆ ಹಿಂತಿರುಗು"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"ಸರಿಯಾಗಿದೆ!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ"</string>
@@ -1048,7 +1051,6 @@
     <string name="save_password_never" msgid="6776808375903410659">"ಎಂದಿಗೂ ಬೇಡ"</string>
     <string name="open_permission_deny" msgid="5136793905306987251">"ಈ ಪುಟವನ್ನು ತೆರೆಯಲು ನೀವು ಅನುಮತಿಯನ್ನು ಹೊಂದಿಲ್ಲ."</string>
     <string name="text_copied" msgid="2531420577879738860">"ಪಠ್ಯವನ್ನು ಕ್ಲಿಪ್‌ಬೋರ್ಡ್‌ಗೆ ನಕಲಿಸಲಾಗಿದೆ."</string>
-    <string name="copied" msgid="4675902854553014676">"ನಕಲಿಸಲಾಗಿದೆ"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ಅನ್ನು <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g> ನಿಂದ ಅಂಟಿಸಲಾಗಿದೆ"</string>
     <string name="pasted_from_clipboard" msgid="7355790625710831847">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>, ನಿಮ್ಮ ಕ್ಲಿಪ್‌ಬೋರ್ಡ್‌ನಲ್ಲಿನ ಡೇಟಾವನ್ನು ಅಂಟಿಸಿದೆ"</string>
     <string name="pasted_text" msgid="4298871641549173733">"ನೀವು ನಕಲಿಸಿರುವ ಪಠ್ಯವನ್ನು <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ನಿಂದ ಅಂಟಿಸಲಾಗಿದೆ"</string>
@@ -1449,8 +1451,6 @@
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"ಈ ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಬ್ಯಾಟರಿ ಆಪ್ಟಿಮೈಸೇಶನ್‌ಗಳನ್ನು ಕಡೆಗಣಿಸುವುದಕ್ಕೆ ಅನುಮತಿಯನ್ನು ಕೇಳಲು ಅಪ್ಲಿಕೇಶನ್‌ ಅನ್ನು ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permlab_queryAllPackages" msgid="2928450604653281650">"ಎಲ್ಲಾ ಪ್ಯಾಕೇಜ್‌ಗಳ ಕುರಿತಾದ ಮಾಹಿತಿಯನ್ನು ಕೇಳಿ"</string>
     <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಿದ ಎಲ್ಲಾ ಪ್ಯಾಕೇಜ್‌ಗಳನ್ನು ವೀಕ್ಷಿಸಲು ಆ್ಯಪ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
-    <string name="permlab_accessSupplementalApi" msgid="3544659160536960275">"SupplementalApis ಅನ್ನು ಪ್ರವೇಶಿಸಿ"</string>
-    <string name="permdesc_accessSupplementalApi" msgid="8974758769370951074">"SupplementalApis ಅನ್ನು ಪ್ರವೇಶಿಸಲು ಆ್ಯಪ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"ಝೂಮ್‌ ನಿಯಂತ್ರಿಸಲು ಎರಡು ಬಾರಿ ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"ವಿಜೆಟ್ ಸೇರಿಸಲು ಸಾಧ್ಯವಾಗುತ್ತಿಲ್ಲ."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"ಹೋಗು"</string>
@@ -1501,8 +1501,7 @@
     <string name="skip_button_label" msgid="3566599811326688389">"ಸ್ಕಿಪ್‌"</string>
     <string name="no_matches" msgid="6472699895759164599">"ಯಾವುದೇ ಹೊಂದಿಕೆಗಳಿಲ್ಲ"</string>
     <string name="find_on_page" msgid="5400537367077438198">"ಪುಟದಲ್ಲಿ ಹುಡುಕಿ"</string>
-    <!-- no translation found for matches_found (2296462299979507689) -->
-    <skip />
+    <string name="matches_found" msgid="2296462299979507689">"{count,plural, =1{# ಹೊಂದಾಣಿಕೆ}one{{total} ರಲ್ಲಿ #}other{{total} ರಲ್ಲಿ #}}"</string>
     <string name="action_mode_done" msgid="2536182504764803222">"ಮುಗಿದಿದೆ"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"ಹಂಚಲಾದ ಸಂಗ್ರಹಣೆಯನ್ನು ಅಳಿಸಲಾಗುತ್ತಿದೆ…"</string>
     <string name="share" msgid="4157615043345227321">"ಹಂಚಿಕೊಳ್ಳಿ"</string>
@@ -1714,6 +1713,7 @@
     <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g>ಗೆ ಬದಲಾಯಿಸಲಾಗುತ್ತಿದೆ…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"<xliff:g id="NAME">%1$s</xliff:g> ಅವರನ್ನು ಲಾಗ್‌ ಔಟ್‌ ಮಾಡಲಾಗುತ್ತಿದೆ…"</string>
     <string name="owner_name" msgid="8713560351570795743">"ಮಾಲೀಕರು"</string>
+    <string name="guest_name" msgid="8502103277839834324">"ಅತಿಥಿ"</string>
     <string name="error_message_title" msgid="4082495589294631966">"ದೋಷ"</string>
     <string name="error_message_change_not_allowed" msgid="843159705042381454">"ಈ ಬದಲಾವಣೆಗೆ ನಿಮ್ಮ ನಿರ್ವಾಹಕರು ಅನುಮತಿಸುವುದಿಲ್ಲ"</string>
     <string name="app_not_found" msgid="3429506115332341800">"ಈ ಕ್ರಿಯೆಯನ್ನು ನಿರ್ವಹಿಸಲು ಯಾವುದೇ ಅಪ್ಲಿಕೇಶನ್ ಕಂಡುಬಂದಿಲ್ಲ"</string>
@@ -1867,8 +1867,10 @@
     <string name="zen_mode_until" msgid="2250286190237669079">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> ವರೆಗೆ"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> ವರೆಗೆ (ಮುಂದಿನ ಅಲಾರಮ್)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"ನೀವು ಆಫ್ ಮಾಡುವವರೆಗೆ"</string>
+    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"ನೀವು ಆಫ್ ಮಾಡುವವರೆಗೂ ಅಡಚಣೆ ಮಾಡಬೇಡಿ"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"ಸಂಕುಚಿಸು"</string>
+    <string name="zen_mode_feature_name" msgid="3785547207263754500">"ಅಡಚಣೆ ಮಾಡಬೇಡಿ"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"ಸ್ಥಗಿತಕಾಲ"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"ವಾರದ ರಾತ್ರಿ"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"ವಾರಾಂತ್ಯ"</string>
@@ -1931,6 +1933,8 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"ಆ್ಯಪ್ ಲಭ್ಯವಿಲ್ಲ"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ಇದೀಗ ಲಭ್ಯವಿಲ್ಲ."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> ಲಭ್ಯವಿಲ್ಲ"</string>
+    <!-- no translation found for app_streaming_blocked_title_for_permission_dialog (4483161748582966785) -->
+    <skip />
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"ಈ ಸಮಯದಲ್ಲಿ ನಿಮ್ಮ <xliff:g id="DEVICE">%1$s</xliff:g> ನಲ್ಲಿ ಇದನ್ನು ಪ್ರವೇಶಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ. ಅದರ ಬದಲು ನಿಮ್ಮ Android TV ಸಾಧನದಲ್ಲಿ ಪ್ರಯತ್ನಿಸಿ."</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"ಈ ಸಮಯದಲ್ಲಿ ನಿಮ್ಮ <xliff:g id="DEVICE">%1$s</xliff:g> ನಲ್ಲಿ ಇದನ್ನು ಪ್ರವೇಶಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ. ಅದರ ಬದಲು ನಿಮ್ಮ ಟ್ಯಾಬ್ಲೆಟ್‌ನಲ್ಲಿ ಪ್ರಯತ್ನಿಸಿ."</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"ಈ ಸಮಯದಲ್ಲಿ ನಿಮ್ಮ <xliff:g id="DEVICE">%1$s</xliff:g> ನಲ್ಲಿ ಇದನ್ನು ಪ್ರವೇಶಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ. ಅದರ ಬದಲು ನಿಮ್ಮ ಫೋನ್‌ನಲ್ಲಿ ಪ್ರಯತ್ನಿಸಿ."</string>
@@ -2023,17 +2027,20 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"ಅನ್‌ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಿ"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"ಹೇಗಿದ್ದರೂ ತೆರೆಯಿರಿ"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"ಅಪಾಯಕಾರಿ ಅಪ್ಲಿಕೇಶನ್ ಕಂಡುಬಂದಿದೆ"</string>
-    <string name="log_access_confirmation_title" msgid="3143035474800851565">"ಸಿಸ್ಟಂ ಲಾಗ್ ಪ್ರವೇಶ ವಿನಂತಿ"</string>
+    <string name="log_access_confirmation_title" msgid="2343578467290592708">"ಎಲ್ಲಾ ಸಾಧನದ ಲಾಗ್‌ಗಳನ್ನು ಆ್ಯಕ್ಸೆಸ್ ಮಾಡಲು <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> ಗೆ ಅನುಮತಿಸುವುದೇ?"</string>
     <string name="log_access_confirmation_allow" msgid="143157286283302512">"ಈ ಬಾರಿ ಮಾತ್ರ"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"ಅನುಮತಿಸಬೇಡಿ"</string>
-    <string name="log_access_confirmation_body" msgid="7599059550906238538">"ಫಂಕ್ಷನಲ್ ಡೀಬಗ್ ಮಾಡುವಿಕೆಗಾಗಿ <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> ಸಿಸ್ಟಂ ಲಾಗ್‌ಗಳನ್ನು ವಿನಂತಿಸುತ್ತದೆ. ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿನ ಆ್ಯಪ್‌ಗಳು ಮತ್ತು ಸೇವೆಗಳು ಬರೆದಿರುವ ಮಾಹಿತಿಯನ್ನು ಈ ಲಾಗ್‌ಗಳು ಒಳಗೊಂಡಿರಬಹುದು."</string>
+    <string name="log_access_confirmation_body" msgid="4483075525611652922">"ಸಾಧನವು ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿನ ಕಾರ್ಯಾಚರಣೆಗಳನ್ನು ಲಾಗ್ ಮಾಡುತ್ತದೆ ಸಮಸ್ಯೆಗಳನ್ನು ಪತ್ತೆಹಚ್ಚಲು ಮತ್ತು ಪರಿಹರಿಸಲು ಆ್ಯಪ್‌ಗಳು ಈ ಲಾಗ್ ಅನ್ನು ಬಳಸಬಹುದು.\n\nಕೆಲವು ಲಾಗ್‌ಗಳು ಸೂಕ್ಷ್ಮ ಮಾಹಿತಿಯನ್ನು ಒಳಗೊಂಡಿರಬಹುದು, ಆದ್ದರಿಂದ ನಿಮ್ಮ ವಿಶ್ವಾಸಾರ್ಹ ಆ್ಯಪ್‌ಗಳಿಗೆ ಮಾತ್ರ ಸಾಧನದ ಎಲ್ಲಾ ಲಾಗ್‌ಗಳಿಗೆ ಆ್ಯಕ್ಸೆಸ್ ಅನ್ನು ಅನುಮತಿಸಿ. \n\nಎಲ್ಲಾ ಸಾಧನ ಲಾಗ್‌ಗಳನ್ನು ಆ್ಯಕ್ಸೆಸ್ ಮಾಡಲು ನೀವು ಈ ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸದಿದ್ದರೆ, ಅದು ಇನ್ನೂ ತನ್ನದೇ ಆದ ಲಾಗ್‌ಗಳನ್ನು ಆ್ಯಕ್ಸೆಸ್ ಮಾಡಬಹುದು ಮತ್ತು ನಿಮ್ಮ ಸಾಧನ ತಯಾರಕರು ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿ ಕೆಲವು ಲಾಗ್‌ಗಳು ಅಥವಾ ಮಾಹಿತಿಯನ್ನು ಆ್ಯಕ್ಸೆಸ್ ಮಾಡಲು ಈಗಲೂ ಸಾಧ್ಯವಾಗುತ್ತದೆ. ಇನ್ನಷ್ಟು ತಿಳಿಯಿರಿ"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"ಮತ್ತೊಮ್ಮೆ ತೋರಿಸಬೇಡಿ"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_2">%2$s</xliff:g> ಸ್ಲೈಸ್‌ಗಳನ್ನು <xliff:g id="APP_0">%1$s</xliff:g> ತೋರಿಸಲು ಬಯಸಿದೆ"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"ಎಡಿಟ್"</string>
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"ಕರೆಗಳು ಮತ್ತು ಅಧಿಸೂಚನೆಗಳು ವೈಬ್ರೇಟ್‌ ಆಗುತ್ತವೆ"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"ಕರೆಗಳು ಮತ್ತು ಅಧಿಸೂಚನೆಗಳನ್ನು ಮ್ಯೂಟ್ ಮಾಡಲಾಗುತ್ತದೆ"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"ಸಿಸ್ಟಂ ಬದಲಾವಣೆಗಳು"</string>
+    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"ಅಡಚಣೆ ಮಾಡಬೇಡಿ"</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"ಅಡಚಣೆ ಮಾಡಬೇಡಿ ಮೋಡ್ ಅಧಿಸೂಚನೆಗಳನ್ನು ಮರೆಮಾಡುತ್ತಿದೆ"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"ಇನ್ನಷ್ಟು ತಿಳಿಯಲು ಮತ್ತು ಬದಲಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
+    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"ಅಡಚಣೆ ಮಾಡಬೇಡಿ ಬದಲಾಗಿದೆ"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"ಏನನ್ನು ನಿರ್ಬಂಧಿಸಲಾಗಿದೆ ಎಂಬುದನ್ನು ಪರೀಕ್ಷಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"ಸಿಸ್ಟಂ"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
@@ -2050,6 +2057,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"ಸರಿ"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"ಆಫ್ ಮಾಡಿ"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"ಇನ್ನಷ್ಟು ತಿಳಿಯಿರಿ"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"ವರ್ಧಿತ ಅಧಿಸೂಚನೆಗಳು Android 12 ರಲ್ಲಿ Android ಅಡಾಪ್ಟಿವ್ ಅಧಿಸೂಚನೆಗಳನ್ನು ಬದಲಾಯಿಸಿವೆ. ಈ ವೈಶಿಷ್ಟ್ಯವು ಸೂಚಿಸಿದ ಕ್ರಿಯೆಗಳು ಮತ್ತು ಪ್ರತ್ಯುತ್ತರಗಳನ್ನು ತೋರಿಸುತ್ತದೆ ಮತ್ತು ನಿಮ್ಮ ಅಧಿಸೂಚನೆಗಳನ್ನು ಆಯೋಜಿಸುತ್ತದೆ.\n\nವರ್ಧಿತ ಅಧಿಸೂಚನೆಗಳು ಸಂಪರ್ಕ ಹೆಸರುಗಳು ಮತ್ತು ಸಂದೇಶಗಳಂತಹ ವೈಯಕ್ತಿಕ ಮಾಹಿತಿಯನ್ನು ಒಳಗೊಂಡಂತೆ ಎಲ್ಲಾ ಅಧಿಸೂಚನೆ ವಿಷಯವನ್ನು ಪ್ರವೇಶಿಸಬಹುದು. ಈ ವೈಶಿಷ್ಟ್ಯವು ಫೋನ್ ಕರೆಗಳಿಗೆ ಉತ್ತರಿಸುವುದು ಮತ್ತು \'ಅಡಚಣೆ ಮಾಡಬೇಡಿ\' ಅನ್ನು ನಿಯಂತ್ರಿಸುವಂತಹ ಅಧಿಸೂಚನೆಗಳನ್ನು ವಜಾಗೊಳಿಸಬಹುದು ಅಥವಾ ಪ್ರತಿಕ್ರಿಯಿಸಬಹುದು."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"ದೈನಂದಿನ ಸ್ಥಿತಿಯ ಮಾಹಿತಿಯ ಅಧಿಸೂಚನೆ"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"ಚಾರ್ಜ್‌ಗೆ ಮೊದಲೆ ಬ್ಯಾಟರಿ ಮುಗಿದು ಬಿಡಬಹುದು"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"ಬ್ಯಾಟರಿ ಅವಧಿ ಹೆಚ್ಚಿಸಲು ಬ್ಯಾಟರಿ ಸೇವರ್ ಸಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ"</string>
@@ -2253,9 +2261,9 @@
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"<xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> ಭಾಷೆಯಿಂದ <xliff:g id="TO_LANGUAGE">%2$s</xliff:g> ಭಾಷೆಗೆ ಸಂದೇಶವನ್ನು ಅನುವಾದಿಸಲಾಗಿದೆ."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"ಹಿನ್ನೆಲೆ ಚಟುವಟಿಕೆ"</string>
     <string name="notification_title_abusive_bg_apps" msgid="344582472797982073">"ಹಿನ್ನೆಲೆ ಚಟುವಟಿಕೆ"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> ಹಿನ್ನೆಲೆಯಲ್ಲಿ ರನ್ ಆಗುತ್ತಿದೆ ಹಾಗೂ ಬ್ಯಾಟರಿಯನ್ನು ಹೆಚ್ಚು ಬಳಸುತ್ತಿದೆ. ಪರಿಶೀಲಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
+    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> ಹಿನ್ನೆಲೆಯಲ್ಲಿ ರನ್ ಆಗುತ್ತಿದ್ದು ಬ್ಯಾಟರಿ ಖಾಲಿ ಮಾಡುತ್ತಿದೆ. ಪರಿಶೀಲಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> ಬಹಳ ಸಮಯದಿಂದ ಹಿನ್ನೆಲೆಯಲ್ಲಿ ರನ್ ಆಗುತ್ತಿದೆ. ಪರಿಶೀಲಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"ಸಕ್ರಿಯ ಆ್ಯಪ್‌ಗಳನ್ನು ಪರಿಶೀಲಿಸಿ"</string>
-    <!-- no translation found for vdm_camera_access_denied (6345652513729130490) -->
-    <skip />
+    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"ಈ ಸಾಧನದಿಂದ ಕ್ಯಾಮರಾ ಪ್ರವೇಶಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
+    <string name="system_locale_title" msgid="3978041860457277638">"ಸಿಸ್ಟಂ ಭಾಷೆ"</string>
 </resources>

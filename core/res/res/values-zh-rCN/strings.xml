@@ -70,6 +70,7 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"三方通话"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"拒绝不想接听的骚扰电话"</string>
     <string name="CndMmi" msgid="185136449405618437">"主叫号码传送"</string>
+    <string name="DndMmi" msgid="8797375819689129800">"勿扰"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"默认不显示本机号码，在下一次通话中也不显示"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"默认不显示本机号码，但在下一次通话中显示"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"默认显示本机号码，但在下一次通话中不显示"</string>
@@ -84,8 +85,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"SIM 卡 <xliff:g id="SIMNUMBER">%d</xliff:g> 已由运营商暂时关闭"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"无法连接到移动网络"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"请尝试更改首选网络。点按即可更改。"</string>
-    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"无法使用紧急呼救服务"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"无法通过 WLAN 拨打紧急呼救电话"</string>
+    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"紧急呼叫服务可能无法使用"</string>
+    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"<xliff:g id="SPN">%s</xliff:g>并不支持通过 WLAN 进行紧急呼叫。点按可了解详情。"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"提醒"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"来电转接"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"紧急回拨模式"</string>
@@ -304,10 +305,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"访问您的日历"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"短信"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"发送和查看短信"</string>
-    <!-- no translation found for permgrouplab_storage (9173334109512154196) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_storage (8352226729501080525) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="9173334109512154196">"文件和文档"</string>
+    <string name="permgroupdesc_storage" msgid="8352226729501080525">"访问您设备上的文件和文档"</string>
     <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"音乐和其他音频"</string>
     <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"访问您设备上的音频文件"</string>
     <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"照片和视频"</string>
@@ -426,10 +425,10 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"允许该应用修改平板电脑的通话记录，包括有关来电和外拨电话的数据。恶意应用可能会借此清除或修改您的通话记录。"</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"允许应用修改您的 Android TV 设备的通话记录，包括关于来电和去电的数据。恶意应用可能会借此清空或修改您的通话记录。"</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"允许该应用修改手机的通话记录，包括有关来电和外拨电话的数据。恶意应用可能会借此清除或修改您的通话记录。"</string>
-    <string name="permlab_bodySensors" msgid="3411035315357380862">"访问身体传感器（如心率监测器）"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="3208940894182188063">"访问身体传感器获得的数据，例如心率、体温、血氧百分比等。"</string>
-    <string name="permlab_bodySensors_background" msgid="4352831883331744370">"在后台时访问身体传感器（如心率监测器）"</string>
-    <string name="permdesc_bodySensors_background" product="default" msgid="8512392249166660872">"在后台时访问身体传感器获得的数据，例如心率、体温、血氧百分比等。"</string>
+    <string name="permlab_bodySensors" msgid="662918578601619569">"允许应用在使用中时访问身体传感器数据，如心率"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"允许应用在使用中时访问身体传感器数据，如心率、体温和血氧浓度。"</string>
+    <string name="permlab_bodySensors_background" msgid="4912560779957760446">"允许应用在后台运行时访问身体传感器数据，如心率"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"允许应用在后台运行时访问身体传感器数据，如心率、体温和血氧浓度。"</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"读取日历活动和详情"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"此应用可读取您平板电脑上存储的所有日历活动，并分享或保存您的日历数据。"</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"此应用可读取您的 Android TV 设备上存储的所有日历活动，以及分享或保存您的日历数据。"</string>
@@ -588,12 +587,9 @@
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"输入您的屏幕锁定凭据才能继续"</string>
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"检测到局部指纹"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"无法处理指纹，请重试。"</string>
-    <!-- no translation found for fingerprint_acquired_imager_dirty (1770676120848224250) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_imager_dirty_alt (9169582140486372897) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_too_fast (1628459767349116104) -->
-    <skip />
+    <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"请清洁指纹传感器，然后重试"</string>
+    <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"请清洁传感器，然后重试"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"请用力按住传感器"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"手指移动太慢，请重试。"</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"请试试其他指纹"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"光线太亮"</string>
@@ -601,10 +597,8 @@
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"请在每次放手指时略微更改手指的位置"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <!-- no translation found for fingerprint_error_not_match (4599441812893438961) -->
-    <skip />
-    <!-- no translation found for fingerprint_udfps_error_not_match (4709197752023550709) -->
-    <skip />
+    <string name="fingerprint_error_not_match" msgid="4599441812893438961">"未能识别指纹"</string>
+    <string name="fingerprint_udfps_error_not_match" msgid="4709197752023550709">"请用力按住传感器"</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"已验证指纹"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"面孔已验证"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"面孔已验证，请按确认按钮"</string>
@@ -695,8 +689,8 @@
     <string name="permdesc_readMediaAudio" msgid="5299772574434619399">"允许应用读取您共享存储空间中的音频文件。"</string>
     <string name="permlab_readMediaVideo" msgid="7768003311260655007">"从共享存储空间读取视频文件"</string>
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"允许应用读取您共享存储空间中的视频文件。"</string>
-    <string name="permlab_readMediaImage" msgid="1507059005825769856">"从共享存储空间读取图片文件"</string>
-    <string name="permdesc_readMediaImage" msgid="8328052622292457588">"允许应用读取您共享存储空间中的图片文件。"</string>
+    <string name="permlab_readMediaImages" msgid="4057590631020986789">"读取共享存储空间中的图片文件"</string>
+    <string name="permdesc_readMediaImages" msgid="5836219373138469259">"允许应用读取您共享存储空间中的图片文件。"</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"修改或删除您共享存储空间中的内容"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"允许该应用写入您共享存储空间中的内容。"</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"拨打/接听SIP电话"</string>
@@ -743,6 +737,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"允许应用绑定到运营商消息传递服务的顶级接口。普通应用绝不需要此权限。"</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"绑定到运营商服务"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"允许应用绑定到运营商服务。普通应用绝不需要此权限。"</string>
+    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"“勿扰”模式使用权限"</string>
+    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"允许此应用读取和写入“勿扰”模式配置。"</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"授权使用“查看权限”"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"允许该应用开始查看应用的权限使用情况（普通应用绝不需要此权限）。"</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"开始查看权限决策"</string>
@@ -916,7 +912,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"按 Menu 解锁或进行紧急呼救。"</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"按 MENU 解锁。"</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"绘制解锁图案"</string>
-    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"紧急呼叫"</string>
+    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"紧急呼救"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"返回通话"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"正确！"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"重试"</string>
@@ -1055,7 +1051,6 @@
     <string name="save_password_never" msgid="6776808375903410659">"永不"</string>
     <string name="open_permission_deny" msgid="5136793905306987251">"您无权打开此网页。"</string>
     <string name="text_copied" msgid="2531420577879738860">"文本已复制到剪贴板。"</string>
-    <string name="copied" msgid="4675902854553014676">"已复制"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>已粘贴从<xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g>复制的内容"</string>
     <string name="pasted_from_clipboard" msgid="7355790625710831847">"已将剪贴板中的内容粘贴到<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>"</string>
     <string name="pasted_text" msgid="4298871641549173733">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>已粘贴您复制的文字"</string>
@@ -1456,8 +1451,6 @@
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"允许应用请求相应的权限，以便忽略针对该应用的电池优化。"</string>
     <string name="permlab_queryAllPackages" msgid="2928450604653281650">"查询所有软件包"</string>
     <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"允许应用查看所有已安装的软件包。"</string>
-    <string name="permlab_accessSupplementalApi" msgid="3544659160536960275">"访问 SupplementalApis"</string>
-    <string name="permdesc_accessSupplementalApi" msgid="8974758769370951074">"允许应用访问 SupplementalApis。"</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"双击可以进行缩放控制"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"无法添加微件。"</string>
     <string name="ime_action_go" msgid="5536744546326495436">"开始"</string>
@@ -1508,8 +1501,7 @@
     <string name="skip_button_label" msgid="3566599811326688389">"跳过"</string>
     <string name="no_matches" msgid="6472699895759164599">"无匹配项"</string>
     <string name="find_on_page" msgid="5400537367077438198">"在网页上查找"</string>
-    <!-- no translation found for matches_found (2296462299979507689) -->
-    <skip />
+    <string name="matches_found" msgid="2296462299979507689">"{count,plural, =1{# 条匹配结果}other{#/{total}}}"</string>
     <string name="action_mode_done" msgid="2536182504764803222">"完成"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"正在清空共享的存储空间…"</string>
     <string name="share" msgid="4157615043345227321">"分享"</string>
@@ -1721,6 +1713,7 @@
     <string name="user_switching_message" msgid="1912993630661332336">"正在切换为<xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"正在将<xliff:g id="NAME">%1$s</xliff:g>退出帐号…"</string>
     <string name="owner_name" msgid="8713560351570795743">"机主"</string>
+    <string name="guest_name" msgid="8502103277839834324">"访客"</string>
     <string name="error_message_title" msgid="4082495589294631966">"错误"</string>
     <string name="error_message_change_not_allowed" msgid="843159705042381454">"您的管理员不允许进行这项更改"</string>
     <string name="app_not_found" msgid="3429506115332341800">"找不到可处理此操作的应用"</string>
@@ -1874,8 +1867,10 @@
     <string name="zen_mode_until" msgid="2250286190237669079">"到<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"直到<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>（闹钟下次响铃时）"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"直到您将其关闭"</string>
+    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"直到您关闭“勿扰”模式"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"收起"</string>
+    <string name="zen_mode_feature_name" msgid="3785547207263754500">"勿扰"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"休息时间"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"周一至周五夜间"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"周末"</string>
@@ -1938,6 +1933,8 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"应用无法使用"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g>目前无法使用。"</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g>不可用"</string>
+    <!-- no translation found for app_streaming_blocked_title_for_permission_dialog (4483161748582966785) -->
+    <skip />
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"目前无法在您的<xliff:g id="DEVICE">%1$s</xliff:g>上访问此内容。您可以尝试在 Android TV 设备上访问。"</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"目前无法在您的<xliff:g id="DEVICE">%1$s</xliff:g>上访问此内容。您可以尝试在平板电脑上访问。"</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"目前无法在您的<xliff:g id="DEVICE">%1$s</xliff:g>上访问此内容。您可以尝试在手机上访问。"</string>
@@ -2030,17 +2027,20 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"卸载"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"仍然打开"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"检测到有害应用"</string>
-    <string name="log_access_confirmation_title" msgid="3143035474800851565">"系统日志访问请求"</string>
+    <string name="log_access_confirmation_title" msgid="2343578467290592708">"允许“<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g>”访问所有设备日志吗？"</string>
     <string name="log_access_confirmation_allow" msgid="143157286283302512">"仅限这一次"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"不允许"</string>
-    <string name="log_access_confirmation_body" msgid="7599059550906238538">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g>请求访问系统日志，以进行功能调试。这些日志可能包含设备上的应用和服务写入的信息。"</string>
+    <string name="log_access_confirmation_body" msgid="4483075525611652922">"设备日志会记录设备上发生的活动。应用可以使用这些日志查找和修复问题。\n\n部分日志可能包含敏感信息，因此请仅允许您信任的应用访问所有设备日志。\n\n如果您不授予此应用访问所有设备日志的权限，那么它仍然可以访问自己的日志，并且您的设备制造商可能仍然能够访问您设备上的部分日志或信息。了解详情"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"不再显示"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"“<xliff:g id="APP_0">%1$s</xliff:g>”想要显示“<xliff:g id="APP_2">%2$s</xliff:g>”图块"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"编辑"</string>
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"有来电和通知时会振动"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"有来电和通知时会静音"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"系统变更"</string>
+    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"勿扰"</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"新功能：勿扰模式目前可隐藏通知"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"点按即可了解详情以及进行更改。"</string>
+    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"“勿扰”设置有变更"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"点按即可查看屏蔽内容。"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"系统"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"设置"</string>
@@ -2057,6 +2057,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"确定"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"关闭"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"了解详情"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"在 Android 12 中，增强型通知功能取代了 Android 自适应通知功能。增强型通知功能可以显示建议的操作和回复，并可将通知整理得井井有条。\n\n增强型通知功能可以读取通知内容，包括联系人名称和消息等个人信息。该功能还可以关闭通知或对通知做出回应，例如接听来电以及控制勿扰模式。"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"日常安排模式信息通知"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"电池电量可能会在您平时的充电时间之前耗尽"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"已启用省电模式以延长电池续航时间"</string>
@@ -2260,9 +2261,10 @@
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"已将消息内容从<xliff:g id="FROM_LANGUAGE">%1$s</xliff:g>翻译成<xliff:g id="TO_LANGUAGE">%2$s</xliff:g>。"</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"后台活动"</string>
     <string name="notification_title_abusive_bg_apps" msgid="344582472797982073">"后台活动"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> 正在后台运行，并且消耗了大量电池电量。点按即可查看。"</string>
-    <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> 已在后台运行较长时间。点按即可查看。"</string>
+    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"“<xliff:g id="APP">%1$s</xliff:g>”正在后台运行，并且消耗了大量电池电量。点按即可查看。"</string>
+    <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"“<xliff:g id="APP">%1$s</xliff:g>”已在后台运行较长时间。点按即可查看。"</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"查看使用中的应用"</string>
-    <!-- no translation found for vdm_camera_access_denied (6345652513729130490) -->
+    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"无法使用此设备的摄像头"</string>
+    <!-- no translation found for system_locale_title (3978041860457277638) -->
     <skip />
 </resources>
