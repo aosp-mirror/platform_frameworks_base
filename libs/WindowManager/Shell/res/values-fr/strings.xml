@@ -20,6 +20,7 @@
     <string name="pip_phone_close" msgid="5783752637260411309">"Fermer"</string>
     <string name="pip_phone_expand" msgid="2579292903468287504">"Développer"</string>
     <string name="pip_phone_settings" msgid="5468987116750491918">"Paramètres"</string>
+    <string name="pip_phone_enter_split" msgid="7042877263880641911">"Accéder à l\'écran partagé"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"Menu"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> est en mode Picture-in-picture"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"Si vous ne voulez pas que l\'application <xliff:g id="NAME">%s</xliff:g> utilise cette fonctionnalité, appuyez ici pour ouvrir les paramètres et la désactiver."</string>
@@ -28,6 +29,8 @@
     <string name="pip_skip_to_next" msgid="8403429188794867653">"Passer au contenu suivant"</string>
     <string name="pip_skip_to_prev" msgid="7172158111196394092">"Passer au contenu précédent"</string>
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"Redimensionner"</string>
+    <string name="accessibility_action_pip_stash" msgid="4060775037619702641">"Stash"</string>
+    <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Unstash"</string>
     <string name="dock_forced_resizable" msgid="1749750436092293116">"Il est possible que l\'application ne fonctionne pas en mode Écran partagé."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"Application incompatible avec l\'écran partagé."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Il est possible que l\'application ne fonctionne pas sur un écran secondaire."</string>
@@ -61,7 +64,7 @@
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"Ne pas afficher la conversation dans une bulle"</string>
     <string name="bubbles_user_education_title" msgid="2112319053732691899">"Chatter en utilisant des bulles"</string>
     <string name="bubbles_user_education_description" msgid="4215862563054175407">"Les nouvelles conversations s\'affichent sous forme d\'icônes flottantes ou bulles. Appuyez sur la bulle pour l\'ouvrir. Faites-la glisser pour la déplacer."</string>
-    <string name="bubbles_user_education_manage_title" msgid="7042699946735628035">"Contrôler les paramètres des bulles"</string>
+    <string name="bubbles_user_education_manage_title" msgid="7042699946735628035">"Contrôlez les bulles à tout moment"</string>
     <string name="bubbles_user_education_manage" msgid="3460756219946517198">"Appuyez sur \"Gérer\" pour désactiver les bulles de cette application"</string>
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"OK"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"Aucune bulle récente"</string>
@@ -70,5 +73,4 @@
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Gérer"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Bulle fermée."</string>
     <string name="restart_button_description" msgid="5887656107651190519">"Appuyez pour redémarrer cette application et activer le mode plein écran."</string>
-    <string name="got_it" msgid="4428750913636945527">"OK"</string>
 </resources>

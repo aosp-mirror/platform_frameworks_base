@@ -20,6 +20,7 @@
     <string name="pip_phone_close" msgid="5783752637260411309">"Sluiten"</string>
     <string name="pip_phone_expand" msgid="2579292903468287504">"Uitvouwen"</string>
     <string name="pip_phone_settings" msgid="5468987116750491918">"Instellingen"</string>
+    <string name="pip_phone_enter_split" msgid="7042877263880641911">"Gesplitst scherm openen"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"Menu"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> is in scherm-in-scherm"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"Als je niet wilt dat <xliff:g id="NAME">%s</xliff:g> deze functie gebruikt, tik je om de instellingen te openen en zet je de functie uit."</string>
@@ -28,6 +29,8 @@
     <string name="pip_skip_to_next" msgid="8403429188794867653">"Doorgaan naar volgende"</string>
     <string name="pip_skip_to_prev" msgid="7172158111196394092">"Teruggaan naar vorige"</string>
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"Formaat aanpassen"</string>
+    <string name="accessibility_action_pip_stash" msgid="4060775037619702641">"Verbergen"</string>
+    <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Niet meer verbergen"</string>
     <string name="dock_forced_resizable" msgid="1749750436092293116">"De app werkt mogelijk niet met gesplitst scherm."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"App biedt geen ondersteuning voor gesplitst scherm."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"App werkt mogelijk niet op een secundair scherm."</string>
@@ -43,10 +46,10 @@
     <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"Bovenste scherm 50%"</string>
     <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"Bovenste scherm 30%"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"Onderste scherm op volledig scherm"</string>
-    <string name="one_handed_tutorial_title" msgid="4583241688067426350">"Bediening met één hand gebruiken"</string>
+    <string name="one_handed_tutorial_title" msgid="4583241688067426350">"Bediening met 1 hand gebruiken"</string>
     <string name="one_handed_tutorial_description" msgid="3486582858591353067">"Als je wilt afsluiten, swipe je omhoog vanaf de onderkant van het scherm of tik je ergens boven de app"</string>
-    <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"Bediening met één hand starten"</string>
-    <string name="accessibility_action_stop_one_handed" msgid="1369940261782179442">"Bediening met één hand afsluiten"</string>
+    <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"Bediening met 1 hand starten"</string>
+    <string name="accessibility_action_stop_one_handed" msgid="1369940261782179442">"Bediening met 1 hand afsluiten"</string>
     <string name="bubbles_settings_button_description" msgid="1301286017420516912">"Instellingen voor <xliff:g id="APP_NAME">%1$s</xliff:g>-bubbels"</string>
     <string name="bubble_overflow_button_content_description" msgid="8160974472718594382">"Overloop"</string>
     <string name="bubble_accessibility_action_add_back" msgid="1830101076853540953">"Weer toevoegen aan stack"</string>
@@ -70,5 +73,4 @@
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Beheren"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Bubbel gesloten."</string>
     <string name="restart_button_description" msgid="5887656107651190519">"Tik om deze app opnieuw te starten en te openen op het volledige scherm."</string>
-    <string name="got_it" msgid="4428750913636945527">"OK"</string>
 </resources>
