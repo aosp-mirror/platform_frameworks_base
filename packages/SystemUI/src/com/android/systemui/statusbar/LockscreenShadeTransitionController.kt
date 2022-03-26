@@ -164,6 +164,17 @@ class LockscreenShadeTransitionController @Inject constructor(
     private var statusBarTransitionDistance = 0
 
     /**
+     * Distance that the full shade transition takes in order for the keyguard elements to fully
+     * translate into their final position
+     */
+    private var keyguardTransitionDistance = 0
+
+    /**
+     * The amount of vertical offset for the keyguard during the full shade transition.
+     */
+    private var keyguardTransitionOffset = 0
+
+    /**
      * Flag to make sure that the dragDownAmount is applied to the listeners even when in the
      * locked down shade.
      */
@@ -275,6 +286,10 @@ class LockscreenShadeTransitionController @Inject constructor(
         statusBarTransitionDistance = context.resources.getDimensionPixelSize(
                 R.dimen.lockscreen_shade_status_bar_transition_distance)
         useSplitShade = LargeScreenUtils.shouldUseSplitNotificationShade(context.resources)
+        keyguardTransitionDistance = context.resources.getDimensionPixelSize(
+            R.dimen.lockscreen_shade_keyguard_transition_distance)
+        keyguardTransitionOffset = context.resources.getDimensionPixelSize(
+            R.dimen.lockscreen_shade_keyguard_transition_vertical_offset)
     }
 
     fun setStackScroller(nsslController: NotificationStackScrollLayoutController) {
@@ -485,18 +500,27 @@ class LockscreenShadeTransitionController @Inject constructor(
         val keyguardAlphaProgress =
             MathUtils.saturate(dragDownAmount / npvcKeyguardContentAlphaTransitionDistance)
         val keyguardAlpha = 1f - keyguardAlphaProgress
-        val keyguardTranslationY = if (useSplitShade) {
-            // On split-shade, the translationY of the keyguard should stay in sync with the
-            // translation of media.
-            mediaHierarchyManager.getGuidedTransformationTranslationY()
-        } else {
-            0
-        }
+        val keyguardTranslationY = calculateKeyguardTranslationY(dragDownAmount)
         notificationPanelController
             .setKeyguardTransitionProgress(keyguardAlpha, keyguardTranslationY)
 
         val statusBarAlpha = if (useSplitShade) keyguardAlpha else -1f
         notificationPanelController.setKeyguardStatusBarAlpha(statusBarAlpha)
+    }
+
+    private fun calculateKeyguardTranslationY(dragDownAmount: Float): Int {
+        if (!useSplitShade) {
+            return 0
+        }
+        // On split-shade, the translationY of the keyguard should stay in sync with the
+        // translation of media.
+        if (mediaHierarchyManager.isCurrentlyInGuidedTransformation()) {
+            return mediaHierarchyManager.getGuidedTransformationTranslationY()
+        }
+        // When media is not showing, apply the default distance
+        val translationProgress = MathUtils.saturate(dragDownAmount / keyguardTransitionDistance)
+        val translationY = translationProgress * keyguardTransitionOffset
+        return translationY.toInt()
     }
 
     private fun setDragDownAmountAnimated(

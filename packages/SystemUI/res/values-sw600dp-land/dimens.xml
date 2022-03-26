@@ -88,5 +88,11 @@
          whether the progress is > 0, therefore this value is not very important. -->
     <dimen name="lockscreen_shade_status_bar_transition_distance">@dimen/lockscreen_shade_full_transition_distance</dimen>
 
+    <dimen name="lockscreen_shade_keyguard_transition_distance">@dimen/lockscreen_shade_media_transition_distance</dimen>
+
+    <!-- Roughly the same distance as media on LS to media on QS. We will translate by this value
+         when media is not showing. -->
+    <dimen name="lockscreen_shade_keyguard_transition_vertical_offset">83dp</dimen>
+
     <dimen name="notification_panel_margin_horizontal">24dp</dimen>
 </resources>
