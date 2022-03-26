@@ -566,7 +566,7 @@ public class PackageParserLegacyCoreTest {
         assertNotNull(pi.signingInfo);
         assertTrue(pi.signingInfo.getApkContentsSigners().length > 0);
         assertTrue(pi.isApex);
-        assertTrue((pi.applicationInfo.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0);
+        assertTrue((pi.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 0);
         assertTrue((pi.applicationInfo.flags & ApplicationInfo.FLAG_INSTALLED) != 0);
     }
 

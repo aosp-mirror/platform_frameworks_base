@@ -4280,11 +4280,8 @@ public class ComputerEngine implements Computer {
 
     @Override
     public List<String> getAllPackages() {
-        // Allow iorapd to call this method.
-        if (Binder.getCallingUid() != Process.IORAPD_UID) {
-            PackageManagerServiceUtils.enforceSystemOrRootOrShell(
-                    "getAllPackages is limited to privileged callers");
-        }
+        PackageManagerServiceUtils.enforceSystemOrRootOrShell(
+                "getAllPackages is limited to privileged callers");
         final int callingUid = Binder.getCallingUid();
         final int callingUserId = UserHandle.getUserId(callingUid);
         if (canViewInstantApps(callingUid, callingUserId)) {

@@ -32,12 +32,12 @@ parcelable AudioPortMixExt {
     AudioPortMixExtUseCase usecase;
     /**
      * Maximum number of input or output streams that can be simultaneously
-     * opened for this port.
+     * opened for this port. '0' means 'unlimited'.
      */
     int maxOpenStreamCount;
     /**
      * Maximum number of input or output streams that can be simultaneously
-     * active for this port.
+     * active for this port. '0' means 'all opened streams'.
      */
     int maxActiveStreamCount;
     /** Mute duration while changing device, when used for output. */

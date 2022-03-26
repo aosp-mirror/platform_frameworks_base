@@ -39,10 +39,10 @@ import android.app.ApplicationPackageManager;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageDeleteObserver2;
-import android.content.pm.PackageChangeEvent;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.SharedLibraryInfo;
+import android.content.pm.UserInfo;
 import android.content.pm.VersionedPackage;
 import android.net.Uri;
 import android.os.Binder;
@@ -159,6 +159,15 @@ final class DeletePackageHelper {
                 Slog.w(TAG, "Not removing package " + packageName + " with versionCode "
                         + uninstalledPs.getVersionCode() + " != " + versionCode);
                 return PackageManager.DELETE_FAILED_INTERNAL_ERROR;
+            }
+
+            if (PackageManagerServiceUtils.isSystemApp(uninstalledPs)) {
+                UserInfo userInfo = mUserManagerInternal.getUserInfo(userId);
+                if (userInfo == null || !userInfo.isAdmin()) {
+                    Slog.w(TAG, "Not removing package " + packageName
+                            + " as only admin user may downgrade system apps");
+                    return PackageManager.DELETE_FAILED_USER_RESTRICTED;
+                }
             }
 
             disabledSystemPs = mPm.mSettings.getDisabledSystemPkgLPr(packageName);
@@ -751,7 +760,6 @@ final class DeletePackageHelper {
             } catch (RemoteException e) {
                 Log.i(TAG, "Observer no longer exists.");
             } //end catch
-            notifyPackageChangeObserversOnDelete(packageName, versionCode);
 
             // Prune unused static shared libraries which have been cached a period of time
             mPm.schedulePruneUnusedStaticSharedLibraries(true /* delay */);
@@ -809,18 +817,6 @@ final class DeletePackageHelper {
             }
         }
         return result;
-    }
-
-    private void notifyPackageChangeObserversOnDelete(String packageName, long version) {
-        PackageChangeEvent pkgChangeEvent = new PackageChangeEvent();
-        pkgChangeEvent.packageName = packageName;
-        pkgChangeEvent.version = version;
-        pkgChangeEvent.lastUpdateTimeMillis = 0L;
-        pkgChangeEvent.newInstalled = false;
-        pkgChangeEvent.dataRemoved = false;
-        pkgChangeEvent.isDeleted = true;
-
-        mPm.notifyPackageChangeObservers(pkgChangeEvent);
     }
 
     private static class TempUserState {

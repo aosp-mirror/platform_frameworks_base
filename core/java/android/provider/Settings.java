@@ -78,6 +78,7 @@ import android.os.ResultReceiver;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.speech.tts.TextToSpeech;
+import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.AndroidException;
 import android.util.ArrayMap;
@@ -86,6 +87,7 @@ import android.util.Log;
 import android.util.MemoryIntArray;
 import android.view.Display;
 import android.view.MotionEvent;
+import android.view.ViewConfiguration;
 import android.view.Window;
 import android.view.WindowManager.LayoutParams;
 import android.widget.Editor;
@@ -7470,6 +7472,16 @@ public final class Settings {
                 "accessibility_shortcut_dialog_shown";
 
         /**
+         * Setting specifying if the timeout restriction
+         * {@link ViewConfiguration#getAccessibilityShortcutKeyTimeout()}
+         * of the accessibility shortcut dialog is skipped.
+         *
+         * @hide
+         */
+        public static final String SKIP_ACCESSIBILITY_SHORTCUT_DIALOG_TIMEOUT_RESTRICTION =
+                "skip_accessibility_shortcut_dialog_timeout_restriction";
+
+        /**
          * Setting specifying the accessibility services, accessibility shortcut targets,
          * or features to be toggled via the accessibility shortcut.
          *
@@ -11298,8 +11310,9 @@ public final class Settings {
 
         /**
          * Whether or not data roaming is enabled. (0 = false, 1 = true)
+         * Use {@link TelephonyManager#isDataRoamingEnabled} instead of calling via settings.
          */
-        @Readable
+        @Readable(maxTargetSdk = Build.VERSION_CODES.S)
         public static final String DATA_ROAMING = "data_roaming";
 
         /**

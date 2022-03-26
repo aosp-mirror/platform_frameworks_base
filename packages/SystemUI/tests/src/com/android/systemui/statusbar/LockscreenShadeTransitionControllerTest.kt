@@ -255,14 +255,25 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun testDragDownAmount_depthDistanceIsZero_doesNotSetProgress() {
+    fun testDragDownAmount_depthDistanceIsZero_setsProgressToZero() {
         context.getOrCreateTestableResources()
             .addOverride(R.dimen.lockscreen_shade_depth_controller_transition_distance, 0)
         configurationController.notifyConfigurationChanged()
 
         transitionController.dragDownAmount = 10f
 
-        verify(depthController, never()).transitionToFullShadeProgress
+        verify(depthController).transitionToFullShadeProgress = 0f
+    }
+
+    @Test
+    fun testDragDownAmount_depthDistanceNonZero_setsProgressBasedOnDistance() {
+        context.getOrCreateTestableResources()
+            .addOverride(R.dimen.lockscreen_shade_depth_controller_transition_distance, 100)
+        configurationController.notifyConfigurationChanged()
+
+        transitionController.dragDownAmount = 10f
+
+        verify(depthController).transitionToFullShadeProgress = 0.1f
     }
 
     @Test
@@ -411,6 +422,28 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
 
         verify(splitShadeOverScroller).expansionDragDownAmount = 10f
         verifyZeroInteractions(singleShadeOverScroller)
+    }
+
+    @Test
+    fun setDragDownAmount_inSplitShade_setsKeyguardStatusBarAlphaBasedOnDistance() {
+        val alphaDistance = context.resources.getDimensionPixelSize(
+            R.dimen.lockscreen_shade_npvc_keyguard_content_alpha_transition_distance)
+        val dragDownAmount = 10f
+        enableSplitShade()
+
+        transitionController.dragDownAmount = dragDownAmount
+
+        val expectedAlpha = 1 - dragDownAmount / alphaDistance
+        verify(notificationPanelController).setKeyguardStatusBarAlpha(expectedAlpha)
+    }
+
+    @Test
+    fun setDragDownAmount_notInSplitShade_setsKeyguardStatusBarAlphaToMinusOne() {
+        disableSplitShade()
+
+        transitionController.dragDownAmount = 10f
+
+        verify(notificationPanelController).setKeyguardStatusBarAlpha(-1f)
     }
 
     private fun enableSplitShade() {

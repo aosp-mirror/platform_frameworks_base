@@ -2370,8 +2370,8 @@
     <!-- Label of the button to stop an app from running but the app is already stopped and the button is disabled [CHAR LIMIT=12]-->
     <string name="fgs_manager_app_item_stop_button_stopped_label">Stopped</string>
 
-    <!-- Label for button to copy edited text back to the clipboard [CHAR LIMIT=20] -->
-    <string name="clipboard_edit_text_copy">Copy</string>
+    <!-- Label for button to finish and copy edited text back to the clipboard [CHAR LIMIT=20] -->
+    <string name="clipboard_edit_text_done">Done</string>
     <!-- Text informing user that content has been copied to the system clipboard [CHAR LIMIT=NONE] -->
     <string name="clipboard_overlay_text_copied">Copied</string>
     <!-- Text informing user where text being edited was copied from [CHAR LIMIT=NONE] -->

@@ -3745,6 +3745,14 @@ public class CentralSurfaces extends CoreStartable implements
         mTransitionToFullShadeProgress = transitionToFullShadeProgress;
     }
 
+    /**
+     * Sets the amount of progress to the bouncer being fully hidden/visible. 1 means the bouncer
+     * is fully hidden, while 0 means the bouncer is visible.
+     */
+    public void setBouncerHiddenFraction(float expansion) {
+        mScrimController.setBouncerHiddenFraction(expansion);
+    }
+
     @VisibleForTesting
     public void updateScrimController() {
         Trace.beginSection("CentralSurfaces#updateScrimController");
@@ -3797,6 +3805,8 @@ public class CentralSurfaces extends CoreStartable implements
             mScrimController.transitionTo(ScrimState.AOD);
         } else if (mKeyguardStateController.isShowing() && !isOccluded() && !unlocking) {
             mScrimController.transitionTo(ScrimState.KEYGUARD);
+        } else if (mKeyguardStateController.isShowing() && mKeyguardUpdateMonitor.isDreaming()) {
+            mScrimController.transitionTo(ScrimState.DREAMING);
         } else {
             mScrimController.transitionTo(ScrimState.UNLOCKED, mUnlockScrimCallback);
         }
@@ -4203,6 +4213,7 @@ public class CentralSurfaces extends CoreStartable implements
             new KeyguardUpdateMonitorCallback() {
                 @Override
                 public void onDreamingStateChanged(boolean dreaming) {
+                    updateScrimController();
                     if (dreaming) {
                         maybeEscalateHeadsUp();
                     }

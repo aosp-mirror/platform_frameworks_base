@@ -6,13 +6,14 @@
     android:layout_height="match_parent">
 
     <Button
-        android:id="@+id/copy_button"
-        style="@android:style/Widget.DeviceDefault.Button.Colored"
+        android:id="@+id/done_button"
+        style="@style/EditTextActivityButton"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
+        android:layout_height="48dp"
         android:layout_marginTop="8dp"
-        android:text="@string/clipboard_edit_text_copy"
+        android:layout_marginStart="12dp"
+        android:background="@drawable/overlay_button_background"
+        android:text="@string/clipboard_edit_text_done"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -20,22 +21,23 @@
         android:id="@+id/attribution"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        app:layout_constraintStart_toStartOf="@+id/copy_button"
-        app:layout_constraintTop_toBottomOf="@+id/copy_button" />
+        android:layout_marginTop="40dp"
+        android:layout_marginStart="4dp"
+        app:layout_constraintStart_toStartOf="@id/done_button"
+        app:layout_constraintTop_toBottomOf="@id/done_button" />
 
     <ImageButton
         android:id="@+id/share"
         style="@android:style/Widget.Material.Button.Borderless"
         android:layout_width="48dp"
         android:layout_height="48dp"
-        android:layout_marginEnd="8dp"
         android:padding="12dp"
         android:scaleType="fitCenter"
         android:contentDescription="@*android:string/share"
         android:tooltipText="@*android:string/share"
+        android:layout_marginEnd="16dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/copy_button"
+        app:layout_constraintTop_toTopOf="@id/done_button"
         android:tint="?android:attr/textColorPrimary"
         android:src="@drawable/ic_screenshot_share" />
 
@@ -43,17 +45,19 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginTop="8dp"
+        android:layout_marginStart="4dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintStart_toStartOf="@+id/copy_button"
+        app:layout_constraintStart_toStartOf="@id/done_button"
         app:layout_constraintEnd_toEndOf="@id/share"
-        app:layout_constraintTop_toBottomOf="@+id/attribution">
+        app:layout_constraintTop_toBottomOf="@id/attribution">
 
         <EditText
             android:id="@+id/edit_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="@null"
             android:gravity="start|top"
             android:textSize="24sp" />
     </ScrollView>

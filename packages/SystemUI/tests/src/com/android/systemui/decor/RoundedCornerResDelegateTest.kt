@@ -45,7 +45,7 @@ class RoundedCornerResDelegateTest : SysuiTestCase() {
     }
 
     @Test
-    fun testUpdateDisplayUniqueId() {
+    fun testReloadAllAndDefaultRadius() {
         mContext.orCreateTestableResources.addOverrides(
                 mockTypeArray = mockTypedArray,
                 radius = 3,
@@ -65,34 +65,7 @@ class RoundedCornerResDelegateTest : SysuiTestCase() {
                 radiusTop = 6,
                 radiusBottom = 0)
 
-        roundedCornerResDelegate.updateDisplayUniqueId("test", null)
-
-        assertEquals(Size(6, 6), roundedCornerResDelegate.topRoundedSize)
-        assertEquals(Size(5, 5), roundedCornerResDelegate.bottomRoundedSize)
-    }
-
-    @Test
-    fun testNotUpdateDisplayUniqueIdButChangeRefreshToken() {
-        mContext.orCreateTestableResources.addOverrides(
-                mockTypeArray = mockTypedArray,
-                radius = 3,
-                radiusTop = 0,
-                radiusBottom = 4,
-                multipleRadius = false)
-
-        roundedCornerResDelegate = RoundedCornerResDelegate(mContext.resources, null)
-
-        assertEquals(Size(3, 3), roundedCornerResDelegate.topRoundedSize)
-        assertEquals(Size(4, 4), roundedCornerResDelegate.bottomRoundedSize)
-        assertEquals(false, roundedCornerResDelegate.isMultipleRadius)
-
-        mContext.orCreateTestableResources.addOverrides(
-                mockTypeArray = mockTypedArray,
-                radius = 5,
-                radiusTop = 6,
-                radiusBottom = 0)
-
-        roundedCornerResDelegate.updateDisplayUniqueId(null, 1)
+        roundedCornerResDelegate.reloadAll("test")
 
         assertEquals(Size(6, 6), roundedCornerResDelegate.topRoundedSize)
         assertEquals(Size(5, 5), roundedCornerResDelegate.bottomRoundedSize)
@@ -109,21 +82,11 @@ class RoundedCornerResDelegateTest : SysuiTestCase() {
         roundedCornerResDelegate = RoundedCornerResDelegate(mContext.resources, null)
 
         val factor = 5
-        roundedCornerResDelegate.updateTuningSizeFactor(factor, 1)
+        roundedCornerResDelegate.updateTuningSizeFactor(factor)
         val length = (factor * mContext.resources.displayMetrics.density).toInt()
 
         assertEquals(Size(length, length), roundedCornerResDelegate.topRoundedSize)
         assertEquals(Size(length, length), roundedCornerResDelegate.bottomRoundedSize)
-
-        mContext.orCreateTestableResources.addOverrides(
-                mockTypeArray = mockTypedArray,
-                radiusTop = 1,
-                radiusBottom = 2,
-                multipleRadius = false)
-        roundedCornerResDelegate.updateTuningSizeFactor(null, 2)
-
-        assertEquals(Size(1, 1), roundedCornerResDelegate.topRoundedSize)
-        assertEquals(Size(2, 2), roundedCornerResDelegate.bottomRoundedSize)
     }
 
     @Test
