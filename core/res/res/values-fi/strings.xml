@@ -85,8 +85,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"Operaattori poisti tämän väliaikaisesti käytöstä SIM-kortilla <xliff:g id="SIMNUMBER">%d</xliff:g>."</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Mobiiliverkkoon ei saada yhteyttä"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Kokeile vaihtaa ensisijaista verkkoa. Vaihda se napauttamalla."</string>
-    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Hätäpuhelut eivät ole käytettävissä"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Hätäpuhelujen soittaminen Wi-Fi-yhteyden kautta ei onnistu."</string>
+    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"Hätäpuhelut eivät ehkä ole käytettävissä"</string>
+    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"<xliff:g id="SPN">%s</xliff:g> ei tue hätäpuheluita Wi-Fi-yhteydellä. Katso lisätietoja napauttamalla."</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Ilmoitukset"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Soitonsiirto"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Hätäpuhelujen takaisinsoittotila"</string>
@@ -425,10 +425,10 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"Antaa sovelluksen muokata tablet-laitteesi puhelulokia, kuten tietoja vastatuista ja soitetuista puheluista. Haitalliset sovellukset voivat poistaa puhelulokisi tai muokata sitä."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Antaa sovelluksen muokata Android TV ‑laitteen puhelulokia, kuten tietoja vastatuista ja soitetuista puheluista. Haitalliset sovellukset voivat tyhjentää puhelulokisi tai muokata sitä."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Antaa sovelluksen muokata puhelimesi puhelulokia, kuten tietoja vastatuista ja soitetuista puheluista. Haitalliset sovellukset voivat poistaa puhelulokisi tai muokata sitä."</string>
-    <string name="permlab_bodySensors" msgid="3411035315357380862">"käyttää kehon antureita (kuten sykemittareita)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="3208940894182188063">"Pääsy kehon antureiden dataan, esim. sykkeeseen, ruumiinlämpöön ja veren happiprosenttiin."</string>
-    <string name="permlab_bodySensors_background" msgid="4352831883331744370">"Pääsy kehon antureihin (kuten sykemittareihin) taustalla"</string>
-    <string name="permdesc_bodySensors_background" product="default" msgid="8512392249166660872">"Pääsy kehon antureiden dataan (esim. sykkeeseen, ruumiinlämpöön ja veren happiprosenttiin) taustalla."</string>
+    <string name="permlab_bodySensors" msgid="662918578601619569">"Pääsy kehoanturidataan, esim. sykkeeseen, kun käytössä"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Myöntää sovellukselle pääsyn kehoanturidataan, esim. sykkeeseen, lämpötilaan ja veren happipitoisuuteen, kun sovellusta käytetään."</string>
+    <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Pääsy kehoanturidataan, esim. sykkeeseen, kun käynnissä taustalla"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Myöntää sovellukselle pääsyn kehoanturidataan, esim. sykkeeseen, lämpötilaan ja veren happipitoisuuteen, kun sovellus on käynnissä taustalla."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Lue kalenterin tapahtumia ja tietoja"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Tämä sovellus voi lukea kaikkia tabletille tallennettuja kalenteritapahtumia sekä jakaa tai tallentaa kalenteritietoja."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Tämä sovellus voi lukea kaikkia Android TV ‑laitteeseen tallennettuja kalenteritapahtumia sekä jakaa tai tallentaa kalenteritietoja."</string>
@@ -689,8 +689,8 @@
     <string name="permdesc_readMediaAudio" msgid="5299772574434619399">"Sallii sovelluksen lukea jaetun tallennustilan audiotiedostoja."</string>
     <string name="permlab_readMediaVideo" msgid="7768003311260655007">"lukulupa jaetun tallennustilan videotiedostoihin"</string>
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"Sallii sovelluksen lukea jaetun tallennustilan videotiedostoja."</string>
-    <string name="permlab_readMediaImage" msgid="1507059005825769856">"lukulupa jaetun tallennustilan kuvatiedostoihin"</string>
-    <string name="permdesc_readMediaImage" msgid="8328052622292457588">"Sallii sovelluksen lukea jaetun tallennustilan kuvatiedostoja."</string>
+    <string name="permlab_readMediaImages" msgid="4057590631020986789">"lue jaetun tallennustilan kuvatiedostoja"</string>
+    <string name="permdesc_readMediaImages" msgid="5836219373138469259">"Sallii sovelluksen lukea jaetun tallennustilan kuvatiedostoja."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"muokata tai poistaa jaetun tallennustilan sisältöä"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Antaa sovelluksen kirjoittaa jaetun tallennustilan sisällön."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"soita/vastaanota SIP-puheluja"</string>
@@ -912,7 +912,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"Poista lukitus tai soita hätäpuhelu painamalla Valikko-painiketta."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"Poista lukitus painamalla Valikko-painiketta."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"Poista lukitus piirtämällä kuvio"</string>
-    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"Hätäpuhelu"</string>
+    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"Hätäpuhelu"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"Palaa puheluun"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"Oikein!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Yritä uudelleen"</string>
@@ -1051,7 +1051,6 @@
     <string name="save_password_never" msgid="6776808375903410659">"Ei koskaan"</string>
     <string name="open_permission_deny" msgid="5136793905306987251">"Ei lupaa avata tätä sivua."</string>
     <string name="text_copied" msgid="2531420577879738860">"Teksti kopioitu leikepöydälle."</string>
-    <string name="copied" msgid="4675902854553014676">"Kopioitu"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> liitetty täältä: <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g>"</string>
     <string name="pasted_from_clipboard" msgid="7355790625710831847">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> liitti leikepöydältäsi"</string>
     <string name="pasted_text" msgid="4298871641549173733">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> on liittänyt kopioimasi tekstin"</string>
@@ -1452,8 +1451,12 @@
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"Sallii sovelluksen pyytää lupaa ohittaa tietyn sovelluksen akun optimoinnit."</string>
     <string name="permlab_queryAllPackages" msgid="2928450604653281650">"kaikkien pakettien näkeminen"</string>
     <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"Antaa sovelluksen nähdä kaikki asennetut paketit."</string>
-    <string name="permlab_accessSupplementalApi" msgid="3544659160536960275">"pääsy SupplementalApi-rajapintoihin"</string>
-    <string name="permdesc_accessSupplementalApi" msgid="8974758769370951074">"Sovellus saa pääsyn SupplementalApi-rajapintoihin."</string>
+    <string name="permlab_accessAdServicesTopics" msgid="6687112022940098945">"pääsy AdServices Topics API ‑rajapintoihin"</string>
+    <string name="permdesc_accessAdServicesTopics" msgid="6011532458156465929">"Sovellus saa pääsyn AdServices Topics API ‑rajapintoihin."</string>
+    <string name="permlab_accessAdServicesAttribution" msgid="3268942271128309354">"pääsy AdServices Attribution API ‑rajapintoihin"</string>
+    <string name="permdesc_accessAdServicesAttribution" msgid="577482544832578288">"Sovellus saa pääsyn AdServices Attribution API ‑rajapintoihin."</string>
+    <string name="permlab_accessAdServicesCustomAudiences" msgid="7249286630514600684">"pääsy AdServices Custom Audiences API ‑rajapintoihin"</string>
+    <string name="permdesc_accessAdServicesCustomAudiences" msgid="645526926477180315">"Sovellus saa pääsyn AdServices Custom Audiences API ‑rajapintoihin."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"Hallitse zoomausta napauttamalla kahdesti"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"Widgetin lisääminen epäonnistui."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"Siirry"</string>
@@ -1716,6 +1719,7 @@
     <string name="user_switching_message" msgid="1912993630661332336">"Vaihdetaan käyttäjään <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"<xliff:g id="NAME">%1$s</xliff:g> kirjautuu ulos…"</string>
     <string name="owner_name" msgid="8713560351570795743">"Omistaja"</string>
+    <string name="guest_name" msgid="8502103277839834324">"Vieras"</string>
     <string name="error_message_title" msgid="4082495589294631966">"Virhe"</string>
     <string name="error_message_change_not_allowed" msgid="843159705042381454">"Järjestelmänvalvoja ei salli tätä muutosta."</string>
     <string name="app_not_found" msgid="3429506115332341800">"Tätä toimintoa käsittelevää sovellusta ei löydy"</string>
@@ -2027,10 +2031,10 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"POISTA"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"AVAA SILTI"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"Haitallinen sovellus havaittu"</string>
-    <string name="log_access_confirmation_title" msgid="3143035474800851565">"Järjestelmälokin pääsyoikeuspyyntö"</string>
+    <string name="log_access_confirmation_title" msgid="2343578467290592708">"Saako <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> pääsyn kaikkiin laitelokeihin?"</string>
     <string name="log_access_confirmation_allow" msgid="143157286283302512">"Vain tämän kerran"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Älä salli"</string>
-    <string name="log_access_confirmation_body" msgid="7599059550906238538">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> pyytää järjestelmälokeja virheenkorjausta varten. Lokeissa voi olla tietoja, jotka ovat peräisin laitteellasi olevista sovelluksista ja palveluista."</string>
+    <string name="log_access_confirmation_body" msgid="4483075525611652922">"Laitteen tapahtumat tallentuvat laitelokeihin. Niiden avulla sovellukset voivat löytää ja korjata ongelmia.\n\nJotkin lokit voivat sisältää arkaluontoista tietoa, joten salli pääsy kaikkiin laitelokeihin vain sovelluksille, joihin luotat. \n\nJos et salli tälle sovellukselle pääsyä kaikkiin laitelokeihin, sillä on kuitenkin pääsy sen omiin lokeihin ja laitteen valmistajalla voi olla pääsy joihinkin lokeihin tai tietoihin laitteella. Lue lisää"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Älä näytä uudelleen"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> haluaa näyttää osia sovelluksesta <xliff:g id="APP_2">%2$s</xliff:g>."</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Muokkaa"</string>
@@ -2265,4 +2269,6 @@
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> on ollut käynnissä taustalla pitkän aikaa. Tarkista napauttamalla."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Tarkista aktiiviset sovellukset"</string>
     <string name="vdm_camera_access_denied" msgid="6345652513729130490">"Ei pääsyä kameraan tältä laitteelta"</string>
+    <!-- no translation found for system_locale_title (3978041860457277638) -->
+    <skip />
 </resources>
