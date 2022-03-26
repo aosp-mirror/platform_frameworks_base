@@ -67,6 +67,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SharedMemory;
+import android.provider.DeviceConfig;
 import android.service.voice.HotwordDetectedResult;
 import android.service.voice.HotwordDetectionService;
 import android.service.voice.HotwordRejectedResult;
@@ -109,12 +110,20 @@ final class HotwordDetectionConnection {
     private static final String TAG = "HotwordDetectionConnection";
     static final boolean DEBUG = false;
 
+    private static final String KEY_RESTART_PERIOD_IN_SECONDS = "restart_period_in_seconds";
     // TODO: These constants need to be refined.
     private static final long VALIDATION_TIMEOUT_MILLIS = 4000;
     private static final long MAX_UPDATE_TIMEOUT_MILLIS = 6000;
     private static final Duration MAX_UPDATE_TIMEOUT_DURATION =
             Duration.ofMillis(MAX_UPDATE_TIMEOUT_MILLIS);
     private static final long RESET_DEBUG_HOTWORD_LOGGING_TIMEOUT_MILLIS = 60 * 60 * 1000; // 1 hour
+    /**
+     * Time after which each HotwordDetectionService process is stopped and replaced by a new one.
+     * 0 indicates no restarts.
+     */
+    private static final int RESTART_PERIOD_SECONDS =
+            DeviceConfig.getInt(DeviceConfig.NAMESPACE_VOICE_INTERACTION,
+                    KEY_RESTART_PERIOD_IN_SECONDS, 3600); // 60 minutes by default
     private static final int MAX_ISOLATED_PROCESS_NUMBER = 10;
 
     // Hotword metrics
@@ -133,6 +142,7 @@ final class HotwordDetectionConnection {
     // TODO: This may need to be a Handler(looper)
     private final ScheduledExecutorService mScheduledExecutorService =
             Executors.newSingleThreadScheduledExecutor();
+    @Nullable private final ScheduledFuture<?> mCancellationTaskFuture;
     private final AtomicBoolean mUpdateStateAfterStartFinished = new AtomicBoolean(false);
     private final IBinder.DeathRecipient mAudioServerDeathRecipient = this::audioServerDied;
     private final @NonNull ServiceConnectionFactory mServiceConnectionFactory;
@@ -148,7 +158,6 @@ final class HotwordDetectionConnection {
     private IMicrophoneHotwordDetectionVoiceInteractionCallback mSoftwareCallback;
     private Instant mLastRestartInstant;
 
-    private ScheduledFuture<?> mCancellationTaskFuture;
     private ScheduledFuture<?> mCancellationKeyPhraseDetectionFuture;
     private ScheduledFuture<?> mDebugHotwordLoggingTimeoutFuture = null;
 
@@ -194,16 +203,20 @@ final class HotwordDetectionConnection {
         mLastRestartInstant = Instant.now();
         updateStateAfterProcessStart(options, sharedMemory);
 
-        // TODO(volnov): we need to be smarter here, e.g. schedule it a bit more often, but wait
-        // until the current session is closed.
-        mCancellationTaskFuture = mScheduledExecutorService.scheduleAtFixedRate(() -> {
-            Slog.v(TAG, "Time to restart the process, TTL has passed");
-            synchronized (mLock) {
-                restartProcessLocked();
-                HotwordMetricsLogger.writeServiceRestartEvent(mDetectorType,
-                        HOTWORD_DETECTION_SERVICE_RESTARTED__REASON__SCHEDULE);
-            }
-        }, 30, 30, TimeUnit.MINUTES);
+        if (RESTART_PERIOD_SECONDS <= 0) {
+            mCancellationTaskFuture = null;
+        } else {
+            // TODO(volnov): we need to be smarter here, e.g. schedule it a bit more often, but wait
+            // until the current session is closed.
+            mCancellationTaskFuture = mScheduledExecutorService.scheduleAtFixedRate(() -> {
+                Slog.v(TAG, "Time to restart the process, TTL has passed");
+                synchronized (mLock) {
+                    restartProcessLocked();
+                    HotwordMetricsLogger.writeServiceRestartEvent(mDetectorType,
+                            HOTWORD_DETECTION_SERVICE_RESTARTED__REASON__SCHEDULE);
+                }
+            }, RESTART_PERIOD_SECONDS, RESTART_PERIOD_SECONDS, TimeUnit.SECONDS);
+        }
     }
 
     private void initAudioFlingerLocked() {
@@ -341,7 +354,9 @@ final class HotwordDetectionConnection {
                 .setHotwordDetectionServiceProvider(null);
         mIdentity = null;
         updateServiceUidForAudioPolicy(Process.INVALID_UID);
-        mCancellationTaskFuture.cancel(/* may interrupt */ true);
+        if (mCancellationTaskFuture != null) {
+            mCancellationTaskFuture.cancel(/* may interrupt */ true);
+        }
         if (mAudioFlinger != null) {
             mAudioFlinger.unlinkToDeath(mAudioServerDeathRecipient, /* flags= */ 0);
         }
@@ -759,6 +774,7 @@ final class HotwordDetectionConnection {
     }
 
     public void dump(String prefix, PrintWriter pw) {
+        pw.print(prefix); pw.print("RESTART_PERIOD_SECONDS="); pw.println(RESTART_PERIOD_SECONDS);
         pw.print(prefix);
         pw.print("mBound=" + mRemoteHotwordDetectionService.isBound());
         pw.print(", mValidatingDspTrigger=" + mValidatingDspTrigger);

@@ -296,7 +296,7 @@
     <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"Erabilerraztasun-hobespenak"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> ari da bateria erabiltzen"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> aplikazio ari dira bateria erabiltzen"</string>
-    <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Sakatu bateria eta datuen erabilerari buruzko xehetasunak ikusteko"</string>
+    <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Sakatu bateria eta datu-erabilerari buruzko xehetasunak ikusteko"</string>
     <string name="foreground_service_multiple_separator" msgid="5002287361849863168">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="8974401416068943888">"Modu segurua"</string>
     <string name="android_system_label" msgid="5974767339591067210">"Android sistema"</string>
@@ -391,7 +391,7 @@
     <string name="permlab_runInBackground" msgid="541863968571682785">"exekutatu atzeko planoan"</string>
     <string name="permdesc_runInBackground" msgid="4344539472115495141">"Atzeko planoan exekuta liteke aplikazioa eta horrek bizkorrago agor lezake bateria."</string>
     <string name="permlab_useDataInBackground" msgid="783415807623038947">"erabili datuak atzeko planoan"</string>
-    <string name="permdesc_useDataInBackground" msgid="1230753883865891987">"Aplikazioak datuak erabil litzake atzeko planoan eta horrek datuen erabilera areago lezake."</string>
+    <string name="permdesc_useDataInBackground" msgid="1230753883865891987">"Aplikazioak datuak erabil litzake atzeko planoan eta horrek datu-erabilera areago lezake."</string>
     <string name="permlab_persistentActivity" msgid="464970041740567970">"izan aplikazioa beti abian"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="6055271149187369916">"Beren zati batzuk memoria modu iraunkorrean ezartzeko baimena ematen die aplikazioei. Horrela, beste aplikazioek erabilgarri duten memoria murritz daiteke eta tableta motel daiteke."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="6800526387664131321">"Beren zati batzuk memorian modu iraunkorrean ezartzeko baimena ematen die aplikazioei. Ondorioz, beste aplikazioek memoria gutxiago izan lezakete erabilgarri, eta Android TV gailuak motelago funtziona lezake."</string>
@@ -1044,7 +1044,7 @@
     <string name="menu_sym_shortcut_label" msgid="4037566049061218776">"Sym +"</string>
     <string name="menu_function_shortcut_label" msgid="2367112760987662566">"Funtzioa +"</string>
     <string name="menu_space_shortcut_label" msgid="5949311515646872071">"zuriunea tekla"</string>
-    <string name="menu_enter_shortcut_label" msgid="6709499510082897320">"sartu tekla"</string>
+    <string name="menu_enter_shortcut_label" msgid="6709499510082897320">"\"sartu\" tekla"</string>
     <string name="menu_delete_shortcut_label" msgid="4365787714477739080">"ezabatu"</string>
     <string name="search_go" msgid="2141477624421347086">"Bilatu"</string>
     <string name="search_hint" msgid="455364685740251925">"Bilatu…"</string>
@@ -1482,7 +1482,7 @@
     <string name="ime_action_previous" msgid="6548799326860401611">"Atzera"</string>
     <string name="ime_action_default" msgid="8265027027659800121">"Abiarazi"</string>
     <string name="dial_number_using" msgid="6060769078933953531">"Markatu zenbakia \n<xliff:g id="NUMBER">%s</xliff:g> erabilita"</string>
-    <string name="create_contact_using" msgid="6200708808003692594">"Sortu kontaktua\n<xliff:g id="NUMBER">%s</xliff:g> erabilita"</string>
+    <string name="create_contact_using" msgid="6200708808003692594">"Sortu kontaktu bat\n<xliff:g id="NUMBER">%s</xliff:g> erabilita"</string>
     <string name="grant_credentials_permission_message_header" msgid="5365733888842570481">"Aplikazio hauetako bat edo gehiago kontua orain eta etorkizunean atzitzeko baimena eskatzen ari dira."</string>
     <string name="grant_credentials_permission_message_footer" msgid="1886710210516246461">"Eskaera onartu nahi duzu?"</string>
     <string name="grant_permissions_header_text" msgid="3420736827804657201">"Sarbide-eskaera"</string>
@@ -1589,7 +1589,7 @@
     <string name="storage_usb_drive_label" msgid="6631740655876540521">"<xliff:g id="MANUFACTURER">%s</xliff:g> enpresaren USB bidezko unitatea"</string>
     <string name="storage_usb" msgid="2391213347883616886">"USB bidezko memoria"</string>
     <string name="extract_edit_menu_button" msgid="63954536535863040">"Editatu"</string>
-    <string name="data_usage_warning_title" msgid="9034893717078325845">"Datuen erabileraren abisua"</string>
+    <string name="data_usage_warning_title" msgid="9034893717078325845">"Datu-erabileraren abisua"</string>
     <string name="data_usage_warning_body" msgid="1669325367188029454">"<xliff:g id="APP">%s</xliff:g> erabili dituzu"</string>
     <string name="data_usage_mobile_limit_title" msgid="3911447354393775241">"Datu-konexioaren mugara iritsi zara"</string>
     <string name="data_usage_wifi_limit_title" msgid="2069698056520812232">"Wi-Fi datuen mugara iritsi zara"</string>
@@ -1883,7 +1883,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Ados"</string>
     <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"Bateria-aurrezleak gai iluna aktibatzen du, eta murriztu edo desaktibatu egiten ditu atzeko planoko jarduerak, zenbait efektu bisual, eta eginbide jakin eta sareko konexio batzuk."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"Bateria-aurrezleak gai iluna aktibatzen du, eta atzeko planoko jarduerak, zenbait efektu bisual, eta eginbide jakin eta sareko konexio batzuk murrizten edo desaktibatzen ditu."</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"Datuen erabilera murrizteko, atzeko planoan datuak bidaltzea eta jasotzea galarazten die datu-aurrezleak aplikazio batzuei. Une honetan erabiltzen ari zaren aplikazio batek datuak atzitu ahal izango ditu, baina baliteke maiztasun txikiagoarekin atzitzea. Horrela, adibidez, baliteke irudiak ez erakustea haiek sakatu arte."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"Datu-erabilera murrizteko, atzeko planoan datuak bidaltzea eta jasotzea galarazten die datu-aurrezleak aplikazio batzuei. Une honetan erabiltzen ari zaren aplikazio batek datuak atzitu ahal izango ditu, baina baliteke maiztasun txikiagoarekin atzitzea. Horrela, adibidez, baliteke irudiak ez erakustea haiek sakatu arte."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Datu-aurrezlea aktibatu nahi duzu?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Aktibatu"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
