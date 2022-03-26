@@ -100,7 +100,7 @@
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"ஸ்க்ரீன் ரெக்கார்டிங் செயலாக்கப்படுகிறது"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"திரை ரெக்கார்டிங் அமர்விற்கான தொடர் அறிவிப்பு"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"ரெக்கார்டிங்கைத் தொடங்கவா?"</string>
-    <string name="screenrecord_description" msgid="1123231719680353736">"ரெக்கார்டு செய்யும்போது, உங்கள் திரையில் தோன்றக்கூடிய அல்லது சாதனத்தில் பிளே ஆகக்கூடிய ஏதேனும் அதிமுக்கியத் தகவலை Android சிஸ்டம் படமெடுக்க முடியும். கடவுச்சொற்கள், பேமெண்ட் தகவல், படங்கள், மெசேஜ்கள், ஆடியோ ஆகியவை இதில் அடங்கும்."</string>
+    <string name="screenrecord_description" msgid="1123231719680353736">"ரெக்கார்டு செய்யும்போது, உங்கள் திரையில் தோன்றக்கூடிய அல்லது சாதனத்தில் பிளே ஆகக்கூடிய பாதுகாக்கப்பட வேண்டிய தகவலை Android சிஸ்டம் படமெடுக்க முடியும். கடவுச்சொற்கள், பேமெண்ட் தகவல், படங்கள், மெசேஜ்கள், ஆடியோ ஆகியவை இதில் அடங்கும்."</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"ஆடியோவை ரெக்கார்டு செய்"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"சாதன ஆடியோ"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"இசை, அழைப்புகள், ரிங்டோன்கள் போன்ற உங்கள் சாதனத்திலிருந்து வரும் ஒலி"</string>
