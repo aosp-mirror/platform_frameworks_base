@@ -109,6 +109,12 @@
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"চার্জ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> ব্যাটারি, R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> ব্যাটারি"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"চালু আছে"</string>
+    <!-- no translation found for bluetooth_hearing_aid_left_active (7084887715570971441) -->
+    <skip />
+    <!-- no translation found for bluetooth_hearing_aid_right_active (8574683234077567230) -->
+    <skip />
+    <!-- no translation found for bluetooth_hearing_aid_left_and_right_active (407704460573163973) -->
+    <skip />
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"মিডিয়া অডিও"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"ফোন কল"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"ফাইল স্থানান্তর"</string>
@@ -158,10 +164,6 @@
     <string name="bluetooth_talkback_headphone" msgid="8613073829180337091">"হেডফোন"</string>
     <string name="bluetooth_talkback_input_peripheral" msgid="5133944817800149942">"পেরিফেরাল ইনপুট"</string>
     <string name="bluetooth_talkback_bluetooth" msgid="1143241359781999989">"ব্লুটুথ"</string>
-    <string name="bluetooth_hearingaid_left_pairing_message" msgid="8561855779703533591">"বাঁদিকের হিয়ারিং এডটি পেয়ার করা হচ্ছে..."</string>
-    <string name="bluetooth_hearingaid_right_pairing_message" msgid="2655347721696331048">"ডানদিকের হিয়ারিং এড পেয়ার করা হচ্ছে…"</string>
-    <string name="bluetooth_hearingaid_left_battery_level" msgid="7375621694748104876">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> চার্জ বাকি আছে"</string>
-    <string name="bluetooth_hearingaid_right_battery_level" msgid="1850094448499089312">"ডানদিকের - চার্জ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="accessibility_wifi_off" msgid="1195445715254137155">"ওয়াই ফাই বন্ধ৷"</string>
     <string name="accessibility_no_wifi" msgid="5297119459491085771">"ওয়াই-ফাই ডিসকানেক্ট হয়েছে৷"</string>
     <string name="accessibility_wifi_one_bar" msgid="6025652717281815212">"ওয়াই ফাই এ একটি দণ্ড৷"</string>
@@ -180,7 +182,6 @@
     <string name="tether_settings_title_usb_bluetooth" msgid="1727111807207577322">"টিথারিং"</string>
     <string name="tether_settings_title_all" msgid="8910259483383010470">"টিথারিং ও পোর্টেবল হটস্পট"</string>
     <string name="managed_user_title" msgid="449081789742645723">"সমস্ত কাজের অ্যাপ্লিকেশান"</string>
-    <string name="user_guest" msgid="6939192779649870792">"অতিথি"</string>
     <string name="unknown" msgid="3544487229740637809">"অজানা"</string>
     <string name="running_process_item_user_label" msgid="3988506293099805796">"ব্যবহারকারী: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="3631650616557252926">"কিছু ডিফল্ট সেট করা রয়েছে"</string>
@@ -442,12 +443,6 @@
     <string name="select_webview_provider_title" msgid="3917815648099445503">"ওয়েবভিউ প্রয়োগ"</string>
     <string name="select_webview_provider_dialog_title" msgid="2444261109877277714">"ওয়েবভিউ প্রয়োগ সেট করুন"</string>
     <string name="select_webview_provider_toast_text" msgid="8512254949169359848">"এই পছন্দটি আর বৈধ নেই৷ আবার চেষ্টা করুন৷"</string>
-    <string name="convert_to_file_encryption" msgid="2828976934129751818">"ফাইল এনক্রিপশান রূপান্তর করুন"</string>
-    <string name="convert_to_file_encryption_enabled" msgid="840757431284311754">"রূপান্তর করুন..."</string>
-    <string name="convert_to_file_encryption_done" msgid="8965831011811180627">"ফাইল ইতিমধ্যেই এনক্রিপ্ট করা রয়েছে"</string>
-    <string name="title_convert_fbe" msgid="5780013350366495149">"ফাইল ভিত্তিক এনক্রিপশানে রূপান্তর করা হচ্ছে"</string>
-    <string name="convert_to_fbe_warning" msgid="34294381569282109">"ডেটা পার্টিশানকে ফাইলভিত্তিক এনক্রিপশানে রূপান্তর করুন৷ \n !!সতর্কবাণী!! এটি আপনার সমস্ত ডেটা মুছে ফেলবে৷\n এই বৈশিষ্ট্যটি আলফা এবং সঠিকভাবে কাজ নাও করতে পারে৷\n চালিয়ে যেতে \'মুছুন ও রূপান্তর করুন...\' টিপুন৷"</string>
-    <string name="button_convert_fbe" msgid="1159861795137727671">"মুছুন ও রূপান্তর করুন..."</string>
     <string name="picture_color_mode" msgid="1013807330552931903">"ছবি রঙ মোড"</string>
     <string name="picture_color_mode_desc" msgid="151780973768136200">"sRGB ব্যবহার করুন"</string>
     <string name="daltonizer_mode_disabled" msgid="403424372812399228">"অক্ষম হয়েছে"</string>
@@ -456,7 +451,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"প্রোটানোম্যালি (লাল-সবুজ)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"ট্রিট্যানোম্যালি (নীল-হলুদ)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"রঙ সংশোধন"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="2333641630205214702">"আপনার ডিভাইসে রঙগুলি কেমন দেখাবে তা অ্যাডজাস্ট করুন। যেক্ষেত্রে এটি আপনাকে সহায়তা করতে পারে:&lt;br/&gt;&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;আরও নির্ভুলভাবে রঙ দেখতে&lt;/li&gt; &lt;li&gt;&amp;nbsp;রঙ সরিয়ে দিয়ে ফোকাস করতে সহায়তা করবে&lt;/li&gt; &lt;/ol&gt;"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"\'রঙ সংশোধন করা\' ফিচারের সাহায্যে এইসব কাজে করা যেতে পারে:&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;আরও সঠিকভাবে রঙ দেখা&lt;/li&gt; &lt;li&gt;&amp;nbsp;ফোকাস করার জন্য রঙ সরানো&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> এর দ্বারা ওভাররাইড করা হয়েছে"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"আর আনুমানিক <xliff:g id="TIME_REMAINING">%1$s</xliff:g> চলবে"</string>
@@ -493,6 +488,7 @@
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"চার্জ হচ্ছে না"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"কানেক্ট করা থাকলেও চার্জ করা হচ্ছে না"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"চার্জ হয়েছে"</string>
+    <string name="battery_info_status_full_charged" msgid="3536054261505567948">"সম্পূর্ণ চার্জ আছে"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"প্রশাসকের দ্বারা নিয়ন্ত্রিত"</string>
     <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"এটি বিধিনিষেধ সেটিং থেকে নিয়ন্ত্রণ করা হয়"</string>
     <string name="disabled" msgid="8017887509554714950">"অক্ষম হয়েছে"</string>
@@ -532,12 +528,14 @@
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"আরও কম।"</string>
     <string name="cancel" msgid="5665114069455378395">"বাতিল"</string>
     <string name="okay" msgid="949938843324579502">"ঠিক আছে"</string>
+    <string name="done" msgid="381184316122520313">"হয়ে গেছে"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"অ্যালার্ম এবং রিমাইন্ডার"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"অ্যালার্ম এবং রিমাইন্ডার সেট করার অনুমতি দিন"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"অ্যালার্ম এবং রিমাইন্ডার"</string>
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"অ্যালার্ম এবং সময়ের মধ্যে শেষ করতে হবে এমন অ্যাকশনের শিডিউল সেট করতে এই অ্যাপকে অনুমতি দিন। এর ফলে ব্যাকগ্রাউন্ডে অ্যাপ চলতে পারে, যার জন্য আরও ব্যাটারির চার্জ খরচ হতে পারে।\n\nএই অনুমতি বন্ধ করা থাকলে, আগে থেকে থাকা অ্যালার্ম এবং অ্যাপের মাধ্যমে শিডিউল করা সময় ভিত্তিক ইভেন্টের রিমাইন্ডার কাজ করবে না।"</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"শিডিউল, অ্যালার্ম, রিমাইন্ডার, ঘড়ি"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"চালু করুন"</string>
+    <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"\'বিরক্ত করবে না\' মোড চালু করুন"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"কখনও নয়"</string>
     <string name="zen_interruption_level_priority" msgid="5392140786447823299">"শুধুমাত্র অগ্রাধিকার"</string>
     <string name="zen_mode_and_condition" msgid="8877086090066332516">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
@@ -549,7 +547,8 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"প্রতিবার জিজ্ঞেস করা হবে"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"যতক্ষণ না আপনি বন্ধ করছেন"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"এখনই"</string>
-    <string name="media_transfer_this_device_name" msgid="2357329267148436433">"এই ফোন"</string>
+    <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"এই ফোন"</string>
+    <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"এই ট্যাবলেট"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"এই ফোনটি"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"কানেক্ট করতে সমস্যা হচ্ছে। ডিভাইস বন্ধ করে আবার চালু করুন"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"ওয়্যার অডিও ডিভাইস"</string>
@@ -589,18 +588,31 @@
     <string name="user_set_lock_button" msgid="1427128184982594856">"লক সেট করুন"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"<xliff:g id="USER_NAME">%s</xliff:g>-এ পাল্টান"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"নতুন ব্যবহারকারী তৈরি করা হচ্ছে…"</string>
+    <string name="creating_new_guest_dialog_message" msgid="1114905602181350690">"নতুন অতিথি তৈরি করা হচ্ছে…"</string>
     <string name="add_user_failed" msgid="4809887794313944872">"নতুন ব্যবহারকারী যোগ করা যায়নি"</string>
+    <string name="add_guest_failed" msgid="8074548434469843443">"নতুন অতিথি তৈরি করা যায়নি"</string>
     <string name="user_nickname" msgid="262624187455825083">"বিশেষ নাম"</string>
+    <!-- no translation found for user_add_user (7876449291500212468) -->
+    <skip />
     <string name="guest_new_guest" msgid="3482026122932643557">"অতিথি যোগ করুন"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"অতিথি সরান"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"অতিথি সেশন রিসেট করুন"</string>
-    <string name="guest_nickname" msgid="6332276931583337261">"অতিথি"</string>
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"গেস্ট সেশন রিসেট করবেন?"</string>
+    <!-- no translation found for guest_remove_guest_dialog_title (4548511006624088072) -->
+    <skip />
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"রিসেট করুন"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"গেস্ট সেশন রিসেট করা হচ্ছে..."</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"ফটো তুলুন"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"একটি ইমেজ বেছে নিন"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"ফটো বেছে নিন"</string>
+    <!-- no translation found for failed_attempts_now_wiping_device (4016329172216428897) -->
+    <skip />
+    <!-- no translation found for failed_attempts_now_wiping_user (469060411789668050) -->
+    <skip />
+    <!-- no translation found for failed_attempts_now_wiping_profile (7626589520888963129) -->
+    <skip />
+    <!-- no translation found for failed_attempts_now_wiping_dialog_dismiss (2749889771223578925) -->
+    <skip />
     <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"ডিভাইসের ডিফল্ট"</string>
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"বন্ধ করা আছে"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"চালু করা আছে"</string>
@@ -642,4 +654,10 @@
     <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"কাস্ট সম্পর্কিত তথ্য"</string>
     <string name="avatar_picker_title" msgid="8492884172713170652">"একটি প্রোফাইল ছবি বেছে নিন"</string>
     <string name="default_user_icon_description" msgid="6554047177298972638">"ডিফল্ট ব্যবহারকারীর আইকন"</string>
+    <string name="physical_keyboard_title" msgid="4811935435315835220">"ফিজিক্যাল কীবোর্ড"</string>
+    <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"কীবোর্ড লেআউট বেছে নিন"</string>
+    <string name="keyboard_layout_default_label" msgid="1997292217218546957">"ডিফল্ট"</string>
+    <string name="turn_screen_on_title" msgid="3266937298097573424">"স্ক্রিন চালু করুন"</string>
+    <string name="allow_turn_screen_on" msgid="6194845766392742639">"স্ক্রিন চালু করার অনুমতি দিন"</string>
+    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"অ্যাপকে স্ক্রিন চালু করার অনুমতি দিন। অনুমতি দেওয়া হলে, অ্যাপ আপনার এক্সপ্লিসিট ইনটেন্ট ছাড়াই যেকোনও সময় স্ক্রিন চালু করতে পারবে।"</string>
 </resources>

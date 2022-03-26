@@ -109,6 +109,12 @@
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> بیٹری"</string>
     <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"بائيں: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> بیٹری، دائیں: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> بیٹری"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"فعال"</string>
+    <!-- no translation found for bluetooth_hearing_aid_left_active (7084887715570971441) -->
+    <skip />
+    <!-- no translation found for bluetooth_hearing_aid_right_active (8574683234077567230) -->
+    <skip />
+    <!-- no translation found for bluetooth_hearing_aid_left_and_right_active (407704460573163973) -->
+    <skip />
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"میڈيا آڈیو"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"فون کالز"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"فائل کی منتقلی"</string>
@@ -158,10 +164,6 @@
     <string name="bluetooth_talkback_headphone" msgid="8613073829180337091">"ہیڈ فون"</string>
     <string name="bluetooth_talkback_input_peripheral" msgid="5133944817800149942">"ان پٹ پیریفرل"</string>
     <string name="bluetooth_talkback_bluetooth" msgid="1143241359781999989">"بلوٹوتھ"</string>
-    <string name="bluetooth_hearingaid_left_pairing_message" msgid="8561855779703533591">"بائيں جانب کے سماعتی آلہ کا جوڑا بنایا جا رہا ہے…"</string>
-    <string name="bluetooth_hearingaid_right_pairing_message" msgid="2655347721696331048">"دائیں جانب کے سماعتی آلہ کا جوڑا بنایا جا رہا ہے…"</string>
-    <string name="bluetooth_hearingaid_left_battery_level" msgid="7375621694748104876">"بائيں - <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> بیٹری"</string>
-    <string name="bluetooth_hearingaid_right_battery_level" msgid="1850094448499089312">"دائيں - <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> بیٹری"</string>
     <string name="accessibility_wifi_off" msgid="1195445715254137155">"‏Wifi آف ہے۔"</string>
     <string name="accessibility_no_wifi" msgid="5297119459491085771">"‏Wifi غیر منسلک ہو گیا۔"</string>
     <string name="accessibility_wifi_one_bar" msgid="6025652717281815212">"‏Wifi ایک بار۔"</string>
@@ -180,7 +182,6 @@
     <string name="tether_settings_title_usb_bluetooth" msgid="1727111807207577322">"ٹیدرنگ"</string>
     <string name="tether_settings_title_all" msgid="8910259483383010470">"ٹیدرنگ و پورٹیبل ہاٹ اسپاٹ"</string>
     <string name="managed_user_title" msgid="449081789742645723">"تمام کام کی ایپس"</string>
-    <string name="user_guest" msgid="6939192779649870792">"مہمان"</string>
     <string name="unknown" msgid="3544487229740637809">"نامعلوم"</string>
     <string name="running_process_item_user_label" msgid="3988506293099805796">"صارف: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="3631650616557252926">"کچھ ڈیفالٹس سیٹ ہیں"</string>
@@ -442,12 +443,6 @@
     <string name="select_webview_provider_title" msgid="3917815648099445503">"‏WebView کا نفاذ"</string>
     <string name="select_webview_provider_dialog_title" msgid="2444261109877277714">"‏WebView کا نفاذ سیٹ کریں"</string>
     <string name="select_webview_provider_toast_text" msgid="8512254949169359848">"یہ انتخاب اب درست نہیں رہا۔ دوبارہ کوشش کریں۔"</string>
-    <string name="convert_to_file_encryption" msgid="2828976934129751818">"فائل مرموز کاری میں بدلیں"</string>
-    <string name="convert_to_file_encryption_enabled" msgid="840757431284311754">"بدلیں…"</string>
-    <string name="convert_to_file_encryption_done" msgid="8965831011811180627">"فائل پہلے ہی مرموز شدہ ہے"</string>
-    <string name="title_convert_fbe" msgid="5780013350366495149">"فائل پر مبنی مرموز کاری میں بدلا جا رہا ہے"</string>
-    <string name="convert_to_fbe_warning" msgid="34294381569282109">"ڈیٹا پارٹیشن کو فائل پر مبنی مرموز کاری میں بدلیں۔\n !!تنبیہ!! اس سے آپ کا سارا ڈیٹا مٹ جائے گا۔\n یہ خصوصیت الفا ہے اور شاید ٹھیک طرح سے کام نہ کرے۔\n جاری رکھنے کیلئے \'صاف کریں اور بدلیں…\' دبائیں۔"</string>
-    <string name="button_convert_fbe" msgid="1159861795137727671">"صاف کریں اور بدلیں…"</string>
     <string name="picture_color_mode" msgid="1013807330552931903">"تصویری رنگ موڈ"</string>
     <string name="picture_color_mode_desc" msgid="151780973768136200">"‏sRGB استعمال کریں"</string>
     <string name="daltonizer_mode_disabled" msgid="403424372812399228">"غیر فعال"</string>
@@ -456,7 +451,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"‏Protanomaly (سرخ سبز)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"‏Tritanomaly (نیلا پیلا)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"رنگ کی اصلاح"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="2333641630205214702">"‏آپ کے آلے پر رنگوں کے ڈسپلے ہونے کے طریقے کو ایڈجسٹ کریں۔ یہ درج ذیل کے لیے مددگار ثابت ہوسکتا ہے:&lt;br/&gt;&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;جب آپ رنگوں کو مزید درست طریقے سے دیکھنا چاہیں&lt;/li&gt; &lt;li&gt;&amp;nbsp;فوکس کرنے میں مدد کرنے کے لئے رنگوں کو ہٹانا چاہیں&lt;/li&gt; &lt;/ol&gt;"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"‏درج ذیل کے لیے رنگ کی اصلاح مددگار ثابت ہو سکتی ہے:‏‎&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;‎جب آپ رنگوں کو مزید درست طریقے سے دیکھنا چاہیں‎&lt;/li&gt; &lt;li&gt;&amp;nbsp;‎فوکس کرنے میں مدد کرنے کے لئے رنگوں کو ہٹانا چاہیں‎&lt;/li&gt; &lt;/ol&gt;‎"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> کے ذریعہ منسوخ کردیا گیا"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"تقریباً <xliff:g id="TIME_REMAINING">%1$s</xliff:g> باقی ہے"</string>
@@ -493,6 +488,7 @@
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"چارج نہیں ہو رہا ہے"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"منسلک ہے، چارج نہیں ہو رہی ہے"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"چارج ہو گئی"</string>
+    <string name="battery_info_status_full_charged" msgid="3536054261505567948">"مکمل طور پر چارج ہو گئی"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"کنٹرول کردہ بذریعہ منتظم"</string>
     <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"محدود کردہ ترتیب کے زیر انتظام ہے"</string>
     <string name="disabled" msgid="8017887509554714950">"غیر فعال"</string>
@@ -532,12 +528,14 @@
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"کم وقت۔"</string>
     <string name="cancel" msgid="5665114069455378395">"منسوخ کریں"</string>
     <string name="okay" msgid="949938843324579502">"ٹھیک ہے"</string>
+    <string name="done" msgid="381184316122520313">"ہو گیا"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"الارمز اور یاد دہانیاں"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"الارمز اور یاد دہانیاں سیٹ کرنے کی اجازت دیں"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"الارمز اور یاد دہانیاں"</string>
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"اس ایپ کو الارمز سیٹ کرنے اور متعین وقت کے لحاظ سے حساس کارروائیوں کو شیڈول کرنے کی اجازت دیں۔ یہ ایپ کو پس منظر میں چلنے دیتا ہے، جس میں زیادہ بیٹری استعمال ہو سکتی ہے۔\n\n اگر یہ اجازت آف ہے تو موجودہ الارمز اور اس ایپ کے ذریعے شیڈول کردہ وقت پر مبنی ایونٹس کام نہیں کریں گے۔"</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"شیڈول، الارم، یاد دہانی، گھڑی"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"آن کریں"</string>
+    <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"\'ڈسٹرب نہ کریں\' کو آن کریں"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"کبھی نہیں"</string>
     <string name="zen_interruption_level_priority" msgid="5392140786447823299">"صرف ترجیحی"</string>
     <string name="zen_mode_and_condition" msgid="8877086090066332516">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
@@ -549,7 +547,8 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"ہر بار پوچھیں"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"یہاں تک کہ آپ آف کر دیں"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"ابھی ابھی"</string>
-    <string name="media_transfer_this_device_name" msgid="2357329267148436433">"یہ فون"</string>
+    <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"یہ فون"</string>
+    <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"یہ ٹیبلیٹ"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"یہ فون"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"منسلک کرنے میں مسئلہ پیش آ گیا۔ آلہ کو آف اور بیک آن کریں"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"وائرڈ آڈیو آلہ"</string>
@@ -589,18 +588,31 @@
     <string name="user_set_lock_button" msgid="1427128184982594856">"لاک سیٹ کریں"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"‫<xliff:g id="USER_NAME">%s</xliff:g> پر سوئچ کریں"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"نیا صارف تخلیق ہو رہا ہے…"</string>
+    <string name="creating_new_guest_dialog_message" msgid="1114905602181350690">"نیا مہمان تخلیق کیا جا رہا ہے…"</string>
     <string name="add_user_failed" msgid="4809887794313944872">"نیا صارف بنانے میں ناکام"</string>
+    <string name="add_guest_failed" msgid="8074548434469843443">"نیا مہمان بنانے میں ناکام"</string>
     <string name="user_nickname" msgid="262624187455825083">"عرفی نام"</string>
+    <!-- no translation found for user_add_user (7876449291500212468) -->
+    <skip />
     <string name="guest_new_guest" msgid="3482026122932643557">"مہمان کو شامل کریں"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"مہمان کو ہٹائیں"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"مہمان کو ری سیٹ کریں"</string>
-    <string name="guest_nickname" msgid="6332276931583337261">"مہمان"</string>
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"مہمان کو ری سیٹ کریں؟"</string>
+    <!-- no translation found for guest_remove_guest_dialog_title (4548511006624088072) -->
+    <skip />
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"ری سیٹ کریں"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"مہمان کو ری سیٹ کرنا…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"ایک تصویر لیں"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"ایک تصویر منتخب کریں"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"تصویر منتخب کریں"</string>
+    <!-- no translation found for failed_attempts_now_wiping_device (4016329172216428897) -->
+    <skip />
+    <!-- no translation found for failed_attempts_now_wiping_user (469060411789668050) -->
+    <skip />
+    <!-- no translation found for failed_attempts_now_wiping_profile (7626589520888963129) -->
+    <skip />
+    <!-- no translation found for failed_attempts_now_wiping_dialog_dismiss (2749889771223578925) -->
+    <skip />
     <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"آلہ ڈیفالٹ"</string>
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"غیر فعال"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"فعال"</string>
@@ -642,4 +654,10 @@
     <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"کاسٹ کرنے کی معلومات"</string>
     <string name="avatar_picker_title" msgid="8492884172713170652">"پروفائل کی تصویر منتخب کریں"</string>
     <string name="default_user_icon_description" msgid="6554047177298972638">"ڈیفالٹ صارف کا آئیکن"</string>
+    <string name="physical_keyboard_title" msgid="4811935435315835220">"فزیکل کی بورڈ"</string>
+    <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"کی بورڈ لے آؤٹ منتخب کریں"</string>
+    <string name="keyboard_layout_default_label" msgid="1997292217218546957">"ڈیفالٹ"</string>
+    <string name="turn_screen_on_title" msgid="3266937298097573424">"اسکرین آن کریں"</string>
+    <string name="allow_turn_screen_on" msgid="6194845766392742639">"اسکرین آن کرنے کی اجازت دیں"</string>
+    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"ایپ کو اسکرین آن کرنے کی اجازت دیں۔ اگر اجازت دی گئی تو ایپ آپ کے واضح مقصد کے بغیر کسی بھی وقت اسکرین کو آن کر سکتی ہے۔"</string>
 </resources>
