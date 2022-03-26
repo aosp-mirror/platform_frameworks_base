@@ -442,6 +442,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
         // Validate first binding
         assertThat(actionPlayPause.isEnabled()).isTrue()
         assertThat(actionPlayPause.contentDescription).isEqualTo("play")
+        assertThat(actionPlayPause.getBackground()).isNull()
         verify(collapsedSet).setVisibility(R.id.actionPlayPause, ConstraintSet.VISIBLE)
         assertThat(actionPlayPause.hasOnClickListeners()).isTrue()
 
@@ -467,6 +468,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
 
         // Validate correct state was bound
         assertThat(actionPlayPause.contentDescription).isEqualTo("loading")
+        assertThat(actionPlayPause.getBackground()).isNull()
         verify(mockAvd0, times(1))
             .registerAnimationCallback(any(Animatable2.AnimationCallback::class.java))
         verify(mockAvd1, times(1)
