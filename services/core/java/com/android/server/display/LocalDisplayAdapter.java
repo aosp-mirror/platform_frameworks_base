@@ -471,12 +471,12 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         }
 
         private int getLogicalDensity() {
-            DensityMap densityMap = getDisplayDeviceConfig().getDensityMap();
-            if (densityMap == null) {
+            DensityMapping densityMapping = getDisplayDeviceConfig().getDensityMapping();
+            if (densityMapping == null) {
                 return (int) (mStaticDisplayInfo.density * 160 + 0.5);
             }
 
-            return densityMap.getDensityForResolution(mInfo.width, mInfo.height);
+            return densityMapping.getDensityForResolution(mInfo.width, mInfo.height);
         }
 
         private void loadDisplayDeviceConfig() {
