@@ -85,8 +85,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"Временно е изключено от оператора ви за SIM карта <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Не може да се установи връзка с мобилната мрежа"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Изберете друга предпочитана мрежа. Докоснете за промяна."</string>
-    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Няма достъп до спешните обаждания"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Не може да се извършват спешни обаждания през Wi-Fi"</string>
+    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"Спешните обаждания може да не са налице"</string>
+    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"<xliff:g id="SPN">%s</xliff:g> не поддържа спешните обаждания през Wi-Fi. Докоснете за подробности."</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Сигнали"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Пренасочване на обаждания"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Режим на обратно обаждане при спешност"</string>
@@ -425,10 +425,10 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"Разрешава на приложението да променя списъка с обаждания на таблета ви, включително данните за входящите и изходящите обаждания. Злонамерените приложения могат да използват това, за да изтрият или променят този списък."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Дава възможност на приложението да променя списъка с обажданията на устройството ви с Android TV, включително данните за входящите и изходящите обаждания. Злонамерените приложения може да използват разрешението, за да изтрият или променят този списък."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Разрешава на приложението да променя списъка с обаждания на телефона ви, включително данните за входящите и изходящите обаждания. Злонамерените приложения могат да използват това, за да изтрият или променят този списък."</string>
-    <string name="permlab_bodySensors" msgid="3411035315357380862">"достъп до телесните сензори (напр. пулсомери)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="3208940894182188063">"Достъп до данните от сензорите за тяло, като например сърдечен ритъм, температура, процент на кислорода в кръвта и др."</string>
-    <string name="permlab_bodySensors_background" msgid="4352831883331744370">"достъп до сензорите за тяло (напр. пулсомери), докато е на заден план"</string>
-    <string name="permdesc_bodySensors_background" product="default" msgid="8512392249166660872">"Достъп до данните от сензорите за тяло, като например сърдечен ритъм, температура, процент на кислорода в кръвта и др., докато е на заден план."</string>
+    <string name="permlab_bodySensors" msgid="662918578601619569">"Достъп до данните от сензорите за тяло (напр. за сърдечен ритъм) при използване"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Разрешава на приложението да осъществява достъп до данните от сензорите за тяло, като например тези за сърдечен ритъм, температура и процент на кислорода в кръвта, докато то се използва."</string>
+    <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Достъп до данните от сензорите за тяло (напр. за сърдечен ритъм) на заден план"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Разрешава на приложението да осъществява достъп до данните от сензорите за тяло, като например тези за сърдечен ритъм, температура и процент на кислорода в кръвта, докато то се изпълнява на заден план."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Четене на събития и подробности от календара"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Това приложение може да чете всички съхранявани на таблета ви събития в календара и да споделя или запазва данни в календара ви."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Това приложение може да чете всички съхранявани на устройството ви с Android TV събития в календара и да споделя или запазва данни в календара ви."</string>
@@ -689,8 +689,8 @@
     <string name="permdesc_readMediaAudio" msgid="5299772574434619399">"Разрешава на приложението да чете аудиофайлове от споделеното ви хранилище."</string>
     <string name="permlab_readMediaVideo" msgid="7768003311260655007">"да чете видеофайлове от споделеното хранилище"</string>
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"Разрешава на приложението да чете видеофайлове от споделеното ви хранилище."</string>
-    <string name="permlab_readMediaImage" msgid="1507059005825769856">"да чете графични файлове от споделеното хранилище"</string>
-    <string name="permdesc_readMediaImage" msgid="8328052622292457588">"Разрешава на приложението да чете графични файлове от споделеното ви хранилище."</string>
+    <string name="permlab_readMediaImages" msgid="4057590631020986789">"да чете графични файлове от споделеното хранилище"</string>
+    <string name="permdesc_readMediaImages" msgid="5836219373138469259">"Разрешава на приложението да чете графични файлове от споделеното ви хранилище."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"промяна или изтрив. на съдърж. от сподел. ви хранил."</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Разрешава на прил. да записва съдърж. от сподел. ви хранил."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"извършване/получаване на обаждания чрез SIP"</string>
@@ -912,7 +912,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"Натиснете „Меню“, за да отключите или да извършите спешно обаждане."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"Натиснете „Меню“, за да отключите."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"Нарисувайте фигура, за да отключите"</string>
-    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"Спешно обаждане"</string>
+    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"Спешни случаи"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"Назад към обаждането"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"Правилно!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Опитайте отново"</string>
@@ -1051,7 +1051,6 @@
     <string name="save_password_never" msgid="6776808375903410659">"Никога"</string>
     <string name="open_permission_deny" msgid="5136793905306987251">"Нямате разрешение да отворите тази страница."</string>
     <string name="text_copied" msgid="2531420577879738860">"Текстът е копиран в буферната памет."</string>
-    <string name="copied" msgid="4675902854553014676">"Копирано"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> постави данни от <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g>"</string>
     <string name="pasted_from_clipboard" msgid="7355790625710831847">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> постави данни от буферната памет"</string>
     <string name="pasted_text" msgid="4298871641549173733">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> постави копиран от вас текст"</string>
@@ -1452,8 +1451,12 @@
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"Разрешава на дадено приложение да иска разрешение за пренебрегване на свързаните с него оптимизации на батерията."</string>
     <string name="permlab_queryAllPackages" msgid="2928450604653281650">"заявка за всички пакети"</string>
     <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"Разрешава на приложението да вижда всички инсталирани пакети."</string>
-    <string name="permlab_accessSupplementalApi" msgid="3544659160536960275">"достъп до SupplementalApis"</string>
-    <string name="permdesc_accessSupplementalApi" msgid="8974758769370951074">"Позволява на приложението достъп до SupplementalApis."</string>
+    <string name="permlab_accessAdServicesTopics" msgid="6687112022940098945">"достъп до API за теми в AdServices"</string>
+    <string name="permdesc_accessAdServicesTopics" msgid="6011532458156465929">"Позволява на приложението достъп до API за теми в AdServices."</string>
+    <string name="permlab_accessAdServicesAttribution" msgid="3268942271128309354">"достъп до API за приписване в AdServices"</string>
+    <string name="permdesc_accessAdServicesAttribution" msgid="577482544832578288">"Позволява на приложението достъп до API за приписване в AdServices."</string>
+    <string name="permlab_accessAdServicesCustomAudiences" msgid="7249286630514600684">"достъп до API за персонализирани аудитории в AdServices"</string>
+    <string name="permdesc_accessAdServicesCustomAudiences" msgid="645526926477180315">"Позволява на приложението достъп до API за персонализирани аудитории в AdServices."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"Докоснете двукратно за управление на промяната на мащаба"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"Приспособлението не можа да бъде добавено."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"Старт"</string>
@@ -1716,6 +1719,7 @@
     <string name="user_switching_message" msgid="1912993630661332336">"Превключва се към: <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"<xliff:g id="NAME">%1$s</xliff:g> излиза…"</string>
     <string name="owner_name" msgid="8713560351570795743">"Собственик"</string>
+    <string name="guest_name" msgid="8502103277839834324">"Гост"</string>
     <string name="error_message_title" msgid="4082495589294631966">"Грешка"</string>
     <string name="error_message_change_not_allowed" msgid="843159705042381454">"Тази промяна не е разрешена от администратора ви"</string>
     <string name="app_not_found" msgid="3429506115332341800">"Няма намерено приложение за извършване на това действие"</string>
@@ -2027,10 +2031,10 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"ДЕИНСТАЛИРАНЕ"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"ОТВАРЯНЕ"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"Открито е опасно приложение"</string>
-    <string name="log_access_confirmation_title" msgid="3143035474800851565">"Заявка за достъп до сист. рег. файлове"</string>
+    <string name="log_access_confirmation_title" msgid="2343578467290592708">"Да се разреши ли на <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> достъп до всички регистрационни файлове за устройството?"</string>
     <string name="log_access_confirmation_allow" msgid="143157286283302512">"Само този път"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Забраняване"</string>
-    <string name="log_access_confirmation_body" msgid="7599059550906238538">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> иска достъп до системните регистрационни файлове с цел отстраняване на грешки с функциите. Тези файлове трябва да съдържат информация, записана от приложенията и услугите на устройството ви."</string>
+    <string name="log_access_confirmation_body" msgid="4483075525611652922">"В регистрационните файлове за устройството се записва какво се извършва на него. Приложенията могат да използват тези регистрационни файлове, за да откриват и отстраняват проблеми.\n\nНякои регистрационни файлове за устройството може да съдържат поверителна информация, затова разрешавайте достъп до всички тях само на приложения, на които имате доверие. \n\nАко не разрешите на това приложение достъп до всички регистрационни файлове за устройството, то пак може да осъществява достъп до собствените си регистрационни файлове и производителят на устройството пак може да има достъп до някои регистрационни файлове или информация на устройството ви. Научете повече"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Да не се показва пак"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> иска да показва части от <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Редактиране"</string>
@@ -2265,4 +2269,6 @@
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> работи на заден план от дълго време. Докоснете за преглед."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Проверете активните приложения"</string>
     <string name="vdm_camera_access_denied" msgid="6345652513729130490">"Не може да се осъществи достъп до камерата от това устройство"</string>
+    <!-- no translation found for system_locale_title (3978041860457277638) -->
+    <skip />
 </resources>

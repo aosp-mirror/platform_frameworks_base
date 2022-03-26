@@ -18,7 +18,6 @@ package android.service.autofill;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillValue;
 
 import com.android.internal.util.DataClass;
@@ -26,10 +25,9 @@ import com.android.internal.util.DataClass;
 import java.util.regex.Pattern;
 
 /**
- * This class is used to set all information of a field. Such as the
- * {@link AutofillId} of the field, the {@link AutofillValue} to be autofilled,
- * a <a href="#Filtering">explicit filter</a>, and presentations to be visualized,
- * etc.
+ * This class is used to set all information of a field. Such as the {@link AutofillValue}
+ * to be autofilled, a <a href="#Filtering">explicit filter</a>, and presentations to be
+ * visualized, etc.
  */
 public final class Field {
 

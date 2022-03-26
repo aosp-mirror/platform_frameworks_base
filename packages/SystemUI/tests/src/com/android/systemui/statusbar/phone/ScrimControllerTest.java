@@ -1078,8 +1078,9 @@ public class ScrimControllerTest extends SysuiTestCase {
                 ScrimState.OFF, ScrimState.AOD, ScrimState.PULSING));
         HashSet<ScrimState> regularStates = new HashSet<>(Arrays.asList(
                 ScrimState.UNINITIALIZED, ScrimState.KEYGUARD, ScrimState.BOUNCER,
-                ScrimState.BOUNCER_SCRIMMED, ScrimState.BRIGHTNESS_MIRROR, ScrimState.UNLOCKED,
-                ScrimState.SHADE_LOCKED, ScrimState.AUTH_SCRIMMED, ScrimState.AUTH_SCRIMMED_SHADE));
+                ScrimState.DREAMING, ScrimState.BOUNCER_SCRIMMED, ScrimState.BRIGHTNESS_MIRROR,
+                ScrimState.UNLOCKED, ScrimState.SHADE_LOCKED, ScrimState.AUTH_SCRIMMED,
+                ScrimState.AUTH_SCRIMMED_SHADE));
 
         for (ScrimState state : ScrimState.values()) {
             if (!lowPowerModeStates.contains(state) && !regularStates.contains(state)) {
@@ -1107,6 +1108,7 @@ public class ScrimControllerTest extends SysuiTestCase {
         // GIVEN device has an activity showing ('UNLOCKED' state can occur on the lock screen
         // with the camera app occluding the keyguard)
         mScrimController.transitionTo(ScrimState.UNLOCKED);
+        mScrimController.setClipsQsScrim(true);
         mScrimController.setRawPanelExpansionFraction(1);
         // notifications scrim alpha change require calling setQsPosition
         mScrimController.setQsPosition(0, 300);
@@ -1120,6 +1122,12 @@ public class ScrimControllerTest extends SysuiTestCase {
                 mScrimBehind.getViewAlpha(), 1, 0.0);
         assertEquals("Notifications scrim should be opaque",
                 mNotificationsScrim.getViewAlpha(), 1, 0.0);
+
+        assertScrimTinted(Map.of(
+                mScrimInFront, true,
+                mScrimBehind, true,
+                mNotificationsScrim, false
+        ));
     }
 
     @Test
@@ -1228,8 +1236,8 @@ public class ScrimControllerTest extends SysuiTestCase {
     public void testNotificationTransparency_followsPanelExpansionInShadeLockedState() {
         mScrimController.transitionTo(ScrimState.SHADE_LOCKED);
 
-        assertAlphaAfterExpansion(mNotificationsScrim, /* alpha */ 0.8f, /* expansion */ 0.8f);
-        assertAlphaAfterExpansion(mNotificationsScrim, /* alpha */ 0.47f, /* expansion */ 0.2f);
+        assertAlphaAfterExpansion(mNotificationsScrim, /* alpha */ 0f, /* expansion */ 0.8f);
+        assertAlphaAfterExpansion(mNotificationsScrim, /* alpha */ 0f, /* expansion */ 0.2f);
     }
 
     @Test
@@ -1242,15 +1250,16 @@ public class ScrimControllerTest extends SysuiTestCase {
 
         // Verify normal behavior after
         mScrimController.setUnocclusionAnimationRunning(false);
-        assertAlphaAfterExpansion(mNotificationsScrim, /* alpha */ 0.2f, /* expansion */ 0.4f);
+        assertAlphaAfterExpansion(mNotificationsScrim, /* alpha */ 1f, /* expansion */ 0.4f);
     }
 
     @Test
     public void testNotificationTransparency_inKeyguardState() {
         mScrimController.transitionTo(ScrimState.KEYGUARD);
 
-        assertAlphaAfterExpansion(mNotificationsScrim, /* alpha */ 0.2f, /* expansion */ 0.4f);
-        assertAlphaAfterExpansion(mNotificationsScrim, /* alpha */ 0.52f, /* expansion */ 0.2f);
+        assertAlphaAfterExpansion(mNotificationsScrim, /* alpha */ 1f, /* expansion */ 0.8f);
+        assertAlphaAfterExpansion(mNotificationsScrim, /* alpha */ 1f, /* expansion */ 0.4f);
+        assertAlphaAfterExpansion(mNotificationsScrim, /* alpha */ 1f, /* expansion */ 0.2f);
     }
 
     @Test
@@ -1321,6 +1330,25 @@ public class ScrimControllerTest extends SysuiTestCase {
         mScrimController.setNotificationsOverScrollAmount(overScrollAmount);
 
         assertThat(mScrimInFront.getTranslationY()).isEqualTo(0);
+    }
+
+    @Test
+    public void transitionToDreaming() {
+        mScrimController.setRawPanelExpansionFraction(0f);
+        mScrimController.setBouncerHiddenFraction(KeyguardBouncer.EXPANSION_HIDDEN);
+        mScrimController.transitionTo(ScrimState.DREAMING);
+        finishAnimationsImmediately();
+
+        assertScrimAlpha(Map.of(
+                mScrimInFront, TRANSPARENT,
+                mNotificationsScrim, TRANSPARENT,
+                mScrimBehind, TRANSPARENT));
+
+        assertScrimTinted(Map.of(
+                mScrimInFront, false,
+                mScrimBehind, true,
+                mNotificationsScrim, false
+        ));
     }
 
     private void assertAlphaAfterExpansion(ScrimView scrim, float expectedAlpha, float expansion) {

@@ -16,6 +16,8 @@
 package com.android.systemui.unfold.updates
 
 import android.annotation.FloatRange
+import android.app.ActivityManager
+import android.app.WindowConfiguration.ACTIVITY_TYPE_HOME
 import android.content.Context
 import android.hardware.devicestate.DeviceStateManager
 import android.os.Handler
@@ -39,6 +41,7 @@ constructor(
     private val hingeAngleProvider: HingeAngleProvider,
     private val screenStatusProvider: ScreenStatusProvider,
     private val deviceStateManager: DeviceStateManager,
+    private val activityManager: ActivityManager,
     @Main private val mainExecutor: Executor,
     @Main private val handler: Handler
 ) : FoldStateProvider {
@@ -92,10 +95,12 @@ constructor(
         }
 
         val isClosing = angle < lastHingeAngle
+        val closingThreshold = getClosingThreshold()
+        val closingThresholdMet = closingThreshold == null || angle < closingThreshold
         val isFullyOpened = FULLY_OPEN_DEGREES - angle < FULLY_OPEN_THRESHOLD_DEGREES
         val closingEventDispatched = lastFoldUpdate == FOLD_UPDATE_START_CLOSING
 
-        if (isClosing && !closingEventDispatched && !isFullyOpened) {
+        if (isClosing && closingThresholdMet && !closingEventDispatched && !isFullyOpened) {
             notifyFoldUpdate(FOLD_UPDATE_START_CLOSING)
         }
 
@@ -111,6 +116,33 @@ constructor(
 
         lastHingeAngle = angle
         outputListeners.forEach { it.onHingeAngleUpdate(angle) }
+    }
+
+    /**
+     * Fold animation should be started only after the threshold returned here.
+     *
+     * This has been introduced because the fold animation might be distracting/unwanted on top of
+     * apps that support table-top/HALF_FOLDED mode. Only for launcher, there is no threshold.
+     */
+    private fun getClosingThreshold(): Int? {
+        val activityType =
+            activityManager
+                .getRunningTasks(/* maxNum= */ 1)
+                ?.getOrNull(0)
+                ?.configuration
+                ?.windowConfiguration
+                ?.activityType
+                ?: return null
+
+        if (DEBUG) {
+            Log.d(TAG, "activityType=" + activityType)
+        }
+
+        return if (activityType == ACTIVITY_TYPE_HOME) {
+            null
+        } else {
+            START_CLOSING_ON_APPS_THRESHOLD_DEGREES
+        }
     }
 
     private inner class FoldStateListener(context: Context) :
@@ -199,7 +231,10 @@ private const val DEBUG = false
  * Time after which [FOLD_UPDATE_FINISH_HALF_OPEN] is emitted following a
  * [FOLD_UPDATE_START_CLOSING] or [FOLD_UPDATE_START_OPENING] event, if an end state is not reached.
  */
-@VisibleForTesting const val HALF_OPENED_TIMEOUT_MILLIS = 1000L
+@VisibleForTesting const val HALF_OPENED_TIMEOUT_MILLIS = 600L
 
 /** Threshold after which we consider the device fully unfolded. */
 @VisibleForTesting const val FULLY_OPEN_THRESHOLD_DEGREES = 15f
+
+/** Fold animation on top of apps only when the angle exceeds this threshold. */
+@VisibleForTesting const val START_CLOSING_ON_APPS_THRESHOLD_DEGREES = 60

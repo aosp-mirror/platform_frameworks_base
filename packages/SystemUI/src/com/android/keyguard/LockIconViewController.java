@@ -212,13 +212,13 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         updateBurnInOffsets();
         updateVisibility();
 
-        mAccessibilityManager.addTouchExplorationStateChangeListener(
-                mTouchExplorationStateChangeListener);
+        mAccessibilityManager.addAccessibilityStateChangeListener(
+                mAccessibilityStateChangeListener);
         updateAccessibility();
     }
 
     private void updateAccessibility() {
-        if (mAccessibilityManager.isTouchExplorationEnabled()) {
+        if (mAccessibilityManager.isEnabled()) {
             mView.setOnClickListener(mA11yClickListener);
         } else {
             mView.setOnClickListener(null);
@@ -238,8 +238,8 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
             mCancelDelayedUpdateVisibilityRunnable = null;
         }
 
-        mAccessibilityManager.removeTouchExplorationStateChangeListener(
-                mTouchExplorationStateChangeListener);
+        mAccessibilityManager.removeAccessibilityStateChangeListener(
+                mAccessibilityStateChangeListener);
     }
 
     public float getTop() {
@@ -721,6 +721,6 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
 
     private final View.OnClickListener mA11yClickListener = v -> onLongPress();
 
-    private final AccessibilityManager.TouchExplorationStateChangeListener
-            mTouchExplorationStateChangeListener = enabled -> updateAccessibility();
+    private final AccessibilityManager.AccessibilityStateChangeListener
+            mAccessibilityStateChangeListener = enabled -> updateAccessibility();
 }
