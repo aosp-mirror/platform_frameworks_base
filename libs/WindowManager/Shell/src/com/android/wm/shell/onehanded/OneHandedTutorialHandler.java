@@ -149,12 +149,7 @@ public class OneHandedTutorialHandler implements OneHandedTransitionCallback,
      * @param displayLayout The latest {@link DisplayLayout} representing current displayId
      */
     public void onDisplayChanged(DisplayLayout displayLayout) {
-        // Ensure the mDisplayBounds is portrait, due to OHM only support on portrait
-        if (displayLayout.height() > displayLayout.width()) {
-            mDisplayBounds = new Rect(0, 0, displayLayout.width(), displayLayout.height());
-        } else {
-            mDisplayBounds = new Rect(0, 0, displayLayout.height(), displayLayout.width());
-        }
+        mDisplayBounds = new Rect(0, 0, displayLayout.width(), displayLayout.height());
         mTutorialAreaHeight = Math.round(mDisplayBounds.height() * mTutorialHeightRatio);
         mAlphaTransitionStart = mTutorialAreaHeight * START_TRANSITION_FRACTION;
         mBackgroundWindowManager.onDisplayChanged(displayLayout);
