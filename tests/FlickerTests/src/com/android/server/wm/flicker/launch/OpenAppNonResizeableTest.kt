@@ -74,7 +74,7 @@ open class OpenAppNonResizeableTest(testSpec: FlickerTestParameter)
      * Checks that the nav bar layer starts invisible, becomes visible during unlocking animation
      * and remains visible at the end
      */
-    @Presubmit
+    @FlakyTest(bugId = 227083463)
     @Test
     fun navBarLayerVisibilityChanges() {
         testSpec.assertLayers {
