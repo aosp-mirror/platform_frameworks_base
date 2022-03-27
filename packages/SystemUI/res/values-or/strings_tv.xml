@@ -19,11 +19,15 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="mic_active" msgid="5766614241012047024">"ମାଇକ୍ରୋଫୋନ୍ ସକ୍ରିୟ"</string>
-    <string name="app_accessed_mic" msgid="2754428675130470196">"%1$s ଆପଣଙ୍କର ମାଇକ୍ରୋଫୋନ୍‌କୁ ଆକ୍ସେସ୍ କରିଛି"</string>
     <string name="notification_vpn_connected" msgid="3891023882833274730">"VPN ସଂଯୋଗ କରାଯାଇଛି"</string>
     <string name="notification_vpn_disconnected" msgid="7150747626448044843">"VPN ବିଚ୍ଛିନ୍ନ କରାଯାଇଛି"</string>
     <string name="notification_disclosure_vpn_text" msgid="3873532735584866236">"<xliff:g id="VPN_APP">%1$s</xliff:g> ମାଧ୍ୟମରେ"</string>
     <string name="tv_notification_panel_title" msgid="5311050946506276154">"ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକ"</string>
     <string name="tv_notification_panel_no_notifications" msgid="9115191912267270678">"କୌଣସି ବିଜ୍ଞପ୍ତି ନାହିଁ"</string>
+    <string name="mic_recording_announcement" msgid="7587123608060316575">"ମାଇକ୍ରୋଫୋନ୍ ରେକର୍ଡିଂ କରୁଛି"</string>
+    <string name="camera_recording_announcement" msgid="7240177719403759112">"କ୍ୟାମେରା ରେକର୍ଡିଂ କରୁଛି"</string>
+    <string name="mic_and_camera_recording_announcement" msgid="8599231390508812667">"କ୍ୟାମେରା ଏବଂ ମାଇକ୍ରୋଫୋନ୍ ରେକର୍ଡିଂ କରୁଛି"</string>
+    <string name="mic_stopped_recording_announcement" msgid="7301537004900721242">"ମାଇକ୍ରୋଫୋନ୍ ରେକର୍ଡିଂ ବନ୍ଦ କରିଛି"</string>
+    <string name="camera_stopped_recording_announcement" msgid="8540496432367032801">"କ୍ୟାମେରା ରେକର୍ଡିଂ ବନ୍ଦ କରିଛି"</string>
+    <string name="mic_camera_stopped_recording_announcement" msgid="8708524579599977412">"କ୍ୟାମେରା ଏବଂ ମାଇକ୍ରୋଫୋନ୍ ରେକର୍ଡିଂ ବନ୍ଦ କରିଛି"</string>
 </resources>
