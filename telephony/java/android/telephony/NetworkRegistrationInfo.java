@@ -242,13 +242,16 @@ public final class NetworkRegistrationInfo implements Parcelable {
      * @param cellIdentity The identity representing a unique cell or wifi AP. Set to null if the
      * information is not available.
      * @param rplmn the registered plmn or the last plmn for attempted registration if reg failed.
+     * @param voiceSpecificInfo Voice specific registration information.
+     * @param dataSpecificInfo Data specific registration information.
      */
     private NetworkRegistrationInfo(@Domain int domain, @TransportType int transportType,
-                                   @RegistrationState int registrationState,
-                                   @NetworkType int accessNetworkTechnology, int rejectCause,
-                                   boolean emergencyOnly,
-                                   @Nullable @ServiceType List<Integer> availableServices,
-                                   @Nullable CellIdentity cellIdentity, @Nullable String rplmn) {
+            @RegistrationState int registrationState,
+            @NetworkType int accessNetworkTechnology, int rejectCause,
+            boolean emergencyOnly, @Nullable @ServiceType List<Integer> availableServices,
+            @Nullable CellIdentity cellIdentity, @Nullable String rplmn,
+            @Nullable VoiceSpecificRegistrationInfo voiceSpecificInfo,
+            @Nullable DataSpecificRegistrationInfo dataSpecificInfo) {
         mDomain = domain;
         mTransportType = transportType;
         mRegistrationState = registrationState;
@@ -262,6 +265,10 @@ public final class NetworkRegistrationInfo implements Parcelable {
         mEmergencyOnly = emergencyOnly;
         mNrState = NR_STATE_NONE;
         mRplmn = rplmn;
+        mVoiceSpecificInfo = voiceSpecificInfo;
+        mDataSpecificInfo = dataSpecificInfo;
+
+        updateNrState();
     }
 
     /**
@@ -276,10 +283,9 @@ public final class NetworkRegistrationInfo implements Parcelable {
                                    boolean cssSupported, int roamingIndicator, int systemIsInPrl,
                                    int defaultRoamingIndicator) {
         this(domain, transportType, registrationState, accessNetworkTechnology, rejectCause,
-                emergencyOnly, availableServices, cellIdentity, rplmn);
-
-        mVoiceSpecificInfo = new VoiceSpecificRegistrationInfo(cssSupported, roamingIndicator,
-                systemIsInPrl, defaultRoamingIndicator);
+                emergencyOnly, availableServices, cellIdentity, rplmn,
+                new VoiceSpecificRegistrationInfo(cssSupported, roamingIndicator,
+                        systemIsInPrl, defaultRoamingIndicator), null);
     }
 
     /**
@@ -295,11 +301,9 @@ public final class NetworkRegistrationInfo implements Parcelable {
                                    boolean isNrAvailable, boolean isEndcAvailable,
                                    @Nullable VopsSupportInfo vopsSupportInfo) {
         this(domain, transportType, registrationState, accessNetworkTechnology, rejectCause,
-                emergencyOnly, availableServices, cellIdentity, rplmn);
-        mDataSpecificInfo = new DataSpecificRegistrationInfo(
-                maxDataCalls, isDcNrRestricted, isNrAvailable,
-                isEndcAvailable, vopsSupportInfo);
-        updateNrState();
+                emergencyOnly, availableServices, cellIdentity, rplmn, null,
+                new DataSpecificRegistrationInfo(maxDataCalls, isDcNrRestricted, isNrAvailable,
+                        isEndcAvailable, vopsSupportInfo));
     }
 
     private NetworkRegistrationInfo(Parcel source) {
@@ -804,6 +808,12 @@ public final class NetworkRegistrationInfo implements Parcelable {
         @NonNull
         private String mRplmn = "";
 
+        @Nullable
+        private DataSpecificRegistrationInfo mDataSpecificRegistrationInfo;
+
+        @Nullable
+        private VoiceSpecificRegistrationInfo mVoiceSpecificRegistrationInfo;
+
         /**
          * Default constructor for Builder.
          */
@@ -930,6 +940,30 @@ public final class NetworkRegistrationInfo implements Parcelable {
         }
 
         /**
+         * Set voice specific registration information.
+         *
+         * @param info The voice specific registration information.
+         * @return The builder.
+         * @hide
+         */
+        public @NonNull Builder setVoiceSpecificInfo(@NonNull VoiceSpecificRegistrationInfo info) {
+            mVoiceSpecificRegistrationInfo = info;
+            return this;
+        }
+
+        /**
+         * Set data specific registration information.
+         *
+         * @param info The data specific registration information.
+         * @return The builder.
+         * @hide
+         */
+        public @NonNull Builder setDataSpecificInfo(@NonNull DataSpecificRegistrationInfo info) {
+            mDataSpecificRegistrationInfo = info;
+            return this;
+        }
+
+        /**
          * Build the NetworkRegistrationInfo.
          * @return the NetworkRegistrationInfo object.
          * @hide
@@ -938,7 +972,8 @@ public final class NetworkRegistrationInfo implements Parcelable {
         public @NonNull NetworkRegistrationInfo build() {
             return new NetworkRegistrationInfo(mDomain, mTransportType, mRegistrationState,
                     mAccessNetworkTechnology, mRejectCause, mEmergencyOnly, mAvailableServices,
-                    mCellIdentity, mRplmn);
+                    mCellIdentity, mRplmn, mVoiceSpecificRegistrationInfo,
+                    mDataSpecificRegistrationInfo);
         }
     }
 }

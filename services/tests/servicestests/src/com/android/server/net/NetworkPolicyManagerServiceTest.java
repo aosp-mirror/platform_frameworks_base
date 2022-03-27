@@ -2238,7 +2238,7 @@ public class NetworkPolicyManagerServiceTest {
 
     private void setSubscriptionPlans(int subId, SubscriptionPlan[] plans, String callingPackage)
             throws InterruptedException {
-        mService.setSubscriptionPlans(subId, plans, callingPackage);
+        mService.setSubscriptionPlans(subId, plans, 0, callingPackage);
         // setSubscriptionPlans() triggers async events, wait for those to be completed before
         // moving forward as they could interfere with the tests later.
         postMsgAndWaitForCompletion();

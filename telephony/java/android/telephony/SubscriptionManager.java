@@ -2792,10 +2792,43 @@ public class SubscriptionManager {
      *             outlined above.
      * @throws IllegalArgumentException if plans don't meet the requirements
      *             defined in {@link SubscriptionPlan}.
+     * @deprecated use {@link #setSubscriptionPlans(int, List, long)} instead.
      */
+    @Deprecated
     public void setSubscriptionPlans(int subId, @NonNull List<SubscriptionPlan> plans) {
+        setSubscriptionPlans(subId, plans, 0);
+    }
+
+    /**
+     * Set the description of the billing relationship plan between a carrier
+     * and a specific subscriber.
+     * <p>
+     * This method is only accessible to the following narrow set of apps:
+     * <ul>
+     * <li>The carrier app for this subscriberId, as determined by
+     * {@link TelephonyManager#hasCarrierPrivileges()}.
+     * <li>The carrier app explicitly delegated access through
+     * {@link CarrierConfigManager#KEY_CONFIG_PLANS_PACKAGE_OVERRIDE_STRING}.
+     * </ul>
+     *
+     * @param subId the subscriber this relationship applies to. An empty list
+     *            may be sent to clear any existing plans.
+     * @param plans the list of plans. The first plan is always the primary and
+     *            most important plan. Any additional plans are secondary and
+     *            may not be displayed or used by decision making logic.
+     * @param expirationDurationMillis the duration after which the subscription plans
+     *            will be automatically cleared, or {@code 0} to leave the plans until
+     *            explicitly cleared, or the next reboot, whichever happens first.
+     * @throws SecurityException if the caller doesn't meet the requirements
+     *             outlined above.
+     * @throws IllegalArgumentException if plans don't meet the requirements
+     *             defined in {@link SubscriptionPlan}.
+     */
+    public void setSubscriptionPlans(int subId, @NonNull List<SubscriptionPlan> plans,
+            @DurationMillisLong long expirationDurationMillis) {
         getNetworkPolicyManager().setSubscriptionPlans(subId,
-                plans.toArray(new SubscriptionPlan[plans.size()]), mContext.getOpPackageName());
+                plans.toArray(new SubscriptionPlan[0]), expirationDurationMillis,
+                mContext.getOpPackageName());
     }
 
     /**
@@ -2814,17 +2847,17 @@ public class SubscriptionManager {
      * @param subId the subscriber this override applies to.
      * @param overrideUnmetered set if the billing relationship should be
      *            considered unmetered.
-     * @param timeoutMillis the timeout after which the requested override will
-     *            be automatically cleared, or {@code 0} to leave in the
+     * @param expirationDurationMillis the duration after which the requested override
+     *            will be automatically cleared, or {@code 0} to leave in the
      *            requested state until explicitly cleared, or the next reboot,
      *            whichever happens first.
      * @throws SecurityException if the caller doesn't meet the requirements
      *            outlined above.
      */
     public void setSubscriptionOverrideUnmetered(int subId, boolean overrideUnmetered,
-            @DurationMillisLong long timeoutMillis) {
+            @DurationMillisLong long expirationDurationMillis) {
         setSubscriptionOverrideUnmetered(subId, overrideUnmetered,
-                TelephonyManager.getAllNetworkTypes(), timeoutMillis);
+                TelephonyManager.getAllNetworkTypes(), expirationDurationMillis);
     }
 
     /**
@@ -2846,8 +2879,8 @@ public class SubscriptionManager {
      * @param networkTypes the network types this override applies to. If no
      *            network types are specified, override values will be ignored.
      *            {@see TelephonyManager#getAllNetworkTypes()}
-     * @param timeoutMillis the timeout after which the requested override will
-     *            be automatically cleared, or {@code 0} to leave in the
+     * @param expirationDurationMillis the duration after which the requested override
+     *            will be automatically cleared, or {@code 0} to leave in the
      *            requested state until explicitly cleared, or the next reboot,
      *            whichever happens first.
      * @throws SecurityException if the caller doesn't meet the requirements
@@ -2855,10 +2888,10 @@ public class SubscriptionManager {
      */
     public void setSubscriptionOverrideUnmetered(int subId, boolean overrideUnmetered,
             @NonNull @Annotation.NetworkType int[] networkTypes,
-            @DurationMillisLong long timeoutMillis) {
+            @DurationMillisLong long expirationDurationMillis) {
         final int overrideValue = overrideUnmetered ? SUBSCRIPTION_OVERRIDE_UNMETERED : 0;
         getNetworkPolicyManager().setSubscriptionOverride(subId, SUBSCRIPTION_OVERRIDE_UNMETERED,
-                overrideValue, networkTypes, timeoutMillis, mContext.getOpPackageName());
+                overrideValue, networkTypes, expirationDurationMillis, mContext.getOpPackageName());
     }
 
     /**
@@ -2878,17 +2911,17 @@ public class SubscriptionManager {
      * @param subId the subscriber this override applies to.
      * @param overrideCongested set if the subscription should be considered
      *            congested.
-     * @param timeoutMillis the timeout after which the requested override will
-     *            be automatically cleared, or {@code 0} to leave in the
+     * @param expirationDurationMillis the duration after which the requested override
+     *            will be automatically cleared, or {@code 0} to leave in the
      *            requested state until explicitly cleared, or the next reboot,
      *            whichever happens first.
      * @throws SecurityException if the caller doesn't meet the requirements
      *            outlined above.
      */
     public void setSubscriptionOverrideCongested(int subId, boolean overrideCongested,
-            @DurationMillisLong long timeoutMillis) {
+            @DurationMillisLong long expirationDurationMillis) {
         setSubscriptionOverrideCongested(subId, overrideCongested,
-                TelephonyManager.getAllNetworkTypes(), timeoutMillis);
+                TelephonyManager.getAllNetworkTypes(), expirationDurationMillis);
     }
 
     /**
@@ -2911,8 +2944,8 @@ public class SubscriptionManager {
      * @param networkTypes the network types this override applies to. If no
      *            network types are specified, override values will be ignored.
      *            {@see TelephonyManager#getAllNetworkTypes()}
-     * @param timeoutMillis the timeout after which the requested override will
-     *            be automatically cleared, or {@code 0} to leave in the
+     * @param expirationDurationMillis the duration after which the requested override
+     *            will be automatically cleared, or {@code 0} to leave in the
      *            requested state until explicitly cleared, or the next reboot,
      *            whichever happens first.
      * @throws SecurityException if the caller doesn't meet the requirements
@@ -2920,10 +2953,10 @@ public class SubscriptionManager {
      */
     public void setSubscriptionOverrideCongested(int subId, boolean overrideCongested,
             @NonNull @Annotation.NetworkType int[] networkTypes,
-            @DurationMillisLong long timeoutMillis) {
+            @DurationMillisLong long expirationDurationMillis) {
         final int overrideValue = overrideCongested ? SUBSCRIPTION_OVERRIDE_CONGESTED : 0;
         getNetworkPolicyManager().setSubscriptionOverride(subId, SUBSCRIPTION_OVERRIDE_CONGESTED,
-                overrideValue, networkTypes, timeoutMillis, mContext.getOpPackageName());
+                overrideValue, networkTypes, expirationDurationMillis, mContext.getOpPackageName());
     }
 
     /**

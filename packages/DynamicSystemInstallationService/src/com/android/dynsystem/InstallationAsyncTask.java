@@ -23,9 +23,11 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.MemoryFile;
 import android.os.ParcelFileDescriptor;
+import android.os.SystemProperties;
 import android.os.image.DynamicSystemManager;
 import android.service.persistentdata.PersistentDataBlockManager;
 import android.util.Log;
+import android.util.Range;
 import android.webkit.URLUtil;
 
 import org.json.JSONException;
@@ -48,7 +50,12 @@ class InstallationAsyncTask extends AsyncTask<String, Long, Throwable> {
 
     private static final String TAG = "InstallationAsyncTask";
 
-    private static final int READ_BUFFER_SIZE = 1 << 13;
+    private static final int MIN_SHARED_MEMORY_SIZE = 8 << 10; // 8KiB
+    private static final int MAX_SHARED_MEMORY_SIZE = 1024 << 10; // 1MiB
+    private static final int DEFAULT_SHARED_MEMORY_SIZE = 64 << 10; // 64KiB
+    private static final String SHARED_MEMORY_SIZE_PROP =
+            "dynamic_system.data_transfer.shared_memory.size";
+
     private static final long MIN_PROGRESS_TO_PUBLISH = 1 << 27;
 
     private static final List<String> UNSUPPORTED_PARTITIONS =
@@ -131,6 +138,7 @@ class InstallationAsyncTask extends AsyncTask<String, Long, Throwable> {
         void onResult(int resultCode, Throwable detail);
     }
 
+    private final int mSharedMemorySize;
     private final String mUrl;
     private final String mDsuSlot;
     private final String mPublicKey;
@@ -164,6 +172,11 @@ class InstallationAsyncTask extends AsyncTask<String, Long, Throwable> {
             Context context,
             DynamicSystemManager dynSystem,
             ProgressListener listener) {
+        mSharedMemorySize =
+                Range.create(MIN_SHARED_MEMORY_SIZE, MAX_SHARED_MEMORY_SIZE)
+                        .clamp(
+                                SystemProperties.getInt(
+                                        SHARED_MEMORY_SIZE_PROP, DEFAULT_SHARED_MEMORY_SIZE));
         mUrl = url;
         mDsuSlot = dsuSlot;
         mPublicKey = publicKey;
@@ -541,10 +554,10 @@ class InstallationAsyncTask extends AsyncTask<String, Long, Throwable> {
 
         Log.d(TAG, "Start installing: " + partitionName);
 
-        MemoryFile memoryFile = new MemoryFile("dsu_" + partitionName, READ_BUFFER_SIZE);
+        MemoryFile memoryFile = new MemoryFile("dsu_" + partitionName, mSharedMemorySize);
         ParcelFileDescriptor pfd = new ParcelFileDescriptor(memoryFile.getFileDescriptor());
 
-        mInstallationSession.setAshmem(pfd, READ_BUFFER_SIZE);
+        mInstallationSession.setAshmem(pfd, memoryFile.length());
 
         mPartitionName = partitionName;
         mPartitionSize = partitionSize;
@@ -553,10 +566,10 @@ class InstallationAsyncTask extends AsyncTask<String, Long, Throwable> {
 
         long prevInstalledSize = 0;
         long installedSize = 0;
-        byte[] bytes = new byte[READ_BUFFER_SIZE];
+        byte[] bytes = new byte[memoryFile.length()];
         int numBytesRead;
 
-        while ((numBytesRead = sis.read(bytes, 0, READ_BUFFER_SIZE)) != -1) {
+        while ((numBytesRead = sis.read(bytes, 0, bytes.length)) != -1) {
             if (isCancelled()) {
                 return;
             }

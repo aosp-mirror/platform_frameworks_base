@@ -33,6 +33,7 @@ gensrcs {
         "&& $(location soong_zip) -jar -o $(out) -C $(genDir)/$(in) -D $(genDir)/$(in)",
 
     srcs: [
+        ":framework-connectivity-protos",
         ":ipconnectivity-proto-src",
         ":libstats_atom_enum_protos",
         ":libstats_atom_message_protos",
@@ -63,6 +64,7 @@ gensrcs {
         "  $(in)",
 
     srcs: [
+        ":framework-connectivity-protos",
         ":ipconnectivity-proto-src",
         ":libstats_atom_enum_protos",
         ":libstats_atom_message_protos",
@@ -78,6 +80,7 @@ gensrcs {
 java_library_host {
     name: "platformprotos",
     srcs: [
+        ":framework-connectivity-protos",
         ":ipconnectivity-proto-src",
         ":libstats_atom_enum_protos",
         ":libstats_atom_message_protos",
@@ -117,6 +120,7 @@ java_library {
     ],
     sdk_version: "9",
     srcs: [
+        ":framework-connectivity-protos",
         ":ipconnectivity-proto-src",
         ":libstats_atom_enum_protos",
         ":libstats_atom_message_protos",
@@ -135,6 +139,7 @@ java_library {
     },
 
     srcs: [
+        ":framework-connectivity-protos",
         ":ipconnectivity-proto-src",
         ":libstats_atom_enum_protos",
         ":libstats_atom_message_protos",
@@ -172,6 +177,7 @@ cc_defaults {
     ],
 
     srcs: [
+        ":framework-connectivity-protos",
         ":ipconnectivity-proto-src",
         ":libstats_atom_enum_protos",
         ":libstats_atom_message_protos",
