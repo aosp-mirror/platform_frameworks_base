@@ -151,10 +151,6 @@
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"మీరు ఒకవేళ తర్వాతి ప్రయత్నంలో తప్పు ఆకృతిని ఎంటర్ చేస్తే, మీ కార్యాలయ ప్రొఫైల్, అలాగే దాని డేటా తొలగించబడతాయి."</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"మీరు ఒకవేళ తర్వాతి ప్రయత్నంలో తప్పు పిన్‌ను ఎంటర్ చేస్తే, మీ కార్యాలయ ప్రొఫైల్, అలాగే దాని డేటా తొలగించబడతాయి."</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"మీరు ఒకవేళ తర్వాతి ప్రయత్నంలో తప్పు పాస్‌వర్డ్‌ను ఎంటర్ చేస్తే, మీ కార్యాలయ ప్రొఫైల్, అలాగే దాని డేటా తొలగించబడతాయి."</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"చాలా ఎక్కువ తప్పు ప్రయత్నాలు చేశారు. ఈ పరికరం యొక్క డేటా తొలగించబడుతుంది."</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"చాలా ఎక్కువ తప్పు ప్రయత్నాలు చేశారు. ఈ యూజర్ తొలగించబడతారు."</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"చాలా ఎక్కువ తప్పు ప్రయత్నాలు చేశారు. ఈ కార్యాలయ ప్రొఫైల్ మరియు దీని డేటా తొలగించబడతాయి."</string>
-    <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"తీసివేయి"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"వేలిముద్ర సెన్సార్‌ను తాకండి"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"వేలిముద్ర చిహ్నం"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"ముఖం గుర్తించలేము. బదులుగా వేలిముద్ర ఉపయోగించండి."</string>
@@ -323,17 +319,12 @@
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • నెమ్మదిగా ఛార్జ్ అవుతోంది • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>లో పూర్తి ఛార్జ్"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • ఛార్జింగ్ డాక్ • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>లో పూర్తిగా ఛార్జ్ అవుతుంది"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"వినియోగదారుని మార్చు"</string>
-    <string name="user_add_user" msgid="4336657383006913022">"యూజర్‌ను జోడించండి"</string>
-    <string name="user_new_user_name" msgid="2019166282704195789">"కొత్త వినియోగదారు"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"గెస్ట్‌ను తీసివేయాలా?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"ఈ సెషన్‌లోని అన్ని యాప్‌లు మరియు డేటా తొలగించబడతాయి."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"తీసివేయి"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"గెస్ట్‌కు తిరిగి స్వాగతం!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"మీరు మీ సెషన్‌ని కొనసాగించాలనుకుంటున్నారా?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"మొదటి నుండి ప్రారంభించు"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"అవును, కొనసాగించు"</string>
-    <string name="user_add_user_title" msgid="4172327541504825032">"కొత్త యూజర్‌ను జోడించాలా?"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"ఒక కొత్త యూజర్‌ను మీరు జోడించినప్పుడు, ఆ వ్యక్తి తన స్పేస్‌ను సెటప్ చేసుకోవాలి.\n\nఏ యూజర్ అయినా మిగతా అందరు యూజర్‌ల కోసం యాప్‌లను అప్‌డేట్ చేయగలరు."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"వినియోగదారు పరిమితిని చేరుకున్నారు"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="other">మీరు <xliff:g id="COUNT">%d</xliff:g> వినియోగదారుల వరకు జోడించవచ్చు.</item>
@@ -459,8 +450,7 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"ఉపయోగించడానికి అన్‌లాక్ చేయండి"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"మీ కార్డ్‌లను పొందడంలో సమస్య ఉంది, దయచేసి తర్వాత మళ్లీ ట్రై చేయండి"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"లాక్ స్క్రీన్ సెట్టింగ్‌లు"</string>
-    <!-- no translation found for qr_code_scanner_title (5290201053875420785) -->
-    <skip />
+    <string name="qr_code_scanner_title" msgid="5290201053875420785">"QR కోడ్‌ను స్కాన్ చేయండి"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"ఆఫీస్ ప్రొఫైల్‌"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"ఎయిర్‌ప్లేన్ మోడ్"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"మీరు <xliff:g id="WHEN">%1$s</xliff:g> సెట్ చేసిన మీ తర్వాత అలారం మీకు వినిపించదు"</string>
@@ -785,9 +775,10 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"మరిన్నింటిని చూడటం కోసం స్వైప్ చేయండి"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"సిఫార్సులు లోడ్ అవుతున్నాయి"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"మీడియా"</string>
-    <string name="controls_media_close_session" msgid="1193000643003066508">"ఈ మీడియా సెషన్‌ను దాచాలా?"</string>
+    <!-- no translation found for controls_media_close_session (4780485355795635052) -->
+    <skip />
     <string name="controls_media_active_session" msgid="3146882316024153337">"ప్రస్తుత మీడియా సెషన్‌ను దాచడం సాధ్యం కాదు."</string>
-    <string name="controls_media_dismiss_button" msgid="9081375542265132213">"విస్మరించు"</string>
+    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"దాచు"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"కొనసాగించండి"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"సెట్టింగ్‌లు"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"<xliff:g id="ARTIST_NAME">%2$s</xliff:g> పాడిన <xliff:g id="SONG_NAME">%1$s</xliff:g> <xliff:g id="APP_LABEL">%3$s</xliff:g> నుండి ప్లే అవుతోంది"</string>
@@ -805,7 +796,8 @@
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"ఇక్కడ ప్లే చేయడానికి <xliff:g id="DEVICENAME">%1$s</xliff:g>కి దగ్గరగా వెళ్లండి"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"<xliff:g id="DEVICENAME">%1$s</xliff:g>లో ప్లే అవుతోంది"</string>
     <string name="media_transfer_playing_this_device" msgid="1856890686844499172">"ఈ ఫోన్‌లో ప్లే అవుతోంది"</string>
-    <string name="media_transfer_failed" msgid="2640354446629980227">"ఏదో తప్పు జరిగింది"</string>
+    <!-- no translation found for media_transfer_failed (7955354964610603723) -->
+    <skip />
     <string name="controls_error_timeout" msgid="794197289772728958">"ఇన్‌యాక్టివ్, యాప్ చెక్ చేయండి"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"కనుగొనబడలేదు"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"కంట్రోల్ అందుబాటులో లేదు"</string>

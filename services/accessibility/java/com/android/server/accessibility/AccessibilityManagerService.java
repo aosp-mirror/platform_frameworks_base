@@ -4290,10 +4290,14 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     private void onDoubleTapInternal(int displayId) {
+        AccessibilityInputFilter inputFilter = null;
         synchronized (mLock) {
             if (mHasInputFilter && mInputFilter != null) {
-                mInputFilter.onDoubleTap(displayId);
+                inputFilter = mInputFilter;
             }
+        }
+        if (inputFilter != null) {
+            inputFilter.onDoubleTap(displayId);
         }
     }
 

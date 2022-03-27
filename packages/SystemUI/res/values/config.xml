@@ -556,6 +556,9 @@
     <!-- Whether to use the split 2-column notification shade -->
     <bool name="config_use_split_notification_shade">false</bool>
 
+    <!-- Whether we use large screen shade header which takes only one row compared to QS header -->
+    <bool name="config_use_large_screen_shade_header">false</bool>
+
     <!-- Whether notification header should never show section headers. -->
     <bool name="config_notification_never_show_section_headers">false</bool>
 

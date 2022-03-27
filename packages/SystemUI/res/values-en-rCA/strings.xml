@@ -151,10 +151,6 @@
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"If you enter an incorrect pattern on the next attempt, your work profile and its data will be deleted."</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"If you enter an incorrect PIN on the next attempt, your work profile and its data will be deleted."</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"If you enter an incorrect password on the next attempt, your work profile and its data will be deleted."</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"Too many incorrect attempts. This device’s data will be deleted."</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"Too many incorrect attempts. This user will be deleted."</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"Too many incorrect attempts. This work profile and its data will be deleted."</string>
-    <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"Dismiss"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Touch the fingerprint sensor"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"Fingerprint icon"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Can’t recognise face. Use fingerprint instead."</string>
@@ -323,17 +319,12 @@
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Charging slowly • Full in <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Charging dock • Full in <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Switch user"</string>
-    <string name="user_add_user" msgid="4336657383006913022">"Add user"</string>
-    <string name="user_new_user_name" msgid="2019166282704195789">"New user"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Remove guest?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"All apps and data in this session will be deleted."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Remove"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Welcome back, guest!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Do you want to continue your session?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Start again"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Yes, continue"</string>
-    <string name="user_add_user_title" msgid="4172327541504825032">"Add new user?"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"When you add a new user, that person needs to set up their space.\n\nAny user can update apps for all other users."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"User limit reached"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="other">You can add up to <xliff:g id="COUNT">%d</xliff:g> users.</item>
@@ -784,9 +775,10 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Swipe to see more"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Loading recommendations"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Media"</string>
-    <string name="controls_media_close_session" msgid="1193000643003066508">"Hide this media session?"</string>
+    <!-- no translation found for controls_media_close_session (4780485355795635052) -->
+    <skip />
     <string name="controls_media_active_session" msgid="3146882316024153337">"The current media session cannot be hidden."</string>
-    <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Dismiss"</string>
+    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Hide"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Resume"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Settings"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"<xliff:g id="SONG_NAME">%1$s</xliff:g> by <xliff:g id="ARTIST_NAME">%2$s</xliff:g> is playing from <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
@@ -804,7 +796,7 @@
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Move closer to <xliff:g id="DEVICENAME">%1$s</xliff:g> to play here"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Playing on <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_transfer_playing_this_device" msgid="1856890686844499172">"Playing on this phone"</string>
-    <string name="media_transfer_failed" msgid="2640354446629980227">"Something went wrong"</string>
+    <string name="media_transfer_failed" msgid="7955354964610603723">"Something went wrong. Try again."</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Inactive, check app"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Not found"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Control is unavailable"</string>

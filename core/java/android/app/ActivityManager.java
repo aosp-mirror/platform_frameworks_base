@@ -4890,6 +4890,11 @@ public class ActivityManager {
     }
 
     /** @hide */
+    public static boolean isProcStateConsideredInteraction(@ProcessState int procState) {
+        return (procState <= PROCESS_STATE_TOP || procState == PROCESS_STATE_BOUND_TOP);
+    }
+
+    /** @hide */
     public static String procStateToString(int procState) {
         final String procStateStr;
         switch (procState) {

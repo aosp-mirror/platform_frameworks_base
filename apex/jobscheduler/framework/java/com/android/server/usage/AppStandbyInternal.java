@@ -1,6 +1,7 @@
 package com.android.server.usage;
 
 import android.annotation.CurrentTimeMillisLong;
+import android.annotation.ElapsedRealtimeLong;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
@@ -150,6 +151,12 @@ public interface AppStandbyInternal {
             boolean shouldObfuscateInstantApps);
 
     /**
+     * Return the bucketing reason code of the given app.
+     */
+    int getAppStandbyBucketReason(@NonNull String packageName, @UserIdInt int userId,
+            @ElapsedRealtimeLong long elapsedRealtime);
+
+    /**
      * Put the specified app in the
      * {@link android.app.usage.UsageStatsManager#STANDBY_BUCKET_RESTRICTED}
      * bucket. If it has been used by the user recently, the restriction will delayed until an
@@ -245,4 +252,7 @@ public interface AppStandbyInternal {
      */
     @Nullable
     String getAppStandbyConstant(@NonNull String key);
+
+    /** Clears the last used timestamps data for the given {@code packageName}. */
+    void clearLastUsedTimestampsForTest(@NonNull String packageName, @UserIdInt int userId);
 }

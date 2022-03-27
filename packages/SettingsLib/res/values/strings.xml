@@ -410,12 +410,14 @@
     <string name="launch_defaults_none">No defaults set</string>
     <!-- DO NOT TRANSLATE Empty summary for dynamic preferences -->
     <string name="summary_empty" translatable="false"></string>
+    <!-- DO NOT TRANSLATE Summary placeholder -->
+    <string name="summary_placeholder" translatable="false">&#160;</string>
     <!-- Text-To-Speech (TTS) settings --><skip />
     <!-- Name of the TTS package as listed by the package manager. -->
     <string name="tts_settings">Text-to-speech settings</string>
     <!-- TTS option item name in the main settings screen -->
     <string name="tts_settings_title">Text-to-speech output</string>
-  <!-- On main TTS Settings screen, in default settings section, setting default speech rate for synthesized voice -->
+    <!-- On main TTS Settings screen, in default settings section, setting default speech rate for synthesized voice -->
     <string name="tts_default_rate_title">Speech rate</string>
     <!-- On main TTS Settings screen, summary for default speech rate for synthesized voice -->
     <string name="tts_default_rate_summary">Speed at which the text is spoken</string>

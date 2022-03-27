@@ -63,12 +63,14 @@ public class LocalMediaManager implements BluetoothCallback {
     @IntDef({MediaDeviceState.STATE_CONNECTED,
             MediaDeviceState.STATE_CONNECTING,
             MediaDeviceState.STATE_DISCONNECTED,
-            MediaDeviceState.STATE_CONNECTING_FAILED})
+            MediaDeviceState.STATE_CONNECTING_FAILED,
+            MediaDeviceState.STATE_SELECTED})
     public @interface MediaDeviceState {
         int STATE_CONNECTED = 0;
         int STATE_CONNECTING = 1;
         int STATE_DISCONNECTED = 2;
         int STATE_CONNECTING_FAILED = 3;
+        int STATE_SELECTED = 4;
     }
 
     private final Collection<DeviceCallback> mCallbacks = new CopyOnWriteArrayList<>();

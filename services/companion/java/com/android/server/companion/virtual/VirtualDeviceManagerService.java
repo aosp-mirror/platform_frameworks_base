@@ -193,8 +193,12 @@ public class VirtualDeviceManagerService extends SystemService {
         synchronized (mVirtualDeviceManagerLock) {
             int size = mVirtualDevices.size();
             for (int i = 0; i < size; i++) {
+                CharSequence deviceName = mVirtualDevices.valueAt(i).getDisplayName();
                 mVirtualDevices.valueAt(i).showToastWhereUidIsRunning(appUid,
-                        com.android.internal.R.string.vdm_camera_access_denied, Toast.LENGTH_LONG);
+                        getContext().getString(
+                            com.android.internal.R.string.vdm_camera_access_denied,
+                            deviceName),
+                        Toast.LENGTH_LONG);
             }
         }
     }

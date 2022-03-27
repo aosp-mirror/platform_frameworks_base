@@ -575,6 +575,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     static final String EXTRA_TITLE = "android.intent.extra.TITLE";
     static final String EXTRA_DESCRIPTION = "android.intent.extra.DESCRIPTION";
     static final String EXTRA_BUGREPORT_TYPE = "android.intent.extra.BUGREPORT_TYPE";
+    static final String EXTRA_BUGREPORT_NONCE = "android.intent.extra.BUGREPORT_NONCE";
 
     /**
      * It is now required for apps to explicitly set either
@@ -1535,6 +1536,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     static final int IDLE_UIDS_MSG = 58;
     static final int HANDLE_TRUST_STORAGE_UPDATE_MSG = 63;
     static final int SERVICE_FOREGROUND_TIMEOUT_MSG = 66;
+    static final int SERVICE_FOREGROUND_TIMEOUT_ANR_MSG = 67;
     static final int PUSH_TEMP_ALLOWLIST_UI_MSG = 68;
     static final int SERVICE_FOREGROUND_CRASH_MSG = 69;
     static final int DISPATCH_OOM_ADJ_OBSERVER_MSG = 70;
@@ -1722,6 +1724,12 @@ public class ActivityManagerService extends IActivityManager.Stub
             } break;
             case SERVICE_FOREGROUND_TIMEOUT_MSG: {
                 mServices.serviceForegroundTimeout((ServiceRecord) msg.obj);
+            } break;
+            case SERVICE_FOREGROUND_TIMEOUT_ANR_MSG: {
+                SomeArgs args = (SomeArgs) msg.obj;
+                mServices.serviceForegroundTimeoutANR((ProcessRecord) args.arg1,
+                        (String) args.arg2);
+                args.recycle();
             } break;
             case SERVICE_FOREGROUND_CRASH_MSG: {
                 SomeArgs args = (SomeArgs) msg.obj;
@@ -6978,7 +6986,7 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     @Override
     public void requestBugReport(@BugreportParams.BugreportMode int bugreportType) {
-        requestBugReportWithDescription(null, null, bugreportType);
+        requestBugReportWithDescription(null, null, bugreportType, 0L);
     }
 
     /**
@@ -6988,6 +6996,15 @@ public class ActivityManagerService extends IActivityManager.Stub
     @Override
     public void requestBugReportWithDescription(@Nullable String shareTitle,
             @Nullable String shareDescription, int bugreportType) {
+        requestBugReportWithDescription(shareTitle, shareDescription, bugreportType, /*nonce*/ 0L);
+    }
+
+    /**
+     * Takes a bugreport using bug report API ({@code BugreportManager}) which gets
+     * triggered by sending a broadcast to Shell.
+     */
+    public void requestBugReportWithDescription(@Nullable String shareTitle,
+            @Nullable String shareDescription, int bugreportType, long nonce) {
         String type = null;
         switch (bugreportType) {
             case BugreportParams.BUGREPORT_MODE_FULL:
@@ -7038,6 +7055,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         triggerShellBugreport.setAction(INTENT_BUGREPORT_REQUESTED);
         triggerShellBugreport.setPackage(SHELL_APP_PACKAGE);
         triggerShellBugreport.putExtra(EXTRA_BUGREPORT_TYPE, bugreportType);
+        triggerShellBugreport.putExtra(EXTRA_BUGREPORT_NONCE, nonce);
         triggerShellBugreport.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
         triggerShellBugreport.addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
         if (shareTitle != null) {
@@ -7104,8 +7122,8 @@ public class ActivityManagerService extends IActivityManager.Stub
      * Takes a bugreport remotely
      */
     @Override
-    public void requestRemoteBugReport() {
-        requestBugReportWithDescription(null, null, BugreportParams.BUGREPORT_MODE_REMOTE);
+    public void requestRemoteBugReport(long nonce) {
+        requestBugReportWithDescription(null, null, BugreportParams.BUGREPORT_MODE_REMOTE, nonce);
     }
 
     /**
@@ -12927,7 +12945,12 @@ public class ActivityManagerService extends IActivityManager.Stub
     public Intent registerReceiverWithFeature(IApplicationThread caller, String callerPackage,
             String callerFeatureId, String receiverId, IIntentReceiver receiver,
             IntentFilter filter, String permission, int userId, int flags) {
-        enforceNotIsolatedOrSdkSandboxCaller("registerReceiver");
+        // Allow Sandbox process to register only unexported receivers.
+        if ((flags & Context.RECEIVER_NOT_EXPORTED) != 0) {
+            enforceNotIsolatedCaller("registerReceiver");
+        } else {
+            enforceNotIsolatedOrSdkSandboxCaller("registerReceiver");
+        }
         ArrayList<Intent> stickyIntents = null;
         ProcessRecord callerApp = null;
         final boolean visibleToInstantApps
@@ -17247,8 +17270,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
-        public void deletePendingTopUid(int uid) {
-            mPendingStartActivityUids.delete(uid);
+        public void deletePendingTopUid(int uid, long nowElapsed) {
+            mPendingStartActivityUids.delete(uid, nowElapsed);
         }
 
         @Override
@@ -17348,6 +17371,11 @@ public class ActivityManagerService extends IActivityManager.Stub
             synchronized (ActivityManagerService.this) {
                 return mConstants.mPushMessagingOverQuotaBehavior;
             }
+        }
+
+        @Override
+        public int getServiceStartForegroundTimeout() {
+            return mConstants.mServiceStartForegroundTimeoutMs;
         }
 
         @Override

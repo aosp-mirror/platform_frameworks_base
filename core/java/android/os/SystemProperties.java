@@ -218,14 +218,15 @@ public class SystemProperties {
     /**
      * Set the value for the given {@code key} to {@code val}.
      *
-     * @throws IllegalArgumentException if the {@code val} exceeds 91 characters
+     * @throws IllegalArgumentException for non read-only properties if the {@code val} exceeds
+     * 91 characters
      * @throws RuntimeException if the property cannot be set, for example, if it was blocked by
      * SELinux. libc will log the underlying reason.
      * @hide
      */
     @UnsupportedAppUsage
     public static void set(@NonNull String key, @Nullable String val) {
-        if (val != null && !val.startsWith("ro.") && val.length() > PROP_VALUE_MAX) {
+        if (val != null && !key.startsWith("ro.") && val.length() > PROP_VALUE_MAX) {
             throw new IllegalArgumentException("value of system property '" + key
                     + "' is longer than " + PROP_VALUE_MAX + " characters: " + val);
         }

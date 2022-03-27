@@ -1741,26 +1741,14 @@ public final class DevicePolicyResources {
 
         /**
          * Class containing the identifiers used to update device management-related system strings
-         * in the Permissions module.
+         * for the permission settings.
          */
-        public static final class PermissionController {
-            
-            private PermissionController() {
+        public static final class PermissionSettings {
+
+            private PermissionSettings() {
             }
 
-            private static final String PREFIX = "PermissionController.";
-
-            /**
-             * Title for settings page to show default apps for work.
-             */
-            public static final String WORK_PROFILE_DEFAULT_APPS_TITLE =
-                    PREFIX + "WORK_PROFILE_DEFAULT_APPS_TITLE";
-
-            /**
-             * Summary indicating that a home role holder app is missing work profile support.
-             */
-            public static final String HOME_MISSING_WORK_PROFILE_SUPPORT_MESSAGE =
-                    PREFIX + "HOME_MISSING_WORK_PROFILE_SUPPORT_MESSAGE";
+            private static final String PREFIX = "PermissionSettings.";
 
             /**
              * Summary of a permission switch in Settings when the background access is denied by an
@@ -1789,6 +1777,30 @@ public final class DevicePolicyResources {
              */
             public static final String LOCATION_AUTO_GRANTED_MESSAGE =
                     PREFIX + "LOCATION_AUTO_GRANTED_MESSAGE";
+        }
+
+        /**
+         * Class containing the identifiers used to update device management-related system strings
+         * for the default app settings.
+         */
+        public static final class DefaultAppSettings {
+
+            private DefaultAppSettings() {
+            }
+
+            private static final String PREFIX = "DefaultAppSettings.";
+
+            /**
+             * Title for settings page to show default apps for work.
+             */
+            public static final String WORK_PROFILE_DEFAULT_APPS_TITLE =
+                    PREFIX + "WORK_PROFILE_DEFAULT_APPS_TITLE";
+
+            /**
+             * Summary indicating that a home role holder app is missing work profile support.
+             */
+            public static final String HOME_MISSING_WORK_PROFILE_SUPPORT_MESSAGE =
+                    PREFIX + "HOME_MISSING_WORK_PROFILE_SUPPORT_MESSAGE";
         }
     }
 }

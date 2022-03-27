@@ -30,6 +30,10 @@ import android.view.InputEvent;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 
+import androidx.annotation.VisibleForTesting;
+
+import com.android.internal.logging.UiEvent;
+import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.KeyguardBouncer;
@@ -82,11 +86,15 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
 
     private Boolean mCapture;
 
+    private boolean mBouncerInitiallyShowing;
+
     private TouchSession mTouchSession;
 
     private ValueAnimatorCreator mValueAnimatorCreator;
 
     private VelocityTrackerFactory mVelocityTrackerFactory;
+
+    private final UiEventLogger mUiEventLogger;
 
     private final GestureDetector.OnGestureListener mOnGestureListener =
             new GestureDetector.SimpleOnGestureListener() {
@@ -97,6 +105,7 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
                         // If the user scrolling favors a vertical direction, begin capturing
                         // scrolls.
                         mCapture = Math.abs(distanceY) > Math.abs(distanceX);
+                        mBouncerInitiallyShowing = mCentralSurfaces.isBouncerShowing();
 
                         if (mCapture) {
                             // Since the user is dragging the bouncer up, set scrimmed to false.
@@ -113,9 +122,11 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
                     // bouncer. As that view's expansion shrinks, the bouncer appears. The bouncer
                     // is fully hidden at full expansion (1) and fully visible when fully collapsed
                     // (0).
-                    final float screenTravelPercentage =
-                            Math.abs((e1.getY() - e2.getY()) / mCentralSurfaces.getDisplayHeight());
-                    setPanelExpansion(mCentralSurfaces.isBouncerShowing()
+                    final float dy = mBouncerInitiallyShowing ? e2.getY() - e1.getY()
+                            : e1.getY() - e2.getY();
+                    final float screenTravelPercentage = Math.max(0,
+                            dy / mCentralSurfaces.getDisplayHeight());
+                    setPanelExpansion(mBouncerInitiallyShowing
                             ? screenTravelPercentage : 1 - screenTravelPercentage);
                     return true;
                 }
@@ -124,6 +135,23 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
     private void setPanelExpansion(float expansion) {
         mCurrentExpansion = expansion;
         mStatusBarKeyguardViewManager.onPanelExpansionChanged(mCurrentExpansion, false, true);
+    }
+
+    @VisibleForTesting
+    public enum DreamEvent implements UiEventLogger.UiEventEnum {
+        @UiEvent(doc = "The screensaver has been swiped up.")
+        DREAM_SWIPED(988);
+
+        private final int mId;
+
+        DreamEvent(int id) {
+            mId = id;
+        }
+
+        @Override
+        public int getId() {
+            return mId;
+        }
     }
 
     @Inject
@@ -138,7 +166,8 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
                     FlingAnimationUtils flingAnimationUtils,
             @Named(SWIPE_TO_BOUNCER_FLING_ANIMATION_UTILS_CLOSING)
                     FlingAnimationUtils flingAnimationUtilsClosing,
-            @Named(SWIPE_TO_BOUNCER_START_REGION) float swipeRegionPercentage) {
+            @Named(SWIPE_TO_BOUNCER_START_REGION) float swipeRegionPercentage,
+            UiEventLogger uiEventLogger) {
         mDisplayMetrics = displayMetrics;
         mCentralSurfaces = centralSurfaces;
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
@@ -148,6 +177,7 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
         mFlingAnimationUtilsClosing = flingAnimationUtilsClosing;
         mValueAnimatorCreator = valueAnimatorCreator;
         mVelocityTrackerFactory = velocityTrackerFactory;
+        mUiEventLogger = uiEventLogger;
     }
 
     @Override
@@ -174,16 +204,16 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
         mTouchSession = session;
         mVelocityTracker.clear();
         mNotificationShadeWindowController.setForcePluginOpen(true, this);
+
+        session.registerCallback(() -> {
+            mVelocityTracker.recycle();
+            mCapture = null;
+            mNotificationShadeWindowController.setForcePluginOpen(false, this);
+        });
+
         session.registerGestureListener(mOnGestureListener);
         session.registerInputListener(ev -> onMotionEvent(ev));
 
-    }
-
-    @Override
-    public void onSessionEnd(TouchSession session) {
-        mVelocityTracker.recycle();
-        mCapture = null;
-        mNotificationShadeWindowController.setForcePluginOpen(false, this);
     }
 
     private void onMotionEvent(InputEvent event) {
@@ -215,6 +245,12 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
 
                 final float expansion = flingRevealsOverlay(verticalVelocity, velocityVector)
                         ? KeyguardBouncer.EXPANSION_HIDDEN : KeyguardBouncer.EXPANSION_VISIBLE;
+
+                // Log the swiping up to show Bouncer event.
+                if (!mBouncerInitiallyShowing && expansion == KeyguardBouncer.EXPANSION_VISIBLE) {
+                    mUiEventLogger.log(DreamEvent.DREAM_SWIPED);
+                }
+
                 flingToExpansion(verticalVelocity, expansion);
 
                 if (expansion == KeyguardBouncer.EXPANSION_HIDDEN) {
