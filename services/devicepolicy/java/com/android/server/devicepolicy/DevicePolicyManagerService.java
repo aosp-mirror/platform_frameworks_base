@@ -1164,7 +1164,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                             policy.mAdminList.remove(i);
                             policy.mAdminMap.remove(aa.info.getComponent());
                             pushActiveAdminPackagesLocked(userHandle);
-                            pushMeteredDisabledPackagesLocked(userHandle);
+                            pushMeteredDisabledPackages(userHandle);
                         }
                     }
                 } catch (RemoteException re) {
@@ -3571,7 +3571,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             for (int i = users.size() - 1; i >= 0; --i) {
                 final int userId = users.get(i).id;
                 mInjector.getNetworkPolicyManagerInternal().setMeteredRestrictedPackagesAsync(
-                        getMeteredDisabledPackagesLocked(userId), userId);
+                        getMeteredDisabledPackages(userId), userId);
             }
         }
     }
@@ -7233,7 +7233,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return;
         }
         Preconditions.checkCallAuthorization(
-                hasCallingOrSelfPermission(permission.SEND_LOST_MODE_LOCATION_UPDATES));
+                hasCallingOrSelfPermission(permission.TRIGGER_LOST_MODE));
 
         synchronized (getLockObject()) {
             final ActiveAdmin admin = getDeviceOwnerOrProfileOwnerOfOrganizationOwnedDeviceLocked(
@@ -12269,7 +12269,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                         + " only profile owner or device owner may control the preferential"
                         + " network service");
         synchronized (getLockObject()) {
-            final ActiveAdmin requiredAdmin = getProfileOwnerAdminLocked(
+            final ActiveAdmin requiredAdmin = getDeviceOrProfileOwnerAdminLocked(
                     caller.getUserId());
             if (!requiredAdmin.mPreferentialNetworkServiceConfigs.equals(
                     preferentialNetworkServiceConfigs)) {
@@ -12299,7 +12299,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                         + " only profile owner or device owner may retrieve the preferential"
                         + " network service configurations");
         synchronized (getLockObject()) {
-            final ActiveAdmin requiredAdmin = getProfileOwnerAdminLocked(caller.getUserId());
+            final ActiveAdmin requiredAdmin = getDeviceOrProfileOwnerAdminLocked(
+                    caller.getUserId());
             return requiredAdmin.mPreferentialNetworkServiceConfigs;
         }
     }
@@ -13985,16 +13986,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                         return;
                     }
                 }
-                try {
-                    if (!isRuntimePermission(permission)) {
-                        callback.sendResult(null);
-                        return;
-                    }
-                } catch (NameNotFoundException e) {
-                    throw new RemoteException("Cannot check if " + permission
-                            + "is a runtime permission", e, false, true);
+                if (!isRuntimePermission(permission)) {
+                    callback.sendResult(null);
+                    return;
                 }
-
                 if (grantState == DevicePolicyManager.PERMISSION_GRANT_STATE_GRANTED
                         || grantState == DevicePolicyManager.PERMISSION_GRANT_STATE_DENIED
                         || grantState == DevicePolicyManager.PERMISSION_GRANT_STATE_DEFAULT) {
@@ -14107,11 +14102,15 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         });
     }
 
-    public boolean isRuntimePermission(String permissionName) throws NameNotFoundException {
-        final PackageManager packageManager = mInjector.getPackageManager();
-        PermissionInfo permissionInfo = packageManager.getPermissionInfo(permissionName, 0);
-        return (permissionInfo.protectionLevel & PermissionInfo.PROTECTION_MASK_BASE)
-                == PermissionInfo.PROTECTION_DANGEROUS;
+    private boolean isRuntimePermission(String permissionName) {
+        try {
+            final PackageManager packageManager = mInjector.getPackageManager();
+            PermissionInfo permissionInfo = packageManager.getPermissionInfo(permissionName, 0);
+            return (permissionInfo.protectionLevel & PermissionInfo.PROTECTION_MASK_BASE)
+                    == PermissionInfo.PROTECTION_DANGEROUS;
+        } catch (NameNotFoundException e) {
+            return false;
+        }
     }
 
     @Override
@@ -14692,7 +14691,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 final List<String> excludedPkgs = removeInvalidPkgsForMeteredDataRestriction(
                         caller.getUserId(), packageNames);
                 admin.meteredDisabledPackages = packageNames;
-                pushMeteredDisabledPackagesLocked(caller.getUserId());
+                pushMeteredDisabledPackages(caller.getUserId());
                 saveSettingsLocked(caller.getUserId());
                 return excludedPkgs;
             });
@@ -14844,21 +14843,22 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 isProfileOwnerOnOrganizationOwnedDevice);
     }
 
-    private void pushMeteredDisabledPackagesLocked(int userId) {
+    private void pushMeteredDisabledPackages(int userId) {
+        wtfIfInLock();
         mInjector.getNetworkPolicyManagerInternal().setMeteredRestrictedPackages(
-                getMeteredDisabledPackagesLocked(userId), userId);
+                getMeteredDisabledPackages(userId), userId);
     }
 
-    private Set<String> getMeteredDisabledPackagesLocked(int userId) {
-        final ComponentName who = getOwnerComponent(userId);
-        final Set<String> restrictedPkgs = new ArraySet<>();
-        if (who != null) {
-            final ActiveAdmin admin = getActiveAdminUncheckedLocked(who, userId);
+    private Set<String> getMeteredDisabledPackages(int userId) {
+        synchronized (getLockObject()) {
+            final Set<String> restrictedPkgs = new ArraySet<>();
+            final ActiveAdmin admin = getDeviceOrProfileOwnerAdminLocked(userId);
             if (admin != null && admin.meteredDisabledPackages != null) {
                 restrictedPkgs.addAll(admin.meteredDisabledPackages);
             }
+
+            return restrictedPkgs;
         }
-        return restrictedPkgs;
     }
 
     @Override
@@ -15302,13 +15302,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 resetGlobalProxyLocked(policy);
             }
             pushActiveAdminPackagesLocked(userHandle);
-            pushMeteredDisabledPackagesLocked(userHandle);
             saveSettingsLocked(userHandle);
             updateMaximumTimeToLockLocked(userHandle);
             policy.mRemovingAdmins.remove(adminReceiver);
 
             Slogf.i(LOG_TAG, "Device admin " + adminReceiver + " removed from user " + userHandle);
         }
+        pushMeteredDisabledPackages(userHandle);
         // The removed admin might have disabled camera, so update user
         // restrictions.
         pushUserRestrictions(userHandle);

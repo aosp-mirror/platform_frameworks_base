@@ -85,8 +85,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"আপোনাৰ বাহকে <xliff:g id="SIMNUMBER">%d</xliff:g> ছিমৰ বাবে সাময়িকভাৱে অফ কৰিছে"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"ম’বাইল নেটৱৰ্কৰ লগত সংযোগ কৰিব পৰা নাই"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"পচন্দৰ নেটৱৰ্ক সলনি কৰি চেষ্টা কৰি চাওক। সলনি কৰিবলৈ টিপক।"</string>
-    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"জৰুৰীকালীন কল কৰাৰ সুবিধা উপলব্ধ নহয়"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"ৱাই-ফাইৰ জৰিয়তে জৰুৰীকালীন কল কৰিব নোৱাৰি"</string>
+    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"জৰুৰীকালীন কল কৰাৰ সুবিধাটো উপলব্ধ নহ’ব পাৰে"</string>
+    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"<xliff:g id="SPN">%s</xliff:g>এ ৱাই-ফাইৰ জৰিয়তে জৰুৰীকালীন কল কৰাটো সমৰ্থন নকৰে। সবিশেষ জানিবলৈ টিপক।"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"সতৰ্কবাণীসমূহ"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"কল ফৰৱাৰ্ডিং"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"জৰুৰীকালীন ক\'লবেক ম\'ড"</string>
@@ -425,10 +425,10 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"অন্তৰ্গামী আৰু বহিৰ্গামী কলৰ ডেটাকে ধৰি আপোনাৰ টেবলেটৰ কল লগ সংশোধন কৰিবলৈ এপক অনুমতি দিয়ে। ক্ষতিকাৰক এপবোৰে আপোনাৰ কল লগ মচিবলৈ বা সংশোধন কৰিবলৈ ইয়াক ব্যৱহাৰ কৰিব পাৰে।"</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"এপ্‌টোৱে অন্তৰ্গামী আৰু বহিৰ্গামী কলৰ ডেটাকে ধৰি আপোনাৰ Android TV ডিভাইচৰ কল লগ সংশোধন কৰিবলৈ অনুমতি দিয়ে। ক্ষতিকাৰক এপ্‌সমূহে আপোনাৰ কল লগ মচিবলৈ বা সংশোধন কৰিবলৈ এইটো ব্যৱহাৰ কৰিব পাৰে।"</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"অন্তৰ্গামী আৰু বহিৰ্গামী কলৰ ডেটাকে ধৰি আপোনাৰ ফ\'নৰ কল লগ সংশোধন কৰিবলৈ এপক অনুমতি দিয়ে। ক্ষতিকাৰক এপবোৰে আপোনাৰ কল লগ মচিবলৈ বা সংশোধন কৰিবলৈ ইয়াক ব্যৱহাৰ কৰিব পাৰে।"</string>
-    <string name="permlab_bodySensors" msgid="3411035315357380862">"শৰীৰৰ ছেন্সৰসমূহ (যেনে হৃদপিণ্ডৰ গতিৰ হাৰ নিৰীক্ষক) ব্যৱহাৰ কৰিব পাৰে"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="3208940894182188063">"শৰীৰৰ ছেন্সৰৰ পৰা হৃদস্পন্দনৰ হাৰ, উষ্ণতা, তেজত অক্সিজেনৰ শতকৰা হাৰ ইত্যাদিৰ দৰে ডেটাৰ এক্সেছ পাওক।"</string>
-    <string name="permlab_bodySensors_background" msgid="4352831883331744370">"নেপথ্যত থকাৰ সময়ত শৰীৰৰ ছেন্সৰ (উদাহৰণস্বৰূপে, হৃদস্পন্দনৰ হাৰ নিৰীক্ষক)"</string>
-    <string name="permdesc_bodySensors_background" product="default" msgid="8512392249166660872">"নেপথ্যত থকাৰ সময়ত শৰীৰৰ ছেন্সৰৰ পৰা হৃদস্পন্দনৰ হাৰ, উষ্ণতা, তেজত অক্সিজেনৰ শতকৰা হাৰ ইত্যাদিৰ দৰে ডেটাৰ এক্সেছ পাওক।"</string>
+    <string name="permlab_bodySensors" msgid="662918578601619569">"ব্যৱহাৰ কৰি থকাৰ সময়ত হৃদস্পন্দনৰ হাৰৰ দৰে শৰীৰৰ ছেন্সৰৰ ডেটা এক্সেছ কৰক"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"এপ্‌টো ব্যৱহাৰ কৰি থকাৰ সময়ত এপ্‌টোক হৃদস্পন্দনৰ হাৰ, উষ্ণতা আৰু তেজত অক্সিজেনৰ শতকৰা হাৰৰ দৰে শৰীৰৰ ছেন্সৰৰ ডেটা এক্সেছ কৰিবলৈ অনুমতি দিয়ে।"</string>
+    <string name="permlab_bodySensors_background" msgid="4912560779957760446">"নেপথ্যত থকাৰ সময়ত হৃদস্পন্দনৰ হাৰৰ দৰে শৰীৰৰ ছেন্সৰৰ ডেটা এক্সেছ কৰক"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"এপ্‌টো নেপথ্যত থকাৰ সময়ত এপ্‌টোক হৃদস্পন্দনৰ হাৰ, উষ্ণতা আৰু তেজত অক্সিজেনৰ শতকৰা হাৰৰ দৰে শৰীৰৰ ছেন্সৰৰ ডেটা এক্সেছ কৰিবলৈ অনুমতি দিয়ে।"</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"কেলেণ্ডাৰৰ কাৰ্যক্ৰম আৰু সবিশেষ পঢ়িব পাৰে"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"এই এপ্‌টোৱে আপোনাৰ টেবলেটটোত সংৰক্ষিত আটাইবোৰ কেলেণ্ডাৰ কাৰ্যক্ৰম পঢ়িব পাৰে আৰু আপোনাৰ কেলেণ্ডাৰৰ ডেটা শ্বেয়াৰ বা ছেভ কৰিব পাৰে।"</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"এই এপ্‌টোৱে আপোনাৰ Android TV ডিভাইচটোত ষ্ট’ৰ কৰি ৰখা আটাইবোৰ কেলেণ্ডাৰৰ অনুষ্ঠান পঢ়িব পাৰে আৰু আপোনাৰ কেলেণ্ডাৰৰ ডেটা শ্বেয়াৰ অথবা ছেভ কৰিব পাৰে।"</string>
@@ -689,8 +689,8 @@
     <string name="permdesc_readMediaAudio" msgid="5299772574434619399">"আপোনাৰ শ্বেয়াৰ কৰি ৰখা ষ্ট’ৰেজৰ পৰা অডিঅ’ ফাইল পঢ়িবলৈ এপ্‌টোক অনুমতি দিয়ে।"</string>
     <string name="permlab_readMediaVideo" msgid="7768003311260655007">"শ্বেয়াৰ কৰি ৰখা ষ্ট’ৰেজৰ পৰা ভিডিঅ’ ফাইল পঢ়ক"</string>
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"আপোনাৰ শ্বেয়াৰ কৰি ৰখা ষ্ট’ৰেজৰ পৰা ভিডিঅ’ ফাইল পঢ়িবলৈ এপ্‌টোক অনুমতি দিয়ে।"</string>
-    <string name="permlab_readMediaImage" msgid="1507059005825769856">"শ্বেয়াৰ কৰি ৰখা ষ্ট’ৰেজৰ পৰা প্ৰতিচ্ছবিৰ ফাইল পঢ়ক"</string>
-    <string name="permdesc_readMediaImage" msgid="8328052622292457588">"আপোনাৰ শ্বেয়াৰ কৰি ৰখা ষ্ট’ৰেজৰ পৰা প্ৰতিচ্ছবিৰ ফাইল পঢ়িবলৈ এপ্‌টোক অনুমতি দিয়ে।"</string>
+    <string name="permlab_readMediaImages" msgid="4057590631020986789">"শ্বেয়াৰ কৰি ৰখা ষ্ট’ৰেজৰ পৰা প্ৰতিচ্ছবিৰ ফাইল পঢ়ক"</string>
+    <string name="permdesc_readMediaImages" msgid="5836219373138469259">"আপোনাৰ শ্বেয়াৰ কৰি ৰখা ষ্ট’ৰেজৰ পৰা প্ৰতিচ্ছবিৰ ফাইল পঢ়িবলৈ এপ্‌টোক অনুমতি দিয়ে।"</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"আপোনাৰ শ্বেয়াৰ কৰি ৰখা ষ্ট’ৰেজৰ সমল সংশোধন কৰিব বা মচিব পাৰে"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"আপোনাৰ শ্বেয়াৰ কৰি ৰখা ষ্ট’ৰেজৰ সমল লিখিবলৈ এপ্‌টোক অনুমতি দিয়ে।"</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"SIP কল কৰা/পোৱা"</string>
@@ -912,7 +912,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"আনলক কৰিবলৈ বা জৰুৰীকালীন কল কৰিবলৈ মেনু টিপক।"</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"আনলক কৰিবলৈ মেনু টিপক।"</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"আনলক কৰিবলৈ আর্হি আঁকক"</string>
-    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"জৰুৰীকালীন কল"</string>
+    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"জৰুৰীকালীন"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"কললৈ উভতি যাওক"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"শুদ্ধ!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"আকৌ চেষ্টা কৰক"</string>
@@ -1051,7 +1051,6 @@
     <string name="save_password_never" msgid="6776808375903410659">"কেতিয়াও মনত নাৰাখিব"</string>
     <string name="open_permission_deny" msgid="5136793905306987251">"এই পৃষ্ঠাটো খুলিবলৈ আপোনাৰ অনুমতি নাই।"</string>
     <string name="text_copied" msgid="2531420577879738860">"ক্লিপব\'র্ডলৈ বাৰ্তা প্ৰতিলিপি কৰা হ’ল।"</string>
-    <string name="copied" msgid="4675902854553014676">"প্ৰতিলিপি কৰা হ’ল"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g>ৰ পৰা <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> পে’ষ্ট কৰা হৈছে"</string>
     <string name="pasted_from_clipboard" msgid="7355790625710831847">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>এ আপোনাৰ ক্লিপব’ৰ্ডৰ পৰা পে’ষ্ট কৰিছে"</string>
     <string name="pasted_text" msgid="4298871641549173733">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>এ আপুনি প্ৰতিলিপি কৰা সমল পে’ষ্ট কৰিছে"</string>
@@ -1452,8 +1451,12 @@
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"কোনো এপক সেই এপ্‌টোৰ বাবে বেটাৰী অপ্টিমাইজেশ্বন উপেক্ষা কৰিবলৈ অনুমতি বিচাৰিবলৈ দিয়ে।"</string>
     <string name="permlab_queryAllPackages" msgid="2928450604653281650">"আটাইবোৰ পেকেজত প্ৰশ্ন সোধক"</string>
     <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"এপক আটাইবোৰ ইনষ্টল কৰি থোৱা পেকেজ চাবলৈ দিয়ে।"</string>
-    <string name="permlab_accessSupplementalApi" msgid="3544659160536960275">"SupplementalApis এক্সেছ কৰক"</string>
-    <string name="permdesc_accessSupplementalApi" msgid="8974758769370951074">"কোনো এপ্লিকেশ্বনক SupplementalApis এক্সেছ কৰিবলৈ অনুমতি দিয়ে।"</string>
+    <string name="permlab_accessAdServicesTopics" msgid="6687112022940098945">"AdServices Topics API এক্সেছ কৰে"</string>
+    <string name="permdesc_accessAdServicesTopics" msgid="6011532458156465929">"এটা এপ্লিকেশ্বনক AdServices Topics API এক্সেছ কৰিবলৈ অনুমতি দিয়ে।"</string>
+    <string name="permlab_accessAdServicesAttribution" msgid="3268942271128309354">"AdServices Attribution API এক্সেছ কৰে"</string>
+    <string name="permdesc_accessAdServicesAttribution" msgid="577482544832578288">"এটা এপ্লিকেশ্বনক AdServices Attribution API এক্সেছ কৰিবলৈ অনুমতি দিয়ে।"</string>
+    <string name="permlab_accessAdServicesCustomAudiences" msgid="7249286630514600684">"AdServices Custom Audiences API এক্সেছ কৰে"</string>
+    <string name="permdesc_accessAdServicesCustomAudiences" msgid="645526926477180315">"এটা এপ্লিকেশ্বনক AdServices Custom Audiences API এক্সেছ কৰিবলৈ অনুমতি দিয়ে।"</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"জুম নিয়ন্ত্ৰণ কৰিবলৈ দুবাৰ টিপক"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"ৱিজেট যোগ কৰিব পৰা নগ\'ল।"</string>
     <string name="ime_action_go" msgid="5536744546326495436">"যাওক"</string>
@@ -1716,6 +1719,7 @@
     <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g>লৈ সলনি কৰি থকা হৈছে…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"<xliff:g id="NAME">%1$s</xliff:g>ৰ পৰা লগ আউট কৰি থকা হৈছে…"</string>
     <string name="owner_name" msgid="8713560351570795743">"গৰাকী"</string>
+    <string name="guest_name" msgid="8502103277839834324">"অতিথি"</string>
     <string name="error_message_title" msgid="4082495589294631966">"আসোঁৱাহ"</string>
     <string name="error_message_change_not_allowed" msgid="843159705042381454">"আপোনাৰ প্ৰশাসকে এই অৱস্থাটো সলনি কৰিবলৈ অনুমতি নিদিয়ে"</string>
     <string name="app_not_found" msgid="3429506115332341800">"এই কাৰ্যটো পৰিচালনা কৰিবলৈ কোনো এপ্লিকেশ্বন পোৱা নগ\'ল"</string>
@@ -2027,10 +2031,10 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"আনইনষ্টল কৰক"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"যিহ\'লেও খোলক"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"ক্ষতিকাৰক এপ্‌ চিনাক্ত কৰা হৈছে"</string>
-    <string name="log_access_confirmation_title" msgid="3143035474800851565">"ছিষ্টেমৰ লগ এক্সেছ কৰাৰ অনুৰোধ"</string>
+    <string name="log_access_confirmation_title" msgid="2343578467290592708">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g>ক আটাইবোৰ ডিভাইচৰ লগ এক্সেছ কৰাৰ অনুমতি প্ৰদান কৰিবনে?"</string>
     <string name="log_access_confirmation_allow" msgid="143157286283302512">"কেৱল এইবাৰৰ বাবে"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"অনুমতি নিদিব"</string>
-    <string name="log_access_confirmation_body" msgid="7599059550906238538">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g>এ কাৰ্যক্ষম ডিবাগিঙৰ বাবে ছিষ্টেমৰ লগসমূহ অনুৰোধ কৰে। এই লগসমূহত আপোনাৰ ডিভাইচত থকা এপ্ আৰু সেৱাসমূহে লিখা তথ্য থাকিব পাৰে।"</string>
+    <string name="log_access_confirmation_body" msgid="4483075525611652922">"আপোনাৰ ডিভাইচত কি কি ঘটে সেয়া ডিভাইচ লগে ৰেকৰ্ড কৰে। এপে সমস্যা বিচাৰিবলৈ আৰু সমাধান কৰিবলৈ এইসমূহ লগ ব্যৱহাৰ কৰিব পাৰে।\n\nকিছুমান লগত সংবেদনশীল তথ্য থাকিব পাৰে, গতিকে কেৱল আপুনি বিশ্বাস কৰা এপকহে আটাইবোৰ ডিভাইচ লগৰ এক্সেছৰ অনুমতি দিয়া উচিত। \n\nআপুনি যদি এই এপ্‌টোক আটাইবোৰ ডিভাইচৰ লগ এক্সেছ কৰাৰ অনুমতি নিদিয়ে, তেতিয়াও ই নিজৰ লগসমূহ এক্সেছ কৰিব পাৰিব আৰু আপোনাৰ ডিভাইচৰ নিৰ্মাতাই আপোনাৰ ডিভাইচটোত কিছু লগ অথবা তথ্য এক্সেছ কৰিবলৈ সক্ষম হ’ব। অধিক জানক"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"পুনৰ নেদেখুৱাব"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g>এ <xliff:g id="APP_2">%2$s</xliff:g>ৰ অংশ দেখুওৱাব খুজিছে"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"সম্পাদনা কৰক"</string>
@@ -2265,4 +2269,6 @@
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> নেপথ্যত দীৰ্ঘ সময় ধৰি চলি আছে। পৰ্যালোচনা কৰিবলৈ টিপক।"</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"সক্ৰিয় এপ্‌সমূহ পৰীক্ষা কৰক"</string>
     <string name="vdm_camera_access_denied" msgid="6345652513729130490">"এইটো ডিভাইচৰ পৰা কেমেৰা এক্সেছ কৰিব নোৱাৰি"</string>
+    <!-- no translation found for system_locale_title (3978041860457277638) -->
+    <skip />
 </resources>

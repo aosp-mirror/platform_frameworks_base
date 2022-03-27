@@ -307,8 +307,6 @@ public class KeyguardSecurityContainer extends FrameLayout {
     void onResume(SecurityMode securityMode, boolean faceAuthEnabled) {
         mSecurityViewFlipper.setWindowInsetsAnimationCallback(mWindowInsetsAnimationCallback);
         updateBiometricRetry(securityMode, faceAuthEnabled);
-
-        setupViewMode();
     }
 
     void initMode(@Mode int mode, GlobalSettings globalSettings, FalsingManager falsingManager,
@@ -1044,17 +1042,26 @@ public class KeyguardSecurityContainer extends FrameLayout {
 
         /**
          * Moves the bouncer to align with a tap (most likely in the shade), so the bouncer
-         * appears on the same side as a touch. Will not update the user-preference.
+         * appears on the same side as a touch.
          */
         @Override
         public void updatePositionByTouchX(float x) {
-            updateSecurityViewLocation(x <= mView.getWidth() / 2f, /* animate= */false);
+            boolean isTouchOnLeft = x <= mView.getWidth() / 2f;
+            updateSideSetting(isTouchOnLeft);
+            updateSecurityViewLocation(isTouchOnLeft, /* animate= */false);
         }
 
         boolean isLeftAligned() {
             return mGlobalSettings.getInt(Settings.Global.ONE_HANDED_KEYGUARD_SIDE,
                     Settings.Global.ONE_HANDED_KEYGUARD_SIDE_LEFT)
                 == Settings.Global.ONE_HANDED_KEYGUARD_SIDE_LEFT;
+        }
+
+        private void updateSideSetting(boolean leftAligned) {
+            mGlobalSettings.putInt(
+                    Settings.Global.ONE_HANDED_KEYGUARD_SIDE,
+                    leftAligned ? Settings.Global.ONE_HANDED_KEYGUARD_SIDE_LEFT
+                    : Settings.Global.ONE_HANDED_KEYGUARD_SIDE_RIGHT);
         }
 
         /**
@@ -1070,10 +1077,7 @@ public class KeyguardSecurityContainer extends FrameLayout {
                     || (!currentlyLeftAligned && (x < mView.getWidth() / 2f))) {
 
                 boolean willBeLeftAligned = !currentlyLeftAligned;
-                mGlobalSettings.putInt(
-                        Settings.Global.ONE_HANDED_KEYGUARD_SIDE,
-                        willBeLeftAligned ? Settings.Global.ONE_HANDED_KEYGUARD_SIDE_LEFT
-                        : Settings.Global.ONE_HANDED_KEYGUARD_SIDE_RIGHT);
+                updateSideSetting(willBeLeftAligned);
 
                 int keyguardState = willBeLeftAligned
                         ? SysUiStatsLog.KEYGUARD_BOUNCER_STATE_CHANGED__STATE__SWITCH_LEFT

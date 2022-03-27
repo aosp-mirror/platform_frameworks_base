@@ -138,7 +138,7 @@
 
         </LinearLayout>
 
-        <com.android.internal.widget.CachingIconView
+        <ImageView
             android:id="@+id/right_icon"
             android:layout_width="@dimen/notification_right_icon_size"
             android:layout_height="@dimen/notification_right_icon_size"
@@ -150,8 +150,6 @@
             android:clipToOutline="true"
             android:importantForAccessibility="no"
             android:scaleType="centerCrop"
-            android:maxDrawableWidth="@dimen/notification_right_icon_size"
-            android:maxDrawableHeight="@dimen/notification_right_icon_size"
             />
 
         <FrameLayout

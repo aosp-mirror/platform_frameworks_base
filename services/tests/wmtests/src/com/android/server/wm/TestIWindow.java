@@ -43,17 +43,14 @@ public class TestIWindow extends IWindow.Stub {
 
     @Override
     public void resized(ClientWindowFrames frames, boolean reportDraw,
-            MergedConfiguration mergedConfig, boolean forceLayout, boolean alwaysConsumeSystemBars,
-            int displayId, int seqId, int resizeMode) throws RemoteException {
-    }
-
-    @Override
-    public void insetsChanged(InsetsState insetsState, boolean willMove, boolean willResize) {
+            MergedConfiguration mergedConfig, InsetsState insetsState, boolean forceLayout,
+            boolean alwaysConsumeSystemBars, int displayId, int seqId, int resizeMode)
+            throws RemoteException {
     }
 
     @Override
     public void insetsControlChanged(InsetsState insetsState,
-            InsetsSourceControl[] activeControls, boolean willMove, boolean willResize) {
+            InsetsSourceControl[] activeControls) {
     }
 
     @Override

@@ -292,7 +292,7 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         boolean currentTouchMode = mWm.getInTouchMode();
         int callingPid = Binder.getCallingPid();
         int callingUid = Binder.getCallingUid();
-        doReturn(false).when(mWm).checkCallingPermission(anyString(), anyString());
+        doReturn(false).when(mWm).checkCallingPermission(anyString(), anyString(), anyBoolean());
         when(mWm.mAtmService.instrumentationSourceHasPermission(callingPid,
                 android.Manifest.permission.MODIFY_TOUCH_MODE_STATE)).thenReturn(true);
 
@@ -307,7 +307,7 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         boolean currentTouchMode = mWm.getInTouchMode();
         int callingPid = Binder.getCallingPid();
         int callingUid = Binder.getCallingUid();
-        doReturn(false).when(mWm).checkCallingPermission(anyString(), anyString());
+        doReturn(false).when(mWm).checkCallingPermission(anyString(), anyString(), anyBoolean());
         when(mWm.mAtmService.instrumentationSourceHasPermission(callingPid,
                 android.Manifest.permission.MODIFY_TOUCH_MODE_STATE)).thenReturn(false);
 
