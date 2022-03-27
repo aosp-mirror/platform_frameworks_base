@@ -87,6 +87,18 @@
     <!-- Checkbox label for USB device dialogs with warning text for USB device dialogs.  [CHAR LIMIT=200]-->
     <string name="usb_device_permission_prompt_warn">Allow <xliff:g id="application" example= "Usb Mega Player">%1$s</xliff:g> to access <xliff:g id="usb_device" example="USB Headphones">%2$s</xliff:g>?\nThis app has not been granted record permission but could capture audio through this USB device.</string>
 
+    <!-- USB audio device permission dialog title.  [CHAR LIMIT=200]-->
+    <string name="usb_audio_device_permission_prompt_title">Allow <xliff:g id="application" example= "Usb Mega Player">%1$s</xliff:g> to access <xliff:g id="usb_device" example="USB Headphones">%2$s</xliff:g>?</string>
+
+    <!-- USB audio device confirm dialog title.  [CHAR LIMIT=200]-->
+    <string name="usb_audio_device_confirm_prompt_title">Open <xliff:g id="application" example= "Usb Mega Player">%1$s</xliff:g> to handle <xliff:g id="usb_device" example="USB Headphones">%2$s</xliff:g>?</string>
+
+    <!-- Checkbox label for USB audio device dialogs with warning text for USB audio device dialogs.  [CHAR LIMIT=NONE]-->
+    <string name="usb_audio_device_prompt_warn">This app has not been granted record permission but could capture audio through this USB device. Using <xliff:g id="application" example= "Usb Mega Player">%1$s</xliff:g> with this device might prevent hearing calls, notifications and alarms.</string>
+
+    <!-- Prompt for the USB audio device permission dialog [CHAR LIMIT=NONE] -->
+    <string name="usb_audio_device_prompt">Using <xliff:g id="application" example= "Usb Mega Player">%1$s</xliff:g> with this device might prevent hearing calls, notifications and alarms.</string>
+
     <!-- Prompt for the USB accessory permission dialog [CHAR LIMIT=80] -->
     <string name="usb_accessory_permission_prompt">Allow <xliff:g id="application" example= "Usb Mega Player">%1$s</xliff:g> to access <xliff:g id="usb_accessory"  example="USB Dock">%2$s</xliff:g>?</string>
 
