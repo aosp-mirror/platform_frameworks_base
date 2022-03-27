@@ -21,7 +21,7 @@ import com.android.systemui.plugins.qs.QSContainerController
 import com.android.systemui.recents.OverviewProxyService
 import com.android.systemui.recents.OverviewProxyService.OverviewProxyListener
 import com.android.systemui.shared.system.QuickStepContract
-import com.android.systemui.util.Utils
+import com.android.systemui.util.LargeScreenUtils
 import com.android.systemui.util.ViewController
 import com.android.systemui.util.concurrency.DelayableExecutor
 import java.util.function.Consumer
@@ -50,7 +50,8 @@ class NotificationsQSContainerController @Inject constructor(
     private var isQSCustomizing = false
     private var isQSCustomizerAnimating = false
 
-    private var splitShadeStatusBarHeight = 0
+    private var largeScreenShadeHeaderHeight = 0
+    private var largeScreenShadeHeaderActive = false
     private var notificationsBottomMargin = 0
     private var scrimShadeBottomMargin = 0
     private var bottomStableInsets = 0
@@ -115,16 +116,18 @@ class NotificationsQSContainerController @Inject constructor(
     }
 
     fun updateResources() {
-        val newSplitShadeEnabled = Utils.shouldUseSplitNotificationShade(resources)
+        val newSplitShadeEnabled = LargeScreenUtils.shouldUseSplitNotificationShade(resources)
         val splitShadeEnabledChanged = newSplitShadeEnabled != splitShadeEnabled
         splitShadeEnabled = newSplitShadeEnabled
+        largeScreenShadeHeaderActive = LargeScreenUtils.shouldUseLargeScreenShadeHeader(resources)
         notificationsBottomMargin = resources.getDimensionPixelSize(
                 R.dimen.notification_panel_margin_bottom)
-        splitShadeStatusBarHeight = Utils.getSplitShadeStatusBarHeight(context)
+        largeScreenShadeHeaderHeight =
+                resources.getDimensionPixelSize(R.dimen.large_screen_shade_header_height)
         panelMarginHorizontal = resources.getDimensionPixelSize(
                 R.dimen.notification_panel_margin_horizontal)
-        topMargin = if (splitShadeEnabled) {
-            splitShadeStatusBarHeight
+        topMargin = if (largeScreenShadeHeaderActive) {
+            largeScreenShadeHeaderHeight
         } else {
             resources.getDimensionPixelSize(R.dimen.notification_panel_margin_top)
         }
@@ -229,13 +232,13 @@ class NotificationsQSContainerController @Inject constructor(
         setKeyguardStatusViewConstraints(constraintSet)
         setQsConstraints(constraintSet)
         setNotificationsConstraints(constraintSet)
-        setSplitShadeStatusBarConstraints(constraintSet)
+        setLargeScreenShadeHeaderConstraints(constraintSet)
         mView.applyConstraints(constraintSet)
     }
 
-    private fun setSplitShadeStatusBarConstraints(constraintSet: ConstraintSet) {
-        if (splitShadeEnabled) {
-            constraintSet.constrainHeight(R.id.split_shade_status_bar, splitShadeStatusBarHeight)
+    private fun setLargeScreenShadeHeaderConstraints(constraintSet: ConstraintSet) {
+        if (largeScreenShadeHeaderActive) {
+            constraintSet.constrainHeight(R.id.split_shade_status_bar, largeScreenShadeHeaderHeight)
         } else {
             if (useCombinedQSHeaders) {
                 constraintSet.constrainHeight(R.id.split_shade_status_bar, WRAP_CONTENT)

@@ -85,8 +85,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"SIM <xliff:g id="SIMNUMBER">%d</xliff:g> は携帯通信会社によって一時的に OFF になっています"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"モバイル ネットワークにアクセスできません"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"タップして、優先ネットワークを変更してください。"</string>
-    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"緊急通報は利用できません"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Wi‑Fi では緊急通報ができません"</string>
+    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"緊急通報が利用できない可能性があります"</string>
+    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"<xliff:g id="SPN">%s</xliff:g> は Wi-Fi 経由の緊急通報をサポートしていません。タップして詳細をご確認ください。"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"通知"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"電話の転送"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"緊急通報待機モード"</string>
@@ -425,10 +425,10 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"タブレットの通話履歴（着信や発信のデータなど）の変更をアプリに許可します。この許可を悪意のあるアプリに利用されると、通話履歴が消去または変更される恐れがあります。"</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Android TV デバイスの通話履歴（着信や発信のデータなど）の変更をアプリに許可します。この許可を悪意のあるアプリに利用されると、通話履歴が消去または変更される恐れがあります。"</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"モバイル デバイスの通話履歴（着信や発信のデータなど）の変更をアプリに許可します。この許可を悪意のあるアプリに利用されると、通話履歴が消去または変更される恐れがあります。"</string>
-    <string name="permlab_bodySensors" msgid="3411035315357380862">"ボディーセンサー（心拍数モニターなど）へのアクセス"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="3208940894182188063">"心拍数、体温、血液中の酸素の割合などのボディセンサー データにアクセスする権限です。"</string>
-    <string name="permlab_bodySensors_background" msgid="4352831883331744370">"ボディセンサー（心拍数モニター）のデータへのバックグラウンドでのアクセス権限"</string>
-    <string name="permdesc_bodySensors_background" product="default" msgid="8512392249166660872">"心拍数、体温、血液中の酸素の割合などのボディセンサー データにバックグラウンドでアクセスする権限です。"</string>
+    <string name="permlab_bodySensors" msgid="662918578601619569">"使用時の、心拍数などのボディセンサー データへのアクセス"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"アプリの使用時に、心拍数、体温、血中酸素濃度など、ボディセンサー データにアクセスすることをアプリに許可します。"</string>
+    <string name="permlab_bodySensors_background" msgid="4912560779957760446">"バックグラウンド動作時の、心拍数などのボディセンサー データへのアクセス"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"バックグラウンドでのアプリの動作時に、心拍数、体温、血中酸素濃度など、ボディセンサー データにアクセスすることをアプリに許可します。"</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"カレンダーの予定と詳細を読み取り"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"このアプリは、お使いのタブレットに保存されたカレンダーの予定をすべて読み取り、カレンダーのデータを共有したり、保存したりできます。"</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"このアプリは、Android TV デバイスに保存されているカレンダーの予定をすべて読み取り、カレンダーのデータを共有したり、保存したりできます。"</string>
@@ -689,8 +689,8 @@
     <string name="permdesc_readMediaAudio" msgid="5299772574434619399">"共有ストレージからの音声ファイルの読み取りをアプリに許可します。"</string>
     <string name="permlab_readMediaVideo" msgid="7768003311260655007">"共有ストレージからの動画ファイルの読み取り"</string>
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"共有ストレージからの動画ファイルの読み取りをアプリに許可します。"</string>
-    <string name="permlab_readMediaImage" msgid="1507059005825769856">"共有ストレージからの画像ファイルの読み取り"</string>
-    <string name="permdesc_readMediaImage" msgid="8328052622292457588">"共有ストレージからの画像ファイルの読み取りをアプリに許可します。"</string>
+    <string name="permlab_readMediaImages" msgid="4057590631020986789">"共有ストレージからの画像ファイルの読み取り"</string>
+    <string name="permdesc_readMediaImages" msgid="5836219373138469259">"共有ストレージからの画像ファイルの読み取りをアプリに許可します。"</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"共有ストレージのコンテンツの変更または削除"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"共有ストレージのコンテンツの書き込みをアプリに許可します。"</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"SIP通話の発着信"</string>
@@ -834,7 +834,7 @@
     <string name="phoneTypeFaxHome" msgid="6678559953115904345">"FAX（自宅）"</string>
     <string name="phoneTypePager" msgid="576402072263522767">"ポケベル"</string>
     <string name="phoneTypeOther" msgid="6918196243648754715">"その他"</string>
-    <string name="phoneTypeCallback" msgid="3455781500844157767">"コールバック"</string>
+    <string name="phoneTypeCallback" msgid="3455781500844157767">"かけ直す"</string>
     <string name="phoneTypeCar" msgid="4604775148963129195">"クルマ"</string>
     <string name="phoneTypeCompanyMain" msgid="4482773154536455441">"会社代表番号"</string>
     <string name="phoneTypeIsdn" msgid="2496238954533998512">"ISDN"</string>
@@ -912,7 +912,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"MENUキーでロック解除(または緊急通報)"</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"MENUキーでロック解除"</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"パターンを入力"</string>
-    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"緊急通報"</string>
+    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"緊急通報"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"通話に戻る"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"一致しました"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"もう一度お試しください"</string>
@@ -1051,7 +1051,6 @@
     <string name="save_password_never" msgid="6776808375903410659">"保存しない"</string>
     <string name="open_permission_deny" msgid="5136793905306987251">"このページへのアクセスは許可されていません。"</string>
     <string name="text_copied" msgid="2531420577879738860">"テキストをクリップボードにコピーしました。"</string>
-    <string name="copied" msgid="4675902854553014676">"コピーしました"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g> から <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> に貼り付けました"</string>
     <string name="pasted_from_clipboard" msgid="7355790625710831847">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> にクリップボードから貼り付けました"</string>
     <string name="pasted_text" msgid="4298871641549173733">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> がクリップボード内のテキストを貼り付けました"</string>
@@ -1452,8 +1451,12 @@
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"電池の最適化の無視についてアプリが確認することを許可します。"</string>
     <string name="permlab_queryAllPackages" msgid="2928450604653281650">"すべてのパッケージを照会する"</string>
     <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"すべてのインストール済みパッケージを参照することをアプリに許可します。"</string>
-    <string name="permlab_accessSupplementalApi" msgid="3544659160536960275">"SupplementalApis へのアクセス"</string>
-    <string name="permdesc_accessSupplementalApi" msgid="8974758769370951074">"SupplementalApis へのアクセスをアプリに許可します。"</string>
+    <string name="permlab_accessAdServicesTopics" msgid="6687112022940098945">"AdServices Topics API へのアクセス"</string>
+    <string name="permdesc_accessAdServicesTopics" msgid="6011532458156465929">"AdServices Topics API へのアクセスをアプリに許可します。"</string>
+    <string name="permlab_accessAdServicesAttribution" msgid="3268942271128309354">"AdServices Attribution API へのアクセス"</string>
+    <string name="permdesc_accessAdServicesAttribution" msgid="577482544832578288">"AdServices Attribution API へのアクセスをアプリに許可します。"</string>
+    <string name="permlab_accessAdServicesCustomAudiences" msgid="7249286630514600684">"AdServices Custom Audiences API へのアクセス"</string>
+    <string name="permdesc_accessAdServicesCustomAudiences" msgid="645526926477180315">"AdServices Custom Audiences API へのアクセスをアプリに許可します。"</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"ダブルタップでズームします"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"ウィジェットを追加できませんでした。"</string>
     <string name="ime_action_go" msgid="5536744546326495436">"移動"</string>
@@ -1716,6 +1719,7 @@
     <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g>に切り替えています…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"<xliff:g id="NAME">%1$s</xliff:g> をログアウトしています…"</string>
     <string name="owner_name" msgid="8713560351570795743">"所有者"</string>
+    <string name="guest_name" msgid="8502103277839834324">"ゲスト"</string>
     <string name="error_message_title" msgid="4082495589294631966">"エラー"</string>
     <string name="error_message_change_not_allowed" msgid="843159705042381454">"この変更は管理者によって許可されていません"</string>
     <string name="app_not_found" msgid="3429506115332341800">"この操作を行うアプリが見つかりません"</string>
@@ -2027,10 +2031,10 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"アンインストール"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"開く"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"有害なアプリが検出されました"</string>
-    <string name="log_access_confirmation_title" msgid="3143035474800851565">"システムログへのアクセスのリクエスト"</string>
+    <string name="log_access_confirmation_title" msgid="2343578467290592708">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> にすべてのデバイスログへのアクセスを許可しますか？"</string>
     <string name="log_access_confirmation_allow" msgid="143157286283302512">"今回のみ"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"許可しない"</string>
-    <string name="log_access_confirmation_body" msgid="7599059550906238538">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> が機能デバッグのためにシステムログをリクエストしています。これらのログには、デバイス上のアプリやサービスが書き込んだ情報が含まれている可能性があります。"</string>
+    <string name="log_access_confirmation_body" msgid="4483075525611652922">"デバイスのログに、このデバイスで発生したことが記録されます。アプリは問題を検出、修正するためにこれらのログを使用することができます。\n\nログによっては機密性の高い情報が含まれている可能性があるため、すべてのデバイスログへのアクセスは信頼できるアプリにのみ許可してください。\n\nすべてのデバイスログへのアクセスをこのアプリに許可しなかった場合も、このアプリはアプリ独自のログにアクセスできます。また、デバイスのメーカーもデバイスの一部のログや情報にアクセスできる可能性があります。詳細"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"次回から表示しない"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"「<xliff:g id="APP_0">%1$s</xliff:g>」が「<xliff:g id="APP_2">%2$s</xliff:g>」のスライスの表示をリクエストしています"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"編集"</string>
@@ -2265,4 +2269,6 @@
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> がバックグラウンドで長時間実行されています。タップしてご確認ください。"</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"有効なアプリをチェック"</string>
     <string name="vdm_camera_access_denied" msgid="6345652513729130490">"このデバイスからはカメラにアクセスできません"</string>
+    <!-- no translation found for system_locale_title (3978041860457277638) -->
+    <skip />
 </resources>

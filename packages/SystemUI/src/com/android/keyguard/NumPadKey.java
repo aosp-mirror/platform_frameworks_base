@@ -219,7 +219,6 @@ public class NumPadKey extends ViewGroup {
     // Cause a VIRTUAL_KEY vibration
     public void doHapticKeyClick() {
         performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY,
-                HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING
-                | HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
+                HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING);
     }
 }
