@@ -20,6 +20,7 @@
     <string name="pip_phone_close" msgid="5783752637260411309">"બંધ કરો"</string>
     <string name="pip_phone_expand" msgid="2579292903468287504">"વિસ્તૃત કરો"</string>
     <string name="pip_phone_settings" msgid="5468987116750491918">"સેટિંગ"</string>
+    <string name="pip_phone_enter_split" msgid="7042877263880641911">"વિભાજિત સ્ક્રીન મોડમાં દાખલ થાઓ"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"મેનૂ"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> ચિત્રમાં-ચિત્રની અંદર છે"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"જો તમે નથી ઇચ્છતા કે <xliff:g id="NAME">%s</xliff:g> આ સુવિધાનો ઉપયોગ કરે, તો સેટિંગ ખોલવા માટે ટૅપ કરો અને તેને બંધ કરો."</string>
@@ -28,6 +29,8 @@
     <string name="pip_skip_to_next" msgid="8403429188794867653">"આગલા પર જાઓ"</string>
     <string name="pip_skip_to_prev" msgid="7172158111196394092">"પહેલાંના પર જાઓ"</string>
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"કદ બદલો"</string>
+    <string name="accessibility_action_pip_stash" msgid="4060775037619702641">"છુપાવો"</string>
+    <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"બતાવો"</string>
     <string name="dock_forced_resizable" msgid="1749750436092293116">"વિભાજિત-સ્ક્રીન સાથે ઍપ કદાચ કામ ન કરે."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"ઍપ્લિકેશન સ્ક્રીન-વિભાજનનું સમર્થન કરતી નથી."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"ઍપ્લિકેશન ગૌણ ડિસ્પ્લે પર કદાચ કામ ન કરે."</string>
@@ -59,7 +62,7 @@
     <string name="bubbles_app_settings" msgid="3617224938701566416">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> સેટિંગ"</string>
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"બબલને છોડી દો"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"વાતચીતને બબલ કરશો નહીં"</string>
-    <string name="bubbles_user_education_title" msgid="2112319053732691899">"બબલનો ઉપયોગ કરીને ચેટ કરો"</string>
+    <string name="bubbles_user_education_title" msgid="2112319053732691899">"બબલનો ઉપયોગ કરીને ચૅટ કરો"</string>
     <string name="bubbles_user_education_description" msgid="4215862563054175407">"નવી વાતચીત ફ્લોટિંગ આઇકન અથવા બબલ જેવી દેખાશે. બબલને ખોલવા માટે ટૅપ કરો. તેને ખસેડવા માટે ખેંચો."</string>
     <string name="bubbles_user_education_manage_title" msgid="7042699946735628035">"બબલને કોઈપણ સમયે નિયંત્રિત કરો"</string>
     <string name="bubbles_user_education_manage" msgid="3460756219946517198">"આ ઍપમાંથી બબલને બંધ કરવા માટે મેનેજ કરો પર ટૅપ કરો"</string>
@@ -70,5 +73,4 @@
     <string name="manage_bubbles_text" msgid="7730624269650594419">"મેનેજ કરો"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"બબલ છોડી દેવાયો."</string>
     <string name="restart_button_description" msgid="5887656107651190519">"આ ઍપ ફરીથી ચાલુ કરવા માટે ટૅપ કરીને પૂર્ણ સ્ક્રીન કરો."</string>
-    <string name="got_it" msgid="4428750913636945527">"સમજાઈ ગયું"</string>
 </resources>

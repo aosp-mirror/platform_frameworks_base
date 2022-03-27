@@ -20,6 +20,7 @@
     <string name="pip_phone_close" msgid="5783752637260411309">"ବନ୍ଦ କରନ୍ତୁ"</string>
     <string name="pip_phone_expand" msgid="2579292903468287504">"ବଢ଼ାନ୍ତୁ"</string>
     <string name="pip_phone_settings" msgid="5468987116750491918">"ସେଟିଂସ୍"</string>
+    <string name="pip_phone_enter_split" msgid="7042877263880641911">"ସ୍ପ୍ଲିଟ ସ୍କ୍ରିନ ମୋଡ ବ୍ୟବହାର କରନ୍ତୁ"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"ମେନୁ"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> \"ଛବି-ଭିତରେ-ଛବି\"ରେ ଅଛି"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"ଏହି ବୈଶିଷ୍ଟ୍ୟ <xliff:g id="NAME">%s</xliff:g> ବ୍ୟବହାର ନକରିବାକୁ ଯଦି ଆପଣ ଚାହାଁନ୍ତି, ସେଟିଙ୍ଗ ଖୋଲିବାକୁ ଟାପ୍‍ କରନ୍ତୁ ଏବଂ ଏହା ଅଫ୍‍ କରିଦିଅନ୍ତୁ।"</string>
@@ -28,6 +29,8 @@
     <string name="pip_skip_to_next" msgid="8403429188794867653">"ପରବର୍ତ୍ତୀକୁ ଯାଆନ୍ତୁ"</string>
     <string name="pip_skip_to_prev" msgid="7172158111196394092">"ପୂର୍ବବର୍ତ୍ତୀକୁ ଛାଡ଼ନ୍ତୁ"</string>
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"ରିସାଇଜ୍ କରନ୍ତୁ"</string>
+    <string name="accessibility_action_pip_stash" msgid="4060775037619702641">"ଲୁଚାନ୍ତୁ"</string>
+    <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"ଦେଖାନ୍ତୁ"</string>
     <string name="dock_forced_resizable" msgid="1749750436092293116">"ସ୍ପ୍ଲିଟ୍-ସ୍କ୍ରିନରେ ଆପ୍ କାମ କରିନପାରେ।"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"ଆପ୍‍ ସ୍ପ୍ଲିଟ୍‍-ସ୍କ୍ରୀନକୁ ସପୋର୍ଟ କରେ ନାହିଁ।"</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"ସେକେଣ୍ଡାରୀ ଡିସପ୍ଲେରେ ଆପ୍‍ କାମ ନକରିପାରେ।"</string>
@@ -70,5 +73,4 @@
     <string name="manage_bubbles_text" msgid="7730624269650594419">"ପରିଚାଳନା କରନ୍ତୁ"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"ବବଲ୍ ଖାରଜ କରାଯାଇଛି।"</string>
     <string name="restart_button_description" msgid="5887656107651190519">"ଏହି ଆପକୁ ରିଷ୍ଟାର୍ଟ କରି ପୂର୍ଣ୍ଣ ସ୍କ୍ରିନ୍ କରିବାକୁ ଟାପ୍ କରନ୍ତୁ।"</string>
-    <string name="got_it" msgid="4428750913636945527">"ବୁଝିଗଲି"</string>
 </resources>
