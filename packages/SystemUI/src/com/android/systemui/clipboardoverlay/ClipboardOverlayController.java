@@ -190,6 +190,13 @@ public class ClipboardOverlayController {
             }
         });
 
+        mTextPreview.getViewTreeObserver().addOnPreDrawListener(() -> {
+            int availableHeight = mTextPreview.getHeight()
+                    - (mTextPreview.getPaddingTop() + mTextPreview.getPaddingBottom());
+            mTextPreview.setMaxLines(availableHeight / mTextPreview.getLineHeight());
+            return true;
+        });
+
         mDismissButton.setOnClickListener(view -> animateOut());
 
         mEditChip.setIcon(Icon.createWithResource(mContext, R.drawable.ic_screenshot_edit), true);
@@ -240,7 +247,10 @@ public class ClipboardOverlayController {
                 SELF_PERMISSION, null);
         monitorOutsideTouches();
 
-        mContext.sendBroadcast(new Intent(COPY_OVERLAY_ACTION), SELF_PERMISSION);
+        Intent copyIntent = new Intent(COPY_OVERLAY_ACTION);
+        // Set package name so the system knows it's safe
+        copyIntent.setPackage(mContext.getPackageName());
+        mContext.sendBroadcast(copyIntent, SELF_PERMISSION);
     }
 
     void setClipData(ClipData clipData, String clipSource) {

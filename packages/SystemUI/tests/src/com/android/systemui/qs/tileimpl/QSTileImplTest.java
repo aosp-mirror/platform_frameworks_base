@@ -361,6 +361,24 @@ public class QSTileImplTest extends SysuiTestCase {
         assertEquals(Settings.ACTION_SHOW_ADMIN_SUPPORT_DETAILS, captor.getValue().getAction());
     }
 
+    @Test
+    public void testIsListening() {
+        Object o = new Object();
+
+        mTile.setListening(o, true);
+        mTestableLooper.processAllMessages();
+        assertTrue(mTile.isListening());
+
+        mTile.setListening(o, false);
+        mTestableLooper.processAllMessages();
+        assertFalse(mTile.isListening());
+
+        mTile.setListening(o, true);
+        mTile.destroy();
+        mTestableLooper.processAllMessages();
+        assertFalse(mTile.isListening());
+    }
+
     private void assertEvent(UiEventLogger.UiEventEnum eventType,
             UiEventLoggerFake.FakeUiEvent fakeEvent) {
         assertEquals(eventType.getId(), fakeEvent.eventId);

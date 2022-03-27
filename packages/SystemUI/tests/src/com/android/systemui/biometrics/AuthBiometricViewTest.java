@@ -42,6 +42,7 @@ import android.view.View;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 
+import org.junit.After;
 import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
@@ -50,7 +51,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
-@Ignore
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
 @SmallTest
@@ -65,6 +65,11 @@ public class AuthBiometricViewTest extends SysuiTestCase {
     private AuthPanelController mPanelController;
 
     private AuthBiometricView mBiometricView;
+
+    @After
+    public void tearDown() {
+        destroyDialog();
+    }
 
     @Test
     public void testOnAuthenticationSucceeded_noConfirmationRequired_sendsActionAuthenticated() {
@@ -245,6 +250,7 @@ public class AuthBiometricViewTest extends SysuiTestCase {
         // TODO: Test dialog size. Should move requireConfirmation to buildBiometricPromptBundle
 
         // Create new dialog and restore the previous state into it
+        destroyDialog();
         initDialog(false /* allowDeviceCredential */, mCallback, state, 10000);
         mBiometricView.mAnimationDurationHideDialog = 10000;
         mBiometricView.setRequireConfirmation(requireConfirmation);
@@ -302,6 +308,12 @@ public class AuthBiometricViewTest extends SysuiTestCase {
         ViewUtils.attachView(mBiometricView);
         mBiometricView.setPanelController(mPanelController);
         waitForIdleSync();
+    }
+
+    private void destroyDialog() {
+        if (mBiometricView != null && mBiometricView.isAttachedToWindow()) {
+            ViewUtils.detachView(mBiometricView);
+        }
     }
 
     @Override

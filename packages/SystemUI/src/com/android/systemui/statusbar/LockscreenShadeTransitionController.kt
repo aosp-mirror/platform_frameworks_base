@@ -40,7 +40,7 @@ import com.android.systemui.statusbar.phone.LSShadeTransitionLogger
 import com.android.systemui.statusbar.phone.NotificationPanelViewController
 import com.android.systemui.statusbar.phone.ScrimController
 import com.android.systemui.statusbar.policy.ConfigurationController
-import com.android.systemui.util.Utils
+import com.android.systemui.util.LargeScreenUtils
 import java.io.FileDescriptor
 import java.io.PrintWriter
 import javax.inject.Inject
@@ -64,6 +64,8 @@ class LockscreenShadeTransitionController @Inject constructor(
     private val scrimController: ScrimController,
     private val depthController: NotificationShadeDepthController,
     private val context: Context,
+    private val splitShadeOverScrollerFactory: SplitShadeLockScreenOverScroller.Factory,
+    private val singleShadeOverScrollerFactory: SingleShadeLockScreenOverScroller.Factory,
     wakefulnessLifecycle: WakefulnessLifecycle,
     configurationController: ConfigurationController,
     falsingManager: FalsingManager,
@@ -162,6 +164,17 @@ class LockscreenShadeTransitionController @Inject constructor(
     private var statusBarTransitionDistance = 0
 
     /**
+     * Distance that the full shade transition takes in order for the keyguard elements to fully
+     * translate into their final position
+     */
+    private var keyguardTransitionDistance = 0
+
+    /**
+     * The amount of vertical offset for the keyguard during the full shade transition.
+     */
+    private var keyguardTransitionOffset = 0
+
+    /**
      * Flag to make sure that the dragDownAmount is applied to the listeners even when in the
      * locked down shade.
      */
@@ -193,6 +206,27 @@ class LockscreenShadeTransitionController @Inject constructor(
      * The touch helper responsible for the drag down animation.
      */
     val touchHelper = DragDownHelper(falsingManager, falsingCollector, this, context)
+
+    private val splitShadeOverScroller: SplitShadeLockScreenOverScroller by lazy {
+        splitShadeOverScrollerFactory.create(qS, nsslController)
+    }
+
+    private val phoneShadeOverScroller: SingleShadeLockScreenOverScroller by lazy {
+        singleShadeOverScrollerFactory.create(nsslController)
+    }
+
+    /**
+     * [LockScreenShadeOverScroller] property that delegates to either
+     * [SingleShadeLockScreenOverScroller] or [SplitShadeLockScreenOverScroller].
+     *
+     * There are currently two different implementations, as the over scroll behavior is different
+     * on single shade and split shade.
+     *
+     * On single shade, only notifications are over scrolled, whereas on split shade, everything is
+     * over scrolled.
+     */
+    private val shadeOverScroller: LockScreenShadeOverScroller
+        get() = if (useSplitShade) splitShadeOverScroller else phoneShadeOverScroller
 
     init {
         updateResources()
@@ -251,7 +285,11 @@ class LockscreenShadeTransitionController @Inject constructor(
                 R.dimen.lockscreen_shade_udfps_keyguard_transition_distance)
         statusBarTransitionDistance = context.resources.getDimensionPixelSize(
                 R.dimen.lockscreen_shade_status_bar_transition_distance)
-        useSplitShade = Utils.shouldUseSplitNotificationShade(context.resources)
+        useSplitShade = LargeScreenUtils.shouldUseSplitNotificationShade(context.resources)
+        keyguardTransitionDistance = context.resources.getDimensionPixelSize(
+            R.dimen.lockscreen_shade_keyguard_transition_distance)
+        keyguardTransitionOffset = context.resources.getDimensionPixelSize(
+            R.dimen.lockscreen_shade_keyguard_transition_vertical_offset)
     }
 
     fun setStackScroller(nsslController: NotificationStackScrollLayoutController) {
@@ -410,7 +448,7 @@ class LockscreenShadeTransitionController @Inject constructor(
                 if (!nsslController.isInLockedDownShade() || field == 0f || forceApplyAmount) {
                     val notificationShelfProgress =
                         MathUtils.saturate(dragDownAmount / notificationShelfTransitionDistance)
-                    nsslController.setTransitionToFullShadeAmount(field, notificationShelfProgress)
+                    nsslController.setTransitionToFullShadeAmount(notificationShelfProgress)
 
                     qSDragProgress = MathUtils.saturate(dragDownAmount / qsTransitionDistance)
                     qS.setTransitionToFullShadeAmount(field, qSDragProgress)
@@ -422,6 +460,7 @@ class LockscreenShadeTransitionController @Inject constructor(
                     transitionToShadeAmountScrim(field)
                     transitionToShadeAmountCommon(field)
                     transitionToShadeAmountKeyguard(field)
+                    shadeOverScroller.expansionDragDownAmount = dragDownAmount
                 }
             }
         }
@@ -441,7 +480,9 @@ class LockscreenShadeTransitionController @Inject constructor(
     }
 
     private fun transitionToShadeAmountCommon(dragDownAmount: Float) {
-        if (depthControllerTransitionDistance > 0) {
+        if (depthControllerTransitionDistance == 0) { // split shade
+            depthController.transitionToFullShadeProgress = 0f
+        } else {
             val depthProgress =
                 MathUtils.saturate(dragDownAmount / depthControllerTransitionDistance)
             depthController.transitionToFullShadeProgress = depthProgress
@@ -459,15 +500,27 @@ class LockscreenShadeTransitionController @Inject constructor(
         val keyguardAlphaProgress =
             MathUtils.saturate(dragDownAmount / npvcKeyguardContentAlphaTransitionDistance)
         val keyguardAlpha = 1f - keyguardAlphaProgress
-        val keyguardTranslationY = if (useSplitShade) {
-            // On split-shade, the translationY of the keyguard should stay in sync with the
-            // translation of media.
-            mediaHierarchyManager.getGuidedTransformationTranslationY()
-        } else {
-            0
-        }
+        val keyguardTranslationY = calculateKeyguardTranslationY(dragDownAmount)
         notificationPanelController
             .setKeyguardTransitionProgress(keyguardAlpha, keyguardTranslationY)
+
+        val statusBarAlpha = if (useSplitShade) keyguardAlpha else -1f
+        notificationPanelController.setKeyguardStatusBarAlpha(statusBarAlpha)
+    }
+
+    private fun calculateKeyguardTranslationY(dragDownAmount: Float): Int {
+        if (!useSplitShade) {
+            return 0
+        }
+        // On split-shade, the translationY of the keyguard should stay in sync with the
+        // translation of media.
+        if (mediaHierarchyManager.isCurrentlyInGuidedTransformation()) {
+            return mediaHierarchyManager.getGuidedTransformationTranslationY()
+        }
+        // When media is not showing, apply the default distance
+        val translationProgress = MathUtils.saturate(dragDownAmount / keyguardTransitionDistance)
+        val translationY = translationProgress * keyguardTransitionOffset
+        return translationY.toInt()
     }
 
     private fun setDragDownAmountAnimated(

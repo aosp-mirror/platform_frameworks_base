@@ -87,8 +87,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"Часова адключана для SIM <xliff:g id="SIMNUMBER">%d</xliff:g> аператарам сувязі"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Сетка мабільнай сувязі недаступная"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Націсніце, каб выбраць іншую сетку."</string>
-    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Экстранныя выклікі недаступныя"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Экстранныя выклікі ў сетцы Wi‑Fi недаступныя"</string>
+    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"Экстранныя выклікі могуць быць недаступнымі"</string>
+    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"<xliff:g id="SPN">%s</xliff:g> не падтрымлівае экстранныя выклікі праз Wi-Fi. Націсніце, каб убачыць больш інфармацыі."</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Абвесткі"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Пераадрасацыя выкліку"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Рэжым экстранных зваротных выклікаў"</string>
@@ -427,10 +427,10 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"Дазваляе прыкладанню змяняць гiсторыю выклiкаў планшэта, у тым лiку дадзеныя пра ўваходныя i зыходныя выклiкi. Шкоднасныя прыкладаннi могуць выкарыстоўваць гэта, каб выдаляць або змяняць гiсторыю выклікаў."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Дазваляе праграме змяняць журнал выклікаў прылады Android TV, у тым ліку даныя пра ўваходныя і выходныя выклікі. Шкодныя праграмы могуць злоўжыць гэтым і сцерці ці змяніць даныя ў журнале выклікаў."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Дазваляе прыкладанням змяняць гiсторыю выклiкаў тэлефону, у тым лiку дадзеныя пра ўваходныя і зыходныя выклiкi. Шкоднасныя прыкладаннi могуць выкарыстоўваць гэта, каб выдаляць або змяняць гiсторыю выклікаў."</string>
-    <string name="permlab_bodySensors" msgid="3411035315357380862">"атрымліваць доступ да датчыкаў цела (напрыклад, пульсометраў)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="3208940894182188063">"Доступ да даных з датчыкаў цела, такіх як пульс, тэмпература, працэнт утрымання ў крыві кіслароду і г. д."</string>
-    <string name="permlab_bodySensors_background" msgid="4352831883331744370">"атрымліваць у фонавым рэжыме доступ да датчыкаў цела (напрыклад, пульсометраў)"</string>
-    <string name="permdesc_bodySensors_background" product="default" msgid="8512392249166660872">"Доступ у фонавым рэжыме да даных з датчыкаў цела, такіх як пульс, тэмпература, працэнт утрымання ў крыві кіслароду і г. д."</string>
+    <string name="permlab_bodySensors" msgid="662918578601619569">"Доступ да даных датчыкаў цела, такіх як пульс, у час выкарыстання"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Праграма ў час яе выкарыстання будзе мець доступ да даных датчыкаў цела, такіх як пульс, тэмпература і працэнт утрымання ў крыві кіслароду."</string>
+    <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Доступ да даных датчыкаў цела, такіх як пульс, у фонавым рэжыме"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Праграма ў час яе працы ў фонавым рэжыме будзе мець доступ да даных датчыкаў цела, такіх як пульс, тэмпература і працэнт утрымання ў крыві кіслароду."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Чытаць падзеі календара і падрабязныя звесткі"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Гэта праграма можа чытаць усе падзеі календара, захаваныя на вашым планшэце, і абагульваць ці захоўваць даныя календара."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Гэта праграма можа счытваць усе падзеі календара, захаваныя на прыладзе Android TV, і абагульваць ці захоўваць яго даныя."</string>
@@ -691,8 +691,8 @@
     <string name="permdesc_readMediaAudio" msgid="5299772574434619399">"Праграма зможа счытваць аўдыяфайлы з абагуленага сховішча."</string>
     <string name="permlab_readMediaVideo" msgid="7768003311260655007">"счытваць відэафайлы з абагуленага сховішча"</string>
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"Праграма зможа счытваць відэафайлы з абагуленага сховішча."</string>
-    <string name="permlab_readMediaImage" msgid="1507059005825769856">"счытваць файлы відарысаў з абагуленага сховішча"</string>
-    <string name="permdesc_readMediaImage" msgid="8328052622292457588">"Праграма зможа счытваць файлы відарысаў з абагуленага сховішча."</string>
+    <string name="permlab_readMediaImages" msgid="4057590631020986789">"счытваць файлы відарысаў з абагуленага сховішча"</string>
+    <string name="permdesc_readMediaImages" msgid="5836219373138469259">"Праграма зможа счытваць файлы відарысаў з абагуленага сховішча."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"змяненне або выдаленне змесціва абагуленага сховішча"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Дазваляе праграме запісваць змесціва абагуленага сховішча."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"ажыццяўленне/прыманне выклікаў SIP"</string>
@@ -914,7 +914,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"Націсніце \"Меню\", каб разблакаваць, або зрабіце экстраны выклік."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"Націсніце \"Меню\", каб разблакаваць."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"Намалюйце камбінацыю разблакоўкі, каб разблакаваць"</string>
-    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"Экстранны выклік"</string>
+    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"Экстранны выклік"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"Вярнуцца да выкліку"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"Правільна!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Паўтарыце спробу"</string>
@@ -1053,7 +1053,6 @@
     <string name="save_password_never" msgid="6776808375903410659">"Ніколі"</string>
     <string name="open_permission_deny" msgid="5136793905306987251">"У вас няма дазволу на адкрыццё гэтай старонкі."</string>
     <string name="text_copied" msgid="2531420577879738860">"Тэкст скапіраваны ў буфер абмену."</string>
-    <string name="copied" msgid="4675902854553014676">"Скапіравана"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"Праграма \"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>\" была ўстаўлена з праграмы \"<xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g>\""</string>
     <string name="pasted_from_clipboard" msgid="7355790625710831847">"Праграма \"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>\" уставіла даныя з буфера абмену"</string>
     <string name="pasted_text" msgid="4298871641549173733">"Скапіраваны вамі тэкст устаўлены праграмай \"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>\""</string>
@@ -1454,8 +1453,12 @@
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"Дазваляе праграме запытваць дазвол на ігнараванне аптымізацыі акумулятара для гэтай праграмы."</string>
     <string name="permlab_queryAllPackages" msgid="2928450604653281650">"запыт усіх пакетаў"</string>
     <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"Дазваляе праграме выяўляць усе ўсталяваныя пакеты."</string>
-    <string name="permlab_accessSupplementalApi" msgid="3544659160536960275">"доступ да SupplementalApis"</string>
-    <string name="permdesc_accessSupplementalApi" msgid="8974758769370951074">"Дазваляе праграме мець доступ да SupplementalApis."</string>
+    <string name="permlab_accessAdServicesTopics" msgid="6687112022940098945">"доступ да AdServices Topics API"</string>
+    <string name="permdesc_accessAdServicesTopics" msgid="6011532458156465929">"Дазваляе праграме мець доступ да AdServices Topics API."</string>
+    <string name="permlab_accessAdServicesAttribution" msgid="3268942271128309354">"доступ да AdServices Attribution API"</string>
+    <string name="permdesc_accessAdServicesAttribution" msgid="577482544832578288">"Дазваляе праграме мець доступ да AdServices Attribution API."</string>
+    <string name="permlab_accessAdServicesCustomAudiences" msgid="7249286630514600684">"доступ да AdServices Custom Audiences API"</string>
+    <string name="permdesc_accessAdServicesCustomAudiences" msgid="645526926477180315">"Дазваляе праграме мець доступ да AdServices Custom Audiences API."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"Націсніце двойчы, каб кіраваць маштабаваннем"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"Немагчыма дадаць віджэт."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"Пачаць"</string>
@@ -1718,6 +1721,7 @@
     <string name="user_switching_message" msgid="1912993630661332336">"Пераход у рэжым \"<xliff:g id="NAME">%1$s</xliff:g>\"..."</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"<xliff:g id="NAME">%1$s</xliff:g> выходзіць з сістэмы…"</string>
     <string name="owner_name" msgid="8713560351570795743">"Уладальнік"</string>
+    <string name="guest_name" msgid="8502103277839834324">"Госць"</string>
     <string name="error_message_title" msgid="4082495589294631966">"Памылка"</string>
     <string name="error_message_change_not_allowed" msgid="843159705042381454">"Ваш адміністратар не дазваляе гэту змену"</string>
     <string name="app_not_found" msgid="3429506115332341800">"Прыкладанне для гэтага дзеяння не знойдзенае"</string>
@@ -2029,10 +2033,10 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"ВЫДАЛІЦЬ"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"УСЁ РОЎНА АДКРЫЦЬ"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"Выяўлена шкодная праграма"</string>
-    <string name="log_access_confirmation_title" msgid="3143035474800851565">"Запыт на доступ да сістэмных журналаў"</string>
+    <string name="log_access_confirmation_title" msgid="2343578467290592708">"Дазволіць праграме \"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g>\" мець доступ да ўсіх журналаў прылады?"</string>
     <string name="log_access_confirmation_allow" msgid="143157286283302512">"Толькі ў гэты раз"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Не дазваляць"</string>
-    <string name="log_access_confirmation_body" msgid="7599059550906238538">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> запытвае доступ да сістэмных журналаў з мэтай функцыянальнай адладкі. У гэтых журналах можа ўтрымлівацца інфармацыя, запісаная праграмамі і сэрвісамі вашай прылады."</string>
+    <string name="log_access_confirmation_body" msgid="4483075525611652922">"Журналы прылад запісваюць усё, што адбываецца на вашай прыладзе. Праграмы выкарыстоўваюць гэтыя журналы для пошуку і выпраўлення памылак.\n\nУ некаторых журналах можа ўтрымлівацца канфідэнцыяльная інфармацыя, таму давайце доступ да ўсіх журналаў прылады толькі тым праграмам, якім вы давяраеце. \n\nКалі вы не дасце гэтай праграме доступу да ўсіх журналаў прылад, у яе ўсё роўна застанецца доступ да ўласных журналаў і для вытворцы вашай прылады будуць даступнымі некаторыя журналы і інфармацыя на вашай прыладзе. Даведацца больш"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Больш не паказваць"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"Праграма <xliff:g id="APP_0">%1$s</xliff:g> запытвае дазвол на паказ зрэзаў праграмы <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Рэдагаваць"</string>
@@ -2267,4 +2271,6 @@
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> працуе ў фонавым рэжыме працяглы час. Націсніце, каб праглядзець."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Праверце актыўныя праграмы"</string>
     <string name="vdm_camera_access_denied" msgid="6345652513729130490">"З гэтай прылады няма доступу да камеры."</string>
+    <!-- no translation found for system_locale_title (3978041860457277638) -->
+    <skip />
 </resources>

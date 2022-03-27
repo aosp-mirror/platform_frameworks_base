@@ -85,8 +85,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"SIM 卡 <xliff:g id="SIMNUMBER">%d</xliff:g> 已由运营商暂时关闭"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"无法连接到移动网络"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"请尝试更改首选网络。点按即可更改。"</string>
-    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"无法使用紧急呼救服务"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"无法通过 WLAN 拨打紧急呼救电话"</string>
+    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"紧急呼叫服务可能无法使用"</string>
+    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"<xliff:g id="SPN">%s</xliff:g>并不支持通过 WLAN 进行紧急呼叫。点按可了解详情。"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"提醒"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"来电转接"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"紧急回拨模式"</string>
@@ -425,10 +425,10 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"允许该应用修改平板电脑的通话记录，包括有关来电和外拨电话的数据。恶意应用可能会借此清除或修改您的通话记录。"</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"允许应用修改您的 Android TV 设备的通话记录，包括关于来电和去电的数据。恶意应用可能会借此清空或修改您的通话记录。"</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"允许该应用修改手机的通话记录，包括有关来电和外拨电话的数据。恶意应用可能会借此清除或修改您的通话记录。"</string>
-    <string name="permlab_bodySensors" msgid="3411035315357380862">"访问身体传感器（如心率监测器）"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="3208940894182188063">"访问身体传感器获得的数据，例如心率、体温、血氧百分比等。"</string>
-    <string name="permlab_bodySensors_background" msgid="4352831883331744370">"在后台时访问身体传感器（如心率监测器）"</string>
-    <string name="permdesc_bodySensors_background" product="default" msgid="8512392249166660872">"在后台时访问身体传感器获得的数据，例如心率、体温、血氧百分比等。"</string>
+    <string name="permlab_bodySensors" msgid="662918578601619569">"允许应用在使用中时访问身体传感器数据，如心率"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"允许应用在使用中时访问身体传感器数据，如心率、体温和血氧浓度。"</string>
+    <string name="permlab_bodySensors_background" msgid="4912560779957760446">"允许应用在后台运行时访问身体传感器数据，如心率"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"允许应用在后台运行时访问身体传感器数据，如心率、体温和血氧浓度。"</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"读取日历活动和详情"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"此应用可读取您平板电脑上存储的所有日历活动，并分享或保存您的日历数据。"</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"此应用可读取您的 Android TV 设备上存储的所有日历活动，以及分享或保存您的日历数据。"</string>
@@ -689,8 +689,8 @@
     <string name="permdesc_readMediaAudio" msgid="5299772574434619399">"允许应用读取您共享存储空间中的音频文件。"</string>
     <string name="permlab_readMediaVideo" msgid="7768003311260655007">"从共享存储空间读取视频文件"</string>
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"允许应用读取您共享存储空间中的视频文件。"</string>
-    <string name="permlab_readMediaImage" msgid="1507059005825769856">"从共享存储空间读取图片文件"</string>
-    <string name="permdesc_readMediaImage" msgid="8328052622292457588">"允许应用读取您共享存储空间中的图片文件。"</string>
+    <string name="permlab_readMediaImages" msgid="4057590631020986789">"读取共享存储空间中的图片文件"</string>
+    <string name="permdesc_readMediaImages" msgid="5836219373138469259">"允许应用读取您共享存储空间中的图片文件。"</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"修改或删除您共享存储空间中的内容"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"允许该应用写入您共享存储空间中的内容。"</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"拨打/接听SIP电话"</string>
@@ -912,7 +912,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"按 Menu 解锁或进行紧急呼救。"</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"按 MENU 解锁。"</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"绘制解锁图案"</string>
-    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"紧急呼叫"</string>
+    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"紧急呼救"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"返回通话"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"正确！"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"重试"</string>
@@ -1051,7 +1051,6 @@
     <string name="save_password_never" msgid="6776808375903410659">"永不"</string>
     <string name="open_permission_deny" msgid="5136793905306987251">"您无权打开此网页。"</string>
     <string name="text_copied" msgid="2531420577879738860">"文本已复制到剪贴板。"</string>
-    <string name="copied" msgid="4675902854553014676">"已复制"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>已粘贴从<xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g>复制的内容"</string>
     <string name="pasted_from_clipboard" msgid="7355790625710831847">"已将剪贴板中的内容粘贴到<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>"</string>
     <string name="pasted_text" msgid="4298871641549173733">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>已粘贴您复制的文字"</string>
@@ -1452,8 +1451,12 @@
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"允许应用请求相应的权限，以便忽略针对该应用的电池优化。"</string>
     <string name="permlab_queryAllPackages" msgid="2928450604653281650">"查询所有软件包"</string>
     <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"允许应用查看所有已安装的软件包。"</string>
-    <string name="permlab_accessSupplementalApi" msgid="3544659160536960275">"访问 SupplementalApis"</string>
-    <string name="permdesc_accessSupplementalApi" msgid="8974758769370951074">"允许应用访问 SupplementalApis。"</string>
+    <string name="permlab_accessAdServicesTopics" msgid="6687112022940098945">"访问 AdServices Topics API"</string>
+    <string name="permdesc_accessAdServicesTopics" msgid="6011532458156465929">"允许应用访问 AdServices Topics API。"</string>
+    <string name="permlab_accessAdServicesAttribution" msgid="3268942271128309354">"访问 AdServices Attribution API"</string>
+    <string name="permdesc_accessAdServicesAttribution" msgid="577482544832578288">"允许应用访问 AdServices Attribution API。"</string>
+    <string name="permlab_accessAdServicesCustomAudiences" msgid="7249286630514600684">"访问 AdServices Custom Audiences API"</string>
+    <string name="permdesc_accessAdServicesCustomAudiences" msgid="645526926477180315">"允许应用访问 AdServices Custom Audiences API。"</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"双击可以进行缩放控制"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"无法添加微件。"</string>
     <string name="ime_action_go" msgid="5536744546326495436">"开始"</string>
@@ -1716,6 +1719,7 @@
     <string name="user_switching_message" msgid="1912993630661332336">"正在切换为<xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"正在将<xliff:g id="NAME">%1$s</xliff:g>退出帐号…"</string>
     <string name="owner_name" msgid="8713560351570795743">"机主"</string>
+    <string name="guest_name" msgid="8502103277839834324">"访客"</string>
     <string name="error_message_title" msgid="4082495589294631966">"错误"</string>
     <string name="error_message_change_not_allowed" msgid="843159705042381454">"您的管理员不允许进行这项更改"</string>
     <string name="app_not_found" msgid="3429506115332341800">"找不到可处理此操作的应用"</string>
@@ -2027,10 +2031,10 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"卸载"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"仍然打开"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"检测到有害应用"</string>
-    <string name="log_access_confirmation_title" msgid="3143035474800851565">"系统日志访问请求"</string>
+    <string name="log_access_confirmation_title" msgid="2343578467290592708">"允许“<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g>”访问所有设备日志吗？"</string>
     <string name="log_access_confirmation_allow" msgid="143157286283302512">"仅限这一次"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"不允许"</string>
-    <string name="log_access_confirmation_body" msgid="7599059550906238538">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g>请求访问系统日志，以进行功能调试。这些日志可能包含设备上的应用和服务写入的信息。"</string>
+    <string name="log_access_confirmation_body" msgid="4483075525611652922">"设备日志会记录设备上发生的活动。应用可以使用这些日志查找和修复问题。\n\n部分日志可能包含敏感信息，因此请仅允许您信任的应用访问所有设备日志。\n\n如果您不授予此应用访问所有设备日志的权限，那么它仍然可以访问自己的日志，并且您的设备制造商可能仍然能够访问您设备上的部分日志或信息。了解详情"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"不再显示"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"“<xliff:g id="APP_0">%1$s</xliff:g>”想要显示“<xliff:g id="APP_2">%2$s</xliff:g>”图块"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"编辑"</string>
@@ -2265,4 +2269,6 @@
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"“<xliff:g id="APP">%1$s</xliff:g>”已在后台运行较长时间。点按即可查看。"</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"查看使用中的应用"</string>
     <string name="vdm_camera_access_denied" msgid="6345652513729130490">"无法使用此设备的摄像头"</string>
+    <!-- no translation found for system_locale_title (3978041860457277638) -->
+    <skip />
 </resources>

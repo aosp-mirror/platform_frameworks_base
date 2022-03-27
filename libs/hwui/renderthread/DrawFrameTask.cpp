@@ -148,6 +148,8 @@ void DrawFrameTask::run() {
     bool canDrawThisFrame;
     {
         TreeInfo info(TreeInfo::MODE_FULL, *mContext);
+        info.forceDrawFrame = mForceDrawFrame;
+        mForceDrawFrame = false;
         canUnblockUiThread = syncFrameState(info);
         canDrawThisFrame = info.out.canDrawThisFrame;
 
