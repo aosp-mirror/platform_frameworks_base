@@ -30,9 +30,8 @@ import android.util.Slog;
 import android.util.Spline;
 import android.view.DisplayAddress;
 
-import com.android.internal.annotations.VisibleForTesting;
-
 import com.android.internal.R;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.display.BrightnessSynchronizer;
 import com.android.server.display.config.BrightnessThresholds;
 import com.android.server.display.config.BrightnessThrottlingMap;
@@ -296,9 +295,9 @@ public class DisplayDeviceConfig {
      * @return A configuration instance for the specified display.
      */
     public static DisplayDeviceConfig create(Context context, long physicalDisplayId,
-            boolean isDefaultDisplay) {
+            boolean isFirstDisplay) {
         final DisplayDeviceConfig config = createWithoutDefaultValues(context, physicalDisplayId,
-                isDefaultDisplay);
+                isFirstDisplay);
 
         config.copyUninitializedValuesFromSecondaryConfig(loadDefaultConfigurationXml(context));
         return config;
@@ -323,7 +322,7 @@ public class DisplayDeviceConfig {
     }
 
     private static DisplayDeviceConfig createWithoutDefaultValues(Context context,
-            long physicalDisplayId, boolean isDefaultDisplay) {
+            long physicalDisplayId, boolean isFirstDisplay) {
         DisplayDeviceConfig config;
 
         config = loadConfigFromDirectory(context, Environment.getProductDirectory(),
@@ -341,7 +340,7 @@ public class DisplayDeviceConfig {
         // If no config can be loaded from any ddc xml at all,
         // prepare a whole config using the global config.xml.
         // Guaranteed not null
-        return create(context, isDefaultDisplay);
+        return create(context, isFirstDisplay);
     }
 
     private static DisplayConfiguration loadDefaultConfigurationXml(Context context) {

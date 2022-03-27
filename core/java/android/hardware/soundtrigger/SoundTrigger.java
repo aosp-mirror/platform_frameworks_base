@@ -29,6 +29,7 @@ import static android.system.OsConstants.EPIPE;
 import static java.util.Objects.requireNonNull;
 
 import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -1630,7 +1631,8 @@ public class SoundTrigger {
          * @hide
          */
         @UnsupportedAppUsage
-        public KeyphraseRecognitionExtra(int id, int recognitionModes, int coarseConfidenceLevel,
+        public KeyphraseRecognitionExtra(int id, int recognitionModes,
+                @IntRange(from = 0, to = 100) int coarseConfidenceLevel,
                 @Nullable ConfidenceLevel[] confidenceLevels) {
             this.id = id;
             this.recognitionModes = recognitionModes;
@@ -1660,6 +1662,7 @@ public class SoundTrigger {
          *
          * <p>The confidence level is expressed in percent (0% -100%).
          */
+        @IntRange(from = 0, to = 100)
         public int getCoarseConfidenceLevel() {
             return coarseConfidenceLevel;
         }

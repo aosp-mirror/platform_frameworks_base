@@ -151,10 +151,6 @@
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"Հաջորդ փորձի ժամանակ սխալ նախշ մուտքագրելու դեպքում ձեր աշխատանքային պրոֆիլը և դրա տվյալները կջնջվեն։"</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"Հաջորդ փորձի ժամանակ սխալ PIN կոդ մուտքագրելու դեպքում աշխատանքային պրոֆիլը և դրա տվյալները կջնջվեն։"</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"Հաջորդ փորձի ժամանակ սխալ գաղտնաբառ մուտքագրելու դեպքում աշխատանքային պրոֆիլը և դրա տվյալները կջնջվեն։"</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"Չափից շատ սխալ փորձեր են արվել։ Այս սարքի տվյալները կջնջվեն։"</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"Չափից շատ սխալ փորձեր են արվել։ Oգտատիրոջ պրոֆիլը կջնջվի։"</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"Չափից շատ սխալ փորձեր են արվել։ Աշխատանքային պրոֆիլը և դրա տվյալները կջնջվեն։"</string>
-    <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"Փակել"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Հպեք մատնահետքի սկաներին"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"Մատնահետքի պատկերակ"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Դեմքը չի հաջողվում ճանաչել։ Օգտագործեք մատնահետքը։"</string>
@@ -323,17 +319,12 @@
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Դանդաղ լիցքավորում • Մնացել է <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Լիցքավորում դոկ-կայանի միջոցով • Մնացել է <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Անջատել օգտվողին"</string>
-    <string name="user_add_user" msgid="4336657383006913022">"Ավելացնել օգտատեր"</string>
-    <string name="user_new_user_name" msgid="2019166282704195789">"Նոր օգտատեր"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Հեռացնե՞լ հյուրին"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Այս աշխատաշրջանի բոլոր ծրագրերն ու տվյալները կջնջվեն:"</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Հեռացնել"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Բարի վերադարձ, հյուր"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Շարունակե՞լ աշխատաշրջանը։"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Վերսկսել"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Այո, շարունակել"</string>
-    <string name="user_add_user_title" msgid="4172327541504825032">"Ավելացնե՞լ նոր օգտատեր"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"Երբ նոր օգտատեր եք ավելացնում, նա պետք է կարգավորի իր պրոֆիլը:\n\nՑանկացած օգտատեր կարող է թարմացնել հավելվածները մյուս բոլոր հաշիվների համար:"</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Սահմանաչափը սպառված է"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="one">Հնարավոր է ավելացնել առավելագույնը <xliff:g id="COUNT">%d</xliff:g> օգտատեր։</item>
@@ -459,8 +450,7 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Ապակողպել՝ օգտագործելու համար"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Չհաջողվեց բեռնել քարտերը։ Նորից փորձեք։"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Կողպէկրանի կարգավորումներ"</string>
-    <!-- no translation found for qr_code_scanner_title (5290201053875420785) -->
-    <skip />
+    <string name="qr_code_scanner_title" msgid="5290201053875420785">"Սկանավորել QR կոդը"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Android for Work-ի պրոֆիլ"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Ավիառեժիմ"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"Ժամը <xliff:g id="WHEN">%1$s</xliff:g>-ի զարթուցիչը չի զանգի"</string>
@@ -546,7 +536,7 @@
     <string name="keyboard_key_enter" msgid="8633362970109751646">"Մուտք"</string>
     <string name="keyboard_key_backspace" msgid="4095278312039628074">"Հետշարժ"</string>
     <string name="keyboard_key_media_play_pause" msgid="8389984232732277478">"Նվագարկում/դադար"</string>
-    <string name="keyboard_key_media_stop" msgid="1509943745250377699">"Դադարեցնել"</string>
+    <string name="keyboard_key_media_stop" msgid="1509943745250377699">"Կանգնեցնել"</string>
     <string name="keyboard_key_media_next" msgid="8502476691227914952">"Հաջորդը"</string>
     <string name="keyboard_key_media_previous" msgid="5637875709190955351">"Նախորդը"</string>
     <string name="keyboard_key_media_rewind" msgid="3450387734224327577">"Հետ անցնել"</string>
@@ -785,9 +775,10 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Սահեցրեք մատը՝ ավելին իմանալու համար"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Բեռնման խորհուրդներ"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Մեդիա"</string>
-    <string name="controls_media_close_session" msgid="1193000643003066508">"Թաքցնե՞լ մեդիայի աշխատաշրջանը"</string>
+    <!-- no translation found for controls_media_close_session (4780485355795635052) -->
+    <skip />
     <string name="controls_media_active_session" msgid="3146882316024153337">"Չհաջողվեց թաքցնել մեդիայի ընթացիկ աշխատաշրջանը։"</string>
-    <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Փակել"</string>
+    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Թաքցնել"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Շարունակել"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Կարգավորումներ"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"Այժմ նվագարկվում է <xliff:g id="SONG_NAME">%1$s</xliff:g> երգը <xliff:g id="ARTIST_NAME">%2$s</xliff:g>-ի կատարմամբ <xliff:g id="APP_LABEL">%3$s</xliff:g> հավելվածից"</string>
@@ -805,7 +796,7 @@
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Ավելի մոտեցեք «<xliff:g id="DEVICENAME">%1$s</xliff:g>» սարքին՝ նվագարկումը սկսելու համար"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Նվագարկվում է «<xliff:g id="DEVICENAME">%1$s</xliff:g>» սարքում"</string>
     <string name="media_transfer_playing_this_device" msgid="1856890686844499172">"Նվագարկվում է այս հեռախոսում"</string>
-    <string name="media_transfer_failed" msgid="2640354446629980227">"Սխալ առաջացավ"</string>
+    <string name="media_transfer_failed" msgid="7955354964610603723">"Սխալ առաջացավ։ Նորից փորձեք։"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Ակտիվ չէ, ստուգեք հավելվածը"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Չի գտնվել"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Կառավարման տարրը հասանելի չէ"</string>
@@ -824,7 +815,7 @@
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Նոր սարքի զուգակցում"</string>
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Այս աշխատաշրջանը հեռարձակելու համար բացեք հավելվածը"</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Անհայտ հավելված"</string>
-    <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Դադարեցնել հեռարձակումը"</string>
+    <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Կանգնեցնել հեռարձակումը"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Կառուցման համարը"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Կառուցման համարը պատճենվեց սեղմատախտակին։"</string>
     <string name="basic_status" msgid="2315371112182658176">"Բաց զրույց"</string>
@@ -899,7 +890,7 @@
     </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Նոր տեղեկություն"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Ակտիվ հավելվածներ"</string>
-    <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Դադարեցնել"</string>
+    <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Կանգնեցնել"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Կանգնեցված է"</string>
     <string name="clipboard_edit_text_copy" msgid="770856373439969178">"Պատճենել"</string>
     <string name="clipboard_overlay_text_copied" msgid="1872624400464891363">"Պատճենվեց"</string>

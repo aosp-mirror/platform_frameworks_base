@@ -16,7 +16,6 @@
 
 package com.android.server.am;
 
-import static com.android.server.am.ActiveServices.SERVICE_START_FOREGROUND_TIMEOUT;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 
@@ -362,7 +361,7 @@ public abstract class BaseAppStateTracker<T extends BaseAppStatePolicy> {
         }
 
         long getServiceStartForegroundTimeout() {
-            return SERVICE_START_FOREGROUND_TIMEOUT;
+            return mActivityManagerInternal.getServiceStartForegroundTimeout();
         }
 
         RoleManager getRoleManager() {

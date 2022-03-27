@@ -27,6 +27,8 @@
         <item name="android:switchStyle">@style/Switch.SettingsLib</item>
         <item name="android:progressBarStyleHorizontal">@style/HorizontalProgressBar.SettingsLib</item>
         <item name="android:spinnerStyle">@style/Spinner.SettingsLib</item>
+        <item name="android:spinnerItemStyle">@style/SpinnerItem.SettingsLib</item>
+        <item name="android:spinnerDropDownItemStyle">@style/SpinnerDropDownItem.SettingsLib</item>
     </style>
 
     <!-- Using in SubSettings page including injected settings page -->

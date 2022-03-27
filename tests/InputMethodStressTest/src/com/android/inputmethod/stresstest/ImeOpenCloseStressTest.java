@@ -18,16 +18,19 @@ package com.android.inputmethod.stresstest;
 
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
+import static android.view.WindowInsetsAnimation.Callback.DISPATCH_MODE_STOP;
 
+import static com.android.inputmethod.stresstest.ImeStressTestUtil.isImeShown;
 import static com.android.inputmethod.stresstest.ImeStressTestUtil.waitOnMainUntil;
-import static com.android.inputmethod.stresstest.ImeStressTestUtil.waitOnMainUntilImeIsHidden;
-import static com.android.inputmethod.stresstest.ImeStressTestUtil.waitOnMainUntilImeIsShown;
 
 import android.app.Activity;
 import android.app.Instrumentation;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.platform.test.annotations.RootPermissionTest;
+import android.view.WindowInsets;
+import android.view.WindowInsetsAnimation;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -39,11 +42,13 @@ import androidx.test.platform.app.InstrumentationRegistry;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.List;
+
 @RootPermissionTest
 @RunWith(AndroidJUnit4.class)
 public final class ImeOpenCloseStressTest {
 
-    private static final int NUM_TEST_ITERATIONS = 100;
+    private static final int NUM_TEST_ITERATIONS = 10;
 
     @Test
     public void test() {
@@ -57,16 +62,46 @@ public final class ImeOpenCloseStressTest {
         EditText editText = activity.getEditText();
         waitOnMainUntil("activity should gain focus", editText::hasWindowFocus);
         for (int i = 0; i < NUM_TEST_ITERATIONS; i++) {
+            String msgPrefix = "Iteration #" + i + " ";
             instrumentation.runOnMainSync(activity::showIme);
-            waitOnMainUntilImeIsShown(editText);
+            waitOnMainUntil(msgPrefix + "IME should be visible",
+                    () -> !activity.isAnimating() && isImeShown(editText));
             instrumentation.runOnMainSync(activity::hideIme);
-            waitOnMainUntilImeIsHidden(editText);
+            waitOnMainUntil(msgPrefix + "IME should be hidden",
+                    () -> !activity.isAnimating() && !isImeShown(editText));
+            // b/b/221483132, wait until IMS and IMMS handles IMM#notifyImeHidden.
+            // There is no good signal, so we just wait a second.
+            SystemClock.sleep(1000);
         }
     }
 
     public static class TestActivity extends Activity {
 
         private EditText mEditText;
+        private boolean mIsAnimating;
+
+        private final WindowInsetsAnimation.Callback mWindowInsetsAnimationCallback =
+                new WindowInsetsAnimation.Callback(DISPATCH_MODE_STOP) {
+                    @Override
+                    public WindowInsetsAnimation.Bounds onStart(WindowInsetsAnimation animation,
+                            WindowInsetsAnimation.Bounds bounds) {
+                        mIsAnimating = true;
+                        return super.onStart(animation, bounds);
+                    }
+
+                    @Override
+                    public void onEnd(WindowInsetsAnimation animation) {
+                        super.onEnd(animation);
+                        mIsAnimating = false;
+                    }
+
+                    @Override
+                    public WindowInsets onProgress(WindowInsets insets,
+                            List<WindowInsetsAnimation> runningAnimations) {
+                        return insets;
+                    }
+                };
+
 
         @Override
         protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -76,6 +111,9 @@ public final class ImeOpenCloseStressTest {
             mEditText = new EditText(this);
             rootView.addView(mEditText, new LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT));
             setContentView(rootView);
+            // Enable WindowInsetsAnimation.
+            getWindow().setDecorFitsSystemWindows(false);
+            mEditText.setWindowInsetsAnimationCallback(mWindowInsetsAnimationCallback);
         }
 
         public EditText getEditText() {
@@ -91,6 +129,10 @@ public final class ImeOpenCloseStressTest {
         public void hideIme() {
             InputMethodManager imm = getSystemService(InputMethodManager.class);
             imm.hideSoftInputFromWindow(mEditText.getWindowToken(), 0);
+        }
+
+        public boolean isAnimating() {
+            return mIsAnimating;
         }
     }
 }
