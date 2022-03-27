@@ -255,6 +255,12 @@ public abstract class EuiccService extends Service {
     public static final String EXTRA_RESOLUTION_CARD_ID =
             "android.service.euicc.extra.RESOLUTION_CARD_ID";
 
+    /**
+     * Intent extra set for resolution requests containing an int indicating the current port index.
+     */
+    public static final String EXTRA_RESOLUTION_PORT_INDEX =
+            "android.service.euicc.extra.RESOLUTION_PORT_INDEX";
+
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = { "RESULT_" }, value = {
@@ -579,9 +585,32 @@ public abstract class EuiccService extends Service {
      * @return the result of the switch operation. May be one of the predefined {@code RESULT_}
      *     constants or any implementation-specific code starting with {@link #RESULT_FIRST_USER}.
      * @see android.telephony.euicc.EuiccManager#switchToSubscription
+     *
+     * @deprecated prefer {@link #onSwitchToSubscriptionWithPort(int, int, String, boolean)}
      */
-    public abstract @Result int onSwitchToSubscription(int slotId, @Nullable String iccid,
-            boolean forceDeactivateSim);
+    @Deprecated public abstract @Result int onSwitchToSubscription(int slotId,
+            @Nullable String iccid, boolean forceDeactivateSim);
+
+    /**
+     * Switch to the given subscription.
+     *
+     * @param slotId ID of the SIM slot to use for the operation.
+     * @param portIndex which port on the eUICC to use
+     * @param iccid the ICCID of the subscription to enable. May be null, in which case the current
+     *     profile should be deactivated and no profile should be activated to replace it - this is
+     *     equivalent to a physical SIM being ejected.
+     * @param forceDeactivateSim If true, and if an active SIM must be deactivated to access the
+     *     eUICC, perform this action automatically. Otherwise, {@link #RESULT_MUST_DEACTIVATE_SIM}
+     *     should be returned to allow the user to consent to this operation first.
+     * @return the result of the switch operation. May be one of the predefined {@code RESULT_}
+     *     constants or any implementation-specific code starting with {@link #RESULT_FIRST_USER}.
+     * @see android.telephony.euicc.EuiccManager#switchToSubscription
+     */
+    public @Result int onSwitchToSubscriptionWithPort(int slotId, int portIndex,
+            @Nullable String iccid, boolean forceDeactivateSim) {
+        // stub implementation, LPA needs to implement this
+        throw new UnsupportedOperationException("LPA must override onSwitchToSubscriptionWithPort");
+    }
 
     /**
      * Update the nickname of the given subscription.
@@ -821,16 +850,15 @@ public abstract class EuiccService extends Service {
                 }
             });
         }
-
         @Override
-        public void switchToSubscription(int slotId, String iccid, boolean forceDeactivateSim,
-                ISwitchToSubscriptionCallback callback) {
+        public void switchToSubscription(int slotId, int portIndex, String iccid,
+                boolean forceDeactivateSim, ISwitchToSubscriptionCallback callback) {
             mExecutor.execute(new Runnable() {
                 @Override
                 public void run() {
                     int result =
-                            EuiccService.this.onSwitchToSubscription(
-                                    slotId, iccid, forceDeactivateSim);
+                            EuiccService.this.onSwitchToSubscriptionWithPort(
+                                    slotId, portIndex, iccid, forceDeactivateSim);
                     try {
                         callback.onComplete(result);
                     } catch (RemoteException e) {

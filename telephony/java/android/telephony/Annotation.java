@@ -127,7 +127,9 @@ public class Annotation {
             ApnSetting.TYPE_EMERGENCY,
             ApnSetting.TYPE_MCX,
             ApnSetting.TYPE_XCAP,
-            // ApnSetting.TYPE_ENTERPRISE
+            ApnSetting.TYPE_BIP,
+            ApnSetting.TYPE_VSIM,
+            ApnSetting.TYPE_ENTERPRISE
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ApnType {
@@ -707,6 +709,9 @@ public class Annotation {
             NetworkCapabilities.NET_CAPABILITY_VSIM,
             NetworkCapabilities.NET_CAPABILITY_BIP,
             NetworkCapabilities.NET_CAPABILITY_HEAD_UNIT,
+            NetworkCapabilities.NET_CAPABILITY_MMTEL,
+            NetworkCapabilities.NET_CAPABILITY_PRIORITIZE_LATENCY,
+            NetworkCapabilities.NET_CAPABILITY_PRIORITIZE_BANDWIDTH
     })
     public @interface NetCapability { }
 
@@ -721,4 +726,16 @@ public class Annotation {
             NetworkAgent.VALIDATION_STATUS_NOT_VALID
     })
     public @interface ValidationStatus {}
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = { "NET_CAPABILITY_ENTERPRISE_SUB_LEVEL" }, value = {
+            NetworkCapabilities.NET_ENTERPRISE_ID_1,
+            NetworkCapabilities.NET_ENTERPRISE_ID_2,
+            NetworkCapabilities.NET_ENTERPRISE_ID_3,
+            NetworkCapabilities.NET_ENTERPRISE_ID_4,
+            NetworkCapabilities.NET_ENTERPRISE_ID_5
+    })
+
+    public @interface EnterpriseId {}
 }

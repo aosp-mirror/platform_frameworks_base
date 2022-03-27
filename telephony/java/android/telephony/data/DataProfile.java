@@ -26,10 +26,10 @@ import android.annotation.SystemApi;
 import android.net.NetworkCapabilities;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.telephony.Annotation.ApnType;
 import android.telephony.Annotation.NetCapability;
 import android.telephony.TelephonyManager;
 import android.telephony.TelephonyManager.NetworkTypeBitMask;
+import android.telephony.data.ApnSetting.ApnType;
 import android.telephony.data.ApnSetting.AuthType;
 import android.text.TextUtils;
 
@@ -245,8 +245,7 @@ public final class DataProfile implements Parcelable {
      * @return The supported APN types bitmask.
      * @deprecated Use {@link #getApnSetting()} and {@link ApnSetting#getApnTypeBitmask()} instead.
      */
-    @Deprecated
-    public @ApnType int getSupportedApnTypesBitmask() {
+    @Deprecated public @ApnType int getSupportedApnTypesBitmask() {
         if (mApnSetting != null) {
             return mApnSetting.getApnTypeBitmask();
         }
@@ -425,6 +424,12 @@ public final class DataProfile implements Parcelable {
                 return ApnSetting.TYPE_MCX;
             case NetworkCapabilities.NET_CAPABILITY_IA:
                 return ApnSetting.TYPE_IA;
+            case NetworkCapabilities.NET_CAPABILITY_BIP:
+                return ApnSetting.TYPE_BIP;
+            case NetworkCapabilities.NET_CAPABILITY_VSIM:
+                return ApnSetting.TYPE_VSIM;
+            case NetworkCapabilities.NET_CAPABILITY_ENTERPRISE:
+                return ApnSetting.TYPE_ENTERPRISE;
             default:
                 return ApnSetting.TYPE_NONE;
         }

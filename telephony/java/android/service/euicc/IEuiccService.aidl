@@ -48,7 +48,7 @@ oneway interface IEuiccService {
             in IGetDefaultDownloadableSubscriptionListCallback callback);
     void getEuiccInfo(int slotId, in IGetEuiccInfoCallback callback);
     void deleteSubscription(int slotId, String iccid, in IDeleteSubscriptionCallback callback);
-    void switchToSubscription(int slotId, String iccid, boolean forceDeactivateSim,
+    void switchToSubscription(int slotId, int portIndex, String iccid, boolean forceDeactivateSim,
             in ISwitchToSubscriptionCallback callback);
     void updateSubscriptionNickname(int slotId, String iccid, String nickname,
             in IUpdateSubscriptionNicknameCallback callback);

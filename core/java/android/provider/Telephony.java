@@ -1425,25 +1425,6 @@ public final class Telephony {
         public static final String KEY_TYPE = "key_type";
 
         /**
-         * MVNO type:
-         * {@code SPN (Service Provider Name), IMSI, GID (Group Identifier Level 1)}.
-         * <P> Type: TEXT </P>
-         */
-        public static final String MVNO_TYPE = "mvno_type";
-
-        /**
-         * MVNO data.
-         * Use the following examples.
-         * <ul>
-         *     <li>SPN: A MOBILE, BEN NL, ...</li>
-         *     <li>IMSI: 302720x94, 2060188, ...</li>
-         *     <li>GID: 4E, 33, ...</li>
-         * </ul>
-         * <P> Type: TEXT </P>
-         */
-        public static final String MVNO_MATCH_DATA = "mvno_match_data";
-
-        /**
          * The carrier public key that is used for the IMSI encryption.
          * <P> Type: TEXT </P>
          */
@@ -1469,6 +1450,11 @@ public final class Telephony {
          */
         public static final String LAST_MODIFIED = "last_modified";
 
+        /**
+         * Carrier ID of the operetor.
+         * <P> Type: TEXT </P>
+         */
+        public static final String CARRIER_ID = "carrier_id";
         /**
          * The {@code content://} style URL for this table.
          */
