@@ -85,8 +85,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"Απενεργοποιήθηκε προσωρινά από την εταιρεία κινητής τηλεφωνίας σας για τον αριθμό SIM <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Δεν είναι δυνατή η σύνδεση στο δίκτυο κινητής τηλεφωνίας"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Δοκιμάστε να αλλάξετε το προτιμώμενο δίκτυο. Πατήστε για αλλαγή."</string>
-    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Οι κλήσεις έκτακτης ανάγκης δεν είναι διαθέσιμες"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Δεν είναι δυνατή η πραγματοποίηση κλήσεων έκτακτης ανάγκης μέσω Wi‑Fi"</string>
+    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"Οι κλήσεις έκτακτης ανάγκης μπορεί να μην είναι διαθέσιμες."</string>
+    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"H εταιρεία <xliff:g id="SPN">%s</xliff:g> δεν υποστηρίζει κλήσεις έκτακτης ανάγκης μέσω Wi-Fi. Πατήστε για λεπτομέρειες."</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Ειδοποιήσεις"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Προώθηση κλήσης"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Λειτουργία επιστροφής κλήσης έκτακτης ανάγκης"</string>
@@ -425,10 +425,10 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"Επιτρέπει στην εφαρμογή να τροποποιεί το αρχείο καταγραφής κλήσεων του tablet σας, συμπεριλαμβανομένων των δεδομένων σχετικά με τις εισερχόμενες και τις εξερχόμενες κλήσεις. Οι κακόβουλες εφαρμογές μπορεί να το χρησιμοποιήσουν για να διαγράψουν ή να τροποποιήσουν το αρχείο καταγραφής κλήσεων."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Επιτρέπει στην εφαρμογή να τροποποιεί το αρχείο καταγραφής κλήσεων της συσκευής σας Android TV, συμπεριλαμβανομένων των δεδομένων σχετικά με τις εισερχόμενες και τις εξερχόμενες κλήσεις. Οι κακόβουλες εφαρμογές μπορεί να εκμεταλλευτούν αυτή την άδεια για να διαγράψουν ή να τροποποιήσουν το αρχείο καταγραφής κλήσεων."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Επιτρέπει στην εφαρμογή να τροποποιεί το αρχείο καταγραφής κλήσεων του τηλεφώνου σας, συμπεριλαμβανομένων των δεδομένων σχετικά με τις εισερχόμενες και τις εξερχόμενες κλήσεις. Οι κακόβουλες εφαρμογές μπορεί να το χρησιμοποιήσουν για να διαγράψουν ή να τροποποιήσουν το αρχείο καταγραφής κλήσεων."</string>
-    <string name="permlab_bodySensors" msgid="3411035315357380862">"πρόσβαση στους αισθητήρες λειτουργιών (π.χ. παρακολούθηση καρδιακού παλμού)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="3208940894182188063">"Πρόσβαση σε δεδομένα από αισθητήρες σώματος όπως καρδιακού ρυθμού, θερμοκρασίας, ποσοστού οξυγόνου στο αίμα κ.λπ."</string>
-    <string name="permlab_bodySensors_background" msgid="4352831883331744370">"πρόσβαση σε αισθητήρες σώματος (π.χ. καρδιακού ρυθμού) στο παρασκήνιο"</string>
-    <string name="permdesc_bodySensors_background" product="default" msgid="8512392249166660872">"Πρόσβαση σε δεδομένα από αισθητήρες σώματος όπως καρδιακού ρυθμού, θερμοκρασίας, ποσοστού οξυγόνου στο αίμα κ.λπ. κατά την εκτέλεση στο παρασκήνιο."</string>
+    <string name="permlab_bodySensors" msgid="662918578601619569">"Πρόσβαση σε δεδομένα αισθητήρων σώματος, όπως καρδιακό ρυθμό, κατά τη χρήση"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Επιτρέπει στην εφαρμογή να αποκτά πρόσβαση σε δεδομένα αισθητήρων σώματος, όπως καρδιακό ρυθμό, θερμοκρασία και ποσοστό οξυγόνου στο αίμα, ενώ η εφαρμογή χρησιμοποιείται."</string>
+    <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Πρόσβαση σε δεδομένα αισθητήρων σώματος, όπως καρδιακό ρυθμό, στο παρασκήνιο"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Επιτρέπει στην εφαρμογή να αποκτά πρόσβαση σε δεδομένα αισθητήρων σώματος, όπως καρδιακό ρυθμό, θερμοκρασία και ποσοστό οξυγόνου στο αίμα, ενώ η εφαρμογή βρίσκεται στο παρασκήνιο."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Ανάγνωση συμβάντων ημερολογίου και λεπτομερειών"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Αυτή η εφαρμογή μπορεί να διαβάσει όλα τα συμβάντα ημερολογίου που είναι αποθηκευμένα στο tablet που χρησιμοποιείτε και να μοιραστεί ή να αποθηκεύσει τα δεδομένα ημερολογίου σας."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Αυτή η εφαρμογή μπορεί να διαβάσει όλα τα συμβάντα ημερολογίου που είναι αποθηκευμένα στη συσκευή Android TV και να μοιραστεί ή να αποθηκεύσει τα δεδομένα ημερολογίου σας."</string>
@@ -689,8 +689,8 @@
     <string name="permdesc_readMediaAudio" msgid="5299772574434619399">"Επιτρέπει στην εφαρμογή την ανάγνωση αρχείων ήχου από τον κοινόχρηστο αποθηκευτικό σας χώρο."</string>
     <string name="permlab_readMediaVideo" msgid="7768003311260655007">"ανάγνωση αρχείων βίντεο από τον κοινόχρηστο αποθηκευτικό χώρο"</string>
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"Επιτρέπει στην εφαρμογή την ανάγνωση αρχείων βίντεο από τον κοινόχρηστο αποθηκευτικό σας χώρο."</string>
-    <string name="permlab_readMediaImage" msgid="1507059005825769856">"ανάγνωση αρχείων εικόνας από τον κοινόχρηστο αποθηκευτικό χώρο"</string>
-    <string name="permdesc_readMediaImage" msgid="8328052622292457588">"Επιτρέπει στην εφαρμογή την ανάγνωση αρχείων εικόνας από τον κοινόχρηστο αποθηκευτικό σας χώρο."</string>
+    <string name="permlab_readMediaImages" msgid="4057590631020986789">"ανάγνωση αρχείων εικόνας από τον κοινόχρηστο αποθηκευτικό χώρο"</string>
+    <string name="permdesc_readMediaImages" msgid="5836219373138469259">"Επιτρέπει στην εφαρμογή την ανάγνωση αρχείων εικόνας από τον κοινόχρηστο αποθηκευτικό σας χώρο."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"τροποποιεί ή διαγράφει το περιεχόμενο του κοινόχρηστου αποθηκευτικού χώρου σας"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Επιτρέπει στην εφαρμογή την εγγραφή του περιεχομένου του κοινόχρηστου αποθηκευτικού χώρου σας."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"πραγματοποιεί/λαμβάνει κλήσεις SIP"</string>
@@ -912,7 +912,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"Πατήστε \"Menu\" για ξεκλείδωμα ή για κλήση έκτακτης ανάγκης."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"Πατήστε \"Μενού\" για ξεκλείδωμα."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"Σχεδιασμός μοτίβου για ξεκλείδωμα"</string>
-    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"Κλήση έκτακτης ανάγκης"</string>
+    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"Κλήση έκτακτης ανάγκης"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"Επιστροφή στην κλήση"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"Σωστό!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Προσπαθήστε ξανά"</string>
@@ -1051,7 +1051,6 @@
     <string name="save_password_never" msgid="6776808375903410659">"Ποτέ"</string>
     <string name="open_permission_deny" msgid="5136793905306987251">"Δεν έχετε άδεια για να ανοίξετε αυτήν τη σελίδα."</string>
     <string name="text_copied" msgid="2531420577879738860">"Το κείμενο αντιγράφηκε στο πρόχειρο."</string>
-    <string name="copied" msgid="4675902854553014676">"Αντιγράφηκε"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"Η εφαρμογή <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> έκανε επικόλληση από την εφαρμογή <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g>"</string>
     <string name="pasted_from_clipboard" msgid="7355790625710831847">"Η εφαρμογή <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> επικόλλησε δεδομένα από το πρόχειρο"</string>
     <string name="pasted_text" msgid="4298871641549173733">"Η εφαρμογή <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> επικόλλησε το κείμενο που αντιγράψατε"</string>
@@ -1452,8 +1451,12 @@
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"Επιτρέπει σε μια εφαρμογή να ζητήσει άδεια για την αγνόηση βελτιστοποιήσεων της μπαταρίας για τη συγκεκριμένη εφαρμογή."</string>
     <string name="permlab_queryAllPackages" msgid="2928450604653281650">"υποβολή ερωτήματος σε όλα τα πακέτα"</string>
     <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"Επιτρέπει σε μια εφαρμογή να βλέπει όλα τα εγκατεστημένα πακέτα."</string>
-    <string name="permlab_accessSupplementalApi" msgid="3544659160536960275">"πρόσβαση στο SupplementalApis"</string>
-    <string name="permdesc_accessSupplementalApi" msgid="8974758769370951074">"Επιτρέπει σε μια εφαρμογή να έχει πρόσβαση στο SupplementalApis."</string>
+    <string name="permlab_accessAdServicesTopics" msgid="6687112022940098945">"πρόσβαση σε API θεμάτων AdServices."</string>
+    <string name="permdesc_accessAdServicesTopics" msgid="6011532458156465929">"Επιτρέπει σε μια εφαρμογή να αποκτήσει πρόσβαση σε API θεμάτων AdServices."</string>
+    <string name="permlab_accessAdServicesAttribution" msgid="3268942271128309354">"πρόσβαση σε API απόδοσης AdServices"</string>
+    <string name="permdesc_accessAdServicesAttribution" msgid="577482544832578288">"Επιτρέπει σε μια εφαρμογή να αποκτήσει πρόσβαση σε API απόδοσης AdServices."</string>
+    <string name="permlab_accessAdServicesCustomAudiences" msgid="7249286630514600684">"πρόσβαση σε API προσαρμοσμένων κοινών AdServices"</string>
+    <string name="permdesc_accessAdServicesCustomAudiences" msgid="645526926477180315">"Επιτρέπει σε μια εφαρμογή να αποκτήσει πρόσβαση σε API προσαρμοσμένων κοινών AdServices."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"Πατήστε δύο φορές για έλεγχο εστίασης"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"Δεν ήταν δυνατή η προσθήκη του γραφικού στοιχείου."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"Μετάβαση"</string>
@@ -1716,6 +1719,7 @@
     <string name="user_switching_message" msgid="1912993630661332336">"Εναλλαγή σε <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"Αποσύνδεση <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="owner_name" msgid="8713560351570795743">"Κάτοχος"</string>
+    <string name="guest_name" msgid="8502103277839834324">"Επισκέπτης"</string>
     <string name="error_message_title" msgid="4082495589294631966">"Σφάλμα"</string>
     <string name="error_message_change_not_allowed" msgid="843159705042381454">"Αυτή η αλλαγή δεν επιτρέπεται από το διαχειριστή σας"</string>
     <string name="app_not_found" msgid="3429506115332341800">"Δεν υπάρχει εφαρμογή για τη διαχείριση αυτής της ενέργειας"</string>
@@ -2027,10 +2031,10 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"ΑΠΕΓΚΑΤΑΣΤΑΣΗ"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"ΑΝΟΙΓΜΑ"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"Εντοπίστηκε επιβλαβής εφαρμογή"</string>
-    <string name="log_access_confirmation_title" msgid="3143035474800851565">"Αίτημα πρόσβ. σε αρχ. καταγρ. συστήματος"</string>
+    <string name="log_access_confirmation_title" msgid="2343578467290592708">"Να επιτρέπεται στην εφαρμογή <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> η πρόσβαση σε όλα τα αρχεία καταγραφής συσκευής;"</string>
     <string name="log_access_confirmation_allow" msgid="143157286283302512">"Μόνο αυτήν τη φορά"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Να μην επιτραπεί"</string>
-    <string name="log_access_confirmation_body" msgid="7599059550906238538">"Η εφαρμογή <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> ζητάει τα αρχεία καταγραφής συστήματος για τον εντοπισμό σφαλμάτων λειτουργικότητας. Αυτά τα αρχεία καταγραφής ενδέχεται να περιέχουν πληροφορίες που έχουν γράψει οι εφαρμογές και οι υπηρεσίες στη συσκευή σας."</string>
+    <string name="log_access_confirmation_body" msgid="4483075525611652922">"Τα αρχεία καταγραφής συσκευής καταγράφουν ό,τι συμβαίνει στη συσκευή σας. Οι εφαρμογές μπορούν να χρησιμοποιούν αυτά τα αρχεία καταγραφής για να εντοπίζουν και να διορθώνουν ζητήματα.\n\nΟρισμένα αρχεία καταγραφής ενδέχεται να περιέχουν ευαίσθητες πληροφορίες, επομένως, επιτρέψτε την πρόσβαση σε όλα τα αρχεία καταγραφής συσκευής μόνο στις εφαρμογές που εμπιστεύεστε. \n\nΑν δεν επιτρέψετε σε αυτήν την εφαρμογή την πρόσβαση σε όλα τα αρχεία καταγραφής συσκευής, εξακολουθεί να έχει πρόσβαση στα δικά της αρχεία καταγραφής, ενώ ο κατασκευαστής της συσκευής σας ενδέχεται να εξακολουθεί να έχει πρόσβαση σε ορισμένα αρχεία καταγραφής ή πληροφορίες στη συσκευή σας. Μάθετε περισσότερα"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Να μην εμφανισ. ξανά"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"Η εφαρμογή <xliff:g id="APP_0">%1$s</xliff:g> θέλει να εμφανίζει τμήματα της εφαρμογής <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Επεξεργασία"</string>
@@ -2265,4 +2269,6 @@
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"Η εφαρμογή <xliff:g id="APP">%1$s</xliff:g> εκτελείται στο παρασκήνιο για πολύ ώρα. Πατήστε για έλεγχο."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Έλεγχος ενεργών εφαρμογών"</string>
     <string name="vdm_camera_access_denied" msgid="6345652513729130490">"Δεν είναι δυνατή η πρόσβαση στην κάμερα από αυτήν τη συσκευή."</string>
+    <!-- no translation found for system_locale_title (3978041860457277638) -->
+    <skip />
 </resources>

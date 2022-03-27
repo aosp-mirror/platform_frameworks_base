@@ -908,6 +908,14 @@ public class DevicePolicyManager {
             "android.intent.extra.REMOTE_BUGREPORT_HASH";
 
     /**
+     * Extra for shared bugreport's nonce in long integer type.
+     *
+     * @hide
+     */
+    public static final String EXTRA_REMOTE_BUGREPORT_NONCE =
+            "android.intent.extra.REMOTE_BUGREPORT_NONCE";
+
+    /**
      * Extra for remote bugreport notification shown type.
      *
      * @hide
@@ -6189,7 +6197,7 @@ public class DevicePolicyManager {
      * organization-owned managed profile.
      *
      * <p>The caller must hold the
-     * {@link android.Manifest.permission#SEND_LOST_MODE_LOCATION_UPDATES} permission.
+     * {@link android.Manifest.permission#TRIGGER_LOST_MODE} permission.
      *
      * <p> Not for use by third-party applications.
      *
@@ -6199,7 +6207,7 @@ public class DevicePolicyManager {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.SEND_LOST_MODE_LOCATION_UPDATES)
+    @RequiresPermission(android.Manifest.permission.TRIGGER_LOST_MODE)
     public void sendLostModeLocationUpdate(@NonNull @CallbackExecutor Executor executor,
             @NonNull Consumer<Boolean> callback) {
         throwIfParentInstance("sendLostModeLocationUpdate");

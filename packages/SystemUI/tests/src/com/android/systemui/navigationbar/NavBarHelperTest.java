@@ -16,8 +16,18 @@
 
 package com.android.systemui.navigationbar;
 
+import static android.provider.Settings.Secure.ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU;
+import static android.provider.Settings.Secure.ACCESSIBILITY_BUTTON_MODE_NAVIGATION_BAR;
+
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_A11Y_BUTTON_CLICKABLE;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE;
+
+import static com.google.common.truth.Truth.assertThat;
+
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -45,10 +55,15 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import dagger.Lazy;
 
+/**
+ * Tests for {@link NavBarHelper}.
+ */
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class NavBarHelperTest extends SysuiTestCase {
@@ -77,7 +92,11 @@ public class NavBarHelperTest extends SysuiTestCase {
     DumpManager mDumpManager;
     @Mock
     NavBarHelper.NavbarTaskbarStateUpdater mNavbarTaskbarStateUpdater;
+    private AccessibilityManager.AccessibilityServicesStateChangeListener
+            mAccessibilityServicesStateChangeListener;
 
+    private static final int ACCESSIBILITY_BUTTON_CLICKABLE_STATE =
+            SYSUI_STATE_A11Y_BUTTON_CLICKABLE | SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE;
     private NavBarHelper mNavBarHelper;
 
     @Before
@@ -87,6 +106,9 @@ public class NavBarHelperTest extends SysuiTestCase {
         when(mAssistManager.getAssistInfoForUser(anyInt())).thenReturn(mAssistantComponent);
         when(mUserTracker.getUserId()).thenReturn(1);
 
+        doAnswer((invocation) -> mAccessibilityServicesStateChangeListener =
+                invocation.getArgument(0)).when(
+                mAccessibilityManager).addAccessibilityServicesStateChangeListener(any());
         mNavBarHelper = new NavBarHelper(mContext, mAccessibilityManager,
                 mAccessibilityButtonModeObserver, mAccessibilityButtonTargetObserver,
                 mSystemActions, mOverviewProxyService, mAssistManagerLazy,
@@ -182,5 +204,43 @@ public class NavBarHelperTest extends SysuiTestCase {
                 .updateAccessibilityServicesState();
         verify(mNavbarTaskbarStateUpdater, times(1))
                 .updateAssistantAvailable(anyBoolean());
+    }
+
+    @Test
+    public void initNavBarHelper_buttonModeNavBar_a11yButtonClickableState() {
+        when(mAccessibilityManager.getAccessibilityShortcutTargets(
+                AccessibilityManager.ACCESSIBILITY_BUTTON)).thenReturn(createFakeShortcutTargets());
+
+        mNavBarHelper.init();
+
+        assertThat(mNavBarHelper.getA11yButtonState()).isEqualTo(
+                ACCESSIBILITY_BUTTON_CLICKABLE_STATE);
+    }
+
+    @Test
+    public void initAccessibilityStateWithFloatingMenuModeAndTargets_disableClickableState() {
+        when(mAccessibilityButtonModeObserver.getCurrentAccessibilityButtonMode()).thenReturn(
+                ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU);
+        mNavBarHelper.init();
+
+        assertThat(mNavBarHelper.getA11yButtonState()).isEqualTo(/* disable_clickable_state */ 0);
+    }
+
+    @Test
+    public void onA11yServicesStateChangedWithMultipleServices_a11yButtonClickableState() {
+        when(mAccessibilityButtonModeObserver.getCurrentAccessibilityButtonMode()).thenReturn(
+                ACCESSIBILITY_BUTTON_MODE_NAVIGATION_BAR);
+
+        when(mAccessibilityManager.getAccessibilityShortcutTargets(
+                AccessibilityManager.ACCESSIBILITY_BUTTON)).thenReturn(createFakeShortcutTargets());
+        mAccessibilityServicesStateChangeListener.onAccessibilityServicesStateChanged(
+                mAccessibilityManager);
+
+        assertThat(mNavBarHelper.getA11yButtonState()).isEqualTo(
+                ACCESSIBILITY_BUTTON_CLICKABLE_STATE);
+    }
+
+    private List<String> createFakeShortcutTargets() {
+        return new ArrayList<>(List.of("a", "b", "c", "d"));
     }
 }

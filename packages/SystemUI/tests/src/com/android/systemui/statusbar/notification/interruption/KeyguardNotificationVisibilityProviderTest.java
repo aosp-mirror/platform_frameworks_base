@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.notification.interruption;
 import static android.app.Notification.VISIBILITY_PUBLIC;
 import static android.app.Notification.VISIBILITY_SECRET;
 import static android.app.NotificationManager.IMPORTANCE_HIGH;
+import static android.app.NotificationManager.IMPORTANCE_LOW;
 import static android.app.NotificationManager.IMPORTANCE_MIN;
 
 import static com.android.systemui.statusbar.notification.collection.EntryUtilKt.modifyEntry;
@@ -209,7 +210,7 @@ public class KeyguardNotificationVisibilityProviderTest  extends SysuiTestCase {
         Consumer<String> listener = mock(Consumer.class);
         mKeyguardNotificationVisibilityProvider.addOnStateChangedListener(listener);
 
-        mFakeSettings.putInt(Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS, 1);
+        mFakeSettings.putBool(Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS, true);
 
         verify(listener).accept(anyString());
     }
@@ -220,7 +221,7 @@ public class KeyguardNotificationVisibilityProviderTest  extends SysuiTestCase {
         Consumer<String> listener = mock(Consumer.class);
         mKeyguardNotificationVisibilityProvider.addOnStateChangedListener(listener);
 
-        mFakeSettings.putInt(Settings.Secure.LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS, 1);
+        mFakeSettings.putBool(Settings.Secure.LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS, true);
 
         verify(listener).accept(anyString());
     }
@@ -231,7 +232,7 @@ public class KeyguardNotificationVisibilityProviderTest  extends SysuiTestCase {
         Consumer<String> listener = mock(Consumer.class);
         mKeyguardNotificationVisibilityProvider.addOnStateChangedListener(listener);
 
-        mFakeSettings.putInt(Settings.Global.ZEN_MODE, 1);
+        mFakeSettings.putBool(Settings.Global.ZEN_MODE, true);
 
         verify(listener).accept(anyString());
     }
@@ -242,7 +243,7 @@ public class KeyguardNotificationVisibilityProviderTest  extends SysuiTestCase {
         Consumer<String> listener = mock(Consumer.class);
         mKeyguardNotificationVisibilityProvider.addOnStateChangedListener(listener);
 
-        mFakeSettings.putInt(Settings.Secure.LOCK_SCREEN_SHOW_SILENT_NOTIFICATIONS, 1);
+        mFakeSettings.putBool(Settings.Secure.LOCK_SCREEN_SHOW_SILENT_NOTIFICATIONS, true);
 
         verify(listener).accept(anyString());
     }
@@ -338,6 +339,25 @@ public class KeyguardNotificationVisibilityProviderTest  extends SysuiTestCase {
     }
 
     @Test
+    public void showSilentOnLockscreenSetting() {
+        // GIVEN an 'unfiltered-keyguard-showing' state
+        setupUnfilteredState(mEntry);
+
+        // WHEN the notification is not high priority and not ambient
+        mEntry.setRanking(new RankingBuilder()
+                .setKey(mEntry.getKey())
+                .setImportance(IMPORTANCE_LOW)
+                .build());
+        when(mHighPriorityProvider.isHighPriority(mEntry)).thenReturn(false);
+
+        // WHEN the show silent notifs on lockscreen setting is true
+        mFakeSettings.putBool(Settings.Secure.LOCK_SCREEN_SHOW_SILENT_NOTIFICATIONS, true);
+
+        // THEN do not filter out the entry
+        assertFalse(mKeyguardNotificationVisibilityProvider.shouldHideNotification(mEntry));
+    }
+
+    @Test
     public void summaryExceedsThresholdToShow() {
         // GIVEN the notification doesn't exceed the threshold to show on the lockscreen
         // but it's part of a group (has a parent)
@@ -360,6 +380,7 @@ public class KeyguardNotificationVisibilityProviderTest  extends SysuiTestCase {
                 .build());
 
         // WHEN its parent does exceed threshold tot show on the lockscreen
+        mFakeSettings.putBool(Settings.Secure.LOCK_SCREEN_SHOW_SILENT_NOTIFICATIONS, false);
         when(mHighPriorityProvider.isHighPriority(parent)).thenReturn(true);
 
         // THEN don't filter out the entry
