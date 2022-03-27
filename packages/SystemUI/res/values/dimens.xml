@@ -1435,4 +1435,15 @@
     <dimen name="dream_overlay_complication_margin">0dp</dimen>
 
     <dimen name="status_view_margin_horizontal">0dp</dimen>
+
+    <!-- Media output broadcast dialog QR code picture size -->
+    <dimen name="media_output_qrcode_size">216dp</dimen>
+    <dimen name="media_output_broadcast_info">21dp</dimen>
+    <dimen name="media_output_broadcast_info_item_width">256dp</dimen>
+    <dimen name="media_output_broadcast_info_item_height">56dp</dimen>
+    <dimen name="media_output_broadcast_info_item_padding_start">43dp</dimen>
+    <dimen name="media_output_broadcast_info_item_padding_end">31dp</dimen>
+    <dimen name="media_output_broadcast_info_title_height">24dp</dimen>
+    <dimen name="media_output_broadcast_info_summary_height">20dp</dimen>
+    <dimen name="media_output_broadcast_info_edit">18dp</dimen>
 </resources>
