@@ -616,7 +616,6 @@
            parent="@android:style/Widget.Material.Button.Borderless.Small">
         <item name="android:background">@drawable/qs_media_light_source</item>
         <item name="android:tint">?android:attr/textColorPrimary</item>
-        <item name="android:stateListAnimator">@anim/media_button_state_list_animator</item>
         <item name="android:paddingTop">12dp</item>
         <item name="android:paddingStart">12dp</item>
         <item name="android:paddingEnd">12dp</item>
@@ -627,6 +626,10 @@
     <style name="MediaPlayer.SessionAction.Primary" parent="MediaPlayer.SessionAction">
         <item name="android:background">@drawable/qs_media_round_button_background</item>
         <item name="android:backgroundTint">@color/media_player_solid_button_bg</item>
+    </style>
+
+    <style name="MediaPlayer.SessionAction.Secondary" parent="MediaPlayer.SessionAction">
+        <item name="android:stateListAnimator">@anim/media_button_state_list_animator</item>
     </style>
 
     <style name="MediaPlayer.OutlineButton">
@@ -697,6 +700,10 @@
 
     <style name="FloatingOverlay" parent="@android:style/Theme.DeviceDefault.DayNight">
         <item name="overlayButtonTextColor">?android:attr/textColorPrimary</item>
+    </style>
+
+    <style name="EditTextActivityButton" parent="@android:style/Widget.DeviceDefault.Button.Colored">
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
     </style>
 
     <!-- Clipboard overlay's edit text activity. -->

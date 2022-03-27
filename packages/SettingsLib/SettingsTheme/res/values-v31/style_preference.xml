@@ -47,6 +47,7 @@
     <style name="SettingsEditTextPreference.SettingsLib"
            parent="@style/Preference.DialogPreference.EditTextPreference.Material">
         <item name="layout">@layout/settingslib_preference</item>
+        <item name="dialogLayout">@layout/settingslib_preference_dialog_edittext</item>
         <item name="iconSpaceReserved">@bool/settingslib_config_icon_space_reserved</item>
     </style>
 

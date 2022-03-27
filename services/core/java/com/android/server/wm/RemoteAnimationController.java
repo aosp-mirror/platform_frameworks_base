@@ -23,6 +23,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Binder;
@@ -49,6 +50,7 @@ import com.android.server.wm.SurfaceAnimator.OnAnimationFinishedCallback;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.function.Consumer;
 
 /**
  * Helper class to run app animations in a remote process.
@@ -72,6 +74,8 @@ class RemoteAnimationController implements DeathRecipient {
     private FinishedCallback mFinishedCallback;
     private boolean mCanceled;
     private boolean mLinkedToDeathOfRunner;
+    @Nullable
+    private Runnable mOnRemoteAnimationReady;
 
     RemoteAnimationController(WindowManagerService service, DisplayContent displayContent,
             RemoteAnimationAdapter remoteAnimationAdapter, Handler handler) {
@@ -99,6 +103,11 @@ class RemoteAnimationController implements DeathRecipient {
                 localBounds, endBounds, startBounds);
         mPendingAnimations.add(adapters);
         return adapters;
+    }
+
+    /** Sets callback to run before starting remote animation. */
+    void setOnRemoteAnimationReady(@Nullable Runnable onRemoteAnimationReady) {
+        mOnRemoteAnimationReady = onRemoteAnimationReady;
     }
 
     /**
@@ -131,6 +140,11 @@ class RemoteAnimationController implements DeathRecipient {
             onAnimationFinished();
             invokeAnimationCancelled("no_app_targets");
             return;
+        }
+
+        if (mOnRemoteAnimationReady != null) {
+            mOnRemoteAnimationReady.run();
+            mOnRemoteAnimationReady = null;
         }
 
         // Create the remote wallpaper animation targets (if any)
@@ -292,6 +306,10 @@ class RemoteAnimationController implements DeathRecipient {
                 mService.closeSurfaceTransaction("RemoteAnimationController#finished");
             }
         }
+        // Reset input for all activities when the remote animation is finished.
+        final Consumer<ActivityRecord> updateActivities =
+                activity -> activity.setDropInputForAnimation(false);
+        mDisplayContent.forAllActivities(updateActivities);
         setRunningRemoteAnimation(false);
         ProtoLog.i(WM_DEBUG_REMOTE_ANIMATIONS, "Finishing remote animation");
     }
@@ -303,6 +321,7 @@ class RemoteAnimationController implements DeathRecipient {
         } catch (RemoteException e) {
             Slog.e(TAG, "Failed to notify cancel", e);
         }
+        mOnRemoteAnimationReady = null;
     }
 
     private void releaseFinishedCallback() {

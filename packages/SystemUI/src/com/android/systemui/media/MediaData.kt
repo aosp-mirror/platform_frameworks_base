@@ -170,9 +170,10 @@ data class MediaButton(
 
 /** State of a media action. */
 data class MediaAction(
-    val icon: Icon?,
+    val icon: Drawable?,
     val action: Runnable?,
-    val contentDescription: CharSequence?
+    val contentDescription: CharSequence?,
+    val background: Drawable?
 )
 
 /** State of the media device. */

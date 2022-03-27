@@ -205,8 +205,15 @@
     <dimen name="bubble_dismiss_target_padding_x">40dp</dimen>
     <dimen name="bubble_dismiss_target_padding_y">20dp</dimen>
     <dimen name="bubble_manage_menu_elevation">4dp</dimen>
-    <!-- Size of user education views on large screens (phone is just match parent). -->
-    <dimen name="bubbles_user_education_width_large_screen">400dp</dimen>
+    <!-- Size of manage user education views on large screens or in landscape. -->
+    <dimen name="bubbles_user_education_width">480dp</dimen>
+    <!-- Margin applied to the end of the user education views (really only matters for phone
+         since the width is match parent). -->
+    <dimen name="bubble_user_education_margin_end">24dp</dimen>
+    <!-- Padding applied to the end of the user education view. -->
+    <dimen name="bubble_user_education_padding_end">58dp</dimen>
+    <!-- Padding between the bubble and the user education text. -->
+    <dimen name="bubble_user_education_stack_padding">16dp</dimen>
 
     <!-- Bottom and end margin for compat buttons. -->
     <dimen name="compat_button_margin">16dp</dimen>

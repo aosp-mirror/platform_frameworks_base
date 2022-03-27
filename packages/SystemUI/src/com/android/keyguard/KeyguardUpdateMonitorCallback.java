@@ -300,6 +300,11 @@ public class KeyguardUpdateMonitorCallback {
     public void onSecondaryLockscreenRequirementChanged(int userId) { }
 
     /**
+     * Called when device policy manager state changes.
+     */
+    public void onDevicePolicyManagerStateChanged() { }
+
+    /**
      * Called when notifying user to unlock in order to use NFC.
      */
     public void onRequireUnlockForNfc() { }

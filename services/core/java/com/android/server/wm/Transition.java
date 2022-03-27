@@ -189,6 +189,9 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
     private boolean mNavBarAttachedToApp = false;
     private int mRecentsDisplayId = INVALID_DISPLAY;
 
+    /** @see #setCanPipOnFinish */
+    private boolean mCanPipOnFinish = true;
+
     Transition(@TransitionType int type, @TransitionFlags int flags,
             TransitionController controller, BLASTSyncEngine syncEngine) {
         mType = type;
@@ -448,6 +451,15 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
     }
 
     /**
+     * Set whether this transition can start a pip-enter transition when finished. This is usually
+     * true, but gets set to false when recents decides that it wants to finish its animation but
+     * not actually finish its animation (yeah...).
+     */
+    void setCanPipOnFinish(boolean canPipOnFinish) {
+        mCanPipOnFinish = canPipOnFinish;
+    }
+
+    /**
      * The transition has finished animating and is ready to finalize WM state. This should not
      * be called directly; use {@link TransitionController#finishTransition} instead.
      */
@@ -475,7 +487,7 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                 // activity in a bad state.
                 if (!visibleAtTransitionEnd && !ar.isVisibleRequested()) {
                     boolean commitVisibility = true;
-                    if (ar.isVisible() && ar.getTask() != null) {
+                    if (mCanPipOnFinish && ar.isVisible() && ar.getTask() != null) {
                         if (ar.pictureInPictureArgs != null
                                 && ar.pictureInPictureArgs.isAutoEnterEnabled()) {
                             if (mTransientLaunches != null) {
@@ -1135,7 +1147,6 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                 continue;
             }
             targets.add(wc);
-            targets.mValidParticipants.add(wc);
         }
         ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "  Initial targets: %s",
                 targets.mArray);
@@ -1153,15 +1164,17 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
     private static void populateParentChanges(Targets targets,
             ArrayMap<WindowContainer, ChangeInfo> changes) {
         final ArrayList<WindowContainer<?>> intermediates = new ArrayList<>();
-        for (int i = targets.mValidParticipants.size() - 1; i >= 0; --i) {
-            WindowContainer<?> wc = targets.mValidParticipants.get(i);
-            // Go up if the participant has been represented by its parent.
-            while (targets.mArray.indexOfValue(wc) < 0 && wc.getParent() != null) {
-                wc = wc.getParent();
-            }
+        // Make a copy to iterate because the original array may be modified.
+        final ArrayList<WindowContainer<?>> targetList = new ArrayList<>(targets.mArray.size());
+        for (int i = targets.mArray.size() - 1; i >= 0; --i) {
+            targetList.add(targets.mArray.valueAt(i));
+        }
+        for (int i = targetList.size() - 1; i >= 0; --i) {
+            final WindowContainer<?> wc = targetList.get(i);
             // Wallpaper must belong to the top (regardless of how nested it is in DisplayAreas).
             final boolean skipIntermediateReports = isWallpaper(wc);
             intermediates.clear();
+            boolean foundParentInTargets = false;
             // Collect the intermediate parents between target and top changed parent.
             for (WindowContainer<?> p = wc.getParent(); p != null; p = p.getParent()) {
                 final ChangeInfo parentChange = changes.get(p);
@@ -1175,19 +1188,19 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                     // The chain above the parent was processed.
                     break;
                 }
-                if (targets.mValidParticipants.contains(p)) {
+                if (targetList.contains(p)) {
                     if (skipIntermediateReports) {
                         changes.get(wc).mParent = p;
                     } else {
                         intermediates.add(p);
                     }
-                    // The parent reaches a participant.
+                    foundParentInTargets = true;
                     break;
                 } else if (reportIfNotTop(p) && !skipIntermediateReports) {
                     intermediates.add(p);
                 }
             }
-            if (intermediates.isEmpty()) continue;
+            if (!foundParentInTargets || intermediates.isEmpty()) continue;
             // Add any always-report parents along the way.
             changes.get(wc).mParent = intermediates.get(0);
             for (int j = 0; j < intermediates.size() - 1; j++) {
@@ -1665,8 +1678,6 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
     private static class Targets {
         /** All targets. Its keys (depth) are sorted in ascending order naturally. */
         final SparseArray<WindowContainer<?>> mArray = new SparseArray<>();
-        /** The initial participants which have changes. */
-        final ArrayList<WindowContainer<?>> mValidParticipants = new ArrayList<>();
         /** The targets which were represented by their parent. */
         private ArrayList<WindowContainer<?>> mRemovedTargets;
         private int mDepthFactor;

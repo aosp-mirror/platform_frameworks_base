@@ -19,6 +19,7 @@ package com.android.server.hdmi;
 import static com.android.server.hdmi.HdmiAnnotations.ServiceThreadOnly;
 
 import android.annotation.Nullable;
+import android.hardware.hdmi.DeviceFeatures;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.HdmiPortInfo;
@@ -512,6 +513,9 @@ public class HdmiCecNetwork {
         }
 
         switch (message.getOpcode()) {
+            case Constants.MESSAGE_FEATURE_ABORT:
+                handleFeatureAbort(message);
+                break;
             case Constants.MESSAGE_REPORT_PHYSICAL_ADDRESS:
                 handleReportPhysicalAddress(message);
                 break;
@@ -541,6 +545,38 @@ public class HdmiCecNetwork {
                 .build();
 
         updateCecDevice(newDeviceInfo);
+    }
+
+    @ServiceThreadOnly
+    private void handleFeatureAbort(HdmiCecMessage message) {
+        assertRunOnServiceThread();
+
+        if (message.getParams().length < 2) {
+            return;
+        }
+
+        int originalOpcode = message.getParams()[0] & 0xFF;
+        int reason = message.getParams()[1] & 0xFF;
+
+         // Check if we received <Feature Abort> in response to <Set Audio Volume Level>.
+         // This provides information on whether the source supports the message.
+        if (originalOpcode == Constants.MESSAGE_SET_AUDIO_VOLUME_LEVEL) {
+
+            @DeviceFeatures.FeatureSupportStatus int featureSupport =
+                    reason == Constants.ABORT_UNRECOGNIZED_OPCODE
+                            ? DeviceFeatures.FEATURE_NOT_SUPPORTED
+                            : DeviceFeatures.FEATURE_SUPPORT_UNKNOWN;
+
+            HdmiDeviceInfo currentDeviceInfo = getCecDeviceInfo(message.getSource());
+            HdmiDeviceInfo newDeviceInfo = currentDeviceInfo.toBuilder()
+                    .updateDeviceFeatures(
+                            currentDeviceInfo.getDeviceFeatures().toBuilder()
+                                    .setSetAudioVolumeLevelSupport(featureSupport)
+                                    .build()
+                    )
+                    .build();
+            updateCecDevice(newDeviceInfo);
+        }
     }
 
     @ServiceThreadOnly
