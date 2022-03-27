@@ -79,4 +79,7 @@
     <color name="settingslib_colorAccentSecondary">@color/settingslib_accent_secondary_device_default</color>
 
     <color name="settingslib_colorSurface">@color/settingslib_surface_light</color>
+
+    <color name="settingslib_spinner_title_color">@android:color/system_neutral1_900</color>
+    <color name="settingslib_spinner_dropdown_color">@android:color/system_neutral2_700</color>
 </resources>

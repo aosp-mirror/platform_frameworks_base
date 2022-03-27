@@ -85,8 +85,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"Привремено исклучена од вашиот оператор за SIM <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Мобилната мрежа е недостапна"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Сменете ја претпочитаната мрежа. Допрете за промена."</string>
-    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Итните повици се недостапни"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Не може да остваруваат итни повици преку Wi-Fi"</string>
+    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"Можно е итните повици да се недостапни"</string>
+    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"<xliff:g id="SPN">%s</xliff:g> не поддржува итни повици преку Wi-Fi. Допрете за детали."</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Предупредувања"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Проследување повик"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Режим на итен повратен повик"</string>
@@ -425,10 +425,10 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"Овозможува апликацијата да го менува дневникот на повици на вашиот таблет, вклучувајќи податоци за дојдовни и појдовни повици. Злонамерните апликации може да го искористат ова да го избришат или да го менуваат вашиот дневник на повици."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Дозволува апликацијата да го менува дневникот на повици на вашиот уред Android TV, вклучувајќи и податоци за дојдовните или појдовните повици. Злонамерните апликации може да го искористат ова за да го избришат или да го менуваат дневникот на повици."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Овозможува апликацијата да го менува дневникот на повици на вашиот телефон, вклучувајќи податоци за дојдовни и појдовни повици. Злонамерните апликации може да го искористат ова да го избришат или да го менуваат вашиот дневник на повици."</string>
-    <string name="permlab_bodySensors" msgid="3411035315357380862">"пристап до телесните сензори (како мониторите за пулс)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="3208940894182188063">"Пристап до податоци од телесни сензори, како пулс, температура, процент на кислород во крвта итн."</string>
-    <string name="permlab_bodySensors_background" msgid="4352831883331744370">"пристап до телесните сензори (како мониторите за пулс) додека се во заднина"</string>
-    <string name="permdesc_bodySensors_background" product="default" msgid="8512392249166660872">"Пристап до податоци од телесни сензори, како пулс, температура, процент на кислород во крвта итн. додека се во заднина."</string>
+    <string name="permlab_bodySensors" msgid="662918578601619569">"Пристап до податоци од телесните сензори, како пулсот, додека се користи"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Дозволува апликацијата да пристапува до податоци од телесните сензори, како што се пулс, температура и процент на кислород во телото, додека апликацијата се користи."</string>
+    <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Пристап до податоци од телесните сензори, како пулсот, додека работи во заднина"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Дозволува апликацијата да пристапува до податоци од телесните сензори, како што се пулс, температура и процент на кислород во телото, додека апликацијата работи во заднина."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Чита настани и детали од календарот"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Апликацијава може да ги чита сите настани во календарот складирани во вашиот таблет и да ги споделува или зачувува податоците од календарот."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Апликацијава може да ги чита сите настани во календарот складирани во вашиот уред Android TV и да ги споделува или зачувува податоците од календарот."</string>
@@ -689,8 +689,8 @@
     <string name="permdesc_readMediaAudio" msgid="5299772574434619399">"Дозволува апликацијата да ги чита аудиодатотеките од споделениот капацитет."</string>
     <string name="permlab_readMediaVideo" msgid="7768003311260655007">"да чита видеодатотеки од споделениот капацитет"</string>
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"Дозволува апликацијата да ги чита видеодатотеките од споделениот капацитет."</string>
-    <string name="permlab_readMediaImage" msgid="1507059005825769856">"да чита датотеки со слики од споделениот капацитет"</string>
-    <string name="permdesc_readMediaImage" msgid="8328052622292457588">"Дозволува апликацијата да ги чита датотеките со слики од споделениот капацитет."</string>
+    <string name="permlab_readMediaImages" msgid="4057590631020986789">"да чита датотеки со слики од споделениот капацитет"</string>
+    <string name="permdesc_readMediaImages" msgid="5836219373138469259">"Дозволува апликацијата да ги чита датотеките со слики од споделениот капацитет."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"ги менува или брише содржините на заедничкото место за складирање"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Дозволува апликацијата да ги пишува содржините на заедничкото место за складирање."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"остварува/прима повици преку SIP"</string>
@@ -912,7 +912,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"Притисни „Мени“ да се отклучи или да направи итен повик."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"Притиснете „Мени“ за да се отклучи."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"Употребете ја шемата за да се отклучи"</string>
-    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"Итен повик"</string>
+    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"Итен случај"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"Врати се на повик"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"Точно!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Обидете се повторно"</string>
@@ -1051,7 +1051,6 @@
     <string name="save_password_never" msgid="6776808375903410659">"Никогаш"</string>
     <string name="open_permission_deny" msgid="5136793905306987251">"Немате дозвола да ја отворите страницава."</string>
     <string name="text_copied" msgid="2531420577879738860">"Текстот е копиран на таблата со исечоци."</string>
-    <string name="copied" msgid="4675902854553014676">"Копирано"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> залепи од <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g>"</string>
     <string name="pasted_from_clipboard" msgid="7355790625710831847">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> залепи од вашата привремена меморија"</string>
     <string name="pasted_text" msgid="4298871641549173733">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> го залепи текстот што го копиравте"</string>
@@ -1452,8 +1451,12 @@
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"Овозможува апликацијата да побара дозвола за игнорирање на оптимизациите на батеријата за таа апликација."</string>
     <string name="permlab_queryAllPackages" msgid="2928450604653281650">"пребарување на сите пакети"</string>
     <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"Дозволува апликацијата да ги гледа сите инсталирани пакети."</string>
-    <string name="permlab_accessSupplementalApi" msgid="3544659160536960275">"пристап до SupplementalApis"</string>
-    <string name="permdesc_accessSupplementalApi" msgid="8974758769370951074">"Дозволува апликацијата да пристапува до SupplementalApis."</string>
+    <string name="permlab_accessAdServicesTopics" msgid="6687112022940098945">"да пристапува до AdServices Topics API"</string>
+    <string name="permdesc_accessAdServicesTopics" msgid="6011532458156465929">"Дозволува апликацијата да пристапува до AdServices Topics API."</string>
+    <string name="permlab_accessAdServicesAttribution" msgid="3268942271128309354">"да пристапува до AdServices Attribution API"</string>
+    <string name="permdesc_accessAdServicesAttribution" msgid="577482544832578288">"Дозволува апликацијата да пристапува до AdServices Attribution API."</string>
+    <string name="permlab_accessAdServicesCustomAudiences" msgid="7249286630514600684">"да пристапува до AdServices Custom Audiences API"</string>
+    <string name="permdesc_accessAdServicesCustomAudiences" msgid="645526926477180315">"Дозволува апликацијата да пристапува до AdServices Custom Audiences API."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"Допрете двапати за контрола на зумот"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"Не може да се додаде виџет."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"Оди"</string>
@@ -1716,6 +1719,7 @@
     <string name="user_switching_message" msgid="1912993630661332336">"Се префрла на <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"<xliff:g id="NAME">%1$s</xliff:g> се одјавува…"</string>
     <string name="owner_name" msgid="8713560351570795743">"Сопственик"</string>
+    <string name="guest_name" msgid="8502103277839834324">"Гостин"</string>
     <string name="error_message_title" msgid="4082495589294631966">"Грешка"</string>
     <string name="error_message_change_not_allowed" msgid="843159705042381454">"Администраторот не ја дозволува промената"</string>
     <string name="app_not_found" msgid="3429506115332341800">"Не се пронајдени апликации да се изврши ова дејство"</string>
@@ -2027,10 +2031,10 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"ДЕИНСТАЛИРАЈ"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"СЕПАК ОТВОРИ"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"Откриена е штетна апликација"</string>
-    <string name="log_access_confirmation_title" msgid="3143035474800851565">"Барање за пристап до системска евиденција"</string>
+    <string name="log_access_confirmation_title" msgid="2343578467290592708">"Да се дозволи <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> да пристапува до целата евиденција на уредот?"</string>
     <string name="log_access_confirmation_allow" msgid="143157286283302512">"Само овој пат"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Не дозволувај"</string>
-    <string name="log_access_confirmation_body" msgid="7599059550906238538">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> бара системска евиденција за отстранување грешка на функција. Оваа евиденција може да содржи податоци запишани од апликациите и услугите на уредот."</string>
+    <string name="log_access_confirmation_body" msgid="4483075525611652922">"Дневниците за евиденција на уредот снимаат што се случува на вашиот уред. Апликациите може да ги користат овие дневници за евиденција за да наоѓаат и поправаат проблеми.\n\nНекои дневници за евиденција може да содржат чувствителни податоци, па затоа дозволете им пристап до сите дневници за евиденција на уредот само на апликациите во кои имате доверба. \n\nАко не ѝ дозволите на апликацијава да пристапува до сите дневници за евиденција на уредот, таа сепак ќе може да пристапува до сопствените дневници за евиденција, а производителот на вашиот уред можеби сепак ќе може да пристапува до некои дневници за евиденција или податоци на уредот. Дознајте повеќе"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Не прикажувај повторно"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> сака да прикажува делови од <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Измени"</string>
@@ -2265,4 +2269,6 @@
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> работи во заднина веќе долго време. Допрете за да прегледате."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Проверете ги активните апликации"</string>
     <string name="vdm_camera_access_denied" msgid="6345652513729130490">"Не може да се пристапи до камерата од уредов"</string>
+    <!-- no translation found for system_locale_title (3978041860457277638) -->
+    <skip />
 </resources>

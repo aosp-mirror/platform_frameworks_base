@@ -22,10 +22,8 @@ import android.view.View.GONE
 import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.statusbar.NotificationLockscreenUserManager
 import com.android.systemui.statusbar.StatusBarState.KEYGUARD
 import com.android.systemui.statusbar.SysuiStatusBarStateController
-import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.ExpandableView
 import com.android.systemui.util.children
@@ -41,8 +39,6 @@ private const val DEBUG = false
 class NotificationStackSizeCalculator
 @Inject
 constructor(
-    private val groupManager: NotificationGroupManagerLegacy,
-    private val lockscreenUserManager: NotificationLockscreenUserManager,
     private val statusBarStateController: SysuiStatusBarStateController,
     @Main private val resources: Resources
 ) {
@@ -191,7 +187,7 @@ constructor(
         if (onLockscreen) {
             when (this) {
                 is ExpandableNotificationRow -> {
-                    if (isSummaryOfSuppressedGroup() || !canShowViewOnLockscreen() || isRemoved) {
+                    if (!canShowViewOnLockscreen() || isRemoved) {
                         return false
                     }
                 }
@@ -208,9 +204,6 @@ constructor(
         visibleIndex: Int
     ) = stack.calculateGapHeight(previous, /* current= */ this, visibleIndex)
 
-    private fun ExpandableNotificationRow.isSummaryOfSuppressedGroup() =
-        groupManager.isSummaryOfSuppressedGroup(entry.sbn)
-
     /**
      * Can a view be shown on the lockscreen when calculating the number of allowed notifications to
      * show?
@@ -220,29 +213,10 @@ constructor(
     private fun ExpandableView.canShowViewOnLockscreen(): Boolean {
         if (hasNoContentHeight()) {
             return false
-        }
-        if (this is ExpandableNotificationRow && !canShowRowOnLockscreen()) {
-            return false
         } else if (visibility == GONE) {
             return false
         }
         return true
-    }
-
-    /**
-     * Can a row be shown on the lockscreen when calculating the number of allowed notifications to
-     * show?
-     *
-     * @return true if it can be shown
-     */
-    private fun ExpandableNotificationRow.canShowRowOnLockscreen(): Boolean {
-        if (isSummaryOfSuppressedGroup()) {
-            return false
-        }
-        if (!lockscreenUserManager.shouldShowOnKeyguard(entry)) {
-            return false
-        }
-        return !isRemoved
     }
 
     private fun log(s: () -> String) {

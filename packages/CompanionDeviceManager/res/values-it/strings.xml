@@ -25,27 +25,27 @@
     <string name="permission_apps" msgid="6142133265286656158">"App"</string>
     <string name="permission_apps_summary" msgid="798718816711515431">"Trasmetti in streaming le app del tuo telefono"</string>
     <string name="title_app_streaming" msgid="2270331024626446950">"Consenti all\'app &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; di accedere a queste informazioni dal tuo telefono"</string>
-    <string name="summary_app_streaming" product="default" msgid="6105916810614498138">"Consenti all\'app &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; di fornire l\'accesso remoto a &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; per accedere alle applicazioni installate su questo telefono quando è connesso."</string>
-    <string name="summary_app_streaming" product="tablet" msgid="2996373715966272792">"Consenti all\'app &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; di fornire l\'accesso remoto a &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; per accedere alle applicazioni installate su questo tablet quando è connesso."</string>
-    <string name="summary_app_streaming" product="device" msgid="7614171699434639963">"Consenti all\'app &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; di fornire l\'accesso remoto a &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; per accedere alle applicazioni installate su questo dispositivo quando è connesso."</string>
     <string name="helper_title_app_streaming" msgid="4151687003439969765">"Servizi cross-device"</string>
-    <string name="helper_summary_app_streaming" msgid="5344341720432827388">"Questo servizio viene utilizzato per trasmettere in streaming le app tra i dispositivi"</string>
+    <!-- no translation found for helper_summary_app_streaming (7380294597268573523) -->
+    <skip />
     <string name="title_automotive_projection" msgid="3296005598978412847"></string>
     <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
     <string name="title_computer" msgid="4693714143506569253">"Consenti a &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; di accedere a questa informazione dal tuo telefono"</string>
     <string name="summary_computer" msgid="3798467601598297062"></string>
     <string name="permission_notification" msgid="693762568127741203">"Notifiche"</string>
-    <string name="permission_notification_summary" msgid="4398672775023193663">"Puoi leggere tutte le notifiche, incluse le informazioni come contatti, messaggi e foto"</string>
+    <!-- no translation found for permission_notification_summary (884075314530071011) -->
+    <skip />
     <string name="permission_storage" msgid="6831099350839392343">"Foto e contenuti multimediali"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
     <string name="helper_title_computer" msgid="4671071173916176037">"Google Play Services"</string>
-    <string name="helper_summary_computer" product="default" msgid="467996390095403648">"Questo servizio condivide foto, contenuti multimediali e notifiche del telefono con altri dispositivi"</string>
-    <string name="helper_summary_computer" product="tablet" msgid="467996390095403648">"Questo servizio condivide foto, contenuti multimediali e notifiche del telefono con altri dispositivi"</string>
+    <!-- no translation found for helper_summary_computer (1676407599909474428) -->
+    <skip />
     <string name="profile_name_generic" msgid="6851028682723034988">"dispositivo"</string>
     <string name="summary_generic" msgid="2346762210105903720"></string>
     <string name="consent_yes" msgid="8344487259618762872">"Consenti"</string>
     <string name="consent_no" msgid="2640796915611404382">"Non consentire"</string>
-    <string name="consent_ok" msgid="3662376764371001106">"OK"</string>
+    <!-- no translation found for consent_back (2560683030046918882) -->
+    <skip />
     <string name="permission_sync_confirmation_title" msgid="667074294393493186">"Trasferisci le autorizzazioni app all\'orologio"</string>
     <string name="permission_sync_summary" msgid="8873391306499120778">"Per facilitare la configurazione dell\'orologio, le app installate su quest\'ultimo durante la configurazione useranno le stesse autorizzazioni delle app sul telefono.\n\n Queste autorizzazioni potrebbero includere l\'accesso al microfono e alla posizione dell\'orologio."</string>
 </resources>

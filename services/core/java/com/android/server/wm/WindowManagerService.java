@@ -709,6 +709,9 @@ public class WindowManagerService extends IWindowManager.Stub
     // State while inside of layoutAndPlaceSurfacesLocked().
     boolean mFocusMayChange;
 
+    // Number of windows whose insets state have been changed.
+    int mWindowsInsetsChanged = 0;
+
     // This is held as long as we have the screen frozen, to give us time to
     // perform a rotation animation when turning off shows the lock screen which
     // changes the orientation.
@@ -2627,6 +2630,19 @@ public class WindowManagerService extends IWindowManager.Stub
         return result;
     }
 
+    int updateViewVisibility(Session session, IWindow client, LayoutParams attrs,
+            int viewVisibility, MergedConfiguration outMergedConfiguration,
+            SurfaceControl outSurfaceControl, InsetsState outInsetsState,
+            InsetsSourceControl[] outActiveControls) {
+        // TODO(b/161810301): Finish the implementation.
+        return 0;
+    }
+
+    void updateWindowLayout(Session session, IWindow client, LayoutParams attrs, int flags,
+            ClientWindowFrames clientWindowFrames, int requestedWidth, int requestedHeight) {
+        // TODO(b/161810301): Finish the implementation.
+    }
+
     public boolean outOfMemoryWindow(Session session, IWindow client) {
         final long origId = Binder.clearCallingIdentity();
 
@@ -3784,7 +3800,8 @@ public class WindowManagerService extends IWindowManager.Stub
             final int uid = Binder.getCallingUid();
             final boolean hasPermission =
                     mAtmService.instrumentationSourceHasPermission(pid, MODIFY_TOUCH_MODE_STATE)
-                            || checkCallingPermission(MODIFY_TOUCH_MODE_STATE, "setInTouchMode()");
+                            || checkCallingPermission(MODIFY_TOUCH_MODE_STATE, "setInTouchMode()",
+                                                      /* printlog= */ false);
             final long token = Binder.clearCallingIdentity();
             try {
                 if (mInputManager.setInTouchMode(mode, pid, uid, hasPermission)) {
@@ -5204,6 +5221,7 @@ public class WindowManagerService extends IWindowManager.Stub
         public static final int LAYOUT_AND_ASSIGN_WINDOW_LAYERS_IF_NEEDED = 63;
         public static final int WINDOW_STATE_BLAST_SYNC_TIMEOUT = 64;
         public static final int REPARENT_TASK_TO_DEFAULT_DISPLAY = 65;
+        public static final int INSETS_CHANGED = 66;
 
         /**
          * Used to denote that an integer field in a message will not be used.
@@ -5527,6 +5545,17 @@ public class WindowManagerService extends IWindowManager.Stub
                         task.reparent(mRoot.getDefaultTaskDisplayArea(), true /* onTop */);
                         // Resume focusable root task after reparenting to another display area.
                         task.resumeNextFocusAfterReparent();
+                    }
+                    break;
+                }
+                case INSETS_CHANGED: {
+                    synchronized (mGlobalLock) {
+                        if (mWindowsInsetsChanged > 0) {
+                            mWindowsInsetsChanged = 0;
+                            // We need to update resizing windows and dispatch the new insets state
+                            // to them.
+                            mRoot.performSurfacePlacement();
+                        }
                     }
                     break;
                 }
@@ -9031,13 +9060,18 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         TaskSnapshot taskSnapshot;
-        synchronized (mGlobalLock) {
-            Task task = mRoot.anyTaskForId(taskId, MATCH_ATTACHED_TASK_OR_RECENT_TASKS);
-            if (task == null) {
-                throw new IllegalArgumentException(
-                        "Failed to find matching task for taskId=" + taskId);
+        final long token = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                Task task = mRoot.anyTaskForId(taskId, MATCH_ATTACHED_TASK_OR_RECENT_TASKS);
+                if (task == null) {
+                    throw new IllegalArgumentException(
+                            "Failed to find matching task for taskId=" + taskId);
+                }
+                taskSnapshot = mTaskSnapshotController.captureTaskSnapshot(task, false);
             }
-            taskSnapshot = mTaskSnapshotController.captureTaskSnapshot(task, false);
+        } finally {
+            Binder.restoreCallingIdentity(token);
         }
 
         if (taskSnapshot == null || taskSnapshot.getHardwareBuffer() == null) {

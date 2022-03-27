@@ -229,6 +229,11 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
     private boolean mShowingKeyguardHeadsUp;
     private StatusBarSystemEventAnimator mSystemEventAnimator;
 
+    /**
+     * The alpha value to be set on the View. If -1, this value is to be ignored.
+     */
+    private float mExplicitAlpha = -1f;
+
     @Inject
     public KeyguardStatusBarViewController(
             KeyguardStatusBarView view,
@@ -425,9 +430,15 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
 
         float alphaQsExpansion = 1 - Math.min(
                 1, mNotificationPanelViewStateProvider.getLockscreenShadeDragProgress() * 2);
-        float newAlpha = Math.min(getKeyguardContentsAlpha(), alphaQsExpansion)
-                * mKeyguardStatusBarAnimateAlpha
-                * (1.0f - mKeyguardHeadsUpShowingAmount);
+
+        float newAlpha;
+        if (mExplicitAlpha != -1) {
+            newAlpha = mExplicitAlpha;
+        } else {
+            newAlpha = Math.min(getKeyguardContentsAlpha(), alphaQsExpansion)
+                    * mKeyguardStatusBarAnimateAlpha
+                    * (1.0f - mKeyguardHeadsUpShowingAmount);
+        }
 
         boolean hideForBypass =
                 mFirstBypassAttempt && mKeyguardUpdateMonitor.shouldListenForFace()
@@ -510,7 +521,17 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println("KeyguardStatusBarView:");
         pw.println("  mBatteryListening: " + mBatteryListening);
+        pw.println("  mExplicitAlpha: " + mExplicitAlpha);
         mView.dump(fd, pw, args);
     }
 
+    /**
+     * Sets the alpha to be set on the view.
+     *
+     * @param alpha a value between 0 and 1. -1 if the value is to be reset/ignored.
+     */
+    public void setAlpha(float alpha) {
+        mExplicitAlpha = alpha;
+        updateViewState();
+    }
 }
