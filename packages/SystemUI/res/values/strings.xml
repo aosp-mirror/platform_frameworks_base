@@ -2212,6 +2212,21 @@
     <!-- App name when can't get app name [CHAR LIMIT=60] -->
     <string name="media_output_dialog_unknown_launch_app_name">Unknown app</string>
 
+    <!-- Media Output Broadcast Dialog -->
+    <!-- Title for Broadcast First Notify Dialog [CHAR LIMIT=60] -->
+    <string name="media_output_first_broadcast_title">How broadcasting works</string>
+    <!-- Title for Broadcast Notify Dialog [CHAR LIMIT=60] -->
+    <string name="media_output_broadcast">Broadcast</string>
+    <!-- Message for notifying the user about the Broadcast at first launch [CHAR LIMIT=NONE] -->
+    <string name="media_output_first_notify_broadcast_message">People near you with compatible Bluetooth devices can listen to the media you\'re broadcasting</string>
+    <!-- Message for Broadcasting information and QR code [CHAR LIMIT=NONE] -->
+    <string name="media_output_broadcasting_message">To listen to your broadcast, people nearby with compatible Bluetooth devices can scan your QR code or use your broadcast name and password</string>
+    <!-- Title for Broadcast Name [CHAR LIMIT=60] -->
+    <string name="media_output_broadcast_name">Broadcast Name</string>
+    <!-- Title for Broadcast Code(Password) [CHAR LIMIT=60] -->
+    <string name="media_output_broadcast_code">Password</string>
+    <!-- Button for change broadcast name and broadcast code [CHAR LIMIT=60] -->
+    <string name="media_output_broadcast_dialog_save">Save</string>
 
     <!-- Label for clip data when copying the build number off QS [CHAR LIMIT=NONE]-->
     <string name="build_number_clip_data_label">Build number</string>
