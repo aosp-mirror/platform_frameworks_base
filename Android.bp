@@ -340,6 +340,7 @@ java_defaults {
         "soundtrigger_middleware-aidl-java",
         "modules-utils-preconditions",
         "modules-utils-os",
+        "modules-utils-uieventlogger-interface",
         "framework-permission-aidl-java",
     ],
 }

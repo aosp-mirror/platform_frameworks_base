@@ -804,7 +804,7 @@
     <string name="phoneTypeFaxHome" msgid="6678559953115904345">"FAX（自宅）"</string>
     <string name="phoneTypePager" msgid="576402072263522767">"ポケベル"</string>
     <string name="phoneTypeOther" msgid="6918196243648754715">"その他"</string>
-    <string name="phoneTypeCallback" msgid="3455781500844157767">"コールバック"</string>
+    <string name="phoneTypeCallback" msgid="3455781500844157767">"かけ直す"</string>
     <string name="phoneTypeCar" msgid="4604775148963129195">"クルマ"</string>
     <string name="phoneTypeCompanyMain" msgid="4482773154536455441">"会社代表番号"</string>
     <string name="phoneTypeIsdn" msgid="2496238954533998512">"ISDN"</string>
