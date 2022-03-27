@@ -85,8 +85,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"<xliff:g id="SIMNUMBER">%d</xliff:g> numaralı SIM kart için operatörünüz tarafından geçici olarak kapatıldı"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Mobil ağa erişilemiyor"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Tercih edilen ağı değiştirmeyi deneyin. Değiştirmek için dokunun."</string>
-    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Acil durum çağrısı kullanılamaz"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Kablosuz ağ üzerinden acil durum çağrıları yapılamaz"</string>
+    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"Acil durum aramaları kullanılamayabilir"</string>
+    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"<xliff:g id="SPN">%s</xliff:g>, kablosuz bağlantı üzerinden acil durum aramalarını desteklemiyor. Ayrıntılar için dokunun."</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Uyarılar"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Çağrı yönlendirme"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Acil geri arama modu"</string>
@@ -425,10 +425,10 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"Uygulamaya tabletinizin çağrı günlüğünde (gelen ve giden çağrılarla ilgili veriler dahil olmak üzere) değişiklik yapma izni verir. Kötü amaçlı uygulamalar bu izni kullanarak çağrı günlüğünüzü silebilir veya değiştirebilir."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Uygulamaya, Android TV cihazınızın arama günlüğünde (gelen ve giden aramalarla ilgili veriler dahil olmak üzere) değişiklik yapma izni verir. Kötü amaçlı uygulamalar bu izni kullanarak arama günlüğünüzü silebilir veya değiştirebilir."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Uygulamaya telefonunuzun arama günlüğünde (gelen ve giden aramalarla ilgili veriler dahil olmak üzere) değişiklik yapma izni verir. Kötü amaçlı uygulamalar bu izni kullanarak arama günlüğünüzü silebilir veya değiştirebilir."</string>
-    <string name="permlab_bodySensors" msgid="3411035315357380862">"vücut sensörlerine erişme (nabız takip cihazları gibi)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="3208940894182188063">"Nabız, vücut ısısı, kandaki oksijen yüzdesi gibi vücut sensörlerinden gelen verilere erişim."</string>
-    <string name="permlab_bodySensors_background" msgid="4352831883331744370">"arka plandayken vücut sensörlerine erişim (nabız takip cihazları gibi)"</string>
-    <string name="permdesc_bodySensors_background" product="default" msgid="8512392249166660872">"Arka plandayken nabız, vücut ısısı, kandaki oksijen yüzdesi gibi vücut sensörlerinden gelen verilere erişim."</string>
+    <string name="permlab_bodySensors" msgid="662918578601619569">"Kullanımdayken nabız gibi vücut sensörü verilerine erişme"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Kullanımdaki uygulamanın nabız, vücut ısısı, kandaki oksijen yüzdesi gibi vücut sensörü verilerine erişmesine izin verir."</string>
+    <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Arka plandayken nabız gibi vücut sensörü verilerine erişme"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Arka plandaki uygulamanın nabız, vücut ısısı, kandaki oksijen yüzdesi gibi vücut sensörü verilerine erişmesine izin verir."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Takvim etkinlikleri ve ayrıntılarını okuma"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Bu uygulama, tabletinizde kayıtlı tüm takvim etkinliklerini okuyabilir ve takvim verilerinizi paylaşabilir ya da kaydedebilir."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Bu uygulama, Android TV cihazınızda kayıtlı tüm takvim etkinliklerini okuyabilir ve takvim verilerinizi paylaşabilir ya da kaydedebilir."</string>
@@ -689,8 +689,8 @@
     <string name="permdesc_readMediaAudio" msgid="5299772574434619399">"Uygulamaya, paylaşılan depolama alanınızdaki ses dosyalarını okuma izni verir."</string>
     <string name="permlab_readMediaVideo" msgid="7768003311260655007">"paylaşılan depolama alanınızdaki video dosyalarını okuma"</string>
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"Uygulamaya, paylaşılan depolama alanınızdaki video dosyalarını okuma izni verir."</string>
-    <string name="permlab_readMediaImage" msgid="1507059005825769856">"paylaşılan depolama alanınızdaki resim dosyalarını okuma"</string>
-    <string name="permdesc_readMediaImage" msgid="8328052622292457588">"Uygulamaya, paylaşılan depolama alanınızdaki resim dosyalarını okuma izni verir."</string>
+    <string name="permlab_readMediaImages" msgid="4057590631020986789">"paylaşılan depolama alanınızdaki resim dosyalarını okuma"</string>
+    <string name="permdesc_readMediaImages" msgid="5836219373138469259">"Uygulamaya, paylaşılan depolama alanınızdaki resim dosyalarını okuma izni verir."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"paylaşılan depolama alanımın içeriğini değiştir veya sil"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Uygulamanın paylaşılan depolama alanınıza içerik yazmasına izin verir."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"SIP aramaları yapma/alma"</string>
@@ -912,7 +912,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"Kilidi açmak veya acil çağrı yapmak için Menü\'ye basın."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"Kilidi açmak için Menü\'ye basın."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"Kilit açmak için deseni çizin"</string>
-    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"Acil durum araması"</string>
+    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"Acil durum çağrısı"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"Çağrıya dön"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"Doğru!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Tekrar deneyin"</string>
@@ -1051,7 +1051,6 @@
     <string name="save_password_never" msgid="6776808375903410659">"Hiçbir zaman"</string>
     <string name="open_permission_deny" msgid="5136793905306987251">"Bu sayfayı açma izniniz yok."</string>
     <string name="text_copied" msgid="2531420577879738860">"Metin panoya kopyalandı."</string>
-    <string name="copied" msgid="4675902854553014676">"Kopyalandı"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> uygulaması <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g> kaynağından yapıştırdı"</string>
     <string name="pasted_from_clipboard" msgid="7355790625710831847">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>, panonuzdakini yapıştırdı"</string>
     <string name="pasted_text" msgid="4298871641549173733">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>, kopyaladığınız metni yapıştırdı"</string>
@@ -1452,8 +1451,12 @@
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"Bir uygulamanın, kendisi için pil optimizasyonlarını göz ardı etme izni istemesine olanak sağlar."</string>
     <string name="permlab_queryAllPackages" msgid="2928450604653281650">"tüm paketleri sorgulama"</string>
     <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"Uygulamaya tüm yüklü paketleri görme izni verir."</string>
-    <string name="permlab_accessSupplementalApi" msgid="3544659160536960275">"SupplementalApis\'e erişim"</string>
-    <string name="permdesc_accessSupplementalApi" msgid="8974758769370951074">"Bir uygulamanın SupplementalApis\'e erişimine izin verir."</string>
+    <string name="permlab_accessAdServicesTopics" msgid="6687112022940098945">"AdServices Topics API\'sine eriş"</string>
+    <string name="permdesc_accessAdServicesTopics" msgid="6011532458156465929">"Uygulamanın AdServices Topics API\'sine erişmesine izin verir."</string>
+    <string name="permlab_accessAdServicesAttribution" msgid="3268942271128309354">"AdServices Attribution API\'lerine eriş"</string>
+    <string name="permdesc_accessAdServicesAttribution" msgid="577482544832578288">"Uygulamanın AdServices Attribution API\'lerine erişmesine izin verir."</string>
+    <string name="permlab_accessAdServicesCustomAudiences" msgid="7249286630514600684">"AdServices Custom Audiences API\'sine eriş"</string>
+    <string name="permdesc_accessAdServicesCustomAudiences" msgid="645526926477180315">"Uygulamanın AdServices Custom Audiences API\'sine erişmesine izin verir."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"Zum denetimi için iki kez dokun"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"Widget eklenemedi."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"Git"</string>
@@ -1716,6 +1719,7 @@
     <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g> adlı kullanıcıya geçiliyor…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"<xliff:g id="NAME">%1$s</xliff:g> hesabından çıkış yapılıyor…"</string>
     <string name="owner_name" msgid="8713560351570795743">"Sahip"</string>
+    <string name="guest_name" msgid="8502103277839834324">"Misafir"</string>
     <string name="error_message_title" msgid="4082495589294631966">"Hata"</string>
     <string name="error_message_change_not_allowed" msgid="843159705042381454">"Yöneticiniz bu değişikliğe izin vermiyor"</string>
     <string name="app_not_found" msgid="3429506115332341800">"Bu eylemi gerçekleştirecek bir uygulama bulunamadı"</string>
@@ -2027,10 +2031,10 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"YÜKLEMEYİ KALDIR"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"YİNE DE AÇ"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"Zararlı uygulama tespit edildi"</string>
-    <string name="log_access_confirmation_title" msgid="3143035474800851565">"Sistem günlük kayıtlarına erişim isteği"</string>
+    <string name="log_access_confirmation_title" msgid="2343578467290592708">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> uygulamasının tüm cihaz günlüklerine erişmesine izin verilsin mi?"</string>
     <string name="log_access_confirmation_allow" msgid="143157286283302512">"Yalnız bu sefer"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"İzin verme"</string>
-    <string name="log_access_confirmation_body" msgid="7599059550906238538">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> uygulaması işlevsel hata ayıklama için sistem günlük kayıtlarını istiyor. Bu günlükler, cihazınızdaki uygulama ve hizmetler tarafından yazılan bilgileri içerebilir."</string>
+    <string name="log_access_confirmation_body" msgid="4483075525611652922">"Cihaz günlükleri, cihazınızda olanları kaydeder. Uygulamalar, sorunları bulup düzeltmek için bu günlükleri kullanabilir.\n\nBazı günlükler hassas bilgiler içerebileceği için yalnızca güvendiğiniz uygulamaların tüm cihaz günlüklerine erişmesine izin verin. \n\nBu uygulamanın tüm cihaz günlüklerine erişmesine izin vermeseniz de kendi günlüklerine erişmeye devam edebilir. Ayrıca, cihaz üreticiniz de cihazınızdaki bazı günlüklere veya bilgilere erişmeye devam edebilir. Daha fazla bilgi"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Bir daha gösterme"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> uygulaması, <xliff:g id="APP_2">%2$s</xliff:g> dilimlerini göstermek istiyor"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Düzenle"</string>
@@ -2265,4 +2269,6 @@
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> uzun süredir arka planda çalışıyor. İncelemek için dokunun."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Etkin uygulamaları kontrol edin"</string>
     <string name="vdm_camera_access_denied" msgid="6345652513729130490">"Bu cihazdan kameraya erişilemiyor"</string>
+    <!-- no translation found for system_locale_title (3978041860457277638) -->
+    <skip />
 </resources>

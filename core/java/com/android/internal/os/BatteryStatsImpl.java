@@ -69,6 +69,7 @@ import android.os.connectivity.GpsBatteryStats;
 import android.os.connectivity.WifiActivityEnergyInfo;
 import android.os.connectivity.WifiBatteryStats;
 import android.provider.Settings;
+import android.telephony.AccessNetworkConstants;
 import android.telephony.Annotation.NetworkType;
 import android.telephony.CellSignalStrength;
 import android.telephony.CellSignalStrengthLte;
@@ -6826,6 +6827,27 @@ public class BatteryStatsImpl extends BatteryStats {
                 return RADIO_ACCESS_TECHNOLOGY_OTHER;
             default:
                 Slog.w(TAG, "Unhandled NetworkType (" + dataType + "), mapping to OTHER");
+                return RADIO_ACCESS_TECHNOLOGY_OTHER;
+        }
+    }
+
+    @RadioAccessTechnology
+    private static int mapRadioAccessNetworkTypeToRadioAccessTechnology(
+            @AccessNetworkConstants.RadioAccessNetworkType int dataType) {
+        switch (dataType) {
+            case AccessNetworkConstants.AccessNetworkType.NGRAN:
+                return RADIO_ACCESS_TECHNOLOGY_NR;
+            case AccessNetworkConstants.AccessNetworkType.EUTRAN:
+                return RADIO_ACCESS_TECHNOLOGY_LTE;
+            case AccessNetworkConstants.AccessNetworkType.UNKNOWN: //fallthrough
+            case AccessNetworkConstants.AccessNetworkType.GERAN: //fallthrough
+            case AccessNetworkConstants.AccessNetworkType.UTRAN: //fallthrough
+            case AccessNetworkConstants.AccessNetworkType.CDMA2000: //fallthrough
+            case AccessNetworkConstants.AccessNetworkType.IWLAN:
+                return RADIO_ACCESS_TECHNOLOGY_OTHER;
+            default:
+                Slog.w(TAG,
+                        "Unhandled RadioAccessNetworkType (" + dataType + "), mapping to OTHER");
                 return RADIO_ACCESS_TECHNOLOGY_OTHER;
         }
     }
@@ -13721,66 +13743,7 @@ public class BatteryStatsImpl extends BatteryStats {
                     mTmpRailStats.resetCellularTotalEnergyUsed();
                 }
 
-                // Proportionally smear Rx and Tx times across each RAt
-                final int levelCount = CellSignalStrength.getNumSignalStrengthLevels();
-                long[] perSignalStrengthActiveTimeMs = new long[levelCount];
-                long totalActiveTimeMs = 0;
-
-                for (int rat = 0; rat < RADIO_ACCESS_TECHNOLOGY_COUNT; rat++) {
-                    final RadioAccessTechnologyBatteryStats ratStats = mPerRatBatteryStats[rat];
-                    if (ratStats == null) continue;
-
-                    final int freqCount = ratStats.getFrequencyRangeCount();
-                    for (int freq = 0; freq < freqCount; freq++) {
-                        for (int level = 0; level < levelCount; level++) {
-                            final long durationMs = ratStats.getTimeSinceMark(freq, level,
-                                    elapsedRealtimeMs);
-                            perSignalStrengthActiveTimeMs[level] += durationMs;
-                            totalActiveTimeMs += durationMs;
-                        }
-                    }
-                }
-
-                if (totalActiveTimeMs != 0) {
-                    // Smear the provided Tx/Rx durations across each RAT, frequency, and signal
-                    // strength.
-                    for (int rat = 0; rat < RADIO_ACCESS_TECHNOLOGY_COUNT; rat++) {
-                        final RadioAccessTechnologyBatteryStats ratStats = mPerRatBatteryStats[rat];
-                        if (ratStats == null) continue;
-
-                        final int freqCount = ratStats.getFrequencyRangeCount();
-                        for (int freq = 0; freq < freqCount; freq++) {
-                            long frequencyDurationMs = 0;
-                            for (int level = 0; level < levelCount; level++) {
-                                final long durationMs = ratStats.getTimeSinceMark(freq, level,
-                                        elapsedRealtimeMs);
-                                final long totalLvlDurationMs =
-                                        perSignalStrengthActiveTimeMs[level];
-                                if (totalLvlDurationMs == 0) continue;
-                                final long totalTxLvlDurations =
-                                        deltaInfo.getTransmitDurationMillisAtPowerLevel(level);
-                                // Smear HAL provided Tx power level duration based on active modem
-                                // duration in a given state. (Add totalLvlDurationMs / 2 before
-                                // the integer division with totalLvlDurationMs for rounding.)
-                                final long proportionalTxDurationMs =
-                                        (durationMs * totalTxLvlDurations
-                                                + (totalLvlDurationMs / 2)) / totalLvlDurationMs;
-                                ratStats.incrementTxDuration(freq, level, proportionalTxDurationMs);
-                                frequencyDurationMs += durationMs;
-                            }
-                            final long totalRxDuration = deltaInfo.getReceiveTimeMillis();
-                            // Smear HAL provided Rx power duration based on active modem
-                            // duration in a given state.  (Add totalActiveTimeMs / 2 before the
-                            // integer division with totalActiveTimeMs for rounding.)
-                            final long proportionalRxDurationMs =
-                                    (frequencyDurationMs * totalRxDuration + (totalActiveTimeMs
-                                            / 2)) / totalActiveTimeMs;
-                            ratStats.incrementRxDuration(freq, proportionalRxDurationMs);
-                        }
-
-                        ratStats.setMark(elapsedRealtimeMs);
-                    }
-                }
+                incrementPerRatDataLocked(deltaInfo, elapsedRealtimeMs);
             }
             long totalAppRadioTimeUs = mMobileRadioActivePerAppTimer.getTimeSinceMarkLocked(
                     elapsedRealtimeMs * 1000);
@@ -13928,6 +13891,100 @@ public class BatteryStatsImpl extends BatteryStats {
 
                 delta = null;
             }
+        }
+    }
+
+    @GuardedBy("this")
+    private void incrementPerRatDataLocked(ModemActivityInfo deltaInfo, long elapsedRealtimeMs) {
+        final int infoSize = deltaInfo.getSpecificInfoLength();
+        if (infoSize == 1 && deltaInfo.getSpecificInfoRat(0)
+                == AccessNetworkConstants.AccessNetworkType.UNKNOWN
+                && deltaInfo.getSpecificInfoFrequencyRange(0)
+                == ServiceState.FREQUENCY_RANGE_UNKNOWN) {
+            // Specific info data unavailable. Proportionally smear Rx and Tx times across each RAT.
+            final int levelCount = CellSignalStrength.getNumSignalStrengthLevels();
+            long[] perSignalStrengthActiveTimeMs = new long[levelCount];
+            long totalActiveTimeMs = 0;
+
+            for (int rat = 0; rat < RADIO_ACCESS_TECHNOLOGY_COUNT; rat++) {
+                final RadioAccessTechnologyBatteryStats ratStats = mPerRatBatteryStats[rat];
+                if (ratStats == null) continue;
+
+                final int freqCount = ratStats.getFrequencyRangeCount();
+                for (int freq = 0; freq < freqCount; freq++) {
+                    for (int level = 0; level < levelCount; level++) {
+                        final long durationMs = ratStats.getTimeSinceMark(freq, level,
+                                elapsedRealtimeMs);
+                        perSignalStrengthActiveTimeMs[level] += durationMs;
+                        totalActiveTimeMs += durationMs;
+                    }
+                }
+            }
+            if (totalActiveTimeMs != 0) {
+                // Smear the provided Tx/Rx durations across each RAT, frequency, and signal
+                // strength.
+                for (int rat = 0; rat < RADIO_ACCESS_TECHNOLOGY_COUNT; rat++) {
+                    final RadioAccessTechnologyBatteryStats ratStats = mPerRatBatteryStats[rat];
+                    if (ratStats == null) continue;
+
+                    final int freqCount = ratStats.getFrequencyRangeCount();
+                    for (int freq = 0; freq < freqCount; freq++) {
+                        long frequencyDurationMs = 0;
+                        for (int level = 0; level < levelCount; level++) {
+                            final long durationMs = ratStats.getTimeSinceMark(freq, level,
+                                    elapsedRealtimeMs);
+                            final long totalLvlDurationMs =
+                                    perSignalStrengthActiveTimeMs[level];
+                            if (totalLvlDurationMs == 0) continue;
+                            final long totalTxLvlDurations =
+                                    deltaInfo.getTransmitDurationMillisAtPowerLevel(level);
+                            // Smear HAL provided Tx power level duration based on active modem
+                            // duration in a given state. (Add totalLvlDurationMs / 2 before
+                            // the integer division with totalLvlDurationMs for rounding.)
+                            final long proportionalTxDurationMs =
+                                    (durationMs * totalTxLvlDurations
+                                            + (totalLvlDurationMs / 2)) / totalLvlDurationMs;
+                            ratStats.incrementTxDuration(freq, level, proportionalTxDurationMs);
+                            frequencyDurationMs += durationMs;
+                        }
+                        final long totalRxDuration = deltaInfo.getReceiveTimeMillis();
+                        // Smear HAL provided Rx power duration based on active modem
+                        // duration in a given state.  (Add totalActiveTimeMs / 2 before the
+                        // integer division with totalActiveTimeMs for rounding.)
+                        final long proportionalRxDurationMs =
+                                (frequencyDurationMs * totalRxDuration + (totalActiveTimeMs
+                                        / 2)) / totalActiveTimeMs;
+                        ratStats.incrementRxDuration(freq, proportionalRxDurationMs);
+                    }
+
+                }
+            }
+        } else {
+            // Specific data available.
+            for (int index = 0; index < infoSize; index++) {
+                final int rat = deltaInfo.getSpecificInfoRat(index);
+                final int freq = deltaInfo.getSpecificInfoFrequencyRange(index);
+
+                // Map RadioAccessNetworkType to course grain RadioAccessTechnology.
+                final int ratBucket = mapRadioAccessNetworkTypeToRadioAccessTechnology(rat);
+                final RadioAccessTechnologyBatteryStats ratStats = getRatBatteryStatsLocked(
+                        ratBucket);
+
+                final long rxTimeMs = deltaInfo.getReceiveTimeMillis(rat, freq);
+                final int[] txTimesMs = deltaInfo.getTransmitTimeMillis(rat, freq);
+
+                ratStats.incrementRxDuration(freq, rxTimeMs);
+                final int numTxLvl = txTimesMs.length;
+                for (int lvl = 0; lvl < numTxLvl; lvl++) {
+                    ratStats.incrementTxDuration(freq, lvl, txTimesMs[lvl]);
+                }
+            }
+        }
+
+        for (int rat = 0; rat < RADIO_ACCESS_TECHNOLOGY_COUNT; rat++) {
+            final RadioAccessTechnologyBatteryStats ratStats = mPerRatBatteryStats[rat];
+            if (ratStats == null) continue;
+            ratStats.setMark(elapsedRealtimeMs);
         }
     }
 

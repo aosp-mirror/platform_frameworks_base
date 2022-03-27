@@ -151,10 +151,6 @@
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"Jei kitu bandymu nupiešite netinkamą atrakinimo piešinį, darbo profilis ir jo duomenys bus ištrinti."</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"Jei kitu bandymu įvesite netinkamą PIN kodą, darbo profilis ir jo duomenys bus ištrinti."</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"Jei kitu bandymu įvesite netinkamą slaptažodį, darbo profilis ir jo duomenys bus ištrinti."</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"Per daug netinkamų bandymų. Šio įrenginio duomenys bus ištrinti."</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"Per daug netinkamų bandymų. Šis naudotojas bus ištrintas."</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"Per daug netinkamų bandymų. Šis darbo profilis ir jo duomenys bus ištrinti."</string>
-    <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"Atsisakyti"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Palieskite piršto antspaudo jutiklį"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"Piršto antspaudo piktograma"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Veidas neatpažintas. Naudokite kontrolinį kodą."</string>
@@ -327,17 +323,12 @@
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Lėtai įkraunama • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> iki visiško įkrovimo"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Įkraunama doke • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> iki visiško įkrovimo"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Perjungti naudotoją"</string>
-    <string name="user_add_user" msgid="4336657383006913022">"Pridėti naudotoją"</string>
-    <string name="user_new_user_name" msgid="2019166282704195789">"Naujas naudotojas"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Pašalinti svečią?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Bus ištrintos visos šios sesijos programos ir duomenys."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Pašalinti"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Sveiki sugrįžę, svety!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Ar norite tęsti sesiją?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Pradėti iš naujo"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Taip, tęsti"</string>
-    <string name="user_add_user_title" msgid="4172327541504825032">"Pridėti naują naudotoją?"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"Kai pridedate naują naudotoją, šis asmuo turi nustatyti savo erdvę.\n\nBet kuris naudotojas gali atnaujinti visų kitų naudotojų programas."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Pasiekta naudotojų riba"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="one">Galite pridėti iki <xliff:g id="COUNT">%d</xliff:g> naudotojo.</item>
@@ -465,8 +456,7 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Atrakinti, kad būtų galima naudoti"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Gaunant korteles kilo problema, bandykite dar kartą vėliau"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Užrakinimo ekrano nustatymai"</string>
-    <!-- no translation found for qr_code_scanner_title (5290201053875420785) -->
-    <skip />
+    <string name="qr_code_scanner_title" msgid="5290201053875420785">"QR kodo nuskaitymas"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Darbo profilis"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Lėktuvo režimas"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"Negirdėsite kito signalo <xliff:g id="WHEN">%1$s</xliff:g>"</string>
@@ -797,9 +787,10 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Perbraukite, kad peržiūrėtumėte daugiau"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Įkeliamos rekomendacijos"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Medija"</string>
-    <string name="controls_media_close_session" msgid="1193000643003066508">"Slėpti šį medijos seansą?"</string>
+    <!-- no translation found for controls_media_close_session (4780485355795635052) -->
+    <skip />
     <string name="controls_media_active_session" msgid="3146882316024153337">"Dabartinio medijos seanso negalima paslėpti."</string>
-    <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Atsisakyti"</string>
+    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Slėpti"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Tęsti"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Nustatymai"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"<xliff:g id="ARTIST_NAME">%2$s</xliff:g> – „<xliff:g id="SONG_NAME">%1$s</xliff:g>“ leidžiama iš „<xliff:g id="APP_LABEL">%3$s</xliff:g>“"</string>
@@ -817,7 +808,8 @@
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Perkelkite arčiau „<xliff:g id="DEVICENAME">%1$s</xliff:g>“, kad būtų galima leisti čia"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Leidžiama įrenginyje „<xliff:g id="DEVICENAME">%1$s</xliff:g>“"</string>
     <string name="media_transfer_playing_this_device" msgid="1856890686844499172">"Leidžiama šiame telefone"</string>
-    <string name="media_transfer_failed" msgid="2640354446629980227">"Kažkas ne taip"</string>
+    <!-- no translation found for media_transfer_failed (7955354964610603723) -->
+    <skip />
     <string name="controls_error_timeout" msgid="794197289772728958">"Neaktyvu, patikrinkite progr."</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Nerasta"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Valdiklis nepasiekiamas"</string>

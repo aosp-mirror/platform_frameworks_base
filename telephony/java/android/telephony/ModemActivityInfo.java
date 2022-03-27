@@ -383,8 +383,6 @@ public final class ModemActivityInfo implements Parcelable {
      * activity.
      */
     public @NonNull ModemActivityInfo getDelta(@NonNull ModemActivityInfo other) {
-        int[] txTimeMs = new int[ModemActivityInfo.TX_POWER_LEVELS];
-
         ActivityStatsTechSpecificInfo[] mDeltaSpecificInfo;
         mDeltaSpecificInfo = new ActivityStatsTechSpecificInfo[other.getSpecificInfoLength()];
 
@@ -399,6 +397,7 @@ public final class ModemActivityInfo implements Parcelable {
                         if (other.mActivityStatsTechSpecificInfo[i].getFrequencyRange()
                                 == mActivityStatsTechSpecificInfo[j].getFrequencyRange()) {
                             int freq = mActivityStatsTechSpecificInfo[j].getFrequencyRange();
+                            int[] txTimeMs = new int[ModemActivityInfo.TX_POWER_LEVELS];
                             for (int lvl = 0; lvl < ModemActivityInfo.TX_POWER_LEVELS; lvl++) {
                                 txTimeMs[lvl] =
                                         (int) (other.getTransmitDurationMillisAtPowerLevel(
@@ -416,6 +415,7 @@ public final class ModemActivityInfo implements Parcelable {
                                                         - getReceiveTimeMillis(rat, freq)));
                         }
                     } else {
+                        int[] txTimeMs = new int[ModemActivityInfo.TX_POWER_LEVELS];
                         for (int lvl = 0; lvl < ModemActivityInfo.TX_POWER_LEVELS; lvl++) {
                             txTimeMs[lvl] =
                                     (int) (other.getTransmitDurationMillisAtPowerLevel(lvl, rat)

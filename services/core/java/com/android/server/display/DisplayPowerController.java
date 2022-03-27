@@ -782,7 +782,13 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 mDisplayStatsId = mUniqueDisplayId.hashCode();
                 mDisplayDeviceConfig = config;
                 loadFromDisplayDeviceConfig(token, info);
+                if (DEBUG) {
+                    Trace.beginAsyncSection("DisplayPowerController#updatePowerState", 0);
+                }
                 updatePowerState();
+                if (DEBUG) {
+                    Trace.endAsyncSection("DisplayPowerController#updatePowerState", 0);
+                }
             }
         });
     }

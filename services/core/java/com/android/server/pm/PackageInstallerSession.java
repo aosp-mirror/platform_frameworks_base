@@ -272,7 +272,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     /**
      * The default value of {@link #mValidatedTargetSdk} is {@link Integer#MAX_VALUE}. If {@link
-     * #mValidatedTargetSdk} is compared with {@link Build.VERSION_CODES#Q} before getting the
+     * #mValidatedTargetSdk} is compared with {@link Build.VERSION_CODES#R} before getting the
      * target sdk version from a validated apk in {@link #validateApkInstallLocked()}, the compared
      * result will not trigger any user action in
      * {@link #checkUserActionRequirement(PackageInstallerSession)}.
@@ -2083,7 +2083,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
 
             if (validatedTargetSdk != INVALID_TARGET_SDK_VERSION
-                    && validatedTargetSdk < Build.VERSION_CODES.Q) {
+                    && validatedTargetSdk < Build.VERSION_CODES.R) {
                 session.sendPendingUserActionIntent(target);
                 return true;
             }

@@ -85,8 +85,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"Оператор SIM <xliff:g id="SIMNUMBER">%d</xliff:g> картасы үшін уақытша өшірді"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Мобильдік желіге қосылу мүмкін емес"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Таңдаулы желіні өзгертіп көріңіз. Өзгерту үшін түртіңіз."</string>
-    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Жедел қызметке қоңырау шалу мүмкін емес"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Wi-Fi арқылы жедел қызметке қоңырау шалу мүмкін емес"</string>
+    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"Құтқару қызметіне қоңырау шалу қолжетімсіз болуы мүмкін"</string>
+    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"<xliff:g id="SPN">%s</xliff:g> операторында Wi-Fi арқылы құтқару қызметіне қоңырау шалу қарастырылмаған. Мәлімет алу үшін түртіңіз."</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Дабылдар"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Қоңырауды басқа нөмірге бағыттау"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Шұғыл кері қоңырау шалу режимі"</string>
@@ -425,10 +425,10 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"Қолданбаға сіздің планшетіңіздегі қоңырау тіркеуін, келетін немесе шығатын қоңыраулар туралы деректерді қоса, өзгерту мүмкіндігін береді. Залалды қолданбалар бұны сіздің қоңырау тіркеуіңізді өшіру үшін қолдануы мүмкін."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Қолданба Android TV құрылғысының қоңыраулар журналын, сонымен қатар кіріс және шығыс қоңыраулар туралы деректерді өзгерте алатын болады. Қоңыраулар журналын деректерден тазарту немесе оны өзгерту үшін зиянды қолданбалар осы рұқсатты пайдалануы мүмкін."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Қолданбаға сіздің телефоныңыздың қоңырау тіркеуін, келетін немесе шығатын қоңыраулар туралы деректерді қоса, өзгерту мүмкіндігін береді. Залалды қолданбалар бұны сіздің қоңырау тіркеуіңізді өшіру үшін қолдануы мүмкін."</string>
-    <string name="permlab_bodySensors" msgid="3411035315357380862">"дене датчиктеріне (мысалы, жүрек соғу жиілігінің мониторларына) қатынасу"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="3208940894182188063">"Жүрек қағысы, температура, қандағы оттегі пайызы және т.б. сияқты дене датчиктерінен алынған деректерді пайдалану."</string>
-    <string name="permlab_bodySensors_background" msgid="4352831883331744370">"дене датчиктерін (мысалы, жүрек қағысын өлшегіштерді) фондық режимде пайдалану"</string>
-    <string name="permdesc_bodySensors_background" product="default" msgid="8512392249166660872">"Жүрек қағысы, температура, қандағы оттегі пайызы және т.б. сияқты дене датчиктерінен алынған деректерді фондық режимде пайдалану."</string>
+    <string name="permlab_bodySensors" msgid="662918578601619569">"Жұмыс кезінде дене датчигінен алынған жүрек қағысы сияқты деректі пайдалану"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Жұмыс кезінде қолданбаға дене датчигінен алынған жүрек қағысы, температура, қандағы оттегі пайызы сияқты деректі пайдалануға рұқсат береді."</string>
+    <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Фондық режимде дене датчигінен алынған жүрек қағысы сияқты деректі пайдалану"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Фондық режимде қолданбаға дене датчигінен алынған жүрек қағысы, температура, қандағы оттегі пайызы сияқты деректі пайдалануға рұқсат береді."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Күнтізбе оқиғалары мен мәліметтерін оқу"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Бұл қолданба планшетте сақталған барлық күнтізбе оқиғаларын оқи алады және күнтізбе деректерін бөлісе не сақтай алады."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Бұл қолданба Android TV құрылғыңызда сақталған барлық күнтізбе оқиғаларын оқи алады және күнтізбе деректерін бөлісе не сақтай алады."</string>
@@ -689,8 +689,8 @@
     <string name="permdesc_readMediaAudio" msgid="5299772574434619399">"Қолданбаға ортақ жадтың аудиофайлдарын оқуға мүмкіндік береді."</string>
     <string name="permlab_readMediaVideo" msgid="7768003311260655007">"ортақ жадтың бейнефайлдарын оқу"</string>
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"Қолданбаға ортақ жадтың бейнефайлдарын оқуға мүмкіндік береді."</string>
-    <string name="permlab_readMediaImage" msgid="1507059005825769856">"ортақ жадтың кескін файлдарын оқу"</string>
-    <string name="permdesc_readMediaImage" msgid="8328052622292457588">"Қолданбаға ортақ жадтың кескін файлдарын оқуға мүмкіндік береді."</string>
+    <string name="permlab_readMediaImages" msgid="4057590631020986789">"ортақ жадтың кескін файлдарын оқу"</string>
+    <string name="permdesc_readMediaImages" msgid="5836219373138469259">"Қолданбаға ортақ жадтың кескін файлдарын оқуға мүмкіндік береді."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"ортақ жадтың мазмұнын өзгерту немесе жою"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Қолданбаға ортақ жадтың мазмұнын жазуға мүмкіндік береді."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"SIP қоңырауларын шалу/қабылдау"</string>
@@ -912,7 +912,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"Бекітпесін ашу үшін немесе төтенше қоңырауды табу үшін Мәзір тармағын басыңыз."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"Ашу үшін Мәзір пернесін басыңыз."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"Бекітпесін ашу үшін кескінді сызыңыз"</string>
-    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"Құтқару қызметіне қоңырау шалу"</string>
+    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"Төтенше жағдай"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"Қоңырауға оралу"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"Дұрыс!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Қайталап көріңіз"</string>
@@ -1051,7 +1051,6 @@
     <string name="save_password_never" msgid="6776808375903410659">"Ешқашан"</string>
     <string name="open_permission_deny" msgid="5136793905306987251">"Сізде осы бетті ашуға рұқсат жоқ."</string>
     <string name="text_copied" msgid="2531420577879738860">"Мәтін ақпарат алмастыру қорына сақталды."</string>
-    <string name="copied" msgid="4675902854553014676">"Көшірілді"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g> қолданбасынан <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> қолданбасына қойылды."</string>
     <string name="pasted_from_clipboard" msgid="7355790625710831847">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> қолданбасы буферіңізден алынған деректерді қойды."</string>
     <string name="pasted_text" msgid="4298871641549173733">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> сіз көшірген мәтінді қойды."</string>
@@ -1452,8 +1451,12 @@
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"Қолданба батареяны оңтайландыру әрекетін елемеуді сұрай алады."</string>
     <string name="permlab_queryAllPackages" msgid="2928450604653281650">"барлық бумаға сұрау жасау"</string>
     <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"Қолданба барлық орнатылған буманы көре алады."</string>
-    <string name="permlab_accessSupplementalApi" msgid="3544659160536960275">"SupplementalApi интерфейстерін пайдалану"</string>
-    <string name="permdesc_accessSupplementalApi" msgid="8974758769370951074">"Қолданбаға SupplementalApi интерфейстерін пайдалануға мүмкіндік береді."</string>
+    <string name="permlab_accessAdServicesTopics" msgid="6687112022940098945">"AdServices Topics API-ын пайдалану"</string>
+    <string name="permdesc_accessAdServicesTopics" msgid="6011532458156465929">"Қолданбаға AdServices Topics API-ын пайдалануға мүмкіндік береді."</string>
+    <string name="permlab_accessAdServicesAttribution" msgid="3268942271128309354">"AdServices Attribution API-ларын пайдалану"</string>
+    <string name="permdesc_accessAdServicesAttribution" msgid="577482544832578288">"Қолданбаға AdServices Attribution API-ларын пайдалануға мүмкіндік береді."</string>
+    <string name="permlab_accessAdServicesCustomAudiences" msgid="7249286630514600684">"AdServices Custom Audiences API-ын пайдалану"</string>
+    <string name="permdesc_accessAdServicesCustomAudiences" msgid="645526926477180315">"Қолданбаға AdServices Custom Audiences API-ын пайдалануға мүмкіндік береді."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"Масштабтау параметрін басқару үшін екі рет түртіңіз"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"Виджетті қосу."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"Өту"</string>
@@ -1716,6 +1719,7 @@
     <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g> профиліне ауысу…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"<xliff:g id="NAME">%1$s</xliff:g> ішінен шығу…"</string>
     <string name="owner_name" msgid="8713560351570795743">"Құрылғы иесі"</string>
+    <string name="guest_name" msgid="8502103277839834324">"Қонақ"</string>
     <string name="error_message_title" msgid="4082495589294631966">"Қателік"</string>
     <string name="error_message_change_not_allowed" msgid="843159705042381454">"Бұл өзгертуге әкімші рұқсат етпеген"</string>
     <string name="app_not_found" msgid="3429506115332341800">"Бұл әрекетті орындайтын қолданба табылмады"</string>
@@ -2027,10 +2031,10 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"ЖОЮ"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"БӘРІБІР АШУ"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"Зиянды қолданба анықталды"</string>
-    <string name="log_access_confirmation_title" msgid="3143035474800851565">"Жүйе журналын пайдалану рұқсатын сұрау"</string>
+    <string name="log_access_confirmation_title" msgid="2343578467290592708">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> қолданбасына барлық құрылғының журналын пайдалануға рұқсат берілсін бе?"</string>
     <string name="log_access_confirmation_allow" msgid="143157286283302512">"Тек осы жолы"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Рұқсат бермеу"</string>
-    <string name="log_access_confirmation_body" msgid="7599059550906238538">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> қолданбасы функционалдық түзету үшін жүйе журналдарын сұрайды. Бұл журналдарда құрылғыңыздағы қолданбалар мен қызметтер енгізген ақпарат қамтылуы мүмкін."</string>
+    <string name="log_access_confirmation_body" msgid="4483075525611652922">"Журналдарға құрылғыда не болып жатқаны жазылады. Қолданбалар осы журналдарды қате тауып, түзету үшін пайдаланады.\n\nКейбір журналдарда құпия ақпарат болуы мүмкін. Сондықтан барлық құрылғының журналын пайдалану рұқсаты тек сенімді қолданбаларға берілуі керек. \n\nБұл қолданбаға барлық құрылғының журналын пайдалануға рұқсат бермесеңіз де, ол өзінің журналдарын пайдалана береді. Сондай-ақ құрылғы өндірушісі де құрылғыдағы кейбір журналдарды немесе ақпаратты пайдалануы мүмкін. Толығырақ"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Қайта көрсетілмесін"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> қолданбасы <xliff:g id="APP_2">%2$s</xliff:g> қолданбасының үзінділерін көрсеткісі келеді"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Өзгерту"</string>
@@ -2265,4 +2269,6 @@
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> қолданбасы ұзақ уақыт бойы фондық режимде жұмыс істеуде. Көру үшін түртіңіз."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Белсенді қолданбаларды тексеру"</string>
     <string name="vdm_camera_access_denied" msgid="6345652513729130490">"Бұл құрылғыдан камераны пайдалану мүмкін емес."</string>
+    <!-- no translation found for system_locale_title (3978041860457277638) -->
+    <skip />
 </resources>
