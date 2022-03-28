@@ -96,12 +96,13 @@ public class TvPipBoundsAlgorithm extends PipBoundsAlgorithm {
                     "%s: getEntryDestinationBounds()", TAG);
         }
         updateExpandedPipSize();
-        if (mTvPipBoundsState.isTvExpandedPipSupported()
+        final boolean isPipExpanded = mTvPipBoundsState.isTvExpandedPipSupported()
                 && mTvPipBoundsState.getDesiredTvExpandedAspectRatio() != 0
-                && !mTvPipBoundsState.isTvPipManuallyCollapsed()) {
+                && !mTvPipBoundsState.isTvPipManuallyCollapsed();
+        if (isPipExpanded) {
             updateGravityOnExpandToggled(Gravity.NO_GRAVITY, true);
-            mTvPipBoundsState.setTvPipExpanded(true);
         }
+        mTvPipBoundsState.setTvPipExpanded(isPipExpanded);
         return getTvPipBounds().getBounds();
     }
 
