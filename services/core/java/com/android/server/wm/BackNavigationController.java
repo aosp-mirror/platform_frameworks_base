@@ -26,6 +26,7 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.HardwareBuffer;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.SystemProperties;
@@ -38,6 +39,7 @@ import android.window.TaskSnapshot;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
+import com.android.server.LocalServices;
 
 /**
  * Controller to handle actions related to the back gesture on the server side.
@@ -73,24 +75,24 @@ class BackNavigationController {
      * Set up the necessary leashes and build a {@link BackNavigationInfo} instance for an upcoming
      * back gesture animation.
      *
-     * @param task the currently focused {@link Task}.
      * @return a {@link BackNavigationInfo} instance containing the required leashes and metadata
-     * for the animation.
+     * for the animation, or null if we don't know how to animate the current window and need to
+     * fallback on dispatching the key event.
      */
     @Nullable
-    BackNavigationInfo startBackNavigation(@NonNull Task task) {
-        return startBackNavigation(task, null);
+    BackNavigationInfo startBackNavigation(@NonNull WindowManagerService wmService) {
+        return startBackNavigation(wmService, null);
     }
 
     /**
      * @param tx, a transaction to be used for the attaching the animation leash.
      *            This is used in tests. If null, the object will be initialized with a new {@link
-     *            android.view.SurfaceControl.Transaction}
-     * @see #startBackNavigation(Task)
+     *            SurfaceControl.Transaction}
+     * @see #startBackNavigation(WindowManagerService)
      */
     @VisibleForTesting
     @Nullable
-    BackNavigationInfo startBackNavigation(@NonNull Task task,
+    BackNavigationInfo startBackNavigation(WindowManagerService wmService,
             @Nullable SurfaceControl.Transaction tx) {
 
         if (tx == null) {
@@ -98,88 +100,125 @@ class BackNavigationController {
         }
 
         int backType = BackNavigationInfo.TYPE_UNDEFINED;
-        Task prevTask = task;
+        Task prevTask = null;
         ActivityRecord prev;
-        WindowContainer<?> removedWindowContainer;
-        ActivityRecord activityRecord;
+        WindowContainer<?> removedWindowContainer = null;
+        ActivityRecord activityRecord = null;
         ActivityRecord prevTaskTopActivity = null;
-        SurfaceControl animationLeashParent;
-        WindowConfiguration taskWindowConfiguration;
+        Task task = null;
+        SurfaceControl animationLeashParent = null;
         HardwareBuffer screenshotBuffer = null;
-        SurfaceControl screenshotSurface;
+        RemoteAnimationTarget topAppTarget = null;
         int prevTaskId;
         int prevUserId;
-        RemoteAnimationTarget topAppTarget;
-        SurfaceControl animLeash;
-        IOnBackInvokedCallback applicationCallback = null;
-        IOnBackInvokedCallback systemCallback = null;
 
-        synchronized (task.mWmService.mGlobalLock) {
+        BackNavigationInfo.Builder infoBuilder = new BackNavigationInfo.Builder();
+        synchronized (wmService.mGlobalLock) {
+            WindowState window;
+            WindowConfiguration taskWindowConfiguration;
+            WindowManagerInternal windowManagerInternal =
+                    LocalServices.getService(WindowManagerInternal.class);
+            IBinder focusedWindowToken = windowManagerInternal.getFocusedWindowToken();
 
-            // TODO Temp workaround for Sysui until b/221071505 is fixed
-            WindowState window = task.mWmService.getFocusedWindowLocked();
+            window = wmService.windowForClientLocked(null, focusedWindowToken,
+                    false /* throwOnError */);
+
             if (window == null) {
-                activityRecord = task.topRunningActivity();
-                removedWindowContainer = activityRecord;
-                taskWindowConfiguration = task.getTaskInfo().configuration.windowConfiguration;
-                window = task.getWindow(WindowState::isFocused);
-            } else {
-                activityRecord = window.mActivityRecord;
-                removedWindowContainer = activityRecord;
-                taskWindowConfiguration = window.getWindowConfiguration();
-            }
-            if (window != null) {
-                applicationCallback = window.getApplicationOnBackInvokedCallback();
-                systemCallback = window.getSystemOnBackInvokedCallback();
-            }
-            if (applicationCallback == null && systemCallback == null) {
-                // Return null when either there's no window, or apps have just initialized and
-                // have not finished registering callbacks.
-                return null;
-            }
-
-            ProtoLog.d(WM_DEBUG_BACK_PREVIEW, "startBackNavigation task=%s, "
-                            + "topRunningActivity=%s, applicationBackCallback=%s, "
-                            + "systemBackCallback=%s",
-                    task, activityRecord, applicationCallback, systemCallback);
-
-            // TODO Temp workaround for Sysui until b/221071505 is fixed
-            if (activityRecord == null && applicationCallback != null) {
-                return new BackNavigationInfo(BackNavigationInfo.TYPE_CALLBACK,
-                        null /* topWindowLeash */, null /* screenshotSurface */,
-                        null /* screenshotBuffer */, null /* taskWindowConfiguration */,
-                        null /* onBackNavigationDone */,
-                        applicationCallback /* onBackInvokedCallback */);
-            }
-
-            // For IME and Home, either a callback is registered, or we do nothing. In both cases,
-            // we don't need to pass the leashes below.
-            if (activityRecord == null || task.getDisplayContent().getImeContainer().isVisible()
-                    || activityRecord.isActivityTypeHome()) {
-                if (applicationCallback != null) {
-                    return new BackNavigationInfo(BackNavigationInfo.TYPE_CALLBACK,
-                            null /* topWindowLeash */, null /* screenshotSurface */,
-                            null /* screenshotBuffer */, null /* taskWindowConfiguration */,
-                            null /* onBackNavigationDone */,
-                            applicationCallback /* onBackInvokedCallback */);
-                } else {
+                EmbeddedWindowController.EmbeddedWindow embeddedWindow =
+                        wmService.mEmbeddedWindowController.getByFocusToken(focusedWindowToken);
+                if (embeddedWindow != null) {
+                    ProtoLog.d(WM_DEBUG_BACK_PREVIEW,
+                            "Current focused window is embeddedWindow. Dispatch KEYCODE_BACK.");
                     return null;
                 }
             }
 
-            prev = task.getActivity(
-                    (r) -> !r.finishing && r.getTask() == task && !r.isTopRunningActivity());
+            // Lets first gather the states of things
+            //  - What is our current window ?
+            //  - Does it has an Activity and a Task ?
+            // TODO Temp workaround for Sysui until b/221071505 is fixed
+            if (window != null) {
+                ProtoLog.d(WM_DEBUG_BACK_PREVIEW,
+                        "Focused window found using getFocusedWindowToken");
+            }
 
-            if (applicationCallback != null) {
-                return new BackNavigationInfo(BackNavigationInfo.TYPE_CALLBACK,
-                        null /* topWindowLeash */, null /* screenshotSurface */,
-                        null /* screenshotBuffer */, null /* taskWindowConfiguration */,
-                        null /* onBackNavigationDone */,
-                        applicationCallback /* onBackInvokedCallback */);
+            if (window == null) {
+                window = wmService.getFocusedWindowLocked();
+                ProtoLog.d(WM_DEBUG_BACK_PREVIEW,
+                        "Focused window found using wmService.getFocusedWindowLocked()");
+            }
+
+            if (window == null) {
+                // We don't have any focused window, fallback ont the top task of the focused
+                // display.
+                ProtoLog.w(WM_DEBUG_BACK_PREVIEW,
+                        "No focused window, defaulting to top task's window");
+                task = wmService.mAtmService.getTopDisplayFocusedRootTask();
+                window = task.getWindow(WindowState::isFocused);
+            }
+
+            // Now let's find if this window has a callback from the client side.
+            IOnBackInvokedCallback applicationCallback = null;
+            IOnBackInvokedCallback systemCallback = null;
+            if (window != null) {
+                activityRecord = window.mActivityRecord;
+                task = window.getTask();
+                applicationCallback = window.getApplicationOnBackInvokedCallback();
+                if (applicationCallback != null) {
+                    backType = BackNavigationInfo.TYPE_CALLBACK;
+                    infoBuilder.setOnBackInvokedCallback(applicationCallback);
+                } else {
+                    systemCallback = window.getSystemOnBackInvokedCallback();
+                    infoBuilder.setOnBackInvokedCallback(systemCallback);
+                }
+            }
+
+            ProtoLog.d(WM_DEBUG_BACK_PREVIEW, "startBackNavigation task=%s, "
+                            + "topRunningActivity=%s, applicationBackCallback=%s, "
+                            + "systemBackCallback=%s, currentFocus=%s",
+                    task, activityRecord, applicationCallback, systemCallback, window);
+
+            if (window == null) {
+                Slog.e(TAG, "Window is null, returning null.");
+                return null;
+            }
+
+            if (systemCallback == null && applicationCallback == null) {
+                Slog.e(TAG, "No callback registered, returning null.");
+                return null;
+            }
+
+            // If we don't need to set up the animation, we return early. This is the case when
+            // - We have an application callback.
+            // - We don't have any ActivityRecord or Task to animate.
+            // - The IME is opened, and we just need to close it.
+            // - The home activity is the focused activity.
+            if (backType == BackNavigationInfo.TYPE_CALLBACK
+                    || activityRecord == null
+                    || task == null
+                    || task.getDisplayContent().getImeContainer().isVisible()
+                    || activityRecord.isActivityTypeHome()) {
+                return infoBuilder
+                        .setType(backType)
+                        .build();
+            }
+
+            // We don't have an application callback, let's find the destination of the back gesture
+            Task finalTask = task;
+            prev = task.getActivity(
+                    (r) -> !r.finishing && r.getTask() == finalTask && !r.isTopRunningActivity());
+            if (window.getParent().getChildCount() > 1 && window.getParent().getChildAt(0)
+                    != window) {
+                // Are we the top window of our parent? If not, we are a window on top of the
+                // activity, we won't close the activity.
+                backType = BackNavigationInfo.TYPE_DIALOG_CLOSE;
+                removedWindowContainer = window;
             } else if (prev != null) {
+                // We have another Activity in the same task to go to
                 backType = BackNavigationInfo.TYPE_CROSS_ACTIVITY;
+                removedWindowContainer = activityRecord;
             } else if (task.returnsToHomeRootTask()) {
-                prevTask = null;
+                // Our Task should bring back to home
                 removedWindowContainer = task;
                 backType = BackNavigationInfo.TYPE_RETURN_TO_HOME;
             } else if (activityRecord.isRootOfTask()) {
@@ -195,12 +234,42 @@ class BackNavigationController {
                     backType = BackNavigationInfo.TYPE_CROSS_TASK;
                 }
             }
+            infoBuilder.setType(backType);
 
             prevTaskId = prevTask != null ? prevTask.mTaskId : 0;
             prevUserId = prevTask != null ? prevTask.mUserId : 0;
 
-            ProtoLog.d(WM_DEBUG_BACK_PREVIEW, "Previous Activity is %s. "
-                    + "Back type is %s", prev != null ? prev.mActivityComponent : null, backType);
+            ProtoLog.d(WM_DEBUG_BACK_PREVIEW, "Previous Destination is Activity:%s Task:%s "
+                            + "removedContainer:%s, backType=%s",
+                    prev != null ? prev.mActivityComponent : null,
+                    prevTask != null ? prevTask.getName() : null,
+                    removedWindowContainer,
+                    BackNavigationInfo.typeToString(backType));
+
+            // For now, we only animate when going home.
+            boolean prepareAnimation = backType == BackNavigationInfo.TYPE_RETURN_TO_HOME
+                    // Only create a new leash if no leash has been created.
+                    // Otherwise return null for animation target to avoid conflict.
+                    && !removedWindowContainer.hasCommittedReparentToAnimationLeash();
+
+            if (prepareAnimation) {
+                taskWindowConfiguration = task.getTaskInfo().configuration.windowConfiguration;
+
+                infoBuilder.setTaskWindowConfiguration(taskWindowConfiguration);
+                // Prepare a leash to animate the current top window
+                // TODO(b/220934562): Use surface animator to better manage animation conflicts.
+                SurfaceControl animLeash = removedWindowContainer.makeAnimationLeash()
+                        .setName("BackPreview Leash for " + removedWindowContainer)
+                        .setHidden(false)
+                        .setBLASTLayer()
+                        .build();
+                removedWindowContainer.reparentSurfaceControl(tx, animLeash);
+                animationLeashParent = removedWindowContainer.getAnimationLeashParent();
+                topAppTarget = createRemoteAnimationTargetLocked(removedWindowContainer,
+                        activityRecord,
+                        task, animLeash);
+                infoBuilder.setDepartingAnimationTarget(topAppTarget);
+            }
 
             //TODO(207481538) Remove once the infrastructure to support per-activity screenshot is
             // implemented. For now we simply have the mBackScreenshots hash map that dumbly
@@ -209,101 +278,85 @@ class BackNavigationController {
                 screenshotBuffer = getActivitySnapshot(task, prev.mActivityComponent);
             }
 
-            // Only create a new leash if no leash has been created.
-            // Otherwise return null for animation target to avoid conflict.
-            if (removedWindowContainer.hasCommittedReparentToAnimationLeash()) {
+            if (backType == BackNavigationInfo.TYPE_RETURN_TO_HOME && isAnimationEnabled()) {
+                task.mBackGestureStarted = true;
+                // Make launcher show from behind by marking its top activity as visible and
+                // launch-behind to bump its visibility for the duration of the back gesture.
+                prevTaskTopActivity = prevTask.getTopNonFinishingActivity();
+                if (prevTaskTopActivity != null) {
+                    if (!prevTaskTopActivity.mVisibleRequested) {
+                        prevTaskTopActivity.setVisibility(true);
+                    }
+                    prevTaskTopActivity.mLaunchTaskBehind = true;
+                    ProtoLog.d(WM_DEBUG_BACK_PREVIEW,
+                            "Setting Activity.mLauncherTaskBehind to true. Activity=%s",
+                            prevTaskTopActivity);
+                    prevTaskTopActivity.mRootWindowContainer.ensureActivitiesVisible(
+                            null /* starting */, 0 /* configChanges */,
+                            false /* preserveWindows */);
+                }
+            }
+        } // Release wm Lock
+
+        // Find a screenshot of the previous activity if we actually have an animation
+        if (topAppTarget != null && needsScreenshot(backType) && prevTask != null
+                && screenshotBuffer == null) {
+            SurfaceControl.Builder builder = new SurfaceControl.Builder()
+                    .setName("BackPreview Screenshot for " + prev)
+                    .setParent(animationLeashParent)
+                    .setHidden(false)
+                    .setBLASTLayer();
+            infoBuilder.setScreenshotSurface(builder.build());
+            screenshotBuffer = getTaskSnapshot(prevTaskId, prevUserId);
+            infoBuilder.setScreenshotBuffer(screenshotBuffer);
+
+
+            // The Animation leash needs to be above the screenshot surface, but the animation leash
+            // needs to be added before to be in the synchronized block.
+            tx.setLayer(topAppTarget.leash, 1);
+            tx.apply();
+
+
+            WindowContainer<?> finalRemovedWindowContainer = removedWindowContainer;
+            try {
+                activityRecord.token.linkToDeath(
+                        () -> resetSurfaces(finalRemovedWindowContainer), 0);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to link to death", e);
+                resetSurfaces(removedWindowContainer);
                 return null;
             }
-            // Prepare a leash to animate the current top window
-            // TODO(b/220934562): Use surface animator to better manage animation conflicts.
-            animLeash = removedWindowContainer.makeAnimationLeash()
-                    .setName("BackPreview Leash for " + removedWindowContainer)
-                    .setHidden(false)
-                    .setBLASTLayer()
-                    .build();
-            removedWindowContainer.reparentSurfaceControl(tx, animLeash);
-            animationLeashParent = removedWindowContainer.getAnimationLeashParent();
-            topAppTarget = new RemoteAnimationTarget(
-                    task.mTaskId,
-                    RemoteAnimationTarget.MODE_CLOSING,
-                    animLeash,
-                    false /* isTransluscent */,
-                    new Rect() /* clipRect */,
-                    new Rect() /* contentInsets */,
-                    activityRecord.getPrefixOrderIndex(),
-                    new Point(0, 0) /* position */,
-                    new Rect() /* localBounds */,
-                    new Rect() /* screenSpaceBounds */,
-                    removedWindowContainer.getWindowConfiguration(),
-                    true /* isNotInRecent */,
-                    null,
-                    null,
-                    task.getTaskInfo(),
-                    false,
-                    activityRecord.windowType);
+
+            RemoteCallback onBackNavigationDone = new RemoteCallback(
+                    result -> resetSurfaces(finalRemovedWindowContainer
+                    ));
+            infoBuilder.setOnBackNavigationDone(onBackNavigationDone);
         }
+        return infoBuilder.build();
+    }
 
-        screenshotSurface = new SurfaceControl.Builder()
-                .setName("BackPreview Screenshot for " + prev)
-                .setParent(animationLeashParent)
-                .setHidden(false)
-                .setBLASTLayer()
-                .build();
-        if (backType == BackNavigationInfo.TYPE_RETURN_TO_HOME && isAnimationEnabled()) {
-            task.mBackGestureStarted = true;
-            // Make launcher show from behind by marking its top activity as visible and
-            // launch-behind to bump its visibility for the duration of the back gesture.
-            prevTaskTopActivity = prevTask.getTopNonFinishingActivity();
-            if (prevTaskTopActivity != null) {
-                if (!prevTaskTopActivity.mVisibleRequested) {
-                    prevTaskTopActivity.setVisibility(true);
-                }
-                prevTaskTopActivity.mLaunchTaskBehind = true;
-                ProtoLog.d(WM_DEBUG_BACK_PREVIEW,
-                        "Setting Activity.mLauncherTaskBehind to true. Activity=%s",
-                        prevTaskTopActivity);
-                prevTaskTopActivity.mRootWindowContainer.ensureActivitiesVisible(
-                        null /* starting */, 0 /* configChanges */,
-                        false /* preserveWindows */);
-            }
-        }
-
-        // Find a screenshot of the previous activity
-
-        if (needsScreenshot(backType) && prevTask != null) {
-            if (screenshotBuffer == null) {
-                screenshotBuffer = getTaskSnapshot(prevTaskId, prevUserId);
-            }
-        }
-
-        // The Animation leash needs to be above the screenshot surface, but the animation leash
-        // needs to be added before to be in the synchronized block.
-        tx.setLayer(topAppTarget.leash, 1);
-        tx.apply();
-
-        WindowContainer<?> finalRemovedWindowContainer = removedWindowContainer;
-        try {
-            activityRecord.token.linkToDeath(() -> resetSurfaces(finalRemovedWindowContainer), 0);
-        } catch (RemoteException e) {
-            Slog.e(TAG, "Failed to link to death", e);
-            resetSurfaces(removedWindowContainer);
-            return null;
-        }
-
-        int finalBackType = backType;
-        final IOnBackInvokedCallback callback =
-                applicationCallback != null ? applicationCallback : systemCallback;
-        ActivityRecord finalPrevTaskTopActivity = prevTaskTopActivity;
-        RemoteCallback onBackNavigationDone = new RemoteCallback(result -> onBackNavigationDone(
-                result, finalRemovedWindowContainer, finalBackType, task,
-                finalPrevTaskTopActivity));
-        return new BackNavigationInfo(backType,
-                topAppTarget,
-                screenshotSurface,
-                screenshotBuffer,
-                taskWindowConfiguration,
-                onBackNavigationDone,
-                callback);
+    @NonNull
+    private static RemoteAnimationTarget createRemoteAnimationTargetLocked(
+            WindowContainer<?> removedWindowContainer,
+            ActivityRecord activityRecord, Task task, SurfaceControl animLeash) {
+        return new RemoteAnimationTarget(
+                task.mTaskId,
+                RemoteAnimationTarget.MODE_CLOSING,
+                animLeash,
+                false /* isTransluscent */,
+                new Rect() /* clipRect */,
+                new Rect() /* contentInsets */,
+                activityRecord.getPrefixOrderIndex(),
+                new Point(0, 0) /* position */,
+                new Rect() /* localBounds */,
+                new Rect() /* screenSpaceBounds */,
+                removedWindowContainer.getWindowConfiguration(),
+                true /* isNotInRecent */,
+                null,
+                null,
+                task.getTaskInfo(),
+                false,
+                activityRecord.windowType);
     }
 
     private void onBackNavigationDone(
@@ -360,6 +413,9 @@ class BackNavigationController {
     }
 
     private boolean needsScreenshot(int backType) {
+        if (!isScreenshotEnabled()) {
+            return false;
+        }
         switch (backType) {
             case BackNavigationInfo.TYPE_RETURN_TO_HOME:
             case BackNavigationInfo.TYPE_DIALOG_CLOSE:
