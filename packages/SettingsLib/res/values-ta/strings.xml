@@ -109,6 +109,9 @@
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> பேட்டரி"</string>
     <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> பேட்டரி, R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> பேட்டரி"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"செயலில் உள்ளது"</string>
+    <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"இடது பக்கம் மட்டும் செயலில் உள்ளது"</string>
+    <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"வலது பக்கம் மட்டும் செயலில் உள்ளது"</string>
+    <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"வலது மற்றும் இடது பக்கம் செயலில் உள்ளது"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"மீடியா ஆடியோ"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"ஃபோன் அழைப்புகள்"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"ஃபைல் இடமாற்றம்"</string>
@@ -158,10 +161,6 @@
     <string name="bluetooth_talkback_headphone" msgid="8613073829180337091">"ஹெட்ஃபோன்"</string>
     <string name="bluetooth_talkback_input_peripheral" msgid="5133944817800149942">"இன்புட் பெரிபெரல்"</string>
     <string name="bluetooth_talkback_bluetooth" msgid="1143241359781999989">"புளூடூத்"</string>
-    <string name="bluetooth_hearingaid_left_pairing_message" msgid="8561855779703533591">"இடப்புறச் செவித்துணைக் கருவியை இணைக்கிறது…"</string>
-    <string name="bluetooth_hearingaid_right_pairing_message" msgid="2655347721696331048">"வலப்புறச் செவித்துணைக் கருவியை இணைக்கிறது…"</string>
-    <string name="bluetooth_hearingaid_left_battery_level" msgid="7375621694748104876">"இடப்புறம் - <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> பேட்டரி"</string>
-    <string name="bluetooth_hearingaid_right_battery_level" msgid="1850094448499089312">"வலப்புறம் - <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> பேட்டரி"</string>
     <string name="accessibility_wifi_off" msgid="1195445715254137155">"வைஃபை முடக்கப்பட்டது."</string>
     <string name="accessibility_no_wifi" msgid="5297119459491085771">"வைஃபை துண்டிக்கப்பட்டது."</string>
     <string name="accessibility_wifi_one_bar" msgid="6025652717281815212">"வைஃபை சிக்னல்: ஒரு கோடு."</string>
@@ -180,7 +179,6 @@
     <string name="tether_settings_title_usb_bluetooth" msgid="1727111807207577322">"டெதெரிங்"</string>
     <string name="tether_settings_title_all" msgid="8910259483383010470">"டெதெரிங் &amp; போர்டபிள் ஹாட்ஸ்பாட்"</string>
     <string name="managed_user_title" msgid="449081789742645723">"எல்லா பணிப் பயன்பாடுகளும்"</string>
-    <string name="user_guest" msgid="6939192779649870792">"கெஸ்ட்"</string>
     <string name="unknown" msgid="3544487229740637809">"அறியப்படாத"</string>
     <string name="running_process_item_user_label" msgid="3988506293099805796">"பயனர்: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="3631650616557252926">"சில இயல்புநிலைகள் அமைக்கப்பட்டன"</string>
@@ -442,12 +440,6 @@
     <string name="select_webview_provider_title" msgid="3917815648099445503">"WebView செயல்படுத்தல்"</string>
     <string name="select_webview_provider_dialog_title" msgid="2444261109877277714">"WebView செயல்படுத்தலை அமை"</string>
     <string name="select_webview_provider_toast_text" msgid="8512254949169359848">"இனி இந்தத் தேர்வைப் பயன்படுத்த முடியாது. மீண்டும் முயலவும்."</string>
-    <string name="convert_to_file_encryption" msgid="2828976934129751818">"ஃபைல் முறைமையாக்கத்திற்கு மாற்று"</string>
-    <string name="convert_to_file_encryption_enabled" msgid="840757431284311754">"மாற்று…"</string>
-    <string name="convert_to_file_encryption_done" msgid="8965831011811180627">"ஏற்கனவே ஃபைல் என்க்ரிப்ட் செய்யப்பட்டது"</string>
-    <string name="title_convert_fbe" msgid="5780013350366495149">"ஃபைல் சார்ந்த முறைமையாக்கத்திற்கு மாற்றுதல்"</string>
-    <string name="convert_to_fbe_warning" msgid="34294381569282109">"தரவுப் பகிர்வை, ஃபைல் சார்ந்த முறைமையாக்கத்திற்கு மாற்றவும்.\n !!எச்சரிக்கை!! இது எல்லா தரவையும் அழிக்கும்.\n இது ஆல்பா நிலை அம்சமாக இருப்பதால் சரியாகச் செயல்படாமல் போகக்கூடும்.\n தொடர, \'அழித்து, மாற்று…\' என்பதை அழுத்தவும்."</string>
-    <string name="button_convert_fbe" msgid="1159861795137727671">"அழித்து மாற்று…"</string>
     <string name="picture_color_mode" msgid="1013807330552931903">"படத்தின் வண்ணப் பயன்முறை"</string>
     <string name="picture_color_mode_desc" msgid="151780973768136200">"sRGBஐப் பயன்படுத்தும்"</string>
     <string name="daltonizer_mode_disabled" msgid="403424372812399228">"முடக்கப்பட்டது"</string>
@@ -456,7 +448,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"நிறம் அடையாளங்காண முடியாமை (சிவப்பு-பச்சை)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"நிறம் அடையாளங்காண முடியாமை (நீலம்-மஞ்சள்)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"வண்ணத்திருத்தம்"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="2333641630205214702">"சாதனத்தில் வண்ணங்கள் காண்பிக்கப்படும் விதத்தைச் சரிசெய்யலாம். இதன் மூலம் நீங்கள் விரும்பும்போதெல்லாம்:&lt;br/&gt;&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;வண்ணங்களை மிகத் தெளிவாகப் பார்க்கலாம்&lt;/li&gt; &lt;li&gt;&amp;nbsp;கவனம் சிதறாமல் இருக்க வண்ணங்களை நீக்கலாம்&lt;/li&gt; &lt;/ol&gt;"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"நீங்கள் இவற்றைச் செய்ய விரும்பும்போது கலர் கரெக்‌ஷன் உதவும்:&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;வண்ணங்களை மிகத் துல்லியமாகப் பார்த்தல்&lt;/li&gt; &lt;li&gt;&amp;nbsp;கவனம் செலுத்துவதற்கு உதவ வண்ணங்களை அகற்றுதல்&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> மூலம் மேலெழுதப்பட்டது"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"கிட்டத்தட்ட <xliff:g id="TIME_REMAINING">%1$s</xliff:g> மீதமுள்ளது"</string>
@@ -493,6 +485,7 @@
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"சார்ஜ் செய்யப்படவில்லை"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"இணைக்கப்பட்டுள்ளது, சார்ஜாகவில்லை"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"சார்ஜாகிவிட்டது"</string>
+    <string name="battery_info_status_full_charged" msgid="3536054261505567948">"முழுவதும் சார்ஜாகிவிட்டது"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"நிர்வாகி கட்டுப்படுத்துகிறார்"</string>
     <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"வரையறுக்கப்பட்ட அமைப்பால் கட்டுப்படுத்தப்படுகிறது"</string>
     <string name="disabled" msgid="8017887509554714950">"முடக்கப்பட்டது"</string>
@@ -532,12 +525,14 @@
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"நேரத்தைக் குறைக்கும்."</string>
     <string name="cancel" msgid="5665114069455378395">"ரத்துசெய்"</string>
     <string name="okay" msgid="949938843324579502">"சரி"</string>
+    <string name="done" msgid="381184316122520313">"முடிந்தது"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"அலாரங்களும் நினைவூட்டல்களும்"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"அலாரங்கள் &amp; நினைவூட்டல்களை அமைக்க அனுமதித்தல்"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"அலாரங்கள் &amp; நினைவூட்டல்கள்"</string>
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"அலாரங்களை அமைக்கவும் குறிப்பிட்ட கால இடைவெளியில் செயல்களைத் திட்டமிடவும் இந்த ஆப்ஸை அனுமதிக்கும். இது ஆப்ஸ் பின்னணியில் இயங்குவதை அனுமதிக்கும், இதற்காக அதிக பேட்டரியைப் பயன்படுத்தக்கூடும்.\n\nஇந்த அனுமதி முடக்கப்பட்டிருந்தால் இந்த ஆப்ஸ் மூலம் திட்டமிடப்பட்ட ஏற்கெனவே அமைத்த அலாரங்களும் நேர அடிப்படையிலான நிகழ்வுகளும் வேலை செய்யாது."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"திட்டமிடல், அலாரம், நினைவூட்டல், கடிகாரம்"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"ஆன் செய்"</string>
+    <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"தொந்தரவு செய்ய வேண்டாம் என்பதை ஆன் செய்யும்"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"ஒருபோதும் வேண்டாம்"</string>
     <string name="zen_interruption_level_priority" msgid="5392140786447823299">"முக்கியமானவை மட்டும்"</string>
     <string name="zen_mode_and_condition" msgid="8877086090066332516">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
@@ -549,7 +544,8 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"ஒவ்வொரு முறையும் கேள்"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"ஆஃப் செய்யும் வரை"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"சற்றுமுன்"</string>
-    <string name="media_transfer_this_device_name" msgid="2357329267148436433">"இந்த மொபைல்"</string>
+    <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"இந்த மொபைல்"</string>
+    <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"இந்த டேப்லெட்"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"இந்த மொபைல்"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"இணைப்பதில் சிக்கல். சாதனத்தை ஆஃப் செய்து மீண்டும் ஆன் செய்யவும்"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"வயருடன்கூடிய ஆடியோ சாதனம்"</string>
@@ -589,18 +585,31 @@
     <string name="user_set_lock_button" msgid="1427128184982594856">"பூட்டை அமை"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"<xliff:g id="USER_NAME">%s</xliff:g>க்கு மாறு"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"புதிய பயனரை உருவாக்குகிறது…"</string>
+    <string name="creating_new_guest_dialog_message" msgid="1114905602181350690">"புதிய விருந்தினரை உருவாக்குகிறது…"</string>
     <string name="add_user_failed" msgid="4809887794313944872">"புதிய பயனரை உருவாக்க முடியவில்லை"</string>
+    <string name="add_guest_failed" msgid="8074548434469843443">"புதிய விருந்தினரை உருவாக்க முடியவில்லை"</string>
     <string name="user_nickname" msgid="262624187455825083">"புனைப்பெயர்"</string>
+    <!-- no translation found for user_add_user (7876449291500212468) -->
+    <skip />
     <string name="guest_new_guest" msgid="3482026122932643557">"கெஸ்ட்டைச் சேர்"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"கெஸ்ட்டை அகற்று"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"கெஸ்ட் அமர்வை மீட்டமை"</string>
-    <string name="guest_nickname" msgid="6332276931583337261">"கெஸ்ட்"</string>
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"கெஸ்ட்டை மீட்டமைக்கவா?"</string>
+    <!-- no translation found for guest_remove_guest_dialog_title (4548511006624088072) -->
+    <skip />
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"மீட்டமை"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"கெஸ்ட்டை மீட்டமைக்கிறது…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"படமெடுங்கள்"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"படத்தைத் தேர்வுசெய்யுங்கள்"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"படத்தைத் தேர்ந்தெடுங்கள்"</string>
+    <!-- no translation found for failed_attempts_now_wiping_device (4016329172216428897) -->
+    <skip />
+    <!-- no translation found for failed_attempts_now_wiping_user (469060411789668050) -->
+    <skip />
+    <!-- no translation found for failed_attempts_now_wiping_profile (7626589520888963129) -->
+    <skip />
+    <!-- no translation found for failed_attempts_now_wiping_dialog_dismiss (2749889771223578925) -->
+    <skip />
     <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"சாதனத்தின் இயல்புநிலை"</string>
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"முடக்கப்பட்டது"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"இயக்கப்பட்டது"</string>
@@ -642,4 +651,10 @@
     <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"அலைபரப்புத் தகவல்"</string>
     <string name="avatar_picker_title" msgid="8492884172713170652">"சுயவிவரப் படத்தைத் தேர்வுசெய்யுங்கள்"</string>
     <string name="default_user_icon_description" msgid="6554047177298972638">"இயல்புநிலைப் பயனர் ஐகான்"</string>
+    <string name="physical_keyboard_title" msgid="4811935435315835220">"கீபோர்டு"</string>
+    <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"கீபோர்டு தளவமைப்பைத் தேர்வுசெய்தல்"</string>
+    <string name="keyboard_layout_default_label" msgid="1997292217218546957">"இயல்பு"</string>
+    <string name="turn_screen_on_title" msgid="3266937298097573424">"திரையை ஆன் செய்தல்"</string>
+    <string name="allow_turn_screen_on" msgid="6194845766392742639">"திரையை ஆன் செய்வதை அனுமதி"</string>
+    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"திரையை ஆன் செய்ய ஓர் ஆப்ஸை அனுமதிக்கவும். அனுமதித்தால், உங்கள் தலையீடு இல்லாமலே ஆப்ஸ் எப்போது வேண்டுமானாலும் திரையை ஆன் செய்யக்கூடும்."</string>
 </resources>

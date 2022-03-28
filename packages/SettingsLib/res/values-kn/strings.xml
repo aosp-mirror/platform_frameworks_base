@@ -109,6 +109,9 @@
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> ಬ್ಯಾಟರಿ"</string>
     <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> ಬ್ಯಾಟರಿ, R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> ಬ್ಯಾಟರಿ"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"ಸಕ್ರಿಯ"</string>
+    <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"ಎಡಕಿವಿಯ ಸಾಧನ ಮಾತ್ರ ಸಕ್ರಿಯವಾಗಿದೆ"</string>
+    <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"ಬಲಕಿವಿಯ ಸಾಧನ ಮಾತ್ರ ಸಕ್ರಿಯವಾಗಿದೆ"</string>
+    <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"ಎಡ ಮತ್ತು ಬಲಕಿವಿಯ ಸಾಧನಗಳು ಸಕ್ರಿಯವಾಗಿವೆ"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"ಮಾಧ್ಯಮ ಆಡಿಯೋ"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"ಫೋನ್ ಕರೆಗಳು"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"ಫೈಲ್ ವರ್ಗಾವಣೆ"</string>
@@ -158,10 +161,6 @@
     <string name="bluetooth_talkback_headphone" msgid="8613073829180337091">"ಹೆಡ್‌ಫೋನ್"</string>
     <string name="bluetooth_talkback_input_peripheral" msgid="5133944817800149942">"ಪೆರಿಪೆರಲ್ ಇನ್‌ಪುಟ್‌‌"</string>
     <string name="bluetooth_talkback_bluetooth" msgid="1143241359781999989">"ಬ್ಲೂಟೂತ್"</string>
-    <string name="bluetooth_hearingaid_left_pairing_message" msgid="8561855779703533591">"ಎಡ ಶ್ರವಣ ಸಾಧನವನ್ನು ಜೋಡಿಸಲಾಗುತ್ತಿದೆ…"</string>
-    <string name="bluetooth_hearingaid_right_pairing_message" msgid="2655347721696331048">"ಬಲ ಶ್ರವಣ ಸಾಧನವನ್ನು ಜೋಡಿಸಲಾಗುತ್ತಿದೆ…"</string>
-    <string name="bluetooth_hearingaid_left_battery_level" msgid="7375621694748104876">"ಎಡ - <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> ಬ್ಯಾಟರಿ"</string>
-    <string name="bluetooth_hearingaid_right_battery_level" msgid="1850094448499089312">"ಬಲ - <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> ಬ್ಯಾಟರಿ"</string>
     <string name="accessibility_wifi_off" msgid="1195445715254137155">"ವೈಫೈ ಆಫ್."</string>
     <string name="accessibility_no_wifi" msgid="5297119459491085771">"ವೈಫೈ ಸಂಪರ್ಕ ಕಡಿತಗೊಂಡಿದೆ."</string>
     <string name="accessibility_wifi_one_bar" msgid="6025652717281815212">"ವೈಫೈ ಒಂದು ಪಟ್ಟಿ."</string>
@@ -180,7 +179,6 @@
     <string name="tether_settings_title_usb_bluetooth" msgid="1727111807207577322">"ಟೆಥರಿಂಗ್‌"</string>
     <string name="tether_settings_title_all" msgid="8910259483383010470">"ಟೆಥರಿಂಗ್ &amp; ಪೋರ್ಟಬಲ್ ಹಾಟ್‌ಸ್ಪಾಟ್"</string>
     <string name="managed_user_title" msgid="449081789742645723">"ಎಲ್ಲ ಕೆಲಸದ ಅಪ್ಲಿಕೇಶನ್‌ಗಳು"</string>
-    <string name="user_guest" msgid="6939192779649870792">"ಅತಿಥಿ"</string>
     <string name="unknown" msgid="3544487229740637809">"ಅಪರಿಚಿತ"</string>
     <string name="running_process_item_user_label" msgid="3988506293099805796">"ಬಳಕೆದಾರ: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="3631650616557252926">"ಕೆಲವು ಡೀಫಾಲ್ಟ್‌ಗಳನ್ನು ಹೊಂದಿಸಲಾಗಿದೆ"</string>
@@ -442,12 +440,6 @@
     <string name="select_webview_provider_title" msgid="3917815648099445503">"WebView ಹೊಂದಿಸಿ"</string>
     <string name="select_webview_provider_dialog_title" msgid="2444261109877277714">"WebView ಅನುಷ್ಠಾನಗೊಳಿಸುವಿಕೆಯನ್ನು ಹೊಂದಿಸಿ"</string>
     <string name="select_webview_provider_toast_text" msgid="8512254949169359848">"ಈ ಆಯ್ಕೆಯು ಇನ್ನು ಮುಂದೆ ಮಾನ್ಯವಾಗಿರುವುದಿಲ್ಲ. ಮತ್ತೊಮ್ಮೆ ಪ್ರಯತ್ನಿಸಿ."</string>
-    <string name="convert_to_file_encryption" msgid="2828976934129751818">"ಫೈಲ್ ಎನ್‌ಕ್ರಿಪ್ಶನ್‌ಗೆ ಪರಿವರ್ತಿಸು"</string>
-    <string name="convert_to_file_encryption_enabled" msgid="840757431284311754">"ಪರಿವರ್ತಿಸು…"</string>
-    <string name="convert_to_file_encryption_done" msgid="8965831011811180627">"ಫೈಲ್ ಈಗಾಗಲೇ ಎನ್‌ಕ್ರಿಪ್ಟ್ ಮಾಡಲಾಗಿದೆ"</string>
-    <string name="title_convert_fbe" msgid="5780013350366495149">"ಫೈಲ್ ಆಧಾರಿತ ಎನ್‌ಕ್ರಿಪ್ಶನ್‌ಗೆ ಪರಿವರ್ತಿಸಲಾಗುತ್ತಿದೆ"</string>
-    <string name="convert_to_fbe_warning" msgid="34294381569282109">"ಡೇಟಾ ವಿಭಜನೆಯನ್ನು ಫೈಲ್ ಆಧಾರಿತ ಎನ್‌ಕ್ರಿಪ್ಶನ್ ಆಗಿ ಪರಿವರ್ತಿಸಿ.\n !!ಎಚ್ಚರಿಕೆ!! ಇದು ನಿಮ್ಮ ಎಲ್ಲ ಡೇಟಾವನ್ನು ಅಳಿಸಿತ್ತದೆ.\n ಈ ವೈಶಿಷ್ಟ್ಯವು ಆಲ್ಫಾ ಆಗಿರುತ್ತದೆ ಮತ್ತು ಸರಿಯಾಗಿ ಕಾರ್ಯನಿರ್ವಹಿಸದೆ ಇರಬಹುದು.\n ಮುಂದುವರಿಸಲು \'ಅಳಿಸಿ ಮತ್ತು ಪರಿವರ್ತಿಸು…\' ಒತ್ತಿರಿ."</string>
-    <string name="button_convert_fbe" msgid="1159861795137727671">"ಅಳಿಸಿ ಮತ್ತು ಪರಿವರ್ತಿಸು…"</string>
     <string name="picture_color_mode" msgid="1013807330552931903">"ಚಿತ್ರ ಬಣ್ಣದ ಮೋಡ್"</string>
     <string name="picture_color_mode_desc" msgid="151780973768136200">"sRGB ಬಳಸಿ"</string>
     <string name="daltonizer_mode_disabled" msgid="403424372812399228">"ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ"</string>
@@ -456,7 +448,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"ಪ್ರೊಟನೋಮಲಿ (ಕೆಂಪು-ಹಸಿರು)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"ಟ್ರಿಟನೋಮಲಿ (ನೀಲಿ-ಹಳದಿ)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"ಬಣ್ಣ ತಿದ್ದುಪಡಿ"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="2333641630205214702">"ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿ ಬಣ್ಣಗಳು ಹೇಗೆ ಡಿಸ್‌ಪ್ಲೇ ಆಗುತ್ತವೆ ಎಂಬುದನ್ನು ಹೊಂದಿಸಿ. ನೀವು ಬಣ್ಣಗಳನ್ನು ಹೆಚ್ಚು ನಿಖರವಾಗಿ ನೋಡಲು ಬಯಸಿದಾಗ:&lt;br/&gt;&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;ಇದು ಸಹಾಯಕವಾಗಿರುತ್ತದೆ&lt;/li&gt; &lt;li&gt;&amp;nbsp;ನಿಮಗೆ ಗಮನಹರಿಸಲು ಸಹಾಯ ಮಾಡಲು ಬಣ್ಣಗಳನ್ನು ತೆಗೆದುಹಾಕಿ&lt;/li&gt; &lt;/ol&gt;"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"ನೀವು ಹೆಚ್ಚು ಸ್ಪಷ್ಟವಾದ ಬಣ್ಣಗಳನ್ನು ನೋಡಲು ಬಯಸಿದರೆ :&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp; ಬಣ್ಣದ ತಿದ್ದುಪಡಿಯು ಸಹಾಯಕವಾಗಿರುತ್ತದೆ; ಗಮನವನ್ನು ಕೇಂದ್ರೀಕರಿಸಲು ನಿಮಗೆ ಸಹಾಯ ಮಾಡಲು ಬಣ್ಣಗಳನ್ನು ತೆಗೆದುಹಾಕಿ &lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> ಮೂಲಕ ಅತಿಕ್ರಮಿಸುತ್ತದೆ"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> ಸಮಯ ಬಾಕಿ ಉಳಿದಿದೆ"</string>
@@ -493,6 +485,7 @@
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"ಚಾರ್ಜ್‌ ಆಗುತ್ತಿಲ್ಲ"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"ಕನೆಕ್ಟ್ ಆಗಿದೆ, ಚಾರ್ಜ್ ಆಗುತ್ತಿಲ್ಲ"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"ಚಾರ್ಜ್ ಆಗಿದೆ"</string>
+    <string name="battery_info_status_full_charged" msgid="3536054261505567948">"ಪೂರ್ಣವಾಗಿ ಚಾರ್ಜ್ ಆಗಿದೆ"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"ನಿರ್ವಾಹಕರ ಮೂಲಕ ನಿಯಂತ್ರಿಸಲಾಗಿದೆ"</string>
     <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"ನಿರ್ಬಂಧಿಸಲಾದ ಸೆಟ್ಟಿಂಗ್ ಮೂಲಕ ನಿಯಂತ್ರಿಸಲಾಗುತ್ತದೆ"</string>
     <string name="disabled" msgid="8017887509554714950">"ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ"</string>
@@ -532,12 +525,14 @@
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"ಕಡಿಮೆ ಸಮಯ."</string>
     <string name="cancel" msgid="5665114069455378395">"ರದ್ದುಮಾಡಿ"</string>
     <string name="okay" msgid="949938843324579502">"ಸರಿ"</string>
+    <string name="done" msgid="381184316122520313">"ಮುಗಿದಿದೆ"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"ಅಲಾರಾಮ್‌ಗಳು ಮತ್ತು ರಿಮೈಂಡರ್‌ಗಳು"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"ಅಲಾರಂಗಳು ಮತ್ತು ರಿಮೈಂಡರ್‌ಗಳನ್ನು ಹೊಂದಿಸಲು ಅನುಮತಿಸಿ"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"ಅಲಾರಂಗಳು ಮತ್ತು ರಿಮೈಂಡರ್‌ಗಳು"</string>
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"ಅಲಾರಂಗಳನ್ನು ಹೊಂದಿಸಲು ಮತ್ತು ಸಮಯ-ಸೂಕ್ಷ್ಮವಾದ ಕ್ರಿಯೆಗಳನ್ನು ನಿಗದಿಪಡಿಸಲು ಈ ಆ್ಯಪ್‌ಗೆ ಅನುಮತಿಸಿ. ಇದು ಹಿನ್ನೆಲೆಯಲ್ಲಿ ರನ್ ಆಗಲು ಆ್ಯಪ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ, ಅದರಿಂದ ಹೆಚ್ಚು ಬ್ಯಾಟರಿ ಬಳಕೆಯಾಗಬಹುದು.\n\nಈ ಅನುಮತಿ ಆಫ್ ಆಗಿದ್ದರೆ, ಅಸ್ತಿತ್ವದಲ್ಲಿರುವ ಅಲಾರಂಗಳು ಮತ್ತು ಈ ಆ್ಯಪ್ ನಿಗದಿಪಡಿಸಿದ ಸಮಯ-ಸೂಕ್ಷ್ಮ ಈವೆಂಟ್‌ಗಳು ಕೆಲಸ ಮಾಡುವುದಿಲ್ಲ."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"ವೇಳಾಪಟ್ಟಿ, ಅಲಾರಂ, ರಿಮೈಂಡರ್, ಗಡಿಯಾರ"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"ಆನ್ ಮಾಡಿ"</string>
+    <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"ಅಡಚಣೆ ಮಾಡಬೇಡಿ ಅನ್ನು ಆನ್ ಮಾಡಿ"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"ಎಂದೂ ಇಲ್ಲ"</string>
     <string name="zen_interruption_level_priority" msgid="5392140786447823299">"ಆದ್ಯತೆ ಮಾತ್ರ"</string>
     <string name="zen_mode_and_condition" msgid="8877086090066332516">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
@@ -549,7 +544,8 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"ಪ್ರತಿ ಬಾರಿ ಕೇಳಿ"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"ನೀವು ಆಫ್ ಮಾಡುವವರೆಗೆ"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"ಇದೀಗ"</string>
-    <string name="media_transfer_this_device_name" msgid="2357329267148436433">"ಈ ಫೋನ್"</string>
+    <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"ಈ ಫೋನ್"</string>
+    <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"ಈ ಟ್ಯಾಬ್ಲೆಟ್"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"ಈ ಫೋನ್"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"ಕನೆಕ್ಟ್ ಮಾಡುವಾಗ ಸಮಸ್ಯೆ ಎದುರಾಗಿದೆ ಸಾಧನವನ್ನು ಆಫ್ ಮಾಡಿ ಹಾಗೂ ನಂತರ ಪುನಃ ಆನ್ ಮಾಡಿ"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"ವೈರ್ ಹೊಂದಿರುವ ಆಡಿಯೋ ಸಾಧನ"</string>
@@ -589,18 +585,31 @@
     <string name="user_set_lock_button" msgid="1427128184982594856">"ಲಾಕ್ ಹೊಂದಿಸಿ"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"<xliff:g id="USER_NAME">%s</xliff:g> ಗೆ ಬದಲಿಸಿ"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"ಹೊಸ ಬಳಕೆದಾರರನ್ನು ರಚಿಸಲಾಗುತ್ತಿದೆ…"</string>
+    <string name="creating_new_guest_dialog_message" msgid="1114905602181350690">"ಹೊಸ ಅತಿಥಿಯನ್ನು ರಚಿಸಲಾಗುತ್ತಿದೆ…"</string>
     <string name="add_user_failed" msgid="4809887794313944872">"ಹೊಸ ಬಳಕೆದಾರರನ್ನು ರಚಿಸಲು ವಿಫಲವಾಗಿದೆ"</string>
+    <string name="add_guest_failed" msgid="8074548434469843443">"ಹೊಸ ಅತಿಥಿಯನ್ನು ರಚಿಸಲು ವಿಫಲವಾಗಿದೆ"</string>
     <string name="user_nickname" msgid="262624187455825083">"ಅಡ್ಡ ಹೆಸರು"</string>
+    <!-- no translation found for user_add_user (7876449291500212468) -->
+    <skip />
     <string name="guest_new_guest" msgid="3482026122932643557">"ಅತಿಥಿಯನ್ನು ಸೇರಿಸಿ"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"ಅತಿಥಿಯನ್ನು ತೆಗೆದುಹಾಕಿ"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"ಅತಿಥಿಯನ್ನು ಮರುಹೊಂದಿಸಿ"</string>
-    <string name="guest_nickname" msgid="6332276931583337261">"ಅತಿಥಿ"</string>
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"ಅತಿಥಿ ಬಳಕೆದಾರರನ್ನು ರೀಸೆಟ್ ಮಾಡಬೇಕೆ?"</string>
+    <!-- no translation found for guest_remove_guest_dialog_title (4548511006624088072) -->
+    <skip />
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"ರೀಸೆಟ್ ಮಾಡಿ"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"ಅತಿಥಿ ಬಳಕೆದಾರರ ಸೆಟ್ಟಿಂಗ್ ಅನ್ನು ರೀಸೆಟ್ ಮಾಡಲಾಗುತ್ತಿದೆ…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"ಫೋಟೋ ತೆಗೆದುಕೊಳ್ಳಿ"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"ಚಿತ್ರವನ್ನು ಆರಿಸಿ"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"ಫೋಟೋ ಆಯ್ಕೆಮಾಡಿ"</string>
+    <!-- no translation found for failed_attempts_now_wiping_device (4016329172216428897) -->
+    <skip />
+    <!-- no translation found for failed_attempts_now_wiping_user (469060411789668050) -->
+    <skip />
+    <!-- no translation found for failed_attempts_now_wiping_profile (7626589520888963129) -->
+    <skip />
+    <!-- no translation found for failed_attempts_now_wiping_dialog_dismiss (2749889771223578925) -->
+    <skip />
     <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"ಸಾಧನದ ಡೀಫಾಲ್ಟ್"</string>
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"ಸಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ"</string>
@@ -642,4 +651,10 @@
     <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"ಬಿತ್ತರಿಸಿದ ಮಾಹಿತಿ"</string>
     <string name="avatar_picker_title" msgid="8492884172713170652">"ಪ್ರೊಫೈಲ್ ಚಿತ್ರವನ್ನು ಆಯ್ಕೆ ಮಾಡಿ"</string>
     <string name="default_user_icon_description" msgid="6554047177298972638">"ಡೀಫಾಲ್ಟ್ ಬಳಕೆದಾರರ ಐಕಾನ್"</string>
+    <string name="physical_keyboard_title" msgid="4811935435315835220">"ಭೌತಿಕ ಕೀಬೋರ್ಡ್"</string>
+    <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"ಕೀಬೋರ್ಡ್ ಲೇಔಟ್ ಆರಿಸಿ"</string>
+    <string name="keyboard_layout_default_label" msgid="1997292217218546957">"ಡೀಫಾಲ್ಟ್"</string>
+    <string name="turn_screen_on_title" msgid="3266937298097573424">"ಸ್ಕ್ರೀನ್ ಅನ್ನು ಆನ್ ಮಾಡಿ"</string>
+    <string name="allow_turn_screen_on" msgid="6194845766392742639">"ಸ್ಕ್ರೀನ್ ಅನ್ನು ಆನ್ ಮಾಡಲು ಅನುಮತಿಸಿ"</string>
+    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"ಸ್ಕ್ರೀನ್ ಅನ್ನು ಆನ್ ಮಾಡಲು ಆ್ಯಪ್‌ಗೆ ಅನುಮತಿಸಿ. ಅನುಮತಿಸಿದರೆ, ನಿಮಗೆ ಅಗತ್ಯವಿಲ್ಲದಿದ್ದಾಗಲೂ ಆ್ಯಪ್ ಯಾವುದೇ ಸಮಯದಲ್ಲಿ ಸ್ಕ್ರೀನ್ ಅನ್ನು ಆನ್ ಮಾಡಬಹುದು."</string>
 </resources>
