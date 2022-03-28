@@ -236,6 +236,7 @@ public class SettingsBackupTest {
                     Settings.Global.DEVICE_NAME,
                     Settings.Global.DEVICE_POLICY_CONSTANTS,
                     Settings.Global.DEVICE_PROVISIONED,
+                    Settings.Global.BYPASS_DEVICE_POLICY_MANAGEMENT_ROLE_QUALIFICATIONS,
                     Settings.Global.DEVICE_PROVISIONING_MOBILE_DATA_ENABLED,
                     Settings.Global.DISK_FREE_CHANGE_REPORTING_THRESHOLD,
                     Settings.Global.DISPLAY_PANEL_LPM,
