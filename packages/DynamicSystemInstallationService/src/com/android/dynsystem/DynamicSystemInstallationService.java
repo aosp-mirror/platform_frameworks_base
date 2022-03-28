@@ -112,18 +112,20 @@ public class DynamicSystemInstallationService extends Service
     private static final int EVENT_DSU_INSTALL_FAILED = 120002;
 
     protected static void logEventProgressUpdate(
-            String partition,
-            long installedSize,
-            long partitionSize,
+            String partitionName,
+            long installedBytes,
+            long totalBytes,
             int partitionNumber,
-            int totalPartitionNumber) {
+            int totalPartitionNumber,
+            int totalProgressPercentage) {
         EventLog.writeEvent(
                 EVENT_DSU_PROGRESS_UPDATE,
-                partition,
-                installedSize,
-                partitionSize,
+                partitionName,
+                installedBytes,
+                totalBytes,
                 partitionNumber,
-                totalPartitionNumber);
+                totalPartitionNumber,
+                totalProgressPercentage);
     }
 
     protected static void logEventComplete() {
@@ -231,10 +233,11 @@ public class DynamicSystemInstallationService extends Service
     public void onProgressUpdate(InstallationAsyncTask.Progress progress) {
         logEventProgressUpdate(
                 progress.partitionName,
-                progress.installedSize,
-                progress.partitionSize,
+                progress.installedBytes,
+                progress.totalBytes,
                 progress.partitionNumber,
-                progress.totalPartitionNumber);
+                progress.totalPartitionNumber,
+                progress.totalProgressPercentage);
 
         mInstallTaskProgress = progress;
         postStatus(STATUS_IN_PROGRESS, CAUSE_NOT_SPECIFIED, null);
@@ -483,23 +486,46 @@ public class DynamicSystemInstallationService extends Service
 
         switch (status) {
             case STATUS_IN_PROGRESS:
-                builder.setContentText(getString(R.string.notification_install_inprogress));
+                String msgInProgress = getString(R.string.notification_install_inprogress);
 
-                if (mInstallTaskProgress != null) {
-                    int max = 1024;
-                    int progress = 0;
+                if (mInstallTaskProgress == null) {
+                    builder.setContentText(msgInProgress);
+                } else {
+                    if (mInstallTaskProgress.totalPartitionNumber > 0) {
+                        builder.setContentText(
+                                String.format(
+                                        "%s: %s partition [%d/%d]",
+                                        msgInProgress,
+                                        mInstallTaskProgress.partitionName,
+                                        mInstallTaskProgress.partitionNumber,
+                                        mInstallTaskProgress.totalPartitionNumber));
 
-                    int currentMax = max >> mInstallTaskProgress.partitionNumber;
-                    progress = max - currentMax * 2;
+                        // totalProgressPercentage is defined iff totalPartitionNumber is defined
+                        builder.setProgress(
+                                100,
+                                mInstallTaskProgress.totalProgressPercentage,
+                                /* indeterminate = */ false);
+                    } else {
+                        builder.setContentText(
+                                String.format(
+                                        "%s: %s partition",
+                                        msgInProgress, mInstallTaskProgress.partitionName));
 
-                    long currentProgress =
-                            (mInstallTaskProgress.installedSize >> 20)
-                                    * currentMax
-                                    / Math.max(mInstallTaskProgress.partitionSize >> 20, 1);
+                        int max = 1024;
+                        int progress = 0;
 
-                    progress += (int) currentProgress;
+                        int currentMax = max >> mInstallTaskProgress.partitionNumber;
+                        progress = max - currentMax * 2;
 
-                    builder.setProgress(max, progress, false);
+                        long currentProgress =
+                                (mInstallTaskProgress.installedBytes >> 20)
+                                        * currentMax
+                                        / Math.max(mInstallTaskProgress.totalBytes >> 20, 1);
+
+                        progress += (int) currentProgress;
+
+                        builder.setProgress(max, progress, false);
+                    }
                 }
                 builder.addAction(new Notification.Action.Builder(
                         null, getString(R.string.notification_action_cancel),
@@ -609,10 +635,11 @@ public class DynamicSystemInstallationService extends Service
         if (status == STATUS_IN_PROGRESS && mInstallTaskProgress != null) {
             msg.append(
                     String.format(
-                            ", partition name: %s, progress: %d/%d",
+                            ", partition name: %s, progress: %d/%d, total_progress: %d%%",
                             mInstallTaskProgress.partitionName,
-                            mInstallTaskProgress.installedSize,
-                            mInstallTaskProgress.partitionSize));
+                            mInstallTaskProgress.installedBytes,
+                            mInstallTaskProgress.totalBytes,
+                            mInstallTaskProgress.totalProgressPercentage));
         }
         if (detail != null) {
             msg.append(", detail: " + detail);
@@ -639,7 +666,7 @@ public class DynamicSystemInstallationService extends Service
         // TODO: send more info to the clients
         if (mInstallTaskProgress != null) {
             bundle.putLong(
-                    DynamicSystemClient.KEY_INSTALLED_SIZE, mInstallTaskProgress.installedSize);
+                    DynamicSystemClient.KEY_INSTALLED_SIZE, mInstallTaskProgress.installedBytes);
         }
 
         if (detail != null) {

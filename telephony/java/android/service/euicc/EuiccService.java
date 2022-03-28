@@ -23,6 +23,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.annotation.SystemApi;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Bundle;
@@ -260,6 +261,14 @@ public abstract class EuiccService extends Service {
      */
     public static final String EXTRA_RESOLUTION_PORT_INDEX =
             "android.service.euicc.extra.RESOLUTION_PORT_INDEX";
+
+    /**
+     * Intent extra set for resolution requests containing a bool indicating whether to use the
+     * given port index. For example, if {@link #switchToSubscription(int, PendingIntent)} is
+     * called, then no portIndex has been provided by the caller, and this extra will be false.
+     */
+    public static final String EXTRA_RESOLUTION_USE_PORT_INDEX =
+            "android.service.euicc.extra.RESOLUTION_USE_PORT_INDEX";
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
@@ -852,13 +861,19 @@ public abstract class EuiccService extends Service {
         }
         @Override
         public void switchToSubscription(int slotId, int portIndex, String iccid,
-                boolean forceDeactivateSim, ISwitchToSubscriptionCallback callback) {
+                boolean forceDeactivateSim, ISwitchToSubscriptionCallback callback,
+                boolean usePortIndex) {
             mExecutor.execute(new Runnable() {
                 @Override
                 public void run() {
-                    int result =
-                            EuiccService.this.onSwitchToSubscriptionWithPort(
-                                    slotId, portIndex, iccid, forceDeactivateSim);
+                    int result = 0;
+                    if (usePortIndex) {
+                        result = EuiccService.this.onSwitchToSubscriptionWithPort(
+                                slotId, portIndex, iccid, forceDeactivateSim);
+                    } else {
+                        result = EuiccService.this.onSwitchToSubscription(
+                                slotId, iccid, forceDeactivateSim);
+                    }
                     try {
                         callback.onComplete(result);
                     } catch (RemoteException e) {

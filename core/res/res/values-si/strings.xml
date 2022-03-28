@@ -202,7 +202,6 @@
     <string name="gnss_service" msgid="8907781262179951385">"GNSS සේවාව"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"සංවේදක දැනුම් දීමේ සේවාව"</string>
     <string name="twilight_service" msgid="8964898045693187224">"ඇඳිරි සේවාව"</string>
-    <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"වේලා කලාප අනාවරකය (සම්බන්ධතාවක් නොමැත)"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"GNSS වේලා යාවත්කාලීන සේවාව"</string>
     <string name="music_recognition_manager_service" msgid="7481956037950276359">"සංගීත හැඳුනුම් කළමනාකරු සේවාව"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"ඔබගේ උපාංගය මකා දැමෙනු ඇත"</string>
@@ -470,6 +469,8 @@
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"ඔබේ මැදිහත්වීමකින් තොරව ඇමතුම් සිදු කිරීමට  IMS සේවාව භාවිතයට යෙදුමට ඉඩ දෙන්න."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"දුරකථනයේ තත්වය සහ අනන්‍යතාවය කියවීම"</string>
     <string name="permdesc_readPhoneState" msgid="7229063553502788058">"උපාංගයේ දුරකථන විශේෂාංග වෙත ප්‍රවේශයට යෙදුමට ඉඩ දෙයි.  ඇමතුම සක්‍රිය වුවත්, සහ ඇමතුමකින් දුරස්ථ අංකය සම්බන්ධ වුවත් දුරකථන අංකය සහ උපාංග ID හඳුනා ගැනීමට මෙම අවසරය යෙදුමට ඉඩ දෙයි."</string>
+    <string name="permlab_readBasicPhoneState" msgid="3214853233263871347">"මූලික දුරකථන තත්ත්වය සහ අනන්‍යතාව කියවන්න"</string>
+    <string name="permdesc_readBasicPhoneState" msgid="828185691675460520">"උපාංගයේ මූලික දුරකථන විශේෂාංග වෙත ප්‍රවේශ වීමට යෙදුමට ඉඩ දෙයි."</string>
     <string name="permlab_manageOwnCalls" msgid="9033349060307561370">"පද්ධතිය හරහා ඇමතුම් මාර්ගගත කරන්න"</string>
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"ඇමතුම් අත්දැකීම වැඩිදියුණු කිරීම සඳහා යෙදුමට පද්ධතිය හරහා එහි ඇමතුම් මාර්ගගත කිරීමට ඉඩ දෙයි."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"පද්ධතිය හරහා ඇමතුම් බලන්න සහ පාලනය කරන්න."</string>
@@ -542,6 +543,8 @@
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"අවට ඇති බ්ලූටූත් උපාංගවලට වෙළඳ ප්‍රචාරණය කිරීමට යෙදුමට ඉඩ දෙයි"</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"අවට අල්ට්‍රා-වයිඩ්බෑන්ඩ් උපාංග අතර සාපේක්ෂ පිහිටීම නිර්ණය"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"අවට ඇති අල්ට්‍රා-වයිඩ්බෑන්ඩ් උපාංග අතර සාපේක්ෂ පිහිටීම නිර්ණය කිරීමට යෙදුමට ඉඩ දීම"</string>
+    <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"අවට Wi‑Fi උපාංග සමග අන්තර්ක්‍රියා කරන්න"</string>
+    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"වෙළඳ දැන්වීම් පළ කිරීමට, සම්බන්ධ වීමට සහ අවට ඇති Wi-Fi උපාංගවල සාපේක්ෂ පිහිටීම නිර්ණය කිරීමට යෙදුමට ඉඩ දෙයි"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"කැමති NFC ගෙවීම් සේවා තොරතුරු"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"ලියාපදිංචි කළ ආධාර සහ ගමන් මාර්ග ගමනාන්ත වැනි කැමති nfc ගෙවීම් සේවා තොරතුරු ලබා ගැනීමට යෙදුමට ඉඩ දෙයි."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"ආසන්න ක්ෂේත්‍ර සන්නිවේදනය පාලනය කරන්න"</string>
@@ -580,11 +583,12 @@
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"අර්ධ ඇඟිලි සලකුණක් අනාවරණය කරන ලදි"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"ඇඟිලි සලකුණ පිරිසැකසීමට නොහැකි විය. කරුණාකර නැවත උත්සාහ කරන්න."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"සංවේදකය පිරිසිදු කරන්න"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1254724478300787385">"ඇඟිල්ල වඩා වේගයෙන් ගෙන යන ලදි"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="6038375140739678098">"තව ටිකක් වැඩිපුර අල්ලාගෙන සිටින්න"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"ඇඟිල්ල වඩා සෙමෙන් ගෙන යන ලදි. කරුණාකර නැවත උත්සාහ කරන්න."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"තවත් ඇඟිලි සලකුණක් උත්සාහ කරන්න"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"දීප්තිය වැඩියි"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"සීරුමාරු කිරීම උත්සාහ කරන්න"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"එක් එක් අවස්ථාවේ ඔබගේ ඇඟිල්ලේ පිහිටීම මදක් වෙනස් කරන්න"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"ඇඟිලි සලකුණ සත්‍යාපනය කරන ලදී"</string>
@@ -601,6 +605,7 @@
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"ඇඟිලි සලකුණු ඇතුළත් කර නොමැත."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"මෙම උපාංගයේ ඇඟිලි සලකුණු සංවේදකයක් නොමැත."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"සංවේදකය තාවකාලිකව අබල කර ඇත."</string>
+    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"ඇඟිලි සලකුණු සංවේදකය භාවිත කළ නොහැකිය. අළුත්වැඩියා සැපයුම්කරුවෙකු බලන්න"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"ඇඟිලි <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"ඇඟිලි සලකුණ භාවිත කරන්න"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"ඇඟිලි සලකුණ හෝ තිර අගුල භාවිත කරන්න"</string>
@@ -608,18 +613,19 @@
     <string name="fingerprint_or_screen_lock_dialog_default_subtitle" msgid="5195808203117992200">"ඉදිරියට යාමට ඔබගේ ඇඟිලි සලකුණ හෝ තිර අගුල භාවිත කරන්න"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
+    <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"යම් දෙයක් වැරදිණි. නැවත උත්සාහ කරන්න."</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"ඇඟිලි සලකුණු නිරූපකය"</string>
-    <string name="permlab_manageFace" msgid="4569549381889283282">"මුහුණු අඟුලු ඇරීමේ දෘඪාංග කළමනා කරන්න"</string>
-    <string name="permdesc_manageFace" msgid="6204569688492710471">"මුහුණු අච්චු එකතු කිරීමට සහ ඉවත් කිරීමට අදාළ ක්‍රම භාවිතය සඳහා මෙම යෙදුමට ඉඩ දෙයි."</string>
-    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"මුහුණු අඟුලු ඇරීමේ දෘඪාංග භෘවිත කරන්න"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"සත්‍යාපනය සඳහා මුහුණු අඟුලු ඇරීමේ දෘඪාංග භාවිත කිරීමට යෙදුමට ඉඩ දෙයි"</string>
-    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"මුහුණු අඟුලු ඇරීම"</string>
-    <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"ඔබේ මුහුණ යළි ලියාපදිංචි කරන්න"</string>
-    <string name="face_recalibrate_notification_content" msgid="892757485125249962">"හඳුනා ගැනීම වැඩිදියුණු කිරීමට, ඔබේ මුහුණ යළි-ලියාපදිංචි කරන්න"</string>
-    <string name="face_setup_notification_title" msgid="550617822603450009">"මුහුණු අඟුලු හැරීම පිහිටුවන්න"</string>
+    <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"මුහුණෙන් අගුළු හැරීම"</string>
+    <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"මුහුණෙන් අගුලු හැරීම සම්බන්ධව ගැටලුවකි"</string>
+    <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"ඔබගේ මුහුණත ආකෘතිය මැකීමට තට්ටු කරන්න, අනතුරුව ඔබගේ මුහුණ නැවත එක් කරන්න"</string>
+    <string name="face_setup_notification_title" msgid="8843461561970741790">"මුහුණෙන් අගුළු හැරීම පිහිටුවන්න"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"ඔබගේ දුරකථනය දෙස බැලීමෙන් එහි අගුලු හරින්න"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"මුහුණෙන් අගුලු හැරීම භාවිත කිරීමට, සැකසීම් &gt; පෞද්ගලිකත්වය තුළ "<b>"කැමරා ප්‍රවේශය"</b>" ක්‍රියාත්මක කරන්න"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"අගුලු හැරීමට තවත් ක්‍රම සකසන්න"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"ඇඟිලි සලකුණක් එක් කිරීමට තට්ටු කරන්න"</string>
+    <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"ඇඟිලි සලකුණු අගුළු හැරීම"</string>
+    <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"ඇඟිලි සලකුණු සංවේදකය භාවිත කළ නොහැකිය"</string>
+    <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"අළුත්වැඩියා සැපයුම්කරුවෙකු බලන්න."</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"නිරවද්‍ය මුහුණු දත්ත ගත නොහැකි විය. නැවත උත්සාහ කරන්න."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"දීප්තිය වැඩියි. තවත් මඳ ආලෝකය උත්සාහ කරන්න."</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"ඉතා අඳුරුයි. තවත් දීප්තිමත් ආලෝකය උත්සාහ කරන්න."</string>
@@ -643,23 +649,25 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"මුහුණ සත්‍යාපනය කළ නොහැක. දෘඩාංගය නොමැත."</string>
-    <string name="face_error_timeout" msgid="522924647742024699">"නැවතත් මුහුණු අඟුලු ඇරීම උත්සාහ කරන්න."</string>
+    <string name="face_error_timeout" msgid="2598544068593889762">"මුහුණෙන් අගුළු හැරීම නැවත උත්සාහ කරන්න."</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"නව මුහුණු දත්ත ගබඩා කළ නොහැක. පළමුව පැරණි එකක් මකන්න."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"මුහුණු මෙහෙයුම අවලංගු කරන ලදී."</string>
-    <string name="face_error_user_canceled" msgid="8553045452825849843">"පරිශීලකයා මුහුණු අඟුලු ඇරීම අවලංගු කර ඇත."</string>
+    <string name="face_error_user_canceled" msgid="5766472033202928373">"පරිශීලකයා විසින් මුහුණෙන් අගුළු හැරීම අවලංගු කරන ලදි"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"උත්සාහයන් ඉතා වැඩි ගණනකි. පසුව නැවත උත්සාහ කරන්න."</string>
-    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"ප්‍රයත්න ගණන වැඩියි. මුහුණු අඟුලු ඇරීම අබලයි."</string>
+    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"උත්සාහයන් ඉතා වැඩි ගණනකි. මුහුණෙන් අගුළු හැරීම අබලයි."</string>
+    <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"උත්සාහයන් ඉතා වැඩි ගණනකි. ඒ වෙනුවට තිර අගුල ඇතුළු කරන්න."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"මුහුණ සත්‍යාපන කළ නොහැක. නැවත උත්සාහ කරන්න."</string>
-    <string name="face_error_not_enrolled" msgid="7369928733504691611">"ඔබ මුහුණු අඟුලු ඇරීම සකසා නැත"</string>
-    <string name="face_error_hw_not_present" msgid="1070600921591729944">"මෙම උපාංගයෙහි මුහුණු අඟුලු ඇරීමට සහය නොදැක්වේ"</string>
+    <string name="face_error_not_enrolled" msgid="1134739108536328412">"ඔබ මුහුණෙන් අගුළු හැරීම පිහිටුවා නැත"</string>
+    <string name="face_error_hw_not_present" msgid="7940978724978763011">"මුහුණෙන් අගුළු හැරීම මෙම උපාංගයේ සහාය නොදක්වයි."</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"සංවේදකය තාවකාලිකව අබල කර ඇත."</string>
     <string name="face_name_template" msgid="3877037340223318119">"මුහුණු <xliff:g id="FACEID">%d</xliff:g>"</string>
-    <string name="face_app_setting_name" msgid="8130135875458467243">"මුහුණු අගුලු හැරීම භාවිත කරන්න"</string>
-    <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"මුහුණු අගුලු හැරීම හෝ තිර අගුල භාවිත කරන්න"</string>
+    <string name="face_app_setting_name" msgid="5854024256907828015">"මුහුණෙන් අගුළු හැරීම භාවිත කර."</string>
+    <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"මුහුණෙන් අගුළු හැරීම හෝ තිර අගුල භාවිත කරන්න"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"ඉදිරියට යාමට ඔබගේ මුහුණ භාවිත කරන්න"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"ඉදිරියට යාමට ඔබගේ මුහුණු හෝ තිර අගුල භාවිත කරන්න"</string>
   <string-array name="face_error_vendor">
   </string-array>
+    <string name="face_error_vendor_unknown" msgid="7387005932083302070">"යම් දෙයක් වැරදිණි. නැවත උත්සාහ කරන්න."</string>
     <string name="face_icon_content_description" msgid="465030547475916280">"මුහුණ නිරූපකය"</string>
     <string name="permlab_readSyncSettings" msgid="6250532864893156277">"සමමුහුර්ත සැකසීම් කියවන්න"</string>
     <string name="permdesc_readSyncSettings" msgid="1325658466358779298">"ගිණුම සඳහා සමමුහුර්ත සැකසීම් කියවීමට යෙදුමට අවසර දෙන්න. උදාහරණයක් ලෙස, ගිණුමක් සමඟ පුද්ගල යෙදුම සමමුහුර්ත දැයි මෙයට හඳුනා ගත හැක."</string>
@@ -726,9 +734,11 @@
     <string name="policylab_watchLogin" msgid="7599669460083719504">"තිරය අගුළු ඇරීමේ උත්සාහයන් නිරීක්ෂණය කරන්න"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"තිරය අගුළු හැරීමේදී වැරදියට ටයිප් කළ මුරපද ගණන නිරීක්ෂණය කරන්න සහ ටැබ්ලටය අගුළු දමන්න හෝ වැරදි මුරපද බොහෝ ගණනක් ටයිප් කර ඇති නම් ටැබ්ලටයේ සියලු දත්ත මකන්න."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"තිරය අගුලු හරින විට වැරදියට මුරපදය ටයිප් කළ වාර ගණන නිරීක්ෂණය කර, ඉතා වැඩි වාර ගණනක් වැරදි මුරපද ටයිප් කළේ නම් ඔබේ Android TV උපාංගය අගුලු දමන්න නැතහොත් මෙම Android TV උපාංගයෙහි සියලු දත්ත මකන්න."</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"තිරය අගුලු හරින විට වැරදියට මුරපදය ටයිප් කළ වාර ගණන නිරීක්ෂණය කර, ඉතා වැඩි වාර ගණනක් වැරදි මුරපද ටයිප් කළේ නම් තොරතුරු විනෝදාස්වාද පද්ධතිය අගුලු දමන්න නැතහොත් මෙම තොරතුරු විනෝදාස්වාද පද්ධතියෙහි සියලු දත්ත මකන්න."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"තිරය අගුළු හැරීමේදී වැරදියට ටයිප් කළ මුරපද ගණන නිරීක්ෂණය කරන්න සහ දුරකථනය අගුළු දමන්න හෝ වැරදි මුරපද බොහෝ ගණනක් ටයිප් කර ඇති නම් දුරකථනයේ සියලු දත්ත මකන්න."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"තිරය අගුලු හරින විට වැරදියට මුරපදය ටයිප් කළ වාර ගණන නිරීක්ෂණය කර, ඉතා වැඩි වාර ගණනක් වැරදි මුරපද ටයිප් කළේ නම් ටැබ්ලටය අගුලු දමන්න නැතහොත් මෙම පරිශීලකයාගේ සියලු දත්ත මකන්න."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"තිරය අගුලු හරින විට වැරදියට මුරපදය ටයිප් කළ වාර ගණන නිරීක්ෂණය කර, ඉතා වැඩි වාර ගණනක් වැරදි මුරපද ටයිප් කළේ නම් ඔබේ Android TV අගුලු දමන්න නැතහොත් මෙම පරිශීලකයාගේ සියලු දත්ත මකන්න."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"තිරය අගුලු හරින විට වැරදියට මුරපදය ටයිප් කළ වාර ගණන නිරීක්ෂණය කර, ඉතා වැඩි වාර ගණනක් වැරදි මුරපද ටයිප් කළේ නම් තොරතුරු විනෝදාස්වාද පද්ධතිය අගුලු දමන්න නැතහොත් මෙම පැතිකඩෙහි සියලු දත්ත මකන්න."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"තිරය අගුලු හරින විට වැරදියට මුරපදය ටයිප් කළ වාර ගණන නිරීක්ෂණය කර, ඉතා වැඩි වාර ගණනක් වැරදි මුරපද ටයිප් කළේ නම් දුරකථනය අගුලු දමන්න නැතහොත් මෙම පරිශීලකයාගේ සියලු දත්ත මකන්න."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"තිර අගුල වෙනස් කරන්න"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"තිර අගුල වෙනස් කරන්න."</string>
@@ -737,10 +747,13 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"සියලු දත්ත මකන්න"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"කර්මාන්ත ශාලා දත්ත යළි පිහිටුවීමෙන් පසුව අනතුරු ඇඟවිමකින් තොරවම ටැබ්ලට් දත්ත මකා දමයි."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"කර්මාන්ත ශාලා දත්ත යළි සැකසීමක් සිදු කිරීම මගින්, අනතුරු ඇඟවිමකින් තොරව ඔබේ Android TV දත්ත මකයි."</string>
+    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"අනතුරු ඇඟවීමෙන් තොරව කර්මාන්තශාලා දත්ත යළි සැකසීමක් සිදු කිරීම මගින් තොරතුරු විනෝදාස්වාද පද්ධතියේ දත්ත මකන්න."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"කර්මාන්ත ශාලා දත්ත යළි පිහිටුවීමෙන් පසුව අනතුරු ඇඟවිමකින් තොරවම දුරකථන දත්ත මකා දමයි."</string>
-    <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"පරිශීලක දත්ත මකන්න"</string>
+    <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"පැතිකඩ දත්ත මකන්න"</string>
+    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"පරිශීලක දත්ත මකන්න"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"අනතුරු ඇඟවීමකින් තොරව මෙම ටැබ්ලටයෙහි මෙම පරිශීලකයාගේ දත්ත මැකීම."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"අනතුරු ඇඟවීමකින් තොරව මෙම Android TV උපාංගයෙහි මෙම පරිශීලකයාගේ දත්ත මැකීම."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"අනතුරු ඇඟවීමෙන් තොරව මෙම තොරතුරු විනෝදාස්වාද පද්ධතියේ මෙම පැතිකඩෙහි දත්ත මකන්න."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"අනතුරු ඇඟවීමකින් තොරව මෙම දුරකථනයෙහි මෙම පරිශීලකයාගේ දත්ත මැකීම."</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"උපාංග ගෝලීය නියුතුව සකස් කිරීම"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"ප්‍රතිපත්තිය සක්‍රිය අතරතුර ගෝලීය ප්‍රොක්සි භාවිත කිරීමට උපාංගය සකසන්න. උපාංග හිමිකරුට පමණක් ගෝලීය ප්‍රොක්සි සැකසිය හැකිය."</string>
@@ -887,7 +900,7 @@
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"නැවත උත්සාහ කරන්න"</string>
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"නැවත උත්සාහ කරන්න"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"සියලු විශේෂාංග සහ දත්ත අනවහිර කරන්න"</string>
-    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"මුහුණ භාවිතයෙන් අඟුළු හැරීමේ උපරිම ප්‍රයන්තයන් ගණන ඉක්මවා ඇත"</string>
+    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"මුහුණෙන් අගුළු හැරීමේ උපරිම ප්‍රයන්තයන් ගණන ඉක්මවා ඇත"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"SIM පත නැත"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"ටැබ්ලටයේ SIM පත නොමැත."</string>
     <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"ඔබගේ Android TV උපාංගයේ SIM කාඩ්පතක් නොමැත."</string>
@@ -957,7 +970,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"අගුළු නොදැමූ ප්‍රදේශය පුළුල් කරන්න."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"සර්පණ අගුළු ඇරීම."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"රටා අගුළු ඇරීම."</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"මුහුණ භාවිතයෙන් අඟුළු හැරීම."</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="4533832120787386728">"මුහුණෙන් අගුළු හැරීම."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"PIN අගුළු ඇරීම."</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"Sim Pin අගුලු දැමීම."</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"Sim Puk අගුලු දැමීම."</string>
@@ -1022,7 +1035,7 @@
     <string name="text_copied" msgid="2531420577879738860">"පෙළ පසුරු පුවරුවට පිටපත් කරන ලදි."</string>
     <string name="copied" msgid="4675902854553014676">"පිටපත් කළා"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g> වෙතින් අලවන ලදි"</string>
-    <string name="pasted_from_clipboard" msgid="6295556725844421812">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> පසුරු පුවරුව වෙතින් අලවන ලදි"</string>
+    <string name="pasted_from_clipboard" msgid="7355790625710831847">"ඔබගේ පසුරු පුවරුව වෙතින් <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> පිටපත් කරන ලදි"</string>
     <string name="pasted_text" msgid="4298871641549173733">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ඔබ පිටපත් කළ පෙළ ඇලවීය"</string>
     <string name="pasted_image" msgid="4729097394781491022">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ඔබ පිටපත් කළ රූපයක් ඇලවීය"</string>
     <string name="pasted_content" msgid="646276353060777131">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ඔබ පිටපත් කළ අන්තර්ගතය ඇලවීය"</string>
@@ -1259,6 +1272,10 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g> සූදානම් කරමින්."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"යෙදුම් ආරම්භ කරමින්."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"ඇරඹුම අවසාන කරමින්."</string>
+    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"තිරය ක්‍රියාවිරහිත කරන්නද?"</string>
+    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"ඔබගේ ඇඟිලි සලකුණ පිහිටුවන අතරතුර ඔබ බල බොත්තම එබුවේය.\n\nමෙය සාමාන්‍යයෙන් ඔබගේ තිරය ක්‍රියාවිරහිත කරයි."</string>
+    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"ක්‍රියාවිරහිත කරන්න"</string>
+    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"අවලංගු කරන්න"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> ධාවනය වෙමින්"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"ක්‍රීඩාව වෙත ආපසු යාමට තට්ටු කරන්න"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"ක්‍රීඩාව තෝරන්න"</string>
@@ -1457,6 +1474,8 @@
     <string name="permdesc_requestDeletePackages" msgid="6133633516423860381">"ස්ථාපන පැකේජ මැකීමට යෙදුමකට ඉඩ දීම."</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="7646611326036631439">"බැටරි ප්‍රශස්තකරණ නොසලකා හැරීමට ඉල්ලන්න"</string>
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"යෙදුමකට එම යෙදුම සඳහා බැටරි ප්‍රශස්තකරණ නොසලකා හැරීමට අවසර ඉල්ලීමට ඉඩ දෙයි."</string>
+    <string name="permlab_queryAllPackages" msgid="2928450604653281650">"සියලු පැකේජ විමසන්න"</string>
+    <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"ස්ථාපනය කර ඇති සියලු පැකේජ බැලීමට යෙදුමකට ඉඩ දෙයි."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"විශාලන පාලක සඳහා දෙවතාවක් තට්ටු කරන්න"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"විජටය එකතු කිරීමට නොහැකි විය."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"යන්න"</string>
@@ -1475,6 +1494,7 @@
     <string name="deny" msgid="6632259981847676572">"ප්‍රතික්ෂේප කරන්න"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"අවසර ඉල්ලා සිටී"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"<xliff:g id="ACCOUNT">%s</xliff:g> ගිණුම සඳහා\nඅවසර ඉල්ලන ලදි."</string>
+    <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"<xliff:g id="ACCOUNT">%2$s</xliff:g> ගිණුම සඳහා <xliff:g id="APP">%1$s</xliff:g>\n විසින් ඉල්ලූ අවසරය"</string>
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"මෙම යෙදුම ඔබගේ කාර්යාල පැතිකඩින් පිට දී ඔබ භාවිතා කරයි"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"මෙම යෙදුම ඔබගේ පුද්ගලික කොටසේ ඔබ භාවිතා කරයි"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"ආදාන ක්‍රමය"</string>
@@ -1683,7 +1703,7 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"කෙටිමග ක්‍රියාත්මක විට, හඬ පරිමා බොත්තම් දෙකම තත්පර 3ක් තිස්සේ එබීමෙන් ප්‍රවේශ්‍යතා විශේෂාංගය ආරම්භ වනු ඇත."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"ප්‍රවේශ්‍යතා විශේෂාංග සඳහා කෙටි මග ක්‍රියාත්මක කරන්නද?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"හඬ පරිමා යතුරු දෙකම තත්පර කීපයකට පහළට අල්ලාගෙන සිටීම ප්‍රවේශ්‍යතා විශේෂාංග ක්‍රියාත්මක කරයි. මෙය ඔබේ උපාංගය ක්‍රියා කරන ආකාරය වෙනස් කළ හැකිය.\n\nවත්මන් විශේෂාංග:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nඔබට තේරූ විශේෂාංග සැකසීම් &gt; ප්‍රවේශ්‍යතාව හි වෙනස් කළ හැකිය."</string>
-    <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
+    <string name="accessibility_shortcut_multiple_service_list" msgid="2128323171922023762">" • <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"<xliff:g id="SERVICE">%1$s</xliff:g> කෙටි මග ක්‍රියාත්මක කරන්නද?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"හඬ පරිමා යතුරු දෙකම තත්පර කීපයකට පහළට අල්ලාගෙන සිටීම ප්‍රවේශ්‍යතා විශේෂාංගයක් වන <xliff:g id="SERVICE">%1$s</xliff:g> ක්‍රියාත්මක කරයි. මෙය ඔබේ උපාංගය ක්‍රියා කරන ආකාරය වෙනස් කළ හැකිය.\n\nඔබට මෙම කෙටිමග සැකසීම් &gt; ප්‍රවේශ්‍යතාව හි තවත් විශේෂාංගයකට වෙනස් කළ හැකිය."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"ක්‍රියාත්මක කරන්න"</string>
@@ -1709,6 +1729,7 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"කෙටිමඟ භාවිතා කරන්න"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"වර්ණ අපවර්තනය"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"වර්ණ නිවැරදි කිරීම"</string>
+    <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"තනි අත් ප්‍රකාරය"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"තවත් අඳුරු"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"හඬ පරිමා යතුරු අල්ලා ගන්න <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ක්‍රියාත්මකයි."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"හඬ පරිමා යතුරු අල්ලා ගන්න <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ක්‍රියාවිරහිතයි."</string>
@@ -1864,8 +1885,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"ඔබගේ පරිපාලක මඟින් යාවත්කාලීන කර ඇත"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"ඔබගේ පරිපාලක මඟින් මකා දමා ඇත"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"හරි"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="750683025714899363">"බැටරි සුරැකුම අඳුරු තේමාව ක්‍රියාත්මක කර පසුබිම් ක්‍රියාකාරකම්, සමහර දෘශ්‍ය ප්‍රයෝග සහ යම් විශේෂාංග ක්‍රියාවිරහිත හෝ සීමා කරයි.\n\n"<annotation id="url">"තව දැන ගන්න"</annotation></string>
-    <string name="battery_saver_description" msgid="5693741424234005958">"බැටරි සුරැකුම අඳුරු තේමාව ක්‍රියාත්මක කර පසුබිම් ක්‍රියාකාරකම්, සමහර දෘශ්‍ය ප්‍රයෝග සහ යම් විශේෂාංග ක්‍රියාවිරහිත හෝ සීමා කරයි."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"බැටරි සුරැකුම අඳුරු තේමාව ක්‍රියාත්මක කර පසුබිම් ක්‍රියාකාරකම්, සමහර දෘශ්‍ය ප්‍රයෝග, යම් විශේෂාංග සහ සමහර ජාල සම්බන්ධතා සීමා හෝ ක්‍රියාවිරහිත කරයි."</string>
+    <string name="battery_saver_description" msgid="8518809702138617167">"බැටරි සුරැකුම අඳුරු තේමාව ක්‍රියාත්මක කර පසුබිම් ක්‍රියාකාරකම්, සමහර දෘශ්‍ය ප්‍රයෝග, යම් විශේෂාංග සහ සමහර ජාල සම්බන්ධතා සීමා හෝ ක්‍රියාවිරහිත කරයි."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"දත්ත භාවිතය අඩු කිරීමට උදවු වීමට, දත්ත සුරැකුම සමහර යෙදුම් පසුබිමින් දත්ත යැවීම සහ ලබා ගැනීම වළක්වයි. ඔබ දැනට භාවිත කරන යෙදුමකට දත්ත වෙත පිවිසීමට හැකිය, නමුත් එසේ කරන්නේ කලාතුරකින් විය හැකිය. මෙයින් අදහස් වන්නේ, උදාහරණයක් ලෙස, එම රූප ඔබ ඒවාට තට්ටු කරන තෙක් සංදර්ශනය නොවන බවය."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"දත්ත සුරැකුම ක්‍රියාත්මක කරන්නද?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"ක්‍රියාත්මක කරන්න"</string>
@@ -1968,8 +1989,8 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> මේ අවස්ථාවේදී ලබා ගත නොහැකිය. මෙය <xliff:g id="APP_NAME_1">%2$s</xliff:g> මගින් කළමනාකරණය කෙරේ."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"තව දැන ගන්න"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"යෙදුම විරාම කිරීම ඉවත් කරන්න"</string>
-    <string name="work_mode_off_title" msgid="5503291976647976560">"කාර්යාල පැතිකඩ ක්‍රියාත්මක කරන්නද?"</string>
-    <string name="work_mode_off_message" msgid="8417484421098563803">"ඔබගේ වැඩ යෙදුම්, දැනුම්දීම්, දත්ත සහ වෙනත් කාර්යාල පැතිකඩ විශේෂාංග ක්‍රියාත්මක කරනු ඇත"</string>
+    <string name="work_mode_off_title" msgid="961171256005852058">"කාර්යාල යෙදු. ක්‍රියා. කරන්නද?"</string>
+    <string name="work_mode_off_message" msgid="7319580997683623309">"ඔබගේ කාර්යාල යෙදුම් සහ දැනුම්දීම් වෙත ප්‍රවේශය ලබා ගන්න"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"ක්‍රියාත්මක කරන්න"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"යෙදුම ලබා ගත නොහැකිය"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> මේ දැන් ලබා ගත නොහැකිය."</string>
@@ -2090,7 +2111,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"හරි"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"ක්‍රියාවිරහිත කරන්න"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"තව දැන ගන්න"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="2353549817159426430">"වැඩිදියුණු කළ දැනුම්දීම් Android 12 හි Android අනුවර්තී දැනුම්දීම් ප්‍රතිස්ථාපනය කරයි. මෙම විශේෂාංගය යෝජිත ක්‍රියා සහ පිළිතුරු පෙන්වන අතර, ඔබගේ දැනුම්දීම් සංවිධානය කරයි.\n\nවැඩිදියුණු කළ දැනුම්දීම්වලට සම්බන්ධතා නම් සහ පණිවිඩ වැනි පුද්ගලික තොරතුරු ඇතුළුව, සියලු දැනුම්දීම් අන්තර්ගතය වෙත ප්‍රවේශ විය හැකිය. මෙම විශේෂාංගයට දැනුම්දීම් ඉවත දැමීමට හෝ දුරකථන ඇමතුම්වලට පිළිතුරු දීම සහ බාධා නොකරන්න පාලනය කිරීම වැනි, දැනුම්දීම්වලට ප්‍රතිචාර දැක්වීමටද හැකිය."</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"වැඩිදියුණු කළ දැනුම්දීම් Android 12 හි Android අනුවර්තී දැනුම්දීම් ප්‍රතිස්ථාපනය කරයි. මෙම විශේෂාංගය යෝජිත ක්‍රියා සහ පිළිතුරු පෙන්වන අතර, ඔබගේ දැනුම්දීම් සංවිධානය කරයි.\n\nවැඩිදියුණු කළ දැනුම්දීම්වලට සම්බන්ධතා නම් සහ පණිවිඩ වැනි පුද්ගලික තොරතුරු ඇතුළුව, සියලු දැනුම්දීම් අන්තර්ගතය වෙත ප්‍රවේශ විය හැකිය. මෙම විශේෂාංගයට දැනුම්දීම් ඉවත දැමීමට හෝ දුරකථන ඇමතුම්වලට පිළිතුරු දීම සහ බාධා නොකිරීම පාලනය කිරීම වැනි, දැනුම්දීම්වලට ප්‍රතිචාර දැක්වීමටද හැකිය."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"දිනචරියා ප්‍රකාර තතු දැනුම්දීම"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"බැටරිය සුපුරුදු ආරෝපණයට පෙර ඉවර විය හැක"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"බැටරි සුරැකුම බැටරි ආයු කාලය දීර්ඝ කිරීමට සක්‍රිය කෙරිණි"</string>
@@ -2287,4 +2308,6 @@
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"යෙදුම් සන්නම් කිරීමේ රූපය"</string>
     <string name="view_and_control_notification_title" msgid="4300765399209912240">"ප්‍රවේශ සැකසීම් පරීක්ෂා කරන්න"</string>
     <string name="view_and_control_notification_content" msgid="8003766498562604034">"<xliff:g id="SERVICE_NAME">%s</xliff:g> හට ඔබගේ තිරය බැලීමට සහ පාලනය කිරීමට හැකිය. සමාලෝචනය කිරීමට තට්ටු කරන්න."</string>
+    <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> පරිවර්තනය කරන ලදි."</string>
+    <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"පණිවිඩය <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> සිට <xliff:g id="TO_LANGUAGE">%2$s</xliff:g> භාෂාවට පරිවර්තනය කරන ලදි."</string>
 </resources>
