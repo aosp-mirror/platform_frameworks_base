@@ -14,37 +14,37 @@
 
 package com.android.systemui.qs;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import android.app.Fragment;
 import android.content.Context;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.testing.AndroidTestingRunner;
-import android.testing.LayoutInflaterBuilder;
-import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
+import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.FrameLayout;
+import android.view.ViewGroup;
 
 import androidx.test.filters.SmallTest;
-import androidx.test.filters.Suppress;
 
-import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
-import com.android.keyguard.CarrierText;
-import com.android.systemui.Dependency;
+import com.android.systemui.R;
 import com.android.systemui.SysuiBaseFragmentTest;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.media.MediaHost;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.qs.customize.QSCustomizerController;
 import com.android.systemui.qs.dagger.QSFragmentComponent;
 import com.android.systemui.qs.external.CustomTileStatePersister;
 import com.android.systemui.qs.external.TileLifecycleManager;
@@ -55,18 +55,16 @@ import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.AutoTileManager;
-import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
+import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
-import com.android.systemui.statusbar.policy.Clock;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
-import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.tuner.TunerService;
+import com.android.systemui.util.animation.UniqueObjectHostView;
 import com.android.systemui.util.settings.SecureSettings;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -75,12 +73,10 @@ import org.mockito.MockitoAnnotations;
 import java.util.Optional;
 
 @RunWith(AndroidTestingRunner.class)
-@RunWithLooper
+@RunWithLooper(setAsMainLooper = true)
 @SmallTest
-@Suppress
 public class QSFragmentTest extends SysuiBaseFragmentTest {
 
-    private MetricsLogger mMockMetricsLogger;
     @Mock
     private QSFragmentComponent.Factory mQsComponentFactory;
     @Mock
@@ -99,41 +95,41 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
     private TileServiceRequestController.Builder mTileServiceRequestControllerBuilder;
     @Mock
     private TileServiceRequestController mTileServiceRequestController;
+    @Mock
+    private QSCustomizerController mQsCustomizerController;
+    @Mock
+    private QuickQSPanelController mQuickQSPanelController;
+    @Mock
+    private FooterActionsController mQSFooterActionController;
+    @Mock
+    private QSContainerImplController mQSContainerImplController;
+    @Mock
+    private QSContainerImpl mContainer;
+    @Mock
+    private QSFooter mFooter;
+    @Mock
+    private LayoutInflater mLayoutInflater;
+    @Mock
+    private NonInterceptingScrollView mQSPanelScrollView;
+    @Mock
+    private QuickStatusBarHeader mHeader;
+    @Mock
+    private QSPanel.QSTileLayout mQsTileLayout;
+    @Mock
+    private QSPanel.QSTileLayout mQQsTileLayout;
+    private View mQsFragmentView;
 
     public QSFragmentTest() {
         super(QSFragment.class);
-        injectLeakCheckedDependencies(ALL_SUPPORTED_CLASSES);
     }
 
     @Before
-    @Ignore("failing")
-    public void addLeakCheckDependencies() {
-        MockitoAnnotations.initMocks(this);
-        when(mQsComponentFactory.create(any(QSFragment.class))).thenReturn(mQsFragmentComponent);
-        when(mQsFragmentComponent.getQSPanelController()).thenReturn(mQSPanelController);
-
-        when(mTileServiceRequestControllerBuilder.create(any()))
-                .thenReturn(mTileServiceRequestController);
-
-        mMockMetricsLogger = mDependency.injectMockDependency(MetricsLogger.class);
-        mContext.addMockSystemService(Context.LAYOUT_INFLATER_SERVICE,
-                new LayoutInflaterBuilder(mContext)
-                        .replace("com.android.systemui.statusbar.policy.SplitClockView",
-                                FrameLayout.class)
-                        .replace("TextClock", View.class)
-                        .replace(CarrierText.class, View.class)
-                        .replace(Clock.class, View.class)
-                        .build());
-
-        mDependency.injectTestDependency(Dependency.BG_LOOPER,
-                TestableLooper.get(this).getLooper());
-        mDependency.injectMockDependency(UserSwitcherController.class);
+    public void setup() {
+        injectLeakCheckedDependencies(ALL_SUPPORTED_CLASSES);
     }
 
     @Test
-    @Ignore("failing")
     public void testListening() {
-        assertEquals(Looper.myLooper(), Looper.getMainLooper());
         QSFragment qs = (QSFragment) mFragment;
         mFragments.dispatchResume();
         processAllMessages();
@@ -157,13 +153,11 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
     }
 
     @Test
-    @Ignore("failing")
     public void testSaveState() {
-        QSFragment qs = (QSFragment) mFragment;
-
         mFragments.dispatchResume();
         processAllMessages();
 
+        QSFragment qs = (QSFragment) mFragment;
         qs.setListening(true);
         qs.setExpanded(true);
         processAllMessages();
@@ -178,7 +172,15 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
 
     @Override
     protected Fragment instantiate(Context context, String className, Bundle arguments) {
+        MockitoAnnotations.initMocks(this);
         CommandQueue commandQueue = new CommandQueue(context);
+
+        setupQsComponent();
+        setUpViews();
+        setUpInflater();
+        setUpMedia();
+        setUpOther();
+
         return new QSFragment(
                 new RemoteInputQuickSettingsDisabler(context, commandQueue,
                         mock(ConfigurationController.class)),
@@ -192,5 +194,47 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
                 mock(QSFragmentDisableFlagsLogger.class),
                 mFalsingManager,
                 mock(DumpManager.class));
+    }
+
+    private void setUpOther() {
+        when(mTileServiceRequestControllerBuilder.create(any()))
+                .thenReturn(mTileServiceRequestController);
+        when(mQSContainerImplController.getView()).thenReturn(mContainer);
+        when(mQSPanelController.getTileLayout()).thenReturn(mQQsTileLayout);
+        when(mQuickQSPanelController.getTileLayout()).thenReturn(mQsTileLayout);
+    }
+
+    private void setUpMedia() {
+        when(mQSMediaHost.getCurrentClipping()).thenReturn(new Rect());
+        when(mQSMediaHost.getHostView()).thenReturn(new UniqueObjectHostView(mContext));
+        when(mQQSMediaHost.getHostView()).thenReturn(new UniqueObjectHostView(mContext));
+    }
+
+    private void setUpViews() {
+        mQsFragmentView = spy(new View(mContext));
+        when(mQsFragmentView.findViewById(R.id.expanded_qs_scroll_view)).thenReturn(
+                mQSPanelScrollView);
+        when(mQsFragmentView.findViewById(R.id.header)).thenReturn(mHeader);
+        when(mQsFragmentView.findViewById(android.R.id.edit)).thenReturn(new View(mContext));
+    }
+
+    private void setUpInflater() {
+        when(mLayoutInflater.cloneInContext(any(Context.class))).thenReturn(mLayoutInflater);
+        when(mLayoutInflater.inflate(anyInt(), any(ViewGroup.class), anyBoolean()))
+                .thenReturn(mQsFragmentView);
+        mContext.addMockSystemService(Context.LAYOUT_INFLATER_SERVICE,
+                mLayoutInflater);
+    }
+
+    private void setupQsComponent() {
+        when(mQsComponentFactory.create(any(QSFragment.class))).thenReturn(mQsFragmentComponent);
+        when(mQsFragmentComponent.getQSPanelController()).thenReturn(mQSPanelController);
+        when(mQsFragmentComponent.getQuickQSPanelController()).thenReturn(mQuickQSPanelController);
+        when(mQsFragmentComponent.getQSCustomizerController()).thenReturn(mQsCustomizerController);
+        when(mQsFragmentComponent.getQSContainerImplController()).thenReturn(
+                mQSContainerImplController);
+        when(mQsFragmentComponent.getQSFooter()).thenReturn(mFooter);
+        when(mQsFragmentComponent.getQSFooterActionController()).thenReturn(
+                mQSFooterActionController);
     }
 }
