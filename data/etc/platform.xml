@@ -243,6 +243,18 @@
                       targetSdk="33">
         <new-permission name="android.permission.READ_MEDIA_IMAGES" />
     </split-permission>
+    <split-permission name="android.permission.WRITE_EXTERNAL_STORAGE"
+                      targetSdk="33">
+        <new-permission name="android.permission.READ_MEDIA_AUDIO" />
+    </split-permission>
+    <split-permission name="android.permission.WRITE_EXTERNAL_STORAGE"
+                      targetSdk="33">
+        <new-permission name="android.permission.READ_MEDIA_VIDEO" />
+    </split-permission>
+    <split-permission name="android.permission.WRITE_EXTERNAL_STORAGE"
+                      targetSdk="33">
+        <new-permission name="android.permission.READ_MEDIA_IMAGES" />
+    </split-permission>
     <split-permission name="android.permission.BLUETOOTH"
                       targetSdk="31">
         <new-permission name="android.permission.BLUETOOTH_SCAN" />
