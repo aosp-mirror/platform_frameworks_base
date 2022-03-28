@@ -11482,6 +11482,15 @@ public final class Settings {
         public static final String DEVICE_PROVISIONED = "device_provisioned";
 
         /**
+         * Whether bypassing the device policy management role holder qualifcation is allowed,
+         * (0 = false, 1 = true).
+         *
+         * @hide
+         */
+        public static final String BYPASS_DEVICE_POLICY_MANAGEMENT_ROLE_QUALIFICATIONS =
+                "bypass_device_policy_management_role_qualifications";
+
+        /**
          * Indicates whether mobile data should be allowed while the device is being provisioned.
          * This allows the provisioning process to turn off mobile data before the user
          * has an opportunity to set things up, preventing other processes from burning
