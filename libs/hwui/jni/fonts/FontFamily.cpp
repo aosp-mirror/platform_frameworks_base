@@ -132,8 +132,8 @@ static const JNINativeMethod gFontFamilyMethods[] = {
 int register_android_graphics_fonts_FontFamily(JNIEnv* env) {
     return RegisterMethodsOrDie(env, "android/graphics/fonts/FontFamily$Builder",
                                 gFontFamilyBuilderMethods, NELEM(gFontFamilyBuilderMethods)) +
-           RegisterMethodsOrDie(env, "android/graphics/fonts/FontFamily", gFontFamilyMethods,
-                                NELEM(gFontFamilyMethods));
+           RegisterMethodsOrDie(env, "org/robolectric/nativeruntime/FontsFontFamilyNatives",
+                                gFontFamilyMethods, NELEM(gFontFamilyMethods));
 }
 
 }

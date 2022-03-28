@@ -15,14 +15,17 @@ extern int register_android_graphics_MaskFilter(JNIEnv* env);
 
 namespace android {
 
+extern int register_android_database_CursorWindow(JNIEnv* env);
+extern int register_android_database_SQLiteConnection(JNIEnv* env);
 extern int register_android_graphics_ColorFilter(JNIEnv* env);
 extern int register_android_graphics_ColorSpace(JNIEnv* env);
-extern int register_android_database_CursorWindow(JNIEnv* env);
+extern int register_android_graphics_FontFamily(JNIEnv* env);
 extern int register_android_graphics_Matrix(JNIEnv* env);
 extern int register_android_graphics_Paint(JNIEnv* env);
 extern int register_android_graphics_Path(JNIEnv* env);
 extern int register_android_graphics_PathMeasure(JNIEnv* env);
-extern int register_android_database_SQLiteConnection(JNIEnv* env);
+extern int register_android_graphics_fonts_Font(JNIEnv* env);
+extern int register_android_graphics_fonts_FontFamily(JNIEnv* env);
 
 #define REG_JNI(name) \
     { name }
@@ -41,12 +44,15 @@ static const RegJNIRec graphicsJNI[] = {
         REG_JNI(register_android_graphics_ColorFilter),
         REG_JNI(register_android_graphics_ColorSpace),
         REG_JNI(register_android_graphics_CreateJavaOutputStreamAdaptor),
+        REG_JNI(register_android_graphics_FontFamily),
         REG_JNI(register_android_graphics_Graphics),
         REG_JNI(register_android_graphics_MaskFilter),
         REG_JNI(register_android_graphics_Matrix),
         REG_JNI(register_android_graphics_Paint),
         REG_JNI(register_android_graphics_Path),
         REG_JNI(register_android_graphics_PathMeasure),
+        REG_JNI(register_android_graphics_fonts_Font),
+        REG_JNI(register_android_graphics_fonts_FontFamily),
 };
 
 JNIEnv* AndroidRuntime::getJNIEnv() {
