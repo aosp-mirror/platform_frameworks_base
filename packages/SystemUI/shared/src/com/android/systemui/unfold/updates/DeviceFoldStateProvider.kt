@@ -126,12 +126,7 @@ constructor(
      */
     private fun getClosingThreshold(): Int? {
         val activityType =
-            activityManager
-                .getRunningTasks(/* maxNum= */ 1)
-                ?.getOrNull(0)
-                ?.configuration
-                ?.windowConfiguration
-                ?.activityType
+            activityManager.getRunningTasks(/* maxNum= */ 1)?.getOrNull(0)?.topActivityType
                 ?: return null
 
         if (DEBUG) {
