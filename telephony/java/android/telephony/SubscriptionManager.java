@@ -941,6 +941,13 @@ public class SubscriptionManager {
     public static final String PROFILE_CLASS = SimInfo.COLUMN_PROFILE_CLASS;
 
     /**
+     * TelephonyProvider column name for the port index of the active UICC port.
+     * <P>Type: INTEGER (int)</P>
+     * @hide
+     */
+    public static final String PORT_INDEX = SimInfo.COLUMN_PORT_INDEX;
+
+    /**
      * TelephonyProvider column name for VoIMS opt-in status.
      *
      * <P>Type: INTEGER (int)</P>
