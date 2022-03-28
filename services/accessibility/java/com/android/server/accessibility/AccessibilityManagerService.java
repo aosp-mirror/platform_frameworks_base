@@ -1301,25 +1301,24 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
     /** Send a motion event to the service to allow it to perform gesture detection. */
     public boolean sendMotionEventToListeningServices(MotionEvent event) {
-        synchronized (mLock) {
-            if (DEBUG) {
-                Slog.d(LOG_TAG, "Sending event to service: " + event);
-            }
-            return notifyMotionEvent(event);
+        boolean result;
+        event = MotionEvent.obtain(event);
+        if (DEBUG) {
+            Slog.d(LOG_TAG, "Sending event to service: " + event);
         }
+        result = scheduleNotifyMotionEvent(event);
+        return result;
     }
 
     /**
      * Notifies services that the touch state on a given display has changed.
      */
     public boolean onTouchStateChanged(int displayId, int state) {
-        synchronized (mLock) {
             if (DEBUG) {
                 Slog.d(LOG_TAG, "Notifying touch state:"
                         + TouchInteractionController.stateToString(state));
             }
-            return notifyTouchState(displayId, state);
-        }
+        return scheduleNotifyTouchState(displayId, state);
     }
 
     /**
@@ -1650,25 +1649,29 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         return false;
     }
 
-    private boolean notifyMotionEvent(MotionEvent event) {
-        AccessibilityUserState state = getCurrentUserStateLocked();
-        for (int i = state.mBoundServices.size() - 1; i >= 0; i--) {
-            AccessibilityServiceConnection service = state.mBoundServices.get(i);
-            if (service.mRequestTouchExplorationMode) {
-                service.notifyMotionEvent(event);
-                return true;
+    private boolean scheduleNotifyMotionEvent(MotionEvent event) {
+        synchronized (mLock) {
+            AccessibilityUserState state = getCurrentUserStateLocked();
+            for (int i = state.mBoundServices.size() - 1; i >= 0; i--) {
+                AccessibilityServiceConnection service = state.mBoundServices.get(i);
+                if (service.mRequestTouchExplorationMode) {
+                    service.notifyMotionEvent(event);
+                    return true;
+                }
             }
         }
         return false;
     }
 
-    private boolean notifyTouchState(int displayId, int touchState) {
-        AccessibilityUserState state = getCurrentUserStateLocked();
-        for (int i = state.mBoundServices.size() - 1; i >= 0; i--) {
-            AccessibilityServiceConnection service = state.mBoundServices.get(i);
-            if (service.mRequestTouchExplorationMode) {
-                service.notifyTouchState(displayId, touchState);
-                return true;
+    private boolean scheduleNotifyTouchState(int displayId, int touchState) {
+        synchronized (mLock) {
+            AccessibilityUserState state = getCurrentUserStateLocked();
+            for (int i = state.mBoundServices.size() - 1; i >= 0; i--) {
+                AccessibilityServiceConnection service = state.mBoundServices.get(i);
+                if (service.mRequestTouchExplorationMode) {
+                    service.notifyTouchState(displayId, touchState);
+                    return true;
+                }
             }
         }
         return false;
