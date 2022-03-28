@@ -20,6 +20,7 @@
     <string name="pip_phone_close" msgid="5783752637260411309">"Funga"</string>
     <string name="pip_phone_expand" msgid="2579292903468287504">"Panua"</string>
     <string name="pip_phone_settings" msgid="5468987116750491918">"Mipangilio"</string>
+    <string name="pip_phone_enter_split" msgid="7042877263880641911">"Weka skrini iliyogawanywa"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"Menyu"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> iko katika hali ya picha ndani ya picha nyingine"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"Ikiwa hutaki <xliff:g id="NAME">%s</xliff:g> itumie kipengele hiki, gusa ili ufungue mipangilio na uizime."</string>
@@ -28,6 +29,8 @@
     <string name="pip_skip_to_next" msgid="8403429188794867653">"Ruka ufikie inayofuata"</string>
     <string name="pip_skip_to_prev" msgid="7172158111196394092">"Ruka ufikie iliyotangulia"</string>
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"Badilisha ukubwa"</string>
+    <string name="accessibility_action_pip_stash" msgid="4060775037619702641">"Ficha"</string>
+    <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Fichua"</string>
     <string name="dock_forced_resizable" msgid="1749750436092293116">"Huenda programu isifanye kazi kwenye skrini inayogawanywa."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"Programu haiwezi kutumia skrini iliyogawanywa."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Huenda programu isifanye kazi kwenye dirisha lingine."</string>
@@ -70,5 +73,4 @@
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Dhibiti"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Umeondoa kiputo."</string>
     <string name="restart_button_description" msgid="5887656107651190519">"Gusa ili uzime na uwashe programu hii, kisha nenda kwenye skrini nzima."</string>
-    <string name="got_it" msgid="4428750913636945527">"Nimeelewa"</string>
 </resources>
