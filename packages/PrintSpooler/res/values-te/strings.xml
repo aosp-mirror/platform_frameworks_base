@@ -31,8 +31,8 @@
     <string name="template_all_pages" msgid="3322235982020148762">"మొత్తం <xliff:g id="PAGE_COUNT">%1$s</xliff:g>"</string>
     <string name="template_page_range" msgid="428638530038286328">"<xliff:g id="PAGE_COUNT">%1$s</xliff:g> పరిధి"</string>
     <string name="pages_range_example" msgid="8558694453556945172">"ఉదా. 1—5,8,11—13"</string>
-    <string name="print_preview" msgid="8010217796057763343">"ముద్రణ పరిదృశ్యం"</string>
-    <string name="install_for_print_preview" msgid="6366303997385509332">"పరిదృశ్యం చేయడానికి PDF వ్యూయర్‌ను ఇన్‌స్టాల్ చేయండి"</string>
+    <string name="print_preview" msgid="8010217796057763343">"ముద్రణ ప్రివ్యూ"</string>
+    <string name="install_for_print_preview" msgid="6366303997385509332">"ప్రివ్యూ చేయడానికి PDF వ్యూయర్‌ను ఇన్‌స్టాల్ చేయండి"</string>
     <string name="printing_app_crashed" msgid="854477616686566398">"ముద్రణ యాప్ క్రాష్ అయ్యింది"</string>
     <string name="generating_print_job" msgid="3119608742651698916">"ముద్రణ జాబ్‌ను ఉత్పన్నం చేస్తోంది"</string>
     <string name="save_as_pdf" msgid="5718454119847596853">"PDF వలె సేవ్ చేయి"</string>
@@ -50,8 +50,8 @@
     <string name="search" msgid="5421724265322228497">"సెర్చ్"</string>
     <string name="all_printers_label" msgid="3178848870161526399">"అన్ని ప్రింటర్‌లు"</string>
     <string name="add_print_service_label" msgid="5356702546188981940">"సేవను జోడించు"</string>
-    <string name="print_search_box_shown_utterance" msgid="7967404953901376090">"శోధన పెట్టె చూపబడింది"</string>
-    <string name="print_search_box_hidden_utterance" msgid="5727755169343113351">"శోధన పెట్టె దాచబడింది"</string>
+    <string name="print_search_box_shown_utterance" msgid="7967404953901376090">"సెర్చ్ బాక్స్ చూపబడింది"</string>
+    <string name="print_search_box_hidden_utterance" msgid="5727755169343113351">"సెర్చ్ బాక్స్ దాచబడింది"</string>
     <string name="print_add_printer" msgid="1088656468360653455">"ప్రింటర్‌ను జోడించు"</string>
     <string name="print_select_printer" msgid="7388760939873368698">"ప్రింటర్‌ను ఎంచుకోండి"</string>
     <string name="print_forget_printer" msgid="5035287497291910766">"ప్రింటర్‌ను విస్మరించు"</string>
@@ -88,7 +88,7 @@
     <string name="no_connection_to_printer" msgid="2159246915977282728">"ప్రింటర్‌కు కనెక్షన్ లేదు"</string>
     <string name="reason_unknown" msgid="5507940196503246139">"తెలియదు"</string>
     <string name="print_service_security_warning_title" msgid="2160752291246775320">"<xliff:g id="SERVICE">%1$s</xliff:g>ని ఉపయోగించాలా?"</string>
-    <string name="print_service_security_warning_summary" msgid="1427434625361692006">"మీ పత్రం ప్రింటర్‌కు వెళ్లే మార్గంలో ఒకటి లేదా అంతకంటే ఎక్కువ సర్వర్‌ల గుండా వెళ్లవచ్చు."</string>
+    <string name="print_service_security_warning_summary" msgid="1427434625361692006">"మీ డాక్యుమెంట్‌ ప్రింటర్‌కు వెళ్లే మార్గంలో ఒకటి లేదా అంతకంటే ఎక్కువ సర్వర్‌ల గుండా వెళ్లవచ్చు."</string>
   <string-array name="color_mode_labels">
     <item msgid="7602948745415174937">"నలుపు &amp; తెలుపు"</item>
     <item msgid="2762241247228983754">"రంగు"</item>
@@ -106,6 +106,6 @@
     <string name="print_error_default_message" msgid="8602678405502922346">"క్షమించండి, అది పని చేయలేదు. మళ్లీ ప్రయత్నించండి."</string>
     <string name="print_error_retry" msgid="1426421728784259538">"మళ్లీ ప్రయత్నించు"</string>
     <string name="print_error_printer_unavailable" msgid="8985614415253203381">"ఈ ప్రింటర్ ప్రస్తుతం అందుబాటులో లేదు."</string>
-    <string name="print_cannot_load_page" msgid="6179560924492912009">"పరిదృశ్యాన్ని ప్రదర్శించడం సాధ్యపడలేదు"</string>
-    <string name="print_preparing_preview" msgid="3939930735671364712">"పరిదృశ్యం సిద్ధమవుతోంది…"</string>
+    <string name="print_cannot_load_page" msgid="6179560924492912009">"ప్రివ్యూను ప్రదర్శించడం సాధ్యపడలేదు"</string>
+    <string name="print_preparing_preview" msgid="3939930735671364712">"ప్రివ్యూ సిద్ధమవుతోంది…"</string>
 </resources>
