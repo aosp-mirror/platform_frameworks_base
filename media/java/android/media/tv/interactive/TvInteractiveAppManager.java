@@ -1047,6 +1047,18 @@ public final class TvInteractiveAppManager {
             }
         }
 
+        void notifyError(@NonNull String errMsg, @NonNull Bundle params) {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.notifyError(mToken, errMsg, params, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
         /**
          * Sets the {@link android.view.Surface} for this session.
          *
