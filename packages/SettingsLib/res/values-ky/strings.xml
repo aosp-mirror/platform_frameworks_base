@@ -109,6 +109,9 @@
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"Батареянын деңгээли: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"Сол: Батареянын деңгээли <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, оң: Батареянын деңгээли <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"Жигердүү"</string>
+    <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Жигердүү, сол кулакчын гана"</string>
+    <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Жигердүү, оң кулакчын гана"</string>
+    <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"Жигердүү, сол жана оң кулакчын"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Аудио"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Телефон чалуулар"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Файл алмашуу"</string>
@@ -158,10 +161,6 @@
     <string name="bluetooth_talkback_headphone" msgid="8613073829180337091">"Кулакчын"</string>
     <string name="bluetooth_talkback_input_peripheral" msgid="5133944817800149942">"Дайындарды киргизүүчү тышкы түзмөк"</string>
     <string name="bluetooth_talkback_bluetooth" msgid="1143241359781999989">"Bluetooth"</string>
-    <string name="bluetooth_hearingaid_left_pairing_message" msgid="8561855779703533591">"Угуу аппаратынын сол кулагы жупташтырылууда…"</string>
-    <string name="bluetooth_hearingaid_right_pairing_message" msgid="2655347721696331048">"Угуу аппаратынын оң кулагы жупташтырылууда…"</string>
-    <string name="bluetooth_hearingaid_left_battery_level" msgid="7375621694748104876">"Сол кулак – батареянын деңгээли: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_hearingaid_right_battery_level" msgid="1850094448499089312">"Оң кулагы – батареянын деңгээли: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="accessibility_wifi_off" msgid="1195445715254137155">"Wifi өчүк."</string>
     <string name="accessibility_no_wifi" msgid="5297119459491085771">"Wifi туташуусу жок."</string>
     <string name="accessibility_wifi_one_bar" msgid="6025652717281815212">"Wifi: бир таякча."</string>
@@ -180,7 +179,6 @@
     <string name="tether_settings_title_usb_bluetooth" msgid="1727111807207577322">"Модем режими"</string>
     <string name="tether_settings_title_all" msgid="8910259483383010470">"Модем режими"</string>
     <string name="managed_user_title" msgid="449081789742645723">"Жумуш профилинин колднмлр"</string>
-    <string name="user_guest" msgid="6939192779649870792">"Конок"</string>
     <string name="unknown" msgid="3544487229740637809">"Белгисиз"</string>
     <string name="running_process_item_user_label" msgid="3988506293099805796">"Колдонуучу: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="3631650616557252926">"Айрым демейки параметрлер туураланды"</string>
@@ -442,12 +440,6 @@
     <string name="select_webview_provider_title" msgid="3917815648099445503">"WebView кызматы"</string>
     <string name="select_webview_provider_dialog_title" msgid="2444261109877277714">"WebView аткарылышын коюу"</string>
     <string name="select_webview_provider_toast_text" msgid="8512254949169359848">"Тандалган нерсе жараксыз болуп калган. Кайталап көрүңүз."</string>
-    <string name="convert_to_file_encryption" msgid="2828976934129751818">"Файлдарды шифрлөөгө өтүү"</string>
-    <string name="convert_to_file_encryption_enabled" msgid="840757431284311754">"Айландыруу…"</string>
-    <string name="convert_to_file_encryption_done" msgid="8965831011811180627">"Файл мурунтан эле шифрленген"</string>
-    <string name="title_convert_fbe" msgid="5780013350366495149">"Файл негизиндеги шифрлөөгө айландырылууда"</string>
-    <string name="convert_to_fbe_warning" msgid="34294381569282109">"Айрым файлдарды шифрлөөгө өтөсүз.\n !!Эскертүү!! Ушуну менен бардык дайындар өчөт.\n Бул альфа версия болгондуктан, функция талаптагыдай иштебеши мүмкүн.\n Улантуу үчүн \'Өчүрүп туруп, кийинкиге өтүү…\' дегенди басыңыз."</string>
-    <string name="button_convert_fbe" msgid="1159861795137727671">"Өчүрүп туруп, кийинкиге өтүү…"</string>
     <string name="picture_color_mode" msgid="1013807330552931903">"Сүрөт түсү режими"</string>
     <string name="picture_color_mode_desc" msgid="151780973768136200">"sRGB колдонуңуз"</string>
     <string name="daltonizer_mode_disabled" msgid="403424372812399228">"Өчүк"</string>
@@ -533,8 +525,7 @@
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Азыраак убакыт."</string>
     <string name="cancel" msgid="5665114069455378395">"Жок"</string>
     <string name="okay" msgid="949938843324579502">"OK"</string>
-    <!-- no translation found for done (381184316122520313) -->
-    <skip />
+    <string name="done" msgid="381184316122520313">"Бүттү"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Ойготкучтар жана эстеткичтер"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Ойготкуч жана эстеткичтерди коюуга уруксат берүү"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Ойготкучтар жана эстеткичтер"</string>
@@ -554,8 +545,7 @@
     <string name="zen_mode_forever" msgid="3339224497605461291">"Бул функция өчүрүлгөнгө чейин"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Жаңы эле"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Ушул телефон"</string>
-    <!-- no translation found for media_transfer_this_device_name (3714653244000242800) -->
-    <skip />
+    <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Ушул планшет"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Ушул телефон"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Туташууда маселе келип чыкты. Түзмөктү өчүрүп, кайра күйгүзүп көрүңүз"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Зымдуу аудио түзмөк"</string>
@@ -599,16 +589,27 @@
     <string name="add_user_failed" msgid="4809887794313944872">"Жаңы колдонуучу түзүлбөй калды"</string>
     <string name="add_guest_failed" msgid="8074548434469843443">"Жаңы конок түзүлгөн жок"</string>
     <string name="user_nickname" msgid="262624187455825083">"Ылакап аты"</string>
+    <!-- no translation found for user_add_user (7876449291500212468) -->
+    <skip />
     <string name="guest_new_guest" msgid="3482026122932643557">"Конок кошуу"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Конокту өчүрүү"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"Конок сеансын баштапкы абалга келтирүү"</string>
-    <string name="guest_nickname" msgid="6332276931583337261">"Конок"</string>
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"Конок сеансын баштапкы абалга келтиресизби?"</string>
+    <!-- no translation found for guest_remove_guest_dialog_title (4548511006624088072) -->
+    <skip />
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Баштапкы абалга келтирүү"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Конок сеансы баштапкы абалга келтирилүүдө…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Сүрөткө тартуу"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Сүрөт тандаңыз"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Сүрөт тандаңыз"</string>
+    <!-- no translation found for failed_attempts_now_wiping_device (4016329172216428897) -->
+    <skip />
+    <!-- no translation found for failed_attempts_now_wiping_user (469060411789668050) -->
+    <skip />
+    <!-- no translation found for failed_attempts_now_wiping_profile (7626589520888963129) -->
+    <skip />
+    <!-- no translation found for failed_attempts_now_wiping_dialog_dismiss (2749889771223578925) -->
+    <skip />
     <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Түзмөктүн демейки параметри"</string>
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Өчүк"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Күйүк"</string>
@@ -653,4 +654,7 @@
     <string name="physical_keyboard_title" msgid="4811935435315835220">"Аппараттык баскычтоп"</string>
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"Тергичтин жайылмасын тандоо"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"Демейки"</string>
+    <string name="turn_screen_on_title" msgid="3266937298097573424">"Экранды күйгүзүү"</string>
+    <string name="allow_turn_screen_on" msgid="6194845766392742639">"Экранды күйгүзүүгө уруксат берүү"</string>
+    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Колдонмого экранды күйгүзүүгө уруксат бериңиз. Уруксат берилсе, колдонмо экранды каалаган убакта сизден уруксат сурабастан күйгүзүшү мүмкүн."</string>
 </resources>

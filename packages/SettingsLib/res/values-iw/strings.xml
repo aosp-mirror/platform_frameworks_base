@@ -109,6 +109,12 @@
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"טעינת הסוללה: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"שמאל: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> סוללה, ימין: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> סוללה"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"פעיל"</string>
+    <!-- no translation found for bluetooth_hearing_aid_left_active (7084887715570971441) -->
+    <skip />
+    <!-- no translation found for bluetooth_hearing_aid_right_active (8574683234077567230) -->
+    <skip />
+    <!-- no translation found for bluetooth_hearing_aid_left_and_right_active (407704460573163973) -->
+    <skip />
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"אודיו של מדיה"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"שיחות טלפון"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"העברת קבצים"</string>
@@ -158,10 +164,6 @@
     <string name="bluetooth_talkback_headphone" msgid="8613073829180337091">"אוזניות"</string>
     <string name="bluetooth_talkback_input_peripheral" msgid="5133944817800149942">"ציוד קלט היקפי"</string>
     <string name="bluetooth_talkback_bluetooth" msgid="1143241359781999989">"Bluetooth"</string>
-    <string name="bluetooth_hearingaid_left_pairing_message" msgid="8561855779703533591">"מתבצעת התאמה של מכשיר שמיעה שמאלי…"</string>
-    <string name="bluetooth_hearingaid_right_pairing_message" msgid="2655347721696331048">"מתבצעת התאמה של מכשיר שמיעה ימני…"</string>
-    <string name="bluetooth_hearingaid_left_battery_level" msgid="7375621694748104876">"שמאלי - טעינת הסוללה: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_hearingaid_right_battery_level" msgid="1850094448499089312">"ימני – טעינת הסוללה: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="accessibility_wifi_off" msgid="1195445715254137155">"‏Wi-Fi כבוי."</string>
     <string name="accessibility_no_wifi" msgid="5297119459491085771">"‏Wi-Fi מנותק."</string>
     <string name="accessibility_wifi_one_bar" msgid="6025652717281815212">"‏פס אחד של Wi-Fi."</string>
@@ -180,7 +182,6 @@
     <string name="tether_settings_title_usb_bluetooth" msgid="1727111807207577322">"שיתוף אינטרנט בין ניידים"</string>
     <string name="tether_settings_title_all" msgid="8910259483383010470">"נקודה לשיתוף אינטרנט"</string>
     <string name="managed_user_title" msgid="449081789742645723">"כל אפליקציות העבודה"</string>
-    <string name="user_guest" msgid="6939192779649870792">"אורח"</string>
     <string name="unknown" msgid="3544487229740637809">"לא ידוע"</string>
     <string name="running_process_item_user_label" msgid="3988506293099805796">"משתמש: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="3631650616557252926">"הוגדרו כמה ברירות מחדל"</string>
@@ -442,12 +443,6 @@
     <string name="select_webview_provider_title" msgid="3917815648099445503">"‏יישום WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="2444261109877277714">"‏הגדרת יישום WebView"</string>
     <string name="select_webview_provider_toast_text" msgid="8512254949169359848">"אפשרות זו כבר אינה תקפה. אפשר לנסות שוב."</string>
-    <string name="convert_to_file_encryption" msgid="2828976934129751818">"המרה לצורך הצפנת קבצים"</string>
-    <string name="convert_to_file_encryption_enabled" msgid="840757431284311754">"להמרה..."</string>
-    <string name="convert_to_file_encryption_done" msgid="8965831011811180627">"הצפנת קבצים כבר מוגדרת"</string>
-    <string name="title_convert_fbe" msgid="5780013350366495149">"המרה להצפנה מבוססת קבצים"</string>
-    <string name="convert_to_fbe_warning" msgid="34294381569282109">"המרת מחיצת הנתונים להצפנה מבוססת-קבצים.\n אזהרה!! פעולה זו תמחק את כל הנתונים.\n תכונה זו זמינה בגרסת אלפא וייתכן שלא תפעל כראוי.\n יש להקיש על \'מחיקה והמרה…\' כדי להמשיך."</string>
-    <string name="button_convert_fbe" msgid="1159861795137727671">"מחיקה והמרה…"</string>
     <string name="picture_color_mode" msgid="1013807330552931903">"מצב צבע התמונה"</string>
     <string name="picture_color_mode_desc" msgid="151780973768136200">"‏שימוש ב-sRGB"</string>
     <string name="daltonizer_mode_disabled" msgid="403424372812399228">"מושבת"</string>
@@ -533,8 +528,7 @@
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"פחות זמן."</string>
     <string name="cancel" msgid="5665114069455378395">"ביטול"</string>
     <string name="okay" msgid="949938843324579502">"אישור"</string>
-    <!-- no translation found for done (381184316122520313) -->
-    <skip />
+    <string name="done" msgid="381184316122520313">"סיום"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"שעונים מעוררים ותזכורות"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"אישור להגדיר שעונים מעוררים ותזכורות"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"שעונים מעוררים ותזכורות"</string>
@@ -554,8 +548,7 @@
     <string name="zen_mode_forever" msgid="3339224497605461291">"עד הכיבוי"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"הרגע"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"הטלפון הזה"</string>
-    <!-- no translation found for media_transfer_this_device_name (3714653244000242800) -->
-    <skip />
+    <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"הטאבלט הזה"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"הטלפון הזה"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"יש בעיה בחיבור. עליך לכבות את המכשיר ולהפעיל אותו מחדש"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"התקן אודיו חוטי"</string>
@@ -599,16 +592,27 @@
     <string name="add_user_failed" msgid="4809887794313944872">"לא ניתן היה ליצור משתמש חדש"</string>
     <string name="add_guest_failed" msgid="8074548434469843443">"יצירת אורח חדש נכשלה"</string>
     <string name="user_nickname" msgid="262624187455825083">"כינוי"</string>
+    <!-- no translation found for user_add_user (7876449291500212468) -->
+    <skip />
     <string name="guest_new_guest" msgid="3482026122932643557">"הוספת אורח"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"הסרת אורח/ת"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"איפוס הגלישה כאורח"</string>
-    <string name="guest_nickname" msgid="6332276931583337261">"אורח"</string>
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"לאפס את הגלישה כאורח?"</string>
+    <!-- no translation found for guest_remove_guest_dialog_title (4548511006624088072) -->
+    <skip />
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"איפוס"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"מתבצע איפוס של הגלישה כאורח…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"צילום תמונה"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"לבחירת תמונה"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"בחירת תמונה"</string>
+    <!-- no translation found for failed_attempts_now_wiping_device (4016329172216428897) -->
+    <skip />
+    <!-- no translation found for failed_attempts_now_wiping_user (469060411789668050) -->
+    <skip />
+    <!-- no translation found for failed_attempts_now_wiping_profile (7626589520888963129) -->
+    <skip />
+    <!-- no translation found for failed_attempts_now_wiping_dialog_dismiss (2749889771223578925) -->
+    <skip />
     <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"ברירת המחדל של המכשיר"</string>
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"מושבת"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"מופעל"</string>
@@ -653,4 +657,7 @@
     <string name="physical_keyboard_title" msgid="4811935435315835220">"מקלדת פיזית"</string>
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"בחירה של פריסת המקלדת"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"ברירת מחדל"</string>
+    <string name="turn_screen_on_title" msgid="3266937298097573424">"הפעלת המסך"</string>
+    <string name="allow_turn_screen_on" msgid="6194845766392742639">"הרשאה להפעלת המסך"</string>
+    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"הרשאה לאפליקציה להפעיל את המסך. אם מעניקים את ההרשאה, האפליקציה יכולה להפעיל את המסך בכל זמן, גם בלי שמתכוונים לכך במפורש."</string>
 </resources>
