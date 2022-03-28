@@ -138,6 +138,7 @@ import static android.net.ConnectivityManager.PROFILE_NETWORK_PREFERENCE_DEFAULT
 import static android.net.ConnectivityManager.PROFILE_NETWORK_PREFERENCE_ENTERPRISE;
 import static android.net.ConnectivityManager.PROFILE_NETWORK_PREFERENCE_ENTERPRISE_NO_FALLBACK;
 import static android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK;
+import static android.provider.Settings.Global.BYPASS_DEVICE_POLICY_MANAGEMENT_ROLE_QUALIFICATIONS;
 import static android.provider.Settings.Global.PRIVATE_DNS_SPECIFIER;
 import static android.provider.Settings.Secure.MANAGED_PROVISIONING_DPC_DOWNLOADED;
 import static android.provider.Settings.Secure.USER_SETUP_COMPLETE;
@@ -18776,13 +18777,26 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Preconditions.checkCallAuthorization(hasCallingOrSelfPermission(
                 android.Manifest.permission.MANAGE_ROLE_HOLDERS));
         return mInjector.binderWithCleanCallingIdentity(() -> {
-            if (mUserManager.getUserCount() > 1) {
-                return false;
+            if (mInjector.settingsGlobalGetInt(
+                    BYPASS_DEVICE_POLICY_MANAGEMENT_ROLE_QUALIFICATIONS, /* def= */ 0) == 1) {
+                return true;
             }
-            AccountManager am = AccountManager.get(mContext);
-            Account[] accounts = am.getAccounts();
-            return accounts.length == 0;
+            if (shouldAllowBypassingDevicePolicyManagementRoleQualificationInternal()) {
+                mInjector.settingsGlobalPutInt(
+                        BYPASS_DEVICE_POLICY_MANAGEMENT_ROLE_QUALIFICATIONS, /* value= */ 1);
+                return true;
+            }
+            return false;
         });
+    }
+
+    private boolean shouldAllowBypassingDevicePolicyManagementRoleQualificationInternal() {
+        if (mUserManager.getUserCount() > 1) {
+            return false;
+        }
+        AccountManager am = AccountManager.get(mContext);
+        Account[] accounts = am.getAccounts();
+        return accounts.length == 0;
     }
 
     @Override
