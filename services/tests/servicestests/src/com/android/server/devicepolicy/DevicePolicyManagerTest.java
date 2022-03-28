@@ -8455,7 +8455,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
     @Test
     public void testSendLostModeLocationUpdate_notOrganizationOwnedDevice() {
-        mContext.callerPermissions.add(permission.SEND_LOST_MODE_LOCATION_UPDATES);
+        mContext.callerPermissions.add(permission.TRIGGER_LOST_MODE);
         assertThrows(IllegalStateException.class, () -> dpm.sendLostModeLocationUpdate(
                 getServices().executor, /* empty callback */ result -> {}));
     }
@@ -8463,7 +8463,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     @Test
     public void testSendLostModeLocationUpdate_asDeviceOwner() throws Exception {
         final String TEST_PROVIDER = "network";
-        mContext.callerPermissions.add(permission.SEND_LOST_MODE_LOCATION_UPDATES);
+        mContext.callerPermissions.add(permission.TRIGGER_LOST_MODE);
         setDeviceOwner();
         when(getServices().locationManager.getAllProviders()).thenReturn(List.of(TEST_PROVIDER));
         when(getServices().locationManager.isProviderEnabled(TEST_PROVIDER)).thenReturn(true);
@@ -8480,7 +8480,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         final int MANAGED_PROFILE_ADMIN_UID =
                 UserHandle.getUid(CALLER_USER_HANDLE, DpmMockContext.SYSTEM_UID);
         mContext.binder.callingUid = MANAGED_PROFILE_ADMIN_UID;
-        mContext.callerPermissions.add(permission.SEND_LOST_MODE_LOCATION_UPDATES);
+        mContext.callerPermissions.add(permission.TRIGGER_LOST_MODE);
         addManagedProfile(admin1, MANAGED_PROFILE_ADMIN_UID, admin1);
         configureProfileOwnerOfOrgOwnedDevice(admin1, CALLER_USER_HANDLE);
         when(getServices().locationManager.getAllProviders()).thenReturn(List.of(TEST_PROVIDER));

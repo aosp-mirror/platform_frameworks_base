@@ -217,7 +217,12 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
     /** */
     public void refreshAllTiles() {
         for (QSPanelControllerBase.TileRecord r : mRecords) {
-            r.tile.refreshState();
+            if (!r.tile.isListening()) {
+                // Only refresh tiles that were not already in the listening state. Tiles that are
+                // already listening is as if they are already expanded (for example, tiles that
+                // are both in QQS and QS).
+                r.tile.refreshState();
+            }
         }
     }
 

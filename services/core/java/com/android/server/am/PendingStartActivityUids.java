@@ -55,9 +55,15 @@ final class PendingStartActivityUids {
         return false;
     }
 
-    synchronized void delete(int uid) {
+    synchronized void delete(int uid, long nowElapsed) {
         final Pair<Integer, Long> pendingPid = mPendingUids.get(uid);
         if (pendingPid != null) {
+            if (nowElapsed < pendingPid.second) {
+                Slog.i(TAG,
+                        "updateOomAdj start time is before than pendingPid added,"
+                        + " don't delete it");
+                return;
+            }
             final long delay = SystemClock.elapsedRealtime() - pendingPid.second;
             if (delay >= 1000 /*ms*/) {
                 Slog.i(TAG,

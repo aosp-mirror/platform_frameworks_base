@@ -722,7 +722,7 @@ public class NotificationPermissionMigrationTest extends UiServiceTestCase {
         when(mPermissionHelper.isPermissionFixed(PKG, temp.getUserId())).thenReturn(true);
 
         NotificationRecord r = mService.createAutoGroupSummary(
-                temp.getUserId(), temp.getSbn().getPackageName(), temp.getKey());
+                temp.getUserId(), temp.getSbn().getPackageName(), temp.getKey(), false);
 
         assertThat(r.isImportanceFixed()).isTrue();
     }

@@ -39,11 +39,13 @@ import android.app.ActivityOptions;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.graphics.Rect;
+import android.graphics.Region;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.SurfaceControl;
 import android.view.SurfaceHolder;
 import android.view.SurfaceSession;
+import android.view.ViewTreeObserver;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
@@ -396,5 +398,46 @@ public class TaskViewTest extends ShellTestCase {
 
         mTaskView.prepareCloseAnimation();
         verify(mOrganizer).setInterceptBackPressedOnTaskRoot(eq(mTaskInfo.token), eq(false));
+    }
+
+    @Test
+    public void testSetObscuredTouchRect() {
+        mTaskView.setObscuredTouchRect(
+                new Rect(/* left= */ 0, /* top= */ 10, /* right= */ 100, /* bottom= */ 120));
+        ViewTreeObserver.InternalInsetsInfo insetsInfo = new ViewTreeObserver.InternalInsetsInfo();
+        mTaskView.onComputeInternalInsets(insetsInfo);
+
+        assertThat(insetsInfo.touchableRegion.contains(0, 10)).isTrue();
+        // Region doesn't contain the right/bottom edge.
+        assertThat(insetsInfo.touchableRegion.contains(100 - 1, 120 - 1)).isTrue();
+
+        mTaskView.setObscuredTouchRect(null);
+        insetsInfo.touchableRegion.setEmpty();
+        mTaskView.onComputeInternalInsets(insetsInfo);
+
+        assertThat(insetsInfo.touchableRegion.contains(0, 10)).isFalse();
+        assertThat(insetsInfo.touchableRegion.contains(100 - 1, 120 - 1)).isFalse();
+    }
+
+    @Test
+    public void testSetObscuredTouchRegion() {
+        Region obscuredRegion = new Region(10, 10, 19, 19);
+        obscuredRegion.union(new Rect(30, 30, 39, 39));
+
+        mTaskView.setObscuredTouchRegion(obscuredRegion);
+        ViewTreeObserver.InternalInsetsInfo insetsInfo = new ViewTreeObserver.InternalInsetsInfo();
+        mTaskView.onComputeInternalInsets(insetsInfo);
+
+        assertThat(insetsInfo.touchableRegion.contains(10, 10)).isTrue();
+        assertThat(insetsInfo.touchableRegion.contains(20, 20)).isFalse();
+        assertThat(insetsInfo.touchableRegion.contains(30, 30)).isTrue();
+
+        mTaskView.setObscuredTouchRegion(null);
+        insetsInfo.touchableRegion.setEmpty();
+        mTaskView.onComputeInternalInsets(insetsInfo);
+
+        assertThat(insetsInfo.touchableRegion.contains(10, 10)).isFalse();
+        assertThat(insetsInfo.touchableRegion.contains(20, 20)).isFalse();
+        assertThat(insetsInfo.touchableRegion.contains(30, 30)).isFalse();
     }
 }

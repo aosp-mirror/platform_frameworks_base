@@ -5707,7 +5707,6 @@ public class Activity extends ContextThemeWrapper
      * their launch had come from the original activity.
      * @param intent The Intent to start.
      * @param options ActivityOptions or null.
-     * @param permissionToken Token received from the system that permits this call to be made.
      * @param ignoreTargetSecurity If true, the activity manager will not check whether the
      * caller it is doing the start is, is actually allowed to start the target activity.
      * If you set this to true, you must set an explicit component in the Intent and do any
@@ -5716,18 +5715,18 @@ public class Activity extends ContextThemeWrapper
      * @hide
      */
     public void startActivityAsCaller(Intent intent, @Nullable Bundle options,
-            IBinder permissionToken, boolean ignoreTargetSecurity, int userId) {
-        startActivityAsCaller(intent, options, permissionToken, ignoreTargetSecurity, userId, -1);
+            boolean ignoreTargetSecurity, int userId) {
+        startActivityAsCaller(intent, options, ignoreTargetSecurity, userId, -1);
     }
 
     /**
-     * @see #startActivityAsCaller(Intent, Bundle, IBinder, boolean, int)
+     * @see #startActivityAsCaller(Intent, Bundle, boolean, int)
      * @param requestCode The request code used for returning a result or -1 if no result should be
      *                    returned.
      * @hide
      */
     public void startActivityAsCaller(Intent intent, @Nullable Bundle options,
-            IBinder permissionToken, boolean ignoreTargetSecurity, int userId, int requestCode) {
+            boolean ignoreTargetSecurity, int userId, int requestCode) {
         if (mParent != null) {
             throw new RuntimeException("Can't be called from a child");
         }
@@ -5735,8 +5734,7 @@ public class Activity extends ContextThemeWrapper
         Instrumentation.ActivityResult ar =
                 mInstrumentation.execStartActivityAsCaller(
                         this, mMainThread.getApplicationThread(), mToken, this,
-                        intent, requestCode, options, permissionToken, ignoreTargetSecurity,
-                        userId);
+                        intent, requestCode, options, ignoreTargetSecurity, userId);
         if (ar != null) {
             mMainThread.sendActivityResult(
                     mToken, mEmbeddedID, requestCode, ar.getResultCode(), ar.getResultData());

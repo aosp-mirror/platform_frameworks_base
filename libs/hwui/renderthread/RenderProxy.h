@@ -144,6 +144,8 @@ public:
 
     static void preload();
 
+    static void setRtAnimationsEnabled(bool enabled);
+
 private:
     RenderThread& mRenderThread;
     CanvasContext* mContext;

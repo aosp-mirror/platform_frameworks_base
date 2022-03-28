@@ -894,10 +894,17 @@ public class NotificationPanelViewController extends PanelViewController {
                         mDepthController.setBlursDisabledForUnlock(mTracking);
 
                         if (playingCannedAnimation && !isWakeAndUnlock) {
-                            // Fling the panel away so it's not in the way or the surface behind the
+                            // Hide the panel so it's not in the way or the surface behind the
                             // keyguard, which will be appearing. If we're wake and unlocking, the
                             // lock screen is hidden instantly so should not be flung away.
-                            fling(0f, false, 0.7f, false);
+                            if (isTracking() || isFlinging()) {
+                                // Instant collpase the notification panel since the notification
+                                // panel is already in the middle animating
+                                onTrackingStopped(false);
+                                instantCollapse();
+                            } else {
+                                fling(0f, false, 0.7f, false);
+                            }
                         }
                     }
                 });
@@ -2675,6 +2682,15 @@ public class NotificationPanelViewController extends PanelViewController {
         updateClock();
     }
 
+    /**
+     * Sets the alpha value to be set on the keyguard status bar.
+     *
+     * @param alpha value between 0 and 1. -1 if the value is to be reset.
+     */
+    public void setKeyguardStatusBarAlpha(float alpha) {
+        mKeyguardStatusBarViewController.setAlpha(alpha);
+    }
+
     private void trackMovement(MotionEvent event) {
         if (mQsVelocityTracker != null) mQsVelocityTracker.addMovement(event);
     }
@@ -3203,12 +3219,14 @@ public class NotificationPanelViewController extends PanelViewController {
     @Override
     protected void onUnlockHintFinished() {
         super.onUnlockHintFinished();
+        mScrimController.setExpansionAffectsAlpha(true);
         mNotificationStackScrollLayoutController.setUnlockHintRunning(false);
     }
 
     @Override
     protected void onUnlockHintStarted() {
         super.onUnlockHintStarted();
+        mScrimController.setExpansionAffectsAlpha(false);
         mNotificationStackScrollLayoutController.setUnlockHintRunning(true);
     }
 

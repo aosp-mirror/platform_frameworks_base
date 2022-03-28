@@ -189,6 +189,9 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
     private boolean mNavBarAttachedToApp = false;
     private int mRecentsDisplayId = INVALID_DISPLAY;
 
+    /** @see #setCanPipOnFinish */
+    private boolean mCanPipOnFinish = true;
+
     Transition(@TransitionType int type, @TransitionFlags int flags,
             TransitionController controller, BLASTSyncEngine syncEngine) {
         mType = type;
@@ -448,6 +451,15 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
     }
 
     /**
+     * Set whether this transition can start a pip-enter transition when finished. This is usually
+     * true, but gets set to false when recents decides that it wants to finish its animation but
+     * not actually finish its animation (yeah...).
+     */
+    void setCanPipOnFinish(boolean canPipOnFinish) {
+        mCanPipOnFinish = canPipOnFinish;
+    }
+
+    /**
      * The transition has finished animating and is ready to finalize WM state. This should not
      * be called directly; use {@link TransitionController#finishTransition} instead.
      */
@@ -475,7 +487,7 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                 // activity in a bad state.
                 if (!visibleAtTransitionEnd && !ar.isVisibleRequested()) {
                     boolean commitVisibility = true;
-                    if (ar.isVisible() && ar.getTask() != null) {
+                    if (mCanPipOnFinish && ar.isVisible() && ar.getTask() != null) {
                         if (ar.pictureInPictureArgs != null
                                 && ar.pictureInPictureArgs.isAutoEnterEnabled()) {
                             if (mTransientLaunches != null) {

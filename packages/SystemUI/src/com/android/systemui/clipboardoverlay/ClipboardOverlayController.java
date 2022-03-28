@@ -247,7 +247,10 @@ public class ClipboardOverlayController {
                 SELF_PERMISSION, null);
         monitorOutsideTouches();
 
-        mContext.sendBroadcast(new Intent(COPY_OVERLAY_ACTION), SELF_PERMISSION);
+        Intent copyIntent = new Intent(COPY_OVERLAY_ACTION);
+        // Set package name so the system knows it's safe
+        copyIntent.setPackage(mContext.getPackageName());
+        mContext.sendBroadcast(copyIntent, SELF_PERMISSION);
     }
 
     void setClipData(ClipData clipData, String clipSource) {

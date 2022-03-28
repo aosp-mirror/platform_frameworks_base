@@ -26,6 +26,8 @@ import static android.Manifest.permission.NETWORK_STACK;
 import static android.Manifest.permission.OBSERVE_NETWORK_POLICY;
 import static android.Manifest.permission.READ_PHONE_STATE;
 import static android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE;
+import static android.app.ActivityManager.PROCESS_STATE_UNKNOWN;
+import static android.app.ActivityManager.isProcStateConsideredInteraction;
 import static android.app.PendingIntent.FLAG_IMMUTABLE;
 import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
 import static android.content.Intent.ACTION_PACKAGE_ADDED;
@@ -4042,14 +4044,14 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         isProcStateAllowedWhileIdleOrPowerSaveMode(oldUidState)
                                 != isProcStateAllowedWhileIdleOrPowerSaveMode(newUidState);
                 if (allowedWhileIdleOrPowerSaveModeChanged) {
-                    updateRuleForAppIdleUL(uid);
+                    updateRuleForAppIdleUL(uid, procState);
                     if (mDeviceIdleMode) {
                         updateRuleForDeviceIdleUL(uid);
                     }
                     if (mRestrictPower) {
                         updateRuleForRestrictPowerUL(uid);
                     }
-                    updateRulesForPowerRestrictionsUL(uid);
+                    updateRulesForPowerRestrictionsUL(uid, procState);
                 }
                 if (mLowPowerStandbyActive) {
                     boolean allowedInLpsChanged =
@@ -4057,7 +4059,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                                     != isProcStateAllowedWhileInLowPowerStandby(newUidState);
                     if (allowedInLpsChanged) {
                         if (!allowedWhileIdleOrPowerSaveModeChanged) {
-                            updateRulesForPowerRestrictionsUL(uid);
+                            updateRulesForPowerRestrictionsUL(uid, procState);
                         }
                         updateRuleForLowPowerStandbyUL(uid);
                     }
@@ -4426,7 +4428,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     }
 
     @GuardedBy("mUidRulesFirstLock")
-    void updateRuleForAppIdleUL(int uid) {
+    void updateRuleForAppIdleUL(int uid, int uidProcessState) {
         if (!isUidValidForDenylistRulesUL(uid)) return;
 
         if (Trace.isTagEnabled(Trace.TRACE_TAG_NETWORK)) {
@@ -4434,7 +4436,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
         try {
             int appId = UserHandle.getAppId(uid);
-            if (!mPowerSaveTempWhitelistAppIds.get(appId) && isUidIdle(uid)
+            if (!mPowerSaveTempWhitelistAppIds.get(appId) && isUidIdle(uid, uidProcessState)
                     && !isUidForegroundOnRestrictPowerUL(uid)) {
                 setUidFirewallRuleUL(FIREWALL_CHAIN_STANDBY, uid, FIREWALL_RULE_DENY);
                 if (LOGD) Log.d(TAG, "updateRuleForAppIdleUL DENY " + uid);
@@ -4585,7 +4587,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             final UserInfo user = users.get(i);
             int uid = UserHandle.getUid(user.id, appId);
             // Update external firewall rules.
-            updateRuleForAppIdleUL(uid);
+            updateRuleForAppIdleUL(uid, PROCESS_STATE_UNKNOWN);
             updateRuleForDeviceIdleUL(uid);
             updateRuleForRestrictPowerUL(uid);
             // Update internal rules.
@@ -4633,7 +4635,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 } else {
                     mAppIdleTempWhitelistAppIds.delete(uid);
                 }
-                updateRuleForAppIdleUL(uid);
+                updateRuleForAppIdleUL(uid, PROCESS_STATE_UNKNOWN);
                 updateRulesForPowerRestrictionsUL(uid);
             } finally {
                 Binder.restoreCallingIdentity(token);
@@ -4659,7 +4661,15 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     /** Returns if the UID is currently considered idle. */
     @VisibleForTesting
     boolean isUidIdle(int uid) {
+        return isUidIdle(uid, PROCESS_STATE_UNKNOWN);
+    }
+
+    private boolean isUidIdle(int uid, int uidProcessState) {
         synchronized (mUidRulesFirstLock) {
+            if (uidProcessState != PROCESS_STATE_UNKNOWN && isProcStateConsideredInteraction(
+                    uidProcessState)) {
+                return false;
+            }
             if (mAppIdleTempWhitelistAppIds.get(uid)) {
                 // UID is temporarily allowlisted.
                 return false;
@@ -4746,7 +4756,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private void updateRestrictionRulesForUidUL(int uid) {
         // Methods below only changes the firewall rules for the power-related modes.
         updateRuleForDeviceIdleUL(uid);
-        updateRuleForAppIdleUL(uid);
+        updateRuleForAppIdleUL(uid, PROCESS_STATE_UNKNOWN);
         updateRuleForRestrictPowerUL(uid);
 
         // If the uid has the necessary permissions, then it should be added to the restricted mode
@@ -4920,7 +4930,12 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
      */
     @GuardedBy("mUidRulesFirstLock")
     private void updateRulesForPowerRestrictionsUL(int uid) {
-        updateRulesForPowerRestrictionsUL(uid, isUidIdle(uid));
+        updateRulesForPowerRestrictionsUL(uid, PROCESS_STATE_UNKNOWN);
+    }
+
+    @GuardedBy("mUidRulesFirstLock")
+    private void updateRulesForPowerRestrictionsUL(int uid, int uidProcState) {
+        updateRulesForPowerRestrictionsUL(uid, isUidIdle(uid, uidProcState));
     }
 
     /**
@@ -5028,7 +5043,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         PackageManager.MATCH_UNINSTALLED_PACKAGES, userId);
                 synchronized (mUidRulesFirstLock) {
                     mLogger.appIdleStateChanged(uid, idle);
-                    updateRuleForAppIdleUL(uid);
+                    updateRuleForAppIdleUL(uid, PROCESS_STATE_UNKNOWN);
                     updateRulesForPowerRestrictionsUL(uid);
                 }
             } catch (NameNotFoundException nnfe) {

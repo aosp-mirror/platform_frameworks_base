@@ -85,8 +85,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"დროებით გამორთულია თქვენი ოპერატორის მიერ SIM-ისთვის (<xliff:g id="SIMNUMBER">%d</xliff:g>)"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"მობილურ ქსელთან დაკავშირება ვერ ხერხდება"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"ცადეთ უპირატესი ქსელის შეცვლა. შეეხეთ შესაცვლელად."</string>
-    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"გადაუდებელი ზარი მიუწვდომელია"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"გადაუდებელი ზარები Wi‑Fi-ს მეშვეობით ვერ განხორციელდება"</string>
+    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"გადაუდებელი ზარები შეიძლება მიუწვდომელი იყოს"</string>
+    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"<xliff:g id="SPN">%s</xliff:g> არ აქვს გადაუდებელი ზარების მხარდაჭერა Wi-Fi-ით. შეეხეთ დეტალების სანახავად."</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"გაფრთხილებები"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"ზარის გადამისამართება"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"გადაუდებელი გადმორეკვის რეჟიმი"</string>
@@ -425,10 +425,10 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"აპს შეეძლება, შეცვალოს თქვენი ტაბლეტის ზარების ჟურნალი, მათ შორის შემომავალი და გამავალი ზარების მონაცემები. მავნე აპებმა შეიძლება გამოიყენონ ეს თქვენი ზარების ჟურნალის წასაშლელად ან შესაცვლელად."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"ნებას რთავს აპს, შეცვალოს თქვენს Android TV მოწყობილობაზე ზარების ჟურნალი, შემომავალი და გამავალი ზარების მონაცემთა ჩათვლით. მავნე აპებს შეუძლიათ, ამის მეშვეობით, ამოშალონ ან შეცვალონ თქვენი ზარების ჟურნალი."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"აპს შეეძლება, შეცვალოს თქვენი ტელეფონის ზარების ჟურნალი, მათ შორის შემომავალი და გამავალი ზარების მონაცემები. მავნე აპებმა შეიძლება გამოიყენონ ეს თქვენი ზარების ჟურნალის წასაშლელად ან შესაცვლელად."</string>
-    <string name="permlab_bodySensors" msgid="3411035315357380862">"სხეულის სენსორებზე წვდომა (მაგ., გულისცემის მონიტორები)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="3208940894182188063">"წვდომა სხეულის ისეთ სენსორებზე, როგორიცაა გულისცემის სიხშირე, ტემპერატურა, სისხლში ჟანგბადის პროცენტული შემცველობა და ა.შ."</string>
-    <string name="permlab_bodySensors_background" msgid="4352831883331744370">"სხეულის სენსორებზე წვდომა (მაგ., გულისცემის სიხშ. მონ.) ფონურ რეჟიმში მუშაობისას"</string>
-    <string name="permdesc_bodySensors_background" product="default" msgid="8512392249166660872">"წვდომა სხეულის ისეთ სენსორებზე, როგორიცაა გულისცემის სიხშირე, ტემპერატურა, სისხლში ჟანგბადის პროცენტული შემცველობა და ა.შ. ფონურ რეჟიმში მუშაობისას."</string>
+    <string name="permlab_bodySensors" msgid="662918578601619569">"აპის გამოყენებისას სხეულის სენსორების მონაცემებზე წვდომა, როგორიცაა გულისცემა"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"საშუალებას აძლევს აპს, მისი გამოყენებისას, წვდომა ჰქონდეს სხეულის სენსორების მონაცემებზე, როგორიცაა გულისცემა, ტემპერატურა და სისხლში ჟანგბადის პროცენტული შემცველობა."</string>
+    <string name="permlab_bodySensors_background" msgid="4912560779957760446">"აპის ფონურ რეჟიმში მუშაობისას, სხეულის სენსორების მონაცემებზე წვდომა, როგორიცაა გულისცემა"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"საშუალებას აძლევს აპს, ფონურ რეჟიმში მუშაობისას, წვდომა ჰქონდეს სხეულის სენსორების მონაცემებზე, როგორიცაა გულისცემა, ტემპერატურა და სისხლში ჟანგბადის პროცენტული შემცველობა."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"კალენდრის მოვლენებისა და დეტალების წაკითხვა"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"ამ აპს შეუძლია თქვენს ტაბლეტში შენახული კალენდრის ყველა მოვლენის წაკითხვა და თქვენი კალენდრის მონაცემების გაზიარება ან შენახვა."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"ამ აპს შეუძლია თქვენს Android TV მოწყობილობაზე შენახული კალენდრის ყველა მოვლენის წაკითხვა და თქვენი კალენდრის მონაცემების გაზიარება ან შენახვა."</string>
@@ -689,8 +689,8 @@
     <string name="permdesc_readMediaAudio" msgid="5299772574434619399">"საშუალებას აძლევს აპს, წაიკითხოს აუდიო ფაილები თქვენი ზიარი მეხსიერებიდან."</string>
     <string name="permlab_readMediaVideo" msgid="7768003311260655007">"ვიდეო ფაილების წაკითხვა ზიარი მეხსიერებიდან"</string>
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"საშუალებას აძლევს აპს, წაიკითხოს ვიდეო ფაილები თქვენი ზიარი მეხსიერებიდან."</string>
-    <string name="permlab_readMediaImage" msgid="1507059005825769856">"სურათების ფაილების წაკითხვა ზიარი მეხსიერებიდან"</string>
-    <string name="permdesc_readMediaImage" msgid="8328052622292457588">"საშუალებას აძლევს აპს, წაიკითხოს სურათის ფაილები თქვენი ზიარი მეხსიერებიდან."</string>
+    <string name="permlab_readMediaImages" msgid="4057590631020986789">"სურათების ფაილების წაკითხვა ზიარი მეხსიერებიდან"</string>
+    <string name="permdesc_readMediaImages" msgid="5836219373138469259">"საშუალებას აძლევს აპს, წაიკითხოს სურათის ფაილები თქვენი ზიარი მეხსიერებიდან."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"თქვენი ზიარი მეხსიერების შიგთავსის შეცვლა ან წაშლა"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"საშუალებას აძლევს აპს, ჩაწეროს თქვენი ზიარი მეხსიერების შიგთავსი."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"SIP ზარების წამოწყება/მიღება"</string>
@@ -912,7 +912,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"განბლოკვისთვის ან გადაუდებელი ზარისთვის დააჭირეთ მენიუს."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"განბლოკვისთვის დააჭირეთ მენიუს."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"განსაბლოკად დახატეთ ნიმუში"</string>
-    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"გადაუდებელი ზარი"</string>
+    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"საგანგებო სამსახურები"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"ზარზე დაბრუნება"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"სწორია!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"კიდევ სცადეთ"</string>
@@ -1051,7 +1051,6 @@
     <string name="save_password_never" msgid="6776808375903410659">"არასოდეს"</string>
     <string name="open_permission_deny" msgid="5136793905306987251">"ამ გვერდის გახსნის უფლება არ გაქვთ."</string>
     <string name="text_copied" msgid="2531420577879738860">"ტექსტი დაკოპირებულია გაცვლის ბუფერში."</string>
-    <string name="copied" msgid="4675902854553014676">"დაკოპირდა"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>-დან <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g>-ში ჩასმული"</string>
     <string name="pasted_from_clipboard" msgid="7355790625710831847">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>-მა ჩასვა ტექსტი თქვენი გაცვლის ბუფერიდან"</string>
     <string name="pasted_text" msgid="4298871641549173733">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>-მ(ა) ჩასვა თქვენ მიერ დაკოპირებული ტექსტი"</string>
@@ -1452,8 +1451,12 @@
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"საშუალებას მისცემს აპს, მოითხოვოს მასთან დაკავშირებული ბატარეის ოპტიმიზაციის იგნორირების ნებართვა."</string>
     <string name="permlab_queryAllPackages" msgid="2928450604653281650">"ყველა პაკეტის მოთხოვნა"</string>
     <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"საშუალებას აძლევს აპს, ნახოს ყველა ინსტალირებული პაკეტი."</string>
-    <string name="permlab_accessSupplementalApi" msgid="3544659160536960275">"SupplementalApis-ზე წვდომა"</string>
-    <string name="permdesc_accessSupplementalApi" msgid="8974758769370951074">"აპლიკაციას SupplementalApis-ზე წვდომის საშუალებას აძლევს."</string>
+    <string name="permlab_accessAdServicesTopics" msgid="6687112022940098945">"წვდომა AdServices Topics API-ებზე"</string>
+    <string name="permdesc_accessAdServicesTopics" msgid="6011532458156465929">"აპლიკაციას აძლევს წვდომას AdServices Topics API-ებზე."</string>
+    <string name="permlab_accessAdServicesAttribution" msgid="3268942271128309354">"წვდომა AdServices Attribution API-ებზე"</string>
+    <string name="permdesc_accessAdServicesAttribution" msgid="577482544832578288">"აპლიკაციას აძლევს წვდომას AdServices Attribution API-ებზე."</string>
+    <string name="permlab_accessAdServicesCustomAudiences" msgid="7249286630514600684">"წვდომა AdServices Custom Audiences API-ებზე"</string>
+    <string name="permdesc_accessAdServicesCustomAudiences" msgid="645526926477180315">"აპლიკაციას აძლევს წვდომას AdServices Custom Audiences API-ებზე."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"მასშტაბის ცვლილებისთვის შეეხეთ ორჯერ"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"ვერ დაემატა ვიჯეტი."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"გადასვლა"</string>
@@ -1716,6 +1719,7 @@
     <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g>-ზე გადართვა…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"<xliff:g id="NAME">%1$s</xliff:g>-ის ანგარიშიდან გასვლა…"</string>
     <string name="owner_name" msgid="8713560351570795743">"მფლობელი"</string>
+    <string name="guest_name" msgid="8502103277839834324">"სტუმარი"</string>
     <string name="error_message_title" msgid="4082495589294631966">"შეცდომა"</string>
     <string name="error_message_change_not_allowed" msgid="843159705042381454">"ეს ცვლილება თქვენი ადმინისტრატორის მიერ ნებადართული არ არის"</string>
     <string name="app_not_found" msgid="3429506115332341800">"ამ მოქმედების შესასრულებლად აპლიკაცია ვერ მოიძებნა"</string>
@@ -2027,10 +2031,10 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"დეინსტალაცია"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"მაინც გახსნა"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"აღმოჩენილია საზიანო აპი"</string>
-    <string name="log_access_confirmation_title" msgid="3143035474800851565">"სისტემის ჟურნალში წვდომის მოთხოვნა"</string>
+    <string name="log_access_confirmation_title" msgid="2343578467290592708">"გსურთ <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g>-ს მიანიჭოთ მოწყობილობის ყველა ჟურნალზე წვდომა?"</string>
     <string name="log_access_confirmation_allow" msgid="143157286283302512">"მხოლოდ ამ ერთხელ"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"არ დაიშვას"</string>
-    <string name="log_access_confirmation_body" msgid="7599059550906238538">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> ითხოვს სისტემის ჟურნალებს ფუნქციური გამართვისთვის. ეს ჟურნალები შეიძლება შეიცავდეს ინფორმაციას, რომელიც დაწერილია თქვენს მოწყობილობაზე არსებულ აპებსა და სერვისებზე."</string>
+    <string name="log_access_confirmation_body" msgid="4483075525611652922">"მოწყობილობის ჟურნალში იწერება, რა ხდება ამ მოწყობილობაზე. აპებს შეუძლია ამ ჟურნალების გამოყენება პრობლემების აღმოსაჩენად და მოსაგვარებლად.\n\nზოგი ჟურნალი შეიძლება სენსიტიური ინფორმაციის მატარებელი იყოს, ამიტომაც მოწყობილობის ყველა ჟურნალზე წვდომა მხოლოდ სანდო აპებს მიანიჭეთ. \n\nთუ ამ აპს მოწყობილობის ყველა ჟურნალზე წვდომას არ მიანიჭებთ, მას მაინც ექნება წვდომა თქვენს ჟურნალებზე და თქვენი მოწყობილობის მწარმოებელს მაინც შეეძლება თქვენი მოწყობილობის ზოგიერთ ჟურნალსა თუ ინფორმაციაზე წვდომა. შეიტყვეთ მეტი"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"აღარ გამოჩნდეს"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g>-ს სურს, გაჩვენოთ <xliff:g id="APP_2">%2$s</xliff:g>-ის ფრაგმენტები"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"რედაქტირება"</string>
@@ -2265,4 +2269,6 @@
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> ფონურ რეჟიმში დიდი ხანია გაშვებულია. შეეხეთ გადასახედად."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"აქტიური აპების შემოწმება"</string>
     <string name="vdm_camera_access_denied" msgid="6345652513729130490">"კამერაზე წვდომა ამ მოწყობილობიდან ვერ მოხერხდება"</string>
+    <!-- no translation found for system_locale_title (3978041860457277638) -->
+    <skip />
 </resources>

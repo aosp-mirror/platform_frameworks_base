@@ -3770,7 +3770,7 @@ public class JobSchedulerService extends com.android.server.SystemService
             pw.decreaseIndent();
 
             pw.println();
-            mConcurrencyManager.dumpActiveJobsLocked(pw, predicate, nowElapsed, nowUptime);
+            mConcurrencyManager.dumpContextInfoLocked(pw, predicate, nowElapsed, nowUptime);
 
             pw.println();
             boolean recentPrinted = false;
