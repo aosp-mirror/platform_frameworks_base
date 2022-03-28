@@ -9716,6 +9716,7 @@ public class AudioService extends IAudioService.Stub
     static final int LOG_NB_EVENTS_FORCE_USE = 20;
     static final int LOG_NB_EVENTS_VOLUME = 40;
     static final int LOG_NB_EVENTS_DYN_POLICY = 10;
+    static final int LOG_NB_EVENTS_SPATIAL = 30;
 
     static final AudioEventLogger sLifecycleLogger = new AudioEventLogger(LOG_NB_EVENTS_LIFECYCLE,
             "audio services lifecycle");
@@ -9735,6 +9736,9 @@ public class AudioService extends IAudioService.Stub
 
     static final AudioEventLogger sVolumeLogger = new AudioEventLogger(LOG_NB_EVENTS_VOLUME,
             "volume changes (logged when command received by AudioService)");
+
+    static final AudioEventLogger sSpatialLogger = new AudioEventLogger(LOG_NB_EVENTS_SPATIAL,
+            "spatial audio");
 
     final private AudioEventLogger mDynPolicyLogger = new AudioEventLogger(LOG_NB_EVENTS_DYN_POLICY,
             "dynamic policy events (logged when command received by AudioService)");
@@ -9877,6 +9881,7 @@ public class AudioService extends IAudioService.Stub
         pw.println("mHasSpatializerEffect:" + mHasSpatializerEffect + " (effect present)");
         pw.println("isSpatializerEnabled:" + isSpatializerEnabled() + " (routing dependent)");
         mSpatializerHelper.dump(pw);
+        sSpatialLogger.dump(pw);
 
         mAudioSystem.dump(pw);
     }
