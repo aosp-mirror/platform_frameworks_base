@@ -128,6 +128,7 @@
     <public name="localeConfig" />
     <public name="showBackground" />
     <public name="useTargetActivityForQuickAccess"/>
+    <public name="removed_inheritKeyStoreKeys" />
     <public name="preferKeepClear" />
     <public name="autoHandwritingEnabled" />
     <public name="fromExtendLeft" />
@@ -147,6 +148,10 @@
     <public name="supportsInlineSuggestionsWithTouchExploration" />
     <public name="lineBreakStyle" />
     <public name="lineBreakWordStyle" />
+    <!-- @hide -->
+    <public name="maxDrawableWidth" />
+    <!-- @hide -->
+    <public name="maxDrawableHeight" />
   </staging-public-group>
 
   <staging-public-group type="id" first-id="0x01de0000">

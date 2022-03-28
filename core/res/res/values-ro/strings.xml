@@ -86,8 +86,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"Dezactivat temporar de operator pentru numărul de card SIM <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Nu se poate stabili conexiunea la rețeaua mobilă"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Încercați să schimbați rețeaua preferată. Atingeți pentru a schimba."</string>
-    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Apelurile de urgență nu sunt disponibile"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Nu puteți efectua apeluri de urgență prin Wi-Fi"</string>
+    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"Este posibil ca apelurile de urgență să nu fie disponibile"</string>
+    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"<xliff:g id="SPN">%s</xliff:g> nu acceptă apelurile de urgență prin Wi-Fi. Atingeți pentru detalii."</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Alerte"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Redirecționarea apelurilor"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Mod de apelare inversă de urgență"</string>
@@ -426,10 +426,10 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"Permite aplicației să modifice jurnalul de apeluri al tabletei dvs., inclusiv datele despre apelurile primite sau efectuate. Aplicațiile rău intenționate pot utiliza această permisiune pentru a șterge sau pentru a modifica jurnalul dvs. de apeluri."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Permite aplicației să modifice jurnalul de apeluri al dispozitivului Android TV, inclusiv datele despre apelurile primite sau efectuate. Aplicațiile rău intenționate pot utiliza această permisiune pentru a șterge sau pentru a modifica jurnalul de apeluri."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Permite aplicației să modifice jurnalul de apeluri al telefonului dvs., inclusiv datele despre apelurile primite sau efectuate. Aplicațiile rău intenționate pot utiliza această permisiune pentru a șterge sau pentru a modifica jurnalul dvs. de apeluri."</string>
-    <string name="permlab_bodySensors" msgid="3411035315357380862">"să acceseze senzorii corporali (cum ar fi monitoarele cardiace)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="3208940894182188063">"Acces la date de la senzori corporali, cum ar fi senzorii pentru puls, temperatură, procentul de oxigen din sânge etc."</string>
-    <string name="permlab_bodySensors_background" msgid="4352831883331744370">"Acces la senzorii corporali (cum ar fi monitoarele cardiace) din fundal"</string>
-    <string name="permdesc_bodySensors_background" product="default" msgid="8512392249166660872">"Acces din fundal la date de la senzori corporali, cum ar fi senzorii pentru puls, temperatură, procentul de oxigen din sânge etc."</string>
+    <string name="permlab_bodySensors" msgid="662918578601619569">"Să acceseze date de la senzorii corporali, cum ar fi pulsul, în timpul folosirii"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Permite aplicației să acceseze date de la senzorii corporali, cum ar fi pulsul, temperatura și procentul de oxigen din sânge, în timpul folosirii aplicației."</string>
+    <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Să acceseze date de la senzorii corporali, precum pulsul, când rulează în fundal"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Permite aplicației să acceseze date de la senzorii corporali, cum ar fi pulsul, temperatura și procentul de oxigen din sânge, în timp ce aplicația rulează în fundal."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"să citească evenimentele din calendar și detaliile"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Această aplicație poate să citească toate evenimentele din calendar stocate pe tabletă și să trimită sau să salveze datele din calendar."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Această aplicație poate să citească toate evenimentele din calendar stocate pe dispozitivul Android TV și să trimită sau să salveze datele din calendar."</string>
@@ -690,8 +690,8 @@
     <string name="permdesc_readMediaAudio" msgid="5299772574434619399">"Permite aplicației să citească fișiere audio din spațiul de stocare comun."</string>
     <string name="permlab_readMediaVideo" msgid="7768003311260655007">"să citească fișiere video din spațiul de stocare comun"</string>
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"Permite aplicației să citească fișiere video din spațiul de stocare comun."</string>
-    <string name="permlab_readMediaImage" msgid="1507059005825769856">"să citească fișiere imagine din spațiul de stocare comun"</string>
-    <string name="permdesc_readMediaImage" msgid="8328052622292457588">"Permite aplicației să citească fișiere imagine din spațiul de stocare comun."</string>
+    <string name="permlab_readMediaImages" msgid="4057590631020986789">"să citească fișiere imagine din spațiul de stocare comun"</string>
+    <string name="permdesc_readMediaImages" msgid="5836219373138469259">"Permite aplicației să citească fișiere imagine din spațiul de stocare comun."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"să modifice sau să șteargă conținutul spațiului de stocare comun"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Permite aplicației scrierea conținutul spațiului de stocare comun."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"efectuarea/primirea apelurilor SIP"</string>
@@ -913,7 +913,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"Apăsați Meniu pentru a debloca sau pentru a efectua apeluri de urgență."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"Apăsați Meniu pentru deblocare."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"Desenați modelul pentru a debloca"</string>
-    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"Apel de urgență"</string>
+    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"Urgență"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"Reveniți la apel"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"Corect!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Încercați din nou"</string>
@@ -1052,7 +1052,6 @@
     <string name="save_password_never" msgid="6776808375903410659">"Niciodată"</string>
     <string name="open_permission_deny" msgid="5136793905306987251">"Nu aveți permisiunea de a deschide această pagină."</string>
     <string name="text_copied" msgid="2531420577879738860">"Text copiat în clipboard."</string>
-    <string name="copied" msgid="4675902854553014676">"Copiat"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> a inserat date din <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g>"</string>
     <string name="pasted_from_clipboard" msgid="7355790625710831847">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> a inserat din clipboard"</string>
     <string name="pasted_text" msgid="4298871641549173733">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> a inserat textul copiat"</string>
@@ -1453,8 +1452,12 @@
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"Permite unei aplicații să solicite permisiunea de a ignora optimizările bateriei pentru aplicația respectivă."</string>
     <string name="permlab_queryAllPackages" msgid="2928450604653281650">"să interogheze toate pachetele"</string>
     <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"Permite unei aplicații să vadă toate pachetele instalate."</string>
-    <string name="permlab_accessSupplementalApi" msgid="3544659160536960275">"să acceseze SupplementalApis"</string>
-    <string name="permdesc_accessSupplementalApi" msgid="8974758769370951074">"Permite unei aplicații să acceseze SupplementalApis."</string>
+    <string name="permlab_accessAdServicesTopics" msgid="6687112022940098945">"să acceseze API-ul AdServices Topics"</string>
+    <string name="permdesc_accessAdServicesTopics" msgid="6011532458156465929">"Permite unei aplicații să acceseze API-ul AdServices Topics."</string>
+    <string name="permlab_accessAdServicesAttribution" msgid="3268942271128309354">"să acceseze API-urile AdServices Attribution"</string>
+    <string name="permdesc_accessAdServicesAttribution" msgid="577482544832578288">"Permite unei aplicații să acceseze API-urile AdServices Attribution."</string>
+    <string name="permlab_accessAdServicesCustomAudiences" msgid="7249286630514600684">"să acceseze API-ul AdServices Custom Audiences"</string>
+    <string name="permdesc_accessAdServicesCustomAudiences" msgid="645526926477180315">"Permite unei aplicații să acceseze API-ul AdServices Custom Audiences."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"Apăsați de două ori pentru a controla mărirea/micșorarea"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"Nu s-a putut adăuga widgetul."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"Accesați"</string>
@@ -1717,6 +1720,7 @@
     <string name="user_switching_message" msgid="1912993630661332336">"Se comută la <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"Se deconectează utilizatorul <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="owner_name" msgid="8713560351570795743">"Proprietar"</string>
+    <string name="guest_name" msgid="8502103277839834324">"Invitat"</string>
     <string name="error_message_title" msgid="4082495589294631966">"Eroare"</string>
     <string name="error_message_change_not_allowed" msgid="843159705042381454">"Această modificare nu este permisă de administratorul dvs."</string>
     <string name="app_not_found" msgid="3429506115332341800">"Nicio aplicație pentru gestionarea acestei acțiuni"</string>
@@ -2028,10 +2032,10 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"DEZINSTALAȚI"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"Deschideți oricum"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"Aplicație dăunătoare detectată"</string>
-    <string name="log_access_confirmation_title" msgid="3143035474800851565">"Solicitare de acces la jurnale de sistem"</string>
+    <string name="log_access_confirmation_title" msgid="2343578467290592708">"Permiteți ca <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> să acceseze toate jurnalele dispozitivului?"</string>
     <string name="log_access_confirmation_allow" msgid="143157286283302512">"Doar de data aceasta"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Nu permiteți"</string>
-    <string name="log_access_confirmation_body" msgid="7599059550906238538">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> solicită jurnale de sistem pentru remedierea erorilor de funcționare. Aceste jurnale pot conține informații scrise de aplicațiile și serviciile de pe dispozitiv."</string>
+    <string name="log_access_confirmation_body" msgid="4483075525611652922">"Jurnalele dispozitivului înregistrează activitatea de pe dispozitivul dvs. Aplicațiile pot folosi aceste jurnale pentru a identifica și a remedia probleme.\n\nUnele jurnale pot să conțină informații sensibile, prin urmare permiteți accesul la toate jurnalele dispozitivului doar aplicațiilor în care aveți încredere. \n\nDacă nu permiteți accesul aplicației la toate jurnalele dispozitivului, aceasta poate în continuare să acceseze propriile jurnale și este posibil ca producătorul dispozitivului să acceseze în continuare unele jurnale sau informații de pe dispozitiv. Aflați mai multe"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Nu mai afișa"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> vrea să afișeze porțiuni din <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Editați"</string>
@@ -2266,4 +2270,6 @@
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> rulează în fundal mult timp. Atingeți pentru a examina."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Verificați aplicațiile active"</string>
     <string name="vdm_camera_access_denied" msgid="6345652513729130490">"Nu se poate accesa camera foto de pe acest dispozitiv"</string>
+    <!-- no translation found for system_locale_title (3978041860457277638) -->
+    <skip />
 </resources>

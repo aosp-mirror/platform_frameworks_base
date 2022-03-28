@@ -47,20 +47,11 @@
     <!-- Confirmation for associating an application with a companion device of APP_STREAMING profile (type) [CHAR LIMIT=NONE] -->
     <string name="title_app_streaming">Allow &lt;strong&gt;<xliff:g id="app_name" example="Exo">%1$s</xliff:g>&lt;/strong&gt; to access this information from your phone</string>
 
-    <!-- Description of the privileges the application will get if associated with the companion device of APP_STREAMING profile (type) [CHAR LIMIT=NONE] -->
-    <string name="summary_app_streaming" product="default">Let &lt;strong&gt;<xliff:g id="app_name" example="Exo">%1$s</xliff:g>&lt;/strong&gt; to provide &lt;strong&gt;<xliff:g id="device_name" example="Pixelbook Go">%2$s</xliff:g>&lt;/strong&gt; remote access to access to applications installed on this phone when connected.</string>
-
-    <!-- Description of the privileges the application will get if associated with the companion device of APP_STREAMING profile (type) [CHAR LIMIT=NONE] -->
-    <string name="summary_app_streaming" product="tablet">Let &lt;strong&gt;<xliff:g id="app_name" example="Exo">%1$s</xliff:g>&lt;/strong&gt; to provide &lt;strong&gt;<xliff:g id="device_name" example="Pixelbook Go">%2$s</xliff:g>&lt;/strong&gt; remote access to access to applications installed on this tablet when connected.</string>
-
-    <!-- Description of the privileges the application will get if associated with the companion device of APP_STREAMING profile (type) [CHAR LIMIT=NONE] -->
-    <string name="summary_app_streaming" product="device">Let &lt;strong&gt;<xliff:g id="app_name" example="Exo">%1$s</xliff:g>&lt;/strong&gt; to provide &lt;strong&gt;<xliff:g id="device_name" example="Pixelbook Go">%2$s</xliff:g>&lt;/strong&gt; remote access to access to applications installed on this device when connected.</string>
-
     <!-- Title of the helper dialog for APP_STREAMING profile [CHAR LIMIT=30]. -->
     <string name="helper_title_app_streaming">Cross-device services</string>
 
     <!-- Description of the helper dialog for APP_STREAMING profile. [CHAR LIMIT=NONE] -->
-    <string name="helper_summary_app_streaming">This service is used to stream apps between your devices</string>
+    <string name="helper_summary_app_streaming"><xliff:g id="app_name" example="GMS">%1$s</xliff:g> is requesting permission on behalf of your <xliff:g id="device_type" example="Chromebook">%2$s</xliff:g> to access your phone\u2019s photos, media, and notifications</string>
 
     <!-- ================= DEVICE_PROFILE_AUTOMOTIVE_PROJECTION ================= -->
 
@@ -94,10 +85,7 @@
     <string name="helper_title_computer">Google Play services</string>
 
     <!-- Description of the helper dialog for COMPUTER profile. [CHAR LIMIT=NONE] -->
-    <string name="helper_summary_computer" product="default">This service shares photos, media, and notifications form your phone to other devices</string>
-
-    <!-- Description of the helper dialog for COMPUTER profile. [CHAR LIMIT=NONE] -->
-    <string name="helper_summary_computer" product="tablet">This service shares photos, media, and notifications form your phone to other devices</string>
+    <string name="helper_summary_computer"> <xliff:g id="app_name" example="GMS">%1$s</xliff:g> is requesting permission on behalf of your <xliff:g id="device_type" example="Chromebook">%2$s</xliff:g> to stream apps between your devices</string>
 
     <!-- ================= null profile ================= -->
 
@@ -115,8 +103,8 @@
     <!-- Negative button for the device-app association consent dialog [CHAR LIMIT=30] -->
     <string name="consent_no">Don\u2019t allow</string>
 
-    <!-- Ok button for the helper consent dialog [CHAR LIMIT=30] -->
-    <string name="consent_ok">OK</string>
+    <!-- Back button for the helper consent dialog [CHAR LIMIT=30] -->
+    <string name="consent_back">Back</string>
 
     <!-- ================== System data transfer ==================== -->
     <!-- Title of the permission sync confirmation dialog. [CHAR LIMIT=60] -->

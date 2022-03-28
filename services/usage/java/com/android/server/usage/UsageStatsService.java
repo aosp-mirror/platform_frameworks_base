@@ -79,6 +79,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -1982,6 +1983,10 @@ public class UsageStatsService extends SystemService implements
         }
     }
 
+    void clearLastUsedTimestamps(@NonNull String packageName, @UserIdInt int userId) {
+        mAppStandby.clearLastUsedTimestampsForTest(packageName, userId);
+    }
+
     private final class BinderService extends IUsageStatsManager.Stub {
 
         private boolean hasPermission(String callingPackage) {
@@ -2815,6 +2820,14 @@ public class UsageStatsService extends SystemService implements
                 throw new SecurityException("Caller doesn't have READ_DEVICE_CONFIG permission");
             }
             return mAppStandby.getAppStandbyConstant(key);
+        }
+
+        @Override
+        public int handleShellCommand(@NonNull ParcelFileDescriptor in,
+                @NonNull ParcelFileDescriptor out, @NonNull ParcelFileDescriptor err,
+                @NonNull String[] args) {
+            return new UsageStatsShellCommand(UsageStatsService.this).exec(this,
+                    in.getFileDescriptor(), out.getFileDescriptor(), err.getFileDescriptor(), args);
         }
     }
 

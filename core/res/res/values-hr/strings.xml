@@ -86,8 +86,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"Uslugu je privremeno isključio mobilni operater za SIM <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Mobilna mreža nije dostupna"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Pokušajte promijeniti preferiranu mrežu. Dodirnite da biste je promijenili."</string>
-    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Hitni pozivi nisu dostupni"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Nije moguće upućivati hitne pozive putem Wi‑Fi-ja"</string>
+    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"Hitni pozivi možda nisu dostupni"</string>
+    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"<xliff:g id="SPN">%s</xliff:g> ne podržava hitne pozive putem Wi-Fija. Dodirnite da biste vidjeli pojedinosti."</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Upozorenja"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Preusmjeravanje poziva"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Način hitnog povratnog poziva"</string>
@@ -426,10 +426,10 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"Aplikaciji omogućuje izmjenu dnevnika poziva vašeg tabletnog računala zajedno s podacima o dolaznim i odlaznim pozivima. Zlonamjerne aplikacije to mogu upotrebljavati za brisanje ili izmjenu vašeg dnevnika poziva."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Aplikaciji omogućuje izmjenu zapisnika poziva vašeg Android TV uređaja, uključujući podatke o dolaznim i odlaznim pozivima. Zlonamjerne aplikacije to mogu upotrijebiti za brisanje ili izmjenu zapisnika poziva."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Aplikaciji omogućuje izmjenu dnevnika poziva vašeg telefona zajedno s podacima o dolaznim i odlaznim pozivima. Zlonamjerne aplikacije to mogu upotrebljavati za brisanje ili izmjenu vašeg dnevnika poziva."</string>
-    <string name="permlab_bodySensors" msgid="3411035315357380862">"pristupati biometrijskim senzorima (kao što su monitori otkucaja srca)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="3208940894182188063">"Pristupite podacima biometrijskih senzora kao što su puls, temperatura, postotak kisika u krvi itd."</string>
-    <string name="permlab_bodySensors_background" msgid="4352831883331744370">"pristup biometrijskim senzorima (kao što su monitori pulsa) u pozadini"</string>
-    <string name="permdesc_bodySensors_background" product="default" msgid="8512392249166660872">"Pristupite podacima biometrijskih senzora kao što su puls, temperatura, postotak kisika u krvi itd. u pozadini."</string>
+    <string name="permlab_bodySensors" msgid="662918578601619569">"Pristup podacima s biometrijskih senzora, kao što je puls, dok se upotrebljava"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Omogućuje aplikaciji pristup podacima s biometrijskih senzora, kao što su puls, temperatura i postotak kisika u krvi, dok se aplikacija upotrebljava."</string>
+    <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Pristup podacima s biometrijskih senzora, kao što je puls, dok je u pozadini"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Omogućuje aplikaciji pristup podacima s biometrijskih senzora, kao što su puls, temperatura i postotak kisika u krvi, dok je aplikacija u pozadini."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Čitanje događaja i pojedinosti kalendara"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Aplikacija može čitati sve kalendarske događaje pohranjene na tabletu i dijeliti ili spremati podatke iz vašeg kalendara."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Aplikacija može čitati sve kalendarske događaje pohranjene na Android TV uređaju i dijeliti ili spremati podatke iz vašeg kalendara."</string>
@@ -690,8 +690,8 @@
     <string name="permdesc_readMediaAudio" msgid="5299772574434619399">"Aplikaciji omogućuje čitanje audiodatoteka iz dijeljene pohrane."</string>
     <string name="permlab_readMediaVideo" msgid="7768003311260655007">"čitanje videodatoteka iz dijeljene pohrane"</string>
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"Aplikaciji omogućuje čitanje videodatoteka iz dijeljene pohrane."</string>
-    <string name="permlab_readMediaImage" msgid="1507059005825769856">"čitanje slikovnih datoteka iz dijeljene pohrane"</string>
-    <string name="permdesc_readMediaImage" msgid="8328052622292457588">"Aplikaciji omogućuje čitanje slikovnih datoteka iz dijeljene pohrane."</string>
+    <string name="permlab_readMediaImages" msgid="4057590631020986789">"čitati slikovne datoteke iz dijeljene pohrane"</string>
+    <string name="permdesc_readMediaImages" msgid="5836219373138469259">"Aplikaciji omogućuje čitanje slikovnih datoteka iz dijeljene pohrane."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"izmjena ili brisanje sadržaja dijeljene pohrane"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Aplikaciji omogućuje pisanje sadržaja u dijeljenu pohranu."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"upućivanje/primanje SIP poziva"</string>
@@ -913,7 +913,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"Pritisnite Izbornik za otključavanje ili pozivanje hitnih službi."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"Pritisnite Izbornik za otključavanje."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"Iscrtajte uzorak za otključavanje"</string>
-    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"Hitni poziv"</string>
+    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"Hitne službe"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"Uzvrati poziv"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"Ispravno!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Pokušajte ponovo"</string>
@@ -1052,7 +1052,6 @@
     <string name="save_password_never" msgid="6776808375903410659">"Nikad"</string>
     <string name="open_permission_deny" msgid="5136793905306987251">"Nemate dozvolu za otvaranje te stranice."</string>
     <string name="text_copied" msgid="2531420577879738860">"Tekst kopiran u međuspremnik."</string>
-    <string name="copied" msgid="4675902854553014676">"Kopirano"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"U aplikaciji <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> zalijepljen je sadržaj aplikacije <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g>"</string>
     <string name="pasted_from_clipboard" msgid="7355790625710831847">"Apl. <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> zalijepila je ovaj sadržaj iz međuspremnika"</string>
     <string name="pasted_text" msgid="4298871641549173733">"Aplikacija <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> zalijepila je tekst koji ste kopirali"</string>
@@ -1453,8 +1452,12 @@
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"Aplikaciji omogućuje da traži dopuštenje za zanemarivanje optimizacija baterije za tu aplikaciju."</string>
     <string name="permlab_queryAllPackages" msgid="2928450604653281650">"slanje upita za sve pakete"</string>
     <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"Aplikaciji omogućuje pregled instaliranih paketa."</string>
-    <string name="permlab_accessSupplementalApi" msgid="3544659160536960275">"pristupiti SupplementalApijima"</string>
-    <string name="permdesc_accessSupplementalApi" msgid="8974758769370951074">"Omogućuje aplikaciji pristupanje SupplementalApijima."</string>
+    <string name="permlab_accessAdServicesTopics" msgid="6687112022940098945">"pristupiti AdServices Topics API-ju"</string>
+    <string name="permdesc_accessAdServicesTopics" msgid="6011532458156465929">"Omogućuje aplikaciji pristupanje AdServices Topics API-ju."</string>
+    <string name="permlab_accessAdServicesAttribution" msgid="3268942271128309354">"pristupiti AdServices Attribution API-jima"</string>
+    <string name="permdesc_accessAdServicesAttribution" msgid="577482544832578288">"Omogućuje aplikaciji pristupanje AdServices Attribution API-jima."</string>
+    <string name="permlab_accessAdServicesCustomAudiences" msgid="7249286630514600684">"pristupiti AdServices Custom Audiences API-ju"</string>
+    <string name="permdesc_accessAdServicesCustomAudiences" msgid="645526926477180315">"Omogućuje aplikaciji pristupanje AdServices Custom Audiences API-ju."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"Dvaput dotaknite za upravljanje zumiranjem"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"Widget nije moguće dodati."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"Idi"</string>
@@ -1717,6 +1720,7 @@
     <string name="user_switching_message" msgid="1912993630661332336">"Prebacivanje na korisnika <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"Odjavljivanje korisnika <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="owner_name" msgid="8713560351570795743">"Vlasnik"</string>
+    <string name="guest_name" msgid="8502103277839834324">"Gost"</string>
     <string name="error_message_title" msgid="4082495589294631966">"Pogreška"</string>
     <string name="error_message_change_not_allowed" msgid="843159705042381454">"Vaš administrator ne dopušta tu promjenu"</string>
     <string name="app_not_found" msgid="3429506115332341800">"Nije pronađena aplikacija za upravljanje ovom radnjom"</string>
@@ -2028,10 +2032,10 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"DEINSTALIRAJ"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"IPAK OTVORI"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"Otkrivena je štetna aplikacija"</string>
-    <string name="log_access_confirmation_title" msgid="3143035474800851565">"Zahtjev za pristup zapisnicima sustava"</string>
+    <string name="log_access_confirmation_title" msgid="2343578467290592708">"Želite li dopustiti aplikaciji <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> da pristupa svim zapisnicima uređaja?"</string>
     <string name="log_access_confirmation_allow" msgid="143157286283302512">"Samo ovaj put"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Nemoj dopustiti"</string>
-    <string name="log_access_confirmation_body" msgid="7599059550906238538">"Aplikacija <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> zahtijeva zapisnike sustava radi funkcionalnog otklanjanja pogrešaka. Ti zapisnici mogu sadržavati podatke koje su zabilježile aplikacije i usluge na vašem uređaju."</string>
+    <string name="log_access_confirmation_body" msgid="4483075525611652922">"U zapisnicima uređaja bilježi se što se događa na uređaju. Aplikacije mogu koristiti te zapisnike kako bi pronašle i riješile poteškoće.\n\nNeki zapisnici mogu sadržavati osjetljive podatke, pa pristup svim zapisnicima uređaja odobrite samo pouzdanim aplikacijama. \n\nAko ne dopustite ovoj aplikaciji da pristupa svim zapisnicima uređaja, ona i dalje može pristupati svojim zapisnicima, a proizvođač uređaja i dalje može pristupati nekim zapisnicima ili podacima na vašem uređaju. Saznajte više"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Ne prikazuj ponovo"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> želi prikazivati isječke aplikacije <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Uredi"</string>
@@ -2266,4 +2270,6 @@
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"Aplikacija <xliff:g id="APP">%1$s</xliff:g> dugo se izvodi u pozadini. Dodirnite za pregled."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Provjera aktivnih aplikacija"</string>
     <string name="vdm_camera_access_denied" msgid="6345652513729130490">"Kameri se ne može pristupiti s ovog uređaja"</string>
+    <!-- no translation found for system_locale_title (3978041860457277638) -->
+    <skip />
 </resources>

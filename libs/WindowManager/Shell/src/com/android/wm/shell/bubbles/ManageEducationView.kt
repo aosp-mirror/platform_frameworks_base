@@ -101,9 +101,8 @@ class ManageEducationView constructor(context: Context, positioner: BubblePositi
         bubbleExpandedView = expandedView
         expandedView.taskView?.setObscuredTouchRect(Rect(positioner.screenRect))
 
-        layoutParams.width = if (positioner.isLargeScreen)
-            context.resources.getDimensionPixelSize(
-                    R.dimen.bubbles_user_education_width_large_screen)
+        layoutParams.width = if (positioner.isLargeScreen || positioner.isLandscape)
+            context.resources.getDimensionPixelSize(R.dimen.bubbles_user_education_width)
         else ViewGroup.LayoutParams.MATCH_PARENT
 
         alpha = 0f

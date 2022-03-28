@@ -148,7 +148,7 @@ public class KeyguardClockPositionAlgorithm {
         mStatusViewBottomMargin = res.getDimensionPixelSize(
                 R.dimen.keyguard_status_view_bottom_margin);
         mSplitShadeTopNotificationsMargin =
-                res.getDimensionPixelSize(R.dimen.split_shade_header_height);
+                res.getDimensionPixelSize(R.dimen.large_screen_shade_header_height);
         mSplitShadeTargetTopMargin =
                 res.getDimensionPixelSize(R.dimen.keyguard_split_shade_top_margin);
 

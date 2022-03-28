@@ -38,7 +38,6 @@ import static android.os.ParcelFileDescriptor.MODE_READ_WRITE;
 import static android.os.storage.OnObbStateChangeListener.ERROR_ALREADY_MOUNTED;
 import static android.os.storage.OnObbStateChangeListener.ERROR_COULD_NOT_MOUNT;
 import static android.os.storage.OnObbStateChangeListener.ERROR_COULD_NOT_UNMOUNT;
-import static android.os.storage.OnObbStateChangeListener.ERROR_INTERNAL;
 import static android.os.storage.OnObbStateChangeListener.ERROR_NOT_MOUNTED;
 import static android.os.storage.OnObbStateChangeListener.ERROR_PERMISSION_DENIED;
 import static android.os.storage.OnObbStateChangeListener.MOUNTED;
@@ -598,12 +597,6 @@ class StorageManagerService extends IStorageManager.Stub
         }
     }
 
-    /** List of crypto types.
-      * These must match CRYPT_TYPE_XXX in cryptfs.h AND their
-      * corresponding commands in CommandListener.cpp */
-    public static final String[] CRYPTO_TYPES
-        = { "password", "default", "pattern", "pin" };
-
     private final Context mContext;
     private final ContentResolver mResolver;
 
@@ -621,18 +614,6 @@ class StorageManagerService extends IStorageManager.Stub
 
     private final Callbacks mCallbacks;
     private final LockPatternUtils mLockPatternUtils;
-
-    /**
-     * The size of the crypto algorithm key in bits for OBB files. Currently
-     * Twofish is used which takes 128-bit keys.
-     */
-    private static final int CRYPTO_ALGORITHM_KEY_SIZE = 128;
-
-    /**
-     * The number of times to run SHA1 in the PBKDF2 function for OBB files.
-     * 1024 is reasonably secure and not too slow.
-     */
-    private static final int PBKDF2_HASH_ROUNDS = 1024;
 
     private static final String ANR_DELAY_MILLIS_DEVICE_CONFIG_KEY =
             "anr_delay_millis";

@@ -151,10 +151,6 @@
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"Wenn du beim nächsten Versuch ein falsches Muster eingibst, werden dein Arbeitsprofil und die zugehörigen Daten gelöscht."</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"Wenn du beim nächsten Versuch eine falsche PIN eingibst, werden dein Arbeitsprofil und die zugehörigen Daten gelöscht."</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"Wenn du beim nächsten Versuch ein falsches Passwort eingibst, werden dein Arbeitsprofil und die zugehörigen Daten gelöscht."</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"Zu viele Fehlversuche. Die Daten auf diesem Gerät werden gelöscht."</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"Zu viele Fehlversuche. Dieser Nutzer wird vom Gerät entfernt."</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"Zu viele Fehlversuche. Dieses Arbeitsprofil und die zugehörigen Daten werden gelöscht."</string>
-    <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"Schließen"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Berühre den Fingerabdrucksensor"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"Fingerabdruck-Symbol"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Gesicht wurde nicht erkannt. Verwende stattdessen den Fingerabdruck."</string>
@@ -323,17 +319,12 @@
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Wird langsam geladen • Voll in <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Ladestation • Voll in <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Nutzer wechseln"</string>
-    <string name="user_add_user" msgid="4336657383006913022">"Nutzer hinzufügen"</string>
-    <string name="user_new_user_name" msgid="2019166282704195789">"Neuer Nutzer"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Gast entfernen?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Alle Apps und Daten in dieser Sitzung werden gelöscht."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Entfernen"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Willkommen zurück im Gastmodus"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Möchtest du deine Sitzung fortsetzen?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Neu starten"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Ja, weiter"</string>
-    <string name="user_add_user_title" msgid="4172327541504825032">"Neuen Nutzer hinzufügen?"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"Wenn du einen neuen Nutzer hinzufügst, muss dieser seinen Bereich einrichten.\n\nJeder Nutzer kann Apps für alle anderen Nutzer aktualisieren."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Nutzerlimit erreicht"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="other">Du kannst bis zu <xliff:g id="COUNT">%d</xliff:g> Nutzer hinzufügen.</item>
@@ -459,8 +450,7 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Zum Verwenden entsperren"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Beim Abrufen deiner Karten ist ein Fehler aufgetreten – bitte versuch es später noch einmal"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Einstellungen für den Sperrbildschirm"</string>
-    <!-- no translation found for qr_code_scanner_title (5290201053875420785) -->
-    <skip />
+    <string name="qr_code_scanner_title" msgid="5290201053875420785">"QR-Code scannen"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Arbeitsprofil"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Flugmodus"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"Lautloser Weckruf <xliff:g id="WHEN">%1$s</xliff:g>"</string>
@@ -785,9 +775,10 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Wischen, um weitere zu sehen"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Empfehlungen werden geladen"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Medien"</string>
-    <string name="controls_media_close_session" msgid="1193000643003066508">"Diese Mediensitzung ausblenden?"</string>
+    <!-- no translation found for controls_media_close_session (4780485355795635052) -->
+    <skip />
     <string name="controls_media_active_session" msgid="3146882316024153337">"Die Mediensitzung kann nicht ausgeblendet werden."</string>
-    <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Ausblenden"</string>
+    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Ausblenden"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Fortsetzen"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Einstellungen"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"<xliff:g id="SONG_NAME">%1$s</xliff:g> von <xliff:g id="ARTIST_NAME">%2$s</xliff:g> wird gerade über <xliff:g id="APP_LABEL">%3$s</xliff:g> wiedergegeben"</string>
@@ -805,7 +796,8 @@
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Platziere für die Wiedergabe dein Gerät näher an „<xliff:g id="DEVICENAME">%1$s</xliff:g>“"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Wird auf „<xliff:g id="DEVICENAME">%1$s</xliff:g>“ abgespielt"</string>
     <string name="media_transfer_playing_this_device" msgid="1856890686844499172">"Wird auf diesem Smartphone abgespielt"</string>
-    <string name="media_transfer_failed" msgid="2640354446629980227">"Ein Fehler ist aufgetreten"</string>
+    <!-- no translation found for media_transfer_failed (7955354964610603723) -->
+    <skip />
     <string name="controls_error_timeout" msgid="794197289772728958">"Inaktiv – sieh in der App nach"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Nicht gefunden"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Steuerelement nicht verfügbar"</string>

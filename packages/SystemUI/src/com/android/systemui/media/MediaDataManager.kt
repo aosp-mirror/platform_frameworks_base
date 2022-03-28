@@ -105,6 +105,17 @@ fun isMediaNotification(sbn: StatusBarNotification): Boolean {
 }
 
 /**
+ * Allow recommendations from smartspace to show in media controls.
+ * Requires [Utils.useQsMediaPlayer] to be enabled.
+ * On by default, but can be disabled by setting to 0
+ */
+private fun allowMediaRecommendations(context: Context): Boolean {
+    val flag = Settings.Secure.getInt(context.contentResolver,
+            Settings.Secure.MEDIA_CONTROLS_RECOMMENDATION, 1)
+    return Utils.useQsMediaPlayer(context) && flag > 0
+}
+
+/**
  * A class that facilitates management and loading of Media Data, ready for binding.
  */
 @SysUISingleton
@@ -164,7 +175,7 @@ class MediaDataManager(
     // There should ONLY be at most one Smartspace media recommendation.
     var smartspaceMediaData: SmartspaceMediaData = EMPTY_SMARTSPACE_MEDIA_DATA
     private var smartspaceSession: SmartspaceSession? = null
-    private var allowMediaRecommendations = Utils.allowMediaRecommendations(context)
+    private var allowMediaRecommendations = allowMediaRecommendations(context)
 
     /**
      * Check whether this notification is an RCN
@@ -272,7 +283,7 @@ class MediaDataManager(
         smartspaceSession?.let { it.requestSmartspaceUpdate() }
         tunerService.addTunable(object : TunerService.Tunable {
             override fun onTuningChanged(key: String?, newValue: String?) {
-                allowMediaRecommendations = Utils.allowMediaRecommendations(context)
+                allowMediaRecommendations = allowMediaRecommendations(context)
                 if (!allowMediaRecommendations) {
                     dismissSmartspaceRecommendation(key = smartspaceMediaData.targetId, delay = 0L)
                 }
@@ -684,11 +695,12 @@ class MediaDataManager(
                     Icon.createWithResource(sbn.packageName, action.getIcon()!!.getResId())
                 } else {
                     action.getIcon()
-                }.setTint(themeText)
+                }.setTint(themeText).loadDrawable(context)
                 val mediaAction = MediaAction(
                     mediaActionIcon,
                     runnable,
-                    action.title)
+                    action.title,
+                    null)
                 actionIcons.add(mediaAction)
             }
         }
@@ -778,30 +790,34 @@ class MediaDataManager(
         return when (action) {
             PlaybackState.ACTION_PLAY -> {
                 MediaAction(
-                    Icon.createWithResource(context, R.drawable.ic_media_play),
+                    context.getDrawable(R.drawable.ic_media_play),
                     { controller.transportControls.play() },
-                    context.getString(R.string.controls_media_button_play)
+                    context.getString(R.string.controls_media_button_play),
+                    context.getDrawable(R.drawable.ic_media_play_container)
                 )
             }
             PlaybackState.ACTION_PAUSE -> {
                 MediaAction(
-                    Icon.createWithResource(context, R.drawable.ic_media_pause),
+                    context.getDrawable(R.drawable.ic_media_pause),
                     { controller.transportControls.pause() },
-                    context.getString(R.string.controls_media_button_pause)
+                    context.getString(R.string.controls_media_button_pause),
+                    context.getDrawable(R.drawable.ic_media_pause_container)
                 )
             }
             PlaybackState.ACTION_SKIP_TO_PREVIOUS -> {
                 MediaAction(
-                    Icon.createWithResource(context, R.drawable.ic_media_prev),
+                    context.getDrawable(R.drawable.ic_media_prev),
                     { controller.transportControls.skipToPrevious() },
-                    context.getString(R.string.controls_media_button_prev)
+                    context.getString(R.string.controls_media_button_prev),
+                    null
                 )
             }
             PlaybackState.ACTION_SKIP_TO_NEXT -> {
                 MediaAction(
-                    Icon.createWithResource(context, R.drawable.ic_media_next),
+                    context.getDrawable(R.drawable.ic_media_next),
                     { controller.transportControls.skipToNext() },
-                    context.getString(R.string.controls_media_button_next)
+                    context.getString(R.string.controls_media_button_next),
+                    null
                 )
             }
             else -> null
@@ -824,9 +840,10 @@ class MediaDataManager(
 
         val it = state.customActions[index]
         return MediaAction(
-            Icon.createWithResource(packageName, it.icon),
+            Icon.createWithResource(packageName, it.icon).loadDrawable(context),
             { controller.transportControls.sendCustomAction(it, it.extras) },
-            it.name
+            it.name,
+            null
         )
     }
 
@@ -889,9 +906,11 @@ class MediaDataManager(
 
     private fun getResumeMediaAction(action: Runnable): MediaAction {
         return MediaAction(
-            Icon.createWithResource(context, R.drawable.ic_media_play).setTint(themeText),
+            Icon.createWithResource(context, R.drawable.ic_media_play)
+                .setTint(themeText).loadDrawable(context),
             action,
-            context.getString(R.string.controls_media_resume)
+            context.getString(R.string.controls_media_resume),
+            context.getDrawable(R.drawable.ic_media_play_container)
         )
     }
 
