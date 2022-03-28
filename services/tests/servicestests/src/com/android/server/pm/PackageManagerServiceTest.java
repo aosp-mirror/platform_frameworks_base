@@ -523,13 +523,9 @@ public class PackageManagerServiceTest {
             userId = um.createUser("Test User", 0 /* flags */).getUserHandle().getIdentifier();
             runShellCommand("am start-user -w " + userId);
             // Since the test APK isn't installed on the 2nd user, the reason should be unknown.
+            assertWithMessage("The test APK should not be installed in the 2nd user").that(
+                    mIPackageManager.getPackageInfo(TEST_PKG_NAME, 0 /* flags */, userId)).isNull();
             assertWithMessage("The install reason in 2nd user should be unknown.").that(
-                    mIPackageManager.getInstallReason(TEST_PKG_NAME, userId)).isEqualTo(
-                    PackageManager.INSTALL_REASON_UNKNOWN);
-
-            // Try to update test APK with different reason INSTALL_REASON_USER
-            runShellCommand("pm install --install-reason 4 " + testApk);
-            assertWithMessage("The install reason in 2nd user should keep unknown.").that(
                     mIPackageManager.getInstallReason(TEST_PKG_NAME, userId)).isEqualTo(
                     PackageManager.INSTALL_REASON_UNKNOWN);
         } finally {
