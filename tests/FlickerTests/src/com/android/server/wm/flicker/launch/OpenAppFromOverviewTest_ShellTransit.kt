@@ -54,13 +54,17 @@ import org.junit.runners.Parameterized
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group1
-@FlakyTest(bugId = 219688533)
 class OpenAppFromOverviewTest_ShellTransit(testSpec: FlickerTestParameter)
     : OpenAppFromOverviewTest(testSpec) {
     @Before
     override fun before() {
         assumeTrue(isShellTransitionsEnabled)
     }
+
+    /** {@inheritDoc} */
+    @FlakyTest(bugId = 216266712)
+    @Test
+    override fun appWindowBecomesTopWindow() = super.appWindowBecomesTopWindow()
 
     /** {@inheritDoc} */
     @FlakyTest(bugId = 216266712)
