@@ -1350,6 +1350,31 @@ public class TvInteractiveAppManagerService extends SystemService {
         }
 
         @Override
+        public void notifyError(IBinder sessionToken, String errMsg, Bundle params, int userId) {
+            if (DEBUG) {
+                Slogf.d(TAG, "notifyError(errMsg=%s)", errMsg);
+            }
+            final int callingUid = Binder.getCallingUid();
+            final int resolvedUserId =
+                    resolveCallingUserId(Binder.getCallingPid(), callingUid, userId, "notifyError");
+            SessionState sessionState = null;
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    try {
+                        sessionState =
+                                getSessionStateLocked(sessionToken, callingUid, resolvedUserId);
+                        getSessionLocked(sessionState).notifyError(errMsg, params);
+                    } catch (RemoteException | SessionNotFoundException e) {
+                        Slogf.e(TAG, "error in notifyError", e);
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
         public void setSurface(IBinder sessionToken, Surface surface, int userId) {
             final int callingUid = Binder.getCallingUid();
             final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
