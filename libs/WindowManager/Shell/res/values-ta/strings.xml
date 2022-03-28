@@ -20,6 +20,7 @@
     <string name="pip_phone_close" msgid="5783752637260411309">"மூடு"</string>
     <string name="pip_phone_expand" msgid="2579292903468287504">"விரி"</string>
     <string name="pip_phone_settings" msgid="5468987116750491918">"அமைப்புகள்"</string>
+    <string name="pip_phone_enter_split" msgid="7042877263880641911">"திரைப் பிரிப்பு பயன்முறைக்குச் செல்"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"மெனு"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> தற்போது பிக்ச்சர்-இன்-பிக்ச்சரில் உள்ளது"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"<xliff:g id="NAME">%s</xliff:g> இந்த அம்சத்தைப் பயன்படுத்த வேண்டாம் என நினைத்தால் இங்கு தட்டி அமைப்புகளைத் திறந்து இதை முடக்கவும்."</string>
@@ -28,6 +29,8 @@
     <string name="pip_skip_to_next" msgid="8403429188794867653">"அடுத்ததற்குச் செல்"</string>
     <string name="pip_skip_to_prev" msgid="7172158111196394092">"முந்தையதற்குச் செல்"</string>
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"அளவு மாற்று"</string>
+    <string name="accessibility_action_pip_stash" msgid="4060775037619702641">"Stash"</string>
+    <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Unstash"</string>
     <string name="dock_forced_resizable" msgid="1749750436092293116">"திரைப் பிரிப்பு அம்சத்தில் ஆப்ஸ் செயல்படாமல் போகக்கூடும்."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"திரையைப் பிரிப்பதைப் ஆப்ஸ் ஆதரிக்கவில்லை."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"இரண்டாம்நிலைத் திரையில் ஆப்ஸ் வேலை செய்யாமல் போகக்கூடும்."</string>
@@ -70,5 +73,4 @@
     <string name="manage_bubbles_text" msgid="7730624269650594419">"நிர்வகி"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"குமிழ் நிராகரிக்கப்பட்டது."</string>
     <string name="restart_button_description" msgid="5887656107651190519">"தட்டுவதன் மூலம் இந்த ஆப்ஸை மீண்டும் தொடங்கலாம், முழுத்திரையில் பார்க்கலாம்."</string>
-    <string name="got_it" msgid="4428750913636945527">"சரி"</string>
 </resources>
