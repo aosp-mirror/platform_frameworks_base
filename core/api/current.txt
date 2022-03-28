@@ -42283,7 +42283,7 @@ package android.telephony.euicc {
     method public boolean isEnabled();
     method public boolean isSimPortAvailable(int);
     method public void startResolutionActivity(android.app.Activity, int, android.content.Intent, android.app.PendingIntent) throws android.content.IntentSender.SendIntentException;
-    method @Deprecated @RequiresPermission("android.permission.WRITE_EMBEDDED_SUBSCRIPTIONS") public void switchToSubscription(int, android.app.PendingIntent);
+    method @RequiresPermission("android.permission.WRITE_EMBEDDED_SUBSCRIPTIONS") public void switchToSubscription(int, android.app.PendingIntent);
     method @RequiresPermission("android.permission.WRITE_EMBEDDED_SUBSCRIPTIONS") public void switchToSubscription(int, int, @NonNull android.app.PendingIntent);
     method @RequiresPermission("android.permission.WRITE_EMBEDDED_SUBSCRIPTIONS") public void updateSubscriptionNickname(int, @Nullable String, @NonNull android.app.PendingIntent);
     field public static final String ACTION_MANAGE_EMBEDDED_SUBSCRIPTIONS = "android.telephony.euicc.action.MANAGE_EMBEDDED_SUBSCRIPTIONS";
@@ -42303,6 +42303,7 @@ package android.telephony.euicc {
     field public static final int ERROR_INSTALL_PROFILE = 10009; // 0x2719
     field public static final int ERROR_INVALID_ACTIVATION_CODE = 10001; // 0x2711
     field public static final int ERROR_INVALID_CONFIRMATION_CODE = 10002; // 0x2712
+    field public static final int ERROR_INVALID_PORT = 10017; // 0x2721
     field public static final int ERROR_INVALID_RESPONSE = 10015; // 0x271f
     field public static final int ERROR_NO_PROFILES_AVAILABLE = 10013; // 0x271d
     field public static final int ERROR_OPERATION_BUSY = 10016; // 0x2720
