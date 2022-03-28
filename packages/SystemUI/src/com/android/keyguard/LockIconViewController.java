@@ -652,7 +652,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         // pre-emptively set to true to hide view
         mIsBouncerShowing = true;
         if (mUdfpsSupported && mShowUnlockIcon && mAuthRippleController != null) {
-            mAuthRippleController.showRipple(FINGERPRINT);
+            mAuthRippleController.showUnlockRipple(FINGERPRINT);
         }
         updateVisibility();
         if (mOnGestureDetectedRunnable != null) {
