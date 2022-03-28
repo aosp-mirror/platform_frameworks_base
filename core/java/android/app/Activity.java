@@ -3938,7 +3938,11 @@ public class Activity extends ContextThemeWrapper
      * </ul>
      *
      * @see #moveTaskToBack(boolean)
+     *
+     * @deprecated Use {@link OnBackInvokedCallback} or
+     * {@code androidx.activity.OnBackPressedCallback} to handle back navigation instead.
      */
+    @Deprecated
     public void onBackPressed() {
         if (mActionBar != null && mActionBar.collapseActionView()) {
             return;
