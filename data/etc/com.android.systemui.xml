@@ -79,5 +79,6 @@
         <permission name="android.permission.LOG_COMPAT_CHANGE" />
         <permission name="android.permission.READ_COMPAT_CHANGE_CONFIG" />
         <permission name="android.permission.READ_DEVICE_CONFIG" />
+        <permission name="android.permission.READ_SAFETY_CENTER_STATUS" />
     </privapp-permissions>
 </permissions>
