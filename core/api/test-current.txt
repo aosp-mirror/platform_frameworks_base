@@ -3260,10 +3260,6 @@ package android.window {
     field public static final int FEATURE_WINDOW_TOKENS = 2; // 0x2
   }
 
-  public interface OnBackInvokedDispatcher {
-    field public static final long DISPATCH_BACK_INVOCATION_AHEAD_OF_TIME = 195946584L; // 0xbade858L
-  }
-
   public final class SplashScreenView extends android.widget.FrameLayout {
     method @Nullable public android.view.View getBrandingView();
   }
