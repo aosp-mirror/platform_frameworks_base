@@ -796,8 +796,7 @@
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"현재 기기에서 재생하려면 <xliff:g id="DEVICENAME">%1$s</xliff:g>에 더 가까이 이동합니다."</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"<xliff:g id="DEVICENAME">%1$s</xliff:g>에서 재생 중"</string>
     <string name="media_transfer_playing_this_device" msgid="1856890686844499172">"휴대전화에서 재생 중"</string>
-    <!-- no translation found for media_transfer_failed (7955354964610603723) -->
-    <skip />
+    <string name="media_transfer_failed" msgid="7955354964610603723">"문제가 발생했습니다. 다시 시도해 주세요."</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"비활성. 앱을 확인하세요."</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"찾을 수 없음"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"컨트롤을 사용할 수 없음"</string>
