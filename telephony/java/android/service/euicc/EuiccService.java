@@ -856,9 +856,10 @@ public abstract class EuiccService extends Service {
             mExecutor.execute(new Runnable() {
                 @Override
                 public void run() {
+                    // TODO(b/207392528: use portIndex API once implemented)
                     int result =
-                            EuiccService.this.onSwitchToSubscriptionWithPort(
-                                    slotId, portIndex, iccid, forceDeactivateSim);
+                            EuiccService.this.onSwitchToSubscription(
+                                    slotId, iccid, forceDeactivateSim);
                     try {
                         callback.onComplete(result);
                     } catch (RemoteException e) {
