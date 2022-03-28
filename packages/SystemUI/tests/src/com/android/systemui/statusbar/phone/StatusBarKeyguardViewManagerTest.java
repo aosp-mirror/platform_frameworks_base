@@ -149,6 +149,7 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                 mBiometricUnlockController,
                 mNotificationContainer,
                 mBypassController);
+        when(mKeyguardStateController.isOccluded()).thenReturn(false);
         mStatusBarKeyguardViewManager.show(null);
     }
 
@@ -286,23 +287,27 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
 
     @Test
     public void setOccluded_onKeyguardOccludedChangedCalledCorrectly() {
-        mStatusBarKeyguardViewManager.setOccluded(false /* occluded */, false /* animated */);
-        verify(mKeyguardUpdateMonitor).onKeyguardOccludedChanged(false);
-
+        clearInvocations(mKeyguardStateController);
         clearInvocations(mKeyguardUpdateMonitor);
 
+        // Should be false to start, so no invocations
         mStatusBarKeyguardViewManager.setOccluded(false /* occluded */, false /* animated */);
         verify(mKeyguardUpdateMonitor, never()).onKeyguardOccludedChanged(anyBoolean());
+        verify(mKeyguardStateController, never()).notifyKeyguardState(anyBoolean(), anyBoolean());
 
         clearInvocations(mKeyguardUpdateMonitor);
+        clearInvocations(mKeyguardStateController);
 
         mStatusBarKeyguardViewManager.setOccluded(true /* occluded */, false /* animated */);
         verify(mKeyguardUpdateMonitor).onKeyguardOccludedChanged(true);
+        verify(mKeyguardStateController).notifyKeyguardState(true, true);
 
         clearInvocations(mKeyguardUpdateMonitor);
+        clearInvocations(mKeyguardStateController);
 
         mStatusBarKeyguardViewManager.setOccluded(true /* occluded */, false /* animated */);
         verify(mKeyguardUpdateMonitor, never()).onKeyguardOccludedChanged(anyBoolean());
+        verify(mKeyguardStateController, never()).notifyKeyguardState(anyBoolean(), anyBoolean());
     }
 
     @Test
@@ -312,6 +317,7 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
 
         mStatusBarKeyguardViewManager.setOccluded(true /* occluded */, false /* animated */);
         verify(mKeyguardUpdateMonitor).onKeyguardOccludedChanged(true);
+        verify(mKeyguardStateController).notifyKeyguardState(true, true);
     }
 
     @Test
@@ -321,6 +327,7 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
 
         mStatusBarKeyguardViewManager.setOccluded(true /* occluded */, false /* animated */);
         verify(mKeyguardUpdateMonitor).onKeyguardOccludedChanged(true);
+        verify(mKeyguardStateController).notifyKeyguardState(true, true);
     }
 
     @Test
