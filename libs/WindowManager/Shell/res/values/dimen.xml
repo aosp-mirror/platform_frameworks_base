@@ -74,6 +74,10 @@
     <!-- PIP stash offset size, which is the width of visible PIP region when stashed. -->
     <dimen name="pip_stash_offset">32dp</dimen>
 
+    <!-- PIP shadow radius, originally as
+         WindowConfiguration#PINNED_WINDOWING_MODE_ELEVATION_IN_DIP -->
+    <dimen name="pip_shadow_radius">5dp</dimen>
+
     <dimen name="dismiss_target_x_size">24dp</dimen>
     <dimen name="floating_dismiss_bottom_margin">50dp</dimen>
 
