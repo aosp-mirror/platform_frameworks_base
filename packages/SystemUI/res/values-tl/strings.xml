@@ -775,8 +775,7 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Mag-swipe para tumingin ng higit pa"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Nilo-load ang rekomendasyon"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Media"</string>
-    <!-- no translation found for controls_media_close_session (4780485355795635052) -->
-    <skip />
+    <string name="controls_media_close_session" msgid="4780485355795635052">"itago ang kontrol sa media na ito para sa <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="controls_media_active_session" msgid="3146882316024153337">"Hindi maitatago ang kasalukuyang session ng media."</string>
     <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Itago"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Ituloy"</string>
@@ -796,8 +795,7 @@
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Lumapit sa <xliff:g id="DEVICENAME">%1$s</xliff:g> para mag-play rito"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Nagpe-play sa <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_transfer_playing_this_device" msgid="1856890686844499172">"Nagpe-play sa teleponong ito"</string>
-    <!-- no translation found for media_transfer_failed (7955354964610603723) -->
-    <skip />
+    <string name="media_transfer_failed" msgid="7955354964610603723">"Nagkaproblema. Subukan ulit."</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Hindi aktibo, tingnan ang app"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Hindi nahanap"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Hindi available ang kontrol"</string>

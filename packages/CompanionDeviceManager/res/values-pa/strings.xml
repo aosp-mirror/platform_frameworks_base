@@ -33,8 +33,7 @@
     <string name="title_computer" msgid="4693714143506569253">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ਨੂੰ ਤੁਹਾਡੇ ਫ਼ੋਨ ਤੋਂ ਇਸ ਜਾਣਕਾਰੀ ਤੱਕ ਪਹੁੰਚ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿਓ"</string>
     <string name="summary_computer" msgid="3798467601598297062"></string>
     <string name="permission_notification" msgid="693762568127741203">"ਸੂਚਨਾਵਾਂ"</string>
-    <!-- no translation found for permission_notification_summary (884075314530071011) -->
-    <skip />
+    <string name="permission_notification_summary" msgid="884075314530071011">"ਤੁਸੀਂ ਸਾਰੀਆਂ ਸੂਚਨਾਵਾਂ ਪੜ੍ਹ ਸਕਦੇ ਹੋ, ਜਿਨ੍ਹਾਂ ਵਿੱਚ ਸੰਪਰਕਾਂ, ਸੁਨੇਹਿਆਂ ਅਤੇ ਫ਼ੋਟੋਆਂ ਵਰਗੀ ਜਾਣਕਾਰੀ ਸ਼ਾਮਲ ਹੁੰਦੀ ਹੈ"</string>
     <string name="permission_storage" msgid="6831099350839392343">"ਫ਼ੋਟੋਆਂ ਅਤੇ ਮੀਡੀਆ"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
     <string name="helper_title_computer" msgid="4671071173916176037">"Google Play ਸੇਵਾਵਾਂ"</string>
