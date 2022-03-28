@@ -292,6 +292,7 @@ public final class PowerManagerService extends SystemService
     private final Clock mClock;
     private final Injector mInjector;
 
+    private AppOpsManager mAppOpsManager;
     private LightsManager mLightsManager;
     private BatteryManagerInternal mBatteryManagerInternal;
     private DisplayManagerInternal mDisplayManagerInternal;
@@ -987,6 +988,10 @@ public final class PowerManagerService extends SystemService
         LowPowerStandbyController createLowPowerStandbyController(Context context, Looper looper) {
             return new LowPowerStandbyController(context, looper, SystemClock::elapsedRealtime);
         }
+
+        AppOpsManager createAppOpsManager(Context context) {
+            return context.getSystemService(AppOpsManager.class);
+        }
     }
 
     final Constants mConstants;
@@ -1040,6 +1045,8 @@ public final class PowerManagerService extends SystemService
                 Looper.getMainLooper());
         mInattentiveSleepWarningOverlayController =
                 mInjector.createInattentiveSleepWarningController();
+
+        mAppOpsManager = injector.createAppOpsManager(mContext);
 
         mPowerGroupWakefulnessChangeListener = new PowerGroupWakefulnessChangeListener();
 
@@ -1564,8 +1571,7 @@ public final class PowerManagerService extends SystemService
             }
             return true;
         }
-        if (mContext.getSystemService(AppOpsManager.class).checkOpNoThrow(
-                AppOpsManager.OP_TURN_SCREEN_ON, opUid, opPackageName)
+        if (mAppOpsManager.checkOpNoThrow(AppOpsManager.OP_TURN_SCREEN_ON, opUid, opPackageName)
                 == AppOpsManager.MODE_ALLOWED) {
             if (DEBUG_SPEW) {
                 Slog.d(TAG, "Allowing device wake-up for app with special access " + opPackageName);
