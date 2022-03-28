@@ -1799,6 +1799,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @VisibleForTesting
     DevicePolicyManagerService(Injector injector) {
+        DevicePolicyManager.disableGetKeyguardDisabledFeaturesCache();
+
         mInjector = injector;
         mContext = Objects.requireNonNull(injector.mContext);
         mHandler = new Handler(Objects.requireNonNull(injector.getMyLooper()));
@@ -1890,6 +1892,19 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         performPolicyVersionUpgrade();
 
         mDeviceManagementResourcesProvider.load();
+
+        // The binder caches are not enabled until the first invalidation.
+        invalidateBinderCaches();
+    }
+
+    /**
+     * Invalidate the binder API caches. The invalidation itself does not require any
+     * locking, but this specific call should be protected by getLockObject() to ensure
+     * that the invalidation is synchronous with cached queries, for those queries that
+     * are served under getLockObject().
+     */
+    static void invalidateBinderCaches() {
+        DevicePolicyManager.invalidateBinderCaches();
     }
 
     /**
@@ -3071,6 +3086,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 !mInjector.storageManagerIsFileBasedEncryptionEnabled())) {
             sendChangedNotification(userHandle);
         }
+        invalidateBinderCaches();
     }
 
     private void sendChangedNotification(int userHandle) {
@@ -3392,6 +3408,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         if (owner != null) {
             mDeviceAdminServiceController.startServiceForOwner(
                     owner.getPackageName(), userId, actionForLog);
+            invalidateBinderCaches();
         }
     }
 
@@ -8419,6 +8436,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     /**
      * Gets the disabled state for features in keyguard for the given admin,
      * or the aggregate of all active admins if who is null.
+     * This API is cached: invalidate with invalidateBinderCaches().
      */
     @Override
     public int getKeyguardDisabledFeatures(ComponentName who, int userHandle, boolean parent) {
@@ -8628,6 +8646,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         return true;
     }
 
+    /**
+     * This API is cached: invalidate with invalidateBinderCaches().
+     */
     @Override
     public boolean hasDeviceOwner() {
         final CallerIdentity caller = getCallerIdentity();
@@ -9403,6 +9424,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         });
     }
 
+    /**
+     * This API is cached: invalidate with invalidateBinderCaches().
+     */
     @Override
     public @Nullable ComponentName getProfileOwnerOrDeviceOwnerSupervisionComponent(
             @NonNull UserHandle userHandle) {
@@ -9468,6 +9492,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         return UserHandle.USER_NULL;
     }
 
+    /**
+     * This API is cached: invalidate with invalidateBinderCaches().
+     */
     @Override
     public boolean isOrganizationOwnedDeviceWithManagedProfile() {
         if (!mHasFeature) {
@@ -13053,6 +13080,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         @Override
         public void onChange(boolean selfChange, Uri uri, int userId) {
             mConstants = loadConstants();
+            invalidateBinderCaches();
 
             mInjector.binderWithCleanCallingIdentity(() -> {
                 final Intent intent = new Intent(
@@ -13213,6 +13241,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     .createEvent(DevicePolicyEnums.SEPARATE_PROFILE_CHALLENGE_CHANGED)
                     .setBoolean(isSeparateProfileChallengeEnabled(userId))
                     .write();
+            invalidateBinderCaches();
         }
 
         @Override
@@ -14636,6 +14665,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
+    /**
+     * This API is cached: invalidate with invalidateBinderCaches().
+     */
     @Override
     public CharSequence getDeviceOwnerOrganizationName() {
         if (!mHasFeature) {
@@ -14650,6 +14682,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
+    /**
+     * This API is cached: invalidate with invalidateBinderCaches().
+     */
     @Override
     public CharSequence getOrganizationNameForUser(int userHandle) {
         if (!mHasFeature) {
@@ -15735,6 +15770,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         // available after next boot.
     }
 
+    /**
+     * This API is cached: invalidate with invalidateBinderCaches().
+     */
     @Override
     public boolean isNetworkLoggingEnabled(@Nullable ComponentName admin,
             @NonNull String packageName) {
