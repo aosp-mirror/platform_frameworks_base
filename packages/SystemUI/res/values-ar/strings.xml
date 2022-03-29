@@ -462,8 +462,7 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"فتح القفل للاستخدام"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"حدثت مشكلة أثناء الحصول على البطاقات، يُرجى إعادة المحاولة لاحقًا."</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"إعدادات شاشة القفل"</string>
-    <!-- no translation found for qr_code_scanner_title (5290201053875420785) -->
-    <skip />
+    <string name="qr_code_scanner_title" msgid="5290201053875420785">"مسح رمز الاستجابة السريعة ضوئيًا"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"الملف الشخصي للعمل"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"وضع الطيران"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"لن تسمع المنبّه القادم في <xliff:g id="WHEN">%1$s</xliff:g>"</string>
@@ -821,8 +820,7 @@
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"يُرجى الاقتراب من <xliff:g id="DEVICENAME">%1$s</xliff:g> لتشغيل الوسائط هنا."</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"جارٍ تشغيل الوسائط على <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_transfer_playing_this_device" msgid="1856890686844499172">"جارٍ تشغيل الوسائط على هذا الهاتف"</string>
-    <!-- no translation found for media_transfer_failed (7955354964610603723) -->
-    <skip />
+    <string name="media_transfer_failed" msgid="7955354964610603723">"حدث خطأ. يُرجى إعادة المحاولة."</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"غير نشط، تحقّق من التطبيق."</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"لم يتم العثور عليه."</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"عنصر التحكّم غير متوفّر"</string>

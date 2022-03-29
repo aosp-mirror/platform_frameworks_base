@@ -775,8 +775,7 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"ಇನ್ನಷ್ಟು ನೋಡಲು ಸ್ವೈಪ್ ಮಾಡಿ"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"ಶಿಫಾರಸುಗಳು ಲೋಡ್ ಆಗುತ್ತಿವೆ"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"ಮಾಧ್ಯಮ"</string>
-    <!-- no translation found for controls_media_close_session (4780485355795635052) -->
-    <skip />
+    <string name="controls_media_close_session" msgid="4780485355795635052">"<xliff:g id="APP_NAME">%1$s</xliff:g> ಗಾಗಿ ಈ ಮಾಧ್ಯಮ ಕಂಟ್ರೋಲ್‌ಗಳನ್ನು ಮರೆಮಾಡಬೇಕೆ?"</string>
     <string name="controls_media_active_session" msgid="3146882316024153337">"ಪ್ರಸ್ತುತ ಮಾಧ್ಯಮ ಸೆಶನ್ ಅನ್ನು ಮರೆಮಾಡಲು ಸಾಧ್ಯವಿಲ್ಲ."</string>
     <string name="controls_media_dismiss_button" msgid="4485675693008031646">"ಮರೆಮಾಡಿ"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"ಪುನರಾರಂಭಿಸಿ"</string>

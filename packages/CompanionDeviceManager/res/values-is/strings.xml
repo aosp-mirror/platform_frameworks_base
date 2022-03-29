@@ -33,8 +33,7 @@
     <string name="title_computer" msgid="4693714143506569253">"Veita &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; aðgang að þessum upplýsingum úr símanum þínum"</string>
     <string name="summary_computer" msgid="3798467601598297062"></string>
     <string name="permission_notification" msgid="693762568127741203">"Tilkynningar"</string>
-    <!-- no translation found for permission_notification_summary (884075314530071011) -->
-    <skip />
+    <string name="permission_notification_summary" msgid="884075314530071011">"Getur lesið allar tilkynningar, þar á meðal upplýsingar á borð við tengiliði skilaboð og myndir"</string>
     <string name="permission_storage" msgid="6831099350839392343">"Myndir og efni"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
     <string name="helper_title_computer" msgid="4671071173916176037">"Þjónusta Google Play"</string>

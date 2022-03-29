@@ -29,7 +29,6 @@
     <string name="device_encryption_backup_text" msgid="5866590762672844664">"Түзмөгүңүздүн шифрлөө сырсөзүн төмөндө киргизиңиз. Ал бэкап архивин шифрлегенге дагы колдонулат."</string>
     <string name="backup_enc_password_text" msgid="4981585714795233099">"Эгер сиз толук бэкапты шифрлегиңиз келсе, төмөндө сырсөз киргизиңиз. Эгер ал бош калтырылса, анда учурдагы сырсөз колдонулат:"</string>
     <string name="backup_enc_password_optional" msgid="1350137345907579306">"Эгер сиз толук бэкапты шифрлегиңиз келсе, төмөндө сырсөз киргизиңиз:"</string>
-    <string name="backup_enc_password_required" msgid="7889652203371654149">"Түзмөгүңүз шифрленген болгондуктан, камдооңузду шифрлешиңиз керек. Төмөнгө сырсөз киргизиңиз:"</string>
     <string name="restore_enc_password_text" msgid="6140898525580710823">"Эгер калыбына келтирүү берилиштери шифрленген болсо, төмөндө сырсөздү киргизиңиз:"</string>
     <string name="toast_backup_started" msgid="550354281452756121">"Бэкап башталды..."</string>
     <string name="toast_backup_ended" msgid="3818080769548726424">"Бэкап аяктады"</string>

@@ -1337,6 +1337,21 @@ class ActivityStarter {
                 : (realCallingAppId == Process.SYSTEM_UID)
                         || realCallingUidProcState <= ActivityManager.PROCESS_STATE_PERSISTENT_UI;
 
+        // In the case of an SDK sandbox calling uid, check if the corresponding app uid has a
+        // visible window.
+        if (Process.isSdkSandboxUid(realCallingUid)) {
+            int realCallingSdkSandboxUidToAppUid = Process.getAppUidForSdkSandboxUid(
+                    UserHandle.getAppId(realCallingUid));
+
+            if (mService.hasActiveVisibleWindow(realCallingSdkSandboxUidToAppUid)) {
+                if (DEBUG_ACTIVITY_STARTS) {
+                    Slog.d(TAG, "Activity start allowed: uid in SDK sandbox ("
+                            + realCallingUid + ") has visible (non-toast) window.");
+                }
+                return false;
+            }
+        }
+
         // Legacy behavior allows to use caller foreground state to bypass BAL restriction.
         final boolean balAllowedByPiSender =
                 PendingIntentRecord.isPendingIntentBalAllowedByCaller(checkedOptions);

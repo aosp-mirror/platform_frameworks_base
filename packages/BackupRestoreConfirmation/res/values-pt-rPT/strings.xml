@@ -18,10 +18,10 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="backup_confirm_title" msgid="827563724209303345">"Cópia de segurança completa"</string>
     <string name="restore_confirm_title" msgid="5469365809567486602">"Restauro completo"</string>
-    <string name="backup_confirm_text" msgid="1878021282758896593">"Foi solicitada uma cópia de segurança completa de todos os dados para um computador. Pretende permitir esta operação?\n\nCaso não tenha solicitado a cópia de segurança, não permita que a operação prossiga."</string>
+    <string name="backup_confirm_text" msgid="1878021282758896593">"Foi solicitada uma cópia de segurança completa de todos os dados para um computador. Permitir esta operação?\n\nCaso não tenha solicitado a cópia de segurança, não permita que a operação prossiga."</string>
     <string name="allow_backup_button_label" msgid="4217228747769644068">"Fazer cópia de seg. dos dados"</string>
     <string name="deny_backup_button_label" msgid="6009119115581097708">"Não efetuar cópia de seg."</string>
-    <string name="restore_confirm_text" msgid="7499866728030461776">"Foi solicitado um restauro completo de todos os dados a partir de um computador. Pretende permitir esta operação?\n\nCaso não tenha solicitado o restauro, não permita que a operação prossiga. Isto substituirá os dados existentes no equipamento!"</string>
+    <string name="restore_confirm_text" msgid="7499866728030461776">"Foi solicitado um restauro completo de todos os dados a partir de um computador. Permitir esta operação?\n\nCaso não tenha solicitado o restauro, não permita que a operação prossiga. Isto substituirá os dados existentes no equipamento!"</string>
     <string name="allow_restore_button_label" msgid="3081286752277127827">"Restaurar os meus dados"</string>
     <string name="deny_restore_button_label" msgid="1724367334453104378">"Não restaurar"</string>
     <string name="current_password_text" msgid="8268189555578298067">"Introduza a palavra-passe de cópia de segurança atual abaixo:"</string>
@@ -29,7 +29,6 @@
     <string name="device_encryption_backup_text" msgid="5866590762672844664">"Introduza a palavra-passe de encriptação do dispositivo abaixo. Esta também será utilizada para encriptar o arquivo da cópia de segurança."</string>
     <string name="backup_enc_password_text" msgid="4981585714795233099">"Introduza uma palavra-passe a utilizar para encriptar os dados da cópia de segurança completa. Se deixar o campo em branco, será utilizada a palavra-passe de cópia de segurança atual."</string>
     <string name="backup_enc_password_optional" msgid="1350137345907579306">"Se pretender encriptar os dados da cópia de segurança completa, introduza uma palavra-passe abaixo:"</string>
-    <string name="backup_enc_password_required" msgid="7889652203371654149">"Uma vez que o seu dispositivo está encriptado, tem de encriptar a sua cópia de segurança. Introduza uma palavra-passe abaixo:"</string>
     <string name="restore_enc_password_text" msgid="6140898525580710823">"Se os dados a restaurar estiverem encriptados, introduza a palavra-passe abaixo:"</string>
     <string name="toast_backup_started" msgid="550354281452756121">"A iniciar cópia de segurança..."</string>
     <string name="toast_backup_ended" msgid="3818080769548726424">"Cópia de segurança concluída"</string>

@@ -25,11 +25,6 @@
     <dimen name="qs_brightness_margin_top">0dp</dimen>
     <dimen name="qs_brightness_margin_bottom">12dp</dimen>
     <dimen name="qqs_layout_margin_top">8dp</dimen>
-    <!-- The height of the qs customize header. Should be
-    (qs_panel_padding_top (48dp) +  brightness_mirror_height (48dp) + qs_brightness_margin_top (0dp) + qs_brightness_margin_bottom (12dp)) -
-    (Toolbar_minWidth (56dp) + qs_tile_margin_top_bottom (4dp))
-    -->
-    <dimen name="qs_customize_header_min_height">48dp</dimen>
 
     <!--  In landscape the security footer is actually part of the header,
     and needs to be as short as the header  -->
