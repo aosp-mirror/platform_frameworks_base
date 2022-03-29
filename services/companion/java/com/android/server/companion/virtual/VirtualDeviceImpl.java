@@ -283,6 +283,11 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         return mVirtualAudioController;
     }
 
+    @VisibleForTesting
+    SparseArray<GenericWindowPolicyController> getWindowPolicyControllersForTesting() {
+        return mWindowPolicyControllers;
+    }
+
     @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     @Override // Binder call
     public void onAudioSessionStarting(int displayId,
