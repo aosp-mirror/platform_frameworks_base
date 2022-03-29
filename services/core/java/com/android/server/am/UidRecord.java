@@ -117,13 +117,16 @@ public final class UidRecord {
      */
     final Object networkStateLock = new Object();
 
-    static final int CHANGE_PROCSTATE = 0;
-    static final int CHANGE_GONE = 1<<0;
-    static final int CHANGE_IDLE = 1<<1;
-    static final int CHANGE_ACTIVE = 1<<2;
-    static final int CHANGE_CACHED = 1<<3;
-    static final int CHANGE_UNCACHED = 1<<4;
-    static final int CHANGE_CAPABILITY = 1<<5;
+    /*
+     * Change bitmask flags.
+     */
+    static final int CHANGE_GONE = 1 << 0;
+    static final int CHANGE_IDLE = 1 << 1;
+    static final int CHANGE_ACTIVE = 1 << 2;
+    static final int CHANGE_CACHED = 1 << 3;
+    static final int CHANGE_UNCACHED = 1 << 4;
+    static final int CHANGE_CAPABILITY = 1 << 5;
+    static final int CHANGE_PROCSTATE = 1 << 31;
 
     // Keep the enum lists in sync
     private static int[] ORIG_ENUMS = new int[] {
@@ -133,6 +136,7 @@ public final class UidRecord {
             CHANGE_CACHED,
             CHANGE_UNCACHED,
             CHANGE_CAPABILITY,
+            CHANGE_PROCSTATE,
     };
     private static int[] PROTO_ENUMS = new int[] {
             UidRecordProto.CHANGE_GONE,
@@ -141,6 +145,7 @@ public final class UidRecord {
             UidRecordProto.CHANGE_CACHED,
             UidRecordProto.CHANGE_UNCACHED,
             UidRecordProto.CHANGE_CAPABILITY,
+            UidRecordProto.CHANGE_PROCSTATE,
     };
 
     // UidObserverController is the only thing that should modify this.
@@ -416,6 +421,12 @@ public final class UidRecord {
                     sb.append("|");
                 }
                 sb.append("uncached");
+            }
+            if ((mLastReportedChange & CHANGE_PROCSTATE) != 0) {
+                if (printed) {
+                    sb.append("|");
+                }
+                sb.append("procstate");
             }
         }
         sb.append(" procs:");

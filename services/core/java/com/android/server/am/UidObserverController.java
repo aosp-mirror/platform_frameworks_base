@@ -154,6 +154,9 @@ public class UidObserverController {
         if ((pendingChange & UidRecord.CHANGE_CAPABILITY) != 0) {
             currentChange |= UidRecord.CHANGE_CAPABILITY;
         }
+        if ((pendingChange & UidRecord.CHANGE_PROCSTATE) != 0) {
+            currentChange |= UidRecord.CHANGE_PROCSTATE;
+        }
         return currentChange;
     }
 
