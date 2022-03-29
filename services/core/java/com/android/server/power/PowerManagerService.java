@@ -674,6 +674,8 @@ public final class PowerManagerService extends SystemService
             }
             mDirty |= DIRTY_DISPLAY_GROUP_WAKEFULNESS;
             updateGlobalWakefulnessLocked(eventTime, reason, uid, opUid, opPackageName, details);
+            mNotifier.onPowerGroupWakefulnessChanged(groupId, wakefulness, reason,
+                    getGlobalWakefulnessLocked());
             updatePowerStateLocked();
         }
     }
