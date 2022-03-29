@@ -2513,7 +2513,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
             if (mUseBLASTSync && win.useBLASTSync() && viewVisibility != View.GONE
                     && (win.mSyncSeqId > win.mLastSeqIdSentToRelayout)) {
-                win.prepareDrawHandlers();
                 win.markRedrawForSyncReported();
 
                 win.mLastSeqIdSentToRelayout = win.mSyncSeqId;
