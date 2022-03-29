@@ -20,6 +20,7 @@ import static android.hardware.hdmi.HdmiControlManager.POWER_STATUS_ON;
 import static android.hardware.hdmi.HdmiControlManager.POWER_STATUS_STANDBY;
 import static android.hardware.hdmi.HdmiControlManager.POWER_STATUS_TRANSIENT_TO_ON;
 
+import static com.android.server.SystemService.PHASE_SYSTEM_SERVICES_READY;
 import static com.android.server.hdmi.Constants.ADDR_PLAYBACK_1;
 import static com.android.server.hdmi.Constants.ADDR_PLAYBACK_2;
 import static com.android.server.hdmi.Constants.ADDR_PLAYBACK_3;
@@ -136,6 +137,7 @@ public class DeviceSelectActionFromPlaybackTest {
 
         mLocalDevices.add(mHdmiCecLocalDevicePlayback);
         mHdmiControlService.initService();
+        mHdmiControlService.onBootPhase(PHASE_SYSTEM_SERVICES_READY);
         mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
         mNativeWrapper.setPhysicalAddress(0x0000);
         mPowerManager = new FakePowerManagerWrapper(context);
