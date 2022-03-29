@@ -249,6 +249,8 @@ public class AmbientContextManagerService extends
             Objects.requireNonNull(eventTypes);
             Objects.requireNonNull(callingPackage);
             assertCalledByPackageOwner(callingPackage);
+            mContext.enforceCallingOrSelfPermission(
+                    Manifest.permission.ACCESS_AMBIENT_CONTEXT_EVENT, TAG);
             mService.onStartConsentActivity(eventTypes, callingPackage);
         }
 
