@@ -94,6 +94,11 @@ public class ActionMenuItemView extends TextView
         updateTextButtonVisibility();
     }
 
+    @Override
+    public CharSequence getAccessibilityClassName() {
+        return android.widget.Button.class.getName();
+    }
+
     /**
      * Whether action menu items should obey the "withText" showAsAction flag. This may be set to
      * false for situations where space is extremely limited. -->
