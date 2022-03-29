@@ -707,13 +707,7 @@ public class RecentsAnimationController implements DeathRecipient {
             if (isAnimatingTask(task) || skipAnimation(task)) {
                 return;
             }
-            final RemoteAnimationTarget target = createTaskRemoteAnimation(task, MODE_OPENING,
-                    finishedCallback);
-            if (target == null) {
-                return;
-            }
-            ProtoLog.d(WM_DEBUG_RECENTS_ANIMATIONS, "addTaskToTargets, target: %s", target);
-            mPendingTaskAppears.add(target);
+            collectTaskRemoteAnimations(task, MODE_OPENING, finishedCallback);
         }
     }
 
@@ -729,19 +723,30 @@ public class RecentsAnimationController implements DeathRecipient {
         }
     }
 
-    private RemoteAnimationTarget createTaskRemoteAnimation(Task task, int mode,
+    private void collectTaskRemoteAnimations(Task task, int mode,
             OnAnimationFinishedCallback finishedCallback) {
         final SparseBooleanArray recentTaskIds =
                 mService.mAtmService.getRecentTasks().getRecentTaskIds();
+
         // The target must be built off the root task (the leaf task surface would be cropped
-        // within the root surface). However, recents only tracks leaf task ids, so we'll replace
-        // the task-id with the leaf id.
-        final Task leafTask = task.getTopLeafTask();
-        int taskId = leafTask.mTaskId;
-        TaskAnimationAdapter adapter = addAnimation(task,
-                !recentTaskIds.get(taskId), true /* hidden */, finishedCallback);
-        mPendingNewTaskTargets.add(taskId);
-        return adapter.createRemoteAnimationTarget(taskId, mode);
+        // within the root surface). However, recents only tracks leaf task ids, so we'll traverse
+        // and create animation target for all visible leaf tasks.
+        task.forAllLeafTasks(leafTask -> {
+            if (!leafTask.shouldBeVisible(null /* starting */)) {
+                return;
+            }
+            final int taskId = leafTask.mTaskId;
+            TaskAnimationAdapter adapter = addAnimation(leafTask,
+                    !recentTaskIds.get(taskId), true /* hidden */, finishedCallback);
+            mPendingNewTaskTargets.add(taskId);
+            final RemoteAnimationTarget target =
+                    adapter.createRemoteAnimationTarget(taskId, mode);
+            if (target != null) {
+                mPendingTaskAppears.add(target);
+                ProtoLog.d(WM_DEBUG_RECENTS_ANIMATIONS,
+                        "collectTaskRemoteAnimations, target: %s", target);
+            }
+        }, true);
     }
 
     void logRecentsAnimationStartTime(int durationMs) {
