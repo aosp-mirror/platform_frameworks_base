@@ -18,6 +18,7 @@ package com.android.systemui.media.dialog;
 
 import static android.provider.Settings.ACTION_BLUETOOTH_PAIRING_SETTINGS;
 
+import android.app.AlertDialog;
 import android.app.Notification;
 import android.app.WallpaperColors;
 import android.content.Context;
@@ -46,6 +47,7 @@ import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
@@ -64,11 +66,13 @@ import com.android.settingslib.utils.ThreadUtils;
 import com.android.systemui.R;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.animation.DialogLaunchAnimator;
+import com.android.systemui.broadcast.BroadcastSender;
 import com.android.systemui.media.nearby.NearbyMediaDevicesManager;
 import com.android.systemui.monet.ColorScheme;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
+import com.android.systemui.statusbar.phone.SystemUIDialog;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -93,6 +97,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
     private final String mPackageName;
     private final Context mContext;
     private final MediaSessionManager mMediaSessionManager;
+    private final LocalBluetoothManager mLocalBluetoothManager;
     private final ActivityStarter mActivityStarter;
     private final DialogLaunchAnimator mDialogLaunchAnimator;
     private final List<MediaDevice> mGroupMediaDevices = new CopyOnWriteArrayList<>();
@@ -117,6 +122,11 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
     private int mColorConnectedItemBackground;
     private int mColorPositiveButtonText;
 
+    public enum BroadcastNotifyDialog {
+        ACTION_FIRST_LAUNCH,
+        ACTION_BROADCAST_INFO_ICON
+    }
+
     @Inject
     public MediaOutputController(@NonNull Context context, String packageName,
             MediaSessionManager mediaSessionManager, LocalBluetoothManager
@@ -127,6 +137,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
         mContext = context;
         mPackageName = packageName;
         mMediaSessionManager = mediaSessionManager;
+        mLocalBluetoothManager = lbm;
         mActivityStarter = starter;
         mNotifCollection = notifCollection;
         InfoMediaManager imm = new InfoMediaManager(mContext, packageName, null, lbm);
@@ -626,6 +637,42 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
             return;
         }
         mActivityStarter.startActivity(launchIntent, true, controller);
+    }
+
+    void launchLeBroadcastNotifyDialog(View mediaOutputDialog, BroadcastSender broadcastSender,
+            BroadcastNotifyDialog action) {
+        final AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+        switch (action) {
+            case ACTION_FIRST_LAUNCH:
+                builder.setTitle(R.string.media_output_first_broadcast_title);
+                builder.setMessage(R.string.media_output_first_notify_broadcast_message);
+                builder.setNegativeButton(android.R.string.cancel, null);
+                builder.setPositiveButton(R.string.media_output_broadcast,
+                        (d, w) -> {
+                            launchMediaOutputBroadcastDialog(mediaOutputDialog, broadcastSender);
+                        });
+                break;
+            case ACTION_BROADCAST_INFO_ICON:
+                builder.setTitle(R.string.media_output_broadcast);
+                builder.setMessage(R.string.media_output_broadcasting_message);
+                builder.setPositiveButton(android.R.string.ok, null);
+                break;
+        }
+
+        final AlertDialog dialog = builder.create();
+        dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
+        SystemUIDialog.setShowForAllUsers(dialog, true);
+        SystemUIDialog.registerDismissListener(dialog);
+        dialog.show();
+    }
+
+    void launchMediaOutputBroadcastDialog(View mediaOutputDialog, BroadcastSender broadcastSender) {
+        MediaOutputController controller = new MediaOutputController(mContext, mPackageName,
+                mMediaSessionManager, mLocalBluetoothManager, mActivityStarter,
+                mNotifCollection, mDialogLaunchAnimator, Optional.of(mNearbyMediaDevicesManager));
+        MediaOutputBroadcastDialog dialog = new MediaOutputBroadcastDialog(mContext, true,
+                broadcastSender, controller);
+        mDialogLaunchAnimator.showFromView(dialog, mediaOutputDialog);
     }
 
     boolean isActiveRemoteDevice(@NonNull MediaDevice device) {
