@@ -1191,7 +1191,7 @@ public class OomAdjuster {
         }
         for (int i = activeUids.size() - 1; i >= 0; i--) {
             final UidRecord uidRec = activeUids.valueAt(i);
-            int uidChange = UidRecord.CHANGE_PROCSTATE;
+            int uidChange = 0;
             if (uidRec.getCurProcState() != PROCESS_STATE_NONEXISTENT
                     && (uidRec.getSetProcState() != uidRec.getCurProcState()
                     || uidRec.getSetCapability() != uidRec.getCurCapability()
@@ -1219,12 +1219,12 @@ public class OomAdjuster {
                         }
                     }
                     if (uidRec.isIdle() && !uidRec.isSetIdle()) {
-                        uidChange = UidRecord.CHANGE_IDLE;
+                        uidChange |= UidRecord.CHANGE_IDLE;
                         becameIdle.add(uidRec);
                     }
                 } else {
                     if (uidRec.isIdle()) {
-                        uidChange = UidRecord.CHANGE_ACTIVE;
+                        uidChange |= UidRecord.CHANGE_ACTIVE;
                         EventLogTags.writeAmUidActive(uidRec.getUid());
                         uidRec.setIdle(false);
                     }
@@ -1240,6 +1240,9 @@ public class OomAdjuster {
                 }
                 if (uidRec.getSetCapability() != uidRec.getCurCapability()) {
                     uidChange |= UidRecord.CHANGE_CAPABILITY;
+                }
+                if (uidRec.getSetProcState() != uidRec.getCurProcState()) {
+                    uidChange |= UidRecord.CHANGE_PROCSTATE;
                 }
                 uidRec.setSetProcState(uidRec.getCurProcState());
                 uidRec.setSetCapability(uidRec.getCurCapability());
