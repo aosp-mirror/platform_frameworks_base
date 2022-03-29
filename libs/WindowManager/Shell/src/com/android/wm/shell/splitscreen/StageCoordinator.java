@@ -1228,13 +1228,10 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         // Only do this when shell transition
         if (!ENABLE_SHELL_TRANSITIONS) return;
 
-        final SurfaceControl.Transaction t = mTransactionPool.acquire();
         mDisplayLayout.rotateTo(mContext.getResources(), toRotation);
         mSplitLayout.rotateTo(toRotation, mDisplayLayout.stableInsets());
         updateWindowBounds(mSplitLayout, wct);
         updateUnfoldBounds();
-        t.apply();
-        mTransactionPool.release(t);
     }
 
     private void onFoldedStateChanged(boolean folded) {
@@ -1286,7 +1283,10 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         final ActivityManager.RunningTaskInfo triggerTask = request.getTriggerTask();
         if (triggerTask == null) {
             if (mMainStage.isActive()) {
-                if (request.getType() == TRANSIT_CHANGE && request.getDisplayChange() != null) {
+                final TransitionRequestInfo.DisplayChange displayChange =
+                        request.getDisplayChange();
+                if (request.getType() == TRANSIT_CHANGE && displayChange != null
+                        && displayChange.getStartRotation() != displayChange.getEndRotation()) {
                     mSplitLayout.setFreezeDividerWindow(true);
                 }
                 // Still want to monitor everything while in split-screen, so return non-null.
