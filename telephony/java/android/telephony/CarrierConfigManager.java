@@ -4754,10 +4754,14 @@ public class CarrierConfigManager {
      * Either omit this key or pass a value of
      * {@link SubscriptionManager#USAGE_SETTING_UNKNOWN unknown} to preserve the current setting.
      *
+     * <p>Devices that support configuration of the cellular usage setting, including devices
+     * with HAL capability to set the cellular usage setting, must honor this setting accordingly.
+     *
      * {@link SubscriptionManager#USAGE_SETTING_DEFAULT default},
      * {@link SubscriptionManager#USAGE_SETTING_VOICE_CENTRIC voice-centric},
      * or {@link SubscriptionManager#USAGE_SETTING_DATA_CENTRIC data-centric}.
      * {@see SubscriptionInfo#getUsageSetting}
+     *
      */
     public static final String KEY_CELLULAR_USAGE_SETTING_INT =
             "cellular_usage_setting_int";
