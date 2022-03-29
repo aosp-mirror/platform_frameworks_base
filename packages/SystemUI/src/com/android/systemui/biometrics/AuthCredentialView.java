@@ -20,7 +20,7 @@ import static android.app.admin.DevicePolicyResources.Strings.SystemUi.BIOMETRIC
 import static android.app.admin.DevicePolicyResources.Strings.SystemUi.BIOMETRIC_DIALOG_WORK_PASSWORD_LAST_ATTEMPT;
 import static android.app.admin.DevicePolicyResources.Strings.SystemUi.BIOMETRIC_DIALOG_WORK_PATTERN_LAST_ATTEMPT;
 import static android.app.admin.DevicePolicyResources.Strings.SystemUi.BIOMETRIC_DIALOG_WORK_PIN_LAST_ATTEMPT;
-import static android.app.admin.DevicePolicyResources.Strings.UNDEFINED;
+import static android.app.admin.DevicePolicyResources.UNDEFINED;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -444,7 +444,7 @@ public abstract class AuthCredentialView extends LinearLayout {
 
     private String getLastAttemptBeforeWipeProfileMessage(
             @Utils.CredentialType int credentialType) {
-        return mDevicePolicyManager.getString(
+        return mDevicePolicyManager.getResources().getString(
                 getLastAttemptBeforeWipeProfileUpdatableStringId(credentialType),
                 () -> getLastAttemptBeforeWipeProfileDefaultMessage(credentialType));
     }
@@ -497,7 +497,7 @@ public abstract class AuthCredentialView extends LinearLayout {
     }
 
     private String getNowWipingMessage(@UserType int userType) {
-        return mDevicePolicyManager.getString(
+        return mDevicePolicyManager.getResources().getString(
                 getNowWipingUpdatableStringId(userType),
                 () -> getNowWipingDefaultMessage(userType));
     }

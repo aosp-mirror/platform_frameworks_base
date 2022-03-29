@@ -17,7 +17,7 @@
 package android.os;
 
 import static android.app.admin.DevicePolicyResources.Strings.Core.WORK_PROFILE_BADGED_LABEL;
-import static android.app.admin.DevicePolicyResources.Strings.UNDEFINED;
+import static android.app.admin.DevicePolicyResources.UNDEFINED;
 
 import android.Manifest;
 import android.accounts.AccountManager;
@@ -4760,7 +4760,7 @@ public class UserManager {
             return label;
         }
         DevicePolicyManager dpm = mContext.getSystemService(DevicePolicyManager.class);
-        return dpm.getString(
+        return dpm.getResources().getString(
                 getUpdatableUserBadgedLabelId(userId),
                 () -> getDefaultUserBadgedLabel(label, userId),
                 /* formatArgs= */ label);

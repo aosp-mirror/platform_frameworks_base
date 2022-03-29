@@ -850,13 +850,13 @@ public class ResolverActivity extends Activity implements
     }
 
     private String getForwardToPersonalMsg() {
-        return getSystemService(DevicePolicyManager.class).getString(
+        return getSystemService(DevicePolicyManager.class).getResources().getString(
                 FORWARD_INTENT_TO_PERSONAL,
                 () -> getString(com.android.internal.R.string.forward_intent_to_owner));
     }
 
     private String getForwardToWorkMsg() {
-        return getSystemService(DevicePolicyManager.class).getString(
+        return getSystemService(DevicePolicyManager.class).getResources().getString(
                 FORWARD_INTENT_TO_WORK,
                 () -> getString(com.android.internal.R.string.forward_intent_to_work));
     }
@@ -1150,7 +1150,7 @@ public class ResolverActivity extends Activity implements
     }
 
     private String getWorkProfileNotSupportedMsg(String launcherName) {
-        return getSystemService(DevicePolicyManager.class).getString(
+        return getSystemService(DevicePolicyManager.class).getResources().getString(
                 RESOLVER_WORK_PROFILE_NOT_SUPPORTED,
                 () -> getString(
                         com.android.internal.R.string.activity_resolver_work_profiles_support,
@@ -1879,12 +1879,12 @@ public class ResolverActivity extends Activity implements
     }
 
     private String getPersonalTabLabel() {
-        return getSystemService(DevicePolicyManager.class).getString(
+        return getSystemService(DevicePolicyManager.class).getResources().getString(
                 RESOLVER_PERSONAL_TAB, () -> getString(R.string.resolver_personal_tab));
     }
 
     private String getWorkTabLabel() {
-        return getSystemService(DevicePolicyManager.class).getString(
+        return getSystemService(DevicePolicyManager.class).getResources().getString(
                 RESOLVER_WORK_TAB, () -> getString(R.string.resolver_work_tab));
     }
 
@@ -1935,13 +1935,13 @@ public class ResolverActivity extends Activity implements
     }
 
     private String getPersonalTabAccessibilityLabel() {
-        return getSystemService(DevicePolicyManager.class).getString(
+        return getSystemService(DevicePolicyManager.class).getResources().getString(
                 RESOLVER_PERSONAL_TAB_ACCESSIBILITY,
                 () -> getString(R.string.resolver_personal_tab_accessibility));
     }
 
     private String getWorkTabAccessibilityLabel() {
-        return getSystemService(DevicePolicyManager.class).getString(
+        return getSystemService(DevicePolicyManager.class).getResources().getString(
                 RESOLVER_WORK_TAB_ACCESSIBILITY,
                 () -> getString(R.string.resolver_work_tab_accessibility));
     }
