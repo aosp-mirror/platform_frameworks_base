@@ -2360,11 +2360,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     private void setDeviceOwnershipSystemPropertyLocked() {
-        // Still at the first stage of CryptKeeper double bounce, nothing can be learnt about
-        // the real system at this point.
-        if (StorageManager.inCryptKeeperBounce()) {
-            return;
-        }
         final boolean deviceProvisioned =
                 mInjector.settingsGlobalGetInt(Settings.Global.DEVICE_PROVISIONED, 0) != 0;
         final boolean hasDeviceOwner = mOwners.hasDeviceOwner();
